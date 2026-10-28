@@ -1,0 +1,727 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/b37/red[39m
+
+[90mstderr[2m | tests/renderer/components/busy-buttons-focus.test.ts[2m > [22m[2mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m[2m(f6) a clean batch Save to 2 files is aria-disabled, focusable, and a click writes nothing
+[22m[39mAn update to TemplatePicker inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ [31m❯[39m tests/renderer/components/busy-buttons-focus.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[33m 706[2mms[22m[39m
+[31m     [31m×[31m (f1) RR-R35-01: Done keeps focus while Applying...: aria-disabled and aria-busy, not natively disabled[39m[32m 162[2mms[22m[39m
+     [32m✓[39m (f2) RR-R35-04: two more clicks on the busy Done start no second onSave[32m 97[2mms[22m[39m
+[31m     [31m×[31m (f3) onSave rejects: Done reads Done, is not busy or aria-disabled, still has focus, and the next click runs onSave again[39m[32m 109[2mms[22m[39m
+[31m     [31m×[31m (f4) Save Tags keeps focus while Saving... and a second click writes once[39m[32m 67[2mms[22m[39m
+[31m     [31m×[31m (f5) after a successful save Save Tags is aria-disabled, not busy, still focused, and a click writes nothing[39m[32m 44[2mms[22m[39m
+[31m     [31m×[31m (f6) a clean batch Save to 2 files is aria-disabled, focusable, and a click writes nothing[39m[32m 30[2mms[22m[39m
+[31m     [31m×[31m (f7) dirty batch save: Save to 2 files is busy and focused while writing, then writes once[39m[32m 91[2mms[22m[39m
+[31m     [31m×[31m (f8) C-R35-01: while Applying... only edge reorder arrows carry their own dim class; middle arrows rely on the fieldset alone[39m[32m 103[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 2347[2mms[22m[39m
+     [33m[2m✓[22m[39m (s1) pin: single selection, no save: the form shows the new field read with the new schema [33m 347[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m49 tests[22m[2m | [22m[31m20 failed[39m[2m)[22m[33m 2573[2mms[22m[39m
+[31m     [31m×[31m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept[39m[32m 121[2mms[22m[39m
+[31m     [31m×[31m (b) partial failure: edits are kept and succeeded files are refreshed in the store[39m[32m 55[2mms[22m[39m
+[31m     [31m×[31m (c) retry after a failure writes the same fields to all selected files and clears on success[39m[32m 63[2mms[22m[39m
+[31m     [31m×[31m (d) full success clears the form back to Multiple values[39m[32m 74[2mms[22m[39m
+[31m     [31m×[31m (e) single-file write failure keeps the typed value and shows the error[39m[32m 53[2mms[22m[39m
+[31m     [31m×[31m (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated[39m[32m 74[2mms[22m[39m
+[31m     [31m×[31m (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept[39m[32m 93[2mms[22m[39m
+[31m     [31m×[31m (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry[39m[32m 84[2mms[22m[39m
+[31m     [31m×[31m (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)[39m[32m 62[2mms[22m[39m
+[31m     [31m×[31m (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept[39m[32m 54[2mms[22m[39m
+[31m     [31m×[31m (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept[39m[32m 66[2mms[22m[39m
+[31m     [31m×[31m (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept[39m[32m 40[2mms[22m[39m
+[31m     [31m×[31m (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept[39m[32m 44[2mms[22m[39m
+     [32m✓[39m (n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read[32m 46[2mms[22m[39m
+     [32m✓[39m (o) batch, all succeed: both files are patched and the selection is kept[32m 55[2mms[22m[39m
+[31m     [31m×[31m (p) batch, partial failure: only the written file is patched even though the scan has the failed one[39m[32m 55[2mms[22m[39m
+[31m     [31m×[31m (q) batch, all failed: no scan, files unchanged, edits kept[39m[32m 47[2mms[22m[39m
+     [32m✓[39m (r) single write rejects: no scan, files unchanged[32m 28[2mms[22m[39m
+     [32m✓[39m (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged[32m 34[2mms[22m[39m
+[31m     [31m×[31m (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged[39m[32m 63[2mms[22m[39m
+     [32m✓[39m (u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged[32m 41[2mms[22m[39m
+     [32m✓[39m (v) folderPath null: no scan, the save behaves as today[32m 29[2mms[22m[39m
+     [32m✓[39m (w) the scan result lacks the saved path: the file keeps its stats and nothing is added[32m 31[2mms[22m[39m
+     [32m✓[39m (x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store[32m 65[2mms[22m[39m
+     [32m✓[39m (x2) the follow-up save on B writes B's own values, never A's[32m 93[2mms[22m[39m
+     [32m✓[39m (x3) typing on B during the write: B's edits and isDirty are kept[32m 52[2mms[22m[39m
+     [32m✓[39m (x4) selection cleared during the write: editor stays empty, store and toast as usual[32m 33[2mms[22m[39m
+     [32m✓[39m (x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values[32m 56[2mms[22m[39m
+     [32m✓[39m (x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept[32m 40[2mms[22m[39m
+     [32m✓[39m (x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read[32m 38[2mms[22m[39m
+     [32m✓[39m (x8) pin: D-24 after A -> B: reload-failed toast, editor shows B, store untouched[32m 33[2mms[22m[39m
+     [32m✓[39m (x9) pin: the same set reordered during a batch write behaves as today[32m 30[2mms[22m[39m
+     [32m✓[39m (x10) pin: A -> B -> A during the write behaves as today[32m 59[2mms[22m[39m
+     [32m✓[39m (x11) batch all succeeded, A+B -> A and typing on A during the write: A's edits and isDirty are kept[32m 45[2mms[22m[39m
+[31m       [31m×[31m (y1) single, same selection: a field typed during the write is kept and Save stays enabled[39m[32m 61[2mms[22m[39m
+       [32m✓[39m (y2) the next Save writes the text typed during the first save[32m 48[2mms[22m[39m
+       [32m✓[39m (y3) the saved field retyped during the write keeps the new value[32m 39[2mms[22m[39m
+[31m       [31m×[31m (y4) pin: a field typed and reverted to the saved value during the write is not a change[39m[32m 63[2mms[22m[39m
+[31m       [31m×[31m (y5) pin: an equal tag array with a new reference during the write is not a change[39m[32m 48[2mms[22m[39m
+       [32m✓[39m (y5b) tag order changed during the write is a change[32m 64[2mms[22m[39m
+       [32m✓[39m (y6) a tag added during the write is kept[32m 37[2mms[22m[39m
+       [32m✓[39m (y7) a number typed during the write is kept[32m 43[2mms[22m[39m
+       [32m✓[39m (y8) A -> B -> A and typing on A during the write: typed text on top of A's re-read[32m 64[2mms[22m[39m
+[31m       [31m×[31m (y9) batch all succeeded, same set: a field typed during the write is kept[39m[32m 46[2mms[22m[39m
+       [32m✓[39m (y10) the next batch Save writes only the field typed during the first save[32m 59[2mms[22m[39m
+       [32m✓[39m (y11) pin: batch partial failure and typing during the write keeps every edit[32m 42[2mms[22m[39m
+       [32m✓[39m (y12) pin: the write rejects and typing during the write keeps every edit[32m 44[2mms[22m[39m
+       [32m✓[39m (y13) pin: D-24 re-read rejects and typing during the write keeps every edit[32m 52[2mms[22m[39m
+     [32m✓[39m (i3) resetWindowApiMocks drops once-values queued on the six window.api mocks[32m 2[2mms[22m[39m
+ [31m❯[39m tests/renderer/components/schema-editor-done-busy.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1847[2mms[22m[39m
+[31m     [31m×[31m (b1) RR-R33-01: while Done is pending the button reads Applying... and is disabled, the editing controls are disabled and Back stays enabled[39m[32m 260[2mms[22m[39m
+     [32m✓[39m (b2) QA-R33-02: a second click on the pending Done starts no second schema re-read[32m 298[2mms[22m[39m
+[31m     [31m×[31m (b3) pin with D-41: Done pending, Back, reopen Customize Fields: the new editor's Done reads Done and is enabled, its inputs are enabled[39m[32m 210[2mms[22m[39m
+[31m     [31m×[31m (b4) review R34 low 1: onSave rejects: the editor stays open, onClose is not called, Done reads Done and is enabled again[39m[32m 71[2mms[22m[39m
+     [32m✓[39m (b5) QA-R34-01: Done #1 (field Qone) pending, Back, reopen, add Qtwo, Done #2; #2's read lands first, #1's last: the store keeps #2's result with both fields[32m 220[2mms[22m[39m
+     [33m[2m✓[22m[39m (b6) pin: Done #1 pending, Back, reopen, Done #2; #1's read lands first, #2's last: the store holds #2's result [33m 355[2mms[22m[39m
+     [33m[2m✓[22m[39m (b7) pin for C-R35-03 (DM-9): two Done calls both waiting on the same pending Open Folder, re-reads land #2 first then #1: store keeps #2 [33m 374[2mms[22m[39m
+     [32m✓[39m (b8) pin for C-R35-03 (BM-6): standalone SchemaEditor with a no-op onClose returns to Done after a resolved onSave[32m 56[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-change-during-folder-load.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1717[2mms[22m[39m
+     [33m[2m✓[22m[39m (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field [33m 447[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-overlap.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 1579[2mms[22m[39m
+     [33m[2m✓[22m[39m (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata [33m 306[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor-stale-close.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 1418[2mms[22m[39m
+     [33m[2m✓[22m[39m (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name [33m 483[2mms[22m[39m
+     [33m[2m✓[22m[39m (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name [33m 367[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/reread-after-folder-switch.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1136[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1040[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 750[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 514[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-during-save.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 890[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-rejected-chunk.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 479[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/utils.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/metadata-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/schema-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/template-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/player-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 30 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/busy-buttons-focus.test.ts[2m > [22mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m(f1) RR-R35-01: Done keeps focus while Applying...: aria-disabled and aria-busy, not natively disabled
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).not.toHaveAttribute([22m[32m[32m"disabled"[32m[31m[2m) // element.hasAttribute("disabled")[22m
+
+Expected the element not to have attribute:
+[32m  disabled[31m
+Received:
+[31m  disabled=""[31m[39m
+[36m [2m❯[22m expectBusyAndFocused tests/renderer/components/busy-buttons-focus.test.ts:[2m93:22[22m[39m
+    [90m 91| [39m
+    [90m 92| [39m[35mfunction[39m [34mexpectBusyAndFocused[39m(button[33m:[39m [33mHTMLElement[39m)[33m:[39m [35mvoid[39m {
+    [90m 93| [39m  [34mexpect[39m(button)[33m.[39mnot[33m.[39m[34mtoHaveAttribute[39m([32m"disabled"[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m 94| [39m  [34mexpect[39m(button)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+    [90m 95| [39m  [34mexpect[39m(button)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-busy"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+[90m [2m❯[22m tests/renderer/components/busy-buttons-focus.test.ts:[2m130:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/busy-buttons-focus.test.ts[2m > [22mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m(f3) onSave rejects: Done reads Done, is not busy or aria-disabled, still has focus, and the next click runs onSave again
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/busy-buttons-focus.test.ts:[2m159:18[22m[39m
+    [90m157| [39m
+    [90m158| [39m    [34mexpect[39m(done)[33m.[39m[34mtoHaveTextContent[39m([36m/^Done$/[39m)[33m;[39m
+    [90m159| [39m    [34mexpect[39m(done)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"false"[39m)[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m160| [39m    [34mexpect[39m(done)[33m.[39mnot[33m.[39m[34mtoHaveAttribute[39m([32m"aria-busy"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+    [90m161| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(done)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/busy-buttons-focus.test.ts[2m > [22mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m(f4) Save Tags keeps focus while Saving... and a second click writes once
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).not.toHaveAttribute([22m[32m[32m"disabled"[32m[31m[2m) // element.hasAttribute("disabled")[22m
+
+Expected the element not to have attribute:
+[32m  disabled[31m
+Received:
+[31m  disabled=""[31m[39m
+[36m [2m❯[22m expectBusyAndFocused tests/renderer/components/busy-buttons-focus.test.ts:[2m93:22[22m[39m
+    [90m 91| [39m
+    [90m 92| [39m[35mfunction[39m [34mexpectBusyAndFocused[39m(button[33m:[39m [33mHTMLElement[39m)[33m:[39m [35mvoid[39m {
+    [90m 93| [39m  [34mexpect[39m(button)[33m.[39mnot[33m.[39m[34mtoHaveAttribute[39m([32m"disabled"[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m 94| [39m  [34mexpect[39m(button)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+    [90m 95| [39m  [34mexpect[39m(button)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-busy"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+[90m [2m❯[22m tests/renderer/components/busy-buttons-focus.test.ts:[2m178:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/busy-buttons-focus.test.ts[2m > [22mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m(f5) after a successful save Save Tags is aria-disabled, not busy, still focused, and a click writes nothing
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).not.toHaveAttribute([22m[32m[32m"disabled"[32m[31m[2m) // element.hasAttribute("disabled")[22m
+
+Expected the element not to have attribute:
+[32m  disabled[31m
+Received:
+[31m  disabled=""[31m[39m
+[36m [2m❯[22m tests/renderer/components/busy-buttons-focus.test.ts:[2m200:22[22m[39m
+    [90m198| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m199| [39m    [34mexpect[39m(save)[33m.[39m[34mtoHaveTextContent[39m([32m"Save Tags"[39m)[33m;[39m
+    [90m200| [39m    [34mexpect[39m(save)[33m.[39mnot[33m.[39m[34mtoHaveAttribute[39m([32m"disabled"[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m201| [39m    [34mexpect[39m(save)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+    [90m202| [39m    [34mexpect[39m(save)[33m.[39mnot[33m.[39m[34mtoHaveAttribute[39m([32m"aria-busy"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/busy-buttons-focus.test.ts[2m > [22mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m(f6) a clean batch Save to 2 files is aria-disabled, focusable, and a click writes nothing
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).not.toHaveAttribute([22m[32m[32m"disabled"[32m[31m[2m) // element.hasAttribute("disabled")[22m
+
+Expected the element not to have attribute:
+[32m  disabled[31m
+Received:
+[31m  disabled=""[31m[39m
+[36m [2m❯[22m tests/renderer/components/busy-buttons-focus.test.ts:[2m213:22[22m[39m
+    [90m211| [39m    [35mconst[39m save [33m=[39m [34mgetButtonByText[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m212| [39m
+    [90m213| [39m    [34mexpect[39m(save)[33m.[39mnot[33m.[39m[34mtoHaveAttribute[39m([32m"disabled"[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m214| [39m    [34mexpect[39m(save)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+    [90m215| [39m    [35mawait[39m [34mfocusAndClick[39m(save)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/busy-buttons-focus.test.ts[2m > [22mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m(f7) dirty batch save: Save to 2 files is busy and focused while writing, then writes once
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).not.toHaveAttribute([22m[32m[32m"disabled"[32m[31m[2m) // element.hasAttribute("disabled")[22m
+
+Expected the element not to have attribute:
+[32m  disabled[31m
+Received:
+[31m  disabled=""[31m[39m
+[36m [2m❯[22m expectBusyAndFocused tests/renderer/components/busy-buttons-focus.test.ts:[2m93:22[22m[39m
+    [90m 91| [39m
+    [90m 92| [39m[35mfunction[39m [34mexpectBusyAndFocused[39m(button[33m:[39m [33mHTMLElement[39m)[33m:[39m [35mvoid[39m {
+    [90m 93| [39m  [34mexpect[39m(button)[33m.[39mnot[33m.[39m[34mtoHaveAttribute[39m([32m"disabled"[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m 94| [39m  [34mexpect[39m(button)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+    [90m 95| [39m  [34mexpect[39m(button)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-busy"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+[90m [2m❯[22m tests/renderer/components/busy-buttons-focus.test.ts:[2m230:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/busy-buttons-focus.test.ts[2m > [22mbusy commit buttons keep focus (TM-B40, D-45)[2m > [22m(f8) C-R35-01: while Applying... only edge reorder arrows carry their own dim class; middle arrows rely on the fieldset alone
+[31m[1mAssertionError[22m: expected [ true, true, true, true, true, …(8) ] to deeply equal [ true, false, false, false, …(9) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    true,[22m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[32m-   false,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[31m+   true,[39m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/busy-buttons-focus.test.ts:[2m244:37[22m[39m
+    [90m242| [39m    [35mawait[39m [34mclickElement[39m([34mgetButtonByText[39m([36m/^Done$/[39m))[33m;[39m
+    [90m243| [39m
+    [90m244| [39m    expect(ups.map(hasOwnDimClass)).toEqual(ups.map((_, index) => inde…
+    [90m   | [39m                                    [31m^[39m
+    [90m245| [39m    expect(downs.map(hasOwnDimClass)).toEqual(downs.map((_, index) => …
+    [90m246| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m save[33m.[39m[34mresolve[39m())[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(a) all files failed: typed value, isDirty, modifiedFields and Save button are kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m132:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(b) partial failure: edits are kept and succeeded files are refreshed in the store
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m148:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(c) retry after a failure writes the same fields to all selected files and clears on success
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m157:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(d) full success clears the form back to Multiple values
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"true"[32m[31m[2m) // element.getAttribute("aria-disabled") === "true"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="true"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m193:34[22m[39m
+    [90m191| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m192| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mplaceholder)[33m.[39m[34mtoBe[39m([32m"Multiple values"[39m)[33m;[39m
+    [90m193| [39m    expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "tru…
+    [90m   | [39m                                 [31m^[39m
+    [90m194| [39m    expect(useFileStore.getState().metadata[PATH_B]?.category).toBe(TY…
+    [90m195| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps edits on failure (TM-B15, D-21)[2m > [22m(e) single-file write failure keeps the typed value and shows the error
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m211:42[22m[39m
+    [90m209| [39m    [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m210| [39m    [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m211| [39m    expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disable…
+    [90m   | [39m                                         [31m^[39m
+    [90m212| [39m  })[33m;[39m
+    [90m213| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps the store entry of failed files (TM-B16, D-22)[2m > [22m(f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m236:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps the store entry of failed files (TM-B16, D-22)[2m > [22m(g) all failed + both re-reads empty: both store entries are unchanged and edits are kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m254:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps the store entry of failed files (TM-B16, D-22)[2m > [22m(h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m265:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel batch save keeps the store entry of failed files (TM-B16, D-22)[2m > [22m(i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m281:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)[2m > [22m(j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m333:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)[2m > [22m(k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m352:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)[2m > [22m(l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m381:42[22m[39m
+    [90m379| [39m    [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m380| [39m    [34mexpect[39m(state[33m.[39misSaving)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m381| [39m    expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disable…
+    [90m   | [39m                                         [31m^[39m
+    [90m382| [39m    [34mexpectNoStaleSkipSync[39m(seedA)[33m;[39m
+    [90m383| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save whose write succeeded but whose re-read rejects (TM-B18, D-24)[2m > [22m(m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m398:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(p) batch, partial failure: only the written file is patched even though the scan has the failed one
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m494:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(q) batch, all failed: no scan, files unchanged, edits kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m509:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)[2m > [22m(t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:[2m99:32[22m[39m
+    [90m 97| [39m  [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m 98| [39m  [34mexpect[39m([34mgetCategoryInput[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([33mTYPED_CATEGORY[39m)[33m;[39m
+    [90m 99| [39m  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false…
+    [90m   | [39m                               [31m^[39m
+    [90m100| [39m  [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m101| [39m  [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"category"[39m]))[33m;[39m
+[90m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m561:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22mtyping while the save is pending (TM-B24, D-30)[2m > [22m(y1) single, same selection: a field typed during the write is kept and Save stays enabled
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m953:44[22m[39m
+    [90m951| [39m      [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m952| [39m      [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"title"[39m]))[33m;[39m
+    [90m953| [39m      expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disab…
+    [90m   | [39m                                           [31m^[39m
+    [90m954| [39m      expect(useFileStore.getState().metadata[PATH_A]).toEqual(REREAD_…
+    [90m955| [39m      [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m([32m"Tags saved"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22mtyping while the save is pending (TM-B24, D-30)[2m > [22m(y4) pin: a field typed and reverted to the saved value during the write is not a change
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"true"[32m[31m[2m) // element.getAttribute("aria-disabled") === "true"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="true"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m994:44[22m[39m
+    [90m992| [39m      [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m993| [39m      [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m())[33m;[39m
+    [90m994| [39m      expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disab…
+    [90m   | [39m                                           [31m^[39m
+    [90m995| [39m    })[33m;[39m
+    [90m996| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22mtyping while the save is pending (TM-B24, D-30)[2m > [22m(y5) pin: an equal tag array with a new reference during the write is not a change
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"true"[32m[31m[2m) // element.getAttribute("aria-disabled") === "true"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="true"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m1006:44[22m[39m
+    [90m1004| [39m      [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m1005| [39m      [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m())[33m;[39m
+    [90m1006| [39m      expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disab…
+    [90m   | [39m                                           [31m^[39m
+    [90m1007| [39m    })[33m;[39m
+    [90m1008| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel save while the selection changes (TM-B23, D-29)[2m > [22mtyping while the save is pending (TM-B24, D-30)[2m > [22m(y9) batch all succeeded, same set: a field typed during the write is kept
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m1071:36[22m[39m
+    [90m1069| [39m      [34mexpect[39m(state[33m.[39mmodifiedFields)[33m.[39m[34mtoEqual[39m([35mnew[39m [33mSet[39m([[32m"title"[39m]))[33m;[39m
+    [90m1070| [39m      [34mexpect[39m(state[33m.[39misDirty)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m1071| [39m      expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "f…
+    [90m   | [39m                                   [31m^[39m
+    [90m1072| [39m      [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m([32m"Tags saved to 2 files"[39m)[33m;[39m
+    [90m1073| [39m      expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor-done-busy.test.ts[2m > [22mschema editor Done busy state and latest schema re-read (D-42, D-43)[2m > [22m(b1) RR-R33-01: while Done is pending the button reads Applying... and is disabled, the editing controls are disabled and Back stays enabled
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"true"[32m[31m[2m) // element.getAttribute("aria-disabled") === "true"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="true"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m158:18[22m[39m
+    [90m156| [39m    [35mconst[39m { scanB[33m,[39m done } [33m=[39m [35mawait[39m [34mdoneDuringPendingOpenFolderB[39m()[33m;[39m
+    [90m157| [39m
+    [90m158| [39m    [34mexpect[39m(done)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"true"[39m)[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m159| [39m    [34mexpect[39m(done)[33m.[39m[34mtoHaveTextContent[39m([32m"Applying..."[39m)[33m;[39m
+    [90m160| [39m    [34mexpect[39m([34mfieldNameInput[39m())[33m.[39m[34mtoBeDisabled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor-done-busy.test.ts[2m > [22mschema editor Done busy state and latest schema re-read (D-42, D-43)[2m > [22m(b3) pin with D-41: Done pending, Back, reopen Customize Fields: the new editor's Done reads Done and is enabled, its inputs are enabled
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m189:26[22m[39m
+    [90m187| [39m
+    [90m188| [39m    [35mconst[39m reopenedDone [33m=[39m [34mgetButtonByText[39m([36m/^Done$/[39m)[33m;[39m
+    [90m189| [39m    [34mexpect[39m(reopenedDone)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"false"[39m)[33m;[39m
+    [90m   | [39m                         [31m^[39m
+    [90m190| [39m    [34mexpect[39m([34mfieldNameInput[39m())[33m.[39m[34mtoBeEnabled[39m()[33m;[39m
+    [90m191| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/30]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/schema-editor-done-busy.test.ts[2m > [22mschema editor Done busy state and latest schema re-read (D-42, D-43)[2m > [22m(b4) review R34 low 1: onSave rejects: the editor stays open, onClose is not called, Done reads Done and is enabled again
+[31m[1mError[22m: [2mexpect([22m[31melement[31m[2m).toHaveAttribute([22m[32m[32m"aria-disabled"[32m[31m[2m, [22m[32m[32m"false"[32m[31m[2m) // element.getAttribute("aria-disabled") === "false"[22m
+
+Expected the element to have attribute:
+[32m  aria-disabled="false"[31m
+Received:
+[31m  null[31m[39m
+[36m [2m❯[22m tests/renderer/components/schema-editor-done-busy.test.ts:[2m207:18[22m[39m
+    [90m205| [39m    [34mexpect[39m(onClose)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m206| [39m    [35mconst[39m done [33m=[39m [34mgetButtonByText[39m([36m/^Done$/[39m)[33m;[39m
+    [90m207| [39m    [34mexpect[39m(done)[33m.[39m[34mtoHaveAttribute[39m([32m"aria-disabled"[39m[33m,[39m [32m"false"[39m)[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m208| [39m    [34mexpect[39m([34mfieldNameInput[39m())[33m.[39m[34mtoBeEnabled[39m()[33m;[39m
+    [90m209| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/30]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m17 passed[39m[22m[90m (20)[39m
+[2m      Tests [22m [1m[31m30 failed[39m[22m[2m | [22m[1m[32m274 passed[39m[22m[90m (304)[39m
+[2m   Start at [22m 03:41:00
+[2m   Duration [22m 15.75s[2m (transform 1.51s, setup 1.89s, import 6.39s, tests 17.13s, environment 16.89s)[22m
+
+
+::error file=/tmp/b37/red/tests/renderer/components/busy-buttons-focus.test.ts,title=tests/renderer/components/busy-buttons-focus.test.ts > busy commit buttons keep focus (TM-B40%2C D-45) > (f1) RR-R35-01%3A Done keeps focus while Applying...%3A aria-disabled and aria-busy%2C not natively disabled,line=93,column=22::Error: expect(element).not.toHaveAttribute("disabled") // element.hasAttribute("disabled")%0A%0AExpected the element not to have attribute:%0A  disabled%0AReceived:%0A  disabled=""%0A ❯ expectBusyAndFocused tests/renderer/components/busy-buttons-focus.test.ts:93:22%0A ❯ tests/renderer/components/busy-buttons-focus.test.ts:130:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/busy-buttons-focus.test.ts,title=tests/renderer/components/busy-buttons-focus.test.ts > busy commit buttons keep focus (TM-B40%2C D-45) > (f3) onSave rejects%3A Done reads Done%2C is not busy or aria-disabled%2C still has focus%2C and the next click runs onSave again,line=159,column=18::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ tests/renderer/components/busy-buttons-focus.test.ts:159:18%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/busy-buttons-focus.test.ts,title=tests/renderer/components/busy-buttons-focus.test.ts > busy commit buttons keep focus (TM-B40%2C D-45) > (f4) Save Tags keeps focus while Saving... and a second click writes once,line=93,column=22::Error: expect(element).not.toHaveAttribute("disabled") // element.hasAttribute("disabled")%0A%0AExpected the element not to have attribute:%0A  disabled%0AReceived:%0A  disabled=""%0A ❯ expectBusyAndFocused tests/renderer/components/busy-buttons-focus.test.ts:93:22%0A ❯ tests/renderer/components/busy-buttons-focus.test.ts:178:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/busy-buttons-focus.test.ts,title=tests/renderer/components/busy-buttons-focus.test.ts > busy commit buttons keep focus (TM-B40%2C D-45) > (f5) after a successful save Save Tags is aria-disabled%2C not busy%2C still focused%2C and a click writes nothing,line=200,column=22::Error: expect(element).not.toHaveAttribute("disabled") // element.hasAttribute("disabled")%0A%0AExpected the element not to have attribute:%0A  disabled%0AReceived:%0A  disabled=""%0A ❯ tests/renderer/components/busy-buttons-focus.test.ts:200:22%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/busy-buttons-focus.test.ts,title=tests/renderer/components/busy-buttons-focus.test.ts > busy commit buttons keep focus (TM-B40%2C D-45) > (f6) a clean batch Save to 2 files is aria-disabled%2C focusable%2C and a click writes nothing,line=213,column=22::Error: expect(element).not.toHaveAttribute("disabled") // element.hasAttribute("disabled")%0A%0AExpected the element not to have attribute:%0A  disabled%0AReceived:%0A  disabled=""%0A ❯ tests/renderer/components/busy-buttons-focus.test.ts:213:22%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/busy-buttons-focus.test.ts,title=tests/renderer/components/busy-buttons-focus.test.ts > busy commit buttons keep focus (TM-B40%2C D-45) > (f7) dirty batch save%3A Save to 2 files is busy and focused while writing%2C then writes once,line=93,column=22::Error: expect(element).not.toHaveAttribute("disabled") // element.hasAttribute("disabled")%0A%0AExpected the element not to have attribute:%0A  disabled%0AReceived:%0A  disabled=""%0A ❯ expectBusyAndFocused tests/renderer/components/busy-buttons-focus.test.ts:93:22%0A ❯ tests/renderer/components/busy-buttons-focus.test.ts:230:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/busy-buttons-focus.test.ts,title=tests/renderer/components/busy-buttons-focus.test.ts > busy commit buttons keep focus (TM-B40%2C D-45) > (f8) C-R35-01%3A while Applying... only edge reorder arrows carry their own dim class; middle arrows rely on the fieldset alone,line=244,column=37::AssertionError: expected [ true, true, true, true, true, …(8) ] to deeply equal [ true, false, false, false, …(9) ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    true,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A-   false,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A+   true,%0A  ]%0A%0A ❯ tests/renderer/components/busy-buttons-focus.test.ts:244:37%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (a) all files failed%3A typed value%2C isDirty%2C modifiedFields and Save button are kept,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:132:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (b) partial failure%3A edits are kept and succeeded files are refreshed in the store,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:148:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (c) retry after a failure writes the same fields to all selected files and clears on success,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:157:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (d) full success clears the form back to Multiple values,line=193,column=34::Error: expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"%0A%0AExpected the element to have attribute:%0A  aria-disabled="true"%0AReceived:%0A  null%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:193:34%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps edits on failure (TM-B15%2C D-21) > (e) single-file write failure keeps the typed value and shows the error,line=211,column=42::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:211:42%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps the store entry of failed files (TM-B16%2C D-22) > (f) partial failure + unreadable failed file%3A failed path keeps its seed%2C succeeded path is updated,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:236:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps the store entry of failed files (TM-B16%2C D-22) > (g) all failed + both re-reads empty%3A both store entries are unchanged and edits are kept,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:254:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps the store entry of failed files (TM-B16%2C D-22) > (h) sync effect regression%3A after an all-failed save a selection change still warns and loads the kept entry,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:265:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel batch save keeps the store entry of failed files (TM-B16%2C D-22) > (i) all-failed save leaves no stale skipSyncRef%3A the next sync-effect run is not swallowed (RR-R12-01),line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:281:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18%2C D-24) > (j) batch%2C all written + re-read rejects%3A write-result toast%2C store untouched%2C edits kept,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:333:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18%2C D-24) > (k) batch%2C partial write + re-read rejects%3A write-result toast%2C store untouched%2C edits kept,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:352:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18%2C D-24) > (l) single%2C write ok + readMetadata rejects%3A write-result toast%2C store untouched%2C edits kept,line=381,column=42::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:381:42%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save whose write succeeded but whose re-read rejects (TM-B18%2C D-24) > (m) pin%3A batch write rejects%3A raw error toast%2C no re-read%2C store untouched%2C edits kept,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:398:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (p) batch%2C partial failure%3A only the written file is patched even though the scan has the failed one,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:494:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (q) batch%2C all failed%3A no scan%2C files unchanged%2C edits kept,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:509:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28) > (t) batch partial + readMetadataBatch rejects (D-24)%3A only the written file is patched%2C D-24 toast unchanged,line=99,column=32::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ expectEditsKept tests/renderer/components/metadata-panel-batch-save.test.ts:99:32%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:561:5%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > typing while the save is pending (TM-B24%2C D-30) > (y1) single%2C same selection%3A a field typed during the write is kept and Save stays enabled,line=953,column=44::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:953:44%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > typing while the save is pending (TM-B24%2C D-30) > (y4) pin%3A a field typed and reverted to the saved value during the write is not a change,line=994,column=44::Error: expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"%0A%0AExpected the element to have attribute:%0A  aria-disabled="true"%0AReceived:%0A  null%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:994:44%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > typing while the save is pending (TM-B24%2C D-30) > (y5) pin%3A an equal tag array with a new reference during the write is not a change,line=1006,column=44::Error: expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"%0A%0AExpected the element to have attribute:%0A  aria-disabled="true"%0AReceived:%0A  null%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1006:44%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel save while the selection changes (TM-B23%2C D-29) > typing while the save is pending (TM-B24%2C D-30) > (y9) batch all succeeded%2C same set%3A a field typed during the write is kept,line=1071,column=36::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:1071:36%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=tests/renderer/components/schema-editor-done-busy.test.ts > schema editor Done busy state and latest schema re-read (D-42%2C D-43) > (b1) RR-R33-01%3A while Done is pending the button reads Applying... and is disabled%2C the editing controls are disabled and Back stays enabled,line=158,column=18::Error: expect(element).toHaveAttribute("aria-disabled", "true") // element.getAttribute("aria-disabled") === "true"%0A%0AExpected the element to have attribute:%0A  aria-disabled="true"%0AReceived:%0A  null%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:158:18%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=tests/renderer/components/schema-editor-done-busy.test.ts > schema editor Done busy state and latest schema re-read (D-42%2C D-43) > (b3) pin with D-41%3A Done pending%2C Back%2C reopen Customize Fields%3A the new editor's Done reads Done and is enabled%2C its inputs are enabled,line=189,column=26::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:189:26%0A%0A
+
+::error file=/tmp/b37/red/tests/renderer/components/schema-editor-done-busy.test.ts,title=tests/renderer/components/schema-editor-done-busy.test.ts > schema editor Done busy state and latest schema re-read (D-42%2C D-43) > (b4) review R34 low 1%3A onSave rejects%3A the editor stays open%2C onClose is not called%2C Done reads Done and is enabled again,line=207,column=18::Error: expect(element).toHaveAttribute("aria-disabled", "false") // element.getAttribute("aria-disabled") === "false"%0A%0AExpected the element to have attribute:%0A  aria-disabled="false"%0AReceived:%0A  null%0A ❯ tests/renderer/components/schema-editor-done-busy.test.ts:207:18%0A%0A

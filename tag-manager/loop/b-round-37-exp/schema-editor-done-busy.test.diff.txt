@@ -1,0 +1,37 @@
+--- /home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor-done-busy.test.ts	2026-10-28 03:11:10.698146107 +0000
++++ proto/tests/renderer/components/schema-editor-done-busy.test.ts	2026-10-28 03:37:25.999401411 +0000
+@@ -155,7 +155,7 @@
+   it("(b1) RR-R33-01: while Done is pending the button reads Applying... and is disabled, the editing controls are disabled and Back stays enabled", async () => {
+     const { scanB, done } = await doneDuringPendingOpenFolderB();
+ 
+-    expect(done).toBeDisabled();
++    expect(done).toHaveAttribute("aria-disabled", "true");
+     expect(done).toHaveTextContent("Applying...");
+     expect(fieldNameInput()).toBeDisabled();
+     expect(getButtonByText(/Add Field/)).toBeDisabled();
+@@ -186,7 +186,7 @@
+     await openCustomize();
+ 
+     const reopenedDone = getButtonByText(/^Done$/);
+-    expect(reopenedDone).toBeEnabled();
++    expect(reopenedDone).toHaveAttribute("aria-disabled", "false");
+     expect(fieldNameInput()).toBeEnabled();
+ 
+     await settle(() => scanB.resolve([FILE_B]));
+@@ -204,7 +204,7 @@
+     expect(onSave).toHaveBeenCalledTimes(1);
+     expect(onClose).not.toHaveBeenCalled();
+     const done = getButtonByText(/^Done$/);
+-    expect(done).toBeEnabled();
++    expect(done).toHaveAttribute("aria-disabled", "false");
+     expect(fieldNameInput()).toBeEnabled();
+   });
+ 
+@@ -292,6 +292,7 @@
+     await waitMs(20);
+     expect(reads.length).toBe(3);
+     expect(reads[1].schema.some((f) => f.key === "qtwo")).toBe(true);
++    expect(reads[2].schema).toEqual(reads[1].schema);
+     const r1 = reads[1];
+     const r2 = reads[2];
+     await settle(() => r2.d.resolve(readFor(r2.paths, r2.schema)));

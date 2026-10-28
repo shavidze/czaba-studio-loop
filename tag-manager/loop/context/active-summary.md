@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T02:56:15.545Z)
+# Active loop summary (2026-10-28T03:30:19.475Z)
 
-- backlog.json 346 KB -> active view 99 KB
-- status: G_ROOT_GATE round 36
+- backlog.json 340 KB -> active view 99 KB
+- status: G_ROOT_GATE round 37
 - servers: `{"servers":"none or skipped"}`
-- last publication: 51969a270d9642b8d2e9ae4fb9ab309b43fbcece (rounds 36-36)
-- last root gate: round 36 published - commit 51969a270d9642b8d2e9ae4fb9ab309b43fbcece pushed
+- last publication: ea4a1cb5c439b47565bce1c3883f8e41ca775511 (rounds 37-37)
+- last root gate: round 37 published - commit ea4a1cb5c439b47565bce1c3883f8e41ca775511 pushed
 
-## Current items: TM-B37, TM-B38, TM-B39, TM-B40
+## Current items: TM-B38, TM-B39, TM-B40, TM-B41
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -164,20 +164,24 @@
 - A-R33-01 / low / open / D-40 relies on handleCloseFolder being synchronous (FolderBrowser.tsx:147 setIsScanning(false) runs before setFiles([])/setMetadata({}) :149
 - A-R33-03 / low / open / Test hygiene: a module-level waitForFolderLoadIdle subscription could leak into the next test if a future test ends with isScanning true (re
 - QA-R33-03 / info / open / A scanFolder that never settles keeps Done waiting forever (no busy indicator); Back, Open Folder and Close Folder still work and end the wa
-- C-R34-01 / low / open / Stale selection after a folder switch: while Open Folder fast's scan is pending, a click on a row of the old listing (s.wav) selects /slow/s
-- C-R34-02 / low / in_progress / Renderer test timing margin: on C's runner (e1)-(e5), (w8) take 2.9-3.95 s alone (5 s default timeout); A's qa-engineer saw an (e1) timeout 
+- C-R34-01 / low / in_progress / Stale selection after a folder switch: while Open Folder fast's scan is pending, a click on a row of the old listing (s.wav) selects /slow/s
 - RR-R34-05 / info / open / Architecture signal: MetadataPanel could own the whole 'save schema -> re-read -> close' flow and return a token or AbortSignal per open edi
-- C-R34-03 / info / in_progress / (e5)'s name says 'the panel stays on the form', but Open Folder clears the selection so the panel shows the empty state
-- B-R34-02 / info / in_progress / TESTING.md rule candidate: in component suites that render FolderBrowser + MetadataPanel, screen.getByRole('button', {name}) costs ~1.5-2 s 
 - B-R34-03 / low / open / Known limit kept by D-42/D-43: Done #1 pending, Back, reopen, add a field, and do NOT press Done again: if #1 was still waiting for a folder
 - C-R35-01 / low / open / While Done is Applying..., the fieldset's disabled:opacity-60 multiplies with the Active Fields arrows' own disabled:opacity-30 (~18%): arro
-- C-R35-02 / low / in_progress / docs/bugs/001: D-41 bullet still says the pending re-read always writes to the store after unmount (since D-43 only if no later Done started
-- C-R35-03 / low / in_progress / Test gap: BM-6 (setIsApplying(false) before onClose removed) and the DM-9 shape (two Done calls waiting on the same isScanning flip, reads o
 - RR-R35-01 / low / open / Focus is lost when Done is clicked: the focused button becomes natively disabled, focus drops to <body>; keyboard/screen-reader users tab ba
 - RR-R35-02 / low / open / Busy state can last forever if onSave never settles (scan that never finishes, QA-R33-03): Applying... until Back / Open Folder / Close Fold
 - RR-R35-03 / info / open / A superseded schema re-read drops its own 'Failed to read N files' toast (MetadataPanel.tsx:249). Correct: the later Done re-reads every fil
 - RR-R35-04 / low / open / (b2) cannot fail on its own: React never fires onClick on a natively disabled button; (b1)'s disabled check is what protects it. Becomes mea
 - RR-R35-05 / info / open / Architecture signal: schema re-read guards are spread (schemaReadIdRef, folderLoadId, write generations, isMountedRef); a file-store action 
+- C-R36-01 / low / open / Helper mutants HM-1 (uniqueness throw removed), HM-2 (string === -> includes), HM-3 (no trim) survive 289/289; equivalent on all 257 current
+- RR-R36-01 / low / open / (b7)'s reads[1].schema.some(qtwo) assertion likely cannot tell Done #1's read from Done #2's (both read the schema at run time); outcome che
+- RR-R36-02 / low / open / getButtonByText has no visibility filter and ignores aria-label; safe because of the unique-match throw, but tests no longer show accessible
+- RR-R36-03 / low / open / getButtonByText RegExp with g/y keeps lastIndex between calls; no current caller uses g/y (C probe)
+- RR-R36-04 / low / open / TESTING.md §6 names a loop agent ('B-ის გაზომვით'); write 'measured on one runner'
+- RR-R36-05 / info / open / Architecture signal: Biome checks only src/ (tests/ unlinted) -> same as TM-B06; a shared clickButton(name) helper would replace ~8 per-suit
+- R36-A-01 / low / open / getButtonByText does not collapse inner whitespace; unreachable today (C probe sameAsRole=true on all 257 lookups)
+- R36-A-02 / low / open / RegExp g/y lastIndex (= RR-R36-03); unreachable today
+- B-R36-01 / info / open / The old file listing stays clickable while a folder scan is pending; locking/blanking it would be a new UX (Saba-question candidate). D-44 m
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

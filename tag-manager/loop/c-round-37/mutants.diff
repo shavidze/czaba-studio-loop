@@ -1,0 +1,95 @@
+== pm1
+--- src/renderer/src/stores/file-store.ts	2026-10-28 03:12:59.308130473 +0000
++++ /tmp/c37/pm1/src/renderer/src/stores/file-store.ts	2026-10-28 03:20:41.415608806 +0000
+@@ -245,6 +245,6 @@
+ ): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
+   const listedPaths = new Set(files.map((file) => file.path));
+   const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
+-  if (selectedPaths.length === state.selectedPaths.length) return { files };
++  return { files };
+   return { files, selectedPaths };
+ }
+== pm2
+--- src/renderer/src/stores/file-store.ts	2026-10-28 03:12:59.308130473 +0000
++++ /tmp/c37/pm2/src/renderer/src/stores/file-store.ts	2026-10-28 03:20:41.433267184 +0000
+@@ -245,6 +245,6 @@
+ ): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
+   const listedPaths = new Set(files.map((file) => file.path));
+   const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
+-  if (selectedPaths.length === state.selectedPaths.length) return { files };
+-  return { files, selectedPaths };
++  if (state.selectedPaths.length === 0 || selectedPaths.length < 0) return { files };
++  return { files, selectedPaths: [] };
+ }
+== pm3
+--- src/renderer/src/stores/file-store.ts	2026-10-28 03:12:59.308130473 +0000
++++ /tmp/c37/pm3/src/renderer/src/stores/file-store.ts	2026-10-28 03:20:41.450960838 +0000
+@@ -245,6 +245,5 @@
+ ): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
+   const listedPaths = new Set(files.map((file) => file.path));
+   const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
+-  if (selectedPaths.length === state.selectedPaths.length) return { files };
+   return { files, selectedPaths };
+ }
+== pm4
+--- src/renderer/src/stores/file-store.ts	2026-10-28 03:12:59.308130473 +0000
++++ /tmp/c37/pm4/src/renderer/src/stores/file-store.ts	2026-10-28 03:20:26.846383360 +0000
+@@ -52,7 +52,7 @@
+   folderLoadId: 0,
+ 
+   setFolderPath: (path) => set({ folderPath: path }),
+-  setFiles: (files) => set((state) => withListedSelection(state, files)),
++  setFiles: (files) => set({ files }),
+ 
+   updateFileStats: (entries) =>
+     set((state) => {
+@@ -238,13 +238,3 @@
+ export function useSelectionCount(): number {
+   return useFileStore((s) => s.selectedPaths.length);
+ }
+-
+-function withListedSelection(
+-  state: FileState,
+-  files: WavFileEntry[],
+-): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
+-  const listedPaths = new Set(files.map((file) => file.path));
+-  const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
+-  if (selectedPaths.length === state.selectedPaths.length) return { files };
+-  return { files, selectedPaths };
+-}
+--- src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-28 03:11:10.693909544 +0000
++++ /tmp/c37/pm4/src/renderer/src/components/sidebar/FolderBrowser.tsx	2026-10-28 03:20:41.469368086 +0000
+@@ -106,6 +106,10 @@
+       const wavFiles = await window.api.scanFolder(path);
+       if (!isFolderLoadCurrent(loadId)) return;
+       setFiles(wavFiles);
++      {
++        const listed = new Set(wavFiles.map((f) => f.path));
++        useFileStore.setState((st) => ({ selectedPaths: st.selectedPaths.filter((x) => listed.has(x)) }));
++      }
+ 
+       if (wavFiles.length > 0) {
+         const paths = wavFiles.map((f) => f.path);
+== pm5
+--- src/renderer/src/stores/file-store.ts	2026-10-28 03:12:59.308130473 +0000
++++ /tmp/c37/pm5/src/renderer/src/stores/file-store.ts	2026-10-28 03:20:41.487433977 +0000
+@@ -246,5 +246,5 @@
+   const listedPaths = new Set(files.map((file) => file.path));
+   const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
+   if (selectedPaths.length === state.selectedPaths.length) return { files };
+-  return { files, selectedPaths };
++  return { files, selectedPaths: [] };
+ }
+== pm6
+--- src/renderer/src/stores/file-store.ts	2026-10-28 03:12:59.308130473 +0000
++++ /tmp/c37/pm6/src/renderer/src/stores/file-store.ts	2026-10-28 03:20:41.505190699 +0000
+@@ -244,7 +244,8 @@
+   files: WavFileEntry[],
+ ): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
+   const listedPaths = new Set(files.map((file) => file.path));
+-  const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
++  const sel = new Set(state.selectedPaths);
++  const selectedPaths = files.map((f) => f.path).filter((path) => sel.has(path) && listedPaths.has(path));
+   if (selectedPaths.length === state.selectedPaths.length) return { files };
+   return { files, selectedPaths };
+ }

@@ -1,0 +1,129 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c37/pm4[39m
+
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x1) Open Folder B pending, row of A clicked, B applies -> no stale selection[32m 147[2mms[22m[39m
+ [31m×[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned[32m 94[2mms[22m[39m
+[31m   → expected [ '/fa/a.wav', '/fa/a2.wav' ] to deeply equal [ '/fa/a2.wav' ][39m
+ [31m×[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x3) App drop B while A listed, row of A clicked during scan -> pruned[32m 199[2mms[22m[39m
+[31m   → expected [ '/fa/a.wav' ] to deeply equal [][39m
+ [31m×[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x4) Open Folder B scan rejects after a row of A was clicked -> selection empty[32m 52[2mms[22m[39m
+[31m   → expected [ '/fa/a.wav' ] to deeply equal [][39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x5) typed in A's row during pending Open Folder B, B applies -> discard toast, editor empty[32m 74[2mms[22m[39m
+ [31m×[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x6) store: setFiles keeps the same selectedPaths array when nothing is pruned[32m 2[2mms[22m[39m
+[31m   → expected [ '/fa/a.wav' ] to deeply equal [][39m
+ [31m×[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x7) pin with D-31: anchor row pruned by Rescan, another selected row kept, Shift-click -> plain single selection[32m 80[2mms[22m[39m
+[31m   → expected [ '/fa/a2.wav', '/fa/a.wav' ] to deeply equal [ '/fa/a2.wav' ][39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned
+[31m[1mAssertionError[22m: expected [ '/fa/a.wav', '/fa/a2.wav' ] to deeply equal [ '/fa/a2.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[31m+   "/fa/a.wav",[39m
+[2m    "/fa/a2.wav",[22m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/selection-after-folder-switch.test.ts:[2m142:51[22m[39m
+    [90m140| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m scan[33m.[39m[34mresolve[39m([[33mENTRY_A2[39m]))[33m;[39m
+    [90m141| [39m    [35mawait[39m [34mwaitMs[39m([34m10[39m)[33m;[39m
+    [90m142| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([[33mPATH_A2[39m])[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m143| [39m  })[33m;[39m
+    [90m144| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x3) App drop B while A listed, row of A clicked during scan -> pruned
+[31m[1mAssertionError[22m: expected [ '/fa/a.wav' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "/fa/a.wav",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m tests/renderer/components/selection-after-folder-switch.test.ts:[2m163:51[22m[39m
+    [90m161| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m bScan[33m.[39m[34mresolve[39m([[33mENTRY_B[39m]))[33m;[39m
+    [90m162| [39m    [35mawait[39m [34mwaitMs[39m([34m10[39m)[33m;[39m
+    [90m163| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m164| [39m  })[33m;[39m
+    [90m165| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x4) Open Folder B scan rejects after a row of A was clicked -> selection empty
+[31m[1mAssertionError[22m: expected [ '/fa/a.wav' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "/fa/a.wav",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m tests/renderer/components/selection-after-folder-switch.test.ts:[2m176:51[22m[39m
+    [90m174| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m bScan[33m.[39m[34mreject[39m([35mnew[39m [33mError[39m([32m"scan failed"[39m)))[33m;[39m
+    [90m175| [39m    [35mawait[39m [34mwaitMs[39m([34m10[39m)[33m;[39m
+    [90m176| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m177| [39m  })[33m;[39m
+    [90m178| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x6) store: setFiles keeps the same selectedPaths array when nothing is pruned
+[31m[1mAssertionError[22m: expected [ '/fa/a.wav' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "/fa/a.wav",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m tests/renderer/components/selection-after-folder-switch.test.ts:[2m205:51[22m[39m
+    [90m203| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoBe[39m(before)[33m;[39m
+    [90m204| [39m    useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34msetFiles[39m([[33mENTRY_B[39m])[33m;[39m
+    [90m205| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m206| [39m  })[33m;[39m
+    [90m207| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x7) pin with D-31: anchor row pruned by Rescan, another selected row kept, Shift-click -> plain single selection
+[31m[1mAssertionError[22m: expected [ '/fa/a2.wav', '/fa/a.wav' ] to deeply equal [ '/fa/a2.wav' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "/fa/a2.wav",[22m
+[31m+   "/fa/a.wav",[39m
+[2m  ][22m
+
+[36m [2m❯[22m tests/renderer/components/selection-after-folder-switch.test.ts:[2m218:51[22m[39m
+    [90m216| [39m    [35mawait[39m [34msettle[39m(() [33m=>[39m scan[33m.[39m[34mresolve[39m([[33mENTRY_A2[39m[33m,[39m [33mENTRY_A3[39m]))[33m;[39m
+    [90m217| [39m    [35mawait[39m [34mwaitMs[39m([34m10[39m)[33m;[39m
+    [90m218| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([[33mPATH_A2[39m])[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m219| [39m    [35mawait[39m [34mclickRow[39m([32m"a3.wav"[39m[33m,[39m { shiftKey[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m220| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([[33mPATH_A3[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 03:20:57
+[2m   Duration [22m 1.86s[2m (transform 280ms, setup 90ms, import 437ms, tests 650ms, environment 549ms)[22m
+

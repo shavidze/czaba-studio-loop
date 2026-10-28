@@ -1,0 +1,27 @@
+diff --git a/src/renderer/src/stores/file-store.ts b/src/renderer/src/stores/file-store.ts
+index c27ae41..33c0c0c 100644
+--- a/src/renderer/src/stores/file-store.ts
++++ b/src/renderer/src/stores/file-store.ts
+@@ -52,7 +52,7 @@ export const useFileStore = create<FileState>((set, get) => ({
+   folderLoadId: 0,
+ 
+   setFolderPath: (path) => set({ folderPath: path }),
+-  setFiles: (files) => set({ files }),
++  setFiles: (files) => set((state) => withListedSelection(state, files)),
+ 
+   updateFileStats: (entries) =>
+     set((state) => {
+@@ -238,3 +238,13 @@ export function useIsSelected(path: string): boolean {
+ export function useSelectionCount(): number {
+   return useFileStore((s) => s.selectedPaths.length);
+ }
++
++function withListedSelection(
++  state: FileState,
++  files: WavFileEntry[],
++): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
++  const listedPaths = new Set(files.map((file) => file.path));
++  const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
++  if (selectedPaths.length === state.selectedPaths.length) return { files };
++  return { files, selectedPaths };
++}

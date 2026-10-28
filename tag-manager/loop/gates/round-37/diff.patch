@@ -1,0 +1,64 @@
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index 3c1b1f7..e5c00de 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -290,3 +290,20 @@
+ - **გადაწყვეტილება:** D-43 მხოლოდ `Done`-ების რიგს იცავს; schema-ს ცვლილება `Done`-ის გარეშე re-read-ს არ იწყებს.
+ - **ტესტი:** ტესტი არ არის
+ - **სტატუსი:** ცნობილი შეზღუდვა
++
++## 20. folder-ის load-ის შემდეგ selection ძველ path-ს ინარჩუნებდა
++
++- **ID:** C-R34-01, TM-B39
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/stores/file-store.ts:55` (`setFiles`), `:242-250` (`withListedSelection`), `src/renderer/src/components/sidebar/FolderBrowser.tsx:103`/`:108` (`handleOpenFolder`: load-ის დასაწყისის `clearSelection` და `setFiles`), `:161`/`:166` (`handleRescan`: იგივე), `src/renderer/src/App.tsx:48`/`:61` (`openFolder`, drop: იგივე), `src/renderer/src/components/file-list/FileList.tsx:68` (row-ზე click, `setSelectedPaths`)
++- **მიღწევადობა:** სანამ scan pending-ია, ძველი სია ჩანს და მასზე click მუშაობს. Rescan იმავე folder-ს ტვირთავს; Open Folder და drop სხვა folder-ს.
++- **Reproduction (გასწორებამდე):**
++  1. საწყისი მდგომარეობა: folder `/fa` გახსნილია (`a.wav`, `a2.wav`), `/fb`-ში ერთი ფაილია (`b.wav`), `/fb`-ის scan ნელია.
++  2. მოქმედება: `Open Folder` `/fb` (`clearSelection()` უკვე გამოიძახა, scan ჯერ არ დასრულებულა) → `a.wav`-ის row-ზე click (სურვილისამებრ Category-ში ტექსტის აკრეფა) → `/fb`-ის scan სრულდება.
++  3. შედეგი: `setFiles` `files`-ს ცვლიდა, `selectedPaths`-ს კი არა, ამიტომ selection-ში რჩებოდა path, რომელიც სიაში აღარ იყო: toolbar აჩვენებდა `1 selected`-ს მონიშნული row-ის გარეშე, panel აჩვენებდა "Select a file to edit metadata"-ს (`useSelectedFiles` `files`-ით ფილტრავს), აკრეფილი ტექსტი `isDirty`-ად რჩებოდა ხილული მფლობელის გარეშე, Shift-click-ის anchor კი სიაში არარსებულ path-ზე იდგა. Rescan-ზე ასევე რჩებოდა row, რომელიც დისკიდან წაიშალა.
++  4. დისკზე არაფერი იცვლება: Save no-op-ია, როცა `selectedFiles` ცარიელია (`MetadataPanel.tsx:143`). ეს მხოლოდ selection-ის მდგომარეობა და ჩვენებაა.
++- **Reference:** R1 Qt `QItemSelectionModel` (`reset()` selection-ს წმენდს, model-ის reset-ზე `selectionChanged` არ იგზავნება); R2 Kid3 (folder-ის გახსნა სიას მისი ფაილებით ავსებს, ფაილები მხოლოდ command line-ის FILE არგუმენტებით ინიშნება); R3 Mp3tag "Select files automatically" (opt-in ოფცია; default off დასკვნაა). R4 (Windows File Explorer refresh) მოძებნილია, მაგრამ მხოლოდ ფორუმის ურთიერთსაწინააღმდეგო პოსტები მოიძებნა, ამიტომ reference-ად არ გამოიყენება.
++- **Deviations:** (1) Rescan-ზე selection იფილტრება და არ იწმინდება: scan-ის დროს click-ით მონიშნული row, რომელიც ახალ სიაშიც არის, მონიშნული რჩება; სხვა folder-ზე შედეგი გაწმენდის ტოლია. თუ რომელიმე row რჩება, D-31-ის anchor არ იწმინდება; თუ anchor-ის row ამოიშალა, Shift-click ჩვეულებრივი click-ია ((x7)). (2) ძველი სია scan-ის დროს click-ადი რჩება: სიის ჩაკეტვა ახალი UX ცვლილებაა (Saba-ს კითხვის კანდიდატი); D-44-ით ასეთი click load-ს ვეღარ გადაურჩება. (3) ახალი ფაილების auto-select არ არის (Mp3tag-ის opt-in ოფცია, R3, არ არის გადმოტანილი); დღევანდელ ქცევას ემთხვევა. (4) აკრეფილი ტექსტი ფილტრით ამოშლილ row-ში load-ის დროს app-ის არსებულ წესს მიჰყვება (`MetadataPanel.tsx:120-121`, `:124-127`): toast `Unsaved changes were discarded` და ცარიელი editor.
++- **გადაწყვეტილება:** D-44: `useFileStore.setFiles(files)` `selectedPaths`-ში ტოვებს მხოლოდ იმ path-ებს, რომლებიც ახალ `files`-შია, არსებული რიგით. თუ არაფერი ამოიშალა, update-ში `selectedPaths` არ შედის და array identity ინახება (ზედმეტი `MetadataPanel` sync არ ხდება). load-ის დასაწყისის `clearSelection()`, `selectRange`, `selectAll` და D-31-ის anchor-ის წესები უცვლელია. უარყოფილი ალტერნატივა: selection-ის გაწმენდა load-ის გამოყენებისას — ის Rescan-ის დროს იმავე სიაში დარჩენილ row-ზე შეგნებულ click-ს გადააგდებდა ((x2), mutant PM-2). პრეცედენტი: `selectRange` selection-ს ხილულ path-ებად უკვე ფილტრავს (`file-store.ts:93`).
++- **ტესტი:** `tests/renderer/components/selection-after-folder-switch.test.ts` — `(x1) Open Folder B pending, row of A clicked, B applies -> no stale selection`, `(x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned`, `(x3) App drop B while A listed, row of A clicked during scan -> pruned`, `(x4) Open Folder B scan rejects after a row of A was clicked -> selection empty`, `(x5) typed in A's row during pending Open Folder B, B applies -> discard toast, editor empty`, `(x6) store: setFiles keeps the same selectedPaths array when nothing is pruned`, `(x7) pin with D-31: anchor row pruned by Rescan, another selected row kept, Shift-click -> plain single selection`
++- **სტატუსი:** გასწორდა (D-44, TM-B39)
+diff --git a/docs/bugs/README.md b/docs/bugs/README.md
+index 69ec441..eef8206 100644
+--- a/docs/bugs/README.md
++++ b/docs/bugs/README.md
+@@ -4,6 +4,6 @@
+ 
+ | # | აღწერა | სტატუსი |
+ |---|--------|---------|
+-| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (19 ჩანაწერი; 10 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა) |
++| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (20 ჩანაწერი; 11 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა) |
+ 
+ ფორმატი: `{NNN}-{short-description}.md`
+diff --git a/src/renderer/src/stores/file-store.ts b/src/renderer/src/stores/file-store.ts
+index c27ae41..33c0c0c 100644
+--- a/src/renderer/src/stores/file-store.ts
++++ b/src/renderer/src/stores/file-store.ts
+@@ -52,7 +52,7 @@ export const useFileStore = create<FileState>((set, get) => ({
+   folderLoadId: 0,
+ 
+   setFolderPath: (path) => set({ folderPath: path }),
+-  setFiles: (files) => set({ files }),
++  setFiles: (files) => set((state) => withListedSelection(state, files)),
+ 
+   updateFileStats: (entries) =>
+     set((state) => {
+@@ -238,3 +238,13 @@ export function useIsSelected(path: string): boolean {
+ export function useSelectionCount(): number {
+   return useFileStore((s) => s.selectedPaths.length);
+ }
++
++function withListedSelection(
++  state: FileState,
++  files: WavFileEntry[],
++): Pick<FileState, 'files'> | Pick<FileState, 'files' | 'selectedPaths'> {
++  const listedPaths = new Set(files.map((file) => file.path));
++  const selectedPaths = state.selectedPaths.filter((path) => listedPaths.has(path));
++  if (selectedPaths.length === state.selectedPaths.length) return { files };
++  return { files, selectedPaths };
++}

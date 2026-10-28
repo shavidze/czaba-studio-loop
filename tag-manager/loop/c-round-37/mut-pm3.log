@@ -1,0 +1,47 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c37/pm3[39m
+
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x1) Open Folder B pending, row of A clicked, B applies -> no stale selection[32m 142[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x2) Rescan pending, row a2 clicked, a2 still listed -> kept; removed row pruned[32m 90[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x3) App drop B while A listed, row of A clicked during scan -> pruned[32m 194[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x4) Open Folder B scan rejects after a row of A was clicked -> selection empty[32m 53[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x5) typed in A's row during pending Open Folder B, B applies -> discard toast, editor empty[32m 69[2mms[22m[39m
+ [31m×[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x6) store: setFiles keeps the same selectedPaths array when nothing is pruned[32m 7[2mms[22m[39m
+[31m   → expected [ '/fa/a.wav' ] to be [ '/fa/a.wav' ] // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: [ '/fa/a.wav' ]
+Received: serializes to the same string
+[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x7) pin with D-31: anchor row pruned by Rescan, another selected row kept, Shift-click -> plain single selection[32m 88[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/selection-after-folder-switch.test.ts[2m > [22mselection after a folder switch (TM-B39)[2m > [22m(x6) store: setFiles keeps the same selectedPaths array when nothing is pruned
+[31m[1mAssertionError[22m: expected [ '/fa/a.wav' ] to be [ '/fa/a.wav' ] // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: [ '/fa/a.wav' ]
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m tests/renderer/components/selection-after-folder-switch.test.ts:[2m203:51[22m[39m
+    [90m201| [39m    [35mconst[39m before [33m=[39m useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths[33m;[39m
+    [90m202| [39m    useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34msetFiles[39m([[33mENTRY_A[39m[33m,[39m [33mENTRY_B[39m])[33m;[39m
+    [90m203| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoBe[39m(before)[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m204| [39m    useFileStore[33m.[39m[34mgetState[39m()[33m.[39m[34msetFiles[39m([[33mENTRY_B[39m])[33m;[39m
+    [90m205| [39m    [34mexpect[39m(useFileStore[33m.[39m[34mgetState[39m()[33m.[39mselectedPaths)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 03:20:55
+[2m   Duration [22m 1.87s[2m (transform 289ms, setup 93ms, import 455ms, tests 646ms, environment 552ms)[22m
+

@@ -1,0 +1,83 @@
+--- /home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts	2026-10-28 03:11:10.698146107 +0000
++++ proto/tests/renderer/components/metadata-panel-batch-save.test.ts	2026-10-28 03:37:25.999098617 +0000
+@@ -96,7 +96,7 @@
+ function expectEditsKept(): void {
+   const state = useMetadataStore.getState();
+   expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
+-  expect(getBatchSaveButton()).toBeEnabled();
++  expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false");
+   expect(state.isDirty).toBe(true);
+   expect(state.modifiedFields).toEqual(new Set(["category"]));
+   expect(state.editingMetadata.category).toBe(TYPED_CATEGORY);
+@@ -168,7 +168,7 @@
+     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved to 2 files");
+     expect(useMetadataStore.getState().isDirty).toBe(false);
+     expect(getCategoryInput().value).toBe("");
+-    expect(getBatchSaveButton()).toBeDisabled();
++    expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "true");
+   });
+ 
+   it("(d) full success clears the form back to Multiple values", async () => {
+@@ -190,7 +190,7 @@
+     expect(state.modifiedFields.size).toBe(0);
+     expect(getCategoryInput().value).toBe("");
+     expect(getCategoryInput().placeholder).toBe("Multiple values");
+-    expect(getBatchSaveButton()).toBeDisabled();
++    expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "true");
+     expect(useFileStore.getState().metadata[PATH_B]?.category).toBe(TYPED_CATEGORY);
+   });
+ 
+@@ -208,7 +208,7 @@
+     expect(state.toastType).toBe("error");
+     expect(state.isDirty).toBe(true);
+     expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
+-    expect(getButtonByText(/Save Tags/)).toBeEnabled();
++    expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disabled", "false");
+   });
+ });
+ 
+@@ -378,7 +378,7 @@
+     expect(state.modifiedFields).toEqual(new Set(["category"]));
+     expect(state.isDirty).toBe(true);
+     expect(state.isSaving).toBe(false);
+-    expect(getButtonByText(/Save Tags/)).toBeEnabled();
++    expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disabled", "false");
+     expectNoStaleSkipSync(seedA);
+   });
+ 
+@@ -950,7 +950,7 @@
+       expect(getCategoryInput().value).toBe("R20Cat");
+       expect(state.isDirty).toBe(true);
+       expect(state.modifiedFields).toEqual(new Set(["title"]));
+-      expect(getButtonByText(/Save Tags/)).toBeEnabled();
++      expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disabled", "false");
+       expect(useFileStore.getState().metadata[PATH_A]).toEqual(REREAD_A);
+       expect(state.toastMessage).toBe("Tags saved");
+       expect(state.isSaving).toBe(false);
+@@ -991,7 +991,7 @@
+       expect(getCategoryInput().value).toBe("R20Cat");
+       expect(state.isDirty).toBe(false);
+       expect(state.modifiedFields).toEqual(new Set());
+-      expect(getButtonByText(/Save Tags/)).toBeDisabled();
++      expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disabled", "true");
+     });
+ 
+     it("(y5) pin: an equal tag array with a new reference during the write is not a change", async () => {
+@@ -1003,7 +1003,7 @@
+       const state = useMetadataStore.getState();
+       expect(state.isDirty).toBe(false);
+       expect(state.modifiedFields).toEqual(new Set());
+-      expect(getButtonByText(/Save Tags/)).toBeDisabled();
++      expect(getButtonByText(/Save Tags/)).toHaveAttribute("aria-disabled", "true");
+     });
+ 
+     it("(y5b) tag order changed during the write is a change", async () => {
+@@ -1068,7 +1068,7 @@
+       expect(getInputByLabel("Title").value).toBe("BatchTitle");
+       expect(state.modifiedFields).toEqual(new Set(["title"]));
+       expect(state.isDirty).toBe(true);
+-      expect(getBatchSaveButton()).toBeEnabled();
++      expect(getBatchSaveButton()).toHaveAttribute("aria-disabled", "false");
+       expect(state.toastMessage).toBe("Tags saved to 2 files");
+       expect(useFileStore.getState().metadata[PATH_A]?.category).toBe(TYPED_CATEGORY);
+       expect(useFileStore.getState().metadata[PATH_B]?.category).toBe(TYPED_CATEGORY);

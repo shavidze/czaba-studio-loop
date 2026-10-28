@@ -1,0 +1,248 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { SchemaEditor } from "~/components/schema/SchemaEditor";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import { useSchemaStore } from "~/stores/schema-store";
+import type { BatchWriteResult, FieldDefinition, FieldValue, WavFileEntry, WavMetadata } from "~/types";
+import { getButtonByText } from "../helpers/dom-queries";
+import { resetAllStores } from "../helpers/reset-stores";
+import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: Error) => void;
+}
+
+const PATH_A = "/music/a.wav";
+const PATH_B = "/music/b.wav";
+const MODIFIED_AT = "2026-10-28T00:00:00.000Z";
+const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 100, modifiedAt: MODIFIED_AT };
+const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 100, modifiedAt: MODIFIED_AT };
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve: (value: T) => void = () => {};
+  let reject: (error: Error) => void = () => {};
+  const promise = new Promise<T>((onResolve, onReject) => {
+    resolve = onResolve;
+    reject = onReject;
+  });
+  return { promise, resolve, reject };
+}
+
+function defaultValueForType(type: FieldDefinition["type"]): FieldValue {
+  if (type === "tags") return [];
+  if (type === "number") return 0;
+  return "";
+}
+
+function emptyRecordForPanelSchema(): WavMetadata {
+  const result: WavMetadata = {};
+  for (const field of useSchemaStore.getState().fields) {
+    result[field.key] = defaultValueForType(field.type);
+  }
+  return result;
+}
+
+function seed(selectedPaths: string[]): void {
+  const base = { ...emptyRecordForPanelSchema(), category: "OLDCat" };
+  useFileStore.setState({
+    files: [FILE_A, FILE_B],
+    metadata: { [PATH_A]: { ...base }, [PATH_B]: { ...base } },
+    selectedPaths,
+  });
+}
+
+function getCategoryInput(): HTMLInputElement {
+  const label = screen.getByText("Category (UCS)");
+  const input = label.parentElement?.querySelector("input");
+  if (!input) throw new Error("Category (UCS) input not found");
+  return input;
+}
+
+async function settle(action: () => void): Promise<void> {
+  await act(async () => {
+    action();
+  });
+}
+
+async function focusAndClick(element: HTMLElement): Promise<void> {
+  await act(async () => {
+    element.focus();
+    fireEvent.click(element);
+  });
+}
+
+async function clickElement(element: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(element);
+  });
+}
+
+function expectBusyAndFocused(button: HTMLElement): void {
+  expect(button).not.toHaveAttribute("disabled");
+  expect(button).toHaveAttribute("aria-disabled", "true");
+  expect(button).toHaveAttribute("aria-busy", "true");
+  expect(document.activeElement).toBe(button);
+}
+
+function arrowButtons(iconClass: string): HTMLButtonElement[] {
+  return Array.from(document.querySelectorAll(`svg.${iconClass}`)).map((svg) => {
+    const button = svg.closest("button");
+    if (!button) throw new Error(`${iconClass} button not found`);
+    return button;
+  });
+}
+
+function hasOwnDimClass(button: HTMLElement): boolean {
+  return Array.from(button.classList).some((name) => /(^|:)opacity-30$/.test(name));
+}
+
+beforeEach(() => {
+  resetAllStores();
+  resetWindowApiMocks();
+  vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+describe("busy commit buttons keep focus (TM-B40, D-45)", () => {
+  it("(f1) RR-R35-01: Done keeps focus while Applying...: aria-disabled and aria-busy, not natively disabled", async () => {
+    const save = createDeferred<void>();
+    const onSave = vi.fn(() => save.promise);
+    render(createElement(SchemaEditor, { onClose: vi.fn(), onSave }));
+    const done = getButtonByText(/^Done$/);
+    await focusAndClick(done);
+
+    expect(done).toHaveTextContent("Applying...");
+    expectBusyAndFocused(done);
+
+    await settle(() => save.resolve());
+  });
+
+  it("(f2) RR-R35-04: two more clicks on the busy Done start no second onSave", async () => {
+    const save = createDeferred<void>();
+    const onSave = vi.fn(() => save.promise);
+    const onClose = vi.fn();
+    render(createElement(SchemaEditor, { onClose, onSave }));
+    const done = getButtonByText(/^Done$/);
+    await focusAndClick(done);
+    await clickElement(done);
+    await clickElement(done);
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    await settle(() => save.resolve());
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("(f3) onSave rejects: Done reads Done, is not busy or aria-disabled, still has focus, and the next click runs onSave again", async () => {
+    const save = createDeferred<void>();
+    const onSave = vi.fn(() => save.promise);
+    render(createElement(SchemaEditor, { onClose: vi.fn(), onSave }));
+    const done = getButtonByText(/^Done$/);
+    await focusAndClick(done);
+    await settle(() => save.reject(new Error("reread failed")));
+
+    expect(done).toHaveTextContent(/^Done$/);
+    expect(done).toHaveAttribute("aria-disabled", "false");
+    expect(done).not.toHaveAttribute("aria-busy", "true");
+    expect(document.activeElement).toBe(done);
+    await clickElement(done);
+    expect(onSave).toHaveBeenCalledTimes(2);
+    await settle(() => save.reject(new Error("reread failed")));
+  });
+
+  it("(f4) Save Tags keeps focus while Saving... and a second click writes once", async () => {
+    seed([PATH_A]);
+    const write = createDeferred<void>();
+    vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+    vi.mocked(window.api.readMetadata).mockResolvedValue({ ...emptyRecordForPanelSchema(), category: "NEWCat" });
+    render(createElement(MetadataPanel));
+    fireEvent.change(getCategoryInput(), { target: { value: "NEWCat" } });
+    const save = getButtonByText(/Save Tags/);
+    await focusAndClick(save);
+
+    expect(save).toHaveTextContent("Saving...");
+    expectBusyAndFocused(save);
+    await clickElement(save);
+    expect(window.api.writeMetadata).toHaveBeenCalledTimes(1);
+
+    await settle(() => write.resolve());
+  });
+
+  it("(f5) after a successful save Save Tags is aria-disabled, not busy, still focused, and a click writes nothing", async () => {
+    seed([PATH_A]);
+    const write = createDeferred<void>();
+    vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+    vi.mocked(window.api.readMetadata).mockResolvedValue({ ...emptyRecordForPanelSchema(), category: "NEWCat" });
+    render(createElement(MetadataPanel));
+    fireEvent.change(getCategoryInput(), { target: { value: "NEWCat" } });
+    const save = getButtonByText(/Save Tags/);
+    await focusAndClick(save);
+    await settle(() => write.resolve());
+    await settle(() => {});
+
+    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+    expect(useMetadataStore.getState().isDirty).toBe(false);
+    expect(save).toHaveTextContent("Save Tags");
+    expect(save).not.toHaveAttribute("disabled");
+    expect(save).toHaveAttribute("aria-disabled", "true");
+    expect(save).not.toHaveAttribute("aria-busy", "true");
+    expect(document.activeElement).toBe(save);
+    await clickElement(save);
+    expect(window.api.writeMetadata).toHaveBeenCalledTimes(1);
+  });
+
+  it("(f6) a clean batch Save to 2 files is aria-disabled, focusable, and a click writes nothing", async () => {
+    seed([PATH_A, PATH_B]);
+    render(createElement(MetadataPanel));
+    const save = getButtonByText(/Save to 2 files/);
+
+    expect(save).not.toHaveAttribute("disabled");
+    expect(save).toHaveAttribute("aria-disabled", "true");
+    await focusAndClick(save);
+    expect(document.activeElement).toBe(save);
+    expect(window.api.writeMetadataBatch).not.toHaveBeenCalled();
+  });
+
+  it("(f7) dirty batch save: Save to 2 files is busy and focused while writing, then writes once", async () => {
+    seed([PATH_A, PATH_B]);
+    const write = createDeferred<BatchWriteResult>();
+    vi.mocked(window.api.writeMetadataBatch).mockReturnValueOnce(write.promise);
+    vi.mocked(window.api.readMetadataBatch).mockResolvedValue({});
+    render(createElement(MetadataPanel));
+    fireEvent.change(getCategoryInput(), { target: { value: "NEWCat" } });
+    const save = getButtonByText(/Save to 2 files/);
+    await focusAndClick(save);
+
+    expectBusyAndFocused(save);
+    await clickElement(save);
+    expect(window.api.writeMetadataBatch).toHaveBeenCalledTimes(1);
+    await settle(() => write.resolve({ succeeded: 2, failed: [] }));
+  });
+
+  it("(f8) C-R35-01: while Applying... only edge reorder arrows carry their own dim class; middle arrows rely on the fieldset alone", async () => {
+    const save = createDeferred<void>();
+    render(createElement(SchemaEditor, { onClose: vi.fn(), onSave: vi.fn(() => save.promise) }));
+    const ups = arrowButtons("lucide-arrow-up");
+    const downs = arrowButtons("lucide-arrow-down");
+    expect(ups.length).toBeGreaterThanOrEqual(3);
+    await clickElement(getButtonByText(/^Done$/));
+
+    expect(ups.map(hasOwnDimClass)).toEqual(ups.map((_, index) => index === 0));
+    expect(downs.map(hasOwnDimClass)).toEqual(downs.map((_, index) => index === downs.length - 1));
+    await settle(() => save.resolve());
+  });
+});
