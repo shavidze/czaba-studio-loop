@@ -1,0 +1,43 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+(async () => {
+  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const page = await ctx.newPage();
+  await page.goto('http://127.0.0.1:5173/studio-lab'); await page.waitForFunction(() => { const x = [...document.querySelectorAll('button')].find((y) => y.textContent.trim() === 'Add'); return x && !x.disabled; }, undefined, { timeout: 90000 }); await sleep(800);
+  await page.getByRole('button', { name: 'Add', exact: true }).click(); await sleep(800);
+  const st = () => page.evaluate(() => ({ zoom: document.querySelector('[data-testid="arrangement-zoom-readout"]')?.textContent, status: document.querySelector('[data-testid="arrangement-status"]')?.textContent, active: document.activeElement === document.body ? 'BODY' : (document.activeElement.getAttribute('data-testid') || document.activeElement.tagName), clips: [...document.querySelectorAll('[data-clip-kind="audio"]')].map((c) => [c.getAttribute('data-clip-start'), Math.round(c.getBoundingClientRect().width), c.closest('[data-track-id]').getAttribute('data-track-id')]), range: document.querySelector('[data-testid="arrangement-range"]')?.textContent || null, pos: document.querySelector('[data-testid="arrangement-position"]')?.textContent }));
+  const out = {};
+  const sc = await page.getByTestId('arrangement-timeline-scroller').boundingBox();
+  const rb = await page.getByTestId('arrangement-ruler').boundingBox();
+  await page.evaluate(() => document.activeElement.blur());
+  await page.keyboard.press('Equal'); await page.keyboard.press('Equal'); await sleep(300);
+  out.zoomed = await st();
+  await page.mouse.dblclick(sc.x + 224 + 120, rb.y + rb.height / 2); await sleep(500);
+  out.rulerFitNoRange = await st();
+  await page.keyboard.press('Equal'); await sleep(300);
+  out.equalAfterRulerDbl = await st();
+  await page.evaluate(() => document.activeElement.blur());
+  await page.keyboard.press('Equal'); await sleep(300);
+  out.equalAfterBlur = await st();
+  // paste probe
+  const title = await page.evaluate(() => { const c = document.querySelector('[data-clip-kind="audio"]'); const r = c.getBoundingClientRect(); return { x: Math.max(r.left, 240) + 30, y: r.top + 10 }; });
+  await page.mouse.dblclick(sc.x + 224 + 120, rb.y + rb.height / 2); await sleep(400);
+  await page.mouse.click(title.x, title.y); await sleep(200);
+  out.sel = await st();
+  await page.keyboard.press('Control+c'); await sleep(200);
+  out.afterCopy = await st();
+  await page.keyboard.press('Control+v'); await sleep(500);
+  out.afterPasteAtPlayhead = await st();
+  await page.keyboard.press('Control+z'); await sleep(300);
+  await page.keyboard.press('End'); await sleep(200);
+  await page.keyboard.press('Control+ArrowRight'); await page.keyboard.press('Control+ArrowRight'); await sleep(300);
+  out.afterEdgeNav = await st();
+  await page.keyboard.press('Control+v'); await sleep(500);
+  out.afterPasteAtEnd = await st();
+  // nudge probe: select first clip by title and press ArrowRight
+  const t2 = await page.evaluate(() => { const c = document.querySelector('[data-clip-kind="audio"]'); const r = c.getBoundingClientRect(); return { x: Math.max(r.left, 240) + 30, y: r.top + 10 }; });
+  await page.mouse.click(t2.x, t2.y); await sleep(200);
+  await page.keyboard.press('ArrowRight'); await sleep(300);
+  out.afterNudgeRight = await st();
+  console.log(JSON.stringify(out, null, 1));
+  await b.close();
+})();

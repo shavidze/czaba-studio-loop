@@ -1,0 +1,14 @@
+# C round 226 checkpoint
+- [x] C-SCOPE start: HEAD 80fbb3b, 4 M + 5 ??, frozen rc0, root rc0 (scope-start.txt)
+- [ ] G226-3 / LAB-SMOKE-226 (g226.cjs)
+- [ ] C-GEOM / C-BBOX / C-BUDGET (geom.mjs)
+- [ ] C-OPEN / C-NO-OPEN / C-LAYOUT / C-INERT / C-SEARCH / C-A11Y / C-SLOT (sheet.mjs)
+- [ ] C-ROWS (rows.mjs)
+- [ ] C-REF, C-LESSON, AN-REVIEW
+- [x] G226-3 / LAB-SMOKE-226 PASS (g/g226.json)
+- [x] C-GEOM PASS both vp S0/S1 (geom-after.json); C-BBOX: only 1280 lane-fit deltas outside (a)-(c) -> Low C-R226-01 (bbox-diff.txt)
+- [x] sheet.cjs both vp: C-OPEN, C-LAYOUT, held ?, C-INERT, C-SEARCH, C-A11Y, esc neighbours PASS; 1280 noopen rerun (sheet-1280x720-noopen.json) PASS
+- [ ] rows.cjs both vp running (rows-done.flag)
+- findings so far: C-R226-01 bbox spec gap (Low); waveform-zoom row says "1x button" but control is a select (Low); fit row omits "with a time selection the ruler zooms to it" (Low); pre-existing: ruler dblclick focuses playhead handle so arrows move playhead / +- dead (info, frozen files)
+- [x] report + json written (PASS, 4 Low)
+- [x] advisor follow-ups: C-R226-04 context, section-6 footer probe, rows-vs-task, probe5 ring/Tab; report updated

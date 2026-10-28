@@ -1,0 +1,27 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
+const r = {};
+await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load' });
+await p.waitForSelector('[data-testid="arrangement-timeline-scroller"]'); await p.waitForTimeout(2000);
+const dialog = p.getByRole('dialog', { name: 'Keyboard shortcuts' });
+await p.click('button[aria-label="Keyboard shortcuts (?)"]'); await p.waitForTimeout(300);
+await p.click('button[aria-label="Close (Esc)"]'); await p.waitForTimeout(300);
+r.mouseClose = await p.evaluate(() => { const a = document.activeElement; return { label: a?.getAttribute('aria-label'), fv: a?.matches(':focus-visible'), outline: getComputedStyle(a).outlineStyle }; });
+await p.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur());
+await p.keyboard.down('Shift');
+for (let i = 0; i < 5; i += 1) { await p.keyboard.down('Slash'); await p.waitForTimeout(100); }
+await p.keyboard.up('Slash'); await p.keyboard.up('Shift'); await p.waitForTimeout(300);
+r.heldOpen = await dialog.count();
+r.search = await p.getByRole('searchbox', { name: 'Search shortcuts' }).inputValue().catch(() => null);
+await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+const cdp = await p.context().newCDPSession(p);
+const send = async (k) => { await cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', ...k }); await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', ...k }); await p.waitForTimeout(250); };
+await send({ key: '?', code: 'Minus', modifiers: 8, text: '?' }); r.minus = await dialog.count(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+await send({ key: '_', code: 'Slash', modifiers: 8, text: '_' }); r.slashUnderscore = await dialog.count(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+await send({ key: '/', code: 'Slash', modifiers: 0, text: '/' }); r.plainSlash = await dialog.count();
+writeFileSync('/home/runner/czaba-project/tmp/studio-real-loop/a-round-226/browser/probe2.json', JSON.stringify(r, null, 2));
+console.log(JSON.stringify(r));
+await b.close();

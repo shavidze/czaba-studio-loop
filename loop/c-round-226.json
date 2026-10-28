@@ -1,0 +1,96 @@
+{
+ "taskStatus": "PASS",
+ "round": 226,
+ "bugs": [
+  {
+   "id": "C-R226-01",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab at 1280x720 (S0 and S1)",
+    "Run b-round-225/bbox-before.mjs equivalent (c-round-226/bbox-after.mjs)",
+    "Diff against b-round-225/bbox-before.json"
+   ],
+   "expected": "Only deltas (a) footer, (b) scroller h+20, (c) exactly 20+-1 px",
+   "actual": "Lane-fit cascade at 1280: video header h 60->64, audio headers 79->80, lane controls y +2..+7, playhead h +7 (fitLaneHeights reacting to the +20 px scroller). Task spec gap, not an app defect.",
+   "evidence": "c-round-226/bbox-diff.txt"
+  },
+  {
+   "id": "C-R226-02",
+   "severity": "low",
+   "steps": [
+    "Open the shortcut sheet (?)",
+    "Read the Zoom & view row 'Waveform zoom'"
+   ],
+   "expected": "Key/control wording matches the real control",
+   "actual": "Chip says '1x button' but the control is a <select> (Waveform Zoom, options 1/2x..8x)",
+   "evidence": "c-round-226/rows/rows-1440x900.json waveform-zoom.info"
+  },
+  {
+   "id": "C-R226-03",
+   "severity": "low",
+   "steps": [
+    "Make a time selection on a clip body",
+    "Double-click the ruler"
+   ],
+   "expected": "Sheet row 'Fit the whole project - Double-click the ruler or the overview' fits the project",
+   "actual": "With a selection the ruler double-click zooms to the selection (by design, StudioWorkspace handleRulerDoubleClick l.1269-1275); sheet omits the condition. 14.1->33.1 px/s vs overview 9 px/s",
+   "evidence": "c-round-226/rows (first 1440 run) and c-round-226.md C-R226-03"
+  },
+  {
+   "id": "C-R226-04",
+   "severity": "low",
+   "steps": [
+    "Add a clip; double-click (or click) the ruler",
+    "Click the clip title bar",
+    "Press ArrowRight; press ="
+   ],
+   "expected": "Sheet: '<- / -> Nudge the selection', '+ / - Zoom'",
+   "actual": "Ruler double-click: 2nd click lands on the moved playhead handle (role=slider), ArrangementRuler l.151 focus(); clip title click does not release it (releaseEditFocusOnTimelinePointerDown covers range/typing/loop brace/marker only). ArrowRight then moves the playhead 0.1 s (clip not nudged), = does not zoom. Pre-existing in frozen files; no backlog ruling found; now advertised by the sheet",
+   "evidence": "c-round-226/probe1.json; rows nudge.focusAfterClipClick; probe2-*.txt (nudge works with body focus)"
+  }
+ ],
+ "passed": [
+  "C-SCOPE",
+  "C-GEOM",
+  "C-OPEN",
+  "C-NO-OPEN",
+  "C-LAYOUT",
+  "C-INERT",
+  "C-ROWS",
+  "C-SEARCH",
+  "C-A11Y",
+  "C-SLOT",
+  "C-BUDGET",
+  "C-REF",
+  "C-LESSON",
+  "G226-3",
+  "LAB-SMOKE-226",
+  "AN-REVIEW-226"
+ ],
+ "notPassed": {
+  "C-BBOX": "Low spec gap C-R226-01 (B ruling)"
+ },
+ "gate": [
+  "full suite",
+  "build",
+  "lint",
+  "verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T13:10:37.6440367Z",
+  "round": 226,
+  "attempt": 1,
+  "store": 200
+ },
+ "report": "c-round-226.md",
+ "evidence": "c-round-226/",
+ "notes": [
+  "C-BBOX not in passed: Low spec gap C-R226-01 for B ruling",
+  "Section 6 footer range+multi-selection probed (probe4*.json): states exclusive; footer 69 px, no overlap, button visible",
+  "C-ROWS 43/43 vs task table programmatic: rows-vs-task.txt"
+ ]
+}
