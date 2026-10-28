@@ -51,3 +51,9 @@ Before building any feature or UX change, B studies how the same thing works in 
 
 - Saba asked for a new Tag Manager release. The repository's `release.yml` builds Windows and macOS installers when a master push carries a new `package.json` version. Root therefore commits one `chore(release): v1.4.0` commit on master that changes only `version` in `package.json` and `package-lock.json` (1.3.1 → 1.4.0). It runs inside a loop job, before the round starts (`tag-manager/cloud/RELEASE` → `run.sh`), so it never lands mid-round.
 - **Baseline rule:** when HEAD is a root `chore(release): vX.Y.Z` commit directly on top of the baseline named in `current-task.md`, and that commit changes only those two `version` fields, it counts as the baseline. A and C do not stop on it, and the frozen-file checks compare against it. The package.json freeze stays as before for agents.
+
+## Root note — green Check run for TM-T0 (2026-10-28)
+
+- Root read the Actions status of `TCzaba/czaba-tag-manager`: `check.yml` run **40639002695** on **a5c6a6b** (round 41 head) completed **success** at 2026-10-28T05:36Z (https://github.com/TCzaba/czaba-tag-manager/actions/runs/40639002695). The seven runs before it, from 3035ffc to e386cca, are green too.
+- This is the Actions link that TM-T0, TM-T0-CI, TM-T0-CI-FU and TM-B14 asked root for. B may close them on this evidence at the next planning step.
+- Saba's answers to Q1–Q17 are still pending. The loop stays NEEDS_ATTENTION until root records them here.
