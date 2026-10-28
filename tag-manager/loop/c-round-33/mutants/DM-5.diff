@@ -1,0 +1,19 @@
+--- /tmp/c33/new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 23:57:54.084586019 +0000
++++ /home/runner/czaba-project/tmp/tag-manager-loop/c-round-33/mutants/DM-5.tsx	2026-10-28 00:12:51.496839470 +0000
+@@ -223,7 +223,6 @@
+   }, [selectedFiles, fields, setIsSaving, setEditingMetadata, showToast, updateFileMetadata]);
+ 
+   const handleSchemaChanged = useCallback(async () => {
+-    await waitForFolderLoadIdle();
+     const { files, folderLoadId: loadId } = useFileStore.getState();
+     if (files.length === 0) return;
+     const newSchema = useSchemaStore.getState().fields;
+@@ -243,7 +242,7 @@
+         for (const path of chunk) keptPaths.add(path);
+       }
+     }
+-    if (!isFolderLoadCurrent(loadId)) return;
++    if (!isFolderLoadCurrent(loadId) || useFileStore.getState().files !== files) return;
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+     const accumulated: Record<string, WavMetadata> = {};
+     for (const { readGeneration, result } of chunkReads) {

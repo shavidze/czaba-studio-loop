@@ -1,0 +1,34 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R33-01",
+      "severity": "low",
+      "steps": [
+        "In a copy of A's tree apply DM-3 (const loadId = useFileStore.getState().folderLoadId; before await waitForFolderLoadIdle(); then const { files } = useFileStore.getState();)",
+        "Unit scenario (k1): /fa open, a selected; Customize Fields; Open Folder /fb with scan deferred; add R33note; Done",
+        "Open Folder /fc (scan resolves [c]); the first readMetadataBatch for /fc rejects, later ones resolve",
+        "Resolve the /fb scan"
+      ],
+      "expected": "A test fails on DM-3: metadata {c: C + r33note 'CN'} (what A's code produces)",
+      "actual": "All 117 tests in the 7-file mutation set pass on DM-3; with DM-3 metadata is {} because the re-read is dropped by the D-39(b) guard while C's own read failed",
+      "evidence": "c-round-33/mutants.log, c-round-33/mutants/DM-3.diff, c-round-33/c-dm3-probe.test.ts.txt (green on A's code, red on DM-3: expected {} to deeply equal { '/fc/c.wav': ... })"
+    },
+    {
+      "id": "C-R33-02",
+      "severity": "low",
+      "steps": [
+        "(A qa-engineer rated QA-R33-01 medium; C rates low; B decides) Real app (new build), harness scan delay 4000 ms for fast/: slow open, s.wav selected",
+        "Click Customize Fields; Open Folder fast (scan pending); add field R33note; click Done (editor stays open, D-40 wait)",
+        "Click Back; click s.wav (old list still shown); click Customize Fields; type QTyped in the field name",
+        "Wait for the fast scan to finish"
+      ],
+      "expected": "The reopened schema editor stays open with QTyped typed",
+      "actual": "The reopened editor closes by itself when the pending Done finishes (4.01 s after Open); QTyped is lost. Pre-existing: the old build shows the same with a slow schema re-read (closes at 3.3 s); D-40 widens the window to the whole folder load. Cause: SchemaEditor handleSave calls the old onClose after await onSave(). Nothing on disk changes. Same as A's QA-R33-01.",
+      "evidence": "c-round-33/run-new-Q.txt, r33-5-new-Q.json, r33-5-new-Q-*.png, run-old-QD.txt, run-new-QD.txt"
+    }
+  ],
+  "passed": ["R33-1", "R33-2", "R33-3", "R33-4", "R33-5", "R33-6"],
+  "blocked": ["Windows packaging is not available in the cloud (not part of this round)"],
+  "realVerified": true
+}

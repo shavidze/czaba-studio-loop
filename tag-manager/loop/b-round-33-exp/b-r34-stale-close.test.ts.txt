@@ -1,0 +1,212 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement, Fragment, StrictMode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import type { FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+import { resetAllStores } from "../helpers/reset-stores";
+import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+type MetadataByPath = Record<string, WavMetadata>;
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: Error) => void;
+}
+
+const MODIFIED_AT = "2026-10-28T00:00:00.000Z";
+const NOTE_KEY = "r34note";
+const PATH_A = "/fa/a.wav";
+const PATH_B = "/fb/b.wav";
+const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 1, modifiedAt: MODIFIED_AT };
+const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 1, modifiedAt: MODIFIED_AT };
+const BASE_BY_PATH: MetadataByPath = {
+  [PATH_A]: { title: "A", category: "ACat", comment: "" },
+  [PATH_B]: { title: "B", category: "BCat", comment: "" },
+};
+const NOTE_BY_PATH: Record<string, string> = { [PATH_A]: "AN", [PATH_B]: "BN" };
+const FIELD_NAME_PLACEHOLDER = "Field name (e.g. Client)";
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve: (value: T) => void = () => {};
+  let reject: (error: Error) => void = () => {};
+  const promise = new Promise<T>((onResolve, onReject) => {
+    resolve = onResolve;
+    reject = onReject;
+  });
+  return { promise, resolve, reject };
+}
+
+async function clickButton(name: RegExp): Promise<void> {
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name }));
+  });
+}
+
+async function clickBack(): Promise<void> {
+  const back = document.querySelector("svg.lucide-arrow-left")?.closest("button");
+  if (!back) throw new Error("back button not found");
+  await act(async () => {
+    fireEvent.click(back);
+  });
+}
+
+async function settle(action: () => void): Promise<void> {
+  await act(async () => {
+    action();
+  });
+}
+
+async function waitMs(ms: number): Promise<void> {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  });
+}
+
+function renderBrowserAndPanel(strict: boolean): void {
+  const tree = createElement(Fragment, null, createElement(FolderBrowser), createElement(MetadataPanel));
+  render(strict ? createElement(StrictMode, null, tree) : tree);
+}
+
+function seedFolderA(): void {
+  useFileStore.setState({
+    folderPath: "/fa",
+    files: [FILE_A],
+    metadata: { [PATH_A]: { ...BASE_BY_PATH[PATH_A] } },
+    selectedPaths: [PATH_A],
+  });
+}
+
+function readFor(paths: string[], schema: FieldDefinition[]): MetadataByPath {
+  const hasNote = schema.some((field) => field.key === NOTE_KEY);
+  const out: MetadataByPath = {};
+  for (const path of paths) {
+    out[path] = hasNote ? { ...BASE_BY_PATH[path], [NOTE_KEY]: NOTE_BY_PATH[path] } : { ...BASE_BY_PATH[path] };
+  }
+  return out;
+}
+
+function fieldNameInput(): HTMLInputElement | null {
+  return screen.queryByPlaceholderText(FIELD_NAME_PLACEHOLDER);
+}
+
+async function reselectAAndOpenCustomize(): Promise<void> {
+  await settle(() => useFileStore.getState().setSelectedPaths([PATH_A]));
+  await openCustomize();
+}
+
+async function openCustomize(): Promise<void> {
+  await act(async () => {
+    fireEvent.click(screen.getByTitle("Customize Fields"));
+  });
+}
+
+async function addNoteField(): Promise<void> {
+  fireEvent.change(screen.getByPlaceholderText(FIELD_NAME_PLACEHOLDER), { target: { value: "R34note" } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
+  });
+}
+
+function armPendingOpenFolderB(): Deferred<WavFileEntry[]> {
+  const scanB = createDeferred<WavFileEntry[]>();
+  vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+  vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+  vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
+  return scanB;
+}
+
+async function doneDuringPendingOpenFolderB(strict: boolean): Promise<Deferred<WavFileEntry[]>> {
+  seedFolderA();
+  const scanB = armPendingOpenFolderB();
+  renderBrowserAndPanel(strict);
+  await openCustomize();
+  await clickButton(/Open Folder/);
+  await addNoteField();
+  await clickButton(/Done/);
+  return scanB;
+}
+
+beforeEach(() => {
+  resetAllStores();
+  resetWindowApiMocks();
+  vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+  vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
+});
+
+describe("schema editor closed and reopened while Done is pending (D-41)", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("(e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name", async () => {
+    const scanB = await doneDuringPendingOpenFolderB(false);
+    expect(fieldNameInput()).not.toBeNull();
+    await clickBack();
+    expect(fieldNameInput()).toBeNull();
+    await reselectAAndOpenCustomize();
+    fireEvent.change(screen.getByPlaceholderText(FIELD_NAME_PLACEHOLDER), { target: { value: "QTyped" } });
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+
+    expect(fieldNameInput()?.value).toBe("QTyped");
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: { ...BASE_BY_PATH[PATH_B], [NOTE_KEY]: "BN" } });
+  });
+
+  it("(e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name", async () => {
+    const scanB = await doneDuringPendingOpenFolderB(true);
+    await clickBack();
+    await reselectAAndOpenCustomize();
+    fireEvent.change(screen.getByPlaceholderText(FIELD_NAME_PLACEHOLDER), { target: { value: "QTyped" } });
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+
+    expect(fieldNameInput()?.value).toBe("QTyped");
+  });
+
+  it("(e3) pin under React.StrictMode: Done with no folder load pending closes the editor", async () => {
+    seedFolderA();
+    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
+    renderBrowserAndPanel(true);
+    await openCustomize();
+    await addNoteField();
+    await clickButton(/Done/);
+    await waitMs(20);
+
+    expect(fieldNameInput()).toBeNull();
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: { ...BASE_BY_PATH[PATH_A], [NOTE_KEY]: "AN" } });
+  });
+
+  it("(e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read", async () => {
+    const scanB = await doneDuringPendingOpenFolderB(false);
+    expect(fieldNameInput()).not.toBeNull();
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+
+    expect(fieldNameInput()).toBeNull();
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: { ...BASE_BY_PATH[PATH_B], [NOTE_KEY]: "BN" } });
+  });
+
+  it("(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form", async () => {
+    const scanB = await doneDuringPendingOpenFolderB(false);
+    await clickBack();
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+
+    expect(fieldNameInput()).toBeNull();
+    expect(useFileStore.getState().files).toEqual([FILE_B]);
+    expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: { ...BASE_BY_PATH[PATH_B], [NOTE_KEY]: "BN" } });
+    expect(useMetadataStore.getState().toastMessage).toBeNull();
+  });
+});

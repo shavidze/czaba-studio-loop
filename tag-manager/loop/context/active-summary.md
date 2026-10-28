@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-27T23:26:43.581Z)
+# Active loop summary (2026-10-28T00:30:42.962Z)
 
-- backlog.json 297 KB -> active view 88 KB
-- status: G_ROOT_GATE round 32
+- backlog.json 309 KB -> active view 90 KB
+- status: G_ROOT_GATE round 33
 - servers: `{"servers":"none or skipped"}`
-- last publication: ee15e6cfa72f50bb1caecb9075526101e3eb03ec (rounds 32-32)
-- last root gate: round 32 published - commit ee15e6cfa72f50bb1caecb9075526101e3eb03ec pushed
+- last publication: 9f5ac51fa93096b1940b6609db203d92ff53fdfc (rounds 33-33)
+- last root gate: round 33 published - commit 9f5ac51fa93096b1940b6609db203d92ff53fdfc pushed
 
-## Current items: TM-B33, TM-B34
+## Current items: TM-B34, TM-B35
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -98,7 +98,6 @@
 - RR-R19-03 / info / open / refreshSavedFileStats reads folderPath after the write; a folder opened during a slow save is scanned instead; harmless because only written
 - RR-R19-04 / info / open / Architecture signal: move the stat refresh into a store action backed by a statFiles IPC, or have meta:write / meta:write-batch return the n
 - A-R19-01 / low / open / No batch test for a scanFolder rejection; the helper is shared and M5 is killed by the single test (u)
-- A-R19-02 / low / in_progress / Folder close/switch during a pending save: updateFileMetadata adds the old folder's path to the new folder's metadata map (stray key); the e
 - C-R19-01 / info / open / After a 2-file batch save the Genres field shows its placeholder although both files carry 'R19 Batch'; matches D-21 (all-succeeded batch ->
 - B-R19-01 / low / open / A selection change while a save is pending shows 'Unsaved changes were discarded' although the edits are being written (and are written if t
 - RR-R20-01 / low / open / Switching away from a dirty selection while a save is pending shows 'Unsaved changes were discarded' although the edits are being written (M
@@ -142,26 +141,29 @@
 - C-R27-01 / info / open / SchemaEditor 'Done' awaits onSave (handleSchemaChanged) before onClose; during a slow schema read the editor stays open (R27-5: Done at 1.16
 - C-R27-02 / info / open / A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)
 - B-R27-02 / info / open / Alternative to D-35 not taken: disable Rescan / Open Folder / drop while a save is pending (UX change, needs reference-first). D-35 keeps th
-- RR-R28-03 / low / in_progress / Rescan / Open Folder / drop are not locked during a save; a save's re-read landing after a folder switch adds an old-folder entry to the new
 - RR-R28-04 / info / open / file-store.test.ts (g2) uses bare keys (a, b) while files hold /music/*.wav paths; cosmetic for a unit test
 - RR-R28-05 / info / open / Architecture signal: handleSchemaChanged (D-34) and applyMetadataRead (D-35) repeat the generation compare / keep-current / absent-if-none l
 - C-R28-01 / info / open / Rescan / Open Folder during a pending save shows 'Unsaved changes were discarded' although the save completes (D-29 baseline, both builds)
 - RR-R29-01 / low / open / Toast grammar 'Failed to read 1 files' (FolderBrowser.tsx:125,175, App.tsx:77) copies D-33 MetadataPanel.tsx:252; pinned by (k4)
 - RR-R29-02 / info / open / Architecture signal: the read-chunks -> applyMetadataRead(generations, failedPaths) -> toast block is repeated three times (FolderBrowser.ts
 - C-R30-01 / info / open / Signal: ME-5 (handleOpenFolder calls setMetadata({}) unconditionally after scanFolder) is killed only by (k2); no D-35 (r*) test sees it
-- RR-R30-01 / low / in_progress / A save on an old-folder file still running when another folder (empty or not) is opened: the save's re-read writes that entry into metadata 
 - RR-R30-02 / info / open / docs/bugs/001 line refs are correct but go stale easily; referring to code by function name (e.g. handleRescan else-branch) would last longe
 - RR-R30-03 / info / open / Architecture signal: one shared loadFolderContents(path, { onErrorClear }) helper for handleOpenFolder, handleRescan and App openFolder woul
 - B-R30-01 / info / open / readMetadataChunked keeps reading every chunk of a superseded folder load (no early stop); with 1000+ files the old load's IPC work continue
-- RR-R31-01 / low / in_progress / tests/renderer/stores/file-store.test.ts:2-3 imports isFolderLoadCurrent in a second statement from ~/stores/file-store; merge into one impo
-- RR-R31-02 / low / in_progress / App.tsx:50-55 schema-wait loop runs after beginFolderLoad() and never checks isFolderLoadCurrent: a superseded drop keeps polling up to 5 s 
 - RR-R31-03 / info / open / file-store.ts:155-158 beginFolderLoad does set then get(); a simpler form computes next = get().folderLoadId + 1, set, return next. Correct 
 - RR-R31-04 / info / open / Architecture signal: the load sequence (begin, stop player, scan, guard, chunked read, guard, apply, toast, guarded finally) is copied in ha
-- A-R31-01 / low / in_progress / handleSchemaChanged (MetadataPanel.tsx:209-254) reads the old folder's files and replaces the whole metadata map: Done in the schema editor,
-- C-R31-01 / low / in_progress / Test gap: Close Folder during a pending scan, and during a pending drop load, have no unit test (only Close during a pending Open Folder rea
 - A-R31-02 / info / open / App-based overlap tests use waitMs(100) to let the drop load start; small flakiness risk under load (same pattern as folder-read-rejected-ch
 - B-R31-01 / info / open / Fact: keying the save's re-read store write on folderLoadId (round 30 'Next' hint) breaks D-35 (r1)(r2)(r3)(r6)(r7)(k6), because Rescan and 
-- B-R31-02 / info / open / Equivalent mutant: App schema-wait guard after the loop instead of inside survives (scanFolder is still skipped); the only difference is up 
+- RR-R32-01 / low / open / MetadataPanel.tsx:60-62,186-188 isListedPath scans the whole files list once per saved path in the batch filter (O(files x paths), ~1e6 comp
+- RR-R32-02 / low / open / refreshSavedFileStats reads folderPath when it runs, so a save finishing after Open Folder B scans folder B; the written-paths filter discar
+- RR-R32-03 / info / open / App.tsx:55 the superseded early return sits before try/finally and so skips setIsScanning(false); correct (only the current load owns isScan
+- RR-R32-04 / low / in_progress / A folder load (Rescan / Open Folder) whose chunked read began with the old schema and lands after the schema re-read applies old-schema data
+- RR-R32-05 / info / open / Architecture signal: folder-switch safety rests on three rules (load id for loads and schema re-read, listed path for save re-read, write ge
+- A-R32-01 / low / in_progress / handleSchemaChanged takes folderLoadId at start; Done pressed after Open Folder B's beginFolderLoad() but before its setFiles(B) captures B'
+- A-R32-02 / info / open / Single save: skipSyncRef.current = true (MetadataPanel.tsx:157) is still set when selectionUnchanged is true but isListedPath(path) is false
+- C-R32-01 / info / open / (s1) (metadata-panel-schema-change.test.ts) timed out once at 5000 ms when C ran two renderer suites in parallel on the 4-core runner; alone
+- B-R32-01 / info / open / Under D-40 a Done pressed during a pending folder load keeps the schema editor open until that load finishes and the re-read completes (Sche
+- B-R32-02 / info / open / Equivalent mutant DM-3: taking folderLoadId before the D-40 wait instead of after survives; a load that starts during the wait begins after 
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

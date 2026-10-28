@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 33: TM-B35 schema re-read waits for a pending folder load (D-40) on baseline ee15e6c",
+  "current_task": "Round 34: TM-B36 schema editor reopened while Done is pending (D-41) on baseline 9f5ac51",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -332,8 +332,14 @@
     },
     {
       "id": "D-40",
-      "status": "planned R33 (TM-B35)",
+      "status": "verified (C R33 PASS), published 9f5ac51 (TM-B35)",
       "decision": "Schema re-read waits for a pending folder load (renderer only). MetadataPanel handleSchemaChanged first awaits a module-level waitForFolderLoadIdle(): it resolves at once when useFileStore isScanning is false, otherwise on the first store change where isScanning is false (subscribe, then unsubscribe). Only then it takes files and folderLoadId from useFileStore.getState() (not the render-closure allFiles) and reads those paths with the current schema. The D-39(b) guard, D-33 (rejected chunk keeps the entry, one toast) and D-34 (write-generation keep) are unchanged. Why wait and not skip: a load whose read began before the field was added reads with the old schema; only a re-read after that load lands puts the new field's values in (RR-R32-04). Why not a files-identity guard: a save's stats refresh replaces the files array (updateFileStats) and would drop a valid re-read ((w7)). Effect: Done during a pending load keeps the editor open until the load and the re-read finish (B-R32-01).",
+      "contract_with": "none (renderer display only)"
+    },
+    {
+      "id": "D-41",
+      "status": "planned R34 (TM-B36)",
+      "decision": "An unmounted schema editor never closes the panel (renderer only, SchemaEditor.tsx). SchemaEditor keeps isMountedRef = useRef(false); a mount effect sets it true and its cleanup sets it false (StrictMode-safe). handleSave awaits onSave() and returns without onClose() when isMountedRef.current is false. Why: Back unmounts the editor while Done may still wait (D-40) or re-read; reopening Customize Fields mounts a new editor, and the old Done's onClose (setShowSchemaEditor(false)) would close the new one and drop what the user typed. The pending re-read itself still runs and applies (D-40 unchanged). Done's busy state / re-entrancy is TM-B37.",
       "contract_with": "none (renderer display only)"
     }
   ],
@@ -1617,7 +1623,7 @@
       "severity": "low",
       "source": "A-R32-01 (Done between Open Folder B's beginFolderLoad and setFiles), RR-R32-04 (Rescan read with the old schema lands after the schema re-read); B R32 red reproduction (b-round-32-exp/)",
       "title": "Schema change during a pending folder load (D-40): Done pressed while Open Folder B is scanning re-reads A's files under B's (current) load id and replaces B's metadata with A's (stale toast on reject); a Rescan/Open read that began with the old schema lands after the schema re-read and wipes the new field's values",
-      "status": "todo",
+      "status": "done",
       "round": 33,
       "depends_on": [
         "TM-B34"
@@ -1631,13 +1637,72 @@
       ],
       "acceptance": [
         "R33: handleSchemaChanged first awaits waitForFolderLoadIdle() (resolves at once when isScanning is false, else on the first store change with isScanning false), then takes files and folderLoadId from useFileStore.getState(); the D-39 guard, D-33/D-34 and every toast unchanged; the allFiles selector is removed; no other src change",
-        "tests (w1)-(w7) in tests/renderer/components/schema-change-during-folder-load.test.ts: on ee15e6c src 3 red ((w1)(w2)(w3)), (w4)-(w7) green (272 passed / 3 failed of 275); 275/275 in 16 files after; mutants DM-1, DM-2, DM-4, DM-5, DM-6, DM-7 killed, DM-3 equivalent",
+        "tests (w1)-(w7) in tests/renderer/components/schema-change-during-folder-load.test.ts: on ee15e6c src 3 red ((w1)(w2)(w3)), (w4)-(w7) green (272 passed / 3 failed of 275); 275/275 in 16 files after; mutants DM-1, DM-2, DM-4, DM-5, DM-6, DM-7 killed, DM-3 survives (not equivalent: C-R33-01 (k1) kills it; pin (w8) planned in round 34)",
         "real app (C, old ee15e6c vs new): W/WJ (Done while Open Folder fast is scanning, slow's batch read delayed/rejected -> old: f.wav loses Tagged / stale toast; new: f.wav keeps R32Fast, no slow read after Done), R (Rescan read with the old schema delayed, field R33note/R33N added, Done -> old: R33note empty after the Rescan lands; new: R33Val), N (no load: Done applies at once on both); sha256 + ffprobe + music-metadata",
         "docs/bugs/001 entry 16 fixed by D-40; D-40 bullet; D-39 bullet (b) sentence updated; header/README 16/8/5; STATE_MANAGEMENT one D-40 line + D-39 wording",
         "gate: verifyCommand green, renderer 275, main 93, E2E 7/7, --retries=0 7/7, Biome 0/8 same list"
       ],
+      "realVerified": true,
+      "evidence_b": "B R32 (b-round-32-exp/): on ee15e6c src 3 red ((w1) metadata = A's map with r33note under B's list; (w2) toast 'Failed to read 2 files'; (w3) r33note missing after the old-schema Rescan read) and (w4)-(w7) green (red-run.log 272 passed / 3 failed of 275); prototype 275/275 in 16 files, Biome 0/8 same list, tsc web + test clean (green-run.log); DM-1/2/4/5/6/7 killed, DM-3 equivalent (mutants.log)",
+      "commit": "9f5ac51fa93096b1940b6609db203d92ff53fdfc",
+      "evidence": [
+        "C R33: red 272 passed / 3 failed on ee15e6c MetadataPanel.tsx with A's tests ((w1) :181 A's map under B's list, (w2) :213 'Failed to read 2 files', (w3) :236 r33note missing); A's tree 275/275 (16 files); each new test alone 1.5-2.2 s; DM-1/2/4/5/6/7 killed with the expected killers, DM-3 survives the 117-test set but C's probe (k1) kills it (C-R33-01); gate verifyCommand exit 0 (50 s), Biome 0/8 same list, renderer 275, main 93/93, E2E 7/7, --retries=0 7/7; real app old ee15e6c vs new: W (old: f.wav loses Tagged, Category empty after the slow/ read lands; new: no slow/ read after Done, editor closes at 1.81 s, f.wav Tagged R32Fast), WJ (old: 'Failed to read 1 files'; new: none), R (old: s.wav R33note empty although ffprobe/music-metadata/raw INFO R33N=R33Val; new: R33Val, editor closes 5.51 s after Done), N (editor closes 9/11 ms on both); sha256 unchanged after setup; ffprobe + music-metadata ICAT=R32Fast/R32Slow, R33N=R33Val; no R33note in f.wav; pageErrors empty; (w4)(w5)(w7) unit-only (stated); docs R33-6 PASS (refs.py)",
+        "root gate round 33: published 9f5ac51, review COMMIT OK (gates/round-33/review.md): 1 medium (Done no feedback while waiting), 2 low"
+      ]
+    },
+    {
+      "id": "TM-B36",
+      "type": "bug",
+      "severity": "low",
+      "source": "C-R33-02 / QA-R33-01 / A-R33-02(2) (stale onClose), C-R33-01 (DM-3 test gap), RR-R33-03 (D-40 doc line), A-R33-04 (README wording); B R33 red reproduction (b-round-33-exp/)",
+      "title": "Schema editor reopened while Done is pending (D-41): the old Done's onClose closes the reopened editor and the typed field name is lost; plus pin (w8) for C-R33-01 and D-40 doc line for the startup-schema drop wait",
+      "status": "todo",
+      "round": 34,
+      "depends_on": [
+        "TM-B35"
+      ],
+      "decisions": [
+        "D-41"
+      ],
+      "findings": [
+        "C-R33-02",
+        "QA-R33-01",
+        "A-R33-02",
+        "C-R33-01",
+        "RR-R33-03",
+        "A-R33-04"
+      ],
+      "acceptance": [
+        "R34: SchemaEditor keeps isMountedRef (useRef(false); useEffect sets true, cleanup sets false) and handleSave returns after await onSave() without calling onClose when the editor has unmounted; MetadataPanel.tsx and every other src file unchanged",
+        "tests (e1)-(e5) in tests/renderer/components/schema-editor-stale-close.test.ts ((e2)(e3) under React.StrictMode) and (w8) appended to schema-change-during-folder-load.test.ts: on 9f5ac51 src (e1)(e2) red on the symptom, (e3)(e4)(e5)(w8) green (279 passed / 2 failed of 281); 281/281 in 17 files after; mutants SM-1..SM-4 killed, DM-3 killed by (w8)",
+        "real app (C, old 9f5ac51 vs new): Q (Done during a pending Open Folder, Back, reopen Customize, type QTyped, scan finishes) -> old: editor closes by itself, QTyped lost; new: editor stays open with QTyped and Done then closes it; QD (same with a slow schema re-read and no load) same result; N (no load) closes at once on both; sha256 + ffprobe + music-metadata",
+        "docs/bugs/001 entry 17 fixed by D-41, D-41 bullet, D-40 bullet + RR-R33-03 sentence, entry 16 test list + (w8); README row reworded 17/9/5",
+        "gate: verifyCommand green, renderer 281, main 93, E2E 7/7, --retries=0 7/7, Biome 0/8 same list"
+      ],
       "realVerified": false,
-      "evidence_b": "B R32 (b-round-32-exp/): on ee15e6c src 3 red ((w1) metadata = A's map with r33note under B's list; (w2) toast 'Failed to read 2 files'; (w3) r33note missing after the old-schema Rescan read) and (w4)-(w7) green (red-run.log 272 passed / 3 failed of 275); prototype 275/275 in 16 files, Biome 0/8 same list, tsc web + test clean (green-run.log); DM-1/2/4/5/6/7 killed, DM-3 equivalent (mutants.log)"
+      "evidence_b": "B R33 (b-round-33-exp/): on 9f5ac51 src (e1)(e2) red ('expected undefined to be QTyped': the reopened editor closed), (e3)(e4)(e5) green; prototype (prototype.diff.txt) 5/5 + (w8) 8/8; mutants.log: SM-1/SM-3/SM-4 killed by (e1)(e2), SM-2 by (e3), DM-3 by (w8)"
+    },
+    {
+      "id": "TM-B37",
+      "type": "bug",
+      "severity": "medium",
+      "source": "RR-R33-01 (root review medium), QA-R33-02 / A-R33-02(1) (double Done -> double re-read), B-R32-01, QA-R33-03",
+      "title": "Schema editor Done gives no feedback while it waits for a folder load and the re-read, and stays re-entrant (each click starts another re-read). UX change: needs a Reference section (tag editors / platform guidance for a pending commit button) and a decision on disabled vs aria-disabled + aria-busy and on edits made while pending",
+      "status": "todo",
+      "depends_on": [
+        "TM-B36"
+      ],
+      "decisions": [],
+      "findings": [
+        "RR-R33-01",
+        "QA-R33-02",
+        "B-R32-01",
+        "QA-R33-03"
+      ],
+      "acceptance": [
+        "to be planned after TM-B36 with a Reference section and Deviations (reference-first rule)"
+      ],
+      "realVerified": false
     }
   ],
   "findings": [
@@ -3925,9 +3990,10 @@
       "id": "RR-R32-04",
       "source": "root-review (gates/round-32/review.md low 4)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "A folder load (Rescan / Open Folder) whose chunked read began with the old schema and lands after the schema re-read applies old-schema data; the schema re-read is not dropped and not repeated (pre-existing, no test)",
-      "routed_to": "TM-B35 round 33 (D-40): B red reproduction b-round-32-exp/ (w3) red on ee15e6c (Rescan read with the old schema lands after the schema re-read)"
+      "routed_to": "TM-B35 round 33 (D-40): B red reproduction b-round-32-exp/ (w3) red on ee15e6c (Rescan read with the old schema lands after the schema re-read)",
+      "closed_by": "TM-B35 (D-40), C R33 PASS (R33-1..R33-6, realVerified=true; c-round-33.md/.json), published 9f5ac51, review COMMIT OK"
     },
     {
       "round": 32,
@@ -3943,9 +4009,10 @@
       "id": "A-R32-01",
       "source": "A R32 code-reviewer + qa-engineer (a-round-32.md), C R32 B-note (inference from code, not reproduced by C)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "handleSchemaChanged takes folderLoadId at start; Done pressed after Open Folder B's beginFolderLoad() but before its setFiles(B) captures B's (current) id while allFiles is still A's list, so the D-39(b) guard cannot fire: when A's schema chunks land after B loaded, setMetadata replaces B's map with A's entries (B loses Tagged / form values; a rejected read shows a stale toast). Display-only. A rated medium",
-      "routed_to": "TM-B35 round 33 (D-40): B red reproduction b-round-32-exp/ (w1)(w2) red on ee15e6c; severity low (A said medium; display-only)"
+      "routed_to": "TM-B35 round 33 (D-40): B red reproduction b-round-32-exp/ (w1)(w2) red on ee15e6c; severity low (A said medium; display-only)",
+      "closed_by": "TM-B35 (D-40), C R33 PASS (R33-1..R33-6, realVerified=true; c-round-33.md/.json), published 9f5ac51, review COMMIT OK"
     },
     {
       "round": 32,
@@ -3972,16 +4039,125 @@
       "severity": "info",
       "status": "open",
       "title": "Under D-40 a Done pressed during a pending folder load keeps the schema editor open until that load finishes and the re-read completes (SchemaEditor awaits onSave, C-R27-01 class); no new text or element",
-      "routed_to": "record; C measures the time in R33-5; a non-blocking Done would be a UX change (reference-first, Saba)"
+      "routed_to": "measured by C R33-5 (new build: W editor closes 1.81 s after Done, R 5.51 s; old build W 6.08 s); open as the UX part of TM-B37 (Done gives no feedback while pending, RR-R33-01)"
     },
     {
       "round": 32,
       "id": "B-R32-02",
       "source": "B R32 mutant DM-3 (b-round-32-exp/mutants.log)",
       "severity": "info",
-      "status": "open",
+      "status": "closed",
       "title": "Equivalent mutant DM-3: taking folderLoadId before the D-40 wait instead of after survives; a load that starts during the wait begins after the schema change and so already reads with the new schema, so dropping the re-read loses nothing",
-      "routed_to": "record; C states it as equivalent in R33-3"
+      "routed_to": "record; C states it as equivalent in R33-3",
+      "closed_by": "corrected by C-R33-01: B's equivalence claim was wrong. DM-3 survives the existing tests but is not equivalent; when the superseding load's own read rejects (D-36), the D-40 re-read is what fills that folder and DM-3 drops it. Pin (w8) in round 34 (TM-B36)"
+    },
+    {
+      "round": 33,
+      "id": "C-R33-01",
+      "source": "C R33-3 (c-round-33/c-dm3-probe.test.ts.txt, mutants.log)",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "Test gap: DM-3 (folderLoadId taken before the D-40 wait) passes all 117 tests of the mutation set but is not equivalent: Done while B's scan is pending, Open Folder C supersedes, C's first readMetadataBatch rejects; A's code fills C via the re-read ({c: C + CN}), DM-3 leaves metadata {}",
+      "routed_to": "TM-B36 round 34: pin (w8) in schema-change-during-folder-load.test.ts (B R33 exp: green on 9f5ac51, killed by DM-3)"
+    },
+    {
+      "round": 33,
+      "id": "C-R33-02",
+      "source": "C R33-5 real app (c-round-33/run-new-Q.txt, r33-5-new-Q-*.png, run-old-QD.txt); same as QA-R33-01 and A-R33-02 (second part)",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "A Done still pending (D-40 wait or slow schema re-read) closes a schema editor that the user reopened after Back: SchemaEditor handleSave calls its captured onClose after await onSave(), MetadataPanel's onClose is setShowSchemaEditor(false), so the reopened editor closes by itself and the typed field name is lost. Pre-existing (old build with a slow re-read: closes at 3.3 s); D-40 widened the window to the whole folder load. Nothing on disk changes. A's qa-engineer rated medium, C low",
+      "routed_to": "TM-B36 round 34 (D-41): B R33 red (b-round-33-exp/) (e1)(e2) red on 9f5ac51; severity low (display/input only; nothing on disk), first in round 34"
+    },
+    {
+      "round": 33,
+      "id": "QA-R33-01",
+      "source": "A R33 qa-engineer Q1 (a-round-33/qa/qa-d40.test.ts)",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "Duplicate of C-R33-02 (stale onClose closes the reopened schema editor); qa-engineer rated medium",
+      "routed_to": "TM-B36 round 34 (with C-R33-02)"
+    },
+    {
+      "round": 33,
+      "id": "QA-R33-02",
+      "source": "A R33 qa-engineer Q2; = A-R33-02 first part",
+      "severity": "low",
+      "status": "open",
+      "title": "Done clicked twice during a pending folder load starts two schema re-reads (readMetadataBatch 3x [b] instead of 2); the result is correct, a reject can show the toast twice",
+      "routed_to": "TM-B37 (with RR-R33-01): needs a busy/disabled Done decision (UX, reference-first)"
+    },
+    {
+      "round": 33,
+      "id": "RR-R33-01",
+      "source": "root-review (gates/round-33/review.md medium)",
+      "severity": "medium",
+      "status": "open",
+      "title": "Done gives no feedback while it waits (SchemaEditor.tsx:128-131): during a pending load and re-read the editor stays open, the button is not disabled and has no busy state; on a slow folder it looks like nothing happened and a second click starts another re-read. Suggested fix: a pending flag in handleSave, Done disabled + aria-busy while pending",
+      "routed_to": "TM-B37 (UX, reference-first; B R33 first search found mixed guidance: Opquast/a11y blogs prefer aria-disabled + aria-busy over disabled, Mp3tag forum users ask for controls disabled while saving). Not combined with TM-B36 because a pending guard changes what a second Done does while the editor is still editable (a field added during the re-read itself would no longer be read), which needs its own reference and decision"
+    },
+    {
+      "round": 33,
+      "id": "RR-R33-02",
+      "source": "root-review (gates/round-33/review.md low 1)",
+      "severity": "low",
+      "status": "open",
+      "title": "waitForFolderLoadIdle's subscription can outlive MetadataPanel: if the panel unmounts while waiting, the re-read still runs at the next idle state; harmless today (panel always mounted, store calls guarded, QA Q5 pin); fix if that changes: AbortSignal or an unmount flag after the wait",
+      "routed_to": "signal (with RR-R32-05 / RR-R31-04 architecture family)"
+    },
+    {
+      "round": 33,
+      "id": "RR-R33-03",
+      "source": "root-review (gates/round-33/review.md low 2)",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "Undocumented D-40 edge: if the schema fails to load at startup, App openFolder (drop) sets isScanning true (App.tsx:47) before its up-to-5 s schema wait (:50-55), so a Done during that drop waits up to 5 s; worth one line in D-40",
+      "routed_to": "TM-B36 round 34: one sentence in the docs/bugs/001 D-40 bullet"
+    },
+    {
+      "round": 33,
+      "id": "A-R33-01",
+      "source": "A R33 code-reviewer",
+      "severity": "low",
+      "status": "open",
+      "title": "D-40 relies on handleCloseFolder being synchronous (FolderBrowser.tsx:147 setIsScanning(false) runs before setFiles([])/setMetadata({}) :149-150); an await between them would let the re-read take the old list",
+      "routed_to": "signal / rule candidate for STATE_MANAGEMENT (with RR-R32-05)"
+    },
+    {
+      "round": 33,
+      "id": "A-R33-02",
+      "source": "A R33 code-reviewer",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "Done stays clickable while it waits: (1) each click adds a waiter and a re-read (= QA-R33-02); (2) Back, reopen Customize, the pending onClose closes the new editor (= C-R33-02)",
+      "routed_to": "part (2) TM-B36 round 34; part (1) TM-B37"
+    },
+    {
+      "round": 33,
+      "id": "A-R33-03",
+      "source": "A R33 code-reviewer",
+      "severity": "low",
+      "status": "open",
+      "title": "Test hygiene: a module-level waitForFolderLoadIdle subscription could leak into the next test if a future test ends with isScanning true (reset-stores sets it false, which resolves the old waiter); (w1)-(w7) all finish their loads",
+      "routed_to": "signal; TESTING.md rule candidate"
+    },
+    {
+      "round": 33,
+      "id": "A-R33-04",
+      "source": "A R33 code-reviewer",
+      "severity": "low",
+      "status": "in_progress",
+      "title": "docs/bugs/README.md row 001 '(16 ჩანაწერი; 8 გასწორდა, 5 მათგანი Saba-ს კითხვაა)' reads as if the 5 were among the 8 fixed; they are among the remaining entries",
+      "routed_to": "TM-B36 round 34: README row reworded with the new count"
+    },
+    {
+      "round": 33,
+      "id": "QA-R33-03",
+      "source": "A R33 qa-engineer Q3 (pin)",
+      "severity": "info",
+      "status": "open",
+      "title": "A scanFolder that never settles keeps Done waiting forever (no busy indicator); Back, Open Folder and Close Folder still work and end the wait",
+      "routed_to": "record (B-R32-01 / TM-B37 family)"
     }
   ],
   "rounds": [
@@ -4687,14 +4863,43 @@
     {
       "round": 33,
       "task": "TM-B35 schema change during a pending folder load (D-40): handleSchemaChanged waits for the load, then reads the current files; docs/bugs/001 entry 16",
-      "status": "planned",
+      "status": "PASS (C R33-1..R33-6, realVerified=true, bugs 2 low: C-R33-01, C-R33-02); root gate published 9f5ac51 (round 33), review COMMIT OK; TM-B35 done",
       "baseline": "ee15e6cfa72f50bb1caecb9075526101e3eb03ec (clean)",
       "items": [
         "TM-B35"
       ],
       "findings": [
         "A-R32-01",
-        "RR-R32-04"
+        "A-R33-01",
+        "A-R33-02",
+        "A-R33-03",
+        "A-R33-04",
+        "C-R33-01",
+        "C-R33-02",
+        "QA-R33-01",
+        "QA-R33-02",
+        "QA-R33-03",
+        "RR-R32-04",
+        "RR-R33-01",
+        "RR-R33-02",
+        "RR-R33-03"
+      ]
+    },
+    {
+      "round": 34,
+      "task": "TM-B36 schema editor reopened while Done is pending (D-41): unmounted editor never calls onClose; pin (w8) for DM-3; D-40 doc line; README wording",
+      "status": "planned",
+      "baseline": "9f5ac51fa93096b1940b6609db203d92ff53fdfc (clean)",
+      "items": [
+        "TM-B36"
+      ],
+      "findings": [
+        "C-R33-02",
+        "QA-R33-01",
+        "A-R33-02",
+        "C-R33-01",
+        "RR-R33-03",
+        "A-R33-04"
       ]
     }
   ]

@@ -1,0 +1,52 @@
+--- ../tmp/tag-manager-loop/a-round-33/MetadataPanel.base.tsx	2026-10-27 23:57:47.931198007 +0000
++++ src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 23:57:54.084586019 +0000
+@@ -61,6 +61,17 @@
+   return useFileStore.getState().files.some((file) => file.path === path);
+ }
+ 
++function waitForFolderLoadIdle(): Promise<void> {
++  if (!useFileStore.getState().isScanning) return Promise.resolve();
++  return new Promise((resolve) => {
++    const unsubscribe = useFileStore.subscribe((state) => {
++      if (state.isScanning) return;
++      unsubscribe();
++      resolve();
++    });
++  });
++}
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+@@ -76,7 +87,6 @@
+ export function MetadataPanel(): React.ReactElement {
+   const selectedFiles = useSelectedFiles();
+   const selectedPaths = useFileStore((s) => s.selectedPaths);
+-  const allFiles = useFileStore((s) => s.files);
+   const metadata = useFileStore((s) => s.metadata);
+   const setMetadata = useFileStore((s) => s.setMetadata);
+   const updateFileMetadata = useFileStore((s) => s.updateFileMetadata);
+@@ -213,10 +223,11 @@
+   }, [selectedFiles, fields, setIsSaving, setEditingMetadata, showToast, updateFileMetadata]);
+ 
+   const handleSchemaChanged = useCallback(async () => {
+-    if (allFiles.length === 0) return;
+-    const loadId = useFileStore.getState().folderLoadId;
++    await waitForFolderLoadIdle();
++    const { files, folderLoadId: loadId } = useFileStore.getState();
++    if (files.length === 0) return;
+     const newSchema = useSchemaStore.getState().fields;
+-    const paths = allFiles.map((f) => f.path);
++    const paths = files.map((f) => f.path);
+     const CHUNK_SIZE = 50;
+     const chunkReads: SchemaChunkRead[] = [];
+     const keptPaths = new Set<string>();
+@@ -259,7 +270,7 @@
+     if (failures > 0) {
+       showToast(`Failed to read ${failures} files`, 'error');
+     }
+-  }, [allFiles, setMetadata, setEditingMetadata, showToast]);
++  }, [setMetadata, setEditingMetadata, showToast]);
+ 
+   if (showSchemaEditor) {
+     return <SchemaEditor onClose={() => setShowSchemaEditor(false)} onSave={handleSchemaChanged} />;

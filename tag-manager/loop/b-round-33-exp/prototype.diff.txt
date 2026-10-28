@@ -1,0 +1,32 @@
+--- /tmp/SchemaEditor.base.tsx	2026-10-28 00:35:22.628277438 +0000
++++ src/renderer/src/components/schema/SchemaEditor.tsx	2026-10-28 00:35:22.642914510 +0000
+@@ -1,5 +1,5 @@
+ import { ArrowDown, ArrowLeft, ArrowUp, Plus, Trash2, X } from 'lucide-react';
+-import { useCallback, useState } from 'react';
++import { useCallback, useEffect, useRef, useState } from 'react';
+ import { Button } from '~/components/ui/button';
+ import { Input } from '~/components/ui/input';
+ import { Select } from '~/components/ui/select';
+@@ -34,6 +34,14 @@
+   const [newFieldType, setNewFieldType] = useState<FieldType>('text');
+   const [newFieldRiffId, setNewFieldRiffId] = useState('');
+   const [fieldError, setFieldError] = useState('');
++  const isMountedRef = useRef(false);
++
++  useEffect(() => {
++    isMountedRef.current = true;
++    return () => {
++      isMountedRef.current = false;
++    };
++  }, []);
+ 
+   const enabledStandardKeys = new Set(fields.filter((f) => f.standard).map((f) => f.key));
+   const disabledStandards = STANDARD_FIELDS.filter((f) => !enabledStandardKeys.has(f.key));
+@@ -128,6 +136,7 @@
+   const handleSave = useCallback(async () => {
+     if (fields.length === 0) return;
+     await onSave?.();
++    if (!isMountedRef.current) return;
+     onClose();
+   }, [fields, onSave, onClose]);
+ 

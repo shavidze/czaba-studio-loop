@@ -1,0 +1,29 @@
+--- /tmp/c33/new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-27 23:57:54.084586019 +0000
++++ /home/runner/czaba-project/tmp/tag-manager-loop/c-round-33/mutants/DM-2.tsx	2026-10-28 00:11:29.639097017 +0000
+@@ -85,6 +85,7 @@
+ }
+ 
+ export function MetadataPanel(): React.ReactElement {
++  const allFiles = useFileStore((s) => s.files);
+   const selectedFiles = useSelectedFiles();
+   const selectedPaths = useFileStore((s) => s.selectedPaths);
+   const metadata = useFileStore((s) => s.metadata);
+@@ -224,7 +225,8 @@
+ 
+   const handleSchemaChanged = useCallback(async () => {
+     await waitForFolderLoadIdle();
+-    const { files, folderLoadId: loadId } = useFileStore.getState();
++    const { folderLoadId: loadId } = useFileStore.getState();
++    const files = allFiles;
+     if (files.length === 0) return;
+     const newSchema = useSchemaStore.getState().fields;
+     const paths = files.map((f) => f.path);
+@@ -270,7 +272,7 @@
+     if (failures > 0) {
+       showToast(`Failed to read ${failures} files`, 'error');
+     }
+-  }, [setMetadata, setEditingMetadata, showToast]);
++  }, [allFiles, setMetadata, setEditingMetadata, showToast]);
+ 
+   if (showSchemaEditor) {
+     return <SchemaEditor onClose={() => setShowSchemaEditor(false)} onSave={handleSchemaChanged} />;

@@ -1,0 +1,142 @@
+MetadataPanel.tsx || for (const path of keptPaths) { … setMetadata(accumulated); || ctx…chunk-ის შემდეგ, და არა chunk-ის reject-ის მომენტში (D-34, `
+MetadataPanel.tsx || const meta = metadata[selectedPaths[0]]; || ctx…ილს ხელახლა არ კითხულობს: ფორმა store-ის entry-ს აჩვენებს (`
+MetadataPanel.tsx || useFileStore.getState().markPathsWritten([path]); || ctx…failed`-ში არმყოფ path-ებზე) იძახებს `markPathsWritten`-ს (`
+MetadataPanel.tsx || useFileStore.getState().markPathsWritten(writtenPaths); || ctx…ზე) იძახებს `markPathsWritten`-ს (`MetadataPanel.tsx:144`, `
+OTHER file-store.ts:126-134
+MetadataPanel.tsx || const readGeneration = useFileStore.getState().writeGeneration; || ctx…readMetadataBatch`-ის წინ `writeGeneration`-ს იმახსოვრებს (`
+MetadataPanel.tsx || if ((pathWriteGenerations[path] ?? 0) > readGeneration) { || ctx…anel.tsx:226`). შედარება ერთხელ ხდება, store-ში ჩაწერისას (`
+MetadataPanel.tsx || for (const path of keptPaths) { … } || ctx…t-ებული chunk) path-ები store-ის მიმდინარე entry-ს იღებენ (`
+MetadataPanel.tsx || if (current && !keptPaths.has(currentSelection[0])) setEditingMetadata({ ...current }); || ctx…მიმდინარე entry-ს იღებენ (`:247-250`) და ფორმას არ ცვლიან (`
+OTHER utils.ts:64
+OTHER utils.ts:68-70
+OTHER file-store.ts:136-153
+OTHER file-store.ts:140
+OTHER file-store.ts:145-146
+OTHER FolderBrowser.tsx:113-129
+OTHER FolderBrowser.tsx:171-187
+OTHER App.tsx:66-82
+OTHER FolderBrowser.tsx:133-139
+OTHER App.tsx:86-92
+OTHER FolderBrowser.tsx:191-195
+OTHER FolderBrowser.tsx:130-132
+OTHER FolderBrowser.tsx:188-190
+OTHER App.tsx:83-85
+OTHER utils.ts:72
+OTHER utils.ts:75
+OTHER file-store.ts:36
+OTHER file-store.ts:148-151
+OTHER FolderBrowser.tsx:126
+OTHER FolderBrowser.tsx:184
+OTHER App.tsx:79
+OTHER FolderBrowser.tsx:127-129
+OTHER FolderBrowser.tsx:185-187
+OTHER App.tsx:80-82
+MetadataPanel.tsx || showToast(`Failed to read ${failures} files`, 'error'); || ctx…x:127-129`, `:185-187`, `App.tsx:80-82`), D-33-ის ტექსტით (`
+OTHER FolderBrowser.tsx:130-132
+OTHER FolderBrowser.tsx:188-190
+OTHER App.tsx:83-85
+OTHER file-store.ts:16
+OTHER file-store.ts:52
+OTHER file-store.ts:38
+OTHER file-store.ts:155-158
+OTHER file-store.ts:161-163
+OTHER FolderBrowser.tsx:99
+OTHER FolderBrowser.tsx:158
+OTHER App.tsx:44
+OTHER FolderBrowser.tsx:107
+OTHER FolderBrowser.tsx:165
+OTHER App.tsx:60
+OTHER FolderBrowser.tsx:123
+OTHER FolderBrowser.tsx:181
+OTHER App.tsx:76
+OTHER FolderBrowser.tsx:134
+OTHER FolderBrowser.tsx:192
+OTHER App.tsx:87
+OTHER FolderBrowser.tsx:141
+OTHER FolderBrowser.tsx:197
+OTHER App.tsx:94
+OTHER FolderBrowser.tsx:146-147
+MetadataPanel.tsx || function isListedPath(path: string): boolean { … } || ctx…) `handleSave`: module-level ფუნქცია `isListedPath(path)` (`
+MetadataPanel.tsx || if (isListedPath(path)) updateFileMetadata(path, updated); || ctx… (isListedPath(path)) updateFileMetadata(path, updated);`, `
+MetadataPanel.tsx || const savedEntries = Object.entries(refreshed).filter( … ); || ctx…ths.has(path)`-ის გარდა `isListedPath(path)`-საც მოითხოვს (`
+MetadataPanel.tsx || const loadId = useFileStore.getState().folderLoadId; || ctx… `const loadId = useFileStore.getState().folderLoadId;`-ს (`
+MetadataPanel.tsx || if (!isFolderLoadCurrent(loadId)) return; || ctx…, `if (!isFolderLoadCurrent(loadId)) return;`-ით ბრუნდება (`
+OTHER App.tsx:55
+MetadataPanel.tsx || if (current !== undefined && !isSameFieldValue(current, startMetadata[key])) { || ctx…- **ფაილი:** `src/renderer/src/components/metadata-editor/
+MetadataPanel.tsx || if (selectionUnchanged) setEditingMetadata({ ...updated }); || ctx…ngSave`, `isSameFieldValue(current, startMetadata[key])`), `
+MetadataPanel.tsx || if (current !== undefined && !isSameFieldValue(current, startMetadata[key])) { || ctx…- **ფაილი:** `src/renderer/src/components/metadata-editor/
+MetadataPanel.tsx || for (const key of modified) { … batchMeta[key] = startEditingMetadata[key]; || ctx…ent !== undefined` და `startMetadata[key]` = `undefined`), `
+MetadataPanel.tsx || updated = await window.api.readMetadata(path, useSchemaStore.getState().fields); || ctx…- **ფაილი:** `src/renderer/src/components/metadata-editor/
+MetadataPanel.tsx || refreshed = await window.api.readMetadataBatch(paths, useSchemaStore.getState().fields); || ctx…d `readMetadata(path, useSchemaStore.getState().fields)`), `
+MetadataPanel.tsx || if (selectionUnchanged) setEditingMetadata({ ...updated }); || ctx…dMetadataBatch(paths, useSchemaStore.getState().fields)`), `
+MetadataPanel.tsx || const handleSchemaChanged = useCallback(async () => { … }, [allFiles, setMetadata, setEditingMetadata, showToast]); || ctx….fields)`), `:159` (`setEditingMetadata({ ...updated })`), `
+MetadataPanel.tsx || if (current && !keptPaths.has(currentSelection[0])) setEditingMetadata({ ...current }); || ctx… })`), `:215-262` (`handleSchemaChanged`, ფორმის განახლება `
+MetadataPanel.tsx || if (selectionChanged && isDirty && hasEditingData) { … showToast('Unsaved changes were discarded', 'error'); || ctx…- **ფაილი:** `src/renderer/src/components/metadata-editor/
+OTHER FileList.tsx:70
+OTHER FileList.tsx:63-64
+OTHER file-store.ts:87-101
+OTHER FileList.tsx:65-66
+OTHER FileList.tsx:112-114
+OTHER FileList.tsx:109
+OTHER FileList.tsx:112-114
+MetadataPanel.tsx || const result = await window.api.readMetadataBatch(chunk, newSchema); || ctx…- **ფაილი:** `src/renderer/src/components/metadata-editor/
+MetadataPanel.tsx || setMetadata(accumulated); || ctx…eSchemaChanged`-ის `readMetadataBatch(chunk, newSchema)`), `
+MetadataPanel.tsx || if (current && !keptPaths.has(currentSelection[0])) setEditingMetadata({ ...current }); || ctx…(chunk, newSchema)`), `:251` (`setMetadata(accumulated)`), `
+MetadataPanel.tsx || updated = await window.api.readMetadata(path, useSchemaStore.getState().fields); || ctx…mulated)`), `:255` (`setEditingMetadata({ ...current })`), `
+MetadataPanel.tsx || refreshed = await window.api.readMetadataBatch(paths, useSchemaStore.getState().fields); || ctx…)`), `:255` (`setEditingMetadata({ ...current })`), `:148`/`
+MetadataPanel.tsx || useFileStore.getState().markPathsWritten([path]); || ctx…({ ...current })`), `:148`/`:181` (save-ის re-read); D-34: `
+MetadataPanel.tsx || useFileStore.getState().markPathsWritten(writtenPaths); || ctx…8`/`:181` (save-ის re-read); D-34: `MetadataPanel.tsx:144`/`
+MetadataPanel.tsx || const readGeneration = useFileStore.getState().writeGeneration; || ctx…D-34: `MetadataPanel.tsx:144`/`:174` (`markPathsWritten`), `
+MetadataPanel.tsx || if ((pathWriteGenerations[path] ?? 0) > readGeneration) { || ctx…`:174` (`markPathsWritten`), `:226` (chunk-ის generation), `
+OTHER file-store.ts:126-134
+L138 BARE-NOFILE :251
+L140 BARE-NOFILE :255
+MetadataPanel.tsx || if (current && !keptPaths.has(currentSelection[0])) setEditingMetadata({ ...current }); || ctx…- **ფაილი:** `src/renderer/src/components/metadata-editor/
+OTHER metadata-store.ts:32-33
+MetadataPanel.tsx || setEditingMetadata({}); || ctx…nged` ფორმას მაინც ცარიელს ხდის (`setEditingMetadata({})`, `
+OTHER FolderBrowser.tsx:113-129
+OTHER FolderBrowser.tsx:171-187
+OTHER App.tsx:66-82
+OTHER utils.ts:64
+OTHER utils.ts:68-70
+OTHER file-store.ts:136-153
+OTHER file-store.ts:140
+OTHER metadata.ts:289
+OTHER metadata.ts:243
+OTHER utils.ts:72
+OTHER utils.ts:75
+OTHER file-store.ts:136-153
+OTHER file-store.ts:148-151
+OTHER FolderBrowser.tsx:113-129
+OTHER FolderBrowser.tsx:171-187
+OTHER App.tsx:66-82
+OTHER metadata.ts:233-247
+OTHER metadata.ts:170-171
+OTHER FolderBrowser.tsx:130-132
+OTHER FolderBrowser.tsx:188-190
+OTHER App.tsx:83-85
+OTHER file-store.ts:16
+OTHER file-store.ts:155-158
+OTHER file-store.ts:161-163
+OTHER FolderBrowser.tsx:99
+OTHER FolderBrowser.tsx:107
+OTHER FolderBrowser.tsx:123
+OTHER FolderBrowser.tsx:134
+OTHER FolderBrowser.tsx:141
+OTHER FolderBrowser.tsx:146-147
+OTHER FolderBrowser.tsx:158
+OTHER FolderBrowser.tsx:165
+OTHER FolderBrowser.tsx:181
+OTHER FolderBrowser.tsx:192
+OTHER FolderBrowser.tsx:197
+OTHER App.tsx:44
+OTHER App.tsx:60
+OTHER App.tsx:76
+OTHER App.tsx:87
+OTHER App.tsx:94
+MetadataPanel.tsx || function isListedPath(path: string): boolean { … } || ctx…- **ფაილი:** `src/renderer/src/components/metadata-editor/
+MetadataPanel.tsx || if (isListedPath(path)) updateFileMetadata(path, updated); || ctx…metadata-editor/MetadataPanel.tsx:60-62` (`isListedPath`), `
+MetadataPanel.tsx || const savedEntries = Object.entries(refreshed).filter( … ); || ctx…(isListedPath(path)) updateFileMetadata(path, updated);`), `
+MetadataPanel.tsx || const loadId = useFileStore.getState().folderLoadId; || ctx…, `:186-188` (batch `savedEntries`, `isListedPath(path)`), `
+MetadataPanel.tsx || if (!isFolderLoadCurrent(loadId)) return; || ctx…, `const loadId = useFileStore.getState().folderLoadId;`), `
+OTHER App.tsx:55

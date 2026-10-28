@@ -1,0 +1,16 @@
+# A round 33 checkpoint
+- [x] baseline ee15e6c clean verified
+- [x] test file written (tests/renderer/components/schema-change-during-folder-load.test.ts)
+- [x] red run on baseline src: 272 passed / 3 failed of 275 (w1,w2,w3) -> a-round-33/red-run.log
+- [x] src D-40 edit (identical to B prototype)
+- [x] green renderer 275/275 16 files; alone runs in alone-run.log
+- [ ] check, e2e, build
+- [ ] docs
+- [ ] reviews (code-reviewer, qa-engineer)
+- [x] a-round-33.md final
+- [x] docs (001, README, STATE_MANAGEMENT) edited
+- [x] verifyCommand exit 0 (biome 8 warn same list, tsc ok, renderer 275/275, main 93/93, e2e 7/7); retries=0 7/7
+- [x] code-reviewer + qa-engineer (no blocking; QA-R33-01 medium proposed for round 34)
+- [x] a-round-33.md final
+- [x] a-round-33.md draft written; waiting for code-reviewer + qa-engineer
+- [x] final git status: 4 M + 1 ?? (owned only); other paths == ee15e6c. Note: docs ref fix 64-74->64-73 made after verify run (docs only, no src/test change after verify).

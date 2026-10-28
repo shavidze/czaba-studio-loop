@@ -1,0 +1,35 @@
+--- /tmp/w-base.ts	2026-10-28 00:39:37.831938702 +0000
++++ tests/renderer/components/schema-change-during-folder-load.test.ts	2026-10-28 00:35:42.004852191 +0000
+@@ -331,4 +331,32 @@
+     expect(useFileStore.getState().metadata[PATH_A2]).toEqual(withNote(PATH_A2));
+     expect(useFileStore.getState().metadata[PATH_A]).toEqual(NEW_A);
+   });
++  it("(w8) C-R33-01: Done while B's scan is pending, Open Folder C supersedes B and C's first read rejects: the schema re-read after the wait fills C", async () => {
++    seedFolderA([PATH_A]);
++    const scanB = createDeferred<WavFileEntry[]>();
++    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb").mockResolvedValueOnce("/fc");
++    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise).mockResolvedValueOnce([FILE_C]);
++    let readsOfC = 0;
++    vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => {
++      if (paths.includes(PATH_C)) {
++        readsOfC += 1;
++        if (readsOfC === 1) throw new Error("C transient");
++      }
++      return readFor(paths, schema);
++    });
++    renderBrowserAndPanel();
++
++    await openCustomize();
++    await clickButton(/Open Folder/);
++    await addNoteField();
++    await clickButton(/Done/);
++    await clickButton(/Open Folder/);
++    await waitMs(20);
++    await settle(() => scanB.resolve([FILE_B]));
++    await waitMs(20);
++
++    expect(useFileStore.getState().files).toEqual([FILE_C]);
++    expect(readsOfC).toBe(2);
++    expect(useFileStore.getState().metadata).toEqual({ [PATH_C]: withNote(PATH_C) });
++  });
+ });

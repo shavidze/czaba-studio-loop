@@ -1,0 +1,168 @@
+
+ RUN  v4.0.18 /home/runner/czaba-project/czaba-tag-manager
+
+ ✓ tests/renderer/components/folder-read-overlap.test.ts (18 tests) 4500ms
+     ✓ (o1) Open Folder A (read pending), Open Folder B (done), A's read lands last -> metadata stays B's  613ms
+     ✓ (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata  566ms
+     ✓ (o10) App: drop folder A (read pending), Open Folder B (read pending), A lands first -> scanning stays, then B  506ms
+     ✓ (o11) App: drop folder A (scan pending), Open Folder B (done), A's scan lands last -> B  458ms
+     ✓ (o12) App: drop folder A (scan pending), Open Folder B (done), A's scan rejects last -> B kept, no toast  425ms
+ ✓ tests/renderer/stores/file-store.test.ts (38 tests) 38ms
+ ✓ tests/renderer/components/folder-read-rejected-chunk.test.ts (11 tests) 1865ms
+     ✓ (k1) Rescan whose only read chunk rejects keeps both store entries and shows Failed to read 2 files  443ms
+     ✓ (k6) single save pending + Rescan whose read rejects after the save re-read applied keeps the entry current at store-write time  433ms
+ ✓ tests/renderer/components/metadata-panel-batch-save.test.ts (49 tests) 9143ms
+     ✓ (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept  711ms
+     ✓ (b) partial failure: edits are kept and succeeded files are refreshed in the store  307ms
+     ✓ (c) retry after a failure writes the same fields to all selected files and clears on success  418ms
+ ✓ tests/renderer/components/folder-read-during-save.test.ts (8 tests) 3150ms
+     ✓ (r1) single save pending + Rescan whose read was issued before the write resolved: the store and the reselected form keep the saved value  826ms
+     ✓ (r2) batch save of a+b pending + Rescan: both saved entries survive the stale rescan read  519ms
+     ✓ (r3) single save pending + Open Folder on the same folder: the store keeps the saved value  319ms
+     ✓ (r4) pin: a Rescan issued after the save completed applies the file's current value  385ms
+     ✓ (r6) App: dropping the same folder during a pending save keeps the saved value  400ms
+ ✓ tests/renderer/components/reread-after-folder-switch.test.ts (9 tests) 7414ms
+     ✓ (v1) single save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B  757ms
+     ✓ (v2) batch save pending, Open Folder B finishes, the save's re-read lands: metadata holds only B  382ms
+     ✓ (v4) RR-R30-01: save lands after Open Folder B, then reopening A with a rejected read shows no entry for a.wav  397ms
+     ✓ (v6) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read lands: metadata holds only B  2034ms
+     ✓ (v7) A-R31-01: schema re-read pending, Open Folder B finishes, the schema re-read rejects: no toast, metadata holds B  1703ms
+     ✓ (v8) A-R31-01: schema re-read pending, Close Folder, the schema re-read lands: metadata stays empty  1148ms
+     ✓ (v9) RR-R31-02: drop A while the schema is loading, Open Folder B finishes, then the schema loads: A is never scanned  475ms
+ ✓ tests/renderer/components/file-list.test.ts (20 tests) 1214ms
+     ✓ (R18-e) sorts a malformed artist row as empty in both directions without throwing  556ms
+ ✓ tests/renderer/utils/utils.test.ts (26 tests) 22ms
+ ✓ tests/renderer/utils/file-row-display.test.ts (36 tests) 13ms
+ ✓ tests/renderer/stores/metadata-store.test.ts (9 tests) 15ms
+ ✓ tests/renderer/stores/schema-store.test.ts (8 tests) 11ms
+ ✓ tests/renderer/components/metadata-panel-schema-change.test.ts (15 tests) 26801ms
+     ✓ (s1) pin: single selection, no save: the form shows the new field read with the new schema  2507ms
+     ✓ (s2) pin: batch selection, no save: editingMetadata stays empty and the store gets the new field  1330ms
+     ✓ (s3) B-R23-01: a rejected schema re-read keeps the store entries and the form  1455ms
+     ✓ (s4) A-R21-03: single save pending while the schema changes re-reads with the current schema  1502ms
+     ✓ (s5) A-R21-03: batch save pending while the schema changes re-reads with the current schema  1714ms
+     ✓ (s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects  1946ms
+     ✓ (s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)  2061ms
+     ✓ (s8) C-R24-01: a listed file without a store entry stays absent when its schema re-read rejects  1865ms
+     ✓ (s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read  1798ms
+     ✓ (s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save  1953ms
+     ✓ (s11) D-34 pin: a schema re-read issued after the write resolved is applied  1834ms
+     ✓ (s12) D-34 pin: a chunk issued after the write resolved is applied even when the save's re-read failed  1981ms
+     ✓ (s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks  1576ms
+     ✓ (s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time  1577ms
+     ✓ (s15) D-34: a path whose batch write failed is not superseded  1698ms
+ ✓ tests/renderer/stores/player-store.test.ts (9 tests) 16ms
+ ✓ tests/renderer/stores/template-store.test.ts (8 tests) 10ms
+ ✓ tests/renderer/components/schema-editor.test.ts (4 tests) 3360ms
+     ✓ rejects a custom field with RIFF ID ICAT  1557ms
+     ✓ rejects a custom field with lowercase RIFF ID icat  681ms
+     ✓ rejects ICAT for a pre-T-1 schema where Category is hidden (reserved, not only in use)  639ms
+     ✓ lists Category (UCS) among hidden standard fields for a pre-T-1 schema  480ms
+ ❯ tests/renderer/components/schema-change-during-folder-load.test.ts (7 tests | 3 failed) 16727ms
+     × (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field 3208ms
+     × (w2) A-R32-01: as (w1), A's schema read rejects: no stale toast, metadata holds B 2651ms
+     × (w3) RR-R32-04: Rescan's read starts with the old schema, field added, Done, the Rescan read lands after the schema read: metadata keeps the new field 2746ms
+     ✓ (w4) pin: Done while Open Folder B's scan is pending, then Close Folder: folder stays closed, no toast  2627ms
+     ✓ (w5) pin: Done while B's scan is pending, Open Folder C supersedes B: metadata holds only C with the new field  3154ms
+     ✓ (w6) pin: no folder load pending, Done re-reads the open folder with the new field at once  1092ms
+     ✓ (w7) pin: a save's stats refresh replaces the files array while the schema re-read is pending: the schema re-read still applies  1246ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/renderer/components/schema-change-during-folder-load.test.ts > schema change during a pending folder load (D-40) > (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field
+AssertionError: expected { …(2) } to deeply equal { '/fb/b.wav': { title: 'B', …(3) } }
+
+- Expected
++ Received
+
+  {
+-   "/fb/b.wav": {
+-     "category": "BCat",
++   "/fa/a.wav": {
++     "category": "ACat",
+      "comment": "",
+-     "r33note": "BN",
+-     "title": "B",
++     "r33note": "AN",
++     "title": "A",
++   },
++   "/fa/a2.wav": {
++     "category": "A2Cat",
++     "comment": "",
++     "r33note": "A2N",
++     "title": "A2",
+    },
+  }
+
+ ❯ tests/renderer/components/schema-change-during-folder-load.test.ts:181:46
+    179| 
+    180|     expect(useFileStore.getState().files).toEqual([FILE_B]);
+    181|     expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: withN…
+       |                                              ^
+    182|     expect(useMetadataStore.getState().toastMessage).toBeNull();
+    183|     expect(batchReadPaths().some((paths) => paths.includes(PATH_A))).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/renderer/components/schema-change-during-folder-load.test.ts > schema change during a pending folder load (D-40) > (w2) A-R32-01: as (w1), A's schema read rejects: no stale toast, metadata holds B
+AssertionError: expected 'Failed to read 2 files' to be null
+
+- Expected: 
+null
+
++ Received: 
+"Failed to read 2 files"
+
+ ❯ tests/renderer/components/schema-change-during-folder-load.test.ts:213:54
+    211|     await waitMs(20);
+    212| 
+    213|     expect(useMetadataStore.getState().toastMessage).toBeNull();
+       |                                                      ^
+    214|     expect(useFileStore.getState().metadata).toEqual({ [PATH_B]: withN…
+    215|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/renderer/components/schema-change-during-folder-load.test.ts > schema change during a pending folder load (D-40) > (w3) RR-R32-04: Rescan's read starts with the old schema, field added, Done, the Rescan read lands after the schema read: metadata keeps the new field
+AssertionError: expected { …(2) } to deeply equal { …(2) }
+
+- Expected
++ Received
+
+  {
+    "/fa/a.wav": {
+      "category": "ACat",
+      "comment": "",
+-     "r33note": "AN",
+      "title": "A",
+    },
+    "/fa/a2.wav": {
+      "category": "A2Cat",
+      "comment": "",
+-     "r33note": "A2N",
+      "title": "A2",
+    },
+  }
+
+ ❯ tests/renderer/components/schema-change-during-folder-load.test.ts:236:46
+    234|     await waitMs(20);
+    235| 
+    236|     expect(useFileStore.getState().metadata).toEqual({ [PATH_A]: withN…
+       |                                              ^
+    237|     expect(useFileStore.getState().isScanning).toBe(false);
+    238|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 15 passed (16)
+      Tests  3 failed | 272 passed (275)
+   Start at  23:57:04
+   Duration  33.54s (transform 1.50s, setup 1.48s, import 5.08s, tests 74.30s, environment 12.61s)
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-change-during-folder-load.test.ts,title=tests/renderer/components/schema-change-during-folder-load.test.ts > schema change during a pending folder load (D-40) > (w1) A-R32-01%3A Done while Open Folder B's scan is pending%2C B loads%2C A's schema read would land%3A metadata holds only B with the new field,line=181,column=46::AssertionError: expected { …(2) } to deeply equal { '/fb/b.wav': { title: 'B', …(3) } }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "/fb/b.wav": {%0A-     "category": "BCat",%0A+   "/fa/a.wav": {%0A+     "category": "ACat",%0A      "comment": "",%0A-     "r33note": "BN",%0A-     "title": "B",%0A+     "r33note": "AN",%0A+     "title": "A",%0A+   },%0A+   "/fa/a2.wav": {%0A+     "category": "A2Cat",%0A+     "comment": "",%0A+     "r33note": "A2N",%0A+     "title": "A2",%0A    },%0A  }%0A%0A ❯ tests/renderer/components/schema-change-during-folder-load.test.ts:181:46%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-change-during-folder-load.test.ts,title=tests/renderer/components/schema-change-during-folder-load.test.ts > schema change during a pending folder load (D-40) > (w2) A-R32-01%3A as (w1)%2C A's schema read rejects%3A no stale toast%2C metadata holds B,line=213,column=54::AssertionError: expected 'Failed to read 2 files' to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A"Failed to read 2 files"%0A%0A ❯ tests/renderer/components/schema-change-during-folder-load.test.ts:213:54%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-change-during-folder-load.test.ts,title=tests/renderer/components/schema-change-during-folder-load.test.ts > schema change during a pending folder load (D-40) > (w3) RR-R32-04%3A Rescan's read starts with the old schema%2C field added%2C Done%2C the Rescan read lands after the schema read%3A metadata keeps the new field,line=236,column=46::AssertionError: expected { …(2) } to deeply equal { …(2) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "/fa/a.wav": {%0A      "category": "ACat",%0A      "comment": "",%0A-     "r33note": "AN",%0A      "title": "A",%0A    },%0A    "/fa/a2.wav": {%0A      "category": "A2Cat",%0A      "comment": "",%0A-     "r33note": "A2N",%0A      "title": "A2",%0A    },%0A  }%0A%0A ❯ tests/renderer/components/schema-change-during-folder-load.test.ts:236:46%0A%0A
