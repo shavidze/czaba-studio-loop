@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T20:21:14.987Z)
+# Active loop summary (2026-10-28T21:28:03.526Z)
 
-- backlog.json 2149 KB -> active view 304 KB
-- status: G_ROOT_GATE round 233
-- servers: `{"checkedUtc":"2026-10-28T20:03:10.0748185Z","round":233,"attempt":1,"store":200}`
-- last publication: db5c297946e3295fec7b2647a2e66dd4cad10692 (rounds 233-233)
-- last root gate: round 233 published - commit db5c297946e3295fec7b2647a2e66dd4cad10692 pushed
+- backlog.json 2161 KB -> active view 310 KB
+- status: G_ROOT_GATE round 234
+- servers: `{"checkedUtc":"2026-10-28T21:10:48.8220774Z","round":234,"attempt":1,"store":200}`
+- last publication: c95b8a8966bfedef7c1d3793e23391be512a831e (rounds 234-234)
+- last root gate: round 234 published - commit c95b8a8966bfedef7c1d3793e23391be512a831e pushed
 
-## Current items: -
+## Current items: SRW-21
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -551,11 +551,14 @@
 - SABA-Q-NOTICE-ONE-ROW / info / awaiting_user (D-29z301): CALM-2b ships the exact approved wording on 2 rows; options for Saba: (1) keep (today), (2) a shorter wording that fits one row, e.g. 'Synthetic demo stems — not CZABA audio.', (3) accept a wider default library (layout change) | evidence C round 231 C-NOTICE-231 / N7: 2 rows 236x32 at the default width at both viewports; 1 row when the library is dragged +56 px (288 -> ~344 px) / Saba's exact notice wording 'Synthetic demo stems — not CZABA catalogue audio.' is 291 px at the Studio 12 px text; the library content box 
 - C-N231-NOTES / info / ruled (D-29z307): N1/N4 wording guidance for future rows (B writes 'no source or consumer hit' and 'marquee'); N2 -> deferred Low C-R231-N2-PC10-DUP; N3/N6/N8 info; N5 -> keep per-lane as specified, reviewer proposal recorded as ARCH-A231-ANY-DRAG-ACTIVE; N7 -> evidence on SABA-Q-NOTICE-ONE-ROW / N1 C-UNIT grep nothingSelected = 1 (ST-C2b's own assertion), row wording; N2 duplicate PC10 id in collection.test.ts (l.332 and l.405); N3 L
 - A-R231-REVIEW-RULINGS / info / ruled (D-29z307): R1 keep per-lane (Saba's text and task 2.5; architecture signal ARCH-A231-ANY-DRAG-ACTIVE); R3 contract stands (in-memory set always, so the session stays consistent when storage works but later throws); R6 stands (focus never falls to body when the clicked button unmounts) / R1 cross-lane hint (hint stays on the active lane while a drag is over another lane); R3 suggested adding the id to the in-memory set only w
-- GATE232-S1 / medium / dispatched round 233 (D-29z314): focus moves to the first enabled dock button after the Overview (arrangement-video-expand docked, arrangement-video-placeholder-return floating); the round-232 'focus not moved' choice (D-29z309) is ruled wrong / Ctrl+Alt+O while the Overview slider has focus unmounts it and focus falls to document.body (C round 232 C-TOGGLE-FOCUS measured BODY; B bas
-- C-R232-01 / low / dispatched round 233 (D-29z315): declare 15000 at l.377 as the sibling R11-P1e (l.432); fixed early because the round's covering set contains it and an unruled L32 would STOP A again / render-budget.test.tsx l.303 'Play -> Pause -> Play' has no declared timeout; 2806 ms (56 %) at gate 232, 2620-2790 ms in covering runs, 148
+- C-R232-01 / low / invalid (D-29z325): premise false (C-R233-01) - the l.303 test already declared 15000 at l.336 since before 4c07d5f; the round-233 change raised the NEXT test (l.338, ~1.1 s) to 15000; kept as harmless (no assertion changed), closes C-R233-01 and GATE233-S2 | dispatched round 233 (D-29z315): declare 15000 at l.377 as the sibling R11-P1e (l.432); fixed early because the round's covering set contains it and an unruled L32 would STOP A again / render-budget.test.tsx l.303 'Play -> Pause -> Play' has no declared timeout; 2806 ms (56 %) at gate 232, 2620-2790 ms in covering runs, 148
 - GATE232-S2 / medium / open_tech_lead_manual (D-29z316): no cloud repro possible (Playwright on Linux cannot produce AltGraph, C round 232 out-g); Tech Lead check TLM-R232-ALTGR-WIN; per the 2026-10-23 root clarification it does not block; becomes a normal Medium if the manual check reproduces it / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - GATE232-S7 / info / info (D-29z316): intentional (slider semantics kept, OV-E2); revisit only with a design review / the empty Overview keeps cursor-ew-resize and its drag/double-click on a transparent strip
 - C-N232-NOTES / info / ruled (D-29z316): N1 recorded for the next design/screen review (not a WCAG 1.4.11 failure: the baseline is decorative, the slider's focus indicator is the ring); N2 info; N3 cross-tab = GATE232-S6 deferred Low; menu-focus case info (menus close on outside key per their own handlers; no user report) / N1 empty baseline bg-outline on the dock is 1.15:1 (deliberately quiet; focus ring 5.45:1); N2 hidden frame keeps its last x after Undo to 0
+- GATE233-S4 / info / open_tech_lead_manual (D-29z325): TLM-R233-SR-ORDER / screen-reader order after the focus rescue (focus moves, then the polite status) is not verified with a real screen reader
+- GATE233-S5 / info / duplicate of deferred Low B-R232-DOC180-FOCUS-STALE (D-29z325) / doc 180 l.42-51 still describes the reversed focus rule
+- SABA-Q-TEMPO-UNDO / info / awaiting_user (D-29z324); default kept until answered / CZABA keeps tempo, grid and Snap outside the undo history (D-29z30 R4), so Undo of the clip that seeded the tempo keeps tempo/grid/Snap; in 
+- SABA-Q-ENVELOPE-TAPER / info / awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
@@ -569,5 +572,4 @@
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
-- SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

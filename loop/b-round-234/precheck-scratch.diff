@@ -1,0 +1,612 @@
+diff -ruN /home/runner/czaba-project/store/app/components/arrangement/ArrangementRuler.tsx app/components/arrangement/ArrangementRuler.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementRuler.tsx	2026-10-28 20:52:34.425945291 +0000
++++ app/components/arrangement/ArrangementRuler.tsx	2026-10-28 21:50:45.752628480 +0000
+@@ -12,20 +12,18 @@
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+ } from '~/contexts/ArrangementContext';
++import { useRulerNavigation } from '~/hooks/useRulerNavigation';
+ import { resolveGridTimeWithTargets } from '~/lib/arrangement/grid';
+ import { studioViewStrings } from '~/lib/arrangement/strings';
+ import {
+   RULER_TICK_STEPS_SECONDS,
+-  rulerDragView,
+   rulerTickMarks,
+   rulerTickStep,
+-  TIMELINE_DRAG_THRESHOLD_PX,
+   type TimelineView,
+ } from '~/lib/arrangement/view';
+ import { watchUncapturedPointerGesture } from './ArrangementClip';
+ 
+ const PLAYHEAD_KEY_STEP_SECONDS = 0.1;
+-const RULER_DOUBLE_CLICK_AFTER_DRAG_MS = 300;
+ const NO_SNAP_MARKER_TIMES: readonly number[] = [];
+ 
+ function noSnapMarkerTimes(): readonly number[] {
+@@ -59,20 +57,6 @@
+   release: () => void;
+ }
+ 
+-interface RulerNavigation {
+-  pointerId: number;
+-  startX: number;
+-  startY: number;
+-  start: TimelineView;
+-  anchorTime: number;
+-  anchorScreenX: number;
+-  moved: boolean;
+-  dx: number;
+-  dy: number;
+-  frame: number | null;
+-  release: () => void;
+-}
+-
+ function ArrangementRulerPlayhead({
+   seconds,
+   pxPerSecond,
+@@ -286,157 +270,33 @@
+     getSnapMarkerTimes = noSnapMarkerTimes,
+   } = props;
+   const rulerRef = useRef<HTMLDivElement>(null);
+-  const navigationRef = useRef<RulerNavigation | null>(null);
+-  const navigationEndedAtRef = useRef(Number.NEGATIVE_INFINITY);
+   const step = rulerTickStep(pxPerSecond);
+   const fractionDigits = step < RULER_TICK_STEPS_SECONDS[1] ? 1 : 0;
+-
+-  useEffect(
+-    () => () => {
+-      const navigation = navigationRef.current;
+-      navigationRef.current = null;
+-      if (navigation) {
+-        if (navigation.frame !== null) {
+-          cancelAnimationFrame(navigation.frame);
+-        }
+-        navigation.release();
+-      }
+-    },
+-    [],
+-  );
+-
+-  const applyRulerNavigation = (navigation: RulerNavigation) => {
+-    navigation.frame = null;
+-    applyTimelineView(
+-      rulerDragView({
+-        start: navigation.start,
+-        anchorTime: navigation.anchorTime,
+-        anchorScreenX: navigation.anchorScreenX,
+-        dx: navigation.dx,
+-        dy: navigation.dy,
+-      }),
+-    );
+-  };
+-
+-  const endRulerNavigation = (navigation: RulerNavigation, seek: boolean, bypass = false) => {
+-    if (navigationRef.current === navigation) {
+-      navigationRef.current = null;
+-    }
+-    if (navigation.frame !== null) {
+-      cancelAnimationFrame(navigation.frame);
+-      applyRulerNavigation(navigation);
+-    }
+-    navigation.release();
+-    if (navigation.moved) {
+-      navigationEndedAtRef.current = performance.now();
+-      return;
+-    }
+-    if (seek) {
++  const navigation = useRulerNavigation({
++    onGestureClaim,
++    getTimelineView,
++    applyTimelineView,
++    onNavigationMove,
++    onRulerDoubleClick,
++    onRulerClick: (anchorTime, { altKey }) => {
+       onSeek(
+         resolveGridTimeWithTargets(
+-          navigation.anchorTime,
++          anchorTime,
+           snapSeconds,
+           gridSeconds,
+-          bypass,
++          altKey,
+           getSnapMarkerTimes(),
+         ),
+       );
+-    }
+-  };
+-
+-  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+-    if (event.button !== 0 || event.buttons === 0) {
+-      return;
+-    }
+-    let claimed: RulerNavigation | null = null;
+-    const releaseClaim = onGestureClaim(event.pointerId, () => {
+-      if (claimed) {
+-        endRulerNavigation(claimed, false);
+-      }
+-    });
+-    if (!releaseClaim) {
+-      return;
+-    }
+-    event.preventDefault();
+-    const rect = event.currentTarget.getBoundingClientRect();
+-    const start = getTimelineView();
+-    const anchorTime = Math.max(0, (event.clientX - rect.left) / start.pxPerSecond);
+-    claimed = {
+-      pointerId: event.pointerId,
+-      startX: event.clientX,
+-      startY: event.clientY,
+-      start,
+-      anchorTime,
+-      anchorScreenX: anchorTime * start.pxPerSecond - start.scrollLeft,
+-      moved: false,
+-      dx: 0,
+-      dy: 0,
+-      frame: null,
+-      release: releaseClaim,
+-    };
+-    navigationRef.current = claimed;
+-    try {
+-      event.currentTarget.setPointerCapture(event.pointerId);
+-    } catch {
+-      const navigation = claimed;
+-      watchUncapturedPointerGesture(navigation, () => endRulerNavigation(navigation, false));
+-    }
+-  };
+-
+-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+-    const navigation = navigationRef.current;
+-    if (!navigation || navigation.pointerId !== event.pointerId) {
+-      return;
+-    }
+-    const dx = event.clientX - navigation.startX;
+-    const dy = event.clientY - navigation.startY;
+-    if (
+-      !navigation.moved &&
+-      Math.abs(dx) < TIMELINE_DRAG_THRESHOLD_PX &&
+-      Math.abs(dy) < TIMELINE_DRAG_THRESHOLD_PX
+-    ) {
+-      return;
+-    }
+-    if (!navigation.moved) {
+-      navigation.moved = true;
+-      onNavigationMove();
+-    }
+-    navigation.dx = dx;
+-    navigation.dy = dy;
+-    if (navigation.frame === null) {
+-      navigation.frame = requestAnimationFrame(() => applyRulerNavigation(navigation));
+-    }
+-  };
+-
+-  const handlePointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+-    const navigation = navigationRef.current;
+-    if (!navigation || navigation.pointerId !== event.pointerId) {
+-      return;
+-    }
+-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+-      event.currentTarget.releasePointerCapture(event.pointerId);
+-    }
+-    endRulerNavigation(navigation, event.type === 'pointerup', event.altKey);
+-  };
+-
+-  const handleDoubleClick = () => {
+-    if (performance.now() - navigationEndedAtRef.current < RULER_DOUBLE_CLICK_AFTER_DRAG_MS) {
+-      return;
+-    }
+-    onRulerDoubleClick();
+-  };
++    },
++  });
+ 
+   return (
+     <div
+       ref={rulerRef}
+       className="relative h-7 shrink-0 cursor-pointer touch-none border-b border-outline bg-surface"
+       style={{ width: seconds * pxPerSecond }}
+-      onPointerDown={handlePointerDown}
+-      onPointerMove={handlePointerMove}
+-      onPointerUp={handlePointerEnd}
+-      onPointerCancel={handlePointerEnd}
+-      onLostPointerCapture={handlePointerEnd}
+-      onDoubleClick={handleDoubleClick}
++      {...navigation}
+       role="presentation"
+       title={studioViewStrings.rulerTitle}
+       data-testid="arrangement-ruler"
+diff -ruN /home/runner/czaba-project/store/app/components/arrangement/ArrangementTempoRow.tsx app/components/arrangement/ArrangementTempoRow.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementTempoRow.tsx	2026-10-28 20:52:34.426578513 +0000
++++ app/components/arrangement/ArrangementTempoRow.tsx	2026-10-28 21:50:45.752628480 +0000
+@@ -8,8 +8,14 @@
+   useState,
+   useSyncExternalStore,
+ } from 'react';
++import { useRulerNavigation } from '~/hooks/useRulerNavigation';
++import { resolveGridTimeWithTargets } from '~/lib/arrangement/grid';
+ import { METRONOME_NEEDS_TEMPO_TITLE, METRONOME_TITLE } from '~/lib/arrangement/metronome';
+-import { studioMetronomeStrings, studioTempoStrings } from '~/lib/arrangement/strings';
++import {
++  studioMetronomeStrings,
++  studioTempoStrings,
++  studioViewStrings,
++} from '~/lib/arrangement/strings';
+ import {
+   barsRulerMarks,
+   formatTempoBpm,
+@@ -32,14 +38,31 @@
+   getTimelineView: () => TimelineView;
+   getTimelineViewportPx: () => number;
+   subscribeTimelineScroll: (listener: () => void) => () => void;
++  rulerGestures: BarsRulerGestures;
++}
++
++export interface BarsRulerGestures {
++  onSeek: (time: number) => void;
++  onPlayFrom: (time: number) => void;
++  onGestureClaim: (pointerId: number, abort: () => void) => (() => void) | null;
++  applyTimelineView: (view: TimelineView) => void;
++  onNavigationMove: () => void;
++  onRulerDoubleClick: () => void;
++  snapSeconds: number | null;
++  gridSeconds: number;
++  getSnapMarkerTimes: () => readonly number[];
+ }
+ 
++export const BARS_RULER_SCRUB_STRIP_PX = 10;
++
+ interface ArrangementBarsRulerProps {
+   seconds: number;
+   pxPerSecond: number;
+   bpm: number | null;
+   fromPx: number | null;
+   toPx: number | null;
++  getTimelineView: () => TimelineView;
++  gestures: BarsRulerGestures;
+ }
+ 
+ interface BarsRulerPage {
+@@ -83,15 +106,52 @@
+   bpm,
+   fromPx,
+   toPx,
++  getTimelineView,
++  gestures,
+ }: ArrangementBarsRulerProps) {
++  const navigation = useRulerNavigation({
++    onGestureClaim: gestures.onGestureClaim,
++    getTimelineView,
++    applyTimelineView: gestures.applyTimelineView,
++    onNavigationMove: gestures.onNavigationMove,
++    onRulerDoubleClick: gestures.onRulerDoubleClick,
++    onRulerClick: (anchorTime, { altKey, offsetY }) => {
++      const time = resolveGridTimeWithTargets(
++        anchorTime,
++        gestures.snapSeconds,
++        gestures.gridSeconds,
++        altKey,
++        gestures.getSnapMarkerTimes(),
++      );
++      if (offsetY < BARS_RULER_SCRUB_STRIP_PX) {
++        gestures.onPlayFrom(time);
++        return;
++      }
++      gestures.onSeek(time);
++    },
++  });
++  const interactive = bpm !== null;
+   return (
+     <div
+-      className="relative h-5 shrink-0 overflow-hidden border-b border-outline bg-surface"
++      className={cn(
++        'relative h-5 shrink-0 overflow-hidden border-b border-outline bg-surface',
++        interactive && 'cursor-pointer touch-none',
++      )}
+       style={{ width: seconds * pxPerSecond }}
++      {...(interactive ? navigation : {})}
+       role="presentation"
++      title={interactive ? studioViewStrings.rulerTitle : undefined}
+       data-testid="arrangement-bars-ruler"
+       data-bpm={bpm === null ? '' : formatTempoBpm(bpm)}
+     >
++      {interactive ? (
++        <div
++          className="absolute inset-x-0 top-0 h-2.5 hover:bg-foreground/8"
++          title={studioTempoStrings.scrubStripTitle}
++          aria-hidden="true"
++          data-testid="arrangement-bars-scrub-strip"
++        />
++      ) : null}
+       {bpm === null
+         ? null
+         : barsRulerMarks(
+@@ -140,6 +200,7 @@
+   getTimelineView,
+   getTimelineViewportPx,
+   subscribeTimelineScroll,
++  rulerGestures,
+ }: ArrangementTempoRowProps) {
+   const [draft, setDraft] = useState<string | null>(null);
+   const skipCommitRef = useRef(false);
+@@ -250,6 +311,8 @@
+         bpm={tempoBpm}
+         fromPx={rulerPage === null ? null : (rulerPage.page - 1) * rulerPage.viewportPx}
+         toPx={rulerPage === null ? null : (rulerPage.page + 2) * rulerPage.viewportPx}
++        getTimelineView={getTimelineView}
++        gestures={rulerGestures}
+       />
+     </div>
+   );
+diff -ruN /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx app/components/arrangement/StudioWorkspace.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx	2026-10-28 21:10:24.612110639 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-10-28 21:36:34.692918471 +0000
+@@ -155,7 +155,7 @@
+ import { ArrangementOverview } from './ArrangementOverview';
+ import { ArrangementRuler } from './ArrangementRuler';
+ import { ArrangementShortcutSheet } from './ArrangementShortcutSheet';
+-import { ArrangementTempoRow } from './ArrangementTempoRow';
++import { ArrangementTempoRow, type BarsRulerGestures } from './ArrangementTempoRow';
+ import { ArrangementTimeText } from './ArrangementTimeText';
+ import { ArrangementTransport } from './ArrangementTransport';
+ import { ArrangementVideoDock } from './ArrangementVideoDock';
+@@ -1309,6 +1309,38 @@
+     fitTimeline();
+   }, [fitTimeline, zoomTimelineToRange]);
+ 
++  const playFromRuler = useCallback((time: number) => {
++    const latest = workspaceRef.current;
++    latest.seekTo(time);
++    if (!latest.isPlaying) {
++      latest.togglePlayback();
++    }
++  }, []);
++  const barsRulerGestures = useMemo<BarsRulerGestures>(
++    () => ({
++      onSeek: seekTo,
++      onPlayFrom: playFromRuler,
++      onGestureClaim: claimPointerGesture,
++      applyTimelineView,
++      onNavigationMove: pauseFollowForNavigation,
++      onRulerDoubleClick: handleRulerDoubleClick,
++      snapSeconds: snapEnabled ? gridSeconds : null,
++      gridSeconds,
++      getSnapMarkerTimes: getRulerSnapMarkerTimes,
++    }),
++    [
++      seekTo,
++      playFromRuler,
++      claimPointerGesture,
++      applyTimelineView,
++      pauseFollowForNavigation,
++      handleRulerDoubleClick,
++      snapEnabled,
++      gridSeconds,
++      getRulerSnapMarkerTimes,
++    ],
++  );
++
+   const toggleFollow = useCallback(() => {
+     const previous = followModeRef.current;
+     const next: TimelineFollowMode = previous === 'on' ? 'off' : 'on';
+@@ -2586,6 +2618,7 @@
+                   getTimelineView={getTimelineView}
+                   getTimelineViewportPx={getTimelineViewportPx}
+                   subscribeTimelineScroll={subscribeTimelineScroll}
++                  rulerGestures={barsRulerGestures}
+                 />
+                 <ArrangementMarkerRow
+                   ref={markerRowRef}
+diff -ruN /home/runner/czaba-project/store/app/hooks/useRulerNavigation.ts app/hooks/useRulerNavigation.ts
+--- /home/runner/czaba-project/store/app/hooks/useRulerNavigation.ts	1970-01-01 00:00:00.000000000 +0000
++++ app/hooks/useRulerNavigation.ts	2026-10-28 21:50:45.749628394 +0000
+@@ -0,0 +1,185 @@
++import { type PointerEvent, useEffect, useRef } from 'react';
++import { watchUncapturedPointerGesture } from '~/components/arrangement/ArrangementClip';
++import {
++  rulerDragView,
++  TIMELINE_DRAG_THRESHOLD_PX,
++  type TimelineView,
++} from '~/lib/arrangement/view';
++
++const RULER_DOUBLE_CLICK_AFTER_DRAG_MS = 300;
++
++export interface RulerClickInfo {
++  altKey: boolean;
++  offsetY: number;
++}
++
++export interface RulerNavigationOptions {
++  onGestureClaim: (pointerId: number, abort: () => void) => (() => void) | null;
++  getTimelineView: () => TimelineView;
++  applyTimelineView: (view: TimelineView) => void;
++  onNavigationMove: () => void;
++  onRulerDoubleClick: () => void;
++  onRulerClick: (anchorTime: number, info: RulerClickInfo) => void;
++}
++
++interface RulerNavigation {
++  pointerId: number;
++  startX: number;
++  startY: number;
++  offsetY: number;
++  start: TimelineView;
++  anchorTime: number;
++  anchorScreenX: number;
++  moved: boolean;
++  dx: number;
++  dy: number;
++  frame: number | null;
++  release: () => void;
++}
++
++export function useRulerNavigation(options: RulerNavigationOptions) {
++  const optionsRef = useRef(options);
++  optionsRef.current = options;
++  const navigationRef = useRef<RulerNavigation | null>(null);
++  const navigationEndedAtRef = useRef(Number.NEGATIVE_INFINITY);
++
++  useEffect(
++    () => () => {
++      const navigation = navigationRef.current;
++      navigationRef.current = null;
++      if (navigation) {
++        if (navigation.frame !== null) {
++          cancelAnimationFrame(navigation.frame);
++        }
++        navigation.release();
++      }
++    },
++    [],
++  );
++
++  const applyRulerNavigation = (navigation: RulerNavigation) => {
++    navigation.frame = null;
++    optionsRef.current.applyTimelineView(
++      rulerDragView({
++        start: navigation.start,
++        anchorTime: navigation.anchorTime,
++        anchorScreenX: navigation.anchorScreenX,
++        dx: navigation.dx,
++        dy: navigation.dy,
++      }),
++    );
++  };
++
++  const endRulerNavigation = (navigation: RulerNavigation, click: boolean, altKey = false) => {
++    if (navigationRef.current === navigation) {
++      navigationRef.current = null;
++    }
++    if (navigation.frame !== null) {
++      cancelAnimationFrame(navigation.frame);
++      applyRulerNavigation(navigation);
++    }
++    navigation.release();
++    if (navigation.moved) {
++      navigationEndedAtRef.current = performance.now();
++      return;
++    }
++    if (click) {
++      optionsRef.current.onRulerClick(navigation.anchorTime, {
++        altKey,
++        offsetY: navigation.offsetY,
++      });
++    }
++  };
++
++  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
++    if (event.button !== 0 || event.buttons === 0) {
++      return;
++    }
++    let claimed: RulerNavigation | null = null;
++    const releaseClaim = optionsRef.current.onGestureClaim(event.pointerId, () => {
++      if (claimed) {
++        endRulerNavigation(claimed, false);
++      }
++    });
++    if (!releaseClaim) {
++      return;
++    }
++    event.preventDefault();
++    const rect = event.currentTarget.getBoundingClientRect();
++    const start = optionsRef.current.getTimelineView();
++    const anchorTime = Math.max(0, (event.clientX - rect.left) / start.pxPerSecond);
++    claimed = {
++      pointerId: event.pointerId,
++      startX: event.clientX,
++      startY: event.clientY,
++      offsetY: event.clientY - rect.top,
++      start,
++      anchorTime,
++      anchorScreenX: anchorTime * start.pxPerSecond - start.scrollLeft,
++      moved: false,
++      dx: 0,
++      dy: 0,
++      frame: null,
++      release: releaseClaim,
++    };
++    navigationRef.current = claimed;
++    try {
++      event.currentTarget.setPointerCapture(event.pointerId);
++    } catch {
++      const navigation = claimed;
++      watchUncapturedPointerGesture(navigation, () => endRulerNavigation(navigation, false));
++    }
++  };
++
++  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
++    const navigation = navigationRef.current;
++    if (!navigation || navigation.pointerId !== event.pointerId) {
++      return;
++    }
++    const dx = event.clientX - navigation.startX;
++    const dy = event.clientY - navigation.startY;
++    if (
++      !navigation.moved &&
++      Math.abs(dx) < TIMELINE_DRAG_THRESHOLD_PX &&
++      Math.abs(dy) < TIMELINE_DRAG_THRESHOLD_PX
++    ) {
++      return;
++    }
++    if (!navigation.moved) {
++      navigation.moved = true;
++      optionsRef.current.onNavigationMove();
++    }
++    navigation.dx = dx;
++    navigation.dy = dy;
++    if (navigation.frame === null) {
++      navigation.frame = requestAnimationFrame(() => applyRulerNavigation(navigation));
++    }
++  };
++
++  const onPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
++    const navigation = navigationRef.current;
++    if (!navigation || navigation.pointerId !== event.pointerId) {
++      return;
++    }
++    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
++      event.currentTarget.releasePointerCapture(event.pointerId);
++    }
++    endRulerNavigation(navigation, event.type === 'pointerup', event.altKey);
++  };
++
++  const onDoubleClick = () => {
++    if (performance.now() - navigationEndedAtRef.current < RULER_DOUBLE_CLICK_AFTER_DRAG_MS) {
++      return;
++    }
++    optionsRef.current.onRulerDoubleClick();
++  };
++
++  return {
++    onPointerDown,
++    onPointerMove,
++    onPointerUp: onPointerEnd,
++    onPointerCancel: onPointerEnd,
++    onLostPointerCapture: onPointerEnd,
++    onDoubleClick,
++  };
++}
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/shortcuts.ts app/lib/arrangement/shortcuts.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/shortcuts.ts	2026-10-28 20:52:34.454579317 +0000
++++ app/lib/arrangement/shortcuts.ts	2026-10-28 21:37:25.252376449 +0000
+@@ -19,6 +19,11 @@
+       { id: 'play-stop', action: 'Play / Stop', keys: ['Space'], ariaKeyShortcuts: 'Space' },
+       { id: 'back-to-start', action: 'Back to start', keys: ['Home'], ariaKeyShortcuts: 'Home' },
+       {
++        id: 'play-from-point',
++        action: 'Play from a point (needs a BPM)',
++        keys: ['Click the top strip of the bars ruler'],
++      },
++      {
+         id: 'loop',
+         action: 'Loop the selection · Loop on / off',
+         keys: ['Ctrl+L'],
+diff -ruN /home/runner/czaba-project/store/app/lib/arrangement/strings.ts app/lib/arrangement/strings.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/strings.ts	2026-10-28 20:56:05.360122637 +0000
++++ app/lib/arrangement/strings.ts	2026-10-28 21:37:25.251906351 +0000
+@@ -321,6 +321,7 @@
+ };
+ 
+ export const studioTempoStrings = {
++  scrubStripTitle: 'Click = play from here',
+   cleared: 'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
+   fieldLabel: 'Project tempo (BPM)',
+   fieldTitle:

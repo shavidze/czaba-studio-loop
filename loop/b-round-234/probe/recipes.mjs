@@ -1,0 +1,76 @@
+import { createRequire } from 'node:module';
+import { mkdirSync, writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const base = process.argv[2] || 'http://127.0.0.1:5174';
+const out = process.argv[3] || './out-scratch';
+mkdirSync(out, { recursive: true });
+const browser = await chromium.launch();
+const res = {};
+const st = (page) => page.evaluate(() => {
+  const q = (s) => document.querySelector(s);
+  const play = [...document.querySelectorAll('button')].find((b) => ['Play', 'Pause'].includes(b.getAttribute('aria-label')));
+  const bars = q('[data-testid="arrangement-bars-ruler"]');
+  const strip = q('[data-testid="arrangement-bars-scrub-strip"]');
+  const sc = q('[data-testid="arrangement-timeline-scroller"]');
+  return { pos: Number(q('[data-testid="arrangement-playhead-handle"]')?.getAttribute('aria-valuenow')), playing: play?.getAttribute('aria-label') === 'Pause',
+    status: q('[data-testid="arrangement-status"]')?.textContent, barsCursor: bars && getComputedStyle(bars).cursor, barsTitle: bars?.getAttribute('title'), strip: strip ? (() => { const r = strip.getBoundingClientRect(); return { h: r.height, title: strip.getAttribute('title') }; })() : null,
+    scrollLeft: sc?.scrollLeft, rulerW: q('[data-testid="arrangement-ruler"]')?.getBoundingClientRect().width, barsText: bars?.textContent.length };
+});
+const ready = async (page) => { await page.waitForFunction(() => { const add = [...document.querySelectorAll('button')].find((b) => /^Add/.test(b.textContent.trim())); return add && !add.disabled; }, undefined, { timeout: 90000 }); await page.waitForTimeout(800); };
+const add = async (page, id) => { await page.locator(`[data-source-id="${id}"]`).first().click(); await page.locator('button', { hasText: /^Add/ }).first().click(); await page.waitForTimeout(700); };
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const r = {}; const errors = [];
+  const fresh = async () => { const ctx = await browser.newContext({ viewport: { width: w, height: h } }); const page = await ctx.newPage(); page.on('pageerror', (e) => errors.push(String(e))); await page.goto(`${base}/studio-lab`, { waitUntil: 'networkidle' }); await ready(page); return { ctx, page }; };
+  let { ctx, page } = await fresh();
+  r.empty = await st(page);
+  await add(page, 'demo-stem-pulse');
+  r.seeded = await st(page);
+  const bb = await page.locator('[data-testid="arrangement-bars-ruler"]').boundingBox();
+  const pps = 40;
+  await page.mouse.click(bb.x + 4.1 * pps, bb.y + 4); await page.waitForTimeout(600);
+  r.stripClickStopped = await st(page);
+  await page.mouse.click(bb.x + 8.2 * pps, bb.y + 4); await page.waitForTimeout(300);
+  r.stripClickPlaying = await st(page);
+  await page.evaluate(() => document.activeElement?.blur()); await page.keyboard.press('Space'); await page.waitForTimeout(300);
+  r.afterSpace = await st(page);
+  await page.mouse.click(bb.x + 6.3 * pps, bb.y + 15); await page.waitForTimeout(300);
+  r.lowerClick = await st(page);
+  await page.keyboard.down('Alt'); await page.mouse.click(bb.x + 6.3 * pps, bb.y + 15); await page.keyboard.up('Alt'); await page.waitForTimeout(300);
+  r.lowerAltClick = await st(page);
+  const s0 = await st(page);
+  await page.mouse.move(bb.x + 10 * pps, bb.y + 15); await page.mouse.down(); for (let i = 1; i <= 10; i++) await page.mouse.move(bb.x + 10 * pps - i * 20, bb.y + 15); await page.mouse.up(); await page.waitForTimeout(400);
+  r.dragPan = { before: s0, after: await st(page) };
+  await page.mouse.dblclick(bb.x + 2 * pps, bb.y + 15); await page.waitForTimeout(500);
+  r.dblclick = await st(page);
+  const sr = await page.locator('[data-testid="arrangement-ruler"]').boundingBox();
+  await page.mouse.click(sr.x + 50, sr.y + 14); await page.waitForTimeout(300);
+  r.secondsRulerClick = await st(page);
+  await page.screenshot({ path: `${out}/seeded-${w}.png` });
+  await ctx.close();
+  ({ ctx, page } = await fresh());
+  await add(page, 'demo-stem-pulse');
+  const bb2 = await page.locator('[data-testid="arrangement-bars-ruler"]').boundingBox();
+  await page.locator('[data-testid="arrangement-timeline-scroller"]').evaluate((e) => { e.scrollLeft = 400; }); await page.waitForTimeout(300);
+  const bb3 = await page.locator('[data-testid="arrangement-bars-ruler"]').boundingBox();
+  await page.mouse.click(bb3.x + 20 * pps, bb3.y + 4); await page.waitForTimeout(400);
+  r.stripPastEnd = await st(page);
+  await ctx.close();
+  ({ ctx, page } = await fresh());
+  await add(page, 'demo-soft-impact');
+  const bb4 = await page.locator('[data-testid="arrangement-bars-ruler"]').boundingBox();
+  await page.mouse.click(bb4.x + 1.2 * pps, bb4.y + 4); await page.waitForTimeout(300);
+  r.noTempoStrip = await st(page);
+  await ctx.close();
+  ({ ctx, page } = await fresh());
+  await page.fill('[data-testid="arrangement-tempo-input"]', '90'); await page.press('[data-testid="arrangement-tempo-input"]', 'Enter'); await page.waitForTimeout(300);
+  const bb5 = await page.locator('[data-testid="arrangement-bars-ruler"]').boundingBox();
+  await page.mouse.click(bb5.x + 2 * pps, bb5.y + 4); await page.waitForTimeout(300);
+  r.emptyProjectStrip = await st(page);
+  await ctx.close();
+  r.errors = errors;
+  res[`${w}x${h}`] = r;
+}
+await browser.close();
+writeFileSync(`${out}/recipes.json`, JSON.stringify(res, null, 1));
+for (const k in res) { console.log(k); for (const [n, v] of Object.entries(res[k])) console.log(' ', n, JSON.stringify(v).slice(0, 330)); }

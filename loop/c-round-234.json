@@ -1,0 +1,78 @@
+{
+  "round": 234,
+  "task": "SABA-B-11a stage 1 — project tempo from the asset's catalogue BPM",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T21:10:48.8220774Z",
+    "round": 234,
+    "attempt": 1,
+    "store": 200
+  },
+  "baseline": "db5c297946e3295fec7b2647a2e66dd4cad10692",
+  "chromium": "143.0.7499.4 (Playwright)",
+  "bugs": [],
+  "passed": [
+    "C-SCOPE-234",
+    "C-UNIT-234",
+    "C-SEED-STEM",
+    "C-SEED-ENTER",
+    "C-NO-BPM",
+    "C-MIXED",
+    "C-USER-WINS",
+    "C-HAND",
+    "C-ONESHOT",
+    "C-SNAP",
+    "C-EXPORT",
+    "C-STATUS-FIT",
+    "C-BUDGET",
+    "C-REF-234",
+    "C-LESSON-234",
+    "AN-REVIEW-234",
+    "LAB-SMOKE-234",
+    "C-SHOTS-234"
+  ],
+  "gate": [
+    "full vitest suite",
+    "npm run typecheck (full)",
+    "npm run lint (full)",
+    "npm run build",
+    "npm run verify",
+    "npm run test:e2e:smoke"
+  ],
+  "blocked": [],
+  "notes": [
+    {
+      "id": "A-R234-REVIEW-M1",
+      "severity": "medium",
+      "text": "Medium per A-R234-REVIEW-M1 (A's reviewer; A confirmed it in TU8): mount-time seed status is overwritten by the provider's loading status. Not reproduced by C in /studio-lab: the project always starts empty and nothing persists across reload (add pulse -> reload -> 0 clips, tempo empty, 1 s, Snap off; no IndexedDB; localStorage only czaba_session_id; out/c234reload.json, both viewports). Not a C-found bug; B rules before SRW-21 or any initial-arrangement path ships."
+    },
+    {
+      "id": "INFO-C234-EXTRA-DROP",
+      "severity": "info",
+      "text": "Extra probe beyond the rows: a real-mouse library drag-drop of demo-stem-pulse onto the Music lane also seeds (120, 1/4, Snap on, status placement + seeded + Snap on) at both viewports; out/c234drop.json."
+    },
+    {
+      "id": "INFO-C234-SECONDS-AFTER-SEED",
+      "severity": "info",
+      "text": "After a seed, choosing the 1 s grid by select works (division 1, Snap stays on, clip snaps to 1.000); the select lists 10…0.1 s and bar…1/32; the metronome is enabled. Clearing the tempo after a seed returns the grid to 1 s and leaves Snap on (existing changeTempo behaviour)."
+    },
+    {
+      "id": "C-BUDGET-METHOD",
+      "severity": "info",
+      "text": "C-BUDGET compared the seeded build against the unchanged no-BPM path (soft-impact) in the same build, not against B's pre-change baseline-after-add screenshots; the no-BPM path is unchanged code, so the diff isolates the seed. B's baseline PNGs were not diffed."
+    }
+  ],
+  "abletonConformance": {
+    "tempo-source": "deliberate deviation (Saba decision 3); manual 9.1.1 re-fetched by C 2026-10-28: tempo is a Set value, nothing says adding a clip changes it",
+    "musical-grid-and-snap": "confirmed (6.10 per B; Alt bypass observed in CZABA)",
+    "no-stretch": "confirmed in behaviour (9.2 warp-off quote re-fetched by C; export byte-identical with/without tempo)",
+    "two-rulers": "confirmed (6.1 per B; both rulers visible after seed)",
+    "default-grid-snap": "unconfirmed in Live (not in manual); Saba decision",
+    "default-division-1/4": "deliberate deviation, stand-in until SABA-B-11b",
+    "tempo-undo": "deliberate deviation D-29z30 R4, sent to Saba as SABA-Q-TEMPO-UNDO",
+    "seconds-grid": "deliberate deviation (Saba decision; Live has none)"
+  },
+  "evidence": "c-round-234.md; c-round-234/out/c234.json, c234play.json, c234drop.json, *.png; c-round-234/unit.log; c-round-234/out/c234reload.json"
+}

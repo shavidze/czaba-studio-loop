@@ -1,0 +1,13 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+page.on('pageerror', (e) => console.log('PAGEERROR', String(e).slice(0, 300)));
+page.on('console', (m) => { if (m.type() === 'error') console.log('CONSOLE', m.text().slice(0, 200)); });
+await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' });
+await page.waitForTimeout(8000);
+console.log(await page.evaluate(() => [...document.querySelectorAll('button')].filter((b) => /Add/.test(b.textContent)).map((b) => `${b.textContent.trim()}|${b.disabled}`).join('\n')));
+console.log(await page.evaluate(() => document.querySelector('[data-testid="arrangement-status"]')?.textContent));
+await page.screenshot({ path: 'dbg.png' });
+await browser.close();
