@@ -1,0 +1,755 @@
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/strings.ts	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/strings.ts	2026-10-28 15:35:41.083333471 +0000
+@@ -271,7 +271,7 @@
+   historyRange: 'Loop range',
+   selectionTitle: studioShortcutTitle('Loop the time selection', 'loop'),
+   toggleTitle: studioShortcutTitle('Loop on / off', 'loop'),
+-  braceHint: 'Loop: make a time selection and press Loop (Ctrl+L)',
++  needsSelectionTitle: studioShortcutTitle('Loop: make a time selection first', 'loop'),
+   braceKeyboardHint: '← → nudge · Shift + ← → length',
+   braceStartTitle: 'Loop start',
+   braceEndTitle: 'Loop end',
+@@ -321,7 +321,6 @@
+ };
+ 
+ export const studioTempoStrings = {
+-  emptyHint: 'Bars: set a BPM — grid only, audio is not stretched',
+   cleared: 'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
+   fieldLabel: 'Project tempo (BPM)',
+   fieldTitle:
+@@ -648,8 +647,11 @@
+ 
+ const STUDIO_VIDEO_IMPORT_LABEL = 'Your own video';
+ 
++const STUDIO_VIDEO_MIX_LABEL = 'Original video sound';
++
+ export const studioLaneStrings = {
+-  videoMixLabel: 'Original video sound',
++  videoMixLabel: STUDIO_VIDEO_MIX_LABEL,
++  videoMuteTitle: `Mute — ${STUDIO_VIDEO_MIX_LABEL}`,
+   videoImportLabel: STUDIO_VIDEO_IMPORT_LABEL,
+   foldTitle: 'Fold / unfold',
+   soloLabel: (name: string): string => `Solo — ${name} (Ctrl/Cmd+click = add to solo)`,
+@@ -794,11 +796,7 @@
+ 
+ export const studioVideoDockStrings = {
+   dockLabel: 'Video',
+-  overviewNote: '· Overview',
+-  captionFallback: 'Video',
+-  captionSoundNote: '· sound from the video track (M/S/Volume)',
+   gapPrefix: 'No video ·',
+-  empty: 'No video added yet',
+   placeholderExpanded: 'Video expanded',
+   placeholderReturn: 'Return',
+   returnLabel: 'Return the video to the compact view',
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/tempo.ts	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/tempo.ts	2026-10-28 15:35:41.083695004 +0000
+@@ -13,7 +13,6 @@
+   min: TEMPO_BPM_MIN,
+   max: TEMPO_BPM_MAX,
+ });
+-export const TEMPO_EMPTY_HINT = studioTempoStrings.emptyHint;
+ 
+ const TEMPO_TEXT_PATTERN = /^\d{1,3}(\.\d{1,2})?$/;
+ const SECONDS_PER_MINUTE = 60;
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/components/arrangement/ArrangementTempoRow.tsx	2026-10-28 15:33:17.626728075 +0000
++++ app/components/arrangement/ArrangementTempoRow.tsx	2026-10-28 15:35:41.083994476 +0000
+@@ -15,7 +15,6 @@
+   formatTempoBpm,
+   parseTempoBpm,
+   TEMPO_BEATS_PER_BAR,
+-  TEMPO_EMPTY_HINT,
+ } from '~/lib/arrangement/tempo';
+ import type { TimelineView } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+@@ -93,41 +92,37 @@
+       data-testid="arrangement-bars-ruler"
+       data-bpm={bpm === null ? '' : formatTempoBpm(bpm)}
+     >
+-      {bpm === null ? (
+-        <span className="pointer-events-none absolute inset-y-0 left-2 flex items-center whitespace-nowrap text-xs text-muted">
+-          {TEMPO_EMPTY_HINT}
+-        </span>
+-      ) : (
+-        barsRulerMarks(
+-          seconds,
+-          pxPerSecond,
+-          bpm,
+-          fromPx === null || toPx === null ? undefined : { fromPx, toPx },
+-        ).map((mark) => (
+-          <div
+-            key={mark.time}
+-            className={cn(
+-              'pointer-events-none absolute bottom-0 border-l border-outline',
+-              mark.kind === 'bar' ? 'top-0' : 'h-1.5',
+-            )}
+-            style={{ left: mark.time * pxPerSecond }}
+-            data-testid="arrangement-bars-mark"
+-            data-kind={mark.kind}
+-            data-time={String(Math.round(mark.time * 1e6) / 1e6)}
+-          >
+-            {mark.label === null ? null : (
+-              <span
+-                className={cn(
+-                  'absolute left-1 whitespace-nowrap font-mono text-xs leading-none tabular-nums text-muted',
+-                  mark.kind === 'bar' ? 'top-1' : 'bottom-0.5',
+-                )}
+-              >
+-                {mark.label}
+-              </span>
+-            )}
+-          </div>
+-        ))
+-      )}
++      {bpm === null
++        ? null
++        : barsRulerMarks(
++            seconds,
++            pxPerSecond,
++            bpm,
++            fromPx === null || toPx === null ? undefined : { fromPx, toPx },
++          ).map((mark) => (
++            <div
++              key={mark.time}
++              className={cn(
++                'pointer-events-none absolute bottom-0 border-l border-outline',
++                mark.kind === 'bar' ? 'top-0' : 'h-1.5',
++              )}
++              style={{ left: mark.time * pxPerSecond }}
++              data-testid="arrangement-bars-mark"
++              data-kind={mark.kind}
++              data-time={String(Math.round(mark.time * 1e6) / 1e6)}
++            >
++              {mark.label === null ? null : (
++                <span
++                  className={cn(
++                    'absolute left-1 whitespace-nowrap font-mono text-xs leading-none tabular-nums text-muted',
++                    mark.kind === 'bar' ? 'top-1' : 'bottom-0.5',
++                  )}
++                >
++                  {mark.label}
++                </span>
++              )}
++            </div>
++          ))}
+     </div>
+   );
+ }
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/components/arrangement/ArrangementLoopBrace.tsx	2026-10-28 15:33:17.626728075 +0000
++++ app/components/arrangement/ArrangementLoopBrace.tsx	2026-10-28 15:38:45.311737005 +0000
+@@ -15,7 +15,6 @@
+ 
+ const LOOP_DRAG_THRESHOLD_PX = 3;
+ const LOOP_KEY_STEP_SECONDS = 0.1;
+-const LOOP_HINT = studioLoopStrings.braceHint;
+ const LOOP_KEYBOARD_HINT = studioLoopStrings.braceKeyboardHint;
+ 
+ type LoopGestureKind = 'move' | LoopEdge;
+@@ -272,11 +271,7 @@
+             data-testid="arrangement-loop-end-edge"
+           />
+         </div>
+-      ) : (
+-        <span className="pointer-events-none sticky left-56 inline-block whitespace-nowrap px-2 text-xs leading-4 text-muted">
+-          {LOOP_HINT}
+-        </span>
+-      )}
++      ) : null}
+     </div>
+   );
+ }
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/components/arrangement/ArrangementTransport.tsx	2026-10-28 15:33:17.626728075 +0000
++++ app/components/arrangement/ArrangementTransport.tsx	2026-10-28 15:38:49.141961706 +0000
+@@ -229,7 +229,13 @@
+         onClick={toggleLoopSelection}
+         disabled={!range && !loop}
+         aria-pressed={loop?.enabled === true}
+-        title={range ? studioLoopStrings.selectionTitle : studioLoopStrings.toggleTitle}
++        title={
++          range
++            ? studioLoopStrings.selectionTitle
++            : loop
++              ? studioLoopStrings.toggleTitle
++              : studioLoopStrings.needsSelectionTitle
++        }
+         aria-keyshortcuts={studioShortcutAria('loop')}
+         className={cn(
+           toolButtonClass,
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/components/arrangement/ArrangementVideoDock.tsx	2026-10-28 15:33:17.626728075 +0000
++++ app/components/arrangement/ArrangementVideoDock.tsx	2026-10-28 15:39:38.093286723 +0000
+@@ -202,8 +202,7 @@
+   const source = sourceId === null ? undefined : videoSources.get(sourceId);
+   return (
+     <p className="min-w-0 flex-1 truncate text-right" data-testid="arrangement-video-caption">
+-      {source ? source.name : studioVideoDockStrings.captionFallback}{' '}
+-      <span className="text-dim">{studioVideoDockStrings.captionSoundNote}</span>
++      {source ? source.name : null}
+     </p>
+   );
+ }
+@@ -887,11 +886,7 @@
+       data-testid="arrangement-video-dock"
+     >
+       <div className="flex min-w-0 flex-1 flex-col justify-end gap-1 self-stretch">
+-        <div className="flex items-baseline justify-between gap-2 text-xs leading-4 text-muted">
+-          <span className="shrink-0">
+-            <span className="text-label font-medium uppercase tracking-label">Arrangement</span>{' '}
+-            <span className="text-dim">{studioVideoDockStrings.overviewNote}</span>
+-          </span>
++        <div className="flex min-h-4 items-baseline justify-between gap-2 text-xs leading-4 text-muted">
+           <ArrangementVideoCaption arrangement={arrangement} videoSources={videoSources} />
+         </div>
+         {overview}
+@@ -956,9 +951,10 @@
+         />
+         <ArrangementVideoFadeOverlay arrangement={arrangement} />
+         {hasVideoClips ? null : (
+-          <p className="absolute inset-0 z-20 flex items-center justify-center bg-background p-2 text-center text-xs text-muted">
+-            {studioVideoDockStrings.empty}
+-          </p>
++          <div
++            className="absolute inset-0 z-20 bg-background"
++            data-testid="arrangement-video-empty"
++          />
+         )}
+         {hasVideoClips ? <ArrangementVideoGapCaption arrangement={arrangement} /> : null}
+         <div className="absolute top-1 right-1 z-30 flex gap-1">
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/components/arrangement/ArrangementLane.tsx	2026-10-28 15:33:17.626645433 +0000
++++ app/components/arrangement/ArrangementLane.tsx	2026-10-28 15:38:57.324331251 +0000
+@@ -642,7 +642,7 @@
+       type="button"
+       aria-pressed={track.mute}
+       aria-label={`Mute — ${mixLabel}`}
+-      title="Mute"
++      title={isVideo ? studioLaneStrings.videoMuteTitle : 'Mute'}
+       onClick={() => toggleTrackMute(track.id)}
+       className={cn(
+         'h-6 w-6 shrink-0 rounded-md border border-transparent bg-foreground/5 text-xs font-medium motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',
+@@ -660,7 +660,7 @@
+       type="button"
+       aria-pressed={track.solo}
+       aria-label={studioLaneStrings.soloLabel(mixLabel)}
+-      title={studioLaneStrings.soloTitle}
++      title={isVideo ? studioLaneStrings.soloLabel(mixLabel) : studioLaneStrings.soloTitle}
+       onClick={(event) => toggleTrackSolo(track.id, event.ctrlKey || event.metaKey)}
+       className={cn(
+         'h-6 w-6 shrink-0 rounded-md border border-transparent bg-foreground/5 text-xs font-medium motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',
+@@ -821,7 +821,7 @@
+               storedValue={track.volume}
+               toSliderValue={trackVolumeSliderDb}
+               formatValueText={formatTrackVolumeDb}
+-              formatTitle={isVideo && density !== 'full' ? videoMixFaderTitle : undefined}
++              formatTitle={isVideo ? videoMixFaderTitle : undefined}
+               fillRange={TRACK_VOLUME_FILL_RANGE}
+               renderReadout={renderTrackVolumeReadout}
+               min={TRACK_VOLUME_DB_MIN}
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 15:37:10.857302063 +0000
+@@ -53,6 +53,7 @@
+ import { createArrangement } from '../model';
+ import { DETAIL_RANGE_INVALID_MESSAGE } from '../panels';
+ import { CLIP_LANE_REFUSAL_MESSAGES, GROUP_MOVE_BLOCKED_MESSAGE } from '../selection';
++import { studioShortcutTitle } from '../shortcuts';
+ import {
+   studioClipEnvelopeStrings,
+   studioClipStrings,
+@@ -80,7 +81,7 @@
+   studioViewStrings,
+   studioWorkspaceStrings,
+ } from '../strings';
+-import { TEMPO_EMPTY_HINT, TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
++import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
+ import { audioFileRejectionMessage, unsupportedFileMessage } from '../video';
+ import { videoAudioNote, videoProbeErrorMessage } from '../video.client';
+ import { formatZoomReadout } from '../view';
+@@ -695,7 +696,7 @@
+     historyRange: 'Loop range',
+     selectionTitle: 'Loop the time selection (Ctrl+L)',
+     toggleTitle: 'Loop on / off (Ctrl+L)',
+-    braceHint: 'Loop: make a time selection and press Loop (Ctrl+L)',
++    needsSelectionTitle: 'Loop: make a time selection first (Ctrl+L)',
+     braceKeyboardHint: '← → nudge · Shift + ← → length',
+     braceStartTitle: 'Loop start',
+     braceEndTitle: 'Loop end',
+@@ -953,7 +954,6 @@
+ 
+ const EXPECTED_V02C2_PLAIN_STRINGS: Record<string, Record<string, string>> = {
+   studioTempoStrings: {
+-    emptyHint: 'Bars: set a BPM — grid only, audio is not stretched',
+     cleared: 'Tempo cleared — the bars ruler is hidden. Audio is unchanged.',
+     fieldLabel: 'Project tempo (BPM)',
+     fieldTitle:
+@@ -997,7 +997,7 @@
+ };
+ 
+ const EXPECTED_V02C2_KEYS: Record<string, string[]> = {
+-  studioTempoStrings: ['cleared', 'emptyHint', 'fieldLabel', 'fieldTitle', 'invalid', 'set'],
++  studioTempoStrings: ['cleared', 'fieldLabel', 'fieldTitle', 'invalid', 'set'],
+   studioMetronomeStrings: ['needsTempoTitle', 'off', 'on', 'title', 'toggleLabel'],
+   studioViewStrings: [
+     'fitStatus',
+@@ -1083,7 +1083,6 @@
+         }
+       }
+     }
+-    expect(TEMPO_EMPTY_HINT).toBe(studioTempoStrings.emptyHint);
+     expect(METRONOME_NEEDS_TEMPO_TITLE).toBe(studioMetronomeStrings.needsTempoTitle);
+   });
+ 
+@@ -1929,6 +1928,7 @@
+ 
+ const EXPECTED_LANE_PLAIN_STRINGS: Record<string, string> = {
+   videoMixLabel: 'Original video sound',
++  videoMuteTitle: 'Mute — Original video sound',
+   videoImportLabel: 'Your own video',
+   foldTitle: 'Fold / unfold',
+   soloTitle: 'Solo (Ctrl/Cmd+click = add to solo)',
+@@ -2552,11 +2552,7 @@
+ 
+ const EXPECTED_VIDEO_DOCK_STRINGS: Record<string, string> = {
+   dockLabel: 'Video',
+-  overviewNote: '· Overview',
+-  captionFallback: 'Video',
+-  captionSoundNote: '· sound from the video track (M/S/Volume)',
+   gapPrefix: 'No video ·',
+-  empty: 'No video added yet',
+   placeholderExpanded: 'Video expanded',
+   placeholderReturn: 'Return',
+   returnLabel: 'Return the video to the compact view',
+@@ -2591,17 +2587,13 @@
+   it('ST50: studioVideoDockStrings has the exact keys, English literals and codepoints, with no Georgian and no «»', () => {
+     expect(Object.keys(studioVideoDockStrings).sort()).toEqual(
+       [
+-        'captionFallback',
+-        'captionSoundNote',
+         'closeLabel',
+         'closeTitle',
+         'dockLabel',
+         'dragLabel',
+         'dragTitle',
+-        'empty',
+         'expandLabel',
+         'gapPrefix',
+-        'overviewNote',
+         'placeholderExpanded',
+         'placeholderReturn',
+         'playFailed',
+@@ -2610,7 +2602,7 @@
+         'standbyLabel',
+       ].sort(),
+     );
+-    expect(Object.keys(EXPECTED_VIDEO_DOCK_STRINGS)).toHaveLength(17);
++    expect(Object.keys(EXPECTED_VIDEO_DOCK_STRINGS)).toHaveLength(13);
+     for (const [key, value] of Object.entries(studioVideoDockStrings)) {
+       expect(value, key).toBe(EXPECTED_VIDEO_DOCK_STRINGS[key]);
+       expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+@@ -2618,8 +2610,6 @@
+     }
+     const vd = studioVideoDockStrings;
+     const middleDot = String.fromCodePoint(0x00b7);
+-    expect(vd.overviewNote.startsWith(middleDot)).toBe(true);
+-    expect(vd.captionSoundNote.startsWith(middleDot)).toBe(true);
+     expect(vd.playFailed).toContain(String.fromCodePoint(0x2014));
+     expect(vd.gapPrefix.endsWith(middleDot)).toBe(true);
+     expect(vd.gapPrefix.endsWith(' ')).toBe(false);
+@@ -2834,3 +2824,22 @@
+     }
+   });
+ });
++
++describe('CALM-2a canvas and dock copy moves (SABA-B-8)', () => {
++  it('ST-C2a: the Loop reason and the video Mute title exist, and the six moved strings are gone', () => {
++    expect(studioLoopStrings.needsSelectionTitle).toBe(
++      'Loop: make a time selection first (Ctrl+L)',
++    );
++    expect(studioLoopStrings.needsSelectionTitle).toBe(
++      studioShortcutTitle('Loop: make a time selection first', 'loop'),
++    );
++    expect(studioLaneStrings.videoMuteTitle).toBe('Mute — Original video sound');
++    expect(studioLaneStrings.videoMuteTitle).toBe(`Mute — ${studioLaneStrings.videoMixLabel}`);
++    expect('emptyHint' in studioTempoStrings).toBe(false);
++    expect('braceHint' in studioLoopStrings).toBe(false);
++    expect('overviewNote' in studioVideoDockStrings).toBe(false);
++    expect('captionFallback' in studioVideoDockStrings).toBe(false);
++    expect('captionSoundNote' in studioVideoDockStrings).toBe(false);
++    expect('empty' in studioVideoDockStrings).toBe(false);
++  });
++});
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/tempo.test.ts	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/__tests__/tempo.test.ts	2026-10-28 15:35:41.086488684 +0000
+@@ -4,7 +4,6 @@
+   barsRulerMarks,
+   formatTempoBpm,
+   parseTempoBpm,
+-  TEMPO_EMPTY_HINT,
+   TEMPO_INVALID_MESSAGE,
+   tempoStatusMessage,
+ } from '../tempo';
+@@ -137,6 +136,5 @@
+     expect(tempoStatusMessage(92.5)).toContain('92.5 BPM');
+     expect(tempoStatusMessage(null)).toBe(studioTempoStrings.cleared);
+     expect(TEMPO_INVALID_MESSAGE).toBe(studioTempoStrings.invalid({ min: 20, max: 999 }));
+-    expect(TEMPO_EMPTY_HINT).toBe(studioTempoStrings.emptyHint);
+   });
+ });
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/tempo-ui.test.tsx	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/__tests__/tempo-ui.test.tsx	2026-10-28 15:36:54.717195772 +0000
+@@ -9,7 +9,7 @@
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+-import { TEMPO_EMPTY_HINT, TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
++import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
+ import { sliderPositionFromZoom } from '../view';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -279,7 +279,7 @@
+ });
+ 
+ describe('SRW-15 stage 1 tempo row and bars ruler', { timeout: 15_000 }, () => {
+-  it('U1 has no tempo by default: empty field, hint, no marks, 4/4 shown', async () => {
++  it('U1 has no tempo by default: empty field, empty strip, no marks, 4/4 shown', async () => {
+     const { view } = await mountTempoWorkspace();
+     const input = tempoInput(view);
+     expect(input.value).toBe('');
+@@ -289,7 +289,8 @@
+     const strip = barsStrip(view);
+     expect(strip.dataset.bpm).toBe('');
+     expect(barsMarks(view)).toHaveLength(0);
+-    expect(strip.textContent).toContain(TEMPO_EMPTY_HINT);
++    expect(strip.textContent).toBe('');
++    expect(input.title).toContain('audio is not stretched');
+     expect(input.parentElement?.textContent).toContain('4/4');
+     expect(input.parentElement?.textContent).toContain('BPM');
+   });
+@@ -396,10 +397,7 @@
+     expect(barsMarks(view)).toHaveLength(0);
+     expect(statusText(view)).toBe(tempoStatusMessage(null));
+     expect(statusText(view)).toBe('Tempo cleared — the bars ruler is hidden. Audio is unchanged.');
+-    expect(barsStrip(view).textContent).toContain(TEMPO_EMPTY_HINT);
+-    expect(barsStrip(view).textContent).toContain(
+-      'Bars: set a BPM — grid only, audio is not stretched',
+-    );
++    expect(barsStrip(view).textContent).toBe('');
+   });
+ 
+   it('U9 committing the same value again is a no-op without a status', async () => {
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/__tests__/tempo-window-ui.test.tsx	2026-10-28 15:35:41.087150630 +0000
+@@ -9,7 +9,6 @@
+   useArrangementPositionStore,
+ } from '~/contexts/ArrangementContext';
+ import type { BarsRulerMark, BarsRulerWindow } from '~/lib/arrangement/tempo';
+-import { TEMPO_EMPTY_HINT } from '~/lib/arrangement/tempo';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+@@ -495,7 +494,7 @@
+     commitTempo(view, '');
+     const strip = view.getByTestId('arrangement-bars-ruler');
+     expect(strip.dataset.bpm).toBe('');
+-    expect(strip.textContent).toContain(TEMPO_EMPTY_HINT);
++    expect(strip.textContent).toBe('');
+     expect(domMarks(view)).toHaveLength(0);
+     const calls = tempoCalls.count;
+     scrollTo(view, 7300);
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx	2026-10-28 15:35:58.896478261 +0000
+@@ -10,7 +10,7 @@
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { findStudioShortcut, type StudioShortcutId, studioShortcutAria } from '../shortcuts';
+-import { studioEditStrings } from '../strings';
++import { studioEditStrings, studioLoopStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -359,9 +359,7 @@
+     scroller.scrollLeft = 300;
+     fireEvent.scroll(scroller);
+     expect(overview.getAttribute('aria-valuetext')).toBe('Visible start 00:03.000 / 00:10.000');
+-    expect(view.getByTestId('arrangement-loop-strip').textContent).toBe(
+-      'Loop: make a time selection and press Loop (Ctrl+L)',
+-    );
++    expect(view.getByTestId('arrangement-loop-strip').textContent).toBe('');
+     act(() => live(api).setTimeRange(MUSIC_RANGE));
+     act(() => live(api).toggleLoopSelection());
+     const brace = view.getByTestId('arrangement-loop-brace');
+@@ -417,4 +415,32 @@
+     expect(workspace.zoomBack().getAttribute('aria-keyshortcuts')).toBe(zoomRange.keys[1]);
+     expect(workspace.fit().hasAttribute('aria-keyshortcuts')).toBe(false);
+   });
++
++  it('NS6 the Loop button title says why it is disabled, then follows the selection and the loop', async () => {
++    const workspace = await mountNavigationWorkspace();
++    const { api } = workspace;
++    const firstKey = findStudioShortcut('loop')?.keys[0];
++    const aria = studioShortcutAria('loop');
++    if (!firstKey || !aria) {
++      throw new Error('loop shortcut row has no key or aria');
++    }
++    const expectLoopState = (title: string, disabled: boolean) => {
++      const button = workspace.loop();
++      expect(button.title).toBe(title);
++      expect(button.hasAttribute('disabled')).toBe(disabled);
++      expect(button.getAttribute('aria-keyshortcuts')).toBe(aria);
++      expect(button.title.endsWith(` (${firstKey})`), button.title).toBe(true);
++    };
++    expect(live(api).range).toBeNull();
++    expect(live(api).arrangement.loop).toBeNull();
++    expectLoopState(studioLoopStrings.needsSelectionTitle, true);
++    expect(workspace.loop().title).toBe('Loop: make a time selection first (Ctrl+L)');
++    act(() => live(api).setTimeRange(MUSIC_RANGE));
++    expectLoopState(studioLoopStrings.selectionTitle, false);
++    act(() => live(api).toggleLoopSelection());
++    act(() => live(api).setTimeRange(null));
++    expect(live(api).range).toBeNull();
++    expect(live(api).arrangement.loop).not.toBeNull();
++    expectLoopState(studioLoopStrings.toggleTitle, false);
++  });
+ });
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx	2026-10-28 15:35:41.087872013 +0000
+@@ -219,10 +219,10 @@
+     const dock = view.getByRole('region', { name: 'Video' });
+     expect(dock.getAttribute('data-testid')).toBe('arrangement-video-dock');
+     const caption = view.getByTestId('arrangement-video-caption');
+-    const overviewLabel = caption.previousElementSibling;
+-    expect(overviewLabel?.textContent).toBe('Arrangement · Overview');
+-    expect(caption.textContent).toBe('Video · sound from the video track (M/S/Volume)');
+-    expect(view.getByText('No video added yet')).toBeTruthy();
++    expect(caption.previousElementSibling).toBeNull();
++    expect(caption.textContent).toBe('');
++    expect(view.queryByText('No video added yet')).toBeNull();
++    expect(view.getByTestId('arrangement-video-empty').textContent).toBe('');
+     const expand = view.getByRole('button', { name: 'Expand video' });
+     expect(expand.getAttribute('title')).toBe('Expand video');
+     const videos = view.getAllByTestId('arrangement-video');
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx	2026-10-28 15:33:17.627092253 +0000
++++ app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx	2026-10-28 15:35:41.088202921 +0000
+@@ -292,13 +292,13 @@
+     }
+   });
+ 
+-  it('TH9: the six Latin section labels use the label tokens and keep their text content', () => {
++  it('TH9: the five Latin section labels use the label tokens and keep their text content', () => {
+     const html = renderToString(<StudioLabRoute />);
+ 
+     const labelTags = classTokensOfEveryTag(html).filter(({ tokens }) =>
+       tokens.includes('tracking-label'),
+     );
+-    expect(labelTags).toHaveLength(6);
++    expect(labelTags).toHaveLength(5);
+     for (const { tag, tokens } of labelTags) {
+       for (const token of ['text-label', 'font-medium', 'uppercase', 'tracking-label']) {
+         expect(tokens, tag).toContain(token);
+@@ -308,7 +308,7 @@
+     const labelTexts = [...html.matchAll(/<([a-z]+)\b[^>]*\bclass="([^"]*)"[^>]*>([^<]*)<\/\1>/g)]
+       .filter((match) => (match[2] ?? '').split(/\s+/).includes('tracking-label'))
+       .map((match) => match[3]);
+-    expect(labelTexts).toEqual(['Master', 'Zoom', 'Arrangement', 'BPM', 'Markers', 'Loop']);
++    expect(labelTexts).toEqual(['Master', 'Zoom', 'BPM', 'Markers', 'Loop']);
+ 
+     expect(countOccurrences(html, 'text-[11px]')).toBe(0);
+     expect(countOccurrences(html, 'tracking-[0.14em]')).toBe(0);
+@@ -339,14 +339,8 @@
+ 
+     const captionIndex = html.indexOf('data-testid="arrangement-video-caption"');
+     expect(captionIndex).toBeGreaterThan(-1);
+-    const captionTagStart = html.lastIndexOf('<', captionIndex);
+-    const overviewStart = html.lastIndexOf('<span class="shrink-0">', captionTagStart);
+-    expect(overviewStart).toBeGreaterThan(-1);
+-    const overviewText = html
+-      .slice(overviewStart, captionTagStart)
+-      .replace(/<!-- -->/g, '')
+-      .replace(/<[^>]*>/g, '');
+-    expect(overviewText).toBe('Arrangement · Overview');
++    expect(html).not.toContain('· Overview');
++    expect(html).not.toContain('>Arrangement<');
+   });
+ 
+   it('TH10: Studio UI text uses weights 400/500 and the spec timecodes use font-mono', () => {
+--- ../tmp/studio-real-loop/b-round-228/granted-start/app/lib/arrangement/__tests__/lane-strings-ui.test.tsx	2026-10-28 15:33:17.626968480 +0000
++++ app/lib/arrangement/__tests__/lane-strings-ui.test.tsx	2026-10-28 15:36:39.692531727 +0000
+@@ -10,6 +10,7 @@
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { studioLaneStrings } from '../strings';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -307,6 +308,57 @@
+     expect(line.getAttribute('title')).toBe(expected);
+     expect(line.textContent).toBe(expected);
+   });
++
++  it('LSU8 the video track Mute, Solo and Volume titles name the original video sound in every density; audio tracks keep theirs', async () => {
++    const { view, row } = await mountLaneStringsWorkspace([]);
++    const videoRow = within(row('video'));
++    const musicRow = within(row('music'));
++    const videoMute = () => videoRow.getByRole('button', { name: 'Mute — Original video sound' });
++    const videoSolo = () =>
++      videoRow.getByRole('button', { name: studioLaneStrings.soloLabel('Original video sound') });
++    const videoVolume = () =>
++      videoRow.getByRole('slider', { name: 'Volume — Original video sound' });
++    expect(videoRow.queryByText(studioLaneStrings.videoOriginalSound)).not.toBeNull();
++    expect(videoMute().getAttribute('title')).toBe('Mute — Original video sound');
++    expect(videoMute().getAttribute('title')).toBe(studioLaneStrings.videoMuteTitle);
++    expect(videoSolo().getAttribute('title')).toBe(
++      'Solo — Original video sound (Ctrl/Cmd+click = add to solo)',
++    );
++    expect(videoVolume().getAttribute('title')).toBe('Original video sound');
++    const height = view.getByRole('separator', { name: studioLaneStrings.heightLabel('ვიდეო') });
++    for (let step = 0; step < 12; step += 1) {
++      if (videoRow.queryByText(studioLaneStrings.videoOriginalSound) === null) {
++        break;
++      }
++      fireEvent.keyDown(height, { key: 'ArrowUp' });
++    }
++    expect(videoRow.queryByText(studioLaneStrings.videoOriginalSound)).toBeNull();
++    expect(videoMute().getAttribute('title')).toBe('Mute — Original video sound');
++    expect(videoSolo().getAttribute('title')).toBe(
++      studioLaneStrings.soloLabel('Original video sound'),
++    );
++    expect(videoVolume().getAttribute('title')).toBe('Original video sound');
++    const musicMute = musicRow.getByRole('button', { name: 'Mute — მუსიკა' });
++    expect(musicMute.getAttribute('title')).toBe('Mute');
++    const musicSolo = musicRow.getByRole('button', { name: studioLaneStrings.soloLabel('მუსიკა') });
++    expect(musicSolo.getAttribute('title')).toBe(studioLaneStrings.soloTitle);
++    expect(musicRow.getByRole('slider', { name: 'Volume — მუსიკა' }).hasAttribute('title')).toBe(
++      false,
++    );
++  });
++
++  it('VDS4 a video clip at the playhead fills the dock caption with its file name and removes the empty monitor', async () => {
++    const { api, view } = await mountLaneStringsWorkspace([]);
++    expect(view.getByTestId('arrangement-video-empty').textContent).toBe('');
++    await importVideo(api, 'film.mp4');
++    const source = [...live(api).videoSources.values()][0];
++    if (!source) {
++      throw new Error('the video source was not imported');
++    }
++    expect(source.name).toBe('film.mp4');
++    expect(view.getByTestId('arrangement-video-caption').textContent).toBe(source.name);
++    expect(view.queryByTestId('arrangement-video-empty')).toBeNull();
++  });
+ });
+ 
+ const V3C2_GLYPHS = /[▶◀×▾▸■＋⌫▣⠿]/u;
+--- /dev/null	2026-10-28 15:32:23.821738084 +0000
++++ docs/implementation/2026/quarter-IV/178-calm-2a-canvas-dock-copy.md	2026-10-28 15:41:26.468606919 +0000
+@@ -0,0 +1,113 @@
++# Calm Studio — timeline canvas-ისა და dock-ის დამხმარე ტექსტის გადატანა მშვიდ ადგილებში (SABA-B-8 CALM-2a)
++
++**თარიღი:** 2026-10-28
++**სტატუსი:** In Progress (stage 1 of 2; C round 229 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++Saba-მ (2026-10-28) Studio-ს ეკრანი გადატვირთულად მიიჩნია. CALM-1-მა (doc 177) მუდმივი shortcut
++ხაზი მოხსნა. Saba-ს decision 2-ის მიხედვით დამხმარე წინადადებები tooltip-ში, `title`-ში, `aria`-ში
++ან ერთჯერად status-ში გადადის, ხოლო dock-ის „No video added yet“ მშვიდ, ცარიელ monitor-ად იქცევა.
++გადატანილი ფაქტები ხელმისაწვდომი უნდა დარჩეს.
++
++CALM-2 ორ ეტაპად იყოფა. ეს ეტაპი (2a) ეხება იმ ხუთ წინადადებას, რომლებიც timeline canvas-ზე და
++video dock-შია:
++
++- „Bars: set a BPM — grid only, audio is not stretched“ (BPM strip);
++- „Loop: make a time selection and press Loop (Ctrl+L)“ (Loop strip);
++- „Arrangement · Overview“ (dock-ის label row);
++- „Video · sound from the video track (M/S/Volume)“ (dock caption);
++- „No video added yet“ (ცარიელი monitor).
++
++## მიდგომა
++
++**გადატანის რუკა:**
++
++| წინადადება | ახალი ადგილი |
++|---|---|
++| BPM strip-ის hint | strip ცარიელია; „audio is not stretched“ უკვე წერია BPM field-ის `title`-ში (`studioTempoStrings.fieldTitle`) და BPM-ის დაყენების status-ში (`studioTempoStrings.set`) |
++| Loop strip-ის hint | strip ცარიელია; მიზეზი გადავიდა disabled Loop ღილაკის `title`-ში: `Loop: make a time selection first (Ctrl+L)` (`studioLoopStrings.needsSelectionTitle`) |
++| „Arrangement · Overview“ | label წაიშალა; Overview-ს `aria-label` და `title` უცვლელად ამბობს, რომ ეს მთელი პროექტია |
++| caption „Video · sound from…“ | caption აჩვენებს მხოლოდ playhead-ის ქვეშ მყოფი ვიდეოს ფაილის სახელს, სხვა შემთხვევაში ცარიელია; „ვიდეოს ხმა ვიდეო ტრეკზე იმართება“ გადავიდა ვიდეო ტრეკის M/S/Volume `title`-ებში |
++| „No video added yet“ | overlay რჩება იმავე ზომისა და `bg-background` ფერის ცარიელ ყუთად (`data-testid="arrangement-video-empty"`), ტექსტის გარეშე |
++
++**Loop ღილაკის `title`:** time selection არის → „Loop the time selection (Ctrl+L)“; selection არ არის,
++loop არის → „Loop on / off (Ctrl+L)“; არც ერთი არ არის (ღილაკი disabled) → „Loop: make a time
++selection first (Ctrl+L)“. ფორმულირება იმეორებს არსებულ „Zoom to selection: make a time selection
++first (Z)“-ს — ერთი pattern „საჭიროა time selection“-ისთვის.
++
++**წაშლილი strings:** `studioTempoStrings.emptyHint`, `studioLoopStrings.braceHint`,
++`studioVideoDockStrings.overviewNote`, `captionFallback`, `captionSoundNote`, `empty` და
++`TEMPO_EMPTY_HINT` export. მიზეზი — ერთი წყარო: consumer-ის გარეშე დარჩენილი string-ი strings-ის
++ტესტებს მისცემდა საშუალებას, დაეპინათ ტექსტი, რომელსაც მომხმარებელი ვერ ხედავს.
++
++**ერთი ფაქტი — ერთი ფორმულირება:** calm review-ში ეწერა „sound from the video“, მაგრამ პროდუქტი ამ
++ფაქტს უკვე „Original video sound“-ს უწოდებს (`aria-label`-ები, `videoSoundLabel`). ამიტომ ახალი
++`title`-ები იყენებს „Original video sound“-ს: Mute — `Mute — Original video sound`
++(`studioLaneStrings.videoMuteTitle`), Solo — `studioLaneStrings.soloLabel('Original video sound')`,
++Volume — `Original video sound` ყველა density-ში (ადრე მხოლოდ full-ზე ნაკლებ density-ში ჩანდა).
++ორივე string ერთ `STUDIO_VIDEO_MIX_LABEL` constant-ს კითხულობს. აუდიო ტრეკების `title`-ები უცვლელია.
++
++**რატომ არ არის sr-only ასლი ცარიელ monitor-ში:** ორ `<video>` ელემენტს თავისი `aria-label` აქვს,
++ხოლო ვიდეო lane უკვე ამბობს „No video — use “Your own video” or drop a file here“. დამალული
++დუბლიკატი ზედმეტი იქნებოდა.
++
++**რატომ არ არის BPM placeholder „—“:** Saba-ს decision 2 მას არ ასახელებს, ხოლო field-ის საზღვარი
++ცალკე finding-ია (DUX-B-3).
++
++**Ableton Live 12-თან შედარება** (task §3): Overview-ზე label-ის არქონა manual-ის აღწერას ემთხვევა
++(ch. 6.1). Loop-ისთვის time selection-ის მოთხოვნა არსებული შეგნებული განსხვავებაა (Live-ში
++selection-ის გარეშე brace მთელ Arrangement-ს ფარავს, ch. 6.6). Dock-ში მუდმივი monitor არსებული
++layout-ია; ცარიელი მუქი ყუთი მხოლოდ დასკვნით ჰგავს Live-ის შავ ეკრანს video gap-ში (ch. 28.2.2.1).
++
++## არქიტექტურა
++
++```mermaid
++flowchart LR
++  S[strings.ts] -->|needsSelectionTitle| T[ArrangementTransport — Loop title]
++  S -->|videoMuteTitle / soloLabel / STUDIO_VIDEO_MIX_LABEL| L[ArrangementLane — video M/S/Volume title]
++  S -->|fieldTitle, set| B[BPM field title + status]
++  R[ArrangementTempoRow] -->|bpm === null| E1[ცარიელი bars strip]
++  LB[ArrangementLoopBrace] -->|loop === null| E2[ცარიელი loop strip]
++  D[ArrangementVideoDock] --> C[caption = ფაილის სახელი ან ცარიელი]
++  D --> M[arrangement-video-empty — ცარიელი ყუთი]
++```
++
++## შეცვლილი ფაილები
++
++- `app/lib/arrangement/strings.ts` — ექვსი string წაიშალა; დაემატა `needsSelectionTitle`, `videoMuteTitle` და `STUDIO_VIDEO_MIX_LABEL`.
++- `app/lib/arrangement/tempo.ts` — წაიშალა `TEMPO_EMPTY_HINT`.
++- `app/components/arrangement/ArrangementTempoRow.tsx` — BPM-ის გარეშე bars strip არაფერს რენდერავს.
++- `app/components/arrangement/ArrangementLoopBrace.tsx` — loop-ის გარეშე strip-ს child არ აქვს.
++- `app/components/arrangement/ArrangementTransport.tsx` — Loop ღილაკის `title`-ის სამი მდგომარეობა.
++- `app/components/arrangement/ArrangementVideoDock.tsx` — label წაიშალა (row-ს `min-h-4`), caption მხოლოდ ფაილის სახელია, ცარიელი monitor ტექსტის გარეშე.
++- `app/components/arrangement/ArrangementLane.tsx` — ვიდეო ტრეკის Mute, Solo და Volume `title`-ები.
++- `app/lib/arrangement/__tests__/strings.test.ts` — ST10, ST17, ST36, ST50 და ახალი ST-C2a.
++- `app/lib/arrangement/__tests__/tempo.test.ts` — T10.
++- `app/lib/arrangement/__tests__/tempo-ui.test.tsx` — U1, U8.
++- `app/lib/arrangement/__tests__/tempo-window-ui.test.tsx` — BU7.
++- `app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx` — NS4 და ახალი NS6.
++- `app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx` — VDS1.
++- `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` — TH9.
++- `app/lib/arrangement/__tests__/lane-strings-ui.test.tsx` — ახალი LSU8 და VDS4.
++
++## პრობლემები და გადაწყვეტები
++
++- **პრობლემა:** `tempo.test.ts` T10 vitest-ში მწვანე რჩებოდა `TEMPO_EMPTY_HINT`-ის წაშლის შემდეგაც (`undefined === undefined`), მხოლოდ `tsc` ვარდებოდა import-ზე. **გადაწყვეტა:** T10-დან import და identity line წაიშალა; vacuous pass მტკიცებულებად არ ჩაითვალა.
++- **პრობლემა:** label-ის წაშლის შემდეგ dock-ის row ცარიელ caption-თან ერთად სიმაღლეს დაკარგავდა და Overview ზემოთ აიწეოდა. **გადაწყვეტა:** row-ს დაემატა `min-h-4`, რომ 16 px დარჩეს. jsdom layout-ს არ ითვლის, ამიტომ ეს მხოლოდ browser-ში მოწმდება (MU-6 → C-BBOX-229); class pin ტესტში არ დაემატა.
++
++## ტესტირება
++
++- **ST-C2a** — ახალი `needsSelectionTitle` და `videoMuteTitle` ზუსტი მნიშვნელობები და ექვსი წაშლილი key-ის არარსებობა.
++- **U1** — bars strip ცარიელია და BPM field-ის `title` შეიცავს „audio is not stretched“-ს; **U8**, **BU7** — tempo-ს გასუფთავების შემდეგ strip ცარიელია.
++- **NS4** — Loop strip loop-ის გარეშე ცარიელია; **NS6** — Loop ღილაკის `title`, `disabled` და `aria-keyshortcuts` სამივე მდგომარეობაში.
++- **VDS1** — caption ცარიელია, label აღარ არის, „No video added yet“ აღარ ჩანს, `arrangement-video-empty` ცარიელია; **VDS4** — ვიდეოს import-ის შემდეგ caption ფაილის სახელს აჩვენებს და ცარიელი monitor ქრება.
++- **LSU8** — ვიდეო ტრეკის Mute/Solo/Volume `title`-ები default და დაპატარავებულ (არა full) density-ში; აუდიო ტრეკისა უცვლელია.
++- **TH9** — section label-ები ხუთია, „Arrangement“ აღარ არის.
++- **Mutants:** MU-1 (Loop hint) → NS4 წითელი; MU-2 (Loop title fallback) → NS6 წითელი; MU-3 (video Mute `title`) და MU-4 (Volume `title` მხოლოდ არა-full density-ში) → LSU8 წითელი; MU-5 (caption „Video“) → VDS1 წითელი; MU-6 (`min-h-4`) — browser-only, C-BBOX-229.
++
++## TODO / შემდეგი ნაბიჯები
++
++- **CALM-2b:** Clip details-ის ცარიელი მდგომარეობა, library notice და მისი dismiss, first-run status და DUX-R-4(a) ცარიელი lane-ის hint.
++- **CALM-3:** Overview-ს empty state და Ctrl+Alt+O.

@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const p = await b.newPage();
+p.on('pageerror', e => console.log('ERR', e.message)); p.on('console', m => m.type()==='error' && console.log('CON', m.text().slice(0,200)));
+await p.goto(process.argv[2], { waitUntil: 'networkidle', timeout: 90000 });
+await p.waitForTimeout(5000);
+console.log((await p.locator('body').innerText()).slice(0, 300));
+console.log(await p.locator('[data-testid="arrangement-timeline-scroller"]').count());
+await b.close();

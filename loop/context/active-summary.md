@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T15:06:21.313Z)
+# Active loop summary (2026-10-28T16:02:50.876Z)
 
-- backlog.json 2080 KB -> active view 294 KB
-- status: G_ROOT_GATE round 228
-- servers: `{"checkedUtc":"2026-10-28T14:52:55.4222822Z","round":228,"attempt":1,"store":200}`
-- last publication: 499c82167aeba92c6edf71af2dd1ddd880b5e098 (rounds 228-228)
-- last root gate: round 228 published - commit 499c82167aeba92c6edf71af2dd1ddd880b5e098 pushed
+- backlog.json 2092 KB -> active view 296 KB
+- status: G_ROOT_GATE round 229
+- servers: `{"checkedUtc":"2026-10-28T15:46:09.9529790Z","round":229,"attempt":1,"store":200}`
+- last publication: 5da0f506a8d09d851cf34fe7d663b1c4a223b2eb (rounds 229-229)
+- last root gate: round 229 published - commit 5da0f506a8d09d851cf34fe7d663b1c4a223b2eb pushed
 
 ## Current items: -
 
@@ -531,16 +531,19 @@
 - R224-WINDOW-BOUNDARY-WATCH / info / watch: if a valid run shows variation, reclassify those classes together with evidence (D-29z259) / windowed rows that stay exact: fader and drag release-commits (split at pointerup) and move-components-per-move (same window as the reclassi
 - C-R225-OBS-01 / info / info - supports D-29z259 wallclock ruling; attached to R224-WINDOW-BOUNDARY-WATCH / windowed drag commit count differs between two clean isolated runs (C 60x3, A 59x3) while render work is constant
 - C-R225-OBS-02 / info / info - outside the round-225 contract; candidate scope for PERF-HARNESS-SHARED-LIB-b-ii (pin every kind), not scheduled / DC-KINDS pins only the 16 RECLASS rows and the 24 fader rows; an unrelated kind flip (interact.harness.hook-live) survives the unit test (eq
-- B-R225-BACK-TO-START-KEY / low / open - fixed in round 228 (backToStartTitle from the shortcut source: Back to start (Home)) / transport 'Back to start' title says '(0)' but no 0/Digit0 binding exists; the key is Home (StudioWorkspace l.1993); pinned by navigation-st
 - R226-PERF-LAYOUT-WATCH / info / watch - perf not run in round 226; PERF-HARNESS-SHARED-LIB-b-ii re-baselines; a shift there is expected, not a regression, if attributed to the 20 px / CALM-1a makes the timeline scroller 20 px taller; PERF-1b deterministic counts that depend on visible rows may shift
 - A-R226-REVIEW-L7 / info / info - UC12 title fixed in round 227; SC4 adds key pins for fit and waveform-zoom; rest recorded, not scheduled / SC1 pins keys only for split and shortcuts; SS5 Space has no positive control in jsdom; UC12 title stale
 - C-R226-OBS-KBD-BORDER / info / info - VISUAL polish candidate, not scheduled / kbd chip border rgb(36,33,30) on surface rgb(22,20,18) is very low contrast; decorative (key text >= 6.68:1), no SC applies
-- C-R227-01 / low / open - fixed in round 228 (owned shortcuts.ts: (no time selection); fitTitle aligned, L4) / fit chip 'Double-click the ruler (no selection)' is imprecise: with a clip selected and no time selection the ruler double-click still fits 
-- C-R227-02 / low / open - fixed in round 228 (whole doc 177 granted, stage 2 of 2) / doc 177 l.74/l.109 still say SC1-SC3; changed-files list omits track-layout.test.tsx
-- A-R227-REVIEW-L3-WZ-VISIBLE-NAME / info / info - not verified as a bug by C; CALM-2 copy-pass candidate (B decides at CALM-2 planning) / 'Waveform Zoom menu' names the accessible name, but the select visibly shows only 1x/2x...; a sighted user hovers to see 'Waveform Zoom'
+- A-R227-REVIEW-L3-WZ-VISIBLE-NAME / info / info (D-29z289): not a CALM-2 item (Saba decision 2 does not list it); stays info, candidate for the polish pass; not verified as a bug by C / 'Waveform Zoom menu' names the accessible name, but the select visibly shows only 1x/2x...; a sighted user hovers to see 'Waveform Zoom'
 - GATE227-S1-ESC-DEFAULTPREVENTED / info / signal - input to ARCH-CHECKPOINT-CALM-DIALOG-KEYMAP (activeDialogRef proposal); not scheduled / Esc closing the sheet relies on the floating-video branch checking defaultPrevented; a future Escape branch without it would also run
 - GATE227-S3-TRUNCATE-PIN / info / rejected (D-29z283): a class pin is what caused GATE226-B1 (L8/L12); truncation is a browser row (C-SLOT-227 measured it); jsdom does not lay out / track-layout case title says 'truncated' but no longer checks the truncate class
 - GATE227-S6-FIND-NONOPTIONAL / info / signal, not scheduled (round 228 helpers fall back safely; candidate for the checkpoint) / findStudioShortcut returns | undefined for a typed id union; a throwing non-optional version would fail the build on a wrong id
+- SABA-Q-CTRL-CMD-DISPLAY / info / awaiting_user (D-29z288): D-29z279 stands until Saba answers; options for Saba: (1) keep Ctrl everywhere (today), (2) a static "Ctrl/⌘+E" display form in both the sheet and the titles, (3) a platform-aware formatter after hydration; aria-keyshortcuts already lists Meta / tooltips say "Ctrl+E"/"Ctrl+L" (D-29z279, matching the sheet whose subline says "Ctrl means ⌘ on Mac"); a Mac user hovering a button never s
+- GATE228-S2-HARDCODED-KEYS / info / signal (D-29z288): candidate for one later one-source task (with Snap/grid/Envelope/marker titles), not scheduled / some hints still hard-code key text: deleteRangeHint / deleteRangeAllTracksHint ("(Delete / Backspace) … Ctrl+Shift+X"), playPastEnd ("Home 
+- GATE228-S3-FOOTER-HELPER / info / signal (D-29z288): StudioWorkspace.tsx frozen; fix when a round already owns that file / StudioWorkspace.tsx l.2692 reads findStudioShortcut("shortcuts")?.ariaKeyShortcuts instead of studioShortcutAria("shortcuts") (same behaviou
+- GATE228-S4-ARIA-LOOKUPS / info / signal (D-29z288): PERF input only, not scheduled / 7 studioShortcutAria + 2 title lookups per transport render (linear over ~45 rows); negligible
+- GATE228-S5-SC5-COUNT / info / ruled kept (D-29z288): deliberate, a new aria row must be acknowledged in the test (A round 228 §5) / shortcuts.test SC5 pins expect(checked).toBe(8)
+- GATE228-ARCH-STRINGS-SHORTCUTS / info / signal: keep (reviewer verdict); input to ARCH-CHECKPOINT-CALM-DIALOG-KEYMAP / strings.ts now depends on shortcuts.ts (one way; shortcuts.ts stays a leaf)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

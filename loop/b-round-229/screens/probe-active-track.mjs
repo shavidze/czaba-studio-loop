@@ -1,0 +1,14 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' });
+await page.waitForSelector('[data-testid="arrangement-timeline-scroller"]'); await page.waitForTimeout(1500);
+const btn = page.locator('[data-testid="arrangement-track-header"] button[aria-pressed]').filter({ hasText: 'Stems' }).first();
+console.log('label', await btn.getAttribute('aria-label'));
+await btn.click(); await page.waitForTimeout(300);
+console.log('pressed', await btn.getAttribute('aria-pressed'));
+await page.getByText(/Stem\s*00:16/).first().click(); await page.waitForTimeout(300);
+await page.keyboard.press('Enter'); await page.waitForTimeout(900);
+console.log('status', await page.getByTestId('arrangement-status').innerText().catch(()=>'?'));
+await b.close();

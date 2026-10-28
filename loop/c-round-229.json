@@ -1,0 +1,62 @@
+{
+  "round": 229,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T15:46:09.9529790Z",
+    "round": 229,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R229-01",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab (S0) at 1280x720, no time selection, no loop",
+        "Press Tab from the page start through the transport row (40 stops)",
+        "Read the Chromium AX tree for the Loop button (CDP Accessibility.getFullAXTree)"
+      ],
+      "expected": "The reason the Loop button is unavailable ('make a time selection first') stays reachable for everyone, including sighted keyboard users, now that the visible strip sentence is gone.",
+      "actual": "The reason lives only in the title of a natively disabled button. AX exposes it as a description ('Loop: make a time selection first (Ctrl+L)'), and a mouse hover shows it, but Tab never reaches the button (disabled), so a sighted keyboard-only user cannot read it. The ? sheet row 'Loop the selection · Loop on / off Ctrl+L' partly carries the fact. This is the spec-mandated pattern (§2.2 freezes disabled) and the same as the existing Zoom-to-selection title; it is also A's code-reviewer Low 1. Not a regression of the requirement. Route to DUX-R-4(b) (aria-disabled + focusable) / deferred_low_polish.",
+      "evidence": "c-round-229/ax.json, c-round-229/ax.cjs"
+    }
+  ],
+  "notes": [
+    "C-N229-S3-METHOD (info, for B): §5 S3 says to clear the time selection with Escape and focus on the workspace. In real Chromium, Escape does not clear a time selection, whether focus is on the scroller, on BODY or after a click on the status bar. This is identical on HEAD 499c821 (reference server :5174, out/c229-1440x900-ref.json). S3 was reached with a click on an empty lane (StudioWorkspace marquee finish -> setTimeRange(null)). Behaviour unchanged by this round; not filed as a bug (Ableton's Esc behaviour was not verified).",
+    "B's before.json differs from C's same-environment HEAD capture in status/library rows only (1440 S0 captured while 'Loading…'; S1 status still 'Demo collection ready'): load timing. Against the HEAD reference: exactly the 7 entries removed, 0 added, in all 4 keys.",
+    "Headless Chromium paints no native title tooltip (out/*-S0-loop-hover.png); the DOM title and the AX description are correct.",
+    "Neighbours §6 (no acceptance ids; results only, not claimed in passed): video float Expand/Drag/Return/Close OK; tempo Esc restore, empty clear, metronome disabled without BPM OK; loop brace focus + arrow nudge/Shift length OK; 1280 video header no bbox delta.",
+    "C-N229-L4-GREP (B note): §2.1 \"grep gives 0 in app\" and §2.5 ST-C2a absence lines bind the same lines (strings.test.ts l.2838-2842). C ruled §2.5 wins (absence assertions mandated). B should pick one wording for CALM-2b/CALM-3 greps (e.g. exclude __tests__ or the `in` lines)."
+  ],
+  "passed": [
+    "C-SCOPE-229",
+    "C-UNIT-229",
+    "C-TEXT-229",
+    "C-BUDGET-229",
+    "C-BBOX-229",
+    "C-LOOP-229",
+    "C-FACTS-229",
+    "C-VIDEO-TITLES-229",
+    "C-MONITOR-229",
+    "C-OVERVIEW-229",
+    "G229-3",
+    "LAB-SMOKE-229",
+    "AN-REVIEW-229",
+    "C-REF-229",
+    "C-SHOTS-229"
+  ],
+  "gate": [
+    "full suite, build, lint, verify, e2e smoke: not claimed by C (gates/gate-round-229.json)"
+  ],
+  "blocked": [],
+  "ableton": {
+    "R1": "deliberate deviation (listed, SRW-15); fact reachable in BPM title + set status",
+    "R2": "deliberate deviation (listed); manual 6.6 re-fetched by C 2026-10-28: confirmed that with no selection the brace covers the whole Arrangement",
+    "R3": "confirmed match (manual 6.1 re-fetched by C: no Overview caption described)",
+    "R4": "deliberate deviation (listed); 'closest to the black screen in gaps' remains inference",
+    "R5": "deliberate deviation (listed)",
+    "R6": "deliberate deviation (no Info View; native title), as in round 228"
+  }
+}
