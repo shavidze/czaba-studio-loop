@@ -1,0 +1,9 @@
+const fs=require('fs');const {File}=require('node-taglib-sharp');
+function wav(n, extra){const data=Buffer.alloc(n*2);const h=Buffer.alloc(44);h.write('RIFF',0);h.writeUInt32LE(36+data.length+(extra?extra.length:0),4);h.write('WAVE',8);h.write('fmt ',12);h.writeUInt32LE(16,16);h.writeUInt16LE(1,20);h.writeUInt16LE(1,22);h.writeUInt32LE(44100,24);h.writeUInt32LE(88200,28);h.writeUInt16LE(2,32);h.writeUInt16LE(16,34);h.write('data',36);h.writeUInt32LE(data.length,40);return Buffer.concat([h,data,extra||Buffer.alloc(0)]);}
+function list(){const p=Buffer.from('INAMabcd\x04\x00\x00\x00old\x00','latin1');const b=Buffer.concat([Buffer.from('INFO'),Buffer.from('INAM'),Buffer.from([4,0,0,0]),Buffer.from('old\0')]);const h=Buffer.alloc(8);h.write('LIST',0);h.writeUInt32LE(b.length,4);return Buffer.concat([h,b]);}
+function nodata(){const h=Buffer.alloc(36);h.write('RIFF',0);h.writeUInt32LE(28,4);h.write('WAVE',8);h.write('fmt ',12);h.writeUInt32LE(16,16);h.writeUInt16LE(1,20);h.writeUInt16LE(1,22);h.writeUInt32LE(44100,24);h.writeUInt32LE(88200,28);h.writeUInt16LE(2,32);h.writeUInt16LE(16,34);return h;}
+const cases={empty_end:wav(0),empty_then_list:wav(0,list()),one:wav(1),no_data:nodata(),empty_data_lenwrong:(()=>{const b=wav(0);b.writeUInt32LE(100,40);return b;})()};
+for(const [k,buf] of Object.entries(cases)){const p='/tmp/b47/'+k+'.wav';fs.writeFileSync(p,buf);
+ let r={};try{const f=File.createFromPath(p);r.readTitle=f.tag.title;r.dur=f.properties&&f.properties.durationMilliseconds;f.dispose();}catch(e){r.readErr=e.constructor.name+': '+e.message}
+ try{const f=File.createFromPath(p);f.tag.title='X';f.save();f.dispose();const g=File.createFromPath(p);r.after=g.tag.title;g.dispose();}catch(e){r.writeErr=e.constructor.name+': '+e.message}
+ console.log(k,JSON.stringify(r));}

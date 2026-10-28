@@ -1,0 +1,330 @@
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 1cd606e..0f339cf 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -16,6 +16,7 @@
+   - `skipSyncRef.current` → skip (set before updateFileMetadata in save)
+   - `isDirty && hasEditingData` → skip (user editing)
+ - Selection change → always sync from file store
++- Number fields (D-50): `editingMetadata[key] === ''` means unset (empty input → `''`); a typed `0` is a real value and is saved.
+ 
+ ### Save flow
+ ```
+diff --git a/.claude/primitives/WAV_METADATA.md b/.claude/primitives/WAV_METADATA.md
+index 7153f55..9f2cdf2 100644
+--- a/.claude/primitives/WAV_METADATA.md
++++ b/.claude/primitives/WAV_METADATA.md
+@@ -18,6 +18,7 @@
+ Tag object-ზე `tag.keywords` არ არსებობს - InfoTag path-ით იკითხება.
+ `category` (`Category (UCS)`) იყენებს `riffChunkId: 'ICAT'`-ს და `keywords`-ის მსგავსად InfoTag path-ით იწერება/იკითხება (კონტრაქტი: `docs/recording-tag-contract.md`).
+ **ცარიელი მნიშვნელობა არ იწერება (D-49):** ცარიელი/whitespace-only `text` ან ცარიელი `tags` სია STANDARD_PROP_MAP-ში setter-ს `''`/`[]`-ით გადაეცემა, InfoTag path-ზე კი `infoTag.removeValue(riffChunkId)` იძახება — ნულოვანი ზომის sub-chunk არასდროს.
++**დაუყენებელი number = `''` (D-50):** number ველი წაკითხვისას არარსებულზე/არა-რიცხვზე `''`-ს აბრუნებს; `''`/whitespace/`NaN` არ იწერება (სტანდარტული setter-ს `0`, InfoTag-ზე `removeValue`), აკრეფილი `0` კი `'0'`-ად იწერება.
+ 
+ ### Read Pattern
+ ```typescript
+diff --git a/docs/recording-tag-contract.md b/docs/recording-tag-contract.md
+index 7e731d8..1b8fea5 100644
+--- a/docs/recording-tag-contract.md
++++ b/docs/recording-tag-contract.md
+@@ -2,7 +2,7 @@
+ 
+ ეს დოკუმენტი არის **source of truth** იმისთვის, თუ რომელ ველს წერს Czaba Tag Manager WAV ფაილში და როგორ უნდა წაიკითხოს ის backend-ის import tool-მა (`czaba-api/tools/recording-import`, K-4). ველის სახელის, chunk ID-ის ან კოდირების ცვლილება ორივე ნაკადის ცვლილებაა და ახალ D-ID-ს მოითხოვს.
+ 
+-გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13, D-49 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`.
++გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13, D-49, D-50 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`.
+ 
+ ## ველები
+ 
+@@ -37,7 +37,7 @@
+ - `IKEY` არის **ერთი** string. გამყოფებია `,` და `;` (D-02). importer-ი ორივეზე ყოფს; ნაწილების `trim()` რეკომენდებულია (ეს D-02-ის ინტერპრეტაციაა, არა ცალკე D-ID).
+ - Tag Manager მნიშვნელობას ისე წერს, როგორც მომხმარებელმა აკრიფა (მაგ. `door, slam`), normalization-ის გარეშე.
+ 
+-## ცარიელი მნიშვნელობა (D-10/D-49, გადაწყვეტილია)
++## ცარიელი მნიშვნელობა (D-10/D-49/D-50, გადაწყვეტილია)
+ 
+ importer-ის წესი (უცვლელი): **sub-chunk-ის არარსებობა ან ცარიელი payload = „მნიშვნელობა არ არის“.**
+ 
+@@ -49,7 +49,12 @@ Saba-ს გადაწყვეტილება (Q4): ცარიელი
+ - single-file save (Metadata panel) ყველა ველს აგზავნის, მაგრამ ფაილზე, რომელსაც category არავინ მიანიჭა, `ICAT` აღარ გაჩნდება. batch save მხოლოდ შეცვლილ ველებს წერს (`modifiedFields`), ამიტომ ერთი ველის გასუფთავება სხვა ველებს არ შლის.
+ - `STANDARD_PROP_MAP`-ის ველები node-taglib-sharp-ის setter-ს `''`/`[]`-ით იღებენ და ბიბლიოთეკა item-ს შლის; `riffChunkId` ველები (`IKEY`, `ICAT`, custom) `InfoTag.removeValue(id)`-ით იშლება (D-49).
+ - node-taglib-sharp save-ისას ცარიელ `LIST/INFO`-ს მაინც წერს (მხოლოდ list type, size 4). ეს ბიბლიოთეკის ქცევაა და კონტრაქტზე გავლენა არ აქვს.
+-- **რიცხვები:** TM-B11 stage 2 ჯერ არ გაკეთებულა. დღეს custom number ველის `0` ისევ `'0'`-ად იწერება (მაგ. `ITKN` size 1).
++- **რიცხვები (D-50, TM-B11 stage 2):**
++  - number ველის „არ არის დაყენებული“ მარკერი არის `''`. წაკითხვისას არარსებული, ცარიელი ან არა-რიცხვითი (`'abc'`) custom payload `''`-ად იკითხება; `'0'` იკითხება როგორც `0`, `'-2'` — როგორც `-2`.
++  - დაუყენებელი number **არ იწერება**: `''`, whitespace-only string ან non-finite რიცხვი (`NaN`, `±Infinity`) custom ველზე `InfoTag.removeValue(id)`-ს იძახებს, ამიტომ მნიშვნელობის გასუფთავება sub-chunk-ს შლის. single-file save-ში ხელუხლებელი Take/`ITKN` ფაილში აღარ ჩნდება (C-R6-01).
++  - მომხმარებლის აკრეფილი `0` **იწერება** `'0'`-ად (მაგ. `ITKN` size 1). importer-მა ის **ნამდვილ 0-ად** უნდა მიიღოს და არა „მნიშვნელობა არ არის“-ად.
++  - სტანდარტული Year/Track #/BPM (`ICRD`/`ITRK`/`IBPM`) `0`-ს ვერ ინახავს: node-taglib-sharp-ის setter `0`-ზე item-ს შლის, ამიტომ აკრეფილი `0` ხელახალი წაკითხვის შემდეგ `''` ხდება. ეს ბიბლიოთეკის ზღვარია.
++  - ძველ build-ებს (D-50-მდე) single-file save-ისას custom number ველი `'0'`-ად შეეძლოთ ჩაეწერათ (მაგ. `ITKN='0'`). ფაილი აკრეფილ `0`-ს ძველი default-ისგან ვერ განასხვავებს, ამიტომ migration არ არის: ასეთი ფაილი `0`-ს აჩვენებს და Tagged-ად ითვლება.
+ 
+ ## ffprobe-ის ხაფანგები
+ 
+@@ -81,11 +86,12 @@ Saba-ს გადაწყვეტილება (Q4): ცარიელი
+ - single-file save-ში (Metadata panel) ისინი `Failed to write metadata: ` prefix-ით ჩანს.
+ - batch save ასეთ ფაილს `failed`-ში წერს და დანარჩენ ფაილებს აგრძელებს.
+ - `riffChunkId` ზუსტად **4 ბაიტი** (4 ASCII სიმბოლო) უნდა იყოს. Schema Editor ამას ამოწმებს, ხელით შეცვლილი `schema.json` კი არა. თუ schema-ში ასეთი ველია, Metadata panel-ის **ყოველი** save ჩავარდება, რადგან panel ყველა ველს აგზავნის. batch save მხოლოდ მაშინ ჩავარდება, თუ ეს ველი შეიცვალა (`modifiedFields`).
+-- წაკითხვისას ასეთი ველი default მნიშვნელობას აჩვენებს (`''`, `[]` ან `0`).
++- წაკითხვისას ასეთი ველი default მნიშვნელობას აჩვენებს (`''` ან `[]`; number ველისთვისაც `''`, D-50).
+ 
+ ## შემოწმება
+ 
+ - `npm run test:main` — `tests/main/recording-tag-contract.test.ts`: raw `LIST/INFO` ბაიტები, `meta:read`, `data`/`bext`/`iXML` sha256, batch, ცარიელი მნიშვნელობა. ტესტი T1-1-ის ფაილს ინახავს `test-results/recording-tag-contract/contract.wav`-ში.
+-- `npm run test:main` — `tests/main/metadata-empty-values.test.ts`: ცარიელი/whitespace-only `text` და `tags` მნიშვნელობა sub-chunk-ს შლის (single და batch), custom ველები, უცნობი ID-ის D-18 შეცდომა, number `0` stage-1 guard (D-49).
++- `npm run test:main` — `tests/main/metadata-empty-values.test.ts`: ცარიელი/whitespace-only `text` და `tags` მნიშვნელობა sub-chunk-ს შლის (single და batch), custom ველები, უცნობი ID-ის D-18 შეცდომა (D-49); (e6) აკრეფილი number `0` იწერება `'0'`-ად (D-50).
++- `npm run test:main` — `tests/main/metadata-number-values.test.ts`: დაუყენებელი number (`''`, whitespace, `NaN`) არ იწერება და გასუფთავება `ITKN`/`ICRD`-ს შლის (single და batch), read-then-save `ITKN`-ს არ ქმნის (C-R6-01), `0`/`-2` round trip, `'abc'` → `''`, corrupt ფაილზე number ველები `''` (D-50).
+ - `npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav` — ffprobe-ით ამოწმებს `ICAT`, `IKEY` და `comment`-ს (CI step „Tag contract ffprobe cross-check“).
+ - `tests/e2e/recording-tag-contract.spec.ts` — Electron-ში `writeMetadata` → `readMetadata` category-ით, სუფთა `XDG_CONFIG_HOME`-ით.
+diff --git a/src/main/ipc/metadata.ts b/src/main/ipc/metadata.ts
+index ecff902..2cbaaf2 100644
+--- a/src/main/ipc/metadata.ts
++++ b/src/main/ipc/metadata.ts
+@@ -30,6 +30,17 @@ function stripRiffNulTerminator(value: string): string {
+   return value.slice(0, end);
+ }
+ 
++function readStandardNumberValue(value: number | undefined): FieldValue {
++  if (value === undefined || value === 0 || !Number.isFinite(value)) return '';
++  return value;
++}
++
++function parseRiffNumberValue(value: string | undefined): FieldValue {
++  if (value === undefined || value.trim() === '') return '';
++  const parsed = Number(value);
++  return Number.isFinite(parsed) ? parsed : '';
++}
++
+ const STANDARD_PROP_MAP: Record<
+   string,
+   { get: (tag: TagObject) => FieldValue; set: (tag: TagObject, val: FieldValue) => void }
+@@ -59,7 +70,7 @@ const STANDARD_PROP_MAP: Record<
+     },
+   },
+   year: {
+-    get: (tag) => tag.year ?? 0,
++    get: (tag) => readStandardNumberValue(tag.year),
+     set: (tag, val) => {
+       tag.year = val as number;
+     },
+@@ -77,13 +88,13 @@ const STANDARD_PROP_MAP: Record<
+     },
+   },
+   track: {
+-    get: (tag) => tag.track ?? 0,
++    get: (tag) => readStandardNumberValue(tag.track),
+     set: (tag, val) => {
+       tag.track = val as number;
+     },
+   },
+   bpm: {
+-    get: (tag) => tag.beatsPerMinute ?? 0,
++    get: (tag) => readStandardNumberValue(tag.beatsPerMinute),
+     set: (tag, val) => {
+       tag.beatsPerMinute = val as number;
+     },
+@@ -109,18 +120,21 @@ function normalizeFieldValueForWrite(type: FieldDefinition['type'], value: Field
+   if (type === 'tags' && Array.isArray(value)) {
+     return value.filter((item) => typeof item === 'string' && item.trim() !== '');
+   }
++  if (type === 'number') {
++    if (typeof value === 'string' && value.trim() === '') return '';
++    if (typeof value === 'number' && !Number.isFinite(value)) return '';
++  }
+   return value;
+ }
+ 
+ function isEmptyFieldValueForWrite(type: FieldDefinition['type'], value: FieldValue): boolean {
+-  if (type === 'text') return value === '';
++  if (type === 'text' || type === 'number') return value === '';
+   if (type === 'tags') return Array.isArray(value) && value.length === 0;
+   return false;
+ }
+ 
+ function getDefaultValue(type: FieldDefinition['type']): FieldValue {
+   if (type === 'tags') return [];
+-  if (type === 'number') return 0;
+   return '';
+ }
+ 
+@@ -154,7 +168,7 @@ function readTagsFromFile(filePath: string, schema: FieldDefinition[]): WavMetad
+             if (field.type === 'tags') {
+               result[field.key] = values.length > 0 ? [...values] : [];
+             } else if (field.type === 'number') {
+-              result[field.key] = values.length > 0 ? Number(values[0]) || 0 : 0;
++              result[field.key] = parseRiffNumberValue(values[0]);
+             } else {
+               result[field.key] = values.length > 0 ? values.join(', ') : '';
+             }
+@@ -186,10 +200,11 @@ function writeTagsToFile(
+       const rawValue = meta[field.key];
+       if (rawValue === undefined) continue;
+       const value = normalizeFieldValueForWrite(field.type, rawValue);
++      const isEmpty = isEmptyFieldValueForWrite(field.type, value);
+ 
+       const standardProp = STANDARD_PROP_MAP[field.key];
+       if (standardProp) {
+-        standardProp.set(tag, value);
++        standardProp.set(tag, field.type === 'number' && isEmpty ? 0 : value);
+         continue;
+       }
+ 
+@@ -197,7 +212,7 @@ function writeTagsToFile(
+         customFields.push({
+           riffChunkId: field.riffChunkId,
+           value,
+-          isEmpty: isEmptyFieldValueForWrite(field.type, value),
++          isEmpty,
+         });
+       }
+     }
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 32d9af5..4ca8129 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -342,10 +342,15 @@ export function MetadataPanel(): React.ReactElement {
+                 key={field.key}
+                 label={field.label}
+                 type="number"
+-                value={numVal === 0 || numVal === undefined ? '' : numVal}
+-                onChange={(e) =>
+-                  updateField(field.key, e.target.value === '' ? 0 : Number(e.target.value) || 0)
+-                }
++                value={typeof numVal === 'number' && Number.isFinite(numVal) ? numVal : ''}
++                onChange={(e) => {
++                  if (e.target.value === '') {
++                    updateField(field.key, '');
++                    return;
++                  }
++                  const parsed = Number(e.target.value);
++                  updateField(field.key, Number.isFinite(parsed) ? parsed : '');
++                }}
+                 placeholder={isBatch ? 'Multiple values' : '0'}
+               />
+             );
+diff --git a/src/renderer/src/components/templates/TemplatePicker.tsx b/src/renderer/src/components/templates/TemplatePicker.tsx
+index 10138f3..76cdb92 100644
+--- a/src/renderer/src/components/templates/TemplatePicker.tsx
++++ b/src/renderer/src/components/templates/TemplatePicker.tsx
+@@ -127,7 +127,7 @@ export function TemplatePicker(): React.ReactElement {
+     const tags: Record<string, FieldValue> = {};
+     for (const field of schemaFields) {
+       const val = meta[field.key];
+-      if (val !== undefined && val !== '' && val !== 0) {
++      if (val !== undefined && val !== '') {
+         if (Array.isArray(val) && val.length === 0) continue;
+         tags[field.key] = val;
+       }
+diff --git a/src/renderer/src/lib/file-row-display.ts b/src/renderer/src/lib/file-row-display.ts
+index d9dc835..625cf7f 100644
+--- a/src/renderer/src/lib/file-row-display.ts
++++ b/src/renderer/src/lib/file-row-display.ts
+@@ -11,7 +11,7 @@ function isNonEmptyFieldValue(value: FieldValue): boolean {
+   if (Array.isArray(value)) {
+     return value.some((item) => typeof item === 'string' && item.trim() !== '');
+   }
+-  return Number.isFinite(value) && value > 0;
++  return Number.isFinite(value);
+ }
+ 
+ export function hasAnyTagValue(meta: WavMetadata | undefined): boolean {
+diff --git a/tests/main/metadata-empty-values.test.ts b/tests/main/metadata-empty-values.test.ts
+index f1846e0..49f3aaf 100644
+--- a/tests/main/metadata-empty-values.test.ts
++++ b/tests/main/metadata-empty-values.test.ts
+@@ -205,7 +205,7 @@ describe("TM-B11 stage 1 / D-49: an empty text or tags value removes its RIFF IN
+     expect(sha256OfRiffChunk(after, "data"), "data sha256").toBe(dataBefore);
+   });
+ 
+-  it("(e6) stage-1 guard: number 0 still written (TM-B11 stage 2 changes this)", async () => {
++  it("(e6) a typed number 0 is written (D-50)", async () => {
+     const filePath = copySampleWav("e6-number.wav");
+     await writeMetadataViaIpc(filePath, { take: 0 }, TAKE_SCHEMA);
+ 
+diff --git a/tests/renderer/components/busy-buttons-focus.test.ts b/tests/renderer/components/busy-buttons-focus.test.ts
+index 245104f..4dfbc88 100644
+--- a/tests/renderer/components/busy-buttons-focus.test.ts
++++ b/tests/renderer/components/busy-buttons-focus.test.ts
+@@ -42,7 +42,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ function defaultValueForType(type: FieldDefinition["type"]): FieldValue {
+   if (type === "tags") return [];
+-  if (type === "number") return 0;
++  if (type === "number") return "";
+   return "";
+ }
+ 
+diff --git a/tests/renderer/components/file-list.test.ts b/tests/renderer/components/file-list.test.ts
+index 30c1c50..9ee3ea1 100644
+--- a/tests/renderer/components/file-list.test.ts
++++ b/tests/renderer/components/file-list.test.ts
+@@ -19,7 +19,7 @@ const FOLDER_PATH = "/recordings";
+ function createDefaultMetadata(overrides: WavMetadata): WavMetadata {
+   const defaults: WavMetadata = {};
+   for (const field of STANDARD_FIELDS) {
+-    defaults[field.key] = field.type === "number" ? 0 : field.type === "tags" ? [] : "";
++    defaults[field.key] = field.type === "number" ? "" : field.type === "tags" ? [] : "";
+   }
+   return { ...defaults, ...overrides };
+ }
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index 8f2ae4e..917ca6b 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -41,7 +41,7 @@ function seedFiles(selectedPaths: string[]): void {
+ 
+ function defaultValueForType(type: FieldDefinition["type"]): FieldValue {
+   if (type === "tags") return [];
+-  if (type === "number") return 0;
++  if (type === "number") return "";
+   return "";
+ }
+ 
+diff --git a/tests/renderer/utils/file-row-display.test.ts b/tests/renderer/utils/file-row-display.test.ts
+index e8fdce3..18636b4 100644
+--- a/tests/renderer/utils/file-row-display.test.ts
++++ b/tests/renderer/utils/file-row-display.test.ts
+@@ -18,8 +18,6 @@ describe("hasAnyTagValue", () => {
+     ["empty array", []],
+     ["array with empty string", [""]],
+     ["array with only blank strings", ["", " "]],
+-    ["zero", 0],
+-    ["negative number", -1],
+     ["NaN", Number.NaN],
+     ["Infinity", Number.POSITIVE_INFINITY],
+   ];
+@@ -32,6 +30,8 @@ describe("hasAnyTagValue", () => {
+     ["non-blank string", "DOORWood"],
+     ["array with one non-blank element", ["", "x"]],
+     ["positive number", 1],
++    ["zero", 0],
++    ["negative number", -1],
+   ];
+ 
+   it.each(nonEmptyValues)("returns true for %s", (_label, value) => {
+@@ -40,13 +40,17 @@ describe("hasAnyTagValue", () => {
+ 
+   it("returns true when one field is set among empty defaults", () => {
+     expect(
+-      hasAnyTagValue({ title: "", artists: [], bpm: 0, keywords: [""], comment: "ok" }),
++      hasAnyTagValue({ title: "", artists: [], bpm: "", keywords: [""], comment: "ok" }),
+     ).toBe(true);
+   });
+ 
++  it("returns true when a custom number is a typed 0 (D-50)", () => {
++    expect(hasAnyTagValue({ title: "", take: 0 })).toBe(true);
++  });
++
+   it("returns false when every field is an empty default", () => {
+     expect(
+-      hasAnyTagValue({ title: "", artists: [], bpm: 0, keywords: [""], comment: "   " }),
++      hasAnyTagValue({ title: "", artists: [], bpm: "", keywords: [""], comment: "   " }),
+     ).toBe(false);
+   });
+ });
+@@ -116,7 +120,7 @@ describe("hasAnyTagValue with non-string array elements (TM-B20, D-26)", () => {
+     expect(
+       hasAnyTagValue(
+         parseUntypedMetadata(
+-          '{"title":"","artists":[null],"genres":[{}],"bpm":0,"keywords":[""],"comment":"   "}',
++          '{"title":"","artists":[null],"genres":[{}],"bpm":"","keywords":[""],"comment":"   "}',
+         ),
+       ),
+     ).toBe(false);

@@ -1,0 +1,16 @@
+# A round 46 checkpoint
+- [x] Baseline: HEAD c822d7f, clean tree (verified at start)
+- [x] Read task, primitives (WAV_METADATA, STATE_MANAGEMENT, TESTING, TYPESCRIPT_STRICT, AGENT_DISCOVERABLE_CODE), sources
+- [x] Write red tests (main n1-n9 with n5/n6 split into halves, renderer r1-r4, flips)
+- [x] Red proof: in-repo with src byte-identical to c822d7f (git diff --quiet). Logs red-main.log, red-renderer.log. main 9 red/13 green; renderer 6 red (r1,r2,r4, 3 file-row-display), r3 GREEN on baseline (observed)
+- [ ] Implement A1-A4
+- [ ] Green + check + e2e + build
+- [ ] Docs A6
+- [ ] code-reviewer
+- [ ] a-round-46.md
+- [x] A1-A4 implemented (NOTE: one sed -i used on metadata.ts for the 3 getter lines — process slip, reported)
+- [x] Green: targeted main 22/22, renderer 122/122; npm run check exit 0 (renderer 325/325, main 120/120, Biome 8 warnings, 0 errors); test:e2e 7/7 (build ok); playwright --retries=0 see e2e-retries0.log
+- [x] Docs A6 (contract doc, WAV_METADATA, STATE_MANAGEMENT)
+- [x] Mutants M1-M5 self-check: all killed (mutants.md)
+- [x] a-round-46.md drafted; waiting on code-reviewer
+- [x] code-reviewer F1 fixed (r5 red->green), full gate re-run green (check2/e2e2 logs); report final

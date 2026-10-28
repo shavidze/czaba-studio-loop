@@ -1,0 +1,48 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+[90mstderr[2m | tests/renderer/components/number-field-values.test.ts[2m > [22m[2mMetadataPanel number field: '' is unset, a typed 0 is a value (TM-B11 stage 2, D-50)[2m > [22m[2m(r5) typing 1.0 on the way to 1.05 keeps the typed text in the Take input
+[22m[39mAn update to TemplatePicker inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ [31m❯[39m tests/renderer/components/number-field-values.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 226[2mms[22m[39m
+     [32m✓[39m (r1) typing 0 into an unset Take keeps 0 in the store and the input, and Save sends take: 0[32m 94[2mms[22m[39m
+     [32m✓[39m (r2) a Take of 0 shows '0'; clearing it stores '' and Save sends take: ''[32m 34[2mms[22m[39m
+     [32m✓[39m (r3) C-R6-01: changing only Title on a file without Take sends take: '', not 0[32m 32[2mms[22m[39m
+[31m     [31m×[31m (r5) typing 1.0 on the way to 1.05 keeps the typed text in the Take input[39m[32m 30[2mms[22m[39m
+     [32m✓[39m (r4) Save as template keeps a typed take 0 and leaves unset numbers out[32m 35[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/number-field-values.test.ts[2m > [22mMetadataPanel number field: '' is unset, a typed 0 is a value (TM-B11 stage 2, D-50)[2m > [22m(r5) typing 1.0 on the way to 1.05 keeps the typed text in the Take input
+[31m[1mAssertionError[22m: expected '1' to be '1.0' // Object.is equality[39m
+
+Expected: [32m"1[7m.0[27m"[39m
+Received: [31m"1"[39m
+
+[36m [2m❯[22m tests/renderer/components/number-field-values.test.ts:[2m134:43[22m[39m
+    [90m132| [39m
+    [90m133| [39m    [34mexpect[39m(useMetadataStore[33m.[39m[34mgetState[39m()[33m.[39meditingMetadata[33m.[39mtake)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m134| [39m    [34mexpect[39m([34mgetInputByLabel[39m([32m"Take"[39m)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m"1.0"[39m)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m135| [39m  })[33m;[39m
+    [90m136| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 10:55:59
+[2m   Duration [22m 1.34s[2m (transform 230ms, setup 86ms, import 372ms, tests 226ms, environment 528ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/number-field-values.test.ts,title=tests/renderer/components/number-field-values.test.ts > MetadataPanel number field%3A '' is unset%2C a typed 0 is a value (TM-B11 stage 2%2C D-50) > (r5) typing 1.0 on the way to 1.05 keeps the typed text in the Take input,line=134,column=43::AssertionError: expected '1' to be '1.0' // Object.is equality%0A%0AExpected: "1.0"%0AReceived: "1"%0A%0A ❯ tests/renderer/components/number-field-values.test.ts:134:43%0A%0A

@@ -1,0 +1,189 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c46base[39m
+
+ [31m❯[39m tests/main/metadata-number-values.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m9 failed[39m[2m)[22m[32m 114[2mms[22m[39m
+[31m     [31m×[31m (n1) an absent custom number and bare-WAV year, bpm and track read as an empty string[39m[32m 25[2mms[22m[39m
+[31m     [31m×[31m (n2) C-R6-01: read-then-save of the whole object with a new title writes no ITKN[39m[32m 16[2mms[22m[39m
+[31m     [31m×[31m (n3) clearing a custom number with '' or whitespace removes ITKN[39m[32m 12[2mms[22m[39m
+     [32m✓[39m (n4) a typed 0 and a negative number are written and read back as numbers[32m 7[2mms[22m[39m
+[31m     [31m×[31m (n5) a non-numeric ITKN payload 'abc' reads as ''[39m[32m 2[2mms[22m[39m
+     [32m✓[39m (n5) a NUL-terminated ITKN payload '0' reads as the number 0[32m 2[2mms[22m[39m
+[31m     [31m×[31m (n6) clearing year with '' removes ICRD and reads as ''[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m (n6) a typed year 0 removes ICRD and reads as '' (library limit, Deviation 1)[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m (n7) meta:write-batch with take '' removes ITKN on both files and keeps their other INFO payloads[39m[32m 22[2mms[22m[39m
+[31m     [31m×[31m (n8) a NaN take is empty and removes ITKN[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m (n9) meta:read on a corrupt file returns '' for every number field of the schema[39m[32m 1[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-empty-values.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 164[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 9 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n1) an absent custom number and bare-WAV year, bpm and track read as an empty string
+[31m[1mAssertionError[22m: expected +0 to be '' // Object.is equality[39m
+
+[32m- Expected:[39m 
+""
+
+[31m+ Received:[39m 
+0
+
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m135:57[22m[39m
+    [90m133| [39m    [35mconst[39m sample [33m=[39m [34mcopySampleWav[39m([32m"n1-sample.wav"[39m)[33m;[39m
+    [90m134| [39m    [34mexpect[39m([34minfoIdsOf[39m(sample))[33m.[39mnot[33m.[39m[34mtoContain[39m([32m"ITKN"[39m)[33m;[39m
+    [90m135| [39m    [34mexpect[39m(([35mawait[39m [34mreadTakeMetadataViaIpc[39m(sample))[33m.[39mtake)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m136| [39m
+    [90m137| [39m    [35mconst[39m bare [33m=[39m [34mwriteBareSineWav[39m([32m"n1-bare.wav"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n2) C-R6-01: read-then-save of the whole object with a new title writes no ITKN
+[31m[1mAssertionError[22m: expected [ 'INAM', 'ITKN' ] to not include 'ITKN'[39m
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m151:37[22m[39m
+    [90m149| [39m    [35mawait[39m [34mwriteTakeMetadataViaIpc[39m(filePath[33m,[39m { [33m...[39mmeta[33m,[39m title[33m:[39m [32m"X"[39m })[33m;[39m
+    [90m150| [39m
+    [90m151| [39m    [34mexpect[39m([34minfoIdsOf[39m(filePath))[33m.[39mnot[33m.[39m[34mtoContain[39m([32m"ITKN"[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m152| [39m    expect(infoPayload(filePath, "INAM")?.toString("utf8").replace(/\0…
+    [90m153| [39m    [34mexpectNoZeroSizeSubChunk[39m(filePath)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n3) clearing a custom number with '' or whitespace removes ITKN
+[31m[1mAssertionError[22m: expected [ 'ICAT', 'ITKN' ] to not include 'ITKN'[39m
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m160:36[22m[39m
+    [90m158| [39m    [35mawait[39m [34mseedTake[39m(cleared[33m,[39m { category[33m:[39m [32m"DOORWood"[39m })[33m;[39m
+    [90m159| [39m    [35mawait[39m [34mwriteTakeMetadataViaIpc[39m(cleared[33m,[39m { take[33m:[39m [32m""[39m })[33m;[39m
+    [90m160| [39m    [34mexpect[39m([34minfoIdsOf[39m(cleared))[33m.[39mnot[33m.[39m[34mtoContain[39m([32m"ITKN"[39m)[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m161| [39m    [34mexpect[39m(
+    [90m162| [39m      [34mlistInfoSubChunkEntries[39m([34mreadFileSync[39m(cleared))[33m.[39m[34msome[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n5) a non-numeric ITKN payload 'abc' reads as ''
+[31m[1mAssertionError[22m: expected +0 to be '' // Object.is equality[39m
+
+[32m- Expected:[39m 
+""
+
+[31m+ Received:[39m 
+0
+
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m194:54[22m[39m
+    [90m192| [39m  [34mit[39m([32m"(n5) a non-numeric ITKN payload 'abc' reads as ''"[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m193| [39m    const abc = writeSampleWavWithInfo("n5-abc.wav", [["ITKN", "abc"]]…
+    [90m194| [39m    [34mexpect[39m(([35mawait[39m [34mreadTakeMetadataViaIpc[39m(abc))[33m.[39mtake)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m   | [39m                                                     [31m^[39m
+    [90m195| [39m  })[33m;[39m
+    [90m196| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n6) clearing year with '' removes ICRD and reads as ''
+[31m[1mError[22m: Failed to write metadata: Argument out of range: val must be a positive, 32-bit integer[39m
+[36m [2m❯[22m src/main/ipc/metadata.ts:[2m293:15[22m[39m
+    [90m291| [39m          [35mthrow[39m [35mnew[39m [33mError[39m([32m'File is locked or read-only'[39m)[33m;[39m
+    [90m292| [39m        }
+    [90m293| [39m        [35mthrow[39m [35mnew[39m [33mError[39m([32m`Failed to write metadata: [39m[36m${[39mmsg[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m              [31m^[39m
+    [90m294| [39m      }
+    [90m295| [39m    }[33m,[39m
+[90m [2m❯[22m writeTakeMetadataViaIpc tests/main/metadata-number-values.test.ts:[2m35:32[22m[39m
+[90m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m206:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n6) a typed year 0 removes ICRD and reads as '' (library limit, Deviation 1)
+[31m[1mAssertionError[22m: expected +0 to be '' // Object.is equality[39m
+
+[32m- Expected:[39m 
+""
+
+[31m+ Received:[39m 
+0
+
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m217:55[22m[39m
+    [90m215| [39m    [35mawait[39m [34mwriteTakeMetadataViaIpc[39m(zero[33m,[39m { year[33m:[39m [34m0[39m })[33m;[39m
+    [90m216| [39m    [34mexpect[39m([34minfoIdsOf[39m(zero))[33m.[39mnot[33m.[39m[34mtoContain[39m([32m"ICRD"[39m)[33m;[39m
+    [90m217| [39m    [34mexpect[39m(([35mawait[39m [34mreadTakeMetadataViaIpc[39m(zero))[33m.[39myear)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m   | [39m                                                      [31m^[39m
+    [90m218| [39m  })[33m;[39m
+    [90m219| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n7) meta:write-batch with take '' removes ITKN on both files and keeps their other INFO payloads
+[31m[1mAssertionError[22m: ITKN removed in /tmp/czaba-number-values-test-9488-1793185125126/n7-first.wav: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m232:63[22m[39m
+    [90m230| [39m    [first[33m,[39m second][33m.[39m[34mforEach[39m((filePath[33m,[39m index) [33m=>[39m {
+    [90m231| [39m      [35mconst[39m info [33m=[39m [34mparseListInfoSubChunks[39m([34mreadFileSync[39m(filePath))[33m;[39m
+    [90m232| [39m      expect(info.has("ITKN"), `ITKN removed in ${filePath}`).toBe(fal…
+    [90m   | [39m                                                              [31m^[39m
+    [90m233| [39m      const expectedIds = [...before[index].keys()].filter((id) => id …
+    [90m234| [39m      expect([...info.keys()].sort(), `other INFO IDs in ${filePath}`)…
+[90m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m230:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n8) a NaN take is empty and removes ITKN
+[31m[1mAssertionError[22m: expected [ 'ICAT', 'ITKN' ] to not include 'ITKN'[39m
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m251:37[22m[39m
+    [90m249| [39m    [35mawait[39m [34mwriteTakeMetadataViaIpc[39m(filePath[33m,[39m { take[33m:[39m [33mNumber[39m[33m.[39m[33mNaN[39m })[33m;[39m
+    [90m250| [39m
+    [90m251| [39m    [34mexpect[39m([34minfoIdsOf[39m(filePath))[33m.[39mnot[33m.[39m[34mtoContain[39m([32m"ITKN"[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m252| [39m    [34mexpectNoZeroSizeSubChunk[39m(filePath)[33m;[39m
+    [90m253| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n9) meta:read on a corrupt file returns '' for every number field of the schema
+[31m[1mAssertionError[22m: bpm: expected +0 to be '' // Object.is equality[39m
+
+[32m- Expected:[39m 
+""
+
+[31m+ Received:[39m 
+0
+
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m260:30[22m[39m
+    [90m258| [39m    expect(numberKeys.sort()).toEqual(["bpm", "take", "track", "year"]…
+    [90m259| [39m    [35mfor[39m ([35mconst[39m key [35mof[39m numberKeys) {
+    [90m260| [39m      [34mexpect[39m(meta[key][33m,[39m key)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m261| [39m    }
+    [90m262| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (22)[39m
+[2m   Start at [22m 10:58:44
+[2m   Duration [22m 1.12s[2m (transform 512ms, setup 241ms, import 932ms, tests 278ms, environment 0ms)[22m
+
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n1) an absent custom number and bare-WAV year%2C bpm and track read as an empty string,line=135,column=57::AssertionError: expected +0 to be '' // Object.is equality%0A%0A- Expected: %0A""%0A%0A+ Received: %0A0%0A%0A ❯ tests/main/metadata-number-values.test.ts:135:57%0A%0A
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n2) C-R6-01%3A read-then-save of the whole object with a new title writes no ITKN,line=151,column=37::AssertionError: expected [ 'INAM', 'ITKN' ] to not include 'ITKN'%0A ❯ tests/main/metadata-number-values.test.ts:151:37%0A%0A
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n3) clearing a custom number with '' or whitespace removes ITKN,line=160,column=36::AssertionError: expected [ 'ICAT', 'ITKN' ] to not include 'ITKN'%0A ❯ tests/main/metadata-number-values.test.ts:160:36%0A%0A
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n5) a non-numeric ITKN payload 'abc' reads as '',line=194,column=54::AssertionError: expected +0 to be '' // Object.is equality%0A%0A- Expected: %0A""%0A%0A+ Received: %0A0%0A%0A ❯ tests/main/metadata-number-values.test.ts:194:54%0A%0A
+
+::error file=/tmp/c46base/src/main/ipc/metadata.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n6) clearing year with '' removes ICRD and reads as '',line=293,column=15::Error: Failed to write metadata: Argument out of range: val must be a positive, 32-bit integer%0A ❯ src/main/ipc/metadata.ts:293:15%0A ❯ writeTakeMetadataViaIpc tests/main/metadata-number-values.test.ts:35:32%0A ❯ tests/main/metadata-number-values.test.ts:206:11%0A%0A
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n6) a typed year 0 removes ICRD and reads as '' (library limit%2C Deviation 1),line=217,column=55::AssertionError: expected +0 to be '' // Object.is equality%0A%0A- Expected: %0A""%0A%0A+ Received: %0A0%0A%0A ❯ tests/main/metadata-number-values.test.ts:217:55%0A%0A
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n7) meta%3Awrite-batch with take '' removes ITKN on both files and keeps their other INFO payloads,line=232,column=63::AssertionError: ITKN removed in /tmp/czaba-number-values-test-9488-1793185125126/n7-first.wav: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ tests/main/metadata-number-values.test.ts:232:63%0A ❯ tests/main/metadata-number-values.test.ts:230:21%0A%0A
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n8) a NaN take is empty and removes ITKN,line=251,column=37::AssertionError: expected [ 'ICAT', 'ITKN' ] to not include 'ITKN'%0A ❯ tests/main/metadata-number-values.test.ts:251:37%0A%0A
+
+::error file=/tmp/c46base/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n9) meta%3Aread on a corrupt file returns '' for every number field of the schema,line=260,column=30::AssertionError: bpm: expected +0 to be '' // Object.is equality%0A%0A- Expected: %0A""%0A%0A+ Received: %0A0%0A%0A ❯ tests/main/metadata-number-values.test.ts:260:30%0A%0A

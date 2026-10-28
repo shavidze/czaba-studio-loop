@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T10:27:51.968Z)
+# Active loop summary (2026-10-28T11:09:50.970Z)
 
-- backlog.json 423 KB -> active view 105 KB
-- status: G_ROOT_GATE round 45
+- backlog.json 431 KB -> active view 107 KB
+- status: G_ROOT_GATE round 46
 - servers: `{"servers":"none or skipped"}`
-- last publication: c822d7f1a60a03741c5c1052f19e934d39a85d08 (rounds 45-45)
-- last root gate: round 45 published - commit c822d7f1a60a03741c5c1052f19e934d39a85d08 pushed
+- last publication: 1ea34df5215a87f386a07f9808b969a834b144d2 (rounds 46-46)
+- last root gate: round 46 published - commit 1ea34df5215a87f386a07f9808b969a834b144d2 pushed
 
-## Current items: TM-B11, TM-B44
+## Current items: TM-B11
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -17,7 +17,6 @@
 - RR-R2-03 / low / open / skipLibCheck:true also skips the project's own src/preload/index.d.ts; consider dropping it from tsconfig.test.json once dependency types ar
 - RR-R2-04 / info / open / Architecture signal: remaining file.tag as unknown as TagObject casts (metadata.ts:113,158); a RiffTags-typed accessor resolved once per fil
 - A-R3-01 / low / open / tests/renderer/setup.ts (frozen) replaces window with a plain object; schema-editor.test.ts works around it locally with vi.hoisted
-- RR-R3-03 / info / open / Every editor-panel save writes empty ICAT (D-10 pinned on purpose)
 - RR-R3-04 / low / open / New test files use double quotes vs src single quotes; Biome does not check tests/
 - RR-R3-05 / info / open / npx --yes tsx@4 downloads a floating major at runtime (verifyCommand + check.yml); consider a pinned devDependency
 - RR-R3-06 / info / open / Architecture: schema.json has no version/migration; a versioned schema with one-time merge in loadSchema() would solve D-07 and TM-T1-DUP to
@@ -25,12 +24,12 @@
 - RR-R4-04 / info / open / tests/main/check-ffprobe-tags.test.ts second test only checks a constant + existsSync (low value; acceptable as a guard against a renamed pr
 - RR-R4-06 / info / open / Architecture signal: move the ffprobe cross-check into recording-tag-contract.test.ts (skip when ffprobe is missing) or into a dedicated npm
 - RR-R5-01 / low / open / Badge now counts every field (year/track/ISRC-only file shows Tagged); fits D-15, add a docs/ note
-- RR-R5-03 / info / open / number field counts as tagged only when > 0; a future custom number field where 0/negative is meaningful would look empty
+- RR-R5-03 / info / in_progress / number field counts as tagged only when > 0; a future custom number field where 0/negative is meaningful would look empty
 - RR-R5-04 / low / open / file-list.test.ts getFileRow walks exactly two parents from the file name; brittle to row markup (data-testid/role=row would need a componen
 - RR-R5-05 / info / open / Tests use double quotes vs single quotes in src; Biome passes because tests/ is not linted
 - RR-R5-06 / info / open / Architecture signal: three different 'is this value empty' rules (file-row-display isNonEmptyFieldValue, TemplatePicker.tsx:130 val !== '' &
 - B-R6-01 / low / open / bpm and track read 0 from an INFO-only WAV with and without NUL (IBPM '120', ITRK '7'): node-taglib-sharp does not map IBPM/ITRK; STANDARD_F
-- C-R6-01 / low / open / Custom Number field in schema -> every save writes ITKN='0' (size 1) into files that never had it; pre-existing
+- C-R6-01 / low / in_progress / Custom Number field in schema -> every save writes ITKN='0' (size 1) into files that never had it; pre-existing
 - RR-R6-03 / low / open / riff-info-nul.test.ts uses double quotes vs single in src; tests/ not linted
 - RR-R6-05 / info / open / Architecture signal: one RIFF value normalisation layer readRiffValue(tag, chunkId): string[] for standard and custom fields, plus a write-s
 - C-R6-02 / info / open / Observation: music-metadata decodes RIFF INFO UTF-8 Georgian as mojibake (also on the original ffmpeg file); ffprobe and ID3 COMM are correc
@@ -136,7 +135,6 @@
 - RR-R25-04 / info / open / Architecture signal: per-path read generation in useFileStore so handleSchemaChanged drops late results (fixes RR-R24-02/A-R21-03 class); ot
 - B-R26-01 / medium / open / Loop-folder / repository desync: 6c956b4 'verified loop rounds 26-26' was published at 15:37Z citing C PASS and review, then the loop folder
 - C-R27-01 / info / open / SchemaEditor 'Done' awaits onSave (handleSchemaChanged) before onClose; during a slow schema read the editor stays open (R27-5: Done at 1.16
-- C-R27-02 / info / open / A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)
 - B-R27-02 / info / open / Alternative to D-35 not taken: disable Rescan / Open Folder / drop while a save is pending (UX change, needs reference-first). D-35 keeps th
 - RR-R28-04 / info / open / file-store.test.ts (g2) uses bare keys (a, b) while files hold /music/*.wav paths; cosmetic for a unit test
 - RR-R28-05 / info / open / Architecture signal: handleSchemaChanged (D-34) and applyMetadataRead (D-35) repeat the generation compare / keep-current / absent-if-none l
@@ -188,7 +186,6 @@
 - RR-R41-02 / low / open / D-46 bullet and entry (22) pin exact SchemaEditor.tsx line numbers (:157, :202, :210, :230); correct now, stale after the next edit. Naming 
 - RR-R41-03 / info / open / Architecture signal: the 'hover only when the button can act' rule is repeated in Button variants and raw SchemaEditor buttons; a shared hel
 - B-R42-01 / low / open / A schema.json that ALREADY holds both a custom and the standard field with the same key (e.g. custom category/CATE + standard category/ICAT,
-- B-R42-02 / info / open / TM-B11 round must flip T1-10 (recording-tag-contract.test.ts pins the size-0 INFO write for empty keywords/category) and K-4 docs (ffprobe a
 - RR-R42-01 / low / open / findStandardFieldConflict compares riffChunkId case-sensitively (SchemaEditor.tsx:38); a hand-edited custom riffChunkId 'icat' does not bloc
 - RR-R42-02 / low / open / D-47 warning is a plain <p> with no link to the chip it replaces; screen-reader users find it by reading the list (message names the field, 
 - RR-R42-03 / low / open / D-47 applies the block to all 13 standard fields, not only Category; B's generalisation awaits Saba's confirmation
@@ -204,6 +201,14 @@
 - RR-R44-02 / low / open / fs:stat-files accepts any path, not only paths inside the open folder (file-system.ts handler); not a regression (readMetadata/getAudioBuffe
 - RR-R44-03 / low / open / Chunk size 50 defined twice: STAT_FILES_CHUNK_SIZE (MetadataPanel.tsx) and MAX_STAT_FILES_PATHS (file-system.ts); a renderer-side change wou
 - RR-R44-04 / info / open / Intentional empty catch {} in refreshSavedFileStats (MetadataPanel.tsx) keeps a failed refresh silent; Biome passes; no change needed
+- RR-R45-01 / medium / open / On a bare WAV where every field is empty the library writes an empty LIST/INFO (size 4); tell the czaba-api recording-import owner so an imp
+- RR-R45-02 / low / open / INFO-creation workaround branch (metadata.ts tag.title = tag.title ?? '' and 'RIFF INFO tag is not available') appears unreachable on real W
+- RR-R45-03 / low / open / Trim rule asymmetry: whitespace-only = empty, but non-empty values keep surrounding spaces (' KM184' kept, e4); intended and documented in t
+- RR-R45-04 / low / open / No renderer test types '   ' into a panel field, saves, and checks the form is no longer dirty after the re-read
+- RR-R45-05 / info / open / Architecture signal: one per-type toRiffWriteOp(field, value) -> remove | set(strings) shared by the standard and riffChunkId paths instead 
+- C-R45-01 / low / open / Emptiness is decided by field.type, not value shape: [''] for a text field or '' for a tags field still writes size 0; renderer never sends 
+- C-R45-02 / info / open / The batch form shows every field empty (D-21 / C-R19-01), so clearing a field in batch needs type-then-delete; fill('') on an empty field do
+- A-R45-01 / info / open / A added (e9)-(e11) beyond the planned (e1)-(e8) after its code-reviewer pass (additions only, in the owned new file); (e9) pins D-18 removeV
 
 ## Other open items
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar

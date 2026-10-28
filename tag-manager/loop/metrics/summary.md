@@ -1,13 +1,12 @@
-# Loop metrics (2026-10-28T10:42:37.315Z)
+# Loop metrics (2026-10-28T11:20:00.693Z)
 
-- rounds: 46; cost $571.86 total, last 10 avg $12.02/round; agent time 20.5 h
-- C: PASS 42, FAIL 1, BLOCKED 2; bugs c/h/m/l 0/0/1/28
+- rounds: 47; cost $589.08 total, last 10 avg $12.34/round; agent time 20.9 h
+- C: PASS 43, FAIL 1, BLOCKED 2; bugs c/h/m/l 0/0/1/28
 - rounds without a real check: 1, 4, 26; agent errors 0
-- gates: 1:published, 2:published, 3:published, 4:published, 5:published, 6:published, 7:published, 8:published, 9:published, 10:published, 11:skipped, 12:published, 13:published, 14:published, 15:published, 16:published, 17:published, 18:published, 19:published, 20:published, 21:published, 22:published, 23:published, 24:published, 25:published, 26:skipped, 27:skipped, 28:published, 29:published, 30:published, 31:published, 32:published, 33:published, 34:published, 35:published, 36:published, 37:published, 38:published, 39:published, 40:published, 41:published, 42:published, 43:skipped, 44:published, 45:published
+- gates: 1:published, 2:published, 3:published, 4:published, 5:published, 6:published, 7:published, 8:published, 9:published, 10:published, 11:skipped, 12:published, 13:published, 14:published, 15:published, 16:published, 17:published, 18:published, 19:published, 20:published, 21:published, 22:published, 23:published, 24:published, 25:published, 26:skipped, 27:skipped, 28:published, 29:published, 30:published, 31:published, 32:published, 33:published, 34:published, 35:published, 36:published, 37:published, 38:published, 39:published, 40:published, 41:published, 42:published, 43:skipped, 44:published, 45:published, 46:published
 
 | round | C | bugs c/h/m/l | real | $ | h | err | gate |
 |---|---|---|---|---|---|---|---|
-| 31 | PASS | 0/0/0/0 | yes | 20.84 | 0.60 | 0 | published |
 | 32 | PASS | 0/0/0/0 | yes | 17.46 | 0.68 | 0 | published |
 | 33 | PASS | 0/0/0/2 | yes | 19.91 | 0.62 | 0 | published |
 | 34 | PASS | 0/0/0/2 | yes | 17.61 | 0.91 | 0 | published |
@@ -22,3 +21,4 @@
 | 43 | FAIL | 0/0/1/0 | yes | 10.94 | 0.42 | 0 | skipped |
 | 44 | PASS | 0/0/0/0 | yes | 7.94 | 0.26 | 0 | published |
 | 45 | PASS | 0/0/0/0 | yes | 15.46 | 0.60 | 0 | published |
+| 46 | PASS | 0/0/0/0 | yes | 17.22 | 0.38 | 0 | published |

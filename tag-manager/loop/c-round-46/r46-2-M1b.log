@@ -1,0 +1,140 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c46mut[39m
+
+ [32m✓[39m tests/main/metadata-empty-values.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [31m❯[39m tests/main/metadata-number-values.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 63[2mms[22m[39m
+[31m     [31m×[31m (n1) an absent custom number and bare-WAV year, bpm and track read as an empty string[39m[32m 13[2mms[22m[39m
+[31m     [31m×[31m (n2) C-R6-01: read-then-save of the whole object with a new title writes no ITKN[39m[32m 10[2mms[22m[39m
+[31m     [31m×[31m (n3) clearing a custom number with '' or whitespace removes ITKN[39m[32m 7[2mms[22m[39m
+     [32m✓[39m (n4) a typed 0 and a negative number are written and read back as numbers[32m 4[2mms[22m[39m
+     [32m✓[39m (n5) a non-numeric ITKN payload 'abc' reads as ''[32m 1[2mms[22m[39m
+     [32m✓[39m (n5) a NUL-terminated ITKN payload '0' reads as the number 0[32m 1[2mms[22m[39m
+     [32m✓[39m (n6) clearing year with '' removes ICRD and reads as ''[32m 5[2mms[22m[39m
+     [32m✓[39m (n6) a typed year 0 removes ICRD and reads as '' (library limit, Deviation 1)[32m 4[2mms[22m[39m
+     [32m✓[39m (n7) meta:write-batch with take '' removes ITKN on both files and keeps their other INFO payloads[32m 8[2mms[22m[39m
+     [32m✓[39m (n8) a NaN take is empty and removes ITKN[32m 3[2mms[22m[39m
+     [32m✓[39m (n9) meta:read on a corrupt file returns '' for every number field of the schema[32m 1[2mms[22m[39m
+ [32m✓[39m tests/main/electron-launch-failure.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 239[2mms[22m[39m
+ [32m✓[39m tests/main/templates.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m tests/main/metadata.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m tests/main/recording-tag-contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 68[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-field-errors.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m tests/main/riff-info-nul.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-write-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m tests/main/create-fixtures.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m tests/main/file-system.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m tests/main/check-ffprobe-tags.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/main/schema.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n1) an absent custom number and bare-WAV year, bpm and track read as an empty string
+[31m[1mAssertionError[22m: expected +0 to be '' // Object.is equality[39m
+
+[32m- Expected:[39m 
+""
+
+[31m+ Received:[39m 
+0
+
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m135:57[22m[39m
+    [90m133| [39m    [35mconst[39m sample [33m=[39m [34mcopySampleWav[39m([32m"n1-sample.wav"[39m)[33m;[39m
+    [90m134| [39m    [34mexpect[39m([34minfoIdsOf[39m(sample))[33m.[39mnot[33m.[39m[34mtoContain[39m([32m"ITKN"[39m)[33m;[39m
+    [90m135| [39m    [34mexpect[39m(([35mawait[39m [34mreadTakeMetadataViaIpc[39m(sample))[33m.[39mtake)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m136| [39m
+    [90m137| [39m    [35mconst[39m bare [33m=[39m [34mwriteBareSineWav[39m([32m"n1-bare.wav"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n2) C-R6-01: read-then-save of the whole object with a new title writes no ITKN
+[31m[1mAssertionError[22m: expected [ 'INAM', 'ITKN' ] to not include 'ITKN'[39m
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m151:37[22m[39m
+    [90m149| [39m    [35mawait[39m [34mwriteTakeMetadataViaIpc[39m(filePath[33m,[39m { [33m...[39mmeta[33m,[39m title[33m:[39m [32m"X"[39m })[33m;[39m
+    [90m150| [39m
+    [90m151| [39m    [34mexpect[39m([34minfoIdsOf[39m(filePath))[33m.[39mnot[33m.[39m[34mtoContain[39m([32m"ITKN"[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m152| [39m    expect(infoPayload(filePath, "INAM")?.toString("utf8").replace(/\0…
+    [90m153| [39m    [34mexpectNoZeroSizeSubChunk[39m(filePath)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-number-values.test.ts[2m > [22mTM-B11 stage 2 / D-50: an unset number is not written, a typed 0 is[2m > [22m(n3) clearing a custom number with '' or whitespace removes ITKN
+[31m[1mAssertionError[22m: expected +0 to be '' // Object.is equality[39m
+
+[32m- Expected:[39m 
+""
+
+[31m+ Received:[39m 
+0
+
+[36m [2m❯[22m tests/main/metadata-number-values.test.ts:[2m169:58[22m[39m
+    [90m167| [39m    expect(infoPayload(cleared, "ICAT")?.equals(Buffer.from("DOORWood"…
+    [90m168| [39m    [34mexpectNoZeroSizeSubChunk[39m(cleared)[33m;[39m
+    [90m169| [39m    [34mexpect[39m(([35mawait[39m [34mreadTakeMetadataViaIpc[39m(cleared))[33m.[39mtake)[33m.[39m[34mtoBe[39m([32m""[39m)[33m;[39m
+    [90m   | [39m                                                         [31m^[39m
+    [90m170| [39m
+    [90m171| [39m    [35mconst[39m blank [33m=[39m [34mcopySampleWav[39m([32m"n3-blank.wav"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (13)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m117 passed[39m[22m[90m (120)[39m
+[2m   Start at [22m 10:59:33
+[2m   Duration [22m 1.64s[2m (transform 373ms, setup 172ms, import 1.61s, tests 767ms, environment 2ms)[22m
+
+
+::error file=/tmp/c46mut/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n1) an absent custom number and bare-WAV year%2C bpm and track read as an empty string,line=135,column=57::AssertionError: expected +0 to be '' // Object.is equality%0A%0A- Expected: %0A""%0A%0A+ Received: %0A0%0A%0A ❯ tests/main/metadata-number-values.test.ts:135:57%0A%0A
+
+::error file=/tmp/c46mut/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n2) C-R6-01%3A read-then-save of the whole object with a new title writes no ITKN,line=151,column=37::AssertionError: expected [ 'INAM', 'ITKN' ] to not include 'ITKN'%0A ❯ tests/main/metadata-number-values.test.ts:151:37%0A%0A
+
+::error file=/tmp/c46mut/tests/main/metadata-number-values.test.ts,title=tests/main/metadata-number-values.test.ts > TM-B11 stage 2 / D-50%3A an unset number is not written%2C a typed 0 is > (n3) clearing a custom number with '' or whitespace removes ITKN,line=169,column=58::AssertionError: expected +0 to be '' // Object.is equality%0A%0A- Expected: %0A""%0A%0A+ Received: %0A0%0A%0A ❯ tests/main/metadata-number-values.test.ts:169:58%0A%0A
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c46mut[39m
+
+ [32m✓[39m tests/renderer/components/metadata-panel-schema-change.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 2140[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-change-during-folder-load.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 2230[2mms[22m[39m
+     [33m[2m✓[22m[39m (w1) A-R32-01: Done while Open Folder B's scan is pending, B loads, A's schema read would land: metadata holds only B with the new field [33m 524[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m52 tests[22m[2m)[22m[33m 2424[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/reread-after-folder-switch.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1058[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-overlap.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 1479[2mms[22m[39m
+     [33m[2m✓[22m[39m (o6) App: Open Folder A (read pending), drop folder B (done), A's read lands last -> B's metadata [33m 328[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor-done-busy.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1732[2mms[22m[39m
+     [33m[2m✓[22m[39m (b1) RR-R33-01: while Done is pending the button reads Applying... and is aria-disabled, the editing controls are disabled and Back stays enabled [33m 466[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 878[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/selection-after-folder-switch.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 938[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/schema-editor-stale-close.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 1702[2mms[22m[39m
+     [33m[2m✓[22m[39m (e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name [33m 689[2mms[22m[39m
+     [33m[2m✓[22m[39m (e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name [33m 488[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/file-list.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 860[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/busy-buttons-focus.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 791[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-during-save.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 763[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/file-store.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+[90mstderr[2m | tests/renderer/components/number-field-values.test.ts[2m > [22m[2mMetadataPanel number field: '' is unset, a typed 0 is a value (TM-B11 stage 2, D-50)[2m > [22m[2m(r5) typing 1.0 on the way to 1.05 keeps the typed text in the Take input
+[22m[39mAn update to TemplatePicker inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ [32m✓[39m tests/renderer/components/number-field-values.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 354[2mms[22m[39m
+ [32m✓[39m tests/renderer/components/folder-read-rejected-chunk.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 506[2mms[22m[39m
+ [32m✓[39m tests/renderer/helpers/dom-queries.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/utils.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/player-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/schema-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/renderer/utils/file-row-display.test.ts [2m([22m[2m37 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/metadata-store.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/renderer/stores/template-store.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m22 passed[39m[22m[90m (22)[39m
+[2m      Tests [22m [1m[32m326 passed[39m[22m[90m (326)[39m
+[2m   Start at [22m 10:59:35
+[2m   Duration [22m 16.80s[2m (transform 1.52s, setup 1.97s, import 7.14s, tests 18.05s, environment 17.96s)[22m
+
