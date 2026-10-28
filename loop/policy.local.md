@@ -268,3 +268,27 @@ Saba found the Studio screen overloaded: a permanent shortcut line, the empty "A
   - Persistent helper sentences that explain a control are not added. The control's tooltip or the shortcut sheet carries them.
   - C counts the persistent text lines outside the timeline content before and after. An increase with no justification in the task is a Low bug, and a Medium one when it adds a new always-visible strip.
 - **Whole-screen review at every RETRO.** `design-philosopher` and `first-visit-host` review a fresh full-window screenshot (1440 and 1280, empty project and demo project). They list clutter, duplicated labels and permanent text that could move to a quieter home. Because Saba approves any move of positions, B writes the result as candidates in `loop/user-review/screen-review-<round>.md` and does not implement them until Saba answers.
+
+## SABA-B-8 "Calm Studio" (Saba, 2026-10-28, approved)
+
+Saba finds the Studio screen overloaded. The design review is in `/home/runner/czaba-project/docs/technical/studio-real-workspace/calm-studio-review.md`: an element-by-element table with file:line, the shortcut sheet with its full grouping and microcopy, 12 acceptance rows, and Ableton references 6.1, 42.1, ch.42 and 6.10. It builds on DUX-R-2 (the shortcut sheet) and does not duplicate it. **DUX-R-2 is done by this entry** and is closed in REVIEW-RECOMMENDATIONS when CALM-1 passes.
+
+**Saba's decisions:**
+1. **Shortcuts:** a modal sheet over Studio. It opens with `?` (code-based, never in text fields or while a dialog is open) and with a quiet footer button "Shortcuts ?", and closes with Esc. Every button tooltip shows its key ("Undo (Ctrl+Z)"), with a matching `aria-keyshortcuts`. One source constant feeds both the sheet and the tooltips. The permanent shortcut line is removed. Deviation from Live: Shift+? opens Info View in Live; here `?` opens the sheet.
+2. **Persistent helper text moves to quieter homes:**
+   - the BPM and Loop sentences, the video caption note and the "Arrangement · Overview" label move to tooltip, title, aria or a one-time status;
+   - the dock's "No video added yet" becomes a quiet empty monitor;
+   - the Clip details empty state becomes one line, and the fields keep their geometry;
+   - the library notice becomes one line ("Synthetic demo stems — not CZABA catalogue audio."), and the viewer can dismiss it (remembered per browser);
+   - the first-run status teaches drag, Enter and `?`.
+
+   Facts that move must stay reachable. "audio is not stretched" stays in the BPM title and in the status when BPM is set.
+3. **Overview:** stays, thin, as a quiet hairline in an empty project. Its full view appears with the first clip, and its bbox is unchanged. It can be hidden with **Ctrl+Alt+O** as in Live; the choice is remembered, and the shortcut is listed in the sheet. Collapsing the whole dock row when there is no video is **not** approved (layout change).
+4. **When:** right after the current round 222 (B-R220-LEGACY-EXPORT-NO-STEMS), before the next PERF task. Order: **CALM-1** (sheet + `?` + footer button + remove the shortcut line + keys in titles + the lane-move hint in the contextual line), then **CALM-2** (copy moves above; the DUX-R-4(a) empty-lane hint shows only on the active empty lane and only before the first clip), then **CALM-3** (Overview empty state + Ctrl+Alt+O). About 3 rounds. Then STUDIO-PERFORMANCE resumes.
+
+**Rules that still hold:**
+- No other positions move.
+- Status line, range hint, drag hints, the video-lane action hint, "Original sound", row labels, transport text buttons and all Overview interactions stay.
+- C runs the doc's 12 acceptance rows at 1440×900 and 1280×720, empty and demo project, before and after.
+- Reference-first and screen-budget rules apply.
+- `Why we missed it` for this issue is written in CALM-1's task.
