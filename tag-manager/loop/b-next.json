@@ -1,7 +1,7 @@
 {
   "decision": "CONTINUE",
-  "reason": "Round 42 closed: C PASS R42-1..R42-7 (realVerified=true), published cf4e147, review COMMIT OK -> TM-T1-DUP done, RR-R3-01 closed, D-47 verified. C-R42-01 (low, B's Mp3tag reference text) is confirmed by B and corrected in round 43's docs scope. No critical/high bug open. Round 43 takes Saba's next item, Q8: TM-B44 (medium RR-R19-01 / B-R18-01, D-48).",
-  "nextTask": "Round 43: TM-B44 — narrow fs:stat-files IPC (main handler, <=50 paths, .wav regular files only; preload gets exactly one statFiles member + one ElectronAPI line per Saba Q8) replaces the per-save recursive scanFolder in the D-28 Size/Date refresh (chunks of 50, sequential, rejected chunk skipped); D-28 tests flipped red-first; real-app Size/Date + independent readers + save-time comparison vs the cf4e147 build on a >=5000-file tree; C-R42-01 docs correction in 001 entry 23; baseline cf4e147",
+  "reason": "Round 43: C FAIL only on C-R43-01 (medium planning gap: unowned renderer test (w7) still mocks scanFolder for the save's stats refresh, renderer 319/320). Product verified in the real app (R43-1/3/4/5/6/7 PASS, realVerified=true; 5000-WAV single save 388 -> 19 ms). Not published; the 13-file tree is carried hash-frozen. B's scratch probe: the one-line flip gives 320/320 and is red on cf4e147 src. No critical/high bug open.",
+  "nextTask": "Round 44: TM-B44 completion — replace schema-change-during-folder-load.test.ts:315 (w7) scanFolder mock with statFiles mock (numstat 1 1); 13 carried round-43 files sha256-frozen; C: ownership/hashes, (w7) red/green, clean verifyCommand renderer 320 main 98 E2E 7/7, fresh real-app smoke with music-metadata + ffprobe; baseline cf4e147 + carried tree",
   "remaining": [
     "TM-B44",
     "TM-B11",

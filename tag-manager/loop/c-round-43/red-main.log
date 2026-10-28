@@ -1,0 +1,103 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c43-base[39m
+
+ [31m❯[39m tests/main/file-system.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 21[2mms[22m[39m
+       [32m✓[39m finds WAV files in directory[32m 4[2mms[22m[39m
+       [32m✓[39m finds nested WAV files[32m 1[2mms[22m[39m
+       [32m✓[39m returns entries with correct shape[32m 2[2mms[22m[39m
+       [32m✓[39m throws on invalid path[32m 1[2mms[22m[39m
+       [32m✓[39m throws on non-directory path[32m 0[2mms[22m[39m
+       [32m✓[39m throws on nonexistent path[32m 0[2mms[22m[39m
+       [32m✓[39m classifies folders and wav files[32m 1[2mms[22m[39m
+       [32m✓[39m skips inaccessible paths[32m 1[2mms[22m[39m
+       [32m✓[39m reads a WAV file as ArrayBuffer[32m 1[2mms[22m[39m
+       [32m✓[39m throws on nonexistent file[32m 0[2mms[22m[39m
+[31m       [31m×[31m (m1) returns entries in input order with basename, identical path, size and mtime[39m[32m 3[2mms[22m[39m
+[31m       [31m×[31m (m2) skips a missing path between two existing ones[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m (m3) skips a directory named .wav and a non-wav file, includes an upper-case .WAV[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m (m4) an empty array returns an empty array[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m (m5) rejects invalid input and more than 50 paths, accepts exactly 50[39m[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/file-system.test.ts[2m > [22mfile-system handlers[2m > [22mfs:stat-files (TM-B44, D-48)[2m > [22m(m1) returns entries in input order with basename, identical path, size and mtime
+[31m[1mError[22m: No handler for channel: fs:stat-files[39m
+[36m [2m❯[22m getHandler tests/main/file-system.test.ts:[2m44:23[22m[39m
+    [90m 42| [39m  const handlers = (ipcMain as unknown as { _handlers: Map<string, (..…
+    [90m 43| [39m  [35mconst[39m handler [33m=[39m handlers[33m.[39m[35mget[39m(channel)[33m;[39m
+    [90m 44| [39m  [35mif[39m ([33m![39mhandler) [35mthrow[39m [35mnew[39m [33mError[39m([32m`No handler for channel: [39m[36m${[39mchannel[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m 45| [39m  [35mreturn[39m handler[33m;[39m
+    [90m 46| [39m}
+[90m [2m❯[22m tests/main/file-system.test.ts:[2m150:23[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/file-system.test.ts[2m > [22mfile-system handlers[2m > [22mfs:stat-files (TM-B44, D-48)[2m > [22m(m2) skips a missing path between two existing ones
+[31m[1mError[22m: No handler for channel: fs:stat-files[39m
+[36m [2m❯[22m getHandler tests/main/file-system.test.ts:[2m44:23[22m[39m
+    [90m 42| [39m  const handlers = (ipcMain as unknown as { _handlers: Map<string, (..…
+    [90m 43| [39m  [35mconst[39m handler [33m=[39m handlers[33m.[39m[35mget[39m(channel)[33m;[39m
+    [90m 44| [39m  [35mif[39m ([33m![39mhandler) [35mthrow[39m [35mnew[39m [33mError[39m([32m`No handler for channel: [39m[36m${[39mchannel[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m 45| [39m  [35mreturn[39m handler[33m;[39m
+    [90m 46| [39m}
+[90m [2m❯[22m tests/main/file-system.test.ts:[2m156:23[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/file-system.test.ts[2m > [22mfile-system handlers[2m > [22mfs:stat-files (TM-B44, D-48)[2m > [22m(m3) skips a directory named .wav and a non-wav file, includes an upper-case .WAV
+[31m[1mError[22m: No handler for channel: fs:stat-files[39m
+[36m [2m❯[22m getHandler tests/main/file-system.test.ts:[2m44:23[22m[39m
+    [90m 42| [39m  const handlers = (ipcMain as unknown as { _handlers: Map<string, (..…
+    [90m 43| [39m  [35mconst[39m handler [33m=[39m handlers[33m.[39m[35mget[39m(channel)[33m;[39m
+    [90m 44| [39m  [35mif[39m ([33m![39mhandler) [35mthrow[39m [35mnew[39m [33mError[39m([32m`No handler for channel: [39m[36m${[39mchannel[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m 45| [39m  [35mreturn[39m handler[33m;[39m
+    [90m 46| [39m}
+[90m [2m❯[22m tests/main/file-system.test.ts:[2m162:23[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/file-system.test.ts[2m > [22mfile-system handlers[2m > [22mfs:stat-files (TM-B44, D-48)[2m > [22m(m4) an empty array returns an empty array
+[31m[1mError[22m: No handler for channel: fs:stat-files[39m
+[36m [2m❯[22m getHandler tests/main/file-system.test.ts:[2m44:23[22m[39m
+    [90m 42| [39m  const handlers = (ipcMain as unknown as { _handlers: Map<string, (..…
+    [90m 43| [39m  [35mconst[39m handler [33m=[39m handlers[33m.[39m[35mget[39m(channel)[33m;[39m
+    [90m 44| [39m  [35mif[39m ([33m![39mhandler) [35mthrow[39m [35mnew[39m [33mError[39m([32m`No handler for channel: [39m[36m${[39mchannel[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m 45| [39m  [35mreturn[39m handler[33m;[39m
+    [90m 46| [39m}
+[90m [2m❯[22m tests/main/file-system.test.ts:[2m168:23[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/file-system.test.ts[2m > [22mfile-system handlers[2m > [22mfs:stat-files (TM-B44, D-48)[2m > [22m(m5) rejects invalid input and more than 50 paths, accepts exactly 50
+[31m[1mError[22m: No handler for channel: fs:stat-files[39m
+[36m [2m❯[22m getHandler tests/main/file-system.test.ts:[2m44:23[22m[39m
+    [90m 42| [39m  const handlers = (ipcMain as unknown as { _handlers: Map<string, (..…
+    [90m 43| [39m  [35mconst[39m handler [33m=[39m handlers[33m.[39m[35mget[39m(channel)[33m;[39m
+    [90m 44| [39m  [35mif[39m ([33m![39mhandler) [35mthrow[39m [35mnew[39m [33mError[39m([32m`No handler for channel: [39m[36m${[39mchannel[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m 45| [39m  [35mreturn[39m handler[33m;[39m
+    [90m 46| [39m}
+[90m [2m❯[22m tests/main/file-system.test.ts:[2m173:23[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m10 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 09:25:58
+[2m   Duration [22m 287ms[2m (transform 57ms, setup 23ms, import 58ms, tests 21ms, environment 0ms)[22m
+
+
+::error file=/tmp/c43-base/tests/main/file-system.test.ts,title=tests/main/file-system.test.ts > file-system handlers > fs%3Astat-files (TM-B44%2C D-48) > (m1) returns entries in input order with basename%2C identical path%2C size and mtime,line=44,column=23::Error: No handler for channel: fs:stat-files%0A ❯ getHandler tests/main/file-system.test.ts:44:23%0A ❯ tests/main/file-system.test.ts:150:23%0A%0A
+
+::error file=/tmp/c43-base/tests/main/file-system.test.ts,title=tests/main/file-system.test.ts > file-system handlers > fs%3Astat-files (TM-B44%2C D-48) > (m2) skips a missing path between two existing ones,line=44,column=23::Error: No handler for channel: fs:stat-files%0A ❯ getHandler tests/main/file-system.test.ts:44:23%0A ❯ tests/main/file-system.test.ts:156:23%0A%0A
+
+::error file=/tmp/c43-base/tests/main/file-system.test.ts,title=tests/main/file-system.test.ts > file-system handlers > fs%3Astat-files (TM-B44%2C D-48) > (m3) skips a directory named .wav and a non-wav file%2C includes an upper-case .WAV,line=44,column=23::Error: No handler for channel: fs:stat-files%0A ❯ getHandler tests/main/file-system.test.ts:44:23%0A ❯ tests/main/file-system.test.ts:162:23%0A%0A
+
+::error file=/tmp/c43-base/tests/main/file-system.test.ts,title=tests/main/file-system.test.ts > file-system handlers > fs%3Astat-files (TM-B44%2C D-48) > (m4) an empty array returns an empty array,line=44,column=23::Error: No handler for channel: fs:stat-files%0A ❯ getHandler tests/main/file-system.test.ts:44:23%0A ❯ tests/main/file-system.test.ts:168:23%0A%0A
+
+::error file=/tmp/c43-base/tests/main/file-system.test.ts,title=tests/main/file-system.test.ts > file-system handlers > fs%3Astat-files (TM-B44%2C D-48) > (m5) rejects invalid input and more than 50 paths%2C accepts exactly 50,line=44,column=23::Error: No handler for channel: fs:stat-files%0A ❯ getHandler tests/main/file-system.test.ts:44:23%0A ❯ tests/main/file-system.test.ts:173:23%0A%0A

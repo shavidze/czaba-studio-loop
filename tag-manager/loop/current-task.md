@@ -1,181 +1,100 @@
-# CURRENT TASK — Round 43: TM-B44 — the save's Size/Date refresh stats only the written files through a narrow `fs:stat-files` IPC instead of rescanning the whole folder (D-48, Saba Q8)
+# CURRENT TASK — Round 44: TM-B44 completion — flip the unowned (w7) save-stats mock from `scanFolder` to `statFiles` (C-R43-01); the round-43 tree is carried unchanged
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-28
 
 ## Why this round
-- **Round 42: C PASS** (R42-1…R42-7, realVerified=true), published `cf4e147`, review COMMIT OK. TM-T1-DUP is done and RR-R3-01 is closed (D-47 verified).
-  - C found one low bug, **C-R42-01**: B's own Mp3tag reference text in `docs/bugs/001` entry 23 is not backed by the cited sources. B re-fetched both sources on 2026-10-28 and confirms this. The correction is a small docs touch in this round (Scope C).
-  - No critical or high bug is open.
-- **This round = Saba's Q8, next in Saba's order (Q2 → Q8 → Q4/Q1 → Q5 → Q3 → Q6).** It fixes the open **medium** finding **RR-R19-01** (with B-R18-01), now backlog item **TM-B44**.
-  - **The problem (code read at `cf4e147`):** `refreshSavedFileStats` (`MetadataPanel.tsx:75-85`) calls `window.api.scanFolder(folderPath)` after every confirmed write. That call walks the whole folder recursively (`file-system.ts:16-66`, depth 20, one `stat` per WAV, no timeout). `handleSave` awaits it while `isSaving` is true (`:155`, `:186`), and only then re-reads. Saving one file in a folder with thousands of WAVs, or on a network drive, therefore pays for a full rescan.
-  - **Saba's Q8:** permission to change `src/preload/index.ts` and `src/preload/index.d.ts` **only** to add the narrow `fs:stat-files` channel. The round lists the exact diff, and C checks that nothing else changed.
-- This is a logic fix (IPC handler + save flow), so `test-on-bugfix` applies: the failing tests come first.
-- **Reference-first:** exempt. This is a pure fix with no visible UX change: the same columns update at the same moment, only faster. C checks that nothing visible changed (R43-4, R43-6).
+- **Round 43: C FAIL. The only cause is C-R43-01 (medium, B's planning gap).** C ran every check against a real build (`realVerified=true`):
+  - R43-1, R43-3, R43-4, R43-5, R43-6 and R43-7 PASS.
+  - Real app: Size/Date refresh after single, nested and 3-file batch saves. Three independent readers (raw INFO, `music-metadata`, `ffprobe`) confirm the tags.
+  - On a 5000-WAV tree the median single-save click→toast time fell from 388 ms (`cf4e147`) to 19 ms.
+  - Main 98/98, E2E 7/7.
+- **The gate is red** because `tests/renderer/components/schema-change-during-folder-load.test.ts` (w7) still feeds the save's stats refresh through `window.api.scanFolder` (`:315`). The save now calls `statFiles`, and the reset mock returns `[]`. Result: renderer 319/320, `verifyCommand` rc=1.
+  - Round 43's B3 did not give A ownership of that test, so A stopped as instructed. Nothing in the product is wrong.
+- **This round:** a one-line test flip, so TM-B44 (Saba Q8, D-48) can pass the gate and be published. The C-R42-01 docs correction already sits in the carried tree.
+- **B's probe on a scratch copy (not the repository):**
+  - With the exact line below, the renderer suite is **320/320** on A's tree.
+  - The same flipped (w7), run with `cf4e147`'s `MetadataPanel.tsx`, **fails** (1 failed / 7 passed in the file).
+- No critical or high bug is open.
+- **Rules:**
+  - `test-on-bugfix`: the flip is the test change. It turns (w7) into a real pin of D-48: red on baseline `src/`, green on the fix.
+  - Reference-first: exempt (test-only round).
 
 ## Baseline
-- HEAD `cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42`. The working tree is clean (`git status --porcelain --untracked-files=all` is empty). If HEAD differs or the tree is dirty, stop and report.
+- HEAD `cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42`.
   - Exception (project release-commit rule): a root `chore(release): vX.Y.Z` commit directly on `cf4e147` that changes only the two `version` fields counts as the baseline.
-- **Frozen:** every path not listed under File ownership. These stay byte-identical to `cf4e147`. In particular:
-  - `src/main/index.ts`, `src/main/ipc/metadata.ts`, `schema.ts`, `templates.ts`;
-  - `src/shared/types.ts`, `src/renderer/src/stores/**`, `src/renderer/src/lib/**`, `src/renderer/src/App.tsx`, `src/renderer/src/components/sidebar/**`, `src/renderer/src/components/schema/**`;
-  - every `tests/**` file not listed below; `playwright.config.ts`, `vitest.config.*`, `biome.json`, `tsconfig*.json`, `.github/**`;
-  - `docs/**` except the one owned file; `.claude/**` except the two owned primitives.
+- **The working tree is expected to be dirty with exactly these 13 modified files from round 43.** `git status --porcelain --untracked-files=all` must show these 13 ` M` lines and nothing else.
+- Before any edit, A runs `sha256sum` on them and C repeats it. Every hash must match the table. If HEAD, the file list or any hash differs, **stop and report**.
+
+| sha256 (round-43 content) | path |
+|---|---|
+| `ba07f735494a1c55094a0b91553adae2ccc6719c1dafc89e4b1255222e593776` | `.claude/primitives/ELECTRON_IPC.md` |
+| `e4b812c2413164285d0605dc5283c607612f3b2b1c7acdec96f6756ea07527e5` | `.claude/primitives/STATE_MANAGEMENT.md` |
+| `f37fca5f82586eda6cece6480e77e284e8068e9b1e4d80315590007feedbc4c6` | `docs/bugs/001-save-and-selection-known-limits.md` |
+| `c78553102bf9f4281068688ca418f39b80aad47f2dab281f6ed10155cd22c09f` | `src/main/ipc/channels.ts` |
+| `d0c00ff2fe74853e96e50991be3da04f952b18b3aeccd8f99bf35674e68c8ba1` | `src/main/ipc/file-system.ts` |
+| `2664c47bfeabf46ab386328c9619538f0b81d6d4a3dc033574ae41d02d7b2126` | `src/preload/index.d.ts` |
+| `be08bbe03943a1d11dd09f164ee1a91e595c2d58dfffa4705e54d75183037711` | `src/preload/index.ts` |
+| `9e0cf8291249851d8a042944df9f02b6fafdc1997b09673c9379d9deb98b93be` | `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` |
+| `32320ea43d84ab0278997d35f5db25c76ee4af58d5c8d9fceae2ec5af4d125ba` | `tests/e2e/app-launch.spec.ts` |
+| `37d941d5a15dd0fb701969b035df2798399c308e59b186509291cef3f57d9342` | `tests/main/file-system.test.ts` |
+| `f64fd3cfb783718faa405d81e9b19b0bfa2631186bd12e55ce400e4a73c8e38d` | `tests/renderer/components/metadata-panel-batch-save.test.ts` |
+| `94bf4b1feb4b00b8848a4f68ece864a29479f01e7a7c653b68df22a79a24f545` | `tests/renderer/helpers/window-api-mocks.ts` |
+| `9850083f4944f6a4e29f206de40feb599089b4b6e72aa2724f7fd3ff66c13d6f` | `tests/renderer/setup.ts` |
+
+- The owned test file is unchanged from `cf4e147` at the start: sha256 `91e030ce9b7c1e0c57d469af613cf9cf7152504b53cfd60b735319bae0ebdf0e`.
+- **Frozen:**
+  - the 13 files above, at their round-43 content (the hashes above). Do not "improve" them; that is preserved work which C has already verified in a real build;
+  - every other path except the one owned file, byte-identical to `cf4e147`.
 - **Protected (never touch):** `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `src/renderer/src/styles/app.css`, `.claude/settings*`, `.claude/hooks/**`.
-- **Protected, with this round's one exception (Saba Q8):** `src/preload/index.ts` and `src/preload/index.d.ts`. Only the exact additions in Scope A3 are allowed. No other line changes, including whitespace and the `console.log` lines.
+  - `src/preload/index.ts` and `src/preload/index.d.ts` keep exactly the round-43 Saba-Q8 additions. Their hashes are in the table, and nothing else may change in them.
 
 ## Scope
-
-### A. `fs:stat-files` (D-48)
-**Step 0 (test first, `test-on-bugfix`):**
-- Write the new and flipped tests (Scope B) first.
-- Run them on unchanged `src/` and record the red output in `a-round-43.md`.
-- Then make the fix.
-
-**A1. `src/main/ipc/channels.ts`** — add exactly one line, directly after `SCAN_FOLDER: 'fs:scan-folder',`:
+**A1. `tests/renderer/components/schema-change-during-folder-load.test.ts`, test (w7) only, line 315 only.** Replace this line:
 ```ts
-  STAT_FILES: 'fs:stat-files',
+    vi.mocked(window.api.scanFolder).mockResolvedValue([{ ...FILE_A, size: 2 }, FILE_A2]);
 ```
-
-**A2. `src/main/ipc/file-system.ts`** — register `ipcMain.handle(IPC_CHANNELS.STAT_FILES, …)` inside `registerFileSystemHandlers`, after the `SCAN_FOLDER` handler.
-- **Input:** the argument must be an array with at most 50 elements (module-private constant, e.g. `MAX_STAT_FILES_PATHS = 50`, per `ELECTRON_IPC.md` "Max 50 files per IPC call"), and every element must be a non-empty `string`. Anything else throws `new Error('Invalid paths')`. That covers a non-array, a 51-element array, `['']` and `[5]`. An empty array is valid and returns `[]`.
-- **Per path, in input order:** `stat(path)`. When `isFile()` and `extname(path).toLowerCase() === '.wav'`, push `{ name: basename(path), path, size: s.size, modifiedAt: s.mtime.toISOString() }`. `path` is the input string, unchanged, so it matches the file list's `path` exactly.
-- **Skipped silently:** a stat error (ENOENT, EACCES, …), a directory, or a non-`.wav` file. A skipped path does not affect the other paths. Duplicates are returned as given.
-- **Return type:** the file's existing local `WavFileEntry[]`.
-- **Rules:** no code comments. Keep the existing comments in the file untouched; they are not yours to remove. Follow `ELECTRON_IPC.md`, `TYPESCRIPT_STRICT.md` (no `any`; the handler parameter is `unknown` and is narrowed by a type guard) and `AGENT_DISCOVERABLE_CODE.md`. Biome must report 0 errors and no new warnings (the baseline has 8).
-  - If an empty `catch {}` is flagged, use a small private helper that returns `null` on error.
-- `scanFolderRecursive` and every other handler stay unchanged.
-
-**A3. Preload (Saba Q8 exception), the exact additions and nothing else.**
-- `src/preload/index.ts`: insert this block directly after the `scanFolder` member (after the line `  > => ipcRenderer.invoke(IPC_CHANNELS.SCAN_FOLDER, path),` and its following blank line), so a blank line separates it from `loadSchema`:
+with this line:
 ```ts
-  statFiles: (
-    paths: string[],
-  ): Promise<
-    Array<{
-      name: string;
-      path: string;
-      size: number;
-      modifiedAt: string;
-    }>
-  > => ipcRenderer.invoke(IPC_CHANNELS.STAT_FILES, paths),
-
+    vi.mocked(window.api.statFiles).mockResolvedValue([{ ...FILE_A, size: 2 }]);
 ```
-- `src/preload/index.d.ts`: insert this one line directly after `  scanFolder: (path: string) => Promise<WavFileEntry[]>;`:
-```ts
-  statFiles: (paths: string[]) => Promise<WavFileEntry[]>;
-```
-- Expected `git diff --numstat cf4e147 -- src/preload`: `11 0 src/preload/index.ts` (10 code lines + 1 blank) and `1 0 src/preload/index.d.ts`. If Biome's formatter insists on a different layout for these added lines only, apply exactly what `npx biome format` prints for them. Record the before/after in `a-round-43.md`. Zero `-` lines is still required.
+- Keep the 4-space indentation, double quotes and everything else in the file. The test title and all other tests stay byte-identical. Expected `git diff --numstat cf4e147 -- <file>`: `1 1`.
+- Why `FILE_A2` is dropped: the save stats only `[PATH_A]`, and D-48's per-chunk filter discards any entry outside the chunk. The intent of (w7) does not change: a save's stats refresh replaces the `files` array while the schema re-read is pending, and the schema re-read still applies.
+- Use the Edit tool only (rule from round 18). No Bash writes to the repository.
+- **Step 0 (red, recorded in `a-round-44.md`):**
+  - Before the edit, run `npx vitest run -c vitest.config.renderer.ts tests/renderer/components/schema-change-during-folder-load.test.ts`. (w7) fails with `expected 1 to be 2` (round-43 state).
+  - After the edit, the same run passes 8/8.
+  - Then do the baseline-src red: copy the repository to a temp dir outside the repo (`node_modules` symlinked), put `git show cf4e147:src/renderer/src/components/metadata-editor/MetadataPanel.tsx` into the copy, and run the flipped test there. (w7) must fail. Delete the temp dir afterwards.
+- If any other test fails after the flip, **stop and report** the test name. Do not edit anything else.
 
-**A4. `src/renderer/src/components/metadata-editor/MetadataPanel.tsx`** — change `refreshSavedFileStats` only:
-- Keep `if (folderPath === null) return;` (D-28 rule: no refresh without an open folder; test (v)).
-- Replace the `scanFolder` call: send `writtenPaths` to `window.api.statFiles` in chunks of 50 (module-private constant, e.g. `STAT_FILES_CHUNK_SIZE = 50`), **one chunk after another**, awaiting each.
-- For each resolved chunk, call `updateFileStats` with the returned entries whose `path` is in that chunk (the same filter as today's `written` set).
-- A rejected chunk is skipped silently, and the following chunks still run.
-- The function still resolves only after the last chunk, so the order **write → markPathsWritten → stats refresh → re-read** is unchanged.
-- **Unchanged:**
-  - every caller (`:155`, `:184-187`): single refreshes `[path]`; batch refreshes `writtenPaths` only when `result.succeeded > 0`; no refresh when the write rejects;
-  - D-22/D-24/D-29/D-30/D-33/D-34/D-39 behaviour, toasts, `isDirty`, edits;
-  - every other function in the file.
-- No comments, semicolons, no `any`.
-
-**Not in this round:**
-- changing Open Folder / Rescan / drop (they keep `scanFolder`);
-- a non-awaited refresh after the toast;
-- returning stats from the write IPCs;
-- any `writeMetadataBatch` chunking (its single-call batch is pre-existing);
-- Q4/Q5/Q3/Q6 work; RR-R42-01..04 signals.
-
-### B. Tests
-**B1. `tests/main/file-system.test.ts`** — a new `describe("fs:stat-files (TM-B44, D-48)")` using the file's `getHandler` pattern. Add its own fixtures (e.g. a `stat` subfolder with `UPPER.WAV`, a `dir.wav` directory and a `.txt` file) in a nested `beforeAll`. Existing tests stay byte-identical.
-- **(m1)** `[test1.wav, sub/nested.wav]` → two entries in input order. `name` = basename, `path` = input string, and `size`/`modifiedAt` equal `statSync(p).size` / `statSync(p).mtime.toISOString()`.
-- **(m2)** a missing path between two existing ones → only the two existing, in order.
-- **(m3)** `dir.wav` (a directory), `not-a-wav.txt` → omitted; `UPPER.WAV` → included.
-- **(m4)** `[]` → `[]`.
-- **(m5)** `"x"`, `null`, `[""]`, `[5]`, and 51 copies of an existing path → each rejects with `Invalid paths`. 50 copies → resolves with 50 entries.
-
-**B2. `tests/renderer/components/metadata-panel-batch-save.test.ts`**, only the `describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)")` block. Retitle it `(TM-B22, D-28, D-48)`. The other describes stay byte-identical.
-- **Flip (n)–(w) from `scanFolder` to `statFiles`.** Each test asserts `window.api.scanFolder` is **not** called during the save.
-  - (n) `statFiles` called once with `[PATH_A]`; order write → stat → read.
-  - (o) once with `[PATH_A, PATH_B]`; order write → stat → read.
-  - (p) once with `[PATH_A]` only (the failed path is not sent).
-  - (q)/(r) not called.
-  - (s)/(t) as today, with `statFiles`.
-  - (u) `statFiles` rejects → silent, toast and store as today.
-  - (v) `folderPath` null → neither `statFiles` nor `scanFolder` called.
-  - (w) the result lacks the saved path → stats unchanged.
-  - Keep each test's existing assertions on toasts, edits and selection.
-- The top-level `seedFiles` seeds only `FILE_A`/`FILE_B` and stays unchanged. For (x)/(y), define a local helper **inside the D-28 describe** that seeds N files (`files`, `selectedPaths`, `folderPath`) and mocks the batch write/read for them. Top-level helpers are not edited.
-- **New (x):** batch of 51 seeded files, all succeed → `statFiles` called twice, with the first 50 and then the last 1 path (in selection order), the second call after the first resolved. All 51 rows refreshed; the re-read is called after the second stat call; toast `Tags saved to 51 files`.
-- **New (y):** the same 51 files, the first `statFiles` call rejects → the 51st row is refreshed, the first 50 keep their stats, and the success toast is unchanged.
-- **New (z):** single save, `statFiles` resolves with `[SCANNED_A, SCANNED_B]` (B was not written) → A refreshed, B not.
-- **Red on baseline `src/`:** (n), (o), (p), (s), (t), (x), (y) and (z) must fail. On the baseline `statFiles` is never called, and the reset `scanFolder` mock resolves `[]`. (q), (r), (u), (v) and (w) may pass on the baseline; they pin rules that stay.
-
-**B3. Test infrastructure, the exact one-line additions** (needed because `Window["api"]` gains a required member and `npm run typecheck` covers `tests/**`):
-- `tests/renderer/setup.ts`: add `  statFiles: vi.fn().mockResolvedValue([]),` directly after the `scanFolder` line of `mockApi`. Nothing else in this file changes; the window workaround (A-R3-01) stays as is. Expected numstat `1 0`.
-- `tests/renderer/helpers/window-api-mocks.ts`: add `  vi.mocked(window.api.statFiles).mockReset().mockResolvedValue([]);` directly after the `scanFolder` line. Expected numstat `1 0`.
-- `tests/e2e/app-launch.spec.ts`: add `  expect(methods).toContain("statFiles");` directly after `expect(methods).toContain("scanFolder");`. Expected numstat `1 0`.
-- If any other existing renderer test fails because a save no longer calls `scanFolder`, **stop and report** the test name to B. Do not edit unowned tests.
-
-### C. Docs
-- `.claude/primitives/STATE_MANAGEMENT.md` (standing `.claude/**` permission; Edit tool only): replace the `File stats (D-28): …` line in `### Save flow` with:
-  `File stats (D-28, D-48): after a confirmed write, before the re-read: statFiles(written paths, chunks of 50, sequential) → updateFileStats(entries of that chunk); a rejected chunk is skipped silently; none if write rejects / all failed / folderPath null; scanFolder only for Open Folder, Rescan, drop`
-- `.claude/primitives/ELECTRON_IPC.md`, `## Input Validation (main process)`: add one bullet after the `SCAN_FOLDER` bullet:
-  `- STAT_FILES: array of ≤ 50 non-empty strings, else "Invalid paths"; only regular .wav files are returned, other paths are skipped`
-- `docs/bugs/001-save-and-selection-known-limits.md`, entry `## 23.` only (C-R42-01). Change no other line, including the README counts (they stay 23/14).
-  - In `**Reference:**`, replace the text from `standard frame-ის სახელის მქონე custom ველი ყოველთვის standard frame-ში ინახება — ერთ სახელს ერთი slot აქვს (community დაკვირვება, არა ოფიციალური docs).` with:
-    `thread-ში წერია, რომ custom ველები, რომლებიც Mp3tag-ის ველების სიაში არ არის, user-defined TXXX frame-ად ინახება; mapping docs თითო ველისთვის აჩვენებს, რომელ frame-ში ან RIFF INFO chunk-ში იწერება ის, და ამბობს, რომ user-defined mapping-ით ეს შეიძლება შეიცვალოს. რა ხდება, როცა custom ველის სახელი standard ველის სახელს ემთხვევა, არც ერთი წყარო არ ამბობს. „ერთ სახელს ერთი slot აქვს“ B-ის დაუდასტურებელი დასკვნაა (C-R42-01, B-მ 2026-10-28-ს ხელახლა შეამოწმა).`
-  - In `**Deviations:**`, replace `(1) Mp3tag ჩუმად აერთიანებს standard slot-ში; აქ toggle იმალება და warning ჩანს (Q2):` with:
-    `(1) Mp3tag-ის ქცევა same-name შემთხვევაში დაუდასტურებელია (იხ. Reference); აქ toggle იმალება და warning ჩანს (Q2):`
-  - The rest of the sentence stays.
+**Not in this round:** any `src/` change. TM-B11 (Q4) and later items. A-R43-01 (`lstat` hardening) and A-R43-02 (EACCES test) are signals, not tasks.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/main/ipc/channels.ts` | A1, one line |
-| `src/main/ipc/file-system.ts` | A2 handler |
-| `src/preload/index.ts` | A3, Saba Q8, exact block only |
-| `src/preload/index.d.ts` | A3, Saba Q8, one line only |
-| `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` | A4, `refreshSavedFileStats` only |
-| `tests/main/file-system.test.ts` | B1, additions only |
-| `tests/renderer/components/metadata-panel-batch-save.test.ts` | B2, the D-28 describe only |
-| `tests/renderer/setup.ts` | B3, one line |
-| `tests/renderer/helpers/window-api-mocks.ts` | B3, one line |
-| `tests/e2e/app-launch.spec.ts` | B3, one line |
-| `.claude/primitives/STATE_MANAGEMENT.md` | C, one line replaced |
-| `.claude/primitives/ELECTRON_IPC.md` | C, one bullet |
-| `docs/bugs/001-save-and-selection-known-limits.md` | C, entry 23 Reference + Deviation (1) only |
+| `tests/renderer/components/schema-change-during-folder-load.test.ts` | A1: line 315 in (w7), one line replaced |
 
-A writes only `a-round-43.md` (and `a-round-43/` logs) in the loop folder. C writes `c-round-43.md`/`.json` and evidence under `c-round-43/`. Repository writes go through Edit/Write only (rule from round 18).
+A writes only `a-round-44.md` (and `a-round-44/` logs) in the loop folder. C writes `c-round-44.md`/`.json` and evidence under `c-round-44/`.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R43-1 ownership + preload | `git diff --name-only cf4e147`, `git status --porcelain --untracked-files=all`, `git diff --numstat cf4e147`, and `git diff cf4e147 -- src/preload` | Only owned paths changed. `src/preload/*`: zero `-` lines, and the `+` lines are byte-equal to the A3 blocks (or the Biome layout A recorded, same tokens). `setup.ts`, `window-api-mocks.ts`, `app-launch.spec.ts` and `channels.ts`: `1 0` with exactly the stated line. In `metadata-panel-batch-save.test.ts`, only the D-28 describe changed (`git diff` hunks inside it). Frozen and protected paths pass `git diff --quiet cf4e147 -- <path>`. No comments added in `src/`. |
-| R43-2 tests + code | `npm run test:main`, `npm run test:renderer`; read the diff | (m1)–(m5) and the flipped (n)–(w) plus (x), (y), (z) exist and pass. Main validation, the skip rules, input order and `path` identity follow A2. `refreshSavedFileStats` chunks by 50, runs the chunks one after another, skips a rejected chunk, and keeps the `folderPath === null` guard. Every caller line is unchanged. `scanFolderRecursive` is unchanged. |
-| R43-3 red proof | `git worktree` (or `git archive`) of `cf4e147` with A's B1/B2/B3 test files copied in; run `npx vitest run -c vitest.config.renderer.ts tests/renderer/components/metadata-panel-batch-save.test.ts` and the main file-system test | Renderer (n), (o), (p), (s), (t), (x), (y), (z) fail on the baseline (`scanFolder` called / `statFiles` not called) and pass on A's tree. Main (m1)–(m5) fail on the baseline with `No handler for channel: fs:stat-files`. That is a structural red, recorded but not the meaningful one. Log both runs. |
-| R43-4 real app, correctness | Built app via Playwright `_electron` under `xvfb-run`, `XDG_CONFIG_HOME` temp. Fixture folder with one WAV in a subfolder. **(a)** select one top-level WAV, note its Size/Date cells, type `DOORWood` in Category, Save Tags. **(b)** select the nested WAV, same save. **(c)** select 3 WAVs, set Keywords `door, slam`, `Save to 3 files`. | (a)–(c): after the toast, each saved row's Size cell = `formatFileSize(fs.statSync(p).size)`, and its Date reflects the new mtime (screenshots before/after). Unsaved rows are unchanged. Independent readers on every saved file: `music-metadata` + `ffprobe -show_entries format_tags -of json` + raw INFO parse show `ICAT=DOORWood` ((a), (b)) and `IKEY=door, slam` ((c)), field by field. `pageErrors` is empty. |
-| R43-5 real app, IPC + speed | **(a)** In the built app, `page.evaluate` → `window.api.statFiles([existing, missing, dir.wav dir, x.txt, UPPER.WAV])` and `statFiles(51 paths)`, `statFiles("x")`. `Object.keys(window.api).sort()` on both builds. **(b)** Build `cf4e147` in its own worktree (`node_modules` symlinked). Generate a nested tree of ≥ 5000 small valid WAVs (e.g. 50 dirs × 100, depth ≤ 3, copies of one ffmpeg-made 0.1 s WAV). On both builds open the tree, then: median of 5 `window.api.scanFolder(root)` timings (T_scan), and the median click→`Tags saved` toast time of 5 single saves of one file (alternating values). | (a) Entries for existing/`UPPER.WAV` match `fs.statSync` (size, mtime ISO, `name`, identical `path`); missing, dir and txt are absent; 51 paths and `"x"` reject with `Invalid paths`. The key list = the baseline list + `statFiles`. (b) Record T_scan, T_base and T_new. PASS when T_new < T_base and T_base − T_new ≥ 0.5 × T_scan. If T_scan < 150 ms, grow the tree (e.g. 15000 files) until T_scan ≥ 150 ms, and say so. Size/Date update in the big tree too (one screenshot). |
-| R43-6 regression | Same harness | Rescan still lists a WAV copied into the open folder after the first load, and Open Folder/drop are unchanged (scanFolder still serves them). A batch save of 2 files where one was made unwritable after the scan (`chmod 000`, the TM-B16 fixture) gives the `1 saved, 1 failed` toast as before, and only the written row's Size changes. The D-07/D-47 schema behaviour is untouched (frozen files). |
-| R43-7 docs | Read the 3 doc files | The `STATE_MANAGEMENT.md` line and the `ELECTRON_IPC.md` bullet equal the Scope C text. 001 entry 23 has the corrected Reference and Deviation (1) text, and `git diff` of 001 touches only those two lines. README counts unchanged (C counts 23 `## N.` / 14 `გასწორდა`). C re-reads both Mp3tag URLs and confirms that the new text claims nothing the sources do not say. |
-| R43-8 gate | Clean `verifyCommand` (`{ npx --yes tsx@4 tests/fixtures/create-fixtures.ts && npm run check && xvfb-run -a npm run test:e2e; }`), plus `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Renderer count = 317 + the new tests (x, y, z); main count = 93 + the new tests; E2E 7/7 with no retry. Biome 0 errors, warnings ≤ 8. |
+| R44-1 ownership + carried tree | `git rev-parse HEAD`; `git status --porcelain --untracked-files=all`; `sha256sum` of the 13 carried files; `git diff --numstat cf4e147`; `git diff cf4e147 -- tests/renderer/components/schema-change-during-folder-load.test.ts`; `git diff cf4e147 -- src/preload` | HEAD is `cf4e147` (or the release-commit exception). Exactly 14 modified paths: the 13 carried, all 13 hashes equal to the Baseline table, plus the owned test file. The test file's numstat is `1 1`, the `-` line and the `+` line are exactly the two A1 lines, and the hunk sits inside (w7). Preload has zero `-` lines and only the round-43 additions (`11 0`, `1 0`). Protected and frozen paths pass `git diff --quiet cf4e147 -- <path>`. No untracked files. |
+| R44-2 red/green for (w7) | **(a)** Run the file on A's tree. **(b)** Temp copy of the tree (outside the repo, `node_modules` symlinked) with `MetadataPanel.tsx` from `cf4e147`, then run the file. **(c)** Optional: the unflipped (w7) on A's tree, i.e. the round-43 state | (a) 8/8 pass. (b) (w7) fails (`files[0].size` stays 1) and the other 7 pass. Logs saved under `c-round-44/`. The temp copy is removed afterwards. |
+| R44-3 gate | Clean `verifyCommand` `{ npx --yes tsx@4 tests/fixtures/create-fixtures.ts && npm run check && xvfb-run -a npm run test:e2e; }`, plus `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Renderer **320/320**, main **98/98**, E2E 7/7 with no retry. Biome 0 errors, warnings ≤ 8. |
+| R44-4 real app, fresh smoke | Built app via Playwright `_electron` under `xvfb-run`, `XDG_CONFIG_HOME` temp; the round-43 harness `c-round-43/r43-probe.mjs` may be reused. Fixture WAVs with an old mtime (e.g. 2020-01-15). **(a)** select one WAV, set Category `DOORWood`, Save Tags. **(b)** select 3 WAVs, set Keywords `door, slam`, `Save to 3 files`. **(c)** `page.evaluate` → `window.api.statFiles([existing, missing])` and `statFiles("x")` | (a), (b): each saved row's Size = `formatFileSize(fs.statSync(p).size)`, Date shows the new mtime, unsaved rows unchanged (screenshots before/after). For every saved file, `music-metadata` + `ffprobe -show_entries format_tags -of json` + raw INFO parse give `ICAT=DOORWood` (a) and `IKEY=door, slam` (b), field by field. (c): only the existing entry is returned, matching `fs.statSync`; `"x"` rejects with `Invalid paths`. `pageErrors` is empty. |
+| R44-5 round-43 evidence carried | Only after R44-1 confirms all 13 hashes and that `src/` diff = round 43's | C may cite `c-round-43.md` R43-3/R43-4/R43-5(b) speed/R43-6/R43-7 as evidence for the unchanged `src/` and docs. It must say so explicitly, with the hash check as the reason. If any hash differs, C re-runs R43-4..R43-6 in full instead. |
 
 `build:win` / `build:mac` stay BLOCKED ("Windows packaging is not available in the cloud"). That is not a FAIL.
 
 ## What could break (C re-checks)
-- **D-28 rules:** no refresh on a write reject, on a batch with 0 succeeded, or with no folder; only written rows change; no row is added or removed (`updateFileStats` is frozen).
-- **D-34/D-39:** `markPathsWritten` still runs before the refresh; `isListedPath` and the re-read guards are unchanged (the existing renderer suites stay green).
-- **Other renderer suites** that save with a folder open (`folder-read-during-save`, `reread-after-folder-switch`, …) used to get stats from the `scanFolder` mock. They must stay green without edits; if one does not, A stops (B3).
-- **Shift-click anchor (D-31, file-list (z2))** after a stats refresh.
-- **E2E `app-launch` method list** and the IPC write E2E.
-- **Security:** the new handler accepts only strings, at most 50, and returns data only for `.wav` regular files.
+- Nothing in `src/` changes. The real risk is A touching anything outside line 315, or a carried file drifting (R44-1 hashes).
+- Shared mock reset: `window-api-mocks.ts` (carried) resets `statFiles` to `[]` in each `beforeEach`. Check that (w7)'s `mockResolvedValue` does not leak into (w8), i.e. the whole file passes in order and the full renderer suite is 320/320.
+- Other suites that mock `scanFolder` (`folder-read-during-save`, `folder-read-overlap`, `folder-read-rejected-chunk`, `schema-editor-done-busy`, `schema-editor-stale-close`, other tests in this file) serve Open Folder / Rescan / drop loads, not the save's refresh. They stay untouched and green; B grepped them (B-R43-01).
 
 ## Next (orientation only, Saba's order)
-1. **Q4 → TM-B11 / D-10:** skip empty text and unset numbers, and keep a meaningful `0`. T1-10 must flip (B-R42-02).
+1. **Q4 → TM-B11 / D-10:** skip empty text and unset numbers, and keep a meaningful `0`. T1-10 in `recording-tag-contract.test.ts` and the K-4 docs must flip (B-R42-02). Touches `src/main/ipc/metadata.ts`.
 2. **Q5 → TM-B05:** a per-file error "audio data is empty, cannot tag", with a test.
 3. **Q3 → TM-B08:** docs/test pin only (D-12 decided).
 4. **Q6 → TM-B06:** Biome over `tests/**` with a relaxed override.
 5. **Q7 → TM-T2-DATA → TM-T2:** still waiting on Saba's UCS list and licence.
-6. **Open for Saba:**
-   - Q9–Q17;
-   - Q18 (B-R42-01; new fact from R42-6: Hide (X) on the standard Category also removes the custom `category` field definition);
-   - Q19 (confirm D-47's generalisation to all 13 standard fields, RR-R42-03).
+6. **Open for Saba:** Q9–Q17, Q18 (B-R42-01), Q19 (RR-R42-03).

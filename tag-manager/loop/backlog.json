@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 43: TM-B44 (Saba Q8, D-48) narrow fs:stat-files IPC replaces the per-save recursive scanFolder in the D-28 stats refresh; baseline cf4e147",
+  "current_task": "Round 44: TM-B44 completion — one-line flip of unowned renderer test (w7) from scanFolder to statFiles mock (C-R43-01); round-43 tree carried (13 files, hash-frozen); baseline cf4e147 + carried tree",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -111,6 +111,10 @@
     {
       "from_round": 18,
       "rule": "Repository writes by A go through Edit/Write only (no Bash heredoc, cat >, tee, sed -i, cp into the repo), so the read-primitives hook can fire; if it does not fire, A reads the primitives the task names before the first edit and says so (A-R17-02)."
+    },
+    {
+      "from_round": 44,
+      "rule": "When a round changes which window.api / IPC call a flow uses, B greps tests/ for every mock of the old call and gives the round ownership of each test that feeds the changed flow (exact lines), or states why it is unaffected (B-R43-01, C-R43-01)."
     }
   ],
   "decisions": [
@@ -378,7 +382,7 @@
     },
     {
       "id": "D-48",
-      "status": "planned (round 43, TM-B44); preload change permitted by Saba Q8 2026-10-28 (only the fs:stat-files channel); pure fix, reference-first exempt",
+      "status": "implemented in working tree (round 43; C R43-4/5/6 real-app PASS); awaiting round 44 green gate + publish; preload change permitted by Saba Q8 2026-10-28",
       "decision": "D-28's stats refresh after a confirmed save reads size and modifiedAt of the written paths only, through a new IPC channel fs:stat-files (IPC_CHANNELS.STAT_FILES, window.api.statFiles(paths): Promise<WavFileEntry[]>), instead of a full recursive scanFolder(folderPath). Main handler: input must be an array of at most 50 non-empty strings, otherwise Error('Invalid paths'); each path is stat-ed; a regular file with extension .wav (case-insensitive) yields { name: basename(path), path (the input string unchanged), size, modifiedAt: mtime ISO }; any other path (missing, directory, non-wav, stat error) is omitted; output keeps input order. Renderer: refreshSavedFileStats sends the written paths in chunks of 50, sequentially, awaits every chunk before the re-read, applies each resolved chunk with updateFileStats, and skips a rejected chunk silently (the other chunks still apply). Every other D-28 rule stays: no refresh when the write rejects, when a batch has 0 succeeded, or when folderPath is null; order write -> refresh -> re-read; toasts, isDirty and edits unchanged. scanFolder itself is unchanged and is still used by Open Folder, Rescan and drop.",
       "contract_with": "none (renderer file list columns only; K-4 tag contract untouched)"
     }
@@ -2044,11 +2048,14 @@
         "D-48"
       ],
       "acceptance": [
-        "round 43 R43-1..R43-8: preload diff is exactly the one statFiles member + one ElectronAPI line (Saba Q8); main handler tests; renderer D-28 tests flipped to statFiles red on cf4e147 src; real app: Size/Date update after single and batch save with independent readers confirming the tag, save time on a large nested folder drops versus the cf4e147 build; verify gate green"
+        "round 43 R43-1..R43-8: preload diff is exactly the one statFiles member + one ElectronAPI line (Saba Q8); main handler tests; renderer D-28 tests flipped to statFiles red on cf4e147 src; real app: Size/Date update after single and batch save with independent readers confirming the tag, save time on a large nested folder drops versus the cf4e147 build; verify gate green",
+        "round 44 R44-1..R44-5: (w7) one-line flip (numstat 1 1), 13 carried files hash-equal to round 43, red/green for (w7), clean verifyCommand renderer 320 main 98 E2E 7/7, fresh real-app smoke"
       ],
       "evidence": [
         "Root review R19 RR-R19-01 (medium); B R18 B-R18-01; C R19 observation 169 ms click->toast on 200 files",
-        "Saba answers 2026-10-28 (policy.local.md) Q8: permission to change src/preload/index.ts and index.d.ts ONLY to add the narrow fs:stat-files channel"
+        "Saba answers 2026-10-28 (policy.local.md) Q8: permission to change src/preload/index.ts and index.d.ts ONLY to add the narrow fs:stat-files channel",
+        "C round 43 FAIL (c-round-43.md/.json, realVerified=true): R43-1, R43-3, R43-4, R43-5, R43-6, R43-7 PASS; R43-2/R43-8 FAIL only because unowned tests/renderer/components/schema-change-during-folder-load.test.ts (w7) still mocks scanFolder for the save's stats refresh (renderer 319/320; C-R43-01, planning gap). Main 98/98, E2E 7/7 (--retries=0 7/7). Real app: Size/Date refresh after single, nested and 3-file batch save, ICAT=DOORWood / IKEY='door, slam' in raw INFO + music-metadata + ffprobe; statFiles edge cases match fs.statSync; keys = baseline 16 + statFiles; 5000-WAV tree: single save click->toast median 388/376 ms (cf4e147) -> 19/17 ms (new), T_scan ~360-380 ms; partial batch chmod 000 -> '1 saved, 1 failed', only written row changes; Rescan/Open Folder live. Not published; tree carried into round 44",
+        "B round 44 planning probe (scratch copy, not the repo): flipping (w7) :315 to vi.mocked(window.api.statFiles).mockResolvedValue([{ ...FILE_A, size: 2 }]) -> renderer 320/320 on A's tree; same test with cf4e147 MetadataPanel.tsx -> (w7) fails (1 failed / 7 passed)"
       ],
       "user_decision": "Saba Q8 2026-10-28"
     }
@@ -2733,7 +2740,10 @@
       "status": "in_progress",
       "round": 9,
       "title": "cold-start electronApplication.firstWindow Timeout 30000ms (A R9 run1, folder-workflow.spec.ts:27); with --retries=0 a single cold-runner occurrence turns the Actions run red",
-      "routed_to": "TM-B14: fix done R10 (35ed18b, C R10-2/3/4 deterministic red/green); open only until a cold-runner Actions Check run is linked (TM-B14 Actions line)"
+      "routed_to": "TM-B14: fix done R10 (35ed18b, C R10-2/3/4 deterministic red/green); open only until a cold-runner Actions Check run is linked (TM-B14 Actions line)",
+      "notes": [
+        "R43: A saw one 'first window did not appear within 60000 ms' flake (folder-workflow.spec.ts:29) with retries on; passed on retry; C's runs 7/7 incl. --retries=0 (A-R43-03)"
+      ]
     },
     {
       "round": 10,
@@ -3293,7 +3303,7 @@
       "severity": "info",
       "status": "in_progress",
       "title": "D-28 refreshes Size/Date with one full recursive scanFolder per save because preload is protected; a dedicated fs:stat-files channel (main + preload) would stat only the written paths. C records save timing on a ~200-file folder in R19 as an observation",
-      "routed_to": "TM-B44 round 43 (D-48, Saba Q8)",
+      "routed_to": "TM-B44 round 43 implemented (C real-app PASS, gate red on C-R43-01) -> round 44 completion",
       "notes": [
         "R19: C measured one single save on a 200-file folder at 169 ms click->toast (observation, no d015470 comparison). Root review R19 rates the full rescan per save medium (RR-R19-01); same Saba question"
       ],
@@ -3306,7 +3316,7 @@
       "severity": "medium",
       "status": "in_progress",
       "title": "Performance: every save awaits a full recursive scanFolder (file-system.ts scanFolderRecursive, depth 20, stat per WAV, no timeout) before the re-read while isSaving is true; slow on 1000+ files or a network drive. Fix: a narrow statFiles(paths) IPC (main + protected preload) or write IPCs returning stats; or a non-awaited refresh after the toast",
-      "routed_to": "TM-B44 round 43 (D-48, Saba Q8)",
+      "routed_to": "TM-B44 round 43 implemented (C real-app PASS, gate red on C-R43-01) -> round 44 completion",
       "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q8: permission to change src/preload/index.ts and index.d.ts ONLY to add the narrow fs:stat-files channel; exact diff listed in the round; C checks nothing else changed. Planned for round 43"
     },
     {
@@ -5150,7 +5160,10 @@
       "severity": "low",
       "status": "in_progress",
       "title": "B's Mp3tag reference R1 (round 42 task, docs/bugs/001 entry 23 **Reference:**) is not supported by the cited sources: the community thread only says custom fields become TXXX frames; docs.mp3tag.de/mapping says mappings can be changed and does not address a custom field named like a standard frame. Entry 23 states it as a fact",
-      "routed_to": "round 43 docs touch: entry 23 Reference rewritten to what the sources say, the 'one slot per name' sentence marked as B's unconfirmed inference"
+      "routed_to": "round 43 docs touch: entry 23 Reference rewritten to what the sources say, the 'one slot per name' sentence marked as B's unconfirmed inference",
+      "notes": [
+        "Round 43: 001 entry 23 corrected in working tree; C R43-7 PASS (re-read both Mp3tag URLs). Closes when round 44 publishes"
+      ]
     },
     {
       "round": 42,
@@ -5214,6 +5227,51 @@
       "status": "open",
       "title": "docs/learning/decisions.md:76 says 'contextBridge (13 მეთოდი)'; window.api has 16 methods at cf4e147 and 17 after round 43 (statFiles). Stale learning doc",
       "routed_to": "record (next docs/learning touch)"
+    },
+    {
+      "round": 43,
+      "id": "C-R43-01",
+      "source": "C (c-round-43.json)",
+      "severity": "medium",
+      "status": "in_progress",
+      "title": "Gate red: tests/renderer/components/schema-change-during-folder-load.test.ts (w7) mocks window.api.scanFolder (:315) to feed the save's stats refresh, which now goes to statFiles (reset mock -> []); renderer 319/320, verifyCommand rc=1. Planning gap (B3 did not own the test); not a product defect",
+      "routed_to": "round 44: one-line flip of :315 to statFiles mock"
+    },
+    {
+      "round": 43,
+      "id": "A-R43-01",
+      "source": "A (code-reviewer subagent, a-round-43.md)",
+      "severity": "low",
+      "status": "open",
+      "title": "fs:stat-files uses stat (follows symlinks) and is not limited to the open folder: any .wav path or a .wav symlink returns its target's size/mtime. Allowed by D-48; scanFolder never lists symlinked WAVs, so the renderer never sends one",
+      "routed_to": "signal: lstat or restrict to folderPath as future hardening"
+    },
+    {
+      "round": 43,
+      "id": "A-R43-02",
+      "source": "A (a-round-43.md)",
+      "severity": "info",
+      "status": "open",
+      "title": "Test gaps: main stat-files tests cover ENOENT but not EACCES; renderer (y) does not assert re-read order (covered by (x))",
+      "routed_to": "record"
+    },
+    {
+      "round": 43,
+      "id": "A-R43-03",
+      "source": "A (a-round-43.md)",
+      "severity": "info",
+      "status": "open",
+      "title": "One E2E launch flake 'first window did not appear within 60000 ms' (folder-workflow.spec.ts:29, retries on, passed on retry); C saw 7/7 with and without retries",
+      "routed_to": "C-R9-02 class, record"
+    },
+    {
+      "round": 43,
+      "id": "B-R43-01",
+      "source": "B (round 44 planning)",
+      "severity": "low",
+      "status": "open",
+      "title": "Process: round 43 changed which window.api call the save flow uses but owned only the D-28 describe; B did not grep tests/ for other suites feeding the save's refresh via scanFolder ((w7)). The other scanFolder mocks serve Open Folder/Rescan/drop and were correctly untouched",
+      "routed_to": "rule from round 44 (rules list)"
     }
   ],
   "rounds": [
@@ -6145,12 +6203,28 @@
     {
       "round": 43,
       "task": "TM-B44 (Saba Q8, D-48): fs:stat-files IPC replaces the per-save scanFolder in the D-28 stats refresh; C-R42-01 docs correction in 001 entry 23",
-      "status": "planned",
+      "status": "C FAIL (gate red only on unowned (w7), C-R43-01); not published; tree carried into round 44",
       "baseline": "cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42 (clean)",
       "items": [
         "TM-B44"
       ],
       "findings": [
+        "RR-R19-01",
+        "B-R18-01",
+        "C-R42-01"
+      ],
+      "result": "C R43-1/3/4/5/6/7 PASS realVerified=true; R43-2/R43-8 FAIL via C-R43-01 (renderer 319/320); main 98/98; E2E 7/7; speed 5000 WAV single save 388->19 ms median; A findings A-R43-01..03"
+    },
+    {
+      "round": 44,
+      "task": "TM-B44 completion: (w7) one-line flip scanFolder -> statFiles mock (C-R43-01); round-43 tree carried hash-frozen",
+      "status": "planned",
+      "baseline": "cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42 + carried round-43 tree (13 files, sha256 listed in current-task.md)",
+      "items": [
+        "TM-B44"
+      ],
+      "findings": [
+        "C-R43-01",
         "RR-R19-01",
         "B-R18-01",
         "C-R42-01"

@@ -1,0 +1,325 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/czaba-project/czaba-tag-manager[39m
+
+ [31m❯[39m tests/renderer/components/metadata-panel-batch-save.test.ts [2m([22m[2m52 tests[22m[2m | [22m[31m10 failed[39m[2m)[22m[33m 1329[2mms[22m[39m
+     [32m✓[39m (a) all files failed: typed value, isDirty, modifiedFields and Save button are kept[32m 92[2mms[22m[39m
+     [32m✓[39m (b) partial failure: edits are kept and succeeded files are refreshed in the store[32m 43[2mms[22m[39m
+     [32m✓[39m (c) retry after a failure writes the same fields to all selected files and clears on success[32m 49[2mms[22m[39m
+     [32m✓[39m (d) full success clears the form back to Multiple values[32m 39[2mms[22m[39m
+     [32m✓[39m (e) single-file write failure keeps the typed value and shows the error[32m 33[2mms[22m[39m
+     [32m✓[39m (f) partial failure + unreadable failed file: failed path keeps its seed, succeeded path is updated[32m 30[2mms[22m[39m
+     [32m✓[39m (g) all failed + both re-reads empty: both store entries are unchanged and edits are kept[32m 38[2mms[22m[39m
+     [32m✓[39m (h) sync effect regression: after an all-failed save a selection change still warns and loads the kept entry[32m 41[2mms[22m[39m
+     [32m✓[39m (i) all-failed save leaves no stale skipSyncRef: the next sync-effect run is not swallowed (RR-R12-01)[32m 36[2mms[22m[39m
+     [32m✓[39m (j) batch, all written + re-read rejects: write-result toast, store untouched, edits kept[32m 34[2mms[22m[39m
+     [32m✓[39m (k) batch, partial write + re-read rejects: write-result toast, store untouched, edits kept[32m 30[2mms[22m[39m
+     [32m✓[39m (l) single, write ok + readMetadata rejects: write-result toast, store untouched, edits kept[32m 34[2mms[22m[39m
+     [32m✓[39m (m) pin: batch write rejects: raw error toast, no re-read, store untouched, edits kept[32m 21[2mms[22m[39m
+[31m     [31m×[31m (n) single save succeeds: statFiles once with the saved path, no scan, write -> stat -> read[39m[32m 31[2mms[22m[39m
+[31m     [31m×[31m (o) batch, all succeed: statFiles once with both paths, both files are patched and the selection is kept[39m[32m 20[2mms[22m[39m
+[31m     [31m×[31m (p) batch, partial failure: only the written path is sent and patched[39m[32m 13[2mms[22m[39m
+     [32m✓[39m (q) batch, all failed: no stat and no scan, files unchanged, edits kept[32m 17[2mms[22m[39m
+     [32m✓[39m (r) single write rejects: no stat and no scan, files unchanged[32m 13[2mms[22m[39m
+[31m     [31m×[31m (s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged[39m[32m 13[2mms[22m[39m
+[31m     [31m×[31m (t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged[39m[32m 30[2mms[22m[39m
+[31m     [31m×[31m (u) statFiles rejects on a single save: silent, toast and store metadata as today, files unchanged[39m[32m 13[2mms[22m[39m
+     [32m✓[39m (v) folderPath null: no stat and no scan, the save behaves as today[32m 12[2mms[22m[39m
+[31m     [31m×[31m (w) the stat result lacks the saved path: the file keeps its stats and nothing is added[39m[32m 15[2mms[22m[39m
+[31m     [31m×[31m (x) batch of 51: statFiles runs twice (50, then 1) one after another, all rows refreshed before the re-read[39m[32m 19[2mms[22m[39m
+[31m     [31m×[31m (y) batch of 51, first chunk rejects: the 51st row is refreshed, the first 50 keep their stats, toast unchanged[39m[32m 16[2mms[22m[39m
+[31m     [31m×[31m (z) single save, the stat result also has an unwritten file: only the saved file is patched[39m[32m 12[2mms[22m[39m
+     [32m✓[39m (x1) single A -> B during the write: the editor shows B, A's re-read only goes to the store[32m 24[2mms[22m[39m
+     [32m✓[39m (x2) the follow-up save on B writes B's own values, never A's[32m 28[2mms[22m[39m
+     [32m✓[39m (x3) typing on B during the write: B's edits and isDirty are kept[32m 22[2mms[22m[39m
+     [32m✓[39m (x4) selection cleared during the write: editor stays empty, store and toast as usual[32m 13[2mms[22m[39m
+     [32m✓[39m (x5) batch all succeeded, A+B -> A during the write: the editor shows A's refreshed values[32m 17[2mms[22m[39m
+     [32m✓[39m (x6) batch partial, A+B -> A during the write: the editor shows A's refreshed value, B's entry is kept[32m 19[2mms[22m[39m
+     [32m✓[39m (x7) pin: the write rejects after A -> B: error toast, editor shows B, store untouched, no re-read[32m 16[2mms[22m[39m
+     [32m✓[39m (x8) pin: D-24 after A -> B: reload-failed toast, editor shows B, store untouched[32m 16[2mms[22m[39m
+     [32m✓[39m (x9) pin: the same set reordered during a batch write behaves as today[32m 26[2mms[22m[39m
+     [32m✓[39m (x10) pin: A -> B -> A during the write behaves as today[32m 18[2mms[22m[39m
+     [32m✓[39m (x11) batch all succeeded, A+B -> A and typing on A during the write: A's edits and isDirty are kept[32m 24[2mms[22m[39m
+       [32m✓[39m (y1) single, same selection: a field typed during the write is kept and Save stays enabled[32m 21[2mms[22m[39m
+       [32m✓[39m (y2) the next Save writes the text typed during the first save[32m 26[2mms[22m[39m
+       [32m✓[39m (y3) the saved field retyped during the write keeps the new value[32m 28[2mms[22m[39m
+       [32m✓[39m (y4) pin: a field typed and reverted to the saved value during the write is not a change[32m 24[2mms[22m[39m
+       [32m✓[39m (y5) pin: an equal tag array with a new reference during the write is not a change[32m 28[2mms[22m[39m
+       [32m✓[39m (y5b) tag order changed during the write is a change[32m 28[2mms[22m[39m
+       [32m✓[39m (y6) a tag added during the write is kept[32m 21[2mms[22m[39m
+       [32m✓[39m (y7) a number typed during the write is kept[32m 24[2mms[22m[39m
+       [32m✓[39m (y8) A -> B -> A and typing on A during the write: typed text on top of A's re-read[32m 33[2mms[22m[39m
+       [32m✓[39m (y9) batch all succeeded, same set: a field typed during the write is kept[32m 28[2mms[22m[39m
+       [32m✓[39m (y10) the next batch Save writes only the field typed during the first save[32m 28[2mms[22m[39m
+       [32m✓[39m (y11) pin: batch partial failure and typing during the write keeps every edit[32m 26[2mms[22m[39m
+       [32m✓[39m (y12) pin: the write rejects and typing during the write keeps every edit[32m 21[2mms[22m[39m
+       [32m✓[39m (y13) pin: D-24 re-read rejects and typing during the write keeps every edit[32m 21[2mms[22m[39m
+     [32m✓[39m (i3) resetWindowApiMocks drops once-values queued on the six window.api mocks[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 10 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(n) single save succeeds: statFiles once with the saved path, no scan, write -> stat -> read
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m474:39[22m[39m
+    [90m472| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save Tags/[39m)[33m;[39m
+    [90m473| [39m
+    [90m474| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m475| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m476| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m [[33mPATH_A[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(o) batch, all succeed: statFiles once with both paths, both files are patched and the selection is kept
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m500:39[22m[39m
+    [90m498| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m499| [39m
+    [90m500| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m501| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m502| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m [[33mPATH_A[39m[33m,[39m [33mPATH_B[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(p) batch, partial failure: only the written path is sent and patched
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m525:39[22m[39m
+    [90m523| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m524| [39m
+    [90m525| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m526| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m527| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m [[33mPATH_A[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(s) single write ok + readMetadata rejects (D-24): the file is patched, D-24 toast and edits unchanged
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m574:39[22m[39m
+    [90m572| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save Tags/[39m)[33m;[39m
+    [90m573| [39m
+    [90m574| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m575| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m576| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m [[33mPATH_A[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(t) batch partial + readMetadataBatch rejects (D-24): only the written file is patched, D-24 toast unchanged
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m598:39[22m[39m
+    [90m596| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 2 files/[39m)[33m;[39m
+    [90m597| [39m
+    [90m598| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m599| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m600| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m [[33mPATH_A[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(u) statFiles rejects on a single save: silent, toast and store metadata as today, files unchanged
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m619:39[22m[39m
+    [90m617| [39m
+    [90m618| [39m    [35mconst[39m state [33m=[39m useMetadataStore[33m.[39m[34mgetState[39m()[33m;[39m
+    [90m619| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m620| [39m    [34mexpect[39m(state[33m.[39mtoastKey [33m-[39m toastKeyBefore)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m621| [39m    [34mexpect[39m(state[33m.[39mtoastMessage)[33m.[39m[34mtoBe[39m([32m"Tags saved"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(w) the stat result lacks the saved path: the file keeps its stats and nothing is added
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m654:39[22m[39m
+    [90m652| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save Tags/[39m)[33m;[39m
+    [90m653| [39m
+    [90m654| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m655| [39m    [34mexpectNotRefreshed[39m([33mPATH_A[39m)[33m;[39m
+    [90m656| [39m    [34mexpectNotRefreshed[39m([33mPATH_B[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(x) batch of 51: statFiles runs twice (50, then 1) one after another, all rows refreshed before the re-read
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m675:39[22m[39m
+    [90m673| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 51 files/[39m)[33m;[39m
+    [90m674| [39m
+    [90m675| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m676| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m2[39m)[33m;[39m
+    [90m677| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m paths[33m.[39m[34mslice[39m([34m0[39m[33m,[39m [34m50[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(y) batch of 51, first chunk rejects: the 51st row is refreshed, the first 50 keep their stats, toast unchanged
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m701:39[22m[39m
+    [90m699| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save to 51 files/[39m)[33m;[39m
+    [90m700| [39m
+    [90m701| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m702| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m2[39m)[33m;[39m
+    [90m703| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m paths[33m.[39m[34mslice[39m([34m0[39m[33m,[39m [34m50[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/renderer/components/metadata-panel-batch-save.test.ts[2m > [22mMetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)[2m > [22m(z) single save, the stat result also has an unwritten file: only the saved file is patched
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/music",
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/renderer/components/metadata-panel-batch-save.test.ts:[2m723:39[22m[39m
+    [90m721| [39m    [35mawait[39m [34mtypeCategoryAndSave[39m([36m/Save Tags/[39m)[33m;[39m
+    [90m722| [39m
+    [90m723| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mscanFolder)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m724| [39m    [34mexpect[39m(window[33m.[39mapi[33m.[39mstatFiles)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m725| [39m    [34mexpectStatCall[39m([34m0[39m[33m,[39m [[33mPATH_A[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m10 failed[39m[22m[2m | [22m[1m[32m42 passed[39m[22m[90m (52)[39m
+[2m   Start at [22m 09:20:01
+[2m   Duration [22m 2.56s[2m (transform 310ms, setup 91ms, import 457ms, tests 1.33s, environment 552ms)[22m
+
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (n) single save succeeds%3A statFiles once with the saved path%2C no scan%2C write -> stat -> read,line=474,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:474:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (o) batch%2C all succeed%3A statFiles once with both paths%2C both files are patched and the selection is kept,line=500,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:500:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (p) batch%2C partial failure%3A only the written path is sent and patched,line=525,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:525:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (s) single write ok + readMetadata rejects (D-24)%3A the file is patched%2C D-24 toast and edits unchanged,line=574,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:574:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (t) batch partial + readMetadataBatch rejects (D-24)%3A only the written file is patched%2C D-24 toast unchanged,line=598,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:598:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (u) statFiles rejects on a single save%3A silent%2C toast and store metadata as today%2C files unchanged,line=619,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:619:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (w) the stat result lacks the saved path%3A the file keeps its stats and nothing is added,line=654,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:654:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (x) batch of 51%3A statFiles runs twice (50%2C then 1) one after another%2C all rows refreshed before the re-read,line=675,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:675:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (y) batch of 51%2C first chunk rejects%3A the 51st row is refreshed%2C the first 50 keep their stats%2C toast unchanged,line=701,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:701:39%0A%0A
+
+::error file=/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts,title=tests/renderer/components/metadata-panel-batch-save.test.ts > MetadataPanel refreshes Size and Date after a confirmed save (TM-B22%2C D-28%2C D-48) > (z) single save%2C the stat result also has an unwritten file%3A only the saved file is patched,line=723,column=39::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "/music",%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ tests/renderer/components/metadata-panel-batch-save.test.ts:723:39%0A%0A

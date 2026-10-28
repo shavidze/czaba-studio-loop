@@ -1,0 +1,30 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R43-01",
+      "severity": "medium",
+      "steps": [
+        "Working tree = A's round-43 changes on cf4e147; generate the fixtures (npx --yes tsx@4 tests/fixtures/create-fixtures.ts)",
+        "npm run check (or npm run test:renderer)"
+      ],
+      "expected": "Renderer 320/320 green; verifyCommand exit 0 (R43-8)",
+      "actual": "Renderer 319/320. tests/renderer/components/schema-change-during-folder-load.test.ts '(w7) pin: a save's stats refresh replaces the files array while the schema re-read is pending: the schema re-read still applies' fails at :328 (expected 1 to be 2). The test mocks window.api.scanFolder (:315) to supply the save's stats refresh, which now goes to statFiles (reset mock -> []). The verifyCommand chain stops at the renderer step (rc=1). This is a planning gap: B3 did not own this unowned test, and A correctly stopped per B3. It is not a product defect: in the real app the stats refresh works (R43-4/5/6).",
+      "evidence": "c-round-43/verify.log lines 171-220; A's a-round-43.md 'B-სთვის' section. Suggested (B decides): give the next round ownership of schema-change-during-folder-load.test.ts (w7) only, and switch :315 to vi.mocked(window.api.statFiles).mockResolvedValue([{ ...FILE_A, size: 2 }])."
+    }
+  ],
+  "passed": [
+    "R43-1",
+    "R43-3",
+    "R43-4",
+    "R43-5",
+    "R43-6",
+    "R43-7"
+  ],
+  "blocked": [
+    "R43-2/R43-8: FAIL (ran, not blocked) — see C-R43-01; all other parts of R43-2 hold, main 98/98, E2E 7/7",
+    "build:win/build:mac: Windows packaging is not available in the cloud",
+    "R43-6 drop: no real OS drag-drop under xvfb; the task criterion \"scanFolder still serves them\" is a code fact — FolderBrowser.tsx frozen, byte-identical, still calls scanFolder; Open Folder and Rescan were verified live"
+  ],
+  "realVerified": true
+}
