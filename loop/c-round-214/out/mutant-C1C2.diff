@@ -1,0 +1,21 @@
+--- /home/runner/czaba-project/store/perf/studio-lab-interactions.perf.spec.ts	2026-10-27 23:03:41.218624720 +0000
++++ perf/studio-lab-interactions.perf.spec.ts	2026-10-27 23:53:37.993459134 +0000
+@@ -31,7 +31,7 @@
+ const zoomKeyCount = 5;
+ const clipsTarget = 30;
+ const expectedReactMajor = '18';
+-const rangeLabelEnd = /\d\d:\d\d\.\d{3} – (\d\d):(\d\d\.\d{3}) ·/;
++const rangeLabelEnd = /\d\d:\d\d\.\d{3} – (\d\d):(\d\d\.\d{3}) ··NEVER/;
+ 
+ const interactionDeterminismMetrics = new Set([
+   'commits',
+--- /home/runner/czaba-project/store/perf/lib/instrumentation.ts	2026-10-27 22:42:57.810180871 +0000
++++ perf/lib/instrumentation.ts	2026-10-27 23:53:37.993596781 +0000
+@@ -136,7 +136,6 @@
+         'version' in renderer &&
+         typeof renderer.version === 'string'
+       ) {
+-        rendererVersions.push(renderer.version);
+       }
+       return id;
+     },

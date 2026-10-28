@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-27T22:08:57.611Z)
+# Active loop summary (2026-10-28T00:31:29.646Z)
 
-- backlog.json 1915 KB -> active view 277 KB
-- status: G_ROOT_GATE round 213
-- servers: `{"checkedUtc":"2026-10-27T21:55:10.2553526Z","round":213,"attempt":1,"store":200}`
-- last publication: fe556fd70c30484920fa53f10db1aadf806c8396 (rounds 212-213)
-- last root gate: round 213 published - commit fe556fd70c30484920fa53f10db1aadf806c8396 pushed
+- backlog.json 1923 KB -> active view 275 KB
+- status: G_ROOT_GATE round 214
+- servers: `{"checkedUtc":"2026-10-27T23:48:43.7237510Z","round":214,"attempt":1,"store":200}`
+- last publication: eb9e76e1bc2b41f6ec1a3e083a391d05cb1a844f (rounds 214-214)
+- last root gate: round 214 published - commit eb9e76e1bc2b41f6ec1a3e083a391d05cb1a844f pushed
 
 ## Current items: -
 
@@ -475,11 +475,10 @@
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- SABA-B-5 / medium / c_pass_pending_publication: part 1 done round 210 (180dd2e); part 2 done round 211 (28a274c); part 3 C PASS round 212 LATENCY-212 (single Clip Gain move-to-paint p95 5.4-7.6 ms stopped/playing both viewports vs baseline 23.9/41.4; harness 6.2-7.6) browserVerified=true; gate 212 failed on the pre-existing CP12 timeout (GATE212-B1), so it closes at the round-213 publication (D-29z202). 6x CPU still 45-60 ms on both builds (C-R212-03 signal) / Fader drag is slow (Saba 2026-10-27): every pointer move of a track/group volume, master or clip-gain fader re-renders the whole Studio
 - GATE205-DOC162-STATUS / low / dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
-- GATE206-S3 / low / scheduled_with PERF-1b / fiber walk depends on React 18 internals (tag/PerformedWork); record renderer.version and fail on unexpected major
-- GATE206-S5 / low / scheduled_with PERF-1b (document or separate build dir) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
-- GATE206-S6 / low / scheduled_with PERF-1b / harness.audio-running is weak with the autoplay flag; require running context + >=1 start() in the playing window
+- GATE206-S3 / low / scheduled round 214 (PERF-1b-i, D-29z207) / fiber walk depends on React 18 internals (tag/PerformedWork); record renderer.version and fail on unexpected major
+- GATE206-S5 / low / scheduled PERF-1b-ii round 216: document only (D-29z207) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
+- GATE206-S6 / low / scheduled round 214 (PERF-1b-i, D-29z207) / harness.audio-running is weak with the autoplay flag; require running context + >=1 start() in the playing window
 - I-206-a / info / root_note / fake-Bearer /api/studio-token returns 500 without the :5199 mock (mock not started at job start; no cloud/ folder in the loop folder), 403 w
 - GATE206-DOC163-STATUS / low / scheduled: round 207 R113 (D-29z175) / doc 163 l.4 published still conditional (C round 206 check pending)
 - A-R207-01 / low / duplicate_of C-R207-01 / 
@@ -504,10 +503,11 @@
 - GATE211-ARCH-CLIPGAIN-GESTURE / info / signal; folded into the frontend-architect checkpoint (D-29z195); not scheduled / Clip Gain pending + pointer machines in ArrangementContext l.2979-3180; proposal lib/arrangement/clip-gain-gesture.ts pure preview/commit/ca
 - GATE211-ARCH-CLIPGAIN-PROPS / info / signal; reviewer verdict keep; folded into the checkpoint / ArrangementDetailClipGain takes ~30 props
 - A-R211-ARCH-USEMIXDRAFT / info / signal; folded into the checkpoint (D-29z195); not scheduled / useMixDraftValue exported from ArrangementMixFader.tsx and used by ArrangementClip.tsx; proposal: move next to mix-draft-store.ts
-- GATE212-B1 / medium / scheduled: round 213 (D-29z201) / full-suite CP12 (clip-gain-pointer-preview.test.tsx) exceeds the 30 s timeout (33.3 s; 25.4 s in gate 211); blocks publication of round 212
-- C-R212-02 / info / signal for PERF-1b (median-of-N or record row; D-29z200); not scheduled / load.longtasks-over-50 2 in every pass (C r211 [1,2,1]); C probe 1 in 8/8 loads on both builds
 - C-R212-03 / info / signal: slow-CPU budget is a Saba question / PERF-1b input (D-29z202); not scheduled / Clip Gain drag under 6x CPU throttle still 45-60 ms p95 on both current and baseline builds
 - B-R212-TIMEOUT-HEADROOM / info / signal for RETRO 215 (lessons.md owned by RETRO) / RETRO 215 lesson signal: a test above ~50 % of its timeout in the last gate log (CP12 25.4/30 s at gate 211) should be split before more row
+- GATE213-S4 / info / signal (D-29z205); fix = include selected clip ids in the sync trigger if it ever counts as a bug / ArrangementDetailPanel render-phase field sync keyed on the displayed dB only: half-typed text survives a selection change to a clip with th
+- GATE213-S5 / info / signal (D-29z205) / ArrangementDetailPanel.tsx:996 allocates [clipGainDb ?? 0] per render; harmless until the gain block is memoized
+- GATE213-S7 / info / root signal (D-29z205): run npx biome lint on the touched paths in the gate / gate verify.log prints only 19 of 205 Biome warnings, so new warnings in touched files cannot be confirmed from the log
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

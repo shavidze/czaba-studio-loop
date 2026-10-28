@@ -1,0 +1,99 @@
+{
+  "round": 214,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-27T23:48:43.7237510Z",
+    "round": 214,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "SCOPE-214",
+    "PERF-RUN-214",
+    "PROBE-214",
+    "REDPROOF-214",
+    "HYGIENE-214",
+    "DOC-214",
+    "AN-REVIEW-214",
+    "G214-3",
+    "STUDIO-SMOKE-214"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck (full gate)",
+    "build",
+    "Biome (full)",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [],
+  "needsBRuling": [
+    "A-R214-DEV-RANGE-LIVE: task's [data-range-end] liveness is impossible for a clip-body range (ArrangementLane.tsx l.1016 renders it only for allTracks; C probe: 0 [data-range-start] while the range label moved). A's label-based substitute is live and red-provable (C mutant C1). C recommends accepting.",
+    "A-R214-DEV-CLICK-LIVE: Clip Gain fader always rendered; enabled/disabled used as the selection signal (minor).",
+    "A-R214-DEV-AUDIO-RUNNING-1X: interact.harness.audio-running is 1x-only although step 5 runs at both rates; at 6x a non-running play still pushes a failure. B to confirm (minor)."
+  ],
+  "notes": [
+    "NEEDS B RULING: A-R214-DEV-RANGE-LIVE: task's [data-range-end] liveness is impossible for a clip-body range (ArrangementLane.tsx l.1016 renders it only for allTracks; C probe: 0 [data-range-start] while the range label moved). A's label-based substitute is live and red-provable (C mutant C1). C recommends accepting.",
+    "NEEDS B RULING: A-R214-DEV-CLICK-LIVE: Clip Gain fader always rendered; enabled/disabled used as the selection signal (minor).",
+    "NEEDS B RULING: A-R214-DEV-AUDIO-RUNNING-1X: interact.harness.audio-running is 1x-only although step 5 runs at both rates; at 6x a non-running play still pushes a failure. B to confirm (minor).",
+    "C-R214-BIOME-PERF-VACUOUS (info, pre-existing): `npx biome check perf/` processes nothing under the repo biome.json (includes app/** only). C's substitute on a clean perf/ copy with includes perf/**: 7 files, no diagnostics.",
+    "Fake-Bearer /api/studio-token returned 500 because the :5199 mock was not running (curl 000); the task allows 500 in that case. No token was issued.",
+    "PROBE fade commits-per-move 0.983 vs A's 1x row 1.000: one-commit window-edge difference (C's window starts after the first in-page move); components per move identical.",
+    "Ableton conformance: not applicable (performance harness round).",
+    "The idle :5173 dev server stayed up during the perf runs (as in rounds 212/213); no build/verify ran in parallel with a perf run.",
+    "PERF-1a latest.json untouched by the new-spec-alone run: byte-identical to run-1 copy, mtime 00:02:52 before run 2 start."
+  ],
+  "measurements": {
+    "perfRun1": {
+      "command": "npm run test:perf",
+      "exit": 0,
+      "wall": "13.6m",
+      "newSpecDurationMs": 327728,
+      "perf1aDurationMs": 477799,
+      "newSpecFailures": 0,
+      "perf1aFailures": 0,
+      "rows": "144x3 / 316x3",
+      "reactRenderer": "18.3.1",
+      "perf1aDeterministicMedianDiffsVsRound212": 0,
+      "countMedianDiffsVsA": 0
+    },
+    "perfRun2": {
+      "command": "new spec alone",
+      "exit": 0,
+      "durationMs": 317214,
+      "failures": 0,
+      "countMedianDiffsVsRun1": 0
+    },
+    "probe": {
+      "server": "remix-serve :5189, 1440x900, 60 steps, +120 px",
+      "rangeStopped": {
+        "componentsPerMove": 101.283,
+        "aMedian": 101.283,
+        "commitsPerMove": 1.983,
+        "runs": 3
+      },
+      "fadeStopped": {
+        "componentsPerMove": 96.367,
+        "aMedian": 96.367,
+        "commitsPerMove": 0.983,
+        "runs": 3
+      },
+      "rangePlaying": {
+        "moveRestarts": 0,
+        "releaseRestarts": 0
+      },
+      "fadePlaying": {
+        "moveRestarts": 0,
+        "releaseRestarts": 1
+      }
+    },
+    "mutants": {
+      "C1": "range label regex unmatchable -> only interact.harness.drag-range-live (+.6x) asserts fail",
+      "C2": "renderer version not recorded -> 'no React renderer was injected' in all 6 passes",
+      "C3": "budgets override range stopped move-components-per-move assert <= 3 -> only that row fails (101.283)"
+    }
+  }
+}
