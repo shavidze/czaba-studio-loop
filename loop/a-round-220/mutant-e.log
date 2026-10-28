@@ -1,0 +1,44 @@
+MUTANT e on app/lib/arrangement/mp3-encoder.client.ts
+sha before: f4111247ab1c1f20013bcc20fe6daaee21a3f7ba748af8307524ddc791778458
+@@ -12,0 +13,4 @@ import {
++export interface ArrangementMp3EncodeOptions {
++  bitrate?: number;
++}
++
+@@ -14 +18,5 @@ export interface ArrangementMp3Encoder {
+-  encode(wav: Blob, onProgress?: (fraction: number) => void): Promise<Blob>;
++  encode(
++    wav: Blob,
++    onProgress?: (fraction: number) => void,
++    options?: ArrangementMp3EncodeOptions,
++  ): Promise<Blob>;
+@@ -16,0 +25,2 @@ export interface ArrangementMp3Encoder {
++export const ARRANGEMENT_MP3_BITRATES: readonly number[] = [128_000, 192_000, 320_000];
++
+@@ -38,0 +49 @@ async function encodeArrangementMp3(
++  options?: ArrangementMp3EncodeOptions,
+@@ -40,0 +52 @@ async function encodeArrangementMp3(
++  const bitrate = options?.bitrate ?? ARRANGEMENT_MP3_BITRATE;
+@@ -41,0 +54,4 @@ async function encodeArrangementMp3(
++  if (!ARRANGEMENT_MP3_BITRATES.includes(bitrate)) {
++    input.dispose();
++    throw new Error(`Unsupported MP3 bitrate: ${bitrate}`);
++  }
+@@ -48 +64 @@ async function encodeArrangementMp3(
+-      audio: { codec: 'mp3', quality: new Quality({ bitrate: ARRANGEMENT_MP3_BITRATE }) },
++      audio: { codec: 'mp3', quality: new Quality({ bitrate }) },
+@@ -79,2 +95,2 @@ function arrangementMp3EncoderFor(generation: number): ArrangementMp3Encoder {
+-    encode(wav, onProgress) {
+-      return encodeArrangementMp3(generation, wav, onProgress);
++    encode(wav, onProgress, options) {
++      return encodeArrangementMp3(generation, wav, onProgress, options);
+ [31m❯[39m app/lib/arrangement/__tests__/mp3-encoder.test.ts [2m([22m[2m18 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 73[2mms[22m[39m
+[31m     [31m×[31m ME11 options.bitrate 256000 rejects with Unsupported MP3 bitrate before any Input or Conversion.init[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m ME11 options.bitrate 0 rejects with Unsupported MP3 bitrate before any Input or Conversion.init[39m[32m 2[2mms[22m[39m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME11 options.bitrate 256000 rejects with Unsupported MP3 bitrate before any Input or Conversion.init
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME11 options.bitrate 0 rejects with Unsupported MP3 bitrate before any Input or Conversion.init
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (18)[39m
+vitest rc=1
+sha after restore: f4111247ab1c1f20013bcc20fe6daaee21a3f7ba748af8307524ddc791778458 match=yes

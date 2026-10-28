@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T05:22:29.849Z)
+# Active loop summary (2026-10-28T06:23:21.996Z)
 
-- backlog.json 1975 KB -> active view 279 KB
-- status: G_ROOT_GATE round 219
-- servers: `{"checkedUtc":"2026-10-28T05:07:12.6071866Z","round":219,"attempt":1,"store":200}`
-- last publication: c54a534e997b9b5caf98e4294187b3e906c4a285 (rounds 219-219)
-- last root gate: round 219 published - commit c54a534e997b9b5caf98e4294187b3e906c4a285 pushed
+- backlog.json 1988 KB -> active view 280 KB
+- status: G_ROOT_GATE round 220
+- servers: `{"checkedUtc":"2026-10-28T05:59:24.3673973Z","round":220,"attempt":1,"store":200}`
+- last publication: c4e6c9d96e3059d5715e89715cae9afda1a7152b (rounds 220-220)
+- last root gate: round 220 published - commit c4e6c9d96e3059d5715e89715cae9afda1a7152b pushed
 
 ## Current items: -
 
@@ -511,9 +511,16 @@
 - R216-MEM-POLLS-HEADROOM / info / watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
 - C-R217-HARNESS-FIRST-NAV / info / harness note applied: warm-up goto in the round-218 C setup; hypothesis (unconfirmed) Vite reload after re-optimisation / first dev-server navigation after a perf run hit a 30 s waitForFunction timeout at 1440 (2x); reruns clean
 - ARCH-GATE217-REPORT-HELPERS / info / signal on PERF-HARNESS-SHARED-LIB (D-29z215, third occurrence); not scheduled by this note / third copy of nowIn/snapshot/waitForQuiet/reactRendererProblem/rateRowId/report builder across the three perf specs
-- ARCH-R218-ENCODER-CANCEL-SCOPE / info / signal attached to PERF-16b scope (b16.scope_notes_round_218); not scheduled by itself / module-wide mp3EncoderGeneration/mp3EncoderRuns: reset cancels every in-flight encode; safe only with one export at a time
+- ARCH-R218-ENCODER-CANCEL-SCOPE / info / ruled (D-29z230): single consumer per page, ME12 pins the invariant, known race documented in doc 172; round 220 / module-wide mp3EncoderGeneration/mp3EncoderRuns: reset cancels every in-flight encode; safe only with one export at a time
 - ROOT-DEPS-NOTICES-REGEN / info / root_signal (D-29z226); optional: root regenerates in its deps step / after OSS-LIC, a root chore(deps) commit leaves TL5 (notices sync) red until the consuming round regenerates THIRD_PARTY_NOTICES.md
 - SABA-Q-LAME-LGPL / info / awaiting_user (Saba); not scheduled; the Export dialog note already names LAME / LAME (LGPL) ships inside a bundled, inlined wasm; whether the notice plus unmodified npm package suffices for LGPL obligations (relink/repla
+- C-R219-01 / low / scheduled round 220 (D-29z228; grants overlap with PERF-16b-i) / non-SPDX GPL spellings (GPLv3, GPLv2, GPL2, AGPLv3) classify clean in the runtime licence gate
+- GATE219-S2 / low / scheduled round 220 (folded, D-29z228) / deleted THIRD_PARTY_NOTICES.md is recreated by toMatchFileSnapshot outside CI
+- GATE219-S3 / low / scheduled round 220 (folded, D-29z228) / notices intro says 'ships' while the table is every non-dev lock entry
+- GATE219-S4 / low / ruled (D-29z228): anchors kept on purpose; L35 and doc 172 name TL4+TL5 / TL4 anchors pin transitive versions; drift rule named only TL5
+- INFO-C219-WARMUP-MP3 / info / applied as harness rule HR-MP3-WARMUP (D-29z231) / first MP3 export on a fresh machine can trigger a Vite re-optimize + full reload
+- LEGACY-MP3-PROGRESS / info / signal (accepted debt; not requested) / purchased-Studio MP3 export shows no intermediate progress (85 -> 100), as with ffmpeg
+- SABA-Q-FFMPEG-FILENAME / info / awaiting_user (Saba); TODO line in the file / app/utils/ffmpeg.ts no longer uses ffmpeg after PERF-16b-i; renaming/deleting the file needs Saba's permission (CLAUDE.md)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

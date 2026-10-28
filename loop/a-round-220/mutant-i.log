@@ -1,0 +1,52 @@
+MUTANT i on app/utils/ffmpeg.ts
+sha before: df2499dfde9c5fbd9ef68b018ab4738dffd02eb55f00d0bbfc25ffac1e7ffccf
+@@ -1,3 +1,6 @@
+-import { FFmpeg } from '@ffmpeg/ffmpeg';
+-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+-import { debug } from '~/lib/debug';
++// TODO: rename to a legacy-mp3 facade once Saba allows file renames (PERF-16b)
++const LEGACY_MP3_BITRATES: ReadonlyMap<string, number> = new Map([
++  ['128k', 128_000],
++  ['192k', 192_000],
++  ['320k', 320_000],
++]);
+@@ -5,58 +7,0 @@ import { debug } from '~/lib/debug';
+-let ffmpegInstance: FFmpeg | null = null;
+-let isLoading = false;
+-let isLoaded = false;
+-
+-/**
+- * Load FFmpeg.wasm (lazy loading)
+- * This downloads the FFmpeg core (~31MB) only when needed
+- */
+-export async function loadFFmpeg(): Promise<FFmpeg> {
+-  // Return existing instance if already loaded
+-  if (ffmpegInstance && isLoaded) {
+-    return ffmpegInstance;
+-  }
+-
+-  // Wait if currently loading
+-  if (isLoading) {
+-    return new Promise((resolve) => {
+-      const checkInterval = setInterval(() => {
+-        if (isLoaded && ffmpegInstance) {
+-          clearInterval(checkInterval);
+-          resolve(ffmpegInstance);
+-        }
+-      }, 100);
+-    });
+-  }
+ [31m❯[39m app/utils/__tests__/ffmpeg.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 54[2mms[22m[39m
+[31m     [31m×[31m LF2 "256k" rejects with Unsupported MP3 bitrate before the encoder module is imported[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m LF2 "" rejects with Unsupported MP3 bitrate before the encoder module is imported[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m LF2 "320" rejects with Unsupported MP3 bitrate before the encoder module is imported[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m LF2 "320K" rejects with Unsupported MP3 bitrate before the encoder module is imported[39m[32m 1[2mms[22m[39m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m app/utils/__tests__/ffmpeg.test.ts[2m > [22mPERF-16b-i legacy MP3 facade (app/utils/ffmpeg.ts) delegates to the shared LAME encoder[2m > [22mLF2 "256k" rejects with Unsupported MP3 bitrate before the encoder module is imported
+[41m[1m FAIL [22m[49m app/utils/__tests__/ffmpeg.test.ts[2m > [22mPERF-16b-i legacy MP3 facade (app/utils/ffmpeg.ts) delegates to the shared LAME encoder[2m > [22mLF2 "" rejects with Unsupported MP3 bitrate before the encoder module is imported
+[41m[1m FAIL [22m[49m app/utils/__tests__/ffmpeg.test.ts[2m > [22mPERF-16b-i legacy MP3 facade (app/utils/ffmpeg.ts) delegates to the shared LAME encoder[2m > [22mLF2 "320" rejects with Unsupported MP3 bitrate before the encoder module is imported
+[41m[1m FAIL [22m[49m app/utils/__tests__/ffmpeg.test.ts[2m > [22mPERF-16b-i legacy MP3 facade (app/utils/ffmpeg.ts) delegates to the shared LAME encoder[2m > [22mLF2 "320K" rejects with Unsupported MP3 bitrate before the encoder module is imported
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (11)[39m
+vitest rc=1
+sha after restore: df2499dfde9c5fbd9ef68b018ab4738dffd02eb55f00d0bbfc25ffac1e7ffccf match=yes

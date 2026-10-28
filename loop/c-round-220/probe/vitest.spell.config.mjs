@@ -1,0 +1,1 @@
+export default { test: { globals: true, environment: 'node', include: ['/home/runner/czaba-project/tmp/studio-real-loop/c-round-220/probe/spellings.probe.test.ts'], root: '/home/runner/czaba-project/store' } };

@@ -1,0 +1,53 @@
+{
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T05:59:24.3673973Z",
+    "round": 220,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R220-01",
+      "severity": "low",
+      "steps": [
+        "npm run build at the round-220 tree and at c54a534 (/tmp copy)",
+        "serve both with remix-serve (:5188 new, :5189 base)",
+        "load /studio/middle-east and /studio-lab at 1440x900 in fresh Chromium contexts, list script requests",
+        "run npx playwright test --config playwright.perf.config.ts perf/studio-lab-resources.perf.spec.ts"
+      ],
+      "expected": "PERF-RUN-220: studio-lab scripts unchanged at 43, guard (/studio/middle-east) scripts <= 41",
+      "actual": "studio-lab scripts 44, guard 42. One new 710 B (373 B gz) chunk repeat-*.js holding lucide chevron-right + repeat icons, previously inside preload-helper; guard bytes decreased (-1072 enc / -6084 dec), studio-lab +1102 enc / +75 dec; no encoder/mediabunny/ffmpeg chunk requested or preloaded (not an eager load). Literal criterion not met; B to rule on re-baselining.",
+      "evidence": "c-round-220/perf-run-1.{log,json,rc}, c-round-220/guard-scripts.json, c-round-220/guard-page.json, c-round-220/bundle.txt"
+    }
+  ],
+  "passed": [
+    "SCOPE-220",
+    "UNIT-220",
+    "REDPROOF-220",
+    "NOTICES-220",
+    "FACADE-REAL-220",
+    "LAB-MP3-220",
+    "STUDIO-SMOKE-220",
+    "BUNDLE-220",
+    "SOURCE-GREP-220",
+    "G220-3",
+    "AN-REVIEW-220"
+  ],
+  "notMet": [
+    "PERF-RUN-220: script counts 44/42 vs 43/<=41 (C-R220-01, low, not an eager load)"
+  ],
+  "gate": [
+    "gate: full vitest, typecheck, build, Biome, npm run verify, e2e smoke"
+  ],
+  "blocked": [
+    "LEGACY-UI-220: backend unavailable in cloud"
+  ],
+  "info": [
+    "classifier treats GPLv and GPL.3 as clean (A-disclosed nit, C probe confirms)",
+    "fresh-machine cold /studio-lab load can exceed 120 s; HR-MP3-WARMUP needs a second goto"
+  ],
+  "ableton": "not applicable (perf/refactor round)"
+}

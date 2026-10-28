@@ -1,0 +1,46 @@
+MUTANT c on app/utils/ffmpeg.ts
+sha before: df2499dfde9c5fbd9ef68b018ab4738dffd02eb55f00d0bbfc25ffac1e7ffccf
+@@ -1,3 +1,8 @@
+-import { FFmpeg } from '@ffmpeg/ffmpeg';
+-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+-import { debug } from '~/lib/debug';
++import { loadArrangementMp3Encoder as staticLoad } from '~/lib/arrangement/mp3-encoder.client';
++export const keepStatic = staticLoad;
++// TODO: rename to a legacy-mp3 facade once Saba allows file renames (PERF-16b)
++const LEGACY_MP3_BITRATES: ReadonlyMap<string, number> = new Map([
++  ['128k', 128_000],
++  ['192k', 192_000],
++  ['320k', 320_000],
++]);
+@@ -5,58 +9,0 @@ import { debug } from '~/lib/debug';
+-let ffmpegInstance: FFmpeg | null = null;
+-let isLoading = false;
+-let isLoaded = false;
+-
+-/**
+- * Load FFmpeg.wasm (lazy loading)
+- * This downloads the FFmpeg core (~31MB) only when needed
+- */
+-export async function loadFFmpeg(): Promise<FFmpeg> {
+-  // Return existing instance if already loaded
+-  if (ffmpegInstance && isLoaded) {
+-    return ffmpegInstance;
+-  }
+-
+-  // Wait if currently loading
+-  if (isLoading) {
+-    return new Promise((resolve) => {
+-      const checkInterval = setInterval(() => {
+-        if (isLoaded && ffmpegInstance) {
+-          clearInterval(checkInterval);
+-          resolve(ffmpegInstance);
+-        }
+-      }, 100);
+ [31m❯[39m app/lib/arrangement/__tests__/mp3-encoder.test.ts [2m([22m[2m18 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 73[2mms[22m[39m
+[31m     [31m×[31m ME9 only mp3-encoder.client imports mediabunny, it is reached only through dynamic import(), and it has no ffmpeg or unpkg[39m[32m 28[2mms[22m[39m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/mp3-encoder.test.ts[2m > [22mSRW-20 stage 3a + PERF-16a lab-owned MP3 encoder (mediabunny + LAME)[2m > [22mME9 only mp3-encoder.client imports mediabunny, it is reached only through dynamic import(), and it has no ffmpeg or unpkg
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m17 passed[39m[22m[90m (18)[39m
+vitest rc=1
+sha after restore: df2499dfde9c5fbd9ef68b018ab4738dffd02eb55f00d0bbfc25ffac1e7ffccf match=yes
