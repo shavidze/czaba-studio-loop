@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 48: TM-B08 (Saba Q3, D-12) - test+docs pin of today's artists encoding: one ISTR per value, no IART, readback, empty list removes ISTR, pre-existing IART read [] and kept on save (pinned until Q25); no source change; baseline ede35de clean",
+  "current_task": "Round 49: TM-B06 (Saba Q6, D-52) - Biome lints and formats tests/ (tests/** override quoteStyle double), package.json scripts lint/lint:fix/check -> biome check src/ tests/, one mechanical biome check --write tests/ + 2 unused-import Edit fixes; src frozen; baseline 2dfd7d6 clean",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -180,7 +180,7 @@
     },
     {
       "id": "D-12",
-      "status": "confirmed by Saba Q3 2026-10-28: K-4 = ICAT/IKEY/ICMT only; artists stay as written; pin planned round 48 (TM-B08): tests/main/metadata-artists.test.ts pins today's artists encoding (ISTR per value, no IART) and the pre-existing-IART behaviour until Q25",
+      "status": "verified round 48 (C R48 PASS realVerified=true, published 2dfd7d6): Saba Q3 2026-10-28 K-4 = ICAT/IKEY/ICMT only; artists stay as written (LIST/INFO ISTR per value, no LIST/INFO IART; library also writes LIST/MID IART per value and one ID3v2.4 TPE1); pinned by tests/main/metadata-artists.test.ts (b1)-(b7); pre-existing IART read [] and kept on save pinned until Q25",
       "decision": "The K-4 contract covers only category/ICAT, keywords/IKEY, comment/ICMT. riffChunkId on STANDARD_PROP_MAP fields (title, artists, album, genres, year, comment, copyright, track, bpm) is informational and reserved for SchemaEditor; the chunk actually written is decided by node-taglib-sharp (artists -> ISTR per value, C-R2-01). No code change until Saba says artists are part of the contract (TM-B08).",
       "contract_with": "K-4"
     },
@@ -410,6 +410,12 @@
       "status": "verified round 47 (C R47 PASS realVerified=true, published ede35de); Deviation 1 wording refined by A/C experiment: truncated data chunk gives the message only when no data byte follows the header (A-R47-01/C-R47-02)",
       "decision": "writeTagsToFile opens the file through a module-private helper; when node-taglib-sharp's File.createFromPath throws an error whose message is exactly 'WAV file is missing data chunk' (library 6.0.1 text, also for no data chunk and for a data size that overruns the file), it throws Error('Audio data is empty, cannot tag') instead. meta:write keeps its wrapper, so the rejection is 'Failed to write metadata: Audio data is empty, cannot tag' (the renderer toast adds Electron's 'Error invoking remote method ...' prefix, pre-existing); meta:write-batch puts 'Audio data is empty, cannot tag' in that file's failed[].error and continues with the other files. Every other library error keeps its text (corrupt.wav: 'WAV file is missing header chunk'). The file is never modified. Read path unchanged: meta:read / meta:read-batch still return emptyMetadata for such a file (Q22). No upstream patch.",
       "contract_with": "none (editor error text only; nothing is written)"
+    },
+    {
+      "id": "D-52",
+      "status": "planned round 49 (TM-B06, Saba Q6)",
+      "decision": "Biome checks tests/ as well as src/. biome.json files.includes = src/**/*.ts, src/**/*.tsx, tests/**/*.ts, tests/**/*.tsx; one override for tests/** sets javascript.formatter.quoteStyle 'double' (the existing test style) and changes nothing else, so lint rules, organizeImports, semicolons, trailing commas, indent and lineWidth 100 apply to tests exactly as to src. package.json scripts lint = 'biome check src/ tests/', lint:fix = 'biome check --write src/ tests/', check = 'biome check src/ tests/ && npm run typecheck && npm run test'. Not chosen: formatter off for tests (14 files touched instead of 37, but semicolons in tests stay unenforced, against CLAUDE.md rule 2).",
+      "contract_with": "none (tooling)"
     }
   ],
   "items": [
@@ -681,7 +687,7 @@
       "severity": "low",
       "source": "C-R2-01",
       "title": "STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows artist = first value plus raw ISTR = second; an importer keyed on ffprobe artist sees only the first artist",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         "TM-T1"
       ],
@@ -694,13 +700,18 @@
       ],
       "evidence": [
         "C round 2 R2-6: c-round-2/r2-6-result.json (LIST/INFO two ISTR, ffprobe artist + ISTR)",
-        "Saba answers 2026-10-28 (policy.local.md) Q3: artists are NOT in the K-4 contract (D-12 decided: ICAT/IKEY/ICMT only); artists stay as written today. Open only for its own small round in Saba order (pin/doc), no writer change"
+        "Saba answers 2026-10-28 (policy.local.md) Q3: artists are NOT in the K-4 contract (D-12 decided: ICAT/IKEY/ICMT only); artists stay as written today. Open only for its own small round in Saba order (pin/doc), no writer change",
+        "C round 48 PASS R48-1..R48-6, realVerified=true (c-round-48.md/.json): ownership = 3 owned paths, src/ and existing tests/main byte-identical; new file 7/7 green; mutants on STANDARD_PROP_MAP.artists M1 (albumArtists setter) killed by (b1)(b2)(b3)(b4)(b7), M2 (join) by (b1)(b3)(b4), M3 (first only) by (b1)(b3), M4 (albumArtists fallback) by (b6), M5 (skip empty) by (b4), no survivor; verify EXIT=0 renderer 326/326 main 135/135 (128+7) E2E 7/7 (--retries=0 7/7), Biome 0 errors 8 warnings; real app R48-4 tone.wav Artists A,B -> LIST/INFO ISTR 'A','B' no IART, LIST/MID IART 'A','B', id3 one TPE1 'A\\0B', ffprobe artist A ISTR B, music-metadata common.artists [A,B], data sha256 unchanged, other.wav byte-identical; R48-5 rec.wav (ffmpeg IART Rec) Artists empty + Title T before save, after Artists New: IART 'Rec' kept, ISTR 'New' added, ffprobe artist Rec album_artist Rec ISTR New, music-metadata common.artists [New] TPE2 Rec; docs match. Root review COMMIT OK (3 low + architecture note). Published 2dfd7d6edfc66640336d19e49d74b233226da6f7"
       ],
       "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q3: artists are NOT in the K-4 contract (D-12 decided: ICAT/IKEY/ICMT only); artists stay as written today. Open only for its own small round in Saba order (pin/doc), no writer change",
       "round": 48,
       "notes": [
-        "B R47 probe (b-round-47-exp-artists-probe.cjs.txt, b-round-47-exp-iart-probe.cjs.txt, b-round-47-exp-artists-mm.mjs.txt; node-taglib-sharp 6.0.1 from the repo at ede35de, ffmpeg sine WAV): tag.performers=['A','B'] -> LIST/INFO ISTR 'A', ISTR 'B' (no IART), id3 chunk TPE1 'A','B'; ffprobe artist='A', ISTR='B'; music-metadata common.artists ['A','B'] (ID3v2.4 TPE1 x2, exif ISTR x2); ['A','B','C'] -> ffprobe artist 'A', ISTR 'C'. ffmpeg -metadata artist=Rec writes IART: library reads performers [] and albumArtists ['Rec\\0']; after performers=['New'] + save ffprobe shows artist='Rec', album_artist='Rec', ISTR='New' (IART kept) -> B-R47-01, Q25"
-      ]
+        "B R47 probe (b-round-47-exp-artists-probe.cjs.txt, b-round-47-exp-iart-probe.cjs.txt, b-round-47-exp-artists-mm.mjs.txt; node-taglib-sharp 6.0.1 from the repo at ede35de, ffmpeg sine WAV): tag.performers=['A','B'] -> LIST/INFO ISTR 'A', ISTR 'B' (no IART), id3 chunk TPE1 'A','B'; ffprobe artist='A', ISTR='B'; music-metadata common.artists ['A','B'] (ID3v2.4 TPE1 x2, exif ISTR x2); ['A','B','C'] -> ffprobe artist 'A', ISTR 'C'. ffmpeg -metadata artist=Rec writes IART: library reads performers [] and albumArtists ['Rec\\0']; after performers=['New'] + save ffprobe shows artist='Rec', album_artist='Rec', ISTR='New' (IART kept) -> B-R47-01, Q25",
+        "B R48 close: done per Saba Q3 = pin and docs, writer unchanged. The title's mismatch (schema riffChunkId IART vs ISTR written) is NOT changed; it is documented (recording-tag-contract.md D-12 section, WAV_METADATA.md) and pinned by tests/main/metadata-artists.test.ts. Pre-existing IART behaviour is pinned 'until Q25' (B-R47-01). Not dropped."
+      ],
+      "realVerified": true,
+      "closed_round": 48,
+      "commit": "2dfd7d6edfc66640336d19e49d74b233226da6f7"
     },
     {
       "id": "TM-T2",
@@ -801,12 +812,13 @@
       "type": "gap",
       "severity": "low",
       "title": "Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check",
-      "status": "todo",
+      "status": "in_progress",
       "depends_on": [
         "TM-B04"
       ],
       "acceptance": [
-        "decide scope; if extended, biome check tests/ green"
+        "decide scope; if extended, biome check tests/ green",
+        "round 49 R49-1..R49-7 (Saba Q6, D-52): biome.json files.includes adds tests/**/*.ts(x) with a tests/** override (quoteStyle double, everything else as src); package.json scripts lint, lint:fix, check run 'biome check src/ tests/' (only these three script values change); tests/ reformatted mechanically by one 'biome check --write tests/' plus two Edit-tool unused-import fixes; npm run check gate: Biome 'Checked 85 files' 0 errors; C red/green: an unused import injected into a test file passes the 2dfd7d6 check and fails A's; C reproduces A's tests/ diff from 2dfd7d6 with the same command; counts renderer 326 main 135 E2E 7 unchanged. The 'tsconfig.test.json not part of check' half of the title is already closed by TM-B04 (round 2, scripts.typecheck); C re-confirms npm run typecheck still includes tsconfig.test.json"
       ],
       "evidence": [
         "biome.json files.includes src/**; package.json lint 'biome check src/'",
@@ -816,9 +828,14 @@
       "note_b_r16": "B R16: RR-R16-01 and A-R16-02 add to the signals on this item (with RR-R14-03, RR-R14-05); scope decision still with Saba",
       "notes": [
         "R20: A's code-reviewer notes '() => {}' placeholders in the new test helpers would meet Biome rules once tests/ is linted (same class as RR-R14-03)",
-        "R36: RR-R36-05 (root review) again notes biome check src/ leaves tests/ unlinted; signal only, scope decision still with Saba"
+        "R36: RR-R36-05 (root review) again notes biome check src/ leaves tests/ unlinted; signal only, scope decision still with Saba",
+        "B R48 probe (b-round-48/probe-steps.txt, HEAD 2dfd7d6, biome 2.4.4, /tmp copies): tests/ under today's rules = 65 errors (51 format, 12 organizeImports, 2 noUnusedImports), 0 lint warnings; with quoteStyle double override 50 (36 format); formatter off 14; formatter+organizeImports off 2. Chosen: quoteStyle double (tests keep their existing double quotes) and every other rule as src, so semicolons/trailing commas/line width are enforced in tests (CLAUDE.md rule 2). Feasibility in /tmp: 37 test files reformatted (1142 diff lines), biome check src/ tests/ Checked 85 files 0 errors 8 warnings, typecheck + npm test EXIT 0"
       ],
-      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q6: Biome lints tests/** too with a relaxed override, as its own round"
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q6: Biome lints tests/** too with a relaxed override, as its own round",
+      "round": 49,
+      "decisions": [
+        "D-52"
+      ]
     },
     {
       "id": "OOS-01",
@@ -2247,12 +2264,14 @@
     {
       "id": "C-R2-01",
       "severity": "low",
-      "status": "open",
+      "status": "closed",
       "title": "Artists written as repeated ISTR while the schema says IART; ffprobe artist shows only the first (pre-existing) -> TM-B08, D-12",
       "round": 2,
       "evidence": "c-round-2/r2-6-result.json",
       "note_b_r16": "B R16 E3: a bare node-taglib-sharp write shows ffprobe ISTR = last value (no 'artist' key) and no music-metadata common.artists; the app's full save (with ID3, C-R1-01) may differ - re-observe in R17-5",
-      "routed_to": "TM-B08 round 48 (pin, D-12)"
+      "routed_to": "TM-B08 round 48 (pin, D-12)",
+      "closed_round": 48,
+      "resolution": "Saba Q3: artists outside K-4, written as today; behaviour documented and pinned (TM-B08 done, round 48, 2dfd7d6), not changed. Pre-existing IART -> Q25 (B-R47-01)"
     },
     {
       "id": "RR-R2-01",
@@ -2362,7 +2381,7 @@
       "status": "open",
       "title": "New test files use double quotes vs src single quotes; Biome does not check tests/",
       "round": 3,
-      "routed_to": "TM-B06 signal"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "id": "RR-R3-05",
@@ -2517,7 +2536,7 @@
       "status": "open",
       "round": 5,
       "title": "Tests use double quotes vs single quotes in src; Biome passes because tests/ is not linted",
-      "routed_to": "TM-B06 signal (same as RR-R3-04)"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "id": "RR-R5-06",
@@ -2577,7 +2596,7 @@
       "status": "open",
       "round": 6,
       "title": "riff-info-nul.test.ts uses double quotes vs single in src; tests/ not linted",
-      "routed_to": "TM-B06 signal"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "id": "RR-R6-04",
@@ -2707,7 +2726,7 @@
       "status": "open",
       "round": 8,
       "title": "metadata-write-field-errors.test.ts uses double quotes vs single in src; tests/ not linted",
-      "routed_to": "TM-B06"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "id": "RR-R8-03",
@@ -2956,7 +2975,7 @@
       "severity": "low",
       "status": "open",
       "title": "metadata-panel-batch-save.test.ts uses double quotes vs single in src; tests/ not linted (same as RR-R3-04/RR-R5-05)",
-      "routed_to": "TM-B06 (needs Saba scope decision)"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "round": 12,
@@ -3052,7 +3071,7 @@
       "severity": "low",
       "status": "open",
       "title": "create-fixtures.ts:69 empty catch {} would trip Biome noEmptyBlockStatements once tests/ is linted; a small cleanup helper fits the no-comments rule",
-      "routed_to": "TM-B06 (lint tests/, waits on Saba)"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "round": 14,
@@ -3070,7 +3089,7 @@
       "severity": "info",
       "status": "open",
       "title": "Architecture signal: add tests/**/*.ts to Biome files.includes (relaxed override if needed) so semicolons, quote style and no-comments rules apply to tests",
-      "routed_to": "signal on TM-B06 (waits on Saba)"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "round": 14,
@@ -3175,7 +3194,7 @@
       "severity": "low",
       "status": "open",
       "title": "Biome does not reach the four R16 files (npm run check runs biome check src/ only); e.g. whether organizeImports accepts tests/e2e/electron-launch.ts:5-13 was never checked",
-      "routed_to": "signal on TM-B06 (with RR-R14-05, A-R16-02); scope decision with Saba"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "round": 16,
@@ -3220,7 +3239,7 @@
       "severity": "info",
       "status": "open",
       "title": "With a tests/-including Biome config, tests/e2e/electron-launch.ts gets one organizeImports assist (@playwright/test before node:*); pre-existing on 5854d45",
-      "routed_to": "signal on TM-B06"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "round": 16,
@@ -4840,7 +4859,7 @@
       "severity": "info",
       "status": "open",
       "title": "Architecture signal: Biome checks only src/ (tests/ unlinted) -> same as TM-B06; a shared clickButton(name) helper would replace ~8 per-suite copies",
-      "routed_to": "signal (TM-B06 note; clickButton helper not a task)"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "round": 36,
@@ -4921,7 +4940,7 @@
       "severity": "low",
       "status": "open",
       "title": "selection-after-folder-switch.test.ts uses double quotes while biome.json sets quoteStyle single; Biome checks only src/ (same class as RR-R3-04, TM-B06)",
-      "routed_to": "TM-B06"
+      "routed_to": "TM-B06 round 49 (D-52); stays open until C R49 evidence"
     },
     {
       "round": 37,
@@ -5657,6 +5676,69 @@
       "status": "open",
       "title": "SchemaEditor RESERVED_RIFF_IDS comes from STANDARD_FIELDS riffChunkIds, so IART is reserved but ISTR (the chunk artists really write) is not: a custom field with RIFF ID ISTR can be created and would share the sub-chunk with Artists. Not run end to end",
       "routed_to": "signal with Q25 (whatever Q25 decides decides which ID to reserve)"
+    },
+    {
+      "round": 48,
+      "id": "A-R48-01",
+      "source": "A",
+      "severity": "low",
+      "status": "open",
+      "title": "tag.performers also writes LIST/MID IART per value (library MovieId tag); measured by A and C (R48-4), documented, not pinned in a unit test. Relevant to Q25: another tool may read IART from LIST/MID",
+      "routed_to": "Saba Q25 (signal)"
+    },
+    {
+      "round": 48,
+      "id": "C-R48-01",
+      "source": "C",
+      "severity": "info",
+      "status": "open",
+      "title": "Saving Artists on a file with a pre-existing IART makes the library write ID3 TPE2 'Rec' (album artist), so ffprobe shows album_artist: Rec; docs do not mention TPE2",
+      "routed_to": "Saba Q25 context"
+    },
+    {
+      "round": 48,
+      "id": "C-R48-02",
+      "source": "C",
+      "severity": "info",
+      "status": "open",
+      "title": "metadata-artists.test.ts writeMetadataViaIpc does not assert the handler's { success }; every case would still fail on its raw-byte assertions if the write failed",
+      "routed_to": "record, no change"
+    },
+    {
+      "round": 48,
+      "id": "RR-R48-01",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "metadata-artists.test.ts writes its own encodeRiffSubChunk and listInfoSubChunkEntries; LIST/INFO parsing is duplicated across main tests; move into tests/main/riff-chunks.ts in a later round so there is one parser",
+      "routed_to": "signal (test-helper consolidation, with RR-R17-02)"
+    },
+    {
+      "round": 48,
+      "id": "RR-R48-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "listInfoSubChunkEntries loop stops silently on a trailing fragment shorter than 8 bytes; optional assert offset === list.length after the loop",
+      "routed_to": "signal"
+    },
+    {
+      "round": 48,
+      "id": "RR-R48-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "If Q25 is answered 'Artists -> IART', files already saved with ISTR would lose their artists on read unless the reader accepts both IART and ISTR or a migration is planned; add to the Q25 text",
+      "routed_to": "added to Saba Q25 text (feature-status)"
+    },
+    {
+      "round": 48,
+      "id": "RR-R48-04",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "title": "Architecture signal: STANDARD_FIELDS artists.riffChunkId 'IART' does not match the chunk written; when Q25 is decided either set it to 'ISTR' (schema tells the truth) or write artists through the InfoTag path to IART with a reader that accepts both (also fixes B-R47-01)",
+      "routed_to": "signal with Q25 / B-R47-02"
     }
   ],
   "rounds": [
@@ -6666,7 +6748,7 @@
     {
       "round": 48,
       "task": "TM-B08 (Saba Q3, D-12 pin): test + docs only; artists encoding (ISTR per value, no IART) and pre-existing IART behaviour pinned until Q25; no source change",
-      "status": "planned",
+      "status": "published",
       "baseline": "ede35de5e5ef06521cede8eef43a92417527c131 (clean)",
       "items": [
         "TM-B08"
@@ -6674,6 +6756,30 @@
       "findings": [
         "C-R2-01",
         "B-R47-01"
+      ],
+      "commit": "2dfd7d6edfc66640336d19e49d74b233226da6f7",
+      "result": "C PASS R48-1..R48-6 realVerified=true; bugs 0; renderer 326/326 main 135/135 E2E 7/7 (--retries=0 7/7); mutants M1-M5 killed; real app tone.wav + rec.wav with raw INFO, ffprobe, music-metadata; root review COMMIT OK (RR-R48-01..04); published 2dfd7d6; TM-B08 done, D-12 verified, C-R2-01 closed"
+    },
+    {
+      "round": 49,
+      "task": "TM-B06 (Saba Q6, D-52): Biome over tests/ (includes + quoteStyle-double override, scripts lint/lint:fix/check), one mechanical biome --write over tests/ + 2 unused-import fixes; no src change",
+      "status": "planned",
+      "baseline": "2dfd7d6edfc66640336d19e49d74b233226da6f7 (clean)",
+      "items": [
+        "TM-B06"
+      ],
+      "findings": [
+        "RR-R3-04",
+        "RR-R5-05",
+        "RR-R6-03",
+        "RR-R8-02",
+        "RR-R12-03",
+        "RR-R14-03",
+        "RR-R14-05",
+        "RR-R16-01",
+        "A-R16-02",
+        "RR-R36-05",
+        "RR-R37-02"
       ]
     }
   ]

@@ -1,123 +1,133 @@
-# CURRENT TASK — Round 48: TM-B08 (Saba Q3, D-12) — pin today's Artists encoding with a test and docs; no source change
+# CURRENT TASK — Round 49: TM-B06 (Saba Q6, D-52) — Biome lints and formats `tests/` too
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-28
 
 ## Why this round
-- **Round 47: C PASS** (R47-1..R47-7, `realVerified=true`, bugs 0). Renderer 326/326, main 128/128, E2E 7/7 (`--retries=0` 7/7).
-  - Real app: an empty-audio WAV now fails its save with `…Failed to write metadata: Audio data is empty, cannot tag` and is not changed. Batch shows `1 saved, 1 failed` and writes the other file. A normal save is unchanged.
-  - Root published **ede35de**. D-51 is verified. **TM-B05 is done** (write half). Its read half stays open as Saba **Q22** and is pinned by (a7).
-- No critical or high bug is open. Root's round-47 findings are low/info signals (RR-R47-01..04) and are not scheduled.
-- **Next in Saba's order: Q3 → TM-B08 (low).**
-  - Saba Q3 (2026-10-28): "artists are **not** in the K-4 import contract. The contract is `ICAT`/`IKEY`/`ICMT` only; artists stay as written today."
-  - The backlog keeps TM-B08 open only for this small pin/doc round. **No writer change.**
-  - The doc already says artists are outside K-4 (`docs/recording-tag-contract.md` `## რა არ შედის კონტრაქტში (D-12)`). What is missing is a test that pins how artists are written today, so a later change is deliberate. The doc also does not yet record what happens to an `IART` written by another program.
-- **B probe** (node-taglib-sharp 6.0.1 from the repo at ede35de; scripts saved in the loop folder as `b-round-47-exp-artists-probe.cjs.txt`, `b-round-47-exp-iart-probe.cjs.txt`, `b-round-47-exp-artists-mm.mjs.txt`). Start state → action → result:
+- **Round 48: C PASS** (R48-1..R48-6, `realVerified=true`, bugs 0). Renderer 326/326, main 135/135, E2E 7/7 (`--retries=0` 7/7). Mutants M1–M5 were all killed. Root published **2dfd7d6**. **TM-B08 is done**, D-12 is verified and C-R2-01 is closed (behaviour pinned and documented, not changed, per Saba Q3).
+- No critical or high bug is open. Root's round-48 findings are low/info signals (RR-R48-01..04) and are not scheduled.
+- **Next in Saba's order: Q6 → TM-B06.** Saba (2026-10-28): "yes, Biome lints `tests/**` too (relaxed override), as its own round."
+- The other half of TM-B06's title ("tsconfig.test.json not part of check") was closed in round 2 by TM-B04 (`scripts.typecheck` runs `tsc --noEmit -p tsconfig.test.json`). C re-confirms it (R49-4). It is not dropped.
+- Today `npm run check` runs `biome check src/`. The CLI path argument limits Biome to `src/`, so changing `biome.json` alone does not change the gate. The three `package.json` scripts have to change too. The backlog rule from round 0 allows this ("B freezes the whole package.json per round unless a task lists scripts as owned"), and round 2 is the precedent. This round lists exactly three script values as owned.
 
-  | Start file | Action (`tag.performers = …`, save; this is what `STANDARD_PROP_MAP.artists.set` does) | Raw `LIST/INFO` after | ffprobe `format_tags` | music-metadata |
-  |---|---|---|---|---|
-  | ffmpeg sine WAV (INFO has only `ISFT`) | `['A','B']` | `ISTR 'A'`, `ISTR 'B'` in that order; **no `IART`** | `artist: 'A'`, `ISTR: 'B'` | `common.artists ['A','B']`; native ID3v2.4 `TPE1` ×2, exif `ISTR` ×2 |
-  | same | `['Solo']` | one `ISTR 'Solo'` | `artist: 'Solo'`, `ISTR: 'Solo'` | `['Solo']` |
-  | same | `['A','B','C']` | `ISTR` ×3 in order | `artist: 'A'`, `ISTR: 'C'` | `['A','B','C']` |
-  | `ffmpeg -metadata artist=Rec -metadata title=T` (writes `IART 'Rec'`) | read only | — | `artist: 'Rec'` | — ; library: `performers []`, `albumArtists ['Rec\0']` |
-  | same | `['New']` | `IART 'Rec'` **kept**, `ISTR 'New'` added | `artist: 'Rec'`, `album_artist: 'Rec'`, `ISTR: 'New'` | — ; library reads `performers ['New']` |
+### B probe (HEAD 2dfd7d6, Biome 2.4.4, `/tmp` copies only; `b-round-48/probe-steps.txt`, `probe-a-biome.json`, `probe-a-changed-files.txt`, `probe-a-check.log`)
+| Config for `tests/**` | Errors from `biome check tests/` |
+|---|---|
+| today's rules (single quotes) | 65: 51 format, 12 organizeImports, 2 noUnusedImports; 0 lint warnings |
+| **override `quoteStyle: "double"` (chosen)** | 50: 36 format, 12 organizeImports, 2 noUnusedImports |
+| formatter off | 14: 12 organizeImports, 2 noUnusedImports |
+| formatter + organizeImports off | 2: noUnusedImports |
 
-  - Every save also writes an `id3 ` chunk (pre-existing, C-R1-01). ffprobe's `artist` follows `IART` when it exists, else the first ID3 `TPE1`.
-  - **Confirmed facts:** the rows above. **Inference:** recorder and DAW files that carry `IART` show an empty Artists field in Tag Manager, and after the user saves Artists, other tools still show the old artist. This is a new finding (**B-R47-01**) and goes to Saba as **Q25**. Round 48 pins today's behaviour and does **not** change it ("artists stay as written today").
-- **Reference:** exempt. This is a test-and-docs round with no UX or behaviour change. Q25 is phrased as a question; B does not claim how other editors map `IART`.
+- Chosen config, then `biome check --write tests/` → only the 2 `noUnusedImports` errors remain: `tests/main/file-system.test.ts` (`vi` in the `vitest` import) and `tests/main/templates.test.ts` (`readdirSync`, `writeFileSync` in the `node:fs` import).
+- After removing them: `biome check src/ tests/` → `Checked 85 files`, **0 errors, 8 warnings** (the same 8 `src/` warnings as today).
+- In that copy, fixtures + `tsc -p tsconfig.test.json` + `npm test` → EXIT 0 (22 renderer and 15 main files passed).
+- **37 test files change** (1142 diff lines: line wrapping, import order, parentheses around `await … as`).
+
+### What "relaxed override" means here (B's reading, D-52)
+- Tests keep their **double quotes**. All 51 test files already use them; switching to single quotes would rewrite every string in every file for no gain. That is the relaxation.
+- Every other rule is the same as for `src/`: lint rules, `organizeImports`, semicolons, trailing commas, indent, line width 100. CLAUDE.md rule 2 says "semicolons everywhere", and only the formatter enforces it.
+- **Not chosen (stated so Saba can overrule):** formatter off for `tests/**`. That would touch 14 files instead of 37, but semicolons and formatting in tests would stay unchecked.
+
+## Reference
+Exempt. This is a tooling and config round with no UX or app behaviour change. Biome's own docs on `files.includes` and `overrides` (https://biomejs.dev/reference/configuration/#overrides) are the only reference. B checked the behaviour by running Biome 2.4.4 (table above).
 
 ## Deviations / limits (stated, not hidden)
-1. **The pins fix behaviour Saba may still change (Q25).** Cases (b6)/(b7) pin "pre-existing `IART` is not read and is kept". If Saba answers Q25 with "map Artists to `IART`", those cases flip on purpose in that round. Their test names say `pinned until Q25`.
-2. **No red proof.** Nothing in `src/` changes, so every new case is green on ede35de. The proof that the pins bite comes from C's mutants (R48-2).
-3. **ID3 is not pinned in the unit test.** Parsing the `id3 ` chunk would need a new parser or a reader in the main test. C checks ID3 through music-metadata in the real app (R48-4).
-4. **B-R47-02 is not fixed.** SchemaEditor reserves `IART` but not `ISTR`. Which ID to reserve depends on Q25. Signal only.
+1. **Tests use double quotes, `src/` uses single quotes** (the D-52 override). The quote-style signals RR-R3-04, RR-R5-05, RR-R6-03, RR-R8-02, RR-R12-03 and RR-R37-02 will be closed at the round-49 close on C's evidence, by D-52 rather than by rewriting quotes. They stay open until then.
+2. **One Bash write into the repository is sanctioned** (process rule C-R46-01 otherwise holds): `npx biome check --write tests/`, run exactly once, with no `--unsafe`. Hand-reformatting 37 files with Edit would be error-prone. C reproduces it byte for byte (R49-2).
+3. **RR-R14-03 predicted** that `create-fixtures.ts`'s empty `catch {}` would trip `noEmptyBlockStatements`. With the recommended set in Biome 2.4.4 it does not fire (0 lint errors besides the 2 imports). C reports what it observes.
+4. **No red test in the usual sense.** This is a gate change, so the red/green evidence is a blind-gate contrast (R49-3): an injected defect passes 2dfd7d6's `npm run lint` and fails A's.
 
 ## Baseline
-- HEAD `ede35de5e5ef06521cede8eef43a92417527c131`, clean working tree (`git status --porcelain --untracked-files=all` empty).
-  - Exception (release-commit rule): a root `chore(release): vX.Y.Z` commit directly on ede35de that changes only the two `version` fields counts as the baseline.
+- HEAD `2dfd7d6edfc66640336d19e49d74b233226da6f7`, clean working tree (`git status --porcelain --untracked-files=all` empty; generated `tests/fixtures/*.wav` are gitignored).
+  - Exception (release-commit rule): a root `chore(release): vX.Y.Z` commit directly on 2dfd7d6 that changes only the two `version` fields counts as the baseline.
   - If HEAD differs or the tree is dirty, **stop and report**.
-- **Frozen:** every path not in the ownership table stays byte-identical to ede35de. That explicitly includes:
-  - **all of `src/**`** (no source change in this round: `src/main/**`, `src/shared/**`, `src/preload/**`, `src/renderer/**`);
-  - every existing test file, including `tests/main/metadata.test.ts`, `metadata-empty-values.test.ts`, `metadata-number-values.test.ts`, `metadata-empty-audio.test.ts`, `metadata-write-guard.test.ts`, `metadata-write-field-errors.test.ts`, `recording-tag-contract.test.ts` (artists are outside the contract), `riff-chunks.ts`, `riff-info-nul.test.ts`, and `tests/contract/**`, `tests/e2e/**`, `tests/renderer/**`, `tests/fixtures/**`;
-  - `docs/plans/**`, `docs/bugs/**`, every other doc and `.claude/**` file except the one owned primitive.
-- **Protected (never touch):** `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `src/renderer/src/styles/app.css`, `.claude/settings*`, `.claude/hooks/**`.
+- **Frozen:** every path not in the ownership table stays byte-identical to 2dfd7d6. That explicitly includes:
+  - all of `src/**`;
+  - `package-lock.json` and every `package.json` key except the three script values below;
+  - `tsconfig*.json`, `vitest.config.*.ts`, `playwright.config.ts`, `electron.vite.config.ts`;
+  - `.github/**` (check.yml already runs `npm run check`), `docs/**`, `CLAUDE.md`, and every `.claude/**` file except `BIOME_LINTING.md`;
+  - `tests/fixtures/*.wav` (generated, not tracked).
+- **Protected (never touch):** `package-lock.json`, `.github/workflows/release.yml`, `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `.claude/settings*`, `.claude/hooks/**`. `package.json` is protected **except** the three owned script values.
 
-## Scope (D-12 pin)
+## Scope
 
-### A1. New file `tests/main/metadata-artists.test.ts`
-- Double quotes, like the neighbouring main tests. No comments; semicolons; no `any`.
-- Register handlers with `registerMetadataHandlers()` and call them through `ipcMain._handlers`, as `metadata-empty-values.test.ts` does. Use `STANDARD_FIELDS` as the schema.
-- Build WAVs in a `mkdtemp`/`tmpdir()` folder:
-  - plain WAV: `createSineWavBuffer(4410)` from `tests/fixtures/create-fixtures.ts` (import only);
-  - `IART` WAV: the sine buffer plus an in-test `LIST/INFO` chunk holding `INAM` = `"T\0"` and `IART` = `"Rec\0"` (even-padded), inserted **after `fmt ` and before `data`** (the order of the ffmpeg files B measured), RIFF size fixed. Write the builder in the new file. Never write into `tests/fixtures/`.
-  - B's probe measured the `IART` case on an ffmpeg-built file, not on this exact builder shape. A's green-on-baseline run is the first run of this shape; if the library treats it differently, that is a stop-and-report, not a test edit.
-- Raw INFO must be read **in order with duplicates**. `parseListInfoSubChunks` returns a `Map` and drops repeats, so write an ordered `listInfoSubChunkEntries(wav): { id, value }[]` helper in the new file (as in `metadata-empty-values.test.ts`; do not import from that frozen file). `riff-chunks.ts` may be imported read-only.
-- **NUL rule for every assertion:** the helper decodes each value as UTF-8 and removes trailing `\0` bytes. Every raw-INFO expectation below (`"A"`, `"Rec"`, `"New"`, …) compares those stripped values.
-- Writes send only `{ artists: [...] }` unless the case says otherwise.
+**Order matters.** Steps 1 and 2 must be done before step 3. If `biome check --write` runs before the override exists, it rewrites every test string to single quotes.
 
-Cases:
-- **(b1)** plain WAV, `meta:write` `{ artists: ["A", "B"] }` → raw INFO has `ISTR` entries exactly `["A", "B"]` in that order; **no `IART`** entry; `meta:read` returns `artists` `["A", "B"]`.
-- **(b2)** plain WAV, `["Solo"]` → exactly one `ISTR` `"Solo"`, no `IART`; read back `["Solo"]`.
-- **(b3)** plain WAV, `["A", "B", "C"]` → `ISTR` `["A", "B", "C"]` in order; read back the same.
-- **(b4)** after (b1)'s save on the same file, `meta:write` `{ artists: [] }` → no `ISTR` and no `IART` entry left; read back `[]` (D-49 neighbour).
-- **(b5)** `meta:write` `{ title: "Only title" }` on a fresh plain WAV → no `ISTR`/`IART` entry (artists not sent → not written).
-- **(b6) pinned until Q25:** `IART` WAV, `meta:read` → `artists` `[]` and `title` `"T"`.
-- **(b7) pinned until Q25:** `IART` WAV, `meta:write` `{ artists: ["New"] }` → raw INFO still has exactly one `IART` with value `"Rec"` and gains `ISTR` `["New"]`; `meta:read` returns `artists` `["New"]`; `data` chunk sha256 unchanged (`sha256OfRiffChunk`).
+### Step 1. `biome.json` (Edit tool)
+- `files.includes` → `["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]`.
+- Add a top-level `overrides` array with one entry and nothing else in it:
+  ```json
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "javascript": { "formatter": { "quoteStyle": "double" } }
+    }
+  ]
+  ```
+- No other key changes (rules, formatter, assist and `$schema` stay as they are).
 
-**Green on baseline** (Deviation 2): A runs the new file on ede35de and records each case as passing in `a-round-48/`. If any case fails on the unchanged tree, **stop and report** the observed bytes. Do not adapt the expectation to make it pass without reporting, and do not touch `src/`.
+### Step 2. `package.json` scripts (Edit tool; exactly three values)
+- `"lint": "biome check src/ tests/"`
+- `"lint:fix": "biome check --write src/ tests/"`
+- `"check": "biome check src/ tests/ && npm run typecheck && npm run test"`
 
-**Stop rule:** if any existing test fails, **stop and report** its name. Do not edit it.
+### Step 3. Mechanical format of `tests/` (the one sanctioned Bash write)
+- Run `npx biome check --write tests/` **once**, from the repository root, with no `--unsafe` and no other flags. Save its full output to `a-round-49/biome-write.log` (the log goes to the loop folder, not the repository).
+- Expected: about 37 files fixed and exactly 2 remaining errors, both `lint/correctness/noUnusedImports` (in `file-system.test.ts` and `templates.test.ts`).
+- **Stop rule:** if anything else remains (another rule, another file, a parse error), **stop and report**. Do not hand-fix it.
 
-### A2. Docs (Georgian, English technical terms)
-- **`docs/recording-tag-contract.md`**, section `## რა არ შედის კონტრაქტში (D-12)`. Add:
-  - Saba Q3 (2026-10-28) decided it: artists are outside K-4 and are written as today;
-  - the measured encoding: one `ISTR` sub-chunk per value in order, no `IART`, plus ID3 `TPE1` per value; ffprobe shows `artist` = first value and `ISTR` = last value; music-metadata `common.artists` shows all of them;
-  - an `IART` written by another program (recorder, DAW, `ffmpeg -metadata artist=`) is not shown in Artists and is kept on save, so ffprobe's `artist` keeps the old value. This is pinned until Q25 (B-R47-01).
-  - In `## შემოწმება`, add `tests/main/metadata-artists.test.ts`.
-  - Line 5 header: the D-list already has D-12. Add the new test file next to `recording-tag-contract.test.ts` only if the header lists tests; otherwise leave line 5 alone.
-- **`.claude/primitives/WAV_METADATA.md`:** one short Georgian line under the STANDARD_PROP_MAP table: `artists` (`tag.performers`) is written as `ISTR` per value; the `IART` in `STANDARD_FIELDS` is informational and reserved; the library maps `IART` to `tag.albumArtists`, which the app does not read (D-12, Q25). Use the **Edit tool** (standing `.claude/**` permission).
+### Step 4. Two unused imports (Edit tool)
+- `tests/main/file-system.test.ts`: remove `vi` from the `vitest` import → `import { afterAll, beforeAll, describe, expect, it } from "vitest";`
+- `tests/main/templates.test.ts`: remove `readdirSync` and `writeFileSync` → `import { mkdirSync, rmSync } from "node:fs";`
+- Nothing else in these two files changes by hand.
+
+### Step 5. Primitive `.claude/primitives/BIOME_LINTING.md` (Edit tool; standing `.claude/**` permission)
+- In `## ბრძანებები`: say that `npm run lint` / `lint:fix` / `check` run on `src/` and `tests/`.
+- Under the `Formatter:` line, add one Georgian line: `tests/**`-ში იგივე წესებია, ოღონდ ორმაგი ბრჭყალებით (`biome.json` override, D-52).
 
 ### Not in this round
-- Any change to `src/**` (Q25, B-R47-01, B-R47-02, B-R6-01).
-- Q22, Q23, Q24, Q26, C-R47-01.
-- RR-R47-01..04, A-R47-02.
-- TM-B06 (next round).
+- Any change to `src/**`, test logic, test names or assertions. Only Biome's own rewrite (step 3) and the two import edits (step 4) touch `tests/`.
+- Moving test helpers (RR-R48-01, RR-R17-02), RR-R48-02, the `clickButton` helper (RR-R36-05).
+- Pinning Biome or tsx versions (RR-R3-05; `package.json` deps stay frozen).
+- Q7 / TM-T2-DATA / TM-T2 (waiting on Saba), Q9–Q26.
 
-**Process (C-R46-01):**
-- Every repository write goes through the **Edit/Write tools only**. No `sed -i`, no shell redirection, no `tee`, no script that writes into the repository.
-- A states in `a-round-48.md` that no Bash command wrote into the repository.
-- Before the first edit, read `TESTING.md`, `WAV_METADATA.md`, `TYPESCRIPT_STRICT.md` and `AGENT_DISCOVERABLE_CODE.md`.
-- 3 files change, so run the `code-reviewer` subagent (read-only) and record its findings in `a-round-48.md`.
+**Process:**
+- Every repository write goes through the Edit/Write tools, **except** the single step-3 command. No `sed -i`, no shell redirection into the repository, no `tee`, no other script that writes into the repository. `a-round-49.md` states this and quotes the step-3 command and its "Fixed N files" line.
+- Before the first edit, read `.claude/primitives/BIOME_LINTING.md`, `TESTING.md`, `SEMICOLONS.md` and `AGENT_DISCOVERABLE_CODE.md`.
+- More than 3 files change, so run the `code-reviewer` subagent (read-only) on the `biome.json`, `package.json` and primitive diffs plus a sample of the reformatted tests. Record its findings in `a-round-49.md`.
+- **Stop rule:** if any test fails after step 4, **stop and report** its name and output. Do not edit the test to make it pass.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `tests/main/metadata-artists.test.ts` (new) | A1: (b1)–(b7) |
-| `docs/recording-tag-contract.md` | A2: D-12 section, `## შემოწმება` line |
-| `.claude/primitives/WAV_METADATA.md` | A2: one line |
+| `biome.json` | Step 1: `files.includes` + `overrides` |
+| `package.json` — **only** `scripts.lint`, `scripts.lint:fix`, `scripts.check` | Step 2 |
+| `tests/**/*.ts` — **only** as rewritten by the step-3 command, plus the two step-4 import edits | Steps 3–4 (B's probe: 37 files, listed in `b-round-48/probe-a-changed-files.txt`) |
+| `.claude/primitives/BIOME_LINTING.md` | Step 5 |
 
-**B's grep** of tests that touch artists (searched `tests/` for `artists`, `ISTR`, `IART`, `performers`): `metadata.test.ts:58-67` (roundtrip `["Artist A","Artist B"]`), `metadata-empty-values.test.ts:181` ((e5) full empty save), renderer `file-list`, `file-row-display`, `file-store`, `template-store` tests (display/sort only). None changes.
-
-In the loop folder, A writes only `a-round-48.md` (plus `a-round-48/` logs). C writes `c-round-48.md`/`.json` and evidence under `c-round-48/`.
+In the loop folder, A writes only `a-round-49.md` (plus `a-round-49/` logs). C writes `c-round-49.md`/`.json` and evidence under `c-round-49/`.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R48-1 ownership | `git rev-parse HEAD`; `git status --porcelain --untracked-files=all`; `git diff --stat ede35de`; `git diff --quiet ede35de -- src tests/fixtures tests/e2e tests/renderer tests/contract docs/plans docs/bugs package.json package-lock.json .github .claude/settings.json .claude/hooks`; existing `tests/main/*` byte-identical | HEAD is ede35de (or the release exception). Changed paths ⊆ ownership table. **`src/` unchanged.** Frozen/protected paths unchanged. |
-| R48-2 pins bite (mutants) | Temp copy outside the repo (`node_modules` symlinked) with A's tree. First run the new file unchanged (all green), then one mutant at a time in `src/main/ipc/metadata.ts` `STANDARD_PROP_MAP.artists`: **M1** setter writes `tag.albumArtists` instead of `tag.performers` (lands in `IART`); **M2** setter writes `[val.join('; ')]` (one sub-chunk); **M3** getter returns only the first performer; **M4** getter falls back to `tag.albumArtists` when performers is empty (a Q25-style change); **M5** setter skips an empty list (`if (val.length)`) | All 7 cases green on A's tree. ede35de `src/` is the same source (nothing in `src/` changes), so a baseline run proves nothing new; **the mutants are the only discriminating evidence.** M1 killed by (b1)/(b2); M2 by (b1)/(b3); M3 by (b1)/(b3)/(b7); M4 by (b6); M5 by (b4). C records each mutant's failing case names; logs in `c-round-48/`. Any surviving mutant is a FAIL unless C shows it is equivalent. |
-| R48-3 gate | Clean `verifyCommand` `{ npx --yes tsx@4 tests/fixtures/create-fixtures.ts && npm run check && xvfb-run -a npm run test:e2e; }`, then `xvfb-run -a npx playwright test --retries=0` once | Exit 0. Renderer 326/326 (unchanged); main 128 + A's new count, all passing. E2E 7/7 with no retry. Biome 0 errors, warnings ≤ 8. |
-| R48-4 real app: two artists on a fresh WAV | Built app via Playwright `_electron`, `xvfb-run`, temp `XDG_CONFIG_HOME`. Folder: `tone.wav` (ffmpeg sine), `rec.wav` (`ffmpeg -metadata artist=Rec -metadata title=T`), `other.wav`. Select `tone.wav`, add Artists `A` and `B` in the tags input, Save Tags | Toast `Tags saved`. Raw INFO: `ISTR 'A'`, `ISTR 'B'` in order, no `IART`. `ffprobe -show_entries format_tags -of json`: `artist` = `A`, `ISTR` = `B`. music-metadata `common.artists` = `['A','B']`. Reselect shows both chips. Artist column shows `A`. Screenshot. `pageErrors` empty. `other.wav` byte-identical. |
-| R48-5 real app: file with another tool's `IART` | Select `rec.wav`. Screenshot the panel. Add Artists `New`, Save Tags | Before save the Artists field is empty and Title shows `T` (pinned until Q25). After save: raw INFO `IART 'Rec'` still present and `ISTR 'New'` added; ffprobe `artist` = `Rec`, `ISTR` = `New`; music-metadata reported as observed (C writes down `common.artists` and native `IART`/`ISTR`/`TPE1`). Reselect shows `New`. `data` chunk sha256 unchanged. This is evidence for Q25, not a FAIL. |
-| R48-6 docs | Read the owned docs diff | `recording-tag-contract.md` D-12 section has every point A2 lists and `## შემოწმება` names the new file. `WAV_METADATA.md` has the one line. Georgian with English technical terms. Every fact in the docs matches B's probe table or C's R48-4/R48-5 measurements. |
+| R49-1 ownership | `git rev-parse HEAD`; `git status --porcelain --untracked-files=all`; `git diff --stat 2dfd7d6`; `git diff 2dfd7d6 -- package.json biome.json`; `git diff --quiet 2dfd7d6 -- src package-lock.json .github docs CLAUDE.md tsconfig.json tsconfig.node.json tsconfig.web.json tsconfig.test.json vitest.config.main.ts vitest.config.renderer.ts playwright.config.ts electron.vite.config.ts .claude/settings.json .claude/hooks`; list of changed `.claude/**` paths | HEAD is 2dfd7d6 (or the release exception). No untracked files. Changed paths ⊆ ownership table. The `package.json` diff is exactly the three script lines. The `biome.json` diff is exactly `files.includes` + the one override. **`src/` unchanged.** |
+| R49-2 tests/ change is mechanical | Temp copy of 2dfd7d6 (outside the repo, `node_modules` symlinked) + A's `biome.json` → `npx biome check --write tests/`, then `npx biome check --write --unsafe tests/main/file-system.test.ts tests/main/templates.test.ts` → `diff -r` of that `tests/` against A's `tests/` (`.ts` files) | **No difference.** Any difference is a FAIL (a non-mechanical edit). C also records the changed-file count and compares it with B's 37-file list. |
+| R49-3 the gate now sees tests/ (blind-gate contrast) | In temp copies of 2dfd7d6 and of A's tree, inject one defect at a time and run `npm run lint`: **D1** an unused `import { createHash } from "node:crypto";` as the first line of `tests/main/schema.test.ts` (no other import from `node:crypto` in that file, and the line sorts first); **D2** a missing semicolon on one statement in `tests/renderer/utils/utils.test.ts`; **D3** a plain single-quoted string (no `"` inside it) in a test file; **D4** a double-quoted string in `src/renderer/src/lib/utils.ts` (control) | 2dfd7d6: D1, D2, D3 exit 0 (blind); D4 fails. A's tree: D1 fails and its diagnostics include `noUnusedImports`; D2 and D3 fail with a format diagnostic; D4 fails. Extra diagnostics next to the expected one are reported, not a FAIL. Logs in `c-round-49/`. |
+| R49-4 gate | Clean `verifyCommand` `{ npx --yes tsx@4 tests/fixtures/create-fixtures.ts && npm run check && xvfb-run -a npm run test:e2e; }`, then `xvfb-run -a npx playwright test --retries=0` once; read `package.json` `typecheck` | Exit 0. Biome `Checked 85 files`, **0 errors, 8 warnings**, and the 8 are the same `src/` warnings as 2dfd7d6. Renderer **326/326**, main **135/135**, E2E **7/7** with no retry (same counts as round 48; no test added or lost). `typecheck` still runs `tsc --noEmit -p tsconfig.test.json` (closes the stale half of TM-B06's title). |
+| R49-5 fixtures unchanged | Run `tests/fixtures/create-fixtures.ts` (reformatted) and the 2dfd7d6 version into two temp folders | `sample.wav` and `corrupt.wav` sha256 are identical between the two, and match the pins in `create-fixtures.test.ts`. |
+| R49-6 real app unchanged | `npm run build` on A's tree and on a 2dfd7d6 copy, compare `out/` file hashes. Then launch A's build via Playwright `_electron` under `xvfb-run` (`--no-sandbox`, temp `XDG_CONFIG_HOME`), open a temp folder holding a copy of `sample.wav` and one ffmpeg sine WAV, select the sine WAV, set Title `R49`, Save Tags | `out/` is identical; if not, C names the differing files and shows they do not come from `src/`. Toast `Tags saved`. ffprobe `format_tags` and music-metadata both show title `R49`. The other file is byte-identical. Screenshot. `pageErrors` empty. |
+| R49-7 docs | Read the `BIOME_LINTING.md` diff | Commands say `src/` and `tests/`. One Georgian line names the `tests/**` double-quote override and D-52. Nothing else in the file changes. |
 
 `build:win` / `build:mac` stay BLOCKED ("Windows packaging is not available in the cloud"). That is not a FAIL.
 
 ## What could break (C re-checks)
-- Nothing in `src/` changes, so app behaviour must be identical to ede35de. The gate's existing tests stay green unchanged.
-- The artists roundtrip in `metadata.test.ts` and (e5) in `metadata-empty-values.test.ts`.
-- D-49 empty-list write and D-50 numbers: no `IBPM`/`ICRD`/`ITRK` appear on the R48-4 save.
-- Artist column display and sort (renderer tests, unchanged).
+- **Import reordering** in 12 files. Vitest hoists `vi.mock` whatever the import order, and `tests/renderer/setup.ts` is loaded via `setupFiles`, not by import. The full Vitest and E2E counts (R49-4) catch any order dependency.
+- **E2E helpers** (`tests/e2e/electron-launch.ts`, `electron-launch-failure.ts`) are reformatted. E2E 7/7 with `--retries=0` and `tests/main/electron-launch-failure.test.ts` cover them.
+- **`tests/fixtures/create-fixtures.ts`** runs through `tsx` in `verifyCommand` and in check.yml. R49-5 checks its output bytes.
+- **`tests/contract/check-ffprobe-tags.ts`** runs in check.yml's "Tag contract ffprobe cross-check" step. C runs `npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav` after the E2E run, and it must exit 0.
+- `npm run lint:fix` now also writes into `tests/`. That is intended (D-52).
+- Biome warnings must not grow (8 → 8).
 
 ## Next (orientation only, Saba's order)
-1. **Q6 → TM-B06:** Biome over `tests/**` with a relaxed override, as its own round.
-2. **Q7 → TM-T2-DATA → TM-T2:** waiting on Saba.
-3. **Open for Saba (non-blocking):** Q9–Q24; new **Q25** (Artists ↔ `IART`, B-R47-01, with B-R6-01 and B-R47-02), **Q26** (truncated `data` grows on save, A-R47-01/C-R47-02), C-R47-01 (multi-select `Multiple values` on equal empties, UX group).
+1. Saba's ordered list (Q2 → Q8 → Q4/Q1 → Q5 → Q3 → Q6) ends with this round.
+2. **Q7 → TM-T2-DATA → TM-T2:** still waiting on Saba (UCS list + licence).
+3. **Open for Saba (non-blocking):** Q9–Q24 (UX), Q25 (Artists ↔ `IART`, now with RR-R48-03's migration note, C-R48-01 `TPE2` and A-R48-01 `LIST/MID`), Q26 (truncated `data` grows on save), C-R47-01. If they are still unanswered after round 49, B reports which scoped items remain and why.

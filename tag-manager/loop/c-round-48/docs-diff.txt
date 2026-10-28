@@ -1,0 +1,58 @@
+diff --git a/.claude/primitives/WAV_METADATA.md b/.claude/primitives/WAV_METADATA.md
+index babf485..d9e60e0 100644
+--- a/.claude/primitives/WAV_METADATA.md
++++ b/.claude/primitives/WAV_METADATA.md
+@@ -14,6 +14,8 @@
+ | STANDARD_PROP_MAP | tag.title, tag.performers, tag.album, tag.genres, tag.year, tag.comment, tag.copyright, tag.track, tag.beatsPerMinute, tag.isrc, tag.publisher | Direct tag property access |
+ | riffChunkId (InfoTag) | INAM, IART, IPRD, IGNR, ICRD, ICMT, ICOP, ITRK, IBPM, IKEY, ICAT | getValuesAsStrings/setValuesFromStrings |
+ 
++**artists (D-12, Q25):** `artists` (`tag.performers`) `LIST/INFO`-ში იწერება `ISTR`-ად (არა `IART`-ად), თითო sub-chunk თითო მნიშვნელობაზე; `STANDARD_FIELDS`-ის `IART` ინფორმაციული და რეზერვირებულია; library `IART`-ს `tag.albumArtists`-ზე ასახავს, რომელსაც app არ კითხულობს.
++
+ **IMPORTANT:** `keywords` field uses `riffChunkId: 'IKEY'`, NOT STANDARD_PROP_MAP.
+ Tag object-ზე `tag.keywords` არ არსებობს - InfoTag path-ით იკითხება.
+ `category` (`Category (UCS)`) იყენებს `riffChunkId: 'ICAT'`-ს და `keywords`-ის მსგავსად InfoTag path-ით იწერება/იკითხება (კონტრაქტი: `docs/recording-tag-contract.md`).
+diff --git a/docs/recording-tag-contract.md b/docs/recording-tag-contract.md
+index 7803bd3..16d91d2 100644
+--- a/docs/recording-tag-contract.md
++++ b/docs/recording-tag-contract.md
+@@ -2,7 +2,7 @@
+ 
+ ეს დოკუმენტი არის **source of truth** იმისთვის, თუ რომელ ველს წერს Czaba Tag Manager WAV ფაილში და როგორ უნდა წაიკითხოს ის backend-ის import tool-მა (`czaba-api/tools/recording-import`, K-4). ველის სახელის, chunk ID-ის ან კოდირების ცვლილება ორივე ნაკადის ცვლილებაა და ახალ D-ID-ს მოითხოვს.
+ 
+-გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13, D-49, D-50, D-51 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`.
++გადაწყვეტილებები: D-01, D-02, D-03, D-04, D-10, D-12, D-13, D-49, D-50, D-51 (loop-ის `feature-status.md`). ქცევა გაზომილია `node-taglib-sharp@6.0.1`-ზე, ტესტები: `tests/main/recording-tag-contract.test.ts`, `tests/main/metadata-artists.test.ts` (D-12).
+ 
+ ## ველები
+ 
+@@ -67,7 +67,23 @@ Saba-ს გადაწყვეტილება (Q4): ცარიელი
+ ## რა არ შედის კონტრაქტში (D-12)
+ 
+ - კონტრაქტი მოიცავს **მხოლოდ** `ICAT`, `IKEY` და `ICMT`-ს.
+-- `artists` და `STANDARD_PROP_MAP`-ის სხვა სტანდარტული ველები (title, album, genres, year, copyright, track, bpm, isrc, publisher) კონტრაქტის ნაწილი არ არის. მათი `riffChunkId` `STANDARD_FIELDS`-ში ინფორმაციულია და SchemaEditor-ისთვის რეზერვირებული; რეალურ chunk-ს node-taglib-sharp ირჩევს. მაგალითად `artists` იწერება `ISTR`-ად, თითო sub-chunk თითო მნიშვნელობაზე, და არა `IART`-ად (C-R2-01, TM-B08).
++- `artists` და `STANDARD_PROP_MAP`-ის სხვა სტანდარტული ველები (title, album, genres, year, copyright, track, bpm, isrc, publisher) კონტრაქტის ნაწილი არ არის. მათი `riffChunkId` `STANDARD_FIELDS`-ში ინფორმაციულია და SchemaEditor-ისთვის რეზერვირებული; რეალურ chunk-ს node-taglib-sharp ირჩევს. მაგალითად `artists` იწერება `ISTR`-ად, თითო sub-chunk თითო მნიშვნელობაზე, და `LIST/INFO`-ში არა `IART`-ად (C-R2-01, TM-B08; `LIST/MID`-ის `IART` იხ. ქვემოთ).
++
++### Artists (D-12, Saba Q3, 2026-10-28)
++
++- Saba-მ Q3-ში (2026-10-28) გადაწყვიტა: artists K-4 კონტრაქტის გარეთაა და იწერება ისე, როგორც დღეს. writer-ის ცვლილება არ არის (TM-B08).
++- გაზომილი კოდირება (`node-taglib-sharp@6.0.1`, `tag.performers`):
++  - `LIST/INFO`-ში თითო `ISTR` sub-chunk თითო მნიშვნელობაზე, იმავე რიგით; `LIST/INFO`-ში `IART` **არ** იწერება;
++  - `LIST/MID ` chunk-ში (library-ის MovieId tag) თითო `IART` თითო მნიშვნელობაზე, იმავე რიგით (A-ს probe, round 48; unit ტესტში არ არის დაფიქსირებული);
++  - ID3v2.4 chunk-ში (`id3 `) **ერთი** `TPE1` frame, მნიშვნელობები NUL-ით გამოყოფილი (`A\0B`); music-metadata მას ორ `TPE1`-ად აჩვენებს;
++  - ffprobe `format_tags`: `artist` = პირველი მნიშვნელობა, `ISTR` = ბოლო მნიშვნელობა (მაგ. `['A','B','C']` → `artist: A`, `ISTR: C`);
++  - music-metadata `common.artists` ყველა მნიშვნელობას აჩვენებს (`['A','B']`);
++  - ცარიელი სია (`[]`) ყველა `ISTR`-ს შლის (D-49); save, რომელიც `artists`-ს არ აგზავნის, `LIST/INFO`-ში `ISTR`/`IART`-ს არ ქმნის.
++- ffprobe/music-metadata-ის შედეგები ხელით გაზომილია (B round 47, A round 48); unit ტესტი მხოლოდ raw `LIST/INFO`-ს და `meta:read`-ს ამოწმებს.
++- **სხვა პროგრამის `LIST/INFO` `IART`** (recorder, DAW, `ffmpeg -metadata artist=`): library `IART`-ს `tag.albumArtists`-ად კითხულობს, app კი მხოლოდ `tag.performers`-ს. ამიტომ:
++  - Metadata panel-ში Artists ველი **ცარიელია**;
++  - Artists-ის save-ისას `IART` **რჩება** უცვლელად და `ISTR` ემატება, ამიტომ ffprobe-ის `artist` ძველ მნიშვნელობას აჩვენებს (`Rec`), `ISTR` კი ახალს.
++  - ეს ქცევა დაფიქსირებულია Q25-მდე (B-R47-01). თუ Q25-ის პასუხი იქნება „Artists → `IART`“, `tests/main/metadata-artists.test.ts`-ის (b6)/(b7) შეგნებულად შეიცვლება.
+ 
+ ## არსებული `schema.json` (D-07)
+ 
+@@ -101,5 +117,6 @@ Saba-ს გადაწყვეტილება (Q4): ცარიელი
+ - `npm run test:main` — `tests/main/metadata-empty-values.test.ts`: ცარიელი/whitespace-only `text` და `tags` მნიშვნელობა sub-chunk-ს შლის (single და batch), custom ველები, უცნობი ID-ის D-18 შეცდომა (D-49); (e6) აკრეფილი number `0` იწერება `'0'`-ად (D-50).
+ - `npm run test:main` — `tests/main/metadata-number-values.test.ts`: დაუყენებელი number (`''`, whitespace, `NaN`) არ იწერება და გასუფთავება `ITKN`/`ICRD`-ს შლის (single და batch), read-then-save `ITKN`-ს არ ქმნის (C-R6-01), `0`/`-2` round trip, `'abc'` → `''`, corrupt ფაილზე number ველები `''` (D-50).
+ - `npm run test:main` — `tests/main/metadata-empty-audio.test.ts`: ცარიელი/არარსებული `data` chunk-ის მქონე WAV-ზე `meta:write` და `meta:write-batch` აბრუნებს `Audio data is empty, cannot tag`-ს და ფაილის sha256 არ იცვლება; `LIST/INFO`-იანი 0-sample და 1-sample WAV იწერება; `corrupt.wav`-ის შეცდომა უცვლელია; წაკითხვა ცარიელ ველებს აბრუნებს (D-51).
++- `npm run test:main` — `tests/main/metadata-artists.test.ts`: artists-ის დღევანდელი კოდირება (D-12, Saba Q3) — თითო `ISTR` თითო მნიშვნელობაზე რიგით, `IART`-ის გარეშე; ცარიელი სია `ISTR`-ს შლის; სხვა პროგრამის `IART` Artists-ად არ იკითხება და save-ისას რჩება, `data` sha256 უცვლელია (Q25-მდე, B-R47-01).
+ - `npx --yes tsx@4 tests/contract/check-ffprobe-tags.ts test-results/recording-tag-contract/contract.wav` — ffprobe-ით ამოწმებს `ICAT`, `IKEY` და `comment`-ს (CI step „Tag contract ffprobe cross-check“).
+ - `tests/e2e/recording-tag-contract.spec.ts` — Electron-ში `writeMetadata` → `readMetadata` category-ით, სუფთა `XDG_CONFIG_HOME`-ით.

@@ -1,0 +1,7 @@
+B round-49 planning probe (2026-10-28), HEAD 2dfd7d6, biome 2.4.4. All in /tmp copies (git archive HEAD), node_modules symlinked. Nothing written into the repository.
+1. Current config + includes extended to tests/**: biome check tests/ -> 65 errors (51 format, 12 organizeImports, 2 noUnusedImports), 0 warnings.
+2. + override tests/** quoteStyle double -> 50 errors (36 format, 12 organizeImports, 2 noUnusedImports).
+3. + override tests/** formatter disabled -> 14 errors (12 organizeImports, 2 noUnusedImports).
+4. + formatter disabled + organizeImports off -> 2 errors (noUnusedImports: file-system.test.ts vi; templates.test.ts readdirSync, writeFileSync).
+5. Option chosen (probe-a-biome.json: includes src+tests, override tests/** quoteStyle double): biome check --write tests/ -> Fixed files, 2 errors left (unused imports); biome check --write --unsafe on the two files removes them; biome check src/ tests/ -> Checked 85 files, 0 errors, 8 warnings (all src, as before).
+6. Feasibility: in that copy fixtures + tsc -p tsconfig.test.json + npm test -> EXIT 0, renderer 22 files, main 15 files passed (probe-a-check.log). 37 test files differ from HEAD (probe-a-changed-files.txt), 1142 diff lines.

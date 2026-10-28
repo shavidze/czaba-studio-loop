@@ -1,0 +1,46 @@
+63c63
+<       tag.performers = val as string[];
+---
+>       if ((val as string[]).length) tag.performers = val as string[];
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c48-mut[39m
+
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b1) two artists become two ISTR sub-chunks in order and no LIST/INFO IART[32m 30[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b2) one artist becomes exactly one ISTR sub-chunk and no LIST/INFO IART[32m 10[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b3) three artists become three ISTR sub-chunks in order[32m 5[2mms[22m[39m
+ [31m×[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b4) an empty artists list removes every ISTR sub-chunk (D-49)[32m 30[2mms[22m[39m
+[31m   → expected [ 'A', 'B' ] to deeply equal [][39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b5) a write without artists adds no LIST/INFO ISTR or IART sub-chunk[32m 8[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b6) pinned until Q25: an IART written by another program is not read as artists[32m 3[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b7) pinned until Q25: saving artists keeps another program's IART and adds ISTR[32m 5[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b4) an empty artists list removes every ISTR sub-chunk (D-49)
+[31m[1mAssertionError[22m: expected [ 'A', 'B' ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "A",[39m
+[31m+   "B",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m tests/main/metadata-artists.test.ts:[2m149:44[22m[39m
+    [90m147| [39m    expect(infoValuesOf(filePath, "ISTR"), "seeded ISTR").toEqual(["A"…
+    [90m148| [39m    [35mawait[39m [34mwriteMetadataViaIpc[39m(filePath[33m,[39m { artists[33m:[39m [] })[33m;[39m
+    [90m149| [39m    [34mexpect[39m([34minfoValuesOf[39m(filePath[33m,[39m [32m"ISTR"[39m))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m150| [39m    [34mexpect[39m([34minfoValuesOf[39m(filePath[33m,[39m [32m"IART"[39m))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m151| [39m    [34mexpect[39m(([35mawait[39m [34mreadMetadataViaIpc[39m(filePath))[33m.[39martists)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 11:52:54
+[2m   Duration [22m 1.03s[2m (transform 226ms, setup 47ms, import 430ms, tests 95ms, environment 0ms)[22m
+

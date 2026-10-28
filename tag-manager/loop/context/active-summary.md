@@ -1,15 +1,14 @@
-# Active loop summary (2026-10-28T11:34:37.188Z)
+# Active loop summary (2026-10-28T11:56:02.121Z)
 
-- backlog.json 440 KB -> active view 112 KB
-- status: G_ROOT_GATE round 47
+- backlog.json 449 KB -> active view 116 KB
+- status: G_ROOT_GATE round 48
 - servers: `{"servers":"none or skipped"}`
-- last publication: ede35de5e5ef06521cede8eef43a92417527c131 (rounds 47-47)
-- last root gate: round 47 published - commit ede35de5e5ef06521cede8eef43a92417527c131 pushed
+- last publication: 2dfd7d6edfc66640336d19e49d74b233226da6f7 (rounds 48-48)
+- last root gate: round 48 published - commit 2dfd7d6edfc66640336d19e49d74b233226da6f7 pushed
 
-## Current items: TM-B05, TM-B11
+## Current items: TM-B08, TM-B05
 
 ## Open findings
-- B-R0-03 / low / in_progress / node-taglib-sharp empty data chunk boundary bug (TM-B05)
 - C-R1-01 / low / open / Empty Keywords written as IKEY=""; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contra
 - RR-R1-03 / low / open / check.yml actions pinned to @v4 tags, not SHAs
 - RR-R1-07 / info / open / Architecture signal: after a green check.yml run make it a required status check and add needs: check to release.yml (release.yml frozen; ne
@@ -217,9 +216,19 @@
 - C-R46-02 / info / open / (r3) was listed as must-fail but is green on c822d7f: the old 0 came from main's read default, not the renderer; the red side of C-R6-01 is 
 - C-R46-03 / info / open / music-metadata reads ICMT 'კარი' as latin1 mojibake while ffprobe reads it correctly; same reader behaviour as C-R6-02
 - B-R46-01 / info / open / meta:write handler's msg.includes('Corrupt'/'corrupt') branch never fires for node-taglib-sharp CorruptFileError: its messages are 'WAV file
+- RR-R47-01 / low / open / D-51 mapping depends on the exact library text 'WAV file is missing data chunk' (node-taglib-sharp dist/riff/riffFile.js:327); a wording cha
+- RR-R47-02 / low / open / One message covers empty-data-at-end and no-data-chunk (documented on purpose in the contract)
+- RR-R47-03 / low / open / readTagsFromFile still swallows the same error and returns empty fields; the user learns only on save (Q22, pinned by (a7))
+- RR-R47-04 / info / open / Architecture signal: one openTagFile(path, mode) helper mapping library errors to app error codes (EMPTY_AUDIO, CORRUPT_HEADER) for read and
+- A-R47-01 / low / open / A WAV whose data chunk declares more bytes than the file has (declared 1000 B, 4 B present, file 48 B) grows to the declared size on save (4
+- A-R47-02 / info / open / openTagFileForWrite throws a new Error without { cause: err }; keeping the original error as cause would help diagnosis
+- C-R47-01 / low / open / Multi-select shows placeholder 'Multiple values' on every field even when both files are equally empty (tone.wav + tone2.wav, both untagged)
+- C-R47-02 / low / open / Confirms A-R47-01: truncated data (declared 1000 B, >=1 B present) is padded to the declared size on write (45 -> 1297 B)
+- C-R47-03 / info / open / Mutant M5 (message.includes('data chunk')) survives (no other library 'data chunk' message known); M6 (read path through the helper) is equi
+- B-R47-01 / low / open / A WAV whose artist was written by another tool as IART (ffmpeg -metadata artist=Rec) shows Artists empty in Tag Manager (library maps IART t
+- B-R47-02 / low / open / SchemaEditor RESERVED_RIFF_IDS comes from STANDARD_FIELDS riffChunkIds, so IART is reserved but ISTR (the chunk artists really write) is not
 
 ## Other open items
-- TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
 - TM-T2 [blocked] T-2 UCS CatID combobox on category field, unknown value blocks save, batch one CatID to many files
 - TM-T2-DATA [blocked] UCS category list file (~750 CatIDs) + licence confirmation, provided by Saba
 - TM-B06 [todo] Biome lint covers only src/ (tests/ not linted); tsconfig.test.json not part of check

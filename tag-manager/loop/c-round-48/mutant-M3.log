@@ -1,0 +1,68 @@
+61c61
+<     get: (tag) => (tag.performers ? tag.performers.map(stripRiffNulTerminator) : []),
+---
+>     get: (tag) => (tag.performers ? tag.performers.slice(0, 1).map(stripRiffNulTerminator) : []),
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/tmp/c48-mut[39m
+
+ [31m×[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b1) two artists become two ISTR sub-chunks in order and no LIST/INFO IART[32m 55[2mms[22m[39m
+[31m   → expected [ 'A' ] to deeply equal [ 'A', 'B' ][39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b2) one artist becomes exactly one ISTR sub-chunk and no LIST/INFO IART[32m 14[2mms[22m[39m
+ [31m×[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b3) three artists become three ISTR sub-chunks in order[32m 10[2mms[22m[39m
+[31m   → expected [ 'A' ] to deeply equal [ 'A', 'B', 'C' ][39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b4) an empty artists list removes every ISTR sub-chunk (D-49)[32m 8[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b5) a write without artists adds no LIST/INFO ISTR or IART sub-chunk[32m 8[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b6) pinned until Q25: an IART written by another program is not read as artists[32m 3[2mms[22m[39m
+ [32m✓[39m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b7) pinned until Q25: saving artists keeps another program's IART and adds ISTR[32m 8[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b1) two artists become two ISTR sub-chunks in order and no LIST/INFO IART
+[31m[1mAssertionError[22m: expected [ 'A' ] to deeply equal [ 'A', 'B' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "A",[22m
+[32m-   "B",[39m
+[2m  ][22m
+
+[36m [2m❯[22m tests/main/metadata-artists.test.ts:[2m125:58[22m[39m
+    [90m123| [39m    [34mexpect[39m([34minfoValuesOf[39m(filePath[33m,[39m [32m"ISTR"[39m))[33m.[39m[34mtoEqual[39m([[32m"A"[39m[33m,[39m [32m"B"[39m])[33m;[39m
+    [90m124| [39m    [34mexpect[39m([34minfoValuesOf[39m(filePath[33m,[39m [32m"IART"[39m))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m125| [39m    expect((await readMetadataViaIpc(filePath)).artists).toEqual(["A",…
+    [90m   | [39m                                                         [31m^[39m
+    [90m126| [39m  })[33m;[39m
+    [90m127| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/main/metadata-artists.test.ts[2m > [22mTM-B08 / D-12: artists are written as today (Saba Q3)[2m > [22m(b3) three artists become three ISTR sub-chunks in order
+[31m[1mAssertionError[22m: expected [ 'A' ] to deeply equal [ 'A', 'B', 'C' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "A",[22m
+[32m-   "B",[39m
+[32m-   "C",[39m
+[2m  ][22m
+
+[36m [2m❯[22m tests/main/metadata-artists.test.ts:[2m141:58[22m[39m
+    [90m139| [39m    [34mexpect[39m([34minfoValuesOf[39m(filePath[33m,[39m [32m"ISTR"[39m))[33m.[39m[34mtoEqual[39m([[32m"A"[39m[33m,[39m [32m"B"[39m[33m,[39m [32m"C"[39m])[33m;[39m
+    [90m140| [39m    [34mexpect[39m([34minfoValuesOf[39m(filePath[33m,[39m [32m"IART"[39m))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m141| [39m    expect((await readMetadataViaIpc(filePath)).artists).toEqual(["A",…
+    [90m   | [39m                                                         [31m^[39m
+    [90m142| [39m  })[33m;[39m
+    [90m143| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 11:52:49
+[2m   Duration [22m 959ms[2m (transform 223ms, setup 41ms, import 436ms, tests 114ms, environment 0ms)[22m
+
