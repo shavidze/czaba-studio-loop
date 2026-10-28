@@ -1,0 +1,32 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [
+    {
+      "id": "C-R35-01",
+      "severity": "low",
+      "steps": ["New build: open folder slow, select s.wav, Customize Fields", "Open Folder fast with scan delay 4000 ms, add field R35note, click Done", "Look at the Active Fields arrows while Done reads Applying..."],
+      "expected": "Editing area visibly dimmed but controls still legible",
+      "actual": "Fieldset opacity 0.6 multiplies with the arrows' own disabled:opacity-30 (~18%): arrows are nearly invisible. Cosmetic only (code-reviewer low 4).",
+      "evidence": "c-round-35/r35-5-new-P-01-pending.png, r35-5-new-P.json domPending"
+    },
+    {
+      "id": "C-R35-02",
+      "severity": "low",
+      "steps": ["Read docs/bugs/001-save-and-selection-known-limits.md D-41 and D-40 bullets"],
+      "expected": "Bullets match code after D-43",
+      "actual": "D-41 still says the pending re-read always writes to the store after unmount (now only if no later Done started); D-40 says await waitForFolderLoadIdle() is on the first line (now the two D-43 id lines precede it). Task forbade editing these clauses; one-line qualification for the next docs touch.",
+      "evidence": "docs/bugs/001-save-and-selection-known-limits.md lines 19-20; MetadataPanel.tsx:226-229"
+    },
+    {
+      "id": "C-R35-03",
+      "severity": "low",
+      "steps": ["Apply BM-6 (remove setIsApplying(false) before onClose()) or DM-9 (take id after the wait)", "Run the six R35-3 test files"],
+      "expected": "A committed test pins each behaviour",
+      "actual": "Both survive the committed suites (equivalent inside the app). BM-6 is killed only by C probe (k2) (standalone SchemaEditor, no-op onClose); the DM-9 shape (two Done calls waiting on the same isScanning flip, reads out of order) is covered only by C probe (k1), which is green on A's tree and red on 3035ffc. Test gap, not a defect.",
+      "evidence": "c-round-35/mutants.log, c-round-35/c-probes.test.ts.txt"
+    }
+  ],
+  "passed": ["R35-1", "R35-2", "R35-3", "R35-4", "R35-5", "R35-6"],
+  "blocked": ["Windows packaging is not available in the cloud (not part of this round)"],
+  "realVerified": true
+}

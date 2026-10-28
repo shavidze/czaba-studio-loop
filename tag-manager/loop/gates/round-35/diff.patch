@@ -1,0 +1,421 @@
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index 1c757f9..830d97f 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -1,23 +1,25 @@
+ # 001 — Save და selection: ცნობილი შეზღუდვები (D-29, D-30, D-31)
+ 
+-**სტატუსი:** ცნობილი შეზღუდვების სია. ბაგი, რომელიც გასწორებას ელოდება, აქ არ არის. გასწორებული ჩანაწერები (3), (9), (11), (12), (13), (14), (15), (16) და (17) ისტორიისთვის რჩება.
+-**წყარო:** TM-B26 (round 23), TM-B27 (round 24), TM-B29 (round 26), TM-B30 (round 28), TM-B31 (round 29), TM-B32 (round 30), TM-B33 (round 31), TM-B34 (round 32), TM-B35 (round 33), TM-B36 (round 34). ID-ები loop-ის backlog-იდანაა.
+-**კოდი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (`handleSave`, `isListedPath`, `waitForFolderLoadIdle`, sync effect, `handleSchemaChanged`), `src/renderer/src/components/file-list/FileList.tsx` (`handleClick`, anchor), `src/renderer/src/stores/file-store.ts` (`selectRange`, `markPathsWritten`, `applyMetadataRead`, `beginFolderLoad`/`isFolderLoadCurrent`), `src/renderer/src/components/sidebar/FolderBrowser.tsx` (`handleOpenFolder`, `handleRescan`, `handleCloseFolder`), `src/renderer/src/App.tsx` (`openFolder`, schema-ს ლოდინის loop), `src/renderer/src/lib/utils.ts` (`readMetadataChunked`), `src/renderer/src/components/schema/SchemaEditor.tsx` (`handleSave`, `isMountedRef`).
++**სტატუსი:** ცნობილი შეზღუდვების სია. ბაგი, რომელიც გასწორებას ელოდება, აქ არ არის. გასწორებული ჩანაწერები (3), (9), (11), (12), (13), (14), (15), (16), (17) და (18) ისტორიისთვის რჩება.
++**წყარო:** TM-B26 (round 23), TM-B27 (round 24), TM-B29 (round 26), TM-B30 (round 28), TM-B31 (round 29), TM-B32 (round 30), TM-B33 (round 31), TM-B34 (round 32), TM-B35 (round 33), TM-B36 (round 34), TM-B37 (round 35). ID-ები loop-ის backlog-იდანაა.
++**კოდი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` (`handleSave`, `isListedPath`, `waitForFolderLoadIdle`, sync effect, `handleSchemaChanged`, `schemaReadIdRef`), `src/renderer/src/components/file-list/FileList.tsx` (`handleClick`, anchor), `src/renderer/src/stores/file-store.ts` (`selectRange`, `markPathsWritten`, `applyMetadataRead`, `beginFolderLoad`/`isFolderLoadCurrent`), `src/renderer/src/components/sidebar/FolderBrowser.tsx` (`handleOpenFolder`, `handleRescan`, `handleCloseFolder`), `src/renderer/src/App.tsx` (`openFolder`, schema-ს ლოდინის loop), `src/renderer/src/lib/utils.ts` (`readMetadataChunked`), `src/renderer/src/components/schema/SchemaEditor.tsx` (`handleSave`, `isMountedRef`, `isApplying`).
+ 
+ გადაწყვეტილებები მოკლედ:
+ - **D-29:** თუ save-ის დროს selection შეიცვალა (set-ად შედარებით), ფაილის მხარის განახლებები რჩება, მაგრამ ფორმას ეს save არ ეხება (`skipSyncRef` არ დგება, `setEditingMetadata` არ იძახება).
+ - **D-30:** იგივე selection-ზე save-ის დროს აკრეფილი ველები (`modifiedFields`-ის key-ები, რომელთა მნიშვნელობა start snapshot-ისგან განსხვავდება) re-read-ის შემდეგ `mergeFields`-ით ბრუნდება. start snapshot-ს D-32 განსაზღვრავს.
+ - **D-32:** `handleSave` save-ის დასაწყისში ერთხელ კითხულობს `useMetadataStore.getState().editingMetadata`-ს. ეს ერთი მნიშვნელობა გამოიყენება single write-ის payload-ად, batch payload-ად (`modifiedFields`-ის key-ები) და D-30-ის შედარებისთვის. ხილული ქცევა არ იცვლება.
+ - **D-31:** Shift-click anchor ინახება file path-ად. ყოველი click (plain, Ctrl/Cmd, Shift) anchor-ს clicked row-ზე აყენებს. anchor იშლება, როცა selection ცარიელი ხდება.
+-- **D-33:** (1) `handleSave`-ის post-save re-read (`readMetadata` და `readMetadataBatch`) schema-ს re-read-ის მომენტში კითხულობს (`useSchemaStore.getState().fields`); write კვლავ click-ის დროის `fields`-ს იყენებს. (2) `handleSchemaChanged`-ში chunk-ის `readMetadataBatch` თუ reject-დება, ამ chunk-ის path-ებს store-ის მიმდინარე entry რჩება (D-22-ის მსგავსად); entry აიღება მაშინ, როცა `handleSchemaChanged` store-ში წერს ბოლო chunk-ის შემდეგ, და არა chunk-ის reject-ის მომენტში (D-34, `MetadataPanel.tsx:258-262`); entry-ის გარეშე path-ები ისევ არ ემატება. failures-ის რაოდენობა და toast `Failed to read N files` უცვლელია. (3) შენარჩუნებული (ხელახლა არ წაკითხული) entry ფორმას არ ცვლის: single selection-ზე `setEditingMetadata` მხოლოდ ახლად წაკითხული entry-ით იძახება, ამიტომ შეუნახავი edits და save-ის დროს აკრეფილი ველები (D-30) რჩება (A-R24-01). შენარჩუნებული entry ძველი schema-თი იყო წაკითხული, ამიტომ ამ schema-ს ცვლილებით დამატებულ ველს ამ ფაილისთვის მნიშვნელობა არ აქვს შემდეგ წარმატებულ read-მდე (rescan ან folder-ის ხელახლა გახსნა, ამ ფაილის save-ის re-read, ან schema-ს შემდეგი ცვლილება წარმატებული read-ით). სხვა ფაილზე გადასვლა და დაბრუნება ფაილს ხელახლა არ კითხულობს: ფორმა store-ის entry-ს აჩვენებს (`MetadataPanel.tsx:130`). ამას toast `Failed to read N files` აცნობებს (RR-R24-01).
+-- **D-34:** stale-result guard schema-ს re-read-ისთვის. ყოველი დადასტურებული write (single `writeMetadata`-ის შემდეგ, batch `writeMetadataBatch`-ის შემდეგ მხოლოდ `result.failed`-ში არმყოფ path-ებზე) იძახებს `markPathsWritten`-ს (`MetadataPanel.tsx:154`, `:184`): ის `writeGeneration`-ს ზრდის 1-ით და ამ path-ებს `pathWriteGenerations[path]`-ში ახალ მნიშვნელობას უწერს (`file-store.ts:126-134`). rejected write არაფერს ნიშნავს. `handleSchemaChanged` ყოველი chunk-ის `readMetadataBatch`-ის წინ `writeGeneration`-ს იმახსოვრებს (`MetadataPanel.tsx:237`). შედარება ერთხელ ხდება, store-ში ჩაწერისას (`:251`): path, რომლის `pathWriteGenerations` chunk-ის generation-ზე მეტია, superseded-ია. superseded და kept (reject-ებული chunk) path-ები store-ის მიმდინარე entry-ს იღებენ (`:258-261`) და ფორმას არ ცვლიან (`:266`). generation-ები app-ის სიცოცხლის განმავლობაში მხოლოდ იზრდება (`setMetadata`, `setFiles` და folder-ის ცვლილება მათ არ ეხება). schema editor არ იკეტება.
++- **D-33:** (1) `handleSave`-ის post-save re-read (`readMetadata` და `readMetadataBatch`) schema-ს re-read-ის მომენტში კითხულობს (`useSchemaStore.getState().fields`); write კვლავ click-ის დროის `fields`-ს იყენებს. (2) `handleSchemaChanged`-ში chunk-ის `readMetadataBatch` თუ reject-დება, ამ chunk-ის path-ებს store-ის მიმდინარე entry რჩება (D-22-ის მსგავსად); entry აიღება მაშინ, როცა `handleSchemaChanged` store-ში წერს ბოლო chunk-ის შემდეგ, და არა chunk-ის reject-ის მომენტში (D-34, `MetadataPanel.tsx:262-266`); entry-ის გარეშე path-ები ისევ არ ემატება. failures-ის რაოდენობა და toast `Failed to read N files` უცვლელია. (3) შენარჩუნებული (ხელახლა არ წაკითხული) entry ფორმას არ ცვლის: single selection-ზე `setEditingMetadata` მხოლოდ ახლად წაკითხული entry-ით იძახება, ამიტომ შეუნახავი edits და save-ის დროს აკრეფილი ველები (D-30) რჩება (A-R24-01). შენარჩუნებული entry ძველი schema-თი იყო წაკითხული, ამიტომ ამ schema-ს ცვლილებით დამატებულ ველს ამ ფაილისთვის მნიშვნელობა არ აქვს შემდეგ წარმატებულ read-მდე (rescan ან folder-ის ხელახლა გახსნა, ამ ფაილის save-ის re-read, ან schema-ს შემდეგი ცვლილება წარმატებული read-ით). სხვა ფაილზე გადასვლა და დაბრუნება ფაილს ხელახლა არ კითხულობს: ფორმა store-ის entry-ს აჩვენებს (`MetadataPanel.tsx:130`). ამას toast `Failed to read N files` აცნობებს (RR-R24-01).
++- **D-34:** stale-result guard schema-ს re-read-ისთვის. ყოველი დადასტურებული write (single `writeMetadata`-ის შემდეგ, batch `writeMetadataBatch`-ის შემდეგ მხოლოდ `result.failed`-ში არმყოფ path-ებზე) იძახებს `markPathsWritten`-ს (`MetadataPanel.tsx:154`, `:184`): ის `writeGeneration`-ს ზრდის 1-ით და ამ path-ებს `pathWriteGenerations[path]`-ში ახალ მნიშვნელობას უწერს (`file-store.ts:126-134`). rejected write არაფერს ნიშნავს. `handleSchemaChanged` ყოველი chunk-ის `readMetadataBatch`-ის წინ `writeGeneration`-ს იმახსოვრებს (`MetadataPanel.tsx:240`). შედარება ერთხელ ხდება, store-ში ჩაწერისას (`:255`): path, რომლის `pathWriteGenerations` chunk-ის generation-ზე მეტია, superseded-ია. superseded და kept (reject-ებული chunk) path-ები store-ის მიმდინარე entry-ს იღებენ (`:262-265`) და ფორმას არ ცვლიან (`:270`). generation-ები app-ის სიცოცხლის განმავლობაში მხოლოდ იზრდება (`setMetadata`, `setFiles` და folder-ის ცვლილება მათ არ ეხება). schema editor არ იკეტება.
+ - **D-35:** stale-result guard folder-ის read-ისთვის (Rescan, Open Folder, drop). `readMetadataChunked` ყოველი chunk-ის `readMetadataBatch`-ის წინ ერთხელ იძახებს `getWriteGeneration()`-ს (`lib/utils.ts:64`) და შედეგში `readGenerations`-ს აბრუნებს: chunk-ის **result**-ის ყოველ path-ს ამ chunk-ის generation (`:68-70`); reject-ებული chunk `readGenerations`-ში არაფერს ამატებს. პარამეტრი სავალდებულოა, ხოლო `lib/utils.ts` store-ს არ import-ავს (გამომძახებელი გადასცემს `() => useFileStore.getState().writeGeneration`-ს). ახალი action `applyMetadataRead(read, readGenerations, keptPaths)` (`file-store.ts:136-153`) `metadata`-ს `setMetadata`-ს მსგავსად ცვლის (`read`-ში არმყოფი path ქრება, თუ ის `keptPaths`-ში არ არის, D-36); path, რომლის `pathWriteGenerations` read-ის generation-ზე მეტია (`:140`), superseded-ია და store-ის მიმდინარე entry-ს იღებს, ან საერთოდ არ ემატება, თუ entry არ არსებობს (`:145-146`); ტოლი generation გამოიყენება. მას იძახებენ `handleOpenFolder` (`FolderBrowser.tsx:113-129`), `handleRescan` (`:171-187`) და App-ის `openFolder` (`App.tsx:66-82`, drop). error path-ები: Open Folder და drop `catch`-ში იძახებენ `setFiles([])`-ს, `setMetadata({})`-ს და toast-ს (`FolderBrowser.tsx:133-139`, `App.tsx:86-92`); Rescan-ის `catch` მხოლოდ toast-ს აჩვენებს, `files` და `metadata` რჩება (`FolderBrowser.tsx:191-195`). ცარიელი folder (WAV-ის გარეშე): სამივე გამომძახებელი `else`-ში `setMetadata({})`-ს იძახებს (`FolderBrowser.tsx:130-132`, `:188-190`, `App.tsx:83-85`; D-37). Rescan / Open Folder / drop save-ის დროს არ იკეტება (ჩაკეტვა Saba-ს ვარიანტია, B-R27-02).
+-- **D-36:** reject-ებული folder-read chunk (Rescan, Open Folder, drop). `readMetadataChunked` შედეგში `failedPaths`-საც აბრუნებს: ყოველი reject-ებული chunk-ის ყველა path, `paths`-ის რიგით (`lib/utils.ts:72`); `failures` უდრის `failedPaths.length`-ს (`:75`). `applyMetadataRead`-ის მესამე პარამეტრი `keptPaths` სავალდებულოა (`file-store.ts:36`): D-35-ის loop-ის შემდეგ ყოველ kept path-ს store-ის მიმდინარე entry რჩება, აღებული store-ში ჩაწერის მომენტში (იმავე `set`-ში), ან path საერთოდ არ ემატება, თუ entry არ არსებობს (`:148-151`). სამივე გამომძახებელი `failedPaths`-ს გადასცემს (`FolderBrowser.tsx:126`, `:184`, `App.tsx:79`) და `failures > 0`-ზე აჩვენებს toast-ს `Failed to read N files` (`FolderBrowser.tsx:127-129`, `:185-187`, `App.tsx:80-82`), D-33-ის ტექსტით (`MetadataPanel.tsx:271`). error path-ები, ცარიელი folder და `handleCloseFolder` D-36-მა არ შეცვალა (ცარიელი folder-ი შემდეგ D-37-მა შეცვალა).
++- **D-36:** reject-ებული folder-read chunk (Rescan, Open Folder, drop). `readMetadataChunked` შედეგში `failedPaths`-საც აბრუნებს: ყოველი reject-ებული chunk-ის ყველა path, `paths`-ის რიგით (`lib/utils.ts:72`); `failures` უდრის `failedPaths.length`-ს (`:75`). `applyMetadataRead`-ის მესამე პარამეტრი `keptPaths` სავალდებულოა (`file-store.ts:36`): D-35-ის loop-ის შემდეგ ყოველ kept path-ს store-ის მიმდინარე entry რჩება, აღებული store-ში ჩაწერის მომენტში (იმავე `set`-ში), ან path საერთოდ არ ემატება, თუ entry არ არსებობს (`:148-151`). სამივე გამომძახებელი `failedPaths`-ს გადასცემს (`FolderBrowser.tsx:126`, `:184`, `App.tsx:79`) და `failures > 0`-ზე აჩვენებს toast-ს `Failed to read N files` (`FolderBrowser.tsx:127-129`, `:185-187`, `App.tsx:80-82`), D-33-ის ტექსტით (`MetadataPanel.tsx:275`). error path-ები, ცარიელი folder და `handleCloseFolder` D-36-მა არ შეცვალა (ცარიელი folder-ი შემდეგ D-37-მა შეცვალა).
+ - **D-37:** ცარიელი folder (scan აბრუნებს `[]`) `metadata`-ს წმენდს სამივე გამომძახებელში: `handleOpenFolder` (`FolderBrowser.tsx:130-132`), `handleRescan` (`:188-190`, უკვე round 30-მდე) და App-ის `openFolder` (`App.tsx:83-85`, drop) `if (wavFiles.length > 0)`-ის `else`-ში `setMetadata({})`-ს იძახებენ. `readMetadataBatch` არ იძახება, toast არ ჩნდება, `setFiles(wavFiles)` უცვლელია. ასე ცარიელი folder-ის შემდეგ ძველი folder-ის entry-ები store-ში აღარ რჩება და ძველი folder-ის ხელახლა გახსნისას reject-ებული read მათ მიმდინარედ აღარ აჩვენებს (ისევე, როგორც D-36 (k5) სხვა არაცარიელ folder-ზე). ჩანაწერი (13).
+ - **D-38:** ერთმანეთზე გადაფარული folder load-ები (Open Folder, Rescan, drop, Close Folder) latest-wins-ია. `FileState`-ს აქვს `folderLoadId: number` (`file-store.ts:16`, საწყისი `0`, `:52`), რომელიც მხოლოდ იზრდება და არასოდეს reset-დება (`reset-stores.ts`-იც არ ცვლის). action `beginFolderLoad()` (`:38`, `:155-158`) `folderLoadId`-ს 1-ით ზრდის და ახალ მნიშვნელობას აბრუნებს; `isFolderLoadCurrent(loadId)` (`:161-163`) ამოწმებს, ისევ ეს load არის თუ არა ბოლო. `handleOpenFolder` id-ს dialog-ის შემდეგ იღებს (`FolderBrowser.tsx:99`, `if (!path) return;`-ის შემდეგ, ამიტომ გაუქმებული dialog მიმდინარე load-ს არ აუქმებს), `handleRescan` `if (!folderPath) return;`-ის შემდეგ (`:158`), App-ის `openFolder` პირველივე ხაზზე (`App.tsx:44`, player-ის stop-მდე და schema-ს ლოდინამდე). სამივეში `scanFolder`-ის შემდეგ (`FolderBrowser.tsx:107`, `:165`, `App.tsx:60`), `readMetadataChunked`-ის შემდეგ (`FolderBrowser.tsx:123`, `:181`, `App.tsx:76`) და `catch`-ის პირველ ხაზზე (`FolderBrowser.tsx:134`, `:192`, `App.tsx:87`) load, რომელიც აღარ არის მიმდინარე, store-ში არაფერს წერს და toast-ს არ აჩვენებს; `finally` `isScanning`-ს მხოლოდ მიმდინარე load-ისთვის აქრობს (`FolderBrowser.tsx:141`, `:197`, `App.tsx:94`). `handleCloseFolder` იძახებს `beginFolderLoad()`-ს და `setIsScanning(false)`-ს (`FolderBrowser.tsx:146-147`), ამიტომ pending load დახურულ folder-ს ვეღარ ავსებს და spinner Close-ზე ჩერდება. `setFolderPath`, `clearSelection()` და player-ის stop load-ის დასაწყისში სინქრონულად რჩება; D-35/D-36/D-37 მიმდინარე load-ის შიგნით უცვლელია; Rescan კვლავ `disabled={isScanning}`-ია. ჩანაწერი (14).
+-- **D-39:** გვიანი re-read-ები folder-ის შეცვლის შემდეგ. (a) `handleSave`: module-level ფუნქცია `isListedPath(path)` (`MetadataPanel.tsx:60-62`) ამოწმებს, ისევ არის თუ არა path `useFileStore.getState().files`-ში. single re-read store-ში მხოლოდ მაშინ იწერება, როცა path ჯერ კიდევ სიაშია (`if (isListedPath(path)) updateFileMetadata(path, updated);`, `:168`); batch-ის `savedEntries` `!failedPaths.has(path)`-ის გარდა `isListedPath(path)`-საც მოითხოვს (`:196-198`). write, `markPathsWritten`, `refreshSavedFileStats`, re-read, `skipSyncRef`, D-29/D-30 და ყველა toast უცვლელია. `handleSave` `folderLoadId`-ს და `folderPath`-ს არ ამოწმებს: Rescan და იმავე folder-ის Open Folder-იც `beginFolderLoad()`-ს იძახებს, ამიტომ load id-ის guard D-35-ს გააფუჭებდა, ხოლო `folderPath`-ის snapshot parent folder-ს, რომელიც ფაილს ისევ აჩვენებს, შენახულ მნიშვნელობას წაართმევდა. (b) `handleSchemaChanged` D-40-ის ლოდინის (`await waitForFolderLoadIdle();`, `:226`) შემდეგ load id-ს იღებს `const { files, folderLoadId: loadId } = useFileStore.getState();`-ით (`:227`), `if (files.length === 0) return;`-მდე (`:228`) (D-40, ჩანაწერი (16)), და chunk-ების loop-ის შემდეგ, `currentMetadata`-ს წაკითხვამდე, `if (!isFolderLoadCurrent(loadId)) return;`-ით ბრუნდება (`:246`): superseded schema re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს. D-33/D-34 უცვლელია. (c) App-ის `openFolder`-ის schema-ს ლოდინის loop-ში, `setTimeout`-ის შემდეგ, `if (!isFolderLoadCurrent(loadId)) return;` (`App.tsx:55`): superseded drop `scanFolder`-ს აღარ იძახებს. ჩანაწერი (15).
+-- **D-40:** schema-ს re-read მიმდინარე folder load-ის დროს. module-level ფუნქცია `waitForFolderLoadIdle()` (`MetadataPanel.tsx:64-73`, `isListedPath`-ის შემდეგ) მაშინვე resolve-დება, თუ `useFileStore`-ის `isScanning` false-ია; სხვა შემთხვევაში `useFileStore.subscribe`-ით ელოდება state-ს, სადაც `isScanning` false-ია, მერე unsubscribe-ს აკეთებს და resolve-დება. `handleSchemaChanged` პირველივე ხაზზე `await waitForFolderLoadIdle();`-ს იძახებს (`:226`), მერე ერთად იღებს იმ მომენტის `files`-ს და `folderLoadId`-ს (`const { files, folderLoadId: loadId } = useFileStore.getState();`, `:227`), ცარიელ `files`-ზე ბრუნდება (`:228`) და `files.map((f) => f.path)`-ს კითხულობს ახალი schema-თი (`:230`). render-ის `allFiles` selector წაიშალა; `useCallback`-ის dependencies `[setMetadata, setEditingMetadata, showToast]`-ია (`:273`). D-39(b)-ის guard (`:246`), D-33, D-34, `handleSave`, `isListedPath`, `refreshSavedFileStats`, sync effect და ყველა toast უცვლელია. load-ის გარეშე `Done` მაშინვე კითხულობს, როგორც ადრე. თუ აპის გაშვებისას schema ჯერ არ ჩატვირთულა (`loadSchema` IPC ნელია ან ჯერ არ დასრულებულა; reject-ებული `loadSchema` `isLoaded`-ს მაშინვე true-ზე აყენებს, `App.tsx:37-39`), drop (App-ის `openFolder`) `isScanning`-ს true-ზე აყენებს (`App.tsx:47`) schema-ს ლოდინამდე, რომელიც 5 წამამდე გრძელდება (`:50-55`), ამიტომ ამ დროს დაჭერილი `Done` 5 წამამდე ელოდება (RR-R33-03). ჩანაწერი (16).
+-- **D-41:** schema editor-ის `Done` მხოლოდ საკუთარ (ჯერ კიდევ mounted) instance-ს ხურავს. `SchemaEditor`-ს აქვს `isMountedRef` (`SchemaEditor.tsx:37`, `useRef(false)`) და mount effect (`:39-44`), რომელიც ref-ს თავად აყენებს `true`-ზე და cleanup-ში `false`-ზე. `handleSave` `await onSave?.();`-ის შემდეგ `if (!isMountedRef.current) return;`-ით ბრუნდება (`:139`) და `onClose()` (`:140`) მხოლოდ მაშინ იძახება, როცა ეს instance ისევ mounted-ია. dependencies `[fields, onSave, onClose]` უცვლელია. Back (`onClick={onClose}`, `:148`) მაშინვე ხურავს editor-ს; `Done` enabled რჩება, busy state-ის გარეშე (TM-B37); ტექსტები და `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელია, ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს. ჩანაწერი (17).
++- **D-39:** გვიანი re-read-ები folder-ის შეცვლის შემდეგ. (a) `handleSave`: module-level ფუნქცია `isListedPath(path)` (`MetadataPanel.tsx:60-62`) ამოწმებს, ისევ არის თუ არა path `useFileStore.getState().files`-ში. single re-read store-ში მხოლოდ მაშინ იწერება, როცა path ჯერ კიდევ სიაშია (`if (isListedPath(path)) updateFileMetadata(path, updated);`, `:168`); batch-ის `savedEntries` `!failedPaths.has(path)`-ის გარდა `isListedPath(path)`-საც მოითხოვს (`:196-198`). write, `markPathsWritten`, `refreshSavedFileStats`, re-read, `skipSyncRef`, D-29/D-30 და ყველა toast უცვლელია. `handleSave` `folderLoadId`-ს და `folderPath`-ს არ ამოწმებს: Rescan და იმავე folder-ის Open Folder-იც `beginFolderLoad()`-ს იძახებს, ამიტომ load id-ის guard D-35-ს გააფუჭებდა, ხოლო `folderPath`-ის snapshot parent folder-ს, რომელიც ფაილს ისევ აჩვენებს, შენახულ მნიშვნელობას წაართმევდა. (b) `handleSchemaChanged` D-40-ის ლოდინის (`await waitForFolderLoadIdle();`, `:229`) შემდეგ load id-ს იღებს `const { files, folderLoadId: loadId } = useFileStore.getState();`-ით (`:230`), `if (files.length === 0) return;`-მდე (`:231`) (D-40, ჩანაწერი (16)), და chunk-ების loop-ის შემდეგ, `currentMetadata`-ს წაკითხვამდე, `if (!isFolderLoadCurrent(loadId)) return;`-ით ბრუნდება (`:250`): superseded schema re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს. D-33/D-34 უცვლელია. (c) App-ის `openFolder`-ის schema-ს ლოდინის loop-ში, `setTimeout`-ის შემდეგ, `if (!isFolderLoadCurrent(loadId)) return;` (`App.tsx:55`): superseded drop `scanFolder`-ს აღარ იძახებს. ჩანაწერი (15).
++- **D-40:** schema-ს re-read მიმდინარე folder load-ის დროს. module-level ფუნქცია `waitForFolderLoadIdle()` (`MetadataPanel.tsx:64-73`, `isListedPath`-ის შემდეგ) მაშინვე resolve-დება, თუ `useFileStore`-ის `isScanning` false-ია; სხვა შემთხვევაში `useFileStore.subscribe`-ით ელოდება state-ს, სადაც `isScanning` false-ია, მერე unsubscribe-ს აკეთებს და resolve-დება. `handleSchemaChanged` პირველივე ხაზზე `await waitForFolderLoadIdle();`-ს იძახებს (`:229`), მერე ერთად იღებს იმ მომენტის `files`-ს და `folderLoadId`-ს (`const { files, folderLoadId: loadId } = useFileStore.getState();`, `:230`), ცარიელ `files`-ზე ბრუნდება (`:231`) და `files.map((f) => f.path)`-ს კითხულობს ახალი schema-თი (`:233`). render-ის `allFiles` selector წაიშალა; `useCallback`-ის dependencies `[setMetadata, setEditingMetadata, showToast]`-ია (`:277`). D-39(b)-ის guard (`:250`), D-33, D-34, `handleSave`, `isListedPath`, `refreshSavedFileStats`, sync effect და ყველა toast უცვლელია. load-ის გარეშე `Done` მაშინვე კითხულობს, როგორც ადრე. თუ აპის გაშვებისას schema ჯერ არ ჩატვირთულა (`loadSchema` IPC ნელია ან ჯერ არ დასრულებულა; reject-ებული `loadSchema` `isLoaded`-ს მაშინვე true-ზე აყენებს, `App.tsx:37-39`), drop (App-ის `openFolder`) `isScanning`-ს true-ზე აყენებს (`App.tsx:47`) schema-ს ლოდინამდე, რომელიც 5 წამამდე გრძელდება (`:50-55`), ამიტომ ამ დროს დაჭერილი `Done` 5 წამამდე ელოდება (RR-R33-03). ჩანაწერი (16).
++- **D-41:** schema editor-ის `Done` მხოლოდ საკუთარ (ჯერ კიდევ mounted) instance-ს ხურავს. `SchemaEditor`-ს აქვს `isMountedRef` (`SchemaEditor.tsx:37`, `useRef(false)`) და mount effect (`:39-44`), რომელიც ref-ს თავად აყენებს `true`-ზე და cleanup-ში `false`-ზე. `handleSave` `await onSave?.();`-ის შემდეგ `if (!isMountedRef.current) return;`-ით ბრუნდება (`:146`) და `onClose()` (`:148`) მხოლოდ მაშინ იძახება, როცა ეს instance ისევ mounted-ია. dependencies `[fields, onSave, onClose]` უცვლელია. Back (`onClick={onClose}`, `:156`) მაშინვე ხურავს editor-ს; `Done`-ის busy state D-42-შია; ტექსტები და `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელია, ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს. ჩანაწერი (17).
++- **D-42:** schema editor-ის `Done` pending-ის დროს busy-ა. `SchemaEditor`-ს აქვს state `isApplying` (`SchemaEditor.tsx:45`, `useState(false)`, mount effect-ის შემდეგ). `handleSave` (`:137-149`) ცარიელ `fields`-ზე ისევ მაშინვე ბრუნდება, მერე `setIsApplying(true)`-ს იძახებს (`:139`) და `await onSave?.();`-ს `try`-ში ელოდება. reject-ზე `catch` `if (isMountedRef.current) setIsApplying(false);`-ს იძახებს (`:143`) და ბრუნდება: editor ღია რჩება, `onClose` არ იძახება, unhandled rejection აღარ არის, toast აქ არ ჩნდება (read-ის შეცდომებს `MetadataPanel` თვითონ აჩვენებს). წარმატებაზე `if (!isMountedRef.current) return;` (`:146`, D-41), `setIsApplying(false);` (`:147`) და `onClose();` (`:148`). dependencies `[fields, onSave, onClose]` უცვლელია. რედაქტირების არე (`<div className="flex-1 overflow-y-auto p-3">`) შიგნით `<fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">`-ს შეიცავს (`:165`, დახურვა `:271`), რომელიც სამივე სექციას (Active Fields, Hidden Standard Fields, Add Custom Field) ფარავს: pending-ის დროს ველის სახელი, RIFF ID, type `select`, Add Field, ისრები, trash/hide და hidden standard-ის ღილაკები disabled-ია და არე მკრთალია. `legend` არ არის; Tailwind preflight fieldset-ის border-ს, margin-ს და padding-ს აშორებს, `min-w-0` კი default `min-inline-size`-ს. `Done` (`:280-282`) არის `disabled={isApplying || fields.length === 0}` და კითხულობს `Applying...`-ს pending-ის დროს, სხვა შემთხვევაში `Done`-ს; `aria-*` prop არ აქვს (native `disabled`, როგორც Save Tags-ს). Back header-შია, fieldset-ის გარეთ, და ყოველთვის enabled რჩება. ჩანაწერი (18).
++- **D-43:** ბოლო `Done` იმარჯვებს. `MetadataPanel`-ს აქვს `schemaReadIdRef` (`MetadataPanel.tsx:225`, `useRef(0)`, უშუალოდ `handleSchemaChanged`-ის ზემოთ, `if (showSchemaEditor)`-ის early return-მდე). `handleSchemaChanged`-ის პირველი ორი ხაზი, D-40-ის ლოდინამდე, არის `schemaReadIdRef.current += 1;` და `const schemaReadId = schemaReadIdRef.current;` (`:227-228`); ლოდინი ამის შემდეგ მოდის (`:229`). chunk-ების loop-ის შემდეგ, D-39(b)-ის guard-ის (`:250`) უშუალოდ წინ, `if (schemaReadId !== schemaReadIdRef.current) return;` (`:249`): თუ ამ re-read-ის შემდეგ სხვა `Done` დაიწყო, ეს re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს, რა რიგითაც არ უნდა დასრულდეს read-ები. ერთი `Done` თავის re-read-ს ისევ იყენებს. D-40-ის ლოდინი, D-34-ის generation-ები, toast, dependencies `[setMetadata, setEditingMetadata, showToast]`, `handleSave` და sync effect უცვლელია. ჩანაწერები (18), (19).
+ 
+ სტატუსები: `ცნობილი შეზღუდვა` ნიშნავს, რომ ქცევა გადაწყვეტილებას მიჰყვება და ცვლილება დაგეგმილი არ არის. `Saba-ს კითხვა` ნიშნავს, რომ ქცევის შეცვლაზე Saba წყვეტს. `გასწორდა` ნიშნავს, რომ ქცევა შეიცვალა და ტესტით არის დაცული.
+ 
+@@ -53,7 +55,7 @@
+ 
+ - **ID:** A-R21-03
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:158` (single re-read `readMetadata(path, useSchemaStore.getState().fields)`), `:191` (batch re-read `readMetadataBatch(paths, useSchemaStore.getState().fields)`), `:169` (`setEditingMetadata({ ...updated })`), `:225-273` (`handleSchemaChanged`, ფორმის განახლება `:266`)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:158` (single re-read `readMetadata(path, useSchemaStore.getState().fields)`), `:191` (batch re-read `readMetadataBatch(paths, useSchemaStore.getState().fields)`), `:169` (`setEditingMetadata({ ...updated })`), `:226-277` (`handleSchemaChanged`, ფორმის განახლება `:270`)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, ველი შეცვლილია, Save დაჭერილია, write ნელია.
+   2. მოქმედება: write-ის დროს Schema Editor-ში custom ველი ემატება და schema ინახება (`handleSchemaChanged` ყველა ფაილს ახალი schema-თი კითხულობს).
+@@ -132,14 +134,14 @@
+ 
+ - **ID:** B-R23-02, RR-R24-02
+ - **Severity:** medium (round 25-მდე low; stale read-ის შემდეგ ფორმის შემდეგი save ძველ მნიშვნელობებს დისკზე ბრუნებდა)
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:239` (`handleSchemaChanged`-ის `readMetadataBatch(chunk, newSchema)`), `:262` (`setMetadata(accumulated)`), `:266` (`setEditingMetadata({ ...current })`), `:158`/`:191` (save-ის re-read); D-34: `MetadataPanel.tsx:154`/`:184` (`markPathsWritten`), `:237` (chunk-ის generation), `:251` (superseded შედარება), `src/renderer/src/stores/file-store.ts:126-134` (`markPathsWritten`)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:242` (`handleSchemaChanged`-ის `readMetadataBatch(chunk, newSchema)`), `:266` (`setMetadata(accumulated)`), `:270` (`setEditingMetadata({ ...current })`), `:158`/`:191` (save-ის re-read); D-34: `MetadataPanel.tsx:154`/`:184` (`markPathsWritten`), `:240` (chunk-ის generation), `:255` (superseded შედარება), `src/renderer/src/stores/file-store.ts:126-134` (`markPathsWritten`)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, ველი შეცვლილია, Save დაჭერილია, write ნელია.
+   2. მოქმედება: write-ის დასრულებამდე Schema Editor-ში schema ინახება (`Done`), და `handleSchemaChanged`-ის `readMetadataBatch` იწყება write-მდე, მაგრამ სრულდება save-ის re-read-ის შემდეგ.
+   3. შედეგი: `handleSchemaChanged` store-ში და ფორმაში write-მდე წაკითხულ მნიშვნელობებს წერს (`isDirty` false), სანამ ფაილი ხელახლა არ წაიკითხება. დისკზე ფაილი სწორია. D-33 ამ თანმიმდევრობას არ ფარავს.
+-  4. variant (RR-R24-02, ორი ან მეტი chunk): `handleSchemaChanged` store-ში მხოლოდ ყველა chunk-ის შემდეგ წერს (`:262`). თუ save (write და მისი re-read) ორ chunk-ს შორის სრულდება, ადრე წაკითხული chunk-ის write-მდე მნიშვნელობები save-ის re-read-ის შედეგს გადაფარავს.
++  4. variant (RR-R24-02, ორი ან მეტი chunk): `handleSchemaChanged` store-ში მხოლოდ ყველა chunk-ის შემდეგ წერს (`:266`). თუ save (write და მისი re-read) ორ chunk-ს შორის სრულდება, ადრე წაკითხული chunk-ის write-მდე მნიშვნელობები save-ის re-read-ის შედეგს გადაფარავს.
+   5. production-ში single save-ის თანმიმდევრობას ნელი write სჭირდება (main-ში single write სინქრონულია), batch და chunk-ებს შორის თანმიმდევრობა კი მიღწევადია (`WRITE_METADATA_BATCH` ყოველ 5 ფაილზე yield-ს აკეთებს).
+-- **გადაწყვეტილება:** D-34 არის stale-result guard (write generation, RR-R24-05): write-მდე დაწყებული chunk-ის შედეგი იმ path-ზე, რომელიც ამ chunk-ის შემდეგ ჩაიწერა, აღარ გამოიყენება; store-ში მიმდინარე entry რჩება და ფორმა არ იცვლება. schema editor არ იკეტება (ჩაკეტვა კვლავ Saba-ს ვარიანტია, UX). D-34 არ ფარავს ორ იშვიათ შემთხვევას: (a) chunk, რომელიც write-მდე დაიწყო, superseded-ია, მაგრამ თუ save-ის re-read reject-დება, store-ის მიმდინარე entry save-მდე მნიშვნელობაა და ახალი schema-ს ველი მასში არ არის (entry-ის გარეშე path store-ში არ ემატება), სანამ ფაილი ხელახლა არ წაიკითხება (toast `Tags saved, but reloading failed. Rescan to refresh.`); (b) chunk, რომელიც write-ის resolve-მდე დასრულდა (stamp ჯერ არ არსებობს), გამოიყენება: single selection-ზე ფორმა save-ის დროს reset-დება (`:266`) და, თუ save-ის re-read-იც reject-დება, store და ფორმა write-მდე მნიშვნელობებს აჩვენებს `isDirty` false-ით.
++- **გადაწყვეტილება:** D-34 არის stale-result guard (write generation, RR-R24-05): write-მდე დაწყებული chunk-ის შედეგი იმ path-ზე, რომელიც ამ chunk-ის შემდეგ ჩაიწერა, აღარ გამოიყენება; store-ში მიმდინარე entry რჩება და ფორმა არ იცვლება. schema editor არ იკეტება (ჩაკეტვა კვლავ Saba-ს ვარიანტია, UX). D-34 არ ფარავს ორ იშვიათ შემთხვევას: (a) chunk, რომელიც write-მდე დაიწყო, superseded-ია, მაგრამ თუ save-ის re-read reject-დება, store-ის მიმდინარე entry save-მდე მნიშვნელობაა და ახალი schema-ს ველი მასში არ არის (entry-ის გარეშე path store-ში არ ემატება), სანამ ფაილი ხელახლა არ წაიკითხება (toast `Tags saved, but reloading failed. Rescan to refresh.`); (b) chunk, რომელიც write-ის resolve-მდე დასრულდა (stamp ჯერ არ არსებობს), გამოიყენება: single selection-ზე ფორმა save-ის დროს reset-დება (`:270`) და, თუ save-ის re-read-იც reject-დება, store და ფორმა write-მდე მნიშვნელობებს აჩვენებს `isDirty` false-ით.
+ - **ტესტი:** `tests/renderer/components/metadata-panel-schema-change.test.ts` — `(s9) B-R23-02: batch save, schema re-read issued before the write resolves lands after the save's re-read`, `(s10) B-R23-02: single save, a stale schema re-read keeps the saved values and the title typed during the save`, `(s13) RR-R24-02: a stale chunk read before the write is not applied when the save lands between chunks`, `(s14) RR-R24-02: a rejected chunk keeps the entry current when the store is written, not the one at reject time`, `(s15) D-34: a path whose batch write failed is not superseded`
+ - **სტატუსი:** გასწორდა (D-34, TM-B29)
+ 
+@@ -147,11 +149,11 @@
+ 
+ - **ID:** B-R23-03
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:266` (`setEditingMetadata({ ...current })` `handleSchemaChanged`-ში), `src/renderer/src/stores/metadata-store.ts:32-33` (`setEditingMetadata` წმენდს `modifiedFields`-ს და `isDirty`-ს)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:270` (`setEditingMetadata({ ...current })` `handleSchemaChanged`-ში), `src/renderer/src/stores/metadata-store.ts:32-33` (`setEditingMetadata` წმენდს `modifiedFields`-ს და `isDirty`-ს)
+ - **Reproduction:**
+   1. საწყისი მდგომარეობა: ერთი ფაილი მონიშნულია, Category შეცვლილია და შეუნახავია (dirty).
+   2. მოქმედება: `Customize Fields` → schema-ს ცვლილება → `Done`.
+-  3. შედეგი: ფორმა ფაილიდან ხელახლა წაკითხულ მნიშვნელობებს აჩვენებს, შეუნახავი edits ქრება, `isDirty` false-ია. toast `Unsaved changes were discarded` არ ჩნდება. ეს მხოლოდ წარმატებულ read-ს ეხება: single selection-ზე, თუ მონიშნული ფაილის chunk-ის read reject-დება, ფორმა არ იცვლება და edits რჩება. 2+ მონიშნულ ფაილზე `handleSchemaChanged` ფორმას მაინც ცარიელს ხდის (`setEditingMetadata({})`, `MetadataPanel.tsx:268`), read-ის reject-ის დროსაც (D-33 part 3; ტესტები `(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects` და `(s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)`).
++  3. შედეგი: ფორმა ფაილიდან ხელახლა წაკითხულ მნიშვნელობებს აჩვენებს, შეუნახავი edits ქრება, `isDirty` false-ია. toast `Unsaved changes were discarded` არ ჩნდება. ეს მხოლოდ წარმატებულ read-ს ეხება: single selection-ზე, თუ მონიშნული ფაილის chunk-ის read reject-დება, ფორმა არ იცვლება და edits რჩება. 2+ მონიშნულ ფაილზე `handleSchemaChanged` ფორმას მაინც ცარიელს ხდის (`setEditingMetadata({})`, `MetadataPanel.tsx:272`), read-ის reject-ის დროსაც (D-33 part 3; ტესტები `(s6) A-R24-01: a dirty form keeps its unsaved edit when the schema re-read rejects` და `(s7) A-R24-01: a title typed during a save survives a rejected schema re-read (D-30)`).
+ - **გადაწყვეტილება:** არ არის. ვარიანტები: toast `Unsaved changes were discarded`; D-30-ის მსგავსი merge (შეცვლილი ველები re-read-ის შემდეგ `mergeFields`-ით ბრუნდება); ან `Customize Fields`-ის ჩაკეტვა, სანამ ფორმა dirty-ა.
+ - **ტესტი:** ტესტი არ არის
+ - **სტატუსი:** Saba-ს კითხვა
+@@ -217,7 +219,7 @@
+ 
+ - **ID:** RR-R28-03, A-R19-02, RR-R30-01, A-R31-01, RR-R31-02, TM-B34
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:60-62` (`isListedPath`), `:168` (single re-read, `if (isListedPath(path)) updateFileMetadata(path, updated);`), `:196-198` (batch `savedEntries`, `isListedPath(path)`), `:227` (`handleSchemaChanged`, `const { files, folderLoadId: loadId } = useFileStore.getState();`, D-40-ის შემდეგ), `:246` (`if (!isFolderLoadCurrent(loadId)) return;`), `src/renderer/src/App.tsx:55` (`openFolder`, schema-ს ლოდინის loop-ის guard)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:60-62` (`isListedPath`), `:168` (single re-read, `if (isListedPath(path)) updateFileMetadata(path, updated);`), `:196-198` (batch `savedEntries`, `isListedPath(path)`), `:230` (`handleSchemaChanged`, `const { files, folderLoadId: loadId } = useFileStore.getState();`, D-40-ის შემდეგ), `:250` (`if (!isFolderLoadCurrent(loadId)) return;`), `src/renderer/src/App.tsx:55` (`openFolder`, schema-ს ლოდინის loop-ის guard)
+ - **მიღწევადობა:** save: Open Folder, drop და Close Folder save-ის დროს არ იკეტება. schema: sidebar გამოყენებადი რჩება, სანამ schema editor `Done`-ის შემდეგ re-read-ს ელოდება (C-R27-01). drop schema-ს ჩატვირთვის დროს: მხოლოდ აპის გაშვებისას, სანამ `loadSchema` დასრულდება.
+ - **Reproduction:**
+   1. (a) save. საწყისი მდგომარეობა: folder `/fa` გახსნილია (`a.wav`, `a2.wav`), `a.wav` მონიშნულია, Category აკრეფილია, `Save Tags` დაჭერილია, write ჯერ არ დასრულებულა. მოქმედება: `Open Folder` `/fb` სრულდება, შემდეგ write და save-ის re-read სრულდება. შედეგი გასწორებამდე: `updateFileMetadata` `/fb`-ის `metadata`-ს `/fa/a.wav`-ის entry-ს უმატებდა (batch-ზე ორივე `/fa` ფაილს, Close Folder-ის შემდეგ დახურულ folder-საც). თუ შემდეგ `/fa` ხელახლა იხსნება და მისი read reject-დება, D-36 ამ entry-ს kept path-ად ტოვებდა და `a.wav` მიმდინარე მნიშვნელობით, `Tagged`-ით ჩანდა `Failed to read 1 files`-ის მიუხედავად (RR-R30-01).
+@@ -232,7 +234,7 @@
+ 
+ - **ID:** A-R32-01, RR-R32-04, TM-B35
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:64-73` (`waitForFolderLoadIdle`), `:226` (`handleSchemaChanged`, `await waitForFolderLoadIdle();`), `:227` (`const { files, folderLoadId: loadId } = useFileStore.getState();`), `:228` (`if (files.length === 0) return;`), `:246` (D-39(b)-ის guard, უცვლელი)
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:64-73` (`waitForFolderLoadIdle`), `:229` (`handleSchemaChanged`, `await waitForFolderLoadIdle();`), `:230` (`const { files, folderLoadId: loadId } = useFileStore.getState();`), `:231` (`if (files.length === 0) return;`), `:250` (D-39(b)-ის guard, უცვლელი)
+ - **მიღწევადობა:** sidebar გამოყენებადი რჩება, სანამ schema editor ღიაა და სანამ `Done` re-read-ს ელოდება (C-R27-01), ამიტომ `Open Folder` და `Close Folder` `Customize Fields`-ის დროს მიღწევადია. `Rescan` მხოლოდ მაშინ არის disabled, როცა scan უკვე მიმდინარეობს (`disabled={isScanning}`), ამიტომ Rescan-ის დაწყება და მერე `Done` მიღწევადია.
+ - **Reproduction:**
+   1. (a) A-R32-01. საწყისი მდგომარეობა: folder `/fa` გახსნილია (`a.wav`, `a2.wav`), `a.wav` მონიშნულია, `Customize Fields` ღიაა. მოქმედება: `Open Folder` `/fb` (`beginFolderLoad()` უკვე გამოიძახა, scan ჯერ არ დასრულებულა) → custom ველი `R33note` → `Done` → `/fb`-ის scan სრულდება (`b.wav`) → schema-ს re-read სრულდება. შედეგი გასწორებამდე: `handleSchemaChanged` `/fb`-ის load id-ს იმახსოვრებდა (ის ჯერ კიდევ მიმდინარე იყო), მაგრამ render-ის `allFiles`-ს კითხულობდა, რომელიც ჯერ `/fa`-ის სია იყო, ამიტომ D-39(b)-ის guard ვერ მუშაობდა: `setMetadata` `/fb`-ის map-ს `/fa`-ის entry-ებით ცვლიდა, `b.wav`-ს `Tagged` badge და ფორმის მნიშვნელობები ეკარგებოდა. თუ `/fa`-ის read reject-დებოდა, ჩნდებოდა stale toast `Failed to read 2 files`.
+@@ -247,7 +249,7 @@
+ 
+ - **ID:** C-R33-02, QA-R33-01, A-R33-02, TM-B36
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:37` (`isMountedRef`), `:39-44` (mount effect: `isMountedRef.current = true;` და cleanup `isMountedRef.current = false;`), `:139` (`handleSave`, `if (!isMountedRef.current) return;`)
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:37` (`isMountedRef`), `:39-44` (mount effect: `isMountedRef.current = true;` და cleanup `isMountedRef.current = false;`), `:146` (`handleSave`, `if (!isMountedRef.current) return;`)
+ - **მიღწევადობა:** Back (`ArrowLeft`) schema editor-ში ყოველთვის ხელმისაწვდომია, ხოლო sidebar გამოყენებადი რჩება, სანამ `Done` pending-ია (C-R27-01, D-40). ამიტომ Back, ფაილის მონიშვნა და `Customize Fields`-ის ხელახლა გახსნა pending `Done`-ის დროს მიღწევადია.
+ - **Reproduction:**
+   1. (a) folder load. საწყისი მდგომარეობა: folder `slow` გახსნილია, `s.wav` მონიშნულია, `Customize Fields` ღიაა. მოქმედება: `Open Folder` `fast` (scan ჯერ არ დასრულებულა) → Text ველი `R34note` → `Done` (D-40-ით editor ღიად რჩება) → Back → `s.wav`-ის row-ზე click → `Customize Fields` → ველის სახელში `QTyped` იკრიფება. შედეგი გასწორებამდე: `fast`-ის load და schema-ს re-read სრულდება, ხელახლა გახსნილი editor თავისით იხურება და `QTyped` იკარგება (C-ის `run-new-Q.txt`).
+@@ -257,3 +259,34 @@
+ - **გადაწყვეტილება:** D-41: mount ref editor-ის შიგნით და არა token `MetadataPanel`-ში. stale callback unmounted instance-ს ეკუთვნის, ამიტომ თვითონ ამ instance-მა უნდა იცოდეს, რომ ის აღარ არის mounted; `MetadataPanel.tsx` (D-40-ის ჩათვლით) უცვლელი რჩება. effect ref-ს თავად აყენებს `true`-ზე: `useRef(true)` მხოლოდ cleanup-ით `React.StrictMode`-ში (`main.tsx:7`) `Done`-ს არღვევს, რადგან StrictMode-ის effect replay ref-ს `false`-ად ტოვებს და `Done` editor-ს აღარ ხურავს (mutant SM-2, (e3)). `Done`-ის busy state და განმეორებითი click-ები (re-entrancy) **არ** შეცვლილა: ეს TM-B37-ია (RR-R33-01, QA-R33-02).
+ - **ტესტი:** `tests/renderer/components/schema-editor-stale-close.test.ts` — `(e1) C-R33-02: Done during a pending Open Folder, Back, reopen Customize Fields and type: the reopened editor stays open with the typed name`, `(e2) C-R33-02 under React.StrictMode: the reopened editor stays open with the typed name`, `(e3) pin under React.StrictMode: Done with no folder load pending closes the editor`, `(e4) pin: Done during a pending Open Folder with the editor left open: the editor closes after the load and the re-read`, `(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form`
+ - **სტატუსი:** გასწორდა (D-41, TM-B36)
++
++## 18. schema editor-ის `Done` ლოდინისას feedback-ს არ აჩვენებდა და ხელახლა დაჭერადი იყო; ორი re-read-იდან ბოლოს დასრულებული იმარჯვებდა
++
++- **ID:** RR-R33-01, QA-R33-02, A-R33-02, RR-R34-02, QA-R34-01, RR-R34-01, TM-B37
++- **Severity:** medium
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:45` (`isApplying`), `:137-149` (`handleSave`: `setIsApplying(true)` `:139`, `catch` `:142-145`, `setIsApplying(false)` `:147`), `:165` (`<fieldset disabled={isApplying} …>`, დახურვა `:271`), `:280-282` (`Done`-ის `disabled` და label `Applying...`); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:225` (`schemaReadIdRef`), `:227-228` (id `handleSchemaChanged`-ის დასაწყისში, D-40-ის ლოდინამდე), `:249` (`if (schemaReadId !== schemaReadIdRef.current) return;`)
++- **მიღწევადობა:** `Done` pending-ია D-40-ის ლოდინის (folder load) ან ნელი re-read-ის დროს. Back და sidebar ამ დროს გამოყენებადია (D-40, D-41), ამიტომ განმეორებითი click და Back → `Customize Fields` → `Done` #2 მიღწევადია.
++- **Reproduction (გასწორებამდე):**
++  1. (a) busy state-ის და feedback-ის გარეშე (RR-R33-01, QA-R33-02, A-R33-02, RR-R34-02). საწყისი მდგომარეობა: folder `/fa` გახსნილია, `a.wav` მონიშნულია, `Customize Fields` ღიაა. მოქმედება: `Open Folder` `/fb` (scan ჯერ არ დასრულებულა) → Text ველი `R35note` → `Done` → `Done` კიდევ ერთხელ. შედეგი: `Done` enabled რჩებოდა `Done` ტექსტით, რედაქტირების ველები აქტიური იყო, არაფერი აჩვენებდა, რომ ცვლილება მიმდინარეობს; ყოველი დამატებითი click ახალ schema re-read-ს იწყებდა (`/fb/b.wav`-ის `readMetadataBatch` 3-ჯერ: load + ორი re-read).
++  2. (b) ორი re-read ერთდროულად (QA-R34-01). საწყისი მდგომარეობა: folder `/fa` გახსნილია, `a.wav` მონიშნულია, load არ მიმდინარეობს, `readMetadataBatch` ნელია. მოქმედება: `Customize Fields` → ველი `Qone` → `Done` #1 (read pending) → Back → `Customize Fields` → ველი `Qtwo` → `Done` #2 → #2-ის read სრულდება, მერე #1-ის. შედეგი: #1-ის გვიანი read (ძველი schema, `qtwo`-ს გარეშე) `metadata`-ს და ფორმას ცვლიდა, ამიტომ `Qtwo`-ს მნიშვნელობა ქრებოდა შემდეგ `Done`-მდე ან Rescan-მდე.
++  3. (c) reject-ებული `onSave` (RR-R34-01). საწყისი მდგომარეობა: `SchemaEditor`, რომლის `onSave` reject-დება. მოქმედება: `Done`. შედეგი: `handleSave` throw-ს აკეთებდა, editor არ იხურებოდა და click unhandled rejection-ს ტოვებდა. busy state-ს ეს გზა სჭირდება: მის გარეშე `Done` სამუდამოდ disabled დარჩებოდა.
++  4. დისკზე არაფერი იცვლება: schema-ს re-read ფაილებში არ წერს; ეს მხოლოდ editor-ის მდგომარეობა, store და ჩვენებაა.
++- **Reference:** R1 in-app Save Tags (`disabled` + `Saving...`); R2 Mp3tag "Writing tag-data" დიალოგი, write-ის დროს რედაქტირება დაბლოკილია; R3 Microsoft progress controls (ბლოკირებადი indicator, როცა მომხმარებელმა უნდა დაელოდოს); R4 W3C ARIA Practices (`aria-disabled` ან HTML `disabled`, არა ორივე); R5 GitLab GlButton / Fluid (`aria-disabled` + `aria-busy` focus-ის შესანარჩუნებლად).
++- **Deviations:** (1) native `disabled` და არა `aria-disabled` + `aria-busy` (R4, R5): Save Tags-ს ემთხვევა (R1), Back enabled და focusable რჩება; ორივე ღილაკის `aria-disabled`-ზე გადასვლა app-ის დონის ცვლილებაა შემდეგი round-ისთვის. (2) inline busy state და არა modal progress დიალოგი (R2, R3): editor მარჯვენა panel-შია, Back ხელმისაწვდომი უნდა დარჩეს (D-41), sidebar კი D-40-ით გამოყენებადია. (3) spinner და progress bar არ არის: label `Applying...` მიჰყვება `Saving...`-ს (R1), ლოდინი folder load-საც მოიცავს, რომლის ხანგრძლივობა უცნობია. (4) label `Applying...` და არა `Done`: ის ასახელებს, რა ხდება (ახალი ველები ღია ფაილებზე ვრცელდება); ASCII `...`, როგორც `Saving...`-ში.
++- **გადაწყვეტილება:** D-42 (busy `Done`, ჩაკეტილი რედაქტირების არე, reject-ის დამუშავება, `SchemaEditor.tsx`) და D-43 (ბოლო `Done` იმარჯვებს, `MetadataPanel.tsx`). ერთ editor-ში `Done` მხოლოდ ერთ re-read-ს იწყებს; Back → ხელახლა გახსნა → `Done` #2: ახალი editor-ის `Done` enabled-ია და ბოლო `Done`-ის re-read იმარჯვებს, read-ების დასრულების რიგის მიუხედავად. QA-R33-03 (scan, რომელიც არ სრულდება) ჩანაწერად რჩება: editor `Applying...`-ს აჩვენებს Back-მდე, Open Folder-მდე ან Close Folder-მდე. დარჩენილი შეზღუდვა: ჩანაწერი (19).
++- **ტესტი:** `tests/renderer/components/schema-editor-done-busy.test.ts` — `(b1) RR-R33-01: while Done is pending the button reads Applying... and is disabled, the editing controls are disabled and Back stays enabled`, `(b2) QA-R33-02: a second click on the pending Done starts no second schema re-read`, `(b3) pin with D-41: Done pending, Back, reopen Customize Fields: the new editor's Done reads Done and is enabled, its inputs are enabled`, `(b4) review R34 low 1: onSave rejects: the editor stays open, onClose is not called, Done reads Done and is enabled again`, `(b5) QA-R34-01: Done #1 (field Qone) pending, Back, reopen, add Qtwo, Done #2; #2's read lands first, #1's last: the store keeps #2's result with both fields`, `(b6) pin: Done #1 pending, Back, reopen, Done #2; #1's read lands first, #2's last: the store holds #2's result`
++- **სტატუსი:** გასწორდა (D-42, D-43, TM-B37)
++
++## 19. pending `Done`, Back, ხელახლა გახსნა და ველის დამატება `Done`-ის ხელახლა დაჭერის გარეშე
++
++- **ID:** B-R34-03
++- **Severity:** low
++- **ფაილი:** `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:229` (D-40-ის ლოდინი), `:232` (`const newSchema = useSchemaStore.getState().fields;`, schema აიღება ლოდინის შემდეგ)
++- **Reproduction:**
++  1. საწყისი მდგომარეობა: folder გახსნილია, ფაილი მონიშნულია, `Customize Fields` ღიაა, ველი დამატებულია, `Done` #1 დაჭერილია და pending-ია.
++  2. მოქმედება: Back → `Customize Fields` → ახალი ველი ემატება → `Done` ხელახლა **არ** იჭერება (editor-იდან Back-ით გასვლა).
++  3. შედეგი: (a) თუ #1 ჯერ კიდევ folder load-ს ელოდებოდა (D-40), მისი re-read schema-ს ლოდინის შემდეგ იღებს, ამიტომ ახალი ველი **იკითხება**. (b) თუ #1-ის read უკვე დაწყებული იყო, ის ძველ schema-ს იყენებს, ამიტომ ახალ ველს მნიშვნელობა არ აქვს, სანამ შემდეგი `Done` ან Rescan ფაილს ხელახლა არ წაიკითხავს.
++  4. დისკზე არაფერი იცვლება: ეს მხოლოდ ჩვენებაა; შემდეგი `Done` ან Rescan მნიშვნელობას აჩვენებს. ქცევა D-42/D-43-მდეც ასეთი იყო.
++- **გადაწყვეტილება:** D-43 მხოლოდ `Done`-ების რიგს იცავს; schema-ს ცვლილება `Done`-ის გარეშე re-read-ს არ იწყებს.
++- **ტესტი:** ტესტი არ არის
++- **სტატუსი:** ცნობილი შეზღუდვა
+diff --git a/docs/bugs/README.md b/docs/bugs/README.md
+index 2c9cb7e..69ec441 100644
+--- a/docs/bugs/README.md
++++ b/docs/bugs/README.md
+@@ -4,6 +4,6 @@
+ 
+ | # | აღწერა | სტატუსი |
+ |---|--------|---------|
+-| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (17 ჩანაწერი; 9 გასწორდა; დანარჩენი 8-დან 5 Saba-ს კითხვაა) |
++| 001 | [Save და selection: D-29/D-30/D-31-ის შეზღუდვები](001-save-and-selection-known-limits.md) | ცნობილი შეზღუდვების სია (19 ჩანაწერი; 10 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა) |
+ 
+ ფორმატი: `{NNN}-{short-description}.md`
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 0421b66..53844f7 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -222,7 +222,10 @@ export function MetadataPanel(): React.ReactElement {
+     }
+   }, [selectedFiles, fields, setIsSaving, setEditingMetadata, showToast, updateFileMetadata]);
+ 
++  const schemaReadIdRef = useRef(0);
+   const handleSchemaChanged = useCallback(async () => {
++    schemaReadIdRef.current += 1;
++    const schemaReadId = schemaReadIdRef.current;
+     await waitForFolderLoadIdle();
+     const { files, folderLoadId: loadId } = useFileStore.getState();
+     if (files.length === 0) return;
+@@ -243,6 +246,7 @@ export function MetadataPanel(): React.ReactElement {
+         for (const path of chunk) keptPaths.add(path);
+       }
+     }
++    if (schemaReadId !== schemaReadIdRef.current) return;
+     if (!isFolderLoadCurrent(loadId)) return;
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+     const accumulated: Record<string, WavMetadata> = {};
+diff --git a/src/renderer/src/components/schema/SchemaEditor.tsx b/src/renderer/src/components/schema/SchemaEditor.tsx
+index 1047de2..4bc3b79 100644
+--- a/src/renderer/src/components/schema/SchemaEditor.tsx
++++ b/src/renderer/src/components/schema/SchemaEditor.tsx
+@@ -42,6 +42,7 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+       isMountedRef.current = false;
+     };
+   }, []);
++  const [isApplying, setIsApplying] = useState(false);
+ 
+   const enabledStandardKeys = new Set(fields.filter((f) => f.standard).map((f) => f.key));
+   const disabledStandards = STANDARD_FIELDS.filter((f) => !enabledStandardKeys.has(f.key));
+@@ -135,8 +136,15 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+ 
+   const handleSave = useCallback(async () => {
+     if (fields.length === 0) return;
+-    await onSave?.();
++    setIsApplying(true);
++    try {
++      await onSave?.();
++    } catch {
++      if (isMountedRef.current) setIsApplying(false);
++      return;
++    }
+     if (!isMountedRef.current) return;
++    setIsApplying(false);
+     onClose();
+   }, [fields, onSave, onClose]);
+ 
+@@ -153,112 +161,114 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+         <span className="text-xs font-medium text-brand">Customize Fields</span>
+       </div>
+ 
+-      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+-        <div className="space-y-1.5">
+-          <span className="text-xs text-muted">Active Fields</span>
+-          {fields.map((field, index) => (
+-            <div
+-              key={field.key}
+-              className={cn(
+-                'flex items-center gap-1.5 rounded px-2 py-1.5',
+-                'bg-background border border-outline text-xs',
+-              )}
+-            >
+-              <span className="flex-1 text-foreground truncate">{field.label}</span>
+-              <span className="text-dim text-[10px]">{field.type}</span>
+-              {field.riffChunkId && (
+-                <span className="text-dim text-[10px] font-mono">{field.riffChunkId}</span>
+-              )}
+-              <div className="flex items-center gap-0.5">
+-                <button
+-                  type="button"
+-                  onClick={() => index > 0 && reorderFields(index, index - 1)}
+-                  disabled={index === 0}
+-                  className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+-                >
+-                  <ArrowUp className="h-3 w-3" />
+-                </button>
+-                <button
+-                  type="button"
+-                  onClick={() => index < fields.length - 1 && reorderFields(index, index + 1)}
+-                  disabled={index === fields.length - 1}
+-                  className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+-                >
+-                  <ArrowDown className="h-3 w-3" />
+-                </button>
+-                {!field.standard ? (
++      <div className="flex-1 overflow-y-auto p-3">
++        <fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">
++          <div className="space-y-1.5">
++            <span className="text-xs text-muted">Active Fields</span>
++            {fields.map((field, index) => (
++              <div
++                key={field.key}
++                className={cn(
++                  'flex items-center gap-1.5 rounded px-2 py-1.5',
++                  'bg-background border border-outline text-xs',
++                )}
++              >
++                <span className="flex-1 text-foreground truncate">{field.label}</span>
++                <span className="text-dim text-[10px]">{field.type}</span>
++                {field.riffChunkId && (
++                  <span className="text-dim text-[10px] font-mono">{field.riffChunkId}</span>
++                )}
++                <div className="flex items-center gap-0.5">
+                   <button
+                     type="button"
+-                    onClick={() => removeField(field.key)}
+-                    className="text-destructive hover:text-destructive/80 p-0.5"
++                    onClick={() => index > 0 && reorderFields(index, index - 1)}
++                    disabled={index === 0}
++                    className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+                   >
+-                    <Trash2 className="h-3 w-3" />
++                    <ArrowUp className="h-3 w-3" />
+                   </button>
+-                ) : (
+                   <button
+                     type="button"
+-                    onClick={() => handleToggleStandard(field)}
+-                    className="text-dim hover:text-destructive p-0.5"
+-                    title="Hide standard field"
++                    onClick={() => index < fields.length - 1 && reorderFields(index, index + 1)}
++                    disabled={index === fields.length - 1}
++                    className="text-dim hover:text-foreground disabled:opacity-30 p-0.5"
+                   >
+-                    <X className="h-3 w-3" />
++                    <ArrowDown className="h-3 w-3" />
+                   </button>
+-                )}
++                  {!field.standard ? (
++                    <button
++                      type="button"
++                      onClick={() => removeField(field.key)}
++                      className="text-destructive hover:text-destructive/80 p-0.5"
++                    >
++                      <Trash2 className="h-3 w-3" />
++                    </button>
++                  ) : (
++                    <button
++                      type="button"
++                      onClick={() => handleToggleStandard(field)}
++                      className="text-dim hover:text-destructive p-0.5"
++                      title="Hide standard field"
++                    >
++                      <X className="h-3 w-3" />
++                    </button>
++                  )}
++                </div>
+               </div>
+-            </div>
+-          ))}
+-        </div>
++            ))}
++          </div>
+ 
+-        {disabledStandards.length > 0 && (
+-          <div className="space-y-1.5">
+-            <span className="text-xs text-muted">Hidden Standard Fields</span>
+-            <div className="flex flex-wrap gap-1">
+-              {disabledStandards.map((field) => (
+-                <button
+-                  key={field.key}
+-                  type="button"
+-                  onClick={() => handleToggleStandard(field)}
+-                  className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim hover:text-foreground hover:border-brand transition-colors"
+-                >
+-                  + {field.label}
+-                </button>
+-              ))}
++          {disabledStandards.length > 0 && (
++            <div className="space-y-1.5">
++              <span className="text-xs text-muted">Hidden Standard Fields</span>
++              <div className="flex flex-wrap gap-1">
++                {disabledStandards.map((field) => (
++                  <button
++                    key={field.key}
++                    type="button"
++                    onClick={() => handleToggleStandard(field)}
++                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim hover:text-foreground hover:border-brand transition-colors"
++                  >
++                    + {field.label}
++                  </button>
++                ))}
++              </div>
+             </div>
+-          </div>
+-        )}
++          )}
+ 
+-        <div className="space-y-2 border-t border-outline pt-3">
+-          <span className="text-xs text-muted">Add Custom Field</span>
+-          <Input
+-            value={newFieldName}
+-            onChange={(e) => {
+-              setNewFieldName(e.target.value);
+-              if (fieldError) setFieldError('');
+-            }}
+-            placeholder="Field name (e.g. Client)"
+-            error={fieldError || undefined}
+-          />
+-          <div className="grid grid-cols-2 gap-1.5">
+-            <Select
+-              options={FIELD_TYPE_OPTIONS}
+-              value={newFieldType}
+-              onChange={(e) => setNewFieldType(e.target.value as FieldType)}
+-            />
++          <div className="space-y-2 border-t border-outline pt-3">
++            <span className="text-xs text-muted">Add Custom Field</span>
+             <Input
+-              value={newFieldRiffId}
++              value={newFieldName}
+               onChange={(e) => {
+-                setNewFieldRiffId(e.target.value.slice(0, 4).toUpperCase());
++                setNewFieldName(e.target.value);
+                 if (fieldError) setFieldError('');
+               }}
+-              placeholder="RIFF ID (auto)"
+-              maxLength={4}
++              placeholder="Field name (e.g. Client)"
++              error={fieldError || undefined}
+             />
++            <div className="grid grid-cols-2 gap-1.5">
++              <Select
++                options={FIELD_TYPE_OPTIONS}
++                value={newFieldType}
++                onChange={(e) => setNewFieldType(e.target.value as FieldType)}
++              />
++              <Input
++                value={newFieldRiffId}
++                onChange={(e) => {
++                  setNewFieldRiffId(e.target.value.slice(0, 4).toUpperCase());
++                  if (fieldError) setFieldError('');
++                }}
++                placeholder="RIFF ID (auto)"
++                maxLength={4}
++              />
++            </div>
++            <Button variant="ghost" size="sm" className="w-full" onClick={handleAddCustomField}>
++              <Plus className="h-3 w-3" />
++              Add Field
++            </Button>
+           </div>
+-          <Button variant="ghost" size="sm" className="w-full" onClick={handleAddCustomField}>
+-            <Plus className="h-3 w-3" />
+-            Add Field
+-          </Button>
+-        </div>
++        </fieldset>
+       </div>
+ 
+       <div className="p-3 border-t border-outline">
+@@ -267,9 +277,9 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+           size="sm"
+           className="w-full"
+           onClick={handleSave}
+-          disabled={fields.length === 0}
++          disabled={isApplying || fields.length === 0}
+         >
+-          Done
++          {isApplying ? 'Applying...' : 'Done'}
+         </Button>
+       </div>
+     </div>

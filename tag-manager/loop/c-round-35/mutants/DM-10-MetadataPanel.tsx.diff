@@ -1,0 +1,18 @@
+--- /tmp/c35/new/src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-28 01:47:50.000000000 +0000
++++ src/renderer/src/components/metadata-editor/MetadataPanel.tsx	2026-10-28 02:12:34.128329865 +0000
+@@ -227,6 +227,7 @@
+     schemaReadIdRef.current += 1;
+     const schemaReadId = schemaReadIdRef.current;
+     await waitForFolderLoadIdle();
++    if (schemaReadId !== schemaReadIdRef.current) return;
+     const { files, folderLoadId: loadId } = useFileStore.getState();
+     if (files.length === 0) return;
+     const newSchema = useSchemaStore.getState().fields;
+@@ -246,7 +247,6 @@
+         for (const path of chunk) keptPaths.add(path);
+       }
+     }
+-    if (schemaReadId !== schemaReadIdRef.current) return;
+     if (!isFolderLoadCurrent(loadId)) return;
+     const { metadata: currentMetadata, pathWriteGenerations } = useFileStore.getState();
+     const accumulated: Record<string, WavMetadata> = {};

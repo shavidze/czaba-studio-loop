@@ -1,0 +1,16 @@
+--- /tmp/c35/new/src/renderer/src/components/schema/SchemaEditor.tsx	2026-10-28 01:47:41.000000000 +0000
++++ src/renderer/src/components/schema/SchemaEditor.tsx	2026-10-28 02:10:38.989208632 +0000
+@@ -137,12 +137,7 @@
+   const handleSave = useCallback(async () => {
+     if (fields.length === 0) return;
+     setIsApplying(true);
+-    try {
+-      await onSave?.();
+-    } catch {
+-      if (isMountedRef.current) setIsApplying(false);
+-      return;
+-    }
++    await onSave?.();
+     if (!isMountedRef.current) return;
+     setIsApplying(false);
+     onClose();

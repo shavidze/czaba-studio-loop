@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T01:16:24.704Z)
+# Active loop summary (2026-10-28T02:25:07.125Z)
 
-- backlog.json 322 KB -> active view 95 KB
-- status: G_ROOT_GATE round 34
+- backlog.json 337 KB -> active view 99 KB
+- status: G_ROOT_GATE round 35
 - servers: `{"servers":"none or skipped"}`
-- last publication: 3035ffca98bbb8af4020c3a799b0d5b20515dacf (rounds 34-34)
-- last root gate: round 34 published - commit 3035ffca98bbb8af4020c3a799b0d5b20515dacf pushed
+- last publication: 46bd74b4f8d18121e981038c9b8a0659070f017e (rounds 35-35)
+- last root gate: round 35 published - commit 46bd74b4f8d18121e981038c9b8a0659070f017e pushed
 
-## Current items: TM-B35, TM-B36, TM-B37
+## Current items: TM-B36, TM-B37, TM-B38, TM-B39
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -161,18 +161,22 @@
 - A-R32-02 / info / open / Single save: skipSyncRef.current = true (MetadataPanel.tsx:157) is still set when selectionUnchanged is true but isListedPath(path) is false
 - C-R32-01 / info / open / (s1) (metadata-panel-schema-change.test.ts) timed out once at 5000 ms when C ran two renderer suites in parallel on the 4-core runner; alone
 - B-R32-01 / info / open / Under D-40 a Done pressed during a pending folder load keeps the schema editor open until that load finishes and the re-read completes (Sche
-- C-R33-01 / low / in_progress / Test gap: DM-3 (folderLoadId taken before the D-40 wait) passes all 117 tests of the mutation set but is not equivalent: Done while B's scan
-- C-R33-02 / low / in_progress / A Done still pending (D-40 wait or slow schema re-read) closes a schema editor that the user reopened after Back: SchemaEditor handleSave ca
-- QA-R33-01 / low / in_progress / Duplicate of C-R33-02 (stale onClose closes the reopened schema editor); qa-engineer rated medium
-- QA-R33-02 / low / open / Done clicked twice during a pending folder load starts two schema re-reads (readMetadataBatch 3x [b] instead of 2); the result is correct, a
-- RR-R33-01 / medium / open / Done gives no feedback while it waits (SchemaEditor.tsx:128-131): during a pending load and re-read the editor stays open, the button is not
+- QA-R33-02 / low / in_progress / Done clicked twice during a pending folder load starts two schema re-reads (readMetadataBatch 3x [b] instead of 2); the result is correct, a
+- RR-R33-01 / medium / in_progress / Done gives no feedback while it waits (SchemaEditor.tsx:128-131): during a pending load and re-read the editor stays open, the button is not
 - RR-R33-02 / low / open / waitForFolderLoadIdle's subscription can outlive MetadataPanel: if the panel unmounts while waiting, the re-read still runs at the next idle
-- RR-R33-03 / low / in_progress / Undocumented D-40 edge: if the schema fails to load at startup, App openFolder (drop) sets isScanning true (App.tsx:47) before its up-to-5 s
 - A-R33-01 / low / open / D-40 relies on handleCloseFolder being synchronous (FolderBrowser.tsx:147 setIsScanning(false) runs before setFiles([])/setMetadata({}) :149
 - A-R33-02 / low / in_progress / Done stays clickable while it waits: (1) each click adds a waiter and a re-read (= QA-R33-02); (2) Back, reopen Customize, the pending onClo
 - A-R33-03 / low / open / Test hygiene: a module-level waitForFolderLoadIdle subscription could leak into the next test if a future test ends with isScanning true (re
-- A-R33-04 / low / in_progress / docs/bugs/README.md row 001 '(16 ჩანაწერი; 8 გასწორდა, 5 მათგანი Saba-ს კითხვაა)' reads as if the 5 were among the 8 fixed; they are among t
 - QA-R33-03 / info / open / A scanFolder that never settles keeps Done waiting forever (no busy indicator); Back, Open Folder and Close Folder still work and end the wa
+- C-R34-01 / low / open / Stale selection after a folder switch: while Open Folder fast's scan is pending, a click on a row of the old listing (s.wav) selects /slow/s
+- C-R34-02 / low / open / Renderer test timing margin: on C's runner (e1)-(e5), (w8) take 2.9-3.95 s alone (5 s default timeout); A's qa-engineer saw an (e1) timeout 
+- QA-R34-01 / low / in_progress / Two concurrent schema re-reads are last-writer-wins with the older schema: Done #1 (Qone, slow read) -> Back -> reopen -> add Qtwo -> Done #
+- RR-R34-01 / low / in_progress / SchemaEditor handleSave: if onSave rejects, the await throws, onClose is never called and the promise from the Done click is unhandled (pre-
+- RR-R34-02 / low / in_progress / Clicking Done several times still starts several re-reads (no busy state / re-entrancy guard); deferred to TM-B37
+- RR-R34-05 / info / open / Architecture signal: MetadataPanel could own the whole 'save schema -> re-read -> close' flow and return a token or AbortSignal per open edi
+- C-R34-03 / info / open / (e5)'s name says 'the panel stays on the form', but Open Folder clears the selection so the panel shows the empty state
+- B-R34-02 / info / open / TESTING.md rule candidate: in component suites that render FolderBrowser + MetadataPanel, screen.getByRole('button', {name}) costs ~1.5-2 s 
+- B-R34-03 / low / open / Known limit kept by D-42/D-43: Done #1 pending, Back, reopen, add a field, and do NOT press Done again: if #1 was still waiting for a folder
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

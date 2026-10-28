@@ -1,0 +1,209 @@
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createElement, Fragment } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MetadataPanel } from "~/components/metadata-editor/MetadataPanel";
+import { SchemaEditor } from "~/components/schema/SchemaEditor";
+import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+import { useFileStore } from "~/stores/file-store";
+import { useMetadataStore } from "~/stores/metadata-store";
+import type { FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
+import { resetAllStores } from "../helpers/reset-stores";
+import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+
+vi.hoisted(() => {
+  const globalScope = globalThis as unknown as { window: { api: unknown }; api: unknown };
+  const mockApi = globalScope.window.api;
+  globalScope.window = globalThis as unknown as { api: unknown };
+  globalScope.api = mockApi;
+});
+
+type MetadataByPath = Record<string, WavMetadata>;
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+}
+
+const MODIFIED_AT = "2026-10-28T00:00:00.000Z";
+const PATH_A = "/fa/a.wav";
+const PATH_B = "/fb/b.wav";
+const FILE_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 1, modifiedAt: MODIFIED_AT };
+const FILE_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 1, modifiedAt: MODIFIED_AT };
+const BASE_BY_PATH: MetadataByPath = {
+  [PATH_A]: { title: "A", category: "ACat", comment: "" },
+  [PATH_B]: { title: "B", category: "BCat", comment: "" },
+};
+const FIELD_NAME_PLACEHOLDER = "Field name (e.g. Client)";
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((onResolve) => {
+    resolve = onResolve;
+  });
+  return { promise, resolve };
+}
+
+function buttonByText(name: RegExp): HTMLButtonElement {
+  const found = Array.from(document.querySelectorAll("button")).find((button) => name.test(button.textContent ?? ""));
+  if (!found) throw new Error(`button ${name} not found`);
+  return found;
+}
+
+function typeSelect(): HTMLSelectElement {
+  const select = document.querySelector("select");
+  if (!select) throw new Error("type select not found");
+  return select;
+}
+
+async function clickElement(element: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(element);
+  });
+}
+
+async function clickButton(name: RegExp): Promise<void> {
+  await clickElement(buttonByText(name));
+}
+
+function backButton(): HTMLButtonElement {
+  const back = document.querySelector("svg.lucide-arrow-left")?.closest("button");
+  if (!back) throw new Error("back button not found");
+  return back;
+}
+
+async function settle(action: () => void): Promise<void> {
+  await act(async () => {
+    action();
+  });
+}
+
+async function waitMs(ms: number): Promise<void> {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  });
+}
+
+function renderBrowserAndPanel(): void {
+  render(createElement(Fragment, null, createElement(FolderBrowser), createElement(MetadataPanel)));
+}
+
+function seedFolderA(): void {
+  useFileStore.setState({
+    folderPath: "/fa",
+    files: [FILE_A],
+    metadata: { [PATH_A]: { ...BASE_BY_PATH[PATH_A] } },
+    selectedPaths: [PATH_A],
+  });
+}
+
+function readFor(paths: string[], schema: FieldDefinition[]): MetadataByPath {
+  const out: MetadataByPath = {};
+  for (const path of paths) {
+    const meta: WavMetadata = { ...BASE_BY_PATH[path] };
+    for (const field of schema) {
+      if (!field.standard) meta[field.key] = `${field.key}@${path}`;
+    }
+    out[path] = meta;
+  }
+  return out;
+}
+
+function fieldNameInput(): HTMLInputElement | null {
+  return screen.queryByPlaceholderText(FIELD_NAME_PLACEHOLDER);
+}
+
+function typeFieldName(value: string): void {
+  fireEvent.change(screen.getByPlaceholderText(FIELD_NAME_PLACEHOLDER), { target: { value } });
+}
+
+async function openCustomize(): Promise<void> {
+  await clickElement(screen.getByTitle("Customize Fields"));
+}
+
+async function addField(name: string): Promise<void> {
+  typeFieldName(name);
+  await clickButton(/Add Field/);
+}
+
+function readsContaining(path: string): number {
+  return vi.mocked(window.api.readMetadataBatch).mock.calls.filter(([paths]) => paths.includes(path)).length;
+}
+
+async function doneDuringPendingOpenFolderB(): Promise<{ scanB: Deferred<WavFileEntry[]>; done: HTMLElement }> {
+  seedFolderA();
+  const scanB = createDeferred<WavFileEntry[]>();
+  vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+  vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+  vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) => readFor(paths, schema));
+  renderBrowserAndPanel();
+  await openCustomize();
+  await clickButton(/Open Folder/);
+  await addField("R35note");
+  const done = buttonByText(/Done/);
+  await clickElement(done);
+  return { scanB, done };
+}
+
+beforeEach(() => {
+  resetAllStores();
+  resetWindowApiMocks();
+  vi.mocked(window.api.openFolderDialog).mockReset().mockResolvedValue(null);
+  vi.mocked(window.api.loadSchema).mockReset().mockResolvedValue([]);
+  vi.mocked(window.api.resolveDroppedPaths).mockReset().mockResolvedValue({ folders: [], wavFiles: [] });
+});
+
+describe("C round 35 probes", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("(k1) DM-9 probe: two Done calls both waiting on the same pending Open Folder, re-reads land #2 first then #1: store keeps #2", async () => {
+    seedFolderA();
+    const scanB = createDeferred<WavFileEntry[]>();
+    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
+    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
+    const reads: { schema: FieldDefinition[]; paths: string[]; d: Deferred<MetadataByPath> }[] = [];
+    vi.mocked(window.api.readMetadataBatch).mockImplementation((paths, schema) => {
+      const d = createDeferred<MetadataByPath>();
+      reads.push({ schema, paths, d });
+      return d.promise;
+    });
+    renderBrowserAndPanel();
+    await openCustomize();
+    await clickButton(/Open Folder/);
+    await addField("Qone");
+    await clickButton(/^Done$/);
+    await clickElement(backButton());
+    await settle(() => useFileStore.getState().setSelectedPaths([PATH_A]));
+    await openCustomize();
+    await addField("Qtwo");
+    await clickButton(/^Done$/);
+    await settle(() => scanB.resolve([FILE_B]));
+    await waitMs(20);
+    expect(reads.length).toBe(1);
+    const load = reads[0];
+    await settle(() => load.d.resolve(readFor(load.paths, load.schema)));
+    await waitMs(20);
+    expect(reads.length).toBe(3);
+    expect(reads[1].schema.some((f) => f.key === "qtwo")).toBe(true);
+    const r1 = reads[1];
+    const r2 = reads[2];
+    await settle(() => r2.d.resolve(readFor(r2.paths, r2.schema)));
+    await waitMs(20);
+    await settle(() => r1.d.resolve({ [PATH_B]: { ...readFor(r1.paths, r1.schema)[PATH_B], title: "STALE1" } }));
+    await waitMs(20);
+    expect(useFileStore.getState().metadata[PATH_B]?.qtwo).toBe(`qtwo@${PATH_B}`);
+    expect(useFileStore.getState().metadata[PATH_B]?.title).toBe("B");
+    expect(fieldNameInput()).toBeNull();
+  });
+
+  it("(k2) BM-6 probe: standalone SchemaEditor with a no-op onClose returns to Done after a resolved onSave", async () => {
+    const onClose = vi.fn();
+    const onSave = vi.fn(() => Promise.resolve());
+    render(createElement(SchemaEditor, { onClose, onSave }));
+    await clickButton(/^Done$/);
+    await waitMs(20);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(buttonByText(/^(Done|Applying\.\.\.)$/)).toHaveTextContent(/^Done$/);
+  });
+});

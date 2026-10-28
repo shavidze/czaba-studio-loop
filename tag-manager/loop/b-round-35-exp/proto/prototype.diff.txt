@@ -1,0 +1,440 @@
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/fixtures/corrupt.wav b/home/runner/czaba-project/czaba-tag-manager/tests/fixtures/corrupt.wav
+deleted file mode 100644
+index 0a31025..0000000
+Binary files a/home/runner/czaba-project/czaba-tag-manager/tests/fixtures/corrupt.wav and /dev/null differ
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/fixtures/sample.wav b/home/runner/czaba-project/czaba-tag-manager/tests/fixtures/sample.wav
+deleted file mode 100644
+index d1b6489..0000000
+Binary files a/home/runner/czaba-project/czaba-tag-manager/tests/fixtures/sample.wav and /dev/null differ
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts b/tmp/b35w/tests/renderer/components/file-list.test.ts
+index b5a70a8..4f4a84a 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/file-list.test.ts
++++ b/tmp/b35w/tests/renderer/components/file-list.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+ import { createElement } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -187,10 +188,10 @@ describe("FileList sort by Artist with a non-string first element (TM-B21, D-27)
+       "c.wav": { artists: ["Abe"] },
+     });
+ 
+-    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
++    expect(() => fireEvent.click(getButtonByText("Artist"))).not.toThrow();
+     expect(getRowNamesInOrder()).toEqual(["b.wav", "c.wav", "a.wav"]);
+ 
+-    expect(() => fireEvent.click(screen.getByRole("button", { name: "Artist" }))).not.toThrow();
++    expect(() => fireEvent.click(getButtonByText("Artist"))).not.toThrow();
+     expect(getRowNamesInOrder()).toEqual(["a.wav", "c.wav", "b.wav"]);
+ 
+     expectUntagged("b.wav");
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-during-save.test.ts b/tmp/b35w/tests/renderer/components/folder-read-during-save.test.ts
+index b82c86e..d7d4337 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-during-save.test.ts
++++ b/tmp/b35w/tests/renderer/components/folder-read-during-save.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement, Fragment } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -94,13 +95,13 @@ function getInputByLabel(labelText: string): HTMLInputElement {
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+   fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: SAVED_CATEGORY } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts b/tmp/b35w/tests/renderer/components/folder-read-overlap.test.ts
+index 15d10bc..c4a0f85 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-overlap.test.ts
++++ b/tmp/b35w/tests/renderer/components/folder-read-overlap.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement, Fragment } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -46,7 +47,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-rejected-chunk.test.ts b/tmp/b35w/tests/renderer/components/folder-read-rejected-chunk.test.ts
+index 1fcae25..3924238 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/folder-read-rejected-chunk.test.ts
++++ b/tmp/b35w/tests/renderer/components/folder-read-rejected-chunk.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement, Fragment } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -96,13 +97,13 @@ function getInputByLabel(labelText: string): HTMLInputElement {
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+   fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: SAVED_CATEGORY } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts b/tmp/b35w/tests/renderer/components/metadata-panel-batch-save.test.ts
+index 25d8077..5a49210 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tmp/b35w/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -77,7 +78,7 @@ function getCategoryInput(): HTMLInputElement {
+ }
+ 
+ function getBatchSaveButton(): HTMLButtonElement {
+-  return screen.getByRole("button", { name: /Save to 2 files/ });
++  return getButtonByText(/Save to 2 files/);
+ }
+ 
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+@@ -88,7 +89,7 @@ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+ 
+ async function clickSave(saveButtonName: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+@@ -207,7 +208,7 @@ describe("MetadataPanel batch save keeps edits on failure (TM-B15, D-21)", () =>
+     expect(state.toastType).toBe("error");
+     expect(state.isDirty).toBe(true);
+     expect(getCategoryInput().value).toBe(TYPED_CATEGORY);
+-    expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++    expect(getButtonByText(/Save Tags/)).toBeEnabled();
+   });
+ });
+ 
+@@ -377,7 +378,7 @@ describe("MetadataPanel save whose write succeeded but whose re-read rejects (TM
+     expect(state.modifiedFields).toEqual(new Set(["category"]));
+     expect(state.isDirty).toBe(true);
+     expect(state.isSaving).toBe(false);
+-    expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++    expect(getButtonByText(/Save Tags/)).toBeEnabled();
+     expectNoStaleSkipSync(seedA);
+   });
+ 
+@@ -949,7 +950,7 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+       expect(getCategoryInput().value).toBe("R20Cat");
+       expect(state.isDirty).toBe(true);
+       expect(state.modifiedFields).toEqual(new Set(["title"]));
+-      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeEnabled();
++      expect(getButtonByText(/Save Tags/)).toBeEnabled();
+       expect(useFileStore.getState().metadata[PATH_A]).toEqual(REREAD_A);
+       expect(state.toastMessage).toBe("Tags saved");
+       expect(state.isSaving).toBe(false);
+@@ -990,7 +991,7 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+       expect(getCategoryInput().value).toBe("R20Cat");
+       expect(state.isDirty).toBe(false);
+       expect(state.modifiedFields).toEqual(new Set());
+-      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeDisabled();
++      expect(getButtonByText(/Save Tags/)).toBeDisabled();
+     });
+ 
+     it("(y5) pin: an equal tag array with a new reference during the write is not a change", async () => {
+@@ -1002,7 +1003,7 @@ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () =>
+       const state = useMetadataStore.getState();
+       expect(state.isDirty).toBe(false);
+       expect(state.modifiedFields).toEqual(new Set());
+-      expect(screen.getByRole("button", { name: /Save Tags/ })).toBeDisabled();
++      expect(getButtonByText(/Save Tags/)).toBeDisabled();
+     });
+ 
+     it("(y5b) tag order changed during the write is a change", async () => {
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-schema-change.test.ts b/tmp/b35w/tests/renderer/components/metadata-panel-schema-change.test.ts
+index c2507ad..bcc9891 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/metadata-panel-schema-change.test.ts
++++ b/tmp/b35w/tests/renderer/components/metadata-panel-schema-change.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -93,16 +94,16 @@ function getInputByLabel(labelText: string): HTMLInputElement {
+ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+   fireEvent.change(getInputByLabel("Category (UCS)"), { target: { value: TYPED_CATEGORY } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: saveButtonName }));
++    fireEvent.click(getButtonByText(saveButtonName));
+   });
+ }
+ 
+ async function addNoteFieldAndDone(): Promise<void> {
+   fireEvent.click(screen.getByTitle("Customize Fields"));
+   fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R24note" } });
+-  fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
++  fireEvent.click(getButtonByText(/Add Field/));
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: /Done/ }));
++    fireEvent.click(getButtonByText(/Done/));
+   });
+ }
+ 
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/reread-after-folder-switch.test.ts b/tmp/b35w/tests/renderer/components/reread-after-folder-switch.test.ts
+index 229b6e6..3e27fcf 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/reread-after-folder-switch.test.ts
++++ b/tmp/b35w/tests/renderer/components/reread-after-folder-switch.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement, Fragment } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -56,7 +57,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+@@ -95,7 +96,7 @@ async function typeCategoryAndSave(saveButtonName: RegExp): Promise<void> {
+ async function addNoteFieldAndDone(): Promise<void> {
+   fireEvent.click(screen.getByTitle("Customize Fields"));
+   fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R32note" } });
+-  fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
++  fireEvent.click(getButtonByText(/Add Field/));
+   await clickButton(/Done/);
+ }
+ 
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-change-during-folder-load.test.ts b/tmp/b35w/tests/renderer/components/schema-change-during-folder-load.test.ts
+index a0c6cfd..ae23f9a 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-change-during-folder-load.test.ts
++++ b/tmp/b35w/tests/renderer/components/schema-change-during-folder-load.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement, Fragment } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -55,7 +56,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+@@ -133,7 +134,7 @@ async function openCustomize(): Promise<void> {
+ async function addNoteField(): Promise<void> {
+   fireEvent.change(screen.getByPlaceholderText("Field name (e.g. Client)"), { target: { value: "R33note" } });
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name: /Add Field/ }));
++    fireEvent.click(getButtonByText(/Add Field/));
+   });
+ }
+ 
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor-done-busy.test.ts b/tmp/b35w/tests/renderer/components/schema-editor-done-busy.test.ts
+index bdf9dd9..d2fe39e 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor-done-busy.test.ts
++++ b/tmp/b35w/tests/renderer/components/schema-editor-done-busy.test.ts
+@@ -7,6 +7,7 @@ import { FolderBrowser } from "~/components/sidebar/FolderBrowser";
+ import { useFileStore } from "~/stores/file-store";
+ import { useMetadataStore } from "~/stores/metadata-store";
+ import type { FieldDefinition, WavFileEntry, WavMetadata } from "~/types";
++import { getButtonByText } from "../helpers/dom-queries";
+ import { resetAllStores } from "../helpers/reset-stores";
+ import { resetWindowApiMocks } from "../helpers/window-api-mocks";
+ 
+@@ -43,12 +44,6 @@ function createDeferred<T>(): Deferred<T> {
+   return { promise, resolve };
+ }
+ 
+-function buttonByText(name: RegExp): HTMLButtonElement {
+-  const found = Array.from(document.querySelectorAll("button")).find((button) => name.test(button.textContent ?? ""));
+-  if (!found) throw new Error(`button ${name} not found`);
+-  return found;
+-}
+-
+ function typeSelect(): HTMLSelectElement {
+   const select = document.querySelector("select");
+   if (!select) throw new Error("type select not found");
+@@ -62,7 +57,7 @@ async function clickElement(element: HTMLElement): Promise<void> {
+ }
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+-  await clickElement(buttonByText(name));
++  await clickElement(getButtonByText(name));
+ }
+ 
+ function backButton(): HTMLButtonElement {
+@@ -139,7 +134,7 @@ async function doneDuringPendingOpenFolderB(): Promise<{ scanB: Deferred<WavFile
+   await openCustomize();
+   await clickButton(/Open Folder/);
+   await addField("R35note");
+-  const done = buttonByText(/Done/);
++  const done = getButtonByText(/Done/);
+   await clickElement(done);
+   return { scanB, done };
+ }
+@@ -163,7 +158,7 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     expect(done).toBeDisabled();
+     expect(done).toHaveTextContent("Applying...");
+     expect(fieldNameInput()).toBeDisabled();
+-    expect(buttonByText(/Add Field/)).toBeDisabled();
++    expect(getButtonByText(/Add Field/)).toBeDisabled();
+     expect(screen.getByPlaceholderText("RIFF ID (auto)")).toBeDisabled();
+     expect(typeSelect()).toBeDisabled();
+     expect(backButton()).toBeEnabled();
+@@ -190,7 +185,7 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     await settle(() => useFileStore.getState().setSelectedPaths([PATH_A]));
+     await openCustomize();
+ 
+-    const reopenedDone = buttonByText(/^Done$/);
++    const reopenedDone = getButtonByText(/^Done$/);
+     expect(reopenedDone).toBeEnabled();
+     expect(fieldNameInput()).toBeEnabled();
+ 
+@@ -208,7 +203,7 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+ 
+     expect(onSave).toHaveBeenCalledTimes(1);
+     expect(onClose).not.toHaveBeenCalled();
+-    const done = buttonByText(/^Done$/);
++    const done = getButtonByText(/^Done$/);
+     expect(done).toBeEnabled();
+     expect(fieldNameInput()).toBeEnabled();
+   });
+@@ -267,4 +262,54 @@ describe("schema editor Done busy state and latest schema re-read (D-42, D-43)",
+     expect(useMetadataStore.getState().editingMetadata).toEqual(expected);
+     expect(fieldNameInput()).toBeNull();
+   });
++
++  it("(b7) pin for C-R35-03 (DM-9): two Done calls both waiting on the same pending Open Folder, re-reads land #2 first then #1: store keeps #2", async () => {
++    seedFolderA();
++    const scanB = createDeferred<WavFileEntry[]>();
++    vi.mocked(window.api.openFolderDialog).mockResolvedValueOnce("/fb");
++    vi.mocked(window.api.scanFolder).mockReturnValueOnce(scanB.promise);
++    const reads: { schema: FieldDefinition[]; paths: string[]; d: Deferred<MetadataByPath> }[] = [];
++    vi.mocked(window.api.readMetadataBatch).mockImplementation((paths, schema) => {
++      const d = createDeferred<MetadataByPath>();
++      reads.push({ schema, paths, d });
++      return d.promise;
++    });
++    renderBrowserAndPanel();
++    await openCustomize();
++    await clickButton(/Open Folder/);
++    await addField("Qone");
++    await clickButton(/^Done$/);
++    await clickElement(backButton());
++    await settle(() => useFileStore.getState().setSelectedPaths([PATH_A]));
++    await openCustomize();
++    await addField("Qtwo");
++    await clickButton(/^Done$/);
++    await settle(() => scanB.resolve([FILE_B]));
++    await waitMs(20);
++    expect(reads.length).toBe(1);
++    const load = reads[0];
++    await settle(() => load.d.resolve(readFor(load.paths, load.schema)));
++    await waitMs(20);
++    expect(reads.length).toBe(3);
++    expect(reads[1].schema.some((f) => f.key === "qtwo")).toBe(true);
++    const r1 = reads[1];
++    const r2 = reads[2];
++    await settle(() => r2.d.resolve(readFor(r2.paths, r2.schema)));
++    await waitMs(20);
++    await settle(() => r1.d.resolve({ [PATH_B]: { ...readFor(r1.paths, r1.schema)[PATH_B], title: "STALE1" } }));
++    await waitMs(20);
++    expect(useFileStore.getState().metadata[PATH_B]?.qtwo).toBe(`qtwo@${PATH_B}`);
++    expect(useFileStore.getState().metadata[PATH_B]?.title).toBe("B");
++    expect(fieldNameInput()).toBeNull();
++  });
++
++  it("(b8) pin for C-R35-03 (BM-6): standalone SchemaEditor with a no-op onClose returns to Done after a resolved onSave", async () => {
++    const onClose = vi.fn();
++    const onSave = vi.fn(() => Promise.resolve());
++    render(createElement(SchemaEditor, { onClose, onSave }));
++    await clickButton(/^Done$/);
++    await waitMs(20);
++    expect(onClose).toHaveBeenCalledTimes(1);
++    expect(getButtonByText(/^(Done|Applying\.\.\.)$/)).toHaveTextContent(/^Done$/);
++  });
+ });
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor-stale-close.test.ts b/tmp/b35w/tests/renderer/components/schema-editor-stale-close.test.ts
+index 227fed1..cf44d03 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor-stale-close.test.ts
++++ b/tmp/b35w/tests/renderer/components/schema-editor-stale-close.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement, Fragment, StrictMode } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -46,7 +47,7 @@ function createDeferred<T>(): Deferred<T> {
+ 
+ async function clickButton(name: RegExp): Promise<void> {
+   await act(async () => {
+-    fireEvent.click(screen.getByRole("button", { name }));
++    fireEvent.click(getButtonByText(name));
+   });
+ }
+ 
+diff --git a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts b/tmp/b35w/tests/renderer/components/schema-editor.test.ts
+index 2d16278..befd2a4 100644
+--- a/home/runner/czaba-project/czaba-tag-manager/tests/renderer/components/schema-editor.test.ts
++++ b/tmp/b35w/tests/renderer/components/schema-editor.test.ts
+@@ -1,3 +1,4 @@
++import { getButtonByText } from "../helpers/dom-queries";
+ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+ import { createElement } from "react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+@@ -26,7 +27,7 @@ function addCustomFieldViaForm(name: string, riffId: string): void {
+   fireEvent.change(screen.getByPlaceholderText("RIFF ID (auto)"), {
+     target: { value: riffId },
+   });
+-  fireEvent.click(screen.getByRole("button", { name: "Add Field" }));
++  fireEvent.click(getButtonByText("Add Field"));
+ }
+ 
+ beforeEach(() => {
+@@ -77,7 +78,7 @@ describe("SchemaEditor reserved ICAT (T1-9)", () => {
+     renderSchemaEditor();
+ 
+     expect(screen.getByText("Hidden Standard Fields")).toBeInTheDocument();
+-    expect(screen.getByRole("button", { name: "+ Category (UCS)" })).toBeInTheDocument();
++    expect(getButtonByText("+ Category (UCS)")).toBeInTheDocument();
+     expect(screen.queryByText("ICAT")).not.toBeInTheDocument();
+   });
+ });
+diff --git a/tmp/b35w/tests/renderer/helpers/dom-queries.ts b/tmp/b35w/tests/renderer/helpers/dom-queries.ts
+new file mode 100644
+index 0000000..c0d3744
+--- /dev/null
++++ b/tmp/b35w/tests/renderer/helpers/dom-queries.ts
+@@ -0,0 +1,11 @@
++function matchesButtonName(button: HTMLButtonElement, name: string | RegExp): boolean {
++  const text = (button.textContent ?? "").trim();
++  return typeof name === "string" ? text === name : name.test(text);
++}
++
++export function getButtonByText(name: string | RegExp): HTMLButtonElement {
++  const matches = Array.from(document.querySelectorAll("button")).filter((button) => matchesButtonName(button, name));
++  if (matches.length === 0) throw new Error(`button ${String(name)} not found`);
++  if (matches.length > 1) throw new Error(`button ${String(name)} matched ${matches.length} buttons`);
++  return matches[0];
++}

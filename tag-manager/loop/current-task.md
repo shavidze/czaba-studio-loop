@@ -1,239 +1,188 @@
-# CURRENT TASK — Round 35: TM-B37 — schema editor Done busy state and latest-Done-wins re-read (D-42, D-43)
+# CURRENT TASK — Round 36: TM-B38 — renderer component test speed and hygiene (shared `getButtonByText`, (e5) rename, pins (b7)/(b8), D-40/D-41 docs wording, TESTING.md rule 6)
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-28
 
 ## Why this round
-- **Round 34: C PASS** (R34-1…R34-6, realVerified=true). TM-B36 (D-41) is **done**. Root published `3035ffc`; the review returned COMMIT OK with 0 critical/high/medium findings, 4 low findings and 1 architecture note. `3035ffc` is the baseline.
-- **No critical or high bug is open.** TM-B37 (medium) is the next unfinished item. This round fixes three closely related bugs, all in the schema editor's Done flow. That is the policy limit, so nothing else joins this round:
-  1. **RR-R33-01 (medium) + QA-R33-02 / A-R33-02(1) / RR-R34-02 (low).** While Done is pending (D-40 wait or a slow re-read), the editor gives no feedback, and every extra click starts another schema re-read.
-  2. **QA-R34-01 (low).** Two re-reads can run at once: Done #1 pending → Back → reopen → add a field → Done #2. Whichever finishes last wins. If #1 (older schema) lands last, the new field's values disappear from `metadata` and the form.
-  3. **RR-R34-01 (low).** If `onSave` rejects, `handleSave` throws, the editor never closes, and the Done click leaves an unhandled rejection. The busy state needs this path anyway: without it Done would stay disabled forever.
-- **B's red reproduction on `3035ffc`** is in a throwaway copy, `b-round-34-exp/`:
-  - Test draft: `schema-editor-done-busy.test.ts.txt`, tests (b1)–(b6).
-  - `red-run.log`: **284 passed / 3 failed of 287, plus 1 Unhandled Rejection**.
-    - (b1): `expect(element).toBeDisabled()`, Done is not disabled.
-    - (b2): `expected 3 to be 2`, reads of `b`.
-    - (b5): `metadata` is missing `qtwo`.
-    - (b4): the Unhandled Rejection `reread failed`.
-    - (b3) and (b6) are green pins.
-  - `prototype.diff.txt`: `green-run.log` **287/287 in 18 files** (three full runs); Biome 0 errors / 8 warnings; `tsc` for web + test is clean.
-  - `mutants.log` (`mut.py.txt`): see R35-3.
-- **Not in this round** (new backlog items, todo):
-  - **TM-B38** (test-only): C-R34-02, the timing margin. B measured the six new tests here at **11.8 s** with `screen.getByRole` button lookups and **0.84 s** with a `querySelectorAll('button')` text lookup, so `getByRole` is the likely cause of the slow suites. TM-B38 also renames (e5) (C-R34-03).
-  - **TM-B39**: C-R34-01, a stale selection after a folder switch.
-  - The new test file in this round already uses the fast lookup.
-- **Signals, not tasks:**
-  - RR-R34-05: `MetadataPanel` could own the whole schema flow with a session token. B keeps the smaller D-42 + D-43, because D-41 already isolates each editor instance.
-  - B-R34-02: a TESTING.md rule candidate.
-- **B's own error (B-R34-01).** The round 34 task's wording for RR-R33-03, "schema fails to load", was wrong. A rejected `loadSchema` sets `isLoaded` true at once. A and the code-reviewer fixed the docs, and C confirmed the fix.
+- **Round 35: C PASS** (R35-1…R35-6, realVerified=true). TM-B37 (D-42, D-43) is **done**. Root published `46bd74b`; the review returned COMMIT OK with 0 critical/high/medium findings. `46bd74b` is the baseline.
+- **No critical, high or medium bug is open.** TM-B38 (low, test-only) is next in dependency order (TM-B37 → TM-B38 → TM-B39). It is one hygiene item with no behaviour change, and it carries five findings, all in test files and test docs:
+  - C-R34-02 / B-R34-02: component tests run close to the 5 s default timeout;
+  - C-R34-03: the (e5) name is wrong;
+  - C-R35-03: BM-6 and the DM-9 shape are pinned only by C's probes;
+  - C-R35-02: two docs phrases went stale after D-43.
 
-## Reference (reference-first rule: this changes visible UI)
-Searched:
-- Mp3tag forum: "writing tag data dialog", "edit while saving", "improper action while saving";
-- Microsoft Windows progress-control guidance;
-- disabled vs `aria-disabled` / `aria-busy` for a loading button.
+  Nothing else joins this round. No code from TM-B39, TM-B40 or `src/` belongs here.
+- **B's measurement on `46bd74b`** (`b-round-35-exp/`; `durations.py` prints per-file sums from `vitest --reporter=json`). Two baseline runs, both 287/287:
 
-Found:
-| # | Source | What it says (confirmed / inference) |
-|---|---|---|
-| R1 | In-app: `MetadataPanel.tsx:369-372`, the Save Tags button | Confirmed. While a save runs it is natively `disabled` and its label reads `Saving...`. This is the closest precedent: same app, same kind of commit button. |
-| R2 | Mp3tag, https://community.mp3tag.de/t/feature-request-make-the-writing-tag-data-dialog-not-a-dialog/65295 | Confirmed. Mp3tag shows a "Writing tag-data" progress dialog during a write, and the developer declined to make it non-blocking. Further posts: https://community.mp3tag.de/t/tag-several-files-then-save-or-edit-next-file-while-first-is-saving/66549 says you cannot move on to edit the next file while a save runs; https://community.mp3tag.de/t/improper-action-while-saving/54838 and https://community.mp3tag.de/t/54892 report that clicking during a save misbehaves. Inference: editing is blocked while a commit runs. |
-| R3 | Microsoft, https://learn.microsoft.com/windows/apps/design/controls/progress-controls | Confirmed. Use a blocking (indeterminate) indicator when the user must wait for the operation; use a non-modal one when they can keep working. |
-| R4 | W3C ARIA Practices list, https://lists.w3.org/Archives/Public/public-aria-practices/2023Jul/0006.html | Confirmed. Use `aria-disabled` if the control should stay focusable, HTML `disabled` otherwise; not both. |
-| R5 | GitLab GlButton, https://gitlab.com/gitlab-org/gitlab-services/design.gitlab.com/-/issues/2981; Fluid, https://issues.fluidproject.org/browse/C2LC-109/ | Confirmed. Native `disabled` on a loading button drops keyboard focus. These projects use `aria-disabled` + `aria-busy`, with a guard in the click handler. |
+  | File | Baseline (2 runs) | Prototype |
+  |---|---|---|
+  | `schema-change-during-folder-load` | 23.1 / 22.1 s (slowest test 4.05 s) | 1.9 s (slowest test 0.5 s) |
+  | `metadata-panel-schema-change` | 21.2 / 24.4 s | 1.7–2.0 s |
+  | `schema-editor-stale-close` | 14.8 / 14.3 s (slowest test 3.9 s) | 1.0–1.6 s |
+  | `reread-after-folder-switch` | 10.1 / 9.5 s | 1.2 s |
+  | `schema-editor` | 4.4 s | 0.5 s |
+  | Slowest test, all files | 4.05 s | **0.61 s** |
 
-Not found: a tag editor that keeps a field-schema dialog open while it re-reads files. Kid3 and Soundminer were not searched in depth. B does not claim how they behave.
-
-**Target behaviour:**
-- While Done is pending, the Done button is disabled and reads `Applying...`. (R1, R2, R3)
-- The editing controls can't be used while the re-read runs. (R2)
-- Back stays usable as the way out.
-- A second click does nothing.
-- A failed `onSave` returns the editor to its normal state.
-
-### Deviations (with reasons)
-1. **Native `disabled`, not `aria-disabled` + `aria-busy`** (R4, R5). Native disabled drops focus from Done.
-   - Kept, because it matches Save Tags (R1).
-   - Back stays enabled and focusable.
-   - Moving both buttons to `aria-disabled` is an app-wide change for a later round (signal B-R34-02 family). C records it, not a FAIL.
-2. **Inline busy state, not a modal progress dialog** (R2, R3). The editor already sits in the right panel, and Back must stay available (D-41). A modal would hide the sidebar, which D-40 keeps usable during a wait.
-3. **No spinner or progress bar.** The label `Applying...` follows `Saving...` (R1). There is no determinate count, because the wait covers a folder load whose length is unknown.
-4. **Label `Applying...` instead of keeping `Done`.** It names what happens: the new fields are being applied to the open files. It uses ASCII `...`, like `Saving...`.
+  - The prototype (`proto/prototype.diff.txt`) passed 287/287 three times, then **289/289** with (b7)/(b8) (`proto-run4.json`).
+  - `tsc -p tsconfig.test.json` is clean.
+  - This confirms the round 34 hypothesis: `screen.getByRole("button", { name })` computes accessible names for the whole tree, and that is the cost.
+- **Pins for C-R35-03.** B checked them in throwaway copies:
+  - (b7) = C's probe (k1). Red on `3035ffc` src with `expected 'STALE1' to be 'B'`; green on `46bd74b`.
+  - (b8) = C's probe (k2). Red on the BM-6 mutant; green on `46bd74b`.
+  - With the migrated `schema-editor-done-busy.test.ts` on `3035ffc` src, (b1), (b2) and (b5) still fail on the same symptoms as round 35, and (b4) still gives the Unhandled Rejection. Migrating that file keeps its red evidence.
+- **Reference-first: exempt.** This is a test-only and docs round; no visible behaviour changes.
+- **Signals and new items, not tasks this round:**
+  - RR-R35-05 (a store-level schema-read id / `isApplyingSchema`) is recorded as a signal.
+  - New item **TM-B40** (todo, UX, after TM-B39) collects four findings:
+    - RR-R35-01: focus is lost on Done / Save Tags;
+    - RR-R35-04: (b2) can't fail on its own;
+    - C-R35-01: the arrows are double-dimmed;
+    - RR-R35-02 (optional): a timeout for an `onSave` that never settles.
+  - RR-R35-03 is "by design, do not fix".
 
 ## Baseline
-- HEAD must be `3035ffca98bbb8af4020c3a799b0d5b20515dacf` and the working tree **clean** (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report BLOCKED.
-  - Exception (baseline rule): HEAD may be one root `chore(release): vX.Y.Z` commit directly on `3035ffc` that changes only the `version` fields of `package.json`/`package-lock.json`. That commit counts as the baseline.
-- **Frozen** (byte-identical to `3035ffc`): every path not listed under File ownership. In particular:
-  - `src/renderer/src/App.tsx`;
-  - `src/renderer/src/stores/**`;
-  - `src/renderer/src/components/sidebar/FolderBrowser.tsx`;
-  - `src/renderer/src/components/file-list/**`;
-  - `src/renderer/src/components/ui/**` (the `Button`, `Input`, `Select` components are not changed);
-  - `src/renderer/src/lib/**` and `src/renderer/src/types/**`;
-  - `src/main/**`;
-  - `tests/renderer/helpers/**` and `tests/renderer/setup.ts`;
-  - `tests/e2e/**`;
-  - **every existing test file**, including `schema-editor-stale-close.test.ts` (the (e5) rename is TM-B38);
-  - `.claude/**` (no primitive change this round).
-- **Protected** (never edit): `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
-- **Rules:**
-  - test-on-bugfix: tests first. A records the red run on the baseline src before touching src.
-  - CLAUDE.md: no comments in code, semicolons, no `any` / `@ts-ignore`, single quotes in `src/`, Tailwind classes only (no custom CSS), design tokens.
-  - Read primitives first: `TESTING.md`, `STATE_MANAGEMENT.md`, `AGENT_DISCOVERABLE_CODE.md`, `DESIGN_TOKENS.md`, `TAILWIND_FIRST.md`.
-  - Use Edit/Write only; no Bash writes to repository files (A-R17-02). That includes `biome format --write`: A writes the re-indent inside the new `<fieldset>` by hand, and `npm run check` (Biome format check) must pass.
-  - After the change, run `/check`, `code-reviewer` (3+ files changed) and `qa-engineer` (bug fix).
+- HEAD `46bd74b4f8d18121e981038c9b8a0659070f017e`; working tree clean. If HEAD differs, stop and report. The one exception is the release-commit rule in the project policy: a root `chore(release)` commit that changes only the two `version` fields counts as the baseline.
+- **Frozen (byte-identical to `46bd74b`):**
+  - everything under `src/`;
+  - `tests/renderer/setup.ts`, `tests/renderer/helpers/reset-stores.ts`, `tests/renderer/helpers/window-api-mocks.ts`;
+  - `tests/renderer/stores/**`, `tests/renderer/utils/**`, `tests/main/**`, `tests/e2e/**`, and the tracked files in `tests/fixtures/**`;
+  - `docs/bugs/README.md` and every other `docs/**` file except `docs/bugs/001-…`;
+  - `package.json`, `package-lock.json`, `vitest.config.*.ts`, `playwright.config.ts`, `biome.json`, `tsconfig*.json`, `electron.vite.config.ts`, `.github/**`;
+  - every `.claude/**` file except `.claude/primitives/TESTING.md`.
+- **Protected (never touch):** `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
 
 ## Scope
 
-### D-42 (`SchemaEditor.tsx` only): busy Done, locked editing area, reject handled
-1. Directly after the `isMountedRef` effect (after its closing `}, []);`), add `const [isApplying, setIsApplying] = useState(false);` (exact name; C greps it).
-2. `handleSave` becomes exactly:
-   ```ts
-   const handleSave = useCallback(async () => {
-     if (fields.length === 0) return;
-     setIsApplying(true);
-     try {
-       await onSave?.();
-     } catch {
-       if (isMountedRef.current) setIsApplying(false);
-       return;
-     }
-     if (!isMountedRef.current) return;
-     setIsApplying(false);
-     onClose();
-   }, [fields, onSave, onClose]);
-   ```
-   Dependencies stay `[fields, onSave, onClose]`. A rejected `onSave` shows no toast here; `MetadataPanel` already toasts read failures.
-3. **Editing area.**
-   - Today it is `<div className="flex-1 overflow-y-auto p-3 space-y-4">`. It becomes `<div className="flex-1 overflow-y-auto p-3">`.
-   - Inside it, a `<fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">` wraps all three sections: Active Fields, Hidden Standard Fields and Add Custom Field.
-   - The children inside the fieldset are re-indented by one level and are otherwise unchanged.
-   - No `legend`. Tailwind preflight already removes the fieldset's border, margin and padding, and `min-w-0` removes the default `min-inline-size`.
-4. **Done button:**
-   - `disabled={isApplying || fields.length === 0}`;
-   - label `{isApplying ? 'Applying...' : 'Done'}`;
-   - no `aria-*` prop (Deviation 1).
-5. **Back** (the header button, outside the fieldset) is unchanged and always enabled. The header, the title text and all other text stay unchanged.
-6. **Conventions:** no comments, no new `as`. Biome reports 0 errors and **8** warnings, the same list as `c-round-31/biome-new.txt` (line shifts allowed).
+### 1. Shared helper: new file `tests/renderer/helpers/dom-queries.ts`
+Export exactly one function, as in `b-round-35-exp/proto/dom-queries.ts.txt`:
+```ts
+export function getButtonByText(name: string | RegExp): HTMLButtonElement
+```
+- **Candidates:** `document.querySelectorAll("button")`. A button's text is `(button.textContent ?? "").trim()`.
+- **Matching:** a `string` name needs exact equality; a `RegExp` name matches when `name.test(text)` is true.
+- **Errors:** it throws `button <name> not found` on 0 matches and `button <name> matched <n> buttons` on more than 1. This keeps the uniqueness `getByRole` gave. Do not return the first match.
+- **Style:** one private, non-exported matcher function is allowed. No comments. Use semicolons and double quotes, as the existing test files do. No `any`.
+- **Why this is equivalent here:** no `<button>` in `src/renderer/src` has an `aria-label` or `title` (B grep), so a button's accessible name is its text content. The Customize Fields icon button is found with `getByTitle`, and that lookup stays.
 
-### D-43 (`MetadataPanel.tsx` only): latest Done wins
-1. Directly above `const handleSchemaChanged = useCallback(async () => {`, add `const schemaReadIdRef = useRef(0);`.
-   - Placing it there keeps every `MetadataPanel.tsx` line ref before `handleSchemaChanged` valid.
-   - It is a top-level hook, before the `if (showSchemaEditor)` early return.
-2. The first lines of `handleSchemaChanged`, before `await waitForFolderLoadIdle();`, are:
-   ```ts
-   schemaReadIdRef.current += 1;
-   const schemaReadId = schemaReadIdRef.current;
-   ```
-3. Directly above the existing `if (!isFolderLoadCurrent(loadId)) return;`, add `if (schemaReadId !== schemaReadIdRef.current) return;`.
-4. Nothing else changes: the wait (D-40), the generation logic (D-34), the toast, the dependencies `[setMetadata, setEditingMetadata, showToast]`, `handleSave` and the sync effect.
+### 2. Migrate every `screen.getByRole("button", …)` in `tests/renderer/components/`
+There are 24 call sites in 10 files:
 
-**Behaviour this gives:**
-- While Done is pending:
-  - the Done button reads `Applying...` and is disabled;
-  - the field-name, RIFF-ID and type inputs, Add Field, the arrow/trash/hide buttons and the hidden-standard toggles are disabled;
-  - Back works.
-- Done in the same editor can start only one re-read.
-- Back → reopen → Done #2: the new editor's Done is enabled ((b3)). The re-read of the latest Done wins, whatever order the reads land in ((b5), (b6)).
-- **Known limit kept (B-R34-03):** Done #1 pending → Back → reopen → add a field, without pressing Done again.
-  - If #1 was still waiting for a folder load, its re-read takes the schema after the wait, so the field **is** read.
-  - If #1's read had already started, the field is read at the next Done or Rescan. This is display only.
-  - Behaviour is unchanged from before. This becomes docs entry 19.
+| File | Call sites |
+|---|---|
+| `file-list.test.ts` | 2 |
+| `folder-read-during-save.test.ts` | 2 |
+| `folder-read-overlap.test.ts` | 1 |
+| `folder-read-rejected-chunk.test.ts` | 2 |
+| `metadata-panel-batch-save.test.ts` | 7 |
+| `metadata-panel-schema-change.test.ts` | 3 |
+| `reread-after-folder-switch.test.ts` | 2 |
+| `schema-change-during-folder-load.test.ts` | 2 |
+| `schema-editor-stale-close.test.ts` | 1 |
+| `schema-editor.test.ts` | 2 |
 
-### Mutant notes (for A and C)
-- **BM-6** (`setIsApplying(false)` before `onClose()` removed) survives. It is equivalent only because `MetadataPanel`'s `onClose` unmounts the editor. A standalone `SchemaEditor` with a no-op `onClose` would stay at `Applying...`. Keep the line.
-- **DM-9** (the id taken after `waitForFolderLoadIdle()` instead of before it) survives. B's claim, which **C must test or refute**:
-  - every `handleSchemaChanged` call that waits is resolved by the same `isScanning → false` store update, and the subscribers run in subscription order, which is click order;
-  - a call that does not wait increments in its first microtask, before any later click can run;
-  - so the id order equals the click order in every reachable sequence.
-  - If C finds a killing sequence, it is a FAIL of the plan, not of A, and B re-plans.
+**Rules:**
+- **The replacement:** `screen.getByRole("button", { name: X })` becomes `getButtonByText(X)` with the same `X`, whether `X` is a string, a RegExp or a variable. `screen.getByRole("button", { name })` becomes `getButtonByText(name)`.
+- **The import:** add `import { getButtonByText } from "../helpers/dom-queries";` in sorted position among the relative `../helpers/` imports. The prototype put it at the top of the file; that was a sed artefact, so don't copy it.
+- **`screen`:** remove it from an import only if it becomes unused. `tsc -p tsconfig.test.json` must stay clean.
+- **Nothing else changes in these files:** no assertion, no timing, no `waitMs`, no `act`, no test name. The one exception is (e5) in §3.
+- **`schema-editor-done-busy.test.ts`:**
+  - Delete its local `buttonByText` and use `getButtonByText` everywhere. `b-round-35-exp/proto/schema-editor-done-busy.test.ts.txt` shows the result.
+  - The shared helper trims and requires a unique match; the local one did neither. Run this file on its own and report the result.
+  - If any existing (b1)–(b6) lookup now matches 0 buttons or more than 1, stop and report. Do not loosen the helper.
+- **Lookups that stay:** `getByText`, `getByPlaceholderText`, `getByTitle` and `within(...)`. They are not the measured cost and are out of scope.
+- **Timeouts:** no test timeout may be added or raised. No `{ timeout }`, no `testTimeout`, no `vi.setConfig`.
 
-### Tests first
-**New file `tests/renderer/components/schema-editor-done-busy.test.ts`:**
-- Start from `b-round-34-exp/schema-editor-done-busy.test.ts.txt`.
-- Keep one `describe("schema editor Done busy state and latest schema re-read (D-42, D-43)", …)`, the double-quote style, and the test names and IDs below.
-- Keep the fast `buttonByText` lookup. Do **not** use `screen.getByRole` for buttons (C-R34-02 / B-R34-02).
-- A may tidy the helpers. No `any`; no unused helper or import.
+### 3. Rename (e5) (C-R34-03)
+- **Old name**, in `schema-editor-stale-close.test.ts`: `(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the panel stays on the form`.
+- **New name:** **`(e5) pin: Done during a pending Open Folder, Back, not reopened: the re-read still applies and the editor stays closed`**.
+- **Why:** the body asserts that the editor is closed (`fieldNameInput()` is null), plus the store's `files`/`metadata` and that there is no toast. Open Folder clears the selection, so "stays on the form" was wrong. The new name describes only what is asserted. The body does not change.
+- **Docs:** change the same name in `docs/bugs/001-save-and-selection-known-limits.md`, in entry 17's test list (currently line 260).
 
-| Test | Scenario | Assert | Baseline |
-|---|---|---|---|
-| (b1) | `/fa` open, a selected; Customize; Open Folder `/fb` (scan deferred); add `R35note`; Done | Done is disabled with text `Applying...`; field-name input, RIFF-ID input, type `select` and Add Field are disabled; Back is enabled; after the scan resolves the editor is closed | red |
-| (b2) | as (b1), then click the same Done element again; scan resolves `[b]` | exactly **2** `readMetadataBatch` calls include `b` (load + one re-read); `metadata[b].r35note` is set; editor closed | red |
-| (b3) pin | as (b1); Back; reselect a; Customize | reopened Done reads `Done` and is enabled; field-name input enabled; after the scan resolves the reopened editor is still open | green |
-| (b4) | `SchemaEditor` alone with an `onSave` that rejects | `onSave` called once; `onClose` not called; Done reads `Done` and is enabled; field-name input enabled; no unhandled rejection | red (Unhandled Rejection) |
-| (b5) | `/fa` open, no load; Customize, add `Qone`, Done (#1 read deferred); Back; Customize; add `Qtwo`; Done (#2 read deferred); resolve #2, then #1 | after #2 the editor is closed; `metadata` and `editingMetadata` equal #2's result (with `qtwo`) | red |
-| (b6) pin | as (b5), but resolve #1 first, then #2 | `metadata` and `editingMetadata` equal #2's result | green |
+### 4. Pins (b7)/(b8) for C-R35-03: append to `schema-editor-done-busy.test.ts`
+Put them inside its `describe`, after (b6). Take the bodies from C's (k1)/(k2) in `c-round-35/c-probes.test.ts.txt`, with `buttonByText` → `getButtonByText`, exactly as in B's prototype file. Names:
+- `(b7) pin for C-R35-03 (DM-9): two Done calls both waiting on the same pending Open Folder, re-reads land #2 first then #1: store keeps #2`
+- `(b8) pin for C-R35-03 (BM-6): standalone SchemaEditor with a no-op onClose returns to Done after a resolved onSave`
 
-**Totals and red run:**
-- Renderer: 281 + 6 = **287** in **18** files.
-- A records the red run on the baseline src (`3035ffc` `SchemaEditor.tsx` and `MetadataPanel.tsx` with A's tests) in `a-round-35.md`:
-  - **284 passed / 3 failed** ((b1), (b2), (b5)) **plus 1 Unhandled Rejection** attributed to (b4);
-  - the first failing assertion of each, which must be the symptom, not setup.
-- A records each new test's duration when run alone. The target is under 1 s each. Do **not** raise any timeout.
+These pin a test gap, not a bug, so both are **green on `46bd74b`**. The red evidence comes from older source and mutants:
+- (b7) is red on `3035ffc` src and on mutant DM-8.
+- (b8) is red on mutant BM-6.
 
-### Docs (Georgian, English technical terms) in `docs/bugs/001-save-and-selection-known-limits.md`
-- **New entry `## 18.`** "schema editor-ის `Done` ლოდინისას feedback-ს არ აჩვენებდა და ხელახლა დაჭერადი იყო; ორი re-read-იდან ბოლოს დასრულებული იმარჯვებდა", in the layout of entry 17:
-  - IDs `RR-R33-01, QA-R33-02, A-R33-02, RR-R34-02, QA-R34-01, RR-R34-01, TM-B37`; severity medium.
-  - Files: `SchemaEditor.tsx:<line>` for `isApplying`, `handleSave`, the `<fieldset>` and the Done label, and `MetadataPanel.tsx:<line>` for `schemaReadIdRef` and the guard, all at A's real line numbers.
-  - Reproduction before the fix: start state → action → result, for each of the three bugs.
-  - Reference R1–R5 in one line, and Deviations 1–4.
-  - Nothing on disk changes.
-  - Full names of (b1)–(b6).
-  - `გასწორდა (D-42, D-43, TM-B37)`.
-- **New entry `## 19.`**: known limit B-R34-03 (open, not a Saba question). It says what happens in the two cases, that it is display only, and that the next Done or Rescan shows the value. It carries no test name.
-- **D-41 bullet:** replace the clause "`Done` enabled რჩება, busy state-ის გარეშე (TM-B37)" with a pointer to D-42. Update its `SchemaEditor.tsx` line refs to A's lines. Nothing else in it changes.
-- **New D-42 and D-43 bullets** after D-41, matching the code.
-- **Line refs:**
-  - Every `SchemaEditor.tsx:N` ref, and every `MetadataPanel.tsx` ref at or after `handleSchemaChanged`, must point at the described code on A's tree. That includes the bare `:226`/`:227`/`:228`/`:230`/`:246`/`:273` refs in the D-40 bullet and the refs in entries 15–17.
-  - A lists every ref changed (old → new) in `a-round-35.md`.
-  - `MetadataPanel.tsx` refs before the new line, and refs into other files, stay byte-identical.
-- **Header:**
-  - fixed list "(3), (9), (11), (12), (13), (14), (15), (16), (17) და (18)";
-  - `**წყარო:**` adds `TM-B37 (round 35)`;
-  - `**კოდი:**` adds `isApplying` to the `SchemaEditor.tsx` list and `schemaReadIdRef` to the `MetadataPanel.tsx` list.
-- **`docs/bugs/README.md`:** row 001's status reads exactly `ცნობილი შეზღუდვების სია (19 ჩანაწერი; 10 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა)`. A recounts first; if the count differs, A writes the true numbers and reports the difference.
+### 5. Docs (Georgian, English technical terms)
+**`docs/bugs/001-save-and-selection-known-limits.md`**: exactly these three text changes. Nothing else changes, and every `file:line` ref stays byte-identical because `src/` does not change.
+
+| Change | Old | New |
+|---|---|---|
+| C-R35-02, D-40 bullet | `` `handleSchemaChanged` პირველივე ხაზზე `await waitForFolderLoadIdle();`-ს იძახებს (`:229`) `` | `` `handleSchemaChanged` D-43-ის ორი id ხაზის შემდეგ (`:227-228`) `await waitForFolderLoadIdle();`-ს იძახებს (`:229`) `` |
+| C-R35-02, D-41 bullet | `ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს. ჩანაწერი (17).` | ``ამიტომ pending re-read unmount-ის შემდეგაც ბოლომდე სრულდება და store-ში წერს, თუ მის შემდეგ ახალი `Done` არ დაწყებულა (D-43). ჩანაწერი (17).`` |
+| (e5) name in entry 17 | old name from §3 | new name from §3 |
+
+- Each "old" string occurs exactly once (B grep).
+- Entry 18's test list does **not** get (b7)/(b8): they pin mutants, not a listed limit.
+- `docs/bugs/README.md` stays unchanged (19 / 10 / 5).
+
+**`.claude/primitives/TESTING.md`.** Standing permission, path (b): Edit tool only, no Bash write to `.claude/**`.
+- **Where:** add `### 6. ღილაკის ძებნა component ტესტებში` directly after rule 5's code block and before `## Main Process ტესტის pattern`.
+- **Content:** 3–6 lines of Georgian with English terms, saying that:
+  - component suites use `getButtonByText` from `tests/renderer/helpers/dom-queries.ts`, not `screen.getByRole("button", …)`;
+  - the reason is that `getByRole` computes accessible names for the whole tree. Give B's numbers from one runner: 23 s → 1.9 s per file, slowest test 4.05 s → 0.61 s;
+  - the helper requires exactly one match;
+  - test timeouts are not raised to hide slowness.
+- Nothing else in the file changes. `.claude/primitives-map.json` stays unchanged.
 
 ## File ownership (nothing else may change)
 | May modify or create | Why |
 |---|---|
-| `src/renderer/src/components/schema/SchemaEditor.tsx` | D-42 |
-| `src/renderer/src/components/metadata-editor/MetadataPanel.tsx` | D-43 only (1 ref line + 3 lines in `handleSchemaChanged`) |
-| `tests/renderer/components/schema-editor-done-busy.test.ts` (new) | (b1)–(b6) |
-| `docs/bugs/001-save-and-selection-known-limits.md` | entries 18, 19; D-41 clause; D-42/D-43 bullets; line refs; header |
-| `docs/bugs/README.md` | row 001 count |
+| `tests/renderer/helpers/dom-queries.ts` (new) | §1 |
+| `tests/renderer/components/file-list.test.ts` | §2 |
+| `tests/renderer/components/folder-read-during-save.test.ts` | §2 |
+| `tests/renderer/components/folder-read-overlap.test.ts` | §2 |
+| `tests/renderer/components/folder-read-rejected-chunk.test.ts` | §2 |
+| `tests/renderer/components/metadata-panel-batch-save.test.ts` | §2 |
+| `tests/renderer/components/metadata-panel-schema-change.test.ts` | §2 |
+| `tests/renderer/components/reread-after-folder-switch.test.ts` | §2 |
+| `tests/renderer/components/schema-change-during-folder-load.test.ts` | §2 |
+| `tests/renderer/components/schema-editor-stale-close.test.ts` | §2, §3 |
+| `tests/renderer/components/schema-editor.test.ts` | §2 |
+| `tests/renderer/components/schema-editor-done-busy.test.ts` | §2 (local helper removed), §4 (b7)/(b8) |
+| `docs/bugs/001-save-and-selection-known-limits.md` | §5, three text changes |
+| `.claude/primitives/TESTING.md` | §5, rule 6 |
 
-A also writes `a-round-35.md` (and any `a-round-35/` logs) in the loop folder. Gitignored output (`out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`) is allowed.
+A also writes `a-round-36.md` (and any `a-round-36/` logs) in the loop folder. Gitignored output is allowed: `out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`, `coverage/`.
 
 ## Acceptance (C)
 | ID | Check | Evidence that means PASS |
 |---|---|---|
-| R35-1 ownership + process | Run:<ul><li>`git status --porcelain --untracked-files=all`;</li><li>`git diff --stat 3035ffc`;</li><li>`git diff --quiet 3035ffc -- . ':!<5 owned paths>'`.</li></ul>Read the full diff, and `git diff -w 3035ffc -- src/` for content without the re-indent. | <ul><li>Only owned paths changed; the only untracked file is `schema-editor-done-busy.test.ts`.</li><li>`git diff -w` of `SchemaEditor.tsx` shows exactly D-42 (state line, `handleSave` body, wrapper `div` class, `<fieldset …>` open/close, Done `disabled` + label). The non-`-w` diff differs from it only by indentation inside the fieldset.</li><li>`MetadataPanel.tsx` diff is exactly the 4 D-43 lines.</li><li>No other text changed; Done has no `aria-*`; no comment, `any`, `@ts-ignore` or new `as` in `src/`; no custom CSS.</li><li>No `screen.getByRole` for buttons and no unused helpers/imports in the new test (a leftover is a low finding, not a FAIL).</li><li>No Bash write to repository files; "unknown" if there is no transcript (not a FAIL).</li></ul> |
-| R35-2 red → green | In a throwaway copy outside the repository, put the `3035ffc` `SchemaEditor.tsx` and `MetadataPanel.tsx` with A's tests and run the renderer suite. Then run it on A's tree, and each new test alone (anchored `-t "^.*\(bN\) "`). | <ul><li>Baseline src: **284 passed / 3 failed** ((b1), (b2), (b5) on the symptom) + **1 Unhandled Rejection** from (b4). C records each first failing assertion.</li><li>A's tree: **287/287** in 18 files, no unhandled errors.</li><li>Each new test passes alone; C records its duration (target < 1 s; > 2 s is a low finding).</li></ul> |
-| R35-3 mutations | In copies of A's tree outside the repository, run `schema-editor-done-busy.test.ts`, `schema-editor-stale-close.test.ts`, `schema-change-during-folder-load.test.ts`, `metadata-panel-schema-change.test.ts`, `schema-editor.test.ts` and `reread-after-folder-switch.test.ts` once per mutant. Start from `b-round-34-exp/mut.py.txt`; run it with the copy's root as cwd. Adjust the patterns if A's text differs, and give each exact edit. | <ul><li>BM-0 control: all pass.</li><li>BM-1 (Done `disabled` ignores `isApplying`): killed by (b1)(b2).</li><li>BM-2 (fieldset `disabled={false}`): (b1).</li><li>BM-3 (catch does not reset): (b4).</li><li>BM-4 (label stays `Done`): (b1).</li><li>BM-5 (`setIsApplying(true)` removed): (b1)(b2).</li><li>DM-8 (id guard removed): (b5).</li><li>DM-10 (guard moved to right after the wait): (b5).</li><li>BM-6 and DM-9: C states whether they are equivalent, with an argument or a killing probe (see Mutant notes).</li><li>D-41 mutants SM-1/SM-2 still killed by (e1)(e2)/(e3).</li><li>Any other survivor C finds is a FAIL unless C shows it is equivalent.</li></ul> |
-| R35-4 gate | On A's tree, from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`. | <ul><li>Exit 0.</li><li>Biome: 0 errors and **8** warnings, the same list.</li><li>Typecheck 0, including `tsconfig.test.json`.</li><li>Renderer **287**, main **93/93**, E2E **7/7**.</li><li>`--retries=0`: **7/7**.</li></ul> |
-| R35-5 real app, old vs new | Build `3035ffc` ("old") and A's tree ("new"), each in its own copy outside the working tree. Launch each with Playwright `_electron` under `xvfb-run`, `--no-sandbox`, an isolated `XDG_CONFIG_HOME`, and a `-r` harness in `c-round-35/` (start from `c-round-33/harness.cjs`). The harness needs:<ul><li>the scan delay for `fast/`;</li><li>**a new per-call knob**: delay only the N-th `meta:read-batch` call after arming;</li><li>a log of every `meta:read-batch` call with its paths and schema keys.</li></ul>Drive the UI only; `dialog.showOpenDialog` may be stubbed.<br>Folders: `slow/` = `s.wav`, `fast/` = `f.wav` (copies of `tests/fixtures/sample.wav`).<br>**Setup** (fresh copies and config per scenario, harness disarmed):<ul><li>open `fast`, click `f.wav`, Category `R35Fast`, Save, wait for `Tags saved`;</li><li>open `slow`, click `s.wav`; Customize Fields; add Text `Qone` with RIFF ID `QONE` and Text `Qtwo` with `QTWO`; Done; enter `Qone`=`V1`, `Qtwo`=`V2`, Category `R35Slow`; Save;</li><li>Customize Fields; hide (trash) `Qone` and `Qtwo`; Done.</li></ul>Record the sha256 of both files and read both with `music-metadata` and `ffprobe -show_entries format_tags -of json`.<br>Scenarios (each from the setup, `slow` open, `s.wav` selected):<ul><li>**P** (scan delay 4000 ms for `fast/`): Customize; Open Folder `fast`; add Text `R35note`; Done. Within 1 s take a screenshot and read the DOM state of Done, the field-name input, Add Field and Back. Click Done again (`force: true`). Wait until `fast` loads plus 2 s; click `f.wav`.</li><li>**PB** (as P up to the first Done): Back; click the `s.wav` row; Customize. Screenshot: reopened Done reads `Done` and is enabled.</li><li>**X** (QA-R34-01; per-call knob: the 1st `meta:read-batch` after arming waits 4000 ms): Customize; add `Qone` (RIFF `QONE`); Done (#1 delayed); Back; Customize; add `Qtwo` (RIFF `QTWO`); Done (#2). Wait for #1's reply plus 2 s. Screenshot the `s.wav` form.</li><li>**N** (disarmed): Customize; add `R35note`; Done.</li></ul>**Idle look:** a screenshot of the open editor before any Done, on both builds. | <ul><li>**New build:**<ul><li>P: Done is `disabled` with text `Applying...`; the field-name input and Add Field are `disabled`; Back is enabled (DOM + screenshot); the editing area looks dimmed.</li><li>P: the harness log shows exactly **one** schema re-read `meta:read-batch` for `f.wav` after the load read (no second from the second click). The editor closes after the load; the `f.wav` form shows Category `R35Fast` and an `R35note` input.</li><li>PB: the reopened Done reads `Done` and is enabled.</li><li>X: after #1's late reply the form shows `Qone`=`V1` and `Qtwo`=`V2`.</li><li>N: the editor closes within 1 s.</li></ul></li><li>**Old build (red):**<ul><li>P: Done stays enabled with text `Done`, and the second click produces a second schema re-read in the log.</li><li>X: after #1's late reply `Qtwo` is empty (or C shows the harness log of why not; then the round is not PASS until B re-plans).</li></ul></li><li>**Both builds:**<ul><li>the idle editor looks the same: same layout, no fieldset border or padding (C compares the two screenshots and notes any pixel difference);</li><li>sha256 of `f.wav` and `s.wav` is unchanged after setup (no save in P/PB/X/N);</li><li>both readers, field by field: `ICAT`=`R35Fast`/`R35Slow`, `QONE`=`V1`, `QTWO`=`V2` for `s.wav`, and no `R35note` value in either file;</li><li>`pageErrors` is empty.</li></ul></li><li>C states that (b4) (reject path) and (b6) are unit-only, and that StrictMode double effects do not run in the production build.</li><li>Artists are record only (TM-B08).</li></ul> |
-| R35-6 docs | Read `docs/bugs/001-save-and-selection-known-limits.md` and `docs/bugs/README.md` on A's tree, against A's src and D-42/D-43 in `feature-status.md` / `backlog.json` `decisions`. | <ul><li>Georgian with English technical terms.</li><li>Entry 18 is marked `გასწორდა (D-42, D-43, TM-B37)`. It names (b1)–(b6) by full test name (each full name has exactly 1 match in the docs file and 1 in the tests). It states R1–R5, Deviations 1–4 and that nothing on disk changes.</li><li>Entry 19 states B-R34-03's two cases and that it is display only.</li><li>The D-41 bullet points to D-42 instead of the "busy state-ის გარეშე" clause; the D-42 and D-43 bullets match the code.</li><li>Every `SchemaEditor.tsx` ref and every `MetadataPanel.tsx` ref at or after `handleSchemaChanged` (including the bare D-40 refs) points at the described line on A's tree (C greps each; a wrong number is a FAIL). A's old → new list matches.</li><li>All other `file:line` refs are byte-identical to `3035ffc`.</li><li>Header: (3), (9), (11)–(18) fixed; `წყარო` has TM-B37; `კოდი` lists `isApplying` and `schemaReadIdRef`.</li><li>The README row reads exactly `ცნობილი შეზღუდვების სია (19 ჩანაწერი; 10 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა)`, or A's reported true count, which C recounts.</li></ul> |
+| R36-1 ownership + process | Run:<ul><li>`git status --porcelain --untracked-files=all`;</li><li>`git diff --stat 46bd74b`;</li><li>`git diff --quiet 46bd74b -- . ':!<14 owned paths>'`;</li><li>`git diff --quiet 46bd74b -- src/ package.json package-lock.json tsconfig*.json vitest.config.*.ts playwright.config.ts biome.json electron.vite.config.ts tests/e2e tests/main tests/renderer/setup.ts tests/renderer/helpers/reset-stores.ts tests/renderer/helpers/window-api-mocks.ts docs/bugs/README.md .claude/primitives-map.json`.</li></ul>Read the full diff. | <ul><li>Only owned paths changed; the only untracked file is `dom-queries.ts`.</li><li>Both `--quiet` checks exit 0.</li><li>`grep -rn 'getByRole("button"' tests/renderer` returns nothing.</li><li>`grep -rn "buttonByText" tests/renderer` finds only `getButtonByText`.</li><li>No `timeout` added anywhere in the diff.</li><li>No comment and no `any` in `dom-queries.ts`.</li><li>No Bash write to `.claude/**` or to repository files. If there is no transcript, record "unknown"; that is not a FAIL.</li></ul> |
+| R36-2 assertions unchanged | For each of the 11 test files, run `git diff -w 46bd74b -- <file>`. | <ul><li>The only changed lines are:<ul><li>lookup expressions (`screen.getByRole("button", { name: X })` → `getButtonByText(X)`, with an identical `X`);</li><li>the import line(s);</li><li>the removed local `buttonByText` in done-busy;</li><li>the (e5) name;</li><li>the appended (b7)/(b8).</li></ul></li><li>No `expect(...)` line changed, except for the lookup inside it.</li><li>The test count per file is unchanged, except done-busy (6 → 8).</li><li>The (b7)/(b8) bodies match C's (k1)/(k2) apart from the helper name and the test name.</li></ul> |
+| R36-3 helper semantics + mutants | In throwaway copies of A's tree outside the repository, run each case below once and record the exact edit.<br>**Known src mutants:**<ul><li>SM-1: `if (!isMountedRef.current) return;` after `await onSave` removed → (e1)(e2);</li><li>SM-2 → (e3);</li><li>DM-3, "loadId before wait" as in `c-round-34/mut.py` → (w8);</li><li>BM-1: `disabled={fields.length === 0}` → (b1)(b2);</li><li>DM-8: id guard removed → (b5)(b7);</li><li>BM-6: `setIsApplying(false);` before `onClose()` removed → (b8).</li></ul>**Red base:** `3035ffc`'s `SchemaEditor.tsx` + `MetadataPanel.tsx` with A's tests.<br>**Helper mutants:**<ul><li>HM-1: the `> 1` check removed, so the first match is returned;</li><li>HM-2: the string compare `===` → `includes`;</li><li>HM-3: `.trim()` removed.</li></ul> | <ul><li>Every listed src mutant is killed by the tests named for it.</li><li>The red base fails as listed: (b7) on `expected 'STALE1' to be 'B'`; (b1)(b2)(b5) on the round 35 symptoms; plus the (b4) Unhandled Rejection.</li><li>DM-9 is still green on (b7). It stays argued-equivalent; record it, not a FAIL.</li><li>For HM-1…HM-3, C records which tests fail.<ul><li>A survivor is acceptable only with C's argument that no current call site tells it apart. Record which; it is a low finding, not a FAIL.</li><li>Any test that passes on A's tree **only because** the helper picked the wrong button is a FAIL.</li></ul></li></ul> |
+| R36-4 durations | Same runner, sequential runs, nothing else running.<ul><li>Run `npx vitest run --config vitest.config.renderer.ts --reporter=json --outputFile=…` twice on a copy at `46bd74b` ("before") and twice on A's tree ("after").</li><li>Summarise with `b-round-35-exp/durations.py`, plus a list of the slowest test per file.</li><li>Then run each component file alone once on A's tree.</li></ul> | <ul><li>After: **289/289** in 18 files, in both runs.</li><li>Every component test < **1.5 s** in both full runs. A test of 1.5–2 s is a low finding; > 2 s is a FAIL.</li><li>`schema-change-during-folder-load`, `metadata-panel-schema-change`, `schema-editor-stale-close` and `reread-after-folder-switch` are each at least **5×** faster (sum of test durations, mean of the 2 runs).</li><li>(b1)–(b8) are each < 1 s.</li><li>C lists before/after for all 11 component files.</li></ul> |
+| R36-5 gate (includes the real-app run) | On A's tree, from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`), run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`. | <ul><li>Exit 0.</li><li>Biome: 0 errors and **8** warnings, the same list as `c-round-35/biome-new.txt`.</li><li>Typecheck 0, including `tsconfig.test.json`, which must pick up `dom-queries.ts`.</li><li>Renderer **289**, main **93/93**, E2E **7/7** (real Electron under xvfb).</li><li>`--retries=0`: **7/7**.</li></ul> |
+| R36-6 docs | Read `git diff 46bd74b` of `docs/bugs/001-…` and of `.claude/primitives/TESTING.md`. | **`docs/bugs/001`:**<ul><li>The diff is exactly the three §5 changes. C greps:<ul><li>the new (e5) name: 1 match in the docs file and 1 in `schema-editor-stale-close.test.ts`;</li><li>the old (e5) name: 0 matches in both;</li><li>each new D-40/D-41 phrase: 1 match.</li></ul></li><li>Every `file:line` ref in the file is byte-identical to `46bd74b`: `git diff --word-diff` shows no ref change.</li><li>With `sed -n`, C checks that the D-40 phrase's refs point at the right lines of `MetadataPanel.tsx`: `:227-228` at the D-43 id lines, `:229` at `await waitForFolderLoadIdle();`.</li></ul>**TESTING.md:**<ul><li>Rule 6 sits between rule 5 and `## Main Process ტესტის pattern`.</li><li>It is in Georgian with English terms. It names the helper path, the unique-match rule and "no timeout raise", and gives the before/after numbers.</li><li>Nothing else in the file changed.</li></ul> |
 
 ## What could break (C re-checks)
-- **D-41:** Back during a pending Done closes the editor at once, the reopened editor stays open, and the pending re-read still applies ((e1)–(e5), (b3)).
-- **Normal Done:** with no load and an open folder, Done closes after the re-read ((e3), (w6), `metadata-panel-schema-change.test.ts` (s*)). With no folder open (`files` empty), `handleSchemaChanged` returns at once and the editor closes.
-- **D-40 (w1)–(w8), D-39 (v*), D-34 schema/write generations:** a single Done still applies its re-read, because the id guard only drops a run when a later Done started.
-- **`schema-editor.test.ts`** (reserved ICAT, hidden standards) renders `SchemaEditor` alone with Add Field, the toggles and the inputs. They must stay enabled while idle.
-- **Layout:** the fieldset must not add a border, padding or width change, and the editor must still scroll (`overflow-y-auto` stays on the outer div).
-- **E2E:** `tests/e2e/**` has no reference to Done or Customize Fields (B grep), so `folder-workflow.spec.ts` is unaffected but still runs.
-- **Biome:** exactly 8 warnings, the same list.
+- **A lookup now matches a different button than before.** The unique-match throw catches ambiguity, and R36-3 HM-1 shows whether any call site depends on it. Cases to watch:
+  - an icon-only button whose empty text matches `""`;
+  - `/Done/` vs `/^Done$/` while both a Done and an `Applying...` label exist;
+  - `Save Tags` vs `Save to 2 files`.
+- **A test relied on the slow lookup for its timing**, for example an `act` flush that happened by accident during the 1–2 s `getByRole`. Watch for a test that fails or flakes only after migration: run the full suite twice and each file alone (R36-4). A flake is a FAIL of the round; a timeout must not paper over it.
+- **Existing assertions:** (e1)–(e5), (w1)–(w8), (s*), (b1)–(b6) and D-35 (r*)/(k*) all keep theirs. R36-2 checks the diff; R36-3 checks the mutants.
+- **`schema-editor.test.ts`:** the reserved-ICAT tests and the `+ Category (UCS)` string match. An exact string must still match after `trim()`.
+- **E2E:** untouched (`tests/e2e/**` is frozen), but it still runs in the gate.
 
 ## What realVerified means here
-- R35-1…R35-4 and R35-6 are real local checks.
-- R35-5 is the real-app check on two builds, with the files hashed and read by two independent readers.
-- PASS on all six closes TM-B37, RR-R33-01, QA-R33-02, A-R33-02, RR-R34-01, RR-R34-02 and QA-R34-01.
-- B-R32-01 (the wait has no visible state) closes with D-42. QA-R33-03 (a scan that never settles keeps Done waiting) stays a record: with D-42 the editor shows `Applying...` until Back, Open Folder or Close Folder.
-- B-R34-03 stays open as a documented known limit.
-- (b1) proves the disabled *state* only. It does not prove that clicks are suppressed. Synthetic events skip the browser's handling of disabled controls; (b2) relies on React ignoring `onClick` on a disabled button. Real click suppression is proven only by R35-5 P (DOM state, plus a second click that produces no extra read in the harness log).
+- `src/` and every runtime file are byte-identical to `46bd74b` (the R36-1 `git diff --quiet` checks). The app's behaviour therefore cannot have changed, and no old/new real-app comparison is needed this round.
+- **Real-app evidence** is the gate's E2E: the built Electron app under `xvfb-run`, **7/7**, plus `--retries=0` 7/7 (R36-5). No harness, metadata readers or screenshots are required, because this round saves nothing.
+- R36-1…R36-4 and R36-6 are real local runs.
+- B's numbers in "Why this round" are a hypothesis until C measures them on its own runner (R36-4).
+- PASS on all six closes TM-B38, C-R34-02, B-R34-02, C-R34-03, C-R35-02 and C-R35-03.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
 
 ## Next (orientation only)
-- If C finds a FAIL, round 36 fixes it first (test-on-bugfix).
-- Otherwise round 36 is **TM-B38** (test-only): replace `getByRole` button lookups in the slow component suites, with before/after durations on one runner; rename (e5) together with its docs name.
-- Then **TM-B39** (C-R34-01, stale selection after a folder switch), which needs a Reference section.
-- After that, the remaining items need Saba or root (Saba's question batch, `b-round-23.md` §5; root's Actions link for TM-T0-CI/TM-B14), or B picks TM-B11 / TM-B05 prep.
+- If C finds a FAIL, round 37 fixes it first.
+- Otherwise round 37 is **TM-B39** (C-R34-01, stale selection after a folder switch). It needs a red reproduction, a Reference section (Explorer / Mp3tag / Kid3 selection on folder change), and a decision between pruning and clearing the selection.
+- Then **TM-B40**: focus-keeping busy buttons and arrow opacity, with its Reference taken from R35's R4/R5 sources.
+- After that, the remaining items need Saba or root:
+  - Saba's question batch (`b-round-23.md` §5);
+  - TM-T2 / TM-T2-DATA, blocked on Saba's UCS list and its licence;
+  - root's Actions link for TM-T0-CI / TM-B14.
+
+  Otherwise B picks TM-B11 or TM-B05 prep.
