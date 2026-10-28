@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T19:16:24.069Z)
+# Active loop summary (2026-10-28T20:21:14.987Z)
 
-- backlog.json 2130 KB -> active view 301 KB
-- status: G_ROOT_GATE round 232
-- servers: `{"checkedUtc":"2026-10-28T18:58:24.7376831Z","round":232,"attempt":1,"store":200}`
-- last publication: bd71144292b1e82e5f0c8934f23bd28ecef0ae3c (rounds 232-232)
-- last root gate: round 232 published - commit bd71144292b1e82e5f0c8934f23bd28ecef0ae3c pushed
+- backlog.json 2149 KB -> active view 304 KB
+- status: G_ROOT_GATE round 233
+- servers: `{"checkedUtc":"2026-10-28T20:03:10.0748185Z","round":233,"attempt":1,"store":200}`
+- last publication: db5c297946e3295fec7b2647a2e66dd4cad10692 (rounds 233-233)
+- last root gate: round 233 published - commit db5c297946e3295fec7b2647a2e66dd4cad10692 pushed
 
 ## Current items: -
 
@@ -551,6 +551,11 @@
 - SABA-Q-NOTICE-ONE-ROW / info / awaiting_user (D-29z301): CALM-2b ships the exact approved wording on 2 rows; options for Saba: (1) keep (today), (2) a shorter wording that fits one row, e.g. 'Synthetic demo stems — not CZABA audio.', (3) accept a wider default library (layout change) | evidence C round 231 C-NOTICE-231 / N7: 2 rows 236x32 at the default width at both viewports; 1 row when the library is dragged +56 px (288 -> ~344 px) / Saba's exact notice wording 'Synthetic demo stems — not CZABA catalogue audio.' is 291 px at the Studio 12 px text; the library content box 
 - C-N231-NOTES / info / ruled (D-29z307): N1/N4 wording guidance for future rows (B writes 'no source or consumer hit' and 'marquee'); N2 -> deferred Low C-R231-N2-PC10-DUP; N3/N6/N8 info; N5 -> keep per-lane as specified, reviewer proposal recorded as ARCH-A231-ANY-DRAG-ACTIVE; N7 -> evidence on SABA-Q-NOTICE-ONE-ROW / N1 C-UNIT grep nothingSelected = 1 (ST-C2b's own assertion), row wording; N2 duplicate PC10 id in collection.test.ts (l.332 and l.405); N3 L
 - A-R231-REVIEW-RULINGS / info / ruled (D-29z307): R1 keep per-lane (Saba's text and task 2.5; architecture signal ARCH-A231-ANY-DRAG-ACTIVE); R3 contract stands (in-memory set always, so the session stays consistent when storage works but later throws); R6 stands (focus never falls to body when the clicked button unmounts) / R1 cross-lane hint (hint stays on the active lane while a drag is over another lane); R3 suggested adding the id to the in-memory set only w
+- GATE232-S1 / medium / dispatched round 233 (D-29z314): focus moves to the first enabled dock button after the Overview (arrangement-video-expand docked, arrangement-video-placeholder-return floating); the round-232 'focus not moved' choice (D-29z309) is ruled wrong / Ctrl+Alt+O while the Overview slider has focus unmounts it and focus falls to document.body (C round 232 C-TOGGLE-FOCUS measured BODY; B bas
+- C-R232-01 / low / dispatched round 233 (D-29z315): declare 15000 at l.377 as the sibling R11-P1e (l.432); fixed early because the round's covering set contains it and an unruled L32 would STOP A again / render-budget.test.tsx l.303 'Play -> Pause -> Play' has no declared timeout; 2806 ms (56 %) at gate 232, 2620-2790 ms in covering runs, 148
+- GATE232-S2 / medium / open_tech_lead_manual (D-29z316): no cloud repro possible (Playwright on Linux cannot produce AltGraph, C round 232 out-g); Tech Lead check TLM-R232-ALTGR-WIN; per the 2026-10-23 root clarification it does not block; becomes a normal Medium if the manual check reproduces it / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
+- GATE232-S7 / info / info (D-29z316): intentional (slider semantics kept, OV-E2); revisit only with a design review / the empty Overview keeps cursor-ew-resize and its drag/double-click on a transparent strip
+- C-N232-NOTES / info / ruled (D-29z316): N1 recorded for the next design/screen review (not a WCAG 1.4.11 failure: the baseline is decorative, the slider's focus indicator is the ring); N2 info; N3 cross-tab = GATE232-S6 deferred Low; menu-focus case info (menus close on outside key per their own handlers; no user report) / N1 empty baseline bg-outline on the dock is 1.15:1 (deliberately quiet; focus ring 5.45:1); N2 hidden frame keeps its last x after Undo to 0
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

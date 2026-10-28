@@ -1,0 +1,169 @@
+Only in ./.husky: _
+diff -ru '--exclude=node_modules' -x .git ./app/components/arrangement/StudioWorkspace.tsx /tmp/b233-scratch/app/components/arrangement/StudioWorkspace.tsx
+--- ./app/components/arrangement/StudioWorkspace.tsx	2026-10-28 20:00:58.841675191 +0000
++++ /tmp/b233-scratch/app/components/arrangement/StudioWorkspace.tsx	2026-10-28 20:28:11.614990895 +0000
+@@ -95,13 +95,15 @@
+   studioGridStrings,
+   studioLaneMoveStrings,
+   studioShortcutSheetStrings,
++  studioTempoStrings,
+   studioTimeTextParts,
+   studioTrackGroupStrings,
+   studioVideoStrings,
+   studioViewStrings,
+   studioWorkspaceStrings,
+ } from '~/lib/arrangement/strings';
+-import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '~/lib/arrangement/tempo';
++import { formatTempoBpm, TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '~/lib/arrangement/tempo';
++import { findAssetTempoSeed } from '~/lib/arrangement/tempo-seed';
+ import {
+   anchoredTimelineView,
+   clampTimelineZoom,
+@@ -533,6 +535,9 @@
+     null,
+   );
+   const [tempoBpm, setTempoBpm] = useState<number | null>(null);
++  const tempoSeedOpenRef = useRef(true);
++  const gridHandChosenRef = useRef(false);
++  const snapHandChosenRef = useRef(false);
+   const [metronomeOn, setMetronomeOn] = useState(false);
+   const snapEnabledRef = useRef(snapEnabled);
+   snapEnabledRef.current = snapEnabled;
+@@ -1319,6 +1324,7 @@
+   }, [setFollowMode]);
+ 
+   const toggleSnap = useCallback(() => {
++    snapHandChosenRef.current = true;
+     const next = !snapEnabledRef.current;
+     snapEnabledRef.current = next;
+     setSnapEnabled(next);
+@@ -1342,6 +1348,7 @@
+   }, []);
+ 
+   const changeGridDivision = useCallback((id: string) => {
++    gridHandChosenRef.current = true;
+     const tempo = tempoBpmRef.current;
+     if (isMusicalGridDivisionId(id)) {
+       if (tempo === null) {
+@@ -1366,6 +1373,7 @@
+   }, []);
+ 
+   const changeTempo = useCallback((next: number | null) => {
++    tempoSeedOpenRef.current = false;
+     tempoBpmRef.current = next;
+     setTempoBpm(next);
+     if (next === null) {
+@@ -1387,6 +1395,35 @@
+     workspaceRef.current.setStatus(tempoStatusMessage(next));
+   }, []);
+ 
++  useEffect(() => {
++    if (!tempoSeedOpenRef.current || tempoBpmRef.current !== null) {
++      return;
++    }
++    const seed = findAssetTempoSeed(arrangement.clips, arrangement.tracks, collection.sources);
++    if (!seed) {
++      return;
++    }
++    tempoSeedOpenRef.current = false;
++    tempoBpmRef.current = seed.bpm;
++    setTempoBpm(seed.bpm);
++    const parts = [
++      studioTempoStrings.seeded({ bpm: formatTempoBpm(seed.bpm), title: seed.source.title }),
++    ];
++    if (!gridHandChosenRef.current) {
++      musicalGridDivisionRef.current = '1/4';
++      gridSecondsRef.current = musicalGridDivisionSeconds('1/4', seed.bpm);
++      gridDivisionIdRef.current = '1/4';
++      setMusicalGridDivision('1/4');
++    }
++    if (!snapHandChosenRef.current) {
++      snapEnabledRef.current = true;
++      setSnapEnabled(true);
++      parts.push(studioGridStrings.snapOnStatus(gridDivisionLabel(gridDivisionIdRef.current)));
++    }
++    const current = workspaceRef.current.status;
++    workspaceRef.current.setStatus([current, ...parts].join(' '));
++  }, [arrangement.clips, arrangement.tracks, collection.sources]);
++
+   const toggleMetronome = useCallback(() => {
+     if (tempoBpm === null) {
+       return;
+diff -ru '--exclude=node_modules' -x .git ./app/data/studio-lab-demo.ts /tmp/b233-scratch/app/data/studio-lab-demo.ts
+--- ./app/data/studio-lab-demo.ts	2026-10-28 19:48:42.148845802 +0000
++++ /tmp/b233-scratch/app/data/studio-lab-demo.ts	2026-10-28 20:27:40.630747397 +0000
+@@ -1,4 +1,5 @@
+ import {
++  DEMO_STEM_BEAT_SECONDS,
+   DEMO_SYNTH_SAMPLE_RATE,
+   type DemoStemPart,
+   generateDemoStereoChannels,
+@@ -13,6 +14,7 @@
+ const PUBLIC_PREVIEW_COLLECTION_LABEL = 'CZABA public previews + synthetic SFX';
+ const SYNTHETIC_COMPOSITION_TITLE = 'ღამის პულსი';
+ const SYNTHETIC_COLLECTION_LABEL = `Synthetic demo · ${SYNTHETIC_COMPOSITION_TITLE}`;
++const SYNTHETIC_COMPOSITION_BPM = 60 / DEMO_STEM_BEAT_SECONDS;
+ 
+ const demoUrls: Record<string, string> = {
+   'demo-middle-east': '/middle-east.mp3',
+@@ -75,6 +77,7 @@
+     collectionLabel: SYNTHETIC_COLLECTION_LABEL,
+     kind: 'music',
+     origin: 'demo',
++    bpm: SYNTHETIC_COMPOSITION_BPM,
+   },
+   ...Object.entries(demoStemParts).map(
+     ([id, part]): WorkspaceSource => ({
+@@ -84,6 +87,7 @@
+       collectionLabel: SYNTHETIC_COLLECTION_LABEL,
+       kind: 'stem',
+       origin: 'demo',
++      bpm: SYNTHETIC_COMPOSITION_BPM,
+     }),
+   ),
+ ];
+diff -ru '--exclude=node_modules' -x .git ./app/lib/arrangement/__tests__/strings.test.ts /tmp/b233-scratch/app/lib/arrangement/__tests__/strings.test.ts
+--- ./app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 19:48:42.166212447 +0000
++++ /tmp/b233-scratch/app/lib/arrangement/__tests__/strings.test.ts	2026-10-28 20:32:02.288879256 +0000
+@@ -999,7 +999,7 @@
+ };
+ 
+ const EXPECTED_V02C2_KEYS: Record<string, string[]> = {
+-  studioTempoStrings: ['cleared', 'fieldLabel', 'fieldTitle', 'invalid', 'set'],
++  studioTempoStrings: ['cleared', 'fieldLabel', 'fieldTitle', 'invalid', 'seeded', 'set'],
+   studioMetronomeStrings: ['needsTempoTitle', 'off', 'on', 'title', 'toggleLabel'],
+   studioViewStrings: [
+     'fitStatus',
+@@ -1044,6 +1044,7 @@
+       studioTempoStrings.set({ bpm: '90', beatsPerBar: 4 }),
+       studioTempoStrings.set({ bpm: '92.5', beatsPerBar: 4 }),
+     ],
++    seeded: [studioTempoStrings.seeded({ bpm: '120', title: 'Night pulse · Pulse' })],
+   },
+   studioMetronomeStrings: {
+     title: [studioMetronomeStrings.title(4)],
+diff -ru '--exclude=node_modules' -x .git ./app/lib/arrangement/strings.ts /tmp/b233-scratch/app/lib/arrangement/strings.ts
+--- ./app/lib/arrangement/strings.ts	2026-10-28 19:48:42.172212539 +0000
++++ /tmp/b233-scratch/app/lib/arrangement/strings.ts	2026-10-28 20:27:40.631161055 +0000
+@@ -329,6 +329,8 @@
+     `Tempo must be ${min}–${max} BPM (e.g. 90 or 92.5) — not changed.`,
+   set: ({ bpm, beatsPerBar }: { bpm: string; beatsPerBar: number }): string =>
+     `Tempo ${bpm} BPM · ${beatsPerBar}/4 — bars ruler updated. Grid only: audio is not stretched.`,
++  seeded: ({ bpm, title }: { bpm: string; title: string }): string =>
++    `Tempo ${bpm} BPM from “${title}” — bars ruler on. Grid only: audio is not stretched.`,
+ };
+ 
+ export const studioMetronomeStrings = {
+Only in /tmp/b233-scratch/app/lib/arrangement: tempo-seed.ts
+diff -ru '--exclude=node_modules' -x .git ./app/types/arrangement.ts /tmp/b233-scratch/app/types/arrangement.ts
+--- ./app/types/arrangement.ts	2026-10-28 19:48:42.179101701 +0000
++++ /tmp/b233-scratch/app/types/arrangement.ts	2026-10-28 20:27:40.629728200 +0000
+@@ -82,6 +82,7 @@
+   collectionLabel: string;
+   kind: WorkspaceSourceKind;
+   origin: WorkspaceOrigin;
++  bpm?: number;
+ }
+ 
+ export interface WorkspaceCollection {
+Only in .: build

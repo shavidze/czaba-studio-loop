@@ -31,3 +31,11 @@ Related pending requests (still open, non-blocking): `b-round-229-checkpoint-req
 Two gate-232 Architecture notes (`gates/round-232/review.md`) are added as inputs to questions 1 and 2. Both are signals and are not scheduled:
 - **GATE232-ARCH-CHORD-ACTION** (signal 3, one region changed repeatedly). The proposal is a pure `studioChordAction(event)` in `lib/arrangement/shortcuts.ts` for the modifier-chord branches (floating-video Escape, Ctrl+Alt+O); the handler would only dispatch. Acceptance: the keyboard tests stay green and unchanged, and the branch order stays the same. The reviewer says: keep for now.
 - **GATE232-ARCH-STORE-DUP** (signal 2). `overview-visibility.ts` duplicates `library-notice.ts`. The reviewer says: keep, and revisit if a third copy appears. This is question 1 above. GATE232-S6 (no cross-tab `storage` sync, deferred Low) would be a natural part of a shared helper.
+
+## Addendum 2 (B, round 233 → 234 planning, 2026-10-28; D-29z326)
+**Status: SABA-B-8 is complete** (C round 233 PASS, gate 233 published `db5c297`). The request is still non-blocking and ready for root.
+
+One gate-233 Architecture note (`gates/round-233/review.md`) is added as an input to question 2. It is a signal and is not scheduled:
+- **GATE233-ARCH-DOCK-FOCUS-RESCUE** (signal 2, coupling). `StudioWorkspace.tsx` l.425–442 depends on the video dock's internal DOM order to find the next Tab stop when the Overview hides. The proposal: the dock exposes `rescueFocusFromOverview()` or accepts `onBeforeOverviewHide`, so the rule lives with the component that defines the order. Acceptance: OV-T6 unchanged, MU-1 still red, no new Tab stop. The reviewer says: keep for now (one call site). Deferred Low GATE233-S1 (production code queries a `data-testid`) would be closed by the same move.
+
+Note for root: the next rounds (SABA-B-11a/b, 10a/b, 9) concentrate on `StudioWorkspace.tsx` (tempo, grid, transport state). A short answer to question 2 (keymap table vs ordered chain) before SABA-B-10a (Space contract) would help that stage.

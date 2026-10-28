@@ -1,0 +1,92 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 05b39a1..b7c922e 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -422,6 +422,25 @@ function isOverviewTarget(target: EventTarget | null): boolean {
+   return target instanceof HTMLElement && target.dataset.timelineOverview !== undefined;
+ }
+ 
++function focusPastHiddenOverview(): void {
++  const focused = document.activeElement;
++  const overview =
++    focused instanceof HTMLElement
++      ? focused.closest<HTMLElement>('[data-timeline-overview]')
++      : null;
++  const dock = overview?.closest<HTMLElement>('[data-testid="arrangement-video-dock"]');
++  if (!overview || !dock) {
++    return;
++  }
++  const next = [...dock.querySelectorAll<HTMLButtonElement>('button')].find(
++    (button) =>
++      !button.disabled &&
++      button.tabIndex >= 0 &&
++      (overview.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
++  );
++  next?.focus({ preventScroll: true });
++}
++
+ function isLoopBraceTarget(target: EventTarget | null): boolean {
+   return (
+     target instanceof HTMLElement &&
+@@ -1817,6 +1836,9 @@ export function StudioWorkspace() {
+           return;
+         }
+         const hidden = !readOverviewHidden();
++        if (hidden) {
++          focusPastHiddenOverview();
++        }
+         setOverviewHidden(hidden);
+         workspaceRef.current.setStatus(
+           hidden ? studioViewStrings.overviewHidden : studioViewStrings.overviewShown,
+diff --git a/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx b/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
+index 489b0fb..8f4e1e0 100644
+--- a/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
+@@ -276,6 +276,34 @@ describe('CALM-3 Overview empty state and Ctrl+Alt+O (SABA-B-8)', () => {
+     expectShownAndUnstored();
+   });
+ 
++  it('OV-T6: hiding the focused Overview moves focus to the next dock control, never to body (GATE232-S1)', async () => {
++    const { overview, view } = await mountOverviewWorkspace();
++    const play = view.getByRole('button', { name: 'Play' });
++    const expand = () => view.getByTestId('arrangement-video-expand');
++    play.focus();
++    expect(document.activeElement).toBe(play);
++    fireEvent.keyDown(play, { ...TOGGLE, ctrlKey: false, metaKey: true });
++    expect(overview()).toBeNull();
++    expect(document.activeElement).toBe(play);
++    fireEvent.keyDown(play, { ...TOGGLE, ctrlKey: false, metaKey: true });
++    expect(overview()).not.toBeNull();
++    expect(document.activeElement).toBe(play);
++    overview()?.focus();
++    expect(document.activeElement).toBe(overview());
++    expect(fireEvent.keyDown(document.activeElement ?? document.body, TOGGLE)).toBe(false);
++    expect(overview()).toBeNull();
++    expect(document.activeElement).toBe(expand());
++    expect(fireEvent.keyDown(document.activeElement ?? document.body, TOGGLE)).toBe(false);
++    expect(overview()).not.toBeNull();
++    expect(document.activeElement).toBe(expand());
++    fireEvent.click(expand());
++    overview()?.focus();
++    expect(document.activeElement).toBe(overview());
++    expect(fireEvent.keyDown(document.activeElement ?? document.body, TOGGLE)).toBe(false);
++    expect(overview()).toBeNull();
++    expect(document.activeElement).toBe(view.getByTestId('arrangement-video-placeholder-return'));
++  });
++
+   it('OV-T4: the toggle is view state and adds no history entry', async () => {
+     const { api, overview } = await mountOverviewWorkspace();
+     act(() => live(api).addSourceToActiveTrack('song'));
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 7b11c6a..998bebf 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -374,7 +374,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     fireEvent.click(view.getByRole('button', { name: 'Pause' }));
+     const stoppedAt = api.current?.getLivePosition() ?? 0;
+     expect(transport.textContent).toBe(formatArrangementTime(stoppedAt));
+-  });
++  }, 15000);
+ 
+   it('does not re-render the detail panel content over 60 position frames or Play → Pause → Play (R11-P1e)', async () => {
+     const api: BudgetApiRef = { current: null };

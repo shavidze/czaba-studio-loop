@@ -1,0 +1,37 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const base = process.argv[2] || 'http://127.0.0.1:5173';
+const browser = await chromium.launch();
+const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+const errors = []; page.on('pageerror', (e) => errors.push(String(e)));
+await page.goto(`${base}/studio-lab`, { waitUntil: 'networkidle' });
+await page.waitForFunction(() => { const add = [...document.querySelectorAll('button')].find((b) => /^Add/.test(b.textContent.trim())); return add && !add.disabled; }, undefined, { timeout: 90000 });
+await page.waitForTimeout(800);
+await page.locator('[data-source-id="demo-stem-pulse"]').first().click();
+await page.locator('button', { hasText: /^Add/ }).first().click(); await page.waitForTimeout(600);
+await page.selectOption('[data-testid="arrangement-grid-division"]', '0.5');
+await page.evaluate(() => document.activeElement && document.activeElement.blur());
+await page.keyboard.press('g'); await page.waitForTimeout(300);
+const res = { snap: await page.getAttribute('[data-testid="arrangement-grid-control"]', 'data-snap') };
+const clip = page.locator('[data-clip-kind="audio"]').first();
+const box = await clip.boundingBox();
+const pxPerSecond = box.width / 16; // demo stems are 16 s (demo-synth.ts DEMO_STEM_DURATION)
+res.pxPerSecond = pxPerSecond;
+const drag = async (dxSec, alt) => {
+  const b = await clip.boundingBox();
+  const x = b.x + b.width / 2, y = b.y + 6;
+  await page.mouse.move(x, y); await page.mouse.down();
+  if (alt) await page.keyboard.down('Alt');
+  for (let i = 1; i <= 10; i++) await page.mouse.move(x + (dxSec * pxPerSecond * i) / 10, y);
+  await page.mouse.up(); if (alt) await page.keyboard.up('Alt');
+  await page.waitForTimeout(400);
+  return clip.getAttribute('data-clip-start');
+};
+res.afterDrag07 = await drag(0.7, false);
+res.afterAltDrag03 = await drag(0.3, true);
+res.errors = errors;
+await browser.close();
+writeFileSync(process.argv[3], JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res, null, 1));

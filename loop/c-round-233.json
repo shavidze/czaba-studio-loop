@@ -1,0 +1,85 @@
+{
+ "round": 233,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T20:03:10.0748185Z",
+  "round": 233,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R233-01",
+   "severity": "low",
+   "steps": [
+    "git show HEAD:app/lib/arrangement/__tests__/render-budget.test.tsx | sed -n '303p;336p;338p;377p'",
+    "git diff app/lib/arrangement/__tests__/render-budget.test.tsx"
+   ],
+   "expected": "C-R232-01 / D-29z315: the l.303 test 'does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play' lacks a timeout and gets 15000 at l.377.",
+   "actual": "C-R232-01 is NOT closed (premise invalid). At HEAD bd71144 that test already closes at l.336 with '}, 15000);' (also at 4c07d5f~1). l.377 closes the NEXT test 'moves the playhead, ruler handle and transport time on playback frames without React renders' (C run 1,098 ms). The granted one-line change raised that other test's timeout. Harmless, but C-R232-01's premise was false: it is not 'closed by a fix', it is invalid. B must rule: mark C-R232-01 invalid and keep or revert the l.377 15000.",
+   "evidence": "c-round-233/unit.log (l.303 test 2,757 ms / 15,000; l.338 test 1,098 ms); a-round-233.md STOP section confirmed independently"
+  },
+  {
+   "id": "C-R233-02",
+   "severity": "low",
+   "steps": [
+    "/studio-lab at 1440x900 or 1280x720",
+    "Your own video -> media/beeps-6s-vp9-opus.webm (docked)",
+    "focus arrangement-library-separator, Tab (Overview), Ctrl+Alt+O"
+   ],
+   "expected": "The focus ring on the rescued target arrangement-video-expand is clearly visible (WCAG 2.4.13 / 1.4.11, >= 3:1 between focused and unfocused pixels).",
+   "actual": "With a video loaded the expand button sits on the video frame; the shared 1px brass ring (rgba 201,164,106,0.8, offset 2px) is drawn over the picture. Over the cyan/magenta test bars the ring pixels are about (161,182,136) vs cyan (0,255,255): ~1.7:1. Brass band pixels drop from 60 (empty dock) to 18. Pre-existing (shared focus style over video), not caused by round 233; it matters more now that focus is moved there by code. Deferred-low candidate.",
+   "evidence": "c-round-233/out2/video-docked-focused-1440x900.png, out2/ring-crops-x12.png, out2/c233f.json video.docked.pixFocused"
+  },
+  {
+   "id": "C-R233-03",
+   "severity": "low",
+   "steps": [
+    "sed -n 50,52p docs/implementation/2026/quarter-IV/181-calm-3-overview-focus-rescue.md",
+    "git show 4c07d5f~1:app/lib/arrangement/__tests__/render-budget.test.tsx | sed -n 336p"
+   ],
+   "expected": "Doc 181 provenance is accurate.",
+   "actual": "Doc 181 l.51 says the 15000 timeout exists 'since commit 4c07d5f'; it is already present at 4c07d5f~1 (l.336). Minor factual slip in the doc; the substance (timeout already present at HEAD) is right.",
+   "evidence": "git show 4c07d5f~1:...render-budget.test.tsx l.336 '}, 15000);'"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-233",
+  "C-UNIT-233",
+  "C-FOCUS-DOCKED-233",
+  "C-FOCUS-FLOAT-233",
+  "C-FOCUS-OTHER-233",
+  "C-TOGGLE-233",
+  "C-BUDGET-233",
+  "G233-3",
+  "LAB-SMOKE-233",
+  "C-LESSON-233",
+  "AN-REVIEW-233",
+  "C-REF-233",
+  "C-SHOTS-233"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notClosed": [
+  "C-R232-01 (premise invalid; see C-R233-01; B ruling needed)"
+ ],
+ "blocked": [
+  "TLM-R232-MAC: needs a Mac",
+  "TLM-R232-ALTGR-WIN: needs a Windows AltGr layout (Polish/German) and Firefox"
+ ],
+ "info": [
+  "A self-recorded MediaRecorder WebM (no duration in header, c-round-233/media) was rejected with 'the browser could not open this video'; root cause unverified, out of scope; owned media/beeps-6s-vp9-opus.webm loaded fine",
+  "MU-1 mutant not re-run by C (would require editing source); relies on A + B pre-check",
+  "Round-232 Ctrl+Alt+O guards re-run in browser (c-round-233/out-neg): search field, open sheet, Ctrl+O, Alt+O, Ctrl+Alt+Shift+O, open Export dialog, during pointer drag -> no toggle; held key flips once; both viewports. AltGr not testable in cloud (TLM-R232-ALTGR-WIN).",
+  "End-of-phase tree proof: c-round-233/end-status.txt (3 M + 1 ??, frozen/root/A-end lists rc 0)."
+ ],
+ "ableton": "not applicable (no reference found; Live's Overview is not a focus stop)"
+}
