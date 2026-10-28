@@ -1,0 +1,78 @@
+{
+  "round": 216,
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T02:28:24.6352343Z",
+    "round": 216,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R216-01",
+      "severity": "low",
+      "steps": [
+        "open store/docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md",
+        "grep -n '^## ' it",
+        "compare with docs/implementation/TEMPLATE.md l.20-50 and docs 163-168 (grep -A3 '^## არქიტექტურა')"
+      ],
+      "expected": "doc 169 has every TEMPLATE section, including '## არქიტექტურა' with the Mermaid diagram (as docs 163-168 do)",
+      "actual": "no '## არქიტექტურა' heading; the Mermaid flowchart sits inside '## მიდგომა' (after '### Pass-ის თანმიმდევრობა', l.30-41)",
+      "evidence": "c-round-216.md DOC-216; TEMPLATE.md l.35"
+    },
+    {
+      "id": "C-R216-02",
+      "severity": "low",
+      "steps": [
+        "cd store; npx playwright test --config playwright.perf.config.ts perf/studio-lab-resources.perf.spec.ts (twice)",
+        "compare medians of kind=deterministic rows across C and A runs"
+      ],
+      "expected": "per task §2.5, a count that differs across passes in A's two runs leaves the deterministic set with a note; deterministic medians agree across runs",
+      "actual": "res.harness.mem-polls-1 (C 8/8, A 7/9), mem-polls-1.6x (10/10, 11/11), mem-polls-2.6x (19/18, 19/20) keep kind 'deterministic'. Labelling assert rows deterministic follows the frozen pattern (all 17 assert rows in budgets.interactions.json are deterministic), but mem-polls is a timing-dependent poll count, and budgets.json labels its timing-dependent liveness rows wallclock (harness.move-latency-live.*). A's own runs differed ([7,7,7] vs [9,9,8]), so §2.5 applies to these rows specifically. The harness cannot catch it because mem-polls is not in resourceDeterminismMetrics (spec l.59-77). All asserts (>=5) pass; label and note only",
+      "evidence": "c-round-216/perf-compare.txt, perf-run-{1,2}.json, a-round-216/final-run-{1,2}.json"
+    }
+  ],
+  "passed": [
+    "SCOPE-216",
+    "RT-FIX-216",
+    "PROBE-216",
+    "REDPROOF-216",
+    "AN-REVIEW-216",
+    "G216-3",
+    "STUDIO-SMOKE-216"
+  ],
+  "failed": [
+    "DOC-216 (C-R216-01)",
+    "PERF-RUN-216 (C-R216-02: determinism label sub-criterion only; runs rc0, complete, failures [], all other sub-criteria pass)"
+  ],
+  "blocked": [],
+  "gate": [
+    "full vitest",
+    "typecheck (gate row)",
+    "build",
+    "Biome",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "rows": {
+    "SCOPE-216": "PASS",
+    "RT-FIX-216": "PASS",
+    "PERF-RUN-216": "FAIL",
+    "PROBE-216": "PASS",
+    "REDPROOF-216": "PASS",
+    "DOC-216": "FAIL",
+    "AN-REVIEW-216": "PASS",
+    "G216-3": "PASS",
+    "STUDIO-SMOKE-216": "PASS"
+  },
+  "ableton": "not applicable (pure performance harness round)",
+  "needsBRuling": [
+    "A's 0.1 MiB asymmetry question (used-ready-mib out, export.1.peak-backing-delta-mib in); C data: peak [65,65,65] x2, used-ready [5.1,5.1,5.1] and [5.2,5.1,5.1]",
+    "C-R216-02: relabel mem-polls rows or exempt liveness asserts from the §2.5 label rule; mem-polls-1 min 7 vs >=5 headroom on this machine",
+    "four late spec changes not seen by A's code-reviewer; root reviewer should cover them"
+  ],
+  "notes": "PROBE: ready 140.34 MiB, export peak delta 64.96 MiB, clip subtree 17, /studio-lab 355,155 B (all within tolerance); A's 37.2 MiB strict-window claim neither confirmed nor refuted. Sentinel latest.json/latest-interactions.json untouched by both runs (removed after). Default demo export shows Overload 14 clipped samples at Master 0 dB: known class C-R86-OBS-DEFAULT-OVERLOAD, not a round-216 regression. FAIL rationale: both Lows are defects in this round's own deliverable against its own acceptance rows (DOC-216 template sections; PERF-RUN-216 determinism criterion), the same class as round 215. They are not product Lows for deferred_low_polish. Task §6 prices this as a bounded fix-up of the failing rows.",
+  "evidence": "c-round-216.md, c-round-216/"
+}

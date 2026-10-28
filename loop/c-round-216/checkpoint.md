@@ -1,0 +1,13 @@
+# C round 216 checkpoint
+- SCOPE start: PASS (HEAD eb9e76e, 4M+3??, frozen rc0, l.4 diffs byte-exact)
+- RT-FIX: PASS (retro diff == rtfix.diff; gate-reviews 10 reviews; a-round-212 l.38-41; lessons 47 lines, 3 changes)
+- PERF-RUN: 2 runs rc0, 58.6/59.5 s, complete, failures [], all det medians == A; sentinels latest.json/latest-interactions.json untouched. Note: mem-polls rows kind=deterministic but vary (Low label issue)
+- PROBE: done (probe-216.json) matches A; 5189 server stopped
+- next: REDPROOF own mutants, A's M logs, DOC, AN-REVIEW, G216-3, STUDIO-SMOKE
+- REDPROOF: CM1 (44100 frame calc) / CM2 (Ctrl+D removed) / CM3 (js-home-seen>=1000) all rc1 named rows, ~70-118 s; A M1-M4 logs checked
+- AN-REVIEW: typecheck rc0, no any/as/@ts/ignore, format diff empty, no class selectors
+- G216-3 + STUDIO-SMOKE both viewports PASS (g216.json, shots/)
+- DOC: doc 169 lacks '## არქიტექტურა' heading (TEMPLATE + docs 163-168 have it) -> candidate Low; mem-polls rows kind deterministic but vary (Low)
+- SCOPE end PASS; sentinels removed
+- next: advisor, then write c-round-216.md/json
+- report + json written (FAIL: C-R216-01, C-R216-02 Low)
