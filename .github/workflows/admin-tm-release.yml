@@ -43,6 +43,7 @@ jobs:
               echo "== workflows"; ls /tmp/tm/.github/workflows
               echo "== release.yml"; cat /tmp/tm/.github/workflows/release.yml
               echo "== recent release.yml runs"; gh run list -R "$R" -w release.yml -L 5 || true
+              echo "== recent check.yml runs"; gh run list -R "$R" -w check.yml -L 8 --json databaseId,headSha,conclusion,status,createdAt,url -q '.[]|"\(.databaseId) \(.headSha[0:7]) \(.status) \(.conclusion) \(.createdAt) \(.url)"' || true
             } >> "$out" 2>&1
           else
             echo "unknown command in cloud/TM-RELEASE: '$cmd'" >> "$out"
