@@ -1,0 +1,16 @@
+# C round 221 checkpoint
+- 07:10 SCOPE start OK (HEAD 521eb27 on c4e6c9d, 8M+1??, frozen rc0, vite untouched, no grant file). Dev server started 06:51:01 > HEAD commit 06:50:56; log is a pipe (not available).
+- DEPS diff exact; npm ls empty; node_modules/@ffmpeg exists EMPTY (unresolvable) -> literal deviation, rule.
+- UNIT 115/115 CI=true, TL9a-d present. REDPROOF A logs ok; C core probe: TL9b red naming core, TL4 copyleft, lock sha unchanged.
+- NOTICES diff exact, indep 560/0/0/0.
+- SOURCE-GREP 0 app; 5 doc path mentions all legacy-noted.
+- NEXT: browser rows (LEGACY-UI-STUBBED, LAB-MP3, SMOKE, G221-3, PERF-RUN), DEV-START console, BUNDLE, AN-REVIEW.
+- 07:3x LAB-MP3 PASS (attempt3 after cold-load + vite-reload warmups): 4224 fr 320k 48k, 101.376 s, RMS -15.29, 0 err, 0 off-origin.
+- STUDIO-SMOKE PASS: WAV 2ch 48k 24-bit, 4864896 frames = created 101.352 s exactly, RMS -15.29, nonzero 0.9977.
+- LEGACY-UI-STUBBED PASS 4/4 (Low attempt1 cold-route timeout, re-run): 168 fr + Xing, 128/192/320, EOF, 2ch, RMS ~-10.5..-10.9, 0 err, 0 off-origin in export window; initial checked 0/10 (B-R220 known).
+- NEXT: G221-3, PERF-RUN, DEV-START console, BUNDLE, AN-REVIEW.
+- G221-3 PASS both vp (lab 200 demo, guard sign-in 0 audio, 401/500, no token). DEV-START: log is a pipe (not available); console 0 optimizeDeps/ffmpeg lines; /studio-lab 200.
+- BUNDLE PASS (0 hits, AGFzbQ x1, studio.$productId manifest no encoder). build/ removed.
+- PERF-RUN PASS rc0 complete failures[]; bytes and counts identical to r220 (44/41/42). sentinels untouched; test-results removed.
+- NEXT: AN-REVIEW (doc 173, 172 l.4, hunks in granted sections, mermaid parse), SCOPE end, write report.
+- DONE: report + json written; PASS.

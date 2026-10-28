@@ -1,0 +1,72 @@
+{
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-28T07:05:59.1640376Z",
+    "round": 221,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R221-01",
+      "severity": "low",
+      "steps": [
+        "cd store; ls -la node_modules/@ffmpeg",
+        "npm ls @ffmpeg/ffmpeg @ffmpeg/util",
+        "node -e \"require.resolve('@ffmpeg/ffmpeg')\" (also util, types)"
+      ],
+      "expected": "DEPS-221: no node_modules/@ffmpeg directory",
+      "actual": "node_modules/@ffmpeg/ exists as an EMPTY directory (0 entries, mtime 06:50 = root npm uninstall for 521eb27). npm ls shows (empty); require.resolve fails MODULE_NOT_FOUND for ffmpeg, util and types; node_modules is gitignored; no commit file produces it; Vite dep cache has 0 ffmpeg entries. Intent (packages not installed) met, literal wording not met. Left by root's uninstall, not A (A was forbidden deletions and reported it). C did not remove it. B to rule which reading applies (re-baseline wording or ask root to rmdir).",
+      "evidence": "c-round-221/deps.txt, c-round-221/an/cited-and-cache.txt"
+    },
+    {
+      "id": "A-R221-REVIEW-L1",
+      "severity": "low",
+      "steps": [
+        "read docs/learning/README.md l.32 and l.39, docs/technical/studio.md l.22 (granted sections)",
+        "compare with package.json"
+      ],
+      "expected": "granted sections state only facts the code backs",
+      "actual": "pre-existing non-ffmpeg errors kept in granted sections: React v19 (package.json ^18.3.1), Firebase v10 (^12.6.0), Remix (Shopify Hydrogen) (not a dependency). Outside the round 221 ffmpeg scope; carried from A's reviewer for deferred_low_polish.",
+      "evidence": "a-round-221.md Code review L1"
+    }
+  ],
+  "passed": [
+    "SCOPE-221",
+    "UNIT-221",
+    "REDPROOF-221",
+    "NOTICES-221",
+    "SOURCE-GREP-221",
+    "LEGACY-UI-STUBBED-221",
+    "LAB-MP3-221",
+    "STUDIO-SMOKE-221",
+    "DEV-START-221",
+    "BUNDLE-221",
+    "PERF-RUN-221",
+    "G221-3",
+    "AN-REVIEW-221"
+  ],
+  "notMet": [
+    "DEPS-221: literal \"no node_modules/@ffmpeg directory\" not met, an empty scope dir remains (C-R221-01, low); diff exact and npm ls empty, packages unresolvable"
+  ],
+  "gate": [
+    "gate: full vitest, typecheck, build, Biome, npm run verify, e2e smoke (not claimed by C)"
+  ],
+  "blocked": [
+    "LEGACY-OWNERSHIP-221: backend unavailable in cloud"
+  ],
+  "recorded": [
+    "B-R220-LEGACY-EXPORT-NO-STEMS (Medium, pre-existing, round 222): initial checked stems 0 of 10 and Export Audio disabled at Low/Medium/High 1440x900 and High 1280x720 (c-round-221/legacy/*-dialog-initial.png)"
+  ],
+  "info": [
+    "VITE-EXCLUDE-STALE: no root grant, vite.config.ts byte-identical to HEAD; dev console 0 optimizeDeps/ffmpeg lines",
+    "dev-server log not available (stdout is a pipe); server started 06:51:01 after HEAD commit 06:50:56; Vite dep cache 0 ffmpeg entries",
+    "cold /studio/middle-east first load exceeded 180 s once (Low attempt 1, invalid, re-run); HR-MP3-WARMUP covers /studio-lab only",
+    "lab warm-ups: attempt 1 cold load 120 s timeout, attempt 2 Vite dep-optimisation reload (as in round 220); measured run was attempt 3",
+    "purchased route requests fonts.googleapis.com/fonts.gstatic.com at page load only; 0 off-origin requests in every export window",
+    "task text signature bitrate?: union vs real bitrate: string = 320k: A documented the real one (correct)"
+  ],
+  "ableton": "not applicable (dependency-removal, test and docs round)"
+}

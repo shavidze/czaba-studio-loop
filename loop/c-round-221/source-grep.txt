@@ -1,0 +1,10 @@
+== app
+app hits: 0
+== docs
+docs/technical/studio.md:45:    └── ffmpeg.ts                      # legacy სახელი: MP3 facade (convertWavToMp3) საერთო LAME encoder-ზე
+docs/technical/studio.md:417:ნაყიდი Studio MP3-ს `app/utils/ffmpeg.ts`-ით იღებს. ფაილის სახელი legacy-ა და ჯერ არ იცვლება (Saba-ს კითხვა). დღეს ეს thin facade-ია და მხოლოდ ერთ ფუნქციას აექსპორტებს:
+docs/technical/studio.md:627:│       └── ffmpeg.ts                      # legacy სახელი: MP3 facade (convertWavToMp3)
+docs/technical/debug-studio.md:101:// MP3: app/utils/ffmpeg.ts (legacy სახელი) → საერთო LAME encoder
+docs/learning/architecture/02-audio-studio-system.md:247:Export-ი client-side-ზე ხდება: stems-ს `OfflineAudioContext` აერთიანებს WAV-ად, MP3-ს კი საერთო LAME encoder (`mediabunny` + `@mediabunny/mp3-encoder`) ქმნის. Encoder საჭიროებისას იტვირთება, იმავე origin-იდან, ცალკე lazy chunk-ით. ნაყიდი Studio დიალოგის Low/Medium/High-ით წერს 128, 192 ან 320 kbps-ს, lab (`/studio-lab`) — 320 kbps CBR-ს. სერვერი საერთოდ არ მონაწილეობს - მომხმარებლის browser-ი თავად ქმნის ფინალურ ფაილს. ნაყიდი Studio encoder-ს `app/utils/ffmpeg.ts`-ით იძახებს; ეს legacy სახელია, ფაილი დღეს მხოლოდ `convertWavToMp3`-ს აექსპორტებს.
+== forbidden
+forbidden rc=1

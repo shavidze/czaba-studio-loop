@@ -1,0 +1,12 @@
+27a28
+>   const stemIdKey = state.stems.map((s) => s.id).join('\u0000');
+29c30
+<     new Set(state.stems.map((s) => s.id)),
+---
+>     () => new Set(state.stems.map((s) => s.id)),
+30a32,36
+>   const [selectionKey, setSelectionKey] = useState(stemIdKey);
+>   if (selectionKey !== stemIdKey) {
+>     setSelectionKey(stemIdKey);
+>     setSelectedStems(new Set(state.stems.map((s) => s.id)));
+>   }

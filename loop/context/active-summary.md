@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T06:23:21.996Z)
+# Active loop summary (2026-10-28T07:27:27.613Z)
 
-- backlog.json 1988 KB -> active view 280 KB
-- status: G_ROOT_GATE round 220
-- servers: `{"checkedUtc":"2026-10-28T05:59:24.3673973Z","round":220,"attempt":1,"store":200}`
-- last publication: c4e6c9d96e3059d5715e89715cae9afda1a7152b (rounds 220-220)
-- last root gate: round 220 published - commit c4e6c9d96e3059d5715e89715cae9afda1a7152b pushed
+- backlog.json 2002 KB -> active view 285 KB
+- status: G_ROOT_GATE round 221
+- servers: `{"checkedUtc":"2026-10-28T07:05:59.1640376Z","round":221,"attempt":1,"store":200}`
+- last publication: 6dd45a1eb0f2a756de3168e950707a89aa6942df (rounds 221-221)
+- last root gate: round 221 published - commit 6dd45a1eb0f2a756de3168e950707a89aa6942df pushed
 
 ## Current items: -
 
@@ -511,16 +511,21 @@
 - R216-MEM-POLLS-HEADROOM / info / watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220) / res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert
 - C-R217-HARNESS-FIRST-NAV / info / harness note applied: warm-up goto in the round-218 C setup; hypothesis (unconfirmed) Vite reload after re-optimisation / first dev-server navigation after a perf run hit a 30 s waitForFunction timeout at 1440 (2x); reruns clean
 - ARCH-GATE217-REPORT-HELPERS / info / signal on PERF-HARNESS-SHARED-LIB (D-29z215, third occurrence); not scheduled by this note / third copy of nowIn/snapshot/waitForQuiet/reactRendererProblem/rateRowId/report builder across the three perf specs
-- ARCH-R218-ENCODER-CANCEL-SCOPE / info / ruled (D-29z230): single consumer per page, ME12 pins the invariant, known race documented in doc 172; round 220 / module-wide mp3EncoderGeneration/mp3EncoderRuns: reset cancels every in-flight encode; safe only with one export at a time
+- ARCH-R218-ENCODER-CANCEL-SCOPE / info / ruled (D-29z230): single consumer per page, ME12 pins the invariant, known race documented in doc 172; round 220 | gate-220 S2 (Low, per-call AbortSignal; neutral app/lib/audio/mp3-encoder.client.ts proposal) attached; input to the export-pipeline checkpoint request at round-222 planning (D-29z234) / module-wide mp3EncoderGeneration/mp3EncoderRuns: reset cancels every in-flight encode; safe only with one export at a time
 - ROOT-DEPS-NOTICES-REGEN / info / root_signal (D-29z226); optional: root regenerates in its deps step / after OSS-LIC, a root chore(deps) commit leaves TL5 (notices sync) red until the consuming round regenerates THIRD_PARTY_NOTICES.md
 - SABA-Q-LAME-LGPL / info / awaiting_user (Saba); not scheduled; the Export dialog note already names LAME / LAME (LGPL) ships inside a bundled, inlined wasm; whether the notice plus unmodified npm package suffices for LGPL obligations (relink/repla
-- C-R219-01 / low / scheduled round 220 (D-29z228; grants overlap with PERF-16b-i) / non-SPDX GPL spellings (GPLv3, GPLv2, GPL2, AGPLv3) classify clean in the runtime licence gate
 - GATE219-S2 / low / scheduled round 220 (folded, D-29z228) / deleted THIRD_PARTY_NOTICES.md is recreated by toMatchFileSnapshot outside CI
 - GATE219-S3 / low / scheduled round 220 (folded, D-29z228) / notices intro says 'ships' while the table is every non-dev lock entry
 - GATE219-S4 / low / ruled (D-29z228): anchors kept on purpose; L35 and doc 172 name TL4+TL5 / TL4 anchors pin transitive versions; drift rule named only TL5
 - INFO-C219-WARMUP-MP3 / info / applied as harness rule HR-MP3-WARMUP (D-29z231) / first MP3 export on a fresh machine can trigger a Vite re-optimize + full reload
-- LEGACY-MP3-PROGRESS / info / signal (accepted debt; not requested) / purchased-Studio MP3 export shows no intermediate progress (85 -> 100), as with ffmpeg
+- LEGACY-MP3-PROGRESS / info / deferred_low_polish as GATE220-S4 (gate reviewer Low, D-29z234) | signal (accepted debt; not requested) / purchased-Studio MP3 export shows no intermediate progress (85 -> 100), as with ffmpeg
 - SABA-Q-FFMPEG-FILENAME / info / awaiting_user (Saba); TODO line in the file / app/utils/ffmpeg.ts no longer uses ffmpeg after PERF-16b-i; renaming/deleting the file needs Saba's permission (CLAUDE.md)
+- GATE220-S1 / medium / converted, closes on C PASS of LEGACY-UI-STUBBED-221 (not counted as an open Medium; the open Medium is B-R220-LEGACY-EXPORT-NO-STEMS) | converted (D-29z234): B ran it in real Chromium with page.route stubs on c4e6c9d (b-round-220/legacy-ui-probe/result.json: Low/Medium/High -> 168 frames at exactly 128/192/320 kbps + 1 Xing, 0 page errors); C row LEGACY-UI-STUBBED-221 re-runs it after the package removal; the ownership half stays backend-only (LEGACY-OWNERSHIP-221) / purchased-Studio MP3 export never ran end to end through /studio/:productId (LEGACY-UI-220 backend-blocked)
+- GATE220-S3 / low / awaiting_user (Saba): .claude/**, .codex/**, CLAUDE.md, AGENTS.md are not agent-editable; proposal in b-round-220.md section 8 (D-29z234) / agent/rule files still teach loadFFmpeg/@ffmpeg: .claude/agents/studio-specialist.md:98, .codex/agents/studio-specialist.toml:94, .claude/pr
+- B-R220-LEGACY-EXPORT-NO-STEMS / medium / scheduled round 222 (D-29z236) unless REGRESSION due first; C records it in LEGACY-UI-STUBBED-221 without failing round 221 / purchased-Studio ExportDialog opens with 0 of 10 stems ticked; 'Export Audio' is disabled until the user presses 'Select All' (pre-existing;
+- VITE-EXCLUDE-STALE / low / root request b-round-220-root-request-vite.md (grant A, do it in the deps commit, or leave as Low polish) / vite.config.ts l.26-28 optimizeDeps.exclude names @ffmpeg/ffmpeg + @ffmpeg/util after their removal (dead config; B scratch: build and dev s
+- PRE-PROD-CHECKLIST-FFMPEG / low / deferred_low_polish / docs/PRE_PRODUCTION_CHECKLIST.md l.124 still lists 'FFmpeg workers' for StudioContext
+- A-R220-GPLV-NIT / info / signal (not scheduled) / licence classifier treats GPLv, AGPLv and GPL.3 as clean; no lock spelling uses them (consistent with R-219-2)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
