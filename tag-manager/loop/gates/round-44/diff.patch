@@ -1,0 +1,651 @@
+diff --git a/.claude/primitives/ELECTRON_IPC.md b/.claude/primitives/ELECTRON_IPC.md
+index 9d7a6aa..e6d27fe 100644
+--- a/.claude/primitives/ELECTRON_IPC.md
++++ b/.claude/primitives/ELECTRON_IPC.md
+@@ -17,6 +17,7 @@
+ ## Input Validation (main process)
+ - Validate path arguments: `typeof path === 'string' && path.length > 0`
+ - SCAN_FOLDER: check path exists + is directory
++- STAT_FILES: array of ≤ 50 non-empty strings, else "Invalid paths"; only regular .wav files are returned, other paths are skipped
+ - GET_AUDIO_BUFFER: try/catch with user-friendly error messages (ENOENT, EACCES)
+ 
+ ## Batch Operations
+diff --git a/.claude/primitives/STATE_MANAGEMENT.md b/.claude/primitives/STATE_MANAGEMENT.md
+index 58330f4..1cd606e 100644
+--- a/.claude/primitives/STATE_MANAGEMENT.md
++++ b/.claude/primitives/STATE_MANAGEMENT.md
+@@ -23,7 +23,7 @@ Single:  writeMetadata → readMetadata → skipSync=true → updateFileMetadata
+ Batch:   writeMetadataBatch(modifiedFields only) → readBatch → update non-failed only (D-22); skipSync only if ≥1 applied → failed empty ? setEditingMetadata({}) : keep edits
+ Batch failed non-empty (D-21): editingMetadata, modifiedFields, isDirty kept → Save stays enabled, retry writes to all selected files
+ Re-read rejects (D-24): no store update, no skipSync, edits kept → error toast with write result + "Rescan to refresh"
+-File stats (D-28): after a confirmed write, before the re-read: scanFolder(folderPath) → updateFileStats(written paths only); scan reject silent; none if write rejects / all failed / folderPath null
++File stats (D-28, D-48): after a confirmed write, before the re-read: statFiles(written paths, chunks of 50, sequential) → updateFileStats(entries of that chunk); a rejected chunk is skipped silently; none if write rejects / all failed / folderPath null; scanFolder only for Open Folder, Rescan, drop
+ Selection changed during save (D-29): start selectedPaths vs current (as set); changed → store updates + toasts as usual, but no skipSync and no setEditingMetadata (sync effect shows the current selection)
+ Typed during save (D-30): same set → keys in modifiedFields whose value differs from the start snapshot (arrays by content) → after setEditingMetadata(re-read | {}) mergeFields(those) → isDirty stays true; partial / reject / D-24 / changed set unchanged
+ Schema at re-read (D-33): post-save re-read uses useSchemaStore.getState().fields (write keeps the click-time fields); handleSchemaChanged keeps the store entry of paths whose chunk read rejected and never resets the form from a kept entry
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index b5e662a..af1f50a 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -356,8 +356,8 @@
+ - **Reproduction (გასწორებამდე):**
+   1. (a) საწყისი მდგომარეობა: `schema.json`-ში 12 pre-T-1 standard ველი და custom `{key:'category', label:'Category', type:'text', riffChunkId:'CATE'}`. მოქმედება: Customize Fields → `+ Category (UCS)`. შედეგი: schema-ში ორი ველია key-ით `category`; ერთი მნიშვნელობა `CATE`-შიც და `ICAT`-შიც იწერება, React duplicate key-ს აფრთხილებს.
+   2. (b) საწყისი მდგომარეობა: 12 pre-T-1 standard ველი და custom `{key:'ucs_cat', label:'UCS Cat', type:'text', riffChunkId:'ICAT'}`. მოქმედება: Customize Fields → `+ Category (UCS)`. შედეგი: `ICAT`-ს ორი ველი წერს.
+-- **Reference:** Saba-ს გადაწყვეტილება Q2 (2026-10-28). R1 Mp3tag (community.mp3tag.de, "Suggestion: distinct custom vs. standard MP3 tag fields in the Extended Tags window", https://community.mp3tag.de/t/suggestion-distinct-custom-vs-standard-mp3-tag-fields-in-the-extended-tags-window/59902; https://docs.mp3tag.de/mapping): standard frame-ის სახელის მქონე custom ველი ყოველთვის standard frame-ში ინახება — ერთ სახელს ერთი slot აქვს (community დაკვირვება, არა ოფიციალური docs). Kid3 და BWF MetaEdit: ძებნამ შედეგი არ მისცა. in-app პრეცედენტი: `Input`-ის inline error (`ui/input.tsx:27`); warning-ს design token `--color-warning` (`text-warning`) აქვს.
+-- **Deviations:** (1) Mp3tag ჩუმად აერთიანებს standard slot-ში; აქ toggle იმალება და warning ჩანს (Q2): ჩუმი გაერთიანება მომხმარებლის მნიშვნელობებს (`CATE` → `ICAT`) შეუტყობინებლად გადაიტანდა. (2) წესი 13-ვე standard ველს ეხება და არა მხოლოდ Category-ს: იგივე code path-ს იგივე ბაგი აქვს (მაგ. ძველი custom `publisher`); B-ის არჩევანი, D-47-ში Saba-ს დასადასტურებლად. (3) `schema.json`, რომელშიც standard და custom ველი ერთი key-ით უკვე ერთად არის, არ სწორდება: Q2 მხოლოდ toggle-ს ეხება, შეკეთება კი შენახულ მონაცემს ცვლის (B-R42-01, Q18).
++- **Reference:** Saba-ს გადაწყვეტილება Q2 (2026-10-28). R1 Mp3tag (community.mp3tag.de, "Suggestion: distinct custom vs. standard MP3 tag fields in the Extended Tags window", https://community.mp3tag.de/t/suggestion-distinct-custom-vs-standard-mp3-tag-fields-in-the-extended-tags-window/59902; https://docs.mp3tag.de/mapping): thread-ში წერია, რომ custom ველები, რომლებიც Mp3tag-ის ველების სიაში არ არის, user-defined TXXX frame-ად ინახება; mapping docs თითო ველისთვის აჩვენებს, რომელ frame-ში ან RIFF INFO chunk-ში იწერება ის, და ამბობს, რომ user-defined mapping-ით ეს შეიძლება შეიცვალოს. რა ხდება, როცა custom ველის სახელი standard ველის სახელს ემთხვევა, არც ერთი წყარო არ ამბობს. „ერთ სახელს ერთი slot აქვს“ B-ის დაუდასტურებელი დასკვნაა (C-R42-01, B-მ 2026-10-28-ს ხელახლა შეამოწმა). Kid3 და BWF MetaEdit: ძებნამ შედეგი არ მისცა. in-app პრეცედენტი: `Input`-ის inline error (`ui/input.tsx:27`); warning-ს design token `--color-warning` (`text-warning`) აქვს.
++- **Deviations:** (1) Mp3tag-ის ქცევა same-name შემთხვევაში დაუდასტურებელია (იხ. Reference); აქ toggle იმალება და warning ჩანს (Q2): ჩუმი გაერთიანება მომხმარებლის მნიშვნელობებს (`CATE` → `ICAT`) შეუტყობინებლად გადაიტანდა. (2) წესი 13-ვე standard ველს ეხება და არა მხოლოდ Category-ს: იგივე code path-ს იგივე ბაგი აქვს (მაგ. ძველი custom `publisher`); B-ის არჩევანი, D-47-ში Saba-ს დასადასტურებლად. (3) `schema.json`, რომელშიც standard და custom ველი ერთი key-ით უკვე ერთად არის, არ სწორდება: Q2 მხოლოდ toggle-ს ეხება, შეკეთება კი შენახულ მონაცემს ცვლის (B-R42-01, Q18).
+ - **გადაწყვეტილება:** D-47.
+ - **ტესტი:** `tests/renderer/components/schema-editor.test.ts` — `T-a hides Category (UCS) and warns when a custom field already uses key category`, `T-b hides Category (UCS) and warns when a custom field already uses RIFF ID ICAT`, `T-c brings Category (UCS) back once the colliding custom field is removed`, `T-d blocks any hidden standard field whose key a custom field uses (Publisher)`
+ - **სტატუსი:** გასწორდა (D-47, TM-T1-DUP)
+diff --git a/src/main/ipc/channels.ts b/src/main/ipc/channels.ts
+index 907fe8a..2031bf9 100644
+--- a/src/main/ipc/channels.ts
++++ b/src/main/ipc/channels.ts
+@@ -1,6 +1,7 @@
+ export const IPC_CHANNELS = {
+   OPEN_FOLDER_DIALOG: 'fs:open-folder-dialog',
+   SCAN_FOLDER: 'fs:scan-folder',
++  STAT_FILES: 'fs:stat-files',
+ 
+   READ_METADATA: 'meta:read',
+   READ_METADATA_BATCH: 'meta:read-batch',
+diff --git a/src/main/ipc/file-system.ts b/src/main/ipc/file-system.ts
+index ebab93e..25489d4 100644
+--- a/src/main/ipc/file-system.ts
++++ b/src/main/ipc/file-system.ts
+@@ -1,6 +1,6 @@
+-import type { Dirent } from 'node:fs';
++import type { Dirent, Stats } from 'node:fs';
+ import { readdir, readFile, realpath, stat } from 'node:fs/promises';
+-import { extname, join } from 'node:path';
++import { basename, extname, join } from 'node:path';
+ import { BrowserWindow, dialog, ipcMain } from 'electron';
+ import { IPC_CHANNELS } from './channels';
+ 
+@@ -12,6 +12,39 @@ interface WavFileEntry {
+ }
+ 
+ const MAX_SCAN_DEPTH = 20;
++const MAX_STAT_FILES_PATHS = 50;
++
++function isStatFilesInput(value: unknown): value is string[] {
++  return (
++    Array.isArray(value) &&
++    value.length <= MAX_STAT_FILES_PATHS &&
++    value.every((item) => typeof item === 'string' && item.length > 0)
++  );
++}
++
++async function statOrNull(filePath: string): Promise<Stats | null> {
++  try {
++    return await stat(filePath);
++  } catch {
++    return null;
++  }
++}
++
++async function statWavFiles(paths: string[]): Promise<WavFileEntry[]> {
++  const entries: WavFileEntry[] = [];
++  for (const filePath of paths) {
++    const fileStat = await statOrNull(filePath);
++    if (fileStat?.isFile() && extname(filePath).toLowerCase() === '.wav') {
++      entries.push({
++        name: basename(filePath),
++        path: filePath,
++        size: fileStat.size,
++        modifiedAt: fileStat.mtime.toISOString(),
++      });
++    }
++  }
++  return entries;
++}
+ 
+ async function scanFolderRecursive(
+   dirPath: string,
+@@ -98,6 +131,16 @@ export function registerFileSystemHandlers(): void {
+     return scanFolderRecursive(folderPath);
+   });
+ 
++  ipcMain.handle(
++    IPC_CHANNELS.STAT_FILES,
++    async (_event, paths: unknown): Promise<WavFileEntry[]> => {
++      if (!isStatFilesInput(paths)) {
++        throw new Error('Invalid paths');
++      }
++      return statWavFiles(paths);
++    },
++  );
++
+   ipcMain.handle(
+     IPC_CHANNELS.RESOLVE_DROPPED_PATHS,
+     async (_event, paths: string[]): Promise<{ folders: string[]; wavFiles: string[] }> => {
+diff --git a/src/preload/index.d.ts b/src/preload/index.d.ts
+index ca12f0f..c8e7e22 100644
+--- a/src/preload/index.d.ts
++++ b/src/preload/index.d.ts
+@@ -9,6 +9,7 @@ import type {
+ interface ElectronAPI {
+   openFolderDialog: () => Promise<string | null>;
+   scanFolder: (path: string) => Promise<WavFileEntry[]>;
++  statFiles: (paths: string[]) => Promise<WavFileEntry[]>;
+   loadSchema: () => Promise<FieldDefinition[]>;
+   saveSchema: (fields: FieldDefinition[]) => Promise<void>;
+   readMetadata: (path: string, schema: FieldDefinition[]) => Promise<WavMetadata>;
+diff --git a/src/preload/index.ts b/src/preload/index.ts
+index 1f36061..d4b7a59 100644
+--- a/src/preload/index.ts
++++ b/src/preload/index.ts
+@@ -18,6 +18,17 @@ const api = {
+     }>
+   > => ipcRenderer.invoke(IPC_CHANNELS.SCAN_FOLDER, path),
+ 
++  statFiles: (
++    paths: string[],
++  ): Promise<
++    Array<{
++      name: string;
++      path: string;
++      size: number;
++      modifiedAt: string;
++    }>
++  > => ipcRenderer.invoke(IPC_CHANNELS.STAT_FILES, paths),
++
+   loadSchema: (): Promise<unknown[]> => ipcRenderer.invoke(IPC_CHANNELS.LOAD_SCHEMA),
+ 
+   saveSchema: (fields: unknown[]): Promise<void> =>
+diff --git a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+index 151e35d..32d9af5 100644
+--- a/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
++++ b/src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+@@ -72,15 +72,18 @@ function waitForFolderLoadIdle(): Promise<void> {
+   });
+ }
+ 
++const STAT_FILES_CHUNK_SIZE = 50;
++
+ async function refreshSavedFileStats(writtenPaths: string[]): Promise<void> {
+   const { folderPath, updateFileStats } = useFileStore.getState();
+   if (folderPath === null) return;
+-  try {
+-    const scanned = await window.api.scanFolder(folderPath);
+-    const written = new Set(writtenPaths);
+-    updateFileStats(scanned.filter((entry) => written.has(entry.path)));
+-  } catch {
+-    return;
++  for (let start = 0; start < writtenPaths.length; start += STAT_FILES_CHUNK_SIZE) {
++    const chunk = writtenPaths.slice(start, start + STAT_FILES_CHUNK_SIZE);
++    try {
++      const statted = await window.api.statFiles(chunk);
++      const written = new Set(chunk);
++      updateFileStats(statted.filter((entry) => written.has(entry.path)));
++    } catch {}
+   }
+ }
+ 
+diff --git a/tests/e2e/app-launch.spec.ts b/tests/e2e/app-launch.spec.ts
+index ea32084..cb37df8 100644
+--- a/tests/e2e/app-launch.spec.ts
++++ b/tests/e2e/app-launch.spec.ts
+@@ -38,6 +38,7 @@ test("window.api has required methods", async () => {
+   );
+   expect(methods).toContain("openFolderDialog");
+   expect(methods).toContain("scanFolder");
++  expect(methods).toContain("statFiles");
+   expect(methods).toContain("readMetadata");
+   expect(methods).toContain("writeMetadata");
+   expect(methods).toContain("loadTemplates");
+diff --git a/tests/main/file-system.test.ts b/tests/main/file-system.test.ts
+index 9dff113..c42ab0d 100644
+--- a/tests/main/file-system.test.ts
++++ b/tests/main/file-system.test.ts
+@@ -1,4 +1,4 @@
+-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
++import { mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+ import { join } from "node:path";
+ import { tmpdir } from "node:os";
+ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+@@ -125,4 +125,59 @@ describe("file-system handlers", () => {
+       await expect(handler({}, join(testDir, "missing.wav"))).rejects.toThrow("File not found");
+     });
+   });
++
++  describe("fs:stat-files (TM-B44, D-48)", () => {
++    const statDir = join(testDir, "stat");
++    const upperWav = join(statDir, "UPPER.WAV");
++    const dirWav = join(statDir, "dir.wav");
++    const test1 = join(testDir, "test1.wav");
++    const nested = join(testDir, "sub", "nested.wav");
++
++    type StatEntry = { name: string; path: string; size: number; modifiedAt: string };
++
++    beforeAll(() => {
++      mkdirSync(statDir, { recursive: true });
++      mkdirSync(dirWav, { recursive: true });
++      writeFileSync(upperWav, Buffer.alloc(64));
++    });
++
++    function expectedEntry(p: string, name: string): StatEntry {
++      const s = statSync(p);
++      return { name, path: p, size: s.size, modifiedAt: s.mtime.toISOString() };
++    }
++
++    it("(m1) returns entries in input order with basename, identical path, size and mtime", async () => {
++      const handler = getHandler("fs:stat-files");
++      const result = await handler({}, [test1, nested]) as StatEntry[];
++      expect(result).toEqual([expectedEntry(test1, "test1.wav"), expectedEntry(nested, "nested.wav")]);
++    });
++
++    it("(m2) skips a missing path between two existing ones", async () => {
++      const handler = getHandler("fs:stat-files");
++      const result = await handler({}, [test1, join(testDir, "missing.wav"), nested]) as StatEntry[];
++      expect(result.map((e) => e.path)).toEqual([test1, nested]);
++    });
++
++    it("(m3) skips a directory named .wav and a non-wav file, includes an upper-case .WAV", async () => {
++      const handler = getHandler("fs:stat-files");
++      const result = await handler({}, [dirWav, join(testDir, "not-a-wav.txt"), upperWav]) as StatEntry[];
++      expect(result).toEqual([expectedEntry(upperWav, "UPPER.WAV")]);
++    });
++
++    it("(m4) an empty array returns an empty array", async () => {
++      const handler = getHandler("fs:stat-files");
++      await expect(handler({}, [])).resolves.toEqual([]);
++    });
++
++    it("(m5) rejects invalid input and more than 50 paths, accepts exactly 50", async () => {
++      const handler = getHandler("fs:stat-files");
++      await expect(handler({}, "x")).rejects.toThrow("Invalid paths");
++      await expect(handler({}, null)).rejects.toThrow("Invalid paths");
++      await expect(handler({}, [""])).rejects.toThrow("Invalid paths");
++      await expect(handler({}, [5])).rejects.toThrow("Invalid paths");
++      await expect(handler({}, Array.from({ length: 51 }, () => test1))).rejects.toThrow("Invalid paths");
++      const fifty = await handler({}, Array.from({ length: 50 }, () => test1)) as StatEntry[];
++      expect(fifty).toHaveLength(50);
++    });
++  });
+ });
+diff --git a/tests/renderer/components/metadata-panel-batch-save.test.ts b/tests/renderer/components/metadata-panel-batch-save.test.ts
+index 4a49121..8f2ae4e 100644
+--- a/tests/renderer/components/metadata-panel-batch-save.test.ts
++++ b/tests/renderer/components/metadata-panel-batch-save.test.ts
+@@ -400,15 +400,16 @@ describe("MetadataPanel save whose write succeeded but whose re-read rejects (TM
+   });
+ });
+ 
+-describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28)", () => {
++describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22, D-28, D-48)", () => {
+   const FOLDER = "/music";
+   const NEW_DATE = "2026-10-27T10:00:00.000Z";
++  const OLD_DATE = "2026-10-26T00:00:00.000Z";
+   const SCANNED_A: WavFileEntry = { name: "a.wav", path: PATH_A, size: 200, modifiedAt: NEW_DATE };
+   const SCANNED_B: WavFileEntry = { name: "b.wav", path: PATH_B, size: 300, modifiedAt: NEW_DATE };
+   const SCANNED_C: WavFileEntry = { name: "c.wav", path: "/music/c.wav", size: 400, modifiedAt: NEW_DATE };
+ 
+-  function mockScan(entries: WavFileEntry[]): void {
+-    vi.mocked(window.api.scanFolder).mockResolvedValue(entries);
++  function mockStat(entries: WavFileEntry[]): void {
++    vi.mocked(window.api.statFiles).mockResolvedValue(entries);
+   }
+ 
+   function readFile(path: string): WavFileEntry | undefined {
+@@ -428,96 +429,134 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+   function expectNotRefreshed(path: string): void {
+     const file = readFile(path);
+     expect(file?.size).toBe(100);
+-    expect(file?.modifiedAt).toBe("2026-10-26T00:00:00.000Z");
++    expect(file?.modifiedAt).toBe(OLD_DATE);
+   }
+ 
+-  it("(n) single save succeeds: one scan of the folder, only the saved file is patched, write -> scan -> read", async () => {
++  function expectStatCall(callIndex: number, paths: string[]): void {
++    expect(vi.mocked(window.api.statFiles).mock.calls[callIndex]?.[0]).toEqual(paths);
++  }
++
++  function manyPath(index: number): string {
++    return `/music/many-${String(index).padStart(3, "0")}.wav`;
++  }
++
++  function statEntryFor(path: string): WavFileEntry {
++    return { name: path.slice(FOLDER.length + 1), path, size: 500, modifiedAt: NEW_DATE };
++  }
++
++  function seedManyFiles(count: number): string[] {
++    const paths = Array.from({ length: count }, (_, index) => manyPath(index));
++    const files: WavFileEntry[] = paths.map((path) => ({
++      name: path.slice(FOLDER.length + 1),
++      path,
++      size: 100,
++      modifiedAt: OLD_DATE,
++    }));
++    const metadata: Record<string, WavMetadata> = {};
++    const refreshed: Record<string, WavMetadata> = {};
++    for (const path of paths) {
++      metadata[path] = {};
++      refreshed[path] = { category: TYPED_CATEGORY };
++    }
++    useFileStore.setState({ files, metadata, selectedPaths: paths, folderPath: FOLDER });
++    mockBatchApi({ succeeded: count, failed: [] }, refreshed);
++    return paths;
++  }
++
++  it("(n) single save succeeds: statFiles once with the saved path, no scan, write -> stat -> read", async () => {
+     seedFiles([PATH_A]);
+     useFileStore.setState({ folderPath: FOLDER });
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save Tags/);
+ 
+-    expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
+-    expect(vi.mocked(window.api.scanFolder).mock.calls[0]?.[0]).toBe(FOLDER);
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(1);
++    expectStatCall(0, [PATH_A]);
+     expectRefreshed(PATH_A, 200);
+     expectNotRefreshed(PATH_B);
+     expect(useFileStore.getState().files).toHaveLength(2);
+     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+     const writeOrder = vi.mocked(window.api.writeMetadata).mock.invocationCallOrder[0] ?? 0;
+-    const scanOrder = vi.mocked(window.api.scanFolder).mock.invocationCallOrder[0] ?? 0;
++    const statOrder = vi.mocked(window.api.statFiles).mock.invocationCallOrder[0] ?? 0;
+     const readOrder = vi.mocked(window.api.readMetadata).mock.invocationCallOrder[0] ?? 0;
+     expect(writeOrder).toBeGreaterThan(0);
+-    expect(scanOrder).toBeGreaterThan(writeOrder);
+-    expect(readOrder).toBeGreaterThan(scanOrder);
++    expect(statOrder).toBeGreaterThan(writeOrder);
++    expect(readOrder).toBeGreaterThan(statOrder);
+     expect(useFileStore.getState().selectedPaths).toEqual([PATH_A]);
+     expect(useFileStore.getState().isScanning).toBe(false);
+   });
+ 
+-  it("(o) batch, all succeed: both files are patched and the selection is kept", async () => {
++  it("(o) batch, all succeed: statFiles once with both paths, both files are patched and the selection is kept", async () => {
+     seedFiles([PATH_A, PATH_B]);
+     useFileStore.setState({ folderPath: FOLDER });
+     mockBatchApi(ALL_SUCCEEDED, { [PATH_A]: { category: TYPED_CATEGORY }, [PATH_B]: { category: TYPED_CATEGORY } });
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A, SCANNED_B]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+ 
+-    expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(1);
++    expectStatCall(0, [PATH_A, PATH_B]);
+     expectRefreshed(PATH_A, 200);
+     expectRefreshed(PATH_B, 300);
+     expect(useFileStore.getState().files).toHaveLength(2);
+     const writeOrder = vi.mocked(window.api.writeMetadataBatch).mock.invocationCallOrder[0] ?? 0;
+-    const scanOrder = vi.mocked(window.api.scanFolder).mock.invocationCallOrder[0] ?? 0;
++    const statOrder = vi.mocked(window.api.statFiles).mock.invocationCallOrder[0] ?? 0;
+     const readOrder = vi.mocked(window.api.readMetadataBatch).mock.invocationCallOrder[0] ?? 0;
+     expect(writeOrder).toBeGreaterThan(0);
+-    expect(scanOrder).toBeGreaterThan(writeOrder);
+-    expect(readOrder).toBeGreaterThan(scanOrder);
++    expect(statOrder).toBeGreaterThan(writeOrder);
++    expect(readOrder).toBeGreaterThan(statOrder);
+     expect(useFileStore.getState().selectedPaths).toEqual([PATH_A, PATH_B]);
+     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved to 2 files");
+   });
+ 
+-  it("(p) batch, partial failure: only the written file is patched even though the scan has the failed one", async () => {
++  it("(p) batch, partial failure: only the written path is sent and patched", async () => {
+     seedFiles([PATH_A, PATH_B]);
+     useFileStore.setState({ folderPath: FOLDER });
+     mockBatchApi(PARTIAL_FAILED, { [PATH_A]: { category: TYPED_CATEGORY }, [PATH_B]: {} });
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+ 
+-    expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(1);
++    expectStatCall(0, [PATH_A]);
+     expectRefreshed(PATH_A, 200);
+     expectNotRefreshed(PATH_B);
+     expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 failed");
+     expectEditsKept();
+   });
+ 
+-  it("(q) batch, all failed: no scan, files unchanged, edits kept", async () => {
++  it("(q) batch, all failed: no stat and no scan, files unchanged, edits kept", async () => {
+     seedFiles([PATH_A, PATH_B]);
+     useFileStore.setState({ folderPath: FOLDER });
+     mockBatchApi(ALL_FAILED, { [PATH_A]: {}, [PATH_B]: {} });
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A, SCANNED_B, SCANNED_C]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+ 
++    expect(window.api.statFiles).not.toHaveBeenCalled();
+     expect(window.api.scanFolder).not.toHaveBeenCalled();
+     expectFilesUnchanged();
+     expect(useMetadataStore.getState().toastMessage).toBe("0 saved, 2 failed");
+     expectEditsKept();
+   });
+ 
+-  it("(r) single write rejects: no scan, files unchanged", async () => {
++  it("(r) single write rejects: no stat and no scan, files unchanged", async () => {
+     seedFiles([PATH_A]);
+     useFileStore.setState({ folderPath: FOLDER });
+     vi.mocked(window.api.writeMetadata).mockRejectedValue(new Error("Failed to write metadata: x"));
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A, SCANNED_B, SCANNED_C]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save Tags/);
+ 
++    expect(window.api.statFiles).not.toHaveBeenCalled();
+     expect(window.api.scanFolder).not.toHaveBeenCalled();
+     expectFilesUnchanged();
+     expect(useMetadataStore.getState().toastMessage).toBe("Failed to write metadata: x");
+@@ -527,12 +566,14 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+     seedFiles([PATH_A]);
+     useFileStore.setState({ folderPath: FOLDER });
+     vi.mocked(window.api.readMetadata).mockRejectedValue(new Error("read down"));
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save Tags/);
+ 
+-    expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(1);
++    expectStatCall(0, [PATH_A]);
+     expectRefreshed(PATH_A, 200);
+     expectNotRefreshed(PATH_B);
+     const state = useMetadataStore.getState();
+@@ -549,30 +590,33 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+     useFileStore.setState({ folderPath: FOLDER });
+     vi.mocked(window.api.writeMetadataBatch).mockResolvedValue(PARTIAL_FAILED);
+     vi.mocked(window.api.readMetadataBatch).mockRejectedValue(new Error("read-batch down"));
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save to 2 files/);
+ 
+-    expect(window.api.scanFolder).toHaveBeenCalledTimes(1);
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(1);
++    expectStatCall(0, [PATH_A]);
+     expectRefreshed(PATH_A, 200);
+     expectNotRefreshed(PATH_B);
+     expect(useMetadataStore.getState().toastMessage).toBe("1 saved, 1 failed. Reloading failed. Rescan to refresh.");
+     expectEditsKept();
+   });
+ 
+-  it("(u) scanFolder rejects on a single save: silent, toast and store metadata as today, files unchanged", async () => {
++  it("(u) statFiles rejects on a single save: silent, toast and store metadata as today, files unchanged", async () => {
+     seedFiles([PATH_A]);
+     useFileStore.setState({ folderPath: FOLDER });
+     const reread: WavMetadata = { category: TYPED_CATEGORY, comment: "from disk" };
+     vi.mocked(window.api.readMetadata).mockResolvedValue(reread);
+-    vi.mocked(window.api.scanFolder).mockRejectedValue(new Error("scan down"));
++    vi.mocked(window.api.statFiles).mockRejectedValue(new Error("stat down"));
+     render(createElement(MetadataPanel));
+ 
+     const toastKeyBefore = useMetadataStore.getState().toastKey;
+     await typeCategoryAndSave(/Save Tags/);
+ 
+     const state = useMetadataStore.getState();
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
+     expect(state.toastKey - toastKeyBefore).toBe(1);
+     expect(state.toastMessage).toBe("Tags saved");
+     expect(state.toastType).toBe("success");
+@@ -582,35 +626,108 @@ describe("MetadataPanel refreshes Size and Date after a confirmed save (TM-B22,
+     expect(state.isDirty).toBe(false);
+   });
+ 
+-  it("(v) folderPath null: no scan, the save behaves as today", async () => {
++  it("(v) folderPath null: no stat and no scan, the save behaves as today", async () => {
+     seedFiles([PATH_A]);
+     const reread: WavMetadata = { category: TYPED_CATEGORY };
+     vi.mocked(window.api.readMetadata).mockResolvedValue(reread);
+-    mockScan([SCANNED_A, SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_A, SCANNED_B, SCANNED_C]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save Tags/);
+ 
+     expect(useFileStore.getState().folderPath).toBeNull();
++    expect(window.api.statFiles).not.toHaveBeenCalled();
+     expect(window.api.scanFolder).not.toHaveBeenCalled();
+     expectFilesUnchanged();
+     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+     expect(useFileStore.getState().metadata[PATH_A]).toEqual(reread);
+   });
+ 
+-  it("(w) the scan result lacks the saved path: the file keeps its stats and nothing is added", async () => {
++  it("(w) the stat result lacks the saved path: the file keeps its stats and nothing is added", async () => {
+     seedFiles([PATH_A]);
+     useFileStore.setState({ folderPath: FOLDER });
+-    mockScan([SCANNED_B, SCANNED_C]);
++    mockStat([SCANNED_B, SCANNED_C]);
+     render(createElement(MetadataPanel));
+ 
+     await typeCategoryAndSave(/Save Tags/);
+ 
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
+     expectNotRefreshed(PATH_A);
+     expectNotRefreshed(PATH_B);
+     expect(useFileStore.getState().files).toHaveLength(2);
+     expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
+   });
++
++  it("(x) batch of 51: statFiles runs twice (50, then 1) one after another, all rows refreshed before the re-read", async () => {
++    const paths = seedManyFiles(51);
++    const events: string[] = [];
++    vi.mocked(window.api.statFiles).mockImplementation(async (chunk: string[]) => {
++      const callIndex = vi.mocked(window.api.statFiles).mock.calls.length - 1;
++      events.push(`call${callIndex}`);
++      await Promise.resolve();
++      events.push(`resolved${callIndex}`);
++      return chunk.map(statEntryFor);
++    });
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSave(/Save to 51 files/);
++
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(2);
++    expectStatCall(0, paths.slice(0, 50));
++    expectStatCall(1, paths.slice(50));
++    expect(events).toEqual(["call0", "resolved0", "call1", "resolved1"]);
++    for (const path of paths) {
++      expect(readFile(path)?.size).toBe(500);
++      expect(readFile(path)?.modifiedAt).toBe(NEW_DATE);
++    }
++    expect(useFileStore.getState().files).toHaveLength(51);
++    const secondStatOrder = vi.mocked(window.api.statFiles).mock.invocationCallOrder[1] ?? 0;
++    const readOrder = vi.mocked(window.api.readMetadataBatch).mock.invocationCallOrder[0] ?? 0;
++    expect(secondStatOrder).toBeGreaterThan(0);
++    expect(readOrder).toBeGreaterThan(secondStatOrder);
++    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved to 51 files");
++  });
++
++  it("(y) batch of 51, first chunk rejects: the 51st row is refreshed, the first 50 keep their stats, toast unchanged", async () => {
++    const paths = seedManyFiles(51);
++    vi.mocked(window.api.statFiles)
++      .mockRejectedValueOnce(new Error("stat down"))
++      .mockImplementation(async (chunk: string[]) => chunk.map(statEntryFor));
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSave(/Save to 51 files/);
++
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(2);
++    expectStatCall(0, paths.slice(0, 50));
++    expectStatCall(1, paths.slice(50));
++    for (const path of paths.slice(0, 50)) {
++      expect(readFile(path)?.size).toBe(100);
++      expect(readFile(path)?.modifiedAt).toBe(OLD_DATE);
++    }
++    expect(readFile(paths[50] ?? "")?.size).toBe(500);
++    expect(readFile(paths[50] ?? "")?.modifiedAt).toBe(NEW_DATE);
++    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved to 51 files");
++    expect(useMetadataStore.getState().toastType).toBe("success");
++  });
++
++  it("(z) single save, the stat result also has an unwritten file: only the saved file is patched", async () => {
++    seedFiles([PATH_A]);
++    useFileStore.setState({ folderPath: FOLDER });
++    mockStat([SCANNED_A, SCANNED_B]);
++    render(createElement(MetadataPanel));
++
++    await typeCategoryAndSave(/Save Tags/);
++
++    expect(window.api.scanFolder).not.toHaveBeenCalled();
++    expect(window.api.statFiles).toHaveBeenCalledTimes(1);
++    expectStatCall(0, [PATH_A]);
++    expectRefreshed(PATH_A, 200);
++    expectNotRefreshed(PATH_B);
++    expect(useFileStore.getState().files).toHaveLength(2);
++    expect(useMetadataStore.getState().toastMessage).toBe("Tags saved");
++  });
+ });
+ 
+ describe("MetadataPanel save while the selection changes (TM-B23, D-29)", () => {
+diff --git a/tests/renderer/components/schema-change-during-folder-load.test.ts b/tests/renderer/components/schema-change-during-folder-load.test.ts
+index 00db1ee..36c49b4 100644
+--- a/tests/renderer/components/schema-change-during-folder-load.test.ts
++++ b/tests/renderer/components/schema-change-during-folder-load.test.ts
+@@ -312,7 +312,7 @@ describe("schema change during a pending folder load (D-40)", () => {
+     const write = createDeferred<undefined>();
+     const schemaRead = createDeferred<MetadataByPath>();
+     vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+-    vi.mocked(window.api.scanFolder).mockResolvedValue([{ ...FILE_A, size: 2 }, FILE_A2]);
++    vi.mocked(window.api.statFiles).mockResolvedValue([{ ...FILE_A, size: 2 }]);
+     vi.mocked(window.api.readMetadata).mockResolvedValue({ ...NEW_A });
+     vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) =>
+       schemaRead.promise.then(() => readFor(paths, schema)),
+diff --git a/tests/renderer/helpers/window-api-mocks.ts b/tests/renderer/helpers/window-api-mocks.ts
+index 2011eb0..6a10602 100644
+--- a/tests/renderer/helpers/window-api-mocks.ts
++++ b/tests/renderer/helpers/window-api-mocks.ts
+@@ -6,5 +6,6 @@ export function resetWindowApiMocks(): void {
+   vi.mocked(window.api.writeMetadata).mockReset().mockResolvedValue(undefined);
+   vi.mocked(window.api.readMetadata).mockReset().mockResolvedValue({});
+   vi.mocked(window.api.scanFolder).mockReset().mockResolvedValue([]);
++  vi.mocked(window.api.statFiles).mockReset().mockResolvedValue([]);
+   vi.mocked(window.api.saveSchema).mockReset().mockResolvedValue(undefined);
+ }
+diff --git a/tests/renderer/setup.ts b/tests/renderer/setup.ts
+index 6ac18ec..ff9c8b7 100644
+--- a/tests/renderer/setup.ts
++++ b/tests/renderer/setup.ts
+@@ -3,6 +3,7 @@ import "@testing-library/jest-dom/vitest";
+ const mockApi: Window["api"] = {
+   openFolderDialog: vi.fn().mockResolvedValue(null),
+   scanFolder: vi.fn().mockResolvedValue([]),
++  statFiles: vi.fn().mockResolvedValue([]),
+   loadSchema: vi.fn().mockResolvedValue([]),
+   saveSchema: vi.fn().mockResolvedValue(undefined),
+   readMetadata: vi.fn().mockResolvedValue({}),

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "czaba-tag-manager",
-  "current_task": "Round 44: TM-B44 completion — one-line flip of unowned renderer test (w7) from scanFolder to statFiles mock (C-R43-01); round-43 tree carried (13 files, hash-frozen); baseline cf4e147 + carried tree",
+  "current_task": "Round 45: TM-B11 stage 1 (D-49) — empty text/tags remove the INFO sub-chunk (no size-0 writes); numbers follow in round 46; baseline d886bef clean",
   "done_policy": "An item is done only with C evidence from a real (not offline) check.",
   "source": "requirements.md (2026-10-26, Saba Shavidze) + B round-0 findings on the ubuntu-24.04 runner at HEAD acefccc",
   "protected_files": [
@@ -169,7 +169,7 @@
     },
     {
       "id": "D-10",
-      "status": "decided by Saba Q4 2026-10-28: skip empty text and unset numbers, meaningful 0 stays expressible; implementation TM-B11 (open)",
+      "status": "decided by Saba Q4 2026-10-28: skip empty text and unset numbers, meaningful 0 stays expressible; implementation TM-B11 stage 1 (text/tags, D-49, round 45) and stage 2 (numbers, round 46)",
       "decision": "Empty-value policy for INFO fields: today an empty Keywords field is written as IKEY=\"\" (size 0) and ffprobe shows \"IKEY\": \"\" (C-R1-01). Options: skip empty INFO chunks vs write and document. B default proposal: skip empty (importer treats absent = empty). Decide before/with T-1. Round 2 B: MetadataPanel.tsx:76 single-file save sends all editingMetadata, so once category exists every single-file save writes ICAT=\"\" when empty. A pure skip-empty write could never clear a value; the real options are (a) write \"\" (current) or (b) remove the sub-chunk when empty. Round 3 pins (a); change only with Saba.",
       "contract_with": "K-4"
     },
@@ -382,9 +382,15 @@
     },
     {
       "id": "D-48",
-      "status": "implemented in working tree (round 43; C R43-4/5/6 real-app PASS); awaiting round 44 green gate + publish; preload change permitted by Saba Q8 2026-10-28",
+      "status": "verified (C R43-4/5/6 + R44-1..R44-5 PASS, realVerified=true), published d886bef086628cd2b6a8efed3a7a98eeb8454480 (TM-B44; Saba Q8)",
       "decision": "D-28's stats refresh after a confirmed save reads size and modifiedAt of the written paths only, through a new IPC channel fs:stat-files (IPC_CHANNELS.STAT_FILES, window.api.statFiles(paths): Promise<WavFileEntry[]>), instead of a full recursive scanFolder(folderPath). Main handler: input must be an array of at most 50 non-empty strings, otherwise Error('Invalid paths'); each path is stat-ed; a regular file with extension .wav (case-insensitive) yields { name: basename(path), path (the input string unchanged), size, modifiedAt: mtime ISO }; any other path (missing, directory, non-wav, stat error) is omitted; output keeps input order. Renderer: refreshSavedFileStats sends the written paths in chunks of 50, sequentially, awaits every chunk before the re-read, applies each resolved chunk with updateFileStats, and skips a rejected chunk silently (the other chunks still apply). Every other D-28 rule stays: no refresh when the write rejects, when a batch has 0 succeeded, or when folderPath is null; order write -> refresh -> re-read; toasts, isDirty and edits unchanged. scanFolder itself is unchanged and is still used by Open Folder, Rescan and drop.",
       "contract_with": "none (renderer file list columns only; K-4 tag contract untouched)"
+    },
+    {
+      "id": "D-49",
+      "status": "planned round 45 (TM-B11 stage 1, Saba Q4 / D-10); whitespace-only = empty is B interpretation of Q4 (Q20, awaiting Saba, non-blocking)",
+      "decision": "writeTagsToFile normalises every schema field value before writing: a text value whose trim() is '' counts as empty; a tags value drops items whose trim() is '' (non-blank items are written exactly as typed, untrimmed). An empty standard-map field goes to the node-taglib-sharp setter as '' / [] (the library removes the item). An empty riffChunkId field (keywords/IKEY, category/ICAT, custom text/tags) calls InfoTag.removeValue(riffChunkId) instead of writing a size-0 sub-chunk; when the file has no InfoTag nothing is removed and no INFO is created for it. The INFO-creation workaround (tag.title = tag.title ?? '') runs only when at least one non-empty riffChunkId value is written. Number fields unchanged in round 45 (stage 2). Importer rule unchanged: absent sub-chunk or empty payload = no value.",
+      "contract_with": "K-4 (docs/recording-tag-contract.md: empty value removes the sub-chunk)"
     }
   ],
   "items": [
@@ -889,21 +895,37 @@
       "severity": "low",
       "source": "C-R6-01",
       "title": "With a custom Number field in the schema (e.g. Take/ITKN), every single-file save writes the default 0 as INFO '0' (size 1) into files that never had the field; ffprobe shows ITKN=0 and the importer would read 0 as a value. Pre-existing (a8c1b53 build does the same). Number analogue of D-10 (empty text written as size-0 sub-chunk)",
-      "status": "todo",
+      "status": "in_progress",
       "depends_on": [
         "TM-T1"
       ],
       "decisions": [
-        "D-10"
+        "D-10",
+        "D-49"
       ],
       "acceptance": [
-        "policy chosen with Saba (write '0' as today vs write size-0 / remove when 0; RR-R5-03: a meaningful 0 must stay expressible); a main test pins the chosen raw INFO bytes and C checks raw INFO + ffprobe after a real-app save"
+        "policy chosen with Saba (write '0' as today vs write size-0 / remove when 0; RR-R5-03: a meaningful 0 must stay expressible); a main test pins the chosen raw INFO bytes and C checks raw INFO + ffprobe after a real-app save",
+        "stage 1 (round 45) R45-1..R45-6; stage 2 (numbers) follows in round 46 - TM-B11 is done only after both stages have C real-app evidence"
       ],
       "evidence": [
         "C round 6 C-R6-01: c-round-6/r6-result.json (commentOnlyAfter.file.riffInfo, catNewFile.riffInfo), r6-before-result.json (same on a8c1b53)",
         "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written. Skip empty text and unset numbers; a meaningful 0 stays expressible (D-10 decided). Note: T1-10 in recording-tag-contract.test.ts currently pins the size-0 write and must flip in the TM-B11 round"
       ],
-      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written. Skip empty text and unset numbers; a meaningful 0 stays expressible (D-10 decided). Note: T1-10 in recording-tag-contract.test.ts currently pins the size-0 write and must flip in the TM-B11 round"
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written. Skip empty text and unset numbers; a meaningful 0 stays expressible (D-10 decided). Note: T1-10 in recording-tag-contract.test.ts currently pins the size-0 write and must flip in the TM-B11 round",
+      "stages": [
+        {
+          "stage": 1,
+          "round": 45,
+          "scope": "text and tags fields: an empty value (text trim()==='' ; tags with no non-blank item) removes the INFO sub-chunk instead of writing size 0; blank tag items are dropped; INFO-creation workaround runs only when a non-empty custom value is written (D-49). Fixes C-R1-01, RR-R3-03, C-R27-02, B-R42-02",
+          "status": "planned"
+        },
+        {
+          "stage": 2,
+          "round": "46 (planned)",
+          "scope": "number fields: distinct unset marker (read + number input + write) so an unset custom number is not written (C-R6-01) while a typed 0 stays expressible (RR-R5-03); D-ID decided at round 46 planning; standard year/track/bpm cannot store 0 in node-taglib-sharp (setValueFromUint 0 -> remove) - FYI deviation for Saba",
+          "status": "todo"
+        }
+      ]
     },
     {
       "id": "TM-B12",
@@ -2039,7 +2061,7 @@
       "severity": "medium",
       "source": "RR-R19-01, B-R18-01",
       "title": "Every save awaits a full recursive scanFolder of the open folder (D-28 stats refresh) while isSaving is true; slow on 1000+ files or a network drive. Fix: narrow fs:stat-files IPC (main + preload, Saba Q8) that stats only the written paths (D-48)",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         "TM-B22"
       ],
@@ -2055,7 +2077,8 @@
         "Root review R19 RR-R19-01 (medium); B R18 B-R18-01; C R19 observation 169 ms click->toast on 200 files",
         "Saba answers 2026-10-28 (policy.local.md) Q8: permission to change src/preload/index.ts and index.d.ts ONLY to add the narrow fs:stat-files channel",
         "C round 43 FAIL (c-round-43.md/.json, realVerified=true): R43-1, R43-3, R43-4, R43-5, R43-6, R43-7 PASS; R43-2/R43-8 FAIL only because unowned tests/renderer/components/schema-change-during-folder-load.test.ts (w7) still mocks scanFolder for the save's stats refresh (renderer 319/320; C-R43-01, planning gap). Main 98/98, E2E 7/7 (--retries=0 7/7). Real app: Size/Date refresh after single, nested and 3-file batch save, ICAT=DOORWood / IKEY='door, slam' in raw INFO + music-metadata + ffprobe; statFiles edge cases match fs.statSync; keys = baseline 16 + statFiles; 5000-WAV tree: single save click->toast median 388/376 ms (cf4e147) -> 19/17 ms (new), T_scan ~360-380 ms; partial batch chmod 000 -> '1 saved, 1 failed', only written row changes; Rescan/Open Folder live. Not published; tree carried into round 44",
-        "B round 44 planning probe (scratch copy, not the repo): flipping (w7) :315 to vi.mocked(window.api.statFiles).mockResolvedValue([{ ...FILE_A, size: 2 }]) -> renderer 320/320 on A's tree; same test with cf4e147 MetadataPanel.tsx -> (w7) fails (1 failed / 7 passed)"
+        "B round 44 planning probe (scratch copy, not the repo): flipping (w7) :315 to vi.mocked(window.api.statFiles).mockResolvedValue([{ ...FILE_A, size: 2 }]) -> renderer 320/320 on A's tree; same test with cf4e147 MetadataPanel.tsx -> (w7) fails (1 failed / 7 passed)",
+        "C round 44 PASS (c-round-44.md/.json, realVerified=true): R44-1 ownership + 13 carried hashes, R44-2 (w7) red on cf4e147 MetadataPanel.tsx / green on fix, R44-3 verifyCommand rc=0 renderer 320/320 main 98/98 E2E 7/7 + --retries=0 7/7, R44-4 real app (a) single save ICAT=DOORWood + (b) 3-file batch IKEY='door, slam' in raw INFO + music-metadata + ffprobe, Size/Date refreshed only on saved rows, statFiles edge cases match fs.statSync, (c) partial batch chmod 000 '1 saved, 1 failed', R44-5 round-43 evidence carried by hash; root gate round 44 published d886bef086628cd2b6a8efed3a7a98eeb8454480"
       ],
       "user_decision": "Saba Q8 2026-10-28"
     }
@@ -2088,7 +2111,9 @@
       "status": "open",
       "title": "Empty Keywords written as IKEY=\"\"; save also adds id3, LIST/MID, IDVX, JUNK chunks and moves data to the end (audio bytes identical). Contract question D-10 -> TM-T1 T1-10",
       "round": 1,
-      "evidence": "c-round-1/r1-9-riff-chunks.json"
+      "evidence": "c-round-1/r1-9-riff-chunks.json",
+      "routed_to": "TM-B11 stage 1 round 45 (D-49)",
+      "notes": []
     },
     {
       "id": "C-R1-02",
@@ -2277,8 +2302,9 @@
       "status": "open",
       "title": "Every editor-panel save writes empty ICAT (D-10 pinned on purpose)",
       "round": 3,
-      "routed_to": "D-10 (Saba)",
-      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written (TM-B11)"
+      "routed_to": "TM-B11 stage 1 round 45 (D-49)",
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written (TM-B11)",
+      "notes": []
     },
     {
       "id": "RR-R3-04",
@@ -3301,9 +3327,9 @@
       "id": "B-R18-01",
       "source": "B (TM-B22 probe)",
       "severity": "info",
-      "status": "in_progress",
+      "status": "closed",
       "title": "D-28 refreshes Size/Date with one full recursive scanFolder per save because preload is protected; a dedicated fs:stat-files channel (main + preload) would stat only the written paths. C records save timing on a ~200-file folder in R19 as an observation",
-      "routed_to": "TM-B44 round 43 implemented (C real-app PASS, gate red on C-R43-01) -> round 44 completion",
+      "routed_to": "closed: TM-B44 done (D-48), published d886bef",
       "notes": [
         "R19: C measured one single save on a 200-file folder at 169 ms click->toast (observation, no d015470 comparison). Root review R19 rates the full rescan per save medium (RR-R19-01); same Saba question"
       ],
@@ -3314,9 +3340,9 @@
       "id": "RR-R19-01",
       "source": "root-review",
       "severity": "medium",
-      "status": "in_progress",
+      "status": "closed",
       "title": "Performance: every save awaits a full recursive scanFolder (file-system.ts scanFolderRecursive, depth 20, stat per WAV, no timeout) before the re-read while isSaving is true; slow on 1000+ files or a network drive. Fix: a narrow statFiles(paths) IPC (main + protected preload) or write IPCs returning stats; or a non-awaited refresh after the toast",
-      "routed_to": "TM-B44 round 43 implemented (C real-app PASS, gate red on C-R43-01) -> round 44 completion",
+      "routed_to": "closed: TM-B44 done (D-48 fs:stat-files), C R43-5 5000-WAV 388->19 ms + R44 PASS, published d886bef",
       "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q8: permission to change src/preload/index.ts and index.d.ts ONLY to add the narrow fs:stat-files channel; exact diff listed in the round; C checks nothing else changed. Planned for round 43"
     },
     {
@@ -4009,8 +4035,9 @@
       "severity": "info",
       "status": "open",
       "title": "A save after adding a custom Text field writes RNOT='' (empty value) into the file; D-10 / C-R1-01 class (empty fields are written)",
-      "routed_to": "record (D-10 / TM-B11 class, Saba batch)",
-      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written (TM-B11)"
+      "routed_to": "TM-B11 stage 1 round 45 (D-49)",
+      "user_decision": "Saba answers 2026-10-28 (policy.local.md) Q4: empty values are not written (TM-B11)",
+      "notes": []
     },
     {
       "round": 27,
@@ -5148,9 +5175,10 @@
       "status": "open",
       "round": 42,
       "title": "TM-B11 round must flip T1-10 (recording-tag-contract.test.ts pins the size-0 INFO write for empty keywords/category) and K-4 docs (ffprobe absent = empty)",
-      "routed_to": "TM-B11 round",
+      "routed_to": "TM-B11 stage 1 round 45 (D-49)",
       "notes": [
-        "C R42-4 (round 42): the empty Keywords field is still written as IKEY size 0 on every editor save; expected until TM-B11 / D-10 (Saba Q4)"
+        "C R42-4 (round 42): the empty Keywords field is still written as IKEY size 0 on every editor save; expected until TM-B11 / D-10 (Saba Q4)",
+        "C R44-4 (a): empty Keywords still written as IKEY= (size 0) by every single-file save; all three readers see it. Round 45 flips T1-10a/b"
       ]
     },
     {
@@ -5158,9 +5186,9 @@
       "id": "C-R42-01",
       "source": "C (c-round-42.json)",
       "severity": "low",
-      "status": "in_progress",
+      "status": "closed",
       "title": "B's Mp3tag reference R1 (round 42 task, docs/bugs/001 entry 23 **Reference:**) is not supported by the cited sources: the community thread only says custom fields become TXXX frames; docs.mp3tag.de/mapping says mappings can be changed and does not address a custom field named like a standard frame. Entry 23 states it as a fact",
-      "routed_to": "round 43 docs touch: entry 23 Reference rewritten to what the sources say, the 'one slot per name' sentence marked as B's unconfirmed inference",
+      "routed_to": "closed: 001 entry 23 Reference corrected (C R43-7 PASS, carried by hash R44-5), published d886bef",
       "notes": [
         "Round 43: 001 entry 23 corrected in working tree; C R43-7 PASS (re-read both Mp3tag URLs). Closes when round 44 publishes"
       ]
@@ -5233,9 +5261,9 @@
       "id": "C-R43-01",
       "source": "C (c-round-43.json)",
       "severity": "medium",
-      "status": "in_progress",
+      "status": "closed",
       "title": "Gate red: tests/renderer/components/schema-change-during-folder-load.test.ts (w7) mocks window.api.scanFolder (:315) to feed the save's stats refresh, which now goes to statFiles (reset mock -> []); renderer 319/320, verifyCommand rc=1. Planning gap (B3 did not own the test); not a product defect",
-      "routed_to": "round 44: one-line flip of :315 to statFiles mock"
+      "routed_to": "closed: round 44 (w7) flip to statFiles mock, C R44-1/R44-2/R44-3 PASS, published d886bef"
     },
     {
       "round": 43,
@@ -5244,7 +5272,10 @@
       "severity": "low",
       "status": "open",
       "title": "fs:stat-files uses stat (follows symlinks) and is not limited to the open folder: any .wav path or a .wav symlink returns its target's size/mtime. Allowed by D-48; scanFolder never lists symlinked WAVs, so the renderer never sends one",
-      "routed_to": "signal: lstat or restrict to folderPath as future hardening"
+      "routed_to": "signal: lstat or restrict to folderPath as future hardening",
+      "notes": [
+        "Root review R44 low #2 (RR-R44-02) same point: handler accepts any path; optional fix = require absolute paths (ELECTRON_IPC.md)"
+      ]
     },
     {
       "round": 43,
@@ -5272,6 +5303,42 @@
       "status": "open",
       "title": "Process: round 43 changed which window.api call the save flow uses but owned only the D-28 describe; B did not grep tests/ for other suites feeding the save's refresh via scanFolder ((w7)). The other scanFolder mocks serve Open Folder/Rescan/drop and were correctly untouched",
       "routed_to": "rule from round 44 (rules list)"
+    },
+    {
+      "round": 44,
+      "id": "RR-R44-01",
+      "source": "root-review (gates/round-44/review.md)",
+      "severity": "low",
+      "status": "open",
+      "title": "D-48 is recorded only in STATE_MANAGEMENT.md:26 and test names, not in the D-list of docs/bugs/001-save-and-selection-known-limits.md (D-39..D-47; D-28 also missing). Fix: one Georgian D-48 line naming refreshSavedFileStats and the fs:stat-files handler",
+      "routed_to": "next docs touch of docs/bugs/001"
+    },
+    {
+      "round": 44,
+      "id": "RR-R44-02",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "fs:stat-files accepts any path, not only paths inside the open folder (file-system.ts handler); not a regression (readMetadata/getAudioBuffer same); optional: require absolute paths",
+      "routed_to": "signal, merged with A-R43-01"
+    },
+    {
+      "round": 44,
+      "id": "RR-R44-03",
+      "source": "root-review",
+      "severity": "low",
+      "status": "open",
+      "title": "Chunk size 50 defined twice: STAT_FILES_CHUNK_SIZE (MetadataPanel.tsx) and MAX_STAT_FILES_PATHS (file-system.ts); a renderer-side change would make every chunk reject silently and only the main side is pinned (m5). Fix: shared constant in src/shared or a renderer test asserting 50",
+      "routed_to": "signal (backlog), candidate small round"
+    },
+    {
+      "round": 44,
+      "id": "RR-R44-04",
+      "source": "root-review",
+      "severity": "info",
+      "status": "open",
+      "title": "Intentional empty catch {} in refreshSavedFileStats (MetadataPanel.tsx) keeps a failed refresh silent; Biome passes; no change needed",
+      "routed_to": "signal"
     }
   ],
   "rounds": [
@@ -6218,7 +6285,7 @@
     {
       "round": 44,
       "task": "TM-B44 completion: (w7) one-line flip scanFolder -> statFiles mock (C-R43-01); round-43 tree carried hash-frozen",
-      "status": "planned",
+      "status": "published",
       "baseline": "cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42 + carried round-43 tree (13 files, sha256 listed in current-task.md)",
       "items": [
         "TM-B44"
@@ -6228,6 +6295,23 @@
         "RR-R19-01",
         "B-R18-01",
         "C-R42-01"
+      ],
+      "commit": "d886bef086628cd2b6a8efed3a7a98eeb8454480",
+      "result": "C PASS R44-1..R44-5 realVerified=true; bugs 0; renderer 320/320 main 98/98 E2E 7/7 (--retries=0 7/7); root review COMMIT OK (4 low/info signals RR-R44-01..04); published d886bef (rounds 43-44)"
+    },
+    {
+      "round": 45,
+      "task": "TM-B11 stage 1 (Saba Q4, D-10 -> D-49): empty text/tags values remove the INFO sub-chunk instead of writing size 0; T1-10a/b flip; K-4 docs",
+      "status": "planned",
+      "baseline": "d886bef086628cd2b6a8efed3a7a98eeb8454480 (clean)",
+      "items": [
+        "TM-B11"
+      ],
+      "findings": [
+        "C-R1-01",
+        "RR-R3-03",
+        "C-R27-02",
+        "B-R42-02"
       ]
     }
   ]

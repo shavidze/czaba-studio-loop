@@ -1,0 +1,97 @@
+cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42
+cf4e147 feat(tag-manager): verified loop rounds 42-42
+a5c6a6b feat(tag-manager): verified loop rounds 41-41
+e386cca feat(tag-manager): verified loop rounds 40-40
+ M .claude/primitives/ELECTRON_IPC.md
+ M .claude/primitives/STATE_MANAGEMENT.md
+ M docs/bugs/001-save-and-selection-known-limits.md
+ M src/main/ipc/channels.ts
+ M src/main/ipc/file-system.ts
+ M src/preload/index.d.ts
+ M src/preload/index.ts
+ M src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+ M tests/e2e/app-launch.spec.ts
+ M tests/main/file-system.test.ts
+ M tests/renderer/components/metadata-panel-batch-save.test.ts
+ M tests/renderer/components/schema-change-during-folder-load.test.ts
+ M tests/renderer/helpers/window-api-mocks.ts
+ M tests/renderer/setup.ts
+1	0	.claude/primitives/ELECTRON_IPC.md
+1	1	.claude/primitives/STATE_MANAGEMENT.md
+2	2	docs/bugs/001-save-and-selection-known-limits.md
+1	0	src/main/ipc/channels.ts
+45	2	src/main/ipc/file-system.ts
+1	0	src/preload/index.d.ts
+11	0	src/preload/index.ts
+9	6	src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+1	0	tests/e2e/app-launch.spec.ts
+56	1	tests/main/file-system.test.ts
+151	34	tests/renderer/components/metadata-panel-batch-save.test.ts
+1	1	tests/renderer/components/schema-change-during-folder-load.test.ts
+1	0	tests/renderer/helpers/window-api-mocks.ts
+1	0	tests/renderer/setup.ts
+diff --git a/tests/renderer/components/schema-change-during-folder-load.test.ts b/tests/renderer/components/schema-change-during-folder-load.test.ts
+index 00db1ee..36c49b4 100644
+--- a/tests/renderer/components/schema-change-during-folder-load.test.ts
++++ b/tests/renderer/components/schema-change-during-folder-load.test.ts
+@@ -312,7 +312,7 @@ describe("schema change during a pending folder load (D-40)", () => {
+     const write = createDeferred<undefined>();
+     const schemaRead = createDeferred<MetadataByPath>();
+     vi.mocked(window.api.writeMetadata).mockReturnValueOnce(write.promise);
+-    vi.mocked(window.api.scanFolder).mockResolvedValue([{ ...FILE_A, size: 2 }, FILE_A2]);
++    vi.mocked(window.api.statFiles).mockResolvedValue([{ ...FILE_A, size: 2 }]);
+     vi.mocked(window.api.readMetadata).mockResolvedValue({ ...NEW_A });
+     vi.mocked(window.api.readMetadataBatch).mockImplementation(async (paths, schema) =>
+       schemaRead.promise.then(() => readFor(paths, schema)),
+diff --git a/src/preload/index.d.ts b/src/preload/index.d.ts
+index ca12f0f..c8e7e22 100644
+--- a/src/preload/index.d.ts
++++ b/src/preload/index.d.ts
+@@ -9,6 +9,7 @@ import type {
+ interface ElectronAPI {
+   openFolderDialog: () => Promise<string | null>;
+   scanFolder: (path: string) => Promise<WavFileEntry[]>;
++  statFiles: (paths: string[]) => Promise<WavFileEntry[]>;
+   loadSchema: () => Promise<FieldDefinition[]>;
+   saveSchema: (fields: FieldDefinition[]) => Promise<void>;
+   readMetadata: (path: string, schema: FieldDefinition[]) => Promise<WavMetadata>;
+diff --git a/src/preload/index.ts b/src/preload/index.ts
+index 1f36061..d4b7a59 100644
+--- a/src/preload/index.ts
++++ b/src/preload/index.ts
+@@ -18,6 +18,17 @@ const api = {
+     }>
+   > => ipcRenderer.invoke(IPC_CHANNELS.SCAN_FOLDER, path),
+ 
++  statFiles: (
++    paths: string[],
++  ): Promise<
++    Array<{
++      name: string;
++      path: string;
++      size: number;
++      modifiedAt: string;
++    }>
++  > => ipcRenderer.invoke(IPC_CHANNELS.STAT_FILES, paths),
++
+   loadSchema: (): Promise<unknown[]> => ipcRenderer.invoke(IPC_CHANNELS.LOAD_SCHEMA),
+ 
+   saveSchema: (fields: unknown[]): Promise<void> =>
+clean package.json
+clean package-lock.json
+clean .github/workflows/release.yml
+clean src/renderer/src/styles/app.css
+ba07f735494a1c55094a0b91553adae2ccc6719c1dafc89e4b1255222e593776  .claude/primitives/ELECTRON_IPC.md
+e4b812c2413164285d0605dc5283c607612f3b2b1c7acdec96f6756ea07527e5  .claude/primitives/STATE_MANAGEMENT.md
+f37fca5f82586eda6cece6480e77e284e8068e9b1e4d80315590007feedbc4c6  docs/bugs/001-save-and-selection-known-limits.md
+c78553102bf9f4281068688ca418f39b80aad47f2dab281f6ed10155cd22c09f  src/main/ipc/channels.ts
+d0c00ff2fe74853e96e50991be3da04f952b18b3aeccd8f99bf35674e68c8ba1  src/main/ipc/file-system.ts
+2664c47bfeabf46ab386328c9619538f0b81d6d4a3dc033574ae41d02d7b2126  src/preload/index.d.ts
+be08bbe03943a1d11dd09f164ee1a91e595c2d58dfffa4705e54d75183037711  src/preload/index.ts
+9e0cf8291249851d8a042944df9f02b6fafdc1997b09673c9379d9deb98b93be  src/renderer/src/components/metadata-editor/MetadataPanel.tsx
+32320ea43d84ab0278997d35f5db25c76ee4af58d5c8d9fceae2ec5af4d125ba  tests/e2e/app-launch.spec.ts
+37d941d5a15dd0fb701969b035df2798399c308e59b186509291cef3f57d9342  tests/main/file-system.test.ts
+f64fd3cfb783718faa405d81e9b19b0bfa2631186bd12e55ce400e4a73c8e38d  tests/renderer/components/metadata-panel-batch-save.test.ts
+4f4b3042311f03adec8819a09eb14b34e9a848bef525058c6cf0a8e78237179b  tests/renderer/components/schema-change-during-folder-load.test.ts
+94bf4b1feb4b00b8848a4f68ece864a29479f01e7a7c653b68df22a79a24f545  tests/renderer/helpers/window-api-mocks.ts
+9850083f4944f6a4e29f206de40feb599089b4b6e72aa2724f7fd3ff66c13d6f  tests/renderer/setup.ts

@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T09:36:32.270Z)
+# Active loop summary (2026-10-28T09:50:52.995Z)
 
-- backlog.json 412 KB -> active view 104 KB
-- status: G_ROOT_GATE round 43
+- backlog.json 417 KB -> active view 104 KB
+- status: G_ROOT_GATE round 44
 - servers: `{"servers":"none or skipped"}`
-- last publication: cf4e147d2516a549b4a8c6ae7eebbf65c51a6e42 (rounds 42-42)
-- last root gate: round 43 skipped - C taskStatus FAIL
+- last publication: d886bef086628cd2b6a8efed3a7a98eeb8454480 (rounds 43-44)
+- last root gate: round 44 published - commit d886bef086628cd2b6a8efed3a7a98eeb8454480 pushed
 
-## Current items: TM-T1, TM-T1-DUP, TM-B44
+## Current items: TM-B44
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -199,6 +199,11 @@
 - A-R42-01 / info / open / A hand-edited schema.json whose standard field lacks the standard flag is treated as custom, so its own standard twin shows a warning (e.g. 
 - A-R42-02 / info / open / T-e tests the enable-branch guard by mocking useSchemaStore.getState once (stale click); from the UI the path is reachable only through a ra
 - B-R42-03 / info / open / docs/learning/decisions.md:76 says 'contextBridge (13 მეთოდი)'; window.api has 16 methods at cf4e147 and 17 after round 43 (statFiles). Stal
+- C-R43-01 / medium / in_progress / Gate red: tests/renderer/components/schema-change-during-folder-load.test.ts (w7) mocks window.api.scanFolder (:315) to feed the save's stat
+- A-R43-01 / low / open / fs:stat-files uses stat (follows symlinks) and is not limited to the open folder: any .wav path or a .wav symlink returns its target's size/
+- A-R43-02 / info / open / Test gaps: main stat-files tests cover ENOENT but not EACCES; renderer (y) does not assert re-read order (covered by (x))
+- A-R43-03 / info / open / One E2E launch flake 'first window did not appear within 60000 ms' (folder-workflow.spec.ts:29, retries on, passed on retry); C saw 7/7 with
+- B-R43-01 / low / open / Process: round 43 changed which window.api call the save flow uses but owned only the D-28 describe; B did not grep tests/ for other suites 
 
 ## Other open items
 - TM-B08 [todo] STANDARD_FIELDS declares artists riffChunkId IART, but node-taglib-sharp writes performers as one ISTR sub-chunk per value; ffprobe shows ar
