@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-28T04:46:13.275Z)
+# Active loop summary (2026-10-28T05:19:23.746Z)
 
-- backlog.json 358 KB -> active view 102 KB
-- status: G_ROOT_GATE round 39
+- backlog.json 366 KB -> active view 100 KB
+- status: G_ROOT_GATE round 40
 - servers: `{"servers":"none or skipped"}`
-- last publication: 24e9723557fb82d572a655136ff7a0849a8e61f3 (rounds 39-39)
-- last root gate: round 39 published - commit 24e9723557fb82d572a655136ff7a0849a8e61f3 pushed
+- last publication: e386cca619e44be8dc3fe0217600beae9608d804 (rounds 40-40)
+- last root gate: round 40 published - commit e386cca619e44be8dc3fe0217600beae9608d804 pushed
 
-## Current items: TM-B40, TM-B41, TM-B42
+## Current items: TM-B41, TM-B42
 
 ## Open findings
 - B-R0-03 / low / open / node-taglib-sharp empty data chunk boundary bug (TM-B05)
@@ -169,26 +169,23 @@
 - RR-R35-02 / low / open / Busy state can last forever if onSave never settles (scan that never finishes, QA-R33-03): Applying... until Back / Open Folder / Close Fold
 - RR-R35-03 / info / open / A superseded schema re-read drops its own 'Failed to read N files' toast (MetadataPanel.tsx:249). Correct: the later Done re-reads every fil
 - RR-R35-05 / info / open / Architecture signal: schema re-read guards are spread (schemaReadIdRef, folderLoadId, write generations, isMountedRef); a file-store action 
-- C-R36-01 / low / open / Helper mutants HM-1 (uniqueness throw removed), HM-2 (string === -> includes), HM-3 (no trim) survive 289/289; equivalent on all 257 current
-- RR-R36-02 / low / open / getButtonByText has no visibility filter and ignores aria-label; safe because of the unique-match throw, but tests no longer show accessible
-- RR-R36-03 / low / open / getButtonByText RegExp with g/y keeps lastIndex between calls; no current caller uses g/y (C probe)
-- RR-R36-04 / low / open / TESTING.md §6 names a loop agent ('B-ის გაზომვით'); write 'measured on one runner'
 - RR-R36-05 / info / open / Architecture signal: Biome checks only src/ (tests/ unlinted) -> same as TM-B06; a shared clickButton(name) helper would replace ~8 per-suit
 - R36-A-01 / low / open / getButtonByText does not collapse inner whitespace; unreachable today (C probe sameAsRole=true on all 257 lookups)
-- R36-A-02 / low / open / RegExp g/y lastIndex (= RR-R36-03); unreachable today
 - B-R36-01 / info / open / The old file listing stays clickable while a folder scan is pending; locking/blanking it would be a new UX (Saba-question candidate). D-44 m
-- C-R37-01 / low / open / PM-6 (pruned selection rebuilt in files order instead of the existing order) survives 7/7. It is equivalent today: the order is used only at
 - RR-R37-02 / low / open / selection-after-folder-switch.test.ts uses double quotes while biome.json sets quoteStyle single; Biome checks only src/ (same class as RR-R
 - RR-R37-03 / info / open / Architecture signal: selection hygiene is spread across setFiles (D-44), selectRange's visible filter and FileList's anchor ref. A store hel
 - B-R37-01 / info / open / After Done succeeds the schema editor unmounts and focus goes to <body>; returning focus to the Customize Fields button (APG dialog-close co
-- B-R37-02 / info / open / Fact: in jsdom a focused button that becomes natively disabled keeps document.activeElement; focus-loss bugs cannot be reproduced in Vitest 
 - B-R37-03 / info / open / While Applying..., Inputs and Add Field inside the fieldset are at 0.6 x 0.5 = 0.3 effective opacity (their own disabled:opacity-50 stacks o
-- C-R38-01 / low / open / CM-3 (Done aria-disabled={isApplying}, fields.length === 0 dropped) survives 304/304: no test pins aria-disabled='true' on an empty-field-li
 - RR-R38-01 / low / open / button.tsx: a Button with aria-disabled='true' still gets its variant hover: colours; review says native disabled got no mouse events so thi
 - RR-R38-02 / low / open / SchemaEditor handleSave reads isApplying from the render closure; correct for real clicks (React flushes before the next event, (f2) covers 
-- RR-R38-03 / low / open / schema-editor-done-busy (b1) name still says 'is disabled' although it now checks aria-disabled
 - RR-R38-04 / low / open / SchemaEditor middle reorder arrows inside the disabled fieldset keep hover:text-foreground while Applying (visual cue only; clicks blocked n
 - RR-R38-05 / info / open / Architecture signal: the focusable-but-disabled pattern (aria-disabled prop + separate handler guard) now repeats in SchemaEditor and Metada
+- RR-R39-02 / low / open / (x8) is a pure store test placed in a component suite (selection-after-folder-switch.test.ts); could move to tests/renderer/stores/file-stor
+- RR-R39-03 / info / open / Architecture signal: a sibling queryButtonByText returning null would let absence checks avoid getByRole; store-only checks belong in stores
+- A-R39-01 / low / open / (f9) toHaveTextContent('Done') is a substring match; /^Done$/ would be stricter; C mutants C-4/C-5/C-7 still killed by (f9)
+- A-R39-02 / info / open / TESTING.md §6 mentions trim only for strings; the helper also tests RegExp against the trimmed text ((q3)/C-3 pin it) and a RegExp may match
+- B-R39-01 / info / open / Fact: Chromium matches :hover on natively disabled buttons; ea4a1cb (native disabled) and 24e9723 (aria-disabled) show the same hover backgr
+- B-R39-02 / info / open / Fieldset-disabled reorder arrows keep cursor default while Applying (Add Field Button shows not-allowed); pre-existing in ea4a1cb too
 
 ## Other open items
 - TM-T0 [in_progress] T-0 Linux-verifiable baseline: clean checkout check + E2E green on ubuntu-24.04

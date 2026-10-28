@@ -1,0 +1,141 @@
+diff --git a/docs/bugs/001-save-and-selection-known-limits.md b/docs/bugs/001-save-and-selection-known-limits.md
+index 0fc229b..f5f9321 100644
+--- a/docs/bugs/001-save-and-selection-known-limits.md
++++ b/docs/bugs/001-save-and-selection-known-limits.md
+@@ -21,7 +21,7 @@
+ - **D-42:** schema editor-ის `Done` pending-ის დროს busy-ა. `SchemaEditor`-ს აქვს state `isApplying` (`SchemaEditor.tsx:45`, `useState(false)`, mount effect-ის შემდეგ). `handleSave` (`:137-149`) ცარიელ `fields`-ზე ისევ მაშინვე ბრუნდება, მერე `setIsApplying(true)`-ს იძახებს (`:139`) და `await onSave?.();`-ს `try`-ში ელოდება. reject-ზე `catch` `if (isMountedRef.current) setIsApplying(false);`-ს იძახებს (`:143`) და ბრუნდება: editor ღია რჩება, `onClose` არ იძახება, unhandled rejection აღარ არის, toast აქ არ ჩნდება (read-ის შეცდომებს `MetadataPanel` თვითონ აჩვენებს). წარმატებაზე `if (!isMountedRef.current) return;` (`:146`, D-41), `setIsApplying(false);` (`:147`) და `onClose();` (`:148`). dependencies D-42-ში `[fields, onSave, onClose]` დარჩა; D-45-მა `isApplying` დაამატა (`:149`). რედაქტირების არე (`<div className="flex-1 overflow-y-auto p-3">`) შიგნით `<fieldset disabled={isApplying} className="min-w-0 space-y-4 disabled:opacity-60">`-ს შეიცავს (`:165`, დახურვა `:271`), რომელიც სამივე სექციას (Active Fields, Hidden Standard Fields, Add Custom Field) ფარავს: pending-ის დროს ველის სახელი, RIFF ID, type `select`, Add Field, ისრები, trash/hide და hidden standard-ის ღილაკები disabled-ია და არე მკრთალია. `legend` არ არის; Tailwind preflight fieldset-ის border-ს, margin-ს და padding-ს აშორებს, `min-w-0` კი default `min-inline-size`-ს. `Done` (`:280-283`) კითხულობს `Applying...`-ს pending-ის დროს, სხვა შემთხვევაში `Done`-ს; მისი "მიუწვდომელი" მდგომარეობა round 38-დან D-45-შია (`aria-disabled` + `aria-busy` native `disabled`-ის ნაცვლად). Back header-შია, fieldset-ის გარეთ, და ყოველთვის enabled რჩება. ჩანაწერი (18).
+ - **D-43:** ბოლო `Done` იმარჯვებს. `MetadataPanel`-ს აქვს `schemaReadIdRef` (`MetadataPanel.tsx:225`, `useRef(0)`, უშუალოდ `handleSchemaChanged`-ის ზემოთ, `if (showSchemaEditor)`-ის early return-მდე). `handleSchemaChanged`-ის პირველი ორი ხაზი, D-40-ის ლოდინამდე, არის `schemaReadIdRef.current += 1;` და `const schemaReadId = schemaReadIdRef.current;` (`:227-228`); ლოდინი ამის შემდეგ მოდის (`:229`). chunk-ების loop-ის შემდეგ, D-39(b)-ის guard-ის (`:250`) უშუალოდ წინ, `if (schemaReadId !== schemaReadIdRef.current) return;` (`:249`): თუ ამ re-read-ის შემდეგ სხვა `Done` დაიწყო, ეს re-read არც `setMetadata`-ს, არც `setEditingMetadata`-ს და არც toast-ს არ იძახებს, რა რიგითაც არ უნდა დასრულდეს read-ები. ერთი `Done` თავის re-read-ს ისევ იყენებს. D-40-ის ლოდინი, D-34-ის generation-ები, toast, dependencies `[setMetadata, setEditingMetadata, showToast]`, `handleSave` და sync effect უცვლელია. ჩანაწერები (18), (19).
+ - **D-44:** selection ჩამოთვლილი ფაილების შიგნით რჩება. `useFileStore.setFiles(files)` (`file-store.ts:55`) private ფუნქციას `withListedSelection` (`:242-250`) იძახებს: `selectedPaths`-ში რჩება მხოლოდ ის path-ები, რომლებიც ახალ `files`-შია, არსებული რიგით. თუ არაფერი ამოიშალა, update-ში `selectedPaths` არ შედის და array identity ინახება (ზედმეტი `MetadataPanel` sync არ ხდება). load-ის დასაწყისის `clearSelection()`, `selectRange`, `selectAll` და D-31-ის anchor-ის წესები უცვლელია. უარყოფილი: selection-ის სრული გაწმენდა load-ის გამოყენებისას (Rescan-ის დროს იმავე სიაში დარჩენილ row-ზე შეგნებულ click-ს დაკარგავდა). ჩანაწერი (20).
+-- **D-45:** `Done` და Save Tags / `Save to N files` "მიუწვდომელს" `aria-disabled`-ით აჩვენებენ native `disabled`-ის ნაცვლად, ამიტომ focused ღილაკი focus-ს აღარ კარგავს. `Done` (`SchemaEditor.tsx:280-281`): `aria-disabled={isApplying || fields.length === 0}` და `aria-busy={isApplying}`; `handleSave` მაშინვე ბრუნდება, როცა `fields` ცარიელია ან `isApplying` true-ა (`:138`), dependencies `[fields, isApplying, onSave, onClose]` (`:149`). Save Tags (`MetadataPanel.tsx:373-374`): `aria-disabled={isSaving || !isDirty}` და `aria-busy={isSaving}`; `handleSave` მაშინვე ბრუნდება, როცა `selectedFiles` ცარიელია ან `isSaveBlocked()` true-ა (`:143`). `isSaveBlocked` ფაილის ბოლოს დამატებული private module-level ფუნქციაა, რომელიც `useMetadataStore.getState()`-ს სინქრონულად კითხულობს (`isSaving || !isDirty`), ამიტომ `useCallback`-ის dependencies არ იცვლება. `Button` (`ui/button.tsx:35`) იღებს `aria-disabled:opacity-50 aria-disabled:cursor-not-allowed`-ს, native disabled-ის იგივე იერს; `aria-disabled="true"`-ის გარეშე Button-ზე გავლენა არ აქვს. reorder ისრები native `disabled`-ს საკუთარ კიდეზე ინარჩუნებენ (`index === 0` / ბოლო), class კი private `reorderArrowClassName(isEdge)`-დან მოდის (`SchemaEditor.tsx:186`, `:194`): საკუთარი `opacity-30` მხოლოდ კიდის ისარს აქვს, ამიტომ Applying-ის დროს შუა ისარი fieldset-ის 60%-ზეა, კიდის ისარი 18%-ზე. fieldset, Back, label-ები `Applying...` / `Saving...`, D-41/D-42/D-43 და D-29/D-30/D-39 უცვლელია. ჩანაწერი (21).
++- **D-45:** `Done` და Save Tags / `Save to N files` "მიუწვდომელს" `aria-disabled`-ით აჩვენებენ native `disabled`-ის ნაცვლად, ამიტომ focused ღილაკი focus-ს აღარ კარგავს. `Done` (`SchemaEditor.tsx:280-281`): `aria-disabled={isApplying || fields.length === 0}` და `aria-busy={isApplying}`; `handleSave` მაშინვე ბრუნდება, როცა `fields` ცარიელია ან `isApplying` true-ა (`:138`), dependencies `[fields, isApplying, onSave, onClose]` (`:149`). Save Tags (`MetadataPanel.tsx:373-374`): `aria-disabled={isSaving || !isDirty}` და `aria-busy={isSaving}`; `handleSave` მაშინვე ბრუნდება, როცა `selectedFiles` ცარიელია ან `isSaveBlocked()` true-ა (`:143`). `isSaveBlocked` ფაილის ბოლოს დამატებული private module-level ფუნქციაა, რომელიც `useMetadataStore.getState()`-ს სინქრონულად კითხულობს (`isSaving || !isDirty`), ამიტომ `useCallback`-ის dependencies არ იცვლება. `Button` (`ui/button.tsx:36`) იღებს `aria-disabled:opacity-50 aria-disabled:cursor-not-allowed`-ს, native disabled-ის იგივე იერს; `aria-disabled="true"`-ის გარეშე Button-ზე გავლენა არ აქვს. reorder ისრები native `disabled`-ს საკუთარ კიდეზე ინარჩუნებენ (`index === 0` / ბოლო), class კი private `reorderArrowClassName(isEdge)`-დან მოდის (`SchemaEditor.tsx:186`, `:194`): საკუთარი `opacity-30` მხოლოდ კიდის ისარს აქვს, ამიტომ Applying-ის დროს შუა ისარი fieldset-ის 60%-ზეა, კიდის ისარი 18%-ზე. fieldset, Back, label-ები `Applying...` / `Saving...`, D-41/D-42/D-43 და D-29/D-30/D-39 უცვლელია. ჩანაწერი (21).
+ 
+ სტატუსები: `ცნობილი შეზღუდვა` ნიშნავს, რომ ქცევა გადაწყვეტილებას მიჰყვება და ცვლილება დაგეგმილი არ არის. `Saba-ს კითხვა` ნიშნავს, რომ ქცევის შეცვლაზე Saba წყვეტს. `გასწორდა` ნიშნავს, რომ ქცევა შეიცვალა და ტესტით არის დაცული.
+ 
+@@ -314,7 +314,7 @@
+ 
+ - **ID:** RR-R35-01, RR-R35-04, C-R35-01, RR-R36-01, TM-B40
+ - **Severity:** low
+-- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:138` (`handleSave`: `isApplying`-ის guard), `:149` (dependencies), `:186`, `:194` (ისრების `className={reorderArrowClassName(…)}`), `:280-281` (`Done`-ის `aria-disabled` და `aria-busy`), `reorderArrowClassName` (ფაილის ბოლოს); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:143` (`handleSave`: `isSaveBlocked()`-ის guard), `:373-374` (Save Tags-ის `aria-disabled` და `aria-busy`), `isSaveBlocked` (ფაილის ბოლოს); `src/renderer/src/components/ui/button.tsx:35` (`aria-disabled:` classes)
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:138` (`handleSave`: `isApplying`-ის guard), `:149` (dependencies), `:186`, `:194` (ისრების `className={reorderArrowClassName(…)}`), `:280-281` (`Done`-ის `aria-disabled` და `aria-busy`), `reorderArrowClassName` (ფაილის ბოლოს); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:143` (`handleSave`: `isSaveBlocked()`-ის guard), `:373-374` (Save Tags-ის `aria-disabled` და `aria-busy`), `isSaveBlocked` (ფაილის ბოლოს); `src/renderer/src/components/ui/button.tsx:36` (`aria-disabled:` classes)
+ - **მიღწევადობა:** ყოველი keyboard ან screen-reader მომხმარებელი, რომელიც `Done`-ს ან Save Tags-ს Enter-ით / Space-ით აჭერს. Save Tags ყოველი წარმატებული save-ის შემდეგ `!isDirty`-ით მიუწვდომელი ხდება, ამიტომ focus ყოველ save-ზე იკარგებოდა.
+ - **Reproduction (გასწორებამდე):**
+   1. (a) focus (RR-R35-01). საწყისი მდგომარეობა: folder გახსნილია, ფაილი მონიშნულია, Category-ში ტექსტი აკრეფილია (ან `Customize Fields` ღიაა და `Open Folder`-ის scan pending-ია). მოქმედება: Tab Save Tags-მდე (ან `Done`-მდე) → Enter. შედეგი real app-ში: ღილაკი native `disabled` ხდებოდა და `document.activeElement` `<body>` ხდებოდა; მომხმარებელს გვერდის თავიდან უნდა გაევლო Tab. jsdom ამას არ აჩვენებს: იქ native `disabled` ღილაკი focus-ს ინარჩუნებს, ამიტომ focus-ის მტკიცება მხოლოდ real app-შია.
+diff --git a/docs/design/component-specs.md b/docs/design/component-specs.md
+index bf0d384..dcfafe9 100644
+--- a/docs/design/component-specs.md
++++ b/docs/design/component-specs.md
+@@ -23,11 +23,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+ 
+ | Variant | Background | Text | Hover | Border |
+ |---------|------------|------|-------|--------|
+-| `primary` | `bg-brand` | `text-brand-foreground` | `hover:bg-brand-hover` | none |
+-| `secondary` | `bg-surface` | `text-foreground` | `hover:bg-elevated` | `border border-outline` |
+-| `ghost` | transparent | `text-foreground` | `hover:bg-elevated` | none |
+-| `accent` | `bg-accent` | `text-white` | `hover:bg-accent/90` | none |
+-| `destructive` | `bg-destructive` | `text-white` | `hover:bg-destructive/90` | none |
++| `primary` | `bg-brand` | `text-brand-foreground` | `enabled:not-aria-disabled:hover:bg-brand-hover` | none |
++| `secondary` | `bg-surface` | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | `border border-outline` |
++| `ghost` | transparent | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | none |
++| `accent` | `bg-accent` | `text-white` | `enabled:not-aria-disabled:hover:bg-accent/90` | none |
++| `destructive` | `bg-destructive` | `text-white` | `enabled:not-aria-disabled:hover:bg-destructive/90` | none |
+ 
+ **Sizes:**
+ 
+@@ -44,8 +44,11 @@ inline-flex items-center justify-center gap-1.5 rounded-md font-medium
+ transition-colors duration-150
+ focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand
+ disabled:opacity-50 disabled:cursor-not-allowed
++aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
+ ```
+ 
++Hover colours apply only while the button can act: neither `disabled` nor `aria-disabled="true"` (D-46).
++
+ **Default `type="button"`** is set automatically.
+ 
+ ---
+diff --git a/docs/design/style-guide.md b/docs/design/style-guide.md
+index 8b50317..bf66bf9 100644
+--- a/docs/design/style-guide.md
++++ b/docs/design/style-guide.md
+@@ -212,7 +212,8 @@ All icons from `lucide-react`. Tree-shakeable, consistent 24x24 viewbox.
+ 
+ ### Hover
+ 
+-- **Buttons:** Variant-specific background shift
++- **Buttons:** Variant-specific background shift, only while the button can act: `enabled:not-aria-disabled:hover:…` (D-46)
++- **Icon buttons that can be disabled** (for example inside a disabled `fieldset`): `enabled:hover:…`
+ - **List rows:** `hover:bg-elevated`
+ - **Text links:** `hover:text-foreground` (from muted/dim)
+ - **Borders:** `hover:border-outline-hover`
+@@ -228,8 +229,11 @@ All icons from `lucide-react`. Tree-shakeable, consistent 24x24 viewbox.
+ 
+ ```
+ disabled:opacity-50 disabled:cursor-not-allowed
++aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
+ ```
+ 
++- A `disabled` or `aria-disabled="true"` button keeps its resting colours on hover: no hover shift (D-46).
++
+ ---
+ 
+ ## Scrollbars
+diff --git a/src/renderer/src/components/schema/SchemaEditor.tsx b/src/renderer/src/components/schema/SchemaEditor.tsx
+index 86b0621..487c96b 100644
+--- a/src/renderer/src/components/schema/SchemaEditor.tsx
++++ b/src/renderer/src/components/schema/SchemaEditor.tsx
+@@ -199,7 +199,7 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+                     <button
+                       type="button"
+                       onClick={() => removeField(field.key)}
+-                      className="text-destructive hover:text-destructive/80 p-0.5"
++                      className="text-destructive enabled:hover:text-destructive/80 p-0.5"
+                     >
+                       <Trash2 className="h-3 w-3" />
+                     </button>
+@@ -207,7 +207,7 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+                     <button
+                       type="button"
+                       onClick={() => handleToggleStandard(field)}
+-                      className="text-dim hover:text-destructive p-0.5"
++                      className="text-dim enabled:hover:text-destructive p-0.5"
+                       title="Hide standard field"
+                     >
+                       <X className="h-3 w-3" />
+@@ -227,7 +227,7 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+                     key={field.key}
+                     type="button"
+                     onClick={() => handleToggleStandard(field)}
+-                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim hover:text-foreground hover:border-brand transition-colors"
++                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
+                   >
+                     + {field.label}
+                   </button>
+@@ -288,5 +288,5 @@ export function SchemaEditor({ onClose, onSave }: SchemaEditorProps): React.Reac
+ }
+ 
+ function reorderArrowClassName(isEdge: boolean): string {
+-  return cn('text-dim hover:text-foreground p-0.5', isEdge && 'opacity-30');
++  return cn('text-dim enabled:hover:text-foreground p-0.5', isEdge && 'opacity-30');
+ }
+diff --git a/src/renderer/src/components/ui/button.tsx b/src/renderer/src/components/ui/button.tsx
+index ab0215e..7dacfea 100644
+--- a/src/renderer/src/components/ui/button.tsx
++++ b/src/renderer/src/components/ui/button.tsx
+@@ -7,11 +7,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+ }
+ 
+ const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
+-  primary: 'bg-brand text-brand-foreground hover:bg-brand-hover',
+-  secondary: 'bg-surface text-foreground border border-outline hover:bg-elevated',
+-  ghost: 'text-foreground hover:bg-elevated',
+-  accent: 'bg-accent text-white hover:bg-accent/90',
+-  destructive: 'bg-destructive text-white hover:bg-destructive/90',
++  primary: 'bg-brand text-brand-foreground enabled:not-aria-disabled:hover:bg-brand-hover',
++  secondary:
++    'bg-surface text-foreground border border-outline enabled:not-aria-disabled:hover:bg-elevated',
++  ghost: 'text-foreground enabled:not-aria-disabled:hover:bg-elevated',
++  accent: 'bg-accent text-white enabled:not-aria-disabled:hover:bg-accent/90',
++  destructive: 'bg-destructive text-white enabled:not-aria-disabled:hover:bg-destructive/90',
+ };
+ 
+ const sizeStyles: Record<NonNullable<ButtonProps['size']>, string> = {

@@ -1,0 +1,530 @@
+# Czaba Tag Manager - Component Specs
+
+Tech stack: React 19 + TypeScript strict + Tailwind CSS v4 + Lucide React icons
+
+All UI components follow the `forwardRef` pattern with `cn()` class merging.
+
+---
+
+## UI Primitives (`src/renderer/src/components/ui/`)
+
+### Button
+
+**File:** `button.tsx`
+
+```typescript
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'accent' | 'destructive';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
+}
+```
+
+**Variants:**
+
+| Variant | Background | Text | Hover | Border |
+|---------|------------|------|-------|--------|
+| `primary` | `bg-brand` | `text-brand-foreground` | `enabled:not-aria-disabled:hover:bg-brand-hover` | none |
+| `secondary` | `bg-surface` | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | `border border-outline` |
+| `ghost` | transparent | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | none |
+| `accent` | `bg-accent` | `text-white` | `enabled:not-aria-disabled:hover:bg-accent/90` | none |
+| `destructive` | `bg-destructive` | `text-white` | `enabled:not-aria-disabled:hover:bg-destructive/90` | none |
+
+**Sizes:**
+
+| Size | Padding | Font |
+|------|---------|------|
+| `sm` | `px-2.5 py-1` | `text-xs` |
+| `md` | `px-4 py-2` | `text-sm` |
+| `lg` | `px-6 py-3` | `text-base` |
+| `icon` | `p-2` | inherits |
+
+**Base classes:**
+```
+inline-flex items-center justify-center gap-1.5 rounded-md font-medium
+transition-colors duration-150
+focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand
+disabled:opacity-50 disabled:cursor-not-allowed
+aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
+```
+
+Hover colours apply only while the button can act: neither `disabled` nor `aria-disabled="true"` (D-46).
+
+**Default `type="button"`** is set automatically.
+
+---
+
+### Input
+
+**File:** `input.tsx`
+
+```typescript
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+}
+```
+
+**Structure:**
+```
+<div class="space-y-1">
+  [label]  text-xs font-medium text-muted
+  [input]  w-full px-3 py-1.5 rounded-md text-sm
+           bg-background border border-outline
+           text-foreground placeholder:text-dim
+           focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand
+           disabled:opacity-50 disabled:cursor-not-allowed
+  [error]  text-xs text-destructive
+</div>
+```
+
+**Error state:** `border-destructive focus:ring-destructive`
+
+---
+
+### Select
+
+**File:** `select.tsx`
+
+```typescript
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  options: Array<{ value: string; label: string }>;
+}
+```
+
+**Structure:**
+```
+<div class="space-y-1">
+  [label]   text-xs font-medium text-muted
+  [select]  w-full px-3 py-1.5 rounded-md text-sm
+            bg-background border border-outline text-foreground
+            focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand
+</div>
+```
+
+---
+
+### Badge
+
+**File:** `badge.tsx`
+
+```typescript
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: 'default' | 'brand' | 'accent' | 'positive' | 'destructive' | 'muted';
+}
+```
+
+**Variants:**
+
+| Variant | Background | Text |
+|---------|------------|------|
+| `default` | `bg-elevated` | `text-foreground` |
+| `brand` | `bg-brand/15` | `text-brand` |
+| `accent` | `bg-accent/15` | `text-accent` |
+| `positive` | `bg-positive/15` | `text-positive` |
+| `destructive` | `bg-destructive/15` | `text-destructive` |
+| `muted` | `bg-muted-bg` | `text-muted` |
+
+**Base classes:**
+```
+inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium
+```
+
+---
+
+### Toast
+
+**File:** `toast.tsx`
+
+Non-forwardRef functional component. Auto-dismisses after 3 seconds.
+
+```typescript
+// Connected to useMetadataStore (toastMessage, toastType, hideToast)
+```
+
+**Structure:**
+```
+<div class="fixed bottom-20 right-4 z-50 flex items-center gap-2
+            rounded-lg px-4 py-3 border shadow-lg
+            transition-all animate-in slide-in-from-bottom-4">
+  [icon]     h-4 w-4 shrink-0 (CheckCircle | XCircle)
+  [message]  text-sm
+  [close]    X icon, h-3.5 w-3.5
+</div>
+```
+
+**Type styles:**
+
+| Type | Classes |
+|------|---------|
+| `success` | `bg-surface border-positive/30 text-positive` |
+| `error` | `bg-surface border-destructive/30 text-destructive` |
+
+---
+
+### TagsInput
+
+**File:** `metadata-editor/TagsInput.tsx`
+
+```typescript
+interface TagsInputProps {
+  label?: string;
+  value: string[];
+  onChange: (tags: string[]) => void;
+  placeholder?: string;
+}
+```
+
+**Behavior:**
+- Enter or comma adds a tag
+- Backspace on empty input removes last tag
+- Duplicate tags are ignored
+
+**Container:**
+```
+flex flex-wrap gap-1 px-2 py-1.5 rounded-md min-h-[34px]
+bg-background border border-outline
+focus-within:ring-1 focus-within:ring-brand focus-within:border-brand
+```
+
+**Tag chip:**
+```
+inline-flex items-center gap-0.5 rounded-sm
+bg-brand/15 text-brand px-1.5 py-0.5 text-xs
+```
+
+**Inline input:**
+```
+flex-1 min-w-[80px] bg-transparent text-sm text-foreground
+placeholder:text-dim outline-none
+```
+
+---
+
+## Layout Components (`src/renderer/src/components/layout/`)
+
+### AppLayout
+
+**File:** `AppLayout.tsx`
+
+```typescript
+interface AppLayoutProps {
+  sidebar: ReactNode;   // FolderBrowser
+  main: ReactNode;      // FileList
+  editor: ReactNode;    // MetadataPanel
+  player: ReactNode;    // AudioPlayer
+}
+```
+
+**Layout:**
+```
+┌─────────────────────────────────────────┐
+│          TitleBar (h-8, 32px)           │
+├──────┬─────────────────────┬────────────┤
+│ w-60 │      flex-1         │    w-80    │
+│      │                     │            │
+│ Side │       Main          │   Editor   │
+│ bar  │                     │            │
+│      │                     │            │
+├──────┴─────────────────────┴────────────┤
+│        Player footer (h-16, 64px)       │
+└─────────────────────────────────────────┘
+```
+
+**Panel classes:**
+
+| Panel | Classes |
+|-------|---------|
+| Root | `flex flex-col h-[calc(100vh-32px)]` |
+| Content row | `flex flex-1 min-h-0` |
+| Sidebar | `w-60 shrink-0 border-r border-outline bg-surface overflow-y-auto` |
+| Main | `flex-1 min-w-0 flex flex-col overflow-hidden` |
+| Editor | `w-80 shrink-0 border-l border-outline bg-surface overflow-y-auto` |
+| Footer | `h-16 shrink-0 border-t border-outline bg-surface` |
+
+---
+
+### TitleBar
+
+**File:** `TitleBar.tsx`
+
+Custom frameless window titlebar (Electron `frame: false`).
+
+**Layout:**
+```
+[CZABA Tag Manager] ──────────── [─] [□] [✕]
+```
+
+**Container:** `flex items-center justify-between h-8 bg-surface border-b border-outline select-none draggable`
+
+**Brand section:**
+- "CZABA": `text-brand font-bold text-xs tracking-wider`
+- "Tag Manager": `text-muted text-xs`
+
+**Window controls (`.no-drag`):**
+
+| Button | Hover |
+|--------|-------|
+| Minimize (`Minus`) | `hover:bg-elevated` |
+| Maximize (`Square`) | `hover:bg-elevated` |
+| Close (`X`) | `hover:bg-destructive` |
+
+All: `px-3 h-8 text-muted hover:text-foreground transition-colors`
+
+---
+
+## Feature Components
+
+### MetadataPanel (`metadata-editor/MetadataPanel.tsx`)
+
+**Structure:**
+```
+<div class="flex flex-col h-full">
+  Header:   px-3 py-2 border-b border-outline
+  Content:  flex-1 overflow-y-auto p-3 space-y-3
+    [dynamic fields from schema]
+    [TemplatePicker]
+    [SchemaEditor toggle]
+  Footer:   p-3 border-t border-outline
+    [Save button - full width primary]
+</div>
+```
+
+**States:**
+- No selection: Empty state with `FileWarning` icon
+- Single file: File name in header, all fields editable
+- Batch (2+): Shows count with `Files` icon + `text-accent`, fields apply to all
+
+**Field rendering:** Iterates `useSchemaStore.fields`, renders `Input` (text/number) or `TagsInput` (tags) per field type.
+
+---
+
+### FileList (`file-list/FileList.tsx`)
+
+**Header/Toolbar:**
+```
+flex items-center gap-2 px-3 py-2 border-b border-outline bg-surface
+```
+
+**File row grid:**
+```
+grid grid-cols-[1fr_80px_100px_100px_80px_70px] gap-2 items-center px-3 py-1.5
+```
+
+**Row states:**
+- Default: `text-muted hover:bg-elevated`
+- Selected: `bg-brand/10 text-foreground`
+
+---
+
+### FolderBrowser (`sidebar/FolderBrowser.tsx`)
+
+**Structure:**
+```
+<div class="flex flex-col h-full">
+  Buttons:  p-3 space-y-2
+  Path:     px-2 pb-1 (with close X)
+  Tree:     flex-1 overflow-y-auto px-1
+</div>
+```
+
+**Tree node indent:** `paddingLeft: ${depth * 12 + 8}px`
+
+---
+
+### AudioPlayer (`player/AudioPlayer.tsx`)
+
+Fixed `h-16` footer. Shows file name, play/pause, progress bar, time, volume.
+
+**Progress bar:**
+```
+Container: flex-1 h-1 bg-elevated rounded-full cursor-pointer
+Fill:      h-full bg-brand rounded-full transition-all
+Thumb:     h-3 w-3 bg-foreground rounded-full (visible on group-hover)
+```
+
+---
+
+### TemplatePicker (`templates/TemplatePicker.tsx`)
+
+**Template card:**
+```
+flex items-center justify-between rounded-md px-2 py-1.5
+bg-background border transition-colors cursor-pointer group
+```
+
+Active: `border-brand`
+Default: `border-outline hover:border-outline-hover`
+
+**Edit dialog:** `rounded-md border border-brand bg-surface p-2.5 space-y-1.5`
+
+---
+
+### SchemaEditor (`schema/SchemaEditor.tsx`)
+
+Replaces the whole MetadataPanel while open (`Customize Fields` → `showSchemaEditor`).
+
+**Structure:**
+```
+<div class="flex flex-col h-full">
+  Header:   px-3 py-2 border-b border-outline flex items-center gap-2
+    [Back: ArrowLeft, text-muted hover:text-foreground p-0.5 transition-colors]
+    [Title: text-xs font-medium text-brand "Customize Fields"]
+  Content:  flex-1 overflow-y-auto p-3
+    <fieldset disabled={isApplying} class="min-w-0 space-y-4 disabled:opacity-60">
+      [Active Fields] [Hidden Standard Fields] [Add Custom Field]
+  Footer:   p-3 border-t border-outline
+    [Done button - full width primary, size sm]
+</div>
+```
+
+**Field row:**
+```
+flex items-center gap-1.5 rounded px-2 py-1.5
+bg-background border border-outline text-xs
+```
+
+**Row icon buttons** (disabled with the fieldset while Applying):
+```
+Reorder arrow:  text-dim enabled:hover:text-foreground p-0.5   (+ opacity-30 on the edge arrow, natively disabled)
+Remove (Trash2, custom field):  text-destructive enabled:hover:text-destructive/80 p-0.5
+Hide (X, standard field):       text-dim enabled:hover:text-destructive p-0.5
+```
+
+**Hidden field chip:**
+```
+text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline
+text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors
+```
+
+**Done:** label `Applying...` while `onSave` is pending, otherwise `Done`; `aria-disabled={isApplying || fields.length === 0}` and `aria-busy={isApplying}` instead of native `disabled` (D-45).
+
+Back sits outside the fieldset and is never disabled, so it keeps plain `hover:`. The icon buttons and the chip inside the fieldset use `enabled:hover:`, and Add Field is a ghost `Button` (`enabled:not-aria-disabled:hover:`), so none of them has a hover shift while disabled (D-46).
+
+---
+
+## Component Authoring Pattern
+
+### Template (all UI components)
+
+```tsx
+import * as React from 'react';
+import { cn } from '~/lib/utils';
+
+interface ComponentProps extends React.HTMLAttributes<HTMLElement> {
+  variant?: 'default' | 'primary';
+}
+
+const Component = React.forwardRef<HTMLElement, ComponentProps>(
+  ({ variant = 'default', className, ...props }, ref) => {
+    return (
+      <element
+        ref={ref}
+        className={cn(
+          'base-classes',
+          variant === 'primary' && 'variant-classes',
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
+
+Component.displayName = 'Component';
+
+export { Component };
+export type { ComponentProps };
+```
+
+### Rules
+
+1. Always `forwardRef` with explicit ref type
+2. Always set `displayName`
+3. Always use `cn()` for class merging
+4. Always accept and spread `className` (last in `cn()`)
+5. Always use `type="button"` on buttons
+6. Never use hardcoded colors -- only design tokens
+7. Export both component and props type
+
+---
+
+## Icon Inventory
+
+### By Component
+
+| Component | Icons |
+|-----------|-------|
+| TitleBar | `Minus`, `Square`, `X` |
+| FolderBrowser | `ChevronRight`, `File`, `FolderOpen`, `RefreshCw`, `X` |
+| FileList | `ArrowDown`, `ArrowUp`, `Music` |
+| Toolbar | `CheckSquare`, `Search`, `Square` |
+| MetadataPanel | `Files`, `FileWarning`, `Save`, `Settings` |
+| TagsInput | `X` |
+| TemplatePicker | `BookTemplate`, `Pencil`, `Plus`, `Trash2`, `X` |
+| SchemaEditor | `ArrowDown`, `ArrowUp`, `Plus`, `Trash2`, `X` |
+| AudioPlayer | `Pause`, `Play`, `Volume2` |
+| Toast | `CheckCircle`, `X`, `XCircle` |
+| App (drag) | `FolderOpen` |
+
+### Size Convention
+
+| Context | Size | Class |
+|---------|------|-------|
+| Inline with `text-xs` | 12px | `h-3 w-3` |
+| Inline with buttons | 14px | `h-3.5 w-3.5` |
+| Status indicators | 16px | `h-4 w-4` |
+| Loading spinners | 20px | `h-5 w-5` |
+| Empty states | 32px | `h-8 w-8` |
+| Drop zone | 48px | `h-12 w-12` |
+
+---
+
+## Zustand Stores
+
+### State Architecture
+
+```
+useSchemaStore     - Field definitions (schema.json)
+useFileStore       - Files, metadata cache, selection, sort
+useMetadataStore   - Editing state, dirty tracking, toast
+useTemplateStore   - Tag templates
+usePlayerStore     - Audio playback state
+```
+
+### Store Pattern
+
+```typescript
+import { create } from 'zustand';
+
+interface FooState {
+  data: Data[];
+  isLoading: boolean;
+  setData: (data: Data[]) => void;
+  setIsLoading: (loading: boolean) => void;
+}
+
+export const useFooStore = create<FooState>((set) => ({
+  data: [],
+  isLoading: false,
+  setData: (data) => set({ data }),
+  setIsLoading: (loading) => set({ isLoading: loading }),
+}));
+```
+
+---
+
+## Utility: `cn()`
+
+**File:** `src/renderer/src/lib/utils.ts`
+
+```typescript
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
+}
+```
+
+Used in every component for safe Tailwind class merging with conditional logic and external `className` override support.

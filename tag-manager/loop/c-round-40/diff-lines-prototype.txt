@@ -1,0 +1,42 @@
++
++
++                      className="text-destructive enabled:hover:text-destructive/80 p-0.5"
++                      className="text-dim enabled:hover:text-destructive p-0.5"
++                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors"
++    'bg-surface text-foreground border border-outline enabled:not-aria-disabled:hover:bg-elevated',
++  accent: 'bg-accent text-white enabled:not-aria-disabled:hover:bg-accent/90',
++  destructive: 'bg-destructive text-white enabled:not-aria-disabled:hover:bg-destructive/90',
++  ghost: 'text-foreground enabled:not-aria-disabled:hover:bg-elevated',
++  primary: 'bg-brand text-brand-foreground enabled:not-aria-disabled:hover:bg-brand-hover',
++  return cn('text-dim enabled:hover:text-foreground p-0.5', isEdge && 'opacity-30');
++  secondary:
++- **Buttons:** Variant-specific background shift, only while the button can act: `enabled:not-aria-disabled:hover:…` (D-46)
++- **D-45:** `Done` და Save Tags / `Save to N files` "მიუწვდომელს" `aria-disabled`-ით აჩვენებენ native `disabled`-ის ნაცვლად, ამიტომ focused ღილაკი focus-ს აღარ კარგავს. `Done` (`SchemaEditor.tsx:280-281`): `aria-disabled={isApplying || fields.length === 0}` და `aria-busy={isApplying}`; `handleSave` მაშინვე ბრუნდება, როცა `fields` ცარიელია ან `isApplying` true-ა (`:138`), dependencies `[fields, isApplying, onSave, onClose]` (`:149`). Save Tags (`MetadataPanel.tsx:373-374`): `aria-disabled={isSaving || !isDirty}` და `aria-busy={isSaving}`; `handleSave` მაშინვე ბრუნდება, როცა `selectedFiles` ცარიელია ან `isSaveBlocked()` true-ა (`:143`). `isSaveBlocked` ფაილის ბოლოს დამატებული private module-level ფუნქციაა, რომელიც `useMetadataStore.getState()`-ს სინქრონულად კითხულობს (`isSaving || !isDirty`), ამიტომ `useCallback`-ის dependencies არ იცვლება. `Button` (`ui/button.tsx:36`) იღებს `aria-disabled:opacity-50 aria-disabled:cursor-not-allowed`-ს, native disabled-ის იგივე იერს; `aria-disabled="true"`-ის გარეშე Button-ზე გავლენა არ აქვს. reorder ისრები native `disabled`-ს საკუთარ კიდეზე ინარჩუნებენ (`index === 0` / ბოლო), class კი private `reorderArrowClassName(isEdge)`-დან მოდის (`SchemaEditor.tsx:186`, `:194`): საკუთარი `opacity-30` მხოლოდ კიდის ისარს აქვს, ამიტომ Applying-ის დროს შუა ისარი fieldset-ის 60%-ზეა, კიდის ისარი 18%-ზე. fieldset, Back, label-ები `Applying...` / `Saving...`, D-41/D-42/D-43 და D-29/D-30/D-39 უცვლელია. ჩანაწერი (21).
++- **Icon buttons that can be disabled** (for example inside a disabled `fieldset`): `enabled:hover:…`
++- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:138` (`handleSave`: `isApplying`-ის guard), `:149` (dependencies), `:186`, `:194` (ისრების `className={reorderArrowClassName(…)}`), `:280-281` (`Done`-ის `aria-disabled` და `aria-busy`), `reorderArrowClassName` (ფაილის ბოლოს); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:143` (`handleSave`: `isSaveBlocked()`-ის guard), `:373-374` (Save Tags-ის `aria-disabled` და `aria-busy`), `isSaveBlocked` (ფაილის ბოლოს); `src/renderer/src/components/ui/button.tsx:36` (`aria-disabled:` classes)
++- A `disabled` or `aria-disabled="true"` button keeps its resting colours on hover: no hover shift (D-46).
++Hover colours apply only while the button can act: neither `disabled` nor `aria-disabled="true"` (D-46).
++aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
++aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
++| `accent` | `bg-accent` | `text-white` | `enabled:not-aria-disabled:hover:bg-accent/90` | none |
++| `destructive` | `bg-destructive` | `text-white` | `enabled:not-aria-disabled:hover:bg-destructive/90` | none |
++| `ghost` | transparent | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | none |
++| `primary` | `bg-brand` | `text-brand-foreground` | `enabled:not-aria-disabled:hover:bg-brand-hover` | none |
++| `secondary` | `bg-surface` | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | `border border-outline` |
+-                      className="text-destructive hover:text-destructive/80 p-0.5"
+-                      className="text-dim hover:text-destructive p-0.5"
+-                    className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline text-dim hover:text-foreground hover:border-brand transition-colors"
+-  accent: 'bg-accent text-white hover:bg-accent/90',
+-  destructive: 'bg-destructive text-white hover:bg-destructive/90',
+-  ghost: 'text-foreground hover:bg-elevated',
+-  primary: 'bg-brand text-brand-foreground hover:bg-brand-hover',
+-  return cn('text-dim hover:text-foreground p-0.5', isEdge && 'opacity-30');
+-  secondary: 'bg-surface text-foreground border border-outline hover:bg-elevated',
+-- **Buttons:** Variant-specific background shift
+-- **D-45:** `Done` და Save Tags / `Save to N files` "მიუწვდომელს" `aria-disabled`-ით აჩვენებენ native `disabled`-ის ნაცვლად, ამიტომ focused ღილაკი focus-ს აღარ კარგავს. `Done` (`SchemaEditor.tsx:280-281`): `aria-disabled={isApplying || fields.length === 0}` და `aria-busy={isApplying}`; `handleSave` მაშინვე ბრუნდება, როცა `fields` ცარიელია ან `isApplying` true-ა (`:138`), dependencies `[fields, isApplying, onSave, onClose]` (`:149`). Save Tags (`MetadataPanel.tsx:373-374`): `aria-disabled={isSaving || !isDirty}` და `aria-busy={isSaving}`; `handleSave` მაშინვე ბრუნდება, როცა `selectedFiles` ცარიელია ან `isSaveBlocked()` true-ა (`:143`). `isSaveBlocked` ფაილის ბოლოს დამატებული private module-level ფუნქციაა, რომელიც `useMetadataStore.getState()`-ს სინქრონულად კითხულობს (`isSaving || !isDirty`), ამიტომ `useCallback`-ის dependencies არ იცვლება. `Button` (`ui/button.tsx:35`) იღებს `aria-disabled:opacity-50 aria-disabled:cursor-not-allowed`-ს, native disabled-ის იგივე იერს; `aria-disabled="true"`-ის გარეშე Button-ზე გავლენა არ აქვს. reorder ისრები native `disabled`-ს საკუთარ კიდეზე ინარჩუნებენ (`index === 0` / ბოლო), class კი private `reorderArrowClassName(isEdge)`-დან მოდის (`SchemaEditor.tsx:186`, `:194`): საკუთარი `opacity-30` მხოლოდ კიდის ისარს აქვს, ამიტომ Applying-ის დროს შუა ისარი fieldset-ის 60%-ზეა, კიდის ისარი 18%-ზე. fieldset, Back, label-ები `Applying...` / `Saving...`, D-41/D-42/D-43 და D-29/D-30/D-39 უცვლელია. ჩანაწერი (21).
+-- **ფაილი:** `src/renderer/src/components/schema/SchemaEditor.tsx:138` (`handleSave`: `isApplying`-ის guard), `:149` (dependencies), `:186`, `:194` (ისრების `className={reorderArrowClassName(…)}`), `:280-281` (`Done`-ის `aria-disabled` და `aria-busy`), `reorderArrowClassName` (ფაილის ბოლოს); `src/renderer/src/components/metadata-editor/MetadataPanel.tsx:143` (`handleSave`: `isSaveBlocked()`-ის guard), `:373-374` (Save Tags-ის `aria-disabled` და `aria-busy`), `isSaveBlocked` (ფაილის ბოლოს); `src/renderer/src/components/ui/button.tsx:35` (`aria-disabled:` classes)
+-| `accent` | `bg-accent` | `text-white` | `hover:bg-accent/90` | none |
+-| `destructive` | `bg-destructive` | `text-white` | `hover:bg-destructive/90` | none |
+-| `ghost` | transparent | `text-foreground` | `hover:bg-elevated` | none |
+-| `primary` | `bg-brand` | `text-brand-foreground` | `hover:bg-brand-hover` | none |
+-| `secondary` | `bg-surface` | `text-foreground` | `hover:bg-elevated` | `border border-outline` |

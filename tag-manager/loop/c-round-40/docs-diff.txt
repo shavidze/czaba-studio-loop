@@ -1,0 +1,59 @@
+diff --git a/docs/design/component-specs.md b/docs/design/component-specs.md
+index bf0d384..dcfafe9 100644
+--- a/docs/design/component-specs.md
++++ b/docs/design/component-specs.md
+@@ -23,11 +23,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+ 
+ | Variant | Background | Text | Hover | Border |
+ |---------|------------|------|-------|--------|
+-| `primary` | `bg-brand` | `text-brand-foreground` | `hover:bg-brand-hover` | none |
+-| `secondary` | `bg-surface` | `text-foreground` | `hover:bg-elevated` | `border border-outline` |
+-| `ghost` | transparent | `text-foreground` | `hover:bg-elevated` | none |
+-| `accent` | `bg-accent` | `text-white` | `hover:bg-accent/90` | none |
+-| `destructive` | `bg-destructive` | `text-white` | `hover:bg-destructive/90` | none |
++| `primary` | `bg-brand` | `text-brand-foreground` | `enabled:not-aria-disabled:hover:bg-brand-hover` | none |
++| `secondary` | `bg-surface` | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | `border border-outline` |
++| `ghost` | transparent | `text-foreground` | `enabled:not-aria-disabled:hover:bg-elevated` | none |
++| `accent` | `bg-accent` | `text-white` | `enabled:not-aria-disabled:hover:bg-accent/90` | none |
++| `destructive` | `bg-destructive` | `text-white` | `enabled:not-aria-disabled:hover:bg-destructive/90` | none |
+ 
+ **Sizes:**
+ 
+@@ -44,8 +44,11 @@ inline-flex items-center justify-center gap-1.5 rounded-md font-medium
+ transition-colors duration-150
+ focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand
+ disabled:opacity-50 disabled:cursor-not-allowed
++aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
+ ```
+ 
++Hover colours apply only while the button can act: neither `disabled` nor `aria-disabled="true"` (D-46).
++
+ **Default `type="button"`** is set automatically.
+ 
+ ---
+diff --git a/docs/design/style-guide.md b/docs/design/style-guide.md
+index 8b50317..bf66bf9 100644
+--- a/docs/design/style-guide.md
++++ b/docs/design/style-guide.md
+@@ -212,7 +212,8 @@ All icons from `lucide-react`. Tree-shakeable, consistent 24x24 viewbox.
+ 
+ ### Hover
+ 
+-- **Buttons:** Variant-specific background shift
++- **Buttons:** Variant-specific background shift, only while the button can act: `enabled:not-aria-disabled:hover:…` (D-46)
++- **Icon buttons that can be disabled** (for example inside a disabled `fieldset`): `enabled:hover:…`
+ - **List rows:** `hover:bg-elevated`
+ - **Text links:** `hover:text-foreground` (from muted/dim)
+ - **Borders:** `hover:border-outline-hover`
+@@ -228,8 +229,11 @@ All icons from `lucide-react`. Tree-shakeable, consistent 24x24 viewbox.
+ 
+ ```
+ disabled:opacity-50 disabled:cursor-not-allowed
++aria-disabled:opacity-50 aria-disabled:cursor-not-allowed
+ ```
+ 
++- A `disabled` or `aria-disabled="true"` button keeps its resting colours on hover: no hover shift (D-46).
++
+ ---
+ 
+ ## Scrollbars

@@ -1,250 +1,128 @@
-# CURRENT TASK — Round 40: TM-B42 — hover feedback only on buttons that can act (D-46)
+# CURRENT TASK — Round 41: TM-B43: docs only: the SchemaEditor spec matches the code, and D-46 enters the decision log
 
 Planner: B · Implementer: A · Verifier: C · Date: 2026-10-28
 
 ## Why this round
-- **Round 39: C PASS** (R39-1…R39-5, realVerified=true, no bug). Root published `24e9723`. The review returned COMMIT OK with 0 critical/high/medium findings. TM-B41 is **done**. `24e9723` is the baseline.
-- **No critical, high or medium bug is open.** TM-B42 (low) is next in dependency order (TM-B41 → TM-B42).
-- **B measured TM-B42's opening question** (`b-round-39-exp/`; throwaway builds in `/tmp/b40`; the repository was not touched).
-  - **Method:** `hover-probe.mjs` launches the real Electron app with Playwright `_electron` under `xvfb-run`. It reuses C's round-38 harness for the delayed scan and write. It moves the mouse onto a button and reads `getComputedStyle` at rest and on hover.
-  - `matchMedia('(hover: hover)')` is true under xvfb, so Tailwind's `hover:` rules apply.
-  - **`ea4a1cb` (native `disabled`) and `24e9723` (`aria-disabled`) behave the same on every step** (`hover-old.json`, `hover-new.json`, `hover-summary.txt`):
-    - clean Save Tags, busy `Saving...` and `Applying...` Done: bg `rgb(18, 217, 200)` → `rgb(29, 237, 219)` on hover;
-    - inside the disabled fieldset, the middle reorder arrow and the Hide-standard X change text colour on hover;
-    - Add Field (disabled by the fieldset) and Rescan (disabled during a scan) change bg on hover.
-  - **Conclusion:** Chromium matches `:hover` on natively disabled buttons. The cue that RR-R38-01 called new is **older** and is not a D-45 regression (finding B-R39-01). Under TM-B42's own rule ("red only if they differ") there is no regression.
-  - **Why TM-B42 still runs:** the cue contradicts the reference (see Reference). The project rule says that a difference from the reference with no listed reason is a bug. So TM-B42 goes on as a fix of the pre-existing cue. Scope is not reduced: it covers RR-R38-01 and RR-R38-04, and also Rescan and Add Field, which share the cause.
-- **B's prototype** (`b-round-39-exp/prototype.diff`, applied to a `git archive` of `24e9723`):
-  - `hover-proto.json`: on every disabled or `aria-disabled` step rest == hover; every enabled control still changes on hover;
-  - renderer 310/310 (`proto-renderer.log`);
-  - `tsc -p tsconfig.web.json` 0;
-  - Biome `src/` 0 errors / 8 warnings once `biome format` wrapped the `secondary` line (the wrap is already in the diff);
-  - the built CSS has `:enabled:not([aria-disabled="true"]):hover` for the 5 variants and `:enabled:hover` for the fieldset buttons;
-  - `pageErrors` was empty in all runs.
-
-## Reference
-- **R1 (in-app):** `src/renderer/src/components/player/AudioPlayer.tsx:114-118`. The disabled play button drops `hover:bg-elevated` and shows `text-dim cursor-not-allowed`. This is the app's own pattern: a disabled control gives no hover feedback.
-- **R2:** Bootstrap 5.3, Buttons → "Disabled state", https://getbootstrap.com/docs/5.3/components/buttons/: "Disabled buttons have `pointer-events: none` applied to, preventing hover and active states from triggering." B fetched it with WebFetch on 2026-10-28.
-- **R3:** Tailwind CSS docs, "Hover, focus, and other states", https://tailwindcss.com/docs/hover-focus-and-other-states:
-  - the `enabled` variant is "most helpful when you only want to apply another style when an element is not disabled", with the example `enabled:hover:border-gray-400 disabled:opacity-75`;
-  - the `aria-disabled` variant is `&[aria-disabled="true"]`;
-  - `not-*` combines with other variants;
-  - `hover` = `@media (hover: hover) { &:hover }`.
-- **R4:** the round-38 references for D-45 (MDN `aria-disabled`). With `aria-disabled`, the author must supply the disabled look and suppress the action. D-45 did this for opacity, cursor and click, but not for hover.
-
-## Deviations (each with its reason)
-1. **No `pointer-events: none`, although R2 uses it.** Pointer events stay on:
-   - D-45 shows `cursor-not-allowed` on a disabled button, and `pointer-events: none` would hide that cursor;
-   - the `aria-disabled` click guard (D-45) stays the only place that blocks the action.
-
-   Only the hover colour is suppressed.
-2. **The fieldset-disabled reorder arrows keep `cursor: default`** while Applying (B-R39-02; `ea4a1cb` does the same). This round removes only their hover colour. The cursor is not part of RR-R38-01/04 and is recorded separately.
-3. **The focus ring stays** on a focused `aria-disabled` button (`focus-visible:ring-2`). Keyboard users must see where focus is (D-45, round-38 K1–K3). R2 does not cover this case: its disabled buttons cannot be focused at all.
-4. **Buttons that can never be disabled keep plain `hover:`**: Back, TitleBar, toast close, and the template and FileList controls. The rule only matters where a button can be disabled. AudioPlayer already follows R1 and does not change.
+- **Round 40: C PASS** (R40-1…R40-7, realVerified=true). Root published `e386cca`, and the review returned COMMIT OK with 0 critical/high/medium findings. TM-B42 and D-46 are **done**, and `e386cca` is the baseline.
+- **Round 40 left 1 low bug, plus findings in the same 3 docs files.** C's bug comes first, and there is no critical, high or medium bug open:
+  - **C-R40-01 = A-R40-01:** `docs/design/component-specs.md:376` ("Hidden field chip") still says `hover:text-foreground hover:border-brand`, but `SchemaEditor.tsx:230` uses `enabled:hover:…`. The whole SchemaEditor section was already stale at baseline:
+    - the container `mt-3 rounded-md border border-brand …` does not exist;
+    - the row says `py-1`, but the code has `py-1.5` (A-R40-04(a)).
+  - **A-R40-02 = RR-R40-01:** `style-guide.md:215/235` and `component-specs.md:50` cite D-46, but the decision log in `docs/bugs/001-save-and-selection-known-limits.md` ends at D-45.
+- This is a **docs-only** round. The Reference-first rule does not apply (fix/docs rounds are exempt). There are no new tests: `test-on-bugfix` covers logic changes, and nothing in `src/` changes.
+- **B's prototype** (`b-round-40-exp/`):
+  - B applied it to a `git archive` of `e386cca` with `patch -p1` (dry run first, then the real apply), and the result equals B's proto tree;
+  - the proto has 22 `## N.` entries and 13 `**სტატუსი:** გასწორდა`;
+  - every class string in the new spec block was copied from `SchemaEditor.tsx` at `e386cca`. B checked lines 152–291 of the source.
 
 ## Baseline
-- HEAD `24e9723557fb82d572a655136ff7a0849a8e61f3`; working tree clean (`git status --porcelain --untracked-files=all` empty). If HEAD differs or the tree is dirty, stop and report.
-  - Exception (project policy release-commit rule): a root `chore(release): vX.Y.Z` commit directly on `24e9723` that changes only the two `version` fields counts as the baseline.
-- **Frozen (byte-identical to `24e9723`):** every path not listed under File ownership. In particular:
-  - every other `src/**` file, including `MetadataPanel.tsx`, `AudioPlayer.tsx` and `FolderBrowser.tsx`;
-  - all of `tests/**`, `.claude/**`, `vitest.config.*.ts`, `playwright.config.ts`, `biome.json`, `tsconfig*.json`, `electron.vite.config.ts` and `.github/**`;
-  - every `docs/**` file except the three listed. In `docs/bugs/001-save-and-selection-known-limits.md`, only lines 24 and 317 change; `docs/bugs/README.md` does not change.
+- HEAD `e386cca619e44be8dc3fe0217600beae9608d804`. The working tree is clean (`git status --porcelain --untracked-files=all` is empty). If HEAD differs or the tree is dirty, stop and report.
+  - Exception (project release-commit rule): a root `chore(release): vX.Y.Z` commit directly on `e386cca` that changes only the two `version` fields counts as the baseline.
+- **Frozen (byte-identical to `e386cca`):** every path not listed under File ownership, in particular:
+  - all of `src/**`, `tests/**`, `.claude/**` and `.github/**`;
+  - `vitest.config.*.ts`, `playwright.config.ts`, `biome.json`, `tsconfig*.json`, `electron.vite.config.ts`;
+  - every other `docs/**` file, including `docs/design/style-guide.md`.
 - **Protected (never touch):** `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/styles/app.css`, `package.json`, `package-lock.json`, `.github/workflows/release.yml`, `.claude/settings*`, `.claude/hooks/**`.
 
 ## Scope
-The canonical text of every change is `b-round-39-exp/prototype.diff` (42 `+`/`-` lines, without the `---`/`+++` headers).
-- Apply it from the repository root: `patch -p1 < <loop>/b-round-39-exp/prototype.diff`.
-- B dry-ran it on a fresh `git archive` of `24e9723`. All 5 files applied, and the result equals B's prototype tree.
-- Full-file copies: `b-round-39-exp/button.tsx.txt`, `SchemaEditor.tsx.txt` and `style-guide.md.txt`.
+The canonical text of every change is `<loop>/b-round-40-exp/prototype.diff`: 57 `+`/`-` lines, not counting the 6 `---`/`+++` header lines.
+- Apply it from the repository root: `patch -p1 --dry-run < <loop>/b-round-40-exp/prototype.diff`, then the same command without `--dry-run`.
+- Full copies of the result are in `b-round-40-exp/component-specs.md.txt`, `001-save-and-selection-known-limits.md.txt` and `README.md.txt`. Each changed file must end byte-identical to its copy.
+- If `patch` reports fuzz or a reject, stop and report. Do not hand-edit around it.
 
-### 1. `src/renderer/src/components/ui/button.tsx` (D-46)
-- In `variantStyles`, each of the 5 variants changes `hover:<x>` to `enabled:not-aria-disabled:hover:<x>`:
+### 1. `docs/design/component-specs.md`: the `### SchemaEditor` section (C-R40-01, A-R40-04(a)); stays English like the file
+- **Remove** the non-existent `**Container:**` line.
+- **Add** a one-line intro: the editor replaces the whole MetadataPanel while open.
+- **Add** a `**Structure:**` block in the same format as the MetadataPanel block:
+  - header `px-3 py-2 border-b border-outline flex items-center gap-2`, with Back (`text-muted hover:text-foreground p-0.5 transition-colors`) and the title (`text-xs font-medium text-brand`);
+  - content `flex-1 overflow-y-auto p-3`, with `<fieldset disabled={isApplying} class="min-w-0 space-y-4 disabled:opacity-60">` around the three sections;
+  - footer `p-3 border-t border-outline`, with the Done button.
+- **Field row:** `py-1` → `py-1.5`.
+- **New "Row icon buttons" block:** the reorder arrow, Trash2 and X, with their exact `enabled:hover:` classes, and `opacity-30` on the edge arrow.
+- **Hidden field chip:** `hover:` → `enabled:hover:` on both classes.
+- **New Done line:** the `Applying...` label, `aria-disabled={isApplying || fields.length === 0}` and `aria-busy={isApplying}` (D-45).
+- **New closing sentence:** Back keeps plain `hover:`. The icon buttons and the chip use `enabled:hover:`, and Add Field is a ghost `Button`, so none of them has a hover shift while disabled (D-46).
+- No other section of the file changes.
 
-  | Variant | `<x>` |
-  |---|---|
-  | `primary` | `bg-brand-hover` |
-  | `secondary` | `bg-elevated` |
-  | `ghost` | `bg-elevated` |
-  | `accent` | `bg-accent/90` |
-  | `destructive` | `bg-destructive/90` |
+### 2. `docs/bugs/001-save-and-selection-known-limits.md` (A-R40-02, RR-R40-01; Georgian with English technical terms)
+- **Line 3 (status):** the fixed-entry list gets `(22)`.
+- **Line 4 (source):** add `TM-B42 (round 40)`.
+- **Line 5 (code):** `button.tsx` gets `variantStyles` next to `aria-disabled:` classes.
+- **New bullet `- **D-46:**` directly after the D-45 bullet (new line 25).** It covers:
+  - the 5 variants with `enabled:not-aria-disabled:hover:`;
+  - the SchemaEditor fieldset buttons with `enabled:hover:` (`:202`, `:210`, `:230`, `reorderArrowClassName`);
+  - Back `:157` stays plain;
+  - the AudioPlayer already follows the rule;
+  - the cue was older than D-45 (B-R39-01);
+  - the rejected alternative is `pointer-events-none`;
+  - it ends with `ჩანაწერი (22).`
+- **New entry `## 22.` at the end**, in the same field order as entry (21): ID, Severity, ფაილი, მიღწევადობა, Reproduction, Reference, Deviations, გადაწყვეტილება, ტესტი, სტატუსი.
+  - The `ტესტი` line says why there is no unit test (styling only; jsdom does not compute `:hover`) and names the round-40 real-app measurement as the protection.
+  - The status is `გასწორდა (D-46, TM-B42)`.
+  - This is intentional. The status legend defines `გასწორდა` as "protected by a test". For this styling-only fix, the `ტესტი` line serves as the protection record, and it points to the round-40 real-app measurement. C treats the status as planned, not as a new finding.
+- **Existing line references do not move:** everything above the D-46 bullet keeps its line number, and entries (1)–(21) move down by 1 line.
 
-- Biome's formatter wraps the `secondary` line onto two lines, as the diff shows. This moves the base-class lines down by 1, so `aria-disabled:opacity-50 …` is now line 36.
-- The base classes, `sizeStyles`, the props and the export do not change.
-
-### 2. `src/renderer/src/components/schema/SchemaEditor.tsx` (D-46)
-- In 4 places, `hover:` becomes `enabled:hover:`. Each is a same-line edit, so no line numbers move:
-
-  | Line | Button | New class |
-  |---|---|---|
-  | 202 | Trash2 | `text-destructive enabled:hover:text-destructive/80 p-0.5` |
-  | 210 | Hide-standard X | `text-dim enabled:hover:text-destructive p-0.5` |
-  | 230 | hidden-standard chip | `… text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors` |
-  | 291 | `reorderArrowClassName` | `cn('text-dim enabled:hover:text-foreground p-0.5', isEdge && 'opacity-30')` |
-
-- Back (line 157) is outside the fieldset and is never disabled, so it does not change (Deviation 4).
-
-### 3. Docs (the 3 files, exactly as in the diff)
-- **`docs/design/style-guide.md`** (stays English, like the rest of the file):
-  - **Hover → Buttons:** add the `enabled:not-aria-disabled:hover:…` rule (D-46) and one line for icon buttons that can be disabled (`enabled:hover:…`);
-  - **Disabled:** add the `aria-disabled:` line and one sentence: a disabled button has no hover shift.
-- **`docs/design/component-specs.md`:**
-  - the Hover column of the Button variants table gets the `enabled:not-aria-disabled:` prefix;
-  - the base-class block gets the `aria-disabled:` line, which has been missing since round 38;
-  - one English sentence (the file is English) names D-46.
-- **`docs/bugs/001-save-and-selection-known-limits.md`:** on lines 24 and 317, `ui/button.tsx:35` → `ui/button.tsx:36`, because of the line shift from §1. Nothing else changes.
+### 3. `docs/bugs/README.md`
+- Change the count to `(22 ჩანაწერი; 13 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა)`.
 
 ### Tests
-None.
-- The repository rule `test-on-bugfix` exempts styling-only changes ("მხოლოდ UI/styling ცვლილებაა (Tailwind classes)").
-- jsdom computes neither `:hover` nor Tailwind CSS, so a test of the class strings would only repeat the diff.
-- The proof is C's real-app hover measurement (R40-3) and the CSS check (R40-2).
-- No test file changes; the renderer stays at 310.
+None. This round changes docs only. The renderer suite stays at 310, main at 93 and E2E at 7.
 
 ### Not in this round
-- **B-R39-02** (arrow cursor while Applying): see Deviation 2.
-- **RR-R38-05** (a `Button` `busy`/`inert` prop): an architecture signal.
-- **RR-R35-02** (timeout): an open Saba question. It is not dropped.
+These stay recorded and are not dropped:
+- **A-R40-04(b) / B-R39-02:** plain disabled `<button>`s have no `cursor-not-allowed`. This is a UX change and needs reference-first.
+- **RR-R40-04:** the `IconButton` architecture signal.
+- **A-R40-03:** an AudioPlayer note.
+- **RR-R35-02:** the timeout, which is a Saba question.
 
 ## File ownership (nothing else may change)
 | May modify | Why |
 |---|---|
-| `src/renderer/src/components/ui/button.tsx` | §1 |
-| `src/renderer/src/components/schema/SchemaEditor.tsx` | §2, lines 202/210/230/291 only |
-| `docs/design/style-guide.md` | §3 |
-| `docs/design/component-specs.md` | §3 |
-| `docs/bugs/001-save-and-selection-known-limits.md` | §3, lines 24/317 only |
+| `docs/design/component-specs.md` | §1, the `### SchemaEditor` section only |
+| `docs/bugs/001-save-and-selection-known-limits.md` | §2 |
+| `docs/bugs/README.md` | §3 |
 
-A also writes `a-round-40.md` (and any `a-round-40/` logs) in the loop folder. Gitignored output is allowed: `out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`, `coverage/`.
+A also writes `a-round-41.md` (and any `a-round-41/` logs) in the loop folder. Gitignored output is allowed: `out/`, `test-results/`, `playwright-report/`, `tests/fixtures/*.wav`, `coverage/`.
 
 ## Acceptance (C)
 
-### R40-1 ownership
-**Check:**
-- `git status --porcelain --untracked-files=all`
-- `git diff --stat 24e9723`
-- `git diff --quiet 24e9723 -- . ':!<5 owned paths>'`
-- Compare the `+`/`-` lines with `prototype.diff`.
-- `diff <(git show 24e9723:docs/bugs/001-…) docs/bugs/001-…`
-
-**PASS when:**
-- only the 5 owned paths changed, and nothing is untracked;
-- the `+`/`-` lines equal `prototype.diff` (42 lines);
-- docs/bugs/001 shows only `24c24` and `317c317`;
-- `--quiet` exits 0 for `tests/` and for the protected paths;
-- there is no comment, no `any` and no new export.
-
-### R40-2 CSS
-**Check:** run `npm run build`, then grep `out/renderer/assets/*.css`.
-
-**PASS when:**
-- there are `…:enabled:not([aria-disabled="true"]):hover` rules for `bg-brand-hover`, `bg-elevated`, `bg-accent/90` and `bg-destructive/90`;
-- there are `:enabled:hover` rules for `text-foreground`, `text-destructive`, `text-destructive/80` and `border-brand`;
-- no `.hover\:bg-brand-hover` selector is left.
-
-### R40-3 real app, old vs new (hover)
-**Check:**
-- Run Playwright `_electron` under `xvfb-run` on two builds: `24e9723` (old) and A's tree (new).
-- Hover with the mouse. Read `getComputedStyle` at rest and again after at least 300 ms of hover.
-- Use a copy of B's `b-round-39-exp/hover-probe.mjs` in `c-round-40/` with `OUT` set to `c-round-40/` (B's folder is not C's to write; `HARNESS` stays read-only from `c-round-38/`), args `<appRoot> <label>`, or C's own driver. The harness may delay scan and write, as in round 38.
-  - B's probe reads `/tmp/b40/sample.wav`, which does not survive the job. Recreate it first: `mkdir -p /tmp/b40 && ffmpeg -v error -f lavfi -i sine=frequency=440:duration=1 -ar 44100 -ac 2 -y /tmp/b40/sample.wav`.
-  - The old build comes from `git archive 24e9723` + a `node_modules` symlink + `npx electron-vite build`.
-- Cover steps H0–H8 from `hover-summary.txt`, plus C's own steps:
-  - **H9:** Trash2 on a custom field, enabled and while Applying;
-  - **H10:** a hidden-standard chip (hide one standard field first), enabled and while Applying;
-  - **H11:** the AudioPlayer play button, disabled (no file playing) and enabled.
-- Take screenshots of H1, H4 and H5 on new.
-
-**PASS when:**
-- **new, disabled steps:** on every disabled or `aria-disabled` step, the rest colour equals the hover colour. These steps are H1, H2, H4, H5, H6, H7, H8, H9-applying, H10-applying and H11-disabled;
-- **new, enabled controls:** they still change on hover, with the same values as old. These are H0 (dirty Save), H3 (arrow), H3b (Done), H6b (X), H7b (Add Field) and H9/H10-enabled;
-- **old, disabled steps:** they change colour on hover. This shows the cue existed;
-- **new, unchanged:** opacity (0.5 / 0.6 / 0.3), cursor (`not-allowed` / `default`), `aria-disabled` and `aria-busy`;
-- H11 is identical on old and new;
-- `pageErrors` is empty.
-
-### R40-4 behaviour unchanged (keyboard + save)
-**Check:** on new, repeat the round-38 K2 path once: select a.wav, type a Category, focus Save Tags, press Enter.
-
-**PASS when:**
-- focus stays on the button during the save and after it (D-45);
-- there is exactly one `meta:write`;
-- ffprobe `format_tags` and music-metadata (`exif:ICAT` / RIFF INFO) both read the new ICAT value;
-- every other file's sha256 is unchanged.
-
-### R40-5 mutants
-**Check:** on a copy of A's tree, revert one class edit at a time, build, and re-run the matching H step.
-
-**PASS when:**
-- each revert brings back a hover change on its step:
-
-  | Reverted edit | Step where the hover change returns |
-  |---|---|
-  | primary: `not-aria-disabled:` dropped | H1 / H2 / H4 (aria-disabled) |
-  | ghost: `enabled:` dropped | H7 / H8 (native disabled) |
-  | reorder arrow (`enabled:` dropped) | H5 |
-  | Hide-standard X | H6 |
-  | Trash2 | H9 |
-  | hidden-standard chip | H10 |
-
-- **Expected survivors (equivalent today; C confirms by grep and records them, not a FAIL):**
-  - primary with `enabled:` dropped: no natively disabled primary Button exists;
-  - ghost with `not-aria-disabled:` dropped: no `aria-disabled` ghost Button exists;
-  - both halves of secondary, accent and destructive: none is ever disabled (`grep -rn 'variant="secondary\|accent\|destructive"' src/`);
-- the copy is restored afterwards.
-
-### R40-6 gate (real Electron)
-**Check:** on A's tree, start from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`). Run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0`.
-
-**PASS when:**
-- exit code is 0;
-- Biome reports 0 errors and **8** warnings, the same list as `c-round-35/biome-new.txt`;
-- typecheck node/web/test is 0;
-- renderer **310/310**, main **93/93**, E2E **7/7**;
-- `--retries=0` gives **7/7**.
-
-### R40-7 Reference / Deviations / docs
-**Check:**
-- Open R2 and R3 with WebFetch.
-- Check Deviations 1–4 in the app.
-- Read `git diff 24e9723 -- docs/`.
-
-**PASS when:**
-- R2 still says that disabled buttons get no hover or active state;
-- R3 shows the `enabled` and `aria-disabled` variants;
-- Deviation 1: the `not-allowed` cursor still shows on hover;
-- Deviation 2: the arrow cursor is `default`;
-- Deviation 3: the focus ring shows on a focused `aria-disabled` Save Tags (screenshot);
-- Deviation 4: the Back arrow still changes colour on hover;
-- the docs match the code, and the D-46 sentence is in component-specs;
-- lines 24 and 317 point to `button.tsx:36`, and `sed -n 36p` shows the `aria-disabled:` line.
+| ID | Check | Evidence that means PASS |
+|---|---|---|
+| R41-1 ownership | `git status --porcelain --untracked-files=all`; `git diff --stat e386cca`; `git diff --quiet e386cca -- src tests .claude .github package.json package-lock.json docs/design/style-guide.md`; sorted `+`/`-` body lines of `git diff e386cca` vs the same lines of `prototype.diff`; `cmp` of each changed file against its `b-round-40-exp/*.txt` copy | Only the 3 owned paths changed, and nothing is untracked. `--quiet` exits 0. There are 57 body lines. `sort` both lists, keeping the duplicate blank `+` lines, and `cmp` reports EQUAL. All 3 files are `cmp`-identical to B's copies. In `component-specs.md`, only lines inside the `### SchemaEditor` section changed. |
+| R41-2 docs ↔ code | For every class string and attribute in the new SchemaEditor spec block (header, Back, title, content, fieldset, footer, row lines 1–2, arrow, Trash2, X, chip lines 1–2, `opacity-30`, Done's `aria-disabled`/`aria-busy` expressions and the `Applying...` label), run `grep -F` against `src/renderer/src/components/schema/SchemaEditor.tsx`. Also run `sed -n` on the refs in the D-46 bullet and in entry (22) (`SchemaEditor.tsx:157`, `:202`, `:210`, `:230`, `reorderArrowClassName`, `ui/button.tsx` `variantStyles`) | Every string occurs verbatim in the source. Each line ref points to the named button, so `:157` is Back, `:202` is Trash2, `:210` is X and `:230` is the chip. No `hover:` without `enabled:` is left in the spec for a button that can be disabled. C lists every string with its source line number. |
+| R41-3 real app | Launch the built app (`npm run build`, Playwright `_electron`, `xvfb-run`). Open a folder with a fixture WAV, select it, click `Customize Fields`, and hide one standard field so a chip exists. Read from the DOM the `className` of the header, Back, the fieldset, a row, an arrow, X, the chip and Done. Add one custom field and read Trash2. Then read the `aria-disabled` and `aria-busy` of Done. | Each DOM `className` contains every class token listed in the spec for that element. Done has `aria-disabled="false"` and `aria-busy="false"` at rest. Screenshot `r41-schema-editor.png`. `pageErrors` is empty. This proves the doc describes the running app, not just the source text. |
+| R41-4 counts and Georgian docs | `grep -c '^## [0-9]'` and `grep -c 'სტატუსი:\*\* გასწორდა'` in 001; read line 3, the D-46 bullet, entry (22) and the README row | 22 entries and 13 fixed. Line 3 lists `(22)`. The README says 22/13/9, and the 9 open entries (5 of them Saba questions) are unchanged from `e386cca`. The D-46 bullet sits directly after D-45 and ends with `ჩანაწერი (22).` Entry (22) has the 10 fields in entry (21)'s order. Its Reference URLs open (WebFetch) and still say what the entry claims. Its content matches C's round-40 evidence: the rgb values, `ea4a1cb` and B-R39-01. |
+| R41-5 gate (real Electron) | On A's tree, start from a clean state (`rm -rf out test-results playwright-report tests/fixtures/*.wav`). Run the full `verifyCommand`, then `xvfb-run -a npx playwright test --retries=0` | Exit 0. Biome 0 errors and **8** warnings, the same list as `c-round-35/biome-new.txt`. Typecheck 0. Renderer **310/310**, main **93/93**, E2E **7/7**, and `--retries=0` gives **7/7**. Nothing moves, because `src/` and `tests/` are untouched. |
 
 ## What could break (C re-checks)
-- **Every `Button` in the app**: Open Folder, Rescan, Close Folder, Add Field, the template buttons and the Save/Done variants. Their enabled hover must look exactly as before. Compare H0, H3b and H7b on old and new, plus one secondary or ghost button outside the fieldset.
-- **D-45** (focus kept, click guard, `aria-busy`): covered by R40-4. The class change must not touch the guards.
-- **SchemaEditor at rest**: the arrows, X, Trash2 and chip must hover as before (H3, H6b, H9-enabled, H10-enabled).
-- **Edge arrows** are natively disabled at the list ends, so they lose their hover colour even when not Applying. This is intended: a disabled arrow does nothing, and R1–R3 agree. C notes it with one measurement.
-- **E2E 7/7**: the specs do not depend on hover.
+- **Other doc sections:**
+  - `component-specs.md` outside `### SchemaEditor`, including the Button section with the D-46 sentence at line 50, and the MetadataPanel block;
+  - `style-guide.md` must stay byte-identical.
+- **Line references into 001:** nothing in the repository cites `001-…md:<line>`. B checked with `grep -rn "known-limits.md:[0-9]"`, which found nothing. C repeats the grep.
+- **Markdown rendering:**
+  - the new code fences in component-specs open and close in pairs;
+  - entry (22)'s numbered Reproduction list renders.
+- **E2E 7/7 and the unit suites:** these are unaffected, and the gate (R41-5) confirms it.
 
 ## What realVerified means here
-- PASS needs real-app evidence of two kinds:
-  - computed styles under a real mouse hover in the built Electron app, old vs new (R40-3);
-  - the keyboard save, checked with independent readers (R40-4).
-- B's numbers are a hypothesis until C reproduces them.
-- PASS on all 7 checks closes:
-  - TM-B42 and D-46;
-  - findings RR-R38-01, RR-R38-04 and B-R39-01.
+- PASS needs R41-3: the running app's DOM matches the corrected spec. R41-2 (source grep) alone is not enough.
+- PASS on all 5 checks closes:
+  - TM-B43;
+  - findings C-R40-01, A-R40-01, A-R40-02, RR-R40-01 and A-R40-04(a). A-R40-04(b) stays open with B-R39-02.
 - Windows packaging is BLOCKED: Windows packaging is not available in the cloud. It is not part of this round.
 
 ## Next (orientation only)
-- If C finds a FAIL, round 41 fixes it first.
-- After TM-B42, the todo items that need Saba's decision before they can be planned:
-  - TM-B08 (artists ISTR vs IART, D-12);
-  - TM-B11 (Number default `0`, D-10);
-  - TM-B05 (empty data chunk);
-  - TM-B06 (Biome on `tests/`);
-  - TM-T1-DUP (old custom field vs category);
-  - TM-T2 / TM-T2-DATA (UCS list and licence);
-  - RR-R35-02 (timeout);
-  - B-R36-01 (list lock during a scan).
-- **TM-T1-MIG** may not need Saba: its acceptance is a C real-UI check under D-07's default (an existing schema.json lists category under hidden standards, and it can be enabled), plus a doc note. B checks in round 41 whether today's build already behaves this way.
-- TM-T0 / TM-T0-CI / TM-T0-CI-FU / TM-B14 wait for root to link a green Actions `Check` run on `7879ee0` or later.
+- If C finds a FAIL, round 42 fixes it first.
+- After TM-B43, every remaining scoped item is waiting on someone outside the loop.
+- **Saba's decisions:**
+  - TM-T1-MIG: confirm D-07, no auto-migration. C's round-3 regression already shows Category under Hidden Standard Fields, but the backlog entry carries `needs_user`;
+  - TM-T1-DUP: the old custom field vs the category;
+  - TM-B08: artists ISTR vs IART, D-12;
+  - TM-B11: the Number default `0`, D-10;
+  - TM-B05: the empty data chunk;
+  - TM-B06: Biome on `tests/`;
+  - TM-T2 / TM-T2-DATA: the UCS list and its licence;
+  - RR-R35-02: the timeout;
+  - B-R36-01: the list lock during a scan.
+- **Root's green Actions `Check` link on `7879ee0` or later:** TM-T0, TM-T0-CI, TM-T0-CI-FU, TM-B14.
+- Low or info items that need no Saba decision (e.g. A-R40-04(b)/B-R39-02 cursor, RR-R39-02 test move, A-R39-01 stricter match) are records, not scope. B decides in round 42 whether any of them justify a round, or whether the loop reports BLOCKED on the Saba questions.

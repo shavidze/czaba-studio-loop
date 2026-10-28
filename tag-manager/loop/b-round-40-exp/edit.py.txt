@@ -1,0 +1,101 @@
+import sys
+root = sys.argv[1]
+def sub(path, old, new):
+    p = root + '/' + path
+    s = open(p, encoding='utf-8').read()
+    assert s.count(old) == 1, (path, old[:60], s.count(old))
+    open(p, 'w', encoding='utf-8').write(s.replace(old, new))
+
+spec_old = """**Container:** `mt-3 rounded-md border border-brand bg-surface p-2.5 space-y-3`
+
+**Field row:**
+```
+flex items-center gap-1.5 rounded px-2 py-1
+bg-background border border-outline text-xs
+```
+
+**Hidden field chip:**
+```
+text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline
+text-dim hover:text-foreground hover:border-brand transition-colors
+```
+"""
+spec_new = """Replaces the whole MetadataPanel while open (`Customize Fields` → `showSchemaEditor`).
+
+**Structure:**
+```
+<div class="flex flex-col h-full">
+  Header:   px-3 py-2 border-b border-outline flex items-center gap-2
+    [Back: ArrowLeft, text-muted hover:text-foreground p-0.5 transition-colors]
+    [Title: text-xs font-medium text-brand "Customize Fields"]
+  Content:  flex-1 overflow-y-auto p-3
+    <fieldset disabled={isApplying} class="min-w-0 space-y-4 disabled:opacity-60">
+      [Active Fields] [Hidden Standard Fields] [Add Custom Field]
+  Footer:   p-3 border-t border-outline
+    [Done button - full width primary, size sm]
+</div>
+```
+
+**Field row:**
+```
+flex items-center gap-1.5 rounded px-2 py-1.5
+bg-background border border-outline text-xs
+```
+
+**Row icon buttons** (disabled with the fieldset while Applying):
+```
+Reorder arrow:  text-dim enabled:hover:text-foreground p-0.5   (+ opacity-30 on the edge arrow, natively disabled)
+Remove (Trash2, custom field):  text-destructive enabled:hover:text-destructive/80 p-0.5
+Hide (X, standard field):       text-dim enabled:hover:text-destructive p-0.5
+```
+
+**Hidden field chip:**
+```
+text-[10px] px-1.5 py-0.5 rounded bg-background border border-outline
+text-dim enabled:hover:text-foreground enabled:hover:border-brand transition-colors
+```
+
+**Done:** label `Applying...` while `onSave` is pending, otherwise `Done`; `aria-disabled={isApplying || fields.length === 0}` and `aria-busy={isApplying}` instead of native `disabled` (D-45).
+
+Back sits outside the fieldset and is never disabled, so it keeps plain `hover:`. Every button inside the fieldset uses `enabled:hover:`, so it has no hover shift while disabled (D-46).
+"""
+sub('docs/design/component-specs.md', spec_old, spec_new)
+
+B = 'docs/bugs/001-save-and-selection-known-limits.md'
+sub(B, "(17), (18), (20) და (21) ისტორიისთვის რჩება.", "(17), (18), (20), (21) და (22) ისტორიისთვის რჩება.")
+sub(B, "TM-B39 (round 37), TM-B40 (round 38). ID-ები", "TM-B39 (round 37), TM-B40 (round 38), TM-B42 (round 40). ID-ები")
+sub(B, "`src/renderer/src/components/ui/button.tsx` (`aria-disabled:` classes).", "`src/renderer/src/components/ui/button.tsx` (`aria-disabled:` classes, `variantStyles`).")
+
+d46 = ("- **D-46:** hover-ის ფერი მხოლოდ იმ ღილაკზე იცვლება, რომელსაც მოქმედება შეუძლია. `Button`-ის ხუთივე variant (`ui/button.tsx`, `variantStyles`: primary, secondary, ghost, accent, destructive) `hover:<x>`-ის ნაცვლად `enabled:not-aria-disabled:hover:<x>`-ს იყენებს, ამიტომ native `disabled` და `aria-disabled=\"true\"` ღილაკი (D-45) hover-ზე resting ფერს ინარჩუნებს; opacity 0.5, `cursor-not-allowed`, focus ring და click guard უცვლელია. `SchemaEditor`-ის fieldset-ის შიგნით მყოფი ღილაკები `enabled:hover:`-ს იყენებენ: reorder ისრები (`reorderArrowClassName`, ფაილის ბოლოს), Trash2 (`SchemaEditor.tsx:202`), Hide standard X (`:210`) და hidden-standard chip (`:230`). ამიტომ Applying-ის დროს და კიდის (native disabled) ისარზე hover ფერს არ ცვლის. Back (`:157`) fieldset-ის გარეთაა, არასოდეს არის disabled და plain `hover:`-ს ინარჩუნებს; `AudioPlayer`-ის play ღილაკი ამ წესს უკვე conditional class-ით მისდევდა. cue D-45-ის regression არ იყო: Chromium `:hover`-ს native disabled ღილაკზეც ამთხვევს (B-R39-01). უარყოფილი: `pointer-events-none` (Bootstrap) — `not-allowed` cursor დაიკარგებოდა, მოქმედებას კი D-45-ის click guard უკვე ბლოკავს. ჩანაწერი (22).\n")
+p = '/tmp/b41/proto/' + B if False else root + '/' + B
+s = open(p, encoding='utf-8').read()
+lines = s.split('\n')
+idx = [i for i, l in enumerate(lines) if l.startswith('- **D-45:**')]
+assert len(idx) == 1
+lines.insert(idx[0] + 1, d46.rstrip('\n'))
+s = '\n'.join(lines)
+entry = """
+## 22. disabled ღილაკები mouse hover-ზე ფერს იცვლიდნენ
+
+- **ID:** RR-R38-01, RR-R38-04, B-R39-01, TM-B42
+- **Severity:** low
+- **ფაილი:** `src/renderer/src/components/ui/button.tsx` (`variantStyles`, ხუთი variant), `src/renderer/src/components/schema/SchemaEditor.tsx:202`, `:210`, `:230`, `reorderArrowClassName` (ფაილის ბოლოს)
+- **მიღწევადობა:** mouse-ის ყოველი მომხმარებელი: სუფთა ან `Saving...` Save Tags, `Applying...` `Done`, Applying-ის დროს fieldset-ის ღილაკები (ისრები, X, Trash2, chip, Add Field), scan-ის დროს Rescan და კიდის reorder ისარი.
+- **Reproduction (გასწორებამდე):**
+  1. საწყისი მდგომარეობა: folder გახსნილია, ფაილი მონიშნულია, ფორმა სუფთაა. მოქმედება: mouse Save Tags-ზე. შედეგი: background `rgb(18, 217, 200)` → `rgb(29, 237, 219)`, თუმცა ღილაკი `aria-disabled`-ია და click არაფერს წერს.
+  2. საწყისი მდგომარეობა: `Customize Fields` ღიაა და `Done` pending-ია (`Applying...`). მოქმედება: mouse შუა ისარზე, Hide standard X-ზე ან Add Field-ზე. შედეგი: ფერი იცვლება, თუმცა fieldset disabled-ია.
+  3. იგივე ხდება `ea4a1cb`-ზე (native `disabled`, D-45-მდე): Chromium `:hover`-ს disabled ღილაკზეც ამთხვევს (B-R39-01).
+  4. დისკზე არაფერი იცვლება: ეს მხოლოდ ჩვენებაა.
+- **Reference:** R1 in-app: `AudioPlayer.tsx`-ის disabled play ღილაკს hover-ის class არ აქვს. R2 Bootstrap 5.3 Buttons, "Disabled state" (https://getbootstrap.com/docs/5.3/components/buttons/): disabled ღილაკზე hover და active state არ ჩნდება. R3 Tailwind CSS "Hover, focus, and other states" (https://tailwindcss.com/docs/hover-focus-and-other-states): `enabled:`, `aria-disabled:` და `not-*` variant-ები.
+- **Deviations:** (1) `pointer-events-none` არ არის (R2): `not-allowed` cursor უნდა ჩანდეს (D-45). (2) fieldset-ით disabled ისრებს Applying-ის დროს cursor `default` რჩება (B-R39-02, backlog-ში ცალკე ჩანაწერი). (3) focus ring `aria-disabled` ღილაკზე რჩება: keyboard-ის მომხმარებელმა უნდა დაინახოს, სად არის focus (D-45). (4) ღილაკები, რომლებიც არასოდეს არის disabled (Back, TitleBar, toast, template და FileList-ის control-ები), plain `hover:`-ს ინარჩუნებენ.
+- **გადაწყვეტილება:** D-46.
+- **ტესტი:** unit ტესტი არ არის: მხოლოდ Tailwind class-ები შეიცვალა (`test-on-bugfix`-ის გამონაკლისი), jsdom კი `:hover`-ს და Tailwind CSS-ს არ ითვლის. დაცვა: round 40-ის real-app გაზომვა (Playwright `_electron`, mouse hover, `getComputedStyle`, ძველი `24e9723` vs ახალი) და build-ის CSS-ის selector-ები `:enabled:not([aria-disabled="true"]):hover` და `:enabled:hover`.
+- **სტატუსი:** გასწორდა (D-46, TM-B42)
+"""
+if not s.endswith('\n'):
+    s += '\n'
+s += entry
+open(p, 'w', encoding='utf-8').write(s)
+
+sub('docs/bugs/README.md', "(21 ჩანაწერი; 12 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა)", "(22 ჩანაწერი; 13 გასწორდა; დანარჩენი 9-დან 5 Saba-ს კითხვაა)")
+print('ok')
