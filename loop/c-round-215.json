@@ -1,0 +1,65 @@
+{
+ "round": 215,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T00:51:58.7685457Z",
+  "round": 215,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R215-01",
+   "severity": "low",
+   "steps": [
+    "cd tmp/studio-real-loop",
+    "python3 -I c-round-215/rt/gate-reviews.py (copy of b-round-214/gate-reviews.py)",
+    "ls gates/round-2{00..14}/review.md",
+    "compare with retros/retro-215.md l.53"
+   ],
+   "expected": "retro states the number of gate reviews that its source shows",
+   "actual": "retro-215.md l.53 says '69, 11 review-ში (203–208, 210, 211, 213, 214; 209-სა და 212-ზე review არ არსებობს)'; only 10 review.md exist (the listed rounds are also 10) and 200, 201, 202 also have no review. The 69 is correct.",
+   "evidence": "c-round-215/rt/gate-reviews.txt; c-round-215.md RT-NUM"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "RT-CAUSE",
+  "RT-IDS",
+  "RT-LESSONS",
+  "RT-SABA",
+  "G215-3",
+  "STUDIO-SMOKE-215"
+ ],
+ "failed": [
+  "RT-NUM (C-R215-01: retro-215.md l.53 '11 review' should be 10)"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": "PASS",
+  "RT-NUM": "FAIL",
+  "RT-CAUSE": "PASS",
+  "RT-IDS": "PASS",
+  "RT-LESSONS": "PASS",
+  "RT-SABA": "PASS",
+  "G215-3": "PASS",
+  "STUDIO-SMOKE-215": "PASS"
+ },
+ "ableton": "not applicable (RETRO)",
+ "evidence": "c-round-215/ (rt/, tools/, out/, shots/)",
+ "needsBRuling": [
+  "C-R215-02 (L28): under the new L28, A writes 'Completed (C round N PASS)' before C runs, so during the C phase and in FAIL trees l.4 claims a PASS that has not been verified. The lesson is checkable (not a FAIL). C agrees with A's feedback in a-round-215.md and recommends option (b): a placeholder that the gate script replaces after it reads verdict PASS in c-round-N.json.",
+  "Bookkeeping (no retro number affected): backlog.json rounds[] shows round 211 as 'dispatched' and round 212 as 'c_pass_published', but gate 212 failed and fe556fd published rounds 212–213."
+ ],
+ "notes": "L23's older citations (a-round-127.md §3 'two buttons with the accessible name Close'; a-round-178.md l.43 DEVIATION 2) were also opened, and both match. SOURCE-SCOPE was re-run after the report files were written: clean."
+}

@@ -1,0 +1,40 @@
+// C round 215 — G215-3 (copied from c-round-211 g211-3.cjs; output names only). Fresh context, no credentials.
+const L = require('./glib.cjs');
+const path = require('path');
+const ev = async (pg, fn) => { for (let i = 0; i < 10; i++) { try { await pg.waitForFunction(() => document.body && document.body.innerText.length > 20, null, { timeout: 30000 }); return await pg.evaluate(fn); } catch (e) { if (i === 9) throw e; await L.sleep(1500); } } };
+(async () => {
+  const browser = await L.launch();
+  const res = { utc: new Date().toISOString() };
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  const forbidden = [], auth = [], errors = [], hyd = [];
+  page.on('request', (q) => { if (/studio-token|\/api\/recording-|\/api\/download|r2\.dev|r2\.cloudflarestorage|r2-proxy|workers\.dev|shopify|identitytoolkit|securetoken|brevo|sendinblue/i.test(q.url())) forbidden.push(q.url()); if (q.headers().authorization) auth.push(q.url()); });
+  page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
+  page.on('console', (m) => { if (/hydrat|did not match|server rendered/i.test(m.text())) hyd.push(m.text().slice(0, 200)); });
+  await page.goto(`${L.BASE}/studio-lab`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid=arrangement-grid-control]', { timeout: 90000 });
+  await L.sleep(2000);
+  res.fonts = await L.fontsWait(page);
+  res.lab = await ev(page, () => ({ authUser: localStorage.getItem('auth_user'), cookies: document.cookie.length, url: location.pathname, workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), demoBadge: document.body.innerText.includes('Demo collection — no sign-in required'), anyGeorgianBadge: document.body.innerText.includes('დემო კოლექცია'), loader: document.querySelectorAll('[data-testid=entrance-loader]').length, ss: sessionStorage.getItem('czaba_entrance_seen') }));
+  await page.mouse.move(700, 400); await page.mouse.wheel(0, 2000); await L.sleep(9000); await page.mouse.move(700, 1, { steps: 4 }); await page.mouse.move(700, -20); await L.sleep(800);
+  res.labLeadMagnet = await ev(page, () => ({ freeDownload: /FREE DOWNLOAD/.test(document.body.innerText), lmDialog: !![...document.querySelectorAll('[role=dialog]')].find((d) => /FREE DOWNLOAD|mystery pack|CLAIM YOUR OFFER/.test(d.innerText)), lmKey: localStorage.getItem('czaba_lead_magnet') }));
+  await page.screenshot({ path: path.join(__dirname, '..', 'shots', 'g215-3-lab-1440.png') });
+  await page.goto(`${L.BASE}/studio/middle-east`, { waitUntil: "load" }); await page.waitForFunction(() => document.body && document.body.innerText.length > 20, null, { timeout: 60000 });
+  await L.sleep(5000);
+  res.protected = await ev(page, () => ({ url: location.pathname, workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), audioSrc: document.querySelectorAll('audio[src]').length, signInRequired: /sign in required/i.test(document.body.innerText), text: document.body.innerText.replace(/\s+/g, ' ').slice(0, 300) }));
+  await page.screenshot({ path: path.join(__dirname, '..', 'shots', 'g215-3-protected-1440.png') });
+  const r = await ctx.request.get(`${L.BASE}/api/studio-token?product=middle-east&file=stem1.wav`, { failOnStatusCode: false });
+  res.token = { status: r.status(), body: (await r.text()).slice(0, 200) };
+  const r2 = await ctx.request.get(`${L.BASE}/api/studio-token?product=middle-east&file=stem1.wav`, { failOnStatusCode: false, headers: { Authorization: 'Bearer fake' } }); res.fakeBearer = { status: r2.status(), body: (await r2.text()).slice(0, 200), setCookie: r2.headers()['set-cookie'] || null }; res.ctxCookiesAfter = (await ctx.cookies()).length;
+  const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 720 } }); const p2 = await ctx2.newPage(); await p2.goto(`${L.BASE}/studio/middle-east`, { waitUntil: "load" }); await p2.waitForFunction(() => document.body && document.body.innerText.length > 20, null, { timeout: 60000 }); await L.sleep(5000); res.protected1280 = await ev(p2, () => ({ workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), audioSrc: document.querySelectorAll('audio[src]').length, signInRequired: /sign in required/i.test(document.body.innerText) })); await p2.screenshot({ path: path.join(__dirname, '..', 'shots', 'g215-3-protected-1280.png') }); await ctx2.close();
+  { const ctx3 = await browser.newContext({ viewport: { width: 1280, height: 720 } }); const p3 = await ctx3.newPage(); const f3 = [], a3 = [];
+    p3.on('request', (q) => { if (/studio-token|\/api\/recording-|\/api\/download|r2\.dev|r2\.cloudflarestorage|r2-proxy|workers\.dev|shopify|identitytoolkit|securetoken|brevo|sendinblue/i.test(q.url())) f3.push(q.url()); if (q.headers().authorization) a3.push(q.url()); });
+    await p3.goto(`${L.BASE}/studio-lab`, { waitUntil: 'domcontentloaded' }); await p3.waitForSelector('[data-testid=arrangement-grid-control]', { timeout: 90000 }); await L.sleep(2000);
+    res.lab1280 = await p3.evaluate(() => ({ authUser: localStorage.getItem('auth_user'), cookies: document.cookie.length, url: location.pathname, workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), demoBadge: document.body.innerText.includes('Demo collection — no sign-in required') }));
+    res.lab1280.forbidden = f3; res.lab1280.auth = a3; res.lab1280.ctxCookies = (await ctx3.cookies()).length;
+    await p3.screenshot({ path: path.join(__dirname, '..', 'shots', 'g215-3-lab-1280.png') }); await ctx3.close(); }
+  res.pageForbidden = forbidden; res.pageAuth = auth; res.errors = errors; res.hydration = hyd;
+  await browser.close();
+  L.save(require('path').join(__dirname,'..','out'), 'g215-3.json', res);
+  console.log(JSON.stringify(res, null, 1));
+})();

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T00:31:29.646Z)
+# Active loop summary (2026-10-28T01:01:10.871Z)
 
-- backlog.json 1923 KB -> active view 275 KB
-- status: G_ROOT_GATE round 214
-- servers: `{"checkedUtc":"2026-10-27T23:48:43.7237510Z","round":214,"attempt":1,"store":200}`
+- backlog.json 1935 KB -> active view 274 KB
+- status: G_ROOT_GATE round 215
+- servers: `{"checkedUtc":"2026-10-28T00:51:58.7685457Z","round":215,"attempt":1,"store":200}`
 - last publication: eb9e76e1bc2b41f6ec1a3e083a391d05cb1a844f (rounds 214-214)
-- last root gate: round 214 published - commit eb9e76e1bc2b41f6ec1a3e083a391d05cb1a844f pushed
+- last root gate: round 215 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -475,16 +475,12 @@
 - A-R203-REVIEW-M1 / low / ruled (D-29z169): folded into SYS-3 (see systemic_tasks SYS-3.also_fixes_d29z169); reviewer rated Medium, B rates Low: fail-safe (extra ring only), not reproducible in the cloud browser; Android device check on the Tech Lead list / Android soft keyboard key=Unidentified / IME isComposing keydowns flip focus-source to keyboard (ring mid-typing on Android)
 - A-R203-REVIEW-I1 / info / ruled (D-29z169): folded into SYS-3 with M1 (AltGraph printable keys count as editing) / AltGr (Ctrl+Alt) / macOS Option typing switches focus-source to keyboard
 - B-R203-AUTH-USER-CLIENT-TRUST / info / root_note: not scheduled; no Studio action; protected file (AuthContext.tsx) / A stored localStorage.auth_user without accessToken renders the signed-in header with no backend verification (AuthContext.tsx:93-94 setUser
-- GATE205-DOC162-STATUS / low / dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
-- GATE206-S3 / low / scheduled round 214 (PERF-1b-i, D-29z207) / fiber walk depends on React 18 internals (tag/PerformedWork); record renderer.version and fail on unexpected major
+- GATE205-DOC162-STATUS / low / queued: SYS-4 (doc 162 l.4 still In Progress at eb9e76e) | dispatched round 206 (D-29z171, R112: one-line status fix, granted) / Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)
 - GATE206-S5 / low / scheduled PERF-1b-ii round 216: document only (D-29z207) / test:perf webServer rewrites shared build/; collides with a parallel verify/build
-- GATE206-S6 / low / scheduled round 214 (PERF-1b-i, D-29z207) / harness.audio-running is weak with the autoplay flag; require running context + >=1 start() in the playing window
 - I-206-a / info / root_note / fake-Bearer /api/studio-token returns 500 without the :5199 mock (mock not started at job start; no cloud/ folder in the loop folder), 403 w
-- GATE206-DOC163-STATUS / low / scheduled: round 207 R113 (D-29z175) / doc 163 l.4 published still conditional (C round 206 check pending)
 - A-R207-01 / low / duplicate_of C-R207-01 / 
 - A-R207-02 / info / tech_lead_manual (non-blocking) / active:cursor-grabbing verified in Chromium only; Firefox/Safari unverified in the cloud
 - C-R208-01 / low / scheduled: round 209 (D-29z181), same owner, not deferred / doc 163 l.16/18/24-31/74/83/151 contradict the a0 harness (row count, wall-clock assert exception, pass sequence, determinism list, TODO)
-- GATE208-DOC163-STATUS / low / scheduled: round 209 R115 (D-29z181, L28 4th time) / doc 163 l.4 published as 'In Progress (... PERF-FADER-a0 C round 208 check pending)'
 - I-208-a / info / ratified D-29z180 (pointerdown commits allowed only with downComponentsMax <= 3) / move window starts at the first move after the in-page pointerdown; -per-move divides by 120
 - I-208-b / info / carried into round 209 WINDOW-209/EXPORT-209 (start below max by keyboard) / track/group drags start at max (endsCase max): high end proves only a return to max
 - I-208-c / info / info, no action / liveness margin 1.2-2.0 ms over the 30 ms busy-wait floor; can only grow under load
@@ -497,17 +493,20 @@
 - C-R211-01 / low / scheduled: round 212 (D-29z198; same owner, fix now, not deferred) / release of a value-changing single Clip Gain drag commits a stale typed-text pending state before the parent's layout-effect sync (never pai
 - C-R211-03 / info / ruled D-29z196: DEV1 accepted (members harness scenario adds Soft impact because /studio-lab has one audio clip; runs after fader.group.playing; verified); DEV2 accepted (both leaves inside granted files; new files are a permitted subset); DEV3 = C-R211-01 (scheduled 212); DEV4 accepted (+0.5 ms on wall-clock liveness rows; the identity list covers deterministic rows only; assert >= 30 passes); DEV5 accepted (setter-loop override unreachable mid-gesture by mutant; restart path proven by CP7/CP8 and C AUDIO-211 (c)) / A DEVIATIONS 1, 2, 4, 5 need B ruling
 - C-R211-04 / info / corrected in round-212 task section 4 (D-29z196); not a regression / task premise 'video lanes draw no waveform' is wrong: a video clip with an audio stream draws a lane waveform on 180dd2e too
-- GATE211-S1 / medium / scheduled: round 212 (D-29z198; stored gains passed as a prop) / ArrangementDetailClipGain reads getArrangement() (mutable ref) during render; undefined prop falls back to 0 dB
 - GATE211-S2 / low / folded into the frontend-architect checkpoint (b-round-211-checkpoint-request.md, D-29z195); ArrangementContext frozen in round 212 / commitClipGainPending before/pointerOverride branches not exclusive (unreachable today)
-- GATE211-S6 / low / scheduled: round 212 exact Completed line (D-29z196); L28 signal (6x) for RETRO / doc 166 l.4 status still 'In Progress (C round 211 check pending)'
 - GATE211-ARCH-CLIPGAIN-GESTURE / info / signal; folded into the frontend-architect checkpoint (D-29z195); not scheduled / Clip Gain pending + pointer machines in ArrangementContext l.2979-3180; proposal lib/arrangement/clip-gain-gesture.ts pure preview/commit/ca
 - GATE211-ARCH-CLIPGAIN-PROPS / info / signal; reviewer verdict keep; folded into the checkpoint / ArrangementDetailClipGain takes ~30 props
 - A-R211-ARCH-USEMIXDRAFT / info / signal; folded into the checkpoint (D-29z195); not scheduled / useMixDraftValue exported from ArrangementMixFader.tsx and used by ArrangementClip.tsx; proposal: move next to mix-draft-store.ts
 - C-R212-03 / info / signal: slow-CPU budget is a Saba question / PERF-1b input (D-29z202); not scheduled / Clip Gain drag under 6x CPU throttle still 45-60 ms p95 on both current and baseline builds
-- B-R212-TIMEOUT-HEADROOM / info / signal for RETRO 215 (lessons.md owned by RETRO) / RETRO 215 lesson signal: a test above ~50 % of its timeout in the last gate log (CP12 25.4/30 s at gate 211) should be split before more row
 - GATE213-S4 / info / signal (D-29z205); fix = include selected clip ids in the sync trigger if it ever counts as a bug / ArrangementDetailPanel render-phase field sync keyed on the displayed dB only: half-typed text survives a selection change to a clip with th
 - GATE213-S5 / info / signal (D-29z205) / ArrangementDetailPanel.tsx:996 allocates [clipGainDb ?? 0] per render; harmless until the gain block is memoized
 - GATE213-S7 / info / root signal (D-29z205): run npx biome lint on the touched paths in the gate / gate verify.log prints only 19 of 205 Biome warnings, so new warnings in touched files cannot be confirmed from the log
+- ROOT-L28-AMEND-MISSED / info / doc 167 fixed by round-214 grant (published eb9e76e); recurred for doc 168 (GATE214-DOC168-STATUS); class handled in RETRO 215 (retro-215.md, L28 replaced, SYS-4) / doc 167 l.4 published stale at fe556fd although current-task 213 section 5 asked root to amend it (third occurrence after docs 161/162)
+- A-R214-DEV-RANGE-LIVE / info / ruled D-29z210: accepted (label-based liveness, red-proved by C mutant C1) / task liveness signal [data-range-end] renders only for all-tracks ranges (ArrangementLane.tsx l.1016-1026); A used the clip range label end 
+- A-R214-DEV-CLICK-LIVE / info / ruled D-29z210: accepted (fader enabled/disabled is the selection signal; count 1 still checked) / Clip Gain fader always rendered; click-live uses enabled after Add -> disabled after empty-lane click -> enabled after header click
+- A-R214-DEV-AUDIO-RUNNING-1X / info / ruled D-29z210: accepted (1x-only row like PERF-1a harness.audio-running; at 6x a non-running play still pushes a failure) / interact.harness.audio-running has no .6x row although step 5 runs at both rates
+- GATE214-DOC168-STATUS / low / queued: SYS-4 (next source round, D-29z212) / doc 168 l.4 published as In Progress (C round 214 check pending) in eb9e76e (gate-214 review item 6)
+- B-R214-DOC160-161-STATUS / low / queued: SYS-4 (next source round, D-29z212) / docs 160 and 161 l.4 still In Progress at eb9e76e although C passed (rounds 203, 204/205) and both are published (135b880, c274930); never f
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,9 +1,9 @@
 {
- "version": 201,
- "updated": "2026-10-28 (B round 214 -> 215 planning, D-29z209..D-29z212)",
+ "version": 202,
+ "updated": "2026-10-28 (B round 215 -> 216 planning, D-29z213..D-29z217)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 215, D-29z209..D-29z212; RETRO window 200-214; no source change)",
+ "current_task": "current-task.md (round 216, D-29z213..D-29z217; PERF-1b-ii resource baselines + SYS-4 doc status backfill + RT-FIX-216)",
  "advisor_used_by_B": "2026-10-27 round 212 -> 213 planning: advisor available and consulted after orientation and at the end; advice followed: archive first, C-R212-01 ruled (derived-row rule), SABA-B-5 c_pass_pending_publication, CP12 split scratch-measured (no timeout raise), 1280 detail-panel expand step, M2 clamp wording, B-R212-TIMEOUT-HEADROOM retro signal | previous: 2026-10-27 round 205 -> 206 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: PERF-1 split 1a/1b, all of app/ frozen, hook stub + start() counter proven on a scratch prod build before dispatch, C-R205-01 ruled Low but scheduled, doc 162 status fix granted, queue move recorded with a D-ID | previous: 2026-10-26 round 189 -> 190 planning: advisor available and consulted after orientation (before writing) and at the end; advice followed: round-179-style fix-up baseline on the uncommitted round-189 tree (frozen 1016 incl. doc 155 at cdf011f9, grants 3), A must reproduce C's fresh-mode CLS and bisec",
  "baseline": {
   "tsc_errors": 0,
@@ -10221,7 +10221,7 @@
    "round": 211,
    "task": "current-task.md",
    "decision": "D-29z188..D-29z194",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "type": "FEATURE STAGE (STUDIO-PERFORMANCE PERF-FADER-b: SABA-B-5 part 2, Clip Gain single + members pointer preview)",
    "items": [
     "clip-gain pointer path: override + live setClipGain for affected clips + draft keys; no updateHistory/syncPlayback per move; pending path unchanged",
@@ -10235,13 +10235,14 @@
    ],
    "note": "baseline HEAD 180dd2e (gate 210 published); frozen 1041 files b-round-210-r211-tree-sha256.txt; grants b-round-210-r211-grants.txt (14); new files b-round-210-r211-new-files.txt (4); consults tech-lead + performance-optimizer (b-round-210.md section 3); re-measure = A round-210 perf run1 clipgain rows (code untouched)",
    "next": "frontend-architect checkpoint request (written at 211->212 planning, non-blocking), then PERF-1b",
-   "added": "2026-10-27 B round 210 -> 211 planning (D-29z189)"
+   "added": "2026-10-27 B round 210 -> 211 planning (D-29z189)",
+   "bookkeeping_fix_d29z214": "was \"dispatched\"; C round 211 PASS, gate 211 published 28a274c (gates/gate-round-211.json); fixed per C round 215 needsBRuling"
   },
   {
    "round": 212,
    "task": "current-task.md",
    "decision": "D-29z195..D-29z199",
-   "status": "c_pass_published",
+   "status": "c_pass_gate_failed_published_with_213",
    "type": "BUG/PERF STAGE (STUDIO-PERFORMANCE PERF-FADER-c: SABA-B-5 part 3 + C-R211-01 + GATE211-S1)",
    "items": [
     "buildPeakShape path = one closed outline (same geometry; WZ1/WG1/WG2 re-expressed as geometry identity; WG2 sha via legacy formatter)",
@@ -10254,7 +10255,8 @@
    "next": "PERF-1b (or a measured follow-up if LATENCY-212 fails)",
    "added": "2026-10-27 B round 211 -> 212 planning (D-29z197)",
    "result": "C PASS (11 rows + PERF-RUN-212 by D-29z200), browserVerified/realVerified true; gate 212 failed: CP12 timeout 33.3 s (pre-existing, GATE212-B1); publication with round 213",
-   "published": "fe556fd (with round 213; gate 212 had failed only on CP12)"
+   "published": "fe556fd (with round 213; gate 212 had failed only on CP12)",
+   "bookkeeping_fix_d29z214": "was \"c_pass_published\"; gate 212 failed (verify exit 1, GATE212-B1), work published by gate 213 as fe556fd (rounds 212+213)"
   },
   {
    "round": 213,
@@ -10293,7 +10295,7 @@
    "round": 215,
    "task": "current-task.md",
    "decision": "D-29z209..D-29z212",
-   "status": "dispatched",
+   "status": "c_fail_rt_num",
    "type": "RETRO (window 200-214)",
    "items": [
     "RETRO 215: C traceability check of retros/retro-215.md + lessons.md + SYS-4 (RT-NUM, RT-CAUSE, RT-IDS, RT-LESSONS, RT-SABA)",
@@ -10303,7 +10305,27 @@
    ],
    "note": "baseline HEAD eb9e76e clean; frozen 1062 (b-round-214-r215-tree-sha256.txt); grants none (b-round-214-r215-grants.txt empty)",
    "next": "round 216 PERF-1b-ii + SYS-4 doc grants (REGRESSION instead if planning on/after 2026-10-30)",
-   "added": "2026-10-28 B round 214 -> 215 planning"
+   "added": "2026-10-28 B round 214 -> 215 planning",
+   "result": "C round 215 FAIL on RT-NUM only (C-R215-01 Low: retro-215.md l.53 \"11 review\" should be 10); SOURCE-SCOPE, RT-CAUSE, RT-IDS, RT-LESSONS, RT-SABA, G215-3, STUDIO-SMOKE-215 PASS; browserVerified=true, realVerified=true; gate 215 skipped (C FAIL; nothing to publish). B corrected retro l.53 (+ C notes l.32/l.70/l.75) at round-216 planning; RT-FIX rides in round 216 (D-29z213)"
+  },
+  {
+   "round": 216,
+   "task": "current-task.md",
+   "decision": "D-29z213..D-29z217",
+   "status": "dispatched",
+   "type": "PERF STAGE (STUDIO-PERFORMANCE PERF-1b-ii: resource baselines) + SYS-4 + RT-FIX-216",
+   "items": [
+    "new perf/studio-lab-resources.perf.spec.ts + perf/budgets.resources.json (res.* rows; 3x1 + 3x6 passes; durationMs <= 8 min)",
+    "WAV export 1 and 2 clips: long tasks, LoAF blocking, backingStorageSize peak delta, bytes, RIFF header liveness",
+    "backing store at ready + leak row; DOM page/clip-subtree/ruler at 0/1/2 clips; JS bytes per route",
+    "doc 169 (incl. GATE206-S5 section, findings for PERF-11/12/13/14)",
+    "SYS-4: docs 160/161/162/168 l.4",
+    "RT-FIX-216 (retro-215 l.32/53/70/75, lessons L28/L32)",
+    "G216-3 auth guard, STUDIO-SMOKE-216 real WAV export"
+   ],
+   "note": "baseline HEAD eb9e76e clean; frozen 1058 (b-round-215-r216-tree-sha256.txt); grants 4 docs l.4 (b-round-215-r216-grants.txt); new files 3 (b-round-215-r216-new-files.txt); no deps change (D-29z216)",
+   "next": "round 217 REGRESSION if planning on/after 2026-10-30 (expected), else PERF-16 with root-deps-request.json",
+   "added": "2026-10-28 B round 215 -> 216 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -12457,7 +12479,7 @@
   },
   {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i done (214, eb9e76e); RETRO 215 (round 215); PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i dispatched round 214 (D-29z206/207); RETRO 215; PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (209-210, 180dd2e); PERF-FADER-b done (211, 28a274c); PERF-FADER-c dispatched round 212 (D-29z197); checkpoint requested (D-29z195, non-blocking); then PERF-1b, PERF-16, OSS-LIC, PERF-2..15 | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (rounds 209-210, C round 210 PASS browserVerified=true, published 180dd2e); PERF-FADER-b dispatched round 211 (D-29z189); then frontend-architect checkpoint request (non-blocking), PERF-1b, PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped, D-29z194) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a dispatched round 209 (D-29z179, pan included); then PERF-FADER-b, PERF-1b | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
+   "status": "in_progress: PERF-1a, SABA-B-6, PERF-FADER-a0/a/b/c, PERF-1b-i done; RETRO 215 (round 215 C FAIL RT-NUM Low, corrected; RT-FIX in 216); PERF-1b-ii dispatched round 216 (D-29z217); then PERF-16 (after REGRESSION 217 if due), OSS-LIC, PERF-HARNESS-SHARED-LIB, then execution_order_d29z215 | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i done (214, eb9e76e); RETRO 215 (round 215); PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i dispatched round 214 (D-29z206/207); RETRO 215; PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (209-210, 180dd2e); PERF-FADER-b done (211, 28a274c); PERF-FADER-c dispatched round 212 (D-29z197); checkpoint requested (D-29z195, non-blocking); then PERF-1b, PERF-16, OSS-LIC, PERF-2..15 | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (rounds 209-210, C round 210 PASS browserVerified=true, published 180dd2e); PERF-FADER-b dispatched round 211 (D-29z189); then frontend-architect checkpoint request (non-blocking), PERF-1b, PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped, D-29z194) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a dispatched round 209 (D-29z179, pan included); then PERF-FADER-b, PERF-1b | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -12475,7 +12497,7 @@
     {
      "id": "PERF-1b",
      "what": "remaining baseline scenarios: zoom keydown with 30 clips, clip click, range drag, fade-handle drag, trim drag (SABA-B-5: 'B checks the other continuous drags'; each showing whole-provider re-render becomes its own PERF task), play/pause commit size, WAV export long tasks and peak memory, JS bytes per route, DOM per clip, backing-store MB",
-     "status": "split D-29z206 into PERF-1b-i (round 214) and PERF-1b-ii (round 216) | PERF-1b-i done round 214 (eb9e76e); PERF-1b-ii round 216"
+     "status": "split D-29z206 into PERF-1b-i (round 214) and PERF-1b-ii (round 216) | PERF-1b-i done round 214 (eb9e76e); PERF-1b-ii round 216 | PERF-1b-ii dispatched round 216"
     },
     {
      "id": "PERF-1b-i",
@@ -12485,7 +12507,7 @@
     {
      "id": "PERF-1b-ii",
      "what": "WAV export long tasks + peak memory, JS bytes per route, DOM per clip, backing-store MB; GATE206-S5 documented",
-     "status": "not_started (round 216, after RETRO 215; regression takes precedence if round-216 planning is on/after 2026-10-30)"
+     "status": "dispatched round 216 (D-29z217) | not_started (round 216, after RETRO 215; regression takes precedence if round-216 planning is on/after 2026-10-30)"
     },
     {
      "id": "PERF-FADER",
@@ -12516,7 +12538,8 @@
     {
      "id": "PERF-16",
      "what": "see perf-plan.md task outline",
-     "status": "not_started; moved up to right after PERF-1b (D-29z194, oss-adoption.md)"
+     "status": "not_started; moved up to right after PERF-1b (D-29z194, oss-adoption.md)",
+     "deps_request_d29z216": "file root-deps-request.json {\"add\": [\"mediabunny\", \"@mediabunny/mp3-encoder\"], \"remove\": []} at the planning step that dispatches PERF-16; the round itself removes @ffmpeg/* via a second request only after the code no longer imports it (B rules the exact sequence at PERF-16 planning)"
     },
     {
      "id": "OSS-LIC",
@@ -12531,7 +12554,8 @@
     {
      "id": "PERF-3",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "not_started",
+     "scope_addition_d29z215": "add a Ctrl+wheel zoom baseline row before the fix (hypothesis in doc 168: continuous zoom, not measured); key zoom baseline 95 comps/key (1 clip)"
     },
     {
      "id": "PERF-4",
@@ -12556,7 +12580,8 @@
     {
      "id": "PERF-8",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "not_started",
+     "target_rebaseline_d29z215": "PERF-1b-i production baseline for range body drag: 101.283 components/move, 1.983 commits/move (doc 168 PERF candidates; interact.drag.range.stopped.move-components-per-move); target stays <= 15/move"
     },
     {
      "id": "PERF-9",
@@ -12566,32 +12591,66 @@
     {
      "id": "PERF-10",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "not_started",
+     "scope_addition_d29z215": "clip click (102 comps, 3 commits) and play/pause (87 comps each) baselines from doc 168 belong here"
     },
     {
      "id": "PERF-11",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "not_started",
+     "baseline_source_d29z217": "round 216 PERF-1b-ii res.* rows (doc 169); probe b-round-215/consult-perf/"
     },
     {
      "id": "PERF-12",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "not_started",
+     "baseline_source_d29z217": "round 216 PERF-1b-ii res.* rows (doc 169); probe b-round-215/consult-perf/"
     },
     {
      "id": "PERF-13",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "not_started",
+     "baseline_source_d29z217": "round 216 PERF-1b-ii res.* rows (doc 169); probe b-round-215/consult-perf/"
     },
     {
      "id": "PERF-14",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "not_started",
+     "scope_addition_d29z215": "zoom with 30 clips grows with clip count: 240 comps/key (interact.zoom.30.components-per-key), key window 98-113 ms 1x",
+     "baseline_source_d29z217": "round 216 PERF-1b-ii res.* rows (doc 169); probe b-round-215/consult-perf/",
+     "probe_note_d29z217": "probe: ~220 page elements per added 101 s clip = 17 clip subtree + ~202 ruler + 1 overview; ruler is not virtualized and grows with project length, so the 200-clip <= 2000-element target needs ruler work too"
     },
     {
      "id": "PERF-15",
      "what": "see perf-plan.md task outline",
      "status": "not_started"
+    },
+    {
+     "id": "PERF-COMMIT-RESCHEDULE",
+     "what": "on a clip-edit commit while playing, reschedule only the changed clip(s) instead of rebuilding the graph and restarting every clip; first row measures trim and move release restarts with 30 clips (doc 168 only infers them); then the fix",
+     "target": "interact.drag.fade.30.playing.release-restarts == 1 (baseline 30), same for trim/move at 30 clips; playback position and mix unchanged; exported mix unchanged",
+     "source": "doc 168 PERF candidates (fade 30-clip release restarts 30); tech-lead consult 2026-10-28",
+     "note": "restarting every clip during playback may be audible: hypothesis, not measured; the stage measures it before claiming it",
+     "status": "not_started (queued D-29z215)",
+     "added": "2026-10-28 B round 215 -> 216 planning"
+    },
+    {
+     "id": "PERF-DRAG-PREVIEW",
+     "what": "fade / trim / move drag previews leave history and provider state during the gesture (fader pattern, PERF-FADER-a/b); one history entry per gesture at release; Undo/Esc/snap/readouts unchanged",
+     "target": "<= 15 committed components per move (baselines 96.367 fade, 101.283 trim, 101.383 move); 1 history entry per gesture",
+     "preview_paths": "ArrangementClip.tsx:503 / :674 / :634 previewArrangement -> ArrangementContext.tsx:1588 previewArrangement -> updateHistory",
+     "source": "doc 168 PERF candidates; tech-lead consult 2026-10-28",
+     "note": "goes right after PERF-8 (same ArrangementContext region ~l.1572-1588; may reuse its external store; B may merge with PERF-8 at its planning)",
+     "status": "not_started (queued D-29z215)",
+     "added": "2026-10-28 B round 215 -> 216 planning"
+    },
+    {
+     "id": "PERF-HARNESS-SHARED-LIB",
+     "what": "test-only: extract the helpers copied between the three perf specs into perf/lib/page.ts + perf/lib/report.ts; behaviour unchanged; tighten ratio-row determinism tolerance (A-R214 review M2)",
+     "target": "every deterministic median of latest.json, latest-interactions.json and latest-resources.json identical before and after; all three specs exit 0",
+     "source": "architecture signal PERF-HARNESS-SHARED-LIB (3rd copy lands with PERF-1b-ii; project 3+ places rule); tech-lead consult 2026-10-28",
+     "status": "not_started (queued D-29z215, after OSS-LIC)",
+     "added": "2026-10-28 B round 215 -> 216 planning"
     }
    ],
    "perf_fader_constraints_d29z174": "Before any event-share-16 row flips to assert: replace the metric (per-move frame/LoAF with liveness red-proof > 0 on a slow drag) or prove it live (C-R206-01); rewrite doc 163 l.60 and budgets.json event-share notes; drag changes the value at both ends (I-206-d); consult performance-optimizer + tech-lead and re-measure before dispatch",
@@ -12601,7 +12660,8 @@
    "consults_round_211": "tech-lead + performance-optimizer, 2026-10-27, summarised in b-round-210.md section 3",
    "execution_order_d29z199": "PERF-FADER-c (SABA-B-5 Medium remainder, bug gate) -> PERF-1b -> PERF-16 -> OSS-LIC -> PERF-2..PERF-15 (PERF-6 dropped). Frontend-architect checkpoint requested at 211->212 planning (non-blocking, D-29z195).",
    "consults_round_212": "performance-optimizer: recommended svg layer promotion + playhead transform (both refuted by B's measurement: promotion worse, playhead no gain), canvas last; cloud ms rows record-only. tech-lead: C-R211-01 via render-phase state adjustment; S1 via storedClipGainsDb index-aligned prop + detailGroup.clipGainsDb; leave ArrangementContext untouched (S2 to checkpoint). B diag: outline path 6.4-10.5 ms; L23 scratch: 3 literal pins red (WZ1, WG1, WG2), detail changes 2223/2223 green.",
-   "consults_round_214": "performance-optimizer (dev-server probe b-round-213/consult-perf/results.json) + tech-lead, 2026-10-27, summarised in b-round-213.md section 4"
+   "consults_round_214": "performance-optimizer (dev-server probe b-round-213/consult-perf/results.json) + tech-lead, 2026-10-27, summarised in b-round-213.md section 4",
+   "execution_order_d29z215": "PERF-1b-ii (216, or 217 if REGRESSION first) -> PERF-16 -> OSS-LIC -> PERF-HARNESS-SHARED-LIB -> PERF-2 -> PERF-3 -> PERF-COMMIT-RESCHEDULE -> PERF-4 -> PERF-5 -> PERF-7 -> PERF-8 -> PERF-DRAG-PREVIEW -> PERF-9 -> PERF-10 -> PERF-11 -> PERF-12 -> PERF-13 -> PERF-14 -> PERF-15 (PERF-6 dropped). Supersedes the PERF-2..15 tail of execution_order_d29z199. Source: tech-lead consult 2026-10-28 (b-round-215.md section 3)."
   },
   {
    "id": "STORE-REDESIGN",
@@ -22866,7 +22926,7 @@
    "title": "Doc 162 l.4 still says it waits for C's round-205 browser check; published stale in c274930 (GATE204-B1 class)",
    "evidence": "c-round-205.json notes.doc162StatusLine; store c274930 docs/implementation/2026/quarter-IV/162-lead-magnet-dialog-focus.md l.4",
    "origin": "C (round 205 note)",
-   "status": "queued: SYS-4 (doc 162 l.4 still In Progress at eb9e76e) | dispatched round 206 (D-29z171, R112: one-line status fix, granted)",
+   "status": "dispatched round 216 SYS-4 | queued: SYS-4 (doc 162 l.4 still In Progress at eb9e76e) | dispatched round 206 (D-29z171, R112: one-line status fix, granted)",
    "added": "2026-10-27 B round 205 -> 206 planning (D-29z171)"
   },
   {
@@ -22915,7 +22975,7 @@
    "severity": "low",
    "origin": "gate 206 reviewer",
    "title": "test:perf webServer rewrites shared build/; collides with a parallel verify/build",
-   "status": "scheduled PERF-1b-ii round 216: document only (D-29z207)",
+   "status": "scheduled PERF-1b-ii round 216: document only (D-29z207) | round 216 PERF-1b-ii: doc 169 section (D-29z217)",
    "evidence": "gates/round-206/review-result.json",
    "added": "2026-10-27 B round 206 -> 207 planning (D-29z173)"
   },
@@ -23348,7 +23408,7 @@
   {
    "id": "GATE214-DOC168-STATUS",
    "severity": "low",
-   "status": "queued: SYS-4 (next source round, D-29z212)",
+   "status": "dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212)",
    "title": "doc 168 l.4 published as In Progress (C round 214 check pending) in eb9e76e (gate-214 review item 6)",
    "source": "gates/round-214/review.md item 6; git show eb9e76e:doc168 l.4",
    "added": "2026-10-28 B round 214 -> 215 planning"
@@ -23356,10 +23416,37 @@
   {
    "id": "B-R214-DOC160-161-STATUS",
    "severity": "low",
-   "status": "queued: SYS-4 (next source round, D-29z212)",
+   "status": "dispatched round 216 SYS-4 | queued: SYS-4 (next source round, D-29z212)",
    "title": "docs 160 and 161 l.4 still In Progress at eb9e76e although C passed (rounds 203, 204/205) and both are published (135b880, c274930); never filed",
    "source": "B grep at round-215 planning (b-round-214.md)",
    "added": "2026-10-28 B round 214 -> 215 planning"
+  },
+  {
+   "id": "C-R215-01",
+   "severity": "low",
+   "origin": "C (round 215 RT-NUM)",
+   "title": "retro-215.md l.53 said \"11 review\" (10 review.md exist in 200-214) and omitted that 200-202 have no review",
+   "source": "c-round-215.json bugs; c-round-215/rt/gate-reviews.txt",
+   "status": "fixed in B planning (retros/retro-215.md l.53; diff b-round-215/retro-215-rtfix.diff); RT-FIX-216 re-check pending (round 216)",
+   "added": "2026-10-28 B round 215 -> 216 planning"
+  },
+  {
+   "id": "C-R215-02",
+   "severity": "info",
+   "origin": "C + A (round 215 lesson feedback)",
+   "title": "L28: A writes \"Completed (C round N PASS)\" before C runs; premature claim in working/FAIL trees",
+   "source": "c-round-215.json needsBRuling; a-round-215.md Lesson feedback",
+   "status": "ruled D-29z214: keep exact string, defined as post-PASS value valid only at HEAD; re-dispatch implicitly grants l.4 for N only; root request b-round-215-root-request-l28.md (gate-side Pending -> Completed substitution); L28 switches only after root confirms",
+   "added": "2026-10-28 B round 215 -> 216 planning"
+  },
+  {
+   "id": "C-R215-BOOKKEEPING-ROUNDS",
+   "severity": "info",
+   "origin": "C (round 215 needsBRuling)",
+   "title": "backlog rounds[] 211 dispatched / 212 c_pass_published were wrong",
+   "source": "c-round-215.json needsBRuling; gates/gate-round-211.json, gate-round-212.json",
+   "status": "closed D-29z214 (rounds[] fixed in this planning)",
+   "added": "2026-10-28 B round 215 -> 216 planning"
   }
  ],
  "tech_lead_notes": [
@@ -25119,7 +25206,9 @@
    "verdict": "keep for 1b-i (PERF-1a reference must not regress together with the new baseline)",
    "proposal": "extract perf/lib/page.ts + perf/lib/report.ts in a later bounded round with C re-running both specs; merges the earlier perf/lib/report.ts signal",
    "added": "2026-10-27 B round 213 -> 214 planning",
-   "round_214": "second occurrence: A code-reviewer (a-round-214.md Architecture note) and gate-214 review Signal 3: helpers copied between both specs; S3 had to be applied twice. Still keep; proposal = bounded test-only round, both specs report identical deterministic medians; also tighten ratio-row determinism tolerance (A review M2). Not scheduled (B rules at a STUDIO-PERFORMANCE boundary)"
+   "round_214": "second occurrence: A code-reviewer (a-round-214.md Architecture note) and gate-214 review Signal 3: helpers copied between both specs; S3 had to be applied twice. Still keep; proposal = bounded test-only round, both specs report identical deterministic medians; also tighten ratio-row determinism tolerance (A review M2). Not scheduled (B rules at a STUDIO-PERFORMANCE boundary)",
+   "round_216": "third occurrence with PERF-1b-ii (third self-contained spec); meets the 3+ places rule -> queued as STUDIO-PERFORMANCE stage PERF-HARNESS-SHARED-LIB after OSS-LIC (D-29z215)",
+   "status": "queued (D-29z215)"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -28687,6 +28776,16 @@
    "source": "gates/round-214/review.md Suggestions",
    "added": "2026-10-28 B round 214 -> 215 planning",
    "note": "perf harness owner; candidate for PERF-HARNESS-SHARED-LIB"
+  },
+  {
+   "id": "B-R215-EXPORT-CEIL-FRAME",
+   "severity": "low",
+   "status": "deferred_low_polish",
+   "title": "WAV export can be one frame longer than the project: renderArrangementWav uses Math.ceil(end * 48000) and 3*101.352*48000 = 14594688.000000002 -> 14594689 frames (6 extra bytes in a 3-clip export)",
+   "source": "B probe b-round-215/consult-perf (3-clip download 87,568,178 B vs 44 + 14594688*6); python check in b-round-215.md section 3; cause is an inference from graph.client.ts l.468-469, not verified by C",
+   "repro": "/studio-lab: Add demo clip, Ctrl+D x2, Export WAV; size - 44 = 6 * 14594689",
+   "note": "harmless silent frame (21 us); owner PERF-12 (chunked export rewrites the length math); PERF-1b-ii liveness tolerates +1 frame",
+   "added": "2026-10-28 B round 215 -> 216 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -30167,7 +30266,7 @@
    "owner_area": "docs/implementation/2026/quarter-IV/ (4 files, l.4 only)",
    "size": "folded into the next source round as doc grants (round 216 PERF-1b-ii, or the regression round if it comes first): 4 one-line grants",
    "root_cause": "status line needed a post-C amend that root missed (ROOT-L28-AMEND-MISSED); removed by L28 replacement",
-   "status": "queued: next source round (D-29z212)",
+   "status": "dispatched round 216 (D-29z217; 4 one-line grants) | queued: next source round (D-29z212)",
    "added": "2026-10-28 B round 214 -> 215 planning"
   }
  ],
@@ -30209,7 +30308,7 @@
     "qa-engineer": "not in B consult list; C may consult in round 215"
    },
    "headline": "15 rounds, C PASS 11 / FAIL 4 (200, 201, 202, 209); gate published 9, skipped 4, blocked 1 (204), failed 1 (212); cost $409.94 (B 151.29, A 146.46, C 112.19; root gate not included); FAIL rounds $100.40; re-do rounds 202/203/210/213 $101.46; largest repeated class: stale doc status lines (8 findings in window)",
-   "status": "dispatched round 215 (C traceability check)",
+   "status": "C round 215 FAIL on RT-NUM only (C-R215-01 Low); corrected by B at round-216 planning (D-29z213, b-round-215/retro-215-rtfix.diff); RT-FIX-216 pending in round 216 | dispatched round 215 (C traceability check)",
    "added": "2026-10-28 B round 214 -> 215 planning"
   }
  ],
@@ -30351,6 +30450,31 @@
    "id": "D-29z212",
    "date": "2026-10-28",
    "text": "Queue: round 215 RETRO (C verifies traceability; no source change). Round 216: if its planning date is on/after 2026-10-30, REGRESSION (regression-last round 199) and PERF-1b-ii moves to 217; else PERF-1b-ii + SYS-4 (docs 160/161/162/168 l.4 grants). At PERF-1b-ii planning B rules on doc 168 PERF candidates and files root-deps-request.json for mediabunny (PERF-16 next). If C fails an RT row, B corrects the retro first at round-216 planning; the next round still runs."
+  },
+  {
+   "id": "D-29z213",
+   "date": "2026-10-28",
+   "text": "Round 215 RETRO: C FAIL on RT-NUM only (C-R215-01 Low, retro-215.md l.53 \"11 review\" -> 10; also 200-202 have no review). Other 7 rows PASS, browserVerified/realVerified true, gate 215 skipped. B corrected retro l.53 and took C notes on l.70 (class label: no listed class fits, B analysis error) and l.32/l.75 (a-round-212.md l.38-41); diff b-round-215/retro-215-rtfix.diff. RT-FIX-216 re-checks only these lines in round 216 (per tasks/round-215.md section 4)."
+  },
+  {
+   "id": "D-29z214",
+   "date": "2026-10-28",
+   "text": "L28 ruling (C-R215-02, A feedback): keep exact Completed (C round N PASS), defined as the post-PASS value true only at HEAD (c-round-N.json is the source of truth); on a re-dispatch as N+1 the doc l.4 is implicitly granted for rewriting N only; root request b-round-215-root-request-l28.md for a gate-side Pending -> Completed substitution with a gate failure on any leftover Pending; L28 switches only after root confirms (tech-lead consult). L32 amended: when a gate verify.log exists, report A time and last gate time; the higher decides. rounds[] bookkeeping fixed: 211 c_pass_published (28a274c), 212 c_pass_gate_failed_published_with_213 (fe556fd)."
+  },
+  {
+   "id": "D-29z215",
+   "date": "2026-10-28",
+   "text": "Doc 168 PERF candidates ruled (tech-lead consult): range drag -> PERF-8 (baseline 101.283/move); clip click + play/pause -> PERF-10; zoom key 1 clip -> PERF-3 (+ Ctrl+wheel baseline row); zoom with 30 clips -> PERF-14; fade/trim/move preview via previewArrangement -> updateHistory -> new stage PERF-DRAG-PREVIEW (after PERF-8); release restart of every clip -> new stage PERF-COMMIT-RESCHEDULE (after PERF-3; audibility is a hypothesis to measure first). PERF-HARNESS-SHARED-LIB reaches its 3rd copy with PERF-1b-ii -> queued test-only stage after OSS-LIC. Order: execution_order_d29z215. interact.harness.drag-range-live DEVIATION (A-R214-DEV-RANGE-LIVE) stays accepted (D-29z210)."
+  },
+  {
+   "id": "D-29z216",
+   "date": "2026-10-28",
+   "text": "root-deps-request.json for mediabunny + @mediabunny/mp3-encoder is filed at the planning step that dispatches PERF-16 (oss-adoption.md allows \"in the same planning step as the dispatch\"), not now: a chore(deps) commit at the start of round 216 would move HEAD and change package.json/package-lock.json under the frozen list, and round 216 does not use the packages. Deviation from D-29z212 recorded. @ffmpeg/* removal is part of the PERF-16 round only."
+  },
+  {
+   "id": "D-29z217",
+   "date": "2026-10-28",
+   "text": "Round 216 = PERF-1b-ii (third self-contained spec perf/studio-lab-resources.perf.spec.ts, perf/budgets.resources.json, res.* rows, latest-resources.json; 3 passes 1x (ready GC backing store, DOM 0/1/2 clips + clip subtree + ruler, WAV export 1 and 2 clips with RIFF header liveness, leak row, JS bytes for /studio-lab, /, /studio/middle-east guard) + 3 passes 6x exports only; durationMs <= 8 min with pre-ruled fallback; GATE206-S5 documented in doc 169) + SYS-4 (docs 160/161/162/168 l.4 -> Completed (C round 203/204/205/214 PASS)) + RT-FIX-216. Probe by performance-optimizer: b-round-215/consult-perf/. Round 217 expected REGRESSION (due 2026-10-30), then PERF-16."
   }
  ]
 }
