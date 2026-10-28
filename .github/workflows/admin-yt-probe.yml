@@ -23,6 +23,11 @@ jobs:
           {
             echo "== search"
             yt-dlp --flat-playlist --print '%(id)s|%(title)s|%(channel)s|%(view_count)s' 'ytsearch3:Ableton Live 12 insert marker tutorial' 2>&1 | tail -5
+            echo "== yt-dlp subs"
+            yt-dlp --skip-download --write-auto-subs --sub-langs en --sub-format vtt -o '/tmp/yt/%(id)s' 'https://www.youtube.com/watch?v=B9ze4m6C-RQ' 2>&1 | tail -3
+            ls -la /tmp/yt 2>&1 | tail -3; head -c 400 /tmp/yt/*.vtt 2>&1
+            echo "== yt-dlp chapters/description"
+            yt-dlp --skip-download --print '%(title)s|%(duration)s|%(chapters)s' 'https://www.youtube.com/watch?v=72pGtn2v56U' 2>&1 | tail -2 | cut -c1-400
             echo "== transcript"
             python3 -c "
           from youtube_transcript_api import YouTubeTranscriptApi
