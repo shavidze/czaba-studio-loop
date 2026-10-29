@@ -1,0 +1,17 @@
+A round 254 mutants (final tests). Scratch: /tmp/a254-scratch (tar copy of the working tree, node_modules symlinked), outside the repo.
+Script: run-mutants.py. Each run covers shortcuts.test.ts, shortcut-sheet-ui.test.tsx, insert-marker-ui.test.tsx and render-budget.test.tsx.
+Final raw output: summary-raw-3.txt. Earlier runs: summary-raw.txt, summary-raw-2.txt (before the review fixes).
+Repo `git status`: identical before and after the mutant runs (git-status-before.txt / git-status-after.txt; the after list adds only the untracked doc 192, written later).
+
+MU-SHEET-NO-ROWS  (two new rows deleted)                  RED: SC1 shortcuts.test.ts:107, SC5 :169, SS-T1 shortcut-sheet-ui.test.tsx:598, SS-T2 :629
+MU-ARIA-NO-META   (Meta+Shift+Space dropped)              RED: SC5 shortcuts.test.ts:170
+MU-COPY-OLD       ('Play / Stop' + old marker text)        RED: SS-T1 shortcut-sheet-ui.test.tsx:600, SS-T2 :629
+MU-HIDDEN-SIGNAL  (old hidden div restored)                RED: IMV1 insert-marker-ui.test.tsx:722, IMV2 :752, IMV3 :782, IMV4 :795, IMV5 :805
+MU-LEFT-FROZEN    (style.left write removed from subscr.)  RED: IMV1 :735, IMV2 :767, IMV3 :782, IMV4 :795, IMV5 :805
+MU-NO-HIDE        (hidden prop dropped)                    RED: IMV3 :777
+MU-NO-PPS-DEP     (pxPerSecond dropped from effect deps)   RED: IMV5 :818
+MU-REMOUNT        (key={String(isPlaying)} on the line)    RED: RB-IM render-budget.test.tsx:369
+MU-ZORDER         (line mounted after the playhead)        RED: IMV1 :727   (added after code-review Medium #1)
+FIX-CONTROL       (unmodified)                             GREEN: 56/56
+
+History: in the first run MU-LEFT-FROZEN left IMV2 green, because React's render-time style prop re-applied `left` on the playing click. IMV1, IMV2, IMV3 and IMV5 now also write the insert-marker store directly, with no context change, so only the subscription can move the line.

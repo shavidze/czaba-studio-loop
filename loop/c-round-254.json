@@ -1,0 +1,107 @@
+{
+ "taskStatus": "FAIL",
+ "round": 254,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T20:59:34.2405901Z",
+  "round": 254,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R254-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab, fresh context, 1440x900 and 1280x720; wait for 'Demo collection ready'; add demo-stem-pulse",
+    "press ? (Shift+Slash) to open the shortcut sheet",
+    "measure the sheet's scrolling container (Modal panel, overflow-auto) scrollHeight; repeat on a HEAD c65e5e9 git-archive control server (:5180)",
+    "diagnostic: set white-space:nowrap on every row action span and re-measure on both"
+   ],
+   "expected": "C-SHEET-254: a two-line action is allowed only if the dialog does not scroll more than at HEAD",
+   "actual": "scrollHeight 1260 vs HEAD 1230 at both viewports (+30 px; clientHeight 808 / 646). Rows now at 40 px (2 lines): play-stop, continue-playback, insert-marker-to-playhead, marker (HEAD play-stop and marker were 20). With nowrap both new and HEAD measure 1070, so the whole +30 px comes from wrapping: +10 px in the Transport/Edit grid row (Transport ul 232 vs Edit 222) plus +20 px from the 'marker' row wrap in Time & clips. The 2 new rows alone would not add scroll. A's +132 px estimate (A-R254-SHEET-SCROLL-DELTA) was too high; the measured delta is +30 px. The texts are byte-exact to §1.2, so A cannot fix this without a B ruling: accept +30 px, shorten the §1.2 copy, or change the sheet layout (needs Saba).",
+   "evidence": "tmp/studio-real-loop/c-round-254/browser/c254.json rows sheet@1440x900, sheet@1280x720; browser/sheet-diag.json; sheet-new-*.png, sheet-head-*.png",
+   "whyMissed": "L3/L16 (text change -> widest-state box row, longest text first) apply to sheet copy; B's pre-check did not measure the dialog scroll against HEAD; A estimated it"
+  },
+  {
+   "id": "C-R254-OBS-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab 1440x900, add demo-stem-pulse, default zoom (40 px/s), Snap on",
+    "Space (play from 0); while playing click the bars-ruler lower zone at 16.4 s -> marker snaps to 16.000 (= project end); the line is drawn at 16.000",
+    "Space (stop): status 'Stopped — Space plays from the insert marker at 00:16.000.'",
+    "Space again"
+   ],
+   "expected": "the stopped sentence and the visible marker match where Space starts (or Space refuses, as in C-R253-01)",
+   "actual": "Space plays from 00:00 (00:00.452 after 500 ms) and the status still reads the stopped sentence; the visible marker stays at 16.000. Pre-existing: identical on the HEAD c65e5e9 control (the marker there is hidden). Not caused by round 254; same class as C-R253-01 (marker exactly at the end rather than past it). Candidate for deferred_low_polish with C-R253-01 / ARCH-CHECKPOINT-TRANSPORT-POSITIONS.",
+   "evidence": "c-round-254/browser/pastend-zoom0.json, pastend-new-zoom0.png, pastend-head-zoom0.png; c254.json pastEnd@*"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-254",
+  "C-UNIT-254",
+  "C-MUT-254",
+  "C-MARKER-VISIBLE-254",
+  "C-BLINK-254",
+  "C-CONTRAST-254",
+  "C-TWO-LINES-254",
+  "C-MARKER-PLAYING-254",
+  "C-MARKER-RANGE-254",
+  "C-HOME-254",
+  "C-ZOOM-254",
+  "C-TITLES-254",
+  "C-FOCUS-254",
+  "C-BUDGET-254",
+  "C-LESSON-254",
+  "AN-REVIEW-254",
+  "LAB-SMOKE-254",
+  "Auth"
+ ],
+ "failed": [
+  "C-SHEET-254 (scroll +30 px vs HEAD; all other sub-checks pass)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "Purchased origin /studio/$productId purchased copy: backend unavailable in cloud"
+ ],
+ "notProbed": [
+  "§6 floating video / video dock z-order with a loaded video (no video loaded; the line shares the playhead's container and z-10; the video dropzone background was measured only)"
+ ],
+ "abletonConformity": {
+  "visible flashing insert marker": "deliberate difference awaiting Saba (SABA-Q-10B-MARKER-LOOK): flashing confirmed; ink not blue; full height not per track",
+  "blink rate": "unconfirmed (no reference found)",
+  "reduced motion": "not applicable (CZABA addition)",
+  "visible during playback": "unconfirmed (manual silent); deliberate CZABA choice awaiting Saba",
+  "hidden with a time selection": "unconfirmed (inference from 6.6/6.9); awaiting Saba",
+  "two positions after stop": "confirmed (6.3)",
+  "back to start (Home)": "confirmed for Home; double-click Stop not applicable yet (SABA-B-9)",
+  "sheet names/keys": "confirmed keys (42.16/42.20); wording a deliberate difference"
+ },
+ "forB": [
+  "A-R254-SHEET-SCROLL-DELTA: measured +30 px, not +132 (C-R254-01)",
+  "A-R254-WRONG-TIMEOUT-PREMISE: confirmed: HEAD render-budget test already ended with }, 15000); the rewrite to { timeout: 15_000 } removed no assertion (git diff -w)",
+  "INFO-B254-INK-ON-BRASS measured 1.88:1 on the selected clip title bar (rgb(201,164,106)), both viewports",
+  "store / at 1280: console set equal to HEAD except the port in URLs; 3.9 % pixel diff is the hero background animation (layout identical by eye); keyframe insert-marker-blink present only in new CSS"
+ ],
+ "gate249S5": {
+  "stoppedHomeRecords": 1,
+  "playingHomeRecords": 2,
+  "oldValues": [
+   "6.000"
+  ],
+  "final": "0.000",
+  "evidence": "c-round-254/browser/home-oldvalue.json"
+ },
+ "notes": [
+  "C-R254-OBS-01 is pre-existing (HEAD identical) and not a FAIL contributor; the only FAIL contributor is C-SHEET-254 / C-R254-01",
+  "HEAD control server :5180 stopped after evidence capture"
+ ]
+}
