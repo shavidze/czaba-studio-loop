@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T06:46:07.080Z)
+# Active loop summary (2026-10-29T07:56:01.626Z)
 
-- backlog.json 2256 KB -> active view 328 KB
-- status: G_ROOT_GATE round 243
-- servers: `{"checkedUtc":"2026-10-29T06:30:44.0114115Z","round":243,"attempt":1,"store":200}`
-- last publication: 149faab85978dff06c7450526e5cefb12013bb91 (rounds 243-243)
-- last root gate: round 243 published - commit 149faab85978dff06c7450526e5cefb12013bb91 pushed
+- backlog.json 2268 KB -> active view 331 KB
+- status: G_ROOT_GATE round 244
+- servers: `{"checkedUtc":"2026-10-29T07:36:33.5312610Z","round":244,"attempt":1,"store":200}`
+- last publication: e9fb805e28e6679c08c6c64f96562b355d171bf7 (rounds 244-244)
+- last root gate: round 244 published - commit e9fb805e28e6679c08c6c64f96562b355d171bf7 pushed
 
 ## Current items: SRW-21
 
@@ -588,8 +588,13 @@
 - SABA-Q-11B-MENU-OFF / info / awaiting_user (D-29z372): non-blocking; round 241 ships without an Off item / Live's grid context menu has an 'Off' choice (Cotec, Live 10; position unconfirmed); CZABA's grid menu has no 'Off' item because Snap off (G
 - SABA-Q-11B-MAC-BYPASS / info / awaiting_user (D-29z372): non-blocking; no code change / Live bypasses snap with Alt (Win) / Cmd (Mac) (manual 6.10); CZABA uses Alt / Option on both platforms because Cmd+click / Cmd+drag mean oth
 - A-R241-REVIEW-R2 / info / info, recorded only (valid ARIA 1.2; C-S4-AX-241 PASS); revisit if Saba or an a11y audit asks (D-29z379) / fieldset groups make screen readers count per group ('1 s, 4 of 7'); the single cross-group check is not conveyed as one set
-- C-R242-01 / medium / open -> round 243 C-R242-01-FIX (D-29z382 ruling, D-29z384 design); B scratch fix returns focus for all 4 origins at both viewports (b-round-242/shots/focus-scratch*.json) / after a right-click grid menu closes, focus is lost to BODY when the origin is an edit control (track Volume fader, BPM field, loop brace, m
-- B-R242-MARKER-EDITOR-MENU-FOCUS / medium / open (pre-existing; different mechanism from C-R242-01: the origin unmounts; candidate target = the committed marker's flag via ArrangementMarkerRow plumbing; scheduled after round 243 (D-29z385); C records it as info in round 243) / with the marker add editor open (M), a right-click on an empty lane commits the marker on the editor's blur (settleEditor('blur'), moveFocus
+- B-R242-MARKER-EDITOR-MENU-FOCUS / medium / dispatched round 244 (D-29z391/D-29z392): successor = the committed/existing/renamed flag via ArrangementMarkerRow focusEditorSuccessor; re-measured BODY at HEAD 149faab (b-round-243/shots/editor-head.json markerAdd, markerRename, both viewports) | open (pre-existing; different mechanism from C-R242-01: the origin unmounts; candidate target = the committed marker's flag via ArrangementMarkerRow plumbing; scheduled after round 243 (D-29z385); C records it as info in round 243) / with the marker add editor open (M), a right-click on an empty lane commits the marker on the editor's blur (settleEditor('blur'), moveFocus
+- B-R243-GROUP-EDITOR-MENU-FOCUS / medium / dispatched round 244 (D-29z391): successor = the group's name button via trackRowNameButton; group id captured at the press / with the group name editor open (F2 on a group name), a right-click on an empty lane commits the rename on the editor's blur (ArrangementGro
+- A-R243-REVIEW-L1 / low / dispatched round 244 (D-29z393): written on every press, null unless right; GM47 + MU-L1-REVERT / gridMenuPressFocusRef written on right presses only; a left press leaves a stale value (narrow in real browsers; harmless by D-29z384)
+- A-R243-REVIEW-L2 / low / dispatched round 244 (D-29z393): GM47 / no row pins that no-menu paths (header right press) blur and never restore
+- A-R243-REVIEW-L3 / low / dispatched round 244 (D-29z393): GM40-GM43 use rightPress (real release); MU-RELEASE-LEFT-ONLY turns them red / GM40-GM42 blur by hand (rightPressThenBlur), so their BODY setup assertion is vacuous
+- GATE243-S2 / low / dispatched round 244 (D-29z393): GM48 + C-FOCUS-243-REG selection info / the BPM field gets focus back after a mouse choice and that path is untested
+- B-R243-UNDO-MARKER-FOCUS / medium / open (pre-existing; scheduled after the regression round and before SABA-B-11b stage 2b, D-29z397); hypothesis to probe at its planning: other undo/redo paths that remove a focused element (clip, group, marker delete redo) / with a just-added marker's flag focused, Ctrl+Z removes the marker and unmounts the focused flag; focus falls to BODY (L47 class: an action 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
