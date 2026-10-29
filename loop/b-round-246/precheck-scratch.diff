@@ -1,0 +1,318 @@
+diff --git a/app/components/arrangement/ArrangementGroupHeader.tsx b/app/components/arrangement/ArrangementGroupHeader.tsx
+index ae78451..09e1a29 100644
+--- a/app/components/arrangement/ArrangementGroupHeader.tsx
++++ b/app/components/arrangement/ArrangementGroupHeader.tsx
+@@ -1,5 +1,5 @@
+ import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
+-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
++import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+ import { GESTURE_EDIT_BLOCKED_MESSAGE, useArrangement } from '~/contexts/ArrangementContext';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
+ import { FADER_SHIFT_FINE_DIVISOR } from '~/lib/arrangement/fader';
+@@ -61,6 +61,7 @@ interface ArrangementGroupHeaderProps {
+   onSelectGroup: (groupId: string, modifiers: TrackRowSelectModifiers) => void;
+   onRenameGroup: (groupId: string, draft: string) => void;
+   onToggleCollapse: (groupId: string) => void;
++  onFocusedRowDetach: (groupId: string) => void;
+ }
+ 
+ function trackGroupNameLabel(
+@@ -89,6 +90,7 @@ export function ArrangementGroupHeader({
+   onSelectGroup,
+   onRenameGroup,
+   onToggleCollapse,
++  onFocusedRowDetach,
+ }: ArrangementGroupHeaderProps) {
+   const [draft, setDraft] = useState<string | null>(null);
+   const nameButtonRef = useRef<HTMLButtonElement>(null);
+@@ -96,6 +98,21 @@ export function ArrangementGroupHeader({
+   const settledRef = useRef(false);
+   const restoreFocusRef = useRef(false);
+   const volumeGestureStartRef = useRef<{ volume: number; sliderDb: number } | null>(null);
++  const rowNodeRef = useRef<HTMLDivElement | null>(null);
++  const attachRowNode = useCallback(
++    (node: HTMLDivElement | null) => {
++      if (node !== null) {
++        rowNodeRef.current = node;
++        return;
++      }
++      const detached = rowNodeRef.current;
++      rowNodeRef.current = null;
++      if (detached?.contains(document.activeElement)) {
++        onFocusedRowDetach(group.id);
++      }
++    },
++    [group.id, onFocusedRowDetach],
++  );
+   const isEditing = draft !== null;
+   const {
+     arrangement,
+@@ -188,6 +205,7 @@ export function ArrangementGroupHeader({
+ 
+   return (
+     <div
++      ref={attachRowNode}
+       className="relative flex border-b border-outline"
+       style={{ height: TRACK_GROUP_ROW_HEIGHT_PX }}
+       data-group-id={group.id}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index ed6d77e..c94fe9c 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -354,6 +354,22 @@ function trackRowNameButton(container: HTMLElement | null, rowId: string): HTMLE
+       );
+ }
+ 
++function focusRowSuccessor(
++  container: HTMLElement | null,
++  removedId: string,
++  order: readonly string[],
++): void {
++  const index = order.indexOf(removedId);
++  const candidates = [...order.slice(index + 1), ...order.slice(0, Math.max(index, 0)).reverse()];
++  for (const rowId of candidates) {
++    const button = trackRowNameButton(container, rowId);
++    if (button) {
++      button.focus({ preventScroll: true });
++      return;
++    }
++  }
++}
++
+ function libraryRailExpandButton(aside: HTMLElement | null): HTMLElement | null {
+   return aside?.querySelector<HTMLElement>('[data-testid="arrangement-library-expand"]') ?? null;
+ }
+@@ -632,6 +648,11 @@ export function StudioWorkspace() {
+   const trackRowsRef = useRef(trackRows);
+   trackRowsRef.current = trackRows;
+   const pendingRowFocusRef = useRef<string | null>(null);
++  const committedTrackRowsRef = useRef(allTrackRows);
++  const detachedRowFocusRef = useRef<{
++    readonly rowId: string;
++    readonly order: readonly string[];
++  } | null>(null);
+   const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);
+   const [isVideoExpanded, setIsVideoExpanded] = useState(false);
+   const [libraryOpenedForVideo, setLibraryOpenedForVideo] = useState(false);
+@@ -905,6 +926,19 @@ export function StudioWorkspace() {
+     refreshTrackLaneLayout();
+   }, [trackRowsLayoutKey, refreshTrackLaneLayout]);
+ 
++  useIsomorphicLayoutEffect(() => {
++    const detached = detachedRowFocusRef.current;
++    detachedRowFocusRef.current = null;
++    if (
++      detached === null ||
++      pendingRowFocusRef.current !== null ||
++      trackRowsRef.current.some((row) => row.id === detached.rowId)
++    ) {
++      return;
++    }
++    focusRowSuccessor(scrollerRef.current, detached.rowId, detached.order);
++  });
++
+   useIsomorphicLayoutEffect(() => {
+     const rowId = pendingRowFocusRef.current;
+     if (rowId === null) {
+@@ -914,6 +948,17 @@ export function StudioWorkspace() {
+     trackRowNameButton(scrollerRef.current, rowId)?.focus({ preventScroll: true });
+   });
+ 
++  useIsomorphicLayoutEffect(() => {
++    committedTrackRowsRef.current = allTrackRows;
++  });
++
++  const recordFocusedRowDetach = useCallback((rowId: string) => {
++    detachedRowFocusRef.current = {
++      rowId,
++      order: committedTrackRowsRef.current.map((row) => row.id),
++    };
++  }, []);
++
+   useIsomorphicLayoutEffect(() => {
+     const shouldRescueFocus = pendingLibraryRailFocusRef.current;
+     pendingLibraryRailFocusRef.current = false;
+@@ -2853,6 +2898,7 @@ export function StudioWorkspace() {
+                     onSelectGroup={selectTrackRow}
+                     onRenameGroup={renameTrackGroupRow}
+                     onToggleCollapse={toggleTrackGroupCollapse}
++                    onFocusedRowDetach={recordFocusedRowDetach}
+                   />
+                 ) : (
+                   <ArrangementLane
+diff --git a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+index fabecdc..7cbbc54 100644
+--- a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+@@ -1072,3 +1072,171 @@ describe('V-3c-2 group header glyphs are lucide icons (D-29z127)', { timeout: 20
+     expectNoGroupHeaderGlyphs(view);
+   });
+ });
++
++function pressHistoryKey(target: Element, key: 'z' | 'y', shiftKey = false) {
++  fireEvent.keyDown(target, {
++    key: shiftKey ? key.toUpperCase() : key,
++    code: key === 'z' ? 'KeyZ' : 'KeyY',
++    ctrlKey: true,
++    shiftKey,
++  });
++}
++
++function groupStemsAndSfxFromKeys(view: GroupsView): HTMLElement {
++  const stems = laneName(view, 'სტემები');
++  stems.focus();
++  fireEvent.click(stems);
++  const sfx = laneName(view, 'SFX');
++  sfx.focus();
++  fireEvent.click(sfx, { shiftKey: true });
++  pressGroupKey(false, sfx);
++  return groupName(view, 'Group 1');
++}
++
++function groupRowControl(view: GroupsView, testId: string): HTMLElement {
++  const control = view.container.querySelector<HTMLElement>(
++    `[data-group-id] [data-testid="${testId}"]`,
++  );
++  if (!control) {
++    throw new Error(`${testId} missing`);
++  }
++  return control;
++}
++
++function groupRowCount(view: GroupsView): number {
++  return view.container.querySelectorAll('[data-group-id]').length;
++}
++
++describe('B-R245 a history step that removes the focused group row', { timeout: 20_000 }, () => {
++  it('GF1 Undo: Group Tracks on the focused group name lands on its first member, never BODY', async () => {
++    const { api, view } = await mountGroupsWorkspace();
++    const group = groupStemsAndSfxFromKeys(view);
++    expect(document.activeElement).toBe(group);
++    pressHistoryKey(group, 'z');
++    expect(groupRowCount(view)).toBe(0);
++    expect(live(api).redoLabel).toBe('Group Tracks');
++    expect(status(view)).toBe('Undo: Group Tracks');
++    expect(document.activeElement).toBe(laneName(view, 'სტემები'));
++  });
++
++  it('GF2 Redo: Ungroup Tracks by Ctrl+Shift+Z and by Ctrl+Y lands on the first former member', async () => {
++    const { api, view } = await mountGroupsWorkspace();
++    const group = groupStemsAndSfxFromKeys(view);
++    pressGroupKey(true, group);
++    const stems = laneName(view, 'სტემები');
++    expect(document.activeElement).toBe(stems);
++    pressHistoryKey(stems, 'z');
++    expect(groupRowCount(view)).toBe(1);
++    expect(document.activeElement).toBe(stems);
++    groupName(view, 'Group 1').focus();
++    pressHistoryKey(groupName(view, 'Group 1'), 'z', true);
++    expect(groupRowCount(view)).toBe(0);
++    expect(status(view)).toBe('Redo: Ungroup Tracks');
++    expect(document.activeElement).toBe(laneName(view, 'სტემები'));
++    pressHistoryKey(laneName(view, 'სტემები'), 'z');
++    groupName(view, 'Group 1').focus();
++    pressHistoryKey(groupName(view, 'Group 1'), 'y');
++    expect(groupRowCount(view)).toBe(0);
++    expect(live(api).undoLabel).toBe('Ungroup Tracks');
++    expect(document.activeElement).toBe(laneName(view, 'სტემები'));
++  });
++
++  it('GF3 focus on the fold, mute or volume control of the removed row moves the same way', async () => {
++    const { view } = await mountGroupsWorkspace();
++    groupStemsAndSfxFromKeys(view);
++    for (const testId of [
++      'arrangement-group-fold',
++      'arrangement-group-mute',
++      'arrangement-group-volume',
++    ]) {
++      const control = groupRowControl(view, testId);
++      control.focus();
++      expect(document.activeElement).toBe(control);
++      pressHistoryKey(control, 'z');
++      expect(groupRowCount(view)).toBe(0);
++      expect(document.activeElement).toBe(laneName(view, 'სტემები'));
++      pressHistoryKey(laneName(view, 'სტემები'), 'y');
++      expect(groupRowCount(view)).toBe(1);
++    }
++  });
++
++  it('GF4 a folded group removed by Undo hands focus to its first member, now shown', async () => {
++    const { view } = await mountGroupsWorkspace();
++    groupStemsAndSfxFromKeys(view);
++    fireEvent.click(foldButton(view, 'Group 1'));
++    expect(renderedLaneIds(view)).toEqual(['video', 'music']);
++    const group = groupName(view, 'Group 1');
++    group.focus();
++    pressHistoryKey(group, 'z');
++    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', 'sfx']);
++    expect(document.activeElement).toBe(laneName(view, 'სტემები'));
++  });
++
++  it('GF5 nested: the removed outer group hands focus to its first child; the kept inner one keeps it', async () => {
++    const { view } = await mountGroupsWorkspace();
++    groupStemsAndSfxFromKeys(view);
++    document.body.focus();
++    clickLane(view, 'მუსიკა');
++    fireEvent.click(groupName(view, 'Group 1'), { ctrlKey: true });
++    pressGroupKey();
++    const outer = groupName(view, 'Group 2');
++    expect(document.activeElement).toBe(outer);
++    pressHistoryKey(outer, 'z');
++    expect(rowOrder(view)).toEqual([
++      'video:-',
++      'music:-',
++      'group:Group 1:0',
++      'stems:20px',
++      'sfx:20px',
++    ]);
++    expect(document.activeElement).toBe(laneName(view, 'მუსიკა'));
++    pressHistoryKey(laneName(view, 'მუსიკა'), 'y');
++    const inner = groupName(view, 'Group 1');
++    inner.focus();
++    pressHistoryKey(inner, 'z');
++    expect(groupRowCount(view)).toBe(1);
++    expect(document.activeElement).toBe(groupName(view, 'Group 1'));
++  });
++
++  it('GF6 focus that was not inside the removed row is not moved', async () => {
++    const { view } = await mountGroupsWorkspace();
++    groupStemsAndSfxFromKeys(view);
++    const video = laneName(view, 'ვიდეო');
++    video.focus();
++    pressHistoryKey(video, 'z');
++    expect(groupRowCount(view)).toBe(0);
++    expect(document.activeElement).toBe(video);
++    pressHistoryKey(video, 'y');
++    const sfx = laneName(view, 'SFX');
++    sfx.focus();
++    pressHistoryKey(sfx, 'z');
++    expect(document.activeElement).toBe(sfx);
++    pressHistoryKey(sfx, 'y');
++    groupName(view, 'Group 1').focus();
++    act(() => {
++      if (document.activeElement instanceof HTMLElement) {
++        document.activeElement.blur();
++      }
++    });
++    expect(document.activeElement).toBe(document.body);
++    pressHistoryKey(document.body, 'z');
++    expect(groupRowCount(view)).toBe(0);
++    expect(document.activeElement).toBe(document.body);
++  });
++
++  it('GF7 Ctrl+Shift+G keeps its own focus target when it also removes the focused row', async () => {
++    const { view } = await mountGroupsWorkspace();
++    groupStemsAndSfxFromKeys(view);
++    document.body.focus();
++    clickLane(view, 'მუსიკა');
++    fireEvent.click(groupName(view, 'Group 1'), { ctrlKey: true });
++    pressGroupKey();
++    fireEvent.click(groupName(view, 'Group 1'), { ctrlKey: true });
++    expect(selectedRows(view)).toEqual(['group:Group 2', 'group:Group 1']);
++    const inner = groupName(view, 'Group 1');
++    inner.focus();
++    pressGroupKey(true, inner);
++    expect(groupRowCount(view)).toBe(0);
++    expect(document.activeElement).toBe(laneName(view, 'მუსიკა'));
++  });
++});

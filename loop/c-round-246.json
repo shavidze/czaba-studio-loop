@@ -1,0 +1,61 @@
+{
+  "round": 246,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-29T09:11:19.9745260Z",
+    "round": 246,
+    "attempt": 1,
+    "store": 200
+  },
+  "chromium": "143.0.7499.4",
+  "head": "e9fb805e28e6679c08c6c64f96562b355d171bf7",
+  "bugs": [],
+  "passed": [
+    "C-SCOPE-246",
+    "C-UNIT-246",
+    "C-MUT-246",
+    "C-UNDO-ORIGINS-246",
+    "C-NO-STEAL-246",
+    "C-KEEP-246",
+    "C-CUTTIME-246",
+    "C-UNDO-BUTTON-246",
+    "C-MENU-DELETE-246",
+    "C-EDITOR-REG-246",
+    "C-BUDGET-246",
+    "AN-REVIEW-246",
+    "RT-FIX-246",
+    "LAB-SMOKE-246",
+    "Auth"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "lint",
+    "build",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "info": [
+    {
+      "id": "C-GROUP-INFO-246",
+      "note": "groupUndo: HEAD and fix both BODY at 1440 and 1280 (1 -> 0 groups). Known B-R245-UNDO-GROUP-FOCUS; not a regression of this round."
+    },
+    {
+      "id": "INFO-C246-DRAG-RING",
+      "note": "After a mouse drag of a focused flag, the flag keeps focus and matches :focus-visible, but its computed outline is none/0px (it was solid 1px brass before the drag). Identical at HEAD e9fb805 (out-head/c246.json focusStability). Pre-existing, outside this round; B may decide whether it is a finding."
+    },
+    {
+      "id": "INFO-C246-VITE-CACHE",
+      "note": "C's first HEAD control server start (/tmp/c246-head, node_modules symlinked as a whole) rewrote store/node_modules/.vite/deps at 09:13 for about 20 s before C stopped it and restarted it with its own cache dir. That is a dependency cache, not source; git status and the 1,104-file hash list were unchanged and :5173 kept serving 200."
+    },
+    {
+      "id": "A-R246-REVIEW-L1-BROWSER",
+      "note": "Cut Time 1-5 over flags 0/2/4/6 with the 2 s flag focused: the next flag (4 s) is removed too; focus goes to the surviving 6 s flag (now 2.000) with a solid 1px ring, at 1440 and 1280. The browser behaviour is correct; the unit-test gap stays A's Low. Evidence c-round-246/out-fix/c246-skip.json."
+    }
+  ],
+  "blocked": [
+    "Purchased origin (browser): backend unavailable in cloud"
+  ]
+}

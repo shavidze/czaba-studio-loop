@@ -1,0 +1,454 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a246-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/markers-ui.test.tsx [2m([22m[2m31 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[33m 2412[2mms[22m[39m
+     [32m✓[39m MU1: M opens a selected default name, Enter commits one Add Marker entry, Undo/Redo work[32m 244[2mms[22m[39m
+     [32m✓[39m MU2: Escape adds nothing even after the input unmounts; a blur after typing commits exactly once[32m 121[2mms[22m[39m
+     [32m✓[39m MU2b: Enter followed by the unmount blur commits once and shows no duplicate refusal[32m 83[2mms[22m[39m
+     [32m✓[39m MU3: with a time range the Add button uses the range start and keeps the range[32m 82[2mms[22m[39m
+[31m     [31m×[31m MU4: M on an existing marker time opens no editor and focuses the existing flag[39m[32m 84[2mms[22m[39m
+     [32m✓[39m MU5: click jumps, double-click while stopped plays from the marker, double-click while playing keeps playing[32m 68[2mms[22m[39m
+     [32m✓[39m MU6: Ctrl+arrows and the buttons visit markers, the end and the start, then refuse[32m 121[2mms[22m[39m
+     [32m✓[39m MU6b: Ctrl+Right while playing jumps to the next marker and keeps playing[32m 55[2mms[22m[39m
+[31m     [31m×[31m MU7: F2 renames, Escape cancels without a later commit, and Delete inside the input never deletes the marker[39m[32m 62[2mms[22m[39m
+[31m     [31m×[31m MU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a focused marker move the marker and never nudge the selected clip[39m[32m 85[2mms[22m[39m
+     [32m✓[39m MU8b: deleting the only marker moves focus to the Add button[32m 50[2mms[22m[39m
+     [32m✓[39m MU8c: a clip click after a marker add releases the flag, so Delete and plain arrows act on the clip (C-R72-01)[32m 170[2mms[22m[39m
+     [32m✓[39m MU8d: a press on a lane background, the ruler or a Markers header button releases a focused flag[32m 51[2mms[22m[39m
+[31m     [31m×[31m MU8e: a press on another flag or inside the open name editor keeps marker focus[39m[32m 49[2mms[22m[39m
+     [32m✓[39m MU8f: Delete or a plain arrow dispatched from inside a flag (not the flag itself) touches neither the clip nor the marker[32m 49[2mms[22m[39m
+     [32m✓[39m MU9: Cut Time removes markers inside, shifts later ones, reports the count, and Undo restores them[32m 101[2mms[22m[39m
+     [32m✓[39m MU18: Ctrl+Z of a marker add with its flag focused moves focus to the Add button (B-R243-UNDO-MARKER-FOCUS)[32m 56[2mms[22m[39m
+     [32m✓[39m MU19: Ctrl+Z of a marker add between or after markers moves focus to the next flag, else the previous one[32m 84[2mms[22m[39m
+[31m     [31m×[31m MU20: Redo of a marker delete (Ctrl+Shift+Z and Ctrl+Y) with the restored flag focused moves focus to the next flag[39m[32m 47[2mms[22m[39m
+[31m     [31m×[31m MU21: Ctrl+Z of a marker add leaves focus alone when the removed flag was not focused[39m[32m 54[2mms[22m[39m
+[31m     [31m×[31m MU22: Undo that keeps the focused flag (Move Marker) leaves focus on that flag[39m[32m 51[2mms[22m[39m
+     [32m✓[39m MU23: Cut Time that removes the focused flag moves focus to the next surviving flag[32m 89[2mms[22m[39m
+     [32m✓[39m MU10: add, rename and delete while playing create no new buffer sources[32m 84[2mms[22m[39m
+     [32m✓[39m MU11: during a pointer gesture M and Ctrl+Right are refused[32m 93[2mms[22m[39m
+     [32m✓[39m MU13: a blur during a pointer gesture commits nothing and reports the refusal[32m 52[2mms[22m[39m
+     [32m✓[39m MU14: committing by moving focus elsewhere keeps focus where the user put it[32m 58[2mms[22m[39m
+     [32m✓[39m MU15: Enter in the add editor during a pointer gesture keeps the draft open; after release it commits once[32m 63[2mms[22m[39m
+     [32m✓[39m MU16: Enter in the rename editor during a pointer gesture keeps the old name and the draft; Escape still cancels[32m 73[2mms[22m[39m
+[31m     [31m×[31m MU17: F2 on a focused flag during a pointer gesture opens no editor and keeps focus on the flag[39m[32m 50[2mms[22m[39m
+     [32m✓[39m MU12: m typed into the library search stays text and opens no editor[32m 45[2mms[22m[39m
+     [32m✓[39m lays labels out without overlap and keeps the flag position in the marker row[32m 36[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 8 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: add, cancel and duplicates (SRW-16 stage 1)[2m > [22mMU4: M on an existing marker time opens no editor and focuses the existing flag
+[31m[1mAssertionError[22m: expected <button type="button" …(5)></button> to be <button type="button" …(10)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  <button[22m
+[32m-   aria-current="true"[39m
+[32m-   aria-haspopup="menu"[39m
+[32m-   aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[39m
+[32m-   aria-label="Marker “აქ შედის მუსიკა” — 00:12.000"[39m
+[32m-   class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[39m
+[32m-   data-marker-id="93ed0b04-7943-46c3-bb9f-f8152e7bd544"[39m
+[32m-   data-marker-time="12.000"[39m
+[32m-   data-testid="arrangement-marker"[39m
+[32m-   style="left: 480px;"[39m
+[32m-   title="“აქ შედის მუსიკა” — 00:12.000[39m
+[32m- Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[39m
+[31m+   aria-keyshortcuts="M"[39m
+[31m+   aria-label="Add marker (M)"[39m
+[31m+   class="h-4 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-xs leading-none text-muted motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 hover:text-foreground [--focus-offset:-2px]"[39m
+[31m+   data-testid="arrangement-marker-add"[39m
+[31m+   title="Add a marker at the playhead or at the start of the time selection (M)"[39m
+[2m    type="button"[22m
+[2m  >[22m
+[32m-   <span[39m
+[32m-     aria-hidden="true"[39m
+[32m-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"[39m
+[32m-   />[39m
+[32m-   <span[39m
+[32m-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"[39m
+[32m-     data-marker-label=""[39m
+[32m-     style="max-width: 160px;"[39m
+[32m-   >[39m
+[32m-     აქ შედის მუსიკა[39m
+[32m-   </span>[39m
+[31m+   +[39m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m384:36[22m[39m
+    [90m382| [39m    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNu…
+    [90m383| [39m    expect(statusText(view)).toBe('A marker already exists at this tim…
+    [90m384| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mflagAt[39m(view[33m,[39m [32m'12.000'[39m))[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m385| [39m    expect(flagAt(view, '12.000').getAttribute('aria-current')).toBe('…
+    [90m386| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement)[33m.[39m[34mtoBe[39m(arrangementBefore)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: rename and delete[2m > [22mMU7: F2 renames, Escape cancels without a later commit, and Delete inside the input never deletes the marker
+[31m[1mAssertionError[22m: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(10)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  <button[22m
+[32m-   aria-current="true"[39m
+[2m    aria-haspopup="menu"[22m
+[2m    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[22m
+[32m-   aria-label="Marker “რეკლამა” — 00:20.000"[39m
+[31m+   aria-label="Marker “Outro” — 00:40.000"[39m
+[2m    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[22m
+[32m-   data-marker-id="k20"[39m
+[32m-   data-marker-time="20.000"[39m
+[31m+   data-marker-id="k40"[39m
+[31m+   data-marker-time="40.000"[39m
+[2m    data-testid="arrangement-marker"[22m
+[32m-   style="left: 800px;"[39m
+[32m-   title="“რეკლამა” — 00:20.000[39m
+[31m+   style="left: 1600px;"[39m
+[31m+   title="“Outro” — 00:40.000[39m
+[2m  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <span[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"[39m
+[31m+     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-muted"[39m
+[2m    />[22m
+[2m    <span[22m
+[32m-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"[39m
+[31m+     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"[39m
+[2m      data-marker-label=""[22m
+[2m      style="max-width: 160px;"[22m
+[2m    >[22m
+[32m-     რეკლამა[39m
+[31m+     Outro[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m499:36[22m[39m
+    [90m497| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBe[39m([32m'Rename Marker'[39m)[33m;[39m
+    [90m498| [39m    expect(flagAt(view, '20.000').getAttribute('aria-label')).toContai…
+    [90m499| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mflagAt[39m(view[33m,[39m [32m'20.000'[39m))[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m500| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mundo[39m())[33m;[39m
+    [90m501| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: rename and delete[2m > [22mMU8: Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a focused marker move the marker and never nudge the selected clip
+[31m[1mAssertionError[22m: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,15 +1,15 @@[39m
+[2m  <button[22m
+[2m    aria-haspopup="menu"[22m
+[2m    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[22m
+[32m-   aria-label="Marker “Drop” — 00:20.000"[39m
+[31m+   aria-label="Marker “Intro” — 00:12.000"[39m
+[2m    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[22m
+[32m-   data-marker-id="k20"[39m
+[32m-   data-marker-time="20.000"[39m
+[31m+   data-marker-id="k12"[39m
+[31m+   data-marker-time="12.000"[39m
+[2m    data-testid="arrangement-marker"[22m
+[32m-   style="left: 800px;"[39m
+[32m-   title="“Drop” — 00:20.000[39m
+[31m+   style="left: 480px;"[39m
+[31m+   title="“Intro” — 00:12.000[39m
+[2m  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <span[22m
+[2m      aria-hidden="true"[22m
+[33m@@ -18,8 +18,8 @@[39m
+[2m    <span[22m
+[2m      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"[22m
+[2m      data-marker-label=""[22m
+[2m      style="max-width: 160px;"[22m
+[2m    >[22m
+[32m-     Drop[39m
+[31m+     Intro[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m548:36[22m[39m
+    [90m546| [39m    expect(live(api).arrangement.clips[0]).toMatchObject({ id: 'm1', s…
+    [90m547| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mselectedClipIds)[33m.[39m[34mtoEqual[39m([[32m'm1'[39m])[33m;[39m
+    [90m548| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mflagAt[39m(view[33m,[39m [32m'20.000'[39m))[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m549| [39m    [35mconst[39m drop [33m=[39m [34mflagAt[39m(view[33m,[39m [32m'20.000'[39m)[33m;[39m
+    [90m550| [39m    fireEvent[33m.[39m[34mkeyDown[39m(drop[33m,[39m { key[33m:[39m [32m'Backspace'[39m[33m,[39m code[33m:[39m [32m'Backspace'[39m })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: rename and delete[2m > [22mMU8e: a press on another flag or inside the open name editor keeps marker focus
+[31m[1mAssertionError[22m: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(10)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  <button[22m
+[32m-   aria-current="true"[39m
+[2m    aria-haspopup="menu"[22m
+[2m    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[22m
+[32m-   aria-label="Marker “Drop” — 00:20.000"[39m
+[31m+   aria-label="Marker “Outro” — 00:40.000"[39m
+[2m    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[22m
+[32m-   data-marker-id="k20"[39m
+[32m-   data-marker-time="20.000"[39m
+[31m+   data-marker-id="k40"[39m
+[31m+   data-marker-time="40.000"[39m
+[2m    data-testid="arrangement-marker"[22m
+[32m-   style="left: 800px;"[39m
+[32m-   title="“Drop” — 00:20.000[39m
+[31m+   style="left: 1600px;"[39m
+[31m+   title="“Outro” — 00:40.000[39m
+[2m  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <span[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"[39m
+[31m+     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-muted"[39m
+[2m    />[22m
+[2m    <span[22m
+[32m-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"[39m
+[31m+     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"[39m
+[2m      data-marker-label=""[22m
+[2m      style="max-width: 160px;"[22m
+[2m    >[22m
+[32m-     Drop[39m
+[31m+     Outro[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m649:36[22m[39m
+    [90m647| [39m    [35mconst[39m drop [33m=[39m [34mflagAt[39m(view[33m,[39m [32m'20.000'[39m)[33m;[39m
+    [90m648| [39m    fireEvent.pointerDown(drop, { button: 0, buttons: 1, pointerId: 75…
+    [90m649| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(drop)[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m650| [39m    fireEvent[33m.[39m[34mpointerUp[39m(window[33m,[39m { pointerId[33m:[39m [34m75[39m })[33m;[39m
+    [90m651| [39m    [35mconst[39m label [33m=[39m drop[33m.[39m[34mquerySelector[39m([32m'[data-marker-label]'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: rename and delete[2m > [22mMU20: Redo of a marker delete (Ctrl+Shift+Z and Ctrl+Y) with the restored flag focused moves focus to the next flag
+[31m[1mAssertionError[22m: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,15 +1,15 @@[39m
+[2m  <button[22m
+[2m    aria-haspopup="menu"[22m
+[2m    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[22m
+[32m-   aria-label="Marker “Outro” — 00:40.000"[39m
+[31m+   aria-label="Marker “Intro” — 00:12.000"[39m
+[2m    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[22m
+[32m-   data-marker-id="k40"[39m
+[32m-   data-marker-time="40.000"[39m
+[31m+   data-marker-id="k12"[39m
+[31m+   data-marker-time="12.000"[39m
+[2m    data-testid="arrangement-marker"[22m
+[32m-   style="left: 1600px;"[39m
+[32m-   title="“Outro” — 00:40.000[39m
+[31m+   style="left: 480px;"[39m
+[31m+   title="“Intro” — 00:12.000[39m
+[2m  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <span[22m
+[2m      aria-hidden="true"[22m
+[33m@@ -18,8 +18,8 @@[39m
+[2m    <span[22m
+[2m      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"[22m
+[2m      data-marker-label=""[22m
+[2m      style="max-width: 160px;"[22m
+[2m    >[22m
+[32m-     Outro[39m
+[31m+     Intro[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m741:36[22m[39m
+    [90m739| [39m    drop[33m.[39m[34mfocus[39m()[33m;[39m
+    [90m740| [39m    fireEvent[33m.[39m[34mkeyDown[39m(drop[33m,[39m { key[33m:[39m [32m'Delete'[39m[33m,[39m code[33m:[39m [32m'Delete'[39m })[33m;[39m
+    [90m741| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mflagAt[39m(view[33m,[39m [32m'40.000'[39m))[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m742| [39m    [34mpressCtrlKey[39m([32m'z'[39m[33m,[39m [34mflagAt[39m(view[33m,[39m [32m'40.000'[39m))[33m;[39m
+    [90m743| [39m    [34mexpect[39m([34mmarkerTimes[39m(view))[33m.[39m[34mtoEqual[39m([[32m'12.000'[39m[33m,[39m [32m'20.000'[39m[33m,[39m [32m'40.000'[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: rename and delete[2m > [22mMU21: Ctrl+Z of a marker add leaves focus alone when the removed flag was not focused
+[31m[1mAssertionError[22m: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,15 +1,15 @@[39m
+[2m  <button[22m
+[2m    aria-haspopup="menu"[22m
+[2m    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[22m
+[32m-   aria-label="Marker “Intro” — 00:12.000"[39m
+[31m+   aria-label="Marker “Drop” — 00:20.000"[39m
+[2m    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[22m
+[32m-   data-marker-id="k12"[39m
+[32m-   data-marker-time="12.000"[39m
+[31m+   data-marker-id="k20"[39m
+[31m+   data-marker-time="20.000"[39m
+[2m    data-testid="arrangement-marker"[22m
+[32m-   style="left: 480px;"[39m
+[32m-   title="“Intro” — 00:12.000[39m
+[31m+   style="left: 800px;"[39m
+[31m+   title="“Drop” — 00:20.000[39m
+[2m  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <span[22m
+[2m      aria-hidden="true"[22m
+[33m@@ -18,8 +18,8 @@[39m
+[2m    <span[22m
+[2m      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"[22m
+[2m      data-marker-label=""[22m
+[2m      style="max-width: 160px;"[22m
+[2m    >[22m
+[32m-     Intro[39m
+[31m+     Drop[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m766:36[22m[39m
+    [90m764| [39m    [34mpressCtrlKey[39m([32m'z'[39m[33m,[39m intro)[33m;[39m
+    [90m765| [39m    [34mexpect[39m([34mmarkerTimes[39m(view))[33m.[39m[34mtoEqual[39m([[32m'12.000'[39m[33m,[39m [32m'20.000'[39m[33m,[39m [32m'40.000'[39m])[33m;[39m
+    [90m766| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mflagAt[39m(view[33m,[39m [32m'12.000'[39m))[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m767| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mredo[39m())[33m;[39m
+    [90m768| [39m    expect(markerTimes(view)).toEqual(['12.000', '20.000', '30.000', '…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: rename and delete[2m > [22mMU22: Undo that keeps the focused flag (Move Marker) leaves focus on that flag
+[31m[1mAssertionError[22m: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(10)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  <button[22m
+[32m-   aria-current="true"[39m
+[2m    aria-haspopup="menu"[22m
+[2m    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[22m
+[32m-   aria-label="Marker “Drop” — 00:20.100"[39m
+[31m+   aria-label="Marker “Outro” — 00:40.000"[39m
+[2m    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[22m
+[32m-   data-marker-id="k20"[39m
+[32m-   data-marker-time="20.100"[39m
+[31m+   data-marker-id="k40"[39m
+[31m+   data-marker-time="40.000"[39m
+[2m    data-testid="arrangement-marker"[22m
+[32m-   style="left: 804px;"[39m
+[32m-   title="“Drop” — 00:20.100[39m
+[31m+   style="left: 1600px;"[39m
+[31m+   title="“Outro” — 00:40.000[39m
+[2m  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <span[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"[39m
+[31m+     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-muted"[39m
+[2m    />[22m
+[2m    <span[22m
+[32m-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"[39m
+[31m+     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"[39m
+[2m      data-marker-label=""[22m
+[2m      style="max-width: 160px;"[22m
+[2m    >[22m
+[32m-     Drop[39m
+[31m+     Outro[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m788:36[22m[39m
+    [90m786| [39m      [35mthrow[39m [35mnew[39m [33mError[39m([32m'moved flag missing'[39m)[33m;[39m
+    [90m787| [39m    }
+    [90m788| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(moved)[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m789| [39m    [34mpressCtrlKey[39m([32m'z'[39m[33m,[39m moved)[33m;[39m
+    [90m790| [39m    [34mexpect[39m([34mmarkerTimes[39m(view))[33m.[39m[34mtoEqual[39m([[32m'12.000'[39m[33m,[39m [32m'20.000'[39m[33m,[39m [32m'40.000'[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/markers-ui.test.tsx[2m > [22mmarker row: playback continuity, gestures and typing[2m > [22mMU17: F2 on a focused flag during a pointer gesture opens no editor and keeps focus on the flag
+[31m[1mAssertionError[22m: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,15 +1,15 @@[39m
+[2m  <button[22m
+[2m    aria-haspopup="menu"[22m
+[2m    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"[22m
+[32m-   aria-label="Marker “Drop” — 00:20.000"[39m
+[31m+   aria-label="Marker “Outro” — 00:40.000"[39m
+[2m    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"[22m
+[32m-   data-marker-id="k20"[39m
+[32m-   data-marker-time="20.000"[39m
+[31m+   data-marker-id="k40"[39m
+[31m+   data-marker-time="40.000"[39m
+[2m    data-testid="arrangement-marker"[22m
+[32m-   style="left: 800px;"[39m
+[32m-   title="“Drop” — 00:20.000[39m
+[31m+   style="left: 1600px;"[39m
+[31m+   title="“Outro” — 00:40.000[39m
+[2m  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <span[22m
+[2m      aria-hidden="true"[22m
+[33m@@ -18,8 +18,8 @@[39m
+[2m    <span[22m
+[2m      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"[22m
+[2m      data-marker-label=""[22m
+[2m      style="max-width: 160px;"[22m
+[2m    >[22m
+[32m-     Drop[39m
+[31m+     Outro[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/markers-ui.test.tsx:[2m1009:36[22m[39m
+    [90m1007| [39m    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNu…
+    [90m1008| [39m    [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m1009| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(drop)[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m1010| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m1011| [39m    [34mact[39m(() [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m8 failed[39m[22m[2m | [22m[1m[32m23 passed[39m[22m[90m (31)[39m
+[2m   Start at [22m 08:58:19
+[2m   Duration [22m 4.45s[2m (transform 1.05s, setup 0ms, import 1.51s, tests 2.41s, environment 403ms)[22m
+
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A add%2C cancel and duplicates (SRW-16 stage 1) > MU4%3A M on an existing marker time opens no editor and focuses the existing flag,line=384,column=36::AssertionError: expected <button type="button" …(5)></button> to be <button type="button" …(10)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A  <button%0A-   aria-current="true"%0A-   aria-haspopup="menu"%0A-   aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “აქ შედის მუსიკა” — 00:12.000"%0A-   class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="93ed0b04-7943-46c3-bb9f-f8152e7bd544"%0A-   data-marker-time="12.000"%0A-   data-testid="arrangement-marker"%0A-   style="left: 480px;"%0A-   title="“აქ შედის მუსიკა” — 00:12.000%0A- Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A+   aria-keyshortcuts="M"%0A+   aria-label="Add marker (M)"%0A+   class="h-4 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-xs leading-none text-muted motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 hover:text-foreground [--focus-offset:-2px]"%0A+   data-testid="arrangement-marker-add"%0A+   title="Add a marker at the playhead or at the start of the time selection (M)"%0A    type="button"%0A  >%0A-   <span%0A-     aria-hidden="true"%0A-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"%0A-   />%0A-   <span%0A-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"%0A-     data-marker-label=""%0A-     style="max-width: 160px;"%0A-   >%0A-     აქ შედის მუსიკა%0A-   </span>%0A+   +%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:384:36%0A%0A
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A rename and delete > MU7%3A F2 renames%2C Escape cancels without a later commit%2C and Delete inside the input never deletes the marker,line=499,column=36::AssertionError: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(10)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A  <button%0A-   aria-current="true"%0A    aria-haspopup="menu"%0A    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “რეკლამა” — 00:20.000"%0A+   aria-label="Marker “Outro” — 00:40.000"%0A    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="k20"%0A-   data-marker-time="20.000"%0A+   data-marker-id="k40"%0A+   data-marker-time="40.000"%0A    data-testid="arrangement-marker"%0A-   style="left: 800px;"%0A-   title="“რეკლამა” — 00:20.000%0A+   style="left: 1600px;"%0A+   title="“Outro” — 00:40.000%0A  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A    type="button"%0A  >%0A    <span%0A      aria-hidden="true"%0A-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"%0A+     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-muted"%0A    />%0A    <span%0A-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"%0A+     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"%0A      data-marker-label=""%0A      style="max-width: 160px;"%0A    >%0A-     რეკლამა%0A+     Outro%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:499:36%0A%0A
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A rename and delete > MU8%3A Delete on a focused marker removes only the marker; Delete elsewhere keeps SRW-24; plain arrows on a focused marker move the marker and never nudge the selected clip,line=548,column=36::AssertionError: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,15 +1,15 @@%0A  <button%0A    aria-haspopup="menu"%0A    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “Drop” — 00:20.000"%0A+   aria-label="Marker “Intro” — 00:12.000"%0A    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="k20"%0A-   data-marker-time="20.000"%0A+   data-marker-id="k12"%0A+   data-marker-time="12.000"%0A    data-testid="arrangement-marker"%0A-   style="left: 800px;"%0A-   title="“Drop” — 00:20.000%0A+   style="left: 480px;"%0A+   title="“Intro” — 00:12.000%0A  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A    type="button"%0A  >%0A    <span%0A      aria-hidden="true"%0A@@ -18,8 +18,8 @@%0A    <span%0A      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"%0A      data-marker-label=""%0A      style="max-width: 160px;"%0A    >%0A-     Drop%0A+     Intro%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:548:36%0A%0A
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A rename and delete > MU8e%3A a press on another flag or inside the open name editor keeps marker focus,line=649,column=36::AssertionError: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(10)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A  <button%0A-   aria-current="true"%0A    aria-haspopup="menu"%0A    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “Drop” — 00:20.000"%0A+   aria-label="Marker “Outro” — 00:40.000"%0A    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="k20"%0A-   data-marker-time="20.000"%0A+   data-marker-id="k40"%0A+   data-marker-time="40.000"%0A    data-testid="arrangement-marker"%0A-   style="left: 800px;"%0A-   title="“Drop” — 00:20.000%0A+   style="left: 1600px;"%0A+   title="“Outro” — 00:40.000%0A  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A    type="button"%0A  >%0A    <span%0A      aria-hidden="true"%0A-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"%0A+     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-muted"%0A    />%0A    <span%0A-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"%0A+     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"%0A      data-marker-label=""%0A      style="max-width: 160px;"%0A    >%0A-     Drop%0A+     Outro%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:649:36%0A%0A
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A rename and delete > MU20%3A Redo of a marker delete (Ctrl+Shift+Z and Ctrl+Y) with the restored flag focused moves focus to the next flag,line=741,column=36::AssertionError: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,15 +1,15 @@%0A  <button%0A    aria-haspopup="menu"%0A    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “Outro” — 00:40.000"%0A+   aria-label="Marker “Intro” — 00:12.000"%0A    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="k40"%0A-   data-marker-time="40.000"%0A+   data-marker-id="k12"%0A+   data-marker-time="12.000"%0A    data-testid="arrangement-marker"%0A-   style="left: 1600px;"%0A-   title="“Outro” — 00:40.000%0A+   style="left: 480px;"%0A+   title="“Intro” — 00:12.000%0A  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A    type="button"%0A  >%0A    <span%0A      aria-hidden="true"%0A@@ -18,8 +18,8 @@%0A    <span%0A      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"%0A      data-marker-label=""%0A      style="max-width: 160px;"%0A    >%0A-     Outro%0A+     Intro%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:741:36%0A%0A
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A rename and delete > MU21%3A Ctrl+Z of a marker add leaves focus alone when the removed flag was not focused,line=766,column=36::AssertionError: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,15 +1,15 @@%0A  <button%0A    aria-haspopup="menu"%0A    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “Intro” — 00:12.000"%0A+   aria-label="Marker “Drop” — 00:20.000"%0A    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="k12"%0A-   data-marker-time="12.000"%0A+   data-marker-id="k20"%0A+   data-marker-time="20.000"%0A    data-testid="arrangement-marker"%0A-   style="left: 480px;"%0A-   title="“Intro” — 00:12.000%0A+   style="left: 800px;"%0A+   title="“Drop” — 00:20.000%0A  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A    type="button"%0A  >%0A    <span%0A      aria-hidden="true"%0A@@ -18,8 +18,8 @@%0A    <span%0A      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"%0A      data-marker-label=""%0A      style="max-width: 160px;"%0A    >%0A-     Intro%0A+     Drop%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:766:36%0A%0A
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A rename and delete > MU22%3A Undo that keeps the focused flag (Move Marker) leaves focus on that flag,line=788,column=36::AssertionError: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(10)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A  <button%0A-   aria-current="true"%0A    aria-haspopup="menu"%0A    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “Drop” — 00:20.100"%0A+   aria-label="Marker “Outro” — 00:40.000"%0A    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="k20"%0A-   data-marker-time="20.100"%0A+   data-marker-id="k40"%0A+   data-marker-time="40.000"%0A    data-testid="arrangement-marker"%0A-   style="left: 804px;"%0A-   title="“Drop” — 00:20.100%0A+   style="left: 1600px;"%0A+   title="“Outro” — 00:40.000%0A  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A    type="button"%0A  >%0A    <span%0A      aria-hidden="true"%0A-     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-brand"%0A+     class="pointer-events-none absolute top-0 left-0 -z-1 h-full w-px bg-muted"%0A    />%0A    <span%0A-     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-brand bg-brand/20 text-brand"%0A+     class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"%0A      data-marker-label=""%0A      style="max-width: 160px;"%0A    >%0A-     Drop%0A+     Outro%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:788:36%0A%0A
+
+::error file=/tmp/a246-scratch/app/lib/arrangement/__tests__/markers-ui.test.tsx,title=app/lib/arrangement/__tests__/markers-ui.test.tsx > marker row%3A playback continuity%2C gestures and typing > MU17%3A F2 on a focused flag during a pointer gesture opens no editor and keeps focus on the flag,line=1009,column=36::AssertionError: expected <button type="button" …(9)>…(2)</button> to be <button type="button" …(9)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,15 +1,15 @@%0A  <button%0A    aria-haspopup="menu"%0A    aria-keyshortcuts="F2 Delete ArrowLeft ArrowRight Shift+F10"%0A-   aria-label="Marker “Drop” — 00:20.000"%0A+   aria-label="Marker “Outro” — 00:40.000"%0A    class="group absolute top-0 isolate flex h-5 cursor-grab touch-none items-center pr-1 pl-1 active:cursor-grabbing [--focus-offset:-1px]"%0A-   data-marker-id="k20"%0A-   data-marker-time="20.000"%0A+   data-marker-id="k40"%0A+   data-marker-time="40.000"%0A    data-testid="arrangement-marker"%0A-   style="left: 800px;"%0A-   title="“Drop” — 00:20.000%0A+   style="left: 1600px;"%0A+   title="“Outro” — 00:40.000%0A  Click: jump here · Double-click: play from here · Drag or ← →: move · F2: rename · Delete: delete · Right-click or Shift+F10: menu"%0A    type="button"%0A  >%0A    <span%0A      aria-hidden="true"%0A@@ -18,8 +18,8 @@%0A    <span%0A      class="h-4 truncate rounded-sm border px-1 text-xs leading-4 border-outline bg-foreground/10 text-foreground group-hover:bg-foreground/20"%0A      data-marker-label=""%0A      style="max-width: 160px;"%0A    >%0A-     Drop%0A+     Outro%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/markers-ui.test.tsx:1009:36%0A%0A

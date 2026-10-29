@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-29T08:26:39.301Z)
+# Active loop summary (2026-10-29T09:37:18.240Z)
 
-- backlog.json 2286 KB -> active view 323 KB
-- status: G_ROOT_GATE round 245
-- servers: `{"checkedUtc":"2026-10-29T08:14:48.6063195Z","round":245,"attempt":1,"store":200}`
-- last publication: e9fb805e28e6679c08c6c64f96562b355d171bf7 (rounds 244-244)
-- last root gate: round 245 skipped - C taskStatus FAIL
+- backlog.json 2296 KB -> active view 331 KB
+- status: G_ROOT_GATE round 246
+- servers: `{"checkedUtc":"2026-10-29T09:11:19.9745260Z","round":246,"attempt":1,"store":200}`
+- last publication: 869d76732e4a4d8e0abe8476b7b403fc195a3a73 (rounds 245-246)
+- last root gate: round 246 published - commit 869d76732e4a4d8e0abe8476b7b403fc195a3a73 pushed
 
-## Current items: -
+## Current items: SRW-21
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -588,10 +588,17 @@
 - SABA-Q-11B-MENU-OFF / info / awaiting_user (D-29z372): non-blocking; round 241 ships without an Off item / Live's grid context menu has an 'Off' choice (Cotec, Live 10; position unconfirmed); CZABA's grid menu has no 'Off' item because Snap off (G
 - SABA-Q-11B-MAC-BYPASS / info / awaiting_user (D-29z372): non-blocking; no code change / Live bypasses snap with Alt (Win) / Cmd (Mac) (manual 6.10); CZABA uses Alt / Option on both platforms because Cmd+click / Cmd+drag mean oth
 - A-R241-REVIEW-R2 / info / info, recorded only (valid ARIA 1.2; C-S4-AX-241 PASS); revisit if Saba or an a11y audit asks (D-29z379) / fieldset groups make screen readers count per group ('1 s, 4 of 7'); the single cross-group check is not conveyed as one set
-- B-R243-UNDO-MARKER-FOCUS / medium / open (D-29z405): next task - round 246 if the round-246 planning is still 2026-10-29, else round 247 after the REGRESSION round; before SABA-B-11b stage 2b. Owner ArrangementMarkerRow.tsx (tech-lead, RETRO 245): when the focused flag id leaves markers, focusMarkerTarget(neighbouring flag, else MARKER_ADD_FOCUS); L50 enumeration of Undo/Redo/delete origins. Reproduced by C round 244 at both viewports (info) | open (pre-existing; scheduled after the regression round and before SABA-B-11b stage 2b, D-29z397); hypothesis to probe at its planning: other undo/redo paths that remove a focused element ... [clipped; see backlog.json] / with a just-added marker's flag focused, Ctrl+Z removes the marker and unmounts the focused flag; focus falls to BODY (L47 class: an action 
+- B-R243-UNDO-MARKER-FOCUS / medium / dispatched round 246 (D-29z408): successor ruling next surviving flag -> previous -> Add button, detected at flag ref detach; closes on C round 246 PASS + gate published | open (D-29z405): next task - round 246 if the round-246 planning is still 2026-10-29, else round 247 after the REGRESSION round; before SABA-B-11b stage 2b. Owner ArrangementMarkerRow.tsx (tech-lead, RETRO 245): when the focused flag id leaves markers, focusMarkerTarget(neighbouring flag, else MARKER_ADD_FOCUS); L50 enumeration of Undo/Redo/delete origins. Reproduced by C round 244 at both viewports (info) | open (pre-existi ... [clipped; see backlog.json] / with a just-added marker's flag focused, Ctrl+Z removes the marker and unmounts the focused flag; focus falls to BODY (L47 class: an action 
 - INFO-C244-ADD-EXISTING-UNREACHABLE / info / info (D-29z403): supports A-R244-REVIEW-L3 / C found no user path that opens the marker add editor at an occupied time (beginAddMarker pre-checks l.224-229); inference from one tested p
 - INFO-C244-BPM-RING-MOUSE / info / info (D-29z403): SABA-B-4 mouse modality; not a pass criterion / after a mouse 0.5 s grid choice the BPM field is :focus-visible but the brass band measured 0 px (mouse modality)
 - GATE244-S6 / info / info (D-29z403) / ArrangementMarkerRowHandle gained focusEditorSuccessor (additive; only caller closeGridMenu)
+- B-R245-UNDO-GROUP-FOCUS / medium / open (D-29z409): scheduled after the REGRESSION round, before SABA-B-11b stage 2b; owner StudioWorkspace.tsx; question 4 of ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS / with the group name button focused, Undo: Group Tracks or Redo: Ungroup Tracks removes the group row; focus falls to BODY (L47 class)
+- INFO-C245-COST-ROUNDING / info / info (D-29z411) / retro cost totals are sums of rounded per-file values (raw 110.72/78.14/347.67)
+- INFO-C245-COLLECT-DIFF / info / info (D-29z411) / collect.txt differs only in round 244 b_cost after b-round-244-result.json appeared; no window number changes
+- INFO-C245-BEFORE-COPY-UNVERIFIABLE / info / info (D-29z411): loop git repo is a shallow single commit; before-copies are the only record / b-round-244/backlog-before-245.json cannot be compared with history
+- INFO-C245-SMOKE-STATE / info / info (D-29z411) / the smoke export SHA 1fea093b... is taken after adding demo-stem-pulse (rounds 237-245 recipe), not on an empty project
+- INFO-B246-CHROMIUM-BLUR-ON-REMOVAL / info / info (D-29z411): harness fact for every focus task / Chromium 143 fires blur and focusout when a focused element is removed; jsdom fires neither. Both move activeElement to BODY. React 18 calls
+- INFO-B246-REDO-ADD-NO-UNMOUNT / info / info (D-29z411) / Redo: Add Marker unmounts nothing; at HEAD focus stays BODY after Undo-then-Redo, with the fix it stays on the Add button
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
@@ -605,5 +612,4 @@
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
-- SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete
