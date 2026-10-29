@@ -1,0 +1,127 @@
+--- app/components/arrangement/StudioWorkspace.tsx	2026-10-29 19:11:11.334248147 +0000
++++ /tmp/b254-scratch/app/components/arrangement/StudioWorkspace.tsx	2026-10-29 20:03:49.570516606 +0000
+@@ -495,26 +495,37 @@
+   return event.code.startsWith('Key') ? event.code.slice(3).toLowerCase() : event.key.toLowerCase();
+ }
+ 
+-function ArrangementInsertMarkerSignal() {
++function ArrangementInsertMarkerLine({
++  pxPerSecond,
++  hidden,
++}: {
++  pxPerSecond: number;
++  hidden: boolean;
++}) {
+   const insertMarkerStore = useArrangementInsertMarkerStore();
+-  const signalRef = useRef<HTMLDivElement>(null);
++  const lineRef = useRef<HTMLDivElement>(null);
+   useEffect(() => {
+     const write = () => {
+-      signalRef.current?.setAttribute(
+-        'data-insert-marker',
+-        insertMarkerStore.getPosition().toFixed(3),
+-      );
++      const position = insertMarkerStore.getPosition();
++      const line = lineRef.current;
++      if (line) {
++        line.style.left = `${ARRANGEMENT_HEADER_WIDTH_PX + position * pxPerSecond}px`;
++        line.setAttribute('data-insert-marker', position.toFixed(3));
++      }
+     };
+     write();
+     return insertMarkerStore.subscribePosition(write);
+-  }, [insertMarkerStore]);
++  }, [insertMarkerStore, pxPerSecond]);
++  const position = insertMarkerStore.getPosition();
+   return (
+     <div
+-      ref={signalRef}
+-      hidden
++      ref={lineRef}
++      hidden={hidden}
+       aria-hidden="true"
++      className="pointer-events-none absolute top-0 bottom-0 z-10 w-px bg-foreground motion-safe:animate-insert-marker-blink"
++      style={{ left: ARRANGEMENT_HEADER_WIDTH_PX + position * pxPerSecond }}
+       data-testid="arrangement-insert-marker"
+-      data-insert-marker={insertMarkerStore.getPosition().toFixed(3)}
++      data-insert-marker={position.toFixed(3)}
+     />
+   );
+ }
+@@ -3050,8 +3061,8 @@
+                   data-testid="arrangement-marquee"
+                 />
+               ) : null}
++              <ArrangementInsertMarkerLine pxPerSecond={pxPerSecond} hidden={range !== null} />
+               <ArrangementPlayheadLine pxPerSecond={pxPerSecond} />
+-              <ArrangementInsertMarkerSignal />
+             </div>
+           </div>
+           <ArrangementDetailPanel
+--- app/lib/arrangement/shortcuts.ts	2026-10-29 19:08:07.076948929 +0000
++++ /tmp/b254-scratch/app/lib/arrangement/shortcuts.ts	2026-10-29 19:59:05.950561913 +0000
+@@ -16,8 +16,30 @@
+     id: 'transport',
+     title: 'Transport',
+     rows: [
+-      { id: 'play-stop', action: 'Play / Stop', keys: ['Space'], ariaKeyShortcuts: 'Space' },
+-      { id: 'back-to-start', action: 'Back to start', keys: ['Home'], ariaKeyShortcuts: 'Home' },
++      {
++        id: 'play-stop',
++        action: 'Play from the insert marker or the selection start · Stop',
++        keys: ['Space'],
++        ariaKeyShortcuts: 'Space',
++      },
++      {
++        id: 'continue-playback',
++        action: 'Continue from where playback stopped',
++        keys: ['Shift+Space'],
++        ariaKeyShortcuts: 'Shift+Space',
++      },
++      {
++        id: 'insert-marker-to-playhead',
++        action: 'Move the insert marker to the playhead',
++        keys: ['Ctrl+Shift+Space'],
++        ariaKeyShortcuts: 'Control+Shift+Space Meta+Shift+Space',
++      },
++      {
++        id: 'back-to-start',
++        action: 'Back to start (the insert marker too)',
++        keys: ['Home'],
++        ariaKeyShortcuts: 'Home',
++      },
+       {
+         id: 'play-from-point',
+         action: 'Play from a point (needs a BPM)',
+@@ -81,7 +103,11 @@
+         action: 'Previous / next marker or clip edge',
+         keys: ['Ctrl+← / Ctrl+→'],
+       },
+-      { id: 'marker', action: 'Add a marker at the insert marker', keys: ['M'] },
++      {
++        id: 'marker',
++        action: 'Add a marker at the selection start, the insert marker, or the playhead while playing',
++        keys: ['M'],
++      },
+       {
+         id: 'add-sound',
+         action: 'Add the selected sound at the insert marker',
+--- /home/runner/czaba-project/store/app/styles/app.css	2026-10-29 19:08:07.082491451 +0000
++++ app/styles/app.css	2026-10-29 20:13:05.092385509 +0000
+@@ -174,9 +174,16 @@
+   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
++
++  --animate-insert-marker-blink: insert-marker-blink 1.2s step-end infinite;
+ }
+ 
+ /* Keyframes */
++@keyframes insert-marker-blink {
++  0%, 100% { opacity: 1; }
++  50% { opacity: 0.25; }
++}
++
+ @keyframes fade-in {
+   from { opacity: 0; }
+   to { opacity: 1; }

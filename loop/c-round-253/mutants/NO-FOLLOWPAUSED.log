@@ -1,0 +1,56 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c253/mut[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx [2m([22m[2m25 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 3740[2mms[22m[39m
+     [32m✓[39m BR1 without a tempo the bars ruler stays display-only[32m 209[2mms[22m[39m
+     [33m[2m✓[22m[39m BR2 a strip click while stopped starts playback from the nearest 1/4 line [33m 452[2mms[22m[39m
+     [32m✓[39m BR3 a strip click while playing jumps to the nearest 1/4 line and keeps playing[32m 245[2mms[22m[39m
+     [32m✓[39m BR4 a lower-zone click while stopped moves the position on the grid and does not play[32m 222[2mms[22m[39m
+     [32m✓[39m BR4b a lower-zone click while playing moves only the insert marker and keeps playing (D-29z430)[32m 150[2mms[22m[39m
+     [32m✓[39m BR5 Alt bypasses the grid on both zones; Snap off lands free as well[32m 136[2mms[22m[39m
+     [32m✓[39m BR6 a drag from either zone scrolls or zooms; a cancelled press never seeks or plays[32m 130[2mms[22m[39m
+     [32m✓[39m BR7 a double-click fits the project; a double-click right after a drag does nothing[32m 138[2mms[22m[39m
+     [32m✓[39m BR8 a strip click past the end or in an empty project reports and does not play[32m 175[2mms[22m[39m
+     [32m✓[39m BR9 the seconds ruler click is unchanged with a tempo[32m 86[2mms[22m[39m
+     [32m✓[39m BR10 a press while another gesture holds the claim is refused[32m 99[2mms[22m[39m
+     [32m✓[39m BR11 a workspace re-render with unchanged gestures does not re-render the bars ruler[32m 114[2mms[22m[39m
+     [32m✓[39m BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits[32m 134[2mms[22m[39m
+     [32m✓[39m BR13 a strip click that snaps to the project end reports past-end and does not play from 0[32m 196[2mms[22m[39m
+     [32m✓[39m BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref)[32m 97[2mms[22m[39m
+     [32m✓[39m FW1 a lower-zone click while playing pauses Follow with one composed status and keeps playing[32m 124[2mms[22m[39m
+     [32m✓[39m FW2 a seconds-ruler click while playing pauses Follow the same way[32m 108[2mms[22m[39m
+     [32m✓[39m FW3 a strip click while playing resumes a paused Follow and keeps playing[32m 122[2mms[22m[39m
+     [32m✓[39m FW4 with Follow off a strip click and a lower-zone click leave it off[32m 113[2mms[22m[39m
+     [32m✓[39m FW5 while stopped a lower-zone or seconds-ruler click leaves Follow on and writes no Follow text[32m 84[2mms[22m[39m
+     [32m✓[39m FW6 Space (stop) resumes a paused Follow and replaces the playing-only status with the stopped text[32m 131[2mms[22m[39m
+[31m     [31m×[31m FW8 a stop after a manual-scroll pause resumes Follow and replaces the Follow-paused status[39m[32m 119[2mms[22m[39m
+     [32m✓[39m FW9 with Follow off a stop after a lower-zone click replaces the playing status and keeps Follow off[32m 125[2mms[22m[39m
+     [32m✓[39m FW10 a stop leaves an unrelated status alone: followResumed stays and no write happens[32m 117[2mms[22m[39m
+     [32m✓[39m FW7 a lane-body click while playing moves the insert marker and leaves Follow on[32m 110[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx[2m > [22mSABA-B-10a stage 2b Follow pause and resume on the rulers (D-29z454)[2m > [22mFW8 a stop after a manual-scroll pause resumes Follow and replaces the Follow-paused status
+[31m[1mAssertionError[22m: expected 'Follow paused by manual navigation. P…' to be 'Stopped — Space plays from the insert…' // Object.is equality[39m
+
+Expected: [32m"[7mStopped — Space plays from the insert marker at 00:02.000[27m."[39m
+Received: [31m"[7mFollow paused by manual navigation. Press Follow, or stop playback, to resume it[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:[2m627:40[22m[39m
+    [90m625| [39m      [34mexpect[39m([34mfollowButton[39m(mounted[33m.[39mview)[33m.[39mdataset[33m.[39mfollowMode)[33m.[39m[34mtoBe[39m([32m'on'[39m)[33m;[39m
+    [90m626| [39m      [34mexpect[39m([34mfollowButton[39m(mounted[33m.[39mview)[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'Follow'[39m)[33m;[39m
+    [90m627| [39m      [34mexpect[39m([34mstatusText[39m(mounted[33m.[39mview))[33m.[39m[34mtoBe[39m(
+    [90m   | [39m                                       [31m^[39m
+    [90m628| [39m        studioPlaybackStrings.insertMarkerAfterStop(formatArrangementT…
+    [90m629| [39m      )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m24 passed[39m[22m[90m (25)[39m
+[2m   Start at [22m 19:29:09
+[2m   Duration [22m 5.88s[2m (transform 1.11s, setup 0ms, import 1.56s, tests 3.74s, environment 422ms)[22m
+
+
+::error file=/tmp/c253/mut/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx,title=app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-10a stage 2b Follow pause and resume on the rulers (D-29z454) > FW8 a stop after a manual-scroll pause resumes Follow and replaces the Follow-paused status,line=627,column=40::AssertionError: expected 'Follow paused by manual navigation. P…' to be 'Stopped — Space plays from the insert…' // Object.is equality%0A%0AExpected: "Stopped — Space plays from the insert marker at 00:02.000."%0AReceived: "Follow paused by manual navigation. Press Follow, or stop playback, to resume it."%0A%0A ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:627:40%0A%0A

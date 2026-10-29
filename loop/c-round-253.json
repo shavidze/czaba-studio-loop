@@ -1,0 +1,57 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T19:27:16.1362482Z",
+  "round": 253,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R253-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab 1440x900 or 1280x720, fresh context; wait for Demo collection ready; add demo-stem-pulse; = x4 (97.7 px/s, 120 BPM)",
+    "scroll so 16 s is centred; click the bars scrub strip at ~13 s (playback starts)",
+    "while playing, click the bars-ruler lower zone at 16.4 s (past the 16 s end): insert marker 16.500, status Insert marker at 00:16.500 — playback continues, Follow paused. …",
+    "press Space (stop)",
+    "press Space again"
+   ],
+   "expected": "The stopped screen does not promise playback that will be refused (round-253 rationale: the stopped sentence must be true)",
+   "actual": "Stop writes Stopped — Space plays from the insert marker at 00:16.500. ; the next Space does not play and writes Insert marker (00:16.500) is past the end of the project (00:16.000) — there is nothing to play here. Home returns to 0. Same at both viewports. Confirms code-reviewer Low A-R253-REVIEW-PASTEND-COPY in the browser. New Low -> deferred_low_polish per 2026-10-23 bug gate; no acceptance row of this round covers it.",
+   "evidence": "tmp/studio-real-loop/c-round-253/fix/c253.json rows probes@1440x900 and probes@1280x720 (pastClick, pastStop, pastSpaceAgain); probes-*.png"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-253",
+  "C-UNIT-253",
+  "C-MUT-253",
+  "C-FOLLOW-STOP-253",
+  "C-STOP-PLAIN-253",
+  "C-STOP-SCROLL-253",
+  "C-STOP-UNRELATED-253",
+  "C-TITLES-253",
+  "C-STATUS-WIDE-253",
+  "C-NAV-ORIGIN-253",
+  "C-BUDGET-253",
+  "C-LESSON-253",
+  "AN-REVIEW-253",
+  "LAB-SMOKE-253",
+  "Auth"
+ ],
+ "blocked": [
+  "Purchased origin /studio/$productId purchased copy: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest, typecheck, lint, build, verify, e2e smoke: gate rows, not claimed by C"
+ ],
+ "observations": [
+  "B-R253-STALE-PLAYING-STATUS residual reproduced (spec: observe, not a failure): ruler click while playing (marker 6.500/4.750), Ctrl+Right moves marker to 2.000 with no status write, Space stop leaves the playing text Insert marker at 00:06.500 — playback continues, Follow paused. … on the stopped screen (0 writes) while Follow reads Follow; both viewports",
+  "Escape does not stop playback in /studio-lab (frozen StudioWorkspace Escape handler only returns the floating video); task section 6 premise is wrong; C probed the transport Pause button instead: stopped text, 1 write, Follow on",
+  "Project-end auto-stop with a playing-only text (lower-zone click at 14.6 s while playing from 12.4 s) is replaced by the stopped text for 00:14.500 (both viewports)",
+  "A STOP (render-budget test 50.7% of its 5 s default timeout in A's covering run, 28% alone): per L11 a report-and-rule item for B, not an in-round fix; frozen file outside grants; does not block C; C did not re-time it",
+  "Final scope re-check after all C work: HEAD 83b7c75, exactly 13 ' M' files, nothing untracked; frozen/carried/root sha rc 0; 7 protected files unchanged"
+ ]
+}

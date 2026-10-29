@@ -1,0 +1,191 @@
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1919,6 +1919,15 @@
+       if (followModeRef.current === 'paused') {
+         setFollowMode('on');
+       }
++      const current = workspaceRef.current;
++      const marker = formatArrangementTime(Math.max(0, current.getLocatorPosition()));
++      if (
++        current.status === studioPlaybackStrings.insertMarkerWhilePlaying(marker) ||
++        current.status === studioPlaybackStrings.insertMarkerWhilePlayingFollowPaused(marker) ||
++        current.status === FOLLOW_PAUSED_MESSAGE
++      ) {
++        current.setStatus(studioPlaybackStrings.insertMarkerAfterStop(marker));
++      }
+       return;
+     }
+     autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -244,6 +244,8 @@
+     `Insert marker at ${time} — playback continues. Stop, then Space plays from here.`,
+   insertMarkerWhilePlayingFollowPaused: (time: string): string =>
+     `Insert marker at ${time} — playback continues, Follow paused. Stop, then Space plays from here.`,
++  insertMarkerAfterStop: (time: string): string =>
++    `Stopped — Space plays from the insert marker at ${time}.`,
+   insertMarkerToPlayhead: (time: string): string =>
+     `Insert marker moved to the playhead (${time}). Space plays from here.`,
+ };
+@@ -365,7 +367,7 @@
+ 
+ export const studioViewStrings = {
+   followOffTitle: 'Follow off: the view does not follow playback',
+-  followPausedTitle: 'Follow paused by manual navigation — press Follow or Play',
++  followPausedTitle: 'Follow paused — press Follow, or stop playback, to resume',
+   followOnTitle: 'Follow: the view follows the playback position',
+   zoomSliderLabel: 'Zoom (px/s)',
+   zoomSliderTitle: 'Zoom around the playhead · + / − · Ctrl+wheel',
+@@ -383,7 +385,7 @@
+   overviewLabel: 'Overview — entire project (← → = 5 s, double-click = Fit)',
+   overviewTitle:
+     'Overview: click = centre here · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit',
+-  followPaused: 'Follow paused by manual navigation. Follow or Play resumes it.',
++  followPaused: 'Follow paused by manual navigation. Press Follow, or stop playback, to resume it.',
+   zoomNeedsSelection: 'To zoom, make a time selection first.',
+   zoomHistoryEmpty: 'The zoom history is empty — there is no view to go back to.',
+   zoomBackMore: 'Previous view restored. X goes back one more step.',
+--- a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+@@ -579,7 +579,7 @@
+       expect(insertMarkerText(mounted.view)).toBe('3.333');
+     });
+ 
+-    it('FW6 Space (stop) resumes a paused Follow silently: the stop writes the same status as a stop without a pause', async () => {
++    it('FW6 Space (stop) resumes a paused Follow and replaces the playing-only status with the stopped text', async () => {
+       const mounted = await mountTempo90SnapOn();
+       clickStrip(mounted, 2.1);
+       const plainBeforeStop = statusText(mounted.view);
+@@ -598,9 +598,76 @@
+       expect(live(mounted.api).isPlaying).toBe(false);
+       expect(followButton(mounted.view).dataset.followMode).toBe('on');
+       expect(followButton(mounted.view).textContent).toBe('Follow');
+-      expect(statusText(mounted.view)).toBe(pausedBeforeStop);
++      expect(pausedBeforeStop).toBe(
++        studioPlaybackStrings.insertMarkerWhilePlayingFollowPaused('00:06.000'),
++      );
++      expect(insertMarkerText(mounted.view)).toBe('6.000');
++      expect(statusText(mounted.view)).toBe(
++        'Stopped — Space plays from the insert marker at 00:06.000.',
++      );
+       expect(statusText(mounted.view)).not.toBe(studioViewStrings.followResumed);
+-      expect(live(mounted.api).statusSequence).toBe(pausedSequence);
++      expect(live(mounted.api).statusSequence).toBe(pausedSequence + 1);
++    });
++
++    it('FW8 a stop after a manual-scroll pause resumes Follow and replaces the Follow-paused status', async () => {
++      const mounted = await mountTempo90SnapOn();
++      clickStrip(mounted, 2.1);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      pauseFollowByScroll(mounted);
++      expect(followButton(mounted.view).dataset.followMode).toBe('paused');
++      expect(statusText(mounted.view)).toBe(studioViewStrings.followPaused);
++      expect(followButton(mounted.view).title).toBe(studioViewStrings.followPausedTitle);
++      const marker = insertMarkerText(mounted.view);
++      expect(marker).toBe('2.000');
++      const sequence = live(mounted.api).statusSequence;
++      fireEvent.keyDown(document.body, { key: ' ', code: 'Space' });
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expect(followButton(mounted.view).dataset.followMode).toBe('on');
++      expect(followButton(mounted.view).textContent).toBe('Follow');
++      expect(statusText(mounted.view)).toBe(
++        studioPlaybackStrings.insertMarkerAfterStop(formatArrangementTime(Number(marker))),
++      );
++      expect(statusText(mounted.view)).toBe(
++        'Stopped — Space plays from the insert marker at 00:02.000.',
++      );
++      expect(live(mounted.api).statusSequence).toBe(sequence + 1);
++    });
++
++    it('FW9 with Follow off a stop after a lower-zone click replaces the playing status and keeps Follow off', async () => {
++      const mounted = await mountTempo90SnapOn();
++      clickStrip(mounted, 2.1);
++      fireEvent.click(followButton(mounted.view));
++      expect(followButton(mounted.view).dataset.followMode).toBe('off');
++      clickLower(mounted, 6.3);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      expect(statusText(mounted.view)).toBe(
++        studioPlaybackStrings.insertMarkerWhilePlaying('00:06.000'),
++      );
++      expect(insertMarkerText(mounted.view)).toBe('6.000');
++      const sequence = live(mounted.api).statusSequence;
++      fireEvent.keyDown(document.body, { key: ' ', code: 'Space' });
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expect(followButton(mounted.view).dataset.followMode).toBe('off');
++      expect(statusText(mounted.view)).toBe(
++        studioPlaybackStrings.insertMarkerAfterStop('00:06.000'),
++      );
++      expect(live(mounted.api).statusSequence).toBe(sequence + 1);
++    });
++
++    it('FW10 a stop leaves an unrelated status alone: followResumed stays and no write happens', async () => {
++      const mounted = await mountTempo90SnapOn();
++      clickStrip(mounted, 2.1);
++      pauseFollowByScroll(mounted);
++      expect(followButton(mounted.view).dataset.followMode).toBe('paused');
++      fireEvent.click(followButton(mounted.view));
++      expect(followButton(mounted.view).dataset.followMode).toBe('on');
++      expect(statusText(mounted.view)).toBe(studioViewStrings.followResumed);
++      const sequence = live(mounted.api).statusSequence;
++      fireEvent.keyDown(document.body, { key: ' ', code: 'Space' });
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expect(followButton(mounted.view).dataset.followMode).toBe('on');
++      expect(statusText(mounted.view)).toBe(studioViewStrings.followResumed);
++      expect(live(mounted.api).statusSequence).toBe(sequence);
+     });
+ 
+     it('FW7 a lane-body click while playing moves the insert marker and leaves Follow on', async () => {
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -734,6 +734,7 @@
+     ],
+     insertMarkerWhilePlaying: [pb.insertMarkerWhilePlaying('00:08.000')],
+     insertMarkerWhilePlayingFollowPaused: [pb.insertMarkerWhilePlayingFollowPaused('00:08.000')],
++    insertMarkerAfterStop: [pb.insertMarkerAfterStop('00:06.500')],
+     insertMarkerToPlayhead: [pb.insertMarkerToPlayhead('00:03.483')],
+   },
+   studioLibraryStrings: {
+@@ -839,6 +840,9 @@
+     expect(pb.insertMarkerWhilePlayingFollowPaused('00:08.000')).toBe(
+       'Insert marker at 00:08.000 — playback continues, Follow paused. Stop, then Space plays from here.',
+     );
++    expect(pb.insertMarkerAfterStop('00:06.500')).toBe(
++      'Stopped — Space plays from the insert marker at 00:06.500.',
++    );
+     expect(pb.insertMarkerToPlayhead('00:03.483')).toBe(
+       'Insert marker moved to the playhead (00:03.483). Space plays from here.',
+     );
+@@ -1008,7 +1012,7 @@
+   },
+   studioViewStrings: {
+     followOffTitle: 'Follow off: the view does not follow playback',
+-    followPausedTitle: 'Follow paused by manual navigation — press Follow or Play',
++    followPausedTitle: 'Follow paused — press Follow, or stop playback, to resume',
+     followOnTitle: 'Follow: the view follows the playback position',
+     zoomSliderLabel: 'Zoom (px/s)',
+     zoomSliderTitle: 'Zoom around the playhead · + / − · Ctrl+wheel',
+@@ -1026,7 +1030,8 @@
+     overviewLabel: 'Overview — entire project (← → = 5 s, double-click = Fit)',
+     overviewTitle:
+       'Overview: click = centre here · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit',
+-    followPaused: 'Follow paused by manual navigation. Follow or Play resumes it.',
++    followPaused:
++      'Follow paused by manual navigation. Press Follow, or stop playback, to resume it.',
+     zoomNeedsSelection: 'To zoom, make a time selection first.',
+     zoomHistoryEmpty: 'The zoom history is empty — there is no view to go back to.',
+     zoomBackMore: 'Previous view restored. X goes back one more step.',
+--- a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+@@ -323,10 +323,10 @@
+     fireEvent.scroll(scroller);
+     expect(workspace.follow().dataset.followMode).toBe('paused');
+     expect(workspace.status()).toBe(
+-      'Follow paused by manual navigation. Follow or Play resumes it.',
++      'Follow paused by manual navigation. Press Follow, or stop playback, to resume it.',
+     );
+     expect(workspace.follow().title).toBe(
+-      'Follow paused by manual navigation — press Follow or Play',
++      'Follow paused — press Follow, or stop playback, to resume',
+     );
+     fireEvent.click(workspace.follow());
+     expect(workspace.follow().dataset.followMode).toBe('on');

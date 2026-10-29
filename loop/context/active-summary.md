@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T18:49:48.475Z)
+# Active loop summary (2026-10-29T19:53:33.337Z)
 
-- backlog.json 2379 KB -> active view 339 KB
-- status: G_ROOT_GATE round 252
-- servers: `{"checkedUtc":"2026-10-29T18:27:20.5676206Z","round":252,"attempt":1,"store":200}`
-- last publication: 83b7c756ce3108d0e31f023a1aa2b0e59547d913 (rounds 250-251)
-- last root gate: round 252 skipped - C taskStatus FAIL
+- backlog.json 2389 KB -> active view 343 KB
+- status: G_ROOT_GATE round 253
+- servers: `{"checkedUtc":"2026-10-29T19:27:16.1362482Z","round":253,"attempt":1,"store":200}`
+- last publication: c65e5e9ab7d53d66d2225ed794bd0c7ef657151b (rounds 252-253)
+- last root gate: round 253 published - commit c65e5e9ab7d53d66d2225ed794bd0c7ef657151b pushed
 
 ## Current items: -
 
@@ -566,7 +566,7 @@
 - SABA-Q-SCRUB-HOLD-LOOP / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live: holding the mouse in the scrub area loops a portion by the global launch quantization (6.3). Not built in SABA-B-11a. Wanted?
 - SABA-Q-SCRUB-ADD-LOCATOR / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live (video riOD 2:22-3:08): right-click in the scrub area -> Add Locator. Our marker menu opens only on an existing flag. Wanted (later can
 - SABA-Q-SEED-STATUS-LENGTH / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / The seed status is one aria-live message of three sentences (placement, 'Tempo N BPM from ... Grid only: audio is not stretched.', 'Snap on 
-- C-R235-02 / low / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b (D-29z436) | scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
+- C-R235-02 / low / round 252 implemented; C round 252 rows PASS but the round FAILED on C-R252-01 and gate 252 skipped; carried to round 253, closes on round-253 C PASS + gate (D-29z461) | dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b (D-29z436) | scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
 - SABA-Q-SCRUB-DOUBLE-CLICK / info / awaiting_user (D-29z333); the round-236 default holds until answered / Live documents a double-click only for the beat-time ruler (6.1 zoom). Round 236 makes a scrub-strip double-click two 'play from here' click
 - GATE235-S3 / info / note; consistent with the codebase; no action / useRulerNavigation writes optionsRef.current during render (same pattern as workspaceRef)
 - C-R236-01 / low / deferred_low_polish (D-29z340); code is togglePlayback, outside round 237 grants / a playPastEnd status stays on screen after playback actually starts (strip click at 2 after an end click; Space after the end click); pre-ex
@@ -624,13 +624,17 @@
 - GATE249-S8 / info / = B-R249-PAUSE-LABEL (SABA-B-9) / status says Stop while the button reads Pause
 - GATE249-S9 / info / = TLM-R249-MAC-CMD-SHIFT-SPACE / Mac Cmd path unverified
 - A-R249-REVIEW-KEYUP-ORDER / info / Tech Lead manual: Firefox and Safari (D-29z439) / Shift released before Space after Ctrl+Shift+Space could click a focused button on key-up in other engines; not reproduced in Chromium (A an
-- B-R250-PLAYHEAD-TITLES / low / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b, not deferred (D-29z436) / ruler and range titles still say click = playhead (rulerTitle, rangeBodyTitle); while playing a click now moves only the insert marker
-- B-R250-NAV-ORIGIN / low / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b (D-29z436) | still stage 2b after the round-251 fix-up and REGRESSION (D-29z451) / Ctrl+Left/Right steps from the playhead (getLivePosition) while stopped; after a stop that differs from the insert marker (Live 6.9 moves th
+- B-R250-PLAYHEAD-TITLES / low / round 252 implemented; C round 252 rows PASS but the round FAILED on C-R252-01 and gate 252 skipped; carried to round 253, closes on round-253 C PASS + gate (D-29z461) | dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b, not deferred (D-29z436) / ruler and range titles still say click = playhead (rulerTitle, rangeBodyTitle); while playing a click now moves only the insert marker
+- B-R250-NAV-ORIGIN / low / round 252 implemented; C round 252 rows PASS but the round FAILED on C-R252-01 and gate 252 skipped; carried to round 253, closes on round-253 C PASS + gate (D-29z461) | dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b (D-29z436) | still stage 2b after the round-251 fix-up and REGRESSION (D-29z451) / Ctrl+Left/Right steps from the playhead (getLivePosition) while stopped; after a stop that differs from the insert marker (Live 6.9 moves th
 - A-R250-REVIEW-SHEET-MARKER-COPY / low / scheduled in SABA-B-10b (D-29z449; owns shortcuts.ts, adds sheet rows; carries the row-height check), not deferred / shortcut sheet row "Add a marker at the insert marker" is inaccurate while playing and with a selection (addTitle names all three cases)
-- B-R251-PASTEND-AT-END / info / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | stage 2b scope (D-29z449) / a strip or flag play exactly at the end reads "(00:16.000) is past the end of the project (00:16.000)" (D-27 at-or-past-end rule for playFro
+- B-R251-PASTEND-AT-END / info / round 252 implemented; C round 252 rows PASS but the round FAILED on C-R252-01 and gate 252 skipped; carried to round 253, closes on round-253 C PASS + gate (D-29z461) | dispatched round 252 (D-29z453): SABA-B-10a stage 2b | stage 2b scope (D-29z449) / a strip or flag play exactly at the end reads "(00:16.000) is past the end of the project (00:16.000)" (D-27 at-or-past-end rule for playFro
 - EXPORT-PROGRESS-LOAD-FLAKE-250 / info / watch (D-29z452): gate 251 verify did not reproduce it (export-progress-ui 8/8, 1242 ms; 215/215 files) | watch (D-29z447) / export-progress-ui.test.tsx l.319/l.350 rows failed once in a covering run under concurrent load (resetEncoderMock call count); green in 3 i
-- A-R251-REVIEW-IM22-PLAYING / medium / dispatched round 252 item 0 (D-29z453): setPosition(getLivePosition()) before the playing assert; red-proof MU-CAPTION-POSITION with the stopped asserts removed (B pre-check b-round-251/precheck-im22.txt: red at the playing line, HEAD green) / IM22 playing assert is vacuous: rAF stubbed, the position store stays at the play-from value 3 = the marker, so a playhead-reading line pass
+- A-R251-REVIEW-IM22-PLAYING / medium / round 252 implemented; C round 252 rows PASS but the round FAILED on C-R252-01 and gate 252 skipped; carried to round 253, closes on round-253 C PASS + gate (D-29z461) | dispatched round 252 item 0 (D-29z453): setPosition(getLivePosition()) before the playing assert; red-proof MU-CAPTION-POSITION with the stopped asserts removed (B pre-check b-round-251/precheck-im22.txt: red at the playing line, HEAD green) / IM22 playing assert is vacuous: rAF stubbed, the position store stays at the play-from value 3 = the marker, so a playhead-reading line pass
 - SABA-Q-FOLLOW-EDIT-RESTART / info / awaiting_user (D-29z457): non-blocking; round 252 builds only the ruler/strip/stop clauses / (a) Live pauses Follow when you make an edit; CZABA does not (edits keep Follow on). (b) Live resumes Follow when playback restarts; CZABA t
+- C-R252-01 / low / dispatched round 253 item 1 (D-29z461, D-29z462): ruling (a), the stop replaces the playing-only text with insertMarkerAfterStop(marker) / after a Follow-pausing ruler click, Stop resumes Follow but the stopped screen still reads 'Insert marker at <t> — playback continues, Follo
+- C-N252-FOLLOW-TITLE / low / dispatched round 253 item 3 (D-29z463) / followPausedTitle 'Follow paused by manual navigation — press Follow or Play' and followPaused 'Follow or Play resumes it' no longer name th
+- B-R253-STALE-PLAYING-STATUS / low / dispatched round 253 item 2 (D-29z462); residual: a playing text naming a time other than the current marker is left alone by design (recorded, not a failure) / pre-existing: a playing-only status (insertMarkerWhilePlaying, followPaused) stays on the stopped screen after Stop
+- A-R252-REVIEW-PLAYING-SOURCE / low / deferred_low_polish (D-29z464); fix needs a ref-backed getter on ArrangementContext / ruler wrappers read render-state workspaceRef.current.isPlaying while setInsertMarker/playFrom read isPlayingRef; same split in stepMarker; 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
