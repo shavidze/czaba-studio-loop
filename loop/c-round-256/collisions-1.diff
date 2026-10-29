@@ -1,0 +1,290 @@
+diff --git a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+index 04de3b0..66cc2ab 100644
+--- a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+@@ -166,9 +166,8 @@ function statusText(view: BarsView): string | null {
+   return view.getByTestId('arrangement-status').textContent;
+ }
+ 
+-function transportLabel(view: BarsView): string {
+-  const pause = view.queryByRole('button', { name: studioPlaybackStrings.pauseLabel });
+-  return pause ? studioPlaybackStrings.pauseLabel : studioPlaybackStrings.playLabel;
++function transportPlaying(view: BarsView): string | undefined {
++  return view.getByRole('button', { name: studioPlaybackStrings.playLabel }).dataset.playing;
+ }
+ 
+ async function mountTempo90SnapOn() {
+@@ -270,7 +269,7 @@ describe('SABA-B-11a stage 2 interactive bars ruler (D-29z327)', { timeout: 15_0
+     expect(mounted.bars().title).toBe(studioViewStrings.rulerTitle);
+     clickStrip(mounted, 4.1);
+     expect(live(mounted.api).isPlaying).toBe(true);
+-    expect(transportLabel(mounted.view)).toBe(studioPlaybackStrings.pauseLabel);
++    expect(transportPlaying(mounted.view)).toBe('true');
+     expect(positionOf(mounted.api)).toBeCloseTo(4, 3);
+   });
+ 
+@@ -280,7 +279,7 @@ describe('SABA-B-11a stage 2 interactive bars ruler (D-29z327)', { timeout: 15_0
+     expect(live(mounted.api).isPlaying).toBe(true);
+     clickStrip(mounted, 8.2);
+     expect(live(mounted.api).isPlaying).toBe(true);
+-    expect(transportLabel(mounted.view)).toBe(studioPlaybackStrings.pauseLabel);
++    expect(transportPlaying(mounted.view)).toBe('true');
+     expect(positionOf(mounted.api)).toBeCloseTo(8, 3);
+   });
+ 
+@@ -289,7 +288,7 @@ describe('SABA-B-11a stage 2 interactive bars ruler (D-29z327)', { timeout: 15_0
+     clickLower(mounted, 6.3);
+     expect(positionOf(mounted.api)).toBeCloseTo(6, 3);
+     expect(live(mounted.api).isPlaying).toBe(false);
+-    expect(transportLabel(mounted.view)).toBe(studioPlaybackStrings.playLabel);
++    expect(transportPlaying(mounted.view)).toBe('false');
+   });
+ 
+   it('BR4b a lower-zone click while playing moves only the insert marker and keeps playing (D-29z430)', async () => {
+diff --git a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+index d1b5526..7fb4917 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -296,26 +296,25 @@ describe('SRW-14 stage 1 grid control and lines', { timeout: 15_000 }, () => {
+ 
+   it('GS14 keeps the transport toolbar unchanged and without a Snap control', async () => {
+     const { view } = await mountGridWorkspace();
+-    const toolbar = view.getByRole('button', { name: 'Play' }).parentElement;
+-    if (!(toolbar instanceof HTMLElement)) {
+-      throw new Error('toolbar missing');
+-    }
++    const toolbar = view.getByTestId('arrangement-transport');
++    expect(toolbar.contains(view.getByRole('button', { name: 'Play' }))).toBe(true);
+     const labels = Array.from(toolbar.querySelectorAll('button')).map(
+       (button) => button.getAttribute('aria-label') ?? button.textContent?.trim() ?? '',
+     );
+-    expect(labels).toHaveLength(12);
+-    expect(labels[0]).toBe('Play');
+-    expect(labels[1]).toBe('Back to start');
+-    expect(labels[2]).toContain('Undo');
+-    expect(labels[3]).toContain('Redo');
+-    expect(labels[4]).toContain('Split');
+-    expect(labels[5]).toContain('Delete');
+-    expect(labels[6]).toContain('Loop');
+-    expect(labels[7]).toContain('Follow');
+-    expect(labels[8]).toBe('Zoom to selection (Z)');
+-    expect(labels[9]).toBe('Zoom');
+-    expect(labels[10]).toBe('Fit');
+-    expect(labels[11]).toBe('Export');
++    expect(labels).toHaveLength(13);
++    expect(labels[0]).toContain('Undo');
++    expect(labels[1]).toContain('Redo');
++    expect(labels[2]).toContain('Split');
++    expect(labels[3]).toContain('Delete');
++    expect(labels[4]).toContain('Follow');
++    expect(labels[5]).toBe('Play');
++    expect(labels[6]).toBe('Stop');
++    expect(labels[7]).toBe('Back to start');
++    expect(labels[8]).toContain('Loop');
++    expect(labels[9]).toBe('Zoom to selection (Z)');
++    expect(labels[10]).toBe('Zoom');
++    expect(labels[11]).toBe('Fit');
++    expect(labels[12]).toBe('Export');
+     expect(toolbar.querySelector('[data-testid="arrangement-zoom"]')).not.toBeNull();
+     expect(toolbar.textContent).not.toContain('Snap');
+     expect(toolbar.querySelector('select')).toBeNull();
+diff --git a/app/lib/arrangement/__tests__/master-ui.test.tsx b/app/lib/arrangement/__tests__/master-ui.test.tsx
+index bbce671..f23b885 100644
+--- a/app/lib/arrangement/__tests__/master-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/master-ui.test.tsx
+@@ -648,7 +648,9 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+       }
+       expect(live(api).getLivePosition()).toBeGreaterThan(0.3);
+       expect(renderLog.counts.get('ArrangementMaster') ?? 0).toBe(0);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     }, 15000);
+   });
+ 
+diff --git a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+index 2c5f5a5..41b78a1 100644
+--- a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+@@ -162,10 +162,7 @@ async function mountModeToggleWorkspace() {
+       await Promise.resolve();
+     });
+   }
+-  const toolbar = view.getByRole('button', { name: 'Play' }).parentElement;
+-  if (!toolbar) {
+-    throw new Error('transport toolbar missing');
+-  }
++  const toolbar = view.getByTestId('arrangement-transport');
+   const toolbarButton = (label: string): HTMLButtonElement => {
+     const match = Array.from(toolbar.querySelectorAll('button')).find(
+       (button) => button.textContent?.trim() === label,
+diff --git a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+index ce5850e..7569631 100644
+--- a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+@@ -162,10 +162,8 @@ async function mountNavigationWorkspace() {
+     await Promise.resolve();
+     await Promise.resolve();
+   });
+-  const toolbar = asElement(
+-    view.getByRole('button', { name: 'Play' }).parentElement,
+-    'transport toolbar',
+-  );
++  const toolbar = view.getByTestId('arrangement-transport');
++  const centre = view.getByTestId('arrangement-transport-centre');
+   const toolbarButton = (prefix: string) =>
+     asElement(
+       Array.from(toolbar.querySelectorAll('button')).find((button) =>
+@@ -176,7 +174,7 @@ async function mountNavigationWorkspace() {
+   return {
+     api,
+     view,
+-    backToStart: () => asElement(toolbar.querySelectorAll('button')[1], 'back to start'),
++    backToStart: () => asElement(centre.querySelectorAll('button')[3], 'back to start'),
+     split: () => toolbarButton('Split'),
+     remove: () => toolbarButton('Delete'),
+     loop: () => toolbarButton('Loop'),
+@@ -379,6 +377,7 @@ describe('transport and navigation texts in the real workspace (V-0.3b, D-29z100
+     const redo = () => view.getByRole('button', { name: /^Redo/ });
+     const transport: ReadonlyArray<readonly [StudioShortcutId, () => HTMLElement]> = [
+       ['play-stop', () => view.getByRole('button', { name: 'Play' })],
++      ['play-stop', () => view.getByRole('button', { name: 'Stop' })],
+       ['back-to-start', workspace.backToStart],
+       ['undo', undo],
+       ['redo', redo],
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 21f605a..2decaa2 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -311,7 +311,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+   }
+ 
+   it(
+-    'does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play',
++    'does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play',
+     { timeout: 15_000 },
+     async () => {
+       const { api, view } = await mountWorkspace();
+@@ -326,7 +326,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       expect(api.current?.isPlaying).toBe(true);
+       await waitReal(260);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+       expect(api.current?.isPlaying).toBe(false);
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       await waitReal(260);
+@@ -345,12 +345,12 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+         ArrangementLibraryOptionInner: 0,
+         ArrangementRulerTicksInner: 0,
+       });
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+     },
+   );
+ 
+   it(
+-    'RB-IM keeps the insert marker line as the same node over Play → Pause → Play',
++    'RB-IM keeps the insert marker line as the same node over Play → Stop → Play',
+     { timeout: 15_000 },
+     async () => {
+       const { api, view } = await mountWorkspace();
+@@ -358,7 +358,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       expect(api.current?.isPlaying).toBe(true);
+       await waitReal(260);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+       expect(api.current?.isPlaying).toBe(false);
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       await waitReal(260);
+@@ -368,7 +368,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       ).toHaveLength(1);
+       expect(view.getByTestId('arrangement-insert-marker')).toBe(line);
+       expect(line.isConnected).toBe(true);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+     },
+   );
+ 
+@@ -408,12 +408,14 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(Number.parseFloat(line.style.left)).toBeGreaterThan(ARRANGEMENT_HEADER_WIDTH_PX);
+     expect(Number.parseFloat(handle.style.left)).toBeGreaterThan(1);
+     expect(Number(handle.getAttribute('aria-valuenow'))).toBeGreaterThan(0);
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     const stoppedAt = api.current?.getLivePosition() ?? 0;
+     expect(transport.textContent).toBe(formatArrangementTime(stoppedAt));
+   }, 15000);
+ 
+-  it('does not re-render the detail panel content over 60 position frames or Play → Pause → Play (R11-P1e)', async () => {
++  it('does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e)', async () => {
+     const api: BudgetApiRef = { current: null };
+     const store: { current: ArrangementPositionStore | null } = { current: null };
+     const view = render(
+@@ -451,7 +453,9 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     fireEvent.click(view.getByRole('button', { name: 'Play' }));
+     expect(api.current?.isPlaying).toBe(true);
+     await waitReal(260);
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     fireEvent.click(view.getByRole('button', { name: 'Play' }));
+     await waitReal(260);
+     runFrames();
+@@ -465,7 +469,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       ArrangementLibraryOptionInner: 0,
+       ArrangementRulerTicksInner: 0,
+     });
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+   }, 15000);
+ 
+   it('shows the seek position immediately when stopped and after a zoom change', async () => {
+@@ -608,6 +612,8 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     for (const name of CONTEXT_CONSUMERS) {
+       expect(renderLog.counts.get(name) ?? 0).toBeGreaterThan(0);
+     }
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+   }, 15000);
+ });
+diff --git a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+index c18f09a..429c11b 100644
+--- a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+@@ -577,7 +577,11 @@ const TRANSPORT_ROWS: readonly { id: string; action: string; keys: string[] }[]
+     action: 'Move the insert marker to the playhead',
+     keys: ['Ctrl+Shift+Space'],
+   },
+-  { id: 'back-to-start', action: 'Back to start (the insert marker too)', keys: ['Home'] },
++  {
++    id: 'back-to-start',
++    action: 'Back to start (the insert marker too)',
++    keys: ['Home', 'Double-click Stop'],
++  },
+ ];
+ 
+ const MARKER_ROW_ACTION =
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 4bfadb1..5c136ce 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -665,9 +665,9 @@ const EXPECTED_V02B_PLAIN_STRINGS: Record<string, Record<string, string>> = {
+     backToStartLabel: 'Back to start',
+     backToStartTitle: 'Back to start (Home)',
+     playLabel: 'Play',
+-    pauseLabel: 'Pause',
++    stopLabel: 'Stop',
+     playTitle: 'Play (Space)',
+-    pauseTitle: 'Pause (Space)',
++    stopTitle: 'Stop (Space)',
+     projectEndPrefix: '/ end',
+     startPointInsertMarker: 'Insert marker',
+     startPointSelection: 'Time selection start',

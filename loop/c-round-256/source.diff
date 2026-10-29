@@ -1,0 +1,221 @@
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index aa617e9..67f20b3 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -2,11 +2,11 @@ import {
+   ArrowLeftToLine,
+   Delete,
+   MoveHorizontal,
+-  Pause,
+   Play,
+   Redo2,
+   Repeat,
+   Scissors,
++  Square,
+   Undo2,
+ } from 'lucide-react';
+ import { type KeyboardEvent, useCallback, useRef } from 'react';
+@@ -127,42 +127,14 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+   };
+ 
+   return (
+-    <div className="flex flex-wrap items-center gap-1.5 border-b border-outline bg-surface px-3 py-2">
+-      <button
+-        type="button"
+-        onClick={togglePlayback}
+-        aria-label={isPlaying ? studioPlaybackStrings.pauseLabel : studioPlaybackStrings.playLabel}
+-        title={isPlaying ? studioPlaybackStrings.pauseTitle : studioPlaybackStrings.playTitle}
+-        aria-keyshortcuts={studioShortcutAria('play-stop')}
+-        className={cn(
+-          toolButtonClass,
+-          'w-8 justify-center rounded-full px-0 bg-foreground text-background enabled:hover:bg-foreground/92 enabled:active:bg-foreground/88',
+-        )}
++    <div
++      data-testid="arrangement-transport"
++      className="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 border-b border-outline bg-surface px-3 py-2 [grid-template-areas:'centre_centre'_'edit_view'] min-[1408px]:grid-cols-[1fr_auto_1fr] min-[1408px]:[grid-template-areas:none]"
+     >
+-        {isPlaying ? (
+-          <Pause className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+-        ) : (
+-          <Play className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+-        )}
+-      </button>
+-      <button
+-        type="button"
+-        onClick={returnToStart}
+-        aria-label={studioPlaybackStrings.backToStartLabel}
+-        title={studioPlaybackStrings.backToStartTitle}
+-        aria-keyshortcuts={studioShortcutAria('back-to-start')}
+-        className={toolButtonClass}
++      <div
++        data-testid="arrangement-transport-edit"
++        className="flex items-center gap-1.5 justify-self-start [grid-area:edit] min-[1408px]:[grid-area:auto]"
+       >
+-        <ArrowLeftToLine className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-      </button>
+-      <div className="flex items-baseline gap-2 rounded-md bg-background px-3 py-1 font-mono tabular-nums">
+-        <ArrangementTransportPosition />
+-        <span className="text-xs text-muted">
+-          {studioPlaybackStrings.projectEndPrefix}{' '}
+-          <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>
+-        </span>
+-      </div>
+-      <div className="mx-1 h-6 w-px bg-outline" />
+         <button
+           ref={undoButtonRef}
+           type="button"
+@@ -225,31 +197,11 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+           <Delete className="size-5 shrink-0" strokeWidth={1.2} aria-hidden="true" />
+           <span>{studioEditStrings.deleteButton}</span>
+         </button>
+-      <div className="mx-1 h-6 w-px bg-outline" />
+-      <button
+-        type="button"
+-        onClick={toggleLoopSelection}
+-        disabled={!range && !loop}
+-        aria-pressed={loop?.enabled === true}
+-        title={
+-          range
+-            ? studioLoopStrings.selectionTitle
+-            : loop
+-              ? studioLoopStrings.toggleTitle
+-              : studioLoopStrings.needsSelectionTitle
+-        }
+-        aria-keyshortcuts={studioShortcutAria('loop')}
+-        className={cn(
+-          toolButtonClass,
+-          'gap-0.75',
+-          loop?.enabled &&
+-            'border-foreground bg-foreground/20 enabled:hover:bg-foreground/20 enabled:active:bg-foreground/20',
+-        )}
++      </div>
++      <div
++        data-testid="arrangement-transport-centre"
++        className="flex items-center gap-1.5 justify-self-center [grid-area:centre] min-[1408px]:[grid-area:auto]"
+       >
+-        <Repeat className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-        <span>Loop</span>
+-      </button>
+-      <div className="ml-auto flex items-center gap-1.5">
+         <button
+           type="button"
+           onClick={navigation.onToggleFollow}
+@@ -273,6 +225,89 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         >
+           {navigation.followMode === 'paused' ? 'Follow ‖' : 'Follow'}
+         </button>
++        <div className="flex items-baseline gap-2 rounded-md bg-background px-3 py-1 font-mono tabular-nums">
++          <ArrangementTransportPosition />
++          <span className="text-xs text-muted">
++            {studioPlaybackStrings.projectEndPrefix}{' '}
++            <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>
++          </span>
++        </div>
++        <button
++          type="button"
++          onClick={() => {
++            if (!isPlaying) {
++              togglePlayback();
++            }
++          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          aria-label={studioPlaybackStrings.playLabel}
++          title={studioPlaybackStrings.playTitle}
++          aria-keyshortcuts={studioShortcutAria('play-stop')}
++          data-playing={isPlaying ? 'true' : 'false'}
++          className={cn(
++            toolButtonClass,
++            'w-8 justify-center rounded-full px-0 text-background',
++            isPlaying
++              ? 'bg-brand enabled:hover:bg-brand/92 enabled:active:bg-brand/88'
++              : 'bg-foreground enabled:hover:bg-foreground/92 enabled:active:bg-foreground/88',
++          )}
++        >
++          <Play className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
++        </button>
++        <button
++          type="button"
++          onClick={() => {
++            if (isPlaying) {
++              togglePlayback();
++            }
++          }}
++          onDoubleClick={returnToStart}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          aria-label={studioPlaybackStrings.stopLabel}
++          title={studioPlaybackStrings.stopTitle}
++          aria-keyshortcuts={studioShortcutAria('play-stop')}
++          className={cn(toolButtonClass, 'w-8 justify-center px-0')}
++        >
++          <Square className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++        </button>
++        <button
++          type="button"
++          onClick={returnToStart}
++          aria-label={studioPlaybackStrings.backToStartLabel}
++          title={studioPlaybackStrings.backToStartTitle}
++          aria-keyshortcuts={studioShortcutAria('back-to-start')}
++          className={toolButtonClass}
++        >
++          <ArrowLeftToLine className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++        </button>
++        <button
++          type="button"
++          onClick={toggleLoopSelection}
++          disabled={!range && !loop}
++          aria-pressed={loop?.enabled === true}
++          title={
++            range
++              ? studioLoopStrings.selectionTitle
++              : loop
++                ? studioLoopStrings.toggleTitle
++                : studioLoopStrings.needsSelectionTitle
++          }
++          aria-keyshortcuts={studioShortcutAria('loop')}
++          className={cn(
++            toolButtonClass,
++            'gap-0.75',
++            loop?.enabled &&
++              'border-foreground bg-foreground/20 enabled:hover:bg-foreground/20 enabled:active:bg-foreground/20',
++          )}
++        >
++          <Repeat className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++          <span>Loop</span>
++        </button>
++      </div>
++      <div
++        data-testid="arrangement-transport-view"
++        className="flex items-center gap-1.5 justify-self-end [grid-area:view] min-[1408px]:[grid-area:auto]"
++      >
+         <label className="flex items-center gap-2 text-xs text-muted">
+           <span className="text-label font-medium uppercase tracking-label">Zoom</span>
+           <input
+diff --git a/app/lib/arrangement/shortcuts.ts b/app/lib/arrangement/shortcuts.ts
+index 05d7f74..d0dc416 100644
+--- a/app/lib/arrangement/shortcuts.ts
++++ b/app/lib/arrangement/shortcuts.ts
+@@ -37,7 +37,7 @@ export const STUDIO_SHORTCUT_GROUPS = [
+       {
+         id: 'back-to-start',
+         action: 'Back to start (the insert marker too)',
+-        keys: ['Home'],
++        keys: ['Home', 'Double-click Stop'],
+         ariaKeyShortcuts: 'Home',
+       },
+       {
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 5750309..2be1574 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -221,9 +221,9 @@ export const studioPlaybackStrings = {
+   backToStartLabel: 'Back to start',
+   backToStartTitle: studioShortcutTitle('Back to start', 'back-to-start'),
+   playLabel: 'Play',
+-  pauseLabel: 'Pause',
++  stopLabel: 'Stop',
+   playTitle: studioShortcutTitle('Play', 'play-stop'),
+-  pauseTitle: studioShortcutTitle('Pause', 'play-stop'),
++  stopTitle: studioShortcutTitle('Stop', 'play-stop'),
+   projectEndPrefix: '/ end',
+   playPastEnd: ({
+     subject,

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T21:51:41.521Z)
+# Active loop summary (2026-10-29T23:16:18.555Z)
 
-- backlog.json 2416 KB -> active view 345 KB
-- status: G_ROOT_GATE round 255
-- servers: `{"checkedUtc":"2026-10-29T21:30:10.7671260Z","round":255,"attempt":1,"store":200}`
+- backlog.json 2425 KB -> active view 343 KB
+- status: G_ROOT_GATE round 256
+- servers: `{"checkedUtc":"2026-10-29T22:55:26.2888291Z","round":256,"attempt":1,"store":200}`
 - last publication: a061d524d14af347119f06b239b77747c36362a0 (rounds 254-255)
-- last root gate: round 255 published - commit a061d524d14af347119f06b239b77747c36362a0 pushed
+- last root gate: round 256 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -614,16 +614,11 @@
 - SABA-Q-10A-HOME-PLAYING / info / awaiting_user (D-29z432): non-blocking; round 249 ships the jump / while playing, Home and Back to start jump playback to 0 and move the insert marker there (as before). Or move only the marker and keep play
 - SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking | gate 249 S2 asks to keep it with the stage-2 questions (D-29z439) / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
 - SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432, (d)/(e) added D-29z441): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
-- B-R249-PAUSE-LABEL / low / scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
-- INFO-B249-STALE-MARKER-STATUS / info / carried to round 255 (D-29z475): round 254 C FAIL only on C-SHEET-254 (spec); closes on round-255 C PASS + gate | dispatched round 254 (SABA-B-10b, D-29z469/D-29z470); closes on round-254 C PASS + gate | info (D-29z431); C row C-STATUS-CLOBBER-249 records it; SABA-B-10b's visible marker shows the state / Home/back write no status, so a previous 'Insert marker at ...' status stays after the marker moved (event line, same class as C-R236-01)
+- B-R249-PAUSE-LABEL / low / dispatched round 256 (SABA-B-9 stage 1, D-29z486): Play label constant, Stop button; closes on C round 256 PASS + gate | scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
 - GATE249-S2 / info / info (D-29z439): = SABA-Q-10A-CTRL-ARROW-RANGE / seekTo keeps the selection, so Space after Ctrl+arrows plays the selection
-- GATE249-S4 / info / carried to round 255 (D-29z475): round 254 C FAIL only on C-SHEET-254 (spec); closes on round-255 C PASS + gate | dispatched round 254 (SABA-B-10b, D-29z469/D-29z470); closes on round-254 C PASS + gate | SABA-B-10b scope (D-29z439): the visible marker carries data-insert-marker and the hidden node is removed / test-only hidden ArrangementInsertMarkerSignal ships to production
-- GATE249-S5 / info / round 254 C-HOME-254 checks the visible line (D-29z469) | info (D-29z439); part of GATE249-ARCH-TRANSPORT-POSITIONS; 10b checks it does not double-render the visible marker / returnToStart and playFrom write the marker store twice (placeInsertMarker then seekTo)
-- GATE249-S7 / info / carried to round 255 (D-29z475): round 254 C FAIL only on C-SHEET-254 (spec); closes on round-255 C PASS + gate | dispatched round 254 (SABA-B-10b, D-29z469/D-29z470); closes on round-254 C PASS + gate | SABA-B-10b scope (sheet rows), D-29z439 / Shift+Space and Ctrl/Cmd+Shift+Space have no aria-keyshortcuts and no shortcut-sheet row
 - GATE249-S8 / info / = B-R249-PAUSE-LABEL (SABA-B-9) / status says Stop while the button reads Pause
 - GATE249-S9 / info / = TLM-R249-MAC-CMD-SHIFT-SPACE / Mac Cmd path unverified
 - A-R249-REVIEW-KEYUP-ORDER / info / Tech Lead manual: Firefox and Safari (D-29z439) / Shift released before Space after Ctrl+Shift+Space could click a focused button on key-up in other engines; not reproduced in Chromium (A an
-- A-R250-REVIEW-SHEET-MARKER-COPY / low / carried to round 255 (D-29z475): round 254 C FAIL only on C-SHEET-254 (spec); closes on round-255 C PASS + gate | dispatched round 254 (SABA-B-10b, D-29z469/D-29z470); closes on round-254 C PASS + gate | scheduled in SABA-B-10b (D-29z449; owns shortcuts.ts, adds sheet rows; carries the row-height check), not deferred / shortcut sheet row "Add a marker at the insert marker" is inaccurate while playing and with a selection (addTitle names all three cases)
 - EXPORT-PROGRESS-LOAD-FLAKE-250 / info / watch (D-29z452): gate 251 verify did not reproduce it (export-progress-ui 8/8, 1242 ms; 215/215 files) | watch (D-29z447) / export-progress-ui.test.tsx l.319/l.350 rows failed once in a covering run under concurrent load (resetEncoderMock call count); green in 3 i
 - SABA-Q-FOLLOW-EDIT-RESTART / info / awaiting_user (D-29z457): non-blocking; round 252 builds only the ruler/strip/stop clauses / (a) Live pauses Follow when you make an edit; CZABA does not (edits keep Follow on). (b) Live resumes Follow when playback restarts; CZABA t
 - A-R252-REVIEW-PLAYING-SOURCE / low / deferred_low_polish (D-29z464); fix needs a ref-backed getter on ArrangementContext / ruler wrappers read render-state workspaceRef.current.isPlaying while setInsertMarker/playFrom read isPlayingRef; same split in stepMarker; 
@@ -639,7 +634,7 @@
 - A-R253-STOP-RENDER-BUDGET / info / ruled (D-29z471): round 254 grant 7 declares { timeout: 15_000 } on that test / render-budget Play->Pause->Play test 2534 ms = 50.7% of the 5 s default in A covering run (gate 253: 2479 ms)
 - INFO-B254-INK-ON-BRASS / info / info (D-29z469) / the ink insert-marker line on a selected clip brass title bar is 1.88:1 (the brass playhead there is ~1:1 today); measured and listed, not a
 - SABA-Q-10B-MARKER-LOOK / info / awaiting_user (D-29z472): non-blocking / SABA-B-10b deviations from Live for the visible insert marker: (a) light ink instead of Live blue (CZABA palette; distinct from the brass pl
-- C-R254-01 / low / ruled (D-29z476): B spec error (clause tighter than the sheet's existing multi-line pattern, HEAD container not measured); accepted with the measured bound scrollHeight <= 1260, clientHeight unchanged, changed/added rows <= 40 px, other rows equal to HEAD; closes on C-SHEET-255 PASS / the ? shortcut sheet scrolls +30 px vs HEAD (1260 vs 1230 at both viewports) because play-stop, the two new transport rows and the marker ro
+- SABA-Q-9-TRANSPORT / info / awaiting_user (D-29z483); defaults implemented in round 256 / Saba question, SABA-B-9: (a) Play pressed while playing: no-op (default) or restart from the insert marker (manual 6.3 silent); (b) single c
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

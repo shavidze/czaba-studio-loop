@@ -1,0 +1,74 @@
+{
+  "round": 256,
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-29T22:55:26.2888291Z",
+    "round": 256,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R256-01",
+      "severity": "medium",
+      "steps": [
+        "Fresh Chromium context, open http://127.0.0.1:5173/studio-lab at 1440x900 and wait for 'Demo collection ready'",
+        "Click demo-stem-pulse, then Add",
+        "Click Play",
+        "Inspect the transport buttons' accessible names/aria-pressed/aria-describedby and the aria-live/role=status regions (ariaSnapshot); compare with the HEAD control (a061d52)"
+      ],
+      "expected": "The playing state that the brass Play on-state shows visually is also programmatically determinable (WCAG 1.3.1 / 4.1.2, Level A); HEAD exposed it as the button name 'Pause'.",
+      "actual": "While playing, the new build exposes only button 'Play' and button 'Stop', with no aria-pressed, no aria-describedby and no live-region change (the status log is unchanged on Play). Playing state is visual-only. Spec-induced: §2.3 requires a constant name and gives no replacement (A reviewer M-2 / A-R256-REVIEW-PLAYING-SR-STATE); this is not an A implementation error. Needs a B ruling.",
+      "evidence": "tmp/studio-real-loop/c-round-256/browser/a11y-playing-state.json; c-round-256/a11y.cjs"
+    },
+    {
+      "id": "C-R256-02",
+      "severity": "low",
+      "steps": [
+        "git diff -w app/lib/arrangement/__tests__/render-budget.test.tsx",
+        "See new l.348, l.371 and l.472: the HEAD name:'Pause' cleanup clicks became name:'Stop' with no data-playing check"
+      ],
+      "expected": "Each lost implicit 'still playing' check (getByRole name 'Pause' resolving) is replaced by an equal explicit one, as A did at l.411, l.454 and l.611.",
+      "actual": "At the three trailing cleanup sites the implicit check was lost without a replacement. Test-strength gap only; the browser behaviour is correct. Candidate for deferred_low_polish.",
+      "evidence": "tmp/studio-real-loop/c-round-256/collisions-1.diff"
+    }
+  ],
+  "passed": [
+    "C-SCOPE-256",
+    "C-UNIT-256",
+    "C-COLLISION-256",
+    "C-LAYOUT-256",
+    "C-STOP-256",
+    "C-STATUS-256",
+    "C-KEYS-256",
+    "C-ONSTATE-256",
+    "C-FOCUS-256",
+    "C-SHEET-256",
+    "C-BUDGET-256",
+    "C-REF-256",
+    "C-LESSON-256",
+    "AN-REVIEW-256",
+    "LAB-SMOKE-256",
+    "Auth"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "lint",
+    "build",
+    "verify",
+    "e2e smoke"
+  ],
+  "blocked": [
+    "Purchased origin /studio/$productId: backend unavailable in cloud"
+  ],
+  "notes": [
+    "C-COLLISION-256 passes with Low C-R256-02 noted; A's rows 5/6 data-playing pairs ruled conformant to the §0.1 equal-or-stronger rule (info).",
+    "D-29z483 window evidence: 1366x768 and 1407x800 toolbar 87 px new vs 49 px HEAD; A's breakpoint of 1408 widens the window by about 8 px.",
+    "LAB-SMOKE export sha256 1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94 at both viewports (16.000 s, 48 kHz, 24-bit, stereo, 0 NaN).",
+    "Contrast Play glyph:fill 15.62 stopped / 8.32 playing; Stop 13.24.",
+    "Info: the GS14 title is stale; the focus outline is a computed 1px (the shared SABA-B-4 style)."
+  ]
+}

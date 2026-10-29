@@ -1,0 +1,147 @@
+diff --git a/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx b/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
+index 25ed74e..21a4aaf 100644
+--- a/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
+@@ -170,16 +170,9 @@ async function mountTransport() {
+     await Promise.resolve();
+     await Promise.resolve();
+   });
+-  const position = view.getByTestId('arrangement-position');
+-  const fit = view.getByTestId('arrangement-fit');
+-  let toolbar: HTMLElement | null = position.parentElement;
+-  while (toolbar && !(toolbar.classList.contains('flex-wrap') && toolbar.contains(fit))) {
+-    toolbar = toolbar.parentElement;
+-  }
+-  if (!toolbar) {
+-    throw new Error('transport toolbar not found');
+-  }
+-  const transport = toolbar;
++  const transport = view.getByTestId('arrangement-transport');
++  expect(transport.contains(view.getByTestId('arrangement-position'))).toBe(true);
++  expect(transport.contains(view.getByTestId('arrangement-fit'))).toBe(true);
+   const buttons = () => Array.from(transport.querySelectorAll('button'));
+   const byName = (name: string) => {
+     const match = buttons().find(
+@@ -225,10 +218,10 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     vi.restoreAllMocks();
+   });
+ 
+-  it('TS1 gives all 12 transport buttons the 8 px radius, colour motion and pressed fill, and the plain 10 the borderless foreground fill', async () => {
++  it('TS1 gives all 13 transport buttons the 8 px radius, colour motion and pressed fill, and the plain 11 the borderless foreground fill', async () => {
+     const { buttons, byName } = await mountTransport();
+     const all = buttons();
+-    expect(all).toHaveLength(12);
++    expect(all).toHaveLength(13);
+     const roundPlay = byName('Play');
+     for (const button of all) {
+       const tokens = TOKENS(button);
+@@ -277,7 +270,8 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     const play = byName('Play');
+     const exportButton = byName('Export');
+     const plain = all.filter((button) => button !== play && button !== exportButton);
+-    expect(plain).toHaveLength(10);
++    expect(plain).toHaveLength(11);
++    expect(plain).toContain(byName('Stop'));
+     const follow = byName('Follow');
+     expect(follow.getAttribute('aria-pressed')).toBe('true');
+     for (const button of plain) {
+@@ -296,20 +290,22 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     }
+   });
+ 
+-  it('TS2 fills Play with foreground in both states and draws the state as a lucide icon only, round', async () => {
++  it('TS2 fills Play with foreground when stopped and brand while playing, keeps its name, title and play icon, round', async () => {
+     const { view, byName } = await mountTransport();
+-    const expectPlaySurface = (button: HTMLElement, iconClass: string) => {
++    const expectPlaySurface = (button: HTMLElement, playing: boolean) => {
+       const tokens = TOKENS(button);
++      const fill = playing ? 'bg-brand' : 'bg-foreground';
++      const otherFill = playing ? 'bg-foreground' : 'bg-brand';
+       for (const present of [
+         'w-8',
+         'h-8',
+         'rounded-full',
+         'px-0',
+         'justify-center',
+-        'bg-foreground',
++        fill,
+         'text-background',
+-        'enabled:hover:bg-foreground/92',
+-        'enabled:active:bg-foreground/88',
++        `enabled:hover:${fill}/92`,
++        `enabled:active:${fill}/88`,
+         'border-transparent',
+       ]) {
+         expect(tokens).toContain(present);
+@@ -323,27 +319,36 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+         'border-brand',
+         'text-brand',
+         'border-accent',
++        otherFill,
++        `enabled:hover:${otherFill}/92`,
++        `enabled:active:${otherFill}/88`,
+       ]) {
+         expect(tokens).not.toContain(absent);
+       }
+       expect(ariaHiddenSvgCount(button)).toBe(1);
+-      expect(button.querySelector('svg')?.classList.contains(iconClass)).toBe(true);
++      expect(button.querySelectorAll('svg')).toHaveLength(1);
++      expect(button.querySelector('svg')?.classList.contains('lucide-play')).toBe(true);
++      expect(button.querySelector('svg')?.classList.contains('lucide-pause')).toBe(false);
++      expect(button.textContent).toBe('');
++      expect(button.textContent).not.toContain('▶');
++      expect(button.textContent).not.toContain('❚');
++      expect(button.getAttribute('aria-label')).toBe(studioPlaybackStrings.playLabel);
++      expect(button.getAttribute('title')).toBe(studioPlaybackStrings.playTitle);
++      expect(button.dataset.playing).toBe(playing ? 'true' : 'false');
+     };
+     const play = byName('Play');
+-    expectPlaySurface(play, 'lucide-play');
+-    expect(play.textContent).toBe('');
+-    expect(play.textContent).not.toContain('▶');
+-    expect(play.getAttribute('title')).toBe(studioPlaybackStrings.playTitle);
++    expectPlaySurface(play, false);
+     expect(view.getByRole('button', { name: 'Play' })).toBe(play);
+     fireEvent.click(play);
+-    const pause = view.getByRole('button', { name: 'Pause' });
+-    expect(pause).toBe(play);
+-    expectPlaySurface(pause, 'lucide-pause');
+-    expect(pause.textContent).toBe('');
+-    expect(pause.textContent).not.toContain('❚');
+-    expect(pause.getAttribute('title')).toBe(studioPlaybackStrings.pauseTitle);
+-    fireEvent.click(pause);
+     expect(view.getByRole('button', { name: 'Play' })).toBe(play);
++    expectPlaySurface(play, true);
++    expect(view.queryByRole('button', { name: 'Pause' })).toBeNull();
++    fireEvent.click(play);
++    expectPlaySurface(play, true);
++    fireEvent.click(byName('Stop'));
++    expect(view.getByRole('button', { name: 'Play' })).toBe(play);
++    expectPlaySurface(play, false);
++    expect(view.queryByRole('button', { name: 'Pause' })).toBeNull();
+   });
+ 
+   it('TS3 shows Zoom to selection as one hidden lucide icon with its label unchanged', async () => {
+@@ -396,7 +401,7 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     expect(deleteTokens).not.toContain('border-transparent');
+   });
+ 
+-  it('TS6 draws the seven V-3b transport glyphs as hidden lucide icons sized to the old glyph slot, with the old-space gaps', async () => {
++  it('TS6 draws the seven V-3b transport glyphs and the Stop square as hidden lucide icons sized to the old glyph slot, with the old-space gaps', async () => {
+     const { view, buttons, byName, byText } = await mountTransport();
+     const iconButtons = [
+       {
+@@ -448,6 +453,13 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+         size: 'size-2.5',
+         strokeWidth: '2.4',
+       },
++      {
++        button: byName('Stop'),
++        text: '',
++        iconClass: 'lucide-square',
++        size: 'size-3',
++        strokeWidth: '2',
++      },
+     ];
+     for (const { button, text, iconClass, size, strokeWidth } of iconButtons) {
+       const svgs = button.querySelectorAll('svg');

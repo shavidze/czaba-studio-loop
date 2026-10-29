@@ -1,0 +1,775 @@
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index aa617e9..67f20b3 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -2,11 +2,11 @@ import {
+   ArrowLeftToLine,
+   Delete,
+   MoveHorizontal,
+-  Pause,
+   Play,
+   Redo2,
+   Repeat,
+   Scissors,
++  Square,
+   Undo2,
+ } from 'lucide-react';
+ import { type KeyboardEvent, useCallback, useRef } from 'react';
+@@ -127,129 +127,81 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+   };
+ 
+   return (
+-    <div className="flex flex-wrap items-center gap-1.5 border-b border-outline bg-surface px-3 py-2">
+-      <button
+-        type="button"
+-        onClick={togglePlayback}
+-        aria-label={isPlaying ? studioPlaybackStrings.pauseLabel : studioPlaybackStrings.playLabel}
+-        title={isPlaying ? studioPlaybackStrings.pauseTitle : studioPlaybackStrings.playTitle}
+-        aria-keyshortcuts={studioShortcutAria('play-stop')}
+-        className={cn(
+-          toolButtonClass,
+-          'w-8 justify-center rounded-full px-0 bg-foreground text-background enabled:hover:bg-foreground/92 enabled:active:bg-foreground/88',
+-        )}
++    <div
++      data-testid="arrangement-transport"
++      className="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 border-b border-outline bg-surface px-3 py-2 [grid-template-areas:'centre_centre'_'edit_view'] min-[1408px]:grid-cols-[1fr_auto_1fr] min-[1408px]:[grid-template-areas:none]"
++    >
++      <div
++        data-testid="arrangement-transport-edit"
++        className="flex items-center gap-1.5 justify-self-start [grid-area:edit] min-[1408px]:[grid-area:auto]"
+       >
+-        {isPlaying ? (
+-          <Pause className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+-        ) : (
+-          <Play className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+-        )}
+-      </button>
+-      <button
+-        type="button"
+-        onClick={returnToStart}
+-        aria-label={studioPlaybackStrings.backToStartLabel}
+-        title={studioPlaybackStrings.backToStartTitle}
+-        aria-keyshortcuts={studioShortcutAria('back-to-start')}
+-        className={toolButtonClass}
+-      >
+-        <ArrowLeftToLine className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-      </button>
+-      <div className="flex items-baseline gap-2 rounded-md bg-background px-3 py-1 font-mono tabular-nums">
+-        <ArrangementTransportPosition />
+-        <span className="text-xs text-muted">
+-          {studioPlaybackStrings.projectEndPrefix}{' '}
+-          <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>
+-        </span>
++        <button
++          ref={undoButtonRef}
++          type="button"
++          onClick={(event) => {
++            armFocusHandoff(event.currentTarget, redoButtonRef.current);
++            undo();
++          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          disabled={!undoLabel}
++          title={studioEditStrings.undoTitle(undoLabel)}
++          aria-keyshortcuts={studioShortcutAria('undo')}
++          className={cn(toolButtonClass, 'w-28')}
++        >
++          <Undo2 className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++          <span className="truncate">Undo{undoLabel ? `: ${undoLabel}` : ''}</span>
++        </button>
++        <button
++          ref={redoButtonRef}
++          type="button"
++          onClick={(event) => {
++            armFocusHandoff(event.currentTarget, undoButtonRef.current);
++            redo();
++          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          disabled={!redoLabel}
++          title={studioEditStrings.redoTitle(redoLabel)}
++          aria-keyshortcuts={studioShortcutAria('redo')}
++          className={cn(toolButtonClass, 'w-28')}
++        >
++          <Redo2 className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++          <span className="truncate">Redo{redoLabel ? `: ${redoLabel}` : ''}</span>
++        </button>
++        <div className="mx-1 h-6 w-px bg-outline" />
++        <button
++          type="button"
++          onClick={splitSelection}
++          disabled={!range && !selectedClipId}
++          title={
++            range ? studioEditStrings.splitRangeTitle : studioEditStrings.splitAtInsertMarkerTitle
++          }
++          aria-keyshortcuts={studioShortcutAria('split')}
++          className={cn(toolButtonClass, 'gap-0.75')}
++        >
++          <Scissors className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++          <span>Split</span>
++        </button>
++        <button
++          type="button"
++          onClick={(event) => {
++            armFocusHandoff(event.currentTarget, undoButtonRef.current);
++            deleteSelection();
++          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          disabled={!range && !selectedClipId}
++          title={rangeDeleteHint ?? studioEditStrings.deleteClipTitle}
++          aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}
++          aria-keyshortcuts={studioShortcutAria('delete')}
++          className={cn(toolButtonClass, 'gap-0.5', range && 'border-foreground')}
++        >
++          <Delete className="size-5 shrink-0" strokeWidth={1.2} aria-hidden="true" />
++          <span>{studioEditStrings.deleteButton}</span>
++        </button>
+       </div>
+-      <div className="mx-1 h-6 w-px bg-outline" />
+-      <button
+-        ref={undoButtonRef}
+-        type="button"
+-        onClick={(event) => {
+-          armFocusHandoff(event.currentTarget, redoButtonRef.current);
+-          undo();
+-        }}
+-        onKeyDown={preventRepeatedEnterKeyDown}
+-        disabled={!undoLabel}
+-        title={studioEditStrings.undoTitle(undoLabel)}
+-        aria-keyshortcuts={studioShortcutAria('undo')}
+-        className={cn(toolButtonClass, 'w-28')}
+-      >
+-        <Undo2 className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-        <span className="truncate">Undo{undoLabel ? `: ${undoLabel}` : ''}</span>
+-      </button>
+-      <button
+-        ref={redoButtonRef}
+-        type="button"
+-        onClick={(event) => {
+-          armFocusHandoff(event.currentTarget, undoButtonRef.current);
+-          redo();
+-        }}
+-        onKeyDown={preventRepeatedEnterKeyDown}
+-        disabled={!redoLabel}
+-        title={studioEditStrings.redoTitle(redoLabel)}
+-        aria-keyshortcuts={studioShortcutAria('redo')}
+-        className={cn(toolButtonClass, 'w-28')}
++      <div
++        data-testid="arrangement-transport-centre"
++        className="flex items-center gap-1.5 justify-self-center [grid-area:centre] min-[1408px]:[grid-area:auto]"
+       >
+-        <Redo2 className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-        <span className="truncate">Redo{redoLabel ? `: ${redoLabel}` : ''}</span>
+-      </button>
+-      <div className="mx-1 h-6 w-px bg-outline" />
+-      <button
+-        type="button"
+-        onClick={splitSelection}
+-        disabled={!range && !selectedClipId}
+-        title={
+-          range ? studioEditStrings.splitRangeTitle : studioEditStrings.splitAtInsertMarkerTitle
+-        }
+-        aria-keyshortcuts={studioShortcutAria('split')}
+-        className={cn(toolButtonClass, 'gap-0.75')}
+-      >
+-        <Scissors className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-        <span>Split</span>
+-      </button>
+-      <button
+-        type="button"
+-        onClick={(event) => {
+-          armFocusHandoff(event.currentTarget, undoButtonRef.current);
+-          deleteSelection();
+-        }}
+-        onKeyDown={preventRepeatedEnterKeyDown}
+-        disabled={!range && !selectedClipId}
+-        title={rangeDeleteHint ?? studioEditStrings.deleteClipTitle}
+-        aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}
+-        aria-keyshortcuts={studioShortcutAria('delete')}
+-        className={cn(toolButtonClass, 'gap-0.5', range && 'border-foreground')}
+-      >
+-        <Delete className="size-5 shrink-0" strokeWidth={1.2} aria-hidden="true" />
+-        <span>{studioEditStrings.deleteButton}</span>
+-      </button>
+-      <div className="mx-1 h-6 w-px bg-outline" />
+-      <button
+-        type="button"
+-        onClick={toggleLoopSelection}
+-        disabled={!range && !loop}
+-        aria-pressed={loop?.enabled === true}
+-        title={
+-          range
+-            ? studioLoopStrings.selectionTitle
+-            : loop
+-              ? studioLoopStrings.toggleTitle
+-              : studioLoopStrings.needsSelectionTitle
+-        }
+-        aria-keyshortcuts={studioShortcutAria('loop')}
+-        className={cn(
+-          toolButtonClass,
+-          'gap-0.75',
+-          loop?.enabled &&
+-            'border-foreground bg-foreground/20 enabled:hover:bg-foreground/20 enabled:active:bg-foreground/20',
+-        )}
+-      >
+-        <Repeat className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-        <span>Loop</span>
+-      </button>
+-      <div className="ml-auto flex items-center gap-1.5">
+         <button
+           type="button"
+           onClick={navigation.onToggleFollow}
+@@ -273,6 +225,89 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         >
+           {navigation.followMode === 'paused' ? 'Follow ‖' : 'Follow'}
+         </button>
++        <div className="flex items-baseline gap-2 rounded-md bg-background px-3 py-1 font-mono tabular-nums">
++          <ArrangementTransportPosition />
++          <span className="text-xs text-muted">
++            {studioPlaybackStrings.projectEndPrefix}{' '}
++            <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>
++          </span>
++        </div>
++        <button
++          type="button"
++          onClick={() => {
++            if (!isPlaying) {
++              togglePlayback();
++            }
++          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          aria-label={studioPlaybackStrings.playLabel}
++          title={studioPlaybackStrings.playTitle}
++          aria-keyshortcuts={studioShortcutAria('play-stop')}
++          data-playing={isPlaying ? 'true' : 'false'}
++          className={cn(
++            toolButtonClass,
++            'w-8 justify-center rounded-full px-0 text-background',
++            isPlaying
++              ? 'bg-brand enabled:hover:bg-brand/92 enabled:active:bg-brand/88'
++              : 'bg-foreground enabled:hover:bg-foreground/92 enabled:active:bg-foreground/88',
++          )}
++        >
++          <Play className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
++        </button>
++        <button
++          type="button"
++          onClick={() => {
++            if (isPlaying) {
++              togglePlayback();
++            }
++          }}
++          onDoubleClick={returnToStart}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          aria-label={studioPlaybackStrings.stopLabel}
++          title={studioPlaybackStrings.stopTitle}
++          aria-keyshortcuts={studioShortcutAria('play-stop')}
++          className={cn(toolButtonClass, 'w-8 justify-center px-0')}
++        >
++          <Square className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++        </button>
++        <button
++          type="button"
++          onClick={returnToStart}
++          aria-label={studioPlaybackStrings.backToStartLabel}
++          title={studioPlaybackStrings.backToStartTitle}
++          aria-keyshortcuts={studioShortcutAria('back-to-start')}
++          className={toolButtonClass}
++        >
++          <ArrowLeftToLine className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++        </button>
++        <button
++          type="button"
++          onClick={toggleLoopSelection}
++          disabled={!range && !loop}
++          aria-pressed={loop?.enabled === true}
++          title={
++            range
++              ? studioLoopStrings.selectionTitle
++              : loop
++                ? studioLoopStrings.toggleTitle
++                : studioLoopStrings.needsSelectionTitle
++          }
++          aria-keyshortcuts={studioShortcutAria('loop')}
++          className={cn(
++            toolButtonClass,
++            'gap-0.75',
++            loop?.enabled &&
++              'border-foreground bg-foreground/20 enabled:hover:bg-foreground/20 enabled:active:bg-foreground/20',
++          )}
++        >
++          <Repeat className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++          <span>Loop</span>
++        </button>
++      </div>
++      <div
++        data-testid="arrangement-transport-view"
++        className="flex items-center gap-1.5 justify-self-end [grid-area:view] min-[1408px]:[grid-area:auto]"
++      >
+         <label className="flex items-center gap-2 text-xs text-muted">
+           <span className="text-label font-medium uppercase tracking-label">Zoom</span>
+           <input
+diff --git a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+index 04de3b0..66cc2ab 100644
+--- a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+@@ -166,9 +166,8 @@ function statusText(view: BarsView): string | null {
+   return view.getByTestId('arrangement-status').textContent;
+ }
+ 
+-function transportLabel(view: BarsView): string {
+-  const pause = view.queryByRole('button', { name: studioPlaybackStrings.pauseLabel });
+-  return pause ? studioPlaybackStrings.pauseLabel : studioPlaybackStrings.playLabel;
++function transportPlaying(view: BarsView): string | undefined {
++  return view.getByRole('button', { name: studioPlaybackStrings.playLabel }).dataset.playing;
+ }
+ 
+ async function mountTempo90SnapOn() {
+@@ -270,7 +269,7 @@ describe('SABA-B-11a stage 2 interactive bars ruler (D-29z327)', { timeout: 15_0
+     expect(mounted.bars().title).toBe(studioViewStrings.rulerTitle);
+     clickStrip(mounted, 4.1);
+     expect(live(mounted.api).isPlaying).toBe(true);
+-    expect(transportLabel(mounted.view)).toBe(studioPlaybackStrings.pauseLabel);
++    expect(transportPlaying(mounted.view)).toBe('true');
+     expect(positionOf(mounted.api)).toBeCloseTo(4, 3);
+   });
+ 
+@@ -280,7 +279,7 @@ describe('SABA-B-11a stage 2 interactive bars ruler (D-29z327)', { timeout: 15_0
+     expect(live(mounted.api).isPlaying).toBe(true);
+     clickStrip(mounted, 8.2);
+     expect(live(mounted.api).isPlaying).toBe(true);
+-    expect(transportLabel(mounted.view)).toBe(studioPlaybackStrings.pauseLabel);
++    expect(transportPlaying(mounted.view)).toBe('true');
+     expect(positionOf(mounted.api)).toBeCloseTo(8, 3);
+   });
+ 
+@@ -289,7 +288,7 @@ describe('SABA-B-11a stage 2 interactive bars ruler (D-29z327)', { timeout: 15_0
+     clickLower(mounted, 6.3);
+     expect(positionOf(mounted.api)).toBeCloseTo(6, 3);
+     expect(live(mounted.api).isPlaying).toBe(false);
+-    expect(transportLabel(mounted.view)).toBe(studioPlaybackStrings.playLabel);
++    expect(transportPlaying(mounted.view)).toBe('false');
+   });
+ 
+   it('BR4b a lower-zone click while playing moves only the insert marker and keeps playing (D-29z430)', async () => {
+diff --git a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+index d1b5526..7fb4917 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -296,26 +296,25 @@ describe('SRW-14 stage 1 grid control and lines', { timeout: 15_000 }, () => {
+ 
+   it('GS14 keeps the transport toolbar unchanged and without a Snap control', async () => {
+     const { view } = await mountGridWorkspace();
+-    const toolbar = view.getByRole('button', { name: 'Play' }).parentElement;
+-    if (!(toolbar instanceof HTMLElement)) {
+-      throw new Error('toolbar missing');
+-    }
++    const toolbar = view.getByTestId('arrangement-transport');
++    expect(toolbar.contains(view.getByRole('button', { name: 'Play' }))).toBe(true);
+     const labels = Array.from(toolbar.querySelectorAll('button')).map(
+       (button) => button.getAttribute('aria-label') ?? button.textContent?.trim() ?? '',
+     );
+-    expect(labels).toHaveLength(12);
+-    expect(labels[0]).toBe('Play');
+-    expect(labels[1]).toBe('Back to start');
+-    expect(labels[2]).toContain('Undo');
+-    expect(labels[3]).toContain('Redo');
+-    expect(labels[4]).toContain('Split');
+-    expect(labels[5]).toContain('Delete');
+-    expect(labels[6]).toContain('Loop');
+-    expect(labels[7]).toContain('Follow');
+-    expect(labels[8]).toBe('Zoom to selection (Z)');
+-    expect(labels[9]).toBe('Zoom');
+-    expect(labels[10]).toBe('Fit');
+-    expect(labels[11]).toBe('Export');
++    expect(labels).toHaveLength(13);
++    expect(labels[0]).toContain('Undo');
++    expect(labels[1]).toContain('Redo');
++    expect(labels[2]).toContain('Split');
++    expect(labels[3]).toContain('Delete');
++    expect(labels[4]).toContain('Follow');
++    expect(labels[5]).toBe('Play');
++    expect(labels[6]).toBe('Stop');
++    expect(labels[7]).toBe('Back to start');
++    expect(labels[8]).toContain('Loop');
++    expect(labels[9]).toBe('Zoom to selection (Z)');
++    expect(labels[10]).toBe('Zoom');
++    expect(labels[11]).toBe('Fit');
++    expect(labels[12]).toBe('Export');
+     expect(toolbar.querySelector('[data-testid="arrangement-zoom"]')).not.toBeNull();
+     expect(toolbar.textContent).not.toContain('Snap');
+     expect(toolbar.querySelector('select')).toBeNull();
+diff --git a/app/lib/arrangement/__tests__/master-ui.test.tsx b/app/lib/arrangement/__tests__/master-ui.test.tsx
+index bbce671..f23b885 100644
+--- a/app/lib/arrangement/__tests__/master-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/master-ui.test.tsx
+@@ -648,7 +648,9 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+       }
+       expect(live(api).getLivePosition()).toBeGreaterThan(0.3);
+       expect(renderLog.counts.get('ArrangementMaster') ?? 0).toBe(0);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     }, 15000);
+   });
+ 
+diff --git a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+index 2c5f5a5..41b78a1 100644
+--- a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+@@ -162,10 +162,7 @@ async function mountModeToggleWorkspace() {
+       await Promise.resolve();
+     });
+   }
+-  const toolbar = view.getByRole('button', { name: 'Play' }).parentElement;
+-  if (!toolbar) {
+-    throw new Error('transport toolbar missing');
+-  }
++  const toolbar = view.getByTestId('arrangement-transport');
+   const toolbarButton = (label: string): HTMLButtonElement => {
+     const match = Array.from(toolbar.querySelectorAll('button')).find(
+       (button) => button.textContent?.trim() === label,
+diff --git a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+index ce5850e..7569631 100644
+--- a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+@@ -162,10 +162,8 @@ async function mountNavigationWorkspace() {
+     await Promise.resolve();
+     await Promise.resolve();
+   });
+-  const toolbar = asElement(
+-    view.getByRole('button', { name: 'Play' }).parentElement,
+-    'transport toolbar',
+-  );
++  const toolbar = view.getByTestId('arrangement-transport');
++  const centre = view.getByTestId('arrangement-transport-centre');
+   const toolbarButton = (prefix: string) =>
+     asElement(
+       Array.from(toolbar.querySelectorAll('button')).find((button) =>
+@@ -176,7 +174,7 @@ async function mountNavigationWorkspace() {
+   return {
+     api,
+     view,
+-    backToStart: () => asElement(toolbar.querySelectorAll('button')[1], 'back to start'),
++    backToStart: () => asElement(centre.querySelectorAll('button')[3], 'back to start'),
+     split: () => toolbarButton('Split'),
+     remove: () => toolbarButton('Delete'),
+     loop: () => toolbarButton('Loop'),
+@@ -379,6 +377,7 @@ describe('transport and navigation texts in the real workspace (V-0.3b, D-29z100
+     const redo = () => view.getByRole('button', { name: /^Redo/ });
+     const transport: ReadonlyArray<readonly [StudioShortcutId, () => HTMLElement]> = [
+       ['play-stop', () => view.getByRole('button', { name: 'Play' })],
++      ['play-stop', () => view.getByRole('button', { name: 'Stop' })],
+       ['back-to-start', workspace.backToStart],
+       ['undo', undo],
+       ['redo', redo],
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 21f605a..2decaa2 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -311,7 +311,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+   }
+ 
+   it(
+-    'does not re-render clips, overview bars, library rows or ruler ticks over Play → Pause → Play',
++    'does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play',
+     { timeout: 15_000 },
+     async () => {
+       const { api, view } = await mountWorkspace();
+@@ -326,7 +326,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       expect(api.current?.isPlaying).toBe(true);
+       await waitReal(260);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+       expect(api.current?.isPlaying).toBe(false);
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       await waitReal(260);
+@@ -345,12 +345,12 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+         ArrangementLibraryOptionInner: 0,
+         ArrangementRulerTicksInner: 0,
+       });
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+     },
+   );
+ 
+   it(
+-    'RB-IM keeps the insert marker line as the same node over Play → Pause → Play',
++    'RB-IM keeps the insert marker line as the same node over Play → Stop → Play',
+     { timeout: 15_000 },
+     async () => {
+       const { api, view } = await mountWorkspace();
+@@ -358,7 +358,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       expect(api.current?.isPlaying).toBe(true);
+       await waitReal(260);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+       expect(api.current?.isPlaying).toBe(false);
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       await waitReal(260);
+@@ -368,7 +368,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       ).toHaveLength(1);
+       expect(view.getByTestId('arrangement-insert-marker')).toBe(line);
+       expect(line.isConnected).toBe(true);
+-      fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++      fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+     },
+   );
+ 
+@@ -408,12 +408,14 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(Number.parseFloat(line.style.left)).toBeGreaterThan(ARRANGEMENT_HEADER_WIDTH_PX);
+     expect(Number.parseFloat(handle.style.left)).toBeGreaterThan(1);
+     expect(Number(handle.getAttribute('aria-valuenow'))).toBeGreaterThan(0);
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     const stoppedAt = api.current?.getLivePosition() ?? 0;
+     expect(transport.textContent).toBe(formatArrangementTime(stoppedAt));
+   }, 15000);
+ 
+-  it('does not re-render the detail panel content over 60 position frames or Play → Pause → Play (R11-P1e)', async () => {
++  it('does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e)', async () => {
+     const api: BudgetApiRef = { current: null };
+     const store: { current: ArrangementPositionStore | null } = { current: null };
+     const view = render(
+@@ -451,7 +453,9 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     fireEvent.click(view.getByRole('button', { name: 'Play' }));
+     expect(api.current?.isPlaying).toBe(true);
+     await waitReal(260);
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     fireEvent.click(view.getByRole('button', { name: 'Play' }));
+     await waitReal(260);
+     runFrames();
+@@ -465,7 +469,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       ArrangementLibraryOptionInner: 0,
+       ArrangementRulerTicksInner: 0,
+     });
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+   }, 15000);
+ 
+   it('shows the seek position immediately when stopped and after a zoom change', async () => {
+@@ -608,6 +612,8 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     for (const name of CONTEXT_CONSUMERS) {
+       expect(renderLog.counts.get(name) ?? 0).toBeGreaterThan(0);
+     }
+-    fireEvent.click(view.getByRole('button', { name: 'Pause' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+   }, 15000);
+ });
+diff --git a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+index c18f09a..429c11b 100644
+--- a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+@@ -577,7 +577,11 @@ const TRANSPORT_ROWS: readonly { id: string; action: string; keys: string[] }[]
+     action: 'Move the insert marker to the playhead',
+     keys: ['Ctrl+Shift+Space'],
+   },
+-  { id: 'back-to-start', action: 'Back to start (the insert marker too)', keys: ['Home'] },
++  {
++    id: 'back-to-start',
++    action: 'Back to start (the insert marker too)',
++    keys: ['Home', 'Double-click Stop'],
++  },
+ ];
+ 
+ const MARKER_ROW_ACTION =
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 4bfadb1..5c136ce 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -665,9 +665,9 @@ const EXPECTED_V02B_PLAIN_STRINGS: Record<string, Record<string, string>> = {
+     backToStartLabel: 'Back to start',
+     backToStartTitle: 'Back to start (Home)',
+     playLabel: 'Play',
+-    pauseLabel: 'Pause',
++    stopLabel: 'Stop',
+     playTitle: 'Play (Space)',
+-    pauseTitle: 'Pause (Space)',
++    stopTitle: 'Stop (Space)',
+     projectEndPrefix: '/ end',
+     startPointInsertMarker: 'Insert marker',
+     startPointSelection: 'Time selection start',
+diff --git a/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx b/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
+index 25ed74e..21a4aaf 100644
+--- a/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
+@@ -170,16 +170,9 @@ async function mountTransport() {
+     await Promise.resolve();
+     await Promise.resolve();
+   });
+-  const position = view.getByTestId('arrangement-position');
+-  const fit = view.getByTestId('arrangement-fit');
+-  let toolbar: HTMLElement | null = position.parentElement;
+-  while (toolbar && !(toolbar.classList.contains('flex-wrap') && toolbar.contains(fit))) {
+-    toolbar = toolbar.parentElement;
+-  }
+-  if (!toolbar) {
+-    throw new Error('transport toolbar not found');
+-  }
+-  const transport = toolbar;
++  const transport = view.getByTestId('arrangement-transport');
++  expect(transport.contains(view.getByTestId('arrangement-position'))).toBe(true);
++  expect(transport.contains(view.getByTestId('arrangement-fit'))).toBe(true);
+   const buttons = () => Array.from(transport.querySelectorAll('button'));
+   const byName = (name: string) => {
+     const match = buttons().find(
+@@ -225,10 +218,10 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     vi.restoreAllMocks();
+   });
+ 
+-  it('TS1 gives all 12 transport buttons the 8 px radius, colour motion and pressed fill, and the plain 10 the borderless foreground fill', async () => {
++  it('TS1 gives all 13 transport buttons the 8 px radius, colour motion and pressed fill, and the plain 11 the borderless foreground fill', async () => {
+     const { buttons, byName } = await mountTransport();
+     const all = buttons();
+-    expect(all).toHaveLength(12);
++    expect(all).toHaveLength(13);
+     const roundPlay = byName('Play');
+     for (const button of all) {
+       const tokens = TOKENS(button);
+@@ -277,7 +270,8 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     const play = byName('Play');
+     const exportButton = byName('Export');
+     const plain = all.filter((button) => button !== play && button !== exportButton);
+-    expect(plain).toHaveLength(10);
++    expect(plain).toHaveLength(11);
++    expect(plain).toContain(byName('Stop'));
+     const follow = byName('Follow');
+     expect(follow.getAttribute('aria-pressed')).toBe('true');
+     for (const button of plain) {
+@@ -296,20 +290,22 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     }
+   });
+ 
+-  it('TS2 fills Play with foreground in both states and draws the state as a lucide icon only, round', async () => {
++  it('TS2 fills Play with foreground when stopped and brand while playing, keeps its name, title and play icon, round', async () => {
+     const { view, byName } = await mountTransport();
+-    const expectPlaySurface = (button: HTMLElement, iconClass: string) => {
++    const expectPlaySurface = (button: HTMLElement, playing: boolean) => {
+       const tokens = TOKENS(button);
++      const fill = playing ? 'bg-brand' : 'bg-foreground';
++      const otherFill = playing ? 'bg-foreground' : 'bg-brand';
+       for (const present of [
+         'w-8',
+         'h-8',
+         'rounded-full',
+         'px-0',
+         'justify-center',
+-        'bg-foreground',
++        fill,
+         'text-background',
+-        'enabled:hover:bg-foreground/92',
+-        'enabled:active:bg-foreground/88',
++        `enabled:hover:${fill}/92`,
++        `enabled:active:${fill}/88`,
+         'border-transparent',
+       ]) {
+         expect(tokens).toContain(present);
+@@ -323,27 +319,36 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+         'border-brand',
+         'text-brand',
+         'border-accent',
++        otherFill,
++        `enabled:hover:${otherFill}/92`,
++        `enabled:active:${otherFill}/88`,
+       ]) {
+         expect(tokens).not.toContain(absent);
+       }
+       expect(ariaHiddenSvgCount(button)).toBe(1);
+-      expect(button.querySelector('svg')?.classList.contains(iconClass)).toBe(true);
++      expect(button.querySelectorAll('svg')).toHaveLength(1);
++      expect(button.querySelector('svg')?.classList.contains('lucide-play')).toBe(true);
++      expect(button.querySelector('svg')?.classList.contains('lucide-pause')).toBe(false);
++      expect(button.textContent).toBe('');
++      expect(button.textContent).not.toContain('▶');
++      expect(button.textContent).not.toContain('❚');
++      expect(button.getAttribute('aria-label')).toBe(studioPlaybackStrings.playLabel);
++      expect(button.getAttribute('title')).toBe(studioPlaybackStrings.playTitle);
++      expect(button.dataset.playing).toBe(playing ? 'true' : 'false');
+     };
+     const play = byName('Play');
+-    expectPlaySurface(play, 'lucide-play');
+-    expect(play.textContent).toBe('');
+-    expect(play.textContent).not.toContain('▶');
+-    expect(play.getAttribute('title')).toBe(studioPlaybackStrings.playTitle);
++    expectPlaySurface(play, false);
+     expect(view.getByRole('button', { name: 'Play' })).toBe(play);
+     fireEvent.click(play);
+-    const pause = view.getByRole('button', { name: 'Pause' });
+-    expect(pause).toBe(play);
+-    expectPlaySurface(pause, 'lucide-pause');
+-    expect(pause.textContent).toBe('');
+-    expect(pause.textContent).not.toContain('❚');
+-    expect(pause.getAttribute('title')).toBe(studioPlaybackStrings.pauseTitle);
+-    fireEvent.click(pause);
+     expect(view.getByRole('button', { name: 'Play' })).toBe(play);
++    expectPlaySurface(play, true);
++    expect(view.queryByRole('button', { name: 'Pause' })).toBeNull();
++    fireEvent.click(play);
++    expectPlaySurface(play, true);
++    fireEvent.click(byName('Stop'));
++    expect(view.getByRole('button', { name: 'Play' })).toBe(play);
++    expectPlaySurface(play, false);
++    expect(view.queryByRole('button', { name: 'Pause' })).toBeNull();
+   });
+ 
+   it('TS3 shows Zoom to selection as one hidden lucide icon with its label unchanged', async () => {
+@@ -396,7 +401,7 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+     expect(deleteTokens).not.toContain('border-transparent');
+   });
+ 
+-  it('TS6 draws the seven V-3b transport glyphs as hidden lucide icons sized to the old glyph slot, with the old-space gaps', async () => {
++  it('TS6 draws the seven V-3b transport glyphs and the Stop square as hidden lucide icons sized to the old glyph slot, with the old-space gaps', async () => {
+     const { view, buttons, byName, byText } = await mountTransport();
+     const iconButtons = [
+       {
+@@ -448,6 +453,13 @@ describe('V-3a transport surfaces and icons (D-29z123)', { timeout: 15_000 }, ()
+         size: 'size-2.5',
+         strokeWidth: '2.4',
+       },
++      {
++        button: byName('Stop'),
++        text: '',
++        iconClass: 'lucide-square',
++        size: 'size-3',
++        strokeWidth: '2',
++      },
+     ];
+     for (const { button, text, iconClass, size, strokeWidth } of iconButtons) {
+       const svgs = button.querySelectorAll('svg');
+diff --git a/app/lib/arrangement/shortcuts.ts b/app/lib/arrangement/shortcuts.ts
+index 05d7f74..d0dc416 100644
+--- a/app/lib/arrangement/shortcuts.ts
++++ b/app/lib/arrangement/shortcuts.ts
+@@ -37,7 +37,7 @@ export const STUDIO_SHORTCUT_GROUPS = [
+       {
+         id: 'back-to-start',
+         action: 'Back to start (the insert marker too)',
+-        keys: ['Home'],
++        keys: ['Home', 'Double-click Stop'],
+         ariaKeyShortcuts: 'Home',
+       },
+       {
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 5750309..2be1574 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -221,9 +221,9 @@ export const studioPlaybackStrings = {
+   backToStartLabel: 'Back to start',
+   backToStartTitle: studioShortcutTitle('Back to start', 'back-to-start'),
+   playLabel: 'Play',
+-  pauseLabel: 'Pause',
++  stopLabel: 'Stop',
+   playTitle: studioShortcutTitle('Play', 'play-stop'),
+-  pauseTitle: studioShortcutTitle('Pause', 'play-stop'),
++  stopTitle: studioShortcutTitle('Stop', 'play-stop'),
+   projectEndPrefix: '/ end',
+   playPastEnd: ({
+     subject,
