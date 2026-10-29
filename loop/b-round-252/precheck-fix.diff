@@ -1,0 +1,47 @@
+--- app/components/arrangement/StudioWorkspace.tsx	2026-10-29 17:55:47.294703652 +0000
++++ /tmp/b253-scratch/app/components/arrangement/StudioWorkspace.tsx	2026-10-29 18:53:57.382688662 +0000
+@@ -1919,6 +1919,15 @@
+       if (followModeRef.current === 'paused') {
+         setFollowMode('on');
+       }
++      const current = workspaceRef.current;
++      const marker = formatArrangementTime(Math.max(0, current.getLocatorPosition()));
++      if (
++        current.status === studioPlaybackStrings.insertMarkerWhilePlaying(marker) ||
++        current.status === studioPlaybackStrings.insertMarkerWhilePlayingFollowPaused(marker) ||
++        current.status === FOLLOW_PAUSED_MESSAGE
++      ) {
++        current.setStatus(studioPlaybackStrings.insertMarkerAfterStop(marker));
++      }
+       return;
+     }
+     autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+--- app/lib/arrangement/strings.ts	2026-10-29 17:56:00.509334573 +0000
++++ /tmp/b253-scratch/app/lib/arrangement/strings.ts	2026-10-29 18:53:57.381924199 +0000
+@@ -244,6 +244,8 @@
+     `Insert marker at ${time} — playback continues. Stop, then Space plays from here.`,
+   insertMarkerWhilePlayingFollowPaused: (time: string): string =>
+     `Insert marker at ${time} — playback continues, Follow paused. Stop, then Space plays from here.`,
++  insertMarkerAfterStop: (time: string): string =>
++    `Stopped — Space plays from the insert marker at ${time}.`,
+   insertMarkerToPlayhead: (time: string): string =>
+     `Insert marker moved to the playhead (${time}). Space plays from here.`,
+ };
+@@ -365,7 +367,7 @@
+ 
+ export const studioViewStrings = {
+   followOffTitle: 'Follow off: the view does not follow playback',
+-  followPausedTitle: 'Follow paused by manual navigation — press Follow or Play',
++  followPausedTitle: 'Follow paused — press Follow, or stop playback, to resume',
+   followOnTitle: 'Follow: the view follows the playback position',
+   zoomSliderLabel: 'Zoom (px/s)',
+   zoomSliderTitle: 'Zoom around the playhead · + / − · Ctrl+wheel',
+@@ -383,7 +385,7 @@
+   overviewLabel: 'Overview — entire project (← → = 5 s, double-click = Fit)',
+   overviewTitle:
+     'Overview: click = centre here · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit',
+-  followPaused: 'Follow paused by manual navigation. Follow or Play resumes it.',
++  followPaused: 'Follow paused by manual navigation. Press Follow, or stop playback, to resume it.',
+   zoomNeedsSelection: 'To zoom, make a time selection first.',
+   zoomHistoryEmpty: 'The zoom history is empty — there is no view to go back to.',
+   zoomBackMore: 'Previous view restored. X goes back one more step.',

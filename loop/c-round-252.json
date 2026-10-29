@@ -1,0 +1,128 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T18:27:20.5676206Z",
+  "round": 252,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R252-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab fresh context, wait 'Demo collection ready'; click library 'demo-stem-pulse', Add; blur; '=' x4 (97.7 px/s, tempo 120)",
+    "Space (play), Follow is 'on'",
+    "click the bars ruler lower zone (scroller right - 300 px, bars.y+h-3; elementFromPoint = arrangement-bars-ruler)",
+    "Space (stop)"
+   ],
+   "expected": "C-FOLLOW-STOP-252: Follow 'on' with text 'Follow' AND the status is not a Follow text",
+   "actual": "Follow is 'on'/'Follow' (correct) but the status line still reads 'Insert marker at 00:06.500 — playback continues, Follow paused. Stop, then Space plays from here.' (1280: 00:04.750) while stopped; Space-stop writes no status. Spec conflict: §1.2/§1.3 + FW6 require the stop to write nothing; A flagged it (a-round-252.md ruling 1). The 'Follow paused' clause is new this round.",
+   "evidence": "c-round-252/fix/c252.json followPause@1440x900/@1280x720 (stop, stop2, stopStatusUnchangedByStop=true); c-round-252/fix/follow-stop-1440x900.png, follow-stop-1280x720.png"
+  },
+  {
+   "id": "C-N252-FOLLOW-TITLE",
+   "severity": "low",
+   "steps": [
+    "Pause Follow by a ruler click while playing",
+    "hover the Follow button / read its title"
+   ],
+   "expected": "Paused title/status names the real pause and resume causes (L29 changed-meaning)",
+   "actual": "title 'Follow paused by manual navigation — press Follow or Play' and followPaused status unchanged; ruler click now pauses, Stop and strip click now resume",
+   "evidence": "c-round-252/fix/c252.json followPause@* after.followTitle; strings.ts l.368/386"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-252",
+  "C-UNIT-252",
+  "C-MUT-252",
+  "C-FOLLOW-PAUSE-252",
+  "C-FOLLOW-SECONDS-252",
+  "C-FOLLOW-RESUME-252",
+  "C-FOLLOW-OFF-252",
+  "C-FOLLOW-STOPPED-252",
+  "C-FOLLOW-LANE-252",
+  "C-FOCUS-252",
+  "C-NAV-ORIGIN-252",
+  "C-TITLES-252",
+  "C-PASTEND-252",
+  "C-STATUS-WIDE-252",
+  "C-COPY-252",
+  "C-BUDGET-252",
+  "C-LESSON-252",
+  "AN-REVIEW-252",
+  "LAB-SMOKE-252",
+  "Auth"
+ ],
+ "failed": [
+  "C-FOLLOW-STOP-252"
+ ],
+ "gate": [
+  "full vitest, typecheck, lint, build, verify, e2e smoke"
+ ],
+ "blocked": [
+  "Purchased origin /studio/$productId: backend unavailable in cloud"
+ ],
+ "notes": [
+  "C-NAV-ORIGIN-252 passed with an amended playing clause ('before the playhead' run; 'after the playhead' is browser-unreachable, IM24 jsdom only); B to rewrite the row",
+  "C-UNIT-252 covering run overlapped C's control dev-server start (no browser job); 1956/1956 green",
+  "C-R252-01 fails the round because an acceptance row fails as written, not because of severity; closes with a B ruling (a) stop-effect status write + FW6 amend, or (b) row rewrite + deferred_low_polish",
+  "Neighbour BR2 stopped strip click verified in browser (stripStopped)"
+ ],
+ "ableton": [
+  {
+   "row": "Pause on beat-time ruler click (6.2)",
+   "status": "confirmed"
+  },
+  {
+   "row": "Pause on horizontal scroll (6.2)",
+   "status": "confirmed"
+  },
+  {
+   "row": "Pause on edit (6.2)",
+   "status": "unconfirmed (not built, SABA-Q-FOLLOW-EDIT-RESTART a)"
+  },
+  {
+   "row": "Resume on scrub-area click (6.2)",
+   "status": "confirmed"
+  },
+  {
+   "row": "Resume on stop (6.2)",
+   "status": "confirmed (Follow state); status text is CZABA-only, C-R252-01"
+  },
+  {
+   "row": "Resume on playback restart (6.2)",
+   "status": "partial; marker-flag play inference (SABA-Q-FOLLOW-EDIT-RESTART b)"
+  },
+  {
+   "row": "Track click while playing (6.3)",
+   "status": "deliberate difference/inference"
+  },
+  {
+   "row": "Time-ruler click (6.1 item 15)",
+   "status": "deliberate difference (SABA-Q-TIME-RULER-ROLE)"
+  },
+  {
+   "row": "Follow-resumed status",
+   "status": "not applicable"
+  },
+  {
+   "row": "Locator origin while stopped (6.3/6.4)",
+   "status": "unconfirmed (manual silent)"
+  },
+  {
+   "row": "Quantized locator jump (6.1 item 6)",
+   "status": "deliberate difference"
+  },
+  {
+   "row": "Follow toggle shortcut",
+   "status": "deliberate difference"
+  },
+  {
+   "row": "At/past end",
+   "status": "no reference found"
+  }
+ ]
+}

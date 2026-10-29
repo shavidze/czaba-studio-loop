@@ -1,0 +1,11 @@
+B round-253 pre-check (L23), 2026-10-29. Scratch /tmp/b253-scratch = tar copy of store working tree (HEAD 83b7c75 + 13 M round-252 files) with b-round-252/precheck-fix.diff applied (stop-effect status replacement + insertMarkerAfterStop + followPaused/followPausedTitle copy).
+tsc --noEmit: rc 0.
+npx vitest run app/lib/arrangement app/components: 165 files, 2408 tests: 4 failed, 2404 passed.
+Failures (all in round-253 grants):
+- bars-ruler-ui.test.tsx FW6 (paused half asserts status unchanged after stop; new contract writes insertMarkerAfterStop) -> grant 3
+- navigation-strings-ui.test.tsx NS3b (followPaused / followPausedTitle literals) -> grant 5
+- strings.test.ts ST12 (formatter sample coverage: new formatter insertMarkerAfterStop needs a sample) -> grant 4
+- strings.test.ts ST17 (exact literals followPaused / followPausedTitle) -> grant 4
+Frozen neighbours green: mode-toggle-colour-ui (expectModeTokens label 'Follow paused' is a message label only), grid-snap-menu GM24, markers-move-ui, focus-reveal-ui, insert-marker-ui, status-announcement-ui, ArrangementContext.test.
+
+Contract proof (after advisor review): on the same scratch, FW6's paused half amended to assert status === 'Stopped — Space plays from the insert marker at 00:06.000.' (marker 6.000 after the 6.3 lower-zone click, snapped) and statusSequence === pausedSequence + 1: `npx vitest run bars-ruler-ui.test.tsx -t FW6` -> 1 passed. So in jsdom, at effect time, workspaceRef.current.status is the composed text and getLocatorPosition() returns the insert marker (not the stop position).

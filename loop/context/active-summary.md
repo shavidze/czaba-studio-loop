@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T17:29:02.911Z)
+# Active loop summary (2026-10-29T18:49:48.475Z)
 
-- backlog.json 2365 KB -> active view 338 KB
-- status: G_ROOT_GATE round 251
-- servers: `{"checkedUtc":"2026-10-29T17:08:19.2725394Z","round":251,"attempt":1,"store":200}`
+- backlog.json 2379 KB -> active view 339 KB
+- status: G_ROOT_GATE round 252
+- servers: `{"checkedUtc":"2026-10-29T18:27:20.5676206Z","round":252,"attempt":1,"store":200}`
 - last publication: 83b7c756ce3108d0e31f023a1aa2b0e59547d913 (rounds 250-251)
-- last root gate: round 251 published - commit 83b7c756ce3108d0e31f023a1aa2b0e59547d913 pushed
+- last root gate: round 252 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -561,12 +561,12 @@
 - SABA-Q-ENVELOPE-TAPER / info / awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
 - GATE234-S5 / info / awaiting_user as SABA-Q-SEED-STATUS-LENGTH (D-29z330) / one aria-live message now carries three sentences (placement, tempo, Snap)
 - GATE234-S7 / info / note for PERF re-baselines (D-29z330); no perf/e2e spec names a source today / a perf scenario that adds a synthetic stem now runs with Snap on, 1/4 and the bars ruler
-- SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered | round 249 (D-29z431): a seconds-ruler click now places the insert marker and clears a time selection (HEAD kept the selection); Live 6.9's point rule is about the Arrangement background, not the ruler, so this is a planner deviation asked here (L44) / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
+- SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered | round 249 (D-29z431): a seconds-ruler click now places the insert marker and clears a time selection (HEAD kept the selection); Live 6.9's point rule is about the Arrangement background, not the ruler, so this is a planner deviation asked here (L44) | (b) round 252 (D-29z457): the seconds-ruler click also pauses Follow while playing, like the beat-time ruler (CZABA rule, inference; Live 6.1 item 15 documents drag-to-scroll only); still awaiting_user / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
 - SABA-Q-SCRUB-QUANTIZE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live quantizes a scrub-area jump by the Control Bar Quantization menu (6.3); CZABA has no launch quantization, so the strip uses the editing
 - SABA-Q-SCRUB-HOLD-LOOP / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live: holding the mouse in the scrub area loops a portion by the global launch quantization (6.3). Not built in SABA-B-11a. Wanted?
 - SABA-Q-SCRUB-ADD-LOCATOR / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live (video riOD 2:22-3:08): right-click in the scrub area -> Add Locator. Our marker menu opens only on an existing flag. Wanted (later can
 - SABA-Q-SEED-STATUS-LENGTH / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / The seed status is one aria-live message of three sentences (placement, 'Tempo N BPM from ... Grid only: audio is not stretched.', 'Snap on 
-- C-R235-02 / low / scheduled in SABA-B-10a stage 2b (D-29z436) | scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
+- C-R235-02 / low / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b (D-29z436) | scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
 - SABA-Q-SCRUB-DOUBLE-CLICK / info / awaiting_user (D-29z333); the round-236 default holds until answered / Live documents a double-click only for the beat-time ruler (6.1 zoom). Round 236 makes a scrub-strip double-click two 'play from here' click
 - GATE235-S3 / info / note; consistent with the codebase; no action / useRulerNavigation writes optionsRef.current during render (same pattern as workspaceRef)
 - C-R236-01 / low / deferred_low_polish (D-29z340); code is togglePlayback, outside round 237 grants / a playPastEnd status stays on screen after playback actually starts (strip click at 2 after an end click; Space after the end click); pre-ex
@@ -624,14 +624,13 @@
 - GATE249-S8 / info / = B-R249-PAUSE-LABEL (SABA-B-9) / status says Stop while the button reads Pause
 - GATE249-S9 / info / = TLM-R249-MAC-CMD-SHIFT-SPACE / Mac Cmd path unverified
 - A-R249-REVIEW-KEYUP-ORDER / info / Tech Lead manual: Firefox and Safari (D-29z439) / Shift released before Space after Ctrl+Shift+Space could click a focused button on key-up in other engines; not reproduced in Chromium (A an
-- B-R250-PLAYHEAD-TITLES / low / scheduled in SABA-B-10a stage 2b, not deferred (D-29z436) / ruler and range titles still say click = playhead (rulerTitle, rangeBodyTitle); while playing a click now moves only the insert marker
-- B-R250-NAV-ORIGIN / low / scheduled in SABA-B-10a stage 2b (D-29z436) | still stage 2b after the round-251 fix-up and REGRESSION (D-29z451) / Ctrl+Left/Right steps from the playhead (getLivePosition) while stopped; after a stop that differs from the insert marker (Live 6.9 moves th
-- C-R250-01 / medium / scheduled round 251 (D-29z444, D-29z445): the line names the insert marker; IM22, R9-L1, C-CAPTION-251/-MOVE-251/-WIDE-251 / the library line above Add reads "playhead <live time>" while Add places the sound at the insert marker (regression of round 250; Arrangemen
-- A-R250-REVIEW-PASTE-SPLIT-PLAYING / medium / scheduled round 251 (D-29z448): playing branches; red-proof MU-PASTE-SPLIT-LOCATOR -> IM15, IM17 / IM15/IM17 test paste and Ctrl+E only while stopped; a paste/split that reads the live position while playing passes the granted tests
-- A-R250-REVIEW-IM18-IM20-ASSERTS / low / scheduled round 251 (D-29z449): IM23 + IM20 asserts; red-proofs MU-M-NO-RANGE, MU-GESTURE-*-NO-PREVENT / IM18 has no selection-start-wins case; IM20 has no preventDefault or metaKey assert
+- B-R250-PLAYHEAD-TITLES / low / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b, not deferred (D-29z436) / ruler and range titles still say click = playhead (rulerTitle, rangeBodyTitle); while playing a click now moves only the insert marker
+- B-R250-NAV-ORIGIN / low / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | scheduled in SABA-B-10a stage 2b (D-29z436) | still stage 2b after the round-251 fix-up and REGRESSION (D-29z451) / Ctrl+Left/Right steps from the playhead (getLivePosition) while stopped; after a stop that differs from the insert marker (Live 6.9 moves th
 - A-R250-REVIEW-SHEET-MARKER-COPY / low / scheduled in SABA-B-10b (D-29z449; owns shortcuts.ts, adds sheet rows; carries the row-height check), not deferred / shortcut sheet row "Add a marker at the insert marker" is inaccurate while playing and with a selection (addTitle names all three cases)
-- B-R251-PASTEND-AT-END / info / stage 2b scope (D-29z449) / a strip or flag play exactly at the end reads "(00:16.000) is past the end of the project (00:16.000)" (D-27 at-or-past-end rule for playFro
-- EXPORT-PROGRESS-LOAD-FLAKE-250 / info / watch (D-29z447) / export-progress-ui.test.tsx l.319/l.350 rows failed once in a covering run under concurrent load (resetEncoderMock call count); green in 3 i
+- B-R251-PASTEND-AT-END / info / dispatched round 252 (D-29z453): SABA-B-10a stage 2b | stage 2b scope (D-29z449) / a strip or flag play exactly at the end reads "(00:16.000) is past the end of the project (00:16.000)" (D-27 at-or-past-end rule for playFro
+- EXPORT-PROGRESS-LOAD-FLAKE-250 / info / watch (D-29z452): gate 251 verify did not reproduce it (export-progress-ui 8/8, 1242 ms; 215/215 files) | watch (D-29z447) / export-progress-ui.test.tsx l.319/l.350 rows failed once in a covering run under concurrent load (resetEncoderMock call count); green in 3 i
+- A-R251-REVIEW-IM22-PLAYING / medium / dispatched round 252 item 0 (D-29z453): setPosition(getLivePosition()) before the playing assert; red-proof MU-CAPTION-POSITION with the stopped asserts removed (B pre-check b-round-251/precheck-im22.txt: red at the playing line, HEAD green) / IM22 playing assert is vacuous: rAF stubbed, the position store stays at the play-from value 3 = the marker, so a playhead-reading line pass
+- SABA-Q-FOLLOW-EDIT-RESTART / info / awaiting_user (D-29z457): non-blocking; round 252 builds only the ruler/strip/stop clauses / (a) Live pauses Follow when you make an edit; CZABA does not (edits keep Follow on). (b) Live resumes Follow when playback restarts; CZABA t
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,180 @@
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 6c984bd..7c6d197 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -150,8 +150,8 @@ export const ArrangementMarkerRow = forwardRef<
+     range,
+     projectEnd,
+     getArrangement,
+-    getLivePosition,
+     getLocatorPosition,
++    isPlaying,
+     previewArrangement,
+     commitArrangement,
+     seekTo,
+@@ -267,14 +267,19 @@ export const ArrangementMarkerRow = forwardRef<
+     ) => {
+       const target = adjacentMarkerTarget(
+         getArrangement(),
+-        getLivePosition(),
++        getLocatorPosition(),
+         direction,
+         projectEnd,
+         edgeTimes,
+       );
+       if (!target) {
+-        const message =
+-          direction === 1 ? studioMarkerStrings.noneAfter : studioMarkerStrings.noneBefore;
++        const message = isPlaying
++          ? direction === 1
++            ? studioMarkerStrings.noneAfter
++            : studioMarkerStrings.noneBefore
++          : direction === 1
++            ? studioMarkerStrings.noneAfterInsertMarker
++            : studioMarkerStrings.noneBeforeInsertMarker;
+         if (options?.keyRepeat !== true || status !== message) {
+           setStatus(message);
+         }
+@@ -285,7 +290,7 @@ export const ArrangementMarkerRow = forwardRef<
+         setSelectedMarkerId(target.marker.id);
+       }
+     },
+-    [getArrangement, getLivePosition, projectEnd, seekTo, setStatus, status],
++    [getArrangement, getLocatorPosition, isPlaying, projectEnd, seekTo, setStatus, status],
+   );
+ 
+   const closeMenu = useCallback(() => {
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 1b44578..bb13200 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -101,6 +101,7 @@ import {
+   studioEditStrings,
+   studioGridStrings,
+   studioLaneMoveStrings,
++  studioPlaybackStrings,
+   studioShortcutSheetStrings,
+   studioTempoStrings,
+   studioTimeTextParts,
+@@ -1405,12 +1406,40 @@ export function StudioWorkspace() {
+     fitTimeline();
+   }, [fitTimeline, zoomTimelineToRange]);
+ 
+-  const playFromRuler = useCallback((time: number) => {
+-    workspaceRef.current.playFrom(time);
+-  }, []);
++  const playFromRuler = useCallback(
++    (time: number) => {
++      const current = workspaceRef.current;
++      const resuming = current.isPlaying && followModeRef.current === 'paused';
++      if (resuming) {
++        autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
++      }
++      current.playFrom(time);
++      if (resuming) {
++        setFollowMode('on');
++        current.setStatus(studioViewStrings.followResumed);
++      }
++    },
++    [setFollowMode],
++  );
++  const placeInsertMarkerFromRuler = useCallback(
++    (time: number) => {
++      const current = workspaceRef.current;
++      const pausing = current.isPlaying && followModeRef.current === 'on';
++      setInsertMarker(time);
++      if (pausing) {
++        setFollowMode('paused');
++        current.setStatus(
++          studioPlaybackStrings.insertMarkerWhilePlayingFollowPaused(
++            formatArrangementTime(Math.max(0, time)),
++          ),
++        );
++      }
++    },
++    [setInsertMarker, setFollowMode],
++  );
+   const barsRulerGestures = useMemo<BarsRulerGestures>(
+     () => ({
+-      onSeek: setInsertMarker,
++      onSeek: placeInsertMarkerFromRuler,
+       onPlayFrom: playFromRuler,
+       onGestureClaim: claimPointerGesture,
+       applyTimelineView,
+@@ -1421,7 +1450,7 @@ export function StudioWorkspace() {
+       getSnapMarkerTimes: getRulerSnapMarkerTimes,
+     }),
+     [
+-      setInsertMarker,
++      placeInsertMarkerFromRuler,
+       playFromRuler,
+       claimPointerGesture,
+       applyTimelineView,
+@@ -1887,6 +1916,9 @@ export function StudioWorkspace() {
+ 
+   useEffect(() => {
+     if (!isPlaying) {
++      if (followModeRef.current === 'paused') {
++        setFollowMode('on');
++      }
+       return;
+     }
+     autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+@@ -2899,7 +2931,7 @@ export function StudioWorkspace() {
+                   <ArrangementRuler
+                     seconds={timelineSeconds}
+                     pxPerSecond={pxPerSecond}
+-                    onSeek={setInsertMarker}
++                    onSeek={placeInsertMarkerFromRuler}
+                     onScrub={scrubPlayhead}
+                     onScrubEnd={endPlayheadScrub}
+                     onGestureClaim={claimPointerGesture}
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 2be5aae..8765d93 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -234,12 +234,16 @@ export const studioPlaybackStrings = {
+     position: string;
+     end: string;
+   }): string =>
+-    `${subject} (${position}) is past the end of the project (${end}) — there is nothing to play here. Home returns to 0.`,
++    position === end
++      ? `${subject} (${position}) is at the end of the project — there is nothing to play here. Home returns to 0.`
++      : `${subject} (${position}) is past the end of the project (${end}) — there is nothing to play here. Home returns to 0.`,
+   startPointInsertMarker: 'Insert marker',
+   startPointSelection: 'Time selection start',
+   startPointPlayhead: 'Playhead',
+   insertMarkerWhilePlaying: (time: string): string =>
+     `Insert marker at ${time} — playback continues. Stop, then Space plays from here.`,
++  insertMarkerWhilePlayingFollowPaused: (time: string): string =>
++    `Insert marker at ${time} — playback continues, Follow paused. Stop, then Space plays from here.`,
+   insertMarkerToPlayhead: (time: string): string =>
+     `Insert marker moved to the playhead (${time}). Space plays from here.`,
+ };
+@@ -375,7 +379,7 @@ export const studioViewStrings = {
+     'Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)',
+   playheadTitle: 'Playhead — drag · ←/→ = ±0.1 s',
+   rulerTitle:
+-    'Click = playhead · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection',
++    'Click = insert marker · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection',
+   overviewLabel: 'Overview — entire project (← → = 5 s, double-click = Fit)',
+   overviewTitle:
+     'Overview: click = centre here · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit',
+@@ -503,6 +507,8 @@ export const studioMarkerStrings = {
+   atTimeStart: 'The marker is at the start of the timeline.',
+   noneAfter: 'No more markers after the playhead',
+   noneBefore: 'No more markers before the playhead',
++  noneAfterInsertMarker: 'No more markers after the insert marker',
++  noneBeforeInsertMarker: 'No more markers before the insert marker',
+   notAdded: 'Marker not added',
+   addTitle:
+     'Add a marker at the time selection start, the insert marker, or the playback position while playing (M)',
+@@ -681,7 +687,7 @@ export const studioClipStrings = {
+   groupMovedLeft: ({ label, count, distance }: StudioClipGroupMoveText): string =>
+     `${label}: ${count} clips moved ${distance} to the left.`,
+   moveTitle: (title: string): string => `${title} — drag to move`,
+-  rangeBodyTitle: 'drag = time selection · click = playhead',
++  rangeBodyTitle: 'drag = time selection · click = insert marker',
+   seconds: (value: string): string => `${value} s`,
+ };
+ 
