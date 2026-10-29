@@ -1,0 +1,133 @@
+--- ../tmp/studio-real-loop/b-round-250/r251-granted-start/docs/implementation/2026/quarter-IV/191-saba-b-10a-insert-marker.md	2026-10-29 16:46:58.940550085 +0000
++++ docs/implementation/2026/quarter-IV/191-saba-b-10a-insert-marker.md	2026-10-29 17:06:38.785139134 +0000
+@@ -1,7 +1,7 @@
+ # SABA-B-10a stages 1–2a — ცალკე Insert Marker: Space მისგან უკრავს, Shift+Space stop point-იდან აგრძელებს, edit command-ები marker-ზე მოქმედებს
+ 
+ **თარიღი:** 2026-10-29
+-**სტატუსი:** In Progress (stage 2 of 3; C round 250 PASS)
++**სტატუსი:** In Progress (stage 2 of 3; C round 251 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -25,6 +25,14 @@
+ (**GATE249-S6 / B-R250-GESTURE-KEYS**): range drag-ის დროს Ctrl/Cmd+Shift+Space ან Home marker-ს
+ გადაადგილებდა და time selection-ს შლიდა.
+ 
++**Stage 2a, round 251 fix-up.** C round 250-მა იპოვა **C-R250-01** (Medium, round 250-ის regression):
++library-ის ხაზი Add-ის ზემოთ ისევ `Active track: SFX · playhead 00:04.491`-ს წერდა, მაშინ როცა Add
++უკვე Insert Marker-ზე (`00:03.000`) სვამდა ხმას. ხაზი მომხმარებელს არასწორ წერტილს უჩვენებდა.
++იმავე რაუნდის reviewer-მა აღნიშნა **A-R250-REVIEW-PASTE-SPLIT-PLAYING** (Medium, test strength):
++IM15 და IM17 მხოლოდ გაჩერებულ მდგომარეობას ამოწმებდა, ამიტომ paste ან split, რომელიც playback-ის
++დროს live position-ს კითხულობდა, მწვანე რჩებოდა. იაფად დაიხურა ორი Low ამავე ფაილში
++(**A-R250-REVIEW-IM18-IM20-ASSERTS**): M-ის time selection-ის პრიორიტეტი და IM20-ის `preventDefault`.
++
+ ## მიდგომა
+ 
+ ### წესი (D-29z430)
+@@ -89,6 +97,28 @@
+ მხოლოდ Ctrl/Cmd+Shift+Space-ს აქვს; Home-ს ის არ ჰქონდა და არც ახლა აქვს (`returnToStart`
+ იდემპოტენტურია).
+ 
++### Stage 2a, round 251: library-ის ხაზი ასახელებს Insert Marker-ს (D-29z445)
++
++- **ტექსტი:** `Active track: <lane> · insert marker 00:03.000` — იგივე წერტილი, სადაც Add ხმას სვამს,
++  გაჩერებულ მდგომარეობაში და playback-ის დროს. `insert marker` პატარა ასოებით, როგორც ძველი
++  `· playhead` და sheet-ის row-ები; string key `studioLibraryPanelStrings.insertMarker`.
++- **Direct write, React render-ის გარეშე.** `LibraryInsertMarkerText` (ყოფილი `LibraryPlayheadText`)
++  კითხულობს `useArrangementInsertMarkerStore()`-ს; `useEffect` writer-ს ერთხელ იძახებს და
++  `subscribePosition`-ით ყოველ marker-ის ცვლილებაზე `textContent`-ს წერს — იგივე pattern, რაც
++  `ArrangementInsertMarkerSignal`-ს აქვს. playback-ის frame-ები ხაზს აღარ ეხება; R9-L1-ის budget
++  (0 render) რჩება. testid: `arrangement-library-insert-marker`.
++- **`findFreeStart`.** `addClip` დაკავებულ წერტილზე clip-ს შემდეგ თავისუფალ ადგილზე გადაიტანს. ხაზი
++  ასახელებს marker-ს, ანუ სად **ცდილობს** Add ჩასმას; status ამბობს, სად აღმოჩნდა. ეს round 250-ის
++  ქცევაა და შეცვლილი არ არის.
++- **უარყოფილი: დროის ამოღება.** marker SABA-B-10b-მდე უხილავია, ამიტომ ეს ხაზი add point-ის ერთადერთი
++  readout-ია.
++- **უარყოფილი: playback-ის დროს playhead-ის ჩვენება.** Add playhead-ს არცერთ მდგომარეობაში არ
++  კითხულობს (D-29z437).
++- **Live 12 (BR 4.10, დადასტურებული):** browser-ში Enter ან double-click item-ს "whatever track is
++  currently selected"-ზე ტვირთავს. **დასკვნა (არა დადასტურებული):** დროის პოზიცია manual-ში არ წერია;
++  Insert Marker AV 6.9-დან გამოგვაქვს. browser-ის გვერდით position readout Live-ში არ მოიძებნა
++  (BR 4.9/4.10) — ეს CZABA-ს დამატებაა.
++
+ ### Stage 2-ის დაყოფა (D-29z436)
+ 
+ stage 2 ქცევის ოჯახების მიხედვით იყოფა: **2a** — command-ები, რომლებიც რაღაცას პოზიციაზე სვამს
+@@ -159,6 +189,7 @@
+   IMS --> ADD[addSourceToActiveTrack<br/>Enter, double-click, Add]
+   IMS --> SPLIT[splitSelection<br/>Ctrl+E without range]
+   IMS --> LOC[getLocatorPosition]
++  IMS -->|subscribePosition, textContent| LIB[LibraryInsertMarkerText<br/>library line, round 251]
+   PS -->|playing: live position| LOC
+   LOC --> MADD[beginAddMarker<br/>M, Add marker]
+   TOG -->|origin: selection / insert-marker| SPA
+@@ -213,6 +244,20 @@
+ - `app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx` — NS1 (Split-ის title).
+ - `app/lib/arrangement/__tests__/marker-strings-ui.test.tsx` — MS1 (Add marker-ის title).
+ 
++**Stage 2a, round 251 fix-up:**
++
++- `app/components/arrangement/ArrangementLibraryPreview.tsx` — `LibraryPlayheadText` →
++  `LibraryInsertMarkerText` (insert-marker store, direct write), testid
++  `arrangement-library-insert-marker`, ხაზის ტექსტი `insertMarker` string-ით.
++- `app/lib/arrangement/strings.ts` — `studioLibraryPanelStrings.insertMarker`.
++- `app/lib/arrangement/__tests__/insert-marker-ui.test.tsx` — IM15 და IM17 playing branch-ით, IM20
++  `preventDefault`-ით და Meta+Shift+Space-ით, ახალი IM22 და IM23.
++- `app/lib/arrangement/__tests__/library-preview.test.tsx` — ახალი testid და ტექსტი.
++- `app/lib/arrangement/__tests__/render-budget.test.tsx` — R9-L1 ახალ კონტრაქტზე,
++  `InsertMarkerStoreProbe`, playback-frames row `LibraryInsertMarkerText`-ით.
++- `app/lib/arrangement/__tests__/strings.test.ts` — ST49 (24 key).
++- `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` — TH10-ის testid.
++
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **ძველი selection strip click-ის შემდეგ.** Problem: prototype v3-ში `playFrom` selection-ს არ
+@@ -239,6 +284,13 @@
+   ტექსტს იმავე helper-ით ითვლის. Solution: ST11 ზუსტ ტექსტებს ამოწმებს, ხოლო caller-ის mutant-ები
+   (MU-STARTAT-PLAYHEAD-SUBJECT, MU-PLAYFROM-PLAYHEAD-SUBJECT, MU-SHIFT-AS-MARKER,
+   MU-SELECTION-AS-MARKER) origin-ის გადაცემას ამოწმებს; RETRO-260-ის კანდიდატი.
++- **Round 251: ხაზი ძველ წყაროს ასახელებდა (C-R250-01).** Problem: round 250-ის copy sweep მხოლოდ
++  `strings.ts`-ს ეხებოდა, ხოლო `· playhead` inline JSX literal იყო `ArrangementLibraryPreview.tsx`-ში.
++  Solution: ხაზი Insert Marker-ს კითხულობს და ასახელებს; L29 ახლა მოითხოვს ძველი სიტყვის grep-ს
++  მთელ `app/**`-ზე (inline JSX, title, aria).
++- **Round 251: IM15/IM17 მხოლოდ stopped.** Problem: C-ის C-MU-PASTE-SPLIT-LOCATOR
++  (`isPlaying ? livePosition() : marker`) round 250-ში 0 row-ს აწითლებდა. Solution: ორივე row-ს
++  playing branch დაემატა; MU-PASTE-SPLIT-LOCATOR → IM15 და IM17.
+ 
+ ## ტესტირება
+ 
+@@ -268,15 +320,32 @@
+   123 ფაილი; 18 red-proof run (17 script-ით + MU-HEAD) `b-round-249/mutants`-ში.
+ - **Stage 2a, A (round 250):** typecheck, lint, Biome granted ფაილებზე, covering set, იგივე 18 run და
+   Playwright probe `/studio-lab`-ზე 1440×900 და 1280×720. რიცხვები: `a-round-250.md`.
++- **Round 251 fix-up, unit (jsdom):** IM15 (paste playback-ის დროსაც 2-ზე), IM17 (split playback-ის
++  დროს `00:05.000`-ზე, playback გრძელდება), IM20 (სამი keyDown default-ს აჩერებს, Meta+Shift+Space
++  ჩათვლით), IM22 (ხაზი `· insert marker 00:03.000`-ს წერს stop-ის შემდეგ და playback-ის დროს, ruler
++  click-ზე `00:06.000`; jsdom-ში `requestAnimationFrame` stub-ია, ამიტომ playing branch-ში playhead
++  store play start-ზე, 3-ზე რჩება და ამ branch-ს playhead-ის წაკითხვის გარჩევა არ შეუძლია — playback-ის
++  frame-ების red-proof R9-L1-ია, A-R251-REVIEW-IM22-PLAYING), IM23 (M time selection-ის დასაწყისს ირჩევს, stopped და playing), R9-L1 (60
++  position frame-ზე ტექსტი უცვლელია, marker-ის ორი ცვლილება იწერება, 0 render), ST49 (24 key), TH10
++  (`font-mono tabular-nums`).
++- **Round 251, B-ის pre-check:** scratch-ზე სრული suite 3,132/3,132; covering set 123 ფაილი; 10
++  red-proof run `b-round-250/mutants`-ში (MU-CAPTION-POSITION → IM22 და R9-L1, MU-CAPTION-REACT-STATE →
++  R9-L1, MU-CAPTION-STATIC → IM22 და R9-L1, MU-PASTE-SPLIT-LOCATOR → IM15 და IM17, MU-M-NO-RANGE → IM23,
++  ორი gesture mutant → IM20).
++- **Round 251, A:** typecheck, lint, Biome granted ფაილებზე, covering set, იგივე 10 run და Playwright
++  probe `/studio-lab`-ზე 1440×900 და 1280×720. რიცხვები: `a-round-251.md`.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+ - **SABA-B-10a stage 2b (ნავიგაცია):** C-R235-02 (Follow, Live 6.2), Ctrl+←/→-ის origin
+   გაჩერებულ მდგომარეობაში `noneAfter`/`noneBefore`-ის copy-ით (B-R250-NAV-ORIGIN), ruler-ისა და
+   range-ის title-ები, რომლებიც ჯერ "click = playhead"-ს წერს (B-R250-PLAYHEAD-TITLES), და seconds
+-  ruler-ის როლი (SABA-Q-TIME-RULER-ROLE). ამ stage-ზე doc-ის სტატუსი `Completed` ხდება.
++  ruler-ის როლი (SABA-Q-TIME-RULER-ROLE), და B-R251-PASTEND-AT-END (ზუსტად end-ზე play-ის ტექსტი
++  "(00:16.000) is past the end … (00:16.000)"). ამ stage-ზე doc-ის სტატუსი `Completed` ხდება.
++- **REGRESSION-ROUND-2026-10-30:** შემდეგი დაგეგმვისას, C-CAPTION-251-ის ჩათვლით.
+ - **SABA-B-10b:** ხილული მოციმციმე marker (`motion-safe:`), contrast და shortcut sheet-ის row-ები
+-  Shift+Space-ისა და Ctrl+Shift+Space-ისთვის.
++  Shift+Space-ისა და Ctrl+Shift+Space-ისთვის, და sheet-ის `marker` row-ის copy
++  (A-R250-REVIEW-SHEET-MARKER-COPY).
+ - **SABA-B-9:** Stop ღილაკი, მისი double-click და label "Pause" → "Stop" (B-R249-PAUSE-LABEL).
+ - **Saba-ს კითხვები:** SABA-Q-10A-HOME-PLAYING, SABA-Q-10A-CTRL-ARROW-RANGE,
+   SABA-Q-10A-DEVIATIONS (stage 2a-ში დაემატა (d) — M playback-ის დროს quantize არ ხდება, და (e) —

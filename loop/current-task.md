@@ -1,66 +1,60 @@
-# Round 251: SABA-B-10a stage 2a fix-up. The library line above Add names the Insert Marker, and the paste/split-while-playing test gap is closed.
+# Round 252: SABA-B-10a stage 2b (final 10a stage) + the IM22 test-strength fix
 
 The changes:
-- The library line `Active track: SFX · playhead 00:04.491` becomes `Active track: SFX · insert marker 00:03.000`. It names the point where Add places the sound, stopped and while playing (C-R250-01, Medium, a regression of round 250).
-- IM15 and IM17 get a playing branch, so a paste or split that reads the live position while playing turns them red (A-R250-REVIEW-PASTE-SPLIT-PLAYING, Medium, test strength).
-- In the same test file, two Low assertion gaps are closed at little cost: M prefers the time selection start (new IM23), and IM20 asserts `preventDefault` and a `metaKey` variant (A-R250-REVIEW-IM18-IM20-ASSERTS).
+- **Item 0 (Medium, first): A-R251-REVIEW-IM22-PLAYING.** IM22's playing assert is vacuous: in jsdom `requestAnimationFrame` is stubbed, so the position store stays at the play-from value 3, which is also the marker. The row writes the live position into the store first.
+- **Item 1 (C-R235-02, Low, Live 12 manual 6.2):**
+  - while playing, a click on the bars ruler's lower zone (and, by the CZABA rule below, on the seconds ruler) **pauses Follow**;
+  - a click in the bars ruler's **scrub strip** while playing **resumes** a paused Follow;
+  - **Stop** resumes a paused Follow.
+- **Item 2 (B-R250-NAV-ORIGIN, Low, Live 6.3/6.4):** while stopped, Ctrl+←/→ steps from the **Insert Marker**, not from the stop point. The "no more markers" status names the insert marker while stopped and the playhead while playing.
+- **Item 3 (B-R250-PLAYHEAD-TITLES, Low):** the seconds ruler, bars ruler and range body titles say `click = insert marker`.
+- **Item 4 (B-R251-PASTEND-AT-END, info; also closes the deferred Low B-R236-END-WORDING, same root cause, L7):** a play exactly at the end reads `… (00:16.000) is at the end of the project — …` instead of `(00:16.000) is past the end of the project (00:16.000)`.
+- **Doc 191** → `Completed (C round 252 PASS)`. This is the last SABA-B-10a stage (L28).
 
-**Planned by:** B, at the round 250 → 251 planning, 2026-10-29. **Decisions:** D-29z444…D-29z451.
+**Planned by:** B, at the round 251 → 252 planning, 2026-10-29. **Decisions:** D-29z452…D-29z460.
 
-**Type:** a fix-up round (bug gate: a Medium regression caused by the round comes before new scope). It has 3 tightly related findings, all in the code that stage 2a changed. There is one owner: `ArrangementLibraryPreview.tsx` (one component), with one string key and 5 test files.
-
-**Why this round (D-29z444):**
-- C round 250 is a **FAIL**, with `browserVerified` and `realVerified` both true. Every runnable §5 row passed at both viewports. The round failed on C-R250-01, a user-visible Medium regression outside the listed rows (precedent: C-R202-01).
-- Gate 250 is `skipped` (`gates/gate-round-250.json`: "C taskStatus FAIL"). Nothing from round 250 is published. Its 13 changed files are still in the working tree (`M`).
-- **Gate 251 publishes rounds 250 and 251 together** after a C PASS.
-- **REGRESSION** is not due yet: `regression-last.json` is 2026-10-27, and this planning is on 2026-10-29. It is due at the first planning on or after 2026-10-30, which is very likely the next one (§7). **RETRO** is due at round 260.
+**Why this round (D-29z452):**
+- **C round 251:** PASS, `browserVerified` and `realVerified` both true.
+- **Gate 251:** `published`, commit **`83b7c756ce3108d0e31f023a1aa2b0e59547d913`**, on both remotes. Rounds 250–251 are published together.
+- **SABA-B-10a stage 2a is done.**
+- **The one open Medium:** A-R251-REVIEW-IM22-PLAYING (test strength, no product failure). C row C-CAPTION-MOVE-251 covers the browser half.
+  - The bug gate puts it first.
+  - It is 3 lines in `insert-marker-ui.test.tsx`, which this stage owns anyway. It is item 0, with its own red-proof.
+- **REGRESSION is not due.** `regression-last.json` is 2026-10-27. Today is 2026-10-29, 2 days later, and the rule is ≥ 3 days. It is due at the first planning on or after **2026-10-30**, which is very likely the next one (§7).
+- **RETRO** is due at round 260.
+- **The export-progress flake did not come back.** Gate 251's `verify.log` shows `export-progress-ui.test.tsx` 8/8 green (1,242 ms) and 215/215 files. EXPORT-PROGRESS-LOAD-FLAKE-250 stays a watch item, and no isolation task is scheduled (D-29z447 condition not met).
+- **Stage 2b as one round, not split (D-29z453):**
+  - All five items are consumers of one change, the insert-marker model of stages 1–2a. Every item is stage-2b scope already sequenced by D-29z436/D-29z449/D-29z451.
+  - Only item 1 changes behaviour, in one owner (`StudioWorkspace.tsx`, which owns `followModeRef`). Items 2–4 are an origin swap and copy.
+  - **Seam, if A STOPs on item 1:** items 0+2+3+4 can pass alone, and item 1 is re-dispatched.
 
 **Read first:** `lessons.md` in full. Directly relevant here:
-- **L29**, with its new clause: a changed position source means every readout that names it is a consumer, grepped over `app/**` (§0.3);
-- **L3** (the changed line → widest-state rows, C-CAPTION-WIDE-251);
-- **L12** (a changed `data-testid` → grep and run every hit file; done in §0.2, 0 hits outside the grants);
-- **L10/L11** (B rules on A's round-250 STOP below);
-- **L23** (pre-applied on a scratch copy);
-- **L26/L28** (doc 191);
-- **L39** (no new persistent element: the text of an existing line changes);
-- **L50** (focus grep: 0 hits, §0.2).
-
-**B ruling on A's round-250 STOP (L10, D-29z447):** `export-progress-ui.test.tsx` failed 2 rows in A's first covering run, which ran under concurrent load.
-- **Ruling: a load flake, not a regression.** The evidence:
-  - A's 3 isolated reruns were green, and A's second covering run was 1841/1841;
-  - C's covering run alone was 1841/1841;
-  - B's full scratch run was 3132/3132 (§0.2);
-  - the round-250 and round-251 diffs touch no encoder, export or timer code.
-- It is recorded as the watch finding **EXPORT-PROGRESS-LOAD-FLAKE-250**.
-- A and C run the covering set **alone**, with no reviewer subagent, scratch extraction or browser job at the same time.
-- If gate 251's `verify.log` reproduces it, B plans a test-only isolation task for that file next, before new scope.
-
-**Not this round (sequenced, not dropped):**
-- **REGRESSION-ROUND-2026-10-30** (§7).
-- **SABA-B-10a stage 2b:**
-  - C-R235-02 Follow;
-  - B-R250-NAV-ORIGIN, with `noneAfter`/`noneBefore`;
-  - B-R250-PLAYHEAD-TITLES (`rulerTitle`, `rangeBodyTitle`);
-  - SABA-Q-TIME-RULER-ROLE;
-  - the new info B-R251-PASTEND-AT-END: a play exactly at the end reads "(00:16.000) is past the end … (00:16.000)" (A reviewer info 7).
-- **SABA-B-10b.** It adds the sheet rows for Shift+Space and Ctrl/Cmd+Shift+Space (GATE249-S7) and now also owns the sheet `marker` row copy (A-R250-REVIEW-SHEET-MARKER-COPY, D-29z449).
-- **SABA-B-9**, **SABA-B-11c**, and **SABA-B-7** (`awaiting_user`).
-- **The protected purchased route** (SRW-21, `deferred_user`).
-- **New Lows go to `deferred_low_polish` (D-29z449):** A-R250-REVIEW-STALE-PASTE-TITLE (`ArrangementContext.test.ts:487` title "pastes at the playhead"; that file is frozen).
+- **L29**, all four clauses (a changed meaning means every readout is a consumer; §0.3 copy sweep);
+- **L23** (pre-applied, §0.2);
+- **L3** (the new status strings → widest-state rows);
+- **L39** (nothing new is persistent);
+- **L47/L50** (focus grep, §0.2);
+- **L51** (status clobber, §1.3);
+- **L49** (the wrapper keeps `setInsertMarker`'s side effects, §1.2);
+- **L28** (doc 191 final);
+- **L52** (new: playing-branch readout asserts in jsdom).
 
 ## 0. Baseline and scope
 
 **Start state:**
-- **HEAD** = `dcb7eb14127850eecad45f373cdebba2258ee95e`, unchanged since gate 249 (`b-round-250/head-at-planning.txt`).
-- **The working tree is not clean, by design.** `git status --short --untracked-files=all` shows exactly 13 `M` paths: the round-250 grants (`b-round-250/git-status-at-planning.txt`). Nothing is untracked.
-- **STOP (L11)** if HEAD differs, if the status shows any other path, or if any hash check below fails. One exception: a root commit that touches only the 4 root files. In that case, re-hash them and continue.
+- **HEAD** = `83b7c756ce3108d0e31f023a1aa2b0e59547d913` (gate 251; `b-round-251/head-at-planning.txt`).
+- **The working tree is clean.** `git status --short --untracked-files=all` is empty (`b-round-251/git-status-at-planning.txt`, 0 lines).
+- **STOP (L11)** if HEAD differs, if the status is not empty, or if any hash check fails. One exception: a root commit that touches only the 4 root files. In that case, re-hash them and continue.
 
-**Frozen:** `b-round-250-r251-tree-sha256.txt`, **1,102** files. That is every tracked file (1,114), minus the 8 round-251 grants and the 4 root files, **hashed from the working tree**.
-- So the 9 round-250 files that this round does not touch are frozen **at their round-250 content**:
-  - `ArrangementContext.tsx`, `StudioWorkspace.tsx`, `ArrangementMarkerRow.tsx`, `ArrangementTransport.tsx` and `shortcuts.ts`;
-  - `ArrangementContext.test.ts`, `bars-ruler-ui.test.tsx`, `navigation-strings-ui.test.tsx` and `marker-strings-ui.test.tsx`.
-- From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-250-r251-tree-sha256.txt` gave rc 0 at planning.
-- Each of the 7 protected auth and purchase files appears exactly once (checked), and `git diff --quiet HEAD` gives rc 0 on each:
+**Frozen:** `b-round-251-r252-tree-sha256.txt`, **1,097** files. That is every tracked file (1,114), minus the 13 grants and the 4 root files.
+- From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-251-r252-tree-sha256.txt` gave rc 0 at planning.
+- These are frozen in particular:
+  - `ArrangementContext.tsx` (no context change this round; it changed in rounds 248–251, see GATE249-ARCH-TRANSPORT-POSITIONS);
+  - `ArrangementRuler.tsx`, `ArrangementTempoRow.tsx`, `ArrangementLane.tsx`, `ArrangementClip.tsx`, `ArrangementTransport.tsx` and `shortcuts.ts`;
+  - `ArrangementContext.test.ts`, `grid-snap-menu.test.tsx`, `markers-move-ui.test.tsx`, `mode-toggle-colour-ui.test.tsx`, `focus-reveal-ui.test.tsx`, `library-preview.test.tsx` and `render-budget.test.tsx`.
+
+  Their Follow asserts (GM24, `markers-move-ui` l.777, DXT3, FR-e) check `paused` **while playing** only. B read each one, and the stop-resume does not reach them.
+- **The 7 protected auth and purchase files** each appear exactly once in the frozen list (checked), and `git diff --quiet HEAD` gives rc 0 on each:
   - `app/routes/studio.$productId.tsx`;
   - `app/routes/api.studio-token.ts`;
   - `app/routes/account.downloads.tsx`;
@@ -70,283 +64,303 @@ The changes:
   - `app/entry.server.tsx`.
 - **Also frozen:**
   - every other component;
-  - `position-store.ts`;
   - every other test file;
   - every implementation doc except doc 191;
   - `.claude/**`, `CLAUDE.md` and every config file.
 
-**Root-owned, must equal HEAD:** `b-round-250-r251-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`), with start hashes in `b-round-250-r251-root-files-start-sha256.txt`. No dependency is needed.
+**Root-owned, must equal HEAD:** `b-round-251-r252-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`), with start hashes in `b-round-251-r252-root-files-start-sha256.txt`. No dependency is needed.
 
-### 0.1 Grants (`b-round-250-r251-grants.txt`; start hashes in `b-round-250-r251-grants-start-sha256.txt`; start copies in `b-round-250/r251-granted-start/`)
-**The diff:** `b-round-250/precheck-251.diff`, sha256 `77b07ca817f44f871d839793ba7205d69d2dcd37b3ac71057e79ea0ae5fb0fef` (`precheck-251.sha256`). It covers grants 1–7 and applies against the **working tree** (HEAD + round 250).
-- On the planning tree, `git apply --check -p1` gives rc 0.
-- Applied to a tar copy of the working tree, it reproduces the scratch files byte for byte.
-- The expected final hashes of grants 1–7 are in `b-round-250/expected-final-sha256.txt`.
-- **A may apply it as is,** then write grant 8.
-
-| # | Path | Change (`git apply --numstat`) |
+### 0.1 Grants (`b-round-251-r252-grants.txt`; start hashes in `b-round-251-r252-grants-start-sha256.txt`; start copies in `b-round-251/r252-granted-start/`)
+| # | Path | Change |
 |---|---|---|
-| 1 | `app/components/arrangement/ArrangementLibraryPreview.tsx` | +21/−19. <ul><li>`LibraryPlayheadText` → **`LibraryInsertMarkerText`**, and its memo → `LibraryInsertMarkerTextMemo`.</li><li>It reads `useArrangementInsertMarkerStore()` and writes `textContent` in a `useEffect` that calls the writer once and returns `insertMarkerStore.subscribePosition(writer)`. This is the same pattern as `ArrangementInsertMarkerSignal` (`StudioWorkspace.tsx` l.497–519).</li><li>No React state and no position-frame writer: `useArrangementPositionStore`/`useArrangementPositionWriter` leave this file's imports.</li><li>`data-testid` `arrangement-library-playhead` → **`arrangement-library-insert-marker`**. Classes stay `font-mono tabular-nums`.</li><li>The line's literal `· playhead ` becomes `· {studioLibraryPanelStrings.insertMarker} `.</li></ul> |
-| 2 | `app/lib/arrangement/strings.ts` | +1/−0: `studioLibraryPanelStrings.insertMarker: 'insert marker'` (after `videoTrackNote`). |
-| 3 | `app/lib/arrangement/__tests__/insert-marker-ui.test.tsx` | +92/−2 (round-250 rows kept). <ul><li>**IM15:** after the stopped paste: Undo, Space, +1 s (live > 2.5, playing), paste. The clip is on Music at **2**, the status contains `00:02.000`, and playback continues.</li><li>**IM17:** after the first Undo: Space, +1 s (live > 5.5), select h1, Ctrl+E. The status is `splitDone('00:05.000')`, the SFX starts are [0, 5], and playback continues. Then Space (stop), Undo, and the existing several-clips part.</li><li>**IM20:** the three blocked keys are sent with `fireEvent.keyDown(...)` and each must return `false` (default prevented): Ctrl+Shift+Space, **Meta+Shift+Space** (new) and Home. The marker, playhead and selection asserts are unchanged.</li><li>New **IM22** and **IM23** (§2.2). Nothing is removed.</li></ul> |
-| 4 | `app/lib/arrangement/__tests__/library-preview.test.tsx` | +10/−10: the new testid and component name; `· playhead 00:00.000` → `· insert marker 00:00.000` (×2); the describe/it titles name the insert marker. The memo row keeps all its asserts. |
-| 5 | `app/lib/arrangement/__tests__/render-budget.test.tsx` | +26/−11. <ul><li>`LibraryPlayheadText` → `LibraryInsertMarkerText` in the playback-frames row.</li><li>New `InsertMarkerStoreProbe`.</li><li>**R9-L1 is rewritten to the new contract** (§2.2). Its old "text changes on every position frame" asserts are replaced by stronger ones: the text is unchanged over 60 frames, and two marker writes update it, all with 0 renders.</li></ul> |
-| 6 | `app/lib/arrangement/__tests__/strings.test.ts` | +3/−1: ST49 gets the `insertMarker` key and literal, and the count goes 23 → 24. |
-| 7 | `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` | +7/−2: TH-row testid `arrangement-library-insert-marker` (`font-mono`, `tabular-nums`). |
-| 8 | `docs/implementation/2026/quarter-IV/191-saba-b-10a-insert-marker.md` | The whole doc (L34). l.4 becomes exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 251 PASS)` (L28 re-dispatch clause). Add a "round 251 fix-up" part to each section (§2.3). Do not rewrite the stage-2a text. |
+| 1 | `app/components/arrangement/StudioWorkspace.tsx` | Item 1 (§1.2): the ruler-click wrapper, strip resume, and Stop resume. |
+| 2 | `app/components/arrangement/ArrangementMarkerRow.tsx` | Item 2 (§1.4): `stepMarker` origin and the "none" message by state. |
+| 3 | `app/lib/arrangement/strings.ts` | <ul><li>Items 1–4 copy (§1.6).</li><li>New: `studioPlaybackStrings.insertMarkerWhilePlayingFollowPaused`, `studioMarkerStrings.noneAfterInsertMarker` and `noneBeforeInsertMarker`.</li><li>Changed: `rulerTitle`, `rangeBodyTitle` and `playPastEnd` (at-end branch).</li></ul> |
+| 4 | `app/lib/arrangement/__tests__/insert-marker-ui.test.tsx` | Item 0 (IM22). New **IM24** (nav origin): this is the known-good home, with M (IM23), Space, `advance` and `clickRuler` already in the file. |
+| 5 | `app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx` | New FW1–FW7 (§2.3). BR9/BR13 are unchanged unless a literal collides. |
+| 6 | `app/lib/arrangement/__tests__/markers-ui.test.tsx` | `No more markers … playhead` literals (l.430/439/450/456) → by state (R-NONE). |
+| 7 | `app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx` | l.371/375 literals by state (R-NONE). This file also mounts with `togglePlayback` (l.424/430), so a playing "none" row may go here. |
+| 8 | `app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `MARKER_NEXT_NONE_TEXT` (l.405) by the state of the row that uses it. |
+| 9 | `app/lib/arrangement/__tests__/strings.test.ts` | <ul><li>ST17 (`rulerTitle`, l.1008–1009) and ST34 (`rangeBodyTitle`, l.1927).</li><li>The marker-strings exact-key row (l.1630–1631) gets the 2 new keys.</li><li>ST11 gets the at-end and Follow-paused formatter cases.</li><li>Any exact-key list of `studioPlaybackStrings` gets the new key.</li></ul> |
+| 10 | `app/lib/arrangement/__tests__/clip-strings-ui.test.tsx` | `RANGE_BODY_TITLE` (l.103) and l.244 → the new title. Fixes CSU1, CSU2 and LC1 (LC1 finds the body by that title). |
+| 11 | `app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx` | NS4 l.343 → the new ruler title. |
+| 12 | `app/lib/arrangement/__tests__/track-layout.test.tsx` | l.475 `rangeBodySelector` → the new title. This keeps the folded-clip "no range body" assert from going vacuous: it must still find the body on an unfolded clip in the same row (it failed on B's scratch, so it does find it today). |
+| 13 | `docs/implementation/2026/quarter-IV/191-saba-b-10a-insert-marker.md` | The whole doc (L34). l.4 becomes exactly `**სტატუსი:** Completed (C round 252 PASS)` (L28 final stage). Add a round-252 / stage-2b part to each of the 7 TEMPLATE sections, without rewriting the earlier text. |
 
-- **No assertion is removed without a stronger replacement.** The one contract change is R9-L1: "the line follows the playhead" becomes "the line follows the Insert Marker". Its red proofs are MU-CAPTION-POSITION and MU-CAPTION-REACT-STATE.
+- **No assertion is removed** without a stronger replacement. A test whose only change is removing an assertion is a Medium bug (policy).
 - **Read before editing:**
-  - `FORWARDREF_COMPONENT.md` and `AGENT_DISCOVERABLE_CODE.md` (the new name `LibraryInsertMarkerText`, the testid, the string key);
-  - `AUDIO_ARCHITECTURE.md` (position stores);
-  - `TAILWIND_FIRST.md` (classes unchanged);
+  - `AGENT_DISCOVERABLE_CODE.md` (the new keys and the wrapper name);
+  - `AUDIO_ARCHITECTURE.md` (position stores and playback restart);
+  - `FORWARDREF_COMPONENT.md` (no component API change expected);
   - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`;
   - `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md`;
   - `.claude/prompts/studio-feature.md`.
 
-### 0.2 B's pre-check (L23, done)
-**Scratch copy:** `/tmp/b251-scratch`, a tar copy of the **working tree** (not `git archive`, which would lack round 250). It was made outside the repo, with its own `node_modules` directory of per-entry symlinks so that `.vite` stayed local.
-- **Scripts:**
-  - `b-round-250/proto_src_251.py` (source) and `proto_tests_251.py` (tests);
-  - IM23's assertions were then changed by hand: the fixture already has a marker at 10, so the row uses `toContain`, not `toEqual`. Its first playing assert ("no marker in (2.5, 4.5)") was vacuous, because Space with the 9–10 selection plays from 9, so it was replaced by "one marker added, exactly one at 9". After that, `insert-marker-ui` was re-run alone (23/23) and FIX-CONTROL and MU-M-NO-RANGE were re-run (`mutants/logs-im23/summary.txt`: none / IM23). Then `biome check --write`.
-  - **The diff is the source of truth.**
-- **Static checks:**
-  - `npx tsc --noEmit` rc 0 (`tsc-251.log`);
-  - `npx biome check` on the 7 files: "No fixes applied", rc 0 (`biome-251.log`).
-- **Whole suite on the scratch, run by B, not A or C:** 215 files, **3,132/3,132** green, rc 0 (`proto-full-251.json`). That is the round-250 count of 3,130 plus IM22 and IM23.
-- **Collisions (L12/L23):**
-  - `grep -rn "arrangement-library-playhead\|LibraryPlayheadText" app e2e` on the scratch gives **0 hits**.
-  - The working tree has hits only in grants 1, 4, 5 and 7.
-  - ST49 pins the `studioLibraryPanelStrings` keys, so it is granted (grant 6).
-- **Covering set:** `b-round-250/covering-251.txt`, **123 files**. This is the round-250 grep plus `ArrangementLibraryPreview|studioLibraryPanelStrings|arrangement-library-`, and it adds no file to round 250's 123.
-- **Timeouts (L31):**
-  - in B's run, IM22 took 130 ms and IM23 89 ms, against 15 s;
-  - the `render-budget` file took 5.2 s, with its slowest row at 2.3 s against its 15 s declaration;
-  - CP12a–d stay near 8 s against 30 s;
-  - nothing is near 50 %.
-- **L50 focus grep:** the regex `onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)` over every added or removed source line of grants 1–2 gives **0 hits** (`l50-grep-251.txt`). Nothing moves focus, and nothing that can hold focus unmounts: the span is not focusable.
-- **Red proofs.** Script: `b-round-250/mutants/run251.sh <fixed-scratch> <logdir>` (set `MUTANTS="…"` for a subset), with the mutants in `mutate251.py`. Each run uses its own copy `/tmp/b251-mut-*` and runs grants 3–7. Summary: `b-round-250/mutants/logs/summary.txt`.
+### 0.2 B's pre-check (L23, L50, done)
+- **Copy collisions** (scratch `/tmp/b252-scratch` = a tar copy of HEAD with the item 3 and item 4 strings changes applied; `b-round-251/precheck-copy-fails.txt`):
+  - `tsc` rc 0.
+  - The 8 files that pin those literals ran: **7 failures, all in granted files.** They are CSU1, CSU2, LC1 (grant 10), NS4 (grant 11), ST17, ST34 (grant 9), and the track-layout row "renders no range body on a folded clip…" (grant 12).
+  - `ArrangementContext.test.ts`, `metronome-horizon-ui`, `bars-ruler-ui` and `insert-marker-ui` stayed green. BR13 and BR8 compute the text with `playPastEndMessage`, so the at-end wording flows through them.
+  - **The only frozen file that names the end wording is `ArrangementContext.test.ts` l.687/701.** Those are test titles with no literal assert, so they are unaffected.
+- **"No more markers" literals:** the grep `grep -rn "noneAfter\|noneBefore\|No more markers" app/lib/arrangement/__tests__` hits only grants 6–9 (markers-ui l.430/439/450/456, marker-edge-nav l.371/375/398, status-announcement l.405, strings.test l.1630–1631). **Ruling R-NONE:** each hit takes the text for the state its row is in (stopped → `…insert marker`, playing → `…playhead`). A hit whose state A cannot tell is a STOP (L23).
+- **Item 0** (`b-round-251/precheck-im22.txt`, sketch `b-round-251/im22-fixed-sketch.test.tsx`):
+  - **The fix:** after `advance(1)`:
+    - `act(() => mounted.api.position?.setPosition(live(mounted.api).getLivePosition()));`
+    - `expect(positionOf(mounted.api)).toBeGreaterThan(3.5);`
+    - then the existing `caption === '00:03.000'`.
+  - **Red-proof:** MU-CAPTION-POSITION (`b-round-250/mutants/mutate251.py`), plus the stopped caption asserts removed on the scratch only. IM22 goes **red at the playing assert** (`expected '00:03.960' to be '00:03.000'`).
+  - **Control:** HEAD's IM22 under the same two changes is **green**, which is the vacuity being fixed.
+- **Focus (L47/L50):**
+  - The regex `onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)` over grants 1–2 has **32 hits**.
+  - **Ruling: all out of scope.** No hunk in this task moves focus or unmounts a focusable element:
+    - Follow changes a `data-follow-mode` attribute and the button text (`Follow` / `Follow ‖`) on the **same** button element;
+    - the nav change only swaps the origin of an existing `seekTo`.
+  - C re-runs the grep and checks that `document.activeElement` is unchanged across the FOLLOW rows (C-FOCUS-252).
+- **Timeout headroom (L31):** gate 251 `verify.log` shows:
 
-| Run | Change | Red rows |
-|---|---|---|
-| FIX-CONTROL | none | none |
-| MU-CAPTION-POSITION | the span reads `useArrangementPositionStore()` (the round-250 behaviour) | **IM22, R9-L1** |
-| MU-CAPTION-REACT-STATE | the span also re-renders through `useState` on every marker change | **R9-L1** (render count) |
-| MU-CAPTION-STATIC | no subscription (written once on mount) | **IM22, R9-L1** |
-| MU-PASTE-SPLIT-LOCATOR | paste and both no-range split branches read `isPlaying ? livePosition() : marker` (C's C-MU-PASTE-SPLIT-LOCATOR) | **IM15, IM17** (0 red in round 250) |
-| MU-PASTE-LOCATOR | paste only | **IM15** |
-| MU-SPLIT-LOCATOR | both split branches only | **IM17** |
-| MU-M-NO-RANGE | `beginAddMarker` ignores the time selection | **IM23** |
-| MU-GESTURE-CS-NO-PREVENT | Ctrl/Cmd+Shift+Space calls `preventDefault` only outside a gesture | **IM20** |
-| MU-GESTURE-HOME-NO-PREVENT | Home calls `preventDefault` only outside a gesture | **IM20** |
+  | File | Tests | Time | Declared timeout |
+  |---|---|---|---|
+  | `insert-marker-ui` | 23 | 5.08 s | 15 s per test |
+  | `bars-ruler-ui` | 15 | 4.38 s | – |
+  | `markers-ui` | 31 | 5.06 s | – |
+  | `marker-edge-nav-ui` | 12 | 2.22 s | – |
 
-### 0.3 Recipes and measurements (L29)
-**Copy sweep (the L29 lesson from C-R250-01).** On the scratch: `grep -rniE "playhead|play head" app --include=*.tsx --include=*.ts | grep -v __tests__` → `b-round-250/copy-sweep-251.txt` (114 lines). After code identifiers are removed, the user-visible Studio-workspace texts that still name the playhead are:
-- `strings.ts` l.244 `Insert marker moved to the playhead …`: correct;
-- l.367 `zoomSliderTitle`: correct, because zoom anchors on the playhead;
-- `ArrangementRuler.tsx` l.210 `aria-label="Playhead"`: correct, it is the handle;
-- l.378 `rulerTitle` and l.684 `rangeBodyTitle`: B-R250-PLAYHEAD-TITLES, stage 2b;
-- l.504/505 `noneAfter`/`noneBefore`: B-R250-NAV-ORIGIN, stage 2b.
+  No single test is near 50 % of its timeout. A reports any test above 50 % of its declared timeout at the top (L11).
+- **Browser baseline at HEAD** (`b-round-251/probe/follow-baseline.cjs` → `follow-baseline.json`, both viewports). This also verifies the recipe (L29):
+  1. Load `/studio-lab` and wait for `Demo collection ready`.
+  2. Click library item `demo-stem-pulse`, then **Add**. The status reads `Tempo 120 BPM from …` and the bars ruler `data-bpm="120"`.
+  3. Blur, then press `=` ×4. The zoom becomes 97.7 px/s.
+  4. Press **Space**.
 
-The other hits are code identifiers, comments, the old `studio/` and `audio/` components or `recordings/SfxSceneBuilder.tsx` (another feature, not this workspace). No other inline JSX literal names a position that the round-250 commands ignore.
+  Results at HEAD:
+  - A lower-zone click (`bars.y + h − 3`) gives `data-follow-mode="on"` (**bug**) with the status `Insert marker at 00:01.250 — playback continues. …`.
+  - A seconds-ruler click gives `on`.
+  - A manual scroll of +200 px gives `paused` (status `Follow paused by manual navigation…`).
+  - A strip click (`bars.y + 2`) gives **`paused`** (bug).
+  - **Space (stop)** gives **`paused`**, so Follow stays paused after Stop (Live: it resumes on stop).
 
-**Browser probe.** Chromium (Playwright), a fresh context per case, at both viewports.
-- Each case waits for `Demo collection ready`, then adds `demo-stem-pulse` (the round-250 §0.3 recipe).
-- Then it clicks the SFX lane at 3 s; Space, 1.5 s, Space; clicks the `demo-soft-impact` row; reads the line; and clicks **+ Add**.
-- "playing" presses Space again (playing from 3) and waits 1 s before reading.
-- "video" makes the Video lane active through its name button (`[data-track-id="video"] button[aria-pressed]`), which is the widest built-in state (`videoTrackNote`).
-- **Runs:** the working tree on `:5173` (round 250) and the scratch on `:5174` (now stopped).
-- **Script:** `b-round-250/caption-probe-251.cjs <base> <out.json>`.
-- **Line count:** distinct `top` values of the line's text rects (a `Range` over the `<p>`).
+### 0.3 Copy sweep (L29 changed-meaning clause)
+`grep -rniE "click = playhead|click.{0,20}playhead|playhead.{0,20}click|markers? (after|before) the playhead" app --include=*.ts --include=*.tsx | grep -v __tests__` gives `strings.ts` `rulerTitle`, `rangeBodyTitle`, `noneAfter` and `noneBefore` (all this round). There are no inline JSX hits.
 
-| Case (both viewports, library width 288 px, `<p>` 264 × 32 px) | Round 250 (`caption-head.json`) | Fix (`caption-proto.json`) |
-|---|---|---|
-| stopped (marker 3.000, playhead ≈ 4.5) | `Active track: SFX · playhead 00:04.552`; Add → `sfx@3.000` | **`Active track: SFX · insert marker 00:03.000`**, 1 line; Add → `sfx@3.000`, status `“Soft impact” added to the SFX track at 00:03.000.` |
-| playing (from 3, ≈ 4.0) | `· playhead 00:04.009` | **`· insert marker 00:03.000`**; Add → `sfx@3.000` |
-| Video lane active (widest) | `Active track: Video (audio is not added here) · playhead 00:04.593`, 2 lines | `… · insert marker 00:03.000`: **2 lines**, the time inside the box, `sh = ch = 32`, `sw = cw = 264` |
+These stay, because they name the playhead correctly:
+- `playheadTitle` (the playhead handle);
+- `startPointPlayhead` (the Shift+Space origin);
+- `insertMarkerToPlayhead`;
+- `noneAfter`/`noneBefore`, now used only while playing.
 
-- Every case had 0 page errors.
-- **Invalid attempt, kept:** `caption-proto-attempt1-timeout.log`. The first cold `:5174` load timed out on "Demo collection ready", and the probe was re-run (the same class as rounds 249 and 250).
-- **Code facts:**
-  - `addSourceToActiveTrack` reads `insertMarkerRef.current` (`ArrangementContext.tsx` l.1590) and has **no** time-selection branch, so the add point is always the marker.
-  - `addClip` → `findFreeStart(…, desiredStart)` (`model.ts` l.147) can move the clip to the next free slot when the marker point is occupied. The line names the marker, which is where Add **tries** to place the sound, and the status reports where it landed. That is honest, and it is the same as round 250.
-  - `insertMarkerStore` is written only by marker moves (`ArrangementContext.tsx` l.815), never per playback frame.
+C re-runs the grep (C-COPY-252).
 
 ## 1. Rulings
 
-### 1.1 What the line shows (D-29z445)
-- **The text names the insert marker**, in its time format: `Active track: <lane> · insert marker 00:03.000`.
-  - **Rejected: dropping the time.** The marker is invisible until SABA-B-10b, so this line is the only readout of the add point, and the add point is what the user needs before pressing Add.
-  - **Rejected: showing the playhead while playing.** Add ignores the playhead in every state (D-29z437).
-- Lowercase `insert marker` matches the rest of the line (`· playhead` was lowercase) and the sheet rows (`… at the insert marker`).
-- **The line updates without a React render:** a direct `textContent` write on each insert-marker store change. It is unchanged by playback frames. This keeps the R9-L1 budget (0 renders).
-- **The video lane keeps its note.** The line stays 2 lines at the widest built-in state.
-  - A user-renamed long lane name can still clamp the line. This is the same at round 250, and the `title` carries the lane name. Recorded as info, not changed.
+### 1.1 Which clicks pause or resume Follow (D-29z454)
+Live 12 manual 6.2, verbatim (§3): *"Follow will pause if you make an edit or scroll the view horizontally in the Arrangement or if you click on the beat-time ruler. Follow will start again once you stop or restart playback, or click in the Arrangement or clip scrub area."*
+- **"the Arrangement or clip scrub area"** is read as "the Arrangement scrub area or the clip scrub area". Both are scrub areas. In CZABA, the Arrangement scrub area is the bars ruler's top strip (`arrangement-bars-scrub-strip`, 11a). There is no clip scrub area (no Clip View).
+- **A track (lane) click is therefore not a resume trigger,** and it is **not changed** (inference, recorded).
 
-### 1.2 Tests that pin the old contract
-`library-preview` and `studio-theme-obsidian` change their testid and text only. R9-L1 changes its contract on purpose (§0.1, grant 5). No row is deleted.
+| Action while playing | Follow before | Follow after | Status after |
+|---|---|---|---|
+| Bars ruler lower zone click | `on` | **`paused`** | **`insertMarkerWhilePlayingFollowPaused(t)`** |
+| Seconds ruler click (CZABA rule, §1.5) | `on` | **`paused`** | same |
+| Either ruler click | `paused` / `off` | unchanged | `insertMarkerWhilePlaying(t)` (unchanged) |
+| Scrub strip click | `paused` | **`on`** | **`followResumed`** |
+| Scrub strip click | `on` / `off` | unchanged | unchanged (no write, as at HEAD) |
+| Lane / clip-body / range-body click | any | unchanged | unchanged |
+| Ruler drag (↔ scroll, ↕ zoom), manual scroll, wheel | `on` | `paused` | `followPaused` (unchanged, HEAD behaviour) |
+| Space (stop) | `paused` | **`on`**, silently | the stop's own status (unchanged) |
+| Space (stop) | `off` | `off` | unchanged |
 
-### 1.3 Lows (D-29z449)
-- **A-R250-REVIEW-IM18-IM20-ASSERTS:** fixed here (IM20 and IM23), because this round owns the file and it costs little (2026-10-23 bug-gate exception).
-- **A-R250-REVIEW-SHEET-MARKER-COPY:** scheduled in **SABA-B-10b**, which owns `shortcuts.ts` and adds sheet rows there anyway. It is not deferred. 10b carries the C-TITLES row-height check.
-- **A-R250-REVIEW-STALE-PASTE-TITLE** (`ArrangementContext.test.ts:487`): goes to `deferred_low_polish`, because the file is frozen this round.
+- **While stopped,** no ruler or strip click changes Follow. That is the existing `isPlaying` guard. A stopped strip click starts playback, and the existing play effect (l.1888–1896) still resumes `paused`.
+- **`off` never turns on by itself.** Only the Follow button does that.
 
-### 1.4 Status writes (L51)
-No status write is added, moved or changed. The add status text is unchanged.
+### 1.2 Where the logic lives (D-29z455, L49)
+- **Not in the context.** `setInsertMarker` serves both the ruler clicks (pause) and the lane clicks (no change), so the rule belongs at the call sites. `StudioWorkspace.tsx` owns `followModeRef` and wires both rulers: `barsRulerGestures.onSeek` (l.1413) and `<ArrangementRuler onSeek>` (l.2902).
+- **New callback `placeInsertMarkerFromRuler(time)`** in `StudioWorkspace.tsx`, used for both `onSeek` props. Its body:
+  1. `const pausing = workspaceRef.current.isPlaying && followModeRef.current === 'on';`
+  2. `setInsertMarker(time)`. It is called unchanged and **keeps all its side effects**: the marker write, the stopped `updatePosition`, the playing status and the scrub-ref reset.
+  3. If `pausing`: `setFollowMode('paused')`, then `workspaceRef.current.setStatus(studioPlaybackStrings.insertMarkerWhilePlayingFollowPaused(formatArrangementTime(Math.max(0, time))))`.
+  - Do **not** call `pauseFollowForNavigation`, whose status would be clobbered or would clobber; see §1.3.
+  - Both status writes happen in one event handler, so React batches them and the `aria-live="polite"` status (`StudioWorkspace.tsx` l.3047) receives one final text. If A finds that `setStatus` announces per call (any announce helper or dedupe), FW1 also asserts a single announcement of the composed text. Otherwise A states the batching in the report.
+  - A mutant that deletes step 2 or step 3 must turn an FW row red.
+- **`playFromRuler`** (l.1408) gains a resume branch. If `isPlaying` and `followModeRef.current === 'paused'`:
+  - first set `autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0` (as `toggleFollow` does, so the next follow scroll is not read as a manual scroll);
+  - then call `playFrom(time)`;
+  - then `setFollowMode('on')` and `setStatus(studioViewStrings.followResumed)`.
 
-### 1.5 Focus (L47/L50)
-Nothing moves focus. The L50 grep gives 0 hits.
+  The `playFrom` call is unchanged in every case.
+- **Stop resume:** in the effect at l.1888, when `isPlaying` turns false and `followModeRef.current === 'paused'`, call `setFollowMode('on')`. It writes no status. The existing true-branch is unchanged.
+- **Not in scope:**
+  - the marker flag's play (`ArrangementMarkerRow` `playFrom` while playing). Whether a locator jump counts as a "restart" is an inference; it is recorded in SABA-Q-FOLLOW-EDIT-RESTART (b).
+  - Ctrl+←/→ during playback. Unchanged.
 
-### 1.6 Screen budget (L39)
-**No new persistent element.** The existing line's text changes:
-- `playhead` (8 characters) becomes `insert marker` (13 characters);
-- it stays within the line's 2-line box at the widest built-in state (§0.3).
+### 1.3 Status writes (L51)
+| Sequence (real order) | Final status after the last write |
+|---|---|
+| Ruler click while playing, Follow `on`: `setInsertMarker` writes `insertMarkerWhilePlaying(t)`, then the wrapper writes the composed text | `Insert marker at 00:01.250 — playback continues, Follow paused. Stop, then Space plays from here.` |
+| Ruler click while playing, Follow `paused`/`off` | `Insert marker at <t> — playback continues. Stop, then Space plays from here.` (HEAD text) |
+| Strip click while playing, Follow `paused`: `playFrom` (no status, `seekTo` only, context l.1490–1498), then `followResumed` | `Follow is following the playback position again.` |
+| Paused, then Space (stop) | the text HEAD writes on stop, unchanged. FW6 computes the expected text from a stop without a pause in the same test and asserts they are equal. |
 
-C-BUDGET-251 counts the persistent lines.
+### 1.4 Ctrl+←/→ origin (D-29z456; Live 6.3/6.4)
+- In `stepMarker` (`ArrangementMarkerRow.tsx` l.262–289), `getLivePosition()` → **`getLocatorPosition()`**. That already exists in the context: while playing it returns the live position, while stopped the insert marker.
+  - **Stopped:** after Play from 1 and a Stop at about 4, Ctrl+→ goes to the first marker after **1**, not after 4.
+  - **Playing:** unchanged.
+  - `seekTo` already writes the insert marker (EN3). Add `getLocatorPosition` to the deps and drop `getLivePosition` if it is now unused.
+  - This also answers part of the gate-251 reviewer's signal 2: the three-way position split becomes two sources (context `getLocatorPosition`, commands `insertMarkerRef`). No refactor.
+- **The "none" message by state:**
+  - stopped → `studioMarkerStrings.noneAfterInsertMarker` = `'No more markers after the insert marker'` (`noneBeforeInsertMarker` = `'No more markers before the insert marker'`);
+  - playing → the existing `noneAfter`/`noneBefore` (`… the playhead`), unchanged.
+  - The key-repeat dedupe (`status !== message`) is unchanged.
+  - The state is read from `isPlaying` of `useArrangement()`; add it to the deps.
+
+### 1.5 The seconds ruler (SABA-Q-TIME-RULER-ROLE stays `awaiting_user`, L44)
+- The default from round 249 holds: a seconds-ruler click places the insert marker. It does what the bars lower zone does.
+- **CZABA rule (inference, not Live):** because it does the same thing, it also pauses Follow while playing. In a no-BPM project the seconds ruler is the only click ruler, and Live's own time ruler only scrolls (6.1 item 15).
+- This is appended to SABA-Q-TIME-RULER-ROLE as part (b). It is not a Saba decision.
+
+### 1.6 Copy (items 1, 3, 4)
+- `rulerTitle`: `'Click = insert marker · ↔ drag = scroll · ↕ drag = Zoom · double-click = Fit / Zoom to selection'`.
+- `rangeBodyTitle`: `'drag = time selection · click = insert marker'`.
+- **`playPastEnd`:** when `position === end` (the formatted strings are equal), it returns `` `${subject} (${position}) is at the end of the project — there is nothing to play here. Home returns to 0.` ``. Otherwise it returns the HEAD text.
+  - The comparison is on the formatted ms strings, so 15.9999995 vs 16 reads as at the end, honestly.
+  - No caller changes.
+- **New** `insertMarkerWhilePlayingFollowPaused: (time: string): string` → `` `Insert marker at ${time} — playback continues, Follow paused. Stop, then Space plays from here.` ``.
+
+### 1.7 Screen budget (L39) and Lows
+- **Nothing persistent is added.** Statuses are transient and titles are tooltips. The Follow button already shows `Follow ‖` when paused. C still counts the persistent lines (C-BUDGET-252).
+- **New Lows go to `deferred_low_polish`** (D-29z458). This round does not fix them:
+  - GATE251-S1 (library span: JSX text plus a direct DOM write);
+  - A-R251-REVIEW-ADD-DESCRIBEDBY;
+  - A-R251-REVIEW-CLASS-SELECTORS.
 
 ## 2. Changes
 
 ### 2.1 Source (grants 1–2)
-Exactly the diff.
-- No new dependency.
-- No new export: the new names are file-local. `studioLibraryPanelStrings` gains one key.
+As §1.2 and §1.4. The new callback is `placeInsertMarkerFromRuler`, wrapped in `useCallback` and placed next to `playFromRuler`. It replaces `setInsertMarker` in `barsRulerGestures` (value and deps) and in the `<ArrangementRuler onSeek>` prop. No prop, type or other component changes.
 
-### 2.2 Rows (grants 3–7)
-| Row | Case | Expected |
-|---|---|---|
-| IM15 (+playing) | as in round 250, then Undo; Space; +1 s; paste | Music clip at 2 again; the status contains `00:02.000`; playing |
-| IM17 (+playing) | as in round 250, the playing split inserted after the first Undo | `splitDone('00:05.000')`, SFX [0, 5], playing; then the several-clips and outside parts unchanged |
-| IM20 (+preventDefault, +Meta) | as in round 250, with Meta+Shift+Space added | each of the 3 keyDowns returns `false`; marker `2.000`, playhead = stop point, selection kept; after release Home → `0.000`, null |
-| **IM22** | play/stop from 3 (stop > 4); read the line; Space, +1 s; Space; ruler click at 6; add `hit` on Music | `00:03.000` and `· insert marker 00:03.000`, with no `playhead` in the line; still `00:03.000` while playing (live > 3.5); `00:06.000` after the click; the add lands at 6 |
-| **IM23** | play/stop from 2; selection 5–7; M, Enter; blur; selection 9–10; Space, +1 s; M, Enter | the markers contain 5 and not 2; while playing exactly one marker is added and it is at 9 (the selection start, not the live ≈ 10 that Space plays from) |
-| R9-L1 (rewritten) | `StudioWorkspace` with the position and insert-marker store probes; 60 position frames; marker → 3; marker → 4.5 | the line contains `· insert marker 00:00.000`; the classes are exactly `font-mono tabular-nums`; the text is `00:00.000` on all 60 frames; then `00:03.000`, then `00:04.500`; `LibraryInsertMarkerText` renders 0 times; the same node throughout |
-| playback-frames row | as before | `LibraryInsertMarkerText: 0` |
-| library-preview C-R16-01 rows and the memo row | as before | the new text and testid; the memo row is unchanged in substance |
-| ST49 | strings | 24 keys, `insertMarker: 'insert marker'` |
-| TH row (obsidian) | SSR html | the new testid has `font-mono` and `tabular-nums` |
+### 2.2 Strings (grant 3)
+As §1.4 and §1.6. Every new key gets its exact literal row in `strings.test.ts`.
 
-### 2.3 Doc 191 (grant 8)
-- Georgian, with technical terms in English. The seven TEMPLATE headings stay in order (L26).
-- l.4 is exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 251 PASS)`.
-- Add a "round 251 fix-up" part to each section:
-  - **`## კონტექსტი`:** C-R250-01 (the line named the playhead while Add used the marker) and A-R250-REVIEW-PASTE-SPLIT-PLAYING.
-  - **`## მიდგომა`:**
-    - D-29z445, with the two rejected alternatives (drop the time; playhead while playing);
-    - the direct-write pattern;
-    - the `findFreeStart` note;
-    - Live 4.10 (§3), kept apart from the inference.
-  - **`## არქიტექტურა`:** the Mermaid diagram gains `insertMarkerStore → LibraryInsertMarkerText`.
-  - **`## შეცვლილი ფაილები`:** the round-251 files.
-  - **`## პრობლემები და გადაწყვეტები`:**
-    - C-R250-01: the copy sweep covered only `strings.ts` → L29 now requires the sweep over `app/**`;
-    - the stopped-only IM15/IM17 → playing branches.
-  - **`## ტესტირება`:** IM15, IM17, IM20, IM22, IM23, R9-L1, ST49, and the §0.2 runs. Cite only rows that exist (grep, L26).
-  - **`## TODO / შემდეგი ნაბიჯები`:**
-    - add REGRESSION;
-    - add B-R251-PASTEND-AT-END to the stage-2b list;
-    - add the sheet `marker` copy to 10b.
+### 2.3 Rows (grants 4–12)
+| Row | File | What it pins | Red-proof (named mutant A runs) |
+|---|---|---|---|
+| IM22 (amended) | 4 | Playing: the position store is above 3.5 and the caption is still `00:03.000`. | MU-CAPTION-POSITION + the scratch-only removal of IM22's stopped caption asserts → red at the playing assert (§0.2). |
+| FW1 | 5 | Tempo 90, Snap on, playing, Follow `on`. A lower-zone click gives `data-follow-mode="paused"`, button text `Follow ‖`, the exact composed status, the insert marker at the snapped time, and `isPlaying` true. | MU-FW-NO-PAUSE (the wrapper's step 3 deleted) |
+| FW2 | 5 | The same with a seconds-ruler click. | MU-FW-SECONDS-RAW (`<ArrangementRuler onSeek={setInsertMarker}>` restored) |
+| FW3 | 5 | Paused (by a scroll of +200 and `fireEvent.scroll`, as NS3b), then a strip click while playing gives `on`, the status `followResumed`, and still `isPlaying` true. | MU-FW-NO-RESUME |
+| FW4 | 5 | Follow `off` (button), playing. A strip click leaves it `off`, and a lower-zone click leaves it `off` with the HEAD status `insertMarkerWhilePlaying(t)`. | MU-FW-RESUME-ANY (`if paused` → `if !== 'on'`) |
+| FW5 | 5 | Stopped, Follow `on`. A lower-zone click and a seconds-ruler click leave it `on`, with no Follow text in the status. | MU-FW-PAUSE-STOPPED (the `isPlaying` guard deleted) |
+| FW6 | 5 | Paused while playing, then Space (stop) gives `on`. The status equals what a stop without the pause writes (computed in the same test). | MU-FW-NO-STOP-RESUME |
+| FW7 | 5 | Playing, Follow `on`. A lane-body click moves the marker and Follow stays `on` (§1.1, the lane row unchanged). neighbour pin, no mutant (the lane takes `setInsertMarker` from `useArrangement()` at `ArrangementLane.tsx` l.189, so a wrapper-routing mutant would need a new prop through a frozen component) |
+| IM24 | 4 | Markers at 2 and 6. Play from 1, advance about 3 s, stop. Ctrl+→ selects the marker at **2**, and the marker and playhead are at 2. Then the stopped "none" text `…after the insert marker` at the end of the steps, and while playing `…after the playhead`. | MU-NAV-LIVE-ORIGIN (`getLivePosition` restored), MU-NONE-PLAYHEAD-STOPPED |
+| ST11 + | 9 | `playPastEnd` at the end: subject Insert marker, 00:16.000 / 00:16.000 → the at-end text. `playPastEndMessage(16, 16, 'insert-marker')` gives the same. `insertMarkerWhilePlayingFollowPaused('00:08.000')` → the exact text. | MU-PASTEND-ALWAYS-PAST |
+
+- Rows FW1–FW7 use the existing `bars-ruler-ui` helpers: `mountTempo90SnapOn`, `clickStrip` and `clickAt`. Lower zone and seconds-ruler y are as in BR4/BR9. Use `fireEvent.scroll` for the pause, as GM24/NS3b do.
+- A states, per row, the mutant run and the failing line (`a-round-252/mutants/`).
+
+### 2.4 Doc 191 (grant 13)
+- l.4 is exactly `**სტატუსი:** Completed (C round 252 PASS)`.
+- Each of the 7 TEMPLATE headings, in order, gets a stage-2b part:
+  - context (C-R235-02, NAV-ORIGIN, the titles, the at-end wording, IM22);
+  - approach: D-29z454…D-29z456, the 6.2 parsing, and the rejected alternatives (pause and resume inside the context: rejected because `setInsertMarker` is shared with lane clicks; `pauseFollowForNavigation` for ruler clicks: rejected because of the status clobber);
+  - Mermaid: rulers → `placeInsertMarkerFromRuler` → `setInsertMarker` + `followModeRef`;
+  - files;
+  - problems: IM22 vacuity → L52;
+  - testing: rows with their mutants;
+  - TODO: 10b, 9, 11c, SABA-Q-FOLLOW-EDIT-RESTART, ARCH-CHECKPOINT-TRANSPORT-POSITIONS.
+- Every test the doc cites exists (L26).
 
 ## 3. Reference: how Ableton Live 12 does it
-**Sources:**
-- [BR] the Live 12 Reference Manual ch. 4 "Working with the Browser", https://www.ableton.com/en/live-manual/12/working-with-the-browser/: 4.9 Previewing Files and 4.10 Adding Content from the Browser to a Live Set. Read on 2026-10-29 through WebFetch; only the first 100,000 characters of the page were read, and they include 4.9 and 4.10.
-- [AV] ch. 6, the capture `b-round-71/ableton-arrangement-view-20261021.txt` (6.9 insert marker).
+Sources:
+- Live 12 Reference Manual, chapter 6 "Arrangement View", https://www.ableton.com/en/manual/arrangement-view/, fetched by B on 2026-10-29 (WebFetch). The section numbers are the manual's.
+- Official Ableton video "Learn Live: Transport bar and Follow behavior" (https://www.youtube.com/watch?v=m84wUU8CQnY), as summarised in root's `reference/youtube/SABA-B-9-10-11-transcripts.md` l.17/l.35. It has no pause/resume detail; B did not watch it.
 
-| Behaviour | Source | Confirmed there | CZABA decision | C check |
+| Behaviour | Ableton source | Confirmed there | CZABA decision / deviation | C check |
 |---|---|---|---|---|
-| Enter or double-click on a sample, Arrangement | BR 4.10 | "In the Arrangement View, double-clicking or pressing Enter on a device or sample in the browser will load the item onto whatever track is currently selected." | The active track (as in Live) | C-ADD-251 (track: **confirmed**) |
-| Where on that track | BR 4.10, AV 6.9 | **no sentence** on the time position; 6.9 defines the insert marker as the editing point | At the insert marker (approved review §10a) | C-ADD-251 (position: inference) |
-| A position readout near the browser's add action | BR 4.9/4.10 | **no reference found**: 4.9 describes the Preview tab waveform, and neither section mentions a time readout | CZABA shows `insert marker <time>` in its existing line | C-CAPTION-251 (n/a) |
-| Paste and split while playing | AV 6.9, 6.12 | as in round 250 (split at the clicked location) | At the insert marker | C-UNIT-251 (IM15, IM17) |
-
-- **Better than Live (claim to test):** Live's insert marker is the only cue to where an Enter-added sample lands. CZABA also names the time next to Add, and it stays correct after a Stop and while playing.
-- **Deviations (⚖):** none new. The ABL-R-6 reconciliation (SABA-Q-10A-DEVIATIONS (e)) is unchanged and still `awaiting_user`.
+| Follow pauses on a beat-time ruler click | 6.2 | "Follow will pause … if you click on the beat-time ruler." | Match: the bars lower zone, while playing | FW1, C-FOLLOW-PAUSE-252 |
+| Follow pauses on a horizontal scroll | 6.2 | "… or scroll the view horizontally" | Match (HEAD) | §6 neighbour |
+| Follow pauses on an edit | 6.2 | "Follow will pause if you make an edit" | **Not built. Deviation listed:** SABA-Q-FOLLOW-EDIT-RESTART (a), `awaiting_user` | not tested (listed) |
+| Follow resumes on a scrub-area click | 6.2 | "… or click in the Arrangement or clip scrub area." | Match: the bars scrub strip | FW3, C-FOLLOW-RESUME-252 |
+| Follow resumes on stop | 6.2 | "Follow will start again once you stop …" | Match: Stop → `on`, silently | FW6, C-FOLLOW-STOP-252 |
+| Follow resumes on a playback restart | 6.2 | "… or restart playback" | Partial: Space-play (HEAD) and a strip click. A marker-flag play while playing is **not** treated as a restart (inference): SABA-Q-FOLLOW-EDIT-RESTART (b) | FW3; listed |
+| A track click while playing | 6.3 "You can click anywhere within a track to move the insert marker" | 6.2 names no Follow effect | Unchanged: Follow stays as it was (inference: not a scrub area) | FW7, C-FOLLOW-LANE-252 |
+| A time-ruler (min:sec) click | 6.1 item 15: "You can click and drag in the time ruler to scroll left or right." | no click action documented | CZABA: click = insert marker (SABA-Q-TIME-RULER-ROLE (a)) and pauses Follow like the beat-time ruler (b, inference) | FW2, C-FOLLOW-SECONDS-252 |
+| A status message when Follow resumes | none (Live has no status line for it) | – | CZABA addition: `followResumed`, the same text as the Follow button's resume | FW3 |
+| Previous/Next locator origin while stopped | 6.4: "You can jump to locators by clicking on them or by using the Previous and Next Locator buttons"; 6.3: "Adjusting the Arrangement Position fields automatically moves the insert marker" | the origin is **not stated** (inference: the play position = the insert marker while stopped) | The insert marker while stopped, the live position while playing. Live has no default keys; Ctrl+←/→ is CZABA's | IM24, C-NAV-ORIGIN-252 |
+| A locator jump during playback is quantized | 6.1 item 6 | "The jump between triggered locators is quantized based on the global launch quantization value." | Deviation already listed: SABA-Q-10A-DEVIATIONS (d) | listed |
+| Follow toggle shortcut | root's transcript note `reference/youtube/SABA-B-9-10-11-transcripts.md` l.35 (official video m84w 0:00–1:50): "Follow is on by default, with Ctrl/Cmd+Shift+F" (not verified in the manual text B fetched) | Live: a key toggles Follow | **CZABA: button only.** `grep -in follow app/lib/arrangement/shortcuts.ts` = 0 hits at HEAD. Listed deviation, not built this round: SABA-Q-FOLLOW-EDIT-RESTART (c), and a candidate for the 10b shortcut-sheet work | listed |
+| Ruler / strip cursor, hover and visuals | 11a (round 235) reference rows | – | Unchanged this round: the bars ruler `cursor-pointer`, strip `hover:bg-foreground/8`, and the Follow button's `Follow ‖` dashed paused state (DXT3) | §6 neighbour |
+| At or past the end | no reference found (the manual text fetched has no end-of-arrangement play rule) | – | D-27 refusal kept; at-end wording only | ST11, C-PASTEND-252 |
 
 ## 4. A: checks to run (speed rule: no full suite, no `verify`)
-1. **Start state (§0):**
-   - HEAD;
-   - exactly the 13 `M` paths;
-   - `sha256sum -c` on the frozen 1,102 list, the root list and the grant start list.
-2. **Apply** `b-round-250/precheck-251.diff` (`git apply -p1`, against the working tree), then write grant 8. `sha256sum -c b-round-250/expected-final-sha256.txt` from `store/` must give rc 0.
-3. **Static checks:** `npm run typecheck` rc 0; `npx biome check` on grants 1–7 clean; `npm run lint` rc 0.
-4. **Covering set, run alone (D-29z447):** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-250/covering-251.txt)`. Expect 123 files, all green (1,843 tests: round 250's 1,841 plus IM22 and IM23). Any test above 50 % of its timeout is a STOP at the top of the report (L11).
-5. **Mutants:**
-   - Make a fixed scratch copy outside `store/`: a tar copy of the working tree after step 2, excluding `node_modules` and `.git`, with `node_modules` symlinked.
-   - Run `b-round-250/mutants/run251.sh <scratch> <logdir>` (10 runs). Expect exactly the §0.2 table.
-   - The repo `git status` must be identical before and after.
-6. **code-reviewer:** run it on the round-251 diff (more than 3 files), after the covering run, never at the same time. Pass its Architecture note to B.
-7. **Playwright** against `:5173` at both viewports. Run a copy of `b-round-250/caption-probe-251.cjs`; do not edit it in place. Expect the "Fix" column of §0.3.
-8. **Report:** write `a-round-251.md` with:
-   - the hunks;
-   - the tests run, with counts;
-   - the mutants;
-   - the reviewer result;
-   - any STOP, at the top.
+1. **Start state:** HEAD, empty status, the frozen and root lists, and the grant start hashes (`sha256sum -c`, rc 0).
+2. Implement §1 and §2.
+   - Re-run the §0.2 "none" grep and apply R-NONE, reporting each hunk old → new.
+   - Re-run the L50 grep: if a hunk now moves focus, STOP.
+3. `npm run typecheck`, `npx biome check` on grants 1–12, and `npm run lint`.
+4. **The covering set,** `b-round-251/covering-252.txt` (130 files), run **alone** (no reviewer, browser or scratch job at the same time). Report the counts and any test above 50 % of its timeout.
+5. **Mutants** (on a tar scratch outside the repo; the repo `git status` is identical before and after): the 10 named in §2.3 (FW7 has none), plus FIX-CONTROL. Each must be red on the named row. Write a table to `a-round-252/mutants/summary.txt`.
+6. **The code-reviewer subagent** (13 files ≥ 3). Hand on its Architecture note.
+7. **Playwright, both viewports,** with the §0.2 recipe: FW1-equivalent, strip resume, stop resume, and nav origin. Save the JSON and screenshots under `a-round-252/`.
+8. Write `a-round-252.md`: files, tests actually run, mutants, reviewer findings, a STOP at the top if any.
 
 ## 5. C: acceptance
-Use real Chromium on `/studio-lab` at 1440×900 and 1280×720, with a fresh context per row.
-- Wait for `Demo collection ready` (L48), then add `demo-stem-pulse` (the round-250 §0.3 recipe).
-- Clicks are as in round 250 (§0.3 there): an empty-lane click picks the track and places the marker.
-- Give every ruler click its own x, with ≥ 850 ms between clicks (INFO-B248-RULER-DBLCLICK); C-CAPTION-MOVE-251 has three.
-- **The control is the round-251 start state, not HEAD.** Make a tar copy of the working tree (excluding `node_modules`, `.git`, `build` and `.vite*`), restore grants 1–8 from `b-round-250/r251-granted-start/`, and check it with `sha256sum -c` on the grant start list. Serve it on its own port with its own `.vite`, and stop it after use. `git archive dcb7eb1` lacks round 250 and is the wrong control.
-- **Round-250 evidence carries over:** gate 251 publishes rounds 250 and 251 together. The round-250 rows ran on files that this round freezes byte for byte (C-SCOPE-251), so C does not re-run them all. It re-runs the add, paste and split rows that touch the changed line and the smoke row.
+Run each browser row at **1440×900 and 1280×720**, fresh context, with the §0.2 recipe (pulse, tempo 120, `=` ×4, 97.7 px/s). Wait for `Demo collection ready` first (L48).
 
-| Row | What | Pass when |
+| ID | Check | Pass |
 |---|---|---|
-| C-SCOPE-251 | HEAD, status, hashes | <ul><li>HEAD is `dcb7eb1`.</li><li>Status is exactly `M` on 17 paths: the 13 round-250 grants plus `ArrangementLibraryPreview.tsx`, `library-preview.test.tsx`, `render-budget.test.tsx` and `studio-theme-obsidian.test.tsx`. Nothing is untracked.</li><li>`sha256sum -c` on `b-round-250-r251-tree-sha256.txt` (1,102), on the root list and on `b-round-250/expected-final-sha256.txt` gives rc 0.</li><li>The 7 protected files give `git diff --quiet HEAD` rc 0.</li></ul> |
-| C-UNIT-251 | `b-round-250/covering-251.txt` (123 files), run alone | All green, including IM1–IM23, R9-L1, the library-preview rows, ST49 and the TH row. The full suite is a gate row. |
-| C-MUT-251 | the 10 runs of §0.2, once each, on a scratch copy outside the repo | The red rows are as listed. The repo status is identical before and after. |
-| C-CAPTION-251 | SFX lane click at 3 s; Space, 1.5 s, Space; click the Soft impact row; read the line; + Add. A fresh context: the same, then Space (plays from 3), 1 s, read, + Add | Both times the line reads exactly `Active track: SFX · insert marker 00:03.000`, with no `playhead`, and the clip lands at `sfx@3.000` with `“Soft impact” added to the SFX track at 00:03.000.`. Playing continues. Control: `· playhead 00:04.5…` (stopped) and the live time (playing). |
-| C-CAPTION-MOVE-251 | the line after each step: ruler click at 6 (stopped); Space, then a ruler click at 9 while playing; Space (stop); Ctrl+Shift+Space; Home | `00:06.000`; `00:09.000` while playback continues; the line does not change between frames while playing (sample it 10 times over 1 s); after Ctrl+Shift+Space it equals the stop point; Home gives `00:00.000` |
-| C-CAPTION-WIDE-251 | L3: the Video lane active (its name button), library at its default width (288 px) | The line is 2 lines with the time inside its 32 px box (the last text rect's bottom ≤ the `<p>` bottom), `scrollWidth = clientWidth`. The control is 2 lines too. Record the width and the line count. |
-| C-ADD-251 | Enter on the focused Soft impact row and a double-click on it, after a stop that differs from the marker | Each lands at the marker that the line names. The track is the active track (Live 4.10, confirmed). |
-| C-PASTE-SPLIT-251 | the round-250 C-PASTE-250 and C-SPLIT-250, including the playing variants, at one viewport (1440) | `sfx@2.000` stopped and playing; split at `5.000` stopped and playing |
-| C-BUDGET-251 | L39 | Persistent text lines outside the timeline equal round 250: empty 85/69, demo 101/85 at 1440/1280. |
-| C-LESSON-251 | `lessons.md` | L29 contains `C-R250-01` and the words `app/**`; the file is ≤ 60 lines. |
-| AN-REVIEW-251 | Doc 191 | <ul><li>l.4 is byte-exact `**სტატუსი:** In Progress (stage 2 of 3; C round 251 PASS)`.</li><li>The 7 headings are in order.</li><li>D-29z445 and the rejected alternatives are explained.</li><li>Every cited row exists (IM22 and IM23 included).</li><li>The TODO lists REGRESSION, stage 2b with B-R251-PASTEND-AT-END, 10b with the sheet copy, 9 and the questions.</li></ul> |
-| LAB-SMOKE-251 | `/studio-lab` | It loads. Space plays and stops; Space again plays from the marker. The export WAV after adding `demo-stem-pulse` has sha256 `1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94`. 0 page errors. |
-| Auth | Standing check | In a fresh context: <ul><li>`/studio-lab` opens anonymously, with `auth_user` null;</li><li>`/studio/middle-east` shows "Sign in required", with no workspace and no `audio[src]`;</li><li>`/api/studio-token` with no header returns 401.</li></ul> |
-| Purchased origin (browser) | The library line on the purchased copy | BLOCKED: backend unavailable in cloud. |
-| gate | Full vitest, typecheck, lint, build, `npm run verify`, e2e smoke | Listed as `gate`, not claimed in `passed`. Gate 251's `verify.log` decides EXPORT-PROGRESS-LOAD-FLAKE-250. |
+| C-SCOPE-252 | HEAD, status, hashes | <ul><li>HEAD is `83b7c75`.</li><li>Status is exactly `M` on a subset of the 13 grants. Nothing is untracked.</li><li>The frozen (1,097) and root lists give rc 0.</li><li>The 7 protected files give rc 0.</li></ul> |
+| C-UNIT-252 | Covering set alone | All green. FW1–FW7, IM22, IM24 and ST11 are present (grep the ids). |
+| C-MUT-252 | ≥ 4 of A's mutants re-run by C, including MU-FW-NO-PAUSE, MU-FW-NO-RESUME, MU-NAV-LIVE-ORIGIN, and the IM22 red-proof | Each is red on its row. |
+| C-FOLLOW-PAUSE-252 | Play; a lower-zone click on the visible bars ruler | <ul><li>`data-follow-mode="paused"` and text `Follow ‖`.</li><li>The status is exactly the composed text with the snapped time.</li><li>Playing continues: the playhead advances over 1.5 s.</li><li>The insert marker (`[data-insert-marker]`) equals the time in the status.</li><li>The discriminators against HEAD are `data-follow-mode` and the status. A sample showing `scrollLeft` unchanged over 1.5 s is a neighbour observation only, because it can also hold at HEAD while the playhead is on screen.</li></ul> |
+| C-FOLLOW-SECONDS-252 | Play; a seconds-ruler click | The same as above. |
+| C-FOLLOW-RESUME-252 | Paused by a ruler click, then a strip click while playing **about 100 px left of the viewport's right edge**, so the follow scroll is due within about 1 s at 97.7 px/s | <ul><li>`on`.</li><li>The status is `Follow is following the playback position again.`</li><li>`data-follow-mode` stays `on` for 3 s (the auto-scroll is not read back as a manual scroll).</li><li>Within 2 s, `scrollLeft` changes (follow scroll). The control is a paused Follow with no strip click: `scrollLeft` stays put. C states the samples.</li></ul> |
+| C-FOLLOW-OFF-252 | Follow off (button), play; a strip click, then a lower-zone click | It stays `off` both times. The second status is the HEAD text without "Follow paused". |
+| C-FOLLOW-STOP-252 | Paused, then Space | `on` and `Follow` text. The status is not a Follow text. |
+| C-FOLLOW-STOPPED-252 | Stopped; a lower-zone click, then a seconds-ruler click | It stays `on`. The marker moves (HEAD behaviour). |
+| C-FOLLOW-LANE-252 | Playing; a lane click | The marker moves, the status is the HEAD text, and Follow stays `on`. |
+| C-FOCUS-252 | `document.activeElement` before and after each FOLLOW row | Unchanged. C re-runs the L50 grep: 32 hits at planning, all ruled out of scope; a new hit needs a ruling. |
+| C-NAV-ORIGIN-252 | <ol><li>Markers at 2 and 6: ruler click at 2 + M, then ruler click at 6 + M.</li><li>Ruler click at 1, Space, wait about 3 s, Space.</li><li>Ctrl+→.</li></ol> | <ul><li>The marker at **2** is selected, and the insert marker and playhead are both 2.000.</li><li>The control at HEAD (a tar copy with `b-round-251/r252-granted-start/` restored) jumps to 6.</li><li>Then repeat Ctrl+→ (≤ 4) until the status reads `No more markers after the insert marker`.</li><li>While playing, the same at the end reads `… after the playhead`.</li></ul> |
+| C-TITLES-252 | `title` of `arrangement-ruler`, `arrangement-bars-ruler` and the range body (after a range drag on a clip) | The exact new strings. |
+| C-PASTEND-252 | Stopped; a strip click that snaps to the project end (C reads the end from the transport `/ end`) | `Insert marker (<end>) is at the end of the project — there is nothing to play here. Home returns to 0.` Not playing. A click past the end with Snap bypassed (Alt) keeps the HEAD past-end text. |
+| C-STATUS-WIDE-252 | The composed Follow text and the at-end text at 1280×720 and 1440×900 | The status box line count and overlap with the transport are measured as in `c-round-251/c251.cjs` `statusBox`. No overlap, and it fits like the HEAD past-end text (the control, which is longer). |
+| C-COPY-252 | The §0.3 grep | Only the listed keep-hits remain. |
+| C-BUDGET-252 | Persistent text lines outside the timeline, empty and demo, both viewports | Equal to the round-251 counts (85/69 empty, 101/85 demo) or to a HEAD control. |
+| C-LESSON-252 | `lessons.md` | L52 exists, and the file has ≤ 60 lines. |
+| AN-REVIEW-252 | Doc 191 | <ul><li>l.4 byte-exact.</li><li>7 TEMPLATE headings in order.</li><li>Every cited row id exists.</li><li>The 6.2 quote matches §3.</li></ul> |
+| LAB-SMOKE-252 | `/studio-lab` loads, plays and exports a WAV | No page errors. |
+| Auth | `/studio/<handle>` without a session shows `Sign in required` and no `audio[src]` | As round 251. |
+| Purchased origin | `/studio/$productId` purchased copy | **BLOCKED:** backend unavailable in cloud. |
+| gate | full vitest, typecheck, lint, build, verify, e2e smoke | Gate rows, not claimed by C. |
 
-**Ableton parity** (C states it separately from the CZABA requirement):
-- **Confirmed:** Enter or double-click adds to the selected track (4.10).
-- **Inference:** the time position (the insert marker).
-- **Not applicable:** the readout (Live has none).
-
-A test PASS does not prove parity.
+**Ableton conformity** is reported separately per §3 row: confirmed / deliberate difference / unconfirmed / not applicable.
 
 ## 6. Neighbouring behaviour that could break (C probes these first)
-- **The library preview:**
-  - Play/Stop of the preview and the waveform cursor still move without renders (the library-preview memo row);
-  - the Add button is disabled on the Video lane;
-  - the `title` on the line is unchanged (`Active track: …`, without the time).
-- **Drag-and-drop from the library:** still lands at the drop point, not at the marker (`dropLibrarySource`, unchanged).
-- **The playhead readouts that stay:**
-  - the transport clock;
-  - the ruler handle `aria-valuenow`;
-  - the detail-panel playhead;
-  - the Overview playhead.
+- **Follow's own auto-scroll** while playing with no clicks. A resume must not be read back as a manual scroll and re-paused.
+- **The ruler drag gestures:**
+  - ↔ drag still pauses with `followPaused`, and ↕ zoom pauses;
+  - a double-click still Fits or zooms;
+  - a strip click while **stopped** still plays from the snapped line (BR2);
+  - a strip click while playing with Follow `on` jumps and keeps playing (BR3), with no status write.
+- **The playhead handle** drag and arrow keys on the seconds ruler: unchanged (`onScrub`/`onScrubEnd`, not `onSeek`).
+- **Marker flags:**
+  - a click selects;
+  - double-click / the play button plays from the flag;
+  - M adds a marker;
+  - Ctrl+←/→ **while playing** steps from the live position.
+- **The library line** (round 251) still names the insert marker after a ruler click.
+- **Export, video sync, history labels, clip drag and trim** are unchanged. Any change there is a regression.
 
-  All of them still move per frame while playing (the playback-frames row).
-- **The export, video sync, history labels, clip drag and trim** are unchanged. Any change there is a regression.
-
-## 7. Next (D-29z451)
+## 7. Next (D-29z460)
 - **PASS and gate:**
-  - SABA-B-10a stage 2a is done (rounds 250 and 251, published together).
-  - Closed: C-R250-01, A-R250-REVIEW-PASTE-SPLIT-PLAYING and A-R250-REVIEW-IM18-IM20-ASSERTS.
-  - Also closed: the round-250 list (A-R249-REVIEW-IM3-CMD, A-R249-REVIEW-IM13-LEAK, B-R250-GESTURE-KEYS, GATE249-S1, C-EDIT-DIVERGE-249 and C-R249-INFO-PASTEND-WORDING).
-- **FAIL on a product row:** a fix-up on the same grants first.
+  - **SABA-B-10a is done** (stages 1, 2a and 2b; rounds 249–252).
+  - Closed: C-R235-02, B-R250-NAV-ORIGIN, B-R250-PLAYHEAD-TITLES, B-R251-PASTEND-AT-END, B-R236-END-WORDING and A-R251-REVIEW-IM22-PLAYING.
+  - B writes the **ARCH-CHECKPOINT-TRANSPORT-POSITIONS** request for root at this 10a/10b boundary (non-blocking), at the next planning.
+- **FAIL on a product row:** a fix-up on the same grants. **A STOP on item 1:** items 0 and 2–4 alone, and item 1 is re-dispatched (D-29z453 seam).
 - **Then:**
-  1. **REGRESSION-ROUND-2026-10-30** at the first planning on or after 2026-10-30, which is almost certainly the next one. It carries every `scope_additions` entry, including C-INSERT-MARKER-249, C-EDIT-MARKER-250 and the new C-CAPTION-251.
-  2. **SABA-B-10a stage 2b:**
-     - C-R235-02 Follow;
-     - B-R250-NAV-ORIGIN;
-     - B-R250-PLAYHEAD-TITLES;
-     - the seconds-ruler role;
-     - B-R251-PASTEND-AT-END;
-     - doc 191 → `Completed (C round N PASS)`.
-  3. Then SABA-B-10b (with the sheet `marker` copy), SABA-B-9 and SABA-B-11c. SABA-B-7 runs when Saba answers.
-- **Checkpoints (non-blocking):**
-  - A's round-250 Architecture note (a pure position-source resolver) is recorded as addendum 1 of GATE249-ARCH-TRANSPORT-POSITIONS. ARCH-CHECKPOINT-TRANSPORT-POSITIONS is requested at the 10a/10b boundary, after stage 2b.
-  - ARCH-CHECKPOINT-TEMPO-GRID and ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS are still unanswered.
-  - None blocks this round. This round does not touch `ArrangementContext.tsx`.
+  1. **REGRESSION-ROUND-2026-10-30** at the next planning, if it is on or after 2026-10-30. It carries every `scope_additions` entry, including C-CAPTION-251 and the new C-FOLLOW-252 / C-NAV-ORIGIN-252.
+  2. **SABA-B-10b:**
+     - the visible flashing marker (`motion-safe:`);
+     - the sheet rows for Shift+Space and Ctrl/Cmd+Shift+Space;
+     - the sheet `marker` copy;
+     - `useArrangementInsertMarkerWriter`, when the third subscriber lands (A's round-251 note).
+  3. **SABA-B-9**, then **SABA-B-11c**. **SABA-B-7** when Saba answers.

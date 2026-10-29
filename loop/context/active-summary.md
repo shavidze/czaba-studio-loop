@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T16:17:22.381Z)
+# Active loop summary (2026-10-29T17:29:02.911Z)
 
-- backlog.json 2353 KB -> active view 340 KB
-- status: G_ROOT_GATE round 250
-- servers: `{"checkedUtc":"2026-10-29T15:51:32.4176921Z","round":250,"attempt":1,"store":200}`
-- last publication: dcb7eb14127850eecad45f373cdebba2258ee95e (rounds 249-249)
-- last root gate: round 250 skipped - C taskStatus FAIL
+- backlog.json 2365 KB -> active view 338 KB
+- status: G_ROOT_GATE round 251
+- servers: `{"checkedUtc":"2026-10-29T17:08:19.2725394Z","round":251,"attempt":1,"store":200}`
+- last publication: 83b7c756ce3108d0e31f023a1aa2b0e59547d913 (rounds 250-251)
+- last root gate: round 251 published - commit 83b7c756ce3108d0e31f023a1aa2b0e59547d913 pushed
 
 ## Current items: -
 
@@ -617,21 +617,21 @@
 - SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432, (d)/(e) added D-29z441): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
 - B-R249-PAUSE-LABEL / low / scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
 - INFO-B249-STALE-MARKER-STATUS / info / info (D-29z431); C row C-STATUS-CLOBBER-249 records it; SABA-B-10b's visible marker shows the state / Home/back write no status, so a previous 'Insert marker at ...' status stays after the marker moved (event line, same class as C-R236-01)
-- A-R249-REVIEW-IM3-CMD / medium / scheduled round 250 (D-29z435): IM3 separates marker and playhead before the Cmd press; red-proof A-MU-CTRL-ONLY -> IM3 red (b-round-249/mutants/logs) / IM3 presses Cmd+Shift+Space with marker = playhead, so the assert passes without the metaKey branch (A-MU-CTRL-ONLY green)
-- A-R249-REVIEW-IM13-LEAK / medium / scheduled round 250 (D-29z435): IM13 separates the positions first and also presses Cmd+Shift+Space in the field; red-proofs C-MU-LEAK-CS and C-MU-LEAK-SHIFT -> IM13 red / IM13 cannot catch Ctrl/Cmd+Shift+Space leaking out of the tempo field (marker = playhead = 2); C-MU-LEAK-CS stays 14/14 green
-- B-R250-GESTURE-KEYS / medium / scheduled round 250 (D-29z439): both keys return early while isPointerGestureActive(); IM20 + C-GESTURE-250 / during a range drag on a clip, Ctrl/Cmd+Shift+Space and Home move the insert marker and playhead and clear the selection; after pointerup th
-- GATE249-S1 / low / scheduled round 250 as IM21 (D-29z439); closes at the round-250 C PASS / a stopped playhead-handle step or drag now clears a time selection, untested
 - GATE249-S2 / info / info (D-29z439): = SABA-Q-10A-CTRL-ARROW-RANGE / seekTo keeps the selection, so Space after Ctrl+arrows plays the selection
 - GATE249-S4 / info / SABA-B-10b scope (D-29z439): the visible marker carries data-insert-marker and the hidden node is removed / test-only hidden ArrangementInsertMarkerSignal ships to production
 - GATE249-S5 / info / info (D-29z439); part of GATE249-ARCH-TRANSPORT-POSITIONS; 10b checks it does not double-render the visible marker / returnToStart and playFrom write the marker store twice (placeInsertMarker then seekTo)
 - GATE249-S7 / info / SABA-B-10b scope (sheet rows), D-29z439 / Shift+Space and Ctrl/Cmd+Shift+Space have no aria-keyshortcuts and no shortcut-sheet row
 - GATE249-S8 / info / = B-R249-PAUSE-LABEL (SABA-B-9) / status says Stop while the button reads Pause
 - GATE249-S9 / info / = TLM-R249-MAC-CMD-SHIFT-SPACE / Mac Cmd path unverified
-- C-EDIT-DIVERGE-249 / info / round 250 scope (D-29z437); B reproduced paste/split/M/Enter-add at HEAD (b-round-249/edit-head.json) / M and Ctrl+E used the playhead while the marker differed; paste inconclusive
-- C-R249-INFO-PASTEND-WORDING / info / round 250 scope (D-29z438) / past-end refusal says Playhead while the refused start is the insert marker
 - A-R249-REVIEW-KEYUP-ORDER / info / Tech Lead manual: Firefox and Safari (D-29z439) / Shift released before Space after Ctrl+Shift+Space could click a focused button on key-up in other engines; not reproduced in Chromium (A an
 - B-R250-PLAYHEAD-TITLES / low / scheduled in SABA-B-10a stage 2b, not deferred (D-29z436) / ruler and range titles still say click = playhead (rulerTitle, rangeBodyTitle); while playing a click now moves only the insert marker
-- B-R250-NAV-ORIGIN / low / scheduled in SABA-B-10a stage 2b (D-29z436) / Ctrl+Left/Right steps from the playhead (getLivePosition) while stopped; after a stop that differs from the insert marker (Live 6.9 moves th
+- B-R250-NAV-ORIGIN / low / scheduled in SABA-B-10a stage 2b (D-29z436) | still stage 2b after the round-251 fix-up and REGRESSION (D-29z451) / Ctrl+Left/Right steps from the playhead (getLivePosition) while stopped; after a stop that differs from the insert marker (Live 6.9 moves th
+- C-R250-01 / medium / scheduled round 251 (D-29z444, D-29z445): the line names the insert marker; IM22, R9-L1, C-CAPTION-251/-MOVE-251/-WIDE-251 / the library line above Add reads "playhead <live time>" while Add places the sound at the insert marker (regression of round 250; Arrangemen
+- A-R250-REVIEW-PASTE-SPLIT-PLAYING / medium / scheduled round 251 (D-29z448): playing branches; red-proof MU-PASTE-SPLIT-LOCATOR -> IM15, IM17 / IM15/IM17 test paste and Ctrl+E only while stopped; a paste/split that reads the live position while playing passes the granted tests
+- A-R250-REVIEW-IM18-IM20-ASSERTS / low / scheduled round 251 (D-29z449): IM23 + IM20 asserts; red-proofs MU-M-NO-RANGE, MU-GESTURE-*-NO-PREVENT / IM18 has no selection-start-wins case; IM20 has no preventDefault or metaKey assert
+- A-R250-REVIEW-SHEET-MARKER-COPY / low / scheduled in SABA-B-10b (D-29z449; owns shortcuts.ts, adds sheet rows; carries the row-height check), not deferred / shortcut sheet row "Add a marker at the insert marker" is inaccurate while playing and with a selection (addTitle names all three cases)
+- B-R251-PASTEND-AT-END / info / stage 2b scope (D-29z449) / a strip or flag play exactly at the end reads "(00:16.000) is past the end of the project (00:16.000)" (D-27 at-or-past-end rule for playFro
+- EXPORT-PROGRESS-LOAD-FLAKE-250 / info / watch (D-29z447) / export-progress-ui.test.tsx l.319/l.350 rows failed once in a covering run under concurrent load (resetEncoderMock call count); green in 3 i
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

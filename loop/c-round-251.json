@@ -1,0 +1,61 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T17:08:19.2725394Z",
+  "round": 251,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R251-REVIEW-IM22-PLAYING",
+   "severity": "medium",
+   "steps": [
+    "read app/lib/arrangement/__tests__/insert-marker-ui.test.tsx l.150 (requestAnimationFrame stubbed to () => 1)",
+    "IM22 playing branch l.559-563: Space, advance(1), assert caption 00:03.000",
+    "position store is never advanced by frames in jsdom, so it stays at the play-from value 3 = the marker"
+   ],
+   "expected": "the playing assert of IM22 distinguishes a playhead-reading line from an insert-marker-reading line",
+   "actual": "the playing assert is vacuous for that difference (confirmed by reading the code); the mutant class is still killed by IM22 stopped + R9-L1 (C mutant run: MU-CAPTION-POSITION red on IM22 and R9-L1). Test-strength gap only, no product failure; real-browser C-CAPTION-MOVE-251 covers it non-vacuously (10 samples, playhead 7.99->8.93 while line stays 00:09.000). Does not flip taskStatus. Reviewer severity kept; B decides.",
+   "evidence": "c-round-251/mutants/logs/summary.txt; c-round-251/fix/c251.json captionMove@*; a-round-251.md §5"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-251",
+  "C-UNIT-251",
+  "C-MUT-251",
+  "C-CAPTION-251",
+  "C-CAPTION-MOVE-251",
+  "C-CAPTION-WIDE-251",
+  "C-ADD-251",
+  "C-PASTE-SPLIT-251",
+  "C-BUDGET-251",
+  "C-LESSON-251",
+  "AN-REVIEW-251",
+  "LAB-SMOKE-251",
+  "Auth",
+  "NEIGHBOUR-DROP-AT-DROP-POINT",
+  "NEIGHBOUR-ADD-DISABLED-VIDEO",
+  "NEIGHBOUR-LINE-TITLE-NO-TIME",
+  "NEIGHBOUR-PLAYHEAD-READOUTS-MOVE"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke",
+  "EXPORT-PROGRESS-LOAD-FLAKE-250 (decided by gate 251 verify.log)"
+ ],
+ "blocked": [
+  "Purchased origin (browser): library line on /studio/$productId purchased copy — backend unavailable in cloud"
+ ],
+ "ableton": {
+  "confirmed": "Enter / double-click in browser loads onto the selected track (Live 12 manual 4.10) — CZABA adds to the active track: matches",
+  "inference": "time position = insert marker (6.9); manual 4.10 has no sentence on position",
+  "notApplicable": "position readout beside Add (Live has none; CZABA addition)"
+ }
+}
