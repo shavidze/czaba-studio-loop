@@ -1,0 +1,80 @@
+{
+ "round": 236,
+ "task": "SABA-B-11a-FIX-1",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-28T23:13:47.2873091Z",
+  "round": 236,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R236-01",
+   "severity": "low",
+   "steps": [
+    "Fresh context, /studio-lab, 1440x900 or 1280x720; wait for 'Demo collection ready'",
+    "Select demo-stem-pulse, click Add (120 BPM, Snap on, 16 s)",
+    "Set arrangement-timeline-scroller.scrollLeft = 400; click the scrub strip at t = 20 (y + 4) -> playPastEnd status",
+    "Set scrollLeft = 0; click the scrub strip at t = 2"
+   ],
+   "expected": "When playback actually starts, the status no longer claims there is nothing to play",
+   "actual": "Playback runs (Pause, pos 2.97 after 1 s) while the status still reads 'Playhead (00:20.000) is past the end of the project (00:16.000) — there is nothing to play here. Home returns to 0.' Same after the new end click at 16.000 followed by Space. Identical at HEAD 49b4c74 (pre-existing, not a regression); round 236 makes the message more reachable",
+   "evidence": "tmp/studio-real-loop/c-round-236/out/c236.json staleStatus/end, out-head/c236.json staleStatus, out/stale-status-*.png"
+  },
+  {
+   "id": "C-R236-02",
+   "severity": "low",
+   "steps": [
+    "Open docs/implementation/2026/quarter-IV/183-saba-b-11a-bars-ruler.md l.38-41"
+   ],
+   "expected": "The playFromRuler bullet describes the current flow (context playFrom with the end rule) or points to doc 184",
+   "actual": "It still says playFromRuler runs seekTo then togglePlayback in StudioWorkspace; outside grant 5, flagged by A as a B ruling",
+   "evidence": "doc 183 l.38-41; a-round-236.md Known gaps"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-236",
+  "C-UNIT-236",
+  "C-DBL-STRIP",
+  "C-DBL-LOWER",
+  "C-END-236",
+  "C-STRIP-236",
+  "C-RACE-236",
+  "C-SECONDS-236",
+  "C-FOLLOW-236",
+  "C-NO-TEMPO-236",
+  "C-BUDGET-236",
+  "C-REF-236",
+  "AN-REVIEW-236",
+  "LAB-SMOKE-236",
+  "C-SHOTS-236",
+  "Auth"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "ableton": {
+  "scrub-click-play": "confirmed (6.1)",
+  "lower-dblclick-fit": "confirmed (6.1)",
+  "strip-dblclick-no-fit": "unconfirmed: inference, deliberate difference awaiting_user SABA-Q-SCRUB-DOUBLE-CLICK",
+  "end-click-no-play": "CZABA rule, not Live",
+  "follow-on-ruler-click": "differs: listed temporary deviation until SABA-B-10a (C-R235-02)"
+ },
+ "notes": [
+  "MU-R re-run by C in /tmp scratch copy: BR13+BR14 red",
+  "Strip dblclick: two live source starts at offset 3.000, no Fit, 40 px/s, scrollLeft 0; HEAD reproduces Fit (bug)",
+  "Loop 14-18 + click at 15.95: plays from 16.000 (silent 16-18), wraps to 14 at ~2.16 s; recorded, not judged",
+  "Export WAV 48k/24/2ch 16.000 s, RMS -24.91 dB, 0 NaN",
+  "HEAD 1440 dblStrip attempt timed out on cold Vite compile (environment-invalid); 1280 HEAD run valid",
+  "A's BR13 extension accepted as info (additive inside the granted row)"
+ ]
+}

@@ -1,0 +1,46 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx (15 tests | 1 failed) 2017ms
+     ✓ BR1 without a tempo the bars ruler stays display-only 184ms
+     ✓ BR2 a strip click while stopped starts playback from the nearest 1/4 line  373ms
+     ✓ BR3 a strip click while playing jumps to the nearest 1/4 line and keeps playing 198ms
+     ✓ BR4 a lower-zone click while stopped moves the position on the grid and does not play 170ms
+     ✓ BR4b a lower-zone click while playing seeks and keeps playing (existing seekTo) 91ms
+     ✓ BR5 Alt bypasses the grid on both zones; Snap off lands free as well 104ms
+     ✓ BR6 a drag from either zone scrolls or zooms; a cancelled press never seeks or plays 104ms
+     ✓ BR7 a double-click fits the project; a double-click right after a drag does nothing 107ms
+     ✓ BR8 a strip click past the end or in an empty project reports and does not play 143ms
+     ✓ BR9 the seconds ruler click is unchanged with a tempo 67ms
+     ✓ BR10 a press while another gesture holds the claim is refused 97ms
+     ✓ BR11 a workspace re-render with unchanged gestures does not re-render the bars ruler 85ms
+     × BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits 90ms
+     ✓ BR13 a strip click that snaps to the project end reports past-end and does not play from 0 130ms
+     ✓ BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref) 72ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits
+AssertionError: expected 'Fit: the entire project is visible (0…' to be 'marker' // Object.is equality
+
+Expected: "marker"
+Received: "Fit: the entire project is visible (00:16.000). X goes back."
+
+ ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:413:38
+    411|     expect(live(mounted.api).isPlaying).toBe(true);
+    412|     expect(positionOf(mounted.api)).toBeCloseTo(4, 3);
+    413|     expect(statusText(mounted.view)).toBe('marker');
+       |                                      ^
+    414|     act(() => live(mounted.api).togglePlayback());
+    415|     clickLower(mounted, 6.3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  23:10:49
+   Duration  3.81s (transform 879ms, setup 0ms, import 1.29s, tests 2.02s, environment 378ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx,title=app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits,line=413,column=38::AssertionError: expected 'Fit: the entire project is visible (0…' to be 'marker' // Object.is equality%0A%0AExpected: "marker"%0AReceived: "Fit: the entire project is visible (00:16.000). X goes back."%0A%0A ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:413:38%0A%0A

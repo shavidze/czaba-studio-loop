@@ -1,0 +1,70 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c236-work[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx [2m([22m[2m15 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1941[2mms[22m[39m
+     [32m✓[39m BR1 without a tempo the bars ruler stays display-only[32m 172[2mms[22m[39m
+     [33m[2m✓[22m[39m BR2 a strip click while stopped starts playback from the nearest 1/4 line [33m 359[2mms[22m[39m
+     [32m✓[39m BR3 a strip click while playing jumps to the nearest 1/4 line and keeps playing[32m 192[2mms[22m[39m
+     [32m✓[39m BR4 a lower-zone click while stopped moves the position on the grid and does not play[32m 167[2mms[22m[39m
+     [32m✓[39m BR4b a lower-zone click while playing seeks and keeps playing (existing seekTo)[32m 89[2mms[22m[39m
+     [32m✓[39m BR5 Alt bypasses the grid on both zones; Snap off lands free as well[32m 106[2mms[22m[39m
+     [32m✓[39m BR6 a drag from either zone scrolls or zooms; a cancelled press never seeks or plays[32m 113[2mms[22m[39m
+     [32m✓[39m BR7 a double-click fits the project; a double-click right after a drag does nothing[32m 104[2mms[22m[39m
+     [32m✓[39m BR8 a strip click past the end or in an empty project reports and does not play[32m 142[2mms[22m[39m
+     [32m✓[39m BR9 the seconds ruler click is unchanged with a tempo[32m 73[2mms[22m[39m
+     [32m✓[39m BR10 a press while another gesture holds the claim is refused[32m 75[2mms[22m[39m
+     [32m✓[39m BR11 a workspace re-render with unchanged gestures does not re-render the bars ruler[32m 89[2mms[22m[39m
+     [32m✓[39m BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits[32m 101[2mms[22m[39m
+[31m     [31m×[31m BR13 a strip click that snaps to the project end reports past-end and does not play from 0[39m[32m 82[2mms[22m[39m
+[31m     [31m×[31m BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref)[39m[32m 72[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx[2m > [22mSABA-B-11a stage 2 interactive bars ruler (D-29z327)[2m > [22mBR13 a strip click that snaps to the project end reports past-end and does not play from 0
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:[2m424:41[22m[39m
+    [90m422| [39m    [35mconst[39m mounted [33m=[39m [35mawait[39m [34mmountTempo90SnapOn[39m()[33m;[39m
+    [90m423| [39m    [34mclickStrip[39m(mounted[33m,[39m [34m15.95[39m)[33m;[39m
+    [90m424| [39m    [34mexpect[39m([34mlive[39m(mounted[33m.[39mapi)[33m.[39misPlaying)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m425| [39m    [34mexpect[39m([34mpositionOf[39m(mounted[33m.[39mapi))[33m.[39m[34mtoBeCloseTo[39m([34m16[39m[33m,[39m [34m3[39m)[33m;[39m
+    [90m426| [39m    [34mexpect[39m([34mstatusText[39m(mounted[33m.[39mview))[33m.[39m[34mtoBe[39m([34mplayPastEndMessage[39m([34m16[39m[33m,[39m [34m16[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx[2m > [22mSABA-B-11a stage 2 interactive bars ruler (D-29z327)[2m > [22mBR14 a strip click in the same task as a playback start keeps playing (reads the playing ref)
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:[2m461:41[22m[39m
+    [90m459| [39m      [34mclickStrip[39m(mounted[33m,[39m [34m8.2[39m)[33m;[39m
+    [90m460| [39m    })[33m;[39m
+    [90m461| [39m    [34mexpect[39m([34mlive[39m(mounted[33m.[39mapi)[33m.[39misPlaying)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m462| [39m    [34mexpect[39m([34mpositionOf[39m(mounted[33m.[39mapi))[33m.[39m[34mtoBeCloseTo[39m([34m8[39m[33m,[39m [34m3[39m)[33m;[39m
+    [90m463| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 23:18:13
+[2m   Duration [22m 3.74s[2m (transform 896ms, setup 0ms, import 1.30s, tests 1.94s, environment 384ms)[22m
+
+
+::error file=/tmp/c236-work/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx,title=app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR13 a strip click that snaps to the project end reports past-end and does not play from 0,line=424,column=41::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:424:41%0A%0A
+
+::error file=/tmp/c236-work/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx,title=app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref),line=461,column=41::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:461:41%0A%0A

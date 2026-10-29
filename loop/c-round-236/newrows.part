@@ -1,0 +1,180 @@
+  async dblStrip(browser, vp, key) {
+    const { ctx, page, errors } = await open(browser, vp);
+    await addBtn(page, 'demo-stem-pulse');
+    await page.evaluate(() => { window.__ev = []; const br = document.querySelector('[data-testid="arrangement-bars-ruler"]'); for (const t of ['pointerdown', 'pointerup', 'click', 'dblclick']) br.addEventListener(t, (e) => window.__ev.push(`${t}:${e.target.getAttribute('data-testid')}`), true); });
+    const b = await bars(page); const p = await pps(page);
+    const r = { pps: p, before: await S(page) };
+    await page.screenshot({ path: path.join(outDir, `shot-before-${key}.png`) });
+    const st0 = await page.evaluate(() => { window.__labels = []; return window.__starts.length; });
+    const n0 = await page.evaluate(() => window.__up.length);
+    await page.mouse.dblclick(b.x + 3 * p, b.y + 4);
+    const samples = []; const t1 = Date.now();
+    while (Date.now() - t1 < 900) { samples.push(await page.evaluate((n) => { const h = document.querySelector('[data-testid="arrangement-playhead-handle"]'); const up = window.__up[n]; return { dt: up ? performance.now() - up.t : null, pos: Number(h.getAttribute('aria-valuenow')), label: window.__playBtn.getAttribute('aria-label') }; }, n0 + 1)); await sleep(60); }
+    r.samples = samples;
+    r.events = await page.evaluate(() => window.__ev);
+    r.labels = await page.evaluate(() => window.__labels);
+    r.liveStarts = await page.evaluate((n) => window.__starts.slice(n).filter((x) => !x.offline).map((x) => ({ offset: +x.offset.toFixed(4), when: x.when, ctxTime: x.ctxTime })), st0);
+    r.after = await S(page);
+    r.rms = await page.evaluate(() => Math.max(0, ...window.__rms()));
+    r.impliedStart = samples.filter((x) => x.label === 'Pause' && x.dt > 300).map((x) => +(x.pos - x.dt / 1000).toFixed(3));
+    await page.screenshot({ path: path.join(outDir, `shot-after-strip-dbl-${key}.png`) });
+    r.errors = errors; await ctx.close(); return r;
+  },
+  async dblLower(browser, vp, key) {
+    const { ctx, page, errors } = await open(browser, vp);
+    await addBtn(page, 'demo-stem-pulse');
+    let b = await bars(page);
+    await page.mouse.dblclick(b.x + 6 * 40, b.y + 15); await sleep(500);
+    const r = { stopped: await S(page) };
+    await page.keyboard.press('x'); await sleep(300); await page.mouse.click(5, 5); await sleep(200);
+    r.afterX = await S(page);
+    await page.keyboard.press('Space'); await sleep(500);
+    b = await bars(page);
+    await page.evaluate(() => { window.__labels = []; });
+    await page.mouse.dblclick(b.x + 6 * 40, b.y + 15); await sleep(500);
+    r.playing = await S(page); r.playingLabels = await page.evaluate(() => window.__labels);
+    await page.keyboard.press('x'); await sleep(300); await page.mouse.click(5, 5); await page.keyboard.press('Space'); await sleep(300);
+    const b3 = await bars(page); const x0 = b3.x + 500; const y0 = b3.y + 15;
+    await page.mouse.move(x0, y0); await page.mouse.down(); for (let i = 1; i <= 6; i += 1) await page.mouse.move(x0 - i * 20, y0); await page.mouse.up();
+    const afterDrag = await S(page);
+    await page.mouse.dblclick(x0 - 120, y0); await sleep(500);
+    r.guard = { afterDrag, afterDbl: await S(page) };
+    // strip press-then-drag then strip dblclick within 300ms
+    const b4 = await bars(page); const y4 = b4.y + 4; const x4 = b4.x + 500;
+    await page.mouse.move(x4, y4); await page.mouse.down(); for (let i = 1; i <= 6; i += 1) await page.mouse.move(x4 - i * 20, y4); await page.mouse.up();
+    const st0 = await page.evaluate(() => window.__starts.length);
+    const afterStripDrag = await S(page);
+    await page.mouse.dblclick(x4 - 120, y4); await sleep(500);
+    r.stripGuard = { afterStripDrag, afterDbl: await S(page), liveStarts: await page.evaluate((n) => window.__starts.slice(n).filter((x) => !x.offline).map((x) => +x.offset.toFixed(3)), st0) };
+    r.errors = errors; await ctx.close(); return r;
+  },
+  async end(browser, vp, key) {
+    const r = {};
+    const scroll = (page, v) => page.evaluate((v) => { document.querySelector('[data-testid="arrangement-timeline-scroller"]').scrollLeft = v; }, v);
+    {
+      const { ctx, page, errors } = await open(browser, vp);
+      await addBtn(page, 'demo-stem-pulse');
+      await scroll(page, 300); await sleep(400);
+      const b = await bars(page); const p = await pps(page);
+      const st0 = await page.evaluate(() => window.__starts.length);
+      const s = await clickAndSample(page, b.x + 15.95 * p, b.y + 4, 900);
+      r.click = { ...(await S(page)), labels: s.labels, anyPause: s.samples.some((x) => x.label === 'Pause'), liveStarts: await page.evaluate((n) => window.__starts.slice(n).filter((x) => !x.offline).length, st0) };
+      r.clickExact = r.click.status === END16;
+      const st1 = await page.evaluate(() => window.__starts.length);
+      await page.keyboard.press('Space'); await sleep(600);
+      r.space = { ...(await S(page)), liveStarts: await page.evaluate((n) => window.__starts.slice(n).filter((x) => !x.offline).map((x) => +x.offset.toFixed(3)), st1) };
+      await page.keyboard.press('Space'); await sleep(200);
+      await page.screenshot({ path: path.join(outDir, `end-${key}.png`) });
+      r.errors1 = errors; await ctx.close();
+    }
+    {
+      // space-related neighbours: Space past the end, Space at end
+      const { ctx, page, errors } = await open(browser, vp);
+      await addBtn(page, 'demo-stem-pulse');
+      await scroll(page, 400); await sleep(300);
+      const sr = await secs(page); const p = await pps(page);
+      await clickAt(page, sr.x + 20 * p, sr.y + 14); await sleep(300);
+      await page.mouse.click(5, 5);
+      await page.keyboard.press('Space'); await sleep(500);
+      r.spacePastEnd = await S(page);
+      r.errors2 = errors; await ctx.close();
+    }
+    {
+      // loop 2-6 active, strip at 15.95 -> not playing; strip at 3 -> plays and wraps
+      const { ctx, page, errors } = await open(browser, vp);
+      await addBtn(page, 'demo-stem-pulse');
+      const clip = page.locator('[data-clip-kind="audio"]').first(); const cb = await clip.boundingBox(); const p = cb.width / 16;
+      await page.mouse.move(cb.x + 2 * p, cb.y + cb.height - 6); await page.mouse.down(); for (let i = 1; i <= 10; i += 1) await page.mouse.move(cb.x + (2 + 0.4 * i) * p, cb.y + cb.height - 6); await page.mouse.up(); await sleep(300);
+      await page.keyboard.press('Control+l'); await sleep(400);
+      r.loop26Status = (await S(page)).status;
+      await page.keyboard.press('Escape'); await page.mouse.click(5, 5); await sleep(200);
+      await scroll(page, 300); await sleep(300);
+      let b = await bars(page);
+      const s = await clickAndSample(page, b.x + 15.95 * p, b.y + 4, 700);
+      r.loop26End = { ...(await S(page)), anyPause: s.samples.some((x) => x.label === 'Pause'), labels: s.labels };
+      r.loop26EndExact = r.loop26End.status === END16;
+      await scroll(page, 0); await sleep(300); b = await bars(page);
+      const s2 = await clickAndSample(page, b.x + 3 * p, b.y + 4, 4200);
+      r.loop26At3 = { maxPos: Math.max(...s2.samples.map((x) => x.pos)), minPosLate: Math.min(...s2.samples.filter((x) => x.dt > 3200).map((x) => x.pos)), last: s2.samples.at(-1) };
+      await page.keyboard.press('Space'); await sleep(200);
+      r.errors3 = errors; await ctx.close();
+    }
+    {
+      // try a loop that reaches past the project end (14-18): select 14-16 on the clip, Ctrl+L, drag the loop end edge right by 2 s
+      const { ctx, page, errors } = await open(browser, vp);
+      await addBtn(page, 'demo-stem-pulse');
+      await scroll(page, 300); await sleep(300);
+      const clip = page.locator('[data-clip-kind="audio"]').first(); const cb = await clip.boundingBox(); const p = cb.width / 16;
+      await page.mouse.move(cb.x + 14 * p, cb.y + cb.height - 6); await page.mouse.down(); for (let i = 1; i <= 10; i += 1) await page.mouse.move(cb.x + (14 + 0.19 * i) * p, cb.y + cb.height - 6); await page.mouse.up(); await sleep(300);
+      await page.keyboard.press('Control+l'); await sleep(400);
+      r.loop14Status = (await S(page)).status;
+      await page.keyboard.press('Escape'); await page.mouse.click(5, 5); await sleep(200);
+      const edge = page.locator('[data-testid="arrangement-loop-end-edge"]').first();
+      if (await edge.count()) {
+        const eb = await edge.boundingBox(); const ex = eb.x + eb.width / 2; const ey = eb.y + eb.height / 2;
+        await page.mouse.move(ex, ey); await page.mouse.down(); for (let i = 1; i <= 10; i += 1) await page.mouse.move(ex + i * 0.2 * p, ey); await page.mouse.up(); await sleep(400);
+        r.loop14Times = await page.evaluate(() => (document.querySelector('[data-testid="arrangement-loop-times"]') || {}).textContent || null);
+        r.loop14AfterEdge = (await S(page)).status;
+      } else r.loop14Times = 'no end edge';
+      const b = await bars(page);
+      const st0 = await page.evaluate(() => window.__starts.length);
+      const s = await clickAndSample(page, b.x + 15.95 * p, b.y + 4, 1200);
+      r.loop14Click = { ...(await S(page)), anyPause: s.samples.some((x) => x.label === 'Pause'), liveStarts: await page.evaluate((n) => window.__starts.slice(n).filter((x) => !x.offline).map((x) => +x.offset.toFixed(3)), st0), maxPos: Math.max(...s.samples.map((x) => x.pos)) };
+      r.errors4 = errors; await ctx.close();
+    }
+    {
+      // library preview running, strip click at the end -> preview stopped, not playing, past-end status
+      const { ctx, page, errors } = await open(browser, vp);
+      await addBtn(page, 'demo-stem-pulse');
+      await page.locator('[data-source-id="demo-stem-pulse"]').first().click(); await sleep(300);
+      const t = page.locator('[data-testid="arrangement-library-preview-toggle"]');
+      const lab = () => t.evaluate((x) => ({ label: x.getAttribute('aria-label'), pressed: x.getAttribute('aria-pressed') }));
+      r.previewBefore = await lab();
+      await t.click(); await sleep(700); r.previewOn = await lab();
+      await scroll(page, 300); await sleep(300);
+      const b = await bars(page); const p = await pps(page);
+      await clickAt(page, b.x + 15.95 * p, b.y + 4); await sleep(600);
+      r.previewAfterEnd = await lab(); r.previewMain = await S(page); r.previewExact = r.previewMain.status === END16;
+      // and preview + strip click inside -> preview stops, playback starts
+      await t.click(); await sleep(700); r.previewOn2 = await lab();
+      await scroll(page, 0); await sleep(300); const b2 = await bars(page);
+      await clickAt(page, b2.x + 2 * p, b2.y + 4); await sleep(600);
+      r.previewAfterInside = await lab(); r.previewMain2 = await S(page);
+      await page.screenshot({ path: path.join(outDir, `preview-end-${key}.png`) });
+      r.errors5 = errors; await ctx.close();
+    }
+    return r;
+  },
+  async race(browser, vp, key) {
+    const { ctx, page, errors } = await open(browser, vp);
+    await addBtn(page, 'demo-stem-pulse');
+    const b = await bars(page); const p = await pps(page);
+    await page.evaluate(() => { window.__labels = []; window.__st = []; const s = document.querySelector('[data-testid="arrangement-status"]'); new MutationObserver(() => window.__st.push(s.textContent)).observe(s, { childList: true, subtree: true, characterData: true }); });
+    const st0 = await page.evaluate(() => window.__starts.length);
+    const ts = [];
+    for (let k = 1; k <= 10; k += 1) { ts.push(Date.now()); await page.mouse.click(b.x + k * p, b.y + 4); await sleep(80); }
+    await sleep(400);
+    const r = { intervals: ts.slice(1).map((t, i) => t - ts[i]), labels: await page.evaluate(() => window.__labels), statuses: await page.evaluate(() => window.__st), final: await S(page) };
+    r.playLabelSeen = r.labels.some((x) => x.label === 'Play');
+    r.fitSeen = r.statuses.some((x) => x.startsWith('Fit:'));
+    r.liveStarts = await page.evaluate((n) => window.__starts.slice(n).filter((x) => !x.offline).map((x) => +x.offset.toFixed(3)), st0);
+    r.errors = errors; await ctx.close(); return r;
+  },
+  async spaceEmpty(browser, vp, key) {
+    const { ctx, page, errors } = await open(browser, vp);
+    await page.mouse.click(5, 5);
+    await page.keyboard.press('Space'); await sleep(400);
+    const r = { s: await S(page) };
+    r.exact = r.s.status === NOTHING;
+    r.errors = errors; await ctx.close(); return r;
+  },
+  async noTempoDbl(browser, vp, key) {
+    const { ctx, page, errors } = await open(browser, vp);
+    await addBtn(page, 'demo-soft-impact');
+    const r = await page.evaluate(() => { const br = document.querySelector('[data-testid="arrangement-bars-ruler"]'); return { strips: document.querySelectorAll('[data-testid="arrangement-bars-scrub-strip"]').length, title: br.getAttribute('title'), cursor: getComputedStyle(br).cursor }; });
+    r.s0 = await S(page);
+    const b = await bars(page);
+    await page.mouse.dblclick(b.x + 200, b.y + 4); await sleep(500); r.dbl4 = await S(page);
+    await page.mouse.dblclick(b.x + 240, b.y + 15); await sleep(500); r.dbl15 = await S(page);
+    r.errors = errors; await ctx.close(); return r;
+  },

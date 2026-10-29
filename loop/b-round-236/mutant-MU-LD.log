@@ -1,0 +1,45 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b236-scratch[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/collection.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/tempo-seed.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 432[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 3249[2mms[22m[39m
+     [32m✓[39m TU1 the mount state is unchanged: empty tempo, seconds 1, Snap off, no bars marks[32m 204[2mms[22m[39m
+     [33m[2m✓[22m[39m TU2 adding the bpm-90 stem seeds 90, 1/4 and Snap on, and appends to the placement status [33m 476[2mms[22m[39m
+     [33m[2m✓[22m[39m TU3 an sfx and a bpm-less music clip change nothing; the bpm-90 stem afterwards seeds 90 [33m 521[2mms[22m[39m
+     [33m[2m✓[22m[39m TU4 a typed tempo wins, a cleared tempo stays empty, an untouched empty field still seeds [33m 557[2mms[22m[39m
+     [33m[2m✓[22m[39m TU5 a hand-chosen division is kept; a hand-toggled Snap stays off [33m 556[2mms[22m[39m
+     [33m[2m✓[22m[39m TU6 the seed is one-shot: a second BPM and Undo of both placements keep 90, 1/4 and Snap on [33m 326[2mms[22m[39m
+     [32m✓[39m TU7 after the seed a clip drag snaps to multiples of 60/90 s; Alt still bypasses the grid[32m 232[2mms[22m[39m
+     [32m✓[39m TU8 an initial arrangement that already holds the bpm-90 stem seeds at mount[32m 52[2mms[22m[39m
+     [32m✓[39m TU9 a seed placed before every source settles keeps placement + seed; the bare ready text never replaces it[32m 190[2mms[22m[39m
+[31m     [31m×[31m TU10 a mount seed composes with the loading text, and ready replaces only that prefix[39m[32m 63[2mms[22m[39m
+     [32m✓[39m TU11 an empty status before the seed gives no leading space[32m 70[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx[2m > [22mSABA-B-11a-FIX-2 the seed status survives the collection ready write[2m > [22mTU10 a mount seed composes with the loading text, and ready replaces only that prefix
+[31m[1mAssertionError[22m: expected 'Loading the demo collection…' to be 'Loading the demo collection… Tempo 90…' // Object.is equality[39m
+
+Expected: [32m"Loading the demo collection…[7m Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)[27m"[39m
+Received: [31m"Loading the demo collection…"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx:[2m462:32[22m[39m
+    [90m460| [39m      ])[33m;[39m
+    [90m461| [39m      const tail = `${studioTempoStrings.seeded({ bpm: '90', title: 'S…
+    [90m462| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m([32m`[39m[36m${[39m[33mDEMO_LOADING[39m[36m}[39m[32m [39m[36m${[39mtail[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m463| [39m      [35mawait[39m [34msettle[39m()[33m;[39m
+    [90m464| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m([32m`[39m[36m${[39m[33mDEMO_READY[39m[36m}[39m[32m [39m[36m${[39mtail[36m}[39m[32m`[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m38 passed[39m[22m[90m (39)[39m
+[2m   Start at [22m 23:57:51
+[2m   Duration [22m 5.73s[2m (transform 2.19s, setup 0ms, import 3.59s, tests 3.72s, environment 2.90s)[22m
+
+
+::error file=/tmp/b236-scratch/app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx,title=app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx > SABA-B-11a-FIX-2 the seed status survives the collection ready write > TU10 a mount seed composes with the loading text%2C and ready replaces only that prefix,line=462,column=32::AssertionError: expected 'Loading the demo collection…' to be 'Loading the demo collection… Tempo 90…' // Object.is equality%0A%0AExpected: "Loading the demo collection… Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"%0AReceived: "Loading the demo collection…"%0A%0A ❯ app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx:462:32%0A%0A

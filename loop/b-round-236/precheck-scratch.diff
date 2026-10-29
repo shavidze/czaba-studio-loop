@@ -1,0 +1,473 @@
+--- a/app/contexts/ArrangementContext.tsx	2026-10-28 23:11:02.223422533 +0000
++++ b/app/contexts/ArrangementContext.tsx	2026-10-28 23:57:51.130281336 +0000
+@@ -30,7 +30,11 @@
+   deleteRangeKeepingGap,
+   planClipboardPaste,
+ } from '~/lib/arrangement/clipboard';
+-import { workspaceCollectionCopy } from '~/lib/arrangement/collection';
++import {
++  loadingCollectionStatus,
++  settledCollectionStatus,
++  workspaceCollectionCopy,
++} from '~/lib/arrangement/collection';
+ import { clipEnvelopeShapes } from '~/lib/arrangement/envelope';
+ import {
+   ARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE,
+@@ -368,7 +372,7 @@
+   blurMasterGain: () => void;
+   resetMasterPeak: () => void;
+   setPxPerSecond: (value: number) => void;
+-  setStatus: (message: string) => void;
++  setStatus: (update: ArrangementStatusUpdate) => void;
+   setMetronomeBpm: (next: number | null) => void;
+   exportWav: (renderWindow?: ArrangementRenderWindow) => Promise<void>;
+   exportMp3: (
+@@ -3654,7 +3658,7 @@
+       setStatus(copy.empty);
+       return () => controller.abort();
+     }
+-    setStatus(copy.loading);
++    setStatus((current) => loadingCollectionStatus(current, copy));
+     const decodeContext = getDecodeContext();
+     let pending = collection.sources.length;
+     for (const source of collection.sources) {
+@@ -3667,7 +3671,8 @@
+       if (pending > 0) {
+         return;
+       }
+-      setStatus(failed === 0 ? copy.ready : copy.failed(failed));
++      const failedCount = failed;
++      setStatus((current) => settledCollectionStatus(current, copy, failedCount));
+     };
+     for (const source of collection.sources) {
+       collection
+--- a/app/components/arrangement/StudioWorkspace.tsx	2026-10-28 23:11:02.225382111 +0000
++++ b/app/components/arrangement/StudioWorkspace.tsx	2026-10-28 23:58:09.870700748 +0000
+@@ -103,7 +103,7 @@
+   studioWorkspaceStrings,
+ } from '~/lib/arrangement/strings';
+ import { formatTempoBpm, TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '~/lib/arrangement/tempo';
+-import { findAssetTempoSeed } from '~/lib/arrangement/tempo-seed';
++import { findAssetTempoSeed, hasAssetTempoSource } from '~/lib/arrangement/tempo-seed';
+ import {
+   anchoredTimelineView,
+   clampTimelineZoom,
+@@ -1423,8 +1423,13 @@
+     workspaceRef.current.setStatus(tempoStatusMessage(next));
+   }, []);
+ 
++  const collectionHasTempoSource = useMemo(
++    () => hasAssetTempoSource(collection.sources),
++    [collection.sources],
++  );
++
+   useEffect(() => {
+-    if (!tempoSeedOpenRef.current || tempoBpmRef.current !== null) {
++    if (!collectionHasTempoSource || !tempoSeedOpenRef.current || tempoBpmRef.current !== null) {
+       return;
+     }
+     const seed = findAssetTempoSeed(arrangement.clips, arrangement.tracks, collection.sources);
+@@ -1448,8 +1453,10 @@
+       setSnapEnabled(true);
+       parts.push(studioGridStrings.snapOnStatus(gridDivisionLabel(gridDivisionIdRef.current)));
+     }
+-    workspaceRef.current.setStatus([workspaceRef.current.status, ...parts].join(' '));
+-  }, [arrangement.clips, arrangement.tracks, collection.sources]);
++    workspaceRef.current.setStatus((current) =>
++      [current, ...parts].filter((part) => part.length > 0).join(' '),
++    );
++  }, [arrangement.clips, arrangement.tracks, collection.sources, collectionHasTempoSource]);
+ 
+   const toggleMetronome = useCallback(() => {
+     if (tempoBpm === null) {
+--- a/app/lib/arrangement/collection.ts	2026-10-28 23:02:13.706507609 +0000
++++ b/app/lib/arrangement/collection.ts	2026-10-28 23:56:31.067262411 +0000
+@@ -40,6 +40,28 @@
+   fileStem: 'czaba-studio',
+ };
+ 
++export function loadingCollectionStatus(current: string, copy: WorkspaceCollectionCopy): string {
++  return current === copy.loading || current.startsWith(`${copy.loading} `)
++    ? current
++    : copy.loading;
++}
++
++export function settledCollectionStatus(
++  current: string,
++  copy: WorkspaceCollectionCopy,
++  failed: number,
++): string {
++  const settled = failed === 0 ? copy.ready : copy.failed(failed);
++  if (current === copy.loading) {
++    return settled;
++  }
++  const loadingPrefix = `${copy.loading} `;
++  if (current.startsWith(loadingPrefix)) {
++    return `${settled} ${current.slice(loadingPrefix.length)}`;
++  }
++  return failed === 0 ? current : settled;
++}
++
+ export function workspaceCollectionCopy(origin: WorkspaceOrigin): WorkspaceCollectionCopy {
+   return origin === 'purchased' ? purchasedWorkspaceCollectionCopy : demoWorkspaceCollectionCopy;
+ }
+--- a/app/lib/arrangement/tempo-seed.ts	2026-10-28 23:02:13.709507673 +0000
++++ b/app/lib/arrangement/tempo-seed.ts	2026-10-28 23:44:12.527039351 +0000
+@@ -23,6 +23,10 @@
+   return bpm >= TEMPO_BPM_MIN && bpm <= TEMPO_BPM_MAX ? bpm : null;
+ }
+ 
++export function hasAssetTempoSource(sources: readonly WorkspaceSource[]): boolean {
++  return sources.some((source) => catalogueTempoBpm(source) !== null);
++}
++
+ export function findAssetTempoSeed(
+   clips: readonly ArrangementClip[],
+   tracks: readonly ArrangementTrack[],
+--- a/app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx	2026-10-28 23:02:13.704507566 +0000
++++ b/app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx	2026-10-28 23:46:01.215333628 +0000
+@@ -379,3 +379,114 @@
+     expectSeed90(view);
+   });
+ });
++
++const DEMO_LOADING = 'Loading the demo collection…';
++const DEMO_READY =
++  'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
++
++function deferredSeedCollection(): { collection: WorkspaceCollection; release: () => void } {
++  let release: () => void = () => {};
++  const gate = new Promise<void>((resolve) => {
++    release = resolve;
++  });
++  const buffer = () => new AudioBuffer({ length: 400, numberOfChannels: 1, sampleRate: 100 });
++  const collection: WorkspaceCollection = {
++    ...seedCollection,
++    id: 'seed-deferred',
++    loadSource: async (source) => {
++      if (source.id !== 'stem-90') {
++        await gate;
++      }
++      return buffer();
++    },
++  };
++  return { collection, release: () => release() };
++}
++
++async function mountDeferredSeedWorkspace(clips: ArrangementClip[] = []) {
++  const api: SeedApiRef = { current: null };
++  const { collection, release } = deferredSeedCollection();
++  const view = render(
++    <ArrangementProvider collection={collection} initialArrangement={seedArrangement(clips)}>
++      <StudioWorkspace />
++      <SeedProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  const addSource = (sourceId: string) => {
++    const option = view
++      .getAllByRole('option')
++      .find((entry) => entry.getAttribute('data-source-id') === sourceId);
++    if (!option) {
++      throw new Error(`option ${sourceId} not rendered`);
++    }
++    fireEvent.click(option);
++    act(() => {
++      fireEvent.click(view.getByRole('button', { name: 'Add' }));
++    });
++  };
++  const settle = async () => {
++    await act(async () => {
++      release();
++      for (let index = 0; index < 6; index += 1) {
++        await Promise.resolve();
++      }
++    });
++  };
++  return { api, view, addSource, settle };
++}
++
++describe(
++  'SABA-B-11a-FIX-2 the seed status survives the collection ready write',
++  { timeout: 15_000 },
++  () => {
++    it('TU9 a seed placed before every source settles keeps placement + seed; the bare ready text never replaces it', async () => {
++      const { view, addSource, settle } = await mountDeferredSeedWorkspace();
++      expect(statusText(view)).toBe(DEMO_LOADING);
++      addSource('stem-90');
++      const seeded = `${placedText('Slow stem')} ${studioTempoStrings.seeded({ bpm: '90', title: 'Slow stem' })} ${SNAP_ON_QUARTER}`;
++      expect(statusText(view)).toBe(seeded);
++      await settle();
++      expect(statusText(view)).toBe(seeded);
++      expectSeed90(view);
++    });
++
++    it('TU10 a mount seed composes with the loading text, and ready replaces only that prefix', async () => {
++      const { view, settle } = await mountDeferredSeedWorkspace([
++        { id: 'c1', trackId: 'music', sourceId: 'stem-90', start: 2, sourceOffset: 0, duration: 4 },
++      ]);
++      const tail = `${studioTempoStrings.seeded({ bpm: '90', title: 'Slow stem' })} ${SNAP_ON_QUARTER}`;
++      expect(statusText(view)).toBe(`${DEMO_LOADING} ${tail}`);
++      await settle();
++      expect(statusText(view)).toBe(`${DEMO_READY} ${tail}`);
++      expectSeed90(view);
++    });
++
++    it('TU11 an empty status before the seed gives no leading space', async () => {
++      const { api, view } = await mountSeedWorkspace();
++      act(() => live(api).setStatus(''));
++      const before = live(api).getArrangement();
++      const clip: ArrangementClip = {
++        id: 'c-empty',
++        trackId: 'music',
++        sourceId: 'stem-90',
++        start: 0,
++        sourceOffset: 0,
++        duration: 4,
++      };
++      act(() => {
++        live(api).commitArrangement(
++          { ...before, clips: [...before.clips, clip] },
++          'Add clip',
++          before,
++        );
++      });
++      expect(statusText(view)).toBe(
++        `${studioTempoStrings.seeded({ bpm: '90', title: 'Slow stem' })} ${SNAP_ON_QUARTER}`,
++      );
++    });
++  },
++);
+--- a/app/lib/arrangement/__tests__/collection.test.ts	2026-10-28 23:02:13.693507329 +0000
++++ b/app/lib/arrangement/__tests__/collection.test.ts	2026-10-28 23:56:31.067973942 +0000
+@@ -3,7 +3,9 @@
+ import type { AudioStem } from '~/types/audio';
+ import {
+   createPurchasedWorkspaceCollection,
++  loadingCollectionStatus,
+   type PurchasedStemFetch,
++  settledCollectionStatus,
+   workspaceCollectionCopy,
+ } from '../collection';
+ import { findStudioShortcut } from '../shortcuts';
+@@ -417,3 +419,40 @@
+     }
+   });
+ });
++
++describe('SABA-B-11a-FIX-2 settledCollectionStatus', () => {
++  const demo = workspaceCollectionCopy('demo');
++  const purchased = workspaceCollectionCopy('purchased');
++  it('CR1 the bare loading text becomes ready, or failed(n) when sources failed', () => {
++    expect(settledCollectionStatus(demo.loading, demo, 0)).toBe(demo.ready);
++    expect(settledCollectionStatus(demo.loading, demo, 1)).toBe(demo.failed(1));
++    expect(settledCollectionStatus(purchased.loading, purchased, 2)).toBe(purchased.failed(2));
++  });
++  it('CR2 a loading prefix is swapped and the rest is kept', () => {
++    expect(settledCollectionStatus(`${demo.loading} Tempo 90.`, demo, 0)).toBe(
++      `${demo.ready} Tempo 90.`,
++    );
++    expect(settledCollectionStatus(`${demo.loading} Tempo 90.`, demo, 1)).toBe(
++      `${demo.failed(1)} Tempo 90.`,
++    );
++  });
++  it('CR3 any other status is kept when all sources loaded, and is replaced by failed(n) otherwise', () => {
++    expect(settledCollectionStatus('Clip added.', demo, 0)).toBe('Clip added.');
++    expect(settledCollectionStatus('Clip added.', demo, 1)).toBe(demo.failed(1));
++    expect(settledCollectionStatus(`${demo.loading}x`, demo, 0)).toBe(`${demo.loading}x`);
++  });
++});
++
++describe('SABA-B-11a-FIX-2 loadingCollectionStatus', () => {
++  const demo = workspaceCollectionCopy('demo');
++  const purchased = workspaceCollectionCopy('purchased');
++  it('CR4 a status that already starts with this loading text is kept; anything else becomes loading', () => {
++    expect(loadingCollectionStatus(demo.loading, demo)).toBe(demo.loading);
++    expect(loadingCollectionStatus(`${demo.loading} Tempo 90.`, demo)).toBe(
++      `${demo.loading} Tempo 90.`,
++    );
++    expect(loadingCollectionStatus(demo.ready, demo)).toBe(demo.loading);
++    expect(loadingCollectionStatus(`${demo.loading} Tempo 90.`, purchased)).toBe(purchased.loading);
++    expect(loadingCollectionStatus('Clip added.', demo)).toBe(demo.loading);
++  });
++});
+--- a/app/lib/arrangement/__tests__/tempo-seed.test.ts	2026-10-28 23:02:13.704507566 +0000
++++ b/app/lib/arrangement/__tests__/tempo-seed.test.ts	2026-10-28 23:46:01.196333201 +0000
+@@ -1,6 +1,6 @@
+ import { describe, expect, it } from 'vitest';
+ import type { ArrangementClip, ArrangementTrack, WorkspaceSource } from '~/types/arrangement';
+-import { findAssetTempoSeed } from '../tempo-seed';
++import { findAssetTempoSeed, hasAssetTempoSource } from '../tempo-seed';
+ 
+ const TRACKS: ArrangementTrack[] = [
+   { id: 'video', kind: 'video', name: 'Video', volume: 1, mute: false, solo: false },
+@@ -71,3 +71,17 @@
+     expect(findAssetTempoSeed([seedClip('c1', 'stem', 0, 'missing')], TRACKS, [stem])).toBeNull();
+   });
+ });
++
++describe('SABA-B-11a-FIX-2 hasAssetTempoSource', () => {
++  it('TS7 true only when a music or stem source has a valid catalogue BPM', () => {
++    expect(hasAssetTempoSource([])).toBe(false);
++    expect(hasAssetTempoSource([seedSource('hit', 'sfx', 120), seedSource('song', 'music')])).toBe(
++      false,
++    );
++    expect(hasAssetTempoSource([seedSource('bad', 'stem', 5000)])).toBe(false);
++    expect(hasAssetTempoSource([seedSource('hit', 'sfx'), seedSource('stem', 'stem', 90)])).toBe(
++      true,
++    );
++    expect(hasAssetTempoSource([seedSource('song', 'music', 128.004)])).toBe(true);
++  });
++});
+--- a/app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx	2026-10-28 23:46:19.627736310 +0000
+@@ -0,0 +1,146 @@
++import { act, render } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import type { ArrangementClip, WorkspaceCollection, WorkspaceSource } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { findAssetTempoSeed } from '../tempo-seed';
++import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++vi.mock('../tempo-seed', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('../tempo-seed')>();
++  return { ...actual, findAssetTempoSeed: vi.fn(actual.findAssetTempoSeed) };
++});
++
++const {
++  fakeClock,
++  FakeAudioContext,
++  FakeOfflineAudioContext,
++  FakeAudioBuffer,
++  FakeResizeObserver,
++} = createWorkspaceTestEnvironment();
++
++beforeEach(() => {
++  fakeClock.base = Date.now() / 1000;
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.mocked(findAssetTempoSeed).mockClear();
++});
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++});
++
++function searchCollection(sources: WorkspaceSource[]): WorkspaceCollection {
++  return {
++    id: 'search',
++    label: 'search',
++    origin: 'demo',
++    sources,
++    loadSource: async () => new AudioBuffer({ length: 400, numberOfChannels: 1, sampleRate: 100 }),
++  };
++}
++
++const NO_BPM_SOURCES: WorkspaceSource[] = [
++  { id: 'hit', title: 'Hit', collectionLabel: 'search', kind: 'sfx', origin: 'demo', bpm: 120 },
++  { id: 'song', title: 'Song', collectionLabel: 'search', kind: 'music', origin: 'demo' },
++];
++
++const BPM_SOURCES: WorkspaceSource[] = [
++  ...NO_BPM_SOURCES,
++  {
++    id: 'stem-90',
++    title: 'Slow stem',
++    collectionLabel: 'search',
++    kind: 'stem',
++    origin: 'demo',
++    bpm: 90,
++  },
++];
++
++interface SearchApiRef {
++  current: ArrangementContextValue | null;
++}
++
++function SearchProbe({ api }: { api: SearchApiRef }) {
++  api.current = useArrangement();
++  return null;
++}
++
++async function mountSearch(sources: WorkspaceSource[]) {
++  const api: SearchApiRef = { current: null };
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++  ]);
++  render(
++    <ArrangementProvider collection={searchCollection(sources)} initialArrangement={base}>
++      <StudioWorkspace />
++      <SearchProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  const addClip = (id: string, sourceId: string, start: number) => {
++    const live = api.current;
++    if (!live) {
++      throw new Error('provider not mounted');
++    }
++    const before = live.getArrangement();
++    const clip: ArrangementClip = {
++      id,
++      trackId: 'music',
++      sourceId,
++      start,
++      sourceOffset: 0,
++      duration: 2,
++    };
++    act(() => {
++      live.commitArrangement({ ...before, clips: [...before.clips, clip] }, 'Add clip', before);
++    });
++  };
++  return { addClip };
++}
++
++describe(
++  'SABA-B-11a-FIX-2 the seed search closes when no source can seed',
++  { timeout: 15_000 },
++  () => {
++    it('TQ1 a collection with no music or stem BPM never runs the seed search, across three clip changes', async () => {
++      const { addClip } = await mountSearch(NO_BPM_SOURCES);
++      addClip('a', 'hit', 0);
++      addClip('b', 'song', 3);
++      addClip('c', 'hit', 6);
++      expect(vi.mocked(findAssetTempoSeed)).not.toHaveBeenCalled();
++    });
++
++    it('TQ2 control: with a BPM stem in the collection the search runs on clip changes until it seeds', async () => {
++      const { addClip } = await mountSearch(BPM_SOURCES);
++      const atMount = vi.mocked(findAssetTempoSeed).mock.calls.length;
++      expect(atMount).toBeGreaterThan(0);
++      addClip('a', 'hit', 0);
++      expect(vi.mocked(findAssetTempoSeed).mock.calls.length).toBeGreaterThan(atMount);
++      addClip('b', 'stem-90', 3);
++      const afterSeed = vi.mocked(findAssetTempoSeed).mock.calls.length;
++      addClip('c', 'hit', 6);
++      expect(vi.mocked(findAssetTempoSeed).mock.calls.length).toBe(afterSeed);
++    });
++  },
++);

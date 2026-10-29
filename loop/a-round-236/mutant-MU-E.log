@@ -1,0 +1,49 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx (15 tests | 1 failed) 1984ms
+     ✓ BR1 without a tempo the bars ruler stays display-only 174ms
+     ✓ BR2 a strip click while stopped starts playback from the nearest 1/4 line  368ms
+     ✓ BR3 a strip click while playing jumps to the nearest 1/4 line and keeps playing 187ms
+     ✓ BR4 a lower-zone click while stopped moves the position on the grid and does not play 164ms
+     ✓ BR4b a lower-zone click while playing seeks and keeps playing (existing seekTo) 96ms
+     ✓ BR5 Alt bypasses the grid on both zones; Snap off lands free as well 116ms
+     ✓ BR6 a drag from either zone scrolls or zooms; a cancelled press never seeks or plays 117ms
+     ✓ BR7 a double-click fits the project; a double-click right after a drag does nothing 107ms
+     ✓ BR8 a strip click past the end or in an empty project reports and does not play 151ms
+     ✓ BR9 the seconds ruler click is unchanged with a tempo 98ms
+     ✓ BR10 a press while another gesture holds the claim is refused 79ms
+     ✓ BR11 a workspace re-render with unchanged gestures does not re-render the bars ruler 86ms
+     ✓ BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits 97ms
+     × BR13 a strip click that snaps to the project end reports past-end and does not play from 0 78ms
+     ✓ BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref) 67ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR13 a strip click that snaps to the project end reports past-end and does not play from 0
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:424:41
+    422|     const mounted = await mountTempo90SnapOn();
+    423|     clickStrip(mounted, 15.95);
+    424|     expect(live(mounted.api).isPlaying).toBe(false);
+       |                                         ^
+    425|     expect(positionOf(mounted.api)).toBeCloseTo(16, 3);
+    426|     expect(statusText(mounted.view)).toBe(playPastEndMessage(16, 16));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  23:10:45
+   Duration  3.80s (transform 930ms, setup 0ms, import 1.34s, tests 1.98s, environment 383ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx,title=app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR13 a strip click that snaps to the project end reports past-end and does not play from 0,line=424,column=41::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:424:41%0A%0A

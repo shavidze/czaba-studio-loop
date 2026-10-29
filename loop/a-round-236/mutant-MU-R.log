@@ -1,0 +1,70 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx (15 tests | 2 failed) 1916ms
+     ✓ BR1 without a tempo the bars ruler stays display-only 174ms
+     ✓ BR2 a strip click while stopped starts playback from the nearest 1/4 line  370ms
+     ✓ BR3 a strip click while playing jumps to the nearest 1/4 line and keeps playing 192ms
+     ✓ BR4 a lower-zone click while stopped moves the position on the grid and does not play 179ms
+     ✓ BR4b a lower-zone click while playing seeks and keeps playing (existing seekTo) 92ms
+     ✓ BR5 Alt bypasses the grid on both zones; Snap off lands free as well 101ms
+     ✓ BR6 a drag from either zone scrolls or zooms; a cancelled press never seeks or plays 101ms
+     ✓ BR7 a double-click fits the project; a double-click right after a drag does nothing 98ms
+     ✓ BR8 a strip click past the end or in an empty project reports and does not play 130ms
+     ✓ BR9 the seconds ruler click is unchanged with a tempo 66ms
+     ✓ BR10 a press while another gesture holds the claim is refused 70ms
+     ✓ BR11 a workspace re-render with unchanged gestures does not re-render the bars ruler 88ms
+     ✓ BR12 a double-click on the strip plays from the point and does not fit; the lower zone still fits 105ms
+     × BR13 a strip click that snaps to the project end reports past-end and does not play from 0 78ms
+     × BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref) 70ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR13 a strip click that snaps to the project end reports past-end and does not play from 0
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:424:41
+    422|     const mounted = await mountTempo90SnapOn();
+    423|     clickStrip(mounted, 15.95);
+    424|     expect(live(mounted.api).isPlaying).toBe(false);
+       |                                         ^
+    425|     expect(positionOf(mounted.api)).toBeCloseTo(16, 3);
+    426|     expect(statusText(mounted.view)).toBe(playPastEndMessage(16, 16));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref)
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:461:41
+    459|       clickStrip(mounted, 8.2);
+    460|     });
+    461|     expect(live(mounted.api).isPlaying).toBe(true);
+       |                                         ^
+    462|     expect(positionOf(mounted.api)).toBeCloseTo(8, 3);
+    463|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  23:10:40
+   Duration  3.70s (transform 874ms, setup 0ms, import 1.27s, tests 1.92s, environment 395ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx,title=app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR13 a strip click that snaps to the project end reports past-end and does not play from 0,line=424,column=41::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:424:41%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx,title=app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx > SABA-B-11a stage 2 interactive bars ruler (D-29z327) > BR14 a strip click in the same task as a playback start keeps playing (reads the playing ref),line=461,column=41::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx:461:41%0A%0A
