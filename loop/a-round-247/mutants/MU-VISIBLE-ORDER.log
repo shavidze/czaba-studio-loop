@@ -1,0 +1,72 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a247-mut[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx [2m([22m[2m30 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 10825[2mms[22m[39m
+     [33m[2m✓[22m[39m UC1 the fold button hides the member lanes, shows an overview and writes no history [33m 677[2mms[22m[39m
+     [32m✓[39m UC2 plain U toggles the selected groups and refuses a track-only selection[32m 265[2mms[22m[39m
+     [32m✓[39m UC2 U is ignored in text fields, with modifiers and while repeating[32m 241[2mms[22m[39m
+     [33m[2m✓[22m[39m UC2 U and the fold button are refused during a pointer gesture and a pending fader preview [33m 584[2mms[22m[39m
+     [33m[2m✓[22m[39m UC3 nested collapse keeps the inner group collapsed when the outer one expands [33m 509[2mms[22m[39m
+     [33m[2m✓[22m[39m UC3 a collapsed group nested by Ctrl+G stays collapsed and ungrouping shows its children [33m 393[2mms[22m[39m
+     [33m[2m✓[22m[39m UC4 hidden lane controls are unreachable and the collapsed label carries the clip count [33m 348[2mms[22m[39m
+     [33m[2m✓[22m[39m UC4 F3 a collapse moves focus from a hidden lane to the collapsing group name [33m 407[2mms[22m[39m
+     [33m[2m✓[22m[39m UC5 collapsing prunes hidden clip, row and lane-range selections, keeps an all-lanes range [33m 839[2mms[22m[39m
+     [32m✓[39m UC5 Ctrl+A while collapsed selects every clip and marks the overview blocks[32m 161[2mms[22m[39m
+     [32m✓[39m UC6 auto-fit uses the visible lanes only and writes heights back by track id[32m 222[2mms[22m[39m
+     [32m✓[39m UC6 a hidden lane keeps its manual height across collapse and expand[32m 204[2mms[22m[39m
+     [33m[2m✓[22m[39m UC6 nested: an outer collapse leaves one lane and one group row to fit [33m 460[2mms[22m[39m
+     [33m[2m✓[22m[39m UC7 a hidden active lane marks its collapsed group and still receives library adds [33m 336[2mms[22m[39m
+     [33m[2m✓[22m[39m UC8 Undo shows the lanes, Redo restores the collapsed group without pruning [33m 372[2mms[22m[39m
+     [32m✓[39m UC9 F1 focus moves to the new group name after Ctrl+G so F2 works at once[32m 265[2mms[22m[39m
+     [32m✓[39m UC9 F1 from BODY, and F2 after Ctrl+Shift+G focus lands on the first child, never BODY[32m 262[2mms[22m[39m
+     [32m✓[39m UC10 a clip dragged onto a collapsed group row keeps its music lane target[32m 232[2mms[22m[39m
+     [32m✓[39m UC10b a marquee across a collapsed middle group never selects its hidden clips[32m 163[2mms[22m[39m
+     [32m✓[39m UC11 collapsing while playing restarts no sources and leaves the arrangement untouched[32m 239[2mms[22m[39m
+     [32m✓[39m UC1 Space on the focused fold button toggles the group and does not start playback[32m 208[2mms[22m[39m
+     [32m✓[39m UC12 the shortcut sheet lists the group keys and track fold stays independent[32m 191[2mms[22m[39m
+     [32m✓[39m LGH1 the group fold is a chevron, the group mark is Layers and no glyph text remains[32m 275[2mms[22m[39m
+     [32m✓[39m GF1 Undo: Group Tracks on the focused group name lands on its first member, never BODY[32m 282[2mms[22m[39m
+     [33m[2m✓[22m[39m GF2 Redo: Ungroup Tracks by Ctrl+Shift+Z and by Ctrl+Y lands on the first former member [33m 536[2mms[22m[39m
+     [33m[2m✓[22m[39m GF3 focus on the fold, mute or volume control of the removed row moves the same way [33m 460[2mms[22m[39m
+[31m     [31m×[31m GF4 a folded group removed by Undo hands focus to its first member, now shown[39m[33m 325[2mms[22m[39m
+     [33m[2m✓[22m[39m GF5 nested: the removed outer group hands focus to its first child; the kept inner one keeps it [33m 546[2mms[22m[39m
+     [33m[2m✓[22m[39m GF6 focus that was not inside the removed row is not moved [33m 362[2mms[22m[39m
+     [33m[2m✓[22m[39m GF7 Ctrl+Shift+G keeps its own focus target when it also removes the focused row [33m 458[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx[2m > [22mB-R245 a history step that removes the focused group row[2m > [22mGF4 a folded group removed by Undo hands focus to its first member, now shown
+[31m[1mAssertionError[22m: expected <button type="button" …(3)></button> to be <button type="button" …(3)></button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  <button[22m
+[32m-   aria-label="სტემები — set as the active track"[39m
+[31m+   aria-label="მუსიკა — set as the active track"[39m
+[2m    aria-pressed="false"[22m
+[2m    class="min-w-0 flex-1 select-none truncate rounded-md text-left text-sm font-medium text-foreground [--focus-offset:-2px]"[22m
+[2m    type="button"[22m
+[2m  >[22m
+[32m-   სტემები[39m
+[31m+   მუსიკა[39m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:[2m1172:36[22m[39m
+    [90m1170| [39m    [34mpressHistoryKey[39m(group[33m,[39m [32m'z'[39m)[33m;[39m
+    [90m1171| [39m    expect(renderedLaneIds(view)).toEqual(['video', 'music', 'stems', …
+    [90m1172| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mlaneName[39m(view[33m,[39m [32m'სტემები'[39m))[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m1173| [39m  })[33m;[39m
+    [90m1174| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m29 passed[39m[22m[90m (30)[39m
+[2m   Start at [22m 10:14:11
+[2m   Duration [22m 12.20s[2m (transform 727ms, setup 0ms, import 1.02s, tests 10.83s, environment 258ms)[22m
+
+
+::error file=/tmp/a247-mut/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx,title=app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx > B-R245 a history step that removes the focused group row > GF4 a folded group removed by Undo hands focus to its first member%2C now shown,line=1172,column=36::AssertionError: expected <button type="button" …(3)></button> to be <button type="button" …(3)></button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A  <button%0A-   aria-label="სტემები — set as the active track"%0A+   aria-label="მუსიკა — set as the active track"%0A    aria-pressed="false"%0A    class="min-w-0 flex-1 select-none truncate rounded-md text-left text-sm font-medium text-foreground [--focus-offset:-2px]"%0A    type="button"%0A  >%0A-   სტემები%0A+   მუსიკა%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx:1172:36%0A%0A
