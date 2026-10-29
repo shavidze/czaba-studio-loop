@@ -1,0 +1,112 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T14:07:49.1205379Z",
+  "round": 249,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R249-REVIEW-IM3-CMD",
+   "severity": "medium",
+   "steps": [
+    "Read insert-marker-ui.test.tsx IM3 l.207-210: clickRuler(1) sets marker = playhead = 1.000, then Cmd+Shift+Space is pressed",
+    "Run A's mutant A-MU-CTRL-ONLY (the Ctrl/Cmd+Shift branch accepts only ctrlKey)"
+   ],
+   "expected": "IM3 turns red when the metaKey branch is removed (the task's claim: Cmd+Shift+Space is covered by IM3 in jsdom)",
+   "actual": "IM3 stays green (A-MU-CTRL-ONLY 14/14 green); the assert expects 1.000, which is true with or without the branch. Product: in Chromium, CDP Meta+Shift+Space moves the marker to the stop point with the exact status (C-CTRLSHIFT-249 extra), so this is test strength only, not a product failure",
+   "evidence": "a-round-249.md section 4/6; c-round-249/out-fix/c249.json ctrlShift@* metaOk=true (3.468 / 3.471)"
+  },
+  {
+   "id": "A-R249-REVIEW-IM13-LEAK",
+   "severity": "medium",
+   "steps": [
+    "Scratch copy outside the repo (git archive HEAD + the 11 working files)",
+    "Mutant C-MU-LEAK-CS: StudioWorkspace.tsx keydown guard l.2130-2135 `isTypingTarget(event.target)` -> `(isTypingTarget(event.target) && !(event.key === ' ' && event.shiftKey && (event.ctrlKey || event.metaKey)))`, so Ctrl/Cmd+Shift+Space leaks out of text fields",
+    "npx vitest run app/lib/arrangement/__tests__/insert-marker-ui.test.tsx"
+   ],
+   "expected": "IM13 fails if Ctrl+Shift+Space or Shift+Space leaks out of a text field",
+   "actual": "14/14 green: IM13 does not catch a Ctrl/Cmd+Shift+Space leak (marker = playhead = 2 at l.343-351). Control mutant C-MU-LEAK-SHIFT (Shift+Space also leaks) turns IM13 red, so only the Ctrl/Cmd+Shift arm is unpinned. Product: no leak in the browser with separated positions (C-KEYS-249)",
+   "evidence": "c-round-249/mutants/C-MU-LEAK-CS.json, C-MU-LEAK-SHIFT.json; c-round-249/out-fix/c249.json keys@*"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-249",
+  "C-UNIT-249",
+  "C-MUT-249",
+  "C-RESTART-249",
+  "C-SHIFT-249",
+  "C-CTRLSHIFT-249",
+  "C-CTRLSHIFT-FOCUS-249",
+  "C-CLICK-PLAYING-249",
+  "C-RANGE-249",
+  "C-POINT-RANGE-249",
+  "C-CTRLARROW-249",
+  "C-HOME-249",
+  "C-STRIP-249",
+  "C-FLAG-249",
+  "C-HANDLE-249",
+  "C-D27-249",
+  "C-CUT-249",
+  "C-VIDEO-249",
+  "C-KEYS-249",
+  "C-STATUS-BOX-249",
+  "C-STATUS-CLOBBER-249",
+  "C-BUDGET-249",
+  "C-LESSON-249",
+  "AN-REVIEW-249",
+  "LAB-SMOKE-249",
+  "Auth"
+ ],
+ "info": [
+  "C-EDIT-DIVERGE-249: M and Ctrl+E use the playhead 3.483 while the marker is 2.000; paste inconclusive (copy step unconfirmed, no new clip id)",
+  "neighbour probes: loop, empty project, playhead line, clip drag, history unchanged; library-preview stop inconclusive (no readable toggle label)",
+  "C-R249-INFO-PASTEND-WORDING: 'Playhead (00:18.000) is past the end of the project (00:16.0...' while the refused start point is the marker. Already scheduled in stage 2; info, not new scope (evidence c-round-249/out-fix/c249.json d27@* past.status)",
+  "INFO-B249-STALE-MARKER-STATUS: marker 0.000 but the status still reads 'Insert marker at 00:06.000 ...' (evidence c-round-249/out-fix/c249.json statusClobber@*)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "Purchased origin (browser): backend unavailable in cloud"
+ ],
+ "abletonParity": {
+  "confirmed": [
+   "insert marker start (AV 6.3)",
+   "Shift+Space continue (AV 6.3, KS)",
+   "Space plays selection (KS, AV 6.6)",
+   "Ctrl/Cmd+Shift+Space keys (KS)",
+   "Home stopped (AV 6.3, KS)",
+   "Ctrl+arrows move marker (AV 6.9)",
+   "scrub area plays (AV 6.3)",
+   "background point replaces selection (AV 6.9)"
+  ],
+  "deliberateDeviation": [
+   "status on Ctrl+Shift+Space",
+   "Home/back jump while playing",
+   "ruler/handle/strip/Home/Ctrl+Shift+Space clear selection",
+   "Ctrl+arrows keep selection",
+   "time-only marker, no Ctrl/Option+Space, Pause label until SABA-B-9"
+  ],
+  "unconfirmed": [
+   "click during playback moves only marker (Saba decision 1)",
+   "Home while playing in Live"
+  ],
+  "inference": [
+   "Stop keeps the marker"
+  ]
+ },
+ "environment": [
+  "HEAD control :5175 first shared node_modules/.vite (re-optimized deps 14:09:12); :5173 smoke still passed; rebuilt with per-entry symlinks",
+  "HEAD restart@1440 attempt 1 timed out on a cold load (invalid, replaced by one re-run)"
+ ],
+ "findingsNote": "Both Mediums are test-strength gaps in grant 10 (B-designed tests). No product row fails, no HEAD coverage is lost, and C-SCOPE-249 forbade A from strengthening them. They do not block this PASS; B rules at stage-2 planning (grant the test file)."
+}

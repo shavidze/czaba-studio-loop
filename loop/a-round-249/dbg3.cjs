@@ -1,0 +1,32 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+const base=process.argv[2];const sleep=(m)=>new Promise(r=>setTimeout(r,m));
+(async()=>{const b=await chromium.launch();const out={};
+for (const vp of [{width:1440,height:900},{width:1280,height:720}]){
+const p=await (await b.newContext({viewport:vp})).newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));
+await p.goto(base+'/studio-lab');
+await p.waitForFunction(()=>document.querySelector('[data-testid="arrangement-status"]')?.textContent.startsWith('Demo collection ready'),undefined,{timeout:120000});
+await sleep(800);
+await p.locator('[data-source-id="demo-stem-pulse"]').first().click();await sleep(250);
+await p.locator('button',{hasText:/^Add/}).first().click();await sleep(900);
+await p.evaluate(()=>document.activeElement&&document.activeElement.blur());
+const st=()=>p.evaluate(()=>({ph:Number(document.querySelector('[data-testid="arrangement-playhead-handle"]')?.getAttribute('aria-valuenow')),m:document.querySelector('[data-testid="arrangement-insert-marker"]')?.getAttribute('data-insert-marker')??null,playing:!!document.querySelector('button[aria-label="Pause"]'),range:document.querySelector('[data-range-start]')?.getAttribute('data-range-start')??null,status:document.querySelector('[data-testid="arrangement-status"]').textContent.slice(0,100)}));
+const r=await p.getByTestId('arrangement-ruler').boundingBox();
+const music=await p.locator('[data-track-id="music"]').boundingBox();
+const pps=await p.evaluate(()=>parseFloat(document.querySelector('[data-testid="arrangement-zoom-readout"]').textContent));
+const o={};const y=music.y+music.height/2;
+await p.mouse.click(r.x+1*pps,y);await sleep(900);o.click1=await st();
+await p.mouse.move(r.x+5*pps,y);await p.mouse.down();await p.mouse.move(r.x+6*pps,y,{steps:5});await p.mouse.move(r.x+7*pps,y,{steps:5});await p.mouse.up();await sleep(900);
+o.afterRange=await st();
+await p.keyboard.press('Space');await sleep(250);o.spaceRange=await st();
+await p.keyboard.press('Space');await sleep(300);o.stopRange=await st();
+await p.keyboard.press('Space');await sleep(250);o.spaceRange2=await st();
+await p.keyboard.press('Space');await sleep(300);
+await p.keyboard.press('Shift+Space');await sleep(250);o.shiftRange=await st();
+await p.keyboard.press('Space');await sleep(300);
+const strip=await p.getByTestId('arrangement-bars-scrub-strip').boundingBox();
+await p.mouse.click(strip.x+9*pps,strip.y+strip.height/2);await sleep(400);o.strip9=await st();
+await p.keyboard.press('Space');await sleep(300);o.stopStrip=await st();
+await p.keyboard.press('Space');await sleep(250);o.spaceAfterStrip=await st();
+await p.keyboard.press('Space');await sleep(300);
+o.errors=errs;out[vp.width]=o;await p.screenshot({path:`range-strip-${base.slice(-4)}-${vp.width}.png`});await p.context().close();}
+console.log(JSON.stringify(out,null,1));await b.close();})();

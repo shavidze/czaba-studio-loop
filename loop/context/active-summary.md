@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T12:47:45.570Z)
+# Active loop summary (2026-10-29T14:44:26.586Z)
 
-- backlog.json 2320 KB -> active view 334 KB
-- status: G_ROOT_GATE round 248
-- servers: `{"checkedUtc":"2026-10-29T12:04:58.4490426Z","round":248,"attempt":1,"store":200}`
-- last publication: 0e862be30b3e1cc19b2971a172584a6fd0f2cbfb (rounds 248-248)
-- last root gate: round 248 published - commit 0e862be30b3e1cc19b2971a172584a6fd0f2cbfb pushed
+- backlog.json 2335 KB -> active view 338 KB
+- status: G_ROOT_GATE round 249
+- servers: `{"checkedUtc":"2026-10-29T14:07:49.1205379Z","round":249,"attempt":1,"store":200}`
+- last publication: dcb7eb14127850eecad45f373cdebba2258ee95e (rounds 249-249)
+- last root gate: round 249 published - commit dcb7eb14127850eecad45f373cdebba2258ee95e pushed
 
 ## Current items: SRW-21
 
@@ -561,7 +561,7 @@
 - SABA-Q-ENVELOPE-TAPER / info / awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
 - GATE234-S5 / info / awaiting_user as SABA-Q-SEED-STATUS-LENGTH (D-29z330) / one aria-live message now carries three sentences (placement, tempo, Snap)
 - GATE234-S7 / info / note for PERF re-baselines (D-29z330); no perf/e2e spec names a source today / a perf scenario that adds a synthetic stem now runs with Snap on, 1/4 and the bars ruler
-- SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
+- SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered | round 249 (D-29z431): a seconds-ruler click now places the insert marker and clears a time selection (HEAD kept the selection); Live 6.9's point rule is about the Arrangement background, not the ruler, so this is a planner deviation asked here (L44) / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
 - SABA-Q-SCRUB-QUANTIZE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live quantizes a scrub-area jump by the Control Bar Quantization menu (6.3); CZABA has no launch quantization, so the strip uses the editing
 - SABA-Q-SCRUB-HOLD-LOOP / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live: holding the mouse in the scrub area loops a portion by the global launch quantization (6.3). Not built in SABA-B-11a. Wanted?
 - SABA-Q-SCRUB-ADD-LOCATOR / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live (video riOD 2:22-3:08): right-click in the scrub area -> Add Locator. Our marker menu opens only on an existing flag. Wanted (later can
@@ -606,9 +606,17 @@
 - GATE247-S3 / info / info (D-29z420); signal GATE247-ARCH-ROW-FOCUS-RESCUE (D-29z421) / three no-deps focus layout effects; precedence by declaration order; do not reorder without GF7
 - GATE247-S4 / info / info (D-29z420) / focusRowSuccessor uses preventScroll; consider scrollIntoView({block: nearest}) if reused for other removals
 - GATE247-S5 / info / info (D-29z420); same as INFO-B247-VOLUME-BLUR-ON-REMOVAL / blurGroupVolume runs on removal for a missing group (pre-existing, doc 190 TODO)
-- SABA-Q-11B-HIDDEN-SNAP / info / awaiting_user (D-29z422): non-blocking; round 248 ships the pause / hidden grid lines: CZABA pauses Snap (Alt and edges included; titles and action statuses say paused; zoom in resumes). Or (b) snap to the fi
+- SABA-Q-11B-HIDDEN-SNAP / info / awaiting_user (D-29z422): non-blocking; round 248 ships the pause | option (e) added (D-29z427) / hidden grid lines: CZABA pauses Snap (Alt and edges included; titles and action statuses say paused; zoom in resumes). Or (b) snap to the fi
 - INFO-B248-RULER-DBLCLICK / info / harness fact (D-29z425) / two ruler clicks at the same x within ~1 s can count as a double-click (Fit); give each click its own x and >= 800 ms
 - INFO-B248-OFFSCREEN-RULER / info / harness fact (D-29z425) / at high zoom the ruler box is wider than the window; a fraction of its width can be off-screen; clamp to the visible part
+- GATE248-S4 / info / info (D-29z427) / prop paths (render-time activeSnapSeconds) and ref paths (seek, nudge) can disagree for one render if wheel-zoom crosses the threshold mid-d
+- INFO-C248-STALE-NOTE / info / info (D-29z427): ruled behaviour section 1.4 of round 248; part of SABA-Q-11B-HIDDEN-SNAP (d) / after zoom-in the status still says Snap is paused; after zoom-out into hidden lines it shows plain (Snap on)
+- INFO-C248-ADAPTIVE-3 / info / info (D-29z427): not checked against the D-29z361 density model in this planning; one REGRESSION row C-ADAPTIVE3-CHECK compares it with the chooser rule; a mismatch becomes a Low / adaptive '3' on 1/4 at 120 BPM and 4 px/s resolves to 1/8T (the chooser picks the triplet member at the current density); unchanged code
+- SABA-Q-10A-HOME-PLAYING / info / awaiting_user (D-29z432): non-blocking; round 249 ships the jump / while playing, Home and Back to start jump playback to 0 and move the insert marker there (as before). Or move only the marker and keep play
+- SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
+- SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
+- B-R249-PAUSE-LABEL / low / scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
+- INFO-B249-STALE-MARKER-STATUS / info / info (D-29z431); C row C-STATUS-CLOBBER-249 records it; SABA-B-10b's visible marker shows the state / Home/back write no status, so a previous 'Insert marker at ...' status stays after the marker moved (event line, same class as C-R236-01)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
