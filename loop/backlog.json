@@ -1,9 +1,9 @@
 {
  "version": 224,
- "updated": "2026-10-29 (B round 242 -> 243 planning, D-29z382..D-29z388)",
+ "updated": "2026-10-29 (B round 243 -> 244 planning, D-29z389..D-29z398)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 243, D-29z382..D-29z388; C-R242-01-FIX: focus returns to an edit control (fader, BPM field, loop brace, marker flag) that the capture-phase edit-focus release blurred on a right press, after the grid menu closes; the single press-focus capture moves to the first line of releaseEditFocusOnTimelinePointerDown and the lane copy is removed; FR3 rewritten to the D-29z382 contract; GM40-GM43; start = clean HEAD 7e5b23c; 3 grants; frozen 1102)",
+ "current_task": "current-task.md (round 244, D-29z389..D-29z398; EDITOR-MENU-FOCUS-FIX: after the grid menu closes, focus goes to the successor (where Enter would land) of a marker add/rename or group name editor that the right press committed and unmounted (B-R242-MARKER-EDITOR-MENU-FOCUS, B-R243-GROUP-EDITOR-MENU-FOCUS); press capture cleared on every press (A-R243-REVIEW-L1/GATE243-S3); GM40-GM43 use the real release (L3); GM44-GM49; doc 186 pointer line; new doc 188; start = clean HEAD 149faab; 5 grants; frozen 1101)",
  "advisor_used_by_B": "2026-10-29 round 240 -> 241 planning: advisor available and consulted twice (after orientation; after the pre-check, before writing). Advice followed: split stage 2 into 2a/2b; one check mark per mode with a D-ID; L49 table for the menu handler; 4 as a silent alias; S4 ruling via title-as-description with a CDP row; checkedIndex fallback fixed before freezing the diff; SABA-Q for Mac bypass; ABL-R-8 closes at 2b; menu-height row; Lows folded/deferred. | 2026-10-29 round 239 -> 240 planning: advisor available and consulted twice (after orientation; before declaring done). Advice followed: the density simulation decides GATE239-S1 (ruling, not a no-op fix; extended to musical families), GATE239-S2 tightly scoped (no triplet flag, 5 unchanged), round 240 = fix round, code-reviewer required for 3 files, C re-runs eq.mjs/eq2.mjs, split case counts, L28 tie. | previous: 2026-10-29 round 238 -> 239 planning: advisor available and consulted after orientation, before writing. Advice followed: triage gate-238 S1-S3 with explicit severity before choosing the round; close round-238 ids from C PASS + gate commit; checkpoint addendum 4; adaptive chooser as a pure function in grid-divisions.ts with no new effect; silent zoom; real L23 pre-check on scratch (it changed the threshold from 20 px to 24 px); split 11b into 2 stages; Saba questions for readout position and density. Second advisor call before declaring done.",
  "baseline": {
   "tsc_errors": 0,
@@ -10606,10 +10606,20 @@
    "round": 243,
    "task": "current-task.md",
    "decision": "D-29z382..D-29z388",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "type": "bug-fix round: C-R242-01-FIX (Medium; merges A-R242-REVIEW-M1)",
    "note": "start = clean HEAD 7e5b23c (b-round-242/head-at-planning.txt, empty status); grants b-round-242-r243-grants.txt (StudioWorkspace.tsx 2 hunks, grid-snap-menu.test.tsx FR3 rewrite + GM40-GM43, new doc 187); frozen 1102 (b-round-242-r243-tree-sha256.txt); L23 pre-check b-round-242/precheck-scratch.diff (127 lines; covering 67 files 1153/1153, tsc rc 0, biome clean; MU-LANE-CAPTURE-ONLY GM40-43+FR3 red; MU-NO-SCROLLER-CAPTURE GM36/37/39/40-43+FR3 red; MU-PRESS-WINS GM38 red); L29/L47 recipe b-round-242/focus-probe-243.cjs (HEAD BODY for fader, BPM field, brace, marker flag, marker editor at both viewports; scratch returns focus to the first four; the marker editor stays BODY = B-R242-MARKER-EDITOR-MENU-FOCUS)",
-   "added": "2026-10-29 B round 242 -> 243 planning"
+   "added": "2026-10-29 B round 242 -> 243 planning",
+   "result": "C round 243 PASS (c-round-243.json: 11 rows passed, browserVerified true, realVerified true; purchased origin BLOCKED backend unavailable in cloud); gate 243 published 149faab on both remotes (D-29z389)"
+  },
+  {
+   "round": 244,
+   "task": "current-task.md",
+   "decision": "D-29z389..D-29z398",
+   "status": "dispatched",
+   "type": "bug-fix round: EDITOR-MENU-FOCUS-FIX (2 Medium, same mechanism) + 3 cheap Lows on owned code (D-29z393)",
+   "note": "start = clean HEAD 149faab (b-round-243/head-at-planning.txt, empty status); grants b-round-243-r244-grants.txt (ArrangementMarkerRow.tsx, StudioWorkspace.tsx, grid-snap-menu.test.tsx, doc 186 one line, new doc 188); frozen 1101 (b-round-243-r244-tree-sha256.txt); L23 pre-check b-round-243/precheck-scratch.diff (378 lines, 20 hunks; tsc rc 0, biome clean; covering 67 files 1159/1159; MU-HEAD GM44/45/46/47/49 red, MU-NO-MARKER-FALLBACK GM44/45, MU-NO-GROUP-FALLBACK GM46/GM49, MU-L1-REVERT GM47, MU-RELEASE-LEFT-ONLY GM40-GM49, MU-SUCCESSOR-NO-IDENTITY GM49, MU-ALWAYS-SUCCESSOR GM44/45+MU14); browser recipe b-round-243/editor-probe-244.cjs + neighbour-probe-244.cjs (HEAD BODY for marker add, marker rename, group name at both viewports; scratch focuses the successor; left-click neighbour BODY at HEAD and scratch); final scratch includes D-29z398 (successor ref cleared on every focusEditorSuccessor call); Undo probe b-round-243/undo-probe-244.cjs (HEAD: Ctrl+Z from flag/group name works; marker-add undo leaves BODY = B-R243-UNDO-MARKER-FOCUS)",
+   "added": "2026-10-29 B round 243 -> 244 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -25306,7 +25316,7 @@
    "evidence": "c-round-242/out/c242.json faderInfo@1440x900, faderInfo@1280x720; B reproduced 4 origins at HEAD 7e5b23c: b-round-242/shots/focus-head.json, focus-head-brace.json",
    "repro": "Tab to the track Volume fader (19 Tabs after adding demo-stem-pulse), right-click an empty lane point, Escape -> document.activeElement BODY at both viewports",
    "why_missed": "round 242's L47 recipe probed only the Snap toggle (a button the release ignores); the release path names range, typing, brace and marker classes; L47 amended (D-29z387) to probe one origin per blurred class",
-   "status": "open -> round 243 C-R242-01-FIX (D-29z382 ruling, D-29z384 design); B scratch fix returns focus for all 4 origins at both viewports (b-round-242/shots/focus-scratch*.json)",
+   "status": "closed (D-29z389): C round 243 PASS (C-FOCUS-ORIGINS-243 fader, BPM field, loop brace, marker flag at both viewports, browserVerified=true), gate 243 published 149faab | open -> round 243 C-R242-01-FIX (D-29z382 ruling, D-29z384 design); B scratch fix returns focus for all 4 origins at both viewports (b-round-242/shots/focus-scratch*.json)",
    "added": "2026-10-29 B round 242 -> 243 planning"
   },
   {
@@ -25314,7 +25324,7 @@
    "severity": "medium",
    "origin": "A round 242 code-reviewer",
    "title": "releaseEditFocusOnTimelinePointerDown has no button check; right press loses an edit-control origin",
-   "status": "merged into C-R242-01 (D-29z383)",
+   "status": "closed with C-R242-01 (D-29z389) | merged into C-R242-01 (D-29z383)",
    "added": "2026-10-29 B round 242 -> 243 planning"
   },
   {
@@ -25324,8 +25334,85 @@
    "title": "with the marker add editor open (M), a right-click on an empty lane commits the marker on the editor's blur (settleEditor('blur'), moveFocus false) and unmounts the input; after the grid menu closes (Escape) focus is BODY because the return target is disconnected",
    "evidence": "b-round-242/shots/focus-head.json and focus-scratch.json rows markerEditor/escape@1440x900 and @1280x720 (BODY; markers 0 -> 1) at HEAD 7e5b23c and on the round-243 scratch fix",
    "repro": "fresh /studio-lab, wait for Demo collection ready, press M (focus in arrangement-marker-name-input), right-click an empty lane point, Escape -> document.activeElement BODY",
-   "status": "open (pre-existing; different mechanism from C-R242-01: the origin unmounts; candidate target = the committed marker's flag via ArrangementMarkerRow plumbing; scheduled after round 243 (D-29z385); C records it as info in round 243)",
+   "status": "dispatched round 244 (D-29z391/D-29z392): successor = the committed/existing/renamed flag via ArrangementMarkerRow focusEditorSuccessor; re-measured BODY at HEAD 149faab (b-round-243/shots/editor-head.json markerAdd, markerRename, both viewports) | open (pre-existing; different mechanism from C-R242-01: the origin unmounts; candidate target = the committed marker's flag via ArrangementMarkerRow plumbing; scheduled after round 243 (D-29z385); C records it as info in round 243)",
    "added": "2026-10-29 B round 242 -> 243 planning"
+  },
+  {
+   "id": "B-R243-GROUP-EDITOR-MENU-FOCUS",
+   "severity": "medium",
+   "origin": "B round-244 planning probe (L47 origin classes; grep settleEditor('blur'))",
+   "title": "with the group name editor open (F2 on a group name), a right-click on an empty lane commits the rename on the editor's blur (ArrangementGroupHeader settleEditor('blur'), restoreFocusRef false) and unmounts the input; after the grid menu closes focus is BODY",
+   "evidence": "b-round-243/shots/editor-head-group.json groupRename/escape@1440x900 and @1280x720 (BODY; group renamed X) at HEAD 149faab; fix on scratch: editor-scratch.json (arrangement-group-name, focus-visible)",
+   "repro": "fresh /studio-lab, Demo collection ready, click track 2 name, Ctrl+click track 3 name, Ctrl+G, focus arrangement-group-name, F2, type X, right-click an empty lane, Escape -> BODY",
+   "status": "dispatched round 244 (D-29z391): successor = the group's name button via trackRowNameButton; group id captured at the press",
+   "why_missed": "round 243 L47 amendment listed blurred classes, not editors that unmount on their own blur; B filed the marker editor alone without grepping other blur-unmount editors (L47 amended D-29z395)",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "A-R243-REVIEW-L1",
+   "severity": "low",
+   "origin": "A round 243 code-reviewer; same as gate-243 suggestion 3",
+   "title": "gridMenuPressFocusRef written on right presses only; a left press leaves a stale value (narrow in real browsers; harmless by D-29z384)",
+   "status": "dispatched round 244 (D-29z393): written on every press, null unless right; GM47 + MU-L1-REVERT",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "GATE243-S3",
+   "severity": "low",
+   "origin": "gate 243 code-reviewer suggestion 3 (gates/round-243/review.md)",
+   "title": "press focus can go stale (same as A-R243-REVIEW-L1)",
+   "status": "merged into A-R243-REVIEW-L1 (D-29z393)",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "A-R243-REVIEW-L2",
+   "severity": "low",
+   "origin": "A round 243 code-reviewer",
+   "title": "no row pins that no-menu paths (header right press) blur and never restore",
+   "status": "dispatched round 244 (D-29z393): GM47",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "A-R243-REVIEW-L3",
+   "severity": "low",
+   "origin": "A round 243 code-reviewer",
+   "title": "GM40-GM42 blur by hand (rightPressThenBlur), so their BODY setup assertion is vacuous",
+   "status": "dispatched round 244 (D-29z393): GM40-GM43 use rightPress (real release); MU-RELEASE-LEFT-ONLY turns them red",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "GATE243-S2",
+   "severity": "low",
+   "origin": "gate 243 code-reviewer suggestion 2",
+   "title": "the BPM field gets focus back after a mouse choice and that path is untested",
+   "status": "dispatched round 244 (D-29z393): GM48 + C-FOCUS-243-REG selection info",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "GATE243-S1",
+   "severity": "medium",
+   "origin": "gate 243 code-reviewer suggestion 1",
+   "title": "FR3 reverses the D-29z22-F contract; make sure D-29z382 is approved by the planner/root and logged",
+   "status": "closed (D-29z390): D-29z382 is a B planner ruling recorded in decisions_log_b at the round-243 planning before dispatch (tasks/round-243.md section 1), C round 243 verified it in the browser and root published it; it rules an internal contract conflict (D-29z22-F vs L47/WAI-ARIA), not a deliberate difference from Live (Live has no DOM focus model), so L44 does not route it to Saba",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "GATE243-S4",
+   "severity": "info",
+   "origin": "gate 243 code-reviewer item 4 / doc 187 TODO",
+   "title": "unconfirmed hypothesis: a clip rename field that unmounts on blur may behave like the marker editor",
+   "status": "closed (D-29z393): falsified by source grep - the only inline name inputs are arrangement-marker-name-input and arrangement-group-name-input; the group one is filed as B-R243-GROUP-EDITOR-MENU-FOCUS",
+   "added": "2026-10-29 B round 243 -> 244 planning"
+  },
+  {
+   "id": "B-R243-UNDO-MARKER-FOCUS",
+   "severity": "medium",
+   "origin": "B round-244 planning Undo probe (advisor-requested check of C-EDITOR-COMMIT-244)",
+   "title": "with a just-added marker's flag focused, Ctrl+Z removes the marker and unmounts the focused flag; focus falls to BODY (L47 class: an action that unmounts the focused element names its focus target)",
+   "evidence": "b-round-243/shots/undo-head.json markerFlag@1440x900 and @1280x720 (markers 1 -> 0, focusAfter BODY) at HEAD 149faab; rename and group-rename undo keep focus (renamedFlag, groupName rows)",
+   "repro": "fresh /studio-lab, Demo collection ready, focus BODY, M, Enter (focus on the new flag), Ctrl+Z -> marker gone, document.activeElement BODY",
+   "status": "open (pre-existing; scheduled after the regression round and before SABA-B-11b stage 2b, D-29z397); hypothesis to probe at its planning: other undo/redo paths that remove a focused element (clip, group, marker delete redo)",
+   "added": "2026-10-29 B round 243 -> 244 planning"
   }
  ],
  "tech_lead_notes": [
@@ -27297,6 +27384,13 @@
    "text": "grid-menu focus/dismiss region patched in rounds 60, 241, 242 (and 243); lane background press handler joined the menu focus lifecycle; verdict keep for now; if touched again extract gridMenuOpenRef/gridMenuReturnFocusRef/gridMenuPressFocusRef/closeGridMenu/handleGridMenuRequest into useGridMenuFocusReturn (GM32-GM43, FR1-FR4 acceptance). Round 243 meets that trigger; recorded as addendum 8 to ARCH-CHECKPOINT-TEMPO-GRID, not scheduled (D-29z386)",
    "status": "signal",
    "added": "2026-10-29 B round 242 -> 243 planning"
+  },
+  {
+   "id": "GATE243-ARCH-GRIDMENU-FOCUS-HOOK",
+   "origin": "gate 243 code-reviewer Architecture note (signals 2+3) + A round 243 reviewer",
+   "text": "timeline release handler now does two jobs (release edit focus + record grid-menu press focus); grid-menu focus-return code changed in rounds 242 and 243 and again in 244 (third time): reviewer trigger 'only if focus changes come up a third time' is met by round 244; proposal useGridMenuFocusReturn exposing notePressFocus(event), acceptance GM1-GM49 + FR1-FR4 unchanged, useArrangement() shape unchanged",
+   "status": "signal; addendum 9 to ARCH-CHECKPOINT-TEMPO-GRID (D-29z394), not scheduled",
+   "added": "2026-10-29 B round 243 -> 244 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -31787,7 +31881,8 @@
     "SABA-B-11b-FIX-1 (round 240, if done): 1 then the demo-synth-mix seed keeps adaptive 0.5 with 'Snap on — grid 0.5 s (G)' (C-HAND-240)",
     "SABA-B-11b stage 2a (round 241, if done): C-MENU-CHECK (one checked radio: Medium at mount, the division after 5), one menu width choice (Narrow -> 'Adaptive grid — Narrow, now 0.5 s'), 4 toggles Snap with the G texts, C-S4-AX description, BPM menu inside 1280x720",
     "SABA-B-11b stage 2a + FIX-2 (rounds 241-242, if published): menu groups 'Adaptive grid'/'Fixed grid' with one checked item (Medium at mount); plain 4 toggles Snap with '(G)' statuses; Tab to the Snap toggle, right-click an empty lane point, Escape -> document.activeElement = Snap toggle with a visible ring (C-FOCUS-242), both viewports (added round 242 planning, D-29z381)",
-    "C-R242-01-FIX (round 243, if done): C-FOCUS-ORIGINS-243 - fader, BPM field, loop brace and marker flag each get focus back after right-click lane + Escape at both viewports; after the brace returns, ArrowRight moves the loop (D-29z388)"
+    "C-R242-01-FIX (round 243, if done): C-FOCUS-ORIGINS-243 - fader, BPM field, loop brace and marker flag each get focus back after right-click lane + Escape at both viewports; after the brace returns, ArrowRight moves the loop (D-29z388)",
+    "C-EDITOR-ORIGINS-244 (if round 244 done): marker add editor, marker rename editor and group name editor -> right-click empty lane -> Escape puts focus on the successor (new/renamed flag, group name button), both viewports; plus C-FOCUS-ORIGINS-243 (fader, BPM field, loop brace, marker flag) (D-29z396)"
    ],
    "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
    "scope_note": "REG-DUX5-PLAYHEAD-RESCAN removed: done in round 200 R200-P1 (2026-10-27 B round 200 -> 201 planning (D-29z166))"
@@ -33241,7 +33336,7 @@
   {
    "id": "ARCH-CHECKPOINT-TEMPO-GRID",
    "file": "b-round-234-checkpoint-request.md",
-   "status": "requested from root (D-29z331); trigger met (SABA-B-11a done, round 235 published 49b4c74); addendum GATE235-ARCH-POINTER-UTIL (D-29z337); non-blocking; best before SABA-B-11b | addendum 2 GATE236-ARCH-PLAYFROM-HELPER / GATE236-ARCH-PRESS-TARGET (D-29z343); still unanswered at round-237 planning; requested before SABA-B-11b (round 238) | addendum 3 A-R237-ARCH-STATUS-PARTS (D-29z349); still unanswered at round-238 planning; requested before SABA-B-11b | addendum 4 A-R238-ARCH-STATUS-PREFIX (D-29z355) | addendum 5 GATE239-ARCH-USESTUDIOGRID (D-29z364); still unanswered at round-240 planning; re-ask after SABA-B-11b stage 2 and before SABA-B-10a; non-blocking | addendum 6 (D-29z373): third gridHandChosenRef writer in round 241; still unanswered at round-241 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a | addendum 7 A-R241-ARCH-GRIDMENUITEM (D-29z379); still unanswered at round-242 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a; non-blocking | addendum 8 A-R242-ARCH-GRIDMENU-FOCUS-HOOK (D-29z386): the reviewer's own extract trigger is met by round 243; still unanswered at round-243 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a; non-blocking",
+   "status": "requested from root (D-29z331); trigger met (SABA-B-11a done, round 235 published 49b4c74); addendum GATE235-ARCH-POINTER-UTIL (D-29z337); non-blocking; best before SABA-B-11b | addendum 2 GATE236-ARCH-PLAYFROM-HELPER / GATE236-ARCH-PRESS-TARGET (D-29z343); still unanswered at round-237 planning; requested before SABA-B-11b (round 238) | addendum 3 A-R237-ARCH-STATUS-PARTS (D-29z349); still unanswered at round-238 planning; requested before SABA-B-11b | addendum 4 A-R238-ARCH-STATUS-PREFIX (D-29z355) | addendum 5 GATE239-ARCH-USESTUDIOGRID (D-29z364); still unanswered at round-240 planning; re-ask after SABA-B-11b stage 2 and before SABA-B-10a; non-blocking | addendum 6 (D-29z373): third gridHandChosenRef writer in round 241; still unanswered at round-241 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a | addendum 7 A-R241-ARCH-GRIDMENUITEM (D-29z379); still unanswered at round-242 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a; non-blocking | addendum 8 A-R242-ARCH-GRIDMENU-FOCUS-HOOK (D-29z386): the reviewer's own extract trigger is met by round 243; still unanswered at round-243 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a; non-blocking | addendum 9 GATE243-ARCH-GRIDMENU-FOCUS-HOOK (D-29z394): round 244 is the third focus change on the grid-menu focus-return code, meeting the reviewer's extract trigger; still unanswered at round-244 planning; re-ask after round 244 (and in any case before SABA-B-10a); non-blocking",
    "added": "2026-10-28 B round 234 -> 235 planning"
   }
  ],
@@ -34182,6 +34277,56 @@
    "id": "D-29z388",
    "date": "2026-10-29",
    "text": "Order after round 243: regression round first if the next planning is on/after 2026-10-30 (scope_additions gain C-FOCUS-ORIGINS-243), then B-R242-MARKER-EDITOR-MENU-FOCUS, then SABA-B-11b stage 2b; if still 2026-10-29, the marker-editor fix comes first."
+  },
+  {
+   "id": "D-29z389",
+   "date": "2026-10-29",
+   "text": "Round 243 closed: C PASS (browserVerified/realVerified true), gate 243 published 149faab; C-R242-01 and A-R242-REVIEW-M1 close; round 243 -> c_pass_published."
+  },
+  {
+   "id": "D-29z390",
+   "date": "2026-10-29",
+   "text": "GATE243-S1 (Medium, 'is D-29z382 approved?') closed: D-29z382 is a planner ruling logged before dispatch, verified by C and published by root; it settles an internal contract conflict, not a Live deviation, so L44 does not send it to Saba."
+  },
+  {
+   "id": "D-29z391",
+   "date": "2026-10-29",
+   "text": "New finding B-R243-GROUP-EDITOR-MENU-FOCUS (Medium, pre-existing; HEAD 149faab BODY both viewports). It shares B-R242-MARKER-EDITOR-MENU-FOCUS's mechanism (editor commits and unmounts on its own blur), so both go into round 244 EDITOR-MENU-FOCUS-FIX (two components, one rule)."
+  },
+  {
+   "id": "D-29z392",
+   "date": "2026-10-29",
+   "text": "Ruling: after the grid menu closes with a disconnected return target, focus goes to the editor's successor (where Enter would land): marker add -> new flag, add-existing -> existing flag, rename (commit/empty/unchanged) -> editor.id flag, group rename -> group name button. Recorded at the settle (not from selection), used only when the menu's return element is that input (identity). The commit at the press stays; skipping the release was rejected because the menu's own focus would still blur and unmount the editor."
+  },
+  {
+   "id": "D-29z393",
+   "date": "2026-10-29",
+   "text": "Lows taken into round 244 under the 2026-10-23 'current round owns the code and it is cheap' exception: A-R243-REVIEW-L1 (= GATE243-S3, merged), A-R243-REVIEW-L2, A-R243-REVIEW-L3, GATE243-S2. GATE243-S4 (clip rename hypothesis) closed: no clip rename editor exists (grep). Round size: 2 Medium (one mechanism) + 1 source Low in the same hunk (A-R243-REVIEW-L1 = GATE243-S3) = the <= 3 bugs; A-R243-REVIEW-L2, A-R243-REVIEW-L3 and GATE243-S2 are test-only rows in the owned test file."
+  },
+  {
+   "id": "D-29z394",
+   "date": "2026-10-29",
+   "text": "Architecture: round 244 is the third focus change on the grid-menu focus-return code; the gate-243 reviewer's extract trigger is met. Recorded as addendum 9 to ARCH-CHECKPOINT-TEMPO-GRID (GATE243-ARCH-GRIDMENU-FOCUS-HOOK); the re-ask moves to after round 244 (before SABA-B-10a at the latest); non-blocking; no extraction inside a behaviour round."
+  },
+  {
+   "id": "D-29z395",
+   "date": "2026-10-29",
+   "text": "lessons.md L47 amended: an editor that commits and unmounts on its own blur names its successor (where Enter would land); the recipe greps settleEditor('blur') / onBlur commit sites for every such editor. Evidence B-R242-MARKER-EDITOR-MENU-FOCUS, B-R243-GROUP-EDITOR-MENU-FOCUS. No lesson dropped (file stays <= 60 lines)."
+  },
+  {
+   "id": "D-29z396",
+   "date": "2026-10-29",
+   "text": "Order after round 244: the REGRESSION round first at the first planning on/after 2026-10-30 (scope_additions gain C-EDITOR-ORIGINS-244); if still 2026-10-29, SABA-B-11b stage 2b first; then re-ask ARCH-CHECKPOINT-TEMPO-GRID before SABA-B-10a."
+  },
+  {
+   "id": "D-29z397",
+   "date": "2026-10-29",
+   "text": "New finding B-R243-UNDO-MARKER-FOCUS (Medium, pre-existing): Ctrl+Z of a marker add with its flag focused leaves BODY at both viewports. Different path from round 244 (Undo, not the grid menu); scheduled after the regression round (or first if the next planning is still 2026-10-29) and before SABA-B-11b stage 2b. Round 244 C records focus after Undo as info only."
+  },
+  {
+   "id": "D-29z398",
+   "date": "2026-10-29",
+   "text": "Round 244 design amendment (advisor): ArrangementMarkerRow focusEditorSuccessor clears blurSuccessorRef on every call, before the identity check, so a successor recorded by a left-press blur does not stay as a stale detached input past the next menu close (same class as A-R243-REVIEW-L1). Re-verified on the final scratch: tsc rc 0, covering 67/1159, all 7 mutants red as listed (MU-NO-GROUP-FALLBACK GM46+GM49; MU-RELEASE-LEFT-ONLY GM40-GM49); diff 378 lines, 20 hunks."
   }
  ],
  "retro_candidates": [

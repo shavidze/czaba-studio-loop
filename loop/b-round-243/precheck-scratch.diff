@@ -1,0 +1,378 @@
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -81,6 +81,7 @@
+ export interface ArrangementMarkerRowHandle {
+   beginAddMarker: () => void;
+   closeMenu: () => void;
++  focusEditorSuccessor: (element: HTMLElement) => boolean;
+   stepMarker: (
+     direction: -1 | 1,
+     edgeTimes?: readonly number[],
+@@ -155,6 +156,10 @@
+   const settledRef = useRef(true);
+   const sessionRef = useRef(0);
+   const restoreFocusRef = useRef<HTMLElement | null>(null);
++  const blurSuccessorRef = useRef<{
++    readonly input: HTMLInputElement;
++    readonly markerId: string;
++  } | null>(null);
+   const pendingFocusRef = useRef<string | null>(null);
+   const dragRef = useRef<MarkerDragGesture | null>(null);
+   const suppressClickRef = useRef<string | null>(null);
+@@ -207,6 +212,7 @@
+   const openEditor = useCallback((next: MarkerEditor) => {
+     const active = document.activeElement;
+     restoreFocusRef.current = active instanceof HTMLElement ? active : null;
++    blurSuccessorRef.current = null;
+     settledRef.current = false;
+     sessionRef.current += 1;
+     setEditor({ ...next, session: sessionRef.current });
+@@ -272,11 +278,24 @@
+     closeMenu();
+   }, [closeMenu, pxPerSecond]);
+ 
+-  useImperativeHandle(ref, () => ({ beginAddMarker, closeMenu, stepMarker }), [
+-    beginAddMarker,
+-    closeMenu,
+-    stepMarker,
+-  ]);
++  const focusEditorSuccessor = useCallback(
++    (element: HTMLElement) => {
++      const successor = blurSuccessorRef.current;
++      blurSuccessorRef.current = null;
++      if (successor === null || successor.input !== element) {
++        return false;
++      }
++      focusMarkerTarget(successor.markerId);
++      return true;
++    },
++    [focusMarkerTarget],
++  );
++
++  useImperativeHandle(
++    ref,
++    () => ({ beginAddMarker, closeMenu, focusEditorSuccessor, stepMarker }),
++    [beginAddMarker, closeMenu, focusEditorSuccessor, stepMarker],
++  );
+ 
+   const runUnlessGesture = (action: () => void) => {
+     if (isPointerGestureActive()) {
+@@ -301,6 +320,12 @@
+       setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+       return;
+     }
++    const input = inputRef.current;
++    const noteBlurSuccessor = (markerId: string) => {
++      if (reason === 'blur' && input) {
++        blurSuccessorRef.current = { input, markerId };
++      }
++    };
+     if (editor.kind === 'add') {
+       if (reason === 'escape') {
+         setStatus(studioMarkerStrings.notAdded);
+@@ -319,6 +344,7 @@
+       if (result.arrangement === null) {
+         setSelectedMarkerId(result.existing.id);
+         setStatus(studioMarkerStrings.existsAtTime(result.existing.name));
++        noteBlurSuccessor(result.existing.id);
+         if (moveFocus) {
+           focusMarkerTarget(result.existing.id);
+         }
+@@ -326,6 +352,7 @@
+       }
+       commitArrangement(result.arrangement, 'Add Marker', before);
+       setSelectedMarkerId(result.marker.id);
++      noteBlurSuccessor(result.marker.id);
+       setStatus(
+         studioMarkerStrings.added({
+           name: result.marker.name,
+@@ -342,6 +369,7 @@
+     if (!marker) {
+       return;
+     }
++    noteBlurSuccessor(editor.id);
+     if (moveFocus) {
+       focusMarkerTarget(editor.id);
+     }
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -462,6 +462,13 @@
+   );
+ }
+ 
++function groupNameEditorRowId(element: HTMLElement | null): string | null {
++  if (element?.dataset.testid !== 'arrangement-group-name-input') {
++    return null;
++  }
++  return element.closest<HTMLElement>('[data-group-id]')?.dataset.groupId ?? null;
++}
++
+ function isSeparatorTarget(target: EventTarget | null): boolean {
+   return target instanceof HTMLElement && target.getAttribute('role') === 'separator';
+ }
+@@ -576,6 +583,8 @@
+   const gridMenuOpenRef = useRef(false);
+   const gridMenuReturnFocusRef = useRef<HTMLElement | null>(null);
+   const gridMenuPressFocusRef = useRef<HTMLElement | null>(null);
++  const gridMenuReturnGroupIdRef = useRef<string | null>(null);
++  const gridMenuPressGroupIdRef = useRef<string | null>(null);
+   const [canZoomBack, setCanZoomBack] = useState(false);
+   const [viewportWidth, setViewportWidth] = useState(0);
+   const [marquee, setMarquee] = useState<MarqueeRect | null>(null);
+@@ -1612,15 +1621,29 @@
+     gridMenuOpenRef.current = false;
+     setGridMenu(null);
+     const returnFocus = gridMenuReturnFocusRef.current;
++    const returnGroupId = gridMenuReturnGroupIdRef.current;
+     gridMenuReturnFocusRef.current = null;
+-    if (returnFocus?.isConnected && returnFocus !== returnFocus.ownerDocument.body) {
++    gridMenuReturnGroupIdRef.current = null;
++    if (returnFocus === null || returnFocus === returnFocus.ownerDocument.body) {
++      return;
++    }
++    if (returnFocus.isConnected) {
+       returnFocus.focus({ preventScroll: true });
++      return;
++    }
++    if (markerRowRef.current?.focusEditorSuccessor(returnFocus)) {
++      return;
++    }
++    if (returnGroupId !== null) {
++      trackRowNameButton(scrollerRef.current, returnGroupId)?.focus({ preventScroll: true });
+     }
+   }, []);
+ 
+   const handleGridMenuRequest = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+     const pressFocus = gridMenuPressFocusRef.current;
++    const pressGroupId = gridMenuPressGroupIdRef.current;
+     gridMenuPressFocusRef.current = null;
++    gridMenuPressGroupIdRef.current = null;
+     if (exportOpenRef.current || workspaceRef.current.isPointerGestureActive()) {
+       return;
+     }
+@@ -1630,6 +1653,7 @@
+       const focused =
+         active instanceof HTMLElement && active !== ownerDocument.body ? active : pressFocus;
+       gridMenuReturnFocusRef.current = focused;
++      gridMenuReturnGroupIdRef.current = focused === pressFocus ? pressGroupId : null;
+       gridMenuOpenRef.current = true;
+     }
+     setGridMenu({ x: event.clientX, y: event.clientY });
+@@ -1843,9 +1867,9 @@
+   const releaseEditFocusOnTimelinePointerDown = useCallback(
+     (event: ReactPointerEvent<HTMLDivElement>) => {
+       const focused = event.currentTarget.ownerDocument.activeElement;
+-      if (event.button === 2) {
+-        gridMenuPressFocusRef.current = focused instanceof HTMLElement ? focused : null;
+-      }
++      const pressFocus = event.button === 2 && focused instanceof HTMLElement ? focused : null;
++      gridMenuPressFocusRef.current = pressFocus;
++      gridMenuPressGroupIdRef.current = groupNameEditorRowId(pressFocus);
+       if (
+         focused instanceof HTMLElement &&
+         (((isRangeInputTarget(focused) || isTypingTarget(focused)) &&
+--- a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+@@ -14,6 +14,7 @@
+   WorkspaceCollection,
+ } from '~/types/arrangement';
+ import { formatGridDivision, GRID_DIVISIONS_SECONDS } from '../grid';
++import { groupSelectedRows } from '../groups';
+ import { createArrangement } from '../model';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -293,6 +294,10 @@
+   act(() => focused.blur());
+ }
+ 
++function rightPress(target: HTMLElement, clientX = 300, clientY = 200) {
++  fireEvent.pointerDown(target, { button: 2, buttons: 2, pointerId: 44, clientX, clientY });
++}
++
+ function clickClipHeader(parts: { root: HTMLElement; header: HTMLElement }, pointerId: number) {
+   fireEvent.pointerDown(parts.header, { ...press, pointerId, clientX: 100, clientY: MUSIC_LANE_Y });
+   fireEvent.pointerUp(parts.root, { pointerId, clientX: 100, clientY: MUSIC_LANE_Y });
+@@ -1049,14 +1054,14 @@
+     const { view, laneBody } = await mountMenuWorkspace();
+     const fader = view.getByRole('slider', { name: 'Volume — მუსიკა' });
+     act(() => fader.focus());
+-    rightPressThenBlur(laneBody('music'), fader);
++    rightPress(laneBody('music'));
+     expect(document.activeElement).toBe(document.body);
+     fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
+     expect(openMenu(view).contains(focusedElement())).toBe(true);
+     pressFocused('Escape');
+     expect(gridMenu(view)).toBeNull();
+     expect(document.activeElement).toBe(fader);
+-    rightPressThenBlur(laneBody('sfx'), fader);
++    rightPress(laneBody('sfx'), 300, 250);
+     fireEvent.contextMenu(laneBody('sfx'), { button: 2, clientX: 300, clientY: 250 });
+     fireEvent.click(menuItem(view, '0.5 s'));
+     expect(gridMenu(view)).toBeNull();
+@@ -1068,7 +1073,7 @@
+     const { view, laneBody } = await mountMenuWorkspace();
+     const tempo = view.getByTestId('arrangement-tempo-input');
+     act(() => tempo.focus());
+-    rightPressThenBlur(laneBody('music'), tempo);
++    rightPress(laneBody('music'));
+     expect(document.activeElement).toBe(document.body);
+     fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
+     expect(openMenu(view).contains(focusedElement())).toBe(true);
+@@ -1090,7 +1095,7 @@
+     const flag = view.getByTestId('arrangement-marker');
+     act(() => flag.focus());
+     expect(document.activeElement).toBe(flag);
+-    rightPressThenBlur(laneBody('music'), flag);
++    rightPress(laneBody('music'));
+     expect(document.activeElement).toBe(document.body);
+     fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
+     expect(openMenu(view).contains(focusedElement())).toBe(true);
+@@ -1104,7 +1109,7 @@
+     const fader = view.getByRole('slider', { name: 'Volume — მუსიკა' });
+     act(() => fader.focus());
+     const clipRoot = clipParts('m1').root;
+-    rightPressThenBlur(clipRoot, fader);
++    rightPress(clipRoot, 320, MUSIC_LANE_Y);
+     expect(document.activeElement).toBe(document.body);
+     fireEvent.contextMenu(clipRoot, { button: 2, clientX: 320, clientY: MUSIC_LANE_Y });
+     expect(openMenu(view).contains(focusedElement())).toBe(true);
+@@ -1112,6 +1117,139 @@
+     expect(gridMenu(view)).toBeNull();
+     expect(document.activeElement).toBe(fader);
+   });
++  it('GM44 B-R242-MARKER-EDITOR-MENU-FOCUS the add editor commits on the right press and the menu returns focus to the new flag', async () => {
++    const { api, view, laneBody } = await mountMenuWorkspace();
++    fireEvent.click(view.getByTestId('arrangement-marker-add'));
++    const input = view.getByTestId('arrangement-marker-name-input');
++    expect(document.activeElement).toBe(input);
++    rightPress(laneBody('music'));
++    expect(document.activeElement).toBe(document.body);
++    expect(view.queryByTestId('arrangement-marker-name-input')).toBeNull();
++    expect(live(api).arrangement.markers).toHaveLength(1);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(view.getByTestId('arrangement-marker'));
++    expect(live(api).arrangement.markers).toHaveLength(1);
++  });
++
++  it('GM45 B-R242-MARKER-EDITOR-MENU-FOCUS the rename editor commits on the right press and a choice returns focus to its flag', async () => {
++    const { api, view, laneBody } = await mountMenuWorkspace();
++    const before = live(api).arrangement;
++    act(() => {
++      live(api).commitArrangement(
++        { ...before, markers: [{ id: 'k1', time: 20, name: 'A' }] },
++        'Add Marker',
++        before,
++      );
++    });
++    const flag = view.getByTestId('arrangement-marker');
++    act(() => flag.focus());
++    fireEvent.keyDown(flag, { key: 'F2', code: 'F2' });
++    const input = view.getByTestId('arrangement-marker-name-input');
++    expect(document.activeElement).toBe(input);
++    fireEvent.change(input, { target: { value: 'Hit' } });
++    rightPress(laneBody('sfx'), 300, 250);
++    expect(document.activeElement).toBe(document.body);
++    expect(live(api).arrangement.markers?.[0]?.name).toBe('Hit');
++    fireEvent.contextMenu(laneBody('sfx'), { button: 2, clientX: 300, clientY: 250 });
++    fireEvent.click(menuItem(view, '0.5 s'));
++    expect(gridMenu(view)).toBeNull();
++    expect(gridControl(view).dataset.gridSeconds).toBe('0.5');
++    expect(document.activeElement).toBe(view.getByTestId('arrangement-marker'));
++  });
++
++  it('GM46 B-R243-GROUP-EDITOR-MENU-FOCUS the group rename editor commits on the right press and Escape returns focus to the group name', async () => {
++    const { api, view, laneBody } = await mountMenuWorkspace();
++    const before = live(api).arrangement;
++    const grouped = groupSelectedRows(before, ['music', 'sfx'], 'g1');
++    if (grouped.kind !== 'grouped') {
++      throw new Error('group refused');
++    }
++    act(() => {
++      live(api).commitArrangement(grouped.arrangement, 'Group Tracks', before);
++    });
++    const name = view.getByTestId('arrangement-group-name');
++    act(() => name.focus());
++    fireEvent.keyDown(name, { key: 'F2', code: 'F2' });
++    const input = view.getByTestId('arrangement-group-name-input');
++    expect(document.activeElement).toBe(input);
++    fireEvent.change(input, { target: { value: 'Drums' } });
++    rightPress(laneBody('music'));
++    expect(document.activeElement).toBe(document.body);
++    expect(view.queryByTestId('arrangement-group-name-input')).toBeNull();
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    const renamed = view.getByTestId('arrangement-group-name');
++    expect(renamed.closest('[data-group-id]')?.getAttribute('data-group-id')).toBe('g1');
++    expect(document.activeElement).toBe(renamed);
++    expect(live(api).arrangement.groups?.[0]?.name).toBe('Drums');
++  });
++
++  it('GM47 A-R243-REVIEW-L1/L2 a header right press releases the fader with no restore, and a later press clears it', async () => {
++    const { view, laneBody } = await mountMenuWorkspace();
++    const fader = view.getByRole('slider', { name: 'Volume — მუსიკა' });
++    act(() => fader.focus());
++    const header = view.getAllByTestId('arrangement-track-header')[1];
++    if (!header) {
++      throw new Error('music header missing');
++    }
++    rightPress(header, 40, 200);
++    expect(fireEvent.contextMenu(header, { button: 2, clientX: 40, clientY: 200 })).toBe(true);
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.pointerDown(header, { ...press, pointerId: 45, clientX: 40, clientY: 200 });
++    fireEvent.pointerUp(header, { pointerId: 45, clientX: 40, clientY: 200 });
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).not.toBe(fader);
++  });
++
++  it('GM49 a marker editor settled by a left press earlier does not take the focus return of a later group editor', async () => {
++    const { api, view, laneBody } = await mountMenuWorkspace();
++    fireEvent.click(view.getByTestId('arrangement-marker-add'));
++    const markerInput = view.getByTestId('arrangement-marker-name-input');
++    expect(document.activeElement).toBe(markerInput);
++    act(() => markerInput.blur());
++    expect(live(api).arrangement.markers).toHaveLength(1);
++    const before = live(api).arrangement;
++    const grouped = groupSelectedRows(before, ['music', 'sfx'], 'g1');
++    if (grouped.kind !== 'grouped') {
++      throw new Error('group refused');
++    }
++    act(() => {
++      live(api).commitArrangement(grouped.arrangement, 'Group Tracks', before);
++    });
++    const name = view.getByTestId('arrangement-group-name');
++    act(() => name.focus());
++    fireEvent.keyDown(name, { key: 'F2', code: 'F2' });
++    rightPress(laneBody('music'));
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(view.getByTestId('arrangement-group-name'));
++  });
++
++  it('GM48 GATE243-S2 the BPM field released by a right press gets focus back after a mouse choice with its value kept', async () => {
++    const { view, laneBody } = await mountMenuWorkspace();
++    const tempo = view.getByTestId('arrangement-tempo-input');
++    act(() => tempo.focus());
++    const value = tempo.getAttribute('value');
++    rightPress(laneBody('music'));
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    fireEvent.click(menuItem(view, '0.5 s'));
++    expect(gridMenu(view)).toBeNull();
++    expect(gridControl(view).dataset.gridSeconds).toBe('0.5');
++    expect(document.activeElement).toBe(tempo);
++    expect(tempo.getAttribute('value')).toBe(value);
++  });
+ });
+ 
+ describe(

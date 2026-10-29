@@ -92,3 +92,14 @@ Related pending requests (non-blocking, still open): `b-round-231-checkpoint-req
   - The reviewer's verdict is **keep for now**. Its own trigger is "if this region is touched again: extract `gridMenuOpenRef`, `gridMenuReturnFocusRef`, `gridMenuPressFocusRef`, `closeGridMenu` and `handleGridMenuRequest` into one `useGridMenuFocusReturn` hook, with GM32–GM43 and FR1–FR4 as the acceptance tests". **Round 243 meets that trigger.**
   - B does not schedule the extraction. Round 243 stays a 2-hunk bug fix. Question 7 now asks keep or extract for that hook as well.
 - **Trigger for re-asking:** unchanged (after stage 2b, before SABA-B-10a).
+
+## Addendum 9 (B, round 243 → 244 planning, D-29z394)
+- **Still unanswered** at round-244 planning. It stays non-blocking.
+- **Round 243 result:** C PASS, and gate 243 published `149faab`. The right-press capture now lives in `releaseEditFocusOnTimelinePointerDown`.
+- **New evidence (gate-243 reviewer, signal GATE243-ARCH-GRIDMENU-FOCUS-HOOK):**
+  - The timeline release handler now does two jobs: it releases edit focus, and it records the grid-menu press focus.
+  - The reviewer's verdict is "keep for now; extract only if focus changes come up a third time".
+  - **Round 244 is that third time.** It adds two group-id refs and a disconnected-target fallback (the marker row's `focusEditorSuccessor`, the group name button) to `closeGridMenu`.
+  - The proposal is one `useGridMenuFocusReturn` hook that owns the open flag, the return target, the press snapshot and the fallback, and exposes `notePressFocus(event)`. Its acceptance: GM1–GM49 and FR1–FR4 pass unchanged, and the shape of `useArrangement()` is unchanged.
+- B does not schedule the extraction inside round 244 (a behaviour round).
+- **Trigger for re-asking:** moved to right after round 244 passes, and in any case before SABA-B-10a. The answer is still at most 3 sentences, keep or extract, with value and risk.
