@@ -1,0 +1,123 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T15:51:32.4176921Z",
+  "round": 250,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R250-01",
+   "severity": "medium",
+   "steps": [
+    "/studio-lab (1440x900 and 1280x720), add demo-stem-pulse",
+    "click the SFX lane at 3 s",
+    "Space, wait 1.5 s, Space (stop at 4.491)",
+    "click the Soft impact library row; read the line above Preview / + Add",
+    "click + Add"
+   ],
+   "expected": "the time shown beside Add is where Add places the sound (round-250 copy: 'Add the selected sound at the insert marker'), or the line names no time Add ignores",
+   "actual": "caption 'Active track: SFX · playhead 00:04.491' but the clip lands at sfx@3.000 (status '“Soft impact” added to the SFX track at 00:03.000.'); HEAD control: caption 4.491 = add 4.491. Regression caused by this round; ArrangementLibraryPreview.tsx:285 inline literal, not in B's strings.ts-only copy sweep; not covered by B-R250-PLAYHEAD-TITLES",
+   "evidence": "tmp/studio-real-loop/c-round-250/caption/caption-fix.json, caption-before-add-*.png, caption-after-add-*.png, out-head/c250.json addStopped"
+  },
+  {
+   "id": "A-R250-REVIEW-PASTE-SPLIT-PLAYING",
+   "severity": "medium",
+   "steps": [
+    "scratch = HEAD + round-250 diff",
+    "mutant C-MU-PASTE-SPLIT-LOCATOR: paste and both no-range split branches read isPlaying ? livePosition() : insertMarker",
+    "run the 6 granted test files"
+   ],
+   "expected": "IM15/IM17 go red (paste/split while playing must use the insert marker)",
+   "actual": "0 red (133/133 green); product correct in browser (paste playing sfx@2.000, split playing music@5.000)",
+   "evidence": "c-round-250/mutants/logs/summary.txt, C-MU-PASTE-SPLIT-LOCATOR.json; out/c250.json paste.pastePlaying, splitPlaying"
+  },
+  {
+   "id": "A-R250-REVIEW-SHEET-MARKER-COPY",
+   "severity": "low",
+   "steps": [
+    "press ? on /studio-lab",
+    "read row 'marker'"
+   ],
+   "expected": "copy consistent with addTitle (selection start / insert marker / playback position while playing)",
+   "actual": "'Add a marker at the insert marker' (exact §1.3 text, B copy decision)",
+   "evidence": "out/sheet-*.png, out/c250.json titles"
+  },
+  {
+   "id": "A-R250-REVIEW-IM18-IM20-ASSERTS",
+   "severity": "low",
+   "steps": [
+    "read IM18/IM20"
+   ],
+   "expected": "IM18 covers selection-start-wins; IM20 asserts preventDefault and a metaKey variant",
+   "actual": "absent (A reviewer finding, not independently mutated by C)",
+   "evidence": "a-round-250.md reviewer items 2-3"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-250",
+  "C-UNIT-250",
+  "C-MUT-250",
+  "C-PASTE-250",
+  "C-SPLIT-250",
+  "C-SPLIT-REFUSAL-250",
+  "C-ADD-250",
+  "C-M-250",
+  "C-PASTEND-250",
+  "C-GESTURE-250",
+  "C-CMD-250",
+  "C-KEYS-250",
+  "C-TITLES-250",
+  "C-STATUS-BOX-250",
+  "C-BUDGET-250",
+  "C-HANDLE-RANGE-250",
+  "AN-REVIEW-250",
+  "LAB-SMOKE-250",
+  "Auth"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "Purchased origin (browser): backend unavailable in cloud"
+ ],
+ "info": [
+  "paste export WAV 18.000 s aligned +2.000 s, residual SNR 123.5 dB at 0-sample offset",
+  "split export sha256 == unsplit 1fea093b... (sample-transparent split)",
+  "paste while playing lands at the insert marker 2.000; playback continues",
+  "Ctrl+→ stopped (marker 1, ph 2.491) -> 3.000, origin indistinguishable; stage 2b",
+  "strip click at x=17.5 s read 18.000 (probably Snap 1 s grid)",
+  "plain/Shift+Space type spaces into BPM/search fields (text input)",
+  "tokenFake 500 'Unable to prepare Studio access' same as round 249, never 200",
+  "raw out/c250.json splitRefusal pass:false is a C criterion error (font-size vs line height); nDrop@1280 run-1 miss is a C harness miss (row off-screen), re-probe drop/ 4/4",
+  "A's L11 STOP (export-progress flake): C covering alone 1841/1841; B rules on a flake task",
+  "HEAD control attempt-1 cold-load timeout kept (out-head/c250-attempt1.json)"
+ ],
+ "abletonParity": {
+  "split": "confirmed (6.12 verbatim in capture)",
+  "markerStopped": "confirmed (6.4 verbatim)",
+  "markerPlaying": "deliberate deviation (not quantized; SABA-Q-10A-DEVIATIONS (d))",
+  "paste": "inference (6.9)",
+  "addFromBrowser": "unconfirmed (no reference)",
+  "pastEndText": "not applicable",
+  "gestureKeys": "not applicable"
+ },
+ "environment": {
+  "chromium": "143.0.7499.4",
+  "base": "http://127.0.0.1:5173/studio-lab",
+  "viewports": [
+   "1440x900",
+   "1280x720"
+  ],
+  "headControl": "git archive dcb7eb1 on :5174, stopped and removed"
+ },
+ "findingsNote": "FAIL on one user-visible Medium regression caused by the round (C-R250-01); every runnable §5 row passed at both viewports. Precedent: round 202 (C-R202-01) failed on a user-visible Medium; round 249 passed with test-only Mediums."
+}

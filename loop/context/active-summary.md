@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-29T14:44:26.586Z)
+# Active loop summary (2026-10-29T16:17:22.381Z)
 
-- backlog.json 2335 KB -> active view 338 KB
-- status: G_ROOT_GATE round 249
-- servers: `{"checkedUtc":"2026-10-29T14:07:49.1205379Z","round":249,"attempt":1,"store":200}`
+- backlog.json 2353 KB -> active view 340 KB
+- status: G_ROOT_GATE round 250
+- servers: `{"checkedUtc":"2026-10-29T15:51:32.4176921Z","round":250,"attempt":1,"store":200}`
 - last publication: dcb7eb14127850eecad45f373cdebba2258ee95e (rounds 249-249)
-- last root gate: round 249 published - commit dcb7eb14127850eecad45f373cdebba2258ee95e pushed
+- last root gate: round 250 skipped - C taskStatus FAIL
 
-## Current items: SRW-21
+## Current items: -
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -566,7 +566,7 @@
 - SABA-Q-SCRUB-HOLD-LOOP / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live: holding the mouse in the scrub area loops a portion by the global launch quantization (6.3). Not built in SABA-B-11a. Wanted?
 - SABA-Q-SCRUB-ADD-LOCATOR / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live (video riOD 2:22-3:08): right-click in the scrub area -> Add Locator. Our marker menu opens only on an existing flag. Wanted (later can
 - SABA-Q-SEED-STATUS-LENGTH / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / The seed status is one aria-live message of three sentences (placement, 'Tempo N BPM from ... Grid only: audio is not stretched.', 'Snap on 
-- C-R235-02 / low / scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
+- C-R235-02 / low / scheduled in SABA-B-10a stage 2b (D-29z436) | scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
 - SABA-Q-SCRUB-DOUBLE-CLICK / info / awaiting_user (D-29z333); the round-236 default holds until answered / Live documents a double-click only for the beat-time ruler (6.1 zoom). Round 236 makes a scrub-strip double-click two 'play from here' click
 - GATE235-S3 / info / note; consistent with the codebase; no action / useRulerNavigation writes optionsRef.current during render (same pattern as workspaceRef)
 - C-R236-01 / low / deferred_low_polish (D-29z340); code is togglePlayback, outside round 237 grants / a playPastEnd status stays on screen after playback actually starts (strip click at 2 after an end click; Space after the end click); pre-ex
@@ -613,10 +613,25 @@
 - INFO-C248-STALE-NOTE / info / info (D-29z427): ruled behaviour section 1.4 of round 248; part of SABA-Q-11B-HIDDEN-SNAP (d) / after zoom-in the status still says Snap is paused; after zoom-out into hidden lines it shows plain (Snap on)
 - INFO-C248-ADAPTIVE-3 / info / info (D-29z427): not checked against the D-29z361 density model in this planning; one REGRESSION row C-ADAPTIVE3-CHECK compares it with the chooser rule; a mismatch becomes a Low / adaptive '3' on 1/4 at 120 BPM and 4 px/s resolves to 1/8T (the chooser picks the triplet member at the current density); unchanged code
 - SABA-Q-10A-HOME-PLAYING / info / awaiting_user (D-29z432): non-blocking; round 249 ships the jump / while playing, Home and Back to start jump playback to 0 and move the insert marker there (as before). Or move only the marker and keep play
-- SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
-- SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
+- SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking | gate 249 S2 asks to keep it with the stage-2 questions (D-29z439) / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
+- SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432, (d)/(e) added D-29z441): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
 - B-R249-PAUSE-LABEL / low / scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
 - INFO-B249-STALE-MARKER-STATUS / info / info (D-29z431); C row C-STATUS-CLOBBER-249 records it; SABA-B-10b's visible marker shows the state / Home/back write no status, so a previous 'Insert marker at ...' status stays after the marker moved (event line, same class as C-R236-01)
+- A-R249-REVIEW-IM3-CMD / medium / scheduled round 250 (D-29z435): IM3 separates marker and playhead before the Cmd press; red-proof A-MU-CTRL-ONLY -> IM3 red (b-round-249/mutants/logs) / IM3 presses Cmd+Shift+Space with marker = playhead, so the assert passes without the metaKey branch (A-MU-CTRL-ONLY green)
+- A-R249-REVIEW-IM13-LEAK / medium / scheduled round 250 (D-29z435): IM13 separates the positions first and also presses Cmd+Shift+Space in the field; red-proofs C-MU-LEAK-CS and C-MU-LEAK-SHIFT -> IM13 red / IM13 cannot catch Ctrl/Cmd+Shift+Space leaking out of the tempo field (marker = playhead = 2); C-MU-LEAK-CS stays 14/14 green
+- B-R250-GESTURE-KEYS / medium / scheduled round 250 (D-29z439): both keys return early while isPointerGestureActive(); IM20 + C-GESTURE-250 / during a range drag on a clip, Ctrl/Cmd+Shift+Space and Home move the insert marker and playhead and clear the selection; after pointerup th
+- GATE249-S1 / low / scheduled round 250 as IM21 (D-29z439); closes at the round-250 C PASS / a stopped playhead-handle step or drag now clears a time selection, untested
+- GATE249-S2 / info / info (D-29z439): = SABA-Q-10A-CTRL-ARROW-RANGE / seekTo keeps the selection, so Space after Ctrl+arrows plays the selection
+- GATE249-S4 / info / SABA-B-10b scope (D-29z439): the visible marker carries data-insert-marker and the hidden node is removed / test-only hidden ArrangementInsertMarkerSignal ships to production
+- GATE249-S5 / info / info (D-29z439); part of GATE249-ARCH-TRANSPORT-POSITIONS; 10b checks it does not double-render the visible marker / returnToStart and playFrom write the marker store twice (placeInsertMarker then seekTo)
+- GATE249-S7 / info / SABA-B-10b scope (sheet rows), D-29z439 / Shift+Space and Ctrl/Cmd+Shift+Space have no aria-keyshortcuts and no shortcut-sheet row
+- GATE249-S8 / info / = B-R249-PAUSE-LABEL (SABA-B-9) / status says Stop while the button reads Pause
+- GATE249-S9 / info / = TLM-R249-MAC-CMD-SHIFT-SPACE / Mac Cmd path unverified
+- C-EDIT-DIVERGE-249 / info / round 250 scope (D-29z437); B reproduced paste/split/M/Enter-add at HEAD (b-round-249/edit-head.json) / M and Ctrl+E used the playhead while the marker differed; paste inconclusive
+- C-R249-INFO-PASTEND-WORDING / info / round 250 scope (D-29z438) / past-end refusal says Playhead while the refused start is the insert marker
+- A-R249-REVIEW-KEYUP-ORDER / info / Tech Lead manual: Firefox and Safari (D-29z439) / Shift released before Space after Ctrl+Shift+Space could click a focused button on key-up in other engines; not reproduced in Chromium (A an
+- B-R250-PLAYHEAD-TITLES / low / scheduled in SABA-B-10a stage 2b, not deferred (D-29z436) / ruler and range titles still say click = playhead (rulerTitle, rangeBodyTitle); while playing a click now moves only the insert marker
+- B-R250-NAV-ORIGIN / low / scheduled in SABA-B-10a stage 2b (D-29z436) / Ctrl+Left/Right steps from the playhead (getLivePosition) while stopped; after a stop that differs from the insert marker (Live 6.9 moves th
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
@@ -630,4 +645,5 @@
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
+- SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

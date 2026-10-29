@@ -1,0 +1,424 @@
+diff --git a/app/components/arrangement/ArrangementLibraryPreview.tsx b/app/components/arrangement/ArrangementLibraryPreview.tsx
+index e556a99..f0a1e52 100644
+--- a/app/components/arrangement/ArrangementLibraryPreview.tsx
++++ b/app/components/arrangement/ArrangementLibraryPreview.tsx
+@@ -12,8 +12,7 @@ import {
+ import {
+   formatArrangementTime,
+   useArrangement,
+-  useArrangementPositionStore,
+-  useArrangementPositionWriter,
++  useArrangementInsertMarkerStore,
+ } from '~/contexts/ArrangementContext';
+ import { normalizePeakColumns } from '~/lib/arrangement/peaks';
+ import { studioLibraryPanelStrings } from '~/lib/arrangement/strings';
+@@ -58,32 +57,35 @@ function previewWaveColumns(peaks: Float32Array | undefined): PreviewWaveColumn[
+   }));
+ }
+ 
+-function LibraryPlayheadText() {
+-  const positionStore = useArrangementPositionStore();
++function LibraryInsertMarkerText() {
++  const insertMarkerStore = useArrangementInsertMarkerStore();
+   const textRef = useRef<HTMLSpanElement>(null);
+-  const writeLibraryPlayheadText = useCallback((position: number) => {
+-    const span = textRef.current;
+-    if (!span) {
+-      return;
+-    }
+-    const text = formatArrangementTime(position);
+-    if (span.textContent !== text) {
+-      span.textContent = text;
+-    }
+-  }, []);
+-  useArrangementPositionWriter(writeLibraryPlayheadText);
++  useEffect(() => {
++    const writeLibraryInsertMarkerText = () => {
++      const span = textRef.current;
++      if (!span) {
++        return;
++      }
++      const text = formatArrangementTime(insertMarkerStore.getPosition());
++      if (span.textContent !== text) {
++        span.textContent = text;
++      }
++    };
++    writeLibraryInsertMarkerText();
++    return insertMarkerStore.subscribePosition(writeLibraryInsertMarkerText);
++  }, [insertMarkerStore]);
+   return (
+     <span
+       ref={textRef}
+       className="font-mono tabular-nums"
+-      data-testid="arrangement-library-playhead"
++      data-testid="arrangement-library-insert-marker"
+     >
+-      {formatArrangementTime(positionStore.getPosition())}
++      {formatArrangementTime(insertMarkerStore.getPosition())}
+     </span>
+   );
+ }
+ 
+-const LibraryPlayheadTextMemo = memo(LibraryPlayheadText);
++const LibraryInsertMarkerTextMemo = memo(LibraryInsertMarkerText);
+ 
+ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPreviewProps) {
+   const {
+@@ -282,7 +284,7 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+           {activeLaneName}
+           {activeLaneVideoNote}
+         </span>{' '}
+-        · playhead <LibraryPlayheadTextMemo />
++        · {studioLibraryPanelStrings.insertMarker} <LibraryInsertMarkerTextMemo />
+       </p>
+       <div className="flex gap-2">
+         <button
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 032a821..2be5aae 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -831,6 +831,7 @@ export const studioLibraryPanelStrings = {
+     'Preview waveform — click = play from here · ← → 1 s · Home/End · Space = play/stop',
+   activeTrack: 'Active track:',
+   videoTrackNote: ' (audio is not added here)',
++  insertMarker: 'insert marker',
+   previewPlay: 'Preview',
+   previewStop: 'Stop',
+   add: 'Add',
+diff --git a/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx b/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+index d3beb08..719d5a4 100644
+--- a/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+@@ -399,6 +399,18 @@ describe(
+       );
+       expect(pasted).toMatchObject({ trackId: 'music', start: 2 });
+       expect(statusText(mounted)).toContain('00:02.000');
++      act(() => live(mounted.api).undo());
++      key(SPACE);
++      advance(1);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      expect(live(mounted.api).getLivePosition()).toBeGreaterThan(2.5);
++      act(() => live(mounted.api).pasteClipboard());
++      const pastedPlaying = live(mounted.api).arrangement.clips.find(
++        (clip) => clip.id === live(mounted.api).selectedClipId,
++      );
++      expect(pastedPlaying).toMatchObject({ trackId: 'music', start: 2 });
++      expect(statusText(mounted)).toContain('00:02.000');
++      expect(live(mounted.api).isPlaying).toBe(true);
+     });
+ 
+     it('IM16 Add from the library lands at the insert marker, stopped and while playing', async () => {
+@@ -449,6 +461,23 @@ describe(
+           .sort((a, b) => a - b),
+       ).toEqual([0, 5]);
+       act(() => live(mounted.api).undo());
++      key(SPACE);
++      advance(1);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      expect(live(mounted.api).getLivePosition()).toBeGreaterThan(5.5);
++      act(() => live(mounted.api).selectClip('h1'));
++      key({ key: 'e', code: 'KeyE', ctrlKey: true });
++      expect(statusText(mounted)).toBe(studioEditStrings.splitDone('00:05.000'));
++      expect(
++        live(mounted.api)
++          .arrangement.clips.filter((clip) => clip.trackId === 'sfx')
++          .map((clip) => clip.start)
++          .sort((a, b) => a - b),
++      ).toEqual([0, 5]);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      key(SPACE);
++      expect(live(mounted.api).isPlaying).toBe(false);
++      act(() => live(mounted.api).undo());
+       act(() => live(mounted.api).selectClips(['h1', copyId ?? '']));
+       key({ key: 'e', code: 'KeyE', ctrlKey: true });
+       expect(statusText(mounted)).toBe(
+@@ -504,8 +533,13 @@ describe(
+       act(() => {
+         release = live(mounted.api).beginPointerGesture();
+       });
+-      key({ ...SPACE, ctrlKey: true, shiftKey: true });
+-      key({ key: 'Home', code: 'Home' });
++      expect(fireEvent.keyDown(document.body, { ...SPACE, ctrlKey: true, shiftKey: true })).toBe(
++        false,
++      );
++      expect(fireEvent.keyDown(document.body, { ...SPACE, metaKey: true, shiftKey: true })).toBe(
++        false,
++      );
++      expect(fireEvent.keyDown(document.body, { key: 'Home', code: 'Home' })).toBe(false);
+       expect(insertMarkerOf(mounted)).toBe('2.000');
+       expect(positionOf(mounted.api)).toBe(stopPoint);
+       expect(live(mounted.api).range).not.toBeNull();
+@@ -515,6 +549,62 @@ describe(
+       expect(live(mounted.api).range).toBeNull();
+     });
+ 
++    it('IM22 the library line names the insert marker, after a stop and while playing (C-R250-01)', async () => {
++      const mounted = await playStopFrom(3);
++      const caption = mounted.view.getByTestId('arrangement-library-insert-marker');
++      expect(positionOf(mounted.api)).toBeGreaterThan(4);
++      expect(caption.textContent).toBe('00:03.000');
++      expect(caption.closest('p')?.textContent).toContain('· insert marker 00:03.000');
++      expect(caption.closest('p')?.textContent).not.toContain('playhead');
++      key(SPACE);
++      advance(1);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      expect(live(mounted.api).getLivePosition()).toBeGreaterThan(3.5);
++      expect(caption.textContent).toBe('00:03.000');
++      key(SPACE);
++      clickRuler(mounted, 6);
++      expect(caption.textContent).toBe('00:06.000');
++      act(() => live(mounted.api).setActiveTrack('music'));
++      act(() => live(mounted.api).addSourceToActiveTrack('hit'));
++      const added = live(mounted.api).arrangement.clips.find(
++        (clip) => clip.id === live(mounted.api).selectedClipId,
++      );
++      expect(added?.start).toBe(6);
++    });
++
++    it('IM23 M prefers the time selection start, stopped and while playing', async () => {
++      const mounted = await playStopFrom(2);
++      act(() => live(mounted.api).setTimeRange({ start: 5, end: 7, trackId: 'sfx' }));
++      key({ key: 'm', code: 'KeyM' });
++      fireEvent.keyDown(mounted.view.getByTestId('arrangement-marker-name-input'), {
++        key: 'Enter',
++        code: 'Enter',
++      });
++      const stoppedTimes =
++        live(mounted.api).arrangement.markers?.map((marker) => marker.time) ?? [];
++      expect(stoppedTimes).toContain(5);
++      expect(stoppedTimes).not.toContain(2);
++      act(() => {
++        if (document.activeElement instanceof HTMLElement) {
++          document.activeElement.blur();
++        }
++      });
++      act(() => live(mounted.api).setTimeRange({ start: 9, end: 10, trackId: 'sfx' }));
++      key(SPACE);
++      advance(1);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      key({ key: 'm', code: 'KeyM' });
++      fireEvent.keyDown(mounted.view.getByTestId('arrangement-marker-name-input'), {
++        key: 'Enter',
++        code: 'Enter',
++      });
++      const playingTimes =
++        live(mounted.api).arrangement.markers?.map((marker) => marker.time) ?? [];
++      expect(playingTimes).toContain(9);
++      expect(playingTimes).toHaveLength(stoppedTimes.length + 1);
++      expect(playingTimes.filter((time) => time === 9)).toHaveLength(1);
++    });
++
+     it('IM21 a stopped playhead-handle step clears a time selection and moves the insert marker', async () => {
+       const mounted = await mountMarkerWorkspace();
+       clickRuler(mounted, 3);
+diff --git a/app/lib/arrangement/__tests__/library-preview.test.tsx b/app/lib/arrangement/__tests__/library-preview.test.tsx
+index 0ddd4ff..85c6520 100644
+--- a/app/lib/arrangement/__tests__/library-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview.test.tsx
+@@ -175,14 +175,14 @@ function PreviewApiProbe({ api }: { api: PreviewApiRef }) {
+ }
+ 
+ function activeLaneRow(view: ReturnType<typeof render>): HTMLParagraphElement {
+-  const row = view.getByTestId('arrangement-library-playhead').closest('p');
++  const row = view.getByTestId('arrangement-library-insert-marker').closest('p');
+   if (!row) {
+     throw new Error('active-lane row not found');
+   }
+   return row;
+ }
+ 
+-describe('ArrangementLibraryPreview active-lane row and playhead memo (C-R16-01, M-R10-1/M2)', () => {
++describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R16-01, M-R10-1/M2, C-R250-01)', () => {
+   const frames: FrameRequestCallback[] = [];
+ 
+   beforeEach(() => {
+@@ -237,7 +237,7 @@ describe('ArrangementLibraryPreview active-lane row and playhead memo (C-R16-01,
+     expect(tokens).not.toContain('truncate');
+     expect(row.getAttribute('title')).toBe('Active track: მუსიკა');
+     expect(row.getAttribute('title')).toBe(row.textContent?.split('·')[0].trim());
+-    expect(row.textContent).toContain('· playhead 00:00.000');
++    expect(row.textContent).toContain('· insert marker 00:00.000');
+     expect(row.querySelector('span.text-foreground')?.textContent).toBe('მუსიკა');
+   });
+ 
+@@ -247,7 +247,7 @@ describe('ArrangementLibraryPreview active-lane row and playhead memo (C-R16-01,
+     const row = activeLaneRow(view);
+     expect(row.getAttribute('title')).toBe('Active track: ვიდეო (audio is not added here)');
+     expect(row.getAttribute('title')).toBe(row.textContent?.split('·')[0].trim());
+-    expect(row.textContent).toContain('· playhead 00:00.000');
++    expect(row.textContent).toContain('· insert marker 00:00.000');
+     expect(view.getByRole('button', { name: 'Add' }).hasAttribute('disabled')).toBe(true);
+     act(() => api.current?.setActiveTrack('sfx'));
+     expect(activeLaneRow(view).getAttribute('title')).toBe('Active track: SFX');
+@@ -263,11 +263,11 @@ describe('ArrangementLibraryPreview active-lane row and playhead memo (C-R16-01,
+     expect(row.getAttribute('title')).toBe(row.textContent?.split('·')[0].trim());
+   });
+ 
+-  it('advances the library-preview cursor without rendering LibraryPlayheadText (M-R10-1/M2)', async () => {
++  it('advances the library-preview cursor without rendering LibraryInsertMarkerText (M-R10-1/M2)', async () => {
+     const { view } = await mountPreview();
+     const wave = view.getByTestId('arrangement-library-preview-wave');
+-    const playhead = view.getByTestId('arrangement-library-playhead');
+-    expect(renderLog.counts.get('LibraryPlayheadText') ?? 0).toBeGreaterThan(0);
++    const insertMarkerText = view.getByTestId('arrangement-library-insert-marker');
++    expect(renderLog.counts.get('LibraryInsertMarkerText') ?? 0).toBeGreaterThan(0);
+     fireEvent.click(view.getByTestId('arrangement-library-preview-toggle'));
+     expect(view.getByTestId('arrangement-library-preview-toggle').textContent).toBe('Stop');
+     runFrames();
+@@ -280,9 +280,9 @@ describe('ArrangementLibraryPreview active-lane row and playhead memo (C-R16-01,
+     }
+     expect(new Set(cursorTexts).size).toBe(12);
+     expect(renderLog.counts.get('ArrangementLibraryPreview') ?? 0).toBeGreaterThanOrEqual(10);
+-    expect(renderLog.counts.get('LibraryPlayheadText') ?? 0).toBe(0);
+-    expect(view.getByTestId('arrangement-library-playhead')).toBe(playhead);
+-    expect(playhead.textContent).toBe('00:00.000');
++    expect(renderLog.counts.get('LibraryInsertMarkerText') ?? 0).toBe(0);
++    expect(view.getByTestId('arrangement-library-insert-marker')).toBe(insertMarkerText);
++    expect(insertMarkerText.textContent).toBe('00:00.000');
+   });
+ 
+   it('HT1 held Enter on the preview toggle prevents only the repeats (B-R98-H1-PREVIEW-TOGGLE-HOLD)', async () => {
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 998bebf..00dc0f7 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -8,6 +8,7 @@ import {
+   ArrangementProvider,
+   formatArrangementTime,
+   useArrangement,
++  useArrangementInsertMarkerStore,
+   useArrangementPositionStore,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+@@ -228,6 +229,15 @@ function PositionStoreProbe({ store }: { store: { current: ArrangementPositionSt
+   return null;
+ }
+ 
++function InsertMarkerStoreProbe({
++  store,
++}: {
++  store: { current: ArrangementPositionStore | null };
++}) {
++  store.current = useArrangementInsertMarkerStore();
++  return null;
++}
++
+ function countsOf(names: readonly string[]): Record<string, number> {
+   return Object.fromEntries(names.map((name) => [name, renderLog.counts.get(name) ?? 0]));
+ }
+@@ -352,13 +362,13 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     runFrames();
+     const position = api.current?.getLivePosition() ?? 0;
+     expect(position).toBeGreaterThan(0.1);
+-    expect(countsOf([...POSITION_CONSUMERS, 'LibraryPlayheadText'])).toEqual({
++    expect(countsOf([...POSITION_CONSUMERS, 'LibraryInsertMarkerText'])).toEqual({
+       ArrangementPlayheadLine: 0,
+       ArrangementRulerPlayhead: 0,
+       ArrangementTransportPosition: 0,
+       ArrangementVideoCaption: 0,
+       ArrangementVideoGapCaption: 0,
+-      LibraryPlayheadText: 0,
++      LibraryInsertMarkerText: 0,
+     });
+     expect(countsOf(WATCHED_LISTS)).toEqual({
+       ArrangementClipViewInner: 0,
+@@ -511,34 +521,39 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(detailPlayhead.style.display).toBe('none');
+   });
+ 
+-  it('writes the library playhead text on 60 position frames without rendering LibraryPlayheadText (R9-L1, C-R6-02)', async () => {
++  it('keeps the library insert-marker text on 60 position frames and writes marker moves without rendering LibraryInsertMarkerText (R9-L1, C-R6-02, C-R250-01)', async () => {
+     const store: { current: ArrangementPositionStore | null } = { current: null };
++    const markerStore: { current: ArrangementPositionStore | null } = { current: null };
+     const view = render(
+       <ArrangementProvider collection={budgetCollection} initialArrangement={budgetArrangement()}>
+         <StudioWorkspace />
+         <PositionStoreProbe store={store} />
++        <InsertMarkerStoreProbe store={markerStore} />
+       </ArrangementProvider>,
+     );
+     await act(async () => {
+       await Promise.resolve();
+       await Promise.resolve();
+     });
+-    const libraryText = view.getByTestId('arrangement-library-playhead');
+-    expect(libraryText.closest('p')?.textContent).toContain('· playhead 00:00.000');
++    const libraryText = view.getByTestId('arrangement-library-insert-marker');
++    expect(libraryText.closest('p')?.textContent).toContain('· insert marker 00:00.000');
+     expect(libraryText.className).toBe('font-mono tabular-nums');
+     expect(libraryText.textContent).toBe('00:00.000');
+-    expect(renderLog.counts.get('LibraryPlayheadText') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('LibraryInsertMarkerText') ?? 0).toBeGreaterThan(0);
+     renderLog.counts.clear();
+     const texts: string[] = [];
+     for (let frame = 1; frame <= 60; frame++) {
+       act(() => store.current?.setPosition(frame * 0.1));
+       texts.push(libraryText.textContent ?? '');
+     }
+-    expect(renderLog.counts.get('LibraryPlayheadText') ?? 0).toBe(0);
+-    expect(texts[0]).toBe(formatArrangementTime(0.1));
+-    expect(texts[59]).toBe(formatArrangementTime(6));
+-    expect(new Set(texts).size).toBe(60);
+-    expect(view.getByTestId('arrangement-library-playhead')).toBe(libraryText);
++    expect(store.current?.getPosition()).toBeCloseTo(6, 6);
++    expect(new Set(texts)).toEqual(new Set(['00:00.000']));
++    act(() => markerStore.current?.setPosition(3));
++    expect(libraryText.textContent).toBe(formatArrangementTime(3));
++    act(() => markerStore.current?.setPosition(4.5));
++    expect(libraryText.textContent).toBe(formatArrangementTime(4.5));
++    expect(renderLog.counts.get('LibraryInsertMarkerText') ?? 0).toBe(0);
++    expect(view.getByTestId('arrangement-library-insert-marker')).toBe(libraryText);
+   });
+ 
+   it('keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)', async () => {
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 178ff91..4e0d33a 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -2518,6 +2518,7 @@ const EXPECTED_LIBRARY_PANEL_STRINGS: Record<string, string> = {
+     'Preview waveform — click = play from here · ← → 1 s · Home/End · Space = play/stop',
+   activeTrack: 'Active track:',
+   videoTrackNote: ' (audio is not added here)',
++  insertMarker: 'insert marker',
+   previewPlay: 'Preview',
+   previewStop: 'Stop',
+   add: 'Add',
+@@ -2536,6 +2537,7 @@ describe('V-0.5b library panel strings', () => {
+         'expand',
+         'filterPrefix',
+         'fold',
++        'insertMarker',
+         'library',
+         'listLabel',
+         'noResults',
+@@ -2552,7 +2554,7 @@ describe('V-0.5b library panel strings', () => {
+         'widthLabel',
+       ].sort(),
+     );
+-    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(23);
++    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(24);
+     for (const [key, value] of Object.entries(studioLibraryPanelStrings)) {
+       expect(value, key).toBe(EXPECTED_LIBRARY_PANEL_STRINGS[key]);
+       expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+diff --git a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx b/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+index 0b6d005..d2306a3 100644
+--- a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+@@ -399,10 +399,15 @@ describe('Studio Obsidian & Brass scoped tokens (V-1a)', () => {
+       }
+     }
+ 
+-    for (const testId of ['arrangement-library-playhead', 'arrangement-detail-clip-gain-reset']) {
++    for (const testId of [
++      'arrangement-library-insert-marker',
++      'arrangement-detail-clip-gain-reset',
++    ]) {
+       expect(classTokensByTestId(html, testId), testId).toContain('font-mono');
+     }
+-    expect(classTokensByTestId(html, 'arrangement-library-playhead')).toContain('tabular-nums');
++    expect(classTokensByTestId(html, 'arrangement-library-insert-marker')).toContain(
++      'tabular-nums',
++    );
+ 
+     const rulerLabelClass =
+       'absolute top-1 left-1 whitespace-nowrap font-mono text-xs tabular-nums text-muted';
