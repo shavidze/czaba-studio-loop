@@ -83,3 +83,12 @@ Related pending requests (non-blocking, still open): `b-round-231-checkpoint-req
   - A shared `setAdaptiveDensity(level, source)` primitive is suggested for `toggleGridMode`, `stepGridDivision` and the menu.
   - Question 7 now also covers whether the grid-menu open/close/focus state (4 refs + state) belongs in a hook.
 - **Trigger for re-asking:** unchanged (after stage 2b, before SABA-B-10a).
+
+## Addendum 8 (B, round 242 → 243 planning, D-29z386)
+- **Still unanswered** at round-243 planning. It stays non-blocking.
+- **Round 242 result:** C PASS, and gate 242 published rounds 241 + 242 as `7e5b23c`. SABA-B-11b stage 2a is done.
+- **New evidence (A's round-242 reviewer, signal A-R242-ARCH-GRIDMENU-FOCUS-HOOK):**
+  - The grid-menu focus and dismiss region was patched in rounds 60, 241 and 242. Round 243 touches it a fourth time: the right-press capture moves into the scroller's capture handler `releaseEditFocusOnTimelinePointerDown`, and the lane handler's copy is removed.
+  - The reviewer's verdict is **keep for now**. Its own trigger is "if this region is touched again: extract `gridMenuOpenRef`, `gridMenuReturnFocusRef`, `gridMenuPressFocusRef`, `closeGridMenu` and `handleGridMenuRequest` into one `useGridMenuFocusReturn` hook, with GM32–GM43 and FR1–FR4 as the acceptance tests". **Round 243 meets that trigger.**
+  - B does not schedule the extraction. Round 243 stays a 2-hunk bug fix. Question 7 now asks keep or extract for that hook as well.
+- **Trigger for re-asking:** unchanged (after stage 2b, before SABA-B-10a).

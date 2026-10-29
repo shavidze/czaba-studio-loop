@@ -1,0 +1,19 @@
+577a578
+>   const gridMenuPressFocusRef = useRef<HTMLElement | null>(null);
+1620a1622,1623
+>     const pressFocus = gridMenuPressFocusRef.current;
+>     gridMenuPressFocusRef.current = null;
+1625,1626c1628,1632
+<       const focused = event.currentTarget.ownerDocument.activeElement;
+<       gridMenuReturnFocusRef.current = focused instanceof HTMLElement ? focused : null;
+---
+>       const ownerDocument = event.currentTarget.ownerDocument;
+>       const active = ownerDocument.activeElement;
+>       const focused =
+>         active instanceof HTMLElement && active !== ownerDocument.body ? active : pressFocus;
+>       gridMenuReturnFocusRef.current = focused;
+1872a1879,1882
+>       if (event.button === 2) {
+>         const active = event.currentTarget.ownerDocument.activeElement;
+>         gridMenuPressFocusRef.current = active instanceof HTMLElement ? active : null;
+>       }

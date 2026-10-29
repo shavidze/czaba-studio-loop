@@ -1,0 +1,77 @@
+284a285,295
+> function rightPressThenBlur(target: HTMLElement, focused: HTMLElement) {
+>   fireEvent.pointerDown(target, {
+>     button: 2,
+>     buttons: 2,
+>     pointerId: 36,
+>     clientX: 300,
+>     clientY: 200,
+>   });
+>   act(() => focused.blur());
+> }
+> 
+970a982,1045
+>   });
+> 
+>   it('GM36 C-R241-01 a right press that blurs to body still returns focus on Escape', async () => {
+>     const { view, laneBody } = await mountMenuWorkspace();
+>     const snapButton = view.getByTestId('arrangement-snap-toggle');
+>     act(() => snapButton.focus());
+>     rightPressThenBlur(laneBody('music'), snapButton);
+>     expect(document.activeElement).toBe(document.body);
+>     fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
+>     expect(openMenu(view).contains(focusedElement())).toBe(true);
+>     pressFocused('Escape');
+>     expect(gridMenu(view)).toBeNull();
+>     expect(document.activeElement).toBe(snapButton);
+>   });
+> 
+>   it('GM37 C-R241-01 a right press that blurs to body returns focus after a width or a division', async () => {
+>     const { view, laneBody } = await mountMenuWorkspace();
+>     const snapButton = view.getByTestId('arrangement-snap-toggle');
+>     act(() => snapButton.focus());
+>     rightPressThenBlur(laneBody('music'), snapButton);
+>     fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
+>     fireEvent.click(menuItem(view, 'Narrow'));
+>     expect(gridMenu(view)).toBeNull();
+>     expect(gridControl(view).dataset.gridMode).toBe('adaptive');
+>     expect(document.activeElement).toBe(snapButton);
+>     rightPressThenBlur(laneBody('sfx'), snapButton);
+>     fireEvent.contextMenu(laneBody('sfx'), { button: 2, clientX: 300, clientY: 250 });
+>     fireEvent.click(menuItem(view, '0.5 s'));
+>     expect(gridMenu(view)).toBeNull();
+>     expect(gridControl(view).dataset.gridSeconds).toBe('0.5');
+>     expect(document.activeElement).toBe(snapButton);
+>   });
+> 
+>   it('GM38 C-R241-01 the element focused at the context menu wins over the press-time element', async () => {
+>     const { view, laneBody } = await mountMenuWorkspace();
+>     const snapButton = view.getByTestId('arrangement-snap-toggle');
+>     const play = view.getByRole('button', { name: 'Play' });
+>     act(() => snapButton.focus());
+>     fireEvent.pointerDown(laneBody('music'), {
+>       button: 2,
+>       buttons: 2,
+>       pointerId: 38,
+>       clientX: 300,
+>       clientY: 200,
+>     });
+>     act(() => play.focus());
+>     fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
+>     pressFocused('Escape');
+>     expect(gridMenu(view)).toBeNull();
+>     expect(document.activeElement).toBe(play);
+>   });
+> 
+>   it('GM39 C-R241-01 a right press on a clip body that blurs to body returns focus on Escape', async () => {
+>     const { view, clipParts } = await mountMenuWorkspace();
+>     const snapButton = view.getByTestId('arrangement-snap-toggle');
+>     act(() => snapButton.focus());
+>     const clipRoot = clipParts('m1').root;
+>     rightPressThenBlur(clipRoot, snapButton);
+>     expect(document.activeElement).toBe(document.body);
+>     fireEvent.contextMenu(clipRoot, { button: 2, clientX: 320, clientY: MUSIC_LANE_Y });
+>     expect(openMenu(view).contains(focusedElement())).toBe(true);
+>     pressFocused('Escape');
+>     expect(gridMenu(view)).toBeNull();
+>     expect(document.activeElement).toBe(snapButton);

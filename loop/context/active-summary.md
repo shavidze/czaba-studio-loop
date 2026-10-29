@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-29T04:49:26.534Z)
+# Active loop summary (2026-10-29T05:51:38.793Z)
 
-- backlog.json 2236 KB -> active view 326 KB
-- status: G_ROOT_GATE round 241
-- servers: `{"checkedUtc":"2026-10-29T04:33:26.6057380Z","round":241,"attempt":1,"store":200}`
-- last publication: 04c2a5b4517c70fa2a040fd845c6f257fab24d33 (rounds 240-240)
-- last root gate: round 241 skipped - C taskStatus FAIL
+- backlog.json 2247 KB -> active view 356 KB
+- status: G_ROOT_GATE round 242
+- servers: `{"checkedUtc":"2026-10-29T05:31:56.9718946Z","round":242,"attempt":1,"store":200}`
+- last publication: 7e5b23ce4636320d4a4a5087d2bf7565075f49f4 (rounds 241-242)
+- last root gate: round 242 published - commit 7e5b23ce4636320d4a4a5087d2bf7565075f49f4 pushed
 
-## Current items: SRW-21
+## Current items: SRW-14, SRW-21
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -581,22 +581,25 @@
 - SABA-Q-11B-READOUT / info / awaiting_user (D-29z358): non-blocking; round 239 ships without a new readout / Live 12 shows the grid spacing readout above the time ruler, lower-right corner (manual 6.10; GRGG 0:00); CZABA keeps the pick in the existi
 - SABA-Q-11B-DENSITY / info / awaiting_user (D-29z358): non-blocking; one constant (GRID_ADAPTIVE_MIN_SPACING_PX) if Saba wants denser or sparser lines / adaptive grid density: Live 12 does not publish its spacing threshold; CZABA uses lines >= 24 px apart (WCAG 2.5.8 minimum target; keeps 1 s
 - SABA-Q-11B-PLAIN-DIGITS / info / awaiting_user (D-29z358): non-blocking / Live 12 uses Ctrl/Cmd+1..5 for the grid; CZABA uses plain 1/2/3/5 (and 4 in stage 2) because Ctrl+digit switches Chrome tabs (D-29z24). The 
-- GATE239-S4 / low / open -> round 241 SABA-B-11b stage 2a (D-29z369): closes on C-MENU-CHECK-241 + C-S4-AX-241 (menu groups with one checked menuitemradio; the select title exposed as accessible description, CDP-read by B at both viewports) / adaptive/fixed mode is exposed only in the select title (hover) and the transient status; not programmatically reliable for screen readers
+- GATE239-S4 / low / open -> round 241 SABA-B-11b stage 2a (D-29z369): closes on C-MENU-CHECK-241 + C-S4-AX-241 (menu groups with one checked menuitemradio; the select title exposed as accessible description, CDP-read by B at both viewports) | met in C round 241 (C-MENU-CHECK-241 + C-S4-AX-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375) / adaptive/fixed mode is exposed only in the select title (hover) and the transient status; not programmatically reliable for screen readers
 - SABA-Q-11B-DENSITY-MODEL / info / awaiting_user (D-29z361): non-blocking / adaptive density at a clamped family end: CZABA re-anchors the stored density to the visible grid so every 1/2 press visibly moves one step;
 - INFO-C239-ZOOM-DURING-DRAG / info / info, no action / - during a clip drag does not zoom (zoom blocked during gestures, gate reviewer confirms l.1758/1790); Ctrl+wheel during a drag not tried
 - INFO-C239-STATUS-STALE-AFTER-ZOOM / info / info, linked to SABA-Q-11B-READOUT / after 5 -> 'Adaptive grid — follows zoom, now 0.5 s (5)', a later zoom changes the pick but the status keeps 'now 0.5 s' (silent zoom by des
 - A-R239-5B-DENSITY-TEMPO-CLEAR / info / intended (D-29z365): density is a family-independent view preference; mirror case now GAU15 / the adaptive density carries over to the seconds family when the tempo is cleared
-- C-R240-01 / low / open -> round 241 grant 14 (l.128 -> GAU1-GAU23; doc granted anyway, L7; D-29z371) / doc 186 '## შეცვლილი ფაილები' l.128 lists grid-adaptive-ui.test.tsx as GAU1-GAU13 while the file and '## ტესტირება' have GAU1-GAU17
-- GATE240-S2 / low / open -> round 241 grant 6 (named const ZOOM_TEN_STEPS_OUT_FROM_320; file granted anyway; D-29z371) / magic number 34.359738368 in GAU14 (grid-adaptive-ui.test.tsx)
+- C-R240-01 / low / open -> round 241 grant 14 (l.128 -> GAU1-GAU23; doc granted anyway, L7; D-29z371) | met in C round 241 (AN-REVIEW-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375) / doc 186 '## შეცვლილი ფაილები' l.128 lists grid-adaptive-ui.test.tsx as GAU1-GAU13 while the file and '## ტესტირება' have GAU1-GAU17
+- GATE240-S2 / low / open -> round 241 grant 6 (named const ZOOM_TEN_STEPS_OUT_FROM_320; file granted anyway; D-29z371) | met in C round 241 (C-SCOPE-241 + C-UNIT-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375) / magic number 34.359738368 in GAU14 (grid-adaptive-ui.test.tsx)
 - SABA-Q-11B-MENU-OFF / info / awaiting_user (D-29z372): non-blocking; round 241 ships without an Off item / Live's grid context menu has an 'Off' choice (Cotec, Live 10; position unconfirmed); CZABA's grid menu has no 'Off' item because Snap off (G
 - SABA-Q-11B-MAC-BYPASS / info / awaiting_user (D-29z372): non-blocking; no code change / Live bypasses snap with Alt (Win) / Cmd (Mac) (manual 6.10); CZABA uses Alt / Option on both platforms because Cmd+click / Cmd+drag mean oth
+- C-R241-01 / medium / open -> round 242 SABA-B-11b-FIX-2 (D-29z376): capture at the lane right press, fallback only when active = BODY; B scratch fix returns focus to the Snap toggle in all 6 cases (b-round-241/shots/focus-scratch.json) / focus is lost to BODY after a mouse-opened grid menu closes (Escape, a division or a width): the right-button mousedown blurs the focused co
+- A-R241-REVIEW-R6 / trivial / open -> round 242 grant 3 (doc granted anyway for l.4; D-29z377) / doc 186 stale stage-1 text: l.1 title 'ეტაპი 1', R6/R8 rows 'ეტაპი 2', stage-1 covering line '(39 ფაილი)' without a stage label
+- A-R241-REVIEW-R5 / low / open -> round 242 GM37 (width + division after a real press-then-blur; D-29z376) / no unit row for focus return after a width choice
+- A-R241-REVIEW-R2 / info / info, recorded only (valid ARIA 1.2; C-S4-AX-241 PASS); revisit if Saba or an a11y audit asks (D-29z379) / fieldset groups make screen readers count per group ('1 s, 4 of 7'); the single cross-group check is not conveyed as one set
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
 - SRW-09 [c_pass_tech_lead_manual] Clipboard: Copy, Cut keeping gap (Ctrl+X), Cut Time closing gap on all lanes (Ctrl+Shift+X), Paste at insert marker
 - SRW-11B [c_pass_tech_lead_manual (C-R8-01 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; accepted Lows C-R11-04 / C-R15-01 do not hold it back; D-29z78)] Panels remainder: detail panel collapse/resize, track height/fold, floating expanded video; FB-08 placement review
 - SRW-13 [c_pass_tech_lead_manual (round 113 C PASS browserVerified=true, published c2837f1: A-R38-REVIEW-TOUCH done for Chromium; C-R27-01 closed round 112; open Low C-R41-01 (Tech Lead viewport question) does not hold it back; Tech Lead R38-T real touch device)] Clip gain (separate from track volume), track pan, master volume + master mute, per-track and master level meters with clip indicator
-- SRW-14 [c_pass_tech_lead_manual (stages 1-5 C PASS with browser evidence; stage 5b C PASS round 69 browserVerified true, published ae4fc39; Tech Lead R67-T/R68-T/R69-T open)] Grid divisions (bar, 1/2, 1/4, 1/8, 1/16, 1/32) + free; Snap on/off; applies to move/trim/range/playhead/paste; snap to clip edges
 - SRW-15 [c_pass_tech_lead_manual (R15-T1 round 65 + R15-T2 round 66, C PASS browserVerified, published b5fb12b; ROOT-R65-M1 perf closed round 70, 2be45df; ROOT-R66-M1 perf closed round 71 C PASS browserVerified, 1e469e5; Tech Lead R65-T/R66-T/R70-T/R71-T open)] Bars/Beats ruler alongside seconds, project BPM (grid only, no time-stretch), metronome click during playback (not exported)
 - SRW-16 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 6b574e8, 2a e347b97, 2b-1 db9cc25, 2b-2 60006d4, 2b-3 c062147; Tech Lead R72-T/R74-T/R77-T/R78-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Named markers/locators: add at insert marker, rename, jump/play from, delete, keyboard prev/next
 - SRW-17 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: stage 1 74eca15, stage 2 68383fa, stage 3 efbed86; Tech Lead R79-T/R81-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud)] Track groups and nested subgroups (Ctrl+G), rename, collapse, group mute/solo/volume summing children

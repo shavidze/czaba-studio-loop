@@ -1,9 +1,9 @@
 {
- "version": 223,
- "updated": "2026-10-29 (B round 241 -> 242 planning, D-29z375..D-29z381)",
+ "version": 224,
+ "updated": "2026-10-29 (B round 242 -> 243 planning, D-29z382..D-29z388)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 242, D-29z375..D-29z381; SABA-B-11b-FIX-2: C-R241-01 Medium focus return after a mouse-opened grid menu (right-button mousedown blurs before contextmenu; capture the focused element at the lane right press, fallback only when the active element is BODY; GM36-GM39) + doc 186 stale stage-1 text; start = round-241 tree (HEAD 04c2a5b + 14 M, hashes b-round-241-r242-start-sha256.txt); 3 grants; frozen 1101; publishes rounds 241+242 together on C PASS)",
+ "current_task": "current-task.md (round 243, D-29z382..D-29z388; C-R242-01-FIX: focus returns to an edit control (fader, BPM field, loop brace, marker flag) that the capture-phase edit-focus release blurred on a right press, after the grid menu closes; the single press-focus capture moves to the first line of releaseEditFocusOnTimelinePointerDown and the lane copy is removed; FR3 rewritten to the D-29z382 contract; GM40-GM43; start = clean HEAD 7e5b23c; 3 grants; frozen 1102)",
  "advisor_used_by_B": "2026-10-29 round 240 -> 241 planning: advisor available and consulted twice (after orientation; after the pre-check, before writing). Advice followed: split stage 2 into 2a/2b; one check mark per mode with a D-ID; L49 table for the menu handler; 4 as a silent alias; S4 ruling via title-as-description with a CDP row; checkedIndex fallback fixed before freezing the diff; SABA-Q for Mac bypass; ABL-R-8 closes at 2b; menu-height row; Lows folded/deferred. | 2026-10-29 round 239 -> 240 planning: advisor available and consulted twice (after orientation; before declaring done). Advice followed: the density simulation decides GATE239-S1 (ruling, not a no-op fix; extended to musical families), GATE239-S2 tightly scoped (no triplet flag, 5 unchanged), round 240 = fix round, code-reviewer required for 3 files, C re-runs eq.mjs/eq2.mjs, split case counts, L28 tie. | previous: 2026-10-29 round 238 -> 239 planning: advisor available and consulted after orientation, before writing. Advice followed: triage gate-238 S1-S3 with explicit severity before choosing the round; close round-238 ids from C PASS + gate commit; checkpoint addendum 4; adaptive chooser as a pure function in grid-divisions.ts with no new effect; silent zoom; real L23 pre-check on scratch (it changed the threshold from 20 px to 24 px); split 11b into 2 stages; Saba questions for readout position and density. Second advisor call before declaring done.",
  "baseline": {
   "tsc_errors": 0,
@@ -10586,20 +10586,30 @@
    "round": 241,
    "task": "current-task.md",
    "decision": "D-29z367..D-29z374",
-   "status": "c_fail_not_published",
+   "status": "c_pass_published",
    "type": "feature stage: SABA-B-11b stage 2a (grid menu Adaptive grid / Fixed grid groups, one check mark = mode, plain 4 = Snap alias of G, GATE239-S4 ruling)",
    "note": "start HEAD 04c2a5b clean; grants b-round-240-r241-grants.txt (14: ArrangementGridMenu.tsx, StudioWorkspace.tsx, grid-divisions.ts, strings.ts, shortcuts.ts, grid-adaptive-ui.test.tsx, 6 frozen tests expected values / query scope only, strings.test.ts additions, doc 186); frozen 1090 (b-round-240-r241-tree-sha256.txt); L23 pre-check b-round-240/precheck-scratch.diff (822 lines; first run 14 red rows in 8 files, all granted; final covering 49 files 780/780; tsc rc 0; biome clean; 5 mutants red: MU-MENU-FLAG-MISSING GAU21, MU-MENU-MODE-MISSING GAU20, MU-MENU-DENSITY-MISSING GAU19-21, MU-CHECK-PICK-IN-ADAPTIVE GAU18-20, MU-4-REPEAT GAU22); L29 recipes b-round-240/probe-241.cjs (HEAD + scratch :5174, both viewports, 0 page errors; BPM menu 641 px fits 1280x720 with 79 px spare)",
    "added": "2026-10-29 B round 240 -> 241 planning",
-   "result": "C FAIL (c-round-241.json): 13 rows PASS incl. every stage-2a feature row, browserVerified true, realVerified true; failed only the focus clause of C-MENU-CHOOSE-241 (a) and C-MENU-REG-241 Escape = C-R241-01 (Medium, pre-existing since SRW-14, identical at HEAD 04c2a5b); purchased origin BLOCKED (backend unavailable in cloud); gate 241 skipped (C taskStatus FAIL), HEAD stays 04c2a5b; tree kept as the round-242 start (D-29z375)"
+   "result": "C FAIL (c-round-241.json): 13 rows PASS incl. every stage-2a feature row, browserVerified true, realVerified true; failed only the focus clause of C-MENU-CHOOSE-241 (a) and C-MENU-REG-241 Escape = C-R241-01 (Medium, pre-existing since SRW-14, identical at HEAD 04c2a5b); purchased origin BLOCKED (backend unavailable in cloud); gate 241 skipped (C taskStatus FAIL), HEAD stays 04c2a5b; tree kept as the round-242 start (D-29z375) | published together with round 242 as 7e5b23c (gate 242 published; D-29z383)"
   },
   {
    "round": 242,
    "task": "current-task.md",
    "decision": "D-29z375..D-29z381",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "type": "fix-up round: SABA-B-11b-FIX-2 (C-R241-01 Medium + doc 186 stale stage-1 text)",
    "note": "start = round-241 tree: HEAD 04c2a5b + exactly 14 M (b-round-241/git-status-at-planning.txt, b-round-241-r242-start-sha256.txt); grants b-round-241-r242-grants.txt (3: StudioWorkspace.tsx 3 hunks, grid-snap-menu.test.tsx append GM36-GM39 + rightPressThenBlur, doc 186); frozen 1101 (b-round-241-r242-tree-sha256.txt, the 11 non-regranted round-241 paths at their round-241 hashes); L23 pre-check b-round-241/precheck-scratch.diff (136 lines; covering 49 files 783/783 + 12 lane-press files 293/293, tsc rc 0, biome clean; BASE-241-CODE GM36+GM37 red; MU-NO-PRESS-CAPTURE GM36+GM37+GM39 red; MU-PRESS-WINS GM38 red); L29 recipe b-round-241/focus-probe-242.cjs (round-241 tree BODY in 3 cases x 2 viewports; scratch Snap toggle in all 6, Escape focus-visible true)",
-   "added": "2026-10-29 B round 241 -> 242 planning"
+   "added": "2026-10-29 B round 241 -> 242 planning",
+   "result": "C PASS (c-round-242.json): taskStatus PASS, browserVerified true, realVerified true; 11 rows passed (C-SCOPE/UNIT/MUT/FOCUS/FOCUS-CLIP/MENU-REG/2A-SPOT/BUDGET/AN-REVIEW/LAB-SMOKE/Auth); purchased origin BLOCKED (backend unavailable in cloud); new bug C-R242-01 (Medium, pre-existing, outside grants); gate 242 published 7e5b23c (rounds 241+242)"
+  },
+  {
+   "round": 243,
+   "task": "current-task.md",
+   "decision": "D-29z382..D-29z388",
+   "status": "dispatched",
+   "type": "bug-fix round: C-R242-01-FIX (Medium; merges A-R242-REVIEW-M1)",
+   "note": "start = clean HEAD 7e5b23c (b-round-242/head-at-planning.txt, empty status); grants b-round-242-r243-grants.txt (StudioWorkspace.tsx 2 hunks, grid-snap-menu.test.tsx FR3 rewrite + GM40-GM43, new doc 187); frozen 1102 (b-round-242-r243-tree-sha256.txt); L23 pre-check b-round-242/precheck-scratch.diff (127 lines; covering 67 files 1153/1153, tsc rc 0, biome clean; MU-LANE-CAPTURE-ONLY GM40-43+FR3 red; MU-NO-SCROLLER-CAPTURE GM36/37/39/40-43+FR3 red; MU-PRESS-WINS GM38 red); L29/L47 recipe b-round-242/focus-probe-243.cjs (HEAD BODY for fader, BPM field, brace, marker flag, marker editor at both viewports; scratch returns focus to the first four; the marker editor stays BODY = B-R242-MARKER-EDITOR-MENU-FOCUS)",
+   "added": "2026-10-29 B round 242 -> 243 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -12839,7 +12849,7 @@
   },
   {
    "id": "SABA-B-9-10-11-TRANSPORT-GRID",
-   "status": "in_progress (D-29z368): SABA-B-11b stage 1 + FIX-1 done (rounds 239-240, published 04c2a5b); round 241 = SABA-B-11b stage 2a; stage 2b next (unless the regression round is due) | in_progress (D-29z356): SABA-B-11a and its fixes done (rounds 234-238; 237+238 published 15a0b41); round 239 = SABA-B-11b stage 1 | in_progress (D-29z339): SABA-B-11a done; round 236 SABA-B-11a-FIX-1 C PASS + published ecaf0e4; round 237 SABA-B-11a-FIX-2 dispatched; then SABA-B-11b (round 238 unless the regression is due) | in_progress (D-29z333): SABA-B-11a done (stage 1 round 234 c95b8a8, stage 2 round 235 49b4c74, both C PASS browserVerified); round 236 SABA-B-11a-FIX-1, round 237 SABA-B-11a-FIX-2, then SABA-B-11b | in_progress (D-29z328): SABA-B-11a stage 1 C PASS + published c95b8a8 (round 234); stage 2 dispatched round 235 | in_progress (D-29z324): SABA-B-11a stage 1 dispatched round 234 (moved ahead of SABA-B-7 while SABA-B-7 is awaiting_user) | not_started: approved by Saba 2026-10-28 (policy section 'SABA-B-9/10/11'); after SABA-B-8 CALM-3 and SABA-B-7, before the next PERF task; recorded at round-233 planning (B-R232-SABA-B-9-11-UNRECORDED, D-29z319)",
+   "status": "in_progress (D-29z383): SABA-B-11b stage 1 + 2a done (published 04c2a5b, 7e5b23c); round 243 = C-R242-01-FIX; then B-R242-MARKER-EDITOR-MENU-FOCUS and stage 2b (regression first if due) | in_progress (D-29z368): SABA-B-11b stage 1 + FIX-1 done (rounds 239-240, published 04c2a5b); round 241 = SABA-B-11b stage 2a; stage 2b next (unless the regression round is due) | in_progress (D-29z356): SABA-B-11a and its fixes done (rounds 234-238; 237+238 published 15a0b41); round 239 = SABA-B-11b stage 1 | in_progress (D-29z339): SABA-B-11a done; round 236 SABA-B-11a-FIX-1 C PASS + published ecaf0e4; round 237 SABA-B-11a-FIX-2 dispatched; then SABA-B-11b (round 238 unless the regression is due) | in_progress (D-29z333): SABA-B-11a done (stage 1 round 234 c95b8a8, stage 2 round 235 49b4c74, both C PASS browserVerified); round 236 SABA-B-11a-FIX-1, round 237 SABA-B-11a-FIX-2, then SABA-B-11b | in_progress (D-29z328): SABA-B-11a stage 1 C PASS + published c95b8a8 (round 234); stage 2 dispatched round 235 | in_progress (D-29z324): SABA-B-11a stage 1 dispatched round 234 (moved ahead of SABA-B-7 while SABA-B-7 is awaiting_user) | not_started: approved by Saba 2026-10-28 (policy section 'SABA-B-9/10/11'); after SABA-B-8 CALM-3 and SABA-B-7, before the next PERF task; recorded at round-233 planning (B-R232-SABA-B-9-11-UNRECORDED, D-29z319)",
    "severity": "medium",
    "requested": "Saba 2026-10-28 (approved): transport in the centre with Stop and master bottom-right (SABA-B-9), a separate Insert Marker and playhead (SABA-B-10), a musical grid with tempo from the product BPM, seconds when no BPM (SABA-B-11)",
    "source": "loop policy section 'SABA-B-9/10/11: transport, Insert Marker and a musical grid'; docs/technical/studio-real-workspace/transport-grid-review.md (read 2d4a93f; B re-checks every file:line before each dispatch); reference/youtube/SABA-B-9-10-11-transcripts.md",
@@ -12880,7 +12890,7 @@
      "order": 2,
      "scope": "zoom-adaptive grid as in Live 6.10; closes ABL-R-8; Live keys Ctrl/Cmd+1..5 as reference; map G and 1/2/3 or list each difference as a deviation",
      "rounds": "~1.5",
-     "status": "in_progress (D-29z375): stage 1 done (rounds 239-240, published d0afa64 + 04c2a5b); stage 2a feature rows met in C round 241 (13 PASS, browserVerified true) but round 241 FAILED on pre-existing C-R241-01 and is not published; round 242 = SABA-B-11b-FIX-2 (C-R241-01); 2a counts done only when rounds 241+242 pass C and are published; then stage 2b, preceded by REGRESSION if that planning is on/after 2026-10-30",
+     "status": "in_progress (D-29z383): stage 1 done (rounds 239-240, published d0afa64 + 04c2a5b); stage 2a done (rounds 241+242 C PASS, round 242 browserVerified true, published 7e5b23c); stage 2b next after C-R242-01-FIX (round 243), B-R242-MARKER-EDITOR-MENU-FOCUS, and the REGRESSION round if that planning is on/after 2026-10-30 | in_progress (D-29z375): stage 1 done (rounds 239-240, published d0afa64 + 04c2a5b); stage 2a feature rows met in C round 241 (13 PASS, browserVerified true) but round 241 FAILED on pre-existing C-R241-01 and is not published; round 242 = SABA-B-11b-FIX-2 (C-R241-01); 2a counts done only when rounds 241+242 pass C and are published; then stage 2b, preceded by REGRESSION if that planning is on/after 2026-10-30",
      "stage_plan": [
       "stage 1 (round 239): pure adaptive chooser in grid-divisions.ts (24 px rule, both families, 5 density levels); adaptive default; key 5 Adaptive/Fixed (window + focused select); 1/2 = density in adaptive mode; choosing a division = fixed; zoom silent; data-grid-mode; select title suffix; sheet row grid-mode",
       "stage 1 fix (round 240, SABA-B-11b-FIX-1): GATE239-S2 hand choice for adaptive 1/2, density model ruled (D-29z361) - C PASS, published 04c2a5b",
@@ -25177,7 +25187,7 @@
    "severity": "low",
    "origin": "gate 239 reviewer (#4)",
    "title": "adaptive/fixed mode is exposed only in the select title (hover) and the transient status; not programmatically reliable for screen readers",
-   "status": "open -> round 241 SABA-B-11b stage 2a (D-29z369): closes on C-MENU-CHECK-241 + C-S4-AX-241 (menu groups with one checked menuitemradio; the select title exposed as accessible description, CDP-read by B at both viewports) | met in C round 241 (C-MENU-CHECK-241 + C-S4-AX-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375)",
+   "status": "closed (D-29z383): met in C round 241, published with rounds 241+242 as 7e5b23c | open -> round 241 SABA-B-11b stage 2a (D-29z369): closes on C-MENU-CHECK-241 + C-S4-AX-241 (menu groups with one checked menuitemradio; the select title exposed as accessible description, CDP-read by B at both viewports) | met in C round 241 (C-MENU-CHECK-241 + C-S4-AX-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375)",
    "added": "2026-10-29 B round 239 -> 240 planning"
   },
   {
@@ -25226,7 +25236,7 @@
    "origin": "C round 240 (AN-REVIEW-240)",
    "title": "doc 186 '## შეცვლილი ფაილები' l.128 lists grid-adaptive-ui.test.tsx as GAU1-GAU13 while the file and '## ტესტირება' have GAU1-GAU17",
    "evidence": "c-round-240.md AN-REVIEW-240; grep -n 'GAU1–GAU13' doc 186 -> l.128",
-   "status": "open -> round 241 grant 14 (l.128 -> GAU1-GAU23; doc granted anyway, L7; D-29z371) | met in C round 241 (AN-REVIEW-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375)",
+   "status": "closed (D-29z383): met in C round 241 (AN-REVIEW-241), published 7e5b23c | open -> round 241 grant 14 (l.128 -> GAU1-GAU23; doc granted anyway, L7; D-29z371) | met in C round 241 (AN-REVIEW-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375)",
    "added": "2026-10-29 B round 240 -> 241 planning"
   },
   {
@@ -25234,7 +25244,7 @@
    "severity": "low",
    "origin": "gate 240 reviewer (gates/round-240/review.md suggestion 2)",
    "title": "magic number 34.359738368 in GAU14 (grid-adaptive-ui.test.tsx)",
-   "status": "open -> round 241 grant 6 (named const ZOOM_TEN_STEPS_OUT_FROM_320; file granted anyway; D-29z371) | met in C round 241 (C-SCOPE-241 + C-UNIT-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375)",
+   "status": "closed (D-29z383): met in C round 241, published 7e5b23c | open -> round 241 grant 6 (named const ZOOM_TEN_STEPS_OUT_FROM_320; file granted anyway; D-29z371) | met in C round 241 (C-SCOPE-241 + C-UNIT-241 PASS, browserVerified true); closes when rounds 241+242 publish (D-29z375)",
    "added": "2026-10-29 B round 240 -> 241 planning"
   },
   {
@@ -25260,7 +25270,7 @@
    "title": "focus is lost to BODY after a mouse-opened grid menu closes (Escape, a division or a width): the right-button mousedown blurs the focused control before contextmenu, so handleGridMenuRequest stores BODY and closeGridMenu skips the restore",
    "evidence": "c-round-241/out/focus-work.json, focus-head.json, focus-work-cause.json; B reproduced on the round-241 tree: b-round-241/shots/focus-base.json",
    "repro": "Tab to the Snap toggle (30 Tabs), right-click an empty lane point, then Escape / click 0.5 s / click Narrow -> document.activeElement BODY at 1440x900 and 1280x720",
-   "status": "open -> round 242 SABA-B-11b-FIX-2 (D-29z376): capture at the lane right press, fallback only when active = BODY; B scratch fix returns focus to the Snap toggle in all 6 cases (b-round-241/shots/focus-scratch.json)",
+   "status": "closed (D-29z383): C round 242 C-FOCUS-242 + C-FOCUS-CLIP-242 PASS browserVerified true; published 7e5b23c | open -> round 242 SABA-B-11b-FIX-2 (D-29z376): capture at the lane right press, fallback only when active = BODY; B scratch fix returns focus to the Snap toggle in all 6 cases (b-round-241/shots/focus-scratch.json)",
    "why_missed": "GM11/GM18 (SRW-14) fire contextMenu without the real right pointerdown + mousedown blur; round-241 B recipes measured the menu, not the focus return in a browser; lesson L47 amended (D-29z380)",
    "added": "2026-10-29 B round 241 -> 242 planning"
   },
@@ -25269,7 +25279,7 @@
    "severity": "trivial",
    "origin": "A round 241 code-reviewer R6 + C round 241 note 4",
    "title": "doc 186 stale stage-1 text: l.1 title 'ეტაპი 1', R6/R8 rows 'ეტაპი 2', stage-1 covering line '(39 ფაილი)' without a stage label",
-   "status": "open -> round 242 grant 3 (doc granted anyway for l.4; D-29z377)",
+   "status": "closed (D-29z383): AN-REVIEW-242 PASS, published 7e5b23c | open -> round 242 grant 3 (doc granted anyway for l.4; D-29z377)",
    "added": "2026-10-29 B round 241 -> 242 planning"
   },
   {
@@ -25277,7 +25287,7 @@
    "severity": "low",
    "origin": "A round 241 code-reviewer R5",
    "title": "no unit row for focus return after a width choice",
-   "status": "open -> round 242 GM37 (width + division after a real press-then-blur; D-29z376)",
+   "status": "closed (D-29z383): GM37 C-UNIT-242 PASS, published 7e5b23c | open -> round 242 GM37 (width + division after a real press-then-blur; D-29z376)",
    "added": "2026-10-29 B round 241 -> 242 planning"
   },
   {
@@ -25287,6 +25297,35 @@
    "title": "fieldset groups make screen readers count per group ('1 s, 4 of 7'); the single cross-group check is not conveyed as one set",
    "status": "info, recorded only (valid ARIA 1.2; C-S4-AX-241 PASS); revisit if Saba or an a11y audit asks (D-29z379)",
    "added": "2026-10-29 B round 241 -> 242 planning"
+  },
+  {
+   "id": "C-R242-01",
+   "severity": "medium",
+   "origin": "C round 242 (faderInfo rows, browser) + A round 242 code-reviewer A-R242-REVIEW-M1 (source) - merged",
+   "title": "after a right-click grid menu closes, focus is lost to BODY when the origin is an edit control (track Volume fader, BPM field, loop brace, marker flag): releaseEditFocusOnTimelinePointerDown (scroller onPointerDownCapture, any button) blurs it before the lane's bubble handler stores the press-time focus",
+   "evidence": "c-round-242/out/c242.json faderInfo@1440x900, faderInfo@1280x720; B reproduced 4 origins at HEAD 7e5b23c: b-round-242/shots/focus-head.json, focus-head-brace.json",
+   "repro": "Tab to the track Volume fader (19 Tabs after adding demo-stem-pulse), right-click an empty lane point, Escape -> document.activeElement BODY at both viewports",
+   "why_missed": "round 242's L47 recipe probed only the Snap toggle (a button the release ignores); the release path names range, typing, brace and marker classes; L47 amended (D-29z387) to probe one origin per blurred class",
+   "status": "open -> round 243 C-R242-01-FIX (D-29z382 ruling, D-29z384 design); B scratch fix returns focus for all 4 origins at both viewports (b-round-242/shots/focus-scratch*.json)",
+   "added": "2026-10-29 B round 242 -> 243 planning"
+  },
+  {
+   "id": "A-R242-REVIEW-M1",
+   "severity": "medium",
+   "origin": "A round 242 code-reviewer",
+   "title": "releaseEditFocusOnTimelinePointerDown has no button check; right press loses an edit-control origin",
+   "status": "merged into C-R242-01 (D-29z383)",
+   "added": "2026-10-29 B round 242 -> 243 planning"
+  },
+  {
+   "id": "B-R242-MARKER-EDITOR-MENU-FOCUS",
+   "severity": "medium",
+   "origin": "B round-243 planning probe (L47 origin classes)",
+   "title": "with the marker add editor open (M), a right-click on an empty lane commits the marker on the editor's blur (settleEditor('blur'), moveFocus false) and unmounts the input; after the grid menu closes (Escape) focus is BODY because the return target is disconnected",
+   "evidence": "b-round-242/shots/focus-head.json and focus-scratch.json rows markerEditor/escape@1440x900 and @1280x720 (BODY; markers 0 -> 1) at HEAD 7e5b23c and on the round-243 scratch fix",
+   "repro": "fresh /studio-lab, wait for Demo collection ready, press M (focus in arrangement-marker-name-input), right-click an empty lane point, Escape -> document.activeElement BODY",
+   "status": "open (pre-existing; different mechanism from C-R242-01: the origin unmounts; candidate target = the committed marker's flag via ArrangementMarkerRow plumbing; scheduled after round 243 (D-29z385); C records it as info in round 243)",
+   "added": "2026-10-29 B round 242 -> 243 planning"
   }
  ],
  "tech_lead_notes": [
@@ -27251,6 +27290,13 @@
    "signal": "ArrangementGridMenu.tsx repeats the item <button> markup and check span 4x (DXL8 3 -> 4); extract a local GridMenuItem if more items are added; and a shared setAdaptiveDensity(level, source) primitive for toggleGridMode / stepGridDivision / the menu (third gridHandChosenRef writer)",
    "status": "signal, not scheduled (D-29z379); addendum 7 to ARCH-CHECKPOINT-TEMPO-GRID",
    "added": "2026-10-29 B round 241 -> 242 planning"
+  },
+  {
+   "id": "A-R242-ARCH-GRIDMENU-FOCUS-HOOK",
+   "origin": "A round 242 code-reviewer Architecture note",
+   "text": "grid-menu focus/dismiss region patched in rounds 60, 241, 242 (and 243); lane background press handler joined the menu focus lifecycle; verdict keep for now; if touched again extract gridMenuOpenRef/gridMenuReturnFocusRef/gridMenuPressFocusRef/closeGridMenu/handleGridMenuRequest into useGridMenuFocusReturn (GM32-GM43, FR1-FR4 acceptance). Round 243 meets that trigger; recorded as addendum 8 to ARCH-CHECKPOINT-TEMPO-GRID, not scheduled (D-29z386)",
+   "status": "signal",
+   "added": "2026-10-29 B round 242 -> 243 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -31740,7 +31786,8 @@
     "SABA-B-11b stage 1 (round 239, d0afa64): mount adaptive 1 s; = x4 -> 0.25 s with painted period >= 24 px; 5 -> 'Fixed grid — <label> at every zoom (5)'; 1 at load zoom -> 'Grid: 0.5 s (Snap off)'; zoom writes no status (C-ADAPT-SEC/MODE/DENSITY/SILENT-239)",
     "SABA-B-11b-FIX-1 (round 240, if done): 1 then the demo-synth-mix seed keeps adaptive 0.5 with 'Snap on — grid 0.5 s (G)' (C-HAND-240)",
     "SABA-B-11b stage 2a (round 241, if done): C-MENU-CHECK (one checked radio: Medium at mount, the division after 5), one menu width choice (Narrow -> 'Adaptive grid — Narrow, now 0.5 s'), 4 toggles Snap with the G texts, C-S4-AX description, BPM menu inside 1280x720",
-    "SABA-B-11b stage 2a + FIX-2 (rounds 241-242, if published): menu groups 'Adaptive grid'/'Fixed grid' with one checked item (Medium at mount); plain 4 toggles Snap with '(G)' statuses; Tab to the Snap toggle, right-click an empty lane point, Escape -> document.activeElement = Snap toggle with a visible ring (C-FOCUS-242), both viewports (added round 242 planning, D-29z381)"
+    "SABA-B-11b stage 2a + FIX-2 (rounds 241-242, if published): menu groups 'Adaptive grid'/'Fixed grid' with one checked item (Medium at mount); plain 4 toggles Snap with '(G)' statuses; Tab to the Snap toggle, right-click an empty lane point, Escape -> document.activeElement = Snap toggle with a visible ring (C-FOCUS-242), both viewports (added round 242 planning, D-29z381)",
+    "C-R242-01-FIX (round 243, if done): C-FOCUS-ORIGINS-243 - fader, BPM field, loop brace and marker flag each get focus back after right-click lane + Escape at both viewports; after the brace returns, ArrowRight moves the loop (D-29z388)"
    ],
    "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
    "scope_note": "REG-DUX5-PLAYHEAD-RESCAN removed: done in round 200 R200-P1 (2026-10-27 B round 200 -> 201 planning (D-29z166))"
@@ -33194,7 +33241,7 @@
   {
    "id": "ARCH-CHECKPOINT-TEMPO-GRID",
    "file": "b-round-234-checkpoint-request.md",
-   "status": "requested from root (D-29z331); trigger met (SABA-B-11a done, round 235 published 49b4c74); addendum GATE235-ARCH-POINTER-UTIL (D-29z337); non-blocking; best before SABA-B-11b | addendum 2 GATE236-ARCH-PLAYFROM-HELPER / GATE236-ARCH-PRESS-TARGET (D-29z343); still unanswered at round-237 planning; requested before SABA-B-11b (round 238) | addendum 3 A-R237-ARCH-STATUS-PARTS (D-29z349); still unanswered at round-238 planning; requested before SABA-B-11b | addendum 4 A-R238-ARCH-STATUS-PREFIX (D-29z355) | addendum 5 GATE239-ARCH-USESTUDIOGRID (D-29z364); still unanswered at round-240 planning; re-ask after SABA-B-11b stage 2 and before SABA-B-10a; non-blocking | addendum 6 (D-29z373): third gridHandChosenRef writer in round 241; still unanswered at round-241 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a | addendum 7 A-R241-ARCH-GRIDMENUITEM (D-29z379); still unanswered at round-242 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a; non-blocking",
+   "status": "requested from root (D-29z331); trigger met (SABA-B-11a done, round 235 published 49b4c74); addendum GATE235-ARCH-POINTER-UTIL (D-29z337); non-blocking; best before SABA-B-11b | addendum 2 GATE236-ARCH-PLAYFROM-HELPER / GATE236-ARCH-PRESS-TARGET (D-29z343); still unanswered at round-237 planning; requested before SABA-B-11b (round 238) | addendum 3 A-R237-ARCH-STATUS-PARTS (D-29z349); still unanswered at round-238 planning; requested before SABA-B-11b | addendum 4 A-R238-ARCH-STATUS-PREFIX (D-29z355) | addendum 5 GATE239-ARCH-USESTUDIOGRID (D-29z364); still unanswered at round-240 planning; re-ask after SABA-B-11b stage 2 and before SABA-B-10a; non-blocking | addendum 6 (D-29z373): third gridHandChosenRef writer in round 241; still unanswered at round-241 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a | addendum 7 A-R241-ARCH-GRIDMENUITEM (D-29z379); still unanswered at round-242 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a; non-blocking | addendum 8 A-R242-ARCH-GRIDMENU-FOCUS-HOOK (D-29z386): the reviewer's own extract trigger is met by round 243; still unanswered at round-243 planning; re-ask after SABA-B-11b stage 2b and before SABA-B-10a; non-blocking",
    "added": "2026-10-28 B round 234 -> 235 planning"
   }
  ],
@@ -34100,6 +34147,41 @@
    "id": "D-29z381",
    "date": "2026-10-29",
    "text": "Order after round 242: if the next planning is on or after 2026-10-30 (regression-last.json 2026-10-27, 3+ days), REGRESSION-ROUND-2026-10-30 runs before SABA-B-11b stage 2b; otherwise stage 2b comes next. Its scope_additions gain the stage-2a + FIX-2 key acceptance (C-FOCUS-242). No architecture checkpoint requested now (no feature boundary; ARCH-CHECKPOINT-TEMPO-GRID re-ask after 2b)."
+  },
+  {
+   "id": "D-29z382",
+   "date": "2026-10-29",
+   "text": "Ruling (supersedes the 'any button' clause of D-29z22-F for the grid-menu path only): a right press on a lane or clip body edits nothing, so keyboard ownership has nothing to follow; the grid menu's focus return (WAI-ARIA, L47) wins and returns focus to the element focused before the press, including edit controls the release blurred. The release itself stays (edits still commit on blur). Left presses (FR1/FR2/FR4) and right presses on paths that open no grid menu (GM14 native menu) keep D-29z22-F. FR3 is rewritten to assert the brace is restored and ArrowRight moves the loop (12.4/14.2) while s1 stays 4.3."
+  },
+  {
+   "id": "D-29z383",
+   "date": "2026-10-29",
+   "text": "Backlog from C evidence: round 242 C PASS (browserVerified true, realVerified true) and gate 242 published 7e5b23c (rounds 241+242): SABA-B-11b stage 2a done; C-R241-01, GATE239-S4, C-R240-01, GATE240-S2, A-R241-REVIEW-R5, A-R241-REVIEW-R6 closed; C-R242-01 opened (Medium) with A-R242-REVIEW-M1 merged."
+  },
+  {
+   "id": "D-29z384",
+   "date": "2026-10-29",
+   "text": "C-R242-01 design: the single right-press capture moves to the first statement of releaseEditFocusOnTimelinePointerDown (scroller capture, before the blur decision) and the lane-bubble capture is removed (one writer). Rejected: skipping the release on button 2 (changes no-menu paths, leaves two writers). Stale value harmless: cleared on every request, used only when active is BODY/non-HTMLElement, overwritten by the next right press, disconnected targets skipped."
+  },
+  {
+   "id": "D-29z385",
+   "date": "2026-10-29",
+   "text": "B-R242-MARKER-EDITOR-MENU-FOCUS filed as a separate Medium (origin unmounts on its own blur; needs ArrangementMarkerRow plumbing, a different mechanism) and not folded into round 243; C records it as info in round 243; scheduled after round 243 (after the regression round if due)."
+  },
+  {
+   "id": "D-29z386",
+   "date": "2026-10-29",
+   "text": "A-R242-ARCH-GRIDMENU-FOCUS-HOOK recorded as architecture signal and addendum 8 to ARCH-CHECKPOINT-TEMPO-GRID; the reviewer's own extract trigger is met by round 243 but the extraction is not scheduled (bug-fix round keeps 2 hunks); re-ask after stage 2b, before SABA-B-10a; non-blocking."
+  },
+  {
+   "id": "D-29z387",
+   "date": "2026-10-29",
+   "text": "lessons.md L47 amended in place (59 lines, nothing dropped): the focus-return recipe probes one origin per class any press handler on the path blurs (button, range, typing, brace, marker). Evidence C-R242-01 (3x)."
+  },
+  {
+   "id": "D-29z388",
+   "date": "2026-10-29",
+   "text": "Order after round 243: regression round first if the next planning is on/after 2026-10-30 (scope_additions gain C-FOCUS-ORIGINS-243), then B-R242-MARKER-EDITOR-MENU-FOCUS, then SABA-B-11b stage 2b; if still 2026-10-29, the marker-editor fix comes first."
   }
  ],
  "retro_candidates": [

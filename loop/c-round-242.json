@@ -1,0 +1,60 @@
+{
+ "round": 242,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T05:31:56.9718946Z",
+  "round": 242,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R242-01",
+   "severity": "medium",
+   "steps": [
+    "Fresh context, /studio-lab at 1440x900 or 1280x720; wait for 'Demo collection ready'; add demo-stem-pulse (Add button).",
+    "Press Tab from BODY until a track-header Volume range input has focus (19 Tabs: 'Volume — Original video sound').",
+    "Right-click an empty lane point (hit-test on [data-track-id] [data-grid-lines]); the grid menu opens.",
+    "Press Escape."
+   ],
+   "expected": "Menu closes and focus returns to the Volume fader that had it (L47: never BODY; WAI-ARIA menu pattern).",
+   "actual": "Menu closes, document.activeElement = BODY at both viewports. Event order: pointerdown[b2] active=INPUT -> focusout INPUT (before mousedown) -> mousedown active=BODY -> contextmenu active=BODY. releaseEditFocusOnTimelinePointerDown (StudioWorkspace.tsx onPointerDownCapture, no event.button check) blurs the range input in the capture phase before the lane's bubble handler stores gridMenuPressFocusRef, so the press capture records BODY. Browser confirmation of A-R242-REVIEW-M1. Pre-existing (that function is frozen and byte-identical to round 241); not caused by round 242; outside this round's grants and acceptance rows. Needs B's ruling (skip the release on a right press vs return focus to the released element).",
+   "evidence": "c-round-242/out/c242.json rows faderInfo@1440x900 and faderInfo@1280x720 (log, final); script c-round-242/c242.cjs ROWS.faderInfo"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-242",
+  "C-UNIT-242",
+  "C-MUT-242",
+  "C-FOCUS-242",
+  "C-FOCUS-CLIP-242",
+  "C-MENU-REG-242",
+  "C-2A-SPOT-242",
+  "C-BUDGET-242",
+  "AN-REVIEW-242",
+  "LAB-SMOKE-242",
+  "Auth"
+ ],
+ "failed": [],
+ "blocked": [
+  "Purchased origin (browser): backend unavailable in cloud; grep 'origin' in the 3 new StudioWorkspace hunks = 0"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notes": [
+  "C-R242-01 is a pre-existing Medium outside the round's grants; taskStatus PASS covers the round-242 acceptance only. Under the 2026-10-23 gate it must be scheduled by B before T12/next stage closure.",
+  "Snap toggle ring after Escape: outline solid 1px color(srgb 0.788 0.643 0.416 / 0.8), offset -2px (inset). After a mouse choice :focus-visible false, outline none (info per §2.2, SABA-B-4).",
+  "The recipe's first empty point is the video lane (arrangement-video-dropzone); an extra music-lane Escape case (escapeMusic) also returns to the Snap toggle.",
+  "Reposition: the second right-click outside the menu closes it (focus restored to Snap), then contextmenu reopens it at the new point (x 1292->692) with return target Snap; final Escape -> Snap toggle.",
+  "Painted ring after Escape: 103 brass px in the 41x24 Snap toggle crop (86 on the 4 px edge band) vs 17 (label only, 0 edge) after a mouse choice; c-round-242/out/ring-pixels.json.",
+  "AN-REVIEW gap: no round-241 snapshot of doc 186, so 'nothing else' cannot be isolated; the 7 listed edits are present."
+ ]
+}

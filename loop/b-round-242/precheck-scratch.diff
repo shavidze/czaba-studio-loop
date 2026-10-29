@@ -1,0 +1,127 @@
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1843,6 +1843,9 @@
+   const releaseEditFocusOnTimelinePointerDown = useCallback(
+     (event: ReactPointerEvent<HTMLDivElement>) => {
+       const focused = event.currentTarget.ownerDocument.activeElement;
++      if (event.button === 2) {
++        gridMenuPressFocusRef.current = focused instanceof HTMLElement ? focused : null;
++      }
+       if (
+         focused instanceof HTMLElement &&
+         (((isRangeInputTarget(focused) || isTypingTarget(focused)) &&
+@@ -1876,10 +1879,6 @@
+ 
+   const handleLaneBackgroundPointerDown = useCallback(
+     (event: ReactPointerEvent<HTMLDivElement>, trackId: string) => {
+-      if (event.button === 2) {
+-        const active = event.currentTarget.ownerDocument.activeElement;
+-        gridMenuPressFocusRef.current = active instanceof HTMLElement ? active : null;
+-      }
+       if (event.button !== 0 || event.target !== event.currentTarget) {
+         return;
+       }
+--- a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+@@ -1044,6 +1044,74 @@
+     expect(gridMenu(view)).toBeNull();
+     expect(document.activeElement).toBe(snapButton);
+   });
++
++  it('GM40 C-R242-01 a track Volume fader released by a right press gets focus back on Escape and after a choice', async () => {
++    const { view, laneBody } = await mountMenuWorkspace();
++    const fader = view.getByRole('slider', { name: 'Volume — მუსიკა' });
++    act(() => fader.focus());
++    rightPressThenBlur(laneBody('music'), fader);
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(fader);
++    rightPressThenBlur(laneBody('sfx'), fader);
++    fireEvent.contextMenu(laneBody('sfx'), { button: 2, clientX: 300, clientY: 250 });
++    fireEvent.click(menuItem(view, '0.5 s'));
++    expect(gridMenu(view)).toBeNull();
++    expect(gridControl(view).dataset.gridSeconds).toBe('0.5');
++    expect(document.activeElement).toBe(fader);
++  });
++
++  it('GM41 C-R242-01 the BPM field released by a right press gets focus back on Escape', async () => {
++    const { view, laneBody } = await mountMenuWorkspace();
++    const tempo = view.getByTestId('arrangement-tempo-input');
++    act(() => tempo.focus());
++    rightPressThenBlur(laneBody('music'), tempo);
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(tempo);
++  });
++
++  it('GM42 C-R242-01 a marker flag released by a right press gets focus back on Escape', async () => {
++    const { api, view, laneBody } = await mountMenuWorkspace();
++    const before = live(api).arrangement;
++    act(() => {
++      live(api).commitArrangement(
++        { ...before, markers: [{ id: 'k1', time: 20, name: 'A' }] },
++        'Add Marker',
++        before,
++      );
++    });
++    const flag = view.getByTestId('arrangement-marker');
++    act(() => flag.focus());
++    expect(document.activeElement).toBe(flag);
++    rightPressThenBlur(laneBody('music'), flag);
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(flag);
++  });
++
++  it('GM43 C-R242-01 a right press on a clip body releases the fader and Escape returns it', async () => {
++    const { view, clipParts } = await mountMenuWorkspace();
++    const fader = view.getByRole('slider', { name: 'Volume — მუსიკა' });
++    act(() => fader.focus());
++    const clipRoot = clipParts('m1').root;
++    rightPressThenBlur(clipRoot, fader);
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(clipRoot, { button: 2, clientX: 320, clientY: MUSIC_LANE_Y });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(fader);
++  });
+ });
+ 
+ describe(
+@@ -1081,7 +1149,7 @@
+       expect(clipOf(api, 's1').start).toBe(4.3);
+     });
+ 
+-    it('FR3 a right-click on the lane releases the brace and the menu does not restore it', async () => {
++    it('FR3 D-29z382 a right-click on the lane releases the brace for the menu and Escape restores it', async () => {
+       const { api, view, laneBody, brace } = await mountMenuWorkspace();
+       act(() => live(api).selectClip('s1'));
+       const element = brace();
+@@ -1089,12 +1157,14 @@
+       expect(focusedElement()).toBe(element);
+       rightClick(laneBody('sfx'), 600, 250);
+       expect(gridMenu(view)).not.toBeNull();
++      expect(element.contains(document.activeElement)).toBe(false);
+       pressFocused('Escape');
+       expect(gridMenu(view)).toBeNull();
+-      expect(element.contains(document.activeElement)).toBe(false);
++      expect(focusedElement()).toBe(element);
+       pressFocused('ArrowRight');
+-      expect(clipOf(api, 's1').start).toBeCloseTo(4.4, 9);
+-      expect(loopOf(api)).toEqual(LOOP_FIXTURE);
++      expect(loopOf(api).start).toBeCloseTo(12.4, 9);
++      expect(loopOf(api).end).toBeCloseTo(14.2, 9);
++      expect(clipOf(api, 's1').start).toBe(4.3);
+     });
+ 
+     it('FR4 a press on the brace start edge keeps the brace focused and moving', async () => {
