@@ -22,3 +22,11 @@
 ## Not in scope
 - B-R243-UNDO-MARKER-FOCUS (Medium). `tech-lead`: a MarkerRow-owned behaviour fix (when the focused flag's id leaves `markers`, focus the neighbouring flag, else the add control). It is scheduled as a normal task and does not wait for this checkpoint.
 - Any change to Undo/Redo atomicity, history entries or the `useArrangement()` shape.
+
+## Addendum (B round 245 → 246 planning, 2026-10-29, D-29z409): question 4
+
+**4. Focus after a history step removes the focused row.** At HEAD `e9fb805`, focus the group name button (`arrangement-group-name`) and press `Ctrl+Z` on `Group Tracks`, or `Ctrl+Shift+Z` on `Ungroup Tracks`. The group row is removed and focus falls to BODY at both viewports. Evidence: `b-round-245/shots/undo-origins-head.json`, rows `groupUndo@*` and `ungroupRedo@*`. This is **B-R245-UNDO-GROUP-FOCUS** (Medium, pre-existing), owner `StudioWorkspace.tsx`. The choice:
+- (a) one rule next to `pendingRowFocusRef` / `focusedTrackRowId` for every history step that removes a focused row; or
+- (b) a per-owner rescue like round 246's marker fix, where `ArrangementMarkerRow.tsx` records the focused flag at its ref detach and focuses the next surviving flag.
+
+The fix is scheduled after the REGRESSION round and before SABA-B-11b stage 2b. It does not wait for this answer (non-blocking). An answer before that round decides between (a) and (b).

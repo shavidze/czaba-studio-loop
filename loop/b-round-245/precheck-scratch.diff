@@ -1,0 +1,204 @@
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 769d2d4..1796a26 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -122,6 +122,20 @@ function orderMarkersForDrag(
+   );
+ }
+ 
++function focusSuccessorAfterRemoval(
++  detached: { readonly markerId: string; readonly order: readonly string[] },
++  markers: readonly ArrangementMarker[],
++): string {
++  const remaining = new Set(markers.map((marker) => marker.id));
++  const index = detached.order.indexOf(detached.markerId);
++  const after = detached.order.slice(index + 1).find((id) => remaining.has(id));
++  const before = detached.order
++    .slice(0, Math.max(index, 0))
++    .reverse()
++    .find((id) => remaining.has(id));
++  return after ?? before ?? MARKER_ADD_FOCUS;
++}
++
+ function markerFlagMenuAnchor(flag: HTMLElement): { x: number; y: number } {
+   const rect = flag.getBoundingClientRect();
+   return { x: rect.left, y: rect.bottom };
+@@ -161,6 +175,10 @@ export const ArrangementMarkerRow = forwardRef<
+     readonly markerId: string;
+   } | null>(null);
+   const pendingFocusRef = useRef<string | null>(null);
++  const detachedFocusRef = useRef<{
++    readonly markerId: string;
++    readonly order: readonly string[];
++  } | null>(null);
+   const dragRef = useRef<MarkerDragGesture | null>(null);
+   const suppressClickRef = useRef<string | null>(null);
+   const [dragOrder, setDragOrder] = useState<readonly string[] | null>(null);
+@@ -187,6 +205,15 @@ export const ArrangementMarkerRow = forwardRef<
+     pendingFocusRef.current = target;
+   }, []);
+ 
++  useIsomorphicLayoutEffect(() => {
++    const detached = detachedFocusRef.current;
++    detachedFocusRef.current = null;
++    if (detached === null || markers.some((marker) => marker.id === detached.markerId)) {
++      return;
++    }
++    focusMarkerTarget(focusSuccessorAfterRemoval(detached, markers));
++  });
++
+   useEffect(() => {
+     const target = pendingFocusRef.current;
+     if (target !== null) {
+@@ -791,6 +818,13 @@ export const ArrangementMarkerRow = forwardRef<
+                 if (node) {
+                   flagRefs.current.set(marker.id, node);
+                 } else {
++                  const detachedNode = flagRefs.current.get(marker.id);
++                  if (detachedNode !== undefined && detachedNode === document.activeElement) {
++                    detachedFocusRef.current = {
++                      markerId: marker.id,
++                      order: markers.map((entry) => entry.id),
++                    };
++                  }
+                   flagRefs.current.delete(marker.id);
+                 }
+               }}
+diff --git a/app/lib/arrangement/__tests__/markers-ui.test.tsx b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+index 5bc29a4..a8ccf10 100644
+--- a/app/lib/arrangement/__tests__/markers-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -235,6 +235,19 @@ function pressCtrlArrow(direction: 'ArrowLeft' | 'ArrowRight', target: Element =
+   fireEvent.keyDown(target, { key: direction, code: direction, ctrlKey: true });
+ }
+ 
++function pressCtrlKey(
++  key: 'z' | 'y',
++  target: Element = document.body,
++  options: { readonly shiftKey?: boolean } = {},
++) {
++  fireEvent.keyDown(target, {
++    key: options.shiftKey ? key.toUpperCase() : key,
++    code: key === 'z' ? 'KeyZ' : 'KeyY',
++    ctrlKey: true,
++    shiftKey: options.shiftKey === true,
++  });
++}
++
+ function addNamedMarker(view: MarkerView, name: string) {
+   pressM();
+   const input = nameInput(view);
+@@ -689,6 +702,113 @@ describe('marker row: rename and delete', { timeout: 15000 }, () => {
+     fireEvent.keyDown(document.body, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
+     expect(statusText(view)).not.toContain('marker');
+   });
++
++  it('MU18: Ctrl+Z of a marker add with its flag focused moves focus to the Add button (B-R243-UNDO-MARKER-FOCUS)', async () => {
++    const { api, view } = await mountMarkerWorkspace();
++    addNamedMarker(view, 'Hit');
++    const flag = flagAt(view, '0.000');
++    expect(document.activeElement).toBe(flag);
++    pressCtrlKey('z', flag);
++    expect(markerFlags(view)).toHaveLength(0);
++    expect(live(api).redoLabel).toBe('Add Marker');
++    expect(statusText(view)).toBe('Undo: Add Marker');
++    expect(document.activeElement).toBe(view.getByTestId('arrangement-marker-add'));
++  });
++
++  it('MU19: Ctrl+Z of a marker add between or after markers moves focus to the next flag, else the previous one', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).seekTo(30));
++    addNamedMarker(view, 'Mid');
++    const mid = flagAt(view, '30.000');
++    expect(document.activeElement).toBe(mid);
++    pressCtrlKey('z', mid);
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(document.activeElement).toBe(flagAt(view, '40.000'));
++    act(() => live(api).seekTo(45));
++    addNamedMarker(view, 'Tail');
++    const tail = flagAt(view, '45.000');
++    expect(document.activeElement).toBe(tail);
++    pressCtrlKey('z', tail);
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(document.activeElement).toBe(flagAt(view, '40.000'));
++  });
++
++  it('MU20: Redo of a marker delete (Ctrl+Shift+Z and Ctrl+Y) with the restored flag focused moves focus to the next flag', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    const drop = flagAt(view, '20.000');
++    drop.focus();
++    fireEvent.keyDown(drop, { key: 'Delete', code: 'Delete' });
++    expect(document.activeElement).toBe(flagAt(view, '40.000'));
++    pressCtrlKey('z', flagAt(view, '40.000'));
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(document.activeElement).toBe(flagAt(view, '40.000'));
++    flagAt(view, '20.000').focus();
++    pressCtrlKey('z', flagAt(view, '20.000'), { shiftKey: true });
++    expect(markerTimes(view)).toEqual(['12.000', '40.000']);
++    expect(statusText(view)).toBe('Redo: Delete Marker');
++    expect(document.activeElement).toBe(flagAt(view, '40.000'));
++    pressCtrlKey('z', flagAt(view, '40.000'));
++    flagAt(view, '20.000').focus();
++    pressCtrlKey('y', flagAt(view, '20.000'));
++    expect(markerTimes(view)).toEqual(['12.000', '40.000']);
++    expect(live(api).undoLabel).toBe('Delete Marker');
++    expect(document.activeElement).toBe(flagAt(view, '40.000'));
++  });
++
++  it('MU21: Ctrl+Z of a marker add leaves focus alone when the removed flag was not focused', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).seekTo(30));
++    addNamedMarker(view, 'Mid');
++    const intro = flagAt(view, '12.000');
++    intro.focus();
++    pressCtrlKey('z', intro);
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(document.activeElement).toBe(flagAt(view, '12.000'));
++    act(() => live(api).redo());
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '30.000', '40.000']);
++    (document.activeElement instanceof HTMLElement ? document.activeElement : document.body).blur();
++    expect(document.activeElement).toBe(document.body);
++    pressCtrlKey('z');
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(document.activeElement).toBe(document.body);
++  });
++
++  it('MU22: Undo that keeps the focused flag (Move Marker) leaves focus on that flag', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    const drop = flagAt(view, '20.000');
++    drop.focus();
++    fireEvent.keyDown(drop, { key: 'ArrowRight', code: 'ArrowRight' });
++    expect(live(api).undoLabel).toBe('Move Marker');
++    const moved = markerFlags(view).find(
++      (flag) => flag.dataset.markerTime !== '12.000' && flag.dataset.markerTime !== '40.000',
++    );
++    if (!moved) {
++      throw new Error('moved flag missing');
++    }
++    expect(document.activeElement).toBe(moved);
++    pressCtrlKey('z', moved);
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    expect(document.activeElement).toBe(flagAt(view, '20.000'));
++  });
++
++  it('MU23: Cut Time that removes the focused flag moves focus to the next surviving flag', async () => {
++    const { api, view } = await mountMarkerWorkspace(markerArrangement(THREE_MARKERS));
++    act(() => live(api).setTimeRange({ start: 15, end: 25, trackId: 'music' }));
++    const drop = flagAt(view, '20.000');
++    drop.focus();
++    fireEvent.keyDown(drop, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
++    expect(live(api).undoLabel).toBe('Cut Time');
++    expect(markerTimes(view)).toEqual(['12.000', '30.000']);
++    expect(document.activeElement).toBe(flagAt(view, '30.000'));
++    pressCtrlKey('z', flagAt(view, '30.000'));
++    expect(markerTimes(view)).toEqual(['12.000', '20.000', '40.000']);
++    act(() => live(api).setTimeRange({ start: 15, end: 45, trackId: 'music' }));
++    const dropAgain = flagAt(view, '20.000');
++    dropAgain.focus();
++    fireEvent.keyDown(dropAgain, { key: 'X', code: 'KeyX', ctrlKey: true, shiftKey: true });
++    expect(markerTimes(view)).toEqual(['12.000']);
++    expect(document.activeElement).toBe(flagAt(view, '12.000'));
++  });
+ });
+ 
+ describe('marker row: playback continuity, gestures and typing', { timeout: 15000 }, () => {

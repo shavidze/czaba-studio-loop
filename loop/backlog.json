@@ -1,9 +1,9 @@
 {
- "version": 225,
- "updated": "2026-10-29 (B round 244 -> 245 planning, D-29z399..D-29z405)",
+ "version": 226,
+ "updated": "2026-10-29 (B round 245 -> 246 planning, D-29z406..D-29z411)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 245, D-29z399..D-29z405; RETRO 245 (window 230-244) + whole-screen review; no app code; baseline e9fb805, 0 grants, frozen 1110)",
+ "current_task": "current-task.md (round 246, D-29z406..D-29z411; B-R243-UNDO-MARKER-FOCUS fix in ArrangementMarkerRow.tsx + RT-FIX-246 of C-R245-01..03; baseline e9fb805, 2 grants + doc 189, frozen 1104)",
  "advisor_used_by_B": "2026-10-29 round 240 -> 241 planning: advisor available and consulted twice (after orientation; after the pre-check, before writing). Advice followed: split stage 2 into 2a/2b; one check mark per mode with a D-ID; L49 table for the menu handler; 4 as a silent alias; S4 ruling via title-as-description with a CDP row; checkedIndex fallback fixed before freezing the diff; SABA-Q for Mac bypass; ABL-R-8 closes at 2b; menu-height row; Lows folded/deferred. | 2026-10-29 round 239 -> 240 planning: advisor available and consulted twice (after orientation; before declaring done). Advice followed: the density simulation decides GATE239-S1 (ruling, not a no-op fix; extended to musical families), GATE239-S2 tightly scoped (no triplet flag, 5 unchanged), round 240 = fix round, code-reviewer required for 3 files, C re-runs eq.mjs/eq2.mjs, split case counts, L28 tie. | previous: 2026-10-29 round 238 -> 239 planning: advisor available and consulted after orientation, before writing. Advice followed: triage gate-238 S1-S3 with explicit severity before choosing the round; close round-238 ids from C PASS + gate commit; checkpoint addendum 4; adaptive chooser as a pure function in grid-divisions.ts with no new effect; silent zoom; real L23 pre-check on scratch (it changed the threshold from 20 px to 24 px); split 11b into 2 stages; Saba questions for readout position and density. Second advisor call before declaring done.",
  "baseline": {
   "tsc_errors": 0,
@@ -25421,7 +25421,7 @@
    "title": "with a just-added marker's flag focused, Ctrl+Z removes the marker and unmounts the focused flag; focus falls to BODY (L47 class: an action that unmounts the focused element names its focus target)",
    "evidence": "b-round-243/shots/undo-head.json markerFlag@1440x900 and @1280x720 (markers 1 -> 0, focusAfter BODY) at HEAD 149faab; rename and group-rename undo keep focus (renamedFlag, groupName rows)",
    "repro": "fresh /studio-lab, Demo collection ready, focus BODY, M, Enter (focus on the new flag), Ctrl+Z -> marker gone, document.activeElement BODY",
-   "status": "open (D-29z405): next task - round 246 if the round-246 planning is still 2026-10-29, else round 247 after the REGRESSION round; before SABA-B-11b stage 2b. Owner ArrangementMarkerRow.tsx (tech-lead, RETRO 245): when the focused flag id leaves markers, focusMarkerTarget(neighbouring flag, else MARKER_ADD_FOCUS); L50 enumeration of Undo/Redo/delete origins. Reproduced by C round 244 at both viewports (info) | open (pre-existing; scheduled after the regression round and before SABA-B-11b stage 2b, D-29z397); hypothesis to probe at its planning: other undo/redo paths that remove a focused element (clip, group, marker delete redo)",
+   "status": "dispatched round 246 (D-29z408): successor ruling next surviving flag -> previous -> Add button, detected at flag ref detach; closes on C round 246 PASS + gate published | open (D-29z405): next task - round 246 if the round-246 planning is still 2026-10-29, else round 247 after the REGRESSION round; before SABA-B-11b stage 2b. Owner ArrangementMarkerRow.tsx (tech-lead, RETRO 245): when the focused flag id leaves markers, focusMarkerTarget(neighbouring flag, else MARKER_ADD_FOCUS); L50 enumeration of Undo/Redo/delete origins. Reproduced by C round 244 at both viewports (info) | open (pre-existing; scheduled after the regression round and before SABA-B-11b stage 2b, D-29z397); hypothesis to probe at its planning: other undo/redo paths that remove a focused element (clip, group, marker delete redo)",
    "added": "2026-10-29 B round 243 -> 244 planning"
   },
   {
@@ -25455,6 +25455,91 @@
    "title": "round-244 task section 0.2/1 called MU14 the \"left-press blur neighbour\"; MU14 commits by moving focus to the library search. The real left-press evidence is the browser leftClick row and FR1/FR2/FR4",
    "source": "c-round-244.md / a-round-244.md / gates/round-244/review.md",
    "added": "2026-10-29 B round 244 -> 245 planning"
+  },
+  {
+   "id": "C-R245-01",
+   "severity": "low",
+   "origin": "C round 245 RT-LESSONS",
+   "title": "merged L11/L12 dropped three old L32/L40 clauses (\"not under For B/root\", the declared timeout, the frozen-file testid STOP)",
+   "evidence": "c-round-245.json bugs[0]; c-round-245/lessons.diff; a-round-245.md Lesson feedback",
+   "status": "fixed by B at round-246 planning (D-29z407, b-round-245/lessons-rtfix.diff); closes on RT-FIX-246 C PASS",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "C-R245-02",
+   "severity": "low",
+   "origin": "C round 245 RT-SABA",
+   "title": "retro-245 §12 L46 list: GATE244-S4 had no deadline; R49-T had no question and a task as deadline",
+   "evidence": "c-round-245.json bugs[1]; retros/retro-245.md l.179-180",
+   "status": "fixed by B at round-246 planning (D-29z407, b-round-245/retro-rtfix.diff); closes on RT-FIX-246 C PASS",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "C-R245-03",
+   "severity": "low",
+   "origin": "C round 245 RT-LESSONS",
+   "title": "L50 conditional-render alternative matched 0 lines (multi-line ternaries); whole-folder run 82 hits above the 20-origin stop",
+   "evidence": "c-round-245.json bugs[2]",
+   "status": "fixed by B at round-246 planning (D-29z407): new alternative ^\\s*\\{[^}]*(\\.map\\(|&&|\\?), root = granted files + grep-found callers; 12 hits on ArrangementMarkerRow.tsx (b-round-245/l50-markerrow.txt); closes on RT-FIX-246 C PASS",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "B-R245-UNDO-GROUP-FOCUS",
+   "severity": "medium",
+   "origin": "B round-246 planning probe (L50 enumeration of Undo/Redo removing a focused element)",
+   "title": "with the group name button focused, Undo: Group Tracks or Redo: Ungroup Tracks removes the group row; focus falls to BODY (L47 class)",
+   "evidence": "b-round-245/shots/undo-origins-head.json groupUndo@1440x900/@1280x720 and ungroupRedo@* at HEAD e9fb805; unchanged on the round-246 marker fix (undo-origins-scratch.json)",
+   "repro": "fresh /studio-lab, Demo collection ready; click the 2nd track name button, Ctrl+click the 3rd, Ctrl+G; focus arrangement-group-name; Ctrl+Z -> 0 groups, document.activeElement BODY",
+   "status": "open (D-29z409): scheduled after the REGRESSION round, before SABA-B-11b stage 2b; owner StudioWorkspace.tsx; question 4 of ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "INFO-C245-COST-ROUNDING",
+   "severity": "info",
+   "status": "info (D-29z411)",
+   "title": "retro cost totals are sums of rounded per-file values (raw 110.72/78.14/347.67)",
+   "source": "c-round-245.json info",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "INFO-C245-COLLECT-DIFF",
+   "severity": "info",
+   "status": "info (D-29z411)",
+   "title": "collect.txt differs only in round 244 b_cost after b-round-244-result.json appeared; no window number changes",
+   "source": "c-round-245.json info",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "INFO-C245-BEFORE-COPY-UNVERIFIABLE",
+   "severity": "info",
+   "status": "info (D-29z411): loop git repo is a shallow single commit; before-copies are the only record",
+   "title": "b-round-244/backlog-before-245.json cannot be compared with history",
+   "source": "c-round-245.json info",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "INFO-C245-SMOKE-STATE",
+   "severity": "info",
+   "status": "info (D-29z411)",
+   "title": "the smoke export SHA 1fea093b... is taken after adding demo-stem-pulse (rounds 237-245 recipe), not on an empty project",
+   "source": "c-round-245.json info",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "INFO-B246-CHROMIUM-BLUR-ON-REMOVAL",
+   "severity": "info",
+   "status": "info (D-29z411): harness fact for every focus task",
+   "title": "Chromium 143 fires blur and focusout when a focused element is removed; jsdom fires neither. Both move activeElement to BODY. React 18 calls the removed element ref with null while it is still activeElement: printed in jsdom; in Chromium inferred (not printed) from the scratch probe reaching the successor at both viewports",
+   "source": "b-round-245/chromium-removal.cjs, jsdom-removal-probe.test.tsx, undo-origins-scratch.json",
+   "added": "2026-10-29 B round 245 -> 246 planning"
+  },
+  {
+   "id": "INFO-B246-REDO-ADD-NO-UNMOUNT",
+   "severity": "info",
+   "status": "info (D-29z411)",
+   "title": "Redo: Add Marker unmounts nothing; at HEAD focus stays BODY after Undo-then-Redo, with the fix it stays on the Add button",
+   "source": "b-round-245/shots/undo-origins-head.json, undo-origins-scratch.json addUndoThenRedo",
+   "added": "2026-10-29 B round 245 -> 246 planning"
   }
  ],
  "tech_lead_notes": [
@@ -32008,7 +32093,8 @@
     "SABA-B-11b stage 2a (round 241, if done): C-MENU-CHECK (one checked radio: Medium at mount, the division after 5), one menu width choice (Narrow -> 'Adaptive grid — Narrow, now 0.5 s'), 4 toggles Snap with the G texts, C-S4-AX description, BPM menu inside 1280x720",
     "SABA-B-11b stage 2a + FIX-2 (rounds 241-242, if published): menu groups 'Adaptive grid'/'Fixed grid' with one checked item (Medium at mount); plain 4 toggles Snap with '(G)' statuses; Tab to the Snap toggle, right-click an empty lane point, Escape -> document.activeElement = Snap toggle with a visible ring (C-FOCUS-242), both viewports (added round 242 planning, D-29z381)",
     "C-R242-01-FIX (round 243, if done): C-FOCUS-ORIGINS-243 - fader, BPM field, loop brace and marker flag each get focus back after right-click lane + Escape at both viewports; after the brace returns, ArrowRight moves the loop (D-29z388)",
-    "C-EDITOR-ORIGINS-244 (if round 244 done): marker add editor, marker rename editor and group name editor -> right-click empty lane -> Escape puts focus on the successor (new/renamed flag, group name button), both viewports; plus C-FOCUS-ORIGINS-243 (fader, BPM field, loop brace, marker flag) (D-29z396)"
+    "C-EDITOR-ORIGINS-244 (if round 244 done): marker add editor, marker rename editor and group name editor -> right-click empty lane -> Escape puts focus on the successor (new/renamed flag, group name button), both viewports; plus C-FOCUS-ORIGINS-243 (fader, BPM field, loop brace, marker flag) (D-29z396)",
+    "C-UNDO-ORIGINS-246 (if round 246 done): with a marker flag focused, Ctrl+Z of its add -> Add marker button (no other flag) or the next surviving flag; Redo of its delete -> the next flag; Undo: Move Marker keeps the flag; focus elsewhere is not moved; both viewports (D-29z410)"
    ],
    "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
    "scope_note": "REG-DUX5-PLAYHEAD-RESCAN removed: done in round 200 R200-P1 (2026-10-27 B round 200 -> 201 planning (D-29z166))"
@@ -33399,7 +33485,7 @@
    "headline": "15 rounds, C PASS 12 / FAIL 3 (230, 237, 241); gate published 12, skipped 3; cost $347.70 (B 158.80, A 110.75, C 78.15); 8 fix rounds $173.17 (5 caused in window, 3 pre-existing surfaced) vs 6 feature stages $154.86; grid-menu focus chain 241-244; retro-230 L28 experiment not refuted (weak)",
    "screen_review": "user-review/screen-review-245.md (SR-245-1..8, awaiting_user)",
    "systemic": "none created (tech-lead): B-R243-UNDO-MARKER-FOCUS stays a MarkerRow task; status ownership is an architecture signal (checkpoint request)",
-   "status": "dispatched round 245 (C traceability check)",
+   "status": "RT-FIX pending (D-29z406/D-29z407): C round 245 PASS on SOURCE-SCOPE, RT-NUM, RT-CAUSE, RT-IDS, RT-SCREEN, G245-AUTH, STUDIO-SMOKE-245; FAIL RT-LESSONS (C-R245-01, C-R245-03) and RT-SABA (C-R245-02); corrected at round-246 planning; closes when C round 246 passes RT-FIX-246 | dispatched round 245 (C traceability check)",
    "added": "2026-10-29 B round 244 -> 245 planning"
   }
  ],
@@ -33490,12 +33576,13 @@
   {
    "id": "ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS",
    "file": "b-round-244-checkpoint-request.md",
-   "question": "1 useGridMenuFocusReturn extraction (+ macOS Ctrl+click GATE244-S4); 2 one editor-successor mechanism vs two (GATE244-S3); 3 status ownership (A-R237-ARCH-STATUS-PARTS) vs spec rule L51",
+   "question": "1 useGridMenuFocusReturn extraction (+ macOS Ctrl+click GATE244-S4); 2 one editor-successor mechanism vs two (GATE244-S3); 3 status ownership (A-R237-ARCH-STATUS-PARTS) vs spec rule L51; 4 (D-29z409) one rule for history steps that remove the focused row (B-R245-UNDO-GROUP-FOCUS) next to pendingRowFocusRef, or a per-owner rescue like the round-246 marker ref-detach rescue",
    "signals": [
     "GATE244-ARCH-GRIDMENU-FOCUS-HOOK",
     "GATE243-ARCH-GRIDMENU-FOCUS-HOOK",
     "GATE233-ARCH-DOCK-FOCUS-RESCUE",
-    "A-R237-ARCH-STATUS-PARTS"
+    "A-R237-ARCH-STATUS-PARTS",
+    "B-R245-UNDO-GROUP-FOCUS"
    ],
    "blocking": false,
    "status": "requested from root (D-29z404): the after-round-244 re-ask of ARCH-CHECKPOINT-TEMPO-GRID addendum 9; wanted before SABA-B-10a; B-R243-UNDO-MARKER-FOCUS does not wait for it",
@@ -34524,6 +34611,36 @@
    "id": "D-29z405",
    "date": "2026-10-29",
    "text": "Next: round 246 = REGRESSION if its planning is on/after 2026-10-30 (scope_additions as named rows, L6), else B-R243-UNDO-MARKER-FOCUS; the other follows; then SABA-B-11b stage 2b, then SABA-B-10a. RT row failure -> RT-FIX lines in the next C round."
+  },
+  {
+   "id": "D-29z406",
+   "date": "2026-10-29",
+   "text": "Round 245 (RETRO 245): C FAIL on RT-LESSONS and RT-SABA only (C-R245-01..03, Low, document findings); SOURCE-SCOPE, RT-NUM, RT-CAUSE, RT-IDS, RT-SCREEN, G245-AUTH, STUDIO-SMOKE-245 PASS; browserVerified and realVerified true; gate 245 skipped (C FAIL), nothing published; baseline stays e9fb805. No product item changes status. retro_runs 245 = RT-FIX pending (as 230 -> 231)."
+  },
+  {
+   "id": "D-29z407",
+   "date": "2026-10-29",
+   "text": "RT-FIX-246: lessons.md L11 regains old L32 \"(a timeout included)\", \"not under For B/root\" and \"its declared timeout\"; L12 regains old L40 \"a hit that pins classes in a frozen or protected file is a STOP (L11) with the hit list\" (C-R245-01, = A round-245 lesson feedback, accepted); L50 regex alternative replaced by ^\\s*\\{[^}]*(\\.map\\(|&&|\\?) and its root narrowed to granted files + grep-found callers of the removing actions (C-R245-03: old alternative 0 hits; whole folder 206 hits); header line notes RT-FIX 246. retro-245 §12: R49-T gets a concrete question and deadline RETRO 260 (11c C PASS closes it), GATE244-S4 gets deadline RETRO 260 (C-R245-02). Diffs: b-round-245/lessons-rtfix.diff (4 lines), retro-rtfix.diff (2 lines). C re-checks only these lines."
+  },
+  {
+   "id": "D-29z408",
+   "date": "2026-10-29",
+   "text": "Round 246 = B-R243-UNDO-MARKER-FOCUS (planning still 2026-10-29, D-29z405 row 2). Ruling: when the focused flag leaves markers by any path (Undo: Add Marker, Redo: Delete Marker, Cut Time), focus goes to the next surviving flag in time order, else the previous surviving flag, else the Add marker button (the removeMarker rule, extended to surviving neighbours); focus that was not on the removed flag is never moved. Detection at the flag ref detach (React 18 detaches before removal: jsdom and Chromium probes), not by blur: Chromium 143 fires blur/focusout on removal, jsdom does not (b-round-245/chromium-removal.cjs, jsdom-removal-probe.test.tsx). B pre-applied it on a scratch copy: precheck-scratch.diff, covering 58 files 1115/1115, 8 mutants red, browser probe both viewports."
+  },
+  {
+   "id": "D-29z409",
+   "date": "2026-10-29",
+   "text": "New Medium B-R245-UNDO-GROUP-FOCUS (pre-existing, found by B round-246 planning probe at e9fb805, both viewports): with the group name button focused, Undo: Group Tracks and Redo: Ungroup Tracks remove the group row and focus falls to BODY. Different owner (StudioWorkspace pendingRowFocusRef / focusedTrackRowId), so not folded into round 246 (one owner per round, advisor); scheduled after the REGRESSION round and before SABA-B-11b stage 2b; successor to decide at its planning (the ungroup rule: first member track name button). Added as question 4 to ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS (non-blocking)."
+  },
+  {
+   "id": "D-29z410",
+   "date": "2026-10-29",
+   "text": "Next: round 247 = REGRESSION at the first planning on/after 2026-10-30 (all scope_additions incl. C-UNDO-ORIGINS-246 as named rows, L6); if that planning is still 2026-10-29, B-R245-UNDO-GROUP-FOCUS first. Then B-R245-UNDO-GROUP-FOCUS, SABA-B-11b stage 2b, SABA-B-10a (with C-R235-02), 10b, 9, 11c. A round-246 FAIL -> fix-up on the same grants first."
+  },
+  {
+   "id": "D-29z411",
+   "date": "2026-10-29",
+   "text": "Info filed: INFO-C245-COST-ROUNDING, INFO-C245-COLLECT-DIFF, INFO-C245-BEFORE-COPY-UNVERIFIABLE, INFO-C245-SMOKE-STATE (c-round-245.json); INFO-B246-CHROMIUM-BLUR-ON-REMOVAL (harness fact); INFO-B246-REDO-ADD-NO-UNMOUNT (Redo: Add Marker unmounts nothing; with the fix the focus stays on the Add button after Undo then Redo). Clips are not focusable (no tabIndex on [data-clip-id], browser probe) so clip Undo/Redo is out of L50 scope."
   }
  ],
  "retro_candidates": [

@@ -176,8 +176,8 @@
    - **TLM-R232-MAC / TLM-R228-META-KEYS:** macOS-ზე Cmd-ის shortcut-ები და Ctrl+Alt+O მუშაობს? ვადა: RETRO 260.
    - **TLM-R233-SR-ORDER:** screen reader-ით Overview-ის დამალვის შემდეგ ჯერ ფოკუსი გადადის და შემდეგ ისმის status? ვადა: RETRO 260.
    - **A-R204-SAFARI-USERMENU-CLICK:** Safari-ში user menu click-ით იხსნება? ვადა: RETRO 260.
-   - **R49-T (F1-ABSOLUTE-SNAP):** ეს SABA-B-11c-ით იხურება (შენი დამტკიცებული რიგით); ცალკე კითხვა არ არის საჭირო, ვადა = SABA-B-11c.
-   - **GATE244-S4 / A-R244-REVIEW-L6 (Low):** macOS-ზე Ctrl+click-ით გახსნილი მენიუს დახურვის შემდეგ ფოკუსი ბრუნდება? cloud-ში (Linux) ვერ მოწმდება.
+   - **R49-T (F1-ABSOLUTE-SNAP):** კითხვა: როცა clip grid-ზე არ დგას და მას snap-ით გადაიტან, მან grid-იდან თავისი დაშორება (offset) უნდა შეინარჩუნოს (relative snap), თუ grid-ის ხაზზე უნდა დაჯდეს? შენს დამტკიცებულ SABA-B-11c-ში relative snap შედის (Live-ის ქცევას 11c-ის dispatch-მდე `ableton-arrangement-expert` დაადასტურებს), ამიტომ 11c-ის C PASS ამ შემოწმებას დახურავს. ვადა: RETRO 260; თუ 11c-ს მანამდე C PASS არ ექნება, კითხვა შენთან მოვა (RT-FIX 246, C-R245-02).
+   - **GATE244-S4 / A-R244-REVIEW-L6 (Low):** macOS-ზე Ctrl+click-ით გახსნილი მენიუს დახურვის შემდეგ ფოკუსი ბრუნდება? cloud-ში (Linux) ვერ მოწმდება. ვადა: RETRO 260 (RT-FIX 246, C-R245-02).
 3. **retro 200-ის §8 1–3 და retro 215-ის §9 1–2** ჯერ უპასუხოა (`biome.json`-ის `perf/**`, `TESTING_QUALITY_GATES.md`, `TAILWIND_FIRST.md`, `code-reviewer.md`).
 
 **Root-ისთვის (loop runner):** `b-round-244-checkpoint-request.md` (StudioWorkspace-ის ფოკუსი და status-ის owner; ARCH-CHECKPOINT-TEMPO-GRID-ის addendum 9-ის ხელახალი მოთხოვნა „after round 244“). წინა მოთხოვნები (`b-round-211`, `-221`, `-225`, `-229`, `-231`, `-234`) ისევ ღიაა და არ ბლოკავს.

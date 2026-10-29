@@ -1,0 +1,280 @@
+{
+ "round": 245,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T08:14:48.6063195Z",
+  "round": 245,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R245-01",
+   "severity": "low",
+   "steps": [
+    "diff b-round-244/lessons-before-245.md lessons.md (c-round-245/lessons.diff)",
+    "compare old L32 (before l.46) and old L40 (before l.48) clause by clause with merged L11 (lessons.md l.39) and L12 (l.40)"
+   ],
+   "expected": "RT-LESSONS: merged L11 and L12 keep the full rule text of old L32, L33 and L40 (current-task.md §3, §5)",
+   "actual": "Three rule clauses are dropped: (1) old L32 'not under \"For B/root\"' (the round-212 failure mode) is gone from L11; (2) old L32 'listed at the top with its time and limit' became 'with A's time and the last gate verify.log time', so the declared timeout is no longer reported and the 50 % claim cannot be checked; (3) old L40 'a hit that pins classes in a frozen file is a STOP (L11) with the hit list' is gone from L12's testid sentence (L12's earlier STOP sentence covers class-token renames only). Weaker: old L32 '(a timeout included)' is implied only by 'slow'. Old L33 is fully kept. A's 'Lesson feedback' in a-round-245.md names the same three, independently confirmed here.",
+   "evidence": "c-round-245/lessons.diff; b-round-244/lessons-before-245.md l.46-48; lessons.md l.39-40; a-round-245.md 'Lesson feedback'"
+  },
+  {
+   "id": "C-R245-02",
+   "severity": "low",
+   "steps": [
+    "open retros/retro-245.md §12 item 2 (l.174-180)",
+    "check each named parked check for one concrete question and a deadline (lessons.md L46)"
+   ],
+   "expected": "RT-SABA (2): the L46 list gives one concrete question and a deadline for each parked check it names",
+   "actual": "GATE244-S4 / A-R244-REVIEW-L6 (l.180) has a question but no deadline. R49-T (l.179) has no question ('no separate question needed') and its deadline is a task (SABA-B-11c), not a round. GATE232-S2, TLM-R232-MAC/TLM-R228-META-KEYS, TLM-R233-SR-ORDER and A-R204-SAFARI-USERMENU-CLICK each have a question and 'RETRO 260'.",
+   "evidence": "retros/retro-245.md l.174-180; lessons.md l.32 (L46)"
+  },
+  {
+   "id": "C-R245-03",
+   "severity": "low",
+   "steps": [
+    "from store/: grep -rnE 'onPointerDown(Capture)?|onBlur|settleEditor\\(|\\.focus\\(|\\{[^}]*&&\\s*<' app/components/arrangement | wc -l -> 82 (19 files)",
+    "split by alternative: onPointerDown(Capture)? 30, onBlur 11, settleEditor\\( 4, \\.focus\\( 39, \\{[^}]*&&\\s*< 0",
+    "grep -rnE '^\\s*\\{.* \\? \\($' app/components/arrangement -> conditional renders exist as multi-line ternaries (e.g. ArrangementGridMenu.tsx l.235, 292, 312)"
+   ],
+   "expected": "L50's regex enumerates focus origins, including elements that a conditional render unmounts",
+   "actual": "The regex is valid for grep -rnE, but its conditional-render alternative matches 0 lines in the arrangement folder. Conditional JSX there is written as multi-line `{x ? (` ternaries, which a line-based grep for `&& <` cannot see. The total of 82 hits is also above the 20-origin stop condition in retro-245 §10 when run on the whole folder.",
+   "evidence": "c-round-245.md RT-LESSONS; lessons.md l.35 (L50); retros/retro-245.md l.162"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "RT-NUM",
+  "RT-CAUSE",
+  "RT-IDS",
+  "RT-SCREEN",
+  "G245-AUTH",
+  "STUDIO-SMOKE-245"
+ ],
+ "failed": [
+  "RT-LESSONS",
+  "RT-SABA"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "info": [
+  "INFO-C245-COST-ROUNDING: B's scripts reproduce every cost exactly. The raw unrounded sums are A 110.72, C 78.14 and total 347.67, against B's 110.75, 78.15 and 347.70. B rounds each file and then sums. The ±0.01 tolerance was applied to B's named script output.",
+  "INFO-C245-COLLECT-DIFF: collect.txt differs only in round 244's b_cost (0 -> 12.38), because b-round-244-result.json (the round-245 planning) now exists. cost.py uses the n-1 shift, so no window number changes.",
+  "INFO-C245-BEFORE-COPY-UNVERIFIABLE: the loop git repo is a shallow single commit (e280950a, which already holds the post-planning backlog), so b-round-244/backlog-before-245.json cannot be compared with history. Its 'updated' field is the round 243->244 planning.",
+  "INFO-C245-SMOKE-STATE: the export SHA is taken after adding demo-stem-pulse, the same recipe as the round 237-244 smoke (c-round-244/c244.cjs smoke), not on an empty project. The WAV is 48 kHz, 24-bit, stereo, 768000 frames, 16.000 s, 0 NaN, peak 0.2967, RMS -24.91 dB."
+ ],
+ "rows": {
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "start": "HEAD e9fb805e28e6679c08c6c64f96562b355d171bf7, status 0 lines, sha256 -c rc 0 (1110 entries)",
+   "end": "2026-10-29T08:23:13Z same three results"
+  },
+  "RT-NUM": {
+   "status": "PASS",
+   "evidence": "c-round-245/out/*.txt (B's scripts re-run, outputs redirected); independent sums in c-round-245.md"
+  },
+  "RT-CAUSE": {
+   "status": "PASS"
+  },
+  "RT-IDS": {
+   "status": "PASS"
+  },
+  "RT-LESSONS": {
+   "status": "FAIL",
+   "bugs": [
+    "C-R245-01",
+    "C-R245-03"
+   ]
+  },
+  "RT-SABA": {
+   "status": "FAIL",
+   "bugs": [
+    "C-R245-02"
+   ]
+  },
+  "RT-SCREEN": {
+   "status": "PASS",
+   "counts": {
+    "S0": "142/121",
+    "DEMO": "170/147"
+   },
+   "evidence": "c-round-245/c245.json, c245-full-*.png"
+  },
+  "G245-AUTH": {
+   "status": "PASS",
+   "1440x900": {
+    "cookies0": 0,
+    "labWorkspace": 1,
+    "labBadge": 1,
+    "labAuthUser": null,
+    "guard": {
+     "path": "/studio/middle-east",
+     "signIn": true,
+     "audioSrc": 0,
+     "workspace": false
+    },
+    "guardAuthUser": null,
+    "tokenNoHeader": {
+     "status": 401,
+     "body": "{\"error\":\"Please sign in to access Studio.\"}"
+    },
+    "tokenFakeBearer": {
+     "status": 500,
+     "body": "{\"error\":\"Unable to prepare Studio access\"}"
+    },
+    "tokenIssued": false
+   },
+   "1280x720": {
+    "cookies0": 0,
+    "labWorkspace": 1,
+    "labBadge": 1,
+    "labAuthUser": null,
+    "guard": {
+     "path": "/studio/middle-east",
+     "signIn": true,
+     "audioSrc": 0,
+     "workspace": false
+    },
+    "guardAuthUser": null,
+    "tokenNoHeader": {
+     "status": 401,
+     "body": "{\"error\":\"Please sign in to access Studio.\"}"
+    },
+    "tokenFakeBearer": {
+     "status": 500,
+     "body": "{\"error\":\"Unable to prepare Studio access\"}"
+    },
+    "tokenIssued": false
+   }
+  },
+  "STUDIO-SMOKE-245": {
+   "status": "PASS",
+   "1440x900": {
+    "smoke": {
+     "status": "“ღამის პულსი · პულსი” added to the Music track at 00:00.000. Tempo 120 BPM from “ღამის პულსი · პულსი” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/2 (G)",
+     "clips": 1,
+     "pos0": 0,
+     "posPlaying": 0.87,
+     "rms": 0.0015026952566138466,
+     "posPaused": 0.882,
+     "posPaused2": 0.882,
+     "rmsAfterPause": 0,
+     "wav": {
+      "bytes": 4608044,
+      "rate": 48000,
+      "bits": 24,
+      "ch": 2,
+      "frames": 768000,
+      "seconds": 16,
+      "rmsDb": -24.91,
+      "peak": 0.2967,
+      "nan": 0,
+      "sha256": "1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94"
+     },
+     "shaExpected": true,
+     "errors": []
+    },
+    "markerEscape": {
+     "editorOpen": 1,
+     "markersBefore": [],
+     "point": {
+      "x": 1412,
+      "y": 315,
+      "track": "video"
+     },
+     "menuOpen": 1,
+     "menuAfter": 0,
+     "markersAfter": [
+      {
+       "id": "75a73d99-b2ec-4635-b1b3-548ef967bc64",
+       "time": "0.000",
+       "label": "Marker “Marker 1” — 00:00.000"
+      }
+     ],
+     "final": {
+      "el": "arrangement-marker",
+      "markerId": "75a73d99-b2ec-4635-b1b3-548ef967bc64",
+      "label": "Marker “Marker 1” — 00:00.000",
+      "focusVisible": true,
+      "outlineStyle": "solid",
+      "outlineWidth": "1px",
+      "outlineColor": "color(srgb 0.788235 0.643137 0.415686 / 0.8)"
+     },
+     "newMarkerIds": [
+      "75a73d99-b2ec-4635-b1b3-548ef967bc64"
+     ],
+     "pass": true,
+     "errors": []
+    }
+   },
+   "1280x720": {
+    "smoke": {
+     "status": "“ღამის პულსი · პულსი” added to the Music track at 00:00.000. Tempo 120 BPM from “ღამის პულსი · პულსი” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/2 (G)",
+     "clips": 1,
+     "pos0": 0,
+     "posPlaying": 0.861,
+     "rms": 0.0015026952566138466,
+     "posPaused": 0.882,
+     "posPaused2": 0.882,
+     "rmsAfterPause": 0,
+     "wav": {
+      "bytes": 4608044,
+      "rate": 48000,
+      "bits": 24,
+      "ch": 2,
+      "frames": 768000,
+      "seconds": 16,
+      "rmsDb": -24.91,
+      "peak": 0.2967,
+      "nan": 0,
+      "sha256": "1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94"
+     },
+     "shaExpected": true,
+     "errors": []
+    },
+    "markerEscape": {
+     "editorOpen": 1,
+     "markersBefore": [],
+     "point": {
+      "x": 1232,
+      "y": 345,
+      "track": "video"
+     },
+     "menuOpen": 1,
+     "menuAfter": 0,
+     "markersAfter": [
+      {
+       "id": "c2e4a380-ccff-48fa-93b9-6669cb77ac59",
+       "time": "0.000",
+       "label": "Marker “Marker 1” — 00:00.000"
+      }
+     ],
+     "final": {
+      "el": "arrangement-marker",
+      "markerId": "c2e4a380-ccff-48fa-93b9-6669cb77ac59",
+      "label": "Marker “Marker 1” — 00:00.000",
+      "focusVisible": true,
+      "outlineStyle": "solid",
+      "outlineWidth": "1px",
+      "outlineColor": "color(srgb 0.788235 0.643137 0.415686 / 0.8)"
+     },
+     "newMarkerIds": [
+      "c2e4a380-ccff-48fa-93b9-6669cb77ac59"
+     ],
+     "pass": true,
+     "errors": []
+    }
+   }
+  }
+ }
+}
