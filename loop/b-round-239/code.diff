@@ -1,0 +1,32 @@
+--- app/components/arrangement/StudioWorkspace.tsx	2026-10-29 02:25:48.179225784 +0000
++++ /tmp/b240-scratch/app/components/arrangement/StudioWorkspace.tsx	2026-10-29 03:04:11.701362992 +0000
+@@ -1545,6 +1545,10 @@
+       const current = gridDivisionIdRef.current;
+       const next = adjacentGridDivisionId(current, direction);
+       if (gridModeRef.current === 'adaptive') {
++        if (next === null) {
++          workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
++          return;
++        }
+         const densityStep = direction === 'narrow' ? -1 : 1;
+         let density = gridDensityRef.current + densityStep;
+         while (
+@@ -1555,10 +1559,6 @@
+         ) {
+           density += densityStep;
+         }
+-        if (next === null) {
+-          workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
+-          return;
+-        }
+         if (density < GRID_ADAPTIVE_DENSITY_MIN || density > GRID_ADAPTIVE_DENSITY_MAX) {
+           workspaceRef.current.setStatus(
+             direction === 'narrow'
+@@ -1567,6 +1567,7 @@
+           );
+           return;
+         }
++        gridHandChosenRef.current = true;
+         gridDensityRef.current = density;
+         setGridDensity(density);
+         const id = resolveAdaptiveGrid(current, tempoBpmRef.current);

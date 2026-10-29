@@ -1,0 +1,10 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+(async()=>{const b=await chromium.launch();const p=await (await b.newContext({viewport:{width:1440,height:900}})).newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab');await p.waitForFunction(()=>document.querySelector('[data-testid="arrangement-status"]')?.textContent.startsWith('Demo collection ready'),undefined,{timeout:120000});
+console.log(await p.evaluate(()=>[...document.querySelectorAll('[data-source-id]')].map(e=>e.getAttribute('data-source-id')).join(',')));
+await p.locator('[data-source-id="demo-stem-pulse"]').first().click();await p.waitForTimeout(300);
+console.log(await p.evaluate(()=>[...document.querySelectorAll('button')].map(b=>b.textContent.trim()).filter(t=>/^Add/.test(t)).join('|')));
+await p.locator('button',{hasText:/^Add/}).first().click();await p.waitForTimeout(800);
+console.log(await p.evaluate(()=>[...document.querySelectorAll('[data-clip-start]')].map(c=>c.getAttribute('data-clip-kind')+':'+c.getAttribute('data-clip-start')).join(',')));
+console.log(await p.evaluate(()=>document.querySelector('[data-testid="arrangement-status"]').textContent));
+await b.close();})();

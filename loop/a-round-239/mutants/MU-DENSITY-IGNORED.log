@@ -1,0 +1,69 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a239-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/grid-adaptive.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 17[2mms[22m[39m
+     [32m✓[39m GA1 the seconds family picks the finest step that is at least 24 px apart[32m 2[2mms[22m[39m
+     [32m✓[39m GA2 for every family and 30 zooms the pick is ≥ 24 px and the next finer member is < 24 px[32m 8[2mms[22m[39m
+     [32m✓[39m GA3 the straight musical family: 120 BPM @ 40 is 1/2, 90 @ 40 is 1/4, 120 @ 97.66 is 1/8[32m 0[2mms[22m[39m
+     [32m✓[39m GA4 the triplet family stays triplet: 120 BPM @ 122.07 px/s is 1/4T[32m 0[2mms[22m[39m
+[31m     [31m×[31m GA5 density moves the pick by one member per level and clamps at the family ends[39m[32m 5[2mms[22m[39m
+     [32m✓[39m GA6 an unknown id or a zoom that is 0, negative or NaN returns the input id[32m 0[2mms[22m[39m
+     [32m✓[39m GA7 gridDivisionSecondsOf reads musical steps at a BPM, seconds as numbers, NaN without a BPM[32m 0[2mms[22m[39m
+     [32m✓[39m GA8 the agreed constants: 24 px, density −2 … 2[32m 0[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1683[2mms[22m[39m
+     [32m✓[39m GAU1 mounts adaptive at 1 s with the adaptive title suffix and the 5 key listed[32m 174[2mms[22m[39m
+     [32m✓[39m GAU2 zooming follows 0.5 → 0.25 → 0.1 s in every lane and writes no status[32m 144[2mms[22m[39m
+     [32m✓[39m GAU3 5 freezes the pick as fixed through a zoom; 5 again re-picks adaptively[32m 96[2mms[22m[39m
+[31m     [31m×[31m GAU4 adaptive 1 and 2 move the density one level; the third 1 reports the narrowest density[39m[32m 58[2mms[22m[39m
+     [32m✓[39m GAU5 choosing 0.1 s in the select makes the grid fixed at any zoom[32m 90[2mms[22m[39m
+     [33m[2m✓[22m[39m GAU6 a 90 BPM seed picks 1/4 in adaptive and in fixed mode with the same seed text [33m 538[2mms[22m[39m
+     [32m✓[39m GAU7 5 on the focused select toggles without type-ahead; modified and repeated 5 change nothing[32m 66[2mms[22m[39m
+     [32m✓[39m GAU8 a 5 typed in the library search or the BPM field, or with Export open, keeps the mode[32m 162[2mms[22m[39m
+     [32m✓[39m GAU9 with Snap on at 100 px/s a 0.6 s drag lands on the adaptive 0.25 s grid; Undo restores[32m 115[2mms[22m[39m
+     [32m✓[39m GAU10 3 with a BPM keeps the adaptive mode and switches to the triplet family and back[32m 239[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx[2m > [22mSABA-B-11b adaptive grid in the workspace (D-29z352)[2m > [22mGAU4 adaptive 1 and 2 move the density one level; the third 1 reports the narrowest density
+[31m[1mAssertionError[22m: expected '1' to be '0.5' // Object.is equality[39m
+
+Expected: [32m"0.5"[39m
+Received: [31m"1"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:[2m286:30[22m[39m
+    [90m284| [39m    [35mconst[39m { view } [33m=[39m [35mawait[39m [34mmountAdaptiveWorkspace[39m()[33m;[39m
+    [90m285| [39m    [34mpressKey[39m([32m'1'[39m)[33m;[39m
+    [90m286| [39m    [34mexpect[39m([34mdivisionOf[39m(view))[33m.[39m[34mtoBe[39m([32m'0.5'[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m287| [39m    [34mexpect[39m([34mgridMode[39m(view))[33m.[39m[34mtoBe[39m([32m'adaptive'[39m)[33m;[39m
+    [90m288| [39m    [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m([32m'Grid: 0.5 s (Snap off)'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/grid-adaptive.test.ts[2m > [22mSABA-B-11b stage 1 adaptive grid chooser (D-29z357)[2m > [22mGA5 density moves the pick by one member per level and clamps at the family ends
+[31m[1mAssertionError[22m: expected '1' to be '0.5' // Object.is equality[39m
+
+Expected: [32m"0.5"[39m
+Received: [31m"1"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/grid-adaptive.test.ts:[2m76:55[22m[39m
+    [90m 74| [39m  it('GA5 density moves the pick by one member per level and clamps at…
+    [90m 75| [39m    [34mexpect[39m([34madaptiveGridDivisionId[39m([32m'1'[39m[33m,[39m [35mnull[39m[33m,[39m [34m40[39m[33m,[39m [34m0[39m))[33m.[39m[34mtoBe[39m([32m'1'[39m)[33m;[39m
+    [90m 76| [39m    [34mexpect[39m([34madaptiveGridDivisionId[39m([32m'1'[39m[33m,[39m [35mnull[39m[33m,[39m [34m40[39m[33m,[39m [33m-[39m[34m1[39m))[33m.[39m[34mtoBe[39m([32m'0.5'[39m)[33m;[39m
+    [90m   | [39m                                                      [31m^[39m
+    [90m 77| [39m    [34mexpect[39m([34madaptiveGridDivisionId[39m([32m'1'[39m[33m,[39m [35mnull[39m[33m,[39m [34m40[39m[33m,[39m [33m-[39m[34m2[39m))[33m.[39m[34mtoBe[39m([32m'0.25'[39m)[33m;[39m
+    [90m 78| [39m    [34mexpect[39m([34madaptiveGridDivisionId[39m([32m'1'[39m[33m,[39m [35mnull[39m[33m,[39m [34m40[39m[33m,[39m [34m1[39m))[33m.[39m[34mtoBe[39m([32m'2'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 02:19:57
+[2m   Duration [22m 3.50s[2m (transform 949ms, setup 0ms, import 1.48s, tests 1.70s, environment 850ms)[22m
+
+
+::error file=/tmp/a239-scratch/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx,title=app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx > SABA-B-11b adaptive grid in the workspace (D-29z352) > GAU4 adaptive 1 and 2 move the density one level; the third 1 reports the narrowest density,line=286,column=30::AssertionError: expected '1' to be '0.5' // Object.is equality%0A%0AExpected: "0.5"%0AReceived: "1"%0A%0A ❯ app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:286:30%0A%0A
+
+::error file=/tmp/a239-scratch/app/lib/arrangement/__tests__/grid-adaptive.test.ts,title=app/lib/arrangement/__tests__/grid-adaptive.test.ts > SABA-B-11b stage 1 adaptive grid chooser (D-29z357) > GA5 density moves the pick by one member per level and clamps at the family ends,line=76,column=55::AssertionError: expected '1' to be '0.5' // Object.is equality%0A%0AExpected: "0.5"%0AReceived: "1"%0A%0A ❯ app/lib/arrangement/__tests__/grid-adaptive.test.ts:76:55%0A%0A

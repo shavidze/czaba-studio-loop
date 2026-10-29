@@ -1,0 +1,63 @@
+{
+  "round": 239,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-29T02:34:08.0962714Z",
+    "round": 239,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R239-01",
+      "severity": "low",
+      "steps": [
+        "Fresh /studio-lab at 1440x900 or 1280x720, load zoom 40 px/s, adaptive grid 1 s",
+        "Press 1 twice -> grid 0.25 s (narrowest density)",
+        "Press = ten times to the 320 px/s maximum -> grid 0.1 s (family end)",
+        "Press 2 once -> grid 0.25 s",
+        "Press - ten times -> zoom 34.4 px/s"
+      ],
+      "expected": "Task section 2.2: one density level per key, so net density -1 and the grid 0.5 s at 34.4 px/s",
+      "actual": "Grid 2 s: the stored density jumped from -2 to +1 on the single 2 press (A's reviewer fix loops until the visible pick changes); A flagged it as needing a B ruling",
+      "evidence": "tmp/studio-real-loop/c-round-239/out/density-skip.json; a-round-239.md sections 5b and 6; GAU12 pins the current behaviour"
+    }
+  ],
+  "passed": [
+    "C-SCOPE-239",
+    "C-UNIT-239",
+    "C-MUT-239",
+    "C-ADAPT-SEC-239",
+    "C-ADAPT-MUS-239",
+    "C-SILENT-239",
+    "C-MODE-239",
+    "C-DENSITY-239",
+    "C-MUS-239",
+    "C-KEYS-239",
+    "C-SNAP-239",
+    "C-BUDGET-239",
+    "C-SHOTS-239",
+    "C-REF-239",
+    "AN-REVIEW-239",
+    "LAB-SMOKE-239",
+    "Auth"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "lint",
+    "build",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [
+    "Purchased origin (browser): backend unavailable in cloud (grep 'origin' in grant-2 hunks = 0)"
+  ],
+  "abletonConformanceNote": "Separate per-row Live conformance is in c-round-239.md (confirmed: R1, R4 keys, R5, Alt bypass; deliberate difference awaiting Saba: R3, R7; no reference: R9; unconfirmed: R2, R4 density model, R10, R11; n/a: R6, R8, R12)",
+  "evidence": "tmp/studio-real-loop/c-round-239/",
+  "neighbourProbes": [
+    "GRID-MENU (task section 6): lane right-click at = x4 adaptive shows the checked radio equal to data-grid-division (0.25 s; 1/8 with the 120 BPM seed); choosing an item (10 s) sets data-grid-mode fixed with the normal 'Grid: 10 s (Snap off|on)' status and stays 10 through - x3; both viewports, 0 page errors (c-round-239/out/menu.json)"
+  ]
+}

@@ -56,3 +56,15 @@ Related pending requests (non-blocking, still open): `b-round-231-checkpoint-req
   - Both reviewers say keep the current design for now.
   - **Question 6 (from addendum 3), restated:** keep, (a) or (b)? Give value and risk in at most 3 sentences.
 - **Trigger for re-asking:** before SABA-B-10a. 10a rewrites the Space/marker contract that writes status on every play/stop.
+
+## Addendum 5 (B, round 239 → 240 planning, D-29z364)
+- **Still unanswered** at round-240 planning. It stays non-blocking.
+- **Round 239 result:** SABA-B-11b stage 1 passed C (`c-round-239.json`), and gate 239 published `d0afa64`.
+- **New signal GATE239-ARCH-USESTUDIOGRID** (gate 239's Architecture note, merged with A-R239-ARCH-GRID-HOOK from A round 239's reviewer). The grid region of `StudioWorkspace.tsx` (l.549–573, 1390–1603) now holds about 8 state/ref pairs. It changed in SRW-14 stages 1, 4b, 5a and 5b and in SABA-B-11b stage 1, and every one of those rounds had to re-grant other tests' title/aria values.
+  - **Proposal:** one bounded `useStudioGrid()` hook, after SABA-B-11b stage 2. It would own the seconds/musical/mode/density state and refs, `resolveAdaptiveGrid`, `changeGridDivision`, `stepGridDivision`, `toggleGridTriplet` and `toggleGridMode`, plus the `gridHandChosen` flag.
+  - **Acceptance:** `useArrangement()` keeps its shape, and every `grid-*.test.tsx` passes unchanged.
+  - **Value:** medium. **Risk:** ref timing (gesture handlers read `gridSecondsRef` synchronously).
+  - Both reviewers say keep for now. The gate reviewer judged a `useReducer` worse than the current eager ref writes.
+- **Round 240 evidence for the hook:** GATE239-S2 came from a new branch that replaced a call to `changeGridDivision` and lost its `gridHandChosen` side effect. A hook that owns the flag would keep that rule in one place.
+- **Question 7:** keep, or extract `useStudioGrid` after stage 2? If extract, which owner and which test set? Answer in at most 3 sentences.
+- **Trigger for re-asking:** after SABA-B-11b stage 2, and before SABA-B-10a, as before.

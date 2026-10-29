@@ -1,0 +1,110 @@
+--- a/app/components/arrangement/StudioWorkspace.tsx	2026-10-29 02:25:48.179225784 +0000
++++ b/app/components/arrangement/StudioWorkspace.tsx	2026-10-29 03:05:10.634450881 +0000
+@@ -1545,6 +1545,10 @@
+       const current = gridDivisionIdRef.current;
+       const next = adjacentGridDivisionId(current, direction);
+       if (gridModeRef.current === 'adaptive') {
++        if (next === null) {
++          workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
++          return;
++        }
+         const densityStep = direction === 'narrow' ? -1 : 1;
+         let density = gridDensityRef.current + densityStep;
+         while (
+@@ -1555,10 +1559,6 @@
+         ) {
+           density += densityStep;
+         }
+-        if (next === null) {
+-          workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
+-          return;
+-        }
+         if (density < GRID_ADAPTIVE_DENSITY_MIN || density > GRID_ADAPTIVE_DENSITY_MAX) {
+           workspaceRef.current.setStatus(
+             direction === 'narrow'
+@@ -1567,6 +1567,7 @@
+           );
+           return;
+         }
++        gridHandChosenRef.current = true;
+         gridDensityRef.current = density;
+         setGridDensity(density);
+         const id = resolveAdaptiveGrid(current, tempoBpmRef.current);
+--- a/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx	2026-10-29 02:28:30.137042244 +0000
++++ b/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx	2026-10-29 03:05:23.596050836 +0000
+@@ -232,7 +232,7 @@
+   vi.restoreAllMocks();
+ });
+ 
+-describe('SABA-B-11b adaptive grid in the workspace (D-29z352)', { timeout: 15_000 }, () => {
++describe('SABA-B-11b adaptive grid in the workspace (D-29z356)', { timeout: 15_000 }, () => {
+   it('GAU1 mounts adaptive at 1 s with the adaptive title suffix and the 5 key listed', async () => {
+     const { view } = await mountAdaptiveWorkspace();
+     expect(gridMode(view)).toBe('adaptive');
+@@ -433,6 +433,9 @@
+     expect(statusText(view)).toBe('Grid: 0.25 s (Snap off)');
+     pressKey('2');
+     expect(divisionOf(view)).toBe('0.5');
++    act(() => live(api).setPxPerSecond(40));
++    expect(divisionOf(view)).toBe('5');
++    expect(gridMode(view)).toBe('adaptive');
+   });
+ 
+   it('GAU13 5 back to adaptive resets the density to Medium', async () => {
+@@ -447,4 +450,56 @@
+     expect(divisionOf(view)).toBe('1');
+     expect(statusText(view)).toBe('Adaptive grid — follows zoom, now 1 s (5)');
+   });
++
++  it('GAU14 C-R239-01 zoom-back: 1 1, zoom to 320, one 2, zoom to 34.4 px/s shows 2 s (density re-anchored to the visible pick)', async () => {
++    const { api, view } = await mountAdaptiveWorkspace();
++    pressKey('1');
++    pressKey('1');
++    act(() => live(api).setPxPerSecond(320));
++    expect(divisionOf(view)).toBe('0.1');
++    pressKey('2');
++    expect(divisionOf(view)).toBe('0.25');
++    act(() => live(api).setPxPerSecond(34.359738368));
++    expect(divisionOf(view)).toBe('2');
++    expect(gridMode(view)).toBe('adaptive');
++  });
++
++  it('GAU15 mirror at the widest end: 2 2, zoom to 0.5 px/s, one 1 narrows at once, zoom to 40 shows 0.5 s', async () => {
++    const { api, view } = await mountAdaptiveWorkspace();
++    pressKey('2');
++    pressKey('2');
++    expect(divisionOf(view)).toBe('5');
++    act(() => live(api).setPxPerSecond(0.5));
++    expect(divisionOf(view)).toBe('10');
++    pressKey('1');
++    expect(divisionOf(view)).toBe('5');
++    expect(statusText(view)).toBe('Grid: 5 s (Snap off)');
++    act(() => live(api).setPxPerSecond(40));
++    expect(divisionOf(view)).toBe('0.5');
++  });
++
++  it('GAU16 GATE239-S2 an adaptive 1 before a BPM seed is a hand choice: the seed keeps the seconds grid', async () => {
++    const { view, addSource } = await mountAdaptiveWorkspace();
++    pressKey('1');
++    expect(divisionOf(view)).toBe('0.5');
++    addSource('stem-90');
++    expect(tempoInput(view).value).toBe('90');
++    expect(gridMode(view)).toBe('adaptive');
++    expect(divisionOf(view)).toBe('0.5');
++    expect(statusText(view)?.endsWith('Snap on — grid 0.5 s (G)')).toBe(true);
++  });
++
++  it('GAU17 a refused adaptive key (family end) is not a hand choice: the seed still picks the musical grid', async () => {
++    const { api, view, addSource } = await mountAdaptiveWorkspace();
++    act(() => live(api).setPxPerSecond(320));
++    expect(divisionOf(view)).toBe('0.1');
++    pressKey('1');
++    expect(divisionOf(view)).toBe('0.1');
++    expect(statusText(view)).toBe('The grid is already at its narrowest — 0.1 s (1)');
++    addSource('stem-90');
++    expect(tempoInput(view).value).toBe('90');
++    expect(gridMode(view)).toBe('adaptive');
++    expect(divisionOf(view)).toBe('1/32');
++    expect(statusText(view)?.endsWith('Snap on — grid 1/32 (G)')).toBe(true);
++  });
+ });

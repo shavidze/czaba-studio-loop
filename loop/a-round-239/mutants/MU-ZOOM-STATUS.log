@@ -1,0 +1,82 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a239-scratch[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/grid-adaptive.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1654[2mms[22m[39m
+     [32m✓[39m GAU1 mounts adaptive at 1 s with the adaptive title suffix and the 5 key listed[32m 169[2mms[22m[39m
+[31m     [31m×[31m GAU2 zooming follows 0.5 → 0.25 → 0.1 s in every lane and writes no status[39m[32m 175[2mms[22m[39m
+[31m     [31m×[31m GAU3 5 freezes the pick as fixed through a zoom; 5 again re-picks adaptively[39m[32m 121[2mms[22m[39m
+     [32m✓[39m GAU4 adaptive 1 and 2 move the density one level; the third 1 reports the narrowest density[32m 102[2mms[22m[39m
+     [32m✓[39m GAU5 choosing 0.1 s in the select makes the grid fixed at any zoom[32m 92[2mms[22m[39m
+[31m     [31m×[31m GAU6 a 90 BPM seed picks 1/4 in adaptive and in fixed mode with the same seed text[39m[33m 343[2mms[22m[39m
+     [32m✓[39m GAU7 5 on the focused select toggles without type-ahead; modified and repeated 5 change nothing[32m 63[2mms[22m[39m
+     [32m✓[39m GAU8 a 5 typed in the library search or the BPM field, or with Export open, keeps the mode[32m 193[2mms[22m[39m
+     [32m✓[39m GAU9 with Snap on at 100 px/s a 0.6 s drag lands on the adaptive 0.25 s grid; Undo restores[32m 112[2mms[22m[39m
+     [32m✓[39m GAU10 3 with a BPM keeps the adaptive mode and switches to the triplet family and back[32m 284[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx[2m > [22mSABA-B-11b adaptive grid in the workspace (D-29z352)[2m > [22mGAU2 zooming follows 0.5 → 0.25 → 0.1 s in every lane and writes no status
+[31m[1mAssertionError[22m: expected 'Grid: 0.1 s (Snap off)' to be 'Demo collection ready. Drag a sound o…' // Object.is equality[39m
+
+Expected: [32m"Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."[39m
+Received: [31m"Grid: 0.1 s (Snap off)"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:[2m263:30[22m[39m
+    [90m261| [39m      [34mexpect[39m([34mgridMode[39m(view))[33m.[39m[34mtoBe[39m([32m'adaptive'[39m)[33m;[39m
+    [90m262| [39m    }
+    [90m263| [39m    [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m264| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatusSequence)[33m.[39m[34mtoBe[39m(sequenceBefore)[33m;[39m
+    [90m265| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx[2m > [22mSABA-B-11b adaptive grid in the workspace (D-29z352)[2m > [22mGAU3 5 freezes the pick as fixed through a zoom; 5 again re-picks adaptively
+[31m[1mAssertionError[22m: expected 'Grid: 0.1 s (Snap off)' to be 'Adaptive grid — follows zoom, now 0.1…' // Object.is equality[39m
+
+Expected: [32m"[7mAdaptive grid — follows zoom, now 0.1 s (5[27m)"[39m
+Received: [31m"[7mGrid: 0.1 s (Snap off[27m)"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:[2m280:30[22m[39m
+    [90m278| [39m    [34mexpect[39m([34mgridMode[39m(view))[33m.[39m[34mtoBe[39m([32m'adaptive'[39m)[33m;[39m
+    [90m279| [39m    [34mexpect[39m([34mdivisionOf[39m(view))[33m.[39m[34mtoBe[39m([32m'0.1'[39m)[33m;[39m
+    [90m280| [39m    expect(statusText(view)).toBe('Adaptive grid — follows zoom, now 0…
+    [90m   | [39m                             [31m^[39m
+    [90m281| [39m  })[33m;[39m
+    [90m282| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx[2m > [22mSABA-B-11b adaptive grid in the workspace (D-29z352)[2m > [22mGAU6 a 90 BPM seed picks 1/4 in adaptive and in fixed mode with the same seed text
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:[2m321:66[22m[39m
+    [90m319| [39m    [34mexpect[39m([34mgridMode[39m(adaptive[33m.[39mview))[33m.[39m[34mtoBe[39m([32m'adaptive'[39m)[33m;[39m
+    [90m320| [39m    [34mexpect[39m([34mdivisionOf[39m(adaptive[33m.[39mview))[33m.[39m[34mtoBe[39m([32m'1/4'[39m)[33m;[39m
+    [90m321| [39m    expect(statusText(adaptive.view)?.endsWith(SNAP_ON_QUARTER)).toBe(…
+    [90m   | [39m                                                                 [31m^[39m
+    [90m322| [39m    adaptive[33m.[39mview[33m.[39m[34munmount[39m()[33m;[39m
+    [90m323| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m15 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 02:20:01
+[2m   Duration [22m 3.47s[2m (transform 930ms, setup 0ms, import 1.45s, tests 1.67s, environment 877ms)[22m
+
+
+::error file=/tmp/a239-scratch/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx,title=app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx > SABA-B-11b adaptive grid in the workspace (D-29z352) > GAU2 zooming follows 0.5 → 0.25 → 0.1 s in every lane and writes no status,line=263,column=30::AssertionError: expected 'Grid: 0.1 s (Snap off)' to be 'Demo collection ready. Drag a sound o…' // Object.is equality%0A%0AExpected: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0AReceived: "Grid: 0.1 s (Snap off)"%0A%0A ❯ app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:263:30%0A%0A
+
+::error file=/tmp/a239-scratch/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx,title=app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx > SABA-B-11b adaptive grid in the workspace (D-29z352) > GAU3 5 freezes the pick as fixed through a zoom; 5 again re-picks adaptively,line=280,column=30::AssertionError: expected 'Grid: 0.1 s (Snap off)' to be 'Adaptive grid — follows zoom, now 0.1…' // Object.is equality%0A%0AExpected: "Adaptive grid — follows zoom, now 0.1 s (5)"%0AReceived: "Grid: 0.1 s (Snap off)"%0A%0A ❯ app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:280:30%0A%0A
+
+::error file=/tmp/a239-scratch/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx,title=app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx > SABA-B-11b adaptive grid in the workspace (D-29z352) > GAU6 a 90 BPM seed picks 1/4 in adaptive and in fixed mode with the same seed text,line=321,column=66::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:321:66%0A%0A
