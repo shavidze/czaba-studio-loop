@@ -1,0 +1,2 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage(); await p.goto('http://127.0.0.1:5181/studio-lab', { waitUntil: 'load', timeout: 400000 }); await p.waitForFunction(() => document.querySelector('[data-testid=arrangement-status]')?.textContent.startsWith('Demo collection ready'), undefined, { timeout: 400000 }); console.log('warm ok'); await b.close(); })();
