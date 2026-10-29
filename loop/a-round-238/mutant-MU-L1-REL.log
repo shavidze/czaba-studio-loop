@@ -1,0 +1,46 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a238-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 4413[2mms[22m[39m
+     [32m✓[39m TU1 the mount state is unchanged: empty tempo, seconds 1, Snap off, no bars marks[32m 223[2mms[22m[39m
+     [33m[2m✓[22m[39m TU2 adding the bpm-90 stem seeds 90, 1/4 and Snap on, and appends to the placement status [33m 535[2mms[22m[39m
+     [33m[2m✓[22m[39m TU3 an sfx and a bpm-less music clip change nothing; the bpm-90 stem afterwards seeds 90 [33m 686[2mms[22m[39m
+     [33m[2m✓[22m[39m TU4 a typed tempo wins, a cleared tempo stays empty, an untouched empty field still seeds [33m 747[2mms[22m[39m
+     [33m[2m✓[22m[39m TU5 a hand-chosen division is kept; a hand-toggled Snap stays off [33m 699[2mms[22m[39m
+     [33m[2m✓[22m[39m TU6 the seed is one-shot: a second BPM and Undo of both placements keep 90, 1/4 and Snap on [33m 441[2mms[22m[39m
+     [32m✓[39m TU7 after the seed a clip drag snaps to multiples of 60/90 s; Alt still bypasses the grid[32m 287[2mms[22m[39m
+     [32m✓[39m TU8 an initial arrangement that already holds the bpm-90 stem seeds at mount[32m 68[2mms[22m[39m
+     [32m✓[39m TU9 a seed placed before every source settles keeps placement + seed; the bare ready text never replaces it[32m 245[2mms[22m[39m
+     [32m✓[39m TU10 a mount seed composes with the loading text, and ready replaces only that prefix[32m 69[2mms[22m[39m
+     [32m✓[39m TU11 an empty status before the seed gives no leading space[32m 86[2mms[22m[39m
+     [32m✓[39m TU12 a refusal shown at settle is restored to the ready text on release, not loading[32m 75[2mms[22m[39m
+     [32m✓[39m TU13 a refusal over a mount seed is restored to ready + seed on release[32m 80[2mms[22m[39m
+     [32m✓[39m TU14 a load failure replaces a showing refusal at settle and stays after release[32m 73[2mms[22m[39m
+[31m     [31m×[31m TU15 a seed appended onto a showing refusal keeps the seed and drops only the refusal on release[39m[32m 96[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m14 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 01:08:35
+[2m   Duration [22m 6.79s[2m (transform 1.19s, setup 0ms, import 1.72s, tests 4.41s, environment 501ms)[22m
+
+
+::error file=/tmp/a238-scratch/app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx,title=app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx > SABA-B-11a-FIX-3 a gesture refusal shown when loading settles restores the settled text > TU15 a seed appended onto a showing refusal keeps the seed and drops only the refusal on release,line=615,column=32::AssertionError: expected 'Editing does not work while dragging …' to be 'Demo collection ready. Drag a sound o…' // Object.is equality%0A%0AExpected: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"%0AReceived: "Editing does not work while dragging — let go first. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"%0A%0A ❯ app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx:615:32%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx[2m > [22mSABA-B-11a-FIX-3 a gesture refusal shown when loading settles restores the settled text[2m > [22mTU15 a seed appended onto a showing refusal keeps the seed and drops only the refusal on release
+[31m[1mAssertionError[22m: expected 'Editing does not work while dragging …' to be 'Demo collection ready. Drag a sound o…' // Object.is equality[39m
+
+Expected: [32m"[7mDemo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts[27m. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"[39m
+Received: [31m"[7mEditing does not work while dragging — let go first[27m. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx:[2m615:32[22m[39m
+    [90m613| [39m      expect(statusText(view)).toBe(`${GESTURE_EDIT_BLOCKED_MESSAGE} $…
+    [90m614| [39m      [34mact[39m(() [33m=>[39m [34mreleaseGesture[39m())[33m;[39m
+    [90m615| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m([32m`[39m[36m${[39mbeforeGesture[36m}[39m[32m [39m[36m${[39mtail[36m}[39m[32m`[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m616| [39m    })[33m;[39m
+    [90m617| [39m  }[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

@@ -42,3 +42,17 @@ Related pending requests (non-blocking, still open): `b-round-231-checkpoint-req
 - **Still unanswered** at round-238 planning. Round 237 implemented option (a) of question 2; it failed C on C-R237-01 (the refusal restore kept a stale loading text). Round 238 (SABA-B-11a-FIX-3) fixes it inside the same contract (`settle` re-derives `lastNonRefusalStatusRef`; one refusal-prefix rule for the layout effect and the release).
 - **New signal A-R237-ARCH-STATUS-PARTS:** three writers (`collection.ts` rules, the seed write in `StudioWorkspace`, the refusal restore in `ArrangementContext`) now share a status-text prefix contract. A's reviewer proposes structured status parts (a collection-state part plus an action part). Question 6: keep the text-prefix contract, or extract structured parts (value, risk, at most 3 sentences)? The reviewer's own verdict is keep for now.
 - **Please run before SABA-B-11b.**
+
+## Addendum 4 (B, round 238 → 239 planning, D-29z355)
+- **Still unanswered** at round-239 planning. It stays non-blocking (policy: low-priority structure does not hold back an approved core feature). Round 239 starts SABA-B-11b without it. **Question 3 is answered provisionally by the design:**
+  - the adaptive chooser is a pure function in `grid-divisions.ts` (`adaptiveGridDivisionId(familyMember, bpm, pxPerSecond, density)`);
+  - StudioWorkspace holds only `gridMode` and `gridDensity`, derived during render;
+  - there is no new effect, and the change does not touch the status writers.
+  
+  If the checkpoint prefers a `useTempoGrid` hook (question 1), the chooser moves into it unchanged.
+- **Round 238 result:** SABA-B-11a-FIX-3 passed C (`c-round-238.json`), and gate 238 published rounds 237 + 238 as `15a0b41`. Question 2's option (a) is now the shipped contract.
+- **New signal A-R238-ARCH-STATUS-PREFIX** (A round 238's reviewer and gate 238's Architecture note, signals 3 and 2). The status line changed in five consecutive rounds (234–238). The "equals prefix or starts with prefix + space" rule now lives twice: in `collection.ts` (loading) and `ArrangementContext.tsx` (refusal). The seed append lives in `StudioWorkspace.tsx`.
+  - Proposals: (a) a shared `statusPrefix` helper in `status-announcement.ts`; or (b) a structured status model with a collection base, last action, seed tail, a refusal overlay and an explicit `announce` flag. Option (b) would also close GATE238-S1 and GATE238-S3, which are deferred Lows.
+  - Both reviewers say keep the current design for now.
+  - **Question 6 (from addendum 3), restated:** keep, (a) or (b)? Give value and risk in at most 3 sentences.
+- **Trigger for re-asking:** before SABA-B-10a. 10a rewrites the Space/marker contract that writes status on every play/stop.

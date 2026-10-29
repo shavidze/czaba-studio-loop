@@ -1,0 +1,49 @@
+{
+  "round": 238,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-29T01:09:18.9898504Z",
+    "round": 238,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "C-SCOPE-238",
+    "C-UNIT-238",
+    "C-MUT-238",
+    "C-REFUSAL-238",
+    "C-REFUSAL-FAIL-238",
+    "C-REFUSAL-READY-238",
+    "C-RACE-238",
+    "C-L1-238",
+    "C-SHOTS-238",
+    "AN-REVIEW-238",
+    "C-REF-238",
+    "LAB-SMOKE-238",
+    "Auth"
+  ],
+  "gate": [
+    "full vitest suite",
+    "typecheck",
+    "lint",
+    "build",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [
+    "Purchased-origin status rules in the browser (/studio/$productId): backend unavailable in cloud; covered only by CR1 and purchased-collection-ui unit rows"
+  ],
+  "notes": [
+    "C-L1-238 is unit-only by the task's own definition: TU15 is green, and red on MU-L1-REL in C's own mutant run. No UI path was found. When C focused a library row and pressed Enter while the fader was held, the status went back to ready 22 ms after focus moved, before the add landed. This is consistent with the focus loss ending the gesture, but it is an inference from timing, not instrumented. Evidence: race238.json, mode l1probe.",
+    "Ableton conformance: not applicable / no reference found (CZABA-internal status contract), as stated in task section 3 and doc 185.",
+    "C-BUDGET not re-run: no persistent element changed, only the status content.",
+    "Observation, not a finding: after Ctrl+Z on a pointer-held Volume fader Chromium shows the focus-visible ring on that fader (a key was pressed while it had focus); same in round 237 shots.",
+    "A's L32 note (LRS4 at 53 % of the 5 s default timeout) is B's ruling item; in C's targeted run library-row-strings-ui was green.",
+    "MU-L1-EFF was not re-run by C (not requested); its result rests on A's report.",
+    "The test file equals B's precheck diff plus 6 added statusSequence lines in TU12/TU14 (A's reviewer-M1 deviation). It is within grant 2, with 0 removed lines. ArrangementContext.tsx is byte-identical to the start copy with the precheck diff applied. The 3 start copies match the start list."
+  ],
+  "evidence": "c-round-238.md; c-round-238/ (unit.log, mutant-MU-RF.log, mutant-MU-L1-REL.log, race238.json, race238-race.json, editref.json, out/c238.json, shots/, context-vs-start.diff)"
+}

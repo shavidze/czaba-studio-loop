@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T00:33:53.679Z)
+# Active loop summary (2026-10-29T01:26:23.823Z)
 
-- backlog.json 2194 KB -> active view 318 KB
-- status: G_ROOT_GATE round 237
-- servers: `{"checkedUtc":"2026-10-29T00:24:06.1831141Z","round":237,"attempt":1,"store":200}`
-- last publication: ecaf0e4bd9c99081c2db7a4cd97497562d00193d (rounds 236-236)
-- last root gate: round 237 skipped - C taskStatus FAIL
+- backlog.json 2201 KB -> active view 320 KB
+- status: G_ROOT_GATE round 238
+- servers: `{"checkedUtc":"2026-10-29T01:09:18.9898504Z","round":238,"attempt":1,"store":200}`
+- last publication: 15a0b412b48740f9211bed344050fa5398130d08 (rounds 237-238)
+- last root gate: round 238 published - commit 15a0b412b48740f9211bed344050fa5398130d08 pushed
 
 ## Current items: SRW-21
 
@@ -559,9 +559,9 @@
 - GATE233-S5 / info / duplicate of deferred Low B-R232-DOC180-FOCUS-STALE (D-29z325) / doc 180 l.42-51 still describes the reversed focus rule
 - SABA-Q-TEMPO-UNDO / info / awaiting_user (D-29z324); default kept until answered / CZABA keeps tempo, grid and Snap outside the undo history (D-29z30 R4), so Undo of the clip that seeded the tempo keeps tempo/grid/Snap; in 
 - SABA-Q-ENVELOPE-TAPER / info / awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
-- A-R234-REVIEW-M1 / medium / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / seed status (placement + seeded + Snap on) is overwritten by the provider's source-loading/ready setStatus when the initial arrangement alre
-- GATE234-S2 / low / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / seed search never closes in a project with no BPM sources: findAssetTempoSeed rebuilds two Maps on every clips/tracks change for the session
-- GATE234-S3 / low / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / [status, ...parts].join(' ') yields a leading space when status is empty
+- A-R234-REVIEW-M1 / medium / open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346) / seed status (placement + seeded + Snap on) is overwritten by the provider's source-loading/ready setStatus when the initial arrangement alre
+- GATE234-S2 / low / open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346) / seed search never closes in a project with no BPM sources: findAssetTempoSeed rebuilds two Maps on every clips/tracks change for the session
+- GATE234-S3 / low / open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346) / [status, ...parts].join(' ') yields a leading space when status is empty
 - GATE234-S5 / info / awaiting_user as SABA-Q-SEED-STATUS-LENGTH (D-29z330) / one aria-live message now carries three sentences (placement, tempo, Snap)
 - GATE234-S7 / info / note for PERF re-baselines (D-29z330); no perf/e2e spec names a source today / a perf scenario that adds a synthetic stem now runs with Snap on, 1/4 and the bars ruler
 - SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
@@ -570,12 +570,16 @@
 - SABA-Q-SCRUB-ADD-LOCATOR / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live (video riOD 2:22-3:08): right-click in the scrub area -> Add Locator. Our marker menu opens only on an existing flag. Wanted (later can
 - SABA-Q-SEED-STATUS-LENGTH / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / The seed status is one aria-live message of three sentences (placement, 'Tempo N BPM from ... Grid only: audio is not stretched.', 'Snap on 
 - C-R235-02 / low / scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
-- B-R235-READY-CLOBBER / medium / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / the provider's 'Demo collection ready' write (ArrangementContext load effect settle, l.~3644) overwrites whatever status was set before all 
+- B-R235-READY-CLOBBER / medium / open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346) / the provider's 'Demo collection ready' write (ArrangementContext load effect settle, l.~3644) overwrites whatever status was set before all 
 - SABA-Q-SCRUB-DOUBLE-CLICK / info / awaiting_user (D-29z333); the round-236 default holds until answered / Live documents a double-click only for the beat-time ruler (6.1 zoom). Round 236 makes a scrub-strip double-click two 'play from here' click
 - GATE235-S3 / info / note; consistent with the codebase; no action / useRulerNavigation writes optionsRef.current during render (same pattern as workspaceRef)
 - C-R236-01 / low / deferred_low_polish (D-29z340); code is togglePlayback, outside round 237 grants / a playPastEnd status stays on screen after playback actually starts (strip click at 2 after an end click; Space after the end click); pre-ex
-- C-R236-02 / low / open, fixed now as doc grant 9 in round 237 (D-29z340; the round owns the feature doc, zero code) / doc 183 playFromRuler bullet (l.38-41) still says seekTo + togglePlayback in StudioWorkspace
+- C-R236-02 / low / open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346) / doc 183 playFromRuler bullet (l.38-41) still says seekTo + togglePlayback in StudioWorkspace
 - SABA-Q-READY-AFTER-ACTION / info / awaiting_user (D-29z339); the round-237 default holds until answered / After round 237, if the viewer acts before every demo/purchased source has loaded, the ready line ('... Press ? for shortcuts.') is not show
+- C-R237-01 / medium / open, dispatched round 238 SABA-B-11a-FIX-3 (D-29z347): settle re-derives lastNonRefusalStatusRef with settledCollectionStatus; TU12/TU13 red on MU-RF; B scratch browser run final ready at both viewports (b-round-237/probe/race-scratch.json) / a gesture refusal on screen when loading settles is replaced on release by the stale 'Loading the demo collection…' (lastNonRefusalStatusRef
+- A-R237-REVIEW-L1 / low / open, fixed now in round 238 (D-29z348; same release function, round owns the code, small cost): refusal-prefix rule in the layout effect and the release; TU15 red on MU-L1-REL and MU-L1-EFF. Reproduced by B at the API level (commitArrangement during a gesture); UI path unproven (gesture commits that create a seeding clip write their own status first) / a seed appended onto a showing refusal ('<refusal> <seed> <Snap on>') is not recognised as a refusal; the release leaves the combined text
+- A-R237-REVIEW-L2-NOTE / info / note (D-29z349) / the failed > 0 settle path drops placement + seed; deliberate (D-29z339), covered by CR3 and C-RACE-FAIL
+- A-R237-REVIEW-L3-NOTE / info / note (D-29z349) / TU11 reaches the empty status only through a direct setStatus(''); a guard for the filter, not a user flow
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,63 @@
+diff --git a/../tmp/studio-real-loop/b-round-237/start-copies/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index a5579bc..fa46bc4 100644
+--- a/../tmp/studio-real-loop/b-round-237/start-copies/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -201,6 +201,24 @@ const AUDIO_PUMP_INTERVAL_MS = 200;
+ export const GESTURE_UNDO_BLOCKED_MESSAGE = studioMoveStrings.undoBlockedDuringDrag;
+ export const GESTURE_EDIT_BLOCKED_MESSAGE = studioMoveStrings.editBlockedDuringDrag;
+ export const NUDGE_AT_TIME_START_MESSAGE = studioMoveStrings.nudgeAtTimeStart;
++
++function gestureRefusalPrefix(text: string): string | null {
++  for (const refusal of [GESTURE_EDIT_BLOCKED_MESSAGE, GESTURE_UNDO_BLOCKED_MESSAGE]) {
++    if (text === refusal || text.startsWith(`${refusal} `)) {
++      return refusal;
++    }
++  }
++  return null;
++}
++
++function statusAfterGestureRelease(current: string, lastNonRefusal: string): string {
++  const refusal = gestureRefusalPrefix(current);
++  if (refusal === null) {
++    return current;
++  }
++  const rest = current.slice(refusal.length).trimStart();
++  return [lastNonRefusal, rest].filter((part) => part.length > 0).join(' ');
++}
+ const AUDIO_ON_VIDEO_LANE_MESSAGE = studioLibraryStrings.audioOnVideoTrack;
+ const LIBRARY_DROP_BLOCKED_MESSAGE = studioLibraryStrings.dropBlocked;
+ const librarySourceFailedMessage = studioLibraryStrings.sourceFailed;
+@@ -639,7 +657,7 @@ export function ArrangementProvider({
+   const statusSequence = statusEntry.sequence;
+   const lastNonRefusalStatusRef = useRef(status);
+   useIsomorphicLayoutEffect(() => {
+-    if (status !== GESTURE_EDIT_BLOCKED_MESSAGE && status !== GESTURE_UNDO_BLOCKED_MESSAGE) {
++    if (gestureRefusalPrefix(status) === null) {
+       lastNonRefusalStatusRef.current = status;
+     }
+   }, [status]);
+@@ -1642,11 +1660,7 @@ export function ArrangementProvider({
+       gestureCountRef.current = Math.max(0, gestureCountRef.current - 1);
+       if (gestureCountRef.current === 0) {
+         previewActiveRef.current = false;
+-        setStatus((current) =>
+-          current === GESTURE_EDIT_BLOCKED_MESSAGE || current === GESTURE_UNDO_BLOCKED_MESSAGE
+-            ? lastNonRefusalStatusRef.current
+-            : current,
+-        );
++        setStatus((current) => statusAfterGestureRelease(current, lastNonRefusalStatusRef.current));
+       }
+     };
+   }, []);
+@@ -3672,6 +3686,11 @@ export function ArrangementProvider({
+         return;
+       }
+       const failedCount = failed;
++      lastNonRefusalStatusRef.current = settledCollectionStatus(
++        lastNonRefusalStatusRef.current,
++        copy,
++        failedCount,
++      );
+       setStatus((current) => settledCollectionStatus(current, copy, failedCount));
+     };
+     for (const source of collection.sources) {

@@ -1,0 +1,534 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 8ed34fe..27f1bca 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -34,10 +34,15 @@ import {
+   resolveGridTimeWithTargets,
+ } from '~/lib/arrangement/grid';
+ import {
++  adaptiveGridDivisionId,
+   adjacentGridDivisionId,
++  GRID_ADAPTIVE_DENSITY_MAX,
++  GRID_ADAPTIVE_DENSITY_MIN,
++  type GridMode,
+   gridDivisionEndMessage,
+   gridDivisionLabel,
+   gridDivisionOptions,
++  gridDivisionSecondsOf,
+   gridDivisionStatusMessage,
+   gridDivisionTitle,
+   gridMusicalGroupLabel,
+@@ -541,14 +546,21 @@ export function StudioWorkspace() {
+   const [metronomeOn, setMetronomeOn] = useState(false);
+   const snapEnabledRef = useRef(snapEnabled);
+   snapEnabledRef.current = snapEnabled;
+-  const gridSeconds =
+-    musicalGridDivision !== null && tempoBpm !== null
+-      ? musicalGridDivisionSeconds(musicalGridDivision, tempoBpm)
+-      : secondsGridDivision;
+-  const gridDivisionId =
++  const [gridMode, setGridMode] = useState<GridMode>('adaptive');
++  const gridModeRef = useRef(gridMode);
++  gridModeRef.current = gridMode;
++  const [gridDensity, setGridDensity] = useState(0);
++  const gridDensityRef = useRef(gridDensity);
++  gridDensityRef.current = gridDensity;
++  const fixedGridDivisionId =
+     musicalGridDivision !== null && tempoBpm !== null
+       ? musicalGridDivision
+       : String(secondsGridDivision);
++  const gridDivisionId =
++    gridMode === 'adaptive'
++      ? adaptiveGridDivisionId(fixedGridDivisionId, tempoBpm, pxPerSecond, gridDensity)
++      : fixedGridDivisionId;
++  const gridSeconds = gridDivisionSecondsOf(gridDivisionId, tempoBpm);
+   const secondsGridDivisionRef = useRef(secondsGridDivision);
+   secondsGridDivisionRef.current = secondsGridDivision;
+   const musicalGridDivisionRef = useRef(musicalGridDivision);
+@@ -1396,33 +1408,82 @@ export function StudioWorkspace() {
+       setMusicalGridDivision(null);
+     }
+     gridHandChosenRef.current = true;
++    gridModeRef.current = 'fixed';
++    setGridMode('fixed');
+     gridDivisionIdRef.current = id;
+     workspaceRef.current.setStatus(gridDivisionStatusMessage(id, tempo, snapEnabledRef.current));
+   }, []);
+ 
+-  const changeTempo = useCallback((next: number | null) => {
+-    tempoSeedOpenRef.current = false;
+-    tempoBpmRef.current = next;
+-    setTempoBpm(next);
+-    if (next === null) {
+-      setMetronomeOn(false);
+-    }
+-    const musical = musicalGridDivisionRef.current;
+-    if (musical !== null && next !== null) {
+-      gridSecondsRef.current = musicalGridDivisionSeconds(musical, next);
+-    }
+-    if (musical !== null && next === null) {
+-      const seconds = secondsGridDivisionRef.current;
+-      musicalGridDivisionRef.current = null;
+-      gridSecondsRef.current = seconds;
+-      gridDivisionIdRef.current = String(seconds);
+-      setMusicalGridDivision(null);
+-      workspaceRef.current.setStatus(gridTempoClearedMessage(seconds));
+-      return;
+-    }
+-    workspaceRef.current.setStatus(tempoStatusMessage(next));
++  const resolveAdaptiveGrid = useCallback((familyMember: string, tempo: number | null) => {
++    const id =
++      gridModeRef.current === 'adaptive'
++        ? adaptiveGridDivisionId(
++            familyMember,
++            tempo,
++            pxPerSecondRef.current,
++            gridDensityRef.current,
++          )
++        : familyMember;
++    gridDivisionIdRef.current = id;
++    gridSecondsRef.current = gridDivisionSecondsOf(id, tempo);
++    return id;
+   }, []);
+ 
++  const toggleGridMode = useCallback(() => {
++    const next: GridMode = gridModeRef.current === 'adaptive' ? 'fixed' : 'adaptive';
++    const tempo = tempoBpmRef.current;
++    const current = gridDivisionIdRef.current;
++    if (next === 'fixed') {
++      if (isMusicalGridDivisionId(current) && tempo !== null) {
++        musicalGridDivisionRef.current = current;
++        setMusicalGridDivision(current);
++      } else {
++        const step = GRID_DIVISIONS_SECONDS.find((division) => String(division) === current);
++        if (step !== undefined) {
++          secondsGridDivisionRef.current = step;
++          setSecondsGridDivision(step);
++        }
++      }
++    } else {
++      gridDensityRef.current = 0;
++      setGridDensity(0);
++    }
++    gridModeRef.current = next;
++    setGridMode(next);
++    const id = resolveAdaptiveGrid(current, tempo);
++    workspaceRef.current.setStatus(
++      next === 'adaptive'
++        ? studioGridStrings.adaptiveOn(gridDivisionLabel(id))
++        : studioGridStrings.fixedOn(gridDivisionLabel(id)),
++    );
++  }, [resolveAdaptiveGrid]);
++
++  const changeTempo = useCallback(
++    (next: number | null) => {
++      tempoSeedOpenRef.current = false;
++      tempoBpmRef.current = next;
++      setTempoBpm(next);
++      if (next === null) {
++        setMetronomeOn(false);
++      }
++      const musical = musicalGridDivisionRef.current;
++      if (musical !== null && next !== null) {
++        resolveAdaptiveGrid(musical, next);
++      }
++      if (musical !== null && next === null) {
++        const seconds = secondsGridDivisionRef.current;
++        musicalGridDivisionRef.current = null;
++        gridSecondsRef.current = seconds;
++        gridDivisionIdRef.current = String(seconds);
++        setMusicalGridDivision(null);
++        workspaceRef.current.setStatus(gridTempoClearedMessage(seconds));
++        return;
++      }
++      workspaceRef.current.setStatus(tempoStatusMessage(next));
++    },
++    [resolveAdaptiveGrid],
++  );
++
+   const collectionHasTempoSource = useMemo(
+     () => hasAssetTempoSource(collection.sources),
+     [collection.sources],
+@@ -1444,8 +1505,7 @@ export function StudioWorkspace() {
+     ];
+     if (!gridHandChosenRef.current) {
+       musicalGridDivisionRef.current = '1/4';
+-      gridSecondsRef.current = musicalGridDivisionSeconds('1/4', seed.bpm);
+-      gridDivisionIdRef.current = '1/4';
++      resolveAdaptiveGrid('1/4', seed.bpm);
+       setMusicalGridDivision('1/4');
+     }
+     if (!snapHandChosenRef.current) {
+@@ -1456,7 +1516,13 @@ export function StudioWorkspace() {
+     workspaceRef.current.setStatus((current) =>
+       [current, ...parts].filter((part) => part.length > 0).join(' '),
+     );
+-  }, [arrangement.clips, arrangement.tracks, collection.sources, collectionHasTempoSource]);
++  }, [
++    arrangement.clips,
++    arrangement.tracks,
++    collection.sources,
++    collectionHasTempoSource,
++    resolveAdaptiveGrid,
++  ]);
+ 
+   const toggleMetronome = useCallback(() => {
+     if (tempoBpm === null) {
+@@ -1479,13 +1545,35 @@ export function StudioWorkspace() {
+     (direction: 'narrow' | 'widen') => {
+       const current = gridDivisionIdRef.current;
+       const next = adjacentGridDivisionId(current, direction);
++      if (gridModeRef.current === 'adaptive') {
++        const density = gridDensityRef.current + (direction === 'narrow' ? -1 : 1);
++        if (next === null) {
++          workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
++          return;
++        }
++        if (density < GRID_ADAPTIVE_DENSITY_MIN || density > GRID_ADAPTIVE_DENSITY_MAX) {
++          workspaceRef.current.setStatus(
++            direction === 'narrow'
++              ? studioGridStrings.adaptiveNarrowest(gridDivisionLabel(current))
++              : studioGridStrings.adaptiveWidest(gridDivisionLabel(current)),
++          );
++          return;
++        }
++        gridDensityRef.current = density;
++        setGridDensity(density);
++        const id = resolveAdaptiveGrid(current, tempoBpmRef.current);
++        workspaceRef.current.setStatus(
++          gridDivisionStatusMessage(id, tempoBpmRef.current, snapEnabledRef.current),
++        );
++        return;
++      }
+       if (next === null) {
+         workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
+       } else {
+         changeGridDivision(next);
+       }
+     },
+-    [changeGridDivision],
++    [changeGridDivision, resolveAdaptiveGrid],
+   );
+ 
+   const toggleGridTriplet = useCallback(() => {
+@@ -1496,8 +1584,15 @@ export function StudioWorkspace() {
+       workspaceRef.current.setStatus(gridTripletRefusalMessage(current, tempo));
+       return;
+     }
++    if (gridModeRef.current === 'adaptive' && isMusicalGridDivisionId(next)) {
++      musicalGridDivisionRef.current = next;
++      setMusicalGridDivision(next);
++      const id = resolveAdaptiveGrid(next, tempo);
++      workspaceRef.current.setStatus(gridDivisionStatusMessage(id, tempo, snapEnabledRef.current));
++      return;
++    }
+     changeGridDivision(next);
+-  }, [changeGridDivision]);
++  }, [changeGridDivision, resolveAdaptiveGrid]);
+ 
+   const closeGridMenu = useCallback(() => {
+     if (!gridMenuOpenRef.current) {
+@@ -2144,6 +2239,13 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
++      if (event.code === 'Digit5' && !event.altKey && !event.shiftKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          toggleGridMode();
++        }
++        return;
++      }
+       if (event.key === 'Home' && !isSliderTarget(event.target)) {
+         event.preventDefault();
+         if (!isSeparatorTarget(event.target)) {
+@@ -2239,6 +2341,7 @@ export function StudioWorkspace() {
+     groupSelectedTrackRows,
+     returnFloatingVideo,
+     stepGridDivision,
++    toggleGridMode,
+     toggleGridTriplet,
+     toggleEnvelopeMode,
+     toggleSelectedTrackGroupsCollapse,
+@@ -2464,6 +2567,7 @@ export function StudioWorkspace() {
+                     data-snap={snapEnabled ? 'on' : 'off'}
+                     data-grid-seconds={gridSeconds}
+                     data-grid-division={gridDivisionId}
++                    data-grid-mode={gridMode}
+                     data-grid-lines={gridLinesShown ? 'visible' : 'hidden'}
+                     data-envelope-mode={envelopeMode ? 'on' : 'off'}
+                     data-waveform-zoom={waveformZoom}
+@@ -2499,7 +2603,8 @@ export function StudioWorkspace() {
+                           exportOpenRef.current ||
+                           (event.code !== 'Digit1' &&
+                             event.code !== 'Digit2' &&
+-                            event.code !== 'Digit3') ||
++                            event.code !== 'Digit3' &&
++                            event.code !== 'Digit5') ||
+                           event.ctrlKey ||
+                           event.metaKey ||
+                           event.altKey ||
+@@ -2513,13 +2618,15 @@ export function StudioWorkspace() {
+                         }
+                         if (event.code === 'Digit3') {
+                           toggleGridTriplet();
++                        } else if (event.code === 'Digit5') {
++                          toggleGridMode();
+                         } else {
+                           stepGridDivision(event.code === 'Digit1' ? 'narrow' : 'widen');
+                         }
+                       }}
+                       aria-label={studioGridStrings.menuLabel}
+-                      aria-keyshortcuts={tempoBpm !== null ? '1 2 3' : '1 2'}
+-                      title={gridDivisionTitle(gridDivisionId, gridLinesShown)}
++                      aria-keyshortcuts={tempoBpm !== null ? '1 2 3 5' : '1 2 5'}
++                      title={`${gridDivisionTitle(gridDivisionId, gridLinesShown)}${gridMode === 'adaptive' ? studioGridStrings.adaptiveTitleSuffix : studioGridStrings.fixedTitleSuffix}`}
+                       className={`h-6 shrink-0 rounded-md border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground ${STUDIO_FOCUS_RING_INSET_CLASS}`}
+                       data-testid="arrangement-grid-division"
+                     >
+diff --git a/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx b/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
+index 35d20af..f28f796 100644
+--- a/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
+@@ -350,7 +350,9 @@ describe('SRW-14 stage 5a musical grid in the workspace (D-29z32)', { timeout: 1
+     }
+     expect(statusText(view)).toBe('Grid: 1/4 · 0.5 s at 120 BPM (Snap off)');
+     expect(divisionSelect(view).value).toBe('1/4');
+-    expect(divisionSelect(view).title).toBe('Grid 1/4 · 1 — narrower, 2 — wider');
++    expect(divisionSelect(view).title).toBe(
++      'Grid 1/4 · 1 — narrower, 2 — wider · Fixed at every zoom — 5 for adaptive',
++    );
+   });
+ 
+   it('GU3 R14-G1 Snap on, 1/4 at 120: a clip drag lands on 0.5 s multiples', async () => {
+diff --git a/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx b/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
+index 5a85ac2..7b9979d 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
+@@ -313,8 +313,10 @@ describe('SRW-14 stage 4b-2a narrow/widen keys (D-29z24-K)', { timeout: 15_000 }
+     const select = divisionSelect(view);
+     expect(select.value).toBe('0.5');
+     expect(statusText(view)).toBe('Grid: 0.5 s (Snap off)');
+-    expect(select.getAttribute('aria-keyshortcuts')).toBe('1 2');
+-    expect(select.title).toBe(`Grid 0.5 s${KEYS_TITLE_SUFFIX}`);
++    expect(select.getAttribute('aria-keyshortcuts')).toBe('1 2 5');
++    expect(select.title).toBe(
++      `Grid 0.5 s${KEYS_TITLE_SUFFIX} · Adaptive: follows zoom — 5 for fixed`,
++    );
+   });
+ 
+   it('GK2 plain 2 widens the grid to 2 s', async () => {
+@@ -441,7 +443,7 @@ describe('SRW-14 stage 4b-2a narrow/widen keys (D-29z24-K)', { timeout: 15_000 }
+     expect(gridSeconds(view)).toBe('1');
+     expect(pressDigit('1', select, { repeat: true })).toBe(false);
+     expect(gridSeconds(view)).toBe('1');
+-    expect(fireEvent.keyDown(select, { key: '5', code: 'Digit5' })).toBe(true);
++    expect(fireEvent.keyDown(select, { key: '6', code: 'Digit6' })).toBe(true);
+     expect(gridSeconds(view)).toBe('1');
+     fireEvent.change(select, { target: { value: '0.1' } });
+     expect(gridSeconds(view)).toBe('0.1');
+diff --git a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+index 6ecc434..bf2bccf 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -226,7 +226,9 @@ describe('SRW-14 stage 1 grid control and lines', { timeout: 15_000 }, () => {
+     const select = divisionSelect(view);
+     expect(select.value).toBe('1');
+     expect(select.getAttribute('aria-label')).toBe('Grid division');
+-    expect(select.title).toBe('Grid 1 s · 1 — narrower, 2 — wider');
++    expect(select.title).toBe(
++      'Grid 1 s · 1 — narrower, 2 — wider · Adaptive: follows zoom — 5 for fixed',
++    );
+     expect(Array.from(select.options).map((option) => [option.value, option.textContent])).toEqual([
+       ['10', '10 s'],
+       ['5', '5 s'],
+@@ -495,7 +497,9 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     fireEvent.change(divisionSelect(view), { target: { value: '0.1' } });
+     const control = view.getByTestId('arrangement-grid-control');
+     expect(control.dataset.gridLines).toBe('hidden');
+-    expect(divisionSelect(view).title).toBe(HIDDEN_LINES_TITLE);
++    expect(divisionSelect(view).title).toBe(
++      `${HIDDEN_LINES_TITLE} · Fixed at every zoom — 5 for adaptive`,
++    );
+     for (const body of laneBodies(view)) {
+       expect(body.dataset.gridLines).toBe('hidden');
+       expect(body.dataset.gridSeconds).toBe('0.1');
+@@ -506,7 +510,9 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     expect(clipOf(api, 'm1').start).toBe(7.3);
+     act(() => live(api).setPxPerSecond(60));
+     expect(view.getByTestId('arrangement-grid-control').dataset.gridLines).toBe('visible');
+-    expect(divisionSelect(view).title).toBe('Grid 0.1 s · 1 — narrower, 2 — wider');
++    expect(divisionSelect(view).title).toBe(
++      'Grid 0.1 s · 1 — narrower, 2 — wider · Fixed at every zoom — 5 for adaptive',
++    );
+     for (const body of laneBodies(view)) {
+       expect(body.dataset.gridLines).toBe('visible');
+       expect(body.style.backgroundImage).toContain('6px');
+diff --git a/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx b/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
+index d1a39b2..d880f26 100644
+--- a/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
+@@ -350,7 +350,7 @@ describe('SRW-14 stage 5b triplet grid in the workspace (D-29z34)', { timeout: 1
+     expect(pressDigit('3')).toBe(false);
+     expect(divisionOf(view)).toBe('1');
+     expect(statusText(view)).toBe(NO_TEMPO_REFUSAL);
+-    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2');
++    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 5');
+     rightClick(laneBody('music'));
+     const menu = openMenu(view);
+     expect(within(menu).getAllByRole('menuitemradio')).toHaveLength(7);
+@@ -364,7 +364,7 @@ describe('SRW-14 stage 5b triplet grid in the workspace (D-29z34)', { timeout: 1
+   it('TU2 with a BPM a seconds or bar division refuses the triplet and stays', async () => {
+     const { view } = await mountTripletWorkspace();
+     commitTempo(view, '90');
+-    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 3');
++    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 3 5');
+     pressDigit('3');
+     expect(divisionOf(view)).toBe('1');
+     expect(divisionSelect(view).value).toBe('1');
+@@ -397,7 +397,9 @@ describe('SRW-14 stage 5b triplet grid in the workspace (D-29z34)', { timeout: 1
+     expect(Array.from(groups[0].querySelectorAll('option')).map((o) => o.textContent)).toEqual(
+       TRIPLET_LABELS,
+     );
+-    expect(select.title).toBe('Grid 1/4T · 1 — narrower, 2 — wider');
++    expect(select.title).toBe(
++      'Grid 1/4T · 1 — narrower, 2 — wider · Fixed at every zoom — 5 for adaptive',
++    );
+     pressDigit('3');
+     expect(divisionOf(view)).toBe('1/4');
+     expect(gridControl(view).dataset.gridSeconds).toBe(String(60 / 90));
+diff --git a/app/lib/arrangement/__tests__/shortcuts.test.ts b/app/lib/arrangement/__tests__/shortcuts.test.ts
+index d3555d2..78ff9a3 100644
+--- a/app/lib/arrangement/__tests__/shortcuts.test.ts
++++ b/app/lib/arrangement/__tests__/shortcuts.test.ts
+@@ -32,6 +32,7 @@ const EXPECTED_ROW_ORDER = [
+   'snap',
+   'grid-width',
+   'triplet',
++  'grid-mode',
+   'snap-bypass',
+   'envelope',
+   'zoom',
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index e874d14..4478cb6 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -1344,6 +1344,8 @@ describe('V-0.2c3 lane-move and track-group strings', () => {
+ const gs = studioGridStrings;
+ 
+ const EXPECTED_GRID_PLAIN_STRINGS: Record<string, string> = {
++  adaptiveTitleSuffix: ' · Adaptive: follows zoom — 5 for fixed',
++  fixedTitleSuffix: ' · Fixed at every zoom — 5 for adaptive',
+   barLabel: '1 bar',
+   tripletMenuLabel: 'Triplets (3)',
+   snapOnSuffix: '(Snap on)',
+@@ -1357,9 +1359,15 @@ const EXPECTED_GRID_PLAIN_STRINGS: Record<string, string> = {
+ };
+ 
+ const EXPECTED_GRID_KEYS = [
++  'adaptiveNarrowest',
++  'adaptiveOn',
++  'adaptiveTitleSuffix',
++  'adaptiveWidest',
+   'backToSeconds',
+   'barLabel',
+   'barsGroup',
++  'fixedOn',
++  'fixedTitleSuffix',
+   'menuLabel',
+   'narrowest',
+   'seconds',
+@@ -1381,6 +1389,10 @@ const EXPECTED_GRID_KEYS = [
+ ];
+ 
+ const GRID_FORMATTER_SAMPLES: Record<string, string[]> = {
++  adaptiveOn: [gs.adaptiveOn('1/4')],
++  fixedOn: [gs.fixedOn('0.5 s')],
++  adaptiveNarrowest: [gs.adaptiveNarrowest('0.25 s')],
++  adaptiveWidest: [gs.adaptiveWidest('1 bar')],
+   seconds: [gs.seconds('0.25'), gs.seconds('10')],
+   narrowest: [gs.narrowest('0.1 s'), gs.narrowest('1/32T')],
+   widest: [gs.widest('10 s'), gs.widest('1 bar')],
+diff --git a/app/lib/arrangement/grid-divisions.ts b/app/lib/arrangement/grid-divisions.ts
+index 5d0e5b3..aeb2b9c 100644
+--- a/app/lib/arrangement/grid-divisions.ts
++++ b/app/lib/arrangement/grid-divisions.ts
+@@ -184,3 +184,47 @@ export function gridDivisionTitle(id: string, linesVisible: boolean): string {
+     ? studioGridStrings.titleLinesVisible(label)
+     : studioGridStrings.titleLinesHidden(label);
+ }
++
++export type GridMode = 'adaptive' | 'fixed';
++
++export const GRID_ADAPTIVE_MIN_SPACING_PX = 24;
++
++export const GRID_ADAPTIVE_DENSITY_MIN = -2;
++
++export const GRID_ADAPTIVE_DENSITY_MAX = 2;
++
++export function gridDivisionSecondsOf(id: string, bpm: number | null): number {
++  if (isMusicalGridDivisionId(id)) {
++    return bpm === null ? Number.NaN : musicalGridDivisionSeconds(id, bpm);
++  }
++  return Number(id);
++}
++
++function adaptiveBaseIndex(
++  family: readonly string[],
++  bpm: number | null,
++  pxPerSecond: number,
++): number {
++  for (let index = family.length - 1; index >= 0; index--) {
++    const spacing = gridDivisionSecondsOf(family[index] ?? '', bpm) * pxPerSecond;
++    if (spacing >= GRID_ADAPTIVE_MIN_SPACING_PX - 1e-6) {
++      return index;
++    }
++  }
++  return 0;
++}
++
++export function adaptiveGridDivisionId(
++  familyMember: string,
++  bpm: number | null,
++  pxPerSecond: number,
++  density = 0,
++): string {
++  const family = gridDivisionFamilyIds(familyMember);
++  if (family.indexOf(familyMember) < 0 || !(pxPerSecond > 0)) {
++    return familyMember;
++  }
++  const base = adaptiveBaseIndex(family, bpm, pxPerSecond);
++  const index = Math.min(family.length - 1, Math.max(0, base - density));
++  return family[index] ?? familyMember;
++}
+diff --git a/app/lib/arrangement/shortcuts.ts b/app/lib/arrangement/shortcuts.ts
+index c486336..1c310d9 100644
+--- a/app/lib/arrangement/shortcuts.ts
++++ b/app/lib/arrangement/shortcuts.ts
+@@ -101,6 +101,7 @@ export const STUDIO_SHORTCUT_GROUPS = [
+       { id: 'snap', action: 'Snap on / off', keys: ['G'] },
+       { id: 'grid-width', action: 'Narrower / wider grid', keys: ['1 / 2'] },
+       { id: 'triplet', action: 'Triplet grid (needs a BPM)', keys: ['3'] },
++      { id: 'grid-mode', action: 'Adaptive / fixed grid', keys: ['5'] },
+       { id: 'snap-bypass', action: 'Ignore snap while dragging', keys: ['Alt + drag'] },
+       { id: 'envelope', action: 'Envelope mode', keys: ['A'] },
+     ],
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index cca39bb..2e39201 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -453,6 +453,14 @@ export const studioGridStrings = {
+   snapOnStatus: (label: string): string => `Snap on — grid ${label} (G)`,
+   snapOnTitle: 'Snap on — clips land on the grid (G)',
+   snapOff: 'Snap off — free movement (G)',
++  adaptiveOn: (label: string): string => `Adaptive grid — follows zoom, now ${label} (5)`,
++  fixedOn: (label: string): string => `Fixed grid — ${label} at every zoom (5)`,
++  adaptiveNarrowest: (label: string): string =>
++    `The adaptive grid is already at its narrowest density — now ${label} (1)`,
++  adaptiveWidest: (label: string): string =>
++    `The adaptive grid is already at its widest density — now ${label} (2)`,
++  adaptiveTitleSuffix: ' · Adaptive: follows zoom — 5 for fixed',
++  fixedTitleSuffix: ' · Fixed at every zoom — 5 for adaptive',
+ };
+ 
+ interface StudioMarkerTimeText {
