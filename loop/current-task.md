@@ -1,232 +1,278 @@
-# Round 248: SABA-B-11b stage 2b. Snap never lands on a grid whose lines are hidden. Hidden lines pause Snap (Alt included), and the controls and grid statuses say so.
+# Round 249: SABA-B-10a stage 1. A separate Insert Marker: Space plays from it, Shift+Space continues from the stop point, Ctrl/Cmd+Shift+Space moves it to the playhead, and a click during playback moves only the marker.
 
-**Planned by:** B, at the round 247 → 248 planning, 2026-10-29. **Decisions:** D-29z419…D-29z425.
+**Planned by:** B, at the round 248 → 249 planning, 2026-10-29 (`date -u` 13:08). **Decisions:** D-29z426…D-29z434.
 
-**Type:** the last stage of a feature (SABA-B-11b, approved by Saba on 2026-10-28 as part of SABA-B-9/10/11). It closes **ABL-R-8**. One owner for the mechanism (`StudioWorkspace.tsx`), plus 1 prop in `ArrangementLane.tsx`, 1 type in `ArrangementTempoRow.tsx` and 3 strings.
+**Type:** stage 1 of 2 of SABA-B-10a. Saba approved it on 2026-10-28 as part of SABA-B-9/10/11; his decision 1 is "a click during playback moves only the Insert Marker; playback continues". It replaces **D-15** (one position model, round 1). One owner for the model (`ArrangementContext.tsx`), with call-site swaps in 5 components, 2 strings and 3 test files.
 
-**Why this round (D-29z419, D-29z424):**
-- Round 247 passed C (`browserVerified: true`), and gate 247 published `da8c641`.
-- D-29z418 says: "if that planning is still 2026-10-29, SABA-B-11b stage 2b first". This planning is on 2026-10-29 (`date -u` 10:58).
-- **REGRESSION** (`regression-last.json`: 2026-10-27, round 199) is due at the first planning on or after 2026-10-30, so not now. **RETRO** is next due at round 260.
+**Why this round (D-29z429):**
+- Round 248 passed C (`browserVerified: true`). Gate 248 published `0e862be` to both remotes. SABA-B-11b is done, and ABL-R-8 closes with it.
+- D-29z424 says: "if that planning is still on 2026-10-29, SABA-B-10a goes first". This planning is on 2026-10-29.
+- **REGRESSION** is due at the first planning on or after 2026-10-30 (`regression-last.json`: 2026-10-27, round 199), so not now. **RETRO** is next due at round 260.
 
 **Read first:** `lessons.md` in full. Directly relevant here:
-- **L23** (B's pre-check, §0.2) and **L29** (every recipe was run; claims cite a grep, §0.3);
-- **L3** (the longest status state, row C-STATUS-BOX-248) and **L51** (status clobber, §1.4);
-- **L39** (screen budget: titles and status only), **L44** (one Saba question, §1.6), **L45** (the unit is unchanged);
-- **L11** (STOP), **L31** (timeouts), **L26** and **L28** (doc 186 is the final-stage doc).
+- **L23** (B's pre-check, §0.2) and **L29** (every recipe was run; every signal is grepped, §0.3);
+- **L44** (deviations go to Saba, §1.6) and **L45** (the unit is the reference's Insert Marker);
+- **L47/L50** (no focus moves here; §1.7 says why), **L49** (`togglePlayback` is split, §1.5) and **L51** (two new status writes, §1.4);
+- **L39** (screen budget: a hidden signal plus statuses only), **L48** (playback-start timing rows include the 50 ms lead);
+- **L11** (STOP), **L31** (timeouts), **L26** and **L28** (doc 191 is a stage doc).
 
-**Not this round:**
-- REGRESSION-ROUND-2026-10-30 (next planning on or after 2026-10-30).
-- SABA-B-10a/10b/9/11c, SABA-B-7 (`awaiting_user`), ROOT-RECON-MARKER-ENTER, and the protected purchased route (SRW-21, `deferred_user`).
-- The round-247 Lows (A-R247-REVIEW-L1, -L2, -L3 + GATE247-S1, GATE247-S2). They are in `deferred_low_polish` (D-29z420).
-- A shared focus-rescue hook (gate 247 Architecture note). It is a checkpoint question, not scope (D-29z421).
-- Clip-edge and marker snapping on their own when the grid is hidden ("magnetic edges without a grid"). That is a new behaviour, not this stage. It is asked as part of SABA-Q-11B-HIDDEN-SNAP (§1.6).
+**Not this round (sequenced, not dropped):**
+- **SABA-B-10a stage 2** (§7): paste, Enter-add, Ctrl+E without a range and M while stopped use the Insert Marker even when it differs from the playhead; the D-27 status text names the marker; **C-R235-02** (Follow pauses on a beat-time ruler click and resumes on a scrub-strip click, Live 6.2) with the seconds-ruler role (SABA-Q-TIME-RULER-ROLE).
+- **SABA-B-10b**: the visible flashing marker line (`motion-safe:`), contrast, and the shortcut-sheet rows for Shift+Space and Ctrl+Shift+Space.
+- **SABA-B-9**: the Stop button, its double-click ("Insert marker to the start"), and the playing-state label "Pause" → "Stop".
+- SABA-B-11c, SABA-B-7 (`awaiting_user`), REGRESSION-ROUND-2026-10-30, and the protected purchased route (SRW-21, `deferred_user`).
+- The round-248 Lows (C-R248-01, GATE248-S1, GATE248-S2). They are in `deferred_low_polish` (D-29z427).
 
 ## 0. Baseline and scope
 
 **Start state:**
-- HEAD = `da8c64192d3574adf349dd3a9626ad16ec94d858` (gate 247 `published`; `b-round-247/head-at-planning.txt`).
-- `git status --short --untracked-files=all` is **empty** (`b-round-247/git-status-at-planning.txt`, 0 bytes).
+- HEAD = `0e862be30b3e1cc19b2971a172584a6fd0f2cbfb` (gate 248 `published`, `commit`; `b-round-248/head-at-planning.txt`).
+- `git status --short --untracked-files=all` is **empty** at planning.
 - **STOP (L11)** if HEAD differs or any path is dirty. One exception: a root commit that touches only the 4 root files. Then re-hash those files and continue.
 
-**Frozen:** `b-round-247-r248-tree-sha256.txt`, **1,098** files. That is every tracked file (1,112), minus the 10 granted files and the 4 root files.
-- From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-247-r248-tree-sha256.txt` gave rc 0 at planning.
+**Frozen:** `b-round-248-r249-tree-sha256.txt`, **1,099** files. That is every tracked file (1,112), minus the 9 granted tracked files and the 4 root files.
+- From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-248-r249-tree-sha256.txt` gave rc 0 at planning.
 - Each of the 7 protected auth and purchase files appears exactly once (checked): `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/entry.server.tsx`.
 - Also frozen:
-  - `grid.ts` (`resolveSnapStep` keeps its contract; §1.2), `grid-divisions.ts`, `ArrangementClip.tsx`, `ArrangementRuler.tsx`, `ArrangementMarkerRow.tsx`, `ArrangementLoopBrace.tsx`, `ArrangementGridMenu.tsx`, `ArrangementContext.tsx` and `shortcuts.ts`;
+  - `ArrangementClip.tsx` (its `seekTo` prop keeps its name; the Lane passes `setInsertMarker` into it), `ArrangementTempoRow.tsx`, `ArrangementOverview.tsx`, `ArrangementVideoDock.tsx`, `shortcuts.ts`, `position-store.ts`, `grid.ts`;
   - every other test file;
-  - every implementation doc except doc 186;
+  - every implementation doc except the new doc 191;
   - `.claude/**`, `CLAUDE.md` and every config file.
 
-**Root-owned, must equal HEAD:** `b-round-247-r248-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`), with start hashes in `b-round-247-r248-root-files-start-sha256.txt`. No dependency is needed.
+**Root-owned, must equal HEAD:** `b-round-248-r249-root-files.txt` (`package.json`, `package-lock.json`, `vite.config.ts`, `vitest.config.ts`), with start hashes in `b-round-248-r249-root-files-start-sha256.txt`. No dependency is needed.
 
-### 0.1 Grants (`b-round-247-r248-grants.txt`; start hashes in `b-round-247-r248-grants-start-sha256.txt`)
-The applied diff is `b-round-247/precheck-scratch.diff` (grants 1–9) against HEAD `da8c641`. `git apply --check -p1` on the clean store tree gives rc 0. **A may apply it as is**, then write grant 10.
+### 0.1 Grants (`b-round-248-r249-grants.txt`; start hashes for 1–9 in `b-round-248-r249-grants-start-sha256.txt`)
+The applied diff is `b-round-248/precheck-scratch.diff` (sha256 `dd9b5198…2686`, grants 1–10) against HEAD `0e862be`. `git apply --check -p1` on the clean store tree gives rc 0. **A may apply it as is**, then write grant 11.
 
 | # | Path | Change (`git apply --numstat`) |
 |---|---|---|
-| 1 | `app/components/arrangement/StudioWorkspace.tsx` | +94/−53. Most of the −53 is Biome re-wrapping `changeGridDivision` once it gets a deps array; its body, order and side effects are unchanged (L49). <ul><li>`gridLinesShown` moves up, next to `gridSeconds` (it was at l.2578, after the `barsRulerGestures` memo that now needs it). Two derived values: `snapGridSeconds = gridLinesShown ? gridSeconds : undefined` and `activeSnapSeconds = snapEnabled && gridLinesShown ? gridSeconds : null`.</li><li>The 5 snap sites get `activeSnapSeconds` / `snapGridSeconds`: `barsRulerGestures` (and its deps), `ArrangementRuler`, `ArrangementMarkerRow`, `ArrangementLoopBrace`. `ArrangementLane` keeps `gridSeconds` (drawing) and gets the new `snapGridSeconds`.</li><li>The two ref paths check `gridLinesVisible(gridSecondsRef.current, pxPerSecondRef.current)`: the empty-lane click seek (l.2041) and the selected-clip arrow nudge (l.2390), which falls back to `NUDGE_SECONDS` (0.1 s) as with Snap off.</li><li>`withSnapPausedNote(message)` (`useCallback`, no deps) appends `studioGridStrings.snapPausedNote` when `snapEnabledRef.current` is true and the current grid's lines are hidden. It wraps exactly 6 writes: `toggleSnap` (on), `changeGridDivision`, the adaptive branch of `stepGridDivision`, `toggleGridMode`, the adaptive branch of `toggleGridTriplet` and `chooseGridMenuAdaptiveDensity`. Their deps arrays gain `withSnapPausedNote`.</li><li>The grid control gets `data-snap-paused` (`'true'` only when Snap is on and the lines are hidden). The Snap button's `title` becomes `snapPausedTitle` in that state. `data-snap`, `aria-pressed` and the button text stay as they are.</li></ul> |
-| 2 | `app/components/arrangement/ArrangementLane.tsx` | +4/−2: the optional prop `snapGridSeconds?: number`. The library-drop `resolveSnapStep` (l.252) uses it, and it is forwarded to `ArrangementClip` as `gridSeconds`. The lane's own `gridSeconds` stays for the lines, `data-grid-seconds` and `data-grid-lines`. |
-| 3 | `app/components/arrangement/ArrangementTempoRow.tsx` | +1/−1: `BarsRulerGestures.gridSeconds: number` → `number \| undefined`. The key stays required. |
-| 4 | `app/lib/arrangement/strings.ts` | +3/−1: `titleLinesHidden` says "…lines are hidden at this zoom, so Snap is paused. Zoom in. …"; new `snapPausedTitle` and `snapPausedNote` (exact text in §1.3). |
-| 5 | `app/lib/arrangement/__tests__/grid-snap-ui.test.tsx` | +122/−3: GS10 rewritten to the new contract (§2.2); `HIDDEN_LINES_TITLE` gets the new text; a new describe `SABA-B-11b stage 2b Snap never lands on hidden grid lines (D-29z420)`, `{ timeout: 15_000 }`, with HS1–HS5 and the helpers `altDragClip` and `pressArrowRight`. |
-| 6 | `app/lib/arrangement/__tests__/grid-snap-position.test.tsx` | +39: a new describe `SABA-B-11b stage 2b no seek snap on hidden grid lines (D-29z420)` with HP1–HP2. |
-| 7 | `app/lib/arrangement/__tests__/grid-musical-ui.test.tsx` | +1: GU12 zooms to 100 px/s before its nudges. At 40 px/s, 1/32 at 120 BPM is 2.5 px, so the old test pinned snapping to hidden lines. Its expected values are unchanged. |
-| 8 | `app/lib/arrangement/__tests__/grid-musical.test.ts` | +2/−2: GM5's two `titleLinesHidden` strings. |
-| 9 | `app/lib/arrangement/__tests__/strings.test.ts` | +7/−3: ST23 keys and plain strings gain `snapPausedNote` and `snapPausedTitle`; three `titleLinesHidden` strings in ST24. |
-| 10 | `docs/implementation/2026/quarter-IV/186-saba-b-11b-adaptive-grid.md` | §2.3. This is the final stage, so l.4 becomes `Completed (C round 248 PASS)` (L28, multi-stage clause). |
+| 1 | `app/contexts/ArrangementContext.tsx` | +142/−53. Most of the −53 is the old `togglePlayback` body moving, unchanged, into `startPlaybackAt` (L49, §1.5). <ul><li>New: `insertMarkerRef`, `insertMarkerStore` (a second `createArrangementPositionStore(0)`), `ArrangementInsertMarkerContext` with its provider, and the export `useArrangementInsertMarkerStore()`.</li><li>New callbacks: `writeInsertMarker` (ref + store), `placeInsertMarker` (write + clear a time selection), `startPlaybackAt(from)`, `continuePlayback`, `setInsertMarker`, `returnToStart` and `moveInsertMarkerToPlayhead`. The last four are on the context value and in `ArrangementContextValue`.</li><li>`togglePlayback`: playing → `stopPlayback()`, unchanged; stopped → `startPlaybackAt(range ? min(range.start, range.end) : insertMarkerRef.current)`.</li><li>`seekTo` also writes the marker (it keeps the range). `playFrom` places the marker and then starts at its target through `startPlaybackAt`. `endPlayheadScrub` places the marker when stopped.</li><li>`cutTimeSelection` remaps the marker with `remapTime`, playing or stopped.</li></ul> |
+| 2 | `app/components/arrangement/StudioWorkspace.tsx` | +51/−12. <ul><li>`ArrangementInsertMarkerSignal`: a `hidden`, `aria-hidden` div `data-testid="arrangement-insert-marker"` whose `data-insert-marker` (3 decimals) follows the store through a subscription, with no re-render. It is rendered next to `ArrangementPlayheadLine`.</li><li>The empty-lane click, `ArrangementRuler onSeek` and `barsRulerGestures.onSeek` call `setInsertMarker`.</li><li>The Space branch: Ctrl/Cmd+Shift (no Alt) → `moveInsertMarkerToPlayhead`; Shift → `continuePlayback`; no Ctrl/Cmd → `togglePlayback`; Ctrl/Cmd without Shift falls through, as at HEAD.</li><li>Home → `returnToStart`.</li><li>The Space key-up `preventDefault` also covers Ctrl/Cmd+Shift+Space, so a focused button is not activated (IM14).</li></ul> |
+| 3 | `app/components/arrangement/ArrangementRuler.tsx` | +1/−1: the playhead handle's ←/→ call `onScrubEnd` (the playhead) instead of `onSeek` (now the marker). |
+| 4 | `app/components/arrangement/ArrangementLane.tsx` | +2/−2: it reads `setInsertMarker` from the context and passes it to `ArrangementClip` as `seekTo` (a clip-body click, or a range gesture that did not move). |
+| 5 | `app/components/arrangement/ArrangementTransport.tsx` | +2/−2: Back to start (↤) calls `returnToStart`. |
+| 6 | `app/components/arrangement/ArrangementMarkerRow.tsx` | +5/−10: the flag's double-click and the menu's "play" call `playFrom(marker.time)` and select the flag. The unused `isPlaying` and `togglePlayback` are removed. |
+| 7 | `app/lib/arrangement/strings.ts` | +4: `insertMarkerWhilePlaying(time)` and `insertMarkerToPlayhead(time)` (exact text in §1.3). |
+| 8 | `app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx` | +8/−1: **BR4b** is rewritten to the new contract (§2.2). Asserts are added; none is removed. |
+| 9 | `app/lib/arrangement/__tests__/strings.test.ts` | +8: two `V02B_FORMATTER_SAMPLES` entries (ST12 requires a sample for each formatter) and two exact-text rows in ST11. |
+| 10 | `app/lib/arrangement/__tests__/insert-marker-ui.test.tsx` | new, 367 lines: describe `SABA-B-10a stage 1 Insert Marker and playhead (D-29z430)`, `{ timeout: 15_000 }`, with IM1–IM14. |
+| 11 | `docs/implementation/2026/quarter-IV/191-saba-b-10a-insert-marker.md` | new, §2.3. l.4 is `In Progress (stage 1 of 2; C round 249 PASS)` (L28). |
 
-- **No test assertion is removed.** GS10 changes its expected values and adds asserts. GU12 adds one zoom line. All the string rows change only the pinned text.
+- **No test assertion is removed.** BR4b keeps its two `isPlaying` asserts; its `positionOf ≈ 6` changes to "≈ 2, the marker is 6, and Stop + Play starts at 6".
 - **Read before editing:**
-  - `AUDIO_ARCHITECTURE.md` (Studio files; no audio change);
-  - `AGENT_DISCOVERABLE_CODE.md`: new names `snapGridSeconds`, `activeSnapSeconds`, `withSnapPausedNote`, the prop `snapGridSeconds`, and the strings `snapPausedTitle` / `snapPausedNote`;
+  - `AUDIO_ARCHITECTURE.md` (playback start and the position store);
+  - `REACT_CONTEXT.md` (a new provider and its hook);
+  - `AGENT_DISCOVERABLE_CODE.md`: new names `insertMarker*`, `placeInsertMarker`, `startPlaybackAt`, `continuePlayback`, `returnToStart`, `useArrangementInsertMarkerStore`, `ArrangementInsertMarkerSignal`;
   - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`;
   - `GEORGIAN_DOCS.md` and `docs/implementation/TEMPLATE.md`;
   - `.claude/prompts/studio-feature.md`.
 
 ### 0.2 B's pre-check (L23, done)
-B extracted HEAD to `/tmp/b248-scratch` with `git archive` (outside the repo) and applied the change there.
-- **Static checks:** `npx tsc --noEmit` rc 0. `npx biome check` on the 9 files: "No fixes applied".
-- **L23 grep** for the changed tokens in tests (`Snap still works|titleLinesHidden|lines are hidden|data-grid-lines|data-snap`) gives 19 test files. All of them are in the covering set. Only GS10, GU12, GM5, ST23 and ST24 went red on the change before their grants were written. No frozen test needed a grant.
-- **Covering set** (`b-round-247/covering.txt`): **134 files, 2,073/2,073 green** (`b-round-247/covering.log`). It is every `app/**` test file that matches `grep -rlE "StudioWorkspace|ArrangementLane|ArrangementTempoRow|studioGridStrings|strings'|grid|[Ss]nap"`.
-- **Timeouts (L31):**
-  - The new rows take 45–80 ms each, against the 15 s describe timeouts.
-  - The files take `grid-snap-ui` 4.8 s (25 tests), `grid-snap-position` 2.6 s (19 tests) and `grid-musical-ui` 3.6 s (14 tests).
-  - No test in these files is near 50 %. The slowest covering file is `track-group-collapse-ui` (22.1 s for 30 tests); it is unchanged.
-- **Red proofs.** All run on the 5 test files of grants 5–9. Script: `b-round-247/mutants/run-mutants.sh <scratch> <logdir>`, with the mutants in `mutate.py`. MU-HEAD was run by hand (the 4 source files from `da8c641`, with the new tests). Summary: `b-round-247/mutants/logs/summary.txt`. The runs used a second copy, `/tmp/b248-mut`, so the browser probe's server never saw a mutant.
+B extracted HEAD to `/tmp/b249-base` and `/tmp/b249-scratch` with `git archive` (outside the repo) and applied the change there. Scripts: `b-round-248/proto_stage1*.py`.
+- **Static checks:** `npx tsc --noEmit` rc 0. `npx biome check` on the 10 files is clean (after `--write`, which is in the diff).
+- **Whole suite on the scratch, run by B, not A or C:** 215 files, **3,123/3,123** green (`b-round-248/proto-full-final.json`). That is the HEAD count of 3,109 plus the 14 IM rows.
+- **The review's "44 files that use Space or `togglePlayback`" did not go red.** Version 1 of the prototype (without the range clearing) ran all 214 HEAD files (`proto-run.json` + `proto-run-rest.json`): **3,108/3,109**. Only BR4b changed contract. That is a measured coverage fact, not a shortcut: no existing test played, stopped and played again expecting the old resume. The IM rows add that coverage.
+- **L23 collisions found and granted:**
+  - BR4b (bars lower-zone click while playing; grant 8);
+  - ST12 (every formatter needs a sample; grant 9);
+  - **EN3** (`marker-edge-nav-ui`, SRW-16 2b-2: "a time range adds its track"). It went red when `seekTo` also cleared the range (`proto-run2.json`). Ruling: `seekTo` keeps the range (§1.2), so EN3 is unchanged and frozen.
+- **Covering set** (`b-round-248/covering.txt`): **122 files, 1,815 tests**, all green in the final full run. It is every `app/**` test file that matches `grep -rlE "StudioWorkspace|ArrangementProvider|ArrangementContext|ArrangementLane|ArrangementRuler|ArrangementTransport|ArrangementMarkerRow|togglePlayback|seekTo|playFrom|Space|'Home'|\{Home\}"`, plus the new file.
+- **Timeouts (L31):** IM7 is the slowest IM row at 822 ms against 15 s. `bars-ruler-ui` peaks at 1.13 s (BR2), and the whole file took 6.2 s in gate 248's `verify.log`. `strings.test` peaks at 18 ms. The slowest covering tests are CP12a–d at 8.2–8.4 s against 30 s (28 %), unchanged. Nothing is near 50 %.
+- **Red proofs.** All run on grants 8–10. Script: `b-round-248/mutants/run-mutants.sh <fixed-scratch> <logdir>`, with the mutants in `mutate.py`. MU-HEAD was run by hand (the 7 source files from `0e862be`, with the new tests). Summary: `b-round-248/mutants/logs/summary.txt`. The runs used copies `/tmp/b249-mut-*`, so no server saw a mutant.
 
 | Run | Change | Red rows |
 |---|---|---|
 | FIX-CONTROL | none | none |
-| MU-HEAD | all 4 source files from `da8c641` | **GM5, GS10, HP1, HP2, HS1, HS2, HS4, HS5, ST23, ST24** (HS3 is green at HEAD, because Alt + Snap on is already free there) |
-| MU-ACTIVE-IGNORES-LINES | `activeSnapSeconds = snapEnabled ? gridSeconds : null` | **GS10, HP1, HS5** |
-| MU-ALT-ENABLES-HIDDEN | `snapGridSeconds = gridSeconds` | **HP2, HS2, HS3** |
-| MU-LANE-FORWARDS-DRAW-GRID | Lane uses `gridSeconds` for its `resolveSnapStep` and for the clip | **HS2, HS3** |
-| MU-SEEK-REF-IGNORES-LINES | the empty-lane seek uses the old ref expressions | **HP1, HP2** |
-| MU-NUDGE-HIDDEN | the nudge checks only `snapEnabledRef` | **HS4** |
-| MU-NO-NOTE | `withSnapPausedNote` returns the message unchanged | **HS1** |
-| MU-TITLE-NOT-PAUSED | the Snap title stays `snapOnTitle` | **HS1** |
-| MU-PAUSED-ATTR | `data-snap-paused` is always `"false"` | **GS10, HS1, HS5** |
+| MU-HEAD | the 7 source files from `0e862be` | `strings.test.ts` fails to load (`pb.insertMarkerWhilePlaying is not a function`); **BR4b, IM1–IM10, IM12–IM14**. IM11 stays green: D-27 is kept. |
+| MU-SPACE-FROM-POSITION | `togglePlayback` starts at `positionRef` | **BR4b, IM1, IM4, IM5** |
+| MU-NO-RANGE-START | the range start is ignored | **IM5** |
+| MU-SHIFT-SAME-AS-SPACE | Shift+Space calls `togglePlayback` | **IM2** |
+| MU-CLICK-SEEKS-PLAYING | `setInsertMarker` moves the playhead while playing | **BR4b, IM4** |
+| MU-NO-STATUS-PLAYING | no status for a click while playing | **IM4** |
+| MU-NO-RANGE-CLEAR | `placeInsertMarker` keeps the range | **IM6, IM12** |
+| MU-CTRL-SHIFT-NOOP | Ctrl/Cmd+Shift+Space does nothing | **IM3, IM6** |
+| MU-HOME-MARKER-ONLY | Home/↤ move only the marker while playing | **IM7** |
+| MU-SEEKTO-NO-MARKER | `seekTo` does not write the marker | **IM9** |
+| MU-SCRUBEND-NO-MARKER | a stopped handle step does not move the marker | **IM8** |
+| MU-HANDLE-ONSEEK | the handle keys call `onSeek` | **IM8** |
+| MU-CUT-NO-REMAP | Cut Time does not remap the marker | **IM10** |
+| MU-KEYUP-OLD | the old key-up condition | **IM14** |
+| MU-MARKER-PLAY-TOGGLE | flag double-click = the old `jumpToMarker` + `togglePlayback` | **IM12** |
 
 ### 0.3 Recipes and measurements (L29)
-**Browser probe** `b-round-247/snap-hidden-probe-248-v2.cjs <base> <out.json> [shotDir] [caseRegex]`. Each case uses a fresh context and waits for `Demo collection ready`. HEAD was measured on `:5173` and the fix on `:5174` (`/tmp/b248-scratch`, now stopped).
-- **At load (both builds):** Snap is **off**. The grid is adaptive 1 s in the seconds family at 40 px/s, with no tempo. So every recipe turns Snap on with `G` itself.
-- Musical cases first add `demo-stem-pulse` (click its library row, then **Add**). That seeds 120 BPM and Snap on (status `… Tempo 120 BPM … Snap on — grid 1/2 (G)`).
-- Zoom is set by the `arrangement-zoom` range input (native value setter + `input` event). The minimum is 0.5 px/s at position 0. The probe binary-searches for 20, 60 or 100 px/s.
+**Browser probes** (Chromium 143, Playwright, a fresh context per case, `Demo collection ready` first, then `demo-stem-pulse` is added: click `[data-source-id="demo-stem-pulse"]`, then the first `Add…` button, then blur). HEAD was measured on `:5173`. The fix ran on `:5174` from `/tmp/b249-scratch`, which is now stopped.
+- Scripts:
+  - `b-round-248/im-probe-249.cjs <base> <out.json> [caseRegex]`: cases `restart`, `shiftContinue`, `ctrlShift`, `clickWhilePlaying`, `ctrlShiftOnPlayButton`;
+  - `b-round-248/dbg3.cjs <base>`: the range and scrub-strip cases;
+  - `b-round-248/dbg2.cjs <base>`: lane clicks, HEAD vs fix.
+- At load the project is empty ("Nothing to play"), so every recipe adds the pulse first. That seeds 120 BPM with Snap on, and every probe time below is on the grid.
+- **Signals:**
+  - the playhead is `[data-testid="arrangement-playhead-handle"]` `aria-valuenow`;
+  - the marker is `[data-testid="arrangement-insert-marker"]` `data-insert-marker` (fix only; absent at HEAD);
+  - playing means the button `aria-label="Pause"` exists;
+  - a time selection of any kind renders `[data-testid="arrangement-range"]` (`StudioWorkspace.tsx` l.3013 at HEAD). `[data-range-start]` renders only for all-track ranges (`ArrangementLane.tsx` l.1031), so it read `null` for B's one-track drag; do not use it for one-track ranges.
+- **Geometry at 1440×900:** the ruler starts at x 512, 40 px/s. Lane centres: music y 396, stems 477, sfx 558.
 
-| Case | HEAD `da8c641` | Fix (scratch) | Files |
+| Case (both viewports) | HEAD `0e862be` | Fix (scratch) | Files |
 |---|---|---|---|
-| **minZoomAdaptive:** slider 0 (0.5 px/s; adaptive 10 s; `data-grid-lines` hidden), `G`, ruler click | 810 (1440) / 670 (1280): a hidden 10 s line | 811.328 / 669.92: free | `head-probe3.json`, `scratch-probe.json` |
-| same, Snap off, **Alt** ruler click | 970 / 800: Alt switched the hidden grid on | 973.08 / 803.48: free | same |
-| **fixed01Hidden:** choose `0.1` (4 px at 40 px/s), `G`, ruler clicks | 11.1, 13.3 | 11.133, 13.299 | same |
-| same, Snap off, Alt click (its own x, ≥ 800 ms after the previous click) | 18.7 | 18.717 | same |
-| **fixed01Visible:** `0.1` at 60 px/s (6 px, visible), `G`, click; then Snap off + Alt click | 11.1; 11.1 | 11.1; 11.1 (unchanged) | `head-probe2.json`, `scratch-probe.json` |
-| **musical132Hidden:** pulse, choose `1/32` (2.5 px), ruler click | 8.563 (1440) / 7.063 (1280) | 8.535 / 7.051 | `head-probe-musical.json`, `scratch-probe-musical.json` |
-| same at 100 px/s (6.25 px, visible), click | 7.688 (1440) | 7.625 (1440): snapped | same; **1280 invalid**, see below |
-| **nudgeHidden:** pulse, choose `0.25`, 20 px/s (5 px), click the clip, Snap on, ArrowRight ×2; then 40 px/s, ArrowRight | 0 → 0.25 → 0.5 → 0.75 | 0 → 0.1 → 0.2 → **0.25** (the next visible line) | `head-probe2.json`, `scratch-probe.json` |
+| ruler click 2 s, Space, 1.5 s, Space (stop), Space | stop 3.491 / 3.483 → restart **3.700 / 3.682** (resume) | stop 3.483 → restart **2.200** after 250 ms (from the marker 2.000) | `head-probe.json`, `proto-probe-final.json` |
+| same, then Shift+Space | 3.691 | **3.700 / 3.682** (from the stop point); marker 2.000 | same |
+| same, then Ctrl+Shift+Space, Space | 3.673 (Ctrl+Shift+Space does nothing) | marker **3.483**, status `Insert marker moved to the playhead (00:03.483). Space plays from here.`; Space → 3.683 | same |
+| play from 1; during playback: sfx-lane click 6 s, ruler click 8 s, Home, ruler click 5 s, ↤ | (`dbg2.cjs`) a lane click jumps playback: 9 → 9.861, 11 → 11.838 | playback continues (2.721, 3.632). Marker 6.000, then 8.000, with status `Insert marker at 00:0N.000 — playback continues. Stop, then Space plays from here.`. Home → playback 0.261, marker 0.000. Ruler 5 → marker 5.000. ↤ → 0.252, marker 0.000. Stop, Space → 0.200 | `proto-probe-final.json` |
+| ruler click 1 s; drag 5 → 7 s on the music clip; Space, stop, Space, stop, Shift+Space | 1.232; 1.451 (the selection is ignored) | **5.223 / 5.232**; again 5.211 / 5.200; Shift+Space 5.411 | `range-strip-*.json` |
+| then a scrub-strip click at 9 s (playing), Space (stop), Space | stop 9.359 → 9.562 (resume) | marker 9.000; stop 9.371 → **9.208** (the strip click cleared the selection) | `range-strip-proto-final.json` |
+| focus Play, Ctrl+Shift+Space | n/a | not playing; focus stays on Play; marker → playhead 0.000 | `proto-probe-final.json` |
 
-- **Signals at the fix** (both viewports, `scratch-probe.json`):
-  - Hidden + Snap on gives `data-snap-paused="true"`, Snap title `Snap on — paused: grid lines are hidden at this zoom. Zoom in. (G)`, and select title `Grid 0.1 s — lines are hidden at this zoom, so Snap is paused. Zoom in. · 1 — narrower, 2 — wider · Fixed at every zoom — 5 for adaptive`.
-  - Status after `G`: `Snap on — grid 0.1 s (G) · Lines are hidden at this zoom, so Snap is paused — zoom in.`
-  - Status after choosing `1/32`: `Grid: 1/32 · 0.063 s at 120 BPM (Snap on) · Lines are hidden at this zoom, so Snap is paused — zoom in.`
-  - Visible gives `data-snap-paused="false"` and no note. At HEAD the attribute does not exist.
-  - Every row has 0 page errors.
+- **Every case has 0 page errors.**
 - **Invalid attempts, kept:**
-  - `atLoad@1440` (fix) timed out on the Vite cold start. Re-run clean in `scratch-probe-musical.json`.
-  - `head-probe2.json` fixed01Hidden `altClickSnapOff` = 11.133. It reused the x of the click before it, so Chromium may have counted a double-click (the ruler's double-click is Fit). Re-measured with distinct positions in `head-probe3.json`: 18.7.
-  - `clickVisible` in `head-probe2.json` and `scratch-probe.json` was off-screen (the ruler at 100 px/s is wider than the window).
-  - The musical visible click at 1280 repeated the first value on both builds, so it is invalid. C re-measures it.
-- **Harness facts for C:** (INFO-B248-RULER-DBLCLICK) give each ruler click its own x and ≥ 800 ms between clicks. (INFO-B248-OFFSCREEN-RULER) clamp click x to the visible part of the ruler.
-- **Code facts (grep at `da8c641`):**
-  - every snap path starts from StudioWorkspace props or refs: `grep -rn "resolveSnapStep\|resolveGridTime\|adjacentGridLine\|snapTimeToGrid" app --include=*.tsx` → Clip l.513/735 (fed by Lane), LoopBrace l.144/167/207, Lane l.252, Ruler l.158/181/283, TempoRow l.119, MarkerRow l.486/580, StudioWorkspace l.2041/2400;
-  - `ArrangementLoopBrace` l.201 and `ArrangementMarkerRow` l.484 already take their Snap-off branch when `snapSeconds === null`: `LOOP_KEY_STEP_SECONDS` and `MARKER_KEY_STEP_SECONDS`, both 0.1 s (l.17, l.54). B did not run those two key paths in the browser; C measures them (C-KEYSTEP-248).
+  - `proto-probe.json` `clickWhilePlaying` `afterLane`: the marker stayed 1.000. The click y (sfx bottom − 6 px) missed the lane. It was re-run at the lane centre in `proto-probe-final.json` (marker 6.000).
+  - `range-strip-proto.json` (prototype v3, before `playFrom` cleared the selection) gave 5.2 after the strip. That is the stale-range ruling of §1.2, fixed in the final version.
+  - The first restart run of `im-probe` had no clip ("Nothing to play").
+- **Code facts (grep at `0e862be`):**
+  - `grep -rn "seekTo\|playFrom\|togglePlayback\|endPlayheadScrub" app --include=*.tsx --include=*.ts | grep -v __tests__` gives the callers. Each one has a ruling in §1.2: Clip l.734 (via the Lane), Lane l.189/1019, MarkerRow l.157/283/437/683/848, Ruler l.200/282, Transport l.80/150, SW l.530/1384/1388/2068/2161/2399/2864, ArrangementContext l.2390 (video add).
+  - `grep -n "remapTime(positionRef" app/contexts/ArrangementContext.tsx` → l.2155 (Cut Time); the marker gets the same remap (IM10).
+  - Other Space handlers (`grep -rn "=== ' '" app/components`): GridMenu, MarkerMenu, ShortcutSheet, DetailPanel, Lane, GroupHeader, LibraryPreview. They are menu or button key-ups and are unchanged.
 
-## 1. Ruling D-29z420: a hidden grid pauses Snap
+## 1. Ruling D-29z430: the Insert Marker model
 
 ### 1.1 The rule
-- **Hidden** means `gridLinesVisible(gridSeconds, pxPerSecond)` is false. The lines are less than 6 px apart (`GRID_LINE_MIN_SPACING_PX`). This covers:
-  - a fixed division zoomed out (0.1 s below 60 px/s, 1/32 at 120 BPM below 96 px/s, …);
-  - the adaptive grid at its widest end (10 s below 0.6 px/s; 1 bar at 120 BPM below 3 px/s).
-- **While the lines are hidden, every grid snap acts as Snap off.** That covers clip move and trim, library drop, ruler click, playhead drag, empty-lane click, the bars ruler, the tempo row, markers and the loop brace.
-  - Clip-edge and marker targets are not snapped to either. Today they are reached only through a non-null grid step, the same as with Snap off.
-  - The keyboard steps use their Snap-off steps: a selected clip moves 0.1 s (`NUDGE_SECONDS`), and the loop brace and markers move 0.1 s.
-- **Alt never switches on a hidden grid.**
-  - With Snap off, Alt + a visible grid still snaps, as Live 6.10 says ("if the grid is switched off, using the modifier will temporarily enable it").
-  - With Snap on, Alt bypasses as before.
-- **The Snap toggle keeps the user's choice.** `data-snap`, `aria-pressed` and the button's look stay `on`. Zooming in until the lines show resumes snapping at once, with no key press.
-- **The drawn grid, the division readout and the adaptive chooser are unchanged.**
+- **Two positions.**
+  - The **Insert Marker** is where Space starts. It starts at 0.
+  - The **playhead** is the song position. It moves during playback and shows the stop point after a stop.
+- **While stopped, every positioning action moves both.** That covers a lane click, a clip-body click, a ruler click (seconds ruler, bars lower zone), the playhead handle keys and drag, Home, ↤, a marker jump and a video add. **Only Stop separates them:** the playhead stays at the stop point and the marker stays where it was.
+- **Space**:
+  - stopped → plays from the start of the time selection if there is one, otherwise from the Insert Marker (Live 6.3, 6.6, 42.20 "Play Arrangement View Selection — Space");
+  - playing → stops, and the marker is unchanged.
+- **Shift+Space**: stopped → plays from the playhead, that is, the stop point (Live 6.3); playing → stops.
+- **Ctrl/Cmd+Shift+Space**: the marker moves to the playhead (live position while playing), and the status says so (Live 42.16, NEW12).
+- **A click during playback** (lane, clip body, seconds ruler, bars lower zone) moves only the marker. Playback continues (Saba decision 1), and the status says so.
+- **Placing a point replaces a time selection** (Live 6.9: clicking the background "selects a point in time"). This covers `setInsertMarker`, `playFrom` (scrub strip, flag play), Ctrl/Cmd+Shift+Space, Home/↤ and a stopped handle step or drag.
+- **D-27 stays, now on the start point:**
+  - a start past the project end refuses with `playPastEnd`;
+  - a start at the end plays from 0;
+  - the "ended here" exception still covers a natural end at the playhead (Shift+Space).
 
-### 1.2 Why this design (and not the alternatives)
-- **The approved text** (transport-grid-review.md, 11b): "snap ხილულ ბიჯზე გადადის ან status-ს წერს" (snap moves to a visible step, or writes a status). This round takes the second branch: snap pauses and the UI says so.
-- **Coarsening was rejected.** Snapping to the finest visible step of the same family would land on lines that are still not drawn, because `ArrangementLane` draws `gridSeconds` (l.677). Drawing the coarser step instead would make the readout ("1/32") disagree with the drawn lines, and it would invent a "fixed with a floor" mode that Live does not document. It is bigger and less honest. It is the alternative in SABA-Q-11B-HIDDEN-SNAP.
-- **`grid.ts` is not changed.** Passing `undefined` as the grid to the existing `resolveSnapStep` already gives `null` for both Alt cases. That keeps its 1 jsdom contract (SP1) and every other caller unchanged.
-- **The ref paths read the zoom from `pxPerSecondRef`** at the moment of the gesture. No new ref is needed.
+### 1.2 Rulings on each path (D-29z431)
+| Path | Ruling | Reason |
+|---|---|---|
+| `seekTo` (stepMarker Ctrl+←/→, flag single click via `jumpToMarker`, video add l.2390) | It writes the marker and **keeps** the time selection | Live 6.9 confirms Ctrl+←/→ move the insert marker. EN3 pins "a time range adds its track" for those keys, and our marker has no track. So Space after Ctrl+→ with a selection still plays the selection: SABA-Q-10A-CTRL-ARROW-RANGE |
+| Scrub strip / flag double-click / marker menu "play" → `playFrom` | Places the marker (clearing a selection) and starts at the target, never at the range start. While playing it jumps, as at HEAD | Without the clear, Space after strip + stop jumped to a stale selection (`range-strip-proto.json`, v3) |
+| Flag "play" at or after the project end | Refuses with `playPastEnd`, like the strip (C-R235-01). At HEAD a flag exactly at the end played from 0 | One play-from rule for every target |
+| Home and ↤ → `returnToStart` | Places the marker at 0 and `seekTo(0)`. **Playing: playback jumps to 0, as at HEAD.** Stopped: both go to 0 | Saba decision 1 is about timeline clicks, not transport commands. Live's analogue for ↤ is a double-click on Stop, which stops. Keeping the audible jump avoids a transport button that does nothing while playing before 10b draws the marker. Unconfirmed in Live: SABA-Q-10A-HOME-PLAYING |
+| The playhead handle (←/→, drag) | It moves the playhead (`onScrubEnd`). While stopped it also places the marker | The handle is the playhead. While playing, its keys jump playback (IM8) |
+| Cut Time | The marker is remapped, playing or stopped | Data consistency with the remapped position (l.2155) |
+| Paste, Enter-add, Ctrl+E without a range, M while stopped | **Unchanged in stage 1:** they still read the playhead. They differ from the marker only after a Stop, a Shift+Space or a click during playback | Stage 2 (§7). C records the divergence as row C-EDIT-DIVERGE-249 (info), not as PASS |
+| Transport button label | Stays `Pause` while playing, though Space now stops | SABA-B-9 adds the Stop button and the label in 2 rounds. Recorded as B-R249-PAUSE-LABEL (Low, scheduled in SABA-B-9, not deferred) |
 
-### 1.3 Exact strings (grant 4)
-- `titleLinesHidden(label)`: `` `Grid ${label} — lines are hidden at this zoom, so Snap is paused. Zoom in. · 1 — narrower, 2 — wider` ``.
-- `snapPausedTitle`: `'Snap on — paused: grid lines are hidden at this zoom. Zoom in. (G)'`.
-- `snapPausedNote`: `'· Lines are hidden at this zoom, so Snap is paused — zoom in.'`. It is appended after one space.
+### 1.3 Exact strings (grant 7)
+- `insertMarkerWhilePlaying(time)`: `` `Insert marker at ${time} — playback continues. Stop, then Space plays from here.` ``
+- `insertMarkerToPlayhead(time)`: `` `Insert marker moved to the playhead (${time}). Space plays from here.` ``
+- `time` is `formatArrangementTime` (`00:08.000`). The playhead value is rounded to 1 ms.
 
 ### 1.4 Status writes (L51)
-- **The note is appended only by the 6 user grid actions of grant 1**, and only when Snap is on and the resulting grid is hidden. The checks read `gridSecondsRef` after the action has updated it.
-- **Zoom changes write no status.** This is D-29z357 (adaptive zoom is silent), and it is the same for the visible/hidden crossing.
-  - A crossing in either direction keeps the last status. The title and `data-snap-paused` follow the zoom.
-  - A status per crossing was rejected. It would fire on every zoom step and overwrite other statuses (L51), for example the seed, an export or a refusal.
-- **Unchanged writes:**
-  - The tempo seed's `Snap on — grid … (G)` part keeps its text. The seed picks an adaptive 1/4 grid, which is hidden only below 3 px/s at 120 BPM.
-  - The tempo change and the clear-tempo message (`gridTempoClearedMessage`), and the adaptive end messages (`adaptiveNarrowest` / `adaptiveWidest`, which do not mention Snap).
-  - All of these are info rows for C (C-STATUS-NEIGHBOURS-248). Saba is asked about them in §1.6.
-- **What a note can overwrite:** the 6 writes replace the status line, as they do at HEAD. The note only lengthens them. No new write is added.
+- **The two new writes are user actions,** written synchronously: one per click while playing, and one per Ctrl/Cmd+Shift+Space. There is no dedupe: each click has its own time.
+- **What they can overwrite:** the add + seed status, an export status, `playPastEnd`, a gesture refusal, the ready text.
+- **What can overwrite them:** any later action status. Home and ↤ write nothing, so after Home the previous marker status stays (B saw `… at 00:08.000 …` while the marker was 0, in `proto-probe-final.json`). This is an event line, the same class as C-R236-01 (`deferred_low_polish`). It is recorded as **INFO-B249-STALE-MARKER-STATUS**, and 10b's visible marker makes the state visible.
+- **No status** for Space, Shift+Space, a stopped click, or Home. The review's acceptance 9 ("Playing from the insert marker …") is **not adopted**: a status on every Space would overwrite every other status (L51), and the marker becomes visible in 10b. This is a deviation recorded in §3.
 
 ### 1.5 Side effects kept (L49)
-`changeGridDivision`, `toggleSnap`, `stepGridDivision`, `toggleGridMode`, `toggleGridTriplet` and `chooseGridMenuAdaptiveDensity` keep every ref and state write, in order, at HEAD: `gridHandChosenRef`, `gridModeRef`, `snapHandChosenRef`, the density and the division. Only the string passed to `setStatus` gains the conditional note. Rows GS1–GS20, GAU*, GM* and GU* in the covering set pin those side effects, and they stay green.
+`startPlaybackAt` is the old `togglePlayback` body, moved unchanged, in the same order. It starts with `stopLibraryPreview`, then the `nothingToPlay` check, the loop and ended-here checks, the D-27 refusal, `ensureAudioContext`, the `playbackEndedAtRef` reset, `isPlayingRef`/`setIsPlaying`, `updatePosition(from)`, `meterFreshFromRef`, `startGraph`, the rAF tick and the audio pump. Rows IM11 (D-27), BR2 (strip start), the render-budget Play→Pause→Play row and the metering and pump rows in the covering set pin them, and they stay green.
 
-### 1.6 Saba question (L44, D-29z422)
-**SABA-Q-11B-HIDDEN-SNAP** (`awaiting_user`, non-blocking):
-- When the grid lines are hidden at the current zoom, CZABA now pauses Snap, including Alt and the clip-edge and marker targets. The Snap title and the grid statuses say "paused", and zooming in resumes it.
-- Alternatives:
-  - (b) snap to the finest visible step and draw that step;
-  - (c) keep edge and marker magnetism while the grid is paused;
-  - (d) add a one-time status when zooming hides the lines, which today is silent.
-- Live 12 documents none of these.
+### 1.6 Saba questions (L44, D-29z432; `awaiting_user`, non-blocking)
+- **SABA-Q-10A-HOME-PLAYING:** while playing, Home and ↤ jump playback to 0 and move the marker there (as today). Or should they move only the marker, so playback continues (Live's "Move Insert Marker to Beginning" wording)?
+- **SABA-Q-10A-CTRL-ARROW-RANGE:** with a time selection, Ctrl+←/→ moves the marker but keeps the selection (it chooses the tracks), so Space still plays the selection. Or should a locator jump replace the selection?
+- **SABA-Q-10A-DEVIATIONS** (the review's planner deviations, asked once):
+  - a time-only marker, where Live also puts it on a track (↑/↓ between tracks);
+  - no Ctrl/Option+Space "Stop at End of Selection" (DUX `design-ux-review.md` l.260: the macOS input-source switch);
+  - no "Playing from …" status on Space.
 
-### 1.7 Why we missed it
-This is not a Saba-reported issue, so no lesson is required. The gap ("Snap still works" on hidden lines) was recorded in `transport-grid-review.md` §3 row "დამალული ხაზები" and has been carried as stage 2b since D-29z368.
+### 1.7 Focus (L47/L50)
+No action in this stage unmounts the focused element or moves focus. `ArrangementInsertMarkerSignal` is `hidden` and not focusable.
+- **L50 grep, run by B:** the regex `onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)` over every added or removed line of grants 1–7 in `precheck-scratch.diff` gives **0 hits**. The MarkerRow hunks only swap the play call inside existing handlers.
+- **Out-of-scope ruling:** the flag keeps focus on double-click, as at HEAD (`focusMarkerTarget` in the menu path, unchanged).
+- C checks `document.activeElement` in C-CTRLSHIFT-FOCUS-249, the browser twin of IM14.
+
+### 1.8 Why we missed it (Saba-reported, SABA-B-10)
+- **The phase that should have caught it:** B at round-1 planning (D-15, "single position model … the prototype works this way"). Then the Ableton expert review (P8, Q1) and the DUX shortcut table (l.62–66). Both saw the gap and filtered it as "already a ⚖ D-15".
+- **Why it slipped:** a planner's ⚖ deviation was treated as Saba's decision, and "the smallest contract" was accepted as a reason (`transport-grid-review.md` §2.4).
+- **The rule that catches it:** **L44** (a ⚖ deviation recorded by the planner is not a Saba decision), which is already in `lessons.md`. No new lesson is needed. This round applies L44 to its own deviations (§1.6). C checks that L44 exists.
 
 ## 2. Changes
 
-### 2.1 Source (grants 1–4)
-Exactly the diff, with no new dependency and no new export. `ArrangementLane`'s new prop is optional, so every other `<ArrangementLane>` render (tests) keeps its old behaviour: a Lane without `snapGridSeconds` has no Alt grid of its own.
+### 2.1 Source (grants 1–7)
+Exactly the diff: no new dependency, and 1 new export (`useArrangementInsertMarkerStore`). `ArrangementContextValue` gains 4 members. No test mocks the full value: tsc rc 0 on the whole scratch.
 
-### 2.2 Rows (grants 5–9)
+### 2.2 Rows (grants 8–10)
 | Row | Case | Expected |
 |---|---|---|
-| GS10 (rewritten) | fixed 0.1 s at 40 px/s: lines hidden; `G`; drag m1 +13 px; zoom 60; drag +13 px | `data-snap` on, `data-snap-paused` true; m1 7 → **7.325** (free); at 60 px/s lines visible, paused false, the old visible title; m1 7.325 → **7.5** (snapped) |
-| HS1 | 0.1 s at 40 px/s: status after the choice, after `G`; zoom 60; choose 0.25; zoom 40, choose 0.1; `G` | `Grid: 0.1 s (Snap off)`, paused false, title Snap off; then the paused status (§0.3), paused title, `aria-pressed` true, paused true; at 60 px/s paused false, the normal title, **status unchanged** by the zoom; `Grid: 0.25 s (Snap on)` with no note; `Grid: 0.1 s (Snap on) · Lines are hidden …`; `Snap off — free movement (G)`, paused false |
-| HS2 | Snap off, 0.1 s at 40 px/s, Alt drag m1 +13 px; zoom 60, Alt drag +13 px | 7.325 (free); then **7.5** (Alt switched the visible grid on) |
-| HS3 | Snap on, 0.1 s at 40 px/s, Alt drag +13 px | 7.325 |
-| HS4 | 0.25 s at 20 px/s (hidden), Snap on, s1 selected, ArrowRight; zoom 40 (visible), ArrowRight | 4.3 → **4.4** (0.1 s step); 4.4 → **4.5** (the next grid line) |
-| HS5 | adaptive, Snap on, 0.5 px/s | mode adaptive, division 10, lines hidden, paused true; drag s1 +4 px (8 s) → **12.3** (free). Under MU-ACTIVE-IGNORES-LINES it lands on 12.5 (m2's start edge, reached through the hidden grid step). At HEAD the row fails first on the missing attribute. |
-| HP1 | fixed 0.1 s at 40 px/s, Snap on: ruler click x 293, empty-lane click x 185, playhead drag to x 213 / release at 217; then 80 px/s: ruler x 586, lane x 370 | **7.325, 4.625**, handle 5.325, release **5.425** (free); at 80 px/s **7.3, 4.6** (snapped) |
-| HP2 | Snap off, Alt, the same ruler and lane clicks at 40 and at 80 px/s | 7.325, 4.625 (free); then **7.3, 4.6** (Alt switched the visible grid on) |
-| GU12 (+1 line) | 1/32 at 120 BPM, zoom 100 px/s before the nudges | the same values as at HEAD: 0.188, 0.25, 0.188, 0.125 |
+| BR4b (rewritten) | 90 BPM, 1/4, Snap on; a strip click at 2.1, then a lower-zone click at 6.3 while playing | playing; position ≈ 2 (not 6); marker `6.000`; Stop + Play → 6 |
+| IM1 | ruler 2; Space; +1.5 s; Space; Space | stop point > 3; marker `2.000`; restart position exactly 2 |
+| IM2 | the same, then Shift+Space ×2 | starts at the stop point (±1e-6); marker `2.000`; the second press stops |
+| IM3 | after the stop: Ctrl+Shift+Space; ruler 1; Cmd+Shift+Space; Space; +2 s; Ctrl+Shift+Space while playing | marker = stop point (3 decimals) with the exact status; Cmd+Shift with playhead = marker keeps 1.000; Space → 1; while playing the marker > 2.5 and playback continues |
+| IM4 | ruler 1, Space, +0.5 s, ruler 8; Space; Space | playing; marker `8.000`; position < 2; the exact status; after the stop the position < 2; Space → 8 |
+| IM5 | ruler 1; range 7→5 (reversed); Space; +1 s; Space; Space | position 5 twice; the range is kept; marker `1.000` |
+| IM6 | range 5–7, ruler 9; Space; range, Home; range, Ctrl+Shift+Space | each time the range becomes null; marker 9 → 0; Space plays from 9 |
+| IM7 | ruler 4, Space, +1 s, Home; ruler 6; ↤ | still playing; position 0; marker `0.000` after Home and after ↤ |
+| IM8 | ruler 3; handle → (stopped); Space, +1 s, handle → | 3.1, marker `3.100`; while playing the position > 3.15 and the marker is still `3.100` |
+| IM9 | range 5–7; `seekTo(4)` | marker `4.000`; the range is kept |
+| IM10 | ruler 6; all-track range 2–4; Cut Time | marker `4.000`; position 4 |
+| IM11 | ruler 18 (end 16); Space; ruler 16; Space | refuses with `playPastEndMessage(18, 16)`; plays from 0 |
+| IM12 | range 5–7; double-click the flag at 10 | plays from 10; marker `10.000`; the range is null |
+| IM13 | ruler 2; Ctrl+Space; Shift+Space and Ctrl+Shift+Space in the tempo field; blur; Alt+Space | no toggle; marker unchanged; Alt+Space plays from 2 |
+| IM14 | focus Play; Ctrl+Shift+Space keydown and keyup | the key-up is `defaultPrevented`; not playing |
 
-### 2.3 Doc 186 (grant 10)
-- l.4 is exactly `**სტატუსი:** Completed (C round 248 PASS)` (L28).
-- `## მიდგომა`: one paragraph on stage 2b. Cover the D-29z420 rule, the rejected coarsening and why `grid.ts` is unchanged, and keep measured facts (§0.3) apart from inference.
-- `## შეცვლილი ფაილები`: add the stage-2b files (a list, no code).
-- `## პრობლემები და გადაწყვეტები`: Problem → Solution for "Snap still works" on hidden lines, and for the Alt path that switched on a hidden grid (HEAD 970 / 18.7 in the browser).
-- `## ტესტირება`: GS10, HS1–HS5, HP1–HP2, GU12 and the 10 runs of §0.2. Cite only rows that exist (grep the ids, L26).
-- `## TODO / შემდეგი ნაბიჯები`: replace the "ეტაპი 2b (შემდეგი რაუნდი)" block with:
-  - stage 2b done;
-  - ABL-R-8 closes at this PASS;
-  - the Saba questions, now with **SABA-Q-11B-HIDDEN-SNAP**;
-  - the ARCH-CHECKPOINT-TEMPO-GRID re-ask (D-29z423).
-- Every other section is unchanged. The seven TEMPLATE headings stay in order (L26).
-- `grep -rn 'In Progress (stage' docs/implementation` at planning gives 2 hits:
-  - doc 186: this grant;
-  - doc 176 (`stage 1 of 2; C round 225 PASS`): tied to the open PERF-HARNESS-SHARED-LIB-b-ii, not this round.
+### 2.3 Doc 191 (grant 11)
+- Path `docs/implementation/2026/quarter-IV/191-saba-b-10a-insert-marker.md`. Georgian, with technical terms in English.
+- The seven TEMPLATE headings in order (L26).
+- l.4 is exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 249 PASS)` (L28).
+- `## კონტექსტი`: SABA-B-10, D-15 replaced, Saba decision 1.
+- `## მიდგომა`:
+  - the §1.1 rule and the §1.2 table;
+  - the alternatives rejected: renaming `seekTo`; a status on every Space; Home marker-only;
+  - measured facts (§0.3) kept apart from inference (the Live behaviour of Stop and Home is inferred from 6.3 and 42.20).
+- `## არქიტექტურა`: one Mermaid diagram of the two stores and the actions that write them.
+- `## შეცვლილი ფაილები`: a list, no code.
+- `## პრობლემები და გადაწყვეტები`, Problem → Solution:
+  - the stale selection after a strip click;
+  - EN3 and `seekTo`;
+  - Ctrl+Shift+Space button activation on key-up;
+  - Cut Time remap.
+- `## ტესტირება`: BR4b, IM1–IM14, ST11/ST12 and the 16 runs of §0.2. Cite only rows that exist (grep the ids, L26).
+- `## TODO / შემდეგი ნაბიჯები`: stage 2 (§7), 10b, 9, the three Saba questions, INFO-B249-STALE-MARKER-STATUS and B-R249-PAUSE-LABEL.
+- `grep -rn 'In Progress (stage' docs/implementation` at planning gives 1 hit, doc 176. It is tied to the open PERF-HARNESS-SHARED-LIB-b-ii, not this round. After this round doc 191 adds a second hit, tied to SABA-B-10a stage 2.
 
 ## 3. Reference: how Ableton Live 12 does it
+Sources:
+- [AV] Live 12 Reference Manual ch. 6, https://www.ableton.com/en/live-manual/12/arrangement-view (capture `b-round-71/ableton-arrangement-view-20261021.txt`, re-read 2026-10-29);
+- [KS] ch. 42, https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/ (capture `b-round-71/ableton-shortcuts-20261021.txt`, 42.16 and 42.20 quoted from it on 2026-10-29);
+- [NEW12] https://help.ableton.com/hc/en-us/articles/12840878679452;
+- tutorial notes `reference/youtube/SABA-B-9-10-11-transcripts.md` (root, 2026-10-28).
+
 | Behaviour | Source | Confirmed there | CZABA decision | C check |
 |---|---|---|---|---|
-| Snap follows the grid lines; the grid is zoom-adaptive or fixed | Live 12 manual 6.10 "Using the Editing Grid" (checked 2026-10-28, `transport-grid-review.md` §3, [AV 6.10]) | "the cursor will snap to grid lines …"; "zoom-adaptive or fixed" | Snap lands only on drawn lines | C-HIDDEN-SNAP-248, C-VISIBLE-KEEP-248 |
-| The modifier with the grid off | the same, 6.10 | "If the grid is switched off, using the modifier will temporarily enable it" | **Kept for a visible grid.** A hidden grid is not enabled: a deviation (⚖), in SABA-Q-11B-HIDDEN-SNAP. The Mac modifier is still SABA-Q-11B-MAC-BYPASS | C-ALT-HIDDEN-248 |
-| Snapping when the lines are not drawn | `ableton-arrangement-expert` and `docs-explorer` consults (2026-10-29, `stage_plan` of SABA-B-11b); the manual 6.10 text; tutorial notes `reference/youtube/SABA-B-9-10-11-transcripts.md` (GRGG 0:00, 0:44: readout and adaptive default only) | **No reference found.** Adaptive mode in Live avoids the state; fixed-mode zoom-out is not described | B ruling D-29z420 (pause), asked once (L44) | parity status: **unconfirmed** |
-| Grid readout and Snap state are shown | GRGG 0:00 (spacing readout bottom-right) | a readout exists | CZABA tells the paused state in titles, `data-snap-paused` and action statuses. No new persistent text (L39) | C-SIGNALS-248, C-BUDGET-248 |
+| Where playback starts | AV 6.3 | "The flashing blue insert marker … determines where playback starts. By default … at the start … click anywhere within a track to move the insert marker" | Same. The marker starts at 0; a click moves it | C-RESTART-249 |
+| Continue from the stop point | AV 6.3; KS 42.20 "Continue Play from Stop Point — Shift Space" | "To continue playback from where it last stopped, rather than from the insert marker, hold Shift while pressing the space bar" | Same | C-SHIFT-249 |
+| Play the selection | KS 42.20 "Play Arrangement View Selection — Space"; AV 6.6 "triggers playback at the insert marker or active time selection" | plain Space | Same. **Transcript CHECK resolved:** m84w 0:58 says Alt+Space plays the selection; the manual gives plain Space, and Ctrl/Option+Space = "Stop Playback at End of Selection". The manual wins. Alt+Space keeps toggling as at HEAD | C-RANGE-249 |
+| Marker → playhead | KS 42.16 "Move Insert Marker to Playhead Position — Ctrl Shift Space / Cmd Shift Space"; NEW12 | the shortcut | Same keys, plus a status (deviation ⚖: Live shows the marker; ours appears in 10b). **Only the Ctrl chord can be browser-verified in the cloud;** Cmd+Shift+Space is jsdom-only (IM3) and on the Tech Lead list (TLM-R249-MAC-CMD-SHIFT-SPACE, deadline RETRO 260) | C-CTRLSHIFT-249 |
+| Marker to the start | AV 6.3 "double-click the Stop button or press the Home key"; KS 42.20 "Move Insert Marker to Beginning — Home" | Home moves the marker | Home and ↤ move the marker to 0. **While playing they also jump playback (as at HEAD): ⚖, unconfirmed in Live**, SABA-Q-10A-HOME-PLAYING. The double-click on Stop comes with SABA-B-9's button | C-HOME-249 |
+| A click during playback | not stated in AV (`transport-grid-review.md` §2.2: "manual-ში ცალკე არ წერია") | **no reference found** | Saba decision 1: only the marker moves | C-CLICK-PLAYING-249 |
+| A point replaces a selection | AV 6.9 "Clicking into the Arrangement background selects a point in time, represented by a flashing insert marker" | a point is a selection **in the background** | Background and clip clicks follow it. The seconds ruler, the playhead handle, the strip, Home and Ctrl+Shift+Space also clear a selection: **planner deviation ⚖** (no Live text), asked in SABA-Q-TIME-RULER-ROLE. Ctrl+←/→ keeps it (⚖, §1.2) | C-POINT-RANGE-249 |
+| Ctrl+←/→ move the marker | AV 6.9 "Holding Ctrl … snaps the insert marker to locators and the edges of clips" | the marker moves | `seekTo` writes the marker | C-CTRLARROW-249 |
+| Scrub area starts playback | AV 6.3 "click anywhere in the scrub area to start playback from that point" | yes | Unchanged since 11a; it now also places the marker | C-STRIP-249 |
+| Stop keeps the marker | inferred from AV 6.3 (two start points); FORUM (secondary) "After stopping, the insert marker stays where playback started" | **inference** | Implemented as the inference | parity: unconfirmed |
 
-- **Deviations:** (⚖) a hidden grid is never enabled by Alt; (⚖) edge and marker magnetism pause together with the grid. "Simpler to build" is not the reason: the reason is that the user cannot see the lines being snapped to (`transport-grid-review.md` §3, "Selection ხტება ხაზებზე, რომლებიც ეკრანზე არ ჩანს").
-- **Better than Live (claim to test):** the select title and the status name the reason and the remedy ("zoom in").
+- **Deviations (⚖, all in SABA-Q-10A-DEVIATIONS or the questions above):** a time-only marker; no Ctrl/Option+Space; no Space status; Home/↤ jump while playing; Ctrl+←/→ keep the selection; a status for Ctrl+Shift+Space; the "Pause" label until SABA-B-9. "Simpler to build" is not the reason for any of them; the reason is given in §1.2 for each.
+- **Better than Live (claim to test):** the status names what happened and what Space will do next ("Stop, then Space plays from here"), so the separate start point can be learned before 10b draws it.
 
 ## 4. A: checks to run (speed rule: no full suite, no `verify`)
-1. **Start state (§0):** HEAD, empty status, and `sha256sum -c` on the frozen 1,098 list, the root list and the grant start list.
-2. **Apply** `b-round-247/precheck-scratch.diff` (`git apply -p1`), then write grant 10.
-3. **Static checks:** `npm run typecheck` rc 0; `npx biome check` on grants 1–9 clean; `npm run lint` rc 0.
-4. **Covering set:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-247/covering.txt)`. Expect 134 files, 2,073/2,073. Any test above 50 % of its timeout is a STOP at the top of the report (L11).
-5. **Mutants:** make a scratch copy outside `store/` (`git archive` of HEAD plus the 9 changed files, with `node_modules` symlinked). Run `b-round-247/mutants/run-mutants.sh <scratch> <logdir>`. For MU-HEAD, put the 4 source files back from `git show da8c641:<file>` and run the 5 test files. Expect exactly the red rows of §0.2. The repo `git status` must be identical before and after.
+1. **Start state (§0):** HEAD, empty status, and `sha256sum -c` on the frozen 1,099 list, the root list and the grant start list.
+2. **Apply** `b-round-248/precheck-scratch.diff` (`git apply -p1`), then write grant 11.
+3. **Static checks:** `npm run typecheck` rc 0; `npx biome check` on grants 1–10 clean; `npm run lint` rc 0.
+4. **Covering set:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-248/covering.txt)`. Expect 122 files, 1,815/1,815. Any test above 50 % of its timeout is a STOP at the top of the report (L11).
+5. **Mutants:** make a fixed scratch copy outside `store/` (`git archive` of HEAD plus the 10 changed files). Run `b-round-248/mutants/run-mutants.sh <scratch> <logdir>`. For MU-HEAD, put the 7 source files back from `git show 0e862be:<file>` and run the 3 test files. Expect exactly the red rows of §0.2. The repo `git status` must be identical before and after.
 6. **code-reviewer:** run it on the diff (3+ files). Pass its Architecture note to B.
-7. **Playwright** against `:5173` at both viewports. Run a copy of `b-round-247/snap-hidden-probe-248-v2.cjs`; do not edit it in place. Expect the "Fix" column of §0.3.
-8. **Report:** write `a-round-248.md` with:
+7. **Playwright** against `:5173` at both viewports. Run a copy of `b-round-248/im-probe-249.cjs` and `dbg3.cjs`; do not edit them in place. Expect the "Fix" column of §0.3.
+8. **Report:** write `a-round-249.md` with:
    - the hunks;
    - the tests run, with counts;
    - the mutants;
@@ -234,44 +280,73 @@ Exactly the diff, with no new dependency and no new export. `ArrangementLane`'s 
    - any STOP, at the top.
 
 ## 5. C: acceptance
-Use real Chromium on `/studio-lab` at 1440×900 and 1280×720, with a fresh context per row. Wait for `Demo collection ready` first (L48). Give each ruler click its own x, within the visible ruler, with ≥ 800 ms between clicks (§0.3 harness facts). Compare with a HEAD control server where the row says "as at HEAD".
+Use real Chromium on `/studio-lab` at 1440×900 and 1280×720, with a fresh context per row.
+- Wait for `Demo collection ready` (L48), then add `demo-stem-pulse` (§0.3 recipe).
+- Click lanes at their vertical centre. Give every ruler click its own x within the visible ruler, with ≥ 850 ms between clicks (INFO-B248-RULER-DBLCLICK).
+- Timing rows allow `PLAYBACK_LOOKAHEAD` (50 ms) on top of the stated tolerance (L48).
+- Compare with a HEAD control server (`git archive 0e862be`, on another port, stopped after use) where the row says "HEAD".
 
 | Row | What | Pass when |
 |---|---|---|
-| C-SCOPE-248 | HEAD, status, hashes | <ul><li>HEAD is `da8c641`.</li><li>Status is exactly `M` on the 10 grants, with nothing else.</li><li>`sha256sum -c` on `b-round-247-r248-tree-sha256.txt` (1,098) and on the root list gives rc 0.</li><li>The 7 protected files give `git diff --quiet HEAD` rc 0.</li><li>`git diff HEAD -- app` equals `b-round-247/precheck-scratch.diff` hunk for hunk.</li></ul> |
-| C-UNIT-248 | `b-round-247/covering.txt` (134 files) | All green, including GS10, HS1–HS5 and HP1–HP2. The full suite is a gate row. |
-| C-MUT-248 | the 10 runs of §0.2, once each, on a scratch copy outside the repo | The red rows are as listed. The repo status is identical before and after. |
-| C-HIDDEN-SNAP-248 | The bug, both viewports, Snap on and lines hidden (`data-grid-lines="hidden"` on the control and every lane): <ul><li>(a) fixed `0.1` at 40 px/s;</li><li>(b) adaptive at the slider minimum (0.5 px/s, division 10);</li><li>(c) after adding `demo-stem-pulse`, fixed `1/32` at 40 px/s.</li></ul>For each: a ruler click, an empty-lane click, a playhead drag release, and a clip drag (read `data-clip-start`). | <ul><li>Every result is the free time: not a multiple of the hidden step (beyond rounding to 1 ms), and within 1 px of the pointer.</li><li>At HEAD the same recipe lands on the hidden line (B: 11.1 / 810 / 8.563).</li><li>`data-snap-paused="true"`.</li><li>Screenshots.</li></ul> |
-| C-ALT-HIDDEN-248 | Alt (on the pointer up) over a hidden grid: (a) Snap off; (b) Snap on. Then the control: Snap off + Alt with the lines visible (0.1 at 60 px/s) | <ul><li>(a) and (b) give the free time; HEAD (a) lands on the hidden line (B: 18.7, 970).</li><li>The control snaps, as at HEAD (11.1).</li></ul> |
-| C-VISIBLE-KEEP-248 | Visible grids still snap, as at HEAD: 0.1 at 60 px/s; 1/32 at 100 px/s (pulse added); the load state (adaptive 1 s at 40 px/s) with Snap on: ruler click, clip drag, loop brace drag, marker drag | The same values as at HEAD, at both viewports. Re-measure the 1/32 at 100 px/s click at 1280, whose B attempt was invalid. |
-| C-RESUME-248 | Snap on, hidden (0.1 at 40 px/s); zoom in to 60 px/s without any key; click the ruler | It snaps (resume without a key press). `data-snap-paused` goes `true` → `false`. The Snap button's `aria-pressed` stays `true` throughout. |
-| C-NUDGE-248 | After the pulse is added: choose `0.25`, 20 px/s, click the clip, Snap on, ArrowRight ×2; then 40 px/s, ArrowRight | `data-clip-start` 0.000 → 0.100 → 0.200 → **0.250** (HEAD: 0.25, 0.5, 0.75). |
-| C-KEYSTEP-248 | Hidden 0.1 at 40 px/s with Snap on: <ul><li>a focused loop brace (make a loop with Ctrl+L on a time selection), ArrowRight;</li><li>a selected marker flag (`M`), ArrowRight.</li></ul> Then the same at 60 px/s | <ul><li>Hidden: each moves 0.1 s (`LOOP_KEY_STEP_SECONDS`, `MARKER_KEY_STEP_SECONDS`).</li><li>Visible: each moves to the next 0.1 s grid line, as at HEAD. B did not run these in the browser (§0.3), so C writes the values it measures, with HEAD as the control.</li></ul> |
-| C-SIGNALS-248 | Titles, attribute and statuses | <ul><li>Hidden + Snap on: the Snap title, the select title and the statuses are exactly the §0.3 / §1.3 texts.</li><li>The note appears after each of `G`, `4`, choosing a division (select and grid menu), `1`/`2` in adaptive mode and the grid menu width items, `5`, and `3` in adaptive mode, whenever the result is hidden with Snap on.</li><li>There is no note when the result is visible or Snap is off.</li><li>A zoom crossing in either direction leaves the status text unchanged.</li><li>Lines visible: `data-snap-paused="false"` and the old titles.</li></ul> |
-| C-STATUS-BOX-248 | L3: the longest note status (`Grid: 1/32T · … (Snap on) · Lines are hidden …` after the pulse, `3`, at 40 px/s) at 1280×720 and 1440×900 | <ul><li>The status element has no horizontal overflow (`scrollWidth ≤ clientWidth`) and does not cover the transport.</li><li>Record its height and the footer height. Compare with the add + seed status after adding the pulse (the existing long state), and record both.</li><li>FAIL if the note status takes more lines than the seed status at the same width.</li></ul> |
-| C-STATUS-NEIGHBOURS-248 | Info | The tempo seed status, tempo clear, and the adaptive end messages keep their HEAD text (§1.4). Record any case where "Snap on" is announced while `data-snap-paused` is true. |
-| C-KEYS-248 | Neighbour keys | `G`, `4`, `5`, `1`, `2` and `3` typed in a text field (BPM, search) do nothing to the grid, as at HEAD. |
-| C-BUDGET-248 | L39 | The persistent text lines outside the timeline match round 247: empty 85/69 and demo 101/85 at 1440/1280. |
-| AN-REVIEW-248 | Doc 186 | <ul><li>l.4 is byte-exact.</li><li>The 7 headings are in order.</li><li>D-29z420 and the rejected coarsening are explained.</li><li>Every cited row exists.</li><li>The TODO no longer calls 2b "next", and lists SABA-Q-11B-HIDDEN-SNAP.</li></ul> |
-| LAB-SMOKE-248 | `/studio-lab` | It loads. Space plays and pauses. After adding `demo-stem-pulse`, the export WAV has sha256 `1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94`. 0 page errors. |
+| C-SCOPE-249 | HEAD, status, hashes | <ul><li>HEAD is `0e862be`.</li><li>Status is exactly `M` on grants 1–9 and `??` on grants 10–11, with nothing else.</li><li>`sha256sum -c` on `b-round-248-r249-tree-sha256.txt` (1,099) and on the root list gives rc 0.</li><li>The 7 protected files give `git diff --quiet HEAD` rc 0.</li><li>`git diff HEAD -- app` plus the new test file equals `b-round-248/precheck-scratch.diff` file by file.</li></ul> |
+| C-UNIT-249 | `b-round-248/covering.txt` (122 files) | All green, including BR4b, IM1–IM14 and ST11/ST12. The full suite is a gate row. |
+| C-MUT-249 | the 16 runs of §0.2, once each, on a scratch copy outside the repo | The red rows are as listed. The repo status is identical before and after. |
+| C-RESTART-249 | ruler click 2 s; Space; 1.5 s; Space; Space | The restart reads the marker time + elapsed (2.0–2.3 s at 250 ms), not the stop point. HEAD resumes (B: 3.700). `data-insert-marker` is `2.000` throughout. Audible: the output tap RMS > 0 within 300 ms of the restart. |
+| C-SHIFT-249 | the same, then Shift+Space | Starts at the stop point (±0.05 s + lead); the marker is unchanged. |
+| C-CTRLSHIFT-249 | after a stop: Ctrl+Shift+Space, then Space; also once while playing | The marker equals the stop point (3 decimals) and the exact §1.3 status appears; Space starts there. While playing, the marker takes the live time and playback continues. |
+| C-CTRLSHIFT-FOCUS-249 | focus the Play button by Tab; Ctrl+Shift+Space | Playback does not start; `document.activeElement` is still Play, with a visible ring (keyboard focus). |
+| C-CLICK-PLAYING-249 | play from 1 s; then a lane-centre click at 6 s, a clip-body click at 11 s, a seconds-ruler click at 8 s and a bars lower-zone click at 4 s | Playback continues each time (the playhead keeps rising from where it was; HEAD jumps). The marker equals each click time, and the exact §1.3 status shows that time. Stop, then Space starts at the last click time. |
+| C-RANGE-249 | ruler 1 s; drag a selection 5 → 7 s on the music clip; Space; stop; Space; stop; Shift+Space | Starts at 5.0 twice (HEAD: 1.2, 1.45), and `[data-testid="arrangement-range"]` stays. Shift+Space starts at the stop point. |
+| C-POINT-RANGE-249 | with a selection: a seconds-ruler click, a stopped playhead-handle step, a scrub-strip click (playing), Home, Ctrl+Shift+Space, each from a fresh selection | `[data-testid="arrangement-range"]` disappears each time. After the strip: Stop, Space → the strip time (B: 9.208), not 5. **HEAD keeps the selection on a seconds-ruler click and a handle step; the fix clears it (§1.1 point rule). This difference is intended, not a bug.** The ruler case is a planner deviation asked in SABA-Q-TIME-RULER-ROLE (Live 6.9 speaks of the background, not the ruler). |
+| C-CTRLARROW-249 | add a marker at 10 s (`M` at 10 s) and a selection 5–7; Ctrl+→ | The marker moves to the next target (`data-insert-marker`). The selection stays (§1.2, ⚖). Record what Space plays. |
+| C-HOME-249 | playing: Home; then a ruler click at 5 s; then ↤. Stopped: Home | Playing: the playhead jumps to 0 and keeps playing, marker `0.000`, after both. Stopped: both go to 0. |
+| C-STRIP-249 | stopped strip click at 9 s; playing strip click at 12 s | Plays from 9 (marker 9.000); while playing it jumps to 12 (marker 12.000), as at HEAD for the playhead. |
+| C-FLAG-249 | a flag double-click with a selection present; then, while playing, a single flag click | Double-click: plays from the flag, the selection is cleared, and the flag stays selected and keeps focus as at HEAD. Single click while playing: **playback jumps to the flag and the marker moves there, as at HEAD** (`jumpToMarker` → `seekTo`; AV 6.4 "You can jump to locators by clicking on them"). This is not covered by Saba decision 1, which is about timeline clicks. |
+| C-HANDLE-249 | stopped: focus the playhead handle, → ×2; playing: → | Stopped: playhead and marker +0.1 each time. Playing: the playhead jumps +0.1 from the live time and the marker is unchanged. |
+| C-D27-249 | ruler past the end (18 s with the 16 s pulse), Space; ruler at the end, Space; a natural end with the marker at 2 s, then Space, then a fresh natural end and Shift+Space | Refuses with `playPastEnd`; plays from 0; after a natural end Space plays from the marker (2 s) and Shift+Space from 0. |
+| C-CUT-249 | ruler 6 s; select 2–4 s on all lanes (Ctrl+Shift+L); Ctrl+Shift+X | `data-insert-marker` is `4.000`. |
+| C-VIDEO-249 | import `tmp/studio-real-loop/media/beeps-6s-vp9-opus.webm` onto the video track at 0; ruler 1 s; Space; 1.5 s; Space; Space | After the restart the video `currentTime` follows the marker: \|currentTime − (marker + elapsed)\| ≤ 0.08 s after a 300 ms settle. HEAD continues from the stop point. Record the values. |
+| C-KEYS-249 | Space, Shift+Space and Ctrl+Shift+Space typed in the BPM field and the library search | Nothing happens to playback or the marker, as at HEAD. Alt+Space toggles as at HEAD. Ctrl+Space alone does nothing. |
+| C-STATUS-BOX-249 | L3: the longest new status (`Insert marker at 00:11.000 — playback continues. …` at 1280×720 and 1440×900) | No horizontal overflow (`scrollWidth ≤ clientWidth`), the transport is not covered, and it takes no more lines than the add + seed status at the same width. Record the heights. |
+| C-STATUS-CLOBBER-249 | L51: add the pulse (seed status), Space, then a lane click at 6 s while playing; read after 1 s | The final text is the marker status. Then Home: record that the old marker status stays (INFO-B249-STALE-MARKER-STATUS, info). |
+| C-EDIT-DIVERGE-249 | info: play from 2 s, stop at ~3.5 s, then Ctrl+V (after copying a clip), `M`, and Ctrl+E on a clip | Record where each lands (playhead or marker). This is stage-2 scope (§7), not a FAIL. |
+| C-BUDGET-249 | L39 | The persistent text lines outside the timeline equal round 248: empty 85/69 and demo 101/85 at 1440/1280. The signal element is `hidden` (0 × 0). |
+| C-LESSON-249 | §1.8 | `lessons.md` contains L44; §1.8 names the phase, the reason and the rule. |
+| AN-REVIEW-249 | Doc 191 | <ul><li>l.4 is byte-exact.</li><li>The 7 headings are in order.</li><li>D-29z430/431 and the rejected alternatives are explained.</li><li>Every cited row exists.</li><li>The TODO lists stage 2, 10b, 9 and the three questions.</li></ul> |
+| LAB-SMOKE-249 | `/studio-lab` | It loads. Space plays and stops; Space again plays from the marker. The export WAV after adding `demo-stem-pulse` has sha256 `1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94` (unchanged; the export does not read the marker). 0 page errors. |
 | Auth | Standing check | In a fresh context: <ul><li>`/studio-lab` opens anonymously, with `auth_user` null;</li><li>`/studio/middle-east` shows "Sign in required", with no workspace and no `audio[src]`;</li><li>`/api/studio-token` with no header returns 401.</li></ul> |
-| Purchased origin (browser) | Snap on the purchased copy | BLOCKED: backend unavailable in cloud. The grants add no origin branch. |
+| Purchased origin (browser) | The Insert Marker on the purchased copy | BLOCKED: backend unavailable in cloud. The grants add no origin branch. |
 | gate | Full vitest, typecheck, lint, build, `npm run verify`, e2e smoke | Listed as `gate`, not claimed in `passed`. |
 
-**Ableton parity** (C states it separately): rows 1–2 of §3 are **confirmed** or a **deliberate deviation**, as listed; row 3 is **unconfirmed**. A test PASS does not prove parity.
+**Ableton parity** (C states it separately): rows 1–4 and 7–9 of §3 are **confirmed** or a **deliberate deviation**, as listed; rows 5 (playing) and 6 are **unconfirmed** (no reference); the Stop row is an **inference**. A test PASS does not prove parity.
 
 ## 6. Neighbouring behaviour that could break (C probes these first)
-- **Visible-grid snapping anywhere** (C-VISIBLE-KEEP-248). The derived values replace 5 prop sites and 2 ref sites; a missed one would stop snapping on a visible grid.
-- **Clip-edge and marker snap with Snap on and a visible grid** (D-29z17/18, the `grid-snap-clip-edges` rows). They are unchanged.
-- **The drawn lines and `data-grid-seconds` on each lane** stay those of the division. Only the snap input changes.
-- **Adaptive zoom silence** (D-29z357), the seed, `gridHandChosen` (GAU21) and the grid menu checks (D-29z369).
-- **Library drop onto a lane** with hidden lines: it lands free (Lane l.252). Snap on with visible lines still snaps.
-- Any change to the export, the audio, history labels or selection is a regression.
+- **Playback start:**
+  - Play from the transport button;
+  - a library-preview stop before playback;
+  - a loop that is active at the marker;
+  - "Nothing to play" in an empty project;
+  - render-budget Play → Pause → Play.
 
-## 7. Outcomes for B's next planning
-- **PASS and gate published:** SABA-B-11b is done (stages 1, 2a, 2b). ABL-R-8 closes.
-  - **Next (D-29z424):** the **REGRESSION round** at the first planning on or after 2026-10-30. It carries every `scope_additions` entry of REGRESSION-ROUND-2026-10-30, plus C-HIDDEN-SNAP-248 (one short row).
-  - If that planning is still on 2026-10-29, **SABA-B-10a** goes first, with C-R235-02. Before dispatching it, B lists every test that pins the Space contract (policy), and asks root once more for the two checkpoints below.
-  - Then SABA-B-10b, 9 and 11c. SABA-B-7 runs when Saba answers.
-- **A product row FAILS:** a fix-up on the same grants first.
-- **Checkpoints (non-blocking, D-29z421, D-29z423):** ARCH-CHECKPOINT-TEMPO-GRID (re-ask after 2b, now due) and ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS (with the gate-247 note) are requested from root at this feature boundary: `b-round-247-checkpoint-request.md`.
+  They run through `startPlaybackAt` unchanged.
+- **The playhead line and the clock** follow the playhead, not the marker, during and after playback.
+- **Follow:** clicks during playback no longer move the playhead, so Follow keeps following playback (C-R235-02 is stage 2).
+- **Snap and Alt** on every click path: the snapped time now goes to the marker (D-29z420's hidden-grid pause is unchanged).
+- **Markers:**
+  - `M` while playing still uses the live position;
+  - Ctrl+←/→ targets;
+  - flag click selection;
+  - the marker menu.
+- **Video:** the dock frame follows the playhead after a stop and on the restart.
+- **The export, history labels, clip selection and drag gestures** are unchanged. Any change there is a regression.
+
+## 7. Stage 2 and what follows (D-29z429)
+- **SABA-B-10a stage 2** (the next round after this PASS, unless REGRESSION is due first):
+  - paste, Enter-add, Ctrl+E without a range and `M` while stopped read the Insert Marker (Live 6.4: "a locator will be added at the insert marker location or at the start of the time selection");
+  - `M` while playing keeps the live position (ABL-R-10);
+  - `playPastEnd` names the marker;
+  - **C-R235-02**: Follow pauses on a bars lower-zone click and resumes on a scrub-strip click (Live 6.2), plus the seconds-ruler role under SABA-Q-TIME-RULER-ROLE;
+  - C-EDIT-DIVERGE-249's findings.
+- **Then:** SABA-B-10b (the visible flashing marker and the sheet rows), SABA-B-9 (Stop button, double-click Stop, the "Stop" label: closes B-R249-PAUSE-LABEL), SABA-B-11c. SABA-B-7 runs when Saba answers.
+- **PASS and gate:** SABA-B-10a stage 1 is done. **FAIL on a product row:** a fix-up on the same grants first.
+- **Checkpoints (non-blocking, D-29z428):** `b-round-248-checkpoint-request.md` asks root again for ARCH-CHECKPOINT-TEMPO-GRID (now with addendum 11: GATE248-ARCH-EFFECTIVE-SNAP) and ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS. Both are still unanswered. They do not block this round, because this round's owner is `ArrangementContext`, not the grid wiring.

@@ -1,0 +1,992 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -303,6 +303,10 @@
+   clipLaneDrag: ClipLaneDragState | null;
+   setClipLaneDrag: (next: ClipLaneDragState | null) => void;
+   togglePlayback: () => void;
++  continuePlayback: () => void;
++  setInsertMarker: (time: number) => void;
++  moveInsertMarkerToPlayhead: () => void;
++  returnToStart: () => void;
+   pausePlaybackWithStatus: (message: string) => void;
+   seekTo: (time: number) => void;
+   playFrom: (time: number) => void;
+@@ -501,6 +505,7 @@
+ const ArrangementContext = createContext<ArrangementContextValue | undefined>(undefined);
+ 
+ const ArrangementPositionContext = createContext<ArrangementPositionStore | null>(null);
++const ArrangementInsertMarkerContext = createContext<ArrangementPositionStore | null>(null);
+ 
+ const ArrangementMixDraftContext = createContext<ArrangementMixDraftStore | null>(null);
+ 
+@@ -641,6 +646,7 @@
+     () => history.present.tracks.find((track) => track.kind === 'audio')?.id ?? null,
+   );
+   const [positionStore] = useState(() => createArrangementPositionStore(0));
++  const [insertMarkerStore] = useState(() => createArrangementPositionStore(0));
+   const [mixDraftStore] = useState(() => createArrangementMixDraftStore());
+   const [meterStore] = useState(() => createMasterMeterStore());
+   const [trackMeterStore] = useState(() => createTrackMeterStore());
+@@ -677,6 +683,7 @@
+ 
+   const historyRef = useRef(history);
+   const positionRef = useRef(0);
++  const insertMarkerRef = useRef(0);
+   const isPlayingRef = useRef(false);
+   const audioContextRef = useRef<AudioContext | null>(null);
+   const meterTapRef = useRef<MasterMeterTap | null>(null);
+@@ -788,6 +795,24 @@
+     [positionStore],
+   );
+ 
++  const writeInsertMarker = useCallback(
++    (next: number) => {
++      insertMarkerRef.current = next;
++      insertMarkerStore.setPosition(next);
++    },
++    [insertMarkerStore],
++  );
++
++  const placeInsertMarker = useCallback(
++    (next: number) => {
++      writeInsertMarker(next);
++      if (latestRef.current.range !== null) {
++        setRange(null);
++      }
++    },
++    [setRange, writeInsertMarker],
++  );
++
+   const refuseEditDuringGesture = useCallback((): boolean => {
+     if (gestureCountRef.current > 0) {
+       setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+@@ -1289,54 +1314,61 @@
+     }
+   }, []);
+ 
++  const startPlaybackAt = useCallback(
++    (current: number) => {
++      stopLibraryPreview();
++      const arrangement = historyRef.current.present;
++      const end = projectEnd(arrangement);
++      if (end <= 0) {
++        setStatus(studioPlaybackStrings.nothingToPlay);
++        return;
++      }
++      const loopActive = resolveActiveLoop(arrangement.loop, current) !== null;
++      const endedHere =
++        playbackEndedAtRef.current !== null &&
++        Math.abs(playbackEndedAtRef.current - current) < ARRANGEMENT_EPS;
++      if (!loopActive && !endedHere && current > end + ARRANGEMENT_EPS) {
++        setStatus(playPastEndMessage(current, end));
++        return;
++      }
++      const ctx = ensureAudioContext();
++      if (!ctx) {
++        return;
++      }
++      playbackEndedAtRef.current = null;
++      const from = current >= end - ARRANGEMENT_EPS && !loopActive ? 0 : current;
++      isPlayingRef.current = true;
++      setIsPlaying(true);
++      updatePosition(from);
++      const startAt = ctx.currentTime + PLAYBACK_LOOKAHEAD;
++      meterFreshFromRef.current = startAt;
++      startGraph(arrangement, createPlaybackAnchor(from, startAt));
++      if (frameRef.current === null) {
++        frameRef.current = requestAnimationFrame(tick);
++      }
++      if (audioPumpTimerRef.current === null) {
++        audioPumpTimerRef.current = window.setInterval(pumpPlaybackAudio, AUDIO_PUMP_INTERVAL_MS);
++      }
++    },
++    [ensureAudioContext, pumpPlaybackAudio, startGraph, stopLibraryPreview, tick, updatePosition],
++  );
++
+   const togglePlayback = useCallback(() => {
+     if (isPlayingRef.current) {
+       stopPlayback();
+       return;
+     }
+-    stopLibraryPreview();
+-    const arrangement = historyRef.current.present;
+-    const end = projectEnd(arrangement);
+-    if (end <= 0) {
+-      setStatus(studioPlaybackStrings.nothingToPlay);
+-      return;
+-    }
+-    const current = positionRef.current;
+-    const loopActive = resolveActiveLoop(arrangement.loop, current) !== null;
+-    const endedHere =
+-      playbackEndedAtRef.current !== null &&
+-      Math.abs(playbackEndedAtRef.current - current) < ARRANGEMENT_EPS;
+-    if (!loopActive && !endedHere && current > end + ARRANGEMENT_EPS) {
+-      setStatus(playPastEndMessage(current, end));
+-      return;
+-    }
+-    const ctx = ensureAudioContext();
+-    if (!ctx) {
++    const range = latestRef.current.range;
++    startPlaybackAt(range ? Math.min(range.start, range.end) : insertMarkerRef.current);
++  }, [startPlaybackAt, stopPlayback]);
++
++  const continuePlayback = useCallback(() => {
++    if (isPlayingRef.current) {
++      stopPlayback();
+       return;
+     }
+-    playbackEndedAtRef.current = null;
+-    const from = current >= end - ARRANGEMENT_EPS && !loopActive ? 0 : current;
+-    isPlayingRef.current = true;
+-    setIsPlaying(true);
+-    updatePosition(from);
+-    const startAt = ctx.currentTime + PLAYBACK_LOOKAHEAD;
+-    meterFreshFromRef.current = startAt;
+-    startGraph(arrangement, createPlaybackAnchor(from, startAt));
+-    if (frameRef.current === null) {
+-      frameRef.current = requestAnimationFrame(tick);
+-    }
+-    if (audioPumpTimerRef.current === null) {
+-      audioPumpTimerRef.current = window.setInterval(pumpPlaybackAudio, AUDIO_PUMP_INTERVAL_MS);
+-    }
+-  }, [
+-    ensureAudioContext,
+-    pumpPlaybackAudio,
+-    startGraph,
+-    stopLibraryPreview,
+-    stopPlayback,
+-    tick,
+-    updatePosition,
+-  ]);
++    startPlaybackAt(positionRef.current);
++  }, [startPlaybackAt, stopPlayback]);
+ 
+   const startLibraryPreview = useCallback(
+     (sourceId: string, offset = 0) => {
+@@ -1400,14 +1432,42 @@
+           createPlaybackAnchor(target, ctx.currentTime + PLAYBACK_LOOKAHEAD),
+         );
+       }
++      writeInsertMarker(target);
+       updatePosition(target);
+     },
+-    [startGraph, updatePosition],
++    [startGraph, updatePosition, writeInsertMarker],
++  );
++
++  const setInsertMarker = useCallback(
++    (time: number) => {
++      const target = Math.max(0, time);
++      placeInsertMarker(target);
++      if (isPlayingRef.current) {
++        setStatus(studioPlaybackStrings.insertMarkerWhilePlaying(formatArrangementTime(target)));
++        return;
++      }
++      scrubbingRef.current = false;
++      lastScrubRescheduleRef.current = null;
++      updatePosition(target);
++    },
++    [placeInsertMarker, updatePosition],
+   );
+ 
++  const returnToStart = useCallback(() => {
++    placeInsertMarker(0);
++    seekTo(0);
++  }, [placeInsertMarker, seekTo]);
++
++  const moveInsertMarkerToPlayhead = useCallback(() => {
++    const target = Math.max(0, Math.round(livePosition() * 1000) / 1000);
++    placeInsertMarker(target);
++    setStatus(studioPlaybackStrings.insertMarkerToPlayhead(formatArrangementTime(target)));
++  }, [livePosition, placeInsertMarker]);
++
+   const playFrom = useCallback(
+     (time: number) => {
+       const target = Math.max(0, time);
++      placeInsertMarker(target);
+       if (isPlayingRef.current) {
+         seekTo(target);
+         return;
+@@ -1425,9 +1485,9 @@
+         return;
+       }
+       seekTo(target);
+-      togglePlayback();
++      startPlaybackAt(target);
+     },
+-    [seekTo, stopLibraryPreview, togglePlayback],
++    [seekTo, startPlaybackAt, stopLibraryPreview, placeInsertMarker],
+   );
+ 
+   const scrubPlayhead = useCallback(
+@@ -1456,6 +1516,9 @@
+       lastScrubRescheduleRef.current = null;
+       const target = Math.max(0, time);
+       updatePosition(target);
++      if (!isPlayingRef.current) {
++        placeInsertMarker(target);
++      }
+       const ctx = audioContextRef.current;
+       if (isPlayingRef.current && ctx) {
+         startGraph(
+@@ -1464,7 +1527,7 @@
+         );
+       }
+     },
+-    [startGraph, updatePosition],
++    [placeInsertMarker, startGraph, updatePosition],
+   );
+ 
+   const selectSource = useCallback(
+@@ -2154,6 +2217,7 @@
+     if (!wasPlaying) {
+       updatePosition(remapTime(positionRef.current, a, b));
+     }
++    writeInsertMarker(remapTime(insertMarkerRef.current, a, b));
+     setRange(null);
+     setSelection(NO_SELECTION);
+     const loopRemoved = arrangement.loop !== null && result.arrangement.loop === null;
+@@ -2169,7 +2233,14 @@
+         suffix: `${loopRemoved ? ` ${studioEditStrings.loopRemoved}` : ''}${markersRemoved > 0 ? studioEditStrings.markersRemoved(markersRemoved) : ''}`,
+       }),
+     );
+-  }, [applyEdit, refuseEditDuringGesture, setRange, setSelection, updatePosition]);
++  }, [
++    applyEdit,
++    refuseEditDuringGesture,
++    setRange,
++    setSelection,
++    updatePosition,
++    writeInsertMarker,
++  ]);
+ 
+   const pasteClipboard = useCallback(() => {
+     if (refuseEditDuringGesture()) {
+@@ -3814,6 +3885,10 @@
+       clipLaneDrag,
+       setClipLaneDrag,
+       togglePlayback,
++      continuePlayback,
++      setInsertMarker,
++      moveInsertMarkerToPlayhead,
++      returnToStart,
+       pausePlaybackWithStatus,
+       seekTo,
+       playFrom,
+@@ -3925,6 +4000,10 @@
+       exportProgress,
+       clipLaneDrag,
+       togglePlayback,
++      continuePlayback,
++      setInsertMarker,
++      moveInsertMarkerToPlayhead,
++      returnToStart,
+       pausePlaybackWithStatus,
+       seekTo,
+       playFrom,
+@@ -4016,13 +4095,15 @@
+ 
+   return (
+     <ArrangementPositionContext.Provider value={positionStore}>
+-      <ArrangementMixDraftContext.Provider value={mixDraftStore}>
+-        <ArrangementMeterContext.Provider value={meterStore}>
+-          <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
+-            <ArrangementContext.Provider value={value}>{children}</ArrangementContext.Provider>
+-          </ArrangementTrackMeterContext.Provider>
+-        </ArrangementMeterContext.Provider>
+-      </ArrangementMixDraftContext.Provider>
++      <ArrangementInsertMarkerContext.Provider value={insertMarkerStore}>
++        <ArrangementMixDraftContext.Provider value={mixDraftStore}>
++          <ArrangementMeterContext.Provider value={meterStore}>
++            <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
++              <ArrangementContext.Provider value={value}>{children}</ArrangementContext.Provider>
++            </ArrangementTrackMeterContext.Provider>
++          </ArrangementMeterContext.Provider>
++        </ArrangementMixDraftContext.Provider>
++      </ArrangementInsertMarkerContext.Provider>
+     </ArrangementPositionContext.Provider>
+   );
+ }
+@@ -4035,6 +4116,14 @@
+   return context;
+ }
+ 
++export function useArrangementInsertMarkerStore(): ArrangementPositionStore {
++  const store = useContext(ArrangementInsertMarkerContext);
++  if (!store) {
++    throw new Error('useArrangementInsertMarkerStore must be used within an ArrangementProvider');
++  }
++  return store;
++}
++
+ export function useArrangementPositionStore(): ArrangementPositionStore {
+   const store = useContext(ArrangementPositionContext);
+   if (!store) {
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -15,6 +15,7 @@
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   NUDGE_AT_TIME_START_MESSAGE,
+   useArrangement,
++  useArrangementInsertMarkerStore,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+ } from '~/contexts/ArrangementContext';
+@@ -493,6 +494,30 @@
+   return event.code.startsWith('Key') ? event.code.slice(3).toLowerCase() : event.key.toLowerCase();
+ }
+ 
++function ArrangementInsertMarkerSignal() {
++  const insertMarkerStore = useArrangementInsertMarkerStore();
++  const signalRef = useRef<HTMLDivElement>(null);
++  useEffect(() => {
++    const write = () => {
++      signalRef.current?.setAttribute(
++        'data-insert-marker',
++        insertMarkerStore.getPosition().toFixed(3),
++      );
++    };
++    write();
++    return insertMarkerStore.subscribePosition(write);
++  }, [insertMarkerStore]);
++  return (
++    <div
++      ref={signalRef}
++      hidden
++      aria-hidden="true"
++      data-testid="arrangement-insert-marker"
++      data-insert-marker={insertMarkerStore.getPosition().toFixed(3)}
++    />
++  );
++}
++
+ function ArrangementPlayheadLine({ pxPerSecond }: { pxPerSecond: number }) {
+   const positionStore = useArrangementPositionStore();
+   const lineRef = useRef<HTMLDivElement>(null);
+@@ -527,7 +552,7 @@
+     selectedClipIds,
+     status,
+     statusSequence,
+-    seekTo,
++    setInsertMarker,
+     scrubPlayhead,
+     endPlayheadScrub,
+     videoSources,
+@@ -1385,7 +1410,7 @@
+   }, []);
+   const barsRulerGestures = useMemo<BarsRulerGestures>(
+     () => ({
+-      onSeek: seekTo,
++      onSeek: setInsertMarker,
+       onPlayFrom: playFromRuler,
+       onGestureClaim: claimPointerGesture,
+       applyTimelineView,
+@@ -1396,7 +1421,7 @@
+       getSnapMarkerTimes: getRulerSnapMarkerTimes,
+     }),
+     [
+-      seekTo,
++      setInsertMarker,
+       playFromRuler,
+       claimPointerGesture,
+       applyTimelineView,
+@@ -2065,7 +2090,7 @@
+         latest.setActiveTrack(gesture.trackId);
+         latest.selectClip(null);
+         latest.setTimeRange(null);
+-        latest.seekTo(
++        latest.setInsertMarker(
+           resolveGridTimeWithTargets(
+             gesture.clickTime,
+             snapEnabledRef.current &&
+@@ -2155,12 +2180,25 @@
+       const modifier = event.ctrlKey || event.metaKey;
+       const key = shortcutLetter(event);
+       const onOverview = isOverviewTarget(event.target);
+-      if (event.key === ' ' && !modifier && (!isRoleSliderTarget(event.target) || onOverview)) {
+-        event.preventDefault();
+-        if (!event.repeat) {
+-          current.togglePlayback();
++      if (event.key === ' ' && (!isRoleSliderTarget(event.target) || onOverview)) {
++        if (modifier && event.shiftKey && !event.altKey) {
++          event.preventDefault();
++          if (!event.repeat) {
++            current.moveInsertMarkerToPlayhead();
++          }
++          return;
++        }
++        if (!modifier) {
++          event.preventDefault();
++          if (!event.repeat) {
++            if (event.shiftKey) {
++              current.continuePlayback();
++            } else {
++              current.togglePlayback();
++            }
++          }
++          return;
+         }
+-        return;
+       }
+       const navigationKey = timelineNavigationKey({
+         key: event.key,
+@@ -2396,7 +2434,7 @@
+       if (event.key === 'Home' && !isSliderTarget(event.target)) {
+         event.preventDefault();
+         if (!isSeparatorTarget(event.target)) {
+-          current.seekTo(0);
++          current.returnToStart();
+         }
+         return;
+       }
+@@ -2460,7 +2498,7 @@
+         event.key === ' ' &&
+         !exportOpenRef.current &&
+         !isTypingTarget(event.target) &&
+-        !(event.ctrlKey || event.metaKey)
++        (!(event.ctrlKey || event.metaKey) || (event.shiftKey && !event.altKey))
+       ) {
+         event.preventDefault();
+       }
+@@ -2861,7 +2899,7 @@
+                   <ArrangementRuler
+                     seconds={timelineSeconds}
+                     pxPerSecond={pxPerSecond}
+-                    onSeek={seekTo}
++                    onSeek={setInsertMarker}
+                     onScrub={scrubPlayhead}
+                     onScrubEnd={endPlayheadScrub}
+                     onGestureClaim={claimPointerGesture}
+@@ -2972,6 +3010,7 @@
+                 />
+               ) : null}
+               <ArrangementPlayheadLine pxPerSecond={pxPerSecond} />
++              <ArrangementInsertMarkerSignal />
+             </div>
+           </div>
+           <ArrangementDetailPanel
+--- a/app/components/arrangement/ArrangementRuler.tsx
++++ b/app/components/arrangement/ArrangementRuler.tsx
+@@ -197,7 +197,7 @@
+     event.preventDefault();
+     const delta =
+       event.key === 'ArrowLeft' ? -PLAYHEAD_KEY_STEP_SECONDS : PLAYHEAD_KEY_STEP_SECONDS;
+-    onSeek(Math.max(0, Math.round((positionStore.getPosition() + delta) * 1000) / 1000));
++    onScrubEnd(Math.max(0, Math.round((positionStore.getPosition() + delta) * 1000) / 1000));
+   };
+ 
+   return (
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -186,7 +186,7 @@
+     getSelectedClipIds,
+     setTimeRange,
+     setActiveTrack,
+-    seekTo,
++    setInsertMarker,
+     setStatus,
+     toggleTrackMute,
+     toggleTrackSolo,
+@@ -1016,7 +1016,7 @@
+               getSelectedClipIds={getSelectedClipIds}
+               setTimeRange={setTimeRange}
+               setActiveTrack={setActiveTrack}
+-              seekTo={seekTo}
++              seekTo={setInsertMarker}
+               setStatus={setStatus}
+               claimPointerGesture={claimPointerGesture}
+               setClipLaneDrag={setClipLaneDrag}
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -78,7 +78,7 @@
+     range,
+     selectedClipId,
+     togglePlayback,
+-    seekTo,
++    returnToStart,
+     undo,
+     redo,
+     splitSelection,
+@@ -147,7 +147,7 @@
+       </button>
+       <button
+         type="button"
+-        onClick={() => seekTo(0)}
++        onClick={returnToStart}
+         aria-label={studioPlaybackStrings.backToStartLabel}
+         title={studioPlaybackStrings.backToStartTitle}
+         aria-keyshortcuts={studioShortcutAria('back-to-start')}
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -148,14 +148,13 @@
+   const {
+     arrangement,
+     range,
+-    isPlaying,
+     projectEnd,
+     getArrangement,
+     getLivePosition,
+     previewArrangement,
+     commitArrangement,
+     seekTo,
+-    togglePlayback,
++    playFrom,
+     status,
+     setStatus,
+     isPointerGestureActive,
+@@ -678,10 +677,8 @@
+       return;
+     }
+     if (action === 'play') {
+-      jumpToMarker(marker);
+-      if (!isPlaying) {
+-        togglePlayback();
+-      }
++      playFrom(marker.time);
++      setSelectedMarkerId(marker.id);
+       focusMarkerTarget(marker.id);
+       return;
+     }
+@@ -843,10 +840,8 @@
+                 if (suppressClickRef.current === marker.id) {
+                   return;
+                 }
+-                jumpToMarker(marker);
+-                if (!isPlaying) {
+-                  togglePlayback();
+-                }
++                playFrom(marker.time);
++                setSelectedMarkerId(marker.id);
+               }}
+               onKeyDown={(event) => handleFlagKeyDown(event, marker)}
+               aria-label={studioMarkerStrings.flagLabel({ name: marker.name, time })}
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -227,6 +227,10 @@
+   projectEndPrefix: '/ end',
+   playPastEnd: ({ position, end }: { position: string; end: string }): string =>
+     `Playhead (${position}) is past the end of the project (${end}) — there is nothing to play here. Home returns to 0.`,
++  insertMarkerWhilePlaying: (time: string): string =>
++    `Insert marker at ${time} — playback continues. Stop, then Space plays from here.`,
++  insertMarkerToPlayhead: (time: string): string =>
++    `Insert marker moved to the playhead (${time}). Space plays from here.`,
+ };
+ 
+ export const studioLibraryStrings = {
+--- a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+@@ -277,12 +277,19 @@
+     expect(transportLabel(mounted.view)).toBe(studioPlaybackStrings.playLabel);
+   });
+ 
+-  it('BR4b a lower-zone click while playing seeks and keeps playing (existing seekTo)', async () => {
++  it('BR4b a lower-zone click while playing moves only the insert marker and keeps playing (D-29z430)', async () => {
+     const mounted = await mountTempo90SnapOn();
+     clickStrip(mounted, 2.1);
+     expect(live(mounted.api).isPlaying).toBe(true);
+     clickLower(mounted, 6.3);
+     expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBeCloseTo(2, 1);
++    expect(
++      mounted.view.getByTestId('arrangement-insert-marker').getAttribute('data-insert-marker'),
++    ).toBe('6.000');
++    act(() => live(mounted.api).togglePlayback());
++    act(() => live(mounted.api).togglePlayback());
++    expect(live(mounted.api).isPlaying).toBe(true);
+     expect(positionOf(mounted.api)).toBeCloseTo(6, 3);
+   });
+ 
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -727,6 +727,8 @@
+       pb.playPastEnd({ position: '00:05.000', end: '00:02.000' }),
+       pb.playPastEnd({ position: '01:00.250', end: '00:30.000' }),
+     ],
++    insertMarkerWhilePlaying: [pb.insertMarkerWhilePlaying('00:08.000')],
++    insertMarkerToPlayhead: [pb.insertMarkerToPlayhead('00:03.483')],
+   },
+   studioLibraryStrings: {
+     sourceFailed: [lib.sourceFailed('Hit')],
+@@ -801,6 +803,12 @@
+     expect(playPastEndMessage(5, 2)).toBe(
+       pb.playPastEnd({ position: '00:05.000', end: '00:02.000' }),
+     );
++    expect(pb.insertMarkerWhilePlaying('00:08.000')).toBe(
++      'Insert marker at 00:08.000 — playback continues. Stop, then Space plays from here.',
++    );
++    expect(pb.insertMarkerToPlayhead('00:03.483')).toBe(
++      'Insert marker moved to the playhead (00:03.483). Space plays from here.',
++    );
+   });
+ 
+   it('ST12: no string or formatter output of the four objects contains a Georgian codepoint', () => {
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+@@ -0,0 +1,367 @@
++import { act, cleanup, fireEvent, render } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  formatArrangementTime,
++  playPastEndMessage,
++  useArrangement,
++  useArrangementPositionStore,
++} from '~/contexts/ArrangementContext';
++import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import type { ArrangementPositionStore } from '../position-store';
++import { studioPlaybackStrings } from '../strings';
++import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++const {
++  fakeClock,
++  FakeAudioContext,
++  FakeOfflineAudioContext,
++  FakeAudioBuffer,
++  FakeResizeObserver,
++} = createWorkspaceTestEnvironment();
++
++const PX_PER_SECOND = 40;
++const LANE_HEIGHT_PX = 100;
++const RULER_Y = 10;
++
++const markerCollection: WorkspaceCollection = {
++  id: 'insert-marker',
++  label: 'insert-marker',
++  origin: 'demo',
++  sources: [{ id: 'hit', title: 'Hit', collectionLabel: 'im', kind: 'sfx', origin: 'demo' }],
++  loadSource: async () => new AudioBuffer({ length: 1600, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++const SFX_CLIPS: ArrangementClip[] = [
++  { id: 'h1', trackId: 'sfx', sourceId: 'hit', start: 0, sourceOffset: 0, duration: 16 },
++];
++
++function markerArrangement(): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'ვიდეო' },
++    { id: 'music', kind: 'audio', name: 'მუსიკა' },
++    { id: 'sfx', kind: 'audio', name: 'SFX' },
++  ]);
++  return { ...base, clips: SFX_CLIPS, markers: [{ id: 'm1', name: 'Hit point', time: 10 }] };
++}
++
++interface MarkerApiRef {
++  current: ArrangementContextValue | null;
++  position: ArrangementPositionStore | null;
++}
++
++function MarkerProbe({ api }: { api: MarkerApiRef }) {
++  api.current = useArrangement();
++  api.position = useArrangementPositionStore();
++  return null;
++}
++
++function live(api: MarkerApiRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++function positionOf(api: MarkerApiRef): number {
++  if (!api.position) {
++    throw new Error('position store not mounted');
++  }
++  return api.position.getPosition();
++}
++
++function stubCapture(element: HTMLElement) {
++  Object.defineProperty(element, 'setPointerCapture', { configurable: true, value: () => {} });
++  Object.defineProperty(element, 'hasPointerCapture', { configurable: true, value: () => false });
++  Object.defineProperty(element, 'releasePointerCapture', { configurable: true, value: () => {} });
++}
++
++async function mountMarkerWorkspace() {
++  const api: MarkerApiRef = { current: null, position: null };
++  const view = render(
++    <ArrangementProvider collection={markerCollection} initialArrangement={markerArrangement()}>
++      <StudioWorkspace />
++      <MarkerProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  act(() => live(api).setPxPerSecond(PX_PER_SECOND));
++  view.container.querySelectorAll<HTMLElement>('[data-track-id]').forEach((row, index) => {
++    const top = index * LANE_HEIGHT_PX;
++    Object.defineProperty(row, 'getBoundingClientRect', {
++      configurable: true,
++      value: () => new DOMRect(0, top, 800, LANE_HEIGHT_PX),
++    });
++  });
++  const ruler = view.getByTestId('arrangement-ruler');
++  stubCapture(ruler);
++  return { api, view, ruler };
++}
++
++type MarkerMount = Awaited<ReturnType<typeof mountMarkerWorkspace>>;
++
++function insertMarkerOf(mounted: MarkerMount): string | null {
++  return mounted.view.getByTestId('arrangement-insert-marker').getAttribute('data-insert-marker');
++}
++
++function statusText(mounted: MarkerMount): string | null {
++  return mounted.view.getByTestId('arrangement-status').textContent;
++}
++
++const press = { button: 0, buttons: 1 };
++
++function clickRuler(mounted: MarkerMount, seconds: number) {
++  const clientX = seconds * PX_PER_SECOND;
++  fireEvent.pointerDown(mounted.ruler, { ...press, pointerId: 1, clientX, clientY: RULER_Y });
++  fireEvent.pointerUp(mounted.ruler, { pointerId: 1, clientX, clientY: RULER_Y });
++}
++
++function key(init: KeyboardEventInit) {
++  fireEvent.keyDown(document.body, init);
++}
++
++const SPACE = { key: ' ', code: 'Space' };
++
++function advance(seconds: number) {
++  fakeClock.base -= seconds;
++}
++
++beforeEach(() => {
++  fakeClock.base = Date.now() / 1000;
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
++  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  cleanup();
++  fireEvent.pointerDown(window);
++  fireEvent.click(document.body);
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++
++async function playStopFrom(seconds: number) {
++  const mounted = await mountMarkerWorkspace();
++  clickRuler(mounted, seconds);
++  key(SPACE);
++  expect(live(mounted.api).isPlaying).toBe(true);
++  advance(1.5);
++  key(SPACE);
++  expect(live(mounted.api).isPlaying).toBe(false);
++  return mounted;
++}
++
++describe('SABA-B-10a stage 1 Insert Marker and playhead (D-29z430)', { timeout: 15_000 }, () => {
++  it('IM1 Space stops, and Space again plays from the insert marker, not the stop point', async () => {
++    const mounted = await playStopFrom(2);
++    const stopPoint = positionOf(mounted.api);
++    expect(stopPoint).toBeGreaterThan(3);
++    expect(insertMarkerOf(mounted)).toBe('2.000');
++    key(SPACE);
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBe(2);
++  });
++
++  it('IM2 Shift+Space continues from the stop point and leaves the insert marker', async () => {
++    const mounted = await playStopFrom(2);
++    const stopPoint = positionOf(mounted.api);
++    key({ ...SPACE, shiftKey: true });
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBeCloseTo(stopPoint, 6);
++    expect(insertMarkerOf(mounted)).toBe('2.000');
++    key({ ...SPACE, shiftKey: true });
++    expect(live(mounted.api).isPlaying).toBe(false);
++  });
++
++  it('IM3 Ctrl+Shift+Space and Cmd+Shift+Space move the insert marker to the playhead', async () => {
++    const mounted = await playStopFrom(2);
++    const stopPoint = Math.round(positionOf(mounted.api) * 1000) / 1000;
++    key({ ...SPACE, ctrlKey: true, shiftKey: true });
++    expect(live(mounted.api).isPlaying).toBe(false);
++    expect(insertMarkerOf(mounted)).toBe(stopPoint.toFixed(3));
++    expect(statusText(mounted)).toBe(
++      studioPlaybackStrings.insertMarkerToPlayhead(formatArrangementTime(stopPoint)),
++    );
++    clickRuler(mounted, 1);
++    expect(insertMarkerOf(mounted)).toBe('1.000');
++    key({ ...SPACE, metaKey: true, shiftKey: true });
++    expect(insertMarkerOf(mounted)).toBe('1.000');
++    key(SPACE);
++    expect(positionOf(mounted.api)).toBe(1);
++    advance(2);
++    key({ ...SPACE, ctrlKey: true, shiftKey: true });
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(Number(insertMarkerOf(mounted))).toBeGreaterThan(2.5);
++  });
++
++  it('IM4 a ruler click while playing moves only the insert marker; playback continues', async () => {
++    const mounted = await mountMarkerWorkspace();
++    clickRuler(mounted, 1);
++    key(SPACE);
++    advance(0.5);
++    clickRuler(mounted, 8);
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(insertMarkerOf(mounted)).toBe('8.000');
++    expect(positionOf(mounted.api)).toBeLessThan(2);
++    expect(statusText(mounted)).toBe(studioPlaybackStrings.insertMarkerWhilePlaying('00:08.000'));
++    key(SPACE);
++    expect(positionOf(mounted.api)).toBeLessThan(2);
++    key(SPACE);
++    expect(positionOf(mounted.api)).toBe(8);
++  });
++
++  it('IM5 Space with a time selection plays from its start, again after a stop', async () => {
++    const mounted = await mountMarkerWorkspace();
++    clickRuler(mounted, 1);
++    act(() => live(mounted.api).setTimeRange({ start: 7, end: 5, trackId: 'sfx' }));
++    expect(insertMarkerOf(mounted)).toBe('1.000');
++    key(SPACE);
++    expect(positionOf(mounted.api)).toBe(5);
++    advance(1);
++    key(SPACE);
++    key(SPACE);
++    expect(positionOf(mounted.api)).toBe(5);
++    expect(live(mounted.api).range).not.toBeNull();
++  });
++
++  it('IM6 placing the insert marker replaces a time selection', async () => {
++    const mounted = await mountMarkerWorkspace();
++    act(() => live(mounted.api).setTimeRange({ start: 5, end: 7, trackId: 'sfx' }));
++    clickRuler(mounted, 9);
++    expect(live(mounted.api).range).toBeNull();
++    expect(insertMarkerOf(mounted)).toBe('9.000');
++    key(SPACE);
++    expect(positionOf(mounted.api)).toBe(9);
++    key(SPACE);
++    act(() => live(mounted.api).setTimeRange({ start: 5, end: 7, trackId: 'sfx' }));
++    key({ key: 'Home', code: 'Home' });
++    expect(live(mounted.api).range).toBeNull();
++    expect(insertMarkerOf(mounted)).toBe('0.000');
++    expect(positionOf(mounted.api)).toBe(0);
++    act(() => live(mounted.api).setTimeRange({ start: 5, end: 7, trackId: 'sfx' }));
++    key({ ...SPACE, ctrlKey: true, shiftKey: true });
++    expect(live(mounted.api).range).toBeNull();
++  });
++
++  it('IM7 Home and Back to start during playback return playback and the insert marker to 0', async () => {
++    const mounted = await mountMarkerWorkspace();
++    clickRuler(mounted, 4);
++    key(SPACE);
++    advance(1);
++    key({ key: 'Home', code: 'Home' });
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBe(0);
++    expect(insertMarkerOf(mounted)).toBe('0.000');
++    clickRuler(mounted, 6);
++    fireEvent.click(
++      mounted.view.getByRole('button', { name: studioPlaybackStrings.backToStartLabel }),
++    );
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(insertMarkerOf(mounted)).toBe('0.000');
++  });
++
++  it('IM8 the playhead handle keys move the playhead; stopped they move the insert marker too', async () => {
++    const mounted = await mountMarkerWorkspace();
++    clickRuler(mounted, 3);
++    const handle = mounted.view.getByTestId('arrangement-playhead-handle');
++    fireEvent.keyDown(handle, { key: 'ArrowRight', code: 'ArrowRight' });
++    expect(positionOf(mounted.api)).toBeCloseTo(3.1, 6);
++    expect(insertMarkerOf(mounted)).toBe('3.100');
++    key(SPACE);
++    advance(1);
++    fireEvent.keyDown(handle, { key: 'ArrowRight', code: 'ArrowRight' });
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBeGreaterThan(3.15);
++    expect(insertMarkerOf(mounted)).toBe('3.100');
++  });
++
++  it('IM9 seekTo jumps move the insert marker and keep a time selection', async () => {
++    const mounted = await mountMarkerWorkspace();
++    act(() => live(mounted.api).setTimeRange({ start: 5, end: 7, trackId: 'sfx' }));
++    act(() => live(mounted.api).seekTo(4));
++    expect(insertMarkerOf(mounted)).toBe('4.000');
++    expect(live(mounted.api).range).not.toBeNull();
++  });
++
++  it('IM10 Cut Time remaps the insert marker', async () => {
++    const mounted = await mountMarkerWorkspace();
++    clickRuler(mounted, 6);
++    act(() =>
++      live(mounted.api).setTimeRange({ start: 2, end: 4, trackId: 'sfx', allTracks: true }),
++    );
++    act(() => live(mounted.api).cutTimeSelection());
++    expect(insertMarkerOf(mounted)).toBe('4.000');
++    expect(positionOf(mounted.api)).toBe(4);
++  });
++
++  it('IM11 D-27 on the insert marker: past the end refuses, at the end plays from 0', async () => {
++    const mounted = await mountMarkerWorkspace();
++    clickRuler(mounted, 18);
++    key(SPACE);
++    expect(live(mounted.api).isPlaying).toBe(false);
++    expect(statusText(mounted)).toBe(playPastEndMessage(18, 16));
++    clickRuler(mounted, 16);
++    key(SPACE);
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBe(0);
++  });
++
++  it('IM12 a marker flag double-click plays from the flag and clears a time selection', async () => {
++    const mounted = await mountMarkerWorkspace();
++    act(() => live(mounted.api).setTimeRange({ start: 5, end: 7, trackId: 'sfx' }));
++    fireEvent.doubleClick(mounted.view.getByTestId('arrangement-marker'));
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBe(10);
++    expect(insertMarkerOf(mounted)).toBe('10.000');
++    expect(live(mounted.api).range).toBeNull();
++  });
++
++  it('IM13 Alt+Space toggles as before; Ctrl+Space alone and keys in text fields do nothing', async () => {
++    const mounted = await mountMarkerWorkspace();
++    clickRuler(mounted, 2);
++    key({ ...SPACE, ctrlKey: true });
++    expect(live(mounted.api).isPlaying).toBe(false);
++    const tempo = mounted.view.getByTestId('arrangement-tempo-input');
++    act(() => tempo.focus());
++    fireEvent.keyDown(tempo, { ...SPACE, shiftKey: true });
++    fireEvent.keyDown(tempo, { ...SPACE, ctrlKey: true, shiftKey: true });
++    expect(live(mounted.api).isPlaying).toBe(false);
++    expect(insertMarkerOf(mounted)).toBe('2.000');
++    act(() => tempo.blur());
++    key({ ...SPACE, altKey: true });
++    expect(live(mounted.api).isPlaying).toBe(true);
++    expect(positionOf(mounted.api)).toBe(2);
++  });
++
++  it('IM14 Ctrl+Shift+Space on a focused button does not activate it on key up', async () => {
++    const mounted = await mountMarkerWorkspace();
++    const play = mounted.view.getByRole('button', { name: studioPlaybackStrings.playLabel });
++    act(() => play.focus());
++    fireEvent.keyDown(play, { ...SPACE, ctrlKey: true, shiftKey: true });
++    const notPrevented = fireEvent.keyUp(play, { ...SPACE, ctrlKey: true, shiftKey: true });
++    expect(notPrevented).toBe(false);
++    expect(live(mounted.api).isPlaying).toBe(false);
++  });
++});

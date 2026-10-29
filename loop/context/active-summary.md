@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T10:58:25.652Z)
+# Active loop summary (2026-10-29T12:47:45.570Z)
 
-- backlog.json 2308 KB -> active view 333 KB
-- status: G_ROOT_GATE round 247
-- servers: `{"checkedUtc":"2026-10-29T10:22:55.2000036Z","round":247,"attempt":1,"store":200}`
-- last publication: da8c64192d3574adf349dd3a9626ad16ec94d858 (rounds 247-247)
-- last root gate: round 247 published - commit da8c64192d3574adf349dd3a9626ad16ec94d858 pushed
+- backlog.json 2320 KB -> active view 334 KB
+- status: G_ROOT_GATE round 248
+- servers: `{"checkedUtc":"2026-10-29T12:04:58.4490426Z","round":248,"attempt":1,"store":200}`
+- last publication: 0e862be30b3e1cc19b2971a172584a6fd0f2cbfb (rounds 248-248)
+- last root gate: round 248 published - commit 0e862be30b3e1cc19b2971a172584a6fd0f2cbfb pushed
 
 ## Current items: SRW-21
 
@@ -591,7 +591,6 @@
 - INFO-C244-ADD-EXISTING-UNREACHABLE / info / info (D-29z403): supports A-R244-REVIEW-L3 / C found no user path that opens the marker add editor at an occupied time (beginAddMarker pre-checks l.224-229); inference from one tested p
 - INFO-C244-BPM-RING-MOUSE / info / info (D-29z403): SABA-B-4 mouse modality; not a pass criterion / after a mouse 0.5 s grid choice the BPM field is :focus-visible but the brass band measured 0 px (mouse modality)
 - GATE244-S6 / info / info (D-29z403) / ArrangementMarkerRowHandle gained focusEditorSuccessor (additive; only caller closeGridMenu)
-- B-R245-UNDO-GROUP-FOCUS / medium / dispatched round 247 (D-29z414/D-29z415): next row in the last committed full order, else previous; row-root ref detach; pendingRowFocusRef wins; closes on C round 247 PASS + gate published | open (D-29z409): scheduled after the REGRESSION round, before SABA-B-11b stage 2b; owner StudioWorkspace.tsx; question 4 of ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS / with the group name button focused, Undo: Group Tracks or Redo: Ungroup Tracks removes the group row; focus falls to BODY (L47 class)
 - INFO-C245-COST-ROUNDING / info / info (D-29z411) / retro cost totals are sums of rounded per-file values (raw 110.72/78.14/347.67)
 - INFO-C245-COLLECT-DIFF / info / info (D-29z411) / collect.txt differs only in round 244 b_cost after b-round-244-result.json appeared; no window number changes
 - INFO-C245-BEFORE-COPY-UNVERIFIABLE / info / info (D-29z411): loop git repo is a shallow single commit; before-copies are the only record / b-round-244/backlog-before-245.json cannot be compared with history
@@ -603,8 +602,13 @@
 - C-GROUP-INFO-246 / info / evidence for B-R245-UNDO-GROUP-FOCUS (round 247) / groupUndo BODY at HEAD and on the round-246 fix, both viewports
 - INFO-B247-MODIFIER-NO-FOCUS-VISIBLE / info / info (D-29z417): harness fact for focus rows / after a mouse-reached focus, a Ctrl chord is not keyboard modality in Chromium 143: a rescued button has :focus-visible false and no ring (S
 - INFO-B247-VOLUME-BLUR-ON-REMOVAL / info / info (D-29z417): C-VOLUME-REMOVAL-247 compares with HEAD / removing a focused group volume fader fires blurGroupVolume -> blurVolumeTarget for a group that no longer exists; 0 page errors at HEAD
-- INFO-B247-GRIDMENU-UNVERIFIED / info / info (D-29z417): C info probe in round 247 section 6 / whether Ctrl+Z reaches the workspace with the lane grid menu open is unverified (B recipe did not open the menu)
 - INFO-B247-COLD-START-REACT / info / info (D-29z417): environment, re-run clean / first scratch probe row logged "Cannot read properties of null (reading useState)" during Vite dependency optimisation on a cold start
+- GATE247-S3 / info / info (D-29z420); signal GATE247-ARCH-ROW-FOCUS-RESCUE (D-29z421) / three no-deps focus layout effects; precedence by declaration order; do not reorder without GF7
+- GATE247-S4 / info / info (D-29z420) / focusRowSuccessor uses preventScroll; consider scrollIntoView({block: nearest}) if reused for other removals
+- GATE247-S5 / info / info (D-29z420); same as INFO-B247-VOLUME-BLUR-ON-REMOVAL / blurGroupVolume runs on removal for a missing group (pre-existing, doc 190 TODO)
+- SABA-Q-11B-HIDDEN-SNAP / info / awaiting_user (D-29z422): non-blocking; round 248 ships the pause / hidden grid lines: CZABA pauses Snap (Alt and edges included; titles and action statuses say paused; zoom in resumes). Or (b) snap to the fi
+- INFO-B248-RULER-DBLCLICK / info / harness fact (D-29z425) / two ruler clicks at the same x within ~1 s can count as a double-click (Fit); give each click its own x and >= 800 ms
+- INFO-B248-OFFSCREEN-RULER / info / harness fact (D-29z425) / at high zoom the ruler box is wider than the window; a fraction of its width can be off-screen; clamp to the visible part
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

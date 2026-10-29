@@ -1,0 +1,64 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T12:04:58.4490426Z",
+  "round": 248,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R248-01",
+   "severity": "low",
+   "steps": [
+    "Open docs/implementation/2026/quarter-IV/186-saba-b-11b-adaptive-grid.md",
+    "Read l.1 (title) and ## არქიტექტურა l.186-188"
+   ],
+   "expected": "A doc marked Completed (C round 248 PASS) describes the shipped stage 2b: title covers stages 1, 2a and 2b; architecture says snap/Alt/edges/markers read snapGridSeconds/activeSnapSeconds and Alt never enables a hidden grid",
+   "actual": "Title says 'ეტაპები 1 და 2a'; l.186-188 says snap, Alt bypass, edges, markers and every gesture read gridSeconds unchanged (sections outside A's grant)",
+   "evidence": "c-round-248.md AN-REVIEW-248; a-round-248.md §2"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-248",
+  "C-UNIT-248",
+  "C-MUT-248",
+  "C-HIDDEN-SNAP-248",
+  "C-ALT-HIDDEN-248",
+  "C-VISIBLE-KEEP-248",
+  "C-RESUME-248",
+  "C-NUDGE-248",
+  "C-KEYSTEP-248",
+  "C-SIGNALS-248",
+  "C-STATUS-BOX-248",
+  "C-KEYS-248",
+  "C-BUDGET-248",
+  "AN-REVIEW-248",
+  "LAB-SMOKE-248",
+  "Auth"
+ ],
+ "info": [
+  "C-STATUS-NEIGHBOURS-248: seed/end/refusal texts equal HEAD; 'Snap on' shown while paused after zoom-out crossing and seed; stale paused note after zoom-in (ruled §1.4, SABA-Q-11B-HIDDEN-SNAP (d))",
+  "Visible clip move with Snap off+Alt keeps off-grid start (0.664 stays), identical at HEAD: pre-existing, relative-snap topic (SABA-B-11c)",
+  "C-SIGNALS adaptive '3' reached in browser (pulse, 4 and 2.5 px/s, after '1' narrowing): 1/8T hidden with note; menu Narrowest at tempo with note (out-adaptive3). Observation: adaptive '3' on 1/4 resolves to 1/8T (chooser, unchanged code)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "Purchased origin (browser): backend unavailable in cloud"
+ ],
+ "abletonParity": {
+  "snapFollowsDrawnLines": "confirmed (visible grids, equal to HEAD)",
+  "modifierEnablesGrid": "confirmed for visible grid; deliberate deviation for hidden grid",
+  "snapWhenLinesNotDrawn": "unconfirmed (no Live reference; B ruling D-29z420)"
+ },
+ "evidence": "c-round-248.md; c-round-248/out-fix, out-head, out-std, out-edge, mutants/logs/summary.txt, covering.log"
+}
