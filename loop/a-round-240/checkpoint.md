@@ -1,0 +1,11 @@
+# A round 240 checkpoint
+- [x] start state: HEAD d0afa64, clean, tree/root/grant hashes rc 0, apply --check rc 0
+- [x] applied b-round-239/precheck-scratch.diff (grants 1+2); git status = 2 M; expect( 98 -> 121
+- [x] doc 186 (grant 3)
+- [x] typecheck / biome / lint
+- [x] covering 41
+- [x] mutants
+- [x] code-reviewer (8.5/10, Lows only; doc mutant wording fixed)
+- [x] playwright
+- [x] report
+- report written; report complete

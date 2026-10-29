@@ -1,0 +1,53 @@
+{
+  "round": 240,
+  "task": "SABA-B-11b-FIX-1",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-29T03:28:34.3700659Z",
+    "round": 240,
+    "attempt": 1,
+    "store": 200
+  },
+  "chromium": "143.0.7499.4",
+  "bugs": [
+    {
+      "id": "C-R240-01",
+      "severity": "low",
+      "steps": [
+        "Open store/docs/implementation/2026/quarter-IV/186-saba-b-11b-adaptive-grid.md",
+        "Read section ## შეცვლილი ფაილები, line 128"
+      ],
+      "expected": "The grid-adaptive-ui.test.tsx entry lists the rows the file now holds (GAU1–GAU17), as ## ტესტირება does",
+      "actual": "Line 128 still says GAU1–GAU13; the section was outside grant 3, so A could not fix it (A reported it in a-round-240.md §2)",
+      "evidence": "c-round-240.md AN-REVIEW-240; grep -n GAU1–GAU13 doc 186 -> l.128"
+    }
+  ],
+  "passed": [
+    "C-SCOPE-240",
+    "C-UNIT-240",
+    "C-MUT-240",
+    "C-HAND-240",
+    "C-REFUSED-240",
+    "C-DENSITY-MODEL-240",
+    "C-SEED-REG-240",
+    "C-GRID-REG-240",
+    "C-BUDGET-240",
+    "C-REF-240",
+    "AN-REVIEW-240",
+    "LAB-SMOKE-240",
+    "Auth"
+  ],
+  "gate": [
+    "full vitest, typecheck, lint, build, npm run verify, e2e smoke (gate row; not run by C, speed rule)"
+  ],
+  "blocked": [
+    "Purchased origin (browser): backend unavailable in cloud. Static check: grep origin in the grant-1 hunks = 0 (c-round-240/scope.txt)"
+  ],
+  "abletonCompliance": {
+    "F1": "unverified: no reference found (Live 12 manual 6.10 read 2026-10-29 via WebFetch says only Ctrl/Cmd+1 narrows/doubles, Ctrl/Cmd+2 widens/halves; nothing on clamped ends); SABA-Q-11B-DENSITY-MODEL open",
+    "F2": "not applicable (Live has no catalogue tempo seed)"
+  },
+  "evidence": "c-round-240/out/c240.json, c-round-240/out/*.png, c-round-240/scope.txt, covering.json/log, mutant-*.log, eq.log"
+}

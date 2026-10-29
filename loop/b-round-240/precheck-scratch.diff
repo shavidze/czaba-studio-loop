@@ -1,0 +1,822 @@
+diff --git a/app/components/arrangement/ArrangementGridMenu.tsx b/app/components/arrangement/ArrangementGridMenu.tsx
+index f7af0e4..649a23c 100644
+--- a/app/components/arrangement/ArrangementGridMenu.tsx
++++ b/app/components/arrangement/ArrangementGridMenu.tsx
+@@ -1,12 +1,18 @@
+ import { Check } from 'lucide-react';
+ import { Fragment, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+-import { GRID_TRIPLET_MENU_LABEL, type GridDivisionOption } from '~/lib/arrangement/grid-divisions';
++import {
++  GRID_ADAPTIVE_WIDTH_OPTIONS,
++  GRID_TRIPLET_MENU_LABEL,
++  type GridDivisionOption,
++  type GridMode,
++} from '~/lib/arrangement/grid-divisions';
+ import { studioGridStrings } from '~/lib/arrangement/strings';
+ 
+ const GRID_MENU_VIEWPORT_MARGIN_PX = 4;
+ const GRID_MENU_LABEL = studioGridStrings.menuLabel;
+ const GRID_MENU_SNAP_LABEL = 'Snap (G)';
++const GRID_MENU_GROUP_LABEL_CLASS = 'px-2 pt-1 pb-0.5 text-xs text-muted';
+ const GRID_MENU_ITEM_CLASS =
+   'flex h-7 w-full items-center gap-2 rounded-sm px-2 text-left font-mono text-xs tabular-nums text-foreground hover:bg-elevated';
+ 
+@@ -15,8 +21,11 @@ interface ArrangementGridMenuProps {
+   y: number;
+   divisions: readonly GridDivisionOption[];
+   checkedId: string;
++  gridMode: GridMode;
++  adaptiveDensity: number;
+   snapEnabled: boolean;
+   onChooseDivision: (id: string) => void;
++  onChooseAdaptiveDensity: (density: number) => void;
+   onToggleSnap: () => void;
+   tripletChecked?: boolean | null;
+   onToggleTriplet?: () => void;
+@@ -70,8 +79,11 @@ export function ArrangementGridMenu({
+   y,
+   divisions,
+   checkedId,
++  gridMode,
++  adaptiveDensity,
+   snapEnabled,
+   onChooseDivision,
++  onChooseAdaptiveDensity,
+   onToggleSnap,
+   tripletChecked = null,
+   onToggleTriplet,
+@@ -79,18 +91,26 @@ export function ArrangementGridMenu({
+ }: ArrangementGridMenuProps) {
+   const menuRef = useRef<HTMLDivElement>(null);
+   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+-  const checkedIndex = Math.max(
+-    0,
+-    divisions.findIndex((option) => option.id === checkedId),
++  const widthCount = GRID_ADAPTIVE_WIDTH_OPTIONS.length;
++  const snapIndex = widthCount + divisions.length;
++  const checkedWidthIndex = GRID_ADAPTIVE_WIDTH_OPTIONS.findIndex(
++    (option) => option.density === adaptiveDensity,
+   );
++  const checkedDivisionIndex = divisions.findIndex((option) => option.id === checkedId);
++  const checkedIndex =
++    gridMode === 'adaptive'
++      ? Math.max(0, checkedWidthIndex)
++      : checkedDivisionIndex < 0
++        ? 0
++        : widthCount + checkedDivisionIndex;
+   const initialIndexRef = useRef(checkedIndex);
+   const [activeIndex, setActiveIndex] = useState(checkedIndex);
+   const [position, setPosition] = useState({ left: x, top: y });
+   const onCloseRef = useRef(onClose);
+   onCloseRef.current = onClose;
+   const tripletIndex =
+-    tripletChecked === null || onToggleTriplet === undefined ? null : divisions.length + 1;
+-  const itemCount = divisions.length + 1 + (tripletIndex === null ? 0 : 1);
++    tripletChecked === null || onToggleTriplet === undefined ? null : snapIndex + 1;
++  const itemCount = snapIndex + 1 + (tripletIndex === null ? 0 : 1);
+ 
+   useIsomorphicLayoutEffect(() => {
+     const menu = menuRef.current;
+@@ -133,12 +153,19 @@ export function ArrangementGridMenu({
+       onToggleTriplet?.();
+       return;
+     }
+-    const division = divisions[index];
+-    if (division === undefined) {
++    if (index === snapIndex) {
+       onToggleSnap();
+       return;
+     }
+-    onChooseDivision(division.id);
++    const width = GRID_ADAPTIVE_WIDTH_OPTIONS[index];
++    if (width !== undefined) {
++      onChooseAdaptiveDensity(width.density);
++      return;
++    }
++    const division = divisions[index - widthCount];
++    if (division !== undefined) {
++      onChooseDivision(division.id);
++    }
+   };
+ 
+   const handleGridMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+@@ -184,43 +211,81 @@ export function ArrangementGridMenu({
+       onKeyUp={(event) => event.stopPropagation()}
+       data-testid="arrangement-grid-menu"
+     >
+-      {divisions.map((option, index) => (
+-        <Fragment key={option.id}>
+-          {option.family === 'musical' && divisions[index - 1]?.family !== 'musical' ? (
+-            <hr className="my-1 border-outline" />
+-          ) : null}
+-          <button
+-            ref={(element) => {
+-              itemRefs.current[index] = element;
+-            }}
+-            type="button"
+-            role="menuitemradio"
+-            aria-checked={option.id === checkedId}
+-            tabIndex={index === activeIndex ? 0 : -1}
+-            onClick={() => chooseGridMenuItem(index)}
+-            onFocus={() => setActiveIndex(index)}
+-            className={GRID_MENU_ITEM_CLASS}
+-          >
+-            <span aria-hidden="true" className="flex w-3 justify-center text-foreground">
+-              {option.id === checkedId ? (
+-                <Check className="size-2.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
++      <fieldset className="m-0 min-w-0 border-0 p-0">
++        <legend className={GRID_MENU_GROUP_LABEL_CLASS}>
++          {studioGridStrings.menuAdaptiveGroup}
++        </legend>
++        {GRID_ADAPTIVE_WIDTH_OPTIONS.map((option, index) => {
++          const checked = gridMode === 'adaptive' && option.density === adaptiveDensity;
++          return (
++            <button
++              key={option.label}
++              ref={(element) => {
++                itemRefs.current[index] = element;
++              }}
++              type="button"
++              role="menuitemradio"
++              aria-checked={checked}
++              tabIndex={index === activeIndex ? 0 : -1}
++              onClick={() => chooseGridMenuItem(index)}
++              onFocus={() => setActiveIndex(index)}
++              className={GRID_MENU_ITEM_CLASS}
++            >
++              <span aria-hidden="true" className="flex w-3 justify-center text-foreground">
++                {checked ? (
++                  <Check className="size-2.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
++                ) : null}
++              </span>
++              {option.label}
++            </button>
++          );
++        })}
++      </fieldset>
++      <hr className="my-1 border-outline" />
++      <fieldset className="m-0 min-w-0 border-0 p-0">
++        <legend className={GRID_MENU_GROUP_LABEL_CLASS}>{studioGridStrings.menuFixedGroup}</legend>
++        {divisions.map((option, divisionIndex) => {
++          const index = widthCount + divisionIndex;
++          const checked = gridMode === 'fixed' && option.id === checkedId;
++          return (
++            <Fragment key={option.id}>
++              {option.family === 'musical' && divisions[divisionIndex - 1]?.family !== 'musical' ? (
++                <hr className="my-1 border-outline" />
+               ) : null}
+-            </span>
+-            {option.label}
+-          </button>
+-        </Fragment>
+-      ))}
++              <button
++                ref={(element) => {
++                  itemRefs.current[index] = element;
++                }}
++                type="button"
++                role="menuitemradio"
++                aria-checked={checked}
++                tabIndex={index === activeIndex ? 0 : -1}
++                onClick={() => chooseGridMenuItem(index)}
++                onFocus={() => setActiveIndex(index)}
++                className={GRID_MENU_ITEM_CLASS}
++              >
++                <span aria-hidden="true" className="flex w-3 justify-center text-foreground">
++                  {checked ? (
++                    <Check className="size-2.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
++                  ) : null}
++                </span>
++                {option.label}
++              </button>
++            </Fragment>
++          );
++        })}
++      </fieldset>
+       <hr className="my-1 border-outline" />
+       <button
+         ref={(element) => {
+-          itemRefs.current[divisions.length] = element;
++          itemRefs.current[snapIndex] = element;
+         }}
+         type="button"
+         role="menuitemcheckbox"
+         aria-checked={snapEnabled}
+-        tabIndex={activeIndex === divisions.length ? 0 : -1}
+-        onClick={() => chooseGridMenuItem(divisions.length)}
+-        onFocus={() => setActiveIndex(divisions.length)}
++        tabIndex={activeIndex === snapIndex ? 0 : -1}
++        onClick={() => chooseGridMenuItem(snapIndex)}
++        onFocus={() => setActiveIndex(snapIndex)}
+         className={GRID_MENU_ITEM_CLASS}
+       >
+         <span aria-hidden="true" className="flex w-3 justify-center text-foreground">
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 8e94062..818658d 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -38,6 +38,7 @@ import {
+   adjacentGridDivisionId,
+   GRID_ADAPTIVE_DENSITY_MAX,
+   GRID_ADAPTIVE_DENSITY_MIN,
++  GRID_ADAPTIVE_WIDTH_OPTIONS,
+   type GridMode,
+   gridDivisionEndMessage,
+   gridDivisionLabel,
+@@ -1636,6 +1637,25 @@ export function StudioWorkspace() {
+     [changeGridDivision, closeGridMenu],
+   );
+ 
++  const chooseGridMenuAdaptiveDensity = useCallback(
++    (density: number) => {
++      const current = gridDivisionIdRef.current;
++      const tempo = tempoBpmRef.current;
++      gridHandChosenRef.current = true;
++      gridModeRef.current = 'adaptive';
++      setGridMode('adaptive');
++      gridDensityRef.current = density;
++      setGridDensity(density);
++      const id = resolveAdaptiveGrid(current, tempo);
++      const width = GRID_ADAPTIVE_WIDTH_OPTIONS.find((option) => option.density === density);
++      workspaceRef.current.setStatus(
++        studioGridStrings.adaptiveWidthOn(width?.label ?? '', gridDivisionLabel(id)),
++      );
++      closeGridMenu();
++    },
++    [resolveAdaptiveGrid, closeGridMenu],
++  );
++
+   const toggleGridMenuSnap = useCallback(() => {
+     toggleSnap();
+     closeGridMenu();
+@@ -2248,6 +2268,13 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
++      if (event.code === 'Digit4' && !event.altKey && !event.shiftKey) {
++        event.preventDefault();
++        if (!event.repeat) {
++          toggleSnap();
++        }
++        return;
++      }
+       if (event.code === 'Digit5' && !event.altKey && !event.shiftKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+@@ -2585,7 +2612,7 @@ export function StudioWorkspace() {
+                       type="button"
+                       onClick={toggleSnap}
+                       aria-pressed={snapEnabled}
+-                      aria-keyshortcuts="G"
++                      aria-keyshortcuts="G 4"
+                       title={
+                         snapEnabled ? studioGridStrings.snapOnTitle : studioGridStrings.snapOff
+                       }
+@@ -2613,6 +2640,7 @@ export function StudioWorkspace() {
+                           (event.code !== 'Digit1' &&
+                             event.code !== 'Digit2' &&
+                             event.code !== 'Digit3' &&
++                            event.code !== 'Digit4' &&
+                             event.code !== 'Digit5') ||
+                           event.ctrlKey ||
+                           event.metaKey ||
+@@ -2627,6 +2655,8 @@ export function StudioWorkspace() {
+                         }
+                         if (event.code === 'Digit3') {
+                           toggleGridTriplet();
++                        } else if (event.code === 'Digit4') {
++                          toggleSnap();
+                         } else if (event.code === 'Digit5') {
+                           toggleGridMode();
+                         } else {
+@@ -2634,7 +2664,7 @@ export function StudioWorkspace() {
+                         }
+                       }}
+                       aria-label={studioGridStrings.menuLabel}
+-                      aria-keyshortcuts={tempoBpm !== null ? '1 2 3 5' : '1 2 5'}
++                      aria-keyshortcuts={tempoBpm !== null ? '1 2 3 4 5' : '1 2 4 5'}
+                       title={`${gridDivisionTitle(gridDivisionId, gridLinesShown)}${gridMode === 'adaptive' ? studioGridStrings.adaptiveTitleSuffix : studioGridStrings.fixedTitleSuffix}`}
+                       className={`h-6 shrink-0 rounded-md border border-outline bg-surface px-1 text-xs leading-none tabular-nums text-foreground ${STUDIO_FOCUS_RING_INSET_CLASS}`}
+                       data-testid="arrangement-grid-division"
+@@ -2952,8 +2982,11 @@ export function StudioWorkspace() {
+           y={gridMenu.y}
+           divisions={gridOptions}
+           checkedId={gridDivisionId}
++          gridMode={gridMode}
++          adaptiveDensity={gridDensity}
+           snapEnabled={snapEnabled}
+           onChooseDivision={chooseGridMenuDivision}
++          onChooseAdaptiveDensity={chooseGridMenuAdaptiveDensity}
+           onToggleSnap={toggleGridMenuSnap}
+           tripletChecked={tempoBpm !== null ? gridTriplet : null}
+           onToggleTriplet={toggleGridMenuTriplet}
+diff --git a/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx b/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx
+index 817c5dd..c63f4dd 100644
+--- a/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx
+@@ -1,4 +1,4 @@
+-import { act, fireEvent, render } from '@testing-library/react';
++import { act, fireEvent, render, within } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+@@ -35,6 +35,9 @@ const MUSIC_LANE_Y = 150;
+ const ADAPTIVE_SUFFIX = ' · Adaptive: follows zoom — 5 for fixed';
+ const FIXED_SUFFIX = ' · Fixed at every zoom — 5 for adaptive';
+ const SNAP_ON_QUARTER = 'Snap on — grid 1/4 (G)';
++const ZOOM_TEN_STEPS_OUT_FROM_320 = 34.359738368;
++const WIDTH_LABELS = ['Widest', 'Wide', 'Medium', 'Narrow', 'Narrowest'];
++const SECONDS_LABELS = ['10 s', '5 s', '2 s', '1 s', '0.5 s', '0.25 s', '0.1 s'];
+ 
+ const adaptiveCollection: WorkspaceCollection = {
+   id: 'grid-adaptive',
+@@ -185,6 +188,35 @@ function tempoInput(view: AdaptiveView): HTMLInputElement {
+   return input;
+ }
+ 
++function gridMenu(view: AdaptiveView): HTMLElement | null {
++  return view.queryByTestId('arrangement-grid-menu');
++}
++
++function openGridMenu(view: AdaptiveView): HTMLElement {
++  const body = view.container.querySelector<HTMLElement>('[data-track-id] [data-grid-lines]');
++  if (!body) {
++    throw new Error('lane body missing');
++  }
++  fireEvent.pointerDown(body, { button: 2, buttons: 2, pointerId: 9, clientX: 300, clientY: 200 });
++  fireEvent.contextMenu(body, { button: 2, clientX: 300, clientY: 200 });
++  const menu = gridMenu(view);
++  if (!menu) {
++    throw new Error('grid menu not open');
++  }
++  return menu;
++}
++
++function menuGroupRadios(menu: HTMLElement, name: 'Adaptive grid' | 'Fixed grid'): HTMLElement[] {
++  return within(within(menu).getByRole('group', { name })).getAllByRole('menuitemradio');
++}
++
++function checkedRadioNames(menu: HTMLElement): Array<string | null> {
++  return within(menu)
++    .getAllByRole('menuitemradio')
++    .filter((radio) => radio.getAttribute('aria-checked') === 'true')
++    .map((radio) => radio.textContent);
++}
++
+ function blurActive() {
+   act(() => {
+     const active = document.activeElement;
+@@ -195,7 +227,7 @@ function blurActive() {
+ }
+ 
+ function pressKey(
+-  digit: '1' | '2' | '3' | '5',
++  digit: '1' | '2' | '3' | '4' | '5',
+   target: Element = document.body,
+   extra: Partial<KeyboardEventInit> = {},
+ ): boolean {
+@@ -238,7 +270,7 @@ describe('SABA-B-11b adaptive grid in the workspace (D-29z356)', { timeout: 15_0
+     expect(gridMode(view)).toBe('adaptive');
+     expect(divisionOf(view)).toBe('1');
+     expect(divisionSelect(view).title.endsWith(ADAPTIVE_SUFFIX)).toBe(true);
+-    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 5');
++    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 4 5');
+   });
+ 
+   it('GAU2 zooming follows 0.5 → 0.25 → 0.1 s in every lane and writes no status', async () => {
+@@ -459,7 +491,7 @@ describe('SABA-B-11b adaptive grid in the workspace (D-29z356)', { timeout: 15_0
+     expect(divisionOf(view)).toBe('0.1');
+     pressKey('2');
+     expect(divisionOf(view)).toBe('0.25');
+-    act(() => live(api).setPxPerSecond(34.359738368));
++    act(() => live(api).setPxPerSecond(ZOOM_TEN_STEPS_OUT_FROM_320));
+     expect(divisionOf(view)).toBe('2');
+     expect(gridMode(view)).toBe('adaptive');
+   });
+@@ -502,4 +534,91 @@ describe('SABA-B-11b adaptive grid in the workspace (D-29z356)', { timeout: 15_0
+     expect(divisionOf(view)).toBe('1/32');
+     expect(statusText(view)?.endsWith('Snap on — grid 1/32 (G)')).toBe(true);
+   });
++  it('GAU18 the lane menu shows an Adaptive grid group and a Fixed grid group with one checked item: Medium at mount', async () => {
++    const { view } = await mountAdaptiveWorkspace();
++    const menu = openGridMenu(view);
++    expect(menuGroupRadios(menu, 'Adaptive grid').map((radio) => radio.textContent)).toEqual(
++      WIDTH_LABELS,
++    );
++    expect(menuGroupRadios(menu, 'Fixed grid').map((radio) => radio.textContent)).toEqual(
++      SECONDS_LABELS,
++    );
++    expect(checkedRadioNames(menu)).toEqual(['Medium']);
++    expect(document.activeElement).toBe(
++      within(menu).getByRole('menuitemradio', { name: 'Medium' }),
++    );
++  });
++
++  it('GAU19 choosing Narrow keeps the grid adaptive one level finer, names it in the status and follows the zoom', async () => {
++    const { api, view } = await mountAdaptiveWorkspace();
++    fireEvent.click(within(openGridMenu(view)).getByRole('menuitemradio', { name: 'Narrow' }));
++    expect(gridMenu(view)).toBeNull();
++    expect(gridMode(view)).toBe('adaptive');
++    expect(divisionOf(view)).toBe('0.5');
++    expect(statusText(view)).toBe('Adaptive grid — Narrow, now 0.5 s');
++    expect(checkedRadioNames(openGridMenu(view))).toEqual(['Narrow']);
++    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
++    act(() => live(api).setPxPerSecond(80));
++    expect(divisionOf(view)).toBe('0.25');
++    expect(gridMode(view)).toBe('adaptive');
++  });
++
++  it('GAU20 in fixed mode the fixed pick is the only checked item; choosing Wide switches to adaptive at that level', async () => {
++    const { view } = await mountAdaptiveWorkspace();
++    pressKey('5');
++    expect(gridMode(view)).toBe('fixed');
++    const menu = openGridMenu(view);
++    expect(checkedRadioNames(menu)).toEqual(['1 s']);
++    expect(document.activeElement).toBe(within(menu).getByRole('menuitemradio', { name: '1 s' }));
++    fireEvent.click(within(menu).getByRole('menuitemradio', { name: 'Wide' }));
++    expect(gridMode(view)).toBe('adaptive');
++    expect(divisionOf(view)).toBe('2');
++    expect(statusText(view)).toBe('Adaptive grid — Wide, now 2 s');
++    expect(divisionSelect(view).title.endsWith(ADAPTIVE_SUFFIX)).toBe(true);
++    expect(checkedRadioNames(openGridMenu(view))).toEqual(['Wide']);
++  });
++
++  it('GAU21 a width chosen in the menu before a BPM seed is a hand choice: the seed keeps the adaptive seconds grid', async () => {
++    const { view, addSource } = await mountAdaptiveWorkspace();
++    fireEvent.click(within(openGridMenu(view)).getByRole('menuitemradio', { name: 'Narrow' }));
++    expect(divisionOf(view)).toBe('0.5');
++    addSource('stem-90');
++    expect(tempoInput(view).value).toBe('90');
++    expect(gridMode(view)).toBe('adaptive');
++    expect(divisionOf(view)).toBe('0.5');
++    expect(statusText(view)?.endsWith('Snap on — grid 0.5 s (G)')).toBe(true);
++  });
++
++  it('GAU22 plain 4 toggles Snap like G with the same status texts; held, modified and typed 4 do nothing to Snap', async () => {
++    const { view } = await mountAdaptiveWorkspace();
++    expect(gridControl(view).dataset.snap).toBe('off');
++    expect(pressKey('4')).toBe(false);
++    expect(gridControl(view).dataset.snap).toBe('on');
++    expect(statusText(view)).toBe('Snap on — grid 1 s (G)');
++    expect(pressKey('4', document.body, { repeat: true })).toBe(false);
++    expect(gridControl(view).dataset.snap).toBe('on');
++    expect(pressKey('4')).toBe(false);
++    expect(gridControl(view).dataset.snap).toBe('off');
++    expect(statusText(view)).toBe('Snap off — free movement (G)');
++    expect(pressKey('4', document.body, { ctrlKey: true })).toBe(true);
++    expect(pressKey('4', document.body, { altKey: true })).toBe(true);
++    expect(gridControl(view).dataset.snap).toBe('off');
++    expect(pressKey('4', tempoInput(view))).toBe(true);
++    expect(gridControl(view).dataset.snap).toBe('off');
++    expect(view.getByTestId('arrangement-snap-toggle').getAttribute('aria-keyshortcuts')).toBe(
++      'G 4',
++    );
++  });
++
++  it('GAU23 4 on the focused division select toggles Snap and leaves the division and mode unchanged', async () => {
++    const { view } = await mountAdaptiveWorkspace();
++    const select = divisionSelect(view);
++    select.focus();
++    expect(pressKey('4', select)).toBe(false);
++    expect(gridControl(view).dataset.snap).toBe('on');
++    expect(select.value).toBe('1');
++    expect(divisionOf(view)).toBe('1');
++    expect(gridMode(view)).toBe('adaptive');
++    expect(select.getAttribute('aria-keyshortcuts')).toBe('1 2 4 5');
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx b/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
+index f28f796..91bc279 100644
+--- a/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
+@@ -228,6 +228,12 @@ function openMenu(view: MusicalView): HTMLElement {
+   return menu;
+ }
+ 
++function fixedGridRadios(menu: HTMLElement): HTMLElement[] {
++  return within(within(menu).getByRole('group', { name: 'Fixed grid' })).getAllByRole(
++    'menuitemradio',
++  );
++}
++
+ function rightClick(target: HTMLElement, clientX = 300, clientY = 200): boolean {
+   fireEvent.pointerDown(target, { button: 2, buttons: 2, pointerId: 9, clientX, clientY });
+   return fireEvent.contextMenu(target, { button: 2, clientX, clientY });
+@@ -316,7 +322,7 @@ describe('SRW-14 stage 5a musical grid in the workspace (D-29z32)', { timeout: 1
+     expect(select.querySelector('optgroup')).toBeNull();
+     expect(gridControl(view).dataset.gridDivision).toBe('1');
+     rightClick(laneBody('music'));
+-    expect(within(openMenu(view)).getAllByRole('menuitemradio')).toHaveLength(7);
++    expect(fixedGridRadios(openMenu(view))).toHaveLength(7);
+   });
+ 
+   it('GU2 a BPM adds the musical group without switching; choosing 1/4 at 120 sets 0.5 s', async () => {
+@@ -477,24 +483,25 @@ describe('SRW-14 stage 5a musical grid in the workspace (D-29z32)', { timeout: 1
+     commitTempo(view, '120');
+     rightClick(laneBody('music'));
+     const menu = openMenu(view);
+-    const radios = within(menu).getAllByRole('menuitemradio');
++    const radios = fixedGridRadios(menu);
+     expect(radios).toHaveLength(13);
+     [...SECONDS_LABELS, ...MUSICAL_LABELS].forEach((label, index) => {
+       expect(radios[index]).toBe(within(menu).getByRole('menuitemradio', { name: label }));
+     });
+-    expect(menu.querySelectorAll('hr')).toHaveLength(2);
++    expect(menu.querySelectorAll('hr')).toHaveLength(3);
+     const familySeparator = radios[6].nextElementSibling;
+     expect(familySeparator?.tagName).toBe('HR');
+     expect(radios[7].previousElementSibling).toBe(familySeparator);
+-    expect(radios.filter((radio) => radio.getAttribute('aria-checked') === 'true')).toEqual([
+-      radios[3],
+-    ]);
++    expect(radios.filter((radio) => radio.getAttribute('aria-checked') === 'true')).toEqual([]);
++    expect(
++      within(menu).getByRole('menuitemradio', { name: 'Medium' }).getAttribute('aria-checked'),
++    ).toBe('true');
+     fireEvent.click(within(menu).getByRole('menuitemradio', { name: '1/8' }));
+     expect(gridControl(view).dataset.gridDivision).toBe('1/8');
+     expect(statusText(view)).toBe('Grid: 1/8 · 0.25 s at 120 BPM (Snap off)');
+     expect(gridMenu(view)).toBeNull();
+     rightClick(laneBody('music'));
+-    const reopened = within(openMenu(view)).getAllByRole('menuitemradio');
++    const reopened = fixedGridRadios(openMenu(view));
+     expect(reopened.filter((radio) => radio.getAttribute('aria-checked') === 'true')).toEqual([
+       reopened[10],
+     ]);
+diff --git a/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx b/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
+index 7b9979d..94cb377 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
+@@ -313,7 +313,7 @@ describe('SRW-14 stage 4b-2a narrow/widen keys (D-29z24-K)', { timeout: 15_000 }
+     const select = divisionSelect(view);
+     expect(select.value).toBe('0.5');
+     expect(statusText(view)).toBe('Grid: 0.5 s (Snap off)');
+-    expect(select.getAttribute('aria-keyshortcuts')).toBe('1 2 5');
++    expect(select.getAttribute('aria-keyshortcuts')).toBe('1 2 4 5');
+     expect(select.title).toBe(
+       `Grid 0.5 s${KEYS_TITLE_SUFFIX} · Adaptive: follows zoom — 5 for fixed`,
+     );
+diff --git a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+index 5c47921..7205fd6 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+@@ -235,6 +235,12 @@ function openMenu(view: ReturnType<typeof render>): HTMLElement {
+   return menu;
+ }
+ 
++function fixedGridRadios(menu: HTMLElement): HTMLElement[] {
++  return within(within(menu).getByRole('group', { name: 'Fixed grid' })).getAllByRole(
++    'menuitemradio',
++  );
++}
++
+ function menuItem(view: ReturnType<typeof render>, name: string): HTMLElement {
+   return within(openMenu(view)).getByRole(
+     name === SNAP_ITEM_LABEL ? 'menuitemcheckbox' : 'menuitemradio',
+@@ -342,14 +348,15 @@ describe('SRW-14 stage 4b-1 lane grid menu (D-29z22-M)', { timeout: 15_000 }, ()
+     const menu = openMenu(view);
+     expect(menu.getAttribute('role')).toBe('menu');
+     expect(menu.getAttribute('aria-label')).toBe(MENU_LABEL);
+-    const radios = within(menu).getAllByRole('menuitemradio');
++    const radios = fixedGridRadios(menu);
+     expect(radios).toHaveLength(GRID_DIVISIONS_SECONDS.length);
+     GRID_DIVISIONS_SECONDS.forEach((step, index) => {
+       expect(radios[index]).toBe(
+         within(menu).getByRole('menuitemradio', { name: formatGridDivision(step) }),
+       );
+-      expect(radios[index].getAttribute('aria-checked')).toBe(step === 1 ? 'true' : 'false');
++      expect(radios[index].getAttribute('aria-checked')).toBe('false');
+     });
++    expect(menuItem(view, 'Medium').getAttribute('aria-checked')).toBe('true');
+     const snapItems = within(menu).getAllByRole('menuitemcheckbox');
+     expect(snapItems).toHaveLength(1);
+     expect(snapItems[0]).toBe(menuItem(view, SNAP_ITEM_LABEL));
+@@ -447,22 +454,22 @@ describe('SRW-14 stage 4b-1 lane grid menu (D-29z22-M)', { timeout: 15_000 }, ()
+   it('GM7 keyboard: focus on the checked item, wrap, Home/End, Enter and Space choose', async () => {
+     const { api, view, laneBody } = await mountMenuWorkspace();
+     rightClick(laneBody('music'));
+-    const checked = menuItem(view, '1 s');
++    const checked = menuItem(view, 'Medium');
+     expect(focusedElement()).toBe(checked);
+     expect(checked.tabIndex).toBe(0);
+-    for (let step = 0; step < 8; step++) {
++    for (let step = 0; step < 13; step++) {
+       pressFocused('ArrowDown');
+     }
+     expect(focusedElement()).toBe(checked);
+     pressFocused('Home');
+-    expect(focusedElement()).toBe(menuItem(view, '10 s'));
++    expect(focusedElement()).toBe(menuItem(view, 'Widest'));
+     pressFocused('ArrowUp');
+     expect(focusedElement()).toBe(menuItem(view, SNAP_ITEM_LABEL));
+     pressFocused('Home');
+     pressFocused('End');
+     expect(focusedElement()).toBe(menuItem(view, SNAP_ITEM_LABEL));
+     pressFocused('Home');
+-    for (let step = 0; step < 4; step++) {
++    for (let step = 0; step < 9; step++) {
+       pressFocused('ArrowDown');
+     }
+     expect(focusedElement()).toBe(menuItem(view, '0.5 s'));
+@@ -860,7 +867,7 @@ describe('SRW-14 stage 4b-1 lane grid menu (D-29z22-M)', { timeout: 15_000 }, ()
+     const { view, laneBody } = await mountMenuWorkspace();
+     rightClick(laneBody('music'));
+     const focused = focusedElement();
+-    expect(focused).toBe(menuItem(view, '1 s'));
++    expect(focused).toBe(menuItem(view, 'Medium'));
+     expect(fireEvent.keyDown(focused, { key: 'Tab', code: 'Tab' })).toBe(true);
+     expect(gridMenu(view)).toBeNull();
+     expect(gridControl(view).dataset.gridSeconds).toBe('1');
+diff --git a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+index bf2bccf..6cccd21 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -221,7 +221,7 @@ describe('SRW-14 stage 1 grid control and lines', { timeout: 15_000 }, () => {
+     const toggle = snapToggle(view);
+     expect(toggle.getAttribute('aria-pressed')).toBe('false');
+     expect(toggle.textContent).toBe('Snap');
+-    expect(toggle.getAttribute('aria-keyshortcuts')).toBe('G');
++    expect(toggle.getAttribute('aria-keyshortcuts')).toBe('G 4');
+     expect(toggle.title).toBe('Snap off — free movement (G)');
+     const select = divisionSelect(view);
+     expect(select.value).toBe('1');
+diff --git a/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx b/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
+index d880f26..da769de 100644
+--- a/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
+@@ -240,6 +240,12 @@ function openMenu(view: TripletView): HTMLElement {
+   return menu;
+ }
+ 
++function fixedGridRadios(menu: HTMLElement): HTMLElement[] {
++  return within(within(menu).getByRole('group', { name: 'Fixed grid' })).getAllByRole(
++    'menuitemradio',
++  );
++}
++
+ function rightClick(target: HTMLElement, clientX = 300, clientY = 200): boolean {
+   fireEvent.pointerDown(target, { button: 2, buttons: 2, pointerId: 9, clientX, clientY });
+   return fireEvent.contextMenu(target, { button: 2, clientX, clientY });
+@@ -350,10 +356,10 @@ describe('SRW-14 stage 5b triplet grid in the workspace (D-29z34)', { timeout: 1
+     expect(pressDigit('3')).toBe(false);
+     expect(divisionOf(view)).toBe('1');
+     expect(statusText(view)).toBe(NO_TEMPO_REFUSAL);
+-    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 5');
++    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 4 5');
+     rightClick(laneBody('music'));
+     const menu = openMenu(view);
+-    expect(within(menu).getAllByRole('menuitemradio')).toHaveLength(7);
++    expect(fixedGridRadios(menu)).toHaveLength(7);
+     expect(menuCheckboxNames(menu)).toEqual([SNAP_MENU_LABEL]);
+     fireEvent.keyDown(menu, { key: 'End' });
+     expect(document.activeElement).toBe(
+@@ -364,7 +370,7 @@ describe('SRW-14 stage 5b triplet grid in the workspace (D-29z34)', { timeout: 1
+   it('TU2 with a BPM a seconds or bar division refuses the triplet and stays', async () => {
+     const { view } = await mountTripletWorkspace();
+     commitTempo(view, '90');
+-    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 3 5');
++    expect(divisionSelect(view).getAttribute('aria-keyshortcuts')).toBe('1 2 3 4 5');
+     pressDigit('3');
+     expect(divisionOf(view)).toBe('1');
+     expect(divisionSelect(view).value).toBe('1');
+@@ -478,8 +484,8 @@ describe('SRW-14 stage 5b triplet grid in the workspace (D-29z34)', { timeout: 1
+     chooseDivision(view, '1/4');
+     rightClick(laneBody('music'));
+     const menu = openMenu(view);
+-    expect(within(menu).getAllByRole('menuitemradio')).toHaveLength(13);
+-    expect(menu.querySelectorAll('hr')).toHaveLength(2);
++    expect(fixedGridRadios(menu)).toHaveLength(13);
++    expect(menu.querySelectorAll('hr')).toHaveLength(3);
+     expect(menuCheckboxNames(menu)).toEqual([SNAP_MENU_LABEL, TRIPLET_MENU_LABEL]);
+     expect(tripletMenuItem(menu).getAttribute('aria-checked')).toBe('false');
+     expect(tripletMenuItem(menu).previousElementSibling).toBe(
+@@ -497,7 +503,7 @@ describe('SRW-14 stage 5b triplet grid in the workspace (D-29z34)', { timeout: 1
+     expect(gridMenu(view)).toBeNull();
+     rightClick(laneBody('music'));
+     const reopened = openMenu(view);
+-    const radios = within(reopened).getAllByRole('menuitemradio');
++    const radios = fixedGridRadios(reopened);
+     expect(radios).toHaveLength(12);
+     expect(radios.map((radio) => radio.textContent)).toEqual([
+       ...SECONDS_LABELS,
+diff --git a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+index c0e47c2..ece70d4 100644
+--- a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+@@ -557,7 +557,7 @@ describe('DUX-R-5b-3a labels and status texts go neutral (D-29z143)', () => {
+       1,
+     );
+     expectCount(LIBRARY_PATH, '<span className="text-foreground">{activeNodeLabel}', 1);
+-    expectCount(GRID_MENU_PATH, 'justify-center text-foreground', 3);
++    expectCount(GRID_MENU_PATH, 'justify-center text-foreground', 4);
+     expectCount(EXPORT_DIALOG_PATH, 'className="text-sm text-foreground"', 2);
+     expectCount(EXPORT_DIALOG_PATH, 'h-2 w-full accent-foreground', 1);
+ 
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 4478cb6..341c4a9 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -1356,6 +1356,13 @@ const EXPECTED_GRID_PLAIN_STRINGS: Record<string, string> = {
+   menuLabel: 'Grid division',
+   snapOnTitle: 'Snap on — clips land on the grid (G)',
+   snapOff: 'Snap off — free movement (G)',
++  menuAdaptiveGroup: 'Adaptive grid',
++  menuFixedGroup: 'Fixed grid',
++  widthWidest: 'Widest',
++  widthWide: 'Wide',
++  widthMedium: 'Medium',
++  widthNarrow: 'Narrow',
++  widthNarrowest: 'Narrowest',
+ };
+ 
+ const EXPECTED_GRID_KEYS = [
+@@ -1363,11 +1370,14 @@ const EXPECTED_GRID_KEYS = [
+   'adaptiveOn',
+   'adaptiveTitleSuffix',
+   'adaptiveWidest',
++  'adaptiveWidthOn',
+   'backToSeconds',
+   'barLabel',
+   'barsGroup',
+   'fixedOn',
+   'fixedTitleSuffix',
++  'menuAdaptiveGroup',
++  'menuFixedGroup',
+   'menuLabel',
+   'narrowest',
+   'seconds',
+@@ -1386,6 +1396,11 @@ const EXPECTED_GRID_KEYS = [
+   'tripletNotOnBar',
+   'tripletsGroup',
+   'widest',
++  'widthMedium',
++  'widthNarrow',
++  'widthNarrowest',
++  'widthWide',
++  'widthWidest',
+ ];
+ 
+ const GRID_FORMATTER_SAMPLES: Record<string, string[]> = {
+@@ -1406,6 +1421,7 @@ const GRID_FORMATTER_SAMPLES: Record<string, string[]> = {
+   titleLinesVisible: [gs.titleLinesVisible('1/4')],
+   titleLinesHidden: [gs.titleLinesHidden('0.1 s')],
+   snapOnStatus: [gs.snapOnStatus('1 s')],
++  adaptiveWidthOn: [gs.adaptiveWidthOn('Narrow', '0.5 s')],
+ };
+ 
+ describe('V-0.3a grid and Snap strings', () => {
+diff --git a/app/lib/arrangement/grid-divisions.ts b/app/lib/arrangement/grid-divisions.ts
+index f8a1ec7..9800de5 100644
+--- a/app/lib/arrangement/grid-divisions.ts
++++ b/app/lib/arrangement/grid-divisions.ts
+@@ -232,3 +232,16 @@ export function adaptiveGridDivisionId(
+   const index = Math.min(family.length - 1, Math.max(0, base - density));
+   return family[index] ?? familyMember;
+ }
++
++export interface GridAdaptiveWidthOption {
++  density: number;
++  label: string;
++}
++
++export const GRID_ADAPTIVE_WIDTH_OPTIONS: readonly GridAdaptiveWidthOption[] = [
++  { density: 2, label: studioGridStrings.widthWidest },
++  { density: 1, label: studioGridStrings.widthWide },
++  { density: 0, label: studioGridStrings.widthMedium },
++  { density: -1, label: studioGridStrings.widthNarrow },
++  { density: -2, label: studioGridStrings.widthNarrowest },
++];
+diff --git a/app/lib/arrangement/shortcuts.ts b/app/lib/arrangement/shortcuts.ts
+index 1c310d9..9238ab0 100644
+--- a/app/lib/arrangement/shortcuts.ts
++++ b/app/lib/arrangement/shortcuts.ts
+@@ -98,7 +98,7 @@ export const STUDIO_SHORTCUT_GROUPS = [
+     id: 'grid-snap',
+     title: 'Grid & snap',
+     rows: [
+-      { id: 'snap', action: 'Snap on / off', keys: ['G'] },
++      { id: 'snap', action: 'Snap on / off', keys: ['G', '4'] },
+       { id: 'grid-width', action: 'Narrower / wider grid', keys: ['1 / 2'] },
+       { id: 'triplet', action: 'Triplet grid (needs a BPM)', keys: ['3'] },
+       { id: 'grid-mode', action: 'Adaptive / fixed grid', keys: ['5'] },
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 2e39201..17fb35f 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -461,6 +461,15 @@ export const studioGridStrings = {
+     `The adaptive grid is already at its widest density — now ${label} (2)`,
+   adaptiveTitleSuffix: ' · Adaptive: follows zoom — 5 for fixed',
+   fixedTitleSuffix: ' · Fixed at every zoom — 5 for adaptive',
++  menuAdaptiveGroup: 'Adaptive grid',
++  menuFixedGroup: 'Fixed grid',
++  widthWidest: 'Widest',
++  widthWide: 'Wide',
++  widthMedium: 'Medium',
++  widthNarrow: 'Narrow',
++  widthNarrowest: 'Narrowest',
++  adaptiveWidthOn: (width: string, label: string): string =>
++    `Adaptive grid — ${width}, now ${label}`,
+ };
+ 
+ interface StudioMarkerTimeText {

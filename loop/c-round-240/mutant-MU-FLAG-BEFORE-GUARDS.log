@@ -1,0 +1,49 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c240-scratch[39m
+
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx [2m([22m[2m17 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 3426[2mms[22m[39m
+     [32m✓[39m GAU1 mounts adaptive at 1 s with the adaptive title suffix and the 5 key listed[32m 228[2mms[22m[39m
+     [32m✓[39m GAU2 zooming follows 0.5 → 0.25 → 0.1 s in every lane and writes no status[32m 196[2mms[22m[39m
+     [32m✓[39m GAU3 5 freezes the pick as fixed through a zoom; 5 again re-picks adaptively[32m 125[2mms[22m[39m
+     [32m✓[39m GAU4 adaptive 1 and 2 move the density one level; the third 1 reports the narrowest density[32m 115[2mms[22m[39m
+     [32m✓[39m GAU5 choosing 0.1 s in the select makes the grid fixed at any zoom[32m 114[2mms[22m[39m
+     [33m[2m✓[22m[39m GAU6 a 90 BPM seed picks 1/4 in adaptive and in fixed mode with the same seed text [33m 717[2mms[22m[39m
+     [32m✓[39m GAU7 5 on the focused select toggles without type-ahead; modified and repeated 5 change nothing[32m 86[2mms[22m[39m
+     [32m✓[39m GAU8 a 5 typed in the library search or the BPM field, or with Export open, keeps the mode[32m 199[2mms[22m[39m
+     [32m✓[39m GAU9 with Snap on at 100 px/s a 0.7 s drag lands on the adaptive 0.25 s grid; Undo restores[32m 150[2mms[22m[39m
+     [32m✓[39m GAU10 3 with a BPM keeps the adaptive mode and switches to the triplet family and back[32m 296[2mms[22m[39m
+     [33m[2m✓[22m[39m GAU11 clearing the BPM while adaptive at 320 px/s re-picks 0.1 s and names it in the status [33m 335[2mms[22m[39m
+     [32m✓[39m GAU12 after a zoom the stored density never swallows a key: 1 1, zoom to 320, 2 widens at once[32m 128[2mms[22m[39m
+     [32m✓[39m GAU13 5 back to adaptive resets the density to Medium[32m 85[2mms[22m[39m
+     [32m✓[39m GAU14 C-R239-01 zoom-back: 1 1, zoom to 320, one 2, zoom to 34.4 px/s shows 2 s (density re-anchored to the visible pick)[32m 101[2mms[22m[39m
+     [32m✓[39m GAU15 mirror at the widest end: 2 2, zoom to 0.5 px/s, one 1 narrows at once, zoom to 40 shows 0.5 s[32m 95[2mms[22m[39m
+     [32m✓[39m GAU16 GATE239-S2 an adaptive 1 before a BPM seed is a hand choice: the seed keeps the seconds grid[32m 215[2mms[22m[39m
+[31m     [31m×[31m GAU17 a refused adaptive key (family end) is not a hand choice: the seed still picks the musical grid[39m[32m 238[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx[2m > [22mSABA-B-11b adaptive grid in the workspace (D-29z356)[2m > [22mGAU17 a refused adaptive key (family end) is not a hand choice: the seed still picks the musical grid
+[31m[1mAssertionError[22m: expected '0.1' to be '1/32' // Object.is equality[39m
+
+Expected: [32m"1/32"[39m
+Received: [31m"0.1"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:[2m502:30[22m[39m
+    [90m500| [39m    [34mexpect[39m([34mtempoInput[39m(view)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m'90'[39m)[33m;[39m
+    [90m501| [39m    [34mexpect[39m([34mgridMode[39m(view))[33m.[39m[34mtoBe[39m([32m'adaptive'[39m)[33m;[39m
+    [90m502| [39m    [34mexpect[39m([34mdivisionOf[39m(view))[33m.[39m[34mtoBe[39m([32m'1/32'[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m503| [39m    expect(statusText(view)?.endsWith('Snap on — grid 1/32 (G)')).toBe…
+    [90m504| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (17)[39m
+[2m   Start at [22m 03:36:55
+[2m   Duration [22m 5.70s[2m (transform 1.13s, setup 0ms, import 1.63s, tests 3.43s, environment 482ms)[22m
+
+
+::error file=/tmp/c240-scratch/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx,title=app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx > SABA-B-11b adaptive grid in the workspace (D-29z356) > GAU17 a refused adaptive key (family end) is not a hand choice%3A the seed still picks the musical grid,line=502,column=30::AssertionError: expected '0.1' to be '1/32' // Object.is equality%0A%0AExpected: "1/32"%0AReceived: "0.1"%0A%0A ❯ app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx:502:30%0A%0A

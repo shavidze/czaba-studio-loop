@@ -68,3 +68,9 @@ Related pending requests (non-blocking, still open): `b-round-231-checkpoint-req
 - **Round 240 evidence for the hook:** GATE239-S2 came from a new branch that replaced a call to `changeGridDivision` and lost its `gridHandChosen` side effect. A hook that owns the flag would keep that rule in one place.
 - **Question 7:** keep, or extract `useStudioGrid` after stage 2? If extract, which owner and which test set? Answer in at most 3 sentences.
 - **Trigger for re-asking:** after SABA-B-11b stage 2, and before SABA-B-10a, as before.
+
+## Addendum 6 (B, round 240 → 241 planning, D-29z373)
+- **Still unanswered** at round-241 planning. It stays non-blocking.
+- **Round 240 result:** SABA-B-11b-FIX-1 passed C (`c-round-240.json`), and gate 240 published `04c2a5b`. The gate-240 reviewer (`gates/round-240/review.md`, Architecture note) and A's round-240 reviewer both say "keep for now" for the grid block.
+- **New evidence for question 7:** round 241 (SABA-B-11b stage 2a) adds `chooseGridMenuAdaptiveDensity` in `StudioWorkspace.tsx`. It is the **third writer** of `gridHandChosenRef`, after `changeGridDivision` and `stepGridDivision`. It also re-states the mode/density writes that `toggleGridMode` owns. The rule "an accepted width choice is a hand choice" now lives in three callbacks, and only full-workspace tests (GAU16, GAU21, TU5) pin it.
+- **Trigger for re-asking:** after SABA-B-11b stage 2b (the last 11b stage), and before SABA-B-10a. The answer is still at most 3 sentences.

@@ -1,0 +1,26 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+const base = process.argv[2]; const out = process.argv[3]; const shots = process.argv[4];
+async function grid(page){return page.evaluate(()=>{const g=document.querySelector('[data-testid="arrangement-grid-control"]');const s=document.querySelector('[data-testid="arrangement-status"]');const r=document.querySelector('[data-testid="arrangement-bars-ruler"]');const t=document.querySelector('[data-testid="arrangement-snap-toggle"]');const sel=document.querySelector('[data-testid="arrangement-grid-division"]');return {division:g?.getAttribute('data-grid-division'),mode:g?.getAttribute('data-grid-mode'),snap:g?.getAttribute('data-snap'),bpm:r?.getAttribute('data-bpm')??null,status:s?.textContent??null,snapAria:t?.getAttribute('aria-keyshortcuts'),selectAria:sel?.getAttribute('aria-keyshortcuts')};});}
+async function fresh(browser,w,h){const context=await browser.newContext({viewport:{width:w,height:h}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.goto(`${base}/studio-lab`,{waitUntil:'networkidle'});await page.getByText('Demo collection ready',{exact:false}).first().waitFor({timeout:60000});await page.waitForTimeout(800);return {context,page,errors};}
+async function key(page,k,n=1){for(let i=0;i<n;i++){await page.locator('body').press(k);await page.waitForTimeout(150);}}
+async function enterSynth(page){const row=page.locator('[data-source-id="demo-synth-mix"]').first();await row.waitFor({timeout:15000});const btn=row.locator('button').first();const t=(await btn.count())?btn:row;await t.focus();await page.keyboard.press('Enter');await page.waitForTimeout(1500);await page.evaluate(()=>{const a=document.activeElement;if(a instanceof HTMLElement)a.blur();});}
+async function openMenu(page){const pt=await page.evaluate(()=>{const vw=window.innerWidth,vh=window.innerHeight;for(const body of document.querySelectorAll('[data-track-id] [data-grid-lines]')){const r=body.getBoundingClientRect();for(const fx of [0.9,0.75,0.6,0.45,0.3]){const x=r.left+r.width*fx,y=r.top+r.height/2;if(x<=0||x>=vw-20||y<=0||y>=vh-10)continue;const hit=document.elementFromPoint(x,y);if(hit===body)return {x,y};}}return null;});if(!pt)return null;await page.mouse.click(pt.x,pt.y,{button:'right'});await page.waitForTimeout(300);const m=page.getByTestId('arrangement-grid-menu');if(!(await m.count()))return null;return m;}
+async function menuInfo(page,m){const box=await m.boundingBox();const info=await m.evaluate((el)=>{const radios=[...el.querySelectorAll('[role=menuitemradio]')];const groups=[...el.querySelectorAll('fieldset,[role=group]')].map(g=>({legend:g.querySelector('legend')?.textContent??null,radios:[...g.querySelectorAll('[role=menuitemradio]')].map(r=>r.textContent)}));return {radioCount:radios.length,checked:radios.filter(r=>r.getAttribute('aria-checked')==='true').map(r=>r.textContent),groups,focused:document.activeElement?.textContent??null,scrollH:el.scrollHeight,clientH:el.clientHeight};});const vp=page.viewportSize();return {...info,box,fits:box?box.y>=0&&box.y+box.height<=vp.height:null};}
+async function axDesc(page){const cdp=await page.context().newCDPSession(page);await cdp.send('Accessibility.enable');const {nodes}=await cdp.send('Accessibility.getFullAXTree');const n=nodes.find(x=>x.role?.value==='combobox'&&x.name?.value==='Grid division');return n?{name:n.name?.value,description:n.description?.value??null}:null;}
+(async()=>{const browser=await chromium.launch();const results=[];
+for(const [w,h] of [[1440,900],[1280,720]]){
+ let {context,page,errors}=await fresh(browser,w,h);const s=[];
+ s.push({step:'mount',...await grid(page),ax:await axDesc(page)});
+ let m=await openMenu(page);s.push({step:'menu-mount',menu:m?await menuInfo(page,m):null});if(m)await page.screenshot({path:`${shots}/menu-mount-${w}.png`});
+ if(m){const narrow=m.getByRole('menuitemradio',{name:'Narrow',exact:true});if(await narrow.count()){await narrow.click();await page.waitForTimeout(200);s.push({step:'choose-Narrow',...await grid(page)});}else{await page.keyboard.press('Escape');s.push({step:'no-Narrow-item'});}}
+ await key(page,'Digit4');s.push({step:'4',...await grid(page)});await key(page,'Digit4');s.push({step:'4again',...await grid(page)});
+ await key(page,'Digit5');s.push({step:'5',...await grid(page),ax:await axDesc(page)});
+ m=await openMenu(page);s.push({step:'menu-fixed',menu:m?await menuInfo(page,m):null});if(m)await page.keyboard.press('Escape');
+ results.push({viewport:`${w}x${h}`,recipe:'seconds',errors,steps:s});await context.close();
+ ({context,page,errors}=await fresh(browser,w,h));const b=[];await enterSynth(page);b.push({step:'seed',...await grid(page)});
+ m=await openMenu(page);b.push({step:'menu-bpm',menu:m?await menuInfo(page,m):null});if(m){await page.screenshot({path:`${shots}/menu-bpm-${w}.png`});await page.keyboard.press('Escape');}
+ results.push({viewport:`${w}x${h}`,recipe:'bpm',errors,steps:b});await context.close();
+}
+await browser.close();require('node:fs').writeFileSync(out,JSON.stringify(results,null,2));
+for(const r of results){console.log(r.viewport,r.recipe,'errors',r.errors.length);for(const x of r.steps)console.log(' ',JSON.stringify(x).slice(0,600));}})();

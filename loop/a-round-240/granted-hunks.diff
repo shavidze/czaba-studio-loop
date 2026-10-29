@@ -1,0 +1,204 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index a6cd751..8e94062 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1545,6 +1545,10 @@ export function StudioWorkspace() {
+       const current = gridDivisionIdRef.current;
+       const next = adjacentGridDivisionId(current, direction);
+       if (gridModeRef.current === 'adaptive') {
++        if (next === null) {
++          workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
++          return;
++        }
+         const densityStep = direction === 'narrow' ? -1 : 1;
+         let density = gridDensityRef.current + densityStep;
+         while (
+@@ -1555,10 +1559,6 @@ export function StudioWorkspace() {
+         ) {
+           density += densityStep;
+         }
+-        if (next === null) {
+-          workspaceRef.current.setStatus(gridDivisionEndMessage(current, direction));
+-          return;
+-        }
+         if (density < GRID_ADAPTIVE_DENSITY_MIN || density > GRID_ADAPTIVE_DENSITY_MAX) {
+           workspaceRef.current.setStatus(
+             direction === 'narrow'
+@@ -1567,6 +1567,7 @@ export function StudioWorkspace() {
+           );
+           return;
+         }
++        gridHandChosenRef.current = true;
+         gridDensityRef.current = density;
+         setGridDensity(density);
+         const id = resolveAdaptiveGrid(current, tempoBpmRef.current);
+diff --git a/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx b/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx
+index cd4ba4d..817c5dd 100644
+--- a/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx
+@@ -232,7 +232,7 @@ afterEach(() => {
+   vi.restoreAllMocks();
+ });
+ 
+-describe('SABA-B-11b adaptive grid in the workspace (D-29z352)', { timeout: 15_000 }, () => {
++describe('SABA-B-11b adaptive grid in the workspace (D-29z356)', { timeout: 15_000 }, () => {
+   it('GAU1 mounts adaptive at 1 s with the adaptive title suffix and the 5 key listed', async () => {
+     const { view } = await mountAdaptiveWorkspace();
+     expect(gridMode(view)).toBe('adaptive');
+@@ -433,6 +433,9 @@ describe('SABA-B-11b adaptive grid in the workspace (D-29z352)', { timeout: 15_0
+     expect(statusText(view)).toBe('Grid: 0.25 s (Snap off)');
+     pressKey('2');
+     expect(divisionOf(view)).toBe('0.5');
++    act(() => live(api).setPxPerSecond(40));
++    expect(divisionOf(view)).toBe('5');
++    expect(gridMode(view)).toBe('adaptive');
+   });
+ 
+   it('GAU13 5 back to adaptive resets the density to Medium', async () => {
+@@ -447,4 +450,56 @@ describe('SABA-B-11b adaptive grid in the workspace (D-29z352)', { timeout: 15_0
+     expect(divisionOf(view)).toBe('1');
+     expect(statusText(view)).toBe('Adaptive grid — follows zoom, now 1 s (5)');
+   });
++
++  it('GAU14 C-R239-01 zoom-back: 1 1, zoom to 320, one 2, zoom to 34.4 px/s shows 2 s (density re-anchored to the visible pick)', async () => {
++    const { api, view } = await mountAdaptiveWorkspace();
++    pressKey('1');
++    pressKey('1');
++    act(() => live(api).setPxPerSecond(320));
++    expect(divisionOf(view)).toBe('0.1');
++    pressKey('2');
++    expect(divisionOf(view)).toBe('0.25');
++    act(() => live(api).setPxPerSecond(34.359738368));
++    expect(divisionOf(view)).toBe('2');
++    expect(gridMode(view)).toBe('adaptive');
++  });
++
++  it('GAU15 mirror at the widest end: 2 2, zoom to 0.5 px/s, one 1 narrows at once, zoom to 40 shows 0.5 s', async () => {
++    const { api, view } = await mountAdaptiveWorkspace();
++    pressKey('2');
++    pressKey('2');
++    expect(divisionOf(view)).toBe('5');
++    act(() => live(api).setPxPerSecond(0.5));
++    expect(divisionOf(view)).toBe('10');
++    pressKey('1');
++    expect(divisionOf(view)).toBe('5');
++    expect(statusText(view)).toBe('Grid: 5 s (Snap off)');
++    act(() => live(api).setPxPerSecond(40));
++    expect(divisionOf(view)).toBe('0.5');
++  });
++
++  it('GAU16 GATE239-S2 an adaptive 1 before a BPM seed is a hand choice: the seed keeps the seconds grid', async () => {
++    const { view, addSource } = await mountAdaptiveWorkspace();
++    pressKey('1');
++    expect(divisionOf(view)).toBe('0.5');
++    addSource('stem-90');
++    expect(tempoInput(view).value).toBe('90');
++    expect(gridMode(view)).toBe('adaptive');
++    expect(divisionOf(view)).toBe('0.5');
++    expect(statusText(view)?.endsWith('Snap on — grid 0.5 s (G)')).toBe(true);
++  });
++
++  it('GAU17 a refused adaptive key (family end) is not a hand choice: the seed still picks the musical grid', async () => {
++    const { api, view, addSource } = await mountAdaptiveWorkspace();
++    act(() => live(api).setPxPerSecond(320));
++    expect(divisionOf(view)).toBe('0.1');
++    pressKey('1');
++    expect(divisionOf(view)).toBe('0.1');
++    expect(statusText(view)).toBe('The grid is already at its narrowest — 0.1 s (1)');
++    addSource('stem-90');
++    expect(tempoInput(view).value).toBe('90');
++    expect(gridMode(view)).toBe('adaptive');
++    expect(divisionOf(view)).toBe('1/32');
++    expect(statusText(view)?.endsWith('Snap on — grid 1/32 (G)')).toBe(true);
++  });
+ });
+diff --git a/docs/implementation/2026/quarter-IV/186-saba-b-11b-adaptive-grid.md b/docs/implementation/2026/quarter-IV/186-saba-b-11b-adaptive-grid.md
+index 9690264..258d7d5 100644
+--- a/docs/implementation/2026/quarter-IV/186-saba-b-11b-adaptive-grid.md
++++ b/docs/implementation/2026/quarter-IV/186-saba-b-11b-adaptive-grid.md
+@@ -1,7 +1,7 @@
+ # SABA-B-11b ეტაპი 1 — zoom-adaptive grid, `5` გასაღები და `1`/`2` როგორც adaptive density
+ 
+ **თარიღი:** 2026-10-29
+-**სტატუსი:** In Progress (stage 1 of 2; C round 239 PASS)
++**სტატუსი:** In Progress (stage 1 of 2; C round 240 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -53,6 +53,15 @@ setting-ია, Snap-ის მსგავსად.
+ `gridDivisionEndMessage`; density-ის ზღვარზე (±2), როცა family-ში ჯერ კიდევ არის ადგილი —
+ `adaptiveNarrowest/Widest(label)`.
+ 
++**density-ის მოდელი (D-29z361, round 240).** ყოველ `1`/`2`-ზე density ხილულ pick-ზე თავიდან
++„ებმება“: შენახული density იმდენი დონით იცვლება, რამდენიც საჭიროა, რომ ხილული division ზუსტად ერთი
++family ნაბიჯით შეიცვალოს. family-ის ბოლოს ან ±2 ზღვარზე density და `gridHandChosen` უცვლელია და
++status-ში შესაბამისი ტექსტი ჩანს. ამრიგად ღილაკი არასდროს „იყლაპება“, შენახული density კი აღწერს იმას,
++რაც ეკრანზეა zoom-ის base-თან შედარებით. clamp-ის მქონე family-ის ბოლოს „ყოველი დაჭერა ერთი ხილული
++ნაბიჯია“ და „უკან zoom აჩვენებს დაჭერების ჯამს“ ერთდროულად შეუძლებელია, ამიტომ არჩეულია პირველი.
++Live-ის manual-ში clamp-ის შემთხვევა აღწერილი არ არის, ამიტომ ეს Saba-ს კითხვაა
++(SABA-Q-11B-DENSITY-MODEL).
++
+ **`3` adaptive რეჟიმში** family-ს triplet-ზე (ან straight-ზე) ცვლის და adaptive რჩება.
+ 
+ **ჩუმი zoom.** zoom status-ს არ წერს და announcement-ს არ იწვევს: `gridDivisionId` და
+@@ -151,6 +160,26 @@ density-ს მანამ აბიჯებს, სანამ ხილუ
+ **Problem (code-reviewer, Low):** musical id BPM-ის გარეშე `bar`-ს აბრუნებდა. → **Solution:**
+ `adaptiveGridDivisionId` ასეთ შემთხვევაში input-ს აბრუნებს (GA6).
+ 
++**Problem (GATE239-S2, Medium, round 239-ის რეგრესია):** adaptive `1`/`2` `changeGridDivision`-ს
++აღარ იძახებდა და `gridHandChosen`-ს აღარ აყენებდა. ამიტომ `1` (0.5 s) და შემდეგ BPM-იანი asset-ის
++დამატება grid-ს musical family-ზე (`1/4`) გადაიყვანდა და მომხმარებლის არჩევანი იკარგებოდა (11a-ს
++კონტრაქტი, `tempo-seed-ui.test.tsx` TU5). → **Solution:** `stepGridDivision`-ის adaptive შტოში `gridHandChosenRef.current =
++true` ორივე უარის guard-ის (family-ის ბოლო, density-ის ზღვარი) შემდეგ ყენდება, `gridDensityRef`-ის
++ჩაწერამდე. უარყოფილი ღილაკი ხელით არჩევანად არ ითვლება. `toggleGridMode` (`5`) და `toggleGridTriplet`
++უცვლელია (D-29z362). ტესტები: GAU16, GAU17.
++
++**Problem (GATE239-S1 / C-R239-01):** clamp-ის მქონე family-ის ბოლოს დაჭერის შემდეგ უკან zoom
++დაჭერების ჯამზე უფრო ფართო grid-ს აჩვენებს. → **Solution:** კოდი არ შეცვლილა, მიღებულია ruling
++D-29z361 (იხ. `## მიდგომა`). reviewer-ის შემოთავაზებული ფორმულა (`base − indexOf(current) + step`)
++B-ის simulation-ში იგივე შედეგს იძლევა: `eq2.mjs` — 19,710 შემთხვევა, `eq.mjs` — 960, 0 განსხვავება.
++აბსოლუტური დონის მოდელი უარყოფილია, რადგან clamp-ზე პირველ ერთ-ორ `2`-ს ეკრანზე არაფერს ცვლის.
++round 239-ის reviewer-მა ზუსტად ეს შეაფასა Medium #2-ად. მნიშვნელობები GAU12, GAU14 და GAU15-შია
++დაფიქსირებული.
++
++**Problem (GATE239-S3, Low):** family-ის ბოლოს შემოწმება density loop-ის შემდეგ ხდებოდა, ამიტომ
++loop უშედეგოდ ტრიალებდა. → **Solution:** `next === null` შემოწმება loop-მდე გადავიდა. ქცევა
++იგივეა (GAU12-ის family-ის ბოლოს ტექსტი, GAU17).
++
+ ## ტესტირება
+ 
+ - `grid-adaptive.test.ts`: GA1 (seconds family 5 zoom-ზე), GA2 (invariant 5 family × 30 zoom),
+@@ -161,19 +190,28 @@ density-ს მანამ აბიჯებს, სანამ ხილუ
+   `1`/`2`), GAU5 (select = fixed), GAU6 (90 BPM seed ორივე რეჟიმში), GAU7 (`5` select-ზე,
+   modifier-ები, auto-repeat), GAU8 (text field-ები და Export), GAU9 (snap adaptive 0.25 s-ზე და
+   Undo), GAU10 (`3` adaptive რეჟიმში), GAU11 (BPM-ის გასუფთავება adaptive რეჟიმში 320 px/s-ზე),
+-  GAU12 (density zoom-ის შემდეგ ღილაკს არ „ყლაპავს“), GAU13 (`5` adaptive-ზე density-ს Medium-ზე აბრუნებს).
++  GAU12 (density zoom-ის შემდეგ ღილაკს არ „ყლაპავს“; round 240-დან უკან zoom 40 px/s-ზე → 5 s,
++  adaptive), GAU13 (`5` adaptive-ზე density-ს Medium-ზე აბრუნებს), GAU14 (C-R239-01: `1 1`, zoom
++  320 → 0.1 s, `2` → 0.25 s, zoom 34.36 px/s → 2 s), GAU15 (სარკე ფართო ბოლოზე: `2 2`, zoom 0.5 →
++  10 s, `1` → 5 s, zoom 40 → 0.5 s), GAU16 (GATE239-S2: adaptive `1` და შემდეგ 90 BPM seed → 0.5 s
++  რჩება), GAU17 (უარყოფილი `1` family-ის ბოლოს ხელით არჩევანი არ არის: seed → `1/32`).
+ - Mutant-ები scratch ასლზე: MU-FIXED-DEFAULT, MU-DENSITY-IGNORED, MU-ZOOM-STATUS, MU-SELECT-5
+-  (შედეგები `a-round-239.md`-ში).
++  (შედეგები `a-round-239.md`-ში); round 240: MU-FLAG-MISSING (GAU16 წითელი) და
++  MU-FLAG-BEFORE-GUARDS (flag adaptive შტოს პირველ statement-ად; GAU17 წითელი), შედეგები
++  `a-round-240.md`-ში. flag-ის პოზიცია ორ guard-ს შორის ტესტით ვერ დაფიქსირდება: ±2 ზღვრამდე
++  მისვლას წინა მიღებული დაჭერები სჭირდება, რომლებმაც flag უკვე დააყენეს.
+ - covering set (39 ფაილი) + ორი ახალი ფაილი, `npm run typecheck`, Biome, Playwright `/studio-lab`-ზე
+   1440×900 და 1280×720.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-ეტაპი 2 (round 240):
++ეტაპი 2 (round 241):
+ 
+ - `4` გასაღები, როგორც G-ის Snap alias;
+ - lane grid menu-ში (`ArrangementGridMenu.tsx`) Adaptive / Fixed და density პუნქტები;
+ - „snap არასდროს ჯდება უხილავ grid-ზე“ (6 px-ზე ნაკლები დამალული ხაზები fixed რეჟიმში და adaptive
+-  family-ის ბოლოებზე).
++  family-ის ბოლოებზე);
++- GATE239-S4: რეჟიმი (Adaptive / Fixed) hover-ის გარეშე უნდა იკითხებოდეს.
+ 
+-Saba-ს კითხვები: SABA-Q-11B-DENSITY, SABA-Q-11B-READOUT, SABA-Q-11B-PLAIN-DIGITS.
++Saba-ს კითხვები: SABA-Q-11B-DENSITY, SABA-Q-11B-READOUT, SABA-Q-11B-PLAIN-DIGITS,
++SABA-Q-11B-DENSITY-MODEL.
