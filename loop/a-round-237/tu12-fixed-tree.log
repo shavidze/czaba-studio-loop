@@ -1,0 +1,43 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a237-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m11 skipped[39m[2m)[22m[32m 156[2mms[22m[39m
+     [2m[90m↓[39m[22m TU1 the mount state is unchanged: empty tempo, seconds 1, Snap off, no bars marks
+     [2m[90m↓[39m[22m TU2 adding the bpm-90 stem seeds 90, 1/4 and Snap on, and appends to the placement status
+     [2m[90m↓[39m[22m TU3 an sfx and a bpm-less music clip change nothing; the bpm-90 stem afterwards seeds 90
+     [2m[90m↓[39m[22m TU4 a typed tempo wins, a cleared tempo stays empty, an untouched empty field still seeds
+     [2m[90m↓[39m[22m TU5 a hand-chosen division is kept; a hand-toggled Snap stays off
+     [2m[90m↓[39m[22m TU6 the seed is one-shot: a second BPM and Undo of both placements keep 90, 1/4 and Snap on
+     [2m[90m↓[39m[22m TU7 after the seed a clip drag snaps to multiples of 60/90 s; Alt still bypasses the grid
+     [2m[90m↓[39m[22m TU8 an initial arrangement that already holds the bpm-90 stem seeds at mount
+     [2m[90m↓[39m[22m TU9 a seed placed before every source settles keeps placement + seed; the bare ready text never replaces it
+     [2m[90m↓[39m[22m TU10 a mount seed composes with the loading text, and ready replaces only that prefix
+     [2m[90m↓[39m[22m TU11 an empty status before the seed gives no leading space
+[31m     [31m×[31m TU12 a refusal shown when loading settles is restored to the ready text on release, not loading[39m[32m 155[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx[2m > [22mA-R237 scratch regression probe[2m > [22mTU12 a refusal shown when loading settles is restored to the ready text on release, not loading
+[31m[1mAssertionError[22m: expected 'Loading the demo collection…' to be 'Demo collection ready. Drag a sound o…' // Object.is equality[39m
+
+Expected: [32m"Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."[39m
+Received: [31m"Loading the demo collection…"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx:[2m508:30[22m[39m
+    [90m506| [39m    [35mawait[39m [34msettle[39m()[33m;[39m
+    [90m507| [39m    [34mact[39m(() [33m=>[39m [34mreleaseGesture[39m())[33m;[39m
+    [90m508| [39m    [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m([33mDEMO_READY[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m509| [39m  })[33m;[39m
+    [90m510| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m11 skipped[39m[90m (12)[39m
+[2m   Start at [22m 00:17:46
+[2m   Duration [22m 1.70s[2m (transform 829ms, setup 0ms, import 1.15s, tests 156ms, environment 283ms)[22m
+
+
+::error file=/tmp/a237-scratch/app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx,title=app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx > A-R237 scratch regression probe > TU12 a refusal shown when loading settles is restored to the ready text on release%2C not loading,line=508,column=30::AssertionError: expected 'Loading the demo collection…' to be 'Demo collection ready. Drag a sound o…' // Object.is equality%0A%0AExpected: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0AReceived: "Loading the demo collection…"%0A%0A ❯ app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx:508:30%0A%0A

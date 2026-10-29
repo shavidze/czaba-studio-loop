@@ -1,10 +1,10 @@
 {
- "version": 222,
+ "version": 223,
  "updated": "2026-10-29",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 237, D-29z339..D-29z345; SABA-B-11a-FIX-2: A-R234-REVIEW-M1 + merged B-R235-READY-CLOBBER (provider loading/ready writes clobber the seed status -> loadingCollectionStatus/settledCollectionStatus functional writes, failed wins), GATE234-S2 (hasAssetTempoSource memo guard), GATE234-S3 (empty-part filter); doc grants 182 + 183 (C-R236-02); baseline ecaf0e4, 9 grants + 2 new files, frozen 1090)",
- "advisor_used_by_B": "2026-10-29 round 236 -> 237 planning: advisor available and consulted after orientation, before writing; advice followed: baseline = gate commit ecaf0e4, functional setStatus via the existing reducer, prefix-swap ready rule, failed decided separately with a browser row, memo guard for GATE234-S2 without closing the seed, jsdom deferred-load repro, doc 183 bullet as a doc grant, Saba question on the lost ready hint. B differed: failed(n) replaces (B measured the append variant: 2-line status at 1280). Final advisor check before handover.",
+ "current_task": "current-task.md (round 238, D-29z346..D-29z351; SABA-B-11a-FIX-3: C-R237-01 (= A-R237-REVIEW-M1, Medium regression of round 237: stale loading text restored after a refusal release) + A-R237-REVIEW-L1 (Low, fixed now: seed appended onto a refusal); fix-up on the unpublished round-237 tree; HEAD ecaf0e4 + 11 round-237 paths at b-round-237-r238-start-sha256.txt; 3 grants; frozen 1098)",
+ "advisor_used_by_B": "2026-10-29 round 237 -> 238 planning: advisor available and consulted after orientation and B scratch pre-check, before writing. Advice followed: explicit dirty-tree start state with per-path hashes, frozen list = HEAD files + 8 non-regranted round-237 paths, L1 ruled with an API-level scratch repro (B chose fix now: same release function), wait for the covering log before quoting numbers, bounded C rows (refusal recipe, round-237 race rows on the changed settle, unit, mutants, doc 185), nothing closes, architecture note as signal, retro candidate instead of a lesson edit. Final advisor check before handover.",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -10550,9 +10550,17 @@
    "round": 237,
    "task": "current-task.md",
    "decision": "D-29z339..D-29z345",
-   "status": "dispatched",
+   "status": "c_fail (C-R237-01 Medium regression; c-round-237.json browserVerified true realVerified true; gate 237 skipped; tree kept for round 238)",
    "type": "bug round (3 related): SABA-B-11a-FIX-2 (A-R234-REVIEW-M1 + B-R235-READY-CLOBBER, GATE234-S2, GATE234-S3) + doc grants 182/183 (C-R236-02)",
    "note": "baseline ecaf0e4 clean (gate 236 published); frozen 1090 (b-round-236-r237-tree-sha256.txt); 9 grants (b-round-236-r237-grants.txt) + 2 new files; L23 pre-check b-round-236/precheck-scratch.diff + precheck-covering.log (121 files, 1715 tests green); mutants MU-RC/MU-LD/MU-F/MU-S2 red, MU-SR equivalent (b-round-236/mutant-*.log); L29 recipes b-round-236/probe/readyrace-{baseline,scratch}.json both viewports"
+  },
+  {
+   "round": 238,
+   "task": "current-task.md",
+   "decision": "D-29z346..D-29z351",
+   "status": "dispatched",
+   "type": "fix-up (2 related): SABA-B-11a-FIX-3 C-R237-01 + A-R237-REVIEW-L1",
+   "note": "start HEAD ecaf0e4 + 11 round-237 paths (b-round-237-r238-start-sha256.txt); grants b-round-237-r238-grants.txt (ArrangementContext.tsx, tempo-seed-ui.test.tsx, doc 185); frozen 1098 (b-round-237-r238-tree-sha256.txt); L23 pre-check b-round-237/precheck-scratch.diff, precheck-covering-final.log (121 files, 1719 tests green); mutants MU-RF (TU12, TU13 red), MU-L1-REL and MU-L1-EFF (TU15 red); L29 recipe b-round-237/probe/race-scratch.json both viewports"
   }
  ],
  "post_current_stage_queue": [
@@ -24773,7 +24781,7 @@
    "severity": "medium",
    "origin": "A round 234 code-reviewer, confirmed by A (TU8 console.log); gate 234 suggestion 1",
    "title": "seed status (placement + seeded + Snap on) is overwritten by the provider's source-loading/ready setStatus when the initial arrangement already holds a BPM clip, or when the seed is triggered by a late collection.sources change; tempo/grid/Snap still correct",
-   "status": "open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json)",
+   "status": "open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346)",
    "repro": "tempo-seed-ui TU8 with a console.log of the status (A, round 234); StudioWorkspace.tsx seed effect l.~1398-1424 vs ArrangementContext loading status",
    "added": "2026-10-28 B round 234 -> 235 planning"
   },
@@ -24782,7 +24790,7 @@
    "severity": "low",
    "origin": "gate 234 code-reviewer suggestion 2 (= A-R234-REVIEW-L1)",
    "title": "seed search never closes in a project with no BPM sources: findAssetTempoSeed rebuilds two Maps on every clips/tracks change for the session",
-   "status": "open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json)",
+   "status": "open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346)",
    "added": "2026-10-28 B round 234 -> 235 planning"
   },
   {
@@ -24790,7 +24798,7 @@
    "severity": "low",
    "origin": "gate 234 code-reviewer suggestion 3",
    "title": "[status, ...parts].join(' ') yields a leading space when status is empty",
-   "status": "open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json)",
+   "status": "open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346)",
    "added": "2026-10-28 B round 234 -> 235 planning"
   },
   {
@@ -24901,7 +24909,7 @@
    "severity": "medium",
    "origin": "B round 235 -> 236 planning probe",
    "title": "the provider's 'Demo collection ready' write (ArrangementContext load effect settle, l.~3644) overwrites whatever status was set before all sources settled: the seed status (A-R234-REVIEW-M1) and a placement message",
-   "status": "open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json)",
+   "status": "open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346)",
    "repro": "b-round-235/probe/out-baseline-noreadywait.json (1440 stripDbl, 1280 endClick show 'Demo collection ready' after the seed); seedrace-baseline.json 1440x900.fast/1280x720.fast (placement message replaced 340/206 ms later)",
    "added": "2026-10-28 B round 235 -> 236 planning"
   },
@@ -24951,7 +24959,7 @@
    "severity": "low",
    "origin": "C round 236 (A asked the same)",
    "title": "doc 183 playFromRuler bullet (l.38-41) still says seekTo + togglePlayback in StudioWorkspace",
-   "status": "open, fixed now as doc grant 9 in round 237 (D-29z340; the round owns the feature doc, zero code)",
+   "status": "open, fixed in the unpublished round-237 tree (C round 237 rows passed for it, c-round-237.json) but round 237 failed on C-R237-01 and gate 237 was skipped; closes when round 238 C PASS and the gate publishes rounds 237+238 (D-29z346)",
    "repro": "docs/implementation/2026/quarter-IV/183-saba-b-11a-bars-ruler.md l.38-41",
    "added": "2026-10-29 B round 236 -> 237 planning"
   },
@@ -24962,6 +24970,41 @@
    "title": "After round 237, if the viewer acts before every demo/purchased source has loaded, the ready line ('... Press ? for shortcuts.') is not shown in that session; the action's status stays (Shortcuts ? footer and tooltips still teach keys). Keep, or append the ready hint after the action's status?",
    "status": "awaiting_user (D-29z339); the round-237 default holds until answered",
    "added": "2026-10-29 B round 236 -> 237 planning"
+  },
+  {
+   "id": "C-R237-01",
+   "alias": "A-R237-REVIEW-M1",
+   "severity": "medium",
+   "origin": "A round 237 code-reviewer; reproduced by A and independently by C (Chromium, both viewports)",
+   "title": "a gesture refusal on screen when loading settles is replaced on release by the stale 'Loading the demo collection…' (lastNonRefusalStatusRef still held copy.loading); regression caused by round 237, HEAD ecaf0e4 ends on ready",
+   "status": "open, dispatched round 238 SABA-B-11a-FIX-3 (D-29z347): settle re-derives lastNonRefusalStatusRef with settledCollectionStatus; TU12/TU13 red on MU-RF; B scratch browser run final ready at both viewports (b-round-237/probe/race-scratch.json)",
+   "repro": "c-round-237/race.cjs <base> <out> refusal; evidence c-round-237/race-after.json, race-head.json, shots/after-refusal-*",
+   "added": "2026-10-29 B round 237 -> 238 planning"
+  },
+  {
+   "id": "A-R237-REVIEW-L1",
+   "severity": "low",
+   "origin": "A round 237 code-reviewer",
+   "title": "a seed appended onto a showing refusal ('<refusal> <seed> <Snap on>') is not recognised as a refusal; the release leaves the combined text",
+   "status": "open, fixed now in round 238 (D-29z348; same release function, round owns the code, small cost): refusal-prefix rule in the layout effect and the release; TU15 red on MU-L1-REL and MU-L1-EFF. Reproduced by B at the API level (commitArrangement during a gesture); UI path unproven (gesture commits that create a seeding clip write their own status first)",
+   "repro": "b-round-237 scratch L1 probe (current-task.md section 0.2)",
+   "added": "2026-10-29 B round 237 -> 238 planning"
+  },
+  {
+   "id": "A-R237-REVIEW-L2-NOTE",
+   "severity": "info",
+   "origin": "A round 237 code-reviewer L2",
+   "title": "the failed > 0 settle path drops placement + seed; deliberate (D-29z339), covered by CR3 and C-RACE-FAIL",
+   "status": "note (D-29z349)",
+   "added": "2026-10-29 B round 237 -> 238 planning"
+  },
+  {
+   "id": "A-R237-REVIEW-L3-NOTE",
+   "severity": "info",
+   "origin": "A round 237 code-reviewer L3",
+   "title": "TU11 reaches the empty status only through a direct setStatus(''); a guard for the filter, not a user flow",
+   "status": "note (D-29z349)",
+   "added": "2026-10-29 B round 237 -> 238 planning"
   }
  ],
  "tech_lead_notes": [
@@ -26890,6 +26933,12 @@
    "signal": "gate 236 signal 2 + A reviewer: pressInStripRef copies useRulerNavigation's pressTarget; proposal: the hook passes the last pressTarget to onRulerDoubleClick({ pressTarget }) and the ref is deleted (BR7/BR12/BR14 + seconds-ruler tests unchanged); value low",
    "status": "signal; addendum 2 to b-round-234-checkpoint-request.md (D-29z343); not scheduled",
    "added": "2026-10-29 B round 236 -> 237 planning"
+  },
+  {
+   "id": "A-R237-ARCH-STATUS-PARTS",
+   "signal": "A round 237 reviewer: the collection rules (collection.ts), the seed write (StudioWorkspace) and the refusal restore (ArrangementContext) are coupled through a status-text prefix contract; proposal: structured status parts (collection-state part + action part). Rounds 234-238 each needed full-provider UI tests in this region",
+   "status": "signal; addendum 3 to b-round-234-checkpoint-request.md (D-29z349); not scheduled; reviewer verdict keep for now",
+   "added": "2026-10-29 B round 237 -> 238 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -31301,7 +31350,8 @@
     "SABA-B-11a stage 1 (round 234, if C PASS): fresh /studio-lab, Add demo-stem-pulse -> tempo 120, grid 1/4, Snap on, bars marks; Add demo-soft-impact alone -> tempo empty, grid 1, Snap off, no '120 BPM' (added round-234 planning, D-29z324)",
     "SABA-B-11a stage 2 (round 235, if C PASS): seeded /studio-lab, click the top strip of the bars ruler at 4.1 s -> playing from 4.000; lower zone click 6.3 -> playhead 6.5; seconds ruler click unchanged; no tempo -> bars ruler inert (added round-235 planning, D-29z328)",
     "SABA-B-11a-FIX-1 (round 236, if C PASS): seeded /studio-lab (wait for 'Demo collection ready' first), strip double-click at 3 s -> playing from 3.000, no Fit status; lower-zone double-click -> Fit; strip click at 15.95 s -> playPastEnd status, not playing (added round-236 planning, D-29z333)",
-    "SABA-B-11a-FIX-2 (if done): delay recipe (4 s route delay on the two demo MP3s, pulse Add before ready) keeps the exact placement + seed status; fail recipe shows failed(1); idle load shows the ready text"
+    "SABA-B-11a-FIX-2 (if done): delay recipe (4 s route delay on the two demo MP3s, pulse Add before ready) keeps the exact placement + seed status; fail recipe shows failed(1); idle load shows the ready text",
+    "SABA-B-11a-FIX-3 (if done): the C-R237-01 refusal recipe (c-round-237/race.cjs refusal, 6 s delay, hold a Volume slider + Ctrl+Z through settle) ends on the ready text at both viewports"
    ],
    "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
    "scope_note": "REG-DUX5-PLAYHEAD-RESCAN removed: done in round 200 R200-P1 (2026-10-27 B round 200 -> 201 planning (D-29z166))"
@@ -32755,7 +32805,7 @@
   {
    "id": "ARCH-CHECKPOINT-TEMPO-GRID",
    "file": "b-round-234-checkpoint-request.md",
-   "status": "requested from root (D-29z331); trigger met (SABA-B-11a done, round 235 published 49b4c74); addendum GATE235-ARCH-POINTER-UTIL (D-29z337); non-blocking; best before SABA-B-11b | addendum 2 GATE236-ARCH-PLAYFROM-HELPER / GATE236-ARCH-PRESS-TARGET (D-29z343); still unanswered at round-237 planning; requested before SABA-B-11b (round 238)",
+   "status": "requested from root (D-29z331); trigger met (SABA-B-11a done, round 235 published 49b4c74); addendum GATE235-ARCH-POINTER-UTIL (D-29z337); non-blocking; best before SABA-B-11b | addendum 2 GATE236-ARCH-PLAYFROM-HELPER / GATE236-ARCH-PRESS-TARGET (D-29z343); still unanswered at round-237 planning; requested before SABA-B-11b (round 238) | addendum 3 A-R237-ARCH-STATUS-PARTS (D-29z349); still unanswered at round-238 planning; requested before SABA-B-11b",
    "added": "2026-10-28 B round 234 -> 235 planning"
   }
  ],
@@ -33521,6 +33571,36 @@
    "id": "D-29z345",
    "date": "2026-10-29",
    "text": "No Saba answers (AGREE-SABA-B-7, SABA-Q-*). Store direction-decision.md already recorded (STORE paused behind STUDIO-PERFORMANCE). Regression due on or after 2026-10-30 (today 2026-10-29) -> not due; FIX-2 key acceptance added to its scope_additions. RETRO next at round 245. b-next CONTINUE; round 238 = SABA-B-11b unless the regression is due first."
+  },
+  {
+   "id": "D-29z346",
+   "date": "2026-10-29",
+   "text": "Round 237 C FAIL from C evidence (c-round-237.json: taskStatus FAIL, browserVerified true, realVerified true; 15 rows passed; C-R237-01 Medium regression; purchased-origin browser row BLOCKED backend unavailable in cloud). Gate 237 skipped; nothing published, HEAD stays ecaf0e4. Nothing closes: A-R234-REVIEW-M1, B-R235-READY-CLOBBER, GATE234-S2, GATE234-S3, C-R236-02 stay open until round 238 passes and the gate publishes rounds 237+238. The round-237 tree is preserved as round 238's start (11 paths hashed)."
+  },
+  {
+   "id": "D-29z347",
+   "date": "2026-10-29",
+   "text": "C-R237-01 ruling (L10, A's STOP): accept A's candidate fix (a-round-237/candidate-fix.diff): settle re-derives lastNonRefusalStatusRef with settledCollectionStatus before the reducer write (callback, StrictMode-safe). B verified on a scratch of the round-237 tree: TU12/TU13 red without it, green with it; browser refusal recipe final ready at both viewports."
+  },
+  {
+   "id": "D-29z348",
+   "date": "2026-10-29",
+   "text": "A-R237-REVIEW-L1 ruling: fix now, not deferred. Reproduced by B at the API level (refusal + commitArrangement of a stem-90 clip during a gesture leaves '<refusal> <seed> <Snap on>' after release). UI path unproven (lane-move commits write their own status first). The round already owns the release function and the test file and the cost is small (2026-10-23 clause). Fix: one refusal-prefix rule (equals or starts with refusal + space) in the layout effect and the release; the rest is kept after the last non-refusal status. TU15 red on MU-L1-REL and MU-L1-EFF."
+  },
+  {
+   "id": "D-29z349",
+   "date": "2026-10-29",
+   "text": "Reviewer L2/L3 recorded as notes. Reviewer Architecture note -> signal A-R237-ARCH-STATUS-PARTS and addendum 3 to b-round-234-checkpoint-request.md; not scheduled. Retro candidate B-R237-REFUSAL-DURING-LOAD-GAP for RETRO 245 (not Saba-reported, so no mandatory lessons.md edit; lessons.md stays at its round-236 text)."
+  },
+  {
+   "id": "D-29z350",
+   "date": "2026-10-29",
+   "text": "Doc 185 granted whole in round 238 (created in round 237, never published): l.4 -> 'Completed (C round 238 PASS)' explicitly (C's AN-REVIEW note), plus Problem -> Solution bullets for C-R237-01 and A-R237-REVIEW-L1 and the TU12-TU15/mutant testing rows. Docs 182/183 frozen at their round-237 hashes."
+  },
+  {
+   "id": "D-29z351",
+   "date": "2026-10-29",
+   "text": "No Saba answers (AGREE-SABA-B-7, SABA-Q-*; user-review has no new decisions file). Regression due on or after 2026-10-30 (regression-last 2026-10-27; today 2026-10-29 = 2 days) -> not due now; the next planning will likely be the REGRESSION round, which then runs on the round-237+238 tree if published (FIX-3 added to its scope_additions). If round 238 fails, its fix-up comes first. SABA-B-11b follows. RETRO next at round 245."
   }
  ],
  "retro_candidates": [
@@ -33529,6 +33609,12 @@
    "text": "implementation doc ## headings must include every TEMPLATE ## heading in order (C-R216-01; DOC-217 carries the grep check); candidate lesson for the next RETRO",
    "added": "2026-10-28 B round 216 -> 217 planning",
    "status": "applied at RETRO 230: lesson L26 amended (D-29z295)"
+  },
+  {
+   "id": "B-R237-REFUSAL-DURING-LOAD-GAP",
+   "round": 237,
+   "text": "round-237 task section 6 named 'gesture refusals' as a neighbour, but no acceptance row and none of B's 121 pre-check files exercised a refusal during loading; A's reviewer found it (C-R237-01). Candidate lesson for RETRO 245: every new status-writer rule gets a row for each other writer that can hold the line at that moment (refusal, seed, placement).",
+   "added": "2026-10-29 B round 237 -> 238 planning"
   }
  ],
  "root_requests_b": [

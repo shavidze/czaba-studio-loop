@@ -1,0 +1,18 @@
+
+import { GESTURE_EDIT_BLOCKED_MESSAGE as A237_BLOCKED } from '~/contexts/ArrangementContext';
+
+describe('A-R237 scratch regression probe', { timeout: 15_000 }, () => {
+  it('TU12 a refusal shown when loading settles is restored to the ready text on release, not loading', async () => {
+    const { api, view, settle } = await mountDeferredSeedWorkspace();
+    expect(statusText(view)).toBe(DEMO_LOADING);
+    let releaseGesture: () => void = () => {};
+    act(() => {
+      releaseGesture = live(api).beginPointerGesture();
+    });
+    act(() => live(api).setStatus(A237_BLOCKED));
+    expect(statusText(view)).toBe(A237_BLOCKED);
+    await settle();
+    act(() => releaseGesture());
+    expect(statusText(view)).toBe(DEMO_READY);
+  });
+});

@@ -1,0 +1,65 @@
+{
+  "round": 237,
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-29T00:24:06.1831141Z",
+    "round": 237,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R237-01",
+      "alias": "A-R237-REVIEW-M1 (independently reproduced by C)",
+      "severity": "medium",
+      "regression": "caused by this round; HEAD ecaf0e4 control ends on the ready text",
+      "steps": [
+        "Fresh Chromium context, /studio-lab, viewport 1440x900 or 1280x720",
+        "page.route delays **/middle-east.mp3 and **/hero-music.mp3 by 6000 ms (route.continue)",
+        "While the status is still 'Loading the demo collection…': mouse down on the first 'Volume — …' slider, move 4 px, press Ctrl+Z (status shows 'Undo/Redo does not work while dragging — let go first.')",
+        "Keep holding until the demo-hero-music row shows its decoded duration 02:30.372 (loading finished), then wait 1.5 s",
+        "Release the mouse and wait 3 s"
+      ],
+      "expected": "After the release the status is the ready text 'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.' (the HEAD behaviour) or the failed(n) text; never the stale loading text",
+      "actual": "The final status is 'Loading the demo collection…' and stays there although every source has loaded. History 1440: loading (189 ms) -> refusal (1099 ms) -> 'Loading the demo collection…' at release (8658 ms); 1280: 251 / 1168 / 8703 ms. HEAD control on :5174 with the same script: refusal -> ready at settle (7244 / 7412 ms), final ready.",
+      "evidence": "c-round-237/race-after.json (mode refusal), c-round-237/race-head.json (mode refusal), c-round-237/shots/after-refusal-1440x900.png, after-refusal-1280x720.png, head-refusal-*.png, c-round-237/race.cjs"
+    }
+  ],
+  "passed": [
+    "C-SCOPE-237",
+    "C-UNIT-237",
+    "C-MUT-237",
+    "C-RACE-DELAY-237",
+    "C-RACE-FAIL-237",
+    "C-IDLE-237",
+    "C-PLACEMENT-237",
+    "C-S2-237",
+    "C-FIX1-REG-237",
+    "C-BUDGET-237",
+    "C-REF-237",
+    "AN-REVIEW-237",
+    "LAB-SMOKE-237",
+    "C-SHOTS-237",
+    "Auth"
+  ],
+  "gate": [
+    "full vitest suite",
+    "typecheck",
+    "lint",
+    "build",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [
+    "Purchased-origin status rules in the browser (/studio/$productId): backend unavailable in cloud; covered only by CR1 and purchased-collection-ui unit rows"
+  ],
+  "notes": [
+    "Task section 6 neighbour 'gesture refusals keep behaving as before' FAILS -> C-R237-01.",
+    "A-R237 reviewer L1 (seed status appended onto a showing refusal stays after release) is not reproduced by C in the browser; it needs a seeding clip change during a gesture. Same class as C-R237-01; B should rule on both together.",
+    "Doc 185 l.4 currently states 'Completed (C round 237 PASS)' while C's verdict is FAIL: a false statement in the tree. The fix-up must grant the l.4 rewrite explicitly and add an M1 Problem -> Solution bullet.",
+    "Live region (section 6): the status <output aria-live=polite> remounts <span key={statusSequence}>. In delay mode the childList/characterData observer recorded 0 mutations from the Add until the read at Add+7 s (settle at about Add+4 s), so the ready settle neither changed the text nor remounted the span: no repeated announcement.",
+    "Chromium 143.0.7499.4 (Playwright, headless). HEAD control server on :5174 stopped after use."
+  ]
+}

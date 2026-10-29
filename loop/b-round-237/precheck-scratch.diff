@@ -1,0 +1,194 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -201,6 +201,24 @@
+ export const GESTURE_UNDO_BLOCKED_MESSAGE = studioMoveStrings.undoBlockedDuringDrag;
+ export const GESTURE_EDIT_BLOCKED_MESSAGE = studioMoveStrings.editBlockedDuringDrag;
+ export const NUDGE_AT_TIME_START_MESSAGE = studioMoveStrings.nudgeAtTimeStart;
++
++function gestureRefusalPrefix(text: string): string | null {
++  for (const refusal of [GESTURE_EDIT_BLOCKED_MESSAGE, GESTURE_UNDO_BLOCKED_MESSAGE]) {
++    if (text === refusal || text.startsWith(`${refusal} `)) {
++      return refusal;
++    }
++  }
++  return null;
++}
++
++function statusAfterGestureRelease(current: string, lastNonRefusal: string): string {
++  const refusal = gestureRefusalPrefix(current);
++  if (refusal === null) {
++    return current;
++  }
++  const rest = current.slice(refusal.length).trimStart();
++  return [lastNonRefusal, rest].filter((part) => part.length > 0).join(' ');
++}
+ const AUDIO_ON_VIDEO_LANE_MESSAGE = studioLibraryStrings.audioOnVideoTrack;
+ const LIBRARY_DROP_BLOCKED_MESSAGE = studioLibraryStrings.dropBlocked;
+ const librarySourceFailedMessage = studioLibraryStrings.sourceFailed;
+@@ -639,7 +657,7 @@
+   const statusSequence = statusEntry.sequence;
+   const lastNonRefusalStatusRef = useRef(status);
+   useIsomorphicLayoutEffect(() => {
+-    if (status !== GESTURE_EDIT_BLOCKED_MESSAGE && status !== GESTURE_UNDO_BLOCKED_MESSAGE) {
++    if (gestureRefusalPrefix(status) === null) {
+       lastNonRefusalStatusRef.current = status;
+     }
+   }, [status]);
+@@ -1642,11 +1660,7 @@
+       gestureCountRef.current = Math.max(0, gestureCountRef.current - 1);
+       if (gestureCountRef.current === 0) {
+         previewActiveRef.current = false;
+-        setStatus((current) =>
+-          current === GESTURE_EDIT_BLOCKED_MESSAGE || current === GESTURE_UNDO_BLOCKED_MESSAGE
+-            ? lastNonRefusalStatusRef.current
+-            : current,
+-        );
++        setStatus((current) => statusAfterGestureRelease(current, lastNonRefusalStatusRef.current));
+       }
+     };
+   }, []);
+@@ -3672,6 +3686,11 @@
+         return;
+       }
+       const failedCount = failed;
++      lastNonRefusalStatusRef.current = settledCollectionStatus(
++        lastNonRefusalStatusRef.current,
++        copy,
++        failedCount,
++      );
+       setStatus((current) => settledCollectionStatus(current, copy, failedCount));
+     };
+     for (const source of collection.sources) {
+--- a/app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx
+@@ -5,6 +5,8 @@
+ import {
+   type ArrangementContextValue,
+   ArrangementProvider,
++  GESTURE_EDIT_BLOCKED_MESSAGE,
++  GESTURE_UNDO_BLOCKED_MESSAGE,
+   useArrangement,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+@@ -490,3 +492,121 @@
+     });
+   },
+ );
++
++function failingDeferredSeedCollection(): { collection: WorkspaceCollection; release: () => void } {
++  let release: () => void = () => {};
++  const gate = new Promise<void>((resolve) => {
++    release = resolve;
++  });
++  const collection: WorkspaceCollection = {
++    ...seedCollection,
++    id: 'seed-deferred-failing',
++    loadSource: async (source) => {
++      if (source.id !== 'stem-90') {
++        await gate;
++        throw new Error('fixture load failure');
++      }
++      return new AudioBuffer({ length: 400, numberOfChannels: 1, sampleRate: 100 });
++    },
++  };
++  return { collection, release: () => release() };
++}
++
++describe(
++  'SABA-B-11a-FIX-3 a gesture refusal shown when loading settles restores the settled text',
++  { timeout: 15_000 },
++  () => {
++    it('TU12 a refusal shown at settle is restored to the ready text on release, not loading', async () => {
++      const { api, view, settle } = await mountDeferredSeedWorkspace();
++      expect(statusText(view)).toBe(DEMO_LOADING);
++      let releaseGesture: () => void = () => {};
++      act(() => {
++        releaseGesture = live(api).beginPointerGesture();
++      });
++      act(() => live(api).setStatus(GESTURE_UNDO_BLOCKED_MESSAGE));
++      expect(statusText(view)).toBe(GESTURE_UNDO_BLOCKED_MESSAGE);
++      await settle();
++      expect(statusText(view)).toBe(GESTURE_UNDO_BLOCKED_MESSAGE);
++      act(() => releaseGesture());
++      expect(statusText(view)).toBe(DEMO_READY);
++    });
++
++    it('TU13 a refusal over a mount seed is restored to ready + seed on release', async () => {
++      const { api, view, settle } = await mountDeferredSeedWorkspace([
++        { id: 'c1', trackId: 'music', sourceId: 'stem-90', start: 2, sourceOffset: 0, duration: 4 },
++      ]);
++      const tail = `${studioTempoStrings.seeded({ bpm: '90', title: 'Slow stem' })} ${SNAP_ON_QUARTER}`;
++      expect(statusText(view)).toBe(`${DEMO_LOADING} ${tail}`);
++      let releaseGesture: () => void = () => {};
++      act(() => {
++        releaseGesture = live(api).beginPointerGesture();
++      });
++      act(() => live(api).setStatus(GESTURE_EDIT_BLOCKED_MESSAGE));
++      await settle();
++      act(() => releaseGesture());
++      expect(statusText(view)).toBe(`${DEMO_READY} ${tail}`);
++    });
++
++    it('TU14 a load failure replaces a showing refusal at settle and stays after release', async () => {
++      const api: SeedApiRef = { current: null };
++      const { collection, release } = failingDeferredSeedCollection();
++      const view = render(
++        <ArrangementProvider collection={collection} initialArrangement={seedArrangement()}>
++          <StudioWorkspace />
++          <SeedProbe api={api} />
++        </ArrangementProvider>,
++      );
++      await act(async () => {
++        await Promise.resolve();
++        await Promise.resolve();
++      });
++      expect(statusText(view)).toBe(DEMO_LOADING);
++      let releaseGesture: () => void = () => {};
++      act(() => {
++        releaseGesture = live(api).beginPointerGesture();
++      });
++      act(() => live(api).setStatus(GESTURE_UNDO_BLOCKED_MESSAGE));
++      await act(async () => {
++        release();
++        for (let index = 0; index < 6; index += 1) {
++          await Promise.resolve();
++        }
++      });
++      const failedText =
++        '3 sounds in the demo collection failed to load — details are in the library.';
++      expect(statusText(view)).toBe(failedText);
++      act(() => releaseGesture());
++      expect(statusText(view)).toBe(failedText);
++    });
++
++    it('TU15 a seed appended onto a showing refusal keeps the seed and drops only the refusal on release', async () => {
++      const { api, view } = await mountSeedWorkspace();
++      const beforeGesture = statusText(view);
++      let releaseGesture: () => void = () => {};
++      act(() => {
++        releaseGesture = live(api).beginPointerGesture();
++      });
++      act(() => live(api).setStatus(GESTURE_EDIT_BLOCKED_MESSAGE));
++      const before = live(api).getArrangement();
++      const clip: ArrangementClip = {
++        id: 'c-gesture',
++        trackId: 'music',
++        sourceId: 'stem-90',
++        start: 0,
++        sourceOffset: 0,
++        duration: 4,
++      };
++      act(() => {
++        live(api).commitArrangement(
++          { ...before, clips: [...before.clips, clip] },
++          'Add clip',
++          before,
++        );
++      });
++      const tail = `${studioTempoStrings.seeded({ bpm: '90', title: 'Slow stem' })} ${SNAP_ON_QUARTER}`;
++      expect(statusText(view)).toBe(`${GESTURE_EDIT_BLOCKED_MESSAGE} ${tail}`);
++      act(() => releaseGesture());
++      expect(statusText(view)).toBe(`${beforeGesture} ${tail}`);
++    });
++  },
++);

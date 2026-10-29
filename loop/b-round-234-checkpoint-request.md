@@ -37,3 +37,8 @@ Related pending requests (non-blocking, still open): `b-round-231-checkpoint-req
 - **New signal GATE236-ARCH-PLAYFROM-HELPER:** the end rule is split between the context's `playFrom` and `togglePlayback`. A's reviewer proposes a pure `lib/arrangement` helper `(arrangement, target, isPlaying) → 'seek' | 'pastEnd' | 'start'`. Gate 236 says keep `playFrom` in the context. Question 5: is the pure helper worth a task (value, risk, at most 3 sentences)?
 - **New signal GATE236-ARCH-PRESS-TARGET:** `ArrangementTempoRow`'s `pressInStripRef` copies `useRulerNavigation`'s `pressTarget`. The proposal is that the hook passes `pressTarget` to `onRulerDoubleClick`. Fold it into question 4 (the hook's shape).
 - **Please run before SABA-B-11b (round 238).**
+
+## Addendum 3 (B, round 237 → 238 planning, D-29z349)
+- **Still unanswered** at round-238 planning. Round 237 implemented option (a) of question 2; it failed C on C-R237-01 (the refusal restore kept a stale loading text). Round 238 (SABA-B-11a-FIX-3) fixes it inside the same contract (`settle` re-derives `lastNonRefusalStatusRef`; one refusal-prefix rule for the layout effect and the release).
+- **New signal A-R237-ARCH-STATUS-PARTS:** three writers (`collection.ts` rules, the seed write in `StudioWorkspace`, the refusal restore in `ArrangementContext`) now share a status-text prefix contract. A's reviewer proposes structured status parts (a collection-state part plus an action part). Question 6: keep the text-prefix contract, or extract structured parts (value, risk, at most 3 sentences)? The reviewer's own verdict is keep for now.
+- **Please run before SABA-B-11b.**

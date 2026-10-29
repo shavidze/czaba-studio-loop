@@ -1,0 +1,14 @@
+--- app/contexts/ArrangementContext.tsx.orig	2026-10-29 00:17:59.946366046 +0000
++++ app/contexts/ArrangementContext.tsx	2026-10-29 00:17:59.957992561 +0000
+@@ -3672,6 +3672,11 @@
+         return;
+       }
+       const failedCount = failed;
++      lastNonRefusalStatusRef.current = settledCollectionStatus(
++        lastNonRefusalStatusRef.current,
++        copy,
++        failedCount,
++      );
+       setStatus((current) => settledCollectionStatus(current, copy, failedCount));
+     };
+     for (const source of collection.sources) {

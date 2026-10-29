@@ -1,0 +1,257 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a237-scratch[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/tempo-seed.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/collection.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 370[2mms[22m[39m
+[31m     [31m×[31m TQ1 a collection with no music or stem BPM never runs the seed search, across three clip changes[39m[32m 207[2mms[22m[39m
+     [32m✓[39m TQ2 control: with a BPM stem in the collection the search runs on clip changes until it seeds[32m 161[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 2581[2mms[22m[39m
+     [33m[2m✓[22m[39m TU2 adding the bpm-90 stem seeds 90, 1/4 and Snap on, and appends to the placement status [33m 402[2mms[22m[39m
+     [33m[2m✓[22m[39m TU3 an sfx and a bpm-less music clip change nothing; the bpm-90 stem afterwards seeds 90 [33m 413[2mms[22m[39m
+     [33m[2m✓[22m[39m TU4 a typed tempo wins, a cleared tempo stays empty, an untouched empty field still seeds [33m 451[2mms[22m[39m
+     [33m[2m✓[22m[39m TU5 a hand-chosen division is kept; a hand-toggled Snap stays off [33m 407[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx[2m > [22mSABA-B-11a-FIX-2 the seed search closes when no source can seed[2m > [22mTQ1 a collection with no music or stem BPM never runs the seed search, across three clip changes
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 4 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      Array [],
+      Array [
+        Object {
+          "id": "video",
+          "kind": "video",
+          "mute": false,
+          "name": "Video",
+          "solo": false,
+          "volume": 1,
+        },
+        Object {
+          "id": "music",
+          "kind": "audio",
+          "mute": false,
+          "name": "Music",
+          "solo": false,
+          "volume": 1,
+        },
+      ],
+      Array [
+        Object {
+          "bpm": 120,
+          "collectionLabel": "search",
+          "id": "hit",
+          "kind": "sfx",
+          "origin": "demo",
+          "title": "Hit",
+        },
+        Object {
+          "collectionLabel": "search",
+          "id": "song",
+          "kind": "music",
+          "origin": "demo",
+          "title": "Song",
+        },
+      ],
+    ]
+
+[1m  2nd vi.fn() call:
+
+[22m    Array [
+      Array [
+        Object {
+          "duration": 2,
+          "id": "a",
+          "sourceId": "hit",
+          "sourceOffset": 0,
+          "start": 0,
+          "trackId": "music",
+        },
+      ],
+      Array [
+        Object {
+          "id": "video",
+          "kind": "video",
+          "mute": false,
+          "name": "Video",
+          "solo": false,
+          "volume": 1,
+        },
+        Object {
+          "id": "music",
+          "kind": "audio",
+          "mute": false,
+          "name": "Music",
+          "solo": false,
+          "volume": 1,
+        },
+      ],
+      Array [
+        Object {
+          "bpm": 120,
+          "collectionLabel": "search",
+          "id": "hit",
+          "kind": "sfx",
+          "origin": "demo",
+          "title": "Hit",
+        },
+        Object {
+          "collectionLabel": "search",
+          "id": "song",
+          "kind": "music",
+          "origin": "demo",
+          "title": "Song",
+        },
+      ],
+    ]
+
+[1m  3rd vi.fn() call:
+
+[22m    Array [
+      Array [
+        Object {
+          "duration": 2,
+          "id": "a",
+          "sourceId": "hit",
+          "sourceOffset": 0,
+          "start": 0,
+          "trackId": "music",
+        },
+        Object {
+          "duration": 2,
+          "id": "b",
+          "sourceId": "song",
+          "sourceOffset": 0,
+          "start": 3,
+          "trackId": "music",
+        },
+      ],
+      Array [
+        Object {
+          "id": "video",
+          "kind": "video",
+          "mute": false,
+          "name": "Video",
+          "solo": false,
+          "volume": 1,
+        },
+        Object {
+          "id": "music",
+          "kind": "audio",
+          "mute": false,
+          "name": "Music",
+          "solo": false,
+          "volume": 1,
+        },
+      ],
+      Array [
+        Object {
+          "bpm": 120,
+          "collectionLabel": "search",
+          "id": "hit",
+          "kind": "sfx",
+          "origin": "demo",
+          "title": "Hit",
+        },
+        Object {
+          "collectionLabel": "search",
+          "id": "song",
+          "kind": "music",
+          "origin": "demo",
+          "title": "Song",
+        },
+      ],
+    ]
+
+[1m  4th vi.fn() call:
+
+[22m    Array [
+      Array [
+        Object {
+          "duration": 2,
+          "id": "a",
+          "sourceId": "hit",
+          "sourceOffset": 0,
+          "start": 0,
+          "trackId": "music",
+        },
+        Object {
+          "duration": 2,
+          "id": "b",
+          "sourceId": "song",
+          "sourceOffset": 0,
+          "start": 3,
+          "trackId": "music",
+        },
+        Object {
+          "duration": 2,
+          "id": "c",
+          "sourceId": "hit",
+          "sourceOffset": 0,
+          "start": 6,
+          "trackId": "music",
+        },
+      ],
+      Array [
+        Object {
+          "id": "video",
+          "kind": "video",
+          "mute": false,
+          "name": "Video",
+          "solo": false,
+          "volume": 1,
+        },
+        Object {
+          "id": "music",
+          "kind": "audio",
+          "mute": false,
+          "name": "Music",
+          "solo": false,
+          "volume": 1,
+        },
+      ],
+      Array [
+        Object {
+          "bpm": 120,
+          "collectionLabel": "search",
+          "id": "hit",
+          "kind": "sfx",
+          "origin": "demo",
+          "title": "Hit",
+        },
+        Object {
+          "collectionLabel": "search",
+          "id": "song",
+          "kind": "music",
+          "origin": "demo",
+          "title": "Song",
+        },
+      ],
+    ]
+[31m[90m
+
+Number of calls: [1m4[22m
+[31m[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx:[2m131:49[22m[39m
+    [90m129| [39m      [34maddClip[39m([32m'b'[39m[33m,[39m [32m'song'[39m[33m,[39m [34m3[39m)[33m;[39m
+    [90m130| [39m      [34maddClip[39m([32m'c'[39m[33m,[39m [32m'hit'[39m[33m,[39m [34m6[39m)[33m;[39m
+    [90m131| [39m      [34mexpect[39m(vi[33m.[39m[34mmocked[39m(findAssetTempoSeed))[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                                [31m^[39m
+    [90m132| [39m    })[33m;[39m
+    [90m133| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m38 passed[39m[22m[90m (39)[39m
+[2m   Start at [22m 00:11:23
+[2m   Duration [22m 4.69s[2m (transform 1.92s, setup 0ms, import 3.12s, tests 3.00s, environment 2.29s)[22m
+
+
+::error file=/tmp/a237-scratch/app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx,title=app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx > SABA-B-11a-FIX-2 the seed search closes when no source can seed > TQ1 a collection with no music or stem BPM never runs the seed search%2C across three clip changes,line=131,column=49::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 4 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      Array [],%0A      Array [%0A        Object {%0A          "id": "video",%0A          "kind": "video",%0A          "mute": false,%0A          "name": "Video",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A        Object {%0A          "id": "music",%0A          "kind": "audio",%0A          "mute": false,%0A          "name": "Music",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A      ],%0A      Array [%0A        Object {%0A          "bpm": 120,%0A          "collectionLabel": "search",%0A          "id": "hit",%0A          "kind": "sfx",%0A          "origin": "demo",%0A          "title": "Hit",%0A        },%0A        Object {%0A          "collectionLabel": "search",%0A          "id": "song",%0A          "kind": "music",%0A          "origin": "demo",%0A          "title": "Song",%0A        },%0A      ],%0A    ]%0A%0A  2nd vi.fn() call:%0A%0A    Array [%0A      Array [%0A        Object {%0A          "duration": 2,%0A          "id": "a",%0A          "sourceId": "hit",%0A          "sourceOffset": 0,%0A          "start": 0,%0A          "trackId": "music",%0A        },%0A      ],%0A      Array [%0A        Object {%0A          "id": "video",%0A          "kind": "video",%0A          "mute": false,%0A          "name": "Video",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A        Object {%0A          "id": "music",%0A          "kind": "audio",%0A          "mute": false,%0A          "name": "Music",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A      ],%0A      Array [%0A        Object {%0A          "bpm": 120,%0A          "collectionLabel": "search",%0A          "id": "hit",%0A          "kind": "sfx",%0A          "origin": "demo",%0A          "title": "Hit",%0A        },%0A        Object {%0A          "collectionLabel": "search",%0A          "id": "song",%0A          "kind": "music",%0A          "origin": "demo",%0A          "title": "Song",%0A        },%0A      ],%0A    ]%0A%0A  3rd vi.fn() call:%0A%0A    Array [%0A      Array [%0A        Object {%0A          "duration": 2,%0A          "id": "a",%0A          "sourceId": "hit",%0A          "sourceOffset": 0,%0A          "start": 0,%0A          "trackId": "music",%0A        },%0A        Object {%0A          "duration": 2,%0A          "id": "b",%0A          "sourceId": "song",%0A          "sourceOffset": 0,%0A          "start": 3,%0A          "trackId": "music",%0A        },%0A      ],%0A      Array [%0A        Object {%0A          "id": "video",%0A          "kind": "video",%0A          "mute": false,%0A          "name": "Video",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A        Object {%0A          "id": "music",%0A          "kind": "audio",%0A          "mute": false,%0A          "name": "Music",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A      ],%0A      Array [%0A        Object {%0A          "bpm": 120,%0A          "collectionLabel": "search",%0A          "id": "hit",%0A          "kind": "sfx",%0A          "origin": "demo",%0A          "title": "Hit",%0A        },%0A        Object {%0A          "collectionLabel": "search",%0A          "id": "song",%0A          "kind": "music",%0A          "origin": "demo",%0A          "title": "Song",%0A        },%0A      ],%0A    ]%0A%0A  4th vi.fn() call:%0A%0A    Array [%0A      Array [%0A        Object {%0A          "duration": 2,%0A          "id": "a",%0A          "sourceId": "hit",%0A          "sourceOffset": 0,%0A          "start": 0,%0A          "trackId": "music",%0A        },%0A        Object {%0A          "duration": 2,%0A          "id": "b",%0A          "sourceId": "song",%0A          "sourceOffset": 0,%0A          "start": 3,%0A          "trackId": "music",%0A        },%0A        Object {%0A          "duration": 2,%0A          "id": "c",%0A          "sourceId": "hit",%0A          "sourceOffset": 0,%0A          "start": 6,%0A          "trackId": "music",%0A        },%0A      ],%0A      Array [%0A        Object {%0A          "id": "video",%0A          "kind": "video",%0A          "mute": false,%0A          "name": "Video",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A        Object {%0A          "id": "music",%0A          "kind": "audio",%0A          "mute": false,%0A          "name": "Music",%0A          "solo": false,%0A          "volume": 1,%0A        },%0A      ],%0A      Array [%0A        Object {%0A          "bpm": 120,%0A          "collectionLabel": "search",%0A          "id": "hit",%0A          "kind": "sfx",%0A          "origin": "demo",%0A          "title": "Hit",%0A        },%0A        Object {%0A          "collectionLabel": "search",%0A          "id": "song",%0A          "kind": "music",%0A          "origin": "demo",%0A          "title": "Song",%0A        },%0A      ],%0A    ]%0A%0A%0ANumber of calls: 4%0A%0A ❯ app/lib/arrangement/__tests__/tempo-seed-search-ui.test.tsx:131:49%0A%0A

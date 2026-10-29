@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-28T23:37:54.547Z)
+# Active loop summary (2026-10-29T00:33:53.679Z)
 
-- backlog.json 2187 KB -> active view 318 KB
-- status: G_ROOT_GATE round 236
-- servers: `{"checkedUtc":"2026-10-28T23:13:47.2873091Z","round":236,"attempt":1,"store":200}`
+- backlog.json 2194 KB -> active view 318 KB
+- status: G_ROOT_GATE round 237
+- servers: `{"checkedUtc":"2026-10-29T00:24:06.1831141Z","round":237,"attempt":1,"store":200}`
 - last publication: ecaf0e4bd9c99081c2db7a4cd97497562d00193d (rounds 236-236)
-- last root gate: round 236 published - commit ecaf0e4bd9c99081c2db7a4cd97497562d00193d pushed
+- last root gate: round 237 skipped - C taskStatus FAIL
 
 ## Current items: SRW-21
 
@@ -559,9 +559,9 @@
 - GATE233-S5 / info / duplicate of deferred Low B-R232-DOC180-FOCUS-STALE (D-29z325) / doc 180 l.42-51 still describes the reversed focus rule
 - SABA-Q-TEMPO-UNDO / info / awaiting_user (D-29z324); default kept until answered / CZABA keeps tempo, grid and Snap outside the undo history (D-29z30 R4), so Undo of the clip that seeded the tempo keeps tempo/grid/Snap; in 
 - SABA-Q-ENVELOPE-TAPER / info / awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
-- A-R234-REVIEW-M1 / medium / open, scheduled round 237 SABA-B-11a-FIX-2 (D-29z334; moved from 236); deadline before SABA-B-11b and before SRW-21 resume. Reachable in /studio-lab within ~1-2 s of load (B round-236 planning probe b-round-235/probe/out-baseline-noreadywait.json); earlier note "unreachable" superseded / seed status (placement + seeded + Snap on) is overwritten by the provider's source-loading/ready setStatus when the initial arrangement alre
-- GATE234-S2 / low / scheduled with A-R234-REVIEW-M1 in round 237 SABA-B-11a-FIX-2 (D-29z334) / seed search never closes in a project with no BPM sources: findAssetTempoSeed rebuilds two Maps on every clips/tracks change for the session
-- GATE234-S3 / low / scheduled with A-R234-REVIEW-M1 in round 237 SABA-B-11a-FIX-2 (D-29z334) / [status, ...parts].join(' ') yields a leading space when status is empty
+- A-R234-REVIEW-M1 / medium / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / seed status (placement + seeded + Snap on) is overwritten by the provider's source-loading/ready setStatus when the initial arrangement alre
+- GATE234-S2 / low / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / seed search never closes in a project with no BPM sources: findAssetTempoSeed rebuilds two Maps on every clips/tracks change for the session
+- GATE234-S3 / low / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / [status, ...parts].join(' ') yields a leading space when status is empty
 - GATE234-S5 / info / awaiting_user as SABA-Q-SEED-STATUS-LENGTH (D-29z330) / one aria-live message now carries three sentences (placement, tempo, Snap)
 - GATE234-S7 / info / note for PERF re-baselines (D-29z330); no perf/e2e spec names a source today / a perf scenario that adds a synthetic stem now runs with Snap on, 1/4 and the bars ruler
 - SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
@@ -569,12 +569,13 @@
 - SABA-Q-SCRUB-HOLD-LOOP / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live: holding the mouse in the scrub area loops a portion by the global launch quantization (6.3). Not built in SABA-B-11a. Wanted?
 - SABA-Q-SCRUB-ADD-LOCATOR / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / Live (video riOD 2:22-3:08): right-click in the scrub area -> Add Locator. Our marker menu opens only on an existing flag. Wanted (later can
 - SABA-Q-SEED-STATUS-LENGTH / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered / The seed status is one aria-live message of three sentences (placement, 'Tempo N BPM from ... Grid only: audio is not stretched.', 'Snap on 
-- GATE235-S1 / medium / open, scheduled round 236 SABA-B-11a-FIX-1 (D-29z333): a strip press suppresses Fit; lower zone keeps Fit; SABA-Q-SCRUB-DOUBLE-CLICK / a double-click on the bars-ruler scrub strip starts playback (first click), jumps again (second click) and runs Fit (dblclick); BR7 fires db
-- A-R235-REVIEW-M1 / medium / open, scheduled round 236 SABA-B-11a-FIX-1 (D-29z333): context playFrom reads isPlayingRef; unit red-proof BR14 + mutant MU-R (B sketch: red) / playFromRuler decides start-or-not from the render-time workspaceRef isPlaying while togglePlayback reads isPlayingRef; a disagreement (star
-- C-R235-01 / low / open, fixed now in round 236 (bug-gate exception: the round owns playFrom, low cost; D-29z333): playPastEnd status, no play / a strip click that snaps to the project end (15.75-16.25 s at 1/4, 120 BPM) plays from 0.000 via togglePlayback's at-end rule
 - C-R235-02 / low / scheduled inside SABA-B-10a (D-29z335), which redefines the ruler click; listed as a temporary deviation in the round-236 task section 3 / Follow is unchanged by ruler clicks: a beat-time (lower zone) click does not pause Follow and a scrub-strip click does not resume it (Live 1
+- B-R235-READY-CLOBBER / medium / open, dispatched round 237 SABA-B-11a-FIX-2 (D-29z339); B reproduced the clobber deterministically at ecaf0e4 with a 4 s route delay on the two demo MP3s (b-round-236/probe/readyrace-baseline.json); sketch fix green (readyrace-scratch.json) / the provider's 'Demo collection ready' write (ArrangementContext load effect settle, l.~3644) overwrites whatever status was set before all 
 - SABA-Q-SCRUB-DOUBLE-CLICK / info / awaiting_user (D-29z333); the round-236 default holds until answered / Live documents a double-click only for the beat-time ruler (6.1 zoom). Round 236 makes a scrub-strip double-click two 'play from here' click
 - GATE235-S3 / info / note; consistent with the codebase; no action / useRulerNavigation writes optionsRef.current during render (same pattern as workspaceRef)
+- C-R236-01 / low / deferred_low_polish (D-29z340); code is togglePlayback, outside round 237 grants / a playPastEnd status stays on screen after playback actually starts (strip click at 2 after an end click; Space after the end click); pre-ex
+- C-R236-02 / low / open, fixed now as doc grant 9 in round 237 (D-29z340; the round owns the feature doc, zero code) / doc 183 playFromRuler bullet (l.38-41) still says seekTo + togglePlayback in StudioWorkspace
+- SABA-Q-READY-AFTER-ACTION / info / awaiting_user (D-29z339); the round-237 default holds until answered / After round 237, if the viewer acts before every demo/purchased source has loaded, the ready line ('... Press ? for shortcuts.') is not show
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
