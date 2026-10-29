@@ -1,0 +1,17 @@
+  async hand(browser, vp, key_) {
+    const out = {};
+    for (const [tag, pre] of [['a', 'Digit1'], ['b', 'Digit2'], ['c', null]]) {
+      const { ctx, page, errors } = await open(browser, vp);
+      await blur(page);
+      const r = { mount: await G(page) };
+      if (pre) { await key(page, pre, 250); r.afterKey = await G(page); }
+      await seedEnter(page, 'demo-synth-mix'); await blur(page);
+      r.afterSeed = await G(page);
+      r.inv = inv(r.afterSeed);
+      await page.screenshot({ path: path.join(outDir, `hand-${tag}-${key_}.png`) });
+      r.errors = errors;
+      out[tag] = r;
+      await ctx.close();
+    }
+    return out;
+  },

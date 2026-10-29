@@ -1,0 +1,136 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 818658d..3add116 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -575,6 +575,7 @@ export function StudioWorkspace() {
+   const [gridMenu, setGridMenu] = useState<{ x: number; y: number } | null>(null);
+   const gridMenuOpenRef = useRef(false);
+   const gridMenuReturnFocusRef = useRef<HTMLElement | null>(null);
++  const gridMenuPressFocusRef = useRef<HTMLElement | null>(null);
+   const [canZoomBack, setCanZoomBack] = useState(false);
+   const [viewportWidth, setViewportWidth] = useState(0);
+   const [marquee, setMarquee] = useState<MarqueeRect | null>(null);
+@@ -1618,12 +1619,17 @@ export function StudioWorkspace() {
+   }, []);
+ 
+   const handleGridMenuRequest = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
++    const pressFocus = gridMenuPressFocusRef.current;
++    gridMenuPressFocusRef.current = null;
+     if (exportOpenRef.current || workspaceRef.current.isPointerGestureActive()) {
+       return;
+     }
+     if (!gridMenuOpenRef.current) {
+-      const focused = event.currentTarget.ownerDocument.activeElement;
+-      gridMenuReturnFocusRef.current = focused instanceof HTMLElement ? focused : null;
++      const ownerDocument = event.currentTarget.ownerDocument;
++      const active = ownerDocument.activeElement;
++      const focused =
++        active instanceof HTMLElement && active !== ownerDocument.body ? active : pressFocus;
++      gridMenuReturnFocusRef.current = focused;
+       gridMenuOpenRef.current = true;
+     }
+     setGridMenu({ x: event.clientX, y: event.clientY });
+@@ -1870,6 +1876,10 @@ export function StudioWorkspace() {
+ 
+   const handleLaneBackgroundPointerDown = useCallback(
+     (event: ReactPointerEvent<HTMLDivElement>, trackId: string) => {
++      if (event.button === 2) {
++        const active = event.currentTarget.ownerDocument.activeElement;
++        gridMenuPressFocusRef.current = active instanceof HTMLElement ? active : null;
++      }
+       if (event.button !== 0 || event.target !== event.currentTarget) {
+         return;
+       }
+diff --git a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+index 7205fd6..ca3192c 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+@@ -282,6 +282,17 @@ function rightClick(target: HTMLElement, clientX = 300, clientY = 200): boolean
+ 
+ const press = { button: 0, buttons: 1 };
+ 
++function rightPressThenBlur(target: HTMLElement, focused: HTMLElement) {
++  fireEvent.pointerDown(target, {
++    button: 2,
++    buttons: 2,
++    pointerId: 36,
++    clientX: 300,
++    clientY: 200,
++  });
++  act(() => focused.blur());
++}
++
+ function clickClipHeader(parts: { root: HTMLElement; header: HTMLElement }, pointerId: number) {
+   fireEvent.pointerDown(parts.header, { ...press, pointerId, clientX: 100, clientY: MUSIC_LANE_Y });
+   fireEvent.pointerUp(parts.root, { pointerId, clientX: 100, clientY: MUSIC_LANE_Y });
+@@ -969,6 +980,70 @@ describe('SRW-14 stage 4b-1 lane grid menu (D-29z22-M)', { timeout: 15_000 }, ()
+     expect(fireEvent.click(snapButton)).toBe(false);
+     expect(gridControl(view).dataset.snap).toBe('off');
+   });
++
++  it('GM36 C-R241-01 a right press that blurs to body still returns focus on Escape', async () => {
++    const { view, laneBody } = await mountMenuWorkspace();
++    const snapButton = view.getByTestId('arrangement-snap-toggle');
++    act(() => snapButton.focus());
++    rightPressThenBlur(laneBody('music'), snapButton);
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(snapButton);
++  });
++
++  it('GM37 C-R241-01 a right press that blurs to body returns focus after a width or a division', async () => {
++    const { view, laneBody } = await mountMenuWorkspace();
++    const snapButton = view.getByTestId('arrangement-snap-toggle');
++    act(() => snapButton.focus());
++    rightPressThenBlur(laneBody('music'), snapButton);
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    fireEvent.click(menuItem(view, 'Narrow'));
++    expect(gridMenu(view)).toBeNull();
++    expect(gridControl(view).dataset.gridMode).toBe('adaptive');
++    expect(document.activeElement).toBe(snapButton);
++    rightPressThenBlur(laneBody('sfx'), snapButton);
++    fireEvent.contextMenu(laneBody('sfx'), { button: 2, clientX: 300, clientY: 250 });
++    fireEvent.click(menuItem(view, '0.5 s'));
++    expect(gridMenu(view)).toBeNull();
++    expect(gridControl(view).dataset.gridSeconds).toBe('0.5');
++    expect(document.activeElement).toBe(snapButton);
++  });
++
++  it('GM38 C-R241-01 the element focused at the context menu wins over the press-time element', async () => {
++    const { view, laneBody } = await mountMenuWorkspace();
++    const snapButton = view.getByTestId('arrangement-snap-toggle');
++    const play = view.getByRole('button', { name: 'Play' });
++    act(() => snapButton.focus());
++    fireEvent.pointerDown(laneBody('music'), {
++      button: 2,
++      buttons: 2,
++      pointerId: 38,
++      clientX: 300,
++      clientY: 200,
++    });
++    act(() => play.focus());
++    fireEvent.contextMenu(laneBody('music'), { button: 2, clientX: 300, clientY: 200 });
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(play);
++  });
++
++  it('GM39 C-R241-01 a right press on a clip body that blurs to body returns focus on Escape', async () => {
++    const { view, clipParts } = await mountMenuWorkspace();
++    const snapButton = view.getByTestId('arrangement-snap-toggle');
++    act(() => snapButton.focus());
++    const clipRoot = clipParts('m1').root;
++    rightPressThenBlur(clipRoot, snapButton);
++    expect(document.activeElement).toBe(document.body);
++    fireEvent.contextMenu(clipRoot, { button: 2, clientX: 320, clientY: MUSIC_LANE_Y });
++    expect(openMenu(view).contains(focusedElement())).toBe(true);
++    pressFocused('Escape');
++    expect(gridMenu(view)).toBeNull();
++    expect(document.activeElement).toBe(snapButton);
++  });
+ });
+ 
+ describe(

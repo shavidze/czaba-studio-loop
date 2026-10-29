@@ -1,0 +1,65 @@
+{
+ "round": 241,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-29T04:33:26.6057380Z",
+  "round": 241,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R241-01",
+   "severity": "medium",
+   "steps": [
+    "Fresh context, /studio-lab, 1440x900 or 1280x720; wait for 'Demo collection ready'.",
+    "Press Tab until document.activeElement is [data-testid=arrangement-snap-toggle] (30 Tabs).",
+    "Right-click an empty lane point ([data-track-id] [data-grid-lines] body hit-test) - the grid menu opens with focus on the checked item.",
+    "Either press Escape, or click a Fixed grid division (0.5 s), or click an Adaptive width (Narrow)."
+   ],
+   "expected": "Menu closes and focus returns to the Snap toggle (task 241 C-MENU-CHOOSE-241 (a), C-MENU-REG-241; GM11/GM18 shape; L47 'never BODY').",
+   "actual": "Menu closes, the choice is applied, but document.activeElement is BODY in all 3 cases at both viewports. focusin/focusout log: out:arrangement-snap-toggle -> in:menu item -> out:menu item (no focus back). Pre-existing: identical at HEAD 04c2a5b (scratch dev server :5174) for Escape and division choice, so not introduced by A; the new width items inherit it. Cause measured (out/focus-work-cause.json): at pointerdown/mousedown activeElement = Snap toggle; the browser's default mousedown blurs it; at contextmenu activeElement = BODY, so handleGridMenuRequest (StudioWorkspace.tsx l.1625-1626) stores BODY and closeGridMenu skips the restore (l.1615). Fix direction: capture the return target at pointerdown/mousedown capture. jsdom GM11/GM18 fire contextMenu without a mousedown blur.",
+   "evidence": "c-round-241/out/focus-work.json, c-round-241/out/focus-head.json, c-round-241/out/c241.json rows menuChoose@*.a.active and menuReg@*.esc.active; script c-round-241/focus-probe.cjs, c-round-241/out/focus-work-cause.json, c-round-241/focus-probe2.cjs"
+  }
+ ],
+ "passed": [
+  "C-SCOPE-241",
+  "C-UNIT-241",
+  "C-MUT-241",
+  "C-MENU-GROUPS-241",
+  "C-MENU-CHECK-241",
+  "C-KEY4-241",
+  "C-S4-AX-241",
+  "C-GRID-REG-241",
+  "C-BUDGET-241",
+  "C-REF-241",
+  "AN-REVIEW-241",
+  "LAB-SMOKE-241",
+  "Auth"
+ ],
+ "failed": [
+  "C-MENU-CHOOSE-241 (a) focus return only; (a) division/status/zoom steps, (b), (c), (d) met",
+  "C-MENU-REG-241 Escape focus return only; Escape no-change, play-through, dismiss swallow, header right-click met"
+ ],
+ "blocked": [
+  "Purchased origin (browser): backend unavailable in cloud; grep 'origin' in grant 1/2 diff hunks = 0"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "lint",
+  "build",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notes": [
+  "Menu height with BPM at 1280x720: top 75, height 641, bottom spare 4 px (task §0.3 said 79 px spare; that was top+bottom). Fits at both acceptance viewports; signal B-R240-MENU-HEIGHT, not a bug at these viewports.",
+  "Keyboard focus ring on a menu item: 1px solid brass @0.8 outline (computed), no box-shadow; recorded only.",
+  "Mouse-opened menu: :focus-visible matched on the focused item in (a),(b),(d), not in (c) (after a mouse choice). Info only per task.",
+  "Doc 186 stale stage-1 text (l.1, R6/R8 rows, '39 ფაილი') outside the grants: info for B.",
+  "HEAD focus probe attempt 1 timed out on cold Vite dependency optimisation (environment-invalid); attempt 2 valid.",
+  "C-KEY4-241: old-key field samples were 5 (library), 1 (BPM), 2 (marker), 5 (sheet search); 3 not sampled because it is a no-op without a BPM."
+ ]
+}

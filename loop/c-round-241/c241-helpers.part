@@ -1,0 +1,200 @@
+// C round 241: independent browser verification of SABA-B-11b stage 2a (copied helpers from c240.cjs).
+// usage: node c241.cjs <outDir> [rowFilter]
+const path = require('node:path');
+const fs = require('node:fs');
+const crypto = require('node:crypto');
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+
+const BASE = 'http://127.0.0.1:5173';
+const HEAD_BASE = 'http://127.0.0.1:5174';
+const outDir = process.argv[2];
+const filter = process.argv[3] ? new RegExp(process.argv[3]) : null;
+fs.mkdirSync(outDir, { recursive: true });
+const resultFile = path.join(outDir, 'c241.json');
+const R = fs.existsSync(resultFile) ? JSON.parse(fs.readFileSync(resultFile, 'utf8')) : { rows: {} };
+R.started = new Date().toISOString();
+const save = () => fs.writeFileSync(resultFile, JSON.stringify(R, null, 1));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const SECONDS = ['10', '5', '2', '1', '0.5', '0.25', '0.1'];
+const STRAIGHT = ['bar', '1/2', '1/4', '1/8', '1/16', '1/32'];
+const TRIPLET = ['1/2T', '1/4T', '1/8T', '1/16T', '1/32T'];
+const BEATS = { bar: 4, '1/2': 2, '1/4': 1, '1/8': 0.5, '1/16': 0.25, '1/32': 0.125, '1/2T': 4 / 3, '1/4T': 2 / 3, '1/8T': 1 / 3, '1/16T': 1 / 6, '1/32T': 1 / 12 };
+const secOf = (id, bpm) => (id in BEATS ? (BEATS[id] * 60) / bpm : Number(id));
+const familyOf = (id) => (SECONDS.includes(id) ? SECONDS : STRAIGHT.includes(id) ? STRAIGHT : TRIPLET);
+const SUF_A = ' · Adaptive: follows zoom — 5 for fixed';
+const SUF_F = ' · Fixed at every zoom — 5 for adaptive';
+
+const INIT = () => {
+  window.__taps = [];
+  const orig = AudioNode.prototype.connect;
+  AudioNode.prototype.connect = function (target, ...rest) {
+    const res = orig.call(this, target, ...rest);
+    try {
+      if (target instanceof AudioDestinationNode && !(this.context instanceof OfflineAudioContext)) {
+        const a = this.context.createAnalyser(); a.fftSize = 2048; orig.call(this, a); window.__taps.push(a);
+      }
+    } catch (e) {}
+    return res;
+  };
+  window.__rms = () => window.__taps.map((a) => { const d = new Float32Array(a.fftSize); a.getFloatTimeDomainData(d); let s = 0; for (const x of d) s += x * x; return Math.sqrt(s / d.length); });
+  window.__keys = [];
+  window.addEventListener('keydown', (e) => { setTimeout(() => window.__keys.push({ code: e.code, ctrl: e.ctrlKey, repeat: e.repeat, prevented: e.defaultPrevented, target: e.target && e.target.tagName }), 0); }, true);
+};
+
+async function open(browser, vp, base = BASE) {
+  const ctx = await browser.newContext({ viewport: vp, acceptDownloads: true });
+  await ctx.addInitScript(INIT);
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(`${base}/studio-lab`, { waitUntil: 'load' });
+  await page.waitForFunction(() => { const s = document.querySelector('[data-testid="arrangement-status"]'); return s && s.textContent.startsWith('Demo collection ready'); }, undefined, { timeout: 120000 });
+  await sleep(600);
+  await page.evaluate(() => {
+    window.__live = 0; window.__modeChanges = 0;
+    const live = document.querySelector('output[aria-live]');
+    if (live) new MutationObserver((rs) => { for (const r of rs) if (r.type === 'childList') window.__live += 1; }).observe(live, { childList: true, subtree: true, characterData: true });
+    else window.__live = -1;
+    const g = document.querySelector('[data-testid="arrangement-grid-control"]');
+    new MutationObserver(() => { window.__modeChanges += 1; }).observe(g, { attributes: true, attributeFilter: ['data-grid-mode'] });
+  });
+  return { ctx, page, errors };
+}
+const blur = (page) => page.evaluate(() => { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); });
+
+const G = (page) => page.evaluate(() => {
+  const g = document.querySelector('[data-testid="arrangement-grid-control"]');
+  const s = document.querySelector('[data-testid="arrangement-status"]');
+  const br = document.querySelector('[data-testid="arrangement-bars-ruler"]');
+  const sel = document.querySelector('[data-testid="arrangement-grid-division"]');
+  const bodies = [...document.querySelectorAll('[data-track-id] [data-grid-seconds]')];
+  const periods = bodies.map((b) => { const m = /([\d.]+)px\)\s*$/.exec((b.style.backgroundImage || '').trim()) || /transparent 1px ([\d.]+)px/.exec(b.style.backgroundImage || ''); return m ? Number(m[1]) : null; });
+  const bodySecs = [...new Set(bodies.map((b) => b.getAttribute('data-grid-seconds')))];
+  const ruler = document.querySelector('[data-testid="arrangement-ruler"]');
+  const ticks = ruler ? [...ruler.querySelectorAll('span')].map((sp) => ({ text: sp.textContent.trim(), left: parseFloat(sp.parentElement.style.left) })).filter((t) => /\d/.test(t.text) && Number.isFinite(t.left)) : [];
+  return {
+    division: g?.getAttribute('data-grid-division'), seconds: g?.getAttribute('data-grid-seconds'), mode: g?.getAttribute('data-grid-mode'),
+    lines: g?.getAttribute('data-grid-lines'), snap: g?.getAttribute('data-snap'), bpm: br?.getAttribute('data-bpm') ?? null,
+    selectValue: sel?.value, title: sel?.getAttribute('title'), aria: sel?.getAttribute('aria-keyshortcuts'),
+    status: s?.textContent ?? null, periods, bodySecs, ticks: ticks.slice(0, 4), live: window.__live, modeChanges: window.__modeChanges,
+  };
+});
+const parseT = (t) => { const m = /^(?:(\d+):)?(\d+)(?:[.:](\d+))?$/.exec(t); if (!m) return null; return (m[1] ? Number(m[1]) * 60 : 0) + Number(m[2]) + (m[3] ? Number(`0.${m[3]}`) : 0); };
+function inv(g) {
+  const sec = Number(g.seconds);
+  const p = g.periods.find((x) => x !== null) ?? null;
+  const bpm = g.bpm ? Number(g.bpm) : null;
+  let rulerPps = null;
+  const tk = g.ticks.map((t) => ({ t: parseT(t.text), left: t.left })).filter((t) => t.t !== null);
+  if (tk.length >= 2 && tk[1].t !== tk[0].t) rulerPps = (tk[1].left - tk[0].left) / (tk[1].t - tk[0].t);
+  const pps = rulerPps;
+  const fam = familyOf(g.division);
+  const idx = fam.indexOf(g.division);
+  const spacing = pps ? sec * pps : null;
+  const finer = idx < fam.length - 1 ? secOf(fam[idx + 1], bpm) * pps : null;
+  return {
+    period: p, rulerPps, spacing, periodMatches: p !== null && spacing !== null ? Math.abs(p - spacing) <= 0.5 : null,
+    secMatches: Math.abs(secOf(g.division, bpm) - sec) < 1e-6,
+    ge24: spacing !== null ? spacing >= 24 - 1e-6 : null,
+    finerLt24: finer === null ? 'family-end' : finer < 24,
+    widestEnd: idx === 0,
+  };
+}
+
+async function addBtn(page, id) {
+  await page.locator(`[data-source-id="${id}"]`).first().click();
+  await sleep(250);
+  await page.locator('button', { hasText: /^Add/ }).first().click();
+  await sleep(800);
+  await blur(page);
+}
+async function seedEnter(page, id) {
+  const row = page.locator(`[data-source-id="${id}"]`).first();
+  const btn = row.locator('button').first();
+  const target = (await btn.count()) ? btn : row;
+  await target.focus();
+  await page.keyboard.press('Enter');
+  await sleep(1500);
+}
+async function key(page, k, wait = 200) { await page.keyboard.press(k); await sleep(wait); }
+
+const wavInfo = (buf) => {
+  const ch = buf.readUInt16LE(22); const rate = buf.readUInt32LE(24); const ba = buf.readUInt16LE(32); const bits = buf.readUInt16LE(34);
+  let off = 12; let dataOff = -1; let dataSize = 0;
+  while (off < buf.length - 8) { const id = buf.toString('ascii', off, off + 4); const sz = buf.readUInt32LE(off + 4); if (id === 'data') { dataOff = off + 8; dataSize = sz; break; } off += 8 + sz; }
+  const frames = dataSize / ba; const bps = bits / 8;
+  let s = 0; let n = 0; let peak = 0; let nan = 0;
+  for (let f = 0; f < frames; f += 1) for (let c = 0; c < ch; c += 1) {
+    const o = dataOff + f * ba + c * bps; let x;
+    if (bits === 24) { let v = buf[o] | (buf[o + 1] << 8) | (buf[o + 2] << 16); if (v & 0x800000) v -= 0x1000000; x = v / 8388608; } else if (bits === 16) { x = buf.readInt16LE(o) / 32768; } else { x = buf.readFloatLE(o); }
+    if (!Number.isFinite(x)) nan += 1;
+    s += x * x; n += 1; const a = Math.abs(x); if (a > peak) peak = a;
+  }
+  return { rate, bits, ch, frames, seconds: frames / rate, rmsDb: +(10 * Math.log10(s / n || 1e-20)).toFixed(2), peak: +peak.toFixed(4), nan, sha256: crypto.createHash('sha256').update(buf).digest('hex') };
+};
+const inventory = (page) => page.evaluate(() => {
+  const rows = [];
+  const vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return false; } const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth; };
+  for (const el of document.body.querySelectorAll('*')) {
+    if (['SCRIPT', 'STYLE', 'svg', 'path', 'OPTION'].includes(el.tagName)) continue;
+    const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s+/g, ' ').trim();
+    if (!own || el.closest('.sr-only') || !vis(el)) continue;
+    if (el.closest('[data-testid="arrangement-timeline-scroller"]')) continue;
+    if (el.closest('[data-testid="arrangement-status"]')) continue;
+    const region = el.closest('[data-testid]') ? el.closest('[data-testid]').getAttribute('data-testid') : el.tagName;
+    rows.push(`${region}|${own.slice(0, 140)}`);
+  }
+  return rows;
+});
+const clipInfo = (page) => page.evaluate(() => [...document.querySelectorAll('[data-clip-kind="audio"]')].map((c) => ({ start: Number(c.getAttribute('data-clip-start')), id: c.getAttribute('data-clip-id') })));
+const isMult = (x, g) => Math.abs(x / g - Math.round(x / g)) * g < 0.0015;
+
+const SEC_FAM = [10, 5, 2, 1, 0.5, 0.25, 0.1];
+const secLabel = (v) => `${v} s`;
+const baseIdx = (pps) => { for (let i = SEC_FAM.length - 1; i >= 0; i -= 1) if (SEC_FAM[i] * pps >= 24 - 1e-6) return i; return 0; };
+const pickIdx = (pps, d) => Math.min(SEC_FAM.length - 1, Math.max(0, baseIdx(pps) - d));
+function makeSim() {
+  const s = { pps: 40, d: 0 };
+  s.zoom = (k) => { s.pps = k === 'Equal' ? Math.min(320, s.pps * 1.25) : Math.max(0.5, s.pps / 1.25); };
+  s.press = (k, snap) => {
+    const step = k === 'Digit1' ? -1 : 1;
+    const c = pickIdx(s.pps, s.d);
+    const n = c - step;
+    if (n < 0 || n >= SEC_FAM.length) return { division: String(SEC_FAM[c]), status: k === 'Digit1' ? `The grid is already at its narrowest — ${secLabel(SEC_FAM.at(-1))} (1)` : `The grid is already at its widest — ${secLabel(SEC_FAM[0])} (2)`, kind: 'end' };
+    let x = s.d + step;
+    while (x >= -2 && x <= 2 && pickIdx(s.pps, x) === c) x += step;
+    if (x < -2 || x > 2) return { division: String(SEC_FAM[c]), status: k === 'Digit1' ? `The adaptive grid is already at its narrowest density — now ${secLabel(SEC_FAM[c])} (1)` : `The adaptive grid is already at its widest density — now ${secLabel(SEC_FAM[c])} (2)`, kind: 'limit' };
+    s.d = x;
+    return { division: String(SEC_FAM[pickIdx(s.pps, x)]), status: `Grid: ${secLabel(SEC_FAM[pickIdx(s.pps, x)])} (Snap ${snap})`, kind: 'step' };
+  };
+  s.expectDivision = () => String(SEC_FAM[pickIdx(s.pps, s.d)]);
+  return s;
+}
+const REFUSAL = /^(The grid is already at its (narrowest|widest) — .+ \([12]\)|The adaptive grid is already at its (narrowest|widest) density — now .+ \([12]\))$/;
+async function runSeq(page, seq) {
+  const sim = makeSim();
+  const steps = [];
+  let prev = await G(page);
+  steps.push({ step: 'mount', division: prev.division, mode: prev.mode, status: prev.status, simDivision: sim.expectDivision() });
+  for (const k of seq) {
+    if (k === 'Equal' || k === 'Minus') {
+      sim.zoom(k); await key(page, k, 150);
+      const g = await G(page);
+      steps.push({ step: k, division: g.division, mode: g.mode, live: g.live, liveChanged: g.live !== prev.live, simDivision: sim.expectDivision(), simPps: +sim.pps.toFixed(4), rulerPps: inv(g).rulerPps, periodMatches: inv(g).periodMatches, zoomOk: g.division === sim.expectDivision() });
+      prev = g; continue;
+    }
+    const exp = sim.press(k, prev.snap === 'on' ? 'on' : 'off');
+    await key(page, k, 220);
+    const g = await G(page);
+    const fam = SEC_FAM.map(String);
+    const moved = Math.abs(fam.indexOf(g.division) - fam.indexOf(prev.division)) === 1;
+    const refusal = REFUSAL.test(g.status || '');
+    const swallowed = g.division === prev.division && g.status === prev.status;
+    steps.push({ step: k, division: g.division, mode: g.mode, status: g.status, moved, refusal, swallowed, okPress: (moved && !refusal) || (refusal && g.division === prev.division), simDivision: exp.division, simStatus: exp.status, simKind: exp.kind, matchesSim: g.division === exp.division && g.status === exp.status, storedDensityAfter: sim.d });
+    prev = g;
+  }
+  return steps;
+}
+const rep = (k, n) => Array(n).fill(k);
+

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T03:45:25.685Z)
+# Active loop summary (2026-10-29T04:49:26.534Z)
 
-- backlog.json 2224 KB -> active view 326 KB
-- status: G_ROOT_GATE round 240
-- servers: `{"checkedUtc":"2026-10-29T03:28:34.3700659Z","round":240,"attempt":1,"store":200}`
+- backlog.json 2236 KB -> active view 326 KB
+- status: G_ROOT_GATE round 241
+- servers: `{"checkedUtc":"2026-10-29T04:33:26.6057380Z","round":241,"attempt":1,"store":200}`
 - last publication: 04c2a5b4517c70fa2a040fd845c6f257fab24d33 (rounds 240-240)
-- last root gate: round 240 published - commit 04c2a5b4517c70fa2a040fd845c6f257fab24d33 pushed
+- last root gate: round 241 skipped - C taskStatus FAIL
 
 ## Current items: SRW-21
 
@@ -581,16 +581,15 @@
 - SABA-Q-11B-READOUT / info / awaiting_user (D-29z358): non-blocking; round 239 ships without a new readout / Live 12 shows the grid spacing readout above the time ruler, lower-right corner (manual 6.10; GRGG 0:00); CZABA keeps the pick in the existi
 - SABA-Q-11B-DENSITY / info / awaiting_user (D-29z358): non-blocking; one constant (GRID_ADAPTIVE_MIN_SPACING_PX) if Saba wants denser or sparser lines / adaptive grid density: Live 12 does not publish its spacing threshold; CZABA uses lines >= 24 px apart (WCAG 2.5.8 minimum target; keeps 1 s
 - SABA-Q-11B-PLAIN-DIGITS / info / awaiting_user (D-29z358): non-blocking / Live 12 uses Ctrl/Cmd+1..5 for the grid; CZABA uses plain 1/2/3/5 (and 4 in stage 2) because Ctrl+digit switches Chrome tabs (D-29z24). The 
-- GATE239-S2 / medium / open -> round 240 (D-29z362): set the flag after the refusal guards in the adaptive stepGridDivision branch; GAU16/GAU17; C-HAND-240, C-REFUSED-240 / adaptive 1/2 no longer set gridHandChosen (they bypass changeGridDivision since round 239), so 1 then a BPM seed replaces the user's 0.5 s w
-- GATE239-S1 / low / ruled by design (D-29z361); closes when round 240 C PASS pins GAU12/GAU14/GAU15 and C-DENSITY-MODEL-240; Saba question SABA-Q-11B-DENSITY-MODEL / stored adaptive density re-anchors to the visible pick at a clamped family end, so zooming back shows a wider grid than the net key count
-- C-R239-01 / low / ruled by design with GATE239-S1 (D-29z361); pinned by GAU14 in round 240 / density skips levels at a family end: 1 1, = x10, 2, - x10 shows 2 s instead of the net -1 (0.5 s)
-- GATE239-S3 / low / open -> round 240 (owned code, cheap, behaviour-equivalent; D-29z363) / next === null check after the density loop: the loop runs for nothing at a family end
-- GATE239-S4 / low / open -> SABA-B-11b stage 2 scope (menu Adaptive/Fixed items + a programmatic mode name; D-29z363) / adaptive/fixed mode is exposed only in the select title (hover) and the transient status; not programmatically reliable for screen readers
-- GATE239-S6 / info / open -> round 240 grant 2 (D-29z363) / describe label decision id D-29z352 in grid-adaptive-ui.test.tsx is wrong (D-29z352 = round-238 closures); the UI describe gets D-29z356, th
+- GATE239-S4 / low / open -> round 241 SABA-B-11b stage 2a (D-29z369): closes on C-MENU-CHECK-241 + C-S4-AX-241 (menu groups with one checked menuitemradio; the select title exposed as accessible description, CDP-read by B at both viewports) / adaptive/fixed mode is exposed only in the select title (hover) and the transient status; not programmatically reliable for screen readers
 - SABA-Q-11B-DENSITY-MODEL / info / awaiting_user (D-29z361): non-blocking / adaptive density at a clamped family end: CZABA re-anchors the stored density to the visible grid so every 1/2 press visibly moves one step;
 - INFO-C239-ZOOM-DURING-DRAG / info / info, no action / - during a clip drag does not zoom (zoom blocked during gestures, gate reviewer confirms l.1758/1790); Ctrl+wheel during a drag not tried
 - INFO-C239-STATUS-STALE-AFTER-ZOOM / info / info, linked to SABA-Q-11B-READOUT / after 5 -> 'Adaptive grid — follows zoom, now 0.5 s (5)', a later zoom changes the pick but the status keeps 'now 0.5 s' (silent zoom by des
 - A-R239-5B-DENSITY-TEMPO-CLEAR / info / intended (D-29z365): density is a family-independent view preference; mirror case now GAU15 / the adaptive density carries over to the seconds family when the tempo is cleared
+- C-R240-01 / low / open -> round 241 grant 14 (l.128 -> GAU1-GAU23; doc granted anyway, L7; D-29z371) / doc 186 '## შეცვლილი ფაილები' l.128 lists grid-adaptive-ui.test.tsx as GAU1-GAU13 while the file and '## ტესტირება' have GAU1-GAU17
+- GATE240-S2 / low / open -> round 241 grant 6 (named const ZOOM_TEN_STEPS_OUT_FROM_320; file granted anyway; D-29z371) / magic number 34.359738368 in GAU14 (grid-adaptive-ui.test.tsx)
+- SABA-Q-11B-MENU-OFF / info / awaiting_user (D-29z372): non-blocking; round 241 ships without an Off item / Live's grid context menu has an 'Off' choice (Cotec, Live 10; position unconfirmed); CZABA's grid menu has no 'Off' item because Snap off (G
+- SABA-Q-11B-MAC-BYPASS / info / awaiting_user (D-29z372): non-blocking; no code change / Live bypasses snap with Alt (Win) / Cmd (Mac) (manual 6.10); CZABA uses Alt / Option on both platforms because Cmd+click / Cmd+drag mean oth
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

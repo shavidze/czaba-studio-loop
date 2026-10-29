@@ -1,0 +1,69 @@
+  async gridReg(browser, vp, key_) {
+    const out = {};
+    { const { ctx, page, errors } = await open(browser, vp); await blur(page);
+      const steps = []; const push = async (step) => { const g = await G(page); steps.push({ step, division: g.division, mode: g.mode, status: g.status, live: g.live, inv: inv(g) }); };
+      await push('mount'); for (let i = 1; i <= 6; i += 1) { await key(page, 'Equal'); await push(`=${i}`); }
+      for (let i = 1; i <= 10; i += 1) { await key(page, 'Minus'); await push(`-${i}`); }
+      out.adaptSec = { steps, errors }; await ctx.close(); }
+    { const { ctx, page, errors } = await open(browser, vp); await blur(page);
+      const steps = []; const push = async (step) => { const g = await G(page); steps.push({ step, division: g.division, mode: g.mode, status: g.status }); };
+      await push('mount'); for (let i = 1; i <= 3; i += 1) { await key(page, 'Digit1'); await push(`1 x${i}`); }
+      for (let i = 1; i <= 5; i += 1) { await key(page, 'Digit2'); await push(`2 x${i}`); }
+      out.density = { steps, errors }; await ctx.close(); }
+    const ref = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'c-round-239', 'out', 'c239.json'), 'utf8')).rows;
+    const r1 = ref[`adaptSec@${key_}`].steps; const r2 = ref[`density@${key_}`].steps.slice(0, 9);
+    out.cmpAdapt = out.adaptSec.steps.map((s, i) => ({ step: s.step, div: s.division, ref: r1[i]?.division, same: s.division === r1[i]?.division }));
+    out.cmpDensity = out.density.steps.map((s, i) => ({ step: s.step, same: s.division === r2[i]?.division && s.status === r2[i]?.status, status: s.status, ref: r2[i]?.status }));
+    const zl = out.adaptSec.steps.map((s) => s.live);
+    out.liveOnZoom = { first: zl[0], last: zl.at(-1) };
+    return out;
+  },
+  async budget(browser, vp, key_) {
+    const { ctx, page, errors } = await open(browser, vp);
+    const empty = await inventory(page);
+    await page.screenshot({ path: path.join(outDir, `budget-empty-${key_}.png`) });
+    await addBtn(page, 'demo-stem-pulse');
+    const demo = await inventory(page);
+    await page.screenshot({ path: path.join(outDir, `budget-demo-${key_}.png`) });
+    await ctx.close();
+    const ref = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'c-round-239', 'out', 'c239.json'), 'utf8')).rows[`budget@${key_}`].work;
+    const diff = (a, b) => ({ onlyRef: a.filter((x) => !b.includes(x)), onlyNow: b.filter((x) => !a.includes(x)) });
+    return { empty: empty.length, demo: demo.length, refEmpty: ref.empty.length, refDemo: ref.demo.length, dEmpty: diff(ref.empty, empty), dDemo: diff(ref.demo, demo), errors };
+  },
+  async smoke(browser, vp, key_) {
+    const { ctx, page, errors } = await open(browser, vp);
+    await addBtn(page, 'demo-stem-pulse');
+    const r = {};
+    const pos = () => page.evaluate(() => Number(document.querySelector('[data-testid="arrangement-playhead-handle"]').getAttribute('aria-valuenow')));
+    r.pos0 = await pos();
+    await page.keyboard.press('Space'); await sleep(900); r.posPlaying = await pos();
+    r.rms = await page.evaluate(() => Math.max(0, ...window.__rms()));
+    await page.keyboard.press('Space'); await sleep(400); r.posPaused = await pos(); await sleep(400); r.posPaused2 = await pos();
+    await page.getByRole('button', { name: 'Export', exact: true }).first().click();
+    const dlg = page.getByRole('dialog'); await dlg.waitFor();
+    const dlP = page.waitForEvent('download', { timeout: 90000 });
+    await dlg.getByRole('button', { name: 'Export WAV', exact: true }).click();
+    const dl = await dlP; const file = path.join(outDir, `export-${key_}.wav`); await dl.saveAs(file);
+    r.wav = wavInfo(fs.readFileSync(file)); fs.unlinkSync(file);
+    r.shaExpected = r.wav.sha256 === '1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94';
+    r.errors = errors; await ctx.close();
+    return r;
+  },
+  async auth(browser, vp, key_) {
+    const ctx = await browser.newContext({ viewport: vp });
+    const page = await ctx.newPage();
+    const r = {};
+    await page.goto(`${BASE}/studio-lab`, { waitUntil: 'load' });
+    await page.waitForSelector('[data-testid="arrangement-ruler"]', { timeout: 120000 });
+    r.labWorkspace = true;
+    r.labAuthUser = await page.evaluate(() => localStorage.getItem('auth_user'));
+    await page.goto(`${BASE}/studio/middle-east`, { waitUntil: 'load' }); await sleep(3000);
+    r.guard = await page.evaluate(() => ({ path: location.pathname, signIn: /Sign in required/i.test(document.body.innerText), audioSrc: document.querySelectorAll('audio[src]').length, workspace: !!document.querySelector('[data-testid=arrangement-ruler]') }));
+    await page.screenshot({ path: path.join(outDir, `auth-guard-${key_}.png`) });
+    const api = `${BASE}/api/studio-token?product=middle-east&file=stem1.wav`;
+    const a = await ctx.request.get(api, { failOnStatusCode: false });
+    r.tokenNoHeader = { status: a.status(), body: (await a.text()).slice(0, 160) };
+    await ctx.close(); return r;
+  },
+};
+

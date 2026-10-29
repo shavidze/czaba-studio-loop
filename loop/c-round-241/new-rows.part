@@ -1,0 +1,247 @@
+const ROWS = {
+  async hand(browser, vp, key_) {
+    const out = {};
+    for (const [tag, pre] of [['a', 'Digit1']]) {
+      const { ctx, page, errors } = await open(browser, vp);
+      await blur(page);
+      const r = { mount: await G(page) };
+      if (pre) { await key(page, pre, 250); r.afterKey = await G(page); }
+      await seedEnter(page, 'demo-synth-mix'); await blur(page);
+      r.afterSeed = await G(page);
+      await page.screenshot({ path: path.join(outDir, `hand-${tag}-${key_}.png`) });
+      r.errors = errors;
+      out[tag] = r;
+      await ctx.close();
+    }
+    return out;
+  },
+  async menuGroups(browser, vp, key_) {
+    const out = {};
+    const { ctx, page, errors } = await open(browser, vp);
+    await blur(page);
+    let m = await openMenu(page);
+    out.mount = m ? await menuInfo(page, m) : null;
+    if (m) { await page.screenshot({ path: path.join(outDir, `menu-mount-${key_}.png`) }); await key(page, 'Escape'); }
+    await seedEnter(page, 'demo-synth-mix'); await blur(page);
+    out.seedGrid = await G(page);
+    m = await openMenu(page);
+    out.bpm = m ? await menuInfo(page, m) : null;
+    if (m) { await page.screenshot({ path: path.join(outDir, `menu-bpm-${key_}.png`) }); await key(page, 'Escape'); }
+    await blur(page);
+    await key(page, 'Digit3', 250);
+    out.tripGrid = await G(page);
+    m = await openMenu(page);
+    out.triplet = m ? await menuInfo(page, m) : null;
+    if (m) { await page.screenshot({ path: path.join(outDir, `menu-triplet-${key_}.png`) }); await key(page, 'Escape'); }
+    out.errors = errors;
+    await ctx.close();
+    return out;
+  },
+  async menuCheck(browser, vp, key_) {
+    const out = {};
+    const one = async (tag, pre) => {
+      const { ctx, page, errors } = await open(browser, vp);
+      await blur(page);
+      if (pre) await pre(page);
+      await blur(page);
+      const m = await openMenu(page);
+      out[tag] = m ? await menuInfo(page, m) : null;
+      out[tag].grid = await G(page);
+      if (m) { await page.screenshot({ path: path.join(outDir, `check-${tag}-${key_}.png`) }); await key(page, 'Escape'); }
+      out[tag].errors = errors;
+      await ctx.close();
+    };
+    await one('a', null);
+    await one('b', async (page) => { await key(page, 'Digit5', 250); });
+    await one('c', async (page) => { const m = await openMenu(page); await m.getByRole('menuitemradio', { name: '0.25 s', exact: true }).click(); await sleep(300); });
+    await one('d', async (page) => { await seedEnter(page, 'demo-synth-mix'); });
+    return out;
+  },
+  async menuChoose(browser, vp, key_) {
+    const out = {};
+    { // (a)
+      const { ctx, page, errors } = await open(browser, vp); await blur(page);
+      const r = { tabs: await tabTo(page, 'arrangement-snap-toggle') };
+      r.before = await G(page);
+      const m = await openMenu(page);
+      await m.getByRole('menuitemradio', { name: 'Narrow', exact: true }).click(); await sleep(300);
+      r.after = await G(page);
+      r.menuOpen = await page.getByTestId('arrangement-grid-menu').count();
+      r.active = await activeDesc(page);
+      r.zoom = [];
+      const sim = makeSim(); sim.d = -1;
+      for (let i = 1; i <= 3; i += 1) {
+        sim.zoom('Equal'); await key(page, 'Equal', 200);
+        const g = await G(page);
+        const iv = inv(g);
+        r.zoom.push({ step: `=${i}`, division: g.division, mode: g.mode, period: iv.period, rulerPps: iv.rulerPps, simPps: sim.pps, expectNarrow: sim.expectDivision(), expectMedium: String(SEC_FAM[pickIdx(sim.pps, 0)]), ok: g.division === sim.expectDivision() });
+      }
+      await page.screenshot({ path: path.join(outDir, `choose-a-${key_}.png`) });
+      r.errors = errors; out.a = r; await ctx.close();
+    }
+    { // (b)
+      const { ctx, page, errors } = await open(browser, vp); await blur(page);
+      await key(page, 'Digit5', 250);
+      const r = { fixed: await G(page) };
+      const m = await openMenu(page);
+      await m.getByRole('menuitemradio', { name: 'Wide', exact: true }).click(); await sleep(300);
+      r.after = await G(page);
+      r.titleAdaptive = (r.after.title || '').endsWith(SUF_A);
+      r.errors = errors; out.b = r; await ctx.close();
+    }
+    { // (c)
+      const { ctx, page, errors } = await open(browser, vp); await blur(page);
+      const m = await openMenu(page);
+      const r = { onOpen: await activeDesc(page) };
+      await page.keyboard.press('ArrowDown'); await sleep(150);
+      r.afterDown1 = await activeDesc(page);
+      r.ring = await page.evaluate(() => { const a = document.activeElement; const cs = getComputedStyle(a); return { outlineStyle: cs.outlineStyle, outlineWidth: cs.outlineWidth, outlineColor: cs.outlineColor, boxShadow: cs.boxShadow }; });
+      await page.screenshot({ path: path.join(outDir, `choose-c-ring-${key_}.png`) });
+      await page.keyboard.press('ArrowDown'); await sleep(150);
+      r.afterDown2 = await activeDesc(page);
+      await page.keyboard.press('Enter'); await sleep(300);
+      r.after = await G(page);
+      r.menuOpen = await page.getByTestId('arrangement-grid-menu').count();
+      r.errors = errors; out.c = r; await ctx.close();
+    }
+    { // (d)
+      const { ctx, page, errors } = await open(browser, vp); await blur(page);
+      const m = await openMenu(page);
+      await m.getByRole('menuitemradio', { name: 'Narrow', exact: true }).click(); await sleep(300);
+      const r = { narrow: await G(page) };
+      await seedEnter(page, 'demo-synth-mix'); await blur(page);
+      r.after = await G(page);
+      r.errors = errors; out.d = r; await ctx.close();
+    }
+    return out;
+  },
+  async key4(browser, vp, key_) {
+    const r = {};
+    const { ctx, page, errors } = await open(browser, vp); await blur(page);
+    r.mount = await G(page);
+    r.snapAria = await page.getByTestId('arrangement-snap-toggle').getAttribute('aria-keyshortcuts');
+    r.snapTitle = await page.getByTestId('arrangement-snap-toggle').getAttribute('title');
+    await key(page, 'Digit4', 250); r.on = await G(page);
+    await key(page, 'Digit4', 250); r.off = await G(page);
+    await page.keyboard.down('Digit4'); await sleep(60); await page.keyboard.down('Digit4'); await sleep(60); await page.keyboard.down('Digit4'); await sleep(60); await page.keyboard.up('Digit4'); await sleep(250);
+    r.held = await G(page);
+    r.heldKeys = await page.evaluate(() => window.__keys.filter((k) => k.code === 'Digit4').slice(-3));
+    r.heldOneFlip = r.off.snap !== r.held.snap;
+    const snapBeforeCtrl = r.held.snap;
+    await page.keyboard.press('Control+Digit4'); await sleep(250);
+    r.ctrl = await G(page); r.ctrlKey = await page.evaluate(() => window.__keys.filter((k) => k.code === 'Digit4' && k.ctrl).slice(-1)[0]);
+    r.ctrlOk = r.ctrl.snap === snapBeforeCtrl && r.ctrlKey && r.ctrlKey.prevented === false;
+    // fields
+    const field = async (name, focusFn, k) => {
+      const before = await G(page);
+      const el = await focusFn();
+      await page.keyboard.press(k); await sleep(200);
+      const val = await el.evaluate((e) => e.value);
+      const after = await G(page);
+      const res = { before: { snap: before.snap, mode: before.mode, division: before.division }, after: { snap: after.snap, mode: after.mode, division: after.division }, value: val, unchanged: before.snap === after.snap && before.mode === after.mode && before.division === after.division };
+      await page.keyboard.press('Escape'); await sleep(200);
+      return res;
+    };
+    const lib = async () => { const e = page.getByTestId('arrangement-library-search'); await e.click(); await e.fill(''); return e; };
+    r.library4 = await field('library', lib, 'Digit4');
+    r.library5 = await field('library', lib, 'Digit5');
+    await page.getByTestId('arrangement-library-search').fill(''); await blur(page);
+    const bpm = async () => { const e = page.getByTestId('arrangement-tempo-input'); await e.click(); await e.fill(''); return e; };
+    r.bpm4 = await field('bpm', bpm, 'Digit4');
+    r.bpm1 = await field('bpm', bpm, 'Digit1');
+    await page.getByTestId('arrangement-tempo-input').fill(''); await page.keyboard.press('Enter'); await sleep(200); await blur(page);
+    const marker = async () => { await blur(page); await page.keyboard.press('KeyM'); await sleep(300); const e = page.getByTestId('arrangement-marker-name-input'); await e.waitFor({ timeout: 5000 }); await e.fill(''); return e; };
+    r.marker4 = await field('marker', marker, 'Digit4');
+    r.marker2 = await field('marker', marker, 'Digit2');
+    await blur(page);
+    // ? sheet
+    await page.keyboard.press('Shift+Slash'); await sleep(400);
+    r.sheetOpen = await page.getByRole('dialog').count();
+    const s = page.getByRole('dialog').locator('input[type="search"]');
+    r.sheetActiveIsSearch = await s.evaluate((e) => e === document.activeElement);
+    const before = await G(page);
+    await s.click(); await page.keyboard.press('Digit4'); await sleep(300);
+    r.sheet4 = { value: await s.inputValue(), snapUnchanged: (await G(page)).snap === before.snap };
+    r.sheetRows = await page.getByRole('dialog').evaluate((d) => [...d.querySelectorAll('[data-shortcut-id]')].filter((x) => x.getBoundingClientRect().height > 0).map((x) => ({ id: x.getAttribute('data-shortcut-id'), text: x.textContent.trim().slice(0, 80), kbds: [...x.querySelectorAll('kbd')].map((k) => k.textContent.trim()) })));
+    await page.screenshot({ path: path.join(outDir, `sheet-4-${key_}.png`) });
+    await s.fill(''); await page.keyboard.press('Digit5'); await sleep(250);
+    { const g5 = await G(page); r.sheet5 = { value: await s.inputValue(), gridUnchanged: g5.division === before.division && g5.snap === before.snap && g5.mode === before.mode }; }
+    await s.fill(''); await sleep(200);
+    r.sheetSnapRow = await page.getByRole('dialog').evaluate((d) => { const x = d.querySelector('[data-shortcut-id="snap"]'); return x ? { text: x.textContent.trim(), kbds: [...x.querySelectorAll('kbd')].map((k) => k.textContent.trim()) } : null; });
+    await page.keyboard.press('Escape'); await sleep(300);
+    r.sheetClosed = (await page.getByRole('dialog').count()) === 0;
+    // Export open
+    await blur(page);
+    const beforeExp = await G(page);
+    await page.getByRole('button', { name: 'Export', exact: true }).first().click(); await sleep(500);
+    r.exportOpen = await page.getByRole('dialog').count();
+    await page.keyboard.press('Digit4'); await sleep(250);
+    const afterExp = await G(page);
+    r.export4 = { before: beforeExp.snap, after: afterExp.snap, unchanged: beforeExp.snap === afterExp.snap && beforeExp.division === afterExp.division && beforeExp.mode === afterExp.mode };
+    await page.keyboard.press('Escape'); await sleep(300); await blur(page);
+    // focused select
+    const sel = page.getByTestId('arrangement-grid-division');
+    await sel.focus(); await sleep(100);
+    const bs = await G(page);
+    await page.keyboard.press('Digit4'); await sleep(250);
+    const as = await G(page);
+    r.select4keys = await page.evaluate(() => window.__keys.filter((k) => k.code === 'Digit4' && k.target === 'SELECT'));
+    r.select4 = { before: { snap: bs.snap, value: bs.selectValue, division: bs.division, mode: bs.mode }, after: { snap: as.snap, value: as.selectValue, division: as.division, mode: as.mode, status: as.status }, key: await page.evaluate(() => window.__keys.filter((k) => k.code === 'Digit4').slice(-1)[0]) };
+    r.selectAria = as.aria;
+    await blur(page);
+    await seedEnter(page, 'demo-synth-mix'); await blur(page);
+    r.bpmAria = (await G(page)).aria;
+    r.statusesWithBad = await page.evaluate(() => document.body.innerHTML.match(/\((G 4|4)\)/g) || []);
+    r.errors = errors; await ctx.close();
+    return r;
+  },
+  async s4ax(browser, vp, key_) {
+    const { ctx, page, errors } = await open(browser, vp); await blur(page);
+    const r = { adaptive: await axDesc(page) };
+    await key(page, 'Digit5', 250);
+    r.fixed = await axDesc(page);
+    r.ok = /Adaptive: follows zoom/.test(r.adaptive?.description || '') && /Fixed at every zoom/.test(r.fixed?.description || '');
+    r.errors = errors; await ctx.close();
+    return r;
+  },
+  async menuReg(browser, vp, key_) {
+    const r = {};
+    { const { ctx, page, errors } = await open(browser, vp); await blur(page);
+      r.tabs = await tabTo(page, 'arrangement-snap-toggle');
+      const before = await G(page);
+      const m = await openMenu(page); r.opened = !!m;
+      await page.keyboard.press('Escape'); await sleep(300);
+      const after = await G(page);
+      r.esc = { closed: (await page.getByTestId('arrangement-grid-menu').count()) === 0, unchanged: before.division === after.division && before.mode === after.mode && before.snap === after.snap && before.status === after.status, active: await activeDesc(page) };
+      // right-click header
+      const hdr = page.getByTestId('arrangement-track-header').first();
+      await page.evaluate(() => { window.__ctx = null; window.addEventListener('contextmenu', (e) => { setTimeout(() => { window.__ctx = e.defaultPrevented; }, 0); }, { once: true }); });
+      await hdr.click({ button: 'right', position: { x: 20, y: 10 } }); await sleep(300);
+      r.header = { gridMenu: await page.getByTestId('arrangement-grid-menu').count(), defaultPrevented: await page.evaluate(() => window.__ctx) };
+      await page.keyboard.press('Escape');
+      r.errors1 = errors; await ctx.close(); }
+    { const { ctx, page, errors } = await open(browser, vp);
+      await addBtn(page, 'demo-stem-pulse');
+      const pos = () => page.evaluate(() => Number(document.querySelector('[data-testid="arrangement-playhead-handle"]').getAttribute('aria-valuenow')));
+      const playing = () => page.evaluate(() => document.querySelector('button[aria-label="Pause"]') !== null);
+      await page.keyboard.press('Space'); await sleep(700);
+      r.play = { playing: await playing(), p0: await pos() };
+      const m = await openMenu(page);
+      await m.getByRole('menuitemradio', { name: '0.25 s', exact: true }).click(); await sleep(500);
+      r.play.afterChoose = { playing: await playing(), p1: await pos(), g: await G(page), rms: await page.evaluate(() => Math.max(0, ...window.__rms())) };
+      await sleep(500); r.play.p2 = await pos();
+      r.play.ok = r.play.afterChoose.playing && r.play.p2 > r.play.afterChoose.p1 && r.play.afterChoose.g.division === '0.25' && r.play.afterChoose.rms > 0.001;
+      await page.keyboard.press('Space'); await sleep(400);
+      // swallow: open menu, click Play (outside) -> only closes; next click on Play plays
+      await blur(page);
+      const playBtn = page.getByRole('button', { name: 'Play', exact: true }).first();
+      const m2 = await openMenu(page); r.swallow = { opened: !!m2 };
+      await playBtn.click(); await sleep(500);
+      r.swallow.afterFirst = { menu: await page.getByTestId('arrangement-grid-menu').count(), playing: await playing() };
+      await playBtn.click(); await sleep(600);
+      r.swallow.afterSecond = { playing: await playing() };
+      r.swallow.ok = r.swallow.afterFirst.menu === 0 && !r.swallow.afterFirst.playing && r.swallow.afterSecond.playing;
+      await page.keyboard.press('Space');
+      r.errors2 = errors; await ctx.close(); }
+    return r;
+  },

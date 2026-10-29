@@ -74,3 +74,12 @@ Related pending requests (non-blocking, still open): `b-round-231-checkpoint-req
 - **Round 240 result:** SABA-B-11b-FIX-1 passed C (`c-round-240.json`), and gate 240 published `04c2a5b`. The gate-240 reviewer (`gates/round-240/review.md`, Architecture note) and A's round-240 reviewer both say "keep for now" for the grid block.
 - **New evidence for question 7:** round 241 (SABA-B-11b stage 2a) adds `chooseGridMenuAdaptiveDensity` in `StudioWorkspace.tsx`. It is the **third writer** of `gridHandChosenRef`, after `changeGridDivision` and `stepGridDivision`. It also re-states the mode/density writes that `toggleGridMode` owns. The rule "an accepted width choice is a hand choice" now lives in three callbacks, and only full-workspace tests (GAU16, GAU21, TU5) pin it.
 - **Trigger for re-asking:** after SABA-B-11b stage 2b (the last 11b stage), and before SABA-B-10a. The answer is still at most 3 sentences.
+
+## Addendum 7 (B, round 241 → 242 planning, D-29z379)
+- **Still unanswered** at round-242 planning. It stays non-blocking.
+- **Round 241 result:** stage 2a met every feature row in C, but the round failed on the pre-existing C-R241-01 (focus return after a mouse-opened grid menu). Round 242 fixes it with a fourth grid-menu ref in `StudioWorkspace.tsx` (`gridMenuPressFocusRef`) and a statement in `handleLaneBackgroundPointerDown`.
+- **New evidence (A's round-241 reviewer, signal A-R241-ARCH-GRIDMENUITEM):**
+  - `ArrangementGridMenu.tsx` repeats the item `<button>` and check span 4×, so it is a candidate for a local `GridMenuItem` if more items are added.
+  - A shared `setAdaptiveDensity(level, source)` primitive is suggested for `toggleGridMode`, `stepGridDivision` and the menu.
+  - Question 7 now also covers whether the grid-menu open/close/focus state (4 refs + state) belongs in a hook.
+- **Trigger for re-asking:** unchanged (after stage 2b, before SABA-B-10a).

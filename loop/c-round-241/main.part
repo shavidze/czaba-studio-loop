@@ -1,0 +1,18 @@
+(async () => {
+  const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+  R.chromium = browser.version();
+  for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 720 }]) {
+    const k = `${vp.width}x${vp.height}`;
+    for (const [name, fn] of Object.entries(ROWS)) {
+      if (filter && !filter.test(name)) continue;
+      const t0 = Date.now();
+      try { R.rows[`${name}@${k}`] = await fn(browser, vp, k); } catch (e) { R.rows[`${name}@${k}`] = { error: String(e).slice(0, 800) }; }
+      R.rows[`${name}@${k}`].ms = Date.now() - t0;
+      save();
+      console.log(name, k, 'done', Date.now() - t0);
+    }
+  }
+  await browser.close();
+  R.finished = new Date().toISOString();
+  save();
+})();
