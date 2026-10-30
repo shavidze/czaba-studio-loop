@@ -1,0 +1,133 @@
+K1
+52b17e4
+K2
+1:  const nudgeSelectedClip = useCallback(
+9:          setStatus(keyRepeat ? () => GROUP_MOVE_BLOCKED_MESSAGE : GROUP_MOVE_BLOCKED_MESSAGE);
+12:        applyEdit(moved, studioClipStrings.historyMoveClips(ids.length));
+13:        setRange(null);
+23:        setStatus(keyRepeat ? () => NUDGE_AT_TIME_START_MESSAGE : NUDGE_AT_TIME_START_MESSAGE);
+29:        setStatus(keyRepeat ? () => message : message);
+32:      applyEdit(next, studioMoveStrings.historyNudgeClip);
+33:      setRange(null);
+35:    [applyEdit, primarySelectedClipId, setRange],
+K3
+export const studioMoveStrings = {
+  undoBlockedDuringDrag: 'Undo/Redo does not work while dragging — let go first.',
+  editBlockedDuringDrag: 'Editing does not work while dragging — let go first.',
+  nudgeAtTimeStart: 'Nudge blocked — start of the timeline.',
+  nudgeBlocked: 'Nudge blocked — a neighbouring clip or the start of the timeline.',
+  historyNudgeClip: 'Nudge clip',
+};
+K4
+      const moved = laneTarget.placements.find((entry) => entry.clipId === gesture.original.id);
+      setStatus(
+        `${laneLabel}: start ${formatArrangementTime(moved?.start ?? gesture.original.start)}.`,
+      );
+    if (updated && !gesture.blocked) {
+      setStatus(
+        `${label}: start ${formatArrangementTime(updated.start)}, length ${formatArrangementTime(updated.duration)}, source offset ${formatArrangementTime(updated.sourceOffset)}.`,
+      );
+K5
+  historyMoveClips: (count: number): string => `Move (${count})`,
+  historyMoveToTrack: (name: string): string => `Move to track — ${name}`,
+  historyMoveClip: 'Move clip',
+  trimStartLabel: 'Trim — left edge',
+  trimEndLabel: 'Trim — right edge',
+  groupMovedRight: ({ label, count, distance }: StudioClipGroupMoveText): string =>
+    `${label}: ${count} clips moved ${distance} to the right.`,
+  groupMovedLeft: ({ label, count, distance }: StudioClipGroupMoveText): string =>
+    `${label}: ${count} clips moved ${distance} to the left.`,
+K6
+export function reduceArrangementStatus(
+  previous: ArrangementStatusEntry,
+  next: ArrangementStatusUpdate,
+  gestureActive: boolean,
+): ArrangementStatusEntry {
+  if (typeof next === 'string') {
+    if (gestureActive && next === previous.text) {
+      return previous;
+    }
+    return { text: next, sequence: previous.sequence + 1 };
+  }
+  const text = next(previous.text);
+  if (text === previous.text) {
+    return previous;
+  }
+  return { text, sequence: previous.sequence + 1 };
+}
+K7
+          className="block w-full basis-full break-words text-foreground"
+          aria-live="polite"
+          data-testid="arrangement-status"
+        >
+          <span key={statusSequence}>{status}</span>
+        </output>
+K8
+369:  it('SU6 a changing readout during a claimed gesture is announced at every change', async () => {
+611:  it('SK8 a held Enter in the unchanged Clip Gain input announces the no-change text once per press', async () => {
+695:  it('SK12 a held Enter in the detail range start input announces the applied range once per press', async () => {
+K9
+function expectOneAnnouncementPerPress(
+  api: AnnouncementApiRef,
+  region: HTMLElement,
+  press: KeyRepeatPress,
+  text: string,
+) {
+  const firstWatch = observeRegion(region);
+  pressKey(press, false);
+  expect(addedTexts(stopWatching(firstWatch))).toEqual([text]);
+  expect(region.textContent).toBe(text);
+  const firstSpan = region.firstElementChild;
+  const firstSequence = live(api).statusSequence;
+K10
+0
+K11
+      setStatus(message);
+    const label = historyRef.current.past.at(-1)?.label;
+    if (label) {
+      restoreHistory(undoHistory(historyRef.current), `Undo: ${label}`);
+    }
+K12
+app/components/arrangement/StudioWorkspace.tsx:2554:          current.nudgeSelectedClip(direction * NUDGE_SECONDS, { keyRepeat: event.repeat });
+app/components/arrangement/StudioWorkspace.tsx:2570:        current.nudgeSelectedClip(target - anchor.start, { keyRepeat: event.repeat });
+K13
+  studioMoveStrings: {},
+    expect(added).toEqual([NUDGE_BLOCKED_TEXT]);
+    expect(addedTexts(stopWatching(watch))).toEqual([NUDGE_SNAP_BLOCKED_TEXT]);
+K14
+  'SYS-6 STATUS-LIFETIME stage 1: texts that name the insert marker stay true (D-29z594)',
+describe('SYS-6 stage 1 playback-start resolver (D-29z594)', () => {
+K15
+204-sys-6-status-lifetime-stage-2.md
+3
+K16
+app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+app/lib/arrangement/__tests__/meter-ui.test.tsx
+app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+app/lib/arrangement/__tests__/track-meter-ui.test.tsx
+app/lib/arrangement/__tests__/strings.test.ts
+app/lib/arrangement/__tests__/detail-panel.test.tsx
+app/lib/arrangement/__tests__/track-layout.test.tsx
+K17
+0
+K18
+    expect(added.filter((text) => text === NUDGE_BLOCKED_TEXT)).toEqual([NUDGE_BLOCKED_TEXT]);
+K20
+const PULSE_CLIPS: ArrangementClip[] = [
+  { id: 'p1', trackId: 'music', sourceId: 'pulse', start: 0, sourceOffset: 0, duration: 16 },
+];
+async function stoppedAt(seconds: number) {
+  const mounted = await playAndAdvance();
+  clickRuler(mounted, seconds);
+  stop(mounted);
+  return mounted;
+}
+K21
+function keyRepeatClip(id: string, start: number) {
+  return { id, trackId: 'music', sourceId: 'ok', start, sourceOffset: 0, duration: 5 };
+}
+  it('SK3 a held ArrowLeft on a two-clip group at 0 announces the group refusal once per press', async () => {
+    const { api, region } = await mountKeyRepeatWorkspace(
+      keyRepeatArrangement({ clips: [keyRepeatClip('c1', 0), keyRepeatClip('c2', 5)] }),
+    );
+    act(() => live(api).selectClips(['c1', 'c2']));

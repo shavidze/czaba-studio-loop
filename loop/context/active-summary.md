@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T18:20:44.587Z)
+# Active loop summary (2026-10-30T19:47:03.061Z)
 
-- backlog.json 2596 KB -> active view 366 KB
-- status: G_ROOT_GATE round 273
-- servers: `{"checkedUtc":"2026-10-30T17:55:05.9814818Z","round":273,"attempt":1,"store":200}`
-- last publication: 52b17e4ef77300a8f13f9babba9d3ea9a9d1c0c6 (rounds 273-273)
-- last root gate: round 273 published - commit 52b17e4ef77300a8f13f9babba9d3ea9a9d1c0c6 pushed
+- backlog.json 2605 KB -> active view 366 KB
+- status: G_ROOT_GATE round 274
+- servers: `{"checkedUtc":"2026-10-30T19:07:42.8302434Z","round":274,"attempt":1,"store":200}`
+- last publication: a4c0e240072cdd8448c291b5217df95289d9c920 (rounds 274-274)
+- last root gate: round 274 published - commit a4c0e240072cdd8448c291b5217df95289d9c920 pushed
 
 ## Current items: -
 
@@ -608,7 +608,7 @@
 - INFO-B248-RULER-DBLCLICK / info / harness fact (D-29z425) / two ruler clicks at the same x within ~1 s can count as a double-click (Fit); give each click its own x and >= 800 ms
 - INFO-B248-OFFSCREEN-RULER / info / harness fact (D-29z425) / at high zoom the ruler box is wider than the window; a fraction of its width can be off-screen; clamp to the visible part
 - GATE248-S4 / info / info (D-29z427) / prop paths (render-time activeSnapSeconds) and ref paths (seek, nudge) can disagree for one render if wheel-zoom crosses the threshold mid-d
-- INFO-C248-STALE-NOTE / info / info (D-29z427): ruled behaviour section 1.4 of round 248; part of SABA-Q-11B-HIDDEN-SNAP (d) / after zoom-in the status still says Snap is paused; after zoom-out into hidden lines it shows plain (Snap on)
+- INFO-C248-STALE-NOTE / info / info (D-29z427): ruled behaviour section 1.4 of round 248; part of SABA-Q-11B-HIDDEN-SNAP (d) | carried unchanged through SYS-6 stage 3 (D-29z603); waits for SABA-Q-11B-HIDDEN-SNAP (d) / after zoom-in the status still says Snap is paused; after zoom-out into hidden lines it shows plain (Snap on)
 - INFO-C248-ADAPTIVE-3 / info / info (D-29z427): not checked against the D-29z361 density model in this planning; one REGRESSION row C-ADAPTIVE3-CHECK compares it with the chooser rule; a mismatch becomes a Low | D-29z509 (round 259 planning): C round 258 SA-28 found the setup unreachable in adaptive mode (adaptive picks bar at 3.4 px/s; key 3 refused with the triplet status); the regression row is reworded to adaptive off / fixed 1/4 / key 3 (record only); stays info / adaptive '3' on 1/4 at 120 BPM and 4 px/s resolves to 1/8T (the chooser picks the triplet member at the current density); unchanged code
 - SABA-Q-10A-HOME-PLAYING / info / awaiting_user (D-29z432): non-blocking; round 249 ships the jump / while playing, Home and Back to start jump playback to 0 and move the insert marker there (as before). Or move only the marker and keep play
 - SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking | gate 249 S2 asks to keep it with the stage-2 questions (D-29z439) / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
@@ -664,17 +664,16 @@
 - GATE271-S1-NO-REALIGN / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
 - GATE271-ARCH-RESOLVE-MOVE-SNAP / info / signal (D-29z593): keep now; after Saba answers SABA-Q-11C-NUDGE/REALIGN, one bounded task resolveMoveSnap(anchor, delta, duration, step, targets, mode) for clip move, library drop and loop brace with GS/CM/RU/RG/loop-brace tests unchanged; listed in b-round-271-checkpoint-addendum.md / one snap toggle, two models (clip drag relative; library drop, loop brace, trim, nudge absolute); grid.ts snap functions rewritten across SR
 - B-R272-PLAYFROM-END-ASYMMETRY / info / signal (D-29z594): recorded, not changed in SYS-6; ask with the next transport question to Saba if it matters / a top-strip playFrom at exactly the project end is refused (playPastEnd 'at the end' text) while Space with the marker at the end plays from
-- GATE272-S1-LATE-READ / medium / dispatched round 273 (D-29z599): ruled late read = state at the end of the action (React 18.3 useReducer applies function updates at the next render); pinned by LT12/LT13/LT8 end; no reducer change / Rule W's status updater reads isPlayingRef/range/end refs when React applies it, not at the marker write; behaviour unstated and unpinned (p
-- GATE272-S2-RENDER-REF / low / dispatched round 273 (D-29z599, owned code, cheap) / describeSpaceStartRef is assigned during render; the indirection is unnecessary (all refs declared before writeInsertMarker)
-- GATE272-S3-SELECTION-PASTEND-STALE / low / dispatched round 273 (D-29z599): classifier gains the selection-subject forms / the selection-subject past-end refusal is outside set T, so Home (range cleared, marker 0) leaves 'Time selection start (00:17.000) is past 
-- C-R272-01 / low / dispatched round 273 (D-29z599): Rule R in setRange (gesture-guarded) + Rule G at gesture release / a time selection set by a range drag leaves a stopped text naming the insert marker while Space plays from the selection start
-- INFO-C272-K11 / info / dispatched round 273 (D-29z599): rename to PBS1..PBS8 (RC-R270-TEST-ID-COLLISION class) / PB1/PB2 row ids in playback-start.test.ts collide with store-focus-fixups.test.tsx PB1/PB2
 - INFO-C272-MUTANT-MAP / info / ruled (D-29z598): round 273 grants keep LT10 byte-identical and keep M-STOP-EXACT in the mutant table / M-STOP-EXACT is killed only by A's LT10 extension; M-KIND-LOOSE only by PB8
-- B-R273-PLAYING-TEXT-WITH-RANGE / info / signal (D-29z599): out of scope of stage 2 (section 3.7); B probes it at stage 3 planning and rules Low or not-a-bug / while playing with a time selection, insertMarkerWhilePlaying says 'Stop, then Space plays from here' although Space would play from the sel
-- GATE272-ARCH-STATUS-TAG / info / signal (D-29z600): keep for stages 2-3; bounded frontend-architect checkpoint requested (b-round-272-checkpoint-request.md) to rule keep vs tag before SYS-6 closes; non-blocking / status text used as state (regex + template re-render classifier); proposal: typed {kind, params} tag next to the status text, public status
+- B-R273-PLAYING-TEXT-WITH-RANGE / low / moved to deferred_low_polish as Low (D-29z602): reproduced at 52b17e4 both viewports | signal (D-29z599): out of scope of stage 2 (section 3.7); B probes it at stage 3 planning and rules Low or not-a-bug / while playing with a time selection, insertMarkerWhilePlaying says 'Stop, then Space plays from here' although Space would play from the sel
+- GATE272-ARCH-STATUS-TAG / info / signal (D-29z600): keep for stages 2-3; bounded frontend-architect checkpoint requested (b-round-272-checkpoint-request.md) to rule keep vs tag before SYS-6 closes; non-blocking | addendum (D-29z604): gate-273 + A-273 note GATE273-ARCH-STATUS-SPLIT added to b-round-272-checkpoint-request.md; still unanswered at SYS-6 close; non-blocking / status text used as state (regex + template re-render classifier); proposal: typed {kind, params} tag next to the status text, public status
 - A-R272-REVIEW-SEL-AT-END-WORDING / low / deferred_low_polish (D-29z598); candidate for SYS-6 stage 3 if cheap / a selection that starts at the project end gets insertMarkerAfterStopFromStart, whose wording names the insert marker
 - A-R272-REVIEW-TEXTS-OUTSIDE-T / low / deferred_low_polish (D-29z598); stage 2 adds the selection-subject forms only (GATE272-S3); the playhead form is ruled out (names the playhead) / describeSpaceStart can write nothingToPlay and the playhead-subject playPastEnd, which are outside set T, so later marker writes cannot corr
 - A-R272-REVIEW-KIND-NAME / low / deferred_low_polish (D-29z598); revisit with GATE272-ARCH-STATUS-TAG / insertMarkerToPlayhead is classified 'stopped' although it can be written while playing; the kind name misleads
+- GATE273-S1-NOOP-RANGE-RERENDER / info / STUDIO-PERFORMANCE candidate (D-29z602): no behaviour row can turn it red (text and sequence unchanged); measure with the PERF re-render harness before building / Rule R queues a status function update on every non-gesture setRange, so a null->null setRange or a write while playing re-renders the provi
+- GATE273-S2-DOUBLE-ANNOUNCE / info / ruled deliberate (D-29z602): round-273 contract (state after the action); not a bug; Tech Lead may judge with a real screen reader / a play/stop cycle from a stopped text now announces twice (Playing from, then the stopped text)
+- GATE273-S4-PBS9-DESCRIBE / info / dispatched round 274 (D-29z603): describe-title renames only / PBS9 and LT12-LT19 sit under describe titles that say stage 1
+- GATE273-ARCH-STATUS-SPLIT / info / signal (D-29z604): added to the open checkpoint request b-round-272-checkpoint-request.md; candidate bounded task only after root's checkpoint answer; non-blocking / status-truth rules split across ArrangementContext (R, G, P, W) and StudioWorkspace (Rule S stop effect); proposal after stage 3: move Rule 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

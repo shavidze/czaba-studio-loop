@@ -1,0 +1,67 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T19:07:42.8302434Z",
+  "round": 274,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "notes": [
+  {
+   "id": "INFO-C274-01",
+   "severity": "info",
+   "summary": "A-R274-GROUP-NUDGE-FLOAT-DRIFT is model-only; Snap-off group nudge x4 in browser shows data-clip-start 0.100..0.400 / 16.100..16.400 and exact texts",
+   "evidence": "c-round-274/probe-r274-new.json floatDrift"
+  },
+  {
+   "id": "INFO-C274-02",
+   "severity": "info",
+   "summary": "group write guarded by if (before && after), beyond \u00a72.2 text; no reachable path found",
+   "evidence": "git diff app/contexts/ArrangementContext.tsx"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "TESTS-TARGETED",
+  "TEST-CHANGES",
+  "MUTANTS",
+  "B-NUDGE-SINGLE",
+  "B-NUDGE-HELD",
+  "B-NUDGE-GROUP",
+  "B-NUDGE-UNDO",
+  "B-NUDGE-BLOCKED",
+  "B-NUDGE-PASTEND",
+  "B-AUDIO",
+  "B-ENTER-TWICE",
+  "LT-WIDTH",
+  "SCREEN-BUDGET",
+  "G274-AUTH",
+  "DOC-205"
+ ],
+ "observations": {
+  "B-R273-RANGE-PLAYING": "deferred Low still present as ruled (same text as HEAD); not a FAIL"
+ },
+ "gate": [
+  "full vitest",
+  "build",
+  "full Biome",
+  "verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "closeSupported": [
+  "C-R271-01-NUDGE-STALE-STATUS",
+  "GATE270-S2-REPEAT-ANNOUNCE",
+  "A-R273-REPEAT-PASTEND",
+  "SYS-6"
+ ],
+ "cExtra": {
+  "EXPORT-WAV": "PASS: nudged export 17.000 s, first audible frame 48001 vs control frame 1 (exact 1.000 s shift), RMS 1.0-1.5 s = control 0-0.5 s = 0.1136401, NaN 0, clip 0, both viewports"
+ },
+ "claimsCaveat": "K22 not re-run at HEAD; B-AUDIO on A's tree reproduces B's HEAD values (audio path unchanged)"
+}

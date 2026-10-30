@@ -1,262 +1,135 @@
-# Round 274: SYS-6 STATUS-LIFETIME, stage 3 (of 3, final). An arrow-key nudge states its result, so the line no longer keeps a stale "Move clip …" or "… added … at 00:00.000" text. Closes C-R271-01-NUDGE-STALE-STATUS; closes GATE270-S2-REPEAT-ANNOUNCE as not reproducible; closes SYS-6
+# Round 275: RETRO 275 (sixth retrospective, rounds 260–274) + whole-screen review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
 
-**Planned by:** B, at the round 273 → 274 planning, 2026-10-30.
+**Planned by:** B, at the round 274 → 275 planning, 2026-10-30. **Decisions:**
+- D-29z605: round 274 accepted; SYS-6 done.
+- D-29z606: gate-274 triage and checkpoint addendum 2.
+- D-29z607: RETRO 275 outputs.
+- D-29z608: lessons.
+- D-29z609: screen review.
+- D-29z610: L46 at RETRO 275.
+- D-29z611: retro candidates and harness rules.
+- D-29z612: what comes next.
 
-**Decisions:**
-- D-29z601: round 273 result.
-- D-29z602: gate-273 triage and the C/A notes.
-- **D-29z603: this contract.**
-- D-29z604: order after this round (RETRO 275), the checkpoint addendum, SYS-6 close.
+**Rules:**
+- **Policy:** "Retrospective: stop, look back, improve" (Saba, 2026-10-26); "Look back on every issue Saba finds, and guard the whole screen" (Saba, 2026-10-28); the product-designer rule (Saba, 2026-10-30); `backlog.json` → `retro_policy`.
+- **Window:** retro 260 covered 245–259, so this window is 260–274. Precedent: rounds 215, 230, 245 and 260.
+- **Read first:** `lessons.md` (loop root). This planning revised it, and it applies from round 275: **L49** gains the consumer-sweep (`SWEEP`) clause, **L29** gains one evidence clause in its code-premise claim type, and header line 3 is updated. This task uses the claims form for its own code and state claims (§8).
 
-**Type:** a bug round on one owner function, `nudgeSelectedClip` in `ArrangementContext.tsx`, plus one formatter in `strings.ts`.
-- **What it covers:** one Low (C-R271-01) whose class is "an edit that writes no result text leaves the previous text standing, now false". Both success paths of the one function (single clip and group) have it.
-- **Reference-first does not apply.** This is a bug-fix round. Live has no status line, so Ableton conformance is "does not apply". The nudge itself (arrow keys move the selection by the grid) is unchanged.
-- **No `product-designer` consult.** There is no new feature and no new persistent element. The new text is one status-line string (L39: no new line, see SCREEN-BUDGET).
+## Baseline: HEAD `a4c0e24`, clean tree
+- **Gate:** gate 274 published `a4c0e240072cdd8448c291b5217df95289d9c920` on both remotes (`gates/gate-round-274.json`, status `published`) [K1]. This commit is the round-275 baseline.
+- **Tree:** `git status --short --untracked-files=all` was empty at planning (`b-round-274/git-status-at-planning.txt`, 0 bytes; `b-round-274/head-at-planning.txt`) [K2].
+- **Frozen:** every tracked file, **1,138** entries, is listed in `b-round-274-r275-tree-sha256.txt` [K3].
+  - Check from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-274-r275-tree-sha256.txt`. B ran it at the start and after every consult: rc 0.
+  - Each of the 7 protected auth and purchase files appears exactly once [K4]: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/entry.server.tsx`.
+- **Grants: none.** `b-round-274-r275-grants.txt` and `b-round-274-r275-new-files.txt` are empty on purpose. No file in `store/` may change in this round. `.claude/**`, `CLAUDE.md` and every config file stay protected as always.
 
-**Grants:** `b-round-273-r274-grants.txt`. Everything not granted is frozen.
+## 0. Why this round
+- **Round 274 PASSED.**
+  - C: 18 rows, `browserVerified` and `realVerified` true, 0 bugs.
+  - Gate 274 published `a4c0e24`.
+  - **SYS-6 STATUS-LIFETIME is done.** Stages 1–3 passed C in rounds 272, 273 and 274.
+  - **Closed** (D-29z605): C-R271-01-NUDGE-STALE-STATUS, GATE270-S2-REPEAT-ANNOUNCE (its premise was false), A-R273-REPEAT-PASTEND and GATE273-S4.
+- **Gate-274 triage (D-29z606):**
+  - **S1 → GATE274-S1-HELD-REPEAT-ANNOUNCE, Medium, `open_tech_lead_manual`.**
+    - It is the round-274 contract (SK13, doc 205), and the reviewer asked for a real screen-reader test first.
+    - The 2026-10-23 root clarification applies: the only remaining step is a manual check, and nothing fails reproducibly in the cloud, so it does not block. Manual row TLM-R274-SR-HELD-REPEAT has the deadline RETRO 290.
+    - `tech-lead` would schedule a fix now. That disagreement is recorded in retro §7.
+  - **S2–S4 and the float drift → `deferred_low_polish`.** The list is 462 − 2 + 4 = 464.
+  - **Architecture note → GATE274-ARCH-NUDGE-DESCRIBE**, carried in `b-round-274-checkpoint-addendum.md` (non-blocking).
+- **Due:** `retro_policy.next_due` said "round 275 or the end of STUDIO-PERFORMANCE"; 275 = 260 + 15. It includes the whole-screen review.
+- **Regression is not due.** `regression-last.json` says round 258, 2026-10-30, so the next one is due on or after 2026-11-02.
+- **No open Critical or High.** The open Mediums are all parked:
+  - GATE232-S2 and GATE274-S1: Tech Lead manual;
+  - GATE271-S1: awaiting Saba;
+  - A-R73-SAFARI-FLAG-FOCUS, GATE128-S1-MIXED-LANGUAGE and R80-RECORDINGS-FIELD-BORDERS: environment, backend or schedule.
 
-## Baseline: HEAD `52b17e4`, clean tree
-`gates/gate-round-273.json` is `published`, commit `52b17e4ef77300a8f13f9babba9d3ea9a9d1c0c6` [K1]. Its `head` field `b288be7` is the pre-commit HEAD.
+  None of them is security or data loss.
+- **Reference first / Ableton:** not applicable (a RETRO round; policy "Not in scope"). **Screen budget:** nothing visible changes.
 
-## 1. What changes, and why
-B reproduced every row at HEAD `52b17e4` in Chromium at 1440×900 and 1280×720 with 0 page errors (`b-round-273/probe-r274-head.json`; script `b-round-273/probe-r274.cjs`). Demo: the 16 s demo stem "pulse" added to Music at 00:00.000. Snap is on with grid 1/2 at 120 BPM, so one arrow step is 1 s.
+## 1. What B already produced (the objects under test)
+| File | Content |
+|---|---|
+| `retros/retro-275.md` | The analysis, in Georgian with English technical terms, for Saba. Window: rounds 260–274. |
+| `lessons.md` | **59 lines** (≤ 60), three parts. Changed: header line 3, L29 (one inserted clause), L49 (one appended clause). Nothing added or removed as a line. Before-copy: `b-round-274/lessons-before-275.md`. |
+| `user-review/screen-review-275.md` | Whole-screen candidates **SR-275-1…8** plus questions **SR-275-Q1/Q2**, for Saba. <ul><li>Consultants: `product-designer`, `design-philosopher` and `first-visit-host`.</li><li>Screenshots: `b-round-274/screens/screen275-full-{S0,DEMO}-{1440x900,1280x720}.png`.</li><li>Inventory: `screen275.json`. Capture script: `screens.mjs`, round 260's copy.</li></ul> |
+| `b-round-274-checkpoint-addendum.md` | Re-request to root, once, at the SYS-6 boundary. Three questions, non-blocking. |
+| `b-round-274/*.py`, `*.txt`, `*.json` | The scripts and data behind every number (the retro header lists them). <ul><li>By hand: `fails-cause-hand.txt`, `claims-findings-hand.txt`, `stops.txt`.</li><li>`claims-count.txt` comes from a one-line grep (retro header).</li><li>`update-backlog.py` holds this planning's backlog edits.</li><li>`smoke/` holds B's HEAD re-measure of the smoke export [K6].</li></ul> |
+| `backlog.json` (version 239) | <ul><li>`retro_runs` entry 275; `retro_policy.next_due` and `signals_for_next_retro`.</li><li>`screen_review_candidates` SR-275-*.</li><li>`harness_rules` HR-TRUNCATE-LEAF-BOXES and HR-C-SHADOW-FIELDS.</li><li>`final_acceptance_saba_manual_items`.</li><li>`tech_lead_manual_checks` TLM-R274-SR-HELD-REPEAT and the `l46_retro275` fields.</li><li>The retro-candidate dispositions.</li><li>The round-274 closures and the gate-274 ids.</li><li>D-29z605…D-29z612.</li></ul> Before-copy: `b-round-274/backlog-before-275.json`. |
+| `feature-status.md` | The round 274 → 275 lines, the TLM-R274 row and the RETRO 275 row. Before-copy: `b-round-274/feature-status-before-275.md`. |
 
-| # | Recipe (probe scenario) | HEAD | After this round (B's sketch, `probe-r274-sketch.json`) |
+**Order of work (the C-R215-01 lesson):**
+- Every analysis script reads `b-round-274/backlog-before-275.json`, the copy taken **before** this planning's edits.
+- Run them from the loop root: `python3 -I b-round-274/<script>.py`.
+- Run `collect.py` first, then `cost.py`, because the others read their JSON.
+- `cost.py` prints to stdout; B saved that output as `cost.txt`.
+
+## 2. A: nothing to implement
+1. From `store/`, confirm three things:
+   - `git rev-parse HEAD` = `a4c0e24…`;
+   - `git status --short --untracked-files=all` is empty;
+   - `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-274-r275-tree-sha256.txt` prints nothing.
+2. Write `a-round-275.md` with the three results and "no change, by RETRO policy". Do not run typecheck, lint, vitest or the code-reviewer: there is no diff.
+3. Do not edit `retros/`, `lessons.md`, `user-review/` or any B file. If you disagree with a lesson in "Before handing over (A self-check)", or with the new L49 `SWEEP` clause as it affects A, write it under "Lesson feedback" in `a-round-275.md`. B rules on it at the round-276 planning.
+
+## 3. C: what to verify
+C writes `c-round-275.md` and `c-round-275.json` as it goes. Rows:
+
+| Row | Check | PASS means | FAIL means |
 |---|---|---|---|
-| 1 | **C-R271-01, single** (`nudgeSingle`). Add the clip, click its header, ArrowRight | clip at 1.000, Undo title `Undo: Nudge clip (Ctrl+Z)`, but the line still reads `“…” added to the Music track at 00:00.000. …` (**0 status mutations**) | `Nudge clip: start 00:01.000.` |
-| 1b | the same, then three held ArrowRight keydowns (`repeat` true on the 2nd and 3rd), then ArrowLeft | clip 4.000, then 3.000; the line is unchanged (0 mutations) | `Nudge clip: start 00:04.000.` after the hold (one new text per step), then `Nudge clip: start 00:03.000.` |
-| 2 | **C-R271-01, group** (`nudgeGroup`). Add the stem twice (at 0 and 16), Ctrl+A, ArrowRight | both clips move +1; the line still reads `“…” added to the Music track at 00:16.000 (nearest free spot).` | `Move (2): 2 clips moved 00:01.000 to the right.` |
-| 3 | **A-R273-REPEAT-PASTEND** (`repeatPastEnd`). Marker at 17, Space (refused: `Insert marker (00:17.000) is past the end …`), click the clip header, hold ArrowRight for 3 steps | Rule R re-derives the T text at each step: `Stopped — the insert marker (00:17.000) is at the end; …`, then `Stopped — Space plays from the insert marker at 00:17.000.` (4 mutations) | `Nudge clip: start 00:01.000.` → `…00:02.000.` → `…00:03.000.` (the edit-result text wins, §2.3) |
+| **SOURCE-SCOPE** | At the start and the end: HEAD is `a4c0e24`, status is clean, and the frozen list gives rc 0. | Nothing in `store/` changed. | Any change fails the round, whoever made it. |
+| **RT-NUM** | Recompute **every number** in `retro-275.md` §1, §2, §3, §6 and §9 from its named file or script. You may copy the scripts to `c-round-275/`; run them from the loop root. At least: <ul><li>**Totals:** the per-phase totals ($154.14 / $101.42 / $79.38 / $334.94); the medians (B $10.51, A $7.11, C $5.26; round $24.12); the top-5 rounds and the top-6 phases.</li><li>**FAILs and gates:** the FAIL list (260, 265, 267) and its cost $75.19; gate published 11 / skipped 3 / failed 1 (262).</li><li>**Round groups:** feature $188.14; fix caused in window $48.79 (263, 266, 268); fix pre-existing $76.08 (261, 264, 267, 270); RETRO $21.93; REGRESSION none. Sum $334.94. Check each round's group against the title of its `tasks/round-N.md`. Check that the stated alternative groupings give $68.57 (270 moved to "caused") and $70.29 (261 moved to "caused"; its title also carries RT-FIX-261).</li><li>**§6:** the pair costs (265+266 $60.67, 262+263 $35.80, 267+268 $32.18) and 1.29 rounds per stage.</li><li>**A and C:** A's FAIL / PASS averages ($6.63 / $6.79); the C bug counts (medium 2, low 9).</li><li>**Gate reviews:** 53 items in **11** reviews; check with `ls gates/round-2{60..74}/review.md`.</li><li>**Window ids:** 42 in `open_findings` and 34 in `deferred_low_polish`, with their origin splits.</li><li>**Totals before the edit:** the deferred total 462 (16 closed/folded) and the 5 open Medium+, from the before-copy.</li><li>**Stops and claims:** 1 A STOP (`stops.txt` against `a-round-267.md` l.3); `claims-count.txt` (all 15 tasks; max 24 in round 265, min 4 in round 263).</li></ul> | Every number matches its source (±0.01 USD; counts exact). | A number has no source or does not match. List each one. |
+| **RT-CAUSE** | Open the quoted source for each row of `retro-275.md` §3, each class in §4 and each row of §9: <ul><li>`c-round-260.json` (C-R260-01/02);</li><li>`gates/round-262/verify.log` l.1982 and `tasks/round-263.md` §0;</li><li>`c-round-265.json` (C-R265-01/02);</li><li>`c-round-267.json` (C-R267-01) and `a-round-267.md` l.3;</li><li>`c-round-266.json` (C-R266-01), `c-round-272.json` (C-R272-01) and `c-round-273.json` (C-R273-01).</li></ul> Check `claims-findings-hand.txt` against each id. Check that the §9 verdict ("refuted on the count clause", 5 accepted, C-R273-01 counted as a mechanism hit) is labelled as `consequence-tester`'s. The quoted `tech-lead`, `consequence-tester`, `product-designer`, `design-philosopher` and `first-visit-host` lines are consult results; they need not be re-derived, but each must be labelled as a consult. **The §7 GATE274-S1 ruling** cites `gates/round-274/review.md` suggestion 1 and its own "Test it with a real screen reader" line; check that it is quoted correctly. | Each cause traces to the quoted line or id. Every inference is labelled as one (e.g. §3 "დასკვნა (B-ის, inference)", §2 the 270 grouping). | A cause is invented or misquoted, or an inference is stated as fact. |
+| **RT-IDS** | <ul><li>**Round 274 closure (D-29z605):** C-R271-01-NUDGE-STALE-STATUS and GATE270-S2-REPEAT-ANNOUNCE are absent from `deferred_low_polish` and present in `open_findings` as `closed (D-29z605)`. A-R273-REPEAT-PASTEND and GATE273-S4-PBS9-DESCRIBE are closed. `systemic_tasks` SYS-6 is `done`.</li><li>**Gate-274 triage (D-29z606):** GATE274-S1-HELD-REPEAT-ANNOUNCE is a Medium in `open_findings` with `open_tech_lead_manual`. TLM-R274-SR-HELD-REPEAT has the deadline RETRO 290. `deferred_low_polish` has GATE274-S2-GROUP-HOLD-TEXT, GATE274-S3-GROUP-ANCHOR-GUARD, GATE274-S4-ZERO-DIRECTION and A-R274-GROUP-NUDGE-FLOAT-DRIFT, and its length is 464. `architecture_signals` has GATE274-ARCH-NUDGE-DESCRIBE. ARCH-CHECKPOINT-SYS6-STATUS-TAG names the addendum.</li><li>**`retro_runs`:** a 275 entry exists, and the 260 entry is `done`. `retro_policy.next_due` names round 290.</li><li>**`screen_review_candidates`:** SR-275-1…8 and SR-275-Q1/Q2 are `awaiting_user`.</li><li>**`final_acceptance_saba_manual_items`** lists the L46 items of retro §12.2.</li><li>**`harness_rules`** has HR-TRUNCATE-LEAF-BOXES and HR-C-SHADOW-FIELDS.</li><li>**Retro candidates:** every candidate whose status said "RETRO 275" now has a disposition, as listed in retro §8.</li><li>**`decisions_log_b`** has D-29z605…D-29z612.</li></ul> | All ids are real and in class; each claim reproduces. | An id is missing or out of class, or a claim does not reproduce. |
+| **RT-LESSONS** | Check `lessons.md`: <ul><li>≤ 60 lines and exactly the three required parts;</li><li>`diff b-round-274/lessons-before-275.md lessons.md` differs only on l.3, L29 (l.18) and L49 (l.34);</li><li>**L49:** the new text starts with the old line byte for byte (prefix compare) and only appends;</li><li>**L29:** deleting the inserted clause (exact text in `b-round-274/l29-inserted-clause.txt`) restores the old line byte for byte. Run from the loop root: `python3 -I -c "a=open('b-round-274/lessons-before-275.md').read().split('\n');b=open('lessons.md').read().split('\n');c=open('b-round-274/l29-inserted-clause.txt').read();print(b[17].replace(c,'',1)==a[17], b[33].startswith(a[33]))"` → `True True`. No old claim type or evidence id is lost (the C-R245-01/C-R260-01 failure mode);</li><li>for every new clause, open each cited source;</li><li>each new clause is concrete and checkable: who runs which grep, and what counts as PASS.</li></ul> | All true. | Over 60 lines, a vague lesson, a citation that does not exist or does not say what the lesson claims, a lost clause, or another lesson changed. |
+| **RT-SABA** | Two checks. <ol><li>`retro-275.md` §12 and `screen-review-275.md`: every project-rule change and every screen candidate is phrased as a **proposal or question**, and no such file changed (SOURCE-SCOPE). Anything that touches CALM-2b's approved text (SR-275-2) or moves a position (SR-275-Q1) is a question.</li><li>**L46 at RETRO 275:** every item that `retro_policy` named for RETRO 275 is recorded as a Saba-owned manual item: A-R204-SAFARI-USERMENU-CLICK, plus the platform halves of TLM-R232-ALTGR-WIN/GATE232-S2, TLM-R232-MAC, TLM-R228-META-KEYS, TLM-R233-SR-ORDER and GATE244-S4. Each one has the passed deadline stated. The claim that F1-ABSOLUTE-SNAP is closed reproduces in `backlog.json` (D-29z592). The claim "no WebKit or Firefox in the cloud" reproduces with `ls ~/.cache/ms-playwright`.</li></ol> | True. | A proposal is phrased as applied, a rule file changed, an L46 item is missing or silently rolled forward, or a closed item is presented as open. |
+| **RT-SCREEN** | `screen-review-275.md`: <ul><li>every candidate names a screenshot that exists under `b-round-274/screens/`;</li><li>each candidate is visible in the cited screenshot as described. Open the PNGs; a mismatch is a finding against the review, not the app. SR-275-1: the track readouts say "+0.0" and Master says "0.0 dB". SR-275-2 (S0): the status line and the Music lane hint say the text quoted. SR-275-6 (DEMO-1280): the collection label wraps to three lines;</li><li>no candidate repeats SR-230-1…10, SR-245-1…8 or SR-260-1…6 (SR-275-1 is distinct from SR-245-8, as the review states);</li><li>**browser:** from `store/`, run `node ../tmp/studio-real-loop/b-round-274/screens/screens.mjs <c-round-275 folder> c275` once. Record the four element counts against B's: S0 142 / 121, DEMO 170 / 147 at 1440 / 1280 [K7].</li></ul> | All true. Equal counts, or a named reason for a difference. | A missing file, a candidate not visible as described, a duplicate, or an unexplained count difference. |
+| **G275-AUTH (browser)** | A fresh anonymous context at 1440×900 and 1280×720: <ul><li>`/studio-lab` shows the workspace and the demo badge; `localStorage.auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>`GET /api/studio-token?product=middle-east&file=stem1.wav` with no header;</li><li>the same request with a fake Bearer.</li></ul> | <ul><li>No header → 401.</li><li>Fake Bearer → 403 with a `:5199` mock, or 500 without it.</li><li>**No token is issued.**</li></ul> B's HEAD probe gave 401 and 500 (`b-round-274/smoke/c260.json`). | Any bypass is Critical. |
+| **STUDIO-SMOKE-275 (browser)** | On `/studio-lab` at both viewports, after `Demo collection ready` (L48), use the smoke recipe of `c-round-260/c260.cjs` (B's copy is `b-round-274/smoke/b274-smoke.cjs`) or C's equivalent: <ul><li>Space plays and stops. The Play button's `data-playing` goes `false` → `true` → `false`, and its name stays `Play` [K5]. The playhead advances, then holds.</li><li>The exported WAV of the same one-clip lab project has sha256 `1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94` [K6].</li><li>0 page errors.</li></ul> | All hold. | Any failure is a regression finding (2026-10-23 bug gate). |
 
-**B probed and ruled two premises before writing this contract (L29 premise claims):**
-- **GATE270-S2-REPEAT-ANNOUNCE is not reproducible.** Its premise was "the keep branch writes the same string, so React skips the update".
-  - At HEAD, a string write always bumps the sequence when no gesture is active [K6], and the live region re-keys its span on the sequence [K7].
-  - In the browser at 1440×900 (`detailEnterTwice`): pressing Enter twice in the Detail range Start field with unchanged values gives **2 mutations per Enter** (span removed, span added). Enter twice in Clip Gain (`Clip Gain unchanged: 0.0 dB.`) gives the same.
-  - The existing rows SK8 and SK12 already pin "re-announced once per press" [K8].
-  - At 1280×720 the Start field had a zero box in that recipe (`startVisible: false`). **Cause, measured (`detail1280`):** at 1280×720 the Clip details panel is collapsed by default (36 px tall, an `Expand` button; the content and the Start field have 0×0 boxes), while at 1440×900 it is open (144 px) [K19]. This is the existing collapsed default, not a finding. C presses `Expand` first at 1280.
-  - **No code change; the finding closes.**
-- **B-R273-PLAYING-TEXT-WITH-RANGE is real; it stays Low and is deferred.** Scenarios `playingWithRange` and `ctrlLeftRangeStop`, both viewports:
-  - While playing, draw a range 2–5, then press Ctrl+←. The line says `Insert marker at 00:00.000 — playback continues. Stop, then Space plays from here.`, and the range is still there.
-  - Stop gives the true `Stopped — Space plays from the time selection start at 00:02.000.`, and Space then plays from 2.56.
-  - The false clause lives only while playing.
-  - A true fix needs two new templates (plain and Follow-paused) and two classifier kinds, which is more than one bug in this round. It moves to `deferred_low_polish` with this repro (D-29z602). **Not part of this round.**
+- **Gate rows:** the full vitest, typecheck, build, Biome, `npm run verify` and e2e smoke. List them under `"gate"`, never in `"passed"`.
+- **`browserVerified`:** true only if G275-AUTH and STUDIO-SMOKE-275 ran at both viewports and the RT-SCREEN capture ran. The other RT rows are document checks under the RETRO policy; they are not skipped browser rows.
+- **New C fields (HR-C-SHADOW-FIELDS):** from round 276 on, C writes `claimRerunMinutes` and `shadowRowSeverityVerdict`. Writing them in this round is optional.
+- **Consults (optional):** `consequence-tester` may review the new L49 clause for checkability. Record any disagreement as a finding against the retro, not as an edit.
+- **Run budget:** the RT rows are reading work. Do not re-verify unrelated product features.
 
-## 2. The contract (D-29z603)
-B's sketch: `b-round-273/sketch.diff`, applied to a `git archive 52b17e4` scratch.
-
-### 2.1 Single-clip success (closes C-R271-01, single)
-- **Where:** in `nudgeSelectedClip`, after the existing `applyEdit(next, studioMoveStrings.historyNudgeClip)` and `setRange(null)` [K2].
-- **What:**
-  ```ts
-  const moved = next.clips.find((entry) => entry.id === clip.id);
-  const text = studioMoveStrings.nudged(formatArrangementTime(moved?.start ?? target));
-  setStatus(keyRepeat ? () => text : text);
-  ```
-- **Copy:** one new formatter in `studioMoveStrings`, right after `historyNudgeClip` [K3]: `nudged: (start: string): string => \`Nudge clip: start ${start}.\``.
-  - "Nudge clip" is the Undo label of the same edit [K3].
-  - The shape mirrors the drag-release lane form `<label>: start <t>.` [K4].
-  - No `nudged` formatter and no `Nudge clip:` text exist today [K10].
-- **The start is read from the committed arrangement** (`next`), not from `target`, so the text names where the clip really is.
-
-### 2.2 Group success (closes C-R271-01, group)
-- **Where:** the `ids.length >= 2` branch, after the existing `applyEdit(moved, studioClipStrings.historyMoveClips(ids.length))` and `setRange(null)` [K2].
-- **What:** reuse the group drag-release texts `groupMovedRight` / `groupMovedLeft` [K5], with:
-  - `label`: `historyMoveClips(ids.length)`, the same label as this edit's Undo entry [K2];
-  - `count`: `ids.length`;
-  - `distance`: `formatArrangementTime(Math.abs(after.start - before.start))` for the first selected id (`ids[0]`), read in `arrangement` (before) and `moved` (after).
-- **Direction:** `after.start >= before.start` → right, otherwise left.
-- **The write:** `setStatus(keyRepeat ? () => text : text)`.
-- **Example:** `Move (2): 2 clips moved 00:01.000 to the right.`
-
-### 2.3 Rulings (each one is a row)
-- **Write order.** The result text is written **after** `setRange(null)`.
-  - Rule R's function update from `setRange(null)` returns a non-T text unchanged, and an explicit write queued after it wins anyway (round 273 §3.8).
-  - Either order would give the same text. The order is fixed so the code reads like every other edit: edit, clear the range, state the result. Row LT21.
-- **Held key (L4, same key path).** Every key-repeat write uses the function form, as the refusal branches already do [K2].
-  - **Single:** each step names a new start, so each step is a new text and is announced. That is the true state, and it matches the existing "a changing readout is announced at every change" rule (SU6 [K8]). Rows SK13, SK7 and NZ3.
-  - **Group:** each step names the same per-step distance, so the text is identical across repeats. The function form returns the same text, so there is **no new announcement during a hold**, and a fresh press announces again (the SK refusal pattern [K9]). Row SK14.
-  - **Refusal once per press stays.** When a hold reaches a neighbour or 0, the refusal is written once: its function form now replaces a nudge text, which bumps the sequence once, and later repeats return the same text. The existing filter and final-text lines of SK7 and NZ3 are unchanged; only their exact `added` lists grow (§5.1).
-- **What the result text can land on (L51 clobber).** Any earlier text: clip-added, a stopped T text (`Stopped — Space plays …`), a past-end refusal, `Loop is on.` or `followResumed`.
-  - In every case the nudge result replaces it, because it is an explicit edit result. "The last message wins", as with drag release and clip-added.
-  - Rows: LT21 (stopped T text) and the browser row B-NUDGE-PASTEND.
-- **Its lifetime (L51).** It becomes false when the clip moves again or the edit is undone. Each of these paths writes its own text:
-  - another nudge (§2.1, §2.2);
-  - a drag release [K4];
-  - Undo or Redo: `restoreHistory` writes `Undo: <label>` / `Redo: <label>` [K11].
-
-  A marker move, Space and Stop do not rewrite it, because it is not a T kind (Rules W, P and S touch T kinds only). It stays true then, because the clip has not moved. Rows: LT20 (Undo) and LT21 (Space and Stop keep it).
-- **These stay as they are** (a change is a STOP):
-  - the refusal branches and their `keyRepeat` function forms;
-  - the deps array;
-  - `StudioWorkspace`'s arrow branches [K12];
-  - every other status writer.
-
-### 2.4 Out of scope (recorded, not built)
-- **B-R273-PLAYING-TEXT-WITH-RANGE:** Low, deferred (§1).
-- **INFO-C248-STALE-NOTE:** carried unchanged. It is ruled behaviour from round 248 and part of the open Saba question SABA-Q-11B-HIDDEN-SNAP (d). Nothing to do until he answers.
-- **Gate-273 suggestion 1** (skip Rule R's write while playing or on a null→null range): no row can show it red, because neither the text nor the sequence changes. It is recorded as a STUDIO-PERFORMANCE candidate, not built here (D-29z602).
-- **Moving Rule S into the provider** (the gate-273 and A Architecture notes): waits for root's checkpoint answer (D-29z604).
-
-## 3. Why this is the smallest honest behaviour
-- **Rejected: clear the line after a nudge.** The edit would lose its announcement, and an empty line says nothing about where the clip is.
-- **Rejected: write nothing on key repeat.** The text would stay one step behind, which is the bug itself.
-- **Rejected: re-derive the transport text after a nudge** (what Rule R does by accident today for T texts). It describes Space, not the edit, and it still leaves non-T texts such as clip-added stale.
-- **Rejected: a new group wording.** The group drag already has a tested text with the same meaning [K5]. A second wording for the same edit would be one more string to learn.
-
-## 4. Grants (exact; also in `b-round-273-r274-grants.txt`)
-| Path | What may change |
+## 4. Outcome, fixed in advance (D-29z612)
+| C result | B at the round-276 planning |
 |---|---|
-| `app/contexts/ArrangementContext.tsx` | `nudgeSelectedClip` only: the two success writes of §2.1 and §2.2. The group label may become a local const. Nothing else |
-| `app/lib/arrangement/strings.ts` | `studioMoveStrings.nudged`, right after `historyNudgeClip`. Nothing else |
-| `app/lib/arrangement/__tests__/strings.test.ts` | **additions only:** `studioMoveStrings: {}` (HEAD l.771 [K13]) gets `nudged: [studioMoveStrings.nudged('00:01.000')]`; one exact-text expect in ST11: `Nudge clip: start 00:01.000.` |
-| `app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | SK7 (HEAD l.606) and NZ3 (HEAD l.1031) [K13]: the exact `added` list becomes the 4-item list of §5.1. New SK13, SK14 and SK15 in the `a held key announces the same refusal once` describe |
-| `app/lib/arrangement/__tests__/status-lifetime.test.tsx` | the describe title (HEAD l.214 [K14]) → `'SYS-6 STATUS-LIFETIME: transport and edit-result texts stay true (D-29z594, D-29z599, D-29z603)'`, options unchanged; new LT20 and LT21. LT1–LT19 stay byte-identical |
-| `app/lib/arrangement/__tests__/playback-start.test.ts` | the describe title (HEAD l.31 [K14]) → `'SYS-6 playback-start resolver (D-29z594, D-29z599)'`. No `it` changes (gate-273 suggestion 4) |
-| `docs/…/203-sys-6-status-lifetime-stage-1.md` | l.4 only → `**სტატუსი:** Completed (C round 274 PASS)` (L28, final stage) |
-| `docs/…/204-sys-6-status-lifetime-stage-2.md` | l.4 only → `**სტატუსი:** Completed (C round 274 PASS)` |
-| `docs/…/205-sys-6-status-lifetime-stage-3.md` | **new** [K15]:<br>• l.4 exactly `**სტატუსი:** Completed (C round 274 PASS)`<br>• the 7 TEMPLATE headings in order (L26)<br>• `## მიდგომა` states the §2.3 held-key rule and the clobber rule<br>• `## პრობლემები და გადაწყვეტები` records GATE270-S2 as premise-false (SK8/SK12) and B-R273-PLAYING-TEXT-WITH-RANGE as deferred |
+| All rows PASS, and the round-276 planning is **before 2026-11-02** | Round 276 is **SYS-5, stage 1**: keyboard-reachable disabled reasons (DUX-R-4(b), approved by Saba 2026-10-25), owner `ArrangementTransport.tsx`. <ul><li>The planning applies the new L49 `SWEEP` clause: `aria-disabled` replaces `disabled`, so every `toBeDisabled`/`disabled` consumer under `app/**` and `perf/**` is a SWEEP hit.</li><li>It also checks whether a disabled-reason path writes status text (`tech-lead`): if it does, L51 rows are added, plus one evidence line for the checkpoint.</li><li>Reference-first and `product-designer` apply, because this is user-visible behaviour.</li></ul> |
+| All rows PASS, and the round-276 planning is **on or after 2026-11-02** | Round 276 is **REGRESSION** (3-day rule; `regression-last.json` round 258), then SYS-5. |
+| After that | The rest of SYS-5, then **STUDIO-PERFORMANCE**, then SYS-1…3, STORE-2b…5, REVIEW-RECOMMENDATIONS, T12-ADVANCED and the phase-2 entries (PHASE2-VIDEO-SCORING is gated on the user's go-ahead; the skip rule applies). |
+| An RT row fails (an untraceable number, an invented cause, a wrong id or citation, a lost clause, a candidate not as described) | B corrects the files at the round-276 planning and records it in `b-round-275.md`. The next C round re-checks only the changed lines (RT-FIX, as rounds 201, 216, 231, 246 and 261). Round 276 still runs as above. |
+| G275-AUTH or STUDIO-SMOKE-275 finds Medium+ | Round 276 is a bounded fix-up first (2026-10-23 bug gate). A Low goes to `deferred_low_polish`. |
+| SOURCE-SCOPE fails | Stop. Root inspects the change. Nothing is published. |
 
-**Frozen:** everything else, in particular:
-- `StudioWorkspace.tsx` (its arrow-key branches), `ArrangementClip.tsx`, `ArrangementDetailPanel.tsx`, `status-announcement.ts` and `playback-start.ts`;
-- these tests, which must pass unchanged: `grid-snap-ui`, `detail-panel`, `detail-panel-polish`, `track-layout`, `meter-ui` and `track-meter-ui` (they call `nudgeSelectedClip` or pin its Undo label [K16]), plus `status-announcement.test.ts`, `pending-status`, `insert-marker-ui`, `bars-ruler-ui` and `gesture-reentry`;
-- `package.json`, `perf/**` and `e2e/**`.
+## 5. Neighbour risk
+There is none in app code, because no source file changes. The risk is in the process:
+- **The L49 `SWEEP` clause** makes every boundary, move or meaning task carry one more tagged grep.
+  - It may push a task toward the 25-tag stop (round 265 had 24).
+  - The experiment in retro §10 measures this; if the stop condition fires, B narrows the claim types.
+- **The L29 insertion** sits inside the longest lesson. RT-LESSONS therefore checks the reverse deletion byte for byte (the C-R260-01 failure mode).
+- **The screen review goes to Saba.** A candidate that misdescribes the screen would waste his decision, so RT-SCREEN opens every screenshot.
 
-**Protected (auth and purchase):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token*`, `app/lib/auth.ts` and `app/contexts/AuthContext.tsx`.
+## 6. Deliverables
+- **A:** `a-round-275.md`.
+- **C:** `c-round-275.md` and `c-round-275.json`, with evidence under `c-round-275/`. The JSON carries `taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate` and `rows`.
 
-## 5. Tests
-### 5.1 Tests that change
-- **First sketch:** B's full pre-check gave **3278/3281**. The 3 failures are exactly the rows below (`b-round-273/precheck-vitest.json`).
-- **Refined sketch** (the key-repeat function form): B re-ran the 8 nudge-related files on the scratch and got 185/187. The two failures are the same SK7 and NZ3.
+## 7. Root notes
+- **Nothing to publish from `store/`.** If SOURCE-SCOPE shows a change, that change is itself a FAIL. The loop-state commit records the retro.
+- **For Saba:**
+  - `user-review/screen-review-275.md`: 8 candidates and 2 questions;
+  - `retro-275.md` §12: the L46 items now in the final acceptance list, the new TLM-R274-SR-HELD-REPEAT, and the proposal that an A STOP routes the round back to B before C runs (RC-R275-STOP-ROUTES-TO-B).
 
-| Test | Why it changes | New exact value |
-|---|---|---|
-| ST12 (`strings.test.ts`) | the new formatter needs a sample | addition only |
-| SK7 l.606 [K13] | each successful step now announces its start | `['Nudge clip: start 00:05.200.', 'Nudge clip: start 00:05.100.', 'Nudge clip: start 00:05.000.', NUDGE_BLOCKED_TEXT]` |
-| NZ3 l.1031 [K13] | the same | `['Nudge clip: start 00:00.200.', 'Nudge clip: start 00:00.100.', 'Nudge clip: start 00:00.000.', NUDGE_SNAP_BLOCKED_TEXT]` |
+  Root may forward them.
+- **For root:** `b-round-274-checkpoint-addendum.md` re-requests the frontend-architect checkpoint once, at the SYS-6 boundary. It has three questions and is non-blocking. The older requests (`b-round-211`, `-221`, `-225`, `-229`, `-231`, `-234`, `-244`, `-253`, `-272`, plus addenda) are still pending and also non-blocking.
 
-Both are stronger replacements. The refusal still appears exactly once (SK7's filter line l.605 stays [K18]), and every successful step is now pinned. **No assertion is lost. A test whose only change removes an assertion is a Medium bug.**
-
-### 5.2 New rows
-All expected texts are exact. "seq" is `statusSequence`.
-
-| Row | File | Steps | Expected |
+## 8. Claims (L29 form; C re-runs each one verbatim)
+| Tag | Claim | Command (from the loop root unless stated) | Expected |
 |---|---|---|---|
-| **LT20** (single, lifetime) | status-lifetime | the file's fixture: one clip `p1` at 0 on Music, 16 s [K20]. `selectClip('p1')`; `nudgeSelectedClip(1)`; then `nudgeSelectedClip(-0.5)`; then `undo()` | `Nudge clip: start 00:01.000.` (seq +1); then `Nudge clip: start 00:00.500.` (seq +1); after Undo, `Undo: Nudge clip` with `p1` at 1 |
-| **LT21** (clobber and order) | status-lifetime | a stopped T text at 4 (the file's `stoppedAt(4)` helper [K20]); `selectClip('p1')`; `nudgeSelectedClip(1)`; then Space (play), then Stop | after the nudge: `Nudge clip: start 00:01.000.`. While playing and after Stop: the same text, with seq unchanged by Space and by Stop |
-| **SK13** (single, held) | status-announcement-ui | Snap off; `keyRepeatClip('c1', 1)` alone, `selectClip('c1')`; ArrowRight with `repeat:false`, then 3× `repeat:true` (the file's `pressKey`) | the added texts are exactly `['Nudge clip: start 00:01.100.', '…00:01.200.', '…00:01.300.', '…00:01.400.']`; seq +4; `childElementCount` 1 |
-| **SK14** (group, held) | status-announcement-ui | Snap off; SK3's fixture: `keyRepeatClip('c1', 0)` and `keyRepeatClip('c2', 5)` (5 s each), `selectClips(['c1', 'c2'])` [K21]; ArrowRight `repeat:false`, then 3× `repeat:true`, then one more `repeat:false` | **First press:** added `['Move (2): 2 clips moved 00:00.100 to the right.']`, seq +1. **The 3 repeats:** added `[]`, the same span, seq unchanged, clips at 0.4 and 5.4. **The fresh press:** the same text added once, a new span, seq +1, clips at 0.5 and 5.5 |
-| **SK15** (group, both directions) | status-announcement-ui | `keyRepeatClip('c1', 2)` and `keyRepeatClip('c2', 7)`, `selectClips(['c1', 'c2'])`; `act(() => live(api).nudgeSelectedClip(1))`; then `nudgeSelectedClip(-0.5)` | `Move (2): 2 clips moved 00:01.000 to the right.`; then `Move (2): 2 clips moved 00:00.500 to the left.` |
-
-- **Helpers:** reuse each file's helpers (`playAndAdvance`, `stoppedAt`, `stop`, `key`, `live`, `pressKey`, `observeRegion`, `addedTexts`, `keyRepeatClip`). Keep `{ timeout: 15_000 }` on the status-lifetime describe.
-- **Headroom (L31):**
-  - At gate 273, `status-lifetime` ran 19 tests in 5522 ms and `status-announcement-ui` ran 33 in 5692 ms.
-  - On B's scratch the slowest rows were LT11 at 826 ms (15 s limit) and SU1 at 363 ms (vitest default 5 s).
-  - Every row is far below 50 %.
-
-### 5.3 What A runs (speed rules)
-- `npm run typecheck` and `npm run lint`.
-- `npx vitest run` on these files: `strings`, `status-lifetime`, `status-announcement-ui`, `playback-start`, `grid-snap-ui`, `detail-panel`, `detail-panel-polish`, `track-layout`, `meter-ui`, `track-meter-ui`, `status-announcement`, `pending-status` and `insert-marker-ui`.
-- A code-reviewer run is required (more than 3 files change).
-
-## 6. B's pre-check (L23); all files are in `b-round-273/`
-- **Sketch:** `sketch.diff`, on a `git archive 52b17e4` scratch with a private `node_modules` of per-entry symlinks. `tsc --noEmit` rc 0, and Biome is clean on both files.
-- **Full vitest (first sketch): 3278/3281.** The failures are exactly ST12, SK7 l.606 and NZ3 l.1031 [K13] (`precheck-vitest.{json,log}`). With the refined sketch, the 8 related files gave 185/187 (SK7 and NZ3).
-- **Consumers:**
-  - `nudgeSelectedClip(` has 2 non-test callers, both in `StudioWorkspace`'s arrow branch [K12].
-  - The test callers and the Undo-label pin are the frozen files of §4 [K16].
-  - None of them asserts the status after a successful nudge; all of them passed on the sketch.
-- **Browser** (`probe-r274.cjs`, HEAD on :5173 and the sketch on :5186, both viewports, 0 page errors): rows 1, 1b, 2 and 3 of §1, as listed.
-- **Cleanup:** the scratch server is stopped, and `store/` is untouched (`git status` is empty).
-
-## 7. Mutants
-A red-proofs them on a scratch copy and restores the tree byte-identically. C re-runs them.
-
-| Id | Mutation | Must turn red |
-|---|---|---|
-| M-NO-SINGLE | remove the single-clip success `setStatus` | LT20, LT21, SK13, SK7, NZ3 |
-| M-NO-GROUP | remove the group success `setStatus` | SK14, SK15 |
-| M-GROUP-ALWAYS-RIGHT | always use `groupMovedRight` | SK15 (second step) |
-| M-SINGLE-PRE-START | name `clip.start`, the start before the move | LT20, SK13 |
-| M-GROUP-NUDGE-LABEL | the group text uses `studioMoveStrings.historyNudgeClip` as its label | SK14, SK15 |
-| M-GROUP-REPEAT-STRING | the group repeat write uses the string form | SK14 (seq during the hold) |
-| M-REPEAT-SILENT | skip the success write when `keyRepeat` | SK13, SK7, NZ3 |
-
-## 8. C rows (Chromium, `/studio-lab`, 1440×900 and 1280×720, fresh anonymous contexts)
-- **Recipe:** copy `b-round-273/probe-r274.cjs` into `c-round-274/` first, because it writes next to itself. Run it on HEAD and on A's tree, and add scenarios as needed.
-- **Wait first:** wait for `Demo collection ready` (L48).
-- **Reading state:** play state from `[data-playing]`, clip starts from `[data-clip-start]`.
-
-**Scope, claims and tests**
-
-| Row | Check |
-|---|---|
-| SOURCE-SCOPE / HUNK-SCOPE | exactly the paths and hunks of §4. `git diff -- app/components` is empty, and the context diff is empty outside `nudgeSelectedClip` |
-| CLAIMS | re-run §9 at HEAD, plus the L29 sweep over this task |
-| TESTS-TARGETED, TEST-CHANGES, MUTANTS | per §5.3, §5.1 (no assertion lost) and §7 |
-
-**Browser behaviour**
-
-| Row | Recipe | Expected |
-|---|---|---|
-| B-NUDGE-SINGLE | §1 row 1 | `Nudge clip: start 00:01.000.`, the clip at 1.000, the Undo title `Undo: Nudge clip (Ctrl+Z)`, and one span swap |
-| B-NUDGE-HELD | §1 row 1b (`keyboard.down` ×3, then up; then ArrowLeft) | after the hold: `Nudge clip: start 00:04.000.` and the clip at 4.000. After ArrowLeft: `Nudge clip: start 00:03.000.` and the clip at 3.000. At no read does the line name a start other than the clip's current one |
-| B-NUDGE-GROUP | §1 row 2, then ArrowLeft | `Move (2): 2 clips moved 00:01.000 to the right.` (clips at 1.000 and 17.000); after ArrowLeft, `Move (2): 2 clips moved 00:01.000 to the left.` |
-| B-NUDGE-UNDO | row 1, then Ctrl+Z | `Undo: Nudge clip`, and the clip is back at 0.000 |
-| B-NUDGE-BLOCKED | a clip at 0, selected; ArrowLeft once, then held ×3 | the same text as HEAD, `Nudge blocked — start of the timeline.`, announced once: one span swap on the first press, none during the hold |
-| B-NUDGE-PASTEND | §1 row 3, then Space and Stop | after the hold: `Nudge clip: start 00:03.000.`. Space plays: `data-playing` is true and the position advances from 17, inside the clip that now ends at 19; the line keeps the nudge text. After Stop: the same text |
-| B-AUDIO | row 1 (the clip at 1.000), Home, Space; sample the analyser RMS every 100 ms for 3.2 s. Control: the same without the nudge | real output: every sample with position 0.10–0.85 s has RMS < 0.0005, and the maximum with position 1.05–2.10 s is > 0.05. Control: the maximum with position 0.05–0.60 s is > 0.05. B measured at HEAD (the audio path is unchanged by this round) [K22]: nudged 0 at every sample below 0.99 s, then 0.0857 at 1.08–1.09 s and 0.0949 at 1.99–2.01 s; control 0.097 at 0.06–0.07 s, both viewports |
-| B-ENTER-TWICE (closes GATE270-S2) | both viewports (at 1280×720 press the panel's `Expand` first [K19]): a range 2–5 on the clip, Enter twice in Detail Start; then Enter twice in Clip Gain | each Enter swaps the span once (2 mutations), with the same text. C notes that this proves a DOM re-announcement, not screen-reader speech |
-| B-R273-RANGE-PLAYING (observation) | `ctrlLeftRangeStop` | records that the deferred Low is still present (the same text as HEAD). **Not a FAIL** of this round |
-| LT-WIDTH | the group text at 1280×720 and 1440×900 | the status box is no taller than with the clip-added text at the same width, and there is no horizontal overflow |
-
-**Guards and docs**
-
-| Row | Check |
-|---|---|
-| SCREEN-BUDGET | persistent text lines outside the timeline in the demo state, HEAD against new: equal |
-| G274-AUTH | `/studio-lab` loads anonymously. `/studio/<id>` signed out shows "Sign in required". `/api/studio-token?product=middle-east&file=Music.wav` without a header returns 401 and no token |
-| DOC-205 | l.4 byte-exact; the 7 TEMPLATE headings in order; every cited row id exists. Docs 203 and 204 differ from HEAD only on l.4, each `**სტატუსი:** Completed (C round 274 PASS)`. `grep -rn 'In Progress (stage' docs/implementation` leaves only doc 176 (STUDIO-PERFORMANCE, still open) |
-
-**Gate rows** (C does not claim them): the full vitest, build, full Biome, verify and e2e smoke.
-
-## 9. Claims (L29). Run from `store/` at HEAD `52b17e4`
-| Tag | Command | Expected |
-|---|---|---|
-| K1 | `git rev-parse --short HEAD; git status --short \| wc -l` | `52b17e4`, `0` |
-| K2 | `sed -n 1993,2031p app/contexts/ArrangementContext.tsx` | `nudgeSelectedClip`. Group branch: `applyEdit(moved, studioClipStrings.historyMoveClips(ids.length));` (l.2004), `setRange(null);`, `return;`, with no `setStatus` on success. Single branch: `applyEdit(next, studioMoveStrings.historyNudgeClip);` (l.2024) and `setRange(null);`, with no `setStatus` after them. Every refusal uses `keyRepeat ? () => … : …` |
-| K3 | `sed -n 314,320p app/lib/arrangement/strings.ts` | `studioMoveStrings`, with `historyNudgeClip: 'Nudge clip',` at l.319 and no `nudged` |
-| K4 | `sed -n 763,766p app/components/arrangement/ArrangementClip.tsx; sed -n 805,808p app/components/arrangement/ArrangementClip.tsx` | the drag-release texts `` `${laneLabel}: start ${…}.` `` and `` `${label}: start ${…}, length …, source offset ….` `` |
-| K5 | `sed -n 691,699p app/lib/arrangement/strings.ts` | `historyMoveClips: (count) => \`Move (${count})\``; `groupMovedRight` / `groupMovedLeft` → `` `${label}: ${count} clips moved ${distance} to the right.` `` / `…left.` |
-| K6 | `sed -n 12,28p app/lib/arrangement/status-announcement.ts` | a string bumps the sequence unless a gesture is active and the text is equal; a function returns `previous` when the text is unchanged |
-| K7 | `sed -n 3136,3141p app/components/arrangement/StudioWorkspace.tsx` | `aria-live="polite"`, `data-testid="arrangement-status"` and `<span key={statusSequence}>{status}</span>` |
-| K8 | `grep -n "it('SK8\|it('SK12\|it('SU6" app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | SU6 l.369, SK8 l.611 and SK12 l.695 |
-| K9 | `sed -n 447,476p app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `expectOneAnnouncementPerPress`: the first press adds the text; repeats add nothing and keep the span and seq; a fresh press adds it again with seq +1 |
-| K10 | `grep -rn "Nudge clip:\|nudged:" app perf e2e \| wc -l` | `0` |
-| K11 | `sed -n 2389p app/contexts/ArrangementContext.tsx; sed -n 2402,2405p app/contexts/ArrangementContext.tsx` | `restoreHistory` ends with `setStatus(message);`; `undo` calls it with `` `Undo: ${label}` `` |
-| K12 | `grep -rn "nudgeSelectedClip(" app --include=*.ts --include=*.tsx \| grep -v __tests__` | 2 hits: `StudioWorkspace.tsx:2554` and `:2570` |
-| K13 | `sed -n 771p app/lib/arrangement/__tests__/strings.test.ts; sed -n 606p app/lib/arrangement/__tests__/status-announcement-ui.test.tsx; sed -n 1031p app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `  studioMoveStrings: {},`; `    expect(added).toEqual([NUDGE_BLOCKED_TEXT]);`; `    expect(addedTexts(stopWatching(watch))).toEqual([NUDGE_SNAP_BLOCKED_TEXT]);` |
-| K14 | `sed -n 214p app/lib/arrangement/__tests__/status-lifetime.test.tsx; sed -n 31p app/lib/arrangement/__tests__/playback-start.test.ts` | `'SYS-6 STATUS-LIFETIME stage 1: texts that name the insert marker stay true (D-29z594)',`; `describe('SYS-6 stage 1 playback-start resolver (D-29z594)', () => {` |
-| K15 | `ls docs/implementation/2026/quarter-IV/ \| tail -1; grep -rn 'In Progress (stage' docs/implementation \| wc -l` | `204-sys-6-status-lifetime-stage-2.md`; `3` (docs 176, 203 and 204) |
-| K16 | `grep -rln "nudgeSelectedClip\|historyNudgeClip" app/lib/arrangement/__tests__ perf e2e` | 7 files: `detail-panel-polish`, `meter-ui`, `grid-snap-ui`, `track-meter-ui`, `strings`, `detail-panel` and `track-layout` |
-| K17 | `grep -rnE "it\('(LT2[0-9]\|SK1[3-9])" app \| wc -l` | `0`: the new ids are free |
-| K18 | `sed -n 605p app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `    expect(added.filter((text) => text === NUDGE_BLOCKED_TEXT)).toEqual([NUDGE_BLOCKED_TEXT]);` |
-| K19 | browser: `b-round-273/probe-r274.cjs` scenario `detail1280` at HEAD | 1280×720: `arrangement-detail-panel` 36 px tall with an `Expand` button, `arrangement-detail-start` box 0×0; 1440×900: panel 144 px, Start 80×24 (`probe-r274-head.json`, `shots/head-detail1280-*.png`) |
-| K20 | `sed -n 52,54p app/lib/arrangement/__tests__/status-lifetime.test.tsx; sed -n 181,186p app/lib/arrangement/__tests__/status-lifetime.test.tsx` | `PULSE_CLIPS` = one clip `{ id: 'p1', trackId: 'music', …, start: 0, …, duration: 16 }`; `async function stoppedAt(seconds: number)` |
-| K21 | `sed -n 408,410p app/lib/arrangement/__tests__/status-announcement-ui.test.tsx; sed -n 529,533p app/lib/arrangement/__tests__/status-announcement-ui.test.tsx` | `keyRepeatClip(id, start)` → duration 5 on `music`; SK3 mounts `c1` at 0 and `c2` at 5 and calls `selectClips(['c1', 'c2'])` |
-| K22 | browser: `b-round-273/probe-r274.cjs` scenarios `nudgeAudio` and `baselineAudio` at HEAD | the RMS series in `probe-r274-head.json` quoted in B-AUDIO |
-
-## 10. STOP conditions (L11)
-- A frozen or covering test fails, including by timeout, or a covering test runs above 50 % of its timeout.
-- A clause would change a refusal text, a refusal's announce-once behaviour, the nudge distance or where Space plays.
-- A §7 mutant stays green and no equal-or-stronger row inside the grants catches it.
-- The reviewer shows a Medium+ regression outside the grants.
-
-## 11. After C PASS
-**Close** these ids and remove them from `deferred_low_polish` and `open_findings` (L7):
-- C-R271-01-NUDGE-STALE-STATUS;
-- GATE270-S2-REPEAT-ANNOUNCE (premise false: browser evidence plus SK8/SK12);
-- A-R273-REPEAT-PASTEND (superseded: the nudge now writes its own text).
-
-**SYS-6 → done.** Docs 203, 204 and 205 have l.4 `Completed (C round 274 PASS)`.
-
-**Next:** RETRO 275 (15 rounds after RETRO 260), unless REGRESSION is due first (on or after 2026-11-02).
+| K1 | gate 274 published `a4c0e24` | `python3 -I -c "import json;g=json.load(open('gates/gate-round-274.json'));print(g['status'],g['commit'][:7])"` | `published a4c0e24` |
+| K2 | clean tree at planning | `wc -c < b-round-274/git-status-at-planning.txt` | `0` |
+| K3 | 1,138 frozen entries | `wc -l < b-round-274-r275-tree-sha256.txt` | `1138` |
+| K4 | each protected file appears once | `for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-routes.test.ts app/lib/auth.ts app/contexts/AuthContext.tsx app/entry.server.tsx; do grep -cF "  $f" b-round-274-r275-tree-sha256.txt; done \| tr '\n' ' '` | `1 1 1 1 1 1 1` |
+| K5 | Play's playing signal is `data-playing`, and its name is constant | from `store/`: `grep -n "data-playing" app/components/arrangement/ArrangementTransport.tsx; grep -n "playLabel" app/lib/arrangement/strings.ts` | `248: data-playing={isPlaying ? 'true' : 'false'}`; `225:  playLabel: 'Play',` |
+| K6 | the smoke export hash at HEAD `a4c0e24`. B re-measured it rather than assume the round-260 value, because SABA-B-7 changed envelope scheduling in round 269 | `python3 -I -c "import json;d=json.load(open('b-round-274/smoke/c260.json'));print(sorted({v['wav']['sha256'][:8] for k,v in d['rows'].items() if k.startswith('smoke')}))"` | `['1fea093b']` (both viewports) |
+| K7 | the screen-capture element counts at HEAD | `python3 -I -c "import json;d=json.load(open('b-round-274/screens/screen275.json'));print({k:len(v) for k,v in d.items()})"` | `{'1440x900-S0': 142, '1440x900-DEMO': 170, '1280x720-S0': 121, '1280x720-DEMO': 147}` |
