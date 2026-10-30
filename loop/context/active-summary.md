@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-30T03:39:13.300Z)
+# Active loop summary (2026-10-30T04:11:59.175Z)
 
-- backlog.json 2457 KB -> active view 349 KB
-- status: G_ROOT_GATE round 259
-- servers: `{"checkedUtc":"2026-10-30T03:10:23.7600268Z","round":259,"attempt":1,"store":200}`
+- backlog.json 2475 KB -> active view 355 KB
+- status: G_ROOT_GATE round 260
+- servers: `{"checkedUtc":"2026-10-30T04:01:27.3761691Z","round":260,"attempt":1,"store":200}`
 - last publication: 7a960c1511bfce1fb63d1c3779e1bb4b4ed76119 (rounds 258-259)
-- last root gate: round 259 published - commit 7a960c1511bfce1fb63d1c3779e1bb4b4ed76119 pushed
+- last root gate: round 260 skipped - C taskStatus FAIL
 
-## Current items: -
+## Current items: SRW-21
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -552,7 +552,7 @@
 - C-N231-NOTES / info / ruled (D-29z307): N1/N4 wording guidance for future rows (B writes 'no source or consumer hit' and 'marquee'); N2 -> deferred Low C-R231-N2-PC10-DUP; N3/N6/N8 info; N5 -> keep per-lane as specified, reviewer proposal recorded as ARCH-A231-ANY-DRAG-ACTIVE; N7 -> evidence on SABA-Q-NOTICE-ONE-ROW / N1 C-UNIT grep nothingSelected = 1 (ST-C2b's own assertion), row wording; N2 duplicate PC10 id in collection.test.ts (l.332 and l.405); N3 L
 - A-R231-REVIEW-RULINGS / info / ruled (D-29z307): R1 keep per-lane (Saba's text and task 2.5; architecture signal ARCH-A231-ANY-DRAG-ACTIVE); R3 contract stands (in-memory set always, so the session stays consistent when storage works but later throws); R6 stands (focus never falls to body when the clicked button unmounts) / R1 cross-lane hint (hint stays on the active lane while a drag is over another lane); R3 suggested adding the id to the in-memory set only w
 - C-R232-01 / low / invalid (D-29z325): premise false (C-R233-01) - the l.303 test already declared 15000 at l.336 since before 4c07d5f; the round-233 change raised the NEXT test (l.338, ~1.1 s) to 15000; kept as harmless (no assertion changed), closes C-R233-01 and GATE233-S2 | dispatched round 233 (D-29z315): declare 15000 at l.377 as the sibling R11-P1e (l.432); fixed early because the round's covering set contains it and an unruled L32 would STOP A again / render-budget.test.tsx l.303 'Play -> Pause -> Play' has no declared timeout; 2806 ms (56 %) at gate 232, 2620-2790 ms in covering runs, 148
-- GATE232-S2 / medium / open_tech_lead_manual (D-29z316): no cloud repro possible (Playwright on Linux cannot produce AltGraph, C round 232 out-g); Tech Lead check TLM-R232-ALTGR-WIN; per the 2026-10-23 root clarification it does not block; becomes a normal Medium if the manual check reproduces it / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
+- GATE232-S2 / medium / L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manual (D-29z316): no cloud repro possible (Playwright on Linux cannot produce AltGraph, C round 232 out-g); Tech Lead check TLM-R232-ALTGR-WIN; per the 2026-10-23 root clarification it does not block; becomes a normal Medium if the manual check reproduces it / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - GATE232-S7 / info / info (D-29z316): intentional (slider semantics kept, OV-E2); revisit only with a design review / the empty Overview keeps cursor-ew-resize and its drag/double-click on a transparent strip
 - C-N232-NOTES / info / ruled (D-29z316): N1 recorded for the next design/screen review (not a WCAG 1.4.11 failure: the baseline is decorative, the slider's focus indicator is the ring); N2 info; N3 cross-tab = GATE232-S6 deferred Low; menu-focus case info (menus close on outside key per their own handlers; no user report) / N1 empty baseline bg-outline on the dock is 1.15:1 (deliberately quiet; focus ring 5.45:1); N2 hidden frame keeps its last x after Undo to 0
 - GATE233-S4 / info / open_tech_lead_manual (D-29z325): TLM-R233-SR-ORDER / screen-reader order after the focus rescue (focus moves, then the polite status) is not verified with a real screen reader
@@ -641,8 +641,10 @@
 - GATE257-INDEX-LOOKUP / low / deferred_low_polish (D-29z504); candidate for SABA-B-9 stage 2 when it owns those tests (L12) / navigation-strings-ui.test.tsx l.175 finds Back to start by index (centre.querySelectorAll('button')[3]); GS14 grid-snap-ui l.405-418 checks
 - GATE257-DOC193-TC / low / open (D-29z504): ruled at the stage-1 close: l.93 is stale and is fixed when SABA-B-9 stage 2 writes doc 193 / its l.4 (L28 multi-stage clause); l.132 vs five = different scopes, no change; approach bullet: one clause added in the same edit / doc 193 l.93 says transport-centre-ui has TC1-TC9 (now TC1-TC11); l.132 'six tests' vs the round-257 bullet's 'five' M9 count (different sco
 - GATE257-EXPORT-INLINE-HANDLER / low / deferred_low_polish (D-29z504); candidate for SABA-B-9 stage 2 if it grants ArrangementTransport.tsx / ArrangementTransport.tsx l.390-394 Export repeats an inline Enter-repeat handler instead of preventRepeatedEnterKeyDown
-- C-R258-01 / medium / dispatched round 259 (D-29z507): H1-H5 harness fix + docs; closes on C round 259 PASS (RR-PERF-259) + gate / npm run test:perf aborts every pass of PERF-1a (waits for Play aria-label 'Pause', removed by SABA-B-9 stage 1, round 256) and PERF-1b-i (cl
-- INFO-B259-COMPONENT-DRIFT / info / signal for STUDIO-PERFORMANCE (D-29z514); ruled at the 259 -> 260 planning from C round 259's valid run; not a budget failure, not scheduled / record rows only: every per-commit component count in PERF-1b-i is +6..+7 vs gate 225 (80fbb3b), e.g. interact.play.start-components 87 -> 9
+- INFO-B259-COMPONENT-DRIFT / info / ruled (D-29z516): accepted as attributable feature growth, not a budget failure; C round 259 oracle (c-round-259/oracle-interactions.txt, oracle-resources.txt) every deterministic per-commit component row +6..+7, DOM +7..+8, studio-lab JS +8.4 kB / +1 script vs gate 225 (80fbb3b); tech-lead confirmed ArrangementShortcutSheet (always mounted, gated on isOpen) and ArrangementInsertMarkerLine on the commit path; 80fbb3b..HEAD = 24 commits incl. rounds 232-238 (tempo-seed, grid-adaptive, overview-visibility, useRulerNavigation, library-notice); per-component split is an inference; next oracle refe ... [clipped; see backlog.json] / record rows only: every per-commit component count in PERF-1b-i is +6..+7 vs gate 225 (80fbb3b), e.g. interact.play.start-components 87 -> 9
+- INFO-C259-CONTEXTRUNNING-NAME / info / info (D-29z516): cheap rename candidate inside PERF-HARNESS-STRINGS-DRIFT (round 261) if granted; not a bug / perf/studio-lab.perf.spec.ts:596 and studio-lab-interactions.perf.spec.ts:535 store isPlaying() as detail.contextRunning; after H2 it means 
+- INFO-C259-STUDIO-TOKEN-400 / info / info (D-29z516): not a bypass; protected file unchanged / /api/studio-token without product/file params returns 400 before the auth check; with params: no header 401, fake Bearer 500; never 200 (C r
+- INFO-C259-HOOK-PER-CLASS / info / info (D-29z516): harness rule HR-HOOK-START-PER-CLASS / C probe attempt 1 hooking AudioScheduledSourceNode.prototype.start timed out; the harness-style per-concrete-class hook passed (C tool issue
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
@@ -656,5 +658,4 @@
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
-- SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

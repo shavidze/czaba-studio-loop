@@ -90,7 +90,7 @@
 
 ## 5. Saba-ს ნაპოვნი საკითხები (2026-10-28-ის წესი)
 
-- **ფანჯარაში Saba-ს ახალი ბაგი (SABA-B-*) არ დარეგისტრირებულა** (`grep -o "SABA-B-1[2-9]"` agent-workflow.md-სა და backlog.json-ზე: 0).
+- **ფანჯარაში Saba-ს ახალი ბაგი (SABA-B-*) არ დარეგისტრირებულა** (`grep -o "SABA-B-1[2-9]"` backlog.json-ზე: 0; `policy.local.md`-ის უმაღლესი id SABA-B-11. agent-workflow.md SABA-B id-ებს საერთოდ არ შეიცავს, ამიტომ მისი 0 არაფერს ამტკიცებს — შესწორება C-R260 info, round-261-ის დაგეგმვა).
 - წინა Saba-ს საკითხების გაკვეთილები არსებობს: SABA-B-8 → L39; SABA-B-7 → L41, L42; SABA-B-9/10/11 → L43–L46.
 - **დაბრუნდა თუ არა იგივე სახე:** L43-ის სახის (გაყინული პოზიცია) ახალი შემთხვევა 1280-ის transport-ის ორი რიგია; ის უკვე კითხვაა (SABA-Q-9-TRANSPORT (c)). L46-ის ვადა ახლა დადგა (§12).
 
@@ -118,7 +118,7 @@
   - **L51 (B):** status-ის lifetime: ყოველი ჩაწერა ასახელებს მოვლენას, რომელიც მას მცდარს ხდის, და კოდს, რომელიც მას შლის; status row ზუსტ ტექსტს წერს, უარყოფით row-ს დადებითი წყვილი აქვს (C-R252-01, B-R253-*, C-R254-OBS-01; RC-R252-NEGATIVE-ROW).
 - **ამოღებული არაფერი** (`consequence-tester`: ამოღებისთვის საჭიროა trigger-ის რაოდენობა; L29 შეიცვალა და არა ამოღებულა; L9 და L21-ს ფანჯარაში trigger არ ჰქონია).
 - **არ მიიღეს ამ ფანჯარაში: row-ის severity წინასწარ** („Low-ზე ჩავარდნილი row ჩაიწერება deferred Low-ად და რაუნდს არ აჩავარდებს“). `consequence-tester`: falsifiable, მაგრამ ასე სახიფათოა — 252-ის Low B-ის შეცდომას მალავდა, 254-ის Low HEAD-თან რეგრესია იყო; და ერთსა და იმავე ფანჯარაში claims block-თან ერთად FAIL-ის რიცხვს აბნევს. `tech-lead`: ერთადერთ ცვლილებად უარყოფს. RETRO 275-ის კანდიდატია, `consequence-tester`-ის საწინააღმდეგო ზომებით (severity dispatch-მდე იყინება; სპეციფიკაციის წინააღმდეგობა და HEAD-თან რეგრესია accessible name-ში ან state-ში არასდროს Low; deferred Low-ს ვადა; ≥ 2 Low row ერთ რაუნდში მაინც FAIL).
-- **retro candidate-ები:** RC-R252-NEGATIVE-ROW → L51; RC-R252-PRECHECK-SCOPE → L23; PERF-HARNESS-STRINGS-DRIFT → §7; B-R237-REFUSAL-DURING-LOAD-GAP და B-R239-BYPASSED-SIDE-EFFECT → retro 245-ში L51 და L49 (ახლა მოინიშნა `applied`); INFO-C246-VITE-CACHE → `harness_rules` (C-ის მეორე server per-entry `node_modules` link-ებით, `.vite`-ის გარეშე), lessons-ში არა; C-ის round-259 tool-ის გაკვეთილი (`start()`-ის hook თითო კონკრეტულ კლასზე, როგორც `perf/lib/instrumentation.ts`) → `harness_rules`.
+- **retro candidate-ები:** RC-R252-NEGATIVE-ROW → L51; RC-R252-PRECHECK-SCOPE → L23; PERF-HARNESS-STRINGS-DRIFT → §7; B-R237-REFUSAL-DURING-LOAD-GAP → retro 245-ში L51; B-R239-BYPASSED-SIDE-EFFECT → round-240-ის დაგეგმვისას L49 (ორივე ახლა მოინიშნა `applied`; შესწორება C-R260-02, round-261-ის დაგეგმვა); INFO-C246-VITE-CACHE → `harness_rules` (C-ის მეორე server per-entry `node_modules` link-ებით, `.vite`-ის გარეშე), lessons-ში არა; C-ის round-259 tool-ის გაკვეთილი (`start()`-ის hook თითო კონკრეტულ კლასზე, როგორც `perf/lib/instrumentation.ts`) → `harness_rules`.
 
 ## 9. retro 245-ის ექსპერიმენტის შედეგი (§10)
 

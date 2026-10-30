@@ -1,0 +1,110 @@
+{
+ "round": 260,
+ "role": "C",
+ "date": "2026-10-30",
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T04:01:27.3761691Z",
+  "round": 260,
+  "attempt": 1,
+  "store": 200
+ },
+ "baseline": "7a960c1511bfce1fb63d1c3779e1bb4b4ed76119",
+ "passed": [
+  "SOURCE-SCOPE",
+  "RT-NUM",
+  "RT-CAUSE",
+  "RT-IDS",
+  "RT-SABA",
+  "RT-SCREEN",
+  "G260-AUTH",
+  "STUDIO-SMOKE-260"
+ ],
+ "failed": [
+  "RT-LESSONS"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "evidence": "start (c-round-260.md) and end (c-round-260/scope-end.txt): HEAD 7a960c1, git status 0 lines, sha256sum -c rc 0 over 1118 entries"
+  },
+  "RT-NUM": {
+   "status": "PASS",
+   "evidence": "c-round-260/rt/: B's 9 scripts copied with output paths moved to c-round-260/rt and run from the loop root on a copy of backlog-before-260.json. cost, retro-numbers, fails-detail, gate-reviews, classify, window-findings, l28-status, deferred-totals and open-medium-plus are byte-identical to B's. collect.txt and rounds-245-259.json differ only in round 259's b_cost (b-round-259-result.json exists now = the round-260 planning). cost.py takes B cost from b-round-(N-1), so no retro number uses that field. Checked by hand: the pair costs 58.68 / 56.45 / 47.46 / 41.65 / 26.37; the group sum 355.83; the top 5 and top 6; A FAIL/PASS 8.04 / 6.05; bugs medium 7 / low 12; 48 findings in 9 reviews (ls gates/round-2{45..59}/review.md finds 9, none on the 6 skipped rounds); open_findings 72 (C22/B8/gate24/A18) and deferred 35 (A17/gate13/C4/B1); deferred 430 with 15 closed/folded; 6 open Medium+; 2 STOPs (a-round-250.md l.5, a-round-253.md l.3); round 247 10+19+5 (tasks/round-247.md l.117-120); round 246 12 (l.112); retro 245's 12/3 and $22.81 / $11.44 / $15.87; $16.79 = 1.5 x 11.19. Raw spot checks: a-round-256 14.14, c-round-250 9.15, b-round-248 19.07. Round groups match every tasks/round-N.md title (245 RETRO, 258 REGRESSION, 248/249/250/252/254/256 feature stages, 251/253/255/257/259 fix-ups, 246/247 pre-existing focus fixes). Section 6: 10a 3 stages + 2 fix-ups, 10b 1+1, 9 1+1, 11b-2b 1 = 6 stages in 10 rounds = 1.67 per stage, checked against the round titles"
+  },
+  "RT-CAUSE": {
+   "status": "PASS",
+   "evidence": "c-round-245/250/252/254/256/258.json bugs and failed rows match retro section 3. a-round-252.md l.5 'Needs B ruling (not STOPs...)' plus l.64 'ruling 1'; a-round-256.md l.157 M-2; D-29z479 adds C-R254-01 to L3. The protocol-miss grep over b-round-246.md and tasks/round-247.md returns no lines (rc 1). window-mediums-hand.txt: all 9 ids and titles match the before-copy. Inferences are labelled (section 3 'inference', section 7 '+6...+7 inference'). Consult lines are labelled with the agent name"
+  },
+  "RT-IDS": {
+   "status": "PASS",
+   "evidence": "C-R258-01 is closed under D-29z515 (c-round-259 + gate 259). INFO-B259-COMPONENT-DRIFT is ruled; the 3 INFO-C259-* entries are info; HR-HOOK-START-PER-CLASS and HR-SECOND-SERVER-VITE exist. systemic_tasks holds PERF-HARNESS-STRINGS-DRIFT, SYS-6 and L46-CONTRACT-CHECKS. SYS-6's closes ids are deferred_low_polish Lows, and its regression_rows ids exist. RC-R252-* are applied and RC-R260-ROW-SEVERITY is a candidate. retro_runs 245 is done and 260 is dispatched. SR-260-1..6 are awaiting_user. D-29z515..D-29z523 are all present. Exception: one provenance phrase is wrong (C-R260-02, Low)"
+  },
+  "RT-LESSONS": {
+   "status": "FAIL",
+   "evidence": "59 lines, 3 parts. The diff differs on exactly l.3, 16 (L23), 18 (L29), 35 (L50), 36 (L51) and 41 (L11). L11, L23, L50 and L51 keep the old text as an exact prefix. New citations open: a-round-252 ruling 1, the 256 M-2, RC-R252-PRECHECK-SCOPE, RC-R252-NEGATIVE-ROW, C-R252-01, B-R253-*, C-R254-OBS-01. In L29, every old claim type and evidence id survives, and 'measured bound' cites C-R254-01 / L3. But two operative obligations were dropped (C-R260-01). The L29 regex runs: 7 hits in current-task.md, all exempt or tagged"
+  },
+  "RT-SABA": {
+   "status": "PASS",
+   "evidence": "retro section 12 and screen-review-260.md use proposal or question wording only, and no rule file changed (SOURCE-SCOPE). All 6 parked L46 items from retro-245 l.174-180 appear in retro-260 section 12. Four carry a cloud contract half labelled 'platform check is still yours' (L46-CONTRACT-CHECKS not_covered matches). A-R204 says 'no cloud equivalent, deadline passed'. R49-T's question is present. ls ~/.cache/ms-playwright lists chromium-1200, chromium_headless_shell-1200 and ffmpeg-1011, with no webkit or firefox"
+  },
+  "RT-SCREEN": {
+   "status": "PASS",
+   "evidence": "All 4 cited PNGs exist and were opened. SR-260-1 is visible in DEMO 1440 and 1280: 'Active track: Music · insert marker 00:00.000' and the status '...added to the Music track at 01:43.352 (nearest free spot)...'. SR-260-2..5 are visible in all four, and SR-260-6 in DEMO-1440. SABA-Q-9-TRANSPORT (c) exists, and 'Home or a double Stop' is in policy.local.md (SABA-B-10a row). SR-260-2 and SR-260-5 are questions. No duplicate of SR-230-1..10 or SR-245-1..8: SR-260-1 shares SR-230-7's element but describes a different defect (wrong time shown versus redundancy). The browser re-capture with B's screens.mjs into c-round-260/screens gives S0 142/121 and DEMO 170/147, equal to B's"
+  },
+  "G260-AUTH": {
+   "status": "PASS",
+   "evidence": "c-round-260/browser/c260.json (1280) and c260-auth1440-attempt2.json (1440). Fresh context with 0 cookies and 0 storage. /studio-lab shows the workspace and the badge 'Demo collection — no sign-in required', with auth_user null. /studio/middle-east shows 'Sign in required', 0 audio[src] and no workspace. The token endpoint returns 401 without a header ('Please sign in to access Studio.') and 500 with a fake Bearer ('Unable to prepare Studio access'), so no token is issued. The page made 0 studio-token responses. The 1440 attempt 1 is invalid (c260-attempt1.json): a cold-start 150 s timeout in C's own ready-wait; it was replaced once, within the budget"
+  },
+  "STUDIO-SMOKE-260": {
+   "status": "PASS",
+   "evidence": "c-round-260/browser/c260.json at both viewports. One demo pulse clip is added, and Space/Space toggles data-playing false>true>false while the name stays 'Play' throughout. The playhead goes 0 -> 1.17 -> 1.67, then holds at 1.683 after stop. Tapped master RMS is 0.0238 while playing and 0 when stopped. The exported WAV is 48 kHz / 24-bit / 2 ch, 16.000 s, peak 0.2967, sha256 1fea093b...3f94 (equal to the baseline [K6]), 0 NaN, with a per-second RMS of -24.9 dB on all 16 s and no dropout. 0 page errors"
+  },
+  "CLAIMS-K1-K7": {
+   "status": "info-PASS",
+   "evidence": "All 7 re-run verbatim and match: published 7a960c1; 0; 1118; '1 1 1 1 1 1 1'; ArrangementTransport l.248 data-playing and strings l.223 playLabel 'Play'; 1; strings.ts:1 (import { studioShortcutTitle } from './shortcuts') and shortcuts.ts:0"
+  }
+ },
+ "bugs": [
+  {
+   "id": "C-R260-01",
+   "severity": "low",
+   "steps": [
+    "From the loop root: diff b-round-259/lessons-before-260.md lessons.md",
+    "Compare the old L29 (before-copy l.18) with the new L29 clause by clause"
+   ],
+   "expected": "The rewritten L29 keeps every old clause as a claim type with its evidence ids, and drops no operative obligation (task 260 RT-LESSONS; the C-R245-01 failure mode)",
+   "actual": "All six claim types and every evidence id survive, but two obligations are gone. (1) Render condition: the old text said '...and the task's state must satisfy that branch'. The new text only says 'the render branch of every named liveness or acceptance signal (A-R214-DEV-RANGE-LIVE...)'. No sentence requires the task's state to reach the rendering branch, so a tag that greps the branch re-runs green even when the task's state never renders it. (2) Changed meaning: the old text said 'when a command's source changes (position, unit, target), every readout that names the old source is a consumer row'. The new text keeps only 'grep the old word over app/** inline JSX, titles and aria, never one strings file'. The trigger and the rule that each hit becomes a consumer (acceptance) row were dropped, and those were the part that would have caught C-R250-01. Retro section 8's self-disclosed 'known gap' (a narrow root re-runs green) is a different gap and does not cover either loss",
+   "evidence": "lessons.md l.18 vs b-round-259/lessons-before-260.md l.18; c-round-260.md RT-LESSONS"
+  },
+  {
+   "id": "C-R260-02",
+   "severity": "low",
+   "steps": [
+    "Read retros/retro-260.md section 8, last bullet: 'B-R237-REFUSAL-DURING-LOAD-GAP and B-R239-BYPASSED-SIDE-EFFECT -> in retro 245, L51 and L49'",
+    "Open retro_candidates B-R239-BYPASSED-SIDE-EFFECT in backlog.json"
+   ],
+   "expected": "The retro names the true origin of each applied lesson",
+   "actual": "The backlog says B-R239 was 'applied at round-240 planning: L49'. Only L51 (B-R237) came from RETRO 245 (D-29z402). The 'applied' status itself reproduces; only the provenance phrase is wrong. No RT row fails on this; it is filed so that the RT-FIX pass corrects the sentence",
+   "evidence": "backlog.json retro_candidates B-R239-BYPASSED-SIDE-EFFECT text and status; retro-260.md l.121"
+  }
+ ],
+ "info": [
+  "collect.txt diff explained: b-round-259-result.json now exists, and cost.py shifts B cost by one round, so no retro number depends on it",
+  "Retro section 5 greps docs/.../agent-workflow.md for SABA-B-1[2-9], but that file contains no SABA-B ids at all, so 0 hits there means nothing. The claim still holds through backlog.json (0) and policy.local.md (highest id SABA-B-11)",
+  "screen260.json stores the library line as 'Active track: · insert marker' because child spans are dropped; the PNGs show the full text. This is a capture quirk, not an app bug",
+  "L29 regex over current-task.md: 7 hit lines. l.9 is tagged [K3], l.63 is tagged [K7], l.46 and l.49 name loop artifacts (exempt), l.91, l.92 and l.94 are the claims table itself"
+ ],
+ "next_for_B": "Per current-task.md section 4: RT-LESSONS failed, so B corrects the L29 text (restore both obligations as claim-type clauses) and the retro section 8 provenance phrase at the round-261 planning, recorded in b-round-260.md. The next C round re-checks only the changed lines (RT-FIX). Round 261 still runs as planned. No Medium+ in G260-AUTH or STUDIO-SMOKE-260."
+}
