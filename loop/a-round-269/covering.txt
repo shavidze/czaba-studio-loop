@@ -1,0 +1,130 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 setClipFade (FD1) > FD1 clamps to [0, duration - other fade], rounds to ms and omits zero 4ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 setClipFade (FD1) > FD1 returns the same reference for no change, a missing clip, a video clip or NaN 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 setClipFade (FD1) > FD1 reads effective fades clamped by the invariant even when stored values overlap 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 clipFadeGainAt (FD2) > FD2 follows the linear in/out ramps and is 1 between them 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 clipFadeGainAt (FD2) > FD2 meets at exactly 1 when fadeIn + fadeOut = duration 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD3 a start trim shrinks the fade-in first, an end trim the fade-out first 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD3 a clip without fades trims to exactly the pre-fade object 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD4 split keeps the fade-in on the left and the fade-out on the right only 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD4 a kept fade longer than its part shrinks to the part 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD5 deleteTime drops the fade at each new cut and only shifts later clips 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD5 a cut that starts before the clip drops only its fade-in 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD6 clip copy and paste keep both fades 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD6 a range copy keeps a fade only when the window contains that clip edge 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD6 cutRangeFromArrangement drops the fade at each new cut edge 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fades under clip edits (FD3-FD6) > FD6 clipFadeShapes lists only audio clips with an effective fade 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling in applySchedule (FD7) > FD7a a fade-in from 0 starts silent at the clip start and ramps to 1 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling in applySchedule (FD7) > FD7b playback started mid-fade begins at the ramp value of that instant 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling in applySchedule (FD7) > FD7c a fade-out holds 1 until its start and ramps to 0 at the clip end 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling in applySchedule (FD7) > FD7d a clip without fades builds the same graph as before (no extra gain node) 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling in applySchedule (FD7) > FD7e a loop iteration appended later schedules the ramps against its own startAt 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling in applySchedule (FD7) > FD7f setClipGain during a fade touches only the clip gain node 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling edge cases (FD7g-FD7h) > FD7g meeting fades with non-exact float sums keep event times in order 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 fade scheduling edge cases (FD7g-FD7h) > FD7h a loop iteration that starts inside a fade-in starts at the ramp value 0ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 export source (FD8) > FD8 renderArrangementWav passes the fade shapes and still has no pan or live-gain calls 1ms
+ ✓ app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 export render (FD8b) > FD8b an export renders a faded clip through its own fade gain with the same ramps 3ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 clipEnvelopeGainAtSource (EV1) > EV1 is 1 without points, holds the edge values, is exact at points and dB-linear between them 3ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 clipEnvelopeGainAtSource (EV1) > EV1 formats gains in dB with a true minus sign, 0 dB at unity and −∞ at silence 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 add and remove points (EV2) > EV2 a new point takes the current line value, rounds to ms and is inserted in order 2ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 add and remove points (EV2) > EV2 returns the same arrangement for a missing clip, a video clip, a time outside or a duplicate ms 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 add and remove points (EV2) > EV2 removing the last point leaves no envelope key and a missing point changes nothing 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 move points (EV3) > EV3 a point stops 1 ms short of each neighbour and inside the clip window 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 move points (EV3) > EV3 the gain is clamped to [0, 1] and rounded to 4 decimals; no change returns the same arrangement 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 a move keeps the envelope and the timeline points shift with the clip 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 a split gives both parts the full list and the level is continuous at the cut 3ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 a start trim hides points without deleting them and a trim back shows them again 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 Delete Time keeps the level of every source sample on the right part 4ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 duplicate, clip copy/paste and range copy keep the whole list 2ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 a clip without an envelope gives exactly today’s objects (no envelope key) 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope under clip edits (EV4) > EV4 shapes cover audio clips with at least one point only 0ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5a playing from 0 sets the first value at the clip start and ramps through every point 9ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5b a mid-clip start begins at the line value of that position, not at the first point 3ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5c a trimmed window ramps toward a hidden point after it and ends on the line value 2ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5d a clip without points builds no extra node; one with points adds exactly one 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5e a loop iteration appended later schedules against its own startAt 6ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5f setClipGain touches only the clip gain; disconnect releases the envelope node 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5g a faded clip with an envelope connects source → fade → envelope → clip gain 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5h an ended source is released together with its envelope node on the next append 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 export source (EV6) > EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 export render (EV6b) > EV6b an export renders an enveloped clip through its own envelope gain 16ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SABA-B-7 dB envelope (DB) > DB1 a 0 dB → −∞ line reads −15 / −30 / −45 dB at 25 / 50 / 75 % and the stored gains at its points 0ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SABA-B-7 dB envelope (DB) > DB2 depth and gain round-trip on the fader scale, with the top at 0 dB and the bottom at −∞ 1ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SABA-B-7 dB envelope (DB) > DB3 the envelope depth uses the same dB scale as the lane Volume fader 0ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SABA-B-7 dB envelope (DB) > DB4 the scheduler steps are at most 0.5 dB apart and land exactly on every knot 5ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SABA-B-7 dB envelope (DB) > DB5 a legacy gain below −60 dB keeps its level and interpolates in dB toward it 0ms
+ ✓ app/lib/arrangement/__tests__/envelope.test.ts > SABA-B-7 dB envelope (DB) > DB6 adding a point on the line keeps the sound of the line around it 0ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR1 no window renders the whole project exactly like the 0-based plan 237ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR1 no window keeps ceil for a fractional project end 24ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR1 window 4–9 on a 20 s project: 240000 frames, mid-start offsets, outside clips skipped 56ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR1 the window length is rounded, not ceiled (4–9.00001 s stays 240000 frames) 40ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR2 a fade-in 3–5 s with window start 4 begins at 0.5 and reaches 1 at render time 1 38ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR2 an envelope crossing the window start begins at its mid-value 42ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR3 overload is measured over the window only 236ms
+ ✓ app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR4 a window past the project end renders its own length with silence after the end 42ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > buildPeakShape display scale (D-29z85, T12 stage 4a) > WG1: the fixture gives the exact B literals at 0/−6/+3/−60/+24 dB; NaN, Infinity and −1 fall back to scale 1 8ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > buildPeakShape display scale (D-29z85, T12 stage 4a) > WG2: scale 1 on a realistic fixture is byte-identical to the pre-round drawing 2ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG3: a −6 dB clip draws the −6 dB shape (not the scale-1 one); a clip without gainDb draws scale 1 543ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 envelope mode (EU1) > EU1 the Env button and the A key toggle the mode and write the status 681ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 envelope mode (EU1) > EU1 A with a modifier, a repeat or in a text field does nothing 313ms
+ ✓ app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx > V-0.4c header, meter and envelope texts in the workspace > HM1 the envelope editor and a new point carry the English titles 689ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG4: during a single Clip Gain drag the lane follows before release; one entry; Undo restores the exact drawing 634ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 envelope mode (EU1) > EU1 mode off shows no editor and no points; mode on hides the fade handles 346ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 setVideoClipFade (VF1) > VF1 sets, clamps against the other edge, rounds to ms and omits zero 4ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 setVideoClipFade (VF1) > VF1 returns the same reference for an audio clip, a missing clip, NaN or no change 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 setVideoClipFade (VF1) > VF1 matches setClipFade exactly when only the track kind differs 3ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 videoFadeOpacityAt (VF2) > VF2 follows the fade-in and fade-out ramps of the video clip under the position 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 videoFadeOpacityAt (VF2) > VF2 is 1 before the clip, at or after its end, in a gap and without video 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 videoFadeOpacityAt (VF2) > VF2 two adjacent clips dip to 0 at their boundary 0ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 videoFadeOpacityAt (VF2) > VF2 arrangementHasVideoFades sees only effective video-track fades 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 video fades under clip edits (VF3) > VF3 move and duplicate keep both fades 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 video fades under clip edits (VF3) > VF3 a start trim clamps the fade-in first 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 video fades under clip edits (VF3) > VF3 a split drops the fade at the cut and keeps the outer ones 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 video fades under clip edits (VF3) > VF3 copy and paste keep both fades 1ms
+ ✓ app/lib/arrangement/__tests__/video-fades.test.ts > SRW-19 video fades leave the audio untouched (VF4) > VF4 clipFadeShapes and the scheduled graph ignore a faded video clip 2ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG5: two clips at −6 and +3 draw their own factors; a multi drag changes both and each matches its stored gain 370ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 envelope mode (EU1) > EU1 a video clip, a narrow clip and a folded lane never render an editor 381ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG6: the detail panel draws the −6 dB shape at 480 columns from the same raw peaks 212ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 add a point (EU2) > EU2 a double-click adds a point at the line value with one entry; undo and redo restore it 294ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG7 must-not: track Volume, group Volume, Master, Pan, Mute/Solo, a fade-in and an envelope point leave the lane byte-identical 344ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG8 must-not (audio): a drag while playing sends exactly 10^(dB/20) to the clip gain node and creates no new sources 208ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 add a point (EU2) > EU2 a point added between two points takes their interpolated value, not the pointer height 124ms
+ ✓ app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx > V-0.4c header, meter and envelope texts in the workspace > HM2 the group name button title and the F2 input label are English 1331ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 dragging a point down by a quarter of the body gives −15 dB (0.1778) with one entry 262ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 a horizontal drag past a neighbour stops 1 ms short of it 212ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 a press without movement writes nothing; pointercancel reverts with no entry 167ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 a drag that ends at its start value writes the no-change status 140ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 the editor unmounting mid-drag reverts with no entry and releases the gesture 134ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 the A key and the Env button are refused mid-drag 128ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 drag a point (EU3) > EU3 a lost pointer during an uncaptured drag reverts with no entry 108ms
+ ✓ app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx > V-0.4c header, meter and envelope texts in the workspace > HM3 the group Solo button title is the shared lane Solo title 475ms
+ ✓ app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx > V-0.4c header, meter and envelope texts in the workspace > HM4 a folded group whose members hold one clip says 1 clip 616ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 review follow-ups (EU7) > EU7 a trimmed clip with a hidden point before the window drags the right point 116ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 review follow-ups (EU7) > EU7 the line stays drawn with the mode off when every point is outside the window 74ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 review follow-ups (EU7) > EU7 Ctrl and Shift on the editor toggle the selection; a double-click on a trim strip adds nothing 140ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 delete a point (EU4) > EU4 a double-click on a point removes it with one entry and adds nothing 121ms
+ ✓ app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx > V-0.4c header, meter and envelope texts in the workspace > HM5 a track meter without an over has the plain Peak title for a −12 dBFS frame 277ms
+ ✓ app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx > V-0.4c header, meter and envelope texts in the workspace > HM6 the Master Peak button reads the over label, then the clear label after a reset 251ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 delete a point (EU4) > EU4 a double-click within 500 ms after a moved drag of that point is ignored 131ms
+ ✓ app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx > V-0.4c header, meter and envelope texts in the workspace > HM7 the Master Peak over state keeps its destructive fill on hover and press, and the reset returns the borderless fill (D-29z132) 271ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 neighbours (EU5) > EU5 in mode an editor press selects without seeking or a range; header move and trim still work 224ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 neighbours (EU5) > EU5 mode off: the body still seeks on click, the line is drawn and there are no points 138ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 neighbours (EU5) > EU5 the line passes through every visible point at y = its dB depth 82ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-1 envelope visibility (EV1) > EV1 the line is a background halo under a foreground line, and the points are foreground with a background border 102ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 X1 fade double-click guard (EU6) > EU6 a double-click right after a fade drag keeps the fade; after 600 ms it resets it 118ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 stage 2 X1 fade double-click guard (EU6) > EU6 a cancelled drag also arms the guard, and the guard is per edge 118ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 round 84 X1 envelope aligned with the ruler (AL1) > AL1 with a 1 px clip border at 40 px/s on an untrimmed clip: a double-click stores the ruler time and points, vertices and the line end align 86ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SRW-18 round 84 X1 envelope aligned with the ruler (AL1) > AL1 with a 1 px clip border at 25 px/s on a start-trimmed clip: a double-click stores the ruler time and points, vertices and the line end align 102ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-6 envelope cursor (CU1, CU2) > CU1 with Env on, every editor overlay shows the pointer cursor and no crosshair 64ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-6 envelope cursor (CU1, CU2) > CU2 every envelope point shows the pointer cursor, no move cursor, and keeps the EV1 tokens 60ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-7 dB envelope UI (EUDB) > EUDB1 point heights follow the fader dB scale: 0 dB at the top, −30 dB halfway, −∞ at the bottom 58ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-7 dB envelope UI (EUDB) > EUDB2 a drag down by half the body reads −30.0 dB; past the bottom it reads −∞ dB 146ms
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx > SABA-B-7 dB envelope UI (EUDB) > EUDB3 a horizontal-only drag keeps a legacy gain below −60 dB byte for byte 100ms
+
+ Test Files  7 passed (7)
+      Tests  121 passed (121)
+   Start at  12:34:07
+   Duration  9.10s (transform 4.50s, setup 0ms, import 8.25s, tests 12.35s, environment 6.23s)
+

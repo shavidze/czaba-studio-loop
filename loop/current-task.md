@@ -1,299 +1,265 @@
-# Round 269: SABA-B-7. The clip volume envelope moves onto the lane fader's dB scale (Medium, agreed by Saba 2026-10-30, option A)
+# Round 270: GATE266-S1. The detail panel's From/To fields show the real time selection, and Enter never shrinks it silently (Medium), plus the neutral split wording (GATE266-S4, B-R266-CLIPS-SPLIT-COPY, both Low)
 
-**Planned by:** B, at the round 268 → 269 planning, 2026-10-30.
+**Planned by:** B, at the round 269 → 270 planning, 2026-10-30.
 
 **Decisions:**
-- D-29z576: the round-268 result (C PASS, gate 268 published `3058a7c`; GATE264-S2 and C-R267-01 closed);
-- D-29z577: C-R268-01 = A-R268-REVIEW-SPACE-ALTGRAPH, one Low, deferred; D-29z572's wording narrowed;
-- D-29z578: SABA-B-7 design (the depth scale, interpolation, scheduling, storage precision, legacy gains);
-- D-29z579: lessons L29 clause (HEAD drift), consults, checkpoint note.
-
-The saved-project consequence (the shape between points and the on-screen height change; stored gains do not) is Saba's answer, recorded as D-29z573. This task cites it and does not re-decide it.
+- D-29z580: the round-269 result (C PASS; gate 269 published `f6ebd2d`; SABA-B-7 done);
+- D-29z581: the GATE266-S1 contract, its sibling B-R269-DETAIL-ALLTRACKS-DROP, and the rejected options;
+- D-29z582: the split wording;
+- D-29z583: triage of the gate-269 review;
+- D-29z584: consults and lessons;
+- D-29z585: order and checkpoint.
 
 **Read first:** `lessons.md` in full. These apply directly:
-- L41 (perceptual axes follow the reference curve; three interior points);
 - L23 (B's scratch pre-check, §6);
 - L29 (claims, §9);
-- L31 (timeouts);
-- L28 (the doc's l.4);
+- L4 (one element, one rule: §3.4);
+- L3 (text change → longest-state box row);
+- L39 (screen budget);
+- L47 (focus target);
+- L51 (status write);
 - L11 (STOP);
-- L26 (docs cite only tests that exist).
+- L26 and L28 (the doc).
 
-**Previous task:** `tasks/round-268.md` (exact copy of the round-268 `current-task.md`).
-- C: `c-round-268.json` = **PASS**, with `browserVerified` and `realVerified` true.
-- Gate 268: **published**, commit `3058a7c` on both remotes.
+**Previous task:** `tasks/round-269.md` (an exact copy of the round-269 `current-task.md`).
+- C: `c-round-269.json` = **PASS**, with `browserVerified` and `realVerified` true and 0 bugs.
+- Gate 269: **published**, commit `f6ebd2d` on both remotes.
 
-## Baseline: HEAD `3058a7c`, clean tree
-`git rev-parse HEAD` = `3058a7c18c558f4139edff0cd6c2cc76ccc47d2e` and `git status --porcelain` prints nothing [K1]. If root commits again before A starts (an agent file, as in round 268), C accepts the drift only when `git diff 3058a7c HEAD -- app` is empty (L29 clause, D-29z579).
+## Baseline: HEAD `f6ebd2d`, clean tree
+`git rev-parse HEAD` = `f6ebd2d01c361c17d11c5b885a40e37e2ca9f9eb`, and `git status --porcelain` prints nothing [K1]. If root commits again before A starts, C accepts the drift only when `git diff f6ebd2d HEAD -- app` is empty (L29 clause).
 
-## 1. What Saba asked for, and why we missed it
+## 1. The bugs, and why we missed them
 
-**Saba (2026-10-28):** he dragged an envelope point to the bottom, and the music did not go fully silent.
+**GATE266-S1 (Medium; found by the gate-266 reviewer, reproduced by B in the browser at `f6ebd2d` at both viewports, `b-round-269/probe-detail-range-head.json`):**
+- Since SABA-B-11c stage 1 (round 265), a drag inside a clip may pass the clip's edge, and the clip stays selected.
+- The detail panel's From/To fields (accessible names "Time selection start (seconds)" / "Time selection end (seconds)") then show only the part of the selection that lies inside the clip. The code clamps them with `Math.max(range.start, clip.start)` and `Math.min(range.end, clip.start + clip.duration)` [K2].
+- Enter (or Set selection) then sends those clamped values through `clampDetailRangeToClip` and `setTimeRange`, which silently shrinks the user's selection [K3].
 
-**Saba (2026-10-30), option A:**
-- The envelope's vertical axis is dB-linear from 0 to −60 dB, and the bottom is −∞.
-- It uses the same scale as the lane Volume fader.
-- The readout stays in dB.
-- Saved projects keep their point gains; the shape between points and the points' height change, with no legacy flag.
-- Scheduling uses short linear ramps of ≤ 0.5 dB, with no `setValueCurveAtTime` and no exponential ramp to 0.
+| Recipe (both viewports) | Selection readout | Fields | After Enter in From |
+|---|---|---|---|
+| past start (drag clip.x+100 → clip.x−150) | 00:06.250 — 00:12.500 | `10` / `12.5` | 00:10.000 — 00:12.500 (shrunk) |
+| past end (drag clip.x+100 → clip.x+width+150) | 00:12.500 — 01:55.102 | `12.5` / `111.352` | 00:12.500 — 01:51.352 (shrunk) |
+| inside (drag clip.x+60 → clip.x+160), control | 00:11.500 — 00:14.000 | `11.5` / `14` | unchanged |
 
-**Today's code:**
-- The line between two points is linear in **gain** [K2].
-- Playback and export ramp linearly in gain straight to each point [K3].
-- A point's height is `1 − gain`, and a drag maps pixels linearly to gain [K4].
+**B-R269-DETAIL-ALLTRACKS-DROP (Medium; B's probe this planning, `b-round-269/probe-alltracks-head.json`). Same root cause, closed by the same rule:**
+- Recipe: the inside recipe, then Ctrl+Shift+L, then Enter in From.
+- Before Enter: the readout shows "… · all tracks" with 4 lane overlays.
+- After Enter: the selection becomes one-track ("Time selection: 00:11.500 — 00:14.000 · Music.") and there are 0 lane overlays. Today `next` is built as `{ ...clamped, trackId: target.trackId }`, without `allTracks` [K3].
 
-So a 0 dB → −∞ line reads −2.5 / −6.0 / −12.0 dB at 25 / 50 / 75 % of its length (`user-review/AGREE-SABA-B-7.md`; B's HEAD probe, §6), and the music stays loud until the very end.
+**GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (Low).** The split messages claim more than happened [K4]. The browser output at `f6ebd2d` is in `b-round-269/probe-split-copy-head.json`:
+- `splitRangeDone` says "split at both edges … the middle part" even when only one edge was cut (the past-start recipe, then Ctrl+E).
+- `splitRangeClipsDone` says "Clips split … the 2 parts" when one of the two selected clips was not cut at all (gap recipe G, then Ctrl+E).
+- `splitRangeTitle` says "both edges".
 
-**Why we missed it:** the envelope was built in rounds 82–83, before the reference-first rule existed. No task cited a reference curve, and no C row measured an interior point; only the ends were checked (round 83 EN-DRAG measured the bottom as 0.0000). The rule that catches it is **L41** ("Perceptual axes follow the reference curve…"), already in `lessons.md` since round 230. C's LESSON row greps it.
+**Why we missed it:**
+- Round 265 changed what a clip drag can select: the selection may now pass the clip edge. The round-265 task never mentions the detail panel, which displayed the clamped region (`grep -ci detail tasks/round-265.md` = 0).
+- No row compared the panel's values with the selection readout after a past-edge drag.
+- The rule that would have caught it: when a gesture newly crosses a boundary, every readout or editor that showed the clamped region becomes a consumer row. It is recorded as retro candidate RC-R266-PANEL-CLAMP-CONSUMER for RETRO 275, with no new lesson now (D-29z584). It extends L29's "changed meaning" clause.
+- C's row DP-BROWSER below is that consumer row.
 
-## 2. Reference: how Ableton Live 12 does it
+## 2. Reference: how Ableton Live 12 does it (checked 2026-10-30)
 
-| # | Behaviour | Source | Confirmed fact | CZABA decision |
+| Point | Source | What the source says | CZABA, this round | C row |
 |---|---|---|---|---|
-| R1 | The vertical axis of an envelope is the control's value; horizontal is time | [Live 12 manual 25.5](https://www.ableton.com/en/live-manual/12/automation-and-editing-envelopes/) | confirmed (unit not stated) | same |
-| R2 | A clip's volume envelope is relative to the clip volume and never boosts. Its bottom is silence | [27.2.3](https://www.ableton.com/en/live-manual/12/clip-envelopes/); `reference/youtube/SABA-B-7-transcripts.md` (FEzm 5:04, OkAX 19:05) | confirmed | same: top = 0 dB (gain 1), bottom = −∞ |
-| R3 | Live's volume fader taper: dB-linear from 0 to −36 dB, slightly compressed below, −∞ at the bottom | `reference/ableton-live-measurements-2026-10-30.md` §1 (root, measured in Live 12 on Saba's PC) | measured: −12/−24/−36 dB sit at 0.22/0.42/0.63 of the scale | **option A:** dB-linear 0…−60 dB, −∞ at the bottom; the same constant as the lane fader (`TRACK_VOLUME_DB_MIN` = −60 [K5]). Within 0.03 of Live down to −36 dB |
-| R4 | Live's clip Gain envelope is linear in its own % axis (a midpoint reads 49.6 %) | measurements §2 | measured; the % → dB mapping is **not** measured | dB axis on the fader scale (deviation D3) |
-| R5 | Breakpoint editing: double-click adds, drag moves, double-click on a point deletes | [Learn Live: Clip automation](https://www.youtube.com/watch?v=IdQYUk8w5jM) 1:38–2:46 (transcripts file) | confirmed | unchanged (rounds 82–83) |
-| R6 | A breakpoint shows a value label when it is created | measurements, "Also observed" | measured | unchanged: the status line and the point's title show dB |
+| Making a time selection | Live 12 manual, Arrangement View §6.9 "Selecting Clips and Time" (https://www.ableton.com/en/live-manual/12/arrangement-view/, fetched by B on 2026-10-30) | "Clicking and dragging selects a timespan." Shift extends "in the same track or across tracks". | Unchanged (round 265 gesture) | n/a |
+| A numeric field for the time selection's start and end | §6.3 (Arrangement Position = the play position), §6.6 (Loop Start/Length fields = the loop brace), §6.9 | **No reference.** The manual has no field that shows or types a time selection's start, end or length. | CZABA-only fields. Rule: the fields always show the real selection, and Enter never changes it silently | DP-BROWSER, DP-ENTER |
+| Split at a selection | §6.12 "Splitting Clips"; [SC] §42.16 "Split Clip at Selection — Ctrl E" (cited in round 266, `tasks/round-266.md` §1) | Splitting separates out the selection into a new clip. The command name does not say "both edges". | Neutral wording: "Split clips at the time selection" | SPLIT-COPY |
 
-**Cursor, hover, selected states, shortcuts and modifiers:** unchanged by this round. The `A` key and the Env button toggle the mode; double-click adds or removes; drag moves. Point size and colour are unchanged (SABA-B-1's look stays).
+**Deviations:**
+- The fields themselves are a CZABA addition with no Live counterpart. They already existed and are not new in this round.
+- No other deviation.
 
-**Deviations (with reasons):**
-- **D1. The readout is in dB, not %.** Saba's decision of 2026-10-30 (item 2). A film editor reads dB, and the lane fader shows dB.
-- **D2. The floor is −60 dB, and below it the value is −∞.** Live compresses a little below −36 dB. Saba accepted option A: the lane fader already uses −60, and one Studio should not have two dB scales.
-- **D3. Interpolation runs in dB on the fader scale.** Live's clip Gain line is straight in %, and whether % is gain or fader position is unmeasured (R4). Saba chose A knowing this.
+**`product-designer`:** not consulted, because this is a bug fix-up that adds no screen element (policy exemption, D-29z584). C may consult it in review mode (at most 7 findings).
 
-**Later candidates, not in scope** (Saba 2026-10-30): Alt-drag curves, Edit Value, and grid snap of points (LATER-SABA-B-7-*). Do not build them.
+## 3. The contract (D-29z581, D-29z582)
 
-**Consults:** `ableton-arrangement-expert` and `docs-explorer` were consulted at round-232 planning (`b-round-232/saba-b-7-reference-*.md`). Neither found a published taper, and root's Live measurement now outranks both. `product-designer` was not consulted: this is a Saba-fixed change to an existing control, with no new screen element; Saba chose the taper, the readout and the saved-project behaviour himself (D-29z579).
+### 3.1 Display (`ArrangementDetailPanel.tsx`, `ArrangementDetailContent`)
+- `rangeOnClip` is unchanged: the selection is on the clip's lane and overlaps the clip.
+- When `rangeOnClip` is true, From/To show `rangeInputText(range.start)` and `rangeInputText(range.end)`, the selection's own values with no clamp. This replaces the two `Math.max`/`Math.min` lines [K2]. The layout effect that resets the texts keeps its dependencies; its inputs are now the raw selection values.
+- When `rangeOnClip` is false (no selection, a selection on another lane, or a selection off this clip on the same lane), the fields show the clip bounds, as today.
+- The waveform overlay `arrangement-detail-range` is unchanged. It still draws only the part on this clip's waveform, which is true.
+- Inputs and button keep `disabled={!clip}`. **No** element gets disabled or hidden by this change. That keeps L47 out of play: nothing focused can unmount or become disabled.
 
-## 3. The contract (D-29z578)
+### 3.2 Enter / Set selection (`applyDetailRange`)
+The order is fixed. Steps 1–2 are unchanged:
+1. Return if there is no selection.
+2. If a pointer gesture is active, show the gesture refusal (`GESTURE_EDIT_BLOCKED_MESSAGE`) and return.
+3. **New, the keep branch.** If `range` is set, `rangeOnClip` is true, `rangeInputText(parseSecondsInput(startText)) === rangeInputText(range.start)` and `rangeInputText(parseSecondsInput(endText)) === rangeInputText(range.end)`. The comparison is on normalised values, so a retyped equivalent such as `6.250` for `6.25` also keeps the selection. B's sketch used the raw-text form; A implements this rule, and every §7 mutant still applies. Then:
+   - do **not** call `setTimeRange` (the range object stays the same reference, `allTracks` included) and do not change the texts;
+   - announce `detailRangeAppliedMessage(range, range.allTracks ? studioEditStrings.allTracks : selection.laneName)`. The track label `allTracks` = `'all tracks'` already exists [K4]. The lane case gives "Time selection: 00:06.250 — 00:12.500 · Music."; the all-tracks case gives "… · all tracks.";
+   - return.
+4. Otherwise (edited values, or the fields show the clip bounds), run the existing code unchanged: `clampDetailRangeToClip` (inside the clip ±0.01 s, clamped), else `rangeInvalid`; on success `setTimeRange({ ...clamped, trackId })` and announce it [K3].
+   - An edited value on an all-tracks selection therefore becomes a one-track selection and is **announced** as such ("· <lane>"). That is the existing, explicit behaviour and it stays (see LATER-DETAIL-LANE-RANGE-EDIT).
 
-Put every function in `app/lib/arrangement/envelope.ts`. Names are A's choice; the behaviour is fixed.
+**Invariant C checks:** Enter or Set either leaves the selection exactly as the fields show it, or applies exactly what the user typed (clamped by ≤ 0.01 s), or refuses with `rangeInvalid` and leaves it unchanged. It never silently changes it.
 
-**3.1 Depth scale.** "Depth" is the point's height from the top as a fraction of the clip body: 0 at the top, 1 at the bottom.
-- `depth(gain)`:
-  - gain ≤ 0, or not finite → 1;
-  - otherwise `clamp(20·log10(gain) / TRACK_VOLUME_DB_MIN, 0, 1)`.
-- `gain(depth)`:
-  - depth ≥ 1, or not finite → 0;
-  - depth ≤ 0 → 1;
-  - otherwise `10^(TRACK_VOLUME_DB_MIN·depth / 20)`.
+**Within-tolerance note:**
+- A selection such as 1.995–7.25 on a clip that starts at 2 now shows `1.995`, its real value.
+- Enter with unchanged text keeps 1.995. Before this round, Enter normalised it to 2.
+- Typing `1.995` while the selection is 2–7.25 still normalises to 2. The existing test "shows the normalized applied values after Apply …" covers this and is unchanged.
 
-Import `TRACK_VOLUME_DB_MIN` from `track-volume-db.ts` [K5]. Do not copy −60 as a literal.
+**Rejected (D-29z581):**
+- (a) Disable the fields with a reason when the selection passes the clip. A focused Set button would be disabled under the focus by Ctrl+Shift+L (a button is not a typing target [K9], so the workspace shortcut runs). It would also add a persistent reason line.
+- (b) Lift the clamp so the panel can edit a lane selection beyond the clip. That is a new ability and changes what `rangeInvalid` means [K8]. It is recorded as later candidate LATER-DETAIL-LANE-RANGE-EDIT, not queued, and needs Saba.
 
-**3.2 Interpolation** (`clipEnvelopeGainAtSource`, today linear in gain [K2]). Between two bracketing points L and R at fraction f (0 < f < 1):
-- **Both gains > 0:** interpolate linearly in dB (`dB = dB_L + (dB_R − dB_L)·f`, unclamped), so a segment between two gains below −60 dB keeps its level.
-- **Either gain is 0:** interpolate linearly in depth (§3.1, with depth(0) = 1) and convert back.
-- **At f = 0 or 1, and outside the first and last point:** return the **stored** gain exactly. No round trip through depth.
+### 3.3 Split wording (`strings.ts`, wording only; `splitClipsByRange` and `splitSelection` unchanged [K6])
+| Key | Old [K4] | New |
+|---|---|---|
+| `splitRangeDone` | `Clip split at both edges of the time selection; the middle part is selected.` | `Clip split at the time selection; the part inside it is selected.` |
+| `splitRangeClipsDone(n)` | `` `Clips split at the edges of the time selection; the ${count} parts inside it are selected.` `` | `` `Split at the time selection; the ${count} clips inside it are selected.` `` |
+| `splitRangeTitle` | `studioShortcutTitle('Split at both edges of the time selection', 'split')` | `studioShortcutTitle('Split clips at the time selection', 'split')` → "Split clips at the time selection (Ctrl+E)" |
 
-**3.3 Scheduling** (`scheduleClipEnvelopeGain` in `graph.client.ts` [K3]; playback and export both reach it [K7]).
-- The scheduler keeps `setValueAtTime(initial)` at the clip's start in the window.
-- The scheduler then calls `linearRampToValueAtTime` once per **step**, from a pure helper in `envelope.ts` that returns the steps for a source window `[from, to]`:
-  - **Knots:** the window start, every point strictly inside, and the window end.
-  - **Steps per knot pair:** `n = max(1, ceil(span / 0.5))`, where `span` is the dB distance (both gains > 0) or the depth distance × 60 (either gain is 0).
-  - **Step values:** step k lands on the curve value at `from + (to − from)·k/n`; the last step lands exactly on the knot's gain.
-  - **Name the step size** as an exported constant (0.5 dB).
-- So a 0 dB → −∞ segment takes 120 steps. Each step is ≤ 0.5 dB until the last one, which ramps linearly to exactly 0.
-- A flat segment, including two points at 0, is one step.
-- No `setValueCurveAtTime`, no `exponentialRampToValueAtTime`, and no `setTargetAtTime` on the envelope gain.
-- Do not change the fade gain, clip gain, track gain or any other node.
+Each new string is true in the one-edge, two-edge and whole-clip cases. "Clips" counts a part as a clip. All three are shorter than the old ones.
 
-**3.4 Display** (`ArrangementClipEnvelope.tsx`):
-- A point's `top` = depth × 100 %.
-- Every polyline vertex `y` = depth, for the first, last and every visible point [K4].
-- A line straight in depth is the curve itself, so no extra vertices are drawn.
-- The two polylines keep identical `points` (EU5 checks halo = line).
+### 3.4 One element, one rule (L4)
+- The From/To values are governed by §3.1 only. The text-preservation rules of the existing L4 tests in `detail-panel-polish.test.tsx` still hold, because they compare displayed values: typed text survives a re-set of the same values and resets when the displayed values change.
+- Where the old "clamped overlap" test pinned the clamped display, §5.1 rewrites it to §3.1.
 
-**3.5 Drag:**
-- The new gain is `gain(depth(originalGain) + dy / bodyHeight)` [K4]. A drag below the bottom gives 0 (−∞ dB); above the top gives 1 (0 dB).
-- **A vertical delta of exactly 0 keeps the stored gain byte for byte.** A horizontal-only drag never rewrites a gain. This protects legacy gains below −60 dB and keeps the "drag back to the start = no change" rule.
-- Threshold, clamps, Esc/pointercancel revert, single history entry, status strings and labels: all unchanged.
+## 4. Grants (exact, `b-round-269-r270-grants.txt`)
+| File | What may change |
+|---|---|
+| `app/components/arrangement/ArrangementDetailPanel.tsx` | only the import of `studioEditStrings` (from `~/lib/arrangement/strings`, joined to the existing `studioDetailStrings` import [K7]), the two `onClipStart`/`onClipEnd` lines [K2] and the keep branch inside `applyDetailRange` before `const target = selection.clip;` [K3]. No class token, no testid, no `disabled`, no JSX change |
+| `app/lib/arrangement/strings.ts` | the three values in §3.3 only |
+| `app/lib/arrangement/__tests__/detail-panel-polish.test.tsx` | §5.1 rewrite of the "clamped overlap" test; new describe DR1–DR6 (§5.2) |
+| `app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx` | BS2 literal (§5.1); a literal line added inside `expectSplitPastStart`; new BS3 and DP1 (§5.2) |
+| `app/lib/arrangement/__tests__/strings.test.ts` | ST6 (l.385, l.411) and ST7 (l.517, l.520) literals only [K5] |
+| `app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx` | NS2 l.261 literal only [K5] |
+| `docs/implementation/2026/quarter-IV/201-gate266-s1-detail-range-readout.md` | new doc. l.4 is exactly `**სტატუსი:** Completed (C round 270 PASS)` (L28). Georgian; the 7 TEMPLATE headings in order (L26); cites only test ids that exist |
 
-**3.6 Storage:**
-- Points keep `{ time, gain }`, with gain rounded to 4 decimals by `roundEnvelopeGain` [K6]. **Keep 4 decimals.** `data-envelope` / `data-gain` (`toFixed(4)` [K8]), clipboard copies and stored points stay byte-identical in format.
-- **Accepted limit:** below about −50 dB one stored step is coarser than the 0.1 dB readout (at −55 dB a step is about 0.5 dB). The readout shows the stored value.
-- **Accepted limit (legacy only):** a stored gain below −60 dB (possible only from the old linear drag) is drawn at the bottom, while the dB-interpolated line towards it is not quite at the bottom. Display and sound disagree only for such points, and `/studio-lab` has none. DB5 pins the sound half.
-- No migration, and no legacy flag (Saba, D-29z573).
+Everything else is frozen:
+- `ArrangementContext.tsx`, `model.ts`, `panels.ts`, `ArrangementTransport.tsx` and `StudioWorkspace.tsx`;
+- the protected auth/purchase files (`studio.$productId.tsx`, `app/routes/api.studio-token*`, `app/lib/auth.ts`, `AuthContext.tsx`);
+- `package.json`.
 
-**3.7 Unchanged:**
-- `formatClipEnvelopeGain` (the dB readout and `−∞ dB`);
-- add/move/remove point rules (ms rounding, the 1 ms gap, the window);
-- split, trim and clipboard behaviour (points live in source time).
-
-Adding a point on a line keeps the sound: the new point takes the curve's value, so the line through it stays the same.
-
-## 4. Grants (exact, `b-round-268-r269-grants.txt`)
-
-Only these paths may change. `git status --porcelain` must list exactly the changed subset.
-1. `app/lib/arrangement/envelope.ts`: §3.1, §3.2, the step helper and its constant.
-2. `app/lib/arrangement/graph.client.ts`: `scheduleClipEnvelopeGain` and its import line only.
-3. `app/components/arrangement/ArrangementClipEnvelope.tsx`: the `top` style, the polyline vertices, and the drag gain mapping in the pointer-move handler (plus its import). Nothing else, including the classes and SABA-B-1's look.
-4. `app/lib/arrangement/__tests__/envelope.test.ts`: the rewrites in §5.1 and the new rows in §5.2.
-5. `app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx`: the rewrites in §5.1 and the new rows in §5.2.
-6. `app/lib/arrangement/__tests__/export-range.test.ts`: **XR2 only**.
-7. New `docs/implementation/2026/quarter-IV/200-saba-b-7-envelope-db-taper.md`: the seven TEMPLATE headings in order (L26). l.4 is exactly `**სტატუსი:** Completed (C round 269 PASS)` (L28). It is written in Georgian, with technical terms in English.
-
-**Not granted:**
-- `ArrangementContext.tsx` (its playback call already passes the shapes [K7]), `track-volume-db.ts`, `ArrangementClip.tsx`, `strings.ts`, and every other test;
-- `perf/**`, `e2e/**`, `package.json`, `.claude/**`, `CLAUDE.md`;
-- the protected auth and purchase files and the rest of `global_forbidden_files` in `backlog.json` (for example `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`, `app/lib/auth*`, `app/contexts/AuthContext.tsx`).
-
-A needed change outside the grants is a STOP (L11).
+The historical doc 111 hit on the old title string stays (it is history, not a consumer).
 
 ## 5. Tests
 
 ### 5.1 Tests that change, and why (Saba's rule: a rewrite whose only change is removing an assertion is a Medium bug)
+| File / test | Old | New | Why |
+|---|---|---|---|
+| strings.test.ts ST6 (l.385, l.411) | the old `splitRangeDone` and `splitRangeTitle` literals | the §3.3 literals | wording change |
+| strings.test.ts ST7 (l.517, l.520) | `Clips split … the 2/3 parts …` | `Split at the time selection; the 2/3 clips inside it are selected.` | wording change |
+| navigation-strings-ui NS2 (l.261) | `'Split at both edges of the time selection (Ctrl+E)'` | `'Split clips at the time selection (Ctrl+E)'` | wording change |
+| background-time-selection-ui BS2 (l.555) | the old literal | `'Split at the time selection; the 2 clips inside it are selected.'` | wording change |
+| detail-panel-polish "shows the clamped overlap for a range that only partly lies on the clip" | selection 0.5–4 shows `['2','4']`; after typing 3 and a re-set to 1–4, start stays `'3'` | renamed "shows the whole time selection for a range that only partly lies on the clip (GATE266-S1)": 0.5–4 shows `['0.5','4']`; typing 3, then a re-set to 1–4 shows `['1','4']` (displayed values changed); typing 3, then the same 1–4 set again as a new object keeps `['3','4']` | the old assertions pinned the bug. Each one is replaced on the same subject, and one more assertion is added |
 
-B ran the sketch (`b-round-268/sketch.diff`) on a scratch copy over the whole `app/lib/arrangement/__tests__` folder: 167 files, 164 passed and **15 tests in 3 files failed** (`b-round-268/precheck-arrangement-folder-tail.txt`). Every failure pins the old linear-gain value. Each is rewritten to the new contract with **an equal or stronger** assertion. The title changes where it names "linear" or "1 − gain". Test lines are at HEAD [K9].
+The B pre-check proves these are the **only** collisions: 168 test files under `app/lib/arrangement/__tests__` and `app/components` ran on the scratch copy, with 5 failures, all listed above (`b-round-269/precheck-folder.txt`).
 
-| File, test | Old pinned value | New expected (pre-check value) |
-|---|---|---|
-| envelope.test.ts EV1 (l.85) | midpoints 0.6256 (linear between 1 and 0.2512) | ≈ 0.501199 (−6.0 dB, half of 0 → −12 dB); exact at points unchanged |
-| EV2 (l.110) | added point 0.75 between 1 and 0.5 | 0.7071 (−3.0 dB); the other cases re-derived |
-| EV4 (l.244) | 0.6256 | ≈ 0.501199 |
-| EV5a (l.442), EV5b (l.456), EV5c (l.469), EV5e (l.494), EV6b (l.602) | 3–5 calls (one ramp per point) | `set` first, then the §3.3 steps. Assert: the first `set` value; each knot lands exactly at its time and gain; the step count per segment = `ceil(dB span / 0.5)`; every consecutive step ≤ 0.5 dB + 1e-9; times strictly increasing; the last call on the window end. A full literal list is allowed but not required |
-| export-range.test.ts XR2 (l.263) | starts at 0.5 (linear midpoint of 0 → 1) | starts at ≈ 0.031623 (−30 dB = depth 0.5), then steps up to 1 at render time 1, then holds 1 |
-| clip-envelope-ui.test.tsx EU2 (l.449) | `10.000:0.7500` | `10.000:0.7071` |
-| EU3 (l.465, "quarter of the body gives 0.75") | 0.7500, status −2.5 dB | 0.1778, status `Envelope: 6.000 s · −15.0 dB` (and with a period after release) |
-| EU3 (l.504) | `data-gain` 0.0012 after dy 20 | 0.0447 |
-| EU3 (l.547) | `6.000:0.7500;…` | `6.000:0.1778;…` |
-| EU7 (l.604) | `0,0.7488 80,0.7488` | y ≈ 0.2000 (depth of 0.2512) on both vertices. Compare numerically within 1e-4, or exactly if A writes rounded vertices |
-| EU5 (l.734, "y = 1 − gain") | `320,0.7488` | `320,≈0.2000`; the rest of that string unchanged |
+### 5.2 New rows (each red on a named mutant, §7, or labelled as a guard)
+In `detail-panel-polish.test.tsx`, a new describe `GATE266-S1 the detail fields show the whole time selection (DR)`, mounted with music-1 (2–10 s) selected and the panel expanded. The lane name in this fixture is `მუსიკა`.
+- **DR1:** set the selection to 0.5–4 → fields `['0.5','4']`. Enter in From → `range` toEqual `{start:0.5,end:4,trackId:'music'}` and the status is exactly `Time selection: 00:00.500 — 00:04.000 · მუსიკა.` Clicking Set leaves the range and the fields unchanged.
+- **DR2:** 8–12.5 → `['8','12.5']`. Enter in To keeps it, and the status is `… 00:08.000 — 00:12.500 · მუსიკა.`
+- **DR3:** `{start:3,end:5,trackId:'music',allTracks:true}` → `['3','5']`. Enter keeps `allTracks: true`, and the status is `Time selection: 00:03.000 — 00:05.000 · all tracks.`
+- **DR4 (guard, the edited-values path is unchanged):** on 0.5–4:
+  - typing From = 1 and pressing Enter → range unchanged, status = `rangeInvalid` exact text;
+  - typing From = 3 and pressing Enter → `{3,4,'music'}`, fields `['3','4']`, status `… 00:03.000 — 00:04.000 · მუსიკა.`
+- **DR5 (guard):** 11–12 on the same lane → fields `['2','10']`. Enter → `{2,10,'music'}`.
+- **DR6:** on 0.5–4, type From = `0.500` (the same value, retyped) and press Enter → `range` toEqual `{0.5,4,'music'}` and the status is the applied text. This pins the normalised comparison; a raw-text mutant turns it red.
 
-The other tests in these 3 files passed on the sketch unchanged and stay unchanged (add-only around them).
+In `background-time-selection-ui.test.tsx` (real workspace, jsdom gestures):
+- **DP1:** run `dragPastClipStart` (6.25–12.5), expanding the panel with `arrangement-detail-toggle` when From is absent. Then:
+  - `selectedClipIds` = `['m1']` and fields `['6.25','12.5']`;
+  - Enter in From → `range` toEqual `{6.25,12.5,'music'}`, fields unchanged, status exactly `Time selection: 00:06.250 — 00:12.500 · Music.`
+- **BS3:** TWO_MUSIC_CLIPS, then `dragClipBody('m1', xFor(5) → +xFor(17))`. Then:
+  - `range` = `{15,32,'music'}`;
+  - Ctrl+E gives clip spans m1 10/0/5, new 15/5/5, m2 25/0/5 (m2 not cut);
+  - selected `[insideA,'m2']`; status exactly `Split at the time selection; the 2 clips inside it are selected.`
+- **`expectSplitPastStart`** gains `expect(statusText(mounted)).toBe('Clip split at the time selection; the part inside it is selected.')`, so BS1 and BS4 pin the one-edge literal.
 
-### 5.2 New rows (each red on a named mutant, §7)
-
-In `envelope.test.ts`, describe `SABA-B-7 dB envelope (DB)`:
-- **DB1:** points 0 dB → 0 over 4 s. At 25 / 50 / 75 %, the value is −15 / −30 / −45 dB ± 0.01 dB. At both points it equals the stored gain exactly (`toBe`).
-- **DB2:** depth and gain round-trip:
-  - −6, −12, −24, −36 and −48 dB within 1e-9;
-  - `depth(1)` = 0 and `depth(0)` = 1;
-  - `gain(1)` = 0, `gain(0)` = 1 and `gain(1.2)` = 0.
-- **DB3 (same scale as the lane fader):** for dB in {−6, −12, −30, −59.9}, `gain(−dB/60)` equals `trackVolumeFromDb(dB)` within 1e-12.
-- **DB4 (steps):**
-  - 0 dB → 0: 120 steps; each step to step ≤ 0.5 dB + 1e-9 except the last; the last step is exactly gain 0 at the point's time.
-  - Two points at 0: exactly one step, at gain 0.
-  - Two points at 0.5: one step.
-  - A window that starts mid-segment starts its steps from the curve value there.
-- **DB5 (legacy gains below −60 dB):** with [0: 0.0005, 4: 0.0005], the value at 2 is 0.0005. With [0: 1, 4: 0.0005], the ends are exact and the midpoint is the dB midpoint (≈ −33 dB).
-- **DB6 (adding keeps the line):** on 0 dB → 0, add a point at 50 % (gain 0.0316). The value at 25 % before and after the add differs by ≤ 0.05 dB.
-
-In `clip-envelope-ui.test.tsx`, describe `SABA-B-7 dB envelope UI (EUDB)`:
-- **EUDB1:** with points at gain 1, 0.5, 0.0316 and 0, the `top` styles are 0 %, ≈ 10.03 %, ≈ 50 % and 100 % (± 0.1 %).
-- **EUDB2:** a point at 0 dB dragged down by half the body reads `−30.0 dB` in the status and commits one entry. Dragged past the bottom, it reads `−∞ dB` with `data-gain` `0.0000`.
-- **EUDB3:** a point stored at 0.0005, dragged horizontally only (dy 0), keeps `data-gain` `0.0005` and moves in time.
-
-Timeouts (L31): at gate 268, `clip-envelope-ui.test.tsx` ran 28 tests in 5280 ms. B's sketch run: slowest test 224 ms; `envelope.test.ts` 66 ms; `export-range.test.ts` 721 ms. All are far below 50 % of the 5 s default. Add no explicit timeouts.
+The sketch of all rows is in `b-round-269/sketch.diff`. A may write them differently, provided they are equal or stronger.
 
 ### 5.3 A runs (speed rules)
-- `npm run typecheck`, `npm run lint`, and `npx biome check` on the changed files.
-- `npx vitest run` on the 3 granted test files plus `clip-gain-waveform.test.tsx`, `header-meter-envelope-strings-ui.test.tsx`, `clip-fades.test.ts` and `video-fades.test.ts` (envelope and fade neighbours, all in `app/lib/arrangement/__tests__`). All must pass.
-- A red-proof for each mutant in §7, on a scratch copy outside `store/`.
-- The `code-reviewer` subagent (3 code files change).
+- `npm run typecheck`;
+- `npm run lint`;
+- `npx biome check` on the 6 changed code and test files;
+- `npx vitest run` on these 7 files: `app/lib/arrangement/__tests__/{detail-panel-polish.test.tsx,background-time-selection-ui.test.tsx,strings.test.ts,navigation-strings-ui.test.tsx,detail-panel.test.tsx,panels.test.ts,workspace-strings-ui.test.tsx}`. The B scratch result was 114/114 for the first four.
 
-The full suite, the build and `npm run verify` are gate rows.
+L31 headroom: gate 269 shows background-time-selection-ui at 20 tests in 6092 ms and detail-panel-polish at 16 tests in 4154 ms. Each test sits far under the 5000 ms default. A reports the slowest covering test; a test above 2500 ms is a STOP (L11).
 
-## 6. B's pre-check (L23)
-- **Sketch** (`b-round-268/sketch.diff`): scratch `/tmp/b268-scratch`; `tsc` rc 0; Biome is clean on the 3 files.
-- **Value check** (`b-round-268/b268-sanity.test.ts`): 0 dB → −∞ reads −15.000 / −30.000 / −45.000 dB; 120 steps, worst step 0.500 dB.
-- **Folder run:** see §5.1. No consumer of `clipEnvelopeGainAtSource` or `scheduleClipEnvelopeGain` exists outside the 4 files [K10]. No `perf/**` or `e2e/**` file references them.
-- **Browser** (`b-round-268/probe-envelope.mjs`). It ran at HEAD on :5173 (`probe-envelope-head.json`) and on the sketch on :5180 (`probe-envelope-sketch.json`), at 1440×900 and 1280×720, with 0 page errors.
-  - **Recipe:** fresh context, `/studio-lab`, wait for `Demo collection ready`, focus the first library option and press Enter (one clip), blur, then click `arrangement-envelope-toggle` [K12].
-  - **Points:** double-click the editor at x + 20 (0.725 s) and at x + 420 (10.725 s), both with y + 5 px. Drag the last point 400 px down. Double-click at x + 220 (5.725 s). Drag the first point down a quarter of the 50 px body.
+A also runs the `code-reviewer` (7 files) and reports any Architecture note.
 
-  | | HEAD | Sketch |
-  |---|---|---|
-  | Mid point added on 0 dB → −∞ | `5.725:0.5000`, "−6.0 dB" | `5.725:0.0316`, "−30.0 dB", depth 0.5 |
-  | Quarter drag from 0 dB | 0.7500, "−2.5 dB" | 0.1778, "−15.0 dB" |
-  | Point dragged to the bottom | `0.0000`, `−∞ dB` | same |
+## 6. B's pre-check (L23), all in `b-round-269/`
+- **Scratch:** `/tmp/b269-scratch` (an rsync of `store/` at `f6ebd2d`, with `node_modules` symlinked). `sketch.diff` (285 lines) applies §3 and §5.
+- **Checks:** `npx tsc --noEmit` rc 0 (`precheck-typecheck.txt`); Biome on the 6 files is clean.
+- **Collision sweep:** `precheck-files.txt` lists 27 files found by the regex in §9 K11; the sketch failed exactly the 5 tests in §5.1 (`precheck-sketch-vitest.txt`). The whole folder (168 files) gave the same 5 failures (`precheck-folder.txt`). With the §5.1 rewrites applied, the 4 files passed 114/114.
+- **Mutants:** `mutants.py` and `mutants.txt` (§7).
+- **Browser (Chromium, both viewports, 0 page errors):**
+  - HEAD on :5173: `probe-detail-range-head.json`, `probe-alltracks-head.json`, `probe-split-copy-head.json`;
+  - sketch on scratch :5182 (stopped after the probe): `*-sketch.json`.
+  - The sketch shows past-start `6.25/12.5`, kept after Enter with "· Music."; past-end `12.5/115.102`, kept; inside unchanged; all-tracks kept, with "· all tracks." and 4 overlays.
+  - Split statuses: A "Clip split at the time selection; the part inside it is selected."; G "Split at the time selection; the 2 clips inside it are selected."; title "Split clips at the time selection (Ctrl+E)".
+- **1280×720:** the detail panel starts collapsed (`panelWasHidden: true`; INFO-C269-1280-DETAIL-COLLAPSED). Every 1280 recipe clicks `arrangement-detail-toggle` first [K10b].
+- **Side effect:** the scratch Vite server re-optimised dependencies, which may have rewritten `store/node_modules/.vite` through the symlink. `store/` `git status` stayed empty.
 
 ## 7. Mutants (A red-proofs them; C re-runs them on its own scratch)
-- **M-LINEAR:** interpolation back to linear gain. DB1 and EV1 go red.
-- **M-NO-STEPS:** step count forced to 1. DB4 and the EV5 step-count asserts go red.
-- **M-DISPLAY:** `top` back to `(1 − gain)`. EUDB1 goes red.
-- **M-DRAG:** drag back to `originalGain − dy/bodyHeight`. The EU3 quarter row and EUDB2 go red.
-- **M-DY0:** the dy = 0 rule removed. EUDB3 goes red.
-- **M-FLOOR:** a literal −40 in place of `TRACK_VOLUME_DB_MIN`. DB3 goes red.
+| Mutant | Change | Red at B (`mutants.txt`) |
+|---|---|---|
+| M-CLAMP-DISPLAY | restore the `Math.max`/`Math.min` display | DP1, DR1, DR2, the rewritten partial-overlap test |
+| M-NO-KEEP | keep branch disabled (`false &&`) | DP1, DR1, DR2, DR3 |
+| M-LANE | always `selection.laneName` in the keep branch | DR3 |
+| M-RAW-TEXT | compare raw `startText`/`endText` instead of normalised values | DR6 (added after B's pre-check; A red-proofs it) |
+| M-STR-DONE | old `splitRangeDone` | BS1, BS4, ST6 |
+| M-STR-CLIPS | old `splitRangeClipsDone` | BS2, BS3, ST7 |
+| M-STR-TITLE | old title | NS2, ST6 |
+
+The unmutated sketch: 114/114. DR4 and DR5 are guards for unchanged paths; they are not mutant rows.
 
 ## 8. C rows (Chromium, `/studio-lab`, 1440×900 and 1280×720, fresh anonymous contexts)
+Recipes as in `b-round-269/probe-detail-range.mjs` and `probe-split-copy.mjs`:
+- wait for `Demo collection ready`;
+- add the first library item to the Music lane by keyboard (focus option, Enter);
+- at 1280, click `arrangement-detail-toggle` before reading fields [K10b].
 
-Use B's recipe (§6; `probe-envelope.mjs` and `probe-meter.mjs` may be reused). For export, use the round-83 method (EN-EXPORT; `c-round-83/tools/wav.cjs` parses the WAV). The round-83 browser scripts predate the export dialog rewrite (PERF-16): the method is the reference, and C adapts the selectors. Export WAV twice from the same one-clip project:
-- **Export A:** no points.
-- **Export B:** three points, made as in `b-round-268/probe-meter.mjs`: double-click the editor at x + 20 and at x + 220, drag the second point past the bottom, then double-click at x + 420 (it takes −∞ from the line). At HEAD this gives `0.725:1.0000;5.725:0.0000;10.725:0.0000` [K13].
-- **Point times:** C reads `p1`, `p2` and `p3` from the clip's `data-envelope` and computes every time below from them. 0.725 / 5.725 / 10.725 are the values B measured, not constants. A different clip start or zoom in C's context must not fail a correct implementation.
+Gate rows (full vitest, build, full Biome, verify, e2e smoke) are `gate`; do not claim them.
 
-**Envelope gain at t:** the offline render gives B = A · g(t) sample for sample. g(t) is the **median of the per-sample ratios B/A** inside a 20 ms window centred at t, on samples where |A| > 0.01.
-
-| Row | What C checks | Pass |
+| Row | Steps | PASS when |
 |---|---|---|
-| SOURCE-SCOPE | `git status --porcelain` ⊆ the grants file; HEAD per the baseline clause | exact |
-| HUNK-SCOPE | `graph.client.ts`: only `scheduleClipEnvelopeGain` and the import change. `ArrangementClipEnvelope.tsx`: only `top`, the polyline vertices, the drag mapping and the import. No class token changes | exact |
-| CLAIMS | K1–K14 re-run verbatim (§9) | all match |
-| TESTS-TARGETED | the §5.3 file set | all pass |
-| TEST-REWRITES | each §5.1 row: the new assertion is equal or stronger. Diff each rewritten test; any removed `expect` without a replacement on the same subject is a Medium | none lost |
-| MUTANTS | the 6 mutants in §7 | each red as listed; unmutated green |
-| TAPER-EXPORT | Export B at p1 + 25 / 50 / 75 % of (p2 − p1) (B measured 1.975 / 3.225 / 4.475 s) | −15 / −30 / −45 dB ± 0.5 dB |
-| CURVE-EXPORT | every 50 ms from p1 + 0.025 s to p1 + 0.75·(p2 − p1) (the curve is ≥ −45 dB there) | within 0.2 dB of `−60·(t − p1)/(p2 − p1)` |
-| SILENCE-EXPORT | every sample of Export B in [p2, p3], all channels, and the clip after p3 | exactly 0 |
-| NO-CLICK-EXPORT | over [p1, p2] the per-sample ratio, where \|A\| > 0.01: \|ratio − curve gain\| | ≤ 0.002 everywhere |
-| UNITY-EXPORT | Export B before p1 | ratio = 1 within 1e-4 |
-| DRAG-READOUT | from 0 dB, drag a point down 25 / 50 / 75 % of the body | status and title read −15.0 / −30.0 / −45.0 dB (± 0.6 dB for pixel rounding); the point's centre depth = the dB / −60 ± 0.03; the bottom reads `−∞ dB` |
-| LINE-THROUGH | after DRAG-READOUT, the visible line passes through each point's centre (± 1 px), and a double-click at the line's middle adds a point whose dB is the mean of its neighbours' dB (both > 0) or the depth midpoint (one is −∞) | ± 0.2 dB |
-| HORIZONTAL-DRAG | drag a point sideways only | `data-gain` unchanged byte for byte; one entry |
-| UNDO | after DRAG-READOUT, Ctrl+Z restores the previous `data-envelope` byte for byte; Ctrl+Shift+Z re-applies it | exact |
-| PLAY-THROUGH | play Export B's project from 0 (Home, then Space) and poll every 250 ms. The `arrangement-track-meter` of the lane holding the clip [K11] reads `data-level-db` = `-inf` at every sample in [p2 + 2.0 s, p3]. At every sample before p1 + 0.5·(p2 − p1) (−30 dB on music that meters about −10 to −20 dB, above the −60 dB meter floor [K14]) it is not `-inf`. No page errors; the position advances monotonically. Baseline: at HEAD the meter reads `-inf` from about p2 + 1.3 s (meter decay) and reads −10.6 dB at 0.46 s, at both viewports [K13] | as stated |
-| PLAY-EDIT | drag a point during playback (EN-PLAY-EDIT, round 83) | no console error; the position stays monotonic; one entry |
-| MULTIPLY-EXPORT | fade-in 1 s + Clip Gain −6 dB + Export B's points | ratio = fade · 0.5012 · curve within 0.002 (EN-MULTIPLY) |
-| SCREEN-BUDGET | persistent text lines outside the timeline, before and after | equal (no new persistent element, L39) |
-| LESSON | `grep -n '^41\. \*\*Perceptual axes' lessons.md` | 1 hit |
-| DOC-200 | l.4 byte-exact; the 7 TEMPLATE headings in order; every test id the doc names exists (L26) | exact |
-| G269-AUTH | `/studio-lab` opens anonymously; `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` without a header returns 401 | as round 268 |
-| Gate rows | full vitest, build, Biome full, `npm run verify`, e2e smoke | `gate`, not claimed |
+| SOURCE-SCOPE | `git status --porcelain` | only the 7 granted paths |
+| HUNK-SCOPE | diff `ArrangementDetailPanel.tsx` | only the import, the 2 display lines and the keep branch; no class, testid, `disabled` or JSX change |
+| CLAIMS | re-run §9 at HEAD | every K matches (L29) |
+| TESTS-TARGETED | §5.3 files | all pass |
+| TEST-REWRITES | diff each §5.1 test against HEAD | each removed `expect` has an equal or stronger replacement on the same subject |
+| MUTANTS | §7 on C's own scratch | each red as listed |
+| DP-BROWSER | past-start and past-end recipes | the From/To values equal the `arrangement-range` readout's start and end to 3 decimals (6.25/12.5; 12.5/115.102 or the measured end) |
+| DP-ENTER | then focus From, Enter; also click Set | the readout, lane overlay `[data-range-start]/[data-range-end]` and fields are unchanged; status exactly `Time selection: <start> — <end> · Music.`; `document.activeElement` is still From after Enter (L47) |
+| DP-EDIT | past-start recipe; type From = 11, Enter; then From = 9 (outside the clip), Enter | 11: selection 11.000–12.500, announced "· Music."; then 9: status = the `rangeInvalid` text, selection unchanged |
+| DP-INSIDE | inside recipe; Enter | unchanged from HEAD (11.5/14, status "… · Music.") |
+| DP-ALLTRACKS | inside recipe, then Ctrl+Shift+L, then Enter in From | readout keeps "all tracks", 4 lane overlays, status `Time selection: 00:11.500 — 00:14.000 · all tracks.` |
+| SPLIT-COPY | recipe A (past start) + Ctrl+E; recipe G (gap, then drag from inside the first part past the last clip's end) + Ctrl+E; the Split button title with a selection | A: `Clip split at the time selection; the part inside it is selected.`; G: `Split at the time selection; the 2 clips inside it are selected.`, with clip starts 10/11.25/20; title `Split clips at the time selection (Ctrl+E)` |
+| SPLIT-BOX (L3) | 1280×720, the G status | the status text box is not wider than its container and not truncated beyond HEAD (the old text is longer; measure both) |
+| SCREEN-BUDGET (L39) | persistent text lines outside the timeline, HEAD vs new, state: past-start selection with the panel open | equal (no new persistent element) |
+| STATUS-CLOBBER (L51) | DP-ENTER: read the status 1 s after Enter | still the applied text (no later write) |
+| G270-AUTH | `/studio-lab` anonymous; `/studio/middle-east` signed out; `/api/studio-token` with no header and with a fake Bearer | loads with 4 lanes / "Sign in required", 0 audio requests / 401 / 500 without a token, as in round 269 |
 
-**Ableton conformance (separate verdicts):**
-- R3 confirmed by measurement (option A within 0.03 down to −36 dB);
-- D1–D3 are deliberate differences approved by Saba;
-- R5 and R6 unchanged.
-
-**Neighbours that could break:**
-- fades and Clip Gain (MULTIPLY-EXPORT);
-- loop playback of an enveloped clip (unit EV5e);
-- range export (XR2);
-- split and trim (EV3/EV4);
-- the envelope-mode refusals mid-drag (EU3 "the A key and the Env button").
+**Ableton conformance:** C rates each §2 row separately. The fields have no reference, so their status is "not applicable". The split wording needs no deliberate-difference entry, because it is closer to Live's command name.
 
 ## 9. Claims (L29). Run from `store/` at HEAD
-- **K1:** `git rev-parse HEAD; git status --porcelain | wc -l` → `3058a7c18c558f4139edff0cd6c2cc76ccc47d2e`, `0`.
-- **K2:** `grep -n "left.gain + ((right.gain - left.gain)" app/lib/arrangement/envelope.ts` → `95:`.
-- **K3:** `grep -n "function scheduleClipEnvelopeGain\|envelopeGain.gain.linearRampToValueAtTime" app/lib/arrangement/graph.client.ts` → `122:`, `137:`, `143:`.
-- **K4:** `grep -n "1 - \|gainDelta" app/components/arrangement/ArrangementClipEnvelope.tsx` → `261:`, `267:`, `370:`, `400:`, `401:`, `402:`.
-- **K5:** `grep -n "export const TRACK_VOLUME_DB_MIN = -60;" app/lib/arrangement/track-volume-db.ts` → `3:`.
-- **K6:** `grep -n "Math.round(value \* 10000) / 10000" app/lib/arrangement/envelope.ts` → `29:`.
-- **K7:** `grep -rn "clipEnvelopes: clipEnvelopeShapes(arrangement)" app --include=*.ts --include=*.tsx | grep -v __tests__` → `app/lib/arrangement/graph.client.ts:483` and `app/contexts/ArrangementContext.tsx:1008` (2 hits).
-- **K8:** `grep -n "toFixed(4)" app/lib/arrangement/envelope.ts app/components/arrangement/ArrangementClipEnvelope.tsx` → `envelope.ts:122` (`formatClipEnvelopeData`) and `ArrangementClipEnvelope.tsx:366` (`data-gain`).
-- **K9:** `grep -c "it('EV1 is\|it('EV2 a new\|it('EV4 a start\|it('EV5[abce] \|it('EV6b\|it('XR2 an env\|it('EU2 a point added between\|it('EU3 dragging\|it('EU3 a press\|it('EU3 the A key\|it('EU7 the line stays\|it('EU5 the line passes" app/lib/arrangement/__tests__/envelope.test.ts app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx app/lib/arrangement/__tests__/export-range.test.ts` → `8`, `6`, `1` (15 tests; lines as in §5.1 with `grep -n`).
-- **K10:** `grep -rlnE "clipEnvelopeGainAtSource|clipEnvelopeGainAt\b|scheduleClipEnvelopeGain" app perf e2e | sort` → exactly `app/components/arrangement/ArrangementClipEnvelope.tsx`, `app/lib/arrangement/__tests__/envelope.test.ts`, `app/lib/arrangement/envelope.ts` and `app/lib/arrangement/graph.client.ts`.
-- **K11:** `grep -n "data-testid=\"arrangement-track-meter\"" app/components/arrangement/ArrangementTrackMeter.tsx; grep -n "return '-inf';" app/lib/arrangement/meter.ts` → `76:` and `125:`.
-- **K12:** `grep -rn "data-testid=\"arrangement-envelope-toggle\"\|data-testid=\"arrangement-clip-envelope-editor\"\|data-testid=\"arrangement-clip-envelope-point\"\|data-testid=\"arrangement-clip-envelope-line\"" app/components/arrangement | wc -l` → `4` (`StudioWorkspace.tsx` 1, `ArrangementClipEnvelope.tsx` 3).
-- **K13:** `b-round-268/probe-meter.mjs` run at HEAD (`node probe-meter.mjs http://127.0.0.1:5173 out.json`).
-  - **Expected** (`b-round-268/probe-meter-head.json`, both viewports, 0 page errors): `data-envelope` = `0.725:1.0000;5.725:0.0000;10.725:0.0000` on lane `music`.
-  - That lane's meter (2nd of 4) reads `-10.6` at ≈ 0.46 s, then `-52.9` at ≈ 6.5 s, then `-inf` from ≈ 7.0 s to the end.
-  - The other 3 meters read `-inf` throughout.
-- **K14:** `grep -n "export const METER_FLOOR_DB = -60;" app/lib/arrangement/meter.ts` → `2:`.
-- **State recipe (§6):** `b-round-268/probe-envelope-head.json` (B ran it at HEAD at both viewports).
+| Tag | Command | Expected |
+|---|---|---|
+| K1 | `git rev-parse HEAD; git status --porcelain \| wc -l` | `f6ebd2d01c361c17d11c5b885a40e37e2ca9f9eb`, `0` |
+| K2 | `grep -n "const onClipStart\|const onClipEnd\|Math.min(range.end, clip.start + clip.duration)" app/components/arrangement/ArrangementDetailPanel.tsx` | `525:` (contains `Math.max(range.start, clip.start)`), `526:`, `527:` |
+| K3 | `grep -n "const clamped = clampDetailRangeToClip\|const next: TimeRange = { ...clamped, trackId: target.trackId }\|const target = selection.clip;" app/components/arrangement/ArrangementDetailPanel.tsx` | `576:`, `578:`, `588:` |
+| K4 | `grep -n "splitRangeDone:\|splitRangeClipsDone:\|splitRangeTitle:\|  allTracks: 'all tracks'," app/lib/arrangement/strings.ts` | `116:`, `117:`, `134:`, `144:` |
+| K5 | `grep -rnE "both edges of the time selection\|Clips split\|middle part is selected\|parts inside it are selected" app perf e2e` | 9 lines: strings.ts 116/118/144, strings.test.ts 385/411/517/520, background-time-selection-ui.test.tsx 555, navigation-strings-ui.test.tsx 261 (`perf`, `e2e`: 0) |
+| K6 | `grep -rn "studioEditStrings.splitRange" app --include=*.ts --include=*.tsx \| grep -v __tests__` | ArrangementTransport.tsx:177; ArrangementContext.tsx:1992, :2000, :2005 |
+| K7 | `grep -n "import { studioDetailStrings } from '~/lib/arrangement/strings';" app/components/arrangement/ArrangementDetailPanel.tsx` | `51:` |
+| K8 | `grep -n "rangeInvalid:\|rangeApplied: " app/lib/arrangement/strings.ts` | `787:`, `810:` |
+| K9 | `grep -n "isTypingTarget(event.target)$" app/components/arrangement/StudioWorkspace.tsx`; `grep -n "const TEXT_INPUT_TYPES" app/components/arrangement/StudioWorkspace.tsx` | `2222:`; `409:` (the set has no `button`) |
+| K10 | `grep -c "it('" app/lib/arrangement/__tests__/detail-panel-polish.test.tsx app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx` | 16 and 18 |
+| K10b | browser: `b-round-269/probe-detail-range.mjs` at HEAD | `panelWasHidden` false at 1440×900, true at 1280×720 |
+| K11 | the collision regex: `grep -rlE "arrangement-detail-(start\|end\|apply\|reason)\|clampDetailRangeToClip\|isDetailRangeInsideClip\|splitRange\|both edges\|Clips split\|studioDetailStrings\|studioEditStrings\|rangeMultiReason\|noneReason" app --include=*.test.ts --include=*.test.tsx \| wc -l` | 27 |
+| K12 | browser state recipes, `b-round-269/probe-*-head.json` | the §1 tables (run once by B at HEAD) |
 
 ## 10. STOP conditions (L11)
-- a change is needed outside the grants;
-- a §5.1 rewrite cannot keep an equal or stronger assertion;
-- a test outside §5.1 goes red;
-- a mutant stays green;
-- any covering test runs above 2.5 s;
-- the export path does not reach `scheduleClipEnvelopeGain`.
+- Any covering test fails, or one runs above 2500 ms.
+- A change is needed outside §4.
+- Two clauses of this task disagree.
+- The keep branch would have to call `setTimeRange` to pass a row.
+- Any row would need a disabled or hidden element.
 
 ## 11. After C PASS
-- SABA-B-7 and SABA-B-7-ENVELOPE-DB → done.
-- Next: round 270 GATE266-S1 (+ GATE266-S4, B-R266-CLIPS-SPLIT-COPY), then 271 SABA-B-11c stage 2, then SYS-6.
-- REGRESSION comes first on or after 2026-11-02.
+- GATE266-S1, B-R269-DETAIL-ALLTRACKS-DROP, GATE266-S4 and B-R266-CLIPS-SPLIT-COPY close.
+- Round 271 = SABA-B-11c stage 2 (relative snap, Saba option (a)), unless REGRESSION is due (on or after 2026-11-02, in which case it goes first).
+- Then SYS-6.
+- RETRO at 275.

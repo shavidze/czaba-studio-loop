@@ -1,0 +1,567 @@
+diff --git a/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx b/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx
+index e74b102..19a5936 100644
+--- a/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx
+@@ -320,6 +320,18 @@ function dragPoint(
+   });
+ }
+ 
++function expectLineVertices(
++  points: string | null | undefined,
++  expected: readonly (readonly [x: number, y: number])[],
++) {
++  const vertices = (points ?? '').split(' ').map((pair) => pair.split(',').map(Number));
++  expect(vertices).toHaveLength(expected.length);
++  expected.forEach(([x, y], index) => {
++    expect(vertices[index]?.[0]).toBe(x);
++    expect(Math.abs((vertices[index]?.[1] ?? Number.NaN) - y)).toBeLessThanOrEqual(1e-4);
++  });
++}
++
+ let performanceNow = 1000;
+ 
+ beforeEach(() => {
+@@ -457,12 +469,12 @@ describe('SRW-18 stage 2 add a point (EU2)', () => {
+     ]);
+     fireEvent.click(toggle());
+     fireEvent.doubleClick(editorOf('s1'), { clientX: 320, clientY: 5 });
+-    expect(clipRoot('s1').dataset.envelope).toBe('6.000:1.0000;10.000:0.7500;14.000:0.5000');
++    expect(clipRoot('s1').dataset.envelope).toBe('6.000:1.0000;10.000:0.7071;14.000:0.5000');
+   });
+ });
+ 
+ describe('SRW-18 stage 2 drag a point (EU3)', () => {
+-  it('EU3 dragging a point down by a quarter of the body gives 0.75 with one entry', async () => {
++  it('EU3 dragging a point down by a quarter of the body gives −15 dB (0.1778) with one entry', async () => {
+     const { api, view, clipRoot, pointOf, toggle } = await mountEnvelopeWorkspace([
+       clipAt('s1', 'stems', 2, 16, { envelope: V_ENVELOPE }),
+     ]);
+@@ -477,13 +489,13 @@ describe('SRW-18 stage 2 drag a point (EU3)', () => {
+         release: false,
+       },
+     );
+-    expect(statusText(view)).toBe('Envelope: 6.000 s · −2.5 dB');
++    expect(statusText(view)).toBe('Envelope: 6.000 s · −15.0 dB');
+     expect(live(api).undoLabel).toBeNull();
+     fireEvent.pointerUp(pointOf('s1', 0), { pointerId: 1, clientX: 300, clientY: 120 });
+-    expect(clipRoot('s1').dataset.envelope).toBe('6.000:0.7500;10.000:0.2512;14.000:1.0000');
+-    expect(pointOf('s1', 0).dataset.gain).toBe('0.7500');
++    expect(clipRoot('s1').dataset.envelope).toBe('6.000:0.1778;10.000:0.2512;14.000:1.0000');
++    expect(pointOf('s1', 0).dataset.gain).toBe('0.1778');
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+-    expect(statusText(view)).toBe('Envelope: 6.000 s · −2.5 dB.');
++    expect(statusText(view)).toBe('Envelope: 6.000 s · −15.0 dB.');
+     expect(positionOf(api)).toBe(0);
+     expect(undoAll(api)).toBe(1);
+     expect(clipRoot('s1').dataset.envelope).toBe(V_DATA);
+@@ -511,7 +523,7 @@ describe('SRW-18 stage 2 drag a point (EU3)', () => {
+     expect(live(api).undoLabel).toBeNull();
+     expect(statusText(view)).toBe(before);
+     dragPoint(pointOf('s1', 1), [{ dx: 0, dy: 20 }], { release: false, pointerId: 3 });
+-    expect(pointOf('s1', 1).dataset.gain).toBe('0.0012');
++    expect(pointOf('s1', 1).dataset.gain).toBe('0.0447');
+     fireEvent.pointerCancel(pointOf('s1', 1), { pointerId: 3 });
+     expect(clipRoot('s1').dataset.envelope).toBe(V_DATA);
+     expect(live(api).undoLabel).toBeNull();
+@@ -557,7 +569,7 @@ describe('SRW-18 stage 2 drag a point (EU3)', () => {
+     expect(statusText(view)).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+     expect(gridControl().dataset.envelopeMode).toBe('on');
+     fireEvent.pointerUp(pointOf('s1', 0), { pointerId: 1, clientX: 300, clientY: 120 });
+-    expect(clipRoot('s1').dataset.envelope).toBe('6.000:0.7500;10.000:0.2512;14.000:1.0000');
++    expect(clipRoot('s1').dataset.envelope).toBe('6.000:0.1778;10.000:0.2512;14.000:1.0000');
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+   });
+ 
+@@ -613,7 +625,10 @@ describe('SRW-18 stage 2 review follow-ups (EU7)', () => {
+     ]);
+     expect(clipRoot('s1').dataset.envelope).toBe('');
+     const line = clipRoot('s1').querySelector(`[data-testid="${LINE}"] polyline`);
+-    expect(line?.getAttribute('points')).toBe('0,0.7488 80,0.7488');
++    expectLineVertices(line?.getAttribute('points'), [
++      [0, 0.2],
++      [80, 0.2],
++    ]);
+   });
+ 
+   it('EU7 Ctrl and Shift on the editor toggle the selection; a double-click on a trim strip adds nothing', async () => {
+@@ -731,13 +746,19 @@ describe('SRW-18 stage 2 neighbours (EU5)', () => {
+     expect(live(api).undoLabel).toBeNull();
+   });
+ 
+-  it('EU5 the line passes through every visible point at y = 1 − gain', async () => {
++  it('EU5 the line passes through every visible point at y = its dB depth', async () => {
+     const { clipRoot, toggle } = await mountEnvelopeWorkspace([
+       clipAt('s1', 'stems', 2, 16, { envelope: V_ENVELOPE }),
+       clipAt('m1', 'music', 0, 1),
+     ]);
+     const line = clipRoot('s1').querySelector(`[data-testid="${LINE}"] polyline`);
+-    expect(line?.getAttribute('points')).toBe('0,0 160,0 320,0.7488 480,0 640,0');
++    expectLineVertices(line?.getAttribute('points'), [
++      [0, 0],
++      [160, 0],
++      [320, 0.2],
++      [480, 0],
++      [640, 0],
++    ]);
+     expect(clipRoot('m1').querySelector(`[data-testid="${LINE}"]`)).toBeNull();
+     fireEvent.click(toggle());
+     expect(
+@@ -957,3 +978,66 @@ describe('SABA-B-6 envelope cursor (CU1, CU2)', () => {
+     }
+   });
+ });
++
++describe('SABA-B-7 dB envelope UI (EUDB)', () => {
++  it('EUDB1 point heights follow the fader dB scale: 0 dB at the top, −30 dB halfway, −∞ at the bottom', async () => {
++    const { pointsOf, toggle } = await mountEnvelopeWorkspace([
++      clipAt('s1', 'stems', 2, 16, {
++        envelope: [
++          { time: 4, gain: 1 },
++          { time: 6, gain: 0.5 },
++          { time: 8, gain: 0.0316 },
++          { time: 10, gain: 0 },
++        ],
++      }),
++    ]);
++    fireEvent.click(toggle());
++    const tops = pointsOf('s1').map((point) => Number.parseFloat(point.style.top));
++    expect(tops).toHaveLength(4);
++    [0, 10.03, 50, 100].forEach((expected, index) => {
++      expect(Math.abs((tops[index] ?? Number.NaN) - expected)).toBeLessThanOrEqual(0.1);
++    });
++  });
++
++  it('EUDB2 a drag down by half the body reads −30.0 dB; past the bottom it reads −∞ dB', async () => {
++    const { api, view, clipRoot, pointOf, toggle } = await mountEnvelopeWorkspace([
++      clipAt('s1', 'stems', 2, 16, { envelope: V_ENVELOPE }),
++    ]);
++    fireEvent.click(toggle());
++    dragPoint(pointOf('s1', 0), [{ dx: 0, dy: BODY_HEIGHT_PX / 2 }], { release: false });
++    expect(statusText(view)).toBe('Envelope: 6.000 s · −30.0 dB');
++    fireEvent.pointerUp(pointOf('s1', 0), {
++      pointerId: 1,
++      clientX: 300,
++      clientY: 100 + BODY_HEIGHT_PX / 2,
++    });
++    expect(statusText(view)).toBe('Envelope: 6.000 s · −30.0 dB.');
++    expect(pointOf('s1', 0).dataset.gain).toBe('0.0316');
++    expect(live(api).undoLabel).toBe(MOVE_LABEL);
++    dragPoint(pointOf('s1', 0), [{ dx: 0, dy: BODY_HEIGHT_PX * 2 }], { pointerId: 2 });
++    expect(statusText(view)).toBe('Envelope: 6.000 s · −∞ dB.');
++    expect(pointOf('s1', 0).dataset.gain).toBe('0.0000');
++    expect(clipRoot('s1').dataset.envelope).toBe('6.000:0.0000;10.000:0.2512;14.000:1.0000');
++    expect(undoAll(api)).toBe(2);
++    expect(clipRoot('s1').dataset.envelope).toBe(V_DATA);
++  });
++
++  it('EUDB3 a horizontal-only drag keeps a legacy gain below −60 dB byte for byte', async () => {
++    const { api, clipRoot, pointOf, toggle } = await mountEnvelopeWorkspace([
++      clipAt('s1', 'stems', 2, 16, {
++        envelope: [
++          { time: 4, gain: 1 },
++          { time: 8, gain: 0.0005 },
++          { time: 12, gain: 1 },
++        ],
++      }),
++    ]);
++    fireEvent.click(toggle());
++    dragPoint(pointOf('s1', 1), [{ dx: PX_PER_SECOND }]);
++    expect(pointOf('s1', 1).dataset.gain).toBe('0.0005');
++    expect(pointOf('s1', 1).dataset.time).toBe('11.000');
++    expect(clipRoot('s1').dataset.envelope).toBe('6.000:1.0000;11.000:0.0005;14.000:1.0000');
++    expect(live(api).arrangement.clips[0].envelope?.[1]).toStrictEqual({ time: 9, gain: 0.0005 });
++    expect(undoAll(api)).toBe(1);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/envelope.test.ts b/app/lib/arrangement/__tests__/envelope.test.ts
+index 3235eb8..1b4d334 100644
+--- a/app/lib/arrangement/__tests__/envelope.test.ts
++++ b/app/lib/arrangement/__tests__/envelope.test.ts
+@@ -14,8 +14,12 @@ import {
+ } from '../clipboard';
+ import {
+   addClipEnvelopePoint,
++  CLIP_ENVELOPE_RAMP_STEP_DB,
++  clipEnvelopeDepthFromGain,
+   clipEnvelopeGainAt,
+   clipEnvelopeGainAtSource,
++  clipEnvelopeGainFromDepth,
++  clipEnvelopeRampSteps,
+   clipEnvelopeShapes,
+   formatClipEnvelopeData,
+   formatClipEnvelopeGain,
+@@ -44,12 +48,14 @@ import {
+   trimClipStart,
+ } from '../model';
+ import { planSchedule } from '../schedule';
++import { trackVolumeFromDb } from '../track-volume-db';
+ 
+ const V_POINTS: ArrangementClipEnvelopePoint[] = [
+   { time: 4, gain: 1 },
+   { time: 8, gain: 0.2512 },
+   { time: 12, gain: 1 },
+ ];
++const V_MIDPOINT_GAIN = Math.sqrt(0.2512);
+ 
+ function envelopeArrangement(clips: ArrangementClip[]): Arrangement {
+   const base = createArrangement([
+@@ -82,18 +88,22 @@ function clipById(arrangement: Arrangement, id: string): ArrangementClip {
+ }
+ 
+ describe('SRW-18 stage 2 clipEnvelopeGainAtSource (EV1)', () => {
+-  it('EV1 is 1 without points, holds the edge values, is exact at points and linear between them', () => {
++  it('EV1 is 1 without points, holds the edge values, is exact at points and dB-linear between them', () => {
+     expect(clipEnvelopeGainAtSource([], 3)).toBe(1);
+     expect(clipEnvelopeGainAtSource(V_POINTS, 0)).toBe(1);
+     expect(clipEnvelopeGainAtSource([{ time: 4, gain: 0.5 }], 1)).toBe(0.5);
+     expect(clipEnvelopeGainAtSource([{ time: 4, gain: 0.5 }], 9)).toBe(0.5);
+     expect(clipEnvelopeGainAtSource(V_POINTS, 8)).toBe(0.2512);
+     expect(clipEnvelopeGainAtSource(V_POINTS, 4)).toBe(1);
+-    expect(clipEnvelopeGainAtSource(V_POINTS, 6)).toBeCloseTo(0.6256, 10);
+-    expect(clipEnvelopeGainAtSource(V_POINTS, 10)).toBeCloseTo(0.6256, 10);
++    expect(clipEnvelopeGainAtSource(V_POINTS, 6)).toBeCloseTo(V_MIDPOINT_GAIN, 12);
++    expect(clipEnvelopeGainAtSource(V_POINTS, 10)).toBeCloseTo(V_MIDPOINT_GAIN, 12);
++    expect(20 * Math.log10(clipEnvelopeGainAtSource(V_POINTS, 6))).toBeCloseTo(
++      10 * Math.log10(0.2512),
++      9,
++    );
+     expect(clipEnvelopeGainAtSource(V_POINTS, 20)).toBe(1);
+     const clip = stemsClip({ envelope: V_POINTS });
+-    expect(clipEnvelopeGainAt(clip, 8)).toBeCloseTo(0.6256, 10);
++    expect(clipEnvelopeGainAt(clip, 8)).toBeCloseTo(V_MIDPOINT_GAIN, 12);
+     expect(clipEnvelopeGainAt(clip, 10)).toBe(0.2512);
+   });
+ 
+@@ -119,7 +129,7 @@ describe('SRW-18 stage 2 add and remove points (EV2)', () => {
+     const added = addClipEnvelopePoint(arrangement, 'c', 10);
+     expect(clipById(added, 'c').envelope).toStrictEqual([
+       { time: 4, gain: 1 },
+-      { time: 8, gain: 0.75 },
++      { time: 8, gain: Math.round(Math.SQRT1_2 * 10000) / 10000 },
+       { time: 12, gain: 0.5 },
+     ]);
+     const third = envelopeArrangement([
+@@ -132,7 +142,7 @@ describe('SRW-18 stage 2 add and remove points (EV2)', () => {
+     ]);
+     expect(clipById(addClipEnvelopePoint(third, 'c', 3.0004), 'c').envelope?.[1]).toStrictEqual({
+       time: 1,
+-      gain: 0.6667,
++      gain: 0.1,
+     });
+     const bare = envelopeArrangement([stemsClip()]);
+     expect(clipById(addClipEnvelopePoint(bare, 'c', 7.0006), 'c').envelope).toStrictEqual([
+@@ -246,7 +256,7 @@ describe('SRW-18 stage 2 envelope under clip edits (EV4)', () => {
+     const clip = clipById(trimmed, 'c');
+     expect(clip.envelope).toStrictEqual(V_POINTS);
+     expect(visibleClipEnvelopePoints(clip)).toStrictEqual([V_POINTS[1], V_POINTS[2]]);
+-    expect(clipEnvelopeGainAt(clip, 8)).toBeCloseTo(0.6256, 10);
++    expect(clipEnvelopeGainAt(clip, 8)).toBeCloseTo(V_MIDPOINT_GAIN, 12);
+     const back = clipById(trimClipStart(trimmed, 'c', 2), 'c');
+     expect(visibleClipEnvelopePoints(back)).toStrictEqual(V_POINTS);
+   });
+@@ -425,6 +435,44 @@ function roundedCalls(gain: RecordingGain): ParamCall[] {
+   ]);
+ }
+ 
++type EnvelopeKnot = readonly [time: number, gain: number, steps: number];
++
++const V_POINTS_KNOTS_FROM_ZERO: readonly EnvelopeKnot[] = [
++  [6, 1, 1],
++  [10, 0.2512, 24],
++  [14, 1, 24],
++  [18, 1, 1],
++];
++
++function expectEnvelopeSteps(
++  gain: RecordingGain,
++  start: readonly [time: number, gain: number],
++  knots: readonly EnvelopeKnot[],
++) {
++  const calls = gain.gain.calls;
++  const rounded = roundedCalls(gain);
++  expect(rounded[0]).toEqual(['set', Math.round(start[1] * 1e6) / 1e6, start[0]]);
++  let index = 1;
++  let previousTime = calls[0]?.[2] ?? Number.NaN;
++  let previousGain = calls[0]?.[1] ?? Number.NaN;
++  for (const [time, value, steps] of knots) {
++    const segment = calls.slice(index, index + steps);
++    expect(segment).toHaveLength(steps);
++    for (const [method, stepGain, stepTime] of segment) {
++      expect(method).toBe('ramp');
++      expect(stepTime).toBeGreaterThan(previousTime);
++      if (previousGain > 0 && stepGain > 0) {
++        expect(Math.abs(20 * Math.log10(stepGain / previousGain))).toBeLessThanOrEqual(0.5 + 1e-9);
++      }
++      previousTime = stepTime;
++      previousGain = stepGain;
++    }
++    expect(rounded[index + steps - 1]).toEqual(['ramp', Math.round(value * 1e6) / 1e6, time]);
++    index += steps;
++  }
++  expect(calls).toHaveLength(index);
++}
++
+ function scheduleEnvelopes(arrangement: Arrangement, from: number, startAt: number) {
+   const ctx = new RecordingContext();
+   const handle = applySchedule(ctx, planSchedule(arrangement, from), {
+@@ -444,26 +492,23 @@ describe('SRW-18 stage 2 envelope scheduling in applySchedule (EV5)', () => {
+     const { ctx } = scheduleEnvelopes(arrangement, 0, 0);
+     const envelopeGain = gainAfter(ctx.sources[0], 'source');
+     expect(envelopeGain.gain.value).toBe(1);
+-    expect(roundedCalls(envelopeGain)).toEqual([
+-      ['set', 1, 2],
+-      ['ramp', 1, 6],
+-      ['ramp', 0.2512, 10],
+-      ['ramp', 1, 14],
+-      ['ramp', 1, 18],
+-    ]);
++    expectEnvelopeSteps(envelopeGain, [2, 1], V_POINTS_KNOTS_FROM_ZERO);
+   });
+ 
+   it('EV5b a mid-clip start begins at the line value of that position, not at the first point', () => {
+     const arrangement = envelopeArrangement([stemsClip({ envelope: V_POINTS })]);
+     const { ctx } = scheduleEnvelopes(arrangement, 8, 100);
+     const envelopeGain = gainAfter(ctx.sources[0], 'source');
+-    expect(envelopeGain.gain.value).toBeCloseTo(0.6256, 10);
+-    expect(roundedCalls(envelopeGain)).toEqual([
+-      ['set', 0.6256, 100],
+-      ['ramp', 0.2512, 102],
+-      ['ramp', 1, 106],
+-      ['ramp', 1, 110],
+-    ]);
++    expect(envelopeGain.gain.value).toBeCloseTo(V_MIDPOINT_GAIN, 12);
++    expectEnvelopeSteps(
++      envelopeGain,
++      [100, V_MIDPOINT_GAIN],
++      [
++        [102, 0.2512, 12],
++        [106, 1, 24],
++        [110, 1, 1],
++      ],
++    );
+   });
+ 
+   it('EV5c a trimmed window ramps toward a hidden point after it and ends on the line value', () => {
+@@ -471,11 +516,14 @@ describe('SRW-18 stage 2 envelope scheduling in applySchedule (EV5)', () => {
+       stemsClip({ start: 8, sourceOffset: 6, duration: 4, envelope: V_POINTS }),
+     ]);
+     const { ctx } = scheduleEnvelopes(arrangement, 0, 0);
+-    expect(roundedCalls(gainAfter(ctx.sources[0], 'source'))).toEqual([
+-      ['set', 0.6256, 8],
+-      ['ramp', 0.2512, 10],
+-      ['ramp', 0.6256, 12],
+-    ]);
++    expectEnvelopeSteps(
++      gainAfter(ctx.sources[0], 'source'),
++      [8, V_MIDPOINT_GAIN],
++      [
++        [10, 0.2512, 12],
++        [12, V_MIDPOINT_GAIN, 12],
++      ],
++    );
+   });
+ 
+   it('EV5d a clip without points builds no extra node; one with points adds exactly one', () => {
+@@ -514,18 +562,24 @@ describe('SRW-18 stage 2 envelope scheduling in applySchedule (EV5)', () => {
+     });
+     handle.appendPlan(planLoopIteration(arrangement, params, 1), 2, 18);
+     expect(ctx.sources).toHaveLength(2);
+-    expect(roundedCalls(gainAfter(ctx.sources[0], 'first source'))).toEqual([
+-      ['set', 1, 10],
+-      ['ramp', 1, 12],
+-      ['ramp', 0.5, 14],
+-      ['ramp', 0.5, 18],
+-    ]);
+-    expect(roundedCalls(gainAfter(ctx.sources[1], 'second source'))).toEqual([
+-      ['set', 1, 18],
+-      ['ramp', 1, 20],
+-      ['ramp', 0.5, 22],
+-      ['ramp', 0.5, 26],
+-    ]);
++    expectEnvelopeSteps(
++      gainAfter(ctx.sources[0], 'first source'),
++      [10, 1],
++      [
++        [12, 1, 1],
++        [14, 0.5, 13],
++        [18, 0.5, 1],
++      ],
++    );
++    expectEnvelopeSteps(
++      gainAfter(ctx.sources[1], 'second source'),
++      [18, 1],
++      [
++        [20, 1, 1],
++        [22, 0.5, 13],
++        [26, 0.5, 1],
++      ],
++    );
+   });
+ 
+   it('EV5f setClipGain touches only the clip gain; disconnect releases the envelope node', () => {
+@@ -619,13 +673,7 @@ describe('SRW-18 stage 2 export render (EV6b)', () => {
+       await renderArrangementWav(arrangement, new Map([['pulse', new FakeRenderBuffer()]]));
+       const [ctx] = contexts;
+       expect(ctx.sources).toHaveLength(2);
+-      expect(roundedCalls(gainAfter(ctx.sources[0], 'source'))).toEqual([
+-        ['set', 1, 2],
+-        ['ramp', 1, 6],
+-        ['ramp', 0.2512, 10],
+-        ['ramp', 1, 14],
+-        ['ramp', 1, 18],
+-      ]);
++      expectEnvelopeSteps(gainAfter(ctx.sources[0], 'source'), [2, 1], V_POINTS_KNOTS_FROM_ZERO);
+       expect(gainAfter(ctx.sources[1], 'plain source').gain.calls).toEqual([]);
+       expect(ctx.gains).toHaveLength(1 + arrangement.tracks.length + 3);
+     } finally {
+@@ -633,3 +681,118 @@ describe('SRW-18 stage 2 export render (EV6b)', () => {
+     }
+   });
+ });
++
++const FADE_TO_SILENCE: ArrangementClipEnvelopePoint[] = [
++  { time: 0, gain: 1 },
++  { time: 4, gain: 0 },
++];
++
++function gainDb(gain: number): number {
++  return 20 * Math.log10(gain);
++}
++
++describe('SABA-B-7 dB envelope (DB)', () => {
++  it('DB1 a 0 dB → −∞ line reads −15 / −30 / −45 dB at 25 / 50 / 75 % and the stored gains at its points', () => {
++    expect(gainDb(clipEnvelopeGainAtSource(FADE_TO_SILENCE, 1))).toBeCloseTo(-15, 2);
++    expect(gainDb(clipEnvelopeGainAtSource(FADE_TO_SILENCE, 2))).toBeCloseTo(-30, 2);
++    expect(gainDb(clipEnvelopeGainAtSource(FADE_TO_SILENCE, 3))).toBeCloseTo(-45, 2);
++    expect(clipEnvelopeGainAtSource(FADE_TO_SILENCE, 0)).toBe(1);
++    expect(clipEnvelopeGainAtSource(FADE_TO_SILENCE, 4)).toBe(0);
++  });
++
++  it('DB2 depth and gain round-trip on the fader scale, with the top at 0 dB and the bottom at −∞', () => {
++    for (const db of [-6, -12, -24, -36, -48]) {
++      const gain = 10 ** (db / 20);
++      expect(clipEnvelopeDepthFromGain(gain)).toBeCloseTo(db / -60, 9);
++      expect(clipEnvelopeGainFromDepth(clipEnvelopeDepthFromGain(gain))).toBeCloseTo(gain, 9);
++    }
++    expect(clipEnvelopeDepthFromGain(1)).toBe(0);
++    expect(clipEnvelopeDepthFromGain(0)).toBe(1);
++    expect(clipEnvelopeDepthFromGain(Number.NaN)).toBe(1);
++    expect(clipEnvelopeGainFromDepth(1)).toBe(0);
++    expect(clipEnvelopeGainFromDepth(0)).toBe(1);
++    expect(clipEnvelopeGainFromDepth(1.2)).toBe(0);
++    expect(clipEnvelopeGainFromDepth(Number.NaN)).toBe(0);
++  });
++
++  it('DB3 the envelope depth uses the same dB scale as the lane Volume fader', () => {
++    for (const db of [-6, -12, -30, -59.9]) {
++      expect(Math.abs(clipEnvelopeGainFromDepth(-db / 60) - trackVolumeFromDb(db))).toBeLessThan(
++        1e-12,
++      );
++    }
++  });
++
++  it('DB4 the scheduler steps are at most 0.5 dB apart and land exactly on every knot', () => {
++    expect(CLIP_ENVELOPE_RAMP_STEP_DB).toBe(0.5);
++    const steps = clipEnvelopeRampSteps(FADE_TO_SILENCE, 0, 4);
++    expect(steps).toHaveLength(120);
++    let previous = 1;
++    for (const step of steps.slice(0, -1)) {
++      expect(Math.abs(gainDb(step.gain) - gainDb(previous))).toBeLessThanOrEqual(0.5 + 1e-9);
++      previous = step.gain;
++    }
++    expect(steps.at(-1)).toStrictEqual({ time: 4, gain: 0 });
++    for (let index = 1; index < steps.length; index++) {
++      expect(steps[index].time).toBeGreaterThan(steps[index - 1].time);
++    }
++    expect(
++      clipEnvelopeRampSteps(
++        [
++          { time: 0, gain: 0 },
++          { time: 4, gain: 0 },
++        ],
++        0,
++        4,
++      ),
++    ).toStrictEqual([{ time: 4, gain: 0 }]);
++    expect(
++      clipEnvelopeRampSteps(
++        [
++          { time: 0, gain: 0.5 },
++          { time: 4, gain: 0.5 },
++        ],
++        0,
++        4,
++      ),
++    ).toStrictEqual([{ time: 4, gain: 0.5 }]);
++    const fromMiddle = clipEnvelopeRampSteps(FADE_TO_SILENCE, 1, 4);
++    expect(fromMiddle).toHaveLength(90);
++    expect(gainDb(fromMiddle[0].gain)).toBeCloseTo(-15.5, 9);
++    expect(fromMiddle[0].time).toBeCloseTo(1 + 3 / 90, 12);
++    expect(fromMiddle.at(-1)).toStrictEqual({ time: 4, gain: 0 });
++  });
++
++  it('DB5 a legacy gain below −60 dB keeps its level and interpolates in dB toward it', () => {
++    expect(
++      clipEnvelopeGainAtSource(
++        [
++          { time: 0, gain: 0.0005 },
++          { time: 4, gain: 0.0005 },
++        ],
++        2,
++      ),
++    ).toBe(0.0005);
++    const legacy: ArrangementClipEnvelopePoint[] = [
++      { time: 0, gain: 1 },
++      { time: 4, gain: 0.0005 },
++    ];
++    expect(clipEnvelopeGainAtSource(legacy, 0)).toBe(1);
++    expect(clipEnvelopeGainAtSource(legacy, 4)).toBe(0.0005);
++    expect(gainDb(clipEnvelopeGainAtSource(legacy, 2))).toBeCloseTo(gainDb(0.0005) / 2, 9);
++    expect(gainDb(clipEnvelopeGainAtSource(legacy, 2))).toBeCloseTo(-33.01, 2);
++  });
++
++  it('DB6 adding a point on the line keeps the sound of the line around it', () => {
++    const arrangement = envelopeArrangement([stemsClip({ envelope: FADE_TO_SILENCE })]);
++    const before = clipEnvelopeGainAtSource(FADE_TO_SILENCE, 1);
++    const added = clipById(addClipEnvelopePoint(arrangement, 'c', 4), 'c').envelope ?? [];
++    expect(added).toStrictEqual([
++      { time: 0, gain: 1 },
++      { time: 2, gain: 0.0316 },
++      { time: 4, gain: 0 },
++    ]);
++    const after = clipEnvelopeGainAtSource(added, 1);
++    expect(Math.abs(gainDb(after) - gainDb(before))).toBeLessThanOrEqual(0.05);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/export-range.test.ts b/app/lib/arrangement/__tests__/export-range.test.ts
+index df04e52..146937d 100644
+--- a/app/lib/arrangement/__tests__/export-range.test.ts
++++ b/app/lib/arrangement/__tests__/export-range.test.ts
+@@ -279,12 +279,21 @@ describe('SRW-20 stage 1 range export renderer (D-29z50, R20-X1)', () => {
+       .map((gain) => gain.gain)
+       .filter((param) => param.calls.length > 0);
+     expect(envelopeCalls).toHaveLength(1);
+-    expect(envelopeCalls[0]?.value).toBe(0.5);
+-    expect(envelopeCalls[0]?.calls).toStrictEqual([
+-      ['set', 0.5, 0],
+-      ['ramp', 1, 1],
+-      ['ramp', 1, 5],
+-    ]);
++    const midValue = 10 ** (-30 / 20);
++    expect(envelopeCalls[0]?.value).toBeCloseTo(midValue, 12);
++    const calls = envelopeCalls[0]?.calls ?? [];
++    expect(calls).toHaveLength(62);
++    expect(calls[0]?.[0]).toBe('set');
++    expect(calls[0]?.[1]).toBeCloseTo(midValue, 12);
++    expect(calls[0]?.[2]).toBe(0);
++    for (let step = 1; step <= 60; step++) {
++      const [method, value, time] = calls[step] ?? ['set', Number.NaN, Number.NaN];
++      expect(method).toBe('ramp');
++      expect(time).toBeCloseTo(step / 60, 12);
++      expect(value).toBeCloseTo(10 ** ((-30 + step / 2) / 20), 12);
++    }
++    expect(calls[60]).toStrictEqual(['ramp', 1, 1]);
++    expect(calls[61]).toStrictEqual(['ramp', 1, 5]);
+   });
+ 
+   it('XR3 overload is measured over the window only', async () => {

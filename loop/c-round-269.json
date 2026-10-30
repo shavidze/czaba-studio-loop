@@ -1,0 +1,55 @@
+{
+ "round": 269,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T12:43:52.3186827Z",
+  "round": 269,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "TESTS-TARGETED",
+  "TEST-REWRITES",
+  "MUTANTS",
+  "TAPER-EXPORT",
+  "CURVE-EXPORT",
+  "SILENCE-EXPORT",
+  "NO-CLICK-EXPORT",
+  "UNITY-EXPORT",
+  "DRAG-READOUT",
+  "LINE-THROUGH",
+  "HORIZONTAL-DRAG",
+  "UNDO",
+  "PLAY-THROUGH",
+  "PLAY-EDIT",
+  "MULTIPLY-EXPORT",
+  "SCREEN-BUDGET",
+  "LESSON",
+  "DOC-200",
+  "G269-AUTH"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome full",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "notes": [
+  "CLAIMS: K2-K12 and K14 re-run; K13 not re-run verbatim (B's probe-meter-head.json used as HEAD baseline; PLAY-THROUGH is the new-code measurement).",
+  "K1 HEAD drift 3058a7c -> 5e73fe9 accepted under L29: git diff 3058a7c HEAD -- app is empty.",
+  "MULTIPLY-EXPORT: full fade 1 s x Clip Gain -6 dB x curve at 1440x900 (max err 0.000155). At 1280x720 the Clip Gain input sits in the collapsed detail panel (display:none ancestor, pre-existing layout, not this round's code), so the 1280 export checked fade x curve only (max err 0.000304).",
+  "PLAY-THROUGH: the very first poll right after Space (position 00:00.000, before audio started) reads -inf on every meter; all samples with position > 0 before p1+50% are not -inf. Same as B's HEAD baseline method.",
+  "G269-AUTH fake Bearer returns 500 'Unable to prepare Studio access' (backend unavailable in cloud), no token; no-header returns 401.",
+  "Ableton conformance: R3 confirmed by root's Live measurement (option A); D1-D3 deliberate Saba-approved deviations; R5/R6 unchanged (double-click add, drag, value label/title in dB re-observed).",
+  "HEAD scratch dev server (:5181, stopped) used store/node_modules via symlink; Vite may have rewritten node_modules/.vite cache. Source tree unchanged."
+ ],
+ "evidence": "tmp/studio-real-loop/c-round-269/ (claims.txt, hunks.diff, rewrites.diff, vitest-targeted.txt, mutants.txt, export-*.json, analysis-*.json, ui.json, *.png; WAVs)"
+}

@@ -1,0 +1,97 @@
+diff --git a/app/components/arrangement/ArrangementClipEnvelope.tsx b/app/components/arrangement/ArrangementClipEnvelope.tsx
+index ca7158a..53a5c9b 100644
+--- a/app/components/arrangement/ArrangementClipEnvelope.tsx
++++ b/app/components/arrangement/ArrangementClipEnvelope.tsx
+@@ -1,7 +1,9 @@
+ import { type MouseEvent, type PointerEvent, useEffect, useRef } from 'react';
+ import {
+   addClipEnvelopePoint,
++  clipEnvelopeDepthFromGain,
+   clipEnvelopeGainAtSource,
++  clipEnvelopeGainFromDepth,
+   clipEnvelopePointTimelineTime,
+   formatClipEnvelopeGain,
+   moveClipEnvelopePoint,
+@@ -258,13 +260,15 @@ function ClipEnvelopeEditor({
+       return;
+     }
+     gesture.moved = true;
+-    const gainDelta = gesture.bodyHeight > 0 ? dy / gesture.bodyHeight : 0;
++    const depthDelta = gesture.bodyHeight > 0 ? dy / gesture.bodyHeight : 0;
+     const next = moveClipEnvelopePoint(
+       gesture.before,
+       clip.id,
+       gesture.pointSourceTime,
+       gesture.originalTime + dx / pxPerSecond,
+-      gesture.originalGain - gainDelta,
++      depthDelta === 0
++        ? gesture.originalGain
++        : clipEnvelopeGainFromDepth(clipEnvelopeDepthFromGain(gesture.originalGain) + depthDelta),
+     );
+     previewArrangement(next);
+     const moved = envelopePointAfterMove(next, clip.id, gesture.pointIndex);
+@@ -367,7 +371,7 @@ function ClipEnvelopeEditor({
+             className="absolute z-30 size-2.5 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-xs border border-background bg-foreground hover:scale-125"
+             style={{
+               left: (point.time - clip.sourceOffset) * pxPerSecond - CLIP_ENVELOPE_ROOT_BORDER_PX,
+-              top: `${(1 - point.gain) * 100}%`,
++              top: `${clipEnvelopeDepthFromGain(point.gain) * 100}%`,
+             }}
+             title={envelopePointTitle(time, point.gain)}
+             onPointerDown={(event) => handlePointPointerDown(slot, event)}
+@@ -397,9 +401,12 @@ export function ArrangementClipEnvelope({
+   const firstGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset);
+   const lastGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset + clip.duration);
+   const linePoints = [
+-    `0,${1 - firstGain}`,
+-    ...points.map((point) => `${(point.time - clip.sourceOffset) * pxPerSecond},${1 - point.gain}`),
+-    `${lineWidth},${1 - lastGain}`,
++    `0,${clipEnvelopeDepthFromGain(firstGain)}`,
++    ...points.map(
++      (point) =>
++        `${(point.time - clip.sourceOffset) * pxPerSecond},${clipEnvelopeDepthFromGain(point.gain)}`,
++    ),
++    `${lineWidth},${clipEnvelopeDepthFromGain(lastGain)}`,
+   ].join(' ');
+   const slots = points.map((point, slot) => ({ point, slot }));
+   return (
+diff --git a/app/lib/arrangement/graph.client.ts b/app/lib/arrangement/graph.client.ts
+index b0d9937..1e84702 100644
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -1,5 +1,10 @@
+ import type { Arrangement, ArrangementTrack, ScheduledClip } from '~/types/arrangement';
+-import { type ClipEnvelopeShape, clipEnvelopeGainAtSource, clipEnvelopeShapes } from './envelope';
++import {
++  type ClipEnvelopeShape,
++  clipEnvelopeGainAtSource,
++  clipEnvelopeRampSteps,
++  clipEnvelopeShapes,
++} from './envelope';
+ import { ArrangementExportCancelledError, raceArrangementExportAbort } from './export-cancel';
+ import { arrangementRenderSuspendFrames } from './export-progress';
+ import { type ExportOverloadReport, measureExportOverload } from './export-wav';
+@@ -132,18 +137,12 @@ function scheduleClipEnvelopeGain(
+   const initial = clipEnvelopeGainAtSource(shape.points, firstSource);
+   envelopeGain.gain.value = initial;
+   envelopeGain.gain.setValueAtTime?.(initial, at(item.when));
+-  for (const point of shape.points) {
+-    if (point.time > firstSource && point.time < lastSource) {
+-      envelopeGain.gain.linearRampToValueAtTime?.(
+-        point.gain,
+-        at(item.when + (point.time - firstSource)),
+-      );
+-    }
++  for (const step of clipEnvelopeRampSteps(shape.points, firstSource, lastSource)) {
++    envelopeGain.gain.linearRampToValueAtTime?.(
++      step.gain,
++      at(item.when + (step.time - firstSource)),
++    );
+   }
+-  envelopeGain.gain.linearRampToValueAtTime?.(
+-    clipEnvelopeGainAtSource(shape.points, lastSource),
+-    at(item.when + item.duration),
+-  );
+ }
+ 
+ function clampPan(value: number): number {

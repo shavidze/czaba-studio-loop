@@ -1,0 +1,38 @@
+== M-LINEAR rc=1 ['Tests  12 failed | 18 passed (30)']
+   RED: SABA-B-7 dB envelope (DB) > DB1 a 0 dB → −∞ line reads −15 / −30 / −45 dB at 25 / 50 / 75 % and the stored gains at its points
+   RED: SABA-B-7 dB envelope (DB) > DB4 the scheduler steps are at most 0.5 dB apart and land exactly on every knot
+   RED: SABA-B-7 dB envelope (DB) > DB5 a legacy gain below −60 dB keeps its level and interpolates in dB toward it
+   RED: SABA-B-7 dB envelope (DB) > DB6 adding a point on the line keeps the sound of the line around it
+   RED: SRW-18 stage 2 add and remove points (EV2) > EV2 a new point takes the current line value, rounds to ms and is inserted in order
+   RED: SRW-18 stage 2 clipEnvelopeGainAtSource (EV1) > EV1 is 1 without points, holds the edge values, is exact at points and dB-linear between them
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5a playing from 0 sets the first value at the clip start and ramps through every point
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5b a mid-clip start begins at the line value of that position, not at the first point
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5c a trimmed window ramps toward a hidden point after it and ends on the line value
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5e a loop iteration appended later schedules against its own startAt
+   RED: SRW-18 stage 2 envelope under clip edits (EV4) > EV4 a start trim hides points without deleting them and a trim back shows them again
+   RED: SRW-18 stage 2 export render (EV6b) > EV6b an export renders an enveloped clip through its own envelope gain
+== M-NO-STEPS rc=1 ['Tests  7 failed | 31 passed (38)']
+   RED: SABA-B-7 dB envelope (DB) > DB4 the scheduler steps are at most 0.5 dB apart and land exactly on every knot
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5a playing from 0 sets the first value at the clip start and ramps through every point
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5b a mid-clip start begins at the line value of that position, not at the first point
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5c a trimmed window ramps toward a hidden point after it and ends on the line value
+   RED: SRW-18 stage 2 envelope scheduling in applySchedule (EV5) > EV5e a loop iteration appended later schedules against its own startAt
+   RED: SRW-18 stage 2 export render (EV6b) > EV6b an export renders an enveloped clip through its own envelope gain
+   RED: SRW-20 stage 1 range export renderer (D-29z50, R20-X1) > XR2 an envelope crossing the window start begins at its mid-value
+== M-DISPLAY rc=1 ['Tests  1 failed | 30 passed (31)']
+   RED: SABA-B-7 dB envelope UI (EUDB) > EUDB1 point heights follow the fader dB scale: 0 dB at the top, −30 dB halfway, −∞ at the bottom
+== M-DRAG rc=1 ['Tests  4 failed | 27 passed (31)']
+   RED: SABA-B-7 dB envelope UI (EUDB) > EUDB2 a drag down by half the body reads −30.0 dB; past the bottom it reads −∞ dB
+   RED: SRW-18 stage 2 drag a point (EU3) > EU3 a press without movement writes nothing; pointercancel reverts with no entry
+   RED: SRW-18 stage 2 drag a point (EU3) > EU3 dragging a point down by a quarter of the body gives −15 dB (0.1778) with one entry
+   RED: SRW-18 stage 2 drag a point (EU3) > EU3 the A key and the Env button are refused mid-drag
+== M-DY0 rc=1 ['Tests  1 failed | 30 passed (31)']
+   RED: SABA-B-7 dB envelope UI (EUDB) > EUDB3 a horizontal-only drag keeps a legacy gain below −60 dB byte for byte
+== M-FLOOR rc=1 ['Tests  6 failed | 24 passed (30)']
+   RED: SABA-B-7 dB envelope (DB) > DB1 a 0 dB → −∞ line reads −15 / −30 / −45 dB at 25 / 50 / 75 % and the stored gains at its points
+   RED: SABA-B-7 dB envelope (DB) > DB2 depth and gain round-trip on the fader scale, with the top at 0 dB and the bottom at −∞
+   RED: SABA-B-7 dB envelope (DB) > DB3 the envelope depth uses the same dB scale as the lane Volume fader
+   RED: SABA-B-7 dB envelope (DB) > DB4 the scheduler steps are at most 0.5 dB apart and land exactly on every knot
+   RED: SABA-B-7 dB envelope (DB) > DB6 adding a point on the line keeps the sound of the line around it
+   RED: SRW-18 stage 2 add and remove points (EV2) > EV2 a new point takes the current line value, rounds to ms and is inserted in order
+== UNMUTATED ['Tests  69 passed (69)'] rc 0

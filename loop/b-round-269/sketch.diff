@@ -1,0 +1,285 @@
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx	2026-10-30 12:27:10.259783364 +0000
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx	2026-10-30 13:21:54.740309558 +0000
+@@ -48,7 +48,7 @@
+   detailPanelStartsOpen,
+   stepDetailPanelHeight,
+ } from '~/lib/arrangement/panels';
+-import { studioDetailStrings } from '~/lib/arrangement/strings';
++import { studioDetailStrings, studioEditStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangement';
+ import { ArrangementPeakPath } from './ArrangementClip';
+@@ -522,9 +522,8 @@
+       : false;
+   const clipStart = clip?.start;
+   const clipDuration = clip?.duration;
+-  const onClipStart = clip && range && rangeOnClip ? Math.max(range.start, clip.start) : null;
+-  const onClipEnd =
+-    clip && range && rangeOnClip ? Math.min(range.end, clip.start + clip.duration) : null;
++  const onClipStart = clip && range && rangeOnClip ? range.start : null;
++  const onClipEnd = clip && range && rangeOnClip ? range.end : null;
+   const [startText, setStartText] = useState('');
+   const [endText, setEndText] = useState('');
+   const contentRef = useRef<HTMLDivElement>(null);
+@@ -573,6 +572,20 @@
+       setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+       return;
+     }
++    if (
++      range &&
++      rangeOnClip &&
++      startText === rangeInputText(range.start) &&
++      endText === rangeInputText(range.end)
++    ) {
++      setStatus(
++        detailRangeAppliedMessage(
++          range,
++          range.allTracks ? studioEditStrings.allTracks : selection.laneName,
++        ),
++      );
++      return;
++    }
+     const target = selection.clip;
+     const clipEnd = target.start + target.duration;
+     const clamped = clampDetailRangeToClip({
+--- a/app/lib/arrangement/strings.ts	2026-10-30 12:27:10.298783534 +0000
++++ b/app/lib/arrangement/strings.ts	2026-10-30 13:22:20.765619590 +0000
+@@ -113,9 +113,9 @@
+   splitMissesSelection: 'The insert marker does not cross any selected clip.',
+   splitRangeFailed: 'Could not split at the time selection.',
+   historySplitRange: 'Split at time selection',
+-  splitRangeDone: 'Clip split at both edges of the time selection; the middle part is selected.',
++  splitRangeDone: 'Clip split at the time selection; the part inside it is selected.',
+   splitRangeClipsDone: (count: number): string =>
+-    `Clips split at the edges of the time selection; the ${count} parts inside it are selected.`,
++    `Split at the time selection; the ${count} clips inside it are selected.`,
+   splitNeedsTarget:
+     'To split, click inside a clip to select it and place the insert marker, or make a time selection.',
+   splitInsertMarkerOutside: 'The insert marker must be inside the selected clip.',
+@@ -141,7 +141,7 @@
+   loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
+   pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
+   clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
+-  splitRangeTitle: studioShortcutTitle('Split at both edges of the time selection', 'split'),
++  splitRangeTitle: studioShortcutTitle('Split clips at the time selection', 'split'),
+   splitAtInsertMarkerTitle: studioShortcutTitle('Split at the insert marker', 'split'),
+   deleteRangeHint:
+     'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+--- a/app/lib/arrangement/__tests__/strings.test.ts	2026-10-30 12:27:10.292783508 +0000
++++ b/app/lib/arrangement/__tests__/strings.test.ts	2026-10-30 13:20:00.983812776 +0000
+@@ -382,7 +382,7 @@
+   splitMissesSelection: 'The insert marker does not cross any selected clip.',
+   splitRangeFailed: 'Could not split at the time selection.',
+   historySplitRange: 'Split at time selection',
+-  splitRangeDone: 'Clip split at both edges of the time selection; the middle part is selected.',
++  splitRangeDone: 'Clip split at the time selection; the part inside it is selected.',
+   splitNeedsTarget:
+     'To split, click inside a clip to select it and place the insert marker, or make a time selection.',
+   splitInsertMarkerOutside: 'The insert marker must be inside the selected clip.',
+@@ -408,7 +408,7 @@
+   loopRemoved: 'The loop range was shorter than 0.1 s after the deletion, so it was removed.',
+   pasteMissing: 'Paste failed: the source or track is unavailable. Nothing changed.',
+   clipboardEmpty: 'The clipboard is empty — Copy or Cut first.',
+-  splitRangeTitle: 'Split at both edges of the time selection (Ctrl+E)',
++  splitRangeTitle: 'Split clips at the time selection (Ctrl+E)',
+   splitAtInsertMarkerTitle: 'Split at the insert marker (Ctrl+E)',
+   deleteRangeHint:
+     'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+@@ -514,10 +514,10 @@
+     );
+     expect(e.splitDone('00:02.500')).toBe('Clip split at 00:02.500.');
+     expect(e.splitRangeClipsDone(2)).toBe(
+-      'Clips split at the edges of the time selection; the 2 parts inside it are selected.',
++      'Split at the time selection; the 2 clips inside it are selected.',
+     );
+     expect(e.splitRangeClipsDone(3)).toBe(
+-      'Clips split at the edges of the time selection; the 3 parts inside it are selected.',
++      'Split at the time selection; the 3 clips inside it are selected.',
+     );
+     expect(e.onTrack('SFX')).toBe('on the SFX track');
+     expect(e.onTrack('—')).toBe('on the — track');
+--- a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx	2026-10-30 12:27:10.289783495 +0000
++++ b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx	2026-10-30 13:20:00.984160737 +0000
+@@ -258,7 +258,7 @@
+     const workspace = await mountNavigationWorkspace();
+     const { api } = workspace;
+     act(() => live(api).setTimeRange(MUSIC_RANGE));
+-    expect(workspace.split().title).toBe('Split at both edges of the time selection (Ctrl+E)');
++    expect(workspace.split().title).toBe('Split clips at the time selection (Ctrl+E)');
+     expect(workspace.remove().title).toBe(
+       'Delete time selection — leaves a gap (Delete / Backspace). Cut Time closes the gap: Ctrl+Shift+X',
+     );
+--- a/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx	2026-10-30 12:27:10.277194160 +0000
++++ b/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx	2026-10-30 13:20:00.984954301 +0000
+@@ -516,6 +516,9 @@
+   const { api } = mounted;
+   expect(live(api).arrangement.clips).toEqual(SPLIT_PAST_START_PARTS);
+   expect(statusText(mounted)).toBe(studioEditStrings.splitRangeDone);
++  expect(statusText(mounted)).toBe(
++    'Clip split at the time selection; the part inside it is selected.',
++  );
+   expect(live(api).selectedClipIds).toEqual(['m1']);
+   expect(live(api).range).toBeNull();
+   expect(mounted.view.queryByTestId('arrangement-range')).toBeNull();
+@@ -534,6 +537,25 @@
+     expectSplitPastStart(mounted);
+   });
+ 
++  it('BS3 a drag from inside clip A past the whole clip B: one cut, both selected, the status names clips (B-R266-CLIPS-SPLIT-COPY)', async () => {
++    const mounted = await mountBackgroundWorkspace(TWO_MUSIC_CLIPS);
++    const { api } = mounted;
++    const from = xFor(5);
++    dragClipBody(mounted, 'm1', from, [from + xFor(17)]);
++    expect(live(api).range).toEqual({ start: 15, end: 32, trackId: 'music' });
++    pressSplitKey();
++    expect(clipSpans(api)).toEqual([
++      { id: 'm1', start: 10, sourceOffset: 0, duration: 5 },
++      { id: expect.any(String), start: 15, sourceOffset: 5, duration: 5 },
++      { id: 'm2', start: 25, sourceOffset: 0, duration: 5 },
++    ]);
++    const insideA = live(api).arrangement.clips[1]?.id;
++    expect(live(api).selectedClipIds).toEqual([insideA, 'm2']);
++    expect(statusText(mounted)).toBe(
++      'Split at the time selection; the 2 clips inside it are selected.',
++    );
++  });
++
+   it('BS2 a drag from clip A across the gap into clip B, then Ctrl+E, cuts both and selects both inside parts', async () => {
+     const mounted = await mountBackgroundWorkspace(TWO_MUSIC_CLIPS);
+     const { api } = mounted;
+@@ -552,7 +574,7 @@
+     expect(live(api).selectedClipIds).toEqual([insideA, 'm2']);
+     expect(statusText(mounted)).toBe(studioEditStrings.splitRangeClipsDone(2));
+     expect(statusText(mounted)).toBe(
+-      'Clips split at the edges of the time selection; the 2 parts inside it are selected.',
++      'Split at the time selection; the 2 clips inside it are selected.',
+     );
+     expect(live(api).range).toBeNull();
+     expect(live(api).undoLabel).toBe(studioEditStrings.historySplitRange);
+@@ -581,3 +603,24 @@
+     expectSplitPastStart(mounted);
+   });
+ });
++
++describe('GATE266-S1 the detail fields show the whole time selection after a drag past the clip edge', () => {
++  it('DP1 an in-clip drag past the clip start shows 6.25 and 12.5, and Enter keeps the selection', async () => {
++    const mounted = await mountBackgroundWorkspace(ONE_MUSIC_CLIP);
++    dragPastClipStart(mounted);
++    if (!mounted.view.queryByTestId('arrangement-detail-start')) {
++      fireEvent.click(mounted.view.getByTestId('arrangement-detail-toggle'));
++    }
++    const start = mounted.view.getByTestId('arrangement-detail-start');
++    const end = mounted.view.getByTestId('arrangement-detail-end');
++    if (!(start instanceof HTMLInputElement) || !(end instanceof HTMLInputElement)) {
++      throw new Error('range inputs missing');
++    }
++    expect(live(mounted.api).selectedClipIds).toEqual(['m1']);
++    expect([start.value, end.value]).toEqual(['6.25', '12.5']);
++    fireEvent.keyDown(start, { key: 'Enter' });
++    expect(live(mounted.api).range).toEqual({ start: 6.25, end: 12.5, trackId: 'music' });
++    expect([start.value, end.value]).toEqual(['6.25', '12.5']);
++    expect(statusText(mounted)).toBe('Time selection: 00:06.250 — 00:12.500 · Music.');
++  });
++});
+--- a/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx	2026-10-30 12:27:10.279783451 +0000
++++ b/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx	2026-10-30 13:20:00.985489772 +0000
+@@ -278,13 +278,16 @@
+       expect([start.value, end.value]).toEqual(['20', '21']);
+     });
+ 
+-    it('shows the clamped overlap for a range that only partly lies on the clip', async () => {
++    it('shows the whole time selection for a range that only partly lies on the clip (GATE266-S1)', async () => {
+       const { api, start, end } = await mountWithMusicSelected();
+       act(() => live(api).setTimeRange({ start: 0.5, end: 4, trackId: 'music' }));
+-      expect([start.value, end.value]).toEqual(['2', '4']);
++      expect([start.value, end.value]).toEqual(['0.5', '4']);
+       fireEvent.change(start, { target: { value: '3' } });
+       act(() => live(api).setTimeRange({ start: 1, end: 4, trackId: 'music' }));
+-      expect(start.value).toBe('3');
++      expect([start.value, end.value]).toEqual(['1', '4']);
++      fireEvent.change(start, { target: { value: '3' } });
++      act(() => live(api).setTimeRange({ start: 1, end: 4, trackId: 'music' }));
++      expect([start.value, end.value]).toEqual(['3', '4']);
+     });
+   });
+ 
+@@ -417,3 +420,79 @@
+     });
+   });
+ });
++
++describe('GATE266-S1 the detail fields show the whole time selection (DR)', () => {
++  beforeEach(() => {
++    fakeClock.base = Date.now() / 1000;
++    vi.stubGlobal('AudioContext', FakeAudioContext);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++    vi.stubGlobal('requestAnimationFrame', () => 1);
++    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++  });
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  function statusOf(view: ReturnType<typeof render>): string | null {
++    return view.getByTestId('arrangement-status').textContent;
++  }
++
++  it('DR1 past the clip start: the fields show the selection, Enter and Set keep it and announce it', async () => {
++    const { api, view, start, end, apply } = await mountWithMusicSelected();
++    act(() => live(api).setTimeRange({ start: 0.5, end: 4, trackId: 'music' }));
++    expect([start.value, end.value]).toEqual(['0.5', '4']);
++    fireEvent.keyDown(start, { key: 'Enter' });
++    expect(live(api).range).toEqual({ start: 0.5, end: 4, trackId: 'music' });
++    expect(statusOf(view)).toBe('Time selection: 00:00.500 — 00:04.000 · მუსიკა.');
++    fireEvent.click(apply);
++    expect(live(api).range).toEqual({ start: 0.5, end: 4, trackId: 'music' });
++    expect([start.value, end.value]).toEqual(['0.5', '4']);
++  });
++
++  it('DR2 past the clip end: the fields show the selection and Enter keeps it', async () => {
++    const { api, view, start, end } = await mountWithMusicSelected();
++    act(() => live(api).setTimeRange({ start: 8, end: 12.5, trackId: 'music' }));
++    expect([start.value, end.value]).toEqual(['8', '12.5']);
++    fireEvent.keyDown(end, { key: 'Enter' });
++    expect(live(api).range).toEqual({ start: 8, end: 12.5, trackId: 'music' });
++    expect(statusOf(view)).toBe('Time selection: 00:08.000 — 00:12.500 · მუსიკა.');
++  });
++
++  it('DR3 an all-tracks selection on the clip stays on all tracks after Enter', async () => {
++    const { api, view, start, end } = await mountWithMusicSelected();
++    act(() => live(api).setTimeRange({ start: 3, end: 5, trackId: 'music', allTracks: true }));
++    expect([start.value, end.value]).toEqual(['3', '5']);
++    fireEvent.keyDown(start, { key: 'Enter' });
++    expect(live(api).range).toEqual({ start: 3, end: 5, trackId: 'music', allTracks: true });
++    expect(statusOf(view)).toBe('Time selection: 00:03.000 — 00:05.000 · all tracks.');
++  });
++
++  it('DR4 edited values keep the clip contract: inside applies and is announced, outside is refused', async () => {
++    const { api, view, start, end } = await mountWithMusicSelected();
++    act(() => live(api).setTimeRange({ start: 0.5, end: 4, trackId: 'music' }));
++    fireEvent.change(start, { target: { value: '1' } });
++    fireEvent.keyDown(start, { key: 'Enter' });
++    expect(live(api).range).toEqual({ start: 0.5, end: 4, trackId: 'music' });
++    expect(statusOf(view)).toBe(
++      'The time selection must stay inside the clip, and its end must be after its start.',
++    );
++    fireEvent.change(start, { target: { value: '3' } });
++    fireEvent.keyDown(start, { key: 'Enter' });
++    expect(live(api).range).toEqual({ start: 3, end: 4, trackId: 'music' });
++    expect([start.value, end.value]).toEqual(['3', '4']);
++    expect(statusOf(view)).toBe('Time selection: 00:03.000 — 00:04.000 · მუსიკა.');
++  });
++
++  it('DR5 a range off the clip on the same lane still shows the clip bounds, and Enter selects the clip span', async () => {
++    const { api, start, end } = await mountWithMusicSelected();
++    act(() => live(api).setTimeRange({ start: 11, end: 12, trackId: 'music' }));
++    expect([start.value, end.value]).toEqual(['2', '10']);
++    fireEvent.keyDown(start, { key: 'Enter' });
++    expect(live(api).range).toEqual({ start: 2, end: 10, trackId: 'music' });
++  });
++});

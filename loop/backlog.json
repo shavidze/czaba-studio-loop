@@ -1,9 +1,9 @@
 {
- "version": 233,
- "updated": "2026-10-30 B round 268 -> 269 planning (D-29z576..D-29z579)",
+ "version": 234,
+ "updated": "2026-10-30 B round 269 -> 270 planning (D-29z580..D-29z585)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 269, D-29z576..D-29z579; SABA-B-7 option A: clip envelope on the lane fader dB scale (depth = dB/-60, -inf at bottom), dB/depth interpolation, <=0.5 dB linear ramp steps, drag on depth, dy=0 keeps gain; baseline HEAD 3058a7c clean; grants b-round-268-r269-grants.txt)",
+ "current_task": "current-task.md (round 270, D-29z580..D-29z585; GATE266-S1 (+ sibling B-R269-DETAIL-ALLTRACKS-DROP) detail Start/End show the whole time selection, unchanged Enter/Set keeps it (all-tracks included) and announces it, edited values keep the clip contract; GATE266-S4 + B-R266-CLIPS-SPLIT-COPY neutral split strings; baseline HEAD f6ebd2d clean; grants b-round-269-r270-grants.txt)",
  "advisor_used_by_B": "round 267 -> 268 planning: advisor available and consulted (before the ruling); 2026-10-30 round 266 -> 267 planning: advisor configured but unavailable (overloaded on the first call; not retried this turn per its error); B proceeded on primary evidence (browser repro at 7ba7cd2, scratch pre-check, Live 12 manual ch. 42). | 2026-10-30 round 263 -> 264 planning: advisor availabl",
  "baseline": {
   "tsc_errors": 0,
@@ -10817,11 +10817,22 @@
    "round": 269,
    "task": "current-task.md",
    "decision": "D-29z576..D-29z579",
-   "status": "dispatched",
+   "status": "c_pass_published",
    "type": "feature (Saba-agreed Medium): SABA-B-7 clip envelope dB taper, option A",
    "note": "baseline HEAD 3058a7c clean; grants b-round-268-r269-grants.txt (envelope.ts, graph.client.ts scheduleClipEnvelopeGain, ArrangementClipEnvelope.tsx top/vertices/drag, 3 test files, new doc 200); B pre-check b-round-268/sketch.diff: 15 tests in 3 files pin linear values (all rewritten, none removed), 164/167 arrangement files unchanged; browser probe HEAD vs sketch both viewports 0 page errors (probe-envelope-*.json)",
    "next": "C PASS + gate -> SABA-B-7 done; round 270 GATE266-S1 (+S4, B-R266-CLIPS-SPLIT-COPY) unless REGRESSION due (on/after 2026-11-02); 271 SABA-B-11c stage 2",
-   "added": "2026-10-30 B round 268 planning"
+   "added": "2026-10-30 B round 268 planning",
+   "result": "C PASS (browserVerified/realVerified true, 0 bugs, 22 rows); gate 269 published f6ebd2d on both remotes (D-29z580)"
+  },
+  {
+   "round": 270,
+   "task": "current-task.md",
+   "decision": "D-29z580..D-29z585",
+   "status": "dispatched",
+   "type": "fix-up (Medium regression of SABA-B-11c stage 1 + 2 Lows on the same code): GATE266-S1 + B-R269-DETAIL-ALLTRACKS-DROP + GATE266-S4 + B-R266-CLIPS-SPLIT-COPY",
+   "note": "baseline HEAD f6ebd2d clean; grants b-round-269-r270-grants.txt (ArrangementDetailPanel.tsx range display + applyDetailRange, strings.ts 3 split strings, 4 test files); B pre-check b-round-269/sketch.diff: tsc rc 0, Biome clean, 168 test files on scratch: exactly 5 collisions (all granted rewrites), 6 mutants red, browser HEAD vs sketch both viewports 0 page errors",
+   "next": "C PASS + gate -> GATE266-S1/S4/CLIPS-SPLIT-COPY closed; round 271 SABA-B-11c stage 2 (relative snap) unless REGRESSION due (on/after 2026-11-02)",
+   "added": "2026-10-30 B round 269 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -13030,7 +13041,7 @@
   },
   {
    "id": "SABA-B-7-ENVELOPE-DB",
-   "status": "dispatched round 269 (D-29z578): contract = depth dB/-60 (TRACK_VOLUME_DB_MIN), interpolation in dB (both >0) or depth (one is 0), <=0.5 dB linear ramp steps, drag on depth, dy=0 keeps stored gain, 4-decimal storage kept (accepted limit below about -50 dB), no migration (D-29z573) | agreed (Saba 2026-10-30, D-29z573): option A dB taper (lane fader scale, 0..-60 dB, -inf bottom), dB readout (listed deviation), saved projects change shape between points (D-29z573), short linear ramps <= 0.5 dB; scheduled round 269 (D-29z574) | awaiting_user (D-29z322): its pre-dispatch condition (experts confirm Live taper with a manual source) is unmet - both consults found no published taper; the taper changes how projects sound, so under L44 Saba decides. AGREE note user-review/AGREE-SABA-B-7.md (taper A dB-linear -60 floor = the lane Volume fader scale, recommended; B p^3; saved-project consequence; Live measurement request; 4 video picks for root transcripts). Not dispatched; scheduled right after the running stage when Saba answers | next after round 233 (unless REGRESSION is due on/after 2026-10-30) (D-29z318); reference prep done at round-232 planning: b-round-232/saba-b-7-reference-docs-explorer.md (Live 12 manual: taper NOT published; lane axis = control value; clip envelope relative %, bottom = silence) and b-round-232/saba-b-7-reference-ableton-expert.md (code map, pinned tests, candidate tapers A dB-floor / B p^3, short-ramp scheduling); B must define the CZABA taper with a D-ID before dispatch | not_started: approved by Saba 2026-10-28; after SABA-B-8 CALM-3, before STUDIO-PERFORMANCE b-ii (policy); recorded late at round-230 planning (B-R229-SABA-B-7-UNRECORDED, D-29z296)",
+   "status": "done (D-29z580): C round 269 PASS, browserVerified/realVerified true (TAPER-EXPORT -15.003/-29.999/-44.999 dB both viewports, SILENCE-EXPORT 0 nonzero, NO-CLICK 0.00100, PLAY-THROUGH, DRAG-READOUT, UNDO), gate 269 published f6ebd2d | dispatched round 269 (D-29z578): contract = depth dB/-60 (TRACK_VOLUME_DB_MIN), interpolation in dB (both >0) or depth (one is 0), <=0.5 dB linear ramp steps, drag on depth, dy=0 keeps stored gain, 4-decimal storage kept (accepted limit below about -50 dB), no migration (D-29z573) | agreed (Saba 2026-10-30, D-29z573): option A dB taper (lane fader scale, 0..-60 dB, -inf bottom), dB readout (listed deviation), saved projects change shape between points (D-29z573), short linear ramps <= 0.5 dB; scheduled round 269 (D-29z574) | awaiting_user (D-29z322): its pre-dispatch condition (experts confirm Live taper with a manual source) is unmet - both consults found no published taper; the taper changes how projects sound, so under L44 Saba decides. AGREE note user-review/AGREE-SABA-B-7.md (taper A dB-linear -60 floor = the lane Volume fader scale, recommended; B p^3; saved-project consequence; Live measurement request; 4 video picks for root transcripts). Not dispatched; scheduled right after the running stage when Saba answers | next after round 233 (unless REGRESSION is due on/after 2026-10-30) (D-29z318); reference prep done at round-232 planning: b-round-232/saba-b-7-reference-docs-explorer.md (Live 12 manual: taper NOT published; lane axis = control value; clip envelope relative %, bottom = silence) and b-round-232/saba-b-7-reference-ableton-expert.md (code map, pinned tests, candidate tapers A dB-floor / B p^3, short-ramp scheduling); B must define the CZABA taper with a D-ID before dispatch | not_started: approved by Saba 2026-10-28; after SABA-B-8 CALM-3, before STUDIO-PERFORMANCE b-ii (policy); recorded late at round-230 planning (B-R229-SABA-B-7-UNRECORDED, D-29z296)",
    "severity": "medium",
    "requested": "Saba 2026-10-28 (approved): clip envelope point dragged to the bottom does not go fully silent",
    "source": "loop policy section \"SABA-B-7: clip volume envelope on a dB scale\"; root code check on 2d4a93f (envelope.ts linear gain 0..1; graph.client.ts scheduleClipEnvelopeGain linearRampToValueAtTime; ArrangementClipEnvelope.tsx l.261-267 linear pixel->gain)",
@@ -24904,7 +24915,7 @@
   {
    "id": "SABA-B-7",
    "severity": "medium",
-   "status": "dispatched round 269 (D-29z578): option A contract in current-task.md section 3 | agreed (Saba 2026-10-30, D-29z573): option A; scheduled round 269 (D-29z574) | scheduled: queue entry SABA-B-7-ENVELOPE-DB (after CALM-3, before PERF b-ii)",
+   "status": "closed (D-29z580): C round 269 PASS with browser, gate 269 published f6ebd2d | dispatched round 269 (D-29z578): option A contract in current-task.md section 3 | agreed (Saba 2026-10-30, D-29z573): option A; scheduled round 269 (D-29z574) | scheduled: queue entry SABA-B-7-ENVELOPE-DB (after CALM-3, before PERF b-ii)",
    "title": "clip volume envelope is linear in gain: one bottom point is silent only for an instant; a line sounds loud for most of the dip",
    "source": "loop policy SABA-B-7 (Saba 2026-10-28, approved)",
    "added": "2026-10-28 B round 229 -> 230 planning"
@@ -26622,8 +26633,8 @@
    "origin": "gate 266 reviewer suggestion 1 (supersedes signal B-R265-DETAIL-RANGE-CLAMP)",
    "title": "after a drag inside a clip past its edge (round 265), the clip stays selected and the details panel Start/End fields show only the part inside the clip (e.g. 10-12.5 for a 6.25-12.5 selection); Enter in those fields silently shrinks the selection to the clip (clampDetailRangeToClip). Regression from SABA-B-11c stage 1 (before, the drag stopped at the clip edge); no test covers it",
    "source": "gates/round-266/review.md suggestion 1 (ArrangementDetailPanel.tsx:519-527, :578-591 at 7ba7cd2)",
-   "repro": "source-reviewed; browser repro by B at the round 267 -> 268 planning before dispatch (D-29z567)",
-   "status": "open (D-29z574): round 270 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY, after SABA-B-7 (269); B browser repro before dispatch | open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due",
+   "repro": "browser-reproduced by B at f6ebd2d, 1440x900 and 1280x720: past-start drag 6.25-12.5 shows 10/12.5, Enter shrinks to 10-12.5; past-end 12.5-115.102 shows 12.5/111.352, Enter shrinks to 12.5-111.352 (b-round-269/probe-detail-range-head.json)",
+   "status": "dispatched round 270 (D-29z581): fields show the whole time selection; unchanged Enter/Set keeps it and announces it; edited values keep the clip contract. B browser repro at HEAD f6ebd2d both viewports (b-round-269/probe-detail-range-head.json) | open (D-29z574): round 270 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY, after SABA-B-7 (269); B browser repro before dispatch | open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due",
    "added": "2026-10-30"
   },
   {
@@ -26632,7 +26643,7 @@
    "origin": "gate 266 reviewer suggestion 4 = A's note B-R266-1, confirmed by C round 266 in the browser",
    "title": "splitRangeDone ('Clip split at both edges ...') and splitRangeTitle say 'both edges' when D3 cuts only one edge (SPLIT-PAST-START, SPLIT-BG-INTO-CLIP); pre-existing at HEAD 2ea196e for the same one-edge cut",
    "source": "c-round-266.md Signals; a-round-266.md For B; c-round-265/nb-head.json pastStartSplit",
-   "status": "scheduled round 268 with GATE266-S1 (owned code, cheap; D-29z569)",
+   "status": "dispatched round 270 (D-29z582): splitRangeDone -> neutral wording | scheduled round 268 with GATE266-S1 (owned code, cheap; D-29z569)",
    "added": "2026-10-30"
   },
   {
@@ -26641,7 +26652,7 @@
    "origin": "A round 266 note, C round 266 signal",
    "title": "splitRangeClipsDone says 'Clips split' when one selected part is a whole clip that was not cut (MS6)",
    "source": "a-round-266.md For B; c-round-266.md Signals",
-   "status": "scheduled round 268 with GATE266-S1 (D-29z569)",
+   "status": "dispatched round 270 (D-29z582): splitRangeClipsDone names clips, not parts | scheduled round 268 with GATE266-S1 (D-29z569)",
    "added": "2026-10-30"
   },
   {
@@ -26746,6 +26757,48 @@
    "origin": "Saba 2026-10-30 answers",
    "title": "grid snap of envelope points",
    "status": "later_candidate (Saba 2026-10-30, not queued; D-29z573)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "B-R269-DETAIL-ALLTRACKS-DROP",
+   "severity": "medium",
+   "origin": "B round 269 planning browser probe (sibling of GATE266-S1, same root cause)",
+   "title": "with an all-tracks time selection (Ctrl+Shift+L) inside the selected clip, Enter in the detail Start/End fields silently turns it into a one-track selection on the clip's lane (status '... · Music.')",
+   "source": "b-round-269/probe-alltracks-head.json (f6ebd2d, both viewports)",
+   "repro": "add the demo clip, drag inside it (11.5-14), Ctrl+Shift+L, focus detail Start, Enter: readout loses 'all tracks', 4 lane overlays -> 0",
+   "status": "dispatched round 270 with GATE266-S1 (D-29z581), alias of the same fix",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "INFO-C269-DB3-FLOOR",
+   "severity": "info",
+   "origin": "C round 269 For B",
+   "title": "DB3 alone does not catch a wrong floor in depth(); DB2 does (C extra mutant)",
+   "status": "info, no action (D-29z580)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "INFO-C269-1280-DETAIL-COLLAPSED",
+   "severity": "info",
+   "origin": "C round 269 note",
+   "title": "at 1280x720 the detail panel starts collapsed (an ancestor display:none); C rows that read or type in it must click arrangement-detail-toggle first (pre-existing layout, not a bug)",
+   "status": "info; round-270 recipes expand the panel (D-29z581)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE269-S4-LEGACY-SEGMENT",
+   "severity": "low",
+   "origin": "gate 269 reviewer suggestion 4 = A-R269-REVIEW-L4",
+   "title": "between a legacy stored gain below -60 dB and 0, both ends sit at depth 1: lookup returns 0 inside while the scheduler plays one linear ramp (about -66 dB, inaudible); documented accepted limitation in doc 200",
+   "status": "accepted_limitation (D-29z583); listed for the polish pass",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "LATER-DETAIL-LANE-RANGE-EDIT",
+   "severity": "info",
+   "origin": "B round 269 planning (D-29z581 rejected option b)",
+   "title": "let the detail From/To fields edit a lane time selection that passes the clip edges (today edits stay inside the clip)",
+   "status": "later_candidate (not queued; a new ability, needs Saba)",
    "added": "2026-10-30"
   }
  ],
@@ -28914,6 +28967,13 @@
    "source": "a-round-266.md Architecture note",
    "text": "splitSelection maps 4 result shapes to selection and status; keep; if one more split variant arrives, a pure 'split result -> {selection, status}' mapper in lib/arrangement/",
    "status": "signal (D-29z570); not scheduled",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE269-ARCH-ENVELOPE-RAMP-DENSITY",
+   "source": "gates/round-269/review.md suggestions 1-2 + Architecture note; a-round-269.md reviewer L2 (same root cause)",
+   "text": "keep envelope.ts as is (one responsibility). Optional bounded task 'Envelope ramp density': cap steps per segment by duration (about 1 ms per step; a 1 ms 0 dB -> -inf segment makes 120 events today) and interpolate per step from the segment's own gains instead of scanning all points (points x steps per clip on every startGraph). Owner envelope.ts; acceptance DB4 unchanged + a 1 ms segment row. Sound is correct today",
+   "status": "signal (D-29z583); not scheduled; candidate for STUDIO-PERFORMANCE",
    "added": "2026-10-30"
   }
  ],
@@ -33597,6 +33657,42 @@
    "evidence": "a-round-268.md code review",
    "status": "deferred_low_polish (D-29z577)",
    "added": "2026-10-30"
+  },
+  {
+   "id": "GATE269-S3-LEGACY-WOBBLE",
+   "severity": "low",
+   "origin": "gate 269 reviewer suggestion 3",
+   "title": "a mostly horizontal envelope drag with 1 px vertical drift rewrites a legacy gain below -60 dB (0.0005 -> about -59 dB); fix hint: treat |dy| < ENVELOPE_DRAG_THRESHOLD_PX as 0 after the gesture starts; /studio-lab has no such point",
+   "evidence": "gates/round-269/review.md; a-round-269.md",
+   "status": "deferred_low_polish (D-29z583)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "A-R269-REVIEW-L3-SEGMENT-DEPTH",
+   "severity": "low",
+   "origin": "A round 269 code-reviewer L3",
+   "title": "segmentDepth(gain, other) is always called as a mirrored pair; optional readability cleanup",
+   "evidence": "gates/round-269/review.md; a-round-269.md",
+   "status": "deferred_low_polish (D-29z583)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "A-R269-REVIEW-L5-UNSORTED-POINTS",
+   "severity": "low",
+   "origin": "A round 269 code-reviewer L5",
+   "title": "step knots assume sorted envelope points (as before); optional sort for imported or corrupted data",
+   "evidence": "gates/round-269/review.md; a-round-269.md",
+   "status": "deferred_low_polish (D-29z583)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "A-R269-REVIEW-L6-INNER-STEPS",
+   "severity": "low",
+   "origin": "A round 269 code-reviewer L6",
+   "title": "EV5/EV6b bound the in-between steps rather than pin them (XR2 and DB4 pin spacing and values)",
+   "evidence": "gates/round-269/review.md; a-round-269.md",
+   "status": "deferred_low_polish (D-29z583)",
+   "added": "2026-10-30"
   }
  ],
  "baseline_tree_at_round108": {
@@ -37462,6 +37558,36 @@
    "id": "D-29z579",
    "date": "2026-10-30",
    "text": "Lessons: L29 gains one clause from INFO-C268-HEAD-DRIFT (K1 is read at dispatch; a root-only commit that leaves git diff <planned> HEAD -- app empty is accepted with a note, not a planning FAIL); lessons.md stays <= 60 lines. Consults: product-designer not consulted for round 269 (Saba fixed taper, readout and saved-project behaviour himself; no new screen element); round-232 ableton-arrangement-expert and docs-explorer consults reused, outranked by root's Live measurement 2026-10-30. Checkpoint: handleKeyDown owner streak (265-268) ends with round 269; ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS stays requested from root, non-blocking."
+  },
+  {
+   "id": "D-29z580",
+   "date": "2026-10-30",
+   "text": "Round 269 result: C PASS (browserVerified/realVerified true, 22 rows, 0 bugs), gate 269 published f6ebd2d on both remotes. SABA-B-7 / SABA-B-7-ENVELOPE-DB -> done. Info: INFO-C269-DB3-FLOOR (no action), INFO-C269-1280-DETAIL-COLLAPSED (recipes expand the panel). Baseline for round 270 = f6ebd2d (gate published), clean tree. REGRESSION not due (last 2026-10-30 round 258; due on/after 2026-11-02)."
+  },
+  {
+   "id": "D-29z581",
+   "date": "2026-10-30",
+   "text": "GATE266-S1 contract (B browser repro at f6ebd2d, both viewports). When the time selection overlaps the selected clip on its lane, the detail From/To fields show the selection's own start and end (no clamp to the clip). Enter/Set with both texts equal to the displayed selection keeps the range object unchanged (allTracks kept) and announces rangeApplied with 'all tracks' or the lane name. Edited values keep the existing clip contract (inside +-0.01 s clamps and applies, otherwise rangeInvalid; range unchanged). Range off the clip / no range: fields show the clip bounds and Enter selects the clip span (unchanged). Sibling B-R269-DETAIL-ALLTRACKS-DROP (Medium, all-tracks Enter dropped to one track) closed by the same rule. Rejected: (a) disable the fields with a reason when the selection passes the clip: a focused Set button would be disabled under the focus by Ctrl+Shift+L (L47) and it adds a persistent reason line; (b) lift the clamp so the panel edits a lane range beyond the clip: a new ability, changes rangeInvalid's meaning; later candidate LATER-DETAIL-LANE-RANGE-EDIT, not queued. Reference: Live 12 manual 6.9 / 6.12 have no numeric time-selection field (no direct reference; the rule is 'a readout shows the real selection')."
+  },
+  {
+   "id": "D-29z582",
+   "date": "2026-10-30",
+   "text": "GATE266-S4 + B-R266-CLIPS-SPLIT-COPY: wording only, splitClipsByRange unchanged. splitRangeDone = 'Clip split at the time selection; the part inside it is selected.'; splitRangeClipsDone(n) = 'Split at the time selection; the n clips inside it are selected.'; splitRangeTitle = 'Split clips at the time selection (Ctrl+E)'. Reason: true for one-edge, two-edge and whole-clip cases, and closer to Live's command name 'Split Clip at Selection' (manual 42.16). Collisions granted: strings.test.ts ST6/ST7, navigation-strings-ui NS2, background-time-selection-ui BS2."
+  },
+  {
+   "id": "D-29z583",
+   "date": "2026-10-30",
+   "text": "Gate 269 and A-269 reviewer triage: S1+S2+A-L2 (ramp density, per-step envelope scan) -> one architecture signal GATE269-ARCH-ENVELOPE-RAMP-DENSITY (keep; optional task, not scheduled; STUDIO-PERFORMANCE candidate). S3 -> deferred_low_polish GATE269-S3-LEGACY-WOBBLE. S4 = A-L4 -> GATE269-S4-LEGACY-SEGMENT accepted limitation (doc 200). A-L1 documented in doc 200 (closed). A-L3/L5/L6 -> deferred_low_polish. Architecture note: keep."
+  },
+  {
+   "id": "D-29z584",
+   "date": "2026-10-30",
+   "text": "Consults: product-designer not consulted (bug fix-up, no new screen element; the policy exempts fix-ups); reference section uses Live 12 manual 6.9/6.12 fetched 2026-10-30 and round 266's [SC] 42.16. No lesson added (lessons.md 59 lines); RC-R266-PANEL-CLAMP-CONSUMER recorded for RETRO 275. product-designer review mode optional for C (max 7 findings)."
+  },
+  {
+   "id": "D-29z585",
+   "date": "2026-10-30",
+   "text": "Order unchanged: 270 GATE266-S1 (+ siblings), 271 SABA-B-11c stage 2 (relative snap), then SYS-6; REGRESSION first on/after 2026-11-02; RETRO at 275. No frontend-architect checkpoint requested now: ArrangementDetailPanel.tsx has had no repeated-owner streak (last structural note none); the open checkpoint requests stay with root."
   }
  ],
  "retro_candidates": [
@@ -37552,6 +37678,12 @@
    "id": "RC-R266-JSX-ATTR-GREP",
    "added": "2026-10-30 B round 266 -> 267 planning",
    "text": "a claim grep for an attribute must grep the value unquoted (JSX attributes may be expressions); C-R266-01 (round 266 K11). Candidate L29 clause",
+   "status": "candidate for RETRO 275"
+  },
+  {
+   "id": "RC-R266-PANEL-CLAMP-CONSUMER",
+   "added": "2026-10-30 B round 269 -> 270 planning",
+   "text": "a gesture that newly crosses a boundary (round 265: a clip drag may pass the clip edge) makes every readout and editor that displayed the clamped region a consumer row of that task (GATE266-S1 found by the gate reviewer, B-R269-DETAIL-ALLTRACKS-DROP by B's probe). Candidate L29 'changed meaning' clause",
    "status": "candidate for RETRO 275"
   }
  ],
