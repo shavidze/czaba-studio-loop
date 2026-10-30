@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T10:31:16.945Z)
+# Active loop summary (2026-10-30T11:22:10.990Z)
 
-- backlog.json 2525 KB -> active view 357 KB
-- status: G_ROOT_GATE round 266
-- servers: `{"checkedUtc":"2026-10-30T09:52:26.9218197Z","round":266,"attempt":1,"store":200}`
+- backlog.json 2536 KB -> active view 359 KB
+- status: G_ROOT_GATE round 267
+- servers: `{"checkedUtc":"2026-10-30T11:09:33.5152811Z","round":267,"attempt":1,"store":200}`
 - last publication: 7ba7cd297accd7c1fadda76f95f54342a93205ef (rounds 265-266)
-- last root gate: round 266 published - commit 7ba7cd297accd7c1fadda76f95f54342a93205ef pushed
+- last root gate: round 267 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -650,9 +650,11 @@
 - SABA-Q-9-MASTER-ROW / info / awaiting_user / Saba question, SABA-B-9 stage 2: (a) Master as a Main-track row under the lanes (Live 12 manual 18.4 'bottom end of the Arrangement View') i
 - SABA-Q-11C-MARQUEE / info / awaiting_user / Saba question, SABA-B-11c stage 1 deviation D1: a plain drag on the empty background now makes a time selection (Live 6.9); the clip marquee
 - SABA-Q-11C-MULTILANE / info / awaiting_user / Saba question, SABA-B-11c stage 1 deviation D2: a background drag that moves vertically keeps the time selection on the lane where it starte
-- GATE264-S2 / medium / open (D-29z558): next bug round after round 265 (REGRESSION first if due on/after 2026-11-02); cloud contract half only, real Windows AltGr stays with Saba / AltGr (ctrlKey+altKey, getModifierState('AltGraph') true) reaches the Ctrl-letter branches of the Studio keydown handler: AltGr+Z (Polish z-
-- C-R265-01 / medium / scheduled round 266 (D-29z559, D-29z560: default D3 split every clip on the lane at the edges inside it; SABA-Q-11C-SPLIT-SPAN) / Ctrl+E on a time selection that crosses a clip edge (now produced by the unclamped in-clip drag and the background drag) refuses with 'Could
-- C-R265-02 / low / scheduled round 266 with C-R265-01 (D-29z561; owned code, cheap; same root as B-R264-RANGE-HOW-COPY) / rangeMissingReason (export) and needsSelection (Ctrl+L) name only 'clip or ruler' / 'waveform' as the place to make a time selection; a back
+- GATE264-S2 / medium / scheduled round 267 (D-29z568): commandChord = Ctrl/Meta without Alt/AltGraph on the gesture arm + 10 Ctrl-letter branches; re-reproduced at 7ba7cd2 (b-round-266/probe-fix-head.json: AltGr Z/Y/E/L/D and real Control+Alt+Z/E act); sketch verified b-round-266/probe-fix-sketch.json; real Windows AltGr half stays TLM-R232-ALTGR-WIN with Saba | open (D-29z558): next bug round after round 265 (REGRESSION first if due on/after 2026-11-02); cloud contract half only, real Windows AltGr stays with Saba / AltGr (ctrlKey+altKey, getModifierState('AltGraph') true) reaches the Ctrl-letter branches of the Studio keydown handler: AltGr+Z (Polish z-
+- GATE266-S1 / medium / open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due / after a drag inside a clip past its edge (round 265), the clip stays selected and the details panel Start/End fields show only the part insi
+- GATE266-S4 / low / scheduled round 268 with GATE266-S1 (owned code, cheap; D-29z569) / splitRangeDone ('Clip split at both edges ...') and splitRangeTitle say 'both edges' when D3 cuts only one edge (SPLIT-PAST-START, SPLIT-BG-
+- B-R266-CLIPS-SPLIT-COPY / low / scheduled round 268 with GATE266-S1 (D-29z569) / splitRangeClipsDone says 'Clips split' when one selected part is a whole clip that was not cut (MS6)
+- B-R266-LINUX-ALTGR-PLAIN-LETTERS / info / hypothesis, unverified; Tech Lead list; becomes a normal finding on a real repro (D-29z570) / if a platform reports AltGr as getModifierState('AltGraph') without altKey/ctrlKey (Linux X11 suspected), the plain-letter branches (M, G, A
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

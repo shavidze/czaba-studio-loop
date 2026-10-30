@@ -1,0 +1,268 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index da17a69..a12c80b 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -2267,6 +2267,7 @@ export function StudioWorkspace() {
+       }
+       const current = workspaceRef.current;
+       const modifier = event.ctrlKey || event.metaKey;
++      const commandChord = modifier && !event.altKey && !event.getModifierState('AltGraph');
+       const key = shortcutLetter(event);
+       const onOverview = isOverviewTarget(event.target);
+       if (event.key === ' ' && (!isRoleSliderTarget(event.target) || onOverview)) {
+@@ -2320,7 +2321,7 @@ export function StudioWorkspace() {
+       }
+       if (
+         current.isPointerGestureActive() &&
+-        ((modifier &&
++        ((commandChord &&
+           (key === 'e' ||
+             key === 'l' ||
+             key === 'd' ||
+@@ -2341,14 +2342,14 @@ export function StudioWorkspace() {
+         current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+         return;
+       }
+-      if (modifier && key === 'e') {
++      if (commandChord && key === 'e') {
+         event.preventDefault();
+         if (!event.repeat) {
+           current.splitSelection();
+         }
+         return;
+       }
+-      if (modifier && key === 'z') {
++      if (commandChord && key === 'z') {
+         event.preventDefault();
+         if (event.shiftKey) {
+           current.redo();
+@@ -2357,12 +2358,12 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
+-      if (modifier && key === 'y') {
++      if (commandChord && key === 'y') {
+         event.preventDefault();
+         current.redo();
+         return;
+       }
+-      if (modifier && key === 'l') {
++      if (commandChord && key === 'l') {
+         event.preventDefault();
+         if (!event.repeat) {
+           if (event.shiftKey) {
+@@ -2373,19 +2374,19 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
+-      if (modifier && key === 'a') {
++      if (commandChord && key === 'a') {
+         event.preventDefault();
+         current.selectAllClips();
+         return;
+       }
+-      if (modifier && key === 'd') {
++      if (commandChord && key === 'd') {
+         event.preventDefault();
+         if (!event.repeat) {
+           current.duplicateSelection();
+         }
+         return;
+       }
+-      if (modifier && key === 'c' && !event.shiftKey) {
++      if (commandChord && key === 'c' && !event.shiftKey) {
+         if (window.getSelection()?.isCollapsed === false) {
+           return;
+         }
+@@ -2395,7 +2396,7 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
+-      if (modifier && key === 'x') {
++      if (commandChord && key === 'x') {
+         event.preventDefault();
+         if (!event.repeat) {
+           if (event.shiftKey) {
+@@ -2406,7 +2407,7 @@ export function StudioWorkspace() {
+         }
+         return;
+       }
+-      if (modifier && key === 'v' && !event.shiftKey) {
++      if (commandChord && key === 'v' && !event.shiftKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+           current.pasteClipboard();
+@@ -2445,7 +2446,7 @@ export function StudioWorkspace() {
+         });
+         return;
+       }
+-      if (modifier && key === 'g' && !event.altKey) {
++      if (commandChord && key === 'g' && !event.altKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+           if (event.shiftKey) {
+diff --git a/app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx b/app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx
+index 344b9f3..0643809 100644
+--- a/app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx
+@@ -5,6 +5,7 @@ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+   type ArrangementContextValue,
+   ArrangementProvider,
++  GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+@@ -316,3 +317,152 @@ describe('L46-CONTRACT-CHECKS: the Meta bit runs the same handlers as Ctrl (TLM-
+     }
+   });
+ });
++
++describe('GATE264-S2: Alt or AltGr held with Ctrl/Meta runs no Ctrl-letter command', () => {
++  const ALT_CHORDS = [
++    ['AltGr', { ctrlKey: true, altKey: true, modifierAltGraph: true }],
++    ['Ctrl+Alt', { ctrlKey: true, altKey: true }],
++    ['Meta+Alt', { metaKey: true, altKey: true }],
++  ] as const;
++
++  const CTRL = { ctrlKey: true };
++
++  function selectOnlyClip(mounted: MetaMount) {
++    const [clip] = live(mounted.api).arrangement.clips;
++    if (!clip) {
++      throw new Error('clip missing');
++    }
++    act(() => live(mounted.api).selectClip(clip.id));
++    return clip;
++  }
++
++  it.each(ALT_CHORDS)('AG1 %s+Z, +Shift+Z and +Y neither undo nor redo', async (_label, chord) => {
++    const mounted = await mountMetaWorkspace();
++    addOneClip(mounted);
++    const undoLabel = live(mounted.api).undoLabel;
++    expect(undoLabel).not.toBeNull();
++    const statusBefore = mounted.status();
++    const undoNotPrevented = press({ ...Z, ...chord });
++    expect(mounted.clipCount()).toBe(1);
++    expect(live(mounted.api).undoLabel).toBe(undoLabel);
++    expect(mounted.status()).toBe(statusBefore);
++    expect(undoNotPrevented).toBe(true);
++    press({ ...Z, ...CTRL });
++    expect(mounted.clipCount()).toBe(0);
++    expect(live(mounted.api).redoLabel).toBe(undoLabel);
++    const statusAfterUndo = mounted.status();
++    const redoShiftNotPrevented = press({ ...SHIFT_Z, ...chord });
++    const redoYNotPrevented = press({ ...Y, ...chord });
++    expect(mounted.clipCount()).toBe(0);
++    expect(mounted.status()).toBe(statusAfterUndo);
++    expect(redoShiftNotPrevented).toBe(true);
++    expect(redoYNotPrevented).toBe(true);
++    press({ ...Y, ...CTRL });
++    expect(mounted.clipCount()).toBe(1);
++  });
++
++  it.each(ALT_CHORDS)('AG2 %s+E does not split the selected clip', async (_label, chord) => {
++    const mounted = await mountMetaWorkspace();
++    addOneClip(mounted);
++    const clip = selectOnlyClip(mounted);
++    act(() => live(mounted.api).setInsertMarker(clip.start + 5));
++    const statusBefore = mounted.status();
++    const notPrevented = press({ ...E, ...chord });
++    expect(mounted.clipCount()).toBe(1);
++    expect(mounted.status()).toBe(statusBefore);
++    expect(notPrevented).toBe(true);
++    press({ ...E, ...CTRL });
++    expect(mounted.clipCount()).toBe(2);
++  });
++
++  it.each(
++    ALT_CHORDS,
++  )('AG3 %s+L and +Shift+L neither loop nor extend the time selection', async (_label, chord) => {
++    const mounted = await mountMetaWorkspace();
++    addOneClip(mounted);
++    act(() => live(mounted.api).setTimeRange({ start: 2.5, end: 7.5, trackId: 'music' }));
++    const rangeBefore = live(mounted.api).range;
++    const statusBefore = mounted.status();
++    const loopNotPrevented = press({ ...L, ...chord });
++    const allTracksNotPrevented = press({ key: 'L', code: 'KeyL', shiftKey: true, ...chord });
++    expect(live(mounted.api).arrangement.loop).toBeNull();
++    expect(mounted.loopButton().getAttribute('aria-pressed')).toBe('false');
++    expect(live(mounted.api).range).toEqual(rangeBefore);
++    expect(mounted.status()).toBe(statusBefore);
++    expect(loopNotPrevented).toBe(true);
++    expect(allTracksNotPrevented).toBe(true);
++    press({ ...L, ...CTRL });
++    expect(mounted.loopButton().getAttribute('aria-pressed')).toBe('true');
++    expect(live(mounted.api).arrangement.loop).toEqual({ start: 2.5, end: 7.5, enabled: true });
++  });
++
++  it.each(
++    ALT_CHORDS,
++  )('AG4 %s+A, D, C, X, V, G and Shift+G change no selection, clip, history or group', async (_label, chord) => {
++    const mounted = await mountMetaWorkspace();
++    addOneClip(mounted);
++    selectOnlyClip(mounted);
++    const selectionBefore = [...live(mounted.api).selectedClipIds];
++    const undoLabel = live(mounted.api).undoLabel;
++    const statusBefore = mounted.status();
++    const letters = [
++      { key: 'a', code: 'KeyA' },
++      { key: 'd', code: 'KeyD' },
++      { key: 'c', code: 'KeyC' },
++      { key: 'x', code: 'KeyX' },
++      { key: 'v', code: 'KeyV' },
++      { key: 'g', code: 'KeyG' },
++      { key: 'G', code: 'KeyG', shiftKey: true },
++    ];
++    for (const letter of letters) {
++      const notPrevented = press({ ...letter, ...chord });
++      expect(mounted.clipCount()).toBe(1);
++      expect(live(mounted.api).selectedClipIds).toEqual(selectionBefore);
++      expect(live(mounted.api).undoLabel).toBe(undoLabel);
++      expect(mounted.view.container.querySelectorAll('[data-group-id]')).toHaveLength(0);
++      expect(mounted.status()).toBe(statusBefore);
++      expect(notPrevented).toBe(true);
++    }
++    press({ key: 'd', code: 'KeyD', ...CTRL });
++    expect(mounted.clipCount()).toBe(2);
++  });
++
++  it('AG5 AltGr+E during a pointer gesture does not show the gesture-blocked message', async () => {
++    const mounted = await mountMetaWorkspace();
++    addOneClip(mounted);
++    const statusBefore = mounted.status();
++    let release: (() => void) | null = null;
++    act(() => {
++      release = live(mounted.api).claimPointerGesture(42, () => {});
++    });
++    const notPrevented = press({ ...E, ctrlKey: true, altKey: true, modifierAltGraph: true });
++    expect(mounted.status()).toBe(statusBefore);
++    expect(mounted.status()).not.toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    expect(mounted.clipCount()).toBe(1);
++    expect(notPrevented).toBe(true);
++    press({ ...E, ...CTRL });
++    expect(mounted.status()).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    act(() => release?.());
++  });
++
++  it('AG6 the AltGraph state alone, without altKey, blocks Ctrl+Z and stops Ctrl+G before the plain G branch', async () => {
++    const mounted = await mountMetaWorkspace();
++    addOneClip(mounted);
++    const snapToggle = mounted.view.getByTestId('arrangement-snap-toggle');
++    const snapBefore = snapToggle.getAttribute('aria-pressed');
++    expect(snapBefore).not.toBeNull();
++    const statusBefore = mounted.status();
++    const altGraphOnly = { ctrlKey: true, altKey: false, modifierAltGraph: true };
++    const undoNotPrevented = press({ ...Z, ...altGraphOnly });
++    const snapNotPrevented = press({ key: 'g', code: 'KeyG', ...altGraphOnly });
++    expect(mounted.clipCount()).toBe(1);
++    expect(mounted.view.getByTestId('arrangement-snap-toggle').getAttribute('aria-pressed')).toBe(
++      snapBefore,
++    );
++    expect(mounted.status()).toBe(statusBefore);
++    expect(undoNotPrevented).toBe(true);
++    expect(snapNotPrevented).toBe(true);
++    press({ ...Z, ...CTRL });
++    expect(mounted.clipCount()).toBe(0);
++  });
++});

@@ -1,0 +1,171 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx (28 tests) 8182ms
+     ✓ EU1 the Env button and the A key toggle the mode and write the status  729ms
+     ✓ EU1 A with a modifier, a repeat or in a text field does nothing  347ms
+     ✓ EU1 mode off shows no editor and no points; mode on hides the fade handles  337ms
+     ✓ EU1 a video clip, a narrow clip and a folded lane never render an editor  345ms
+     ✓ EU2 a double-click adds a point at the line value with one entry; undo and redo restore it  317ms
+     ✓ EU3 dragging a point down by a quarter of the body gives 0.75 with one entry  364ms
+     ✓ EU3 a horizontal drag past a neighbour stops 1 ms short of it  455ms
+     ✓ EU3 a press without movement writes nothing; pointercancel reverts with no entry  336ms
+     ✓ EU3 the editor unmounting mid-drag reverts with no entry and releases the gesture  313ms
+     ✓ EU7 Ctrl and Shift on the editor toggle the selection; a double-click on a trim strip adds nothing  329ms
+     ✓ EU5 in mode an editor press selects without seeking or a range; header move and trim still work  551ms
+ ✓ app/lib/arrangement/__tests__/insert-marker-ui.test.tsx (29 tests) 8248ms
+     ✓ IM1 Space stops, and Space again plays from the insert marker, not the stop point  646ms
+     ✓ IM2 Shift+Space continues from the stop point and leaves the insert marker  409ms
+     ✓ IM3 Ctrl+Shift+Space and Cmd+Shift+Space move the insert marker to the playhead  424ms
+     ✓ IM6 placing the insert marker replaces a time selection  360ms
+     ✓ IM7 Home and Back to start during playback return playback and the insert marker to 0  807ms
+     ✓ IM14 Ctrl+Shift+Space on a focused button does not activate it on key up  433ms
+     ✓ IM15 Paste lands at the insert marker, not at the stop point  304ms
+     ✓ IM17 Ctrl+E without a time selection splits at the insert marker (one clip and several)  658ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx (11 tests) 6556ms
+     ✓ TU1 without a BPM the 3 key refuses and the menu has no triplet item  1039ms
+     ✓ TU2 with a BPM a seconds or bar division refuses the triplet and stays  485ms
+     ✓ TU3 the 3 key toggles 1/4 to 1/4T and back with the select families  336ms
+     ✓ TU4 drag and ruler snap to triplet lines; Alt keeps the drag free  481ms
+     ✓ TU5 the keyboard nudge steps along stored triplet lines  523ms
+     ✓ TU6 the 1 and 2 keys stay inside the triplet family  492ms
+     ✓ TU7 the lane menu triplet item toggles the mode and closes the menu  913ms
+     ✓ TU8 the focused select takes 3; text fields, repeat, Shift and Alt do not  566ms
+     ✓ TU9 toggles write no history; a BPM change re-derives and a clear forgets  513ms
+     ✓ TU10 the brace drag and brace keys move a loop along triplet lines  401ms
+     ✓ TU11 the grid menu draws its checked marks as hidden lucide Check icons only on checked items (D-29z131)  804ms
+ ✓ app/lib/arrangement/__tests__/track-groups-ui.test.tsx (14 tests) 19873ms
+     ✓ TG1 plain, Shift and Ctrl clicks shape the track selection while the active lane follows  3252ms
+     ✓ TG2 Ctrl+G renders one indented group above its members, with Undo and Redo  1007ms
+     ✓ TG2 after Undo removes the selected group, the stale selection is filtered, not reused  987ms
+     ✓ TG3 nesting by clicks and keys stacks the outer header, then the inner one  1333ms
+     ✓ TG4 Ctrl+Shift+G dissolves only the selected group and refuses a track-only selection  1721ms
+     ✓ TG5 refusals leave history, rows and selection untouched with an English status  2652ms
+     ✓ TG6 F2 renames the group inline; Escape cancels; empty keeps the name; editor keys stay local  2275ms
+     ✓ TG7 plain g still toggles Snap and Ctrl+G inside the BPM field or library search is ignored  465ms
+     ✓ TG8 a clip dragged onto a group header row keeps its previous lane target (G10)  1112ms
+     ✓ TG8b group rows never carry data-track-id and share one parent with the lane rows  1258ms
+     ✓ TG9 a Ctrl marquee across a group header row selects clips on both sides  764ms
+     ✓ TG10 auto-fit reserves the group header rows (0, 1 and 2 groups)  2064ms
+     ✓ TG11 grouping and ungrouping while playing restarts no sources and the position advances  701ms
+ ✓ app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx (23 tests) 9889ms
+     ✓ GAU1 mounts adaptive at 1 s with the adaptive title suffix and the 5 key listed  497ms
+     ✓ GAU2 zooming follows 0.5 → 0.25 → 0.1 s in every lane and writes no status  474ms
+     ✓ GAU3 5 freezes the pick as fixed through a zoom; 5 again re-picks adaptively  315ms
+     ✓ GAU6 a 90 BPM seed picks 1/4 in adaptive and in fixed mode with the same seed text  1548ms
+     ✓ GAU8 a 5 typed in the library search or the BPM field, or with Export open, keeps the mode  377ms
+     ✓ GAU9 with Snap on at 100 px/s a 0.7 s drag lands on the adaptive 0.25 s grid; Undo restores  346ms
+     ✓ GAU10 3 with a BPM keeps the adaptive mode and switches to the triplet family and back  717ms
+     ✓ GAU11 clearing the BPM while adaptive at 320 px/s re-picks 0.1 s and names it in the status  699ms
+     ✓ GAU16 GATE239-S2 an adaptive 1 before a BPM seed is a hand choice: the seed keeps the seconds grid  493ms
+     ✓ GAU17 a refused adaptive key (family end) is not a hand choice: the seed still picks the musical grid  738ms
+     ✓ GAU18 the lane menu shows an Adaptive grid group and a Fixed grid group with one checked item: Medium at mount  324ms
+     ✓ GAU19 choosing Narrow keeps the grid adaptive one level finer, names it in the status and follows the zoom  325ms
+     ✓ GAU20 in fixed mode the fixed pick is the only checked item; choosing Wide switches to adaptive at that level  414ms
+     ✓ GAU21 a width chosen in the menu before a BPM seed is a hand choice: the seed keeps the adaptive seconds grid  598ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx (12 tests) 3089ms
+     ✓ EN1: with the active track only, Ctrl+Right stops at its clip edges and the markers  491ms
+     ✓ EN2: a selected clip adds its track; a Ctrl-click adds a second track  410ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx (13 tests) 7439ms
+     ✓ SS1: the permanent shortcut line is gone and the footer button names the sheet  1113ms
+     ✓ SS2: ? opens the sheet with focus in search, Esc closes it and focus returns to the opener or the footer button  1862ms
+     ✓ SS3: ? is left alone in text fields, in Export, with modifiers, in a menu, during a gesture, and a held ? opens once  892ms
+     ✓ SS4: the key and the code paths both open the sheet; a plain slash does not  341ms
+     ✓ SS5: with the sheet open Studio keys do nothing; ? on Close closes, ? in search types  435ms
+     ✓ SS8: the contextual slot shows the lane-move hint during a drag, the selected clip after, and the button throughout  849ms
+     ✓ SS10: a backdrop click closes the sheet and focus returns to the opener  542ms
+ ✓ app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx (20 tests) 6388ms
+     ✓ BT1 a plain background drag makes a free lane range, clears the selection and activates the lane  784ms
+     ✓ BT1 a Shift drag also makes a range, and a drag to the left gives the same ordered range  404ms
+     ✓ BT1 a background drag replaces an all-tracks range, clears the selection once and pointercancel keeps the last range  373ms
+     ✓ BT2 Snap on 1 s snaps the ends; Alt keeps them free; both ends on one line is no range  347ms
+     ✓ BT6 an in-clip drag continues past the clip start and end, bounded by 0 and the lane extent  424ms
+     ✓ BS1 an in-clip drag past the clip start, then Ctrl+E, cuts only at the edge inside the clip  313ms
+     ✓ BS4 the Split toolbar button on the BS1 range gives the same result as Ctrl+E  900ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/grid-snap-keys.test.tsx (13 tests) 4162ms
+     ✓ GK1 plain 1 narrows the grid to 0.5 s with the Snap-off status and the select hint  565ms
+     ✓ GK3 at the narrowest and widest division the keys stay and report the end  450ms
+     ✓ GK5 a 1 typed in the library search or pressed with Export open changes nothing  895ms
+     ✓ GK7 after 1 with Snap on, ArrowRight nudges a whole-second clip by the new 0.5 s grid  360ms
+     ✓ GK11 the focused select ignores modified, repeated and other digits, stops at the end and yields to Export  532ms
+ ✓ app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx (7 tests) 2452ms
+     ✓ OV-E1: an empty project shows the quiet state; the first clip shows the full view; undo returns  622ms
+     ✓ OV-T2: AltGr, Shift, auto-repeat, text fields, the open sheet, a pointer gesture and partial modifiers are ignored  494ms
+     ✓ OV-T6: hiding the focused Overview moves focus to the next dock control, never to body (GATE232-S1)  585ms
+ ✓ app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx (25 tests) 8005ms
+     ✓ MS1 Ctrl+Z undoes the last edit  1424ms
+     ✓ MS1 Meta+Z undoes the last edit  879ms
+     ✓ MS2 Ctrl+Shift+Z redoes the undone edit  527ms
+     ✓ MS2 Meta+Shift+Z redoes the undone edit  564ms
+     ✓ MS3 Ctrl+Y redoes the undone edit  406ms
+     ✓ MS3 Meta+Y redoes the undone edit  418ms
+     ✓ MS5 Ctrl+L turns the loop on from the time selection, and again turns it off  826ms
+     ✓ MS5 Meta+L turns the loop on from the time selection, and again turns it off  491ms
+ ✓ app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx (30 tests) 40473ms
+     ✓ UC1 the fold button hides the member lanes, shows an overview and writes no history  3096ms
+     ✓ UC2 plain U toggles the selected groups and refuses a track-only selection  1234ms
+     ✓ UC2 U is ignored in text fields, with modifiers and while repeating  996ms
+     ✓ UC2 U and the fold button are refused during a pointer gesture and a pending fader preview  2465ms
+     ✓ UC3 nested collapse keeps the inner group collapsed when the outer one expands  2099ms
+     ✓ UC3 a collapsed group nested by Ctrl+G stays collapsed and ungrouping shows its children  1828ms
+     ✓ UC4 hidden lane controls are unreachable and the collapsed label carries the clip count  1764ms
+     ✓ UC4 F3 a collapse moves focus from a hidden lane to the collapsing group name  1827ms
+     ✓ UC5 collapsing prunes hidden clip, row and lane-range selections, keeps an all-lanes range  3430ms
+     ✓ UC5 Ctrl+A while collapsed selects every clip and marks the overview blocks  647ms
+     ✓ UC6 auto-fit uses the visible lanes only and writes heights back by track id  962ms
+     ✓ UC6 a hidden lane keeps its manual height across collapse and expand  796ms
+     ✓ UC6 nested: an outer collapse leaves one lane and one group row to fit  2081ms
+     ✓ UC7 a hidden active lane marks its collapsed group and still receives library adds  1539ms
+     ✓ UC8 Undo shows the lanes, Redo restores the collapsed group without pruning  1576ms
+     ✓ UC9 F1 focus moves to the new group name after Ctrl+G so F2 works at once  1013ms
+     ✓ UC9 F1 from BODY, and F2 after Ctrl+Shift+G focus lands on the first child, never BODY  1377ms
+     ✓ UC10 a clip dragged onto a collapsed group row keeps its music lane target  1117ms
+     ✓ UC10b a Ctrl marquee across a collapsed middle group never selects its hidden clips  898ms
+     ✓ UC11 collapsing while playing restarts no sources and leaves the arrangement untouched  1035ms
+     ✓ UC1 Space on the focused fold button toggles the group and does not start playback  953ms
+     ✓ UC12 the shortcut sheet lists the group keys and track fold stays independent  771ms
+     ✓ LGH1 the group fold is a chevron, the group mark is Layers and no glyph text remains  957ms
+     ✓ GF1 Undo: Group Tracks on the focused group name lands on its first member, never BODY  624ms
+     ✓ GF2 Redo: Ungroup Tracks by Ctrl+Shift+Z and by Ctrl+Y lands on the first former member  1157ms
+     ✓ GF3 focus on the fold, mute or volume control of the removed row moves the same way  900ms
+     ✓ GF4 a folded group removed by Undo hands focus to its first member, now shown  637ms
+     ✓ GF5 nested: the removed outer group hands focus to its first child; the kept inner one keeps it  1073ms
+     ✓ GF6 focus that was not inside the removed row is not moved  710ms
+     ✓ GF7 Ctrl+Shift+G keeps its own focus target when it also removes the focused row  905ms
+
+ Test Files  12 passed (12)
+      Tests  225 passed (225)
+   Start at  10:56:49
+   Duration  44.10s (transform 6.21s, setup 0ms, import 19.81s, tests 124.76s, environment 11.69s)
+
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/__tests__/focus-source-typing.test.tsx (6 tests) 80ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  10:57:37
+   Duration  947ms (transform 67ms, setup 0ms, import 196ms, tests 80ms, environment 499ms)
+

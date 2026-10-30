@@ -1,0 +1,58 @@
+{
+ "round": 267,
+ "task": "GATE264-S2",
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T11:09:33.5152811Z",
+  "round": 267,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R267-01",
+   "severity": "medium",
+   "steps": [
+    "Fresh anonymous context, http://127.0.0.1:5173/studio-lab, wait for status 'Demo collection ready', focus first library option, Enter (1 clip on Music).",
+    "Click inside the clip 300 px from its left edge (marker 7.500), blur.",
+    "mouse.down at clip x+120 and move 6 px (hold; a pointer gesture is active: plain Control+ArrowRight now shows 'Editing does not work while dragging — let go first.').",
+    "document.body.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',code:'ArrowRight',ctrlKey:true,modifierAltGraph:true,bubbles:true,cancelable:true})) — altKey false, AltGraph true (the AG6 contract state).",
+    "Read [data-testid=arrangement-insert-marker] data-insert-marker and the status before mouse.up."
+   ],
+   "expected": "As at HEAD 7ba7cd2 (control server :5174, same script): blocked during the gesture — marker stays 7.500, event prevented, status 'Editing does not work while dragging — let go first.'.",
+   "actual": "Diff: the chord passes the gesture arm (commandChord false, !modifier false), skips the letter branches and reaches the Ctrl+Arrow branch ((event.ctrlKey && !event.altKey)): preventDefault + stepMarker mid-gesture — marker 7.500 -> 101.352 (clip end), no blocked message. Same at 1440x900 and 1280x720. Regression introduced by the changed hunk at StudioWorkspace.tsx l.2324 (gesture arm modifier -> commandChord). Reachability: Playwright real input on this Linux Chromium (keyboard.down('AltGraph')) yields altGraph=false and ctrl only with Control, so the state was not produced by real input here; it is the task's own contract state (AG6), not shown on a real platform. Ctrl+Alt / Meta+Alt / Ctrl+Alt+AltGraph + Arrow during a gesture changed from 'blocked + message + prevented' (HEAD) to silent pass-through, not prevented, marker unchanged (Info; consistent with the letter rule but not stated in the task's 'do not change' list). This is A's STOP A-R267-REVIEW-GESTURE-ARROW, which B has not ruled on (L10).",
+   "evidence": "c-round-267/gesture-diff.json, c-round-267/gesture-head.json, c-round-267/c267-gesture.mjs, c-round-267/c267-browser.json (gesture.ctrlAltGraphNoAltArrow, platformProbe), a-round-267/arrow-gesture-probe.log"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "TESTS-TARGETED",
+  "MUTANTS",
+  "ALTGR-UNDO",
+  "ALTGR-EDIT",
+  "CTRLALT-REAL",
+  "META-ALT-REAL",
+  "POS-CTRL",
+  "FOCUS-ALT",
+  "DOC-199",
+  "G267-AUTH"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome full",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "blocked": [],
+ "notes": [
+  "FAIL reason: A handed the round over as STOP (a-round-267.md l.3) with a Medium regression in a changed hunk; C reproduced it in the real browser against a HEAD control. Per D-29z568 (Medium+ in a changed path -> fix-up with the same grants) and L10 (B rules on the STOP before re-dispatch). All listed acceptance rows pass; the round fails on the unruled regression, not on them.",
+  "Planning gap: §2.1.2 required commandChord in the whole gesture arm including its ArrowLeft/ArrowRight alternatives, while §2.1.3 froze the Ctrl+Arrow branch; §3 'at risk' did not list gesture + Ctrl+Arrow. B's pre-check probe had no gesture row.",
+  "Platform probe (fact): in headless Chromium 143 on Linux, Playwright keyboard.down('AltGraph') then KeyQ gives ctrl=false, alt=false, getModifierState('AltGraph')=false; with Control held: ctrl=true, alt=false, AltGraph=false. Real AltGr layouts were not tested (TLM-R232-ALTGR-WIN, B-R266-LINUX-ALTGR-PLAIN-LETTERS stay open hypotheses).",
+  "Ableton conformance: Ctrl+Alt rows confirmed (Live 12 manual §42: Ctrl+Alt+letter is a different command, never the Ctrl one); AltGr rows unconfirmed (no source); plain chords confirmed (§42.5, §42.16). Live gesture + Ctrl+Alt+Arrow: no source; not judged."
+ ]
+}
