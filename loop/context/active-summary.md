@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T06:41:09.651Z)
+# Active loop summary (2026-10-30T07:01:38.248Z)
 
-- backlog.json 2490 KB -> active view 352 KB
-- status: G_ROOT_GATE round 262
-- servers: `{"checkedUtc":"2026-10-30T06:08:55.1167982Z","round":262,"attempt":1,"store":200}`
-- last publication: 10e1cd4f7df96bb0f9bd4c2f6ab293ee2e805839 (rounds 260-261)
-- last root gate: round 262 failed - verify exit 1 (gates/round-262/verify.log)
+- backlog.json 2497 KB -> active view 352 KB
+- status: G_ROOT_GATE round 263
+- servers: `{"checkedUtc":"2026-10-30T06:52:15.2075938Z","round":263,"attempt":1,"store":200}`
+- last publication: 28c4f83bf3a9c59606ee141032ee4f267137dfc2 (rounds 262-263)
+- last root gate: round 263 published - commit 28c4f83bf3a9c59606ee141032ee4f267137dfc2 pushed
 
 ## Current items: -
 
@@ -146,7 +146,7 @@
 - A-R84-ARCH-DOCK-WRITER / info / acknowledged (reviewer: keep; own sibling component, no link to sync effect) / ArrangementVideoDock.tsx l.237-273 adds a position writer and layout effect for the fade overlay
 - A-R84-BORDER-CONSTANTS / info / open - one-line backlog item (reviewer: keep) / CLIP_ENVELOPE_ROOT_BORDER_PX (ArrangementClipEnvelope.tsx:21) and CLIP_BORDER_PX (ArrangementClip.tsx:44) both depend on the root border cla
 - C-R85-L1 / low / ruled (B, D-29z51): not a CZABA contract - the round-85 M1-GHOST "then Escape" wording was B's assumption; no pointer gesture in the workspace cancels on Escape today (grep); Live behaviour unconfirmed; not requested by the user -> signal ESCAPE-CANCEL-GESTURE, not scheduled / Escape does not cancel a clip drag / lane move; on release the move commits
-- ESCAPE-CANCEL-GESTURE / info / signal (cross-cutting product question: clip move, trim, fade, envelope, marker, loop and range gestures; needs a Live source check and a user decision before any task) / no Escape-to-cancel for pointer gestures
+- ESCAPE-CANCEL-GESTURE / info / signal (cross-cutting product question: clip move, trim, fade, envelope, marker, loop and range gestures; needs a Live source check and a user decision before any task) | D-29z541: + relative faders (track, group, master, pan, clip gain; C-R262-01 evidence). Policy SABA-B-5 lists "Esc-cancel" among fader behaviours to keep, but no fader has it at HEAD (C round 262); decide together with this signal / no Escape-to-cancel for pointer gestures
 - GATE85-S5-SCOPE-RESET-EFFECT / info / open - Lows batch (optional; round 86 format state may reset in the same place) / scope reset runs in an effect after close (one extra render)
 - GATE85-S6-ROW-BOUNDARY-HANDLES / info / acknowledged (precondition unreachable; cross-boundary drag verified) / isolate per lane body: a fade handle dragged near the row boundary could be covered by the next row
 - C-R85-OBS-PLAYHEAD-OVER-CLIPS / info / acknowledged (A review L6; intended: playhead z-10 row sibling paints over clips, pointer-events-none) / playhead line paints over clips and the selected clip after the isolate change

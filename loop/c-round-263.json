@@ -1,0 +1,83 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T06:52:15.2075938Z",
+  "round": 263,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "NO-ASSERTION-LOST",
+  "TESTS-TARGETED",
+  "MUTANTS",
+  "PLACE-1440",
+  "PLACE-1280",
+  "G263-AUTH",
+  "LESSON"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest incl. the l.867 test",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke (never ran on the round-262 diff)"
+ ],
+ "rows": [
+  {
+   "id": "SOURCE-SCOPE",
+   "status": "PASS",
+   "evidence": "c-round-263/source-scope.txt: HEAD 10e1cd4; sha256sum -c frozen 1120 list rc 0 at start and at end; git status = 9 round-262 M + doc 196 ?? + M track-layout.test.tsx (11 entries), nothing else"
+  },
+  {
+   "id": "NO-ASSERTION-LOST",
+   "status": "PASS",
+   "evidence": "source-scope.txt diff: exactly 2 hunks (@@ -867 +867,4 / @@ -873 +876,4), each removes only toHaveLength(2) and adds toHaveLength(3) + children[0] placeholder|selected + children[1] arrangement-master + children[2] shortcutButton; file sha f25c3853... equals A's record"
+  },
+  {
+   "id": "TESTS-TARGETED",
+   "status": "PASS",
+   "evidence": "c-round-263/vitest-targeted.txt: 4/4 files, 81/81 tests (track-layout 36)"
+  },
+  {
+   "id": "MUTANTS",
+   "status": "PASS",
+   "evidence": "scratch copy outside store: control 36/36 green (mutant-control.txt); M1 Master removed -> red at track-layout.test.tsx:867:28 'length 3 got 2' (mutant-m1.txt/.diff); M2 Master after Shortcuts button -> red at :869:60 'expected null to be arrangement-master' (mutant-m2.txt/.diff)"
+  },
+  {
+   "id": "PLACE-1440",
+   "status": "PASS",
+   "evidence": "r263.json, layout-run.txt, compare-262.txt: 5 app/perf hashes equal c-round-262/perf-run-1.start; footer 53, header 35, Master x 911.75 in footer/row before Shortcuts ? x 1352, scroller 512; empty/clip/range/lane-move states 0 overlaps; 0 deltas >0.5 vs c-round-262/after.json; screenshots r263-*-1440x900.png"
+  },
+  {
+   "id": "PLACE-1280",
+   "status": "PASS",
+   "evidence": "same files: footer 53, header 35, Master x 751.75, Shortcuts ? x 1192, scroller 402, 0 overlaps, 0 deltas vs round 262; screenshots r263-*-1280x720.png"
+  },
+  {
+   "id": "G263-AUTH",
+   "status": "PASS",
+   "evidence": "g263-auth.json: fresh anonymous context, /studio-lab workspace + demo badge, auth_user null, 0 cookies, 0 page errors; /studio/middle-east 'Sign in required' 1, audio[src] 0, 0 audio/token requests; /api/studio-token no header 401 no token; fake Bearer 500 no token (same as rounds 261/262, backend unavailable)"
+  },
+  {
+   "id": "LESSON",
+   "status": "PASS",
+   "evidence": "claims.txt: grep -c 'Moved element → grep the destination too' lessons.md = 1"
+  },
+  {
+   "id": "CLAIMS-K1-K5",
+   "status": "PASS",
+   "evidence": "claims.txt: K1 failed 10e1cd4..., same head, 10; K2 1120, 1 1 1 1 1 1 1; K3 HEAD l.867/l.873 toHaveLength(2), current tree l.867/l.876 toHaveLength(3); K4 StudioWorkspace, strings, meter-ui, shortcut-sheet-ui, track-layout, master-ui; K5 2, '1 failed | 3163 passed (3164)'"
+  }
+ ],
+ "notes": [
+  "Layout attempt 1 crashed on a cold dev-server compile (master null before the page was ready); after a warm-up load (ready in 3.3 s) attempt 2 ran clean. Environment, not a product finding (layout-attempts.txt).",
+  "1024x720 clip-state overlap 'SPAN:00:00.000' with Master is identical to round 262 (pre-existing narrow-viewport note, outside the 1440/1280 acceptance).",
+  "Not re-run on purpose per task §3: AUDIO, KEYS, TAB-ORDER, STATES, NARROW, SCREEN-BUDGET, PERF-RUN; no app/perf byte changed (hash row)."
+ ]
+}

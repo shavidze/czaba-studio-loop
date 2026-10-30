@@ -1,102 +1,141 @@
-# Round 263: gate-262 fix-up (test-only). `track-layout.test.tsx` pins the footer's last row to 2 children; with Master there it has 3
+# Round 264: L46-CONTRACT-CHECKS. Handler contract check; the platform check stays parked with Saba
 
-**Planned by:** B, at the round 262 → 263 planning, 2026-10-30. **Decisions:** D-29z539 (round 262 = C PASS, gate failed), D-29z540 (this round), D-29z541 (C-R262-01), D-29z542 (A's notes), D-29z543 (lesson L23), D-29z544 (docs), D-29z545 (C's notes).
-- **Read first:** `lessons.md` in full. These apply directly: L4 (no assertion lost; equal or stronger replacements allowed), L11 (STOP), L12 (selectors by testid or role), L23 (now with the "Moved element → grep the destination too" clause), L29 (claims, §7).
-- **Previous task:** `tasks/round-262.md` (an exact copy of the round-262 `current-task.md`). C's result: `c-round-262.json` (PASS, 17 rows). The gate's result: `gates/gate-round-262.json` = **failed**, `gates/round-262/verify.log`. B's reasoning: `b-round-262.md`.
-- **Reference-first:** not in scope. This is a test-only round, and no behaviour changes.
+**Planned by:** B, at the round 263 → 264 planning, 2026-10-30. **Decisions:** D-29z546 (SABA-B-9 done), D-29z547 (this round), D-29z548 (GATE244-S4 ruling), D-29z549 (A's grant: one new test file and implementation doc 197), D-29z550 (outcome table), D-29z551 (root checkpoint addendum at the SABA-B-9 boundary).
+- **Read first:** `lessons.md` in full. These apply directly:
+  - L11 (STOP);
+  - L12 (selectors by testid or role);
+  - L29 (claims, §6);
+  - L46 (this round is its reopening);
+  - L47 (BODY is never an *expected* focus value; row CC-CTRLCLICK below *observes and records* it).
+- **Previous task:** `tasks/round-263.md` (an exact copy of the round-263 `current-task.md`). C's result: `c-round-263.json` (PASS, 8 rows, `browserVerified` true). The gate's result: `gates/gate-round-263.json` = **published**, commit `28c4f83`. B's reasoning: `b-round-263.md`.
+- **Reference-first:** not in scope. This round verifies handlers and adds test rows only. No behaviour changes.
+- **Source of the scope:** `retros/retro-260.md` §12 item 2, plus the backlog `systemic_tasks` entry `L46-CONTRACT-CHECKS` (D-29z521). Saba did not answer the parked platform checks by RETRO 260. Under L46, the half that the cloud can check honestly is reopened here. **The real-platform half stays with Saba:** Windows AltGr layouts, the native macOS Cmd and Ctrl+click, VoiceOver/NVDA, and Safari. This round does not claim it, and C writes no row that claims it.
 
-## Baseline: HEAD `10e1cd4` plus the unpublished round-262 diff
-- `gates/gate-round-262.json`: `failed`, head `10e1cd4f7df96bb0f9bd4c2f6ab293ee2e805839`. Nothing was published. `git rev-parse HEAD` = `10e1cd4…` (`b-round-262/head-at-planning.txt`) [K1].
-- **The working tree holds round 262's C-verified work:** 9 ` M` plus doc 196 `??` (`b-round-262/git-status-at-planning.txt`) [K1]. Keep all of it exactly as it is. This round adds one test edit on top, and the gate then publishes rounds 262 and 263 together.
-- **Frozen:** every tracked file plus doc 196, except the one grant: **1,120** entries in `b-round-262-r263-tree-sha256.txt`. This freezes the 9 round-262 files at their C-verified bytes. From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-262-r263-tree-sha256.txt` returns rc 0 at planning. Each of the 7 protected auth and purchase files appears in it exactly once [K2].
-- **Grant (edit):** `b-round-262-r263-grants.txt`. It has one entry: `app/lib/arrangement/__tests__/track-layout.test.tsx`, and only the two assertions in §2.
-- **New files:** none (`b-round-262-r263-new-files.txt` is empty).
-- **Not granted:** everything else. That includes the 9 round-262 files, doc 196, doc 193, doc 195 (its stale count is a deferred Low, D-29z542), `shortcut-sheet-ui.test.tsx`, `e2e/**`, `perf/**`, `package.json`, `.claude/**`, `CLAUDE.md` and the 7 protected files.
+## Baseline: published HEAD `28c4f83`
+- `gates/gate-round-263.json`: `published`, commit `28c4f83bf3a9c59606ee141032ee4f267137dfc2`, pushed to both remotes.
+- `git rev-parse HEAD` = `28c4f83…`, and the working tree is clean (`b-round-263/head-at-planning.txt`, `b-round-263/git-status-at-planning.txt`, which is empty) [K1].
+- **Frozen:** every tracked file, **1,121** entries, in `b-round-263-r264-tree-sha256.txt`. From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-263-r264-tree-sha256.txt` returns rc 0 at planning. Each of the 7 protected auth and purchase files appears in it exactly once [K2].
+- **Grant (edit):** none. `b-round-263-r264-grants.txt` is empty.
+- **Grant (new files):** `b-round-263-r264-new-files.txt` has two entries:
+  - `app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx` [K3];
+  - `docs/implementation/2026/quarter-IV/197-l46-meta-shortcut-contract.md` [K3].
+
+  Neither exists at planning, and 197 is the next free number [K3].
+- **Not granted:** everything else. That includes `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `shortcuts.ts`, `strings.ts`, every existing test file, `e2e/**`, `perf/**`, every other doc, `package.json`, `.claude/**`, `CLAUDE.md` and the 7 protected files [K2].
+- **Implementation doc:** doc 197 (D-29z549). This round adds a whole test file, so it follows the round-261 precedent (test/perf-only, doc 195), not round 263's two-hunk edit. The doc follows L26 (headings as an in-order subsequence of TEMPLATE's) and L28 (l.4 exactly `Completed (C round 264 PASS)`) [K3]. It is written in Georgian, and it cites only rows that exist in the new file.
 
 ## 0. Why this round
-- Round 262 (SABA-B-9 stage 2: Master to the footer's last row, directly before `Shortcuts ?`) passed C: 17 rows, with `browserVerified` and `realVerified` true.
-- The root gate then failed. `npm run verify` stopped in `test:run`, so the build and e2e smoke never ran. The failure:
-  - test: `track-layout.test.tsx` > "panel polish 14a" > "reserves the selected-clip row with an aria-hidden placeholder and renders the real line as one truncated full-width row (C-R11-02, C-R15-02)";
-  - l.867 `expect(row.children).toHaveLength(2)` received 3 [K3].
-- The test asserts that the footer's last row has exactly [reserve or line, `Shortcuts ?`]. Round 262 put the Master group between them, which is the approved and C-verified layout. The test's old structural fact is stale; the product is right.
-- The same row repeats the assert at l.873, after `selectClip('music-1')` [K3]. The full gate run had no other failure: 1 failed / 3,163 passed.
-- **Open Critical/High:** none. The regression round is not due: `regression-last.json` gives round 258, 2026-10-30, so the next one is due on or after 2026-11-02.
+- SABA-B-9 is complete: stage 1 was published in `d732d26`, and stage 2 by rounds 262 and 263 in `28c4f83`.
+- The pre-fixed outcome table of `tasks/round-263.md` §4 names this round. Planning is on 2026-10-30, and the next regression round is due on or after 2026-11-02.
+- **Open Critical/High:** none. C round 263 reported 0 bugs.
+- After this round: **SABA-B-11c** (the `ableton-arrangement-expert` consult on the off-grid offset first), then **SYS-6**.
 
-## Why we missed it (B's pre-check; not a Saba issue, recorded for RETRO 275)
-- **Which phase should have caught it:** B's L23 pre-check at the round-262 planning.
-- **Why not:** it grepped only the moved element's tokens (`arrangement-master|'Master'|Master Volume|…`). It did not grep the destination row's existing children (`arrangement-selected-clip-reserve`, `footerButtonLabel`). `track-layout.test.tsx` pins that row by those, so it was never run. A ran B's 23-file list, and C does not run the full suite (speed rules), so only the gate saw it.
-- **The rule:** L23 now has the clause "Moved element → grep the destination too" (D-29z543). B applied it in this planning: `grep -rln "arrangement-selected-clip-reserve\|footerButtonLabel" app perf e2e` gives 4 test files, which are the run list in §3 [K4]. Retro candidate RC-R262-DEST-CONTAINER-GREP. C row LESSON checks it.
+### The four contracts and what is already covered
+| # | Finding (severity) | Cloud contract | jsdom coverage now | Browser coverage now | This round |
+|---|---|---|---|---|---|
+| 1 | GATE232-S2 / TLM-R232-ALTGR-WIN (Medium, open_tech_lead_manual) | A `keydown` with `getModifierState('AltGraph')` true never toggles the Overview [K4] | OV-T2 in `overview-visibility-ui.test.tsx` [K4] | none | C browser rows CC-ALTGR |
+| 2 | TLM-R232-MAC / TLM-R228-META-KEYS | The Meta bit alone (no Ctrl) runs the same handlers as Ctrl: Z, Shift+Z, Y, E, L and Alt+O. That is what `aria-keyshortcuts` advertises [K5][K6] | Meta+Alt+O (OV-T1) and Meta+Shift+Space (insert-marker-ui) only. **No handler row for Meta+Z / Shift+Z / Y / E / L** [K7] | none | **A adds jsdom rows MS1–MS6**; C browser rows CC-META |
+| 3 | TLM-R233-SR-ORDER (GATE233-S4, info) | After Ctrl+Alt+O on the focused Overview, focus moves to the next dock button, and then the polite status gets the hidden text. This proves DOM/ARIA order, not what a screen reader speaks [K8] | OV-T6 (focus to "Expand video", never body) [K8] | none | C browser row CC-SR-ORDER |
+| 4 | GATE244-S4 / A-R244-REVIEW-L6 (Low, deferred_low_polish) | The grid-menu focus return when the menu is opened by the macOS Ctrl+click path: `pointerdown` button 0 + `ctrlKey`, then `contextmenu`. `pressFocus` is recorded only for `button === 2` [K9] | right-button order only (L47) | none | C browser row CC-CTRLCLICK (**observe and record**) |
 
-## 1. Measured facts (B's scratch pre-check)
-- **Scratch:** `/home/runner/czaba-project/tmp/b262-scratch`, a copy of the current working tree (tracked files plus doc 196, with `node_modules` symlinked), and the §2 sketch applied (`b-round-262/sketch-track-layout.diff`).
-- **Targeted tests:** `npx vitest run` on `track-layout`, `shortcut-sheet-ui`, `master-ui` and `meter-ui` gave **4/4 files, 81/81 tests** (`b-round-262/precheck-vitest.txt`).
-- **Mutant** (the `<ArrangementMaster />` line removed from the footer of `StudioWorkspace.tsx`): `track-layout` → 1 failed / 35 passed, and the failure is the amended row (`b-round-262/precheck-mutant-no-master-in-footer.txt`).
-- **Typecheck and lint:** `npx tsc --noEmit` rc 0 (`precheck-tsc.txt`); `npx biome check` on the file: clean (`precheck-biome.txt`).
-- **Headroom (L31):** in the gate-262 `verify.log`, `track-layout.test.tsx` took 10.4 s for 36 tests. The changed row's describe block has a `{ timeout: 15_000 }` per-test limit, and the edit adds only synchronous asserts.
+### B's baseline probe (run once, L29)
+Scripts are `b-round-263/probe-l46.mjs` and `b-round-263/probe-meta.mjs`; results are in `probe-l46.json` and `probe-meta.json`. Both ran at 1440×900 and 1280×720 against HEAD `28c4f83` with 0 page errors [K10][K11]:
+- **Meta [K11]:** Linux Chromium delivers `metaKey: true, ctrlKey: false` for `Meta+KeyZ`. For each of Z, Shift+Z, Z, Y, E and L, Meta gives the same clip count, Loop `aria-pressed` and status text as Control.
+- **AltGraph:** a synthetic `Ctrl+Alt+O` with `modifierAltGraph: true` has `getModifierState('AltGraph')` true. It is not prevented, and the Overview stays. The same event without AltGraph is prevented, and the Overview hides.
+- **Overview order:** focused Overview → `Control+Alt+KeyO` → the active element is `BUTTON "Expand video"`, which matches `:focus-visible`, with outline `solid` / computed `1px` / offset `2px`. The status becomes "Overview hidden. Ctrl+Alt+O shows it again." [K10].
+- **Ctrl+click path:** started from the library search field, it ends at **BODY**. A real right-click returns focus to the field. Started from a focused button, the button keeps focus on both paths.
 
-## 2. A: what to change
-Edit only `app/lib/arrangement/__tests__/track-layout.test.tsx`, in the one test named in §0. The rule: **no assertion lost; equal or stronger replacements allowed** (L4).
-1. **l.867** (empty state, after `expect(shortcutButton.parentElement).toBe(row);`): replace `expect(row.children).toHaveLength(2);` with:
-   - `expect(row.children).toHaveLength(3);`
-   - `expect(row.children[0]).toBe(placeholder);`
-   - `expect(row.children[1]?.getAttribute('data-testid')).toBe('arrangement-master');`
-   - `expect(row.children[2]).toBe(shortcutButton);`
-2. **l.873** (after `selectClip('music-1')` and `expect(selected?.parentElement).toBe(row);`): replace `expect(row.children).toHaveLength(2);` with the same 4 asserts, using `selected` instead of `placeholder` as `children[0]`.
-3. **Change nothing else:** not the test name, not the other asserts, and not any other test in the file. The name still describes the reserve and the line, which stay true. B's sketch is `b-round-262/sketch-track-layout.diff`. It is for reading only: it was made with `git diff --no-index` and carries absolute paths, so `git apply` will not take it. Make the §2.1/§2.2 edits by hand.
-4. **Checks A runs** (speed rules):
+So GATE244-S4 **reproduces in cloud Chromium when the origin is a typing field**.
+
+## 1. Ruling on GATE244-S4 (D-29z548)
+- **Severity:** it stays Low and stays in `deferred_low_polish`. It gains the cloud evidence `b-round-263/probe-l46.json` `p5_ctrl`, and C's CC-CTRLCLICK evidence after this round.
+- **Why not reopened as a normal task:** L46's reopening clause covers parked checks that hold a Medium. The 2026-10-23 bug gate defers Lows to the polish pass. This round does not own `StudioWorkspace.tsx`, and that file is not granted.
+- **Unconfirmed premise:** that macOS Chrome sends `button 0 + ctrlKey` before `contextmenu` is a hypothesis. It belongs to Saba's platform half, and C does not state it as fact.
+- **Not a round FAIL:** a BODY result in CC-CTRLCLICK is the expected reproduction of a known deferred Low.
+- **What would be a finding:** the menu fails to open on the explicit `contextmenu`, or the right-button control row does not return focus to the field. That is a Medium regression.
+
+## 2. A: what to do (one new test file)
+1. **Create** `app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx` [K3]. Read `.claude/prompts/new-test.md`, `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md` first.
+   - Reuse the render scaffolding pattern of `overview-visibility-ui.test.tsx`: the `@remix-run/react` mock, the fake audio classes, `ArrangementProvider` with `createArrangement`, and `StudioWorkspace`. Copy it; do not import from another test file.
+   - Dispatch keys on `document.body`. The handler listens on `window` [K5].
+2. **Rows.** Each row runs the same step twice: once with `ctrlKey: true` (the control), once with `metaKey: true, ctrlKey: false`. Each asserts the **effect**, never only `defaultPrevented`.
+   - **MS1 Z (undo):** after one history edit, Meta+Z restores the previous clip count. The Undo history title or label changes the same way as with Ctrl. The recipe for the edit is the add-then-undo pattern of OV-E1 in `overview-visibility-ui.test.tsx` [K12].
+   - **MS2 Shift+Z (redo):** after MS1, Meta+Shift+Z re-applies the edit.
+   - **MS3 Y (redo):** after an undo, Meta+Y re-applies the edit.
+   - **MS4 E (split):** a selected clip with the insert marker inside it splits into 2 clips. The status equals the Ctrl run's status. Recipe: the Ctrl+E split rows of `insert-marker-ui.test.tsx` [K12].
+   - **MS5 L (loop):** with a time selection, Meta+L turns the loop on (`aria-pressed` true), and a second Meta+L turns it off (`aria-pressed` false) [K11]. The Loop button is the one whose `aria-keyshortcuts` advertises `Meta+L` [K5]. Recipe: the plain Ctrl+L row of `delete-selection-ui.test.tsx` [K12].
+   - **MS6 negative:** Alt alone (no Ctrl or Meta) + Z, E or L changes no clip count and no loop state. This proves the rows above do not pass on a missing modifier check.
+3. **Red-proofs** (L23, L52). Run them on a scratch copy **outside** `store/`, and report each one as a file + line.
+   - Each mutant run executes **the new file only**.
+   - M1 also turns the Meta+Shift+Space rows of `insert-marker-ui.test.tsx` red, because they use the same `modifier` line. That collateral red is expected and is not a finding.
+   - **M1:** l.2232 `const modifier = event.ctrlKey || event.metaKey;` → `const modifier = event.ctrlKey;` [K6]. Every Meta half of MS1–MS5 must go red, and every Ctrl half must stay green.
+   - **M2:** in the `key === 'y'` branch, delete `current.redo();` [K6]. MS3 must go red.
+4. **Checks** (speed rules), from `store/`:
    - `npm run typecheck` and `npm run lint`;
-   - `npx vitest run app/lib/arrangement/__tests__/track-layout.test.tsx app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx app/lib/arrangement/__tests__/master-ui.test.tsx app/lib/arrangement/__tests__/meter-ui.test.tsx`;
-   - `npx biome check` on the edited file;
-   - no full suite, `npm run verify`, `test:perf` or code-reviewer. This is one test file with no app code, below the 3-file reviewer rule.
-5. **STOP conditions** (L11, at the top of `a-round-263.md`):
-   - any of the 4 files is red after the edit;
-   - the edit needs any other file;
-   - `sha256sum -c` of the frozen list is not rc 0 before or after the edit.
-6. **Docs:** none. Doc 196 and doc 193 l.4 stay `Completed (C round 262 PASS)` (D-29z544). That is true, because rounds 262 and 263 publish together. No implementation doc is needed for a test-assertion update.
-7. **Report:** `a-round-263.md` lists the diff hunks (old → new), the command results, and the `sha256sum -c` result before and after.
+   - `npx vitest run app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx app/lib/arrangement/__tests__/insert-marker-ui.test.tsx` [K3][K12];
+   - `npx biome check app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx` [K3];
+   - report the new file's slowest test time against its timeout (L31);
+   - no full suite, no `npm run verify` and no code-reviewer (2 files, below the 3-file rule).
+5. **STOP conditions** (L11, at the top of `a-round-264.md`):
+   - any row needs a change outside the two new files;
+   - a Meta half is red on unmodified code (that is a product bug: report it with the measurement and do not fix it);
+   - M1 leaves a Meta half green;
+   - `sha256sum -c` of the frozen list is not rc 0 before or after.
+6. **Report:** `a-round-264.md` lists the doc path, the rows (id → what is asserted), the command results, the M1 and M2 red lines, and the `sha256sum -c` result before and after.
 
 ## 3. C: what to verify
-C writes `c-round-263.md` and `c-round-263.json` as it goes. "Both viewports" means 1440×900 and 1280×720, in a fresh anonymous context on `/studio-lab`, after `Demo collection ready`.
+C writes `c-round-264.md` and `c-round-264.json` as it goes.
+- "Both viewports" means 1440×900 and 1280×720, in a fresh anonymous context on `/studio-lab`, after `Demo collection ready` (L48).
+- C may reuse B's two probe scripts or write its own equivalent under `c-round-264/`. The verdicts come from C's run, not from B's JSON.
+- **Ableton conformance** for every row: "not applicable". The rows check CZABA handler contracts, not Live behaviour.
 
 | Row | Check | PASS means | FAIL means |
 |---|---|---|---|
-| **SOURCE-SCOPE** | From `store/`:<ul><li>`sha256sum -c --quiet ../tmp/studio-real-loop/b-round-262-r263-tree-sha256.txt` → rc 0;</li><li>`git status --short --untracked-files=all` lists the round-262 set (9 ` M` + doc 196 `??`) plus ` M` `track-layout.test.tsx`, and nothing else;</li><li>HEAD is `10e1cd4`.</li></ul> | Only the grant changed on top of round 262. | Any other change. |
-| **NO-ASSERTION-LOST** | `git diff -U0 app/lib/arrangement/__tests__/track-layout.test.tsx`. | Exactly 2 hunks. Each removes one `toHaveLength(2)` line and adds the 4 lines of §2. No other line is removed. | Any other removed line, or a weaker replacement. |
-| **TESTS-TARGETED** | `npx vitest run` on the 4 files of §2.4. | 4/4 files green. | Red. |
-| **MUTANTS** (scratch copy outside `store/`) | <ol><li>Control: unchanged copy, `track-layout` green.</li><li>M1: remove `<ArrangementMaster />` from the footer of `StudioWorkspace.tsx`.</li><li>M2: move it to after the `Shortcuts ?` button.</li></ol> | Control green; M1 and M2 each red at the amended row. | A mutant stays green. |
-| **PLACE-1440 / PLACE-1280** (browser, short re-check; the app code is unchanged since C round 262) | <ul><li>The sha256 of the 5 app/perf files equals C's `c-round-262/perf-run-1.start` record.</li><li>Re-measure with C's `c-round-262/layout.mjs`, or an equivalent: the Master group, `footer`, `header`, `Shortcuts ?` and the scroller, in the empty state and with a clip selected.</li></ul> | <ul><li>The hashes are equal.</li><li>Master is inside `footer` and directly before `Shortcuts ?`.</li><li>The values equal `c-round-262/after.json` (±0.5): footer 53, header 35, Master x 911.75 / 751.75, `Shortcuts ?` x 1352 / 1192, scroller 512 / 402.</li><li>0 overlaps.</li></ul> | A hash differs, or any value is out of bound. |
-| **G263-AUTH** (browser; re-run `c-round-262/g262-auth.cjs` or an equivalent) | Fresh anonymous context at 1440×900: <ul><li>`/studio-lab` shows the workspace and the demo badge, and `auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required" and 0 `audio[src]`;</li><li>`/api/studio-token` with no header.</li></ul> | 401, and no token is issued. | Any bypass (Critical). |
-| **LESSON** | From the loop root: `grep -c "Moved element → grep the destination too" lessons.md`. | `1` | `0` |
+| **SOURCE-SCOPE** | From `store/`:<ul><li>`sha256sum -c --quiet ../tmp/studio-real-loop/b-round-263-r264-tree-sha256.txt`;</li><li>`git status --short --untracked-files=all`;</li><li>HEAD.</li></ul> | <ul><li>rc 0;</li><li>status is exactly the two `??` entries of `b-round-263-r264-new-files.txt` [K1][K3];</li><li>HEAD is `28c4f83`.</li></ul> | Any other change. |
+| **MS-REVIEW** | Read the new file. | <ul><li>MS1–MS6 exist, and each has a Ctrl half and a Meta half (MS6: Alt only);</li><li>each asserts a clip count, `aria-pressed` or the status text [K11];</li><li>no styling-class selectors (L12).</li></ul> | A row is missing, or a row asserts only `defaultPrevented`. |
+| **TESTS-TARGETED** | The 3 files of §2.4. | 3/3 green. | Red. |
+| **MUTANTS** (scratch outside `store/`) | Control, M1, M2 as in §2.3, with the new file only. A red in another file under M1 is expected (§2.3). | <ul><li>Control: green.</li><li>M1: every Meta half red, every Ctrl half green.</li><li>M2: MS3 red.</li></ul> | Any mutant stays green. |
+| **CC-META-1440 / -1280** (browser) | <ul><li>Install a capture `keydown` listener on `window`. `Meta+KeyZ` must record `metaKey true, ctrlKey false`.</li><li>Then run the recipe once with `Control` and once with `Meta`, each in a fresh context:<ol><li>focus the first library `option`, then Enter;</li><li>Z;</li><li>Shift+Z;</li><li>Z;</li><li>Y;</li><li>click the clip at its left edge x + 300 px, mid-height;</li><li>E;</li><li>drag on the clip from left edge x + 100 px to x + 400 px;</li><li>L;</li><li>L.</li></ol></li><li>After each step, record the `[data-clip-id]` count, the Loop button's `aria-pressed` (the button with `aria-keyshortcuts="Control+L Meta+L"`) and the `arrangement-status` text.</li></ul> | <ul><li>Meta equals Control at every step.</li><li>Clip counts: 1, 0, 1, 0, 1 → split 2.</li><li>Loop: true, then false.</li><li>Statuses: "Clip split at 00:07.500.", "Loop created and turned on: 00:02.500 — 00:07.500.", "Loop is off; the range is kept." [K11]</li></ul> | Any Meta step differs from Control. |
+| **CC-ALTGR-1440 / -1280** (browser) | <ol><li>Dispatch on `document.body`: `new KeyboardEvent('keydown', {key:'o', code:'KeyO', ctrlKey:true, altKey:true, modifierAltGraph:true, bubbles:true, cancelable:true})`.</li><li>Dispatch the same event without `modifierAltGraph`.</li><li>Real `page.keyboard.press('Control+Alt+KeyO')` twice.</li></ol> | <ol><li>`getModifierState('AltGraph')` is true, `dispatchEvent` returns true, `[data-timeline-overview]` stays and the status is unchanged.</li><li>Prevented; the Overview hides; the status is "Overview hidden. Ctrl+Alt+O shows it again.".</li><li>Hides, then shows ("Overview shown. Ctrl+Alt+O hides it.") [K10].</li></ol> | The AltGraph event toggles, or a control does not. |
+| **CC-SR-ORDER-1440 / -1280** (browser) | Focus `[data-timeline-overview]`, then `Control+Alt+KeyO`. Read `document.activeElement` right after the press, then the `arrangement-status` text after 600 ms, then `ariaSnapshot()` of `[data-testid="arrangement-video-dock"]`. | <ul><li>Active is the button "Expand video". It matches `:focus-visible`, and its computed outline is style `solid`, width ≥ `1px` (Chromium computes the 1.5px ring as 1px, L9) and offset `2px` [K10].</li><li>The status is "Overview hidden. Ctrl+Alt+O shows it again.".</li><li>The snapshot shows region "Video" with the button "Expand video", and no Overview [K8][K10].</li></ul> | Active is BODY or another element, or the status is missing. |
+| **CC-CTRLCLICK-1440 / -1280** (browser; observe and record, §1) [K9][K10] | The origin is the library search field (`Search the library`), and the target is an audio lane background (`[data-grid-seconds]:not([data-testid])`, x + 400 px, mid-height). Two cases:<ul><li>**(a) control:** a real right-click, then Escape;</li><li>**(b) Ctrl+click path:** hold Control, then left `mouse.down`/`up` (no native menu on Linux), then dispatch `contextmenu` (`button: 0, ctrlKey: true`) at the same point, then Escape.</li></ul> Record `document.activeElement` after each of: the press, the menu open (`[role="menu"]` count) and Escape. | <ul><li>(a) The menu opens, and focus returns to the search field.</li><li>(b) The menu opens. The final focus is **recorded** as observed (B's baseline: BODY). A BODY result here is GATE244-S4 reproduced: attach it as evidence; it is not a FAIL.</li></ul> | (a) does not return focus, or the menu does not open in (a) or (b) (Medium regression). |
+| **G264-AUTH** (browser; reuse `c-round-262/g262-auth.cjs` or an equivalent) | A fresh anonymous context at 1440×900:<ul><li>`/studio-lab`;</li><li>`/studio/middle-east`;</li><li>`/api/studio-token` with no header.</li></ul> | <ul><li>`/studio-lab`: the workspace and the demo badge show; `auth_user` is null.</li><li>`/studio/middle-east`: "Sign in required" shows, and 0 `audio[src]`.</li><li>`/api/studio-token`: 401, and no token is issued.</li></ul> | Any bypass (Critical). |
 
-- **Gate rows:** full vitest (it must include the l.867 test), build, Biome, `npm run verify` and e2e smoke. List them under `"gate"`, never in `"passed"`.
-- **`browserVerified`** is true only if PLACE-1440, PLACE-1280 and G263-AUTH ran in the browser.
-- **Not re-run, on purpose:** AUDIO, KEYS, TAB-ORDER, STATES, NARROW, SCREEN-BUDGET and PERF-RUN. No app or perf byte changes (the SOURCE-SCOPE and hash rows prove it), and C round 262 holds that evidence.
+- **Gate rows:** the full vitest, the build, Biome, `npm run verify` and e2e smoke. List them under `"gate"`, never under `"passed"`.
+- **`browserVerified`** is true only if every CC-* row and G264-AUTH ran in the browser.
+- **Not re-run, on purpose:** layout, audio, tab order and screen budget. No app byte changes, and SOURCE-SCOPE proves it.
+- **Platform halves:** list these under `"notRunHere"` with the reason "cloud is Linux Chromium only; Saba's platform check":
+  - Windows AltGr;
+  - macOS Cmd and Ctrl+click;
+  - VoiceOver and NVDA;
+  - Safari (A-R204-SAFARI-USERMENU-CLICK).
 
-## 4. Outcome, fixed in advance
-| Result | B at the round-264 planning |
+  They are neither PASS nor FAIL.
+
+## 4. Outcome, fixed in advance (D-29z550)
+| Result | B at the round-265 planning |
 |---|---|
-| C PASS and gate 263 `published` | SABA-B-9 → **მზადაა** (rounds 262 and 263); SABA-Q-9-MASTER-ROW stays with Saba (`awaiting_user`). Round 264 = **L46-CONTRACT-CHECKS** if planned before 2026-11-02, otherwise **REGRESSION**. Then SABA-B-11c (the `ableton-arrangement-expert` consult on the off-grid offset first), then SYS-6. |
-| C PASS, gate fails on any other step (test, build, Biome, e2e smoke; the build and e2e smoke never ran on the round-262 diff) | A bounded fix-up for that step, with the L23 destination grep re-applied for a test failure. |
-| A row fails | A bounded fix-up with the same grant. |
-| G263-AUTH bypass | Stop. Critical first. |
-| SOURCE-SCOPE fails | Stop. Root inspects. |
+| C PASS and gate 264 `published` | <ul><li>L46-CONTRACT-CHECKS → **მზადაა**.</li><li>GATE232-S2, TLM-R232-MAC, TLM-R228-META-KEYS and TLM-R233-SR-ORDER: "contract half verified (C round 264); platform half open_tech_lead_manual". The platform half does not block (2026-10-23 root clarification).</li><li>GATE244-S4 stays `deferred_low_polish`, now with cloud repro evidence.</li><li>Round 265 = **REGRESSION** if planned on or after 2026-11-02. Otherwise **SABA-B-11c** stage 1: the expert consult on the off-grid offset first, plus the R49-T Saba question, which is already asked in retro-260 §12.</li></ul> |
+| C PASS, gate fails | A bounded fix-up for that step. |
+| A Meta half red on unmodified code (A's STOP, or C's CC-META) | A new finding, Medium. It changes what a Mac user must learn. Fix it next with a grant on `StudioWorkspace.tsx`. |
+| CC-ALTGR / CC-SR-ORDER fail | A new finding with C's severity. Fix it next. |
+| Another row fails | A bounded fix-up with the same grant. |
 
-## 5. Neighbour risk
-- None in the product, because no app byte changes.
-- In the tests, `shortcut-sheet-ui.test.tsx` uses the same footer button but makes no children-count assert (B's grep). It stays in the run list as a guard.
+## 5. Neighbouring behaviour at risk
+None in the product, because no app byte changes. The only risk is a vacuous test, which MUTANTS covers. A slow new file is covered by the timeout report in §2.4.
 
-## 6. Deliverables and root notes
-- **A:** the one granted file and `a-round-263.md`.
-- **C:** `c-round-263.md` and `c-round-263.json` (`taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`), with evidence under `c-round-263/`.
-- **Root:** commit-ready on C PASS. The commit covers rounds 262 and 263 (the 9 round-262 files, doc 196 and `track-layout.test.tsx`). This completes SABA-B-9 once the gate is green.
-
-## 7. Claims (L29 form; C re-runs each verbatim)
-`\|` inside a command is the markdown table escape; run it with `|`.
-
-| Tag | Claim | Command (from `store/` unless stated) | Expected |
+## 6. Claims (L29; C re-runs each command verbatim; commands from `store/` unless marked "loop root")
+| Tag | Claim | Command | Expected |
 |---|---|---|---|
-| K1 | gate 262 failed; HEAD and the tree at planning | from the loop root: `python3 -I -c "import json;g=json.load(open('gates/gate-round-262.json'));print(g['status'],g['head'])"; cat b-round-262/head-at-planning.txt; wc -l < b-round-262/git-status-at-planning.txt` | `failed 10e1cd4f7df96bb0f9bd4c2f6ab293ee2e805839`; the same hash; `10` |
-| K2 | 1,120 frozen entries; each protected file once | from the loop root: `wc -l < b-round-262-r263-tree-sha256.txt; for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-routes.test.ts app/lib/auth.ts app/contexts/AuthContext.tsx app/entry.server.tsx; do grep -cF "  $f" b-round-262-r263-tree-sha256.txt; done \| tr '\n' ' '` | `1120`; `1 1 1 1 1 1 1` |
-| K3 | the two stale asserts | `grep -n "row.children).toHaveLength(2)" app/lib/arrangement/__tests__/track-layout.test.tsx` (on the start tree) | 2 lines: l.867, l.873 |
-| K4 | the destination-children grep | `grep -rln "arrangement-selected-clip-reserve\|footerButtonLabel" app perf e2e` | `StudioWorkspace.tsx`, `strings.ts`, and 4 tests: `meter-ui`, `shortcut-sheet-ui`, `track-layout`, `master-ui` |
-| K5 | the gate failure | from the loop root: `grep -c "track-layout.test.tsx:.*867:28" gates/round-262/verify.log; grep -E "Tests .*failed" gates/round-262/verify.log` | `2`; `1 failed \| 3163 passed (3164)` once the ANSI colour codes are stripped |
+| K1 | HEAD, clean tree | `git rev-parse HEAD; git status --short --untracked-files=all \| wc -l` | `28c4f83bf3a9c59606ee141032ee4f267137dfc2`; `0` (at planning) |
+| K2 | 1,121 frozen entries; each protected file once | loop root: `wc -l < b-round-263-r264-tree-sha256.txt; for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-routes.test.ts app/lib/auth.ts app/contexts/AuthContext.tsx app/entry.server.tsx; do grep -cF "  $f" b-round-263-r264-tree-sha256.txt; done \| tr '\n' ' '` | `1121`; `1 1 1 1 1 1 1` |
+| K3 | the two new files are absent at planning; 197 is the next doc number | `test -e app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx; echo $?; ls docs/implementation/2026/quarter-IV/ \| sort -n \| tail -1` | `1` (at planning); `196-saba-b-9-master-bottom-right.md` |
+| K4 | AltGraph guard and its jsdom row | `grep -n "getModifierState('AltGraph')" app/components/arrangement/StudioWorkspace.tsx; grep -n "modifierAltGraph: true" app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx; grep -n "it('OV-T2" app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx \| cut -c1-12` | `2215:`; `247:`; `241:  it('OV` |
+| K5 | the handler is on `window`; advertised Meta shortcuts | `grep -n "window.addEventListener('keydown', handleKeyDown)" app/components/arrangement/StudioWorkspace.tsx \| cut -d: -f1; grep -nE "ariaKeyShortcuts: '(Control\+L Meta\+L\|Control\+Z Meta\+Z\|Control\+Shift\+Z Meta\+Shift\+Z Control\+Y Meta\+Y\|Control\+E Meta\+E\|Control\+Alt\+O Meta\+Alt\+O)'" app/lib/arrangement/shortcuts.ts \| cut -d: -f1 \| tr '\n' ' '` | `2569`; `52 60 65 92 153` |
+| K6 | the modifier line and the four branches | `grep -n "const modifier = event.ctrlKey \|\| event.metaKey;" app/components/arrangement/StudioWorkspace.tsx \| cut -d: -f1; grep -nE "if \(modifier && key === '(e\|z\|y\|l)'\)" app/components/arrangement/StudioWorkspace.tsx \| cut -d: -f1 \| tr '\n' ' '` | `2232`; `2307 2314 2323 2328` |
+| K7 | no handler row with Meta for Z, Y, E or L (the one hit is the pure `timelineNavigationKey` unit row) | `grep -rnE "metaKey: true" app/lib/arrangement/__tests__ \| grep -E "Key(Z\|Y\|E\|L)'" \| cut -d: -f1,2` | `app/lib/arrangement/__tests__/view.test.ts:307` (1 line) |
+| K8 | focus rescue and its jsdom row | `grep -n "^function focusPastHiddenOverview" app/components/arrangement/StudioWorkspace.tsx \| cut -d: -f1; grep -n "it('OV-T6" app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx \| cut -d: -f1` | `451`; `279` |
+| K9 | press focus recorded for button 2 only | `grep -n "event.button === 2 && focused instanceof HTMLElement" app/components/arrangement/StudioWorkspace.tsx \| cut -d: -f1` | `2020` |
+| K10 | browser baseline: AltGraph, Overview order, Ctrl+click (both viewports) | loop root: `node b-round-263/probe-l46.mjs /tmp/k10.json` then read the JSON | per viewport: `p2_altGraph.hidden false`, `p2_control.hidden true`; `p3_activeAfter "BUTTON\|Expand video"`, `p3_ring {outlineStyle solid, outlineWidth 1px, outlineOffset 2px, focusVisible true}`, `p3_status "Overview hidden. Ctrl+Alt+O shows it again."`; `p5_right.afterEsc "INPUT\|Search the library"`, `p5_ctrl.menu 1`, `p5_ctrl.afterEsc "BODY"` |
+| K11 | browser baseline: Meta equals Control (both viewports) | loop root: `node b-round-263/probe-meta.mjs /tmp/k11.json` | the 4 runs print identical step lines; split → 2 clips, "Clip split at 00:07.500."; loop → `true`, "Loop created and turned on: 00:02.500 — 00:07.500."; again → `false`, "Loop is off; the range is kept." |
+| K12 | recipe sources for MS1, MS4, MS5 | `grep -n "it('OV-E1" app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx \| cut -d: -f1; grep -c "key: 'e', code: 'KeyE', ctrlKey: true" app/lib/arrangement/__tests__/insert-marker-ui.test.tsx; grep -n "key: 'l', code: 'KeyL', ctrlKey: true })" app/lib/arrangement/__tests__/delete-selection-ui.test.tsx \| cut -d: -f1` | `183`; `4`; `453` |
