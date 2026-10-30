@@ -1,0 +1,82 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T08:47:30.8719229Z",
+  "round": 265,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R265-01",
+   "severity": "medium",
+   "steps": [
+    "Fresh anonymous /studio-lab at 1440x900 or 1280x720; setup S: click Music lane x+400, focus first library option, Enter (clip at 10.000, 40 px/s)",
+    "Drag on the clip body from clip x+100 to clip x-150 (range 00:06.250 - 00:12.500)",
+    "Press Ctrl+E"
+   ],
+   "expected": "The clip is split at the selection edge inside it (12.500), as HEAD did for the same gesture (clamped range 10-12.5 -> \"Clip split at both edges of the time selection; the middle part is selected.\", clips [10.000,12.500]) (exact target behaviour for ranges spanning an edge/gap/multiple clips is for B to source: Ableton unconfirmed)",
+   "actual": "Status \"Could not split at the time selection.\", clips unchanged; same for the background range 1-15 over a gap + clip. A following Ctrl+Z undoes the previous edit (clip add). Cause: splitClipsByRange (model.ts, not granted) requires a clip fully containing the range; the removed clamp now makes such ranges normal. Ableton: unconfirmed (manual 12 6.12 silent).",
+   "evidence": "c-round-265/split2-after.json, c-round-265/nb-head.json vs nb-after.json, c-round-265/browser-after.json NB_SPLIT, c-round-265/shots/after-split-refused-*.png"
+  },
+  {
+   "id": "C-R265-02",
+   "severity": "low",
+   "steps": [
+    "Without a range press Ctrl+L, or open the export dialog without a range"
+   ],
+   "expected": "Copy reflects that a time selection can also be made by dragging the empty lane background",
+   "actual": "strings.ts:289 \"To set a loop, first make a time selection on the waveform.\"; strings.ts:24 \"Make a time selection in the Arrangement (drag on a clip or on the ruler)\" (L29 changed-meaning; strings.ts not granted)",
+   "evidence": "c-round-265.md Bugs; c-round-265/k-head-altgr-edit.json l.after.status"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "TESTS-TARGETED",
+  "REWRITES",
+  "MUTANTS",
+  "BG-RANGE",
+  "BG-INTO-CLIP",
+  "BG-EMPTY-DELETE",
+  "CLIP-PAST-START",
+  "IN-CLIP-SAME",
+  "SNAP",
+  "MARQUEE-CTRL",
+  "CLICK-SAME",
+  "VERTICAL",
+  "ALL-TRACKS",
+  "PLAYING",
+  "SHEET",
+  "SCREEN-BUDGET",
+  "FOCUS-SAME",
+  "LESSONS",
+  "DOC-198",
+  "G265-AUTH"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "full Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notInScope": [
+  "relative snap (stage 2, awaiting R49-T)",
+  "multi-lane partial ranges (D2)",
+  "Live-style Shift-click extension"
+ ],
+ "notesForB": [
+  "A deviation from 2.1: background path returns null for any equal ends after ms rounding (vertical-only drag -> no range, insert marker unchanged); browser-confirmed, needs B ruling (L10)",
+  "strings.ts:809 rangeInvalid details-panel entry still enforces the clip clamp",
+  "FAIL reason: all section-4 rows PASS; the Medium is a section-3 neighbour regression caused by this round, outside A grants (planning gap)",
+  "nb-after.json fields after pastStartSplit are invalid (probe Ctrl+Z undid the clip add); split2-after.json is the clean in-clip control",
+  "Fix direction is a reference-first question for B (Live behaviour of Ctrl+E on a selection spanning a clip edge is unconfirmed); fix-up should grant model.ts + tests and carry the section-4 rows",
+  "Doc 198 l.4 says 'C round 265 PASS' per L28; the fix-up must re-rule it",
+  "No section-4 row covers a background drag started on the video lane",
+  "Why FAIL vs GATE264-S2 precedent: C-R265-01 is a regression caused by this round (HEAD gesture + Ctrl+E split works), not pre-existing"
+ ]
+}

@@ -1,0 +1,237 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index d649ba2..2190108 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -122,6 +122,7 @@ export interface ArrangementClipViewProps {
+   gridSeconds?: number;
+   envelopeMode?: boolean;
+   waveformZoom?: number;
++  timelineSeconds?: number;
+ }
+ 
+ function roundTime(value: number): number {
+@@ -355,6 +356,7 @@ function ArrangementClipViewInner({
+   gridSeconds,
+   envelopeMode = false,
+   waveformZoom = 1,
++  timelineSeconds = Number.POSITIVE_INFINITY,
+ }: ArrangementClipViewProps) {
+   const rootRef = useRef<HTMLDivElement>(null);
+   const gestureRef = useRef<ClipGesture | null>(null);
+@@ -674,12 +676,11 @@ function ArrangementClipViewInner({
+       previewArrangement(next);
+       return;
+     }
+-    const clipEnd = original.start + original.duration;
+     const markers = markerSnapTimes(gesture.before);
+     const onGrid = (time: number) =>
+       step === null ? time : snapTimeToGridOrEdges(time, step, markers);
+-    const current = Math.min(clipEnd, Math.max(original.start, onGrid(gesture.anchorTime + delta)));
+-    const anchor = Math.min(clipEnd, Math.max(original.start, onGrid(gesture.anchorTime)));
++    const current = Math.min(timelineSeconds, Math.max(0, onGrid(gesture.anchorTime + delta)));
++    const anchor = Math.min(timelineSeconds, Math.max(0, onGrid(gesture.anchorTime)));
+     if (step !== null && Math.abs(current - anchor) < 1e-9) {
+       setTimeRange(null);
+       return;
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 31fc195..021fbe1 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -57,7 +57,7 @@ import {
+ } from '~/lib/arrangement/track-volume-db';
+ import { audioLaneDropMessage } from '~/lib/arrangement/video';
+ import { cn } from '~/lib/utils';
+-import type { ArrangementTrack } from '~/types/arrangement';
++import type { ArrangementClip, ArrangementTrack } from '~/types/arrangement';
+ import { ArrangementClipView } from './ArrangementClip';
+ import { ArrangementMixFader } from './ArrangementMixFader';
+ import { ArrangementTrackMeter } from './ArrangementTrackMeter';
+@@ -131,6 +131,7 @@ function hasLibrarySource(event: DragEvent<HTMLElement>): boolean {
+ interface ArrangementLaneProps {
+   track: ArrangementTrack;
+   timelineWidth: number;
++  timelineSeconds?: number;
+   onBackgroundPointerDown: (event: PointerEvent<HTMLDivElement>, trackId: string) => void;
+   height?: number;
+   folded?: boolean;
+@@ -152,6 +153,7 @@ interface ArrangementLaneProps {
+ export function ArrangementLane({
+   track,
+   timelineWidth,
++  timelineSeconds,
+   onBackgroundPointerDown,
+   height = TRACK_DEFAULT_HEIGHT_PX,
+   folded = false,
+@@ -226,6 +228,18 @@ export function ArrangementLane({
+   const density = trackHeaderDensity(height, folded);
+   const isCompactHeader = density === 'folded' || density === 'tight';
+   const clips = arrangement.clips.filter((clip) => clip.trackId === track.id);
++  const laneSeconds = timelineSeconds ?? timelineWidth / pxPerSecond;
++  const isRangeInClip = (clip: ArrangementClip) =>
++    range !== null &&
++    !range.allTracks &&
++    range.trackId === clip.trackId &&
++    range.start >= clip.start - 1e-4 &&
++    range.end <= clip.start + clip.duration + 1e-4;
++  const laneRange =
++    range !== null &&
++    (range.allTracks === true || (range.trackId === track.id && !clips.some(isRangeInClip)))
++      ? range
++      : null;
+   const isActive = activeTrackId === track.id;
+   const isVideo = track.kind === 'video';
+   const mixLabel = isVideo ? VIDEO_MIX_LABEL : track.name;
+@@ -975,14 +989,7 @@ export function ArrangementLane({
+           );
+         })}
+         {clips.map((clip) => {
+-          const clipRange =
+-            range &&
+-            !range.allTracks &&
+-            range.trackId === clip.trackId &&
+-            range.start >= clip.start - 1e-4 &&
+-            range.end <= clip.start + clip.duration + 1e-4
+-              ? range
+-              : null;
++          const clipRange = isRangeInClip(clip) ? range : null;
+           const videoSource = isVideo ? videoSources.get(clip.sourceId) : undefined;
+           return (
+             <ArrangementClipView
+@@ -1025,32 +1032,33 @@ export function ArrangementLane({
+               gridSeconds={snapGridSeconds}
+               envelopeMode={envelopeMode}
+               waveformZoom={waveformZoom}
++              timelineSeconds={laneSeconds}
+             />
+           );
+         })}
+-        {range?.allTracks ? (
++        {laneRange ? (
+           <div
+             className="pointer-events-none absolute inset-y-0 z-10 border-x-2 border-foreground bg-foreground/30"
+             style={{
+-              left: Math.min(range.start, range.end) * pxPerSecond,
+-              width: Math.max(2, Math.abs(range.end - range.start) * pxPerSecond),
++              left: Math.min(laneRange.start, laneRange.end) * pxPerSecond,
++              width: Math.max(2, Math.abs(laneRange.end - laneRange.start) * pxPerSecond),
+             }}
+             aria-hidden="true"
+             data-testid="arrangement-lane-range"
+-            data-range-start={Math.min(range.start, range.end).toFixed(3)}
+-            data-range-end={Math.max(range.start, range.end).toFixed(3)}
++            data-range-start={Math.min(laneRange.start, laneRange.end).toFixed(3)}
++            data-range-end={Math.max(laneRange.start, laneRange.end).toFixed(3)}
+           >
+-            {range.trackId === track.id ? (
++            {laneRange.trackId === track.id ? (
+               <span className="absolute top-0 left-0 whitespace-nowrap rounded-br-sm bg-foreground px-1 text-xs font-medium text-background">
+                 <span className="font-mono font-normal tabular-nums">
+-                  {formatArrangementTime(Math.min(range.start, range.end))}
++                  {formatArrangementTime(Math.min(laneRange.start, laneRange.end))}
+                 </span>{' '}
+                 –{' '}
+                 <span className="font-mono font-normal tabular-nums">
+-                  {formatArrangementTime(Math.max(range.start, range.end))}
++                  {formatArrangementTime(Math.max(laneRange.start, laneRange.end))}
+                 </span>{' '}
+-                · {studioClipStrings.seconds(Math.abs(range.end - range.start).toFixed(3))} ·{' '}
+-                {studioEditStrings.allTracks}
++                · {studioClipStrings.seconds(Math.abs(laneRange.end - laneRange.start).toFixed(3))}
++                {laneRange.allTracks ? ` · ${studioEditStrings.allTracks}` : null}
+               </span>
+             ) : null}
+           </div>
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 65a6f9c..da17a69 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -33,6 +33,8 @@ import {
+   GRID_DIVISIONS_SECONDS,
+   gridLinesVisible,
+   resolveGridTimeWithTargets,
++  resolveSnapStep,
++  snapTimeToGridOrEdges,
+ } from '~/lib/arrangement/grid';
+ import {
+   adaptiveGridDivisionId,
+@@ -243,6 +245,7 @@ interface MarqueeGesture {
+   trackId: string;
+   clickTime: number;
+   base: readonly string[];
++  mode: 'marquee' | 'range';
+   active: boolean;
+ }
+ 
+@@ -649,6 +652,7 @@ export function StudioWorkspace() {
+   const timelineChromeRef = useRef<HTMLDivElement>(null);
+   const markerRowRef = useRef<ArrangementMarkerRowHandle>(null);
+   const marqueeCleanupRef = useRef<(() => void) | null>(null);
++  const timelineSecondsRef = useRef(0);
+   const workspaceRef = useRef(workspace);
+   workspaceRef.current = workspace;
+   const getRulerSnapMarkerTimes = useCallback(
+@@ -2071,8 +2075,32 @@ export function StudioWorkspace() {
+         trackId,
+         clickTime: Math.max(0, (event.clientX - laneRect.left) / current.pxPerSecond),
+         base: event.ctrlKey || event.metaKey ? current.getSelectedClipIds() : [],
++        mode: event.ctrlKey || event.metaKey ? 'marquee' : 'range',
+         active: false,
+       };
++      const updateRange = (clientX: number, altKey: boolean) => {
++        const latest = workspaceRef.current;
++        const gridStep = gridSecondsRef.current;
++        const linesShown = gridLinesVisible(gridStep, pxPerSecondRef.current);
++        const step = resolveSnapStep(
++          snapEnabledRef.current && linesShown ? gridStep : null,
++          linesShown ? gridStep : undefined,
++          altKey,
++        );
++        const markers = markerSnapTimes(latest.getArrangement());
++        const onTimeline = (time: number) =>
++          Math.min(
++            timelineSecondsRef.current,
++            Math.max(0, step === null ? time : snapTimeToGridOrEdges(time, step, markers)),
++          );
++        const anchor = onTimeline(gesture.clickTime);
++        const pointerTime = onTimeline(
++          gesture.clickTime + (clientX - gesture.startX) / latest.pxPerSecond,
++        );
++        const start = Math.round(Math.min(anchor, pointerTime) * 1000) / 1000;
++        const end = Math.round(Math.max(anchor, pointerTime) * 1000) / 1000;
++        latest.setTimeRange(end > start ? { start, end, trackId: gesture.trackId } : null);
++      };
+       const updateMarquee = (clientX: number, clientY: number) => {
+         const container = timelineRef.current;
+         if (!container) {
+@@ -2116,6 +2144,15 @@ export function StudioWorkspace() {
+         ) {
+           return;
+         }
++        if (gesture.mode === 'range') {
++          if (!gesture.active) {
++            gesture.active = true;
++            workspaceRef.current.selectClip(null);
++            workspaceRef.current.setActiveTrack(gesture.trackId);
++          }
++          updateRange(move.clientX, move.altKey);
++          return;
++        }
+         if (!gesture.active) {
+           gesture.active = true;
+           workspaceRef.current.setTimeRange(null);
+@@ -2613,6 +2650,7 @@ export function StudioWorkspace() {
+   const viewportSeconds = Math.max(0, viewportWidth - ARRANGEMENT_HEADER_WIDTH_PX) / pxPerSecond;
+   const timelineSeconds = Math.ceil(Math.max(projectEnd + TIMELINE_TAIL_SECONDS, viewportSeconds));
+   const timelineWidth = timelineSeconds * pxPerSecond;
++  timelineSecondsRef.current = timelineSeconds;
+   const extent = useMemo(
+     () => timelineExtent(projectEnd, arrangement.loop),
+     [projectEnd, arrangement.loop],
+@@ -3037,6 +3075,7 @@ export function StudioWorkspace() {
+                     depth={row.depth}
+                     onSelectTrack={selectTrackRow}
+                     timelineWidth={timelineWidth}
++                    timelineSeconds={timelineSeconds}
+                     onBackgroundPointerDown={handleLaneBackgroundPointerDown}
+                     onGridMenuRequest={handleGridMenuRequest}
+                     height={trackLaneLayout.heights[row.id] ?? TRACK_DEFAULT_HEIGHT_PX}

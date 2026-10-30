@@ -1,0 +1,64 @@
+diff --git a/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx b/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+index c524d4b..10d00f5 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+@@ -430,3 +430,3 @@ describe('SRW-14 stage 2 clip-body time range on the grid', () => {
+ 
+-  it('SE8 a snapped range past the clip end is clamped to the clip end', async () => {
++  it('SE8 a snapped range past the clip end continues past it', async () => {
+     const music = clipAt('m1', 'music', 7, 16);
+@@ -437,3 +437,3 @@ describe('SRW-14 stage 2 clip-body time range on the grid', () => {
+     dragFrom(parts.body, parts.root, from, [{ dx: xAt(music, 24.3) - from }]);
+-    expect(live(api).range).toEqual({ start: 7, end: 23, trackId: 'music' });
++    expect(live(api).range).toEqual({ start: 7, end: 24, trackId: 'music' });
+   });
+diff --git a/app/lib/arrangement/__tests__/grid-snap-position.test.tsx b/app/lib/arrangement/__tests__/grid-snap-position.test.tsx
+index b665750..4393bf1 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-position.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-position.test.tsx
+@@ -446,3 +446,3 @@ describe('SRW-14 stage 3a empty-lane click on the grid', () => {
+ 
+-  it('SP13 a marquee drag from an empty lane selects and does not seek', async () => {
++  it('SP13 a Ctrl marquee drag from an empty lane selects and does not seek', async () => {
+     const { api, laneBody } = await mountPositionWorkspace([clipAt('m1', 'music', 7, 16)]);
+@@ -453,2 +453,3 @@ describe('SRW-14 stage 3a empty-lane click on the grid', () => {
+       ...press,
++      ctrlKey: true,
+       pointerId: 1,
+diff --git a/app/lib/arrangement/__tests__/shortcuts.test.ts b/app/lib/arrangement/__tests__/shortcuts.test.ts
+index 215bab8..3925105 100644
+--- a/app/lib/arrangement/__tests__/shortcuts.test.ts
++++ b/app/lib/arrangement/__tests__/shortcuts.test.ts
+@@ -24,4 +24,6 @@ const EXPECTED_ROW_ORDER = [
+   'add-to-selection',
++  'select-area',
+   'rename',
+   'split',
++  'select-time',
+   'cut-time',
+diff --git a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+index 7cbbc54..e6b23ba 100644
+--- a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+@@ -903,3 +903,3 @@ describe('SRW-17 stage 2 track group collapse in the workspace', { timeout: 20_0
+ 
+-  it('UC10b a marquee across a collapsed middle group never selects its hidden clips', async () => {
++  it('UC10b a Ctrl marquee across a collapsed middle group never selects its hidden clips', async () => {
+     const { api, view } = await mountGroupsWorkspace();
+@@ -918,2 +918,3 @@ describe('SRW-17 stage 2 track group collapse in the workspace', { timeout: 20_0
+       buttons: 1,
++      ctrlKey: true,
+       pointerId: 3,
+diff --git a/app/lib/arrangement/__tests__/track-groups-ui.test.tsx b/app/lib/arrangement/__tests__/track-groups-ui.test.tsx
+index df76077..29e7ea6 100644
+--- a/app/lib/arrangement/__tests__/track-groups-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-groups-ui.test.tsx
+@@ -722,3 +722,3 @@ describe('SRW-17 stage 1 track groups in the workspace', { timeout: 20_000 }, ()
+ 
+-  it('TG9 a marquee across a group header row selects clips on both sides', async () => {
++  it('TG9 a Ctrl marquee across a group header row selects clips on both sides', async () => {
+     const { api, view } = await mountGroupsWorkspace();
+@@ -735,2 +735,3 @@ describe('SRW-17 stage 1 track groups in the workspace', { timeout: 20_000 }, ()
+       buttons: 1,
++      ctrlKey: true,
+       pointerId: 3,

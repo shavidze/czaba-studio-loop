@@ -1,0 +1,55 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/tmp/a265-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx [2m([22m[2m16 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2245[2mms[22m[39m
+     [33m[2m✓[22m[39m BT1 a plain background drag makes a free lane range, clears the selection and activates the lane [33m 431[2mms[22m[39m
+     [32m✓[39m BT1 a Shift drag also makes a range, and a drag to the left gives the same ordered range[32m 136[2mms[22m[39m
+     [32m✓[39m BT1 a background drag replaces an all-tracks range, clears the selection once and pointercancel keeps the last range[32m 165[2mms[22m[39m
+     [32m✓[39m BT2 Snap on 1 s snaps the ends; Alt keeps them free; both ends on one line is no range[32m 161[2mms[22m[39m
+     [32m✓[39m BT2 Snap on also snaps a background range end to a marker[32m 106[2mms[22m[39m
+     [32m✓[39m BT3 a drag from the background across a clip and a gap into a second clip spans both; Delete leaves the gap[32m 134[2mms[22m[39m
+     [32m✓[39m BT3 a range over empty space only, then Delete, changes nothing[32m 101[2mms[22m[39m
+     [32m✓[39m BT4 ctrlKey+drag is the marquee: it adds to the earlier selection and clears the range[32m 130[2mms[22m[39m
+     [32m✓[39m BT4 metaKey+drag is the marquee: it adds to the earlier selection and clears the range[32m 121[2mms[22m[39m
+     [32m✓[39m BT5 a click under the threshold sets the insert marker and makes no range[32m 89[2mms[22m[39m
+     [32m✓[39m BT6 an in-clip drag continues past the clip start and end, bounded by 0 and the lane extent[32m 180[2mms[22m[39m
+     [32m✓[39m BT6 a background drag is bounded by 0 and the lane extent[32m 117[2mms[22m[39m
+     [32m✓[39m BT7 a range inside one clip keeps the in-clip overlay and renders no lane overlay[32m 97[2mms[22m[39m
+     [32m✓[39m BT8 a background drag while playing neither stops nor moves playback[32m 84[2mms[22m[39m
+[31m     [31m×[31m BT9 a vertical-only drag makes no zero-length range, and a drag back to its start removes the range[39m[32m 94[2mms[22m[39m
+     [32m✓[39m BT9 a drag that ends over another lane keeps the range on the origin lane[32m 97[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx[2m > [22mSABA-B-11c stage 1 background time selection[2m > [22mBT9 a vertical-only drag makes no zero-length range, and a drag back to its start removes the range
+[31m[1mAssertionError[22m: expected { start: 3, end: 3, trackId: 'music' } to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+{
+  "end": 3,
+  "start": 3,
+  "trackId": "music",
+}
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx:[2m467:37[22m[39m
+    [90m465| [39m    [35mconst[39m mounted [33m=[39m [35mawait[39m [34mmountBackgroundWorkspace[39m([33mTWO_MUSIC_CLIPS[39m)[33m;[39m
+    [90m466| [39m    dragBackground(mounted, xFor(3), [xFor(3)], { moveY: STEMS_LANE_Y …
+    [90m467| [39m    [34mexpect[39m([34mlive[39m(mounted[33m.[39mapi)[33m.[39mrange)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m468| [39m    expect(mounted.view.queryAllByTestId('arrangement-lane-range')).to…
+    [90m469| [39m    [34mdragBackground[39m(mounted[33m,[39m [34mxFor[39m([34m3[39m)[33m,[39m [[34mxFor[39m([34m6[39m)[33m,[39m [34mxFor[39m([34m3[39m)])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m15 passed[39m[22m[90m (16)[39m
+[2m   Start at [22m 08:41:58
+[2m   Duration [22m 4.71s[2m (transform 1.24s, setup 0ms, import 1.81s, tests 2.25s, environment 501ms)[22m
+
+
+::error file=/home/runner/czaba-project/tmp/a265-scratch/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx,title=app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx > SABA-B-11c stage 1 background time selection > BT9 a vertical-only drag makes no zero-length range%2C and a drag back to its start removes the range,line=467,column=37::AssertionError: expected { start: 3, end: 3, trackId: 'music' } to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A{%0A  "end": 3,%0A  "start": 3,%0A  "trackId": "music",%0A}%0A%0A ❯ app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx:467:37%0A%0A
+rc=1

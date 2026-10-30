@@ -1,0 +1,115 @@
+--- /home/runner/czaba-project/store/app/lib/arrangement/model.ts	2026-10-30 08:20:08.165949784 +0000
++++ app/lib/arrangement/model.ts	2026-10-30 09:11:06.620994347 +0000
+@@ -290,37 +290,38 @@
+ export function splitClipsByRange(
+   arrangement: Arrangement,
+   range: TimeRange,
+-): { arrangement: Arrangement; middleId: string } | null {
+-  const clip = arrangement.clips.find(
++): { arrangement: Arrangement; middleIds: string[] } | null {
++  const targets = arrangement.clips.filter(
+     (entry) =>
+       entry.trackId === range.trackId &&
+-      entry.start <= range.start + ARRANGEMENT_EPS &&
+-      clipEnd(entry) >= range.end - ARRANGEMENT_EPS,
++      entry.start < range.end - ARRANGEMENT_EPS &&
++      clipEnd(entry) > range.start + ARRANGEMENT_EPS,
+   );
+-  if (!clip) {
+-    return null;
+-  }
+-  const a = Math.max(range.start, clip.start);
+-  const b = Math.min(range.end, clipEnd(clip));
+-  if (b - a < MIN_CLIP_DURATION) {
+-    return null;
+-  }
+   let current = arrangement;
+-  let middleId = clip.id;
+   let changed = false;
+-  const leftSplit = splitClipAt(current, middleId, a);
+-  if (leftSplit) {
+-    current = leftSplit.arrangement;
+-    middleId = leftSplit.rightId;
+-    changed = true;
+-  }
+-  const rightSplit = splitClipAt(current, middleId, b);
+-  if (rightSplit) {
+-    current = rightSplit.arrangement;
+-    middleId = rightSplit.leftId;
+-    changed = true;
++  const middleIds: string[] = [];
++  for (const clip of targets) {
++    const a = Math.max(range.start, clip.start);
++    const b = Math.min(range.end, clipEnd(clip));
++    if (b - a < MIN_CLIP_DURATION) {
++      continue;
++    }
++    let middleId = clip.id;
++    const leftSplit = splitClipAt(current, middleId, a);
++    if (leftSplit) {
++      current = leftSplit.arrangement;
++      middleId = leftSplit.rightId;
++      changed = true;
++    }
++    const rightSplit = splitClipAt(current, middleId, b);
++    if (rightSplit) {
++      current = rightSplit.arrangement;
++      middleId = rightSplit.leftId;
++      changed = true;
++    }
++    middleIds.push(middleId);
+   }
+-  return changed ? { arrangement: current, middleId } : null;
++  return changed ? { arrangement: current, middleIds } : null;
+ }
+ 
+ export function findClipPlacementConflict(
+--- /home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx	2026-10-30 08:20:08.139042649 +0000
++++ app/contexts/ArrangementContext.tsx	2026-10-30 09:11:06.621900759 +0000
+@@ -1993,9 +1993,15 @@
+         return;
+       }
+       applyEdit(result.arrangement, studioEditStrings.historySplitRange);
+-      setSelectedClipId(result.middleId);
++      const [onlyId] = result.middleIds;
++      if (result.middleIds.length === 1 && onlyId) {
++        setSelectedClipId(onlyId);
++        setStatus(studioEditStrings.splitRangeDone);
++      } else {
++        setSelection(result.middleIds);
++        setStatus(studioEditStrings.splitRangeClipsDone(result.middleIds.length));
++      }
+       setRange(null);
+-      setStatus(studioEditStrings.splitRangeDone);
+       return;
+     }
+     const time = insertMarkerRef.current;
+--- /home/runner/czaba-project/store/app/lib/arrangement/strings.ts	2026-10-30 08:20:08.166949784 +0000
++++ app/lib/arrangement/strings.ts	2026-10-30 09:11:06.622352692 +0000
+@@ -21,7 +21,7 @@
+   mp3FormatNote: 'LAME (mediabunny) — 320 kbps CBR; the encoder loads with the first MP3 export',
+   bothFormatNote:
+     'The same mix as two files — either both are created or neither. Your browser may ask for permission to download the second file.',
+-  rangeMissingReason: 'Make a time selection in the Arrangement (drag on a clip or on the ruler)',
++  rangeMissingReason: 'Make a time selection in the Arrangement (drag in a lane)',
+   videoRenderReason:
+     "Video is not rendered in this version — the export is audio only (the video's original sound is included if it is on).",
+   videoFadesPreviewNote:
+@@ -114,6 +114,8 @@
+   splitRangeFailed: 'Could not split at the time selection.',
+   historySplitRange: 'Split at time selection',
+   splitRangeDone: 'Clip split at both edges of the time selection; the middle part is selected.',
++  splitRangeClipsDone: (count: number): string =>
++    `Clips split at the edges of the time selection; the ${count} parts inside it are selected.`,
+   splitNeedsTarget:
+     'To split, click inside a clip to select it and place the insert marker, or make a time selection.',
+   splitInsertMarkerOutside: 'The insert marker must be inside the selected clip.',
+@@ -286,7 +288,7 @@
+   tooShort: 'A loop needs a time selection of at least 0.1 s.',
+   historyReplaced: 'Loop replaced',
+   historyCreated: 'Loop created',
+-  needsSelection: 'To set a loop, first make a time selection on the waveform.',
++  needsSelection: 'To set a loop, first make a time selection (drag in a lane).',
+   historyOn: 'Loop on',
+   historyOff: 'Loop off',
+   on: 'Loop is on.',
