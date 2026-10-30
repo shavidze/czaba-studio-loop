@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T02:30:46.359Z)
+# Active loop summary (2026-10-30T03:39:13.300Z)
 
-- backlog.json 2448 KB -> active view 347 KB
-- status: G_ROOT_GATE round 258
-- servers: `{"checkedUtc":"2026-10-30T00:28:34.3778174Z","round":258,"attempt":1,"store":200}`
-- last publication: d732d2623fc16032153aa262c3e7d41fca4ed59a (rounds 256-257)
-- last root gate: round 258 skipped - C taskStatus FAIL
+- backlog.json 2457 KB -> active view 349 KB
+- status: G_ROOT_GATE round 259
+- servers: `{"checkedUtc":"2026-10-30T03:10:23.7600268Z","round":259,"attempt":1,"store":200}`
+- last publication: 7a960c1511bfce1fb63d1c3779e1bb4b4ed76119 (rounds 258-259)
+- last root gate: round 259 published - commit 7a960c1511bfce1fb63d1c3779e1bb4b4ed76119 pushed
 
 ## Current items: -
 
@@ -610,7 +610,7 @@
 - INFO-B248-OFFSCREEN-RULER / info / harness fact (D-29z425) / at high zoom the ruler box is wider than the window; a fraction of its width can be off-screen; clamp to the visible part
 - GATE248-S4 / info / info (D-29z427) / prop paths (render-time activeSnapSeconds) and ref paths (seek, nudge) can disagree for one render if wheel-zoom crosses the threshold mid-d
 - INFO-C248-STALE-NOTE / info / info (D-29z427): ruled behaviour section 1.4 of round 248; part of SABA-Q-11B-HIDDEN-SNAP (d) / after zoom-in the status still says Snap is paused; after zoom-out into hidden lines it shows plain (Snap on)
-- INFO-C248-ADAPTIVE-3 / info / info (D-29z427): not checked against the D-29z361 density model in this planning; one REGRESSION row C-ADAPTIVE3-CHECK compares it with the chooser rule; a mismatch becomes a Low / adaptive '3' on 1/4 at 120 BPM and 4 px/s resolves to 1/8T (the chooser picks the triplet member at the current density); unchanged code
+- INFO-C248-ADAPTIVE-3 / info / info (D-29z427): not checked against the D-29z361 density model in this planning; one REGRESSION row C-ADAPTIVE3-CHECK compares it with the chooser rule; a mismatch becomes a Low | D-29z509 (round 259 planning): C round 258 SA-28 found the setup unreachable in adaptive mode (adaptive picks bar at 3.4 px/s; key 3 refused with the triplet status); the regression row is reworded to adaptive off / fixed 1/4 / key 3 (record only); stays info / adaptive '3' on 1/4 at 120 BPM and 4 px/s resolves to 1/8T (the chooser picks the triplet member at the current density); unchanged code
 - SABA-Q-10A-HOME-PLAYING / info / awaiting_user (D-29z432): non-blocking; round 249 ships the jump / while playing, Home and Back to start jump playback to 0 and move the insert marker there (as before). Or move only the marker and keep play
 - SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking | gate 249 S2 asks to keep it with the stage-2 questions (D-29z439) / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
 - SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432, (d)/(e) added D-29z441): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
@@ -641,6 +641,8 @@
 - GATE257-INDEX-LOOKUP / low / deferred_low_polish (D-29z504); candidate for SABA-B-9 stage 2 when it owns those tests (L12) / navigation-strings-ui.test.tsx l.175 finds Back to start by index (centre.querySelectorAll('button')[3]); GS14 grid-snap-ui l.405-418 checks
 - GATE257-DOC193-TC / low / open (D-29z504): ruled at the stage-1 close: l.93 is stale and is fixed when SABA-B-9 stage 2 writes doc 193 / its l.4 (L28 multi-stage clause); l.132 vs five = different scopes, no change; approach bullet: one clause added in the same edit / doc 193 l.93 says transport-centre-ui has TC1-TC9 (now TC1-TC11); l.132 'six tests' vs the round-257 bullet's 'five' M9 count (different sco
 - GATE257-EXPORT-INLINE-HANDLER / low / deferred_low_polish (D-29z504); candidate for SABA-B-9 stage 2 if it grants ArrangementTransport.tsx / ArrangementTransport.tsx l.390-394 Export repeats an inline Enter-repeat handler instead of preventRepeatedEnterKeyDown
+- C-R258-01 / medium / dispatched round 259 (D-29z507): H1-H5 harness fix + docs; closes on C round 259 PASS (RR-PERF-259) + gate / npm run test:perf aborts every pass of PERF-1a (waits for Play aria-label 'Pause', removed by SABA-B-9 stage 1, round 256) and PERF-1b-i (cl
+- INFO-B259-COMPONENT-DRIFT / info / signal for STUDIO-PERFORMANCE (D-29z514); ruled at the 259 -> 260 planning from C round 259's valid run; not a budget failure, not scheduled / record rows only: every per-commit component count in PERF-1b-i is +6..+7 vs gate 225 (80fbb3b), e.g. interact.play.start-components 87 -> 9
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

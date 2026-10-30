@@ -1,210 +1,94 @@
-# CURRENT TASK — Round 259: bounded fix-up C-R258-01 (stale perf harness: the `Pause` label and the old clip-body title). Test code and docs only; `app/` does not change
+# Round 260: RETRO 260 (fifth retrospective, rounds 245–259) + whole-screen review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
 
-Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-10-30 (`date -u`) · Decisions: **D-29z507 … D-29z514** (`backlog.json` → `decisions_log_b`, `rounds[259]`, `open_findings` C-R258-01).
+**Planned by:** B, at the round 259 → 260 planning, 2026-10-30. **Decisions:** D-29z515 (round 259 accepted), D-29z516 (INFO-B259-COMPONENT-DRIFT ruling and round-259 info), D-29z517 (RETRO 260 outputs), D-29z518 (screen review), D-29z519 (lessons), D-29z520 (systemic tasks), D-29z521 (L46 deadline), D-29z522 (retro candidates and harness rules), D-29z523 (what comes next).
+- Policy: "Retrospective: stop, look back, improve" (Saba, 2026-10-26) and "Look back on every issue Saba finds, and guard the whole screen" (Saba, 2026-10-28); `backlog.json` → `retro_policy`. Retro 245 covered 230–244, so this window is 245–259. Precedent: rounds 215, 230 and 245.
+- **Read first:** `lessons.md` (loop root). It was revised in this planning step and applies from round 260: **L29 is rewritten as a tagged claims block**; L11, L23, L50 and L51 gain one clause each. This task already uses the claims form for its own code and state claims (§8).
 
-**Read first:**
-- `lessons.md` in full. These apply directly:
-  - L11 (STOP);
-  - L23 (grep before a rename);
-  - L26 and L28 (implementation doc);
-  - L29 (every named signal has a grep);
-  - L30 (Biome ignores `perf/`, so use `npm run typecheck`);
-  - L34 (grant the whole doc section);
-  - L38 (perf runs alone).
-  - L12 and L23 each gain one clause in this planning (D-29z512): a removed or renamed accessible name, title or testid is also grepped in `perf/**`, not only in `app/**/__tests__`.
-- **The rules:** `docs/technical/studio-real-workspace/agent-workflow.md` (the speed rules, the 2026-10-23 bug gate and the cloud-runner section).
-- **The previous task** is `tasks/round-258.md`, an exact copy of the round-258 `current-task.md` (`cmp` OK). C's result is in `c-round-258.json` and `c-round-258.md`. B's reasoning is in `b-round-258.md`.
+## Baseline: HEAD `7a960c1`, clean tree
+- Gate 259 published `7a960c1511bfce1fb63d1c3779e1bb4b4ed76119` on both remotes (`gates/gate-round-259.json`, status `published`) [K1]. This is the round-260 baseline. `git status --short --untracked-files=all` was empty at planning (`b-round-259/git-status-at-planning.txt`, 0 bytes; `b-round-259/head-at-planning.txt`) [K2].
+- **Frozen:** every tracked file (**1,118** entries) in `b-round-259-r260-tree-sha256.txt` [K3]. From `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-259-r260-tree-sha256.txt`. B checked it at the start and after every consult: rc 0. Each of the 7 protected auth and purchase files appears exactly once (`app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/entry.server.tsx`) [K4].
+- **Grants: none.** `b-round-259-r260-grants.txt` and `b-round-259-r260-new-files.txt` are empty on purpose. No file in `store/` may change in this round. `.claude/**`, `CLAUDE.md` and every config file stay protected as always.
 
-## Baseline: HEAD `d732d26`, clean tree
-- `gates/gate-round-258.json` = `skipped` ("C taskStatus FAIL"). The last published commit is still `d732d2623fc16032153aa262c3e7d41fca4ed59a` (gate 257, rounds 256 + 257).
-- At planning, `git rev-parse HEAD` = `d732d2623fc1…` and `git status --short --untracked-files=all` is empty.
-- The 7 protected files stay untouched:
-  - `app/routes/studio.$productId.tsx`
-  - `app/routes/api.studio-token.ts`
-  - `app/routes/account.downloads.tsx`
-  - `app/lib/__tests__/download-routes.test.ts`
-  - `app/lib/auth.ts`
-  - `app/contexts/AuthContext.tsx`
-  - `app/entry.server.tsx`
+## 0. Why this round
+- **Round 259 PASSED.** C: 8 rows passed, 1 BLOCKED (SRW-21, backend unavailable in cloud), `browserVerified` and `realVerified` true, 0 bugs. Gate 259 published `7a960c1`. **C-R258-01 (Medium) closes**; PERF-HARNESS-SHARED-LIB is მზადაა again and the PERF-FADER "0 graph restarts while playing" evidence is current (D-29z515).
+- **RR-PERF-ORACLE ruling (task 259 §3, L10):** INFO-B259-COMPONENT-DRIFT (+6…+7 components on every deterministic commit row, +7…+8 DOM nodes, +8.4 kB JS vs gate 225) is accepted as attributable feature growth; the attribution is an inference; the next oracle reference is `c-round-259/latest*.json` at `7a960c1` (D-29z516, retro §7).
+- **Due:** `tasks/round-259.md` §6 row 1 fixed round 260 = RETRO; `retro_policy.next_due` said "round 260 or the end of STUDIO-PERFORMANCE". It includes the whole-screen review.
+- **Regression:** `regression-last.json` = round 258, 2026-10-30; the next is due on or after 2026-11-02. Not due.
+- **No open Critical or High.** The open Mediums are parked (GATE232-S2, Tech Lead manual; SABA-B-7 awaiting Saba; A-R73-SAFARI-FLAG-FOCUS, GATE128-S1-MIXED-LANGUAGE and R80-RECORDINGS-FIELD-BORDERS environment/backend/schedule). None is security or data loss.
+- **Reference first / Ableton:** not applicable (RETRO round, policy "Not in scope"). **Screen budget:** nothing visible changes.
 
-## 0. Why this round (D-29z507)
-- **The round-258 regression sweep ran in full:**
-  - 114 browser rows PASS at 1440×900 and 1280×720;
-  - `browserVerified=true` and `realVerified=true`;
-  - smoke PASS;
-  - no regression in app behaviour.
-- **One Medium finding: C-R258-01, a regression in the harness, not in the app.** `npm run test:perf` aborts every pass of PERF-1a and PERF-1b-i:
-  - **PERF-1a** waits for the Play button's `aria-label` to become `Pause`. SABA-B-9 stage 1 (round 256) made Play's name constant and removed Pause. The playing state is now `data-playing="true"`, plus the hidden `aria-describedby` state element from round 257.
-  - **PERF-1b-i** looks up the clip-body title `drag = time selection · click = playhead`. SABA-B-10a (rounds 252–253) changed it to `… click = insert marker`.
-- **Effect:** the fader, drag and playback budgets have been **unmeasured since gate 225 (`80fbb3b`)**. That includes the SABA-B-5 promise of "0 graph restarts during a drag while playing".
-- **Why nobody noticed:**
-  - `test:perf` is not a gate row;
-  - B's L23 rename greps covered `app/**/__tests__` only (`b-round-258.md` §4, D-29z512).
-- **Why a fix-up now:** `tasks/round-258.md` §7 row 2, fixed in advance, makes round 259 a **bounded fix-up**. RETRO 260 comes next, then SABA-B-9 stage 2 (D-29z511).
+## 1. What B already produced (the objects under test)
+| File | Content |
+|---|---|
+| `retros/retro-260.md` | The analysis, in Georgian with English technical terms, for Saba. Window: rounds 245–259. |
+| `lessons.md` | **59 lines** (≤ 60), three parts. Changed: header line 3, L29 (rewritten), L11, L23, L50, L51 (one clause each). Nothing added or removed as a line. Before-copy: `b-round-259/lessons-before-260.md`. |
+| `user-review/screen-review-260.md` | Whole-screen candidates **SR-260-1…6** for Saba (`design-philosopher` + `first-visit-host`), screenshots `b-round-259/screens/screen260-full-{S0,DEMO}-{1440x900,1280x720}.png`, inventory `screen260.json`, capture script `screens.mjs` (round 245's copy). |
+| `b-round-259/*.py`, `*.txt`, `*.json` | The scripts and data behind every number (retro header lists them). By hand: `fails-cause-hand.txt`, `window-mediums-hand.txt`, `stops.txt`. `update-backlog.py` holds this planning's backlog edits. |
+| `backlog.json` | `retro_runs` entry 260, `retro_policy.next_due`, `screen_review_candidates` SR-260-*, `systemic_tasks` PERF-HARNESS-STRINGS-DRIFT / SYS-6 / L46-CONTRACT-CHECKS, `harness_rules` HR-HOOK-START-PER-CLASS / HR-SECOND-SERVER-VITE, the round-259 closure and info ids, D-29z515…D-29z523. Before-copy: `b-round-259/backlog-before-260.json`. |
+| `feature-status.md` | Round 259 → 260 line, C-R258-01 მზადაა, §7 rows. Before-copy: `b-round-259/feature-status-before-260.md`. |
 
-## 1. B's pre-check (L23, L29): the fix was applied to a scratch copy and run
-- **Scratch copy:** `/tmp/b259-scratch/store`, made with `rsync` from `store/` without `.git`, `build` or `test-results`, and with `node_modules` symlinked.
-  - Its own `test:perf` webServer built and served the scratch app on :5188.
-  - Root's dev server on :5173 was not touched.
-- **The scratch change** is H1–H4 of §2.1 (the diff is `b-round-258/precheck/perf-fix.diff`). H5 changes only the `note` text, which the run does not read.
-- `npx tsc --noEmit -p .` on the scratch printed no error.
-- **Scratch `npm run test:perf`, run alone (L38):** the log is `b-round-258/precheck/perf-run-1.log`, and the reports are under `b-round-258/precheck/reports/`. The result is in §1a.
+**Order of work (C-R215-01 lesson):** every analysis script reads `b-round-259/backlog-before-260.json`, the copy taken **before** this planning's edits. Run them from the loop root: `python3 -I b-round-259/<script>.py`. Run `collect.py` first, then `cost.py`, because the others read their JSON.
 
-### 1a. Scratch run result
-- **rc 0, 3/3 specs passed in 13.5 min** (`b-round-258/precheck/perf-run-1.log` l.184, l.289, l.607, l.612–613):
-  - PERF-1b-i: 5.2 min;
-  - PERF-1b-ii: 1.1 min;
-  - PERF-1a: 7.0 min.
-- **Every report** (`latest.json`, `latest-interactions.json`, `latest-resources.json`) has `complete: true`, `failures: []`, and 6/6 passes (1× and 6×, 3 each) with `abortedAt: null`, 0 page errors and 0 problems.
-- **The playing signal works:** `harness.audio-running` = 1 and `interact.harness.audio-running` = 1.
-- **The SABA-B-5 fader budgets pass on the published app** (PERF-1a, track, group and master, 1× and 6×):
-  - `*.playing.restarts` = 0;
-  - `move-components-max` = 1 (budget ≤ 3);
-  - `move-components-per-move` = 0.74–0.75;
-  - `release-commits` = 1 (budget ≥ 1).
-- **No further stale selector was found.** H1–H4 are sufficient, so no H6 is expected. If A's run differs, §2.1's DEVIATION/STOP rule applies.
-- **Preview of the interactions oracle** (report only; `b-round-258/precheck/equiv-interactions.txt`, against `c-round-225/latest-interactions.json`):
-  - Every per-commit component count is **+6 to +7** compared with `80fbb3b`. For example, `interact.play.start-components` went 87 → 94, the drag `move-components-max` rows 98 → 105, and `interact.zoom.30.components-per-key` 240 → 247.
-  - These are `record` rows, not budgets. B rules them at the 259 → 260 planning from C's run. Until then they are recorded as the signal INFO-B259-COMPONENT-DRIFT for STUDIO-PERFORMANCE.
-  - The "kind must become wallclock" lines are the round-224 → 225 reclassification check of that script and are not deltas.
+## 2. A: nothing to implement
+1. From `store/`, confirm:
+   - `git rev-parse HEAD` = `7a960c1…`;
+   - `git status --short --untracked-files=all` is empty;
+   - `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-259-r260-tree-sha256.txt` prints nothing.
+2. Write `a-round-260.md` with the three results and "no change, by RETRO policy". Do not run typecheck, lint, vitest or the code-reviewer: there is no diff.
+3. Do not edit `retros/`, `lessons.md`, `user-review/` or any B file. If you disagree with a lesson in "Before handing over (A self-check)", especially the new **L11** clause (a spec conflict you notice is a STOP), write it under "Lesson feedback" in `a-round-260.md`. B rules on it at the round-261 planning.
 
-### 1b. Signal greps (L29), at `d732d26`
-- `grep -rn "data-playing" app/components` gives 1 hit:
-  - `app/components/arrangement/ArrangementTransport.tsx:248`, `data-playing={isPlaying ? 'true' : 'false'}` on the Play button;
-  - the button is rendered unconditionally (no surrounding branch).
-- `ArrangementTransport.tsx` l.236–273: neither button's name ever changes.
-  - Play has `aria-label={studioPlaybackStrings.playLabel}` = `'Play'` (`app/lib/arrangement/strings.ts` l.223).
-  - Stop has the `aria-label` `'Stop'` (l.224).
-- `app/lib/arrangement/strings.ts` l.694: `rangeBodyTitle: 'drag = time selection · click = insert marker'`.
-- `grep -rn "Pause\|click = playhead" perf` over the whole folder gives **6 hits, all six covered by §2.1**:
-  - `perf/lib/page.ts` l.63, l.70 and l.76;
-  - `perf/studio-lab-interactions.perf.spec.ts` l.110;
-  - `perf/budgets.json` l.28 (`note`);
-  - `perf/budgets.interactions.json` l.39 (`note`).
-- **Docs that describe the old signal (L34):**
-  - doc 163, l.73 in `## მეტრიკების განმარტება და ზღვრები` and l.100 in `## პრობლემები და გადაწყვეტები`;
-  - doc 168, l.48 in `### Liveness-ის წესები` and l.208 in `## Hygiene (PERF-1a)` (l.205–210).
-  - Doc 175 l.59 is a historical record of round 214 and stays as it is.
+## 3. C: what to verify
+C writes `c-round-260.md` and `c-round-260.json` as it goes. Rows:
 
-## 2. A — what changes
-
-### 2.1 Test code (`perf/`), all mandatory
-| # | File | Old → new | Why |
+| Row | Check | PASS means | FAIL means |
 |---|---|---|---|
-| H1 | `perf/lib/page.ts`, `playButton` (l.62–63) | `getByRole('button', { name: /^(Play|Pause)$/ })` → `getByRole('button', { name: 'Play', exact: true })` | Pause no longer exists. `Stop` is a separate button with its own name. |
-| H2 | `perf/lib/page.ts`, `isPlaying` (l.68–71) | Reads `aria-label === 'Pause'` → reads `getAttribute('data-playing') === 'true'`, still **and** `audioRunning(page)` | `data-playing` is the only programmatic playing signal on Play (§1b). The `audioRunning` half (GATE206-S6) stays. |
-| H3 | `perf/lib/page.ts`, `setPlayback` (l.73–78) | `toHaveAttribute('aria-label', playing ? 'Pause' : 'Play', { timeout: 15000 })` → `toHaveAttribute('data-playing', playing ? 'true' : 'false', { timeout: 15000 })` | The same wait on the new signal. The 15 s timeout and the Space press are unchanged. |
-| H4 | `perf/studio-lab-interactions.perf.spec.ts`, `dragTarget` `'range'` (l.110) | `'drag = time selection · click = playhead'` → `'drag = time selection · click = insert marker'`, keeping `exact: true` | Matches `strings.ts` l.694. |
-| H5 | `perf/budgets.json` l.28 and `perf/budgets.interactions.json` l.39 | In each `note`, the words about the Play button's label turning or being `Pause` → the Play button's `data-playing` attribute turning or being `true` | **Only the `note` text changes.** Every `id`, `mode`, `budget`, `unit` and `determinism` field, and the row order, stay byte-identical. C diffs them. |
+| **SOURCE-SCOPE** | At start and end: HEAD `7a960c1`, clean status, frozen list rc 0. | Nothing in `store/` changed. | Any change fails the round, whoever made it. |
+| **RT-NUM** | Recompute **every number** in `retro-260.md` §1, §2, §3, §6 and §9 from its named file or script (copy the scripts to `c-round-260/` if you prefer; run from the loop root). At least: <ul><li>the per-phase totals ($159.85 / $102.66 / $93.32 / $355.83), the medians ($11.19 / $7.07 / $5.89; round $22.89), the top-5 rounds and the top-6 phases;</li><li>the FAIL-round list (245, 250, 252, 254, 256, 258) and its cost $162.43; gate 9 published / 6 skipped / 0 failed;</li><li>the round groups and totals (feature $184.34; fix caused in window $89.08; fix pre-existing $48.92; RETRO $20.90; REGRESSION $12.59; sum $355.83); check each round's group against its `tasks/round-N.md` title;</li><li>the four FAIL + fix-up pair costs in §6 and 258+259;</li><li>A's FAIL / PASS averages ($8.04 / $6.05);</li><li>the C bug counts (medium 7, low 12);</li><li>the gate-review count (48 items in **9** reviews; check `ls gates/round-2{45..59}/review.md`);</li><li>the window counts in `open_findings` (72) and `deferred_low_polish` (35) and their origin splits;</li><li>the deferred total 430 (15 closed/folded) and the 6 open Medium+ (from the before-copy);</li><li>the 2 A STOPs (`stops.txt` against `a-round-250.md` and `a-round-253.md`);</li><li>§9: round 247's 10 + 19 + 5 hits (`tasks/round-247.md` l.117–120) and round 246's 12 (`tasks/round-246.md` l.112).</li></ul> | Every number matches its source (±0.01 USD; counts exact). | A number has no source or does not match. List each one. |
+| **RT-CAUSE** | For each row of `retro-260.md` §3 and each group in §4, open the quoted source: `c-round-245.json` (C-R245-01…03); `c-round-250.json` (C-R250-01); `a-round-252.md` ("ruling 1") and `c-round-252.json`; `c-round-254.json` (C-R254-01) and D-29z479; `c-round-256.json` (C-R256-01) and the reviewer M-2 in `a-round-256.md`; `c-round-258.json` (C-R258-01). Check `window-mediums-hand.txt` against each id's title in the before-copy. Check the **protocol-miss claim** in §9: `grep -n -i "stop condition\|> 20\|20 origin" b-round-246.md tasks/round-247.md` finds no ruling on the 34 > 20 stop. The quoted `tech-lead`, `consequence-tester`, `design-philosopher` and `first-visit-host` lines are consult results; they need not be re-derived, but each must be labelled as a consult. | Each cause traces to the quoted line or id. Every inference is labelled as one (e.g. §3 "დასკვნა (B-ის, inference)", §7 the component attribution). | A cause is invented, misquoted, or an inference is stated as fact. |
+| **RT-IDS** | <ul><li>The round-259 closure (D-29z515): C-R258-01 is closed in `backlog.json` with `c-round-259.json` + gate 259 as the evidence.</li><li>D-29z516: INFO-B259-COMPONENT-DRIFT is `ruled`; INFO-C259-CONTEXTRUNNING-NAME, INFO-C259-STUDIO-TOKEN-400 and INFO-C259-HOOK-PER-CLASS are info; `harness_rules` has HR-HOOK-START-PER-CLASS and HR-SECOND-SERVER-VITE.</li><li>`systemic_tasks` has PERF-HARNESS-STRINGS-DRIFT, SYS-6 and L46-CONTRACT-CHECKS; every id SYS-6 names in `closes` exists as an open deferred Low (B-R253-STALE-PLAYING-STATUS-RESIDUAL, C-R253-01, C-R254-OBS-01), and its `regression_rows` ids exist.</li><li>The retro candidates named in retro §8 have the stated statuses; RC-R260-ROW-SEVERITY exists as a candidate.</li><li>`retro_runs` has a 260 entry and the 245 entry is `done`.</li><li>`screen_review_candidates` lists SR-260-1…6 as `awaiting_user`.</li><li>`decisions_log_b` has D-29z515…D-29z523.</li></ul> | All ids are real and in class; each claim reproduces. | An id is missing or out of class, or a claim does not reproduce. |
+| **RT-LESSONS** | `lessons.md`: <ul><li>≤ 60 lines, exactly the three required parts;</li><li>each lesson is concrete and checkable;</li><li>`diff b-round-259/lessons-before-260.md lessons.md`: only l.3, L11, L23, L29, L50 and L51 differ (6 lines);</li><li>**the rewritten L29 keeps every old clause as a claim type, with its evidence ids** (compare clause by clause with the before-copy: render condition / A-R214-DEV-RANGE-LIVE; state recipe / C-N229-S3-METHOD; code premise / B-R230-APPLY-DESCRIBEDBY, C-R233-01 + A STOP 233, A-R254-WRONG-TIMEOUT-PREMISE, INFO-C253-ESCAPE-NO-STOP; changed meaning / C-R250-01; removed accessible signal / C-R256-01), and the new claim type "measured bound" cites C-R254-01 / L3. This is the C-R245-01 failure mode;</li><li>L11, L23, L50 and L51 keep their old text in full and only append (prefix compare);</li><li>for every new clause, open each cited source;</li><li>L29's regex is valid and usable: run `grep -nE 'l\.[0-9]+|(app|perf|docs)/[^ `]+|data-testid|aria-[a-z-]+' current-task.md` once and record the hit count (info). Every hit that states a fact about a file under `store/` carries a `[K#]` tag (§8); hits on loop artifacts are exempt by the rule.</li></ul> | All true. | Over 60 lines, a vague lesson, a citation that does not exist or does not say what the lesson claims, a rewritten rule that lost a clause, or another lesson changed. |
+| **RT-SABA** | Two checks. (1) `retro-260.md` §12 and `screen-review-260.md`: every project-rule change and every screen candidate is phrased as a **proposal or question**, and no such file changed (SOURCE-SCOPE). (2) **L46 deadline:** for each parked check that retro-245 §12 gave "ვადა: RETRO 260" (GATE232-S2/TLM-R232-ALTGR-WIN, TLM-R232-MAC/TLM-R228-META-KEYS, TLM-R233-SR-ORDER, A-R204-SAFARI-USERMENU-CLICK, R49-T, GATE244-S4), retro-260 §12 states that the deadline passed and gives either its cloud contract half in L46-CONTRACT-CHECKS (with "platform check still parked") or "no cloud path"; R49-T's question is present because 11c has no C PASS. The claim "no WebKit or Firefox in the cloud" reproduces with `ls ~/.cache/ms-playwright`. | True. | A proposal is phrased as applied, a rule file changed, a parked check is missing or silently rolled forward, or the cloud half is presented as the platform check. |
+| **RT-SCREEN** | `screen-review-260.md`: <ul><li>every candidate SR-260-1…6 names a screenshot that exists under `b-round-259/screens/`;</li><li>each candidate is visible in the cited screenshot as described (open the PNGs; a mismatch is a finding against the review, not the app). SR-260-1: in the DEMO output the library line reads "insert marker 00:00.000" and the status line "…at 01:43.352 (nearest free spot)…";</li><li>the two excluded proposals cite something that exists: SABA-Q-9-TRANSPORT (c) in `backlog.json`, and SABA-B-9 decision 4 plus SABA-B-10a's "Home or a double Stop" in the loop policy;</li><li>SR-260-2 and SR-260-5 are phrased as questions; no candidate repeats SR-230-1…10 or SR-245-1…8;</li><li>**browser:** from `store/`, run `node ../tmp/studio-real-loop/b-round-259/screens/screens.mjs <c-round-260 folder> c260` once. Record the four element counts against B's (S0 142 / 121, DEMO 170 / 147 at 1440 / 1280). Equal counts, or a named reason for a difference, pass.</li></ul> | All true. | A missing file, a candidate not visible as described, a duplicate, or an unexplained count difference. |
+| **G260-AUTH (browser)** | Fresh anonymous context at 1440×900 and 1280×720: <ul><li>`/studio-lab` shows the workspace and the demo badge; `localStorage.auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>`GET /api/studio-token?product=middle-east&file=stem1.wav` with no header;</li><li>the same with a fake Bearer.</li></ul> | <ul><li>No header → 401.</li><li>Fake Bearer → 403 with a `:5199` mock, or 500 without it.</li><li>**No token is issued.**</li></ul> | Any bypass is Critical. |
+| **STUDIO-SMOKE-260 (browser)** | On `/studio-lab` at both viewports, after `Demo collection ready` (L48), with the smoke recipe of `c-round-257/c257.cjs` (`c257-smokeauth.part`) or C's equivalent: <ul><li>Space plays and stops: the Play button's `data-playing` goes `false` → `true` → `false` and its name stays `Play` [K5]; the playhead advances, then holds;</li><li>the exported WAV of the same one-clip lab project has sha256 `1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94` [K6];</li><li>0 page errors.</li></ul> | All hold. | Any failure is a regression finding (2026-10-23 bug gate). |
 
-- **No other change in `perf/`.** In particular:
-  - no budget value, window, scenario order, wait, repetition count or `determinism` class changes;
-  - `perf/lib/report.ts`, `determinism.ts`, `stats.ts`, `budgets.ts`, `instrumentation.ts` and `report.test.ts` do not change.
-- **If A's own `npm run test:perf` aborts at a step that §1a did not list:**
-  - **The same kind of drift** is a locator or expected text that an intended app change renamed, with the D-ID or round found through `git log -p` of the app file. A adapts that one locator and reports it as **"DEVIATION H6: <file:line> old → new, app source <file:line>, changing round <N>"**. C checks it.
-  - **Anything else** (a changed scenario, a budget, a timing) is a **STOP — needs B ruling** (L11).
-- **A budget assertion that fails on a valid, isolated run is not A's to fix.**
-  - A reports it at the top of `a-round-259.md` with the row id, the value and the budget.
-  - A does not change the budget, the window or the scenario.
-  - B rules the severity (§6), not A.
+- **Gate rows:** full vitest, typecheck, build, Biome, `npm run verify` and e2e smoke. List them under `"gate"`, never in `"passed"`.
+- **`browserVerified`:** true only if G260-AUTH and STUDIO-SMOKE-260 ran at both viewports and the RT-SCREEN capture ran. The other RT rows are document checks by RETRO policy; they are not skipped browser rows.
+- **Consults (optional):** `consequence-tester` may review the rewritten L29 for checkability. Record any disagreement as a finding against the retro, not as an edit.
+- **Run budget:** the RT rows are reading work. Do not re-verify unrelated product features.
 
-### 2.2 Docs (L34: whole sections granted)
-- **Doc 163** (`docs/implementation/2026/quarter-IV/163-studio-perf-harness.md`):
-  - granted: the whole `## მეტრიკების განმარტება და ზღვრები` section (l.58–83) and the whole `## პრობლემები და გადაწყვეტები` section (l.95–104);
-  - replace the "Play label Pause" wording with the `data-playing` wording. Nothing else changes in meaning.
-- **Doc 168** (`docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md`):
-  - granted: the whole `### Liveness-ის წესები` section (l.39–52) and the whole `## Hygiene (PERF-1a)` section (l.205–210);
-  - the same replacement. The range row of the liveness table needs no change.
-- **Doc 175** l.59 is a historical record of round 214 and is **not** granted.
-- **New implementation doc:** `docs/implementation/2026/quarter-IV/194-perf-harness-playing-signal.md`.
-  - 194 is the next free number (`ls` ends at `193-saba-b-9-centre-transport.md`).
-  - Georgian, with technical terms in English.
-  - Its `## ` headings contain the seven TEMPLATE headings in order (L26).
-  - l.4 is exactly `**სტატუსი:** Completed (C round 259 PASS)` (L28).
-  - It names C-R258-01, the six stale hits, the rounds that renamed them (252–253 and 256), and the new grep rule (D-29z512).
-  - It cites only tests that exist (L26).
-- **Docs not granted:** every other file under `docs/`. The `docs/technical/**` files that mention a "Pause" button describe the legacy player and are outside this round.
-
-### 2.3 Forbidden
-- Everything in `global_forbidden_files` and `global_forbidden_actions`.
-- The 7 protected files.
-- **All of `app/`.** This round changes no app source and no app test.
-- `package.json`, `package-lock.json`, `playwright.perf.config.ts`, `biome.json`, `tsconfig.json` and `.claude/**`.
-- Commit, push, stash, checkout, deploy and dev-server restarts. Root's server runs on :5173; `test:perf` starts its own on :5188 and stops it.
-
-### 2.4 A's checks (speed rules)
-- `npm run typecheck`. It covers `perf/**`; Biome does not (L30).
-- `npm run lint` (app scope). It must stay clean even though `app/` does not change.
-- `npm run test:perf`, **alone** (L38): no vitest, tsc, build or browser job runs at the same time. Paste its summary into `a-round-259.md`: rc, specs passed, `complete`, aborts and failed budget rows.
-- No full vitest and no `npm run verify`: those are gate rows.
-- **Code review:** the change touches 4 test files and 3 docs (7 files), so A asks `code-reviewer` (3+ files).
-  - Its findings go into the report with severities.
-  - An Architecture note goes to B as a signal.
-
-## 3. C — acceptance (perf alone, in this order)
-| Row | What | PASS when |
-|---|---|---|
-| SOURCE-SCOPE-start / -end | `git status --short --untracked-files=all` and `git diff --name-only` | <ul><li>Only these paths changed: `perf/lib/page.ts`, `perf/studio-lab-interactions.perf.spec.ts`, `perf/budgets.json`, `perf/budgets.interactions.json`, docs 163 and 168, and the new doc 194.</li><li>`git diff --quiet` on the 7 protected files and on `app/` returns rc 0.</li></ul> |
-| H-DIFF | `git diff -U0 perf/` | <ul><li>The hunks are exactly H1–H5, plus any reported DEVIATION H6 with its app source cited.</li><li>In `budgets*.json`, `note` is the only changed key on any row: the files with `note` removed are identical before and after (`jq` or equivalent).</li></ul> |
-| H-GREP | `grep -rn "Pause\|click = playhead" perf` | 0 hits. |
-| H-SIGNAL | Browser, `/studio-lab` on :5173 at 1440×900 and 1280×720. Count `getByRole('button', { name: 'Play', exact: true })`. Wait for `Demo collection ready` (L48). A fresh lab is an **empty** arrangement, where Space only says "Nothing to play — add a clip from the library first." (C round 258 RP-SPACE-EMPTY). So first run the harness's own recipe (`perf/studio-lab.perf.spec.ts` l.565–570): click `getByRole('button', { name: 'Add', exact: true })` and wait until `[data-clip-kind="audio"]` has count 1. Then blur the active element (`document.activeElement.blur()`, as `blurActive` does in `perf/lib/page.ts` l.32) and press Space twice, ≥ 1.5 s apart | <ul><li>Exactly 1 Play match.</li><li>`data-playing` goes `false` → `true` on the first Space and back to `false` on the second.</li><li>This proves the new locator and signal on the live dev app, independently of the harness. B's scratch PERF-1a run (§1a) is the baseline evidence that this sequence flips the attribute on the built app.</li><li>B ran this exact recipe at `d732d26` on :5173 (`b-round-258/probe/hsignal.cjs` → `hsignal.json`): both viewports gave count 1, `false` → `true` → `false`, with 1 clip.</li></ul> |
-| RR-PERF-259 | `npm run test:perf` alone, after H-SIGNAL, with nothing else running (L38) | <ul><li>rc 0 and 3/3 specs pass.</li><li>Every pass has `complete: true`, 0 aborts and 0 page errors.</li><li>Every budget row passes its contract.</li><li>**Explicitly:** `harness.audio-running` = 1 and `interact.harness.audio-running` = 1 (the playing signal works).</li><li>Every PERF-1a fader row for graph restarts during a drag while playing = 0.</li><li>The committed-components-per-move rows are within budget, and the release rows show ≥ 1 commit. This is SABA-B-5 / RR-FADER, carried from round 258.</li></ul> |
-| RR-PERF-ORACLE | `python3 -I b-round-224/scripts/equiv-check-b2.py` against `c-round-225/latest-interactions.json` and `latest-resources.json` | <ul><li>Report only, not a pass criterion.</li><li>List every deterministic row that differs, with the scenario id and both values.</li><li>B rules the deltas at the 259 → 260 planning (L10). B's scratch run (§1a) is a preview, not the ruling.</li></ul> |
-| DOC-259 | The granted sections of docs 163 and 168; doc 194 | <ul><li>The granted sections describe the live `perf/lib/page.ts` signal (`data-playing`, `audioRunning`, `start()` ≥ 1) and no longer say Pause (L34).</li><li>Doc 194 has the TEMPLATE headings in order (L26), l.4 byte-exact `**სტატუსი:** Completed (C round 259 PASS)` (L28), and every test it cites exists.</li></ul> |
-| G259-AUTH | As G258-3 | <ul><li>`/studio-lab` shows the workspace and the demo badge anonymously; `auth_user` is null.</li><li>`/studio/middle-east` shows "Sign in required" with 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401; with a fake Bearer → 403 or 500. Never 200.</li><li>The SRW-21 mount is BLOCKED (backend unavailable in cloud).</li></ul> |
-| Gate rows (not claimed) | full vitest, typecheck, build, Biome, `npm run verify` | Root's gate. |
-
-- **Validity and budget:**
-  - The perf run gets one valid run, plus at most two replacements for environment-invalid runs (an overlapped job, a cold-compile timeout).
-  - A failure that repeats is a finding.
-  - A tolerance is never loosened.
-- **Budget failures are judged row by row (fixed in advance):**
-  - **Medium:** a fader, drag or playback budget that fails on a valid isolated run. It is filed against the item that owns the budget (PERF-FADER-a/b/c or PERF-1b-i), not against this harness fix.
-  - **Low:** any other budget failure.
-  - **FAIL of this round:** an abort, `complete: false`, or a liveness row at 0.
-- `browserVerified` covers H-SIGNAL and RR-PERF-259 (the perf specs drive a real Chromium).
-
-## 4. Neighbour risk
-| Risk | Check |
+## 4. Outcome, fixed in advance (D-29z523)
+| C result | B at the round-261 planning |
 |---|---|
-| The new `playButton` matches more than one button (for example a library "Play" preview) | H-SIGNAL counts exact matches with a clip added; Playwright's strict mode would also abort on 2 |
-| H-SIGNAL on an empty lab never plays (Space only reports "Nothing to play") | H-SIGNAL adds a clip first with the harness's own Add recipe, then blurs focus before Space |
-| `data-playing` flips before the audio really runs | `isPlaying` keeps `audioRunning`; `harness.audio-running` still needs ≥ 1 `start()` (GATE206-S6) |
-| A budget changes silently along with the note edit | H-DIFF compares `budgets*.json` with `note` removed |
-| The perf run disturbs root's :5173 server or C's tabs | L38: perf runs alone, on :5188 |
-| After the range drag, Space now plays from the time selection's start (SABA-B-10a) | The harness presses Home before each playing drag (`studio-lab-interactions.perf.spec.ts` l.295, l.513). B's scratch run (§1a) shows that this order still yields "playing" |
+| All rows PASS, and the round-261 planning is **before 2026-11-02** | Round 261 = **PERF-HARNESS-STRINGS-DRIFT** (systemic, `perf/**` only; `systemic_tasks` entry; `tech-lead`: relative import from `app/lib/arrangement/strings.ts`, which imports only `./shortcuts` while `shortcuts.ts` imports nothing [K7], grep 0 inline label/title literals, a scratch key-rename mutant turns `npm run typecheck` red, one isolated `test:perf` run as evidence; the task states the limit "a key that exists but is no longer rendered is not caught"). It is the first round task written in full with the L29 claims block. |
+| All rows PASS, and the round-261 planning is **on or after 2026-11-02** | Round 261 = **REGRESSION** (3-day rule; `regression-last.json` round 258), then PERF-HARNESS-STRINGS-DRIFT. |
+| After that | **SABA-B-9 stage 2** (master volume to the workspace bottom-right), then **L46-CONTRACT-CHECKS**, then **SABA-B-11c** (`ableton-arrangement-expert` consult on the off-grid offset first), then **SYS-6 STATUS-LIFETIME**. SABA-B-7 when Saba answers `AGREE-SABA-B-7.md`; SYS-5; STUDIO-PERFORMANCE b-ii; the rest of the queue unchanged. |
+| An RT row fails (an untraceable number, an invented cause, a wrong id or citation, a lost L29 clause, a candidate not as described) | B corrects `retro-260.md`, `lessons.md`, `screen-review-260.md` or the backlog at the round-261 planning and records it in `b-round-260.md`. The next C round re-checks only the changed lines (RT-FIX, as rounds 201, 216, 231 and 246). Round 261 still runs as above. |
+| G260-AUTH or STUDIO-SMOKE-260 finds Medium+ | Round 261 is a bounded fix-up first (2026-10-23 bug gate). A Low goes to `deferred_low_polish`. |
+| SOURCE-SCOPE fails | Stop. Root inspects the change. Nothing is published. |
 
-## 5. Deliverables
-- **A:** `a-round-259.md`, with:
-  - the start HEAD;
-  - the diff summary for H1–H5, plus any H6;
-  - the `npm run typecheck`, `npm run lint` and `npm run test:perf` results;
-  - the code-reviewer findings, and the Architecture note if there is one.
-- **C:**
-  - `c-round-259.json`, with `browserVerified`, `realVerified`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `observations`, `invalidRuns` and `lookups`;
-  - `c-round-259.md`;
-  - evidence under `c-round-259/`.
-- **Every bug** gets:
-  - an id `C-R259-NN`;
-  - a severity;
-  - the item;
-  - the steps;
-  - the evidence path;
-  - "regression yes/no", with the round of the last pass.
+## 5. Neighbour risk
+None in app code: no source file changes. The risk is in the process.
+- **The L29 rewrite** changes how every later task is written. If it lost a clause, later tasks lose a check silently (C-R245-01 happened exactly this way), so RT-LESSONS compares clause by clause.
+- **The new L11 clause** turns some of A's in-report "rulings" into STOPs. That may add a STOP round; it is meant to replace a FAIL + fix-up pair ($41.65–58.68, retro §6).
+- **The screen review goes to Saba.** A candidate that misdescribes the screen would waste his decision, so RT-SCREEN opens every screenshot.
 
-## 6. Outcome, fixed in advance
-| C result | B at the round 259 → 260 planning |
-|---|---|
-| PASS | <ul><li>Close C-R258-01. PERF-HARNESS-SHARED-LIB goes back to **მზადაა**, and the PERF-FADER "0 restarts while playing" evidence is current again.</li><li>Round 260 = **RETRO** (15 rounds after 245; it analyses this miss).</li><li>Round 261 = **SABA-B-9 stage 2** (master volume to the bottom-right, plus the cheap gate-257 Lows if it grants `ArrangementTransport.tsx`).</li><li>Then SABA-B-11c.</li></ul> |
-| FAIL on the harness itself (an abort, liveness 0) | Round 260 = the same fix-up again, with B's ruling. RETRO moves one round. |
-| PASS on the harness, but a Medium budget finding | That finding gets its own bounded round, after RETRO 260 and before SABA-B-9 stage 2, under the 2026-10-23 bug gate. |
-| Low budget findings only | They go to `deferred_low_polish`; otherwise the same as PASS. |
+## 6. Deliverables
+- **A:** `a-round-260.md`.
+- **C:** `c-round-260.md` and `c-round-260.json`, with evidence under `c-round-260/`. The JSON carries `taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate` and `rows`.
 
 ## 7. Root notes
-- **Gate on C PASS:** the diff is test code and docs only. The gate's full verify does not run `test:perf`, so C's RR-PERF-259 is the evidence for the perf half.
-- **Systemic candidate for RETRO 260 (not a 259 grant): PERF-HARNESS-STRINGS-DRIFT.**
-  - The perf harness could import its labels and titles from `app/lib/arrangement/strings.ts` (which imports only `./shortcuts`).
-  - Or the gate could run a short `test:perf` smoke.
-  - Either way, the next rename would then break a checked run instead of silently breaking the harness.
-  - B records it in `retro_candidates`, and RETRO 260 decides. A rule change to the gate is a proposal for Saba and root.
-- The existing root request `b-round-223-root-request-vitest.md` (include `perf/**/*.test.ts` in vitest) still stands. It would not have caught this miss, because the spec files are Playwright specs, not vitest tests.
+- **Nothing to publish from `store/`.** If SOURCE-SCOPE shows a change, that change is itself a FAIL. The loop-state commit records the retro.
+- **For Saba:** `user-review/screen-review-260.md` (6 candidates) and `retro-260.md` §12: the L46 checks whose deadline passed (with the cloud contract halves now planned), the R49-T snap question, and the proposal for a gate `test:perf` smoke. Root may forward them.
+- **Still pending and non-blocking:** the checkpoint requests `b-round-211`, `-221`, `-225`, `-229`, `-231`, `-234`, `-244` and `-253` (+ addenda). SYS-6's status matrix will be attached to ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS question 3.
+
+## 8. Claims (L29 form; C re-runs each verbatim)
+| Tag | Claim | Command (from the loop root unless stated) | Expected |
+|---|---|---|---|
+| K1 | gate 259 published `7a960c1` | `python3 -I -c "import json;g=json.load(open('gates/gate-round-259.json'));print(g['status'],g['commit'][:7])"` | `published 7a960c1` |
+| K2 | clean tree at planning | `wc -c < b-round-259/git-status-at-planning.txt` | `0` |
+| K3 | 1,118 frozen entries | `wc -l < b-round-259-r260-tree-sha256.txt` | `1118` |
+| K4 | each protected file once | `for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-routes.test.ts app/lib/auth.ts app/contexts/AuthContext.tsx app/entry.server.tsx; do grep -cF "  $f" b-round-259-r260-tree-sha256.txt; done \| tr '\n' ' '` | `1 1 1 1 1 1 1` |
+| K5 | Play's playing signal is `data-playing`; its name is constant | from `store/`: `grep -n "data-playing" app/components/arrangement/ArrangementTransport.tsx; grep -n "playLabel" app/lib/arrangement/strings.ts` | `248: data-playing={isPlaying ? 'true' : 'false'}`; `223: playLabel: 'Play',` |
+| K6 | the smoke export hash | `grep -c "1fea093b" c-round-257.md` | `1` (LAB-SMOKE-257 row, "equal to rounds 255 and 256") |
+| K7 | `strings.ts` imports only `./shortcuts`; `shortcuts.ts` imports nothing | from `store/`: `grep -c "^import" app/lib/arrangement/strings.ts app/lib/arrangement/shortcuts.ts` | `app/lib/arrangement/strings.ts:1` and `app/lib/arrangement/shortcuts.ts:0` |

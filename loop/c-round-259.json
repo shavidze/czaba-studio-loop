@@ -1,0 +1,109 @@
+{
+  "round": 259,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-30T03:10:23.7600268Z",
+    "round": 259,
+    "attempt": 1,
+    "store": 200
+  },
+  "baseline": "HEAD d732d2623fc16032153aa262c3e7d41fca4ed59a; tree = A's 7 paths only",
+  "passed": [
+    "SOURCE-SCOPE-start",
+    "H-DIFF",
+    "H-GREP",
+    "H-SIGNAL",
+    "RR-PERF-259",
+    "DOC-259",
+    "G259-AUTH",
+    "SOURCE-SCOPE-end"
+  ],
+  "failed": [],
+  "inconclusive": [],
+  "blocked": [
+    "SRW-21 route mount on /studio/$productId with a real purchase: backend unavailable in cloud (deferred_user)"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify"
+  ],
+  "reportOnly": {
+    "RR-PERF-ORACLE": "run; interactions 63 problems / resources 17 problems vs c-round-225 — every deterministic component row +6..+7 (e.g. interact.play.start-components 87->94, drag move-components-max 98->105, zoom.1 components 95->102), resources DOM +7..+8 nodes, studio-lab JS +8.4 kB encoded / +1 script; 'kind must become wallclock' lines are the round-224->225 reclass check, not deltas; 1 note-text diff (H5). Matches B's preview INFO-B259-COMPONENT-DRIFT; B rules. Evidence c-round-259/oracle-interactions.txt, oracle-resources.txt"
+  },
+  "bugs": [],
+  "observations": [
+    "INFO-B259-COMPONENT-DRIFT confirmed independently by C's run (record rows only, no budget failed).",
+    "A's code-reviewer info carried: detail.contextRunning (perf/studio-lab.perf.spec.ts:596, studio-lab-interactions.perf.spec.ts:535) now means data-playing && context running; name slightly misleading. Signal for RETRO 260, not a bug of this round.",
+    "/api/studio-token without product/file query params returns 400 (param validation precedes the auth check); with valid params: no header 401, fake Bearer 500. Never 200. Not a bypass.",
+    "RETRO candidate PERF-HARNESS-STRINGS-DRIFT still stands (task §7)."
+  ],
+  "invalidRuns": [
+    "C probe attempt 1 (hsignal-auth.cjs, hook on AudioScheduledSourceNode.prototype.start) timed out at 180 s before 'Demo collection ready'. Cause unconfirmed: Object.hasOwn(AudioScheduledSourceNode.prototype,'start') is true in this Chromium, so the hook was not undefined; possibly a cold start or the base-prototype patch. B's unmodified probe and the harness-style per-class hook then passed. C-tool issue, not an app finding. Lesson candidate: hook start() per concrete class as perf/lib/instrumentation.ts does."
+  ],
+  "measurements": {
+    "H-SIGNAL": {
+      "1440x900": {
+        "playMatches": 1,
+        "dataPlaying": [
+          "false",
+          "true",
+          "false"
+        ],
+        "ariaLabelConstant": "Play",
+        "clips": 1,
+        "ctxState": "running",
+        "realStarts": 1,
+        "ctxClockAdvance500ms": 0.499,
+        "pageErrors": 0
+      },
+      "1280x720": {
+        "playMatches": 1,
+        "dataPlaying": [
+          "false",
+          "true",
+          "false"
+        ],
+        "ariaLabelConstant": "Play",
+        "clips": 1,
+        "ctxState": "running",
+        "realStarts": 1,
+        "ctxClockAdvance500ms": 0.499,
+        "pageErrors": 0
+      }
+    },
+    "RR-PERF-259": {
+      "rc": 0,
+      "specs": "3/3 passed in 14.6 min",
+      "reports": "latest/latest-interactions/latest-resources: complete true, failures 0, 6/6 passes, 0 aborts, 0 page errors",
+      "assertRows": "124/124 PASS",
+      "harness.audio-running": 1,
+      "interact.harness.audio-running": 1,
+      "fader.{track,group,master,pan}.playing.restarts(1x,6x)": 0,
+      "fader.track.move-components-max": 1,
+      "fader.track.move-components-per-move": 0.75,
+      "release-commits": 1
+    },
+    "G259-AUTH": {
+      "studioLabAnon": "workspace + demo badge, auth_user null (both vp)",
+      "studioMiddleEast": "Sign in required, 0 audio[src], 0 audio requests (both vp)",
+      "apiNoHeader": 401,
+      "apiFakeBearer": 500,
+      "demoBadgeExact": "'Demo collection — no sign-in required' visible, auth_user null, 0 cookies at both vp (c-round-259/badge.json, studio-lab-anon-*.png)"
+    },
+    "DOC-194-content": "names C-R258-01, rounds 252/256, D-29z512 and the six stale hits (page.ts x3, dragTarget range, two notes) at l.14"
+  },
+  "lookups": [
+    "perf/lib/page.ts l.62-78",
+    "perf/studio-lab-interactions.perf.spec.ts l.110",
+    "app/components/arrangement/ArrangementTransport.tsx l.244,248",
+    "app/lib/arrangement/strings.ts l.223,694",
+    "app/routes/api.studio-token.ts l.8-59"
+  ],
+  "evidence": "c-round-259/ (hsignal-auth.cjs/json, api-auth.cjs/json, perf-run-1.log, latest*.json, oracle-*.txt, screenshots)",
+  "perfRunValidity": "1 valid run, 0 replacement attempts used. Light overlap during the run: greps, git diff, sed/od on docs, one checkpoint file write; no vitest/tsc/build/browser job (L38)."
+}
