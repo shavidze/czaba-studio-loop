@@ -1,0 +1,60 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T17:55:05.9814818Z",
+  "round": 273,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R273-01",
+   "severity": "low",
+   "steps": [
+    "grep -nE \"l\\.[0-9]+|(app|perf|docs)/[^ `]+|data-testid|aria-[a-z-]+\" current-task.md | grep -v \"\\[K[0-9]\"",
+    "read hit l.86"
+   ],
+   "expected": "every task sentence stating a fact about store code carries a [K#] tag with a re-runnable claim (L29)",
+   "actual": "l.86 \"ArrangementDetailPanel l.604, Enter\" is untagged; C verified it is true at HEAD b288be7 (setTimeRange(next) at l.604, then an explicit setStatus). Planning finding only, no impact on A work",
+   "evidence": "c-round-273.md CLAIMS row"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "NO-REF",
+  "CLAIMS",
+  "TESTS-TARGETED",
+  "TEST-CHANGES",
+  "MUTANTS",
+  "B-RANGE-STATUS",
+  "B-SPACE-PLAYING",
+  "B-SPACE-FROMSTART",
+  "B-SEL-PASTEND-HOME",
+  "B-STRIP-STOPPED",
+  "B-CLOBBER",
+  "B-AUDIO",
+  "LT-WIDTH",
+  "SCREEN-BUDGET",
+  "G273-AUTH",
+  "DOC-204"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "full Biome",
+  "verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "ableton": "does not apply (bug-fix round on CZABA status line)",
+ "observations": [
+  "A-R273-REPEAT-PASTEND not probed (optional, stage-3 recipe)",
+  "B-R273-PLAYING-TEXT-WITH-RANGE observed as ruled (rangeWhilePlaying)",
+  "A-R273-TOPLAYHEAD-REWRITE: Space after Ctrl+Shift+Space now shows Playing from <t>. (true; HEAD kept stale text)",
+  "M-NO-R not caught by LT13 first step; caught by LT8, LT14 (accepted, §10 not met)"
+ ],
+ "evidence": "c-round-273/ (probe-r273-{new,head}.json, mutants/results.txt, targeted-vitest.json, guards.json, auth-token.json, shots/)"
+}

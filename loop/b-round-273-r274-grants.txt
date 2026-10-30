@@ -1,0 +1,32 @@
+Round 274 grants (B, round 273 -> 274 planning, D-29z603). Baseline HEAD 52b17e4ef77300a8f13f9babba9d3ea9a9d1c0c6 (gate 273 published), clean tree.
+Only these paths may change. Everything else is frozen (current-task.md section 4).
+
+app/contexts/ArrangementContext.tsx
+  - nudgeSelectedClip only (HEAD l.1993-2030): after the existing `applyEdit(...)` + `setRange(null)` of the group success path, write the group text (section 3.1);
+    after the existing `applyEdit(...)` + `setRange(null)` of the single success path, write the single text (section 3.1). The group label may be hoisted into a local const.
+    The refusal branches, the keyRepeat function forms, the deps array (unless Biome asks) and every other function stay byte-identical.
+app/lib/arrangement/strings.ts
+  - studioMoveStrings.nudged: (start: string): string => `Nudge clip: start ${start}.` placed right after historyNudgeClip. Nothing else.
+app/lib/arrangement/__tests__/strings.test.ts
+  - additions only: V02B_FORMATTER_SAMPLES.studioMoveStrings (HEAD l.771 `studioMoveStrings: {}`) gets `nudged: [studioMoveStrings.nudged('00:01.000')]`; one exact-text expect in ST11.
+app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
+  - SK7 HEAD l.606 and NZ3 HEAD l.1031: the exact `added` list becomes the exact 4-item list of section 5.1 (stronger replacement; every other line of SK7/NZ3 unchanged).
+  - new SK13, SK14 and SK15 (section 5.2), appended inside the existing `a held key announces the same refusal once` describe.
+app/lib/arrangement/__tests__/status-lifetime.test.tsx
+  - the describe title (HEAD l.214) -> 'SYS-6 STATUS-LIFETIME: transport and edit-result texts stay true (D-29z594, D-29z599, D-29z603)'; options object unchanged.
+  - new LT20 and LT21 (section 5.2) inside that describe. LT1-LT19 byte-identical.
+app/lib/arrangement/__tests__/playback-start.test.ts
+  - the describe title (HEAD l.31) -> 'SYS-6 playback-start resolver (D-29z594, D-29z599)'. No `it` changes.
+docs/implementation/2026/quarter-IV/203-sys-6-status-lifetime-stage-1.md
+  - l.4 only -> **სტატუსი:** Completed (C round 274 PASS)
+docs/implementation/2026/quarter-IV/204-sys-6-status-lifetime-stage-2.md
+  - l.4 only -> **სტატუსი:** Completed (C round 274 PASS)
+docs/implementation/2026/quarter-IV/205-sys-6-status-lifetime-stage-3.md   (new)
+  - l.4 exactly: **სტატუსი:** Completed (C round 274 PASS)
+
+Frozen (examples, not exhaustive): StudioWorkspace.tsx (the arrow-key branches l.2541-2571), ArrangementClip.tsx, ArrangementDetailPanel.tsx, ArrangementMarkerRow.tsx,
+status-announcement.ts, playback-start.ts, model.ts, loop.ts, shortcuts.ts, grid.ts;
+tests that must pass unchanged: grid-snap-ui.test.tsx, detail-panel.test.tsx, detail-panel-polish.test.tsx, track-layout.test.tsx, meter-ui.test.tsx, track-meter-ui.test.tsx,
+status-announcement.test.ts, pending-status.test.tsx, insert-marker-ui.test.tsx, bars-ruler-ui.test.tsx, gesture-reentry.test.tsx;
+package.json, perf/**, e2e/**.
+Protected auth/purchase: app/routes/studio.$productId.tsx, app/routes/api.studio-token*, app/lib/auth.ts, app/contexts/AuthContext.tsx.

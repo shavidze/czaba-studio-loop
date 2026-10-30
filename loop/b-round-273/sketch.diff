@@ -1,0 +1,48 @@
+--- /home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx	2026-10-30 17:33:24.383583190 +0000
++++ app/contexts/ArrangementContext.tsx	2026-10-30 18:36:59.278421788 +0000
+@@ -2001,8 +2001,24 @@
+           setStatus(keyRepeat ? () => GROUP_MOVE_BLOCKED_MESSAGE : GROUP_MOVE_BLOCKED_MESSAGE);
+           return;
+         }
+-        applyEdit(moved, studioClipStrings.historyMoveClips(ids.length));
++        const label = studioClipStrings.historyMoveClips(ids.length);
++        applyEdit(moved, label);
+         setRange(null);
++        const [anchorId] = ids;
++        const before = arrangement.clips.find((entry) => entry.id === anchorId);
++        const after = moved.clips.find((entry) => entry.id === anchorId);
++        if (before && after) {
++          const text = (
++            after.start >= before.start
++              ? studioClipStrings.groupMovedRight
++              : studioClipStrings.groupMovedLeft
++          )({
++            label,
++            count: ids.length,
++            distance: formatArrangementTime(Math.abs(after.start - before.start)),
++          });
++          setStatus(keyRepeat ? () => text : text);
++        }
+         return;
+       }
+       const clipId = primarySelectedClipId();
+@@ -2023,6 +2039,9 @@
+       }
+       applyEdit(next, studioMoveStrings.historyNudgeClip);
+       setRange(null);
++      const moved = next.clips.find((entry) => entry.id === clip.id);
++      const text = studioMoveStrings.nudged(formatArrangementTime(moved?.start ?? target));
++      setStatus(keyRepeat ? () => text : text);
+     },
+     [applyEdit, primarySelectedClipId, setRange],
+   );
+--- /home/runner/czaba-project/store/app/lib/arrangement/strings.ts	2026-10-30 17:33:24.381593857 +0000
++++ app/lib/arrangement/strings.ts	2026-10-30 18:27:35.757659500 +0000
+@@ -317,6 +317,7 @@
+   nudgeAtTimeStart: 'Nudge blocked — start of the timeline.',
+   nudgeBlocked: 'Nudge blocked — a neighbouring clip or the start of the timeline.',
+   historyNudgeClip: 'Nudge clip',
++  nudged: (start: string): string => `Nudge clip: start ${start}.`,
+ };
+ 
+ export const studioVideoStrings = {
