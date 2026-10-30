@@ -398,3 +398,13 @@ Saba accepted root's recommendations. They override every default and open quest
 - Tag Manager Q9–Q27.
 
 None of these blocks the Studio loop.
+
+## product-designer agent (Saba, 2026-10-30)
+
+Saba approved a new read-only agent, `.claude/agents/product-designer.md`. It decides **how** a feature should work: behaviour, interaction, what is and is not on screen, states, microcopy and acceptance rows. It arrives on store master through root's commit step at the start of the next job.
+
+Until now, `design-philosopher` (a brand and perceived-value lens) made most Studio interaction calls, and part of the clutter Saba found came from that. From now on:
+- **B, for each new user-visible feature (not fix-ups, PERF, refactor, tests or RETRO),** consults `product-designer` after the reference section and before writing the task. The task records its framing, the chosen option and the rejected ones, the states checklist and its acceptance rows. Where `product-designer`, `design-philosopher`, `ableton-arrangement-expert`, `flow-sage` or `first-visit-host` disagree, `product-designer` states the choice and the trade-off. B writes that into the task and does not average the advice.
+- **C** runs `product-designer`'s acceptance rows for those tasks. C may consult it in review mode (at most 7 findings, Medium or Low).
+- **The whole-screen review at RETRO** adds `product-designer` to `design-philosopher` and `first-visit-host`.
+- Position moves and keep-list items stay Saba's decision. `product-designer` proposes them only as questions.

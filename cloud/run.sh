@@ -64,7 +64,7 @@ save_state() {
       gh issue create --label loop-review --title "Studio loop: $(basename "$f" .md) ready for you" --body "The loop wrote loop/user-review/$(basename "$f"): $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/main/loop/user-review/$(basename "$f"). The loop keeps running. Your answers go to loop/user-review/$(basename "$f" .md | sed 's/-review$//')-decisions.md." >/dev/null && date -u +%FT%TZ > "$f.notified"
     fi
   done
-  git add -A loop docs worktree cloud/KICK
+  git add -A loop docs worktree cloud/KICK cloud/root-commits
   if ! git diff --cached --quiet; then
     local ph rd
     ph="$(jq -r '.phase // "?"' "$LOOP/status.json" 2>/dev/null)"; rd="$(jq -r '.round // "?"' "$LOOP/status.json" 2>/dev/null)"
@@ -145,6 +145,28 @@ if [ -s "$REQ" ] && [ -s "$ALLOW" ]; then
     rm -f "$REQ"
   fi
 fi
+
+# ---------- root store commits (Saba-approved changes made by root, applied before the round) ----------
+# Root never pushes to store master while a round runs (the gate's push would be rejected). Instead root leaves a
+# `git format-patch` file in cloud/root-commits/; the next job applies it on master before the round, pushes both
+# remotes, and moves it to cloud/root-commits/done/. A patch that does not apply is left in place and reported.
+for P in $(ls "$STATE"/cloud/root-commits/*.patch 2>/dev/null | sort); do
+  name="$(basename "$P")"
+  if git -C "$STORE" -c user.name="Saba Shavidze" -c user.email="sabashavidze@gmail.com" am -q --committer-date-is-author-date "$P"; then
+    ok=1
+    for r in $(jq -r '.pushRemotes[]' "$STATE/cloud/config.template.json"); do git -C "$STORE" push -q "$r" HEAD:master || ok=0; done
+    if [ "$ok" = 1 ]; then
+      mkdir -p "$STATE/cloud/root-commits/done"; git -C "$STATE" mv "$P" "$STATE/cloud/root-commits/done/$name"
+      log "root-commit: $name pushed as $(git -C "$STORE" rev-parse --short HEAD)"
+    else
+      notify "Studio loop: root commit push failed" "Root's commit $name could not be pushed to every store remote. The round continues on the pushed state."
+      git -C "$STORE" reset -q --hard origin/master
+    fi
+  else
+    git -C "$STORE" am --abort 2>/dev/null || true
+    notify "Studio loop: root commit does not apply" "cloud/root-commits/$name does not apply to store master. It is left in place for root."
+  fi
+done
 
 # ---------- root YouTube search step (Saba, 2026-10-28: reference-first includes the best tutorials) ----------
 # B writes loop/youtube-request.json ({"task": "...", "queries": [...]}); root lists ranked candidates in
