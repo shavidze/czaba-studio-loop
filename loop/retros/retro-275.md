@@ -169,6 +169,8 @@
   - C-R261-N1-SWEEP-FORMS: L49-ის sweep-ის პუნქტი მოიცავს, `applied`.
   - C-R261-N2-WIRING-WORDING: `candidate`.
   - RC-R260-ROW-SEVERITY: §9 — მხოლოდ shadow mode.
+  - **RT-FIX 276 (C-R275-01):** RC-R265-AT-RISK-NO-ROW (D-29z565, მეორე შემთხვევა D-29z575) `applied`, ახალი ხაზის გარეშე. შემთხვევა 1 (round 265: მოხსნილი clamp-ის consumer split, C-R265-01) L49-ის ახალი `SWEEP` პუნქტით იფარება, რომლის მტკიცებულებაშიც C-R265-01 უკვე წერია. შემთხვევა 2 (round 267: gesture arm + Ctrl+Arrow, C-R267-01) L4-ის „Same key path, two clauses“ პუნქტით იფარება (D-29z575). ზოგადი ფორმა („§5-ში დასახელებულ ყოველ რისკს row ან გამორიცხვა“) RETRO 290-მდე დაკვირვების კანდიდატია. (D-29z613)
+  - **RT-FIX 276 (C-R275-02):** architecture signal GATE264-ARCH-TEST-HELPER: ზოგადი გადატანა `helpers/workspace-test-environment.ts`-ზე (13 მომხმარებელი) ცალკე systemic test-only დავალების კანდიდატად რჩება, RETRO 290-მდე. მანამდე წესი: SYS-5-ის და შემდეგი რაუნდების ახალი test ფაილი helper-ს იყენებს, ხოლო არსებული ფაილის შეხება მას არ ავალდებულებს (assertion-ების რისკის გამო). (D-29z613)
 
 ## 9. retro 260-ის ექსპერიმენტის შედეგი (§10)
 

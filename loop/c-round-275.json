@@ -1,0 +1,82 @@
+{
+  "round": 275,
+  "taskStatus": "FAIL",
+  "verdictNote": "RETRO round. Product/browser rows PASS (auth guard not bypassed, smoke playback + export WAV hash identical at both viewports, screen counts equal). RT-IDS fails on two Low document findings (two RETRO-275 candidates outside retro_candidates without a disposition). Per task section 4 these go to RT-FIX at the round-276 planning; round 276 still runs as planned. No app-code defect found.",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-30T20:11:19.9081081Z",
+    "round": 275,
+    "attempt": 1,
+    "store": 200
+  },
+  "baseline": "a4c0e240072cdd8448c291b5217df95289d9c920",
+  "passed": [
+    "SOURCE-SCOPE",
+    "RT-NUM",
+    "RT-CAUSE",
+    "RT-LESSONS",
+    "RT-SABA",
+    "RT-SCREEN",
+    "G275-AUTH",
+    "STUDIO-SMOKE-275"
+  ],
+  "failed": [
+    "RT-IDS"
+  ],
+  "blocked": [],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "biome",
+    "npm run verify",
+    "test:e2e:smoke"
+  ],
+  "bugs": [
+    {
+      "id": "C-R275-01",
+      "severity": "low",
+      "row": "RT-IDS",
+      "steps": [
+        "grep -c RC-R265-AT-RISK-NO-ROW backlog.json b-round-274/backlog-before-275.json retros/retro-275.md",
+        "Read decisions_log_b D-29z565 and D-29z575, and open_findings B-R267-GESTURE-ARROW-SPEC-CONFLICT status"
+      ],
+      "expected": "Every candidate named for RETRO 275 has a disposition listed in retro-275 section 8 (task RT-IDS: 'every candidate whose status said RETRO 275 now has a disposition').",
+      "actual": "Outside retro_candidates (beyond the literal RT-IDS pointer, but within the retro policy 'every finding that was opened'): RC-R265-AT-RISK-NO-ROW is declared a 'RETRO-275 candidate' in D-29z565 and again as '2nd instance' in D-29z575 and B-R267-GESTURE-ARROW-SPEC-CONFLICT, but it has no retro_candidates entry and no disposition in retro-275 section 8 (0 hits in retro-275.md). It may be covered by the L4 evidence clause added at round 268, but the retro does not say so.",
+      "evidence": "c-round-275/rt/ids2.py output; backlog.json decisions_log_b D-29z565/D-29z575"
+    },
+    {
+      "id": "C-R275-02",
+      "severity": "low",
+      "row": "RT-IDS",
+      "steps": [
+        "In backlog.json architecture_signals, read GATE264-ARCH-TEST-HELPER status (same in backlog-before-275.json)",
+        "grep -n GATE264-ARCH-TEST-HELPER retros/retro-275.md"
+      ],
+      "expected": "A signal whose status says 'candidate for RETRO 275' gets a disposition at RETRO 275 (applied, deferred to RETRO 290, systemic task, or dropped).",
+      "actual": "Outside retro_candidates (beyond the literal RT-IDS pointer, but within the retro policy 'every finding that was opened'): Status is still 'signal (D-29z558); not scheduled; candidate for RETRO 275 / a systemic test-only task', unchanged by this planning; retro-275 does not mention it.",
+      "evidence": "backlog.json architecture_signals GATE264-ARCH-TEST-HELPER; retro-275.md (0 hits)"
+    }
+  ],
+  "info": [
+    "INFO-C275-01: b-round-274/stops.txt comment says no other a-round-260..274.md has STOP at lines 1-3; the stated grep actually matches 13 files, all negations ('No STOP', 'STOP: none'). The count of 1 real STOP (267) is correct.",
+    "INFO-C275-02: lessons L29 clause counts C-R273-01 toward '2x' while retro section 9 says C-R273-01 'does not count' (fact true, mechanism hit) and consequence-tester counted one case. The disagreement is disclosed in retro section 8; not a misquote. B may want to say '1x + 1 mechanism hit'.",
+    "INFO-C275-03: re-running collect.py now gives round 274 b_cost 16.67 in rounds-260-274.json (b-round-274-result.json, i.e. the round-275 planning, now exists). cost.py uses the b-round-(N-1) offset, so cost-rows.json and every total are byte-identical to B's.",
+    "INFO-C275-04 (env): the first auth@1440 attempt timed out (150 s) waiting for 'Demo collection ready'; probable cause (inference, compile not observed): dev-server cold start; a probe 1 min later was ready in 5 s and the re-run passed. One environment retry used.",
+    "INFO-C275-05 (was C-R275-03, downgraded): SR-275-1 says the gain value appears in four formats '(ოთხივე screenshot)'. Under the reading 'inconsistent formats are visible in all four screenshots' it holds (+0.0 x4 and Master 0.0 dB are in all four). Under the reading 'all four formats in every screenshot' it does not: at 1280x720 Clip details is collapsed, so the Clip Gain field '0.0' and the '0 dB' readout are absent. The candidate is visible as described, so RT-SCREEN passes; B may narrow the wording to '1440 screenshots show all four'."
+  ],
+  "rows": {
+    "SOURCE-SCOPE": "PASS: start and end HEAD a4c0e24, status 0 lines, sha256sum -c rc 0 (1138 entries)",
+    "RT-NUM": "PASS: all B scripts re-run in c-round-275/rt on a byte-identical backlog-before copy; every output identical (cost.txt only dict order); hand checks of groups, alternatives 68.57/70.29, pairs 60.67/35.80/32.18, 1.29, 53 items/11 reviews, claims counts, retro-260 comparison figures",
+    "RT-CAUSE": "PASS: every section 3/4/9 cause traced to c-round-260/265/266/267/272/273.json, verify.log l.1982, tasks/round-263.md section 0, a-round-267.md l.3; consult lines labelled; GATE274-S1 quote exact (review.md l.19, l.49)",
+    "RT-IDS": "FAIL (C-R275-01, C-R275-02, Low): all named ids reproduce (closures, GATE274 triage, deferred 464, TLM deadline, retro_runs, next_due 290, SR-275 awaiting_user, final acceptance list, harness rules, D-29z605..612, 11/11 retro_candidates dispositioned), but two RETRO-275 candidates outside retro_candidates have no disposition",
+    "RT-LESSONS": "PASS: 59 lines, 3 parts, diff only l.3/18/34, python check True True, citations open and say what is claimed",
+    "RT-SABA": "PASS: section 12 and screen review are proposals/questions; SR-275-2 and Q1 are questions; L46 items have l46_retro275 fields with both passed deadlines and are in final_acceptance_saba_manual_items; F1-ABSOLUTE-SNAP closed D-29z592; ~/.cache/ms-playwright has only chromium + ffmpeg",
+    "RT-SCREEN": "PASS: screenshots exist, every candidate visible as described (see INFO-C275-05 for the SR-275-1 wording), no duplicates of SR-230/245/260; browser capture counts 142/170/121/147 equal to B",
+    "G275-AUTH": "PASS at 1440x900 (re-run) and 1280x720: lab workspace 1 + badge, auth_user null, 0 cookies at start; /studio/middle-east Sign in required, 0 audio[src], no workspace; token no header 401, fake Bearer 500 (no :5199), no token in bodies",
+    "STUDIO-SMOKE-275": "PASS at both viewports: data-playing false>true>false, name Play constant, playhead 0>1.172>1.691 then holds, analyser RMS ~0.02 while playing and 0 stopped; export WAV 48 kHz/24-bit/2 ch, 768000 frames = 16.000 s, no NaN, flat -24.9 dB per second, sha256 1fea093b... matches K6; 0 page errors"
+  },
+  "claimRerunMinutes": 3,
+  "shadowRowSeverityVerdict": "PASS (all findings Low; no row carried a Medium+)"
+}

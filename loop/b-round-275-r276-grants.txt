@@ -1,0 +1,26 @@
+Round 276 grants (B, round 275 -> 276 planning, D-29z614/D-29z615). Baseline HEAD a4c0e240072cdd8448c291b5217df95289d9c920 (gate 274 published; gate 275 skipped), clean tree.
+Only these paths may change. Everything else is frozen (current-task.md section 5; manifest b-round-275-r276-tree-sha256.txt).
+
+app/components/arrangement/ArrangementTransport.tsx
+  - section 2.1-2.4 only: local soft-disabled helper; the 7 buttons (Undo, Redo, Split, Delete, Loop, Zoom to selection, Zoom back) lose `disabled`, gain aria-disabled (absent when available) + onClick guard first + mousedown preventDefault;
+    Split/Delete title selection; toolButtonClass variant swap; the 4 enabled: overrides (l.221, 253, 254, 308) -> not-aria-disabled:; handoff predicate (l.111) rekeyed on aria-disabled.
+app/lib/arrangement/strings.ts
+  - undoTitle/redoTitle null branches; new splitNeedsTargetTitle, deleteNeedsTargetTitle. Nothing else.
+app/styles/app.css
+  - l.380-381 selectors only: add :not([aria-disabled="true"]).
+app/styles/base/utilities.css
+  - l.73-74 selectors only: add :not([aria-disabled="true"]).
+app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+  - .disabled reads (l.306-401) -> aria-disabled reads + hasAttribute('disabled') false; new describe SD1-SD7 (SD5b conditional).
+app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
+  - transport enabled:/disabled: token lists -> new tokens (no assertion removed); l.382 loop.disabled -> aria-disabled read.
+app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+  - transport tokens l.180-191 and transportOn string l.476-481 (count 2) -> not-aria-disabled:; WORKSPACE_PATH / TEMPO_ROW_PATH expectations byte-identical.
+app/lib/arrangement/__tests__/waveform-zoom.test.tsx
+  - transportButton (l.387) returns ariaDisabled; expectations at l.604-613, l.686-699 follow.
+app/lib/arrangement/__tests__/strings.test.ts
+  - l.619/l.621 new texts; the two new keys in the studioEditStrings inventory (l.411-417 table, formatter samples near l.455).
+docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md   (new)
+  - l.4 exactly: **სტატუსი:** In Progress (stage 1 of 2; C round 276 PASS)
+
+Protected auth/purchase (never touched): app/routes/studio.$productId.tsx, app/routes/api.studio-token*, app/lib/auth.ts, app/contexts/AuthContext.tsx.

@@ -1,0 +1,26 @@
+=== ROUND 260 FAIL bV True failed: ['RT-LESSONS']
+  BUG {"id": "C-R260-01", "severity": "low", "actual": "All six claim types and every evidence id survive, but two obligations are gone. (1) Render condition: the old text said '...and the task's state must satisfy that branch'. The new text only says 'the render branch of every named liveness or acceptance signal (A-R214-DEV-RANGE-LIVE...)'. No sentence requires the task's state to reach the rendering branch, so a tag tha
+  BUG {"id": "C-R260-02", "severity": "low", "actual": "The backlog says B-R239 was 'applied at round-240 planning: L49'. Only L51 (B-R237) came from RETRO 245 (D-29z402). The 'applied' status itself reproduces; only the provenance phrase is wrong. No RT row fails on this; it is filed so that the RT-FIX pass corrects the sentence"}
+=== ROUND 261 PASS bV True failed: []
+=== ROUND 262 PASS bV True failed: []
+  BUG {"id": "C-R262-01", "severity": "low", "actual": "The dragged value stays (-1.5 -> -21.5 dB) and a Master Volume entry is written. Pre-existing: C's HEAD 10e1cd4 copy behaves the same; useRelativeFaderDrag.ts cancels only on blur and pointercancel. Not caused by round 262. The only global Escape branch (StudioWorkspace.tsx l.2201-2208) returns the expanded floating video; no useRelativeFaderDrag fader (track, group, 
+=== ROUND 263 PASS bV True failed: []
+=== ROUND 264 PASS bV True failed: None
+=== ROUND 265 FAIL bV True failed: None
+  BUG {"id": "C-R265-01", "severity": "medium", "actual": "Status \"Could not split at the time selection.\", clips unchanged; same for the background range 1-15 over a gap + clip. A following Ctrl+Z undoes the previous edit (clip add). Cause: splitClipsByRange (model.ts, not granted) requires a clip fully containing the range; the removed clamp now makes such ranges normal. Ableton: unconfirmed (manual 12 6.12 silent)."}
+  BUG {"id": "C-R265-02", "severity": "low", "actual": "strings.ts:289 \"To set a loop, first make a time selection on the waveform.\"; strings.ts:24 \"Make a time selection in the Arrangement (drag on a clip or on the ruler)\" (L29 changed-meaning; strings.ts not granted)"}
+=== ROUND 266 PASS bV True failed: None
+  BUG {"id": "C-R266-01", "severity": "low", "actual": "No output. The attribute is a JSX expression, data-testid={isVideo ? 'arrangement-video-dropzone' : undefined}, at ArrangementLane.tsx:897 (also l.883 at HEAD), so the literal pattern cannot match. The fact itself is true: grep -rn 'arrangement-video-dropzone' finds l.897, and the selector resolves to exactly 1 element at both viewports in the browser (VIDEO-BG, K13 F
+=== ROUND 267 FAIL bV True failed: None
+  BUG {"id": "C-R267-01", "severity": "medium", "actual": "Diff: the chord passes the gesture arm (commandChord false, !modifier false), skips the letter branches and reaches the Ctrl+Arrow branch ((event.ctrlKey && !event.altKey)): preventDefault + stepMarker mid-gesture — marker 7.500 -> 101.352 (clip end), no blocked message. Same at 1440x900 and 1280x720. Regression introduced by the changed hunk at StudioWorkspace.tsx
+=== ROUND 268 PASS bV True failed: None
+  BUG {"id": "C-R268-01", "severity": "low", "actual": "Insert marker moves 0.000 -> 1.483 with status 'Insert marker moved to the playhead (00:01.483). Space plays from here.'; keydown and keyup both prevented (dispatchEvent false). Same at 1440x900 and 1280x720; plain Ctrl+Shift+Space control behaves identically (1.459). Contract-only (no real platform shown to send AltGraph without altKey, as AG6); the Space arm (tree l
+=== ROUND 269 PASS bV True failed: None
+=== ROUND 270 PASS bV True failed: None
+=== ROUND 271 PASS bV True failed: None
+  BUG {"id": "C-R271-01-NUDGE-STALE-STATUS", "severity": "low", "actual": "clip data-clip-start=11.000 and Undo title 'Undo: Nudge clip (Ctrl+Z)', but the status line still reads 'Move clip: start 00:10.300, length 01:41.352, source offset 00:00.000.'. The same at HEAD 4b912a9 (b-round-270/probe-group-nudge-head.json afterArrowRight; C HEAD run ui-head.json). Cause: ArrangementContext.nudgeSelectedClip success path calls a
+=== ROUND 272 PASS bV True failed: ['LT-RANGE-OWN-STATUS (C-R272-01, pre-existing, B §3.7 premise false)', 'CLAIMS-K11 (INFO: PB1/PB2 ids already exist in store-focus-fixups.test.tsx)']
+  BUG {"id": "C-R272-01", "severity": "low", "actual": "the status line stays 'Stopped — Space plays from the insert marker at 00:04.000.'; Space plays from 00:02.548 (the selection start). Pre-existing: HEAD 66b570a is identical. Rule W/S correct it only on the next marker write or Stop"}
+=== ROUND 273 PASS bV True failed: None
+  BUG {"id": "C-R273-01", "severity": "low", "actual": "l.86 \"ArrangementDetailPanel l.604, Enter\" is untagged; C verified it is true at HEAD b288be7 (setTimeRange(next) at l.604, then an explicit setStatus). Planning finding only, no impact on A work"}
+=== ROUND 274 PASS bV True failed: None

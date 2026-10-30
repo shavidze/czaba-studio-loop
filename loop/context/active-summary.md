@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T19:47:03.061Z)
+# Active loop summary (2026-10-30T20:19:44.880Z)
 
-- backlog.json 2605 KB -> active view 366 KB
-- status: G_ROOT_GATE round 274
-- servers: `{"checkedUtc":"2026-10-30T19:07:42.8302434Z","round":274,"attempt":1,"store":200}`
+- backlog.json 2624 KB -> active view 367 KB
+- status: G_ROOT_GATE round 275
+- servers: `{"checkedUtc":"2026-10-30T20:11:19.9081081Z","round":275,"attempt":1,"store":200}`
 - last publication: a4c0e240072cdd8448c291b5217df95289d9c920 (rounds 274-274)
-- last root gate: round 274 published - commit a4c0e240072cdd8448c291b5217df95289d9c920 pushed
+- last root gate: round 275 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -672,8 +672,10 @@
 - A-R272-REVIEW-KIND-NAME / low / deferred_low_polish (D-29z598); revisit with GATE272-ARCH-STATUS-TAG / insertMarkerToPlayhead is classified 'stopped' although it can be written while playing; the kind name misleads
 - GATE273-S1-NOOP-RANGE-RERENDER / info / STUDIO-PERFORMANCE candidate (D-29z602): no behaviour row can turn it red (text and sequence unchanged); measure with the PERF re-render harness before building / Rule R queues a status function update on every non-gesture setRange, so a null->null setRange or a write while playing re-renders the provi
 - GATE273-S2-DOUBLE-ANNOUNCE / info / ruled deliberate (D-29z602): round-273 contract (state after the action); not a bug; Tech Lead may judge with a real screen reader / a play/stop cycle from a stopped text now announces twice (Playing from, then the stopped text)
-- GATE273-S4-PBS9-DESCRIBE / info / dispatched round 274 (D-29z603): describe-title renames only / PBS9 and LT12-LT19 sit under describe titles that say stage 1
 - GATE273-ARCH-STATUS-SPLIT / info / signal (D-29z604): added to the open checkpoint request b-round-272-checkpoint-request.md; candidate bounded task only after root's checkpoint answer; non-blocking / status-truth rules split across ArrangementContext (R, G, P, W) and StudioWorkspace (Rule S stop effect); proposal after stage 3: move Rule 
+- INFO-C274-01 / info / info (D-29z606): folded into A-R274-GROUP-NUDGE-FLOAT-DRIFT (deferred Low) / A-R274-GROUP-NUDGE-FLOAT-DRIFT is model-only: Snap-off group nudge x4 shows data-clip-start 0.100..0.400 and exact texts in the browser
+- INFO-C274-02 / info / info (D-29z606): folded into GATE274-S3-GROUP-ANCHOR-GUARD (deferred Low) / group status write guarded by if (before && after), beyond section 2.2; no reachable path found
+- GATE274-S1-HELD-REPEAT-ANNOUNCE / medium / open_tech_lead_manual (D-29z606): per-step announcement is the round-274 contract (SK13, doc 205); the only remaining step is a real screen-reader check (2026-10-23 root clarification: does not block); manual row TLM-R274-SR-HELD-REPEAT, deadline RETRO 290 (L46). If Saba reproduces it, it becomes a normal Medium: announce the final start on settle, rewrite SK13, LT21 unchanged / a held ArrowRight on one clip writes a new nudge text on every key repeat (function form, new start each step), so the aria-live span is re-
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

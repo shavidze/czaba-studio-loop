@@ -20,3 +20,11 @@ Root measures these in Ableton Live 12 on Saba's computer when it is online, and
 7. Trim the left edge of the off-grid clip with a drag. Does the edge land on a bar line?
 
 **What to write:** the Live version, OS, grid setting, and the start after each step; one screenshot per step where possible. Keep confirmed observations separate from inferences.
+
+## LIVE-MEAS-SYS5-DISABLED (B, 2026-10-30, round 275 → 276 planning; SYS-5 / DUX-R-4(b)) — non-blocking
+Why: the Live 12 manual chapter "Accessibility and Keyboard Navigation" (§41.1.1, §41.4.1.1) describes Tab navigation but says nothing about unavailable controls. CZABA round 276 keeps unavailable toolbar buttons focusable (`aria-disabled`, Saba-approved DUX-R-4(b)); this measurement only records how Live does it, for the conformance column. It does not block the round.
+Setup: Live 12, Settings → Display & Input → "Use Tab Key to Navigate" On; a screen reader on (NVDA or Narrator on Windows) if available.
+1. New empty Set, Arrangement View. Nothing to undo. Press Tab repeatedly through the Control Bar. Read: is there any stop whose command is unavailable (e.g. an arrangement Loop switch with no loop, or any greyed control)? Is it skipped or focused?
+2. If a greyed control is focused, what does the screen reader say (name, "unavailable"/"dimmed", any reason)?
+3. Open the Edit menu with nothing to undo. Read: is Undo greyed? With the keyboard (arrow keys) does the menu highlight stop on it?
+Write the result to `reference/ableton-live-measurements-<date>.md` with the Live version.
