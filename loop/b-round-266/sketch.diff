@@ -1,0 +1,101 @@
+--- /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx	2026-10-30 09:32:24.395645789 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-10-30 10:36:00.177866843 +0000
+@@ -2267,6 +2267,7 @@
+       }
+       const current = workspaceRef.current;
+       const modifier = event.ctrlKey || event.metaKey;
++      const commandChord = modifier && !event.altKey && !event.getModifierState('AltGraph');
+       const key = shortcutLetter(event);
+       const onOverview = isOverviewTarget(event.target);
+       if (event.key === ' ' && (!isRoleSliderTarget(event.target) || onOverview)) {
+@@ -2320,7 +2321,7 @@
+       }
+       if (
+         current.isPointerGestureActive() &&
+-        ((modifier &&
++        ((commandChord &&
+           (key === 'e' ||
+             key === 'l' ||
+             key === 'd' ||
+@@ -2341,14 +2342,14 @@
+         current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);
+         return;
+       }
+-      if (modifier && key === 'e') {
++      if (commandChord && key === 'e') {
+         event.preventDefault();
+         if (!event.repeat) {
+           current.splitSelection();
+         }
+         return;
+       }
+-      if (modifier && key === 'z') {
++      if (commandChord && key === 'z') {
+         event.preventDefault();
+         if (event.shiftKey) {
+           current.redo();
+@@ -2357,12 +2358,12 @@
+         }
+         return;
+       }
+-      if (modifier && key === 'y') {
++      if (commandChord && key === 'y') {
+         event.preventDefault();
+         current.redo();
+         return;
+       }
+-      if (modifier && key === 'l') {
++      if (commandChord && key === 'l') {
+         event.preventDefault();
+         if (!event.repeat) {
+           if (event.shiftKey) {
+@@ -2373,19 +2374,19 @@
+         }
+         return;
+       }
+-      if (modifier && key === 'a') {
++      if (commandChord && key === 'a') {
+         event.preventDefault();
+         current.selectAllClips();
+         return;
+       }
+-      if (modifier && key === 'd') {
++      if (commandChord && key === 'd') {
+         event.preventDefault();
+         if (!event.repeat) {
+           current.duplicateSelection();
+         }
+         return;
+       }
+-      if (modifier && key === 'c' && !event.shiftKey) {
++      if (commandChord && key === 'c' && !event.shiftKey) {
+         if (window.getSelection()?.isCollapsed === false) {
+           return;
+         }
+@@ -2395,7 +2396,7 @@
+         }
+         return;
+       }
+-      if (modifier && key === 'x') {
++      if (commandChord && key === 'x') {
+         event.preventDefault();
+         if (!event.repeat) {
+           if (event.shiftKey) {
+@@ -2406,7 +2407,7 @@
+         }
+         return;
+       }
+-      if (modifier && key === 'v' && !event.shiftKey) {
++      if (commandChord && key === 'v' && !event.shiftKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+           current.pasteClipboard();
+@@ -2445,7 +2446,7 @@
+         });
+         return;
+       }
+-      if (modifier && key === 'g' && !event.altKey) {
++      if (commandChord && key === 'g' && !event.altKey) {
+         event.preventDefault();
+         if (!event.repeat) {
+           if (event.shiftKey) {

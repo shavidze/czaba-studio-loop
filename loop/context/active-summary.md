@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T09:06:38.124Z)
+# Active loop summary (2026-10-30T10:31:16.945Z)
 
-- backlog.json 2515 KB -> active view 355 KB
-- status: G_ROOT_GATE round 265
-- servers: `{"checkedUtc":"2026-10-30T08:47:30.8719229Z","round":265,"attempt":1,"store":200}`
-- last publication: 2ea196e20e6c3b9099db519f807eaa4a1d95a48a (rounds 264-264)
-- last root gate: round 265 skipped - C taskStatus FAIL
+- backlog.json 2525 KB -> active view 357 KB
+- status: G_ROOT_GATE round 266
+- servers: `{"checkedUtc":"2026-10-30T09:52:26.9218197Z","round":266,"attempt":1,"store":200}`
+- last publication: 7ba7cd297accd7c1fadda76f95f54342a93205ef (rounds 265-266)
+- last root gate: round 266 published - commit 7ba7cd297accd7c1fadda76f95f54342a93205ef pushed
 
 ## Current items: -
 
@@ -651,6 +651,8 @@
 - SABA-Q-11C-MARQUEE / info / awaiting_user / Saba question, SABA-B-11c stage 1 deviation D1: a plain drag on the empty background now makes a time selection (Live 6.9); the clip marquee
 - SABA-Q-11C-MULTILANE / info / awaiting_user / Saba question, SABA-B-11c stage 1 deviation D2: a background drag that moves vertically keeps the time selection on the lane where it starte
 - GATE264-S2 / medium / open (D-29z558): next bug round after round 265 (REGRESSION first if due on/after 2026-11-02); cloud contract half only, real Windows AltGr stays with Saba / AltGr (ctrlKey+altKey, getModifierState('AltGraph') true) reaches the Ctrl-letter branches of the Studio keydown handler: AltGr+Z (Polish z-
+- C-R265-01 / medium / scheduled round 266 (D-29z559, D-29z560: default D3 split every clip on the lane at the edges inside it; SABA-Q-11C-SPLIT-SPAN) / Ctrl+E on a time selection that crosses a clip edge (now produced by the unclamped in-clip drag and the background drag) refuses with 'Could
+- C-R265-02 / low / scheduled round 266 with C-R265-01 (D-29z561; owned code, cheap; same root as B-R264-RANGE-HOW-COPY) / rangeMissingReason (export) and needsSelection (Ctrl+L) name only 'clip or ruler' / 'waveform' as the place to make a time selection; a back
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

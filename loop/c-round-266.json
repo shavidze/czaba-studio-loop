@@ -1,0 +1,85 @@
+{
+ "round": 266,
+ "role": "C",
+ "date": "2026-10-30",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T09:52:26.9218197Z",
+  "round": 266,
+  "attempt": 1,
+  "store": 200
+ },
+ "baseline": "HEAD 2ea196e20e6c3b9099db519f807eaa4a1d95a48a + A's uncommitted round-265/266 diff (16 entries)",
+ "bugs": [
+  {
+   "id": "C-R266-01",
+   "severity": "low",
+   "owner": "B (planning claim)",
+   "steps": [
+    "From store/: grep -rn 'data-testid=\"arrangement-video-dropzone\"' app/components --include=*.tsx | cut -d: -f1,2 (task §7 K11, first command, verbatim)"
+   ],
+   "expected": "app/components/arrangement/ArrangementLane.tsx:897",
+   "actual": "No output. The attribute is a JSX expression, data-testid={isVideo ? 'arrangement-video-dropzone' : undefined}, at ArrangementLane.tsx:897 (also l.883 at HEAD), so the literal pattern cannot match. The fact itself is true: grep -rn 'arrangement-video-dropzone' finds l.897, and the selector resolves to exactly 1 element at both viewports in the browser (VIDEO-BG, K13 F). The second K11 command gives 708 as claimed.",
+   "evidence": "c-round-266/claims.txt (K11 block), c-round-266/c266-browser.json VIDEO_count=1"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "TESTS-TARGETED",
+  "REWRITES",
+  "MUTANTS",
+  "SPLIT-PAST-START",
+  "SPLIT-BG-INTO-CLIP",
+  "SPLIT-GAP-2",
+  "SPLIT-NO-EDGE",
+  "SPLIT-MARKER",
+  "SPLIT-ALL-TRACKS",
+  "FOCUS-SPLIT",
+  "VIDEO-BG",
+  "COPY",
+  "CARRIED",
+  "LESSONS",
+  "DOC-198",
+  "G266-AUTH"
+ ],
+ "partial": {
+  "CLAIMS": "K1-K10, K12-K16 and the L29 untagged-fact grep reproduce (K9 at HEAD via git grep equals B's list; K13 equals probe-split-sketch.json 46/46 keys; K14 equals B's values with the new loopNoRange text, statusFits true). K11's first command is defective (C-R266-01, Low, B); its fact is verified another way. Not counted as passed."
+ },
+ "extra": {
+  "AUDIO-INTEGRITY": "1440x900: 4 project WAV exports (24-bit/48 kHz/stereo, 111.352 s each). After SPLIT-PAST-START the file is byte-identical to the baseline; after SPLIT-GAP-2 maxDiff 0 on 10-12.5 s, 20-30 s and both cut windows, and digital silence 12.6-19.9 s (the gap); after the marker split maxDiff 0 over the whole file. No click, no offset shift at any cut."
+ },
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome (full)",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "notInScope": [
+  "relative snap (stage 2)",
+  "multi-lane partial ranges (D2)",
+  "Live-style Shift-click extension",
+  "Split on an all-tracks range",
+  "details-panel clamp (B-R265-DETAIL-RANGE-CLAMP)"
+ ],
+ "ableton": {
+  "SPLIT-MARKER / split in one clip": "confirmed ([AV] 6.12)",
+  "D3 rows (SPLIT-PAST-START, SPLIT-BG-INTO-CLIP, SPLIT-GAP-2, SPLIT-NO-EDGE)": "unconfirmed: default D3 awaiting Saba (SABA-Q-11C-SPLIT-SPAN)",
+  "SPLIT-ALL-TRACKS refusal": "unconfirmed; Saba question",
+  "COPY": "not applicable"
+ },
+ "notesForB": [
+  "B-R266-1 (A): splitRangeDone/splitRangeTitle say 'both edges' on a one-edge cut (SPLIT-PAST-START, SPLIT-BG-INTO-CLIP show it in the browser). Pre-existing at HEAD (c-round-265/nb-head.json pastStartSplit). Task pins the text; open Low copy signal.",
+  "splitRangeClipsDone says 'Clips split' when one selected part is a whole uncut clip (MS6).",
+  "A's deviation: targets sorted by start (timeline order) vs B's sketch array order; no browser row depends on it; B to rule (L10).",
+  "G266-AUTH fake Bearer returns 500 'Unable to prepare Studio access' (no token), same as round 265; not a bypass.",
+  "The browser 'selected' reader found no aria-selected/data-selected on clips; selection was proven by Delete results and the '2 clips selected' readout.",
+  "CLAIMS row is partial, not passed: K11's first command does not reproduce (C-R266-01). L29 calls a claim mismatch a planning FAIL; C keeps taskStatus PASS because the claimed fact (ArrangementLane.tsx:897, selector resolves to 1 element at both viewports) is verified by other means, the defect is in B's grep pattern only, and no prior C round (searched c-round-245..265) set taskStatus FAIL for this class (c-round-261 N1 treated a claim-sweep gap as a note under PASS). B/root may overrule.",
+  "REWRITES: A added MS6, MS7 and a laneRanges('music') empty assert in BS1/BS4 beyond the §2.6 list; inside the granted describe block / add-only UI file, no assertion removed; accepted.",
+  "CARRIED IN-CLIP-SAME smoke re-read the range and 0 [data-range-start]; the in-clip label was not re-read (carried from round 265)."
+ ]
+}

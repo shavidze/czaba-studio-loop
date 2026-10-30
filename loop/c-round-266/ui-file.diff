@@ -1,0 +1,104 @@
+480a481,583
+> 
+> const ONE_MUSIC_CLIP = [clipAt('m1', 'music', 10, 10)];
+> 
+> const SPLIT_PAST_START_PARTS = [
+>   { id: 'm1', trackId: 'music', sourceId: 'song', start: 10, sourceOffset: 0, duration: 2.5 },
+>   {
+>     id: expect.any(String),
+>     trackId: 'music',
+>     sourceId: 'song',
+>     start: 12.5,
+>     sourceOffset: 2.5,
+>     duration: 7.5,
+>   },
+> ];
+> 
+> function dragPastClipStart(mounted: BackgroundMount) {
+>   const from = xFor(2.5);
+>   dragClipBody(mounted, 'm1', from, [from - xFor(6.25)]);
+>   expect(live(mounted.api).range).toEqual({ start: 6.25, end: 12.5, trackId: 'music' });
+> }
+> 
+> function pressSplitKey() {
+>   pressKey({ key: 'e', code: 'KeyE', ctrlKey: true });
+> }
+> 
+> function clipSpans(api: BackgroundApiRef) {
+>   return live(api).arrangement.clips.map(({ id, start, sourceOffset, duration }) => ({
+>     id,
+>     start,
+>     sourceOffset,
+>     duration,
+>   }));
+> }
+> 
+> function expectSplitPastStart(mounted: BackgroundMount) {
+>   const { api } = mounted;
+>   expect(live(api).arrangement.clips).toEqual(SPLIT_PAST_START_PARTS);
+>   expect(statusText(mounted)).toBe(studioEditStrings.splitRangeDone);
+>   expect(live(api).selectedClipIds).toEqual(['m1']);
+>   expect(live(api).range).toBeNull();
+>   expect(mounted.view.queryByTestId('arrangement-range')).toBeNull();
+>   expect(mounted.laneRanges('music')).toHaveLength(0);
+>   expect(live(api).undoLabel).toBe(studioEditStrings.historySplitRange);
+>   pressKey({ key: 'z', code: 'KeyZ', ctrlKey: true });
+>   expect(live(api).arrangement.clips).toEqual(ONE_MUSIC_CLIP);
+>   expect(live(api).undoLabel).toBeNull();
+> }
+> 
+> describe('SABA-B-11c stage 1 split at a time selection that crosses a clip edge (C-R265-01)', () => {
+>   it('BS1 an in-clip drag past the clip start, then Ctrl+E, cuts only at the edge inside the clip', async () => {
+>     const mounted = await mountBackgroundWorkspace(ONE_MUSIC_CLIP);
+>     dragPastClipStart(mounted);
+>     pressSplitKey();
+>     expectSplitPastStart(mounted);
+>   });
+> 
+>   it('BS2 a drag from clip A across the gap into clip B, then Ctrl+E, cuts both and selects both inside parts', async () => {
+>     const mounted = await mountBackgroundWorkspace(TWO_MUSIC_CLIPS);
+>     const { api } = mounted;
+>     const from = xFor(5);
+>     dragClipBody(mounted, 'm1', from, [from + xFor(12)]);
+>     expect(live(api).range).toEqual({ start: 15, end: 27, trackId: 'music' });
+>     pressSplitKey();
+>     expect(clipSpans(api)).toEqual([
+>       { id: 'm1', start: 10, sourceOffset: 0, duration: 5 },
+>       { id: expect.any(String), start: 15, sourceOffset: 5, duration: 5 },
+>       { id: 'm2', start: 25, sourceOffset: 0, duration: 2 },
+>       { id: expect.any(String), start: 27, sourceOffset: 2, duration: 3 },
+>     ]);
+>     const insideA = live(api).arrangement.clips[1]?.id;
+>     expect(insideA).not.toBe('m1');
+>     expect(live(api).selectedClipIds).toEqual([insideA, 'm2']);
+>     expect(statusText(mounted)).toBe(studioEditStrings.splitRangeClipsDone(2));
+>     expect(statusText(mounted)).toBe(
+>       'Clips split at the edges of the time selection; the 2 parts inside it are selected.',
+>     );
+>     expect(live(api).range).toBeNull();
+>     expect(live(api).undoLabel).toBe(studioEditStrings.historySplitRange);
+>     pressKey({ key: 'z', code: 'KeyZ', ctrlKey: true });
+>     expect(live(api).arrangement.clips).toEqual(TWO_MUSIC_CLIPS);
+>     expect(live(api).undoLabel).toBeNull();
+>   });
+> 
+>   it('BS3 a range over empty space only, then Ctrl+E, is refused and changes nothing', async () => {
+>     const mounted = await mountBackgroundWorkspace(TWO_MUSIC_CLIPS);
+>     const { api } = mounted;
+>     dragBackground(mounted, xFor(1), [xFor(7.5)]);
+>     const before = live(api).arrangement;
+>     pressSplitKey();
+>     expect(statusText(mounted)).toBe(studioEditStrings.splitRangeFailed);
+>     expect(live(api).arrangement).toBe(before);
+>     expect(live(api).range).toEqual({ start: 1, end: 7.5, trackId: 'music' });
+>     expectOnlyMusicOverlay(mounted, '1.000', '7.500');
+>     expect(live(api).undoLabel).toBeNull();
+>   });
+> 
+>   it('BS4 the Split toolbar button on the BS1 range gives the same result as Ctrl+E', async () => {
+>     const mounted = await mountBackgroundWorkspace(ONE_MUSIC_CLIP);
+>     dragPastClipStart(mounted);
+>     fireEvent.click(mounted.view.getByRole('button', { name: 'Split' }));
+>     expectSplitPastStart(mounted);
+>   });
+> });

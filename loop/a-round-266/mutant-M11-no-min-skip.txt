@@ -1,0 +1,82 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a266-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/model.test.ts [2m([22m[2m45 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 44[2mms[22m[39m
+     [32m✓[39m requires exactly one video track[32m 3[2mms[22m[39m
+     [32m✓[39m places a clip at the requested free spot[32m 1[2mms[22m[39m
+     [32m✓[39m falls back to the nearest free start when the spot is taken[32m 0[2mms[22m[39m
+     [32m✓[39m refuses the video track[32m 0[2mms[22m[39m
+     [32m✓[39m findFreeStart never caps at 60 seconds[32m 0[2mms[22m[39m
+     [32m✓[39m moves the start and keeps sourceOffset[32m 1[2mms[22m[39m
+     [32m✓[39m is blocked by a neighbour on the same track[32m 0[2mms[22m[39m
+     [32m✓[39m ignores clips on other tracks[32m 0[2mms[22m[39m
+     [32m✓[39m adjusts sourceOffset and keeps the end fixed[32m 1[2mms[22m[39m
+     [32m✓[39m stops at the source start[32m 0[2mms[22m[39m
+     [32m✓[39m stops at the previous neighbour and keeps the minimum length[32m 0[2mms[22m[39m
+     [32m✓[39m stops at the source end[32m 0[2mms[22m[39m
+     [32m✓[39m stops at the next neighbour[32m 0[2mms[22m[39m
+     [32m✓[39m returns the same arrangement when nothing can change[32m 0[2mms[22m[39m
+     [32m✓[39m splits with the right part offset into the source[32m 1[2mms[22m[39m
+     [32m✓[39m refuses a split outside the clip[32m 0[2mms[22m[39m
+     [32m✓[39m produces three parts with the middle one returned[32m 1[2mms[22m[39m
+     [32m✓[39m MS1: a range past the clip start cuts only at the edge inside the clip[32m 10[2mms[22m[39m
+     [32m✓[39m MS2: a range across a gap cuts both clips and returns both inside parts in clip order[32m 1[2mms[22m[39m
+     [32m✓[39m MS3: empty space only, or a whole clip inside the range, is refused[32m 1[2mms[22m[39m
+     [32m✓[39m MS4: an edge closer than the minimum to a clip edge is not cut; the other edge is[32m 1[2mms[22m[39m
+     [32m✓[39m MS5: clips on another track in the same time window are untouched[32m 1[2mms[22m[39m
+     [32m✓[39m MS6: a whole clip inside the range next to a cut clip is selected uncut[32m 1[2mms[22m[39m
+[31m     [31m×[31m MS7: a neighbour overlapping the range by less than the minimum, or only touching it, is skipped[39m[32m 10[2mms[22m[39m
+     [32m✓[39m removes only the clip and leaves the gap[32m 0[2mms[22m[39m
+     [32m✓[39m keeps clips that end before a[32m 0[2mms[22m[39m
+     [32m✓[39m shifts clips after b by -(b - a)[32m 0[2mms[22m[39m
+     [32m✓[39m trims a clip straddling the left edge[32m 0[2mms[22m[39m
+     [32m✓[39m moves the right part of a clip straddling the right edge to a[32m 0[2mms[22m[39m
+     [32m✓[39m removes clips fully inside the range[32m 0[2mms[22m[39m
+     [32m✓[39m splits a clip spanning both edges, including the video track[32m 0[2mms[22m[39m
+     [32m✓[39m drops parts shorter than a millisecond[32m 0[2mms[22m[39m
+     [32m✓[39m maps positions around a deleted range[32m 0[2mms[22m[39m
+     [32m✓[39m is 0 when empty and grows beyond 60 seconds[32m 0[2mms[22m[39m
+     [32m✓[39m toggleSolo is exclusive on a plain click and additive with modifier[32m 1[2mms[22m[39m
+     [32m✓[39m setTrackMix clamps volume and keeps mute[32m 0[2mms[22m[39m
+     [32m✓[39m undo and redo restore exact snapshots[32m 1[2mms[22m[39m
+     [32m✓[39m ignores a commit equal to the current snapshot[32m 0[2mms[22m[39m
+     [32m✓[39m records one entry for a drag preview with an explicit before snapshot[32m 0[2mms[22m[39m
+     [32m✓[39m createArrangement starts without a loop[32m 0[2mms[22m[39m
+     [32m✓[39m undo and redo restore the loop exactly (create, replace, toggle)[32m 1[2mms[22m[39m
+     [32m✓[39m clears redo after a new commit[32m 0[2mms[22m[39m
+     [32m✓[39m appends sequentially on the single video track with offset 0[32m 1[2mms[22m[39m
+     [32m✓[39m rejects a non-finite or empty duration[32m 0[2mms[22m[39m
+     [32m✓[39m trimClipEnd on a video clip stops at the probed duration[32m 0[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[33m 2716[2mms[22m[39m
+     [33m[2m✓[22m[39m BT1 a plain background drag makes a free lane range, clears the selection and activates the lane [33m 385[2mms[22m[39m
+     [33m[2m✓[22m[39m BS4 the Split toolbar button on the BS1 range gives the same result as Ctrl+E [33m 372[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/model.test.ts[2m > [22msplitClipsByRange[2m > [22mMS7: a neighbour overlapping the range by less than the minimum, or only touching it, is skipped
+[31m[1mAssertionError[22m: expected [ …(2) ] to have a length of 1 but got 2[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/model.test.ts:[2m365:27[22m[39m
+    [90m363| [39m      [[32m'music'[39m[33m,[39m [32m'srcT'[39m[33m,[39m [34m15[39m[33m,[39m [34m0[39m[33m,[39m [34m5[39m][33m,[39m
+    [90m364| [39m    ])[33m;[39m
+    [90m365| [39m    [34mexpect[39m(cut[33m.[39mmiddleIds)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m366| [39m    [34mexpect[39m(cut[33m.[39mmiddleIds)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'b'[39m)[33m;[39m
+    [90m367| [39m    [35mconst[39m touching [33m=[39m [34msplitClipsByRange[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m64 passed[39m[22m[90m (65)[39m
+[2m   Start at [22m 09:47:50
+[2m   Duration [22m 5.13s[2m (transform 1.37s, setup 0ms, import 2.02s, tests 2.76s, environment 1.14s)[22m
+
+
+::error file=/tmp/a266-scratch/app/lib/arrangement/__tests__/model.test.ts,title=app/lib/arrangement/__tests__/model.test.ts > splitClipsByRange > MS7%3A a neighbour overlapping the range by less than the minimum%2C or only touching it%2C is skipped,line=365,column=27::AssertionError: expected [ …(2) ] to have a length of 1 but got 2%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/model.test.ts:365:27%0A%0A

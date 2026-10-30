@@ -1,0 +1,57 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a266-scratch[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/model.test.ts [2m([22m[2m45 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2708[2mms[22m[39m
+     [33m[2m✓[22m[39m BT1 a plain background drag makes a free lane range, clears the selection and activates the lane [33m 379[2mms[22m[39m
+     [32m✓[39m BT1 a Shift drag also makes a range, and a drag to the left gives the same ordered range[32m 124[2mms[22m[39m
+     [32m✓[39m BT1 a background drag replaces an all-tracks range, clears the selection once and pointercancel keeps the last range[32m 139[2mms[22m[39m
+     [32m✓[39m BT2 Snap on 1 s snaps the ends; Alt keeps them free; both ends on one line is no range[32m 136[2mms[22m[39m
+     [32m✓[39m BT2 Snap on also snaps a background range end to a marker[32m 101[2mms[22m[39m
+     [32m✓[39m BT3 a drag from the background across a clip and a gap into a second clip spans both; Delete leaves the gap[32m 111[2mms[22m[39m
+     [32m✓[39m BT3 a range over empty space only, then Delete, changes nothing[32m 91[2mms[22m[39m
+     [32m✓[39m BT4 ctrlKey+drag is the marquee: it adds to the earlier selection and clears the range[32m 110[2mms[22m[39m
+     [32m✓[39m BT4 metaKey+drag is the marquee: it adds to the earlier selection and clears the range[32m 116[2mms[22m[39m
+     [32m✓[39m BT5 a click under the threshold sets the insert marker and makes no range[32m 84[2mms[22m[39m
+     [32m✓[39m BT6 an in-clip drag continues past the clip start and end, bounded by 0 and the lane extent[32m 168[2mms[22m[39m
+     [32m✓[39m BT6 a background drag is bounded by 0 and the lane extent[32m 89[2mms[22m[39m
+     [32m✓[39m BT7 a range inside one clip keeps the in-clip overlay and renders no lane overlay[32m 88[2mms[22m[39m
+     [32m✓[39m BT8 a background drag while playing neither stops nor moves playback[32m 105[2mms[22m[39m
+     [32m✓[39m BT9 a vertical-only drag makes no zero-length range, and a drag back to its start removes the range[32m 91[2mms[22m[39m
+     [32m✓[39m BT9 a drag that ends over another lane keeps the range on the origin lane[32m 88[2mms[22m[39m
+     [32m✓[39m BS1 an in-clip drag past the clip start, then Ctrl+E, cuts only at the edge inside the clip[32m 111[2mms[22m[39m
+[31m     [31m×[31m BS2 a drag from clip A across the gap into clip B, then Ctrl+E, cuts both and selects both inside parts[39m[32m 109[2mms[22m[39m
+     [32m✓[39m BS3 a range over empty space only, then Ctrl+E, is refused and changes nothing[32m 84[2mms[22m[39m
+     [33m[2m✓[22m[39m BS4 the Split toolbar button on the BS1 range gives the same result as Ctrl+E [33m 384[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m64 passed[39m[22m[90m (65)[39m
+[2m   Start at [22m 09:48:26
+[2m   Duration [22m 5.17s[2m (transform 1.41s, setup 0ms, import 2.08s, tests 2.74s, environment 1.15s)[22m
+
+
+::error file=/tmp/a266-scratch/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx,title=app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx > SABA-B-11c stage 1 split at a time selection that crosses a clip edge (C-R265-01) > BS2 a drag from clip A across the gap into clip B%2C then Ctrl+E%2C cuts both and selects both inside parts,line=552,column=39::AssertionError: expected [ Array(1) ] to deeply equal [ …(2) ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "b02a57ab-81a9-441a-aad4-47d36f520ec4",%0A-   "m2",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx:552:39%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx[2m > [22mSABA-B-11c stage 1 split at a time selection that crosses a clip edge (C-R265-01)[2m > [22mBS2 a drag from clip A across the gap into clip B, then Ctrl+E, cuts both and selects both inside parts
+[31m[1mAssertionError[22m: expected [ Array(1) ] to deeply equal [ …(2) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "b02a57ab-81a9-441a-aad4-47d36f520ec4",[22m
+[32m-   "m2",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx:[2m552:39[22m[39m
+    [90m550| [39m    [35mconst[39m insideA [33m=[39m [34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[[34m1[39m][33m?.[39mid[33m;[39m
+    [90m551| [39m    [34mexpect[39m(insideA)[33m.[39mnot[33m.[39m[34mtoBe[39m([32m'm1'[39m)[33m;[39m
+    [90m552| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mselectedClipIds)[33m.[39m[34mtoEqual[39m([insideA[33m,[39m [32m'm2'[39m])[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m553| [39m    expect(statusText(mounted)).toBe(studioEditStrings.splitRangeClips…
+    [90m554| [39m    [34mexpect[39m([34mstatusText[39m(mounted))[33m.[39m[34mtoBe[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

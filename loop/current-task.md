@@ -1,275 +1,264 @@
-# Round 266: fix-up of SABA-B-11c stage 1. Ctrl+E on a time selection that crosses a clip edge (C-R265-01, Medium) + the "how to make a time selection" copy (C-R265-02, Low)
+# Round 267: GATE264-S2. Ctrl/Cmd+letter shortcuts must not fire while Alt or AltGr is held (Medium)
 
-**Planned by:** B, at the round 265 → 266 planning, 2026-10-30. **Decisions:** D-29z559 (round-265 result), D-29z560 (split rule + Saba question), D-29z561 (copy), D-29z562 (rulings on A's notes), D-29z563 (grants, freeze, doc 198), D-29z564 (outcome table), D-29z565 (signals, checkpoint addendum, RETRO candidate).
-- **Read first:** `lessons.md` in full. These apply directly:
-  - L10 (B rules on every open note, §2.4);
-  - L11 (STOP);
-  - L12 (no class selectors);
-  - L23 (the collisions below come from B's scratch run of the whole sketch);
-  - L28 (doc 198 l.4);
-  - L29 (claims, §7);
-  - L47/L50 (focus, §2.5);
-  - L51 (status writes, §2.2).
-- **Previous task:** `tasks/round-265.md` (an exact copy of the round-265 `current-task.md`). C's result: `c-round-265.json` = **FAIL**. Every §4 row passed (20 rows, `browserVerified` true), but one Medium regression the round caused in a §3 neighbour: C-R265-01. Gate: `gates/gate-round-265.json` = `skipped` ("C taskStatus FAIL"). B's reasoning: `b-round-265.md`.
-- **What this round is:** a bounded fix-up of the same feature stage. It is not a redo. A's round-265 work stays in the working tree, frozen byte for byte, and C's 20 passing rows are carried (§4).
+**Planned by:** B, at the round 266 → 267 planning, 2026-10-30.
 
-## Baseline: HEAD `2ea196e` + A's uncommitted round-265 diff
-- The gate skipped round 265, so HEAD is still `2ea196e…` (gate 264's published commit) [K1].
-- The working tree holds A's round-265 diff: 9 ` M` files and 2 `??` files (`b-round-265/git-status-at-planning.txt`) [K1]. `git diff` of the 3 component sources is byte-identical to C's evidence `c-round-265/source.diff` [K2].
-- **Frozen:** every tracked file plus the 2 untracked files, except the 7 grants: **1,118** entries in `b-round-265-r266-tree-sha256.txt`, hashed on the working tree. That includes A's round-265 files at their round-265 content (`StudioWorkspace.tsx`, `ArrangementClip.tsx`, `ArrangementLane.tsx`, `shortcuts.ts` and the 5 rewritten tests). From `store/`, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-265-r266-tree-sha256.txt` returns rc 0 at planning. Each of the 7 protected auth and purchase files appears in it exactly once [K3].
-- **Grant (edit):** `b-round-265-r266-grants.txt`, 7 files [K3]:
-  - `app/lib/arrangement/model.ts` (only `splitClipsByRange`); [K3]
-  - `app/lib/arrangement/__tests__/model.test.ts` (the `splitClipsByRange` describe block); [K3]
-  - `app/contexts/ArrangementContext.tsx` (only the range branch of `splitSelection`); [K3]
-  - `app/lib/arrangement/strings.ts` (only `rangeMissingReason`, `needsSelection` and the new `splitRangeClipsDone`); [K3]
-  - `app/lib/arrangement/__tests__/strings.test.ts` (only ST1, ST8, ST10 and the formatter rows for the new key, §2.6); [K3]
-  - `app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx` (A's round-265 file; new rows only, its BT1–BT9 rows unchanged); [K3]
-  - `docs/implementation/2026/quarter-IV/198-saba-b-11c-background-time-selection.md` (l.4 and the sections that describe Split, §2.7). [K3]
-- **No new files.** Implementation doc 198 is reused (L28: a re-dispatch rewrites its l.4).
-- **Not granted:** everything else. That includes the 4 round-265 sources, the 5 round-265 rewritten tests, `ArrangementContext.test.ts`, `delete-selection-ui.test.tsx`, `perf/**`, `e2e/**`, `package.json`, `.claude/**`, `CLAUDE.md` and the 7 protected files. [K3]
+**Decisions:**
+- D-29z566: the round-266 result and its closures;
+- D-29z567: gate-266 triage;
+- D-29z568: this round's rule and the outcome table;
+- D-29z569: rulings on A's and C's notes;
+- D-29z570: signals, the checkpoint addendum and the RETRO candidates.
+
+**Read first:** `lessons.md` in full. These apply directly:
+- L11 (STOP);
+- L12 (no class selectors);
+- L23 (B's scratch pre-check, §3);
+- L26 and L28 (doc 199);
+- L29 (claims, §7);
+- L31 (timeouts);
+- L47 and L50 (focus, §2.5);
+- L51 (status writes, §2.5).
+
+**Previous task:** `tasks/round-266.md`.
+- C's result: `c-round-266.json` = **PASS**, with `browserVerified` true and `realVerified` true.
+- Gate 266 published rounds 265–266 as `7ba7cd2`.
+
+**What this round is:** a single Medium bug fix in one handler.
+- The bug is pre-existing, not a regression.
+- D-29z564 fixed it in advance as the next bug round.
+- REGRESSION is not due yet: `regression-last.json` says the next one is on or after 2026-11-02.
+
+## Baseline: published HEAD `7ba7cd2`
+- HEAD is `7ba7cd297accd7c1fadda76f95f54342a93205ef`, gate 266's published commit. The working tree is clean [K1].
+- **Grant (edit):** `b-round-266-r267-grants.txt`, 3 files:
+  - `app/components/arrangement/StudioWorkspace.tsx`: only the `handleKeyDown` function in the keydown `useEffect` (it starts at `const handleKeyDown` [K12]), and only the changes in §2.1.
+  - `app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx`: **add-only.** Append one new `describe` block. The existing 318 lines stay byte-identical, with one allowed exception: you may add names to existing import lines, for example `GESTURE_EDIT_BLOCKED_MESSAGE` [K10].
+  - **New file** `docs/implementation/2026/quarter-IV/199-gate264-s2-altgr-shortcuts.md`. 199 is the next free number [K13].
+- **Not granted:** everything else, including:
+  - `shortcuts.ts` and its sheet. No sheet row changes: the sheet lists no Ctrl+Alt+letter except O [K11].
+  - `view.ts` and `ArrangementContext.tsx`.
+  - Every other test.
+  - `perf/**`, `e2e/**`, `package.json`, `.claude/**` and `CLAUDE.md`.
+  - The protected auth and purchase files and the rest of `global_forbidden_files` in `backlog.json`. Examples: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/__tests__/download-routes.test.ts`, `app/lib/auth*`, `app/contexts/AuthContext.tsx`.
+- **Scope check:** `git status --porcelain` lists only the 3 grant paths: ` M` on the two code files and `??` on the doc.
 
 ## 0. Why this round
-- **The bug gate.** C-R265-01 is a Medium regression caused by round 265: the same gesture + Ctrl+E split the clip at HEAD and refuses after the removed clamp (`c-round-265/nb-head.json` vs `split2-after.json`). The policy fixes such regressions before the feature counts as done. The pre-fixed outcome (`tasks/round-265.md` §5, "A Medium+ finding in a §4 row → a fix-up, ≤ 3 related bugs") applies. Under C's verdict, the finding sits in a §3 neighbour, not a §4 row; the fix-up rule is the same.
-- **Why the grants change.** The cause is in `splitClipsByRange` (`model.ts`), which round 265 did not grant. C called it a planning gap. B confirmed it: §3 of round 265 named "Ctrl+E split at a range … on a range that spans a gap" as at risk, but §4 had no row and B's scratch pre-check did not run that sequence (RETRO-275 candidate RC-R265-AT-RISK-NO-ROW, D-29z565).
-- **The bundle (≤ 3 related bugs):**
-  1. C-R265-01 (Medium);
-  2. C-R265-02 (Low). It is the same "where a time selection comes from" change, it lives in `strings.ts`, which this round must own anyway for the new split copy, and it costs two literals. The policy lets a Low be fixed early when the round owns the code and it is cheap. It also closes B-R264-RANGE-HOW-COPY (the same root cause, L7).
-- **Not in this round:** GATE264-S2 (AltGr, different root cause; next bug round). REGRESSION is due on or after 2026-11-02, so not yet.
+**The bug.** The gate-264 reviewer found it, and B reproduced it in cloud Chromium (`b-round-264/probe-altgr-edit.json`). At this planning B reproduced it again on `7ba7cd2` at both viewports, with 0 page errors (`b-round-266/probe-fix-head.json`). Each of these chords runs the plain Ctrl command and is `preventDefault`-ed:
+- AltGr+Z (`ż`, `KeyZ`, ctrl + alt + AltGraph) runs Undo.
+- AltGr+Shift+Z and AltGr+Y run Redo.
+- AltGr+E splits the selected clip.
+- AltGr+L reaches the loop handler.
+- AltGr+D duplicates the selection (2 clips → 4).
+- Without AltGr too: a real Playwright `Control+Alt+KeyZ` (no AltGraph) also undoes, and `Control+Alt+KeyE` reaches the split handler.
+
+**Who it hurts.** Polish, Czech or German users who type ż, ę, ł, ą or € outside a text field. On Windows AltGr layouts, Chromium reports AltGr as `ctrlKey && altKey`. The KeyO branch already guards AltGraph for this reason [K4].
+
+**The cause.**
+- The Ctrl-letter branches test only `modifier = event.ctrlKey || event.metaKey` [K6].
+- Ten of them never check `altKey` or AltGraph [K2]. Only G checks `!event.altKey`, and only KeyO checks AltGraph [K4].
 
 ## 1. Reference: how Ableton Live 12 does it (checked 2026-10-30)
-Sources:
-- **[AV]** Live 12 manual, Arrangement View, https://www.ableton.com/en/live-manual/12/arrangement-view/ §6.12 "Splitting Clips", fetched by B on 2026-10-30;
-- **[SC]** Live 12 manual, Live Keyboard Shortcuts, https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/ §42.16 and §42.12, read by the `ableton-arrangement-expert` consult from the saved capture `b-round-71/ableton-shortcuts-20261021.txt` (2026-10-30);
-- **[FORUM]** community forum posts found by B's WebSearch (forum.ableton.com threads "Splitting multiple tracks in arrangement view"). **Not a source** under the reference-first rule; listed only as a community report.
+Source: Live 12 Reference Manual, ch. 42 "Live Keyboard Shortcuts", https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/. Read with WebFetch on 2026-10-30, up to character 100000 of the page.
 
-No hands-on Live session was available.
-
-| Behaviour | Source | What the source says | CZABA, this round | C row |
+| Behaviour | Live source | Confirmed in Live | CZABA decision | C check |
 |---|---|---|---|---|
-| Split inside one clip at the insert marker | [AV] 6.12 (confirmed) | "Clicking within a clip and using Ctrl+E … divides the clip at that point." | Unchanged (marker path) | none (K22 of round 265 still holds) |
-| Split a time selection inside one clip | [AV] 6.12 (confirmed) | "isolate a specific portion within a clip by dragging over the desired area of the clip's waveform … then using the same shortcut … to separate out that selection into a new clip." [SC] 42.16: "Split Clip at Selection — Ctrl E / Cmd E" | Unchanged: cut at both edges, the middle part is selected | SPLIT-IN-CLIP |
-| Selection starts outside the clip and ends inside it | **unknown** (expert: "UNKNOWN"; its guess: split only at the edge inside the clip) | none | **Default D3:** cut at every selection edge that lies inside the clip | SPLIT-PAST-START, SPLIT-BG-INTO-CLIP |
-| Selection over a gap touching two clips | **unknown** ([FORUM] reports that Live cuts every covered clip) | none | **Default D3:** each clip on the lane is cut at the edges inside it; the parts inside the selection are selected | SPLIT-GAP-2 |
-| Selection covers a whole clip, both edges outside | **unknown** (expert's guess: the clip stays unchanged) | none | Default D3: no edge inside any clip → the existing refusal | SPLIT-NO-EDGE |
-| Selection over empty space only | **unknown** | none | The existing refusal | SPLIT-NO-EDGE |
-| Selection on all tracks | **unknown** ([AV] 6.14.2 confirms "Splitting" for **linked** tracks only) | none | Unchanged: refused (`splitAllTracksRefused`). Asked to Saba as a separate question, not built | none |
+| Undo / Redo | §42.5 Editing: Ctrl+Z / Cmd+Z; Ctrl+Y / Cmd+Shift+Z | no Alt in the chord | unchanged | POS-CTRL |
+| Split, loop, select, duplicate, clipboard, group | §42.16: Ctrl+E Split Clip at Selection, Ctrl+L Toggle Loop Brace; §42.5: Ctrl+A/D/C/X/V; §42.19: Ctrl+G Group Selected Tracks | no Alt in the chord | unchanged | POS-CTRL |
+| Ctrl+Alt+letter is a **different** command | §42.1: Ctrl+Alt+O Overview, +V Video Window, +B Browser, +M Mixer; §42.12: Ctrl+Alt+E Full-Size Clip View; §42.16: Ctrl+Alt+F Create Fade; §42.19: Ctrl+Alt+T Insert Return Track; §42.22: Ctrl+Alt+G Filter View | Ctrl+Alt+E is not Split and Ctrl+Alt+G is not Group: adding Alt never means the plain Ctrl command | Ctrl/Cmd+Alt+letter runs **no** Ctrl-letter command. CZABA implements only Ctrl+Alt+O (Overview, CALM-3), so every other such chord does nothing and is not prevented | ALT-CHORDS (ALTGR-UNDO, ALTGR-EDIT), CTRLALT-REAL, META-ALT-REAL; Ctrl+Alt+O in POS-CTRL |
+| AltGr (Windows AltGr layouts) | **No source found.** Searched the ch. 42 text for "AltGr" and "Alt Gr" | — | An AltGr character press is typing, not a shortcut: same rule as Ctrl+Alt | ALTGR-* rows; Ableton conformance "unconfirmed (no source)" |
 
-### Deviations and defaults (each one goes to Saba once, L44)
-- **D3, SABA-Q-11C-SPLIT-SPAN (D-29z560):** written to `user-review/questions-11c.md` §4. Until Saba answers, D3 is the implemented default. It is the smallest rule that (a) restores HEAD's result for the gesture C-R265-01 found and (b) agrees with how the model already treats a range that crosses clips: `deleteRangeKeepingGap` and `deleteTime` cut every clip at the range edges, and the multi-clip split at the insert marker selects every right part. Options (b) one clip only and (c) always refuse are listed for Saba.
-- **The all-tracks refusal** stays. Whether Split should cut every lane is a separate question in the same §4. It is a feature request, not this bug.
-
-### Why we missed it
-- Round 265 §3 listed "Ctrl+E split at a range … on a range that spans a gap" as at risk, but no §4 row exercised it.
-- B's scratch pre-check ran the test suite on the sketch. No unit or UI test pins Ctrl+E on a range that crosses a clip edge, because before round 265 the drag could not produce one. So the suite stayed green.
-- The rule that would have caught it: every command named in §3 as at risk gets one browser row with the changed gesture, run by B on the sketch at planning (RC-R265-AT-RISK-NO-ROW, a RETRO-275 candidate for L23).
+- **Deviations:** none from Live. CZABA does not add the Ctrl+Alt commands Live has and CZABA lacks (V, B, M, E, F, T, G and the rest); they are outside this round. This is not a ⚖ deviation, because we do not run a different command on those keys. We run none.
+- **Screen budget (L39):** nothing visible is added or changed, and no shortcut-sheet row changes.
 
 ## 2. A: what to do
-### 2.1 `splitClipsByRange` (`model.ts`), rule D3
-- **Today:** it picks the first clip on `range.trackId` that fully contains the range, and returns `null` when there is none [K4].
-- **New:**
-  - **Targets:** every clip on `range.trackId` that overlaps the open range: `clip.start < range.end − ε` and `clipEnd(clip) > range.start + ε` (ε = `ARRANGEMENT_EPS`, as today).
-  - **Per clip:**
-    - `a = max(range.start, clip.start)` and `b = min(range.end, clipEnd(clip))`;
-    - skip it when `b − a < MIN_CLIP_DURATION` (as today);
-    - cut at `a`, then at `b`, with the existing `splitClipAt`, which already refuses a cut closer than `MIN_CLIP_DURATION` to an edge [K4].
-  - The inside part of each target (the middle piece, or the whole clip if neither cut happened) is collected in clip order.
-  - **Result:** `{ arrangement, middleIds: string[] }`, or `null` when **no** cut happened on any clip. A clip that lies fully inside the range, with no cut, is not a reason to succeed on its own.
-- The function name stays. `middleId` becomes `middleIds`. Its only caller is `splitSelection` [K5].
-- B's sketch of exactly this is `b-round-265/sketch.diff`. It is B's evidence, not code for A to copy.
+### 2.1 Behaviour (only `handleKeyDown` in `StudioWorkspace.tsx`)
+1. **Add one boolean.** Right after `const modifier = event.ctrlKey || event.metaKey;` [K6], add a derived boolean meaning "a command chord: Ctrl or Cmd, with no Alt and no AltGraph". Its exact value is `modifier && !event.altKey && !event.getModifierState('AltGraph')`. Give it a discoverable name, for example `commandChord` (AGENT_DISCOVERABLE_CODE).
+2. **Use it instead of `modifier`** in exactly these places:
+   - the `modifier && (key === 'e' || …)` arm of the pointer-gesture block [K3];
+   - the ten Ctrl-letter branches e, z, y, l, a, d, c, x, v and g [K2]. On g, the existing `&& !event.altKey` may stay or go; both are equivalent.
+3. **Do not change:**
+   - the KeyO branch [K4];
+   - the Space branch;
+   - `timelineNavigationKey`, which already rejects Alt [K7];
+   - the Ctrl+Arrow and Apple Alt+Arrow branch;
+   - the `if (modifier) { return; }` line [K5]. It keeps `modifier`, so an Alt chord stops there and never reaches the plain-letter branches (M, G, A, U and the digits);
+   - any status string or shortcut-sheet text.
+4. **Result.** An Alt or AltGr chord with Ctrl or Cmd plus one of those letters:
+   - changes no state;
+   - writes no status;
+   - is **not** `preventDefault`-ed (`dispatchEvent` returns true);
+   - does not show the gesture-blocked message while a pointer gesture is active.
 
-### 2.2 `splitSelection`, the range branch (`ArrangementContext.tsx`)
-Only the range branch changes [K5]. The all-tracks refusal, the multi-clip marker branch and the single-clip marker branch stay byte-identical.
+   Plain Ctrl/Cmd chords behave exactly as at HEAD. B's sketch is `b-round-266/sketch.diff` (1 added line and 11 substitutions). A may use it as is.
 
-| Result | Selection | Status | Range | History |
-|---|---|---|---|---|
-| `null` | unchanged | `splitRangeFailed` "Could not split at the time selection." (unchanged) | kept | none |
-| 1 inside part | `setSelectedClipId(id)`, as today | `splitRangeDone` (unchanged text) | cleared | one entry `historySplitRange`, as today |
-| ≥ 2 inside parts | `setSelection(middleIds)`, like the marker branch's `setSelection(result.rightIds)` [K5] | **new** `splitRangeClipsDone(count)` = `Clips split at the edges of the time selection; the ${count} parts inside it are selected.` | cleared | one entry `historySplitRange` |
+### 2.2 Tests: add-only, one new `describe` in `meta-shortcuts-ui.test.tsx`
+Name the block `GATE264-S2: Alt or AltGr held with Ctrl/Meta runs no Ctrl-letter command`. Reuse the file's `mountMetaWorkspace`, `live`, `press` and `addOneClip`.
 
-**L51 (status writes).**
-- **Overwrites:** the new write lands on the same status line as `splitRangeDone`/`splitRangeFailed` today. Before it, the line shows the last action (an add, a delete or the ready text); C's rows read the final text after the key.
-- **Lifetime:** it is replaced by the next action's status, as `splitRangeDone` is today. No new clearing code is added.
+Put the chord variants in one table:
+- `AltGr` = `{ ctrlKey: true, altKey: true, modifierAltGraph: true }`;
+- `Ctrl+Alt` = `{ ctrlKey: true, altKey: true }`;
+- `Meta+Alt` = `{ metaKey: true, altKey: true }`.
 
-### 2.3 Copy (`strings.ts`, C-R265-02)
-| Key | Old [K6] | New | Why |
+Rules for every row:
+- AG1–AG4 use `it.each` over the three variants.
+- Assert the effect first and `notPrevented === true` last.
+- End with a positive plain-chord control in the same mount, so that a broken mount cannot pass as "nothing happened".
+
+| Row | Start state | Action | Expected |
 |---|---|---|---|
-| `rangeMissingReason` (export dialog) | `Make a time selection in the Arrangement (drag on a clip or on the ruler)` | `Make a time selection in the Arrangement (drag in a lane)` | A drag on the lane background or on a clip makes a range. **No ruler code sets a time range:** the only non-null range writers are the clip gesture, the lane background and the details panel [K7]. So "on the ruler" was already untrue at HEAD. "Drag in a lane" matches the sheet row `select-time` "Drag in a lane" from round 265. |
-| `needsSelection` (Ctrl+L without a range) | `To set a loop, first make a time selection on the waveform.` | `To set a loop, first make a time selection (drag in a lane).` | Same reason. |
-| `splitRangeClipsDone` | none | the formatter in §2.2 | New status. |
+| AG1 (each variant) | 1 clip added (Undo available) | chord+Z | clip count 1, `undoLabel` unchanged, status unchanged, not prevented |
+| | | plain Ctrl+Z (positive control) | clip count 0 (Redo now available) |
+| | | chord+Shift+Z, then chord+Y | clip count still 0, status unchanged, both not prevented |
+| AG2 (each variant) | 1 clip selected, insert marker inside it (`setInsertMarker(clip.start + 5)`) | chord+E | clip count 1, status unchanged, not prevented |
+| | | plain Ctrl+E (positive control) | clip count 2 |
+| AG3 (each variant) | 1 clip; `setTimeRange({ start: 2.5, end: 7.5, trackId: 'music' })` | chord+L, then chord+Shift+L | `arrangement.loop` null; loop button `aria-pressed="false"`; the range deep-equals the one set, so it was not extended to all tracks; status unchanged; both not prevented |
+| | | plain Ctrl+L (positive control) | the loop is set (the same assertion as MS5) |
+| AG4 (each variant) | 1 clip selected | chord+A, D, C, X, V, G and Shift+G | after each: clip count 1, selected clip ids unchanged, `undoLabel` unchanged, 0 `[data-group-id]`, status unchanged, not prevented |
+| | | plain Ctrl+D (positive control) | clip count 2 |
+| AG5 | 1 clip; then `act(() => { release = live(api).claimPointerGesture(42, () => {}); })` (the technique of `track-groups-ui.test.tsx` [K14]) | AltGr+E | status unchanged (not `GESTURE_EDIT_BLOCKED_MESSAGE`), clip count 1 |
+| | | plain Ctrl+E (positive control), then release the gesture | status `GESTURE_EDIT_BLOCKED_MESSAGE` |
+| AG6 | 1 clip, Undo available; read the Snap toggle's `aria-pressed` (`getByTestId('arrangement-snap-toggle')` [K16]) | `{ ctrlKey: true, altKey: false, modifierAltGraph: true }` with Z, then with G (`key: 'g', code: 'KeyG'`) | clip count 1, Snap `aria-pressed` unchanged, status unchanged, both not prevented |
 
-- **Left alone:** `splitRangeDone`, `splitRangeFailed`, `splitRangeTitle` and `needsSelectionTitle`.
-- **`rangeInvalid` (l.808 [K6])** belongs to the details-panel numeric range entry, which is not granted. It is a signal and a question, not this round (§2.4).
-- **L3 (longest state):** the new export reason is shorter. B measured the reason box at both viewports: HEAD 390 × 16 px (1 line), sketch 310 × 16 px (1 line) (`b-round-265/probe-split-*.json` G). C row COPY.
+AG6 makes the AltGraph term non-vacuous. It is a contract row, not a claim about a real platform.
 
-### 2.4 B rulings on round 265's open notes (L10, D-29z562)
-1. **A's deviation from §2.1 item 1 of round 265 is accepted.** On the background path, any `end === start` after ms rounding gives no range, not only snapped ends. Reasons:
-   - a zero-length range has no meaning;
-   - HEAD had no background range, so nothing regresses;
-   - the code reviewer's Medium 1 found `{X, X}` on a vertical-only drag;
-   - BT9 (vertical-only) and mutant M5 cover it, and C's extra probe confirmed it in the browser.
-   No code change.
-2. **The clip-path `{0, 0}` free range at the 0 bound** (A's reviewer Low 1): this is HEAD's behaviour at `clip.start`, carried. It goes to `deferred_low_polish` as A-R265-REVIEW-CLIP-ZERO-RANGE. It is not this round: `ArrangementClip.tsx` is frozen.
-3. **Hidden grid on the background path has no jsdom row.** This round does not add one: `StudioWorkspace.tsx` is frozen, and the background path reads the same `gridLinesVisible` inputs as the click and in-clip paths (A's code reading, `a-round-265.md`). It is carried into the next REGRESSION round as a scope addition, REG-11C-HIDDEN-GRID-BG: a browser row that zooms out until the grid hides, then makes a background drag.
-4. **`rangeInvalid` (details-panel clamp)** is recorded as the signal B-R265-DETAIL-RANGE-CLAMP. The question for Saba is whether "no clamp to one clip" also covers the numeric entry. It is not a bug: the panel edits the selected clip's own range.
-5. **A background drag on the video lane** gets a row now: VIDEO-BG. It uses the same handler; B measured it at baseline (§4).
-6. **Doc 198 l.4** is re-ruled (§2.7).
+**Red-proofs.** A runs these on a scratch copy outside `store/`, logs them to `a-round-267/` and restores the scratch afterwards:
+- **10 per-branch mutants:** revert one of the ten letter branches to `modifier` at a time. Each mutant turns at least one AG row red. Name the row and the line.
+- **M-ALT:** the boolean without `!event.altKey`. The Ctrl+Alt and Meta+Alt variants go red.
+- **M-AG:** the boolean without the AltGraph term. AG6 goes red.
+- **M-GESTURE:** the gesture arm keeps `modifier`. AG5 goes red.
+- **M-RETURN:** change `if (modifier)` to `if (commandChord)`. AG6's G step goes red, because the plain-letter G branch (`!event.altKey`) then toggles Snap.
 
-### 2.5 Focus (L47, L50)
-- **L50 grep** over the 3 granted sources gives 0 hits: `ArrangementContext.tsx`, `model.ts`, `strings.ts`. The callers of `splitSelection` are the Ctrl+E handler in `StudioWorkspace.tsx` and the Split toolbar button in `ArrangementTransport.tsx` [K10]. Both are frozen and unchanged.
-- **Which element can unmount.** A split keeps the original clip id on the left part (`splitClipAt`) [K4]. So a clip element focused before the split stays mounted. The new parts are new elements, and no focused element unmounts that does not unmount at HEAD's split.
-- **Ruling:** the focus target equals HEAD for the same origin:
-  - Ctrl+E pressed from the library option (B's probe: the active element stays that `BUTTON` before and after, `b-round-265/probe-split-*.json` H);
-  - the Split toolbar button clicked: focus stays on that button.
-  
-  Row FOCUS-SPLIT.
+**Timeouts (L31).** At gate 266 the file ran 11 tests in 7175 ms, about 0.65 s per test against the 5 s default, so the new rows have headroom. If any new row takes more than 2.5 s in A's run, report it at the top of the report (L11).
 
-### 2.6 Tests
-**Collisions (L23).** B ran the whole sketch (§2.1–2.3) on a scratch copy of the working tree, including A's round-265 diff, over all 168 test files in `app/lib/arrangement` + `app/components`. Result: `Tests 4 failed | 2455 passed (2459)` (`b-round-265/precheck-sketch-vitest.clean.txt` [K8]). All 4 are in granted files:
+### 2.3 Implementation doc 199 (L26, L28)
+- l.4 is exactly `**სტატუსი:** Completed (C round 267 PASS)`.
+- Write it in Georgian, following `docs/implementation/TEMPLATE.md`. Its `## ` headings contain TEMPLATE's seven headings in order.
+- Cite only rows that exist (AG1–AG6), the mutants and the manual §42 source.
+- State the §6 item 4 Linux hypothesis as an open question, not as fixed.
 
-| Test (file:line) | Why it changes | Allowed rewrite |
-|---|---|---|
-| `model.test.ts:192` [K8] "produces three parts with the middle one returned" | `middleId` → `middleIds` (tsc error at l.201 on the sketch [K8]) | Read `result.middleIds[0]` and assert `middleIds` has length 1. Keep every existing assertion. |
-| `strings.test.ts` ST1 (l.182 [K8]) | `rangeMissingReason` literal | Replace the literal with the new one. |
-| `strings.test.ts` ST8 (l.618 [K8]) | the sorted formatter-name list gains `splitRangeClipsDone` | Add the name. Also add its exact output for count 2 and 3 to the formatter-literal row of the same describe block. |
-| `strings.test.ts` ST10 (l.767 [K8]) | `needsSelection` literal | Replace the literal with the new one. |
+### 2.4 Checks (speed rules), from `store/`
+- `npm run typecheck`, `npm run lint`, and `npx biome check` on the 2 granted code files.
+- `npx vitest run` on these 13 files:
+  - `meta-shortcuts-ui.test.tsx`, `overview-visibility-ui.test.tsx`, `shortcut-sheet-ui.test.tsx`;
+  - `insert-marker-ui.test.tsx`, `marker-edge-nav-ui.test.tsx`;
+  - `grid-snap-keys.test.tsx`, `grid-adaptive-ui.test.tsx`, `grid-triplet-ui.test.tsx`;
+  - `clip-envelope-ui.test.tsx`, `track-group-collapse-ui.test.tsx`, `track-groups-ui.test.tsx`;
+  - `background-time-selection-ui.test.tsx`, `focus-source-typing.test.tsx`.
+- 3 files change, so run the read-only `code-reviewer` subagent and pass its Architecture note to B.
+- No full suite and no `npm run verify`: those are gate rows.
 
-**Rules:**
-- No assertion is removed (a removal is a Medium bug).
-- Equal or stronger replacements are allowed (L4).
-- `perf/**` and `e2e/**` have 0 hits for every changed token [K9].
-- The one other hit (`detail-panel-polish.test.tsx`, a test title "… on the waveform box") is unrelated [K9].
+### 2.5 Focus and status (L47, L50, L51)
+- **L50 grep** over the code grant: `grep -cE "onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)" app/components/arrangement/StudioWorkspace.tsx` gives 20 hits. **None of them** lies inside `handleKeyDown` (HEAD lines 2206–2584) [K15].
+  - **Class ruling:** every hit is outside the changed function and out of scope. The change only removes action paths for Alt chords, so nothing mounts or unmounts because of them, and no new focus origin exists.
+  - C's row FOCUS-ALT checks that a focused element keeps focus across Alt chords.
+- **L51:** the change adds no `setStatus`. It removes one path to the existing `GESTURE_EDIT_BLOCKED_MESSAGE` write [K3] for Alt chords, and AG5 covers both sides. The handler's status writes are at HEAD lines 2263, 2341 and 2566 [K15].
 
-**New rows in `model.test.ts`** (`splitClipsByRange` block). Each asserts the exact clip list (`start`, `sourceOffset`, `duration`) and `middleIds`:
-- **MS1:** a range past the clip start (range 6.25–12.5, clip 10–111.35): one cut at 12.5, `middleIds` = [the 10–12.5 part], whose id equals the original id.
-- **MS2:** a range from inside clip A, across a gap, into clip B: 4 parts, `middleIds` = [A's right part, B's left part].
-- **MS3:** a range over empty space only → `null`. A range covering a whole clip with both edges outside → `null`.
-- **MS4:** a range edge within `MIN_CLIP_DURATION` of a clip edge: no cut at that edge; the other edge is still cut.
-- **MS5:** clips on another track inside the same time window are untouched.
+### 2.6 STOP conditions (L11: write them at the top of `a-round-267.md`)
+- A needed change outside the 3 grants or outside `handleKeyDown`.
+- An existing test goes red. B's pre-check (§3) found none.
+- An existing line of `meta-shortcuts-ui.test.tsx` changes, other than names added to an import line.
+- A §2.2 mutant stays green and you cannot show it is equivalent.
+- A test runs above 50 % of its timeout.
 
-**New rows in `background-time-selection-ui.test.tsx`.** Use the file's existing helpers. Do not change BT1–BT9.
-- **BS1:** in-clip overshoot drag (past the clip start) → Ctrl+E:
-  - clips at [10, 12.5];
-  - status `splitRangeDone`;
-  - the selection is the [10, 12.5] part;
-  - range null;
-  - `undoLabel` `historySplitRange`;
-  - Ctrl+Z restores 1 clip.
-- **BS2:** a drag that starts inside clip A, crosses the gap and ends inside clip B (as MS2 and SPLIT-GAP-2) → Ctrl+E:
-  - 2 inside parts selected;
-  - status = `splitRangeClipsDone(2)`;
-  - one history entry (a single Ctrl+Z restores both clips).
-- **BS3:** a range over empty space only → Ctrl+E:
-  - status `splitRangeFailed`;
-  - arrangement and range unchanged;
-  - no history entry.
-- **BS4:** the Split toolbar button with a BS1 range gives the same result as Ctrl+E.
+## 3. Neighbouring behaviour at risk, and B's pre-check (L23)
+**Pre-check on a scratch copy** (`/tmp/b266-scratch`, with the sketch `b-round-266/sketch.diff` applied):
+- `npx vitest run` on every test file under `app/` that mentions `altKey|modifierAltGraph|getModifierState`: 24 files (`b-round-266/precheck-files.txt`), **507/507** tests pass (`b-round-266/precheck-sketch-vitest.txt`).
+- Every test file that mentions `ctrlKey|metaKey|Control+|Meta+`: 40 files, **725/725** tests pass (`b-round-266/precheck-ctrl-vitest.txt`).
+- `tsc --noEmit`: rc 0 (`b-round-266/precheck-typecheck.txt`).
+- **Collisions: 0.** No existing test sends Ctrl/Meta+Alt+letter and expects the Ctrl command. At HEAD the only `modifierAltGraph` use is the Overview negative row [K9].
 
-**Red-proofs (L23, L52).** Run them on a scratch copy **outside** `store/`, with `model.test.ts` + the new rows only. Report each red as file:line.
-- **M6:** restore HEAD's full-containment `find` in `splitClipsByRange`. MS1, MS2, BS1 and BS2 must go red.
-- **M7:** keep only the first target (`targets.slice(0, 1)`). MS2 and BS2 must go red.
-- **M8:** in `splitSelection`, always use `setSelectedClipId(middleIds[0])` and `splitRangeDone`. BS2 must go red on the selection or the status.
-- **M9:** return a result when no cut happened (`changed` ignored). MS3 and BS3 must go red.
+**Browser sketch.** A scratch server on :5174 ran `b-round-266/probe-altgr-fix.mjs` at both viewports, with 0 page errors. Compared with HEAD (`probe-fix-head.json`), the sketch run (`probe-fix-sketch.json`) shows:
+- **No effect:** every AltGr chord (Z, Shift+Z, Y, E, L, A, D) and the real `Control+Alt+KeyZ` and `Control+Alt+KeyE` leave clips and status unchanged and are not prevented.
+- **Plain chords still work:**
+  - `Control+KeyZ` undoes (1 clip → 0) and `Control+Shift+KeyZ` redoes;
+  - `Control+KeyE` splits (1 → 2) with "Clip split at 00:07.500.";
+  - `Control+KeyL` gives the needsSelection text.
+- **Overview still toggles:** `Control+Alt+KeyO` gives "Overview hidden. Ctrl+Alt+O shows it again.", then "Overview shown. Ctrl+Alt+O hides it.".
 
-### 2.7 Implementation doc 198
-- **l.4** becomes exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 266 PASS)` (L28: rewriting N only). Before this round it read `**სტატუსი:** In Progress (stage 1 of 2; C round 265 PASS)` [K15].
-- In Georgian, add the Split rule D3, the copy change and the C-R265-01 Problem → Solution to its existing sections. Cite only rows that exist: MS1–MS5, BS1–BS4 and the rewritten rows (L26).
-- The headings stay a superset of TEMPLATE's, in order.
-
-### 2.8 Checks (speed rules), from `store/`
-- `npm run typecheck` and `npm run lint`.
-- `npx biome check` on the 5 granted code and test files plus `background-time-selection-ui.test.tsx`.
-- `npx vitest run` on `model.test.ts`, `strings.test.ts`, `background-time-selection-ui.test.tsx`, `ArrangementContext.test.ts`, `delete-selection-ui.test.tsx`, `export-range-ui.test.tsx`, `export-dialog-a11y-copy.test.tsx`, `navigation-strings-ui.test.tsx` and `selection.test.ts`.
-- **L31:** report the slowest test in each changed test file against its limit. Round 265: BT1 0.79 s of the default 5 s (`a-round-265.md`).
-- **code-reviewer:** required (7 files). Pass its Architecture notes to B.
-- Do not run the full suite or `npm run verify`.
-
-### 2.9 STOP conditions (L11, at the top of `a-round-266.md`)
-- A change is needed outside the 7 grants.
-- A test outside §2.6 goes red.
-- A rewrite would need to drop an assertion.
-- A mutant leaves its rows green.
-- `sha256sum -c` of the frozen list is not rc 0 before or after.
-- D3 cannot reproduce HEAD's result for the C-R265-01 gesture (clips [10, 12.5], `splitRangeDone`).
-
-## 3. Neighbouring behaviour at risk
-- **The three marker-split branches** (all-tracks refusal, multi-selected at the marker, single clip at the marker): they are not edited, and C runs SPLIT-MARKER.
-- **Delete, Ctrl+Shift+X and Ctrl+L on the same ranges:** the code is unchanged. C's round-265 rows BG-INTO-CLIP, BG-EMPTY-DELETE and C's extra Ctrl+L / Ctrl+Shift+X probes are carried.
-- **The export dialog's no-range state:** the text changes (COPY).
-- **Undo/Redo labels:** `historySplitRange` is reused (BS1, BS2).
+**At risk.** Each of these is covered by A's test list or by C's rows:
+- Ctrl+Alt+O (Overview), which runs before the changed lines;
+- Ctrl+Shift+Space, which checks `!event.altKey` itself;
+- the macOS Alt+Arrow marker step;
+- Alt-alone letters (MS6);
+- plain letters with Alt, which already require `!event.altKey`;
+- the Mac Cmd chords (the Meta halves of MS1–MS5).
 
 ## 4. C: what to verify
-C writes `c-round-266.md` and `c-round-266.json` as it goes.
-- "Both viewports" means 1440×900 and 1280×720, in a fresh anonymous `/studio-lab` context, after `Demo collection ready` (L48).
-- **Setup S** is unchanged from round 265:
-  1. click the Music lane background at lane x + 400 px, 70 % of the lane height;
-  2. focus the first library `option` and press Enter;
-  3. the clip is at "10.000", and the zoom is 40 px/s.
+Run the browser rows at 1440×900 and 1280×720, in a fresh anonymous context on `http://127.0.0.1:5173/studio-lab`. Wait for "Demo collection ready" first (L48).
 
-  The Music lane is `[data-grid-seconds]:not([data-testid])` first. The video lane background is `[data-track-id="video"] [data-testid="arrangement-video-dropzone"]` [K11].
-- **Read:**
-  - the clips are `[data-clip-id]` → `data-clip-start`;
-  - the status is `arrangement-status` [K12];
-  - the range is `arrangement-range`;
-  - the lane overlays are `arrangement-lane-range`.
-- **B's baseline:** B's own probe `b-round-265/probe-split.mjs` ran on the current working tree (`probe-split-before.json`) and on the sketch served from a scratch copy on `:5175` (`probe-split-sketch.json`). Both viewports, 0 page errors, identical results per viewport. The "PASS means" values below are the sketch's measured values.
+| Row | Steps | PASS when |
+|---|---|---|
+| SOURCE-SCOPE | `git rev-parse HEAD`; `git status --porcelain` | HEAD is `7ba7cd2`; only the 3 grant paths are listed |
+| HUNK-SCOPE | `git diff -U0 app/components/arrangement/StudioWorkspace.tsx`; `git diff app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx` | every hunk lies between HEAD lines 2206 and 2584 [K12, K15]; exactly 1 added declaration line and 11 substitutions [K2, K3] (the g line may also drop `&& !event.altKey`); the test diff is add-only (import-line additions allowed) |
+| CLAIMS | re-run §7 K1–K16 verbatim at HEAD | every output matches |
+| TESTS-TARGETED | the §2.4 file list | all green; report the counts |
+| MUTANTS | on C's own scratch: M-ALT, M-AG, M-GESTURE, M-RETURN and at least 3 of the 10 per-branch mutants | each turns its named row red |
+| ALTGR-UNDO | add a clip (focus the first library option, press Enter), blur; on `document.body` dispatch `new KeyboardEvent('keydown', {key:'ż', code:'KeyZ', ctrlKey:true, altKey:true, modifierAltGraph:true, bubbles:true, cancelable:true})`; then the same with Shift (`'Ż'`); then with `KeyY` | clips stay 1, status text unchanged, `dispatchEvent` returns true each time |
+| ALTGR-EDIT | click inside the clip 300 px from its left edge (this selects it and sets the marker), blur; AltGr `KeyE` (`'ę'`), `KeyL` (`'ł'`), `KeyA` (`'ą'`), `KeyD` | clips stay 1, loop button `aria-pressed="false"`, status unchanged, not prevented |
+| CTRLALT-REAL | Playwright `page.keyboard.press('Control+Alt+KeyZ')`, then `Control+Alt+KeyE` | clips and status unchanged |
+| META-ALT-REAL | `Meta+Alt+KeyZ`, then `Meta+Alt+KeyE` | clips and status unchanged |
+| POS-CTRL | see the list below the table | all as listed |
+| FOCUS-ALT | focus the first library option (`role="option"`); AltGr Z, then E, then L | after each, `document.activeElement` is the same option; clips unchanged |
+| DOC-199 | read l.4 and the headings; grep the cited rows | l.4 byte-exact; headings contain TEMPLATE's 7 in order; every cited row (AG1–AG6) exists in the test file |
+| G267-AUTH | `/studio-lab` anonymous; `/studio/middle-east`; `/api/studio-token` with no header | workspace and demo notice shown, `auth_user` null; "Sign in required", 0 `audio[src]`; 401, no token |
+| Gate rows | full vitest, build, Biome full, `npm run verify`, `npm run test:e2e:smoke` | **gate**, not claimed |
 
-| Row | Steps | PASS means | FAIL means |
+**POS-CTRL**, in order:
+1. `Control+KeyZ`: clips 0, status "Undo: Add — …".
+2. `Control+Shift+KeyZ`: clips 1.
+3. Re-select the clip with the marker inside it, then `Control+KeyE`: 2 clips and "Clip split at 00:07.500." (or the exact split time C sets).
+4. `Control+KeyL` with no range: "To set a loop, first make a time selection (drag in a lane)."
+5. `Control+Alt+KeyO` twice: "Overview hidden. Ctrl+Alt+O shows it again.", then "Overview shown. Ctrl+Alt+O hides it."
+
+**Ableton conformance**, judged separately from the CZABA requirement:
+- the Ctrl+Alt rows: "confirmed" (§42: a different command, never the Ctrl one);
+- the AltGr rows: "unconfirmed (no source)";
+- the plain chords: "confirmed" (§42.5, §42.16).
+
+**Not in scope:**
+- real Windows AltGr hardware (TLM-R232-ALTGR-WIN stays with Saba);
+- Linux AltGr without `ctrlKey` (§6 item 4);
+- the Ctrl+Alt commands Live has and CZABA lacks.
+
+## 5. Outcome, fixed in advance (D-29z568)
+- **PASS and gate published:** GATE264-S2 is closed. Round 268 fixes the stage-1 readout bugs of 11c (§6 item 1), unless REGRESSION is due (on or after 2026-11-02 at planning time).
+- **Gate fail:** a bounded fix-up with the same grants.
+- **C finds a Medium or higher in a changed path:** a fix-up with the same grants.
+- **STOP:** B rules first (L10).
+
+## 6. Signals and the next rounds (not this round)
+1. **GATE266-S1 (Medium, open, D-29z567).** When a time selection extends past the selected clip, the details panel shows Start/End values clamped to the clip, and Enter in those fields shrinks the selection to the clip. It is planned for round 268, together with two Lows on the same stage-1 readouts:
+   - B-R266-1 / GATE266-S4: `splitRangeDone` and `splitRangeTitle` say "both edges" when only one edge is cut;
+   - `splitRangeClipsDone` says "Clips split" when one selected part was not cut.
+
+   Before dispatch, B reproduces GATE266-S1 in the browser at that planning.
+2. **Gate-266 Lows go to `deferred_low_polish`:**
+   - GATE266-S2: scroll or zoom drift during a drag, joined to A-R265-REVIEW-SCROLL-DRIFT;
+   - GATE266-S3: the Mac Ctrl+drag label and the context menu it may open;
+   - GATE266-S5: a background selection is not announced to screen readers.
+3. Then SYS-6, as already ordered.
+4. **Hypothesis, not scheduled: B-R266-LINUX-ALTGR-PLAIN-LETTERS.** A platform may report AltGr as AltGraph **without** `altKey` or `ctrlKey`; Linux X11 is suspected. The plain-letter branches (M, G, A, U, 1–5) check only `!event.altKey`, so there AltGr+M could add a marker. This is unverified and goes to the Tech Lead list. A real repro makes it a normal finding.
+
+## 7. Claims (L29)
+C re-runs each command verbatim at HEAD `7ba7cd2`. Commands run from `store/` unless marked "loop root". Set `W=app/components/arrangement/StudioWorkspace.tsx`. Line numbers are HEAD's; the commands read HEAD through `git show HEAD:` or `git grep … HEAD`, so A's diff does not change them. In the table, `\|` stands for a literal `|`.
+
+| Tag | Claim | Command | Expected output |
 |---|---|---|---|
-| **SOURCE-SCOPE** | From `store/`:<ul><li>`sha256sum -c --quiet ../tmp/studio-real-loop/b-round-265-r266-tree-sha256.txt`;</li><li>`git status --short --untracked-files=all`;</li><li>HEAD.</li></ul> | <ul><li>rc 0;</li><li>status = the 11 round-265 entries, plus ` M` on `model.ts`, `model.test.ts`, `ArrangementContext.tsx`, `strings.ts` and `strings.test.ts` (16 entries);</li><li>HEAD `2ea196e`.</li></ul> | Any other change. |
-| **HUNK-SCOPE** | `git diff -U0 -- app/lib/arrangement/model.ts app/contexts/ArrangementContext.tsx app/lib/arrangement/strings.ts` (HEAD line numbers in the `@@ -a,b` headers). | Every removed or changed HEAD line lies in the allowed window:<ul><li>`model.ts` l.290–324, the `splitClipsByRange` function [K4];</li><li>`ArrangementContext.tsx` l.1989–2000, the range branch of `splitSelection` [K5];</li><li>`strings.ts` l.24, l.114–117 (the new key goes here) and l.289 [K6].</li></ul>Pure insertions are allowed only inside the same windows. | A hunk outside a window: the carried round-265 rows lean on these two files (status texts, every edit command), so every round-265 row is then re-run, not carried. |
-| **CLAIMS** | Re-run K1–K16 verbatim, plus the L29 untagged-fact grep over this file.<ul><li>K4–K9 at HEAD, or with `git show HEAD:` for the granted files.</li><li>K13 and K14 give the before-values on the current tree. After A's fix, K13 gives the sketch values (`probe-split-sketch.json`) and K14 the same values except the `loopNoRange` text.</li><li>K15 runs against B's saved copy.</li><li>Copy `probe-split.mjs` and `probe-neighbours.mjs` into `c-round-266/` and change their `DIR` before running them: the scripts write screenshots to a hard-coded folder. The shots in `b-round-265/shots/` come from B's sketch run.</li></ul> | Every output matches. | A mismatch (planning FAIL). |
-| **TESTS-TARGETED** | The §2.8 file set. | All green. | Red. |
-| **REWRITES** | <ul><li>`git diff` of `model.test.ts` and `strings.test.ts`, which round 265 did not change.</li><li>`diff b-round-265/background-time-selection-ui.test.tsx.r265.txt app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx` (B's copy of A's round-265 file [K16]).</li></ul> | <ul><li>Only the §2.6 rows change, and no assertion is removed.</li><li>The UI file diff only **adds** lines (new `it(` blocks, plus imports if needed). No BT1–BT9 line is changed or removed.</li></ul> | An assertion is removed (Medium), or a BT line changed (then BT1–BT9 are not carried). |
-| **MUTANTS** | M6–M9 on C's own scratch. | Each goes red as in §2.6. | A mutant stays green. |
-| **SPLIT-PAST-START** (both; the C-R265-01 repro) | After S, drag on the clip body from clip x + 100 to clip x − 150 (range "00:06.250 — 00:12.500"). Press Ctrl+E. Then Delete. Then Ctrl+Z twice. | <ul><li>Ctrl+E: clips `["10.000","12.500"]`, status "Clip split at both edges of the time selection; the middle part is selected.", no `arrangement-range`.</li><li>Delete: clips `["12.500"]`, status "Clip deleted; the gap remains." (the selected part was 10–12.5).</li><li>Ctrl+Z: `["10.000","12.500"]`, then Ctrl+Z: `["10.000"]` with status "Undo: Split at time selection".</li></ul> | "Could not split …", or a different cut. |
-| **SPLIT-BG-INTO-CLIP** (both) | After S, drag lane x + 40 → clip x + 200 (range 1–15). Press Ctrl+E. | Clips `["10.000","15.000"]`, the `splitRangeDone` status, no range. | Otherwise. |
-| **SPLIT-GAP-2** (both) | After S:<ol><li>drag on the clip body from clip x + 100 to clip x + 400, then Delete (clips `["10.000","20.000"]`);</li><li>click the background at lane x + 60;</li><li>drag from clip x + 50 to clip x + 500 (range "00:11.250 — 00:22.500", 1 lane overlay);</li><li>Ctrl+E;</li><li>Delete.</li></ol> | <ul><li>Ctrl+E: clips `["10.000","11.250","20.000","22.500"]`, status "Clips split at the edges of the time selection; the 2 parts inside it are selected.", no range.</li><li>Delete: clips `["10.000","22.500"]`, status "2 clips deleted; the gap remains."</li><li>Screenshot after Ctrl+E.</li></ul> | Otherwise. |
-| **SPLIT-NO-EDGE** (both) | <ol><li>After S: drag lane x + 40 → lane x + 300 (empty, 1–7.5), then Ctrl+E.</li><li>After S and step 1 of SPLIT-GAP-2: click the background, drag clip x − 40 → clip x + 120 (range "00:09.000 — 00:13.000", covering the whole 10–12.5 clip), then Ctrl+E.</li></ol> | Both: status "Could not split at the time selection."; clips unchanged (`["10.000"]`, then `["10.000","20.000"]`); the range is still shown. | A split, or the range cleared. |
-| **SPLIT-MARKER** (both) | After S: click inside the clip at clip x + 200 (marker 15.000), then Ctrl+E. | Clips `["10.000","15.000"]`, status "Clip split at 00:15.000." (the marker branch is unchanged; B's baseline [K14]). | Otherwise. |
-| **SPLIT-ALL-TRACKS** (both) | BG-RANGE's range (lane x + 40 → lane x + 300), then Ctrl+Shift+L, then Ctrl+E. | The status is the unchanged `splitAllTracksRefused` text: "Split does not work on a selection across all tracks — make a time selection on one track." Clips unchanged, the range still shown [K14]. | Otherwise. |
-| **FOCUS-SPLIT** (both) | <ol><li>SPLIT-PAST-START's range, with focus on the first library option (as after S), then Ctrl+E: read `document.activeElement`.</li><li>The same range, then click the Split toolbar button: read `document.activeElement`.</li></ol> | <ol><li>The same library `BUTTON` as before the key (B's probe, H).</li><li>The Split button (`BUTTON`, text "Split", the only button named /^Split/ [K14]).</li></ol> Equal to the baseline [K14]; never BODY. | Focus moves to BODY or elsewhere. |
-| **VIDEO-BG** (both) | After S: click the Music background at lane x + 60, then drag on the video lane background from its x + 40 to x + 300. | A range "00:01.000 — 00:07.500" with exactly 1 `arrangement-lane-range`, inside `[data-track-id="video"]`; no marquee mid-drag. | Otherwise. |
-| **COPY** (both) | <ol><li>After S: click the background (no range), then Ctrl+L.</li><li>With no range, open Export.</li></ol> | <ol><li>Status "To set a loop, first make a time selection (drag in a lane)." and not truncated (`scrollWidth ≤ clientWidth` on the status element). B measured `statusFits` only for the old text, which is 1 character shorter [K14]; C measures the new text.</li><li>`arrangement-export-scope-range-reason` reads "Make a time selection in the Arrangement (drag in a lane)", on 1 line (B: 310 × 16 px).</li><li>Screenshot.</li></ol> | Old text, or wrapping or clipping. |
-| **CARRIED** | Confirm SOURCE-SCOPE rc 0 (the 4 round-265 sources and the 5 rewritten tests are byte-identical to what C tested in round 265, [K2]), HUNK-SCOPE PASS, and REWRITES' add-only diff of the UI file. | The 20 round-265 PASS rows (`c-round-265.json` `passed`) are carried without a re-run. The exception is BG-INTO-CLIP and IN-CLIP-SAME, which C re-runs once at 1440×900 as a smoke check (their code path shares `splitSelection`'s neighbour Delete). | A frozen file changed (then every round-265 row must be re-run). |
-| **LESSONS** | `grep -n '^4[56]\. ' lessons.md` (loop root). | L45 and L46 exist. | Missing. |
-| **DOC-198** | l.4 byte for byte; the headings subsequence (L26); the row citations exist (`grep`). | l.4 is `**სტატუსი:** In Progress (stage 1 of 2; C round 266 PASS)`. | Otherwise. |
-| **G266-AUTH** (browser; reuse `c-round-265/g265-auth.cjs`) | A fresh anonymous 1440×900 context: `/studio-lab`, `/studio/middle-east`, `/api/studio-token` with no header. | <ul><li>Workspace + demo badge, `auth_user` null.</li><li>"Sign in required", 0 `audio[src]`.</li><li>401, no token.</li></ul> | Any bypass (Critical). |
+| K1 | HEAD and a clean tree at planning | `git rev-parse HEAD`; loop root: `wc -l < b-round-266/git-status-at-planning.txt` | `7ba7cd297accd7c1fadda76f95f54342a93205ef`; `0` |
+| K2 | the ten Ctrl-letter branches test `modifier` | `git show HEAD:$W \| grep -n "if (modifier && key === '"` | 10 lines: 2344 e, 2351 z, 2360 y, 2365 l, 2376 a, 2381 d, 2388 c, 2398 x, 2409 v, 2448 g (the g line ends `&& !event.altKey) {`) |
+| K3 | the gesture-block arm and its status write in the handler | `git show HEAD:$W \| grep -n "((modifier &&\|setStatus(GESTURE_EDIT_BLOCKED_MESSAGE)" \| awk -F: '$1>=2206 && $1<=2584'` | `2323:        ((modifier &&` and `2341:        current.setStatus(GESTURE_EDIT_BLOCKED_MESSAGE);` |
+| K4 | only KeyO guards AltGraph | `git show HEAD:$W \| grep -n "getModifierState('AltGraph')"` | 1 line: `2252:        !event.getModifierState('AltGraph')` |
+| K5 | the modifier early return | `git show HEAD:$W \| grep -n "if (modifier) {"` | `2459:      if (modifier) {` |
+| K6 | the modifier definition | `git show HEAD:$W \| grep -n "const modifier = event.ctrlKey \|\| event.metaKey;"` | 1 line at `2269:` |
+| K7 | navigation keys reject Alt | `grep -n "input.ctrlKey \|\| input.metaKey \|\| input.altKey" app/lib/arrangement/view.ts` | 1 line at `278:` |
+| K8 | shortcut letters come from `event.code` | `git show HEAD:$W \| grep -n "event.code.startsWith('Key')"` | 1 line at `498:` |
+| K9 | the only `modifierAltGraph` use at HEAD | `git grep -n "modifierAltGraph" HEAD -- app perf e2e` | 1 line, starting `HEAD:app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx:247:` |
+| K10 | the test file at HEAD | `git show HEAD:app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx \| sha256sum`; the same piped to `wc -l` | `fc9a6b9ebaeec2661e0a6e142f30f7322ef3daad6da13237a58f8886109510a8`; `318` |
+| K11 | the sheet lists only one Ctrl+Alt key | `grep -n "keys: \['Ctrl+Alt" app/lib/arrangement/shortcuts.ts` | 1 line: `158:        keys: ['Ctrl+Alt+O'],` |
+| K12 | the handler and its listener | `git show HEAD:$W \| grep -n "const handleKeyDown = (event: KeyboardEvent)\|window.addEventListener('keydown', handleKeyDown)"` | `2206:` and `2606:` |
+| K13 | 199 is free | `git ls-tree --name-only HEAD docs/implementation/2026/quarter-IV/ \| sort -V \| tail -1` | `docs/implementation/2026/quarter-IV/198-saba-b-11c-background-time-selection.md` |
+| K14 | the gesture technique exists | `grep -n "claimPointerGesture(42" app/lib/arrangement/__tests__/track-groups-ui.test.tsx` | 1 line at `579:` |
+| K15 | the L50 and L51 counts | (a) `git show HEAD:$W \| grep -cE "onPointerDown(Capture)?\|onBlur\|settleEditor\(\|\.focus\(\|^\s*\{[^}]*(\.map\(\|&&\|\?)"`; (b) the same pattern with `-nE` piped to `awk -F: '$1>=2206 && $1<=2584' \| wc -l`; (c) `git show HEAD:$W \| grep -n "setStatus(" \| awk -F: '$1>=2206 && $1<=2584' \| cut -d: -f1 \| tr '\n' ' '` | (a) `20`; (b) `0`; (c) `2263 2341 2566 ` |
+| K16 | the Snap toggle testid (unquoted grep, because a JSX attribute value may be an expression) | `git grep -n "arrangement-snap-toggle" HEAD -- app/components` | 1 line: `HEAD:app/components/arrangement/StudioWorkspace.tsx:2870:` |
 
-- **Gate rows:** the full vitest, the build, Biome (full), `npm run verify` and the e2e smoke. List them under `"gate"`, never under `"passed"`.
-- **`browserVerified`** is true only if every browser row above ran at both viewports. CARRIED rows count as verified by round 265's browser run.
-- **Ableton conformance:** SPLIT-IN-CLIP / the marker path is confirmed ([AV] 6.12). D3's rows are "unconfirmed, default D3 awaiting Saba" (SABA-Q-11C-SPLIT-SPAN), never "matches Live".
-- **Not in this round:** relative snap (stage 2), multi-lane partial ranges (D2), the Live-style Shift-click extension, Split on an all-tracks range, the details-panel clamp. List them under `"notInScope"`.
-
-## 5. Outcome, fixed in advance (D-29z564)
-| Result | B at the round-267 planning |
-|---|---|
-| C PASS and gate 266 `published` | <ul><li>SABA-B-11c stage 1 → done.</li><li>C-R265-01, C-R265-02 and B-R264-RANGE-HOW-COPY → closed.</li><li>R6-S2 (the marquee) re-verified on Ctrl/Cmd.</li><li>Stage 2 stays `awaiting_user` (R49-T).</li><li>Round 267 = **REGRESSION** if planned on or after 2026-11-02 (with REG-11C-HIDDEN-GRID-BG added). Otherwise **GATE264-S2** (AltGr, Medium), then SYS-6 STATUS-LIFETIME.</li></ul> |
-| C PASS, gate fails | A bounded fix-up for that step. |
-| A Medium+ finding | A fix-up with the same grants, ≤ 3 related bugs. |
-| A STOP | B rules on it before re-dispatch (L10). |
-
-## 6. Saba questions (`user-review/questions-11c.md`)
-- **New §4: SABA-Q-11C-SPLIT-SPAN** (D3, plus the all-tracks split question).
-- **Still open:** SABA-Q-11C-MARQUEE, SABA-Q-11C-MULTILANE and R49-T.
-
-## 7. Claims (L29; C re-runs each command verbatim; commands from `store/` unless marked "loop root")
-Claims K4–K9 describe HEAD content. The granted files are unchanged at planning, so the working tree equals HEAD for them. After A's edits, re-run K4–K9 against `git show HEAD:<file>`.
-
-| Tag | Claim | Command | Expected |
-|---|---|---|---|
-| K1 | HEAD; the round-265 working tree | `git rev-parse HEAD; git status --short --untracked-files=all \| wc -l` | `2ea196e20e6c3b9099db519f807eaa4a1d95a48a`; `11` (at planning) |
-| K2 | A's 3 component sources equal C's evidence | `git diff -- app/components/arrangement/ArrangementClip.tsx app/components/arrangement/ArrangementLane.tsx app/components/arrangement/StudioWorkspace.tsx \| cmp - ../tmp/studio-real-loop/c-round-265/source.diff && echo SAME` | `SAME` |
-| K3 | 1,118 frozen entries; 7 grants; each protected file once | loop root: `wc -l < b-round-265-r266-tree-sha256.txt; wc -l < b-round-265-r266-grants.txt; for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-routes.test.ts app/lib/auth.ts app/contexts/AuthContext.tsx app/entry.server.tsx; do grep -cF "  $f" b-round-265-r266-tree-sha256.txt; done \| tr '\n' ' '` | `1118`; `7`; `1 1 1 1 1 1 1` |
-| K4 | `splitClipsByRange`, its full-containment check; `splitClipAt` and its edge guard | `grep -n "export function splitClipsByRange(" app/lib/arrangement/model.ts \| cut -d: -f1; grep -n "clipEnd(entry) >= range.end - ARRANGEMENT_EPS," app/lib/arrangement/model.ts \| cut -d: -f1; grep -n "export function splitClipAt(" app/lib/arrangement/model.ts \| cut -d: -f1; grep -n "if (time - clip.start < MIN_CLIP_DURATION \|\| end - time < MIN_CLIP_DURATION) {" app/lib/arrangement/model.ts \| cut -d: -f1; awk 'NR>=290 && /^}/ {print NR; exit}' app/lib/arrangement/model.ts` | `290`; `298`; `256`; `266`; `324` (the function's closing brace) |
-| K5 | `splitSelection`: all-tracks refusal, marker-branch `setSelection`, range branch | `grep -n "setStatus(studioEditStrings.splitAllTracksRefused);\|setSelection(result.rightIds);\|const result = splitClipsByRange(arrangement, latest.range);\|setStatus(studioEditStrings.splitRangeFailed);\|setSelectedClipId(result.middleId);\|setStatus(studioEditStrings.splitRangeDone);" app/contexts/ArrangementContext.tsx \| cut -d: -f1 \| tr '\n' ' '` | `1973 1985 1990 1992 1996 1998` |
-| K6 | the strings | `grep -n "  rangeMissingReason: 'Make a time selection in the Arrangement (drag on a clip or on the ruler)',\|  splitRangeFailed: 'Could not split at the time selection.',\|  splitRangeDone: 'Clip split at both edges of the time selection; the middle part is selected.',\|  needsSelection: 'To set a loop, first make a time selection on the waveform.',\|  rangeInvalid:" app/lib/arrangement/strings.ts \| cut -d: -f1 \| tr '\n' ' '` | `24 114 116 289 808` |
-| K7 | the only non-null time-range writers in components; the ruler sets none | `grep -rn "setTimeRange(\|setRange(" app/components --include=*.tsx \| grep -v __tests__ \| grep -v "(null)" \| cut -d: -f1,2 \| tr '\n' ' '; grep -c "setRange\|setTimeRange" app/components/arrangement/ArrangementRuler.tsx` | `app/components/arrangement/ArrangementClip.tsx:688 app/components/arrangement/StudioWorkspace.tsx:2102 app/components/arrangement/ArrangementDetailPanel.tsx:591`; `0` |
-| K8 | the collision lines; B's scratch result | `grep -n "splitClipsByRange\|middleId" app/lib/arrangement/__tests__/model.test.ts \| cut -d: -f1 \| tr '\n' ' '; grep -n "it('ST1:\|it('ST8:\|it('ST10:" app/lib/arrangement/__tests__/strings.test.ts \| cut -d: -f1 \| tr '\n' ' '`; loop root: `grep -E "^ FAIL \|Tests  " b-round-265/precheck-sketch-vitest.clean.txt \| sed 's/ >.*//' \| sort \| uniq -c` | `18 192 194 201`; `182 618 767`; three lines: `1       Tests  4 failed \| 2455 passed (2459)`, `1  FAIL  app/lib/arrangement/__tests__/model.test.ts`, `3  FAIL  app/lib/arrangement/__tests__/strings.test.ts` (each with its leading `uniq -c` padding) |
-| K9 | the sweep over every test root for the changed tokens | `grep -rlE "splitClipsByRange\|splitRangeDone\|splitRangeFailed\|Could not split\|middle part is selected\|on the waveform\|drag on a clip or on the ruler" app perf e2e 2>/dev/null \| sort \| tr '\n' ' '` | `app/contexts/ArrangementContext.tsx app/lib/arrangement/__tests__/detail-panel-polish.test.tsx app/lib/arrangement/__tests__/model.test.ts app/lib/arrangement/__tests__/strings.test.ts app/lib/arrangement/model.ts app/lib/arrangement/strings.ts ` |
-| K10 | the callers of `splitSelection` | `grep -n "current.splitSelection();" app/components/arrangement/StudioWorkspace.tsx \| cut -d: -f1; grep -n "onClick={splitSelection}" app/components/arrangement/ArrangementTransport.tsx \| cut -d: -f1` | `2347`; `174` |
-| K11 | the lane selectors C uses | `grep -rn 'data-testid="arrangement-video-dropzone"' app/components --include=*.tsx \| cut -d: -f1,2; grep -n "data-track-id={track.id}" app/components/arrangement/ArrangementLane.tsx \| cut -d: -f1` | `app/components/arrangement/ArrangementLane.tsx:897`; `708` |
-| K12 | the status and export-reason signals | `grep -n 'data-testid="arrangement-status"' app/components/arrangement/StudioWorkspace.tsx \| cut -d: -f1; grep -n 'data-testid="arrangement-export-scope-range-reason"' app/components/arrangement/ArrangementExportDialog.tsx \| cut -d: -f1` | `3138`; `453` |
-| K13 | B's browser baseline and sketch | loop root: `node b-round-265/probe-split.mjs /tmp/k13.json` (the current tree on :5173) | per viewport, 0 errors: `A_split` "Could not split at the time selection." (the C-R265-01 repro, before the fix); `F_videoOverlayRow` `["video"]`; `G_exportReason` 390 × 16 px. After A's fix, the same script gives the `probe-split-sketch.json` values |
-| K14 | B's neighbour baseline on the current tree (both viewports, 0 errors) | loop root: `node b-round-265/probe-neighbours.mjs /tmp/k14.json` | `markerSplit` clips `["10.000","15.000"]`, "Clip split at 00:15.000."; `allTracks` the `splitAllTracksRefused` text, clips `["10.000"]`, range true; `splitBtnCount` 1, `splitBtnAfter.active` `BUTTON\|Split`; `loopNoRange` "To set a loop, first make a time selection on the waveform." with `statusFits` true (before the fix; after it, the new text) |
-| K15 | doc 198 l.4 before this round (A's round-265 file, saved by B) | loop root: `sed -n 4p b-round-265/198-doc.r265.txt` | `**სტატუსი:** In Progress (stage 1 of 2; C round 265 PASS)` |
-| K16 | B's copies of the 2 untracked round-265 files equal the planning hashes in the frozen-list generation | loop root: `sha256sum b-round-265/background-time-selection-ui.test.tsx.r265.txt b-round-265/198-doc.r265.txt \| cut -c1-12` | `6cfae02a9f47`, `fed6cea433bf` |
+**Browser claims (§0, §3):** in the loop root, `b-round-266/probe-fix-head.json` and `b-round-266/probe-fix-sketch.json`. Script: `b-round-266/probe-altgr-fix.mjs <base> <out.json>`.

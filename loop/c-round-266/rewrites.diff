@@ -1,0 +1,227 @@
+diff --git a/app/lib/arrangement/__tests__/model.test.ts b/app/lib/arrangement/__tests__/model.test.ts
+index 56d7f0a..258ee6e 100644
+--- a/app/lib/arrangement/__tests__/model.test.ts
++++ b/app/lib/arrangement/__tests__/model.test.ts
+@@ -198,12 +198,178 @@ describe('splitClipsByRange', () => {
+     });
+     expect(result?.arrangement.clips).toHaveLength(3);
+     if (!result) return;
+-    expect(find(result.arrangement, result.middleId)).toMatchObject({
++    expect(result.middleIds).toHaveLength(1);
++    expect(find(result.arrangement, result.middleIds[0] ?? '')).toMatchObject({
+       start: 4,
+       sourceOffset: 4,
+       duration: 2,
+     });
+   });
++
++  function spans(arrangement: Arrangement): Array<[string, string, number, number, number]> {
++    return arrangement.clips
++      .map((entry): [string, string, number, number, number] => [
++        entry.trackId,
++        entry.sourceId,
++        Number(entry.start.toFixed(6)),
++        Number(entry.sourceOffset.toFixed(6)),
++        Number(entry.duration.toFixed(6)),
++      ])
++      .sort((left, right) => left[0].localeCompare(right[0]) || left[2] - right[2]);
++  }
++
++  it('MS1: a range past the clip start cuts only at the edge inside the clip', () => {
++    const result = splitClipsByRange(baseArrangement([clip('a', 'music', 10, 101.35)]), {
++      start: 6.25,
++      end: 12.5,
++      trackId: 'music',
++    });
++    expect(result).not.toBeNull();
++    if (!result) return;
++    expect(spans(result.arrangement)).toEqual([
++      ['music', 'src', 10, 0, 2.5],
++      ['music', 'src', 12.5, 2.5, 98.85],
++    ]);
++    expect(result.middleIds).toEqual(['a']);
++    expect(find(result.arrangement, 'a')).toMatchObject({ start: 10, duration: 2.5 });
++  });
++
++  it('MS2: a range across a gap cuts both clips and returns both inside parts in clip order', () => {
++    const result = splitClipsByRange(
++      baseArrangement([clip('b', 'music', 14, 10, 0, 'srcB'), clip('a', 'music', 0, 10)]),
++      { start: 6, end: 18, trackId: 'music' },
++    );
++    expect(result).not.toBeNull();
++    if (!result) return;
++    expect(spans(result.arrangement)).toEqual([
++      ['music', 'src', 0, 0, 6],
++      ['music', 'src', 6, 6, 4],
++      ['music', 'srcB', 14, 0, 4],
++      ['music', 'srcB', 18, 4, 6],
++    ]);
++    expect(result.middleIds).toHaveLength(2);
++    expect(find(result.arrangement, result.middleIds[0] ?? '')).toMatchObject({
++      sourceId: 'src',
++      start: 6,
++      sourceOffset: 6,
++      duration: 4,
++    });
++    expect(result.middleIds[0]).not.toBe('a');
++    expect(result.middleIds[1]).toBe('b');
++    expect(find(result.arrangement, 'b')).toMatchObject({
++      start: 14,
++      sourceOffset: 0,
++      duration: 4,
++    });
++  });
++
++  it('MS3: empty space only, or a whole clip inside the range, is refused', () => {
++    const arrangement = baseArrangement([clip('a', 'music', 0, 10)]);
++    expect(splitClipsByRange(arrangement, { start: 11, end: 13, trackId: 'music' })).toBeNull();
++    const covered = baseArrangement([clip('a', 'music', 10, 2.5), clip('b', 'music', 20, 5)]);
++    expect(splitClipsByRange(covered, { start: 9, end: 13, trackId: 'music' })).toBeNull();
++  });
++
++  it('MS4: an edge closer than the minimum to a clip edge is not cut; the other edge is', () => {
++    const atStart = splitClipsByRange(baseArrangement([clip('a', 'music', 0, 10)]), {
++      start: 0.03,
++      end: 6,
++      trackId: 'music',
++    });
++    expect(atStart).not.toBeNull();
++    if (!atStart) return;
++    expect(spans(atStart.arrangement)).toEqual([
++      ['music', 'src', 0, 0, 6],
++      ['music', 'src', 6, 6, 4],
++    ]);
++    expect(atStart.middleIds).toEqual(['a']);
++    const atEnd = splitClipsByRange(baseArrangement([clip('a', 'music', 0, 10)]), {
++      start: 4,
++      end: 9.97,
++      trackId: 'music',
++    });
++    expect(atEnd).not.toBeNull();
++    if (!atEnd) return;
++    expect(spans(atEnd.arrangement)).toEqual([
++      ['music', 'src', 0, 0, 4],
++      ['music', 'src', 4, 4, 6],
++    ]);
++    expect(atEnd.middleIds).toHaveLength(1);
++    expect(find(atEnd.arrangement, atEnd.middleIds[0] ?? '')).toMatchObject({
++      start: 4,
++      duration: 6,
++    });
++  });
++
++  it('MS5: clips on another track in the same time window are untouched', () => {
++    const other = clip('s', 'stems', 0, 10, 0, 'srcS');
++    const result = splitClipsByRange(baseArrangement([clip('a', 'music', 0, 10), other]), {
++      start: 4,
++      end: 6,
++      trackId: 'music',
++    });
++    expect(result).not.toBeNull();
++    if (!result) return;
++    expect(spans(result.arrangement)).toEqual([
++      ['music', 'src', 0, 0, 4],
++      ['music', 'src', 4, 4, 2],
++      ['music', 'src', 6, 6, 4],
++      ['stems', 'srcS', 0, 0, 10],
++    ]);
++    expect(find(result.arrangement, 's')).toEqual(other);
++    expect(result.middleIds).toHaveLength(1);
++  });
++
++  it('MS6: a whole clip inside the range next to a cut clip is selected uncut', () => {
++    const result = splitClipsByRange(
++      baseArrangement([clip('a', 'music', 0, 10), clip('b', 'music', 12, 2, 0, 'srcB')]),
++      { start: 6, end: 15, trackId: 'music' },
++    );
++    expect(result).not.toBeNull();
++    if (!result) return;
++    expect(spans(result.arrangement)).toEqual([
++      ['music', 'src', 0, 0, 6],
++      ['music', 'src', 6, 6, 4],
++      ['music', 'srcB', 12, 0, 2],
++    ]);
++    expect(result.middleIds).toHaveLength(2);
++    expect(find(result.arrangement, result.middleIds[0] ?? '')).toMatchObject({
++      start: 6,
++      duration: 4,
++    });
++    expect(result.middleIds[1]).toBe('b');
++  });
++
++  it('MS7: a neighbour overlapping the range by less than the minimum, or only touching it, is skipped', () => {
++    const result = splitClipsByRange(
++      baseArrangement([clip('a', 'music', 0, 10), clip('b', 'music', 10.02, 4.98, 0, 'srcB')]),
++      { start: 0, end: 10.05, trackId: 'music' },
++    );
++    expect(result).toBeNull();
++    const cut = splitClipsByRange(
++      baseArrangement([
++        clip('a', 'music', 0, 10),
++        clip('b', 'music', 10.02, 4.98, 0, 'srcB'),
++        clip('t', 'music', 15, 5, 0, 'srcT'),
++      ]),
++      { start: 4, end: 10.05, trackId: 'music' },
++    );
++    expect(cut).not.toBeNull();
++    if (!cut) return;
++    expect(spans(cut.arrangement)).toEqual([
++      ['music', 'src', 0, 0, 4],
++      ['music', 'src', 4, 4, 6],
++      ['music', 'srcB', 10.02, 0, 4.98],
++      ['music', 'srcT', 15, 0, 5],
++    ]);
++    expect(cut.middleIds).toHaveLength(1);
++    expect(cut.middleIds).not.toContain('b');
++    const touching = splitClipsByRange(
++      baseArrangement([clip('a', 'music', 0, 4), clip('b', 'music', 6, 4, 0, 'srcB')]),
++      { start: 4, end: 6, trackId: 'music' },
++    );
++    expect(touching).toBeNull();
++  });
+ });
+ 
+ describe('deleteClip', () => {
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 0b66253..827bb9b 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -104,7 +104,7 @@ const EXPECTED_PLAIN_STRINGS: Record<string, string> = {
+   mp3FormatNote: 'LAME (mediabunny) — 320 kbps CBR; the encoder loads with the first MP3 export',
+   bothFormatNote:
+     'The same mix as two files — either both are created or neither. Your browser may ask for permission to download the second file.',
+-  rangeMissingReason: 'Make a time selection in the Arrangement (drag on a clip or on the ruler)',
++  rangeMissingReason: 'Make a time selection in the Arrangement (drag in a lane)',
+   videoRenderReason:
+     "Video is not rendered in this version — the export is audio only (the video's original sound is included if it is on).",
+   videoFadesPreviewNote:
+@@ -428,6 +428,7 @@ const EDIT_FORMATTER_SAMPLES: Record<string, string[]> = {
+     e.splitClipsDone({ count: 3, time: '00:02.500' }),
+   ],
+   splitDone: [e.splitDone('00:02.500')],
++  splitRangeClipsDone: [e.splitRangeClipsDone(2), e.splitRangeClipsDone(3)],
+   deleteRangeDone: [
+     e.deleteRangeDone({ start: '00:03.000', end: '00:05.000', lanes: e.onTrack('SFX') }),
+     e.deleteRangeDone({ start: '00:03.000', end: '00:05.000', lanes: e.onTrack('—') }),
+@@ -512,6 +513,12 @@ describe('studioEditStrings (V-0.2a)', () => {
+       '3 clips split at 00:02.500; the right parts are selected.',
+     );
+     expect(e.splitDone('00:02.500')).toBe('Clip split at 00:02.500.');
++    expect(e.splitRangeClipsDone(2)).toBe(
++      'Clips split at the edges of the time selection; the 2 parts inside it are selected.',
++    );
++    expect(e.splitRangeClipsDone(3)).toBe(
++      'Clips split at the edges of the time selection; the 3 parts inside it are selected.',
++    );
+     expect(e.onTrack('SFX')).toBe('on the SFX track');
+     expect(e.onTrack('—')).toBe('on the — track');
+     expect(
+@@ -693,7 +700,7 @@ const EXPECTED_V02B_PLAIN_STRINGS: Record<string, Record<string, string>> = {
+     tooShort: 'A loop needs a time selection of at least 0.1 s.',
+     historyReplaced: 'Loop replaced',
+     historyCreated: 'Loop created',
+-    needsSelection: 'To set a loop, first make a time selection on the waveform.',
++    needsSelection: 'To set a loop, first make a time selection (drag in a lane).',
+     historyOn: 'Loop on',
+     historyOff: 'Loop off',
+     on: 'Loop is on.',

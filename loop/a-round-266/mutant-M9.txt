@@ -1,0 +1,255 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a266-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/model.test.ts [2m([22m[2m45 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 47[2mms[22m[39m
+     [32m✓[39m requires exactly one video track[32m 3[2mms[22m[39m
+     [32m✓[39m places a clip at the requested free spot[32m 2[2mms[22m[39m
+     [32m✓[39m falls back to the nearest free start when the spot is taken[32m 0[2mms[22m[39m
+     [32m✓[39m refuses the video track[32m 0[2mms[22m[39m
+     [32m✓[39m findFreeStart never caps at 60 seconds[32m 0[2mms[22m[39m
+     [32m✓[39m moves the start and keeps sourceOffset[32m 0[2mms[22m[39m
+     [32m✓[39m is blocked by a neighbour on the same track[32m 0[2mms[22m[39m
+     [32m✓[39m ignores clips on other tracks[32m 0[2mms[22m[39m
+     [32m✓[39m adjusts sourceOffset and keeps the end fixed[32m 1[2mms[22m[39m
+     [32m✓[39m stops at the source start[32m 0[2mms[22m[39m
+     [32m✓[39m stops at the previous neighbour and keeps the minimum length[32m 0[2mms[22m[39m
+     [32m✓[39m stops at the source end[32m 0[2mms[22m[39m
+     [32m✓[39m stops at the next neighbour[32m 0[2mms[22m[39m
+     [32m✓[39m returns the same arrangement when nothing can change[32m 0[2mms[22m[39m
+     [32m✓[39m splits with the right part offset into the source[32m 1[2mms[22m[39m
+     [32m✓[39m refuses a split outside the clip[32m 0[2mms[22m[39m
+     [32m✓[39m produces three parts with the middle one returned[32m 1[2mms[22m[39m
+     [32m✓[39m MS1: a range past the clip start cuts only at the edge inside the clip[32m 8[2mms[22m[39m
+     [32m✓[39m MS2: a range across a gap cuts both clips and returns both inside parts in clip order[32m 1[2mms[22m[39m
+[31m     [31m×[31m MS3: empty space only, or a whole clip inside the range, is refused[39m[32m 13[2mms[22m[39m
+     [32m✓[39m MS4: an edge closer than the minimum to a clip edge is not cut; the other edge is[32m 1[2mms[22m[39m
+     [32m✓[39m MS5: clips on another track in the same time window are untouched[32m 0[2mms[22m[39m
+     [32m✓[39m MS6: a whole clip inside the range next to a cut clip is selected uncut[32m 1[2mms[22m[39m
+[31m     [31m×[31m MS7: a neighbour overlapping the range by less than the minimum, or only touching it, is skipped[39m[32m 2[2mms[22m[39m
+     [32m✓[39m removes only the clip and leaves the gap[32m 0[2mms[22m[39m
+     [32m✓[39m keeps clips that end before a[32m 0[2mms[22m[39m
+     [32m✓[39m shifts clips after b by -(b - a)[32m 0[2mms[22m[39m
+     [32m✓[39m trims a clip straddling the left edge[32m 0[2mms[22m[39m
+     [32m✓[39m moves the right part of a clip straddling the right edge to a[32m 0[2mms[22m[39m
+     [32m✓[39m removes clips fully inside the range[32m 0[2mms[22m[39m
+     [32m✓[39m splits a clip spanning both edges, including the video track[32m 1[2mms[22m[39m
+     [32m✓[39m drops parts shorter than a millisecond[32m 0[2mms[22m[39m
+     [32m✓[39m maps positions around a deleted range[32m 0[2mms[22m[39m
+     [32m✓[39m is 0 when empty and grows beyond 60 seconds[32m 0[2mms[22m[39m
+     [32m✓[39m toggleSolo is exclusive on a plain click and additive with modifier[32m 1[2mms[22m[39m
+     [32m✓[39m setTrackMix clamps volume and keeps mute[32m 0[2mms[22m[39m
+     [32m✓[39m undo and redo restore exact snapshots[32m 1[2mms[22m[39m
+     [32m✓[39m ignores a commit equal to the current snapshot[32m 0[2mms[22m[39m
+     [32m✓[39m records one entry for a drag preview with an explicit before snapshot[32m 0[2mms[22m[39m
+     [32m✓[39m createArrangement starts without a loop[32m 0[2mms[22m[39m
+     [32m✓[39m undo and redo restore the loop exactly (create, replace, toggle)[32m 1[2mms[22m[39m
+     [32m✓[39m clears redo after a new commit[32m 1[2mms[22m[39m
+     [32m✓[39m appends sequentially on the single video track with offset 0[32m 1[2mms[22m[39m
+     [32m✓[39m rejects a non-finite or empty duration[32m 0[2mms[22m[39m
+     [32m✓[39m trimClipEnd on a video clip stops at the probed duration[32m 0[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2875[2mms[22m[39m
+     [33m[2m✓[22m[39m BT1 a plain background drag makes a free lane range, clears the selection and activates the lane [33m 401[2mms[22m[39m
+     [32m✓[39m BT1 a Shift drag also makes a range, and a drag to the left gives the same ordered range[32m 128[2mms[22m[39m
+     [32m✓[39m BT1 a background drag replaces an all-tracks range, clears the selection once and pointercancel keeps the last range[32m 160[2mms[22m[39m
+     [32m✓[39m BT2 Snap on 1 s snaps the ends; Alt keeps them free; both ends on one line is no range[32m 146[2mms[22m[39m
+     [32m✓[39m BT2 Snap on also snaps a background range end to a marker[32m 102[2mms[22m[39m
+     [32m✓[39m BT3 a drag from the background across a clip and a gap into a second clip spans both; Delete leaves the gap[32m 117[2mms[22m[39m
+     [32m✓[39m BT3 a range over empty space only, then Delete, changes nothing[32m 99[2mms[22m[39m
+     [32m✓[39m BT4 ctrlKey+drag is the marquee: it adds to the earlier selection and clears the range[32m 115[2mms[22m[39m
+     [32m✓[39m BT4 metaKey+drag is the marquee: it adds to the earlier selection and clears the range[32m 117[2mms[22m[39m
+     [32m✓[39m BT5 a click under the threshold sets the insert marker and makes no range[32m 87[2mms[22m[39m
+     [32m✓[39m BT6 an in-clip drag continues past the clip start and end, bounded by 0 and the lane extent[32m 186[2mms[22m[39m
+     [32m✓[39m BT6 a background drag is bounded by 0 and the lane extent[32m 91[2mms[22m[39m
+     [32m✓[39m BT7 a range inside one clip keeps the in-clip overlay and renders no lane overlay[32m 93[2mms[22m[39m
+     [32m✓[39m BT8 a background drag while playing neither stops nor moves playback[32m 86[2mms[22m[39m
+     [32m✓[39m BT9 a vertical-only drag makes no zero-length range, and a drag back to its start removes the range[32m 98[2mms[22m[39m
+     [32m✓[39m BT9 a drag that ends over another lane keeps the range on the origin lane[32m 95[2mms[22m[39m
+     [32m✓[39m BS1 an in-clip drag past the clip start, then Ctrl+E, cuts only at the edge inside the clip[32m 119[2mms[22m[39m
+     [32m✓[39m BS2 a drag from clip A across the gap into clip B, then Ctrl+E, cuts both and selects both inside parts[32m 148[2mms[22m[39m
+[31m     [31m×[31m BS3 a range over empty space only, then Ctrl+E, is refused and changes nothing[39m[32m 95[2mms[22m[39m
+     [33m[2m✓[22m[39m BS4 the Split toolbar button on the BS1 range gives the same result as Ctrl+E [33m 391[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m62 passed[39m[22m[90m (65)[39m
+[2m   Start at [22m 09:48:32
+[2m   Duration [22m 5.30s[2m (transform 1.39s, setup 0ms, import 2.02s, tests 2.92s, environment 1.12s)[22m
+
+
+::error file=/tmp/a266-scratch/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx,title=app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx > SABA-B-11c stage 1 split at a time selection that crosses a clip edge (C-R265-01) > BS3 a range over empty space only%2C then Ctrl+E%2C is refused and changes nothing,line=570,column=33::AssertionError: expected 'Clips split at the edges of the time …' to be 'Could not split at the time selection.' // Object.is equality%0A%0AExpected: "Could not split at the time selection."%0AReceived: "Clips split at the edges of the time selection; the 0 parts inside it are selected."%0A%0A ❯ app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx:570:33%0A%0A
+
+::error file=/tmp/a266-scratch/app/lib/arrangement/__tests__/model.test.ts,title=app/lib/arrangement/__tests__/model.test.ts > splitClipsByRange > MS3%3A empty space only%2C or a whole clip inside the range%2C is refused,line=268,column=86::AssertionError: expected { Object (arrangement, middleIds) } to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A{%0A  "arrangement": {%0A    "clips": [%0A      {%0A        "duration": 10,%0A        "id": "a",%0A        "sourceId": "src",%0A        "sourceOffset": 0,%0A        "start": 0,%0A        "trackId": "music",%0A      },%0A    ],%0A    "loop": null,%0A    "master": {%0A      "gainDb": 0,%0A      "mute": false,%0A    },%0A    "tracks": [%0A      {%0A        "id": "video",%0A        "kind": "video",%0A        "mute": false,%0A        "name": "ვიდეო",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A      {%0A        "id": "music",%0A        "kind": "audio",%0A        "mute": false,%0A        "name": "მუსიკა",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A      {%0A        "id": "stems",%0A        "kind": "audio",%0A        "mute": false,%0A        "name": "სტემები",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A      {%0A        "id": "sfx",%0A        "kind": "audio",%0A        "mute": false,%0A        "name": "SFX",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A    ],%0A  },%0A  "middleIds": [],%0A}%0A%0A ❯ app/lib/arrangement/__tests__/model.test.ts:268:86%0A%0A
+
+::error file=/tmp/a266-scratch/app/lib/arrangement/__tests__/model.test.ts,title=app/lib/arrangement/__tests__/model.test.ts > splitClipsByRange > MS7%3A a neighbour overlapping the range by less than the minimum%2C or only touching it%2C is skipped,line=348,column=20::AssertionError: expected { arrangement: { …(4) }, …(1) } to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A{%0A  "arrangement": {%0A    "clips": [%0A      {%0A        "duration": 10,%0A        "id": "a",%0A        "sourceId": "src",%0A        "sourceOffset": 0,%0A        "start": 0,%0A        "trackId": "music",%0A      },%0A      {%0A        "duration": 4.98,%0A        "id": "b",%0A        "sourceId": "srcB",%0A        "sourceOffset": 0,%0A        "start": 10.02,%0A        "trackId": "music",%0A      },%0A    ],%0A    "loop": null,%0A    "master": {%0A      "gainDb": 0,%0A      "mute": false,%0A    },%0A    "tracks": [%0A      {%0A        "id": "video",%0A        "kind": "video",%0A        "mute": false,%0A        "name": "ვიდეო",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A      {%0A        "id": "music",%0A        "kind": "audio",%0A        "mute": false,%0A        "name": "მუსიკა",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A      {%0A        "id": "stems",%0A        "kind": "audio",%0A        "mute": false,%0A        "name": "სტემები",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A      {%0A        "id": "sfx",%0A        "kind": "audio",%0A        "mute": false,%0A        "name": "SFX",%0A        "solo": false,%0A        "volume": 1,%0A      },%0A    ],%0A  },%0A  "middleIds": [%0A    "a",%0A  ],%0A}%0A%0A ❯ app/lib/arrangement/__tests__/model.test.ts:348:20%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx[2m > [22mSABA-B-11c stage 1 split at a time selection that crosses a clip edge (C-R265-01)[2m > [22mBS3 a range over empty space only, then Ctrl+E, is refused and changes nothing
+[31m[1mAssertionError[22m: expected 'Clips split at the edges of the time …' to be 'Could not split at the time selection.' // Object.is equality[39m
+
+Expected: [32m"C[7mould not[27m split at the time selection."[39m
+Received: [31m"C[7mlips[27m split at the [7medges of the [27mtime selection[7m; the 0 parts inside it are selected[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx:[2m570:33[22m[39m
+    [90m568| [39m    [35mconst[39m before [33m=[39m [34mlive[39m(api)[33m.[39marrangement[33m;[39m
+    [90m569| [39m    [34mpressSplitKey[39m()[33m;[39m
+    [90m570| [39m    expect(statusText(mounted)).toBe(studioEditStrings.splitRangeFaile…
+    [90m   | [39m                                [31m^[39m
+    [90m571| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement)[33m.[39m[34mtoBe[39m(before)[33m;[39m
+    [90m572| [39m    expect(live(api).range).toEqual({ start: 1, end: 7.5, trackId: 'mu…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/model.test.ts[2m > [22msplitClipsByRange[2m > [22mMS3: empty space only, or a whole clip inside the range, is refused
+[31m[1mAssertionError[22m: expected { Object (arrangement, middleIds) } to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+{
+  "arrangement": {
+    "clips": [
+      {
+        "duration": 10,
+        "id": "a",
+        "sourceId": "src",
+        "sourceOffset": 0,
+        "start": 0,
+        "trackId": "music",
+      },
+    ],
+    "loop": null,
+    "master": {
+      "gainDb": 0,
+      "mute": false,
+    },
+    "tracks": [
+      {
+        "id": "video",
+        "kind": "video",
+        "mute": false,
+        "name": "ვიდეო",
+        "solo": false,
+        "volume": 1,
+      },
+      {
+        "id": "music",
+        "kind": "audio",
+        "mute": false,
+        "name": "მუსიკა",
+        "solo": false,
+        "volume": 1,
+      },
+      {
+        "id": "stems",
+        "kind": "audio",
+        "mute": false,
+        "name": "სტემები",
+        "solo": false,
+        "volume": 1,
+      },
+      {
+        "id": "sfx",
+        "kind": "audio",
+        "mute": false,
+        "name": "SFX",
+        "solo": false,
+        "volume": 1,
+      },
+    ],
+  },
+  "middleIds": [],
+}
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/model.test.ts:[2m268:86[22m[39m
+    [90m266| [39m  it('MS3: empty space only, or a whole clip inside the range, is refu…
+    [90m267| [39m    [35mconst[39m arrangement [33m=[39m [34mbaseArrangement[39m([[34mclip[39m([32m'a'[39m[33m,[39m [32m'music'[39m[33m,[39m [34m0[39m[33m,[39m [34m10[39m)])[33m;[39m
+    [90m268| [39m    expect(splitClipsByRange(arrangement, { start: 11, end: 13, trackI…
+    [90m   | [39m                                                                                     [31m^[39m
+    [90m269| [39m    const covered = baseArrangement([clip('a', 'music', 10, 2.5), clip…
+    [90m270| [39m    expect(splitClipsByRange(covered, { start: 9, end: 13, trackId: 'm…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/model.test.ts[2m > [22msplitClipsByRange[2m > [22mMS7: a neighbour overlapping the range by less than the minimum, or only touching it, is skipped
+[31m[1mAssertionError[22m: expected { arrangement: { …(4) }, …(1) } to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+{
+  "arrangement": {
+    "clips": [
+      {
+        "duration": 10,
+        "id": "a",
+        "sourceId": "src",
+        "sourceOffset": 0,
+        "start": 0,
+        "trackId": "music",
+      },
+      {
+        "duration": 4.98,
+        "id": "b",
+        "sourceId": "srcB",
+        "sourceOffset": 0,
+        "start": 10.02,
+        "trackId": "music",
+      },
+    ],
+    "loop": null,
+    "master": {
+      "gainDb": 0,
+      "mute": false,
+    },
+    "tracks": [
+      {
+        "id": "video",
+        "kind": "video",
+        "mute": false,
+        "name": "ვიდეო",
+        "solo": false,
+        "volume": 1,
+      },
+      {
+        "id": "music",
+        "kind": "audio",
+        "mute": false,
+        "name": "მუსიკა",
+        "solo": false,
+        "volume": 1,
+      },
+      {
+        "id": "stems",
+        "kind": "audio",
+        "mute": false,
+        "name": "სტემები",
+        "solo": false,
+        "volume": 1,
+      },
+      {
+        "id": "sfx",
+        "kind": "audio",
+        "mute": false,
+        "name": "SFX",
+        "solo": false,
+        "volume": 1,
+      },
+    ],
+  },
+  "middleIds": [
+    "a",
+  ],
+}
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/model.test.ts:[2m348:20[22m[39m
+    [90m346| [39m      { start[33m:[39m [34m0[39m[33m,[39m end[33m:[39m [34m10.05[39m[33m,[39m trackId[33m:[39m [32m'music'[39m }[33m,[39m
+    [90m347| [39m    )[33m;[39m
+    [90m348| [39m    [34mexpect[39m(result)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m349| [39m    [35mconst[39m cut [33m=[39m [34msplitClipsByRange[39m(
+    [90m350| [39m      [34mbaseArrangement[39m([
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
