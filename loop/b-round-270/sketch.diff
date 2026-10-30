@@ -1,0 +1,440 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index 2190108..1f5bd53 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -12,7 +12,7 @@ import {
+   resolveGridTimeWithTargets,
+   resolveSnapStep,
+   snapGroupMoveDelta,
+-  snapMoveStartToGridOrEdges,
++  snapRelativeMoveStartToGridOrEdges,
+   snapTimeToGridOrEdges,
+ } from '~/lib/arrangement/grid';
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+@@ -147,7 +147,7 @@ function moveStartOnGrid(
+ ): number {
+   return snapStep === null
+     ? Math.max(0, roundTime(start + delta))
+-    : snapMoveStartToGridOrEdges(start + delta, duration, snapStep, startEdges, endEdges);
++    : snapRelativeMoveStartToGridOrEdges(start, delta, duration, snapStep, startEdges, endEdges);
+ }
+ 
+ function groupDeltaOnGrid(
+diff --git a/app/lib/arrangement/__tests__/grid-edges.test.ts b/app/lib/arrangement/__tests__/grid-edges.test.ts
+index b62d692..961fa83 100644
+--- a/app/lib/arrangement/__tests__/grid-edges.test.ts
++++ b/app/lib/arrangement/__tests__/grid-edges.test.ts
+@@ -5,6 +5,7 @@ import {
+   clipEdgeTimes,
+   snapGroupMoveDelta,
+   snapMoveStartToGridOrEdges,
++  snapRelativeMoveStartToGridOrEdges,
+   snapTimeToGridOrEdges,
+ } from '../grid';
+ 
+@@ -124,3 +125,92 @@ describe('SRW-14 stage 4c group move snaps the anchor to edges (D-29z27)', () =>
+     });
+   });
+ });
++
++describe('SABA-B-11c stage 2 relative move snap (RU)', () => {
++  const quarterAt90 = 60 / 90;
++
++  it('RU1 an off-grid start keeps its offset and moves in whole divisions', () => {
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 0.9, 1, 1, [])).toBe(5.3);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 1.6, 1, 1, [])).toBe(6.3);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 0.49, 1, 1, [])).toBe(4.3);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 0.5, 1, 1, [])).toBe(5.3);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, -0.4, 1, 1, [])).toBe(4.3);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, -0.6, 1, 1, [])).toBe(3.3);
++  });
++
++  it('RU2 an on-grid start gives exactly the absolute result', () => {
++    const cases: [number, number][] = [
++      [0, 1],
++      [2, 1],
++      [7, 0.25],
++      [6.0004, 1],
++      [0.667, quarterAt90],
++      [1.333, quarterAt90],
++    ];
++    for (const [anchor, step] of cases) {
++      for (let tenth = -40; tenth <= 40; tenth++) {
++        const delta = tenth / 20;
++        expect(snapRelativeMoveStartToGridOrEdges(anchor, delta, 1, step, [])).toBe(
++          snapMoveStartToGridOrEdges(anchor + delta, 1, step, []),
++        );
++      }
++    }
++  });
++
++  it('RU3 the lowest start is the offset itself, never below zero', () => {
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, -10, 1, 1, [])).toBe(0.3);
++    expect(snapRelativeMoveStartToGridOrEdges(0.3, -0.6, 1, 1, [])).toBe(0.3);
++  });
++
++  it('RU4 a nearer edge still wins and a tie goes to the grid step', () => {
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 0.95, 1, 1, [5.22])).toBe(5.22);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 0.95, 1, 1, [5.2])).toBe(5.3);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 0.95, 1, 1, [], [6.27])).toBeCloseTo(5.27, 9);
++  });
++
++  it('RU5 a musical step keeps the offset in whole beats', () => {
++    expect(snapRelativeMoveStartToGridOrEdges(1, 0.7, 1, quarterAt90, [])).toBe(1.666);
++    expect(snapRelativeMoveStartToGridOrEdges(1, -0.3, 1, quarterAt90, [])).toBe(1);
++  });
++
++  it('RU8 jitter on an off-grid clip with a neighbour edge 0.6 s away does not move it', () => {
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, 0.1, 1, 1, [4.9])).toBe(4.3);
++    expect(snapRelativeMoveStartToGridOrEdges(4.3, -0.1, 1, 1, [4.9])).toBe(4.3);
++  });
++
++  it('RU7 twenty one-beat drags on a musical step keep the same offset from the stored line', () => {
++    let start = 1;
++    for (let drag = 0; drag < 20; drag++) {
++      start = snapRelativeMoveStartToGridOrEdges(start, quarterAt90, 1, quarterAt90, []);
++    }
++    expect(start).toBe(14.333);
++  });
++
++  it('RU6 a start within half a millisecond of a line counts as on the grid', () => {
++    expect(snapRelativeMoveStartToGridOrEdges(6.0004, 1.9, 2, 1, [])).toBe(8);
++    expect(snapRelativeMoveStartToGridOrEdges(6.0006, 1.9, 2, 1, [])).toBe(8.001);
++  });
++
++  it('RG1 a group delta from an off-grid anchor is a whole number of divisions inside the bounds', () => {
++    expect(snapGroupMoveDelta(4.3, 1, 0.9, 1, -4.3, 10, [], [])).toEqual({
++      requested: 1,
++      allowed: 1,
++    });
++    expect(snapGroupMoveDelta(4.3, 1, 2.6, 1, -4.3, 1.5, [], [])).toEqual({
++      requested: 3,
++      allowed: 1,
++    });
++    expect(snapGroupMoveDelta(4.3, 1, -2.6, 1, -1.5, 10, [], [])).toEqual({
++      requested: -3,
++      allowed: -1,
++    });
++    expect(snapGroupMoveDelta(4.3, 1, 0.9, 1, -4.3, 0.7, [], [])).toEqual({
++      requested: 1,
++      allowed: 0,
++    });
++    expect(snapGroupMoveDelta(4.3, 1, -10, 1, -4.3, 10, [], [])).toEqual({
++      requested: -4,
++      allowed: -4,
++    });
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx b/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
+index 85a7ee1..f0dba08 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
+@@ -458,11 +458,11 @@ describe('SRW-14 stage 4a single clip move snaps to the edges of other clips', (
+   });
+ 
+   it('CM11 the moved clip ignores its own edges', async () => {
+-    const { api, clipParts } = await mountEdgeWorkspace([clipAt('m1', 'music', 7.3, 2)]);
++    const { api, clipParts } = await mountEdgeWorkspace([clipAt('m1', 'music', 7.3, 2.4)]);
+     pressG();
+     const parts = clipParts('m1');
+-    dragFrom(parts.header, parts.root, 40, [{ dx: 8 }]);
+-    expect(clipOf(api, 'm1').start).toBe(8);
++    dragFrom(parts.header, parts.root, 40, [{ dx: 94 }]);
++    expect(clipOf(api, 'm1').start).toBe(9.3);
+   });
+ 
+   it('CM17 a Snap-off move keeps a whole-millisecond start at a fractional zoom', async () => {
+diff --git a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+index c682d8a..a913b1c 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -336,7 +336,7 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     expect(view.getByTestId('arrangement-status').textContent).toBe(SNAP_ON_STATUS);
+     expect(view.getByTestId('arrangement-grid-control').dataset.snap).toBe('on');
+     expect(snapToggle(view).getAttribute('aria-pressed')).toBe('true');
+-    expect(snapToggle(view).title).toBe('Snap on — clips land on the grid (G)');
++    expect(snapToggle(view).title).toBe('Snap on — clips follow the grid (G)');
+     expect(live(api).undoLabel).toBeNull();
+     expect(live(api).arrangement).toBe(before);
+     dragClip(clipParts('m1'), [{ dx: 37 }]);
+@@ -365,14 +365,14 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     expect(live(api).undoLabel).toBe('Move clip');
+   });
+ 
+-  it('GS5 a group follows the grabbed clip onto the grid with one history entry', async () => {
++  it('GS5 a group moves by whole grid steps from the grabbed off-grid clip, keeping every offset, with one history entry', async () => {
+     const { api, clipParts } = await mountGridWorkspace();
+     act(() => live(api).selectClip('s1'));
+     act(() => live(api).toggleClipSelection('m1', 'toggle'));
+     pressG();
+     dragClip(clipParts('s1'), [{ dx: 36 }], 1, SFX_LANE_Y);
+-    expect(clipOf(api, 's1').start).toBe(5);
+-    expect(clipOf(api, 'm1').start).toBe(7.7);
++    expect(clipOf(api, 's1').start).toBe(5.3);
++    expect(clipOf(api, 'm1').start).toBe(8);
+     expect(clipOf(api, 's1').trackId).toBe('sfx');
+     expect(live(api).undoLabel).toBe('Move (2)');
+     expect(undoAll(api)).toBe(1);
+@@ -380,7 +380,7 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     expect(clipOf(api, 'm1').start).toBe(7);
+   });
+ 
+-  it('GS5b a group blocked by an unselected neighbour stops on the last grid line before it', async () => {
++  it('GS5b a group blocked by an unselected neighbour stops at the last whole grid step before it', async () => {
+     const { api, view, clipParts } = await mountGridWorkspace();
+     act(() => live(api).selectClip('s1'));
+     act(() => live(api).toggleClipSelection('m1', 'toggle'));
+@@ -394,11 +394,11 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     });
+     fireEvent.pointerMove(parts.root, { pointerId: 7, clientX: 204, clientY: SFX_LANE_Y });
+     expect(view.getByTestId('arrangement-status').textContent).toBe(GROUP_BLOCKED_STATUS);
+-    expect(clipOf(api, 's1').start).toBe(5);
+-    expect(clipOf(api, 'm1').start).toBe(7.7);
++    expect(clipOf(api, 's1').start).toBe(5.3);
++    expect(clipOf(api, 'm1').start).toBe(8);
+     fireEvent.pointerUp(parts.root, { pointerId: 7, clientX: 204, clientY: SFX_LANE_Y });
+-    expect(clipOf(api, 's1').start).toBe(5);
+-    expect(clipOf(api, 'm1').start).toBe(7.7);
++    expect(clipOf(api, 's1').start).toBe(5.3);
++    expect(clipOf(api, 'm1').start).toBe(8);
+     expect(clipOf(api, 'm1').start + clipOf(api, 'm1').duration).toBeLessThanOrEqual(
+       clipOf(api, 'm2').start,
+     );
+@@ -407,7 +407,7 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     expect(clipOf(api, 's1').start).toBe(4.3);
+   });
+ 
+-  it('GS6 a cross-lane move shows a grid ghost and lands on the grid with one entry', async () => {
++  it('GS6 a cross-lane move of an off-grid clip shows its ghost one whole grid step away and lands there with one entry', async () => {
+     const { api, view, clipParts } = await mountGridWorkspace();
+     pressG();
+     const parts = clipParts('s1');
+@@ -419,15 +419,15 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+     });
+     fireEvent.pointerMove(parts.root, { pointerId: 3, clientX: 120, clientY: MUSIC_LANE_Y });
+     const ghosts = view.getAllByTestId('arrangement-lane-move-ghost');
+-    expect(ghosts.map((ghost) => ghost.dataset.ghostStart)).toEqual(['5.000']);
++    expect(ghosts.map((ghost) => ghost.dataset.ghostStart)).toEqual(['5.300']);
+     fireEvent.pointerUp(parts.root, { pointerId: 3, clientX: 120, clientY: MUSIC_LANE_Y });
+     expect(clipOf(api, 's1').trackId).toBe('music');
+-    expect(clipOf(api, 's1').start).toBe(5);
++    expect(clipOf(api, 's1').start).toBe(5.3);
+     expect(live(api).undoLabel).toBe('Move to track — მუსიკა');
+     expect(undoAll(api)).toBe(1);
+   });
+ 
+-  it('GS6b a group moved to another lane puts the off-grid anchor on the grid despite a same-lane neighbour', async () => {
++  it('GS6b a group moved to another lane keeps the off-grid anchor offset (one whole grid step) despite a same-lane neighbour', async () => {
+     const clips: ArrangementClip[] = [
+       ...DEFAULT_CLIPS.map((clip) => (clip.id === 'm1' ? { ...clip, start: 7.3 } : clip)),
+       { id: 'm3', trackId: 'music', sourceId: 'song', start: 15, sourceOffset: 0, duration: 2 },
+@@ -449,12 +449,12 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+         .getAllByTestId('arrangement-lane-move-ghost')
+         .map((ghost) => ghost.dataset.ghostStart)
+         .sort(),
+-    ).toEqual(['13.200', '8.000']);
++    ).toEqual(['13.500', '8.300']);
+     fireEvent.pointerUp(parts.root, { pointerId: 8, clientX: 136, clientY: SFX_LANE_Y });
+     expect(clipOf(api, 'm1').trackId).toBe('sfx');
+-    expect(clipOf(api, 'm1').start).toBe(8);
++    expect(clipOf(api, 'm1').start).toBe(8.3);
+     expect(clipOf(api, 'm2').trackId).toBe('sfx');
+-    expect(clipOf(api, 'm2').start).toBe(13.2);
++    expect(clipOf(api, 'm2').start).toBe(13.5);
+     expect(clipOf(api, 'm3').start).toBe(15);
+     expect(live(api).undoLabel).toBe('Move (2)');
+     expect(undoAll(api)).toBe(1);
+@@ -520,7 +520,7 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+       expect(body.style.backgroundImage).toContain('6px');
+     }
+     dragClip(clipParts('m1'), [{ dx: 13 }]);
+-    expect(clipOf(api, 'm1').start).toBe(7.5);
++    expect(clipOf(api, 'm1').start).toBe(7.525);
+   });
+ 
+   it('GS12 G pressed mid-drag snaps the next move and the drag stays one Undo step', async () => {
+@@ -717,7 +717,7 @@ describe(
+       expect(control.dataset.snapPaused).toBe('true');
+       act(() => live(api).setPxPerSecond(60));
+       expect(control.dataset.snapPaused).toBe('false');
+-      expect(snapToggle(view).title).toBe('Snap on — clips land on the grid (G)');
++      expect(snapToggle(view).title).toBe('Snap on — clips follow the grid (G)');
+       expect(view.getByTestId('arrangement-status').textContent).toBe(SNAP_PAUSED_STATUS);
+       fireEvent.change(divisionSelect(view), { target: { value: '0.25' } });
+       expect(view.getByTestId('arrangement-status').textContent).toBe('Grid: 0.25 s (Snap on)');
+@@ -741,7 +741,7 @@ describe(
+       expect(clipOf(api, 'm1').start).toBe(7.325);
+       act(() => live(api).setPxPerSecond(60));
+       altDragClip(clipParts('m1'), 13);
+-      expect(clipOf(api, 'm1').start).toBe(7.5);
++      expect(clipOf(api, 'm1').start).toBe(7.525);
+     });
+ 
+     it('HS3 Alt with Snap on stays free on a hidden grid (no snap either way)', async () => {
+@@ -781,3 +781,57 @@ describe(
+     });
+   },
+ );
++
++describe('SABA-B-11c stage 2 relative snap of clip moves (RS)', { timeout: 15_000 }, () => {
++  it('RS1 a few pixels of drag jitter past the threshold never moves an off-grid clip (F1)', async () => {
++    const { api, clipParts } = await mountGridWorkspace();
++    pressG();
++    dragClip(clipParts('s1'), [{ dx: 5 }], 1, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(4.3);
++    dragClip(clipParts('s1'), [{ dx: -19 }], 2, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(4.3);
++    dragClip(clipParts('s1'), [{ dx: 21 }], 3, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(5.3);
++    expect(live(api).undoLabel).toBe('Move clip');
++    expect(undoAll(api)).toBe(1);
++    expect(clipOf(api, 's1').start).toBe(4.3);
++  });
++
++  it('RS2 an off-grid clip keeps its offset over successive drags (4.3 -> 5.3 -> 6.3), one entry each', async () => {
++    const { api, clipParts } = await mountGridWorkspace();
++    pressG();
++    dragClip(clipParts('s1'), [{ dx: 36 }], 1, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(5.3);
++    dragClip(clipParts('s1'), [{ dx: 36 }], 2, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(6.3);
++    expect(undoAll(api)).toBe(2);
++    expect(clipOf(api, 's1').start).toBe(4.3);
++  });
++
++  it('RS3 a nearer clip edge still wins, and the next drag keeps the new offset', async () => {
++    const { api, clipParts } = await mountGridWorkspace();
++    pressG();
++    dragClip(clipParts('s1'), [{ dx: 326 }], 1, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(12.5);
++    dragClip(clipParts('s1'), [{ dx: 116 }], 2, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(15.5);
++  });
++
++  it('RS4 an off-grid clip dragged toward the time start stops at its own offset, never below zero', async () => {
++    const { api, clipParts } = await mountGridWorkspace();
++    pressG();
++    dragClip(clipParts('s1'), [{ dx: -164 }], 1, SFX_LANE_Y);
++    expect(clipOf(api, 's1').start).toBe(0.3);
++  });
++
++  it('RS5 an on-grid anchor with an off-grid follower is unchanged: the anchor lands on the next line', async () => {
++    const { api, clipParts } = await mountGridWorkspace();
++    act(() => live(api).selectClip('s1'));
++    act(() => live(api).toggleClipSelection('m1', 'toggle'));
++    pressG();
++    dragClip(clipParts('m1'), [{ dx: 36 }]);
++    expect(clipOf(api, 'm1').start).toBe(8);
++    expect(clipOf(api, 's1').start).toBe(5.3);
++    expect(live(api).undoLabel).toBe('Move (2)');
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 98981f6..53d139f 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -1409,7 +1409,7 @@ const EXPECTED_GRID_PLAIN_STRINGS: Record<string, string> = {
+   tripletNotOnBar: '1 bar has no triplets — choose 1/2 or narrower (3)',
+   tripletNeedsBarsGrid: 'Triplets work only on the bars grid — choose 1/2 … 1/32 (3)',
+   menuLabel: 'Grid division',
+-  snapOnTitle: 'Snap on — clips land on the grid (G)',
++  snapOnTitle: 'Snap on — clips follow the grid (G)',
+   snapPausedTitle: 'Snap on — paused: grid lines are hidden at this zoom. Zoom in. (G)',
+   snapPausedNote: '· Lines are hidden at this zoom, so Snap is paused — zoom in.',
+   snapOff: 'Snap off — free movement (G)',
+diff --git a/app/lib/arrangement/grid.ts b/app/lib/arrangement/grid.ts
+index 242d9a8..7dfcfa1 100644
+--- a/app/lib/arrangement/grid.ts
++++ b/app/lib/arrangement/grid.ts
+@@ -282,6 +282,57 @@ export function snapMoveStartToGridOrEdges(
+   ]);
+ }
+ 
++const GRID_OFFSET_TOLERANCE = 0.0005;
++
++function isOnGrid(time: number, step: number): boolean {
++  return Math.abs(snapTimeToGrid(time, step) - time) < GRID_OFFSET_TOLERANCE;
++}
++
++function relativeGridStart(anchorStart: number, rawDelta: number, step: number): number {
++  if (isOnGrid(anchorStart, step)) {
++    return snapTimeToGrid(anchorStart + rawDelta, step);
++  }
++  const baseIndex = Math.floor((anchorStart + GRID_TIME_TOLERANCE) / step);
++  const offset = anchorStart - storedGridLine(baseIndex, step);
++  const whole = Math.max(-baseIndex, Math.floor(rawDelta / step + 0.5));
++  return roundGridTime(storedGridLine(baseIndex + whole, step) + offset);
++}
++
++export function snapRelativeMoveStartToGridOrEdges(
++  anchorStart: number,
++  rawDelta: number,
++  duration: number,
++  step: number,
++  edges: readonly number[],
++  endEdges: readonly number[] = edges,
++): number {
++  return nearestGridOrEdge(anchorStart + rawDelta, relativeGridStart(anchorStart, rawDelta, step), [
++    ...edges,
++    ...endEdges.map((edge) => edge - duration),
++  ]);
++}
++
++function relativeGroupDelta(
++  anchorStart: number,
++  rawDelta: number,
++  step: number,
++  minDelta: number,
++  maxDelta: number,
++): number {
++  if (isOnGrid(anchorStart, step)) {
++    return snapGroupDelta(anchorStart, rawDelta, step, minDelta, maxDelta);
++  }
++  const requested = roundGridTime(relativeGridStart(anchorStart, rawDelta, step) - anchorStart);
++  if (requested >= minDelta - GRID_TIME_TOLERANCE && requested <= maxDelta + GRID_TIME_TOLERANCE) {
++    return requested;
++  }
++  const whole =
++    requested > 0
++      ? Math.max(0, Math.floor((maxDelta + GRID_TIME_TOLERANCE) / step))
++      : Math.min(0, Math.ceil((minDelta - GRID_TIME_TOLERANCE) / step));
++  return roundGridTime(whole * step);
++}
++
+ export function snapGroupMoveDelta(
+   anchorStart: number,
+   anchorDuration: number,
+@@ -292,10 +343,16 @@ export function snapGroupMoveDelta(
+   startEdges: readonly number[],
+   endEdges: readonly number[],
+ ): { requested: number; allowed: number } {
+-  const rawStart = anchorStart + rawDelta;
+-  const gridStart = snapTimeToGrid(rawStart, step);
+-  const target = snapMoveStartToGridOrEdges(rawStart, anchorDuration, step, startEdges, endEdges);
+-  const gridFallback = snapGroupDelta(anchorStart, rawDelta, step, minDelta, maxDelta);
++  const gridStart = relativeGridStart(anchorStart, rawDelta, step);
++  const target = snapRelativeMoveStartToGridOrEdges(
++    anchorStart,
++    rawDelta,
++    anchorDuration,
++    step,
++    startEdges,
++    endEdges,
++  );
++  const gridFallback = relativeGroupDelta(anchorStart, rawDelta, step, minDelta, maxDelta);
+   const gridResult = { requested: roundGridTime(gridStart - anchorStart), allowed: gridFallback };
+   if (toWholeMicroseconds(target) === toWholeMicroseconds(gridStart)) {
+     return gridResult;
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 9a3ad7a..97ffb3d 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -476,7 +476,7 @@ export const studioGridStrings = {
+     `Grid ${label} — lines are hidden at this zoom, so Snap is paused. Zoom in. · 1 — narrower, 2 — wider`,
+   menuLabel: 'Grid division',
+   snapOnStatus: (label: string): string => `Snap on — grid ${label} (G)`,
+-  snapOnTitle: 'Snap on — clips land on the grid (G)',
++  snapOnTitle: 'Snap on — clips follow the grid (G)',
+   snapPausedTitle: 'Snap on — paused: grid lines are hidden at this zoom. Zoom in. (G)',
+   snapPausedNote: '· Lines are hidden at this zoom, so Snap is paused — zoom in.',
+   snapOff: 'Snap off — free movement (G)',

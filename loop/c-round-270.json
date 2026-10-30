@@ -1,0 +1,68 @@
+{
+  "round": 270,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-30T13:52:03.4900469Z",
+    "round": 270,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "SOURCE-SCOPE",
+    "HUNK-SCOPE",
+    "CLAIMS",
+    "TESTS-TARGETED",
+    "TEST-REWRITES",
+    "MUTANTS",
+    "DP-BROWSER",
+    "DP-ENTER",
+    "DP-EDIT",
+    "DP-INSIDE",
+    "DP-ALLTRACKS",
+    "SPLIT-COPY",
+    "SPLIT-BOX",
+    "SCREEN-BUDGET",
+    "STATUS-CLOBBER",
+    "G270-AUTH"
+  ],
+  "gate": [
+    "full vitest",
+    "build",
+    "full Biome",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [],
+  "ableton": {
+    "time-selection-gesture": "not applicable (unchanged)",
+    "detail From/To fields": "not applicable (no Live reference; CZABA-only)",
+    "split wording": "confirmed closer to Live 12 manual §42.16 'Split Clip at Selection' (not re-fetched by C; B citation)"
+  },
+  "evidence": "c-round-270/ui.json, split-selection.json, mutants.txt, vitest.json, claims.txt, *.png",
+  "notes": [
+    {
+      "id": "INFO-C270-MUTANT-NO-ONCLIP",
+      "severity": "info",
+      "note": "C extra mutant: dropping `rangeOnClip` from the keep-branch condition survives all 115 tests in the 4 files. Only reachable when a selection on another lane / off this clip has exactly the clip's bounds as start/end; then Enter would announce without moving the selection to this lane. Test gap, not a contract violation. Candidate guard row for B.",
+      "evidence": "c-round-270/mutants.txt"
+    },
+    {
+      "id": "INFO-C270-BS3-ID",
+      "severity": "info",
+      "note": "Task §5.2/§7 named the new split row 'BS3', but BS3 already existed at HEAD (l.586). A renamed it BS5; doc 201 records it. Planning id collision; no behaviour impact.",
+      "evidence": "a-round-270.md deviation 1; background-time-selection-ui.test.tsx"
+    },
+    {
+      "id": "INFO-C270-ONE-FIELD-EDIT",
+      "severity": "info",
+      "note": "(Reviewer M-1, confirmed in browser.) On a past-edge selection, editing only one field sends the other, out-of-clip value through the clamp path -> rangeInvalid (announced, selection unchanged). Explicit contract (§3.2 step 4, LATER-DETAIL-LANE-RANGE-EDIT, awaiting Saba). Not a silent change.",
+      "evidence": "c-round-270/ui.json pastStart.edit9"
+    }
+  ],
+  "checks": [
+    "DOC-201 (grant row 7 / A next-check 6): PASS"
+  ]
+}

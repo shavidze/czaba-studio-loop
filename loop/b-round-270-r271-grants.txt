@@ -1,0 +1,26 @@
+Round 271 grants (B, round 270 -> 271 planning, D-29z587/D-29z588). Baseline HEAD 4b912a9e065b60a714c196bae5456a9857944634, clean tree.
+Only these paths may change. Everything else is frozen (current-task.md section 4).
+
+app/lib/arrangement/grid.ts
+  - add: GRID_OFFSET_TOLERANCE (0.0005), isOnGrid, relativeGridStart, exported snapRelativeMoveStartToGridOrEdges, relativeGroupDelta
+  - change: the body of snapGroupMoveDelta (its gridStart / target / gridFallback lines) to use the relative helpers
+  - unchanged: snapTimeToGrid, snapGroupDelta, snapMoveStartToGridOrEdges, snapTimeToGridOrEdges, adjacentGridLine, resolve* and every other export
+app/components/arrangement/ArrangementClip.tsx
+  - the grid import (snapMoveStartToGridOrEdges -> snapRelativeMoveStartToGridOrEdges) and the single call inside moveStartOnGrid; nothing else
+app/lib/arrangement/strings.ts
+  - studioGridStrings.snapOnTitle value only -> 'Snap on — clips follow the grid (G)'
+app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+  - section 5.1 rewrites (GS5, GS5b, GS6, GS6b, GS10 last assert, HS2 last assert, the two snapOnTitle literals); new describe RS1-RS5
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
+  - CM11 rewrite only
+app/lib/arrangement/__tests__/grid-edges.test.ts
+  - the import of snapRelativeMoveStartToGridOrEdges; new describe RU1-RU7 + RG1
+app/lib/arrangement/__tests__/strings.test.ts
+  - the snapOnTitle literal (l.1412 at HEAD) only
+docs/implementation/2026/quarter-IV/202-saba-b-11c-relative-snap.md
+  - new doc; l.4 exactly: **სტატუსი:** Completed (C round 271 PASS)
+docs/implementation/2026/quarter-IV/198-saba-b-11c-background-time-selection.md
+  - l.4 only -> **სტატუსი:** Completed (C round 271 PASS)   (L28 multi-stage clause)
+
+Frozen (examples, not exhaustive): StudioWorkspace.tsx (arrow nudge stays absolute), ArrangementLane.tsx (library drop), ArrangementLoopBrace.tsx, ArrangementRuler.tsx, ArrangementMarkerRow.tsx, ArrangementTempoRow.tsx, ArrangementContext.tsx, model.ts, shortcuts.ts, package.json, perf/**, e2e/**.
+Protected auth/purchase: app/routes/studio.$productId.tsx, app/routes/api.studio-token*, app/lib/auth.ts, app/contexts/AuthContext.tsx.

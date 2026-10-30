@@ -1,0 +1,37 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const DIR = '/home/runner/czaba-project/tmp/studio-real-loop/b-round-270';
+const OUT = process.argv[2] ?? `${DIR}/probe-group-nudge-head.json`;
+const BASE = process.argv[3] ?? 'http://127.0.0.1:5173';
+const browser = await chromium.launch(); const out = {};
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const vp = `${w}x${h}`; const r = (out[vp] = {});
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } }); const page = await ctx.newPage();
+  const errors = []; page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(`${BASE}/studio-lab`, { waitUntil: 'networkidle', timeout: 120000 });
+  await page.getByText(/Demo collection ready/).first().waitFor({ timeout: 120000 }); await page.waitForTimeout(1000);
+  const laneBox = async (id) => page.locator(`[data-track-id="${id}"] [data-grid-seconds]`).first().boundingBox();
+  const clips = () => page.evaluate(() => [...document.querySelectorAll('[data-clip-id]')].map((c) => ({ id: c.getAttribute('data-clip-id').slice(0, 6), start: c.getAttribute('data-clip-start'), track: c.closest('[data-track-id]')?.getAttribute('data-track-id'), selected: c.getAttribute('aria-selected') ?? c.getAttribute('data-selected') })));
+  const status = () => page.evaluate(() => document.querySelector('[data-testid="arrangement-status"]')?.textContent);
+  const m = await laneBox('music'); await page.mouse.click(m.x + 400, m.y + m.height * 0.7); await page.waitForTimeout(300);
+  await page.getByRole('option').first().focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(900);
+  await page.mouse.click(5, 5); await page.keyboard.press('g'); await page.waitForTimeout(300);
+  const header = async (i) => page.locator('[data-clip-id]').nth(i).locator(':scope > *').first().boundingBox();
+  const drag = async (i, dx, mods = []) => { const b = await header(i); const x = b.x + 20; const y = b.y + b.height / 2; for (const k of mods) await page.keyboard.down(k);
+    await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + dx / 2, y, { steps: 3 }); await page.mouse.move(x + dx, y, { steps: 3 }); await page.mouse.up(); for (const k of mods) await page.keyboard.up(k); await page.waitForTimeout(300); };
+  await drag(0, 12, ['Alt']); r.afterAlt = await clips();
+  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(300); r.afterArrowRight = { clips: await clips(), status: await status(), active: await page.evaluate(() => document.activeElement?.tagName + ':' + (document.activeElement?.getAttribute('data-testid') ?? document.activeElement?.getAttribute('aria-label') ?? '')) };
+  await page.keyboard.press('Control+z'); await page.waitForTimeout(300); r.afterUndo = await clips();
+  const s = await laneBox('stems'); await page.mouse.click(s.x + 600, s.y + s.height * 0.7); await page.waitForTimeout(300);
+  await page.getByRole('option').nth(1).focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(900);
+  r.afterSecond = await clips();
+  const b0 = await header(0); await page.mouse.click(b0.x + 20, b0.y + b0.height / 2); await page.waitForTimeout(200);
+  const b1 = await header(1); await page.keyboard.down('Control'); await page.mouse.click(b1.x + 20, b1.y + b1.height / 2); await page.keyboard.up('Control'); await page.waitForTimeout(300);
+  r.selected = await clips();
+  await drag(0, 48); r.afterGroupDrag = { clips: await clips(), status: await status() };
+  await page.screenshot({ path: `${DIR}/shots/group-${OUT.includes('sketch') ? 'sketch' : 'head'}-${vp}.png` });
+  r.errors = errors; await ctx.close();
+}
+writeFileSync(OUT, JSON.stringify(out, null, 1)); await browser.close(); console.log(JSON.stringify(out, null, 1));

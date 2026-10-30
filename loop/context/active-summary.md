@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T13:05:13.962Z)
+# Active loop summary (2026-10-30T14:12:06.551Z)
 
-- backlog.json 2549 KB -> active view 359 KB
-- status: G_ROOT_GATE round 269
-- servers: `{"checkedUtc":"2026-10-30T12:43:52.3186827Z","round":269,"attempt":1,"store":200}`
-- last publication: f6ebd2d01c361c17d11c5b885a40e37e2ca9f9eb (rounds 269-269)
-- last root gate: round 269 published - commit f6ebd2d01c361c17d11c5b885a40e37e2ca9f9eb pushed
+- backlog.json 2559 KB -> active view 361 KB
+- status: G_ROOT_GATE round 270
+- servers: `{"checkedUtc":"2026-10-30T13:52:03.4900469Z","round":270,"attempt":1,"store":200}`
+- last publication: 4b912a9e065b60a714c196bae5456a9857944634 (rounds 270-270)
+- last root gate: round 270 published - commit 4b912a9e065b60a714c196bae5456a9857944634 pushed
 
 ## Current items: -
 
@@ -544,7 +544,6 @@
 - GATE228-S4-ARIA-LOOKUPS / info / signal (D-29z288): PERF input only, not scheduled / 7 studioShortcutAria + 2 title lookups per transport render (linear over ~45 rows); negligible
 - GATE228-S5-SC5-COUNT / info / ruled kept (D-29z288): deliberate, a new aria row must be acknowledged in the test (A round 228 §5) / shortcuts.test SC5 pins expect(checked).toBe(8)
 - GATE228-ARCH-STRINGS-SHORTCUTS / info / signal: keep (reviewer verdict); input to ARCH-CHECKPOINT-CALM-DIALOG-KEYMAP / strings.ts now depends on shortcuts.ts (one way; shortcuts.ts stays a leaf)
-- SABA-B-7 / medium / dispatched round 269 (D-29z578): option A contract in current-task.md section 3 | agreed (Saba 2026-10-30, D-29z573): option A; scheduled round 269 (D-29z574) | scheduled: queue entry SABA-B-7-ENVELOPE-DB (after CALM-3, before PERF b-ii) / clip volume envelope is linear in gain: one bottom point is silent only for an instant; a line sounds loud for most of the dip
 - C-N229-S3-METHOD / info / ruled D-29z293: future task recipes reach "no time selection" with an empty-lane click; Escape does not clear a time selection (HEAD identical); whether Live Esc deselects is unverified, not a bug; lesson L29 amended / round 229 S3 recipe "clear the time selection with Escape" does not work
 - C-N229-L4-GREP / info / ruled D-29z293: deleted-key greps in later tasks are written as grep -rn ... app --exclude-dir=__tests__ = 0, plus "the only test hits are the mandated '<key>' in absence lines" / round 229 section 2.1 grep-0 rule and section 2.5 absence lines bound the same lines
 - GATE229-S4 / info / dispatched round 232 as C-CAPTION-232 (D-29z310) | routed to CALM-3 C row (D-29z292): caption row height with an empty caption and with a long truncated file name at 1280 / min-h-4 row height covered only by C-BBOX-229 (empty caption and a short file name)
@@ -650,9 +649,9 @@
 - SABA-Q-9-MASTER-ROW / info / awaiting_user / Saba question, SABA-B-9 stage 2: (a) Master as a Main-track row under the lanes (Live 12 manual 18.4 'bottom end of the Arrangement View') i
 - SABA-Q-11C-MARQUEE / info / answered (Saba 2026-10-30, D-29z573): Ctrl/Cmd+drag on the background kept | awaiting_user / Saba question, SABA-B-11c stage 1 deviation D1: a plain drag on the empty background now makes a time selection (Live 6.9); the clip marquee
 - SABA-Q-11C-MULTILANE / info / answered (Saba 2026-10-30, D-29z573): not now; a selection stays on its starting lane, Ctrl+Shift+L covers all lanes; multi-lane = later candidate, not queued | awaiting_user / Saba question, SABA-B-11c stage 1 deviation D2: a background drag that moves vertically keeps the time selection on the lane where it starte
-- GATE266-S1 / medium / open (D-29z574): round 270 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY, after SABA-B-7 (269); B browser repro before dispatch | open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due / after a drag inside a clip past its edge (round 265), the clip stays selected and the details panel Start/End fields show only the part insi
-- GATE266-S4 / low / scheduled round 268 with GATE266-S1 (owned code, cheap; D-29z569) / splitRangeDone ('Clip split at both edges ...') and splitRangeTitle say 'both edges' when D3 cuts only one edge (SPLIT-PAST-START, SPLIT-BG-
-- B-R266-CLIPS-SPLIT-COPY / low / scheduled round 268 with GATE266-S1 (D-29z569) / splitRangeClipsDone says 'Clips split' when one selected part is a whole clip that was not cut (MS6)
+- GATE266-S1 / medium / dispatched round 270 (D-29z581): fields show the whole time selection; unchanged Enter/Set keeps it and announces it; edited values keep the clip contract. B browser repro at HEAD f6ebd2d both viewports (b-round-269/probe-detail-range-head.json) | open (D-29z574): round 270 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY, after SABA-B-7 (269); B browser repro before dispatch | open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due / after a drag inside a clip past its edge (round 265), the clip stays selected and the details panel Start/End fields show only the part insi
+- GATE266-S4 / low / dispatched round 270 (D-29z582): splitRangeDone -> neutral wording | scheduled round 268 with GATE266-S1 (owned code, cheap; D-29z569) / splitRangeDone ('Clip split at both edges ...') and splitRangeTitle say 'both edges' when D3 cuts only one edge (SPLIT-PAST-START, SPLIT-BG-
+- B-R266-CLIPS-SPLIT-COPY / low / dispatched round 270 (D-29z582): splitRangeClipsDone names clips, not parts | scheduled round 268 with GATE266-S1 (D-29z569) / splitRangeClipsDone says 'Clips split' when one selected part is a whole clip that was not cut (MS6)
 - B-R266-LINUX-ALTGR-PLAIN-LETTERS / info / hypothesis, unverified; Tech Lead list; becomes a normal finding on a real repro (D-29z570) / if a platform reports AltGr as getModifierState('AltGraph') without altKey/ctrlKey (Linux X11 suspected), the plain-letter branches (M, G, A
 - A-R267-ARCH-CHORD-CLASSIFIER / info / signal (not scheduled, D-29z575): evidence for ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS question 10 / handleKeyDown branch-order interactions (gesture arm vs Ctrl+Arrow) caused the round-267 regression; proposal: pure chord classifier (event 
 - SABA-Q-11C-SPLIT-SPAN / info / answered (Saba 2026-10-30, D-29z573): Ctrl+E cuts every clip the selection touches at the edges inside a clip, as built in round 266; all-lanes split = later candidate, not queued / Ctrl+E on a selection spanning several clips; split on an all-lanes selection
@@ -661,6 +660,10 @@
 - LATER-SABA-B-7-ALT-DRAG-CURVES / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / envelope Alt-drag curves
 - LATER-SABA-B-7-EDIT-VALUE / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / envelope Edit Value
 - LATER-SABA-B-7-POINT-SNAP / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / grid snap of envelope points
+- B-R269-DETAIL-ALLTRACKS-DROP / medium / dispatched round 270 with GATE266-S1 (D-29z581), alias of the same fix / with an all-tracks time selection (Ctrl+Shift+L) inside the selected clip, Enter in the detail Start/End fields silently turns it into a one
+- INFO-C269-DB3-FLOOR / info / info, no action (D-29z580) / DB3 alone does not catch a wrong floor in depth(); DB2 does (C extra mutant)
+- INFO-C269-1280-DETAIL-COLLAPSED / info / info; round-270 recipes expand the panel (D-29z581) / at 1280x720 the detail panel starts collapsed (an ancestor display:none); C rows that read or type in it must click arrangement-detail-toggl
+- LATER-DETAIL-LANE-RANGE-EDIT / info / later_candidate (not queued; a new ability, needs Saba) / let the detail From/To fields edit a lane time selection that passes the clip edges (today edits stay inside the clip)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
