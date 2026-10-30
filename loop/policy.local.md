@@ -372,3 +372,29 @@ While a feature waits, B dispatches the next task that does not wait. B sets NEE
 - the clip Gain envelope is linear in %;
 - the first loop sets the Set tempo;
 - a click snaps the insert marker to the grid (a CHECK for SABA-B-10a).
+
+## Saba's answers, 2026-10-30: SABA-B-7 and SABA-B-11c
+
+Saba accepted root's recommendations. They override every default and open question in `AGREE-SABA-B-7.md` and `questions-11c.md`, and both items are now agreed.
+
+**SABA-B-7: agreed; dispatch it next, before GATE264-S2 and SYS-6.**
+1. **Taper: option A.** The envelope is dB-linear from 0 to −60 dB, the bottom is −∞, and it uses the same scale as the lane Volume fader (`track-volume-db.ts`). Root measured Live 12's fader (`reference/ableton-live-measurements-2026-10-30.md`): A matches it within 0.03 down to −36 dB.
+2. **Readout and deviation.** The readout stays in dB. This is a listed deviation from Live's % label on the clip Gain envelope.
+3. **Saved projects: yes.** Stored points keep their gain values, but the shape between points and the points' on-screen height change. No legacy flag. B records it with a D-ID.
+4. **Scheduling and checks.** Scheduling follows B's plan: short linear ramps of ≤ 0.5 dB, no `setValueCurveAtTime`, and no exponential ramp to 0. C checks as written in the 2026-10-28 entry; the 25/50/75 % points must land on A's values ±0.5 dB.
+5. **Later candidates, not in scope:** Alt-drag curves, Edit Value and grid snap of envelope points.
+
+**SABA-B-11c:**
+1. **Marquee: Ctrl/Cmd + drag on the background**, as B already built.
+2. **Multi-lane time selection: not now.** A selection stays on its starting lane, and Ctrl+Shift+L covers all lanes. B lists multi-lane as a later candidate, not a queued task.
+3. **R49-T / F1-ABSOLUTE-SNAP: option (a), relative snap.** A clip off the grid keeps its offset and moves in whole divisions (4.3 → 5.3 → 6.3). This **unblocks SABA-B-11c stage 2**; B dispatches it after SABA-B-7.
+   - Root could not measure Live's behaviour today (a Windows overlay blocked input). When root does, a Live result that differs comes to Saba as a question and does not silently change (a).
+   - R49-T and F1-ABSOLUTE-SNAP are closed by this answer once stage 2 passes.
+4. **Split: yes.** Ctrl+E cuts every clip the selection touches, at the selection edges that fall inside a clip, as built in round 266. Split on an all-lanes selection (Ctrl+Shift+L) is a later candidate, not queued.
+
+**Still open with Saba:**
+- Tag Manager Q7: the UCS list file and licence.
+- The screen-review candidates SR-230/245/260.
+- Tag Manager Q9–Q27.
+
+None of these blocks the Studio loop.
