@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T15:30:53.394Z)
+# Active loop summary (2026-10-30T17:03:29.049Z)
 
-- backlog.json 2572 KB -> active view 361 KB
-- status: G_ROOT_GATE round 271
-- servers: `{"checkedUtc":"2026-10-30T15:07:46.7172217Z","round":271,"attempt":1,"store":200}`
-- last publication: 66b570add291123a296f87044070804abe73707d (rounds 271-271)
-- last root gate: round 271 published - commit 66b570add291123a296f87044070804abe73707d pushed
+- backlog.json 2584 KB -> active view 362 KB
+- status: G_ROOT_GATE round 272
+- servers: `{"checkedUtc":"2026-10-30T16:30:09.2556356Z","round":272,"attempt":1,"store":200}`
+- last publication: b288be7bd3aa7fd26e16387e90008122ce0a94e1 (rounds 272-272)
+- last root gate: round 272 published - commit b288be7bd3aa7fd26e16387e90008122ce0a94e1 pushed
 
 ## Current items: -
 
@@ -27,7 +27,6 @@
 - HOMEPAGE-SSR-FETCH-INFO / info / root / homepage SSR logs 'Error loading homepage products: fetch failed' while the backend is down
 - ARCH-CHECKPOINT-SRW13 / info / requested_from_root / bounded architecture checkpoint at the SRW-13 feature boundary: ArrangementContext.tsx (2850 lines), StudioWorkspace.tsx (1552), Arrangement
 - GSTACK-NO-MOUSE / info / open / gstack browse CLI, its CDP allowlist and the server-node.mjs fallback expose no mouse down/move/up; C47 REAL-mouse drags used standalone Pla
-- F1-ABSOLUTE-SNAP / medium / dispatched round 271 (D-29z587): relative snap of clip drags; closes on C round 271 PASS (RS-B-JITTER + RS1) | accepted; closes when SABA-B-11c stage 2 (relative snap, option (a), Saba 2026-10-30) passes C (D-29z573) | accepted / absolute snap after the 3 px drag threshold can jump a clip up to half a division on a select-click jitter (root reviewer F1, 10 s grid exam
 - ALT-CHROME-MENU / info / unconfirmed / Windows Chrome may focus its app-menu button when a lone Alt is released after an Alt+drag; CDP-dispatched keys (gstack/Playwright) never re
 - ARCH-CHECKPOINT-SRW14-PREFS / info / requested (sixth request, round 69 planning, SRW-14 feature boundary): (a) useGridPreferences proposal from the root round-68 reviewer (gates/round-68/review.md Architecture note), (b) time precision incl. the 1.334 s range readout, (c) shared UI test harness (4th grid UI file in round 69), (d) grid-menu state, (e) focus-release predicate, (f) metronome buffers; non-gating / bounded checkpoint: StudioWorkspace view/edit preferences (followMode, snapEnabled, gridSeconds + refs) vs a non-history edit-preferences sl
 - ABLETON-R49-CLICK-ROW / info / corrected / round-49 task section 4.8 marked 'click in a clip selects a point (insert marker)' as Confirmed from 6.9; the saved 6.9 text names clicking 
@@ -621,8 +620,8 @@
 - EXPORT-PROGRESS-LOAD-FLAKE-250 / info / watch (D-29z452): gate 251 verify did not reproduce it (export-progress-ui 8/8, 1242 ms; 215/215 files) | watch (D-29z447) / export-progress-ui.test.tsx l.319/l.350 rows failed once in a covering run under concurrent load (resetEncoderMock call count); green in 3 i
 - SABA-Q-FOLLOW-EDIT-RESTART / info / awaiting_user (D-29z457): non-blocking; round 252 builds only the ruler/strip/stop clauses / (a) Live pauses Follow when you make an edit; CZABA does not (edits keep Follow on). (b) Live resumes Follow when playback restarts; CZABA t
 - A-R252-REVIEW-PLAYING-SOURCE / low / deferred_low_polish (D-29z464); fix needs a ref-backed getter on ArrangementContext / ruler wrappers read render-state workspaceRef.current.isPlaying while setInsertMarker/playFrom read isPlayingRef; same split in stepMarker; 
-- C-R253-01 / low / deferred_low_polish (D-29z468): the refusal predicate (ArrangementContext startPlaybackAt l.1339-1346: loopActive, endedHere/playbackEndedAtRef, > end + ARRANGEMENT_EPS) is context-private; a second copy in StudioWorkspace could disagree; fix with an exported pure resolver (ARCH-CHECKPOINT-TRANSPORT-POSITIONS addendum 5) / after a lower-zone click past the project end during playback and a Stop, the stopped text says "Space plays from the insert marker at 00:16
-- B-R253-STALE-PLAYING-STATUS-RESIDUAL / low / deferred_low_polish (D-29z468) / a playing-only status naming a time other than the current marker stays after Stop (ruler click while playing, Ctrl+Right moves the marker w
+- C-R253-01 / low / dispatched round 272 (D-29z594) | deferred_low_polish (D-29z468): the refusal predicate (ArrangementContext startPlaybackAt l.1339-1346: loopActive, endedHere/playbackEndedAtRef, > end + ARRANGEMENT_EPS) is context-private; a second copy in StudioWorkspace could disagree; fix with an exported pure resolver (ARCH-CHECKPOINT-TRANSPORT-POSITIONS addendum 5) / after a lower-zone click past the project end during playback and a Stop, the stopped text says "Space plays from the insert marker at 00:16
+- B-R253-STALE-PLAYING-STATUS-RESIDUAL / low / dispatched round 272 (D-29z594) | deferred_low_polish (D-29z468) / a playing-only status naming a time other than the current marker stays after Stop (ruler click while playing, Ctrl+Right moves the marker w
 - A-R253-REVIEW-STRICTMODE-REMOUNT / low / deferred_low_polish (D-29z468) / a remount while a playing-only text is shown would replace it on mount (StrictMode: statusSequence +2); dev browser showed 1 write
 - A-R253-REVIEW-PASSIVE-EFFECT / low / deferred_low_polish (D-29z468) / theoretical: a setStatus landing between commit and the passive stop effect on the rAF auto-stop could be overwritten; no current writer doe
 - A-R253-REVIEW-STOP-PATHS-UNIT / low / deferred_low_polish (D-29z468) / no jsdom row covers a stop by the transport button or the project-end auto-stop with a playing-only text (browser-only today: C round 253 pr
@@ -664,6 +663,9 @@
 - SABA-Q-11C-NUDGE / info / awaiting_user (D-29z590); not implemented; does not block round 271 / should the arrow-key nudge (and the loop brace move) of an off-grid clip keep its offset like the drag does after round 271 (10.3 -> 11.3), 
 - SABA-Q-11C-REALIGN / info / awaiting_user (D-29z590); not implemented; does not block round 271 / with relative snap no snapped drag returns an off-grid clip to the grid and a left drag stops at the offset (0.3), not 0; product-designer d
 - LIVE-MEAS-11C-OFFSET / info / open_root (D-29z590) / root measurement request in Ableton Live 12: off-grid clip drag, jitter, left stop, arrow nudge, group drag, left trim with a 1-bar fixed gr
+- GATE271-S1-NO-REALIGN / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
+- GATE271-ARCH-RESOLVE-MOVE-SNAP / info / signal (D-29z593): keep now; after Saba answers SABA-Q-11C-NUDGE/REALIGN, one bounded task resolveMoveSnap(anchor, delta, duration, step, targets, mode) for clip move, library drop and loop brace with GS/CM/RU/RG/loop-brace tests unchanged; listed in b-round-271-checkpoint-addendum.md / one snap toggle, two models (clip drag relative; library drop, loop brace, trim, nudge absolute); grid.ts snap functions rewritten across SR
+- B-R272-PLAYFROM-END-ASYMMETRY / info / signal (D-29z594): recorded, not changed in SYS-6; ask with the next transport question to Saba if it matters / a top-strip playFrom at exactly the project end is refused (playPastEnd 'at the end' text) while Space with the marker at the end plays from
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

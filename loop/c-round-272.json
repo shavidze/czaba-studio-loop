@@ -1,0 +1,66 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T16:30:09.2556356Z",
+  "round": 272,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R272-01",
+   "severity": "low",
+   "steps": [
+    "/studio-lab 16 s demo stem pulse on Music",
+    "Space; click bars-ruler lower zone at 4 s; Space (stop) -> 'Stopped — Space plays from the insert marker at 00:04.000.'",
+    "drag on the Music lane (lower half) from 2 s to 5 s -> time selection 00:02.000-00:05.000",
+    "read the status; press Space"
+   ],
+   "expected": "the status names the real Space start (a range text or selectionAfterStop('00:02.000')), as B's §3.7 premise LT-RANGE-OWN-STATUS claims",
+   "actual": "the status line stays 'Stopped — Space plays from the insert marker at 00:04.000.'; Space plays from 00:02.548 (the selection start). Pre-existing: HEAD 66b570a is identical. Rule W/S correct it only on the next marker write or Stop",
+   "evidence": "c-round-272/extended-new.json + extended-head.json (rangeSpace, rangeOwnStatus), shots/new-rangeSpace-afterDrag-*.png"
+  }
+ ],
+ "passed": [
+  "K12-CLAIMS-HEAD",
+  "B-PASTEND",
+  "B-ATEND",
+  "B-RESIDUAL-PLAYING",
+  "B-RESIDUAL-END",
+  "B-PASTEND-HOME",
+  "B-STOPPED-MOVE",
+  "B-UNRELATED",
+  "B-AUDIO",
+  "LT-WIDTH",
+  "SCREEN-BUDGET",
+  "G272-AUTH",
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "SRC-ONE-PREDICATE",
+  "TESTS-TARGETED",
+  "TEST-ADDITIONS",
+  "MUTANTS",
+  "DOC-203",
+  "ARCH-EVIDENCE"
+ ],
+ "failed": [
+  "LT-RANGE-OWN-STATUS (C-R272-01, pre-existing, B §3.7 premise false)",
+  "CLAIMS-K11 (INFO: PB1/PB2 ids already exist in store-focus-fixups.test.tsx)"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "full biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "info": [
+  "INFO-C272-K11",
+  "INFO-C272-MUTANT-MAP: M-STOP-EXACT killed only by A's LT10 extension; M-KIND-LOOSE only by PB8",
+  "SECTION-0: strip click / marker-flag dblclick from a stopped T text now gives the true playing text (HEAD kept stale 00:04.000); needs B ruling; Space half of B-R272-STOPPED-TEXT-WHILE-PLAYING remains open"
+ ],
+ "ableton": "does not apply"
+}

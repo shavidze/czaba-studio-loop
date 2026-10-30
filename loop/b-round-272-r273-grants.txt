@@ -1,0 +1,28 @@
+Round 273 grants (B, round 272 -> 273 planning, D-29z599). Baseline HEAD b288be7bd3aa7fd26e16387e90008122ce0a94e1 (gate 272 published), clean tree.
+Only these paths may change. Everything else is frozen (current-task.md section 4).
+
+app/contexts/ArrangementContext.tsx
+  - section 3.1: move describeSpaceStart above writeInsertMarker (body unchanged); delete describeSpaceStartRef (3 lines); writeInsertMarker calls describeSpaceStart() and lists it in deps.
+  - section 3.2: new provider-local rewriteStoppedTruth (not exported, not in the context value).
+  - section 3.3: move setRange below rewriteStoppedTruth; Rule R `if (gestureCountRef.current === 0) setStatus(rewriteStoppedTruth)`; deps [rewriteStoppedTruth].
+  - section 3.4: beginPointerGesture release updater wraps statusAfterGestureRelease in rewriteStoppedTruth; deps [rewriteStoppedTruth].
+  - section 3.5: Rule P in startPlaybackAt after setIsPlaying(true) (deps only if Biome asks). Nothing else.
+app/lib/arrangement/playback-start.ts
+  - InsertMarkerStatusKind + insertMarkerStatusKind only: 'playing-from' kind for playingFrom; selection-subject playPastEnd forms -> 'stopped'.
+app/lib/arrangement/strings.ts
+  - studioPlaybackStrings.playingFrom: (time) => `Playing from ${time}.` placed right before insertMarkerToPlayhead. Nothing else.
+app/lib/arrangement/__tests__/strings.test.ts
+  - additions only: one V02B_FORMATTER_SAMPLES.studioPlaybackStrings entry (playingFrom); one exact-text expect in ST11.
+app/lib/arrangement/__tests__/playback-start.test.ts
+  - row ids PB1..PB8 -> PBS1..PBS8; PBS8: the two selection-subject samples move from `outside` to the classified list as 'stopped', add playingFrom as 'playing-from'; new PBS9. No assertion lost.
+app/lib/arrangement/__tests__/status-lifetime.test.tsx
+  - LT8 middle step (l.325-326) -> selectionAfterStop('00:02.000'); new LT12-LT19 in the SYS-6 describe; LT10 byte-identical (kills M-STOP-EXACT).
+docs/implementation/2026/quarter-IV/203-sys-6-status-lifetime-stage-1.md
+  - only the PB<n> row-id tokens -> PBS<n> (3 lines). l.4 unchanged.
+docs/implementation/2026/quarter-IV/204-sys-6-status-lifetime-stage-2.md   (new)
+  - l.4 exactly: **სტატუსი:** In Progress (stage 2 of 3; C round 273 PASS)
+
+Frozen (examples, not exhaustive): StudioWorkspace.tsx, ArrangementClip.tsx, ArrangementMarkerRow.tsx, status-announcement.ts, model.ts, loop.ts, shortcuts.ts, grid.ts,
+bars-ruler-ui.test.tsx, insert-marker-ui.test.tsx, ArrangementContext.test.ts, background-time-selection-ui.test.tsx, gesture-reentry.test.tsx, pending-status.test.tsx (must pass unchanged),
+store-focus-fixups.test.tsx, package.json, perf/**, e2e/**.
+Protected auth/purchase: app/routes/studio.$productId.tsx, app/routes/api.studio-token*, app/lib/auth.ts, app/contexts/AuthContext.tsx.

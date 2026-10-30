@@ -1,0 +1,209 @@
+--- a/app/contexts/ArrangementContext.tsx	2026-10-30 16:29:07.177879500 +0000
++++ b/app/contexts/ArrangementContext.tsx	2026-10-30 17:07:55.628054466 +0000
+@@ -787,11 +787,6 @@
+     setSelectedSourceIdState(next);
+   }, []);
+ 
+-  const setRange = useCallback((next: TimeRange | null) => {
+-    latestRef.current.range = next;
+-    setRangeState(next);
+-  }, []);
+-
+   const setActiveTrackId = useCallback((next: string | null) => {
+     latestRef.current.activeTrackId = next;
+     setActiveTrackIdState(next);
+@@ -816,7 +811,48 @@
+     [positionStore],
+   );
+ 
+-  const describeSpaceStartRef = useRef<() => string>(() => '');
++  const describeSpaceStart = useCallback((): string => {
++    const point = resolveSpaceStartPoint({
++      insertMarker: insertMarkerRef.current,
++      range: latestRef.current.range,
++    });
++    const plan = resolvePlaybackStart({
++      requested: point.requested,
++      arrangement: historyRef.current.present,
++      playbackEndedAt: playbackEndedAtRef.current,
++    });
++    const time = formatArrangementTime(Math.max(0, point.requested));
++    if (plan.kind === 'empty') {
++      return studioPlaybackStrings.nothingToPlay;
++    }
++    if (plan.kind === 'past-end') {
++      return playPastEndMessage(plan.requested, plan.end, point.origin);
++    }
++    if (plan.from !== plan.requested) {
++      return studioPlaybackStrings.insertMarkerAfterStopFromStart(time);
++    }
++    return point.origin === 'selection'
++      ? studioPlaybackStrings.selectionAfterStop(time)
++      : studioPlaybackStrings.insertMarkerAfterStop(time);
++  }, []);
++  const rewriteStoppedTruth = useCallback(
++    (text: string): string =>
++      !isPlayingRef.current && insertMarkerStatusKind(text) === 'stopped'
++        ? describeSpaceStart()
++        : text,
++    [describeSpaceStart],
++  );
++  const setRange = useCallback(
++    (next: TimeRange | null) => {
++      latestRef.current.range = next;
++      setRangeState(next);
++      if (gestureCountRef.current === 0) {
++        setStatus(rewriteStoppedTruth);
++      }
++    },
++    [rewriteStoppedTruth],
++  );
++
+   const writeInsertMarker = useCallback(
+     (next: number) => {
+       insertMarkerRef.current = next;
+@@ -833,10 +869,10 @@
+         if (isPlayingRef.current) {
+           return studioPlaybackStrings.insertMarkerWhilePlaying(time);
+         }
+-        return describeSpaceStartRef.current();
++        return describeSpaceStart();
+       });
+     },
+-    [insertMarkerStore],
++    [describeSpaceStart, insertMarkerStore],
+   );
+ 
+   const placeInsertMarker = useCallback(
+@@ -1375,6 +1411,11 @@
+       const from = plan.from;
+       isPlayingRef.current = true;
+       setIsPlaying(true);
++      setStatus((text) =>
++        insertMarkerStatusKind(text) === 'stopped'
++          ? studioPlaybackStrings.playingFrom(formatArrangementTime(from))
++          : text,
++      );
+       updatePosition(from);
+       const startAt = ctx.currentTime + PLAYBACK_LOOKAHEAD;
+       meterFreshFromRef.current = startAt;
+@@ -1401,32 +1442,6 @@
+     startPlaybackAt(point.requested, point.origin);
+   }, [startPlaybackAt, stopPlayback]);
+ 
+-  const describeSpaceStart = useCallback((): string => {
+-    const point = resolveSpaceStartPoint({
+-      insertMarker: insertMarkerRef.current,
+-      range: latestRef.current.range,
+-    });
+-    const plan = resolvePlaybackStart({
+-      requested: point.requested,
+-      arrangement: historyRef.current.present,
+-      playbackEndedAt: playbackEndedAtRef.current,
+-    });
+-    const time = formatArrangementTime(point.requested);
+-    if (plan.kind === 'empty') {
+-      return studioPlaybackStrings.nothingToPlay;
+-    }
+-    if (plan.kind === 'past-end') {
+-      return playPastEndMessage(plan.requested, plan.end, point.origin);
+-    }
+-    if (plan.from !== plan.requested) {
+-      return studioPlaybackStrings.insertMarkerAfterStopFromStart(time);
+-    }
+-    return point.origin === 'selection'
+-      ? studioPlaybackStrings.selectionAfterStop(time)
+-      : studioPlaybackStrings.insertMarkerAfterStop(time);
+-  }, []);
+-  describeSpaceStartRef.current = describeSpaceStart;
+-
+   const continuePlayback = useCallback(() => {
+     if (isPlayingRef.current) {
+       stopPlayback();
+@@ -1786,10 +1801,12 @@
+       gestureCountRef.current = Math.max(0, gestureCountRef.current - 1);
+       if (gestureCountRef.current === 0) {
+         previewActiveRef.current = false;
+-        setStatus((current) => statusAfterGestureRelease(current, lastNonRefusalStatusRef.current));
++        setStatus((current) =>
++          rewriteStoppedTruth(statusAfterGestureRelease(current, lastNonRefusalStatusRef.current)),
++        );
+       }
+     };
+-  }, []);
++  }, [rewriteStoppedTruth]);
+ 
+   const claimPointerGesture = useCallback(
+     (pointerId: number, abort: () => void): (() => void) | null => {
+--- a/app/lib/arrangement/playback-start.ts	2026-10-30 16:29:07.185789936 +0000
++++ b/app/lib/arrangement/playback-start.ts	2026-10-30 17:07:31.858593579 +0000
+@@ -42,7 +42,11 @@
+ 
+ const TIME_TOKEN = /\d{2,}:\d{2}\.\d{3}/g;
+ 
+-export type InsertMarkerStatusKind = 'playing' | 'playing-follow-paused' | 'stopped';
++export type InsertMarkerStatusKind =
++  | 'playing'
++  | 'playing-follow-paused'
++  | 'playing-from'
++  | 'stopped';
+ 
+ export function insertMarkerStatusKind(text: string): InsertMarkerStatusKind | null {
+   const times = text.match(TIME_TOKEN) ?? [];
+@@ -56,6 +60,9 @@
+   if (text === studioPlaybackStrings.insertMarkerWhilePlayingFollowPaused(first)) {
+     return 'playing-follow-paused';
+   }
++  if (text === studioPlaybackStrings.playingFrom(first)) {
++    return 'playing-from';
++  }
+   if (
+     text === studioPlaybackStrings.insertMarkerAfterStop(first) ||
+     text === studioPlaybackStrings.insertMarkerAfterStopFromStart(first) ||
+@@ -64,26 +71,16 @@
+   ) {
+     return 'stopped';
+   }
+-  if (
+-    second !== undefined &&
+-    text ===
+-      studioPlaybackStrings.playPastEnd({
+-        subject: studioPlaybackStrings.startPointInsertMarker,
+-        position: first,
+-        end: second,
+-      })
+-  ) {
+-    return 'stopped';
+-  }
+-  if (
+-    text ===
+-    studioPlaybackStrings.playPastEnd({
+-      subject: studioPlaybackStrings.startPointInsertMarker,
+-      position: first,
+-      end: first,
+-    })
+-  ) {
+-    return 'stopped';
++  const subjects = [
++    studioPlaybackStrings.startPointInsertMarker,
++    studioPlaybackStrings.startPointSelection,
++  ];
++  for (const subject of subjects) {
++    if (
++      text === studioPlaybackStrings.playPastEnd({ subject, position: first, end: second ?? first })
++    ) {
++      return 'stopped';
++    }
+   }
+   return null;
+ }
+--- a/app/lib/arrangement/strings.ts	2026-10-30 16:11:01.172905469 +0000
++++ b/app/lib/arrangement/strings.ts	2026-10-30 17:07:31.858325055 +0000
+@@ -254,6 +254,7 @@
+     `Stopped — the insert marker (${time}) is at the end; Space plays from 00:00.000.`,
+   selectionAfterStop: (time: string): string =>
+     `Stopped — Space plays from the time selection start at ${time}.`,
++  playingFrom: (time: string): string => `Playing from ${time}.`,
+   insertMarkerToPlayhead: (time: string): string =>
+     `Insert marker moved to the playhead (${time}). Space plays from here.`,
+ };

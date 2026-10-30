@@ -1,9 +1,9 @@
 {
- "version": 236,
- "updated": "2026-10-30 B round 271 -> 272 planning (D-29z592..D-29z596)",
+ "version": 237,
+ "updated": "2026-10-30 B round 272 -> 273 planning (D-29z597..D-29z600)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 272, D-29z592..D-29z596; SYS-6 STATUS-LIFETIME stage 1: pure resolver app/lib/arrangement/playback-start.ts (resolvePlaybackStart, resolveSpaceStartPoint, insertMarkerStatusKind); describeSpaceStart on the context; Rule W in writeInsertMarker keeps texts that name the insert marker true; Rule S at Stop writes the resolver's text; two new strings; matrix test status-lifetime.test.tsx LT1-LT11 + PB1-PB8; closes B-R253-STALE-PLAYING-STATUS-RESIDUAL, C-R253-01, C-R254-OBS-01; baseline HEAD 66b570a clean; grants b-round-271-r272-grants.txt)",
+ "current_task": "current-task.md (round 273, D-29z597..D-29z600; SYS-6 STATUS-LIFETIME stage 2 of 3: GATE272-S1 ruling (late read = state at end of action, pinned by LT12/LT13), Rule P playingFrom on start from a stopped text, Rule R in setRange (gesture-guarded) + Rule G at gesture release, classifier gains playing-from + selection past-end forms, describeSpaceStartRef removed; closes GATE272-S1-LATE-READ, B-R272-STOPPED-TEXT-WHILE-PLAYING, C-R272-01, GATE272-S3-SELECTION-PASTEND-STALE, GATE272-S2-RENDER-REF; baseline HEAD b288be7 clean; grants b-round-272-r273-grants.txt)",
  "advisor_used_by_B": "round 270 -> 271 planning: advisor available and consulted (before the design and at the done-check; scope to drags, rule every snap caller, Saba questions, Why-we-missed-it section, RU8 mapping) | round 267 -> 268 planning: advisor available and consulted (before the ruling); 2026-10-30 round 266 -> 267 planning: advisor configured but unavailable (overloaded on the first call; not retried this turn per its error); B proceeded on primary evidence (browser repro at 7ba7cd2, scratch pre-check, Live 12 manual ch. 42). | 2026-10-30 round 263 -> 264 planning: advisor availabl",
  "baseline": {
   "tsc_errors": 0,
@@ -10850,10 +10850,19 @@
    "round": 272,
    "task": "current-task.md",
    "decision": "D-29z592..D-29z596",
-   "status": "dispatched",
+   "status": "c_pass_published (D-29z597): C PASS 20 rows, browserVerified/realVerified true, 1 pre-existing Low C-R272-01; gate 272 published b288be7",
    "type": "systemic bug round: SYS-6 STATUS-LIFETIME stage 1 (3 related Lows, one root cause: texts that name the insert marker are never rewritten and the stop text ignores the Space predicate)",
    "note": "baseline HEAD 66b570a clean; grants b-round-271-r272-grants.txt; B pre-check b-round-271/: sketch.diff, tsc rc 0, Biome clean; full vitest on scratch 3252/3253 (only ST12, a granted addition); browser HEAD (:5173) vs sketch (:5186) both viewports 0 page errors, all 5 cases fixed (probe-stale-status-*.json)",
    "next": "C PASS + gate -> close RESIDUAL, C-R253-01, C-R254-OBS-01; round 273 = SYS-6 stage 2 (C-R271-01, GATE270-S2, INFO-C248 carry)"
+  },
+  {
+   "round": 273,
+   "task": "current-task.md",
+   "decision": "D-29z597..D-29z600",
+   "status": "dispatched",
+   "type": "systemic bug round: SYS-6 STATUS-LIFETIME stage 2 of 3 (one Medium GATE272-S1 + two related Lows, one owner)",
+   "note": "baseline HEAD b288be7 clean; grants b-round-272-r273-grants.txt; B pre-check b-round-272/: sketch.diff, tsc rc 0, Biome clean; full vitest on scratch 3269/3272 (ST12, PB8, LT8 l.326: all granted); browser HEAD (:5173) vs sketch (:5186) both viewports 0 page errors, 5 scenarios as task section 1 (0 status mutations during range drag)",
+   "next": "C PASS + gate -> close GATE272-S1/S2/S3, B-R272-STOPPED-TEXT-WHILE-PLAYING, C-R272-01, INFO-C272-K11; round 274 = SYS-6 stage 3 unless REGRESSION due (on/after 2026-11-02); RETRO 275"
   }
  ],
  "post_current_stage_queue": [
@@ -26251,7 +26260,7 @@
    "severity": "low",
    "origin": "C round 253 (bugs; confirms A-R253-REVIEW-PASTEND-COPY)",
    "title": "after a lower-zone click past the project end during playback and a Stop, the stopped text says \"Space plays from the insert marker at 00:16.500\" but the next Space is refused (past end)",
-   "status": "dispatched round 272 (D-29z594) | deferred_low_polish (D-29z468): the refusal predicate (ArrangementContext startPlaybackAt l.1339-1346: loopActive, endedHere/playbackEndedAtRef, > end + ARRANGEMENT_EPS) is context-private; a second copy in StudioWorkspace could disagree; fix with an exported pure resolver (ARCH-CHECKPOINT-TRANSPORT-POSITIONS addendum 5)",
+   "status": "closed (D-29z597): SYS-6 stage 1, C round 272 PASS browserVerified/realVerified (B-RESIDUAL-PLAYING/END, B-PASTEND, B-ATEND, B-STOPPED-MOVE both viewports), gate 272 published b288be7 | dispatched round 272 (D-29z594) | deferred_low_polish (D-29z468): the refusal predicate (ArrangementContext startPlaybackAt l.1339-1346: loopActive, endedHere/playbackEndedAtRef, > end + ARRANGEMENT_EPS) is context-private; a second copy in StudioWorkspace could disagree; fix with an exported pure resolver (ARCH-CHECKPOINT-TRANSPORT-POSITIONS addendum 5)",
    "repro": "c-round-253/fix/c253.json probes@1440x900/@1280x720 (pastClick, pastStop, pastSpaceAgain); probes-*.png",
    "added": "2026-10-29 B round 253 -> 254 planning"
   },
@@ -26269,7 +26278,7 @@
    "severity": "low",
    "origin": "c-round-253.json observations (both viewports)",
    "title": "a playing-only status naming a time other than the current marker stays after Stop (ruler click while playing, Ctrl+Right moves the marker with no status write, Space): stopped screen keeps \"... playback continues, Follow paused ...\"",
-   "status": "dispatched round 272 (D-29z594) | deferred_low_polish (D-29z468)",
+   "status": "closed (D-29z597): SYS-6 stage 1, C round 272 PASS browserVerified/realVerified (B-RESIDUAL-PLAYING/END, B-PASTEND, B-ATEND, B-STOPPED-MOVE both viewports), gate 272 published b288be7 | dispatched round 272 (D-29z594) | deferred_low_polish (D-29z468)",
    "repro": "c-round-253/fix/c253.json residual probes",
    "added": "2026-10-29 B round 253 -> 254 planning"
   },
@@ -26876,6 +26885,112 @@
    "title": "a top-strip playFrom at exactly the project end is refused (playPastEnd 'at the end' text) while Space with the marker at the end plays from 0; pre-existing, two contracts",
    "status": "signal (D-29z594): recorded, not changed in SYS-6; ask with the next transport question to Saba if it matters",
    "added": "2026-10-30"
+  },
+  {
+   "id": "GATE272-S1-LATE-READ",
+   "severity": "medium",
+   "origin": "gates/round-272/review.md suggestion 1",
+   "title": "Rule W's status updater reads isPlayingRef/range/end refs when React applies it, not at the marker write; behaviour unstated and unpinned (playFrom from a stopped text)",
+   "status": "dispatched round 273 (D-29z599): ruled late read = state at the end of the action (React 18.3 useReducer applies function updates at the next render); pinned by LT12/LT13/LT8 end; no reducer change",
+   "evidence": "gates/round-272/review.md; a-round-272.md section 0; c-round-272.md section 0",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE272-S2-RENDER-REF",
+   "severity": "low",
+   "origin": "gates/round-272/review.md suggestion 2",
+   "title": "describeSpaceStartRef is assigned during render; the indirection is unnecessary (all refs declared before writeInsertMarker)",
+   "status": "dispatched round 273 (D-29z599, owned code, cheap)",
+   "evidence": "gates/round-272/review.md",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE272-S3-SELECTION-PASTEND-STALE",
+   "severity": "low",
+   "origin": "gates/round-272/review.md suggestion 3",
+   "title": "the selection-subject past-end refusal is outside set T, so Home (range cleared, marker 0) leaves 'Time selection start (00:17.000) is past the end...' on screen",
+   "status": "dispatched round 273 (D-29z599): classifier gains the selection-subject forms",
+   "repro": "b-round-272/probe-r273-head.json selPastEndHome (both viewports)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE272-S4-CLAMP",
+   "severity": "low",
+   "origin": "gates/round-272/review.md suggestion 4",
+   "title": "describeSpaceStart formats point.requested without Math.max(0, ...)",
+   "status": "closed (D-29z598): not reproducible - formatArrangementTime clamps with Math.max(0, seconds) at ArrangementContext l.598 (round 273 claim K7); no code change",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "C-R272-01",
+   "severity": "low",
+   "origin": "C round 272 (c-round-272.json bugs[0]; pre-existing at 66b570a)",
+   "title": "a time selection set by a range drag leaves a stopped text naming the insert marker while Space plays from the selection start",
+   "status": "dispatched round 273 (D-29z599): Rule R in setRange (gesture-guarded) + Rule G at gesture release",
+   "repro": "c-round-272/extended-new.json rangeSpace/rangeOwnStatus; b-round-272/probe-r273-head.json rangeDrag",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "INFO-C272-K11",
+   "severity": "info",
+   "origin": "C round 272 claims K11",
+   "title": "PB1/PB2 row ids in playback-start.test.ts collide with store-focus-fixups.test.tsx PB1/PB2",
+   "status": "dispatched round 273 (D-29z599): rename to PBS1..PBS8 (RC-R270-TEST-ID-COLLISION class)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "INFO-C272-MUTANT-MAP",
+   "severity": "info",
+   "origin": "C round 272 mutants",
+   "title": "M-STOP-EXACT is killed only by A's LT10 extension; M-KIND-LOOSE only by PB8",
+   "status": "ruled (D-29z598): round 273 grants keep LT10 byte-identical and keep M-STOP-EXACT in the mutant table",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "B-R273-PLAYING-TEXT-WITH-RANGE",
+   "severity": "info",
+   "origin": "B round 272 -> 273 planning (source read; hypothesis, not probed)",
+   "title": "while playing with a time selection, insertMarkerWhilePlaying says 'Stop, then Space plays from here' although Space would play from the selection start",
+   "status": "signal (D-29z599): out of scope of stage 2 (section 3.7); B probes it at stage 3 planning and rules Low or not-a-bug",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE272-ARCH-STATUS-TAG",
+   "severity": "info",
+   "origin": "gates/round-272/review.md Architecture note",
+   "title": "status text used as state (regex + template re-render classifier); proposal: typed {kind, params} tag next to the status text, public status:string unchanged",
+   "status": "signal (D-29z600): keep for stages 2-3; bounded frontend-architect checkpoint requested (b-round-272-checkpoint-request.md) to rule keep vs tag before SYS-6 closes; non-blocking",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "A-R272-REVIEW-SEL-AT-END-WORDING",
+   "severity": "low",
+   "title": "a selection that starts at the project end gets insertMarkerAfterStopFromStart, whose wording names the insert marker",
+   "source": "a-round-272.md section 3 (reviewer Low, not fixed)",
+   "repro": "not probed in the browser (c-round-272.md section 4)",
+   "status": "deferred_low_polish (D-29z598); candidate for SYS-6 stage 3 if cheap",
+   "added": "2026-10-30",
+   "origin": "a-round-272.md section 3 (reviewer Low, not fixed)"
+  },
+  {
+   "id": "A-R272-REVIEW-TEXTS-OUTSIDE-T",
+   "severity": "low",
+   "title": "describeSpaceStart can write nothingToPlay and the playhead-subject playPastEnd, which are outside set T, so later marker writes cannot correct them",
+   "source": "a-round-272.md section 3 (reviewer Low)",
+   "repro": "source read",
+   "status": "deferred_low_polish (D-29z598); stage 2 adds the selection-subject forms only (GATE272-S3); the playhead form is ruled out (names the playhead)",
+   "added": "2026-10-30",
+   "origin": "a-round-272.md section 3 (reviewer Low)"
+  },
+  {
+   "id": "A-R272-REVIEW-KIND-NAME",
+   "severity": "low",
+   "title": "insertMarkerToPlayhead is classified 'stopped' although it can be written while playing; the kind name misleads",
+   "source": "a-round-272.md section 3 (reviewer info)",
+   "repro": "source read",
+   "status": "deferred_low_polish (D-29z598); revisit with GATE272-ARCH-STATUS-TAG",
+   "added": "2026-10-30",
+   "origin": "a-round-272.md section 3 (reviewer info)"
   }
  ],
  "tech_lead_notes": [
@@ -33463,24 +33578,6 @@
    "added": "2026-10-29 B round 252 -> 253 planning"
   },
   {
-   "id": "C-R253-01",
-   "severity": "low",
-   "title": "after a lower-zone click past the project end during playback and a Stop, the stopped text says \"Space plays from the insert marker at 00:16.500\" but the next Space is refused (past end)",
-   "source": "C round 253 (bugs; confirms A-R253-REVIEW-PASTEND-COPY)",
-   "repro": "c-round-253/fix/c253.json probes@1440x900/@1280x720 (pastClick, pastStop, pastSpaceAgain); probes-*.png",
-   "status": "dispatched round 272 (D-29z594): SYS-6 stage 1 (exported resolver playback-start.ts + Rule W/S); closes on C round 272 PASS | deferred_low_polish (D-29z468): the refusal predicate (ArrangementContext startPlaybackAt l.1339-1346: loopActive, endedHere/playbackEndedAtRef, > end + ARRANGEMENT_EPS) is context-private; a second copy in StudioWorkspace could disagree; fix with an exported pure resolver (ARCH-CHECKPOINT-TRANSPORT-POSITIONS addendum 5)",
-   "added": "2026-10-29 B round 253 -> 254 planning"
-  },
-  {
-   "id": "B-R253-STALE-PLAYING-STATUS-RESIDUAL",
-   "severity": "low",
-   "title": "a playing-only status naming a time other than the current marker stays after Stop (ruler click while playing, Ctrl+Right moves the marker with no status write, Space): stopped screen keeps \"... playback continues, Follow paused ...\"",
-   "source": "c-round-253.json observations (both viewports)",
-   "repro": "c-round-253/fix/c253.json residual probes",
-   "status": "dispatched round 272 (D-29z594): SYS-6 stage 1 (exported resolver playback-start.ts + Rule W/S); closes on C round 272 PASS | deferred_low_polish (D-29z468)",
-   "added": "2026-10-29 B round 253 -> 254 planning"
-  },
-  {
    "id": "A-R253-REVIEW-STRICTMODE-REMOUNT",
    "severity": "low",
    "title": "a remount while a playing-only text is shown would replace it on mount (StrictMode: statusSequence +2); dev browser showed 1 write",
@@ -33524,15 +33621,6 @@
    "repro": "docs/implementation/2026/quarter-IV/191-saba-b-10a-insert-marker.md TODO section",
    "status": "deferred_low_polish (D-29z468)",
    "added": "2026-10-29 B round 253 -> 254 planning"
-  },
-  {
-   "id": "C-R254-OBS-01",
-   "severity": "low",
-   "title": "while playing, a click past the end snaps the marker to exactly 16.000 (the end); after Stop the status says Space plays from the insert marker at 00:16.000, the visible marker stays at 16.000, but Space plays from 00:00",
-   "source": "C round 254 (pre-existing, identical on the HEAD c65e5e9 control)",
-   "repro": "c-round-254/browser/pastend-zoom0.json, pastend-new-zoom0.png, pastend-head-zoom0.png",
-   "status": "dispatched round 272 (D-29z594): SYS-6 stage 1 (exported resolver playback-start.ts + Rule W/S); closes on C round 272 PASS | deferred_low_polish (D-29z478): same class as C-R253-01; needs the exported resolver (ARCH-CHECKPOINT-TRANSPORT-POSITIONS)",
-   "added": "2026-10-29 B round 254 -> 255 planning"
   },
   {
    "id": "A-R254-REVIEW-FRAMES-ROW",
@@ -33794,7 +33882,7 @@
    "title": "pressing Enter twice with unchanged detail values does not re-announce: the keep branch writes the same status string, React skips the update, the aria-live output does not change (same pattern as clipGainUnchanged); class fix candidate for SYS-6 STATUS-LIFETIME (status nonce/key)",
    "evidence": "gates/round-270/review.md",
    "repro": "inside recipe, Enter in From twice; the live region text does not change",
-   "status": "deferred_low_polish (D-29z589)",
+   "status": "scheduled SYS-6 stage 3 (round 274, D-29z600): probe premise first (reduceArrangementStatus string form bumps sequence unless gesture active) | deferred_low_polish (D-29z589)",
    "added": "2026-10-30"
   },
   {
@@ -33843,7 +33931,7 @@
    "title": "after a successful arrow nudge the status still shows the previous 'Move clip: start ...' text (nudgeSelectedClip success path writes no status); pre-existing at 4b912a9",
    "source": "C round 271 (c-round-271.json bugs[0])",
    "repro": "c-round-271/ui-new.json nudge, ui-head.json; b-round-270/probe-group-nudge-head.json",
-   "status": "deferred_low_polish (D-29z593); scheduled in SYS-6 stage 2 (round 273, D-29z596) as an edit-result lifetime row",
+   "status": "scheduled SYS-6 stage 3 (round 274, D-29z600) | deferred_low_polish (D-29z593); scheduled in SYS-6 stage 2 (round 273, D-29z596) as an edit-result lifetime row",
    "added": "2026-10-30"
   },
   {
@@ -33888,7 +33976,61 @@
    "title": "a stopped-form status ('Stopped — Space plays from …') stays on screen after playback starts (startPlaybackAt writes nothing on success); pre-existing at 66b570a",
    "source": "B round 271 -> 272 planning (advisor review of the lifetime matrix; B probe)",
    "repro": "b-round-271/probe-stale-status-head.json atEnd afterSpaceAgain (data-playing true, stopped text shown), both viewports",
-   "status": "deferred_low_polish (D-29z596); scheduled SYS-6 stage 2 (round 273) as the play-start lifetime row; ruled out of stage 1 in current-task.md section 3.7",
+   "status": "dispatched round 273 (D-29z599): SYS-6 stage 2 Rule P (playingFrom) | deferred_low_polish (D-29z596); scheduled SYS-6 stage 2 (round 273) as the play-start lifetime row; ruled out of stage 1 in current-task.md section 3.7",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "A-R272-REVIEW-SEL-AT-END-WORDING",
+   "severity": "low",
+   "title": "a selection that starts at the project end gets insertMarkerAfterStopFromStart, whose wording names the insert marker",
+   "source": "a-round-272.md section 3 (reviewer Low, not fixed)",
+   "repro": "not probed in the browser (c-round-272.md section 4)",
+   "status": "deferred_low_polish (D-29z598); candidate for SYS-6 stage 3 if cheap",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "A-R272-REVIEW-TEXTS-OUTSIDE-T",
+   "severity": "low",
+   "title": "describeSpaceStart can write nothingToPlay and the playhead-subject playPastEnd, which are outside set T, so later marker writes cannot correct them",
+   "source": "a-round-272.md section 3 (reviewer Low)",
+   "repro": "source read",
+   "status": "deferred_low_polish (D-29z598); stage 2 adds the selection-subject forms only (GATE272-S3); the playhead form is ruled out (names the playhead)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "A-R272-REVIEW-KIND-NAME",
+   "severity": "low",
+   "title": "insertMarkerToPlayhead is classified 'stopped' although it can be written while playing; the kind name misleads",
+   "source": "a-round-272.md section 3 (reviewer info)",
+   "repro": "source read",
+   "status": "deferred_low_polish (D-29z598); revisit with GATE272-ARCH-STATUS-TAG",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE272-S2-RENDER-REF",
+   "severity": "low",
+   "title": "describeSpaceStartRef is assigned during render; the indirection is unnecessary (all refs declared before writeInsertMarker)",
+   "source": "gates/round-272/review.md suggestion 2",
+   "repro": "gates/round-272/review.md",
+   "status": "dispatched round 273 (D-29z599, owned code, cheap)",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "GATE272-S3-SELECTION-PASTEND-STALE",
+   "severity": "low",
+   "title": "the selection-subject past-end refusal is outside set T, so Home (range cleared, marker 0) leaves 'Time selection start (00:17.000) is past the end...' on screen",
+   "source": "gates/round-272/review.md suggestion 3",
+   "repro": "b-round-272/probe-r273-head.json selPastEndHome (both viewports)",
+   "status": "dispatched round 273 (D-29z599): classifier gains the selection-subject forms",
+   "added": "2026-10-30"
+  },
+  {
+   "id": "C-R272-01",
+   "severity": "low",
+   "title": "a time selection set by a range drag leaves a stopped text naming the insert marker while Space plays from the selection start",
+   "source": "C round 272 (c-round-272.json bugs[0]; pre-existing at 66b570a)",
+   "repro": "c-round-272/extended-new.json rangeSpace/rangeOwnStatus; b-round-272/probe-r273-head.json rangeDrag",
+   "status": "dispatched round 273 (D-29z599): Rule R in setRange (gesture-guarded) + Rule G at gesture release",
    "added": "2026-10-30"
   }
  ],
@@ -35604,7 +35746,14 @@
    "closes": [
     "B-R253-STALE-PLAYING-STATUS-RESIDUAL",
     "C-R253-01",
-    "C-R254-OBS-01"
+    "C-R254-OBS-01",
+    "GATE272-S1-LATE-READ",
+    "B-R272-STOPPED-TEXT-WHILE-PLAYING",
+    "C-R272-01",
+    "GATE272-S3-SELECTION-PASTEND-STALE",
+    "GATE272-S2-RENDER-REF",
+    "C-R271-01-NUDGE-STALE-STATUS",
+    "GATE270-S2-REPEAT-ANNOUNCE"
    ],
    "regression_rows": [
     "C-R252-01",
@@ -35615,7 +35764,7 @@
    "size": "1-2 rounds",
    "queue": "after SABA-B-9-10-11-TRANSPORT-GRID completes (stage 2, L46-CONTRACT-CHECKS, 11c), before SABA-B-7 / SYS-5 (D-29z520)",
    "source": "retro-260 section 7 (tech-lead, consequence-tester)",
-   "status": "in_progress (D-29z594): stage 1 dispatched round 272",
+   "status": "in_progress (D-29z599): stage 1 done (C round 272 PASS, published b288be7); stage 2 dispatched round 273; stage 3 round 274",
    "added": "2026-10-30 B round 259 -> 260 planning",
    "candidates_r270": "GATE270-S2-REPEAT-ANNOUNCE (repeat status not re-announced) is a status-lifetime class candidate; B rules on inclusion when SYS-6 is planned (D-29z589)",
    "stages": [
@@ -35628,16 +35777,31 @@
       "C-R253-01",
       "C-R254-OBS-01"
      ],
-     "status": "dispatched"
+     "status": "done (D-29z597): C round 272 PASS browserVerified/realVerified true, gate 272 published b288be7"
     },
     {
      "stage": 2,
      "round": 273,
-     "scope": "edit-result and announcement class: C-R271-01-NUDGE-STALE-STATUS (nudge success writes a status), GATE270-S2-REPEAT-ANNOUNCE (probe the claim first: the live span is keyed by statusSequence at StudioWorkspace l.3141), INFO-C248-STALE-NOTE regression row; matrix rows extended; doc 203 -> Completed; B-R272-STOPPED-TEXT-WHILE-PLAYING (play-start lifetime of stopped-form texts)",
-     "status": "planned (D-29z596)"
+     "scope": "transport start-point truth: GATE272-S1 ruling (late read, pinned LT12/LT13), Rule P playingFrom, Rule R (setRange, gesture-guarded), Rule G (gesture release), classifier playing-from + selection past-end forms, describeSpaceStartRef removed, PB->PBS rename; LT8 middle step + LT12-LT19 + PBS9; doc 204",
+     "closes": [
+      "GATE272-S1-LATE-READ",
+      "B-R272-STOPPED-TEXT-WHILE-PLAYING",
+      "C-R272-01",
+      "GATE272-S3-SELECTION-PASTEND-STALE",
+      "GATE272-S2-RENDER-REF",
+      "INFO-C272-K11"
+     ],
+     "status": "dispatched (D-29z599)"
+    },
+    {
+     "stage": 3,
+     "round": 274,
+     "scope": "edit-result and announcement class: C-R271-01-NUDGE-STALE-STATUS, GATE270-S2-REPEAT-ANNOUNCE (probe premise first), INFO-C248-STALE-NOTE carry, B-R273-PLAYING-TEXT-WITH-RANGE probe/ruling, A-R272-REVIEW-SEL-AT-END-WORDING if cheap; docs 203+204 l.4 -> Completed (C round 274 PASS)",
+     "status": "planned (D-29z600)"
     }
    ],
-   "ruling_r272": "GATE270-S2 not included in stage 1: it is an announcement-mechanism question, not a lifetime one, and its premise must be probed first (D-29z594)"
+   "ruling_r272": "GATE270-S2 not included in stage 1: it is an announcement-mechanism question, not a lifetime one, and its premise must be probed first (D-29z594)",
+   "ruling_r273": "stage 2 split from the old D-29z596 plan: the round-size rule (one Medium + two related Lows on one owner) keeps the transport class together; the edit-result/announcement class moves to stage 3 (D-29z600)"
   },
   {
    "id": "L46-CONTRACT-CHECKS",
@@ -37862,6 +38026,26 @@
    "id": "D-29z596",
    "date": "2026-10-30",
    "text": "Order: 272 SYS-6 stage 1; 273 SYS-6 stage 2 (C-R271-01, GATE270-S2 after probing its premise, INFO-C248 carry); then SYS-5, then STUDIO-PERFORMANCE. REGRESSION goes first on/after 2026-11-02 (re-checked at every planning, not assumed to fall at a fixed round); RETRO at 275 (15 rounds after 260). No new lesson (no Saba-found issue). Stage 2 also takes B-R272-STOPPED-TEXT-WHILE-PLAYING (found at the advisor review; pre-existing)."
+  },
+  {
+   "id": "D-29z597",
+   "date": "2026-10-30",
+   "text": "Round 272 result: C PASS (20 rows; LT-RANGE-OWN-STATUS FAIL is the pre-existing C-R272-01 from B's false section 3.7 premise, not A's work), browserVerified/realVerified true; gate 272 published b288be7 on both remotes. SYS-6 stage 1 done; B-R253-STALE-PLAYING-STATUS-RESIDUAL, C-R253-01, C-R254-OBS-01 closed and removed from deferred_low_polish (L7). Archived tasks/round-272.md (did not exist before). Round-272 section 0 (strip/flag click from a stopped text now gives the true playing text) accepted and pinned as LT12 in round 273."
+  },
+  {
+   "id": "D-29z598",
+   "date": "2026-10-30",
+   "text": "Gate-272 triage: S1 (Medium, late read) -> GATE272-S1-LATE-READ dispatched 273 with an explicit ruling; S2 -> GATE272-S2-RENDER-REF dispatched 273 (owned, cheap); S3 -> GATE272-S3-SELECTION-PASTEND-STALE dispatched 273 (B reproduced at b288be7 both viewports); S4 closed not reproducible (formatArrangementTime clamps, l.598); Architecture note -> signal GATE272-ARCH-STATUS-TAG. C notes: C-R272-01 dispatched 273; INFO-C272-K11 -> PB->PBS rename in 273; INFO-C272-MUTANT-MAP -> LT10 frozen byte-identical + M-STOP-EXACT kept. A reviewer Lows -> deferred_low_polish: A-R272-REVIEW-SEL-AT-END-WORDING, A-R272-REVIEW-TEXTS-OUTSIDE-T, A-R272-REVIEW-KIND-NAME."
+  },
+  {
+   "id": "D-29z599",
+   "date": "2026-10-30",
+   "text": "Round 273 contract = SYS-6 stage 2: late-read semantic ruled (state at the end of the action; React ^18.3.1 useReducer applies function updates at the next render), Rule P (playingFrom on a successful start from a stopped T text only), Rule R (setRange re-derives a stopped T text when no gesture is active), Rule G (gesture release re-derives it), classifier kinds playing-from + selection past-end forms, describeSpaceStartRef removed. Rejected: snapshot-at-write (breaks Home-with-range and playFrom), reuse insertMarkerWhilePlaying on start (false with a selection or at the end), write on every start (clobbers clip-added/Loop/followResumed), ungated Rule R (per-pixel announcements). B pre-check: full vitest 3269/3272 (3 granted collisions), browser sketch fixes all rows both viewports, 0 status mutations during the drag. New signal B-R273-PLAYING-TEXT-WITH-RANGE (hypothesis)."
+  },
+  {
+   "id": "D-29z600",
+   "date": "2026-10-30",
+   "text": "SYS-6 now 3 stages: 272 (done), 273 (transport start-point truth), 274 (edit-result/announcement: C-R271-01, GATE270-S2 after premise probe, INFO-C248, B-R273-PLAYING-TEXT-WITH-RANGE ruling, docs 203/204 -> Completed). Then SYS-5, STUDIO-PERFORMANCE. REGRESSION first when due (on/after 2026-11-02; not due today); RETRO 275 unchanged. Accumulated structural risk on ArrangementContext status logic (text classifier grows each stage): bounded frontend-architect checkpoint requested from root (b-round-272-checkpoint-request.md), non-blocking, to rule keep vs typed tag before SYS-6 closes. No lesson change (no Saba-found issue)."
   }
  ],
  "retro_candidates": [
@@ -37970,6 +38154,12 @@
    "id": "RC-R271-SCRATCH-NODE-MODULES",
    "added": "2026-10-30",
    "text": "scratch copies that symlink store/node_modules as a whole let Vite/vitest write caches into store/node_modules/.vite (INFO-C271-VITE-CACHE; A, B and C all did it). Candidate lesson: scratches use a private node_modules dir of per-entry symlinks (B round 271 planning did this)",
+   "status": "candidate for RETRO 275"
+  },
+  {
+   "id": "RC-R272-UNPROBED-PREMISE",
+   "added": "2026-10-30",
+   "text": "round-272 task section 3.7 stated a ruling premise ('setting a range always writes its own range status') with no K-tag and no baseline probe; C's LT-RANGE-OWN-STATUS failed on it (C-R272-01). Candidate lesson: a ruling that rests on current behaviour is an L29 claim (tagged, probed by B at the baseline)",
    "status": "candidate for RETRO 275"
   }
  ],
