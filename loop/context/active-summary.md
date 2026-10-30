@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T20:19:44.880Z)
+# Active loop summary (2026-10-30T21:26:36.415Z)
 
-- backlog.json 2624 KB -> active view 367 KB
-- status: G_ROOT_GATE round 275
-- servers: `{"checkedUtc":"2026-10-30T20:11:19.9081081Z","round":275,"attempt":1,"store":200}`
+- backlog.json 2631 KB -> active view 367 KB
+- status: G_ROOT_GATE round 276
+- servers: `{"checkedUtc":"2026-10-30T21:03:58.3339164Z","round":276,"attempt":1,"store":200}`
 - last publication: a4c0e240072cdd8448c291b5217df95289d9c920 (rounds 274-274)
-- last root gate: round 275 skipped - C taskStatus FAIL
+- last root gate: round 276 failed - verify exit 1 (gates/round-276/verify.log)
 
 ## Current items: -
 

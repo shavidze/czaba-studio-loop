@@ -1,10 +1,10 @@
 {
- "version": 240,
- "updated": "2026-10-30 B round 275 -> 276 planning",
+ "version": 241,
+ "updated": "2026-10-30 B round 276 -> 277 planning",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 276, D-29z613..D-29z617; SYS-5 stage 1: soft-disabled transport buttons with reachable reasons + RT-FIX 276; baseline a4c0e24, 10 grants (b-round-275-r276-grants.txt), frozen 1129 (b-round-275-r276-tree-sha256.txt))",
- "advisor_used_by_B": "round 275 -> 276 planning: available and consulted (before the approach and before finishing)",
+ "current_task": "current-task.md (round 277, D-29z618..D-29z623; GATE276 test-only fix-up: NS1/NS6 navigation-strings-ui, TC9 transport-centre-ui -> aria-disabled contract + doc 206 line; baseline a4c0e24 + A's unpublished round-276 tree; 3 grants (b-round-276-r277-grants.txt), frozen 1136 (b-round-276-r277-tree-sha256.txt))",
+ "advisor_used_by_B": "round 276 -> 277 planning: available and consulted (before the approach and before finishing)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -10876,11 +10876,29 @@
    "round": 275,
    "task": "current-task.md",
    "decision": "D-29z605..D-29z612",
-   "status": "dispatched",
+   "status": "done: C FAIL on RT-IDS only (two Low document findings), gate 275 skipped; RT-FIX in round 276",
    "type": "RETRO 275 (window 260-274) + whole-screen review (no app code)",
    "note": "baseline a4c0e24 clean; frozen 1138 (b-round-274-r275-tree-sha256.txt); grants none; outputs retros/retro-275.md, lessons.md, user-review/screen-review-275.md",
    "next": "all RT rows PASS -> round 276 = SYS-5 (or REGRESSION if due); RT row failure -> RT-FIX lines in round 276",
    "added": "2026-10-30 B round 274 -> 275 planning"
+  },
+  {
+   "round": 276,
+   "task": "tasks/round-276.md",
+   "decision": "D-29z613..D-29z617",
+   "status": "C PASS (28 rows, browserVerified/realVerified true; V-HOVER-SOFT cursor half FAIL, Low, pre-existing: C-R276-01; C-R276-02 Low); gate 276 FAILED (verify exit 1: NS1, NS6, TC9 stale assertions in navigation-strings-ui/transport-centre-ui) -> unpublished; round 277 fix-up",
+   "type": "SYS-5 stage 1 + RT-FIX 276",
+   "added": "2026-10-30 B round 276 -> 277 planning"
+  },
+  {
+   "round": 277,
+   "task": "current-task.md",
+   "decision": "D-29z618..D-29z623",
+   "status": "dispatched",
+   "type": "GATE276 test-only fix-up (no app code)",
+   "note": "baseline a4c0e24 + A's round-276 working tree (9 M + doc 206 untracked); grants 2 tests + doc 206; frozen 1136; B pre-applied sketch (b-round-276/sketch.diff: 18/18 pass, mutants N1/N2 red)",
+   "next": "C PASS + gate publish -> SYS-5 stage 1 done, round 278 SYS-5 stage 2 (REGRESSION first if on/after 2026-11-02)",
+   "added": "2026-10-30 B round 276 -> 277 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -27117,7 +27135,7 @@
   {
    "id": "C-R275-01",
    "severity": "low",
-   "status": "fixed at round-276 planning (D-29z613; retro-275.md section 8 RT-FIX bullets, backlog), pending C RT-FIX-276 row",
+   "status": "closed: C round 276 RT-FIX-276 PASS (c-round-276.json rows)",
    "title": "RC-R265-AT-RISK-NO-ROW named a RETRO-275 candidate (D-29z565, D-29z575) but had no retro_candidates entry or retro-275 disposition",
    "source": "c-round-275.json",
    "evidence": "c-round-275.json bugs[0]",
@@ -27127,12 +27145,51 @@
   {
    "id": "C-R275-02",
    "severity": "low",
-   "status": "fixed at round-276 planning (D-29z613; retro-275.md section 8 RT-FIX bullets, backlog), pending C RT-FIX-276 row",
+   "status": "closed: C round 276 RT-FIX-276 PASS (c-round-276.json rows)",
    "title": "architecture signal GATE264-ARCH-TEST-HELPER said 'candidate for RETRO 275' with no disposition",
    "source": "c-round-275.json",
    "evidence": "c-round-275.json bugs[1]",
    "against": "B (retro documents)",
    "added": "2026-10-30 B round 275 -> 276 planning"
+  },
+  {
+   "id": "GATE276-T1",
+   "severity": "medium",
+   "status": "open: round 277 fix-up (D-29z618)",
+   "title": "gate 276 failed: NS1 (navigation-strings-ui l.222 old Split title), NS6 (l.429 hasAttribute('disabled')), TC9 (transport-centre-ui l.404 toHaveProperty('disabled', true)) pin the pre-SYS-5 contract",
+   "source": "gates/gate-round-276.json, gates/round-276/verify.log",
+   "evidence": "verify.log FAIL blocks; 2 failed / 218 files, 3 failed / 3291 tests",
+   "against": "B (round-276 SW1 sweep too narrow; L23 amended D-29z622)",
+   "added": "2026-10-30 B round 276 -> 277 planning"
+  },
+  {
+   "id": "C-R276-01",
+   "severity": "low",
+   "status": "scheduled: SYS-5 stage 2 round 278 (D-29z619), transport part; app-wide part -> B-R276-CURSOR-UNLAYERED-GLOBAL deferred",
+   "title": "soft-disabled transport buttons compute cursor pointer, not not-allowed (unlayered app.css button{cursor:pointer}); pre-existing at HEAD",
+   "source": "c-round-276.json bugs[0]",
+   "evidence": "c-round-276/c276-new.json look@*.hoverSoft; c276-head.json; c276-ring-new.json cursorControl",
+   "against": "B (spec premise)",
+   "added": "2026-10-30 B round 276 -> 277 planning"
+  },
+  {
+   "id": "C-R276-02",
+   "severity": "low",
+   "status": "ruled keep (D-29z620); stage 2 adds the explicit row",
+   "title": "a click on a soft-disabled button no longer blurs/commits a focused text field (HEAD native disabled did)",
+   "source": "c-round-276.json bugs[1]",
+   "evidence": "c-round-276/c276-blur.json",
+   "against": "B (section 2.1 L49 table)",
+   "added": "2026-10-30 B round 276 -> 277 planning"
+  },
+  {
+   "id": "A-R276-REVIEW-DELETE-NAME",
+   "severity": "low",
+   "status": "scheduled: SYS-5 stage 2 round 278 (D-29z621)",
+   "title": "soft-disabled Delete's aria-label says 'the selected clip' while its title says select a clip first; newly Tab-reachable",
+   "source": "a-round-276.md code-reviewer; confirmed c-round-276.md",
+   "evidence": "c-round-276.json info[0]",
+   "added": "2026-10-30 B round 276 -> 277 planning"
   }
  ],
  "tech_lead_notes": [
@@ -29348,6 +29405,13 @@
    "text": "nudge result text is inline in the provider action; proposal: pure describeNudgeResult(before, after, ids): string | null in app/lib/arrangement/status-*.ts with unit tests; must not change useArrangement() shape, the applyEdit -> setRange -> setStatus order or sequence numbers (SK13/SK14/LT20/LT21). Reviewer: keep for now",
    "status": "signal (D-29z606): added to checkpoint addendum b-round-274-checkpoint-addendum.md (question 3); not scheduled",
    "added": "2026-10-30 B round 274 -> 275 planning"
+  },
+  {
+   "id": "A-R276-ARCH-GUARD-IN-HELPER",
+   "source": "a-round-276.md code-reviewer Architecture note",
+   "text": "the two-line soft-disabled guard is hand-copied into seven onClick handlers, separate from softDisabledButtonProps; proposal: the shared helper also owns the click wrapper (guard -> armFocusHandoff -> action order unchanged), SD1-SD7/FL3-FL10/SD2b run over all nine users; reviewer prefers the DOM-attribute guard",
+   "status": "signal (D-29z621): ruled at SYS-5 stage 2 planning (round 278), where the helper moves to a shared file; not a separate round",
+   "added": "2026-10-30 B round 276 -> 277 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -34232,6 +34296,17 @@
    "repro": "Tab to a soft-disabled transport button after round 276",
    "added": "2026-10-30 B round 275 -> 276 planning",
    "deferred_reason": "user decision 2026-10-23: open Lows go to deferred_low_polish"
+  },
+  {
+   "id": "B-R276-CURSOR-UNLAYERED-GLOBAL",
+   "severity": "low",
+   "status": "deferred_low_polish (D-29z619)",
+   "title": "every natively disabled button with disabled:cursor-not-allowed still computes cursor pointer: app.css unlayered button{cursor:pointer} beats @layer utilities (app-wide form of C-R276-01)",
+   "source": "c-round-276.json bugs[0] cursorControl",
+   "evidence": "c-round-276/c276-ring-new.json cursorControl; a-round-276/probe-1440.json",
+   "repro": "any page, hover a natively disabled button with disabled:cursor-not-allowed; read getComputedStyle(b).cursor",
+   "added": "2026-10-30 B round 276 -> 277 planning",
+   "deferred_reason": "user decision 2026-10-23: open Lows go to deferred_low_polish; fix belongs to the polish pass (app.css base layer, grant needed)"
   }
  ],
  "baseline_tree_at_round108": {
@@ -35931,8 +36006,9 @@
    "added": "2026-10-28 B round 229 -> 230 planning",
    "note_retro275": "next after RETRO 275 (round 276 unless REGRESSION is due, on/after 2026-11-02). Planning check (tech-lead, D-29z612): grep the sketch for setStatus; if a disabled-reason path writes status text, add L51 rows (clobber + lifetime) and one evidence line to ARCH-CHECKPOINT-SYS6-STATUS-TAG. Apply the L49 SWEEP clause: aria-disabled replaces disabled, so every toBeDisabled/disabled consumer is a SWEEP hit",
    "owner_area_corrected_d29z614": "stage 1 (round 276): ArrangementTransport.tsx (Undo, Redo, Split, Delete, Loop, Zoom to selection, Zoom back) + strings.ts titles + app.css/utilities.css press-scale selectors; stage 2 (round 277): metronome toggle in ArrangementTempoRow.tsx (l.317, not ArrangementTransport.tsx) + library Add in ArrangementLibraryPreview.tsx (l.333), helper moved to app/components/arrangement/ (tech-lead); no ui/Button prop",
-   "status": "in progress: stage 1 dispatched round 276 (D-29z614/D-29z615)",
-   "stage1_contract": "aria-disabled (absent when available), focusable, onClick guard first, mousedown preventDefault, reasons in titles (Undo/Redo null titles + splitNeedsTargetTitle/deleteNeedsTargetTitle), silent no-op (product-designer Q1), handoff rekeyed (doc 093/D-29z73), children dimmed aria-disabled:*:opacity-40 (product-designer over tech-lead, ring stays full strength), shortcuts unchanged (L49 D-29z616)"
+   "status": "in progress: stage 1 C PASS round 276, gate 276 failed on 3 stale test assertions -> round 277 test-only fix-up (D-29z618); stage 2 round 278 (D-29z623)",
+   "stage1_contract": "aria-disabled (absent when available), focusable, onClick guard first, mousedown preventDefault, reasons in titles (Undo/Redo null titles + splitNeedsTargetTitle/deleteNeedsTargetTitle), silent no-op (product-designer Q1), handoff rekeyed (doc 093/D-29z73), children dimmed aria-disabled:*:opacity-40 (product-designer over tech-lead, ring stays full strength), shortcuts unchanged (L49 D-29z616)",
+   "stage2_additions_d29z619_d29z621": "C-R276-01 token aria-disabled:cursor-not-allowed! + computed-cursor row; A-R276-REVIEW-DELETE-NAME; C-R276-02 keep row (L49 side-effect table); rule A-R276-ARCH-GUARD-IN-HELPER; apply amended L23 sweep (assertion forms + accessible names + old literals) to the metronome and Add consumers"
   },
   {
    "id": "PERF-HARNESS-STRINGS-DRIFT",
@@ -38381,6 +38457,36 @@
    "id": "D-29z617",
    "date": "2026-10-30",
    "text": "Round 276 outcome table: PASS before 2026-11-02 -> round 277 SYS-5 stage 2; on/after 2026-11-02 -> REGRESSION first; Medium+ row fail -> bounded fix-up; RT-FIX fail -> correct and re-check only."
+  },
+  {
+   "id": "D-29z618",
+   "date": "2026-10-30",
+   "text": "Round 277 = GATE276 test-only fix-up (gate-round-276.json failed: verify exit 1; 3 failed tests NS1 l.222, NS6 l.429, TC9 l.404 still pinned native disabled / the old Split title). Equal-or-stronger replacements pre-applied by B on a scratch copy (b-round-276/sketch.diff, 18/18 pass, mutants N1/N2 red). SYS-5 stage 1 stays 'checked' until the gate publishes; stage 2 moves to round 278."
+  },
+  {
+   "id": "D-29z619",
+   "date": "2026-10-30",
+   "text": "C-R276-01 (soft-disabled transport cursor computes pointer because unlayered app.css button{cursor:pointer} beats @layer utilities; pre-existing at HEAD): ruled option (b) aria-disabled:cursor-not-allowed! (layered !important wins) + SD7 token list, built in SYS-5 stage 2 (round 278, owns ArrangementTransport.tsx) with C's computed-cursor row. The app-wide form (every native disabled:cursor-not-allowed loses to the same rule) recorded as Low B-R276-CURSOR-UNLAYERED-GLOBAL in deferred_low_polish. L29 premise gap noted: round-276 HEAD cursor was never probed."
+  },
+  {
+   "id": "D-29z620",
+   "date": "2026-10-30",
+   "text": "C-R276-02 ruled KEEP: a click on a soft-disabled button does not blur/commit a focused text field (intended by round-276 section 2.1 mousedown preventDefault and B-MOUSE-FOCUS; no data loss, the value commits on Enter/blur). Stage 2 adds it as an explicit L49 side-effect row (tempo input + marker editor) so it is a decided behaviour."
+  },
+  {
+   "id": "D-29z621",
+   "date": "2026-10-30",
+   "text": "A-R276-REVIEW-DELETE-NAME (soft-disabled Delete keeps aria-label 'Delete — the selected clip; leaves a gap' while the title says select a clip first; newly Tab-reachable) scheduled into SYS-5 stage 2 (name form confirmed with product-designer at that planning). A-R276-ARCH-GUARD-IN-HELPER (7 hand-copied onClick guards; proposal: shared helper owns the click wrapper) recorded as architecture signal, ruled at stage-2 planning where the helper moves to a shared file; not a separate refactor round."
+  },
+  {
+   "id": "D-29z622",
+   "date": "2026-10-30",
+   "text": "lessons.md L23 gains the attribute/state-contract sweep clause (every assertion form, filter by accessible name/test accessor, grep old literals, never narrow an earlier wider list without per-file ruling). Evidence GATE276-T1. Line count stays 59."
+  },
+  {
+   "id": "D-29z623",
+   "date": "2026-10-30",
+   "text": "Round 277 outcome table: C PASS + gate publish -> SYS-5 stage 1 done, round 278 = SYS-5 stage 2 (metronome, library Add, shared helper, C-R276-01 token, DELETE-NAME, C-R276-02 row), REGRESSION first if on/after 2026-11-02; C FAIL on a row -> re-fix that row only; gate fails again -> one more bounded fix-up."
   }
  ],
  "retro_candidates": [

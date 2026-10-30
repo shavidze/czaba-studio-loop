@@ -1,0 +1,122 @@
+{
+ "round": 276,
+ "taskStatus": "PASS",
+ "verdictNote": "All SYS-5 stage-1 behaviour, look, guard, doc and RT-FIX rows pass in real Chromium at 1440x900 and 1280x720 against a HEAD a4c0e24 control server. One half-row fails: V-HOVER-SOFT expects cursor not-allowed, computed is pointer on new AND on HEAD (unlayered app.css l.483); Low, pre-existing, A's STOP awaits B ruling; section 11 routes only Medium+ look failures to a fix-up. Two Low findings for B.",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T21:03:58.3339164Z",
+  "round": 276,
+  "attempt": 1,
+  "store": 200
+ },
+ "baseline": "a4c0e24 + A working tree (manifest rc 0)",
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "SWEEP",
+  "TESTS-TARGETED",
+  "TEST-CHANGES",
+  "MUTANTS",
+  "B-TAB",
+  "B-AX",
+  "B-NOOP",
+  "B-MOUSE-FOCUS",
+  "B-REASON-TITLES",
+  "B-HANDOFF-DELETE",
+  "B-HANDOFF-ZOOM",
+  "B-HANDOFF-UNDO",
+  "B-ENABLE-WHILE-FOCUSED",
+  "B-SPACE",
+  "B-SHORTCUTS",
+  "B-SHEET-RESTORE",
+  "STUDIO-SMOKE-276",
+  "V-REST",
+  "V-HOVER-ENABLED",
+  "V-PRESS",
+  "V-RING",
+  "SCREEN-BUDGET",
+  "G276-AUTH",
+  "DOC-206",
+  "RT-FIX-276"
+ ],
+ "failed": [
+  "V-HOVER-SOFT (cursor half)"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "bugs": [
+  {
+   "id": "C-R276-01",
+   "severity": "low",
+   "against": "B (spec premise; pre-existing)",
+   "steps": [
+    "/studio-lab empty demo, 1440x900 or 1280x720",
+    "hover any of Undo, Redo, Split, Delete, Loop, Zoom to selection, Zoom back",
+    "read getComputedStyle(button).cursor"
+   ],
+   "expected": "cursor: not-allowed (task section 8 V-HOVER-SOFT)",
+   "actual": "cursor: pointer on all seven; HEAD natively disabled buttons also pointer; injected <button disabled class=disabled:cursor-not-allowed> also pointer. Cause: unlayered app.css l.483 button { cursor:pointer } beats @layer utilities. Options: grant l.483 or use aria-disabled:cursor-not-allowed!",
+   "evidence": "c-round-276/c276-new.json look@*.hoverSoft; c276-head.json look@*; c276-ring-new.json cursorControl"
+  },
+  {
+   "id": "C-R276-02",
+   "severity": "low",
+   "against": "B (section 2.1 L49 side-effect table)",
+   "steps": [
+    "/studio-lab 1440x900",
+    "click tempo input, type 97 (no Enter)",
+    "mouse-click the soft-disabled Undo"
+   ],
+   "expected": "a ruling on whether a click on an unavailable button should blur/commit a focused text field (HEAD native disabled did)",
+   "actual": "new: focus stays in tempo input, value not committed (data-bpm empty). HEAD: focus -> BODY, tempo 97 committed. Intended by section 2.1 mousedown preventDefault; value commits on later Enter/blur",
+   "evidence": "c-round-276/c276-blur.json, c276-blur.cjs"
+  }
+ ],
+ "info": [
+  "A-R276-REVIEW-DELETE-NAME confirmed in browser: soft-disabled Delete AX name 'Delete — the selected clip; leaves a gap' vs description 'select a clip ... first'; aria-label frozen by section 2.2; newly reachable by Tab",
+  "B-REASON-TITLES: native OS tooltip is not painted in headless Chromium; title attribute + :hover verified",
+  "Ableton: APG point confirmed; Live behaviour for unavailable controls unconfirmed (LIVE-MEAS-SYS5-DISABLED); reason text = Saba-approved DUX-R-4(b)"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": "PASS",
+  "HUNK-SCOPE": "PASS",
+  "CLAIMS": "PASS (identical to B at a4c0e24; K10 re-measured on HEAD server)",
+  "SWEEP": "PASS (remaining hits non-transport; B-R276-SHARED-TEST-CONSTANTS)",
+  "TESTS-TARGETED": "PASS 20 files 379 tests",
+  "TEST-CHANGES": "PASS no assertion lost",
+  "MUTANTS": "PASS M1 red SD2/SD2b, M3 red FL3-FL6/FL10/SD5",
+  "B-TAB": "PASS 14 stops 1440/1280/375, backward reversed",
+  "B-AX": "PASS",
+  "B-NOOP": "PASS",
+  "B-MOUSE-FOCUS": "PASS (HEAD data: BODY)",
+  "B-REASON-TITLES": "PASS (title+:hover; native tooltip not painted in headless)",
+  "B-HANDOFF-DELETE": "PASS",
+  "B-HANDOFF-ZOOM": "PASS",
+  "B-HANDOFF-UNDO": "PASS",
+  "B-ENABLE-WHILE-FOCUSED": "PASS",
+  "B-SPACE": "PASS",
+  "B-SHORTCUTS": "PASS (byte-identical to HEAD)",
+  "B-SHEET-RESTORE": "PASS",
+  "STUDIO-SMOKE-276": "PASS sha256 1fea093b equal",
+  "V-REST": "PASS dE2000 text 2.31 fill 1.88",
+  "V-HOVER-SOFT": "FAIL cursor half (C-R276-01, Low, pre-existing at HEAD); background half PASS",
+  "V-HOVER-ENABLED": "PASS equal to HEAD",
+  "V-PRESS": "PASS",
+  "V-RING": "PASS 5.43:1 equal to Fit",
+  "SCREEN-BUDGET": "PASS equal to HEAD",
+  "G276-AUTH": "PASS",
+  "DOC-206": "PASS",
+  "RT-FIX-276": "PASS"
+ },
+ "claimRerunMinutes": 4,
+ "shadowRowSeverityVerdict": "PASS (one failed half-row and all findings Low; no Medium+)"
+}

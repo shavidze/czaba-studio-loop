@@ -1,0 +1,796 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-276/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx [2m([22m[2m18 tests[22m[2m | [22m[31m6 failed[39m[2m)[22m[33m 563[2mms[22m[39m
+     [32m✓[39m FL1: a keyboard 0 dB reset moves focus to the Clip Gain input, and a fresh Enter there adds no clip[32m 235[2mms[22m[39m
+     [32m✓[39m FL2: a mouse 0 dB reset never focuses the button and leaves focus on BODY[32m 97[2mms[22m[39m
+[31m     [31m×[31m FL3: Undo keeps focus while history remains and hands it to Redo on the last step[39m[32m 28[2mms[22m[39m
+[31m     [31m×[31m FL4: Redo keeps focus while redo entries remain and hands it to Undo on the last step[39m[32m 23[2mms[22m[39m
+[31m     [31m×[31m FL5: Delete on the selected clip hands focus to Undo, which now undoes the delete[39m[32m 13[2mms[22m[39m
+[31m     [31m×[31m FL6: Zoom back on its last history step hands focus to Fit[39m[32m 11[2mms[22m[39m
+     [32m✓[39m FL7: Undo clicked without holding focus never moves focus[32m 14[2mms[22m[39m
+     [32m✓[39m FL8: an Undo refused during a pointer gesture keeps Undo enabled and focused[32m 15[2mms[22m[39m
+     [32m✓[39m FL9: enabled Undo, Redo, Delete and Zoom back prevent a repeated Enter and allow a fresh one; a repeated Space is untouched[32m 13[2mms[22m[39m
+[31m     [31m×[31m FL10: when the browser already dropped focus to BODY before the commit, Zoom back still hands focus to Fit[39m[32m 22[2mms[22m[39m
+     [32m✓[39m SD1: in an empty arrangement the seven unavailable buttons are aria-disabled, focusable and titled with their reason[32m 14[2mms[22m[39m
+     [32m✓[39m SD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom[32m 13[2mms[22m[39m
+     [32m✓[39m SD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)[32m 9[2mms[22m[39m
+     [32m✓[39m SD3: mousedown on a soft-disabled button is default-prevented, on Fit it is not[32m 10[2mms[22m[39m
+     [32m✓[39m SD4: a selected clip or a range makes Split and Delete available with their action titles[32m 13[2mms[22m[39m
+[31m     [31m×[31m SD5: after one edit, Undo hands focus to Redo when it becomes soft-disabled, and Redo hands it back[39m[32m 12[2mms[22m[39m
+     [32m✓[39m SD6: a focused soft-disabled Redo becomes available in place after Ctrl+Z, and a click then redoes[32m 11[2mms[22m[39m
+     [32m✓[39m SD7: the transport source has no enabled:/disabled: tokens or disabled props, and the rendered Undo keeps the aria-disabled tokens[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22ma self-disabling button hands keyboard focus to its partner (C-R107-01, D-29z73)[2m > [22mFL3: Undo keeps focus while history remains and hands it to Redo on the last step
+[31m[1mAssertionError[22m: expected <button type="button" …(4)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,14 +1,15 @@[39m
+[2m  <button[22m
+[32m-   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"[39m
+[31m+   aria-disabled="true"[39m
+[31m+   aria-keyshortcuts="Control+Z Meta+Z"[39m
+[2m    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"[22m
+[32m-   title="Redo: Clip Gain (Ctrl+Shift+Z)"[39m
+[31m+   title="Undo — nothing to undo yet (Ctrl+Z)"[39m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <svg[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"[39m
+[31m+     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"[39m
+[2m      fill="none"[22m
+[2m      height="24"[22m
+[2m      stroke="currentColor"[22m
+[2m      stroke-linecap="round"[22m
+[2m      stroke-linejoin="round"[22m
+[33m@@ -16,18 +17,17 @@[39m
+[2m      viewBox="0 0 24 24"[22m
+[2m      width="24"[22m
+[2m      xmlns="http://www.w3.org/2000/svg"[22m
+[2m    >[22m
+[2m      <path[22m
+[32m-       d="m15 14 5-5-5-5"[39m
+[31m+       d="M9 14 4 9l5-5"[39m
+[2m      />[22m
+[2m      <path[22m
+[32m-       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"[39m
+[31m+       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[2m      />[22m
+[2m    </svg>[22m
+[2m    <span[22m
+[2m      class="truncate"[22m
+[2m    >[22m
+[32m-     Redo[39m
+[32m-     : Clip Gain[39m
+[31m+     Undo[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m315:36[22m[39m
+    [90m313| [39m    [34mexpect[39m([34mundoButton[39m()[33m.[39m[34mgetAttribute[39m([32m'aria-disabled'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m314| [39m    [34mexpect[39m([34mundoButton[39m()[33m.[39m[34mhasAttribute[39m([32m'disabled'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m315| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mredoButton[39m())[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m316| [39m  })[33m;[39m
+    [90m317| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22ma self-disabling button hands keyboard focus to its partner (C-R107-01, D-29z73)[2m > [22mFL4: Redo keeps focus while redo entries remain and hands it to Undo on the last step
+[31m[1mAssertionError[22m: expected <button type="button" …(4)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,14 +1,15 @@[39m
+[2m  <button[22m
+[32m-   aria-keyshortcuts="Control+Z Meta+Z"[39m
+[31m+   aria-disabled="true"[39m
+[31m+   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"[39m
+[2m    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"[22m
+[32m-   title="Undo: Clip Gain (Ctrl+Z)"[39m
+[31m+   title="Redo — nothing to redo (Ctrl+Shift+Z)"[39m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <svg[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"[39m
+[31m+     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"[39m
+[2m      fill="none"[22m
+[2m      height="24"[22m
+[2m      stroke="currentColor"[22m
+[2m      stroke-linecap="round"[22m
+[2m      stroke-linejoin="round"[22m
+[33m@@ -16,18 +17,17 @@[39m
+[2m      viewBox="0 0 24 24"[22m
+[2m      width="24"[22m
+[2m      xmlns="http://www.w3.org/2000/svg"[22m
+[2m    >[22m
+[2m      <path[22m
+[32m-       d="M9 14 4 9l5-5"[39m
+[31m+       d="m15 14 5-5-5-5"[39m
+[2m      />[22m
+[2m      <path[22m
+[32m-       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[31m+       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"[39m
+[2m      />[22m
+[2m    </svg>[22m
+[2m    <span[22m
+[2m      class="truncate"[22m
+[2m    >[22m
+[32m-     Undo[39m
+[32m-     : Clip Gain[39m
+[31m+     Redo[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m331:36[22m[39m
+    [90m329| [39m    [34mexpect[39m([34mredoButton[39m()[33m.[39m[34mgetAttribute[39m([32m'aria-disabled'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m330| [39m    [34mexpect[39m([34mredoButton[39m()[33m.[39m[34mhasAttribute[39m([32m'disabled'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m331| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mundoButton[39m())[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m332| [39m  })[33m;[39m
+    [90m333| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22ma self-disabling button hands keyboard focus to its partner (C-R107-01, D-29z73)[2m > [22mFL5: Delete on the selected clip hands focus to Undo, which now undoes the delete
+[31m[1mAssertionError[22m: expected <button type="button" …(5)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  <button[22m
+[32m-   aria-keyshortcuts="Control+Z Meta+Z"[39m
+[32m-   class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"[39m
+[32m-   title="Undo: Delete clip (Ctrl+Z)"[39m
+[31m+   aria-disabled="true"[39m
+[31m+   aria-keyshortcuts="Delete Backspace"[39m
+[31m+   aria-label="Delete — the selected clip; leaves a gap"[39m
+[31m+   class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5"[39m
+[31m+   title="Delete — select a clip or make a time selection first (Delete)"[39m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <svg[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"[39m
+[31m+     class="lucide lucide-delete size-5 shrink-0"[39m
+[2m      fill="none"[22m
+[2m      height="24"[22m
+[2m      stroke="currentColor"[22m
+[2m      stroke-linecap="round"[22m
+[2m      stroke-linejoin="round"[22m
+[32m-     stroke-width="2"[39m
+[31m+     stroke-width="1.2"[39m
+[2m      viewBox="0 0 24 24"[22m
+[2m      width="24"[22m
+[2m      xmlns="http://www.w3.org/2000/svg"[22m
+[2m    >[22m
+[2m      <path[22m
+[32m-       d="M9 14 4 9l5-5"[39m
+[31m+       d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"[39m
+[2m      />[22m
+[2m      <path[22m
+[32m-       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[31m+       d="m12 9 6 6"[39m
+[31m+     />[39m
+[31m+     <path[39m
+[31m+       d="m18 9-6 6"[39m
+[2m      />[22m
+[2m    </svg>[22m
+[32m-   <span[39m
+[32m-     class="truncate"[39m
+[32m-   >[39m
+[32m-     Undo[39m
+[32m-     : Delete clip[39m
+[31m+   <span>[39m
+[31m+     Delete[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m342:36[22m[39m
+    [90m340| [39m    [34mexpect[39m([34mdeleteButton[39m()[33m.[39m[34mgetAttribute[39m([32m'aria-disabled'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m341| [39m    [34mexpect[39m([34mdeleteButton[39m()[33m.[39m[34mhasAttribute[39m([32m'disabled'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m342| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mundoButton[39m())[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m343| [39m    [34mexpect[39m([34mundoButton[39m()[33m.[39mtitle)[33m.[39m[34mtoBe[39m(
+    [90m344| [39m      studioEditStrings[33m.[39m[34mundoTitle[39m(studioEditStrings[33m.[39mhistoryDeleteClip)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22ma self-disabling button hands keyboard focus to its partner (C-R107-01, D-29z73)[2m > [22mFL6: Zoom back on its last history step hands focus to Fit
+[31m[1mAssertionError[22m: expected <button type="button" …(5)>…(2)</button> to be <button type="button" …(3)></button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  <button[22m
+[32m-   class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 px-2 text-xs"[39m
+[32m-   data-testid="arrangement-fit"[39m
+[32m-   title="Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)"[39m
+[31m+   aria-disabled="true"[39m
+[31m+   aria-keyshortcuts="X"[39m
+[31m+   class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5 px-2 text-xs"[39m
+[31m+   data-testid="arrangement-zoom-back"[39m
+[31m+   title="Previous zoom: the history is empty — use Fit or Zoom to selection first (X)"[39m
+[2m    type="button"[22m
+[2m  >[22m
+[32m-   Fit[39m
+[31m+   <svg[39m
+[31m+     aria-hidden="true"[39m
+[31m+     class="lucide lucide-undo2 lucide-undo-2 size-2.5 shrink-0"[39m
+[31m+     fill="none"[39m
+[31m+     height="24"[39m
+[31m+     stroke="currentColor"[39m
+[31m+     stroke-linecap="round"[39m
+[31m+     stroke-linejoin="round"[39m
+[31m+     stroke-width="2.4"[39m
+[31m+     viewBox="0 0 24 24"[39m
+[31m+     width="24"[39m
+[31m+     xmlns="http://www.w3.org/2000/svg"[39m
+[31m+   >[39m
+[31m+     <path[39m
+[31m+       d="M9 14 4 9l5-5"[39m
+[31m+     />[39m
+[31m+     <path[39m
+[31m+       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[31m+     />[39m
+[31m+   </svg>[39m
+[31m+   <span>[39m
+[31m+     Zoom[39m
+[31m+   </span>[39m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m357:36[22m[39m
+    [90m355| [39m    expect(zoomBackButton().getAttribute('aria-disabled')).toBe('true'…
+    [90m356| [39m    [34mexpect[39m([34mzoomBackButton[39m()[33m.[39m[34mhasAttribute[39m([32m'disabled'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m357| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mfitButton[39m())[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m358| [39m  })[33m;[39m
+    [90m359| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22ma self-disabling button hands keyboard focus to its partner (C-R107-01, D-29z73)[2m > [22mFL10: when the browser already dropped focus to BODY before the commit, Zoom back still hands focus to Fit
+[31m[1mAssertionError[22m: expected <body><div>…(1)</div></body> to be <button type="button" …(3)></button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ <body>[39m
+[31m+   <div>[39m
+[31m+     <div[39m
+[31m+       class="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 border-b border-outline bg-surface px-3 py-2 [grid-template-areas:'centre_centre'_'edit_view'] min-[1408px]:grid-cols-[1fr_auto_1fr] min-[1408px]:[grid-template-areas:none]"[39m
+[31m+       data-testid="arrangement-transport"[39m
+[31m+     >[39m
+[31m+       <div[39m
+[31m+         class="flex items-center gap-1.5 justify-self-start [grid-area:edit] min-[1408px]:[grid-area:auto]"[39m
+[31m+         data-testid="arrangement-transport-edit"[39m
+[31m+       >[39m
+[31m+         <button[39m
+[31m+           aria-disabled="true"[39m
+[31m+           aria-keyshortcuts="Control+Z Meta+Z"[39m
+[31m+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"[39m
+[31m+           title="Undo — nothing to undo yet (Ctrl+Z)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="2"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="M9 14 4 9l5-5"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+           <span[39m
+[31m+             class="truncate"[39m
+[31m+           >[39m
+[31m+             Undo[39m
+[31m+           </span>[39m
+[31m+         </button>[39m
+[31m+         <button[39m
+[31m+           aria-disabled="true"[39m
+[31m+           aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"[39m
+[31m+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"[39m
+[31m+           title="Redo — nothing to redo (Ctrl+Shift+Z)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="2"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="m15 14 5-5-5-5"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+           <span[39m
+[31m+             class="truncate"[39m
+[31m+           >[39m
+[31m+             Redo[39m
+[31m+           </span>[39m
+[31m+         </button>[39m
+[31m+         <div[39m
+[31m+           class="mx-1 h-6 w-px bg-outline"[39m
+[31m+         />[39m
+[31m+         <button[39m
+[31m+           aria-disabled="true"[39m
+[31m+           aria-keyshortcuts="Control+E Meta+E"[39m
+[31m+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.75"[39m
+[31m+           title="Split — select a clip or make a time selection first (Ctrl+E)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-scissors size-3 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="2"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <circle[39m
+[31m+               cx="6"[39m
+[31m+               cy="6"[39m
+[31m+               r="3"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M8.12 8.12 12 12"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M20 4 8.12 15.88"[39m
+[31m+             />[39m
+[31m+             <circle[39m
+[31m+               cx="6"[39m
+[31m+               cy="18"[39m
+[31m+               r="3"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M14.8 14.8 20 20"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+           <span>[39m
+[31m+             Split[39m
+[31m+           </span>[39m
+[31m+         </button>[39m
+[31m+         <button[39m
+[31m+           aria-disabled="true"[39m
+[31m+           aria-keyshortcuts="Delete Backspace"[39m
+[31m+           aria-label="Delete — the selected clip; leaves a gap"[39m
+[31m+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5"[39m
+[31m+           title="Delete — select a clip or make a time selection first (Delete)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-delete size-5 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="1.2"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="m12 9 6 6"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="m18 9-6 6"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+           <span>[39m
+[31m+             Delete[39m
+[31m+           </span>[39m
+[31m+         </button>[39m
+[31m+       </div>[39m
+[31m+       <div[39m
+[31m+         class="flex items-center gap-1.5 justify-self-center [grid-area:centre] min-[1408px]:[grid-area:auto]"[39m
+[31m+         data-testid="arrangement-transport-centre"[39m
+[31m+       >[39m
+[31m+         <button[39m
+[31m+           aria-pressed="false"[39m
+[31m+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-16 justify-center px-1 text-xs"[39m
+[31m+           data-follow-mode="off"[39m
+[31m+           data-testid="arrangement-follow"[39m
+[31m+           title="Follow off: the view does not follow playback"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           Follow[39m
+[31m+         </button>[39m
+[31m+         <div[39m
+[31m+           class="flex items-baseline gap-2 rounded-md bg-background px-3 py-1 font-mono tabular-nums"[39m
+[31m+         >[39m
+[31m+           <span[39m
+[31m+             class="text-base text-foreground"[39m
+[31m+             data-testid="arrangement-position"[39m
+[31m+           >[39m
+[31m+             00:00.000[39m
+[31m+           </span>[39m
+[31m+           <span[39m
+[31m+             class="text-xs text-muted"[39m
+[31m+           >[39m
+[31m+             / end[39m
+[31m+              [39m
+[31m+             <span[39m
+[31m+               data-testid="arrangement-project-end"[39m
+[31m+             >[39m
+[31m+               00:10.000[39m
+[31m+             </span>[39m
+[31m+           </span>[39m
+[31m+         </div>[39m
+[2m          <button[22m
+[31m+           aria-describedby=":r15:"[39m
+[31m+           aria-keyshortcuts="Space"[39m
+[31m+           aria-label="Play"[39m
+[31m+           class="inline-flex h-8 items-center gap-1 border border-transparent text-sm motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-8 justify-center rounded-full px-0 text-background bg-foreground not-aria-disabled:hover:bg-foreground/92 not-aria-disabled:active:bg-foreground/88"[39m
+[31m+           data-playing="false"[39m
+[31m+           title="Play (Space)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-play size-4 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="1.5"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+         </button>[39m
+[31m+         <button[39m
+[31m+           aria-describedby=":r15:"[39m
+[31m+           aria-keyshortcuts="Space"[39m
+[31m+           aria-label="Stop"[39m
+[31m+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-8 justify-center px-0"[39m
+[31m+           title="Stop (Space)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-square size-3 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="2"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <rect[39m
+[31m+               height="18"[39m
+[31m+               rx="2"[39m
+[31m+               width="18"[39m
+[31m+               x="3"[39m
+[31m+               y="3"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+         </button>[39m
+[31m+         <span[39m
+[31m+           data-testid="arrangement-playback-state"[39m
+[31m+           hidden=""[39m
+[31m+           id=":r15:"[39m
+[31m+         >[39m
+[31m+           Stopped[39m
+[31m+         </span>[39m
+[31m+         <button[39m
+[31m+           aria-keyshortcuts="Home"[39m
+[31m+           aria-label="Back to start"[39m
+[31m+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40"[39m
+[31m+           title="Back to start (Home)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-arrow-left-to-line size-3 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="2"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="M3 19V5"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="m13 6-6 6 6 6"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M7 12h14"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+         </button>[39m
+[31m+         <button[39m
+[31m+           aria-disabled="true"[39m
+[31m+           aria-keyshortcuts="Control+L Meta+L"[39m
+[31m+           aria-pressed="false"[39m
+[31m+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.75"[39m
+[31m+           title="Loop: make a time selection first (Ctrl+L)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-repeat size-3 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="2"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="m17 2 4 4-4 4"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M3 11v-1a4 4 0 0 1 4-4h14"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="m7 22-4-4 4-4"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M21 13v1a4 4 0 0 1-4 4H3"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+           <span>[39m
+[31m+             Loop[39m
+[31m+           </span>[39m
+[31m+         </button>[39m
+[31m+       </div>[39m
+[31m+       <div[39m
+[31m+         class="flex items-center gap-1.5 justify-self-end [grid-area:view] min-[1408px]:[grid-area:auto]"[39m
+[31m+         data-testid="arrangement-transport-view"[39m
+[31m+       >[39m
+[31m+         <label[39m
+[31m+           class="flex items-center gap-2 text-xs text-muted"[39m
+[31m+         >[39m
+[31m+           <span[39m
+[31m+             class="text-label font-medium uppercase tracking-label"[39m
+[31m+           >[39m
+[31m+             Zoom[39m
+[31m+           </span>[39m
+[31m+           <input[39m
+[31m+             aria-label="Zoom (px/s)"[39m
+[31m+             aria-valuetext="40 px/s"[39m
+[31m+             class="h-4 w-20 appearance-none bg-transparent rounded-full forced-colors:appearance-auto [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-outline-hover [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-outline-hover [&::-webkit-slider-thumb]:-mt-1.25 [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:bg-foreground [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-foreground"[39m
+[31m+             data-testid="arrangement-zoom"[39m
+[31m+             max="1000"[39m
+[31m+             min="0"[39m
+[31m+             step="1"[39m
+[31m+             title="Zoom around the playhead · + / − · Ctrl+wheel"[39m
+[31m+             type="range"[39m
+[31m+             value="678"[39m
+[31m+           />[39m
+[31m+           <span[39m
+[31m+             class="w-16 text-right tabular-nums"[39m
+[31m+             data-testid="arrangement-zoom-readout"[39m
+[31m+           >[39m
+[31m+             40 px/s[39m
+[31m+           </span>[39m
+[31m+         </label>[39m
+[31m+         <button[39m
+[31m+           aria-disabled="true"[39m
+[31m+           aria-keyshortcuts="Z"[39m
+[31m+           aria-label="Zoom to selection (Z)"[39m
+[31m+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-8 justify-center px-0 text-xs"[39m
+[31m+           data-testid="arrangement-zoom-range"[39m
+[31m+           title="Zoom to selection: make a time selection first (Z)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-move-horizontal size-4 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="1.5"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="m18 8 4 4-4 4"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M2 12h20"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="m6 8-4 4 4 4"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+         </button>[39m
+[31m+         <button[39m
+[31m+           aria-disabled="true"[39m
+[31m+           aria-keyshortcuts="X"[39m
+[31m+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5 px-2 text-xs"[39m
+[31m+           data-testid="arrangement-zoom-back"[39m
+[31m+           title="Previous zoom: the history is empty — use Fit or Zoom to selection first (X)"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           <svg[39m
+[31m+             aria-hidden="true"[39m
+[31m+             class="lucide lucide-undo2 lucide-undo-2 size-2.5 shrink-0"[39m
+[31m+             fill="none"[39m
+[31m+             height="24"[39m
+[31m+             stroke="currentColor"[39m
+[31m+             stroke-linecap="round"[39m
+[31m+             stroke-linejoin="round"[39m
+[31m+             stroke-width="2.4"[39m
+[31m+             viewBox="0 0 24 24"[39m
+[31m+             width="24"[39m
+[31m+             xmlns="http://www.w3.org/2000/svg"[39m
+[31m+           >[39m
+[31m+             <path[39m
+[31m+               d="M9 14 4 9l5-5"[39m
+[31m+             />[39m
+[31m+             <path[39m
+[31m+               d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[31m+             />[39m
+[31m+           </svg>[39m
+[31m+           <span>[39m
+[31m+             Zoom[39m
+[31m+           </span>[39m
+[31m+         </button>[39m
+[31m+         <button[39m
+[2m            class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 px-2 text-xs"[22m
+[2m            data-testid="arrangement-fit"[22m
+[2m            title="Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)"[22m
+[2m            type="button"[22m
+[2m          >[22m
+[2m            Fit[22m
+[31m+         </button>[39m
+[31m+         <div[39m
+[31m+           class="mx-1 h-6 w-px bg-outline"[39m
+[31m+         />[39m
+[31m+         <button[39m
+[31m+           class="inline-flex h-8 items-center gap-1 rounded-md border bg-foreground/5 px-2.5 text-sm motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 border-brand font-medium text-brand"[39m
+[31m+           type="button"[39m
+[31m+         >[39m
+[31m+           Export[39m
+[2m          </button>[22m
+[31m+       </div>[39m
+[31m+     </div>[39m
+[31m+   </div>[39m
+[31m+ </body>[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m414:36[22m[39m
+    [90m412| [39m    expect(zoomBackButton().getAttribute('aria-disabled')).toBe('true'…
+    [90m413| [39m    [34mexpect[39m([34mzoomBackButton[39m()[33m.[39m[34mhasAttribute[39m([32m'disabled'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m414| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mfitButton[39m())[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m415| [39m  })[33m;[39m
+    [90m416| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22mSYS-5 stage 1: soft-disabled transport buttons (D-29z615)[2m > [22mSD5: after one edit, Undo hands focus to Redo when it becomes soft-disabled, and Redo hands it back
+[31m[1mAssertionError[22m: expected <button type="button" …(4)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,14 +1,15 @@[39m
+[2m  <button[22m
+[32m-   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"[39m
+[31m+   aria-disabled="true"[39m
+[31m+   aria-keyshortcuts="Control+Z Meta+Z"[39m
+[2m    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"[22m
+[32m-   title="Redo: Clip Gain (Ctrl+Shift+Z)"[39m
+[31m+   title="Undo — nothing to undo yet (Ctrl+Z)"[39m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <svg[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"[39m
+[31m+     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"[39m
+[2m      fill="none"[22m
+[2m      height="24"[22m
+[2m      stroke="currentColor"[22m
+[2m      stroke-linecap="round"[22m
+[2m      stroke-linejoin="round"[22m
+[33m@@ -16,18 +17,17 @@[39m
+[2m      viewBox="0 0 24 24"[22m
+[2m      width="24"[22m
+[2m      xmlns="http://www.w3.org/2000/svg"[22m
+[2m    >[22m
+[2m      <path[22m
+[32m-       d="m15 14 5-5-5-5"[39m
+[31m+       d="M9 14 4 9l5-5"[39m
+[2m      />[22m
+[2m      <path[22m
+[32m-       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"[39m
+[31m+       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[2m      />[22m
+[2m    </svg>[22m
+[2m    <span[22m
+[2m      class="truncate"[22m
+[2m    >[22m
+[32m-     Redo[39m
+[32m-     : Clip Gain[39m
+[31m+     Undo[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m615:36[22m[39m
+    [90m613| [39m    [34mexpect[39m([34mundoButton[39m()[33m.[39m[34mhasAttribute[39m([32m'disabled'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m614| [39m    [34mexpect[39m([34mredoButton[39m()[33m.[39m[34mgetAttribute[39m([32m'aria-disabled'[39m))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m615| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mredoButton[39m())[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m616| [39m    fireEvent[33m.[39m[34mclick[39m([34mredoButton[39m())[33m;[39m
+    [90m617| [39m    [34mexpect[39m([34mclipGainOf[39m(api))[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 21:08:10
+[2m   Duration [22m 2.42s[2m (transform 996ms, setup 0ms, import 1.39s, tests 563ms, environment 343ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-276/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > a self-disabling button hands keyboard focus to its partner (C-R107-01%2C D-29z73) > FL3%3A Undo keeps focus while history remains and hands it to Redo on the last step,line=315,column=36::AssertionError: expected <button type="button" …(4)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,14 +1,15 @@%0A  <button%0A-   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"%0A+   aria-disabled="true"%0A+   aria-keyshortcuts="Control+Z Meta+Z"%0A    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"%0A-   title="Redo: Clip Gain (Ctrl+Shift+Z)"%0A+   title="Undo — nothing to undo yet (Ctrl+Z)"%0A    type="button"%0A  >%0A    <svg%0A      aria-hidden="true"%0A-     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"%0A+     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"%0A      fill="none"%0A      height="24"%0A      stroke="currentColor"%0A      stroke-linecap="round"%0A      stroke-linejoin="round"%0A@@ -16,18 +17,17 @@%0A      viewBox="0 0 24 24"%0A      width="24"%0A      xmlns="http://www.w3.org/2000/svg"%0A    >%0A      <path%0A-       d="m15 14 5-5-5-5"%0A+       d="M9 14 4 9l5-5"%0A      />%0A      <path%0A-       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"%0A+       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A      />%0A    </svg>%0A    <span%0A      class="truncate"%0A    >%0A-     Redo%0A-     : Clip Gain%0A+     Undo%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:315:36%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-276/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > a self-disabling button hands keyboard focus to its partner (C-R107-01%2C D-29z73) > FL4%3A Redo keeps focus while redo entries remain and hands it to Undo on the last step,line=331,column=36::AssertionError: expected <button type="button" …(4)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,14 +1,15 @@%0A  <button%0A-   aria-keyshortcuts="Control+Z Meta+Z"%0A+   aria-disabled="true"%0A+   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"%0A    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"%0A-   title="Undo: Clip Gain (Ctrl+Z)"%0A+   title="Redo — nothing to redo (Ctrl+Shift+Z)"%0A    type="button"%0A  >%0A    <svg%0A      aria-hidden="true"%0A-     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"%0A+     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"%0A      fill="none"%0A      height="24"%0A      stroke="currentColor"%0A      stroke-linecap="round"%0A      stroke-linejoin="round"%0A@@ -16,18 +17,17 @@%0A      viewBox="0 0 24 24"%0A      width="24"%0A      xmlns="http://www.w3.org/2000/svg"%0A    >%0A      <path%0A-       d="M9 14 4 9l5-5"%0A+       d="m15 14 5-5-5-5"%0A      />%0A      <path%0A-       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A+       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"%0A      />%0A    </svg>%0A    <span%0A      class="truncate"%0A    >%0A-     Undo%0A-     : Clip Gain%0A+     Redo%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:331:36%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-276/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > a self-disabling button hands keyboard focus to its partner (C-R107-01%2C D-29z73) > FL5%3A Delete on the selected clip hands focus to Undo%2C which now undoes the delete,line=342,column=36::AssertionError: expected <button type="button" …(5)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A  <button%0A-   aria-keyshortcuts="Control+Z Meta+Z"%0A-   class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"%0A-   title="Undo: Delete clip (Ctrl+Z)"%0A+   aria-disabled="true"%0A+   aria-keyshortcuts="Delete Backspace"%0A+   aria-label="Delete — the selected clip; leaves a gap"%0A+   class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5"%0A+   title="Delete — select a clip or make a time selection first (Delete)"%0A    type="button"%0A  >%0A    <svg%0A      aria-hidden="true"%0A-     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"%0A+     class="lucide lucide-delete size-5 shrink-0"%0A      fill="none"%0A      height="24"%0A      stroke="currentColor"%0A      stroke-linecap="round"%0A      stroke-linejoin="round"%0A-     stroke-width="2"%0A+     stroke-width="1.2"%0A      viewBox="0 0 24 24"%0A      width="24"%0A      xmlns="http://www.w3.org/2000/svg"%0A    >%0A      <path%0A-       d="M9 14 4 9l5-5"%0A+       d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"%0A      />%0A      <path%0A-       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A+       d="m12 9 6 6"%0A+     />%0A+     <path%0A+       d="m18 9-6 6"%0A      />%0A    </svg>%0A-   <span%0A-     class="truncate"%0A-   >%0A-     Undo%0A-     : Delete clip%0A+   <span>%0A+     Delete%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:342:36%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-276/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > a self-disabling button hands keyboard focus to its partner (C-R107-01%2C D-29z73) > FL6%3A Zoom back on its last history step hands focus to Fit,line=357,column=36::AssertionError: expected <button type="button" …(5)>…(2)</button> to be <button type="button" …(3)></button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A  <button%0A-   class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 px-2 text-xs"%0A-   data-testid="arrangement-fit"%0A-   title="Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)"%0A+   aria-disabled="true"%0A+   aria-keyshortcuts="X"%0A+   class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5 px-2 text-xs"%0A+   data-testid="arrangement-zoom-back"%0A+   title="Previous zoom: the history is empty — use Fit or Zoom to selection first (X)"%0A    type="button"%0A  >%0A-   Fit%0A+   <svg%0A+     aria-hidden="true"%0A+     class="lucide lucide-undo2 lucide-undo-2 size-2.5 shrink-0"%0A+     fill="none"%0A+     height="24"%0A+     stroke="currentColor"%0A+     stroke-linecap="round"%0A+     stroke-linejoin="round"%0A+     stroke-width="2.4"%0A+     viewBox="0 0 24 24"%0A+     width="24"%0A+     xmlns="http://www.w3.org/2000/svg"%0A+   >%0A+     <path%0A+       d="M9 14 4 9l5-5"%0A+     />%0A+     <path%0A+       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A+     />%0A+   </svg>%0A+   <span>%0A+     Zoom%0A+   </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:357:36%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-276/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > a self-disabling button hands keyboard focus to its partner (C-R107-01%2C D-29z73) > FL10%3A when the browser already dropped focus to BODY before the commit%2C Zoom back still hands focus to Fit,line=414,column=36::AssertionError: expected <body><div>…(1)</div></body> to be <button type="button" …(3)></button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A+ <body>%0A+   <div>%0A+     <div%0A+       class="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 border-b border-outline bg-surface px-3 py-2 [grid-template-areas:'centre_centre'_'edit_view'] min-[1408px]:grid-cols-[1fr_auto_1fr] min-[1408px]:[grid-template-areas:none]"%0A+       data-testid="arrangement-transport"%0A+     >%0A+       <div%0A+         class="flex items-center gap-1.5 justify-self-start [grid-area:edit] min-[1408px]:[grid-area:auto]"%0A+         data-testid="arrangement-transport-edit"%0A+       >%0A+         <button%0A+           aria-disabled="true"%0A+           aria-keyshortcuts="Control+Z Meta+Z"%0A+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"%0A+           title="Undo — nothing to undo yet (Ctrl+Z)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="2"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="M9 14 4 9l5-5"%0A+             />%0A+             <path%0A+               d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A+             />%0A+           </svg>%0A+           <span%0A+             class="truncate"%0A+           >%0A+             Undo%0A+           </span>%0A+         </button>%0A+         <button%0A+           aria-disabled="true"%0A+           aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"%0A+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"%0A+           title="Redo — nothing to redo (Ctrl+Shift+Z)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="2"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="m15 14 5-5-5-5"%0A+             />%0A+             <path%0A+               d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"%0A+             />%0A+           </svg>%0A+           <span%0A+             class="truncate"%0A+           >%0A+             Redo%0A+           </span>%0A+         </button>%0A+         <div%0A+           class="mx-1 h-6 w-px bg-outline"%0A+         />%0A+         <button%0A+           aria-disabled="true"%0A+           aria-keyshortcuts="Control+E Meta+E"%0A+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.75"%0A+           title="Split — select a clip or make a time selection first (Ctrl+E)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-scissors size-3 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="2"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <circle%0A+               cx="6"%0A+               cy="6"%0A+               r="3"%0A+             />%0A+             <path%0A+               d="M8.12 8.12 12 12"%0A+             />%0A+             <path%0A+               d="M20 4 8.12 15.88"%0A+             />%0A+             <circle%0A+               cx="6"%0A+               cy="18"%0A+               r="3"%0A+             />%0A+             <path%0A+               d="M14.8 14.8 20 20"%0A+             />%0A+           </svg>%0A+           <span>%0A+             Split%0A+           </span>%0A+         </button>%0A+         <button%0A+           aria-disabled="true"%0A+           aria-keyshortcuts="Delete Backspace"%0A+           aria-label="Delete — the selected clip; leaves a gap"%0A+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5"%0A+           title="Delete — select a clip or make a time selection first (Delete)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-delete size-5 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="1.2"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"%0A+             />%0A+             <path%0A+               d="m12 9 6 6"%0A+             />%0A+             <path%0A+               d="m18 9-6 6"%0A+             />%0A+           </svg>%0A+           <span>%0A+             Delete%0A+           </span>%0A+         </button>%0A+       </div>%0A+       <div%0A+         class="flex items-center gap-1.5 justify-self-center [grid-area:centre] min-[1408px]:[grid-area:auto]"%0A+         data-testid="arrangement-transport-centre"%0A+       >%0A+         <button%0A+           aria-pressed="false"%0A+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-16 justify-center px-1 text-xs"%0A+           data-follow-mode="off"%0A+           data-testid="arrangement-follow"%0A+           title="Follow off: the view does not follow playback"%0A+           type="button"%0A+         >%0A+           Follow%0A+         </button>%0A+         <div%0A+           class="flex items-baseline gap-2 rounded-md bg-background px-3 py-1 font-mono tabular-nums"%0A+         >%0A+           <span%0A+             class="text-base text-foreground"%0A+             data-testid="arrangement-position"%0A+           >%0A+             00:00.000%0A+           </span>%0A+           <span%0A+             class="text-xs text-muted"%0A+           >%0A+             / end%0A+              %0A+             <span%0A+               data-testid="arrangement-project-end"%0A+             >%0A+               00:10.000%0A+             </span>%0A+           </span>%0A+         </div>%0A          <button%0A+           aria-describedby=":r15:"%0A+           aria-keyshortcuts="Space"%0A+           aria-label="Play"%0A+           class="inline-flex h-8 items-center gap-1 border border-transparent text-sm motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-8 justify-center rounded-full px-0 text-background bg-foreground not-aria-disabled:hover:bg-foreground/92 not-aria-disabled:active:bg-foreground/88"%0A+           data-playing="false"%0A+           title="Play (Space)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-play size-4 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="1.5"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"%0A+             />%0A+           </svg>%0A+         </button>%0A+         <button%0A+           aria-describedby=":r15:"%0A+           aria-keyshortcuts="Space"%0A+           aria-label="Stop"%0A+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-8 justify-center px-0"%0A+           title="Stop (Space)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-square size-3 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="2"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <rect%0A+               height="18"%0A+               rx="2"%0A+               width="18"%0A+               x="3"%0A+               y="3"%0A+             />%0A+           </svg>%0A+         </button>%0A+         <span%0A+           data-testid="arrangement-playback-state"%0A+           hidden=""%0A+           id=":r15:"%0A+         >%0A+           Stopped%0A+         </span>%0A+         <button%0A+           aria-keyshortcuts="Home"%0A+           aria-label="Back to start"%0A+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40"%0A+           title="Back to start (Home)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-arrow-left-to-line size-3 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="2"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="M3 19V5"%0A+             />%0A+             <path%0A+               d="m13 6-6 6 6 6"%0A+             />%0A+             <path%0A+               d="M7 12h14"%0A+             />%0A+           </svg>%0A+         </button>%0A+         <button%0A+           aria-disabled="true"%0A+           aria-keyshortcuts="Control+L Meta+L"%0A+           aria-pressed="false"%0A+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.75"%0A+           title="Loop: make a time selection first (Ctrl+L)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-repeat size-3 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="2"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="m17 2 4 4-4 4"%0A+             />%0A+             <path%0A+               d="M3 11v-1a4 4 0 0 1 4-4h14"%0A+             />%0A+             <path%0A+               d="m7 22-4-4 4-4"%0A+             />%0A+             <path%0A+               d="M21 13v1a4 4 0 0 1-4 4H3"%0A+             />%0A+           </svg>%0A+           <span>%0A+             Loop%0A+           </span>%0A+         </button>%0A+       </div>%0A+       <div%0A+         class="flex items-center gap-1.5 justify-self-end [grid-area:view] min-[1408px]:[grid-area:auto]"%0A+         data-testid="arrangement-transport-view"%0A+       >%0A+         <label%0A+           class="flex items-center gap-2 text-xs text-muted"%0A+         >%0A+           <span%0A+             class="text-label font-medium uppercase tracking-label"%0A+           >%0A+             Zoom%0A+           </span>%0A+           <input%0A+             aria-label="Zoom (px/s)"%0A+             aria-valuetext="40 px/s"%0A+             class="h-4 w-20 appearance-none bg-transparent rounded-full forced-colors:appearance-auto [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-outline-hover [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-outline-hover [&::-webkit-slider-thumb]:-mt-1.25 [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:bg-foreground [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-foreground"%0A+             data-testid="arrangement-zoom"%0A+             max="1000"%0A+             min="0"%0A+             step="1"%0A+             title="Zoom around the playhead · + / − · Ctrl+wheel"%0A+             type="range"%0A+             value="678"%0A+           />%0A+           <span%0A+             class="w-16 text-right tabular-nums"%0A+             data-testid="arrangement-zoom-readout"%0A+           >%0A+             40 px/s%0A+           </span>%0A+         </label>%0A+         <button%0A+           aria-disabled="true"%0A+           aria-keyshortcuts="Z"%0A+           aria-label="Zoom to selection (Z)"%0A+           class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-8 justify-center px-0 text-xs"%0A+           data-testid="arrangement-zoom-range"%0A+           title="Zoom to selection: make a time selection first (Z)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-move-horizontal size-4 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="1.5"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="m18 8 4 4-4 4"%0A+             />%0A+             <path%0A+               d="M2 12h20"%0A+             />%0A+             <path%0A+               d="m6 8-4 4 4 4"%0A+             />%0A+           </svg>%0A+         </button>%0A+         <button%0A+           aria-disabled="true"%0A+           aria-keyshortcuts="X"%0A+           class="inline-flex h-8 items-center rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 gap-0.5 px-2 text-xs"%0A+           data-testid="arrangement-zoom-back"%0A+           title="Previous zoom: the history is empty — use Fit or Zoom to selection first (X)"%0A+           type="button"%0A+         >%0A+           <svg%0A+             aria-hidden="true"%0A+             class="lucide lucide-undo2 lucide-undo-2 size-2.5 shrink-0"%0A+             fill="none"%0A+             height="24"%0A+             stroke="currentColor"%0A+             stroke-linecap="round"%0A+             stroke-linejoin="round"%0A+             stroke-width="2.4"%0A+             viewBox="0 0 24 24"%0A+             width="24"%0A+             xmlns="http://www.w3.org/2000/svg"%0A+           >%0A+             <path%0A+               d="M9 14 4 9l5-5"%0A+             />%0A+             <path%0A+               d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A+             />%0A+           </svg>%0A+           <span>%0A+             Zoom%0A+           </span>%0A+         </button>%0A+         <button%0A            class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 px-2 text-xs"%0A            data-testid="arrangement-fit"%0A            title="Fit — the entire project is visible (double-click the overview, or the ruler with no time selection)"%0A            type="button"%0A          >%0A            Fit%0A+         </button>%0A+         <div%0A+           class="mx-1 h-6 w-px bg-outline"%0A+         />%0A+         <button%0A+           class="inline-flex h-8 items-center gap-1 rounded-md border bg-foreground/5 px-2.5 text-sm motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 border-brand font-medium text-brand"%0A+           type="button"%0A+         >%0A+           Export%0A          </button>%0A+       </div>%0A+     </div>%0A+   </div>%0A+ </body>%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:414:36%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-276/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > SYS-5 stage 1%3A soft-disabled transport buttons (D-29z615) > SD5%3A after one edit%2C Undo hands focus to Redo when it becomes soft-disabled%2C and Redo hands it back,line=615,column=36::AssertionError: expected <button type="button" …(4)>…(2)</button> to be <button type="button" …(3)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,14 +1,15 @@%0A  <button%0A-   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"%0A+   aria-disabled="true"%0A+   aria-keyshortcuts="Control+Z Meta+Z"%0A    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40 w-28"%0A-   title="Redo: Clip Gain (Ctrl+Shift+Z)"%0A+   title="Undo — nothing to undo yet (Ctrl+Z)"%0A    type="button"%0A  >%0A    <svg%0A      aria-hidden="true"%0A-     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"%0A+     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"%0A      fill="none"%0A      height="24"%0A      stroke="currentColor"%0A      stroke-linecap="round"%0A      stroke-linejoin="round"%0A@@ -16,18 +17,17 @@%0A      viewBox="0 0 24 24"%0A      width="24"%0A      xmlns="http://www.w3.org/2000/svg"%0A    >%0A      <path%0A-       d="m15 14 5-5-5-5"%0A+       d="M9 14 4 9l5-5"%0A      />%0A      <path%0A-       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"%0A+       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A      />%0A    </svg>%0A    <span%0A      class="truncate"%0A    >%0A-     Redo%0A-     : Clip Gain%0A+     Undo%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:615:36%0A%0A
