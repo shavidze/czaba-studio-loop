@@ -1,0 +1,67 @@
+{
+ "round": 264,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T07:29:55.9731872Z",
+  "round": 264,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "MS-REVIEW",
+  "TESTS-TARGETED",
+  "MUTANTS",
+  "CC-META-1440",
+  "CC-META-1280",
+  "CC-ALTGR-1440",
+  "CC-ALTGR-1280",
+  "CC-SR-ORDER-1440",
+  "CC-SR-ORDER-1280",
+  "CC-CTRLCLICK-1440",
+  "CC-CTRLCLICK-1280",
+  "G264-AUTH"
+ ],
+ "observedEvidence": {
+  "GATE244-S4": "reproduced in cloud Chromium at both viewports: Ctrl+click path from 'Search the library' -> afterPress BODY, menu 1, afterEsc BODY (c-round-264/cc.json l46.*.cc_ctrl); remains deferred_low_polish per D-29z548, not a FAIL"
+ },
+ "gate": [
+  "full vitest",
+  "npm run build",
+  "Biome (full)",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "notRunHere": [
+  {
+   "row": "Windows AltGr",
+   "reason": "cloud is Linux Chromium only; Saba's platform check"
+  },
+  {
+   "row": "macOS Cmd and Ctrl+click",
+   "reason": "cloud is Linux Chromium only; Saba's platform check"
+  },
+  {
+   "row": "VoiceOver and NVDA",
+   "reason": "cloud is Linux Chromium only; Saba's platform check"
+  },
+  {
+   "row": "Safari (A-R204-SAFARI-USERMENU-CLICK)",
+   "reason": "cloud is Linux Chromium only; Saba's platform check"
+  }
+ ],
+ "blocked": [],
+ "ableton": "not applicable (CZABA handler contracts only, task section 3)",
+ "notes": [
+  "first cc.mjs attempt timed out waiting for 'Demo collection ready' although curl/env-status were 200; likely first-load Vite transforms (unconfirmed); diag.mjs then saw it within 5 s; one replacement attempt used, kept as cc-attempt1-invalid.log",
+  "/api/studio-token with a fake Bearer returns 500 'Unable to prepare Studio access' (backend absent), no token; unchanged from round 262; not in this round's criteria"
+ ],
+ "evidence": "c-round-264/",
+ "alsoChecked": [
+  "CLAIMS-K1-K9,K12 verbatim; K10/K11 via cc.mjs: match",
+  "DOC-197: l.4, headings, MS1-MS6 citations ok"
+ ]
+}

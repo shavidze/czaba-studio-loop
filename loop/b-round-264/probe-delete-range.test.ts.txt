@@ -1,0 +1,16 @@
+import { describe, expect, it } from 'vitest';
+import { deleteRangeKeepingGap } from '../../clipboard';
+import { createArrangement } from '../../model';
+describe('probe', () => { it('range starting before a clip', () => {
+  const base = createArrangement([
+    { id: 'video', kind: 'video', name: 'Video' },
+    { id: 'music', kind: 'audio', name: 'Music' },
+  ]);
+  const arr = { ...base, clips: [{ id: 'c1', trackId: 'music', sourceId: 's', start: 10, sourceOffset: 0, duration: 101.352 }] };
+  const next = deleteRangeKeepingGap(arr, { start: 1, end: 15, trackId: 'music' });
+  console.log('RESULT', JSON.stringify(next.clips));
+  const two = { ...base, clips: [{ id: 'a', trackId: 'music', sourceId: 's', start: 2, sourceOffset: 0, duration: 4 }, { id: 'b', trackId: 'music', sourceId: 's', start: 10, sourceOffset: 0, duration: 4 }] };
+  console.log('ACROSS', JSON.stringify(deleteRangeKeepingGap(two, { start: 4, end: 12, trackId: 'music' }).clips));
+  console.log('EMPTY_SAME', deleteRangeKeepingGap(arr, { start: 1, end: 7.5, trackId: 'music' }) === arr);
+  expect(true).toBe(true);
+}); });
