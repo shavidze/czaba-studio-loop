@@ -1,0 +1,638 @@
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -9,7 +9,7 @@
+   Square,
+   Undo2,
+ } from 'lucide-react';
+-import { type KeyboardEvent, type MouseEvent, useCallback, useId, useRef } from 'react';
++import { type KeyboardEvent, useCallback, useId, useRef } from 'react';
+ import {
+   formatArrangementTime,
+   useArrangement,
+@@ -33,6 +33,11 @@
+ } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import { STUDIO_NEUTRAL_SLIDER_CLASS } from './studio-fader';
++import {
++  guardSoftDisabledClick,
++  isSoftDisabledButton,
++  softDisabledButtonProps,
++} from './studio-soft-disabled';
+ 
+ export interface ArrangementTransportNavigation {
+   followMode: TimelineFollowMode;
+@@ -50,26 +55,7 @@
+ }
+ 
+ const toolButtonClass =
+-  'inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40';
+-
+-interface SoftDisabledButtonProps {
+-  'aria-disabled'?: 'true';
+-  onMouseDown?: (event: MouseEvent<HTMLButtonElement>) => void;
+-}
+-
+-function preventSoftDisabledMouseFocus(event: MouseEvent<HTMLButtonElement>) {
+-  event.preventDefault();
+-}
+-
+-function softDisabledButtonProps(isUnavailable: boolean): SoftDisabledButtonProps {
+-  return isUnavailable
+-    ? { 'aria-disabled': 'true', onMouseDown: preventSoftDisabledMouseFocus }
+-    : {};
+-}
+-
+-function isSoftDisabledButton(button: HTMLButtonElement): boolean {
+-  return button.getAttribute('aria-disabled') === 'true';
+-}
++  'inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40';
+ 
+ function ArrangementTransportPosition() {
+   const positionStore = useArrangementPositionStore();
+@@ -163,13 +149,10 @@
+         <button
+           ref={undoButtonRef}
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, redoButtonRef.current);
+             undo();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!undoLabel)}
+           title={studioEditStrings.undoTitle(undoLabel)}
+@@ -182,13 +165,10 @@
+         <button
+           ref={redoButtonRef}
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, undoButtonRef.current);
+             redo();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!redoLabel)}
+           title={studioEditStrings.redoTitle(redoLabel)}
+@@ -201,12 +181,9 @@
+         <div className="mx-1 h-6 w-px bg-outline" />
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             splitSelection();
+-          }}
++          })}
+           {...softDisabledButtonProps(!range && !selectedClipId)}
+           title={
+             range
+@@ -223,13 +200,10 @@
+         </button>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, undoButtonRef.current);
+             deleteSelection();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!range && !selectedClipId)}
+           title={
+@@ -238,7 +212,10 @@
+               ? studioEditStrings.deleteClipTitle
+               : studioEditStrings.deleteNeedsTargetTitle)
+           }
+-          aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}
++          aria-label={
++            rangeDeleteHint ??
++            (selectedClipId ? studioEditStrings.deleteClipLabel : studioEditStrings.deleteButton)
++          }
+           aria-keyshortcuts={studioShortcutAria('delete')}
+           className={cn(toolButtonClass, 'gap-0.5', range && 'border-foreground')}
+         >
+@@ -337,12 +314,9 @@
+         </button>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             toggleLoopSelection();
+-          }}
++          })}
+           {...softDisabledButtonProps(!range && !loop)}
+           aria-pressed={loop?.enabled === true}
+           title={
+@@ -391,12 +365,9 @@
+         </label>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             navigation.onZoomToRange();
+-          }}
++          })}
+           {...softDisabledButtonProps(!range)}
+           aria-label={studioViewStrings.zoomToSelectionLabel}
+           aria-keyshortcuts="Z"
+@@ -412,13 +383,10 @@
+         </button>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, fitButtonRef.current);
+             navigation.onZoomBack();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!navigation.canZoomBack)}
+           aria-keyshortcuts="X"
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -26,6 +26,7 @@
+ import { cn } from '~/lib/utils';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from './ArrangementLane';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { guardSoftDisabledClick } from './studio-soft-disabled';
+ 
+ interface ArrangementTempoRowProps {
+   seconds: number;
+@@ -313,19 +314,19 @@
+         <span className="tabular-nums">{`${TEMPO_BEATS_PER_BAR}/4`}</span>
+         <button
+           type="button"
+-          onClick={onMetronomeToggle}
+-          disabled={tempoBpm === null}
++          onClick={guardSoftDisabledClick(onMetronomeToggle)}
++          aria-disabled={tempoBpm === null ? 'true' : undefined}
+           aria-pressed={metronomeOn}
+           title={tempoBpm === null ? METRONOME_NEEDS_TEMPO_TITLE : METRONOME_TITLE}
+           className={cn(
+-            'h-4 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-xs leading-none text-muted motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-muted',
++            'h-4 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-xs leading-none text-muted motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 not-aria-disabled:hover:text-foreground aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-50',
+             metronomeOn &&
+-              'border-foreground bg-foreground/20 text-foreground enabled:hover:bg-foreground/20 enabled:active:bg-foreground/20',
++              'border-foreground bg-foreground/20 text-foreground not-aria-disabled:hover:bg-foreground/20 not-aria-disabled:active:bg-foreground/20',
+             STUDIO_FOCUS_RING_INSET_CLASS,
+           )}
+           data-testid="arrangement-metronome-toggle"
+         >
+-          {studioMetronomeStrings.toggleLabel}
++          <span>{studioMetronomeStrings.toggleLabel}</span>
+         </button>
+       </div>
+       <ArrangementBarsRuler
+--- a/app/components/arrangement/ArrangementLibraryPreview.tsx
++++ b/app/components/arrangement/ArrangementLibraryPreview.tsx
+@@ -17,6 +17,7 @@
+ import { normalizePeakColumns } from '~/lib/arrangement/peaks';
+ import { studioLibraryPanelStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
++import { guardSoftDisabledClick, softDisabledButtonProps } from './studio-soft-disabled';
+ 
+ const PREVIEW_WAVE_COLUMNS = 96;
+ const PREVIEW_KEY_STEP_SECONDS = 1;
+@@ -109,6 +110,22 @@
+   const isPreviewing = source !== null && libraryPreviewSourceId === source.id;
+   const activeTrack = arrangement.tracks.find((track) => track.id === activeTrackId);
+   const canAdd = isReady && activeTrack?.kind === 'audio';
++  const previewUnavailableTitle = !source
++    ? studioLibraryPanelStrings.previewNeedsSoundTitle
++    : state?.status === 'error'
++      ? studioLibraryPanelStrings.previewFailedTitle
++      : isReady
++        ? null
++        : studioLibraryPanelStrings.previewLoadingTitle;
++  const addTitle = !source
++    ? studioLibraryPanelStrings.addNeedsSoundTitle
++    : state?.status === 'error'
++      ? studioLibraryPanelStrings.addFailedTitle
++      : !isReady
++        ? studioLibraryPanelStrings.addLoadingTitle
++        : activeTrack?.kind !== 'audio'
++          ? studioLibraryPanelStrings.addNeedsAudioTrackTitle
++          : studioLibraryPanelStrings.addTitle;
+   const activeLaneName = activeTrack ? activeTrack.name : '—';
+   const activeLaneVideoNote =
+     activeTrack?.kind === 'video' ? studioLibraryPanelStrings.videoTrackNote : '';
+@@ -289,7 +306,7 @@
+       <div className="flex gap-2">
+         <button
+           type="button"
+-          onClick={() => {
++          onClick={guardSoftDisabledClick(() => {
+             if (!source) {
+               return;
+             }
+@@ -298,15 +315,16 @@
+             } else {
+               startLibraryPreview(source.id, 0);
+             }
+-          }}
++          })}
+           onKeyDown={(event) => {
+             if (event.key === 'Enter' && event.repeat) {
+               event.preventDefault();
+             }
+           }}
+-          disabled={!isReady}
++          {...softDisabledButtonProps(!isReady)}
++          title={previewUnavailableTitle ?? undefined}
+           className={cn(
+-            'flex flex-1 items-center justify-center gap-0.75 rounded-md border border-transparent bg-foreground/5 px-2 py-1.5 text-sm font-medium motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:cursor-not-allowed disabled:opacity-40',
++            'flex flex-1 items-center justify-center gap-0.75 rounded-md border border-transparent bg-foreground/5 px-2 py-1.5 text-sm font-medium motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40',
+             isPreviewing ? 'border-foreground text-foreground' : 'text-foreground',
+           )}
+           data-testid="arrangement-library-preview-toggle"
+@@ -324,14 +342,19 @@
+         </button>
+         <button
+           type="button"
+-          onClick={() => source && addSourceToActiveTrack(source.id)}
++          onClick={guardSoftDisabledClick(() => {
++            if (source) {
++              addSourceToActiveTrack(source.id);
++            }
++          })}
+           onKeyDown={(event) => {
+             if (event.key === 'Enter' && event.repeat) {
+               event.preventDefault();
+             }
+           }}
+-          disabled={!canAdd}
+-          className="flex flex-1 items-center justify-center gap-0.75 rounded-md border border-outline-strong bg-foreground/5 px-2 py-1.5 text-sm font-medium text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:cursor-not-allowed disabled:opacity-40"
++          {...softDisabledButtonProps(!canAdd)}
++          title={addTitle}
++          className="flex flex-1 items-center justify-center gap-0.75 rounded-md border border-outline-strong bg-foreground/5 px-2 py-1.5 text-sm font-medium text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40"
+         >
+           <Plus className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+           <span>{studioLibraryPanelStrings.add}</span>
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -866,7 +866,15 @@
+   insertMarker: 'insert marker',
+   previewPlay: 'Preview',
+   previewStop: 'Stop',
++  previewNeedsSoundTitle: 'Preview — select a sound in the list first',
++  previewLoadingTitle: 'Preview — wait for the sound to load',
++  previewFailedTitle: 'Preview — this sound could not load; choose another',
+   add: 'Add',
++  addTitle: 'Add to the active track at the insert marker',
++  addNeedsSoundTitle: 'Add — select a sound in the list first',
++  addLoadingTitle: 'Add — wait for the sound to load',
++  addFailedTitle: 'Add — this sound could not load; choose another',
++  addNeedsAudioTrackTitle: 'Add — make an audio track active first',
+ };
+ 
+ export const studioVideoDockStrings = {
+--- a/app/lib/arrangement/__tests__/metronome-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+@@ -287,7 +287,8 @@
+     const toggle = metronomeToggle(view);
+     expect(toggle.textContent).toBe('Metronome');
+     expect(toggle.type).toBe('button');
+-    expect(toggle.disabled).toBe(true);
++    expect(toggle.getAttribute('aria-disabled')).toBe('true');
++    expect(toggle.hasAttribute('disabled')).toBe(false);
+     expect(toggle.getAttribute('aria-pressed')).toBe('false');
+     expect(toggle.title).toBe(METRONOME_NEEDS_TEMPO_TITLE);
+     expect(toggle.title).toBe('Metronome — set a BPM first');
+@@ -301,7 +302,8 @@
+     const { api, view } = await mountMetronomeWorkspace();
+     commitTempo(view, '120');
+     const toggle = metronomeToggle(view);
+-    expect(toggle.disabled).toBe(false);
++    expect(toggle.hasAttribute('aria-disabled')).toBe(false);
++    expect(toggle.hasAttribute('disabled')).toBe(false);
+     expect(toggle.title).toBe(METRONOME_TITLE);
+     expect(toggle.title).toBe(
+       'Metronome — a click on every beat during playback (4/4, the first beat of each bar is louder). Master volume and Mute also apply to it. Not included in the export.',
+@@ -399,10 +401,11 @@
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('true');
+     commitTempo(view, '');
+     expect(statusText(view)).toBe(tempoStatusMessage(null));
+-    expect(metronomeToggle(view).disabled).toBe(true);
++    expect(metronomeToggle(view).getAttribute('aria-disabled')).toBe('true');
++    expect(metronomeToggle(view).hasAttribute('disabled')).toBe(false);
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('false');
+     commitTempo(view, '120');
+-    expect(metronomeToggle(view).disabled).toBe(false);
++    expect(metronomeToggle(view).hasAttribute('aria-disabled')).toBe(false);
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('false');
+     play(api);
+     expect(lastScheduleOptions().metronome).toBeUndefined();
+@@ -506,8 +509,8 @@
+       'border',
+       'border-transparent',
+       'bg-foreground/5',
+-      'enabled:hover:bg-foreground/8',
+-      'enabled:active:bg-foreground/12',
++      'not-aria-disabled:hover:bg-foreground/8',
++      'not-aria-disabled:active:bg-foreground/12',
+       'rounded-md',
+       'motion-safe:transition-[background-color,color]!',
+       'motion-safe:duration-180!',
+@@ -515,20 +518,21 @@
+       'motion-reduce:transition-none!',
+     ];
+     const toggle = metronomeToggle(view);
+-    expect(toggle.disabled).toBe(true);
++    expect(toggle.getAttribute('aria-disabled')).toBe('true');
++    expect(toggle.hasAttribute('disabled')).toBe(false);
+     const offTokens = tokensOf(toggle);
+     for (const token of [
+       ...SURF,
+-      'disabled:cursor-not-allowed',
+-      'disabled:opacity-50',
+-      'disabled:hover:text-muted',
++      'aria-disabled:cursor-not-allowed!',
++      'aria-disabled:*:opacity-50',
++      'not-aria-disabled:hover:text-foreground',
+     ]) {
+       expect(offTokens).toContain(token);
+     }
+     expect(offTokens).not.toContain('border-outline');
+     expect(offTokens).not.toContain('rounded-sm');
+     commitTempo(view, '120');
+-    expect(toggle.disabled).toBe(false);
++    expect(toggle.hasAttribute('aria-disabled')).toBe(false);
+     clickMetronome(view);
+     expect(toggle.getAttribute('aria-pressed')).toBe('true');
+     const onTokens = tokensOf(toggle);
+@@ -536,17 +540,17 @@
+       'border-foreground',
+       'bg-foreground/20',
+       'text-foreground',
+-      'enabled:hover:bg-foreground/20',
+-      'enabled:active:bg-foreground/20',
+-      'hover:text-foreground',
++      'not-aria-disabled:hover:bg-foreground/20',
++      'not-aria-disabled:active:bg-foreground/20',
++      'not-aria-disabled:hover:text-foreground',
+     ]) {
+       expect(onTokens).toContain(token);
+     }
+     for (const token of [
+       'bg-foreground/5',
+       'border-transparent',
+-      'enabled:hover:bg-foreground/8',
+-      'enabled:active:bg-foreground/12',
++      'not-aria-disabled:hover:bg-foreground/8',
++      'not-aria-disabled:active:bg-foreground/12',
+       'hover:text-accent',
+       'text-muted',
+     ]) {
+--- a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+@@ -373,11 +373,16 @@
+       expectModeTokens(toggle, `${testId} off`, ['text-muted'], ['border-foreground']);
+       fireEvent.click(toggle);
+       expect(byModeTestId(view, testId).getAttribute('aria-pressed'), `${testId} on`).toBe('true');
++      const isMetronome = testId === 'arrangement-metronome-toggle';
+       expectModeTokens(
+         byModeTestId(view, testId),
+         `${testId} on`,
+-        [...ON_TOKENS, 'text-foreground', 'hover:text-foreground'],
+-        [...DROPPED_TOKENS, 'text-muted', 'hover:text-accent'],
++        isMetronome
++          ? [...TRANSPORT_ON_TOKENS, 'text-foreground', 'not-aria-disabled:hover:text-foreground']
++          : [...ON_TOKENS, 'text-foreground', 'hover:text-foreground'],
++        isMetronome
++          ? [...TRANSPORT_DROPPED_TOKENS, 'text-muted', 'hover:text-accent']
++          : [...DROPPED_TOKENS, 'text-muted', 'hover:text-accent'],
+       );
+     }
+   });
+@@ -500,7 +505,12 @@
+     const transportOn =
+       "'border-foreground bg-foreground/20 not-aria-disabled:hover:bg-foreground/20 not-aria-disabled:active:bg-foreground/20'";
+     expectCount(WORKSPACE_PATH, fullOn, 2);
+-    expectCount(TEMPO_ROW_PATH, fullOn, 1);
++    expectCount(TEMPO_ROW_PATH, fullOn, 0);
++    expectCount(
++      TEMPO_ROW_PATH,
++      "'border-foreground bg-foreground/20 text-foreground not-aria-disabled:hover:bg-foreground/20 not-aria-disabled:active:bg-foreground/20'",
++      1,
++    );
+     expectCount(TRANSPORT_PATH, transportOn, 2);
+     expectCount(WORKSPACE_PATH, "'border-foreground bg-foreground/20'", 1);
+     expectCount(LOOP_BRACE_PATH, "'border-foreground bg-foreground/20'", 1);
+--- a/app/lib/arrangement/__tests__/library-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview.test.tsx
+@@ -248,7 +248,10 @@
+     expect(row.getAttribute('title')).toBe('Active track: ვიდეო (audio is not added here)');
+     expect(row.getAttribute('title')).toBe(row.textContent?.split('·')[0].trim());
+     expect(row.textContent).toContain('· insert marker 00:00.000');
+-    expect(view.getByRole('button', { name: 'Add' }).hasAttribute('disabled')).toBe(true);
++    const add = view.getByRole('button', { name: 'Add' });
++    expect(add.getAttribute('aria-disabled')).toBe('true');
++    expect(add.hasAttribute('disabled')).toBe(false);
++    expect(add.title).toBe('Add — make an audio track active first');
+     act(() => api.current?.setActiveTrack('sfx'));
+     expect(activeLaneRow(view).getAttribute('title')).toBe('Active track: SFX');
+     expect(activeLaneRow(view)).toBe(row);
+--- a/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+@@ -488,8 +488,9 @@
+ 
+ const LIBRARY_SURFACE_FILL = [
+   'bg-foreground/5',
+-  'enabled:hover:bg-foreground/8',
+-  'enabled:active:bg-foreground/12',
++  'not-aria-disabled:hover:bg-foreground/8',
++  'not-aria-disabled:active:bg-foreground/12',
++  'aria-disabled:cursor-not-allowed!',
+ ];
+ 
+ function libraryClassTokens(element: HTMLElement): string[] {
+@@ -543,7 +544,7 @@
+       'text-foreground',
+       'font-medium',
+       'gap-0.75',
+-      'disabled:opacity-40',
++      'aria-disabled:*:opacity-40',
+     ];
+     const toggleOffExcluded = ['border-outline', 'hover:border-brand', 'rounded-sm'];
+     expect(toggle.textContent).toBe('Preview');
+@@ -583,7 +584,7 @@
+         ...LIBRARY_SURFACE_FILL,
+         'rounded-md',
+         ...LIBRARY_SURFACE_MOTION,
+-        'disabled:opacity-40',
++        'aria-disabled:*:opacity-40',
+       ],
+       [
+         'bg-brand/10',
+--- a/app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx
+@@ -465,7 +465,7 @@
+     expect(brassTokens(full)).toEqual([]);
+ 
+     const add = libraryAddButton(view);
+-    expectDragTokens(add, [...neutral, 'disabled:opacity-40'], forbidden, 'Preview Add');
++    expectDragTokens(add, [...neutral, 'aria-disabled:*:opacity-40'], forbidden, 'Preview Add');
+     expect(brassTokens(add)).toEqual([]);
+ 
+     fireEvent.click(view.getByRole('button', { name: studioLaneStrings.foldLabel('ვიდეო') }));
+--- a/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
++++ b/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+@@ -649,7 +649,7 @@
+     for (const token of [
+       'not-aria-disabled:hover:bg-foreground/8',
+       'not-aria-disabled:active:bg-foreground/12',
+-      'aria-disabled:cursor-not-allowed',
++      'aria-disabled:cursor-not-allowed!',
+       'aria-disabled:*:opacity-40',
+     ]) {
+       expect(tokens).toContain(token);
+--- a/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+@@ -190,7 +190,7 @@
+         'Undo',
+         'Redo',
+         'Split',
+-        'Delete — the selected clip; leaves a gap',
++        'Delete',
+       ]);
+       expect(Array.from(centre.querySelectorAll('button')).map(buttonName)).toEqual([
+         'Follow',
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -2568,7 +2568,15 @@
+   insertMarker: 'insert marker',
+   previewPlay: 'Preview',
+   previewStop: 'Stop',
++  previewNeedsSoundTitle: 'Preview — select a sound in the list first',
++  previewLoadingTitle: 'Preview — wait for the sound to load',
++  previewFailedTitle: 'Preview — this sound could not load; choose another',
+   add: 'Add',
++  addTitle: 'Add to the active track at the insert marker',
++  addNeedsSoundTitle: 'Add — select a sound in the list first',
++  addLoadingTitle: 'Add — wait for the sound to load',
++  addFailedTitle: 'Add — this sound could not load; choose another',
++  addNeedsAudioTrackTitle: 'Add — make an audio track active first',
+ };
+ 
+ describe('V-0.5b library panel strings', () => {
+@@ -2577,6 +2585,11 @@
+       [
+         'activeTrack',
+         'add',
++        'addFailedTitle',
++        'addLoadingTitle',
++        'addNeedsAudioTrackTitle',
++        'addNeedsSoundTitle',
++        'addTitle',
+         'all',
+         'clearSearch',
+         'collapse',
+@@ -2589,7 +2602,10 @@
+         'listLabel',
+         'noResults',
+         'previewEmpty',
++        'previewFailedTitle',
+         'previewLabel',
++        'previewLoadingTitle',
++        'previewNeedsSoundTitle',
+         'previewPlay',
+         'previewStop',
+         'previewWaveLabel',
+@@ -2601,7 +2617,7 @@
+         'widthLabel',
+       ].sort(),
+     );
+-    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(24);
++    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(32);
+     for (const [key, value] of Object.entries(studioLibraryPanelStrings)) {
+       expect(value, key).toBe(EXPECTED_LIBRARY_PANEL_STRINGS[key]);
+       expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -558,7 +558,7 @@
+         (button) => button.textContent?.trim() === addLabel,
+       );
+       const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && !add.disabled && wave !== null
++      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null
+         ? performance.now()
+         : 0;
+     },
+--- a/perf/studio-lab.perf.spec.ts
++++ b/perf/studio-lab.perf.spec.ts
+@@ -518,7 +518,7 @@
+         (button) => button.textContent?.trim() === addLabel,
+       );
+       const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && !add.disabled && wave !== null
++      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null
+         ? performance.now()
+         : 0;
+     },
+--- a/perf/studio-lab-resources.perf.spec.ts
++++ b/perf/studio-lab-resources.perf.spec.ts
+@@ -194,7 +194,7 @@
+         (button) => button.textContent?.trim() === addLabel,
+       );
+       const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && !add.disabled && wave !== null;
++      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null;
+     },
+     perfLibraryAddLabel,
+     { polling: 'raf', timeout: 90000 },
+--- a/app/components/arrangement/studio-soft-disabled.ts
++++ b/app/components/arrangement/studio-soft-disabled.ts
+@@ -0,0 +1,31 @@
++import type { MouseEvent } from 'react';
++
++export interface SoftDisabledButtonProps {
++  'aria-disabled'?: 'true';
++  onMouseDown?: (event: MouseEvent<HTMLButtonElement>) => void;
++}
++
++function preventSoftDisabledMouseFocus(event: MouseEvent<HTMLButtonElement>) {
++  event.preventDefault();
++}
++
++export function softDisabledButtonProps(isUnavailable: boolean): SoftDisabledButtonProps {
++  return isUnavailable
++    ? { 'aria-disabled': 'true', onMouseDown: preventSoftDisabledMouseFocus }
++    : {};
++}
++
++export function isSoftDisabledButton(button: HTMLButtonElement): boolean {
++  return button.getAttribute('aria-disabled') === 'true';
++}
++
++export function guardSoftDisabledClick(
++  handler: (event: MouseEvent<HTMLButtonElement>) => void,
++): (event: MouseEvent<HTMLButtonElement>) => void {
++  return (event) => {
++    if (isSoftDisabledButton(event.currentTarget)) {
++      return;
++    }
++    handler(event);
++  };
++}

@@ -1,0 +1,82 @@
+K1 transport helper + guards
+60:function preventSoftDisabledMouseFocus(event: MouseEvent<HTMLButtonElement>) {
+64:function softDisabledButtonProps(isUnavailable: boolean): SoftDisabledButtonProps {
+70:function isSoftDisabledButton(button: HTMLButtonElement): boolean {
+167:            if (isSoftDisabledButton(event.currentTarget)) {
+186:            if (isSoftDisabledButton(event.currentTarget)) {
+205:            if (isSoftDisabledButton(event.currentTarget)) {
+227:            if (isSoftDisabledButton(event.currentTarget)) {
+341:            if (isSoftDisabledButton(event.currentTarget)) {
+395:            if (isSoftDisabledButton(event.currentTarget)) {
+416:            if (isSoftDisabledButton(event.currentTarget)) {
+K2 transport cursor token
+1
+K3 Delete aria-label
+241:          aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}
+K4 metronome toggle
+316:          onClick={onMetronomeToggle}
+317:          disabled={tempoBpm === null}
+328:          {studioMetronomeStrings.toggleLabel}
+K5 metronome workspace no-op
+1
+K6 library buttons
+111:  const canAdd = isReady && activeTrack?.kind === 'audio';
+243:        tabIndex={isReady ? 0 : -1}
+244:        aria-disabled={!isReady}
+307:          disabled={!isReady}
+327:          onClick={() => source && addSourceToActiveTrack(source.id)}
+333:          disabled={!canAdd}
+K7 add refusal statuses
+3
+K8 app.css unlayered button cursor
+492:  cursor: pointer;
+534:  cursor: pointer;
+567:  cursor: pointer;
+380:button:active:not(:disabled):not([aria-disabled="true"]),
+483:button { cursor:pointer }
+app/styles/app.css:380:button:active:not(:disabled):not([aria-disabled="true"]),
+app/styles/app.css:381:[role="button"]:active:not(:disabled):not([aria-disabled="true"]) {
+app/styles/base/utilities.css:73:button:active:not(:disabled):not([aria-disabled="true"]),
+app/styles/base/utilities.css:74:[role="button"]:active:not(:disabled):not([aria-disabled="true"]) {
+K9 perf readiness predicate
+perf/studio-lab-interactions.perf.spec.ts:561:      return add instanceof HTMLButtonElement && !add.disabled && wave !== null
+perf/studio-lab-resources.perf.spec.ts:197:      return add instanceof HTMLButtonElement && !add.disabled && wave !== null;
+perf/studio-lab.perf.spec.ts:521:      return add instanceof HTMLButtonElement && !add.disabled && wave !== null
+K10 shortcuts: no metronome key
+0
+K11 doc 206 stage-2 round lines
+4:**სტატუსი:** In Progress (stage 1 of 2; C round 276 PASS; gate 276 test fix-up round 277)
+9:Transport-ის შვიდი ღილაკი — Undo, Redo, Split, Delete, Loop, Zoom to selection და Zoom back — მიუწვდომელ მდგომარეობაში native `disabled`-ს იყენებდა. ბრაუზერი ასეთ ღილაკს Tab-ის რიგიდან იღებს, ამიტომ keyboard-ისა და screen reader-ის მომხმარებელი ვერ აღწევდა `title`-მდე, სადაც მიზეზი ეწერა (C-R229-01, GATE229-S1). ოთხ ღილაკს (Undo, Redo, Split, Delete) `title`-ში მიზეზი საერთოდ არ ჰქონდა, მხოლოდ მოქმედების სახელი. ეს Saba-ს დამტკიცებული DUX-R-4(b)-ის გაგრძელებაა (2026-10-25). SYS-5 ორ ეტაპად იყოფა: ეს რაუნდი (276) შვიდ transport-ის ღილაკს ეხება, მეორე ეტაპი (277) — metronome toggle-სა და ბიბლიოთეკის Add ღილაკს.
+65:- SYS-5 ეტაპი 2 (რაუნდი 277): metronome toggle (`ArrangementTempoRow.tsx`) და ბიბლიოთეკის Add ღილაკი; helper საერთო ფაილში გადადის.
+K12 next free doc number
+206-sys-5-disabled-reasons-stage-1.md
+K13 L50 grep counts (TempoRow, LibraryPreview, Transport)
+5
+5
+5
+SW-A assertion-form sweep (files in app/** __tests__, perf/**, e2e/**)
+49
+SW-A consumer filter (metronome/Add/Preview/transport names)
+app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx
+app/lib/arrangement/__tests__/held-enter-add.test.tsx
+app/lib/arrangement/__tests__/library-preview.test.tsx
+app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+app/lib/arrangement/__tests__/metronome-ui.test.tsx
+app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+perf/studio-lab-interactions.perf.spec.ts
+perf/studio-lab-resources.perf.spec.ts
+perf/studio-lab.perf.spec.ts
+SW-B old literals (no-target Delete label, old cursor token)
+app/lib/arrangement/__tests__/fader-style-ui.test.tsx:426
+app/lib/arrangement/__tests__/strings.test.ts:420
+app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:652
+app/lib/arrangement/__tests__/metronome-ui.test.tsx:523
+app/lib/arrangement/__tests__/metronome-ui.test.tsx:524
+app/lib/arrangement/__tests__/transport-centre-ui.test.tsx:193
+app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx:231
+K16 sweep-ruled lines
+      expect(button.hasAttribute('disabled')).toBe(false);
+    expect(add.hasAttribute('disabled')).toBe(false);
+1
+1

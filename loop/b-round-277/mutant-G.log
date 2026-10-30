@@ -1,0 +1,67 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-277/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx [2m([22m[2m18 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 697[2mms[22m[39m
+     [33m[2m✓[22m[39m FL1: a keyboard 0 dB reset moves focus to the Clip Gain input, and a fresh Enter there adds no clip [33m 306[2mms[22m[39m
+     [32m✓[39m FL2: a mouse 0 dB reset never focuses the button and leaves focus on BODY[32m 127[2mms[22m[39m
+     [32m✓[39m FL3: Undo keeps focus while history remains and hands it to Redo on the last step[32m 24[2mms[22m[39m
+     [32m✓[39m FL4: Redo keeps focus while redo entries remain and hands it to Undo on the last step[32m 27[2mms[22m[39m
+     [32m✓[39m FL5: Delete on the selected clip hands focus to Undo, which now undoes the delete[32m 15[2mms[22m[39m
+     [32m✓[39m FL6: Zoom back on its last history step hands focus to Fit[32m 13[2mms[22m[39m
+     [32m✓[39m FL7: Undo clicked without holding focus never moves focus[32m 15[2mms[22m[39m
+     [32m✓[39m FL8: an Undo refused during a pointer gesture keeps Undo enabled and focused[32m 21[2mms[22m[39m
+     [32m✓[39m FL9: enabled Undo, Redo, Delete and Zoom back prevent a repeated Enter and allow a fresh one; a repeated Space is untouched[32m 19[2mms[22m[39m
+     [32m✓[39m FL10: when the browser already dropped focus to BODY before the commit, Zoom back still hands focus to Fit[32m 12[2mms[22m[39m
+     [32m✓[39m SD1: in an empty arrangement the seven unavailable buttons are aria-disabled, focusable and titled with their reason[32m 14[2mms[22m[39m
+[31m     [31m×[31m SD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom[39m[32m 27[2mms[22m[39m
+[31m     [31m×[31m SD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)[39m[32m 12[2mms[22m[39m
+     [32m✓[39m SD3: mousedown on a soft-disabled button is default-prevented, on Fit it is not[32m 10[2mms[22m[39m
+     [32m✓[39m SD4: a selected clip or a range makes Split and Delete available with their action titles[32m 11[2mms[22m[39m
+     [32m✓[39m SD5: after one edit, Undo hands focus to Redo when it becomes soft-disabled, and Redo hands it back[32m 17[2mms[22m[39m
+     [32m✓[39m SD6: a focused soft-disabled Redo becomes available in place after Ctrl+Z, and a click then redoes[32m 14[2mms[22m[39m
+     [32m✓[39m SD7: the transport source has no enabled:/disabled: tokens or disabled props, and the rendered Undo keeps the aria-disabled tokens[32m 12[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22mSYS-5 stage 1: soft-disabled transport buttons (D-29z615)[2m > [22mSD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom
+[31m[1mAssertionError[22m: Split: expected 'To split, click inside a clip to sele…' to be 'SD2 known status.' // Object.is equality[39m
+
+Expected: [32m"[7mSD2 known status[27m."[39m
+Received: [31m"[7mTo split, click inside a clip to select it and place the insert marker, or make a time selection[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m540:38[22m[39m
+    [90m538| [39m    [35mfor[39m ([35mconst[39m { name[33m,[39m button } [35mof[39m [34msoftDisabledSeven[39m()) {
+    [90m539| [39m      fireEvent[33m.[39m[34mclick[39m(button)[33m;[39m
+    [90m540| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus[33m,[39m name)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m541| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatusSequence[33m,[39m name)[33m.[39m[34mtoBe[39m(sequenceBefore)[33m;[39m
+    [90m542| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel[33m,[39m name)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22mSYS-5 stage 1: soft-disabled transport buttons (D-29z615)[2m > [22mSD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)
+[31m[1mAssertionError[22m: Undo: expected 'Undo/Redo does not work while draggin…' to be 'SD2b known status.' // Object.is equality[39m
+
+Expected: [32m"[7mSD2b known status[27m."[39m
+Received: [31m"[7mUndo/Redo does not work while dragging — let go first[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m568:38[22m[39m
+    [90m566| [39m    [35mfor[39m ([35mconst[39m { name[33m,[39m button } [35mof[39m [34msoftDisabledSeven[39m()) {
+    [90m567| [39m      fireEvent[33m.[39m[34mclick[39m(button)[33m;[39m
+    [90m568| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus[33m,[39m name)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m569| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatusSequence[33m,[39m name)[33m.[39m[34mtoBe[39m(sequenceBefore)[33m;[39m
+    [90m570| [39m      [34mexpect[39m(spies[33m.[39monZoomToRange[33m,[39m name)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 22:21:02
+[2m   Duration [22m 3.01s[2m (transform 1.15s, setup 0ms, import 1.65s, tests 697ms, environment 501ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-277/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > SYS-5 stage 1%3A soft-disabled transport buttons (D-29z615) > SD2%3A a click on each soft-disabled button changes no status%2C history%2C range%2C loop%2C clips or zoom,line=540,column=38::AssertionError: Split: expected 'To split, click inside a clip to sele…' to be 'SD2 known status.' // Object.is equality%0A%0AExpected: "SD2 known status."%0AReceived: "To split, click inside a clip to select it and place the insert marker, or make a time selection."%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:540:38%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-277/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > SYS-5 stage 1%3A soft-disabled transport buttons (D-29z615) > SD2b%3A during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO),line=568,column=38::AssertionError: Undo: expected 'Undo/Redo does not work while draggin…' to be 'SD2b known status.' // Object.is equality%0A%0AExpected: "SD2b known status."%0AReceived: "Undo/Redo does not work while dragging — let go first."%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:568:38%0A%0A

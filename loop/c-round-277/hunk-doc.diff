@@ -1,0 +1,26 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-276/planning-copies/206-sys-5-disabled-reasons-stage-1.md	2026-10-30 21:38:05.334285355 +0000
++++ docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md	2026-10-30 21:40:00.379711969 +0000
+@@ -1,7 +1,7 @@
+ # SYS-5 ეტაპი 1 — transport-ის მიუწვდომელი ღილაკები keyboard-ით მისაწვდომი რჩება და მიზეზს ასახელებს
+ 
+ **თარიღი:** 2026-10-30
+-**სტატუსი:** In Progress (stage 1 of 2; C round 276 PASS)
++**სტატუსი:** In Progress (stage 1 of 2; C round 276 PASS; gate 276 test fix-up round 277)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -51,12 +51,14 @@
+ - **Problem:** `BASE_FILL` და `ON_TOKENS`/`DROPPED_TOKENS` სატესტო კონსტანტებს transport-ის და frozen კომპონენტების (Snap, Env, Master, Metronome) ტესტები ერთად იყენებდა. **Solution:** transport-ისთვის შეიქმნა იმავე სიგრძის ცალკე კონსტანტები; ძველები frozen კომპონენტებზე დარჩა. Assertion არ წაშლილა.
+ - **Problem:** `aria-disabled:cursor-not-allowed` ბრაუზერში არ მოქმედებს: `app.css`-ის unlayered `button { cursor:pointer }` წესი `@layer utilities`-ს სჯობს. HEAD-ის `disabled:cursor-not-allowed`-საც იგივე შედეგი ჰქონდა, ამიტომ regression არ არის. **Solution:** B-ის გადაწყვეტილებას ელოდება: ან ამ ხაზის შეცვლა (grant-ის გარეთაა), ან `!` ფორმა.
+ - **Problem:** ტესტში `fit` ცვლადს Biome `noFocusedTests`-ად (`fit()`) კითხულობდა. **Solution:** ცვლადს დაერქვა `fitButton`.
++- **Problem:** gate 276 ჩავარდა NS1, NS6 და TC9 ტესტებზე (`navigation-strings-ui.test.tsx`, `transport-centre-ui.test.tsx`): ისინი ჯერ კიდევ native `disabled`-სა და Split-ის ძველ title-ს ამოწმებდნენ. **Solution:** რაუნდ 277-ში assertion-ები გადავიდა `aria-disabled`-სა და ახალ title-ზე; არცერთი assertion არ დაკარგულა (Split-ის ძველი title ახლა მონიშნული კლიპის მდგომარეობაში მოწმდება).
+ 
+ ## ტესტირება
+ 
+ - `self-disabling-focus.test.tsx`: SD1 (შვიდივე ღილაკი `aria-disabled`, focusable, მიზეზიანი title), SD2 (click არაფერს ცვლის — status, sequence, ისტორია, range, loop, clips, zoom), SD2b (იგივე აქტიური pointer gesture-ის დროს, როცა undo/redo/split/delete/loop უარის ტექსტს წერდნენ), SD3 (mousedown default-prevented; Fit-ზე არა), SD4 (კლიპი/range → Split/Delete ხელმისაწვდომი, action-ის title), SD5 (Undo → Redo → Undo handoff), SD6 (focused soft-disabled Redo Ctrl+Z-ის შემდეგ ადგილზე ხელმისაწვდომი ხდება), SD7 (source-ში 0 `enabled:`/`disabled:` token და 0 `disabled={`; rendered Undo-ს class-ში ოთხი ახალი token). FL3–FL10 გადაყვანილია `aria-disabled`-ზე, დაემატა `hasAttribute('disabled') === false`.
+ - Mutant-ები M1–M5 წითელია: SD2, SD3, FL3–FL6/FL10/SD5, SD1/ST-K1 და SD7. დამატებითი M6/M7 (Undo-ს ან Redo-ს guard-ის წაშლა) SD2b-ს წითლად აქცევს.
+ - §6.3-ის 20 ფაილი (379 ტესტი) გავიდა, ასევე `npm run typecheck`, `npm run lint`, Biome owned ფაილებზე და `npm run build`.
++- რაუნდი 277: NS1 (Split-ის მიზეზიანი title და `aria-disabled` → კლიპის მონიშვნის შემდეგ ძველი title, ატრიბუტის გარეშე), NS6 (Loop-ს `disabled` არასოდეს აქვს, `aria-disabled` = `"true"`/არ არის) და TC9 (Undo `aria-disabled="true"`, `disabled === false`) — `navigation-strings-ui.test.tsx` და `transport-centre-ui.test.tsx`.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 

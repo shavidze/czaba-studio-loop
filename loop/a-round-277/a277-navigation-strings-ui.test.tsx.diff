@@ -1,0 +1,27 @@
+--- ../tmp/studio-real-loop/b-round-276/planning-copies/navigation-strings-ui.test.tsx	2026-10-30 21:38:05.335122677 +0000
++++ app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx	2026-10-30 21:39:47.336662818 +0000
+@@ -219,8 +219,13 @@
+     const projectEnd = view.getByTestId('arrangement-project-end');
+     expect(projectEnd.textContent).toBe('00:10.000');
+     expect(asElement(projectEnd.parentElement, 'project end').textContent).toBe('/ end 00:10.000');
+-    expect(workspace.split().title).toBe('Split at the insert marker (Ctrl+E)');
++    expect(workspace.split().title).toBe(
++      'Split — select a clip or make a time selection first (Ctrl+E)',
++    );
++    expect(workspace.split().getAttribute('aria-disabled')).toBe('true');
+     act(() => live(api).selectClip('music-1'));
++    expect(workspace.split().title).toBe('Split at the insert marker (Ctrl+E)');
++    expect(workspace.split().hasAttribute('aria-disabled')).toBe(false);
+     expect(workspace.remove().title).toBe('Delete clip — leaves a gap (Delete)');
+     expect(workspace.remove().getAttribute('aria-label')).toBe(
+       'Delete — the selected clip; leaves a gap',
+@@ -426,7 +431,8 @@
+     const expectLoopState = (title: string, disabled: boolean) => {
+       const button = workspace.loop();
+       expect(button.title).toBe(title);
+-      expect(button.hasAttribute('disabled')).toBe(disabled);
++      expect(button.hasAttribute('disabled')).toBe(false);
++      expect(button.getAttribute('aria-disabled')).toBe(disabled ? 'true' : null);
+       expect(button.getAttribute('aria-keyshortcuts')).toBe(aria);
+       expect(button.title.endsWith(` (${firstKey})`), button.title).toBe(true);
+     };

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Round 278 claims (L29). Run from store/ at HEAD 42872cf (or a scratch copy of it).
+echo "K1 transport helper + guards"; grep -nE "function softDisabledButtonProps|function isSoftDisabledButton|function preventSoftDisabledMouseFocus|if \(isSoftDisabledButton\(event\.currentTarget\)\)" app/components/arrangement/ArrangementTransport.tsx
+echo "K2 transport cursor token"; grep -c "aria-disabled:cursor-not-allowed aria-disabled:\*:opacity-40" app/components/arrangement/ArrangementTransport.tsx
+echo "K3 Delete aria-label"; grep -n "aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}" app/components/arrangement/ArrangementTransport.tsx
+echo "K4 metronome toggle"; grep -nE "onClick=\{onMetronomeToggle\}|disabled=\{tempoBpm === null\}|\{studioMetronomeStrings.toggleLabel\}" app/components/arrangement/ArrangementTempoRow.tsx
+echo "K5 metronome workspace no-op"; grep -n -A3 "const toggleMetronome = useCallback" app/components/arrangement/StudioWorkspace.tsx | grep -c "if (tempoBpm === null)"
+echo "K6 library buttons"; grep -nE "disabled=\{!isReady\}|disabled=\{!canAdd\}|const canAdd =|onClick=\{\(\) => source && addSourceToActiveTrack|tabIndex=\{isReady \? 0 : -1\}" app/components/arrangement/ArrangementLibraryPreview.tsx
+echo "K7 add refusal statuses"; sed -n 1625,1651p app/contexts/ArrangementContext.tsx | grep -cE "setStatus\("
+echo "K8 app.css unlayered button cursor"; grep -nE "^\s*cursor: pointer;" app/styles/app.css | head -3; grep -n "^button" app/styles/app.css | head -3; grep -n 'not(\[aria-disabled="true"\])' app/styles/app.css app/styles/base/utilities.css
+echo "K9 perf readiness predicate"; grep -n "!add.disabled" perf/*.perf.spec.ts
+echo "K10 shortcuts: no metronome key"; grep -ci "metronome" app/lib/arrangement/shortcuts.ts
+echo "K11 doc 206 stage-2 round lines"; grep -n "(277)\|(რაუნდი 277)\|^\*\*სტატუსი" docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md
+echo "K12 next free doc number"; ls docs/implementation/2026/quarter-IV | tail -1
+echo "K13 L50 grep counts (TempoRow, LibraryPreview, Transport)"; for f in ArrangementTempoRow ArrangementLibraryPreview ArrangementTransport; do grep -cE 'onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)' app/components/arrangement/$f.tsx; done
+echo "SW-A assertion-form sweep (files in app/** __tests__, perf/**, e2e/**)"; grep -rlE "toBeDisabled|toBeEnabled|\.disabled\b|:disabled|\[disabled\]|disabled=\{|hasAttribute\('disabled'\)|getAttribute\('disabled'\)|toHaveProperty\('disabled'|toHaveAttribute\('disabled'|enabled:(hover|active)|disabled:(opacity|cursor|hover)" app perf e2e 2>/dev/null | grep -E "__tests__|perf/|e2e/" | wc -l
+echo "SW-A consumer filter (metronome/Add/Preview/transport names)"; grep -rlE "toBeDisabled|toBeEnabled|\.disabled\b|:disabled|\[disabled\]|disabled=\{|hasAttribute\('disabled'\)|getAttribute\('disabled'\)|toHaveProperty\('disabled'|toHaveAttribute\('disabled'|enabled:(hover|active)|disabled:(opacity|cursor|hover)" app perf e2e 2>/dev/null | grep -E "__tests__|perf/|e2e/" | xargs grep -lE "arrangement-metronome-toggle|metronomeToggle|perfLibraryAddLabel|name: 'Add'|arrangement-library-preview-toggle|LIBRARY_PREVIEW_PATH|TEMPO_ROW_PATH|Preview Add" | sort
+echo "SW-B old literals (no-target Delete label, old cursor token)"; grep -rnE "Delete — the selected clip; leaves a gap|'aria-disabled:cursor-not-allowed'|'disabled:opacity-50'|'disabled:hover:text-muted'" app/lib perf e2e 2>/dev/null | grep -E "__tests__|perf/|e2e/" | cut -d: -f1,2
+echo "K16 sweep-ruled lines"; sed -n 434p app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx; sed -n 270p app/lib/arrangement/__tests__/held-enter-add.test.tsx; sed -n 226,230p perf/studio-lab.perf.spec.ts | grep -c faderLocator; sed -n 276,278p perf/studio-lab-resources.perf.spec.ts | grep -c perfExportWavLabel

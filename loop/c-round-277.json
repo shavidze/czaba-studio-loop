@@ -1,0 +1,107 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T21:43:11.7158922Z",
+  "round": 277,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "TEST-CHANGES",
+  "CLAIMS",
+  "SWEEP",
+  "TESTS-TARGETED",
+  "MUTANTS",
+  "B-MATCH-SPLIT",
+  "B-MATCH-LOOP",
+  "B-MATCH-UNDO",
+  "STUDIO-SMOKE-277",
+  "G277-AUTH",
+  "DOC-206"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "evidence": "c-round-277/manifest.log (rc 0 before and after C's runs), git-status.txt (12 lines), grant-sha.log (exactly the 3 grant files differ)"
+  },
+  "HUNK-SCOPE": {
+   "status": "PASS",
+   "evidence": "c-round-277/hunk-ns.diff, hunk-tc.diff, hunk-doc.diff; test +/- lines match b-round-276/sketch.diff; doc 206 = l.4 + 1 bullet + 1 testing line; l.4 byte-exact (cmp)"
+  },
+  "TEST-CHANGES": {
+   "status": "PASS",
+   "evidence": "NS1 1->4 assertions incl. old Split literal after selectClip; NS6 1->2 (no disabled attr + aria-disabled true/null); TC9 1->2 (aria-disabled true + disabled false), activeElement===redo kept; no assertion lost"
+  },
+  "CLAIMS": {
+   "status": "PASS",
+   "evidence": "c-round-277/claims-restored.txt == b-round-276/claims-output.txt (diff empty) on a scratch copy with the 2 planning-copy tests restored"
+  },
+  "SWEEP": {
+   "status": "PASS",
+   "evidence": "c-round-277/claims-a-tree.txt: SW-A 14 files; SW-B 6 hits, navigation-strings-ui at l.227/l.229, other 4 identical; NS6 read at l.434"
+  },
+  "TESTS-TARGETED": {
+   "status": "PASS",
+   "evidence": "c-round-277/vitest-targeted.log: 3 files, 36/36"
+  },
+  "MUTANTS": {
+   "status": "PASS",
+   "evidence": "c-round-277/mutant-N1.log (NS1, NS6, TC9 red; 3 failed/15 passed), mutant-N2.log (NS1 red; 1 failed/17); scratch file restored cmp-equal, scratch removed"
+  },
+  "B-MATCH-SPLIT": {
+   "status": "PASS",
+   "evidence": "c277-bmatch-run2.json split@1440x900, split@1280x720: empty demo aria-disabled=true, no disabled attr, no-target title; after Add the new clip is auto-selected (Split available); after a click on an empty stems lane: aria-disabled=true + no-target title; after a click on the clip: no aria-disabled, 'Split at the insert marker (Ctrl+E)'. Screenshots bmatch-split-*.png"
+  },
+  "B-MATCH-LOOP": {
+   "status": "PASS",
+   "evidence": "c277-bmatch-run2.json loop@both: no range aria-disabled=true, no disabled, 'Loop: make a time selection first (Ctrl+L)'; drag on empty stems lane -> range, no aria-disabled; Ctrl+L -> aria-pressed true; click on empty lane clears range (0) -> no aria-disabled, 'Loop on / off (Ctrl+L)'. Run 1 (video lane) also passed: c277-bmatch-run1.json"
+  },
+  "B-MATCH-UNDO": {
+   "status": "PASS",
+   "evidence": "c277-bmatch-run1.json undo@both and undoLoop@both: real Tab presses reach Undo (55/50 and 31 tabs); Enter until history empty -> Undo aria-disabled=true, no disabled attr, activeElement=Redo, :focus-visible, outline solid 1px brass 0.8, offset 2px; Redo available. Screenshots bmatch-undo*.png"
+  },
+  "STUDIO-SMOKE-277": {
+   "status": "PASS",
+   "evidence": "c277-smoke.json smoke@both: data-playing false>true>false, playhead advances then holds, live RMS 0.02+ > 0.001, export WAV 48 kHz/24-bit/2 ch, 768000 frames = 16.000 s, 0 NaN, per-second -24.9 dB, sha256 1fea093b... == round 276"
+  },
+  "G277-AUTH": {
+   "status": "PASS",
+   "evidence": "c277-smoke.json auth@both: fresh context 0 cookies/0 storage; /studio-lab badge 'Demo collection — no sign-in required', auth_user null; /studio/middle-east 'Sign in required', 0 audio[src], no workspace; /api/studio-token no header 401, fake bearer 500, no token in bodies, no 200 token responses"
+  },
+  "DOC-206": {
+   "status": "PASS",
+   "evidence": "l.4 byte-exact; 7 TEMPLATE headings in order (კონტექსტი, მიდგომა, არქიტექტურა, შეცვლილი ფაილები, პრობლემები და გადაწყვეტები, ტესტირება, TODO); new bullet names NS1, NS6, TC9"
+  },
+  "gate": {
+   "status": "gate",
+   "evidence": "full vitest, typecheck, build, Biome, npm run verify, test:e2e:smoke belong to root gate (gates/gate-round-277.json not yet present)"
+  }
+ },
+ "notes": [
+  {
+   "id": "INFO-C277-DOC206-STAGE2-ROUND",
+   "severity": "info",
+   "text": "Doc 206 l.9 and TODO l.63 still say stage 2 = round 277; D-29z618 moved it to round 278 (A reported it; outside grant). B: grant in round 278."
+  },
+  {
+   "id": "INFO-C277-ENV-LOAD-TIMEOUT",
+   "severity": "info",
+   "text": "First fresh context of run 1 (split@1440x900) timed out waiting for 'Demo collection ready' (150 s, cold dev-server compile); rerun passed, every later context loaded. Environment, not an app finding."
+  }
+ ]
+}
