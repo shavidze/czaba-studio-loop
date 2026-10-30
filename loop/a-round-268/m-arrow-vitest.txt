@@ -1,0 +1,85 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a268-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx [2m([22m[2m30 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 3877[2mms[22m[39m
+     [33m[2m✓[22m[39m MS1 Ctrl+Z undoes the last edit [33m 529[2mms[22m[39m
+     [32m✓[39m MS1 Meta+Z undoes the last edit[32m 275[2mms[22m[39m
+     [32m✓[39m MS2 Ctrl+Shift+Z redoes the undone edit[32m 177[2mms[22m[39m
+     [32m✓[39m MS2 Meta+Shift+Z redoes the undone edit[32m 166[2mms[22m[39m
+     [32m✓[39m MS3 Ctrl+Y redoes the undone edit[32m 151[2mms[22m[39m
+     [32m✓[39m MS3 Meta+Y redoes the undone edit[32m 138[2mms[22m[39m
+     [32m✓[39m MS4 Ctrl+E splits the selected clip at the insert marker[32m 72[2mms[22m[39m
+     [32m✓[39m MS4 Meta+E splits the selected clip at the insert marker[32m 66[2mms[22m[39m
+     [32m✓[39m MS5 Ctrl+L turns the loop on from the time selection, and again turns it off[32m 275[2mms[22m[39m
+     [32m✓[39m MS5 Meta+L turns the loop on from the time selection, and again turns it off[32m 253[2mms[22m[39m
+     [32m✓[39m MS6 Alt alone with Z, E or L changes no clip count, history or loop state[32m 209[2mms[22m[39m
+     [32m✓[39m AG1 AltGr+Z, +Shift+Z and +Y neither undo nor redo[32m 76[2mms[22m[39m
+     [32m✓[39m AG1 Ctrl+Alt+Z, +Shift+Z and +Y neither undo nor redo[32m 64[2mms[22m[39m
+     [32m✓[39m AG1 Meta+Alt+Z, +Shift+Z and +Y neither undo nor redo[32m 61[2mms[22m[39m
+     [32m✓[39m AG2 AltGr+E does not split the selected clip[32m 60[2mms[22m[39m
+     [32m✓[39m AG2 Ctrl+Alt+E does not split the selected clip[32m 58[2mms[22m[39m
+     [32m✓[39m AG2 Meta+Alt+E does not split the selected clip[32m 61[2mms[22m[39m
+     [32m✓[39m AG3 AltGr+L and +Shift+L neither loop nor extend the time selection[32m 181[2mms[22m[39m
+     [32m✓[39m AG3 Ctrl+Alt+L and +Shift+L neither loop nor extend the time selection[32m 181[2mms[22m[39m
+     [32m✓[39m AG3 Meta+Alt+L and +Shift+L neither loop nor extend the time selection[32m 188[2mms[22m[39m
+     [32m✓[39m AG4 AltGr+A, D, C, X, V, G and Shift+G change no selection, clip, history or group[32m 73[2mms[22m[39m
+     [32m✓[39m AG4 Ctrl+Alt+A, D, C, X, V, G and Shift+G change no selection, clip, history or group[32m 69[2mms[22m[39m
+     [32m✓[39m AG4 Meta+Alt+A, D, C, X, V, G and Shift+G change no selection, clip, history or group[32m 74[2mms[22m[39m
+     [32m✓[39m AG5 AltGr+E during a pointer gesture does not show the gesture-blocked message[32m 56[2mms[22m[39m
+     [32m✓[39m AG6 the AltGraph state alone, without altKey, blocks Ctrl+Z and stops Ctrl+G before the plain G branch[32m 56[2mms[22m[39m
+[31m     [31m×[31m AG7 Ctrl+AltGraph without altKey+Arrow during a pointer gesture neither steps the marker nor shows the blocked message[39m[32m 65[2mms[22m[39m
+     [32m✓[39m AG7 Ctrl+Alt+Arrow during a pointer gesture neither steps the marker nor shows the blocked message[32m 67[2mms[22m[39m
+     [32m✓[39m AG7 Meta+Alt+Arrow during a pointer gesture neither steps the marker nor shows the blocked message[32m 61[2mms[22m[39m
+     [32m✓[39m AG7 Ctrl+Alt+AltGraph+Arrow during a pointer gesture neither steps the marker nor shows the blocked message[32m 64[2mms[22m[39m
+[31m     [31m×[31m AG8 Ctrl+AltGraph+ArrowRight without altKey and without a gesture does not step the marker[39m[32m 50[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx[2m > [22mGATE264-S2: Alt or AltGr held with Ctrl/Meta runs no Ctrl-letter command[2m > [22mAG7 Ctrl+AltGraph without altKey+Arrow during a pointer gesture neither steps the marker nor shows the blocked message
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx:[2m501:52[22m[39m
+    [90m499| [39m    [35mconst[39m rightNotPrevented [33m=[39m [34mpress[39m({ [33m...[39m[33mARROW_RIGHT[39m[33m,[39m [33m...[39mchord })[33m;[39m
+    [90m500| [39m    [35mconst[39m leftNotPrevented [33m=[39m [34mpress[39m({ [33m...[39m[33mARROW_LEFT[39m[33m,[39m [33m...[39mchord })[33m;[39m
+    [90m501| [39m    [34mexpect[39m([34mlive[39m(mounted[33m.[39mapi)[33m.[39m[34mgetLocatorPosition[39m())[33m.[39m[34mtoBe[39m(markerAt)[33m;[39m
+    [90m   | [39m                                                   [31m^[39m
+    [90m502| [39m    [34mexpect[39m(mounted[33m.[39m[34mstatus[39m())[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m503| [39m    [34mexpect[39m(mounted[33m.[39m[34mstatus[39m())[33m.[39mnot[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx[2m > [22mGATE264-S2: Alt or AltGr held with Ctrl/Meta runs no Ctrl-letter command[2m > [22mAG8 Ctrl+AltGraph+ArrowRight without altKey and without a gesture does not step the marker
+[31m[1mAssertionError[22m: expected 20 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 20[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx:[2m524:52[22m[39m
+    [90m522| [39m      modifierAltGraph[33m:[39m [35mtrue[39m[33m,[39m
+    [90m523| [39m    })[33m;[39m
+    [90m524| [39m    [34mexpect[39m([34mlive[39m(mounted[33m.[39mapi)[33m.[39m[34mgetLocatorPosition[39m())[33m.[39m[34mtoBe[39m(markerAt)[33m;[39m
+    [90m   | [39m                                                   [31m^[39m
+    [90m525| [39m    [34mexpect[39m(mounted[33m.[39m[34mstatus[39m())[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m526| [39m    [34mexpect[39m(notPrevented)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m28 passed[39m[22m[90m (30)[39m
+[2m   Start at [22m 11:44:09
+[2m   Duration [22m 5.74s[2m (transform 928ms, setup 0ms, import 1.34s, tests 3.88s, environment 395ms)[22m
+
+
+::error file=/tmp/a268-scratch/app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx,title=app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx > GATE264-S2%3A Alt or AltGr held with Ctrl/Meta runs no Ctrl-letter command > AG7 Ctrl+AltGraph without altKey+Arrow during a pointer gesture neither steps the marker nor shows the blocked message,line=501,column=52::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx:501:52%0A%0A
+
+::error file=/tmp/a268-scratch/app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx,title=app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx > GATE264-S2%3A Alt or AltGr held with Ctrl/Meta runs no Ctrl-letter command > AG8 Ctrl+AltGraph+ArrowRight without altKey and without a gesture does not step the marker,line=524,column=52::AssertionError: expected 20 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 20%0A%0A ❯ app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx:524:52%0A%0A

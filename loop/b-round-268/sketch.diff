@@ -1,0 +1,203 @@
+--- /home/runner/czaba-project/store/app/lib/arrangement/envelope.ts	2026-10-30 11:41:55.283151437 +0000
++++ app/lib/arrangement/envelope.ts	2026-10-30 12:06:05.833910396 +0000
+@@ -3,8 +3,10 @@
+   ArrangementClip,
+   ArrangementClipEnvelopePoint,
+ } from '~/types/arrangement';
++import { TRACK_VOLUME_DB_MIN } from './track-volume-db';
+ 
+ export const CLIP_ENVELOPE_MIN_GAP_SECONDS = 0.001;
++export const CLIP_ENVELOPE_RAMP_STEP_DB = 0.5;
+ const CLIP_ENVELOPE_WINDOW_EPS = 1e-6;
+ const CLIP_ENVELOPE_SAME_MS = 0.0005;
+ 
+@@ -70,6 +72,46 @@
+   };
+ }
+ 
++export function clipEnvelopeDepthFromGain(gain: number): number {
++  if (!Number.isFinite(gain) || gain <= 0) {
++    return 1;
++  }
++  return clampEnvelopeValue((20 * Math.log10(gain)) / TRACK_VOLUME_DB_MIN, 0, 1);
++}
++
++export function clipEnvelopeGainFromDepth(depth: number): number {
++  if (!Number.isFinite(depth) || depth >= 1) {
++    return 0;
++  }
++  if (depth <= 0) {
++    return 1;
++  }
++  return 10 ** ((TRACK_VOLUME_DB_MIN * depth) / 20);
++}
++
++function segmentDepth(gain: number, other: number): number {
++  if (gain > 0 && other > 0) {
++    return (20 * Math.log10(gain)) / TRACK_VOLUME_DB_MIN;
++  }
++  return clipEnvelopeDepthFromGain(gain);
++}
++
++function interpolateEnvelopeGain(leftGain: number, rightGain: number, fraction: number): number {
++  if (fraction <= 0) {
++    return leftGain;
++  }
++  if (fraction >= 1 || leftGain === rightGain) {
++    return fraction >= 1 ? rightGain : leftGain;
++  }
++  const from = segmentDepth(leftGain, rightGain);
++  const to = segmentDepth(rightGain, leftGain);
++  const depth = from + (to - from) * fraction;
++  if (leftGain > 0 && rightGain > 0) {
++    return 10 ** ((TRACK_VOLUME_DB_MIN * depth) / 20);
++  }
++  return clipEnvelopeGainFromDepth(depth);
++}
++
+ export function clipEnvelopeGainAtSource(
+   points: readonly ArrangementClipEnvelopePoint[],
+   sourceTime: number,
+@@ -92,12 +134,48 @@
+       const segment = right.time - left.time;
+       return segment <= 0
+         ? right.gain
+-        : left.gain + ((right.gain - left.gain) * (sourceTime - left.time)) / segment;
++        : interpolateEnvelopeGain(left.gain, right.gain, (sourceTime - left.time) / segment);
+     }
+   }
+   return last.gain;
+ }
+ 
++export interface ClipEnvelopeRampStep {
++  time: number;
++  gain: number;
++}
++
++export function clipEnvelopeRampSteps(
++  points: readonly ArrangementClipEnvelopePoint[],
++  fromSource: number,
++  toSource: number,
++): ClipEnvelopeRampStep[] {
++  if (!(toSource > fromSource)) {
++    return [];
++  }
++  const knots = [
++    fromSource,
++    ...points.map((point) => point.time).filter((time) => time > fromSource && time < toSource),
++    toSource,
++  ];
++  const steps: ClipEnvelopeRampStep[] = [];
++  for (let index = 1; index < knots.length; index++) {
++    const from = knots[index - 1];
++    const to = knots[index];
++    const fromGain = clipEnvelopeGainAtSource(points, from);
++    const toGain = clipEnvelopeGainAtSource(points, to);
++    const span =
++      Math.abs(segmentDepth(toGain, fromGain) - segmentDepth(fromGain, toGain)) *
++      Math.abs(TRACK_VOLUME_DB_MIN);
++    const count = Math.max(1, Math.ceil(span / CLIP_ENVELOPE_RAMP_STEP_DB - 1e-9));
++    for (let step = 1; step <= count; step++) {
++      const time = step === count ? to : from + ((to - from) * step) / count;
++      steps.push({ time, gain: step === count ? toGain : clipEnvelopeGainAtSource(points, time) });
++    }
++  }
++  return steps;
++}
++
+ export function clipEnvelopeGainAt(clip: ArrangementClip, time: number): number {
+   return clipEnvelopeGainAtSource(clip.envelope ?? [], clip.sourceOffset + (time - clip.start));
+ }
+--- /home/runner/czaba-project/store/app/lib/arrangement/graph.client.ts	2026-10-30 11:41:55.284151417 +0000
++++ app/lib/arrangement/graph.client.ts	2026-10-30 12:06:05.835120649 +0000
+@@ -1,5 +1,10 @@
+ import type { Arrangement, ArrangementTrack, ScheduledClip } from '~/types/arrangement';
+-import { type ClipEnvelopeShape, clipEnvelopeGainAtSource, clipEnvelopeShapes } from './envelope';
++import {
++  type ClipEnvelopeShape,
++  clipEnvelopeGainAtSource,
++  clipEnvelopeRampSteps,
++  clipEnvelopeShapes,
++} from './envelope';
+ import { ArrangementExportCancelledError, raceArrangementExportAbort } from './export-cancel';
+ import { arrangementRenderSuspendFrames } from './export-progress';
+ import { type ExportOverloadReport, measureExportOverload } from './export-wav';
+@@ -132,18 +137,12 @@
+   const initial = clipEnvelopeGainAtSource(shape.points, firstSource);
+   envelopeGain.gain.value = initial;
+   envelopeGain.gain.setValueAtTime?.(initial, at(item.when));
+-  for (const point of shape.points) {
+-    if (point.time > firstSource && point.time < lastSource) {
+-      envelopeGain.gain.linearRampToValueAtTime?.(
+-        point.gain,
+-        at(item.when + (point.time - firstSource)),
+-      );
+-    }
++  for (const step of clipEnvelopeRampSteps(shape.points, firstSource, lastSource)) {
++    envelopeGain.gain.linearRampToValueAtTime?.(
++      step.gain,
++      at(item.when + (step.time - firstSource)),
++    );
+   }
+-  envelopeGain.gain.linearRampToValueAtTime?.(
+-    clipEnvelopeGainAtSource(shape.points, lastSource),
+-    at(item.when + item.duration),
+-  );
+ }
+ 
+ function clampPan(value: number): number {
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-30 11:41:55.255082036 +0000
++++ app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-30 12:06:05.835370528 +0000
+@@ -1,7 +1,9 @@
+ import { type MouseEvent, type PointerEvent, useEffect, useRef } from 'react';
+ import {
+   addClipEnvelopePoint,
++  clipEnvelopeDepthFromGain,
+   clipEnvelopeGainAtSource,
++  clipEnvelopeGainFromDepth,
+   clipEnvelopePointTimelineTime,
+   formatClipEnvelopeGain,
+   moveClipEnvelopePoint,
+@@ -258,13 +260,15 @@
+       return;
+     }
+     gesture.moved = true;
+-    const gainDelta = gesture.bodyHeight > 0 ? dy / gesture.bodyHeight : 0;
++    const depthDelta = gesture.bodyHeight > 0 ? dy / gesture.bodyHeight : 0;
+     const next = moveClipEnvelopePoint(
+       gesture.before,
+       clip.id,
+       gesture.pointSourceTime,
+       gesture.originalTime + dx / pxPerSecond,
+-      gesture.originalGain - gainDelta,
++      depthDelta === 0
++        ? gesture.originalGain
++        : clipEnvelopeGainFromDepth(clipEnvelopeDepthFromGain(gesture.originalGain) + depthDelta),
+     );
+     previewArrangement(next);
+     const moved = envelopePointAfterMove(next, clip.id, gesture.pointIndex);
+@@ -367,7 +371,7 @@
+             className="absolute z-30 size-2.5 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-xs border border-background bg-foreground hover:scale-125"
+             style={{
+               left: (point.time - clip.sourceOffset) * pxPerSecond - CLIP_ENVELOPE_ROOT_BORDER_PX,
+-              top: `${(1 - point.gain) * 100}%`,
++              top: `${clipEnvelopeDepthFromGain(point.gain) * 100}%`,
+             }}
+             title={envelopePointTitle(time, point.gain)}
+             onPointerDown={(event) => handlePointPointerDown(slot, event)}
+@@ -397,9 +401,12 @@
+   const firstGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset);
+   const lastGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset + clip.duration);
+   const linePoints = [
+-    `0,${1 - firstGain}`,
+-    ...points.map((point) => `${(point.time - clip.sourceOffset) * pxPerSecond},${1 - point.gain}`),
+-    `${lineWidth},${1 - lastGain}`,
++    `0,${clipEnvelopeDepthFromGain(firstGain)}`,
++    ...points.map(
++      (point) =>
++        `${(point.time - clip.sourceOffset) * pxPerSecond},${clipEnvelopeDepthFromGain(point.gain)}`,
++    ),
++    `${lineWidth},${clipEnvelopeDepthFromGain(lastGain)}`,
+   ].join(' ');
+   const slots = points.map((point, slot) => ({ point, slot }));
+   return (

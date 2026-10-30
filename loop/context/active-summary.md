@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T11:22:10.990Z)
+# Active loop summary (2026-10-30T12:00:41.424Z)
 
-- backlog.json 2536 KB -> active view 359 KB
-- status: G_ROOT_GATE round 267
-- servers: `{"checkedUtc":"2026-10-30T11:09:33.5152811Z","round":267,"attempt":1,"store":200}`
-- last publication: 7ba7cd297accd7c1fadda76f95f54342a93205ef (rounds 265-266)
-- last root gate: round 267 skipped - C taskStatus FAIL
+- backlog.json 2542 KB -> active view 363 KB
+- status: G_ROOT_GATE round 268
+- servers: `{"checkedUtc":"2026-10-30T11:48:04.9784954Z","round":268,"attempt":1,"store":200}`
+- last publication: 3058a7c18c558f4139edff0cd6c2cc76ccc47d2e (rounds 267-268)
+- last root gate: round 268 published - commit 3058a7c18c558f4139edff0cd6c2cc76ccc47d2e pushed
 
 ## Current items: -
 
@@ -544,7 +544,7 @@
 - GATE228-S4-ARIA-LOOKUPS / info / signal (D-29z288): PERF input only, not scheduled / 7 studioShortcutAria + 2 title lookups per transport render (linear over ~45 rows); negligible
 - GATE228-S5-SC5-COUNT / info / ruled kept (D-29z288): deliberate, a new aria row must be acknowledged in the test (A round 228 §5) / shortcuts.test SC5 pins expect(checked).toBe(8)
 - GATE228-ARCH-STRINGS-SHORTCUTS / info / signal: keep (reviewer verdict); input to ARCH-CHECKPOINT-CALM-DIALOG-KEYMAP / strings.ts now depends on shortcuts.ts (one way; shortcuts.ts stays a leaf)
-- SABA-B-7 / medium / scheduled: queue entry SABA-B-7-ENVELOPE-DB (after CALM-3, before PERF b-ii) / clip volume envelope is linear in gain: one bottom point is silent only for an instant; a line sounds loud for most of the dip
+- SABA-B-7 / medium / agreed (Saba 2026-10-30, D-29z573): option A; scheduled round 269 (D-29z574) | scheduled: queue entry SABA-B-7-ENVELOPE-DB (after CALM-3, before PERF b-ii) / clip volume envelope is linear in gain: one bottom point is silent only for an instant; a line sounds loud for most of the dip
 - C-N229-S3-METHOD / info / ruled D-29z293: future task recipes reach "no time selection" with an empty-lane click; Escape does not clear a time selection (HEAD identical); whether Live Esc deselects is unverified, not a bug; lesson L29 amended / round 229 S3 recipe "clear the time selection with Escape" does not work
 - C-N229-L4-GREP / info / ruled D-29z293: deleted-key greps in later tasks are written as grep -rn ... app --exclude-dir=__tests__ = 0, plus "the only test hits are the mandated '<key>' in absence lines" / round 229 section 2.1 grep-0 rule and section 2.5 absence lines bound the same lines
 - GATE229-S4 / info / dispatched round 232 as C-CAPTION-232 (D-29z310) | routed to CALM-3 C row (D-29z292): caption row height with an empty caption and with a long truncated file name at 1280 / min-h-4 row height covered only by C-BBOX-229 (empty caption and a short file name)
@@ -558,7 +558,7 @@
 - GATE233-S4 / info / open_tech_lead_manual (D-29z325): TLM-R233-SR-ORDER / screen-reader order after the focus rescue (focus moves, then the polite status) is not verified with a real screen reader
 - GATE233-S5 / info / duplicate of deferred Low B-R232-DOC180-FOCUS-STALE (D-29z325) / doc 180 l.42-51 still describes the reversed focus rule
 - SABA-Q-TEMPO-UNDO / info / awaiting_user (D-29z324); default kept until answered / CZABA keeps tempo, grid and Snap outside the undo history (D-29z30 R4), so Undo of the clip that seeded the tempo keeps tempo/grid/Snap; in 
-- SABA-Q-ENVELOPE-TAPER / info / awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
+- SABA-Q-ENVELOPE-TAPER / info / answered (Saba 2026-10-30, D-29z573): option A | awaiting_user (D-29z322): user-review/AGREE-SABA-B-7.md / clip envelope taper: A dB-linear -60 dB floor (lane fader scale) vs B p^3; saved projects change between points; Live measurement request
 - GATE234-S5 / info / awaiting_user as SABA-Q-SEED-STATUS-LENGTH (D-29z330) / one aria-live message now carries three sentences (placement, tempo, Snap)
 - GATE234-S7 / info / note for PERF re-baselines (D-29z330); no perf/e2e spec names a source today / a perf scenario that adds a synthetic stem now runs with Snap on, 1/4 and the bars ruler
 - SABA-Q-TIME-RULER-ROLE / info / awaiting_user (D-29z332); the default in current-task.md section 3 holds until answered | round 249 (D-29z431): a seconds-ruler click now places the insert marker and clears a time selection (HEAD kept the selection); Live 6.9's point rule is about the Arrangement background, not the ruler, so this is a planner deviation asked here (L44) | (b) round 252 (D-29z457): the seconds-ruler click also pauses Follow while playing, like the beat-time ruler (CZABA rule, inference; Live 6.1 item 15 documents drag-to-scroll only); still awaiting_user / Live's time ruler (min:sec) only scrolls on drag (6.1); a plain click there and in the beat-time ruler outside the scrub area is undocumente
@@ -648,13 +648,21 @@
 - C-R261-N4 / info / root_note / npx tsx installed tsx@4.23.15 into the npm cache (outside store/); store unchanged (same class as C-R29-NPX-CACHE)
 - C-R261-N5 / info / watch (D-29z537) / C's first G261-AUTH script waitFor (Add, visible) timed out right after the perf run; rerun with the harness readiness predicate passed, 0 p
 - SABA-Q-9-MASTER-ROW / info / awaiting_user / Saba question, SABA-B-9 stage 2: (a) Master as a Main-track row under the lanes (Live 12 manual 18.4 'bottom end of the Arrangement View') i
-- SABA-Q-11C-MARQUEE / info / awaiting_user / Saba question, SABA-B-11c stage 1 deviation D1: a plain drag on the empty background now makes a time selection (Live 6.9); the clip marquee
-- SABA-Q-11C-MULTILANE / info / awaiting_user / Saba question, SABA-B-11c stage 1 deviation D2: a background drag that moves vertically keeps the time selection on the lane where it starte
-- GATE264-S2 / medium / scheduled round 267 (D-29z568): commandChord = Ctrl/Meta without Alt/AltGraph on the gesture arm + 10 Ctrl-letter branches; re-reproduced at 7ba7cd2 (b-round-266/probe-fix-head.json: AltGr Z/Y/E/L/D and real Control+Alt+Z/E act); sketch verified b-round-266/probe-fix-sketch.json; real Windows AltGr half stays TLM-R232-ALTGR-WIN with Saba | open (D-29z558): next bug round after round 265 (REGRESSION first if due on/after 2026-11-02); cloud contract half only, real Windows AltGr stays with Saba / AltGr (ctrlKey+altKey, getModifierState('AltGraph') true) reaches the Ctrl-letter branches of the Studio keydown handler: AltGr+Z (Polish z-
-- GATE266-S1 / medium / open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due / after a drag inside a clip past its edge (round 265), the clip stays selected and the details panel Start/End fields show only the part insi
+- SABA-Q-11C-MARQUEE / info / answered (Saba 2026-10-30, D-29z573): Ctrl/Cmd+drag on the background kept | awaiting_user / Saba question, SABA-B-11c stage 1 deviation D1: a plain drag on the empty background now makes a time selection (Live 6.9); the clip marquee
+- SABA-Q-11C-MULTILANE / info / answered (Saba 2026-10-30, D-29z573): not now; a selection stays on its starting lane, Ctrl+Shift+L covers all lanes; multi-lane = later candidate, not queued | awaiting_user / Saba question, SABA-B-11c stage 1 deviation D2: a background drag that moves vertically keeps the time selection on the lane where it starte
+- GATE264-S2 / medium / re-dispatched round 268 (D-29z572): fix-up for C-R267-01; closes on C PASS + gate | scheduled round 267 (D-29z568): commandChord = Ctrl/Meta without Alt/AltGraph on the gesture arm + 10 Ctrl-letter branches; re-reproduced at 7ba7cd2 (b-round-266/probe-fix-head.json: AltGr Z/Y/E/L/D and real Control+Alt+Z/E act); sketch verified b-round-266/probe-fix-sketch.json; real Windows AltGr half stays TLM-R232-ALTGR-WIN with Saba | open (D-29z558): next bug round after round 265 (REGRESSION first if due on/after 2026-11-02); cloud contract half only, real Windows AltGr stays with Saba / AltGr (ctrlKey+altKey, getModifierState('AltGraph') true) reaches the Ctrl-letter branches of the Studio keydown handler: AltGr+Z (Polish z-
+- GATE266-S1 / medium / open (D-29z574): round 270 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY, after SABA-B-7 (269); B browser repro before dispatch | open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due / after a drag inside a clip past its edge (round 265), the clip stays selected and the details panel Start/End fields show only the part insi
 - GATE266-S4 / low / scheduled round 268 with GATE266-S1 (owned code, cheap; D-29z569) / splitRangeDone ('Clip split at both edges ...') and splitRangeTitle say 'both edges' when D3 cuts only one edge (SPLIT-PAST-START, SPLIT-BG-
 - B-R266-CLIPS-SPLIT-COPY / low / scheduled round 268 with GATE266-S1 (D-29z569) / splitRangeClipsDone says 'Clips split' when one selected part is a whole clip that was not cut (MS6)
 - B-R266-LINUX-ALTGR-PLAIN-LETTERS / info / hypothesis, unverified; Tech Lead list; becomes a normal finding on a real repro (D-29z570) / if a platform reports AltGr as getModifierState('AltGraph') without altKey/ctrlKey (Linux X11 suspected), the plain-letter branches (M, G, A
+- C-R267-01 / medium / scheduled round 268 (D-29z572): Ctrl arm of the Ctrl+Arrow branch requires !AltGraph; AG7/AG8; C rows GESTURE-ARROW, NOGESTURE-ARROW, MAC-ALT-ARROW / during a pointer gesture, Ctrl+AltGraph (altKey false) + ArrowLeft/Right passes the gesture arm (commandChord) and reaches the Ctrl+Arrow br
+- A-R267-ARCH-CHORD-CLASSIFIER / info / signal (not scheduled, D-29z575): evidence for ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS question 10 / handleKeyDown branch-order interactions (gesture arm vs Ctrl+Arrow) caused the round-267 regression; proposal: pure chord classifier (event 
+- SABA-Q-11C-SPLIT-SPAN / info / answered (Saba 2026-10-30, D-29z573): Ctrl+E cuts every clip the selection touches at the edges inside a clip, as built in round 266; all-lanes split = later candidate, not queued / Ctrl+E on a selection spanning several clips; split on an all-lanes selection
+- LATER-11C-MULTILANE-SELECTION / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / multi-lane time selection
+- LATER-11C-ALL-LANES-SPLIT / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / split on an all-lanes (Ctrl+Shift+L) selection
+- LATER-SABA-B-7-ALT-DRAG-CURVES / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / envelope Alt-drag curves
+- LATER-SABA-B-7-EDIT-VALUE / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / envelope Edit Value
+- LATER-SABA-B-7-POINT-SNAP / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / grid snap of envelope points
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

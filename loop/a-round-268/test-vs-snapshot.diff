@@ -1,0 +1,64 @@
+467a468,530
+> 
+>   const ALT_ARROW_CHORDS = [
+>     ['Ctrl+AltGraph without altKey', { ctrlKey: true, altKey: false, modifierAltGraph: true }],
+>     ['Ctrl+Alt', { ctrlKey: true, altKey: true }],
+>     ['Meta+Alt', { metaKey: true, altKey: true }],
+>     ['Ctrl+Alt+AltGraph', { ctrlKey: true, altKey: true, modifierAltGraph: true }],
+>   ] as const;
+> 
+>   const ARROW_RIGHT = { key: 'ArrowRight', code: 'ArrowRight' };
+>   const ARROW_LEFT = { key: 'ArrowLeft', code: 'ArrowLeft' };
+> 
+>   function placeMarkerInsideClip(mounted: MetaMount) {
+>     const clip = selectOnlyClip(mounted);
+>     const markerAt = clip.start + 1;
+>     act(() => live(mounted.api).setInsertMarker(markerAt));
+>     expect(live(mounted.api).getLocatorPosition()).toBe(markerAt);
+>     return markerAt;
+>   }
+> 
+>   it.each(
+>     ALT_ARROW_CHORDS,
+>   )('AG7 %s+Arrow during a pointer gesture neither steps the marker nor shows the blocked message', async (_label, chord) => {
+>     const mounted = await mountMetaWorkspace();
+>     addOneClip(mounted);
+>     const markerAt = placeMarkerInsideClip(mounted);
+>     const statusBefore = mounted.status();
+>     expect(statusBefore).not.toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+>     let release: (() => void) | null = null;
+>     act(() => {
+>       release = live(mounted.api).claimPointerGesture(42, () => {});
+>     });
+>     const rightNotPrevented = press({ ...ARROW_RIGHT, ...chord });
+>     const leftNotPrevented = press({ ...ARROW_LEFT, ...chord });
+>     expect(live(mounted.api).getLocatorPosition()).toBe(markerAt);
+>     expect(mounted.status()).toBe(statusBefore);
+>     expect(mounted.status()).not.toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+>     expect(rightNotPrevented).toBe(true);
+>     expect(leftNotPrevented).toBe(true);
+>     const plainNotPrevented = press({ ...ARROW_RIGHT, ...CTRL });
+>     expect(mounted.status()).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+>     expect(live(mounted.api).getLocatorPosition()).toBe(markerAt);
+>     expect(plainNotPrevented).toBe(false);
+>     act(() => release?.());
+>   });
+> 
+>   it('AG8 Ctrl+AltGraph+ArrowRight without altKey and without a gesture does not step the marker', async () => {
+>     const mounted = await mountMetaWorkspace();
+>     addOneClip(mounted);
+>     const markerAt = placeMarkerInsideClip(mounted);
+>     const statusBefore = mounted.status();
+>     const notPrevented = press({
+>       ...ARROW_RIGHT,
+>       ctrlKey: true,
+>       altKey: false,
+>       modifierAltGraph: true,
+>     });
+>     expect(live(mounted.api).getLocatorPosition()).toBe(markerAt);
+>     expect(mounted.status()).toBe(statusBefore);
+>     expect(notPrevented).toBe(true);
+>     const plainNotPrevented = press({ ...ARROW_RIGHT, ...CTRL });
+>     expect(live(mounted.api).getLocatorPosition()).toBeGreaterThan(markerAt);
+>     expect(plainNotPrevented).toBe(false);
+>   });

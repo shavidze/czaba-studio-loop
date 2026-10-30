@@ -1,0 +1,65 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T11:48:04.9784954Z",
+  "round": 268,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R268-01",
+   "severity": "low",
+   "steps": [
+    "Fresh anonymous context, /studio-lab, wait for 'Demo collection ready'; add the first library option (Enter); blur",
+    "Home, then Space (play), wait 1.5 s",
+    "Dispatch on document.body keydown+keyup {key:' ', code:'Space', ctrlKey:true, shiftKey:true, modifierAltGraph:true} (altKey false)"
+   ],
+   "expected": "Under D-29z572 ('a chord with Alt or AltGraph held is never a command chord anywhere in handleKeyDown'): no action, event not prevented",
+   "actual": "Insert marker moves 0.000 -> 1.483 with status 'Insert marker moved to the playhead (00:01.483). Space plays from here.'; keydown and keyup both prevented (dispatchEvent false). Same at 1440x900 and 1280x720; plain Ctrl+Shift+Space control behaves identically (1.459). Contract-only (no real platform shown to send AltGraph without altKey, as AG6); the Space arm (tree l.2274) and keyup (~l.2591) are unchanged since HEAD (code read; not measured at HEAD) and frozen by task §2.1.2, so not a changed-path finding. Same as A's reviewer Low A-R268-REVIEW-SPACE-ALTGRAPH -> deferred_low_polish, or narrow D-29z572's wording.",
+   "evidence": "c-round-268/probe-space-altgraph.json, c-round-268/probe-space-altgraph.mjs"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "TESTS-TARGETED",
+  "MUTANTS",
+  "GESTURE-ARROW",
+  "NOGESTURE-ARROW",
+  "MAC-ALT-ARROW",
+  "R267-ROWS",
+  "DOC-199",
+  "G268-AUTH"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome full",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "blocked": [],
+ "notes": [
+  {
+   "id": "INFO-C268-HEAD-DRIFT",
+   "severity": "info",
+   "text": "HEAD is e937046 (root commit 'feat(agents): add product-designer agent', only .claude/agents/product-designer.md + .codex/agents/product-designer.toml) instead of the planned 7ba7cd2; git diff 7ba7cd2 HEAD touches no app file; K2-K20 match verbatim. SOURCE-SCOPE/K1 accepted with this note. L29 would make a K1 mismatch a planning FAIL; C applies an explicit exception because the drift is root's agent-file commit and app code is byte-identical (git diff 7ba7cd2 HEAD verified).",
+   "evidence": "c-round-268/claims.txt"
+  },
+  {
+   "id": "INFO-C268-PROBE-LOAD",
+   "severity": "info",
+   "text": "first probe-arrow attempt timed out waiting for 'Demo collection ready' while C's vitest/mutant runs loaded the machine; environment-invalid, re-run alone and valid (1 of 2 replacement attempts used).",
+   "evidence": "c-round-268/probe-arrow-attempt1-invalid.log"
+  }
+ ],
+ "ableton": {
+  "ctrlAltLetter": "confirmed per B's cited Live 12 manual ch.42 (not re-fetched by C this round)",
+  "ctrlArrowOutsideDrag": "CZABA edge navigation, accepted earlier; SABA-Q-10A-CTRL-ARROW-RANGE stays with Saba",
+  "altChordDuringDrag": "no source, not judged"
+ }
+}
