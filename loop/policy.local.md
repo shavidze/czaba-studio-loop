@@ -366,3 +366,9 @@ The review read master **2d4a93f** (round 222). B re-checks every file:line on t
 4. **Agree.** B writes the reference, the video findings and the plan in `loop/user-review/AGREE-<task>.md` and does not dispatch that task. Root brings it to Saba, adds the transcripts, and records his answer in this file. A builds only after that.
 
 While a feature waits, B dispatches the next task that does not wait. B sets NEEDS_ATTENTION (detail `AGREE-WITH-SABA <task>`) only when no other task can run. Performance, bug-fix, refactor, test-only and RETRO rounds do not wait. SABA-B-9/10/11 are already agreed. Root has already read the tutorials for them: `loop/reference/youtube/SABA-B-9-10-11-transcripts.md`. B reads that file before planning each of the six tasks, resolves its CHECK items against the manual, and requests more searches only if needed. Where a video shows a behaviour the review missed, B lists it as a question for Saba and does not change the agreed scope by itself.
+
+**Live itself is a source (Saba, 2026-10-30).** Saba installed Ableton Live 12 on his computer and gave root access. When the manual, the videos and the consults cannot settle a behaviour, B writes a `Live measurement request` section in the AGREE note or in `loop/user-review/live-checks.md`: the exact steps and what to read off the screen. Root measures in Live when Saba's computer is online and writes the result to `loop/reference/ableton-live-measurements-<date>.md`. That file outranks forum posts and inference. Do not guess a behaviour that root can measure. The first measurements are in `ableton-live-measurements-2026-10-30.md`:
+- the volume fader taper (option A of SABA-B-7 matches Live);
+- the clip Gain envelope is linear in %;
+- the first loop sets the Set tempo;
+- a click snaps the insert marker to the grid (a CHECK for SABA-B-10a).
