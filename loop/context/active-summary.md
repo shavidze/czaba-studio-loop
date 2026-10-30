@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T14:12:06.551Z)
+# Active loop summary (2026-10-30T15:30:53.394Z)
 
-- backlog.json 2559 KB -> active view 361 KB
-- status: G_ROOT_GATE round 270
-- servers: `{"checkedUtc":"2026-10-30T13:52:03.4900469Z","round":270,"attempt":1,"store":200}`
-- last publication: 4b912a9e065b60a714c196bae5456a9857944634 (rounds 270-270)
-- last root gate: round 270 published - commit 4b912a9e065b60a714c196bae5456a9857944634 pushed
+- backlog.json 2572 KB -> active view 361 KB
+- status: G_ROOT_GATE round 271
+- servers: `{"checkedUtc":"2026-10-30T15:07:46.7172217Z","round":271,"attempt":1,"store":200}`
+- last publication: 66b570add291123a296f87044070804abe73707d (rounds 271-271)
+- last root gate: round 271 published - commit 66b570add291123a296f87044070804abe73707d pushed
 
 ## Current items: -
 
@@ -27,6 +27,7 @@
 - HOMEPAGE-SSR-FETCH-INFO / info / root / homepage SSR logs 'Error loading homepage products: fetch failed' while the backend is down
 - ARCH-CHECKPOINT-SRW13 / info / requested_from_root / bounded architecture checkpoint at the SRW-13 feature boundary: ArrangementContext.tsx (2850 lines), StudioWorkspace.tsx (1552), Arrangement
 - GSTACK-NO-MOUSE / info / open / gstack browse CLI, its CDP allowlist and the server-node.mjs fallback expose no mouse down/move/up; C47 REAL-mouse drags used standalone Pla
+- F1-ABSOLUTE-SNAP / medium / dispatched round 271 (D-29z587): relative snap of clip drags; closes on C round 271 PASS (RS-B-JITTER + RS1) | accepted; closes when SABA-B-11c stage 2 (relative snap, option (a), Saba 2026-10-30) passes C (D-29z573) | accepted / absolute snap after the 3 px drag threshold can jump a clip up to half a division on a select-click jitter (root reviewer F1, 10 s grid exam
 - ALT-CHROME-MENU / info / unconfirmed / Windows Chrome may focus its app-menu button when a lone Alt is released after an Alt+drag; CDP-dispatched keys (gstack/Playwright) never re
 - ARCH-CHECKPOINT-SRW14-PREFS / info / requested (sixth request, round 69 planning, SRW-14 feature boundary): (a) useGridPreferences proposal from the root round-68 reviewer (gates/round-68/review.md Architecture note), (b) time precision incl. the 1.334 s range readout, (c) shared UI test harness (4th grid UI file in round 69), (d) grid-menu state, (e) focus-release predicate, (f) metronome buffers; non-gating / bounded checkpoint: StudioWorkspace view/edit preferences (followMode, snapEnabled, gridSeconds + refs) vs a non-history edit-preferences sl
 - ABLETON-R49-CLICK-ROW / info / corrected / round-49 task section 4.8 marked 'click in a clip selects a point (insert marker)' as Confirmed from 6.9; the saved 6.9 text names clicking 
@@ -649,9 +650,6 @@
 - SABA-Q-9-MASTER-ROW / info / awaiting_user / Saba question, SABA-B-9 stage 2: (a) Master as a Main-track row under the lanes (Live 12 manual 18.4 'bottom end of the Arrangement View') i
 - SABA-Q-11C-MARQUEE / info / answered (Saba 2026-10-30, D-29z573): Ctrl/Cmd+drag on the background kept | awaiting_user / Saba question, SABA-B-11c stage 1 deviation D1: a plain drag on the empty background now makes a time selection (Live 6.9); the clip marquee
 - SABA-Q-11C-MULTILANE / info / answered (Saba 2026-10-30, D-29z573): not now; a selection stays on its starting lane, Ctrl+Shift+L covers all lanes; multi-lane = later candidate, not queued | awaiting_user / Saba question, SABA-B-11c stage 1 deviation D2: a background drag that moves vertically keeps the time selection on the lane where it starte
-- GATE266-S1 / medium / dispatched round 270 (D-29z581): fields show the whole time selection; unchanged Enter/Set keeps it and announces it; edited values keep the clip contract. B browser repro at HEAD f6ebd2d both viewports (b-round-269/probe-detail-range-head.json) | open (D-29z574): round 270 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY, after SABA-B-7 (269); B browser repro before dispatch | open (D-29z567): round 268 with GATE266-S4 and B-R266-CLIPS-SPLIT-COPY (same stage-1 readouts), unless REGRESSION is due / after a drag inside a clip past its edge (round 265), the clip stays selected and the details panel Start/End fields show only the part insi
-- GATE266-S4 / low / dispatched round 270 (D-29z582): splitRangeDone -> neutral wording | scheduled round 268 with GATE266-S1 (owned code, cheap; D-29z569) / splitRangeDone ('Clip split at both edges ...') and splitRangeTitle say 'both edges' when D3 cuts only one edge (SPLIT-PAST-START, SPLIT-BG-
-- B-R266-CLIPS-SPLIT-COPY / low / dispatched round 270 (D-29z582): splitRangeClipsDone names clips, not parts | scheduled round 268 with GATE266-S1 (D-29z569) / splitRangeClipsDone says 'Clips split' when one selected part is a whole clip that was not cut (MS6)
 - B-R266-LINUX-ALTGR-PLAIN-LETTERS / info / hypothesis, unverified; Tech Lead list; becomes a normal finding on a real repro (D-29z570) / if a platform reports AltGr as getModifierState('AltGraph') without altKey/ctrlKey (Linux X11 suspected), the plain-letter branches (M, G, A
 - A-R267-ARCH-CHORD-CLASSIFIER / info / signal (not scheduled, D-29z575): evidence for ARCH-CHECKPOINT-STUDIOWORKSPACE-FOCUS-STATUS question 10 / handleKeyDown branch-order interactions (gesture arm vs Ctrl+Arrow) caused the round-267 regression; proposal: pure chord classifier (event 
 - SABA-Q-11C-SPLIT-SPAN / info / answered (Saba 2026-10-30, D-29z573): Ctrl+E cuts every clip the selection touches at the edges inside a clip, as built in round 266; all-lanes split = later candidate, not queued / Ctrl+E on a selection spanning several clips; split on an all-lanes selection
@@ -660,10 +658,12 @@
 - LATER-SABA-B-7-ALT-DRAG-CURVES / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / envelope Alt-drag curves
 - LATER-SABA-B-7-EDIT-VALUE / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / envelope Edit Value
 - LATER-SABA-B-7-POINT-SNAP / info / later_candidate (Saba 2026-10-30, not queued; D-29z573) / grid snap of envelope points
-- B-R269-DETAIL-ALLTRACKS-DROP / medium / dispatched round 270 with GATE266-S1 (D-29z581), alias of the same fix / with an all-tracks time selection (Ctrl+Shift+L) inside the selected clip, Enter in the detail Start/End fields silently turns it into a one
 - INFO-C269-DB3-FLOOR / info / info, no action (D-29z580) / DB3 alone does not catch a wrong floor in depth(); DB2 does (C extra mutant)
 - INFO-C269-1280-DETAIL-COLLAPSED / info / info; round-270 recipes expand the panel (D-29z581) / at 1280x720 the detail panel starts collapsed (an ancestor display:none); C rows that read or type in it must click arrangement-detail-toggl
 - LATER-DETAIL-LANE-RANGE-EDIT / info / later_candidate (not queued; a new ability, needs Saba) / let the detail From/To fields edit a lane time selection that passes the clip edges (today edits stay inside the clip)
+- SABA-Q-11C-NUDGE / info / awaiting_user (D-29z590); not implemented; does not block round 271 / should the arrow-key nudge (and the loop brace move) of an off-grid clip keep its offset like the drag does after round 271 (10.3 -> 11.3), 
+- SABA-Q-11C-REALIGN / info / awaiting_user (D-29z590); not implemented; does not block round 271 / with relative snap no snapped drag returns an off-grid clip to the grid and a left drag stops at the offset (0.3), not 0; product-designer d
+- LIVE-MEAS-11C-OFFSET / info / open_root (D-29z590) / root measurement request in Ableton Live 12: off-grid clip drag, jitter, left stop, arrow nudge, group drag, left trim with a 1-bar fixed gr
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

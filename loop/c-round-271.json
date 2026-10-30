@@ -1,0 +1,86 @@
+{
+  "round": 271,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-30T15:07:46.7172217Z",
+    "round": 271,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R271-01-NUDGE-STALE-STATUS",
+      "severity": "low",
+      "preExisting": true,
+      "inScope": false,
+      "steps": [
+        "/studio-lab, fresh anonymous context, 1440x900 or 1280x720",
+        "click the Music lane, focus the first library option, press Enter (clip at 10.000)",
+        "press G (Snap on, grid 1 s), Alt-drag the clip header +12 px (status 'Move clip: start 00:10.300, ...')",
+        "press ArrowRight"
+      ],
+      "expected": "the status line reflects the nudge (the clip is now at 11.000), or is cleared",
+      "actual": "clip data-clip-start=11.000 and Undo title 'Undo: Nudge clip (Ctrl+Z)', but the status line still reads 'Move clip: start 00:10.300, length 01:41.352, source offset 00:00.000.'. The same at HEAD 4b912a9 (b-round-270/probe-group-nudge-head.json afterArrowRight; C HEAD run ui-head.json). Cause: ArrangementContext.nudgeSelectedClip success path calls applyEdit without setStatus. Nudge is frozen in round 271 (task section 3.3), so this is not A's regression. Candidate for SYS-6 STATUS-LIFETIME (round 272) or deferred_low_polish",
+      "evidence": "c-round-271/ui-new.json (1440x900.nudge, 1280x720.nudge), c-round-271/ui-head.json, b-round-270/probe-group-nudge-head.json",
+      "verdictImpact": "none: pre-existing at HEAD, outside the round scope; does not change the round verdict"
+    }
+  ],
+  "passed": [
+    "SOURCE-SCOPE",
+    "HUNK-SCOPE",
+    "CLAIMS",
+    "TESTS-TARGETED",
+    "TEST-REWRITES",
+    "MUTANTS",
+    "RS-B-OFFSET",
+    "RS-B-JITTER",
+    "RS-B-XLANE",
+    "RS-B-ONGRID",
+    "RS-B-TRIM",
+    "RS-B-NUDGE",
+    "RS-B-GROUP",
+    "SNAP-TITLE",
+    "SCREEN-BUDGET",
+    "G271-AUTH",
+    "DOC-202",
+    "DOC-198",
+    "LESSON-EXISTS"
+  ],
+  "gate": [
+    "full vitest",
+    "build",
+    "full Biome",
+    "npm run verify",
+    "e2e smoke"
+  ],
+  "blocked": [],
+  "closes": [
+    "F1-ABSOLUTE-SNAP (RS-B-JITTER browser both viewports + RS1 unit)",
+    "R49-T part (1)"
+  ],
+  "ableton": {
+    "clip moves snap to grid and clip edges": "confirmed (Live 12 manual 6.7, B citation; edge-wins rows RS3/RU4 green; not re-fetched by C)",
+    "off-grid clip keeps its offset": "unconfirmed (no source; Saba decision option (a); LIVE-MEAS-11C-OFFSET open)",
+    "Alt bypasses snap": "confirmed (Live 12 manual 6.10, B citation; browser Alt-drag +12 px -> 10.300 free)",
+    "edge trims snap to absolute grid": "confirmed by video riOD 2:22 (root transcript summary, not watched by C); browser RS-B-TRIM 14.000",
+    "arrow nudge step / offset": "unconfirmed (Saba question SABA-Q-11C-NUDGE); unchanged absolute behaviour verified"
+  },
+  "notes": [
+    {
+      "id": "INFO-C271-MUTANT-NO-INNER",
+      "severity": "info",
+      "note": "C extra mutant C-X-NO-INNER (relativeGroupDelta's last line 'return isInBounds(inner) ? inner : 0' -> 'return 0') survives all 4 files (and C-X-NO-FLOOR survives, as B section 7 predicted: storedGridLine already clamps). The inner one-step-back fallback only matters when whole >= 2 and the ms-rounded musical step overshoots the bound; RG2 uses whole = 1 where inner = 0. Test gap, no contract violation; optional guard row: step 60/90, an off-grid anchor, a bound just below 2 stored steps -> 1 step."
+    },
+    {
+      "id": "INFO-C271-VITE-CACHE",
+      "severity": "info",
+      "note": "C's first HEAD scratch (/tmp/c271-head) had node_modules symlinked to store/node_modules, so its Vite dep optimisation rewrote store/node_modules/.vite/deps (untracked cache, 15:09-15:12 UTC). Stopped and restarted with a private node_modules directory of per-entry symlinks. :5173 stayed 200 and all :5173 browser runs had 0 page errors. No tracked file changed (git diff hash unchanged across the phase). C's mutant/vitest scratch /tmp/c271-mut also had node_modules symlinked to store/node_modules, so vitest wrote its cache under store/node_modules/.vite/vitest (A and B scratches do the same; a loop pattern). node_modules is git-ignored, so git status shows nothing; the tracked tree is unchanged (identical diff hash at start and end)."
+    }
+  ],
+  "evidence": "c-round-271.md; c-round-271/ui-new.json, ui-head.json, paused-new.json, wav-analysis.json, auth.json, vitest.json, mutants.json, mutants.txt, claims.txt, a271.diff, shots/*.png, scripts/*",
+  "extraChecks": {
+    "EXPORT-SHIFT": "PASS: WAV 48 kHz/24-bit/2ch, header sizes valid, 0 non-finite samples; clip moved 10.000 -> 12.300 by relative-snap drags gives an export 2.300 s longer, first non-zero 10.0240625 -> 12.3240625 s (110400 samples = 2.3*48000), 0 non-zero samples before 12.3 s, shifted comparison 10689792/10689792 samples bit-identical, both viewports (c-round-271/wav-analysis.json)"
+  }
+}

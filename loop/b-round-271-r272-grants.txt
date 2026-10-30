@@ -1,0 +1,23 @@
+Round 272 grants (B, round 271 -> 272 planning, D-29z594). Baseline HEAD 66b570add291123a296f87044070804abe73707d (gate 271 published), clean tree.
+Only these paths may change. Everything else is frozen (current-task.md section 4).
+
+app/lib/arrangement/playback-start.ts                       (new)
+  - PlaybackStartOrigin, resolvePlaybackStart, resolveSpaceStartPoint, insertMarkerStatusKind (+ its kind type); section 3.1
+app/contexts/ArrangementContext.tsx
+  - the playback-start import; PlaybackStartOrigin -> type re-export; startPlaybackAt predicate -> resolvePlaybackStart;
+    togglePlayback branch -> resolveSpaceStartPoint; new describeSpaceStart (interface field, both value objects, deps);
+    writeInsertMarker Rule W (a ref to describeSpaceStart is allowed). Nothing else.
+app/components/arrangement/StudioWorkspace.tsx
+  - the insertMarkerStatusKind import; the stop effect's if-condition and its setStatus(describeSpaceStart()). Nothing else.
+app/lib/arrangement/strings.ts
+  - studioPlaybackStrings.insertMarkerAfterStopFromStart and .selectionAfterStop, after insertMarkerAfterStop (exact text section 3.5). Nothing else.
+app/lib/arrangement/__tests__/strings.test.ts
+  - additions only: two V02B_FORMATTER_SAMPLES.studioPlaybackStrings entries; two exact-text expects in ST11.
+app/lib/arrangement/__tests__/playback-start.test.ts          (new; PB1-PB8)
+app/lib/arrangement/__tests__/status-lifetime.test.tsx        (new; LT1-LT11; describe names SYS-6; { timeout: 15_000 })
+docs/implementation/2026/quarter-IV/203-sys-6-status-lifetime-stage-1.md   (new)
+  - l.4 exactly: **სტატუსი:** In Progress (stage 1 of 2; C round 272 PASS)
+
+Frozen (examples, not exhaustive): bars-ruler-ui.test.tsx, insert-marker-ui.test.tsx, ArrangementContext.test.ts (must pass unchanged),
+ArrangementMarkerRow.tsx, ArrangementTransport.tsx, model.ts, loop.ts, shortcuts.ts, grid.ts, package.json, perf/**, e2e/**.
+Protected auth/purchase: app/routes/studio.$productId.tsx, app/routes/api.studio-token*, app/lib/auth.ts, app/contexts/AuthContext.tsx.
