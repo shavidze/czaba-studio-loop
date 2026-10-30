@@ -1,0 +1,33 @@
+  async onstate(browser, vp, k) {
+    const { ctx, page, errors } = await open(browser, vp, { pulse: true, zoom: false });
+    const read = () => page.evaluate(() => {
+      const toRgb = (c) => { const cv = document.createElement('canvas'); cv.width = 1; cv.height = 1; const g = cv.getContext('2d'); g.clearRect(0, 0, 1, 1); g.fillStyle = c; g.fillRect(0, 0, 1, 1); const d = g.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255]; };
+      const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+      const over = (t, b) => [0, 1, 2].map((i) => t[i] * t[3] + b[i] * (1 - t[3])).concat(1);
+      const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return +((x + 0.05) / (y + 0.05)).toFixed(2); };
+      const tb = toRgb(getComputedStyle(document.querySelector('[data-testid="arrangement-transport"]')).backgroundColor);
+      const one = (label) => { const b = [...document.querySelectorAll('button')].find((x) => x.getAttribute('aria-label') === label); const cs = getComputedStyle(b); const svg = b.querySelector('svg'); const fill = over(toRgb(cs.backgroundColor), tb); const glyph = over(toRgb(getComputedStyle(svg).color), fill); const bx = b.getBoundingClientRect(); return { rawBg: cs.backgroundColor, rawGlyph: getComputedStyle(svg).color, fill, glyph, ratio: ratio(glyph, fill), ratioFillVsToolbar: ratio(fill, tb), box: [bx.x, bx.y, bx.width, bx.height], label: b.getAttribute('aria-label'), title: b.title, keys: b.getAttribute('aria-keyshortcuts'), dp: b.dataset.playing ?? null, svgClass: svg.getAttribute('class') }; };
+      return { toolbar: tb, play: one('Play'), stop: one('Stop') };
+    });
+    await page.mouse.move(2, 2);
+    const r = { stopped: await read() };
+    const playBox = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox();
+    await page.screenshot({ path: path.join(outDir, `onstate-stopped-${k}.png`), clip: { x: Math.max(0, playBox.x - 260), y: playBox.y - 12, width: 560, height: 56 } });
+    await page.getByRole('button', { name: 'Play', exact: true }).click(); await page.mouse.move(2, 2); await sleep(800);
+    r.playing = await read();
+    await page.screenshot({ path: path.join(outDir, `onstate-playing-${k}.png`), clip: { x: Math.max(0, playBox.x - 260), y: playBox.y - 12, width: 560, height: 56 } });
+    await page.getByRole('button', { name: 'Stop', exact: true }).click(); await sleep(300);
+    r.errors = errors; await ctx.close();
+    const S = r.stopped; const P = r.playing;
+    r.checks = {
+      differ: S.play.rawBg !== P.play.rawBg,
+      contrastPlay: S.play.ratio >= 3 && P.play.ratio >= 3,
+      contrastStop: S.stop.ratio >= 3 && P.stop.ratio >= 3,
+      dpFlip: S.play.dp === 'false' && P.play.dp === 'true',
+      constName: S.play.label === 'Play' && P.play.label === 'Play' && S.play.title === 'Play (Space)' && P.play.title === 'Play (Space)' && P.play.keys === 'Space',
+      stopName: S.stop.label === 'Stop' && S.stop.title === 'Stop (Space)' && S.stop.keys === 'Space',
+      boxStill: JSON.stringify(S.play.box) === JSON.stringify(P.play.box),
+      errors: errors.length === 0,
+    };
+    r.pass = Object.values(r.checks).every(Boolean); return r;
+  },

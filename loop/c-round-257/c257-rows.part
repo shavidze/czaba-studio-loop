@@ -1,0 +1,176 @@
+const REF256 = {
+  '1440x900': { h: 49, tops: { library: 84, dock: 84, ruler: 191, firstLane: 275 }, seqLen: 80, budget: { empty: 85, demo: 101 } },
+  '1280x720': { h: 87, tops: { library: 122, dock: 122, ruler: 229, firstLane: 313 }, seqLen: 75, budget: { empty: 69, demo: 85 } },
+};
+const REF_TOOLBAR = ['Undo', 'Split', 'Delete', 'Follow', 'Play', 'Stop', 'Back to start', 'Zoom', 'Fit', 'Export'];
+const ax = async (page, cdp) => {
+  const { root } = await cdp.send('DOM.getDocument', { depth: 0 });
+  const one = async (sel) => {
+    const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: sel });
+    if (!nodeId) return null;
+    const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false });
+    const n = nodes[0];
+    const prop = (p) => n.properties?.find((x) => x.name === p)?.value?.value ?? null;
+    return { role: n.role?.value, name: n.name?.value ?? null, desc: n.description?.value ?? null, ignored: n.ignored, keys: prop('keyshortcuts'), focusable: prop('focusable') };
+  };
+  const play = await one('[data-testid="arrangement-transport-centre"] button[aria-label="Play"]');
+  const stop = await one('[data-testid="arrangement-transport-centre"] button[aria-label="Stop"]');
+  const dom = await page.evaluate(() => {
+    const s = document.querySelector('[data-testid="arrangement-playback-state"]');
+    const p = document.querySelector('button[aria-label="Play"]'); const t = document.querySelector('button[aria-label="Stop"]');
+    return { stateText: s?.textContent ?? null, stateCount: document.querySelectorAll('[data-testid="arrangement-playback-state"]').length, hidden: s?.hasAttribute('hidden'), display: s ? getComputedStyle(s).display : null, tabindex: s?.getAttribute('tabindex'), live: s?.getAttribute('aria-live'), role: s?.getAttribute('role'), inCentre: !!s?.closest('[data-testid="arrangement-transport-centre"]'), id: s?.id, playRef: p?.getAttribute('aria-describedby'), stopRef: t?.getAttribute('aria-describedby'), playTitle: p?.title, stopTitle: t?.title, dp: p?.dataset.playing, activeIsState: document.activeElement === s, refs: [...document.querySelectorAll('[aria-describedby],[aria-labelledby]')].filter((e) => s && ((e.getAttribute('aria-describedby') || '').split(/\s+/).includes(s.id) || (e.getAttribute('aria-labelledby') || '').split(/\s+/).includes(s.id))).map((e) => e.getAttribute('aria-label')) };
+  });
+  return { play, stop, dom };
+};
+const ROWS = {
+  async a11y(browser, vp, k) {
+    const { ctx, page, errors } = await open(browser, vp, { pulse: true, zoom: false });
+    const o = await origin(page); await laneClick(page, o, 2); await blur(page);
+    const cdp = await ctx.newCDPSession(page); await cdp.send('Accessibility.enable');
+    const snap = async (label) => { const s = await st(page); const a = await ax(page, cdp); return { label, playing: s.playing, dp: s.dp, ph: s.ph, m: s.m, rms: s.rms, statusN: s.statusN, status: s.status, active: s.active, ...a }; };
+    const play = page.getByRole('button', { name: 'Play', exact: true }); const stop = page.getByRole('button', { name: 'Stop', exact: true });
+    const steps = [];
+    steps.push(await snap('stopped'));
+    await play.click(); await page.mouse.move(2, 2); await sleep(700); steps.push(await snap('playing-click'));
+    steps[1].aria = await page.getByTestId('arrangement-transport-centre').ariaSnapshot();
+    await play.click(); await sleep(400); steps.push(await snap('play-again'));
+    await stop.click(); await sleep(400); steps.push(await snap('after-stop'));
+    steps[3].aria = await page.getByTestId('arrangement-transport-centre').ariaSnapshot();
+    await page.mouse.click(5, 5); await blur(page);
+    await key(page, 'Space', 700); steps.push(await snap('space-play'));
+    await key(page, 'Space', 500); steps.push(await snap('space-stop'));
+    await play.click(); await sleep(900); steps.push(await snap('before-dbl'));
+    await stop.dblclick(); await sleep(500); steps.push(await snap('after-dbl-stop'));
+    const stateBox = await page.getByTestId('arrangement-playback-state').boundingBox();
+    const focusTry = await page.evaluate(() => { const s = document.querySelector('[data-testid="arrangement-playback-state"]'); s.focus(); return document.activeElement === s; });
+    const r = { steps, stateBox, focusTry, errors };
+    const want = { stopped: 'Stopped', 'playing-click': 'Playing', 'play-again': 'Playing', 'after-stop': 'Stopped', 'space-play': 'Playing', 'space-stop': 'Stopped', 'before-dbl': 'Playing', 'after-dbl-stop': 'Stopped' };
+    const statusOnPlay = steps[1].statusN - steps[0].statusN;
+    r.statusOnPlay = statusOnPlay;
+    r.checks = {
+      descriptions: steps.every((s) => s.play?.desc === want[s.label] && s.stop?.desc === want[s.label] && s.dom.stateText === want[s.label]),
+      playingTruth: steps.every((s) => (want[s.label] === 'Playing') === (s.dp === 'true')),
+      audio: steps.filter((s) => want[s.label] === 'Playing').every((s) => s.rms > 0.001) && steps.filter((s) => want[s.label] === 'Stopped' && s.label !== 'stopped').every((s) => s.rms < 0.001),
+      names: steps.every((s) => s.play?.name === 'Play' && s.stop?.name === 'Stop' && s.play.role === 'button' && s.stop.role === 'button'),
+      titles: steps.every((s) => s.dom.playTitle === 'Play (Space)' && s.dom.stopTitle === 'Stop (Space)'),
+      keys: steps.every((s) => s.play?.keys === 'Space' && s.stop?.keys === 'Space'),
+      element: steps.every((s) => s.dom.stateCount === 1 && s.dom.hidden && s.dom.display === 'none' && s.dom.tabindex === null && s.dom.live === null && s.dom.role === null && s.dom.inCentre && s.dom.playRef === s.dom.id && s.dom.stopRef === s.dom.id && JSON.stringify(s.dom.refs) === '["Play","Stop"]' && !s.dom.activeIsState),
+      noBox: stateBox === null,
+      neverFocused: !focusTry,
+      noPause: steps.every((s) => !/Pause/.test(s.aria || '')),
+      errors: errors.length === 0,
+    };
+    r.dv1StatusChangedOnPlay = statusOnPlay !== 0;
+    r.pass = Object.values(r.checks).every(Boolean);
+    await ctx.close(); return r;
+  },
+  async keys(browser, vp, k) {
+    const { ctx, page, errors } = await open(browser, vp, { pulse: true, zoom: false });
+    const o = await origin(page); await laneClick(page, o, 2); await blur(page);
+    const cdp = await ctx.newCDPSession(page); await cdp.send('Accessibility.enable');
+    await page.evaluate(() => { window.__clicks = []; for (const l of ['Play', 'Stop']) document.querySelector(`button[aria-label="${l}"]`).addEventListener('click', (e) => window.__clicks.push(l + ':' + e.detail)); window.__rep = 0; window.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.repeat) window.__rep += 1; }, true); });
+    const tabTo = async (label) => { await page.mouse.click(5, 5); await blur(page); await page.locator('body').focus(); for (let i = 0; i < 200; i += 1) { await page.keyboard.press('Tab'); const a = await page.evaluate(() => document.activeElement?.getAttribute('aria-label')); if (a === label) return i + 1; } return -1; };
+    const r = {};
+    r.tabsToPlay = await tabTo('Play'); const a0 = await st(page); const d0 = await ax(page, cdp);
+    await page.keyboard.press('Space'); await sleep(700); const a1 = await st(page); const d1 = await ax(page, cdp);
+    r.spaceOnPlay = { before: [a0.playing, d0.play.desc], after: [a1.playing, d1.play.desc, a1.rms], active: a1.active };
+    r.tabsToStop = await tabTo('Stop'); const b0 = await st(page);
+    await page.keyboard.press('Space'); await sleep(700); const b1 = await st(page); const db1 = await ax(page, cdp);
+    r.spaceOnStop = { before: b0.playing, after: [b1.playing, db1.stop.desc, db1.play.desc], active: b1.active };
+    r.clicksFromSpace = await page.evaluate(() => window.__clicks.slice());
+    await page.getByRole('button', { name: 'Play', exact: true }).click(); await sleep(700);
+    await page.getByRole('button', { name: 'Stop', exact: true }).focus(); await sleep(100);
+    const h0 = await st(page);
+    const ev = { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' };
+    const c0 = await page.evaluate(() => window.__clicks.length);
+    await cdp.send('Input.dispatchKeyEvent', ev); await sleep(250); const h1 = await st(page);
+    for (let i = 0; i < 20; i += 1) { await cdp.send('Input.dispatchKeyEvent', { ...ev, autoRepeat: true }); await sleep(40); }
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    await sleep(500); const h2 = await st(page); const dh = await ax(page, cdp);
+    r.holdEnterStop = { h0: [h0.playing, h0.statusN], h1: [h1.playing, h1.ph, h1.statusN], h2: [h2.playing, h2.ph, h2.statusN, h2.rms], desc: dh.stop.desc, clicksDuringHold: (await page.evaluate(() => window.__clicks.length)) - c0, repeats: await page.evaluate(() => window.__rep) };
+    r.errors = errors; await ctx.close();
+    r.checks = {
+      spacePlay: r.tabsToPlay > 0 && !a0.playing && d0.play.desc === 'Stopped' && a1.playing && d1.play.desc === 'Playing' && d1.stop.desc === 'Playing' && a1.rms > 0.001 && /Play/.test(a1.active),
+      spaceStop: r.tabsToStop > 0 && b0.playing && !b1.playing && db1.stop.desc === 'Stopped' && db1.play.desc === 'Stopped',
+      noNativeClickFromSpace: r.clicksFromSpace.length === 0,
+      holdEnterOneStop: h0.playing && !h1.playing && !h2.playing && h2.ph === h1.ph && h2.statusN === h1.statusN && r.holdEnterStop.clicksDuringHold === 1 && dh.stop.desc === 'Stopped' && r.holdEnterStop.repeats >= 20,
+      errors: errors.length === 0,
+    };
+    r.pass = Object.values(r.checks).every(Boolean); return r;
+  },
+  async focus(browser, vp, k) {
+    const { ctx, page, errors } = await open(browser, vp, { pulse: true, zoom: false });
+    await toolbarOf(page);
+    await page.locator('body').focus(); await page.evaluate(() => document.activeElement?.blur());
+    const seq = []; for (let i = 0; i < 160; i += 1) { await page.keyboard.press('Tab'); const a = await page.evaluate(() => { const e = document.activeElement; if (!e || e === document.body) return 'BODY'; const t = e.closest('[data-c257-toolbar]') ? 'T:' : ''; return t + (e.getAttribute('data-testid') ? e.getAttribute('data-testid') + '|' : '') + (e.getAttribute('aria-label') || e.getAttribute('title') || e.textContent.trim() || e.tagName).slice(0, 40); }); if (seq.length && a === seq[0]) break; seq.push(a); }
+    const r = { seqLen: seq.length, toolbar: seq.filter((x) => x.startsWith('T:')), stateFocused: seq.some((x) => x.includes('arrangement-playback-state')) };
+    const ring = () => page.evaluate(() => { const e = document.activeElement; const cs = getComputedStyle(e); return { who: e.getAttribute('aria-label'), fv: e.matches(':focus-visible'), outline: `${cs.outlineStyle} ${cs.outlineWidth} ${cs.outlineColor} off ${cs.outlineOffset}` }; });
+    const stop = page.getByRole('button', { name: 'Stop', exact: true });
+    await page.mouse.click(5, 5); await stop.click(); await page.mouse.move(2, 2); await sleep(300); r.mouseRing = await ring();
+    const clip = async () => { const b = await stop.boundingBox(); return { x: b.x - 40, y: b.y - 12, width: 112, height: 56 }; };
+    await page.screenshot({ path: path.join(outDir, `focus-mouse-${k}.png`), clip: await clip() });
+    await page.mouse.click(5, 5); await blur(page);
+    await page.getByRole('button', { name: 'Play', exact: true }).focus(); await page.keyboard.press('Shift+Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await sleep(300); r.kbRing = await ring();
+    await page.screenshot({ path: path.join(outDir, `focus-kb-${k}.png`), clip: await clip() });
+    await page.mouse.click(5, 5); await page.getByRole('button', { name: 'Play', exact: true }).click(); await sleep(600); await stop.dblclick(); await sleep(400);
+    r.afterDbl = await page.evaluate(() => [document.activeElement?.getAttribute('aria-label'), document.activeElement?.matches(':focus-visible')]);
+    r.errors = errors; await ctx.close();
+    const lab = r.toolbar.map((x) => x.replace(/^T:/, '').split('|').pop());
+    r.labels = lab;
+    r.checks = {
+      toolbarOrder: lab.length === REF_TOOLBAR.length && REF_TOOLBAR.every((p, i) => lab[i].startsWith(p)),
+      seqLen: r.seqLen === REF256[k].seqLen,
+      stateNotTabStop: !r.stateFocused,
+      ringKbOnly: r.kbRing.who === 'Stop' && r.kbRing.fv && !/none/.test(r.kbRing.outline) && r.mouseRing.who === 'Stop' && !r.mouseRing.fv,
+      dblFocus: r.afterDbl[0] === 'Stop',
+      errors: errors.length === 0,
+    };
+    r.pass = Object.values(r.checks).every(Boolean); return r;
+  },
+  async layout(browser, vp, k) {
+    const { ctx, page, errors } = await open(browser, vp, { pulse: true, zoom: false });
+    await toolbarOf(page); await sleep(300);
+    const g = await geometry(page); await shot(page, 'layout', k);
+    await page.getByRole('button', { name: 'Play', exact: true }).click(); await page.mouse.move(2, 2); await sleep(700);
+    const gp = await geometry(page); await shot(page, 'layout-playing', k);
+    await page.getByRole('button', { name: 'Stop', exact: true }).click(); await sleep(300);
+    const r = { g, playing: { toolbar: gp.toolbar, centre: gp.rects?.centre }, errors }; await ctx.close();
+    const ref = REF256[k];
+    r.checks = {
+      height: g.toolbar.h === ref.h && gp.toolbar.h === ref.h,
+      centred: Math.abs(g.centreOffset) <= 24,
+      tops: ['library', 'dock', 'ruler', 'firstLane'].every((t) => g.tops[t] != null && Math.abs(g.tops[t] - ref.tops[t]) <= 1),
+      noOverlap: g.overlaps.every((x) => !x),
+      noOverflow: g.rootOverflow === 0 && Object.values(g.groupOverflow).every((x) => x === 0),
+      centreStableWhilePlaying: JSON.stringify(g.rects.centre) === JSON.stringify(gp.rects.centre),
+      order: JSON.stringify(g.childOrder.centre.filter((x) => x !== 'SEP' && x !== '')) === JSON.stringify(['Follow', 'CLOCK', 'Play', 'Stop', 'Back to start', 'Loop']),
+      errors: errors.length === 0,
+    };
+    r.centreChildren = g.childOrder.centre;
+    r.pass = Object.values(r.checks).every(Boolean); return r;
+  },
+  async budget(browser, vp, k) {
+    const { ctx, page, errors } = await open(browser, vp, { pulse: false });
+    const inv = () => page.evaluate(() => {
+      const rows = [];
+      const vis = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return false; } const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth; };
+      for (const el of document.body.querySelectorAll('*')) {
+        if (['SCRIPT', 'STYLE', 'svg', 'path', 'OPTION'].includes(el.tagName)) continue;
+        const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s+/g, ' ').trim();
+        if (!own || el.closest('.sr-only') || !vis(el)) continue;
+        if (el.closest('[data-testid="arrangement-timeline-scroller"]')) continue;
+        if (el.closest('[data-testid="arrangement-status"]')) continue;
+        rows.push(own.slice(0, 140));
+      }
+      return rows;
+    });
+    const empty = await inv(); await page.screenshot({ path: path.join(outDir, `budget-empty-${k}.png`) });
+    await addPulse(page);
+    const demo = await inv(); await page.screenshot({ path: path.join(outDir, `budget-demo-${k}.png`) });
+    await page.getByRole('button', { name: 'Play', exact: true }).click(); await page.mouse.move(2, 2); await sleep(600);
+    const playingLines = await inv(); await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    const r = { counts: { empty: empty.length, demo: demo.length, demoPlaying: playingLines.length }, stateWordVisible: [...empty, ...demo, ...playingLines].some((x) => x === 'Playing' || x === 'Stopped'), errors };
+    await ctx.close();
+    r.pass = r.counts.empty === REF256[k].budget.empty && r.counts.demo === REF256[k].budget.demo && !r.stateWordVisible && errors.length === 0;
+    return r;
+  },

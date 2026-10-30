@@ -1,0 +1,32 @@
+  async smoke(browser, vp, k) {
+    const { ctx, page, errors } = await open(browser, vp, { pulse: true, zoom: false });
+    const r = {}; r.s0 = await st(page);
+    await key(page, 'Space', 1200); r.playing = await st(page);
+    await key(page, 'Space', 400);
+    await page.getByRole('button', { name: 'Export', exact: true }).first().click();
+    const dlg = page.getByRole('dialog'); await dlg.waitFor();
+    const dlP = page.waitForEvent('download', { timeout: 120000 });
+    await dlg.getByRole('button', { name: 'Export WAV', exact: true }).click();
+    const dl = await dlP; const file = path.join(outDir, `smoke-${k}.wav`); await dl.saveAs(file);
+    r.wav = wavInfo(fs.readFileSync(file)); fs.unlinkSync(file);
+    r.errors = errors;
+    r.pass = r.playing.playing && r.playing.ph > r.s0.ph && r.playing.rms > 0.001 && r.wav.sha256 === SHA && r.wav.nan === 0 && Math.abs(r.wav.seconds - 16) < 0.001 && errors.length === 0;
+    await ctx.close(); return r;
+  },
+  async auth(browser, vp, k) {
+    const ctx = await browser.newContext({ viewport: vp }); const page = await ctx.newPage(); const r = {};
+    const tokenResponses = []; page.on('response', (res) => { if (res.url().includes('/api/studio-token')) tokenResponses.push(res.status()); });
+    r.cookies0 = (await ctx.cookies()).length;
+    await page.goto(`${BASE}/studio-lab`, { waitUntil: 'load' }); await page.waitForSelector('[data-testid="arrangement-ruler"]', { timeout: 150000 });
+    r.labWorkspace = await page.locator('[data-testid="arrangement-timeline-scroller"]').count();
+    r.labAuthUser = await page.evaluate(() => localStorage.getItem('auth_user'));
+    await page.goto(`${BASE}/studio/middle-east`, { waitUntil: 'load' }); await sleep(3000);
+    r.guard = await page.evaluate(() => ({ signIn: /Sign in required/i.test(document.body.innerText), audioSrc: document.querySelectorAll('audio[src]').length, workspace: !!document.querySelector('[data-testid=arrangement-ruler]') || !!document.querySelector('[data-testid=arrangement-timeline-scroller]') }));
+    await shot(page, 'auth-guard', k);
+    const api = `${BASE}/api/studio-token?product=middle-east&file=stem1.wav`;
+    const a = await ctx.request.get(api, { failOnStatusCode: false }); r.tokenNoHeader = { status: a.status(), body: (await a.text()).slice(0, 160) };
+    const b = await ctx.request.get(api, { failOnStatusCode: false, headers: { Authorization: 'Bearer fake.invalid.token' } }); r.tokenFake = { status: b.status(), body: (await b.text()).slice(0, 160) };
+    r.pageTokenResponses = tokenResponses;
+    r.pass = r.labWorkspace === 1 && r.labAuthUser === null && r.guard.signIn && r.guard.audioSrc === 0 && !r.guard.workspace && r.tokenNoHeader.status !== 200 && r.tokenFake.status !== 200 && !tokenResponses.includes(200);
+    await ctx.close(); return r;
+  },

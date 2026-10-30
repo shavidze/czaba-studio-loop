@@ -1,0 +1,45 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/transport-centre-ui.test.tsx [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 4186[2mms[22m[39m
+     [33m[2m✓[22m[39m TC1 the three groups are edit, centre and view in DOM order, with the clock between Follow and Play [33m 381[2mms[22m[39m
+     [32m✓[39m TC2 Play while stopped plays from the insert marker; Play while playing neither stops nor restarts[32m 170[2mms[22m[39m
+     [33m[2m✓[22m[39m TC3 Stop while playing stops at the stop point and keeps the insert marker; Space then plays from it [33m 314[2mms[22m[39m
+     [32m✓[39m TC4 a single Stop click while stopped changes nothing[32m 268[2mms[22m[39m
+     [33m[2m✓[22m[39m TC5 a Stop double-click returns marker and playhead to 0, stopped and while playing, never restarting [33m 518[2mms[22m[39m
+     [33m[2m✓[22m[39m TC6 Play and Stop keep constant names, titles and Space shortcuts; no Pause button exists [33m 384[2mms[22m[39m
+     [32m✓[39m TC7 Space on a focused Play or Stop toggles once per press and ignores key repeat[32m 185[2mms[22m[39m
+     [32m✓[39m TC8 Enter on Stop while playing stops once; held Enter on Stop and on Play adds nothing[32m 253[2mms[22m[39m
+     [33m[2m✓[22m[39m TC9 focus stays on Stop after its double-click, and the Undo → Redo handoff still works [33m 363[2mms[22m[39m
+     [33m[2m✓[22m[39m TC10 Play and Stop share a Playing or Stopped description that follows every toggle [33m 1305[2mms[22m[39m
+[31m     [31m×[31m TC11 the playback state element is one hidden, non-live, unfocusable node in the centre group[39m[32m 43[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/transport-centre-ui.test.tsx[2m > [22mSABA-B-9 stage 1 centre transport, Stop and an honest Play (D-29z481)[2m > [22mTC11 the playback state element is one hidden, non-live, unfocusable node in the centre group
+[31m[1mAssertionError[22m: expected null to be '' // Object.is equality[39m
+
+[32m- Expected:[39m 
+""
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/transport-centre-ui.test.tsx:[2m446:44[22m[39m
+    [90m444| [39m      [35mconst[39m state [33m=[39m view[33m.[39m[34mgetByTestId[39m([32m'arrangement-playback-state'[39m)[33m;[39m
+    [90m445| [39m      expect(view.getAllByTestId('arrangement-playback-state')).toHave…
+    [90m446| [39m      [34mexpect[39m(state[33m.[39m[34mgetAttribute[39m([32m'hidden'[39m))[33m.[39m[34mtoBe[39m([32m''[39m)[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m447| [39m      expect(view.getByTestId('arrangement-transport-centre').contains…
+    [90m448| [39m      [34mexpect[39m(state[33m.[39m[34mhasAttribute[39m([32m'tabindex'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m10 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 23:52:17
+[2m   Duration [22m 5.87s[2m (transform 816ms, setup 0ms, import 1.19s, tests 4.19s, environment 374ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx,title=app/lib/arrangement/__tests__/transport-centre-ui.test.tsx > SABA-B-9 stage 1 centre transport%2C Stop and an honest Play (D-29z481) > TC11 the playback state element is one hidden%2C non-live%2C unfocusable node in the centre group,line=446,column=44::AssertionError: expected null to be '' // Object.is equality%0A%0A- Expected: %0A""%0A%0A+ Received: %0Anull%0A%0A ❯ app/lib/arrangement/__tests__/transport-centre-ui.test.tsx:446:44%0A%0A

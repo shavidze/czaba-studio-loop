@@ -1,0 +1,230 @@
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/components/arrangement/ArrangementTransport.tsx	2026-10-29 23:38:20.432530560 +0000
++++ app/components/arrangement/ArrangementTransport.tsx	2026-10-29 23:52:23.710966436 +0000
+@@ -9,7 +9,7 @@
+   Square,
+   Undo2,
+ } from 'lucide-react';
+-import { type KeyboardEvent, useCallback, useRef } from 'react';
++import { type KeyboardEvent, useCallback, useId, useRef } from 'react';
+ import {
+   formatArrangementTime,
+   useArrangement,
+@@ -92,6 +92,7 @@
+       ? studioEditStrings.deleteRangeAllTracksHint
+       : studioEditStrings.deleteRangeHint
+     : null;
++  const playbackStateId = useId();
+   const undoButtonRef = useRef<HTMLButtonElement>(null);
+   const redoButtonRef = useRef<HTMLButtonElement>(null);
+   const fitButtonRef = useRef<HTMLButtonElement>(null);
+@@ -241,6 +242,7 @@
+           }}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           aria-label={studioPlaybackStrings.playLabel}
++          aria-describedby={playbackStateId}
+           title={studioPlaybackStrings.playTitle}
+           aria-keyshortcuts={studioShortcutAria('play-stop')}
+           data-playing={isPlaying ? 'true' : 'false'}
+@@ -264,12 +266,18 @@
+           onDoubleClick={returnToStart}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           aria-label={studioPlaybackStrings.stopLabel}
++          aria-describedby={playbackStateId}
+           title={studioPlaybackStrings.stopTitle}
+           aria-keyshortcuts={studioShortcutAria('play-stop')}
+           className={cn(toolButtonClass, 'w-8 justify-center px-0')}
+         >
+           <Square className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+         </button>
++        <span id={playbackStateId} hidden data-testid="arrangement-playback-state">
++          {isPlaying
++            ? studioPlaybackStrings.playbackStatePlaying
++            : studioPlaybackStrings.playbackStateStopped}
++        </span>
+         <button
+           type="button"
+           onClick={returnToStart}
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/strings.ts	2026-10-29 23:38:20.432704001 +0000
++++ app/lib/arrangement/strings.ts	2026-10-29 23:41:40.387517143 +0000
+@@ -224,6 +224,8 @@
+   stopLabel: 'Stop',
+   playTitle: studioShortcutTitle('Play', 'play-stop'),
+   stopTitle: studioShortcutTitle('Stop', 'play-stop'),
++  playbackStatePlaying: 'Playing',
++  playbackStateStopped: 'Stopped',
+   projectEndPrefix: '/ end',
+   playPastEnd: ({
+     subject,
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-29 23:38:20.432704001 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-29 23:41:41.992538277 +0000
+@@ -668,6 +668,8 @@
+     stopLabel: 'Stop',
+     playTitle: 'Play (Space)',
+     stopTitle: 'Stop (Space)',
++    playbackStatePlaying: 'Playing',
++    playbackStateStopped: 'Stopped',
+     projectEndPrefix: '/ end',
+     startPointInsertMarker: 'Insert marker',
+     startPointSelection: 'Time selection start',
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx	2026-10-29 23:38:20.432704001 +0000
++++ app/lib/arrangement/__tests__/transport-centre-ui.test.tsx	2026-10-29 23:51:58.715712733 +0000
+@@ -404,5 +404,68 @@
+       expect(undo).toHaveProperty('disabled', true);
+       expect(document.activeElement).toBe(redo);
+     });
++
++    it('TC10 Play and Stop share a Playing or Stopped description that follows every toggle', async () => {
++      const mounted = await mountCentreWorkspace();
++      const { view } = mounted;
++      const expectDescription = (description: 'Playing' | 'Stopped') => {
++        expect(view.getByRole('button', { name: 'Play', description })).toBe(mounted.play());
++        expect(view.getByRole('button', { name: 'Stop', description })).toBe(mounted.stop());
++        expect(mounted.play().title).toBe('Play (Space)');
++        expect(mounted.stop().title).toBe('Stop (Space)');
++      };
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expectDescription('Stopped');
++      fireEvent.click(mounted.play());
++      expect(live(mounted.api).isPlaying).toBe(true);
++      expectDescription('Playing');
++      fireEvent.click(mounted.play());
++      expect(live(mounted.api).isPlaying).toBe(true);
++      expectDescription('Playing');
++      fireEvent.click(mounted.stop());
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expectDescription('Stopped');
++      fireEvent.keyDown(window, SPACE);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      expectDescription('Playing');
++      fireEvent.keyDown(window, SPACE);
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expectDescription('Stopped');
++      fireEvent.click(mounted.play());
++      advance(0.5);
++      expectDescription('Playing');
++      doubleClickStop(mounted.stop());
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expectDescription('Stopped');
++    });
++
++    it('TC11 the playback state element is one hidden, non-live, unfocusable node in the centre group', async () => {
++      const { view, play, stop } = await mountCentreWorkspace();
++      const state = view.getByTestId('arrangement-playback-state');
++      expect(view.getAllByTestId('arrangement-playback-state')).toHaveLength(1);
++      expect(state.getAttribute('hidden')).toBe('');
++      expect(view.getByTestId('arrangement-transport-centre').contains(state)).toBe(true);
++      expect(state.hasAttribute('tabindex')).toBe(false);
++      expect(state.hasAttribute('aria-live')).toBe(false);
++      expect(state.hasAttribute('role')).toBe(false);
++      expect(state.id).not.toBe('');
++      expect(play().getAttribute('aria-describedby')).toBe(state.id);
++      expect(stop().getAttribute('aria-describedby')).toBe(state.id);
++      const referencesState = (element: Element, attribute: string) =>
++        (element.getAttribute(attribute) ?? '').split(/\s+/).includes(state.id);
++      const toolbar = view.getByTestId('arrangement-transport');
++      expect(
++        Array.from(toolbar.querySelectorAll('[aria-describedby]')).filter((element) =>
++          referencesState(element, 'aria-describedby'),
++        ),
++      ).toEqual([play(), stop()]);
++      expect(
++        Array.from(document.querySelectorAll('[aria-describedby], [aria-labelledby]')).filter(
++          (element) =>
++            referencesState(element, 'aria-describedby') ||
++            referencesState(element, 'aria-labelledby'),
++        ),
++      ).toEqual([play(), stop()]);
++    });
+   },
+ );
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/__tests__/render-budget.test.tsx	2026-10-29 23:38:20.432704001 +0000
++++ app/lib/arrangement/__tests__/render-budget.test.tsx	2026-10-29 23:41:55.269714347 +0000
+@@ -345,7 +345,9 @@
+         ArrangementLibraryOptionInner: 0,
+         ArrangementRulerTicksInner: 0,
+       });
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+       fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     },
+   );
+ 
+@@ -368,7 +370,9 @@
+       ).toHaveLength(1);
+       expect(view.getByTestId('arrangement-insert-marker')).toBe(line);
+       expect(line.isConnected).toBe(true);
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+       fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     },
+   );
+ 
+@@ -469,7 +473,9 @@
+       ArrangementLibraryOptionInner: 0,
+       ArrangementRulerTicksInner: 0,
+     });
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+     fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+   }, 15000);
+ 
+   it('shows the seek position immediately when stopped and after a zoom change', async () => {
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-29 23:38:20.432622889 +0000
++++ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-29 23:41:43.170553933 +0000
+@@ -294,7 +294,7 @@
+     expect(gridded.container.querySelectorAll('[data-grid-lines="visible"]')).toHaveLength(2);
+   });
+ 
+-  it('GS14 keeps the transport toolbar unchanged and without a Snap control', async () => {
++  it('GS14 lists the regrouped transport toolbar controls in order and has no Snap control', async () => {
+     const { view } = await mountGridWorkspace();
+     const toolbar = view.getByTestId('arrangement-transport');
+     expect(toolbar.contains(view.getByRole('button', { name: 'Play' }))).toBe(true);
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md	2026-10-29 23:38:20.433018743 +0000
++++ docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md	2026-10-29 23:54:57.415078538 +0000
+@@ -1,7 +1,7 @@
+ # SABA-B-9 ეტაპი 1 — ცენტრალური transport ჯგუფი, Stop ღილაკი და Play-ის მუდმივი სახელი
+ 
+ **თარიღი:** 2026-10-29
+-**სტატუსი:** In Progress (stage 1 of 2; C round 256 PASS)
++**სტატუსი:** In Progress (stage 1 of 2; C round 257 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -94,6 +94,7 @@
+ - ტესტების კოლიზიები C1–C9: `transport-surface-ui`, `render-budget`, `master-ui`,
+   `bars-ruler-ui`, `strings`, `grid-snap-ui`, `mode-toggle-colour-ui`, `navigation-strings-ui`,
+   `shortcut-sheet-ui`
++- რაუნდი 257: `render-budget` — Stop-ის სამ ბოლო click-ზე `data-playing` (C-R256-02); GS14 — სათაური
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+@@ -111,6 +112,14 @@
+   px-მდე ერთი მწკრივი იყო (49 px). **გადაწყვეტა:** ეს ცენტრის გადაწყვეტილებისა და CALM-ის
+   წესის შედეგია (D-29z483) და SABA-Q-9-TRANSPORT (c)-შია. 1440-სა და 1280-ზე სიმაღლეები HEAD-ს
+   ემთხვევა.
++- **პრობლემა (C-R256-01):** Play-ის სახელი მუდმივად `Play` გახდა, ამიტომ screen reader-ი ვეღარ
++  იგებდა, მიდის თუ არა დაკვრა. HEAD-ში ამის ერთადერთი სიგნალი `Pause` სახელი იყო, ახლა კი მხოლოდ
++  brass ფერი დარჩა (WCAG 1.3.1 / 4.1.2). **გადაწყვეტა (D-29z492):** ცენტრალურ ჯგუფში დაემატა
++  ერთი `hidden` span (`data-testid="arrangement-playback-state"`, `useId`-ის id). მისი ტექსტია
++  `Playing` ან `Stopped`. Play და Stop მას `aria-describedby`-ით მიუთითებენ. სახელები, title-ები
++  და `aria-keyshortcuts` უცვლელია. span live region არ არის, ამიტომ ცვლილება არ ცხადდება (DV1).
++  `aria-pressed` უარყოფილია, რადგან „pressed“ toggle-ს ნიშნავს და მეორე დაჭერა მას აუქმებს.
++  Play-ის მეორე click კი no-op-ია (R5), ამიტომ `aria-pressed` ქცევას არასწორად აღწერდა (DV3).
+ 
+ ## ტესტირება
+ 
+@@ -127,6 +136,13 @@
+   1408 → 49. ცენტრის გადახრა 0 px-ია, overflow და გადაფარვა არ არის, საათი ერთ ხაზზეა.
+   კონტრასტი: Play-ის glyph გაჩერებისას 15.62:1, დაკვრისას 8.32:1 (hover 7.24:1), Stop-ის
+   glyph 13.24:1.
++- რაუნდი 257: TC10 ამოწმებს Play-ისა და Stop-ის საერთო description-ს (`Stopped` → Play-ზე
++  `Playing`, მეორე Play-ზე `Playing`, Stop-ზე `Stopped`, Space-ით ორივე მიმართულებით,
++  double-click Stop დაკვრისას), ასევე უცვლელ title-ებს. TC11 ამოწმებს state ელემენტს: ის ერთია,
++  `hidden`-ია, ცენტრალურ ჯგუფშია, არ აქვს `tabindex`, `aria-live` და `role`, და მას მხოლოდ
++  Play და Stop მიუთითებენ. მუტანტები: M6 (Play-ს `aria-describedby` არ აქვს) → TC10/TC11, M7
++  (ტექსტი ყოველთვის `Stopped`) → TC10, M8 (`hidden` არ არის) → TC11, M9 (Stop არაფერს აკეთებს)
++  → `render-budget`-ის ხუთი ტესტი, მათ შორის Stop-ის სამივე ბოლო click-ის ტესტი.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 

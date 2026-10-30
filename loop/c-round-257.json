@@ -1,0 +1,64 @@
+{
+  "round": 257,
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-29T23:55:15.7262727Z",
+    "round": 257,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "C-SCOPE-257",
+    "C-UNIT-257",
+    "C-COLLISION-257",
+    "C-A11Y-257",
+    "C-ONSTATE-257",
+    "C-FOCUS-257",
+    "C-KEYS-257",
+    "C-LAYOUT-257",
+    "C-BUDGET-257",
+    "C-LESSON-257",
+    "AN-REVIEW-257",
+    "LAB-SMOKE-257",
+    "Auth"
+  ],
+  "carriedByDiffIdentity": [
+    "C-STOP-256",
+    "C-STATUS-256",
+    "C-SHEET-256",
+    "C-REF-256 (R1-R6, R8-R10)"
+  ],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "lint",
+    "build",
+    "verify",
+    "e2e smoke"
+  ],
+  "blocked": [
+    "Purchased origin /studio/$productId: backend unavailable in cloud"
+  ],
+  "closes": [
+    "C-R256-01",
+    "C-R256-02"
+  ],
+  "info": [
+    "C-I257-01: task C-FOCUS-257 says the full Tab sequence has 80 stops; round-256 evidence is 80 at 1440x900 and 75 at 1280x720. C compared per viewport against the round-256 numbers (80/75, both equal). Task text only.",
+    "C-I257-02: Playwright ariaSnapshot does not print accessible descriptions; the description evidence is the CDP Accessibility.getPartialAXTree column. ariaSnapshot confirms the names stay Play/Stop and no Pause button exists while playing.",
+    "C-I257-03 (forwarded from A's reviewer, not granted this round): doc 193 l.132 'six tests' vs the new bullet's 'five' M9 count; doc 193 approach bullet l.39-43 does not mention the new description. B to rule at stage-1 close.",
+    "C-I257-04: computed focus outline on Stop reads 'solid 1px color(srgb 0.788 0.643 0.416 / 0.8) off 2px' in Chromium 143 (policy text says 1.5px); identical to round-256 c256.json focus rows at both viewports, so no regression; observation only.",
+    "C-I257-05: /api/studio-token returns 401 (no header) and 500 (fake bearer), the same as round 256; the 500 is expected with the backend absent; never 200."
+  ],
+  "ableton": {
+    "R7-SR": "unconfirmed (no Live source on how Play's on-state is exposed to a screen reader; B's search recorded)",
+    "R-GROUP": "confirmed text [ACC] 41.4.1.1; DOM order edit -> centre -> view unchanged; role=group not added (backlog D-29z496)",
+    "DV1": "deliberate deviation listed: no live announcement on start/stop; measured status log unchanged on Play (0 writes)",
+    "DV2": "deliberate deviation listed: description is the state, key stays via aria-keyshortcuts=Space and title",
+    "DV3": "deliberate deviation listed: aria-pressed rejected"
+  },
+  "evidence": "tmp/studio-real-loop/c-round-257/ (browser/c257.json, screenshots, unit.log, mutant-M6.log, mutant-M8.log, granted-diff.txt, scope-end.txt, c257.cjs)"
+}

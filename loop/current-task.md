@@ -1,69 +1,22 @@
-# Round 257: SABA-B-9 stage 1 fix-up — the playing state becomes programmatically determinable (C-R256-01), plus C-R256-02
+# CURRENT TASK — Round 258: REGRESSION round (phase 1 + T12 V1 + everything done since round 199). C-only browser sweep; A changes nothing
 
-This round finishes SABA-B-9 stage 1. C round 256 failed on one Medium only, and the cause was B's spec, not A's code.
-
-- **The ruling (D-29z492).** Play and Stop get one shared accessible description, "Playing" or "Stopped". It comes from a hidden state element inside the centre group, referenced by `aria-describedby`. Play's name stays `Play` (§2.3 of round 256 holds).
-- **The Low (D-29z494).** C-R256-02 is fixed in the same round. Three render-budget cleanup Stop clicks regain an explicit "still playing" check.
-- **The rest.** Every other round-256 row carries **by diff identity** (§3.3). C re-runs only the rows this change can affect.
-
-**Planned by:** B, at the round 256 → 257 planning, 2026-10-29 (≈ 23:20 UTC). **Decisions:** D-29z491…D-29z498.
-
-**Why this round (D-29z491):**
-- **C round 256:** FAIL. `browserVerified` and `realVerified` are both true. 16 rows PASS.
-  - The FAIL comes only from **C-R256-01** (Medium, an a11y regression this round caused). While playing, the build exposes `button "Play"` and `button "Stop"` with no state. HEAD exposed playing as the name `Pause`. The brass fill is now the only playing signal (WCAG 1.3.1 / 4.1.2, Level A).
-  - C states the cause is §2.3 of round 256: it removed the name signal and named no replacement. A's code-reviewer had already flagged this as M-2.
-- **Gate 256 was `skipped`** ("C taskStatus FAIL"). Nothing was published, so the baseline is still `a061d52` plus the unpublished round-256 diff.
-- **Policy:** "If C fails: a fix-up on the same grants" (`tasks/round-256.md` §7). L10: rule before re-dispatch.
-- **REGRESSION is not due.** `regression-last.json` = 2026-10-27, and this planning is on 2026-10-29, which is 2 days later. It falls due on or after 2026-10-30.
-  - A regression round checks the published HEAD, and the round-256 diff is not published. So REGRESSION is the first task after this fix-up publishes, if the date has come (D-29z497).
+Dispatcher: B · Implementer: A (no change, baseline report only) · Verifier: C · Planned 2026-10-30 from 00:10 UTC (`date -u`) · Decisions: **D-29z499 … D-29z506** (`backlog.json` → `decisions_log_b`, `rounds[258]`, `regression_rounds[2]`).
 
 **Read first:**
-- `lessons.md` in full. These lessons apply directly:
-  - L10: the ruling;
-  - L11/L12: STOP, and no class selectors;
-  - L23: the pre-check below;
-  - L26/L28: doc 193;
-  - L29: the new clause on removed accessible signals;
-  - L39: screen budget;
-  - L47/L50: focus.
-- `tasks/round-256.md` §2.3, §2.4 and §2.6, and `c-round-256.md` C-R256-01/02.
-- Primitives: `FORWARDREF_COMPONENT.md`, `TAILWIND_FIRST.md`, `AUDIO_ARCHITECTURE.md`, `GEORGIAN_DOCS.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `AGENT_DISCOVERABLE_CODE.md`.
+- `lessons.md` in full. These apply directly:
+  - L6: every scope addition is a named row.
+  - L29: every recipe below was run by B, or is cited from the C round that ran it.
+  - L38: perf runs alone.
+  - L48: the playback-start lead; wait for `Demo collection ready`.
+  - L25: the file chooser.
+- **The rules:** `docs/technical/studio-real-workspace/agent-workflow.md` (speed rules, "Regression round every 3 days", the 2026-10-23 bug gate and the cloud-runner section). They take precedence over older text.
+- **The template:** `tasks/round-199.md` §2–§10 and `c-round-199.md` (91 rows, PASS). **This task reuses round 199's row text by reference** and lists only what changed since then. Where this task and round 199 differ, this task wins.
+- **The previous task** is `tasks/round-257.md`, an exact copy of the round-257 `current-task.md` (`cmp` OK). B's reasoning is in `b-round-257.md`.
 
-## 0. Baseline and scope
-
-**Start state:**
-- **HEAD** = `a061d524d14af347119f06b239b77747c36362a0`, the gate 255 publication (`b-round-256/head-at-planning.txt`).
-- **`git status --short --untracked-files=all` lists exactly these 14 lines** (`b-round-256/git-status-at-planning.txt`), which is the round-256 diff:
-
-  ```
-   M app/components/arrangement/ArrangementTransport.tsx
-   M app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
-   M app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
-   M app/lib/arrangement/__tests__/master-ui.test.tsx
-   M app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
-   M app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
-   M app/lib/arrangement/__tests__/render-budget.test.tsx
-   M app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
-   M app/lib/arrangement/__tests__/strings.test.ts
-   M app/lib/arrangement/__tests__/transport-surface-ui.test.tsx
-   M app/lib/arrangement/shortcuts.ts
-   M app/lib/arrangement/strings.ts
-  ?? app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
-  ?? docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md
-  ```
-
-- **STOP (L11)** if HEAD differs, the status differs, or any hash check below fails. Exception: a root commit that touches only the 4 root files. Then re-hash those files and continue.
-
-**Hash checks** (run from `store/`; each gave rc 0 at planning):
-- **The round-256 diff is the one C verified.** All 14 files were last written between 22:29:59 and 22:55:09 UTC. C round 256 started at 22:55:47 (`c-round-256/checkpoint.txt` l.1).
-  - `git diff HEAD | sha256sum` = `7faaa6047d4bd4302a8fc2c44cca4a26d121a0224604b84ea69249f90b566fb0` (tracked files only; copy in `b-round-256/round256-full.diff`).
-- **Carried files, frozen at their round-256 content.** `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-256-r257-carried-sha256.txt` covers 7 files (`b-round-256-r257-carried.txt`):
-  - the `bars-ruler-ui`, `master-ui`, `mode-toggle-colour-ui`, `navigation-strings-ui`, `shortcut-sheet-ui` and `transport-surface-ui` tests;
-  - `shortcuts.ts`.
-
-  Their `git diff HEAD -- …` sha256 is `b261346f4808a255fbc95779369bb45f8b55a3d434f182276f1420bd4e516cba`, 285 lines (`b-round-256/round256-carried.diff`).
-- **Frozen tree.** `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-256-r257-tree-sha256.txt` covers **1,106** files: `git ls-files` (1,115) minus the 4 root files and the 5 tracked granted files. It includes the 7 carried files at their round-256 content.
-- **Protected files.** The 7 protected files are inside the frozen list, and each also gives `git diff --quiet HEAD` rc 0:
+## Baseline: HEAD `d732d26`, clean tree
+- `gates/gate-round-257.json` is `published`: commit `d732d2623fc16032153aa262c3e7d41fca4ed59a`, on both remotes (rounds 256 + 257).
+- At planning, `git rev-parse HEAD` = `d732d2623fc1…` and `git status --short --untracked-files=all` is empty.
+- The 7 protected files are unchanged at HEAD:
   - `app/routes/studio.$productId.tsx`
   - `app/routes/api.studio-token.ts`
   - `app/routes/account.downloads.tsx`
@@ -71,206 +24,248 @@ This round finishes SABA-B-9 stage 1. C round 256 failed on one Medium only, and
   - `app/lib/auth.ts`
   - `app/contexts/AuthContext.tsx`
   - `app/entry.server.tsx`
-- **Root files.** `b-round-256-r257-root-files-start-sha256.txt` covers `package.json`, `package-lock.json`, `vite.config.ts` and `vitest.config.ts`. No dependency is needed: `useId` is React's.
-- **Grant start state.** `b-round-256-r257-grants-start-sha256.txt` covers 7 files, with a copy in `b-round-256/r257-granted-start/`.
 
-### 0.1 Grants (`b-round-256-r257-grants.txt`, 7 paths)
-| # | Path | What may change |
+## 0. Why this round (D-29z499)
+- **Round 257 passed and is published.**
+  - C round 257: PASS, `browserVerified=true`, `realVerified=true`, 0 bugs. It closes C-R256-01 and C-R256-02.
+  - Gate 257 published `d732d26`.
+  - SABA-B-9 stage 1 is **done**.
+- **The regression is due.** `regression-last.json` = 2026-10-27 (round 199), and today is 2026-10-30, 3 days later. The speed rule makes the next round a REGRESSION round instead of new scope. Round 257 §7 fixed this in advance (D-29z497).
+- **Nothing outranks it.**
+  - No Critical, High or Medium finding is open with a cloud reproduction:
+    - SABA-B-7 is `awaiting_user`;
+    - A-R73-SAFARI-FLAG-FOCUS and GATE232-S2 are Tech Lead manual checks;
+    - R80-RECORDINGS-FIELD-BORDERS is backend-blocked.
+  - **The gate-257 reviewer's Suggestion 1** ("Medium: on narrow windows the toolbar's groups overlap") was reproduced by B in Chromium (`b-round-257/probe/narrow2.json`, `narrow-768.png`):
+    - the overlap starts at **864 px** (Delete × Zoom, 1 px) and reaches 48 px at 768;
+    - at 870, 900, 960, 1024, 1100 and 1280 there is no overlap.
+  - **B rules it Low (D-29z500).** The overlap appears only below the project's own desktop floor:
+    - `MobileBlocker` shows "Studio is Desktop-Only" below 1024 px (`app/components/ui/MobileWarning.tsx` l.103), but only on the purchased route `studio.$productId.tsx` (l.301), and it offers "continue anyway". **`/studio-lab` has no blocker at all**, so the 1024 px floor is the project's stated intent, not a guard on the lab;
+    - the two required viewports are 1280×720 and 1440×900;
+    - TL-Q-VIEWPORT (are widths below 1280 in scope?) is still open;
+    - the precedent is C-R41-01 at 1024×768 (Low, TL-Q-VIEWPORT).
+  - **Where it goes:**
+    - recorded as **GATE257-NARROW-TOOLBAR-OVERLAP** (Low, regression since round 256, `deferred_low_polish`);
+    - added to TL-Q-VIEWPORT and SABA-Q-9-TRANSPORT;
+    - flagged as a cheap candidate for SABA-B-9 stage 2, if that round grants `ArrangementTransport.tsx`.
+  - C records it once as observation RP-NARROW (§5), so C's own evidence exists too.
+- **A changes nothing.** A regression round checks the published HEAD, so A writes a baseline-only report (§1).
+- A Critical, High or Medium finding becomes round 259, a bounded fix-up (§7).
+
+## 1. A — no code or doc change
+- **Baseline check, from `store/`:**
+  - `git rev-parse HEAD` must be `d732d26…`;
+  - `git status --short --untracked-files=all` must be empty.
+- **If either differs:** write "STOP — baseline differs" at the top of `a-round-258.md` with the output, and change nothing.
+- **Do not edit any file in `store/`.** Run no vitest, typecheck, lint or code-reviewer, because there is no change.
+- **Report:** write `a-round-258.md` with:
+  - the start HEAD;
+  - the status output;
+  - "no change by design (REGRESSION round, D-29z499)".
+- **Forbidden:**
+  - everything in `global_forbidden_files` and `global_forbidden_actions`;
+  - the 7 protected files;
+  - commit, push, stash, checkout and deploy;
+  - dev-server restarts.
+
+## 2. C — scope, method and budget
+**Round 199 §2 applies unchanged, with these changes:**
+- **SOURCE-SCOPE**, at the start and at the end:
+  - HEAD = `d732d26`;
+  - `git status --short --untracked-files=all` is empty;
+  - the protected files are unchanged: `git diff --quiet HEAD -- <7 files>` gives rc 0.
+
+  A change by anyone is a SCOPE FAIL. Report who made it, if you can tell.
+- **Tooling base:**
+  - Use the newest per-round scripts:
+    - post-199 rows: the script of the round that the row cites (`c-round-N/*.cjs`, see §4b);
+    - phase-1 rows: `c-round-199/tools/` (`lib.cjs`, `rows1..10.cjs`, `rich.cjs`, `rk-lib.cjs`).
+  - Adapt them only for the intended changes listed in §3 ("adapted for round N"). Record each fix as **"lookup, not deviation"**.
+  - Copy what you use into `c-round-258/tools/`, and say which scripts you adapted.
+- **Changed UI facts since round 199.** B checked all of these at `d732d26` (`b-round-257/probe/recipes2.json`) unless another source is cited.
+  - **Transport:**
+    - separate **Play** and **Stop** buttons, and no `Pause` button;
+    - Play's `data-playing` is `true` while playing;
+    - Play and Stop share the description `Playing`/`Stopped` (C round 257).
+  - **Space and Home:**
+    - Space plays from the insert marker (`[data-insert-marker]`);
+    - a second Space stops, and Space again restarts at the marker;
+    - **Shift+Space** continues from the stop point;
+    - **Home** sends the marker and the playhead to 0.
+  - **Seconds ruler, while stopped:** a click sets the insert marker and the playhead to the click time, with no playback. B's probe: a click at 2 s gives `m = 2.000`, `ph = 2`, not playing.
+  - **Playhead handle, while stopped:** dragging it from 0 to 6 s gives `m = 6.000` and `ph = 6`.
+  - **A fresh `/studio-lab`:**
+    - 0 clips and an empty BPM field;
+    - Snap **off**, and an adaptive grid labelled `1 s` at 40 px/s;
+    - the status `Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.`
+  - **Library Enter** adds the selected row to the active track at the insert marker. The status is `“<title>” added to the <Track> track at 00:00.000.`
+  - **Space on an empty project** writes `Nothing to play — add a clip from the library first.` and does not play.
+  - **MP3 export** runs through `mediabunny` (PERF-16). There is no ffmpeg CDN path any more, so an MP3 encode failure is a finding, not "inconclusive (environment)".
+  - **CALM:**
+    - no permanent shortcut line;
+    - `?` and the footer `Shortcuts ?` open the sheet;
+    - the BPM, Loop and dock texts moved into titles.
+- **The ledger rule for RV-EN** (OBS-R199-LEDGER ruled, D-29z501):
+  - The demo sound titles in `app/data/studio-lab-demo.ts` (`საჯარო preview`, `ღამის პულსი` and the stem names) are an allowed ledger. They are excluded from RV-EN, together with user-typed text.
+  - Every other Georgian character in visible text or an accessible name is a hit.
+- **Store rows** need the mock API:
+  - Start `mock-api/server.mjs` from the loop folder on 127.0.0.1:5199 if it is not running. It was not running at planning (`curl` returned code 000).
+  - Stop only the PID you started.
+- **Order.** After a time-limit stop, resume from `c-round-258/progress.json`.
+  1. SOURCE-SCOPE start;
+  2. §4b (the post-199 rows, newest risk first);
+  3. §3;
+  4. §4;
+  5. §4.S;
+  6. §5;
+  7. RR-PERF (alone, L38);
+  8. RG-SMOKE;
+  9. G258-3;
+  10. SOURCE-SCOPE end.
+
+  **Write `c-round-258.json` and `c-round-258.md` after every row.**
+- **Budget per row** (as in round 199):
+  - up to 2 replacement attempts, for environment-invalid runs only;
+  - thresholds are not relaxed;
+  - a row that fails on a valid setup is a finding.
+- **Network and console (PX-NET / REG-HYD), every session:**
+  - as in round 199 §2;
+  - the known cloud noise is `Failed to load cart`, `ERR_CONNECTION_REFUSED` and `ERR_TUNNEL_CONNECTION_FAILED`;
+  - `/api/studio-token` 401/500 without the mock is expected.
+- **Ableton:** no new behaviour is introduced, so no new parity claim is made.
+  - C judges only the CZABA requirement.
+  - Parity statuses stay as recorded in the original rounds and in `user-review/ableton-review.md`.
+
+## 3. C — Studio phase 1 + T12 V1 rows (round 199 §3, adapted)
+Run every row of `tasks/round-199.md` §3 (**RG-01 … RG-24, RG-T1 … RG-T4B**) at both viewports (RG-03 at 1440 only). Use the round-199 action and expected text, **except for these adaptations**:
+
+| Row | Adapted for | Action and expected (replaces round 199's text where they differ) |
 |---|---|---|
-| 1 | `app/components/arrangement/ArrangementTransport.tsx` | §2.1 only: the `useId` import, one id, `aria-describedby` on Play and on Stop, and one hidden state element. Nothing else: the classes, handlers, names, titles, `aria-keyshortcuts`, `data-playing` and the grid stay byte-identical. |
-| 2 | `app/lib/arrangement/strings.ts` | In `studioPlaybackStrings` only, add two keys right after `stopTitle`: `playbackStatePlaying: 'Playing'` and `playbackStateStopped: 'Stopped'`. No other key changes. |
-| 3 | `app/lib/arrangement/__tests__/strings.test.ts` | Collision C10 (B's scratch: ST10 red on the key list). Add the two keys with their exact literals to ST10's expected `studioPlaybackStrings` literals. Nothing else. |
-| 4 | `app/lib/arrangement/__tests__/transport-centre-ui.test.tsx` (untracked) | Add TC10 and TC11 (§2.2). TC1–TC9 keep every assertion. |
-| 5 | `app/lib/arrangement/__tests__/render-budget.test.tsx` | C-R256-02 only, at the three trailing cleanup Stop clicks (now l.348, l.371 and l.472). Before each one, add `expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true')`. After each one, add the matching `.toBe('false')`. This is the l.411 pattern. Nothing else. |
-| 6 | `app/lib/arrangement/__tests__/grid-snap-ui.test.tsx` | GS14's title only (C info: stale). Replace "keeps the transport toolbar unchanged and without a Snap control" with a title that names what it asserts, for example "GS14 lists the regrouped transport toolbar controls in order and has no Snap control". The body is unchanged. |
-| 7 | `docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md` (untracked) | <ul><li>**l.4** becomes exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 257 PASS)` (L28 re-dispatch).</li><li>**One bullet** in `## პრობლემები და გადაწყვეტები`, in Problem → Solution form. It names C-R256-01, D-29z492 and the hidden-description solution, and why `aria-pressed` was rejected.</li><li>**One bullet** in `## ტესტირება` that names TC10, TC11 and M6–M9.</li><li>**Optionally, one line** in `## შეცვლილი ფაილები` for the render-budget and GS14 edits.</li><li>The 7 TEMPLATE headings stay in order. Georgian, with English technical terms.</li></ul> |
+| RG-01 | 10a (round 250) | <ul><li>"Demo music on Music at 0": Library row + Enter at insert marker 0.</li><li>"Split at 4": click the clip body at 4 (this moves the insert marker), then Ctrl+E.</li><li>The expected text is unchanged.</li></ul> |
+| RG-03 | SABA-B-9 | <ul><li>Start and stop with the **Play** and **Stop** buttons, or with Space.</li><li>The `Original video sound` toggle is the video lane's M control. Its title names "Original video sound" (CALM-2a).</li></ul> |
+| RG-04 | 10a (249–253), B probe | <ul><li>Stopped, 1 clip on Music: drag the playhead handle from 0 to 6. `[data-insert-marker]` = `6.000`, the playhead is 6 ±0.05, and the handle tracks the pointer within ±1 px.</li><li>Space → playing from 6. After about 1 s, drag a 1 s body range on the clip: no playhead jump (monotonic, no step > 0.1).</li><li>**Space → stopped.** Only now, while stopped, click an empty lane point at 6. This clears the range, and that point becomes the new insert marker (the C-N229-S3 recipe; L29: Escape does not clear a range). Do not click the lane while playing: a click during playback moves only the insert marker (Saba decision 1).</li><li>Space → playing from 6. Space at ≈ 7.2 → stopped. Space → restarts at 6.000 (±0.05, plus the 0.05 s start lead, L48). Space → stopped at t₁. Shift+Space → continues from t₁ ±0.05.</li><li>Stop, then Home → marker 0.000, playhead 0.</li></ul> |
+| RG-05 | CALM-2a | <ul><li>The status strings come from `strings.ts` (lookup).</li><li>The disabled Loop title is `Loop: make a time selection first (Ctrl+L)`.</li><li>The rest of the expected text is unchanged.</li></ul> |
+| RG-10 | 10a, 11a | <ul><li>The zoom-key and Z/X parts are unchanged.</li><li>A seconds-ruler click under 4 px of movement while stopped: on release, the insert marker and the playhead move to the click time. No playback and no history entry (no new `Undo:` title).</li></ul> |
+| RG-12 | 10a | <ul><li>Enter adds the item at the insert marker on the active lane.</li><li>The status names the track and the time.</li></ul> |
+| RG-14 | 11a, 11b | <ul><li>Fresh session: BPM empty, Snap off, adaptive `1 s` at 40 px/s.</li><li>Press **G** → Snap on. Drag a clip 2 → ≈ 3.3 → start 3.000.</li><li>**G** again → Snap off. Drag to ≈ 4.37 → the start is within ±1 px of the pointer.</li><li>The grid lines follow the 1 s division.</li></ul> |
+| RG-15 | 11a, CALM-2 | <ul><li>Type BPM 90. Bars 1, 2 and 3 show under the unchanged seconds ruler.</li><li>"Audio is not stretched" is in the **BPM field title** and in the status written when the BPM is set. There is no persistent sentence (CALM-2).</li><li>The metronome export comparison is unchanged.</li></ul> |
+| RG-16 | 10a | <ul><li>"Insert marker at 12": a seconds-ruler click at 12, then `M`.</li><li>"Next-marker key": Home, then Ctrl+Right. If Ctrl+Right stops at a clip edge first, press it again until the flag at 12 is reached. The expected readouts, as in C-NAV-ORIGIN-252: the flag at 12 has `aria-current`, `[data-insert-marker]` = `12.000`, the playhead is 12, and the clock reads `00:12.000`.</li><li>The rest is unchanged.</li></ul> |
+| RG-20 | PERF-16 | <ul><li>WAV is unchanged.</li><li>**MP3** (High, 320k) decodes at 5.0 ±0.06 s.</li><li>An encode error is a **finding**; there is no CDN fallback any more.</li></ul> |
 
-**Rules for the grants:**
-- **Every other file is frozen,** including the 7 carried files, `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `ArrangementMaster.tsx`, `app.css` and `e2e/**`. No context change is needed.
-- **No assertion lost.** Equal or stronger replacements are allowed (D-29z495 wording). A test whose only change is a removed assertion is a Medium bug.
-- **A collision outside C10 is a STOP (L11, L23),** with the hit list. A must not edit a frozen file.
+**Not adapted.** Run these as written in round 199: RG-02, RG-06, RG-07, RG-08, RG-09, RG-11A, RG-11B, RG-13, RG-17, RG-18, RG-19, RG-22, RG-23, RG-24 and RG-T1 … RG-T4B. Where a control name or key differs from the round-199 text, use the current UI (`strings.ts`, testids, `shortcuts.ts`) and record a lookup.
 
-### 0.2 B's pre-check (L23, L29, L50)
-Everything below is in `b-round-256/probe/`.
+## 4. C — items finished between rounds 122 and 199 (round 199 §4, adapted)
+Run **RV-EN, RV-TOKENS, RV-ICONS, RV-M, RV-SABA-1-2, RV-SABA-3-4, RV-REVEAL and RV-MARKER-ENTER** as written in `tasks/round-199.md` §4, at both viewports, with these adaptations:
+- **RV-EN:** apply the ledger rule in §2. Scan the same 6 states, plus the shortcut sheet open.
+- **RV-ICONS:** the new **Stop** button renders a lucide `svg` and has empty `innerText`.
+- **RV-M:** Play is still a round, icon-only, 32×32 ±0.5 button. Its box is identical while playing (C round 257: [779.5, 43, 32, 32] at 1440 and [699.5, 43, 32, 32] at 1280).
+- **RV-SABA-1-2 (Overview):**
+  - Scan `[data-testid=arrangement-overview]`, not `arrangement-overview-frame` (OBS-C200-OVERVIEW-FRAME, scope addition SA-1).
+  - OBS-R199-OV-PLAYHEAD-CORNER applies: with the playhead at 0 %, the overview playhead itself paints into the corner arc. Measure the empty-project notch with the playhead off 0, as round 199 did.
+- **RV-SABA-3-4:** the PERF-FADER work (rounds 208–213) changed how faders write, not their style, so the expected style is unchanged.
 
-**1. Scratch with the sketch applied.**
-- The copy is the whole working tree in `/tmp/b256-scratch`. The sketch diff is `probe/sketch.diff` (61 lines). It is a sketch, not a prescription.
-- `tsc --noEmit`: rc 0, no errors. `npx biome check` on the two scratch source files: clean.
-- `vitest run app/lib/arrangement app/components/arrangement app/contexts`: **170 files, 2,513 tests; 1 failed:** ST10 (`probe/scratch-vitest-tail.txt`). That is collision C10, and it is granted.
-- **jsdom half (L29):** this repo has no jest-dom, so `toHaveAccessibleDescription` does not exist (`Invalid Chai property`). Testing Library's `getByRole('button', { name: 'Play', description: 'Stopped' })` resolves the hidden referenced span in jsdom: a probe row went green on the sketch and red with the state text forced to `Stopped` (`probe/jsdom-description-probe.txt`, `probe/transport-centre-ui.scratch-probe.test.tsx`).
+### 4.S — store rows (mock API on :5199; both viewports)
+Run **RS-1A, RS-1B, RS-1C, RS-1D and RS-2A** as written in round 199 §4.S, plus:
 
-**2. Greps (L29).**
-- No test in `app/**/__tests__` pins Play's or Stop's description or `aria-describedby`. The `aria-describedby` / `describedby` hits in tests are in the detail panel, clip gain, meter, pending-status and export files only. `toHaveAccessibleDescription` has 0 hits in `app/**`.
-- The four source scanners that read `ArrangementTransport.tsx` stayed green on the scratch:
-  - `mode-toggle-colour-ui` (class tokens);
-  - `studio-focus-ring`;
-  - `affordance-colour-ui`;
-  - `panel-radius-ui`.
-- `strings.test` ST27 forbids Georgian codepoints in the transport source. The new strings are English and live in `strings.ts`.
+| Row | Item (rounds) | Action | Expected |
+|---|---|---|---|
+| RS-4B | SABA-B-4 stage 2, store focus style (201–203, SA-0) | On `/` and on a product page, keyboard-Tab to a nav link, a card Play, a field (LeadMagnet or `/support`) and a footer link; then mouse-press each one | <ul><li>Keyboard: one outline ring, as in KEY-RING-203.</li><li>Mouse press: no ring.</li><li>The input error border is visible, as in ERROR-BORDER-203.</li><li>No layout shift on focus, as in NO-SHIFT-203.</li></ul> |
+| RS-HIDDEN | Hidden focusables (204) | As MOBILE-204, USERMENU-204 and SHOWCASE-204 (`tasks/round-204.md`) | <ul><li>The closed mobile menu has no Tab stop.</li><li>The user menu works by keyboard.</li><li>No Tab stop sits at effective opacity 0.</li></ul> |
+| RS-LM | LeadMagnet dialog (205) | As LM-OPEN-205, LM-TAB-205, LM-CLOSE-205 and SCROLL-LOCK-205 | <ul><li>The popup is a real dialog: focus moves in, Tab is trapped, and Esc closes it with focus restored.</li><li>The page position is kept after close.</li><li>The keep-list text ("FREE DOWNLOAD") is unchanged.</li></ul> |
 
-**3. Chromium on the scratch** (port 5181, stopped afterwards; `probe/desc-probe.cjs`, `desc-probe-sketch.json`). CDP `Accessibility.getPartialAXTree` at 1440×900 and 1280×720:
+## 4b. C — items finished since round 199 (one short check each; both viewports unless stated)
+"As in round N" means: reuse that round's C script and threshold, adapted only for a later intended change named in the row. Every scope addition of `regression_rounds[2]` (SA-0 … SA-42, numbered in `b-round-257.md` §3) is either a named row here, in §4 or in §4.S, or is marked carried (L6).
 
-| State | Play name / description | Stop name / description |
+| Row | Item (rounds; scope additions) | Action and expected |
 |---|---|---|
-| Stopped | `Play` / `Stopped` | `Stop` / `Stopped` |
-| Playing | `Play` / `Playing` | `Stop` / `Playing` |
-| After Stop | `Play` / `Stopped` | – |
+| RR-CURSOR | SABA-B-6 (207) | <ul><li>As CUR-ENV-207, CUR-POINT-207 and CUR-VIDEO-207.</li><li>The computed `cursor` on the envelope overlay, its breakpoint and the floating dock follows the round-207 cursor map, at rest and during the drag.</li><li>No `crosshair`, `move`, `copy` or `cell` cursor remains on those elements.</li></ul> |
+| RR-FADER | PERF-FADER a/b/c (209–213) | <ul><li>As EXPORT-210 and EXPORT-211: drag a track Volume and a group Volume to a value and export WAV. Then type the same values and export again. The two exports have **equal sha256**.</li><li>**No graph restart during a drag while playing** is not re-measured here. RR-PERF's fader scenarios carry it: PERF-1a's track, group, master, pan and clip-gain drags while playing, with 0 restarts as the PERF-FADER budget. An output-RMS liveness check would false-fail on the gapped pulse stem (round 199 RG-18).</li></ul> |
+| RR-MP3 | PERF-16a, 16b-i, 16b-ii (218–221; SA-2, SA-4, SA-5) | <ul><li>**1440:** one lab MP3 export at High. Every audio frame is 320 kbps CBR at 48 kHz (joint stereo is fine), with the expected duration and not silent, as MP3-REAL in round 218.</li><li>FACADE-REAL: `convertWavToMp3` at 128k, 192k and 320k gives CBR frames in Chromium, as in round 220.</li><li>DEPS: `npm ls @ffmpeg/ffmpeg @ffmpeg/util` is empty and `require.resolve` fails. An empty scope directory is not a finding (D-29z239).</li></ul> |
+| RR-OSS | OSS-LIC (219; SA-3) | `CI=true npx vitest run app/lib/__tests__/third-party-licenses.test.ts` passes. This single named file is a row; the full suite stays a gate row. |
+| RR-LEGACY | B-R220-LEGACY-EXPORT-NO-STEMS (222; SA-6), HR-LEGACY-STUBBED | Through `/studio/middle-east` with the round-221/222 `page.route` stubs: <ul><li>the initial checked count is 10/10, and Export Audio is enabled without Select All;</li><li>one deselect → close → reopen gives 9/10;</li><li>one MP3 export at High completes, as in LEGACY-UI-STUBBED-221.</li></ul> The row proves the client path only. The backend-only ownership row stays BLOCKED. |
+| RR-SHEET | CALM-1, CALM-2, SABA-B-8 (226–232; SA-8, SA-9, SA-10), C-SHEET-256 (SA-40, SA-41) | <ul><li>`?` and the footer `Shortcuts ?` open the sheet. Esc closes it and returns focus to the opener. Searching "split" shows `Ctrl+E`.</li><li>The transport titles end with their first key, and `aria-keyshortcuts` matches the `shortcuts.ts` rows: `Undo (Ctrl+Z)`, `Back to start (Home)`, `Loop … (Ctrl+L)`, `Play (Space)`, `Stop (Space)`.</li><li>There is no `arrangement-shortcut-hint`.</li><li>The sheet's `scrollHeight` is ≤ 1280 at both viewports. **C-SHEET-256's bound replaces C-SHEET-255's ≤ 1260** (D-29z502). The back-to-start keys are `Home` and `Double-click Stop`.</li><li>The empty demo shows no text in the BPM strip, the Loop strip, the dock label row or the empty monitor.</li><li>Library notice: a dismissal is remembered in that context, and a fresh context shows the notice again.</li><li>The first-run status is as in §2.</li><li>The active empty-lane hint shows only on the active empty lane, and only before the first clip.</li></ul> |
+| RR-OVERVIEW | CALM-3 + follow-up (232–233; SA-10, SA-11) | <ul><li>The empty project shows an Overview hairline. With the first clip it shows in full, and its bbox is unchanged.</li><li>Ctrl+Alt+O hides and shows it, and the choice persists after a reload.</li><li>With the Overview focused (separator → Tab), Ctrl+Alt+O moves focus to `arrangement-video-expand` with a visible ring (floating video: placeholder-return). Focus elsewhere is unchanged.</li></ul> |
+| RR-TEMPO | SABA-B-11a stage 1 (234; SA-12) | <ul><li>Fresh `/studio-lab`: Add `demo-stem-pulse` → tempo 120, Snap on, bars marks.</li><li>The adaptive grid label at the load zoom is whatever the D-29z359 contract gives (**adapted for 11b**: C round 239 measured 1/2 at 40 px/s for a 120 BPM seed, not 1/4).</li><li>In a fresh context, Add `demo-soft-impact` alone → tempo empty, grid `1 s`, Snap off, and no `120 BPM` anywhere.</li></ul> |
+| RR-STRIP | SABA-B-11a stage 2 + FIX-1 (235–236; SA-13, SA-14) | Seeded (wait for `Demo collection ready` first): <ul><li>a click on the bars-ruler top strip at 4.1 s → playing from 4.000;</li><li>a lower-zone click at 6.3 → **insert marker** 6.5 (adapted for 10a);</li><li>a seconds-ruler click is unchanged;</li><li>with no tempo, the bars ruler is inert;</li><li>a strip double-click at 3 s → playing from 3.000, with no Fit status; a lower-zone double-click → Fit;</li><li>a strip click at 15.95 s → the `playPastEnd` status, not playing.</li></ul> |
+| RR-SEEDRACE | SABA-B-11a-FIX-2, FIX-3 (237–238; SA-15, SA-16) | As in round 238 (`c-round-238/race238.cjs`): <ul><li>the 4 s delay recipe keeps the exact placement and the seed status;</li><li>the fail recipe shows failed(1);</li><li>an idle load shows the ready text;</li><li>the C-R237-01 refusal recipe (6 s delay; hold a Volume slider and press Ctrl+Z through settle) ends on the ready text.</li></ul> |
+| RR-ADAPT | SABA-B-11b stage 1 + FIX-1 (239–240; SA-17, SA-18, SA-19) | As C-ADAPT-SEC-239, C-ADAPT-MUS-239, C-SILENT-239, C-MODE-239 and C-HAND-240: <ul><li>at mount: adaptive `1 s`;</li><li>`=` ×4 → 0.25 s, with a painted period ≥ 24 px;</li><li>`5` → `Fixed grid — <label> at every zoom (5)`;</li><li>`1` at the load zoom → `Grid: 0.5 s (Snap off)`;</li><li>zooming writes no status;</li><li>a 120 BPM seed at 40 px/s shows 1/2;</li><li>`1`, then the demo-synth-mix seed, keeps adaptive 0.5 with `Snap on — grid 0.5 s (G)`.</li></ul> |
+| RR-MENU | SABA-B-11b stage 2a + FIX-2 (241–242; SA-20, SA-21) | <ul><li>The grid menu has the groups `Adaptive grid` and `Fixed grid`, with exactly one checked radio (Medium at mount; the division after `5`).</li><li>Narrow → `Adaptive grid — Narrow, now 0.5 s`.</li><li>Plain `4` toggles Snap, with the `(G)` statuses.</li><li>The C-S4-AX description is present.</li><li>The BPM menu fits inside 1280×720.</li><li>C-FOCUS-242: Tab to the Snap toggle, right-click an empty lane point, then Escape → `document.activeElement` = the Snap toggle, with a visible ring.</li></ul> |
+| RR-FOCUS-ORIGINS | C-R242-01-FIX, editor, undo and group origins (243–247; SA-22 … SA-25) | One check per origin class, at both viewports: <ul><li>**243:** the fader, the BPM field, the loop brace and a marker flag each get focus back after right-click lane + Escape. After the brace gets focus back, ArrowRight moves the loop.</li><li>**244:** marker add editor, marker rename editor and group name editor → right-click an empty lane → Escape → focus on the successor (the new or renamed flag, or the group name button).</li><li>**246:** with a marker flag focused, Ctrl+Z of its add → `Add marker` (if no other flag exists) or the next surviving flag. Redo of its delete → the next flag.</li><li>**247:** with a group name focused, Ctrl+Z of Group Tracks → the first member name button, with a ring.</li></ul> In every case the focused element has a visible ring and is never BODY. |
+| RR-HIDDEN-SNAP | 248 (SA-26), SA-28 | <ul><li>Fixed 0.1 s at 40 px/s with Snap on: a ruler click lands on the free time, and `data-snap-paused` is true. At 60 px/s the same click snaps.</li><li>**SA-28 (record only):** compare adaptive `3` on 1/4 at 120 BPM and 4 px/s with the D-29z361 chooser rule. A mismatch is a note for B, not a FAIL.</li></ul> |
+| RR-MARKER | SABA-B-10a (249–253; SA-27, SA-29 … SA-37, SA-39) | At both viewports: <ul><li>**C-INSERT-MARKER-249:** ruler 2 s, Space, 1.5 s, Space, Space → restarts at the marker. Shift+Space continues. A ruler click while playing moves only `data-insert-marker`.</li><li>**C-EDIT-MARKER-250:** play from 2 and stop at ≈ 3.5. Then each of these lands at the insert marker, not at the stop point: Ctrl+V on another track; Ctrl+E on a clip spanning 5 s, after a clip-body click at 5 and play/stop; Enter on a library row; `M`. Space past the end says `Insert marker (…`.</li><li>**C-CAPTION-251:** after play from 3 and stop at ≈ 4.5, the library line reads `Active track: SFX · insert marker 00:03.000`, both stopped and while playing. `+ Add` lands at 3.000.</li><li>**C-FOLLOW-252 / C-FOLLOW-STOP-253:** use the round-252 §0.2 recipe. While playing, a bars lower-zone click → Follow paused, with the composed status. A strip click → Follow on + followResumed. Space → Follow on and exactly `Stopped — Space plays from the insert marker at <t>.`</li><li>**C-STOP-PLAIN-253 / C-STOP-UNRELATED-253:** Follow off + ruler click + stop → the stopped text. A plain stop writes nothing.</li><li>**C-TITLES-253:** the paused Follow title is exactly `Follow paused — press Follow, or stop playback, to resume`.</li><li>**C-NAV-ORIGIN-252/253:** markers at 2 and 6; play from 1 and stop at ≈ 4; Ctrl+Right selects the marker at 2. Stopped, the none text names the insert marker. Playing half: Home, Space, two fast Ctrl+Left → `No more markers before the playhead`, still playing.</li><li>**GATE251-REVIEW-HOME-DRAG-INFO:** Home during a range drag moves neither the page scroll nor focus.</li></ul> |
+| RR-BLINK | SABA-B-10b (254–255; SA-38, SA-40) | <ul><li>C-MARKER-VISIBLE-254: one visible ink line at the click time.</li><li>C-BLINK-254: it blinks with `prefers-reduced-motion: no-preference` and is static with `reduce`.</li><li>C-SHEET-254: the transport rows `Shift+Space` and `Ctrl+Shift+Space`, with their exact texts.</li><li>C-MARKER-RANGE-254: the marker is hidden while a time selection exists.</li><li>C-VIDEO-ZORDER-255: the insert-marker line paints in the playhead's order, over both the docked and the floating video.</li></ul> |
+| RR-TRANSPORT | SABA-B-9 stage 1 (256–257; SA-41, SA-42) | <ul><li>**C-LAYOUT-256:**<ul><li>the toolbar is 49 px at 1440 and ≤ 87 px at 1280;</li><li>the transport is centred ±24 px;</li><li>the below-toolbar tops are within ±1 px of round 257 (library/dock/ruler/first lane: 84/84/191/275 at 1440, 122/122/229/313 at 1280).</li></ul></li><li>**C-STOP-256:** Play while playing is a no-op; Stop stops; a double-click on Stop → 0.</li><li>**C-A11Y-257:** the Play and Stop descriptions are `Stopped`/`Playing` (CDP `Accessibility.getPartialAXTree`), the names stay constant, and the state element is `hidden`.</li></ul> |
 
-- The hidden element's `boundingBox()` is `null`.
-- The toolbar is 49 px at 1440 and 87 px at 1280, the same as round 256.
-- **Control: the current round-256 tree on :5173** (`desc-probe-r256tree.json`). Play's description is `Play (Space)` and Stop's is `Stop (Space)`: Chromium uses `title` as the description when nothing else gives one. With `aria-describedby`, the description becomes the state. This is deviation **DV2** (§1).
+## 5. C — parked rows and observations (record only unless stated)
+| Row | Source | Action | Expected / how B rules it |
+|---|---|---|---|
+| RP-METRO-MUTE | C-R167 (info) | As round 199 | Record only. |
+| RP-SPACE-EMPTY | C-R149 (info) | Empty project, press Space | Record the text and whether the playhead moves. B's probe: `Nothing to play — add a clip from the library first.`, with no movement. |
+| RP-VIDEO-MARKER | GATE76-S3 (Low, deferred) | As round 199 | A wrong snap is Low. A lost clip or a broken Undo is Medium. |
+| RP-NARROW | GATE257-NARROW-TOOLBAR-OVERLAP (Low, D-29z500) | `/studio-lab` at 1024×768, 900×720, 864×720 and 768×720: the bounding boxes of every `button`, `input`, `select` and `label > span` in `arrangement-transport-edit` versus `-view`, plus a screenshot | <ul><li>Record the overlap pairs and their px.</li><li>B's probe: 0 at 1024 and 900, 1 px at 864, 48 px at most at 768.</li><li>This is not a FAIL in this round, because the overlap is below the 1024 px desktop floor.</li><li>A **new** overlap at ≥ 1024 px would be Medium.</li></ul> |
 
-**4. L50 grep** on the 2 granted source files:
+## 6. C — perf, smoke, gate rows, auth guard
+- **RR-PERF** (SA-7, PERF-HARNESS-SHARED-LIB):
+  - Run `npm run test:perf` **alone**, after §5. L38: no other browser, vitest or build job may run at the same time.
+  - **PASS:** rc 0, 3/3 specs pass, every budget row passes its contract (`perf/budgets*.json`), `complete` is true, 0 aborts and 0 page errors. A budget assertion that fails on a valid isolated run is a **finding**. Its severity is Medium for a fader, drag or playback budget, and Low otherwise.
+  - **Comparison with the last accepted oracle (report, not a pass criterion):**
+    - The oracle is `c-round-225/latest-interactions.json` and `latest-resources.json`, accepted at gate 225 (`80fbb3b`).
+    - `npm run test:perf` has not run on a published commit since then (`git log -- perf/` ends at `80fbb3b`), while the transport, the insert marker and the grid changed in rounds 234–257.
+    - Run `python3 -I b-round-224/scripts/equiv-check-b2.py` against that oracle, and list every deterministic row that differs, with its scenario id and both values.
+    - B rules those deltas at the round 258 → 259 planning (L10). A delta alone is not a FAIL.
+  - An overlapped run is environment-invalid and uses one replacement attempt.
+- **RG-SMOKE:** run `npm run test:e2e:smoke` in `store/` after RR-PERF, and not concurrently with anything. The round-199 §6 validity rules apply.
+- **G258-3 (auth):**
+  - `/studio-lab` shows the workspace and the demo badge anonymously, and `auth_user` is null.
+  - `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`.
+  - `/api/studio-token` with no header → 401. With a fake Bearer → 403 when the mock runs, or 500 without it. **Never 200.**
+  - The SRW-21 purchased-route mount is **BLOCKED** (backend unavailable in cloud; SRW-21 is `deferred_user`).
+- **Blocked, as in round 199:**
+  - R80-RECORDINGS-FIELD-BORDERS, F11–F13 (`/account`) and F16 (`ChatInput`): backend unavailable in cloud.
+  - They are listed under `blocked` and do not make `browserVerified` false.
+- **Gate rows, not claimed by C:** full vitest, typecheck, build, Biome and `npm run verify`.
 
-```
-grep -nE "onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)" app/components/arrangement/ArrangementTransport.tsx app/lib/arrangement/strings.ts
-```
-
-- **Working tree (round-256 content): 2 hits.**
-  - l.119 `handoff.partner.focus()`: the Undo/Redo/Delete/Zoom-back handoff, kept; TC9 covers it.
-  - l.226 `{navigation.followMode === 'paused' ? …}`: the Follow text, same element, unchanged.
-- **Scratch with the sketch: 2 hits,** the same two shifted by one line (l.120, l.227).
-- **The new span's text matches 0 times:** Biome puts its ternary on several lines (`{isPlaying` / `? …`), and the `\?` alternative only matches a one-line `{…?`. B rules on it by hand: it is text inside a hidden, non-focusable `span`, so nothing focusable mounts or unmounts. Play and Stop stay mounted and enabled in both states, so no focus target changes (TC9 stays).
-- A re-runs the grep and pastes the hit count.
-
-**5. Timeout headroom (L31).** Gate 256 did not run, so A's round-256 numbers are the only source (`a-round-256.md` §5):
-- `transport-centre-ui` 9.8 s for the file, highest row TC5 1,618 ms / 15 s;
-- `render-budget` highest 2,892 ms / 15 s (19 %);
-- `strings` 0.08 s.
-
-TC10/TC11 and six read-only lines fit under 50 %.
-
-## 1. Reference: how Ableton Live 12 does it
-
-**Sources:**
-- **[ACC]** <https://www.ableton.com/en/live-manual/12/accessibility-and-keyboard-navigation/> (WebFetch 2026-10-29; the page numbers its sections 41.x):
-  - 41.4.1.1: "The Control Bar … transport controls … The controls are organized into accessible groupings; you can use Tab and Shift+Tab to navigate between them with Speak Help Text activated";
-  - 41.1.2: "It is also possible to use the Enter key to switch between toggle states."
-- **[AV]** 6.3 "Transport and Playback", as in round 256.
-- Live version 12.
-
-| # | Behaviour | Live source | Confirmed in Live | CZABA decision / deviation | C check |
-|---|---|---|---|---|---|
-| R7-SR | A screen reader can tell whether playback runs | **No reference found.** I searched [ACC], ch. 38 "Accessibility Options in Live" (search result) and WebSearch ("Ableton Live 12 screen reader Play button announced state"). None says how Live exposes the Play button's on state to a screen reader. | **Unconfirmed** | Play and Stop carry the description "Playing" or "Stopped" (D-29z492). The name stays `Play`. | C-A11Y-257 |
-| R-GROUP | Control Bar in accessible groupings, Tab between them | [ACC] 41.4.1.1 | Yes (text) | Already true in DOM order: edit, then centre, then view. No `role="group"` is added in this round; the pre-existing finding stays a backlog signal (D-29z496). | C-FOCUS-257 (order unchanged) |
-
-**Deviations (listed, each with a reason):**
-- **DV1: not announced on change.** The state is determinable on focus or by query. Starting or stopping playback is **not** announced by a new live region.
-  - **The one existing announcement:** the shared status line (`StudioWorkspace.tsx` l.3097–3101, `<output aria-live="polite" data-testid="arrangement-status">`) writes "Stopped — Space plays from the insert marker at …" (`insertMarkerAfterStop`) on a stop. It does so **only** when the line held a while-playing marker or Follow-paused text (`StudioWorkspace.tsx` l.1928–1941). A plain start or stop announces nothing, at HEAD as now.
-  - **Why not here:** a transport live region would compete with that conditional stop status and with the ready and refusal texts on the same polite channel, which needs an L51 clobber analysis. A "Playing"/"Stopped" status write needs `StudioWorkspace.tsx` or `ArrangementContext.tsx`, which are frozen in this fix-up.
-  - Asked once as **SABA-Q-9-TRANSPORT (f)**: should starting and stopping playback be announced?
-- **DV2: the title is no longer the description.** Play's and Stop's description changes from the title text (`Play (Space)`, `Stop (Space)`) to the state.
-  - The key stays exposed: `aria-keyshortcuts="Space"`, the visible tooltip and the `?` sheet row. This is the CALM rule: the tooltip shows its key, with a matching `aria-keyshortcuts`.
-- **DV3: `aria-pressed` is rejected (D-29z492).** It would announce "Play, toggle button, pressed", which says a second press releases it. Round 256 §2.3 / R5 makes a second click on Play a no-op, so `aria-pressed` would misdescribe the control (A's reviewer M-2). Follow and Loop keep `aria-pressed`, because their second press does release.
-
-## 2. A: what to build
-
-### 2.1 The state element (ArrangementTransport.tsx)
-**The element:**
-- `const playbackStateId = useId();` sits in `ArrangementTransport`.
-- Inside the centre group, right after the Stop button, add one `span`:
-  - `id={playbackStateId}`;
-  - the `hidden` attribute;
-  - `data-testid="arrangement-playback-state"`;
-  - text: `studioPlaybackStrings.playbackStatePlaying` while `isPlaying`, otherwise `playbackStateStopped`.
-- No class is needed (`hidden` is `display: none`).
-  - It must not be `sr-only`: browse mode would then read a stray word in the toolbar.
-  - It must not be a live region (DV1).
-  - It has no `tabIndex`.
-
-**The buttons:**
-- Play and Stop both get `aria-describedby={playbackStateId}`.
-- Back to start, Loop, Follow and every other control get nothing.
-
-**Unchanged:** Play's `aria-label` `Play`, title `Play (Space)`, `aria-keyshortcuts` `Space`, `data-playing`, the classes, the click guards (R5/R6), `onDoubleClick` and the Enter repeat guard. The same holds for Stop.
-
-### 2.2 Tests (transport-centre-ui.test.tsx)
-Find elements by role, name, text or `data-testid` only (L12). Use the existing describe and harness.
-
-| Row | Asserts |
+## 7. Outcome, fixed in advance
+| C result | B at the round 258 → 259 planning |
 |---|---|
-| TC10 | <ol><li>**Stopped:** `getByRole('button', { name: 'Play', description: 'Stopped' })` is the Play element, and `{ name: 'Stop', description: 'Stopped' }` is Stop. Use the `description` filter, not `toHaveAccessibleDescription`: jest-dom is not installed (§0.2.1).</li><li>**Click Play:** both descriptions are `Playing`, and the names are unchanged.</li><li>**Click Play again (no-op):** still `Playing`.</li><li>**Click Stop:** both are `Stopped`.</li><li>**Space keydown on `window`:** `Playing`; Space again: `Stopped`. This covers a state change that does not come from the buttons.</li><li>**Double-click Stop while playing** (real order `click`, `click`, `dblclick`): `Stopped`.</li><li>**Titles in both states:** `Play (Space)` and `Stop (Space)`.</li></ol> |
-| TC11 | The state element (`getByTestId('arrangement-playback-state')`): <ul><li>it has the `hidden` attribute;</li><li>it is inside `arrangement-transport-centre`;</li><li>it has no `tabindex`, no `aria-live` and no `role`;</li><li>its id equals both buttons' `aria-describedby`;</li><li>no other element in the toolbar references it;</li><li>exactly one such element exists.</li></ul> |
+| Every row PASS, smoke PASS | <ul><li>**First**, set `regression-last.json` = `{"date": <C's completion date>, "round": 258}`.</li><li>Round 259 = **SABA-B-9 stage 2** (master volume to the workspace bottom-right). If it grants `ArrangementTransport.tsx`, it also folds in the cheap gate-257 Lows: GATE257-NARROW-TOOLBAR-OVERLAP (`flex-wrap` on the three groups, probed at 768/900/1280/1440), GATE257-KBD-GESTURE, GATE257-INDEX-LOOKUP and the doc-193 notes (C-I257-03, GATE257-DOC193-TC).</li><li>Round 260 = **RETRO** (every 15 rounds; the last was 245).</li><li>Then SABA-B-11c, after the `ableton-arrangement-expert` consult on the off-grid offset.</li></ul> |
+| Any Critical, High or Medium finding, including a regression | <ul><li>Round 259 = a **bounded fix-up**: at most three related bugs, Critical first. C re-runs the failed rows.</li><li>`regression-last.json` is still updated, because the sweep ran.</li><li>SABA-B-9 stage 2 follows the fix-up. The RETRO stays at round 260, or moves to the round after the fix-up.</li></ul> |
+| Low findings only | <ul><li>They go to `deferred_low_polish` with id, severity, evidence and repro.</li><li>Otherwise the same as the all-PASS row.</li></ul> |
+| Rows not run (time limit), or inconclusive past the budget | <ul><li>The missing rows continue first in round 259, from `progress.json`.</li><li>`regression-last.json` is updated only when every row has run.</li><li>An inconclusive row is never PASS.</li></ul> |
+| A browser row that could run here did not run | `browserVerified=false`, and B re-plans that half. |
 
-**Red-proofs** (named mutants on a scratch copy, or in place and restored with a sha256 check; report each red row):
-- **M6:** remove `aria-describedby` from Play. TC10 must go red.
-- **M7:** the state text is always `playbackStateStopped`. TC10 must go red.
-- **M8:** remove `hidden`. TC11 must go red.
-- **M9:** Stop's `onClick` does nothing. The three render-budget tests go red. The first red line is the existing l.330 (`isPlaying` false), the existing l.362, and the **new** after-click line at the l.472 site. The l.348 and l.371 pairs are equal replacements of HEAD's implicit check. They have no separate mutant red-proof, because an earlier existing line fails first. Report the three first-red lines.
+**Item status:** a failed row does not change its item's earlier status by itself. It opens a finding linked to the item. The item drops from done or c_pass only when B rules the finding a reproducible regression.
 
-### 2.3 Checks A runs (speed rule: no full suite, no `verify`)
-1. The start state of §0.
-2. Run `npm run typecheck` and `npm run lint`.
-3. Run `npx vitest run` on the round-256 set: the 9 collision files, `transport-centre-ui`, `shortcuts.test.ts` and `insert-marker-ui.test.tsx`. Also run the 3 other source scanners: `studio-focus-ring`, `affordance-colour-ui` and `panel-radius-ui` (`mode-toggle-colour-ui` is already in the set).
-   - Report each file's time against its declared timeout (L31). Any test above 50 % is a STOP.
-4. Run the mutants M6–M9.
-5. **Chromium at both viewports, one run each:** the CDP description table of §0.2.3 (stopped, playing, after Stop), the toolbar height, and the state element's box (null).
-6. **code-reviewer:** 3 or more files changed, so it is required. Pass every Architecture note to B.
-7. **Re-check the hashes:** the frozen tree, the carried files and the protected files give rc 0, and the root files are unchanged.
-8. **Report `a-round-257.md`:**
-   - every hunk, old → new;
-   - the description table;
-   - test times;
-   - mutants;
-   - reviewer notes;
-   - a STOP at the top if there is one.
+## 8. Neighbour risk
+| Risk | Check |
+|---|---|
+| A probe writes into `store/` | SOURCE-SCOPE at the start and at the end |
+| The perf run, the smoke run or the mock disturb the 5173 tabs | The serial order in §2; the mock is started and stopped by its PID |
+| The job time limit | Incremental reports and `progress.json`; §4b runs first |
+| False FAILs from pre-10a or pre-SABA-B-9 scripts (Pause button, Space resume) | The "Changed UI facts" in §2 and the §3 adaptations; record "lookup, not deviation" |
+| C's own stubs (HR-LEGACY-STUBBED) mistaken for backend evidence | RR-LEGACY proves the client path only; the ownership row stays BLOCKED |
 
-## 3. C: acceptance
-Run each browser row at **1440×900 and 1280×720**, in a fresh context.
+## 9. Deliverables
+- **A:** `a-round-258.md` (baseline only).
+- **C:**
+  - `c-round-258.json`, with `browserVerified`, `realVerified`, `passed`, `failed`, `inconclusive`, `blocked`, `gate`, `bugs`, `observations`, `invalidRuns`, `lookups` and `carried` (any scope addition not run, with the reason);
+  - `c-round-258.md`;
+  - evidence under `c-round-258/{tools,out,shots}`.
+- Every bug gets:
+  - an id `C-R258-NN`;
+  - a severity;
+  - the item;
+  - the steps;
+  - the evidence path;
+  - "regression yes/no", with the round of the last pass.
 
-**Setup:** open `/studio-lab` and wait until `[data-testid="arrangement-status"]` starts with `Demo collection ready` (L48). Click `[data-source-id="demo-stem-pulse"]`, then Add. For marker rows, set the insert marker at 2.000 as in round 256.
-- No HEAD server is needed: C-A11Y-257's control column cites the existing evidence. C may start one if it doubts that evidence; stop it afterwards.
+## 10. Root notes
+- **Gate on C PASS:** no source change is expected. Nothing is published when no source changed; the loop-state commit records the sweep.
+- **Architecture checkpoint (non-blocking):** `b-round-257-checkpoint-addendum.md` adds two items to ARCH-CHECKPOINT-TRANSPORT-POSITIONS, as question 7:
+  - the gate-257 Signal 3 (toolbar layout churn, and tests that depend on button order);
+  - C's note (the transport a11y contract is spread over 9–10 test files).
 
-### 3.1 Rows
-| ID | Check | Pass |
-|---|---|---|
-| C-SCOPE-257 | HEAD, status, hashes | <ul><li>HEAD is `a061d52`.</li><li>The status lists the same 14 paths as §0.</li><li>The carried files (7), frozen tree (1,106), root and protected checks give rc 0.</li><li>`git diff` of each granted file against `b-round-256/r257-granted-start/` shows only §0.1 changes.</li><li>Re-check at the end of the phase.</li></ul> |
-| C-UNIT-257 | The §2.3.3 files, run alone | All green; report the counts. Re-run M6 and M8 yourself on a scratch copy: both must be red. |
-| C-COLLISION-257 | `git diff -w` of `strings.test.ts`, `render-budget.test.tsx` and `grid-snap-ui.test.tsx` against the start copies | <ul><li>ST10 gains exactly the two keys.</li><li>render-budget gains the 3 before/after pairs at the 3 cleanup sites, and nothing else.</li><li>GS14: the title only.</li><li>No assertion is removed.</li></ul> |
-| C-A11Y-257 | Playing state, read programmatically (closes C-R256-01). CDP `Accessibility.getPartialAXTree` on Play and Stop, plus an `ariaSnapshot` of the centre group. | <ul><li>Stopped: descriptions `Stopped`. Playing: `Playing`. After Stop: `Stopped`. After a Space press: it follows. After a double-click on Stop while playing: `Stopped`.</li><li>Names are constant `Play` / `Stop`, titles `Play (Space)` / `Stop (Space)`, and `aria-keyshortcuts` `Space`, in every state.</li><li>The state element has no box (`boundingBox()` null) and is never focused.</li><li>The status log does not change on Play. This is DV1, a listed deviation, not a FAIL.</li><li>**Control column:** cite the existing evidence, with no new HEAD server: HEAD `Pause` while playing is in `c-round-256/browser/a11y-playing-state.json`, and the round-256 description `Play (Space)` (DV2) is in `b-round-256/probe/desc-probe-r256tree.json`.</li></ul> |
-| C-ONSTATE-257 | Play's state (short re-run) | `data-playing` flips. The Play box is ±0 px between states. The glyph contrast is ≥ 3:1 in both states (round 256: 15.62 / 8.32; Stop 13.24). |
-| C-FOCUS-257 | Focus | <ul><li>The toolbar Tab stops equal round 256's list: Undo, Split, Delete, Follow, Play, Stop, Back to start, Zoom slider, Fit, Export.</li><li>The full page sequence has 80 stops, the same as round 256.</li><li>After a double-click on Stop, `activeElement` is Stop. The ring shows on `:focus-visible` after keyboard focus only.</li></ul> |
-| C-KEYS-257 | Keyboard (short re-run) | <ul><li>Tab to Play, then Space: one toggle. Tab to Stop, then Space: one toggle.</li><li>0 native click events from Space (round-256 method).</li><li>Held Enter on Stop while playing: one stop.</li><li>The description follows each toggle.</li></ul> |
-| C-LAYOUT-257 | Toolbar (short) | 1440: 49 px, centre offset ≤ 24 px. 1280: ≤ 87 px. Library, dock, ruler and first-lane tops equal round 256's numbers (84/84/191/275 and 122/122/229/313). |
-| C-BUDGET-257 | Screen budget (L39) | Persistent visible text lines outside the timeline equal round 256: 1440 empty 85 / demo 101; 1280 empty 69 / demo 85. Count visible text only: a `hidden` element is not a line. Full-window screenshots. |
-| C-LESSON-257 | `lessons.md` | ≤ 60 lines. L29 contains the C-R256-01 clause, and L4 contains the row-wording clause (D-29z495). |
-| AN-REVIEW-257 | Doc 193 | <ul><li>l.4 is byte-exact `**სტატუსი:** In Progress (stage 1 of 2; C round 257 PASS)`.</li><li>The new Problem → Solution bullet names C-R256-01 and D-29z492.</li><li>Every cited test id exists, including TC10 and TC11 (L26).</li><li>The 7 TEMPLATE headings are in order.</li><li>Georgian, with English terms.</li></ul> |
-| LAB-SMOKE-257 | Load, play, export WAV | No page errors. The export sha256 equals rounds 255 and 256: `1fea093b975946c800329006e1c9943560bf3ac3cb86e361f2cd4628ce033f94`. |
-| Auth | `/studio/<handle>` without a session | `Sign in required`, no `audio[src]`, and `/api/studio-token` never returns 200. |
-| Purchased origin | `/studio/$productId` | **BLOCKED:** backend unavailable in cloud. |
-| gate | Full vitest, typecheck, lint, build, verify, e2e smoke | Gate rows; C does not claim them. |
-
-### 3.2 `browserVerified`
-True only if C-A11Y, C-ONSTATE, C-FOCUS, C-KEYS, C-LAYOUT, C-BUDGET, LAB-SMOKE and Auth all ran in the browser.
-
-### 3.3 Carried by diff identity (D-29z493)
-These round-256 PASS rows test files and behaviour this round does not change: C-STOP-256, C-STATUS-256, C-SHEET-256 and C-REF-256 (R1–R6, R8–R10; R7 is re-judged by C-A11Y-257).
-- **The carried files** are proven identical by `b-round-256-r257-carried-sha256.txt`.
-- **The granted source change** adds only an attribute and a hidden element. B's scratch showed the toolbar height and the Tab order are unchanged.
-- **Who decides:** C decides whether the carry holds. If C-SCOPE-257 shows anything else changed, or a re-run row shows a behaviour change, C re-runs the affected round-256 row.
-
-## 4. Neighbouring behaviour that could break
-- **Description-based tests elsewhere:** none pin the transport (§0.2.2).
-- **The tooltip and the `?` sheet:** unchanged. DV2 changes only the AX description.
-- **The status line:** untouched (DV1). This round writes no new status text, so no L51 clobber row is needed.
-- **render-budget:** its render budgets are unchanged. The new lines are reads only.
-- **The 1,408 px breakpoint and grid:** untouched. The hidden span is `display: none`, so it takes no gap.
-
-## 5. Saba questions (L44): SABA-Q-9-TRANSPORT gains two parts
-| Part | Question | Default until answered |
-|---|---|---|
-| (e) | Space on a focused Play while playing stops, and Space on a focused Stop while stopped plays. That is the global Space toggle, the same as Live's Space bar. A's reviewer (A-R256-REVIEW-SPACE-ON-FOCUSED, Low) says it undercuts the honest label. Keep it, or make Space on a focused transport button behave like its click? | Keep the global toggle (Live 6.3: "use the space bar to toggle playback"). |
-| (f) | Should starting and stopping playback be announced to screen readers (a "Playing" / "Stopped" status)? Today only a stop after a while-playing marker or Follow-paused text is announced. | Not announced; the state is a description on Play and Stop (DV1). |
-
-## 6. Root cause (spec-induced; not a Saba-reported issue)
-- **What happened:** B's round-256 §2.3 made Play's name constant to fix a Low (B-R249-PAUSE-LABEL). That removed the only programmatic playing signal, and the task named no replacement. A's reviewer caught it (M-2), but the spec did not let A fix it.
-- **The rule:** L29 gains a clause. A removed or constant-ed accessible name or state is a signal too: the task names its programmatic replacement, with a row. B adds it in this planning (D-29z495).
-
-## 7. Next (D-29z497)
-**If C passes and the gate publishes:**
-- SABA-B-9 stage 1 is **done**. C-R256-01, C-R256-02 and B-R249-PAUSE-LABEL close.
-- Then **REGRESSION-ROUND-2026-10-30** if the date is 2026-10-30 or later. It carries every `scope_additions` entry, plus C-LAYOUT-256, C-STOP-256, C-SHEET-256 and C-A11Y-257.
-- Then **SABA-B-9 stage 2** (master volume to the workspace bottom-right), then **SABA-B-11c** (after the expert consult on the off-grid offset), then **SABA-B-7** when Saba answers.
-- RETRO at round 260.
-
-**If C fails:** a fix-up on the same grants, with a ruling on what C found.
+  SABA-B-9 stage 2 does not wait for it.
+- **For Saba (non-blocking):** SABA-Q-9-TRANSPORT gains part (g). Below 1408 px the Tab order (edit → centre → view) differs from the visual order, where the centre row is on top. The gate-257 reviewer's Suggestion 2 notes this.
+  - The question: is that acceptable, or should the centre row come first in Tab order too?
+  - Today's default: keep the DOM order.

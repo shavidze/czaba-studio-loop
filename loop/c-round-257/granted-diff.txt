@@ -1,0 +1,116 @@
+=== app/components/arrangement/ArrangementTransport.tsx
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/components/arrangement/ArrangementTransport.tsx	2026-10-29 23:38:20.432530560 +0000
++++ app/components/arrangement/ArrangementTransport.tsx	2026-10-29 23:52:23.710966436 +0000
+@@ -9,7 +9,7 @@
+   Square,
+   Undo2,
+ } from 'lucide-react';
+-import { type KeyboardEvent, useCallback, useRef } from 'react';
++import { type KeyboardEvent, useCallback, useId, useRef } from 'react';
+ import {
+   formatArrangementTime,
+   useArrangement,
+@@ -92,6 +92,7 @@
+       ? studioEditStrings.deleteRangeAllTracksHint
+       : studioEditStrings.deleteRangeHint
+     : null;
++  const playbackStateId = useId();
+   const undoButtonRef = useRef<HTMLButtonElement>(null);
+   const redoButtonRef = useRef<HTMLButtonElement>(null);
+   const fitButtonRef = useRef<HTMLButtonElement>(null);
+@@ -241,6 +242,7 @@
+           }}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           aria-label={studioPlaybackStrings.playLabel}
++          aria-describedby={playbackStateId}
+           title={studioPlaybackStrings.playTitle}
+           aria-keyshortcuts={studioShortcutAria('play-stop')}
+           data-playing={isPlaying ? 'true' : 'false'}
+@@ -264,12 +266,18 @@
+           onDoubleClick={returnToStart}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           aria-label={studioPlaybackStrings.stopLabel}
++          aria-describedby={playbackStateId}
+           title={studioPlaybackStrings.stopTitle}
+           aria-keyshortcuts={studioShortcutAria('play-stop')}
+           className={cn(toolButtonClass, 'w-8 justify-center px-0')}
+         >
+           <Square className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+         </button>
++        <span id={playbackStateId} hidden data-testid="arrangement-playback-state">
++          {isPlaying
++            ? studioPlaybackStrings.playbackStatePlaying
++            : studioPlaybackStrings.playbackStateStopped}
++        </span>
+         <button
+           type="button"
+           onClick={returnToStart}
+=== app/lib/arrangement/strings.ts
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/strings.ts	2026-10-29 23:38:20.432704001 +0000
++++ app/lib/arrangement/strings.ts	2026-10-29 23:41:40.387517143 +0000
+@@ -224,6 +224,8 @@
+   stopLabel: 'Stop',
+   playTitle: studioShortcutTitle('Play', 'play-stop'),
+   stopTitle: studioShortcutTitle('Stop', 'play-stop'),
++  playbackStatePlaying: 'Playing',
++  playbackStateStopped: 'Stopped',
+   projectEndPrefix: '/ end',
+   playPastEnd: ({
+     subject,
+=== app/lib/arrangement/__tests__/strings.test.ts
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/__tests__/strings.test.ts	2026-10-29 23:38:20.432704001 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-29 23:41:41.992538277 +0000
+@@ -668,6 +668,8 @@
+     stopLabel: 'Stop',
+     playTitle: 'Play (Space)',
+     stopTitle: 'Stop (Space)',
++    playbackStatePlaying: 'Playing',
++    playbackStateStopped: 'Stopped',
+     projectEndPrefix: '/ end',
+     startPointInsertMarker: 'Insert marker',
+     startPointSelection: 'Time selection start',
+=== app/lib/arrangement/__tests__/render-budget.test.tsx
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/__tests__/render-budget.test.tsx	2026-10-29 23:38:20.432704001 +0000
++++ app/lib/arrangement/__tests__/render-budget.test.tsx	2026-10-29 23:41:55.269714347 +0000
+@@ -345,7 +345,9 @@
+         ArrangementLibraryOptionInner: 0,
+         ArrangementRulerTicksInner: 0,
+       });
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+       fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     },
+   );
+ 
+@@ -368,7 +370,9 @@
+       ).toHaveLength(1);
+       expect(view.getByTestId('arrangement-insert-marker')).toBe(line);
+       expect(line.isConnected).toBe(true);
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+       fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++      expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     },
+   );
+ 
+@@ -469,7 +473,9 @@
+       ArrangementLibraryOptionInner: 0,
+       ArrangementRulerTicksInner: 0,
+     });
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+     fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+   }, 15000);
+ 
+   it('shows the seek position immediately when stopped and after a zoom change', async () => {
+=== app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+--- ../tmp/studio-real-loop/b-round-256/r257-granted-start/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-29 23:38:20.432622889 +0000
++++ app/lib/arrangement/__tests__/grid-snap-ui.test.tsx	2026-10-29 23:41:43.170553933 +0000
+@@ -294,7 +294,7 @@
+     expect(gridded.container.querySelectorAll('[data-grid-lines="visible"]')).toHaveLength(2);
+   });
+ 
+-  it('GS14 keeps the transport toolbar unchanged and without a Snap control', async () => {
++  it('GS14 lists the regrouped transport toolbar controls in order and has no Snap control', async () => {
+     const { view } = await mountGridWorkspace();
+     const toolbar = view.getByTestId('arrangement-transport');
+     expect(toolbar.contains(view.getByRole('button', { name: 'Play' }))).toBe(true);

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-29T23:16:18.555Z)
+# Active loop summary (2026-10-30T00:08:34.586Z)
 
-- backlog.json 2425 KB -> active view 343 KB
-- status: G_ROOT_GATE round 256
-- servers: `{"checkedUtc":"2026-10-29T22:55:26.2888291Z","round":256,"attempt":1,"store":200}`
-- last publication: a061d524d14af347119f06b239b77747c36362a0 (rounds 254-255)
-- last root gate: round 256 skipped - C taskStatus FAIL
+- backlog.json 2435 KB -> active view 345 KB
+- status: G_ROOT_GATE round 257
+- servers: `{"checkedUtc":"2026-10-29T23:55:15.7262727Z","round":257,"attempt":1,"store":200}`
+- last publication: d732d2623fc16032153aa262c3e7d41fca4ed59a (rounds 256-257)
+- last root gate: round 257 published - commit d732d2623fc16032153aa262c3e7d41fca4ed59a pushed
 
 ## Current items: -
 
@@ -614,7 +614,7 @@
 - SABA-Q-10A-HOME-PLAYING / info / awaiting_user (D-29z432): non-blocking; round 249 ships the jump / while playing, Home and Back to start jump playback to 0 and move the insert marker there (as before). Or move only the marker and keep play
 - SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking | gate 249 S2 asks to keep it with the stage-2 questions (D-29z439) / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
 - SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432, (d)/(e) added D-29z441): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
-- B-R249-PAUSE-LABEL / low / dispatched round 256 (SABA-B-9 stage 1, D-29z486): Play label constant, Stop button; closes on C round 256 PASS + gate | scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
+- B-R249-PAUSE-LABEL / low / round 256 implemented (C rows pass) but C round 256 FAIL on C-R256-01; closes on C round 257 PASS + gate (D-29z491) | dispatched round 256 (SABA-B-9 stage 1, D-29z486): Play label constant, Stop button; closes on C round 256 PASS + gate | scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
 - GATE249-S2 / info / info (D-29z439): = SABA-Q-10A-CTRL-ARROW-RANGE / seekTo keeps the selection, so Space after Ctrl+arrows plays the selection
 - GATE249-S8 / info / = B-R249-PAUSE-LABEL (SABA-B-9) / status says Stop while the button reads Pause
 - GATE249-S9 / info / = TLM-R249-MAC-CMD-SHIFT-SPACE / Mac Cmd path unverified
@@ -634,7 +634,11 @@
 - A-R253-STOP-RENDER-BUDGET / info / ruled (D-29z471): round 254 grant 7 declares { timeout: 15_000 } on that test / render-budget Play->Pause->Play test 2534 ms = 50.7% of the 5 s default in A covering run (gate 253: 2479 ms)
 - INFO-B254-INK-ON-BRASS / info / info (D-29z469) / the ink insert-marker line on a selected clip brass title bar is 1.88:1 (the brass playhead there is ~1:1 today); measured and listed, not a
 - SABA-Q-10B-MARKER-LOOK / info / awaiting_user (D-29z472): non-blocking / SABA-B-10b deviations from Live for the visible insert marker: (a) light ink instead of Live blue (CZABA palette; distinct from the brass pl
-- SABA-Q-9-TRANSPORT / info / awaiting_user (D-29z483); defaults implemented in round 256 / Saba question, SABA-B-9: (a) Play pressed while playing: no-op (default) or restart from the insert marker (manual 6.3 silent); (b) single c
+- SABA-Q-9-TRANSPORT / info / awaiting_user (D-29z483; parts e,f added D-29z492/D-29z496); defaults implemented in rounds 256-257 / Saba question, SABA-B-9: (a) Play pressed while playing: no-op (default) or restart from the insert marker (manual 6.3 silent); (b) single c
+- C-R256-01 / medium / dispatched round 257 (D-29z492): Play and Stop aria-describedby a hidden state element 'Playing'/'Stopped'; closes on C round 257 PASS (C-A11Y-257) + gate / while playing, the transport exposes no programmatic playing state (Play name constant, no aria-pressed/description/live change); HEAD expos
+- C-R256-02 / low / dispatched round 257 (D-29z494): fixed in the owning round (cheap, file already granted) instead of deferred_low_polish / render-budget.test.tsx l.348, l.371, l.472: the cleanup Stop clicks lost HEAD's implicit 'still playing' check (name 'Pause') with no data-p
+- A-R256-REVIEW-STALE-GUARD / info / info; input for ARCH-CHECKPOINT-TRANSPORT-POSITIONS (A-R256-ARCH-PLAY-STOP-COMMANDS) (D-29z496) / Play/Stop guards read the rendered isPlaying while togglePlayback reads isPlayingRef; a Stop click between a non-click auto-stop and React's
+- A-R256-REVIEW-INFO / info / info signals (D-29z496); role=group candidate for SYS/a11y polish, not scheduled / pre-existing: no role=toolbar/role=group on the transport groups (Live 12 manual 41.4.1.1 'accessible groupings') and separators without ari
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
