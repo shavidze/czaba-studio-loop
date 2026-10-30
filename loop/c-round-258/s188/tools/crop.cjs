@@ -1,0 +1,5 @@
+// crop header band of two PNGs into one stacked PNG via Playwright page canvas. node crop.cjs <a.png> <b.png> <hDevPx> <out.png>
+const L = require('./lib.cjs'); const fs = require('fs');
+(async () => { const [a, bb, h, out] = process.argv.slice(2); const b = await L.chromium.launch(); const p = await b.newPage();
+  const d = await p.evaluate(async ({ a, b, h }) => { const ld = (s) => new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.src = s; }); const A = await ld(a), B = await ld(b); const c = document.createElement('canvas'); c.width = A.width; c.height = h * 2 + 10; const g = c.getContext('2d'); g.fillStyle = '#f00'; g.fillRect(0, 0, c.width, c.height); g.drawImage(B, 0, 0, A.width, h, 0, 0, A.width, h); g.drawImage(A, 0, 0, A.width, h, 0, h + 10, A.width, h); return c.toDataURL('image/png'); }, { a: 'data:image/png;base64,' + fs.readFileSync(a).toString('base64'), b: 'data:image/png;base64,' + fs.readFileSync(bb).toString('base64'), h: +h });
+  fs.writeFileSync(out, Buffer.from(d.split(',')[1], 'base64')); await b.close(); })();

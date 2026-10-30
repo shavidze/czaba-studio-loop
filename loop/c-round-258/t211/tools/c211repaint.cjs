@@ -1,0 +1,10 @@
+const L = require('./c211lib.cjs'); const path = require('path');
+(async () => { const b = await L.launch(); for (const [base, tag] of [['http://127.0.0.1:5191', 'base'], ['http://127.0.0.1:5190', 'cur']]) { const { ctx, page } = await L.openLab(b, base, 1280, 720);
+  await L.selectFirstClip(page); await L.typeClipGain(page, -6); await page.mouse.move(5, 5); await L.sleep(500);
+  const f = page.getByTestId('arrangement-detail-clip-gain-input'); const bb = await f.boundingBox(); const clip = { x: bb.x - 10, y: bb.y - 8, width: bb.width + 20, height: bb.height + 16 };
+  await page.screenshot({ path: path.join(L.SHOTS, `rp-${tag}-a-fresh.png`), clip });
+  const fd = L.sl(page, 'Clip Gain — fader'); await fd.focus(); await page.keyboard.press('Shift+Tab'); await page.keyboard.press('Tab'); await L.blurActive(page); await page.mouse.move(5, 5); await L.sleep(500);
+  await page.screenshot({ path: path.join(L.SHOTS, `rp-${tag}-b-afterfocus.png`), clip });
+  await page.setViewportSize({ width: 1281, height: 720 }); await L.sleep(300); await page.setViewportSize({ width: 1280, height: 720 }); await L.sleep(600);
+  await page.screenshot({ path: path.join(L.SHOTS, `rp-${tag}-c-afterresize.png`), clip });
+  await ctx.close(); } await b.close(); })();

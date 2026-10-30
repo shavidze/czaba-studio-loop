@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T00:08:34.586Z)
+# Active loop summary (2026-10-30T02:30:46.359Z)
 
-- backlog.json 2435 KB -> active view 345 KB
-- status: G_ROOT_GATE round 257
-- servers: `{"checkedUtc":"2026-10-29T23:55:15.7262727Z","round":257,"attempt":1,"store":200}`
+- backlog.json 2448 KB -> active view 347 KB
+- status: G_ROOT_GATE round 258
+- servers: `{"checkedUtc":"2026-10-30T00:28:34.3778174Z","round":258,"attempt":1,"store":200}`
 - last publication: d732d2623fc16032153aa262c3e7d41fca4ed59a (rounds 256-257)
-- last root gate: round 257 published - commit d732d2623fc16032153aa262c3e7d41fca4ed59a pushed
+- last root gate: round 258 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -614,7 +614,6 @@
 - SABA-Q-10A-HOME-PLAYING / info / awaiting_user (D-29z432): non-blocking; round 249 ships the jump / while playing, Home and Back to start jump playback to 0 and move the insert marker there (as before). Or move only the marker and keep play
 - SABA-Q-10A-CTRL-ARROW-RANGE / info / awaiting_user (D-29z432): non-blocking | gate 249 S2 asks to keep it with the stage-2 questions (D-29z439) / with a time selection, Ctrl+arrows move the insert marker but keep the selection (it chooses the tracks), so Space still plays the selection
 - SABA-Q-10A-DEVIATIONS / info / awaiting_user (D-29z432, (d)/(e) added D-29z441): non-blocking / SABA-B-10a deviations from Live: a time-only insert marker (no track, no up/down between tracks); no Ctrl/Option+Space Stop at End of Select
-- B-R249-PAUSE-LABEL / low / round 256 implemented (C rows pass) but C round 256 FAIL on C-R256-01; closes on C round 257 PASS + gate (D-29z491) | dispatched round 256 (SABA-B-9 stage 1, D-29z486): Play label constant, Stop button; closes on C round 256 PASS + gate | scheduled in SABA-B-9 (Stop button + label), not deferred (D-29z431) / after SABA-B-10a stage 1, Space while playing stops (the next Space restarts from the marker) but the transport button still says 'Pause'
 - GATE249-S2 / info / info (D-29z439): = SABA-Q-10A-CTRL-ARROW-RANGE / seekTo keeps the selection, so Space after Ctrl+arrows plays the selection
 - GATE249-S8 / info / = B-R249-PAUSE-LABEL (SABA-B-9) / status says Stop while the button reads Pause
 - GATE249-S9 / info / = TLM-R249-MAC-CMD-SHIFT-SPACE / Mac Cmd path unverified
@@ -634,11 +633,14 @@
 - A-R253-STOP-RENDER-BUDGET / info / ruled (D-29z471): round 254 grant 7 declares { timeout: 15_000 } on that test / render-budget Play->Pause->Play test 2534 ms = 50.7% of the 5 s default in A covering run (gate 253: 2479 ms)
 - INFO-B254-INK-ON-BRASS / info / info (D-29z469) / the ink insert-marker line on a selected clip brass title bar is 1.88:1 (the brass playhead there is ~1:1 today); measured and listed, not a
 - SABA-Q-10B-MARKER-LOOK / info / awaiting_user (D-29z472): non-blocking / SABA-B-10b deviations from Live for the visible insert marker: (a) light ink instead of Live blue (CZABA palette; distinct from the brass pl
-- SABA-Q-9-TRANSPORT / info / awaiting_user (D-29z483; parts e,f added D-29z492/D-29z496); defaults implemented in rounds 256-257 / Saba question, SABA-B-9: (a) Play pressed while playing: no-op (default) or restart from the insert marker (manual 6.3 silent); (b) single c
-- C-R256-01 / medium / dispatched round 257 (D-29z492): Play and Stop aria-describedby a hidden state element 'Playing'/'Stopped'; closes on C round 257 PASS (C-A11Y-257) + gate / while playing, the transport exposes no programmatic playing state (Play name constant, no aria-pressed/description/live change); HEAD expos
-- C-R256-02 / low / dispatched round 257 (D-29z494): fixed in the owning round (cheap, file already granted) instead of deferred_low_polish / render-budget.test.tsx l.348, l.371, l.472: the cleanup Stop clicks lost HEAD's implicit 'still playing' check (name 'Pause') with no data-p
+- SABA-Q-9-TRANSPORT / info / awaiting_user (D-29z483; parts e,f added D-29z492/D-29z496; part g added D-29z503); defaults implemented in rounds 256-257 / Saba question, SABA-B-9: (a) Play pressed while playing: no-op (default) or restart from the insert marker (manual 6.3 silent); (b) single c
 - A-R256-REVIEW-STALE-GUARD / info / info; input for ARCH-CHECKPOINT-TRANSPORT-POSITIONS (A-R256-ARCH-PLAY-STOP-COMMANDS) (D-29z496) / Play/Stop guards read the rendered isPlaying while togglePlayback reads isPlayingRef; a Stop click between a non-click auto-stop and React's
 - A-R256-REVIEW-INFO / info / info signals (D-29z496); role=group candidate for SYS/a11y polish, not scheduled / pre-existing: no role=toolbar/role=group on the transport groups (Live 12 manual 41.4.1.1 'accessible groupings') and separators without ari
+- GATE257-NARROW-TOOLBAR-OVERLAP / low / deferred_low_polish (D-29z500): ruled Low, below the project's 1024 px desktop floor (MobileWarning.tsx l.103 MobileBlocker on studio.$productId.tsx l.301), required viewports 1280/1440, TL-Q-VIEWPORT open, precedent C-R41-01; cheap candidate to fold into SABA-B-9 stage 2 if it grants ArrangementTransport.tsx (flex-wrap on the three groups, probe 768/900/1280/1440); C records RP-NARROW in round 258; a new overlap at >= 1024 px would be Medium | floor nuance: MobileBlocker (with continue-anyway) is only on the purchased studio.$productId route; /studio-lab has no blocker - the 1024 floor is sta ... [clipped; see backlog.json] / below 864 px the non-wrapping edit and view groups of the 2-column toolbar grid overlap (Delete/Split under the Zoom label and slider); HEAD
+- GATE257-KBD-GESTURE / low / deferred_low_polish (D-29z504); candidate for SABA-B-9 stage 2 if it grants shortcuts.ts / the sheet / the shortcut sheet renders 'Double-click Stop' inside <kbd> (shortcuts.ts l.40 keys; ArrangementShortcutSheet.tsx l.173-178) although it is 
+- GATE257-INDEX-LOOKUP / low / deferred_low_polish (D-29z504); candidate for SABA-B-9 stage 2 when it owns those tests (L12) / navigation-strings-ui.test.tsx l.175 finds Back to start by index (centre.querySelectorAll('button')[3]); GS14 grid-snap-ui l.405-418 checks
+- GATE257-DOC193-TC / low / open (D-29z504): ruled at the stage-1 close: l.93 is stale and is fixed when SABA-B-9 stage 2 writes doc 193 / its l.4 (L28 multi-stage clause); l.132 vs five = different scopes, no change; approach bullet: one clause added in the same edit / doc 193 l.93 says transport-centre-ui has TC1-TC9 (now TC1-TC11); l.132 'six tests' vs the round-257 bullet's 'five' M9 count (different sco
+- GATE257-EXPORT-INLINE-HANDLER / low / deferred_low_polish (D-29z504); candidate for SABA-B-9 stage 2 if it grants ArrangementTransport.tsx / ArrangementTransport.tsx l.390-394 Export repeats an inline Enter-repeat handler instead of preventRepeatedEnterKeyDown
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

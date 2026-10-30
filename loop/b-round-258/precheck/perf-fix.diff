@@ -1,0 +1,38 @@
+--- /home/runner/czaba-project/store/perf/lib/page.ts	2026-10-30 00:27:13.674427830 +0000
++++ perf/lib/page.ts	2026-10-30 02:33:44.219036109 +0000
+@@ -60,20 +60,20 @@
+ }
+ 
+ export const playButton = (page: Page): Locator =>
+-  page.getByRole('button', { name: /^(Play|Pause)$/ });
++  page.getByRole('button', { name: 'Play', exact: true });
+ 
+ export const audioRunning = (page: Page): Promise<boolean> =>
+   page.evaluate(() => window.__czabaPerf?.audioContextStates().includes('running') ?? false);
+ 
+ export async function isPlaying(page: Page): Promise<boolean> {
+-  const label = await playButton(page).getAttribute('aria-label');
+-  return label === 'Pause' && (await audioRunning(page));
++  const state = await playButton(page).getAttribute('data-playing');
++  return state === 'true' && (await audioRunning(page));
+ }
+ 
+ export async function setPlayback(page: Page, playing: boolean): Promise<void> {
+   await blurActive(page);
+   await page.keyboard.press('Space');
+-  await expect(playButton(page)).toHaveAttribute('aria-label', playing ? 'Pause' : 'Play', {
++  await expect(playButton(page)).toHaveAttribute('data-playing', playing ? 'true' : 'false', {
+     timeout: 15000,
+   });
+ }
+--- /home/runner/czaba-project/store/perf/studio-lab-interactions.perf.spec.ts	2026-10-30 00:27:13.674444225 +0000
++++ perf/studio-lab-interactions.perf.spec.ts	2026-10-30 02:33:44.219317494 +0000
+@@ -107,7 +107,7 @@
+ function dragTarget(clip: Locator, drag: DragName): Locator {
+   switch (drag) {
+     case 'range':
+-      return clip.getByTitle('drag = time selection · click = playhead', { exact: true });
++      return clip.getByTitle('drag = time selection · click = insert marker', { exact: true });
+     case 'fade':
+       return clip.getByTestId('arrangement-clip-fade-in-handle');
+     case 'trim':

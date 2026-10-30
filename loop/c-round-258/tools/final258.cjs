@@ -1,0 +1,12 @@
+const R = require('/home/runner/czaba-project/tmp/studio-real-loop/c-round-258/tools/report.cjs'); const fs = require('fs');
+R.record('SOURCE-SCOPE-end', 'pass', 'HEAD d732d2623fc1, git status empty, protected git diff --quiet rc 0 (scope-end.txt); mock :5199 stopped by its own PID; perf/smoke outputs only in gitignored test-results/');
+const d = R.load();
+d.taskStatus = 'FAIL';
+d.browserVerified = true; d.realVerified = true;
+d.envStatus = JSON.parse(fs.readFileSync('/home/runner/czaba-project/tmp/studio-real-loop/env-status.json', 'utf8'));
+d.summary = 'Regression sweep at d732d26: every §4b, §3, §4, §4.S, §5 and G258-3 browser row PASS (or recorded observation) at 1440x900 and 1280x720 (RG-03 1440; RG-22 also 390); RG-SMOKE PASS; RR-PERF FAIL = C-R258-01 (Medium, stale perf harness: Pause label + clip-body title), so the round has one Medium finding -> task §7 row 2 (bounded fix-up). No app-behaviour regression found.';
+d.scopeAdditions = 'SA-0..SA-43 all mapped: SA-0 RS-4B; SA-1 RV-SABA-1-2; SA-2/4/5 RR-MP3; SA-3 RR-OSS; SA-6 RR-LEGACY; SA-7 RR-PERF (FAIL); SA-8/9/10 RR-SHEET; SA-11 RR-OVERVIEW; SA-12 RR-TEMPO; SA-13/14 RR-STRIP; SA-15/16 RR-SEEDRACE; SA-17/18/19 RR-ADAPT; SA-20/21 RR-MENU; SA-22..25 RR-FOCUS-ORIGINS; SA-26 RR-HIDDEN-SNAP; SA-27,29..37,39 RR-MARKER; SA-28 observation; SA-38,40 RR-BLINK (+RR-SHEET bound 1280); SA-41/42 RR-TRANSPORT; SA-43 RP-NARROW.';
+d.carried = (d.carried || []).concat(['NO-SHIFT-203 tree-vs-ref box compare (needs a ref server; not started this round) — focus rings are outline-only per the sweep']);
+d.gate = ['full vitest', 'typecheck', 'build', 'Biome', 'npm run verify'];
+d.bugs = d.bugs.map((b) => ({ id: b.id, severity: b.severity, item: b.item, regression: b.regression, steps: b.steps, expected: b.expected, actual: b.actual, evidence: b.evidence }));
+R.saveJ(d);

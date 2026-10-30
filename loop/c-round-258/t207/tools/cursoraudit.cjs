@@ -1,0 +1,13 @@
+const { createRequire } = require('module');
+const req = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = req('playwright'); const fs=require('fs'); const path=require('path');
+const audit=(p)=>p.evaluate(()=>{const out=[];for(const e of document.querySelectorAll('[class*="cursor-"]')){const cls=(e.getAttribute('class')||'').split(/\s+/);const base=cls.filter(c=>/^cursor-[a-z-]+$/.test(c)).map(c=>c.slice(7));const dis=cls.some(c=>c==='disabled:cursor-not-allowed');const want=(dis&&e.disabled)?'not-allowed':base[base.length-1];if(!want)continue;const got=getComputedStyle(e).cursor;if(got!==want)out.push({tag:e.tagName.toLowerCase(),tid:e.getAttribute('data-testid')||e.getAttribute('aria-label')||'',want,got,disabled:!!e.disabled});}return out;});
+(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1440,height:900}});const p=await c.newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab');await p.waitForSelector('[data-testid=arrangement-grid-control]',{timeout:90000});await p.waitForTimeout(3000);
+const r={initial:await audit(p)};
+await p.locator('[data-testid=arrangement-video-input]').first().setInputFiles('/home/runner/czaba-project/tmp/studio-real-loop/media/beeps-6s-h264-aac.mp4');
+await p.waitForFunction(()=>document.querySelectorAll('[data-clip-kind=video]').length>0,null,{timeout:30000});await p.waitForTimeout(1500);
+await p.click('[data-testid=arrangement-video-expand]');await p.waitForTimeout(600);
+r.floating=await audit(p);await b.close();
+fs.writeFileSync(path.join(__dirname,'..','out','cursor-audit-1440.json'),JSON.stringify(r,null,1));
+const agg={};for(const [k,v] of Object.entries(r))for(const x of v){const key=`${x.tag}|${x.want}->${x.got}|${x.tid.slice(0,40)}`;agg[key]=(agg[key]||0)+1;}console.log(JSON.stringify(agg,null,1));})();
