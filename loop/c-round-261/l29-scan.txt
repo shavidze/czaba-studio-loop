@@ -1,0 +1,31 @@
+1:# Round 261: PERF-HARNESS-STRINGS-DRIFT (systemic, test code only: `perf/**` + doc 195) + RT-FIX-261 (re-check of B's retro corrections)
+11:- **Grants (edit):** `b-round-260-r261-grants.txt`: `perf/lib/page.ts`, `perf/studio-lab-interactions.perf.spec.ts`, `perf/studio-lab-resources.perf.spec.ts`, `perf/studio-lab.perf.spec.ts`.
+12:- **New files:** `b-round-260-r261-new-files.txt`: `perf/lib/app-labels.ts`, `docs/implementation/2026/quarter-IV/195-perf-harness-strings-drift.md`.
+13:- **Not granted:** everything else, especially all of `app/**` (including `app/lib/arrangement/strings.ts`), `perf/budgets*.json`, `perf/lib/report*.ts`, `playwright*.config.ts`, `package.json`, `tsconfig.json`, `biome.json`, `.claude/**`, `CLAUDE.md` and t
+41:**(b) 6 labels that exist only inline in components: one perf-local allowlist.** No `strings.ts` key produces these names, and moving them there is an `app/**` change, which this round does not grant [K5]:
+45:| `Clip Gain — fader` | `ArrangementDetailPanel.tsx` (aria-label) [K5] |
+46:| `Volume — ${mixLabel}` (track fader) | `ArrangementLane.tsx` (aria-label) [K5] |
+47:| `Pan — ${track.name}` | `ArrangementLane.tsx` (aria-label) [K5] |
+48:| `Master Volume` | `ArrangementMaster.tsx` (aria-label) [K5] |
+52:Why not grant `app/**` (D-29z525):
+53:- the systemic entry's `owner_area` is `perf/** only (test code)`;
+59:**(c) Fixture data: perf-local constants.** The track names `Music`, `Stems` and `SFX`, and the demo source title `Soft impact`, are data, not UI labels. Keep them as named constants in `perf/lib/app-labels.ts`. Do not import `app/data/*`: `studio-lab-demo.
+62:1. **New `perf/lib/app-labels.ts`**, the single point where perf gets app text:
+63:   - Exactly one import from the app: `../../app/lib/arrangement/strings` (relative). `strings.ts` imports only `./shortcuts`, and `shortcuts.ts` imports nothing [K7], so no alias is needed.
+66:   - Export the class (b) allowlist as data, one entry per label: `{ label, sourceFile, sourceNeedle }`. `sourceNeedle` is the exact substring that is in that file at HEAD (for example `aria-label="Master Volume"`). Use data, not comments (CLAUDE.md: no cod
+70:   - import every label, title and fixture text from `./lib/app-labels` (from `perf/lib/page.ts`: `./app-labels`);
+74:3. **Doc 195** (`docs/implementation/2026/quarter-IV/195-perf-harness-strings-drift.md`):
+76:   - l.4 byte-exact `**სტატუსი:** Completed (C round 261 PASS)` (L28);
+96:| **SOURCE-SCOPE** | From `store/`: <ul><li>`sha256sum -c --quiet ../tmp/studio-real-loop/b-round-260-r261-tree-sha256.txt` → rc 0;</li><li>`git status --short --untracked-files=all` lists only the 4 grants (` M`) and the 2 new files (`??`);</li><li>HEAD 
+97:| **PERF-SWEEP** | Run the sweep regex of claim [K3] over the 4 granted files. Also run `grep -nE "'Soft impact'\|WAV created\|drag to move\|set as the active track\|'Master Volume'\|'Clip Gain" perf/lib/page.ts perf/*.perf.spec.ts`. | Both print 0 lines. |
+98:| **WIRING** | Read `perf/lib/app-labels.ts`. | <ul><li>Exactly one app import, `../../app/lib/arrangement/strings`, and no `~/` import.</li><li>Each of the 11 class (a) rows of §1 is read from its named key or function.</li><li>No string literal in the fi
+103:| **DOC-261** | Doc 195. | TEMPLATE headings in order (L26); l.4 byte-exact (L28); every cited test exists (L26); both limits of §2.3 stated. | A heading missing, a status mismatch, a non-existent test, or a limit missing. |
+104:| **RT-FIX-261** | From the loop root: <ul><li>`diff b-round-260/lessons-before-261.md lessons.md`: only l.18 (L29) differs. `wc -l lessons.md` = 59, still 3 parts.</li><li>The new L29 contains the two inserted substrings exactly: `, and the task's state m
+128:- **A:** the 4 granted files, `perf/lib/app-labels.ts`, doc 195, and `a-round-261.md` (changes, the commands actually run and their results, the mutant line, the `test:perf` summary, the reviewer's notes).
+141:| K2 | 1,114 frozen entries; each protected file once | from the loop root: `wc -l < b-round-260-r261-tree-sha256.txt; for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-ro
+142:| K3 | the literal sites at `7a960c1` (baseline claim: pipe the sweep regex over `for f in perf/lib/page.ts perf/studio-lab-interactions.perf.spec.ts perf/studio-lab-resources.perf.spec.ts perf/studio-lab.perf.spec.ts; do git show 7a960c1:$f; done` with `g
+143:| K4 | the class (a) keys | `grep -nE "^\s+(playLabel\|formatButtonWav\|closeButton\|wavDone\|zoomSliderLabel\|trimStartLabel\|moveTitle\|rangeBodyTitle\|activeTrackLabel\|volumeLabel\|add):" app/lib/arrangement/strings.ts` | 11 lines: l.10, 41, 89, 223, 3
+144:| K5 | the class (b) inline labels | `grep -n 'aria-label="Clip Gain — fader"' app/components/arrangement/ArrangementDetailPanel.tsx; grep -nF 'Pan — ${track.name}' app/components/arrangement/ArrangementLane.tsx; grep -nF 'Volume — ${mixLabel}' app/c
+145:| K6 | the fixture title and the alias import | `grep -n "title: 'Soft impact'" app/data/studio-lab-demo.ts; grep -c "from '~/" app/data/studio-lab-demo.ts` | l.61; `3` |
+146:| K7 | `strings.ts` imports only `./shortcuts`; `shortcuts.ts` imports nothing | `grep -c "^import" app/lib/arrangement/strings.ts app/lib/arrangement/shortcuts.ts; grep -n "^import" app/lib/arrangement/strings.ts` | `…strings.ts:1`, `…shortcuts.ts:0`;
+147:| K8 | `perf/` is type-checked; Biome checks only `app/**`; vitest runs only `app/**` tests | `grep -n '"include"\|"exclude"' tsconfig.json; grep -n '"includes"' biome.json; grep -n "include:" vitest.config.ts` | `"include": ["**/*.ts", "**/*.tsx"]` and `"

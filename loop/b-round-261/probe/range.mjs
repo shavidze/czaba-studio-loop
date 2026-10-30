@@ -1,0 +1,34 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const out = process.argv[2];
+const res = {};
+const browser = await chromium.launch();
+const m = (page) => page.evaluate(() => { const f = document.querySelector('footer').getBoundingClientRect(); const s = document.querySelector('[data-testid="arrangement-timeline-scroller"]').getBoundingClientRect(); const ms = document.querySelector('[data-testid="arrangement-master"]').getBoundingClientRect(); return { footerH: f.height, footerY: f.y, scrollerH: s.height, master: [ms.x, ms.y, ms.width, ms.height], range: !!document.querySelector('[data-testid="arrangement-range"]'), status: document.querySelector('[data-testid="arrangement-status"]').textContent }; });
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const v = `${w}x${h}`;
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  await page.goto((process.env.BASE ?? 'http://127.0.0.1:5173') + '/studio-lab', { waitUntil: 'networkidle' });
+  await page.getByText(/Demo collection ready/).first().waitFor({ timeout: 60000 }).catch(() => {});
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.waitForTimeout(1200);
+  const body = page.locator('[title="drag = time selection · click = insert marker"]').first();
+  const bb = await body.boundingBox();
+  await page.mouse.move(bb.x + 40, bb.y + bb.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bb.x + 140, bb.y + bb.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(500);
+  res[v] = { headRange: await m(page) };
+  await page.evaluate(() => { const ms = document.querySelector('[data-testid="arrangement-master"]'); const row = document.querySelector('footer > div'); row.insertBefore(ms, [...row.children].at(-1)); });
+  await page.waitForTimeout(300);
+  res[v].sketchRange = await m(page);
+  await page.screenshot({ path: `${out}/sketch-range-${v}.png` });
+  await ctx.close();
+}
+await browser.close();
+writeFileSync(`${out}/range.json`, JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res));

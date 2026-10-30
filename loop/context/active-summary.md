@@ -1,12 +1,12 @@
-# Active loop summary (2026-10-30T04:11:59.175Z)
+# Active loop summary (2026-10-30T05:20:49.622Z)
 
-- backlog.json 2475 KB -> active view 355 KB
-- status: G_ROOT_GATE round 260
-- servers: `{"checkedUtc":"2026-10-30T04:01:27.3761691Z","round":260,"attempt":1,"store":200}`
-- last publication: 7a960c1511bfce1fb63d1c3779e1bb4b4ed76119 (rounds 258-259)
-- last root gate: round 260 skipped - C taskStatus FAIL
+- backlog.json 2481 KB -> active view 350 KB
+- status: G_ROOT_GATE round 261
+- servers: `{"checkedUtc":"2026-10-30T04:52:07.1857579Z","round":261,"attempt":1,"store":200}`
+- last publication: 10e1cd4f7df96bb0f9bd4c2f6ab293ee2e805839 (rounds 260-261)
+- last root gate: round 261 published - commit 10e1cd4f7df96bb0f9bd4c2f6ab293ee2e805839 pushed
 
-## Current items: SRW-21
+## Current items: -
 
 ## Open findings
 - untracked-frontend-architect-agent / - / root / store/.claude/agents/frontend-architect.md appeared untracked at 19:43:40 during C round 8; not created by A or C; .claude/** is forbidden f
@@ -658,4 +658,5 @@
 - SRW-18 [c_pass_tech_lead_manual (both stages C PASS browserVerified=true: stage 1 bdc2067, stage 2 a68c81d; Tech Lead R82-T/R83-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; C-R83-L1 closed round 84 X1-ALIGN)] Clip fade in/out handles and clip volume envelope (breakpoints line on clip)
 - SRW-19 [c_pass_tech_lead_manual (stage 1 C PASS round 84 browserVerified=true realVerified=true, both viewports, published 88b0262; R19-F1/R19-F2 pass; Tech Lead R84-T open; fake-Bearer 403 sub-check blocked: backend unavailable in cloud)] Simple video opacity fade (from/to black) on single video lane, preview only
 - SRW-20 [c_pass_tech_lead_manual (all stages C PASS browserVerified=true: 1 51e024a, 2 971141d, 3a eb1d0c0, 3b-1 35c8403, 3b-2 77cd5b6 (C round 91, gate 91); R20-X1..X4 pass; Tech Lead R86-T..R91-T open; fake-Bearer 403 sub-checks blocked: backend unavailable in cloud; PROD-MP3-UNVERIFIED gate row open)] Export completeness: range export, MP3 via existing ffmpeg (clear error if CDN load fails), WAV+MP3, encoding off main thread, overload warn
+- SRW-21 [deferred_user] Purchased-library mount readiness + final regression
 - SRW-24 [c_pass_tech_lead_manual] Delete/Backspace always leave a gap; Ctrl+Shift+L extends the existing time range to every lane; Ctrl+Shift+X is the only gap-closing delete

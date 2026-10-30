@@ -1,0 +1,134 @@
+diff -ru /home/runner/czaba-project/store/app/components/arrangement/ArrangementMaster.tsx /home/runner/czaba-project/tmp/b261-scratch/app/components/arrangement/ArrangementMaster.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementMaster.tsx	2026-10-30 04:24:57.171871569 +0000
++++ /home/runner/czaba-project/tmp/b261-scratch/app/components/arrangement/ArrangementMaster.tsx	2026-10-30 05:29:50.275464671 +0000
+@@ -21,7 +21,7 @@
+   MASTER_GAIN_MAX_DB,
+   MASTER_GAIN_MIN_DB,
+ } from '~/lib/arrangement/model';
+-import { studioMeterStrings } from '~/lib/arrangement/strings';
++import { studioMasterStrings, studioMeterStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import { ArrangementMixFader } from './ArrangementMixFader';
+ import { STUDIO_LEVEL_FADER_CLASS } from './studio-fader';
+@@ -169,7 +169,7 @@
+ 
+   return (
+     <fieldset
+-      aria-label="Master"
++      aria-label={studioMasterStrings.groupLabel}
+       className="flex items-center gap-2 border-l border-outline pl-3"
+       data-testid="arrangement-master"
+     >
+@@ -177,13 +177,13 @@
+         className="text-label font-medium uppercase tracking-label text-muted"
+         aria-hidden="true"
+       >
+-        Master
++        {studioMasterStrings.groupLabel}
+       </span>
+       <button
+         type="button"
+         aria-pressed={master.mute}
+-        aria-label="Master Mute"
+-        title="Master Mute"
++        aria-label={studioMasterStrings.muteLabel}
++        title={studioMasterStrings.muteLabel}
+         onClick={toggleMasterMute}
+         className={cn(
+           'h-5 w-5 shrink-0 rounded-md border border-transparent bg-foreground/5 text-xs font-medium leading-none motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',
+@@ -205,7 +205,7 @@
+         min={MASTER_GAIN_MIN_DB}
+         max={MASTER_GAIN_MAX_DB}
+         step={MASTER_GAIN_STEP_DB}
+-        aria-label="Master Volume"
++        aria-label={studioMasterStrings.volumeLabel}
+         onChange={(event) => previewMasterGain(Number(event.target.value))}
+         onPointerDown={masterFaderDrag.onPointerDown}
+         onDoubleClick={resetMasterGain}
+diff -ru /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx /home/runner/czaba-project/tmp/b261-scratch/app/components/arrangement/StudioWorkspace.tsx
+--- /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx	2026-10-30 04:24:57.173871566 +0000
++++ /home/runner/czaba-project/tmp/b261-scratch/app/components/arrangement/StudioWorkspace.tsx	2026-10-30 05:27:22.417025626 +0000
+@@ -2730,7 +2730,6 @@
+           </h1>
+         </div>
+         <div className="flex items-center gap-3">
+-          <ArrangementMaster />
+           <span className="rounded-sm border border-outline-strong px-2 py-0.5 text-xs text-muted">
+             {workspaceCollectionCopy(collection.origin).badge}
+           </span>
+@@ -3171,6 +3170,7 @@
+               &nbsp;
+             </p>
+           )}
++          <ArrangementMaster />
+           <button
+             ref={shortcutButtonRef}
+             type="button"
+diff -ru /home/runner/czaba-project/store/app/lib/arrangement/strings.ts /home/runner/czaba-project/tmp/b261-scratch/app/lib/arrangement/strings.ts
+--- /home/runner/czaba-project/store/app/lib/arrangement/strings.ts	2026-10-30 04:24:57.208871526 +0000
++++ /home/runner/czaba-project/tmp/b261-scratch/app/lib/arrangement/strings.ts	2026-10-30 05:29:45.578979149 +0000
+@@ -745,6 +745,12 @@
+   peak: string;
+ }
+ 
++export const studioMasterStrings = {
++  groupLabel: 'Master',
++  muteLabel: 'Master Mute',
++  volumeLabel: 'Master Volume',
++};
++
+ export const studioMeterStrings = {
+   trackPeakTitle: ({ name, peak }: StudioMeterPeakText): string => `${name} · Peak ${peak} dBFS`,
+   trackPeakOverTitle: ({ name, peak }: StudioMeterPeakText): string =>
+diff -ru /home/runner/czaba-project/store/perf/lib/app-labels.ts perf/lib/app-labels.ts
+--- /home/runner/czaba-project/store/perf/lib/app-labels.ts	2026-10-30 04:48:09.996571019 +0000
++++ perf/lib/app-labels.ts	2026-10-30 05:29:55.056096788 +0000
+@@ -4,6 +4,7 @@
+   studioGroupHeaderStrings,
+   studioLaneStrings,
+   studioLibraryPanelStrings,
++  studioMasterStrings,
+   studioPlaybackStrings,
+   studioViewStrings,
+ } from '../../app/lib/arrangement/strings';
+@@ -53,6 +54,8 @@
+   sourceNeedle: string;
+ }
+ 
++export const perfMasterVolumeLabel = studioMasterStrings.volumeLabel;
++
+ export const perfInlineLabels = {
+   clipGainFader: {
+     label: 'Clip Gain — fader',
+@@ -69,11 +72,6 @@
+     sourceFile: 'app/components/arrangement/ArrangementLane.tsx',
+     sourceNeedle: 'aria-label={`Pan — ${track.name}`}',
+   },
+-  masterVolume: {
+-    label: 'Master Volume',
+-    sourceFile: 'app/components/arrangement/ArrangementMaster.tsx',
+-    sourceNeedle: 'aria-label="Master Volume"',
+-  },
+   exportButton: {
+     label: 'Export',
+     sourceFile: 'app/components/arrangement/ArrangementTransport.tsx',
+diff -ru /home/runner/czaba-project/store/perf/studio-lab.perf.spec.ts perf/studio-lab.perf.spec.ts
+--- /home/runner/czaba-project/store/perf/studio-lab.perf.spec.ts	2026-10-30 04:31:16.467535674 +0000
++++ perf/studio-lab.perf.spec.ts	2026-10-30 05:29:50.290845465 +0000
+@@ -14,6 +14,7 @@
+   perfFixtureTracks,
+   perfGroupVolumePattern,
+   perfInlineLabels,
++  perfMasterVolumeLabel,
+   perfLibraryAddLabel,
+   perfMembersSourceTitle,
+   perfTrackPanLabel,
+@@ -176,7 +177,7 @@
+     case 'pan':
+       return slider(page, perfTrackPanLabel(perfFixtureTracks.music));
+     case 'master':
+-      return slider(page, perfInlineLabels.masterVolume.label);
++      return slider(page, perfMasterVolumeLabel);
+     case 'clipgain':
+     case 'clipgain-members':
+       return slider(page, perfInlineLabels.clipGainFader.label);
