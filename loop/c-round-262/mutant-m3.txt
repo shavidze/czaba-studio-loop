@@ -1,0 +1,92 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/tmp/c262-scratch[39m
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/master-ui.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1018[2mms[22m[39m
+       [32m✓[39m toggleMasterMute commits one Master Mute entry that Undo and Redo restore, with no status text[32m 24[2mms[22m[39m
+       [32m✓[39m applies a master change while playing to the live graph without creating a new one[32m 14[2mms[22m[39m
+       [32m✓[39m starts a new graph with the current master gain[32m 4[2mms[22m[39m
+       [32m✓[39m a Master fader pointer drag with several previews gives exactly one Master Volume entry[32m 5[2mms[22m[39m
+       [32m✓[39m keyboard steps commit one Master Volume entry per key-up, and a pending preview is flushed by Undo[32m 4[2mms[22m[39m
+       [32m✓[39m cancels a Master drag on blur and restores the value without an entry[32m 3[2mms[22m[39m
+       [32m✓[39m refuses Master edits during another pointer gesture and keeps track Volume labelled Volume[32m 5[2mms[22m[39m
+       [32m✓[39m reverts a Master drag on pointercancel without an entry[32m 3[2mms[22m[39m
+       [32m✓[39m refuses a Master drag while another pointer owns a gesture, and keeps that gesture[32m 4[2mms[22m[39m
+       [32m✓[39m removes the Master drag window listeners when the provider unmounts mid-drag[32m 8[2mms[22m[39m
+       [32m✓[39m adds the overload warning after a clipped render and keeps the done message[32m 4[2mms[22m[39m
+       [32m✓[39m has no warning key after a clean render, and renders with the current master[32m 3[2mms[22m[39m
+       [32m✓[39m still exports while Master is muted and says the file is silence[32m 3[2mms[22m[39m
+       [32m✓[39m renders the Master group with Mute, the fader and a readout that follows the value[32m 170[2mms[22m[39m
+[31m       [31m×[31m sits in the footer's last row, directly before the Shortcuts button, and renders 0 times per Play frame[39m[33m 372[2mms[22m[39m
+       [32m✓[39m LABELS: names the group, Mute and Volume from studioMasterStrings with no inline literals[32m 17[2mms[22m[39m
+       [32m✓[39m FOCUS-KEEP: keeps the same focused Master Volume node while the footer content changes[32m 292[2mms[22m[39m
+       [32m✓[39m shows the master-mute note only when muted and keeps the export button enabled[32m 28[2mms[22m[39m
+       [32m✓[39m shows the gain note only at a non-zero Master gain[32m 16[2mms[22m[39m
+       [32m✓[39m renders the overload warning as an alert after a clipped export and removes it on close[32m 37[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/meter-ui.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2323[2mms[22m[39m
+     [32m✓[39m creates one stereo splitter with an analyser per channel (fftSize ≥ 4096) as the live tap[32m 217[2mms[22m[39m
+     [32m✓[39m keeps the same tap when an edit reschedules the graph while playing[32m 172[2mms[22m[39m
+     [32m✓[39m latches an over that is only on the right channel (no mono down-mix)[32m 168[2mms[22m[39m
+     [32m✓[39m shows a −12 dBFS block as level −12.0, Peak text −12.0 and the clear state[32m 163[2mms[22m[39m
+     [32m✓[39m latches over at 1.5, shows +3.5 and keeps it through quiet frames and Pause/Play[32m 274[2mms[22m[39m
+     [32m✓[39m a Master Peak click resets to −∞ and clear with no history entry and no status text[32m 203[2mms[22m[39m
+     [32m✓[39m ignores a stale analyser block after a reset while paused, before fresh audio arrives[32m 160[2mms[22m[39m
+     [32m✓[39m Pause writes the floor frame: both attributes -inf, the Peak text unchanged[32m 159[2mms[22m[39m
+     [32m✓[39m renders ArrangementMaster and its meter 0 times per frame and at most once on the latch[32m 169[2mms[22m[39m
+     [32m✓[39m without createAnalyser, Play works, nothing throws and the meter stays at -inf[32m 158[2mms[22m[39m
+[31m     [31m×[31m puts Master Peak after Master Volume, after Play and before the Shortcuts button in the footer[39m[33m 452[2mms[22m[39m
+       [32m✓[39m hides the gain note while Master is muted and shows it again when unmuted[32m 25[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/master-ui.test.tsx[2m > [22mMaster bus (SRW-13 stage 1, FB-14, D-29p)[2m > [22mArrangementMaster component[2m > [22msits in the footer's last row, directly before the Shortcuts button, and renders 0 times per Play frame
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/master-ui.test.tsx:[2m655:38[22m[39m
+    [90m653| [39m      [34mexpect[39m(header)[33m.[39mnot[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m654| [39m      [34mexpect[39m(footer)[33m.[39mnot[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m655| [39m      [34mexpect[39m(footer[33m?.[39m[34mcontains[39m(mute))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m656| [39m      [34mexpect[39m(footer[33m?.[39m[34mcontains[39m(fader))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m657| [39m      [34mexpect[39m(header[33m?.[39m[34mcontains[39m(mute))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/meter-ui.test.tsx[2m > [22mMaster meter and Master Peak (SRW-13 stage 2a, D-29q)[2m > [22mputs Master Peak after Master Volume, after Play and before the Shortcuts button in the footer
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/meter-ui.test.tsx:[2m550:68[22m[39m
+    [90m548| [39m    })[33m;[39m
+    [90m549| [39m    [34mexpect[39m(group[33m.[39m[34mcontains[39m(peak))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m550| [39m    expect(view.container.querySelector('footer')?.contains(peak)).toB…
+    [90m   | [39m                                                                   [31m^[39m
+    [90m551| [39m    expect(view.container.querySelector('header')?.contains(peak)).toB…
+    [90m552| [39m    expect(peak.getAttribute('data-testid')).toBe('arrangement-master-…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m30 passed[39m[22m[90m (32)[39m
+[2m   Start at [22m 06:19:00
+[2m   Duration [22m 4.47s[2m (transform 2.00s, setup 0ms, import 3.10s, tests 3.34s, environment 858ms)[22m
+
+
+::error file=/home/runner/czaba-project/tmp/c262-scratch/app/lib/arrangement/__tests__/master-ui.test.tsx,title=app/lib/arrangement/__tests__/master-ui.test.tsx > Master bus (SRW-13 stage 1%2C FB-14%2C D-29p) > ArrangementMaster component > sits in the footer's last row%2C directly before the Shortcuts button%2C and renders 0 times per Play frame,line=655,column=38::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/master-ui.test.tsx:655:38%0A%0A
+
+::error file=/home/runner/czaba-project/tmp/c262-scratch/app/lib/arrangement/__tests__/meter-ui.test.tsx,title=app/lib/arrangement/__tests__/meter-ui.test.tsx > Master meter and Master Peak (SRW-13 stage 2a%2C D-29q) > puts Master Peak after Master Volume%2C after Play and before the Shortcuts button in the footer,line=550,column=68::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/meter-ui.test.tsx:550:68%0A%0A

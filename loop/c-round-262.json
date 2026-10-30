@@ -1,0 +1,90 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-30T06:08:55.1167982Z",
+  "round": 262,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R262-01",
+   "severity": "low",
+   "steps": [
+    "Fresh /studio-lab at 1440x900 or 1280x720",
+    "Press on the Master Volume thumb (footer), move left about 30% of the fader width",
+    "Press Escape while the pointer is still down",
+    "Release"
+   ],
+   "expected": "Task 262 KEYS row (and policy SABA-B-5 'Esc-cancel'): the pre-drag value is restored, with no history entry",
+   "actual": "The dragged value stays (-1.5 -> -21.5 dB) and a Master Volume entry is written. Pre-existing: C's HEAD 10e1cd4 copy behaves the same; useRelativeFaderDrag.ts cancels only on blur and pointercancel. Not caused by round 262. The only global Escape branch (StudioWorkspace.tsx l.2201-2208) returns the expanded floating video; no useRelativeFaderDrag fader (track, group, master, clip gain) has an Escape cancel.",
+   "evidence": "c-round-262/after-audio-keys.json and c-round-262/head/head-audio-keys.json (escPre/escMid/escAfter); app/hooks/useRelativeFaderDrag.ts listeners l.109-120"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "PLACE-1440",
+  "PLACE-1280",
+  "STATES",
+  "NARROW",
+  "SCREEN-BUDGET",
+  "TAB-ORDER",
+  "FOCUS-KEEP",
+  "AUDIO",
+  "KEYS",
+  "LABELS",
+  "PERF-WIRING",
+  "PERF-RUN",
+  "TESTS-TARGETED",
+  "DOCS",
+  "ABLETON",
+  "LESSON",
+  "G262-AUTH"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome full",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "specTensions": [
+  "AUDIO: '-inf within 1 s' after M. Measured 1083/1104 ms (HEAD 1074/1086). Trajectory (mute-trace.json): one pre-mute block held about 122 ms, then exactly -20.0 dB/s with no plateau, so the output is silent. Time to -inf depends on the pre-mute level: 2577 ms from 0 dB, 1336 ms from -20 dB. Meter ballistics in unchanged code.",
+  "KEYS: 'Esc restores the pre-drag value' is not a HEAD contract (no Escape handler; no unit row pins it). The keyboard steps (-0.5, -1.0, -1.5) equal HEAD. Filed as C-R262-01."
+ ],
+ "ableton": {
+  "R1": "deliberate difference D1",
+  "R2": "deliberate difference D2",
+  "R3": "deliberate difference D2 (not built)",
+  "R4": "deliberate difference D3",
+  "R5": "confirmed (volume lowers the output, measured); D4 for M and double-click",
+  "R6": "not applicable (no reference found)",
+  "R7": "unconfirmed on the Live side (inference); CZABA side measured"
+ },
+ "rows": {
+  "SOURCE-SCOPE": "PASS: HEAD 10e1cd4, sha -c rc 0, 9 M + doc196 ??, re-checked after perf",
+  "PLACE-1440": "PASS: footer 53, scroller 512, header 35, toolbar 49, Master 911.75..1336, gap 16.00, Shortcuts 1352/1428, 0 overlaps, no overflow",
+  "PLACE-1280": "PASS: footer 53, scroller 402, header 35, toolbar 87, Master 751.75..1176, gap 16.00, Shortcuts 1192/1268, 0 overlaps",
+  "STATES": "PASS: Master x/w unchanged across empty/clip/range/lane-move (hint reached by a real drag); footer 53/53/73/53; the clip line is nowrap with an ellipsis",
+  "NARROW": "PASS: 1024 empty and clip, 0 visible overlaps (one span hidden by truncate intersects geometrically); first visible overlap: none >= 1024",
+  "SCREEN-BUDGET": "PASS: 3 persistent text lines outside the timeline before and after, both viewports, empty and clip; no new strip",
+  "TAB-ORDER": "PASS: first stop Follow; full forward path ends Master Mute, Volume, Peak, Shortcuts; 0 BODY; Shift+Tab Peak, Volume, Mute focus-visible with a 1px brass outline; Tab from Shortcuts as HEAD",
+  "FOCUS-KEEP": "PASS: control 32/32; M2 (Master inside the ternary branch) red",
+  "AUDIO": "PASS (spec tension 1): finite at 0 dB; -26.5 dB drag drops the meter about 26 dB; M aria-pressed true, -inf at 1.08-1.10 s (HEAD identical); dblclick 0.0 dB; one Undo restores 0.0",
+  "KEYS": "PASS (spec tension 2): -0.5, -1.0, -1.5 equal HEAD; Esc does not cancel the drag at HEAD or after (C-R262-01)",
+  "LABELS": "PASS: grep 0; 3 keys; browser names Master / Master Mute / Master Volume",
+  "PERF-WIRING": "PASS: 5 entries, 5/5 needles; tsc control rc 0, rename mutant rc 2 with an error in perf/lib/app-labels.ts",
+  "PERF-RUN": "PASS: alone, rc 0, 3/3, complete, 0 aborts or errors, master rows present, playing.restarts 0; 0/0/4 deterministic deltas (bundle bytes only)",
+  "TESTS-TARGETED": "PASS: 9 files, 147/147; M3 (header) red in 2 rows",
+  "DOCS": "PASS: l.4 byte-exact in 193 and 196, headings in order, D1-D4 and +4px stated, cited tests exist",
+  "ABLETON": "PASS: every difference is a listed deviation",
+  "LESSON": "PASS: grep = 1",
+  "G262-AUTH": "PASS: studio-lab demo, auth_user null; product page Sign in required, 0 audio[src]; studio-token no header 401, no token"
+ },
+ "claimsL29": "K1-K10 re-run, all match (c-round-262/claims.txt)",
+ "rowCount": "17 task rows / 18 ids (PLACE at 2 viewports)"
+}

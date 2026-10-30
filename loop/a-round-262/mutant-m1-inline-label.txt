@@ -1,0 +1,282 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/tmp/a262-scratch[39m
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/master-ui.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1654[2mms[22m[39m
+       [32m✓[39m toggleMasterMute commits one Master Mute entry that Undo and Redo restore, with no status text[32m 24[2mms[22m[39m
+       [32m✓[39m applies a master change while playing to the live graph without creating a new one[32m 14[2mms[22m[39m
+       [32m✓[39m starts a new graph with the current master gain[32m 4[2mms[22m[39m
+       [32m✓[39m a Master fader pointer drag with several previews gives exactly one Master Volume entry[32m 5[2mms[22m[39m
+       [32m✓[39m keyboard steps commit one Master Volume entry per key-up, and a pending preview is flushed by Undo[32m 4[2mms[22m[39m
+       [32m✓[39m cancels a Master drag on blur and restores the value without an entry[32m 3[2mms[22m[39m
+       [32m✓[39m refuses Master edits during another pointer gesture and keeps track Volume labelled Volume[32m 5[2mms[22m[39m
+       [32m✓[39m reverts a Master drag on pointercancel without an entry[32m 3[2mms[22m[39m
+       [32m✓[39m refuses a Master drag while another pointer owns a gesture, and keeps that gesture[32m 4[2mms[22m[39m
+       [32m✓[39m removes the Master drag window listeners when the provider unmounts mid-drag[32m 8[2mms[22m[39m
+       [32m✓[39m adds the overload warning after a clipped render and keeps the done message[32m 4[2mms[22m[39m
+       [32m✓[39m has no warning key after a clean render, and renders with the current master[32m 3[2mms[22m[39m
+       [32m✓[39m still exports while Master is muted and says the file is silence[32m 3[2mms[22m[39m
+       [32m✓[39m renders the Master group with Mute, the fader and a readout that follows the value[32m 161[2mms[22m[39m
+       [33m[2m✓[22m[39m sits in the footer's last row, directly before the Shortcuts button, and renders 0 times per Play frame [33m 1008[2mms[22m[39m
+[31m       [31m×[31m LABELS: names the group, Mute and Volume from studioMasterStrings with no inline literals[39m[32m 34[2mms[22m[39m
+       [32m✓[39m FOCUS-KEEP: keeps the same focused Master Volume node while the footer content changes[32m 290[2mms[22m[39m
+       [32m✓[39m shows the master-mute note only when muted and keeps the export button enabled[32m 27[2mms[22m[39m
+       [32m✓[39m shows the gain note only at a non-zero Master gain[32m 18[2mms[22m[39m
+       [32m✓[39m renders the overload warning as an alert after a clipped export and removes it on close[32m 31[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/master-ui.test.tsx[2m > [22mMaster bus (SRW-13 stage 1, FB-14, D-29p)[2m > [22mArrangementMaster component[2m > [22mLABELS: names the group, Mute and Volume from studioMasterStrings with no inline literals
+[31m[1mAssertionError[22m: expected 'import { useCallback, useRef, useSync…' to contain 'studioMasterStrings.volumeLabel'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- studioMasterStrings.volumeLabel[39m
+[31m+ import { useCallback, useRef, useSyncExternalStore } from 'react';[39m
+[31m+ import {[39m
+[31m+   GESTURE_EDIT_BLOCKED_MESSAGE,[39m
+[31m+   useArrangement,[39m
+[31m+   useMasterMeterStore,[39m
+[31m+   useMasterMeterWriter,[39m
+[31m+ } from '~/contexts/ArrangementContext';[39m
+[31m+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';[39m
+[31m+ import { FADER_SHIFT_FINE_DIVISOR } from '~/lib/arrangement/fader';[39m
+[31m+ import {[39m
+[31m+   formatMeterDbAttribute,[39m
+[31m+   formatPeakDbfs,[39m
+[31m+   type MasterMeterStore,[39m
+[31m+   METER_CEILING_DB,[39m
+[31m+   METER_FLOOR_DB,[39m
+[31m+   meterDbToFraction,[39m
+[31m+ } from '~/lib/arrangement/meter';[39m
+[31m+ import { MASTER_GAIN_DRAFT_KEY } from '~/lib/arrangement/mix-draft-store';[39m
+[31m+ import {[39m
+[31m+   formatMasterGainDb,[39m
+[31m+   MASTER_GAIN_MAX_DB,[39m
+[31m+   MASTER_GAIN_MIN_DB,[39m
+[31m+ } from '~/lib/arrangement/model';[39m
+[31m+ import { studioMasterStrings, studioMeterStrings } from '~/lib/arrangement/strings';[39m
+[31m+ import { cn } from '~/lib/utils';[39m
+[31m+ import { ArrangementMixFader } from './ArrangementMixFader';[39m
+[31m+ import { STUDIO_LEVEL_FADER_CLASS } from './studio-fader';[39m
+[31m+[39m
+[31m+ const MASTER_GAIN_STEP_DB = 0.5;[39m
+[31m+ const MASTER_GAIN_DEFAULT_DB = 0;[39m
+[31m+ const MASTER_HOLD_CLAMP_FROM_DB = METER_CEILING_DB - 1;[39m
+[31m+ const MASTER_HOLD_TOP_TRANSFORM = 'translateX(calc(100% - 1px))';[39m
+[31m+ const MASTER_GAIN_FILL_RANGE = { min: MASTER_GAIN_MIN_DB, max: MASTER_GAIN_MAX_DB };[39m
+[31m+[39m
+[31m+ function masterGainSliderValue(gainDb: number): number {[39m
+[31m+   return gainDb;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ function renderMasterReadout(gainDb: number) {[39m
+[31m+   return ([39m
+[31m+     <span[39m
+[31m+       className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-foreground"[39m
+[31m+       data-testid="arrangement-master-readout"[39m
+[31m+     >[39m
+[31m+       {formatMasterGainDb(gainDb)}[39m
+[31m+     </span>[39m
+[31m+   );[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ function masterPeakLabel(text: string, over: boolean): string {[39m
+[31m+   return over[39m
+[31m+     ? studioMeterStrings.masterPeakOverLabel(text)[39m
+[31m+     : studioMeterStrings.masterPeakLabel(text);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ function ArrangementMasterMeter({ onResetPeak }: { onResetPeak: () => void }) {[39m
+[31m+   const store = useMasterMeterStore();[39m
+[31m+   const over = useSyncExternalStore(store.subscribeMeter, store.getMeterOver, () => false);[39m
+[31m+   const meterRef = useRef<HTMLDivElement>(null);[39m
+[31m+   const coverRef = useRef<HTMLSpanElement>(null);[39m
+[31m+   const holdRef = useRef<HTMLSpanElement>(null);[39m
+[31m+   const peakRef = useRef<HTMLButtonElement>(null);[39m
+[31m+   const writtenPeakRef = useRef('');[39m
+[31m+   const frame = store.getMeterFrame();[39m
+[31m+   const peakText = formatPeakDbfs(frame.maxPeak, frame.over);[39m
+[31m+[39m
+[31m+   const writeMeter = useCallback((meterStore: MasterMeterStore) => {[39m
+[31m+     const meter = meterRef.current;[39m
+[31m+     const cover = coverRef.current;[39m
+[31m+     const hold = holdRef.current;[39m
+[31m+     const peak = peakRef.current;[39m
+[31m+     if (!meter || !cover || !hold || !peak) {[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     const next = meterStore.getMeterFrame();[39m
+[31m+     meter.setAttribute('data-level-db', formatMeterDbAttribute(next.levelDb));[39m
+[31m+     meter.setAttribute('data-hold-db', formatMeterDbAttribute(next.holdDb));[39m
+[31m+     cover.style.transform = `scaleX(${1 - meterDbToFraction(next.levelDb)})`;[39m
+[31m+     hold.style.transform =[39m
+[31m+       next.holdDb > MASTER_HOLD_CLAMP_FROM_DB[39m
+[31m+         ? MASTER_HOLD_TOP_TRANSFORM[39m
+[31m+         : `translateX(${meterDbToFraction(next.holdDb) * 100}%)`;[39m
+[31m+     hold.style.visibility = next.holdDb > METER_FLOOR_DB ? 'visible' : 'hidden';[39m
+[31m+     const text = formatPeakDbfs(next.maxPeak, next.over);[39m
+[31m+     const labelKey = `${text}|${next.over}`;[39m
+[31m+     if (writtenPeakRef.current !== labelKey) {[39m
+[31m+       writtenPeakRef.current = labelKey;[39m
+[31m+       peak.textContent = text;[39m
+[31m+       peak.setAttribute('aria-label', masterPeakLabel(text, next.over));[39m
+[31m+     }[39m
+[31m+   }, []);[39m
+[31m+[39m
+[31m+   useMasterMeterWriter(writeMeter);[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <>[39m
+[31m+       <div[39m
+[31m+         ref={meterRef}[39m
+[31m+         aria-hidden="true"[39m
+[31m+         data-testid="arrangement-master-meter"[39m
+[31m+         data-level-db={formatMeterDbAttribute(frame.levelDb)}[39m
+[31m+         data-hold-db={formatMeterDbAttribute(frame.holdDb)}[39m
+[31m+         className="relative h-1.5 w-20 shrink-0 overflow-hidden rounded-full"[39m
+[31m+       >[39m
+[31m+         <span className="absolute inset-0 flex">[39m
+[31m+           <span className="flex-9 bg-positive/80" />[39m
+[31m+           <span className="flex-1 bg-warning/80" />[39m
+[31m+           <span className="flex-1 bg-destructive" />[39m
+[31m+         </span>[39m
+[31m+         <span ref={coverRef} className="absolute inset-0 origin-right bg-outline" />[39m
+[31m+         <span className="absolute inset-0 flex">[39m
+[31m+           <span className="flex-10" />[39m
+[31m+           <span className="flex-1 border-l border-foreground/70" />[39m
+[31m+         </span>[39m
+[31m+         <span ref={holdRef} className="invisible absolute inset-0">[39m
+[31m+           <span className="absolute inset-y-0 left-0 -ml-px w-0.5 bg-foreground" />[39m
+[31m+         </span>[39m
+[31m+       </div>[39m
+[31m+       <button[39m
+[31m+         ref={peakRef}[39m
+[31m+         type="button"[39m
+[31m+         data-testid="arrangement-master-peak"[39m
+[31m+         data-state={over ? 'over' : 'clear'}[39m
+[31m+         aria-label={masterPeakLabel(peakText, frame.over)}[39m
+[31m+         onClick={onResetPeak}[39m
+[31m+         className={cn([39m
+[31m+           'h-5 w-14 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-right font-mono text-xs tabular-nums motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',[39m
+[31m+           over[39m
+[31m+             ? 'border-destructive bg-destructive/15 text-destructive'[39m
+[31m+             : 'text-muted hover:text-foreground',[39m
+[31m+           over && 'enabled:hover:bg-destructive/15 enabled:active:bg-destructive/15',[39m
+[31m+         )}[39m
+[31m+       >[39m
+[31m+         {peakText}[39m
+[31m+       </button>[39m
+[31m+     </>[39m
+[31m+   );[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ export function ArrangementMaster() {[39m
+[31m+   const {[39m
+[31m+     master,[39m
+[31m+     toggleMasterMute,[39m
+[31m+     previewMasterGain,[39m
+[31m+     commitMasterGain,[39m
+[31m+     beginMasterGainGesture,[39m
+[31m+     blurMasterGain,[39m
+[31m+     isPointerGestureActive,[39m
+[31m+     resetMasterPeak,[39m
+[31m+     getArrangement,[39m
+[31m+     setStatus,[39m
+[31m+   } = useArrangement();[39m
+[31m+   const masterFaderDrag = useRelativeFaderDrag({[39m
+[31m+     min: MASTER_GAIN_MIN_DB,[39m
+[31m+     max: MASTER_GAIN_MAX_DB,[39m
+[31m+     step: MASTER_GAIN_STEP_DB,[39m
+[31m+     fineDivisor: FADER_SHIFT_FINE_DIVISOR,[39m
+[31m+     readStoredValue: () => getArrangement().master.gainDb,[39m
+[31m+     isPointerGestureActive,[39m
+[31m+     beginGesture: beginMasterGainGesture,[39m
+[31m+     previewValue: previewMasterGain,[39m
+[31m+     refuseGesture: () => setStatus(GESTURE_EDIT_BLOCKED_MESSAGE),[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   const resetMasterGain = () => {[39m
+[31m+     previewMasterGain(MASTER_GAIN_DEFAULT_DB);[39m
+[31m+     commitMasterGain();[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <fieldset[39m
+[31m+       aria-label={studioMasterStrings.groupLabel}[39m
+[31m+       className="flex items-center gap-2 border-l border-outline pl-3"[39m
+[31m+       data-testid="arrangement-master"[39m
+[31m+     >[39m
+[31m+       <span[39m
+[31m+         className="text-label font-medium uppercase tracking-label text-muted"[39m
+[31m+         aria-hidden="true"[39m
+[31m+       >[39m
+[31m+         {studioMasterStrings.groupLabel}[39m
+[31m+       </span>[39m
+[31m+       <button[39m
+[31m+         type="button"[39m
+[31m+         aria-pressed={master.mute}[39m
+[31m+         aria-label={studioMasterStrings.muteLabel}[39m
+[31m+         title={studioMasterStrings.muteLabel}[39m
+[31m+         onClick={toggleMasterMute}[39m
+[31m+         className={cn([39m
+[31m+           'h-5 w-5 shrink-0 rounded-md border border-transparent bg-foreground/5 text-xs font-medium leading-none motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',[39m
+[31m+           master.mute[39m
+[31m+             ? 'border-muted bg-muted text-background enabled:hover:bg-muted enabled:active:bg-muted'[39m
+[31m+             : 'text-muted hover:text-foreground',[39m
+[31m+         )}[39m
+[31m+       >[39m
+[31m+         M[39m
+[31m+       </button>[39m
+[31m+       <ArrangementMixFader[39m
+[31m+         ref={masterFaderDrag.ref}[39m
+[31m+         draftKey={MASTER_GAIN_DRAFT_KEY}[39m
+[31m+         storedValue={master.gainDb}[39m
+[31m+         toSliderValue={masterGainSliderValue}[39m
+[31m+         formatValueText={formatMasterGainDb}[39m
+[31m+         fillRange={MASTER_GAIN_FILL_RANGE}[39m
+[31m+         renderReadout={renderMasterReadout}[39m
+[31m+         min={MASTER_GAIN_MIN_DB}[39m
+[31m+         max={MASTER_GAIN_MAX_DB}[39m
+[31m+         step={MASTER_GAIN_STEP_DB}[39m
+[31m+         aria-label="Master Volume"[39m
+[31m+         onChange={(event) => previewMasterGain(Number(event.target.value))}[39m
+[31m+         onPointerDown={masterFaderDrag.onPointerDown}[39m
+[31m+         onDoubleClick={resetMasterGain}[39m
+[31m+         onPointerUp={commitMasterGain}[39m
+[31m+         onLostPointerCapture={commitMasterGain}[39m
+[31m+         onKeyUp={() => {[39m
+[31m+           if (!isPointerGestureActive()) {[39m
+[31m+             commitMasterGain();[39m
+[31m+           }[39m
+[31m+         }}[39m
+[31m+         onBlur={blurMasterGain}[39m
+[31m+         className={`h-4 w-24 shrink-0 touch-none ${STUDIO_LEVEL_FADER_CLASS}`}[39m
+[31m+       />[39m
+[31m+       <ArrangementMasterMeter onResetPeak={resetMasterPeak} />[39m
+[31m+     </fieldset>[39m
+[31m+   );[39m
+[31m+ }[39m
+[31m+[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/master-ui.test.tsx:[2m703:22[22m[39m
+    [90m701| [39m      expect(view.getByRole('slider', { name: studioMasterStrings.volu…
+    [90m702| [39m      const source = readFileSync(ARRANGEMENT_MASTER_SOURCE_PATH, 'utf…
+    [90m703| [39m      [34mexpect[39m(source)[33m.[39m[34mtoContain[39m([32m'studioMasterStrings.volumeLabel'[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m704| [39m      [34mexpect[39m(source)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'aria-label="Master'[39m)[33m;[39m
+    [90m705| [39m      [34mexpect[39m(source)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'title="Master Mute"'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m19 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 05:46:38
+[2m   Duration [22m 3.63s[2m (transform 1.04s, setup 0ms, import 1.47s, tests 1.65s, environment 374ms)[22m
+
+
+::error file=/home/runner/czaba-project/tmp/a262-scratch/app/lib/arrangement/__tests__/master-ui.test.tsx,title=app/lib/arrangement/__tests__/master-ui.test.tsx > Master bus (SRW-13 stage 1%2C FB-14%2C D-29p) > ArrangementMaster component > LABELS%3A names the group%2C Mute and Volume from studioMasterStrings with no inline literals,line=703,column=22::AssertionError: expected 'import { useCallback, useRef, useSync…' to contain 'studioMasterStrings.volumeLabel'%0A%0A- Expected%0A+ Received%0A%0A- studioMasterStrings.volumeLabel%0A+ import { useCallback, useRef, useSyncExternalStore } from 'react';%0A+ import {%0A+   GESTURE_EDIT_BLOCKED_MESSAGE,%0A+   useArrangement,%0A+   useMasterMeterStore,%0A+   useMasterMeterWriter,%0A+ } from '~/contexts/ArrangementContext';%0A+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';%0A+ import { FADER_SHIFT_FINE_DIVISOR } from '~/lib/arrangement/fader';%0A+ import {%0A+   formatMeterDbAttribute,%0A+   formatPeakDbfs,%0A+   type MasterMeterStore,%0A+   METER_CEILING_DB,%0A+   METER_FLOOR_DB,%0A+   meterDbToFraction,%0A+ } from '~/lib/arrangement/meter';%0A+ import { MASTER_GAIN_DRAFT_KEY } from '~/lib/arrangement/mix-draft-store';%0A+ import {%0A+   formatMasterGainDb,%0A+   MASTER_GAIN_MAX_DB,%0A+   MASTER_GAIN_MIN_DB,%0A+ } from '~/lib/arrangement/model';%0A+ import { studioMasterStrings, studioMeterStrings } from '~/lib/arrangement/strings';%0A+ import { cn } from '~/lib/utils';%0A+ import { ArrangementMixFader } from './ArrangementMixFader';%0A+ import { STUDIO_LEVEL_FADER_CLASS } from './studio-fader';%0A+%0A+ const MASTER_GAIN_STEP_DB = 0.5;%0A+ const MASTER_GAIN_DEFAULT_DB = 0;%0A+ const MASTER_HOLD_CLAMP_FROM_DB = METER_CEILING_DB - 1;%0A+ const MASTER_HOLD_TOP_TRANSFORM = 'translateX(calc(100%25 - 1px))';%0A+ const MASTER_GAIN_FILL_RANGE = { min: MASTER_GAIN_MIN_DB, max: MASTER_GAIN_MAX_DB };%0A+%0A+ function masterGainSliderValue(gainDb: number): number {%0A+   return gainDb;%0A+ }%0A+%0A+ function renderMasterReadout(gainDb: number) {%0A+   return (%0A+     <span%0A+       className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-foreground"%0A+       data-testid="arrangement-master-readout"%0A+     >%0A+       {formatMasterGainDb(gainDb)}%0A+     </span>%0A+   );%0A+ }%0A+%0A+ function masterPeakLabel(text: string, over: boolean): string {%0A+   return over%0A+     ? studioMeterStrings.masterPeakOverLabel(text)%0A+     : studioMeterStrings.masterPeakLabel(text);%0A+ }%0A+%0A+ function ArrangementMasterMeter({ onResetPeak }: { onResetPeak: () => void }) {%0A+   const store = useMasterMeterStore();%0A+   const over = useSyncExternalStore(store.subscribeMeter, store.getMeterOver, () => false);%0A+   const meterRef = useRef<HTMLDivElement>(null);%0A+   const coverRef = useRef<HTMLSpanElement>(null);%0A+   const holdRef = useRef<HTMLSpanElement>(null);%0A+   const peakRef = useRef<HTMLButtonElement>(null);%0A+   const writtenPeakRef = useRef('');%0A+   const frame = store.getMeterFrame();%0A+   const peakText = formatPeakDbfs(frame.maxPeak, frame.over);%0A+%0A+   const writeMeter = useCallback((meterStore: MasterMeterStore) => {%0A+     const meter = meterRef.current;%0A+     const cover = coverRef.current;%0A+     const hold = holdRef.current;%0A+     const peak = peakRef.current;%0A+     if (!meter || !cover || !hold || !peak) {%0A+       return;%0A+     }%0A+     const next = meterStore.getMeterFrame();%0A+     meter.setAttribute('data-level-db', formatMeterDbAttribute(next.levelDb));%0A+     meter.setAttribute('data-hold-db', formatMeterDbAttribute(next.holdDb));%0A+     cover.style.transform = `scaleX(${1 - meterDbToFraction(next.levelDb)})`;%0A+     hold.style.transform =%0A+       next.holdDb > MASTER_HOLD_CLAMP_FROM_DB%0A+         ? MASTER_HOLD_TOP_TRANSFORM%0A+         : `translateX(${meterDbToFraction(next.holdDb) * 100}%25)`;%0A+     hold.style.visibility = next.holdDb > METER_FLOOR_DB ? 'visible' : 'hidden';%0A+     const text = formatPeakDbfs(next.maxPeak, next.over);%0A+     const labelKey = `${text}|${next.over}`;%0A+     if (writtenPeakRef.current !== labelKey) {%0A+       writtenPeakRef.current = labelKey;%0A+       peak.textContent = text;%0A+       peak.setAttribute('aria-label', masterPeakLabel(text, next.over));%0A+     }%0A+   }, []);%0A+%0A+   useMasterMeterWriter(writeMeter);%0A+%0A+   return (%0A+     <>%0A+       <div%0A+         ref={meterRef}%0A+         aria-hidden="true"%0A+         data-testid="arrangement-master-meter"%0A+         data-level-db={formatMeterDbAttribute(frame.levelDb)}%0A+         data-hold-db={formatMeterDbAttribute(frame.holdDb)}%0A+         className="relative h-1.5 w-20 shrink-0 overflow-hidden rounded-full"%0A+       >%0A+         <span className="absolute inset-0 flex">%0A+           <span className="flex-9 bg-positive/80" />%0A+           <span className="flex-1 bg-warning/80" />%0A+           <span className="flex-1 bg-destructive" />%0A+         </span>%0A+         <span ref={coverRef} className="absolute inset-0 origin-right bg-outline" />%0A+         <span className="absolute inset-0 flex">%0A+           <span className="flex-10" />%0A+           <span className="flex-1 border-l border-foreground/70" />%0A+         </span>%0A+         <span ref={holdRef} className="invisible absolute inset-0">%0A+           <span className="absolute inset-y-0 left-0 -ml-px w-0.5 bg-foreground" />%0A+         </span>%0A+       </div>%0A+       <button%0A+         ref={peakRef}%0A+         type="button"%0A+         data-testid="arrangement-master-peak"%0A+         data-state={over ? 'over' : 'clear'}%0A+         aria-label={masterPeakLabel(peakText, frame.over)}%0A+         onClick={onResetPeak}%0A+         className={cn(%0A+           'h-5 w-14 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-right font-mono text-xs tabular-nums motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',%0A+           over%0A+             ? 'border-destructive bg-destructive/15 text-destructive'%0A+             : 'text-muted hover:text-foreground',%0A+           over && 'enabled:hover:bg-destructive/15 enabled:active:bg-destructive/15',%0A+         )}%0A+       >%0A+         {peakText}%0A+       </button>%0A+     </>%0A+   );%0A+ }%0A+%0A+ export function ArrangementMaster() {%0A+   const {%0A+     master,%0A+     toggleMasterMute,%0A+     previewMasterGain,%0A+     commitMasterGain,%0A+     beginMasterGainGesture,%0A+     blurMasterGain,%0A+     isPointerGestureActive,%0A+     resetMasterPeak,%0A+     getArrangement,%0A+     setStatus,%0A+   } = useArrangement();%0A+   const masterFaderDrag = useRelativeFaderDrag({%0A+     min: MASTER_GAIN_MIN_DB,%0A+     max: MASTER_GAIN_MAX_DB,%0A+     step: MASTER_GAIN_STEP_DB,%0A+     fineDivisor: FADER_SHIFT_FINE_DIVISOR,%0A+     readStoredValue: () => getArrangement().master.gainDb,%0A+     isPointerGestureActive,%0A+     beginGesture: beginMasterGainGesture,%0A+     previewValue: previewMasterGain,%0A+     refuseGesture: () => setStatus(GESTURE_EDIT_BLOCKED_MESSAGE),%0A+   });%0A+%0A+   const resetMasterGain = () => {%0A+     previewMasterGain(MASTER_GAIN_DEFAULT_DB);%0A+     commitMasterGain();%0A+   };%0A+%0A+   return (%0A+     <fieldset%0A+       aria-label={studioMasterStrings.groupLabel}%0A+       className="flex items-center gap-2 border-l border-outline pl-3"%0A+       data-testid="arrangement-master"%0A+     >%0A+       <span%0A+         className="text-label font-medium uppercase tracking-label text-muted"%0A+         aria-hidden="true"%0A+       >%0A+         {studioMasterStrings.groupLabel}%0A+       </span>%0A+       <button%0A+         type="button"%0A+         aria-pressed={master.mute}%0A+         aria-label={studioMasterStrings.muteLabel}%0A+         title={studioMasterStrings.muteLabel}%0A+         onClick={toggleMasterMute}%0A+         className={cn(%0A+           'h-5 w-5 shrink-0 rounded-md border border-transparent bg-foreground/5 text-xs font-medium leading-none motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',%0A+           master.mute%0A+             ? 'border-muted bg-muted text-background enabled:hover:bg-muted enabled:active:bg-muted'%0A+             : 'text-muted hover:text-foreground',%0A+         )}%0A+       >%0A+         M%0A+       </button>%0A+       <ArrangementMixFader%0A+         ref={masterFaderDrag.ref}%0A+         draftKey={MASTER_GAIN_DRAFT_KEY}%0A+         storedValue={master.gainDb}%0A+         toSliderValue={masterGainSliderValue}%0A+         formatValueText={formatMasterGainDb}%0A+         fillRange={MASTER_GAIN_FILL_RANGE}%0A+         renderReadout={renderMasterReadout}%0A+         min={MASTER_GAIN_MIN_DB}%0A+         max={MASTER_GAIN_MAX_DB}%0A+         step={MASTER_GAIN_STEP_DB}%0A+         aria-label="Master Volume"%0A+         onChange={(event) => previewMasterGain(Number(event.target.value))}%0A+         onPointerDown={masterFaderDrag.onPointerDown}%0A+         onDoubleClick={resetMasterGain}%0A+         onPointerUp={commitMasterGain}%0A+         onLostPointerCapture={commitMasterGain}%0A+         onKeyUp={() => {%0A+           if (!isPointerGestureActive()) {%0A+             commitMasterGain();%0A+           }%0A+         }}%0A+         onBlur={blurMasterGain}%0A+         className={`h-4 w-24 shrink-0 touch-none ${STUDIO_LEVEL_FADER_CLASS}`}%0A+       />%0A+       <ArrangementMasterMeter onResetPeak={resetMasterPeak} />%0A+     </fieldset>%0A+   );%0A+ }%0A+%0A%0A ❯ app/lib/arrangement/__tests__/master-ui.test.tsx:703:22%0A%0A

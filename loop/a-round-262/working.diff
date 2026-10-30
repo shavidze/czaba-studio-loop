@@ -1,0 +1,357 @@
+diff --git a/app/components/arrangement/ArrangementMaster.tsx b/app/components/arrangement/ArrangementMaster.tsx
+index b1f2a68..ae3e418 100644
+--- a/app/components/arrangement/ArrangementMaster.tsx
++++ b/app/components/arrangement/ArrangementMaster.tsx
+@@ -21,7 +21,7 @@ import {
+   MASTER_GAIN_MAX_DB,
+   MASTER_GAIN_MIN_DB,
+ } from '~/lib/arrangement/model';
+-import { studioMeterStrings } from '~/lib/arrangement/strings';
++import { studioMasterStrings, studioMeterStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
+ import { ArrangementMixFader } from './ArrangementMixFader';
+ import { STUDIO_LEVEL_FADER_CLASS } from './studio-fader';
+@@ -169,7 +169,7 @@ export function ArrangementMaster() {
+ 
+   return (
+     <fieldset
+-      aria-label="Master"
++      aria-label={studioMasterStrings.groupLabel}
+       className="flex items-center gap-2 border-l border-outline pl-3"
+       data-testid="arrangement-master"
+     >
+@@ -177,13 +177,13 @@ export function ArrangementMaster() {
+         className="text-label font-medium uppercase tracking-label text-muted"
+         aria-hidden="true"
+       >
+-        Master
++        {studioMasterStrings.groupLabel}
+       </span>
+       <button
+         type="button"
+         aria-pressed={master.mute}
+-        aria-label="Master Mute"
+-        title="Master Mute"
++        aria-label={studioMasterStrings.muteLabel}
++        title={studioMasterStrings.muteLabel}
+         onClick={toggleMasterMute}
+         className={cn(
+           'h-5 w-5 shrink-0 rounded-md border border-transparent bg-foreground/5 text-xs font-medium leading-none motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12',
+@@ -205,7 +205,7 @@ export function ArrangementMaster() {
+         min={MASTER_GAIN_MIN_DB}
+         max={MASTER_GAIN_MAX_DB}
+         step={MASTER_GAIN_STEP_DB}
+-        aria-label="Master Volume"
++        aria-label={studioMasterStrings.volumeLabel}
+         onChange={(event) => previewMasterGain(Number(event.target.value))}
+         onPointerDown={masterFaderDrag.onPointerDown}
+         onDoubleClick={resetMasterGain}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 1e201b7..65a6f9c 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -2730,7 +2730,6 @@ export function StudioWorkspace() {
+           </h1>
+         </div>
+         <div className="flex items-center gap-3">
+-          <ArrangementMaster />
+           <span className="rounded-sm border border-outline-strong px-2 py-0.5 text-xs text-muted">
+             {workspaceCollectionCopy(collection.origin).badge}
+           </span>
+@@ -3171,6 +3170,7 @@ export function StudioWorkspace() {
+               &nbsp;
+             </p>
+           )}
++          <ArrangementMaster />
+           <button
+             ref={shortcutButtonRef}
+             type="button"
+diff --git a/app/lib/arrangement/__tests__/master-ui.test.tsx b/app/lib/arrangement/__tests__/master-ui.test.tsx
+index f23b885..b7445e0 100644
+--- a/app/lib/arrangement/__tests__/master-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/master-ui.test.tsx
+@@ -1,3 +1,5 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
+ import { act, fireEvent, render, renderHook } from '@testing-library/react';
+ import { createElement, type ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+@@ -16,7 +18,11 @@ import {
+   type ScheduleHandle,
+ } from '~/lib/arrangement/graph.client';
+ import { MASTER_GAIN_DRAFT_KEY } from '~/lib/arrangement/mix-draft-store';
+-import { studioExportStrings } from '~/lib/arrangement/strings';
++import {
++  studioExportStrings,
++  studioMasterStrings,
++  studioShortcutSheetStrings,
++} from '~/lib/arrangement/strings';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ 
+@@ -101,6 +107,11 @@ vi.mock('~/lib/arrangement/graph.client', async (importOriginal) => {
+   };
+ });
+ 
++const ARRANGEMENT_MASTER_SOURCE_PATH = resolve(
++  __dirname,
++  '../../../components/arrangement/ArrangementMaster.tsx',
++);
++
+ const applyScheduleMock = vi.mocked(applySchedule);
+ const renderWavMock = vi.mocked(renderArrangementWav);
+ 
+@@ -620,7 +631,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+       expect(live(api).undoLabel).toBe('Master Mute');
+     });
+ 
+-    it('sits in the workspace header before the transport and renders 0 times per Play frame', async () => {
++    it("sits in the footer's last row, directly before the Shortcuts button, and renders 0 times per Play frame", async () => {
+       const api: MasterApiRef = { current: null };
+       const view = render(
+         <ArrangementProvider collection={masterCollection} initialArrangement={masterArrangement()}>
+@@ -631,14 +642,33 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+       await flushLoads();
+       expect(renderLog.counts.get('ArrangementMaster') ?? 0).toBeGreaterThan(0);
+       const header = view.container.querySelector('header');
++      const footer = view.container.querySelector('footer');
+       const mute = view.getByRole('button', { name: 'Master Mute' });
+       const fader = view.getByRole('slider', { name: 'Master Volume' });
++      const peak = view.getByRole('button', { name: /^Master Peak / });
+       const play = view.getByRole('button', { name: 'Play' });
+-      expect(header?.contains(mute)).toBe(true);
+-      expect(header?.contains(fader)).toBe(true);
++      const shortcuts = view.getByRole('button', {
++        name: studioShortcutSheetStrings.footerButtonLabel,
++      });
++      expect(header).not.toBeNull();
++      expect(footer).not.toBeNull();
++      expect(footer?.contains(mute)).toBe(true);
++      expect(footer?.contains(fader)).toBe(true);
++      expect(header?.contains(mute)).toBe(false);
++      expect(header?.contains(fader)).toBe(false);
++      const group = view.getByTestId('arrangement-master');
++      expect(group.nextElementSibling).toBe(shortcuts);
++      expect(group.previousElementSibling?.getAttribute('data-testid')).toMatch(
++        /^arrangement-(lane-move-hint|selected-clip|selected-clip-reserve)$/,
++      );
++      expect(group.parentElement).toBe(shortcuts.parentElement);
+       const exit = view.getByTestId('arrangement-exit');
+       expect(exit.compareDocumentPosition(mute) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+-      expect(fader.compareDocumentPosition(play) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++      expect(play.compareDocumentPosition(mute) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++      expect(mute.compareDocumentPosition(fader) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++      expect(
++        peak.compareDocumentPosition(shortcuts) & Node.DOCUMENT_POSITION_FOLLOWING,
++      ).toBeTruthy();
+       fireEvent.click(play);
+       expect(live(api).isPlaying).toBe(true);
+       await waitReal(450);
+@@ -652,6 +682,69 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+       fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+       expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+     }, 15000);
++
++    it('LABELS: names the group, Mute and Volume from studioMasterStrings with no inline literals', async () => {
++      expect(studioMasterStrings).toEqual({
++        groupLabel: 'Master',
++        muteLabel: 'Master Mute',
++        volumeLabel: 'Master Volume',
++      });
++      const view = render(
++        <ArrangementProvider collection={masterCollection} initialArrangement={masterArrangement()}>
++          <ArrangementMaster />
++        </ArrangementProvider>,
++      );
++      await flushLoads();
++      const group = view.getByTestId('arrangement-master');
++      expect(group.getAttribute('aria-label')).toBe(studioMasterStrings.groupLabel);
++      expect(view.getByRole('group', { name: studioMasterStrings.groupLabel })).toBe(group);
++      expect(group.querySelector('span[aria-hidden="true"]')?.textContent).toBe(
++        studioMasterStrings.groupLabel,
++      );
++      const mute = view.getByRole('button', { name: studioMasterStrings.muteLabel });
++      expect(mute.getAttribute('title')).toBe(studioMasterStrings.muteLabel);
++      expect(view.getByRole('slider', { name: studioMasterStrings.volumeLabel })).toBeTruthy();
++      const source = readFileSync(ARRANGEMENT_MASTER_SOURCE_PATH, 'utf8');
++      expect(source).toContain('studioMasterStrings.volumeLabel');
++      expect(source).not.toContain('aria-label="Master');
++      expect(source).not.toContain('title="Master Mute"');
++      expect(source).not.toMatch(/^ *Master$/m);
++    });
++
++    it('FOCUS-KEEP: keeps the same focused Master Volume node while the footer content changes', async () => {
++      const api: MasterApiRef = { current: null };
++      const view = render(
++        <ArrangementProvider collection={masterCollection} initialArrangement={masterArrangement()}>
++          <StudioWorkspace />
++          <MasterProbe api={api} />
++        </ArrangementProvider>,
++      );
++      await flushLoads();
++      const held = view.getByRole('slider', { name: studioMasterStrings.volumeLabel });
++      act(() => held.focus());
++      expect(document.activeElement).toBe(held);
++      expect(view.getByTestId('arrangement-selected-clip-reserve')).toBeTruthy();
++      const expectHeld = () => {
++        expect(view.getByRole('slider', { name: studioMasterStrings.volumeLabel })).toBe(held);
++        expect(held.isConnected).toBe(true);
++        expect(document.activeElement).toBe(held);
++      };
++      const clipCount = live(api).arrangement.clips.length;
++      act(() => live(api).addSourceToActiveTrack('song'));
++      expect(live(api).arrangement.clips.length).toBe(clipCount + 1);
++      expect(view.getByTestId('arrangement-selected-clip')).toBeTruthy();
++      expectHeld();
++      act(() => live(api).selectClip(null));
++      expect(view.queryByTestId('arrangement-selected-clip')).toBeNull();
++      expect(view.getByTestId('arrangement-selected-clip-reserve')).toBeTruthy();
++      expectHeld();
++      act(() => live(api).setTimeRange({ start: 1, end: 3, trackId: 'music' }));
++      expect(view.getByTestId('arrangement-range')).toBeTruthy();
++      expectHeld();
++      act(() => live(api).selectClip('music-1'));
++      expect(view.getByTestId('arrangement-selected-clip')).toBeTruthy();
++      expectHeld();
++    });
+   });
+ 
+   describe('export dialog notes', () => {
+diff --git a/app/lib/arrangement/__tests__/meter-ui.test.tsx b/app/lib/arrangement/__tests__/meter-ui.test.tsx
+index 12ed06f..3f2d1aa 100644
+--- a/app/lib/arrangement/__tests__/meter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/meter-ui.test.tsx
+@@ -10,7 +10,7 @@ import {
+   useArrangement,
+ } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+-import { studioExportStrings } from '~/lib/arrangement/strings';
++import { studioExportStrings, studioShortcutSheetStrings } from '~/lib/arrangement/strings';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ 
+@@ -532,7 +532,7 @@ describe('Master meter and Master Peak (SRW-13 stage 2a, D-29q)', () => {
+     act(() => live(api).togglePlayback());
+   });
+ 
+-  it('puts Master Peak after Master Volume and before Play in the header', async () => {
++  it('puts Master Peak after Master Volume, after Play and before the Shortcuts button in the footer', async () => {
+     const view = render(
+       <ArrangementProvider collection={meterCollection} initialArrangement={meterArrangement()}>
+         <StudioWorkspace />
+@@ -543,11 +543,17 @@ describe('Master meter and Master Peak (SRW-13 stage 2a, D-29q)', () => {
+     const fader = view.getByRole('slider', { name: 'Master Volume' });
+     const peak = view.getByRole('button', { name: /^Master Peak / });
+     const play = view.getByRole('button', { name: 'Play' });
++    const shortcuts = view.getByRole('button', {
++      name: studioShortcutSheetStrings.footerButtonLabel,
++    });
+     expect(group.contains(peak)).toBe(true);
++    expect(view.container.querySelector('footer')?.contains(peak)).toBe(true);
++    expect(view.container.querySelector('header')?.contains(peak)).toBe(false);
+     expect(peak.getAttribute('data-testid')).toBe('arrangement-master-peak');
+     expect(peak.hasAttribute('disabled')).toBe(false);
+     expect(fader.compareDocumentPosition(peak) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+-    expect(peak.compareDocumentPosition(play) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++    expect(play.compareDocumentPosition(peak) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
++    expect(peak.compareDocumentPosition(shortcuts) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+     expect(view.getByTestId('arrangement-master-meter').getAttribute('aria-hidden')).toBe('true');
+   });
+ 
+diff --git a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx b/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+index d2306a3..27249f7 100644
+--- a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+@@ -308,7 +308,7 @@ describe('Studio Obsidian & Brass scoped tokens (V-1a)', () => {
+     const labelTexts = [...html.matchAll(/<([a-z]+)\b[^>]*\bclass="([^"]*)"[^>]*>([^<]*)<\/\1>/g)]
+       .filter((match) => (match[2] ?? '').split(/\s+/).includes('tracking-label'))
+       .map((match) => match[3]);
+-    expect(labelTexts).toEqual(['Master', 'Zoom', 'BPM', 'Markers', 'Loop']);
++    expect(labelTexts).toEqual(['Zoom', 'BPM', 'Markers', 'Loop', 'Master']);
+ 
+     expect(countOccurrences(html, 'text-[11px]')).toBe(0);
+     expect(countOccurrences(html, 'tracking-[0.14em]')).toBe(0);
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 8347a2c..3b5bd82 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -745,6 +745,12 @@ interface StudioMeterPeakText {
+   peak: string;
+ }
+ 
++export const studioMasterStrings = {
++  groupLabel: 'Master',
++  muteLabel: 'Master Mute',
++  volumeLabel: 'Master Volume',
++};
++
+ export const studioMeterStrings = {
+   trackPeakTitle: ({ name, peak }: StudioMeterPeakText): string => `${name} · Peak ${peak} dBFS`,
+   trackPeakOverTitle: ({ name, peak }: StudioMeterPeakText): string =>
+diff --git a/docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md b/docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md
+index cd32c0d..de49be6 100644
+--- a/docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md
++++ b/docs/implementation/2026/quarter-IV/193-saba-b-9-centre-transport.md
+@@ -1,7 +1,7 @@
+ # SABA-B-9 ეტაპი 1 — ცენტრალური transport ჯგუფი, Stop ღილაკი და Play-ის მუდმივი სახელი
+ 
+ **თარიღი:** 2026-10-29
+-**სტატუსი:** In Progress (stage 1 of 2; C round 257 PASS)
++**სტატუსი:** Completed (C round 262 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+diff --git a/perf/lib/app-labels.ts b/perf/lib/app-labels.ts
+index 4958aba..58568d3 100644
+--- a/perf/lib/app-labels.ts
++++ b/perf/lib/app-labels.ts
+@@ -4,6 +4,7 @@ import {
+   studioGroupHeaderStrings,
+   studioLaneStrings,
+   studioLibraryPanelStrings,
++  studioMasterStrings,
+   studioPlaybackStrings,
+   studioViewStrings,
+ } from '../../app/lib/arrangement/strings';
+@@ -53,6 +54,8 @@ interface PerfInlineLabel {
+   sourceNeedle: string;
+ }
+ 
++export const perfMasterVolumeLabel = studioMasterStrings.volumeLabel;
++
+ export const perfInlineLabels = {
+   clipGainFader: {
+     label: 'Clip Gain — fader',
+@@ -69,11 +72,6 @@ export const perfInlineLabels = {
+     sourceFile: 'app/components/arrangement/ArrangementLane.tsx',
+     sourceNeedle: 'aria-label={`Pan — ${track.name}`}',
+   },
+-  masterVolume: {
+-    label: 'Master Volume',
+-    sourceFile: 'app/components/arrangement/ArrangementMaster.tsx',
+-    sourceNeedle: 'aria-label="Master Volume"',
+-  },
+   exportButton: {
+     label: 'Export',
+     sourceFile: 'app/components/arrangement/ArrangementTransport.tsx',
+diff --git a/perf/studio-lab.perf.spec.ts b/perf/studio-lab.perf.spec.ts
+index 92ae0c9..e1889c4 100644
+--- a/perf/studio-lab.perf.spec.ts
++++ b/perf/studio-lab.perf.spec.ts
+@@ -15,6 +15,7 @@ import {
+   perfGroupVolumePattern,
+   perfInlineLabels,
+   perfLibraryAddLabel,
++  perfMasterVolumeLabel,
+   perfMembersSourceTitle,
+   perfTrackPanLabel,
+   perfTrackVolumeLabel,
+@@ -176,7 +177,7 @@ function faderLocator(page: Page, fader: FaderName): Locator {
+     case 'pan':
+       return slider(page, perfTrackPanLabel(perfFixtureTracks.music));
+     case 'master':
+-      return slider(page, perfInlineLabels.masterVolume.label);
++      return slider(page, perfMasterVolumeLabel);
+     case 'clipgain':
+     case 'clipgain-members':
+       return slider(page, perfInlineLabels.clipGainFader.label);

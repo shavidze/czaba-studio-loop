@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T05:20:49.622Z)
+# Active loop summary (2026-10-30T06:41:09.651Z)
 
-- backlog.json 2481 KB -> active view 350 KB
-- status: G_ROOT_GATE round 261
-- servers: `{"checkedUtc":"2026-10-30T04:52:07.1857579Z","round":261,"attempt":1,"store":200}`
+- backlog.json 2490 KB -> active view 352 KB
+- status: G_ROOT_GATE round 262
+- servers: `{"checkedUtc":"2026-10-30T06:08:55.1167982Z","round":262,"attempt":1,"store":200}`
 - last publication: 10e1cd4f7df96bb0f9bd4c2f6ab293ee2e805839 (rounds 260-261)
-- last root gate: round 261 published - commit 10e1cd4f7df96bb0f9bd4c2f6ab293ee2e805839 pushed
+- last root gate: round 262 failed - verify exit 1 (gates/round-262/verify.log)
 
 ## Current items: -
 
@@ -645,6 +645,9 @@
 - INFO-C259-CONTEXTRUNNING-NAME / info / info (D-29z516): cheap rename candidate inside PERF-HARNESS-STRINGS-DRIFT (round 261) if granted; not a bug / perf/studio-lab.perf.spec.ts:596 and studio-lab-interactions.perf.spec.ts:535 store isPlaying() as detail.contextRunning; after H2 it means 
 - INFO-C259-STUDIO-TOKEN-400 / info / info (D-29z516): not a bypass; protected file unchanged / /api/studio-token without product/file params returns 400 before the auth check; with params: no header 401, fake Bearer 500; never 200 (C r
 - INFO-C259-HOOK-PER-CLASS / info / info (D-29z516): harness rule HR-HOOK-START-PER-CLASS / C probe attempt 1 hooking AudioScheduledSourceNode.prototype.start timed out; the harness-style per-concrete-class hook passed (C tool issue
+- C-R261-N4 / info / root_note / npx tsx installed tsx@4.23.15 into the npm cache (outside store/); store unchanged (same class as C-R29-NPX-CACHE)
+- C-R261-N5 / info / watch (D-29z537) / C's first G261-AUTH script waitFor (Add, visible) timed out right after the perf run; rerun with the harness readiness predicate passed, 0 p
+- SABA-Q-9-MASTER-ROW / info / awaiting_user / Saba question, SABA-B-9 stage 2: (a) Master as a Main-track row under the lanes (Live 12 manual 18.4 'bottom end of the Arrangement View') i
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

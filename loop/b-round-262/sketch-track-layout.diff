@@ -1,0 +1,26 @@
+diff --git a/home/runner/czaba-project/store/app/lib/arrangement/__tests__/track-layout.test.tsx b/app/lib/arrangement/__tests__/track-layout.test.tsx
+index 4aa4338..537bd77 100644
+--- a/home/runner/czaba-project/store/app/lib/arrangement/__tests__/track-layout.test.tsx
++++ b/app/lib/arrangement/__tests__/track-layout.test.tsx
+@@ -864,13 +864,19 @@ describe(
+         name: studioShortcutSheetStrings.footerButtonLabel,
+       });
+       expect(shortcutButton.parentElement).toBe(row);
+-      expect(row.children).toHaveLength(2);
++      expect(row.children).toHaveLength(3);
++      expect(row.children[0]).toBe(placeholder);
++      expect(row.children[1]?.getAttribute('data-testid')).toBe('arrangement-master');
++      expect(row.children[2]).toBe(shortcutButton);
+       act(() => live(api).selectClip('music-1'));
+       const selected = line();
+       expect(selected).not.toBeNull();
+       expect(reserve()).toBeNull();
+       expect(selected?.parentElement).toBe(row);
+-      expect(row.children).toHaveLength(2);
++      expect(row.children).toHaveLength(3);
++      expect(row.children[0]).toBe(selected);
++      expect(row.children[1]?.getAttribute('data-testid')).toBe('arrangement-master');
++      expect(row.children[2]).toBe(shortcutButton);
+       expect(selected?.textContent).toBe(
+         'Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000',
+       );
