@@ -28,3 +28,13 @@ Setup: Live 12, Settings → Display & Input → "Use Tab Key to Navigate" On; a
 2. If a greyed control is focused, what does the screen reader say (name, "unavailable"/"dimmed", any reason)?
 3. Open the Edit menu with nothing to undo. Read: is Undo greyed? With the keyboard (arrow keys) does the menu highlight stop on it?
 Write the result to `reference/ableton-live-measurements-<date>.md` with the Live version.
+
+## LIVE-MEAS-STEM-DROP (root, 2026-10-31; STEM-LANES / review F2)
+**Why:** STEM-LANES gives each stem its own lane. The manual does not say how Live places several files dropped at once.
+**Setup:** a new Live 12 Set, Arrangement View, empty; four WAV files of the same length in the browser (Samples).
+**Steps:**
+1. Select the four files in the browser (Ctrl-click) and drag them together into the empty drop area under the tracks. Record: one track or four, and the start of each clip.
+2. Undo. Drag them onto one existing audio track. Record placement (one after another, or on new tracks).
+3. Undo. Repeat step 2 holding Ctrl (Windows) while dropping. Record placement.
+
+**What to write:** the Live version, OS, the result of each step and a screenshot per step.

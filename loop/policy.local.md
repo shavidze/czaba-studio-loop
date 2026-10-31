@@ -408,3 +408,46 @@ Until now, `design-philosopher` (a brand and perceived-value lens) made most Stu
 - **C** runs `product-designer`'s acceptance rows for those tasks. C may consult it in review mode (at most 7 findings, Medium or Low).
 - **The whole-screen review at RETRO** adds `product-designer` to `design-philosopher` and `first-visit-host`.
 - Position moves and keep-list items stay Saba's decision. `product-designer` proposes them only as questions.
+
+## Whole-product design review: Saba's decisions and new tasks (Saba, 2026-10-31)
+
+Source: `/home/runner/czaba-project/docs/technical/studio-real-workspace/product-design-review-2026-10-31.md`. `product-designer` wrote it after walking Store and `/studio-lab` in a real browser on master 000da42. It lists findings F1–F12, positions on the SR candidates and questions Q1–Q5.
+
+Saba accepted **all five recommended defaults (Q1–Q5)** and the review's UX recommendations. The visual mismatch between Store and Studio (F6 visual part) is **not a new task**: STORE-2b–5 changes the Store's design. Every task below follows reference-first: Ableton Live 12 where Studio is concerned, competitor and established practice for the Store. Each user-visible one is also designed with `product-designer`. "Saba approved the direction" does not exempt a task from the reference section and acceptance rows.
+
+**Saba's decisions:**
+- **Q1 / F1, the purchased Studio.** Mounting the new workspace for purchased tracks (SRW-21) is the first Studio product priority after STUDIO-PERFORMANCE.
+  - The mount touches protected files (`app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`). The loop still does not edit them.
+  - B writes `SRW-21-PLAN`: a plan doc with the exact diff proposal, the risks and the tests. Root and Saba then apply the protected part outside the loop.
+  - Until then, **STUDIO-LINK** (below) gives buyers a way in.
+- **Q2 / F2, stem lanes.** Adding a stem or a stem set gives each stem its own lane. All stems start at the same time (the Insert Marker) and sit inside a "Stems" group, which already exists. One Enter or drag on a library folder ("Stems 4") adds the whole set. The purchased adapter (`createPurchasedWorkspaceCollection`) uses the same rule. The Video, Music and SFX lanes stay; a free "new track" command is later.
+- **Q3 / F4, LeadMagnet** (keep-list). Its content and behaviour stay, but it does not open on `/products/*`, `/cart` or `/checkout*`. Done inside STORE-2b, when the popup is restyled.
+- **Q4 / F6, one name.** "CZABA Studio" everywhere: "Studio" in the nav, and the `<title>`, header and home copy say "CZABA Studio". "Personal Mixdown Studio" and "Studio Lab · Workspace" go. A badge carries the demo status, not the name.
+- **Q5, moving a clip by its name bar.** After the first clip is added, a one-time status says "Drag a clip by its name bar to move it". Behaviour does not change: body drag still makes a time selection, as in Live.
+- **The SR candidates (SR-230, SR-245, SR-260, SR-275).** The review's §5 positions are approved as written.
+  - "endorse" → implement.
+  - "modify" → implement the modified version.
+  - "drop" → close as `wontfix (Saba 2026-10-31)`.
+  - SR-260-5 takes the default: the insert marker is drawn only when it is not at the playhead.
+  - Position moves stay out unless the review names them.
+
+**New tasks and where they go:**
+
+| Order | Task | Scope (from the review) | Rounds |
+|---|---|---|---|
+| Next, between PERF tasks (the bug gate fixes Medium now) | **FIX-PD-1** | F9: `$0.00` fallback to `standardPrice`/`minPrice`; with no price, Buy is disabled with a reason. F8: below 900 px, `/studio-lab` shows a calm "The Studio works on a computer" state with a preview player. F7: English demo names in `app/data/studio-lab-demo.ts`, with the collection label shown once, as a group heading | 1–2 |
+| Next | **STUDIO-LINK** | Product page gets "Try it in the Studio", which opens `/studio-lab` with that product's public preview selected. In the Studio library, a public preview gets "View in store" in its tooltip or context menu. The Studio's exit keeps "← CZABA" | 1 |
+| Next | **NAME-AND-HINT** | Q4 naming (nav, `<title>`, Studio header, home copy) + the Q5 one-time hint | 1 |
+| After STUDIO-PERFORMANCE, **before SYS-1…3** | **STEM-LANES** | Q2. Reference: Live 12 manual 6.1 (a new track in the drop area) + root's Live measurement LIVE-MEAS-STEM-DROP (B requests it in `live-checks.md`; it does not block planning, but a differing result comes to Saba as a question). Includes the undo of a set add as one step, and export of all stem lanes | 2–3 |
+| In parallel (root + Saba) | **SRW-21-PLAN** | B writes the plan doc only; no protected-file edits | 1 (planning) |
+| STORE-3 | add to acceptance | F5: the Studio block shows a real crop of the workspace (the soloed stem in brass), its copy says what the screen shows, and the CTA reads "Open the Studio" | — |
+| STORE-4 | add to acceptance | F3: the version card's first line shows "Full mix · WAV" / "Full mix + N stems · WAV · opens in Studio" from the data, "1 audio files" becomes "1 file", and the top line of "What's included" is visible without opening the accordion. F10: play on every `/store` card, mono meta (length · BPM · Stems, from data only), 3 columns at 1440. F1: "Make it yours — open in Studio" | — |
+| After STORE-5, or in REVIEW-RECOMMENDATIONS | **COPY-PD** | F11 export copy: "MP3 · 320 kbps — smaller file for review links", "WAV · 24-bit / 48 kHz — for your edit timeline"; "Done" becomes "Cancel"; the primary button is filled; when the project is empty, Export is soft-disabled with the tooltip "Add a clip to export". Plus the approved SR copy items | 1–2 |
+| `deferred_low_polish` | F12 | Envelope value beside the point while dragging; From/To in mm:ss.mmm; a second "+" commits the marker editor without a duplicate message; the footer line count (with SR-230-1) | — |
+
+**RETRO change.** The whole-screen review at every RETRO adds a three-step journey on fresh screenshots: product page → Studio (add a stem set, play) → export dialog. It is reviewed by `product-designer` with `design-philosopher` and `first-visit-host`. Static screenshots alone missed F1, F2, F7, F8 and F11.
+
+**Why we missed it.**
+- Every RETRO screen review looked only at `/studio-lab` stills and counted clutter. No phase walked the buyer's journey across Store and Studio.
+- F2, the stems not playing together, is a product-model gap. The workspace plan fixed four lanes in round 1, and no consult asked "can the stems of one track play together?".
+- B adds to `lessons.md` (merge or drop an old lesson to stay within 60 lines): **L47, test the journey and not just the screen**, and **L48, check the product promise against the model** ("Personal Mixdown" means the stems play together).
