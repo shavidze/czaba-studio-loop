@@ -1,251 +1,260 @@
-# Round 285: PERF-3b. The seconds ruler renders only the three-viewport page window that the bars ruler already uses, and a Follow page flip updates both rulers before paint. Stage 2 of 3 of PERF-3; PERF-3c (the harness rows and the exit target) follows
+# Round 286: FIX-PD-1a (F9, Medium). A product page shows the catalogue price instead of "$0.00". When no price is known, it shows "Price unavailable", Add to Cart and Buy Now do nothing, and a visible reason line links to /support
 
-**Planned by:** B, at the round 284 → 285 planning, 2026-10-31. **Decisions:**
-- D-29z681: round 284 closed with **C PASS** (`browserVerified`/`realVerified` true), and gate 284 published `0f99960`. PERF-3a is **მზადაა**.
-- D-29z682: ruling on A's L10 request in `a-round-284.md`. A-R284-REVIEW-NEG-LOOP (C reproduced it: rc 124) and A-R284-REVIEW-ZQ3-VACUITY go to `deferred_low_polish`. This round does not own `peaks.ts` or `clip-envelope-ui.test.tsx`, and under the 2026-10-23 bug gate a Low is fixed early only when the round already owns that code. C's note on the round-284 §2.1 prose ("[6.25, 25]") is acknowledged: the code, ZQ2 and doc 212 agree on (6.25, 25].
-- D-29z683: the design (§2). It follows the `tech-lead` consult (option a: shared pure helpers in `view.ts`; optional props) and the `performance-optimizer` consult (build only an index range, not every tick).
-  - Rejected: CSS gradient lines, because every tick carries a label, so nothing is saved.
-  - Rejected: tiles with hysteresis, because the page window already has it (a scroll inside a page renders nothing, SR3).
-  - Rejected: a second copy of the helpers in the ruler, because the two copies would drift.
-- D-29z684: an unknown viewport (SSR, or a scroller not yet measured) renders **every** tick, the same rule the bars ruler follows today [K20].
-  - `performance-optimizer`'s capped fallback was rejected. It would change the bars ruler, and it would break the jsdom rows that rely on the full render (BU1, SR1, `tempo-ui`).
-  - In the browser the window replaces the full render at mount: the resize effect notifies the scroll listeners [K8], and B measured a start count of 94 at 1440 and 78 at 1280.
-- D-29z685: PERF-3 has **three** stages: 3a (done), 3b (this round), and 3c.
-  - 3c holds the harness rows: Event Timing p95 per zoom key, path rewrites, ruler nodes per key, the Ctrl+wheel baseline of `scope_addition_d29z215`, and the `res.dom.ruler-1/2` notes. It also makes the PERF-3 exit decision.
-  - It is a separate stage because it changes the perf harness contract (`perf/**`, the doc 163 section, and 10.8-minute perf runs).
-  - Doc 212 l.4, and its two lines that still describe two stages (l.17 and l.101), are granted below (L28).
-- D-29z686: the browser contract (§6).
-- D-29z687: ROOT-R70-ARCH-TIMELINE-TRIO is updated. The page helpers become shared. `tech-lead` says the seconds ruler is not a fourth consumer of `getTimelineView`, so no frontend-architect checkpoint is requested.
-- D-29z688: this is a pure performance round. Reference-first, AGREE, `product-designer`, the screen budget and Ableton conformity **do not apply**: nothing visible changes, and RULER-PIXELS proves the ruler pixels equal HEAD's. The new tick attributes are not visible.
+**Planned by:** B, at the round 285 → 286 planning, 2026-10-31.
 
-**Owner:** A. **Verifier:** C. **Grants:** §4.
+**Decisions** (full text in `backlog.json` → `decisions_log_b`):
+- **D-29z690:** round 285 closed with C PASS (`browserVerified` and `realVerified` true). Gate 285 published `60bfb38`. PERF-3b is **მზადაა**.
+- **D-29z691:** A-R285-REVIEW-NAN-PAGE goes to `deferred_low_polish`.
+- **D-29z692:** Saba's 2026-10-31 product-review decisions are recorded as queue entry `PD-REVIEW-2026-10-31`. FIX-PD-1 is split into 1a, 1b and 1c, and this round is 1a.
+- **D-29z693:** the SR candidates are assigned to queue entries.
+- **D-29z694 / D-29z695:** the design (§2).
+- **D-29z696:** the browser contract (§6).
+- **D-29z697:** the reference section (§1.2).
+- **D-29z698:** lessons L54 and L55.
 
-## Baseline: HEAD `0f99960` [K1], clean tree [K16]
-- `gates/gate-round-284.json` is `published`, at commit `0f99960`.
-- Claims: from `store/`, run `bash ../tmp/studio-real-loop/b-round-284/claims-285.sh` **before editing**. Its output must equal `b-round-284/claims-285-output.txt`. Any difference is a STOP (§9).
+**Owner:** A. **Verifier:** C. **Grants:** §4. The round touches no Studio, auth, cart or checkout code.
+
+## Baseline: HEAD `60bfb38` [K1], clean tree [K2]
+- `gates/gate-round-285.json` is `published` at commit `60bfb38`.
+- **Claims (L29):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-285/claims-286.sh` **before editing**. Its output must equal `b-round-285/claims-286-output.txt`; on an archive, only K1 may differ, reading `(archive)`. Any other difference is a STOP (§9).
 
 ## 0. Read first
-1. `lessons.md` (every role), especially L11, L12, L23, L26, L28, L29, L31, L37 and L38.
-2. This task, then `b-round-284.md` §2 (the measurements).
-3. A's primitives: `AUDIO_ARCHITECTURE.md` (Studio), `FORWARDREF_COMPONENT.md` (component edit), `REACT_CONTEXT.md` (an external-store subscription), `AGENT_DISCOVERABLE_CODE.md` (new exports), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `.claude/prompts/studio-feature.md`.
+1. `lessons.md` (every role), especially L11, L12, L23, L26, L28, L29, L54 and L55.
+2. This task.
+3. The review's F9 section: `/home/runner/czaba-project/docs/technical/studio-real-workspace/product-design-review-2026-10-31.md`, lines 97–103 (outside `store/`; use the absolute path).
+4. A's primitives:
+   - `AGENT_DISCOVERABLE_CODE.md` (new exports)
+   - `FORWARDREF_COMPONENT.md` (component edit)
+   - `DESIGN_TOKENS.md` and `TAILWIND_FIRST.md` (new text styles)
+   - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`
+   - `GEORGIAN_DOCS.md`
+   - `.claude/prompts/new-test.md`
 
-## 1. What B measured (evidence `b-round-284/`)
-Setup: production builds of HEAD (`/tmp/b284/head`, port 5311) and of B's sketch (port 5312), each with its own `cacheDir`, a warm-up run, and run alone. Chromium, `/studio-lab`, Add, then Ctrl+D ×29 (30 clips of 101.352 s). Probes: `ruler-probe.cjs` (modes `in`, `out`, `jump`, `follow`, `follow-bpm`, `follow-zoom`) and `flip-probe.cjs`.
+## 1. What B measured, and the reference
 
-1. **HEAD:**
-   - The seconds ruler maps every tick over the whole arrangement [K2][K3]. It has **6,143** elements at 40 px/s at both viewports, and **12,286** at 122.1 px/s (zoom key 5).
-   - Event Timing keydown on key 5 is 112 ms (1440) and 160 ms (1280); key 6 is 64–72 ms (`probe-results/head-in-{1440,1280}.json`).
-   - Follow playback at 40 px/s and scroll jumps cause 0 ruler DOM churn (`head-follow*.json`, `head-jump-*.json`).
-2. **Sketch** (`probe-results/final-*.json`):
+### 1.1 Reproduction on HEAD (evidence `b-round-285/probe/`)
+- **Setup:** mock API `node mock-api/server.mjs` (:5199, health `{"ok":true,"products":8}`) and the dev server :5173. Probe: `b-round-285/probe/f9-probe.cjs`.
+- **`/products/door-slams`** (SFX, no `variants`, `standardPrice` 9; the `/store` card shows $9), at both 1440×900 and 1280×720:
+  - the only price on the page is **`$0.00USD`**;
+  - Buy Now `disabled: false`;
+  - Add to Cart `disabled: false`.
+- **`/products/middle-east`:** `$29.00USD`, buttons enabled (control).
+- Files: `head-f9.json`, `head-door-slams-{1440,1280}.png`, `head-middle-east-{1440,1280}.png`.
+- **Cause, in two steps:**
+  1. `createDisplayVersions` deliberately returns `[]` for an SFX product with no variants [K5]. This is pinned by the test "does not invent a purchasable SFX variant when none exists" [K10], which must stay byte-identical.
+  2. `ProductDetailPage` then passes `selectedVersion?.price ?? 0` [K3] and `selectedVersion?.name ?? 'Standard'` [K4]. A missing version therefore looks like a supported $0 Standard.
+- **Neighbour defect in the same class:** with no price at all, `ProductSidebar` computes `standardPrice ?? minPrice ?? variants[0].price ?? 0` and shows "Complimentary Download" for 0 [K9]. A product whose price is unknown would advertise a free download.
+- The synthetic Standard version of a Track with no variants also falls back to 0 [K6].
 
-   | Path | 1440×900 | 1280×720 |
-   |---|---|---|
-   | Ruler elements, `in` path (start, then 10 keys) | 94, then `[76,62,50,40,64,40,50,62,76,94]` | 78, then `[64,52,42,34,52,34,42,52,64,78]` |
-   | Ruler elements, `out` path | 94, then `[60,74,92,48,60,48,92,74,60,94]` | 78, then `[50,62,78,40,50,40,78,62,50,78]` |
-   | Event Timing, `in` keys | 16–24 ms | 16 ms |
-   | Event Timing, `out` path maximum | 56 ms, on key 8 (the 25 px/s waveform band crossing from PERF-3a, not the ruler) | 48 ms, on the same key |
-   | Jumps to 25 / 50 / 99.9 / 0 % of the scroll | 140 / 140 / 129 / 94 elements | 114 / 114 / 114 / 78 elements |
+### 1.2 Reference: how comparable stores do it (D-29z697)
+- **Searched:** `/home/runner/czaba-project/docs/technical/store-redesign/research/competitors.md`, `luxury-and-galleries.md` and `visual-pass.md` (absolute paths; not under `store/`) (unavailable / no-price / contact states). **No reference found** for an unknown-price state. B invents none.
+- **Kept from the reference:** the price shown on the product page equals the price on the `/store` card. That is the card's existing rule: `standardPrice ?? minPrice ?? variants[0].price` (`store.tsx:79`, `ProductCard.tsx:32`).
+- **Deviations:** none from any listed reference.
+- **Ableton conformity:** not applicable (a Store page).
+- **Screen budget:** not applicable to `/studio-lab`. The reason line appears only in the unknown-price state.
 
-   - On every step and every jump, 0 visible ticks are missing (the probe's `coverage` field).
-3. **Pixels.** Each ruler screenshot of the visible ruler at every zoom step and every jump (28 per viewport) is **pixel-identical** to HEAD: meanAbs 0 (`probe-results/final-imgdiff-{1440,1280}.json`). The `follow-zoom-stopped` shot is not comparable, because the two builds stop playback at different positions.
-4. **The Follow page-flip gap, found by B and fixed in the sketch:**
-   - After 9 `=` keys (about 298 px/s), Follow scrolls the view in its position-store writer by setting `scrollLeft` [K21]. The page key updates only on the next frame's scroll event [K22].
-   - A post-frame check (`flip-probe.cjs`: `requestAnimationFrame` → `setTimeout 0`, so it sees what was painted) found **one painted frame with missing visible ticks** on each flip that crossed a page: `[1,1]` at 1440 and `[1,1,1]` at 1280 (`probe-results/sketch-flipT-{1440,1280}.json`, sketch without the fix).
-   - **Inferred, not measured:** the bars ruler at HEAD probably has the same gap when a tempo is set, because it uses the same page key and the same scroll notification. B's post-frame probe checks the seconds ruler only. In jsdom, SR6 proves that after the fix both rulers already show the new window before any scroll event.
-   - The fix: `notifyTimelineScroll()` right after the Follow writer sets `scrollLeft`. Four runs then show 0 gap frames over 18 flips (`final-flipT-{1440,1280}-{1,2}.json`). An early `rAF` check found nothing in either version (`sketch-flip-*.json`), because it runs before the Follow writer; only the post-frame check is a valid oracle.
-5. **Follow playback at the default zoom**, with and without BPM 120: over 6 s there is 0 ruler and 0 bars-ruler DOM churn at both viewports (`final-follow*-*.json`; the bars ruler has 116 elements at 1440 and 96 at 1280).
-6. **B scratch** (`/tmp/b284/sketch`):
-   - 69 covering files / **1,261** tests pass (`covering-files.txt`, `covering-run.txt`, 77 s);
-   - `tsc` rc 0, Biome clean on the 6 files;
-   - the mutants are red at their rows (`mutants.txt`, §3).
+### 1.3 Design consult (`product-designer`, this planning)
+- **Chosen design:**
+  - the panel keeps its shape;
+  - the "Total Price" label stays, and its figure is replaced by "Price unavailable", with no currency symbol;
+  - Add to Cart and Buy Now stay visible as `aria-disabled="true"`. They stay focusable, and `aria-describedby` points to the reason line;
+  - pressing them does nothing;
+  - a visible reason line contains a "contact us" link to `/support`. `/hire-us` is for commissions, so it is the wrong target;
+  - the ownership panels and the loading state come first, unchanged.
+- **Rejected:** replacing the buttons with a single contact panel. It contradicts Saba's "Buy is disabled with a reason", and the layout would jump once a price exists.
+- **Copy ruling (B):** the designer proposed "Online purchase isn't open for this collection yet." B keeps the reviewed wording, **"Price unavailable — contact us to buy it."** The data does not say *why* the price is missing, so B uses the smallest honest copy.
 
-## 2. The code change (exactly `b-round-284/sketch.diff`, code part)
-1. **`app/lib/arrangement/view.ts`** [K3]:
-   - New exports: `TimelinePxWindow`, `TimelinePage`, `readTimelinePage`, `timelinePageKey`, `getServerTimelinePageKey`, `parseTimelinePageKey` and `timelinePageWindow`. The window is `[(page − 1) × viewport, (page + 2) × viewport]`. These are the bars ruler's private helpers [K4][K5], moved and renamed; their behaviour is unchanged.
-   - `rulerTickMarks(seconds, pxPerSecond, rulerWindow?)`:
-     - Without a window, it returns the same list as HEAD.
-     - With a window, it builds only the index range around the window (±1 or 2 indices of slack), computes each label against the **full** ruler width, and keeps exactly the marks with `fromPx ≤ x ≤ toPx`. The result therefore equals the full list filtered to the window (RW1).
-     - A non-finite or inverted window gives `[]`, the same rule as `barsRulerMarks`.
-2. **`app/components/arrangement/ArrangementRuler.tsx`** [K2]:
-   - New optional props `getTimelineViewportPx` and `subscribeTimelineScroll`. When they are absent, the viewport is 0 and nothing subscribes, so every tick renders (the `view.test` ruler mount, which passes neither prop [K24], stays unchanged).
-   - The ruler reads the page key with `useSyncExternalStore` and passes `fromPx`/`toPx` as numbers to the memoised ticks.
-   - Each tick gains `data-testid="arrangement-ruler-tick"` and `data-time` (the time rounded to 1e-6 s, the same format as the bars marks). The new names are free [K13], and the HEAD ticks have no testid [K19].
-   - The playhead, the navigation, `data-tick-step` and the classes are unchanged.
-3. **`app/components/arrangement/ArrangementTempoRow.tsx`** [K4][K5]: it imports the shared helpers. The private copies are removed, and its behaviour is unchanged (the eight rows BU1–BU8 [K25] are unchanged and green).
-4. **`app/components/arrangement/StudioWorkspace.tsx`:**
-   - The `<ArrangementRuler>` element [K9] passes `getTimelineViewportPx` and `subscribeTimelineScroll`, as the overview and the tempo row already do [K6].
-   - The Follow position writer calls `notifyTimelineScroll()` after it sets `scrollLeft` [K21], and its dependency list gains `notifyTimelineScroll`.
-   - The scroll handler still notifies on the scroll event [K22]. That second call finds the same page key, so nothing renders.
+### 1.4 Why we missed it (L54)
+Before STORE-0 the cloud had no product data. Every Store check after it looked at one product type (Track with variants), and no row compared the card price with the page price across the catalogue. L54 (added at this planning) makes that walk a row: B-JOURNEY below.
 
-**Side effects of the Follow notify (L49), each ruled:**
-- The overview frame now updates in the same frame as the Follow scroll instead of one frame later. Kept; it is correct earlier.
-- `handleTimelineScroll` is not called by the notify, so the marker-menu close and the Follow-pause logic still run only on the real scroll event. Unchanged.
-- With an unchanged key there is no React render. SR5 proves this for playhead frames, and BU8 for the bars ruler.
+## 2. The change (D-29z694, D-29z695)
 
-**Not this round:** `perf/**`, the harness rows and budgets (PERF-3c), `peaks.ts`, `ArrangementOverview.tsx`, `ArrangementLane.tsx`, any context split, and the bars ruler's behaviour.
+### 2.1 `app/lib/product-utils.ts`: two new exports only
+Every existing function stays byte-identical, including `createDisplayVersions` and its `?? 0` [K6]. Only add:
 
-## 3. Tests (exactly `b-round-284/sketch.diff`, test part)
-| Row | File | Asserts |
+- **`resolveCatalogPrice(product: Product): number | undefined`**
+  - Returns the first **valid** value of `product.standardPrice`, `product.minPrice`, `product.variants?.[0]?.price`.
+  - **Valid** means `typeof v === 'number' && Number.isFinite(v) && v >= 0`.
+  - A `null` from JSON, `NaN` or a negative value is skipped.
+  - Returns `undefined` when none is valid.
+  - An explicit `0` is valid and returned. 0 is the existing "free" state.
+- **`resolvePurchasePrice(product: Product, version: DisplayVersion | null): number | undefined`**
+  - If `version` exists and `version.id !== -1`: return `version.price` when valid, else `undefined`. This covers a real backend variant (id > 0) and the synthetic Premium (id −2, built only when `premiumPrice` is truthy).
+  - Otherwise (no version, or the synthetic Standard id −1): return `resolveCatalogPrice(product)`.
+- **Rules:** TypeScript strict, no `any`, no type assertions. Each helper gets a one-line comment in English, per `AGENT_DISCOVERABLE_CODE.md`.
+
+### 2.2 `app/components/product/ProductDetailPage.tsx`
+- `currentPrice` becomes `resolvePurchasePrice(product, selectedVersion)`, of type `number | undefined`. Drop the `useMemo`, or keep it; either is fine.
+- Nothing else changes. Keep the `selectedVersionName` fallback [K4]: `isSupportedVersion` stays true for the no-variant case, so a known price still buys exactly as today, with `productVariantId` undefined. **Purchase protection:** `addToCart` and `buyNow` are called with the same arguments as on HEAD whenever a price is known.
+
+### 2.3 `app/components/product/PurchaseHeader.tsx`
+- **The prop:** `price: number | undefined` (it was `number` [K7]). Define `const isPriceUnknown = price === undefined;`.
+- **Branch order is unchanged.** The order is:
+  1. `!isSupportedVersion` `<output>`;
+  2. Case 1 (owns Premium or SFX);
+  3. Case 2 (owns Standard, Standard selected);
+  4. Case 3 (upgrade);
+  5. loading;
+  6. default.
+- **Case 3** requires a known price: `isUpgrade && price !== undefined && price - ownedPrice > 0`. With an unknown price it falls through to the default panel.
+- **Default panel, known price:** byte-equivalent behaviour to HEAD (figure `$x.xx USD`, same buttons, same handlers).
+- **Default panel, unknown price:**
+  - **Figure.** The "Total Price" label stays. The figure is the text `Price unavailable`, smaller and muted (for example `text-2xl font-light text-muted`; tokens only). The panel contains no `$` character.
+  - **Buttons.** Add to Cart and Buy Now render in the same place with `aria-disabled="true"` and `aria-describedby={reasonId}` (`useId`). They have **no** `disabled` attribute, so they stay in the Tab order. Their look matches the existing disabled look (`opacity-50`, `cursor-not-allowed`), through an `aria-disabled:` variant or a conditional class. No focus-variant classes may be added (STF2 in `store-focus-ring.test.ts`).
+  - **Activation.** Click, Enter and Space do nothing. There is no toast, no `openModal`, no `addToCart` or `buyNow` call and no GA4 or Facebook event. The guard sits at the top of `handleAddToCart` and `handleBuyNow` (`if (isPriceUnknown) return;`), **before** the sign-in check.
+  - **Exception.** `CartButton` in its `alreadyInCart` state ("In Cart" → `/cart`) keeps working; it is navigation, not a purchase.
+  - **Reason line.** A visible `<p id={reasonId}>` under the buttons reads exactly `Price unavailable — ` + `<Link to="/support">contact us</Link>` + ` to buy it.` (an em dash with spaces). The link must not be disabled.
+  - **One Buy Now.** The single Buy Now `<button>` that carries `bg-buy` stays one element; `store-theme-tokens.test.ts` expects exactly one `bg-buy` class attribute in this file. Do not render a second Buy Now button for the unknown state.
+- **Analytics.** The `productPrice` sent with a known price is unchanged.
+
+### 2.4 `app/components/product/ProductSidebar.tsx`
+- Change only how `isFree` is computed: `const isFree = resolveCatalogPrice(product) === 0;`. Keep or remove the local `standardPrice` constant as you need.
+- An unknown price shows no "Complimentary Download". An explicit 0 still shows it, unchanged.
+
+## 3. Tests
+Before writing them, read the `vi.mock` patterns for the hooks in existing tests (for example `grep -rln "vi.mock('~/hooks/useAuth'" app`).
+
+### 3.1 `app/lib/__tests__/product-utils.test.ts`: append only
+- Add one new `describe('purchase price resolution', …)` at the end. **No existing line changes**: `git diff` must show only added lines.
+- Build values such as `null`, `NaN` and negative numbers through a typed helper or `JSON.parse` of a product string. Use no `as` or `any`.
+
+| Row | What it checks |
+|---|---|
+| PR1 | The catalogue order: `standardPrice` 9 → 9; standardPrice missing and `minPrice` 7 → 7; only `variants[0].price` 5 → 5 |
+| PR2 | Nothing valid → `undefined`. `standardPrice: null` with `minPrice: 7` → 7. `NaN` → skipped. `-1` → skipped |
+| PR3 | An explicit `standardPrice: 0` → `0`, not `undefined` |
+| PR4 | A real variant (id 12, price 49) wins over `standardPrice` 29. A real variant with a non-finite price → `undefined` |
+| PR5 | `version` null with SFX `standardPrice` 9 → 9. The synthetic Standard (id −1) built by `createDisplayVersions` for a Track with no price fields → `undefined`, while that version's own `price` is still 0 (the old function is unchanged) |
+| PR6 | The synthetic Premium (id −2) → `premiumPrice` |
+
+### 3.2 New file `app/lib/__tests__/product-price-unavailable.test.tsx` (RTL)
+Render `ProductDetailPage` (and `ProductSidebar` for PU7). Wrap it in `createRemixStub` or `MemoryRouter`, whichever existing store tests use. Mock `useAuth`, `useCart`, `usePurchases`, `useToast`, `~/lib/analytics` and `~/lib/facebook-pixel`. Follow L27: a mocked-hook rerender needs a fresh element.
+
+| Row | What it checks |
+|---|---|
+| PU1 | A door-slams-like product (SFX, no variants, `standardPrice` 9): the text `$9.00` is present and `$0.00` absent. Buy Now and Add to Cart have no `aria-disabled="true"` and no `disabled` |
+| PU2 | A priceless product: `Price unavailable` is visible; the purchase panel has no `$`; both buttons have `aria-disabled="true"` and no `disabled` attribute. Each button's `aria-describedby` resolves to an element whose text is exactly `Price unavailable — contact us to buy it.` The link named `contact us` has `href="/support"` |
+| PU3 | Priceless and signed out: click, `{Enter}` and `{Space}` on each button → `openModal`, `showToast`, `addToCart`, `buyNow`, `trackAddToCart`, `trackBeginCheckout`, `trackFBAddToCart` and `trackFBInitiateCheckout` are each called **0** times |
+| PU4 | Priceless, signed in, not an owner: the same 0 calls |
+| PU5 | Priceless, the owner panels keep precedence and are unchanged:<br>• owns SFX → `You own this collection`;<br>• owns Premium → `You own Premium`;<br>• owns Standard with Standard selected → `You own Standard`;<br>• purchases loading → `Checking purchase status...` |
+| PU6 | Known-price regression: a Track with Standard 29 / Premium 99 variants shows `$29.00`. Add to Cart calls `addToCart(productId, handle, standardVariantId)` once. Signed-out Buy Now calls `openModal('signin')` once, as on HEAD |
+| PU7 | `ProductSidebar`: unknown price → no `Complimentary Download`; `standardPrice` 0 → present; 9 → absent |
+
+### 3.3 Mutants (A runs them and records which rows go red; C re-runs them)
+Each mutant is applied to A's tree and must turn red at the rows listed.
+
+| Mutant | Change | Must go red at |
 |---|---|---|
-| RW1 | `view.test.ts` (new describe "PERF-3b windowed ruler ticks…") | Over 4 durations × 7 zooms × 5 pages (viewport 1216), the windowed list equals the full list filtered to the window, labels included. A covering window equals the full list. More than 40 checks are true partial windows. 3040.56 s at 122.1 px/s with page 0 gives 40 marks (`0:00`, `0:00.5`, `0:01` … `{19.5,'0:19.5'}`); the full list has 6,082 |
-| RW2 | same | NaN, Infinity and inverted windows give `[]`; `undefined` gives the full list; `{400,400}` at 40 px/s gives `[10]` |
-| RW3 | same | the page helpers: viewport 0 or NaN gives null; a negative scroll gives page 0; `'2:1216'` round-trips; `''` gives null; the window for page 2 is `{1216, 4864}`; null gives `undefined` |
-| SR1 | `tempo-window-ui.test.tsx` (new describe "PERF-3b viewport-windowed seconds ruler") | an unmeasured viewport renders all 266 ticks (133 s at 320 px/s) |
-| SR2 | same | a measured viewport renders exactly the page-0 window (16 ticks, fewer than the full list), and the visible span is complete |
-| SR3 | same | a scroll inside page 5 renders neither `ArrangementRuler` nor `ArrangementRulerTicksInner`, and the first tick is the same node; a scroll to page 6 renders the ticks once, with the new window |
-| SR4 | same | the first render after a keyboard `=` already uses the new view (page 1); `ArrangementRulerTicksInner` renders once |
-| SR5 | same | a resize re-measures (window for viewport 1000); 30 playhead frames cause 0 tick renders and 0 `clientWidth` reads |
-| SR6 | same | with BPM 999, playing, `setPosition(12)`: Follow scrolls past one viewport with **no scroll event**, and both the seconds-ruler ticks and the bars marks already equal the new page's window |
-
-**Named mutants.** A and C each run them with `HEAD_TREE=<a git archive 0f99960 copy> bash b-round-284/mu.sh <NAME> <copy of the final tree>`. The script copies the tree, applies `mutants.py <NAME>`, and runs `view.test.ts` and `tempo-window-ui.test.tsx`; it writes to `/tmp/b284/`. B's results are in `b-round-284/mutants.txt`.
-
-| Mutant | Change | Must be red at |
-|---|---|---|
-| HEADRULER | HEAD's `ArrangementRuler.tsx`, with only the tick testid and `data-time` added | SR2, SR3, SR4, SR5, SR6 |
-| W1 | the ruler passes no window | SR2, SR3, SR4, SR5, SR6 |
-| W2 | no window filter in `rulerTickMarks` | RW1, RW2, SR2 |
-| W3 | the first index starts 2 too late | RW1, RW2 |
-| W4 | `StudioWorkspace` does not pass the two props | SR2, SR3, SR4, SR5, SR6 |
-| W5 | the page key changes on every scroll pixel | SR3 |
-| W6 | window `page + 1` instead of `page + 2` | RW3, BU2–BU7, SR2, SR3, SR4, SR6 |
-| W7 | no `notifyTimelineScroll()` in the Follow writer | SR6 |
-
-**Timeout headroom (L31):**
-- `tempo-window-ui` has a 15 s describe timeout [K23]; the file took 2.0 s for 8 tests at gate 284 (`gates/round-284/verify.log`). The new rows take about 40–70 ms each on B's scratch.
-- `view.test.ts` took 0.3 s for 41 tests at gate 284.
+| M1 | `resolveCatalogPrice` ends with `?? 0` instead of `undefined` | PR2, PR5, PU2 |
+| M2 | Remove the guard in `handleBuyNow` | PU3 |
+| M2b | Remove the guard in `handleAddToCart` (both guards are required) | PU3 |
+| M3 | Use `disabled` instead of `aria-disabled` | PU2 |
+| M4 | Sidebar `isFree` back to the old `?? 0` chain | PU7 |
+| M5 | `resolvePurchasePrice` always returns the catalogue price | PR4, PU6 |
 
 ## 4. Grants (exact)
-| Path | Change |
-|---|---|
-| `app/lib/arrangement/view.ts` | M, = sketch |
-| `app/components/arrangement/ArrangementRuler.tsx` | M, = sketch |
-| `app/components/arrangement/ArrangementTempoRow.tsx` | M, = sketch |
-| `app/components/arrangement/StudioWorkspace.tsx` | M, = sketch (2 props + 1 notify line + 1 dependency) |
-| `app/lib/arrangement/__tests__/view.test.ts` | M, = sketch |
-| `app/lib/arrangement/__tests__/tempo-window-ui.test.tsx` | M, = sketch |
-| `docs/implementation/2026/quarter-IV/213-perf-ruler-tick-window.md` | new (§5); the last doc is 212 [K14] |
-| `docs/implementation/2026/quarter-IV/212-perf-zoom-waveform-columns.md` | **three lines only** (D-29z685, L28): l.4 [K15] to exactly `**სტატუსი:** In Progress (stage 1 of 3; C round 284 PASS)`; l.17 [K26] to exactly `ამიტომ PERF-3 სამ ეტაპად გაიყო (D-29z685): **PERF-3a** (ეს ეტაპი) — waveform-ის column band-ები და envelope-ის ხაზი წამებში; **PERF-3b** — ruler-ის tick windowing; **PERF-3c** — harness-ის row-ები და საბოლოო მიზანი.`; l.101 [K26] to exactly `- PERF-3-ის საბოლოო მიზანი — zoom keydown p95 < 50 ms 30 clip-ით — PERF-3c-ზე იზომება; ამ ეტაპზე wall-clock მხოლოდ ტრენდად ჩაიწერა.` |
+**Allowed changes:**
+- **M** `app/lib/product-utils.ts`: the two new exports only.
+- **M** `app/components/product/ProductDetailPage.tsx`
+- **M** `app/components/product/PurchaseHeader.tsx`
+- **M** `app/components/product/ProductSidebar.tsx`
+- **M** `app/lib/__tests__/product-utils.test.ts`: append only.
+- **??** `app/lib/__tests__/product-price-unavailable.test.tsx`
+- **??** `docs/implementation/2026/quarter-IV/214-fix-pd-price-fallback.md` (next free number [K13])
 
-- All six code and test files must match `b-round-284/sketch-sha256.txt` byte for byte. Apply the patch with `patch -p1 < ../tmp/studio-real-loop/b-round-284/sketch.diff` (B dry-ran it cleanly on HEAD).
-- Nothing else. In particular, these are not granted: `perf/**`, `peaks.ts`, the protected files (`backlog.json` → `global_forbidden_files`), and `package.json`.
-- **Consumer sweeps:**
-  - `arrangement-ruler` [K10]: 17 hits in 16 files;
-  - the tick helpers [K11];
-  - the old helper names [K12]: all 7 hits are in `ArrangementTempoRow.tsx`, which the patch rewrites;
-  - every test that touches Follow, scroll, the overview or the position store: 69 files (`covering-files.txt`).
+**Everything else is frozen.** In particular:
+- `app/contexts/CartContext.tsx`, `app/services/api/**`, `app/routes/**`
+- the auth files (`app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/lib/firebase.client.ts`)
+- the protected `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts` and `app/routes/account.downloads.tsx`
+- every Studio file
+- `package.json` and the lock file
+- every loop file, including `mock-api/server.mjs`
 
-  All of them were run on the sketch and pass. `perf/studio-lab-resources.perf.spec.ts` counts the ruler subtree for `res.dom.ruler-1/2` [K17]. Those are `record` rows: the value drops, and PERF-RUN records it.
+## 5. Doc 214 (Georgian, technical terms in English)
+Follow the `docs/implementation/TEMPLATE.md` headings, in order.
+- **Line 4** is exactly `Completed (C round 286 PASS)` (L28).
+- **Content:** the context (F9 and the HEAD reproduction), the approach (§2, with the rejected options), the changed files, the Problem → Solution entries, the testing (cite only rows that exist: PR1–PR6, PU1–PU7, M1–M5; L26) and the TODO (FIX-PD-1b and FIX-PD-1c).
 
-## 5. Doc 213 (Georgian, technical terms in English)
-- l.4 exactly: `**სტატუსი:** In Progress (stage 2 of 3; C round 285 PASS)` (L28).
-- The seven TEMPLATE headings, in order (L26).
-- Contents:
-  - the §1 measurements, citing their `b-round-284/` files;
-  - the shared page helpers (D-29z683) and the unknown-viewport rule (D-29z684);
-  - the Follow notify with its painted-gap evidence and the post-frame oracle (§1.4);
-  - the 3-stage split (D-29z685);
-  - the changed files;
-  - the tests by row id (RW1–RW3, SR1–SR6) and the mutants (HEADRULER, W1–W7);
-  - the TODO: PERF-3c harness rows, the exit target and the `res.dom.ruler` notes.
-- Every row or mutant id cited must exist (`grep -c` in the test files or §3).
+## 6. The browser contract (D-29z696)
+- **Servers.** C runs the dev server :5173 (already up) and the mock API on :5199. The product page is SSR-loaded (`products.$handle.tsx` loader), so `page.route` cannot fake a product.
+- **Unknown-price fixture.** C copies `mock-api/server.mjs` to `c-round-286/mock-priceless.mjs` and adds one active SFX fixture:
+  - `id 9`, handle `priceless-pack`;
+  - no `standardPrice`, `minPrice`, `premiumPrice` or `variants`;
+  - a local `audioPreviewUrl`.
 
-## 6. The browser contract (D-29z686)
-- C builds **three** production trees, each with its own port and `cacheDir` (L38), each warmed up and run alone:
-  - HEAD `0f99960` (`git archive`);
-  - A's tree;
-  - A's tree with mutant W7 applied (the control for the flip oracle).
-- B's probes are the oracle scripts:
-  - `b-round-284/ruler-probe.cjs` (arguments: base, out, mode, width, height, shot dir);
-  - `flip-probe.cjs` (base, out, width, height, bpm);
-  - `imgdiff.cjs` (dir A, dir B).
-
-  C may copy them; C must not change their counting.
-- `browserVerified`/`realVerified` are true only if every browser row in §8 ran in real Chromium.
+  C stops the standard mock, runs the copy on :5199 for the B-UNKNOWN rows, and restores the standard mock afterwards. `mock-api/server.mjs` itself is never edited.
+- **Builds.** C compares HEAD `60bfb38` with A's tree, each as its own build with its own port and `cacheDir` (L38), with a warm-up before measuring. Alternatively C may use the :5173 dev server for A and a scratch HEAD build.
+- **Backend-only rows.** Signed-in and owner states are unit rows only (PU4, PU5). The mock's auth returns 401, so a browser check of those states is **BLOCKED: backend unavailable in cloud**. That does not make `browserVerified` false.
 
 ## 7. What A runs (speed rules)
-1. Run the claims (§Baseline) before any edit.
-2. Apply the patch, then run `sha256sum -c ../tmp/studio-real-loop/b-round-284/sketch-sha256.txt` from `store/`.
-3. `npm run typecheck`; `npm run lint` (report the counts; gate 284 found 205 warnings).
-4. `npx vitest run $(cat ../tmp/studio-real-loop/b-round-284/covering-files.txt)`. Expected: **69 files / 1,261 tests**.
-5. Run the mutants HEADRULER and W1–W7 (§3).
-6. One browser smoke on A's own production build, run alone: `ruler-probe.cjs` in `in` mode at 1440×900. The ruler counts must equal §1.2, and the coverage must have 0 missing. This is not a perf run.
-7. Write doc 213 and the three doc 212 lines (§4).
-8. Ask the code-reviewer subagent (8 paths) and pass on its notes, including any Architecture note.
+1. Run the claims (§Baseline).
+2. Make the edits.
+3. Run `npm run typecheck` and `npm run lint`.
+4. Run `npx vitest run` on the 6 covering files in `b-round-285/covering-files.txt` plus the new test file. HEAD baseline: 6 files / 111 tests pass (`covering-run-head.txt`).
+5. Run mutants M1–M5 and M2b. Restore the tree after each one and check its sha256.
+6. Run one browser smoke on `/products/door-slams` ($9.00) at 1440. The page is SSR-loaded from the mock API, which is not running by default. From the loop folder, start `node mock-api/server.mjs > a-round-286-mock.log 2>&1 &` first, check `curl -s http://127.0.0.1:5199/__mock/health` (`products: 8`), and stop the mock afterwards by its PID (not with `pkill -f`, which can match the calling shell).
+7. Run `code-reviewer`; the round changes 3+ files.
 
-**Not A's:** the full vitest suite, the build gate, `npm run verify`, `test:e2e:smoke` and `test:perf` (C's and the gate's).
+**Report in `a-round-286.md`:** the diff stat, the test counts, the mutant table, the sha256 of the 7 changed paths, and any code-reviewer Architecture note (passed on as a backlog signal). Do not run the full suite or `npm run verify`; the gate does.
 
-## 8. C rows
+## 8. C rows (both viewports, 1440×900 and 1280×720, unless stated)
 | Row | Check |
 |---|---|
-| CLAIMS | `claims-285.sh` on a `git archive 0f99960` scratch equals `claims-285-output.txt`, except that K1 prints `(archive)`. Also run the L29 untagged-fact sweep over this task |
-| SOURCE-SCOPE | `git status` = exactly 7 `M` (the 6 files of §4 + doc 212) + 1 `??` (doc 213); `git diff` of doc 212 is exactly l.4, l.17 and l.101, with the §4 texts; `sha256sum -c b-round-284/sketch-sha256.txt` rc 0. Check at the start and at the end |
+| CLAIMS | `claims-286.sh` on a `git archive 60bfb38` scratch equals `claims-286-output.txt`, except K1 `(archive)`. Run the L29 untagged-fact sweep of this task |
+| SOURCE-SCOPE | `git status` lists exactly the §4 paths. `git diff app/lib/__tests__/product-utils.test.ts` shows only `+` lines (the file ends with a newline at HEAD, so appending needs no `-` line). In `product-utils.ts`, every pre-existing function is byte-identical (diff hunks only add). CartContext, client.ts, routes and auth files are unchanged |
 | TYPECHECK | `npm run typecheck` rc 0 |
-| UNIT | the §7.4 list: 69 / 1,261 pass; RW1–RW3 and SR1–SR6 exist by name; BU1–BU8 are unchanged in the diff |
-| UNIT-MUTANTS | C's own HEADRULER and W1–W7, each red at its §3 rows |
-| RULER-NODES-IN | **browser, both viewports**, `in` mode, 3 runs on A's tree. The ruler element counts equal §1.2 at the start and at every key, and every step has `coverage.missing` 0. HEAD control, 1 run per viewport: start 6,143, key 5 12,286 |
-| RULER-NODES-OUT | **browser, both viewports**, `out` mode, 1 run on A's tree: counts equal §1.2, missing 0. HEAD control: `[3073,3073,3073,1231,…,6143]` |
-| RULER-PIXELS | **browser, both viewports.** `imgdiff.cjs` on the shot dirs of HEAD and A (modes `in`, `out`, `jump`): all **28** shots per viewport have meanAbs 0. `follow-zoom-stopped` is excluded (§1.3) |
-| RULER-JUMP | **browser, both viewports**, `jump` mode on A's tree: counts `140/140/129/94` (1440) and `114/114/114/78` (1280), missing 0. HEAD control: 6,143 at every jump |
-| RULER-FOLLOW-FLIP | **browser, both viewports**, `flip-probe.cjs`, no BPM, 2 runs each. A's tree: ≥ 3 flips (B measured 4 at 1440 and 5 at 1280; the flip count is recorded) and `secondsGapRuns` `[]`. W7 control build, 1 run per viewport: at least one gap run (this proves the oracle sees the painted gap). Then 1 run with BPM 120 on A's tree: `secondsGapRuns` `[]`. The probe checks the **seconds ruler only**; the bars-ruler half of the fix is proven by SR6 in jsdom |
-| FOLLOW-IDLE | **browser, both viewports**, `follow` and `follow-bpm` modes on A's tree: over 6 s, `rm.ruler` = 0 and `rm.bars` = 0. Bars counts with BPM 120 equal HEAD's (C runs the HEAD `follow-bpm` control at both viewports; B measured 116 at 1440) |
-| ZOOM-TIMING | trend only, `record`: Event Timing keydown per key for the `in` and `out` modes, A's tree vs HEAD, at both viewports. No pass or fail; the exit target belongs to PERF-3c |
-| PERF-RUN | `npm run test:perf` once, alone, on A's tree: rc 0, 0 harness problems, every assert row within budget. Record `res.dom.ruler-1/2`, `play.idle-commits` and the `interact.zoom.*` rows |
-| DOC-213 | l.4 is byte-exact (§5); the TEMPLATE headings are in order; every cited id exists; every number matches its cited `b-round-284/` file. Doc 212's l.4, l.17 and l.101 are byte-exact (§4) |
-| G285-AUTH | **browser, both viewports**, fresh context, no credentials:<br>• `/studio-lab`: the demo workspace and the badge `Demo collection — no sign-in required`, with `auth_user` null;<br>• `/studio/middle-east`: `Sign in required`, `audio[src]` 0, and no workspace;<br>• `/api/studio-token?product=middle-east&file=stem-01.wav`: no header → 401; a fake bearer → not 200 and no token. A real backend 401/403 is BLOCKED: backend unavailable in cloud |
-| gate | the full vitest suite, the build, Biome, `npm run verify` and `test:e2e:smoke` belong to the root gate and are not claimed |
+| UNIT | The 7 covering files pass. PR1–PR6 and PU1–PU7 each exist exactly once by name |
+| UNIT-MUTANTS | C re-runs M1–M5 and M2b on its own copy; each is red exactly at its §3.3 rows |
+| B-KNOWN | `/products/door-slams` on A shows `$9.00 USD` and no `$0.00` anywhere (HEAD: `$0.00`). Add to Cart and Buy Now are enabled. Signed out, Buy Now gives the same result as on HEAD for `/products/middle-east`: the sign-in modal and toast |
+| B-UNKNOWN | With the `mock-priceless` server, `/products/priceless-pack`:<br>• `Price unavailable` is visible, and the purchase panel has no `$`;<br>• both buttons have `aria-disabled="true"` and no `disabled`;<br>• keyboard Tab, starting from the sidebar preview button (or from the document start if that button is absent), reaches Add to Cart → Buy Now → `contact us`, in that order. The priceless product has no version selector (`ProductDetailPage.tsx:138` renders it only with a selected version), and the ring is visible on each (computed outline ≥ 1 px);<br>• click, Enter and Space on each button: no dialog, no toast element, no request to `/api/cart*`, `/api/auth*` or `/api/orders*` (network log);<br>• `contact us` navigates to `/support`;<br>• `aria-describedby` resolves to the reason text, exactly as in PU2.<br>Screenshot of the panel |
+| B-SIDEBAR | No `Complimentary Download` on `priceless-pack` or on `door-slams` |
+| B-REGRESS | On A versus HEAD:<br>• `middle-east` shows `$29.00`, and Premium selected shows `$99.00`;<br>• `copper-horizon` (Track, no variants, 19) shows `$19.00`;<br>• `harbour-lights` shows `$24.00`;<br>• each price text is equal on HEAD and A;<br>• the purchase-panel bbox is equal ±1 px |
+| B-JOURNEY (L54) | `/store` → for each active fixture product (7): the card price equals the product page's price figure on A. Screenshot each step for `door-slams`: the card, then the page |
+| G286-AUTH | Fresh context, no credentials:<br>• `/studio-lab` shows the demo badge, `auth_user` null, and Add present;<br>• `/studio/middle-east` shows `Sign in required` and has 0 `audio[src]`;<br>• `/api/studio-token?product=middle-east&file=stem-01.wav` with no header → 401; with a fake bearer → not 200 and no token.<br>A real-backend 403 is BLOCKED: backend unavailable in cloud |
+| DOC-214 | Line 4 is byte-exact. The headings equal TEMPLATE's, in order. Every cited row id exists |
+| gate | The full suite, the build, Biome, `verify` and `test:e2e:smoke` are the gate's rows. C does not claim them |
+
+**Product-designer acceptance rows** are B-UNKNOWN, PU3–PU5, B-KNOWN and B-SIDEBAR. C may consult `product-designer` in review mode (at most 7 findings).
 
 ## 9. STOP conditions (L11)
-- The claims output differs from `claims-285-output.txt` (other than K1 on an archive).
-- The patch does not apply cleanly, a sha256 mismatches, a covering test fails or exceeds 50 % of its timeout, or a mutant stays green at its row.
-- Any edit seems needed outside §4, including a defect the code-reviewer finds in the sketch.
-- The browser smoke (§7.6) differs from §1.2 or shows a missing tick.
+Write a STOP and change nothing else when:
+- the claims output differs;
+- keeping exactly one `bg-buy` attribute is impossible;
+- any frozen file would need a change;
+- `createDisplayVersions` or the SFX `[]` test would need a change;
+- a required row cannot be written without a type assertion.
 
 ## 10. Neighbour risk
-1. **The bars ruler** now uses the shared helpers and the earlier Follow notify. BU1–BU8 cover it unchanged, plus SR6 and FOLLOW-IDLE.
-2. **The overview** updates one frame earlier during Follow. Covered by the overview tests in the 69-file sweep.
-3. **Ruler gestures** (seek, scrub, double-click Fit, the snap seeks): the ruler element, its handlers and the playhead are unchanged. The 16 files hitting `arrangement-ruler` [K10] are in the sweep.
-4. **SSR and hydration:** the server key is `''`, so an unmeasured ruler renders every tick (`ssr-layout-effect` is in the sweep).
-5. **The perf specs** count the ruler subtree [K17]. PERF-RUN records the new values.
+- **Products with a known price.** The buttons, handlers, analytics price and cart arguments must stay exactly as on HEAD (PU6, B-REGRESS).
+- **The upgrade panel (Case 3)** depends on `price`. Its known-price arithmetic is unchanged.
+- **Free products (explicit 0).** They still render `$0.00` in the header, as today. This is out of scope; recorded as open signal PD-FREE-HEADER for STORE-4.
+- **Themes and focus.** The `store-theme-tokens` and `store-focus-ring` scans must stay green.
 
 ## 11. Outcome, fixed in advance
-| Result | Next |
-|---|---|
-| C PASS and the gate publishes | PERF-3b is done, and PERF-3 stays **მუშავდება**. The next round is REGRESSION if its planning is on or after 2026-11-02 (`regression-last.json`); otherwise PERF-3c, after consults (the harness rows of D-29z685; the exit decision on the measured p95; doc 212/213 l.4 → `Completed`) |
-| C FAIL on a test or doc row | a bounded fix-up with the same grants |
-| RULER-PIXELS, RULER-JUMP or RULER-FOLLOW-FLIP fails | B re-plans the window; no tolerance is loosened |
+- **PASS:** every runnable row above passes at both viewports, with `browserVerified` true. FIX-PD-1a becomes **მზადაა** after gate publication, and the next round is FIX-PD-1b.
+- **Fix-up:** any Medium or higher finding in B-KNOWN, B-UNKNOWN or B-REGRESS makes the next round a fix-up.
+- **Lows:** they go to `deferred_low_polish`, unless this round's files own them cheaply.
 
 ## 12. Deliverables
-- **A:** the six files (= the sketch), doc 213, the three doc 212 lines, and `a-round-285.md` with the commands, the results, the mutant table, the smoke counts and the review notes.
-- **C:** `c-round-285.md`, `c-round-285.json`, and evidence in `c-round-285/`.
+- **A:** the §4 files and `a-round-286.md` (with a checkpoint).
+- **C:** `c-round-286.md`, `c-round-286.json` and evidence in `c-round-286/`.
 
 ## Claims block (L29)
-From `store/` on the pre-edit tree, run `bash ../tmp/studio-real-loop/b-round-284/claims-285.sh`. The expected output is `b-round-284/claims-285-output.txt`.
+Every fact in this task about current code carries a K tag from `b-round-285/claims-286.sh`; their output is in `claims-286-output.txt`.
 
-| Tag | Claim | Expected |
-|---|---|---|
-| K1 | HEAD | `0f99960` |
-| K2 | the ruler maps every tick | `ArrangementRuler.tsx` l.239 |
-| K3 | the `rulerTickMarks` definition | `view.ts` l.233 |
-| K4 | the tempo row's private page helpers | l.72, 86, 90, 98 |
-| K5 | the tempo row's window props | l.336, 337 |
-| K6 | `subscribeTimelineScroll={subscribeTimelineScroll}` in `StudioWorkspace.tsx` | 2, at l.2807 and 3014 |
-| K7 | the `getTimelineViewportPx` definition | l.1276 |
-| K8 | the resize effect notifies the scroll listeners | 1 |
-| K9 | the `<ArrangementRuler` element | l.2988 |
-| K10 | SWEEP `arrangement-ruler` testid, roots `app perf` | 17 hits, 16 files |
-| K11 | SWEEP `rulerTickMarks\|rulerTickStep\|formatRulerLabel`, roots `app perf` | 3 files |
-| K12 | SWEEP the old page-helper names, roots `app perf` | `ArrangementTempoRow.tsx`: 7 |
-| K13 | SWEEP the new names, roots `app perf` | 0 |
-| K14 | the last implementation doc | `212-perf-zoom-waveform-columns.md` |
-| K15 | `In Progress (stage` lines | doc 212 l.4 |
-| K16 | `git status` lines | 0 |
-| K17 | the perf ruler rows | `res.dom.ruler-1`, `res.dom.ruler-2`, both `record` |
-| K18 | `play.idle-commits` | `record` |
-| K19 | the HEAD tick element has no testid | 0 |
-| K20 | the bars ruler renders everything when the page is null | 2 |
-| K21 | the Follow writer sets `scrollLeft`, then closes without a notify | `autoScrollLeftRef.current = target;` l.1979, next line `}),` |
-| K22 | the scroll notifications | l.1262 (resize), l.1905 (scroll handler) |
-| K23 | the `tempo-window-ui` describe timeout | `timeout: 15_000` |
-| K24 | the `view.test.ts` ruler mount (`createElement(ArrangementRuler, {` block) passes neither new prop | starts l.367; 0 props in the block (the 2 other mentions are overview mounts) |
-| K25 | `it('BU…` rows in `tempo-window-ui.test.tsx` | 8 |
-| K26 | doc 212's two-stage lines | l.17 starts `ამიტომ PERF-3 ორ ეტაპად გაიყო`; l.101 ends `PERF-3b-ზე იზომება; ამ ეტაპზე wall-clock მხოლოდ ტრენდად ჩაიწერა.` |
+| Tag | Fact |
+|---|---|
+| K1 | HEAD `60bfb38` |
+| K2 | Clean tree |
+| K3 | `ProductDetailPage.tsx:68` `selectedVersion?.price ?? 0` |
+| K4 | `:122` `selectedVersion?.name ?? 'Standard'` |
+| K5 | `product-utils.ts:85` SFX `return [];` |
+| K6 | `:92` synthetic Standard `… ?? 0` |
+| K7 | `PurchaseHeader.tsx:22` `price: number;`, `:140` `isDisabled`, `:327` the `${price.toFixed(2)}` figure |
+| K8 | `PurchaseHeader` is used only by `ProductDetailPage` |
+| K9 | `ProductSidebar.tsx:36` `isFree = standardPrice === 0`, `:65` `Complimentary Download` |
+| K10 | `product-utils.test.ts:263`, the frozen SFX test |
+| K11 | `app/routes/support.tsx` exists |
+| K12 | Exactly 1 test file mentions `PurchaseHeader` (`store-theme-tokens.test.ts`, the `bg-buy` count) |
+| K13 | The last doc is `213-…`, so the next is 214 |
+| K14 | The sha256 of the five owned pre-existing files |

@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T08:11:08.287Z)
+# Active loop summary (2026-10-31T09:46:32.314Z)
 
-- backlog.json 2717 KB -> active view 377 KB
-- status: G_ROOT_GATE round 284
-- servers: `{"checkedUtc":"2026-10-31T07:44:34.4125094Z","round":284,"attempt":1,"store":200}`
-- last publication: 0f9996063fa965d23f70554797a60f8b4a38df67 (rounds 284-284)
-- last root gate: round 284 published - commit 0f9996063fa965d23f70554797a60f8b4a38df67 pushed
+- backlog.json 2728 KB -> active view 378 KB
+- status: G_ROOT_GATE round 285
+- servers: `{"checkedUtc":"2026-10-31T09:06:35.0286970Z","round":285,"attempt":1,"store":200}`
+- last publication: 60bfb380a2f9ad330249953630ce84f8ac3720bc (rounds 285-285)
+- last root gate: round 285 published - commit 60bfb380a2f9ad330249953630ce84f8ac3720bc pushed
 
 ## Current items: -
 
@@ -78,7 +78,7 @@
 - INFO-C69-TAB-ORDER / info / acknowledged (pre-existing; harness note: the division select precedes the BPM field, Shift+Tab x2 from BPM) / division select comes before the BPM field in tab order
 - INFO-C69-METER-POST-ACCENT / info / applied as a harness rule from round 70 / a >=10 dB rise detector misses the beat after each accented click at 90 BPM; use >=3 dB to >=-15 dB with 0.25 s refractory or a single onset
 - R70-T-TECH-LEAD / info / open / real Chrome at 999 BPM, maximum zoom: scroll and zoom the bars ruler - smooth, and never a missing mark at the edges while scrolling fast?
-- ROOT-R70-ARCH-TIMELINE-TRIO / info / signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (seventh request); both reviewers: keep until a fourth consumer / getTimelineView/getTimelineViewportPx/subscribeTimelineScroll passed by hand to three consumers; proposal useTimelinePageKey or one Timeline
+- ROOT-R70-ARCH-TIMELINE-TRIO / info / signal updated (D-29z687): round 285 shares the page helpers (view.ts) between the seconds and bars rulers and passes getTimelineViewportPx/subscribeTimelineScroll to the seconds ruler; tech-lead: not a fourth consumer (overview, ruler, tempo row already take getTimelineView); no checkpoint requested | signal - merged into ARCH-CHECKPOINT-SRW14-PREFS (seventh request); both reviewers: keep until a fourth consumer / getTimelineView/getTimelineViewportPx/subscribeTimelineScroll passed by hand to three consumers; proposal useTimelinePageKey or one Timeline
 - INFO-C70-DOC058-PLACEMENT / info / acknowledged (one line, two hunks; no action) / doc 058 sentence sits one sub-bullet below the exports line
 - R71-T-TECH-LEAD / info / open / real Chrome, metronome on at a fast tempo, long project, play and scrub: clicks steady, never missing or doubled?
 - ROOT-R71-L4-RB-R9L2 / info / watch (merged with INFO-C71-RB-R9L2-SERIES: final 1/17, baseline 0/13; no distinguishing signal; the test never enables the metronome) / render-budget R9-L2 flaked once on the final round-71 tree
@@ -695,6 +695,7 @@
 - A-R282-REVIEW-DW11 / medium / fix dispatched round 283: DW11 + MU-U5 / postMessage-throw fallback (client l.72-76) had no test row
 - INFO-B283-NPX-TSX-CACHE / info / root_note / B's planning ran 'npx tsx' once for a scratch helper table; npm fetched tsx@4.23.15 into the npm cache only; project, lockfile and store unc
 - GATE283-S3 / info / watch / worst case at 6x CPU: 10 s worker stall + ~2.5 s sync synth ~ 12.5 s vs waitForCollectionReady 15 s timeout (perf/lib/page.ts); little headr
+- B-R284-FOLLOW-FLIP-GAP / low / scheduled round 285 (PERF-3b, D-29z683): the Follow writer notifies the page store after setting scrollLeft; SR6 + mutant W7 + C row RULER-FOLLOW-FLIP; close on C PASS / a Follow page flip paints one frame with ticks missing at the right of the view, because the page key updates only on the next frame's scrol
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

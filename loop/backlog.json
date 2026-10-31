@@ -1,9 +1,9 @@
 {
  "version": 248,
- "updated": "2026-10-31 (B round 284 -> 285 planning, D-29z681..D-29z689)",
+ "updated": "2026-10-31 B round 285 -> 286 planning",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 285, D-29z681..D-29z689; PERF-3b: seconds ruler renders only the three-viewport page window shared with the bars ruler; view.ts gains readTimelinePage/timelinePageKey/parseTimelinePageKey/getServerTimelinePageKey/timelinePageWindow + windowed rulerTickMarks; ArrangementRuler subscribes via optional getTimelineViewportPx/subscribeTimelineScroll; tick testid arrangement-ruler-tick + data-time; 6 files byte-identical to b-round-284/sketch.diff + doc 213 new + doc 212 l.4; rows RW1-RW3, SR1-SR5; mutants HEADRULER/W1..W6; C browser rows RULER-NODES-IN/OUT, RULER-PIXELS, RULER-FOLLOW-FLIP, RULER-JUMP, FOLLOW-IDLE, BARS-REGRESSION, ZOOM-TIMING record, PERF-RUN, G285-AUTH)",
+ "current_task": "current-task.md (round 286, D-29z690..D-29z698; FIX-PD-1a: product page price falls back to the catalogue price; unknown price -> Price unavailable + aria-disabled buttons + reason line to /support; sidebar complimentary only for explicit 0)",
  "advisor_used_by_B": "round 283 -> 284 planning: available and consulted (before the approach; before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -5049,7 +5049,8 @@
    "status_before_2026_10_23": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 published 64e12d8; load-status hardening C PASS round 94 unit-proven, published 0513439, browser half at the mount; SRW-21-PREMOUNT bundle open; R21-I2 full regression open)",
    "deferred_reason": "route mount on the protected studio.$productId.tsx waits for the auth work; not testable in the cloud (no backend)",
    "user_decision_2026_10_23": "SRW-21 deferred by the user; finished stage 1 stays; counts as deferred for every gate; do not touch the protected files",
-   "visual_a_note_d29z116": "when the purchased mount is unblocked, the studio route needs the same font stylesheet links() as /studio-lab (V-2a, D-29z116 R3); do not touch protected files before then"
+   "visual_a_note_d29z116": "when the purchased mount is unblocked, the studio route needs the same font stylesheet links() as /studio-lab (V-2a, D-29z116 R3); do not touch protected files before then",
+   "pd_review_d29z692": "Saba 2026-10-31 Q1: first Studio product priority after STUDIO-PERFORMANCE; status stays deferred_user for the protected mount; SRW-21-PLAN (plan doc only) queued in PD-REVIEW-2026-10-31; STUDIO-LINK is the interim way in"
   },
   {
    "id": "SRW-24",
@@ -10972,10 +10973,18 @@
    "round": 285,
    "task": "current-task.md",
    "decision": "D-29z681..D-29z689",
-   "status": "dispatched",
+   "status": "done (D-29z690): C PASS (c-round-285.json, browserVerified/realVerified true, 14 rows), gate 285 published 60bfb38 (both remotes); Low A-R285-REVIEW-NAN-PAGE -> deferred_low_polish; B-R284-FOLLOW-FLIP-GAP closed",
    "type": "STUDIO-PERFORMANCE PERF-3b (seconds ruler page window; stage 2 of 3 of PERF-3)",
    "note": "baseline HEAD 0f99960 clean; grants 6 M (= b-round-284/sketch.diff, sketch-sha256.txt) + doc 213 new + doc 212 l.4; B scratch: 20 files / 468 tests PASS, tsc 0, Biome clean; mutants HEADRULER/W1..W6 red (b-round-284/mutants.txt); browser HEAD vs sketch: ruler 6143 -> 94 elements, key-5 Event Timing 112 -> 16 ms, ruler screenshots identical 28/28 per viewport",
    "added": "2026-10-31 B round 284 -> 285 planning"
+  },
+  {
+   "round": 286,
+   "task": "current-task.md",
+   "decision": "D-29z690..D-29z698",
+   "status": "dispatched",
+   "type": "PD-REVIEW FIX-PD-1a (F9 price fallback / price-unavailable state)",
+   "note": "baseline HEAD 60bfb38 clean; grants 4 M app + 1 M test (append) + 1 new test + doc 214; claims b-round-285/claims-286.sh"
   }
  ],
  "post_current_stage_queue": [
@@ -13370,8 +13379,93 @@
    "added": "2026-10-28 B round 232 -> 233 planning"
   },
   {
+   "id": "PD-REVIEW-2026-10-31",
+   "status": "in_progress (D-29z692): FIX-PD-1a dispatched round 286",
+   "requested": "Saba 2026-10-31 (agent-workflow.md \"Whole-product design review: Saba's decisions and new tasks\"); review docs/technical/studio-real-workspace/product-design-review-2026-10-31.md (product-designer, master 000da42)",
+   "saba_decisions": {
+    "Q1": "SRW-21 mount = first Studio product priority after STUDIO-PERFORMANCE; protected files stay outside the loop; B writes SRW-21-PLAN only; STUDIO-LINK until then",
+    "Q2": "stem or stem set add -> one lane per stem, all start at the Insert Marker, inside the existing Stems group; one Enter/drag on a library folder adds the set; purchased adapter same rule; Video/Music/SFX lanes stay; free new-track command later",
+    "Q3": "LeadMagnet keeps content/behaviour but does not open on /products/*, /cart, /checkout* - inside STORE-2b",
+    "Q4": "\"CZABA Studio\" everywhere (\"Studio\" in nav); \"Personal Mixdown Studio\" and \"Studio Lab · Workspace\" go; a badge carries demo status",
+    "Q5": "one-time status after the first clip: \"Drag a clip by its name bar to move it\"; behaviour unchanged"
+   },
+   "order_rule": "FIX-PD-1a/b/c, STUDIO-LINK, NAME-AND-HINT run next, between PERF tasks (bug gate fixes Medium now); STEM-LANES after STUDIO-PERFORMANCE and before SYS-1..3; SRW-21-PLAN in parallel (planning doc only); COPY-PD after STORE-5 or inside REVIEW-RECOMMENDATIONS; SR-BEHAVIOUR after COPY-PD. REGRESSION (due on/after 2026-11-02) and RETRO-290 keep precedence when due.",
+   "stages": [
+    {
+     "id": "FIX-PD-1a",
+     "finding": "F9 (Medium)",
+     "what": "product page price: no-variant product shows the catalogue price (standardPrice/minPrice/variants[0]) instead of $0.00; no known price -> \"Price unavailable\", Add to Cart / Buy Now aria-disabled no-op with a visible reason line linking /support; sidebar shows Complimentary Download only for an explicit 0",
+     "status": "dispatched round 286 (D-29z694..D-29z697)",
+     "files": [
+      "app/lib/product-utils.ts",
+      "app/components/product/ProductDetailPage.tsx",
+      "app/components/product/PurchaseHeader.tsx",
+      "app/components/product/ProductSidebar.tsx",
+      "app/lib/__tests__/product-utils.test.ts (append only)",
+      "app/lib/__tests__/product-price-unavailable.test.tsx (new)",
+      "docs/implementation/2026/quarter-IV/214-fix-pd-price-fallback.md (new)"
+     ]
+    },
+    {
+     "id": "FIX-PD-1b",
+     "finding": "F7 (Medium) + SR-230-6",
+     "what": "English demo names in app/data/studio-lab-demo.ts (\"Night Pulse · Full mix\", \"… · Bass\", \"Middle East — public preview\"); collection label shown once as a library group heading; reference-first + product-designer + screen budget",
+     "status": "not_started (next after 286)"
+    },
+    {
+     "id": "FIX-PD-1c",
+     "finding": "F8 (Medium)",
+     "what": "below 900 px /studio-lab shows a calm \"The Studio works on a computer\" state with a preview player; desktop-only decision unchanged; legacy MobileBlocker on the protected route untouched",
+     "status": "not_started"
+    },
+    {
+     "id": "STUDIO-LINK",
+     "finding": "F1 interim",
+     "what": "product page \"Try it in the Studio\" opens /studio-lab with that product's public preview selected; library public preview gets \"View in store\" (tooltip or context menu); Studio exit keeps \"← CZABA\"",
+     "status": "not_started"
+    },
+    {
+     "id": "NAME-AND-HINT",
+     "finding": "Q4 + Q5",
+     "what": "naming (nav, <title>, Studio header, home copy) + one-time \"Drag a clip by its name bar to move it\" status after the first clip",
+     "status": "not_started"
+    },
+    {
+     "id": "STEM-LANES",
+     "finding": "F2 (High) / Q2",
+     "what": "one lane per stem in the Stems group, all at the Insert Marker; folder Enter/drag adds the set; one undo step; export all stem lanes; purchased adapter same rule; status says \"Snap on (G)\" once (SR-245-2). Reference: Live 12 manual 6.1 + LIVE-MEAS-STEM-DROP (requested in user-review/live-checks.md; differing result -> question to Saba)",
+     "status": "queued: after STUDIO-PERFORMANCE, before SYS-1..3 (2-3 rounds)"
+    },
+    {
+     "id": "SRW-21-PLAN",
+     "finding": "F1 / Q1",
+     "what": "plan doc only: exact diff proposal, risks and tests for mounting the new workspace on studio.$productId.tsx / api.studio-token.ts / account.downloads.tsx; root and Saba apply the protected part outside the loop",
+     "status": "not_started (planning task, parallel)"
+    },
+    {
+     "id": "COPY-PD",
+     "finding": "F11 + approved SR copy",
+     "what": "export copy (\"MP3 · 320 kbps — smaller file for review links\", \"WAV · 24-bit / 48 kHz — for your edit timeline\"), \"Done\" -> \"Cancel\", filled primary, soft-disabled Export on an empty project with tooltip \"Add a clip to export\"; plus SR items assigned below",
+     "status": "queued: after STORE-5 or inside REVIEW-RECOMMENDATIONS (1-2 rounds)"
+    },
+    {
+     "id": "SR-BEHAVIOUR",
+     "finding": "SR-230-9, SR-260-5",
+     "what": "scroll to a newly added clip only when it is completely out of view; insert marker drawn only when not at the playhead",
+     "status": "queued after COPY-PD"
+    }
+   ],
+   "store_acceptance_additions": {
+    "STORE-3": "F5: Studio block shows a real crop of the workspace (soloed stem in brass); copy says what the screen shows; CTA \"Open the Studio\"",
+    "STORE-4": "F3: version card first line from data (\"Full mix · WAV\" / \"Full mix + N stems · WAV · opens in Studio\"), \"1 audio files\" -> \"1 file\", top line of What's included visible without the accordion; F10: play on every /store card, mono meta (length · BPM · Stems, data only), 3 columns at 1440; F1: \"Make it yours — open in Studio\"",
+    "STORE-2b": "F4/Q3 LeadMagnet route exclusion (/products/*, /cart, /checkout*), keep-list content unchanged; F6 visual part"
+   },
+   "retro_change": "every RETRO whole-screen review adds a 3-step journey on fresh screenshots: product page -> Studio (add a stem set, play) -> export dialog; reviewed by product-designer with design-philosopher and first-visit-host",
+   "added": "2026-10-31 B round 285 -> 286 planning"
+  },
+  {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress (D-29z685): PERF-3a done (round 284); round 285 = PERF-3b; then REGRESSION if due (on/after 2026-11-02), then PERF-3c; RETRO at 290 | in_progress (D-29z673): PERF-2 done (round 283, 54a3fcc); PERF-3 split -> PERF-3a round 284 (dispatched), PERF-3b next PERF round; REGRESSION first when due (on/after 2026-11-02); RETRO at 290",
+   "status": "in_progress (D-29z692): PERF-3a/3b done; paused for PD-REVIEW fix-ups FIX-PD-1a (round 286), FIX-PD-1b, FIX-PD-1c, STUDIO-LINK, NAME-AND-HINT (\"between PERF tasks\", Saba 2026-10-31); REGRESSION when due (on/after 2026-11-02) takes precedence; RETRO at 290; then PERF-3c | in_progress (D-29z685): PERF-3a done (round 284); round 285 = PERF-3b; then REGRESSION if due (on/after 2026-11-02), then PERF-3c; RETRO at 290 | in_progress (D-29z673): PERF-2 done (round 283, 54a3fcc); PERF-3 split -> PERF-3a round 284 (dispatched), PERF-3b next PERF round; REGRESSION first when due (on/after 2026-11-02); RETRO at 290",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -13558,7 +13652,7 @@
     {
      "id": "PERF-3",
      "what": "see perf-plan.md task outline",
-     "status": "in_progress (D-29z685): PERF-3a done (round 284, 0f99960); PERF-3b dispatched round 285; PERF-3c (harness rows + exit target) queued; 3 stages | in_progress (D-29z673): split into PERF-3a (round 284) + PERF-3b; exit target zoom keydown p95 < 50 ms with 30 clips measured at PERF-3b",
+     "status": "in_progress (D-29z690): PERF-3a + PERF-3b done (rounds 284, 285); PERF-3c queued after the FIX-PD-1 / STUDIO-LINK / NAME-AND-HINT fix-ups (D-29z692) | in_progress (D-29z685): PERF-3a done (round 284, 0f99960); PERF-3b dispatched round 285; PERF-3c (harness rows + exit target) queued; 3 stages | in_progress (D-29z673): split into PERF-3a (round 284) + PERF-3b; exit target zoom keydown p95 < 50 ms with 30 clips measured at PERF-3b",
      "scope_addition_d29z215": "add a Ctrl+wheel zoom baseline row before the fix (hypothesis in doc 168: continuous zoom, not measured); key zoom baseline 95 comps/key (1 clip)",
      "split_d29z673": {
       "PERF-3a": "waveform column bands (waveformPeakColumns in peaks.ts) + envelope polyline in seconds viewBox memoised on clip; deterministic rows ZOOM-PATH-IN 0 (HEAD 60), ZOOM-PATH-OUT 60 (HEAD 300); wallclock trend only",
@@ -13574,7 +13668,7 @@
     {
      "id": "PERF-3b",
      "what": "seconds ruler tick windowing + harness rows (p95 per key, path rewrites, ruler nodes, Ctrl+wheel baseline); PERF-3 exit target",
-     "status": "dispatched round 285 (D-29z683..D-29z687): seconds ruler page window shared with the bars ruler (view.ts helpers), windowed rulerTickMarks; B sketch: ruler 6143 -> 94 elements at 40 px/s with 30 clips, key-5 Event Timing 112 -> 16 ms, 28/28 ruler screenshots per viewport pixel-identical to HEAD; harness rows moved to PERF-3c (D-29z685) | not_started (queued D-29z673; consults performance-optimizer + tech-lead before dispatch)",
+     "status": "done (D-29z690): C round 285 PASS (c-round-285.json, 14 rows passed, browserVerified/realVerified true; ruler 6143 -> 94/78 elements, 28/28 ruler shots per viewport meanAbs 0, Follow flip gaps [] with W7 control [1,1]/[1,1,1], res.dom.ruler-1/2 95/95, zoom.30 key-window median 11 ms) + gate 285 published 60bfb38 (both remotes) | dispatched round 285 (D-29z683..D-29z687): seconds ruler page window shared with the bars ruler (view.ts helpers), windowed rulerTickMarks; B sketch: ruler 6143 -> 94 elements at 40 px/s with 30 clips, key-5 Event Timing 112 -> 16 ms, 28/28 ruler screenshots per viewport pixel-identical to HEAD; harness rows moved to PERF-3c (D-29z685) | not_started (queued D-29z673; consults performance-optimizer + tech-lead before dispatch)",
      "added": "2026-10-31 B round 283 -> 284 planning",
      "measured_d29z683": "HEAD 0f99960 prod, 30 clips: ruler 6143 elements at 40 px/s, 12286 at 122.1 px/s (+6142 on key 5), 0 ruler churn in 6 s Follow playback and on scroll jumps; sketch: 94/76/62/50/40/64 elements over the in path (1440), 78.. at 1280, Event Timing 16 ms on every in key, out path max 48 ms (band-crossing key 8), follow at ~298 px/s: 5-16 ruler nodes per page flip, jump: 94-140 elements; evidence b-round-284/probe-results/, imgdiff-{1440,1280}.json"
     },
@@ -13724,7 +13818,8 @@
      "id": "PERF-3c",
      "what": "perf harness rows for zoom (Event Timing p95 per zoom key with 30 clips, waveform path rewrites per key, ruler nodes per key, Ctrl+wheel zoom baseline from scope_addition_d29z215, res.dom.ruler-1/2 note update) + the PERF-3 exit decision (p95 < 50 ms with 30 clips; <= 1 commit per step); doc 212/213 l.4 -> Completed",
      "status": "not_started (queued D-29z685; stage 3 of 3 of PERF-3; after PERF-3b C PASS, REGRESSION first when due)",
-     "added": "2026-10-31 B round 284 -> 285 planning"
+     "added": "2026-10-31 B round 284 -> 285 planning",
+     "note_d29z690": "C round 285 ZOOM-TIMING record: out-path key 8 (25 px/s waveform band crossing from PERF-3a) 88 ms at both viewports on the round-285 tree (HEAD 104, B sketch 56/48). PERF-3c exit decision (p95 < 50 ms) must measure that key explicitly; not a ruler cost (ruler 48/40 elements there)."
     }
    ],
    "perf_fader_constraints_d29z174": "Before any event-share-16 row flips to assert: replace the metric (per-move frame/LoAF with liveness red-proof > 0 on a slow drag) or prove it live (C-R206-01); rewrite doc 163 l.60 and budgets.json event-share notes; drag changes the value at both ends (I-206-d); consult performance-optimizer + tech-lead and re-measure before dispatch",
@@ -14228,7 +14323,8 @@
    },
    "note_d29z163": "order after round 197: 198 C-R196-02 (Medium first; regression not due at this planning, 2026-10-26T22:34Z), 199 REGRESSION, 200 RETRO, 201 SABA-B-4 stage 2, then STORE-2b",
    "retro_200_insert": "after SABA-B-4 stage 2 (round 201): SYS-1, SYS-2, SYS-3 (backlog systemic_tasks), then STORE-2b (2026-10-27 B round 199 -> 200 planning (D-29z165))",
-   "round_205_note": "2026-10-27 B round 204 -> 205 planning (D-29z170): round 204 (hidden focusables) C PASS, gate blocked on a doc/test claim; round 205 = gate fix-up + LeadMagnet dialog + scroll lock; then SYS-1..3, then STORE-2b"
+   "round_205_note": "2026-10-27 B round 204 -> 205 planning (D-29z170): round 204 (hidden focusables) C PASS, gate blocked on a doc/test claim; round 205 = gate fix-up + LeadMagnet dialog + scroll lock; then SYS-1..3, then STORE-2b",
+   "pd_review_acceptance_d29z692": "see PD-REVIEW-2026-10-31.store_acceptance_additions (F5 -> STORE-3, F3/F10/F1 -> STORE-4, F4/F6 -> STORE-2b)"
   },
   {
    "id": "REVIEW-RECOMMENDATIONS",
@@ -20483,7 +20579,8 @@
    "round132_note": "B round 131 -> 132 planning: +C-R131-01, +GATE131-S1-V6-WORDING, +GATE131-S2-REVOKE-OBJECTURL-RESTORE (185 entries)",
    "round143_note": "B round 142 -> 143 planning: +C-R142-02, +C-R142-03 (201 entries; pointer count corrected from the stale 185)",
    "round147_note": "B round 146 -> 147 planning: +C-R146-01, +GATE146-S3-PLAYING-GLYPH-A11Y, +GATE146-S4-LRS3-CLASSNAME-PINS, +GATE146-S6-ROWERROR-EMPTY; ABL-B-1 and C-R142-02 closed (published 3328e75); 208 entries, 206 not closed",
-   "count_round285_note": "B round 284 -> 285 planning: +A-R284-REVIEW-NEG-LOOP, +A-R284-REVIEW-ZQ3-VACUITY (494 entries, 474 not closed)"
+   "count_round285_note": "B round 284 -> 285 planning: +A-R284-REVIEW-NEG-LOOP, +A-R284-REVIEW-ZQ3-VACUITY (494 entries, 474 not closed)",
+   "count_round286_note": "B round 285 -> 286 planning: +A-R285-REVIEW-NAN-PAGE, +PD-F12-ENVELOPE-VALUE, +PD-F12-FROM-TO-FORMAT, +PD-F12-MARKER-PLUS, +PD-F12-FOOTER-LINES (499 entries, 479 not closed)"
   },
   {
    "id": "PROD-SSR-NUL",
@@ -27687,11 +27784,20 @@
   {
    "id": "B-R284-FOLLOW-FLIP-GAP",
    "severity": "low",
-   "status": "scheduled round 285 (PERF-3b, D-29z683): the Follow writer notifies the page store after setting scrollLeft; SR6 + mutant W7 + C row RULER-FOLLOW-FLIP; close on C PASS",
+   "status": "closed (D-29z690): fixed by round 285 (StudioWorkspace notifies after the Follow writer sets scrollLeft); C RULER-FOLLOW-FLIP PASS both viewports, W7 control shows the gap | scheduled round 285 (PERF-3b, D-29z683): the Follow writer notifies the page store after setting scrollLeft; SR6 + mutant W7 + C row RULER-FOLLOW-FLIP; close on C PASS",
    "to": "B",
    "title": "a Follow page flip paints one frame with ticks missing at the right of the view, because the page key updates only on the next frame's scroll event. Measured on the seconds ruler of B's first round-285 sketch; the bars ruler at HEAD 0f99960 with a tempo is inferred to share it (same page key and notification), not measured",
    "evidence": "b-round-284/flip-probe.cjs (post-frame rAF->setTimeout check); probe-results/sketch-flipT-{1440,1280}.json gap runs [1,1] / [1,1,1]; final-flipT-*.json [] after the fix",
    "added": "2026-10-31 B round 284 -> 285 planning"
+  },
+  {
+   "id": "PD-FREE-HEADER",
+   "severity": "info",
+   "status": "signal (D-29z695): for STORE-4",
+   "to": "B",
+   "title": "a product with an explicit price 0 shows \"Complimentary Download\" in ProductSidebar (button without a handler) and \"$0.00 USD\" with Buy Now in PurchaseHeader; free-product purchase UX undefined",
+   "evidence": "ProductSidebar.tsx:36,62-66; PurchaseHeader.tsx:327 (HEAD 60bfb38); current-task round 286 section 10",
+   "added": "2026-10-31 B round 285 -> 286 planning"
   }
  ],
  "tech_lead_notes": [
@@ -35141,6 +35247,57 @@
    "fix": "expect(before).toBeTruthy()",
    "deferred_reason": "Low/info (D-29z682): round 285 does not own clip-envelope-ui.test.tsx",
    "added": "2026-10-31 B round 284 -> 285 planning"
+  },
+  {
+   "id": "A-R285-REVIEW-NAN-PAGE",
+   "severity": "low",
+   "status": "deferred",
+   "title": "readTimelinePage / parseTimelinePageKey (view.ts) have no finiteness guard: a non-finite scrollLeft or page key yields an empty ruler window; not reproducible in the browser (scrollLeft always finite)",
+   "evidence": "a-round-285.md (code-reviewer); c-round-285.json notes[0]",
+   "repro": "unit: call timelinePageWindow / parseTimelinePageKey with NaN",
+   "fix": "Number.isFinite guard -> treat as unknown viewport (full render)",
+   "deferred_reason": "Low (D-29z691): round 286 does not own view.ts (2026-10-23 bug gate)",
+   "added": "2026-10-31 B round 285 -> 286 planning"
+  },
+  {
+   "id": "PD-F12-ENVELOPE-VALUE",
+   "severity": "low",
+   "status": "deferred",
+   "title": "envelope point value shown only in the status line while dragging; Live shows a label beside the point (ableton-live-measurements-2026-10-30.md \"value label on creation\")",
+   "evidence": "docs/technical/studio-real-workspace/product-design-review-2026-10-31.md F12; studio-C2-envelope-drag-bottom-1440.png",
+   "repro": "see review F12 (product-designer, master 000da42)",
+   "deferred_reason": "Saba 2026-10-31 table: F12 -> deferred_low_polish (D-29z693)",
+   "added": "2026-10-31 B round 285 -> 286 planning"
+  },
+  {
+   "id": "PD-F12-FROM-TO-FORMAT",
+   "severity": "low",
+   "status": "deferred",
+   "title": "Clip details From/To in seconds (84.941) while every other time is mm:ss.mmm",
+   "evidence": "docs/technical/studio-real-workspace/product-design-review-2026-10-31.md F12; studio-B4-fade-1440.png",
+   "repro": "see review F12 (product-designer, master 000da42)",
+   "deferred_reason": "Saba 2026-10-31 table: F12 -> deferred_low_polish (D-29z693)",
+   "added": "2026-10-31 B round 285 -> 286 planning"
+  },
+  {
+   "id": "PD-F12-MARKER-PLUS",
+   "severity": "low",
+   "status": "deferred",
+   "title": "a second \"+\" while the marker name editor is open creates the marker and at once writes \"A marker already exists at this time\"; should commit the editor without the message",
+   "evidence": "docs/technical/studio-real-workspace/product-design-review-2026-10-31.md F12; scripts/studio-4.cjs log, studio-D1-after-plus-1440.png",
+   "repro": "see review F12 (product-designer, master 000da42)",
+   "deferred_reason": "Saba 2026-10-31 table: F12 -> deferred_low_polish (D-29z693)",
+   "added": "2026-10-31 B round 285 -> 286 planning"
+  },
+  {
+   "id": "PD-F12-FOOTER-LINES",
+   "severity": "low",
+   "status": "deferred",
+   "title": "after a time selection the bottom bar grows to 3 lines (status + time selection + Clip); with SR-230-1 (footer Clip line only while Clip details is collapsed)",
+   "evidence": "docs/technical/studio-real-workspace/product-design-review-2026-10-31.md F12; studio-B2-dragging-1440.png",
+   "repro": "see review F12 (product-designer, master 000da42)",
+   "deferred_reason": "Saba 2026-10-31 table: F12 -> deferred_low_polish (D-29z693)",
+   "added": "2026-10-31 B round 285 -> 286 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -39688,6 +39845,51 @@
    "id": "D-29z689",
    "date": "2026-10-31",
    "text": "regression-last.json unchanged (2026-10-30, round 258 sweep); next REGRESSION due on/after 2026-11-02; RETRO at 290. No lesson changed this planning (no new failure class in round 284; the band prose note is 1x and covered by L29 claims). Lesson candidate for RETRO 290 (1x, B-found): a per-frame painted-state check uses a post-frame probe (requestAnimationFrame -> setTimeout 0); a plain rAF check runs before later rAF writers and misses their frame (B-R284-FOLLOW-FLIP-GAP)."
+  },
+  {
+   "id": "D-29z690",
+   "date": "2026-10-31",
+   "text": "Round 285 closed: C PASS (c-round-285.json, browserVerified/realVerified true, 14 rows) and gate 285 published 60bfb38 on both remotes. PERF-3b done (mzadaa). B-R284-FOLLOW-FLIP-GAP closed. ZOOM-TIMING out-key-8 88 ms recorded on PERF-3c."
+  },
+  {
+   "id": "D-29z691",
+   "date": "2026-10-31",
+   "text": "A-R285-REVIEW-NAN-PAGE (Low, A code-reviewer, not reproducible in browser per C) -> deferred_low_polish; round 286 does not own view.ts."
+  },
+  {
+   "id": "D-29z692",
+   "date": "2026-10-31",
+   "text": "Saba 2026-10-31 whole-product design review recorded (L42): new queue entry PD-REVIEW-2026-10-31 inserted before STUDIO-PERFORMANCE in post_current_stage_queue with stages FIX-PD-1a/1b/1c, STUDIO-LINK, NAME-AND-HINT (next, between PERF tasks), STEM-LANES (after STUDIO-PERFORMANCE, before SYS-1..3), SRW-21-PLAN (parallel plan doc), COPY-PD (after STORE-5 or in REVIEW-RECOMMENDATIONS), SR-BEHAVIOUR (after COPY-PD); STORE-2b/3/4 acceptance additions F3/F4/F5/F6/F10/F1; RETRO journey review. FIX-PD-1 split into 1a/1b/1c (round rule: one feature or <=3 tightly related bugs; F9 is Store purchase code, F7 Studio data, F8 a Studio route state). STUDIO-PERFORMANCE paused at PERF-3c; REGRESSION (due >= 2026-11-02) and RETRO-290 keep precedence."
+  },
+  {
+   "id": "D-29z693",
+   "date": "2026-10-31",
+   "text": "Review section 5 SR positions applied as approved: endorse/modify -> COPY-PD, FIX-PD-1b (SR-230-6), SR-BEHAVIOUR (SR-230-9, SR-260-5) or deferred_low_polish (SR-230-1); drop -> wontfix (Saba 2026-10-31) for SR-230-5/8/10, SR-245-4, SR-260-6; SR-245-2 closed as info; SR-275-4/6/8/Q1/Q2 stay awaiting_user (not named). F12 -> four deferred Lows PD-F12-*."
+  },
+  {
+   "id": "D-29z694",
+   "date": "2026-10-31",
+   "text": "FIX-PD-1a design (F9): new pure helpers in product-utils.ts resolveCatalogPrice(product) and resolvePurchasePrice(product, version) return number | undefined (first finite >= 0 of standardPrice, minPrice, variants[0].price; a real variant uses its own price); createDisplayVersions untouched (its SFX [] test stays byte-identical). ProductDetailPage passes number | undefined; ProductSidebar isFree only for an explicit 0. Rejected: inventing an SFX version (contradicts product-utils.test.ts:263), and collapsing unknown to 0 (0 is a real free state in ProductSidebar)."
+  },
+  {
+   "id": "D-29z695",
+   "date": "2026-10-31",
+   "text": "FIX-PD-1a unknown-price state per product-designer consult: same panel shape; \"Total Price\" label kept; figure replaced by \"Price unavailable\" (no currency symbol); Add to Cart and Buy Now stay visible with aria-disabled=\"true\" (focusable, aria-describedby the reason), click/Enter/Space do nothing (no toast, no sign-in modal, no analytics, no cart call); visible reason line \"Price unavailable — contact us to buy it.\" with \"contact us\" a link to /support. Ownership panels and the loading state keep precedence and are unchanged. Rejected: replacing the buttons by a contact panel (contradicts Saba \"Buy is disabled with a reason\", layout jump). Copy rationale: product-designer proposed \"Online purchase isn't open for this collection yet\", B kept the reviewed wording because the \"not open yet\" cause is not known from data (smallest honest copy)."
+  },
+  {
+   "id": "D-29z696",
+   "date": "2026-10-31",
+   "text": "Round 286 browser contract: mock API (mock-api/server.mjs, :5199) + dev server :5173. door-slams (no variants, standardPrice 9) is the known-price row. The unknown-price branch is SSR-loaded (products.$handle loader) so page.route cannot intercept it: C runs its own scratch copy of the mock in c-round-286/ with one added active SFX fixture without any price, on :5199 in place of the standard mock (mock-api/server.mjs itself is not edited). Signed-in and owner rows are unit-only (backend unavailable in cloud; mock auth returns 401)."
+  },
+  {
+   "id": "D-29z697",
+   "date": "2026-10-31",
+   "text": "Round 286 reference: Store reference (docs/technical/store-redesign/research/competitors.md, luxury-and-galleries.md) has no unknown-price pattern; B records \"no reference found\" for the unavailable state and keeps the current panel shape. Ableton conformity: not applicable (Store page). Screen budget: Store page, no Studio persistent element; the reason line appears only in the unknown-price state."
+  },
+  {
+   "id": "D-29z698",
+   "date": "2026-10-31",
+   "text": "lessons.md: L54 (test the journey, not just the screen) and L55 (check the product promise against the model) added per Saba 2026-10-31 (policy calls them L47/L48; those ids are taken, so new ids). L21 merged into L20 (RETRO-275 deferred merge candidate) to stay within 60 lines. L42 unchanged: the PD-REVIEW approvals first reached B at this planning (absent from the round-283/284 prompts) and are recorded in it. LIVE-MEAS-STEM-DROP already present in user-review/live-checks.md (root, 2026-10-31); not duplicated. regression-last.json unchanged (next due on/after 2026-11-02)."
   }
  ],
  "retro_candidates": [
@@ -39853,7 +40055,7 @@
    "id": "SR-230-1",
    "what": "footer \"Clip:\" line duplicates the open Clip details (show only while collapsed)",
    "kind": "behaviour",
-   "status": "awaiting_user",
+   "status": "approved (endorse) -> deferred_low_polish with PD-F12-FOOTER-LINES (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39861,7 +40063,7 @@
    "id": "SR-230-2",
    "what": "clip name repeated as the first body line of Clip details",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39869,7 +40071,7 @@
    "id": "SR-230-3",
    "what": "\"The source file stays unchanged\" permanent; move to Source offset tooltip + ? sheet",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse) -> COPY-PD (tooltip + ? sheet; trust phrase stays reachable) (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39877,7 +40079,7 @@
    "id": "SR-230-4",
    "what": "zoom cluster: Zoom twice, px/s readout, 1280 toolbar wraps to 2 rows",
    "kind": "layout",
-   "status": "awaiting_user",
+   "status": "approved (modify: px/s readout into the slider tooltip, reset as icon + tooltip; no layout change) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39885,7 +40087,7 @@
    "id": "SR-230-5",
    "what": "demo chip first-run only (B advises keep: demo-only acceptance signal)",
    "kind": "behaviour",
-   "status": "awaiting_user",
+   "status": "wontfix (Saba 2026-10-31) (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39893,7 +40095,7 @@
    "id": "SR-230-6",
    "what": "\"Synthetic demo · ...\" repeated under each synthetic library card",
    "kind": "behaviour/layout",
-   "status": "awaiting_user",
+   "status": "approved (endorse + F7) -> FIX-PD-1b (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39901,7 +40103,7 @@
    "id": "SR-230-7",
    "what": "\"Active track: ... playhead ...\" line -> Add button label \"Add to <track>\"",
    "kind": "visual/layout",
-   "status": "awaiting_user",
+   "status": "approved (modify: merged into SR-260-1, Add label \"Add to Music\") -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39909,7 +40111,7 @@
    "id": "SR-230-8",
    "what": "\"· active\" text on the active track header -> hidden text/aria (not colour only)",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "wontfix (Saba 2026-10-31) (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39917,7 +40119,7 @@
    "id": "SR-230-9",
    "what": "a newly added clip lands off-screen and the view does not follow",
    "kind": "behaviour",
-   "status": "awaiting_user",
+   "status": "approved (endorse, scroll only when the clip is completely out of view) -> SR-BEHAVIOUR (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39925,7 +40127,7 @@
    "id": "SR-230-10",
    "what": "first-visit: the status \"Choose a track\" does not say how (click the track name); NOT a routing bug: the B capture script missed the name button; B probe b-round-229/screens/probe-active-track.txt shows the name button sets Stems active and Enter adds there",
    "kind": "copy",
-   "status": "awaiting_user",
+   "status": "wontfix (Saba 2026-10-31) (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-230.md; b-round-229/screens/",
    "added": "2026-10-28 B round 229 -> 230 planning"
   },
@@ -39933,7 +40135,7 @@
    "id": "SR-245-1",
    "what": "status line after Add packs five facts; shorten to the confirmation, tempo note to BPM tooltip and ? sheet (conflicts with the CALM decision that \"audio is not stretched\" stays in status when BPM is set: Saba decides)",
    "kind": "copy",
-   "status": "awaiting_user",
+   "status": "approved (modify: short confirmation + \"audio is not stretched\"; drop \"Snap on — grid 1/2\") -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39941,7 +40143,7 @@
    "id": "SR-245-2",
    "what": "info for Saba: Add silently set BPM, Snap on and grid 1/2 (SABA-B-11a decision); B proposes no change",
    "kind": "behaviour (info)",
-   "status": "info",
+   "status": "closed info (Saba 2026-10-31): stays; STEM-LANES status says \"Snap on (G)\" once (D-29z693; review section 5) | was info",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39949,7 +40151,7 @@
    "id": "SR-245-3",
    "what": "empty project shows BPM / MARKERS / LOOP rows: BPM placeholder, Metronome reason tooltip (SYS-5), show Markers/Loop only when one exists or merge (counter-argument: stable layout)",
    "kind": "visual + layout/behaviour",
-   "status": "awaiting_user",
+   "status": "approved (modify: BPM placeholder \"—\" and Metronome reason tooltip; rows not hidden) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39957,7 +40159,7 @@
    "id": "SR-245-4",
    "what": "two stacked rulers when BPM is set (Saba decision: min:sec ruler always visible; question only)",
    "kind": "layout",
-   "status": "awaiting_user",
+   "status": "wontfix (Saba 2026-10-31) (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39965,7 +40167,7 @@
    "id": "SR-245-5",
    "what": "grid select \"1/2\" has no unit (bar or beat); \"1/2 bar\" or tooltip; tied to SABA-Q-11B-READOUT",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse: tooltip \"Grid: ½ bar\", chip keeps the fraction) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39973,7 +40175,7 @@
    "id": "SR-245-6",
    "what": "\"1x\" waveform-height button reads like playback speed; icon + tooltip \"Waveform height\"; \"Env\" abbreviation",
    "kind": "visual/layout",
-   "status": "awaiting_user",
+   "status": "approved (endorse: icon + tooltip \"Waveform height\") -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39981,7 +40183,7 @@
    "id": "SR-245-7",
    "what": "Undo button label grows and truncates (\"Undo: Ad...\"); keep \"Undo\", action name in tooltip",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39989,7 +40191,7 @@
    "id": "SR-245-8",
    "what": "Clip Gain shown three ways (field, slider, \"0 dB\" readout); drop the readout",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse, with SR-275-1) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-245.md; b-round-244/screens/",
    "added": "2026-10-29 B round 244 -> 245 planning"
   },
@@ -39997,7 +40199,7 @@
    "id": "SR-260-1",
    "what": "library line names the insert-marker time while Add lands at the nearest free spot when occupied (DEMO: 00:00.000 vs 01:43.352); show the real Add target or only \"Adds to Music\"",
    "kind": "copy (+ behaviour if the free spot is predicted)",
-   "status": "awaiting_user",
+   "status": "approved (endorse, first) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-260.md; b-round-259/screens/",
    "added": "2026-10-30 B round 259 -> 260 planning"
   },
@@ -40005,7 +40207,7 @@
    "id": "SR-260-2",
    "what": "question: keep the Live term \"insert marker\" in visible text, or \"Adds at 00:00.000\" with the term in tooltip and ? sheet (SABA-B-10a introduced the term)",
    "kind": "copy (question)",
-   "status": "awaiting_user",
+   "status": "approved (modify: visible \"Adds at 00:00.000\", term in tooltip and sheet) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-260.md; b-round-259/screens/",
    "added": "2026-10-30 B round 259 -> 260 planning"
   },
@@ -40013,7 +40215,7 @@
    "id": "SR-260-3",
    "what": "Follow is the loudest control when on; outline-only on state and tooltip \"Follow playhead\"; position unchanged",
    "kind": "visual + tooltip",
-   "status": "awaiting_user",
+   "status": "approved (endorse: outline on-state, tooltip \"Follow playhead\") -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-260.md; b-round-259/screens/",
    "added": "2026-10-30 B round 259 -> 260 planning"
   },
@@ -40021,7 +40223,7 @@
    "id": "SR-260-4",
    "what": "\"Loop\" twice (transport button + LOOP strip label) and disabled Loop gives no reason; icon-only button with \"Loop (Ctrl+L)\" tooltip; disabled tooltip \"Drag on the LOOP lane to set a loop range\" (relates to SYS-5)",
    "kind": "visual + tooltip",
-   "status": "awaiting_user",
+   "status": "approved (modify: text buttons stay; disabled tooltip \"Drag on the LOOP lane to set a loop range\") -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-260.md; b-round-259/screens/",
    "added": "2026-10-30 B round 259 -> 260 planning"
   },
@@ -40029,7 +40231,7 @@
    "id": "SR-260-5",
    "what": "question, addition to SABA-Q-10B-MARKER-LOOK: at rest the insert marker at 0:00 reads as a thick gold border next to the playhead and the active-track edge; show it only when it differs from the playhead?",
    "kind": "visual/behaviour (question)",
-   "status": "awaiting_user",
+   "status": "approved (default: insert marker drawn only when not at the playhead) -> SR-BEHAVIOUR (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-260.md; b-round-259/screens/",
    "added": "2026-10-30 B round 259 -> 260 planning"
   },
@@ -40037,7 +40239,7 @@
    "id": "SR-260-6",
    "what": "library \"Preview\" and transport Play share the triangle; label \"Preview sound\" (weakest)",
    "kind": "copy",
-   "status": "awaiting_user",
+   "status": "wontfix (Saba 2026-10-31) (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-260.md; b-round-259/screens/",
    "added": "2026-10-30 B round 259 -> 260 planning"
   },
@@ -40045,7 +40247,7 @@
    "id": "SR-275-1",
    "what": "gain value in four formats (+0.0 track, 0.0 dB Master, 0.0 Clip Gain field, 0 dB readout); one format, signed, one decimal, dB",
    "kind": "visual/copy",
-   "status": "awaiting_user",
+   "status": "approved (endorse) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
    "added": "2026-10-30 B round 274 -> 275 planning"
   },
@@ -40053,7 +40255,7 @@
    "id": "SR-275-2",
    "what": "question: first-run instruction twice (status line and Music lane hint; \"Press ? for shortcuts\" next to the Shortcuts ? button); options (a) shorter status, (b) lane hint names + Add, (c) keep; CALM-2b text",
    "kind": "copy (question)",
-   "status": "awaiting_user",
+   "status": "approved (endorse option b) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
    "added": "2026-10-30 B round 274 -> 275 planning"
   },
@@ -40061,7 +40263,7 @@
    "id": "SR-275-3",
    "what": "Master peak \"-inf\" in a bordered box reads as an empty input; remove the border, tooltip \"Peak\"",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
    "added": "2026-10-30 B round 274 -> 275 planning"
   },
@@ -40071,13 +40273,14 @@
    "kind": "visual",
    "status": "awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
-   "added": "2026-10-30 B round 274 -> 275 planning"
+   "added": "2026-10-30 B round 274 -> 275 planning",
+   "note_d29z693": "not named in the 2026-10-31 review section 5; stays awaiting_user"
   },
   {
    "id": "SR-275-5",
    "what": "library cards and preview header show durations with milliseconds, twice; show 1:42 there, keep ms in timeline and Clip details",
    "kind": "copy/visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse: \"1:42\" on cards) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
    "added": "2026-10-30 B round 274 -> 275 planning"
   },
@@ -40087,13 +40290,14 @@
    "kind": "copy (question)",
    "status": "awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
-   "added": "2026-10-30 B round 274 -> 275 planning"
+   "added": "2026-10-30 B round 274 -> 275 planning",
+   "note_d29z693": "not named in the 2026-10-31 review section 5; stays awaiting_user (SR-275-6 may be resolved by FIX-PD-1b group heading; C reports)"
   },
   {
    "id": "SR-275-7",
    "what": "two equally bright start hints (Video lane and Music lane) on an empty project; dim the video hint until the first clip",
    "kind": "visual",
-   "status": "awaiting_user",
+   "status": "approved (endorse) -> COPY-PD (D-29z693; review section 5) | was awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
    "added": "2026-10-30 B round 274 -> 275 planning"
   },
@@ -40103,7 +40307,8 @@
    "kind": "visual",
    "status": "awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
-   "added": "2026-10-30 B round 274 -> 275 planning"
+   "added": "2026-10-30 B round 274 -> 275 planning",
+   "note_d29z693": "not named in the 2026-10-31 review section 5; stays awaiting_user"
   },
   {
    "id": "SR-275-Q1",
@@ -40111,7 +40316,8 @@
    "kind": "layout (question)",
    "status": "awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
-   "added": "2026-10-30 B round 274 -> 275 planning"
+   "added": "2026-10-30 B round 274 -> 275 planning",
+   "note_d29z693": "not named in the 2026-10-31 review section 5; stays awaiting_user"
   },
   {
    "id": "SR-275-Q2",
@@ -40119,7 +40325,8 @@
    "kind": "behaviour signifier (question)",
    "status": "awaiting_user",
    "source": "user-review/screen-review-275.md; b-round-274/screens/",
-   "added": "2026-10-30 B round 274 -> 275 planning"
+   "added": "2026-10-30 B round 274 -> 275 planning",
+   "note_d29z693": "not named in the 2026-10-31 review section 5; stays awaiting_user"
   }
  ],
  "final_acceptance_saba_manual_items": {

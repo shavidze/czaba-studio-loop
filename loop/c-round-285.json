@@ -1,0 +1,51 @@
+{
+ "round": 285,
+ "task": "PERF-3b seconds ruler page window + Follow flip notify",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T09:06:35.0286970Z",
+  "round": 285,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "RULER-NODES-IN",
+  "RULER-NODES-OUT",
+  "RULER-PIXELS",
+  "RULER-JUMP",
+  "RULER-FOLLOW-FLIP",
+  "FOLLOW-IDLE",
+  "PERF-RUN",
+  "DOC-213",
+  "G285-AUTH"
+ ],
+ "record": {
+  "ZOOM-TIMING": "c-round-285/timing-table.md; A in-path 16 ms every key both vp; out-path key 8 88 ms both vp (HEAD 104, B sketch 56/48)",
+  "PERF": "res.dom.ruler-1/2 95/95 (r284 267/469); play.idle-commits 0; interact.zoom.30.key-window-longest-ms median 11 (r284 73.4)"
+ },
+ "gate": [
+  "full vitest suite",
+  "build gate",
+  "Biome/lint",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "blocked": [
+  "G285-AUTH sub-item only (row itself PASS): real backend 401/403 for a forged bearer — backend unavailable in cloud; the app route gives 401 without header and 500 with a fake bearer, never 200, no token"
+ ],
+ "notes": [
+  "A-R285-REVIEW-NAN-PAGE (Low, A code-reviewer) not reproducible in browser (scrollLeft finite); code matches description; deferred_low_polish per 2026-10-23 gate",
+  "W7 control flip gapRuns [1,1] (1440) / [1,1,1] (1280) proves oracle; A [] x2 per vp + BPM120 []",
+  "Neighbour: ruler click-seek 00:10.000, playback advances, WAV export 48k/24-bit/stereo 101.352 s data sha256 identical HEAD vs A both vp",
+  "Env-invalid attempt: first :5173 auth run timed out during Vite firebase dep optimize 09:22:43; retry after warm-up PASS"
+ ],
+ "evidence": "tmp/studio-real-loop/c-round-285/"
+}
