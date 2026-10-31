@@ -1,0 +1,203 @@
+diff --git a/app/components/arrangement/ArrangementLibrary.tsx b/app/components/arrangement/ArrangementLibrary.tsx
+index bb3d530..d63f413 100644
+--- a/app/components/arrangement/ArrangementLibrary.tsx
++++ b/app/components/arrangement/ArrangementLibrary.tsx
+@@ -8,6 +8,7 @@ import {
+   type RefObject,
+   useCallback,
+   useEffect,
++  useId,
+   useMemo,
+   useRef,
+   useState,
+@@ -114,14 +115,6 @@ function ArrangementLibraryOptionInner({
+       >
+         {source.shortTitle ?? source.title}
+       </span>
+-      {source.shortTitle ? (
+-        <span
+-          className="w-full break-words text-xs leading-snug text-muted"
+-          data-testid="arrangement-library-option-context"
+-        >
+-          {source.collectionLabel}
+-        </span>
+-      ) : null}
+       <span className="flex gap-2 text-xs tabular-nums text-muted">
+         <span>{LIBRARY_KIND_LABELS[source.kind]}</span>
+         <span>
+@@ -201,6 +194,19 @@ export function ArrangementLibrary({
+     [collection.sources, node, query],
+   );
+   const resultIds = useMemo(() => results.map((source) => source.id), [results]);
++  const libraryGroupIdPrefix = useId();
++  const libraryResultRuns = useMemo(() => {
++    const runs: { label: string; start: number; end: number }[] = [];
++    results.forEach((source, index) => {
++      const last = runs[runs.length - 1];
++      if (last && last.label === source.collectionLabel) {
++        last.end = index + 1;
++      } else {
++        runs.push({ label: source.collectionLabel, start: index, end: index + 1 });
++      }
++    });
++    return runs;
++  }, [results]);
+   const visibleSelectedId =
+     selectedSourceId !== null && resultIds.includes(selectedSourceId) ? selectedSourceId : null;
+   const activeNodeLabel =
+@@ -426,6 +432,26 @@ export function ArrangementLibrary({
+     resizeCleanupRef.current = cleanup;
+   };
+ 
++  const renderLibraryOption = (source: WorkspaceSource, index: number) => {
++    const isSelected = source.id === visibleSelectedId;
++    return (
++      <ArrangementLibraryOption
++        key={source.id}
++        source={source}
++        state={sourceStates[source.id]}
++        isSelected={isSelected}
++        isFocusTarget={isSelected || (visibleSelectedId === null && index === 0)}
++        isPreviewing={libraryPreviewSourceId === source.id}
++        onSelect={handleOptionSelect}
++        onAdd={handleOptionAdd}
++        onOptionKeyDown={handleOptionKeyDownStable}
++        onOptionDragStart={handleOptionDragStartStable}
++        onOptionDragEnd={endLibraryDrag}
++        registerOption={registerLibraryOption}
++      />
++    );
++  };
++
+   return (
+     <aside
+       ref={asideRef}
+@@ -631,25 +657,32 @@ export function ArrangementLibrary({
+                 style={bottomInsetStyle}
+                 data-testid="arrangement-library-list"
+               >
+-                {results.map((source, index) => {
+-                  const isSelected = source.id === visibleSelectedId;
+-                  return (
+-                    <ArrangementLibraryOption
+-                      key={source.id}
+-                      source={source}
+-                      state={sourceStates[source.id]}
+-                      isSelected={isSelected}
+-                      isFocusTarget={isSelected || (visibleSelectedId === null && index === 0)}
+-                      isPreviewing={libraryPreviewSourceId === source.id}
+-                      onSelect={handleOptionSelect}
+-                      onAdd={handleOptionAdd}
+-                      onOptionKeyDown={handleOptionKeyDownStable}
+-                      onOptionDragStart={handleOptionDragStartStable}
+-                      onOptionDragEnd={endLibraryDrag}
+-                      registerOption={registerLibraryOption}
+-                    />
+-                  );
+-                })}
++                {libraryResultRuns.length >= 2
++                  ? libraryResultRuns.map((run, runIndex) => {
++                      const headingId = `${libraryGroupIdPrefix}-${runIndex}`;
++                      return (
++                        // biome-ignore lint/a11y/useSemanticElements: a listbox may own role=group children only; a native fieldset is a form-control grouping
++                        <div
++                          key={headingId}
++                          role="group"
++                          aria-labelledby={headingId}
++                          className="space-y-1"
++                        >
++                          <div
++                            id={headingId}
++                            className="break-words px-2 pt-2 pb-0.5 text-xs leading-snug text-muted"
++                          >
++                            {run.label}
++                          </div>
++                          {results
++                            .slice(run.start, run.end)
++                            .map((source, offset) =>
++                              renderLibraryOption(source, run.start + offset),
++                            )}
++                        </div>
++                      );
++                    })
++                  : results.map((source, index) => renderLibraryOption(source, index))}
+               </div>
+             </div>
+           </div>
+diff --git a/app/data/studio-lab-demo.ts b/app/data/studio-lab-demo.ts
+index 95b7a09..84807ed 100644
+--- a/app/data/studio-lab-demo.ts
++++ b/app/data/studio-lab-demo.ts
+@@ -12,7 +12,7 @@ import type { WorkspaceCollection, WorkspaceSource } from '~/types/arrangement';
+ 
+ const DEMO_COLLECTION_LABEL = 'Demo collection · CZABA public previews + synthetic sounds';
+ const PUBLIC_PREVIEW_COLLECTION_LABEL = 'CZABA public previews + synthetic SFX';
+-const SYNTHETIC_COMPOSITION_TITLE = 'ღამის პულსი';
++const SYNTHETIC_COMPOSITION_TITLE = 'Night Pulse';
+ const SYNTHETIC_COLLECTION_LABEL = `Synthetic demo · ${SYNTHETIC_COMPOSITION_TITLE}`;
+ const SYNTHETIC_COMPOSITION_BPM = 60 / DEMO_STEM_BEAT_SECONDS;
+ 
+@@ -34,23 +34,23 @@ const demoStemParts: Record<string, DemoStemPart> = {
+ };
+ 
+ const demoStemTitles: Record<DemoStemPart, string> = {
+-  pulse: 'პულსი',
+-  bass: 'ბასი',
+-  pad: 'პადი',
+-  lead: 'მელოდია',
++  pulse: 'Pulse',
++  bass: 'Bass',
++  pad: 'Pad',
++  lead: 'Melody',
+ };
+ 
+ const studioLabDemoSources: WorkspaceSource[] = [
+   {
+     id: 'demo-middle-east',
+-    title: 'Middle East — საჯარო preview',
++    title: 'Middle East — public preview',
+     collectionLabel: PUBLIC_PREVIEW_COLLECTION_LABEL,
+     kind: 'music',
+     origin: 'demo',
+   },
+   {
+     id: 'demo-hero-music',
+-    title: 'CZABA hero — საჯარო preview',
++    title: 'CZABA hero — public preview',
+     collectionLabel: PUBLIC_PREVIEW_COLLECTION_LABEL,
+     kind: 'music',
+     origin: 'demo',
+@@ -71,8 +71,8 @@ const studioLabDemoSources: WorkspaceSource[] = [
+   },
+   {
+     id: 'demo-synth-mix',
+-    title: `${SYNTHETIC_COMPOSITION_TITLE} · სრული მიქსი`,
+-    shortTitle: 'სრული მიქსი',
++    title: `${SYNTHETIC_COMPOSITION_TITLE} · Full mix`,
++    shortTitle: 'Full mix',
+     collectionLabel: SYNTHETIC_COLLECTION_LABEL,
+     kind: 'music',
+     origin: 'demo',
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 7f5186e..db449b8 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -2438,17 +2438,7 @@ const LIBRARY_REMAINING_GEORGIAN_LINES: readonly string[] = [];
+ 
+ const COLLECTION_REMAINING_GEORGIAN_LINES: readonly string[] = [];
+ 
+-const DEMO_REMAINING_GEORGIAN_LINES = [
+-  "const SYNTHETIC_COMPOSITION_TITLE = 'ღამის პულსი';",
+-  "pulse: 'პულსი',",
+-  "bass: 'ბასი',",
+-  "pad: 'პადი',",
+-  "lead: 'მელოდია',",
+-  "title: 'Middle East — საჯარო preview',",
+-  "title: 'CZABA hero — საჯარო preview',",
+-  'title: `{SYNTHETIC_COMPOSITION_TITLE} · სრული მიქსი`,',
+-  "shortTitle: 'სრული მიქსი',",
+-];
++const DEMO_REMAINING_GEORGIAN_LINES: readonly string[] = [];
+ 
+ describe('V-0.5a source-load strings', () => {
+   it('ST45: every plain-string property of studioSourceLoadStrings equals its exact English literal', () => {

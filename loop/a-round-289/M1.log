@@ -1,0 +1,83 @@
+
+ RUN  v4.0.16 /tmp/a289scratch
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx (7 tests | 3 failed) 665ms
+     ✓ LG1: the All view shows one labelled group per collection, no per-option collection line, options in source order 218ms
+     ✓ LG2: headings take no focus and are not options; ArrowDown/ArrowUp walk the options in resultIds order 125ms
+     × LG3: a selected collection node or folder shows the options flat in the listbox, with no group 88ms
+     × LG4: search shows groups only when the results span two collections 72ms
+     × LG5: a purchased-style single collection with short titles shows no group and no collection text in any option 48ms
+     ✓ LG6: option title attributes keep the full title while the card shows the short title 52ms
+     ✓ LG7: a label that returns after another one (A, B, A) gives three groups in source order 62ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b, SR-230-6) > LG3: a selected collection node or folder shows the options flat in the listbox, with no group
+AssertionError: expected [ <div role="group" …(2)>…(3)</div> ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:318:53
+    316|     const tree = view.getByTestId('arrangement-library-tree');
+    317|     fireEvent.click(within(tree).getByRole('button', { name: SET_LABEL…
+    318|     expect(within(listbox).queryAllByRole('group')).toHaveLength(0);
+       |                                                     ^
+    319|     expect(optionIds(listbox)).toEqual(['ember-mix', 'ember-bass']);
+    320|     for (const option of within(listbox).getAllByRole('option')) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b, SR-230-6) > LG4: search shows groups only when the results span two collections
+AssertionError: expected [ <div role="group" …(2)>…(3)</div> ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:345:53
+    343|     );
+    344|     typeLibraryQuery(view, 'ember');
+    345|     expect(within(listbox).queryAllByRole('group')).toHaveLength(0);
+       |                                                     ^
+    346|     expect(optionIds(listbox)).toEqual(['ember-mix', 'ember-bass']);
+    347|     typeLibraryQuery(view, 'low');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b, SR-230-6) > LG5: a purchased-style single collection with short titles shows no group and no collection text in any option
+AssertionError: expected [ <div role="group" …(2)>…(3)</div> ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:357:53
+    355|       groupCollection(purchasedSources, 'purchased'),
+    356|     );
+    357|     expect(within(listbox).queryAllByRole('group')).toHaveLength(0);
+       |                                                     ^
+    358|     expect(view.queryAllByTestId('arrangement-library-option-context')…
+    359|     const options = within(listbox).getAllByRole('option');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 4 passed (7)
+   Start at  12:27:05
+   Duration  1.95s (transform 656ms, setup 0ms, import 945ms, tests 665ms, environment 252ms)
+
+
+::error file=/tmp/a289scratch/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx,title=app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b%2C SR-230-6) > LG3%3A a selected collection node or folder shows the options flat in the listbox%2C with no group,line=318,column=53::AssertionError: expected [ <div role="group" …(2)>…(3)</div> ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:318:53%0A%0A
+
+::error file=/tmp/a289scratch/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx,title=app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b%2C SR-230-6) > LG4%3A search shows groups only when the results span two collections,line=345,column=53::AssertionError: expected [ <div role="group" …(2)>…(3)</div> ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:345:53%0A%0A
+
+::error file=/tmp/a289scratch/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx,title=app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b%2C SR-230-6) > LG5%3A a purchased-style single collection with short titles shows no group and no collection text in any option,line=357,column=53::AssertionError: expected [ <div role="group" …(2)>…(3)</div> ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:357:53%0A%0A

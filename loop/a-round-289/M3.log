@@ -1,0 +1,44 @@
+
+ RUN  v4.0.16 /tmp/a289scratch
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx (7 tests | 1 failed) 673ms
+     ✓ LG1: the All view shows one labelled group per collection, no per-option collection line, options in source order 220ms
+     ✓ LG2: headings take no focus and are not options; ArrowDown/ArrowUp walk the options in resultIds order 128ms
+     ✓ LG3: a selected collection node or folder shows the options flat in the listbox, with no group 91ms
+     ✓ LG4: search shows groups only when the results span two collections 83ms
+     ✓ LG5: a purchased-style single collection with short titles shows no group and no collection text in any option 49ms
+     ✓ LG6: option title attributes keep the full title while the card shows the short title 51ms
+     × LG7: a label that returns after another one (A, B, A) gives three groups in source order 48ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b, SR-230-6) > LG7: a label that returns after another one (A, B, A) gives three groups in source order
+AssertionError: expected [ 'Label A', 'Label B' ] to deeply equal [ 'Label A', 'Label B', 'Label A' ]
+
+- Expected
++ Received
+
+  [
+    "Label A",
+    "Label B",
+-   "Label A",
+  ]
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:388:33
+    386|   it('LG7: a label that returns after another one (A, B, A) gives thre…
+    387|     const { view, listbox } = await mountGroupLibrary(groupCollection(…
+    388|     expect(groupNames(listbox)).toEqual(['Label A', 'Label B', 'Label …
+       |                                 ^
+    389|     expect(optionIds(listbox)).toEqual(['a-one', 'b-one', 'a-two']);
+    390|     const headingIds = within(listbox)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  12:27:10
+   Duration  1.96s (transform 653ms, setup 0ms, import 937ms, tests 673ms, environment 257ms)
+
+
+::error file=/tmp/a289scratch/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx,title=app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b%2C SR-230-6) > LG7%3A a label that returns after another one (A%2C B%2C A) gives three groups in source order,line=388,column=33::AssertionError: expected [ 'Label A', 'Label B' ] to deeply equal [ 'Label A', 'Label B', 'Label A' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "Label A",%0A    "Label B",%0A-   "Label A",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:388:33%0A%0A

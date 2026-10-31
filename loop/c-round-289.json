@@ -1,0 +1,50 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T12:34:18.7948060Z",
+  "round": 289,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "B-NAMES",
+  "B-GROUPS",
+  "B-KEYS",
+  "B-STATES",
+  "B-JOURNEY",
+  "B-SCREEN",
+  "G289-AUTH",
+  "DOC-216"
+ ],
+ "failed": [],
+ "gate": [
+  "full test suite",
+  "build",
+  "Biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "blocked": [
+  "purchased /studio/$productId buyer-side rendering (one run, no heading): backend unavailable in cloud (unit LG5 carries it)"
+ ],
+ "signalsForB": [
+  "C-R289-INFO-01 (info): b-round-288/sketch.patch, which task section 5 says is kept, does not exist in b-round-288/ (A noted the same). Planning-artifact claim, not a code fact; no row depends on it.",
+  "C-R289-INFO-02 (info): a search from All that hits one collection (e.g. 'bass') renders a flat list; the option shows only 'Bass'. Under All, the tree lists both collections, so it does not say which one Bass belongs to. The only cues are the title tooltip on hover, the accessible description 'Night Pulse · Bass', and the preview panel's full title after selection. This matches the task rule (0 groups for one run), but it is weaker than the section 1 promise 'you can always see which collection it belongs to'. Evidence: shots/search-bass-a-*.png. Candidate for Saba with SR-275-6, not a bug.",
+  "G289-AUTH needs the standard mock for the 403 leg. Without it, a fake bearer gets 500 'Unable to prepare Studio access' (fails closed, no token). The mock was not running at job start; C started it and stopped it again.",
+  "A deviation accepted: Fragment not imported (an unused import fails Biome noUnusedImports). Section 3.2(4) listed it as new.",
+  "A review Lows A-R289-REVIEW-L1 (option remount on run change), L2 (ST47/ST51 names stale) and L4 (Mtavruli range) are B's to triage. C saw no browser symptom of L1: keys, drag and search are all correct."
+ ],
+ "ableton": {
+  "czabaRequirement": "met (English UI, collection said once as a group heading when the results span 2 or more collections)",
+  "abletonConformity": "deliberate difference (group heading, listed in task section 2). Live's search-result location behaviour is unconfirmed until LIVE-MEAS-BROWSER-SEARCH-LOCATION"
+ },
+ "cleanup": "HEAD dev :3289 and C mock :5199 stopped (mock was down at start); live tree sha 6/6 unchanged; HEAD c345def"
+}

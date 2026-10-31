@@ -1,0 +1,62 @@
+
+ RUN  v4.0.16 /tmp/a289scratch
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx (7 tests | 2 failed) 679ms
+     × LG1: the All view shows one labelled group per collection, no per-option collection line, options in source order 207ms
+     ✓ LG2: headings take no focus and are not options; ArrowDown/ArrowUp walk the options in resultIds order 134ms
+     ✓ LG3: a selected collection node or folder shows the options flat in the listbox, with no group 93ms
+     ✓ LG4: search shows groups only when the results span two collections 86ms
+     × LG5: a purchased-style single collection with short titles shows no group and no collection text in any option 44ms
+     ✓ LG6: option title attributes keep the full title while the card shows the short title 53ms
+     ✓ LG7: a label that returns after another one (A, B, A) gives three groups in source order 61ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b, SR-230-6) > LG1: the All view shows one labelled group per collection, no per-option collection line, options in source order
+AssertionError: expected [ <span …(1)></span>, …(1) ] to have a length of +0 but got 2
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:260:73
+    258|     expect(within(listbox).getByRole('group', { name: SET_LABEL })).to…
+    259|     expect(groupNames(listbox)).toEqual([PREVIEW_LABEL, SET_LABEL]);
+    260|     expect(view.queryAllByTestId('arrangement-library-option-context')…
+       |                                                                         ^
+    261|     expect(optionIds(listbox)).toEqual(['rain', 'door', 'ember-mix', '…
+    262|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b, SR-230-6) > LG5: a purchased-style single collection with short titles shows no group and no collection text in any option
+AssertionError: expected [ <span …(1)></span>, …(1) ] to have a length of +0 but got 2
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:358:73
+    356|     );
+    357|     expect(within(listbox).queryAllByRole('group')).toHaveLength(0);
+    358|     expect(view.queryAllByTestId('arrangement-library-option-context')…
+       |                                                                         ^
+    359|     const options = within(listbox).getAllByRole('option');
+    360|     expect(options.map((option) => option.getAttribute('title'))).toEq…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+   Start at  12:27:07
+   Duration  1.96s (transform 656ms, setup 0ms, import 945ms, tests 679ms, environment 255ms)
+
+
+::error file=/tmp/a289scratch/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx,title=app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b%2C SR-230-6) > LG1%3A the All view shows one labelled group per collection%2C no per-option collection line%2C options in source order,line=260,column=73::AssertionError: expected [ <span …(1)></span>, …(1) ] to have a length of +0 but got 2%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:260:73%0A%0A
+
+::error file=/tmp/a289scratch/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx,title=app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b%2C SR-230-6) > LG5%3A a purchased-style single collection with short titles shows no group and no collection text in any option,line=358,column=73::AssertionError: expected [ <span …(1)></span>, …(1) ] to have a length of +0 but got 2%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:358:73%0A%0A

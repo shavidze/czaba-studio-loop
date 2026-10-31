@@ -1,243 +1,146 @@
-# Round 289: FIX-PD-1b. English demo names (F7, Medium) and the collection label shown once as a library group heading (SR-230-6)
+# Round 290: RETRO 290 (seventh retrospective, rounds 275–289) + whole-screen and journey review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
 
-**Planned by:** B, at the round 288 → 289 planning, 2026-10-31.
+**Planned by:** B, at the round 289 → 290 planning, 2026-10-31.
 
-**Decisions** (full text in `backlog.json` → `decisions_log_b`):
-- **D-29z707:** round 288 (FIX-PD-1a2) is closed.
-  - C PASSED, with `browserVerified` and `realVerified` both true; gate 288 published `c345def`. **F9 is closed.**
-  - Closed: C-R286-01/02, C-R287-01, A-R287-PREMIUM-UNVALIDATED, and C-R186-01 (by L7).
-- **D-29z708:** A-R288-ARCH-LEADING-SPANS is recorded as a signal only.
-- **D-29z709:** this round's names, group-heading rule, wrap ruling, biome-ignore ruling and buyer-side change, all detailed below.
+**Decisions:**
+- D-29z710: round 289 accepted; FIX-PD-1b is done; L7 closures.
+- D-29z711: gate-289 triage; FIX-PD-1b2 queued for round 291.
+- D-29z712: RETRO 290 outputs.
+- D-29z713: lessons.
+- D-29z714: screen and journey review.
+- D-29z715: L46, TLM-R274.
+- D-29z716: experiments and the systemic task.
+- D-29z717: what comes next.
+- D-29z718: inventory of every entry that names "RETRO 290".
 
-**Owner:** A. **Verifier:** C. **Grants:** §4.
-- This round touches no Store, auth, cart, checkout, purchase or protected file.
-- It does not touch audio, playback, export or video code either. Demo audio is keyed by source id, not by title [K17].
+**Rules:**
+- **Policy:** "Retrospective: stop, look back, improve" (Saba, 2026-10-26); "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28); the product-designer rule (2026-10-30); the RETRO journey step (2026-10-31); `backlog.json` → `retro_policy`.
+- **Window:** retro 275 covered 260–274, so this one covers 275–289. Precedent: rounds 260 and 275.
+- **Read first:** `lessons.md`. This planning revised it, and the revision applies from round 290:
+  - L27 is merged into L52;
+  - L17 is folded into L2;
+  - **L56** is new;
+  - L4 gains the ruling-line clause.
+  - This task uses L56 itself: every `b-round-289/` file it cites is checked by a `test -f` claim in §8.
 
-## Baseline: HEAD `c345def` [K1], clean tree [K2]
-- `gates/gate-round-288.json` is `published`, commit `c345def…`.
-- **Claims (L29):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-288/claims-289.sh` **before editing**. Its output must equal `b-round-288/claims-289-output.txt`. Any difference is a STOP (§8).
-- If HEAD moves through a root-only commit and `git diff c345def HEAD -- app` stays empty, that is accepted with a note.
+## Baseline: HEAD `5a911ff`, clean tree
+- **Gate:** gate 289 published `5a911ff…` on both remotes [K1]. That commit is the round-290 baseline.
+- **Tree:** `git status --short --untracked-files=all` was empty at planning [K2].
+- **Frozen:** every tracked file, **1,157** entries, is listed in `b-round-289-r290-tree-sha256.txt` [K3].
+  - Check from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-289-r290-tree-sha256.txt`.
+  - B ran it after the last consult: rc 0.
+  - Each of the 7 protected auth and purchase files appears exactly once [K4].
+- **Grants: none.** `b-round-289-r290-grants.txt` and `b-round-289-r290-new-files.txt` are empty on purpose. No file in `store/` may change in this round.
 
-## 0. Read first
-1. `lessons.md` (every role), especially L3, L4, L12, L23, L26, L28, L29, L39, L51 and L54.
-2. This task.
-3. Product review F7 and SR-230-6: `/home/runner/czaba-project/docs/technical/studio-real-workspace/product-design-review-2026-10-31.md` l.81–87 and l.154.
-4. A's primitives:
-   - `AGENT_DISCOVERABLE_CODE.md` and `FORWARDREF_COMPONENT.md` (component edit)
-   - `DESIGN_TOKENS.md` and `TAILWIND_FIRST.md` (tokens only, no custom CSS)
-   - `AUDIO_ARCHITECTURE.md` (read only: Studio file; no audio change)
-   - `prompts/new-test.md`, `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`
-   - `GEORGIAN_DOCS.md`
+## 0. Why this round
+- **Round 289 passed.**
+  - C: 13 rows, `browserVerified` and `realVerified` both true, 0 bugs.
+  - Gate 289 published `5a911ff`.
+  - **FIX-PD-1b is done.** F7 and SR-230-6 are closed.
+  - L7 bookkeeping: C-R282-01/02/03 and A-R282-REVIEW-DW11 were still "fix dispatched". Round 283 fixed them and was published, so they are now closed.
+- **Gate-289 triage (D-29z711):**
+  - **Two Mediums → FIX-PD-1b2, round 291:**
+    - GATE289-S1: the heading `div` inside `listbox > group` may be read twice by a screen reader. Fix: `aria-hidden`.
+    - GATE289-S2: doc 216 l.17 says the collection "always shows", which is false.
+  - GATE289-S3 (run keys) and A-R289-REVIEW-L2 (stale test names) are fixed early in that round. They have the same owner and cost little.
+  - S5, A-R289-REVIEW-L3 and Mtavruli go to `deferred_low_polish`.
+  - The product question goes to Saba as SABA-Q-LIB-SINGLE-RUN.
+- **RETRO is due:** `retro_policy.next_due` was "round 290".
+- **REGRESSION is not due yet.** `regression-last.json` says 2026-10-30, so the next one is due on or after 2026-11-02.
+- **No open Critical or High.** The new Mediums run next round, and the older ones are parked:
+  - Tech Lead manual: GATE232-S2 and GATE274-S1;
+  - awaiting Saba: GATE271-S1;
+  - environment or backend: A-R73, GATE128-S1 and R80.
 
-## 1. Why, and the promise (L55)
-**Promise:** "an English-only Studio UI where a stem's short name is never ambiguous: you can always see which collection it belongs to, without the label repeating on every card."
+  None is a security or data-loss bug.
+- **Reference first / Ableton:** not applicable (RETRO round). **Screen budget:** nothing visible changes.
 
-**Today's problem:**
-- The demo data is Georgian [K3]. Studio strings are English-only (plan R5); only the demo data was missed.
-- Each synthetic card repeats `Synthetic demo · ღამის პულსი` under its short title [K5]. Five cards repeat it five times.
-
-**What the browser shows today** (B baseline, `b-round-288/probe/journey-head.json` and `sketch.json`, both viewports):
-- **Georgian text:** 8 Georgian text lines in the body before any edit, plus 9 Georgian `title`/`aria-label` attributes. After adding Bass, the clip name, the status, the Undo button and the footer "Clip:" line are Georgian as well [K20].
-
-## 2. Reference: how Ableton Live 12 does it
-Source: Live 12 manual, "Working with the Browser", https://www.ableton.com/en/live-manual/12/working-with-the-browser/. It was cited by `product-designer` on 2026-10-31 (§4.1 Content Pane, §4.2 Search Bar, §4.6 Library).
-
-| Point | Live 12 (confirmed in the manual) | CZABA after this round | C row |
-|---|---|---|---|
-| Behaviour | The content pane lists items by **Name**; other columns are optional (4.1). The **All** label shows every item from every label in one list (4.6), and search over the whole Library runs under All (4.2) | The All view lists every source, in the same order as today | B-KEYS |
-| Location of an item in results | **Not confirmed.** The manual does not describe a per-row location or a group header in search results. Root measurement requested: LIVE-MEAS-BROWSER-SEARCH-LOCATION (`user-review/live-checks.md`; non-blocking) | One collection heading per group, shown only when the results span ≥ 2 collections | B-GROUPS, B-STATES |
-| Names | Live shows the file or device name | Names are English, `<composition> · <part>`; the short title shows on the card and the full title in its `title` | B-NAMES |
-| Cursor, hover, selected | Unchanged by this round | Options keep their current hover and selected classes. Headings get no hover and take no focus | B-KEYS |
-| Shortcuts | Arrow keys move through the content pane | Up and Down move through options only and skip headings. The order is `resultIds` [K7] | B-KEYS |
-| Visuals | — | The heading is `text-xs`, muted, and wraps | B-GROUPS |
-
-**Deviations:**
-1. **Group headings.**
-   - Reason: CZABA's card shows a **short** title ("Bass") to fit a 144 px list. Without its collection, a short title is ambiguous. Live has no short-title concept.
-   - Why it is better than Live: the label is said once, instead of repeated on each card or hidden.
-   - Saba approved this direction (SR-230-6, endorse + F7). Per L44, the Live-difference itself is listed for Saba once in `b-round-288.md`.
-2. **Stem part names.**
-   - "Pulse" and "Melody" are faithful translations, chosen as defaults.
-   - The alternatives "Rhythm" and "Lead" go to Saba as SABA-Q-FIXPD1B-NAMES. The question is non-blocking.
-
-**Product-designer** (consulted 2026-10-31; framing: "remove Georgian, say the collection once").
-
-Chosen:
-- **Element:** an ARIA `group` inside the listbox, labelled by a plain heading `div`.
-- **When:** only when the results contain ≥ 2 distinct collections.
-- **Which groups:** every group gets a heading.
-
-Rejected:
-- A header row without a group role: screen-reader users lose the context.
-- A sticky heading: `scrollIntoView` would hide the focused first option at 1280.
-- Always showing the heading: it repeats the tree node and breaks the screen budget.
-- Headings only on short-title groups: preview items would look like members of the group above.
-
-**B override (D-29z709, measured):**
-- The designer proposed truncating the heading to one line. At the **default list width of 144 px**, **both** labels truncate (`sketch.json`: `truncated: true` for both).
-- So the heading **wraps** (`break-words`), as the option titles already do. The wrapped heights are 59.5 px and 43 px (`sketch-wrap.json`).
-- SR-275-6 (shorter collection label) is still `awaiting_user`. This round does not rename the public-preview label.
-
-## 3. What changes
-### 3.1 `app/data/studio-lab-demo.ts`: English demo data
-Only the 9 Georgian literals change [K3]. Ids, `kind`, `bpm`, `origin`, the other labels and the notice [K4], and every loader stay byte-identical.
-
-| Line | Before → After |
+## 1. What B already produced (the objects under test)
+| File | Content |
 |---|---|
-| `SYNTHETIC_COMPOSITION_TITLE` | `'ღამის პულსი'` → `'Night Pulse'` (so `SYNTHETIC_COLLECTION_LABEL` becomes `Synthetic demo · Night Pulse`) |
-| `pulse` / `bass` / `pad` / `lead` | → `'Pulse'` / `'Bass'` / `'Pad'` / `'Melody'` |
-| `demo-middle-east` title | → `'Middle East — public preview'` |
-| `demo-hero-music` title | → `'CZABA hero — public preview'` |
-| `demo-synth-mix` title | → `` `${SYNTHETIC_COMPOSITION_TITLE} · Full mix` `` |
-| `demo-synth-mix` shortTitle | → `'Full mix'` |
+| `retros/retro-290.md` | The analysis, in Georgian with English terms, for Saba. Window 275–289 |
+| `lessons.md` | **59 lines** (≤ 60), three parts. Before-copy: `b-round-289/lessons-before-290.md`. Diff: `b-round-289/lessons-diff.txt` |
+| `user-review/screen-review-290.md` | Candidates **SR-290-1…10** and the question SABA-Q-LIB-SINGLE-RUN. Captures in `b-round-289/screens/` (`capture.mjs`, `screen290.json`, `counts.txt`, `stems-probe.mjs/.json`, the PNGs) |
+| `b-round-289/*.py`, `*.txt`, `*.json` | The scripts and data behind every number. <ul><li>Hand files: `fails-cause-hand.txt`, `claims-findings-hand.txt`, `stops.txt`.</li><li>`claims-count.txt` comes from a shell loop: SWEEP hits, unique `[K#]`, STOP lines and shadow fields per round.</li><li>`retro290-mentions.txt` and `retro290-mention-ids.txt` hold the "RETRO 290" inventory.</li><li>`helper-users.txt`.</li><li>`update-backlog.py` and `update-backlog-2.py` hold this planning's backlog edits.</li></ul> |
+| `backlog.json` (version 250) | Decisions D-29z710…D-29z718. <ul><li>`retro_runs` 290 and `retro_policy`.</li><li>`harness_rules`: HR-C-MANIFEST-FIELDS and HR-CAPTURE-LANE-BY-NAME are new; HR-C-SHADOW-FIELDS is retired.</li><li>`systemic_tasks` SYS-VACUOUS-ROWS.</li><li>`screen_review_candidates` SR-290-*.</li><li>The gate-289 ids and the retro-candidate dispositions.</li></ul> Before-copy: `b-round-289/backlog-before-290.json` |
+| `feature-status.md` | Rows 289/290, the next line, the PD-REVIEW row and the TLM-R274 row |
 
-After the edit, `grep -nP '[\x{10A0}-\x{10FF}]' app/data/studio-lab-demo.ts` returns 0 lines.
+**Order of work (the C-R215-01 lesson).**
+- The analysis scripts read the **before** copy.
+- Run them from the loop root as `python3 -I b-round-289/<script>.py`: first `collect.py`, then `cost.py`, then the others.
+- `cost.py` prints to stdout; B saved that output as `cost.txt`.
+- `update-backlog*.py` are **not** re-runnable: each refuses to run twice. Do not run them.
 
-### 3.2 `app/components/arrangement/ArrangementLibrary.tsx`: the group heading
-1. **Remove the per-option collection line.** This is the `{source.shortTitle ? (<span … data-testid="arrangement-library-option-context">{source.collectionLabel}</span>) : null}` block [K5].
-   - The option keeps `title={source.title}` [K5], the title span, the kind/duration row and the Playing row unchanged.
-   - Sweep: the testid has 1 hit in `app`, `perf` and `e2e`, the component itself [K11]. No test references it.
-2. **Group the rendered options** inside the existing `role="listbox"` [K6]:
-   - Build the groups in a `useMemo` from `results`, as **contiguous runs** of equal `collectionLabel`. The DOM order must equal `resultIds` order [K7].
-   - Do not regroup by first appearance. Keyboard order comes from `resultIds`, so a regrouped DOM would move the focus visually out of order.
-   - **When there are ≥ 2 runs,** wrap each run as:
-     ```
-     <div role="group" aria-labelledby={id} className="space-y-1">
-       <div id={id} className="break-words px-2 pt-2 pb-0.5 text-xs leading-snug text-muted">{label}</div>
-       …options
-     </div>
-     ```
-     The heading id is unique per instance, from `useId()` plus the run index. Key each group by that id.
-   - **When there are 0 or 1 runs,** render the options exactly as today, with no wrapper element and no heading.
-   - **Deliberate edge rule (D-29z709):** a label that comes back after another one (results A, B, A) gives **3** groups, and heading A appears twice. Demo and purchased data cannot produce this today: each collection is contiguous in source order. Order is never traded for fewer headings.
-   - The heading is a plain `div`. It is never `role="heading"` or `h*` (not allowed inside a listbox), never focusable and never an option.
-   - The option props stay unchanged, including the `isFocusTarget` rule, which keeps using the index into `results`/`resultIds` [K6].
-3. **Biome ruling.** Biome's `lint/a11y/useSemanticElements` flags `role="group"` and asks for `<fieldset>`. B ran this on a scratch copy.
-   - Use the existing precedent [K12]: one `// biome-ignore lint/a11y/useSemanticElements: a listbox may own role=group children only; a native fieldset is a form-control grouping` line directly above the group `div`.
-   - No other ignore is allowed.
-4. **Imports.** `Fragment` and `useId` from `react` are new [K16]. No other new import.
-5. **Spacing.**
-   - The listbox keeps `space-y-1` [K6], so the gap between options inside a group stays 4 px.
-   - The gap at a group boundary is the heading block. It measured 51 px in the B sketch.
+## 2. A: nothing to implement
+1. From `store/`, confirm three things:
+   - HEAD = `5a911ff…`;
+   - `git status --short --untracked-files=all` is empty;
+   - the frozen sha check prints nothing.
+2. Write `a-round-290.md` with the three results and "no change, by RETRO policy". Do not run typecheck, lint, vitest or the code-reviewer.
+3. Do not edit `retros/`, `lessons.md`, `user-review/` or any B file. If you disagree with a lesson in the A part, or with L56 or the L4 ruling line as they affect A, write it under "Lesson feedback".
 
-**Not changed:**
-- the tree (`nav`);
-- the search haystack, which already contains `collectionLabel` [K8];
-- `library.ts`, `collection.ts` and `strings.ts`;
-- status, Undo and clip name code [K14][K18];
-- the preview panel.
+## 3. C: what to verify
+C writes `c-round-290.md` and `c-round-290.json` as it goes. New fields under HR-C-MANIFEST-FIELDS, starting this round:
+- `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`;
+- an `origin` for each finding: B spec, B pre-check, A, pre-existing or environment.
 
-**Buyer-side effect (recorded, D-29z709):** a purchased collection sets `shortTitle` and one `collectionLabel` [K13]. Its stems lose the per-card product line, and no heading shows because there is one run. The product name stays visible in the tree node, in each option's `title` and in the clip names.
-
-### 3.3 Tests
-1. **Pins of the old data.** Each is a replacement; no assertion is lost (L4).
-   - `app/lib/arrangement/__tests__/strings.test.ts`: `DEMO_REMAINING_GEORGIAN_LINES` (the 9-entry array [K9]) becomes `const DEMO_REMAINING_GEORGIAN_LINES: readonly string[] = [];`. The assertion that uses it stays.
-   - `app/data/__tests__/studio-lab-demo.test.ts` l.248 [K9]: `'Synthetic demo · ღამის პულსი'` → `'Synthetic demo · Night Pulse'`.
-   - **Add DL-EN** to `studio-lab-demo.test.ts`: the 9 sources' `title` and `shortTitle` equal the exact table in §3.1, and no `title`, `shortTitle` or `collectionLabel` matches `/[Ⴀ-ჿ]/`.
-2. **SWEEP [K10]** (roots `app`, `perf`, `e2e`; demo terms). There are 4 files:
-   - the data file;
-   - the 2 pins above;
-   - `library.test.ts` (12 hits). These are **its own fixture**, independent of the demo file, so it stays unchanged (ruled).
-   
-   Other Georgian strings in the tests are legacy track-name fixtures (`მუსიკა`, `ვიდეო`, `სტემები`); they are out of scope.
-3. **New file `app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx`.**
-   - Render the library the way `library-row-strings-ui.test.tsx` [K19] does, with a two-collection fixture (one group with `shortTitle`, one without).
-   - Find elements by role and accessible name (L12), never by class.
-   - Rows:
-     - **LG1:** All view → exactly 2 `group`s inside the `listbox`, with accessible names equal to the labels. 0 `arrangement-library-option-context` elements. `getAllByRole('option')` lists the options in source order.
-     - **LG2:** each heading is not focusable (`tabIndex` < 0 or absent, not `role=option` or `heading`). ArrowDown from the first option visits every option in `resultIds` order and never focuses a heading. ArrowUp returns.
-     - **LG3:** select one collection node, then a folder → 0 `group`s, and the options are direct children of the listbox.
-     - **LG4:** a query that matches nothing → 0 `group`s and the empty output shows. A query that matches one collection → 0 `group`s. A query that matches both → 2.
-     - **LG5:** a purchased-style single collection with `shortTitle`s → 0 `group`s, no collection text inside any option, and each option `title` = the full title.
-     - **LG6:** option `title` attributes are unchanged (full title), and the short title is shown.
-     - **LG7:** a non-contiguous fixture, labels A, B, A → exactly **3** `group`s with accessible names A, B, A; the options are in source order; ArrowDown follows that order.
-   - **Mutants** (A's script under `a-round-289/`, run on a scratch copy, tree sha restored):
-     - **M1:** render the heading with ≥ 1 run instead of ≥ 2 → LG3/LG4/LG5 red.
-     - **M2:** put the context span back → LG1/LG5 red.
-     - **M3:** group by first appearance (2 groups, options reordered) → LG7 red.
-     - **M4:** give the heading `tabIndex={0}` → LG2 red.
-     - **M5:** revert one name in `studio-lab-demo.ts` → DL-EN red.
-
-### 3.4 Implementation doc
-Create `docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md`. The last number is 215 [K15].
-- Use the TEMPLATE headings (L26), in Georgian with English terms.
-- l.4 is exactly `**სტატუსი:** Completed (C round 289 PASS)` (L28).
-- The doc cites only test ids that exist.
-
-## 4. Grants (exact)
-| Path | What |
-|---|---|
-| `app/data/studio-lab-demo.ts` | §3.1 only |
-| `app/components/arrangement/ArrangementLibrary.tsx` | §3.2 only |
-| `app/lib/arrangement/__tests__/strings.test.ts` | the one array replacement in §3.3(1) |
-| `app/data/__tests__/studio-lab-demo.test.ts` | l.248 [K9] replacement + DL-EN |
-| `app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx` | new |
-| `docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md` | new |
-
-**Frozen:** everything else. In particular:
-- `library.ts`, `collection.ts`, `strings.ts`, `ArrangementContext.tsx`, `ArrangementLibraryPreview.tsx`, `StudioWorkspace.tsx` and `library.test.ts`;
-- every Store file;
-- the protected `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/auth.ts` and the auth tests;
-- `package.json` and the lock file.
-
-## 5. B pre-check (L23, on a scratch copy of `c345def`)
-Done in `/tmp/b288scratch`, a `git archive` copy with `node_modules` symlinked. B applied §3.1, the two pins and a sketch of §3.2. The sketch is kept as `b-round-288/sketch.patch` (diff against `git archive c345def`), and the Georgian-codepoint sweep as `b-round-288/sweep-georgian.txt`; /tmp does not survive the job. The sketch is a reference, not a grant: §3.2 governs.
-- `tsc --noEmit`: rc 0.
-- Biome on the 4 files: only `useSemanticElements` fired, and the ignore line resolves it.
-- **14 covering files / 247 tests passed:**
-  - studio-lab-demo, strings, library, collection;
-  - library-focus-handoff, library-notice-ui, library-preview, library-row-strings-ui, library-video-return-focus;
-  - purchased-collection-ui, collection-load-status, held-enter-add, tempo-seed-ui, floating-video.
-- The whole `app/lib/arrangement` + `app/data` folders also ran on the scratch: **172 files / 2607 tests passed** (`b-round-288/scratch-arrangement-suite.log`). This is a B pre-check, not a gate result.
-
-**A's covering run** (speed rules): `npm run typecheck`, `npm run lint`, and `npx vitest run` on those 14 files plus the new `library-group-heading-ui.test.tsx`. The expected total is 15 files, 247 + DL-EN + LG rows.
-
-## 6. C acceptance (browser rows run at 1440×900 and 1280×720)
-Use a fresh context with empty storage, and wait for `Demo collection ready` (L48). For the HEAD comparison, run a separate server with its own Vite `cacheDir`, warmed up first (L38).
-
-| Row | What C checks | Pass |
+| Row | Check | PASS means |
 |---|---|---|
-| CLAIMS | `claims-289.sh` at `c345def` = `claims-289-output.txt`; C also runs the L29 untagged-fact grep over this task | equal; no untagged fact |
-| SOURCE-SCOPE | `git status` and the diff vs `c345def` | only the §4 paths; the diff of each matches §3; frozen files `git diff` empty |
-| TYPECHECK | `npm run typecheck` | rc 0 |
-| UNIT | the 15 files of §5 | all pass; DL-EN and LG1–LG7 present by name, and LG7 |
-| UNIT-MUTANTS | C's own run of M1–M5 on a scratch copy | each red as listed; the live tree sha is unchanged |
-| B-NAMES | All view | the 9 option `title`s are exactly the §3.1 titles (Soft impact and Slow rise unchanged). The visible short titles are `Full mix`, `Pulse`, `Bass`, `Pad`, `Melody`. The tree shows `Synthetic demo · Night Pulse`. **0** Georgian code points (`/[Ⴀ-ჿ]/`) in `document.body.innerText` and in every `title`, `aria-*`, `alt` and `placeholder` attribute. Baseline: 8 lines + 9 attributes |
-| B-GROUPS | All view | the `listbox` contains exactly **2** `[role=group]`, accessible names `CZABA public previews + synthetic SFX` and `Synthetic demo · Night Pulse`, in that order.<br>0 `[data-testid=arrangement-library-option-context]`.<br>The headings are not truncated (`scrollWidth ≤ clientWidth`) and have heights ≈ 59.5 / 43 px (±2) at the default width.<br>Option heights: previews 66.5, SFX 47.25 and synthetic **47.25** (±1; HEAD 80.25).<br>The gap between options in a group is 4 px.<br>The list `scrollHeight` is 614 ±4 (HEAD 669). The HEAD values and the sketch values are [K20] |
-| B-KEYS | focus the first option and press ArrowDown ×8, then ArrowUp ×8 (250 ms between keys) | `document.activeElement` visits `demo-middle-east, demo-hero-music, demo-soft-impact, demo-slow-rise, demo-synth-mix, demo-stem-pulse, demo-stem-bass, demo-stem-pad, demo-stem-lead` and back, never a heading, with a visible ring. After every step the focused option's box lies fully inside the list's client box (±0.5 px), at both viewports. At HEAD the same order holds and all 17 steps are inside at both viewports (`b-round-288/probe/states-head.json`) [K20] |
-| B-STATES | (a) click the `Synthetic demo · Night Pulse` tree node; (b) click its `Stems` folder; then click `All` and type into the search box named `Search the library` [K19]: (c) `zzz`; (d) `night`; (e) `bass`; (f) `synthetic` | (a) 0 groups, 5 options; (b) 0 groups, `Pulse Bass Pad Melody`, `title` = `Night Pulse · <part>`; (c) the empty output `[data-testid=arrangement-library-empty]` [K19] shows, 0 groups; (d) 5 options, 0 groups; (e) 1 option (`demo-stem-bass`), 0 groups; (f) 9 options, 2 groups.<br>**Measured at HEAD** (`probe/states-head.json`, both viewports) [K20]: (a) the same 5 ids, (b) the same 4 ids, (c) empty, (f) the same 9 ids, all with 0 groups, as expected before the change. (d) and (e) are **derived**: the haystack is title + kind keywords + `collectionLabel` [K8], and the new strings contain `night` only in the 5 Night Pulse sources and `bass` only in `demo-stem-bass`. At HEAD the Georgian `ბასი` gives exactly `demo-stem-bass` |
-| B-JOURNEY (L54, L51) | fresh load → click the `Bass` option → Enter → read after 2 s → click `Play` → after 1.5 s → `Stop`. Locators [K19]: the status is `[data-testid=arrangement-status]` `textContent.trim()`, one status string composed of the add sentence, the tempo sentence and the snap hint, in that order; the Undo button is the button whose text starts `Undo`; the clip is the `[data-clip-id]` element; the footer line is `[data-testid=arrangement-selected-clip]` | Status is exactly `“Night Pulse · Bass” added to the Music track at 00:00.000. Tempo 120 BPM from “Night Pulse · Bass” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/2 (G)`.<br>The Undo button text is `Undo: Add — Night Pulse · Bass` (`title` + ` (Ctrl+Z)`).<br>The clip name is `Night Pulse · Bass`. The footer starts `Clip: Night Pulse · Bass ·`.<br>`[data-testid=arrangement-position]` [K19] advances from `00:00.000` to ≥ `00:01.000`, so the audio really plays.<br>0 Georgian code points on the page.<br>HEAD gives the same sentence with the Georgian title (`b-round-288/probe/journey-head.json`, `play-head.json`) [K20]. Screenshots per step |
-| B-SCREEN (L39) | full-window screenshots of the All view, HEAD vs A, and an element count in the library list: title spans + `option-context` spans + headings. The count is taken on a fresh load: library expanded, default width, `All` selected, empty search | count **14 → 11** (9 titles + 5 context → 9 titles + 2 headings); no new persistent element outside the list; HEAD vs A screenshots attached |
-| G289-AUTH | dev :5173, fresh context | `/studio-lab` opens anonymously with the `Demo collection — no sign-in required` badge [K19]. `/studio/middle-east` shows `Sign in required`, with 0 `audio[src]`. The token API returns 401 with no header and 403 with a fake bearer |
-| DOC-216 | doc 216 | l.4 is byte-exact; the TEMPLATE headings are in order; every cited test id exists |
-| gate | full suite, build, Biome, `verify`, `test:e2e:smoke` | gate rows (not claimed) |
+| **SOURCE-SCOPE** | At the start and the end: HEAD `5a911ff`, a clean status, and the frozen list with rc 0 | Nothing in `store/` changed. Any change fails the round, whoever made it |
+| **CLAIMS** | Run K1–K12 of §8 verbatim, **first** (L56) | Every output equals its expected value. Each `test -f` path exists |
+| **RT-NUM** | Recompute **every number** in `retro-290.md` §1, §2, §9 and §10 from its named file or script. C may copy the scripts to `c-round-290/`; run them from the loop root. At least: <ul><li>**Totals:** $183.74 / $96.58 / $78.49 / $358.81; the round median $22.32; the phase medians B $12.77, A $6.54, C $4.98; the FAIL-round cost $72.19; the fix-up costs 11.93 / 17.41 / 15.26.</li><li>**Groups:** feature stage $193.90; test-only $79.89.</li><li>**Counts:** gate 11 / 3 / 1; C `bugs[]` Medium 3, Low 13; 56 review suggestions; the `classify.txt` origin and category counts; 503 / 22 / 481.</li><li>**Origins in §4:** C 24, gate 23, A 30, B 11 (`open_findings` + `deferred_low_polish` window sums).</li><li>The 2 STOPs; max tags 24.</li></ul> | Each number matches its source, or the difference is ≤ $0.01 rounding |
+| **RT-CAUSE** | For each row of §3 and each item of §9, open the quoted source: <ul><li>`c-round-275.json`;</li><li>`gates/gate-round-276.json` and `gates/round-276/verify.log` (NS1, NS6, TC9);</li><li>`tasks/round-276.md` §2.5 (runtime-only rulings);</li><li>`c-round-282.json`;</li><li>`c-round-287.json`;</li><li>`tasks/round-286.md` (0 SWEEP hits);</li><li>`c-round-286.json`.</li></ul> | Each stated cause is what the source says. No invented cause. The SWEEP verdict follows from the written rule in `retros/retro-275.md` §10 |
+| **RT-IDS** | <ul><li>**Round 289 closure:** FIX-PD-1b is `done (D-29z710)`. SR-230-6 is done. C-R282-01/02/03 and A-R282-REVIEW-DW11 are `closed (D-29z710…)`.</li><li>**Gate-289 ids:** S1/S2 are Medium `open` and are named in the FIX-PD-1b2 stage. S3 and A-R289-REVIEW-L2 are `open`. S5, A-R289-REVIEW-L3 and L4-MTAVRULI are in `deferred_low_polish`. SABA-Q-LIB-SINGLE-RUN is `awaiting_user`. BACKEND-EVIDENCE-F7 and A-R289-ARCH-GROUP-RUNS are present.</li><li>**Inventory (D-29z718):** every id in `b-round-289/retro290-mention-ids.txt` has a disposition in `retro-290.md` §7, §8 or §10. Also grep the **before** copy for `RETRO 290`, `RETRO-290` and `retro 290`, case-insensitive, to catch spelling variants. Any entry with no disposition is a finding.</li><li>**Systemic task:** SYS-VACUOUS-ROWS closes the 4 Lows it names, and each of them has the `scheduled in systemic task` status.</li></ul> | All present as stated |
+| **RT-LESSONS** | `lessons.md`: <ul><li>≤ 60 lines, with the three parts;</li><li>`diff b-round-289/lessons-before-290.md lessons.md` touches only l.3, L2, L4, L52, the new L56 and the removed L17 and L27;</li><li>L2 and L4 start with their old text byte for byte (prefix compare) and only append;</li><li>the merged L52 keeps every evidence id of the old L27 and L52;</li><li>no other line changed</li></ul> | As stated. A lost clause or evidence id is a finding |
+| **RT-SABA** | `retro-290.md` §12 and `screen-review-290.md`: every rule change and screen candidate is phrased as a **proposal or question**. SR-290-3 and SR-290-10 are questions. The position-moving variant of SR-290-7/10 says it needs Saba | As stated |
+| **RT-SCREEN** | Every SR-290 candidate names a screenshot that exists, and shows what it describes. C opens the PNGs. **SR-290-3 rests on `stems-probe.json`, not on the screenshots.** C re-runs `stems-probe.mjs` (or an equivalent) at both viewports and checks two things: with no lane chosen, Add puts a Stem on Music; after clicking the name `Stems`, Add puts it on Stems. The "capture error" paragraph matches what C sees | Each candidate is as described. A mismatch is a finding against the review, not against the app |
+| **G290-AUTH (browser)** | A fresh anonymous context at 1440×900 and 1280×720: <ul><li>`/studio-lab` shows the workspace and the `Demo collection — no sign-in required` badge; `localStorage.auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>the token API returns 401 with no header, and 403 with a fake bearer when the mock runs.</li></ul> If the mock does not run, record the status code: a 500 with no token means "fails closed" | As stated |
+| **STUDIO-SMOKE-290 (browser)** | On `/studio-lab` at both viewports, after `Demo collection ready` (L48): <ul><li>add `Bass` (Enter);</li><li>Play, then after 1.5 s `[data-testid=arrangement-position]` reads ≥ `00:01.000`;</li><li>Play's `data-playing` goes `false` → `true` → `false` [K5];</li><li>export a WAV: RIFF/WAVE, 48 kHz, length 16.000 s, non-silent (peak > 0)</li></ul> | As stated. A hash compare is not required |
 
-**Not testable in the cloud:** the purchased route needs the backend. LG5 carries the buyer-side rule at unit level. C may also run a stubbed client probe (L36), but no row depends on it.
+- **Gate rows:** the full vitest, typecheck, build, Biome, `npm run verify` and the e2e smoke. List them under `"gate"`, never under `"passed"`.
+- **`browserVerified`:** true only if G290-AUTH, STUDIO-SMOKE-290 and the RT-SCREEN re-probe ran at both viewports. The other RT rows are document checks.
+- **Consults (optional):** `consequence-tester` may review L56 and EXP-R290-ARTIFACT-MANIFEST for checkability. Record any disagreement as a finding against the retro.
 
-**Neighbouring behaviour that could break:**
-- library keyboard order and focus target;
-- the drag start from an option;
-- the preview panel title;
-- search;
-- the notice dismiss (`library-notice-ui`);
-- the first-run status and the tempo seed text.
+## 4. Outcome, fixed in advance (D-29z717)
+| C result | B at the round-291 planning |
+|---|---|
+| All rows PASS | Round 291 is **FIX-PD-1b2**. Its scope: <ul><li>GATE289-S1: `aria-hidden` on the heading; C checks the Chromium accessibility tree, and the group name still resolves.</li><li>GATE289-S2: doc 216 wording.</li><li>GATE289-S3: `key` from the first id of the run.</li><li>A-R289-REVIEW-L2: test names.</li></ul> One owner, `ArrangementLibrary.tsx`. The Medium fix goes first even when REGRESSION is due (on or after 2026-11-02); REGRESSION then follows in round 292 |
+| An RT row fails (an untraceable number, an invented cause, a missing disposition, a lost clause, a candidate not as described) | B corrects the files at the round-291 planning. The next C round re-checks only the changed lines (RT-FIX, as rounds 216, 231, 246, 261 and 276), together with FIX-PD-1b2 |
+| G290-AUTH or STUDIO-SMOKE-290 finds a Medium or worse | It is fixed first (2026-10-23 bug gate). A Low goes to `deferred_low_polish` |
+| SOURCE-SCOPE fails | Stop. Root inspects. Nothing is published |
 
-B-KEYS, B-STATES and B-JOURNEY cover them in the browser, and §5's files cover them in unit tests.
+**After that:** FIX-PD-1c → SYS-VACUOUS-ROWS → STUDIO-LINK → NAME-AND-HINT → PERF-3c and the rest of STUDIO-PERFORMANCE → STEM-LANES → SYS-1…3 → STORE-2b…5 (direction gate) → REVIEW-RECOMMENDATIONS → T12-ADVANCED → the phase-2 entries (skip rule).
 
-## 7. Ableton conformity (C reports separately)
-- **CZABA requirement:** English UI and the collection said once.
-- **Ableton:** the group heading is a listed deviation (§2); Live's search-location behaviour is "not confirmed" until LIVE-MEAS-BROWSER-SEARCH-LOCATION is measured.
+## 5. Neighbour risk
+App code carries none: no source file changes. The risk is in the process:
+- **L56** adds a `test -f` claim per cited artifact. EXP-R290-ARTIFACT-MANIFEST stops it if a manifest grows past 30 lines or the B median passes $15.96.
+- **L52's merge** must keep the old L27 evidence. RT-LESSONS checks this.
+- **The screen review goes to Saba.** SR-290-3 corrects a capture error, so RT-SCREEN re-probes it.
 
-## 8. STOP conditions (L11)
-Write "STOP — needs B ruling" at the top of `a-round-289.md` and change nothing else if:
-- the claims output differs;
-- a covering test fails or exceeds 50 % of its timeout;
-- Biome demands any ignore other than §3.2(3);
-- grouping needs a change in a frozen file;
-- a group appears with fewer than 2 runs;
-- any task clause conflicts with another.
+## 6. Deliverables
+- **A:** `a-round-290.md`.
+- **C:** `c-round-290.md` and `c-round-290.json`, with evidence under `c-round-290/`. The JSON carries `taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`, plus the HR-C-MANIFEST-FIELDS fields.
 
-## 9. Why we missed it (F7)
-- **Missed by:** every screen review, which counted clutter on stills.
-- **Why:** the strings test only listed the "remaining" Georgian lines in the demo file as a known exception [K9]. Nobody turned that exception into a task.
-- **Rule:** L54 (journey row) already covers it. RETRO 290 counts it. No new lesson.
+## 7. Root notes
+- **Nothing to publish from `store/`.** A change there is itself a FAIL. The loop-state commit records the retro.
+- **For Saba:**
+  - `user-review/screen-review-290.md`: 10 candidates and one question;
+  - `retro-290.md` §12: RC-R275-STOP-ROUTES-TO-B, repeated (2 STOPped rounds reached C);
+  - TLM-R274 is now on the final acceptance list.
+- **For root:** no new frontend-architect checkpoint. A-R289-ARCH-GROUP-RUNS is a small signal on one owner. The older requests stay pending and non-blocking.
+
+## 8. Claims (L29 + L56 form; C re-runs each one verbatim, from the loop root unless stated)
+| Tag | Claim | Command | Expected |
+|---|---|---|---|
+| K1 | gate 289 published `5a911ff` | `python3 -I -c "import json;g=json.load(open('gates/gate-round-289.json'));print(g['status'],g['commit'][:7])"` | `published 5a911ff` |
+| K2 | clean tree at planning | `wc -c < b-round-289/git-status-at-planning.txt` | `0` |
+| K3 | 1,157 frozen entries | `wc -l < b-round-289-r290-tree-sha256.txt` | `1157` |
+| K4 | each protected file appears once | `for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-routes.test.ts app/lib/auth.ts app/contexts/AuthContext.tsx app/entry.server.tsx; do grep -cF "  $f" b-round-289-r290-tree-sha256.txt; done \| tr '\n' ' '` | `1 1 1 1 1 1 1 ` |
+| K5 | Play's playing signal and name | from `store/`: `grep -n "data-playing" app/components/arrangement/ArrangementTransport.tsx; grep -n "playLabel" app/lib/arrangement/strings.ts` | `272:          data-playing={isPlaying ? 'true' : 'false'}`; `233:  playLabel: 'Play',` |
+| K6 | screen-capture element counts | `python3 -I -c "import json;d=json.load(open('b-round-289/screens/screen290.json'));print({k:len(v) for k,v in d['screens'].items()})"` | `{'1440x900-S0': 139, '1440x900-DEMO': 167, '1280x720-S0': 119, '1280x720-DEMO': 143}` |
+| K7 | lessons line count | `wc -l < lessons.md` | `59` |
+| K8 | the cited artifacts exist (L56) | `for p in b-round-289/backlog-before-290.json b-round-289/lessons-before-290.md b-round-289/lessons-diff.txt b-round-289/cost.txt b-round-289/retro-numbers.txt b-round-289/fails-detail.txt b-round-289/gate-reviews.txt b-round-289/classify.txt b-round-289/window-findings.txt b-round-289/deferred-totals.txt b-round-289/open-medium-plus.txt b-round-289/claims-count.txt b-round-289/fails-cause-hand.txt b-round-289/claims-findings-hand.txt b-round-289/stops.txt b-round-289/retro290-mentions.txt b-round-289/retro290-mention-ids.txt b-round-289/helper-users.txt b-round-289/screens/capture.mjs b-round-289/screens/stems-probe.mjs b-round-289/screens/stems-probe.json b-round-289/screens/counts.txt; do test -f $p \|\| echo MISSING $p; done; echo done` | `done` |
+| K9 | the screenshots exist | `ls b-round-289/screens/*.png \| wc -l` | `12` (10 capture + 2 stems-probe) |
+| K10 | backlog version and last decision | `python3 -I -c "import json;b=json.load(open('backlog.json'));print(b['version'],b['decisions_log_b'][-1]['id'])"` | `250 D-29z718` |
+| K11 | shadow fields only in 275–276 | `grep -l shadowRowSeverityVerdict c-round-27[5-9].json c-round-28[0-9].json` | `c-round-275.json` and `c-round-276.json` only |
+| K12 | the stems probe facts | `python3 -I -c "import json;d=json.load(open('b-round-289/screens/stems-probe.json'));print([(k,v['noSelectStatus'][:45],v['afterSelectStatus'][:45]) for k,v in d.items()])"` | both viewports: the second item starts with `“Night Pulse · Bass” added to the Music track` and the third with `“Night Pulse · Pad” added to the Stems track` (the 45-character slice of the third ends in one space) |

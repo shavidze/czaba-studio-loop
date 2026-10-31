@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T11:59:47.822Z)
+# Active loop summary (2026-10-31T12:53:29.895Z)
 
-- backlog.json 2762 KB -> active view 382 KB
-- status: G_ROOT_GATE round 288
-- servers: `{"checkedUtc":"2026-10-31T11:44:27.8195385Z","round":288,"attempt":1,"store":200}`
-- last publication: c345defdd29c8866c2a20a3064a38451a18b3d8b (rounds 287-288)
-- last root gate: round 288 published - commit c345defdd29c8866c2a20a3064a38451a18b3d8b pushed
+- backlog.json 2768 KB -> active view 381 KB
+- status: G_ROOT_GATE round 289
+- servers: `{"checkedUtc":"2026-10-31T12:34:18.7948060Z","round":289,"attempt":1,"store":200}`
+- last publication: 5a911ffa677a580cc010b1612ab7b86aa843f160 (rounds 289-289)
+- last root gate: round 289 published - commit 5a911ffa677a580cc010b1612ab7b86aa843f160 pushed
 
 ## Current items: -
 
@@ -427,7 +427,6 @@
 - C-R185-I4-I5 / info / info / I4: AudioPreviewButton hydration mismatch not seen in round-185 sessions (layout-shift fix stays STORE-1b); I5: mock raw clientError 404 has
 - B-R185-ARTISTBIO-UNSPLASH / info / info / ArtistBioSection.tsx:12 has an unsplash URL but no route imports the component; mockProductDetail.ts and studio.$productId.tsx:177 also hold
 - B-R185-OTHER-META-TEMPLATES / info / signal / store.tsx and free-downloads.tsx meta contain similar generic marketing phrasing ('Professional ... pack' / 'creative freedom')
-- C-R186-01 / low / open_low_conditional / active SFX product without variants (/products/door-slams) shows TOTAL PRICE $0.00 with live Add to Cart and Buy Now (list card shows standa
 - GATE186-REVIEW-SIGNALS / info / signal / gate-186 reviewer: (1) doc 153 status stale -> scheduled round 187 K3; (2) sitemap lists inactive products -> GATE186-SITEMAP-INACTIVE defer
 - B-R186-PLAYER-SIGNALS / info / signal / AudioPlayer inline rgba(255,255,255,0.1) unfilled-track colour (Tailwind-first) and .audio-preview-overlay-text unused after R55 (app.css fr
 - GATE187-REVIEW-SIGNALS / info / signal / gate-187 reviewer: (1) doc 154 status stale -> scheduled round 188 K6; (2) ProductCard.tsx:117-133 AudioPreviewButton nested inside <Link> (
@@ -698,11 +697,13 @@
 - PD-FREE-HEADER / info / signal (D-29z695): for STORE-4 / a product with an explicit price 0 shows "Complimentary Download" in ProductSidebar (button without a handler) and "$0.00 USD" with Buy Now 
 - A-R286-ARCH-ONE-RESOLVER / info / adopted in round 287 (D-29z702) because the Medium fix changes that line; not a separate refactor / price resolution lived in two places (DisplayVersion.price synthetic 0 vs resolvePurchasePrice undefined); proposal DisplayVersion.price num
 - B-R286-UNUSED-PRICE-RENDERERS / info / signal (D-29z703): no route renders them at 096fa4b; check when STORE-4 touches them / RelatedTracksCarousel.tsx:120 and TrackRow.tsx:149 render a caller-formatted price; no consumer found
-- C-R287-01 / low / open -> fixed now in round 288 (D-29z705): own-round regression from B spec conflict (L4: text-sm mandated next to an unchanged-bbox clause); not deferred, owned cheaply / unknown-price label shortens the card: /store 577.6 vs 589.6 (-12 px; SFX row bottoms ragged next to free-pack), home article 409.6 vs 417.6
-- A-R287-PREMIUM-UNVALIDATED / low / ruled Low by B (no fixture or known backend emits a negative/Infinity premiumPrice; pre-existing) and fixed now in round 288 because product-utils.ts is owned and it is the same F9 card = page class (D-29z706) / synthetic Premium price: product.premiumPrice unvalidated: premiumPrice -5/Infinity shows $-5/$Infinity on the version card while resolvePur
 - A-R287-ARCH-ADAPTER-ZERO / info / signal (D-29z706): productAdapter.ts createVariants has no consumer outside app/services/api/adapters (claims K10); app/services/api is frozen; check when STORE-4 or a service task touches adapters / productAdapter.ts:108 (variant.price ?? 0).toFixed(2), another unknown->0 collapse
 - A-R287-L12-CLASS-PINS / info / ruled (D-29z705): class-substring pins in product-price-cards.test.tsx allowed because the task mandates the exact class set; they are source pins, not cascade assertions; browser bbox/line-height rows are the real guard / A asked whether L12 forbids asserting class substrings in the new card tests
 - INFO-C287-L29-PROTECTION-CLAUSE / info / noted (D-29z706): round 288 protection clauses carry K tags / round-287 §2.2 "Unchanged: selection, aria-pressed" protection clause had no K tag; covered by C probe
+- BACKEND-EVIDENCE-F9 / info / open_backend_evidence (D-29z707): not a reason to call round 288 unverified / F9 rows that need the real backend: owned-Standard upgrade state in the browser (unit VC3/VC4 carry it) and the real-backend 403 for /api/st
+- A-R288-ARCH-LEADING-SPANS / info / signal (D-29z708): not scheduled; candidate for STORE-4 price component / three hand-matched leading-* 'Price unavailable' spans (store.tsx, ProductCard.tsx, VersionSelector) each copy the known line box by hand; o
+- INFO-C288-FIXTURE-COUNT / info / noted (D-29z708): B task text said 10 active fixtures, the mock has 11; C checked all 11; L29 already covers counts as tagged claims / round-288 task fixture count 10 vs 11
+- SABA-Q-FIXPD1B-NAMES / info / awaiting_user (D-29z709): non-blocking; round 289 ships the defaults / Demo stem names: 'Pulse' (default) or 'Rhythm' for the pulse stem; 'Melody' (default, translation of მელოდია) or 'Lead' for the lead stem
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

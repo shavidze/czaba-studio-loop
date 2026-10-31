@@ -1,0 +1,18 @@
+# Post-dispatch findings caused by a B claim, a missing consumer sweep or a B artifact (by hand), window 275-289
+SWEEP-caused (experiment from retro-275 §10):
+  GATE276-T1   Medium  task 276 carried SWEEP (2 hits); sweep ruled runtime hits only, test readers missed -> gate fail
+  C-R286-01    Medium  task 286 carried no SWEEP tag (0 hits); VersionSelector '?? 0' consumer not listed
+  C-R286-02    Low     task 286 no SWEEP tag; store.tsx:79 consumer not listed
+  => 3 findings, 2 Medium, 1 Medium in a SWEEP-tagged task -> REFUTED (rule: >= 3 or >= 1 Medium in a tagged task)
+Claim / artifact caused:
+  C-R281-01         Low   untagged code fact in task 281 (L29)
+  C-R283-02         Low   task 282 §1.1 cites a '+1' run file not saved in b-round-281/
+  C-R283-03         Low   doc says 316 rows, budgets.json 320 (stale count outside A's grant)
+  INFO-C288-FIXTURE-COUNT info  task 288 said 10 active fixtures, mock had 11
+  C-R289-INFO-01    info  task 289 §5 cites b-round-288/sketch.patch as kept; file absent
+  => claim-caused 5 (counter <= 2 in retro 275: exceeded); artifact-cited-but-absent 2x (C-R283-02, C-R289-INFO-01)
+Spec / pre-check caused FAILs: C-R282-01 (L23), C-R287-01 (L4)
+B-found after dispatch, before damage (not in the experiment baseline; listed for completeness, from retro290-mention-ids.txt):
+  B-R280-TASK-2.4-OVERSTATED  info  task 279 §2.4 overstated a leak path; code change still correct
+  B-R281-GATE279-S1-PREMISE   info  gate reviewer premise wrong; caught by B's L23 pre-check (rule worked)
+  INFO-B282-CONSULT-FALSE-CLAIMS info performance-optimizer consult claimed two false facts; treated as data (policy rule 4)

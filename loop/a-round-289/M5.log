@@ -1,0 +1,62 @@
+
+ RUN  v4.0.16 /tmp/a289scratch
+
+ ❯ app/data/__tests__/studio-lab-demo.test.ts (15 tests | 1 failed) 14ms
+     ✓ DL1 network failure maps to the English network text without browser text or URL 1ms
+     ✓ DL2 body read failure maps to the English network text 1ms
+     ✓ DL3 decode failure maps to the English decode text 0ms
+     ✓ DL4 HTTP 404 keeps the status text and never decodes 0ms
+     ✓ DL5 aborted fetch rethrows the same error object 1ms
+     ✓ DL5 aborted body read rethrows the same error object 0ms
+     ✓ DL5 any fetch error after abort is rethrown unchanged, not mapped 0ms
+     ✓ DL5 decode failure after abort still maps to the English decode text, like the purchased adapter 0ms
+     ✓ DL6 success for demo-middle-east fetches /middle-east.mp3 once with omitted credentials and returns the decoded buffer 1ms
+     ✓ DL6 success for demo-hero-music fetches /videos/hero/hero-music.mp3 once with omitted credentials and returns the decoded buffer 0ms
+     ✓ DL7 unknown source rejects with the unknown-demo text and never fetches 0ms
+     ✓ DL8 network and decode texts equal the purchased adapter texts for the same failure 1ms
+     ✓ DL-VAL demo collection label, notice and source collection labels are the exact English values 0ms
+     × DL-EN the 9 demo sources carry the exact English titles and short titles, with no Georgian code point 5ms
+     ✓ DL-BPM the 5 synthetic-composition sources carry bpm 120; the 4 others have no bpm 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/data/__tests__/studio-lab-demo.test.ts > C-R92-N1 studio-lab demo loader error text (D-29z60) > DL-EN the 9 demo sources carry the exact English titles and short titles, with no Georgian code point
+AssertionError: expected [ [ 'demo-middle-east', …(2) ], …(8) ] to deeply equal [ [ 'demo-middle-east', …(2) ], …(8) ]
+
+- Expected
++ Received
+
+@@ -29,12 +29,12 @@
+      "Night Pulse · Pulse",
+      "Pulse",
+    ],
+    [
+      "demo-stem-bass",
+-     "Night Pulse · Bass",
+-     "Bass",
++     "Night Pulse · ბასი",
++     "ბასი",
+    ],
+    [
+      "demo-stem-pad",
+      "Night Pulse · Pad",
+      "Pad",
+
+ ❯ app/data/__tests__/studio-lab-demo.test.ts:266:7
+    264|         source.shortTitle ?? null,
+    265|       ]),
+    266|     ).toEqual([
+       |       ^
+    267|       ['demo-middle-east', 'Middle East — public preview', null],
+    268|       ['demo-hero-music', 'CZABA hero — public preview', null],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  12:27:14
+   Duration  467ms (transform 97ms, setup 0ms, import 115ms, tests 14ms, environment 252ms)
+
+
+::error file=/tmp/a289scratch/app/data/__tests__/studio-lab-demo.test.ts,title=app/data/__tests__/studio-lab-demo.test.ts > C-R92-N1 studio-lab demo loader error text (D-29z60) > DL-EN the 9 demo sources carry the exact English titles and short titles%2C with no Georgian code point,line=266,column=7::AssertionError: expected [ [ 'demo-middle-east', …(2) ], …(8) ] to deeply equal [ [ 'demo-middle-east', …(2) ], …(8) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -29,12 +29,12 @@%0A      "Night Pulse · Pulse",%0A      "Pulse",%0A    ],%0A    [%0A      "demo-stem-bass",%0A-     "Night Pulse · Bass",%0A-     "Bass",%0A+     "Night Pulse · ბასი",%0A+     "ბასი",%0A    ],%0A    [%0A      "demo-stem-pad",%0A      "Night Pulse · Pad",%0A      "Pad",%0A%0A ❯ app/data/__tests__/studio-lab-demo.test.ts:266:7%0A%0A
