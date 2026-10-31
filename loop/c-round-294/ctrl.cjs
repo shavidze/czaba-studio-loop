@@ -1,0 +1,12 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+const fs=require('fs');
+const cmp=async(p,a,c)=>p.evaluate(async([a,c])=>{const load=(s)=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src='data:image/png;base64,'+s});const px=(img)=>{const cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;const x=cv.getContext('2d');x.drawImage(img,0,0);return x.getImageData(0,0,img.width,img.height).data};const [ia,ib]=await Promise.all([load(a),load(c)]);const da=px(ia),db=px(ib);let d=0,mx=0;for(let i=0;i<da.length;i+=4){const q=Math.max(Math.abs(da[i]-db[i]),Math.abs(da[i+1]-db[i+1]),Math.abs(da[i+2]-db[i+2]));if(q){d++;mx=Math.max(mx,q)}}return {d,maxDelta:mx}},[a.toString('base64'),c.toString('base64')]);
+(async()=>{const b=await chromium.launch();console.log('chromium',b.version());const p=await b.newPage();const out={};
+for(const s of ['1280x720','1440x900']){const mine=fs.readFileSync(`c-round-294/shots/desk-${s}.png`),c293=fs.readFileSync(`c-round-293/shots/desk-${s}.png`),base=fs.readFileSync(`b-round-291/probe/desk-5173-${s}.png`);
+out[s]={mine_vs_base:await cmp(p,mine,base),c293_vs_base:await cmp(p,c293,base),mine_vs_c293:await cmp(p,mine,c293)};}
+// identify elements
+const c=await b.newContext({viewport:{width:1280,height:720}});const pg=await c.newPage();await pg.goto('http://127.0.0.1:5173/studio-lab');await pg.getByText('Demo collection ready',{exact:false}).first().waitFor({timeout:25000});
+out.el1280=await pg.evaluate(()=>[[18,174],[12,180],[12,197],[18,203]].map(([x,y])=>{const e=document.elementFromPoint(x,y);return [x,y,e&&e.tagName,e&&(e.getAttribute('data-testid')||e.getAttribute('aria-label')||e.className.baseVal||String(e.className)).slice(0,80)]}));
+await c.close();const c2=await b.newContext({viewport:{width:1440,height:900}});const pg2=await c2.newPage();await pg2.goto('http://127.0.0.1:5173/studio-lab');await pg2.getByText('Demo collection ready',{exact:false}).first().waitFor({timeout:25000});
+out.el1440=await pg2.evaluate(()=>[[18,136],[154,801],[268,801]].map(([x,y])=>{const e=document.elementFromPoint(x,y);return [x,y,e&&e.tagName,e&&(e.getAttribute('data-testid')||e.getAttribute('aria-label')||e.className.baseVal||String(e.className)).slice(0,80)]}));
+console.log(JSON.stringify(out,null,1));fs.writeFileSync('c-round-294/desk-control.json',JSON.stringify(out,null,1));await b.close();})();

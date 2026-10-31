@@ -1,0 +1,223 @@
+--- app/lib/arrangement/__tests__/demo-synth-worker.test.ts	2026-10-31 15:56:33.466921510 +0000
++++ app/lib/arrangement/__tests__/demo-synth-worker.test.ts	2026-10-31 16:20:27.033994608 +0000
+@@ -291,4 +291,44 @@
+     expect(worker.posted).toEqual([]);
+     expectReleased(worker);
+   });
++
++  it.each([
++    [
++      'a valid complete message',
++      (worker: FakeWorker) => worker.emit({ type: 'complete', composition: smallComposition() }),
++    ],
++    ['a malformed message', (worker: FakeWorker) => worker.emit({ type: 'complete' })],
++    ['onerror', (worker: FakeWorker) => worker.onerror?.(new Event('error'))],
++    [
++      'onmessageerror',
++      (worker: FakeWorker) => worker.onmessageerror?.(new MessageEvent('messageerror')),
++    ],
++  ])('DW12: %s clears the stall timer, so the timeout never releases the worker a second time', async (_label, settleWorker) => {
++    vi.useFakeTimers();
++    vi.stubGlobal('Worker', FakeWorker);
++    const { client } = await loadClient();
++    const state = track(client.synthesizeDemoCompositionOffMainThread());
++    const worker = onlyWorker();
++    expect(vi.getTimerCount()).toBe(1);
++    settleWorker(worker);
++    await flushMicrotasks();
++    expect(state.value).toBeDefined();
++    expect(vi.getTimerCount()).toBe(0);
++    await vi.advanceTimersByTimeAsync(client.DEMO_SYNTH_WORKER_STALL_TIMEOUT_MS + 1);
++    expectReleased(worker);
++  });
++
++  it('DW12b: a throwing postMessage clears the stall timer, so the timeout never releases the worker a second time', async () => {
++    vi.useFakeTimers();
++    FakeWorker.throwOnPost = true;
++    vi.stubGlobal('Worker', FakeWorker);
++    const { client } = await loadClient();
++    const state = track(client.synthesizeDemoCompositionOffMainThread());
++    const worker = onlyWorker();
++    await flushMicrotasks();
++    expect(state.value).toBeDefined();
++    expect(vi.getTimerCount()).toBe(0);
++    await vi.advanceTimersByTimeAsync(client.DEMO_SYNTH_WORKER_STALL_TIMEOUT_MS + 1);
++    expectReleased(worker);
++  });
+ });
+--- app/lib/arrangement/__tests__/self-disabling-focus.test.tsx	2026-10-31 15:56:33.476921542 +0000
++++ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx	2026-10-31 16:20:53.968211666 +0000
+@@ -3,6 +3,7 @@
+ import { act, fireEvent, render } from '@testing-library/react';
+ import { type ReactNode, useState } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { ArrangementTempoRow } from '~/components/arrangement/ArrangementTempoRow';
+ import {
+   ArrangementTransport,
+   type ArrangementTransportNavigation,
+@@ -711,4 +712,43 @@
+     }
+     expect(metronome.getAttribute('aria-disabled')).toBe('true');
+   });
++
++  it.each([
++    { label: 'without a tempo the click never reaches the handler', tempoBpm: null, calls: 0 },
++    { label: 'with a tempo the same click calls it once', tempoBpm: 120, calls: 1 },
++  ])('SD10: the metronome toggle is guarded at the button: $label (A-R278-REVIEW-METRONOME-SPY)', ({
++    tempoBpm,
++    calls,
++  }) => {
++    const onMetronomeToggle = vi.fn();
++    const view = render(
++      <ArrangementTempoRow
++        seconds={16}
++        pxPerSecond={40}
++        tempoBpm={tempoBpm}
++        onTempoChange={() => undefined}
++        onTempoInvalid={() => undefined}
++        metronomeOn={false}
++        onMetronomeToggle={onMetronomeToggle}
++        getTimelineView={() => ({ pxPerSecond: 40, scrollLeft: 0 })}
++        getTimelineViewportPx={() => 800}
++        subscribeTimelineScroll={() => () => undefined}
++        rulerGestures={{
++          onSeek: () => undefined,
++          onPlayFrom: () => undefined,
++          onGestureClaim: () => null,
++          applyTimelineView: () => undefined,
++          onNavigationMove: () => undefined,
++          onRulerDoubleClick: () => undefined,
++          snapSeconds: null,
++          gridSeconds: undefined,
++          getSnapMarkerTimes: () => [],
++        }}
++      />,
++    );
++    const metronome = asButton(view.getByTestId('arrangement-metronome-toggle'), 'metronome');
++    expect(metronome.getAttribute('aria-disabled')).toBe(tempoBpm === null ? 'true' : null);
++    fireEvent.click(metronome);
++    expect(onMetronomeToggle).toHaveBeenCalledTimes(calls);
++  });
+ });
+--- app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-31 15:56:33.465921507 +0000
++++ app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-31 16:21:24.883171273 +0000
+@@ -1052,6 +1052,7 @@
+       throw new Error('envelope line missing');
+     }
+     const before = svg.querySelector('polyline')?.getAttribute('points');
++    expect(before).toBeTruthy();
+     expect(svg.getAttribute('viewBox')).toBe('0 0 16 1');
+     expect(Number.parseFloat(svg.style.width)).toBe(16 * PX_PER_SECOND);
+     const observer = new MutationObserver(() => undefined);
+--- perf/lib/instrumentation.ts	2026-10-31 15:56:33.521752400 +0000
++++ perf/lib/instrumentation.ts	2026-10-31 16:22:19.534255872 +0000
+@@ -31,6 +31,7 @@
+   duration: number;
+   name: string;
+   scriptMax?: number;
++  scriptCount?: number;
+ }
+ 
+ export interface PerfState {
+@@ -210,6 +211,7 @@
+             duration: entry.duration,
+             name: entry.name,
+             ...(scriptMax === undefined ? {} : { scriptMax }),
++            ...(scripts === null ? {} : { scriptCount: scripts.length }),
+           });
+         }
+       }).observe(options);
+--- perf/lib/report.ts	2026-10-31 15:56:33.521752400 +0000
++++ perf/lib/report.ts	2026-10-31 16:23:47.613518818 +0000
+@@ -1,5 +1,6 @@
+ import { isWithinBudget, type PerfBudgetLimit, type PerfBudgetRow } from './budgets';
+ import { determinismContract } from './determinism';
++import type { PerfTimedEntry } from './instrumentation';
+ import { median } from './stats';
+ 
+ export interface PerfSample {
+@@ -48,6 +49,13 @@
+ 
+ export const rowRate = (id: string): number => Number(rateSuffix.exec(id)?.[0].slice(1, -1) ?? 1);
+ 
++export const LOAF_SCRIPTS_PROBLEM =
++  'harness.loaf-scripts: no long-animation-frame entry carried script timings';
++
++export function loafScriptsProblem(loafs: readonly PerfTimedEntry[]): string | null {
++  return loafs.some((entry) => (entry.scriptCount ?? 0) > 0) ? null : LOAF_SCRIPTS_PROBLEM;
++}
++
+ export function rateRowId(base: string, cpuRate: number): string {
+   return cpuRate === 1 ? base : `${base}.${cpuRate}x`;
+ }
+--- perf/lib/report.test.ts	2026-10-31 15:56:33.521752400 +0000
++++ perf/lib/report.test.ts	2026-10-31 16:23:46.391673662 +0000
+@@ -6,6 +6,8 @@
+ import { determinismContract } from './determinism';
+ import {
+   buildPerfReportCore,
++  LOAF_SCRIPTS_PROBLEM,
++  loafScriptsProblem,
+   type PerfReportCoreOptions,
+   type PerfReportPass,
+   type PerfSample,
+@@ -398,4 +400,31 @@
+       });
+     }
+   });
++
++  it.each([
++    { label: 'no entries', loafs: [], problem: LOAF_SCRIPTS_PROBLEM },
++    {
++      label: 'entries whose scripts arrays are all empty',
++      loafs: [
++        { t: 1, duration: 80, name: 'long-animation-frame', scriptMax: 0, scriptCount: 0 },
++        { t: 2, duration: 60, name: 'long-animation-frame', scriptMax: 0, scriptCount: 0 },
++      ],
++      problem: LOAF_SCRIPTS_PROBLEM,
++    },
++    {
++      label: 'entries without a scripts field',
++      loafs: [{ t: 1, duration: 80, name: 'long-animation-frame' }],
++      problem: LOAF_SCRIPTS_PROBLEM,
++    },
++    {
++      label: 'one entry with a script beside an empty one',
++      loafs: [
++        { t: 1, duration: 80, name: 'long-animation-frame', scriptMax: 0, scriptCount: 0 },
++        { t: 2, duration: 70, name: 'long-animation-frame', scriptMax: 40, scriptCount: 1 },
++      ],
++      problem: null,
++    },
++  ])('LOAF1: harness.loaf-scripts with $label', ({ loafs, problem }) => {
++    expect(loafScriptsProblem(loafs)).toBe(problem);
++  });
+ });
+--- perf/studio-lab.perf.spec.ts	2026-10-31 15:56:33.521921686 +0000
++++ perf/studio-lab.perf.spec.ts	2026-10-31 16:22:19.536443033 +0000
+@@ -35,7 +35,12 @@
+   waitForPlaybackSettled,
+   waitForQuiet,
+ } from './lib/page';
+-import { buildPerfReportCore, formatLimit, type PerfSample } from './lib/report';
++import {
++  buildPerfReportCore,
++  formatLimit,
++  loafScriptsProblem,
++  type PerfSample,
++} from './lib/report';
+ import { frameIntervals, median, percentile, roundTo } from './lib/stats';
+ 
+ const storeRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+@@ -531,8 +536,9 @@
+ async function measureSettled(page: Page, result: PassResult, settledMs: number): Promise<void> {
+   const settled = await snapshot(page, 0, settledMs);
+   const scriptMaxes = settled.loafs.map((entry) => entry.scriptMax ?? 0);
+-  if (!settled.loafs.some((entry) => entry.scriptMax !== undefined)) {
+-    result.problems.push('harness.loaf-scripts: no long-animation-frame entry carried script timings');
++  const loafProblem = loafScriptsProblem(settled.loafs);
++  if (loafProblem !== null) {
++    result.problems.push(loafProblem);
+   }
+   const longest = settled.longtasks.reduce((max, entry) => Math.max(max, entry.duration), 0);
+   result.samples.set('load.settled-ms', { value: roundTo(settledMs, 0) });

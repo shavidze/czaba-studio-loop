@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T15:45:52.457Z)
+# Active loop summary (2026-10-31T16:16:26.242Z)
 
-- backlog.json 2815 KB -> active view 388 KB
-- status: G_ROOT_GATE round 293
-- servers: `{"checkedUtc":"2026-10-31T15:34:35.7968850Z","round":293,"attempt":1,"store":200}`
-- last publication: 88b23dd028581a4926cdbf6bdcb0694b41e115ba (rounds 290-291)
-- last root gate: round 293 failed - verify exit 1 (gates/round-293/verify.log)
+- backlog.json 2822 KB -> active view 389 KB
+- status: G_ROOT_GATE round 294
+- servers: `{"checkedUtc":"2026-10-31T16:02:11.8394981Z","round":294,"attempt":1,"store":200}`
+- last publication: bc85a1ad45eb442ae5bf927b57868adfb92e1bf6 (rounds 292-294)
+- last root gate: round 294 published - commit bc85a1ad45eb442ae5bf927b57868adfb92e1bf6 pushed
 
 ## Current items: -
 
@@ -714,7 +714,9 @@
 - INFO-C291-K5-WORDING / info / noted (D-29z723); no lesson (one-line wording slip) / task 291 section 6 K5 said 3 headingId lines; correct is 2 (key replaced)
 - SABA-Q-FIXPD1C-COPY / info / awaiting_user (D-29z725): approved copy shipped in round 292; non-blocking / narrow-state copy: Saba-approved 'The Studio works on a computer. Listen here, or send yourself the link.' vs product-designer 'The Studio n
 - SABA-Q-FIXPD1C-ESCAPE / info / awaiting_user (D-29z725): listed deviation; non-blocking / narrow state has no 'Continue anyway' escape, unlike the legacy MobileBlocker (1024 px); below 900 px the workspace layout is broken
-- C-R292-01 / medium / scheduled round 293 (D-29z729): StopPlaybackOnNarrow also calls stopLibraryPreview; NG5c (B scratch pre-run: green with fix, red with the effect removed) / library preview keeps playing behind the latched narrow screen (<900 px) with no control to stop it; widening shows the library toggle still
+- GATE293-T1 / medium / dispatched round 294 FIX-PD-1c3 (D-29z734): ST6 exact map + StudioNarrowScreen.tsx; B scratch green, Footer and old-map mutants red / gate 293 failed: store-theme-tokens ST6 pins the data-studio-theme marker to StudioWorkspace.tsx + app.css (3/1); round 292's StudioNarrowSc
+- INFO-C293-DOC-L21 / info / scheduled round 294 (D-29z735) §3.3 / doc 218 l.21 names only togglePlayback for the narrowed branch
+- INFO-C293-K15 / info / noted (D-29z735) / claim K15 counted demo-soft-impact file-wide (1->2 after NG5c); B claim wording gap
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

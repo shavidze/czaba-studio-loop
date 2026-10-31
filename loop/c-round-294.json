@@ -1,0 +1,177 @@
+{
+ "round": 294,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T16:02:11.8394981Z",
+  "round": 294,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R294-REVIEW-L-DOC-FILELIST",
+   "severity": "low",
+   "origin": "A code-reviewer (confirmed by C)",
+   "steps": [
+    "Open docs/implementation/2026/quarter-IV/218-fix-pd-narrow-studio-state.md",
+    "Read the 'შეცვლილი ფაილები' list (l.44-53)"
+   ],
+   "expected": "The list names every file the FIX-PD-1c work changed, including app/lib/__tests__/store-theme-tokens.test.ts (ST6)",
+   "actual": "store-theme-tokens.test.ts is not listed; the doc grant covered only l.4, l.21 and the §3.3 additions, so A could not fix it",
+   "evidence": "a-round-294.md code-reviewer section; doc 218 l.44-53 (read by C)"
+  }
+ ],
+ "info": [
+  {
+   "id": "INFO-C294-DESK-BASELINE-DRIFT",
+   "severity": "info",
+   "origin": "C (environment)",
+   "note": "Against the stored baseline b-round-291/probe/desk-5173-*.png, the round-294 shots differ by 15 px (1280x720) and 22 px (1440x900), max channel delta 1, deterministic over 3 attempts, on the anti-aliased corners of arrangement-library-search and two rounded footer buttons. C-293 shots vs baseline = 0, while this round's shots vs C-293 = 15/22. HEAD 88b23dd served on this same machine (git archive, :3294, own cacheDir) vs baseline = 15/22, and current tree vs HEAD on the same machine = 0/0. So the drift is cross-job rasterization, not the round. Proposal for B: define desk-sameness rows as 0 px vs HEAD rendered in the same job, or re-capture the baseline per job.",
+   "evidence": "c-round-294/desk-headctrl.json, desk-control.json, pxdiff.cjs, shots/headctrl-3294-*, shots/desk-*"
+  },
+  {
+   "id": "INFO-C294-STORE-NO-MAIN-LANDMARK",
+   "severity": "info",
+   "origin": "C (B row wording; pre-existing a11y)",
+   "note": "/ and /store render 0 <main>/[role=main] elements at HEAD and in the current tree (no Store route or root.tsx renders one), so the row's 'does not render its main landmark -> BLOCKED' clause cannot be the check. C judged rendering by status 200 plus the visible h1 ('CZABA'; 'Curated Sound Collections'). The missing main landmark is a pre-existing Store a11y gap (WCAG 1.3.1/2.4.1), for B to rule on (STORE stages).",
+   "evidence": "c-round-294/extra.json, c294.json B-MARKER"
+  },
+  {
+   "id": "INFO-C294-TOKEN-POST-405-STACK",
+   "severity": "info",
+   "origin": "C (pre-existing, dev server)",
+   "note": "POST /api/studio-token returns 405 with a Remix dev error body that includes a stack trace (no token). GET returns 401 {error:'Please sign in to access Studio.'}. Protected file, unchanged; the production build may strip the stack trace. Not verified.",
+   "evidence": "c-round-294/c294.json G294-AUTH.token"
+  },
+  {
+   "id": "INFO-C294-AUTH-ATTEMPT1",
+   "severity": "info",
+   "origin": "C (environment)",
+   "note": "G294-AUTH attempt 1 hit a navigation race on /studio/middle-east (document.body null during re-navigation; 3 framenavigated events). Replaced by attempt 2 with load/body waits (1 of 2 replacements used). The attempt-1 record is kept.",
+   "evidence": "c-round-294/c294-attempt1.json, extra.json"
+  },
+  {
+   "id": "INFO-C294-STORE-BACKENDLESS",
+   "severity": "info",
+   "origin": "C (environment)",
+   "note": "/store renders only its hero (303 chars, no product grid or footer) because the backend is not available in the cloud. Expected; not a defect.",
+   "evidence": "c-round-294/shots/marker-store-1440x900.png"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "B-MARKER",
+  "B-DESK-SAME",
+  "G294-AUTH",
+  "DOC-218"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "gate (full suite incl. ST6, build, Biome, verify, test:e2e:smoke)"
+ ],
+ "carried": [
+  "B-NARROW-PREVIEW",
+  "B-NARROW-MIX",
+  "B-RESIZE-KEEP",
+  "B-NARROW-WIDE",
+  "B-NARROW-LOAD (round 293)",
+  "B-BOUNDARY",
+  "B-THEME",
+  "B-AX",
+  "B-FOCUS-ORDER",
+  "B-PREVIEW",
+  "B-SEND",
+  "B-AUDIO-ERROR",
+  "B-NET",
+  "B-JOURNEY-292 (round 292)"
+ ],
+ "carriedNote": "carried on SOURCE-SCOPE (app source byte-identical to the tree C passed in round 293); not re-run and not in passed. No audio or export measurement was made in round 294.",
+ "rows": {
+  "CLAIMS": {
+   "status": "PASS",
+   "evidence": "c-round-294/claims-on-A.txt, claims-diff.txt",
+   "note": "deltas only K2 9->10, K3 rc 1, K6 746 / totals l. empty / StudioNarrowScreen 1, K9 old-title 0, K10 'Completed (C round 294 PASS)', K11 stopLibraryPreview 1 / ST6+GATE293 2 / TH4 line 66->67; all other K lines identical"
+  },
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "evidence": "c-round-294/git-status.txt, sha-check.txt, sketch-exact.txt",
+   "note": "git status 10 paths (the 9 plus store-theme-tokens.test.ts); sha256sum -c fails only on the 3 §4 paths; all 7 protected files OK; the 2 test diffs reverse-apply B's sketches exactly to the frozen hashes; no non-test, non-doc file differs. After all C runs: still 10 paths and 3 failures."
+  },
+  "TYPECHECK": {
+   "status": "PASS",
+   "evidence": "c-round-294/typecheck.log",
+   "note": "rc 0"
+  },
+  "UNIT": {
+   "status": "PASS",
+   "evidence": "c-round-294/covering.log, covering.json",
+   "note": "6 files, 90 tests pass; ST6 (21 ms) and TH4 (new title, 11 ms) present; slowest NG5 691 ms / 15000 (4.6%), PNR3a 264 ms / 5000"
+  },
+  "UNIT-MUTANTS": {
+   "status": "PASS",
+   "evidence": "c-round-294/mutant-a-footer.log, mutant-b-oldmap.log, scratch-restore-diff.txt",
+   "note": "scratch /tmp/c294-scratch: (a) Footer <footer data-studio-theme> -> ST6 red ({5,3} vs {4,2}); (b) old map -> ST6 red ({4,2} vs {3,1}); restore diff -r empty"
+  },
+  "B-MARKER": {
+   "status": "PASS",
+   "evidence": "c-round-294/c294.json#B-MARKER, shots/marker-*",
+   "note": "/studio-lab 1440 and 1280: 1 marker, DIV.studio-container containing arrangement-exit, body:has matches; 390x844 direct load: 1 marker on main[data-testid=studio-narrow-screen]; / and /store at 1440: 200, 0 markers in DOM and 0 data-studio-theme in SSR HTML; 0 hydration warnings. See INFO-C294-STORE-NO-MAIN-LANDMARK."
+  },
+  "B-DESK-SAME": {
+   "status": "PASS",
+   "evidence": "c-round-294/desk-headctrl.json, desk-control.json, c294.json#B-DESK-SAME",
+   "note": "PASS on the same-machine HEAD control: current vs HEAD 88b23dd = 0 px at 1280x720 and 1440x900, 0 hydration warnings. Literal comparison vs the stored b-round-291 baseline = 15 / 22 px (max delta 1); HEAD on this machine gives the same 15 / 22, so this is cross-job raster drift (INFO-C294-DESK-BASELINE-DRIFT).",
+   "literalBaselineDiffPx": {
+    "1280x720": 15,
+    "1440x900": 22,
+    "maxChannelDelta": 1
+   },
+   "sameMachineHeadDiffPx": {
+    "1280x720": 0,
+    "1440x900": 0
+   },
+   "method": "same-machine HEAD control (deviation from row text; see INFO-C294-DESK-BASELINE-DRIFT)"
+  },
+  "G294-AUTH": {
+   "status": "PASS",
+   "evidence": "c-round-294/c294.json#G294-AUTH, shots/auth-*",
+   "note": "fresh contexts: /studio-lab 1440 demo badge and auth_user null; 390 narrow state and auth_user null; /studio/middle-east 'Sign in required', 0 audio[src]; token GET 401 with no token, POST 405 with no token. Attempt 1 environment-invalid (navigation race), replaced."
+  },
+  "DOC-218": {
+   "status": "PASS",
+   "evidence": "doc 218 l.4, l.21, l.62, l.67 (read by C)",
+   "note": "l.4 byte-exact; l.21 names togglePlayback and stopLibraryPreview; GATE293-T1 entry present; ST6 exists (store-theme-tokens.test.ts l.684); cited ids GATE293-T1, C-R292-01, B-R291-NARROW-PREFETCH, SABA-Q-FIXPD1C-ESCAPE/COPY exist in backlog.json; TH4, TH10, LRS4, NG5c, NG9c exist. File list gap = A-R294-REVIEW-L-DOC-FILELIST (Low)."
+  },
+  "gate": {
+   "status": "gate",
+   "note": "full suite incl. ST6, build, Biome, verify, test:e2e:smoke: root gate rows; not claimed"
+  }
+ },
+ "manifestPaths": [
+  "app/components/arrangement/index.ts",
+  "app/hooks/index.ts",
+  "app/lib/__tests__/store-theme-tokens.test.ts",
+  "app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx",
+  "app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx",
+  "app/routes/studio-lab.tsx",
+  "app/components/arrangement/StudioNarrowScreen.tsx",
+  "app/hooks/useStudioWideViewport.ts",
+  "app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx",
+  "docs/implementation/2026/quarter-IV/218-fix-pd-narrow-studio-state.md"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 3,
+ "ableton": {
+  "requirement": "Store never wears the Studio theme; both Studio surfaces do: met (B-MARKER)",
+  "conformity": "not applicable (test/doc-only gate fix-up)"
+ },
+ "housekeeping": "HEAD control server :3294 stopped (own cacheDir /tmp/c294head-vitecache); root :5173 still 200; scratch copies only under /tmp; no app edits, commits or pushes."
+}

@@ -1,0 +1,24 @@
+     [33m[2m✓[22m[39m DW1: without a Worker global it resolves to the synchronous composition object [33m 304[2mms[22m[39m
+     [32m✓[39m DW2: five concurrent calls share one worker and one synthesize message[32m 3[2mms[22m[39m
+     [32m✓[39m DW3: a valid complete message resolves every caller and releases the worker[32m 2[2mms[22m[39m
+     [32m✓[39m DW4: onerror falls back to the synchronous composition without waiting for the stall timer[32m 277[2mms[22m[39m
+     [32m✓[39m DW5: onmessageerror falls back to the synchronous composition without waiting for the stall timer[32m 268[2mms[22m[39m
+     [32m✓[39m DW6: a malformed message falls back: (a) a complete message without a composition[32m 271[2mms[22m[39m
+     [32m✓[39m DW6: a malformed message falls back: (b) a pulse stem that is a plain array[32m 270[2mms[22m[39m
+     [32m✓[39m DW7: a throwing Worker constructor falls back to the synchronous composition[32m 279[2mms[22m[39m
+     [32m✓[39m DW8: the stall timer falls back only once the full timeout has passed[32m 264[2mms[22m[39m
+     [32m✓[39m DW9: a later call reuses the completed job without a new worker[32m 2[2mms[22m[39m
+     [33m[2m✓[22m[39m DW10: the worker module posts the full composition and transfers its five buffers [33m 572[2mms[22m[39m
+     [33m[2m✓[22m[39m DW11: a throwing postMessage falls back to the synchronous composition without waiting for the stall timer [33m 316[2mms[22m[39m
+[31m     [31m×[31m DW12: a valid complete message clears the stall timer, so the timeout never releases the worker a second time[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m DW12: a malformed message clears the stall timer, so the timeout never releases the worker a second time[39m[32m 272[2mms[22m[39m
+[31m     [31m×[31m DW12: onerror clears the stall timer, so the timeout never releases the worker a second time[39m[32m 258[2mms[22m[39m
+[31m     [31m×[31m DW12: onmessageerror clears the stall timer, so the timeout never releases the worker a second time[39m[32m 266[2mms[22m[39m
+[31m     [31m×[31m DW12b: a throwing postMessage clears the stall timer, so the timeout never releases the worker a second time[39m[32m 265[2mms[22m[39m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW12: a valid complete message clears the stall timer, so the timeout never releases the worker a second time
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW12: a malformed message clears the stall timer, so the timeout never releases the worker a second time
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW12: onerror clears the stall timer, so the timeout never releases the worker a second time
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW12: onmessageerror clears the stall timer, so the timeout never releases the worker a second time
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW12b: a throwing postMessage clears the stall timer, so the timeout never releases the worker a second time
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (17)[39m
