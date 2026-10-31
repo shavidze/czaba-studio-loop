@@ -1,0 +1,65 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T11:04:17.8805543Z",
+  "round": 287,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R287-01",
+   "severity": "low",
+   "steps": [
+    "Serve A's tree with c-round-287/mock-c287.mjs on :5199 (priceless-track id 10, priceless-pack id 9, free-pack id 11)",
+    "Open /store at 1440x900 and 1280x720; measure the a[href='/products/priceless-pack'] and priceless-track grid items",
+    "Click the SFX filter; compare priceless-pack's card frame with free-pack's in the same row",
+    "Open /; measure the article of the priceless cards"
+   ],
+   "expected": "Task §8 B-STORE-CARD: the card's outer bbox equals HEAD's ±1 px; §10: the muted label does not change the card height",
+   "actual": "/store priceless card 400x577.6 on A vs 400x589.6 on HEAD (both viewports); in the All view every row below moves up 12 px; in the SFX row the visible frame is 577.6 next to free-pack's 589.6 (ragged bottoms); the home article is 409.6 vs 417.6. Cause: text-sm (20 px line) replaces text-2xl (32 px) / text-lg (28 px) in a content-sized card. This is a spec clause conflict (L4) for B to rule on",
+   "evidence": "c-round-287/probe/p2-{a,head}.json, probe/bbox-{a,head}.json, shots/a/store-sfx-row-{1440,1280}.png, shots/{a,head}/store-card-priceless-*-{1440,1280}.png, shots/{a,head}/home-row-*.png"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "B-VERSION-CARD",
+  "B-FREE",
+  "B-REGRESS",
+  "B-JOURNEY",
+  "R286-KEEP",
+  "G287-AUTH",
+  "DOC-215"
+ ],
+ "failed": [
+  "B-STORE-CARD (bbox clause; text/colour pass)",
+  "B-HOME-CARD §10 card-height clause (text/badge pass)"
+ ],
+ "gate": [
+  "full test suite",
+  "build",
+  "Biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "blocked": [
+  "owned-Standard upgrade state in browser: backend unavailable in cloud (mock auth 401); unit VC3/VC4 carry it",
+  "real-backend 403 for /api/studio-token: backend unavailable in cloud"
+ ],
+ "signalsForB": [
+  "A-R287-PREMIUM-UNVALIDATED",
+  "A-R287-ARCH-ADAPTER-ZERO",
+  "INFO-C287-L29-PROTECTION-CLAUSE (§2.2 aria-pressed clause untagged; covered by probe)"
+ ],
+ "cleanup": {
+  "servers3287_3288": "stopped",
+  "mock": "standard mock-api/server.mjs running, health products 8",
+  "storeTree": "unchanged, sha 7/7 OK"
+ }
+}

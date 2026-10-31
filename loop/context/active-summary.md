@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T10:39:14.396Z)
+# Active loop summary (2026-10-31T11:18:07.494Z)
 
-- backlog.json 2748 KB -> active view 378 KB
-- status: G_ROOT_GATE round 286
-- servers: `{"checkedUtc":"2026-10-31T10:17:14.7789879Z","round":286,"attempt":1,"store":200}`
+- backlog.json 2755 KB -> active view 380 KB
+- status: G_ROOT_GATE round 287
+- servers: `{"checkedUtc":"2026-10-31T11:04:17.8805543Z","round":287,"attempt":1,"store":200}`
 - last publication: 096fa4b61a6a853bdb53d4d0b9ca8f6b1f841a42 (rounds 286-286)
-- last root gate: round 286 published - commit 096fa4b61a6a853bdb53d4d0b9ca8f6b1f841a42 pushed
+- last root gate: round 287 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -696,6 +696,10 @@
 - INFO-B283-NPX-TSX-CACHE / info / root_note / B's planning ran 'npx tsx' once for a scratch helper table; npm fetched tsx@4.23.15 into the npm cache only; project, lockfile and store unc
 - GATE283-S3 / info / watch / worst case at 6x CPU: 10 s worker stall + ~2.5 s sync synth ~ 12.5 s vs waitForCollectionReady 15 s timeout (perf/lib/page.ts); little headr
 - PD-FREE-HEADER / info / signal (D-29z695): for STORE-4 / a product with an explicit price 0 shows "Complimentary Download" in ProductSidebar (button without a handler) and "$0.00 USD" with Buy Now 
+- C-R286-01 / medium / open -> round 287 FIX-PD-1a2 (D-29z701) / priceless Track: version card reads "Standard $0" while the panel reads Price unavailable (createDisplayVersions ?? 0 rendered by VersionSel
+- C-R286-02 / low / open -> fixed in round 287 with C-R286-01 (same cause, same fixtures, L54; D-29z701), not deferred / /store card for a priceless product reads $0 while its page reads Price unavailable (store.tsx:79 ?? 0); ProductCard.tsx:32 same chain would
+- A-R286-ARCH-ONE-RESOLVER / info / adopted in round 287 (D-29z702) because the Medium fix changes that line; not a separate refactor / price resolution lived in two places (DisplayVersion.price synthetic 0 vs resolvePurchasePrice undefined); proposal DisplayVersion.price num
+- B-R286-UNUSED-PRICE-RENDERERS / info / signal (D-29z703): no route renders them at 096fa4b; check when STORE-4 touches them / RelatedTracksCarousel.tsx:120 and TrackRow.tsx:149 render a caller-formatted price; no consumer found
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

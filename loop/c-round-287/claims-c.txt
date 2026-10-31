@@ -1,0 +1,48 @@
+K1 HEAD: (archive)
+K2 tree: 0 changed paths
+K3 DisplayVersion.price type:
+17:  price: number;
+K4 real-variant price + synthetic Standard chain + Premium guard:
+79:          price: variant.price,
+92:      price: product.standardPrice ?? product.minPrice ?? product.variants?.[0]?.price ?? 0,
+100:  if (product.premiumPrice) {
+K5 SFX without variants returns []:
+85:  if (mapProductType(product.category) === 'Sound Effects') return [];
+K6 validity guard is module-private; resolvers exported:
+116:function isValidCatalogPrice(value: unknown): value is number {
+121:export function resolveCatalogPrice(product: Product): number | undefined {
+131:export function resolvePurchasePrice(
+K7 VersionSelector price renders + upgrade arithmetic:
+32:    return version.price - ownedVersionPrice;
+55:          const upgradePrice = isUpgrade ? getUpgradePrice(version) : 0;
+105:                      <span className="text-xl font-light text-brand">+${upgradePrice}</span>
+107:                        ${version.price}
+114:                      ${version.price}
+K8 /store card chain:
+79:    price: `$${product.standardPrice ?? product.minPrice ?? product.variants?.[0]?.price ?? 0}`,
+K9 /store card render:
+552:                <span className="text-2xl font-bold text-foreground">{pack.price}</span>
+K10 ProductCard API chain + free rule + render:
+32:    ? (product.standardPrice ?? product.minPrice ?? product.variants?.[0]?.price ?? 0)
+35:  const isFree = priceAmount === 0;
+36:  const price = isFree ? 'Complimentary' : `$${priceAmount}`;
+157:              <span className="text-lg font-bold text-foreground">{price}</span>
+K11 account.downloads ProductCard is a local component (protected file, out of scope):
+52:function ProductCard({ product, onOpenDownloadDialog }: ProductCardProps) {
+K12 the PR5 assertion that changes:
+347:    expect(standard?.price).toBe(0);
+K13 frozen SFX test:
+263:  it('does not invent a purchasable SFX variant when none exists', () => {
+K14 test files that import createDisplayVersions/VersionSelector/ProductCard:
+app/lib/__tests__/bug-hunting/product-utils-bugs.test.ts
+app/lib/__tests__/product-presentation.test.tsx
+app/lib/__tests__/product-utils.test.ts
+app/lib/__tests__/store-focus-ring.test.ts
+K15 last implementation doc:
+214-fix-pd-price-fallback.md
+K16 sha256 of the owned pre-existing files:
+57c37d7ef35879a75eaa01c0ad353e9b5da74cb009ece92e2137510211002e80  app/lib/product-utils.ts
+3504ca456802d515102fb67b358e98a5c1b9d7f991b85c58968e173507dcc888  app/components/product/VersionSelector.tsx
+f9684d9eccefccff007daa482ae4e92759086671c5af5f87313c772cf23f6e21  app/components/product/ProductCard.tsx
+83b4d2f713fe0b174abdf18e7014ce6fc47d076222fab6e5b5317c0dc16b2e62  app/routes/store.tsx
+319b8b588d635bf55d58ef9cd7b32a24532e86329acbf9e606d8f60293d7866f  app/lib/__tests__/product-utils.test.ts

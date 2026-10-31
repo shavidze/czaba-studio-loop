@@ -1,9 +1,9 @@
 {
  "version": 249,
- "updated": "2026-10-31 B round 286 -> 287 planning",
+ "updated": "2026-10-31",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 287, D-29z700..D-29z703; FIX-PD-1a2: F9 remainder C-R286-01 + C-R286-02 - unknown price shows muted \"Price unavailable\" on the version card, /store card and home card, never $0/Complimentary; DisplayVersion.price number|undefined)",
+ "current_task": "current-task.md (round 288, D-29z704..D-29z706; FIX-PD-1a2 fix-up: C-R287-01 unknown-price label keeps the card line box (leading-8 /store, leading-7 home) + A-R287-PREMIUM-UNVALIDATED synthetic Premium validated; baseline 096fa4b + A round-287 tree)",
  "advisor_used_by_B": "round 283 -> 284 planning: available and consulted (before the approach; before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -13380,7 +13380,7 @@
   },
   {
    "id": "PD-REVIEW-2026-10-31",
-   "status": "in_progress (D-29z700): FIX-PD-1a done as scoped (286, 096fa4b); FIX-PD-1a2 (F9 remainder) dispatched round 287 | in_progress (D-29z692): FIX-PD-1a dispatched round 286",
+   "status": "in_progress (D-29z704): FIX-PD-1a2 fix-up round 288 (C-R287-01 + A-R287-PREMIUM-UNVALIDATED) | in_progress (D-29z700): FIX-PD-1a done as scoped (286, 096fa4b); FIX-PD-1a2 (F9 remainder) dispatched round 287 | in_progress (D-29z692): FIX-PD-1a dispatched round 286",
    "requested": "Saba 2026-10-31 (agent-workflow.md \"Whole-product design review: Saba's decisions and new tasks\"); review docs/technical/studio-real-workspace/product-design-review-2026-10-31.md (product-designer, master 000da42)",
    "saba_decisions": {
     "Q1": "SRW-21 mount = first Studio product priority after STUDIO-PERFORMANCE; protected files stay outside the loop; B writes SRW-21-PLAN only; STUDIO-LINK until then",
@@ -13410,14 +13410,14 @@
      "id": "FIX-PD-1a2",
      "finding": "F9 remainder: C-R286-01 (Medium) + C-R286-02 (Low)",
      "what": "DisplayVersion.price number|undefined (synthetic Standard = resolveCatalogPrice; invalid variant price -> undefined); VersionSelector, /store card (store.tsx mapProductToPack) and home ProductCard show muted \"Price unavailable\" for an unknown price, never $0 / Complimentary; explicit 0 unchanged; formatCatalogPriceLabel shared helper",
-     "status": "dispatched round 287 (D-29z701/D-29z702)",
+     "status": "bug (D-29z704): C round 287 FAIL on C-R287-01 (Low, card bbox clause; B spec conflict L4); 12 rows PASS incl. B-VERSION-CARD/B-FREE/B-REGRESS/B-JOURNEY/R286-KEEP both viewports, browserVerified/realVerified true; gate 287 skipped, A tree uncommitted (7 paths, sha in a-round-287.md). Fix-up round 288 (same stage id) adds leading-8 (/store) / leading-7 (home) on the unknown branch + A-R287-PREMIUM-UNVALIDATED fold-in (D-29z705/D-29z706) | dispatched round 287 (D-29z701/D-29z702)",
      "files": [
-      "app/lib/product-utils.ts",
-      "app/components/product/VersionSelector.tsx",
-      "app/routes/store.tsx",
       "app/components/product/ProductCard.tsx",
-      "app/lib/__tests__/product-utils.test.ts",
+      "app/components/product/VersionSelector.tsx",
       "app/lib/__tests__/product-price-cards.test.tsx",
+      "app/lib/__tests__/product-utils.test.ts",
+      "app/lib/product-utils.ts",
+      "app/routes/store.tsx",
       "docs/implementation/2026/quarter-IV/215-fix-pd-card-price-unknown.md"
      ],
      "added": "2026-10-31 B round 286 -> 287 planning"
@@ -27819,7 +27819,7 @@
    "id": "C-R286-01",
    "severity": "medium",
    "origin": "C",
-   "status": "open -> round 287 FIX-PD-1a2 (D-29z701)",
+   "status": "fixed in A tree round 287 (C B-VERSION-CARD/B-STORE-CARD text+colour PASS, both viewports); closes with FIX-PD-1a2 at round 288 PASS + gate publish (D-29z704) | open -> round 287 FIX-PD-1a2 (D-29z701)",
    "title": "priceless Track: version card reads \"Standard $0\" while the panel reads Price unavailable (createDisplayVersions ?? 0 rendered by VersionSelector); pre-existing, outside round-286 grants; same as A-R286-REVIEW-TRACK-VERSION-ZERO",
    "evidence": "c-round-286/probe/extra-{dev,head}.json, c-round-286/shots/priceless-track-{1440,1280}.png",
    "added": "2026-10-31 B round 286 -> 287 planning"
@@ -27828,7 +27828,7 @@
    "id": "C-R286-02",
    "severity": "low",
    "origin": "C",
-   "status": "open -> fixed in round 287 with C-R286-01 (same cause, same fixtures, L54; D-29z701), not deferred",
+   "status": "fixed in A tree round 287 (C B-VERSION-CARD/B-STORE-CARD text+colour PASS, both viewports); closes with FIX-PD-1a2 at round 288 PASS + gate publish (D-29z704) | open -> fixed in round 287 with C-R286-01 (same cause, same fixtures, L54; D-29z701), not deferred",
    "title": "/store card for a priceless product reads $0 while its page reads Price unavailable (store.tsx:79 ?? 0); ProductCard.tsx:32 same chain would read Complimentary",
    "evidence": "c-round-286/probe/unknown-dev.json cards, c-round-286/shots/unknown-dev/priceless-store-card-*.png",
    "added": "2026-10-31 B round 286 -> 287 planning"
@@ -27868,6 +27868,51 @@
    "title": "jsdom does not synthesize click from Enter/Space on a button; PU3/PU4 key presses only prove no keydown handler acts. Untested in unit: unknown price + alreadyInCart, owned Standard + priceless Premium (Case 3 fall-through)",
    "evidence": "a-round-286.md code-reviewer",
    "added": "2026-10-31 B round 286 -> 287 planning"
+  },
+  {
+   "id": "C-R287-01",
+   "severity": "low",
+   "origin": "C",
+   "status": "open -> fixed now in round 288 (D-29z705): own-round regression from B spec conflict (L4: text-sm mandated next to an unchanged-bbox clause); not deferred, owned cheaply",
+   "title": "unknown-price label shortens the card: /store 577.6 vs 589.6 (-12 px; SFX row bottoms ragged next to free-pack), home article 409.6 vs 417.6 (-8 px); cause text-sm 20 px line replaces text-2xl 32 px / text-lg 28 px",
+   "evidence": "c-round-287/probe/p2-{a,head}.json, probe/bbox-{a,head}.json, shots/a/store-sfx-row-{1440,1280}.png; B sketch b-round-287/probe/lh-sketch.json (inline line-height 2rem/1.75rem restores 589.6/417.6 at both viewports)",
+   "added": "2026-10-31 B round 287 -> 288 planning"
+  },
+  {
+   "id": "A-R287-PREMIUM-UNVALIDATED",
+   "severity": "low",
+   "origin": "A (code-reviewer, rated Medium)",
+   "status": "ruled Low by B (no fixture or known backend emits a negative/Infinity premiumPrice; pre-existing) and fixed now in round 288 because product-utils.ts is owned and it is the same F9 card = page class (D-29z706)",
+   "title": "synthetic Premium price: product.premiumPrice unvalidated: premiumPrice -5/Infinity shows $-5/$Infinity on the version card while resolvePurchasePrice makes the panel read Price unavailable",
+   "evidence": "a-round-287.md code-reviewer Medium 1; product-utils.ts:100/105 [b-round-287 claims K5]",
+   "added": "2026-10-31 B round 287 -> 288 planning"
+  },
+  {
+   "id": "A-R287-ARCH-ADAPTER-ZERO",
+   "severity": "info",
+   "origin": "A (code-reviewer Architecture note)",
+   "status": "signal (D-29z706): productAdapter.ts createVariants has no consumer outside app/services/api/adapters (claims K10); app/services/api is frozen; check when STORE-4 or a service task touches adapters",
+   "title": "productAdapter.ts:108 (variant.price ?? 0).toFixed(2), another unknown->0 collapse",
+   "evidence": "a-round-287.md Architecture note; b-round-287/claims-288-output.txt K10",
+   "added": "2026-10-31 B round 287 -> 288 planning"
+  },
+  {
+   "id": "A-R287-L12-CLASS-PINS",
+   "severity": "info",
+   "origin": "A (L12 self-check question)",
+   "status": "ruled (D-29z705): class-substring pins in product-price-cards.test.tsx allowed because the task mandates the exact class set; they are source pins, not cascade assertions; browser bbox/line-height rows are the real guard",
+   "title": "A asked whether L12 forbids asserting class substrings in the new card tests",
+   "evidence": "a-round-287.md Lessons self-check L12",
+   "added": "2026-10-31 B round 287 -> 288 planning"
+  },
+  {
+   "id": "INFO-C287-L29-PROTECTION-CLAUSE",
+   "severity": "info",
+   "origin": "C",
+   "status": "noted (D-29z706): round 288 protection clauses carry K tags",
+   "title": "round-287 §2.2 \"Unchanged: selection, aria-pressed\" protection clause had no K tag; covered by C probe",
+   "evidence": "c-round-287.md L29 sweep ruling",
+   "added": "2026-10-31 B round 287 -> 288 planning"
   }
  ],
  "tech_lead_notes": [
@@ -35389,6 +35434,26 @@
    "repro": "priceless product page, focus Buy Now with a screen reader",
    "deferred_reason": "2026-10-23 bug gate: Low -> deferred_low_polish (D-29z703); copy change is a STORE-4/COPY-PD question",
    "added": "2026-10-31 B round 286 -> 287 planning"
+  },
+  {
+   "id": "A-R287-REVIEW-UPGRADE-NEGATIVE",
+   "severity": "low",
+   "status": "deferred",
+   "title": "VersionSelector upgrade price has no > 0 guard: ownedVersionPrice above the target price renders +$-10 (pre-existing)",
+   "evidence": "a-round-287.md code-reviewer Lows (pre-existing)",
+   "repro": "unit: renderVersions with owned standard price 120 and Premium 99; browser needs an owned purchase (backend unavailable in cloud)",
+   "deferred_reason": "2026-10-23 bug gate: Low -> deferred_low_polish (D-29z706); needs backend ownership state",
+   "added": "2026-10-31 B round 287 -> 288 planning"
+  },
+  {
+   "id": "A-R287-REVIEW-DECIMAL-FORMAT",
+   "severity": "low",
+   "status": "deferred",
+   "title": "card label $12.5 vs panel $12.50 (toFixed(2)) for a non-integer price (pre-existing format difference)",
+   "evidence": "a-round-287.md code-reviewer Lows",
+   "repro": "product with standardPrice 12.5: /store card $12.5, page $12.50",
+   "deferred_reason": "2026-10-23 bug gate: Low -> deferred_low_polish (D-29z706); a STORE-4 price-format question",
+   "added": "2026-10-31 B round 287 -> 288 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -40001,6 +40066,21 @@
    "id": "D-29z703",
    "date": "2026-10-31",
    "text": "A-R286-REVIEW-HOVER-SOFT-DISABLED and A-R286-REVIEW-DOUBLE-ANNOUNCE -> deferred_low_polish; unlayered cursor signal attached to existing B-R276-CURSOR-UNLAYERED-GLOBAL (no duplicate); A-R286-UNIT-KEY-ACTIVATION recorded; B-R286-UNUSED-PRICE-RENDERERS signal. No lesson added (not Saba-found; L49/L54 cover it); lessons.md stays 60 lines. REGRESSION not due (last 2026-10-30, due on/after 2026-11-02); RETRO at 290. No architecture checkpoint: small Store fix-up, one owner."
+  },
+  {
+   "id": "D-29z704",
+   "date": "2026-10-31",
+   "text": "Round 287 closed FAIL: c-round-287.json taskStatus FAIL, browserVerified/realVerified true, 12 rows passed (CLAIMS, SOURCE-SCOPE, TYPECHECK, UNIT 8 files/134, UNIT-MUTANTS N1-N6, B-VERSION-CARD, B-FREE, B-REGRESS, B-JOURNEY, R286-KEEP, G287-AUTH, DOC-215); failed only the bbox/height clauses of B-STORE-CARD and B-HOME-CARD (C-R287-01 Low). Gate 287 skipped (C FAIL), baseline stays 096fa4b with A tree uncommitted. FIX-PD-1a2 = bug; fix-up round 288 keeps the stage id. C-R286-01/02 fixed in tree, close with 288 PASS + publish."
+  },
+  {
+   "id": "D-29z705",
+   "date": "2026-10-31",
+   "text": "Ruling on C-R287-01 (L4/L10): option (a) wins - the card height is preserved; the unknown branch keeps text-sm font-light text-muted and adds the known line box: leading-8 (2rem = text-2xl line) in store.tsx, leading-7 (1.75rem = text-lg line) in ProductCard.tsx. Rejected (b) accept -12/-8 px: visible ragged bottoms in one grid row (SFX filter). VersionSelector unchanged (C measured 124 px = HEAD). B sketch b-round-287/probe/lh-sketch.json: inline 2rem/1.75rem gives 589.6/417.6 = HEAD at both viewports. Fixed now, not deferred: own-round regression, owned files. Cause is B: two clauses on one element with no winner (L4) and a bound written without measuring text-sm (L3); no new lesson (both exist). A L12 question ruled: class pins allowed here (mandated class set, source pins); granted pin edits are replacements, not removals."
+  },
+  {
+   "id": "D-29z706",
+   "date": "2026-10-31",
+   "text": "A-R287-PREMIUM-UNVALIDATED ruled Low (reviewer said Medium; no fixture/backend emits it) and folded into round 288 (owned file, same F9 card = page class, <=3 related bugs): keep if (product.premiumPrice), price: isValidCatalogPrice(product.premiumPrice) ? product.premiumPrice : undefined. A-R287-ARCH-ADAPTER-ZERO signal (no consumer, frozen services). A-R287-REVIEW-UPGRADE-NEGATIVE and A-R287-REVIEW-DECIMAL-FORMAT -> deferred_low_polish. REGRESSION not due (last 2026-10-30, due on/after 2026-11-02); RETRO at 290. No architecture checkpoint: small Store fix-up, one owner. No lesson added; lessons.md stays 60 lines."
   }
  ],
  "retro_candidates": [
