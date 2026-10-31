@@ -1,0 +1,28 @@
+# C round 299: STUDIO-LINK-a4 verification (test-only hydration fix-up)
+
+**Verdict: PASS.** 12 rows passed, 0 failed, 0 blocked. `browserVerified` and `realVerified` are true. Gate rows (full suite, build, Biome, verify, e2e smoke) belong to root.
+Env: `env-status.json` round 299, store 200. Chromium is Playwright's bundled build. Every browser context was fresh, with empty storage. Evidence is in `c-round-299/`.
+
+## Rows
+| Row | Result | Evidence |
+|---|---|---|
+| CLAIMS | PASS. Equal to `claims-299-after-sketch.txt` except K1 (the HEAD line) and K2 (4 lines); both are allowed. Compared with `claims-299-output.txt`, only K2, K3 (rc 1), K5, K6, K8, K9 and K10 differ. K4 and K7 are identical, and K11 is 30/30 `ok`. | `claims-after.txt` |
+| SOURCE-SCOPE | PASS. `git status` shows exactly the 4 §4 paths. `sha256sum -c` fails only on those 4. Each file is `cmp`-equal to its sketch. HEAD is `ece19e3`. I re-checked this after all of my own work. | — |
+| TYPECHECK | PASS, rc 0 | `tsc.log` |
+| UNIT | PASS: 7 files, 58 tests. Slowest: NG5 1,908 ms (timeout 15 s), LH3 815 ms, LH1 725 ms; none is above 50 % of its timeout. Only 2 stderr lines match the pattern, both the jsdom `muted` warning: one under LH1 (l.854), one under NG9c (l.2142). None under LH3 or NG9. | `covering.log.clean` |
+| UNIT-MUTANTS | PASS. My own scratch (`/tmp/c299-scratch`, its own `cacheDir`).<br>• x, v and h turn LH3 and NG9 red.<br>• y turns LH3, NG9 and NG9c red.<br>• r turns LH3 red, r2 turns NG9 red, e turns LH1 and LH3 red, g turns LH4 red.<br>• (i) and the unmutated copy: 20/20 green.<br>• **Controls** x and v on unmodified `ece19e3`: 20/20 green, which reproduces C-R298-01 and A-R298-REVIEW-3.<br>• **C's own mutant w** (the standby `<video>` is muted on the client only) turns LH3 and NG9 red, so the helper does not hide a real `muted` mismatch.<br>• Every restore was `cmp`-equal. | `mutants-summary.txt`, `mutant-*.log` |
+| UNIT-VACUITY | PASS. LH3 fails at l.184, `expect(firstOptionSourceId()).not.toBe(PREVIEW_SOURCE_ID)`. | `mutant-vacuity.log` |
+| UNIT-CLEANUP | PASS, by reading the code.<br>• ssr file: `push` (l.133) comes before `await act` (l.134). Same in hydrate-ui (l.117 before l.118).<br>• `afterEach` calls every unmount before `innerHTML = ''`.<br>• The unmount sets `root` to null first, so a second call does nothing.<br>• **Run:** the green 58-test run already makes that second call. LH3 (ssr l.189) and LH1, LH2 and LH4 (hydrate-ui l.161, 171, 186) call `unmount()` inside the test, and `afterEach` (l.160 and l.144) then calls the same tracked unmount again. No error. | source, `covering.log.clean` |
+| JSDOM-MUTED-PREMISE | PASS.<br>• jsdom 27.4.0: after both `innerHTML` and the parser, the attribute is present, `muted` is false and `defaultMuted` is true.<br>• `curl /studio-lab`: both `<video>` tags carry `muted=""`.<br>• Chromium: `DOMParser` gives `muted` true, and `innerHTML` also gives true. | `jsdom-muted.json`, `curl-video-tags.txt`, `browser.json.premise` |
+| B-DOCK-MUTED | PASS at 1440×900 and 1280×720.<br>• Step 1: both videos report `.muted` true, with 0 page errors and 0 probe matches.<br>• `canPlayType` for H.264 returns `probably`.<br>• `1.mp4` was added, and the status reads "added … 00:00.000 — 00:12.969".<br>• Space for about 2.25 s: the active video's `currentTime` went from 0 to 2.237 s at 1440 and to 2.231 s at 1280; the clock read 00:02.252. Both videos stayed muted in all 5 samples, and the video was paused after the second Space. 0 probe matches. | `shots/dock-playing-*.png`, `browser.json` |
+| B-COLD-DEEPLINK | PASS at both viewports.<br>• Focus (`document.activeElement`) is the `role=option` `demo-middle-east`, with `aria-selected="true"`.<br>• 0 page errors and 0 probe matches. The only errors are the expected environment ones: cart `ERR_CONNECTION_REFUSED` and INFO-C298-01.<br>• Plain `/studio-lab`: focus is on BODY, with the same selection. | `shots/cold-*`, `shots/plain-*` |
+| G299-AUTH | PASS.<br>• A fresh context with 0 cookies loads `/studio-lab`: the workspace and the "Demo collection — no sign-in required" badge show, and `auth_user` is null.<br>• `/studio/middle-east` shows "Sign in required", with 0 `audio[src]`.<br>• `GET /api/studio-token` returns 401, and the body holds no token. | `shots/auth-*` |
+| DOC-220 | PASS.<br>• l.4 is exact.<br>• The 7 TEMPLATE headings are in order, and all 3 test files are listed.<br>• The old phrase count is 0, and "STUDIO-LINK-b (რაუნდი 300)" appears once.<br>• The jsdom/Chromium claim matches my measurements.<br>• All 6 cited ids exist in `backlog.json`. | — |
+
+## Findings for B
+No bugs.
+- **INFO-C299-01 (C harness):** my button click (role button, name /video/i) did not open a file chooser. The video went in through `setInputFiles` on `arrangement-video-input`, the same `onChange` path. This does not change the row's result.
+- **INFO-C299-02 (A-R299-REVIEW-1, premise confirmed):** NG9's `hydrateRoot` (l.397) is the first hydration in `studio-narrow-gate-ui.test.tsx`; NG9c's is at l.428. So `toEqual([])` holds today. A hydration test placed above NG9, or a shuffled run order, would make it vacuous. No acceptance row failed, and I could not reproduce a vacuous pass. This is the same class as A-R298-REVIEW-6 ("one hydration per file" has no guard), which B ruled Low (`deferred_low_polish`) in D-29z765 and routed to A-R298-ARCH-HYDRATE-HARNESS. C recommends B file A-R299-REVIEW-1 there, not as a new open Medium.
+- **INFO-C298-01:** `/middle-east.mp3` `ERR_ABORTED` still appears. It is environment noise from an earlier round.
+
+Ableton conformity: not applicable (test-only round). No app source was changed by C.

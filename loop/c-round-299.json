@@ -1,0 +1,84 @@
+{
+ "round": 299,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T19:35:51.3974944Z",
+  "round": 299,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "UNIT-VACUITY",
+  "UNIT-CLEANUP",
+  "JSDOM-MUTED-PREMISE",
+  "B-DOCK-MUTED",
+  "B-COLD-DEEPLINK",
+  "G299-AUTH",
+  "DOC-220"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "gate: full suite, build, Biome, verify, test:e2e:smoke (root gate)"
+ ],
+ "rows": {
+  "CLAIMS": "PASS - equal to claims-299-after-sketch.txt except K1 (HEAD line, allowed) and K2 4 lines (allowed); vs claims-299-output.txt differs only on K2,K3(rc 1),K5,K6,K8,K9,K10; K4,K7 identical; K11 30/30 ok (c-round-299/claims-after.txt)",
+  "SOURCE-SCOPE": "PASS - git status = exactly the 4 §4 paths; sha256sum -c fails only on those 4 (re-checked after all C work); each cmp-equal to its sketch; HEAD ece19e3",
+  "TYPECHECK": "PASS rc 0 (tsc.log)",
+  "UNIT": "PASS 7 files 58 tests; slowest NG5 1908 ms/15 s, LH3 815 ms, LH1 725 ms; none >50%; pattern matches in stderr only 2x muted warning, under LH1 (l.854) and NG9c (l.2142); none under LH3/NG9 (covering.log.clean)",
+  "UNIT-MUTANTS": "PASS x,v,h -> LH3+NG9 red; y -> LH3+NG9+NG9c red; r -> LH3; r2 -> NG9; e -> LH1+LH3; g -> LH4; i 20/20 green; unmutated 20/20; controls x and v on unmodified ece19e3 20/20 green (C-R298-01 / A-R298-REVIEW-3 reproduced); C's own mutant w (client-only muted on standby video) -> LH3+NG9 red, so the helper does not mask a real muted mismatch; every restore cmp-equal; scratch /tmp/c299-scratch, cacheDir /tmp/c299-vite-cache",
+  "UNIT-VACUITY": "PASS LH3 red at l.184 expect(firstOptionSourceId()).not.toBe(PREVIEW_SOURCE_ID) (mutant-vacuity.log)",
+  "UNIT-CLEANUP": "PASS reading + run: ssr push l.133 before await act l.134; hydrate-ui l.117 before l.118; afterEach unmounts all before innerHTML=''; unmount nulls root first. Second call exercised in the green 58-test run: LH3 (ssr l.189) and LH1/LH2/LH4 (hydrate-ui l.161/171/186) call unmount() inline, then afterEach (l.160/l.144) calls the same tracked unmount again, with no error",
+  "JSDOM-MUTED-PREMISE": "PASS jsdom 27.4.0: innerHTML and parser both attr true muted false defaultMuted true; curl /studio-lab: both <video> carry muted=\"\"; Chromium DOMParser muted true (also innerHTML true)",
+  "B-DOCK-MUTED": "PASS both viewports: step1 both videos .muted true, 0 page errors, 0 probe matches; canPlayType H.264 'probably'; 1.mp4 added (status '1.mp4 added to the video track: 00:00.000 — 00:12.969'); Space ~2.25 s: active currentTime 0 -> 2.237 (1440) / 2.231 (1280), both videos muted in all 5 samples, paused after Space; 0 probe matches",
+  "B-COLD-DEEPLINK": "PASS both viewports: activeElement BUTTON role=option demo-middle-east aria-selected=true; 0 page errors, 0 probe matches; only env errors (cart ERR_CONNECTION_REFUSED, INFO-C298-01 middle-east.mp3 ERR_ABORTED); plain /studio-lab: focus BODY, same selection",
+  "G299-AUTH": "PASS fresh context 0 cookies: /studio-lab workspace + 'Demo collection — no sign-in required' badge, auth_user null (only czaba_session_id); /studio/middle-east 'Sign in required', 0 audio[src]; GET /api/studio-token 401, no token in body",
+  "DOC-220": "PASS l.4 exact; 7 TEMPLATE headings in order; 3 test files listed; 'row-ის ჩავარდნის შემთხვევაშიც' 0; 'STUDIO-LINK-b (რაუნდი 300)' 1; jsdom/Chromium statement matches JSDOM-MUTED-PREMISE; all cited ids (A-R298-ARCH-HYDRATE-HARNESS, C-R298-01, D-29z749, D-29z750, GATE296-ARCH-ROUTE-DOM-FOCUS, GATE297-S5-VIDEO-MUTED-SSR) found in backlog.json",
+  "gate": "gate row - full suite, build, Biome, verify, test:e2e:smoke belong to root gate 299"
+ },
+ "bugs": [],
+ "info": [
+  {
+   "id": "INFO-C299-01",
+   "origin": "C harness",
+   "note": "B-DOCK-MUTED: the role=button /video/i click did not open a file chooser within 1.5 s (selector likely not the lane '+ Video' import button); the video was added through setInputFiles on [data-testid=arrangement-video-input] (same input, onChange path). Row criterion unaffected."
+  },
+  {
+   "id": "INFO-C299-02",
+   "origin": "A reviewer A-R299-REVIEW-1, premise confirmed by C",
+   "note": "NG9 (hydrateRoot l.397) is the first hydrateRoot in studio-narrow-gate-ui.test.tsx (NG9c l.428), so NG9's toEqual([]) holds today (mutants x/v/y/h/r2/w red); a hydrate test inserted above NG9 or shuffled order would make it vacuous. For B ruling; no failure reproduced. C observation: no acceptance row failed and no vacuous pass was reproduced. It is the same class as A-R298-REVIEW-6 ('one hydration per file has no guard'), which B ruled Low/deferred_low_polish in D-29z765 and routed to A-R298-ARCH-HYDRATE-HARNESS; C recommends B classify A-R299-REVIEW-1 there rather than as a new open Medium."
+  },
+  {
+   "id": "INFO-C298-01",
+   "origin": "environment",
+   "note": "/middle-east.mp3 net::ERR_ABORTED still logged on /studio-lab loads; pre-existing signal."
+  }
+ ],
+ "manifestPaths": [
+  "c-round-299/claims-after.txt",
+  "c-round-299/tsc.log",
+  "c-round-299/covering.log",
+  "c-round-299/covering.log.clean",
+  "c-round-299/mutants-summary.txt",
+  "c-round-299/mutant-*.log",
+  "c-round-299/mutant-w-client-only-muted.py",
+  "c-round-299/run-mutant.sh",
+  "c-round-299/jsdom-muted.json",
+  "c-round-299/curl-video-tags.txt",
+  "c-round-299/c299.mjs",
+  "c-round-299/browser.json",
+  "c-round-299/browser.log",
+  "c-round-299/shots/"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "abletonConformity": "not applicable (test-only round)"
+}

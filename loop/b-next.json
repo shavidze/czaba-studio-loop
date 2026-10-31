@@ -1,19 +1,18 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 298 (STUDIO-LINK-a3) C PASS: 9 rows, browserVerified/realVerified true; CLAIMS was not passed on K11 only (B's sketch.patch dropped by the loop .gitignore, C-R298-02). Gate 298 published ece19e3 on both remotes. C confirmed C-R298-01 (Medium): LH3's regex misses 'Extra attributes from the server', so GATE297-F1 is only partly closed, and the bug gate puts the fix before new scope. B's planning probe re-classified GATE297-S5: the server HTML carries muted=\"\", and jsdom (not Chromium) leaves .muted false, so the dock warning is a jsdom-only gap. The fix is test-only (helper applyBrowserParsedMutedState). A production suppressHydrationWarning was pre-run and rejected. B pre-ran the round on a scratch: 7 files/58 tests green, tsc rc 0, Biome clean; mutants x, v, y, h, r, r2, e, g and reorder red, i green; controls x and v at HEAD 20/20 green. Regression is not due until 2026-11-02; RETRO at 305. Not COMPLETE: most queued scope and every deferred Low remain. Not BLOCKED: nothing external is missing. Advisor available and consulted.",
- "nextTask": "Round 299: STUDIO-LINK-a4, test-only, baseline ece19e3 clean (frozen b-round-298-r299-tree-sha256.txt, 1168; claims b-round-298/claims-299.sh, after-sketch claims-299-after-sketch.txt). A (4 grants, byte-copies of B's sketches): studio-link-hydrate-ssr-ui.test.tsx (full 7-site regex, zero tolerance, muted helper, unmount before hydration); studio-link-hydrate-ui.test.tsx (unmount before hydration); studio-narrow-gate-ui.test.tsx (NG9: helper, full regex, zero tolerance); doc 220. C rows: CLAIMS, SOURCE-SCOPE, TYPECHECK, UNIT, UNIT-MUTANTS (with controls), UNIT-VACUITY, UNIT-CLEANUP, JSDOM-MUTED-PREMISE, B-DOCK-MUTED (both viewports), B-COLD-DEEPLINK (both viewports), G299-AUTH, DOC-220.",
+ "reason": "Round 299 (STUDIO-LINK-a4, test-only) C PASS: 12 rows, browserVerified/realVerified true (dock muted, cold deep link, auth at both viewports). Gate 299 published 61c37d8 on both remotes. C-R298-01, GATE297-F1, GATE297-S5, GATE298-S3, GATE298-S1, A-R298-REVIEW-5 closed. A-R299-REVIEW-1..4 (= gate-299 S1..S3) ruled Low (no reproduced failure, test-only, same class as A-R298-REVIEW-6) and routed to A-R298-ARCH-HYDRATE-HARNESS. No Critical/High/Medium open from round 299, so round 300 opens the next scope: STUDIO-LINK-b, Saba-approved 2026-10-31 (no AGREE note; reference + product-designer framing + rows in the task). B pre-ran the sketch on a 61c37d8 scratch: tsc rc 0, Biome clean, 21 new tests green, mutants m1-m10 red, 114-file covering set green except IM24 under concurrent load (passes alone 3/3 and in gate 299; signal), browser probe at both viewports. Regression not due until 2026-11-02; RETRO at 305. Not COMPLETE: most queued scope and every deferred Low remain. Not BLOCKED: nothing external is missing. Advisor available and consulted.",
+ "nextTask": "Round 300: STUDIO-LINK-b, baseline 61c37d8 clean (frozen b-round-299-r300-tree-sha256.txt, 1168; claims b-round-299/claims-300.sh, after-sketch claims-300-after-sketch.txt). A (9 grants, byte copies of B's sketches): studio-lab-links.ts (reverse map + product href), new ArrangementLibraryMenu.tsx (one <a role=menuitem target=_blank rel=noopener noreferrer> 'View in store'), ArrangementLibrary.tsx (right-click / Shift+F10 / ContextMenu on mapped options, select + refocus on every close), strings.ts (studioLibraryMenuStrings), shortcuts.ts (library-view-in-store row), shortcuts.test.ts, panel-radius-ui.test.tsx (PNR2 10th site), new studio-link-view-in-store-ui.test.tsx (VS1-VS8, 21 tests), doc 220 (stage 2, l.4 Completed (C round 300 PASS)). C rows: CLAIMS, SOURCE-SCOPE, TYPECHECK, UNIT, UNIT-MUTANTS, L50-FOCUS, DOC-220, browser B-MENU, B-NEWTAB, B-KBD, B-CLOSE, B-SPACE, B-UNMAPPED, B-PREVIEW-PARITY, B-ADD-INTACT, B-SHEET, B-SCREEN-BUDGET, B-JOURNEY (mock API), G300-AUTH at 1440x900 and 1280x720.",
  "remaining": [
-  "STUDIO-LINK-a4 (round 299: test-only, closes C-R298-01 Medium, GATE297-F1, GATE297-S5, GATE298-S3, GATE298-S1, A-R298-REVIEW-5)",
-  "STUDIO-LINK-b (round 300: View in store context menu + ? sheet row + gate-296 S4 first-load-only decision; design inputs in b-round-297/product-designer-studio-link-b.md)",
+  "STUDIO-LINK-b (round 300: View in store context menu on mapped library options + ? sheet row + reverse map + doc 220 stage 2/Completed)",
   "REGRESSION (due on/after 2026-11-02)",
   "NAME-AND-HINT",
-  "FRONTEND-ARCHITECT-CHECKPOINT request (after STUDIO-LINK-b / NAME-AND-HINT: GATE296-ARCH-ROUTE-DOM-FOCUS, library vs marker menu, A-R298-ARCH-HYDRATE-HARNESS + ROOT-RECON-GRID-HARNESS)",
+  "FRONTEND-ARCHITECT-CHECKPOINT request (bounded, b-round-299.md section 6, after round 300 gate: GATE296-ARCH-ROUTE-DOM-FOCUS, library vs marker menu, A-R298-ARCH-HYDRATE-HARNESS + ROOT-RECON-GRID-HARNESS)",
   "STEM-LANES (after STUDIO-PERFORMANCE, before SYS-1..3)",
   "SRW-21-PLAN (plan doc only)",
   "COPY-PD",
   "SR-BEHAVIOUR (SR-230-9, SR-260-5)",
   "STUDIO-LINK-DYNAMIC (later candidate, needs R2 CORS evidence)",
-  "SABA-Q-STUDIO-LINK (awaiting_user, non-blocking)",
+  "SABA-Q-STUDIO-LINK and SABA-Q-STUDIO-LINK-B (awaiting_user, non-blocking)",
   "PERF-3c",
   "PERF-COMMIT-RESCHEDULE",
   "PERF-4",
@@ -44,11 +43,11 @@
   "PHASE2B-SPOTTING",
   "STUDIO-AGENT-COMMANDS",
   "RECORDING-META-S1",
-  "deferred_low_polish (incl. A-R298-REVIEW-6, GATE298-S4-UNUSED-STUB-RETURN, C-R296-02, A-R296-REVIEW-6, GATE296-S1-PHONE-LINK, GATE296-S2-PREFETCH, GATE295-R1-LOAF-FALSE-ALARM, DOC218-POLISH, GATE294-R1/R2/R5, C-R291-01, GATE291-S1/S2, B-R290-LIB-SHAPE-SWITCH-FOCUS, B-R291-NARROW-PREFETCH, A-R292-REVIEW-L-*)",
+  "deferred_low_polish (incl. A-R299-REVIEW-1..4, A-R298-REVIEW-6, GATE298-S4-UNUSED-STUB-RETURN, C-R296-02, A-R296-REVIEW-6, GATE296-S1-PHONE-LINK, GATE296-S2-PREFETCH, GATE295-R1-LOAF-FALSE-ALARM, DOC218-POLISH, GATE294-R1/R2/R5, C-R291-01, GATE291-S1/S2, B-R290-LIB-SHAPE-SWITCH-FOCUS, B-R291-NARROW-PREFETCH, A-R292-REVIEW-L-*)",
   "parked Medium / Tech Lead manual items",
   "awaiting_user recommendations (ABL-R, DUX-R, SR candidates incl. SR-290-*, Tag Manager Q7/Q9-Q27, SABA-Q-FIXPD1B-NAMES, SABA-Q-LIB-SINGLE-RUN, SABA-Q-FIXPD1C-COPY, SABA-Q-FIXPD1C-ESCAPE)",
   "BACKEND-EVIDENCE-F7, BACKEND-EVIDENCE-F9 (backend-only rows)",
-  "architecture signals (A-R298-ARCH-HYDRATE-HARNESS, GATE296-ARCH-ROUTE-DOM-FOCUS, A-R288-ARCH-LEADING-SPANS, PD-FREE-HEADER, B-R286-UNUSED-PRICE-RENDERERS, A-R287-ARCH-ADAPTER-ZERO, A-R293-ARCH-SILENCE-ALL, A-R292-ARCH-DEFER-SOURCE-LOAD, LIB-RUNS-POLISH, GATE295-ARCH-PERF-RULES, R216-MEM-POLLS-HEADROOM)",
+  "architecture signals (A-R298-ARCH-HYDRATE-HARNESS (3x), B-R299-LIBRARY-MENU-DUPLICATION, GATE296-ARCH-ROUTE-DOM-FOCUS, A-R288-ARCH-LEADING-SPANS, PD-FREE-HEADER, B-R286-UNUSED-PRICE-RENDERERS, A-R287-ARCH-ADAPTER-ZERO, A-R293-ARCH-SILENCE-ALL, A-R292-ARCH-DEFER-SOURCE-LOAD, LIB-RUNS-POLISH, GATE295-ARCH-PERF-RULES, R216-MEM-POLLS-HEADROOM)",
   "SRW-21 (deferred_user)"
  ]
 }
