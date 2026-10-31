@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T17:00:13.123Z)
+# Active loop summary (2026-10-31T17:49:23.829Z)
 
-- backlog.json 2833 KB -> active view 389 KB
-- status: G_ROOT_GATE round 295
-- servers: `{"checkedUtc":"2026-10-31T16:38:55.0664910Z","round":295,"attempt":1,"store":200}`
-- last publication: eded57acb4cc2a69a8b68869f38c2a5761724064 (rounds 295-295)
-- last root gate: round 295 published - commit eded57acb4cc2a69a8b68869f38c2a5761724064 pushed
+- backlog.json 2841 KB -> active view 389 KB
+- status: G_ROOT_GATE round 296
+- servers: `{"checkedUtc":"2026-10-31T17:29:38.7449518Z","round":296,"attempt":1,"store":200}`
+- last publication: bc9d9a7d2b005b9c0ab87342b0b33329c909ae5d (rounds 296-296)
+- last root gate: round 296 published - commit bc9d9a7d2b005b9c0ab87342b0b33329c909ae5d pushed
 
 ## Current items: -
 
@@ -718,6 +718,7 @@
 - INFO-C294-DESK-BASELINE-DRIFT / info / adopted (D-29z741): from round 295 a desk-sameness row means 0 px against HEAD rendered in the same job (git archive, own port and cacheDir); stored b-round-291 baselines are reference only / stored cross-job desk baselines drift by +-1 LSB on anti-aliased corners (15/22 px); same-job HEAD control 0/0
 - INFO-C294-STORE-NO-MAIN-LANDMARK / info / routed (D-29z741): acceptance row for STORE-2b (layout restyle owns root/Store layout); not scheduled alone / / and /store render no <main>/role=main at HEAD (WCAG 1.3.1/2.4.1)
 - INFO-C294-TOKEN-POST-405-STACK / info / routed (D-29z741): risk line for SRW-21-PLAN (protected route review); loop does not edit the file / dev-server POST /api/studio-token 405 body includes a Remix stack trace (no token); protected file; production unverified
+- SABA-Q-STUDIO-LINK / info / awaiting_user (non-blocking; defaults applied) / STUDIO-LINK defaults to confirm: (1) product-sidebar text link under title/artist; (2) hide the link on products without a Studio source; (3
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

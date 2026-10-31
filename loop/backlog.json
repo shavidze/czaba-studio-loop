@@ -1,9 +1,9 @@
 {
  "version": 255,
- "updated": "2026-10-31 B round 295 -> 296 planning",
+ "updated": "2026-10-31T B round 296 -> 297 planning",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 296, D-29z746..D-29z751; STUDIO-LINK-a: product-page 'Try it in the Studio' + /studio-lab?preview= selection and focus; baseline eded57a, frozen b-round-295-r296-tree-sha256.txt 1163; claims b-round-295/claims-296.sh)",
+ "current_task": "current-task.md (round 297, D-29z752..D-29z757; STUDIO-LINK-a2: test-only fix-up of A-R296-REVIEW-1/2/5 - hydrate + reordered-collection wiring rows LH1-LH4; baseline bc9d9a7, frozen b-round-296-r297-tree-sha256.txt 1166; claims b-round-296/claims-297.sh)",
  "advisor_used_by_B": "round 293 -> 294 planning: advisor available and consulted (before writing)",
  "baseline": {
   "tsc_errors": 0,
@@ -11054,9 +11054,18 @@
    "task": "current-task.md",
    "decision": "D-29z746..D-29z751",
    "type": "STUDIO-LINK-a (user-visible, Store + Studio route): product-page link + /studio-lab?preview= deep link",
-   "status": "dispatched",
+   "status": "c_pass_published (D-29z752): C PASS (B-SCREEN-BUDGET threshold ruled B arithmetic), gate 296 published bc9d9a7 | dispatched",
    "note": "baseline eded57a clean; 10 grants (links module, provider prop, route, ProductSidebar, 4 route-test mock lines, new studio-link-ui test, doc 220); frozen b-round-295-r296-tree-sha256.txt (1163); claims b-round-295/claims-296.sh + after-sketch",
    "added": "2026-10-31 B round 295 -> 296 planning"
+  },
+  {
+   "round": 297,
+   "task": "current-task.md",
+   "decision": "D-29z752..D-29z757",
+   "type": "STUDIO-LINK-a2 test-only Medium fix-up (A-R296-REVIEW-1/2/5)",
+   "status": "dispatched",
+   "note": "baseline bc9d9a7 clean; 2 grants (new studio-link-hydrate-ui.test.tsx, doc 220 l.4 + Testing/TODO lines); frozen b-round-296-r297-tree-sha256.txt (1166); claims b-round-296/claims-297.sh + after-sketch",
+   "added": "2026-10-31 B round 296 -> 297 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -13552,27 +13561,34 @@
      "id": "STUDIO-LINK",
      "finding": "F1 interim",
      "what": "product page \"Try it in the Studio\" opens /studio-lab with that product's public preview selected; library public preview gets \"View in store\" (tooltip or context menu); Studio exit keeps \"← CZABA\"",
-     "status": "split (D-29z749): STUDIO-LINK-a round 296 (dispatched), STUDIO-LINK-b round 297; full scope kept | not_started"
+     "status": "in progress (D-29z752): STUDIO-LINK-a done round 296; round 297 = STUDIO-LINK-a2 test fix-up (Medium); STUDIO-LINK-b round 298 | split (D-29z749): STUDIO-LINK-a round 296 (dispatched), STUDIO-LINK-b round 297; full scope kept | not_started"
     },
     {
      "id": "STUDIO-LINK-a",
      "finding": "F1 interim (rec 2)",
      "what": "product sidebar 'Try it in the Studio' (mapped products only) -> /studio-lab?preview=<handle>; provider initialSelectedSourceId; route focuses the option once at first hydrated wide commit; no auto-add, no status",
-     "status": "dispatched (D-29z749/D-29z750): round 296, baseline eded57a; B sketch b-round-295/sketch-studio-link-a.diff (9 files, 89 tests green, 4 mutants red, real-browser journey probe)",
+     "status": "done (D-29z752): C round 296 PASS (15 rows passed, 1 failed: B-SCREEN-BUDGET failed only on B's own threshold -> C-R296-01 ruled), browserVerified/realVerified true (c-round-296.json); gate 296 published bc9d9a7 on both remotes | dispatched (D-29z749/D-29z750): round 296, baseline eded57a; B sketch b-round-295/sketch-studio-link-a.diff (9 files, 89 tests green, 4 mutants red, real-browser journey probe)",
      "added": "2026-10-31 B round 295 -> 296 planning"
+    },
+    {
+     "id": "STUDIO-LINK-a2",
+     "finding": "A-R296-REVIEW-1/2/5 (test gaps of STUDIO-LINK-a)",
+     "what": "test-only: new studio-link-hydrate-ui.test.tsx LH1-LH4 (reordered demo collection mock; SSR->hydrateRoot wide/narrow; later widening focuses only arrangement-exit) + doc 220 status/testing lines",
+     "status": "dispatched (D-29z753): round 297, baseline bc9d9a7; B sketch b-round-296/sketch-studio-link-hydrate-ui.test.tsx.txt (4/4 green, covering 6 files/58 green, mutants e and g red, f equivalent)",
+     "added": "2026-10-31 B round 296 -> 297 planning"
     },
     {
      "id": "STUDIO-LINK-b",
      "finding": "F1 interim (rec 3)",
      "what": "library option context menu (right-click, Shift+F10, ContextMenu key) with 'View in store' for mapped sources only, new tab (no project persistence), focus return named (L47), '?' sheet row; reverse map in studio-lab-links.ts",
-     "status": "queued (D-29z749): round 297 after STUDIO-LINK-a C PASS; needs reference + product-designer rows + L47/L50 focus sweep",
+     "status": "queued (D-29z753): round 298 (moved from 297 by the Medium test fix-up); also owns gate-296 S4 (?preview= change on a mounted route) as an explicit decision row | queued (D-29z749): round 297 after STUDIO-LINK-a C PASS; needs reference + product-designer rows + L47/L50 focus sweep",
      "added": "2026-10-31 B round 295 -> 296 planning"
     },
     {
      "id": "STUDIO-LINK-DYNAMIC",
      "finding": "F1 later candidate",
      "what": "load any product's audioPreviewUrl into /studio-lab (not only mapped demo sources)",
-     "status": "later_candidate (D-29z750): prerequisite R2 CORS confirmed for Web Audio decode in a real browser + backend-enabled evidence; not queued",
+     "status": "later_candidate (D-29z754): add prerequisite gate-296 S3 - CSS.escape the source id or focus by ref (GATE296-ARCH-ROUTE-DOM-FOCUS) before any non-constant id reaches the route selector | later_candidate (D-29z750): prerequisite R2 CORS confirmed for Web Audio decode in a real browser + backend-enabled evidence; not queued",
      "added": "2026-10-31 B round 295 -> 296 planning"
     },
     {
@@ -28326,9 +28342,41 @@
    "id": "SABA-Q-STUDIO-LINK",
    "severity": "info",
    "origin": "B + product-designer (round 296 planning)",
-   "title": "STUDIO-LINK defaults to confirm: (1) product-sidebar text link under title/artist; (2) hide the link on products without a Studio source; (3) round 297 'View in store' opens a new tab",
+   "title": "STUDIO-LINK defaults to confirm: (1) product-sidebar text link under title/artist; (2) hide the link on products without a Studio source; (3) round 297 'View in store' opens a new tab; (4, added D-29z754 from C-R296-02) should a mouse user who clicks the product link see a distinct landing cue when the deep-linked item is already the default selection? A ring after a pointer click would be a second, non-:focus-visible focus style (collides with SABA-B-4 one focus style); Chromium 143 has no focus({focusVisible:true})",
    "status": "awaiting_user (non-blocking; defaults applied)",
    "added": "2026-10-31 B round 295 -> 296 planning"
+  },
+  {
+   "id": "A-R296-REVIEW-1",
+   "severity": "medium",
+   "origin": "A code-reviewer round 296",
+   "title": "SSR -> hydrateRoot path of the ?preview= focus untested (LK5-LK7 use createRoot)",
+   "status": "in fix (D-29z753): round 297 LH3/LH4; C round 296 COLD row covered it in the real browser meanwhile",
+   "added": "2026-10-31 B round 296 -> 297 planning"
+  },
+  {
+   "id": "A-R296-REVIEW-2",
+   "severity": "medium",
+   "origin": "A code-reviewer + A mutant (e) round 296",
+   "title": "route prop wiring initialSelectedSourceId={previewSourceId} mutation-vacuous (demo-middle-east is sources[0])",
+   "status": "in fix (D-29z753): round 297 LH1 on a reordered demo collection; B sketch mutant e turns LH1+LH3 red",
+   "added": "2026-10-31 B round 296 -> 297 planning"
+  },
+  {
+   "id": "A-R296-REVIEW-5",
+   "severity": "low",
+   "origin": "A code-reviewer round 296",
+   "title": "LK7 cannot fail on the route's !isWide focus guard",
+   "status": "in fix (D-29z753): round 297 LH4 covers narrow hydrate + later widening (mutant g red). B's mutant f (guard removed) stays green on every path: the guard is unreachable because a narrow hydrated route unmounts the workspace before the effect runs -> recorded as an equivalent mutant, not a test gap",
+   "added": "2026-10-31 B round 296 -> 297 planning"
+  },
+  {
+   "id": "C-R296-01",
+   "severity": "low",
+   "origin": "C round 296 (origin B)",
+   "title": "product sidebar grows 37.59 px, above B's <= 32 px budget",
+   "status": "closed (D-29z754): B spec arithmetic (measured the 20 px link box, not the 25.59 px <p> line box + mt-3); budget corrected to the measured line box, the option C offered; the only growth is the justified line and nothing else moves (c-round-296/probe-a.json vs probe-head.json). STORE-4 re-measures when it restyles the sidebar",
+   "added": "2026-10-31 B round 296 -> 297 planning"
   }
  ],
  "tech_lead_notes": [
@@ -30659,6 +30707,11 @@
    "id": "GATE295-ARCH-PERF-RULES",
    "added": "2026-10-31 B round 295 -> 296 planning",
    "text": "gate-295 reviewer: keep loafScriptsProblem in perf/lib/report.ts (rule out of the spec, testable); revisit a harness-guards module only at >= 3 guards. Signal only, not scheduled (D-29z748)."
+  },
+  {
+   "id": "GATE296-ARCH-ROUTE-DOM-FOCUS",
+   "added": "2026-10-31 B round 296 -> 297 planning",
+   "text": "gate-296 reviewer signal 2 + A-R296-ARCH-DEEPLINK-HOOK: the route focuses library/exit elements by attribute selector; keep for now (one mapping, attributes pinned by LK/LH). Bounded proposal: provider/library initialFocusedSourceId via optionRefs, route stops reading the library DOM; also covers gate-296 S5 (collapsed library). Trigger: STUDIO-LINK-b adds a second URL-driven behaviour, or STUDIO-LINK-DYNAMIC. Not scheduled (D-29z754)."
   }
  ],
  "vitest_floor_round46": 1357,
@@ -36114,6 +36167,46 @@
    "repro": "PERF-1a on a fast machine; watch for harness.loaf-scripts",
    "fix": "split the problem message: 'no long frames at all' vs 'long frames but no script timings'",
    "added": "2026-10-31 B round 295 -> 296 planning"
+  },
+  {
+   "id": "C-R296-02",
+   "severity": "low",
+   "status": "deferred (D-29z754): question 4 of SABA-Q-STUDIO-LINK",
+   "origin": "gate reviewer finding 3 of A round 296, confirmed by C",
+   "title": "after a mouse click on 'Try it in the Studio' the landing option has focus but no visible ring (data-focus-source=pointer survives client navigation; native :focus-visible also false); the default selection is the same item, so the screen equals plain /studio-lab",
+   "evidence": "c-round-296/probe-a.json vp.*.journey.active; b-round-296/probe/fv.cjs (Chromium 143.0.7499.4: focus() and focus({focusVisible:true}) after a pointer interaction both give :focus-visible false)",
+   "repro": "fresh context, /products/middle-east, mouse-click the link, wait for Demo collection ready, read activeElement outline",
+   "added": "2026-10-31 B round 296 -> 297 planning"
+  },
+  {
+   "id": "A-R296-REVIEW-6",
+   "severity": "low",
+   "status": "deferred (D-29z754)",
+   "origin": "A code-reviewer round 296",
+   "title": "no StrictMode variant of the deep-link focus effect (ref persists across double effects; logic correct)",
+   "evidence": "a-round-296.md reviewer finding 6",
+   "repro": "wrap LK5 in <StrictMode>",
+   "added": "2026-10-31 B round 296 -> 297 planning"
+  },
+  {
+   "id": "GATE296-S1-PHONE-LINK",
+   "severity": "low",
+   "status": "deferred (D-29z754): STORE-4 owns the sidebar order ('Make it yours - open in Studio')",
+   "origin": "gate-296 reviewer suggestion 1",
+   "title": "on phones the product link opens the Studio narrow state; option: hidden min-[900px]:inline-flex, or keep (the narrow state has the preview player)",
+   "evidence": "gates/round-296/review.md suggestion 1",
+   "repro": "/products/middle-east at 390x844, tap 'Try it in the Studio'",
+   "added": "2026-10-31 B round 296 -> 297 planning"
+  },
+  {
+   "id": "GATE296-S2-PREFETCH",
+   "severity": "low",
+   "status": "deferred (D-29z754): candidate for the PERF route-weight work",
+   "origin": "gate-296 reviewer suggestion 2",
+   "title": "product link to /studio-lab has no prefetch=\"intent\"",
+   "evidence": "gates/round-296/review.md suggestion 2",
+   "repro": "hover the link, no route module request",
+   "added": "2026-10-31 B round 296 -> 297 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -40998,6 +41091,36 @@
    "id": "D-29z751",
    "date": "2026-10-31",
    "text": "Order after 296: REGRESSION when the planning date is on/after 2026-11-02 (regression-last 2026-10-30, round 258), else STUDIO-LINK-b (297) -> NAME-AND-HINT -> PERF-3c and the rest of STUDIO-PERFORMANCE -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction-decision.md exists: direction A) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase-2 entries (skip rule). SRW-21-PLAN parallel planning. RETRO at round 305. No frontend-architect checkpoint: STUDIO-LINK-a touches the context by one optional prop; request one at the PD-REVIEW stage boundary if ArrangementContext gains further route-driven props."
+  },
+  {
+   "id": "D-29z752",
+   "date": "2026-10-31",
+   "text": "Round 296 (STUDIO-LINK-a) C PASS: 15 rows passed, 1 failed, 0 blocked, B-SCREEN-BUDGET failed only on B's own <= 32 px threshold (C-R296-01, origin B); browserVerified/realVerified true (c-round-296.json); gate 296 published bc9d9a7 on both remotes (review 9/10, COMMIT OK). STUDIO-LINK-a done (both viewports, real audio + WAV export journey)."
+  },
+  {
+   "id": "D-29z753",
+   "date": "2026-10-31",
+   "text": "Bug gate (2026-10-23): A's reviewer Mediums A-R296-REVIEW-1 (SSR->hydrate untested) and A-R296-REVIEW-2 (route prop wiring vacuous, A mutant e) are open, so round 297 = STUDIO-LINK-a2, a test-only fix-up with A-R296-REVIEW-5 (three tightly related test gaps). STUDIO-LINK-b moves to round 298. B sketch on a bc9d9a7 scratch: LH1-LH4 green, covering 6 files/58 green, tsc rc 0, Biome clean; mutant e (prop removed) -> LH1+LH3 red, mutant g (settle ref never set) -> LH4 red, mutant f (!isWide removed) green = equivalent mutant (narrow hydrated route unmounts the workspace before the effect)."
+  },
+  {
+   "id": "D-29z754",
+   "date": "2026-10-31",
+   "text": "Rulings: C-R296-01 closed as B spec arithmetic (budget = measured 37.6 px <p> line box, C's own option); C-R296-02 -> deferred_low_polish + SABA-Q-STUDIO-LINK question 4 (probe: Chromium 143 gives :focus-visible false after a pointer interaction even with focus({focusVisible:true}); any fix is a second focus style vs SABA-B-4); A-R296-REVIEW-6 deferred Low; gate-296 S1 (phone link) and S2 (prefetch) deferred Low; S3 -> STUDIO-LINK-DYNAMIC prerequisite; S4 -> STUDIO-LINK-b decision row; S5 + Architecture note + A-R296-ARCH-DEEPLINK-HOOK -> signal GATE296-ARCH-ROUTE-DOM-FOCUS (keep)."
+  },
+  {
+   "id": "D-29z755",
+   "date": "2026-10-31",
+   "text": "Round 297 is test-only: no reference-first, product-designer or screen-budget section (policy exemption for test-only rounds). C still runs a small real-browser row (cold direct load of /studio-lab?preview=middle-east at both viewports, equal to round 296) and G297-AUTH, so browserVerified stays meaningful."
+  },
+  {
+   "id": "D-29z756",
+   "date": "2026-10-31",
+   "text": "No root-pre-push-review / publication-checkpoint findings newer than round 296 (both files date from 2026-10-07 content). user-review has no new decision file since round 295 planning. Regression not due (regression-last 2026-10-30; due on/after 2026-11-02); RETRO at round 305."
+  },
+  {
+   "id": "D-29z757",
+   "date": "2026-10-31",
+   "text": "Order after 297: REGRESSION when the planning date is on/after 2026-11-02, else STUDIO-LINK-b (298) -> NAME-AND-HINT -> PERF-3c and the rest of STUDIO-PERFORMANCE -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase-2 entries (skip rule). SRW-21-PLAN parallel planning. Frontend-architect checkpoint: not yet; request it at the PD-REVIEW boundary (after STUDIO-LINK-b / NAME-AND-HINT) with GATE296-ARCH-ROUTE-DOM-FOCUS and A-R296-ARCH-DEEPLINK-HOOK as inputs."
   }
  ],
  "retro_candidates": [

@@ -1,0 +1,107 @@
+{
+  "round": 296,
+  "task": "STUDIO-LINK-a",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-31T17:29:38.7449518Z",
+    "round": 296,
+    "attempt": 1,
+    "store": 200
+  },
+  "passed": [
+    "CLAIMS",
+    "SOURCE-SCOPE",
+    "TYPECHECK",
+    "UNIT",
+    "UNIT-MUTANTS",
+    "B-LINK",
+    "B-LINK-KEYBOARD",
+    "B-LANDING",
+    "B-ADD-PLAY",
+    "B-JOURNEY",
+    "B-DEEP-NEGATIVE",
+    "B-NARROW",
+    "B-PAGE-ERRORS",
+    "G296-AUTH",
+    "DOC-220"
+  ],
+  "failed": ["B-SCREEN-BUDGET"],
+  "blocked": [],
+  "gate": ["gate (full suite, build, Biome, verify, test:e2e:smoke)"],
+  "rows": {
+    "CLAIMS": "PASS - c-round-296/claims-after.txt vs b-round-295/claims-296-after-sketch.txt: diff only K1-K3 lines added (K2 status lines 10, K3 frozen 1163 rc 1) and K14 0->1; K4-K13, K16 identical",
+    "SOURCE-SCOPE": "PASS - git status 10 entries = the 10 section-4 paths; sha256sum -c fails on exactly the 7 modified paths; protected files OK; patch -R --dry-run of B's sketch applies cleanly (9 code/test files = sketch hunks)",
+    "TYPECHECK": "PASS - c-round-296/tsc.log rc 0",
+    "UNIT": "PASS - c-round-296/covering.log: 9 files, 89 tests passed; LK1-LK7 present by name; slowest LK3 749 ms of 15 s (5%)",
+    "UNIT-MUTANTS": "PASS - C's own scratch /tmp/c296-mut: (a) LK5 red, (b) LK4 second+third red, (c) LK1 __proto__/constructor/toString red, (d) LK3 red; each file restored and cmp-equal (mutant-*.log)",
+    "B-LINK": "PASS - both viewports: middle-east 1 link 'Try it in the Studio', href /studio-lab?preview=middle-east, target null, color rgb(163,155,142) == 'by CZABA' color; harbour-lights 0, door-slams 0 (real product page rendered); main-area button names/order identical to HEAD (9 buttons)",
+    "B-LINK-KEYBOARD": "PASS - Tab x11 reaches the link; :focus-visible true, outline 1px solid brass @0.8, offset 2px; Enter -> /studio-lab?preview=middle-east, landing focus on demo-middle-east option with ring",
+    "B-LANDING": "PASS - mouse click: ready status waited; activeElement role=option data-source-id=demo-middle-east aria-selected=true tabindex=0; option box inside library list box and viewport; 0 [data-clip-id]; status equals HEAD plain /studio-lab status (both viewports). Note C-R296-02: no visible focus ring after mouse click",
+    "B-ADD-PLAY": "PASS - Enter: 1 clip on track 'music', status '“Middle East — public preview” added to the Music track at 00:00.000.'; Ctrl+Z -> 0 clips; Ctrl+Shift+Z -> 1 clip; Space: 00:00.000 -> 00:01.471 at 1502 ms; analyser tap on destination RMS 0.017-0.100 while playing, 0 after stop",
+    "B-JOURNEY": "PASS - screenshots a-journey-1..6 per viewport; Export WAV: czaba-studio-lab.wav 29,189,420 bytes, RIFF/WAVE ok, RIFF and data sizes consistent, PCM 24-bit 2ch 48 kHz, 101.352 s, RMS first 2 s 0.0744, 0 non-finite; arrangement-exit 'CZABA' href / -> navigated to /",
+    "B-DEEP-NEGATIVE": "PASS - plain, ?preview=harbour-lights, ?preview=__proto__, ?preview= at both viewports: 0 page errors, activeElement BODY, selected demo-middle-east, status equals plain, 0 clips",
+    "B-NARROW": "PASS - 860x700 ?preview=middle-east: narrow text shown, 0 page errors, focus BODY (no option); widen to 1280x720 -> focus arrangement-exit, identical to HEAD",
+    "B-PAGE-ERRORS": "PASS - 0 pageerror and 0 console error/warning in every A row and every HEAD comparison row (warm-up loads excluded per L38)",
+    "B-SCREEN-BUDGET": "FAIL (threshold) - only new persistent line on product page is 'Try it in the Studio' and /studio-lab line count equals HEAD (146/146 at 1440, 139/139 at 1280; whole-page count), but the sidebar grows 37.59 px (699.78 vs 662.19) and 3 leaves below move 38 px, above the row's <= 32 px; see C-R296-01",
+    "G296-AUTH": "PASS - fresh context 0 cookies: /studio-lab workspace + 'Demo collection — no sign-in required', auth_user null; /studio/middle-east 'Sign in required', 0 audio[src]; /api/studio-token GET 401, no token in body",
+    "DOC-220": "PASS - exists; l.4 exact; 7 TEMPLATE headings in order; all 10 files listed; cited ids D-29z749, D-29z750, NAME-AND-HINT, PD-REVIEW-2026-10-31, STUDIO-LINK-DYNAMIC, STUDIO-LINK-b found in backlog.json"
+  },
+  "bugs": [
+    {
+      "id": "C-R296-01",
+      "severity": "low",
+      "origin": "B",
+      "steps": [
+        "Start mock API on :5199; open /products/middle-east at 1440x900 and 1280x720 on A's tree and on HEAD (scratch :5297)",
+        "Measure the sidebar (.space-y-6 parent of the 'by CZABA' link) height and the y of the blocks below"
+      ],
+      "expected": "B-SCREEN-BUDGET: sidebar grows by the new line's box, <= 32 px (20 px link + mt-3 12 px)",
+      "actual": "Sidebar grows 37.59 px (662.19 -> 699.78) at both viewports; BPM/Key block and tags move 37.59 px. The <p class='mt-3'> wrapper is 25.59 px tall (inherited base line-height), not the 20 px inline-flex link box B measured. Nothing else changes; the extra 5.6 px is B's sketch arithmetic, A applied the sketch byte-for-byte (D-29z747 precedent). Options for B: leading-5/leading-none on the <p>, or accept 38 px as the budget.",
+      "evidence": "c-round-296/probe-a.json + probe-head.json (vp.*.me.sidebarBox, sideKids); shots/a-product-middle-east-*.png vs shots/head-product-middle-east-*.png"
+    },
+    {
+      "id": "C-R296-02",
+      "severity": "low",
+      "origin": "gate reviewer finding 3 (A round 296), confirmed by C",
+      "steps": [
+        "Fresh context, /products/middle-east, mouse-click 'Try it in the Studio'",
+        "Wait for 'Demo collection ready'; read document.activeElement and its computed outline"
+      ],
+      "expected": "The promised 'selected and focused' landing is perceivable to a mouse user",
+      "actual": "Focus is on the demo-middle-east option, but html[data-focus-source=pointer] survives the client navigation: :focus-visible false, outline-style none. demo-middle-east is also the default selection, so a mouse user sees exactly the same screen as plain /studio-lab. Keyboard Enter and cold direct load do show the ring. Not an acceptance row; B decides.",
+      "evidence": "c-round-296/probe-a.json vp.*.journey.active vs vp.*.kb.landingActive and vp.*.cold.active; shots/a-journey-2-landing-*.png vs shots/a-kb-landing-*.png"
+    }
+  ],
+  "passThroughOpen": [
+    {"id": "A-R296-REVIEW-1", "severity": "medium", "origin": "A code-reviewer", "note": "SSR->hydrateRoot path has no unit test; C's COLD row covers it in the real browser (option focused, aria-selected, 0 errors/warnings, both viewports)"},
+    {"id": "A-R296-REVIEW-2", "severity": "medium", "origin": "A code-reviewer + A mutant (e)", "note": "removing the route's initialSelectedSourceId prop leaves all LK green (demo-middle-east is sources[0]); C did not re-run mutant (e); test-only follow-up for B"},
+    {"id": "A-R296-REVIEW-5-6", "severity": "low", "origin": "A code-reviewer", "note": "LK7 cannot fail on !isWide in client render; no StrictMode variant"}
+  ],
+  "ableton": {"status": "not applicable", "note": "store-to-Studio hand-off; library select and Enter-to-add unchanged"},
+  "manifestPaths": [
+    "c-round-296.md",
+    "c-round-296.json",
+    "c-round-296/c296.mjs",
+    "c-round-296/auth.mjs",
+    "c-round-296/bundle.mjs",
+    "c-round-296/probe-a.json",
+    "c-round-296/probe-head.json",
+    "c-round-296/auth.json",
+    "c-round-296/bundle.json",
+    "c-round-296/claims-after.txt",
+    "c-round-296/tsc.log",
+    "c-round-296/covering.log",
+    "c-round-296/mutant-a.log",
+    "c-round-296/mutant-b.log",
+    "c-round-296/mutant-c.log",
+    "c-round-296/mutant-d.log",
+    "c-round-296/wav/journey-a-1440x900.wav",
+    "c-round-296/wav/journey-a-1280x720.wav",
+    "c-round-296/shots/"
+  ],
+  "missingPaths": [],
+  "countMismatches": [],
+  "claimCheckMinutes": 2
+}
