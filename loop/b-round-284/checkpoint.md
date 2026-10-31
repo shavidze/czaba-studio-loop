@@ -1,0 +1,19 @@
+# B round 284 -> 285 planning checkpoint
+- [x] tasks/round-284.md archived (copy of current-task.md); backups of backlog/feature-status/b-next/lessons in b-round-284/
+- [ ] backlog update from C-284 (PERF-3a done; 2 Lows -> deferred_low_polish)
+- [ ] HEAD measurements for PERF-3b (idle commits with/without tempo, ruler nodes)
+- [ ] sketch + sweeps + covering tests
+- [ ] consults (performance-optimizer, tech-lead)
+- [ ] current-task.md, b-round-284.md, b-next.json, feature-status.md
+- [x] HEAD probes (probe-results/head-{in,out,follow,follow-bpm,jump}.json): ruler 6143 elems @40px/s, +6142 on key 5; follow/jump 0 churn
+- [x] consults done (tech-lead: option (a) helpers in view.ts, optional props; perf-optimizer: index range, cap fallback -> B ruled full-render fallback)
+- [x] sketch in /tmp/b284/sketch (view.ts, ArrangementRuler.tsx, ArrangementTempoRow.tsx, StudioWorkspace.tsx, view.test.ts RW1-3, tempo-window-ui SR1-5); 20 consumer files 460 pass; mutants HEADRULER,W1..W6 red (mutants.txt)
+- [ ] sketch prod build + browser HEAD vs sketch (zoom nodes, shots, follow page flip, jump)
+- [x] backlog updated (b-round-284/backlog-update.py, D-29z681..689)
+- [x] feature-status.md updated
+- [x] B found and fixed in the sketch a 1-frame painted gap on Follow page flips (flip-probe post-frame check; also pre-existing for the bars ruler with a tempo): notifyTimelineScroll() after the Follow writer sets scrollLeft (StudioWorkspace); SR6 + mutant W7
+- [x] final sketch frozen: sketch.diff + sketch-sha256.txt (6 files); 69 covering files / 1261 tests; tsc 0; Biome clean; mutants HEADRULER, W1..W7 red; browser final-*.json both viewports; servers stopped (5173 untouched)
+- [x] claims-285.sh + claims-285-output.txt (archive differs only at K1 '(archive)')
+- [ ] write current-task.md, b-round-284.md, b-next.json
+- [x] current-task.md, b-round-284.md, b-next.json written
+- [x] advisor completion fixes applied (bars gap inferred, flips >= 3, doc 212 l.17/l.101 granted, W4 dead line removed, advisor count 2). DONE.

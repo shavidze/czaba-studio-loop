@@ -1,0 +1,62 @@
+const fs = require('fs');
+const dir = '/home/runner/czaba-project/tmp/studio-real-loop';
+const env = JSON.parse(fs.readFileSync(`${dir}/env-status.json`, 'utf8'));
+const j = {
+  round: 284,
+  taskStatus: 'PASS',
+  browserVerified: true,
+  realVerified: true,
+  envStatus: env,
+  bugs: [
+    {
+      id: 'A-R284-REVIEW-NEG-LOOP',
+      severity: 'low',
+      steps: [
+        'Create an ESM script that imports waveformPeakColumns from store app/lib/arrangement/peaks.ts (A tree) and calls waveformPeakColumns(-12, -40)',
+        'Run it with: timeout 10 node --experimental-strip-types neg.mjs',
+      ],
+      expected: 'returns 0 for a non-positive duration or zoom, like (12,0), (-12,40) and (12,-40) do',
+      actual:
+        'never returns; timeout exits rc 124 (pixelsPerBucket < 0, so bucketsPerColumn*4*ppb <= 1 holds forever). Unreachable in the app: the only caller is ArrangementClip.tsx:366, clampTimelineZoom keeps px/s >= 0.5, and durations are positive. The sketch file is byte-locked; deferred_low_polish. Suggested fix: guard !(pxPerSecond > 0) || !(duration > 0) -> 0, plus a ZQ2 row [-12, -40, 0]',
+      evidence: 'c-round-284/neg-loop.txt',
+    },
+    {
+      id: 'A-R284-REVIEW-ZQ3-VACUITY',
+      severity: 'low',
+      steps: ['Read app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx, ZQ3 at l.1054 and l.1068'],
+      expected: 'ZQ3 asserts that the polyline points exist before it compares them across zoom steps',
+      actual:
+        "before = svg.querySelector('polyline')?.getAttribute('points') may be undefined, and toBe(before) would then pass vacuously. The other asserts (viewBox, node identity, 0 mutation records) make a miss unlikely. Info-level test hardening: add expect(before).toBeTruthy(). deferred_low_polish",
+      evidence: 'clip-envelope-ui.test.tsx:1054,1068 (read by C)',
+    },
+  ],
+  passed: [
+    'CLAIMS',
+    'SOURCE-SCOPE',
+    'TYPECHECK',
+    'UNIT',
+    'UNIT-MUTANTS',
+    'ZOOM-PATH-IN',
+    'ZOOM-PATH-OUT',
+    'ZOOM-ONE-COMMIT',
+    'WAVE-PIXELS',
+    'ENVELOPE-ZOOM',
+    'PERF-RUN',
+    'DOC-212',
+    'G284-AUTH',
+  ],
+  record: [
+    'ZOOM-TIMING (trend only; the PERF-3 exit target, p95 < 50 ms, is not met yet: the ruler keys measure 104-128 ms, which is PERF-3b scope)',
+  ],
+  gate: ['full vitest suite', 'build', 'Biome/lint', 'npm run verify', 'test:e2e:smoke'],
+  ableton: 'does not apply (pure performance round)',
+  blocked: [
+    'G284-AUTH sub-check: the real backend rejection (401/403) of a forged bearer cannot be checked - backend unavailable in cloud (the route returns 500, not 200, and no token, so the criterion as written holds)',
+  ],
+  notesForB: [
+    'The task §2.1 prose gives the band edges as [6.25, 25], which is imprecise; the code, ZQ2 and doc 212 agree on (6.25, 25] and (1.5625, 6.25]',
+    'Export and audio output were not re-measured: this round does not touch them; the regression round due on or after 2026-11-02 covers them',
+  ],
+};
+fs.writeFileSync(`${dir}/c-round-284.json`, JSON.stringify(j, null, 1));
+console.log(j.taskStatus, j.browserVerified, j.passed.length, j.bugs.length, JSON.stringify(j.envStatus));

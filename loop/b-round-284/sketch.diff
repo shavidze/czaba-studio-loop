@@ -1,0 +1,588 @@
+diff --git a/app/components/arrangement/ArrangementRuler.tsx b/app/components/arrangement/ArrangementRuler.tsx
+index be6a5ba..61df1ee 100644
+--- a/app/components/arrangement/ArrangementRuler.tsx
++++ b/app/components/arrangement/ArrangementRuler.tsx
+@@ -6,6 +6,7 @@ import {
+   useCallback,
+   useEffect,
+   useRef,
++  useSyncExternalStore,
+ } from 'react';
+ import {
+   formatArrangementTime,
+@@ -16,10 +17,15 @@ import { useRulerNavigation } from '~/hooks/useRulerNavigation';
+ import { resolveGridTimeWithTargets } from '~/lib/arrangement/grid';
+ import { studioViewStrings } from '~/lib/arrangement/strings';
+ import {
++  getServerTimelinePageKey,
++  parseTimelinePageKey,
+   RULER_TICK_STEPS_SECONDS,
++  readTimelinePage,
+   rulerTickMarks,
+   rulerTickStep,
+   type TimelineView,
++  timelinePageKey,
++  timelinePageWindow,
+ } from '~/lib/arrangement/view';
+ import { watchUncapturedPointerGesture } from './ArrangementClip';
+ 
+@@ -30,6 +36,14 @@ function noSnapMarkerTimes(): readonly number[] {
+   return NO_SNAP_MARKER_TIMES;
+ }
+ 
++function noTimelineViewportPx(): number {
++  return 0;
++}
++
++function noTimelineScrollSubscription(): () => void {
++  return () => {};
++}
++
+ interface ArrangementRulerProps {
+   seconds: number;
+   pxPerSecond: number;
+@@ -44,6 +58,8 @@ interface ArrangementRulerProps {
+   snapSeconds?: number | null;
+   gridSeconds?: number;
+   getSnapMarkerTimes?: () => readonly number[];
++  getTimelineViewportPx?: () => number;
++  subscribeTimelineScroll?: (listener: () => void) => () => void;
+ }
+ 
+ interface ArrangementRulerPlayheadProps extends ArrangementRulerProps {
+@@ -230,17 +246,27 @@ function ArrangementRulerPlayhead({
+ function ArrangementRulerTicksInner({
+   seconds,
+   pxPerSecond,
++  fromPx,
++  toPx,
+ }: {
+   seconds: number;
+   pxPerSecond: number;
++  fromPx: number | null;
++  toPx: number | null;
+ }) {
+   return (
+     <>
+-      {rulerTickMarks(seconds, pxPerSecond).map((mark) => (
++      {rulerTickMarks(
++        seconds,
++        pxPerSecond,
++        fromPx === null || toPx === null ? undefined : { fromPx, toPx },
++      ).map((mark) => (
+         <div
+           key={mark.time}
+           className="pointer-events-none absolute top-0 bottom-0 border-l border-outline"
+           style={{ left: mark.time * pxPerSecond }}
++          data-testid="arrangement-ruler-tick"
++          data-time={String(Math.round(mark.time * 1e6) / 1e6)}
+         >
+           {mark.label === null ? null : (
+             <span className="absolute top-1 left-1 whitespace-nowrap font-mono text-xs tabular-nums text-muted">
+@@ -268,8 +294,19 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+     snapSeconds = null,
+     gridSeconds,
+     getSnapMarkerTimes = noSnapMarkerTimes,
++    getTimelineViewportPx = noTimelineViewportPx,
++    subscribeTimelineScroll = noTimelineScrollSubscription,
+   } = props;
+   const rulerRef = useRef<HTMLDivElement>(null);
++  const getRulerPageKey = useCallback(
++    () => timelinePageKey(readTimelinePage(getTimelineView, getTimelineViewportPx)),
++    [getTimelineView, getTimelineViewportPx],
++  );
++  const rulerWindow = timelinePageWindow(
++    parseTimelinePageKey(
++      useSyncExternalStore(subscribeTimelineScroll, getRulerPageKey, getServerTimelinePageKey),
++    ),
++  );
+   const step = rulerTickStep(pxPerSecond);
+   const fractionDigits = step < RULER_TICK_STEPS_SECONDS[1] ? 1 : 0;
+   const navigation = useRulerNavigation({
+@@ -307,7 +344,12 @@ export function ArrangementRuler(props: ArrangementRulerProps) {
+       data-testid="arrangement-ruler"
+       data-tick-step={step.toFixed(fractionDigits)}
+     >
+-      <ArrangementRulerTicks seconds={seconds} pxPerSecond={pxPerSecond} />
++      <ArrangementRulerTicks
++        seconds={seconds}
++        pxPerSecond={pxPerSecond}
++        fromPx={rulerWindow === undefined ? null : rulerWindow.fromPx}
++        toPx={rulerWindow === undefined ? null : rulerWindow.toPx}
++      />
+       <ArrangementRulerPlayhead {...props} rulerRef={rulerRef} />
+     </div>
+   );
+diff --git a/app/components/arrangement/ArrangementTempoRow.tsx b/app/components/arrangement/ArrangementTempoRow.tsx
+index acd4756..afa5e94 100644
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -22,7 +22,14 @@ import {
+   parseTempoBpm,
+   TEMPO_BEATS_PER_BAR,
+ } from '~/lib/arrangement/tempo';
+-import type { TimelineView } from '~/lib/arrangement/view';
++import {
++  getServerTimelinePageKey,
++  parseTimelinePageKey,
++  readTimelinePage,
++  type TimelineView,
++  timelinePageKey,
++  timelinePageWindow,
++} from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from './ArrangementLane';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
+@@ -64,41 +71,6 @@ interface ArrangementBarsRulerProps {
+   gestures: BarsRulerGestures;
+ }
+ 
+-interface BarsRulerPage {
+-  page: number;
+-  viewportPx: number;
+-}
+-
+-function readBarsRulerPage(
+-  getTimelineView: () => TimelineView,
+-  getTimelineViewportPx: () => number,
+-): BarsRulerPage | null {
+-  const viewportPx = getTimelineViewportPx();
+-  if (!(viewportPx > 0)) {
+-    return null;
+-  }
+-  return {
+-    page: Math.floor(Math.max(0, getTimelineView().scrollLeft) / viewportPx),
+-    viewportPx,
+-  };
+-}
+-
+-function barsRulerPageKey(rulerPage: BarsRulerPage | null): string {
+-  return rulerPage === null ? '' : `${rulerPage.page}:${rulerPage.viewportPx}`;
+-}
+-
+-function parseBarsRulerPageKey(key: string): BarsRulerPage | null {
+-  const [pageText, viewportText] = key.split(':');
+-  if (viewportText === undefined) {
+-    return null;
+-  }
+-  return { page: Number(pageText), viewportPx: Number(viewportText) };
+-}
+-
+-function getServerBarsRulerPageKey(): string {
+-  return '';
+-}
+-
+ function ArrangementBarsRulerInner({
+   seconds,
+   pxPerSecond,
+@@ -232,11 +204,13 @@ export function ArrangementTempoRow({
+   const hasTempo = tempoBpm !== null;
+   const getBarsRulerPageKey = useCallback(
+     () =>
+-      hasTempo ? barsRulerPageKey(readBarsRulerPage(getTimelineView, getTimelineViewportPx)) : '',
++      hasTempo ? timelinePageKey(readTimelinePage(getTimelineView, getTimelineViewportPx)) : '',
+     [hasTempo, getTimelineView, getTimelineViewportPx],
+   );
+-  const rulerPage = parseBarsRulerPageKey(
+-    useSyncExternalStore(subscribeTimelineScroll, getBarsRulerPageKey, getServerBarsRulerPageKey),
++  const rulerWindow = timelinePageWindow(
++    parseTimelinePageKey(
++      useSyncExternalStore(subscribeTimelineScroll, getBarsRulerPageKey, getServerTimelinePageKey),
++    ),
+   );
+ 
+   const commitTempoDraft = (text: string) => {
+@@ -333,8 +307,8 @@ export function ArrangementTempoRow({
+         seconds={seconds}
+         pxPerSecond={pxPerSecond}
+         bpm={tempoBpm}
+-        fromPx={rulerPage === null ? null : (rulerPage.page - 1) * rulerPage.viewportPx}
+-        toPx={rulerPage === null ? null : (rulerPage.page + 2) * rulerPage.viewportPx}
++        fromPx={rulerWindow === undefined ? null : rulerWindow.fromPx}
++        toPx={rulerWindow === undefined ? null : rulerWindow.toPx}
+         getTimelineView={getTimelineView}
+         gestures={rulerGestures}
+       />
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 524aa4f..cc166dd 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -1977,8 +1977,9 @@ export function StudioWorkspace() {
+         scroller.scrollLeft = target;
+         lastScrollLeftRef.current = target;
+         autoScrollLeftRef.current = target;
++        notifyTimelineScroll();
+       }),
+-    [positionStore],
++    [notifyTimelineScroll, positionStore],
+   );
+ 
+   useEffect(() => {
+@@ -2999,6 +3000,8 @@ export function StudioWorkspace() {
+                     snapSeconds={activeSnapSeconds}
+                     gridSeconds={snapGridSeconds}
+                     getSnapMarkerTimes={getRulerSnapMarkerTimes}
++                    getTimelineViewportPx={getTimelineViewportPx}
++                    subscribeTimelineScroll={subscribeTimelineScroll}
+                   />
+                 </div>
+                 <ArrangementTempoRow
+diff --git a/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx b/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx
+index 98a8f9f..8f3a3f2 100644
+--- a/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx
+@@ -9,6 +9,7 @@ import {
+   useArrangementPositionStore,
+ } from '~/contexts/ArrangementContext';
+ import type { BarsRulerMark, BarsRulerWindow } from '~/lib/arrangement/tempo';
++import { rulerTickMarks, type TimelinePxWindow } from '~/lib/arrangement/view';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+@@ -521,3 +522,128 @@ describe('SRW-15 viewport-windowed bars ruler strip (D-29z35)', { timeout: 15_00
+     expect(domMarks(view)).toEqual(before);
+   });
+ });
++
++function secondsTicks(view: WindowView) {
++  return Array.from(
++    view.container.querySelectorAll<HTMLElement>('[data-testid="arrangement-ruler-tick"]'),
++  ).map((tick) => ({ time: tick.dataset.time, text: tick.textContent }));
++}
++
++function asTicks(seconds: number, pxPerSecond: number, rulerWindow?: TimelinePxWindow) {
++  return rulerTickMarks(seconds, pxPerSecond, rulerWindow).map((mark) => ({
++    time: String(Math.round(mark.time * 1e6) / 1e6),
++    text: mark.label ?? '',
++  }));
++}
++
++function secondsRulerSeconds(view: WindowView, pxPerSecond: number): number {
++  return Math.round(parseFloat(view.getByTestId('arrangement-ruler').style.width) / pxPerSecond);
++}
++
++function expectTicksCover(
++  view: WindowView,
++  seconds: number,
++  px: number,
++  visible: TimelinePxWindow,
++) {
++  const expected = asTicks(seconds, px, visible);
++  expect(expected.length).toBeGreaterThan(0);
++  const present = new Set(secondsTicks(view).map((tick) => `${tick.time}|${tick.text}`));
++  expect(expected.filter((tick) => !present.has(`${tick.time}|${tick.text}`))).toEqual([]);
++}
++
++describe('PERF-3b viewport-windowed seconds ruler (D-29z683)', { timeout: 15_000 }, () => {
++  it('SR1 an unmeasured viewport renders every tick of the seconds ruler', async () => {
++    layout.scrollerWidth = 0;
++    const { view } = await mountWindowWorkspace(320);
++    const seconds = secondsRulerSeconds(view, 320);
++    expect(seconds).toBe(133);
++    const full = asTicks(seconds, 320);
++    expect(full).toHaveLength(266);
++    expect(secondsTicks(view)).toEqual(full);
++  });
++
++  it('SR2 a measured viewport renders only the three-viewport window, labels unchanged', async () => {
++    const { view } = await mountWindowWorkspace(320);
++    const seconds = secondsRulerSeconds(view, 320);
++    const pageZero = windowFor(0, VIEWPORT_PX);
++    const ticks = secondsTicks(view);
++    expect(ticks).toEqual(asTicks(seconds, 320, pageZero));
++    expect(ticks).toHaveLength(16);
++    expect(ticks.length).toBeLessThan(asTicks(seconds, 320).length);
++    expectTicksCover(view, seconds, 320, { fromPx: 0, toPx: VIEWPORT_PX });
++  });
++
++  it('SR3 scrolling inside a page renders nothing; the next page moves the window once', async () => {
++    const { view } = await mountWindowWorkspace(320);
++    const seconds = secondsRulerSeconds(view, 320);
++    scrollTo(view, 6090);
++    expect(secondsTicks(view)).toEqual(asTicks(seconds, 320, windowFor(5, VIEWPORT_PX)));
++    const tick = view.container.querySelector('[data-testid="arrangement-ruler-tick"]');
++    renderLog.counts.clear();
++    scrollTo(view, 6500);
++    scrollTo(view, 7200);
++    expect(rendersOf('ArrangementRuler')).toBe(0);
++    expect(rendersOf('ArrangementRulerTicksInner')).toBe(0);
++    expect(view.container.querySelector('[data-testid="arrangement-ruler-tick"]')).toBe(tick);
++    scrollTo(view, 7300);
++    expect(rendersOf('ArrangementRulerTicksInner')).toBe(1);
++    expect(secondsTicks(view)).toEqual(asTicks(seconds, 320, windowFor(6, VIEWPORT_PX)));
++    expectTicksCover(view, seconds, 320, { fromPx: 7300, toPx: 7300 + VIEWPORT_PX });
++  });
++
++  it('SR4 the first render after a keyboard zoom already uses the new view', async () => {
++    const { api, view } = await mountWindowWorkspace(40);
++    act(() => live(api).seekTo(40));
++    scrollTo(view, 1000);
++    renderLog.counts.clear();
++    fireEvent.keyDown(document.body, { key: '=', code: 'Equal' });
++    const zoomed = live(api).pxPerSecond;
++    expect(zoomed).toBeCloseTo(50, 9);
++    const scrollLeft = scrollerOf(view).scrollLeft;
++    expect(Math.floor(scrollLeft / VIEWPORT_PX)).toBe(1);
++    expect(rendersOf('ArrangementRulerTicksInner')).toBe(1);
++    const seconds = secondsRulerSeconds(view, zoomed);
++    expect(secondsTicks(view)).toEqual(asTicks(seconds, zoomed, windowFor(1, VIEWPORT_PX)));
++    expectTicksCover(view, seconds, zoomed, { fromPx: scrollLeft, toPx: scrollLeft + VIEWPORT_PX });
++  });
++
++  it('SR6 a Follow page flip moves both ruler windows before any scroll event', async () => {
++    const { api, store, view } = await mountWindowWorkspace(320);
++    commitTempo(view, '999');
++    const seconds = secondsRulerSeconds(view, 320);
++    const scroller = scrollerOf(view);
++    const onScroll = vi.fn();
++    scroller.addEventListener('scroll', onScroll);
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    act(() => store.current?.setPosition(12));
++    const left = scroller.scrollLeft;
++    expect(left).toBeGreaterThan(VIEWPORT_PX);
++    expect(onScroll).not.toHaveBeenCalled();
++    const page = Math.floor(left / VIEWPORT_PX);
++    expect(secondsTicks(view)).toEqual(asTicks(seconds, 320, windowFor(page, VIEWPORT_PX)));
++    expectTicksCover(view, seconds, 320, { fromPx: left, toPx: left + VIEWPORT_PX });
++    expect(domMarks(view)).toEqual(
++      asDom(actualMarks(seconds, 320, 999, windowFor(page, VIEWPORT_PX))),
++    );
++    act(() => live(api).togglePlayback());
++  });
++
++  it('SR5 a resize re-measures; playhead frames neither render ticks nor read layout', async () => {
++    const { store, view } = await mountWindowWorkspace(320);
++    const seconds = secondsRulerSeconds(view, 320);
++    scrollTo(view, 6090);
++    resizeScroller(view, 1000 + HEADER_PX);
++    expect(secondsTicks(view)).toEqual(asTicks(seconds, 320, windowFor(6, 1000)));
++    const reads = layout.clientWidthReads;
++    renderLog.counts.clear();
++    for (let frame = 1; frame <= 30; frame++) {
++      act(() => store.current?.setPosition(frame * 0.5));
++    }
++    expect(store.current?.getPosition()).toBe(15);
++    expect(layout.clientWidthReads - reads).toBe(0);
++    expect(rendersOf('ArrangementRulerTicksInner')).toBe(0);
++    expect(secondsTicks(view)).toEqual(asTicks(seconds, 320, windowFor(6, 1000)));
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/view.test.ts b/app/lib/arrangement/__tests__/view.test.ts
+index 5566f65..44d6658 100644
+--- a/app/lib/arrangement/__tests__/view.test.ts
++++ b/app/lib/arrangement/__tests__/view.test.ts
+@@ -20,15 +20,18 @@ import {
+   followScrollTarget,
+   formatRulerLabel,
+   formatZoomReadout,
++  getServerTimelinePageKey,
+   overviewDragView,
+   overviewFrame,
+   overviewTimeAt,
++  parseTimelinePageKey,
+   popZoomHistory,
+   pushZoomHistory,
+   RULER_LABEL_CHAR_WIDTH_PX,
+   RULER_LABEL_OFFSET_PX,
+   RULER_TICK_LINE_PX,
+   RULER_TICK_STEPS_SECONDS,
++  readTimelinePage,
+   rulerDragView,
+   rulerTickMarks,
+   rulerTickStep,
+@@ -41,6 +44,8 @@ import {
+   type TimelineView,
+   timelineExtent,
+   timelineNavigationKey,
++  timelinePageKey,
++  timelinePageWindow,
+   zoomFromSliderPosition,
+   zoomTimelineAround,
+   zoomToRangeView,
+@@ -270,6 +275,84 @@ describe('timeline view maths (SRW-10, R10-U)', () => {
+   });
+ });
+ 
++describe('PERF-3b windowed ruler ticks and the shared timeline page (D-29z683)', () => {
++  it('RW1 windowed ticks equal the full tick list cut to the window, labels included', () => {
++    const viewport = 1216;
++    let windowedChecks = 0;
++    for (const seconds of [10, 101.352, 133, 3040.56]) {
++      for (const px of [0.5, 13.1, 25, 40, 50, 122.1, 320]) {
++        const full = rulerTickMarks(seconds, px);
++        const lastPage = Math.floor((seconds * px) / viewport);
++        for (const page of [0, 1, 5, lastPage, lastPage + 1]) {
++          const rulerWindow = timelinePageWindow({ page, viewportPx: viewport });
++          if (!rulerWindow) {
++            throw new Error('window expected');
++          }
++          const expected = full.filter(
++            (mark) => mark.time * px >= rulerWindow.fromPx && mark.time * px <= rulerWindow.toPx,
++          );
++          expect(rulerTickMarks(seconds, px, rulerWindow)).toEqual(expected);
++          windowedChecks += expected.length > 0 && expected.length < full.length ? 1 : 0;
++        }
++        expect(rulerTickMarks(seconds, px, { fromPx: -1, toPx: seconds * px + 1 })).toEqual(full);
++      }
++    }
++    expect(windowedChecks).toBeGreaterThan(40);
++    const long = rulerTickMarks(3040.56, 122.1, { fromPx: -1216, toPx: 2432 });
++    expect(long).toHaveLength(40);
++    expect(long.slice(0, 3).map((mark) => mark.label)).toEqual(['0:00', '0:00.5', '0:01']);
++    expect(long.at(-1)).toEqual({ time: 19.5, label: '0:19.5' });
++    expect(rulerTickMarks(3040.56, 122.1)).toHaveLength(6082);
++  });
++
++  it('RW2 an invalid window renders no ticks; no window keeps the full list', () => {
++    expect(rulerTickMarks(100, 40, { fromPx: Number.NaN, toPx: 100 })).toEqual([]);
++    expect(rulerTickMarks(100, 40, { fromPx: 0, toPx: Number.POSITIVE_INFINITY })).toEqual([]);
++    expect(rulerTickMarks(100, 40, { fromPx: 500, toPx: 100 })).toEqual([]);
++    expect(rulerTickMarks(100, 40, undefined)).toEqual(rulerTickMarks(100, 40));
++    expect(rulerTickMarks(100, 40, { fromPx: 400, toPx: 400 }).map((mark) => mark.time)).toEqual([
++      10,
++    ]);
++  });
++
++  it('RW3 the page helpers read, key, parse and window one page of the viewport', () => {
++    const view = { pxPerSecond: 40, scrollLeft: 2500 };
++    expect(
++      readTimelinePage(
++        () => view,
++        () => 0,
++      ),
++    ).toBeNull();
++    expect(
++      readTimelinePage(
++        () => view,
++        () => Number.NaN,
++      ),
++    ).toBeNull();
++    expect(
++      readTimelinePage(
++        () => ({ pxPerSecond: 40, scrollLeft: -30 }),
++        () => 1000,
++      ),
++    ).toEqual({
++      page: 0,
++      viewportPx: 1000,
++    });
++    const page = readTimelinePage(
++      () => view,
++      () => 1216,
++    );
++    expect(page).toEqual({ page: 2, viewportPx: 1216 });
++    expect(timelinePageKey(page)).toBe('2:1216');
++    expect(timelinePageKey(null)).toBe('');
++    expect(getServerTimelinePageKey()).toBe('');
++    expect(parseTimelinePageKey('2:1216')).toEqual({ page: 2, viewportPx: 1216 });
++    expect(parseTimelinePageKey('')).toBeNull();
++    expect(timelinePageWindow(page)).toEqual({ fromPx: 1216, toPx: 4864 });
++    expect(timelinePageWindow(null)).toBeUndefined();
++  });
++});
++
+ describe('timelineNavigationKey (R10-N2 keys)', () => {
+   const base = {
+     key: '',
+diff --git a/app/lib/arrangement/view.ts b/app/lib/arrangement/view.ts
+index 9426c91..93daeab 100644
+--- a/app/lib/arrangement/view.ts
++++ b/app/lib/arrangement/view.ts
+@@ -230,16 +230,92 @@ export interface RulerTickMark {
+   label: string | null;
+ }
+ 
+-export function rulerTickMarks(seconds: number, pxPerSecond: number): RulerTickMark[] {
++export interface TimelinePxWindow {
++  fromPx: number;
++  toPx: number;
++}
++
++export interface TimelinePage {
++  page: number;
++  viewportPx: number;
++}
++
++export function readTimelinePage(
++  getTimelineView: () => TimelineView,
++  getTimelineViewportPx: () => number,
++): TimelinePage | null {
++  const viewportPx = getTimelineViewportPx();
++  if (!(viewportPx > 0)) {
++    return null;
++  }
++  return {
++    page: Math.floor(Math.max(0, getTimelineView().scrollLeft) / viewportPx),
++    viewportPx,
++  };
++}
++
++export function timelinePageKey(timelinePage: TimelinePage | null): string {
++  return timelinePage === null ? '' : `${timelinePage.page}:${timelinePage.viewportPx}`;
++}
++
++export function getServerTimelinePageKey(): string {
++  return '';
++}
++
++export function parseTimelinePageKey(key: string): TimelinePage | null {
++  const [pageText, viewportText] = key.split(':');
++  if (viewportText === undefined) {
++    return null;
++  }
++  return { page: Number(pageText), viewportPx: Number(viewportText) };
++}
++
++export function timelinePageWindow(
++  timelinePage: TimelinePage | null,
++): TimelinePxWindow | undefined {
++  if (timelinePage === null) {
++    return undefined;
++  }
++  return {
++    fromPx: (timelinePage.page - 1) * timelinePage.viewportPx,
++    toPx: (timelinePage.page + 2) * timelinePage.viewportPx,
++  };
++}
++
++export function rulerTickMarks(
++  seconds: number,
++  pxPerSecond: number,
++  rulerWindow?: TimelinePxWindow,
++): RulerTickMark[] {
++  if (
++    rulerWindow !== undefined &&
++    (!Number.isFinite(rulerWindow.fromPx) ||
++      !Number.isFinite(rulerWindow.toPx) ||
++      rulerWindow.toPx < rulerWindow.fromPx)
++  ) {
++    return [];
++  }
+   const step = rulerTickStep(pxPerSecond);
+   const rulerWidthPx = seconds * pxPerSecond;
+-  return Array.from({ length: Math.floor(seconds / step) + 1 }, (_, index) => {
+-    const time = index * step;
++  const stepPx = step * pxPerSecond;
++  const count = Math.floor(seconds / step) + 1;
++  const firstIndex =
++    rulerWindow === undefined ? 0 : Math.max(0, Math.floor(rulerWindow.fromPx / stepPx) - 1);
++  const endIndex =
++    rulerWindow === undefined ? count : Math.min(count, Math.ceil(rulerWindow.toPx / stepPx) + 2);
++  return Array.from({ length: Math.max(0, endIndex - firstIndex) }, (_, offset) => {
++    const time = (firstIndex + offset) * step;
+     const label = formatRulerLabel(time);
+     const labelEndPx =
+       time * pxPerSecond + RULER_LABEL_OFFSET_PX + label.length * RULER_LABEL_CHAR_WIDTH_PX;
+     return { time, label: labelEndPx <= rulerWidthPx ? label : null };
+-  }).filter((mark) => mark.time * pxPerSecond + RULER_TICK_LINE_PX <= rulerWidthPx);
++  }).filter(
++    (mark) =>
++      mark.time * pxPerSecond + RULER_TICK_LINE_PX <= rulerWidthPx &&
++      (rulerWindow === undefined ||
++        (mark.time * pxPerSecond >= rulerWindow.fromPx &&
++          mark.time * pxPerSecond <= rulerWindow.toPx)),
++  );
+ }
+ 
+ export function zoomFromSliderPosition(position: number): number {

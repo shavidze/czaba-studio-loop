@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T07:06:53.833Z)
+# Active loop summary (2026-10-31T08:11:08.287Z)
 
-- backlog.json 2703 KB -> active view 377 KB
-- status: G_ROOT_GATE round 283
-- servers: `{"checkedUtc":"2026-10-31T06:46:45.6278527Z","round":283,"attempt":1,"store":200}`
-- last publication: 54a3fcc00d3ae58888f2189dcfb9654634466c48 (rounds 282-283)
-- last root gate: round 283 published - commit 54a3fcc00d3ae58888f2189dcfb9654634466c48 pushed
+- backlog.json 2717 KB -> active view 377 KB
+- status: G_ROOT_GATE round 284
+- servers: `{"checkedUtc":"2026-10-31T07:44:34.4125094Z","round":284,"attempt":1,"store":200}`
+- last publication: 0f9996063fa965d23f70554797a60f8b4a38df67 (rounds 284-284)
+- last root gate: round 284 published - commit 0f9996063fa965d23f70554797a60f8b4a38df67 pushed
 
 ## Current items: -
 
@@ -693,6 +693,8 @@
 - C-R282-02 / medium / fix dispatched round 283 / doc 211 and the doc 163/169 sections (incl. GATE281-S2 sentence) not written in round 282
 - C-R282-03 / low / fix dispatched round 283 (D-29z668; the round already owns the file and the cost is small): fresh module import + === identity guard; MU-U4 proves it (green on a282 DW10, red on sketch) / DW10 sample loop vacuous: worker and test share one demo-synth module instance, so arrays are compared with themselves
 - A-R282-REVIEW-DW11 / medium / fix dispatched round 283: DW11 + MU-U5 / postMessage-throw fallback (client l.72-76) had no test row
+- INFO-B283-NPX-TSX-CACHE / info / root_note / B's planning ran 'npx tsx' once for a scratch helper table; npm fetched tsx@4.23.15 into the npm cache only; project, lockfile and store unc
+- GATE283-S3 / info / watch / worst case at 6x CPU: 10 s worker stall + ~2.5 s sync synth ~ 12.5 s vs waitForCollectionReady 15 s timeout (perf/lib/page.ts); little headr
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,11 +1,11 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 283 (PERF-2 fix-up) C PASS with browserVerified/realVerified true and gate 283 published 54a3fcc: PERF-2 is done. C's 3 Lows and gate 283's 2 Lows go to deferred_low_polish (2026-10-23 bug gate); no Critical/High/Medium open on PERF-2. REGRESSION not due until 2026-11-02. Next queue item PERF-3: B re-measured its premise at HEAD (prod build, 30 clips): waveform paths are rewritten only below the 4096-column cap (zoom-in 60, zoom-out 300 rewrites), and the slowest zoom key is the seconds ruler (+6142 DOM nodes). PERF-3 split without shrinking: 3a (column bands + envelope seconds viewBox; B sketch: 60->0 and 300->60 rewrites, pixel-identical >= 50 px/s, 9 files/171 tests, mutants red) then 3b (ruler windowing + harness p95/Ctrl+wheel; exit p95 < 50 ms). Not COMPLETE: PERF-3..15, SYS-1..3, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase-2 entries and deferred Lows remain. Not BLOCKED: nothing external is missing for PERF-3a. Advisor available and consulted.",
- "nextTask": "Round 284: PERF-3a. Six files byte-identical to b-round-283/sketch-full.diff (sketch-sha256.txt): peaks.ts gains PEAK_SHAPE_MAX_COLUMNS + waveformPeakColumns (zoom bands x4 at 25/6.25/1.5625 px/s); ArrangementClip.tsx uses it for peakColumns; ArrangementClipEnvelope.tsx draws the polyline in seconds (viewBox 0 0 duration 1) memoised on the clip; tests ZQ1/ZQ2/ZQ2b/ZQ3 added, EU5/EU7 rewritten to seconds; new doc 212 (l.4 'In Progress (stage 1 of 2; C round 284 PASS)'). A: claims, patch, sha256, typecheck/lint, 9 covering files (171 tests), mutants HEADCODE/Z1..Z5, one browser smoke, code-reviewer. C: CLAIMS, SOURCE-SCOPE, TYPECHECK, UNIT, UNIT-MUTANTS, ZOOM-PATH-IN (0; HEAD 60), ZOOM-PATH-OUT (60; HEAD 300), WAVE-PIXELS + ENVELOPE-ZOOM at both viewports, ZOOM-TIMING (record), PERF-RUN, DOC-212, G284-AUTH. See current-task.md.",
+ "reason": "Round 284 (PERF-3a) C PASS with browserVerified/realVerified true and gate 284 published 0f99960: PERF-3a done. A's L10 request ruled: A-R284-REVIEW-NEG-LOOP and A-R284-REVIEW-ZQ3-VACUITY -> deferred_low_polish (round 285 does not own those files). No Critical/High/Medium open. REGRESSION not due until 2026-11-02. Next: PERF-3b, re-measured at HEAD (prod, 30 clips): the seconds ruler holds 6143 elements (12286 at 122.1 px/s, Event Timing 112-160 ms). B sketch: shared page helpers in view.ts (tech-lead option a), windowed rulerTickMarks (index range), ruler 94/78 elements, Event Timing 16-24 ms on in keys, 28/28 ruler screenshots per viewport pixel-identical to HEAD, plus a fix for a painted one-frame gap on Follow page flips that B found (pre-existing for the bars ruler). PERF-3 split into 3 stages (3c = harness rows + exit target). Not COMPLETE: PERF-3b..15, SYS-1..3, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase-2 entries and deferred Lows remain. Not BLOCKED: nothing external is missing. Advisor available and consulted.",
+ "nextTask": "Round 285: PERF-3b. Six files byte-identical to b-round-284/sketch.diff (sketch-sha256.txt): view.ts gains readTimelinePage/timelinePageKey/getServerTimelinePageKey/parseTimelinePageKey/timelinePageWindow + rulerTickMarks(seconds, px, window?); ArrangementRuler subscribes to the page key (optional props) and tags ticks arrangement-ruler-tick + data-time; ArrangementTempoRow imports the shared helpers; StudioWorkspace passes the two props and notifies scroll listeners after the Follow writer sets scrollLeft; tests RW1-RW3 (view.test.ts) and SR1-SR6 (tempo-window-ui.test.tsx); new doc 213 (l.4 'In Progress (stage 2 of 3; C round 285 PASS)') and doc 212 l.4 -> 'stage 1 of 3'. A: claims, patch, sha256, typecheck/lint, 69 covering files (1261 tests), mutants HEADRULER/W1..W7, one browser smoke, code-reviewer. C: CLAIMS, SOURCE-SCOPE, TYPECHECK, UNIT, UNIT-MUTANTS, RULER-NODES-IN/OUT, RULER-PIXELS, RULER-JUMP, RULER-FOLLOW-FLIP (with a W7 control build), FOLLOW-IDLE, ZOOM-TIMING (record), PERF-RUN, DOC-213, G285-AUTH. See current-task.md.",
  "remaining": [
   "R216-MEM-POLLS-HEADROOM (watch)",
-  "PERF-3a (round 284: waveform column bands + envelope seconds viewBox)",
-  "PERF-3b (ruler tick windowing + harness p95/Ctrl+wheel rows; PERF-3 exit target)",
+  "PERF-3b (round 285: seconds ruler page window + Follow flip notify)",
+  "PERF-3c (harness rows: Event Timing p95 per zoom key, path rewrites, ruler nodes, Ctrl+wheel baseline; PERF-3 exit target)",
   "PERF-COMMIT-RESCHEDULE",
   "PERF-4",
   "PERF-5",
@@ -39,6 +39,7 @@
   "RECORDING-META-S1",
   "deferred_low_polish",
   "parked Medium / Tech Lead manual items",
-  "awaiting_user recommendations (ABL-R, DUX-R, SR candidates, Tag Manager Q7/Q9-Q27)"
+  "awaiting_user recommendations (ABL-R, DUX-R, SR candidates, Tag Manager Q7/Q9-Q27)",
+  "B-R284-FOLLOW-FLIP-GAP (Low, fixed by round 285 on C PASS)"
  ]
 }
