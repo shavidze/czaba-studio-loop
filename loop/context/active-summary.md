@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T12:53:29.895Z)
+# Active loop summary (2026-10-31T13:23:23.713Z)
 
-- backlog.json 2768 KB -> active view 381 KB
-- status: G_ROOT_GATE round 289
-- servers: `{"checkedUtc":"2026-10-31T12:34:18.7948060Z","round":289,"attempt":1,"store":200}`
+- backlog.json 2790 KB -> active view 385 KB
+- status: G_ROOT_GATE round 290
+- servers: `{"checkedUtc":"2026-10-31T13:12:55.7039819Z","round":290,"attempt":1,"store":200}`
 - last publication: 5a911ffa677a580cc010b1612ab7b86aa843f160 (rounds 289-289)
-- last root gate: round 289 published - commit 5a911ffa677a580cc010b1612ab7b86aa843f160 pushed
+- last root gate: round 290 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -678,20 +678,19 @@
 - B-R277-METRONOME-DRAFT-CLICK / info / designed out in round 278 (variant X, D-29z628) / the shared soft-disabled pattern (mousedown preventDefault) would make a click on Metronome with an uncommitted BPM draft a dead click; HEAD
 - C-R278-ENV-01 / info / lesson (D-29z639): L38 clause / C's HEAD dev server shared node_modules/.vite and broke :5173 (504 Outdated Optimize Dep); a second Vite server needs its own cacheDir
 - GATE279-S2 / info / watch (D-29z643) / a capped quiet wait while playing may flake on a slower runner (cap hit is now a problem by design); if it shows up, name the last commit in
+- B-R280-TASK-2.4-OVERSTATED / info / RETRO 290 (D-29z718): counted in retro-290 section 8 / claims-findings-hand.txt (B-found before damage; not in the experiment baseline) | recorded / round 279 task section 2.4 said a throw before the try also leaked the poll loop; at 873d835 nothing between the poll-loop start and the try
 - GATE280-S4 / info / acknowledged (by design, D-29z646: named problem, no silent fallback) / a probe over 20 ms is reported but its offset is still used
 - A-R280-REVIEW-KEY-NAMES / info / ruled (D-29z651): keep clockOffsetMs and endpointRule; the names are fixed by the round-280 contract, doc 209 and B/C scripts read them / code-reviewer L1/L2: clockOffsetMs resembles clock.offsetMs; endpointRule holds a count
 - B-R281-RESOURCES-READY-FAILED / low / signal (D-29z657, narrowed; not scheduled): adding a status wait to 1b-ii moves time-since-load rows such as res.mem.used-ready-mib (round 279 measured) | signal (D-29z652; not scheduled): tech-lead (b) - different ready signal, a change would not be byte-identical / PERF-1b-ii has no status wait: when a NON-selected demo source fails after the library is ready (Add enabled + waveform), it continues and m
+- B-R281-GATE279-S1-PREMISE / info / RETRO 290 (D-29z718): counted in retro-290 section 8 / claims-findings-hand.txt (B-found before damage; not in the experiment baseline) | recorded (D-29z657) / GATE279-S1 named waitForCollectionReady as the wait that times out on a failed demo source; the first wait that times out is the 90 s librar
 - PERF2-FIRST-FRAME-LONGTASK / info / signal (D-29z662): not scheduled; candidates PERF-11 (root diet) and PERF-7 (fonts); B re-measures with LoAF attribution when planning those / the first load frame is a long task of 77-131 ms with no script over 5 ms (parse/style/layout before hydration); it keeps load.longtask-max 
 - PERF2-STEREO-COPY / low / signal (D-29z661): not in round 282 (code = measured sketch); fold into PERF-5 (peaks in a worker) planning / loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) before copyToChannel; calling copyToChannel t
+- INFO-B282-CONSULT-FALSE-CLAIMS / info / RETRO 290 (D-29z718): counted in retro-290 section 8 / claims-findings-hand.txt (B-found before damage; not in the experiment baseline) | recorded (D-29z661): consult output is data; count at RETRO 290 / performance-optimizer consult (round 282 planning) stated perf-plan.md does not exist and that no export sha check exists; both false
 - GATE281-S2 / low / re-dispatched round 283 (D-29z666): doc 169 B-R281 TODO bullet; round 282 did not write it / doc 169 / doc 210: B-R281-RESOURCES-READY-FAILED should say that in the measured runs a failed non-selected source usually aborts PERF-1b-ii
 - GATE281-ARCH-COLLECTION-STATE-ATTR / info / architecture signal (D-29z659): recorded, not scheduled / proposal: the app sets data-collection-state="loading|ready|failed" on arrangement-status and the three perf waits read it instead of text p
 - GATE281-ARCH-DOC-TODO-CHANGELOG / info / architecture signal (D-29z659): recorded, not scheduled / proposal: keep one changelog of harness waits in doc 175 and replace per-round TODO bullets in docs 168/169/208/209 with a link
 - A-R281-ARCH-PAGE-READINESS / info / architecture signal (D-29z659): recorded, not scheduled (keep) / perf/lib/page.ts shared timing helpers now hold Studio-specific readiness checks; app-labels pattern builders accumulate; reviewer: keep
 - GATE281-S5 / info / info (D-29z659): existing tooling gap; config change is root/Saba / npm run lint runs Biome on ./app only, so perf/** formatting is unchecked (existing gap, C-R214-BIOME-PERF-VACUOUS, L30)
-- C-R282-01 / medium / fix dispatched round 283 (D-29z667): option (a) expectSameComposition = toStrictEqual + toBe per array; DW3 one shared result / DW3/DW9 assert toBe on the composition wrapper; readDemoComposition returns a new wrapper around the same five arrays (client l.35), so the 
-- C-R282-02 / medium / fix dispatched round 283 / doc 211 and the doc 163/169 sections (incl. GATE281-S2 sentence) not written in round 282
-- C-R282-03 / low / fix dispatched round 283 (D-29z668; the round already owns the file and the cost is small): fresh module import + === identity guard; MU-U4 proves it (green on a282 DW10, red on sketch) / DW10 sample loop vacuous: worker and test share one demo-synth module instance, so arrays are compared with themselves
-- A-R282-REVIEW-DW11 / medium / fix dispatched round 283: DW11 + MU-U5 / postMessage-throw fallback (client l.72-76) had no test row
 - INFO-B283-NPX-TSX-CACHE / info / root_note / B's planning ran 'npx tsx' once for a scratch helper table; npm fetched tsx@4.23.15 into the npm cache only; project, lockfile and store unc
 - GATE283-S3 / info / watch / worst case at 6x CPU: 10 s worker stall + ~2.5 s sync synth ~ 12.5 s vs waitForCollectionReady 15 s timeout (perf/lib/page.ts); little headr
 - PD-FREE-HEADER / info / signal (D-29z695): for STORE-4 / a product with an explicit price 0 shows "Complimentary Download" in ProductSidebar (button without a handler) and "$0.00 USD" with Buy Now 
@@ -704,6 +703,15 @@
 - A-R288-ARCH-LEADING-SPANS / info / signal (D-29z708): not scheduled; candidate for STORE-4 price component / three hand-matched leading-* 'Price unavailable' spans (store.tsx, ProductCard.tsx, VersionSelector) each copy the known line box by hand; o
 - INFO-C288-FIXTURE-COUNT / info / noted (D-29z708): B task text said 10 active fixtures, the mock has 11; C checked all 11; L29 already covers counts as tagged claims / round-288 task fixture count 10 vs 11
 - SABA-Q-FIXPD1B-NAMES / info / awaiting_user (D-29z709): non-blocking; round 289 ships the defaults / Demo stem names: 'Pulse' (default) or 'Rhythm' for the pulse stem; 'Melody' (default, translation of მელოდია) or 'Lead' for the lead stem
+- GATE289-S1-HEADING-SR-DOUBLE / medium / open (D-29z711): fix-up FIX-PD-1b2, round 291 (aria-hidden on the heading div; aria-labelledby still resolves); C checks the Chromium accessibility tree / library group heading div is plain text inside listbox > group; screen readers may read it as a stray item and again as the group name
+- GATE289-S2-DOC216-ALWAYS / medium / open (D-29z711): doc half fixed in FIX-PD-1b2 round 291; product half = SABA-Q-LIB-SINGLE-RUN (awaiting_user) / doc 216 l.17 says the collection always shows; false for a one-collection search and for purchased libraries (hover title only)
+- SABA-Q-LIB-SINGLE-RUN / info / awaiting_user (D-29z711): paired with SR-275-6 in user-review/screen-review-290.md; non-blocking / when a search or a purchased library shows one collection, should one heading still name it? (today: none; collection only in the hover titl
+- BACKEND-EVIDENCE-F7 / info / open_backend_evidence (D-29z711): later backend-enabled check; not a reason to call round 289 unverified / purchased /studio/$productId library with one run: no heading, short names (unit LG5 carries it)
+- C-R289-INFO-01 / info / counted at RETRO 290 (D-29z712) as an artifact-cited-but-absent finding (2nd: C-R283-02); experiment EXP-R290-ARTIFACT-MANIFEST / task 289 section 5 cites b-round-288/sketch.patch as kept; the file does not exist
+- GATE289-S3-RUN-KEYS / low / open (D-29z711): fixed early in FIX-PD-1b2 round 291 (same owner, one line; bug-gate exception "round already owns that code and it costs little") / group keys use runIndex; an option moving to another run remounts and focus falls to body
+- A-R289-REVIEW-L2 / low / open (D-29z711): fixed early in FIX-PD-1b2 round 291 (rename only) / ST47/ST51 test names still say "keeps only the sound titles" while the array is empty
+- GATE289-S4-BIOME-IGNORE / info / noted (D-29z711) / new biome-ignore (ruled in task 289, precedent K12)
+- GATE289-S6-LIBRARY-TEST-GEORGIAN / info / noted (D-29z711) / library.test.ts keeps its own Georgian fixtures (ruled in task 289; doc 216 TODO)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

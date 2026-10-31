@@ -1,0 +1,30 @@
+171a172,180
+> 
+> const threeRunSources: WorkspaceSource[] = [
+>   { id: 'a-one', title: 'Alpha one', collectionLabel: 'Label A', kind: 'music', origin: 'demo' },
+>   { id: 'b-one', title: 'Beta one', collectionLabel: 'Label B', kind: 'sfx', origin: 'demo' },
+>   { id: 'b-two', title: 'Kick two', collectionLabel: 'Label B', kind: 'sfx', origin: 'demo' },
+>   { id: 'c-one', title: 'Kick three', collectionLabel: 'Label C', kind: 'sfx', origin: 'demo' },
+>   { id: 'c-two', title: 'Kick four', collectionLabel: 'Label C', kind: 'sfx', origin: 'demo' },
+> ];
+> 
+401a411,429
+>     view.unmount();
+>   });
+> 
+>   it.each([
+>     ['c-two', 'a whole run before it disappears'],
+>     ['b-two', 'the first option of its own run disappears'],
+>   ])('LG8 (%s): a focused option keeps its DOM node and focus when %s', async (focusId) => {
+>     const { view, listbox } = await mountGroupLibrary(groupCollection(threeRunSources));
+>     expect(groupNames(listbox)).toEqual(['Label A', 'Label B', 'Label C']);
+>     const before = within(listbox).getAllByRole('option').find((o) => o.getAttribute('data-source-id') === focusId);
+>     if (!before) throw new Error('missing');
+>     act(() => before.focus());
+>     typeLibraryQuery(view, 'kick');
+>     flushFrames();
+>     await flushAsync();
+>     expect(groupNames(listbox)).toEqual(['Label B', 'Label C']);
+>     expect(optionIds(listbox)).toEqual(['b-two', 'c-one', 'c-two']);
+>     expect(before.isConnected).toBe(true);
+>     expect(document.activeElement).toBe(before);

@@ -1,0 +1,15 @@
+199c199,200
+<     const runs: { label: string; start: number; end: number }[] = [];
+---
+>     const runs: { key: string; label: string; start: number; end: number }[] = [];
+>     const seen = new Map<string, number>();
+205c206,208
+<         runs.push({ label: source.collectionLabel, start: index, end: index + 1 });
+---
+>         const occurrence = seen.get(source.collectionLabel) ?? 0;
+>         seen.set(source.collectionLabel, occurrence + 1);
+>         runs.push({ key: `${source.collectionLabel}#${occurrence}`, label: source.collectionLabel, start: index, end: index + 1 });
+666c669
+<                           key={headingId}
+---
+>                           key={run.key}

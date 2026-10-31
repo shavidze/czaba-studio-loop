@@ -1,0 +1,112 @@
+{
+ "round": 290,
+ "role": "C",
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T13:12:55.7039819Z",
+  "round": 290,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R290-01",
+   "severity": "low",
+   "origin": "B spec",
+   "row": "RT-CAUSE (and RT-NUM count)",
+   "steps": [
+    "Open retros/retro-290.md §3, row '276 gate fail': 'SWEEP-მა მხოლოდ runtime consumer-ები განიხილა; 3 test ფაილი native `disabled`-ს ამოწმებდა'",
+    "grep 'Test Files' gates/round-276/verify.log -> 'Test Files  2 failed | 218 passed (220)'",
+    "verify.log l.1992-1996: NS1 (navigation-strings-ui.test.tsx:222) expects the old Split title 'Split at the insert marker (Ctrl+E)'; NS6 (same file l.429) and TC9 (transport-centre-ui.test.tsx:404) pin native disabled",
+    "backlog GATE276-T1 evidence: '2 failed / 218 files, 3 failed / 3291 tests'"
+   ],
+   "expected": "§3 states what the source says: 3 tests in 2 test files pinned the pre-SYS-5 contract (two native `disabled` asserts, one old Split title), as GATE276-T1 and b-round-289/fails-cause-hand.txt ('NS1, NS6, TC9 pinned native `disabled` / old Split title') record",
+   "actual": "§3 says 3 test files and that all of them checked native `disabled`. The file count is wrong (2, not 3), and NS1 pinned the old Split title, not `disabled`. The stated root cause (SWEEP ruled runtime hits only, task 276 §2.5) and the lesson (L23 attribute/state clause) are correct; §1 '3 ტესტი ჩავარდა' is correct. Basis for failing the row: the RETRO policy (2026-10-26) requires every number in the report to be traceable to its evidence; §3's file count is not",
+   "evidence": "c-round-290/rt/gate276-excerpt.txt; sources: gates/round-276/verify.log l.1406/1412/1429/1986/1992-1996; tasks/round-276.md §2.5; b-round-289/fails-cause-hand.txt l.3; backlog.json GATE276-T1"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "RT-NUM",
+  "RT-IDS",
+  "RT-LESSONS",
+  "RT-SABA",
+  "RT-SCREEN",
+  "G290-AUTH",
+  "STUDIO-SMOKE-290"
+ ],
+ "failed": [
+  "RT-CAUSE (C-R290-01, Low: §3 row 276 says 3 test files / all native disabled; source: 2 files, 3 tests, one pinned the old Split title)"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest (npm run test:run)",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "evidence": "c-round-290/source-scope-start.txt (13:13:10Z) and source-scope-end.txt (13:20:33Z): HEAD 5a911ffa677a580cc010b1612ab7b86aa843f160, git status empty, sha256sum -c --quiet rc=0 both times"
+  },
+  "CLAIMS": {
+   "status": "PASS",
+   "evidence": "c-round-290/claims.txt: K1-K12 run verbatim first; every output equals its expected value; K8 prints only 'done'"
+  },
+  "RT-NUM": {
+   "status": "PASS",
+   "evidence": "c-round-290/rt/: B's 9 scripts copied with outputs redirected to c-round-290/rt/, run from the loop root with python3 -I on a copy of backlog-before-290.json. retro-numbers, fails-detail, gate-reviews, classify, window-findings, l28-status, deferred-totals, open-medium-plus, cost-rows.json, classify-out.json byte-identical to B's. cost.txt differs only in dict key order. collect.txt/rounds-275-289.json differ only in round 289's raw b_cost (now 14.64 = b-round-289-result, the round-290 planning, written after B saved collect.txt); cost.py's shifted B cost for 289 stays 10.05, so no retro number changes. Hand sums: 183.74+96.58+78.49=358.81; FAIL rounds 22.32+31.77+18.10=72.19; fix-ups 11.93+17.41+15.26=44.60; feature 193.90; test-only 79.89; round median 22.32 (8th of 15); B share 51.2%; C bugs Low 13 / Medium 3 recounted from fails-detail.txt; 11 review.md (11 'commit OK' lines), 56 suggestions; origins C 21+3=24, gate 13+10=23, A 11+19=30, B 8+3=11; 503/22/481; STOP 2; max K 24 (285); retro-275 baselines 24.12, 10.51, 15.77 (=10.51x1.5), 12/3, 1 of 7 found in retro-275.md l.28/41/49/203/31; 15.96 = 12.77x1.25"
+  },
+  "RT-CAUSE": {
+   "status": "FAIL",
+   "bug": "C-R290-01",
+   "evidence": "275: c-round-275.json C-R275-01/02 match; 276: gate-round-276.json status failed, verify exit 1, tasks/round-276.md §2.5 rules runtime hits only (cause correct; file count and NS1 nature misstated, C-R290-01); 282: c-round-282.json C-R282-01 (DW3/DW9, B pre-check) and C-R282-02 (doc 211 absent, A STOP) match; 287: C-R287-01 text-sm vs card box matches; §9: tasks/round-286.md 0 SWEEP hits, task 276 2 hits, c-round-286.json C-R286-01 Medium / -02 Low match; verdict follows retro-275.md l.202 (>=3 findings: 3; >=1 Medium in a tagged task: GATE276-T1)"
+  },
+  "RT-IDS": {
+   "status": "PASS",
+   "evidence": "c-round-290/rt/rt-ids.txt: FIX-PD-1b and SR-230-6 done (D-29z710); C-R282-01/02/03 and A-R282-REVIEW-DW11 closed (D-29z710); GATE289-S1/S2 Medium open, named in FIX-PD-1b2; S3 and A-R289-REVIEW-L2 open; S5, A-R289-REVIEW-L3, A-R289-REVIEW-L4-MTAVRULI in deferred_low_polish; SABA-Q-LIB-SINGLE-RUN awaiting_user; BACKEND-EVIDENCE-F7 and A-R289-ARCH-GROUP-RUNS present; SYS-VACUOUS-ROWS closes the 4 Lows, each 'scheduled in systemic task SYS-VACUOUS-ROWS (D-29z716)'. Inventory: C's case-insensitive grep retro[ _-]?290 on the before copy (c-round-290/rt/inventory-c.txt) adds D-29z692, PD-REVIEW-2026-10-31, retro_policy and final_acceptance_saba_manual_items; all four are scheduling/precedence notes or the already-dispositioned TLM-R274 item, so no disposition is missing (INFO-C290-01)"
+  },
+  "RT-LESSONS": {
+   "status": "PASS",
+   "evidence": "c-round-290/rt/lessons-diff-c.txt identical to b-round-289/lessons-diff.txt; changed lines only l.3, L2, L4, L52, +L56, -L17, -L27; L2/L4 old text is a byte prefix of the new; all evidence ids of old L27+L52 in new L52 and of old L17 in new L2 (lessons-check.txt); 59 lines, three parts"
+  },
+  "RT-SABA": {
+   "status": "PASS",
+   "evidence": "retro-290 §12 items are proposals; screen-review-290 l.9 'only candidates, nothing implemented before your answer; position/behaviour moves are yours'; SR-290-3 and SR-290-10 marked 'კითხვა'; SR-290-10 names the Night Pulse move as a position move; SR-290-7 has no position variant (dim only)"
+  },
+  "RT-SCREEN": {
+   "status": "PASS",
+   "evidence": "PNGs opened: export 1280 shows Time selection under the footer and the 2-line video reason (SR-290-1), duplicated 'Entire project 00:00.000 — 01:04.000' (SR-290-2); studio 1440: ruler label under playhead head (SR-290-4), near-white Overview (SR-290-5), video lane controls and empty monitor (SR-290-7), pan 'C' (SR-290-8), stems on Music (capture-error paragraph); product 1440: '$29.00 USD' vs '$29' (SR-290-6), 'WAV' + '24-bit / 48 kHz' on both cards (SR-290-9). counts.txt matches l.22. Re-probe (c-round-290/stems/stems-probe.json, both viewports): no lane chosen -> 'Night Pulse · Bass added to the Music track'; after clicking the name 'Stems' -> 'Active track: Stems' and 'Night Pulse · Pad added to the Stems track' (identical to B's); SR-290-10: product-1440 is /products/middle-east and studio-1440's library tree lists only the CZABA public preview and Night Pulse (Full mix + 4 stems), no Middle East stems"
+  },
+  "G290-AUTH": {
+   "status": "PASS",
+   "evidence": "c-round-290/auth-nomock.json and auth-mock.json, shots/auth/*: fresh contexts 1440x900 and 1280x720, 0 cookies; /studio-lab workspace 1, badge 'Demo collection — no sign-in required' 1, auth_user null; /studio/middle-east 'Sign in required', 0 audio[src], no workspace; token API: no header 401 both runs; fake bearer 500 'Unable to prepare Studio access' without mock (fails closed, no token), 403 'Unable to verify ownership' with mock; page made 0 token requests. First no-mock attempt timed out on the cold Vite start (environment, INFO-C280-AUTH-COLD-START); re-run after warm-up"
+  },
+  "STUDIO-SMOKE-290": {
+   "status": "PASS",
+   "evidence": "c-round-290/smoke290.json, shots/smoke-*.png: both viewports: 'Night Pulse · Bass added to the Music track at 00:00.000'; position at 1.5 s 00:01.471 (1440) / 00:01.483 (1280); data-playing false>true>false (stopped with the Stop button; Play does not toggle, Live-like, SABA-B-9); destination analyser RMS 0.049/0.043 while playing, 0 after stop, position holds 00:01.831; WAV RIFF/WAVE, 48000 Hz, 24-bit stereo, 16.000000 s, peak 0.21707, 0 NaN, same sha256 at both viewports. First smoke run used a second Play click to stop (script error, not app)"
+  }
+ },
+ "manifestPaths": 22,
+ "missingPaths": 0,
+ "countMismatches": 1,
+ "claimCheckMinutes": 1,
+ "info": [
+  {
+   "id": "INFO-C290-01",
+   "origin": "B pre-check",
+   "text": "retro290-mention-ids.txt misses the hyphen spelling 'RETRO-290' (D-29z692, PD-REVIEW-2026-10-31 order_rule) and retro_policy/final_acceptance hits; none needs a disposition (precedence notes / TLM-R274 already in §7)"
+  },
+  {
+   "id": "INFO-C290-02",
+   "origin": "environment",
+   "text": "first G290-AUTH attempt timed out (150 s) on the cold dev server; warm load reached 'Demo collection ready' in 8.8 s"
+  }
+ ]
+}

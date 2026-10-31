@@ -1,0 +1,74 @@
+--- /home/runner/czaba-project/store/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx	2026-10-31 13:11:31.621841915 +0000
++++ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx	2026-10-31 13:29:16.887446902 +0000
+@@ -169,6 +169,14 @@
+   { id: 'a-two', title: 'Alpha two', collectionLabel: 'Label A', kind: 'sfx', origin: 'demo' },
+ ];
+ 
++const threeRunSources: WorkspaceSource[] = [
++  { id: 'a-one', title: 'Alpha one', collectionLabel: 'Label A', kind: 'music', origin: 'demo' },
++  { id: 'b-one', title: 'Beta one', collectionLabel: 'Label B', kind: 'sfx', origin: 'demo' },
++  { id: 'b-two', title: 'Kick two', collectionLabel: 'Label B', kind: 'sfx', origin: 'demo' },
++  { id: 'c-one', title: 'Kick three', collectionLabel: 'Label C', kind: 'sfx', origin: 'demo' },
++  { id: 'c-two', title: 'Kick four', collectionLabel: 'Label C', kind: 'sfx', origin: 'demo' },
++];
++
+ function groupArrangement(): Arrangement {
+   return createArrangement([
+     { id: 'video', kind: 'video', name: 'Video' },
+@@ -401,4 +409,36 @@
+     expect(visited).toEqual(['b-one', 'a-two']);
+     view.unmount();
+   });
++
++  it.each([
++    ['c-two', 'a whole run before it disappears'],
++    ['b-two', 'the first option of its own run disappears'],
++  ])('LG8 (%s): a focused option keeps its DOM node and focus when %s', async (focusId) => {
++    const { view, listbox } = await mountGroupLibrary(groupCollection(threeRunSources));
++    expect(groupNames(listbox)).toEqual(['Label A', 'Label B', 'Label C']);
++    const before = within(listbox)
++      .getAllByRole('option')
++      .find((o) => o.getAttribute('data-source-id') === focusId);
++    if (!before) throw new Error('missing');
++    act(() => before.focus());
++    typeLibraryQuery(view, 'kick');
++    flushFrames();
++    await flushAsync();
++    expect(groupNames(listbox)).toEqual(['Label B', 'Label C']);
++    expect(optionIds(listbox)).toEqual(['b-two', 'c-one', 'c-two']);
++    expect(before.isConnected).toBe(true);
++    expect(document.activeElement).toBe(before);
++    view.unmount();
++  });
++
++  it('LG9: each heading is hidden from the accessibility tree and still names its group', async () => {
++    const { view, listbox } = await mountGroupLibrary(groupCollection(threeRunSources));
++    for (const label of ['Label A', 'Label B', 'Label C']) {
++      const group = within(listbox).getByRole('group', { name: label });
++      const heading = document.getElementById(group.getAttribute('aria-labelledby') ?? '');
++      expect(heading?.textContent).toBe(label);
++      expect(heading?.getAttribute('aria-hidden')).toBe('true');
++    }
++    view.unmount();
++  });
+ });
+--- /home/runner/czaba-project/store/app/lib/arrangement/__tests__/strings.test.ts	2026-10-31 13:11:31.627841936 +0000
++++ app/lib/arrangement/__tests__/strings.test.ts	2026-10-31 13:28:51.071528946 +0000
+@@ -2479,7 +2479,7 @@
+     expect(sl.rowError('')).toBe('Error: ');
+   });
+ 
+-  it('ST47: the library, preview and collection sources have no Georgian lines; the demo source keeps only the sound titles', () => {
++  it('ST47: the library, preview, collection and demo sources have no Georgian lines', () => {
+     expect(
+       normalisedGeorgianLines('../../../components/arrangement/ArrangementLibrary.tsx'),
+     ).toEqual(LIBRARY_REMAINING_GEORGIAN_LINES);
+@@ -2747,7 +2747,7 @@
+     expect(vd.gapPrefix.endsWith(' ')).toBe(false);
+   });
+ 
+-  it('ST51: every Studio workspace source, found by a directory walk, has no Georgian lines except the demo sound titles', () => {
++  it('ST51: every Studio workspace source, found by a directory walk, has no Georgian lines', () => {
+     const walked = [
+       ...collectWorkspaceSourceFiles(resolve(__dirname, '../../../components/arrangement')),
+       ...collectWorkspaceSourceFiles(resolve(__dirname, '..')),

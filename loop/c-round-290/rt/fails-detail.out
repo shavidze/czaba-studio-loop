@@ -1,0 +1,31 @@
+=== ROUND 275 FAIL bV True failed: ['RT-IDS']
+  BUG {"id": "C-R275-01", "severity": "low", "actual": "Outside retro_candidates (beyond the literal RT-IDS pointer, but within the retro policy 'every finding that was opened'): RC-R265-AT-RISK-NO-ROW is declared a 'RETRO-275 candidate' in D-29z565 and again as '2nd instance' in D-29z575 and B-R267-GESTURE-ARROW-SPEC-CONFLICT, but it has no retro_candidates entry and no disposition in retro-275 section 8 (0 hits in retro-
+  BUG {"id": "C-R275-02", "severity": "low", "actual": "Outside retro_candidates (beyond the literal RT-IDS pointer, but within the retro policy 'every finding that was opened'): Status is still 'signal (D-29z558); not scheduled; candidate for RETRO 275 / a systemic test-only task', unchanged by this planning; retro-275 does not mention it."}
+=== ROUND 276 PASS bV True failed: ['V-HOVER-SOFT (cursor half)']
+  BUG {"id": "C-R276-01", "severity": "low", "actual": "cursor: pointer on all seven; HEAD natively disabled buttons also pointer; injected <button disabled class=disabled:cursor-not-allowed> also pointer. Cause: unlayered app.css l.483 button { cursor:pointer } beats @layer utilities. Options: grant l.483 or use aria-disabled:cursor-not-allowed!"}
+  BUG {"id": "C-R276-02", "severity": "low", "actual": "new: focus stays in tempo input, value not committed (data-bpm empty). HEAD: focus -> BODY, tempo 97 committed. Intended by section 2.1 mousedown preventDefault; value commits on later Enter/blur"}
+=== ROUND 277 PASS bV True failed: []
+=== ROUND 278 PASS bV True failed: []
+=== ROUND 279 PASS bV True failed: []
+=== ROUND 280 PASS bV True failed: []
+=== ROUND 281 PASS bV True failed: None
+  BUG {"id": "C-R281-01", "severity": "low", "actual": "task l.264 states doc 208 l.18/l.34/l.71 describe the round-279 waitForCollectionReady without a tag; C verified the fact true with sed (planning hygiene only, no implementation impact)"}
+=== ROUND 282 FAIL bV True failed: ['UNIT (DW3, DW9)', 'DOC-211 (not implemented)']
+  BUG {"id": "C-R282-01", "severity": "medium", "actual": "DW3 and DW9 red: the byte-frozen sketch's readDemoComposition returns a new wrapper { mix, stems: {...} } (l.35), so toBe on the wrapper can never hold; the five Float32Arrays keep identity. Planning gap: B's scratch pre-check did not run the DW rows against the sketch (L23). A's option (a) (toStrictEqual + per-array toBe + one shared result) keeps the code bytes a
+  BUG {"id": "C-R282-02", "severity": "medium", "actual": "doc 211 absent; docs 163/169 unchanged (not implemented; A deferred until the DW ruling)"}
+  BUG {"id": "C-R282-03", "severity": "low", "actual": "the added toBe passes: worker and test share one demo-synth module instance (resetModules only in beforeEach), so the sample loop compares each array with itself; only the transfer toBe checks carry weight"}
+=== ROUND 283 PASS bV True failed: None
+  BUG {"id": "C-R283-01", "severity": "low", "actual": "12/12 green; no row pins the timer clear (confirms A's reviewer L6). Runtime today unaffected"}
+  BUG {"id": "C-R283-02", "severity": "low", "actual": "file holds 3 runs: [90,365],[83,363],[83,364] -> 83-90 / 363-365; the '+1' run from task 282 §1.1 is not saved in b-round-281/"}
+  BUG {"id": "C-R283-03", "severity": "low", "actual": "l.16 and l.94 say 316 rows; budgets.json has 320 (equiv.txt 'PERF-1a: rows 320'); lines outside A's grant (confirms A's reviewer M1)"}
+=== ROUND 284 PASS bV True failed: None
+  BUG {"id": "A-R284-REVIEW-NEG-LOOP", "severity": "low", "actual": "never returns; timeout exits rc 124 (pixelsPerBucket < 0, so bucketsPerColumn*4*ppb <= 1 holds forever). Unreachable in the app: the only caller is ArrangementClip.tsx:366, clampTimelineZoom keeps px/s >= 0.5, and durations are positive. The sketch file is byte-locked; deferred_low_polish. Suggested fix: guard !(pxPerSecond > 0) || !(duration > 0) -> 0, p
+  BUG {"id": "A-R284-REVIEW-ZQ3-VACUITY", "severity": "low", "actual": "before = svg.querySelector('polyline')?.getAttribute('points') may be undefined, and toBe(before) would then pass vacuously. The other asserts (viewBox, node identity, 0 mutation records) make a miss unlikely. Info-level test hardening: add expect(before).toBeTruthy(). deferred_low_polish"}
+=== ROUND 285 PASS bV True failed: None
+=== ROUND 286 PASS bV True failed: None
+  BUG {"id": "C-R286-01", "severity": "medium", "actual": "The purchase panel correctly says 'Price unavailable' with both buttons aria-disabled, but the Standard version card on the same page reads 'Standard $0'. Pre-existing (HEAD 60bfb38 shows the same card plus $0.00 in the panel); cause is the frozen createDisplayVersions '?? 0' (K6) rendered by VersionSelector. Not A's failure: outside the round-286 grants. This is A
+  BUG {"id": "C-R286-02", "severity": "low", "actual": "The /store card shows '$0' while the product page shows 'Price unavailable'. Cause: app/routes/store.tsx:79 mapProductToPack ends its chain with '?? 0' (ProductCard.tsx:32 has the same chain and would render 'Complimentary'). Pre-existing, outside the grants, reachable only with a priceless product (no standard fixture). Also: task §1.2 quotes the card rule without it
+=== ROUND 287 FAIL bV True failed: ['B-STORE-CARD (bbox clause; text/colour pass)', 'B-HOME-CARD §10 card-height clause (text/badge pass)']
+  BUG {"id": "C-R287-01", "severity": "low", "actual": "/store priceless card 400x577.6 on A vs 400x589.6 on HEAD (both viewports); in the All view every row below moves up 12 px; in the SFX row the visible frame is 577.6 next to free-pack's 589.6 (ragged bottoms); the home article is 409.6 vs 417.6. Cause: text-sm (20 px line) replaces text-2xl (32 px) / text-lg (28 px) in a content-sized card. This is a spec clause confl
+=== ROUND 288 PASS bV True failed: []
+=== ROUND 289 PASS bV True failed: []

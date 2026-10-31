@@ -84,7 +84,7 @@
 | რაუნდი | რა მოხდა | საიდან | წესი |
 |---|---|---|---|
 | 275 C FAIL | retro-მ `retro_candidates`-ის გარეთ მონიშნული ორი „RETRO-275 candidate“ გამოტოვა (C-R275-01/02, Low) | B, retro-ს inventory | უკვე გასწორდა RT-FIX-276-ში. ამ retro-ს inventory D-ID-ებსა და სტატუსებშიც ეძებს „RETRO 290“-ს (§8) |
-| 276 gate fail | SWEEP-მა მხოლოდ runtime consumer-ები განიხილა; 3 test ფაილი native `disabled`-ს ამოწმებდა (GATE276-T1, Medium) | B spec, SWEEP-ის ფარგლები | L23-ის attribute/state-contract პუნქტი (D-29z622). მას შემდეგ განმეორება 0 |
+| 276 gate fail | SWEEP-მა მხოლოდ runtime consumer-ები განიხილა; 2 test ფაილში 3 ტესტი ძველ კონტრაქტს ამოწმებდა: ორი native `disabled`-ს (NS6, TC9), ერთი Split-ის ძველ title-ს (NS1) (GATE276-T1, Medium; `gates/round-276/verify.log`: `Test Files 2 failed`; RT-FIX-291, C-R290-01) | B spec, SWEEP-ის ფარგლები | L23-ის attribute/state-contract პუნქტი (D-29z622). მას შემდეგ განმეორება 0 |
 | 282 C FAIL | B-ის scratch-მა DW row-ები sketch-ზე არ გაუშვა (C-R282-01, Medium); doc 211 A-ს STOP-ის გამო არ დაიწერა (C-R282-02) | B pre-check | L23-ის „specified test rows run on the sketch“ (D-29z670) |
 | 287 C FAIL | task-ის `text-sm` label ეწინააღმდეგებოდა იმავე task-ის „card keeps its box“-ს (C-R287-01, Low) | B spec conflict | L4-ის ახალი „ruling line“ პუნქტი (D-29z713) |
 

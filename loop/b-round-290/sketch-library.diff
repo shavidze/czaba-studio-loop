@@ -1,0 +1,42 @@
+--- /tmp/Lib.orig	2026-10-31 13:28:40.494183550 +0000
++++ app/components/arrangement/ArrangementLibrary.tsx	2026-10-31 13:29:16.889446912 +0000
+@@ -196,13 +196,21 @@
+   const resultIds = useMemo(() => results.map((source) => source.id), [results]);
+   const libraryGroupIdPrefix = useId();
+   const libraryResultRuns = useMemo(() => {
+-    const runs: { label: string; start: number; end: number }[] = [];
++    const runs: { key: string; label: string; start: number; end: number }[] = [];
++    const seen = new Map<string, number>();
+     results.forEach((source, index) => {
+       const last = runs[runs.length - 1];
+       if (last && last.label === source.collectionLabel) {
+         last.end = index + 1;
+       } else {
+-        runs.push({ label: source.collectionLabel, start: index, end: index + 1 });
++        const occurrence = seen.get(source.collectionLabel) ?? 0;
++        seen.set(source.collectionLabel, occurrence + 1);
++        runs.push({
++          key: `${source.collectionLabel}#${occurrence}`,
++          label: source.collectionLabel,
++          start: index,
++          end: index + 1,
++        });
+       }
+     });
+     return runs;
+@@ -663,13 +671,14 @@
+                       return (
+                         // biome-ignore lint/a11y/useSemanticElements: a listbox may own role=group children only; a native fieldset is a form-control grouping
+                         <div
+-                          key={headingId}
++                          key={run.key}
+                           role="group"
+                           aria-labelledby={headingId}
+                           className="space-y-1"
+                         >
+                           <div
+                             id={headingId}
++                            aria-hidden="true"
+                             className="break-words px-2 pt-2 pb-0.5 text-xs leading-snug text-muted"
+                           >
+                             {run.label}
