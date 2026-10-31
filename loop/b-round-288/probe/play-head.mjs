@@ -1,0 +1,16 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' });
+await page.getByText('Demo collection ready', { exact: false }).first().waitFor({ timeout: 60000 });
+await page.locator('[role="option"][data-source-id="demo-stem-bass"]').click();
+await page.keyboard.press('Enter'); await page.waitForTimeout(1500);
+const names = await page.evaluate(() => [...document.querySelectorAll('button')].map(b => b.getAttribute('aria-label') || b.textContent.trim()).filter(n => /play|stop/i.test(n)));
+const clock = () => page.evaluate(() => { const el = document.querySelector('[data-testid="arrangement-position"]'); return el ? el.textContent.trim() : null; });
+const t0 = await clock();
+await page.getByRole('button', { name: /^Play/ }).first().click();
+await page.waitForTimeout(1500);
+const t1 = await clock();
+const st = await page.evaluate(() => [...document.querySelectorAll('[aria-live="polite"]')].map(e=>e.textContent.trim()).slice(0,2));
+console.log(JSON.stringify({ names, t0, t1, st }, null, 1));
+await browser.close();

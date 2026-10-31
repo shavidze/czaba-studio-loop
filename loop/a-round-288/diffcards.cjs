@@ -1,0 +1,6 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async () => { const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+ await p.goto('http://127.0.0.1:5173/store', { waitUntil: 'load' }); await p.waitForTimeout(3000);
+ for (let y = 0; y < 6000; y += 600) { await p.mouse.wheel(0, 600); await p.waitForTimeout(120); } await p.waitForTimeout(1500);
+ console.log(JSON.stringify(await p.evaluate(() => Object.fromEntries(['priceless-track','bad-premium-track','priceless-pack','free-pack'].map((hd) => { const a = document.querySelector(`a[href="/products/${hd}"]`); if (!a) return [hd, null]; let el = a; while (el.parentElement && getComputedStyle(el.parentElement).display !== 'grid') el = el.parentElement; const vis=[...a.querySelectorAll('*')].map(e=>e.getBoundingClientRect()).filter(q=>q.height>0); const ab=a.getBoundingClientRect(); return [hd, { item: +el.getBoundingClientRect().height.toFixed(1), y: +(el.getBoundingClientRect().y+scrollY).toFixed(1), inner: +(Math.max(...vis.map(q=>q.bottom))-ab.top).toFixed(1), text: a.innerText.replace(/\s+/g,' ').slice(0,200) }]; }))), null, 1));
+ await b.close(); })();

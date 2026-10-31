@@ -13380,7 +13380,7 @@
   },
   {
    "id": "PD-REVIEW-2026-10-31",
-   "status": "in_progress (D-29z704): FIX-PD-1a2 fix-up round 288 (C-R287-01 + A-R287-PREMIUM-UNVALIDATED) | in_progress (D-29z700): FIX-PD-1a done as scoped (286, 096fa4b); FIX-PD-1a2 (F9 remainder) dispatched round 287 | in_progress (D-29z692): FIX-PD-1a dispatched round 286",
+   "status": "in_progress (D-29z709): FIX-PD-1a2 done (288, c345def); FIX-PD-1b dispatched round 289 | in_progress (D-29z704): FIX-PD-1a2 fix-up round 288 (C-R287-01 + A-R287-PREMIUM-UNVALIDATED) | in_progress (D-29z700): FIX-PD-1a done as scoped (286, 096fa4b); FIX-PD-1a2 (F9 remainder) dispatched round 287 | in_progress (D-29z692): FIX-PD-1a dispatched round 286",
    "requested": "Saba 2026-10-31 (agent-workflow.md \"Whole-product design review: Saba's decisions and new tasks\"); review docs/technical/studio-real-workspace/product-design-review-2026-10-31.md (product-designer, master 000da42)",
    "saba_decisions": {
     "Q1": "SRW-21 mount = first Studio product priority after STUDIO-PERFORMANCE; protected files stay outside the loop; B writes SRW-21-PLAN only; STUDIO-LINK until then",
@@ -13410,7 +13410,7 @@
      "id": "FIX-PD-1a2",
      "finding": "F9 remainder: C-R286-01 (Medium) + C-R286-02 (Low)",
      "what": "DisplayVersion.price number|undefined (synthetic Standard = resolveCatalogPrice; invalid variant price -> undefined); VersionSelector, /store card (store.tsx mapProductToPack) and home ProductCard show muted \"Price unavailable\" for an unknown price, never $0 / Complimentary; explicit 0 unchanged; formatCatalogPriceLabel shared helper",
-     "status": "bug (D-29z704): C round 287 FAIL on C-R287-01 (Low, card bbox clause; B spec conflict L4); 12 rows PASS incl. B-VERSION-CARD/B-FREE/B-REGRESS/B-JOURNEY/R286-KEEP both viewports, browserVerified/realVerified true; gate 287 skipped, A tree uncommitted (7 paths, sha in a-round-287.md). Fix-up round 288 (same stage id) adds leading-8 (/store) / leading-7 (home) on the unknown branch + A-R287-PREMIUM-UNVALIDATED fold-in (D-29z705/D-29z706) | dispatched round 287 (D-29z701/D-29z702)",
+     "status": "done (D-29z707): C round 288 PASS, browserVerified/realVerified true (c-round-288.json 11 rows, both viewports); gate 288 published c345def; closes C-R286-01, C-R286-02, C-R287-01, A-R287-PREMIUM-UNVALIDATED; F9 closed | bug (D-29z704): C round 287 FAIL on C-R287-01 (Low, card bbox clause; B spec conflict L4); 12 rows PASS incl. B-VERSION-CARD/B-FREE/B-REGRESS/B-JOURNEY/R286-KEEP both viewports, browserVerified/realVerified true; gate 287 skipped, A tree uncommitted (7 paths, sha in a-round-287.md). Fix-up round 288 (same stage id) adds leading-8 (/store) / leading-7 (home) on the unknown branch + A-R287-PREMIUM-UNVALIDATED fold-in (D-29z705/D-29z706) | dispatched round 287 (D-29z701/D-29z702)",
      "files": [
       "app/components/product/ProductCard.tsx",
       "app/components/product/VersionSelector.tsx",
@@ -13426,7 +13426,15 @@
      "id": "FIX-PD-1b",
      "finding": "F7 (Medium) + SR-230-6",
      "what": "English demo names in app/data/studio-lab-demo.ts (\"Night Pulse · Full mix\", \"… · Bass\", \"Middle East — public preview\"); collection label shown once as a library group heading; reference-first + product-designer + screen budget",
-     "status": "not_started (next after 286)"
+     "status": "in_progress (D-29z709): dispatched round 289, baseline c345def | not_started",
+     "files": [
+      "app/data/studio-lab-demo.ts",
+      "app/components/arrangement/ArrangementLibrary.tsx",
+      "app/data/__tests__/studio-lab-demo.test.ts",
+      "app/lib/arrangement/__tests__/strings.test.ts",
+      "app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx (new)",
+      "docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md (new)"
+     ]
     },
     {
      "id": "FIX-PD-1c",
@@ -23393,7 +23401,7 @@
   {
    "id": "C-R186-01",
    "severity": "low",
-   "status": "open_low_conditional",
+   "status": "closed (D-29z707, L7): same F9 root cause; FIX-PD-1a (C round 286 PASS: door-slams $0.00 -> $9.00, 096fa4b) + FIX-PD-1a2 (C round 288 PASS, c345def); backend-only upgrade rule kept as BACKEND-EVIDENCE-F9 | open_low_conditional",
    "title": "active SFX product without variants (/products/door-slams) shows TOTAL PRICE $0.00 with live Add to Cart and Buy Now (list card shows standardPrice $9)",
    "evidence": "c-round-186/shots/store-after/1280-product-door-slams.png; c-round-186/out/store-{1440,1280,375}-1.json pages.product-door-slams",
    "repro": "start mock; open /products/door-slams at any viewport",
@@ -27819,7 +27827,7 @@
    "id": "C-R286-01",
    "severity": "medium",
    "origin": "C",
-   "status": "fixed in A tree round 287 (C B-VERSION-CARD/B-STORE-CARD text+colour PASS, both viewports); closes with FIX-PD-1a2 at round 288 PASS + gate publish (D-29z704) | open -> round 287 FIX-PD-1a2 (D-29z701)",
+   "status": "closed (D-29z707): C round 288 PASS + gate 288 published c345def | fixed in A tree round 287 (C B-VERSION-CARD/B-STORE-CARD text+colour PASS, both viewports); closes with FIX-PD-1a2 at round 288 PASS + gate publish (D-29z704) | open -> round 287 FIX-PD-1a2 (D-29z701)",
    "title": "priceless Track: version card reads \"Standard $0\" while the panel reads Price unavailable (createDisplayVersions ?? 0 rendered by VersionSelector); pre-existing, outside round-286 grants; same as A-R286-REVIEW-TRACK-VERSION-ZERO",
    "evidence": "c-round-286/probe/extra-{dev,head}.json, c-round-286/shots/priceless-track-{1440,1280}.png",
    "added": "2026-10-31 B round 286 -> 287 planning"
@@ -27828,7 +27836,7 @@
    "id": "C-R286-02",
    "severity": "low",
    "origin": "C",
-   "status": "fixed in A tree round 287 (C B-VERSION-CARD/B-STORE-CARD text+colour PASS, both viewports); closes with FIX-PD-1a2 at round 288 PASS + gate publish (D-29z704) | open -> fixed in round 287 with C-R286-01 (same cause, same fixtures, L54; D-29z701), not deferred",
+   "status": "closed (D-29z707): C round 288 PASS + gate 288 published c345def | fixed in A tree round 287 (C B-VERSION-CARD/B-STORE-CARD text+colour PASS, both viewports); closes with FIX-PD-1a2 at round 288 PASS + gate publish (D-29z704) | open -> fixed in round 287 with C-R286-01 (same cause, same fixtures, L54; D-29z701), not deferred",
    "title": "/store card for a priceless product reads $0 while its page reads Price unavailable (store.tsx:79 ?? 0); ProductCard.tsx:32 same chain would read Complimentary",
    "evidence": "c-round-286/probe/unknown-dev.json cards, c-round-286/shots/unknown-dev/priceless-store-card-*.png",
    "added": "2026-10-31 B round 286 -> 287 planning"
@@ -27873,7 +27881,7 @@
    "id": "C-R287-01",
    "severity": "low",
    "origin": "C",
-   "status": "open -> fixed now in round 288 (D-29z705): own-round regression from B spec conflict (L4: text-sm mandated next to an unchanged-bbox clause); not deferred, owned cheaply",
+   "status": "closed (D-29z707): C round 288 PASS + gate 288 published c345def | open -> fixed now in round 288 (D-29z705): own-round regression from B spec conflict (L4: text-sm mandated next to an unchanged-bbox clause); not deferred, owned cheaply",
    "title": "unknown-price label shortens the card: /store 577.6 vs 589.6 (-12 px; SFX row bottoms ragged next to free-pack), home article 409.6 vs 417.6 (-8 px); cause text-sm 20 px line replaces text-2xl 32 px / text-lg 28 px",
    "evidence": "c-round-287/probe/p2-{a,head}.json, probe/bbox-{a,head}.json, shots/a/store-sfx-row-{1440,1280}.png; B sketch b-round-287/probe/lh-sketch.json (inline line-height 2rem/1.75rem restores 589.6/417.6 at both viewports)",
    "added": "2026-10-31 B round 287 -> 288 planning"
@@ -27882,7 +27890,7 @@
    "id": "A-R287-PREMIUM-UNVALIDATED",
    "severity": "low",
    "origin": "A (code-reviewer, rated Medium)",
-   "status": "ruled Low by B (no fixture or known backend emits a negative/Infinity premiumPrice; pre-existing) and fixed now in round 288 because product-utils.ts is owned and it is the same F9 card = page class (D-29z706)",
+   "status": "closed (D-29z707): C round 288 PASS + gate 288 published c345def | ruled Low by B (no fixture or known backend emits a negative/Infinity premiumPrice; pre-existing) and fixed now in round 288 because product-utils.ts is owned and it is the same F9 card = page class (D-29z706)",
    "title": "synthetic Premium price: product.premiumPrice unvalidated: premiumPrice -5/Infinity shows $-5/$Infinity on the version card while resolvePurchasePrice makes the panel read Price unavailable",
    "evidence": "a-round-287.md code-reviewer Medium 1; product-utils.ts:100/105 [b-round-287 claims K5]",
    "added": "2026-10-31 B round 287 -> 288 planning"
@@ -27913,6 +27921,42 @@
    "title": "round-287 §2.2 \"Unchanged: selection, aria-pressed\" protection clause had no K tag; covered by C probe",
    "evidence": "c-round-287.md L29 sweep ruling",
    "added": "2026-10-31 B round 287 -> 288 planning"
+  },
+  {
+   "id": "BACKEND-EVIDENCE-F9",
+   "severity": "info",
+   "origin": "C",
+   "status": "open_backend_evidence (D-29z707): not a reason to call round 288 unverified",
+   "title": "F9 rows that need the real backend: owned-Standard upgrade state in the browser (unit VC3/VC4 carry it) and the real-backend 403 for /api/studio-token; also C-R186-01's real /api/products/handle variant check",
+   "evidence": "c-round-288.json blocked[]; c-round-286.json blocked[]",
+   "added": "2026-10-31 B round 288 -> 289 planning"
+  },
+  {
+   "id": "A-R288-ARCH-LEADING-SPANS",
+   "severity": "info",
+   "origin": "A (code-reviewer Architecture note)",
+   "status": "signal (D-29z708): not scheduled; candidate for STORE-4 price component",
+   "title": "three hand-matched leading-* 'Price unavailable' spans (store.tsx, ProductCard.tsx, VersionSelector) each copy the known line box by hand; one shared price-label component would hold it",
+   "evidence": "a-round-288.md; c-round-288.json signalsForB",
+   "added": "2026-10-31 B round 288 -> 289 planning"
+  },
+  {
+   "id": "INFO-C288-FIXTURE-COUNT",
+   "severity": "info",
+   "origin": "C",
+   "status": "noted (D-29z708): B task text said 10 active fixtures, the mock has 11; C checked all 11; L29 already covers counts as tagged claims",
+   "title": "round-288 task fixture count 10 vs 11",
+   "evidence": "c-round-288.md Setup",
+   "added": "2026-10-31 B round 288 -> 289 planning"
+  },
+  {
+   "id": "SABA-Q-FIXPD1B-NAMES",
+   "severity": "info",
+   "origin": "B (product-designer)",
+   "status": "awaiting_user (D-29z709): non-blocking; round 289 ships the defaults",
+   "title": "Demo stem names: 'Pulse' (default) or 'Rhythm' for the pulse stem; 'Melody' (default, translation of მელოდია) or 'Lead' for the lead stem",
+   "evidence": "b-round-288.md section 3; tasks round 289",
+   "added": "2026-10-31 B round 288 -> 289 planning"
   }
  ],
  "tech_lead_notes": [
@@ -36903,7 +36947,7 @@
    "GLOBAL-FOCUS-VISIBLE-UNLAYERED (C-R169-N1 double focus ring class)",
    "handled in retro 200: SYS-1..3; GLOBAL-FOCUS-VISIBLE-UNLAYERED store half stays in SABA-B-4 stage 2"
   ],
-  "next_due": "round 290 or the end of STUDIO-PERFORMANCE, whichever first (retro 275 window 260-274)",
+  "next_due": "round 290 (next planning after round 289 closes) or the end of STUDIO-PERFORMANCE, whichever first (retro 290 window 275-289)",
   "added": "2026-10-26 B round 190 -> 191 planning (D-29z156)",
   "first_run": "round 200 (D-29z165)",
   "signals_for_next_retro": [
@@ -40081,6 +40125,21 @@
    "id": "D-29z706",
    "date": "2026-10-31",
    "text": "A-R287-PREMIUM-UNVALIDATED ruled Low (reviewer said Medium; no fixture/backend emits it) and folded into round 288 (owned file, same F9 card = page class, <=3 related bugs): keep if (product.premiumPrice), price: isValidCatalogPrice(product.premiumPrice) ? product.premiumPrice : undefined. A-R287-ARCH-ADAPTER-ZERO signal (no consumer, frozen services). A-R287-REVIEW-UPGRADE-NEGATIVE and A-R287-REVIEW-DECIMAL-FORMAT -> deferred_low_polish. REGRESSION not due (last 2026-10-30, due on/after 2026-11-02); RETRO at 290. No architecture checkpoint: small Store fix-up, one owner. No lesson added; lessons.md stays 60 lines."
+  },
+  {
+   "id": "D-29z707",
+   "date": "2026-10-31",
+   "text": "Round 288 FIX-PD-1a2 fix-up: C PASS (c-round-288.json, 11 rows, browserVerified/realVerified true, no bugs); gate-round-288 published c345def (both remotes). FIX-PD-1a2 done; F9 closed. Closed: C-R286-01, C-R286-02, C-R287-01, A-R287-PREMIUM-UNVALIDATED, and C-R186-01 by L7 (same root cause, door-slams fixed in 286). Backend-only rows kept as BACKEND-EVIDENCE-F9 (open evidence, not unverified). Baseline for round 289 = c345def."
+  },
+  {
+   "id": "D-29z708",
+   "date": "2026-10-31",
+   "text": "C round 288 signals: A-R288-ARCH-LEADING-SPANS recorded as an architecture signal (not scheduled; STORE-4 candidate, joins A-R287-ARCH-ADAPTER-ZERO family); INFO-C288-FIXTURE-COUNT noted (L29 covers it; no new lesson). No frontend-architect checkpoint: one owner, small Store fix-ups, no accumulated structural risk."
+  },
+  {
+   "id": "D-29z709",
+   "date": "2026-10-31",
+   "text": "Dispatch round 289 = FIX-PD-1b (F7 Medium + SR-230-6). Names: Night Pulse; Full mix; stems Pulse/Bass/Pad/Melody; 'Middle East — public preview', 'CZABA hero — public preview'; synthetic collection label 'Synthetic demo · Night Pulse'; other labels and the notice unchanged. Library list: per-option collection line removed; the collection label shows once as a group heading (div role=group aria-labelledby a plain div, never role=heading) only when the filtered results contain >= 2 distinct collectionLabels, grouped by contiguous runs so DOM order = resultIds order. B overrides product-designer's truncate on measured evidence: at the default 144 px list both labels truncate (b-round-288/probe/sketch.json); the heading wraps like the option titles (sketch-wrap: 59.5/43 px, list scrollHeight 669 -> 614). biome-ignore useSemanticElements ruled (fieldset is a form grouping, listbox children must be option/group). Buyer-side change recorded: a purchased single collection loses the per-stem product line; the product name stays in the tree node, the option title attribute and clip names. Name defaults asked once as SABA-Q-FIXPD1B-NAMES (L44). Live measurement LIVE-MEAS-BROWSER-SEARCH-LOCATION requested (non-blocking). No AGREE wait: approved Medium bug fix. Edge rule: contiguous runs, so labels A,B,A give 3 groups with heading A twice (cannot occur with demo or purchased data today; order is never traded for fewer headings; LG7 + mutant M3). HEAD probes b-round-288/probe/states-head.json: keyboard order and in-view focus at both viewports, tree/folder/search states."
   }
  ],
  "retro_candidates": [

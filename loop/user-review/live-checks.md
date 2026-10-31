@@ -38,3 +38,11 @@ Write the result to `reference/ableton-live-measurements-<date>.md` with the Liv
 3. Undo. Repeat step 2 holding Ctrl (Windows) while dropping. Record placement.
 
 **What to write:** the Live version, OS, the result of each step and a screenshot per step.
+
+## LIVE-MEAS-BROWSER-SEARCH-LOCATION (B, 2026-10-31, round 288 → 289 planning; FIX-PD-1b / F7, SR-230-6) — non-blocking
+Purpose: CZABA's library now shows a collection heading above grouped search results. The Live 12 manual (4.1 Content Pane, 4.2 Search Bar, 4.6 Library — https://www.ableton.com/en/live-manual/12/working-with-the-browser/) does not say whether search results show each hit's location. Round 289 ships the heading as a listed deviation either way.
+1. Live 12, browser, label **All**, type `bass` in the search field. Record: is the result a flat list, or grouped under folder/pack rows? Is any per-row location (pack, folder, path) visible without hovering? Screenshot.
+2. Same search with **Packs** (or one installed pack) selected. Record the same. Screenshot.
+3. Hover one result (and open the Info View, Shift+?). Record whether the location is shown there.
+
+**What to write:** the Live version, OS, the answer for each step and a screenshot per step. A result that contradicts the heading goes to Saba as a question; it does not silently change round 289.

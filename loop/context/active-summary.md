@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T11:18:07.494Z)
+# Active loop summary (2026-10-31T11:59:47.822Z)
 
-- backlog.json 2755 KB -> active view 380 KB
-- status: G_ROOT_GATE round 287
-- servers: `{"checkedUtc":"2026-10-31T11:04:17.8805543Z","round":287,"attempt":1,"store":200}`
-- last publication: 096fa4b61a6a853bdb53d4d0b9ca8f6b1f841a42 (rounds 286-286)
-- last root gate: round 287 skipped - C taskStatus FAIL
+- backlog.json 2762 KB -> active view 382 KB
+- status: G_ROOT_GATE round 288
+- servers: `{"checkedUtc":"2026-10-31T11:44:27.8195385Z","round":288,"attempt":1,"store":200}`
+- last publication: c345defdd29c8866c2a20a3064a38451a18b3d8b (rounds 287-288)
+- last root gate: round 288 published - commit c345defdd29c8866c2a20a3064a38451a18b3d8b pushed
 
 ## Current items: -
 
@@ -696,10 +696,13 @@
 - INFO-B283-NPX-TSX-CACHE / info / root_note / B's planning ran 'npx tsx' once for a scratch helper table; npm fetched tsx@4.23.15 into the npm cache only; project, lockfile and store unc
 - GATE283-S3 / info / watch / worst case at 6x CPU: 10 s worker stall + ~2.5 s sync synth ~ 12.5 s vs waitForCollectionReady 15 s timeout (perf/lib/page.ts); little headr
 - PD-FREE-HEADER / info / signal (D-29z695): for STORE-4 / a product with an explicit price 0 shows "Complimentary Download" in ProductSidebar (button without a handler) and "$0.00 USD" with Buy Now 
-- C-R286-01 / medium / open -> round 287 FIX-PD-1a2 (D-29z701) / priceless Track: version card reads "Standard $0" while the panel reads Price unavailable (createDisplayVersions ?? 0 rendered by VersionSel
-- C-R286-02 / low / open -> fixed in round 287 with C-R286-01 (same cause, same fixtures, L54; D-29z701), not deferred / /store card for a priceless product reads $0 while its page reads Price unavailable (store.tsx:79 ?? 0); ProductCard.tsx:32 same chain would
 - A-R286-ARCH-ONE-RESOLVER / info / adopted in round 287 (D-29z702) because the Medium fix changes that line; not a separate refactor / price resolution lived in two places (DisplayVersion.price synthetic 0 vs resolvePurchasePrice undefined); proposal DisplayVersion.price num
 - B-R286-UNUSED-PRICE-RENDERERS / info / signal (D-29z703): no route renders them at 096fa4b; check when STORE-4 touches them / RelatedTracksCarousel.tsx:120 and TrackRow.tsx:149 render a caller-formatted price; no consumer found
+- C-R287-01 / low / open -> fixed now in round 288 (D-29z705): own-round regression from B spec conflict (L4: text-sm mandated next to an unchanged-bbox clause); not deferred, owned cheaply / unknown-price label shortens the card: /store 577.6 vs 589.6 (-12 px; SFX row bottoms ragged next to free-pack), home article 409.6 vs 417.6
+- A-R287-PREMIUM-UNVALIDATED / low / ruled Low by B (no fixture or known backend emits a negative/Infinity premiumPrice; pre-existing) and fixed now in round 288 because product-utils.ts is owned and it is the same F9 card = page class (D-29z706) / synthetic Premium price: product.premiumPrice unvalidated: premiumPrice -5/Infinity shows $-5/$Infinity on the version card while resolvePur
+- A-R287-ARCH-ADAPTER-ZERO / info / signal (D-29z706): productAdapter.ts createVariants has no consumer outside app/services/api/adapters (claims K10); app/services/api is frozen; check when STORE-4 or a service task touches adapters / productAdapter.ts:108 (variant.price ?? 0).toFixed(2), another unknown->0 collapse
+- A-R287-L12-CLASS-PINS / info / ruled (D-29z705): class-substring pins in product-price-cards.test.tsx allowed because the task mandates the exact class set; they are source pins, not cascade assertions; browser bbox/line-height rows are the real guard / A asked whether L12 forbids asserting class substrings in the new card tests
+- INFO-C287-L29-PROTECTION-CLAUSE / info / noted (D-29z706): round 288 protection clauses carry K tags / round-287 §2.2 "Unchanged: selection, aria-pressed" protection clause had no K tag; covered by C probe
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

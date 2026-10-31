@@ -1,253 +1,243 @@
-# Round 288: FIX-PD-1a2 fix-up. The "Price unavailable" label keeps the card's line box (C-R287-01, Low), and an invalid synthetic Premium price reads "Price unavailable" (A-R287-PREMIUM-UNVALIDATED, Low)
+# Round 289: FIX-PD-1b. English demo names (F7, Medium) and the collection label shown once as a library group heading (SR-230-6)
 
-**Planned by:** B, at the round 287 → 288 planning, 2026-10-31.
+**Planned by:** B, at the round 288 → 289 planning, 2026-10-31.
 
 **Decisions** (full text in `backlog.json` → `decisions_log_b`):
-- **D-29z704:** round 287 closed with C **FAIL**. `browserVerified` and `realVerified` are both true.
-  - 12 rows passed at both viewports, including B-VERSION-CARD, B-FREE, B-REGRESS, B-JOURNEY and R286-KEEP.
-  - Only the box/height clauses of B-STORE-CARD and B-HOME-CARD failed (C-R287-01).
-  - Gate 287 was **skipped**, so the baseline is still `096fa4b` and A's round-287 work is **uncommitted in the tree**. This round builds on it.
-  - The stage id stays FIX-PD-1a2.
-- **D-29z705:** B's ruling on C-R287-01 (L4, L10). **Option (a) wins: the card height is preserved.**
-  - The unknown-price branch keeps `text-sm font-light text-muted` and adds the line height of the known price line.
-  - Rejected option (b), "accept −12/−8 px": under the SFX filter it makes the card bottoms in one grid row visibly ragged.
-  - **The cause was B's spec.** Round 287 bound one element with two clauses, `text-sm` and "bbox unchanged", and named no winner (L4). Its bound was written without measuring `text-sm` (L3). Both lessons already exist, so no lesson is added.
-  - A's L12 question is ruled: the class-substring pins in `product-price-cards.test.tsx` are allowed here. The task mandates the exact class set, so these are source pins, not cascade assertions. The browser box rows remain the real guard.
-- **D-29z706:**
-  - **A-R287-PREMIUM-UNVALIDATED** is ruled **Low**. The reviewer rated it Medium, but no fixture or known backend emits the price. It is folded in here because `product-utils.ts` is owned and it is the same F9 "card = page" class.
-  - The adapter note is a signal only.
-  - Two reviewer Lows go to `deferred_low_polish`.
+- **D-29z707:** round 288 (FIX-PD-1a2) is closed.
+  - C PASSED, with `browserVerified` and `realVerified` both true; gate 288 published `c345def`. **F9 is closed.**
+  - Closed: C-R286-01/02, C-R287-01, A-R287-PREMIUM-UNVALIDATED, and C-R186-01 (by L7).
+- **D-29z708:** A-R288-ARCH-LEADING-SPANS is recorded as a signal only.
+- **D-29z709:** this round's names, group-heading rule, wrap ruling, biome-ignore ruling and buyer-side change, all detailed below.
 
-**Owner:** A. **Verifier:** C. **Grants:** §4. This round touches no Studio, auth, cart, checkout or purchase-header code.
+**Owner:** A. **Verifier:** C. **Grants:** §4.
+- This round touches no Store, auth, cart, checkout, purchase or protected file.
+- It does not touch audio, playback, export or video code either. Demo audio is keyed by source id, not by title [K17].
 
-## Baseline: HEAD `096fa4b` [K1] plus A's round-287 tree (7 paths, sha256 fixed) [K2]
-- `gates/gate-round-287.json` is `skipped` (C FAIL), so no new commit exists.
-- **Claims (L29):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-287/claims-288.sh` **before editing**. Its output must equal `b-round-287/claims-288-output.txt`.
-  - **The K2 state is preserved as files:** `b-round-287/k2-snapshot/` holds A's 7 round-287 paths (relative paths kept; sha256 equal to K2). Each job runs on a fresh machine, so this snapshot is the only after-the-fact copy of the baseline.
-  - C runs the claims on a `git archive 096fa4b` scratch with `k2-snapshot/` copied over it; the output equals `claims-288-output.txt` except K1 `(archive)`.
-  - Any difference is a STOP (§8).
-- Do not revert, rewrite or reformat any of A's round-287 changes except the lines named in §2.
+## Baseline: HEAD `c345def` [K1], clean tree [K2]
+- `gates/gate-round-288.json` is `published`, commit `c345def…`.
+- **Claims (L29):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-288/claims-289.sh` **before editing**. Its output must equal `b-round-288/claims-289-output.txt`. Any difference is a STOP (§8).
+- If HEAD moves through a root-only commit and `git diff c345def HEAD -- app` stays empty, that is accepted with a note.
 
 ## 0. Read first
-1. `lessons.md` (every role), especially L3, L4, L10, L12, L23, L26, L28, L29 and L54.
+1. `lessons.md` (every role), especially L3, L4, L12, L23, L26, L28, L29, L39, L51 and L54.
 2. This task.
-3. `tasks/round-287.md` §2–§3 for the design this round finishes.
-4. `c-round-287.md` §C-R287-01 and `a-round-287.md` §code-reviewer.
-5. A's primitives:
-   - `FORWARDREF_COMPONENT.md` (component edits)
-   - `DESIGN_TOKENS.md` and `TAILWIND_FIRST.md` (one line-height utility, tokens only)
-   - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`
+3. Product review F7 and SR-230-6: `/home/runner/czaba-project/docs/technical/studio-real-workspace/product-design-review-2026-10-31.md` l.81–87 and l.154.
+4. A's primitives:
+   - `AGENT_DISCOVERABLE_CODE.md` and `FORWARDREF_COMPONENT.md` (component edit)
+   - `DESIGN_TOKENS.md` and `TAILWIND_FIRST.md` (tokens only, no custom CSS)
+   - `AUDIO_ARCHITECTURE.md` (read only: Studio file; no audio change)
+   - `prompts/new-test.md`, `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`
    - `GEORGIAN_DOCS.md`
 
-## 1. What C found, and the reference
+## 1. Why, and the promise (L55)
+**Promise:** "an English-only Studio UI where a stem's short name is never ambiguous: you can always see which collection it belongs to, without the label repeating on every card."
 
-### 1.1 C-R287-01 (Low, C's evidence)
-On A's tree with C's priceless mock, `/store` and the home page measure:
+**Today's problem:**
+- The demo data is Georgian [K3]. Studio strings are English-only (plan R5); only the demo data was missed.
+- Each synthetic card repeats `Synthetic demo · ღამის პულსი` under its short title [K5]. Five cards repeat it five times.
 
-| Card | A | HEAD |
-|---|---|---|
-| `/store` card | 400×577.6 | 400×589.6 |
-| home `article` | 409.6 | 417.6 |
+**What the browser shows today** (B baseline, `b-round-288/probe/journey-head.json` and `sketch.json`, both viewports):
+- **Georgian text:** 8 Georgian text lines in the body before any edit, plus 9 Georgian `title`/`aria-label` attributes. After adding Bass, the clip name, the status, the Undo button and the footer "Clip:" line are Georgian as well [K20].
 
-Both values hold at 1440×900 and 1280×720.
-- In the "All" view, every row below the priceless cards moves up 12 px.
-- In the SFX-filtered row, the card frames are ragged next to `free-pack`.
-- **Cause:** the unknown branch's `text-sm` sets a 20 px line. The known `text-2xl` line is 32 px on `/store` and the known `text-lg` line is 28 px on home, and the cards are content-sized [K3, K4].
-- **The version card is not affected.** C measured 124 px on A and on HEAD.
-- Evidence: `c-round-287/probe/{p2,bbox}-{a,head}.json`, `shots/a/store-sfx-row-{1440,1280}.png`.
+## 2. Reference: how Ableton Live 12 does it
+Source: Live 12 manual, "Working with the Browser", https://www.ableton.com/en/live-manual/12/working-with-the-browser/. It was cited by `product-designer` on 2026-10-31 (§4.1 Content Pane, §4.2 Search Bar, §4.6 Library).
 
-### 1.2 B's sketch (L23: tried before dispatch)
-- **Method:** dev :5173 (A's tree) with C's `c-round-287/mock-c287.mjs`. On the `Price unavailable` spans, B set inline `line-height` to 2rem on `/store` and 1.75rem on home.
-- **Result:** every priceless card measured **589.6 on `/store` and 417.6 on home** at both viewports. These equal `free-pack` and `middle-east` and equal HEAD. The price line's top stayed at 503 and 389.6.
-- Evidence: `b-round-287/probe/lh-sketch.cjs` and `lh-sketch.json`.
-- The standard mock was restored (`products: 8`).
-- **Tailwind:** numeric `leading-N` already compiles in this app (`leading-4`, 4 uses) [K8]. In Tailwind v4, `leading-8` = `calc(var(--spacing) * 8)` = 2rem and `leading-7` = 1.75rem.
-
-### 1.3 A-R287-PREMIUM-UNVALIDATED (Low)
-`createDisplayVersions` pushes the synthetic Premium when `product.premiumPrice` is truthy, and copies it unvalidated: `price: product.premiumPrice` [K5].
-- For `premiumPrice: -5` (or `Infinity`), the version card reads `$-5`.
-- The panel, through `resolvePurchasePrice` (id −2 ≠ −1 → `isValidCatalogPrice`), reads `Price unavailable`.
-- This breaks L54, card = page.
-
-### 1.4 Reference and design
-- **Reference:** none. This is a Store bug fix-up; the round-286 search (D-29z697) is reused.
-- **product-designer:** not consulted, because no new state is introduced.
-- **Ableton conformity:** does not apply. **Screen budget:** does not apply.
-- **Smallest honest behaviour:**
-  - the same label in a line box of the same height;
-  - an invalid Premium reads the same words as the panel.
-  - Hiding an invalid Premium was rejected: the panel would then still offer a Premium choice that the cards don't show, so card and page would differ again.
-
-### 1.5 Why we missed it
-B wrote two binding clauses on one element without a winner (L4) and wrote the bbox bound without measuring `text-sm` (L3). C caught it with exactly the bbox row the task carried. No new lesson.
-
-## 2. The change
-
-### 2.1 `app/routes/store.tsx`: one string, the unknown branch only [K3]
-- **Line 559:** `'text-sm font-light text-muted'` → `'text-sm leading-8 font-light text-muted'`.
-- The known branch `'text-2xl font-bold text-foreground'` (line 560) is byte-identical.
-- Nothing else changes.
-
-### 2.2 `app/components/product/ProductCard.tsx`: one string, the unknown branch only [K4]
-- **Line 162:** `'text-sm font-light text-muted'` → `'text-sm leading-7 font-light text-muted'`.
-- The known branch `'text-lg font-bold text-foreground'` (line 163) is byte-identical.
-- Nothing else changes.
-
-### 2.3 `app/lib/product-utils.ts`: the synthetic Premium [K5]
-- **Line 105:** `price: product.premiumPrice,` → `price: isValidCatalogPrice(product.premiumPrice) ? product.premiumPrice : undefined,`
-- **Line 100 is unchanged:** `if (product.premiumPrice) {`. That keeps today's presence rule: 0, `undefined` and `NaN` still push no Premium, and only truthy-but-invalid values (−5, `Infinity`) change, to `undefined`.
-- `isValidCatalogPrice` stays module-private. Every other function is unchanged.
-
-### 2.4 Not changed
-- **`VersionSelector.tsx` stays byte-identical to A's round-287 tree** (sha256 in K2). Do not "harmonise" its unknown span; its card height is already equal.
-- `PurchaseHeader.tsx`, `ProductDetailPage.tsx` and `ProductSidebar.tsx`.
-- Cart, auth, services and the protected routes.
-
-## 3. Tests
-
-### 3.1 Changed pins in `app/lib/__tests__/product-price-cards.test.tsx` (A's round-287 file; replacements, not removals) [K7]
-| Line | Before | After | Why |
+| Point | Live 12 (confirmed in the manual) | CZABA after this round | C row |
 |---|---|---|---|
-| 180 (PC1) | `toContain('text-sm font-light text-muted')` | `toContain('text-sm leading-7 font-light text-muted')` | §2.2 |
-| 192 (PC2) | `not.toContain('text-sm font-light text-muted')` | `not.toContain('leading-7')` | The free span must not carry the unknown line box. This is equal or stronger: the old substring no longer exists anywhere after §2.2, so keeping it would be vacuous |
-| 246 (SC1) | `'<span class="text-sm font-light text-muted">Price unavailable</span>'` | `'<span class="text-sm leading-8 font-light text-muted">Price unavailable</span>'` | §2.1 |
+| Behaviour | The content pane lists items by **Name**; other columns are optional (4.1). The **All** label shows every item from every label in one list (4.6), and search over the whole Library runs under All (4.2) | The All view lists every source, in the same order as today | B-KEYS |
+| Location of an item in results | **Not confirmed.** The manual does not describe a per-row location or a group header in search results. Root measurement requested: LIVE-MEAS-BROWSER-SEARCH-LOCATION (`user-review/live-checks.md`; non-blocking) | One collection heading per group, shown only when the results span ≥ 2 collections | B-GROUPS, B-STATES |
+| Names | Live shows the file or device name | Names are English, `<composition> · <part>`; the short title shows on the card and the full title in its `title` | B-NAMES |
+| Cursor, hover, selected | Unchanged by this round | Options keep their current hover and selected classes. Headings get no hover and take no focus | B-KEYS |
+| Shortcuts | Arrow keys move through the content pane | Up and Down move through options only and skip headings. The order is `resultIds` [K7] | B-KEYS |
+| Visuals | — | The heading is `text-xs`, muted, and wraps | B-GROUPS |
 
-- Every other assertion in the file is unchanged.
-- No row is deleted.
-- If any other existing assertion turns red, that is a STOP (§8).
+**Deviations:**
+1. **Group headings.**
+   - Reason: CZABA's card shows a **short** title ("Bass") to fit a 144 px list. Without its collection, a short title is ambiguous. Live has no short-title concept.
+   - Why it is better than Live: the label is said once, instead of repeated on each card or hidden.
+   - Saba approved this direction (SR-230-6, endorse + F7). Per L44, the Live-difference itself is listed for Saba once in `b-round-288.md`.
+2. **Stem part names.**
+   - "Pulse" and "Melody" are faithful translations, chosen as defaults.
+   - The alternatives "Rhythm" and "Lead" go to Saba as SABA-Q-FIXPD1B-NAMES. The question is non-blocking.
 
-### 3.2 Appended rows
-| File | Row | What it checks |
-|---|---|---|
-| `product-utils.test.ts`, inside the existing `describe('display version and card price labels')` | **PR10** | `createDisplayVersions` for a Track with `standardPrice` 19:<br>• `premiumPrice: -5` → the Premium version exists with `price === undefined`;<br>• `premiumPrice: Infinity` → the same;<br>• `premiumPrice: 59` → 59;<br>• `premiumPrice: 0` → no Premium, the version names equal `['Standard']`. |
-| `product-price-cards.test.tsx`, version-card describe | **VC5** | The `VersionSelector` render for a Track with `standardPrice` 19 and `premiumPrice` −5:<br>• the Premium card contains `Price unavailable`;<br>• the markup has no `$-5`, no `$<!-- -->-5` and no `NaN` (do not assert a bare `-5`: class names such as `gap-5` contain it);<br>• the Standard card still reads `$19` (the `$(<!-- -->)?19` regex, as VC2 does). |
+**Product-designer** (consulted 2026-10-31; framing: "remove Georgian, say the collection once").
 
-- **PR6 is unchanged.** `product-utils.test.ts:351` covers premiumPrice 59 resolving to 59 [K12].
-- PR1–PR9, VC1–VC4, PC1, PC2 and SC1 keep their names.
+Chosen:
+- **Element:** an ARIA `group` inside the listbox, labelled by a plain heading `div`.
+- **When:** only when the results contain ≥ 2 distinct collections.
+- **Which groups:** every group gets a heading.
 
-### 3.3 Mutants (A runs them and records the red rows; C re-runs them; L23 lower bound)
-| Mutant | Change | Must go red at |
-|---|---|---|
-| N7 | `store.tsx`: drop `leading-8` from the unknown branch | SC1 |
-| N8 | `ProductCard.tsx`: drop `leading-7` from the unknown branch | PC1 |
-| N9 | `product-utils.ts:105` back to `price: product.premiumPrice,` | PR10, VC5 |
-| N10 | `product-utils.ts:100` becomes `if (isValidCatalogPrice(product.premiumPrice)) {` (Premium hidden instead of unknown, and 0 would push a Premium) | PR10 |
+Rejected:
+- A header row without a group role: screen-reader users lose the context.
+- A sticky heading: `scrollIntoView` would hide the focused first option at 1280.
+- Always showing the heading: it repeats the tree node and breaks the screen budget.
+- Headings only on short-title groups: preview items would look like members of the group above.
 
-Round 287's N1–N6 still apply. A re-runs them once on the final tree and reports the red rows.
+**B override (D-29z709, measured):**
+- The designer proposed truncating the heading to one line. At the **default list width of 144 px**, **both** labels truncate (`sketch.json`: `truncated: true` for both).
+- So the heading **wraps** (`break-words`), as the option titles already do. The wrapped heights are 59.5 px and 43 px (`sketch-wrap.json`).
+- SR-275-6 (shorter collection label) is still `awaiting_user`. This round does not rename the public-preview label.
+
+## 3. What changes
+### 3.1 `app/data/studio-lab-demo.ts`: English demo data
+Only the 9 Georgian literals change [K3]. Ids, `kind`, `bpm`, `origin`, the other labels and the notice [K4], and every loader stay byte-identical.
+
+| Line | Before → After |
+|---|---|
+| `SYNTHETIC_COMPOSITION_TITLE` | `'ღამის პულსი'` → `'Night Pulse'` (so `SYNTHETIC_COLLECTION_LABEL` becomes `Synthetic demo · Night Pulse`) |
+| `pulse` / `bass` / `pad` / `lead` | → `'Pulse'` / `'Bass'` / `'Pad'` / `'Melody'` |
+| `demo-middle-east` title | → `'Middle East — public preview'` |
+| `demo-hero-music` title | → `'CZABA hero — public preview'` |
+| `demo-synth-mix` title | → `` `${SYNTHETIC_COMPOSITION_TITLE} · Full mix` `` |
+| `demo-synth-mix` shortTitle | → `'Full mix'` |
+
+After the edit, `grep -nP '[\x{10A0}-\x{10FF}]' app/data/studio-lab-demo.ts` returns 0 lines.
+
+### 3.2 `app/components/arrangement/ArrangementLibrary.tsx`: the group heading
+1. **Remove the per-option collection line.** This is the `{source.shortTitle ? (<span … data-testid="arrangement-library-option-context">{source.collectionLabel}</span>) : null}` block [K5].
+   - The option keeps `title={source.title}` [K5], the title span, the kind/duration row and the Playing row unchanged.
+   - Sweep: the testid has 1 hit in `app`, `perf` and `e2e`, the component itself [K11]. No test references it.
+2. **Group the rendered options** inside the existing `role="listbox"` [K6]:
+   - Build the groups in a `useMemo` from `results`, as **contiguous runs** of equal `collectionLabel`. The DOM order must equal `resultIds` order [K7].
+   - Do not regroup by first appearance. Keyboard order comes from `resultIds`, so a regrouped DOM would move the focus visually out of order.
+   - **When there are ≥ 2 runs,** wrap each run as:
+     ```
+     <div role="group" aria-labelledby={id} className="space-y-1">
+       <div id={id} className="break-words px-2 pt-2 pb-0.5 text-xs leading-snug text-muted">{label}</div>
+       …options
+     </div>
+     ```
+     The heading id is unique per instance, from `useId()` plus the run index. Key each group by that id.
+   - **When there are 0 or 1 runs,** render the options exactly as today, with no wrapper element and no heading.
+   - **Deliberate edge rule (D-29z709):** a label that comes back after another one (results A, B, A) gives **3** groups, and heading A appears twice. Demo and purchased data cannot produce this today: each collection is contiguous in source order. Order is never traded for fewer headings.
+   - The heading is a plain `div`. It is never `role="heading"` or `h*` (not allowed inside a listbox), never focusable and never an option.
+   - The option props stay unchanged, including the `isFocusTarget` rule, which keeps using the index into `results`/`resultIds` [K6].
+3. **Biome ruling.** Biome's `lint/a11y/useSemanticElements` flags `role="group"` and asks for `<fieldset>`. B ran this on a scratch copy.
+   - Use the existing precedent [K12]: one `// biome-ignore lint/a11y/useSemanticElements: a listbox may own role=group children only; a native fieldset is a form-control grouping` line directly above the group `div`.
+   - No other ignore is allowed.
+4. **Imports.** `Fragment` and `useId` from `react` are new [K16]. No other new import.
+5. **Spacing.**
+   - The listbox keeps `space-y-1` [K6], so the gap between options inside a group stays 4 px.
+   - The gap at a group boundary is the heading block. It measured 51 px in the B sketch.
+
+**Not changed:**
+- the tree (`nav`);
+- the search haystack, which already contains `collectionLabel` [K8];
+- `library.ts`, `collection.ts` and `strings.ts`;
+- status, Undo and clip name code [K14][K18];
+- the preview panel.
+
+**Buyer-side effect (recorded, D-29z709):** a purchased collection sets `shortTitle` and one `collectionLabel` [K13]. Its stems lose the per-card product line, and no heading shows because there is one run. The product name stays visible in the tree node, in each option's `title` and in the clip names.
+
+### 3.3 Tests
+1. **Pins of the old data.** Each is a replacement; no assertion is lost (L4).
+   - `app/lib/arrangement/__tests__/strings.test.ts`: `DEMO_REMAINING_GEORGIAN_LINES` (the 9-entry array [K9]) becomes `const DEMO_REMAINING_GEORGIAN_LINES: readonly string[] = [];`. The assertion that uses it stays.
+   - `app/data/__tests__/studio-lab-demo.test.ts` l.248 [K9]: `'Synthetic demo · ღამის პულსი'` → `'Synthetic demo · Night Pulse'`.
+   - **Add DL-EN** to `studio-lab-demo.test.ts`: the 9 sources' `title` and `shortTitle` equal the exact table in §3.1, and no `title`, `shortTitle` or `collectionLabel` matches `/[Ⴀ-ჿ]/`.
+2. **SWEEP [K10]** (roots `app`, `perf`, `e2e`; demo terms). There are 4 files:
+   - the data file;
+   - the 2 pins above;
+   - `library.test.ts` (12 hits). These are **its own fixture**, independent of the demo file, so it stays unchanged (ruled).
+   
+   Other Georgian strings in the tests are legacy track-name fixtures (`მუსიკა`, `ვიდეო`, `სტემები`); they are out of scope.
+3. **New file `app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx`.**
+   - Render the library the way `library-row-strings-ui.test.tsx` [K19] does, with a two-collection fixture (one group with `shortTitle`, one without).
+   - Find elements by role and accessible name (L12), never by class.
+   - Rows:
+     - **LG1:** All view → exactly 2 `group`s inside the `listbox`, with accessible names equal to the labels. 0 `arrangement-library-option-context` elements. `getAllByRole('option')` lists the options in source order.
+     - **LG2:** each heading is not focusable (`tabIndex` < 0 or absent, not `role=option` or `heading`). ArrowDown from the first option visits every option in `resultIds` order and never focuses a heading. ArrowUp returns.
+     - **LG3:** select one collection node, then a folder → 0 `group`s, and the options are direct children of the listbox.
+     - **LG4:** a query that matches nothing → 0 `group`s and the empty output shows. A query that matches one collection → 0 `group`s. A query that matches both → 2.
+     - **LG5:** a purchased-style single collection with `shortTitle`s → 0 `group`s, no collection text inside any option, and each option `title` = the full title.
+     - **LG6:** option `title` attributes are unchanged (full title), and the short title is shown.
+     - **LG7:** a non-contiguous fixture, labels A, B, A → exactly **3** `group`s with accessible names A, B, A; the options are in source order; ArrowDown follows that order.
+   - **Mutants** (A's script under `a-round-289/`, run on a scratch copy, tree sha restored):
+     - **M1:** render the heading with ≥ 1 run instead of ≥ 2 → LG3/LG4/LG5 red.
+     - **M2:** put the context span back → LG1/LG5 red.
+     - **M3:** group by first appearance (2 groups, options reordered) → LG7 red.
+     - **M4:** give the heading `tabIndex={0}` → LG2 red.
+     - **M5:** revert one name in `studio-lab-demo.ts` → DL-EN red.
+
+### 3.4 Implementation doc
+Create `docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md`. The last number is 215 [K15].
+- Use the TEMPLATE headings (L26), in Georgian with English terms.
+- l.4 is exactly `**სტატუსი:** Completed (C round 289 PASS)` (L28).
+- The doc cites only test ids that exist.
 
 ## 4. Grants (exact)
-**Allowed changes:**
-- **M** `app/routes/store.tsx`: §2.1 only.
-- **M** `app/components/product/ProductCard.tsx`: §2.2 only.
-- **M** `app/lib/product-utils.ts`: §2.3 only.
-- **M** `app/lib/__tests__/product-utils.test.ts`: append PR10 only.
-- **??** `app/lib/__tests__/product-price-cards.test.tsx`: the §3.1 lines plus VC5.
-- **??** `docs/implementation/2026/quarter-IV/215-fix-pd-card-price-unknown.md` (§5).
-
-**Frozen:**
-- `VersionSelector.tsx` (at its K2 sha256);
-- every other file, including `PurchaseHeader.tsx`, `ProductDetailPage.tsx`, `ProductSidebar.tsx`, `app/contexts/**`, `app/services/**`, the auth files, `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, every Studio file, `package.json`, the lock file and every loop file (including `mock-api/server.mjs`). A may create files only under the loop folder's `a-round-288/` and write `a-round-288.md`; C likewise under `c-round-288/`.
-
-At the end, `git status` lists the same 7 paths as K2, and no other.
-
-## 5. Doc 215 (A's round-287 doc, same feature; Georgian, technical terms in English)
-- **Line 4** becomes exactly `**სტატუსი:** Completed (C round 288 PASS)` (L28).
-- **Problem → Solution** gains two entries:
-  - C-R287-01 (the line box, D-29z705);
-  - A-R287-PREMIUM-UNVALIDATED.
-- **Testing** gains PR10, VC5 and N7–N10. Cite only rows that exist (L26).
-- **TODO** gains A-R287-ARCH-ADAPTER-ZERO (signal).
-- The headings stay TEMPLATE's, in order.
-
-## 6. What A runs (speed rules)
-1. Run the claims (see Baseline).
-2. Make the edits.
-3. Run `npm run typecheck` and `npm run lint`.
-4. Run `npx vitest run` on the 7 files in `b-round-286/covering-files.txt` plus `app/lib/__tests__/product-price-cards.test.tsx`. Round 287 ended at 8 files / 134 tests, so the expected result is 8 files / 136 tests.
-5. Also run `store-focus-ring` and `store-theme-tokens`. They were 48/48 in round 287.
-6. Run mutants N7–N10 and the re-run of N1–N6. Restore the tree after each one and check that its sha256 equals your own post-edit sha256 (record those first). The persisted script may extend `a-round-287/mutants.py` as `a-round-288/mutants.py`.
-7. Run one browser smoke at 1440:
-   - Use a copy of C's `c-round-287/mock-c287.mjs` in `a-round-288/`, with one added active fixture `bad-premium-track`: `category: 'Track'` (not SFX), **no `variants`** (empty or absent), `standardPrice` 19, `premiumPrice` −5. Without variants and outside SFX, the synthetic Standard/Premium path is the one taken [K14]; a fixture with variants would test real variants and prove nothing. Stop the standard mock by PID first and restore it at the end (`products: 8`).
-   - Report the `/store` and home card heights for `priceless-pack`, `priceless-track` and `free-pack`.
-   - Report the `bad-premium-track` version cards.
-8. Run `code-reviewer`; the round changes 3 or more files.
-
-**Report in `a-round-288.md`:**
-- the diff stat against A's round-287 tree;
-- the test counts;
-- the mutant table;
-- the 7 sha256 values;
-- any Architecture note, as a backlog signal.
-
-Do not run the full suite or `npm run verify`; the gate does.
-
-## 7. C rows (both viewports, 1440×900 and 1280×720, unless stated)
-**Servers:**
-- HEAD `096fa4b` build and A's build, each with its own port and `cacheDir`, warmed up (L38).
-- The mock is C's `c-round-287/mock-c287.mjs` copied to `c-round-288/`, plus `bad-premium-track` exactly as in §6 step 7 (Track, **no variants**, `standardPrice` 19, `premiumPrice` −5) [K14].
-- `mock-api/server.mjs` is never edited. Restore it at the end (`products: 8`).
-
-| Row | Check |
+| Path | What |
 |---|---|
-| CLAIMS | `git archive 096fa4b` scratch + `b-round-287/k2-snapshot/` overlaid → `claims-288.sh` equals `claims-288-output.txt` except K1 `(archive)`. Run the L29 sweep |
-| SOURCE-SCOPE | `git status` = the 7 K2 paths. `diff` each live path against `b-round-287/k2-snapshot/<path>`:<br>• `VersionSelector.tsx` is unchanged;<br>• the `store.tsx`, `ProductCard.tsx` and `product-utils.ts` diffs are exactly §2.1, §2.2 and §2.3;<br>• the `product-utils.test.ts` diff vs K2 has only `+` lines (PR10);<br>• the `product-price-cards.test.tsx` diff vs K2 has exactly the three §3.1 `-` lines.<br>The frozen files are unchanged against `096fa4b` |
-| TYPECHECK | `npm run typecheck` rc 0 |
-| UNIT | 8 covering files pass. PR10 and VC5 each exist exactly once |
-| UNIT-MUTANTS | C re-runs N7–N10 on its own copy; each is red at least at its §3.3 rows |
-| B-LINE-BOX | On A, for every `Price unavailable` span, computed `line-height`:<br>• **32px** on `/store` (`priceless-pack`, `priceless-track`);<br>• **28px** on home;<br>• font-size 14px, colour `rgb(163,155,142)`.<br>Card heights:<br>• `/store` card = 589.6 ±1 = HEAD's card for the same handle;<br>• home `article` = 417.6 ±1 = HEAD.<br>In the SFX-filtered row, the visible card frames of `priceless-pack` and `free-pack` are equal ±1 px. The y of `free-pack` in the All view equals HEAD's ±1 px. Screenshot the SFX row and the home row |
-| B-PREMIUM | `/products/bad-premium-track` on A:<br>• the version cards read `Standard $19` and `Premium` + `Price unavailable`;<br>• the page text has no `$-5`, `-$5` or `NaN`;<br>• selecting Premium makes the panel read `Price unavailable` with both buttons `aria-disabled="true"` (card = page).<br>HEAD shows `$-5`; screenshot both. The version-card box is equal to HEAD's ±1 px |
-| B-KEEP-287 | Re-check the round-287 rows that this round could touch, at both viewports:<br>• **`priceless-track` version card:** `Price unavailable`, 124 px;<br>• **`/store` and home labels:** `Price unavailable`, no `$0` and no `Complimentary`, and the `Pack` badge on `priceless-pack` home;<br>• **B-FREE:** `free-pack` `$0` / `Complimentary`;<br>• **B-REGRESS:** the 7 standard fixtures. Price strings and card boxes are byte-equal to HEAD; `middle-east` reads `$29` / `$99`, with no Premium change;<br>• **R286-KEEP:** `priceless-pack` buttons soft-disabled, 0 cart/auth/orders requests after activation |
-| B-JOURNEY (L54) | For all 10 active fixtures (9 + `bad-premium-track`), the `/store` card label equals the page figure.<br>For `bad-premium-track`, the card reads `$19`. The page opens with Standard selected (the default without `?upgrade=premium` [K13]), and Standard reads `$19.00`. Then Premium is selected, and both the Premium card and the panel read `Price unavailable`.<br>Screenshot card → page → Premium |
-| G288-AUTH | Fresh context, no credentials:<br>• `/studio-lab` shows the demo badge, `auth_user` is null, and Add is present;<br>• `/studio/middle-east` shows `Sign in required` with 0 `audio[src]`;<br>• `/api/studio-token?product=middle-east&file=stem-01.wav` returns 401 with no header, and with a fake bearer it is not 200 and has no token.<br>A real-backend 403 is BLOCKED: backend unavailable in cloud |
-| DOC-215 | Line 4 is byte-exact `**სტატუსი:** Completed (C round 288 PASS)`. The headings are TEMPLATE's, in order. Every cited row id exists, including PR10, VC5 and N7–N10 |
-| gate | The full suite, the build, Biome, `verify` and `test:e2e:smoke` are gate rows. C does not claim them |
+| `app/data/studio-lab-demo.ts` | §3.1 only |
+| `app/components/arrangement/ArrangementLibrary.tsx` | §3.2 only |
+| `app/lib/arrangement/__tests__/strings.test.ts` | the one array replacement in §3.3(1) |
+| `app/data/__tests__/studio-lab-demo.test.ts` | l.248 [K9] replacement + DL-EN |
+| `app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx` | new |
+| `docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md` | new |
 
-**BLOCKED, not a FAIL:** the owned-Standard upgrade state in the browser (backend unavailable in cloud; unit VC3/VC4 carry it).
+**Frozen:** everything else. In particular:
+- `library.ts`, `collection.ts`, `strings.ts`, `ArrangementContext.tsx`, `ArrangementLibraryPreview.tsx`, `StudioWorkspace.tsx` and `library.test.ts`;
+- every Store file;
+- the protected `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx`, `app/lib/auth.ts` and the auth tests;
+- `package.json` and the lock file.
+
+## 5. B pre-check (L23, on a scratch copy of `c345def`)
+Done in `/tmp/b288scratch`, a `git archive` copy with `node_modules` symlinked. B applied §3.1, the two pins and a sketch of §3.2. The sketch is kept as `b-round-288/sketch.patch` (diff against `git archive c345def`), and the Georgian-codepoint sweep as `b-round-288/sweep-georgian.txt`; /tmp does not survive the job. The sketch is a reference, not a grant: §3.2 governs.
+- `tsc --noEmit`: rc 0.
+- Biome on the 4 files: only `useSemanticElements` fired, and the ignore line resolves it.
+- **14 covering files / 247 tests passed:**
+  - studio-lab-demo, strings, library, collection;
+  - library-focus-handoff, library-notice-ui, library-preview, library-row-strings-ui, library-video-return-focus;
+  - purchased-collection-ui, collection-load-status, held-enter-add, tempo-seed-ui, floating-video.
+- The whole `app/lib/arrangement` + `app/data` folders also ran on the scratch: **172 files / 2607 tests passed** (`b-round-288/scratch-arrangement-suite.log`). This is a B pre-check, not a gate result.
+
+**A's covering run** (speed rules): `npm run typecheck`, `npm run lint`, and `npx vitest run` on those 14 files plus the new `library-group-heading-ui.test.tsx`. The expected total is 15 files, 247 + DL-EN + LG rows.
+
+## 6. C acceptance (browser rows run at 1440×900 and 1280×720)
+Use a fresh context with empty storage, and wait for `Demo collection ready` (L48). For the HEAD comparison, run a separate server with its own Vite `cacheDir`, warmed up first (L38).
+
+| Row | What C checks | Pass |
+|---|---|---|
+| CLAIMS | `claims-289.sh` at `c345def` = `claims-289-output.txt`; C also runs the L29 untagged-fact grep over this task | equal; no untagged fact |
+| SOURCE-SCOPE | `git status` and the diff vs `c345def` | only the §4 paths; the diff of each matches §3; frozen files `git diff` empty |
+| TYPECHECK | `npm run typecheck` | rc 0 |
+| UNIT | the 15 files of §5 | all pass; DL-EN and LG1–LG7 present by name, and LG7 |
+| UNIT-MUTANTS | C's own run of M1–M5 on a scratch copy | each red as listed; the live tree sha is unchanged |
+| B-NAMES | All view | the 9 option `title`s are exactly the §3.1 titles (Soft impact and Slow rise unchanged). The visible short titles are `Full mix`, `Pulse`, `Bass`, `Pad`, `Melody`. The tree shows `Synthetic demo · Night Pulse`. **0** Georgian code points (`/[Ⴀ-ჿ]/`) in `document.body.innerText` and in every `title`, `aria-*`, `alt` and `placeholder` attribute. Baseline: 8 lines + 9 attributes |
+| B-GROUPS | All view | the `listbox` contains exactly **2** `[role=group]`, accessible names `CZABA public previews + synthetic SFX` and `Synthetic demo · Night Pulse`, in that order.<br>0 `[data-testid=arrangement-library-option-context]`.<br>The headings are not truncated (`scrollWidth ≤ clientWidth`) and have heights ≈ 59.5 / 43 px (±2) at the default width.<br>Option heights: previews 66.5, SFX 47.25 and synthetic **47.25** (±1; HEAD 80.25).<br>The gap between options in a group is 4 px.<br>The list `scrollHeight` is 614 ±4 (HEAD 669). The HEAD values and the sketch values are [K20] |
+| B-KEYS | focus the first option and press ArrowDown ×8, then ArrowUp ×8 (250 ms between keys) | `document.activeElement` visits `demo-middle-east, demo-hero-music, demo-soft-impact, demo-slow-rise, demo-synth-mix, demo-stem-pulse, demo-stem-bass, demo-stem-pad, demo-stem-lead` and back, never a heading, with a visible ring. After every step the focused option's box lies fully inside the list's client box (±0.5 px), at both viewports. At HEAD the same order holds and all 17 steps are inside at both viewports (`b-round-288/probe/states-head.json`) [K20] |
+| B-STATES | (a) click the `Synthetic demo · Night Pulse` tree node; (b) click its `Stems` folder; then click `All` and type into the search box named `Search the library` [K19]: (c) `zzz`; (d) `night`; (e) `bass`; (f) `synthetic` | (a) 0 groups, 5 options; (b) 0 groups, `Pulse Bass Pad Melody`, `title` = `Night Pulse · <part>`; (c) the empty output `[data-testid=arrangement-library-empty]` [K19] shows, 0 groups; (d) 5 options, 0 groups; (e) 1 option (`demo-stem-bass`), 0 groups; (f) 9 options, 2 groups.<br>**Measured at HEAD** (`probe/states-head.json`, both viewports) [K20]: (a) the same 5 ids, (b) the same 4 ids, (c) empty, (f) the same 9 ids, all with 0 groups, as expected before the change. (d) and (e) are **derived**: the haystack is title + kind keywords + `collectionLabel` [K8], and the new strings contain `night` only in the 5 Night Pulse sources and `bass` only in `demo-stem-bass`. At HEAD the Georgian `ბასი` gives exactly `demo-stem-bass` |
+| B-JOURNEY (L54, L51) | fresh load → click the `Bass` option → Enter → read after 2 s → click `Play` → after 1.5 s → `Stop`. Locators [K19]: the status is `[data-testid=arrangement-status]` `textContent.trim()`, one status string composed of the add sentence, the tempo sentence and the snap hint, in that order; the Undo button is the button whose text starts `Undo`; the clip is the `[data-clip-id]` element; the footer line is `[data-testid=arrangement-selected-clip]` | Status is exactly `“Night Pulse · Bass” added to the Music track at 00:00.000. Tempo 120 BPM from “Night Pulse · Bass” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/2 (G)`.<br>The Undo button text is `Undo: Add — Night Pulse · Bass` (`title` + ` (Ctrl+Z)`).<br>The clip name is `Night Pulse · Bass`. The footer starts `Clip: Night Pulse · Bass ·`.<br>`[data-testid=arrangement-position]` [K19] advances from `00:00.000` to ≥ `00:01.000`, so the audio really plays.<br>0 Georgian code points on the page.<br>HEAD gives the same sentence with the Georgian title (`b-round-288/probe/journey-head.json`, `play-head.json`) [K20]. Screenshots per step |
+| B-SCREEN (L39) | full-window screenshots of the All view, HEAD vs A, and an element count in the library list: title spans + `option-context` spans + headings. The count is taken on a fresh load: library expanded, default width, `All` selected, empty search | count **14 → 11** (9 titles + 5 context → 9 titles + 2 headings); no new persistent element outside the list; HEAD vs A screenshots attached |
+| G289-AUTH | dev :5173, fresh context | `/studio-lab` opens anonymously with the `Demo collection — no sign-in required` badge [K19]. `/studio/middle-east` shows `Sign in required`, with 0 `audio[src]`. The token API returns 401 with no header and 403 with a fake bearer |
+| DOC-216 | doc 216 | l.4 is byte-exact; the TEMPLATE headings are in order; every cited test id exists |
+| gate | full suite, build, Biome, `verify`, `test:e2e:smoke` | gate rows (not claimed) |
+
+**Not testable in the cloud:** the purchased route needs the backend. LG5 carries the buyer-side rule at unit level. C may also run a stubbed client probe (L36), but no row depends on it.
+
+**Neighbouring behaviour that could break:**
+- library keyboard order and focus target;
+- the drag start from an option;
+- the preview panel title;
+- search;
+- the notice dismiss (`library-notice-ui`);
+- the first-run status and the tempo seed text.
+
+B-KEYS, B-STATES and B-JOURNEY cover them in the browser, and §5's files cover them in unit tests.
+
+## 7. Ableton conformity (C reports separately)
+- **CZABA requirement:** English UI and the collection said once.
+- **Ableton:** the group heading is a listed deviation (§2); Live's search-location behaviour is "not confirmed" until LIVE-MEAS-BROWSER-SEARCH-LOCATION is measured.
 
 ## 8. STOP conditions (L11)
-Write a STOP and change nothing else when:
+Write "STOP — needs B ruling" at the top of `a-round-289.md` and change nothing else if:
 - the claims output differs;
-- a frozen file would need a change, `VersionSelector.tsx` included;
-- an existing assertion other than the three §3.1 pins turns red;
-- `leading-8` or `leading-7` does not produce a 32 px or 28 px computed line height in A's smoke. Report the measured value; do not substitute an arbitrary value or inline style;
-- a row cannot be written without a type assertion.
+- a covering test fails or exceeds 50 % of its timeout;
+- Biome demands any ignore other than §3.2(3);
+- grouping needs a change in a frozen file;
+- a group appears with fewer than 2 runs;
+- any task clause conflicts with another.
 
-## 9. Neighbour risk
-- **Known prices:** byte-identical classes on the known branch (B-KEEP-287 / B-REGRESS).
-- **Vertical alignment:** the price row is `flex items-center`. A taller line box centres the 14 px text in the same 32/28 px band; the price line's top must stay at its HEAD y (B's sketch: 503 / 389.6).
-- **Premium presence:** line 100 is unchanged, so `premiumPrice` 0, `undefined` and `NaN` still show no Premium card (PR10, N10). `middle-east` (premiumPrice 99) is unchanged.
-- **Scans:** `store-focus-ring` and `store-theme-tokens` must stay green. `leading-*` is not a colour, focus or opacity token. There is one `className` per element, as in round 287.
-
-## 10. Outcome, fixed in advance
-- **PASS:** every runnable row passes at both viewports, with `browserVerified` true. Then, after gate publication:
-  - FIX-PD-1a2 → **მზადაა**;
-  - C-R286-01, C-R286-02, C-R287-01 and A-R287-PREMIUM-UNVALIDATED close;
-  - F9 closes.
-
-  The next round is REGRESSION if it is planned on or after 2026-11-02, otherwise FIX-PD-1b.
-- **Fix-up:** a Medium or higher finding in B-LINE-BOX, B-PREMIUM, B-KEEP-287 or B-JOURNEY makes the next round a fix-up.
-- **Lows:** they go to `deferred_low_polish`, unless the round's own regression is cheap in owned files.
-
-## 11. Deliverables
-- **A:** the §4 edits and `a-round-288.md` (with a checkpoint).
-- **C:** `c-round-288.md`, `c-round-288.json` and the evidence in `c-round-288/`.
-
-## Claims block (L29)
-Every fact about current code in this task carries a K tag from `b-round-287/claims-288.sh`; the output is in `claims-288-output.txt`.
-
-| Tag | Fact |
-|---|---|
-| K1 | HEAD `096fa4b` |
-| K2 | `git status` = 5 M + 2 ?? (A's round-287 paths), with their 7 sha256 values (equal to `a-round-287.md`) |
-| K3 | `store.tsx:558–560`: `pack.isPriceUnknown` ? `'text-sm font-light text-muted'` : `'text-2xl font-bold text-foreground'` |
-| K4 | `ProductCard.tsx:37` `const isPriceUnknown`; `:161–163`: `isPriceUnknown` ? `'text-sm font-light text-muted'` : `'text-lg font-bold text-foreground'` |
-| K5 | `product-utils.ts:100` `if (product.premiumPrice) {`, `:105` `price: product.premiumPrice,` and `:116` `function isValidCatalogPrice` |
-| K6 | `VersionSelector.tsx:105`, the unknown span (frozen) |
-| K7 | `product-price-cards.test.tsx:180`, `:192` and `:246` hold the `text-sm font-light text-muted` pins |
-| K8 | Numeric `leading-N` in `app/**/*.tsx`: `leading-4` ×4; `min-h-11` ×18 (the v4 spacing multiplier is live) |
-| K9 | Doc 215 line 4 = `**სტატუსი:** Completed (C round 287 PASS)` |
-| K10 | `createVariants`/adapters has no consumer outside `app/services/api/adapters/productAdapter.ts` |
-| K11 | The last docs are `214-…` and `215-…` (215 is A's, uncommitted) |
-| K13 | `ProductDetailPage.tsx:46/54`: the default selection is Standard unless `?upgrade=premium` |
-| K14 | `product-utils.ts:65` maps real variants first; `:85` is the SFX `return [];`. The synthetic Standard/Premium exists only for a non-SFX product without variants |
-| K12 | The premium tests: `product-utils.test.ts:154` (39.99) and `:351` PR6; `product-price-cards.test.tsx:78` (99) |
+## 9. Why we missed it (F7)
+- **Missed by:** every screen review, which counted clutter on stills.
+- **Why:** the strings test only listed the "remaining" Georgian lines in the demo file as a known exception [K9]. Nobody turned that exception into a task.
+- **Rule:** L54 (journey row) already covers it. RETRO 290 counts it. No new lesson.

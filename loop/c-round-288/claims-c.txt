@@ -1,0 +1,50 @@
+K1 HEAD: (archive)
+K2 status:
+K2 sha256 of A's round-287 paths:
+b63d02bf0091e7d0f3c02189701ba8da3ec744f6dcdc22f0b0aed17e085e2f7f  app/lib/product-utils.ts
+539f28fc433fce02aa8362f1331b3288bf07846bc06c3ce0fcd6a76ccbbebf93  app/components/product/VersionSelector.tsx
+65aa29cceaafac3d2a92e5a601823913c1fc7eec30a6428d67c768c4ba317074  app/routes/store.tsx
+21e3d8edb2684b99257a2eff45a71732eb67ccade1dc56bc3a9fe007232bdf54  app/components/product/ProductCard.tsx
+8f51eaf080327642c8b484fd0862831136da96c0fabf32a45fb5a92da07fba19  app/lib/__tests__/product-utils.test.ts
+7c25efa402a4c1763497d44e2cf26b9549faf6b299641a5ca7e1ad2bc7e5928b  app/lib/__tests__/product-price-cards.test.tsx
+b0673fd9ac5c78d9b74b319698a9391c9b2f383ad2deca9693b195c231d49fda  docs/implementation/2026/quarter-IV/215-fix-pd-card-price-unknown.md
+K3 store.tsx unknown/known price span classes:
+558:                    pack.isPriceUnknown
+559:                      ? 'text-sm font-light text-muted'
+560:                      : 'text-2xl font-bold text-foreground'
+K4 ProductCard.tsx unknown/known price span classes:
+37:  const isPriceUnknown = priceAmount === undefined;
+161:                  isPriceUnknown
+162:                    ? 'text-sm font-light text-muted'
+163:                    : 'text-lg font-bold text-foreground'
+K5 product-utils.ts synthetic Premium:
+100:  if (product.premiumPrice) {
+105:      price: product.premiumPrice,
+116:function isValidCatalogPrice(value: unknown): value is number {
+K6 VersionSelector.tsx unknown span:
+105:                    <span className="text-sm font-light text-muted">Price unavailable</span>
+K7 class pins in product-price-cards.test.tsx:
+180:    expect(html).toContain('text-sm font-light text-muted');
+192:    expect(freeHtml).not.toContain('text-sm font-light text-muted');
+246:      '<span class="text-sm font-light text-muted">Price unavailable</span>',
+K8 numeric leading-N tokens in app tsx:
+      4 leading-4
+K8 spacing multiplier utilities in use (min-h-11 count):
+18
+K9 doc 215 line 4:
+**სტატუსი:** Completed (C round 287 PASS)
+K10 adapters consumers outside tests:
+app/services/api/adapters/productAdapter.ts
+K11 last implementation docs:
+214-fix-pd-price-fallback.md
+215-fix-pd-card-price-unknown.md
+K12 premium tests:
+app/lib/__tests__/product-utils.test.ts:154:    const product = mockProduct({ standardPrice: 19.99, premiumPrice: 39.99, variants: undefined });
+app/lib/__tests__/product-utils.test.ts:351:  it('PR6: the synthetic Premium resolves to premiumPrice', async () => {
+app/lib/__tests__/product-price-cards.test.tsx:78:    const versions = createDisplayVersions(createCardProduct({ premiumPrice: 99 }));
+K13 ProductDetailPage default selection (Standard unless ?upgrade=premium):
+46:  const shouldDefaultToPremium = upgradeParam === 'premium';
+54:      displayVersions.find((v) => v.name.toLowerCase() === 'standard') || displayVersions[0] || null
+K14 real variants are mapped before the synthetic path (synthetic Standard/Premium only without variants, non-SFX):
+65:  if (product.variants && product.variants.length > 0) {
+85:  if (mapProductType(product.category) === 'Sound Effects') return [];

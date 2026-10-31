@@ -1,0 +1,6 @@
+- start 11:44:47
+- claims/scope/typecheck rc0/unit 8/136 11:45:32
+- mutants N1-N10 red as required; probes a/head done 11:49:58
+- product/journey/activation analysed: all pass both vp 11:50:40; next auth, doc
+- servers stopped, std mock restored 11:51:36; next report
+- FINAL c-round-288.md/.json PASS 11:52:21

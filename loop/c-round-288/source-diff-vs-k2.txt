@@ -1,0 +1,93 @@
+=== app/components/product/ProductCard.tsx
+162c162
+<                     ? 'text-sm font-light text-muted'
+---
+>                     ? 'text-sm leading-7 font-light text-muted'
+=== app/components/product/VersionSelector.tsx
+=== app/lib/__tests__/product-price-cards.test.tsx
+171a172,189
+> 
+>   it('VC5: an invalid Premium price reads Price unavailable and the Standard keeps its price', () => {
+>     const versions = createDisplayVersions(
+>       createCardProduct({ handle: 'bad-premium-track', standardPrice: 19, premiumPrice: -5 }),
+>     );
+>     expect(versions.map((version) => version.name)).toEqual(['Standard', 'Premium']);
+>     const html = renderVersions(versions);
+>     const cards = html.split('<button').slice(1);
+>     expect(cards).toHaveLength(2);
+>     const [standardCard, premiumCard] = cards;
+>     expect(premiumCard).toContain('Premium');
+>     expect(premiumCard).toContain('Price unavailable');
+>     expect(standardCard).toMatch(/\$(<!-- -->)?19/);
+>     expect(standardCard).not.toContain('Price unavailable');
+>     expect(html).not.toContain('$-5');
+>     expect(html).not.toContain('$<!-- -->-5');
+>     expect(html).not.toContain('NaN');
+>   });
+180c198
+<     expect(html).toContain('text-sm font-light text-muted');
+---
+>     expect(html).toContain('text-sm leading-7 font-light text-muted');
+192c210
+<     expect(freeHtml).not.toContain('text-sm font-light text-muted');
+---
+>     expect(freeHtml).not.toContain('leading-7');
+246c264
+<       '<span class="text-sm font-light text-muted">Price unavailable</span>',
+---
+>       '<span class="text-sm leading-8 font-light text-muted">Price unavailable</span>',
+=== app/lib/__tests__/product-utils.test.ts
+397a398,422
+> 
+>   it('PR10: an invalid synthetic Premium price is unknown, a valid one is kept and 0 adds no Premium', () => {
+>     const findPremium = (premiumPrice: number) =>
+>       createDisplayVersions(
+>         mockProduct({ category: 'Track', standardPrice: 19, premiumPrice }),
+>       ).find((version) => version.id === -2);
+>     const negative = findPremium(-5);
+>     expect(negative).toBeDefined();
+>     expect(negative?.name).toBe('Premium');
+>     expect(negative?.price).toBeUndefined();
+>     const infinite = findPremium(Number.POSITIVE_INFINITY);
+>     expect(infinite).toBeDefined();
+>     expect(infinite?.price).toBeUndefined();
+>     expect(findPremium(59)?.price).toBe(59);
+>     expect(
+>       createDisplayVersions(
+>         mockProduct({ category: 'Track', standardPrice: 19, premiumPrice: 0 }),
+>       ).map((version) => version.name),
+>     ).toEqual(['Standard']);
+>     expect(
+>       createDisplayVersions(
+>         mockProduct({ category: 'Track', standardPrice: 19, premiumPrice: Number.NaN }),
+>       ).map((version) => version.name),
+>     ).toEqual(['Standard']);
+>   });
+=== app/lib/product-utils.ts
+105c105
+<       price: product.premiumPrice,
+---
+>       price: isValidCatalogPrice(product.premiumPrice) ? product.premiumPrice : undefined,
+=== app/routes/store.tsx
+559c559
+<                       ? 'text-sm font-light text-muted'
+---
+>                       ? 'text-sm leading-8 font-light text-muted'
+=== docs/implementation/2026/quarter-IV/215-fix-pd-card-price-unknown.md
+4c4
+< **სტატუსი:** Completed (C round 287 PASS)
+---
+> **სტატუსი:** Completed (C round 288 PASS)
+55a56,57
+> - **Problem (C-R287-01, D-29z705):** უცნობი ფასის `text-sm` 20px-იან line box-ს ქმნიდა, ცნობილი ფასისა კი 32px (`/store`, `text-2xl`) და 28px (home, `text-lg`) იყო. ამიტომ ფასის გარეშე ბარათი 12/8px-ით დაბალი იყო და grid-ის რიგი ირღვეოდა. **Solution:** unknown შტოს დაემატა line-height utility: `/store`-ზე `leading-8`, home-ზე `leading-7`. ტექსტი კვლავ `text-sm font-light text-muted`-ია, ბარათის სიმაღლე კი ცნობილი ფასის ბარათისას უდრის (589.6 / 417.6). ცნობილი ფასის შტო byte-identical-ია.
+> - **Problem (A-R287-PREMIUM-UNVALIDATED):** synthetic Premium `product.premiumPrice`-ს ვალიდაციის გარეშე იღებდა, ამიტომ `premiumPrice: -5` card-ზე `$-5`-ად ჩანდა, panel-ში კი `Price unavailable`-ად (card ≠ page). **Solution:** `price` ხდება `isValidCatalogPrice(product.premiumPrice) ? product.premiumPrice : undefined`. არსებობის წესი (`if (product.premiumPrice)`) უცვლელია: 0 Premium-ს არ ამატებს, −5 და `Infinity` კი Premium-ს `Price unavailable`-ით აჩვენებს. დამალვა უარვყავით, რადგან მაშინ panel-ი Premium-ს შესთავაზებდა, ბარათები კი არა.
+63a66,68
+> - **PR10:** synthetic Premium: `-5` და `Infinity` → Premium არსებობს `undefined` ფასით, `59` → 59, `0` → მხოლოდ `Standard`.
+> - **VC5:** `premiumPrice: -5` → Premium card-ზე `Price unavailable`, Standard card-ზე `$19`, markup-ში `$-5` და `NaN` არ არის.
+> - PC1, PC2 და SC1-ის class pin-ები განახლდა `leading-7` / `leading-8`-ზე (ჩანაცვლება და არა წაშლა).
+64a70
+> - **Mutants N7–N10:** N7 (`leading-8`-ის მოხსნა) → SC1; N8 (`leading-7`-ის მოხსნა) → PC1; N9 (`price: product.premiumPrice`) → PR10, VC5; N10 (Premium-ის დამალვა არავალიდურ ფასზე) → PR10, VC5.
+65a72
+> - რაუნდი 288: browser smoke 1440-ზე `bad-premium-track` fixture-ით. Computed `line-height` 32px (`/store`) და 28px (home), ბარათები 589.6 / 417.6, Premium-ის არჩევისას panel-ში `Price unavailable` და ორივე ღილაკი `aria-disabled`.
+71a79
+> - **A-R287-ARCH-ADAPTER-ZERO** (signal) — `productAdapter.ts`-ში `(variant.price ?? 0)` კიდევ ერთი `?? 0`-ია ამ diff-ის გარეთ. ამჟამად consumer არ ჰყავს, ცალკე შეზღუდულ შემოწმებას მოითხოვს.
