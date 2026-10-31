@@ -1,0 +1,43 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx [2m([22m[2m16 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m15 skipped[39m[2m)[22m[33m 491[2mms[22m[39m
+     [2m[90m↓[39m[22m NG1: a narrow client render shows only the narrow state and never mounts the provider
+     [2m[90m↓[39m[22m NG2: a wide client render shows the workspace with exactly one theme marker
+     [2m[90m↓[39m[22m NG3: the server HTML holds both trees once, one theme marker and the complementary visibility classes
+     [2m[90m↓[39m[22m NG4: the boundary query is exactly (min-width: 900px) and the innerWidth fallback is inclusive at 900
+     [2m[90m↓[39m[22m NG5: narrowing after a wide start keeps the arrangement, its history and moves focus both ways
+     [2m[90m↓[39m[22m NG5b: narrowing while a clip plays stops playback and it stays stopped after widening
+[31m     [31m×[31m NG5c: narrowing while a library preview plays stops the preview and it reads Preview after widening[39m[33m 488[2mms[22m[39m
+     [2m[90m↓[39m[22m NG6: in the latched narrow state Space and Delete on Send link never reach the workspace transport
+       [2m[90m↓[39m[22m NG7a: navigator.share is called once with the title and URL and the status stays empty
+       [2m[90m↓[39m[22m NG7b: a cancelled share (AbortError) leaves the status empty and does not touch the clipboard
+       [2m[90m↓[39m[22m NG7c: without share, a successful clipboard write reads Link copied
+       [2m[90m↓[39m[22m NG7d: a failed clipboard write shows the error and a focused read-only Studio link field
+     [2m[90m↓[39m[22m NG8: an audio error replaces the preview with Preview unavailable. and keeps Send link
+     [2m[90m↓[39m[22m NG9: hydrating the server HTML on a narrow window lands on the narrow state without autofocus or warnings
+     [2m[90m↓[39m[22m NG9c: hydrating the server HTML on a wide window keeps the workspace and moves no focus
+     [2m[90m↓[39m[22m NG9b: a client navigation render on a narrow window does not autofocus the heading
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx[2m > [22mFIX-PD-1c studio-lab narrow-window gate (D-29z725, R1–R8)[2m > [22mNG5c: narrowing while a library preview plays stops the preview and it reads Preview after widening
+[31m[1mAssertionError[22m: expected "stop" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx:[2m258:21[22m[39m
+    [90m256| [39m
+    [90m257| [39m    viewport[33m.[39m[34msetWide[39m([35mfalse[39m)[33m;[39m
+    [90m258| [39m    [34mexpect[39m(stopSpy)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m259| [39m    viewport[33m.[39m[34msetWide[39m([35mtrue[39m)[33m;[39m
+    [90m260| [39m    expect(within(previewRegion()).queryByRole('button', { name: 'Stop…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m15 skipped[39m[90m (16)[39m
+[2m   Start at [22m 15:32:25
+[2m   Duration [22m 2.68s[2m (transform 1.12s, setup 0ms, import 1.62s, tests 491ms, environment 424ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx,title=app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx > FIX-PD-1c studio-lab narrow-window gate (D-29z725%2C R1–R8) > NG5c%3A narrowing while a library preview plays stops the preview and it reads Preview after widening,line=258,column=21::AssertionError: expected "stop" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx:258:21%0A%0A

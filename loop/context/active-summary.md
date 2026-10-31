@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T15:15:46.990Z)
+# Active loop summary (2026-10-31T15:45:52.457Z)
 
-- backlog.json 2808 KB -> active view 386 KB
-- status: G_ROOT_GATE round 292
-- servers: `{"checkedUtc":"2026-10-31T14:58:37.6596181Z","round":292,"attempt":1,"store":200}`
+- backlog.json 2815 KB -> active view 388 KB
+- status: G_ROOT_GATE round 293
+- servers: `{"checkedUtc":"2026-10-31T15:34:35.7968850Z","round":293,"attempt":1,"store":200}`
 - last publication: 88b23dd028581a4926cdbf6bdcb0694b41e115ba (rounds 290-291)
-- last root gate: round 292 skipped - C taskStatus FAIL
+- last root gate: round 293 failed - verify exit 1 (gates/round-293/verify.log)
 
 ## Current items: -
 
@@ -714,6 +714,7 @@
 - INFO-C291-K5-WORDING / info / noted (D-29z723); no lesson (one-line wording slip) / task 291 section 6 K5 said 3 headingId lines; correct is 2 (key replaced)
 - SABA-Q-FIXPD1C-COPY / info / awaiting_user (D-29z725): approved copy shipped in round 292; non-blocking / narrow-state copy: Saba-approved 'The Studio works on a computer. Listen here, or send yourself the link.' vs product-designer 'The Studio n
 - SABA-Q-FIXPD1C-ESCAPE / info / awaiting_user (D-29z725): listed deviation; non-blocking / narrow state has no 'Continue anyway' escape, unlike the legacy MobileBlocker (1024 px); below 900 px the workspace layout is broken
+- C-R292-01 / medium / scheduled round 293 (D-29z729): StopPlaybackOnNarrow also calls stopLibraryPreview; NG5c (B scratch pre-run: green with fix, red with the effect removed) / library preview keeps playing behind the latched narrow screen (<900 px) with no control to stop it; widening shows the library toggle still
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

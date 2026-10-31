@@ -1,0 +1,155 @@
+{
+ "round": 293,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T15:34:35.7968850Z",
+  "round": 293,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "B-NARROW-PREVIEW",
+  "B-NARROW-MIX",
+  "B-RESIZE-KEEP",
+  "B-NARROW-WIDE",
+  "B-DESK-SAME",
+  "B-NARROW-LOAD",
+  "G293-AUTH",
+  "DOC-218"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "gate (full suite, build, Biome, verify, test:e2e:smoke)"
+ ],
+ "rows": {
+  "CLAIMS": {
+   "status": "PASS",
+   "evidence": "c-round-293/claims-on-A.txt",
+   "note": "all deltas in allow-list (K3 rc1, K5 94 lines + destructure, K6=3, K10 440/16/NG5c 1, K11 293); K2 still 9; extra K15 1->2 is INFO-C293-K15 (file-wide grep; NG5b l.193 still uses it once, NG5c l.239 adds the second, required by §3.2)"
+  },
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "evidence": "c-round-293/sha-check.txt",
+   "note": "git status 9 paths; sha256sum -c fails only on the 3 §4 paths; 7 protected files OK"
+  },
+  "TYPECHECK": {
+   "status": "PASS",
+   "evidence": "c-round-293/typecheck.log"
+  },
+  "UNIT": {
+   "status": "PASS",
+   "evidence": "c-round-293/covering.log",
+   "note": "5 files 46 tests; all NG ids present; slowest NG5 918 ms of 15000 (6%); NG5c 248 ms"
+  },
+  "UNIT-MUTANTS": {
+   "status": "PASS",
+   "evidence": "c-round-293/mutants.json",
+   "note": "{'Ma-preview-effect-deleted': {'rc': 1, 'red': ['NG5c']}, 'M9-stop-child-removed': {'rc': 1, 'red': ['NG5b', 'NG5c']}, 'M3-server-snapshot-false': {'rc': 1, 'red': ['NG9c']}}; scratch restore diff empty"
+  },
+  "B-NARROW-PREVIEW": {
+   "status": "PASS",
+   "evidence": "c-round-293/c293.json#B-NARROW-PREVIEW, shots/preview-*",
+   "note": "1440->899, 1280->899, 1440->390: playing RMS 0.112, RMS 0 at 100/200/300 ms, 1/5/10 s; after widen toggle Preview, Bass still selected, replay RMS 0.067-0.084"
+  },
+  "B-NARROW-MIX": {
+   "status": "PASS",
+   "evidence": "c-round-293/c293.json#B-NARROW-MIX, shots/mix-390-native-play.png",
+   "note": "native audio playing, currentTime 0.398->1.902, master tap 0 and 0"
+  },
+  "B-RESIZE-KEEP": {
+   "status": "PASS",
+   "evidence": "c-round-293/c293.json#B-RESIZE-KEEP, shots/resize-*",
+   "note": "(a) all lanes unmuted, play RMS 0.045/0.048, RMS 0 at 100 ms..1 s, heading focused; (b) clips 1=1, Music muted, data-playing false, active arrangement-exit, Ctrl+Z unmutes; both viewports"
+  },
+  "B-NARROW-WIDE": {
+   "status": "PASS",
+   "evidence": "c-round-293/c293.json#B-NARROW-WIDE"
+  },
+  "B-DESK-SAME": {
+   "status": "PASS",
+   "evidence": "c-round-293/c293.json#B-DESK-SAME, shots/desk-*",
+   "note": "0 differing pixels at 1280x720 and 1440x900, 0 hydration warnings"
+  },
+  "B-NARROW-LOAD": {
+   "status": "PASS",
+   "evidence": "c-round-293/c293.json#B-NARROW-LOAD",
+   "note": "390x844 activeElement BODY, no arrangement-exit, 0 hydration warnings"
+  },
+  "G293-AUTH": {
+   "status": "PASS",
+   "evidence": "c-round-293/c293.json#G293-AUTH, shots/auth-legacy.png",
+   "note": "attempt 1 environment-invalid (page.evaluate during navigation: document.body null), replaced by attempt 2; anon auth_user null both widths, /studio/middle-east Sign in required, 0 audio[src], token GET 401 no token, POST 405 no token"
+  },
+  "DOC-218": {
+   "status": "PASS",
+   "evidence": "doc l.4, l.61, l.65",
+   "note": "l.4 byte-exact; C-R292-01 entry l.61; NG5c cited and exists; NG1/5b/7a/9/9b/9c, TH4, TH10, LRS4 exist"
+  },
+  "gate": {
+   "status": "gate",
+   "note": "full suite, build, Biome, verify, test:e2e:smoke are root gate rows"
+  }
+ },
+ "info": [
+  {
+   "id": "INFO-C293-K15",
+   "origin": "C",
+   "note": "claims K15 counts demo-soft-impact file-wide; 2 after NG5c, NG5b still 1. Expected spec gap, not an A deviation (A flagged it)."
+  },
+  {
+   "id": "INFO-C293-AUTH-ATTEMPT1",
+   "origin": "C",
+   "note": "G293-AUTH first attempt threw (document.body null mid-navigation); environment-invalid, one replacement used, second attempt PASS."
+  },
+  {
+   "id": "INFO-C293-DOC-L21",
+   "origin": "A reviewer, confirmed by C",
+   "note": "doc 218 l.21 (approach) names only togglePlayback for the narrowed branch; not an \"all sound\" claim and outside the §4 grant. B: one clause at the next doc touch."
+  },
+  {
+   "id": "INFO-C293-BASS-NAME",
+   "origin": "C",
+   "note": "library option accessible name is \"BassStem00:16.000\" (collection label is a group heading, \"Synthetic demo · Night Pulse\"); the spec wording \"Night Pulse · Bass\" maps to it."
+  },
+  {
+   "id": "INFO-C293-L49",
+   "origin": "C",
+   "note": "L49 clause on subtree unmounts present (lessons.md l.34); lessons.md 59 lines"
+  }
+ ],
+ "ableton": {
+  "requirement": "met",
+  "conformity": "not applicable (Live has no browser/phone version)"
+ },
+ "manifestPaths": [
+  "c-round-293.md",
+  "c-round-293.json",
+  "c-round-293/c293.cjs",
+  "c-round-293/c293.json",
+  "c-round-293/claims-on-A.txt",
+  "c-round-293/sha-check.txt",
+  "c-round-293/typecheck.log",
+  "c-round-293/covering.log",
+  "c-round-293/mutants.py",
+  "c-round-293/mutants.json",
+  "c-round-293/shots",
+  "c-round-293/mutant-M3-server-snapshot-false.log",
+  "c-round-293/mutant-M9-stop-child-removed.log",
+  "c-round-293/mutant-Ma-preview-effect-deleted.log",
+  "c-round-293/checkpoint.md"
+ ],
+ "missingPaths": [],
+ "countMismatches": [
+  "K15 1->2 (INFO-C293-K15)"
+ ],
+ "claimCheckMinutes": 1
+}

@@ -1,10 +1,10 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 292 (FIX-PD-1c) C FAIL with browserVerified/realVerified true: 20 specified rows PASS, but C-R292-01 (Medium, caused by the round) - the library preview keeps sounding behind the latched narrow screen. Gate 292 skipped; HEAD 88b23dd; A's 9 paths kept. Bug gate: fix the Medium first. Round 293 is a 3-path fix-up (StopPlaybackOnNarrow also calls stopLibraryPreview, NG5c pre-run on a scratch copy: green with the fix, red without). Regression not due until 2026-11-02. Not COMPLETE: C-R292-01 open and most queued scope not done. Not BLOCKED: nothing external missing. Advisor available and consulted.",
- "nextTask": "Round 293: FIX-PD-1c2, baseline 88b23dd + A round-292 tree (frozen b-round-292-r293-tree-sha256.txt, 1162; claims b-round-292/claims-293.sh). A: studio-lab.tsx StopPlaybackOnNarrow also calls stopLibraryPreview once on mount; NG5c in studio-narrow-gate-ui (demo-soft-impact preview, Stop before narrowing, Preview + source stop after widening, mutant red); doc 218 l.4 -> Completed (C round 293 PASS) + Problem/Solution. C: CLAIMS, SOURCE-SCOPE, TYPECHECK, UNIT + 3 mutants, B-NARROW-PREVIEW (1440/1280 + 390, RMS 0 within 300 ms), B-NARROW-MIX, B-RESIZE-KEEP rewritten (sound unmuted + state), B-NARROW-WIDE, B-DESK-SAME 0 px, B-NARROW-LOAD short, G293-AUTH, DOC-218. Root publishes 292+293 together. See current-task.md.",
+ "reason": "Round 293 (FIX-PD-1c2) C PASS 13/13, browserVerified/realVerified true, 0 bugs; C-R292-01 closed. Gate 293 failed: full suite 1 failed / 226 files, store-theme-tokens ST6 pins the Studio theme marker to StudioWorkspace.tsx + app.css and round 292's StudioNarrowScreen marker makes it 4/2 (GATE293-T1, Medium, B sweep gap). Nothing published; HEAD 88b23dd + 9-path tree. Round 294 = test/doc-only fix-up (B scratch: 6 files/90 tests green, Footer and old-map mutants red, build rc 0). Regression not due until 2026-11-02. Not COMPLETE: GATE293-T1 open, FIX-PD-1c unpublished, most queued scope not done. Not BLOCKED: nothing external missing. Advisor available and consulted.",
+ "nextTask": "Round 294: FIX-PD-1c3, baseline 88b23dd + 9-path tree of rounds 292-293 (frozen b-round-293-r294-tree-sha256.txt, 1162; claims b-round-293/claims-294.sh). A: store-theme-tokens ST6 exact map gains components/arrangement/StudioNarrowScreen.tsx (totals 4/2, stays per-file); TH4 title names StudioNarrowScreen; doc 218 l.4 -> Completed (C round 294 PASS), l.21 adds stopLibraryPreview, GATE293-T1 Problem/Solution, ST6 cited. No app source change. C: CLAIMS, SOURCE-SCOPE (10-path union, no non-test/non-doc diff), TYPECHECK, UNIT (6 files/90 tests), UNIT-MUTANTS (Footer marker, old map -> ST6 red), B-MARKER browser (one marker on /studio-lab at 1440/1280/390; none on / and /store), B-DESK-SAME 0 px, G294-AUTH, DOC-218. Root publishes 292+293+294 together. See current-task.md.",
  "remaining": [
-  "FIX-PD-1c2 (round 293: C-R292-01 Medium fix-up, library preview stop on narrow; closes FIX-PD-1c)",
-  "SYS-VACUOUS-ROWS (systemic test-only, after FIX-PD-1c)",
+  "FIX-PD-1c3 (round 294: GATE293-T1 Medium gate fix-up + A-R292-REVIEW-L-TH4-TITLE early + INFO-C293-DOC-L21; publishes FIX-PD-1c/1c2)",
+  "SYS-VACUOUS-ROWS (systemic test-only)",
   "STUDIO-LINK",
   "NAME-AND-HINT",
   "STEM-LANES (after STUDIO-PERFORMANCE, before SYS-1..3)",
@@ -15,6 +15,7 @@
   "PD-FREE-HEADER (signal, STORE-4)",
   "B-R286-UNUSED-PRICE-RENDERERS (signal)",
   "A-R287-ARCH-ADAPTER-ZERO (signal)",
+  "A-R293-ARCH-SILENCE-ALL (signal)",
   "R216-MEM-POLLS-HEADROOM (watch)",
   "PERF-3c",
   "PERF-COMMIT-RESCHEDULE",
@@ -64,7 +65,6 @@
   "SABA-Q-FIXPD1C-COPY (awaiting_user, non-blocking)",
   "SABA-Q-FIXPD1C-ESCAPE (awaiting_user, non-blocking)",
   "A-R292-REVIEW-L-NARROW-REMOUNT (deferred_low_polish)",
-  "A-R292-REVIEW-L-TH4-TITLE (deferred_low_polish)",
   "A-R292-REVIEW-L-ERROR-NOT-ANNOUNCED (deferred_low_polish)",
   "A-R292-ARCH-DEFER-SOURCE-LOAD (signal)"
  ]
