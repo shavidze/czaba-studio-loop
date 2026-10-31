@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T16:16:26.242Z)
+# Active loop summary (2026-10-31T17:00:13.123Z)
 
-- backlog.json 2822 KB -> active view 389 KB
-- status: G_ROOT_GATE round 294
-- servers: `{"checkedUtc":"2026-10-31T16:02:11.8394981Z","round":294,"attempt":1,"store":200}`
-- last publication: bc85a1ad45eb442ae5bf927b57868adfb92e1bf6 (rounds 292-294)
-- last root gate: round 294 published - commit bc85a1ad45eb442ae5bf927b57868adfb92e1bf6 pushed
+- backlog.json 2833 KB -> active view 389 KB
+- status: G_ROOT_GATE round 295
+- servers: `{"checkedUtc":"2026-10-31T16:38:55.0664910Z","round":295,"attempt":1,"store":200}`
+- last publication: eded57acb4cc2a69a8b68869f38c2a5761724064 (rounds 295-295)
+- last root gate: round 295 published - commit eded57acb4cc2a69a8b68869f38c2a5761724064 pushed
 
 ## Current items: -
 
@@ -714,9 +714,10 @@
 - INFO-C291-K5-WORDING / info / noted (D-29z723); no lesson (one-line wording slip) / task 291 section 6 K5 said 3 headingId lines; correct is 2 (key replaced)
 - SABA-Q-FIXPD1C-COPY / info / awaiting_user (D-29z725): approved copy shipped in round 292; non-blocking / narrow-state copy: Saba-approved 'The Studio works on a computer. Listen here, or send yourself the link.' vs product-designer 'The Studio n
 - SABA-Q-FIXPD1C-ESCAPE / info / awaiting_user (D-29z725): listed deviation; non-blocking / narrow state has no 'Continue anyway' escape, unlike the legacy MobileBlocker (1024 px); below 900 px the workspace layout is broken
-- GATE293-T1 / medium / dispatched round 294 FIX-PD-1c3 (D-29z734): ST6 exact map + StudioNarrowScreen.tsx; B scratch green, Footer and old-map mutants red / gate 293 failed: store-theme-tokens ST6 pins the data-studio-theme marker to StudioWorkspace.tsx + app.css (3/1); round 292's StudioNarrowSc
-- INFO-C293-DOC-L21 / info / scheduled round 294 (D-29z735) §3.3 / doc 218 l.21 names only togglePlayback for the narrowed branch
 - INFO-C293-K15 / info / noted (D-29z735) / claim K15 counted demo-soft-impact file-wide (1->2 after NG5c); B claim wording gap
+- INFO-C294-DESK-BASELINE-DRIFT / info / adopted (D-29z741): from round 295 a desk-sameness row means 0 px against HEAD rendered in the same job (git archive, own port and cacheDir); stored b-round-291 baselines are reference only / stored cross-job desk baselines drift by +-1 LSB on anti-aliased corners (15/22 px); same-job HEAD control 0/0
+- INFO-C294-STORE-NO-MAIN-LANDMARK / info / routed (D-29z741): acceptance row for STORE-2b (layout restyle owns root/Store layout); not scheduled alone / / and /store render no <main>/role=main at HEAD (WCAG 1.3.1/2.4.1)
+- INFO-C294-TOKEN-POST-405-STACK / info / routed (D-29z741): risk line for SRW-21-PLAN (protected route review); loop does not edit the file / dev-server POST /api/studio-token 405 body includes a Remix stack trace (no token); protected file; production unverified
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

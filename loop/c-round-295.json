@@ -1,0 +1,172 @@
+{
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-31T16:38:55.0664910Z",
+    "round": 295,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R295-INFO-01",
+      "severity": "low",
+      "info": true,
+      "origin": "B",
+      "steps": [
+        "From store/, run bash ../tmp/studio-real-loop/b-round-294/claims-295.sh on A's tree (= HEAD + B's sketch + doc 219)",
+        "Compare K6 and K10 with the task §6 CLAIMS allowed-delta list"
+      ],
+      "expected": "§6 lists every delta the granted change produces",
+      "actual": "K6 0->1 (the §3.2 import) is not listed; K10 also lists perf/lib/report.test.ts because the LOAF1 row title from B's sketch l.192 contains 'harness.loaf-scripts'. A raised a STOP on this. No code defect.",
+      "evidence": "c-round-295/claims-after.txt; b-round-294/sketch-sys-vacuous-rows.diff l.192"
+    }
+  ],
+  "findings_note": "C-R295-INFO-01 is info-level (listed in bugs with severity low and info=true because the schema has no info severity); it does not block.",
+  "passed": [
+    "CLAIMS",
+    "SOURCE-SCOPE",
+    "TYPECHECK",
+    "UNIT",
+    "UNIT-PERF",
+    "UNIT-MUTANTS",
+    "B-LOAF-REAL",
+    "B-PERF-LOAF",
+    "G295-AUTH",
+    "DOC-219"
+  ],
+  "failed": [],
+  "blocked": [],
+  "gate": [
+    "full test suite",
+    "npm run build",
+    "Biome",
+    "npm run verify",
+    "test:e2e:smoke",
+    "LOAF1 not gate-covered until ROOT-REQ-VITEST-PERF-INCLUDE"
+  ],
+  "rows": [
+    {
+      "id": "CLAIMS",
+      "status": "PASS",
+      "note": "every delta traced; K6 and K10 row-title delta are B spec omissions (C-R295-INFO-01)",
+      "evidence": "c-round-295/claims-after.txt"
+    },
+    {
+      "id": "SOURCE-SCOPE",
+      "status": "PASS",
+      "evidence": "c-round-295/sha-fail.txt"
+    },
+    {
+      "id": "TYPECHECK",
+      "status": "PASS",
+      "evidence": "c-round-295/typecheck.log"
+    },
+    {
+      "id": "UNIT",
+      "status": "PASS",
+      "count": "4 files 85/85",
+      "evidence": "c-round-295/unit-cover.log"
+    },
+    {
+      "id": "UNIT-PERF",
+      "status": "PASS",
+      "count": "23/23",
+      "evidence": "c-round-295/unit-perf.log"
+    },
+    {
+      "id": "UNIT-MUTANTS",
+      "status": "PASS",
+      "evidence": [
+        "c-round-295/mut-a.log",
+        "c-round-295/mut-b.log",
+        "c-round-295/mut-c.log",
+        "c-round-295/mut-c-control.log",
+        "c-round-295/mut-d.log"
+      ]
+    },
+    {
+      "id": "B-LOAF-REAL",
+      "status": "PASS",
+      "browser": true,
+      "measure": {
+        "1440x900": {
+          "entries": 5,
+          "withScripts": 4,
+          "emptyScripts": 1
+        },
+        "1280x720": {
+          "entries": 6,
+          "withScripts": 5,
+          "emptyScripts": 1
+        }
+      },
+      "evidence": "c-round-295/c295.json"
+    },
+    {
+      "id": "B-PERF-LOAF",
+      "status": "PASS",
+      "browser": true,
+      "measure": {
+        "loafScriptsProblems": 0,
+        "loadScriptMaxSamples": [
+          56,
+          48,
+          51
+        ],
+        "passesProblems": "all 6 empty"
+      },
+      "evidence": [
+        "c-round-295/perf-run.log",
+        "c-round-295/perf-latest.json"
+      ]
+    },
+    {
+      "id": "G295-AUTH",
+      "status": "PASS",
+      "browser": true,
+      "evidence": [
+        "c-round-295/c295.json",
+        "c-round-295/shots/auth-lab-1440.png",
+        "c-round-295/shots/auth-legacy-1440.png"
+      ]
+    },
+    {
+      "id": "DOC-219",
+      "status": "PASS",
+      "evidence": "c-round-295.md"
+    },
+    {
+      "id": "gate",
+      "status": "gate"
+    }
+  ],
+  "manifestPaths": [
+    "c-round-295/claims-after.txt",
+    "c-round-295/sha-fail.txt",
+    "c-round-295/typecheck.log",
+    "c-round-295/unit-cover.log",
+    "c-round-295/unit-perf.log",
+    "c-round-295/mut-a.log",
+    "c-round-295/mut-b.log",
+    "c-round-295/mut-c.log",
+    "c-round-295/mut-c-control.log",
+    "c-round-295/mut-d.log",
+    "c-round-295/c295.cjs",
+    "c-round-295/c295.json",
+    "c-round-295/perf-run.log",
+    "c-round-295/perf-latest.json",
+    "c-round-295/perf-start.txt",
+    "c-round-295/perf-rc.txt",
+    "c-round-295/shots/auth-lab-1440.png",
+    "c-round-295/shots/auth-legacy-1440.png",
+    "c-round-295/shots/loaf-1440x900.png",
+    "c-round-295/shots/loaf-1280x720.png"
+  ],
+  "missingPaths": [],
+  "countMismatches": [],
+  "claimCheckMinutes": 2,
+  "aStop": "A's STOP on K6/K10 ruled by C as a B spec omission (C-R295-INFO-01); no §8 STOP condition fired",
+  "ableton": "not applicable (test/harness round)"
+}

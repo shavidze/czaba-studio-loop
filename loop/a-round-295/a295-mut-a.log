@@ -1,0 +1,75 @@
+
+ RUN  v4.0.16 /tmp/a295-scratch
+
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW1: without a Worker global it resolves to the synchronous composition object 460ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW2: five concurrent calls share one worker and one synthesize message 4ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW3: a valid complete message resolves every caller and releases the worker 4ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW4: onerror falls back to the synchronous composition without waiting for the stall timer 431ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW5: onmessageerror falls back to the synchronous composition without waiting for the stall timer 422ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW6: a malformed message falls back: (a) a complete message without a composition 418ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW6: a malformed message falls back: (b) a pulse stem that is a plain array 419ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW7: a throwing Worker constructor falls back to the synchronous composition 428ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW8: the stall timer falls back only once the full timeout has passed 424ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW9: a later call reuses the completed job without a new worker 2ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW10: the worker module posts the full composition and transfers its five buffers 923ms
+ ✓ app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW11: a throwing postMessage falls back to the synchronous composition without waiting for the stall timer 414ms
+ × app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: a valid complete message clears the stall timer, so the timeout never releases the worker a second time 8ms
+   → expected 1 to be +0 // Object.is equality
+ × app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: a malformed message clears the stall timer, so the timeout never releases the worker a second time 428ms
+   → expected 1 to be +0 // Object.is equality
+ × app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: onerror clears the stall timer, so the timeout never releases the worker a second time 419ms
+   → expected 1 to be +0 // Object.is equality
+ × app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: onmessageerror clears the stall timer, so the timeout never releases the worker a second time 422ms
+   → expected 1 to be +0 // Object.is equality
+ × app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12b: a throwing postMessage clears the stall timer, so the timeout never releases the worker a second time 415ms
+   → expected 1 to be +0 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: a valid complete message clears the stall timer, so the timeout never releases the worker a second time
+ FAIL  app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: a malformed message clears the stall timer, so the timeout never releases the worker a second time
+ FAIL  app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: onerror clears the stall timer, so the timeout never releases the worker a second time
+ FAIL  app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12: onmessageerror clears the stall timer, so the timeout never releases the worker a second time
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/demo-synth-worker.test.ts:316:32
+    314|     await flushMicrotasks();
+    315|     expect(state.value).toBeDefined();
+    316|     expect(vi.getTimerCount()).toBe(0);
+       |                                ^
+    317|     await vi.advanceTimersByTimeAsync(client.DEMO_SYNTH_WORKER_STALL_T…
+    318|     expectReleased(worker);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW12b: a throwing postMessage clears the stall timer, so the timeout never releases the worker a second time
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/demo-synth-worker.test.ts:330:32
+    328|     await flushMicrotasks();
+    329|     expect(state.value).toBeDefined();
+    330|     expect(vi.getTimerCount()).toBe(0);
+       |                                ^
+    331|     await vi.advanceTimersByTimeAsync(client.DEMO_SYNTH_WORKER_STALL_T…
+    332|     expectReleased(worker);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 12 passed (17)
+   Start at  16:35:39
+   Duration  6.76s (transform 107ms, setup 0ms, import 81ms, tests 6.04s, environment 481ms)
+
