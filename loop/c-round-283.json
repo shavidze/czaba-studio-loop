@@ -1,0 +1,89 @@
+{
+ "round": 283,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T06:46:45.6278527Z",
+  "round": 283,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SOURCE-SCOPE",
+  "TEST-BYTES",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "DOC-211",
+  "LIBRARY-STATES",
+  "G283-AUTH"
+ ],
+ "carried": {
+  "PERF-RUN": "c-round-282.md §Perf; c-round-282/perf/run.log, latest*.json",
+  "SCRIPT-MAX": "c-round-282.md §Perf (median 44 [41,53,44])",
+  "EQUIV": "c-round-282/equiv.txt",
+  "SYNC-FALLBACK": "c-round-282/mu-sync-fallback/run.log (median 371)",
+  "WORKER-BROWSER": "c-round-282/worker-probe.json",
+  "EXPORT-BITEXACT": "c-round-282/export-c282.json",
+  "SSR": "c-round-282/logs/ssr-grep.txt",
+  "validity": "SOURCE-SCOPE start+end: code-six-sha256 6x OK, tree sha rc 0"
+ },
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "blocked": [
+  "G283-AUTH sub-check: real backend rejection (401/403) of a forged bearer cannot be checked - backend unavailable in cloud (route returns 500, not 200, no token: criterion as written holds)"
+ ],
+ "bugs": [
+  {
+   "id": "C-R283-01",
+   "severity": "low",
+   "steps": [
+    "scratch copy of A's tree (/tmp/c283/tree)",
+    "delete 'window.clearTimeout(stallTimer);' at app/lib/arrangement/demo-synth.client.ts l.60",
+    "npx vitest run app/lib/arrangement/__tests__/demo-synth-worker.test.ts"
+   ],
+   "expected": "at least one DW row red (the stall timer must be cleared on every finish path, doc 211 l.24 claims it)",
+   "actual": "12/12 green; no row pins the timer clear (confirms A's reviewer L6). Runtime today unaffected",
+   "evidence": "c-round-283/mutants-c.txt (MU-C-TIMER)"
+  },
+  {
+   "id": "C-R283-02",
+   "severity": "low",
+   "steps": [
+    "read doc 211 l.12-14",
+    "open tmp/studio-real-loop/b-round-281/loaf-head.json",
+    "list each run's lt durations"
+   ],
+   "expected": "cited ranges 83-131 ms and 363-367 ms appear in the cited file",
+   "actual": "file holds 3 runs: [90,365],[83,363],[83,364] -> 83-90 / 363-365; the '+1' run from task 282 §1.1 is not saved in b-round-281/",
+   "evidence": "b-round-281/loaf-head.json; docs/implementation/2026/quarter-IV/211-perf-demo-synth-worker.md l.12-14"
+  },
+  {
+   "id": "C-R283-03",
+   "severity": "low",
+   "steps": [
+    "grep -n 316 docs/implementation/2026/quarter-IV/163-studio-perf-harness.md",
+    "python len(json.load(perf/budgets.json))"
+   ],
+   "expected": "doc states the current row count",
+   "actual": "l.16 and l.94 say 316 rows; budgets.json has 320 (equiv.txt 'PERF-1a: rows 320'); lines outside A's grant (confirms A's reviewer M1)",
+   "evidence": "c-round-283/c-round-283.md Findings; c-round-282/equiv.txt"
+  }
+ ],
+ "notes": [
+  "G283-AUTH attempt 1 on :5173 env-invalid (warm-up timeout during Vite dep re-optimise), kept in c-round-283/auth-dev-attempts.txt and replaced (L38). Cause (inference from timing and log, not proven): the build ended 06:50:17; the :5173 dev server logged 'new dependencies optimized: firebase/app, firebase/auth ... reloading' at 06:50:54, 11 s into C's :5173 warm-up (servers/store-20261031T063446Z.out.log). That is lazy runtime discovery in dev mode. remix vite:build does not run the dep optimiser. :5173 recovered (200), and attempt 2 passed.",
+  "Ableton conformity: not applicable (test+docs performance fix-up)",
+  "All three Lows go to deferred_low_polish under the 2026-10-23 bug gate"
+ ],
+ "extra": {
+  "C283-EXTRA-EXPORT-RECHECK": "PASS, real Chromium, C prod build, both viewports: pulse sha 1fea093b..., all 7 clips sha 72228706..., 48 kHz/24-bit/2ch, 16 s / 87 s, identical to c-round-282/export-c282.json; evidence c-round-283/export-c283.json"
+ }
+}

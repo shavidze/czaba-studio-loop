@@ -1,10 +1,10 @@
 {
- "version": 246,
- "updated": "2026-10-31 (B round 282 -> 283 planning, D-29z666..D-29z670)",
+ "version": 247,
+ "updated": "2026-10-31 (B round 283 -> 284 planning, D-29z671..D-29z680)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 283, D-29z666..D-29z670; PERF-2 fix-up, test + docs only: DW3/DW9 option (a) expectSameComposition, DW10 fresh-module identity guard, new DW11 postMessage throw, MU-U4/MU-U5; test file byte-identical to b-round-282/demo-synth-worker.test.sketch.ts; doc 211 + doc 163/169 sections; six code files byte-frozen; browser rows LIBRARY-STATES + G283-AUTH, round-282 runtime rows carried)",
- "advisor_used_by_B": "round 276 -> 277 planning: available and consulted (before the approach and before finishing)",
+ "current_task": "current-task.md (round 284, D-29z671..D-29z680; PERF-3a: waveformPeakColumns zoom bands (x4 at 25/6.25/1.5625 px/s) in peaks.ts + envelope polyline in seconds viewBox memoised on clip; 6 files byte-identical to b-round-283/sketch-full.diff (sketch-sha256.txt) + new doc 212; ZQ1/ZQ2/ZQ2b/ZQ3, EU5/EU7 rewritten to seconds; mutants HEADCODE/Z1..Z5; C browser rows ZOOM-PATH-IN/OUT (HEAD 60/300 -> 0/60), WAVE-PIXELS, ENVELOPE-ZOOM, PERF-RUN, G284-AUTH)",
+ "advisor_used_by_B": "round 283 -> 284 planning: available and consulted (before the approach; before finishing)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -10954,10 +10954,19 @@
    "round": 283,
    "task": "current-task.md",
    "decision": "D-29z666..D-29z670",
-   "status": "dispatched",
+   "status": "done (D-29z671): C PASS (c-round-283.json, browserVerified/realVerified true, 10 rows passed, runtime rows carried from round 282), gate 283 published 54a3fcc (both remotes); 3 Lows C-R283-01..03 -> deferred_low_polish",
    "type": "STUDIO-PERFORMANCE PERF-2 fix-up (test-only + docs)",
    "note": "baseline HEAD 000da42 + A's round-282 tree (4 M + 3 ??); grants 4 (test file = sketch, doc 211 new, doc 163/169 sections); code six frozen by b-round-282/code-six-sha256.txt; B scratch: 5 files / 101 tests PASS, typecheck rc 0, Biome 0; MU-U1..U5 red at named rows, MU-U4 control green on a282 DW10 (b-round-282/mutants.txt); DW10 0.89 s",
    "added": "2026-10-31 B round 282 -> 283 planning"
+  },
+  {
+   "round": 284,
+   "task": "current-task.md",
+   "decision": "D-29z671..D-29z680",
+   "status": "dispatched",
+   "type": "STUDIO-PERFORMANCE PERF-3a (waveform column bands + envelope seconds viewBox; stage 1 of 2 of PERF-3)",
+   "note": "baseline HEAD 54a3fcc clean; grants 6 M (= sketch) + doc 212 new; B scratch: 9 files / 171 tests PASS, tsc 0, Biome clean; mutants HEADCODE/Z1..Z5 red (b-round-283/mutants.txt); browser HEAD vs sketch: zoom-in d rewrites 60 -> 0, zoom-out 300 -> 60, pixels identical >= 50 px/s, <= 6.057 % |d|>32 below the cap; ruler adds 6142 nodes at 122.1 px/s with 30 clips (PERF-3b)",
+   "added": "2026-10-31 B round 283 -> 284 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -13353,7 +13362,7 @@
   },
   {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress (D-29z666): PERF-HARNESS-DIAG-281 done (round 281); PERF-2 round 282 C FAIL on test/doc rows only (runtime rows PASS) -> round 283 fix-up (test + docs); then REGRESSION if due (on/after 2026-11-02), else PERF-3; RETRO at 290",
+   "status": "in_progress (D-29z673): PERF-2 done (round 283, 54a3fcc); PERF-3 split -> PERF-3a round 284 (dispatched), PERF-3b next PERF round; REGRESSION first when due (on/after 2026-11-02); RETRO at 290",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -13533,15 +13542,31 @@
     {
      "id": "PERF-2",
      "what": "see perf-plan.md task outline",
-     "status": "dispatched round 282 (D-29z661..D-29z665): demo synth in a module Web Worker (demo-synth.client.ts + demo-synth.worker.ts, studio-lab-demo.ts async), sync fallback; harness rows load.settled-ms, load.script-max (assert < 100), load.settled.longtask-max, load.settled.longtasks-over-50; load.commits/components -> wallclock; code = b-round-281/sketch.diff | not_started",
+     "status": "done (D-29z671): round 282 runtime rows C PASS + round 283 fix-up C PASS browserVerified/realVerified true; gate 283 published 54a3fcc | dispatched round 282 (D-29z661..D-29z665): demo synth in a module Web Worker (demo-synth.client.ts + demo-synth.worker.ts, studio-lab-demo.ts async), sync fallback; harness rows load.settled-ms, load.script-max (assert < 100), load.settled.longtask-max, load.settled.longtasks-over-50; load.commits/components -> wallclock; code = b-round-281/sketch.diff | not_started",
      "measured_d29z662": "HEAD 000da42: synth effect task 363-367 ms (LoAF MessagePort.onmessage), first-frame task 83-131 ms with no script > 5 ms; sketch: load.script-max 42-67, load.longtask-max 77-115 (first frame), WAV sha256 identical (pulse 1fea093b, all 7 synth 72228706) at both viewports; MU-SYNC-FALLBACK assert FAIL median 375; evidence b-round-281/",
      "done_definition_d29z662": "load.script-max < 100 (median of 3) and the synth task gone; load.longtask-max stays record-only because the first-frame task (PERF2-FIRST-FRAME-LONGTASK) is not PERF-2 work; the perf-plan row \"load long task < 100 ms\" is not claimed as met"
     },
     {
      "id": "PERF-3",
      "what": "see perf-plan.md task outline",
-     "status": "not_started",
-     "scope_addition_d29z215": "add a Ctrl+wheel zoom baseline row before the fix (hypothesis in doc 168: continuous zoom, not measured); key zoom baseline 95 comps/key (1 clip)"
+     "status": "in_progress (D-29z673): split into PERF-3a (round 284) + PERF-3b; exit target zoom keydown p95 < 50 ms with 30 clips measured at PERF-3b",
+     "scope_addition_d29z215": "add a Ctrl+wheel zoom baseline row before the fix (hypothesis in doc 168: continuous zoom, not measured); key zoom baseline 95 comps/key (1 clip)",
+     "split_d29z673": {
+      "PERF-3a": "waveform column bands (waveformPeakColumns in peaks.ts) + envelope polyline in seconds viewBox memoised on clip; deterministic rows ZOOM-PATH-IN 0 (HEAD 60), ZOOM-PATH-OUT 60 (HEAD 300); wallclock trend only",
+      "PERF-3b": "seconds ruler tick windowing (ArrangementRuler renders every tick over the whole arrangement: +6142 nodes at 122.1 px/s with 30 clips) without breaking play.idle-commits (rule tiles-with-hysteresis vs CSS repeating-gradient lines + windowed labels, cf. ArrangementLane grid lines); bars ruler sibling ArrangementTempoRow; data-tick-step consumers; harness rows: Event Timing p95 per zoom key, waveform path rewrites, ruler node count, Ctrl+wheel zoom baseline (scope_addition_d29z215 moves here); exit p95 < 50 ms with 30 clips; doc 212 l.4 -> Completed"
+     }
+    },
+    {
+     "id": "PERF-3a",
+     "what": "waveform column bands + envelope seconds viewBox (stage 1 of 2 of PERF-3)",
+     "status": "dispatched round 284 (D-29z673..D-29z679)",
+     "added": "2026-10-31 B round 283 -> 284 planning"
+    },
+    {
+     "id": "PERF-3b",
+     "what": "seconds ruler tick windowing + harness rows (p95 per key, path rewrites, ruler nodes, Ctrl+wheel baseline); PERF-3 exit target",
+     "status": "not_started (queued D-29z673; consults performance-optimizer + tech-lead before dispatch)",
+     "added": "2026-10-31 B round 283 -> 284 planning"
     },
     {
      "id": "PERF-4",
@@ -13767,7 +13792,13 @@
     "tech-lead": "worker + client like export-wav; demo-synth.ts pure and untouched; impact/rise stay sync (one job type); constructor throw/onerror/onmessageerror/malformed/stall -> terminate + sync fallback, source error only if sync also throws; one module-level promise; abort rejects nothing (ArrangementContext drops after abort); FakeWorker via vi.stubGlobal (not a factory: breaks Vite worker detection); Worker literal inline; type guard instead of as; one round; optional stereo copy drop",
     "performance-optimizer": "worker over chunked yield (still ~413 ms main thread, generators need resumable state) and over lazy (library items without duration/waveform, status never ready); transfer list; sync fallback acceptable; measure until settled, not ready; settled-window rows; commit rows may go nondeterministic (confirmed by B: [5,5,6]); peaks in the worker and stereo-copy drop as later savings; LoAF script attribution to identify the other long task. Its proposed longtask-max.settled < 100 assert was rejected by B measurement (first-frame task 77-131 ms). DATA ERRORS: it stated docs/technical/performance/perf-plan.md does not exist and that no export sha check exists; both false (B read perf-plan.md; c-round-281 smoke sha 1fea093b covers the pulse stem) -> INFO-B282-CONSULT-FALSE-CLAIMS"
    },
-   "order_note_d29z661": "round 282 = PERF-2 (REGRESSION not due: regression-last 2026-10-30 -> due on/after 2026-11-02); RETRO at 290"
+   "order_note_d29z661": "round 282 = PERF-2 (REGRESSION not due: regression-last 2026-10-30 -> due on/after 2026-11-02); RETRO at 290",
+   "execution_order_d29z673": "... -> PERF-2 (done, 282-283) -> PERF-3a (284) -> PERF-3b -> PERF-COMMIT-RESCHEDULE -> PERF-4 -> PERF-5 -> PERF-7 -> PERF-8 -> PERF-DRAG-PREVIEW -> PERF-9 -> PERF-10 -> PERF-11 -> PERF-12 -> PERF-13 -> PERF-14 -> PERF-15 (PERF-6 dropped). REGRESSION first whenever due (on/after 2026-11-02); RETRO at 290. Supersedes execution_order_d29z645.",
+   "consults_round_283": {
+    "performance-optimizer": "path rebuild likely 5-15 ms of ~118 ms; columns = min(span, 4096, next power of two >= width); clamp to span before the memo key; envelope in seconds viewBox memoised on envelope/sourceOffset/duration; p95 < 50 unlikely before PERF-10; deterministic rows: d mutations, points mutations; risk: paint cost grows with segments",
+    "tech-lead": "owners ArrangementClip.tsx l.367, peaks.ts helper + unit test, ArrangementClipEnvelope.tsx; zoom bands columns = min(4096, ceil(span/d)), d = 4^floor(log4(100/pps)) -> no rebuild above 25 px/s; envelope: memo above the early return, x in seconds, pixel fields stay; AL1 robust to viewBox unit; do not React.memo ArrangementPeakPath (clip-gain-pointer-preview :557 counts renders); one round. DATA ERRORS: said docs/technical/performance/perf-plan.md does not exist (it exists outside store/) and that perf/budgets.json has no interact.zoom rows (they live in perf/budgets.interactions.json) -> INFO-B283-CONSULT-FALSE-CLAIMS",
+    "B measurement": "HEAD prod build 30 clips: zoom-in d rewrites [30,0..0,30]=60, zoom-out 300; Event Timing key 5 (122.1 px/s) 144-152 ms from ArrangementRuler adding 6142 tick nodes over the whole 3040 s; evidence b-round-283/"
+   }
   },
   {
    "id": "STORE-REDESIGN",
@@ -27586,6 +27617,51 @@
    "status": "fix dispatched round 283: DW11 + MU-U5",
    "evidence": "a-round-282.md code review",
    "added": "2026-10-31 B round 282 -> 283 planning"
+  },
+  {
+   "id": "INFO-B283-CONSULT-FALSE-CLAIMS",
+   "severity": "info",
+   "origin": "B",
+   "title": "tech-lead consult (round 283 planning) stated perf-plan.md does not exist and perf/budgets.json has no zoom rows; both false (doc outside store/, rows in budgets.interactions.json); B verified every consult line before use (follows INFO-B282-CONSULT-FALSE-CLAIMS)",
+   "status": "recorded",
+   "evidence": "backlog STUDIO-PERFORMANCE consults_round_283",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "INFO-B283-PERF3-PREMISE",
+   "severity": "info",
+   "origin": "B",
+   "title": "perf-plan PERF-3 premise 'waveform SVG path is rebuilt on every zoom step' holds only below the 4096-column cap; with the 101-s demo clip the harness zoom range (40-122 px/s) rewrites paths only on 2 of 10 keys; the slowest key is the seconds ruler (+6142 nodes); PERF-3 split (D-29z673)",
+   "status": "recorded",
+   "evidence": "b-round-283/probe-results, head-detail.json, nodes-probe.cjs",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "INFO-B283-NPX-TSX-CACHE",
+   "severity": "info",
+   "origin": "B",
+   "title": "B's planning ran 'npx tsx' once for a scratch helper table; npm fetched tsx@4.23.15 into the npm cache only; project, lockfile and store unchanged (cf. C-R29-NPX-CACHE)",
+   "status": "root_note",
+   "evidence": "b-round-283.md section 6",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "GATE283-S3",
+   "severity": "info",
+   "origin": "gate reviewer",
+   "title": "worst case at 6x CPU: 10 s worker stall + ~2.5 s sync synth ~ 12.5 s vs waitForCollectionReady 15 s timeout (perf/lib/page.ts); little headroom; harness owner note (cf. PERF-1A-TIMEOUT-HEADROOM)",
+   "status": "watch",
+   "evidence": "gates/round-283/review.md suggestion 3",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "GATE283-S4",
+   "severity": "info",
+   "origin": "gate reviewer",
+   "title": "load.commits / load.components became wallclock (record-only); making them deterministic again needs an explicit worker wait in the harness",
+   "status": "recorded",
+   "evidence": "gates/round-283/review.md suggestion 4",
+   "added": "2026-10-31 B round 283 -> 284 planning"
   }
  ],
  "tech_lead_notes": [
@@ -29857,6 +29933,13 @@
    "text": "demo-synth.worker.ts imports DemoSynthWorkerResponse and demoCompositionTransfer from its own launcher demo-synth.client.ts; repo pattern (export-wav.worker, sfx-export.worker) imports neutral modules. Proposal: move the protocol to demo-synth.ts or demo-synth-protocol.ts, no behaviour change. Build verified OK (prod worker chunk 1959 B, no new Worker).",
    "status": "recorded (D-29z670), not scheduled; candidate for PERF-5 (peaks in the worker touches the same protocol)",
    "added": "2026-10-31 B round 282 -> 283 planning"
+  },
+  {
+   "id": "B-R283-RULER-WINDOW-REUSE",
+   "source": "B round 283 planning (advisor)",
+   "text": "PERF-14 clip virtualization should reuse the visible-window primitive PERF-3b introduces for the ruler, rather than a second scroll-window mechanism; PERF-3b must keep play.idle-commits (Follow scroll during playback) - tiles with hysteresis or CSS lines + windowed labels",
+   "status": "signal (not scheduled)",
+   "added": "2026-10-31 B round 283 -> 284 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -34936,6 +35019,76 @@
    "repro": "n/a (wasted AudioBuffer build only)",
    "deferred_reason": "covered by ruling; candidate for PERF-5 when peaks move",
    "added": "2026-10-31 B round 282 -> 283 planning"
+  },
+  {
+   "id": "C-R283-01",
+   "severity": "low",
+   "status": "deferred",
+   "title": "no demo-synth-worker row pins that the stall timer is cleared on every finish path (mutant deleting window.clearTimeout(stallTimer) stays green); = A-R283-REVIEW-L6",
+   "evidence": "c-round-283/mutants-c.txt (MU-C-TIMER); a-round-283.md reviewer item 6",
+   "repro": "scratch copy; delete window.clearTimeout(stallTimer) in app/lib/arrangement/demo-synth.client.ts finish(); run demo-synth-worker.test.ts -> 12/12 green",
+   "deferred_reason": "2026-10-23 bug gate: Low; runtime unaffected today",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "C-R283-02",
+   "severity": "low",
+   "status": "deferred",
+   "title": "doc 211 l.12-14 cites LoAF ranges 83-131 / 363-367 ms but b-round-281/loaf-head.json holds 83-90 / 363-365 (the 4th run of task 282 section 1.1 is not saved)",
+   "evidence": "b-round-281/loaf-head.json; docs/implementation/2026/quarter-IV/211-perf-demo-synth-worker.md l.12-14",
+   "repro": "list lt durations of the 3 runs in loaf-head.json",
+   "deferred_reason": "2026-10-23 bug gate: Low (doc evidence citation)",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "C-R283-03",
+   "severity": "low",
+   "status": "deferred",
+   "title": "doc 163 l.16 and l.94 say perf/budgets.json has 316 rows; it has 320; = A-R283-REVIEW-M1",
+   "evidence": "c-round-283.md Findings; c-round-282/equiv.txt",
+   "repro": "python len(json.load(open('perf/budgets.json')))",
+   "deferred_reason": "2026-10-23 bug gate: Low (doc count); fix with the next round that grants doc 163",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "A-R283-REVIEW-LOAF-SCRIPTS",
+   "severity": "low",
+   "status": "deferred",
+   "title": "harness.loaf-scripts can be satisfied by a window whose LoAF entries all have empty scripts arrays; require at least one entry with scripts.length > 0 (A reviewer M2, code frozen in round 283)",
+   "evidence": "a-round-283.md 'Not addressed' (M2)",
+   "repro": "read perf/lib/instrumentation.ts loaf-scripts derivation",
+   "deferred_reason": "Low, harness robustness; candidate for PERF-3b (harness touched)",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "A-R283-REVIEW-L9-EXPECTRELEASED",
+   "severity": "low",
+   "status": "deferred",
+   "title": "demo-synth-worker.test.ts l.156-159 repeat expectReleased(worker) inline instead of the helper (nit)",
+   "evidence": "a-round-283.md reviewer L9",
+   "repro": "read the test lines",
+   "deferred_reason": "Low nit",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "GATE283-S1",
+   "severity": "low",
+   "status": "deferred",
+   "title": "demo-synth.client.ts:22 narrows stems only to object, so Object.entries(stems) yields [string, any][] (inferred any under strict); fix new Map<string, unknown>(Object.entries(stems))",
+   "evidence": "gates/round-283/review.md suggestion 1",
+   "repro": "read app/lib/arrangement/demo-synth.client.ts l.22",
+   "deferred_reason": "2026-10-23 bug gate: Low; runtime safe (isDemoSamples narrows)",
+   "added": "2026-10-31 B round 283 -> 284 planning"
+  },
+  {
+   "id": "GATE283-S2",
+   "severity": "low",
+   "status": "deferred",
+   "title": "app/data/studio-lab-demo.ts imports a .client.ts module from route-level data; Remix strips .client exports on the server, so doc 211's SSR sentence (typeof Worker branch covers SSR) is inaccurate; a future loader call to loadSource would throw",
+   "evidence": "gates/round-283/review.md suggestion 2",
+   "repro": "read app/data/studio-lab-demo.ts l.9 and doc 211 section მიდგომა",
+   "deferred_reason": "Low: no loader calls loadSource today; fix the doc wording or rename the module together with A-R282-REVIEW-WORKER-PROTOCOL",
+   "added": "2026-10-31 B round 283 -> 284 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -39388,6 +39541,56 @@
    "id": "D-29z670",
    "date": "2026-10-31",
    "text": "Round-282 reviewer Lows to deferred_low_polish (untyped entries/length, message type, abort-after-await ruled); protocol-module note recorded as architecture signal A-R282-REVIEW-WORKER-PROTOCOL (not scheduled); planning gap B-R282-DW-UNRUN closed by an in-place L23 amendment."
+  },
+  {
+   "id": "D-29z671",
+   "date": "2026-10-31",
+   "text": "Round 283 closed C PASS (c-round-283.json: browserVerified/realVerified true; 10 rows passed; round-282 runtime rows carried), gate 283 published 54a3fcc both remotes. PERF-2 -> done (მზადაა). Baseline for round 284 = 54a3fcc."
+  },
+  {
+   "id": "D-29z672",
+   "date": "2026-10-31",
+   "text": "C-R283-01..03 -> deferred_low_polish (2026-10-23 bug gate); A's M1 = C-R283-03 (merged), M2 -> A-R283-REVIEW-LOAF-SCRIPTS, L9 nit -> deferred; A-R282-REVIEW-WORKER-PROTOCOL stays an architecture signal (unchanged). Gate 283 reviewer: GATE283-S1/S2 (Low) -> deferred_low_polish; S3/S4 info recorded; S5 = A-R283-REVIEW-LOAF-SCRIPTS; architecture note unchanged (A-R282-REVIEW-WORKER-PROTOCOL)."
+  },
+  {
+   "id": "D-29z673",
+   "date": "2026-10-31",
+   "text": "PERF-3 premise re-measured at HEAD (prod build, 30 clips): waveform path rewrites only below the 4096-column cap (zoom-in 60 over 10 keys, zoom-out 300); slowest key = seconds ruler +6142 nodes. PERF-3 split into PERF-3a (round 284: column bands + envelope seconds viewBox) and PERF-3b (ruler windowing + harness rows incl. per-key p95, path rewrites, ruler nodes, Ctrl+wheel baseline from scope_addition_d29z215). PERF-3 exit p95 < 50 ms with 30 clips measured at 3b; not shrunk."
+  },
+  {
+   "id": "D-29z674",
+   "date": "2026-10-31",
+   "text": "Column rule = tech-lead zoom bands (x4 at 25/6.25/1.5625 px/s, cap 4096) over performance-optimizer next-power-of-two width: bands never rebuild in 25-320 px/s; >= 1 column per pixel, < 4 per pixel; pixel-identical to HEAD >= 50 px/s, <= 6.057 % |delta|>32 below the cap (b-round-283/imgdiff-head-vs-sketch.json)."
+  },
+  {
+   "id": "D-29z675",
+   "date": "2026-10-31",
+   "text": "Envelope polyline drawn in seconds (viewBox 0 0 duration 1), memo on [clip]; EU5/EU7 expected vertices rewritten pixel -> seconds (equal strength); AL1 unchanged proves pixel alignment; Z4 mutant (deps []) red at 9 rows."
+  },
+  {
+   "id": "D-29z676",
+   "date": "2026-10-31",
+   "text": "Consult data errors recorded as INFO-B283-CONSULT-FALSE-CLAIMS; B verified each consult claim by grep/measurement before use."
+  },
+  {
+   "id": "D-29z677",
+   "date": "2026-10-31",
+   "text": "Architecture signal B-R283-RULER-WINDOW-REUSE recorded (not scheduled); no frontend-architect checkpoint requested this boundary: PERF-3a is 3 small code files with no structural risk; earlier pending requests unchanged."
+  },
+  {
+   "id": "D-29z678",
+   "date": "2026-10-31",
+   "text": "Lessons: L37 amended in place (a new deterministic perf row is first measured non-zero at HEAD in the same scenario, and the perf-plan premise is re-measured before the task is shaped); 60-line limit kept."
+  },
+  {
+   "id": "D-29z679",
+   "date": "2026-10-31",
+   "text": "Round 284 browser contract: C builds HEAD 54a3fcc and A's tree (separate ports/cacheDir), runs B's probes (zoom-probe3.cjs, imgdiff.cjs) unchanged in counting: ZOOM-PATH-IN/OUT with HEAD controls, WAVE-PIXELS and ENVELOPE-ZOOM at both viewports, PERF-RUN once alone, G284-AUTH; wallclock ZOOM-TIMING record only."
+  },
+  {
+   "id": "D-29z680",
+   "date": "2026-10-31",
+   "text": "regression-last.json unchanged (2026-10-30, round 258 sweep); next REGRESSION due on/after 2026-11-02; RETRO at 290."
   }
  ],
  "retro_candidates": [

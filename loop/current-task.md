@@ -1,198 +1,219 @@
-# Round 283: PERF-2 fix-up (test file + docs only). DW3/DW9 pin the zero-copy hand-off instead of the wrapper object, DW10 compares against an independent composition, new DW11 covers the `postMessage` throw, and doc 211 plus the doc 163/169 sections are written. The six code files stay byte-identical
+# Round 284: PERF-3a. During zoom, the lane waveform keeps one column count per zoom band instead of one per pixel. The clip envelope line is drawn in seconds, so a zoom step rewrites neither shape. Stage 1 of 2 of PERF-3; PERF-3b (windowed ruler ticks) follows
 
-**Planned by:** B, at the round 282 → 283 planning, 2026-10-31. **Decisions:**
-- D-29z666: round 282 closed as **C FAIL** on test and doc rows (C-R282-01 Medium, C-R282-02 Medium, C-R282-03 Low). Gate 282 `skipped`. All of C's browser and perf rows passed on the code bytes, which this round does not change. The round-282 outcome table (D-29z665, row 2) applies: a bounded fix-up with the same grants, narrowed.
-- D-29z667: ruling on A's STOP: **option (a)**, test-only. The code stays byte-identical to `b-round-281/sketch.diff`. Option (b) (return the received object) is rejected. It would need a type assertion or an unchecked type predicate (CLAUDE.md: no `as`), and it would move the bytes rows, EQUIV and the mutants.
-- D-29z668: DW10 is fixed (C-R282-03), DW11 is added (A's reviewer DW11 proposal), and there are two new named mutants, MU-U4 and MU-U5. The test file must be **byte-identical** to B's measured sketch (§3).
-- D-29z669: the browser contract for this round (§6), with the reasoning recorded there.
-- D-29z670: reviewer Lows and the architecture note are recorded and not scheduled (see `b-round-282.md`). L23 is amended in place (B-R282-DW-UNRUN).
+**Planned by:** B, at the round 283 → 284 planning, 2026-10-31. **Decisions:**
+- D-29z671: round 283 closed with **C PASS** (`browserVerified`/`realVerified` true), and gate 283 published `54a3fcc`. PERF-2 is **მზადაა**.
+- D-29z673: B re-measured PERF-3's premise at HEAD (production build, Chromium, 30 clips). See §1. The outline's claim "the waveform path is rebuilt on every zoom step" holds only below the 4096-column cap. The slowest zoom key comes from the seconds ruler, not from the waveform. **PERF-3 is split:**
+  - **PERF-3a (this round):** waveform column bands, plus the envelope line drawn in seconds and memoised;
+  - **PERF-3b (next PERF round):** ruler tick windowing, plus harness rows (Event Timing p95 per key, path rewrites, ruler nodes, and the Ctrl+wheel baseline of `scope_addition_d29z215`).
 
-**Kind of round:** a performance-round fix-up, **test + docs only**. Nothing visible changes. By the policy (2026-10-27/28, "pure performance … test-only … rounds"), these do not apply: reference-first, AGREE, YouTube, `product-designer` and the screen budget. Ableton conformity: **does not apply**.
+  PERF-3's exit target, "zoom keydown p95 < 50 ms with 30 clips", is measured at 3b. This round records wall-clock as a trend only.
+- D-29z674: the column rule is the `tech-lead` consult's zoom bands (×4 at 25 / 6.25 / 1.5625 px/s). `performance-optimizer`'s rule (the next power of two ≥ the width) was rejected: it still rebuilds about every third 1.25× step, and the bands never rebuild between 25 and 320 px/s. Measured: §1.3.
+- D-29z675: the envelope polyline uses `viewBox="0 0 <duration> 1"` with x in seconds, memoised on the clip object. EU5 and EU7 are rewritten from pixel x to seconds; this is an equal-strength replacement and no assertion is lost. AL1 stays unchanged and still proves the pixel alignment.
+- D-29z679: the browser contract (§6).
+
+**Kind of round:** performance. Nothing is added to the screen, and the layout does not change. Reference-first, AGREE, `product-designer` and the screen budget do not apply (policy: pure performance rounds). Ableton conformity: **does not apply**. The waveform's drawing resolution is not an Ableton contract.
 
 **Owner:** A. **Verifier:** C. **Grants:** §4.
 
-## Baseline: HEAD `000da42` **plus A's round-282 working tree** (preserved, not committed)
-- `gates/gate-round-282.json` is `skipped` ("C taskStatus FAIL"). So HEAD is still `000da42` [K1], and the tree carries A's round-282 work: 4 `M` + 3 `??` [K15].
-- **The sketch is already applied. Do NOT run `patch` again.** The six code files equal the round-282 sketch bytes [K2] (`b-round-282/code-six-sha256.txt`).
-- The test file is A's round-282 version [K3] (`b-round-282/test-at-a282-sha256.txt`; copy `b-round-282/demo-synth-worker.test.a282.ts`).
-- Claims: run `bash ../tmp/studio-real-loop/b-round-282/claims-283.sh` from `store/` **before editing**. The output must equal `b-round-282/claims-283-output.txt`. A difference is a STOP (§9).
+## Baseline: HEAD `54a3fcc` [K1], clean tree [K18]
+- `gates/gate-round-283.json` is `published`, at commit `54a3fcc`.
+- Claims: from `store/`, run `bash ../tmp/studio-real-loop/b-round-283/claims-284.sh` **before editing**. Its output must equal `b-round-283/claims-284-output.txt`. Any difference is a STOP (§9).
 
 ## 0. Read first
-1. `lessons.md`, every role. Especially L11, L23 (amended this planning: B-R282-DW-UNRUN), L26, L28, L29 and L38.
-2. This task, then `tasks/round-282.md` §2 (the contract), §6.1 (the DW rows) and §7 (doc 211). Those sections still describe the code exactly.
-3. `a-round-282.md` and `c-round-282.md`, which hold the evidence the docs cite.
+1. `lessons.md` (every role), especially L11, L23, L26, L28, L29, L31, L37 (amended this planning) and L38.
+2. This task, then `b-round-283.md` §2 (the measurements).
+3. A's primitives: `AUDIO_ARCHITECTURE.md` (Studio), `FORWARDREF_COMPONENT.md` (component edit), `AGENT_DISCOVERABLE_CODE.md` (new export), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `.claude/prompts/studio-feature.md`.
 
-**Primitives for A:** `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `.claude/prompts/new-test.md`.
+## 1. What B measured at HEAD (evidence `b-round-283/`)
+Setup: the production build of HEAD, Chromium at 1440×900, `/studio-lab`, Add, then Ctrl+D ×29 (30 clips of 101.352 s; the probe `zoom-probe3.cjs`).
 
-## 1. What failed in round 282, and why
-| Id | Sev | Finding | Cause | Fix this round |
-|---|---|---|---|---|
-| C-R282-01 | Medium | DW3 and DW9 are red. `toBe(composition)` on the result can never hold | `readDemoComposition` returns a **new wrapper** `{ mix, stems: { pulse, bass, pad, lead } }` to narrow the type without `as` [K4]. The five `Float32Array`s keep their identity. B wrote `toBe` rows against its sketch without running them (planning gap B-R282-DW-UNRUN) | §3.1 |
-| C-R282-02 | Medium | doc 211 and the doc 163/169 sections are missing | A waited for the DW ruling (L26: docs must not cite red rows) | §5 |
-| C-R282-03 | Low | DW10's sample loop is vacuous | The worker module and the test share one `demo-synth` module instance: `vi.resetModules()` runs only in `beforeEach` [K9]. The posted arrays and `getDemoStemComposition()` are the same objects, so the loop compares each array with itself. **B's proof:** the mutant MU-U4 (the worker overwrites the mix before posting) leaves DW10 **green** on A's round-282 file; only DW3/DW9 are red there (`b-round-282/mutants.txt`) | §3.2 |
-| A reviewer, DW11 proposal | (gap) | The `postMessage` throw fallback [K5] has no row. Round 282 §2.1 names it as a fallback case | B's §6.1 listed no row for it | §3.3 |
+1. **Zoom in, then out** (`=` ×5, then `-` ×5; 40 → 122.1 → 40 px/s):
+   - waveform `d` rewrites per key: `[30,0,0,0,0,0,0,0,0,30]`, 60 in total, in 3/3 runs (`probe-results/head-in-*.json`);
+   - Event Timing keydown: 88–104 ms on keys 1 and 10 (the path rewrites), 152 ms on key 5 and 104 ms on key 6, about 40 ms on the rest.
+2. **Zoom out, then in** (40 → 13.1 → 40 px/s):
+   - rewrites `[30 ×10]`, 300 in total, in 3/3 runs (`probe-results/head-out-*.json`);
+   - Event Timing 40–128 ms.
+3. **Why:**
+   - The lane waveform's column count is `round(min(width, 4096))` [K2][K3][K6], and the memo keys on it [K5].
+   - Below the cap, every zoom step changes the count and rewrites all 30 paths. Above the cap (the 101-s clip is wider than 4096 px from about 41 px/s), it does not.
+   - On key 5, at 122.1 px/s, the document gains **6,142 DOM nodes** (`head-detail.json`, `dNodes`). By a testid census over the five `=` keys, the `arrangement-ruler` subtree grows by 6,143 nodes with 30 clips and by 264 with 1 clip (`probe-results/nodes-head-30.json`, `nodes-head-1.json`; probe `nodes-probe.cjs`). The ruler renders one tick per step over the whole arrangement [K15]. That is PERF-3b.
+4. **B's sketch** (`b-round-283/sketch-full.diff`):
+   - zoom in: rewrites `[0 ×10]`, 0 in total, in 3/3 runs;
+   - zoom out: `[0,0,30,0,0,0,0,30,0,0]`, 60 in total, in 3/3 runs (only where 25 px/s is crossed, once down and once up);
+   - Event Timing: about 40 ms on in-band keys (keys 1 and 10 drop from 88–104 to 40 ms); the ruler keys are unchanged (144–152, 96–104);
+   - envelope (probe `env-probe.cjs`; Env mode on, one point added by double-clicking the first clip's envelope editor, then three `=` keys, 40 → 50 → 62.5 → 78.1 px/s): HEAD writes 180 `points` and 90 `viewBox` attributes over the 3 keys (30 lines in Env mode × 2 polylines + 1 viewBox per key); the sketch writes 0; the dot and the vertex coincide (Δ 0 px) at every step on both builds and at 1440×900 and 1280×720; Ctrl+Z removes the point (`probe-results/head-env-*.json`, `sketch-env-*.json`);
+   - pixels: the clip waveform is **pixel-identical** to HEAD at every zoom ≥ 50 px/s (`imgdiff-head-vs-sketch.json`, in-0…in-8: meanAbs 0); below the cap meanAbs is ≤ 5.001 and the share of pixels with |Δ| > 32 is ≤ 6.057 %, at 13.1 px/s (`shots/compare-out4.png`: HEAD on top, sketch below, the same shape with slightly softer spikes).
+5. **B scratch:**
+   - 9 covering files, 171 tests pass (`covering-9files.txt`);
+   - `tsc` rc 0, Biome clean;
+   - the HEAD-code control and mutants Z1–Z5 are each red at their named rows (`mutants.txt`).
 
-## 2. What does not change
-- The six code files: `app/lib/arrangement/demo-synth.client.ts`, `demo-synth.worker.ts`, `app/data/studio-lab-demo.ts`, `perf/lib/instrumentation.ts`, `perf/studio-lab.perf.spec.ts` and `perf/budgets.json`. They stay byte-identical (`sha256sum -c b-round-282/code-six-sha256.txt`).
-- So the round-282 measurements stay valid for these bytes, and A **does not re-run** them: PERF-RUN, EQUIV, SCRIPT-MAX, MU-SYNC-FALLBACK and the browser rows. The docs cite them by path (§5).
-- DW1, DW2 and DW4–DW8 keep their assertions. DW6 is the `it.each` with cases (a) and (b), which is why [K7] does not list it by grep. A's round-282 tightening (`expectReleased`, fake timers in DW2) stays.
+## 2. The code change (exactly `b-round-283/sketch-full.diff`, code part)
+1. **`app/lib/arrangement/peaks.ts`** [K9]:
+   - add `export const PEAK_SHAPE_MAX_COLUMNS = 4096;` (moved here from `ArrangementClip.tsx` [K2]; that file is its only user [K10]);
+   - add `export function waveformPeakColumns(duration, pxPerSecond)`, which returns 0 when the width is not finite or rounds to ≤ 0. Otherwise, `bucketsPerColumn` is the largest power of 4 with `bucketsPerColumn × 4 × (pxPerSecond / 100) ≤ 1`, and the function returns `max(1, min(4096, ceil(ceil(duration × 100) / bucketsPerColumn)))`.
+   - Properties: at least one column per pixel, up to the cap and the bucket count; fewer than four columns per pixel; constant within the bands ≥ 25 px/s (exclusive), [6.25, 25] and [1.5625, 6.25].
+2. **`app/components/arrangement/ArrangementClip.tsx`** [K3]:
+   - `peakColumns = waveformPeakColumns(clip.duration, pxPerSecond)` replaces the HEAD formula [K3];
+   - the local constant is removed [K2];
+   - `buildPeakShape`, its memo, the svg, the fades svg, video, folded and gain-draft behaviour are unchanged [K4][K5].
+   - The detail panel keeps its fixed column count [K14] (not touched).
+3. **`app/components/arrangement/ArrangementClipEnvelope.tsx`** [K7]:
+   - the visible points, the first/last gains, the polyline `points` (x = `time − sourceOffset`, in seconds, ending at `duration`, or at 1 if the duration is ≤ 0) and the editor `slots` move into one `useMemo` on `[clip]`, above the early return;
+   - the viewBox becomes `0 0 <spanSeconds> 1` [K7][K8];
+   - `style.width` (`max(1, width)`), the `left` offset, `vectorEffect`, the two polylines and the editor (pixel positions and handlers) are unchanged.
+   - Ruling for the < 1 px clip: `lineWidth` stays `max(1, width)`, so interior vertices of a sub-pixel clip map onto 1 px. That is accepted (invisible).
 
-## 3. The test file: byte-identical to B's sketch (D-29z668)
-Target: `b-round-282/demo-synth-worker.test.sketch.ts`, sha256 in `b-round-282/test-sketch-sha256.txt`. The diff against A's file is `b-round-282/test-sketch.diff` (115 lines). A applies it with `patch -p1` from `store/`, or copies the sketch file, and then checks the sha256. **Any defect A or the code-reviewer finds in the sketch is a STOP (§9), not an edit.** The same precedent as the code in round 282: an edit moves the measured mutant table.
+**Not this round:** the ruler, the bars ruler, the fades svg, `ArrangementDetailPanel`, the perf harness and budgets, and any context split (PERF-10).
 
-### 3.1 DW3 and DW9 (C-R282-01)
-- A new helper `expectSameComposition(actual, expected)`:
-  - `toStrictEqual` on the wrapper;
-  - `toBe` on `mix` and on each of the four stems (the zero-copy hand-off).
-- **DW3:** every one of the 5 results passes `expectSameComposition(result, composition)`, and `new Set(results).size` is 1 (all callers share one result object). The release checks stay.
-- **DW9:** the first result passes `expectSameComposition`. The later call resolves `toBe` the first result. There is still 1 instance.
+## 3. Tests (exactly `b-round-283/sketch-full.diff`, test part)
+| Row | File | Asserts |
+|---|---|---|
+| ZQ1 | `clip-gain-waveform.test.tsx` (inside "lane and detail waveforms follow Clip Gain") | at 40 px/s the lane columns are `[1200, 200]` (m1, s1). Zoom 50 → 62.5 → 80 keeps `{d, columns}` equal, and a jsdom `MutationObserver` on both waveform svgs records 0 `d`/`viewBox` writes. 20 px/s gives m1 300 columns, `d` = `buildPeakShape(…, 300, 1)`, s1 50 columns, and exactly 2 `d` writes |
+| ZQ2 | `waveform-outline-path.test.tsx` | an 18-case table of `waveformPeakColumns` (band edges 25.1/25, 6.3/6.25, 1.5625, the cap, < 1 px, NaN, 0 px/s) |
+| ZQ2b | same file | sweeps 0.5…320 px/s ×1.25 over 4 durations: columns ≥ min(cap, round(width), buckets) and ≤ ceil(4 × width) + 1 |
+| ZQ3 | `clip-envelope-ui.test.tsx` (new describe at the end) | viewBox `0 0 16 1`. Zoom 50 → 62.5 → 80: the same svg node, `style.width` = 16 × zoom, `points` unchanged, and 0 `points`/`viewBox` mutation records |
+| EU5, EU7 | `clip-envelope-ui.test.tsx` | expected vertices in seconds: EU7 `[0,0.2],[2,0.2]`; EU5 `[0,0],[4,0],[8,0.2],[12,0],[16,0]` and `'0,0 1,0'` (were pixels at 40 px/s) |
 
-### 3.2 DW10 (C-R282-03)
-- After the handler posts, the test calls `vi.resetModules()` and imports `../demo-synth` again. This gives a **fresh module instance** and an independently synthesised `expected`.
-- Before the sample loop, the test asserts that every posted array is a different object from its `expected` array: `expect(a === b).toBe(false)` for the mix and the four stems.
-- **Fact 1, do not "improve" it back:** `expect(a).not.toBe(b)` on two different 768 000-float arrays made DW10 take about **16.6 s** on B's scratch (vitest's `toBe` runs a deep equality for its failure hint), against the 5 s default timeout [K14]. The `=== … toBe(false)` form costs nothing. The sketch's DW10 took **0.90 s** (A's round-282 version: 0.46 s; one extra synthesis ≈ 0.43 s).
-- Unchanged: the transfer list holds exactly the five buffers (`toBe` each).
+**Named mutants** (A and C each run them on a scratch copy of the final tree; B's script is `b-round-283/mu.sh` + `mutants.py`, and the results are in `b-round-283/mutants.txt`):
 
-### 3.3 DW11 (new)
-- `FakeWorker` gains `static throwOnPost = false`. `postMessage` throws when it is set. Both `beforeEach` and `afterEach` reset it.
-- **DW11:** fake timers, `throwOnPost = true`, call the client, flush microtasks **without advancing time**. Expected:
-  - the promise has resolved to `getDemoStemComposition()`'s object;
-  - nothing was posted;
-  - `expectReleased(worker)` (terminated once, three handlers `null`).
+| Mutant | Change | Must be red at |
+|---|---|---|
+| HEADCODE | HEAD's three code files (with peaks.ts kept so the tests compile) | ZQ1, ZQ3, EU5, EU7 |
+| Z1 | HEAD formula in `ArrangementClip.tsx` | ZQ1 |
+| Z2 | band factor 4 → 2 | ZQ2, ZQ1 |
+| Z3 | envelope x in pixels inside the memo | EU5, AL1 ×2 |
+| Z4 | memo deps `[]` | EU3/EU4/AL1/EUDB2 (9 rows) |
+| Z5 | no bands (`min(cap, buckets)`) | ZQ2, ZQ2b, ZQ1 |
 
-### 3.4 Named unit mutants (A and C each run all five, on a scratch copy of the final tree)
-| Id | Mutation (one line, in a code file) | Red row(s) on the sketch test (B, `b-round-282/mutants.txt`) | Must be red |
-|---|---|---|---|
-| MU-U1 | client: `demoCompositionJob ??= ` → `demoCompositionJob = ` | DW2, DW3, DW9 | DW2 |
-| MU-U2 | client: `worker.onerror = () => finish(null);` → `worker.onerror = () => undefined;` | DW4 | DW4 |
-| MU-U3 | worker: drop `, { transfer: demoCompositionTransfer(composition) }` | DW10 | DW10 |
-| MU-U4 (new) | worker: after `const composition = getDemoStemComposition();` add `composition.mix.fill(0.5);` | DW10 | DW10 |
-| MU-U5 (new) | client: in the `postMessage` `catch`, `finish(null);` → `return;` | DW11 | DW11 |
-
-**MU-U4 control (C-R282-03 proof):** the same mutation on A's round-282 file `b-round-282/demo-synth-worker.test.a282.ts` leaves DW10 **green**: red rows are DW3 and DW9 only, which were red anyway. C re-runs this control.
+Timeout headroom (L31):
+- `clip-envelope-ui` 31 tests took 5.4 s at gate 283; the largest single row is about 0.2 s against the 5 s default;
+- ZQ1 is about 0.15 s and ZQ3 about 0.04 s on B's scratch.
 
 ## 4. Grants (exact)
-| Path | What may change |
+| Path | Change |
 |---|---|
-| `app/lib/arrangement/__tests__/demo-synth-worker.test.ts` | becomes byte-identical to `b-round-282/demo-synth-worker.test.sketch.ts` (§3) |
-| `docs/implementation/2026/quarter-IV/211-perf-demo-synth-worker.md` | **new** (§5) |
-| `docs/implementation/2026/quarter-IV/163-studio-perf-harness.md` | the whole sections `### Pass-ის თანმიმდევრობა (ინტერპრეტაცია)` (l.20; step 1 names the new rows) and `## მეტრიკების განმარტება და ზღვრები` (l.58; the load rows) (L34), plus one new bullet under `## TODO / შემდეგი ნაბიჯები` (l.156) [K11] |
-| `docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md` | the `loaf-blocking-max` row (l.37 says the instrumentation stores only `duration` [K12]; it now also stores `scriptMax`, still no `blockingDuration`), plus the TODO bullet on B-R281-RESOURCES-READY-FAILED (l.215 [K12]). That bullet gains GATE281-S2's sentence: in the measured runs (MU-FAILED-OTHER 6/6), the usual result for a failed non-selected source is an abort at load |
+| `app/lib/arrangement/peaks.ts` | M, = sketch |
+| `app/components/arrangement/ArrangementClip.tsx` | M, = sketch |
+| `app/components/arrangement/ArrangementClipEnvelope.tsx` | M, = sketch |
+| `app/lib/arrangement/__tests__/waveform-outline-path.test.tsx` | M, = sketch |
+| `app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx` | M, = sketch |
+| `app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx` | M, = sketch |
+| `docs/implementation/2026/quarter-IV/212-perf-zoom-waveform-columns.md` | new (§5); the last doc is 211 [K16] |
 
-**Frozen:**
-- the six code files (`code-six-sha256.txt`);
-- every tracked file in `b-round-281-r282-tree-sha256.txt` (1139 files);
-- `package*.json`, `e2e/**`, `.claude/**`;
-- the four protected auth/purchase files (`studio.$productId.tsx`, `api.studio-token.ts`, `app/lib/auth.ts`, `AuthContext.tsx`).
+- All six code and test files must match `b-round-283/sketch-sha256.txt` byte for byte. Apply the patch with `patch -p1 < ../tmp/studio-real-loop/b-round-283/sketch-full.diff` (B dry-ran it cleanly on `git archive HEAD`).
+- Nothing else. In particular, these are not granted: `perf/**`, `ArrangementRuler.tsx`, `ArrangementDetailPanel.tsx`, the protected files (`backlog.json` → `global_forbidden_files`), and `package.json`.
+- The full sweeps [K10]–[K14] list every consumer. The test files among the hits that this round does not edit (`waveform-zoom`, `clip-gain-pointer-preview`, `content-colour-ui`) must stay green unchanged. They parse the column count from the viewBox, and any whole number passes.
 
-A hunk outside its row is a scope FAIL. After A, `git status --short` shows exactly: 4 `M` code + 2 `M` docs + 4 `??` (client, worker, test, doc 211).
+## 5. Doc 212 (Georgian, technical terms in English)
+- l.4 exactly: `**სტატუსი:** In Progress (stage 1 of 2; C round 284 PASS)` (L28: PERF-3 has 2 stages; 3b's task will grant this line).
+- The seven TEMPLATE headings, in order (L26).
+- Contents:
+  - the §1 measurements, citing their `b-round-283/` files;
+  - the band rule and why it was chosen over a power of two (D-29z674);
+  - the envelope in seconds (D-29z675);
+  - the PERF-3a/3b split and the ruler finding (D-29z673);
+  - the changed files;
+  - the tests by row id (ZQ1, ZQ2, ZQ2b, ZQ3; EU5/EU7 rewritten) and the mutants;
+  - the TODO: PERF-3b ruler windowing, the per-key p95 and Ctrl+wheel harness rows, and the exit target.
+- Every row or mutant id cited must exist (`grep -c` in the test files or §3).
 
-## 5. Doc 211 (new) and the doc 163/169 sections
-The content is as `tasks/round-282.md` §7, with these changes:
-- l.4 is exactly `**სტატუსი:** Completed (C round 283 PASS)` (L28: N = this round).
-- It has the seven TEMPLATE headings in order (L26).
-- **`## ტესტირება`:**
-  - It names DW1–DW11 and MU-U1…MU-U5 only as they exist in the final test file (L26).
-  - It states the C-R282-01 ruling in one sentence: the client returns a new wrapper around the **same** five arrays, so the rows pin the arrays (`toBe`) and the wrapper by value.
-  - It cites the round-282 measurements on these same code bytes **by path**, not re-measured:
-    - A's perf run: `a-round-282.md` §Perf and `a-round-282/perf/`;
-    - C's runs: `c-round-282.md` §Perf;
-    - EQUIV: `c-round-282/equiv.txt`;
-    - MU-SYNC-FALLBACK: medians 372 (A) and 371 (C);
-    - the export sha256s `1fea093b…` and `72228706…`: `c-round-282/export-c282.json`;
-    - WORKER-BROWSER: `c-round-282/worker-probe.json`.
-- **`## პრობლემები და გადაწყვეტები`** adds:
-  - the DW3/DW9 wrapper (C-R282-01 → option (a));
-  - the vacuous DW10 (C-R282-03 → fresh module + identity guard; the `not.toBe` 16 s cost).
-- **`## TODO`** also records the architecture note: the worker↔client protocol could move to a neutral module (signal `A-R282-REVIEW-WORKER-PROTOCOL`, not scheduled).
-- Docs 163 and 169: only the §4 sections.
-
-## 6. The browser contract for this round (D-29z669)
-- **What this round changes:** a test file and docs. It changes no runtime byte (C checks the bytes with `cmp`).
-- **Carried evidence:** C's round-282 browser and perf rows (PERF-RUN, SYNC-FALLBACK, WORKER-BROWSER, LIBRARY-STATES, EXPORT-BITEXACT, SSR) ran on exactly these code bytes, so they remain the evidence for the runtime half of PERF-2. C lists them in `c-round-283.json` under a separate key, `"carried"`, with their round-282 evidence paths, and **never** under `"passed"`.
-- **Re-run in a browser this round,** so the round's own browser rows are real and current:
-  - G283-AUTH: purchase protection, a per-publish criterion;
-  - LIBRARY-STATES: one cheap check that the demo still loads on A's fix-up tree.
-
-  LIBRARY-STATES runs on C's own production build of A's tree, as in round 282, because its oracle was measured on production. G283-AUTH runs on `:5173` (round 282 proved it there). Both run at both viewports, after one untimed warm-up (L38).
-- `browserVerified`/`realVerified` are true only if these two rows ran in real Chromium.
-- **Why this is honest:** PERF-2's user-relevant behaviour lives only in the six code files. Their bytes are proven unchanged, and the full browser and perf proof of those bytes is C's own round-282 work, which `c-round-282.json` marks `browserVerified: true`. Re-running a 13-minute perf suite on identical bytes adds no information (L38 cost). PERF-2 becomes **მზადაა** only on the round-283 C PASS plus the gate.
+## 6. The browser contract (D-29z679)
+- C builds **both** HEAD `54a3fcc` (`git archive`) and A's tree as production builds. Each gets its own port and `cacheDir` (L38), then a warm-up, and they never run alongside another job.
+- B's probes are the oracle scripts: `b-round-283/zoom-probe3.cjs` (arguments: base URL, out JSON, '', mode `in`|`out`, screenshot dir) and `imgdiff.cjs`. C may copy them and add a viewport argument; C must not change their counting.
+- `browserVerified`/`realVerified` are true only if every browser row in §8 ran in real Chromium.
 
 ## 7. What A runs (speed rules)
-1. Claims (§Baseline) before any edit.
-2. Apply the test sketch, then `sha256sum -c ../tmp/studio-real-loop/b-round-282/test-sketch-sha256.txt`.
-3. `npm run typecheck`; `npm run lint` (report the counts); Biome on the test file.
-4. `npx vitest run` on these five files, **5 files / 101 tests** expected (B's scratch: `b-round-282/covering-5files.txt`):
-   - `app/lib/arrangement/__tests__/demo-synth-worker.test.ts`;
-   - `app/lib/arrangement/__tests__/demo-synth.test.ts`;
-   - `app/data/__tests__/studio-lab-demo.test.ts`;
-   - `app/lib/arrangement/__tests__/library-notice-ui.test.tsx`;
-   - `app/lib/arrangement/__tests__/strings.test.ts`.
+1. Run the claims (§Baseline) before any edit.
+2. Apply the patch, then run `sha256sum -c ../tmp/studio-real-loop/b-round-283/sketch-sha256.txt` from `store/`.
+3. `npm run typecheck`; `npm run lint` (report the counts).
+4. `npx vitest run` on these nine files. Expected: **9 files / 171 tests** (B's scratch, `covering-9files.txt`):
+   - `waveform-outline-path.test.tsx`
+   - `clip-gain-waveform.test.tsx`
+   - `waveform-zoom.test.tsx`
+   - `clip-gain-pointer-preview.test.tsx`
+   - `content-colour-ui.test.tsx`
+   - `clip-envelope-ui.test.tsx`
+   - `strings.test.ts`
+   - `affordance-colour-ui.test.tsx`
+   - `studio-theme-obsidian.test.tsx`
 
-   Report DW10's time.
-5. MU-U1…U5 and the MU-U4 control (§3.4).
-6. Write doc 211 and the two doc sections. Check that every row and mutant id cited in doc 211 exists: `grep -c` in the test file, or §3.4 for the mutants.
-7. `sha256sum -c ../tmp/studio-real-loop/b-round-282/code-six-sha256.txt` at the end.
-8. The code-reviewer subagent (4 changed paths). Pass its notes on.
+   All nine are in `app/lib/arrangement/__tests__/` [K20].
+5. Run the mutants HEADCODE and Z1–Z5 (§3).
+6. One browser smoke on A's own production build: `zoom-probe3.cjs` in `in` mode, sum = 0. Not a perf run (L38: alone).
+7. Write doc 212.
+8. Ask the code-reviewer subagent (7 paths) and pass on its notes, including any Architecture note.
 
-**Not A's:**
-- no perf run, no EQUIV and no MU-SYNC-FALLBACK (the code bytes are unchanged; L38 cost);
-- the full vitest, the build, `npm run verify` and `test:e2e:smoke` (gate rows).
+**Not A's:** the full vitest suite, the build gate, `npm run verify`, `test:e2e:smoke` and `test:perf` (C's and the gate's).
 
 ## 8. C rows
 | Row | Check |
 |---|---|
-| SOURCE-SCOPE | `sha256sum -c b-round-281-r282-tree-sha256.txt` **and** `sha256sum -c b-round-282/code-six-sha256.txt` both rc 0, at the start and at the end; `git status` = exactly the §4 set (4 `M` code + 2 `M` docs + 4 `??`) |
-| TEST-BYTES | `sha256sum -c b-round-282/test-sketch-sha256.txt` rc 0 |
-| HUNK-SCOPE | doc 163/169 hunks lie only inside their §4 sections; doc 211 is new |
-| CLAIMS | `claims-283.sh` on A's **pre-edit** state is reproducible: run it on a scratch copy = `git archive 000da42` + the six code files + `b-round-282/demo-synth-worker.test.a282.ts`, and it must equal `claims-283-output.txt` except K1 and K15, which print `(archive)` outside git (B verified this: `claims-283-output-archive.txt`); plus the L29 untagged-fact sweep over this task |
+| CLAIMS | `claims-284.sh` on a `git archive 54a3fcc` scratch equals `claims-284-output.txt` (K1 and K18 print `(archive)` / 0 outside git), plus the L29 untagged-fact sweep over this task |
+| SOURCE-SCOPE | `git status` = exactly the 6 `M` + 1 `??` of §4; `sha256sum -c b-round-283/sketch-sha256.txt` rc 0, checked at the start and at the end |
 | TYPECHECK | `npm run typecheck` rc 0 |
-| UNIT | the five §7 files: 5 files / 101 tests pass; DW1–DW11 exist by name (DW6 has two cases); DW10 below 2.5 s (50 % of 5 s) |
-| UNIT-MUTANTS | C's own MU-U1…U5, each red at its "must be red" row; plus the MU-U4 control on `demo-synth-worker.test.a282.ts` (DW10 green, which proves the old vacuity) |
-| DOC-211 | l.4 is byte-exact `**სტატუსი:** Completed (C round 283 PASS)`; the seven TEMPLATE headings are in order; every row and mutant id it cites exists; every round-282 number it cites matches the cited file; GATE281-S2's sentence is in doc 169's B-R281 bullet; `grep -rn 'In Progress (stage' docs/implementation` = 0 |
-| LIBRARY-STATES | **real browser, both viewports**, on **C's own production build of A's tree** (separate port and `cacheDir`, as in round 282; L38), after a warm-up: the values of round-282 §1.4 exactly. The oracle `library-head.json` was measured on a production build, so dev mode (StrictMode double mount, HMR) is not used for this row. Probe `b-round-281/scripts/library-probe.cjs` (pass the production server's base URL); expected values: `b-round-281/library-head.json`; 0 page errors |
-| G283-AUTH | **real browser, both viewports**, fresh context, no credentials. **`/studio-lab`:** demo workspace plus the badge `Demo collection — no sign-in required`; `auth_user` null. **`/studio/middle-east`:** `Sign in required`, `audio[src]` 0, no workspace. **`/api/studio-token`:** no header → 401; fake bearer → not 200 and no token |
-| carried | listed under `"carried"` only (§6): PERF-RUN, SCRIPT-MAX, EQUIV, SYNC-FALLBACK, WORKER-BROWSER, EXPORT-BITEXACT and SSR, with their `c-round-282/` paths, valid because SOURCE-SCOPE proves the code bytes |
-| gate | full vitest, build, Biome, `npm run verify` and `test:e2e:smoke` are the root gate's and are not claimed |
+| UNIT | the nine §7 files: 9 / 171 pass; ZQ1, ZQ2, ZQ2b and ZQ3 exist by name |
+| UNIT-MUTANTS | C's own HEADCODE and Z1–Z5, each red at its §3 row |
+| ZOOM-PATH-IN | **browser**, 1440×900, 30 clips, `in` mode, 3 runs. A's tree: the per-key waveform `d` rewrites are all 0 (sum 0). HEAD control, 1 run: sum 60 (`[30,0,…,0,30]`), which proves the probe sees rewrites |
+| ZOOM-PATH-OUT | **browser**, 1440×900, `out` mode, 3 runs. A's tree: `[0,0,30,0,0,0,0,30,0,0]` (sum 60). HEAD control, 1 run: sum 300 |
+| (viewport note) | ZOOM-PATH-IN/OUT run at 1440×900 only (the harness viewport): they count DOM attribute writes, which do not depend on the viewport. WAVE-PIXELS, ENVELOPE-ZOOM and G284-AUTH carry 1280×720 |
+| ZOOM-ONE-COMMIT | from PERF-RUN: `interact.zoom.1.commits-per-key` and `interact.zoom.30.commits-per-key` = 1 (no regression; HEAD is already 1) |
+| WAVE-PIXELS | **browser, both viewports.** Waveform element screenshots at every probe step, A's tree vs HEAD (`imgdiff.cjs`). Steps at ≥ 50 px/s: meanAbs 0. The others: meanAbs ≤ 6.0 and the share with \|Δ\| > 32 ≤ 7.0 %. Attach the side-by-side crop at 13.1 px/s with C's visual verdict (the same shape; no stair steps, gaps or clipping) |
+| ENVELOPE-ZOOM | **browser, both viewports**, recipe and oracle `b-round-283/env-probe.cjs` (30 clips; the Env toggle; one double-click on the first clip's envelope editor adds one point, status `Envelope: point added — …`; three `=` keys, 40 → 50 → 62.5 → 78.1 px/s). A's tree: 0 `points` and 0 `viewBox` writes on the envelope lines. HEAD control, 1 run: 180 and 90. The dot's centre and the polyline vertex (svg box × viewBox scale) agree within 0.5 px at every step (B measured 0 on both builds). Ctrl+Z leaves 0 points |
+| ZOOM-TIMING | trend only, `record`: Event Timing keydown per key for both modes, A's tree vs HEAD; report the quiet-key and ruler-key values. No pass or fail (the exit target is PERF-3b's) |
+| PERF-RUN | `npm run test:perf` once, alone, on A's tree: rc 0, 0 harness problems, every assert row within budget; record the zoom rows |
+| DOC-212 | l.4 is byte-exact (§5); the TEMPLATE headings are in order; every cited id exists; every number matches its cited `b-round-283/` file |
+| G284-AUTH | **browser, both viewports**, fresh context, no credentials. `/studio-lab`: the demo workspace and the badge `Demo collection — no sign-in required`, with `auth_user` null. `/studio/middle-east`: `Sign in required`, `audio[src]` 0, and no workspace. `/api/studio-token`: no header → 401; a fake bearer → not 200 and no token (a real backend 401/403 is BLOCKED: backend unavailable in cloud) |
+| gate | the full vitest suite, the build, Biome, `npm run verify` and `test:e2e:smoke` belong to the root gate and are not claimed |
 
 ## 9. STOP conditions (L11)
-- The claims output differs from `claims-283-output.txt` (except K1/K15 `(archive)` outside git).
-- The test sketch does not apply cleanly, or any of its rows fails, or a mutant stays green at its row, or DW10 takes ≥ 2.5 s.
-- Any edit seems needed in a code file or outside §4, including a sketch defect the code-reviewer reports.
-- A doc claim would need a number not found in the cited round-282 file.
+- The claims output differs from `claims-284-output.txt`.
+- The patch does not apply cleanly, a sha256 mismatches, a covering test fails, or a mutant stays green at its row.
+- Any edit seems needed outside §4, including a defect the code-reviewer finds in the sketch.
+- The browser smoke (§7.6) shows a sum other than 0.
 
 ## 10. Neighbour risk
-- Test-only plus docs. The runtime risk is nil while the code bytes hold, and SOURCE-SCOPE checks that.
-- The new test adds about 0.9 s to the full suite (DW10's second synthesis). That is a gate-row concern only.
+1. **Waveform appearance below about 41 px/s.** There are now 1 to 4 columns per pixel instead of 1, so spikes anti-alias slightly softer. WAVE-PIXELS bounds this.
+2. **Clip Gain drag preview and the vertical waveform zoom** still change `scale`, and so the path. WG3–WG8 and WZ2/WZ3 cover this.
+3. **Envelope editing:**
+   - the memo deps (Z4 proves that removing them breaks editing);
+   - the AL1 pixel alignment;
+   - the halo/line identity (EV1 rows).
+4. **The `perf/**` specs read the waveform testid** [K12]: PERF-RUN covers them.
 
 ## 11. Outcome, fixed in advance
 | Result | Next |
 |---|---|
-| C PASS and the gate publishes | PERF-2 is **მზადაა**. Round 284 = REGRESSION if its planning falls on or after 2026-11-02 (`regression-last.json`), otherwise PERF-3 (consults first) |
-| C FAIL on a test or doc row | a bounded fix-up, the same grants |
-| SOURCE-SCOPE shows a code byte moved | the carried evidence is void; B re-plans the runtime rows |
+| C PASS and the gate publishes | PERF-3a is done, and PERF-3 stays **მუშავდება**. The next round is REGRESSION if its planning is on or after 2026-11-02 (`regression-last.json`); otherwise PERF-3b, after consults (ruler windowing that keeps `play.idle-commits`; harness rows p95, path rewrites, ruler nodes and Ctrl+wheel) |
+| C FAIL on a test or doc row | a bounded fix-up with the same grants |
+| ZOOM-PATH or WAVE-PIXELS fails | B re-plans the rule; no tolerance is loosened |
 
 ## 12. Deliverables
-- **A:** the test file (= sketch), doc 211, and the doc 163/169 sections. `a-round-283.md` with the commands, results, the mutant table with the control, DW10's time, and the review notes.
-- **C:** `c-round-283.md`, `c-round-283.json` (with `"carried"`), and evidence in `c-round-283/`.
+- **A:** the six files (= the sketch), doc 212, and `a-round-284.md` with the commands, the results, the mutant table, the smoke sum and the review notes.
+- **C:** `c-round-284.md`, `c-round-284.json`, and evidence in `c-round-284/`.
 
 ## Claims block (L29)
-Run `bash ../tmp/studio-real-loop/b-round-282/claims-283.sh` from `store/` on the pre-edit tree. Expected: `b-round-282/claims-283-output.txt`.
+From `store/` on the pre-edit tree, run `bash ../tmp/studio-real-loop/b-round-283/claims-284.sh`. The expected output is `b-round-283/claims-284-output.txt`.
 
 | Tag | Claim | Expected |
 |---|---|---|
-| K1 | HEAD | `000da42` |
-| K2 | the six code files equal the round-282 sketch | 6 × OK |
-| K3 | the test file is A's round-282 version | OK |
-| K4 | the client returns a new wrapper | l.35 |
-| K5 | the `postMessage` throw falls back | l.72–76 `catch { finish(null); }` |
-| K6 | the worker synthesises and posts with a transfer list | l.5, l.7 |
-| K7 | the DW ids found by grep | DW1–5, 7–10 (DW6 is `it.each`); `DW11` count 0 |
-| K8 | DW3/DW9 use `toBe` on the wrapper | l.138, 226, 227 |
-| K9 | `vi.resetModules()` only in `beforeEach`; DW10 imports the worker and then `loadClient()` in one module graph | l.97; l.233–234 |
-| K10 | the last implementation doc is 210 | 210 |
-| K11 | doc 163's granted headings | l.20, 58, 156 |
-| K12 | doc 169's `loaf-blocking-max` row and the B-R281 bullet | l.37; l.215 |
-| K13 | `In Progress (stage` lines | 0 |
-| K14 | vitest has no `testTimeout` override | 0 |
-| K15 | `git status` | 4 `M` + 3 `??` |
+| K1 | HEAD | `54a3fcc` |
+| K2 | the cap constant in `ArrangementClip.tsx` | l.45 |
+| K3 | the HEAD column formula | l.367 |
+| K4 | `buildPeakShape` export | l.247 |
+| K5 | the path memo deps | l.313 |
+| K6 | clip width = duration × px/s | l.366 |
+| K7 | the envelope `linePoints`, pixel viewBox, two polylines | l.403, l.417, count 2 |
+| K8 | the visible points computed before the early return | l.395 |
+| K9 | 100 buckets per second | `peaks.ts` l.1 |
+| K10 | SWEEP `PEAK_SHAPE_MAX_COLUMNS`, roots `app perf` | 2 hits, 1 file |
+| K11 | SWEEP `getAttribute('points'\|'viewBox')`, roots `app perf` | 10 hits, 4 test files |
+| K12 | SWEEP `arrangement-clip-waveform`, roots `app perf` | 8 files (1 component, 4 tests, 3 perf specs) |
+| K13 | SWEEP `arrangement-clip-envelope-line`, roots `app perf` | 2 files |
+| K14 | SWEEP `ArrangementPeakPath\|buildPeakShape`, roots `app perf` | 7 files (incl. `perf/budgets.json` text) |
+| K15 | the ruler maps every tick; `rulerTickMarks` | `ArrangementRuler.tsx` l.239; `view.ts` l.233 |
+| K16 | the last implementation doc | `211-perf-demo-synth-worker.md` |
+| K17 | `In Progress (stage` lines | 0 |
+| K18 | `git status` lines | 0 |
+| K19 | `interact.zoom.*` rows in `perf/budgets.interactions.json` | 12 |
+| K20 | the nine covering test files exist | `111111111` |

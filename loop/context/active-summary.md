@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T06:19:05.529Z)
+# Active loop summary (2026-10-31T07:06:53.833Z)
 
-- backlog.json 2702 KB -> active view 375 KB
-- status: G_ROOT_GATE round 282
-- servers: `{"checkedUtc":"2026-10-31T05:47:33.5687906Z","round":282,"attempt":1,"store":200}`
-- last publication: 000da42be6bb6e3adcfbb7a2f6e0e965084f8218 (rounds 281-281)
-- last root gate: round 282 skipped - C taskStatus FAIL
+- backlog.json 2703 KB -> active view 377 KB
+- status: G_ROOT_GATE round 283
+- servers: `{"checkedUtc":"2026-10-31T06:46:45.6278527Z","round":283,"attempt":1,"store":200}`
+- last publication: 54a3fcc00d3ae58888f2189dcfb9654634466c48 (rounds 282-283)
+- last root gate: round 283 published - commit 54a3fcc00d3ae58888f2189dcfb9654634466c48 pushed
 
 ## Current items: -
 
@@ -684,11 +684,15 @@
 - B-R281-RESOURCES-READY-FAILED / low / signal (D-29z657, narrowed; not scheduled): adding a status wait to 1b-ii moves time-since-load rows such as res.mem.used-ready-mib (round 279 measured) | signal (D-29z652; not scheduled): tech-lead (b) - different ready signal, a change would not be byte-identical / PERF-1b-ii has no status wait: when a NON-selected demo source fails after the library is ready (Add enabled + waveform), it continues and m
 - PERF2-FIRST-FRAME-LONGTASK / info / signal (D-29z662): not scheduled; candidates PERF-11 (root diet) and PERF-7 (fonts); B re-measures with LoAF attribution when planning those / the first load frame is a long task of 77-131 ms with no script over 5 ms (parse/style/layout before hydration); it keeps load.longtask-max 
 - PERF2-STEREO-COPY / low / signal (D-29z661): not in round 282 (code = measured sketch); fold into PERF-5 (peaks in a worker) planning / loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) before copyToChannel; calling copyToChannel t
-- GATE281-S2 / low / dispatched round 282 (D-29z659): doc 169 TODO bullet (granted with the l.37 row); doc 210 stays as written (round-281 record) / doc 169 / doc 210: B-R281-RESOURCES-READY-FAILED should say that in the measured runs a failed non-selected source usually aborts PERF-1b-ii
+- GATE281-S2 / low / re-dispatched round 283 (D-29z666): doc 169 B-R281 TODO bullet; round 282 did not write it / doc 169 / doc 210: B-R281-RESOURCES-READY-FAILED should say that in the measured runs a failed non-selected source usually aborts PERF-1b-ii
 - GATE281-ARCH-COLLECTION-STATE-ATTR / info / architecture signal (D-29z659): recorded, not scheduled / proposal: the app sets data-collection-state="loading|ready|failed" on arrangement-status and the three perf waits read it instead of text p
 - GATE281-ARCH-DOC-TODO-CHANGELOG / info / architecture signal (D-29z659): recorded, not scheduled / proposal: keep one changelog of harness waits in doc 175 and replace per-round TODO bullets in docs 168/169/208/209 with a link
 - A-R281-ARCH-PAGE-READINESS / info / architecture signal (D-29z659): recorded, not scheduled (keep) / perf/lib/page.ts shared timing helpers now hold Studio-specific readiness checks; app-labels pattern builders accumulate; reviewer: keep
 - GATE281-S5 / info / info (D-29z659): existing tooling gap; config change is root/Saba / npm run lint runs Biome on ./app only, so perf/** formatting is unchecked (existing gap, C-R214-BIOME-PERF-VACUOUS, L30)
+- C-R282-01 / medium / fix dispatched round 283 (D-29z667): option (a) expectSameComposition = toStrictEqual + toBe per array; DW3 one shared result / DW3/DW9 assert toBe on the composition wrapper; readDemoComposition returns a new wrapper around the same five arrays (client l.35), so the 
+- C-R282-02 / medium / fix dispatched round 283 / doc 211 and the doc 163/169 sections (incl. GATE281-S2 sentence) not written in round 282
+- C-R282-03 / low / fix dispatched round 283 (D-29z668; the round already owns the file and the cost is small): fresh module import + === identity guard; MU-U4 proves it (green on a282 DW10, red on sketch) / DW10 sample loop vacuous: worker and test share one demo-synth module instance, so arrays are compared with themselves
+- A-R282-REVIEW-DW11 / medium / fix dispatched round 283: DW11 + MU-U5 / postMessage-throw fallback (client l.72-76) had no test row
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

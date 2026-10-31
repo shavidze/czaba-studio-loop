@@ -1,0 +1,138 @@
+--- head/app/lib/arrangement/peaks.ts	2026-10-31 07:06:50.000000000 +0000
++++ sketch/app/lib/arrangement/peaks.ts	2026-10-31 07:15:27.443008706 +0000
+@@ -1,5 +1,23 @@
+ export const PEAK_BUCKETS_PER_SECOND = 100;
+ 
++export const PEAK_SHAPE_MAX_COLUMNS = 4096;
++
++const PEAK_COLUMN_BAND_FACTOR = 4;
++
++export function waveformPeakColumns(duration: number, pxPerSecond: number): number {
++  const width = duration * pxPerSecond;
++  if (!Number.isFinite(width) || Math.round(width) <= 0) {
++    return 0;
++  }
++  const pixelsPerBucket = pxPerSecond / PEAK_BUCKETS_PER_SECOND;
++  let bucketsPerColumn = 1;
++  while (bucketsPerColumn * PEAK_COLUMN_BAND_FACTOR * pixelsPerBucket <= 1) {
++    bucketsPerColumn *= PEAK_COLUMN_BAND_FACTOR;
++  }
++  const buckets = Math.ceil(duration * PEAK_BUCKETS_PER_SECOND);
++  return Math.max(1, Math.min(PEAK_SHAPE_MAX_COLUMNS, Math.ceil(buckets / bucketsPerColumn)));
++}
++
+ export function computePeaks(
+   channels: readonly Float32Array[],
+   sampleRate: number,
+--- head/app/components/arrangement/ArrangementClip.tsx	2026-10-31 07:06:50.000000000 +0000
++++ sketch/app/components/arrangement/ArrangementClip.tsx	2026-10-31 07:15:27.443273557 +0000
+@@ -18,7 +18,7 @@
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { clipGainDraftKey } from '~/lib/arrangement/mix-draft-store';
+ import { moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
+-import { PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
++import { PEAK_BUCKETS_PER_SECOND, waveformPeakColumns } from '~/lib/arrangement/peaks';
+ import {
+   CLIP_LANE_REFUSAL_MESSAGES,
+   type ClipLanePlacement,
+@@ -42,7 +42,6 @@
+ 
+ const DRAG_THRESHOLD_PX = 3;
+ const TRIM_BLOCK_TOLERANCE = 0.01;
+-const PEAK_SHAPE_MAX_COLUMNS = 4096;
+ const CLIP_FOLDED_TITLE_LINE = studioClipStrings.foldedTitleLine;
+ const FADE_HANDLE_PX = 10;
+ const FADE_HANDLE_MIN_CLIP_PX = 24;
+@@ -364,7 +363,7 @@
+   const setFade = isVideo ? setVideoClipFade : setClipFade;
+   const fadeLabels = isVideo ? VIDEO_FADE_LABELS : CLIP_FADE_LABELS;
+   const width = clip.duration * pxPerSecond;
+-  const peakColumns = Math.round(Math.min(width, PEAK_SHAPE_MAX_COLUMNS));
++  const peakColumns = waveformPeakColumns(clip.duration, pxPerSecond);
+ 
+   useEffect(
+     () => () => {
+--- head/app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-31 07:06:50.000000000 +0000
++++ sketch/app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-31 07:15:51.323474549 +0000
+@@ -1,4 +1,4 @@
+-import { type MouseEvent, type PointerEvent, useEffect, useRef } from 'react';
++import { type MouseEvent, type PointerEvent, useEffect, useMemo, useRef } from 'react';
+ import {
+   addClipEnvelopePoint,
+   clipEnvelopeDepthFromGain,
+@@ -391,50 +391,57 @@
+   editing,
+   ...props
+ }: ArrangementClipEnvelopeProps) {
+-  const { clip, pxPerSecond } = props;
+-  const points = visibleClipEnvelopePoints(clip);
++  const { clip } = props;
++  const line = useMemo(() => {
++    const { envelope, sourceOffset, duration } = clip;
++    const visible = visibleClipEnvelopePoints(clip);
++    const all = envelope ?? [];
++    const spanSeconds = duration > 0 ? duration : 1;
++    const firstGain = clipEnvelopeGainAtSource(all, sourceOffset);
++    const lastGain = clipEnvelopeGainAtSource(all, sourceOffset + duration);
++    const points = [
++      `0,${clipEnvelopeDepthFromGain(firstGain)}`,
++      ...visible.map(
++        (point) => `${point.time - sourceOffset},${clipEnvelopeDepthFromGain(point.gain)}`,
++      ),
++      `${spanSeconds},${clipEnvelopeDepthFromGain(lastGain)}`,
++    ].join(' ');
++    return {
++      points,
++      spanSeconds,
++      slots: visible.map((point, slot) => ({ point, slot })),
++    };
++  }, [clip]);
+   if ((clip.envelope?.length ?? 0) === 0 && !editing) {
+     return null;
+   }
+   const lineWidth = Math.max(1, width);
+-  const envelope = clip.envelope ?? [];
+-  const firstGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset);
+-  const lastGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset + clip.duration);
+-  const linePoints = [
+-    `0,${clipEnvelopeDepthFromGain(firstGain)}`,
+-    ...points.map(
+-      (point) =>
+-        `${(point.time - clip.sourceOffset) * pxPerSecond},${clipEnvelopeDepthFromGain(point.gain)}`,
+-    ),
+-    `${lineWidth},${clipEnvelopeDepthFromGain(lastGain)}`,
+-  ].join(' ');
+-  const slots = points.map((point, slot) => ({ point, slot }));
+   return (
+     <>
+       <svg
+         className="pointer-events-none absolute inset-y-0 h-full overflow-visible"
+         style={{ left: -CLIP_ENVELOPE_ROOT_BORDER_PX, width: lineWidth }}
+-        viewBox={`0 0 ${lineWidth} 1`}
++        viewBox={`0 0 ${line.spanSeconds} 1`}
+         preserveAspectRatio="none"
+         aria-hidden="true"
+         data-testid="arrangement-clip-envelope-line"
+       >
+         <polyline
+-          points={linePoints}
++          points={line.points}
+           fill="none"
+           className="stroke-background"
+           strokeWidth={4}
+           vectorEffect="non-scaling-stroke"
+         />
+         <polyline
+-          points={linePoints}
++          points={line.points}
+           fill="none"
+           className="stroke-foreground"
+           strokeWidth={1.5}
+           vectorEffect="non-scaling-stroke"
+         />
+       </svg>
+-      {editing ? <ClipEnvelopeEditor {...props} slots={slots} /> : null}
++      {editing ? <ClipEnvelopeEditor {...props} slots={line.slots} /> : null}
+     </>
+   );
+ }

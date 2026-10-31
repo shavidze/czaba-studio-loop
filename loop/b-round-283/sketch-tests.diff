@@ -1,0 +1,170 @@
+--- head/app/lib/arrangement/__tests__/waveform-outline-path.test.tsx	2026-10-31 07:06:50.000000000 +0000
++++ sketch/app/lib/arrangement/__tests__/waveform-outline-path.test.tsx	2026-10-31 07:18:23.003995544 +0000
+@@ -1,6 +1,6 @@
+ import { describe, expect, it } from 'vitest';
+ import { buildPeakShape } from '~/components/arrangement/ArrangementClip';
+-import { PEAK_BUCKETS_PER_SECOND } from '../peaks';
++import { PEAK_BUCKETS_PER_SECOND, PEAK_SHAPE_MAX_COLUMNS, waveformPeakColumns } from '../peaks';
+ 
+ type PeakColumnEdges = readonly [string, string];
+ 
+@@ -134,3 +134,52 @@
+     expect(buildPeakShape(FIVE_COLUMN_PEAKS, 0, 0, 5, 1)).toBeNull();
+   });
+ });
++
++describe('waveformPeakColumns zoom bands (PERF-3a)', () => {
++  it('ZQ2: the column count depends on the clip length and the zoom band only', () => {
++    const cases: readonly (readonly [duration: number, pxPerSecond: number, columns: number])[] = [
++      [12, 40, 1200],
++      [12, 50, 1200],
++      [12, 80, 1200],
++      [12, 25.1, 1200],
++      [12, 25, 300],
++      [12, 20, 300],
++      [12, 6.3, 300],
++      [12, 6.25, 75],
++      [12, 6.2, 75],
++      [12, 1.5625, 19],
++      [12, 0.5, 19],
++      [101.352, 40, 4096],
++      [101.352, 20, 2534],
++      [101.352, 320, 4096],
++      [0.006, 100, 1],
++      [0.004, 100, 0],
++      [Number.NaN, 40, 0],
++      [12, 0, 0],
++    ];
++    for (const [duration, pxPerSecond, columns] of cases) {
++      expect(
++        waveformPeakColumns(duration, pxPerSecond),
++        `${duration} s at ${pxPerSecond} px/s`,
++      ).toBe(columns);
++    }
++  });
++
++  it('ZQ2b: at least one column per pixel up to the cap and the bucket count, fewer than four per pixel', () => {
++    for (let pxPerSecond = 0.5; pxPerSecond <= 320; pxPerSecond *= 1.25) {
++      for (const duration of [0.5, 2, 12, 101.352]) {
++        const columns = waveformPeakColumns(duration, pxPerSecond);
++        const width = duration * pxPerSecond;
++        const label = `${duration} s at ${pxPerSecond} px/s`;
++        expect(columns, label).toBeGreaterThanOrEqual(
++          Math.min(
++            PEAK_SHAPE_MAX_COLUMNS,
++            Math.round(width),
++            Math.ceil(duration * PEAK_BUCKETS_PER_SECOND),
++          ),
++        );
++        expect(columns, label).toBeLessThanOrEqual(Math.ceil(4 * width) + 1);
++      }
++    }
++  });
++});
+--- head/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx	2026-10-31 07:06:50.000000000 +0000
++++ sketch/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx	2026-10-31 07:18:22.748644350 +0000
+@@ -398,6 +398,36 @@
+     expect(sfx.d).toBe(expectedShape('s1', sfx.columns, 1));
+   });
+ 
++  it('ZQ1 (PERF-3a): zoom 40 → 50 → 62.5 → 80 px/s writes no lane waveform d or viewBox; 20 px/s redraws each clip once at its band', async () => {
++    const { api, view, lane, expectedShape } = await mountWaveformWorkspace();
++    act(() => live(api).setPxPerSecond(40));
++    const ids = ['m1', 's1'];
++    const before = ids.map((id) => lane(id));
++    expect(before.map((shape) => shape.columns)).toStrictEqual([1200, 200]);
++    const observer = new MutationObserver(() => undefined);
++    for (const id of ids) {
++      const svg = view.container.querySelector(
++        `[data-clip-id="${id}"] [data-testid="arrangement-clip-waveform"]`,
++      );
++      if (!svg) {
++        throw new Error(`lane ${id} waveform missing`);
++      }
++      observer.observe(svg, { subtree: true, attributes: true, attributeFilter: ['d', 'viewBox'] });
++    }
++    for (const zoom of [50, 62.5, 80]) {
++      act(() => live(api).setPxPerSecond(zoom));
++      expect(ids.map((id) => lane(id))).toStrictEqual(before);
++    }
++    expect(observer.takeRecords()).toHaveLength(0);
++    act(() => live(api).setPxPerSecond(20));
++    const records = observer.takeRecords();
++    observer.disconnect();
++    expect(lane('m1').columns).toBe(300);
++    expect(lane('m1').d).toBe(expectedShape('m1', 300, 1));
++    expect(lane('s1').columns).toBe(50);
++    expect(records.filter((record) => record.attributeName === 'd')).toHaveLength(2);
++  });
++
+   it('WG4: during a single Clip Gain drag the lane follows before release; one entry; Undo restores the exact drawing', async () => {
+     const { api, lane, detail, expectedShape, fader, select } = await mountWaveformWorkspace();
+     select(['m1']);
+--- head/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-31 07:06:50.000000000 +0000
++++ sketch/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-31 07:18:23.036995343 +0000
+@@ -627,7 +627,7 @@
+     const line = clipRoot('s1').querySelector(`[data-testid="${LINE}"] polyline`);
+     expectLineVertices(line?.getAttribute('points'), [
+       [0, 0.2],
+-      [80, 0.2],
++      [2, 0.2],
+     ]);
+   });
+ 
+@@ -754,16 +754,16 @@
+     const line = clipRoot('s1').querySelector(`[data-testid="${LINE}"] polyline`);
+     expectLineVertices(line?.getAttribute('points'), [
+       [0, 0],
+-      [160, 0],
+-      [320, 0.2],
+-      [480, 0],
+-      [640, 0],
++      [4, 0],
++      [8, 0.2],
++      [12, 0],
++      [16, 0],
+     ]);
+     expect(clipRoot('m1').querySelector(`[data-testid="${LINE}"]`)).toBeNull();
+     fireEvent.click(toggle());
+     expect(
+       clipRoot('m1').querySelector(`[data-testid="${LINE}"] polyline`)?.getAttribute('points'),
+-    ).toBe('0,0 40,0');
++    ).toBe('0,0 1,0');
+   });
+ });
+ 
+@@ -1041,3 +1041,34 @@
+     expect(undoAll(api)).toBe(1);
+   });
+ });
++
++describe('PERF-3a zoom keeps the envelope line (ZQ3)', () => {
++  it('ZQ3 zoom 40 → 50 → 62.5 → 80 px/s writes no points or viewBox; only the width follows the zoom', async () => {
++    const { api, clipRoot } = await mountEnvelopeWorkspace([
++      clipAt('s1', 'stems', 2, 16, { envelope: V_ENVELOPE }),
++    ]);
++    const svg = clipRoot('s1').querySelector<SVGSVGElement>(`[data-testid="${LINE}"]`);
++    if (!svg) {
++      throw new Error('envelope line missing');
++    }
++    const before = svg.querySelector('polyline')?.getAttribute('points');
++    expect(svg.getAttribute('viewBox')).toBe('0 0 16 1');
++    expect(Number.parseFloat(svg.style.width)).toBe(16 * PX_PER_SECOND);
++    const observer = new MutationObserver(() => undefined);
++    observer.observe(svg, {
++      subtree: true,
++      attributes: true,
++      attributeFilter: ['points', 'viewBox'],
++    });
++    for (const zoom of [50, 62.5, 80]) {
++      act(() => live(api).setPxPerSecond(zoom));
++      const current = clipRoot('s1').querySelector<SVGSVGElement>(`[data-testid="${LINE}"]`);
++      expect(current).toBe(svg);
++      expect(Number.parseFloat(current?.style.width ?? 'NaN')).toBe(16 * zoom);
++      expect(current?.querySelector('polyline')?.getAttribute('points')).toBe(before);
++    }
++    const records = observer.takeRecords();
++    observer.disconnect();
++    expect(records.map((record) => record.attributeName)).toStrictEqual([]);
++  });
++});

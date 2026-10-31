@@ -1,0 +1,11 @@
+# B round 283 -> 284 planning checkpoint
+- 07:xx archived current-task.md -> tasks/round-283.md (new copy).
+- C 283 PASS (browserVerified/realVerified true), gate 283 published 54a3fcc = baseline HEAD.
+- Lows C-R283-01..03 -> deferred_low_polish (pending backlog write).
+- Next: PERF-3 (regression not due until 2026-11-02). Consults performance-optimizer + tech-lead launched.
+- Next step: B attribution probe on prod build scratch (/tmp/b283), sketch quantized columns.
+- sketch + tests on scratch: 3 files 48 tests PASS; mutants HEADCODE/Z1..Z5 red (mutants.txt). Next: browser probe head vs sketch (in/out).
+- browser probe done: in HEAD 60 -> sketch 0; out HEAD 300 -> 60; imgdiff saved. Next: write task.
+- task, backlog (v247), feature-status, lessons L37, b-round-283.md, b-next.json written. Next: advisor final check.
+- env probe (HEAD 180 points/90 viewBox writes over 3 keys -> sketch 0, delta 0, both viewports) and nodes evidence saved; servers stopped.
+- final: task patched (env recipe, node evidence, viewport note); store clean. DONE.

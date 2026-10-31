@@ -1,0 +1,308 @@
+--- a/app/lib/arrangement/peaks.ts	2026-10-31 07:06:50.000000000 +0000
++++ b/app/lib/arrangement/peaks.ts	2026-10-31 07:15:27.443008706 +0000
+@@ -1,5 +1,23 @@
+ export const PEAK_BUCKETS_PER_SECOND = 100;
+ 
++export const PEAK_SHAPE_MAX_COLUMNS = 4096;
++
++const PEAK_COLUMN_BAND_FACTOR = 4;
++
++export function waveformPeakColumns(duration: number, pxPerSecond: number): number {
++  const width = duration * pxPerSecond;
++  if (!Number.isFinite(width) || Math.round(width) <= 0) {
++    return 0;
++  }
++  const pixelsPerBucket = pxPerSecond / PEAK_BUCKETS_PER_SECOND;
++  let bucketsPerColumn = 1;
++  while (bucketsPerColumn * PEAK_COLUMN_BAND_FACTOR * pixelsPerBucket <= 1) {
++    bucketsPerColumn *= PEAK_COLUMN_BAND_FACTOR;
++  }
++  const buckets = Math.ceil(duration * PEAK_BUCKETS_PER_SECOND);
++  return Math.max(1, Math.min(PEAK_SHAPE_MAX_COLUMNS, Math.ceil(buckets / bucketsPerColumn)));
++}
++
+ export function computePeaks(
+   channels: readonly Float32Array[],
+   sampleRate: number,
+--- a/app/components/arrangement/ArrangementClip.tsx	2026-10-31 07:06:50.000000000 +0000
++++ b/app/components/arrangement/ArrangementClip.tsx	2026-10-31 07:15:27.443273557 +0000
+@@ -18,7 +18,7 @@
+ import { markerSnapTimes } from '~/lib/arrangement/markers';
+ import { clipGainDraftKey } from '~/lib/arrangement/mix-draft-store';
+ import { moveClip, trimClipEnd, trimClipStart } from '~/lib/arrangement/model';
+-import { PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
++import { PEAK_BUCKETS_PER_SECOND, waveformPeakColumns } from '~/lib/arrangement/peaks';
+ import {
+   CLIP_LANE_REFUSAL_MESSAGES,
+   type ClipLanePlacement,
+@@ -42,7 +42,6 @@
+ 
+ const DRAG_THRESHOLD_PX = 3;
+ const TRIM_BLOCK_TOLERANCE = 0.01;
+-const PEAK_SHAPE_MAX_COLUMNS = 4096;
+ const CLIP_FOLDED_TITLE_LINE = studioClipStrings.foldedTitleLine;
+ const FADE_HANDLE_PX = 10;
+ const FADE_HANDLE_MIN_CLIP_PX = 24;
+@@ -364,7 +363,7 @@
+   const setFade = isVideo ? setVideoClipFade : setClipFade;
+   const fadeLabels = isVideo ? VIDEO_FADE_LABELS : CLIP_FADE_LABELS;
+   const width = clip.duration * pxPerSecond;
+-  const peakColumns = Math.round(Math.min(width, PEAK_SHAPE_MAX_COLUMNS));
++  const peakColumns = waveformPeakColumns(clip.duration, pxPerSecond);
+ 
+   useEffect(
+     () => () => {
+--- a/app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-31 07:06:50.000000000 +0000
++++ b/app/components/arrangement/ArrangementClipEnvelope.tsx	2026-10-31 07:15:51.323474549 +0000
+@@ -1,4 +1,4 @@
+-import { type MouseEvent, type PointerEvent, useEffect, useRef } from 'react';
++import { type MouseEvent, type PointerEvent, useEffect, useMemo, useRef } from 'react';
+ import {
+   addClipEnvelopePoint,
+   clipEnvelopeDepthFromGain,
+@@ -391,50 +391,57 @@
+   editing,
+   ...props
+ }: ArrangementClipEnvelopeProps) {
+-  const { clip, pxPerSecond } = props;
+-  const points = visibleClipEnvelopePoints(clip);
++  const { clip } = props;
++  const line = useMemo(() => {
++    const { envelope, sourceOffset, duration } = clip;
++    const visible = visibleClipEnvelopePoints(clip);
++    const all = envelope ?? [];
++    const spanSeconds = duration > 0 ? duration : 1;
++    const firstGain = clipEnvelopeGainAtSource(all, sourceOffset);
++    const lastGain = clipEnvelopeGainAtSource(all, sourceOffset + duration);
++    const points = [
++      `0,${clipEnvelopeDepthFromGain(firstGain)}`,
++      ...visible.map(
++        (point) => `${point.time - sourceOffset},${clipEnvelopeDepthFromGain(point.gain)}`,
++      ),
++      `${spanSeconds},${clipEnvelopeDepthFromGain(lastGain)}`,
++    ].join(' ');
++    return {
++      points,
++      spanSeconds,
++      slots: visible.map((point, slot) => ({ point, slot })),
++    };
++  }, [clip]);
+   if ((clip.envelope?.length ?? 0) === 0 && !editing) {
+     return null;
+   }
+   const lineWidth = Math.max(1, width);
+-  const envelope = clip.envelope ?? [];
+-  const firstGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset);
+-  const lastGain = clipEnvelopeGainAtSource(envelope, clip.sourceOffset + clip.duration);
+-  const linePoints = [
+-    `0,${clipEnvelopeDepthFromGain(firstGain)}`,
+-    ...points.map(
+-      (point) =>
+-        `${(point.time - clip.sourceOffset) * pxPerSecond},${clipEnvelopeDepthFromGain(point.gain)}`,
+-    ),
+-    `${lineWidth},${clipEnvelopeDepthFromGain(lastGain)}`,
+-  ].join(' ');
+-  const slots = points.map((point, slot) => ({ point, slot }));
+   return (
+     <>
+       <svg
+         className="pointer-events-none absolute inset-y-0 h-full overflow-visible"
+         style={{ left: -CLIP_ENVELOPE_ROOT_BORDER_PX, width: lineWidth }}
+-        viewBox={`0 0 ${lineWidth} 1`}
++        viewBox={`0 0 ${line.spanSeconds} 1`}
+         preserveAspectRatio="none"
+         aria-hidden="true"
+         data-testid="arrangement-clip-envelope-line"
+       >
+         <polyline
+-          points={linePoints}
++          points={line.points}
+           fill="none"
+           className="stroke-background"
+           strokeWidth={4}
+           vectorEffect="non-scaling-stroke"
+         />
+         <polyline
+-          points={linePoints}
++          points={line.points}
+           fill="none"
+           className="stroke-foreground"
+           strokeWidth={1.5}
+           vectorEffect="non-scaling-stroke"
+         />
+       </svg>
+-      {editing ? <ClipEnvelopeEditor {...props} slots={slots} /> : null}
++      {editing ? <ClipEnvelopeEditor {...props} slots={line.slots} /> : null}
+     </>
+   );
+ }
+--- a/app/lib/arrangement/__tests__/waveform-outline-path.test.tsx	2026-10-31 07:06:50.000000000 +0000
++++ b/app/lib/arrangement/__tests__/waveform-outline-path.test.tsx	2026-10-31 07:18:23.003995544 +0000
+@@ -1,6 +1,6 @@
+ import { describe, expect, it } from 'vitest';
+ import { buildPeakShape } from '~/components/arrangement/ArrangementClip';
+-import { PEAK_BUCKETS_PER_SECOND } from '../peaks';
++import { PEAK_BUCKETS_PER_SECOND, PEAK_SHAPE_MAX_COLUMNS, waveformPeakColumns } from '../peaks';
+ 
+ type PeakColumnEdges = readonly [string, string];
+ 
+@@ -134,3 +134,52 @@
+     expect(buildPeakShape(FIVE_COLUMN_PEAKS, 0, 0, 5, 1)).toBeNull();
+   });
+ });
++
++describe('waveformPeakColumns zoom bands (PERF-3a)', () => {
++  it('ZQ2: the column count depends on the clip length and the zoom band only', () => {
++    const cases: readonly (readonly [duration: number, pxPerSecond: number, columns: number])[] = [
++      [12, 40, 1200],
++      [12, 50, 1200],
++      [12, 80, 1200],
++      [12, 25.1, 1200],
++      [12, 25, 300],
++      [12, 20, 300],
++      [12, 6.3, 300],
++      [12, 6.25, 75],
++      [12, 6.2, 75],
++      [12, 1.5625, 19],
++      [12, 0.5, 19],
++      [101.352, 40, 4096],
++      [101.352, 20, 2534],
++      [101.352, 320, 4096],
++      [0.006, 100, 1],
++      [0.004, 100, 0],
++      [Number.NaN, 40, 0],
++      [12, 0, 0],
++    ];
++    for (const [duration, pxPerSecond, columns] of cases) {
++      expect(
++        waveformPeakColumns(duration, pxPerSecond),
++        `${duration} s at ${pxPerSecond} px/s`,
++      ).toBe(columns);
++    }
++  });
++
++  it('ZQ2b: at least one column per pixel up to the cap and the bucket count, fewer than four per pixel', () => {
++    for (let pxPerSecond = 0.5; pxPerSecond <= 320; pxPerSecond *= 1.25) {
++      for (const duration of [0.5, 2, 12, 101.352]) {
++        const columns = waveformPeakColumns(duration, pxPerSecond);
++        const width = duration * pxPerSecond;
++        const label = `${duration} s at ${pxPerSecond} px/s`;
++        expect(columns, label).toBeGreaterThanOrEqual(
++          Math.min(
++            PEAK_SHAPE_MAX_COLUMNS,
++            Math.round(width),
++            Math.ceil(duration * PEAK_BUCKETS_PER_SECOND),
++          ),
++        );
++        expect(columns, label).toBeLessThanOrEqual(Math.ceil(4 * width) + 1);
++      }
++    }
++  });
++});
+--- a/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx	2026-10-31 07:06:50.000000000 +0000
++++ b/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx	2026-10-31 07:18:22.748644350 +0000
+@@ -398,6 +398,36 @@
+     expect(sfx.d).toBe(expectedShape('s1', sfx.columns, 1));
+   });
+ 
++  it('ZQ1 (PERF-3a): zoom 40 → 50 → 62.5 → 80 px/s writes no lane waveform d or viewBox; 20 px/s redraws each clip once at its band', async () => {
++    const { api, view, lane, expectedShape } = await mountWaveformWorkspace();
++    act(() => live(api).setPxPerSecond(40));
++    const ids = ['m1', 's1'];
++    const before = ids.map((id) => lane(id));
++    expect(before.map((shape) => shape.columns)).toStrictEqual([1200, 200]);
++    const observer = new MutationObserver(() => undefined);
++    for (const id of ids) {
++      const svg = view.container.querySelector(
++        `[data-clip-id="${id}"] [data-testid="arrangement-clip-waveform"]`,
++      );
++      if (!svg) {
++        throw new Error(`lane ${id} waveform missing`);
++      }
++      observer.observe(svg, { subtree: true, attributes: true, attributeFilter: ['d', 'viewBox'] });
++    }
++    for (const zoom of [50, 62.5, 80]) {
++      act(() => live(api).setPxPerSecond(zoom));
++      expect(ids.map((id) => lane(id))).toStrictEqual(before);
++    }
++    expect(observer.takeRecords()).toHaveLength(0);
++    act(() => live(api).setPxPerSecond(20));
++    const records = observer.takeRecords();
++    observer.disconnect();
++    expect(lane('m1').columns).toBe(300);
++    expect(lane('m1').d).toBe(expectedShape('m1', 300, 1));
++    expect(lane('s1').columns).toBe(50);
++    expect(records.filter((record) => record.attributeName === 'd')).toHaveLength(2);
++  });
++
+   it('WG4: during a single Clip Gain drag the lane follows before release; one entry; Undo restores the exact drawing', async () => {
+     const { api, lane, detail, expectedShape, fader, select } = await mountWaveformWorkspace();
+     select(['m1']);
+--- a/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-31 07:06:50.000000000 +0000
++++ b/app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx	2026-10-31 07:18:23.036995343 +0000
+@@ -627,7 +627,7 @@
+     const line = clipRoot('s1').querySelector(`[data-testid="${LINE}"] polyline`);
+     expectLineVertices(line?.getAttribute('points'), [
+       [0, 0.2],
+-      [80, 0.2],
++      [2, 0.2],
+     ]);
+   });
+ 
+@@ -754,16 +754,16 @@
+     const line = clipRoot('s1').querySelector(`[data-testid="${LINE}"] polyline`);
+     expectLineVertices(line?.getAttribute('points'), [
+       [0, 0],
+-      [160, 0],
+-      [320, 0.2],
+-      [480, 0],
+-      [640, 0],
++      [4, 0],
++      [8, 0.2],
++      [12, 0],
++      [16, 0],
+     ]);
+     expect(clipRoot('m1').querySelector(`[data-testid="${LINE}"]`)).toBeNull();
+     fireEvent.click(toggle());
+     expect(
+       clipRoot('m1').querySelector(`[data-testid="${LINE}"] polyline`)?.getAttribute('points'),
+-    ).toBe('0,0 40,0');
++    ).toBe('0,0 1,0');
+   });
+ });
+ 
+@@ -1041,3 +1041,34 @@
+     expect(undoAll(api)).toBe(1);
+   });
+ });
++
++describe('PERF-3a zoom keeps the envelope line (ZQ3)', () => {
++  it('ZQ3 zoom 40 → 50 → 62.5 → 80 px/s writes no points or viewBox; only the width follows the zoom', async () => {
++    const { api, clipRoot } = await mountEnvelopeWorkspace([
++      clipAt('s1', 'stems', 2, 16, { envelope: V_ENVELOPE }),
++    ]);
++    const svg = clipRoot('s1').querySelector<SVGSVGElement>(`[data-testid="${LINE}"]`);
++    if (!svg) {
++      throw new Error('envelope line missing');
++    }
++    const before = svg.querySelector('polyline')?.getAttribute('points');
++    expect(svg.getAttribute('viewBox')).toBe('0 0 16 1');
++    expect(Number.parseFloat(svg.style.width)).toBe(16 * PX_PER_SECOND);
++    const observer = new MutationObserver(() => undefined);
++    observer.observe(svg, {
++      subtree: true,
++      attributes: true,
++      attributeFilter: ['points', 'viewBox'],
++    });
++    for (const zoom of [50, 62.5, 80]) {
++      act(() => live(api).setPxPerSecond(zoom));
++      const current = clipRoot('s1').querySelector<SVGSVGElement>(`[data-testid="${LINE}"]`);
++      expect(current).toBe(svg);
++      expect(Number.parseFloat(current?.style.width ?? 'NaN')).toBe(16 * zoom);
++      expect(current?.querySelector('polyline')?.getAttribute('points')).toBe(before);
++    }
++    const records = observer.takeRecords();
++    observer.disconnect();
++    expect(records.map((record) => record.attributeName)).toStrictEqual([]);
++  });
++});
