@@ -1,0 +1,11 @@
+--- /home/runner/czaba-project/store/perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:55:41.307425739 +0000
++++ perf/studio-lab-resources.perf.spec.ts	2026-10-31 02:13:18.310486010 +0000
+@@ -424,7 +424,7 @@
+     const endpointRule = heapSamples.filter(
+       (sample) => sample.sentAt >= windowStartEpoch && sample.receivedAt <= windowEndEpoch,
+     ).length;
+-    const inWindow = heapSamplesInWindow(heapSamples, clock.offsetMs, t0, windowEnd);
++    const inWindow = heapSamples.filter((sample) => sample.sentAt >= windowStartEpoch && sample.receivedAt <= windowEndEpoch);
+     putLive(`mem-polls-${clips}`, inWindow.length, {
+       errors: heapErrors,
+       allSamples: heapSamples.length,

@@ -1,0 +1,102 @@
+{
+  "round": 280,
+  "task": "PERF-HARNESS-SHARED-LIB-b-ii-2",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-31T02:08:54.0574161Z",
+    "round": 280,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "passed": [
+    "SOURCE-SCOPE",
+    "HUNK-SCOPE",
+    "CLAIMS",
+    "SWEEP",
+    "KEEP",
+    "TYPECHECK",
+    "PERF-RUN",
+    "EQUIV",
+    "CLOCK-DATA",
+    "BUDGET-NOTES",
+    "MUTANTS",
+    "G280-AUTH",
+    "DOC-209"
+  ],
+  "failed": [],
+  "blocked": [],
+  "gate": [
+    "full vitest",
+    "typecheck",
+    "build",
+    "Biome",
+    "npm run verify",
+    "test:e2e:smoke"
+  ],
+  "notes": [
+    "INFO-C280-AUTH-COLD-START: the first G280-AUTH attempt at 1440x900 timed out (150 s) waiting for 'Demo collection ready' on the cold dev server (same class as INFO-C279-LANE-PROBE-TIMEOUT). It was kept as evidence (c-round-280/c280-auth-attempt1.json) and replaced once (attempt 2 PASS, 5.6 s). 1280x720 passed on attempt 1.",
+    "INFO-C280-MU-PROBE-THROW-TSC: the MU-PROBE-THROW mutant copy fails tsc (TS18047/TS2322: the throw makes best's narrowing unreachable). This is an artifact of the mutant; Playwright does not typecheck, and the runtime signal is exact.",
+    "STUDIO-SMOKE (extra, not a task row): playback and WAV export pass at both viewports, and the WAV SHA-256 equals the round-279 pin."
+  ],
+  "rows": {
+    "SOURCE-SCOPE": {
+      "result": "PASS",
+      "evidence": "sha256sum -c b-round-279-r280-tree-sha256.txt rc 0 (start and end); git status: 7 M + 1 ?? (doc 209), all section-5 paths"
+    },
+    "HUNK-SCOPE": {
+      "result": "PASS",
+      "evidence": "git archive 1dbf3af + patch -p1 sketch.diff -> both perf files cmp-identical to A's tree; the doc hunks stay inside the granted lines and sections (git diff -U0)"
+    },
+    "CLAIMS": {
+      "result": "PASS",
+      "evidence": "c-round-280/claims-output-archive.txt == b-round-279/claims-output-at-1dbf3af.txt; L29 sweep ruling in c-round-280/l29-untagged.txt"
+    },
+    "SWEEP": {
+      "result": "PASS",
+      "evidence": "SW-B: 11 hits, all in perf/studio-lab-resources.perf.spec.ts; test.setTimeout in perf = 0; SW-C: spec l.430/449 plus docs 169 and 209 (granted)"
+    },
+    "KEEP": {
+      "result": "PASS",
+      "evidence": "heapPollMs = 50 (l.52), observerSettleMs = 200 (l.59), the '< 5' and no-peak texts unchanged; t0/windowEnd/wall-ms l.395/396/405; probePageClock l.340, before the poll loop at l.347 and the click at l.367"
+    },
+    "TYPECHECK": {
+      "result": "PASS",
+      "evidence": "c-round-280/typecheck.log rc 0"
+    },
+    "PERF-RUN": {
+      "result": "PASS",
+      "evidence": "c-round-280/run-1/run.log: 1 passed (1.3m), real 1m19.8s, Chromium 143.0.7499.4, Playwright 1.57.0, run alone"
+    },
+    "EQUIV": {
+      "result": "PASS",
+      "evidence": "c-round-280/run-1/equiv.txt: rows 61, deterministic 37, problems 0, tolerated 0, rc 0 (export.1 peak samples 65.1/65/65, median 65; export.2 129.9 x3)"
+    },
+    "CLOCK-DATA": {
+      "result": "PASS",
+      "evidence": "c-round-280/run-1/mempolls-diff.txt: clockRttMs 1-3, clockOffsetMs -0.7 to -1.9, value >= endpointRule in all 12 exports, sum = 11"
+    },
+    "BUDGET-NOTES": {
+      "result": "PASS",
+      "evidence": "c-round-280/budget-notes.txt: 8 notes changed, each equal to the exact section 2.4 substitution (the first 4 MISMATCH lines are a C regex error, corrected below them); 0 other field diffs over 61 rows"
+    },
+    "MUTANTS": {
+      "result": "PASS",
+      "evidence": "c-round-280/mutants/: MU-SIGN rc 1, 32 failures, every mem-polls [0,0,0], both exact problem texts; MU-ENDPOINT rc 0, sum = 0; MU-ORIGIN rc 0, EQUIV-B2 rc 0, 0 problems, 1 tolerated 65 -> 65.1, sum = 11; MU-PROBE-THROW rc 1, every pass abortedAt 'export 1 clip', the only problem is 'aborted at export 1 clip: MU-PROBE-THROW', 'was not released' count 0. MU-RTT not re-run by C (not in C's row; A's result only)"
+    },
+    "G280-AUTH": {
+      "result": "PASS",
+      "evidence": "c-round-280/c280-auth-attempt1.json (1280 PASS; 1440 cold-start timeout) + c280-auth-1440-attempt2.json (1440 PASS): demo workspace 1, badge exact, auth_user null; /studio/middle-east 'Sign in required', audio[src] 0, no workspace; /api/studio-token no header 401 'Please sign in to access Studio.', fake bearer 500, no token; screenshots auth-lab-*/auth-guard-*"
+    },
+    "DOC-209": {
+      "result": "PASS",
+      "evidence": "the l.4 status of docs 209/208/176 is byte-exact; 'In Progress (stage' hits = 0; 209 has the 7 TEMPLATE headings in order; its ranges equal A's run-1/2 mempolls-diff (new 9-11/17-19/14-16/22-25; endpoint 8-10/16-18/12-15/20-25; expected 9.6-10.5/17.7-19.2/21.5-23.2/32.2-36.2; offset -0.6..-1.6, RTT 1-3); all 13 cited ids exist in the task or backlog.json; doc 169's section matches the live code; the 168/169/175/176 TODO bullets say what round 280 did; 208 l.88 names round 281 (B-R280-CLICK-LIVE-LANE-ID)"
+    },
+    "gate": {
+      "result": "gate",
+      "evidence": "not claimed; root gate runs full vitest, build, Biome, verify, test:e2e:smoke"
+    }
+  }
+}

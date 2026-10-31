@@ -1,0 +1,73 @@
+== K1 heap poll period and observer flush
+52:const heapPollMs = 50;
+59:const observerSettleMs = 200;
+== K2 HeapSample fields
+106:interface HeapSample {
+107:  sentAt: number;
+108:  receivedAt: number;
+109:  backingBytes: number;
+113:  backingBytes: number;
+== K3 timeOrigin read and poll loop timestamps
+305:    const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+309:        const sentAt = Date.now();
+313:            heapSamples.push({ sentAt, receivedAt: Date.now(), backingBytes: heap.backingBytes });
+== K4 window conversion and endpoint filter
+382:    const windowStartEpoch = timeOrigin + t0;
+383:    const windowEndEpoch = timeOrigin + windowEnd;
+385:      (sample) => sample.sentAt >= windowStartEpoch && sample.receivedAt <= windowEndEpoch,
+== K5 mem-polls row, the >= 5 problem and the no-peak problem
+387:    putLive(`mem-polls-${clips}`, inWindow.length, {
+391:    if (inWindow.length < 5) {
+409:        `export ${clips}: no peak (${inWindow.length} window samples, end sample ${endHeap ? 'read' : 'missing'})`,
+== K6 endSampleLagMs mixes the node clock and the epoch window
+404:          endSampleLagMs: roundTo(endSentAt - windowEndEpoch, 0),
+== K7 t0 / windowEnd / wall-ms
+355:    const t0 = clickDown ?? beforeClick;
+356:    const windowEnd = t1 ?? (await nowIn(page));
+365:    put('wall-ms', { value: roundTo(windowEnd - t0, 0), detail: { textSeen: t1 !== null } });
+== K8 budget notes: peak-backing wording, mem-polls observed ranges
+4
+4
+== K9 kinds of the 8 rows
+res.export.1.peak-backing-delta-mib deterministic record None
+res.export.2.peak-backing-delta-mib deterministic record None
+res.harness.mem-polls-1 wallclock assert {'op': '>=', 'value': 5}
+res.harness.mem-polls-2 wallclock assert {'op': '>=', 'value': 5}
+res.export.1.peak-backing-delta-mib.6x wallclock record None
+res.export.2.peak-backing-delta-mib.6x wallclock record None
+res.harness.mem-polls-1.6x wallclock assert {'op': '>=', 'value': 5}
+res.harness.mem-polls-2.6x wallclock assert {'op': '>=', 'value': 5}
+== K10 resources spec does not use waitForCollectionReady (GATE279-S1 is outside it)
+0
+== K11 last implementation doc
+208-perf-harness-state-waits.md
+== K12 multi-stage status lines
+docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md:4:**სტატუსი:** In Progress (stage 1 of 2; C round 225 PASS)
+docs/implementation/2026/quarter-IV/208-perf-harness-state-waits.md:4:**სტატუსი:** In Progress (stage 1 of 2; C round 279 PASS)
+== K13 vitest include
+9:    include: ['app/**/*.test.{ts,tsx}'],
+== K14 docs that name mem-polls or the window rule
+docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md
+docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md
+docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md
+docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md
+docs/implementation/2026/quarter-IV/208-perf-harness-state-waits.md
+== K15 b-ii TODO bullets
+docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md:253:- **PERF-HARNESS-SHARED-LIB-b-ii:** b-ii-1 (round 279, `208-perf-h
+docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md:213:- PERF-HARNESS-SHARED-LIB-b-ii: b-ii-1 (round 279, `208-perf-harness-
+docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md:132:- **PERF-HARNESS-SHARED-LIB-b-ii:** ორ ეტაპად გა�
+docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md:153:- **PERF-HARNESS-SHARED-LIB-b-ii** (D-29z252; ორ ეტაპ�
+docs/implementation/2026/quarter-IV/208-perf-harness-state-waits.md:1:# Perf harness: მდგომარეობის ლოდინ�
+docs/implementation/2026/quarter-IV/208-perf-harness-state-waits.md:85:- **PERF-HARNESS-SHARED-LIB-b-ii-2 (round 280):** R216-MEM-POLLS-HEAD
+== K16 doc 169 section headings around the export metrics
+30:### Export-ის მეტრიკები
+42:### WAV header-ის შემოწმება (`export-N-produced`)
+== K17 doc 208 D-29z254 leftover bullet
+88:- D-29z254-ის „არჩეული lane-ის id click-live-ის d
+== SW-B identifiers this round adds, roots perf app e2e (expect 0 before)
+(end SW-B)
+== SW-C consumers of the mem-polls detail and endSampleLagMs outside the spec, roots perf app e2e docs
+docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md:38:| `peak-backing-delta-mib` | `Runtime.getHeapUsage
+(end SW-C)
+== K18 who reads budgets.resources.json or imports the resources spec (roots perf, playwright configs)
+perf/studio-lab-resources.perf.spec.ts:43:  process.env.PERF_BUDGETS_RESOURCES ?? path.join('perf', 'budgets.resources.json'),

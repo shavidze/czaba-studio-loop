@@ -1,0 +1,126 @@
+diff -ru head/perf/lib/app-labels.ts final/perf/lib/app-labels.ts
+--- a/perf/lib/app-labels.ts	2026-10-31 02:30:48.000000000 +0000
++++ b/perf/lib/app-labels.ts	2026-10-31 02:38:35.112756510 +0000
+@@ -32,6 +32,29 @@
+ export const perfCollectionReadyPattern = new RegExp(
+   `^${escapeRegExp(workspaceCollectionCopy('demo').ready)}`,
+ );
++
++function countedTemplatePattern(render: (count: number) => string): string {
++  return [1, 2]
++    .map((count) => {
++      const rendered = render(count);
++      const digits = String(count);
++      const at = rendered.indexOf(digits);
++      if (at < 0 || rendered.indexOf(digits, at + digits.length) >= 0) {
++        throw new Error(`count template needs exactly one count: ${JSON.stringify(rendered)}`);
++      }
++      const before = escapeRegExp(rendered.slice(0, at));
++      const after = escapeRegExp(rendered.slice(at + digits.length));
++      return `${before}\\d+${after}`;
++    })
++    .join('|');
++}
++
++export const perfCollectionFailedPattern = new RegExp(
++  `^(?:${countedTemplatePattern(workspaceCollectionCopy('demo').failed)})`,
++);
++export const perfCollectionSettledPattern = new RegExp(
++  `${perfCollectionReadyPattern.source}|${perfCollectionFailedPattern.source}`,
++);
+ export const perfActiveTrackLabel = (name: string): string =>
+   studioLaneStrings.activeTrackLabel(name);
+ 
+diff -ru head/perf/lib/page.ts final/perf/lib/page.ts
+--- a/perf/lib/page.ts	2026-10-31 02:30:48.000000000 +0000
++++ b/perf/lib/page.ts	2026-10-31 02:38:42.364152390 +0000
+@@ -1,5 +1,10 @@
+ import { expect, type Locator, type Page } from '@playwright/test';
+-import { perfCollectionReadyPattern, perfPlayLabel } from './app-labels';
++import {
++  perfCollectionFailedPattern,
++  perfCollectionReadyPattern,
++  perfCollectionSettledPattern,
++  perfPlayLabel,
++} from './app-labels';
+ import type { PerfWindowSnapshot } from './instrumentation';
+ 
+ const quietMs = 200;
+@@ -110,9 +115,15 @@
+   problems: string[],
+   label: string,
+ ): Promise<number> {
+-  await expect(page.getByTestId('arrangement-status')).toHaveText(perfCollectionReadyPattern, {
+-    timeout: 15000,
+-  });
++  const status = page.getByTestId('arrangement-status');
++  await expect(status).toHaveText(perfCollectionSettledPattern, { timeout: 15000 });
++  const text = (await status.textContent()) ?? '';
++  if (perfCollectionFailedPattern.test(text)) {
++    throw new Error(`${label}: demo collection failed: ${text}`);
++  }
++  if (!perfCollectionReadyPattern.test(text)) {
++    throw new Error(`${label}: demo collection status is not ready: ${text}`);
++  }
+   return waitForStudioQuiet(page, problems, label);
+ }
+ 
+diff -ru head/perf/studio-lab-interactions.perf.spec.ts final/perf/studio-lab-interactions.perf.spec.ts
+--- a/perf/studio-lab-interactions.perf.spec.ts	2026-10-31 02:30:48.000000000 +0000
++++ b/perf/studio-lab-interactions.perf.spec.ts	2026-10-31 02:38:35.113143303 +0000
+@@ -90,6 +90,11 @@
+   y: number;
+ }
+ 
++interface EmptyLanePoint extends GrabPoint {
++  trackId: string;
++  clipTrackId: string;
++}
++
+ const sumRendered = (commits: readonly { rendered: number }[]): number =>
+   commits.reduce((sum, commit) => sum + commit.rendered, 0);
+ 
+@@ -187,7 +192,7 @@
+   }
+ }
+ 
+-async function emptyLanePointAfterClip(clip: Locator): Promise<GrabPoint> {
++async function emptyLanePointAfterClip(clip: Locator): Promise<EmptyLanePoint> {
+   const found = await clip.evaluate((clipElement) => {
+     const ownLane = clipElement.closest('[data-track-id]');
+     if (ownLane === null) return { point: null, ownTrack: null };
+@@ -215,13 +220,24 @@
+     }
+     return { point: null, ownTrack: ownLane.getAttribute('data-track-id') };
+   });
++  if (found.ownTrack === null) {
++    throw new Error('the clip is not inside a lane with a data-track-id');
++  }
+   if (found.point === null) {
+     throw new Error(`no lane after the clip's lane ${found.ownTrack} has an empty timeline point`);
+   }
++  if (found.point.trackId === null) {
++    throw new Error('the empty timeline point is on a lane without a data-track-id');
++  }
+   if (found.point.trackId === found.ownTrack) {
+     throw new Error(`the empty point is on the clip's own lane ${found.ownTrack}`);
+   }
+-  return { x: found.point.x, y: found.point.y };
++  return {
++    x: found.point.x,
++    y: found.point.y,
++    trackId: found.point.trackId,
++    clipTrackId: found.ownTrack,
++  };
+ }
+ 
+ async function clipHeaderPoint(clip: Locator): Promise<GrabPoint> {
+@@ -517,6 +533,8 @@
+       faderEnabledAfterAdd: selectedAfterAdd,
+       faderDisabledBeforeClick: deselected,
+       faderEnabledAfterClick: selected,
++      clipTrackId: empty.clipTrackId,
++      emptyLaneTrackId: empty.trackId,
+     },
+   });
+   if (!live) {
