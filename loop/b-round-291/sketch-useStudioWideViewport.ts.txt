@@ -1,0 +1,25 @@
+import { useSyncExternalStore } from 'react';
+
+export const STUDIO_WIDE_MIN_PX = 900;
+const STUDIO_WIDE_QUERY = `(min-width: ${STUDIO_WIDE_MIN_PX}px)`;
+
+function readStudioWide(): boolean {
+  if (typeof window.matchMedia === 'function') {
+    return window.matchMedia(STUDIO_WIDE_QUERY).matches;
+  }
+  return window.innerWidth >= STUDIO_WIDE_MIN_PX;
+}
+
+function subscribeStudioWide(onChange: () => void): () => void {
+  if (typeof window.matchMedia === 'function') {
+    const query = window.matchMedia(STUDIO_WIDE_QUERY);
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }
+  window.addEventListener('resize', onChange);
+  return () => window.removeEventListener('resize', onChange);
+}
+
+export function useStudioWideViewport(): boolean {
+  return useSyncExternalStore(subscribeStudioWide, readStudioWide, () => true);
+}

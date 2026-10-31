@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T13:23:23.713Z)
+# Active loop summary (2026-10-31T14:05:58.811Z)
 
-- backlog.json 2790 KB -> active view 385 KB
-- status: G_ROOT_GATE round 290
-- servers: `{"checkedUtc":"2026-10-31T13:12:55.7039819Z","round":290,"attempt":1,"store":200}`
-- last publication: 5a911ffa677a580cc010b1612ab7b86aa843f160 (rounds 289-289)
-- last root gate: round 290 skipped - C taskStatus FAIL
+- backlog.json 2798 KB -> active view 387 KB
+- status: G_ROOT_GATE round 291
+- servers: `{"checkedUtc":"2026-10-31T13:49:56.6323366Z","round":291,"attempt":1,"store":200}`
+- last publication: 88b23dd028581a4926cdbf6bdcb0694b41e115ba (rounds 290-291)
+- last root gate: round 291 published - commit 88b23dd028581a4926cdbf6bdcb0694b41e115ba pushed
 
 ## Current items: -
 
@@ -703,15 +703,18 @@
 - A-R288-ARCH-LEADING-SPANS / info / signal (D-29z708): not scheduled; candidate for STORE-4 price component / three hand-matched leading-* 'Price unavailable' spans (store.tsx, ProductCard.tsx, VersionSelector) each copy the known line box by hand; o
 - INFO-C288-FIXTURE-COUNT / info / noted (D-29z708): B task text said 10 active fixtures, the mock has 11; C checked all 11; L29 already covers counts as tagged claims / round-288 task fixture count 10 vs 11
 - SABA-Q-FIXPD1B-NAMES / info / awaiting_user (D-29z709): non-blocking; round 289 ships the defaults / Demo stem names: 'Pulse' (default) or 'Rhythm' for the pulse stem; 'Melody' (default, translation of მელოდია) or 'Lead' for the lead stem
-- GATE289-S1-HEADING-SR-DOUBLE / medium / open (D-29z711): fix-up FIX-PD-1b2, round 291 (aria-hidden on the heading div; aria-labelledby still resolves); C checks the Chromium accessibility tree / library group heading div is plain text inside listbox > group; screen readers may read it as a stray item and again as the group name
-- GATE289-S2-DOC216-ALWAYS / medium / open (D-29z711): doc half fixed in FIX-PD-1b2 round 291; product half = SABA-Q-LIB-SINGLE-RUN (awaiting_user) / doc 216 l.17 says the collection always shows; false for a one-collection search and for purchased libraries (hover title only)
+- GATE289-S1-HEADING-SR-DOUBLE / medium / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): fix-up FIX-PD-1b2, round 291 (aria-hidden on the heading div; aria-labelledby still resolves); C checks the Chromium accessibility tree / library group heading div is plain text inside listbox > group; screen readers may read it as a stray item and again as the group name
+- GATE289-S2-DOC216-ALWAYS / medium / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): doc half fixed in FIX-PD-1b2 round 291; product half = SABA-Q-LIB-SINGLE-RUN (awaiting_user) / doc 216 l.17 says the collection always shows; false for a one-collection search and for purchased libraries (hover title only)
 - SABA-Q-LIB-SINGLE-RUN / info / awaiting_user (D-29z711): paired with SR-275-6 in user-review/screen-review-290.md; non-blocking / when a search or a purchased library shows one collection, should one heading still name it? (today: none; collection only in the hover titl
 - BACKEND-EVIDENCE-F7 / info / open_backend_evidence (D-29z711): later backend-enabled check; not a reason to call round 289 unverified / purchased /studio/$productId library with one run: no heading, short names (unit LG5 carries it)
 - C-R289-INFO-01 / info / counted at RETRO 290 (D-29z712) as an artifact-cited-but-absent finding (2nd: C-R283-02); experiment EXP-R290-ARTIFACT-MANIFEST / task 289 section 5 cites b-round-288/sketch.patch as kept; the file does not exist
-- GATE289-S3-RUN-KEYS / low / open (D-29z711): fixed early in FIX-PD-1b2 round 291 (same owner, one line; bug-gate exception "round already owns that code and it costs little") / group keys use runIndex; an option moving to another run remounts and focus falls to body
-- A-R289-REVIEW-L2 / low / open (D-29z711): fixed early in FIX-PD-1b2 round 291 (rename only) / ST47/ST51 test names still say "keeps only the sound titles" while the array is empty
+- GATE289-S3-RUN-KEYS / low / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): fixed early in FIX-PD-1b2 round 291 (same owner, one line; bug-gate exception "round already owns that code and it costs little") / group keys use runIndex; an option moving to another run remounts and focus falls to body
+- A-R289-REVIEW-L2 / low / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): fixed early in FIX-PD-1b2 round 291 (rename only) / ST47/ST51 test names still say "keeps only the sound titles" while the array is empty
 - GATE289-S4-BIOME-IGNORE / info / noted (D-29z711) / new biome-ignore (ruled in task 289, precedent K12)
 - GATE289-S6-LIBRARY-TEST-GEORGIAN / info / noted (D-29z711) / library.test.ts keeps its own Georgian fixtures (ruled in task 289; doc 216 TODO)
+- INFO-C290-01 / info / noted (D-29z719): next RETRO inventory greps retro[ _-]?<N> case-insensitive (C method, c-round-290/rt/inventory-c.txt) / retro290-mention-ids.txt missed the hyphen spelling RETRO-290 (D-29z692, PD-REVIEW order_rule) and the retro_policy/final_acceptance hits; C
+- INFO-C290-02 / info / noted (D-29z719): no app bug / first G290-AUTH attempt timed out on the cold dev server (L38 warm-up class); first smoke script stopped with a second Play click (Play is n
+- B-R290-S3-FIRST-ID-KEY-PARTIAL / info / ruled (D-29z720): task 291 requires the behaviour (LG8 both cases); sketch uses `${label}#${occurrence}` / the gate reviewer's S3 fix key={results[run.start].id} keeps focus only when a whole run before the focused option disappears; when the firs
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

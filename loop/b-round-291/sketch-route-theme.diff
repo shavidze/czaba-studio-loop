@@ -1,0 +1,73 @@
+--- a/app/routes/studio-lab.tsx	2026-10-31 13:42:14.289302007 +0000
++++ app/routes/studio-lab.tsx	2026-10-31 14:15:08.437433236 +0000
+@@ -1,5 +1,8 @@
+ import type { LinksFunction, MetaFunction } from '@remix-run/node';
++import { useRef } from 'react';
+ import { StudioWorkspace } from '~/components/arrangement';
++import { StudioNarrowScreen } from '~/components/arrangement/StudioNarrowScreen';
++import { useStudioWideViewport } from '~/hooks/useStudioWideViewport';
+ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { studioLabDemoCollection } from '~/data/studio-lab-demo';
+ import { createArrangement } from '~/lib/arrangement/model';
+@@ -22,12 +25,25 @@
+ ]);
+ 
+ export default function StudioLabRoute() {
++  const isWide = useStudioWideViewport();
++  const wasWideRef = useRef(false);
++  if (isWide) {
++    wasWideRef.current = true;
++  }
++  if (!wasWideRef.current) {
++    return <StudioNarrowScreen themeMarker={true} />;
++  }
+   return (
+-    <ArrangementProvider
+-      collection={studioLabDemoCollection}
+-      initialArrangement={studioLabInitialArrangement}
+-    >
+-      <StudioWorkspace />
+-    </ArrangementProvider>
++    <>
++      <div className="contents max-[899px]:hidden">
++        <ArrangementProvider
++          collection={studioLabDemoCollection}
++          initialArrangement={studioLabInitialArrangement}
++        >
++          {isWide ? <StudioWorkspace /> : null}
++        </ArrangementProvider>
++      </div>
++      {isWide ? <StudioNarrowScreen className="min-[900px]:hidden" themeMarker={false} /> : <StudioNarrowScreen themeMarker={true} />}
++    </>
+   );
+ }
+--- a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx	2026-10-31 13:42:14.278301855 +0000
++++ app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx	2026-10-31 14:15:57.340625122 +0000
+@@ -189,6 +189,7 @@
+     expect(appFiles.length).toBeGreaterThanOrEqual(100);
+ 
+     expect(scopeMarkerCountsByFile(appFiles)).toEqual({
++      'components/arrangement/StudioNarrowScreen.tsx': 1,
+       'components/arrangement/StudioWorkspace.tsx': 1,
+       'styles/app.css': 2,
+     });
+@@ -374,7 +375,18 @@
+       };
+     });
+     const weightTargets = [
+-      { name: 'h1', match: (tag: string) => tag.startsWith('<h1'), count: 1 },
++      {
++        name: 'h1',
++        match: (tag: string) =>
++          tag.startsWith('<h1') && !tag.includes('data-testid="studio-narrow-heading"'),
++        count: 1,
++      },
++      {
++        name: 'narrow h1',
++        match: (tag: string) =>
++          tag.startsWith('<h1') && tag.includes('data-testid="studio-narrow-heading"'),
++        count: 1,
++      },
+       {
+         name: 'Library h2',
+         match: (tag: string) =>

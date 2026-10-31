@@ -1,0 +1,135 @@
+diff --git a/app/components/arrangement/ArrangementLibrary.tsx b/app/components/arrangement/ArrangementLibrary.tsx
+index d63f413..c8e9b6d 100644
+--- a/app/components/arrangement/ArrangementLibrary.tsx
++++ b/app/components/arrangement/ArrangementLibrary.tsx
+@@ -196,13 +196,21 @@ export function ArrangementLibrary({
+   const resultIds = useMemo(() => results.map((source) => source.id), [results]);
+   const libraryGroupIdPrefix = useId();
+   const libraryResultRuns = useMemo(() => {
+-    const runs: { label: string; start: number; end: number }[] = [];
++    const runs: { key: string; label: string; start: number; end: number }[] = [];
++    const seen = new Map<string, number>();
+     results.forEach((source, index) => {
+       const last = runs[runs.length - 1];
+       if (last && last.label === source.collectionLabel) {
+         last.end = index + 1;
+       } else {
+-        runs.push({ label: source.collectionLabel, start: index, end: index + 1 });
++        const occurrence = seen.get(source.collectionLabel) ?? 0;
++        seen.set(source.collectionLabel, occurrence + 1);
++        runs.push({
++          key: `${source.collectionLabel}#${occurrence}`,
++          label: source.collectionLabel,
++          start: index,
++          end: index + 1,
++        });
+       }
+     });
+     return runs;
+@@ -663,13 +671,14 @@ export function ArrangementLibrary({
+                       return (
+                         // biome-ignore lint/a11y/useSemanticElements: a listbox may own role=group children only; a native fieldset is a form-control grouping
+                         <div
+-                          key={headingId}
++                          key={run.key}
+                           role="group"
+                           aria-labelledby={headingId}
+                           className="space-y-1"
+                         >
+                           <div
+                             id={headingId}
++                            aria-hidden="true"
+                             className="break-words px-2 pt-2 pb-0.5 text-xs leading-snug text-muted"
+                           >
+                             {run.label}
+diff --git a/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx b/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx
+index 1e6e671..27a4b8b 100644
+--- a/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx
+@@ -169,6 +169,14 @@ const nonContiguousSources: WorkspaceSource[] = [
+   { id: 'a-two', title: 'Alpha two', collectionLabel: 'Label A', kind: 'sfx', origin: 'demo' },
+ ];
+ 
++const threeRunSources: WorkspaceSource[] = [
++  { id: 'a-one', title: 'Alpha one', collectionLabel: 'Label A', kind: 'music', origin: 'demo' },
++  { id: 'b-one', title: 'Beta one', collectionLabel: 'Label B', kind: 'sfx', origin: 'demo' },
++  { id: 'b-two', title: 'Kick two', collectionLabel: 'Label B', kind: 'sfx', origin: 'demo' },
++  { id: 'c-one', title: 'Kick three', collectionLabel: 'Label C', kind: 'sfx', origin: 'demo' },
++  { id: 'c-two', title: 'Kick four', collectionLabel: 'Label C', kind: 'sfx', origin: 'demo' },
++];
++
+ function groupArrangement(): Arrangement {
+   return createArrangement([
+     { id: 'video', kind: 'video', name: 'Video' },
+@@ -401,4 +409,36 @@ describe('library collection group headings (FIX-PD-1b, SR-230-6)', () => {
+     expect(visited).toEqual(['b-one', 'a-two']);
+     view.unmount();
+   });
++
++  it.each([
++    ['c-two', 'a whole run before it disappears'],
++    ['b-two', 'the first option of its own run disappears'],
++  ])('LG8 (%s): a focused option keeps its DOM node and focus when %s', async (focusId) => {
++    const { view, listbox } = await mountGroupLibrary(groupCollection(threeRunSources));
++    expect(groupNames(listbox)).toEqual(['Label A', 'Label B', 'Label C']);
++    const before = within(listbox)
++      .getAllByRole('option')
++      .find((o) => o.getAttribute('data-source-id') === focusId);
++    if (!before) throw new Error('missing');
++    act(() => before.focus());
++    typeLibraryQuery(view, 'kick');
++    flushFrames();
++    await flushAsync();
++    expect(groupNames(listbox)).toEqual(['Label B', 'Label C']);
++    expect(optionIds(listbox)).toEqual(['b-two', 'c-one', 'c-two']);
++    expect(before.isConnected).toBe(true);
++    expect(document.activeElement).toBe(before);
++    view.unmount();
++  });
++
++  it('LG9: each heading is hidden from the accessibility tree and still names its group', async () => {
++    const { view, listbox } = await mountGroupLibrary(groupCollection(threeRunSources));
++    for (const label of ['Label A', 'Label B', 'Label C']) {
++      const group = within(listbox).getByRole('group', { name: label });
++      const heading = document.getElementById(group.getAttribute('aria-labelledby') ?? '');
++      expect(heading?.textContent).toBe(label);
++      expect(heading?.getAttribute('aria-hidden')).toBe('true');
++    }
++    view.unmount();
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index db449b8..e46eff2 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -2479,7 +2479,7 @@ describe('V-0.5a source-load strings', () => {
+     expect(sl.rowError('')).toBe('Error: ');
+   });
+ 
+-  it('ST47: the library, preview and collection sources have no Georgian lines; the demo source keeps only the sound titles', () => {
++  it('ST47: the library, preview, collection and demo sources have no Georgian lines', () => {
+     expect(
+       normalisedGeorgianLines('../../../components/arrangement/ArrangementLibrary.tsx'),
+     ).toEqual(LIBRARY_REMAINING_GEORGIAN_LINES);
+@@ -2747,7 +2747,7 @@ describe('V-0.5c video dock strings and the final RV-4 sweep', () => {
+     expect(vd.gapPrefix.endsWith(' ')).toBe(false);
+   });
+ 
+-  it('ST51: every Studio workspace source, found by a directory walk, has no Georgian lines except the demo sound titles', () => {
++  it('ST51: every Studio workspace source, found by a directory walk, has no Georgian lines', () => {
+     const walked = [
+       ...collectWorkspaceSourceFiles(resolve(__dirname, '../../../components/arrangement')),
+       ...collectWorkspaceSourceFiles(resolve(__dirname, '..')),
+diff --git a/docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md b/docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md
+index 5cb8d12..b0c8144 100644
+--- a/docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md
++++ b/docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md
+@@ -14,7 +14,7 @@ Studio-ს UI ინგლისურია, მაგრამ `/studio-lab`-
+ 
+ ამასთან, ყოველ სინთეზურ ბარათზე მოკლე სათაურის ქვეშ მეორდებოდა `Synthetic demo · <კომპოზიცია>` (ხუთჯერ). SR-230-6 (Saba-ს endorse) ითხოვს, კოლექცია ერთხელ ითქვას.
+ 
+-**დაპირება:** ინგლისური Studio UI, სადაც სტემის მოკლე სახელი არასდროს არის ორაზროვანი — კოლექცია ყოველთვის ჩანს, ოღონდ ყველა ბარათზე არ მეორდება.
++**დაპირება:** ინგლისური Studio UI, სადაც კოლექციის სახელი ყველა ბარათზე აღარ მეორდება. Heading ჩანს მხოლოდ მაშინ, როცა შედეგები ≥ 2 კოლექციას მოიცავს. ერთი კოლექციის ძიებასა და purchased library-ში ბარათი მოკლე სათაურს აჩვენებს, სრული სათაური კი (`<კომპოზიცია> · <ნაწილი>`) ჩანს hover `title`-ში, accessible description-სა და preview-ის სათაურში (SABA-Q-LIB-SINGLE-RUN — Saba-ს კითხვა, 2026-10-31).
+ 
+ ## მიდგომა
+ 

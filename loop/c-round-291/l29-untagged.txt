@@ -1,0 +1,30 @@
+6:- **D-29z719:** round 290 (RETRO 290) is closed. C failed only RT-CAUSE (C-R290-01, Low, origin B spec). Every other row passed, with `browserVerified` and `realVerified` both true. B corrected `retros/retro-290.md` l.87 at this planning; RT-FIX-291 re-checks that line.
+53:### 3.1 `app/components/arrangement/ArrangementLibrary.tsx`
+56:   - Do not change the group's `aria-labelledby`. `aria-labelledby` still uses aria-hidden content, so the group name stays the same.
+62:   - `headingId` stays index-based. It only links the `id` and `aria-labelledby`, both on elements that stay mounted.
+70:### 3.2 `app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx`
+83:  - **LG9.** For each label A/B/C, `within(listbox).getByRole('group', { name: label })` resolves. The element named by its `aria-labelledby` has `textContent === label` and `aria-hidden === 'true'`.
+85:### 3.3 `app/lib/arrangement/__tests__/strings.test.ts`
+93:   - l.4 stays byte-identical (ruling line R2).
+96:   - l.4 is exactly `**სტატუსი:** Completed (C round 291 PASS)` (L28).
+102:- **R1. Heading `div`:** §3.1(1) `aria-hidden` wins over §3.1(3) "no other change". Its box must stay equal (B-AX bbox, B-SCREEN).
+103:- **R2. Doc 216:** §3.4(1) l.17 wins over L28's "l.4 final"; l.4 does not change. L28's multi-stage clause does not apply, because 217 is a separate fix-up doc.
+110:| `app/components/arrangement/ArrangementLibrary.tsx` | §3.1 only |
+111:| `app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx` | §3.2 only |
+112:| `app/lib/arrangement/__tests__/strings.test.ts` | §3.3 only (2 titles) |
+113:| `docs/implementation/2026/quarter-IV/216-fix-pd-demo-names-group-heading.md` | l.17 only (§3.4(1)) |
+114:| `docs/implementation/2026/quarter-IV/217-fix-pd-library-heading-a11y.md` | new |
+141:  | M3 | `aria-hidden` removed | LG9 red (`mutant-M3-no-aria-hidden.log`) |
+166:| CLAIMS | <ul><li>**Planning values:** `b-round-290/claims-291-output.txt` was produced at `5a911ff` on a clean tree. C checks every planning value against HEAD with `git show 5a911ff:<path>` where a line depends on the tree (K5–K8, K11, K12, K16).</li><li>**On A's tree,** `claims-291.sh` must give the planning output for K1, K4, K9, K10, K13, K14, K15, K17, K18 and K19. These are expected to differ:<ul><li>K2: the tree is now dirty, with the 5 §4 paths;</li><li>K3: rc ≠ 0, failing only on the 4 granted existing paths;</li><li>K5: the 3 `headingId` lines (moved by the run-key lines), and `aria-hidden` count 8;</li><li>K6: one `runs.push` site;</li><li>K7: 2 titles, 0 stale hits;</li><li>K8: no `ყოველთვის ჩანს` hit, l.4 unchanged;</li><li>K11: `217 1`;</li><li>K12: the ternary line moves; the count stays 17 unless A's key code adds a matching line (a `?` or `&&` render). That is allowed, gets the §5 out-of-scope ruling, and A names it in the report;</li><li>K16: LG1–LG9;</li><li>K19 unchanged.</li></ul></li><li>C also runs the L29 untagged-fact grep over this task.</li></ul> | each value as stated; no untagged fact |
+167:| SOURCE-SCOPE | `git status` and `git diff 5a911ff` | only the §4 paths. Each diff matches §3: doc 216 differs on l.17 only, and strings.test.ts differs in 2 title strings only. `sha256sum -c` of the frozen list fails only on the 4 granted existing paths |
+177:| DOC-216 | doc 216 | l.17 equals §3.4(1) byte for byte; `diff` against `5a911ff` touches l.17 only; l.4 is `**სტატუსი:** Completed (C round 289 PASS)` |
+178:| DOC-217 | doc 217 | l.4 byte-exact; the TEMPLATE headings in order (L26); every cited test id exists; it records the key choice, M2 and the deferred Low |
+204:- `aria-hidden` changes a group's computed name in jsdom (LG9) or in the browser;
+226:| K5 | `ArrangementLibrary.tsx` l.666 `key={headingId}`, l.668 `aria-labelledby={headingId}`, l.672 `id={headingId}`; 7 `aria-hidden` in the file |
+227:| K6 | l.205 `runs.push({ label: source.collectionLabel, start: index, end: index + 1 });` |
+228:| K7 | ST47 at l.2482 and ST51 at l.2750 in `strings.test.ts`; 2 stale-title hits |
+229:| K8 | doc 216 l.17 holds `ყოველთვის ჩანს`; l.4 `**სტატუსი:** Completed (C round 289 PASS)` |
+230:| K9 | option `title={source.title}` at `ArrangementLibrary.tsx` l.104; preview `title={source?.title}` at `ArrangementLibraryPreview.tsx` l.251 |
+233:| K12 | L50 regex: 17 hits in `ArrangementLibrary.tsx`; the group ternary `libraryResultRuns.length >= 2` is at l.660 |
+235:| K14 | retro-290 has the new l.87 phrase once, and the old phrase 0 times |
+240:| K19 | one hit each: `data-testid="arrangement-position"` and `data-playing=` in `ArrangementTransport.tsx`; the badge `Demo collection — no sign-in required` and `Demo collection ready.` in `collection.ts`; `Sign in required` in `RequireAuth.tsx`; `searchLabel: 'Search the library'` in `strings.ts`; the label `Synthetic demo · <composition>` in `studio-lab-demo.ts` |

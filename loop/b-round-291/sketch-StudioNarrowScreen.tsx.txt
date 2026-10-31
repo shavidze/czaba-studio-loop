@@ -1,0 +1,48 @@
+import { Link } from '@remix-run/react';
+import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+
+interface StudioNarrowScreenProps {
+  className?: string;
+  themeMarker: boolean;
+}
+
+export function StudioNarrowScreen({ className, themeMarker }: StudioNarrowScreenProps) {
+  const [status, setStatus] = useState('');
+  const sendLink = async () => {
+    const url = window.location.href;
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: 'CZABA Studio', url });
+      } catch {
+        setStatus('');
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setStatus('Link copied');
+    } catch {
+      setStatus(`Couldn't copy. Link: ${url}`);
+    }
+  };
+  return (
+    <main
+      className={`flex min-h-screen flex-col bg-background p-4 text-foreground ${className ?? ''}`}
+      data-studio-theme={themeMarker ? 'obsidian' : undefined}
+      data-testid="studio-narrow-screen"
+    >
+      <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted" data-testid="studio-narrow-exit">
+        <ArrowLeft className="size-3" aria-hidden="true" />
+        CZABA
+      </Link>
+      <h1 tabIndex={-1} className="mt-8 text-lg font-medium" data-testid="studio-narrow-heading">The Studio works on a computer</h1>
+      <p className="mt-2 text-sm text-muted">Listen here, or send yourself the link.</p>
+      <p id="studio-narrow-preview-title" className="mt-6 text-sm">Middle East — public preview</p>
+      {/* biome-ignore lint/a11y/useMediaCaption: sketch */}
+      <audio controls preload="none" src="/middle-east.mp3" aria-labelledby="studio-narrow-preview-title" className="mt-2 w-full scheme-dark" />
+      <button type="button" onClick={sendLink} className="mt-4 rounded-sm border border-outline px-3 py-2 text-sm">Send link</button>
+      <p aria-live="polite" className="mt-2 text-sm text-muted">{status}</p>
+    </main>
+  );
+}

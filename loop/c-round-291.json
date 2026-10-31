@@ -1,0 +1,129 @@
+{
+ "round": 291,
+ "role": "C",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T13:49:56.6323366Z",
+  "round": 291,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R291-01",
+   "severity": "low",
+   "origin": "B spec",
+   "row": "UNIT-MUTANTS (extra M4); confirms A-R291-REVIEW-M1 / A STOP item 2",
+   "steps": [
+    "Copy 5a911ff (git archive) and apply A's diff",
+    "In ArrangementLibrary.tsx replace key: `${source.collectionLabel}#${occurrence}` with key: source.collectionLabel",
+    "npx vitest run app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx"
+   ],
+   "expected": "some row (LG7 A,B,A or a new LG10) fails when the #occurrence suffix is removed, since A,B,A data then renders duplicate React keys",
+   "actual": "10/10 pass; the occurrence suffix is unpinned. No user-visible defect today: demo and purchased data never produce a returning label (A,B,A). R3 forbade A from adding the row, so the fix needs a B grant (LG10 or a console.error spy in LG7). Reviewer graded it Medium as a test gap; C grades it Low because there is no reproducible behaviour failure.",
+   "evidence": "tmp/studio-real-loop/c-round-291/mutant-M4-label-only-key.log"
+  }
+ ],
+ "info": [
+  {
+   "id": "INFO-C291-LRS4-HEADROOM",
+   "origin": "pre-existing",
+   "detail": "A STOP item 1 reproduced: library-row-strings-ui LRS4 took 2707 ms in C's 15-file covering run (> 2500 ms = 50 % of the 5000 ms default); A 2609/2543 ms, A alone 1061 ms, gate 289 1044 ms. Unchanged file, load-dependent. Report-and-rule item for B (L10/L11), as in round 253; it does not fail an acceptance row.",
+   "evidence": "c-round-291/covering.log"
+  },
+  {
+   "id": "INFO-C291-K5-WORDING",
+   "origin": "B spec",
+   "detail": "§6 CLAIMS expects 'the 3 headingId lines' for K5 after A's edit, but §3.1(2) itself replaces key={headingId}, so the correct result is 2 lines (aria-labelledby l.676, id l.680). B's sketch gives the same. Wording slip only."
+  },
+  {
+   "id": "INFO-C291-S3-BROWSER",
+   "origin": "C extra",
+   "detail": "Browser S3 probe: All view, demo-stem-bass focused, search value set without moving focus to 'a' (Full mix drops out, 2 groups remain): activeElement is the same node, isConnected true, both viewports. HEAD not run in the browser (B's jsdom M1 covers the red side)."
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "B-AX",
+  "B-KEYS-291",
+  "B-STATES-291",
+  "B-SCREEN",
+  "B-JOURNEY-291",
+  "G291-AUTH",
+  "DOC-216",
+  "DOC-217",
+  "RT-FIX-291"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full suite",
+  "build",
+  "Biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "rows": {
+  "CLAIMS": "PASS - A tree deltas = §6 list (K2 5, K3 rc1 on 4 granted, K5 2 headingId lines + aria-hidden 8, K6 one site l.208, K7 0 stale, K8 no hit/l.4 289, K11 217 1, K12 17 / l.668, K16 LG1-LG9); others identical. Planning values K3-K19 reproduced on a git archive of 5a911ff (c-round-291/claims-at-5a911ff-archive.txt; K1/K2 differ only because the archive is not the repo). L29 grep 30 hits, none an untagged fact about current store code (grants, instructions, claims rows). Note INFO-C291-K5-WORDING.",
+  "SOURCE-SCOPE": "PASS - git status = 5 §4 paths; sha256sum -c fails only on the 4 granted existing paths; strings.test.ts 2 title lines; doc 216 single hunk @@ -17 +17.",
+  "TYPECHECK": "PASS - npm run typecheck rc 0 (c-round-291/typecheck.log).",
+  "UNIT": "PASS - 15 files / 258 tests passed; LG1-LG9 (LG8 x2), ST47, ST51 present by name. LRS4 2707 ms (see INFO-C291-LRS4-HEADROOM).",
+  "UNIT-MUTANTS": "PASS - scratch copy /tmp/c291a (A diff on 5a911ff archive): M1 key={headingId} -> LG8 c-two and b-two red; M2 key={results[run.start].id} -> LG8 b-two red only; M3 aria-hidden removed -> LG9 red. Extra M4 key=label only -> all green (C-R291-01). Live tree unchanged (scratch file cmp-equal to live after restore).",
+  "B-AX": "PASS - both viewports: nonOptionChildrenInGroups 0, textLinesInSnapshot 0, group names exact, children 4 and 5 all option, listbox bbox delta 0 vs ax-before.json (probe/ax-after.json).",
+  "B-KEYS-291": "PASS - both viewports: 17 steps visit the 9 ids there and back, role option only, :focus-visible with 1px solid brass (0.788,0.643,0.416 / 0.8) outline, every step inside the list box (probe/main-a.json keys).",
+  "B-STATES-291": "PASS - both viewports: (a) Night Pulse node 0 groups / 5 options; (b) 'bass' 0 groups / demo-stem-bass; (c) 'synthetic' 2 groups with exact names / 9 options, ariaSnapshot text lines 0.",
+  "B-SCREEN": "PASS - full-window viewport screenshots vs B's HEAD ax-before PNGs: 0 differing pixels at 1440x900 and 1280x720 (probe/screen-diff.json), so heading boxes and persistent text are unchanged.",
+  "B-JOURNEY-291": "PASS - both viewports: status starts “Night Pulse · Bass” added to the Music track; position 00:01.483 / 00:01.471 at 1.50 s; data-playing false -> true -> false; master tap RMS ~0.045 while playing, 0 after Stop; extra WAV export 48 kHz/24-bit/2 ch, 16.000 s, peak 0.217, RIFF size consistent.",
+  "G291-AUTH": "PASS - fresh context, 0 cookies: /studio-lab opens with the badge, auth_user null; /studio/middle-east shows Sign in required, 0 audio[src], no workspace; token API 401 without header, 500 with fake bearer (mock :5199 not running -> fails closed), no token in bodies.",
+  "DOC-216": "PASS - l.17 byte-equal to §3.4(1) (task backslash escapes unescaped); diff touches l.17 only; l.4 Completed (C round 289 PASS).",
+  "DOC-217": "PASS - l.4 byte-exact; TEMPLATE headings in order (diff empty); cites LG1, LG7, LG8, LG9, ST47, ST51 (all exist); records key choice, M2 rejection and B-R290-LIB-SHAPE-SWITCH-FOCUS under TODO.",
+  "RT-FIX-291": "PASS - diff(before, retro-290.md) byte-equal to b-round-290/retro-diff.txt (l.87 only); verify.log 276 'Test Files 2 failed | 218 passed (220)', l.1992-1996 NS1 (strings/Split title), NS6, TC9; fails-cause-hand l.3 consistent; old phrase count 0.",
+  "gate": "gate rows (full suite, build, Biome, verify, test:e2e:smoke) not run by C, not claimed"
+ },
+ "aStopItems": {
+  "1-LRS4-timing": "open for B ruling (INFO-C291-LRS4-HEADROOM)",
+  "2-REVIEW-M1": "open for B ruling (C-R291-01)"
+ },
+ "ableton": {
+  "czabaRequirement": "met: collection name exposed once (group name only), focus stable on run-key changes",
+  "abletonConformity": "not applicable to this fix-up; the group heading remains the task-289 §2 deviation, status not confirmed until LIVE-MEAS-BROWSER-SEARCH-LOCATION"
+ },
+ "manifestPaths": [
+  "c-round-291.md",
+  "c-round-291.json",
+  "c-round-291/checkpoint.md",
+  "c-round-291/claims-on-A.txt",
+  "c-round-291/claims-at-5a911ff-archive.txt",
+  "c-round-291/l29-untagged.txt",
+  "c-round-291/typecheck.log",
+  "c-round-291/covering.log",
+  "c-round-291/mutant-A-baseline.log",
+  "c-round-291/mutant-M1.log",
+  "c-round-291/mutant-M2.log",
+  "c-round-291/mutant-M3.log",
+  "c-round-291/mutant-M4-label-only-key.log",
+  "c-round-291/probe/ax-after.json",
+  "c-round-291/probe/ax-after-1440x900.png",
+  "c-round-291/probe/ax-after-1280x720.png",
+  "c-round-291/probe/main-a.json",
+  "c-round-291/probe/screen-diff.json",
+  "c-round-291/probe/auth-a.json",
+  "c-round-291/probe/export-a-1440x900.wav",
+  "c-round-291/probe/export-a-1280x720.wav",
+  "c-round-291/sha-check.txt",
+  "c-round-291/source-diff.txt",
+  "c-round-291/retro-diff-c.txt",
+  "c-round-291/probe.mjs",
+  "c-round-291/screen-diff.mjs",
+  "c-round-291/auth-probe.cjs"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 5
+}

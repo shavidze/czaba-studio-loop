@@ -1,0 +1,44 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c291a/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1659[2mms[22m[39m
+     [33m[2m✓[22m[39m LG1: the All view shows one labelled group per collection, no per-option collection line, options in source order [33m 436[2mms[22m[39m
+     [32m✓[39m LG2: headings take no focus and are not options; ArrowDown/ArrowUp walk the options in resultIds order[32m 245[2mms[22m[39m
+     [32m✓[39m LG3: a selected collection node or folder shows the options flat in the listbox, with no group[32m 179[2mms[22m[39m
+     [32m✓[39m LG4: search shows groups only when the results span two collections[32m 158[2mms[22m[39m
+     [32m✓[39m LG5: a purchased-style single collection with short titles shows no group and no collection text in any option[32m 91[2mms[22m[39m
+     [32m✓[39m LG6: option title attributes keep the full title while the card shows the short title[32m 95[2mms[22m[39m
+     [32m✓[39m LG7: a label that returns after another one (A, B, A) gives three groups in source order[32m 118[2mms[22m[39m
+     [32m✓[39m LG8 (c-two): a focused option keeps its DOM node and focus when a whole run before it disappears[32m 127[2mms[22m[39m
+     [32m✓[39m LG8 (b-two): a focused option keeps its DOM node and focus when the first option of its own run disappears[32m 126[2mms[22m[39m
+[31m     [31m×[31m LG9: each heading is hidden from the accessibility tree and still names its group[39m[32m 82[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx[2m > [22mlibrary collection group headings (FIX-PD-1b, SR-230-6)[2m > [22mLG9: each heading is hidden from the accessibility tree and still names its group
+[31m[1mAssertionError[22m: expected null to be 'true' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"true"
+
+[31m+ Received:[39m 
+null
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:[2m440:52[22m[39m
+    [90m438| [39m      const heading = document.getElementById(group.getAttribute('aria…
+    [90m439| [39m      [34mexpect[39m(heading[33m?.[39mtextContent)[33m.[39m[34mtoBe[39m(label)[33m;[39m
+    [90m440| [39m      [34mexpect[39m(heading[33m?.[39m[34mgetAttribute[39m([32m'aria-hidden'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m   | [39m                                                   [31m^[39m
+    [90m441| [39m    }
+    [90m442| [39m    view[33m.[39m[34munmount[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 13:51:48
+[2m   Duration [22m 4.02s[2m (transform 1.16s, setup 0ms, import 1.70s, tests 1.66s, environment 493ms)[22m
+
+
+::error file=/tmp/c291a/store/app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx,title=app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx > library collection group headings (FIX-PD-1b%2C SR-230-6) > LG9%3A each heading is hidden from the accessibility tree and still names its group,line=440,column=52::AssertionError: expected null to be 'true' // Object.is equality%0A%0A- Expected: %0A"true"%0A%0A+ Received: %0Anull%0A%0A ❯ app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx:440:52%0A%0A
