@@ -1,0 +1,64 @@
+{
+  "round": 286,
+  "task": "FIX-PD-1a (F9): catalogue price on the product page; Price unavailable state",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-10-31T10:17:14.7789879Z",
+    "round": 286,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [
+    {
+      "id": "C-R286-01",
+      "severity": "medium",
+      "steps": [
+        "Start c-round-286/mock-priceless2.mjs on :5199 (copy of mock-api/server.mjs plus Track id 10 'priceless-track' with no standardPrice/minPrice/premiumPrice/variants)",
+        "Open http://127.0.0.1:5173/products/priceless-track at 1440x900 and 1280x720",
+        "Read the version selector card and the purchase panel"
+      ],
+      "expected": "No $0 anywhere for a product whose price is unknown (F9: no $0.00 fallback)",
+      "actual": "The purchase panel correctly says 'Price unavailable' with both buttons aria-disabled, but the Standard version card on the same page reads 'Standard $0'. Pre-existing (HEAD 60bfb38 shows the same card plus $0.00 in the panel); cause is the frozen createDisplayVersions '?? 0' (K6) rendered by VersionSelector. Not A's failure: outside the round-286 grants. This is A's reviewer finding A-R286-REVIEW-TRACK-VERSION-ZERO, now reproduced by C.",
+      "evidence": "c-round-286/probe/extra-dev.json, probe/extra-head.json, shots/priceless-track-1440.png, shots/priceless-track-1280.png"
+    },
+    {
+      "id": "C-R286-02",
+      "severity": "low",
+      "steps": [
+        "Start c-round-286/mock-priceless.mjs on :5199 (adds SFX id 9 'priceless-pack' with no price fields)",
+        "Open http://127.0.0.1:5173/store and find the Priceless Pack card",
+        "Open the card's product page"
+      ],
+      "expected": "Card price equals the page's price figure (L54 journey rule); an unknown price is never shown as $0",
+      "actual": "The /store card shows '$0' while the product page shows 'Price unavailable'. Cause: app/routes/store.tsx:79 mapProductToPack ends its chain with '?? 0' (ProductCard.tsx:32 has the same chain and would render 'Complimentary'). Pre-existing, outside the grants, reachable only with a priceless product (no standard fixture). Also: task §1.2 quotes the card rule without its trailing '?? 0'.",
+      "evidence": "c-round-286/probe/unknown-dev.json (cards.priceless-pack = '$0'), shots/unknown-dev/priceless-store-card-1440.png, shots/unknown-dev/priceless-store-card-1280.png"
+    }
+  ],
+  "passed": [
+    "CLAIMS",
+    "SOURCE-SCOPE",
+    "TYPECHECK",
+    "UNIT",
+    "UNIT-MUTANTS",
+    "B-KNOWN",
+    "B-UNKNOWN",
+    "B-SIDEBAR",
+    "B-REGRESS",
+    "B-JOURNEY",
+    "G286-AUTH",
+    "DOC-214"
+  ],
+  "gate": [
+    "full suite, build, Biome, verify and test:e2e:smoke are the root gate's rows; C does not claim them"
+  ],
+  "blocked": [
+    "signed-in and owner panel states in the browser (PU4, PU5 browser counterparts) and a real-backend 403 for /api/studio-token: backend unavailable in cloud (mock auth returns 401); covered only by unit rows PU4/PU5"
+  ],
+  "notes": [
+    "UNIT-MUTANTS: every mutant is red at all its required rows; extra reds by mechanism (M1 also PU3/PU4/PU7, M2/M2b also PU4, M5 also PR6), same as A's run",
+    "DOC-214 line 4 is '**სტატუსი:** Completed (C round 286 PASS)'; the value matches byte-exact, with the same '**სტატუსი:**' prefix doc 213 uses (L28 precedent)",
+    "A's aria-disabled:cursor-not-allowed! (important modifier) deviation accepted: computed cursor not-allowed measured at both viewports; the store-focus-ring and store-theme-tokens scans pass in UNIT"
+  ]
+}

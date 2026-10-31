@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T09:46:32.314Z)
+# Active loop summary (2026-10-31T10:39:14.396Z)
 
-- backlog.json 2728 KB -> active view 378 KB
-- status: G_ROOT_GATE round 285
-- servers: `{"checkedUtc":"2026-10-31T09:06:35.0286970Z","round":285,"attempt":1,"store":200}`
-- last publication: 60bfb380a2f9ad330249953630ce84f8ac3720bc (rounds 285-285)
-- last root gate: round 285 published - commit 60bfb380a2f9ad330249953630ce84f8ac3720bc pushed
+- backlog.json 2748 KB -> active view 378 KB
+- status: G_ROOT_GATE round 286
+- servers: `{"checkedUtc":"2026-10-31T10:17:14.7789879Z","round":286,"attempt":1,"store":200}`
+- last publication: 096fa4b61a6a853bdb53d4d0b9ca8f6b1f841a42 (rounds 286-286)
+- last root gate: round 286 published - commit 096fa4b61a6a853bdb53d4d0b9ca8f6b1f841a42 pushed
 
 ## Current items: -
 
@@ -695,7 +695,7 @@
 - A-R282-REVIEW-DW11 / medium / fix dispatched round 283: DW11 + MU-U5 / postMessage-throw fallback (client l.72-76) had no test row
 - INFO-B283-NPX-TSX-CACHE / info / root_note / B's planning ran 'npx tsx' once for a scratch helper table; npm fetched tsx@4.23.15 into the npm cache only; project, lockfile and store unc
 - GATE283-S3 / info / watch / worst case at 6x CPU: 10 s worker stall + ~2.5 s sync synth ~ 12.5 s vs waitForCollectionReady 15 s timeout (perf/lib/page.ts); little headr
-- B-R284-FOLLOW-FLIP-GAP / low / scheduled round 285 (PERF-3b, D-29z683): the Follow writer notifies the page store after setting scrollLeft; SR6 + mutant W7 + C row RULER-FOLLOW-FLIP; close on C PASS / a Follow page flip paints one frame with ticks missing at the right of the view, because the page key updates only on the next frame's scrol
+- PD-FREE-HEADER / info / signal (D-29z695): for STORE-4 / a product with an explicit price 0 shows "Complimentary Download" in ProductSidebar (button without a handler) and "$0.00 USD" with Buy Now 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

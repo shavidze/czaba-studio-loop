@@ -1,260 +1,283 @@
-# Round 286: FIX-PD-1a (F9, Medium). A product page shows the catalogue price instead of "$0.00". When no price is known, it shows "Price unavailable", Add to Cart and Buy Now do nothing, and a visible reason line links to /support
+# Round 287: FIX-PD-1a2, the rest of F9 (C-R286-01 Medium + C-R286-02 Low). An unknown price never shows as `$0`: not on the version card, not on the `/store` card, not on the home product card
 
-**Planned by:** B, at the round 285 → 286 planning, 2026-10-31.
+**Planned by:** B, at the round 286 → 287 planning, 2026-10-31.
 
 **Decisions** (full text in `backlog.json` → `decisions_log_b`):
-- **D-29z690:** round 285 closed with C PASS (`browserVerified` and `realVerified` true). Gate 285 published `60bfb38`. PERF-3b is **მზადაა**.
-- **D-29z691:** A-R285-REVIEW-NAN-PAGE goes to `deferred_low_polish`.
-- **D-29z692:** Saba's 2026-10-31 product-review decisions are recorded as queue entry `PD-REVIEW-2026-10-31`. FIX-PD-1 is split into 1a, 1b and 1c, and this round is 1a.
-- **D-29z693:** the SR candidates are assigned to queue entries.
-- **D-29z694 / D-29z695:** the design (§2).
-- **D-29z696:** the browser contract (§6).
-- **D-29z697:** the reference section (§1.2).
-- **D-29z698:** lessons L54 and L55.
+- **D-29z700:** round 286 closed with C PASS (`browserVerified` and `realVerified` true), and gate 286 published `096fa4b`. FIX-PD-1a, as scoped, is **მზადაა**. F9 is **not** closed: its remainder is C-R286-01 and C-R286-02, and this round is stage FIX-PD-1a2.
+- **D-29z701:** C-R286-02 (Low) is fixed now and not deferred. It has the same cause as the Medium (an unknown price collapses to 0 through `?? 0`), it needs the same fixtures, and the L54 rule says card = page. That makes it one of the "≤ 3 tightly related bugs".
+- **D-29z702:** the design (§2). The reviewer's architecture note A-R286-ARCH-ONE-RESOLVER is adopted here because fixing the Medium means changing that line anyway. It is not a scheduled refactor.
+- **D-29z703:** A's Lows and signals from round 286 go to `deferred_low_polish` or stay as signals (`b-round-286.md` §1).
 
-**Owner:** A. **Verifier:** C. **Grants:** §4. The round touches no Studio, auth, cart or checkout code.
+**Owner:** A. **Verifier:** C. **Grants:** §4. The round touches no Studio, auth, cart, checkout or purchase-header code.
 
-## Baseline: HEAD `60bfb38` [K1], clean tree [K2]
-- `gates/gate-round-285.json` is `published` at commit `60bfb38`.
-- **Claims (L29):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-285/claims-286.sh` **before editing**. Its output must equal `b-round-285/claims-286-output.txt`; on an archive, only K1 may differ, reading `(archive)`. Any other difference is a STOP (§9).
+## Baseline: HEAD `096fa4b` [K1], clean tree [K2]
+- `gates/gate-round-286.json` is `published` at commit `096fa4b`. Its `head` field reads `60bfb38`; the commit field is the baseline.
+- **Claims (L29):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-286/claims-287.sh` **before editing**. Its output must equal `b-round-286/claims-287-output.txt`. On an archive, only K1 may differ, and it then reads `(archive)`. Any other difference is a STOP (§9).
 
 ## 0. Read first
-1. `lessons.md` (every role), especially L11, L12, L23, L26, L28, L29, L54 and L55.
-2. This task.
-3. The review's F9 section: `/home/runner/czaba-project/docs/technical/studio-real-workspace/product-design-review-2026-10-31.md`, lines 97–103 (outside `store/`; use the absolute path).
+1. `lessons.md` (every role), especially L11, L23, L25, L26, L28, L29, L49 and L54.
+2. This task, then `tasks/round-286.md` §2 for the round-286 design this round builds on.
+3. `c-round-286.md` §"Findings for B" and `a-round-286.md` §"code-reviewer".
 4. A's primitives:
-   - `AGENT_DISCOVERABLE_CODE.md` (new exports)
-   - `FORWARDREF_COMPONENT.md` (component edit)
-   - `DESIGN_TOKENS.md` and `TAILWIND_FIRST.md` (new text styles)
+   - `AGENT_DISCOVERABLE_CODE.md` (one new export)
+   - `FORWARDREF_COMPONENT.md` (component edits)
+   - `DESIGN_TOKENS.md` and `TAILWIND_FIRST.md` (the muted price style)
    - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`
    - `GEORGIAN_DOCS.md`
    - `.claude/prompts/new-test.md`
 
-## 1. What B measured, and the reference
+## 1. What C found, and the reference
 
-### 1.1 Reproduction on HEAD (evidence `b-round-285/probe/`)
-- **Setup:** mock API `node mock-api/server.mjs` (:5199, health `{"ok":true,"products":8}`) and the dev server :5173. Probe: `b-round-285/probe/f9-probe.cjs`.
-- **`/products/door-slams`** (SFX, no `variants`, `standardPrice` 9; the `/store` card shows $9), at both 1440×900 and 1280×720:
-  - the only price on the page is **`$0.00USD`**;
-  - Buy Now `disabled: false`;
-  - Add to Cart `disabled: false`.
-- **`/products/middle-east`:** `$29.00USD`, buttons enabled (control).
-- Files: `head-f9.json`, `head-door-slams-{1440,1280}.png`, `head-middle-east-{1440,1280}.png`.
-- **Cause, in two steps:**
-  1. `createDisplayVersions` deliberately returns `[]` for an SFX product with no variants [K5]. This is pinned by the test "does not invent a purchasable SFX variant when none exists" [K10], which must stay byte-identical.
-  2. `ProductDetailPage` then passes `selectedVersion?.price ?? 0` [K3] and `selectedVersion?.name ?? 'Standard'` [K4]. A missing version therefore looks like a supported $0 Standard.
-- **Neighbour defect in the same class:** with no price at all, `ProductSidebar` computes `standardPrice ?? minPrice ?? variants[0].price ?? 0` and shows "Complimentary Download" for 0 [K9]. A product whose price is unknown would advertise a free download.
-- The synthetic Standard version of a Track with no variants also falls back to 0 [K6].
+### 1.1 The defects (evidence from C, not B)
+- **C-R286-01 (Medium).** `/products/priceless-track` is a Track with no price fields (C's `c-round-286/mock-priceless2.mjs`, id 10). Its purchase panel correctly reads `Price unavailable`, but the Standard version card on the same page reads **`Standard $0`**, at 1440 and at 1280. HEAD `60bfb38` shows the same card. Evidence: `c-round-286/probe/extra-{dev,head}.json`, `shots/priceless-track-{1440,1280}.png`.
+  - **Cause:** the synthetic Standard version is built with `… ?? 0` [K4, line 92], and `VersionSelector` renders `${version.price}` [K7].
+- **C-R286-02 (Low).** The `/store` card for `priceless-pack` reads **`$0`** while its page reads `Price unavailable`. Evidence: `c-round-286/probe/unknown-dev.json` (`cards`), `shots/unknown-dev/priceless-store-card-*.png`.
+  - **Cause:** `mapProductToPack` ends its chain with `?? 0` [K8].
+  - **Same chain on the home page:** `ProductCard` (home `ProductSection`) has it too [K10]. Its unknown price would show **`Complimentary`**, which is worse: it advertises a free product.
+- **Correction of round 286's §1.2:** it quoted the card rule without its trailing `?? 0`. C was right about this.
 
-### 1.2 Reference: how comparable stores do it (D-29z697)
-- **Searched:** `/home/runner/czaba-project/docs/technical/store-redesign/research/competitors.md`, `luxury-and-galleries.md` and `visual-pass.md` (absolute paths; not under `store/`) (unavailable / no-price / contact states). **No reference found** for an unknown-price state. B invents none.
-- **Kept from the reference:** the price shown on the product page equals the price on the `/store` card. That is the card's existing rule: `standardPrice ?? minPrice ?? variants[0].price` (`store.tsx:79`, `ProductCard.tsx:32`).
-- **Deviations:** none from any listed reference.
-- **Ableton conformity:** not applicable (a Store page).
-- **Screen budget:** not applicable to `/studio-lab`. The reason line appears only in the unknown-price state.
+### 1.2 Consumer sweep (L49, `SWEEP`)
+Where a catalogue or version price reaches the screen on HEAD:
+- **Version card:** `VersionSelector.tsx` lines 32, 55, 105, 107, 114 [K7]. Fixed here.
+- **Purchase panel:** `PurchaseHeader`. Already correct since round 286, and **unchanged** here.
+- **`/store` card:** `store.tsx:79/552` [K8, K9]. Fixed here.
+- **Home card:** `ProductCard.tsx:32/35/36/157` [K10]. Fixed here (API branch only).
+- **Sidebar:** `ProductSidebar` already uses `resolveCatalogPrice` (round 286). Unchanged.
+- **Not in scope:**
+  - The `ProductCard` in `account.downloads.tsx:52` [K11] is a **different, local component** in a protected file. Do not touch it, and do not confuse it with the shared one in a grep.
+  - `RelatedTracksCarousel.tsx:120` and `TrackRow.tsx:149` take an already-formatted price from their caller. Neither is rendered by any route at HEAD (B's grep found no consumer). They are recorded as signal B-R286-UNUSED-PRICE-RENDERERS, not fixed.
+  - The legacy Shopify branch of `ProductCard` (`priceRange.minVariantPrice.amount`) is unchanged.
 
-### 1.3 Design consult (`product-designer`, this planning)
-- **Chosen design:**
-  - the panel keeps its shape;
-  - the "Total Price" label stays, and its figure is replaced by "Price unavailable", with no currency symbol;
-  - Add to Cart and Buy Now stay visible as `aria-disabled="true"`. They stay focusable, and `aria-describedby` points to the reason line;
-  - pressing them does nothing;
-  - a visible reason line contains a "contact us" link to `/support`. `/hire-us` is for commissions, so it is the wrong target;
-  - the ownership panels and the loading state come first, unchanged.
-- **Rejected:** replacing the buttons with a single contact panel. It contradicts Saba's "Buy is disabled with a reason", and the layout would jump once a price exists.
-- **Copy ruling (B):** the designer proposed "Online purchase isn't open for this collection yet." B keeps the reviewed wording, **"Price unavailable — contact us to buy it."** The data does not say *why* the price is missing, so B uses the smallest honest copy.
+### 1.3 Reference and design
+- **Reference:** none found. Round 286 searched the competitor and gallery research for an unknown-price state and found none (D-29z697); B adds no new reference.
+- **Design:** this is a bug fix-up, so no `product-designer` consult is required. The smallest honest behaviour that fits Saba's F9 decision and round 286's chosen state is the same words, `Price unavailable`, in the existing price slot of each card. The styling is muted and lighter, so it does not read as a price.
+  - **Rejected: "—".** It is ambiguous, and it is a different word from the panel's.
+  - **Rejected: hiding the price slot.** It would make the card layout jump, and it is a different state from the page's.
+- **Explicit 0 stays exactly as it is:** `$0` on the `/store` card, `Complimentary` on the home card, and `$0.00` in the panel. PD-FREE-HEADER stays a STORE-4 signal.
+- **Ableton conformity:** does not apply (Store pages). **Screen budget:** does not apply to `/studio-lab`.
 
-### 1.4 Why we missed it (L54)
-Before STORE-0 the cloud had no product data. Every Store check after it looked at one product type (Track with variants), and no row compared the card price with the page price across the catalogue. L54 (added at this planning) makes that walk a row: B-JOURNEY below.
+### 1.4 Why we missed it
+Round 286 froze `createDisplayVersions` to keep the SFX `[]` test byte-identical, and its §1.2 quoted the card rule without its trailing `?? 0`. No row in round 286 rendered a priceless **Track** or a priceless card. C added both fixtures on its own initiative. L54 (card = page) and L49 (consumer sweep) already cover this. No new lesson is added; the file stays at 60 lines.
 
-## 2. The change (D-29z694, D-29z695)
+## 2. The change (D-29z702)
 
-### 2.1 `app/lib/product-utils.ts`: two new exports only
-Every existing function stays byte-identical, including `createDisplayVersions` and its `?? 0` [K6]. Only add:
+### 2.1 `app/lib/product-utils.ts`
+- **The type.** `DisplayVersion.price` becomes `number | undefined` [K3]. **`undefined` means the price is unknown**; `0` stays the "free" state.
+- **The synthetic Standard** [K4, line 92]: `price: resolveCatalogPrice(product)`.
+- **Real variants** [K4, line 79]: `price: isValidCatalogPrice(variant.price) ? variant.price : undefined`. `isValidCatalogPrice` stays module-private [K6].
+- **Unchanged:**
+  - the SFX `return [];` [K5];
+  - the Premium guard and its `price: product.premiumPrice` [K4, line 100];
+  - `resolveCatalogPrice`;
+  - `resolvePurchasePrice`. Its results for every PR row must stay the same; do not simplify it in this round;
+  - every other function.
+- **One new export:** `formatCatalogPriceLabel(price: number | undefined): string`.
+  - It returns exactly `Price unavailable` for `undefined`, and `` `$${price}` `` otherwise. For example, 0 → `$0` and 29 → `$29`, the same format as today's cards.
+  - It gets a one-line English comment (`AGENT_DISCOVERABLE_CODE.md`).
+- **Rules:** TypeScript strict, no `any`, no type assertions, no `@ts-ignore`.
 
-- **`resolveCatalogPrice(product: Product): number | undefined`**
-  - Returns the first **valid** value of `product.standardPrice`, `product.minPrice`, `product.variants?.[0]?.price`.
-  - **Valid** means `typeof v === 'number' && Number.isFinite(v) && v >= 0`.
-  - A `null` from JSON, `NaN` or a negative value is skipped.
-  - Returns `undefined` when none is valid.
-  - An explicit `0` is valid and returned. 0 is the existing "free" state.
-- **`resolvePurchasePrice(product: Product, version: DisplayVersion | null): number | undefined`**
-  - If `version` exists and `version.id !== -1`: return `version.price` when valid, else `undefined`. This covers a real backend variant (id > 0) and the synthetic Premium (id −2, built only when `premiumPrice` is truthy).
-  - Otherwise (no version, or the synthetic Standard id −1): return `resolveCatalogPrice(product)`.
-- **Rules:** TypeScript strict, no `any`, no type assertions. Each helper gets a one-line comment in English, per `AGENT_DISCOVERABLE_CODE.md`.
+### 2.2 `app/components/product/VersionSelector.tsx`
+- **`getUpgradePrice`** returns `number | undefined`. It returns `undefined` when `version.price` is `undefined`, and otherwise `version.price - ownedVersionPrice`, exactly as today.
+- **The price slot of each card:**
+  - **Upgrade with a known upgrade price:** exactly as today (`+$N` and the struck-through `$price`).
+  - **Price unknown (any card, upgrade or not):** the text `Price unavailable`, styled `text-sm font-light text-muted`. There is no `$`, no `+$` and no struck-through figure.
+  - **Otherwise:** exactly as today (`$price`).
+- **Unchanged:**
+  - selection, `aria-pressed`, ownership, the badges (Upgrade, Premium, Owned), the "Standard credit applied" line and the formats/stems lines;
+  - every class except the one new conditional for the unknown price;
+  - no focus-variant class is added (`store-focus-ring` STF scans).
 
-### 2.2 `app/components/product/ProductDetailPage.tsx`
-- `currentPrice` becomes `resolvePurchasePrice(product, selectedVersion)`, of type `number | undefined`. Drop the `useMemo`, or keep it; either is fine.
-- Nothing else changes. Keep the `selectedVersionName` fallback [K4]: `isSupportedVersion` stays true for the no-variant case, so a known price still buys exactly as today, with `productVariantId` undefined. **Purchase protection:** `addToCart` and `buyNow` are called with the same arguments as on HEAD whenever a price is known.
+### 2.3 `app/routes/store.tsx`
+- **`Pack`** gains `isPriceUnknown: boolean`.
+- **`mapProductToPack`** [K8]:
+  - `const catalogPrice = resolveCatalogPrice(product);`
+  - `price: formatCatalogPriceLabel(catalogPrice)`
+  - `isPriceUnknown: catalogPrice === undefined`
+- **The render** [K9]: the same `<span>`. When `pack.isPriceUnknown`, its class is `text-sm font-light text-muted`; otherwise it stays byte-identical to today's `text-2xl font-bold text-foreground`.
+- Nothing else in the route changes: no loader, meta, filter, focus or theme change.
 
-### 2.3 `app/components/product/PurchaseHeader.tsx`
-- **The prop:** `price: number | undefined` (it was `number` [K7]). Define `const isPriceUnknown = price === undefined;`.
-- **Branch order is unchanged.** The order is:
-  1. `!isSupportedVersion` `<output>`;
-  2. Case 1 (owns Premium or SFX);
-  3. Case 2 (owns Standard, Standard selected);
-  4. Case 3 (upgrade);
-  5. loading;
-  6. default.
-- **Case 3** requires a known price: `isUpgrade && price !== undefined && price - ownedPrice > 0`. With an unknown price it falls through to the default panel.
-- **Default panel, known price:** byte-equivalent behaviour to HEAD (figure `$x.xx USD`, same buttons, same handlers).
-- **Default panel, unknown price:**
-  - **Figure.** The "Total Price" label stays. The figure is the text `Price unavailable`, smaller and muted (for example `text-2xl font-light text-muted`; tokens only). The panel contains no `$` character.
-  - **Buttons.** Add to Cart and Buy Now render in the same place with `aria-disabled="true"` and `aria-describedby={reasonId}` (`useId`). They have **no** `disabled` attribute, so they stay in the Tab order. Their look matches the existing disabled look (`opacity-50`, `cursor-not-allowed`), through an `aria-disabled:` variant or a conditional class. No focus-variant classes may be added (STF2 in `store-focus-ring.test.ts`).
-  - **Activation.** Click, Enter and Space do nothing. There is no toast, no `openModal`, no `addToCart` or `buyNow` call and no GA4 or Facebook event. The guard sits at the top of `handleAddToCart` and `handleBuyNow` (`if (isPriceUnknown) return;`), **before** the sign-in check.
-  - **Exception.** `CartButton` in its `alreadyInCart` state ("In Cart" → `/cart`) keeps working; it is navigation, not a purchase.
-  - **Reason line.** A visible `<p id={reasonId}>` under the buttons reads exactly `Price unavailable — ` + `<Link to="/support">contact us</Link>` + ` to buy it.` (an em dash with spaces). The link must not be disabled.
-  - **One Buy Now.** The single Buy Now `<button>` that carries `bg-buy` stays one element; `store-theme-tokens.test.ts` expects exactly one `bg-buy` class attribute in this file. Do not render a second Buy Now button for the unknown state.
-- **Analytics.** The `productPrice` sent with a known price is unchanged.
+### 2.4 `app/components/product/ProductCard.tsx` (API branch only)
+- `priceAmount` for an API product becomes `resolveCatalogPrice(product)`, of type `number | undefined`. The legacy branch is unchanged.
+- `isFree` stays `priceAmount === 0`. An unknown price is **not** free, so it gets no `Complimentary` text and no `Complimentary` badge.
+- `price` becomes `isFree ? 'Complimentary' : formatCatalogPriceLabel(priceAmount)`.
+- **The render** [K10, line 157]: the same `<span>`. When the price is unknown, its class is `text-sm font-light text-muted`; otherwise it stays byte-identical.
+- The badge order is otherwise unchanged. A priceless pack keeps its `Pack` badge (`isPack && !isFree`).
 
-### 2.4 `app/components/product/ProductSidebar.tsx`
-- Change only how `isFree` is computed: `const isFree = resolveCatalogPrice(product) === 0;`. Keep or remove the local `standardPrice` constant as you need.
-- An unknown price shows no "Complimentary Download". An explicit 0 still shows it, unchanged.
+### 2.5 What must not change
+- `PurchaseHeader.tsx`, `ProductDetailPage.tsx`, `ProductSidebar.tsx`, the cart/checkout/auth code and the analytics price.
+- For every product with a known price, every visible price string on the page, the `/store` card and the home card is byte-identical to HEAD.
 
 ## 3. Tests
-Before writing them, read the `vi.mock` patterns for the hooks in existing tests (for example `grep -rln "vi.mock('~/hooks/useAuth'" app`).
+Read the existing patterns first. `product-presentation.test.tsx` renders `VersionSelector` with `renderToStaticMarkup`; store tests render routes with `createRemixStub`.
 
-### 3.1 `app/lib/__tests__/product-utils.test.ts`: append only
-- Add one new `describe('purchase price resolution', …)` at the end. **No existing line changes**: `git diff` must show only added lines.
-- Build values such as `null`, `NaN` and negative numbers through a typed helper or `JSON.parse` of a product string. Use no `as` or `any`.
+### 3.1 Tests that change on purpose (the 2026-10-28 rule: no change may be a bare assertion removal)
+| File:line | Before | After | Why |
+|---|---|---|---|
+| `product-utils.test.ts:347` [K12] | `expect(standard?.price).toBe(0);` | `expect(standard?.price).toBeUndefined();` | The contract changes: the synthetic Standard of a priceless Track is unknown, not 0. This is the only edited line in the file; everything else is appended |
 
+**Unchanged:**
+- `product-utils.test.ts:134–161` (known variant prices);
+- `bug-hunting/product-utils-bugs.test.ts:76` (19.99);
+- `product-presentation.test.tsx:44–45` and `56–57` (149 and 49);
+- the frozen SFX test [K13];
+- PR1–PR6, except that one line of PR5.
+
+If any other existing assertion turns red, that is a STOP (§9). Do not rewrite it.
+
+### 3.2 `app/lib/__tests__/product-utils.test.ts`: append one `describe('display version and card price labels', …)`
 | Row | What it checks |
 |---|---|
-| PR1 | The catalogue order: `standardPrice` 9 → 9; standardPrice missing and `minPrice` 7 → 7; only `variants[0].price` 5 → 5 |
-| PR2 | Nothing valid → `undefined`. `standardPrice: null` with `minPrice: 7` → 7. `NaN` → skipped. `-1` → skipped |
-| PR3 | An explicit `standardPrice: 0` → `0`, not `undefined` |
-| PR4 | A real variant (id 12, price 49) wins over `standardPrice` 29. A real variant with a non-finite price → `undefined` |
-| PR5 | `version` null with SFX `standardPrice` 9 → 9. The synthetic Standard (id −1) built by `createDisplayVersions` for a Track with no price fields → `undefined`, while that version's own `price` is still 0 (the old function is unchanged) |
-| PR6 | The synthetic Premium (id −2) → `premiumPrice` |
+| PR7 | `createDisplayVersions`: a priceless Track's Standard has `price === undefined`. A Track with `standardPrice` 19 has Standard 19. A Track with `minPrice` 7 has Standard 7. A Track with `standardPrice: 0` has Standard `0`, not `undefined` |
+| PR8 | A real variant with price 49 keeps 49. A real variant whose price is `NaN` or `-1` (built through a typed helper or `JSON.parse`, with no `as`) gets `price === undefined` |
+| PR9 | `formatCatalogPriceLabel`: `undefined` → `Price unavailable`; 0 → `$0`; 29 → `$29`; 12.5 → `$12.5` |
 
-### 3.2 New file `app/lib/__tests__/product-price-unavailable.test.tsx` (RTL)
-Render `ProductDetailPage` (and `ProductSidebar` for PU7). Wrap it in `createRemixStub` or `MemoryRouter`, whichever existing store tests use. Mock `useAuth`, `useCart`, `usePurchases`, `useToast`, `~/lib/analytics` and `~/lib/facebook-pixel`. Follow L27: a mocked-hook rerender needs a fresh element.
-
+### 3.3 New file `app/lib/__tests__/product-price-cards.test.tsx`
 | Row | What it checks |
 |---|---|
-| PU1 | A door-slams-like product (SFX, no variants, `standardPrice` 9): the text `$9.00` is present and `$0.00` absent. Buy Now and Add to Cart have no `aria-disabled="true"` and no `disabled` |
-| PU2 | A priceless product: `Price unavailable` is visible; the purchase panel has no `$`; both buttons have `aria-disabled="true"` and no `disabled` attribute. Each button's `aria-describedby` resolves to an element whose text is exactly `Price unavailable — contact us to buy it.` The link named `contact us` has `href="/support"` |
-| PU3 | Priceless and signed out: click, `{Enter}` and `{Space}` on each button → `openModal`, `showToast`, `addToCart`, `buyNow`, `trackAddToCart`, `trackBeginCheckout`, `trackFBAddToCart` and `trackFBInitiateCheckout` are each called **0** times |
-| PU4 | Priceless, signed in, not an owner: the same 0 calls |
-| PU5 | Priceless, the owner panels keep precedence and are unchanged:<br>• owns SFX → `You own this collection`;<br>• owns Premium → `You own Premium`;<br>• owns Standard with Standard selected → `You own Standard`;<br>• purchases loading → `Checking purchase status...` |
-| PU6 | Known-price regression: a Track with Standard 29 / Premium 99 variants shows `$29.00`. Add to Cart calls `addToCart(productId, handle, standardVariantId)` once. Signed-out Buy Now calls `openModal('signin')` once, as on HEAD |
-| PU7 | `ProductSidebar`: unknown price → no `Complimentary Download`; `standardPrice` 0 → present; 9 → absent |
+| VC1 | `VersionSelector` with the versions of a priceless Track (a single Standard): the markup contains `Price unavailable` and no `$` |
+| VC2 | A Track with no Standard price and `premiumPrice` 99: the Standard card reads `Price unavailable`, the Premium card reads `$99`, and there is no `$0` and no `NaN` |
+| VC3 | `ownedVersionType="standard"`, `ownedVersionPrice` 50, and a real Premium variant whose price is `NaN` (so `undefined` after mapping): the Premium card shows the Upgrade badge and `Price unavailable`, with no `+$`, no `NaN` and no `$` |
+| VC4 | Known-price regression: round 286's existing upgrade case (Standard 80, Premium 199, credit 50) still renders `+$149` and `$199`, and a plain known-price render (Universal 49) still renders `$49`. Neither contains `Price unavailable`. Assert these price-slot substrings, not whole-markup equality: inserting a ternary into the class template literal may change whitespace without changing behaviour. `product-presentation.test.tsx:44–45` and `56–57` stay the existing pins |
+| PC1 | `ProductCard` (API product, no price fields, `category: 'SFX'`): the text `Price unavailable` is present; `Complimentary` and `$` are absent; the `Pack` badge is present |
+| PC2 | `ProductCard` explicit 0: `Complimentary` is present (as on HEAD). `standardPrice` 9: `$9`, and no `Complimentary`, `Price unavailable` or `$0` |
+| SC1 | `/store` route via `createRemixStub` with a loader returning two packs mapped from products (priceless, and `standardPrice` 29). If the route's loader cannot be stubbed without touching frozen code, test `mapProductToPack` behaviour through the rendered route only, never by exporting it. Expect: the priceless card reads `Price unavailable` with no `$0`, and the other reads `$29`. If rendering the route needs a frozen-file change, drop SC1, say so in the report, and C's B-STORE-CARD row carries it |
 
-### 3.3 Mutants (A runs them and records which rows go red; C re-runs them)
-Each mutant is applied to A's tree and must turn red at the rows listed.
+Wrap `ProductCard` in `MemoryRouter` or `createRemixStub`, as existing store tests do. It renders `AudioPreviewButton`: mock only what existing tests already mock for it.
+
+### 3.4 Mutants (A runs them and records which rows go red; C re-runs them)
+Each mutant is applied to A's tree, and it must turn red at least at the rows listed (L23: a lower bound).
 
 | Mutant | Change | Must go red at |
 |---|---|---|
-| M1 | `resolveCatalogPrice` ends with `?? 0` instead of `undefined` | PR2, PR5, PU2 |
-| M2 | Remove the guard in `handleBuyNow` | PU3 |
-| M2b | Remove the guard in `handleAddToCart` (both guards are required) | PU3 |
-| M3 | Use `disabled` instead of `aria-disabled` | PU2 |
-| M4 | Sidebar `isFree` back to the old `?? 0` chain | PU7 |
-| M5 | `resolvePurchasePrice` always returns the catalogue price | PR4, PU6 |
+| N1 | The synthetic Standard back to `… ?? 0` | PR5, PR7, VC1 |
+| N2 | `VersionSelector` renders `${version.price ?? 0}` with no unknown branch | VC1, VC2 |
+| N3 | `formatCatalogPriceLabel(undefined)` returns `$0` | PR9, PC1 |
+| N4 | `ProductCard` `isFree` becomes `(priceAmount ?? 0) === 0` | PC1 |
+| N5 | The real-variant price passes through unvalidated (`price: variant.price`) | PR8 |
+| N6 | `getUpgradePrice` returns `(version.price ?? 0) - ownedVersionPrice` and the upgrade branch ignores the unknown case | VC3 |
 
 ## 4. Grants (exact)
 **Allowed changes:**
-- **M** `app/lib/product-utils.ts`: the two new exports only.
-- **M** `app/components/product/ProductDetailPage.tsx`
-- **M** `app/components/product/PurchaseHeader.tsx`
-- **M** `app/components/product/ProductSidebar.tsx`
-- **M** `app/lib/__tests__/product-utils.test.ts`: append only.
-- **??** `app/lib/__tests__/product-price-unavailable.test.tsx`
-- **??** `docs/implementation/2026/quarter-IV/214-fix-pd-price-fallback.md` (next free number [K13])
+- **M** `app/lib/product-utils.ts`: §2.1 only.
+- **M** `app/components/product/VersionSelector.tsx`
+- **M** `app/routes/store.tsx`: §2.3 only. This route is not in `global_forbidden_files`.
+- **M** `app/components/product/ProductCard.tsx`: §2.4 only.
+- **M** `app/lib/__tests__/product-utils.test.ts`: line 347 as in §3.1, plus an appended block.
+- **??** `app/lib/__tests__/product-price-cards.test.tsx`
+- **??** `docs/implementation/2026/quarter-IV/215-fix-pd-card-price-unknown.md` (next free number [K15])
 
 **Everything else is frozen.** In particular:
-- `app/contexts/CartContext.tsx`, `app/services/api/**`, `app/routes/**`
-- the auth files (`app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/lib/firebase.client.ts`)
-- the protected `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts` and `app/routes/account.downloads.tsx`
-- every Studio file
-- `package.json` and the lock file
-- every loop file, including `mock-api/server.mjs`
+- `PurchaseHeader.tsx`, `ProductDetailPage.tsx` and `ProductSidebar.tsx`;
+- `app/contexts/CartContext.tsx`, `app/services/api/**` and every other route;
+- the auth files (`app/lib/auth.ts`, `app/contexts/AuthContext.tsx`, `app/lib/firebase.client.ts`);
+- the protected `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts` and `app/routes/account.downloads.tsx`;
+- every Studio file;
+- `package.json` and the lock file;
+- every loop file, including `mock-api/server.mjs`.
 
-## 5. Doc 214 (Georgian, technical terms in English)
-Follow the `docs/implementation/TEMPLATE.md` headings, in order.
-- **Line 4** is exactly `Completed (C round 286 PASS)` (L28).
-- **Content:** the context (F9 and the HEAD reproduction), the approach (§2, with the rejected options), the changed files, the Problem → Solution entries, the testing (cite only rows that exist: PR1–PR6, PU1–PU7, M1–M5; L26) and the TODO (FIX-PD-1b and FIX-PD-1c).
+If typecheck reports a consumer of `DisplayVersion.price` outside the granted files, that is a STOP (§9). B's sweep found none.
 
-## 6. The browser contract (D-29z696)
-- **Servers.** C runs the dev server :5173 (already up) and the mock API on :5199. The product page is SSR-loaded (`products.$handle.tsx` loader), so `page.route` cannot fake a product.
-- **Unknown-price fixture.** C copies `mock-api/server.mjs` to `c-round-286/mock-priceless.mjs` and adds one active SFX fixture:
-  - `id 9`, handle `priceless-pack`;
-  - no `standardPrice`, `minPrice`, `premiumPrice` or `variants`;
-  - a local `audioPreviewUrl`.
+## 5. Doc 215 (Georgian, technical terms in English)
+- Follow the `docs/implementation/TEMPLATE.md` headings, in order.
+- **Line 4** is exactly `**სტატუსი:** Completed (C round 287 PASS)`, the same format as docs 213 and 214 (L28).
+- **Content:**
+  - the context: C-R286-01, C-R286-02, and the home-card `Complimentary` risk;
+  - the approach: §2, with the rejected options from §1.3 and from A-R286-ARCH-ONE-RESOLVER;
+  - the changed files;
+  - Problem → Solution;
+  - the testing. Cite only rows that exist: PR5 (changed line), PR7–PR9, VC1–VC4, PC1–PC2, SC1 if it exists, and N1–N6 (L26);
+  - the TODO: FIX-PD-1b, PD-FREE-HEADER (STORE-4), B-R286-UNUSED-PRICE-RENDERERS.
 
-  C stops the standard mock, runs the copy on :5199 for the B-UNKNOWN rows, and restores the standard mock afterwards. `mock-api/server.mjs` itself is never edited.
-- **Builds.** C compares HEAD `60bfb38` with A's tree, each as its own build with its own port and `cacheDir` (L38), with a warm-up before measuring. Alternatively C may use the :5173 dev server for A and a scratch HEAD build.
-- **Backend-only rows.** Signed-in and owner states are unit rows only (PU4, PU5). The mock's auth returns 401, so a browser check of those states is **BLOCKED: backend unavailable in cloud**. That does not make `browserVerified` false.
+## 6. The browser contract
+- **Servers.** C runs the dev server :5173 (already up) and a mock API on :5199. The pages are SSR-loaded, so `page.route` cannot fake a product.
+- **Fixtures (scratch only).** C reuses its own `c-round-286/mock-priceless2.mjs` (it has `priceless-track` id 10 and `priceless-pack` id 9) as a copy in `c-round-287/`. For B-FREE, C adds one active SFX fixture to that copy: `free-pack`, `standardPrice: 0`, `minPrice: 0`. `mock-api/server.mjs` itself is never edited. C restores the standard mock at the end (`/__mock/health` → `products: 8`).
+- **Builds.** C compares HEAD `096fa4b` with A's tree, each as its own build with its own port and `cacheDir` (L38), with a warm-up before measuring. Alternatively, C may use the :5173 dev server for A and a scratch HEAD build.
+- **Backend-only rows.** The owned-Standard upgrade state is unit only (VC3, VC4). In the browser it is **BLOCKED: backend unavailable in cloud** (the mock's auth returns 401). That does not make `browserVerified` false.
 
 ## 7. What A runs (speed rules)
-1. Run the claims (§Baseline).
+1. Run the claims (see Baseline).
 2. Make the edits.
 3. Run `npm run typecheck` and `npm run lint`.
-4. Run `npx vitest run` on the 6 covering files in `b-round-285/covering-files.txt` plus the new test file. HEAD baseline: 6 files / 111 tests pass (`covering-run-head.txt`).
-5. Run mutants M1–M5 and M2b. Restore the tree after each one and check its sha256.
-6. Run one browser smoke on `/products/door-slams` ($9.00) at 1440. The page is SSR-loaded from the mock API, which is not running by default. From the loop folder, start `node mock-api/server.mjs > a-round-286-mock.log 2>&1 &` first, check `curl -s http://127.0.0.1:5199/__mock/health` (`products: 8`), and stop the mock afterwards by its PID (not with `pkill -f`, which can match the calling shell).
-7. Run `code-reviewer`; the round changes 3+ files.
+4. Run `npx vitest run` on the 7 covering files in `b-round-286/covering-files.txt` plus the new test file. The HEAD baseline is 7 files / 124 tests passing (`b-round-286/covering-run-head.txt`). Afterwards, every pre-existing test must still pass; only the PR5 line in §3.1 changes.
+5. Run mutants N1–N6. Restore the tree after each one and check its sha256.
+6. Run one browser smoke at 1440 with the standard mock:
+   - from the loop folder: `node mock-api/server.mjs > a-round-287-mock.log 2>&1 &`;
+   - check `curl -s http://127.0.0.1:5199/__mock/health` (`products: 8`);
+   - `/store` must show the 7 known card prices unchanged;
+   - `/products/middle-east` must show the version cards `$29` / `$99`;
+   - stop the mock by its PID, not with `pkill -f`.
+7. Run `code-reviewer`; the round changes 3 or more files.
 
-**Report in `a-round-286.md`:** the diff stat, the test counts, the mutant table, the sha256 of the 7 changed paths, and any code-reviewer Architecture note (passed on as a backlog signal). Do not run the full suite or `npm run verify`; the gate does.
+**Report in `a-round-287.md`:** the diff stat, the test counts, the mutant table, the sha256 of the 7 changed paths, and any code-reviewer Architecture note (passed on as a backlog signal). Do not run the full suite or `npm run verify`; the gate does.
 
 ## 8. C rows (both viewports, 1440×900 and 1280×720, unless stated)
 | Row | Check |
 |---|---|
-| CLAIMS | `claims-286.sh` on a `git archive 60bfb38` scratch equals `claims-286-output.txt`, except K1 `(archive)`. Run the L29 untagged-fact sweep of this task |
-| SOURCE-SCOPE | `git status` lists exactly the §4 paths. `git diff app/lib/__tests__/product-utils.test.ts` shows only `+` lines (the file ends with a newline at HEAD, so appending needs no `-` line). In `product-utils.ts`, every pre-existing function is byte-identical (diff hunks only add). CartContext, client.ts, routes and auth files are unchanged |
+| CLAIMS | `claims-287.sh` on a `git archive 096fa4b` scratch equals `claims-287-output.txt`, except K1 `(archive)`. Run the L29 untagged-fact sweep of this task |
+| SOURCE-SCOPE | `git status` lists exactly the §4 paths. `git diff app/lib/__tests__/product-utils.test.ts` shows exactly one `-` line (line 347), and the rest are `+` lines. `PurchaseHeader`, `ProductDetailPage`, `ProductSidebar`, `CartContext`, `client.ts`, the protected routes and the auth files are unchanged against `096fa4b` |
 | TYPECHECK | `npm run typecheck` rc 0 |
-| UNIT | The 7 covering files pass. PR1–PR6 and PU1–PU7 each exist exactly once by name |
-| UNIT-MUTANTS | C re-runs M1–M5 and M2b on its own copy; each is red exactly at its §3.3 rows |
-| B-KNOWN | `/products/door-slams` on A shows `$9.00 USD` and no `$0.00` anywhere (HEAD: `$0.00`). Add to Cart and Buy Now are enabled. Signed out, Buy Now gives the same result as on HEAD for `/products/middle-east`: the sign-in modal and toast |
-| B-UNKNOWN | With the `mock-priceless` server, `/products/priceless-pack`:<br>• `Price unavailable` is visible, and the purchase panel has no `$`;<br>• both buttons have `aria-disabled="true"` and no `disabled`;<br>• keyboard Tab, starting from the sidebar preview button (or from the document start if that button is absent), reaches Add to Cart → Buy Now → `contact us`, in that order. The priceless product has no version selector (`ProductDetailPage.tsx:138` renders it only with a selected version), and the ring is visible on each (computed outline ≥ 1 px);<br>• click, Enter and Space on each button: no dialog, no toast element, no request to `/api/cart*`, `/api/auth*` or `/api/orders*` (network log);<br>• `contact us` navigates to `/support`;<br>• `aria-describedby` resolves to the reason text, exactly as in PU2.<br>Screenshot of the panel |
-| B-SIDEBAR | No `Complimentary Download` on `priceless-pack` or on `door-slams` |
-| B-REGRESS | On A versus HEAD:<br>• `middle-east` shows `$29.00`, and Premium selected shows `$99.00`;<br>• `copper-horizon` (Track, no variants, 19) shows `$19.00`;<br>• `harbour-lights` shows `$24.00`;<br>• each price text is equal on HEAD and A;<br>• the purchase-panel bbox is equal ±1 px |
-| B-JOURNEY (L54) | `/store` → for each active fixture product (7): the card price equals the product page's price figure on A. Screenshot each step for `door-slams`: the card, then the page |
-| G286-AUTH | Fresh context, no credentials:<br>• `/studio-lab` shows the demo badge, `auth_user` null, and Add present;<br>• `/studio/middle-east` shows `Sign in required` and has 0 `audio[src]`;<br>• `/api/studio-token?product=middle-east&file=stem-01.wav` with no header → 401; with a fake bearer → not 200 and no token.<br>A real-backend 403 is BLOCKED: backend unavailable in cloud |
-| DOC-214 | Line 4 is byte-exact. The headings equal TEMPLATE's, in order. Every cited row id exists |
+| UNIT | The 8 covering files pass. PR7–PR9, VC1–VC4, PC1–PC2 (and SC1 if present) each exist exactly once by name |
+| UNIT-MUTANTS | C re-runs N1–N6 on its own copy; each is red at least at its §3.4 rows |
+| B-VERSION-CARD | `/products/priceless-track` on A:<br>• the page text contains no `$0`, `$NaN` or `NaN`;<br>• the version card reads `Standard` and `Price unavailable`;<br>• the purchase panel still reads `Price unavailable`, with both buttons `aria-disabled="true"`;<br>• the version card's bbox is equal to HEAD's ±1 px.<br>Compare with HEAD's `Standard $0`. Screenshot the card on HEAD and on A |
+| B-STORE-CARD | `/store` on A: the `priceless-pack` and `priceless-track` cards read `Price unavailable` (computed colour = the `muted` token value), and there is no `$0` on either card. The card's outer bbox is equal to HEAD's ±1 px. Screenshot both cards |
+| B-HOME-CARD | `/` (home `ProductSection`) on A:<br>• if the priceless fixtures appear in it, their cards read `Price unavailable`, with no `Complimentary` text or badge and no `$0` (HEAD: `Complimentary`);<br>• if they do not appear (sort or page size), write that, with the reason, and the unit rows PC1/PC2 carry it. That is not a FAIL |
+| B-FREE | With `free-pack` (explicit 0): the `/store` card reads `$0`, the home card reads `Complimentary` if it appears, and the product page panel is the same on HEAD and A. Explicit 0 is unchanged |
+| B-REGRESS | On A versus HEAD, for the 7 standard active fixtures:<br>• each `/store` card price string, each home card price string, each product page panel figure and each version-card price text is byte-equal;<br>• `middle-east` version cards read `$29` / `$99`;<br>• each card's price-span bbox is equal ±1 px |
+| B-JOURNEY (L54) | For all 9 active fixtures (7 + `priceless-track` + `priceless-pack`): the `/store` card price label equals the product page's price figure (`Price unavailable` ↔ `Price unavailable`; `$N` ↔ `$N.00`). Screenshot the card, then the page, for `priceless-track` |
+| R286-KEEP | Round 286's state still holds on `priceless-pack`: `Price unavailable`, both buttons `aria-disabled="true"`, and no `/api/cart*`, `/api/auth*` or `/api/orders*` request after a click, Enter or Space (only post-activation requests count). `door-slams` still shows `$9.00` |
+| G287-AUTH | Fresh context, no credentials:<br>• `/studio-lab` shows the demo badge, `auth_user` is null, and Add is present;<br>• `/studio/middle-east` shows `Sign in required` with 0 `audio[src]`;<br>• `/api/studio-token?product=middle-east&file=stem-01.wav` returns 401 with no header, and with a fake bearer it is not 200 and has no token.<br>A real-backend 403 is BLOCKED: backend unavailable in cloud |
+| DOC-215 | Line 4 is byte-exact. The headings equal TEMPLATE's, in order. Every cited row id exists |
 | gate | The full suite, the build, Biome, `verify` and `test:e2e:smoke` are the gate's rows. C does not claim them |
 
-**Product-designer acceptance rows** are B-UNKNOWN, PU3–PU5, B-KNOWN and B-SIDEBAR. C may consult `product-designer` in review mode (at most 7 findings).
+C may consult `product-designer` in review mode (at most 7 findings) on the three unknown-price slots.
 
 ## 9. STOP conditions (L11)
 Write a STOP and change nothing else when:
 - the claims output differs;
-- keeping exactly one `bg-buy` attribute is impossible;
-- any frozen file would need a change;
-- `createDisplayVersions` or the SFX `[]` test would need a change;
+- a frozen file would need a change, including another consumer of `DisplayVersion.price`;
+- an existing assertion other than the PR5 line turns red;
+- the SFX `[]` test would need a change;
 - a required row cannot be written without a type assertion.
 
 ## 10. Neighbour risk
-- **Products with a known price.** The buttons, handlers, analytics price and cart arguments must stay exactly as on HEAD (PU6, B-REGRESS).
-- **The upgrade panel (Case 3)** depends on `price`. Its known-price arithmetic is unchanged.
-- **Free products (explicit 0).** They still render `$0.00` in the header, as today. This is out of scope; recorded as open signal PD-FREE-HEADER for STORE-4.
-- **Themes and focus.** The `store-theme-tokens` and `store-focus-ring` scans must stay green.
+- **The purchase panel and buttons.** `resolvePurchasePrice` is unchanged and the synthetic Standard's resolved price is the same value, so the panel and the cart arguments stay as in round 286 (R286-KEEP, B-REGRESS).
+- **The upgrade card.** Its known-price arithmetic is unchanged (VC4).
+- **Free products (explicit 0).** They are unchanged everywhere (PR7, PC2, B-FREE).
+- **The theme and focus scans.** `store-theme-tokens` and `store-focus-ring` cover `store.tsx`, `ProductCard.tsx` and `VersionSelector.tsx`; they must stay green. Use tokens only.
+- **Card layout.** The muted label must not wrap the price row or change the card height (bbox rows).
+- **The scan constraints for the three edited components.**
+  - The new conditional style goes inside the element's existing `className` value (a ternary in the template literal or string). Do not add a second `className`.
+  - Add no `focus:`/`focus-visible:` token, `ring-*`, `outline-*` or `opacity-0` hover-reveal wrapper. `store-focus-ring` STF2 forbids focus-variant tokens, and STF6(c) expects exactly one hover-reveal wrapper in `ProductCard`.
+  - Use the colour tokens only (`text-muted`); there are no raw hex values (`store-theme-tokens`).
+  - `mapProductToPack` is the only constructor of `Pack` (`store.tsx:72`, used at `:101`), so the required `isPriceUnknown` field needs no other change.
 
 ## 11. Outcome, fixed in advance
-- **PASS:** every runnable row above passes at both viewports, with `browserVerified` true. FIX-PD-1a becomes **მზადაა** after gate publication, and the next round is FIX-PD-1b.
-- **Fix-up:** any Medium or higher finding in B-KNOWN, B-UNKNOWN or B-REGRESS makes the next round a fix-up.
+- **PASS:** every runnable row passes at both viewports, with `browserVerified` true. FIX-PD-1a2 then becomes **მზადაა** after gate publication; C-R286-01 and C-R286-02 close, and F9 closes. The next round is FIX-PD-1b, unless REGRESSION falls due first (it is due when planning happens on or after 2026-11-02).
+- **Fix-up:** any Medium or higher finding in B-VERSION-CARD, B-STORE-CARD, B-HOME-CARD, B-FREE, B-REGRESS or R286-KEEP makes the next round a fix-up.
 - **Lows:** they go to `deferred_low_polish`, unless this round's files own them cheaply.
 
 ## 12. Deliverables
-- **A:** the §4 files and `a-round-286.md` (with a checkpoint).
-- **C:** `c-round-286.md`, `c-round-286.json` and evidence in `c-round-286/`.
+- **A:** the §4 files and `a-round-287.md` (with a checkpoint).
+- **C:** `c-round-287.md`, `c-round-287.json` and the evidence in `c-round-287/`.
 
 ## Claims block (L29)
-Every fact in this task about current code carries a K tag from `b-round-285/claims-286.sh`; their output is in `claims-286-output.txt`.
+Every fact in this task about current code carries a K tag from `b-round-286/claims-287.sh`. The output is in `claims-287-output.txt`.
 
 | Tag | Fact |
 |---|---|
-| K1 | HEAD `60bfb38` |
+| K1 | HEAD `096fa4b` |
 | K2 | Clean tree |
-| K3 | `ProductDetailPage.tsx:68` `selectedVersion?.price ?? 0` |
-| K4 | `:122` `selectedVersion?.name ?? 'Standard'` |
-| K5 | `product-utils.ts:85` SFX `return [];` |
-| K6 | `:92` synthetic Standard `… ?? 0` |
-| K7 | `PurchaseHeader.tsx:22` `price: number;`, `:140` `isDisabled`, `:327` the `${price.toFixed(2)}` figure |
-| K8 | `PurchaseHeader` is used only by `ProductDetailPage` |
-| K9 | `ProductSidebar.tsx:36` `isFree = standardPrice === 0`, `:65` `Complimentary Download` |
-| K10 | `product-utils.test.ts:263`, the frozen SFX test |
-| K11 | `app/routes/support.tsx` exists |
-| K12 | Exactly 1 test file mentions `PurchaseHeader` (`store-theme-tokens.test.ts`, the `bg-buy` count) |
-| K13 | The last doc is `213-…`, so the next is 214 |
-| K14 | The sha256 of the five owned pre-existing files |
+| K3 | `product-utils.ts:17` `price: number;` (`DisplayVersion`) |
+| K4 | `:79` `price: variant.price,`; `:92` the synthetic Standard's `… ?? 0`; `:100` `if (product.premiumPrice) {` |
+| K5 | `:85` the SFX `return [];` |
+| K6 | `:116` the private `isValidCatalogPrice`; `:121` `resolveCatalogPrice` and `:131` `resolvePurchasePrice`, both exported |
+| K7 | `VersionSelector.tsx:32` the upgrade subtraction, `:55` `upgradePrice`, `:105` `+${upgradePrice}`, `:107` and `:114` `${version.price}` |
+| K8 | `store.tsx:79`, the card chain ending in `?? 0` |
+| K9 | `store.tsx:552`, `{pack.price}` |
+| K10 | `ProductCard.tsx:32` the API chain ending in `?? 0`, `:35` `isFree`, `:36` the `Complimentary` / `$` label, `:157` the render |
+| K11 | `account.downloads.tsx:52`, a local `ProductCard` (protected, out of scope) |
+| K12 | `product-utils.test.ts:347`, `expect(standard?.price).toBe(0);` |
+| K13 | `product-utils.test.ts:263`, the frozen SFX test |
+| K14 | The test files that import `createDisplayVersions`, `VersionSelector` or `ProductCard` |
+| K15 | The last doc is `214-…`, so the next is 215 |
+| K16 | The sha256 of the five owned pre-existing files |
