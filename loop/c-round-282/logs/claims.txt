@@ -1,0 +1,81 @@
+== K1 HEAD
+(archive)
+== K2 synchronous composition calls in the demo collection
+27:  'demo-synth-mix': () => getDemoStemComposition().mix,
+98:    return getDemoStemComposition().stems[part];
+== K3 the load effect calls loadSource for every source
+3874:        .loadSource(source, decodeContext, controller.signal)
+== K4 peaks are computed on the main thread after each source resolves
+2466:        const peaks = computePeaks(channels, buffer.sampleRate, PEAK_BUCKETS_PER_SECOND);
+3883:          const peaks = computePeaks(channels, buffer.sampleRate, PEAK_BUCKETS_PER_SECOND);
+== K5 the LoAF/longtask observer stores t, duration and name only
+196:          target.push({ t: entry.startTime, duration: entry.duration, name: entry.name });
+== K6 the load window ends at ready; the status wait follows
+519:  const load = await snapshot(page, 0, readyMs);
+564:    await waitForCollectionReady(page, result.problems, 'after load');
+== K7 the PERF-1a load rows (id kind mode owner)
+load.longtask-max wallclock record PERF-2
+load.longtasks-over-50 wallclock record PERF-2
+load.ready-ms wallclock record PERF-5
+load.commits deterministic record PERF-2
+load.components deterministic record PERF-2
+== K8 demo-synth files in app/lib/arrangement
+demo-synth.ts
+== K9 importers of the demo collection or the synth (roots app perf e2e)
+app/data/__tests__/studio-lab-demo.test.ts
+app/data/studio-lab-demo.ts
+app/lib/arrangement/__tests__/demo-synth.test.ts
+app/lib/arrangement/__tests__/library-notice-ui.test.tsx
+app/routes/studio-lab.tsx
+== K10 module-worker precedent
+app/lib/arrangement/export-wav.client.ts:32:      worker = new Worker(new URL('./export-wav.worker.ts', import.meta.url), {
+app/lib/sfx-export.client.ts:19:    const worker = new Worker(new URL('./sfx-export.worker.ts', import.meta.url), {
+app/utils/audio-encoder.ts:19:    const worker = new Worker(new URL('../workers/audio-encoder.worker.ts', import.meta.url), {
+== K11 FakeWorker precedent
+38:class FakeWorker {
+330:    vi.stubGlobal('Worker', FakeWorker);
+376:    vi.stubGlobal('Worker', FakeWorker);
+428:    vi.stubGlobal('Worker', FakeWorker);
+451:    vi.stubGlobal('Worker', FakeWorker);
+469:    vi.stubGlobal('Worker', FakeWorker);
+494:    vi.stubGlobal('Worker', FakeWorker);
+== K12 vitest and Biome include app/** only
+vitest.config.ts:9:    include: ['app/**/*.test.{ts,tsx}'],
+biome.json:66:    "includes": ["app/**/*.ts", "app/**/*.tsx"]
+== K13 last implementation doc
+210-perf-harness-load-diagnostics.md
+== K14 In Progress (stage lines
+0
+== K15 doc 163 load-row text
+24:1. `/studio-lab` → ready (`load.ready-ms`, `load.longtask-max`, `load.longt
+70:| `load.longtask-max`, `load.longtasks-over-50` | ready-მდე ყვე�
+71:| `load.commits`, `load.components` | ready-მდე commit-ები და
+117:Harness: `harness.hook-live` = 2, `harness.audio-running` = 1, `harness.rest
+== K16 doc 169 says instrumentation stores only duration
+37:| `loaf-blocking-max` | უდიდესი LoAF `block
+== K17 load rows are recorded at 1x only
+555:    if (!record) result.samples.clear();
+== K18 ST51 walks app/lib/arrangement
+2760:  it('ST51: every Studio workspace source, found by a d
+== K19 generateDemoStereoChannels callers outside tests
+app/data/studio-lab-demo.ts:142:  const channels = generateDemoStereoChannels(() => samples);
+app/data/studio-lab-demo.ts:5:  generateDemoStereoChannels,
+app/lib/arrangement/demo-synth.ts:160:export function generateDemoStereoChannels(
+== K20 the demo collection is used only by /studio-lab
+app/data/studio-lab-demo.ts:154:export const studioLabDemoCollection: WorkspaceCollection = {
+app/routes/studio-lab.tsx:27:      collection={studioLabDemoCollection}
+app/routes/studio-lab.tsx:4:import { studioLabDemoCollection } from '~/data/studio-lab-demo';
+== SW-A new names absent at HEAD (roots app perf e2e)
+0
+== SW-B consumers of load.commits / load.components (roots app perf e2e)
+perf/budgets.json
+perf/studio-lab.perf.spec.ts
+== SW-C consumers of PerfTimedEntry / state.loafs (roots app perf e2e)
+      9 perf/lib/instrumentation.ts
+      1 perf/lib/page.ts
+      3 perf/studio-lab-interactions.perf.spec.ts
+      1 perf/studio-lab.perf.spec.ts
+== K21 the load effect drops results after abort
+2
+== K22 strings.test names neither demo-synth file (ST4 lists export files only)
+0

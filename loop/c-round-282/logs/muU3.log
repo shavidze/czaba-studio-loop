@@ -1,0 +1,81 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c282/muU3[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/demo-synth-worker.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 3489[2mms[22m[39m
+     [33m[2m✓[22m[39m DW1: without a Worker global it resolves to the synchronous composition object [33m 469[2mms[22m[39m
+     [32m✓[39m DW2: five concurrent calls share one worker and one synthesize message[32m 4[2mms[22m[39m
+[31m     [31m×[31m DW3: a valid complete message resolves every caller and releases the worker[39m[32m 10[2mms[22m[39m
+     [33m[2m✓[22m[39m DW4: onerror falls back to the synchronous composition without waiting for the stall timer [33m 430[2mms[22m[39m
+     [33m[2m✓[22m[39m DW5: onmessageerror falls back to the synchronous composition without waiting for the stall timer [33m 420[2mms[22m[39m
+     [33m[2m✓[22m[39m DW6: a malformed message falls back: (a) a complete message without a composition [33m 418[2mms[22m[39m
+     [33m[2m✓[22m[39m DW6: a malformed message falls back: (b) a pulse stem that is a plain array [33m 419[2mms[22m[39m
+     [33m[2m✓[22m[39m DW7: a throwing Worker constructor falls back to the synchronous composition [33m 431[2mms[22m[39m
+     [33m[2m✓[22m[39m DW8: the stall timer falls back only once the full timeout has passed [33m 413[2mms[22m[39m
+[31m     [31m×[31m DW9: a later call reuses the completed job without a new worker[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m DW10: the worker module posts the full composition and transfers its five buffers[39m[33m 467[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW3: a valid complete message resolves every caller and releases the worker
+[31m[1mAssertionError[22m: expected { …(2) } to be { …(2) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(2) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/demo-synth-worker.test.ts:[2m138:22[22m[39m
+    [90m136| [39m    [35mconst[39m results [33m=[39m [35mawait[39m [33mPromise[39m[33m.[39m[34mall[39m(calls)[33m;[39m
+    [90m137| [39m    [35mfor[39m ([35mconst[39m result [35mof[39m results) {
+    [90m138| [39m      [34mexpect[39m(result)[33m.[39m[34mtoBe[39m(composition)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m139| [39m    }
+    [90m140| [39m    [34mexpect[39m(worker[33m.[39mterminated)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW9: a later call reuses the completed job without a new worker
+[31m[1mAssertionError[22m: expected { …(2) } to be { …(2) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(2) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW10: the worker module posts the full composition and transfers its five buffers
+[31m[1mAssertionError[22m: expected [] to have a length of 5 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 5[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/demo-synth-worker.test.ts:[2m252:22[22m[39m
+    [90m250| [39m    }
+    [90m251| [39m    [35mconst[39m transfer [33m=[39m [34mreadTransfer[39m(options)[33m;[39m
+    [90m252| [39m    [34mexpect[39m(transfer)[33m.[39m[34mtoHaveLength[39m([34m5[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m253| [39m    [34mexpect[39m(transfer[[34m0[39m])[33m.[39m[34mtoBe[39m(composition[33m.[39mmix[33m.[39mbuffer)[33m;[39m
+    [90m254| [39m    synth[33m.[39m[33mDEMO_STEM_PARTS[39m[33m.[39m[34mforEach[39m((part[33m,[39m index) [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 05:50:11
+[2m   Duration [22m 4.20s[2m (transform 106ms, setup 0ms, import 74ms, tests 3.49s, environment 478ms)[22m
+
+
+::error file=/tmp/c282/muU3/app/lib/arrangement/__tests__/demo-synth-worker.test.ts,title=app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW3%3A a valid complete message resolves every caller and releases the worker,line=138,column=22::AssertionError: expected { …(2) } to be { …(2) } // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: { …(2) }%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ app/lib/arrangement/__tests__/demo-synth-worker.test.ts:138:22%0A%0A
+
+::error file=/tmp/c282/muU3/app/lib/arrangement/__tests__/demo-synth-worker.test.ts,title=app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW10%3A the worker module posts the full composition and transfers its five buffers,line=252,column=22::AssertionError: expected [] to have a length of 5 but got +0%0A%0A- Expected%0A+ Received%0A%0A- 5%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/demo-synth-worker.test.ts:252:22%0A%0A

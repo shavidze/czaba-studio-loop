@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T04:19:08.383Z)
+# Active loop summary (2026-10-31T06:19:05.529Z)
 
-- backlog.json 2689 KB -> active view 373 KB
-- status: G_ROOT_GATE round 281
-- servers: `{"checkedUtc":"2026-10-31T03:46:41.6953440Z","round":281,"attempt":1,"store":200}`
+- backlog.json 2702 KB -> active view 375 KB
+- status: G_ROOT_GATE round 282
+- servers: `{"checkedUtc":"2026-10-31T05:47:33.5687906Z","round":282,"attempt":1,"store":200}`
 - last publication: 000da42be6bb6e3adcfbb7a2f6e0e965084f8218 (rounds 281-281)
-- last root gate: round 281 published - commit 000da42be6bb6e3adcfbb7a2f6e0e965084f8218 pushed
+- last root gate: round 282 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -525,7 +525,7 @@
 - PRE-PROD-CHECKLIST-FFMPEG / low / deferred_low_polish / docs/PRE_PRODUCTION_CHECKLIST.md l.124 still lists 'FFmpeg workers' for StudioContext
 - A-R220-GPLV-NIT / info / signal (not scheduled) / licence classifier treats GPLv, AGPLv and GPL.3 as clean; no lock spelling uses them (consistent with R-219-2)
 - C-R222-01 / low / deferred_low_polish (D-29z243); criterion LEGACY-UI-STUBBED amended to 'PCM within 1 LSB on every sample + per-stem spectrum delta <= 0.01 dB'; hypothesis (float summation order in the offline render) attached to the export-pipeline checkpoint / legacy WAV export is not bit-deterministic: two exports of the same untouched selection differ by 1 LSB in 318/383996 samples (48 in a secon
-- PERF-1A-TIMEOUT-HEADROOM / info / data (D-29z651): B round-281 sketch run PERF-1a 6.8 min = 45 % of 15 min; config unchanged, not closed | data (D-29z644): round 279 PERF-1a 6.4 min (A) and 6.5 min (C) = 43 % of 15 min on two fresh cloud machines; config unchanged, so not closed | root request ROOT-REQ-PERF-TIMEOUT filed (D-29z638): B run at 873d835 1a 8.4 min = 56 % of 15 min (b-round-278/head-perf-run.log); closes when root applies 25 min and a run shows <= 50 % | watch: round 224 A 5.8 min, C 8.0 min (53 % of 15 min, after C's build and 1b runs) -> above the 50 % rule; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE ... [clipped; see backlog.json] / PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s
+- PERF-1A-TIMEOUT-HEADROOM / info / data (D-29z661): C round 281 PERF-1a 7.1 min; B round-282 sketch PERF-1a 7.3-7.4 min = 49 % of 15 min; not closed | data (D-29z651): B round-281 sketch run PERF-1a 6.8 min = 45 % of 15 min; config unchanged, not closed | data (D-29z644): round 279 PERF-1a 6.4 min (A) and 6.5 min (C) = 43 % of 15 min on two fresh cloud machines; config unchanged, so not closed | root request ROOT-REQ-PERF-TIMEOUT filed (D-29z638): B run at 873d835 1a 8.4 min = 56 % of 15 min (b-round-278/head-perf-run.log); closes when root applies 25 min and a run shows <= 50 % | watch: round 224 A 5.8 min, C 8.0 min (53 % of  ... [clipped; see backlog.json] / PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s
 - C-R223-OBS-01 / info / recurred C round 224 (first cold 1440 dev load: invalid hook call + hydration error; fresh contexts clean) | attached to VITE-EXCLUDE-STALE / b-round-220-root-request-vite.md (dev optimiser hypothesis, unconfirmed); C re-notes if it recurs | recurred again C round 225 (first 1440 cold load: useState null + hydration; two fresh contexts clean; smoke 0 page errors) / first cold dev-server /studio-lab load logged invalid hook call / hydration error once; not reproduced in 4 later loads; app unchanged
 - R224-WINDOW-BOUNDARY-WATCH / info / watch: if a valid run shows variation, reclassify those classes together with evidence (D-29z259) / windowed rows that stay exact: fader and drag release-commits (split at pointerup) and move-components-per-move (same window as the reclassi
 - C-R225-OBS-01 / info / info - supports D-29z259 wallclock ruling; attached to R224-WINDOW-BOUNDARY-WATCH / windowed drag commit count differs between two clean isolated runs (C 60x3, A 59x3) while render work is constant
@@ -678,12 +678,17 @@
 - INFO-C277-ENV-LOAD-TIMEOUT / info / environment note, no action / first fresh context of C run 1 timed out (150 s) waiting for Demo collection ready during the cold dev-server compile; rerun passed
 - B-R277-METRONOME-DRAFT-CLICK / info / designed out in round 278 (variant X, D-29z628) / the shared soft-disabled pattern (mousedown preventDefault) would make a click on Metronome with an uncommitted BPM draft a dead click; HEAD
 - C-R278-ENV-01 / info / lesson (D-29z639): L38 clause / C's HEAD dev server shared node_modules/.vite and broke :5173 (504 Outdated Optimize Dep); a second Vite server needs its own cacheDir
-- GATE279-S1 / medium / dispatched round 281 (PERF-HARNESS-DIAG-281, D-29z652) | open - scheduled round 281 (PERF-HARNESS-DIAG-281, D-29z645) / perf/lib/page.ts waitForCollectionReady waits 15 s for the ready text only; a failed demo source shows copy.failed(n) and the pass aborts on
-- B-R280-CLICK-LIVE-LANE-ID / low / dispatched round 281 (PERF-HARNESS-DIAG-281, D-29z652) | open - scheduled round 281 (PERF-HARNESS-DIAG-281, D-29z645) / D-29z254 leftover: the chosen deselect lane id is not written into the interact.harness.click-live detail (round 279 equivalence contract fo
 - GATE279-S2 / info / watch (D-29z643) / a capped quiet wait while playing may flake on a slower runner (cap hit is now a problem by design); if it shows up, name the last commit in
 - GATE280-S4 / info / acknowledged (by design, D-29z646: named problem, no silent fallback) / a probe over 20 ms is reported but its offset is still used
 - A-R280-REVIEW-KEY-NAMES / info / ruled (D-29z651): keep clockOffsetMs and endpointRule; the names are fixed by the round-280 contract, doc 209 and B/C scripts read them / code-reviewer L1/L2: clockOffsetMs resembles clock.offsetMs; endpointRule holds a count
 - B-R281-RESOURCES-READY-FAILED / low / signal (D-29z657, narrowed; not scheduled): adding a status wait to 1b-ii moves time-since-load rows such as res.mem.used-ready-mib (round 279 measured) | signal (D-29z652; not scheduled): tech-lead (b) - different ready signal, a change would not be byte-identical / PERF-1b-ii has no status wait: when a NON-selected demo source fails after the library is ready (Add enabled + waveform), it continues and m
+- PERF2-FIRST-FRAME-LONGTASK / info / signal (D-29z662): not scheduled; candidates PERF-11 (root diet) and PERF-7 (fonts); B re-measures with LoAF attribution when planning those / the first load frame is a long task of 77-131 ms with no script over 5 ms (parse/style/layout before hydration); it keeps load.longtask-max 
+- PERF2-STEREO-COPY / low / signal (D-29z661): not in round 282 (code = measured sketch); fold into PERF-5 (peaks in a worker) planning / loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) before copyToChannel; calling copyToChannel t
+- GATE281-S2 / low / dispatched round 282 (D-29z659): doc 169 TODO bullet (granted with the l.37 row); doc 210 stays as written (round-281 record) / doc 169 / doc 210: B-R281-RESOURCES-READY-FAILED should say that in the measured runs a failed non-selected source usually aborts PERF-1b-ii
+- GATE281-ARCH-COLLECTION-STATE-ATTR / info / architecture signal (D-29z659): recorded, not scheduled / proposal: the app sets data-collection-state="loading|ready|failed" on arrangement-status and the three perf waits read it instead of text p
+- GATE281-ARCH-DOC-TODO-CHANGELOG / info / architecture signal (D-29z659): recorded, not scheduled / proposal: keep one changelog of harness waits in doc 175 and replace per-round TODO bullets in docs 168/169/208/209 with a link
+- A-R281-ARCH-PAGE-READINESS / info / architecture signal (D-29z659): recorded, not scheduled (keep) / perf/lib/page.ts shared timing helpers now hold Studio-specific readiness checks; app-labels pattern builders accumulate; reviewer: keep
+- GATE281-S5 / info / info (D-29z659): existing tooling gap; config change is root/Saba / npm run lint runs Biome on ./app only, so perf/** formatting is unchecked (existing gap, C-R214-BIOME-PERF-VACUOUS, L30)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

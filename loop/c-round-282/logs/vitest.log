@@ -1,0 +1,66 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/demo-synth.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 330[2mms[22m[39m
+ [32m✓[39m app/data/__tests__/studio-lab-demo.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/strings.test.ts [2m([22m[2m64 tests[22m[2m)[22m[32m 139[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/library-notice-ui.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1730[2mms[22m[39m
+     [33m[2m✓[22m[39m LN1: the demo workspace shows the one-sentence notice and a named dismiss button [33m 645[2mms[22m[39m
+     [33m[2m✓[22m[39m LN2: a click hides the notice, remembers it per collection and moves focus to the search field [33m 348[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/demo-synth-worker.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 4673[2mms[22m[39m
+     [33m[2m✓[22m[39m DW1: without a Worker global it resolves to the synchronous composition object [33m 896[2mms[22m[39m
+     [32m✓[39m DW2: five concurrent calls share one worker and one synthesize message[32m 6[2mms[22m[39m
+[31m     [31m×[31m DW3: a valid complete message resolves every caller and releases the worker[39m[32m 23[2mms[22m[39m
+     [33m[2m✓[22m[39m DW4: onerror falls back to the synchronous composition without waiting for the stall timer [33m 660[2mms[22m[39m
+     [33m[2m✓[22m[39m DW5: onmessageerror falls back to the synchronous composition without waiting for the stall timer [33m 630[2mms[22m[39m
+     [33m[2m✓[22m[39m DW6: a malformed message falls back: (a) a complete message without a composition [33m 485[2mms[22m[39m
+     [33m[2m✓[22m[39m DW6: a malformed message falls back: (b) a pulse stem that is a plain array [33m 503[2mms[22m[39m
+     [33m[2m✓[22m[39m DW7: a throwing Worker constructor falls back to the synchronous composition [33m 500[2mms[22m[39m
+     [33m[2m✓[22m[39m DW8: the stall timer falls back only once the full timeout has passed [33m 484[2mms[22m[39m
+[31m     [31m×[31m DW9: a later call reuses the completed job without a new worker[39m[32m 4[2mms[22m[39m
+     [33m[2m✓[22m[39m DW10: the worker module posts the full composition and transfers its five buffers [33m 478[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW3: a valid complete message resolves every caller and releases the worker
+[31m[1mAssertionError[22m: expected { …(2) } to be { …(2) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(2) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/demo-synth-worker.test.ts:[2m138:22[22m[39m
+    [90m136| [39m    [35mconst[39m results [33m=[39m [35mawait[39m [33mPromise[39m[33m.[39m[34mall[39m(calls)[33m;[39m
+    [90m137| [39m    [35mfor[39m ([35mconst[39m result [35mof[39m results) {
+    [90m138| [39m      [34mexpect[39m(result)[33m.[39m[34mtoBe[39m(composition)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m139| [39m    }
+    [90m140| [39m    [34mexpect[39m(worker[33m.[39mterminated)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/demo-synth-worker.test.ts[2m > [22mdemo synth off the main thread[2m > [22mDW9: a later call reuses the completed job without a new worker
+[31m[1mAssertionError[22m: expected { …(2) } to be { …(2) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(2) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m98 passed[39m[22m[90m (100)[39m
+[2m   Start at [22m 05:49:34
+[2m   Duration [22m 5.95s[2m (transform 3.48s, setup 0ms, import 6.31s, tests 6.90s, environment 4.31s)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/demo-synth-worker.test.ts,title=app/lib/arrangement/__tests__/demo-synth-worker.test.ts > demo synth off the main thread > DW3%3A a valid complete message resolves every caller and releases the worker,line=138,column=22::AssertionError: expected { …(2) } to be { …(2) } // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: { …(2) }%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ app/lib/arrangement/__tests__/demo-synth-worker.test.ts:138:22%0A%0A

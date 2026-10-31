@@ -1,0 +1,115 @@
+--- a/app/lib/arrangement/__tests__/demo-synth-worker.test.ts
++++ b/app/lib/arrangement/__tests__/demo-synth-worker.test.ts
+@@ -4,6 +4,7 @@
+ class FakeWorker {
+   static instances: FakeWorker[] = [];
+   static throwOnConstruct = false;
++  static throwOnPost = false;
+   posted: unknown[] = [];
+   terminated = 0;
+   onmessage: ((event: MessageEvent) => void) | null = null;
+@@ -16,6 +17,9 @@
+     FakeWorker.instances.push(this);
+   }
+   postMessage(message: unknown) {
++    if (FakeWorker.throwOnPost) {
++      throw new Error('postMessage failed');
++    }
+     this.posted.push(message);
+   }
+   terminate() {
+@@ -54,6 +58,15 @@
+   };
+ }
+ 
++function expectSameComposition(actual: DemoStemComposition, expected: DemoStemComposition) {
++  expect(actual).toStrictEqual(expected);
++  expect(actual.mix).toBe(expected.mix);
++  expect(actual.stems.pulse).toBe(expected.stems.pulse);
++  expect(actual.stems.bass).toBe(expected.stems.bass);
++  expect(actual.stems.pad).toBe(expected.stems.pad);
++  expect(actual.stems.lead).toBe(expected.stems.lead);
++}
++
+ async function flushMicrotasks() {
+   for (let index = 0; index < 10; index += 1) {
+     await Promise.resolve();
+@@ -97,6 +110,7 @@
+     vi.resetModules();
+     FakeWorker.instances = [];
+     FakeWorker.throwOnConstruct = false;
++    FakeWorker.throwOnPost = false;
+   });
+ 
+   afterEach(() => {
+@@ -105,6 +119,7 @@
+     vi.restoreAllMocks();
+     FakeWorker.instances = [];
+     FakeWorker.throwOnConstruct = false;
++    FakeWorker.throwOnPost = false;
+   });
+ 
+   it('DW1: without a Worker global it resolves to the synchronous composition object', async () => {
+@@ -135,8 +150,9 @@
+     worker.emit({ type: 'complete', composition });
+     const results = await Promise.all(calls);
+     for (const result of results) {
+-      expect(result).toBe(composition);
++      expectSameComposition(result, composition);
+     }
++    expect(new Set(results).size).toBe(1);
+     expect(worker.terminated).toBe(1);
+     expect(worker.onmessage).toBeNull();
+     expect(worker.onerror).toBeNull();
+@@ -223,15 +239,16 @@
+     const worker = onlyWorker();
+     const composition = smallComposition();
+     worker.emit({ type: 'complete', composition });
+-    await expect(first).resolves.toBe(composition);
+-    await expect(client.synthesizeDemoCompositionOffMainThread()).resolves.toBe(composition);
++    const firstResult = await first;
++    expectSameComposition(firstResult, composition);
++    await expect(client.synthesizeDemoCompositionOffMainThread()).resolves.toBe(firstResult);
+     expect(FakeWorker.instances).toHaveLength(1);
+   });
+ 
+   it('DW10: the worker module posts the full composition and transfers its five buffers', async () => {
+     const postMessage = vi.spyOn(window, 'postMessage').mockImplementation(() => undefined);
+     await import('../demo-synth.worker');
+-    const { client, synth } = await loadClient();
++    const client = await import('../demo-synth.client');
+     const handler = self.onmessage;
+     self.onmessage = null;
+     expect(handler).toBeTypeOf('function');
+@@ -243,7 +260,13 @@
+     if (!composition) {
+       throw new Error('worker message is not a complete composition');
+     }
++    vi.resetModules();
++    const synth = await import('../demo-synth');
+     const expected = synth.getDemoStemComposition();
++    expect(composition.mix === expected.mix).toBe(false);
++    for (const part of synth.DEMO_STEM_PARTS) {
++      expect(composition.stems[part] === expected.stems[part]).toBe(false);
++    }
+     expectSameSamples(composition.mix, expected.mix);
+     for (const part of synth.DEMO_STEM_PARTS) {
+       expectSameSamples(composition.stems[part], expected.stems[part]);
+@@ -255,4 +278,17 @@
+       expect(transfer[index + 1]).toBe(composition.stems[part].buffer);
+     });
+   });
++
++  it('DW11: a throwing postMessage falls back to the synchronous composition without waiting for the stall timer', async () => {
++    vi.useFakeTimers();
++    FakeWorker.throwOnPost = true;
++    vi.stubGlobal('Worker', FakeWorker);
++    const { client, synth } = await loadClient();
++    const state = track(client.synthesizeDemoCompositionOffMainThread());
++    const worker = onlyWorker();
++    await flushMicrotasks();
++    expect(state.value).toBe(synth.getDemoStemComposition());
++    expect(worker.posted).toEqual([]);
++    expectReleased(worker);
++  });
+ });

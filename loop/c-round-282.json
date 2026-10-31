@@ -1,0 +1,81 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T05:47:33.5687906Z",
+  "round": 282,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R282-01",
+   "severity": "medium",
+   "steps": [
+    "cd store; npx vitest run app/lib/arrangement/__tests__/demo-synth-worker.test.ts",
+    "read app/lib/arrangement/demo-synth.client.ts l.35"
+   ],
+   "expected": "DW3/DW9 (task \u00a76.1): every caller resolves to the emitted composition c (toBe)",
+   "actual": "DW3 and DW9 red: the byte-frozen sketch's readDemoComposition returns a new wrapper { mix, stems: {...} } (l.35), so toBe on the wrapper can never hold; the five Float32Arrays keep identity. Planning gap: B's scratch pre-check did not run the DW rows against the sketch (L23). A's option (a) (toStrictEqual + per-array toBe + one shared result) keeps the code bytes and all browser/perf evidence valid",
+   "evidence": "c-round-282/logs/vitest.log (98/100); c-round-282.md UNIT row; confirms A's STOP"
+  },
+  {
+   "id": "C-R282-02",
+   "severity": "medium",
+   "steps": [
+    "ls docs/implementation/2026/quarter-IV/ | grep ^211",
+    "git diff --stat -- docs"
+   ],
+   "expected": "doc 211 written (l.4 'Completed (C round 282 PASS)', 7 TEMPLATE headings) and the doc 163/169 \u00a75 sections updated incl. GATE281-S2's sentence",
+   "actual": "doc 211 absent; docs 163/169 unchanged (not implemented; A deferred until the DW ruling)",
+   "evidence": "c-round-282.md DOC-211 row"
+  },
+  {
+   "id": "C-R282-03",
+   "severity": "low",
+   "steps": [
+    "scratch copy: in DW10 add expect(composition.mix).toBe(expected.mix) before expectSameSamples",
+    "npx vitest run demo-synth-worker.test.ts -t DW10"
+   ],
+   "expected": "DW10's sample loop compares the worker's output with an independently computed composition",
+   "actual": "the added toBe passes: worker and test share one demo-synth module instance (resetModules only in beforeEach), so the sample loop compares each array with itself; only the transfer toBe checks carry weight",
+   "evidence": "c-round-282/logs/dw10-identity-proof.diff + dw10-identity-proof.log"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "SWEEP",
+  "TYPECHECK",
+  "UNIT-MUTANTS",
+  "PERF-RUN",
+  "EQUIV",
+  "SCRIPT-MAX",
+  "SYNC-FALLBACK",
+  "WORKER-BROWSER",
+  "LIBRARY-STATES",
+  "EXPORT-BITEXACT",
+  "SSR",
+  "G282-AUTH"
+ ],
+ "failed": [
+  "UNIT (DW3, DW9)",
+  "DOC-211 (not implemented)"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "blocked": [],
+ "abletonConformity": "does not apply (performance round)",
+ "passThrough": [
+  "A reviewer: postMessage-throw fallback has no row (DW11 proposal)",
+  "A reviewer Architecture note: worker imports from its own launcher demo-synth.client; move protocol to a neutral module"
+ ],
+ "evidence": "c-round-282/ (perf/, mu-sync-fallback/, equiv.txt, worker-probe.json, library-c282.json, export-c282.json, auth-*.json, auth-*.png)"
+}

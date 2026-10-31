@@ -1,0 +1,69 @@
+== K1 HEAD
+000da42
+== K2 the six code files equal the round-282 sketch bytes
+app/data/studio-lab-demo.ts: OK
+perf/budgets.json: OK
+perf/lib/instrumentation.ts: OK
+perf/studio-lab.perf.spec.ts: OK
+app/lib/arrangement/demo-synth.client.ts: OK
+app/lib/arrangement/demo-synth.worker.ts: OK
+== K3 the test file is A's round-282 version
+app/lib/arrangement/__tests__/demo-synth-worker.test.ts: OK
+== K4 readDemoComposition builds a new wrapper (client l.35)
+35:  return { mix, stems: { pulse, bass, pad, lead } };
+== K5 a postMessage throw falls back (client l.72-76)
+    try {
+      worker.postMessage({ type: 'synthesize' });
+    } catch {
+      finish(null);
+    }
+== K6 the worker builds the composition and posts it with a transfer list
+5:  const composition = getDemoStemComposition();
+7:  self.postMessage(message, { transfer: demoCompositionTransfer(composition) });
+== K7 test rows at round 282 (DW ids)
+DW1
+DW2
+DW3
+DW4
+DW5
+DW7
+DW8
+DW9
+DW10
+0
+== K8 DW3/DW9 use toBe on the wrapper
+138:      expect(result).toBe(composition);
+226:    await expect(first).resolves.toBe(composition);
+227:    await expect(client.synthesizeDemoCompositionOffMainThread()).resolves.toBe(composition);
+== K9 DW10 imports the synth in the same module graph as the worker
+97:    vi.resetModules();
+112:    const { client, synth } = await loadClient();
+149:    const { client, synth } = await loadClient();
+161:    const { client, synth } = await loadClient();
+185:    const { client, synth } = await loadClient();
+197:    const { client, synth } = await loadClient();
+207:    const { client, synth } = await loadClient();
+233:    await import('../demo-synth.worker');
+234:    const { client, synth } = await loadClient();
+== K10 implementation docs after 209
+209-perf-export-window-page-clock.md
+210-perf-harness-load-diagnostics.md
+== K11 doc 163 granted headings and TODO
+20:### Pass-ის თანმიმდევრობა (ინტერპრეტაცია)
+58:## მეტრიკების განმარტება და ზღვრები
+156:## TODO / შემდეგი ნაბიჯები
+== K12 doc 169 l.37 duration-only sentence; B-R281 TODO bullet
+37:| `loaf-blocking-max` | უდიდ�
+215:- Round 281 (`210-perf-harness-load-
+== K13 In Progress (stage lines
+0
+== K14 vitest has no testTimeout override (default 5000 ms)
+0
+== K15 git status
+ M app/data/studio-lab-demo.ts
+ M perf/budgets.json
+ M perf/lib/instrumentation.ts
+ M perf/studio-lab.perf.spec.ts
+?? app/lib/arrangement/__tests__/demo-synth-worker.test.ts
+?? app/lib/arrangement/demo-synth.client.ts
+?? app/lib/arrangement/demo-synth.worker.ts
