@@ -1,0 +1,136 @@
+== K1 HEAD
+(archive)
+== K2 waitForCollectionReady body
+108:export async function waitForCollectionReady(
+109-  page: Page,
+110-  problems: string[],
+111-  label: string,
+112-): Promise<number> {
+113-  await expect(page.getByTestId('arrangement-status')).toHaveText(perfCollectionReadyPattern, {
+114-    timeout: 15000,
+115-  });
+116-  return waitForStudioQuiet(page, problems, label);
+117-}
+118-
+== K3 waitForCollectionReady callers (roots app perf e2e)
+perf/lib/page.ts:108:export async function waitForCollectionReady(
+perf/studio-lab-interactions.perf.spec.ts:652:    await waitForCollectionReady(page, result.problems, 'after load');
+perf/studio-lab.perf.spec.ts:576:    await waitForCollectionReady(page, result.problems, 'after load');
+== K4 load step and catch path
+perf/studio-lab.perf.spec.ts:563:  let step = 'load';
+perf/studio-lab.perf.spec.ts:688:    result.problems.push(`aborted at ${step}: ${message.split('\n')[0]}`);
+perf/studio-lab-interactions.perf.spec.ts:639:  let step = 'load';
+perf/studio-lab-interactions.perf.spec.ts:738:    result.problems.push(`aborted at ${step}: ${message.split('\n')[0]}`);
+== K5 demo failed copy
+22:  failed: (count) =>
+23-    count === 1
+24-      ? '1 sound in the demo collection failed to load — details are in the library.'
+25-      : `${count} sounds in the demo collection failed to load — details are in the library.`,
+26-  fileStem: 'czaba-studio-lab',
+== K6 status testid render
+app/components/arrangement/StudioWorkspace.tsx:3138:          data-testid="arrangement-status"
+== K7 ready pattern
+32:export const perfCollectionReadyPattern = new RegExp(
+33-  `^${escapeRegExp(workspaceCollectionCopy('demo').ready)}`,
+34-);
+== K8 emptyLanePointAfterClip throws and return
+219:    throw new Error(`no lane after the clip's lane ${found.ownTrack} has an empty timeline point`);
+221:  if (found.point.trackId === found.ownTrack) {
+222:    throw new Error(`the empty point is on the clip's own lane ${found.ownTrack}`);
+224:  return { x: found.point.x, y: found.point.y };
+== K9 click-live detail keys
+514:  put('interact.harness.click-live', {
+515-    value: live ? 1 : 0,
+516-    detail: {
+517-      faderEnabledAfterAdd: selectedAfterAdd,
+518-      faderDisabledBeforeClick: deselected,
+519-      faderEnabledAfterClick: selected,
+520-    },
+521-  });
+== K10 PerfSample detail type
+7:  detail?: Record<string, number | string | boolean>;
+== K11 perf outside vitest and biome (L30)
+1:vitest.config.ts:9:    include: ['app/**/*.test.{ts,tsx}'],
+2:biome.json:66:    "includes": ["app/**/*.ts", "app/**/*.tsx"]
+== K12 doc 208 round-281 TODO
+88:- D-29z254-ის „არჩეული lane-ის id click-live-ის detail-ში“ ნაწილი არ გაკეთებულა (ეკვივალენტობის contract-ი სტრიქონის ველების ცვლილებას კრძალავს); round 281-ში გადავიდა (B-R280-CLICK-LIVE-LANE-ID, D-29z645).
+== K13 In Progress (stage
+0
+== K14 last doc number
+209-perf-export-window-page-clock.md
+== K15 'Stems lane' click texts
+perf/studio-lab-interactions.perf.spec.ts:60:  'clip click: empty Stems lane click deselects (Clip Gain fader disabled),
+perf/budgets.interactions.json:53:    "note": "The Clip Gain fader is enabled after Add (the added clip is selected); an
+perf/budgets.interactions.json:797:    "note": "The Clip Gain fader is enabled after Add (the added clip is selected); a
+== K16 resources spec ready wait (no waitForCollectionReady)
+0
+== SW-A new names (roots app perf e2e; HEAD expect 0)
+0
+== SW-B consumers of the ready pattern / status testid in tests (roots app perf e2e)
+app/components/arrangement/StudioWorkspace.tsx
+app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx
+app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+app/lib/arrangement/__tests__/clip-envelope-ui.test.tsx
+app/lib/arrangement/__tests__/clip-fades-ui.test.tsx
+app/lib/arrangement/__tests__/clip-gain.test.tsx
+app/lib/arrangement/__tests__/clip-strings-ui.test.tsx
+app/lib/arrangement/__tests__/collection-load-status.test.tsx
+app/lib/arrangement/__tests__/context-hygiene.test.tsx
+app/lib/arrangement/__tests__/delete-selection-ui.test.tsx
+app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+app/lib/arrangement/__tests__/detail-panel.test.tsx
+app/lib/arrangement/__tests__/floating-video.test.tsx
+app/lib/arrangement/__tests__/grid-adaptive-ui.test.tsx
+app/lib/arrangement/__tests__/grid-musical-ui.test.tsx
+app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
+app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+app/lib/arrangement/__tests__/grid-snap-keys.test.tsx
+app/lib/arrangement/__tests__/grid-snap-loop-drop.test.tsx
+app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+app/lib/arrangement/__tests__/grid-snap-position.test.tsx
+app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+app/lib/arrangement/__tests__/grid-triplet-ui.test.tsx
+app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
+app/lib/arrangement/__tests__/marker-snap.test.tsx
+app/lib/arrangement/__tests__/marker-strings-ui.test.tsx
+app/lib/arrangement/__tests__/markers-move-ui.test.tsx
+app/lib/arrangement/__tests__/markers-ui.test.tsx
+app/lib/arrangement/__tests__/meta-shortcuts-ui.test.tsx
+app/lib/arrangement/__tests__/metronome-ui.test.tsx
+app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
+app/lib/arrangement/__tests__/pending-status.test.tsx
+app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx
+app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
+app/lib/arrangement/__tests__/status-lifetime.test.tsx
+app/lib/arrangement/__tests__/tempo-seed-ui.test.tsx
+app/lib/arrangement/__tests__/tempo-ui.test.tsx
+app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
+app/lib/arrangement/__tests__/track-groups-ui.test.tsx
+app/lib/arrangement/__tests__/track-layout.test.tsx
+app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx
+app/lib/arrangement/__tests__/video-fades-ui.test.tsx
+perf/lib/app-labels.ts
+perf/lib/page.ts
+== SW-C consumers of click-live detail keys (roots app perf e2e)
+perf/studio-lab-interactions.perf.spec.ts
+== K17 three copies of the library ready predicate
+perf/studio-lab-interactions.perf.spec.ts:581:    { polling: 'raf', timeout: 90000 },
+perf/studio-lab-resources.perf.spec.ts:235:    { polling: 'raf', timeout: 90000 },
+perf/studio-lab.perf.spec.ts:528:    { polling: 'raf', timeout: 90000 },
+== K18 measure-load signatures
+perf/studio-lab-interactions.perf.spec.ts:569:async function measureLoadReady(page: Page, result: InteractionPassResult): Promise<void> {
+perf/studio-lab-resources.perf.spec.ts:225:async function measureLoadReady(page: Page): Promise<void> {
+perf/studio-lab.perf.spec.ts:516:async function measureLoad(page: Page, result: PassResult): Promise<void> {
+== K19 resources predicate returns a boolean, caller ignores it
+2:  await page.waitForFunction(
+8:      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null;
+== K20 doc 169 names measureLoadReady in its approach
+13:- **მესამე, თვითკმარი spec** (D-29z217, tech-lead): `perf/studio-lab-resources.perf.spec.ts`, ერთი ტესტი `studio-lab perf harness PERF-1b-ii`. თავდაპირველად PERF-1b-i-დან გადმოკოპირდა მხოლოდ საჭირო helper-ები; round 223-იდან (PERF-HARNESS-SHARED-LIB) `nowIn`, `snapshot`, `waitForQuiet`, `blurActive`, `reactRendererProblem`, `rateRowId` და `audioClips` `perf/lib/page.ts`-დან, `formatLimit` და report-ის ლოგიკა (budget id-ების შემოწმება, 3-ის median, determinism, `complete`, `failures`) კი `perf/lib/report.ts`-ის `buildPerfReportCore`-დან იმპორტდება (`175-perf-harness-shared-lib.md`). playback helper-ებს ეს spec არ იყენებს. ready-ის ლოდინი (`measureLoadReady`) spec-ში რჩება.
+== SW-D new helper names (roots app perf e2e; HEAD expect 0)
+0

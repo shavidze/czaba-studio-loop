@@ -1,0 +1,32 @@
+57:| `/middle-east.mp3` (the selected library item) | `1 sound in the demo collection failed to load — details are in the library.` at ≈ 2.3 s, unchanged 15 s later | `aria-disabled="true"` / not drawn | the library-ready wait, after **90 s**: `aborted at load: page.waitForFunction: Timeout 90000ms exceeded.` (`head-load-control-partial.json`, 2 passes) |
+69:### 2.1 `perf/lib/app-labels.ts`: two new patterns built from the app's copy
+87:### 2.2 `perf/lib/page.ts`: a new shared `waitForLibraryReady(page): Promise<number>`
+108:### 2.3 `perf/lib/page.ts`: `waitForCollectionReady`
+123:### 2.4 `perf/studio-lab-interactions.perf.spec.ts`: lane ids and texts
+143:For 1a and 1b-i: the two specs, `perf/lib/**`, both budgets files, the perf config and `app/**` are byte-identical between `1dbf3af` and `145f6c1`. At planning, `git diff --quiet 1dbf3af 145f6c1 -- app perf/lib perf/studio-lab.perf.spec.ts perf/studio-lab-interactions.perf.spec.ts perf/budgets.json perf/budgets.interactions.json playwright.perf.config.ts` returned rc 0. Round 280's C run is on the published `145f6c1` content.
+213:- `perf/lib/report.ts` and every other `perf/lib/*` except `page.ts` and `app-labels.ts`;
+214:- all `perf/budgets*.json` (the notes stay true, §2.4);
+216:- `app/**`, `e2e/**`, `package*.json`;
+226:1. `npm run typecheck` (it covers `perf/**`) and `npm run lint` (app only; report the count, L30).
+247:Write `docs/implementation/2026/quarter-IV/210-perf-harness-load-diagnostics.md` in Georgian, with English technical terms:
+248:- l.4 is exactly `**სტატუსი:** Completed (C round 281 PASS)` (L28; this is a one-round item, not a stage).
+260:- Doc 208 l.88, doc 209 l.87 and the doc 168/169/175 TODO bullets say that round 281 did the work (doc 210).
+264:- **Doc 208's body stays as written** (its approach l.18, the Mermaid node at l.34 and the problem at l.71 describe the round-279 `waitForCollectionReady`). Doc 208 is the round-279 record; doc 175's helper map and doc 210 are the live description. Only l.88 changes. The same rule protects doc 209's body.
+272:| SWEEP | SW-A and SW-D: the new names occur only in the granted code files (and the docs); SW-B and SW-C re-run with no new consumer; K17 on A's tree: `polling: 'raf', timeout: 90000` occurs once, in `perf/lib/page.ts` |
+312:- Test-only: nothing under `app/**` changes. The gate runs the full verify.
+321:| K2 | `waitForCollectionReady` waits for `perfCollectionReadyPattern` with a 15000 ms timeout, then calls `waitForStudioQuiet` | `grep -n -A10 '^export async function waitForCollectionReady' perf/lib/page.ts` | l.108–117, as in the output file |
+324:| K5 | the demo failed copy has a singular and a plural branch | `grep -n -A4 '^  failed: (count) =>' app/lib/arrangement/collection.ts` | l.22–25 |
+325:| K6 | the status line renders with `data-testid="arrangement-status"` | `grep -rn 'data-testid="arrangement-status"' app --include=*.tsx` (tests excluded) | 1 line, `StudioWorkspace.tsx:3138` |
+326:| K7 | the ready pattern is anchored at the start only | `grep -n -A2 '^export const perfCollectionReadyPattern' perf/lib/app-labels.ts` | l.32–34 |
+327:| K8 | `emptyLanePointAfterClip` interpolates `found.ownTrack` in two texts and returns only `{ x, y }` | `grep -n "found.ownTrack\|return { x: found.point.x" …interactions…` | l.219, 221, 222, 224 |
+328:| K9 | the click-live detail has three keys | `grep -n -A7 "put('interact.harness.click-live'" …` | l.514–521 |
+329:| K10 | `PerfSample.detail` is `Record<string, number \| string \| boolean>` | `grep -n 'detail?: Record' perf/lib/report.ts` | l.7 |
+330:| K11 | vitest and Biome include `app/**` only | `grep -n include vitest.config.ts biome.json` | 2 lines |
+331:| K12 | doc 208 l.88 names round 281 | `grep -n 'round 281' …208…` | l.88 |
+334:| K15 | "empty Stems lane" is in the sequence text and in both click-live notes | `grep -n 'empty Stems lane' …` | 3 lines (spec l.60, budgets l.53 and l.797) |
+335:| K16 | the resources spec does not call `waitForCollectionReady` | `grep -c … perf/studio-lab-resources.perf.spec.ts` | 0 |
+336:| K17 | the 90 s library-ready predicate exists in three copies | `grep -n "polling: 'raf', timeout: 90000" perf/*.ts` | 3 lines (interactions l.581, resources l.235, studio-lab l.528) |
+337:| K18 | the three load-measure functions | `grep -n "^async function measureLoad" perf/*.ts` | interactions l.569 `measureLoadReady(page, result)`, resources l.225 `measureLoadReady(page)`, studio-lab l.516 `measureLoad(page, result)` |
+339:| K20 | doc 169's approach says the ready wait stays in the spec | `grep -n measureLoadReady …169…` | l.13 |
+341:| SW-B | consumers of the ready pattern / status testid (roots `app perf e2e`) | file list | `StudioWorkspace.tsx`, 47 `app/lib/arrangement/__tests__` files (they render the status; none imports a perf pattern), `perf/lib/app-labels.ts`, `perf/lib/page.ts` |
+342:| SW-C | consumers of the click-live detail keys (roots `app perf e2e`) | file list | only `perf/studio-lab-interactions.perf.spec.ts` |

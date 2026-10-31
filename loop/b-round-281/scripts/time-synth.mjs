@@ -1,0 +1,10 @@
+import { pathToFileURL } from 'node:url';
+const mod = await import(pathToFileURL(process.argv[2]).href);
+const t0 = performance.now();
+const c = mod.getDemoStemComposition();
+const t1 = performance.now();
+const a = mod.generateSoftImpactSamples();
+const t2 = performance.now();
+const b = mod.generateSlowRiseSamples();
+const t3 = performance.now();
+console.log(JSON.stringify({ compositionMs: +(t1-t0).toFixed(1), softImpactMs: +(t2-t1).toFixed(1), slowRiseMs: +(t3-t2).toFixed(1), stemLen: c.stems.pulse.length }));

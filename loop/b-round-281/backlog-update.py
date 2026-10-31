@@ -1,0 +1,70 @@
+# B round 281 -> 282 planning: backlog update (runs once). Evidence: c-round-281.json PASS, gates/gate-round-281.json published 000da42.
+import json
+P = 'backlog.json'
+b = json.load(open(P))
+DATE = '2026-10-31'
+ADDED = '2026-10-31 B round 281 -> 282 planning'
+def find(key, fid):
+    for f in b[key]:
+        if isinstance(f, dict) and f.get('id') == fid:
+            return f
+    return None
+def prepend(f, text):
+    f['status'] = text + ' | ' + str(f.get('status', ''))
+CLOSE = 'closed (D-29z658): C round 281 PASS (c-round-281.json, browserVerified/realVerified true) + gate 281 published 000da42'
+for key, fid in [('open_findings', 'GATE279-S1'), ('open_findings', 'B-R280-CLICK-LIVE-LANE-ID'), ('deferred_low_polish', 'A-R279-REVIEW-LANE-NULL')]:
+    prepend(find(key, fid), CLOSE)
+sp = next(e for e in b['post_current_stage_queue'] if e.get('id') == 'STUDIO-PERFORMANCE')
+st = {s['id']: s for s in sp['stages'] if isinstance(s, dict) and 'id' in s}
+prepend(st['PERF-HARNESS-DIAG-281'], 'done (D-29z658): C round 281 PASS (15 rows, browserVerified/realVerified true, 1 Low planning C-R281-01) + gate 281 published 000da42 (both remotes)')
+prepend(st['PERF-2'], 'dispatched round 282 (D-29z661..D-29z665): demo synth in a module Web Worker (demo-synth.client.ts + demo-synth.worker.ts, studio-lab-demo.ts async), sync fallback; harness rows load.settled-ms, load.script-max (assert < 100), load.settled.longtask-max, load.settled.longtasks-over-50; load.commits/components -> wallclock; code = b-round-281/sketch.diff')
+st['PERF-2']['measured_d29z662'] = 'HEAD 000da42: synth effect task 363-367 ms (LoAF MessagePort.onmessage), first-frame task 83-131 ms with no script > 5 ms; sketch: load.script-max 42-67, load.longtask-max 77-115 (first frame), WAV sha256 identical (pulse 1fea093b, all 7 synth 72228706) at both viewports; MU-SYNC-FALLBACK assert FAIL median 375; evidence b-round-281/'
+st['PERF-2']['done_definition_d29z662'] = 'load.script-max < 100 (median of 3) and the synth task gone; load.longtask-max stays record-only because the first-frame task (PERF2-FIRST-FRAME-LONGTASK) is not PERF-2 work; the perf-plan row "load long task < 100 ms" is not claimed as met'
+sp['status'] = 'in_progress (D-29z661): PERF-HARNESS-DIAG-281 done (round 281); round 282 = PERF-2; then REGRESSION if due (on/after 2026-11-02), then PERF-3.. per execution_order_d29z645 | ' + sp['status']
+sp['consults_round_282'] = {
+    'tech-lead': 'worker + client like export-wav; demo-synth.ts pure and untouched; impact/rise stay sync (one job type); constructor throw/onerror/onmessageerror/malformed/stall -> terminate + sync fallback, source error only if sync also throws; one module-level promise; abort rejects nothing (ArrangementContext drops after abort); FakeWorker via vi.stubGlobal (not a factory: breaks Vite worker detection); Worker literal inline; type guard instead of as; one round; optional stereo copy drop',
+    'performance-optimizer': 'worker over chunked yield (still ~413 ms main thread, generators need resumable state) and over lazy (library items without duration/waveform, status never ready); transfer list; sync fallback acceptable; measure until settled, not ready; settled-window rows; commit rows may go nondeterministic (confirmed by B: [5,5,6]); peaks in the worker and stereo-copy drop as later savings; LoAF script attribution to identify the other long task. Its proposed longtask-max.settled < 100 assert was rejected by B measurement (first-frame task 77-131 ms). DATA ERRORS: it stated docs/technical/performance/perf-plan.md does not exist and that no export sha check exists; both false (B read perf-plan.md; c-round-281 smoke sha 1fea093b covers the pulse stem) -> INFO-B282-CONSULT-FALSE-CLAIMS',
+}
+sp['order_note_d29z661'] = 'round 282 = PERF-2 (REGRESSION not due: regression-last 2026-10-30 -> due on/after 2026-11-02); RETRO at 290'
+of = b['open_findings']
+def add(lst, d):
+    assert find(lst, d['id']) is None, d['id']
+    d.setdefault('added', ADDED)
+    b[lst].append(d)
+add('open_findings', {'id': 'PERF2-FIRST-FRAME-LONGTASK', 'severity': 'info', 'origin': 'B', 'title': 'the first load frame is a long task of 77-131 ms with no script over 5 ms (parse/style/layout before hydration); it keeps load.longtask-max near or above 100 after PERF-2', 'status': 'signal (D-29z662): not scheduled; candidates PERF-11 (root diet) and PERF-7 (fonts); B re-measures with LoAF attribution when planning those', 'evidence': 'b-round-281/loaf-head.json, loaf-sketch.json, v2-1a/latest.json'})
+add('open_findings', {'id': 'PERF2-STEREO-COPY', 'severity': 'low', 'origin': 'tech-lead + performance-optimizer (round 282 consults)', 'title': 'loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) before copyToChannel; calling copyToChannel twice with the same array saves one 768k-float copy per source', 'status': 'signal (D-29z661): not in round 282 (code = measured sketch); fold into PERF-5 (peaks in a worker) planning', 'evidence': 'current-task.md round 282 §2.3; claims K19'})
+add('open_findings', {'id': 'INFO-B282-CONSULT-FALSE-CLAIMS', 'severity': 'info', 'origin': 'B', 'title': 'performance-optimizer consult (round 282 planning) stated perf-plan.md does not exist and that no export sha check exists; both false', 'status': 'recorded (D-29z661): consult output is data; count at RETRO 290', 'evidence': 'backlog STUDIO-PERFORMANCE consults_round_282'})
+add('open_findings', {'id': 'C-R281-01', 'severity': 'low', 'origin': 'C', 'title': 'task round 281 l.264 cited doc 208 l.18/l.34/l.71 in a "stays as written" clause without a [K#] tag (C verified the fact true)', 'status': 'closed (D-29z660): planning-only; L29 amended in place: a doc-line reference inside a protection clause is a fact and gets a tag; round-282 task tags K15/K16', 'evidence': 'c-round-281/l29-untagged.txt; c-round-281.md §L29'})
+add('open_findings', {'id': 'GATE281-S2', 'severity': 'low', 'origin': 'gate reviewer', 'title': 'doc 169 / doc 210: B-R281-RESOURCES-READY-FAILED should say that in the measured runs a failed non-selected source usually aborts PERF-1b-ii at load', 'status': 'dispatched round 282 (D-29z659): doc 169 TODO bullet (granted with the l.37 row); doc 210 stays as written (round-281 record)', 'evidence': 'gates/round-281/review.md suggestion 2'})
+add('open_findings', {'id': 'GATE281-ARCH-COLLECTION-STATE-ATTR', 'severity': 'info', 'origin': 'gate reviewer', 'title': 'proposal: the app sets data-collection-state="loading|ready|failed" on arrangement-status and the three perf waits read it instead of text patterns (deletes countedTemplatePattern and the ready/failed/settled patterns); deepens GATE279-ARCH-COPY-STRINGS', 'status': 'architecture signal (D-29z659): recorded, not scheduled', 'evidence': 'gates/round-281/review.md Architecture note 1'})
+add('open_findings', {'id': 'GATE281-ARCH-DOC-TODO-CHANGELOG', 'severity': 'info', 'origin': 'gate reviewer', 'title': 'proposal: keep one changelog of harness waits in doc 175 and replace per-round TODO bullets in docs 168/169/208/209 with a link', 'status': 'architecture signal (D-29z659): recorded, not scheduled', 'evidence': 'gates/round-281/review.md Architecture note 2'})
+add('open_findings', {'id': 'A-R281-ARCH-PAGE-READINESS', 'severity': 'info', 'origin': 'A code-reviewer', 'title': 'perf/lib/page.ts shared timing helpers now hold Studio-specific readiness checks; app-labels pattern builders accumulate; reviewer: keep', 'status': 'architecture signal (D-29z659): recorded, not scheduled (keep)', 'evidence': 'a-round-281.md Architecture note'})
+DEF = 'user decision 2026-10-23: open Lows no longer block; fixed in the polish pass before release'
+add('deferred_low_polish', {'id': 'GATE281-S1', 'severity': 'low', 'status': 'open - Lows batch (optional)', 'title': 'perf/lib/page.ts waitForCollectionReady re-reads textContent() after toHaveText and tests anchored patterns without trim; leading whitespace would throw "status is not ready" (same root cause as A-R281-REVIEW-STATUS-REREAD)', 'evidence': 'gates/round-281/review.md suggestion 1', 'repro': 'source read perf/lib/page.ts l.159-167, l.179', 'deferred_reason': DEF})
+add('deferred_low_polish', {'id': 'A-R281-REVIEW-STATUS-REREAD', 'severity': 'low', 'status': 'open - Lows batch (optional), fix together with GATE281-S1', 'title': 'second textContent() read after toHaveText on the shared aria-live status can see a later text', 'evidence': 'a-round-281.md review #3', 'repro': 'source read perf/lib/page.ts l.120-127', 'deferred_reason': DEF})
+add('deferred_low_polish', {'id': 'A-R281-REVIEW-SETTLED-GROUP', 'severity': 'low', 'status': 'open - Lows batch (optional)', 'title': 'perfCollectionSettledPattern joins two sources with | without grouping the ready source; a later ready-copy alternation would lose the ^ anchor', 'evidence': 'a-round-281.md review #2', 'repro': 'source read perf/lib/app-labels.ts l.55-57', 'deferred_reason': DEF})
+add('deferred_low_polish', {'id': 'GATE281-S3', 'severity': 'low', 'status': 'open - Lows batch (optional)', 'title': 'doc 175 helper map lists LibraryReadyState as shared although it is not exported', 'evidence': 'gates/round-281/review.md suggestion 3', 'repro': 'grep -n LibraryReadyState perf/lib/page.ts docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md', 'deferred_reason': DEF})
+add('deferred_low_polish', {'id': 'GATE281-S4', 'severity': 'low', 'status': 'open - Lows batch (optional)', 'title': 'countedTemplatePattern import-time error message does not name its origin (suggest prefix perfCollectionFailedPattern:)', 'evidence': 'gates/round-281/review.md suggestion 4', 'repro': 'source read perf/lib/app-labels.ts l.110-123', 'deferred_reason': DEF})
+add('open_findings', {'id': 'GATE281-S5', 'severity': 'info', 'origin': 'gate reviewer', 'title': 'npm run lint runs Biome on ./app only, so perf/** formatting is unchecked (existing gap, C-R214-BIOME-PERF-VACUOUS, L30)', 'status': 'info (D-29z659): existing tooling gap; config change is root/Saba', 'evidence': 'gates/round-281/review.md suggestion 5'})
+prepend(find('open_findings', 'PERF-1A-TIMEOUT-HEADROOM'), 'data (D-29z661): C round 281 PERF-1a 7.1 min; B round-282 sketch PERF-1a 7.3-7.4 min = 49 % of 15 min; not closed')
+dl = b['decisions_log_b']
+for did, text in [
+    ('D-29z658', 'Round 281 closed: C round 281 PASS (15 rows, browserVerified/realVerified true) + gate 281 published 000da42 -> PERF-HARNESS-DIAG-281 done; GATE279-S1, B-R280-CLICK-LIVE-LANE-ID, A-R279-REVIEW-LANE-NULL closed.'),
+    ('D-29z659', 'Gate-281 review (9/10) and A notes recorded: GATE281-S1/S3/S4 + A-R281-REVIEW-SETTLED-GROUP/-STATUS-REREAD -> deferred_low_polish; GATE281-S2 folded into round 282 (doc 169 granted anyway); GATE281-S5 info; architecture signals GATE281-ARCH-COLLECTION-STATE-ATTR, GATE281-ARCH-DOC-TODO-CHANGELOG, A-R281-ARCH-PAGE-READINESS recorded, not scheduled.'),
+    ('D-29z660', 'C-R281-01 (Low, planning) closed by amending L29 in place: a doc-line reference inside a "stays as written" protection clause is a fact and gets a [K#] tag (C asked for a ruling).'),
+    ('D-29z661', 'PERF-2 design (round 282): demo synth composition in a module Web Worker (demo-synth.client.ts + demo-synth.worker.ts), one shared job, transfer list, sync fallback on any worker failure, impact/rise stay sync, no abort wiring, ArrangementContext and demo-synth.ts frozen; stereo copy drop and peaks-in-worker not taken (PERF2-STEREO-COPY -> PERF-5). Consults tech-lead + performance-optimizer (consults_round_282).'),
+    ('D-29z662', 'PERF-2 harness contract: PerfTimedEntry.scriptMax from LoAF scripts; rows load.settled-ms, load.script-max (wallclock assert < 100, median of 3), load.settled.longtask-max, load.settled.longtasks-over-50; load.commits/load.components -> wallclock (worker races the mp3: [5,5,6], [371,371,464]; L37). Done = script-max < 100 and the synth task gone; load.longtask-max stays record (first-frame task 77-131 ms, PERF2-FIRST-FRAME-LONGTASK); the perf-plan row is not claimed as met.'),
+    ('D-29z663', 'Round 282 code byte-identical to b-round-281/sketch.diff; EQUIV with b-round-281/scripts/equiv-check-r282.py: 1a vs B sketch exact and vs C round 281 with --new/--reclass; 1b-i vs C round 281 exact; 1b-ii vs B sketch (bytes exact, used-ready +-0.1, peaks +-0.1) and vs C round 281 with five named --free rows.'),
+    ('D-29z664', 'Docs round 282: new doc 211 (perf-demo-synth-worker); doc 163 sections Pass-order + metrics (L34) + TODO bullet; doc 169 loaf-blocking-max row + B-R281-RESOURCES-READY-FAILED TODO bullet (GATE281-S2).'),
+    ('D-29z665', 'Round 282 outcome table: C PASS + gate -> PERF-2 done; round 283 = REGRESSION if planned on/after 2026-11-02, else PERF-3 (consults first); C FAIL on test/doc rows -> bounded fix-up; FAIL on SCRIPT-MAX/WORKER-BROWSER in valid runs -> B re-measures (L10).'),
+]:
+    dl.append({'id': did, 'date': DATE, 'text': text})
+b['rounds'].append({'round': 282, 'task': 'current-task.md', 'decision': 'D-29z658..D-29z665', 'status': 'dispatched', 'type': 'STUDIO-PERFORMANCE PERF-2 (demo synth in a Web Worker; app code + perf harness)', 'note': 'baseline 000da42 clean (1145 tracked); grants 10 (4 new); frozen 1139; B sketch measured (3-spec run, v2 PERF-1a, MU-SYNC-FALLBACK, LoAF HEAD vs sketch, export sha256 bit-exact, library states equal); evidence b-round-281/'})
+for r in b['rounds']:
+    if isinstance(r, dict) and r.get('round') == 281:
+        r['status'] = 'done (D-29z658): C PASS, gate 281 published 000da42'
+b['current_task'] = 'current-task.md (round 282, D-29z658..D-29z665; PERF-2: demo synth composition in a module Web Worker with sync fallback; harness rows load.script-max (assert < 100) + settled window; load.commits/components -> wallclock; code = b-round-281/sketch.diff; new test demo-synth-worker.test.ts DW1-DW10; new doc 211)'
+b['updated'] = '2026-10-31 B round 281 -> 282 planning'
+b['version'] = b['version'] + 1
+json.dump(b, open(P, 'w'), indent=1, ensure_ascii=False)
+print('ok')

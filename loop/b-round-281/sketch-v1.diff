@@ -1,0 +1,278 @@
+diff -ruN a/app/data/studio-lab-demo.ts b/app/data/studio-lab-demo.ts
+--- a/app/data/studio-lab-demo.ts	2026-10-31 04:44:34.440223433 +0000
++++ b/app/data/studio-lab-demo.ts	2026-10-31 04:44:34.438720183 +0000
+@@ -5,8 +5,8 @@
+   generateDemoStereoChannels,
+   generateSlowRiseSamples,
+   generateSoftImpactSamples,
+-  getDemoStemComposition,
+ } from '~/lib/arrangement/demo-synth';
++import { synthesizeDemoCompositionOffMainThread } from '~/lib/arrangement/demo-synth.client';
+ import { studioSourceLoadStrings } from '~/lib/arrangement/strings';
+ import type { WorkspaceCollection, WorkspaceSource } from '~/types/arrangement';
+ 
+@@ -24,7 +24,6 @@
+ const demoSynths: Record<string, () => Float32Array<ArrayBuffer>> = {
+   'demo-soft-impact': generateSoftImpactSamples,
+   'demo-slow-rise': generateSlowRiseSamples,
+-  'demo-synth-mix': () => getDemoStemComposition().mix,
+ };
+ 
+ const demoStemParts: Record<string, DemoStemPart> = {
+@@ -92,10 +91,13 @@
+   ),
+ ];
+ 
+-function synthesizeDemoSamples(sourceId: string): Float32Array<ArrayBuffer> | null {
++async function synthesizeDemoSamples(sourceId: string): Promise<Float32Array<ArrayBuffer> | null> {
+   const part = demoStemParts[sourceId];
+   if (part) {
+-    return getDemoStemComposition().stems[part];
++    return (await synthesizeDemoCompositionOffMainThread()).stems[part];
++  }
++  if (sourceId === 'demo-synth-mix') {
++    return (await synthesizeDemoCompositionOffMainThread()).mix;
+   }
+   const generate = demoSynths[sourceId];
+   return generate ? generate() : null;
+@@ -135,7 +137,7 @@
+       throw new Error(studioSourceLoadStrings.decodeFailed);
+     }
+   }
+-  const samples = synthesizeDemoSamples(source.id);
++  const samples = await synthesizeDemoSamples(source.id);
+   if (!samples) {
+     throw new Error(studioSourceLoadStrings.unknownDemoSource);
+   }
+diff -ruN a/app/lib/arrangement/demo-synth.client.ts b/app/lib/arrangement/demo-synth.client.ts
+--- a/app/lib/arrangement/demo-synth.client.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/demo-synth.client.ts	2026-10-31 04:44:34.445837874 +0000
+@@ -0,0 +1,88 @@
++import { DEMO_STEM_PARTS, type DemoStemComposition, getDemoStemComposition } from './demo-synth';
++
++export const DEMO_SYNTH_WORKER_STALL_TIMEOUT_MS = 10_000;
++
++export interface DemoSynthWorkerResponse {
++  type: 'complete';
++  composition: DemoStemComposition;
++}
++
++function isDemoSamples(value: unknown): value is Float32Array<ArrayBuffer> {
++  return value instanceof Float32Array && value.buffer instanceof ArrayBuffer;
++}
++
++function readDemoComposition(value: unknown): DemoStemComposition | null {
++  if (typeof value !== 'object' || value === null || !('mix' in value) || !('stems' in value)) {
++    return null;
++  }
++  const { mix, stems } = value;
++  if (!isDemoSamples(mix) || typeof stems !== 'object' || stems === null) {
++    return null;
++  }
++  const parts = new Map(Object.entries(stems));
++  const pulse = parts.get('pulse');
++  const bass = parts.get('bass');
++  const pad = parts.get('pad');
++  const lead = parts.get('lead');
++  if (
++    !isDemoSamples(pulse) ||
++    !isDemoSamples(bass) ||
++    !isDemoSamples(pad) ||
++    !isDemoSamples(lead)
++  ) {
++    return null;
++  }
++  return { mix, stems: { pulse, bass, pad, lead } };
++}
++
++export function readDemoSynthWorkerComposition(data: unknown): DemoStemComposition | null {
++  if (typeof data !== 'object' || data === null || !('type' in data) || data.type !== 'complete') {
++    return null;
++  }
++  return 'composition' in data ? readDemoComposition(data.composition) : null;
++}
++
++export function demoCompositionTransfer(composition: DemoStemComposition): ArrayBuffer[] {
++  return [composition.mix.buffer, ...DEMO_STEM_PARTS.map((part) => composition.stems[part].buffer)];
++}
++
++function synthesizeDemoCompositionInWorker(): Promise<DemoStemComposition> {
++  return new Promise<DemoStemComposition>((resolve) => {
++    let worker: Worker;
++    try {
++      worker = new Worker(new URL('./demo-synth.worker.ts', import.meta.url), { type: 'module' });
++    } catch {
++      resolve(getDemoStemComposition());
++      return;
++    }
++    let stallTimer = 0;
++    const finish = (composition: DemoStemComposition | null) => {
++      window.clearTimeout(stallTimer);
++      worker.onmessage = null;
++      worker.onerror = null;
++      worker.onmessageerror = null;
++      worker.terminate();
++      resolve(composition ?? getDemoStemComposition());
++    };
++    worker.onmessage = (event: MessageEvent<unknown>) =>
++      finish(readDemoSynthWorkerComposition(event.data));
++    worker.onerror = () => finish(null);
++    worker.onmessageerror = () => finish(null);
++    stallTimer = window.setTimeout(() => finish(null), DEMO_SYNTH_WORKER_STALL_TIMEOUT_MS);
++    try {
++      worker.postMessage({ type: 'synthesize' });
++    } catch {
++      finish(null);
++    }
++  });
++}
++
++let demoCompositionJob: Promise<DemoStemComposition> | null = null;
++
++export function synthesizeDemoCompositionOffMainThread(): Promise<DemoStemComposition> {
++  if (typeof Worker === 'undefined') {
++    return Promise.resolve(getDemoStemComposition());
++  }
++  demoCompositionJob ??= synthesizeDemoCompositionInWorker();
++  return demoCompositionJob;
++}
+diff -ruN a/app/lib/arrangement/demo-synth.worker.ts b/app/lib/arrangement/demo-synth.worker.ts
+--- a/app/lib/arrangement/demo-synth.worker.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/demo-synth.worker.ts	2026-10-31 04:44:34.451344602 +0000
+@@ -0,0 +1,8 @@
++import { getDemoStemComposition } from './demo-synth';
++import { type DemoSynthWorkerResponse, demoCompositionTransfer } from './demo-synth.client';
++
++self.onmessage = () => {
++  const composition = getDemoStemComposition();
++  const message: DemoSynthWorkerResponse = { type: 'complete', composition };
++  self.postMessage(message, { transfer: demoCompositionTransfer(composition) });
++};
+diff -ruN a/perf/budgets.json b/perf/budgets.json
+--- a/perf/budgets.json	2026-10-31 04:44:34.472468875 +0000
++++ b/perf/budgets.json	2026-10-31 04:44:34.470950417 +0000
+@@ -164,6 +164,53 @@
+     "note": "Summed re-rendered components over the load commits."
+   },
+   {
++    "id": "load.settled-ms",
++    "scenario": "fresh /studio-lab until the demo collection is ready and quiet",
++    "metric": "settled-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-2",
++    "note": "ms from navigation start to the end of waitForCollectionReady (status ready + 200 ms without commits)."
++  },
++  {
++    "id": "load.script-max",
++    "scenario": "fresh /studio-lab until the demo collection is ready and quiet",
++    "metric": "script-max",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "assert",
++    "budget": {
++      "op": "<",
++      "value": 100
++    },
++    "owner": "PERF-2",
++    "note": "Longest single script in any long-animation-frame entry from navigation start to settled. HEAD 000da42: the demo synth effect, 363-367 ms (b-round-281 LoAF probe)."
++  },
++  {
++    "id": "load.settled.longtask-max",
++    "scenario": "fresh /studio-lab until the demo collection is ready and quiet",
++    "metric": "longtask-max",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-2",
++    "note": "Longest long task from navigation start to settled; includes the first-frame task (no script over 5 ms), which PERF-2 does not own."
++  },
++  {
++    "id": "load.settled.longtasks-over-50",
++    "scenario": "fresh /studio-lab until the demo collection is ready and quiet",
++    "metric": "longtasks-over-50",
++    "unit": "count",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-2",
++    "note": "Long tasks over 50 ms from navigation start to settled."
++  },
++  {
+     "id": "play.idle-commits",
+     "scenario": "5 s of playback after start + 1 s settle",
+     "metric": "commits",
+diff -ruN a/perf/lib/instrumentation.ts b/perf/lib/instrumentation.ts
+--- a/perf/lib/instrumentation.ts	2026-10-31 04:44:34.458428670 +0000
++++ b/perf/lib/instrumentation.ts	2026-10-31 04:44:34.456999348 +0000
+@@ -30,6 +30,7 @@
+   t: number;
+   duration: number;
+   name: string;
++  scriptMax?: number;
+ }
+ 
+ export interface PerfState {
+@@ -193,7 +194,23 @@
+     try {
+       new PerformanceObserver((list) => {
+         for (const entry of list.getEntries()) {
+-          target.push({ t: entry.startTime, duration: entry.duration, name: entry.name });
++          const scripts = 'scripts' in entry && Array.isArray(entry.scripts) ? entry.scripts : null;
++          const scriptMax = scripts?.reduce((max: number, script: unknown) => {
++            const ms =
++              typeof script === 'object' &&
++              script !== null &&
++              'duration' in script &&
++              typeof script.duration === 'number'
++                ? script.duration
++                : 0;
++            return Math.max(max, ms);
++          }, 0);
++          target.push({
++            t: entry.startTime,
++            duration: entry.duration,
++            name: entry.name,
++            ...(scriptMax === undefined ? {} : { scriptMax }),
++          });
+         }
+       }).observe(options);
+     } catch (error) {
+diff -ruN a/perf/studio-lab.perf.spec.ts b/perf/studio-lab.perf.spec.ts
+--- a/perf/studio-lab.perf.spec.ts	2026-10-31 04:44:34.465458706 +0000
++++ b/perf/studio-lab.perf.spec.ts	2026-10-31 04:44:34.463916563 +0000
+@@ -528,6 +528,21 @@
+   result.samples.set('load.components', { value: rendered.reduce((sum, n) => sum + n, 0) });
+ }
+ 
++async function measureSettled(page: Page, result: PassResult, settledMs: number): Promise<void> {
++  const settled = await snapshot(page, 0, settledMs);
++  const scriptMaxes = settled.loafs.map((entry) => entry.scriptMax ?? 0);
++  if (!settled.loafs.some((entry) => entry.scriptMax !== undefined)) {
++    result.problems.push('harness.loaf-scripts: no long-animation-frame entry carried script timings');
++  }
++  const longest = settled.longtasks.reduce((max, entry) => Math.max(max, entry.duration), 0);
++  result.samples.set('load.settled-ms', { value: roundTo(settledMs, 0) });
++  result.samples.set('load.script-max', { value: roundTo(Math.max(0, ...scriptMaxes), 0) });
++  result.samples.set('load.settled.longtask-max', { value: roundTo(longest, 0) });
++  result.samples.set('load.settled.longtasks-over-50', {
++    value: settled.longtasks.filter((entry) => entry.duration > 50).length,
++  });
++}
++
+ async function runPass(browser: Browser, cpuRate: number, pass: number): Promise<PassResult> {
+   const result: PassResult = {
+     cpuRate,
+@@ -561,7 +576,8 @@
+     result.reactRenderer = rendererVersions.join(', ');
+     const rendererProblem = reactRendererProblem(rendererVersions);
+     if (rendererProblem) result.problems.push(rendererProblem);
+-    await waitForCollectionReady(page, result.problems, 'after load');
++    const settledMs = await waitForCollectionReady(page, result.problems, 'after load');
++    if (record) await measureSettled(page, result, settledMs);
+ 
+     step = 'library Add';
+     const addStart = await nowIn(page);

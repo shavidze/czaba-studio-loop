@@ -1,0 +1,72 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R281-01",
+   "severity": "low",
+   "steps": [
+    "grep -nE 'l\\.[0-9]+|(app|perf|docs)/[^ `]+|data-testid|aria-[a-z-]+' current-task.md | grep -v '\\[K[0-9]'",
+    "read task l.264"
+   ],
+   "expected": "every fact about a file under store/ carries a [K#] tag with a re-runnable command (L29)",
+   "actual": "task l.264 states doc 208 l.18/l.34/l.71 describe the round-279 waitForCollectionReady without a tag; C verified the fact true with sed (planning hygiene only, no implementation impact)",
+   "evidence": "tmp/studio-real-loop/c-round-281/l29-untagged.txt; c-round-281.md §L29"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "HUNK-SCOPE",
+  "CLAIMS",
+  "SWEEP",
+  "TYPECHECK",
+  "PERF-RUN",
+  "EQUIV",
+  "DETAIL-LANE",
+  "FAILED-SOURCE",
+  "FAILED-OTHER",
+  "STATUS-WAIT",
+  "NO-OWN-GUARD",
+  "HEAD-CONTROL",
+  "G281-AUTH",
+  "DOC-210"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "blocked": [],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T03:46:41.6953440Z",
+  "round": 281,
+  "attempt": 1,
+  "store": 200
+ },
+ "measurements": {
+  "perfRun": "3 passed (13.9m); 1b-i 5.4m, 1b-ii 1.1m, 1a 7.1m",
+  "equiv": {
+   "1a": "316/166/0",
+   "1b-i": "144/106/0",
+   "1b-ii": "61/37/0, tolerated 1 (res.export.1.peak-backing-delta-mib 65->65.1)"
+  },
+  "detailLane": "6/6 music->stems; browser music:1 stems:0 at 1440x900 and 1280x720",
+  "mutantsDurationMs": {
+   "MU-FAILED-SOURCE": 9287,
+   "MU-FAILED-OTHER": 6775,
+   "MU-STATUS-WAIT": 6978
+  },
+  "failedOtherPrefix": "library-ready 6/6",
+  "auth": "lab badge ok, auth_user null; /studio/middle-east Sign in required, audio[src] 0; token 401 no header, 500 fake bearer, no token",
+  "smokeWav": "48k/24bit/2ch 16.000 s sha256 1fea093b... matches reference, 0 NaN"
+ },
+ "carriedOpen": [
+  "A-R281-REVIEW-SETTLED-GROUP",
+  "A-R281-REVIEW-STATUS-REREAD",
+  "B-R281-RESOURCES-READY-FAILED",
+  "ROOT-REQ-PERF-TIMEOUT"
+ ]
+}

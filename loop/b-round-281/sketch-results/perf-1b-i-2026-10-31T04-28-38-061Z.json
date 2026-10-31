@@ -1,0 +1,5131 @@
+{
+  "harness": "PERF-1b-i",
+  "complete": true,
+  "startedAt": "2026-10-31T04:28:38.061Z",
+  "finishedAt": "2026-10-31T04:33:43.845Z",
+  "durationMs": 305784,
+  "budgetsFile": "perf/budgets.interactions.json",
+  "chromium": "143.0.7499.4",
+  "reactRenderer": "18.3.1",
+  "viewport": "1440x900",
+  "innerWidths": [
+    1440
+  ],
+  "cpuRates": [
+    1,
+    6
+  ],
+  "passesPerRate": 3,
+  "dragSteps": 60,
+  "dragDistancePx": 120,
+  "sequence": [
+    "1x only: load until ready (interact.load.ready-ms), library Add, wait for the waveform and quiet (interact.harness.hook-live)",
+    "CPU throttle on (6x passes)",
+    "clip click: empty Stems lane click deselects (Clip Gain fader disabled), then a click on the clip header (interact.click.*, interact.harness.click-live)",
+    "zoom with 1 clip: 5 x \"=\" then 5 x \"-\", one window per key (interact.zoom.1.*, interact.harness.zoom-live)",
+    "drags stopped: range, fade-in, trim start, move; 60 steps, +120 px; reset after each (interact.drag.<d>.stopped.*)",
+    "Home (seek to 0), then Space -> playing (interact.play.start-*, 1x: interact.harness.audio-running)",
+    "drags playing, each after Home (seek to 0): range, fade-in, trim start, move (interact.drag.<d>.playing.*)",
+    "Space -> stopped (interact.play.stop-*)",
+    "1x only: click the clip header, Ctrl+D x 29 (interact.harness.clips-30), zoom with 30 clips (interact.zoom.30.*), Space, Home, fade-in drag on the first clip (interact.drag.fade.30.playing.*), Space"
+  ],
+  "passes": [
+    {
+      "cpuRate": 1,
+      "pass": 1,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 1,
+      "pass": 2,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 1,
+      "pass": 3,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 6,
+      "pass": 1,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 6,
+      "pass": 2,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "cpuRate": 6,
+      "pass": 3,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    }
+  ],
+  "failures": [],
+  "rows": [
+    {
+      "id": "interact.load.ready-ms",
+      "scenario": "load until ready",
+      "metric": "ready-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "1x only. Navigation start to ready (library Add enabled and the preview waveform drawn), as load.ready-ms in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        964,
+        960,
+        951
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 960,
+      "min": 951,
+      "max": 964,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.hook-live",
+      "scenario": "load + library Add click",
+      "metric": "hook-live",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": ">=",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1x only. React commits seen by the devtools-hook stub from the Add click until the added clip's waveform is drawn and the page is quiet; a disabled hook must fail, not report 0.",
+      "samples": [
+        2,
+        2,
+        2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 2,
+      "min": 2,
+      "max": 2,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.harness.audio-running",
+      "scenario": "Space -> playing",
+      "metric": "audio-running",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1x only. Home (seek to 0) first. 1 only when the Play button data-playing attribute is true, a tracked (non-offline) AudioContext reports state running, and at least 1 start() was recorded from the Space press until the page is quiet (at least 1 s); GATE206-S6 rule.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "contextRunning": true,
+          "starts": 1
+        },
+        {
+          "contextRunning": true,
+          "starts": 1
+        },
+        {
+          "contextRunning": true,
+          "starts": 1
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.harness.click-live",
+      "scenario": "clip click",
+      "metric": "click-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "The Clip Gain fader is enabled after Add (the added clip is selected); an empty Stems lane click deselects: the fader is disabled. After the click on the clip header the fader is enabled and there is exactly 1 of it. The fader is always rendered, so enabled state is the selection signal.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "faderEnabledAfterAdd": true,
+          "faderDisabledBeforeClick": true,
+          "faderEnabledAfterClick": true,
+          "clipTrackId": "music",
+          "emptyLaneTrackId": "stems"
+        },
+        {
+          "faderEnabledAfterAdd": true,
+          "faderDisabledBeforeClick": true,
+          "faderEnabledAfterClick": true,
+          "clipTrackId": "music",
+          "emptyLaneTrackId": "stems"
+        },
+        {
+          "faderEnabledAfterAdd": true,
+          "faderDisabledBeforeClick": true,
+          "faderEnabledAfterClick": true,
+          "clipTrackId": "music",
+          "emptyLaneTrackId": "stems"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.click.commits",
+      "scenario": "clip click",
+      "metric": "commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "React commits from the click until quiet (min 600 ms, then 200 ms without a commit or start(), cap 3 s).",
+      "samples": [
+        3,
+        3,
+        3
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 3,
+      "min": 3,
+      "max": 3,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.click.components",
+      "scenario": "clip click",
+      "metric": "components",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components over the click window; detail lists the per-commit sizes.",
+      "samples": [
+        109,
+        109,
+        109
+      ],
+      "details": [
+        {
+          "perCommit": "104,5,0"
+        },
+        {
+          "perCommit": "104,5,0"
+        },
+        {
+          "perCommit": "104,5,0"
+        }
+      ],
+      "median": 109,
+      "min": 109,
+      "max": 109,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.click.event-duration-max",
+      "scenario": "clip click",
+      "metric": "event-duration-max",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Longest Event Timing entry (>= 16 ms) in the click window; when the observer gives none, the longest long-animation-frame in the window; 0 when neither exists. detail.source names which. Trend only.",
+      "samples": [
+        24,
+        24,
+        24
+      ],
+      "details": [
+        {
+          "source": "event-timing",
+          "events": "pointerout,pointerleave,pointerleave,pointerover,pointerenter,pointerenter,pointerenter,pointerenter,mouseout,mouseover,pointerdown,pointerout,pointerleave,pointerover,gotpointercapture,mouseout,mouseover,pointerup,lostpointercapture,click,pointerout,pointerover,pointerenter,mouseout,mouseover"
+        },
+        {
+          "source": "event-timing",
+          "events": "pointerout,pointerleave,pointerleave,pointerover,pointerenter,pointerenter,pointerenter,pointerenter,mouseout,mouseover,pointerdown,pointerout,pointerleave,pointerover,gotpointercapture,mouseout,mouseover,pointerup,lostpointercapture,click,pointerout,pointerover,pointerenter,mouseout,mouseover"
+        },
+        {
+          "source": "event-timing",
+          "events": "pointerout,pointerleave,pointerleave,pointerover,pointerenter,pointerenter,pointerenter,pointerenter,mouseout,mouseover,pointerdown,pointerout,pointerleave,pointerover,gotpointercapture,mouseout,mouseover,pointerup,lostpointercapture,click,pointerout,pointerover,pointerenter,mouseout,mouseover"
+        }
+      ],
+      "median": 24,
+      "min": 24,
+      "max": 24,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.zoom-live",
+      "scenario": "zoom, 1 clip",
+      "metric": "zoom-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "The Zoom (px/s) slider value rises on each of the 5 '=' keys, falls on each of the 5 '-' keys, and returns along the same values (value i equals value 10 - i), every value strictly between the slider's min and max (read before the first key; a missing min or max is a problem). The slider steps are integers, so the exact compare is valid.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        },
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        },
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.zoom.1.commits-per-key",
+      "scenario": "zoom, 1 clip",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits over the 10 key windows (5 '=' then 5 '-'; each window from the key press until quiet, min 300 ms) / 10.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "commits": 10
+        },
+        {
+          "commits": 10
+        },
+        {
+          "commits": 10
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.1.components-per-key",
+      "scenario": "zoom, 1 clip",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components over the 10 key windows / 10.",
+      "samples": [
+        102,
+        102,
+        102
+      ],
+      "details": [
+        {
+          "components": 1020
+        },
+        {
+          "components": 1020
+        },
+        {
+          "components": 1020
+        }
+      ],
+      "median": 102,
+      "min": 102,
+      "max": 102,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.1.components-max",
+      "scenario": "zoom, 1 clip",
+      "metric": "components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in any key window.",
+      "samples": [
+        102,
+        102,
+        102
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 102,
+      "min": 102,
+      "max": 102,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.1.key-window-longest-ms",
+      "scenario": "zoom, 1 clip",
+      "metric": "key-window-longest-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Longest time from a key press (measured in the page before the press) to the last commit of its window; detail.longestLoafMs is the longest long-animation-frame. Trend only.",
+      "samples": [
+        18.2,
+        14.8,
+        17.9
+      ],
+      "details": [
+        {
+          "longestLoafMs": 0
+        },
+        {
+          "longestLoafMs": 0
+        },
+        {
+          "longestLoafMs": 0
+        }
+      ],
+      "median": 17.9,
+      "min": 14.8,
+      "max": 18.2,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-range-live",
+      "scenario": "range body drag (time selection)",
+      "metric": "drag-range-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: the clip's range label end time exists at mid-drag and at the end and grows (DEVIATION: the task named [data-range-end], which renders only for an all-tracks range; see doc 168).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.range.stopped.commits-per-move",
+      "scenario": "range body drag (time selection), stopped",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.983,
+        1.983,
+        1.983
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 604
+        }
+      ],
+      "median": 1.983,
+      "min": 1.983,
+      "max": 1.983,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.move-components-per-move",
+      "scenario": "range body drag (time selection), stopped",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 604,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.move-components-max",
+      "scenario": "range body drag (time selection), stopped",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 604
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.release-commits",
+      "scenario": "range body drag (time selection), stopped",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.move-to-paint-p95",
+      "scenario": "range body drag (time selection), stopped",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        6.8,
+        5.8,
+        5.9
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 5.9,
+      "min": 5.8,
+      "max": 6.8,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.commits-per-move",
+      "scenario": "range body drag (time selection), playing",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.983,
+        1.983,
+        1.983
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        }
+      ],
+      "median": 1.983,
+      "min": 1.983,
+      "max": 1.983,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-components-per-move",
+      "scenario": "range body drag (time selection), playing",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-components-max",
+      "scenario": "range body drag (time selection), playing",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 605
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.release-commits",
+      "scenario": "range body drag (time selection), playing",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-to-paint-p95",
+      "scenario": "range body drag (time selection), playing",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        8.5,
+        6.5,
+        6.8
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 6.8,
+      "min": 6.5,
+      "max": 8.5,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-restarts",
+      "scenario": "range body drag (time selection), playing",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.release-restarts",
+      "scenario": "range body drag (time selection), playing",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-fade-live",
+      "scenario": "fade-in handle drag",
+      "metric": "drag-fade-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: data-fade-in grows from the start to mid-drag and from mid-drag to the end.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.fade.stopped.commits-per-move",
+      "scenario": "fade-in handle drag, stopped",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 604
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 605
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.move-components-per-move",
+      "scenario": "fade-in handle drag, stopped",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        103.25,
+        103.25,
+        103.25
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 605,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 604,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 605,
+          "componentsSum": 6195
+        }
+      ],
+      "median": 103.25,
+      "min": 103.25,
+      "max": 103.25,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.move-components-max",
+      "scenario": "fade-in handle drag, stopped",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 604
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 60,
+          "settleMs": 605
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.release-commits",
+      "scenario": "fade-in handle drag, stopped",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.move-to-paint-p95",
+      "scenario": "fade-in handle drag, stopped",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        5.3,
+        4.9,
+        4.7
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 4.9,
+      "min": 4.7,
+      "max": 5.3,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.commits-per-move",
+      "scenario": "fade-in handle drag, playing",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        0.983,
+        0.983,
+        0.983
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 604
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 604
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 605
+        }
+      ],
+      "median": 0.983,
+      "min": 0.983,
+      "max": 0.983,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-components-per-move",
+      "scenario": "fade-in handle drag, playing",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        103.25,
+        103.25,
+        103.25
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 604,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 604,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 605,
+          "componentsSum": 6195
+        }
+      ],
+      "median": 103.25,
+      "min": 103.25,
+      "max": 103.25,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-components-max",
+      "scenario": "fade-in handle drag, playing",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 604
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 604
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 605
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.release-commits",
+      "scenario": "fade-in handle drag, playing",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-to-paint-p95",
+      "scenario": "fade-in handle drag, playing",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        6.3,
+        6.3,
+        6.2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 6.3,
+      "min": 6.2,
+      "max": 6.3,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-restarts",
+      "scenario": "fade-in handle drag, playing",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.release-restarts",
+      "scenario": "fade-in handle drag, playing",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-trim-live",
+      "scenario": "trim start (left edge) drag",
+      "metric": "drag-trim-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: data-clip-start changes from the start to mid-drag and from mid-drag to the end.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.trim.stopped.commits-per-move",
+      "scenario": "trim start (left edge) drag, stopped",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.move-components-per-move",
+      "scenario": "trim start (left edge) drag, stopped",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.move-components-max",
+      "scenario": "trim start (left edge) drag, stopped",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.release-commits",
+      "scenario": "trim start (left edge) drag, stopped",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.move-to-paint-p95",
+      "scenario": "trim start (left edge) drag, stopped",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        10.5,
+        9.1,
+        9.5
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 9.5,
+      "min": 9.1,
+      "max": 10.5,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.commits-per-move",
+      "scenario": "trim start (left edge) drag, playing",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-components-per-move",
+      "scenario": "trim start (left edge) drag, playing",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-components-max",
+      "scenario": "trim start (left edge) drag, playing",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.release-commits",
+      "scenario": "trim start (left edge) drag, playing",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-to-paint-p95",
+      "scenario": "trim start (left edge) drag, playing",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        10,
+        9.7,
+        9.9
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 9.9,
+      "min": 9.7,
+      "max": 10,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-restarts",
+      "scenario": "trim start (left edge) drag, playing",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.release-restarts",
+      "scenario": "trim start (left edge) drag, playing",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-move-live",
+      "scenario": "clip header move drag",
+      "metric": "drag-move-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: data-clip-start changes from the start to mid-drag and from mid-drag to the end.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.move.stopped.commits-per-move",
+      "scenario": "clip header move drag, stopped",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.move-components-per-move",
+      "scenario": "clip header move drag, stopped",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        107.283,
+        107.283,
+        107.283
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606,
+          "componentsSum": 6437
+        }
+      ],
+      "median": 107.283,
+      "min": 107.283,
+      "max": 107.283,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.move-components-max",
+      "scenario": "clip header move drag, stopped",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        106,
+        106,
+        106
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        }
+      ],
+      "median": 106,
+      "min": 106,
+      "max": 106,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.release-commits",
+      "scenario": "clip header move drag, stopped",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.move-to-paint-p95",
+      "scenario": "clip header move drag, stopped",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        7.7,
+        6.4,
+        6.9
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 6.9,
+      "min": 6.4,
+      "max": 7.7,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.commits-per-move",
+      "scenario": "clip header move drag, playing",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-components-per-move",
+      "scenario": "clip header move drag, playing",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        107.283,
+        107.283,
+        107.283
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605,
+          "componentsSum": 6437
+        }
+      ],
+      "median": 107.283,
+      "min": 107.283,
+      "max": 107.283,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-components-max",
+      "scenario": "clip header move drag, playing",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        106,
+        106,
+        106
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 606
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 605
+        }
+      ],
+      "median": 106,
+      "min": 106,
+      "max": 106,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.release-commits",
+      "scenario": "clip header move drag, playing",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-to-paint-p95",
+      "scenario": "clip header move drag, playing",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        10,
+        10.1,
+        10.7
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 10.1,
+      "min": 10,
+      "max": 10.7,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-restarts",
+      "scenario": "clip header move drag, playing",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.release-restarts",
+      "scenario": "clip header move drag, playing",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.start-commits",
+      "scenario": "Space -> playing",
+      "metric": "start-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the Space press until quiet (min 1 s).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.start-components",
+      "scenario": "Space -> playing",
+      "metric": "start-components",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the same window.",
+      "samples": [
+        94,
+        94,
+        94
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 94,
+      "min": 94,
+      "max": 94,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.start-sources",
+      "scenario": "Space -> playing",
+      "metric": "start-sources",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls in the same window.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.stop-commits",
+      "scenario": "Space -> stopped",
+      "metric": "stop-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the Space press until quiet (min 1 s).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.stop-components",
+      "scenario": "Space -> stopped",
+      "metric": "stop-components",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the same window.",
+      "samples": [
+        94,
+        94,
+        94
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 94,
+      "min": 94,
+      "max": 94,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.click-live.6x",
+      "scenario": "clip click (6x CPU throttle)",
+      "metric": "click-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "The Clip Gain fader is enabled after Add (the added clip is selected); an empty Stems lane click deselects: the fader is disabled. After the click on the clip header the fader is enabled and there is exactly 1 of it. The fader is always rendered, so enabled state is the selection signal.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "faderEnabledAfterAdd": true,
+          "faderDisabledBeforeClick": true,
+          "faderEnabledAfterClick": true,
+          "clipTrackId": "music",
+          "emptyLaneTrackId": "stems"
+        },
+        {
+          "faderEnabledAfterAdd": true,
+          "faderDisabledBeforeClick": true,
+          "faderEnabledAfterClick": true,
+          "clipTrackId": "music",
+          "emptyLaneTrackId": "stems"
+        },
+        {
+          "faderEnabledAfterAdd": true,
+          "faderDisabledBeforeClick": true,
+          "faderEnabledAfterClick": true,
+          "clipTrackId": "music",
+          "emptyLaneTrackId": "stems"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.click.commits.6x",
+      "scenario": "clip click (6x CPU throttle)",
+      "metric": "commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "React commits from the click until quiet (min 600 ms, then 200 ms without a commit or start(), cap 3 s).",
+      "samples": [
+        3,
+        3,
+        3
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 3,
+      "min": 3,
+      "max": 3,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.click.components.6x",
+      "scenario": "clip click (6x CPU throttle)",
+      "metric": "components",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components over the click window; detail lists the per-commit sizes.",
+      "samples": [
+        109,
+        109,
+        109
+      ],
+      "details": [
+        {
+          "perCommit": "104,5,0"
+        },
+        {
+          "perCommit": "104,5,0"
+        },
+        {
+          "perCommit": "104,5,0"
+        }
+      ],
+      "median": 109,
+      "min": 109,
+      "max": 109,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.click.event-duration-max.6x",
+      "scenario": "clip click (6x CPU throttle)",
+      "metric": "event-duration-max",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Longest Event Timing entry (>= 16 ms) in the click window; when the observer gives none, the longest long-animation-frame in the window; 0 when neither exists. detail.source names which. Trend only.",
+      "samples": [
+        96,
+        104,
+        88
+      ],
+      "details": [
+        {
+          "source": "event-timing",
+          "events": "pointerout,pointerleave,pointerleave,pointerover,pointerenter,pointerenter,pointerenter,pointerenter,mouseout,mouseover,pointerdown,pointerout,pointerleave,pointerover,gotpointercapture,mouseout,mouseover,pointerup,lostpointercapture,click,pointerout,pointerover,pointerenter,mouseout,mouseover"
+        },
+        {
+          "source": "event-timing",
+          "events": "pointerout,pointerleave,pointerleave,pointerover,pointerenter,pointerenter,pointerenter,pointerenter,mouseout,mouseover,pointerdown,pointerout,pointerleave,pointerover,gotpointercapture,mouseout,mouseover,pointerup,lostpointercapture,click,pointerout,pointerover,pointerenter,mouseout,mouseover"
+        },
+        {
+          "source": "event-timing",
+          "events": "pointerout,pointerleave,pointerleave,pointerover,pointerenter,pointerenter,pointerenter,pointerenter,mouseout,mouseover,pointerdown,pointerout,pointerleave,pointerover,gotpointercapture,mouseout,mouseover,pointerup,lostpointercapture,click,pointerout,pointerover,pointerenter,mouseout,mouseover"
+        }
+      ],
+      "median": 96,
+      "min": 88,
+      "max": 104,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.zoom-live.6x",
+      "scenario": "zoom, 1 clip (6x CPU throttle)",
+      "metric": "zoom-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "The Zoom (px/s) slider value rises on each of the 5 '=' keys, falls on each of the 5 '-' keys, and returns along the same values (value i equals value 10 - i), every value strictly between the slider's min and max (read before the first key; a missing min or max is a problem). The slider steps are integers, so the exact compare is valid.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        },
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        },
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.zoom.1.commits-per-key.6x",
+      "scenario": "zoom, 1 clip (6x CPU throttle)",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits over the 10 key windows (5 '=' then 5 '-'; each window from the key press until quiet, min 300 ms) / 10.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "commits": 10
+        },
+        {
+          "commits": 10
+        },
+        {
+          "commits": 10
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.1.components-per-key.6x",
+      "scenario": "zoom, 1 clip (6x CPU throttle)",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components over the 10 key windows / 10.",
+      "samples": [
+        102,
+        102,
+        102
+      ],
+      "details": [
+        {
+          "components": 1020
+        },
+        {
+          "components": 1020
+        },
+        {
+          "components": 1020
+        }
+      ],
+      "median": 102,
+      "min": 102,
+      "max": 102,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.1.components-max.6x",
+      "scenario": "zoom, 1 clip (6x CPU throttle)",
+      "metric": "components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in any key window.",
+      "samples": [
+        102,
+        102,
+        102
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 102,
+      "min": 102,
+      "max": 102,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.1.key-window-longest-ms.6x",
+      "scenario": "zoom, 1 clip (6x CPU throttle)",
+      "metric": "key-window-longest-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Longest time from a key press (measured in the page before the press) to the last commit of its window; detail.longestLoafMs is the longest long-animation-frame. Trend only.",
+      "samples": [
+        96.7,
+        106.4,
+        108.9
+      ],
+      "details": [
+        {
+          "longestLoafMs": 65
+        },
+        {
+          "longestLoafMs": 0
+        },
+        {
+          "longestLoafMs": 118.7
+        }
+      ],
+      "median": 106.4,
+      "min": 96.7,
+      "max": 108.9,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-range-live.6x",
+      "scenario": "range body drag (time selection) (6x CPU throttle)",
+      "metric": "drag-range-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: the clip's range label end time exists at mid-drag and at the end and grows (DEVIATION: the task named [data-range-end], which renders only for an all-tracks range; see doc 168).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":6.725,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":8.225,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.range.stopped.commits-per-move.6x",
+      "scenario": "range body drag (time selection), stopped (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.983,
+        1.983,
+        1.983
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607
+        }
+      ],
+      "median": 1.983,
+      "min": 1.983,
+      "max": 1.983,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.move-components-per-move.6x",
+      "scenario": "range body drag (time selection), stopped (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.move-components-max.6x",
+      "scenario": "range body drag (time selection), stopped (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 607
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.release-commits.6x",
+      "scenario": "range body drag (time selection), stopped (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.stopped.move-to-paint-p95.6x",
+      "scenario": "range body drag (time selection), stopped (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        36.9,
+        39.8,
+        40.4
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 39.8,
+      "min": 36.9,
+      "max": 40.4,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.commits-per-move.6x",
+      "scenario": "range body drag (time selection), playing (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.983,
+        1.983,
+        1.983
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 648
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 624
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 630
+        }
+      ],
+      "median": 1.983,
+      "min": 1.983,
+      "max": 1.983,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-components-per-move.6x",
+      "scenario": "range body drag (time selection), playing (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 648,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 624,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 630,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-components-max.6x",
+      "scenario": "range body drag (time selection), playing (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 648
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 624
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 119,
+          "settleMs": 630
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.release-commits.6x",
+      "scenario": "range body drag (time selection), playing (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        },
+        {
+          "releaseComponentsMax": 0
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-to-paint-p95.6x",
+      "scenario": "range body drag (time selection), playing (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        104,
+        99.1,
+        98.2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 99.1,
+      "min": 98.2,
+      "max": 104,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.move-restarts.6x",
+      "scenario": "range body drag (time selection), playing (6x CPU throttle)",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.range.playing.release-restarts.6x",
+      "scenario": "range body drag (time selection), playing (6x CPU throttle)",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-fade-live.6x",
+      "scenario": "fade-in handle drag (6x CPU throttle)",
+      "metric": "drag-fade-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: data-fade-in grows from the start to mid-drag and from mid-drag to the end.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.fade.stopped.commits-per-move.6x",
+      "scenario": "fade-in handle drag, stopped (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        0.983,
+        0.983,
+        0.983
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 609
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 608
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 608
+        }
+      ],
+      "median": 0.983,
+      "min": 0.983,
+      "max": 0.983,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.move-components-per-move.6x",
+      "scenario": "fade-in handle drag, stopped (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        103.25,
+        103.25,
+        103.25
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 609,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 608,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 608,
+          "componentsSum": 6195
+        }
+      ],
+      "median": 103.25,
+      "min": 103.25,
+      "max": 103.25,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.move-components-max.6x",
+      "scenario": "fade-in handle drag, stopped (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 609
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 608
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 608
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.release-commits.6x",
+      "scenario": "fade-in handle drag, stopped (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.stopped.move-to-paint-p95.6x",
+      "scenario": "fade-in handle drag, stopped (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        35.3,
+        31.8,
+        34.6
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 34.6,
+      "min": 31.8,
+      "max": 35.3,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.commits-per-move.6x",
+      "scenario": "fade-in handle drag, playing (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        0.983,
+        0.983,
+        0.983
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 636
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 621
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 620
+        }
+      ],
+      "median": 0.983,
+      "min": 0.983,
+      "max": 0.983,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-components-per-move.6x",
+      "scenario": "fade-in handle drag, playing (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        103.25,
+        103.25,
+        103.25
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 636,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 621,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 620,
+          "componentsSum": 6195
+        }
+      ],
+      "median": 103.25,
+      "min": 103.25,
+      "max": 103.25,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-components-max.6x",
+      "scenario": "fade-in handle drag, playing (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 636
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 621
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 620
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.release-commits.6x",
+      "scenario": "fade-in handle drag, playing (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-to-paint-p95.6x",
+      "scenario": "fade-in handle drag, playing (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        107.5,
+        99.3,
+        37.9
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 99.3,
+      "min": 37.9,
+      "max": 107.5,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.move-restarts.6x",
+      "scenario": "fade-in handle drag, playing (6x CPU throttle)",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.playing.release-restarts.6x",
+      "scenario": "fade-in handle drag, playing (6x CPU throttle)",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-trim-live.6x",
+      "scenario": "trim start (left edge) drag (6x CPU throttle)",
+      "metric": "drag-trim-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: data-clip-start changes from the start to mid-drag and from mid-drag to the end.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":3994.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":3934.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.trim.stopped.commits-per-move.6x",
+      "scenario": "trim start (left edge) drag, stopped (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 609
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 610
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 608
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.move-components-per-move.6x",
+      "scenario": "trim start (left edge) drag, stopped (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 609,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 610,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 608,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.move-components-max.6x",
+      "scenario": "trim start (left edge) drag, stopped (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 609
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 610
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 608
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.release-commits.6x",
+      "scenario": "trim start (left edge) drag, stopped (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.stopped.move-to-paint-p95.6x",
+      "scenario": "trim start (left edge) drag, stopped (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        56.9,
+        61.3,
+        66.2
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 61.3,
+      "min": 56.9,
+      "max": 66.2,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.commits-per-move.6x",
+      "scenario": "trim start (left edge) drag, playing (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 628
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 619
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 635
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-components-per-move.6x",
+      "scenario": "trim start (left edge) drag, playing (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        108.167,
+        108.167,
+        108.167
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 628,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 619,
+          "componentsSum": 6490
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 635,
+          "componentsSum": 6490
+        }
+      ],
+      "median": 108.167,
+      "min": 108.167,
+      "max": 108.167,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-components-max.6x",
+      "scenario": "trim start (left edge) drag, playing (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        105,
+        105,
+        105
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 628
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 619
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 635
+        }
+      ],
+      "median": 105,
+      "min": 105,
+      "max": 105,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.release-commits.6x",
+      "scenario": "trim start (left edge) drag, playing (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-to-paint-p95.6x",
+      "scenario": "trim start (left edge) drag, playing (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        69.6,
+        112,
+        111.8
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 111.8,
+      "min": 69.6,
+      "max": 112,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.move-restarts.6x",
+      "scenario": "trim start (left edge) drag, playing (6x CPU throttle)",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.trim.playing.release-restarts.6x",
+      "scenario": "trim start (left edge) drag, playing (6x CPU throttle)",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-move-live.6x",
+      "scenario": "clip header move drag (6x CPU throttle)",
+      "metric": "drag-move-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1 only when both the stopped and the playing drag were live: data-clip-start changes from the start to mid-drag and from mid-drag to the end.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "stoppedBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "stoppedEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"1.500\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"3.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.move.stopped.commits-per-move.6x",
+      "scenario": "clip header move drag, stopped (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 611
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 609
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 608
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.move-components-per-move.6x",
+      "scenario": "clip header move drag, stopped (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        107.283,
+        107.283,
+        107.283
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 611,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 609,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 608,
+          "componentsSum": 6437
+        }
+      ],
+      "median": 107.283,
+      "min": 107.283,
+      "max": 107.283,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.move-components-max.6x",
+      "scenario": "clip header move drag, stopped (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        106,
+        106,
+        106
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 611
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 609
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 608
+        }
+      ],
+      "median": 106,
+      "min": 106,
+      "max": 106,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.release-commits.6x",
+      "scenario": "clip header move drag, stopped (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.stopped.move-to-paint-p95.6x",
+      "scenario": "clip header move drag, stopped (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        40.9,
+        43.9,
+        47.6
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 43.9,
+      "min": 40.9,
+      "max": 47.6,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.commits-per-move.6x",
+      "scenario": "clip header move drag, playing (6x CPU throttle)",
+      "metric": "commits-per-move",
+      "unit": "commits / move",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits in the move window (after the first pointermove that follows the in-page pointerdown, before the in-page pointerup) / pointermoves in that window.",
+      "samples": [
+        1.967,
+        1.967,
+        1.967
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 626
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 628
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 634
+        }
+      ],
+      "median": 1.967,
+      "min": 1.967,
+      "max": 1.967,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-components-per-move.6x",
+      "scenario": "clip header move drag, playing (6x CPU throttle)",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal).",
+      "samples": [
+        107.283,
+        107.283,
+        107.283
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 626,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 628,
+          "componentsSum": 6437
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 634,
+          "componentsSum": 6437
+        }
+      ],
+      "median": 107.283,
+      "min": 107.283,
+      "max": 107.283,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-components-max.6x",
+      "scenario": "clip header move drag, playing (6x CPU throttle)",
+      "metric": "move-components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Largest single commit in the move window.",
+      "samples": [
+        106,
+        106,
+        106
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 626
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 628
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 118,
+          "settleMs": 634
+        }
+      ],
+      "median": 106,
+      "min": 106,
+      "max": 106,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.release-commits.6x",
+      "scenario": "clip header move drag, playing (6x CPU throttle)",
+      "metric": "release-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the in-page pointerup until quiet (min 600 ms).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        },
+        {
+          "releaseComponentsMax": 94
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-to-paint-p95.6x",
+      "scenario": "clip header move drag, playing (6x CPU throttle)",
+      "metric": "move-to-paint-p95",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "p95 of the pointermove-to-next-frame sampler up to pointerup, as in PERF-1a. Trend only (±30 %).",
+      "samples": [
+        51.7,
+        95.4,
+        56.9
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 56.9,
+      "min": 51.7,
+      "max": 95.4,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.move-restarts.6x",
+      "scenario": "clip header move drag, playing (6x CPU throttle)",
+      "metric": "move-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls on a non-offline context inside the move window.",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        },
+        {
+          "tasks": 0,
+          "startsPerTask": ""
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.move.playing.release-restarts.6x",
+      "scenario": "clip header move drag, playing (6x CPU throttle)",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls from the in-page pointerup until quiet; detail groups them by task.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.start-commits.6x",
+      "scenario": "Space -> playing (6x CPU throttle)",
+      "metric": "start-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the Space press until quiet (min 1 s).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.start-components.6x",
+      "scenario": "Space -> playing (6x CPU throttle)",
+      "metric": "start-components",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the same window.",
+      "samples": [
+        94,
+        94,
+        94
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 94,
+      "min": 94,
+      "max": 94,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.start-sources.6x",
+      "scenario": "Space -> playing (6x CPU throttle)",
+      "metric": "start-sources",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "start() calls in the same window.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.stop-commits.6x",
+      "scenario": "Space -> stopped (6x CPU throttle)",
+      "metric": "stop-commits",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Commits from the Space press until quiet (min 1 s).",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.play.stop-components.6x",
+      "scenario": "Space -> stopped (6x CPU throttle)",
+      "metric": "stop-components",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "Sum of rendered components in the same window.",
+      "samples": [
+        94,
+        94,
+        94
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 94,
+      "min": 94,
+      "max": 94,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.clips-30",
+      "scenario": "Ctrl+D x 29",
+      "metric": "clips",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 30
+      },
+      "owner": "PERF-1b-i",
+      "note": "1x only. Audio clips after the clip header click and 29 Ctrl+D presses; each press is checked for count = press + 1, and the 30 copies must have 30 distinct data-clip-start values.",
+      "samples": [
+        30,
+        30,
+        30
+      ],
+      "details": [
+        {
+          "distinctStarts": 30
+        },
+        {
+          "distinctStarts": 30
+        },
+        {
+          "distinctStarts": 30
+        }
+      ],
+      "median": 30,
+      "min": 30,
+      "max": 30,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.harness.zoom-30-live",
+      "scenario": "zoom, 30 clips",
+      "metric": "zoom-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1x only. Same rule as interact.harness.zoom-live (symmetric path, no clamp at the slider min or max), with 30 clips.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        },
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        },
+        {
+          "sliderValues": "678,713,747,782,816,851,816,782,747,713,678",
+          "sliderMin": 0,
+          "sliderMax": 1000
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.zoom.30.commits-per-key",
+      "scenario": "zoom, 30 clips",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "1x only. Same definition as the interact.zoom.1 row, with 30 clips.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "commits": 10
+        },
+        {
+          "commits": 10
+        },
+        {
+          "commits": 10
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.30.components-per-key",
+      "scenario": "zoom, 30 clips",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "1x only. Same definition as the interact.zoom.1 row, with 30 clips.",
+      "samples": [
+        247,
+        247,
+        247
+      ],
+      "details": [
+        {
+          "components": 2470
+        },
+        {
+          "components": 2470
+        },
+        {
+          "components": 2470
+        }
+      ],
+      "median": 247,
+      "min": 247,
+      "max": 247,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.30.components-max",
+      "scenario": "zoom, 30 clips",
+      "metric": "components-max",
+      "unit": "components",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "1x only. Same definition as the interact.zoom.1 row, with 30 clips.",
+      "samples": [
+        247,
+        247,
+        247
+      ],
+      "details": [
+        null,
+        null,
+        null
+      ],
+      "median": 247,
+      "min": 247,
+      "max": 247,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.zoom.30.key-window-longest-ms",
+      "scenario": "zoom, 30 clips",
+      "metric": "key-window-longest-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "1x only. Same definition as the interact.zoom.1 row, with 30 clips.",
+      "samples": [
+        123.3,
+        121,
+        119.2
+      ],
+      "details": [
+        {
+          "longestLoafMs": 0
+        },
+        {
+          "longestLoafMs": 143.8
+        },
+        {
+          "longestLoafMs": 0
+        }
+      ],
+      "median": 121,
+      "min": 119.2,
+      "max": 123.3,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.harness.drag-fade-30-live",
+      "scenario": "fade-in handle drag, playing, 30 clips",
+      "metric": "drag-fade-live",
+      "unit": "boolean (1 = true)",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 1
+      },
+      "owner": "PERF-1b-i",
+      "note": "1x only. The first clip's data-fade-in grows from the start to mid-drag and from mid-drag to the end.",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        },
+        {
+          "playingBefore": "{\"start\":\"0.000\",\"fadeIn\":\"0.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingMid": "{\"start\":\"0.000\",\"fadeIn\":\"1.500\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}",
+          "playingEnd": "{\"start\":\"0.000\",\"fadeIn\":\"3.000\",\"width\":4054.078,\"rangeEnd\":null,\"rangeElements\":0}"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "interact.drag.fade.30.playing.move-components-per-move",
+      "scenario": "fade-in handle drag, playing, 30 clips",
+      "metric": "move-components-per-move",
+      "unit": "components / move",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "1x only. Same definition as interact.drag.fade.playing.move-components-per-move, with 30 clips.",
+      "samples": [
+        103.25,
+        103.25,
+        103.25
+      ],
+      "details": [
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 615,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 613,
+          "componentsSum": 6195
+        },
+        {
+          "movesInWindow": 60,
+          "windowCommits": 59,
+          "settleMs": 614,
+          "componentsSum": 6195
+        }
+      ],
+      "median": 103.25,
+      "min": 103.25,
+      "max": 103.25,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "interact.drag.fade.30.playing.release-restarts",
+      "scenario": "fade-in handle drag, playing, 30 clips",
+      "metric": "release-restarts",
+      "unit": "start() calls",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-1b-i",
+      "note": "1x only. start() calls from pointerup until quiet: shows whether the commit restarts every clip.",
+      "samples": [
+        30,
+        30,
+        30
+      ],
+      "details": [
+        {
+          "tasks": 1,
+          "startsPerTask": "30"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "30"
+        },
+        {
+          "tasks": 1,
+          "startsPerTask": "30"
+        }
+      ],
+      "median": 30,
+      "min": 30,
+      "max": 30,
+      "withinBudget": null,
+      "pass": null
+    }
+  ]
+}

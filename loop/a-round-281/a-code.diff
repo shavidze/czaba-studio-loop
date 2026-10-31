@@ -1,0 +1,258 @@
+diff --git a/perf/lib/app-labels.ts b/perf/lib/app-labels.ts
+index 883493a..bfbc6f0 100644
+--- a/perf/lib/app-labels.ts
++++ b/perf/lib/app-labels.ts
+@@ -32,6 +32,29 @@ export const perfLibraryAddLabel = studioLibraryPanelStrings.add;
+ export const perfCollectionReadyPattern = new RegExp(
+   `^${escapeRegExp(workspaceCollectionCopy('demo').ready)}`,
+ );
++
++function countedTemplatePattern(render: (count: number) => string): string {
++  return [1, 2]
++    .map((count) => {
++      const rendered = render(count);
++      const digits = String(count);
++      const at = rendered.indexOf(digits);
++      if (at < 0 || rendered.indexOf(digits, at + digits.length) >= 0) {
++        throw new Error(`count template needs exactly one count: ${JSON.stringify(rendered)}`);
++      }
++      const before = escapeRegExp(rendered.slice(0, at));
++      const after = escapeRegExp(rendered.slice(at + digits.length));
++      return `${before}\\d+${after}`;
++    })
++    .join('|');
++}
++
++export const perfCollectionFailedPattern = new RegExp(
++  `^(?:${countedTemplatePattern(workspaceCollectionCopy('demo').failed)})`,
++);
++export const perfCollectionSettledPattern = new RegExp(
++  `${perfCollectionReadyPattern.source}|${perfCollectionFailedPattern.source}`,
++);
+ export const perfActiveTrackLabel = (name: string): string =>
+   studioLaneStrings.activeTrackLabel(name);
+ 
+diff --git a/perf/lib/page.ts b/perf/lib/page.ts
+index 0b19527..911695d 100644
+--- a/perf/lib/page.ts
++++ b/perf/lib/page.ts
+@@ -1,5 +1,11 @@
+ import { expect, type Locator, type Page } from '@playwright/test';
+-import { perfCollectionReadyPattern, perfPlayLabel } from './app-labels';
++import {
++  perfCollectionFailedPattern,
++  perfCollectionReadyPattern,
++  perfCollectionSettledPattern,
++  perfLibraryAddLabel,
++  perfPlayLabel,
++} from './app-labels';
+ import type { PerfWindowSnapshot } from './instrumentation';
+ 
+ const quietMs = 200;
+@@ -110,12 +116,48 @@ export async function waitForCollectionReady(
+   problems: string[],
+   label: string,
+ ): Promise<number> {
+-  await expect(page.getByTestId('arrangement-status')).toHaveText(perfCollectionReadyPattern, {
+-    timeout: 15000,
+-  });
++  const status = page.getByTestId('arrangement-status');
++  await expect(status).toHaveText(perfCollectionSettledPattern, { timeout: 15000 });
++  const text = (await status.textContent()) ?? '';
++  if (perfCollectionFailedPattern.test(text)) {
++    throw new Error(`${label}: demo collection failed: ${text}`);
++  }
++  if (!perfCollectionReadyPattern.test(text)) {
++    throw new Error(`${label}: demo collection status is not ready: ${text}`);
++  }
+   return waitForStudioQuiet(page, problems, label);
+ }
+ 
++type LibraryReadyState =
++  | { readyMs: number; failedStatus: null }
++  | { readyMs: null; failedStatus: string };
++
++export async function waitForLibraryReady(page: Page): Promise<number> {
++  const handle = await page.waitForFunction(
++    ({ addLabel, failedSource }): LibraryReadyState | null => {
++      const statusNode = document.querySelector('[data-testid="arrangement-status"]');
++      const status = statusNode?.textContent ?? '';
++      if (new RegExp(failedSource).test(status)) return { readyMs: null, failedStatus: status };
++      const add = [...document.querySelectorAll('button')].find(
++        (button) => button.textContent?.trim() === addLabel,
++      );
++      const wave = document.querySelector(
++        '[data-testid="arrangement-library-preview-wave"] rect',
++      );
++      const enabled = add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true';
++      return enabled && wave !== null ? { readyMs: performance.now(), failedStatus: null } : null;
++    },
++    { addLabel: perfLibraryAddLabel, failedSource: perfCollectionFailedPattern.source },
++    { polling: 'raf', timeout: 90000 },
++  );
++  const state = await handle.jsonValue();
++  if (state === null) throw new Error('the library ready wait resolved without a state');
++  if (state.failedStatus !== null) {
++    throw new Error(`demo collection failed before the library was ready: ${state.failedStatus}`);
++  }
++  return state.readyMs;
++}
++
+ export async function waitForPlaybackSettled(
+   page: Page,
+   problems: string[],
+diff --git a/perf/studio-lab-interactions.perf.spec.ts b/perf/studio-lab-interactions.perf.spec.ts
+index d926561..60364db 100644
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -24,6 +24,7 @@ import {
+   snapshot,
+   startTasks,
+   waitForCollectionReady,
++  waitForLibraryReady,
+   waitForPlaybackSettled,
+   waitForQuiet,
+ } from './lib/page';
+@@ -90,6 +91,11 @@ interface GrabPoint {
+   y: number;
+ }
+ 
++interface EmptyLanePoint extends GrabPoint {
++  trackId: string;
++  clipTrackId: string;
++}
++
+ const sumRendered = (commits: readonly { rendered: number }[]): number =>
+   commits.reduce((sum, commit) => sum + commit.rendered, 0);
+ 
+@@ -187,7 +193,7 @@ function grabOptions(drag: DragName): { fractionY: number; centreX: boolean; tra
+   }
+ }
+ 
+-async function emptyLanePointAfterClip(clip: Locator): Promise<GrabPoint> {
++async function emptyLanePointAfterClip(clip: Locator): Promise<EmptyLanePoint> {
+   const found = await clip.evaluate((clipElement) => {
+     const ownLane = clipElement.closest('[data-track-id]');
+     if (ownLane === null) return { point: null, ownTrack: null };
+@@ -215,13 +221,24 @@ async function emptyLanePointAfterClip(clip: Locator): Promise<GrabPoint> {
+     }
+     return { point: null, ownTrack: ownLane.getAttribute('data-track-id') };
+   });
++  if (found.ownTrack === null) {
++    throw new Error('the clip is not inside a lane with a data-track-id');
++  }
+   if (found.point === null) {
+     throw new Error(`no lane after the clip's lane ${found.ownTrack} has an empty timeline point`);
+   }
++  if (found.point.trackId === null) {
++    throw new Error('the empty timeline point is on a lane without a data-track-id');
++  }
+   if (found.point.trackId === found.ownTrack) {
+     throw new Error(`the empty point is on the clip's own lane ${found.ownTrack}`);
+   }
+-  return { x: found.point.x, y: found.point.y };
++  return {
++    x: found.point.x,
++    y: found.point.y,
++    trackId: found.point.trackId,
++    clipTrackId: found.ownTrack,
++  };
+ }
+ 
+ async function clipHeaderPoint(clip: Locator): Promise<GrabPoint> {
+@@ -517,6 +534,8 @@ async function measureClipClick(
+       faderEnabledAfterAdd: selectedAfterAdd,
+       faderDisabledBeforeClick: deselected,
+       faderEnabledAfterClick: selected,
++      clipTrackId: empty.clipTrackId,
++      emptyLaneTrackId: empty.trackId,
+     },
+   });
+   if (!live) {
+@@ -567,20 +586,7 @@ async function measurePlayback(
+ }
+ 
+ async function measureLoadReady(page: Page, result: InteractionPassResult): Promise<void> {
+-  const readyHandle = await page.waitForFunction(
+-    (addLabel) => {
+-      const add = [...document.querySelectorAll('button')].find(
+-        (button) => button.textContent?.trim() === addLabel,
+-      );
+-      const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null
+-        ? performance.now()
+-        : 0;
+-    },
+-    perfLibraryAddLabel,
+-    { polling: 'raf', timeout: 90000 },
+-  );
+-  const readyMs = await readyHandle.jsonValue();
++  const readyMs = await waitForLibraryReady(page);
+   if (result.cpuRate === 1) {
+     result.samples.set('interact.load.ready-ms', { value: roundTo(readyMs, 0) });
+   }
+diff --git a/perf/studio-lab-resources.perf.spec.ts b/perf/studio-lab-resources.perf.spec.ts
+index 1ef66f7..4f76273 100644
+--- a/perf/studio-lab-resources.perf.spec.ts
++++ b/perf/studio-lab-resources.perf.spec.ts
+@@ -31,6 +31,7 @@ import {
+   rateRowId,
+   reactRendererProblem,
+   snapshot,
++  waitForLibraryReady,
+   waitForQuiet,
+   waitForStudioQuiet,
+ } from './lib/page';
+@@ -223,17 +224,7 @@ const countSubtree = (target: Locator): Promise<number> =>
+   target.evaluate((element) => element.querySelectorAll('*').length + 1);
+ 
+ async function measureLoadReady(page: Page): Promise<void> {
+-  await page.waitForFunction(
+-    (addLabel) => {
+-      const add = [...document.querySelectorAll('button')].find(
+-        (button) => button.textContent?.trim() === addLabel,
+-      );
+-      const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null;
+-    },
+-    perfLibraryAddLabel,
+-    { polling: 'raf', timeout: 90000 },
+-  );
++  await waitForLibraryReady(page);
+ }
+ 
+ function checkWavFile(
+diff --git a/perf/studio-lab.perf.spec.ts b/perf/studio-lab.perf.spec.ts
+index 4cb16e7..f9226b8 100644
+--- a/perf/studio-lab.perf.spec.ts
++++ b/perf/studio-lab.perf.spec.ts
+@@ -31,6 +31,7 @@ import {
+   snapshot,
+   startTasks,
+   waitForCollectionReady,
++  waitForLibraryReady,
+   waitForPlaybackSettled,
+   waitForQuiet,
+ } from './lib/page';
+@@ -514,20 +515,7 @@ async function measureLivenessDrags(
+ }
+ 
+ async function measureLoad(page: Page, result: PassResult): Promise<void> {
+-  const readyHandle = await page.waitForFunction(
+-    (addLabel) => {
+-      const add = [...document.querySelectorAll('button')].find(
+-        (button) => button.textContent?.trim() === addLabel,
+-      );
+-      const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null
+-        ? performance.now()
+-        : 0;
+-    },
+-    perfLibraryAddLabel,
+-    { polling: 'raf', timeout: 90000 },
+-  );
+-  const readyMs = await readyHandle.jsonValue();
++  const readyMs = await waitForLibraryReady(page);
+   const load = await snapshot(page, 0, readyMs);
+   const rendered = load.commits.map((commit) => commit.rendered);
+   const longest = load.longtasks.reduce((max, entry) => Math.max(max, entry.duration), 0);
