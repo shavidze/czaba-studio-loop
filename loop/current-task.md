@@ -1,397 +1,275 @@
-# Round 278: SYS-5 stage 2 (final). The metronome toggle and the library Preview and Add buttons keep their reason reachable by keyboard, the soft-disabled helper moves to one shared file with a click wrapper, the soft-disabled cursor finally shows `not-allowed`, and the unavailable Delete is named plainly
+# Round 279: PERF-HARNESS-SHARED-LIB-b-ii stage 1 (b-ii-1, test-only). The perf harness waits for real states instead of fixed settles outside its measurement windows, picks the deselect lane from the DOM instead of a hard-coded id, and always releases the export observer and heap poll loop
 
-**Planned by:** B, at the round 277 → 278 planning, 2026-10-30. **Decisions:**
-- D-29z624: round 277 closed (C PASS, gate 277 published `42872cf`). SYS-5 stage 1 is **მზადაა**; GATE276-T1, C-R229-01 and GATE229-S1 are closed.
-- D-29z625: round 278 = SYS-5 stage 2, the final stage. Its scope is §2.
-- D-29z626: the Preview toggle is in scope. `product-designer` and `tech-lead` disagreed; the ruling is in §3.
-- D-29z627: A-R276-ARCH-GUARD-IN-HELPER is ruled: one shared wrapper, `guardSoftDisabledClick` (`tech-lead`).
-- D-29z628: the metronome keeps mouse focus (variant X, `product-designer`). This is a measured HEAD-equivalence and a narrow exception to C-R276-02.
-- D-29z629: A-R276-REVIEW-DELETE-NAME. With no target, Delete's `aria-label` is `Delete`.
-- D-29z630: C-R276-01. Every soft-disabled button gets `aria-disabled:cursor-not-allowed!`. The app-wide form stays deferred as B-R276-CURSOR-UNLAYERED-GLOBAL.
-- D-29z631: the perf readiness predicate is granted (C-R258-01 class).
-- D-29z632: the outcome table of §11.
-- D-29z633: the doc grants of §5 (doc 206 is closed, doc 207 is new).
+**Planned by:** B, at the round 278 → 279 planning, 2026-10-30/31. **Decisions:**
+- D-29z634: round 278 closed (C PASS, gate 278 published `873d835`). SYS-5 is **მზადაა**.
+- D-29z635: the gate-278 and A/C notes are recorded (Lows deferred, info, architecture signals).
+- D-29z636: round 279 = b-ii-1. Stage b-ii is split (`tech-lead`): R216-MEM-POLLS-HEADROOM moves to b-ii-2 (round 280). Nothing is dropped.
+- D-29z637: the per-site wait rulings of §2.1.
+- D-29z638: PERF-1A-TIMEOUT-HEADROOM goes to root as ROOT-REQ-PERF-TIMEOUT (`b-round-278-root-request-perf-timeout.md`). A does not touch the timeout.
+- D-29z640: the equivalence contract of §2.5.
+- D-29z641: the outcome table of §11.
 
-This is a fix-up of a recommendation Saba approved (DUX-R-4(b), `user-review/design-ux-decisions.md`, 2026-10-25). It needs no AGREE note and no YouTube request. The reference section is still written.
+**Kind of round:** performance-harness, test-only. Reference-first, the AGREE note, the YouTube request, `product-designer` and the screen budget do not apply (policy 2026-10-27/28: "pure performance, refactor, test-only … rounds"). No app source changes. `oss-adoption.md` was read: no new dependency.
 
-**Owner:** A (one implementer). **Verifier:** C. **Grants:** §5 and `b-round-277-r278-grants.txt`. **Frozen list:** `b-round-277-r278-tree-sha256.txt` (every tracked file except the grants).
+**Owner:** A (one implementer). **Verifier:** C. **Grants:** §5 and `b-round-278-r279-grants.txt`. **Frozen list:** `b-round-278-r279-tree-sha256.txt` (every tracked file except the grants).
 
-## Baseline: HEAD `42872cf`, clean tree
-`gates/gate-round-277.json` is `published`, commit `42872cf`. At planning, `git status --short` was empty and `git ls-files | wc -l` was 1139.
+## Baseline: HEAD `873d835`, clean tree
+`gates/gate-round-278.json` is `published`, commit `873d835`. At planning, `git status --short` was empty and `git ls-files | wc -l` was 1142 (`b-round-278/git-status-at-planning.txt`).
 
 ## 0. Read first
-1. `lessons.md`, every role. Especially L4, L23 (the attribute/state-contract clause), L29, L47, L49 and L51.
+1. `lessons.md`, every role. Especially L11, L23 (the deleted-export and `perf/**` grep-root clauses), L29, L30, L31, L34, L37 and **L38 (perf runs alone)**.
 2. This task.
-3. B's sketch: `b-round-277/sketch.diff`.
+3. B's sketch: `b-round-278/sketch.diff` (v2, §4).
 
-**Primitives for A:**
-- `AGENT_DISCOVERABLE_CODE.md` (a new export file);
-- `FORWARDREF_COMPONENT.md`;
-- `TAILWIND_FIRST.md`, `DESIGN_TOKENS.md`;
-- `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`;
-- `GEORGIAN_DOCS.md`;
-- `.claude/prompts/new-test.md` for the new test file.
+**Primitives for A:** `AGENT_DISCOVERABLE_CODE.md` (new exports), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`; `.claude/prompts/new-test.md` does not apply (no new test file).
 
 ## 1. What changes, and why
-**Metronome.** At HEAD the toggle uses native `disabled` while no BPM is committed [K4], so Tab never reaches it [K14]. Its reason, `Metronome — set a BPM first`, therefore exists only for mouse hover. This is ROOT-R66-L3, the disabled-reason half.
+The three perf specs wait a fixed `idleSettleMs` (1000 ms) at several places outside their measurement windows [K1][K2] (GATE214-S1). A fixed wait either wastes time or, on a slow machine, lets late work spill into the next window. The deselect click picks the lane by the hard-coded id `'stems'` [K3] (GATE214-S2). The export spec installs its "WAV created" observer and starts its heap poll loop before the `try` whose `finally` releases them [K6] (GATE223-S2).
 
-**Add.** On the video track, Add is natively disabled and has **no title in any state** [K6][K14]. This is C-R130-ADD-DISABLED-NO-REASON.
+**B measured why a plain "quiet" wait is not enough after load** (`b-round-278/probe/load-tail.json`, 3 loads of the production build):
+- the readiness predicate commits at about 1.06–1.13 s;
+- the collection-ready status commits about 470–510 ms later ("Demo collection ready…").
 
-**Preview.** The Preview toggle next to Add has the same native `disabled` and no title [K6].
+The 200 ms quiet window returns between the two. B's sketch v1 used it and the late status commit landed in the Add window: `harness.hook-live` and `interact.harness.hook-live` went from 2 to 3, and `res.mem.used-ready-mib` became nondeterministic (5.6–5.8 against 5.3) (`b-round-278/sketch1-results/`). The fixed 1000 ms had been hiding this. Sketch v2 waits for the collection-ready status text, then for quiet (§2.1).
 
-**Stage-1 leftovers:**
-- The soft-disabled transport buttons compute `cursor: pointer` [K14] (C-R276-01). `aria-disabled:cursor-not-allowed` is a layered rule [K2]. It loses to the unlayered `button { cursor:pointer }` in `app.css` l.483 [K8].
-- With nothing selected, Delete's `aria-label` still says "Delete — the selected clip; leaves a gap" [K3][K14] (A-R276-REVIEW-DELETE-NAME).
-- The soft-disabled helper and seven hand-copied guards are local to `ArrangementTransport.tsx` [K1] (A-R276-ARCH-GUARD-IN-HELPER).
-
-| Button | Unavailable when | Title when unavailable, after | Title when available, after |
-|---|---|---|---|
-| Metronome | no committed BPM [K4] | `Metronome — set a BPM first` (unchanged) | unchanged |
-| Preview | no sound / failed / loading | `Preview — select a sound in the list first` / `Preview — this sound could not load; choose another` / `Preview — wait for the sound to load` | none (unchanged) |
-| Add | no sound / failed / loading / active track not audio [K6] | `Add — select a sound in the list first` / `Add — this sound could not load; choose another` / `Add — wait for the sound to load` / `Add — make an audio track active first` | `Add to the active track at the insert marker` |
-| Delete | no range and no selected clip | unchanged | unchanged; `aria-label` `Delete` when there is no target (range → range hint, clip → `deleteClipLabel`, unchanged) |
-
-**Title precedence.** The order follows the refusal order in `addSourceToActiveTrack` [K7]: no source, then error, then not ready, then not audio. So a title can never contradict the status text the same action writes from the keyboard path. Accessible names do not change (`Add`, `Preview`/`Stop`, `Metronome`). The reasons live in `title` only, which the AX tree exposes as the description.
-
-## Reference: how others do it
-| Point | Source | What it shows | CZABA |
-|---|---|---|---|
-| Unavailable toolbar controls stay focusable | WAI-ARIA APG, "Developing a Keyboard Interface" → "Focusability of disabled controls" (https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/, read 2026-10-30, as in round 276) | `aria-disabled` keeps a control in the Tab sequence; native `disabled` removes it | Same pattern as stage 1 |
-| Live's metronome | Ableton Live 12 manual, §19.4 "Recording in Sync" and §19.4.1 "Metronome Settings" (https://www.ableton.com/en/live-manual/12/recording-new-clips/, read 2026-10-30) | "the built-in metronome, which is activated via its Control Bar switch and will begin ticking when the Play button is pressed". The manual never describes the switch as unavailable; Live always has a Set tempo | **Deviation (Saba decision, 2026-10-28, "never invent 120 BPM"):** CZABA has no tempo until one is committed, so the toggle can be unavailable. Its reason is now keyboard-reachable |
-| Live: commit a field by clicking away | Live 12 manual §41 "Accessibility and Keyboard Navigation" (read in round 276); no sentence about a click-away commit was found | No reference found. Searched: §19.4, §19.4.1, §41.1–§41.5 as read | Variant X (§2.3) keeps HEAD's own measured behaviour [K15]. It is not presented as Live's |
-| Live: unavailable controls and screen readers | No reference found (round 276, LIVE-MEAS-SYS5-DISABLED, open in `user-review/live-checks.md`) | — | Not guessed |
-
-**Deviations:**
-- The metronome can be unavailable. This is Saba's decision above.
-- Reason titles are the approved DUX-R-4(b) addition.
-
-**No new persistent screen text (L39).** Every reason is a `title`. The quieter homes considered:
-- tooltip: chosen;
-- the `?` sheet: rejected, because it does not explain the current state;
-- the status line: rejected by stage-1 Q1 (no status write on a no-op).
-
-## 2. The contract (D-29z625…D-29z630)
-### 2.1 The shared helper (D-29z627, `tech-lead`)
-New file `app/components/arrangement/studio-soft-disabled.ts`, a `.ts` sibling of `studio-focus.ts` and `studio-fader.ts`. It exports the stage-1 names and one new wrapper:
-- `SoftDisabledButtonProps`;
-- `softDisabledButtonProps(isUnavailable)`: unchanged. `{ 'aria-disabled': 'true', onMouseDown: preventDefault }` or `{}`;
-- `isSoftDisabledButton(button)`: unchanged;
-- **new:** `guardSoftDisabledClick(handler)` returns `(event) => { if (isSoftDisabledButton(event.currentTarget)) return; handler(event); }`.
-
-`preventSoftDisabledMouseFocus` stays private.
-
-`ArrangementTransport.tsx` deletes its local copies [K1] and imports from the new file. Each of its seven `onClick` guards becomes `onClick={guardSoftDisabledClick((event) => { …body unchanged… })}`. The body keeps `armFocusHandoff` first and the action second, so the order is unchanged.
-
-The onClick is **not** folded into `softDisabledButtonProps`, because a later explicit `onClick` prop would silently override it.
-
-B's sketch is byte-exact in `b-round-277/sketch.diff`. A applies it; formatting may differ only where Biome demands.
-
-### 2.2 Library Preview and Add (D-29z626)
-- Both use `{...softDisabledButtonProps(…)}`: Preview with `!isReady`, Add with `!canAdd`. Neither has a `disabled` prop.
-- Each `onClick` is wrapped in `guardSoftDisabledClick`. A click, Enter or Space on a soft-disabled Preview or Add therefore runs nothing:
-  - no preview starts;
-  - no clip is added;
-  - **no status write**, although `addSourceToActiveTrack` writes a status in each refused branch [K7]. They stay unreachable from the button, as native `disabled` left them.
-- Titles follow §1. Two derived constants in the component: `previewUnavailableTitle` (null when ready) and `addTitle`.
-- **Class tokens on both:**
-  - `enabled:hover:bg-foreground/8` → `not-aria-disabled:hover:bg-foreground/8`;
-  - `enabled:active:bg-foreground/12` → `not-aria-disabled:active:bg-foreground/12`;
-  - `disabled:cursor-not-allowed` → `aria-disabled:cursor-not-allowed!`;
-  - `disabled:opacity-40` → `aria-disabled:*:opacity-40`.
-
-  The children are dimmed, as in stage 1, so the ring keeps full strength. After the change the file has 0 `enabled:` and 0 `disabled:` tokens.
-- **Keyboard paths are unchanged (L49).** Enter on a library row, the global Enter and the preview wave's Space/Enter keep their handlers and status texts.
-
-### 2.3 Metronome (D-29z628, variant X)
-- `aria-disabled={tempoBpm === null ? 'true' : undefined}`; no `disabled` prop; `onClick={guardSoftDisabledClick(onMetronomeToggle)}`. The label is wrapped in a `<span>`, so `aria-disabled:*:opacity-50` has a child to dim [K4]. The button keeps its own 50 %.
-- **No `onMouseDown` preventDefault on this one button.** It is the only soft-disabled button that does not use `softDisabledButtonProps`.
-  - **Why:** B measured HEAD [K15]. A user types `120` in the BPM field, does not press Enter, and clicks Metronome. At HEAD the mousedown blurs the field, the tempo commits, the button re-renders as enabled before `click`, and the same click turns the metronome on. The status reads `Metronome is on — 120 BPM, 4/4: …`.
-  - The shared pattern (preventDefault) would turn that click into a dead click. The field would keep focus with an uncommitted draft. That is a regression.
-  - Variant X keeps HEAD's result. One improvement: on an invalid draft (`abc`), focus lands on the toggle instead of BODY [K15].
-  - `product-designer` chose X. The field and the toggle are one tempo unit.
-  - This is a narrow exception to C-R276-02 ("keep"), which still holds for every other soft-disabled button.
-- Class tokens:
-  - `enabled:hover:bg-foreground/8` → `not-aria-disabled:hover:bg-foreground/8`;
-  - `enabled:active:bg-foreground/12` → `not-aria-disabled:active:bg-foreground/12`;
-  - `hover:text-foreground` → `not-aria-disabled:hover:text-foreground`;
-  - drop `disabled:hover:text-muted`;
-  - `disabled:cursor-not-allowed` → `aria-disabled:cursor-not-allowed!`;
-  - `disabled:opacity-50` → `aria-disabled:*:opacity-50`.
-
-  The on-state `enabled:hover:bg-foreground/20 enabled:active:bg-foreground/20` becomes `not-aria-disabled:hover:bg-foreground/20 not-aria-disabled:active:bg-foreground/20`.
-- `aria-pressed` is unchanged. The workspace's `toggleMetronome` still returns early when `tempoBpm === null` [K5]. That return is the second line of defence, which is why the button-level guard has a unit row (§6.2) and a source row, not a workspace mutant (L52).
-- There is no metronome keyboard shortcut [K10].
-
-### 2.4 Transport leftovers
-- `toolButtonClass`: `aria-disabled:cursor-not-allowed` → `aria-disabled:cursor-not-allowed!` [K2] (D-29z630).
-  - `tech-lead` compiled it with Tailwind 4.1.18 to `@layer utilities { [aria-disabled="true"] { cursor: not-allowed !important } }`. A layered `!important` beats the unlayered `button { cursor:pointer }` [K8].
-  - B measured it on the sketch: `not-allowed` on soft-disabled Split, Delete, Metronome and Add; `pointer` on Fit [K14].
-- Delete's `aria-label` (D-29z629) becomes `rangeDeleteHint ?? (selectedClipId ? studioEditStrings.deleteClipLabel : studioEditStrings.deleteButton)` [K3].
-  - With no target, the name is `Delete` and the needs-target sentence stays the description.
-  - Rejected (`product-designer`): the sentence as the name, because it is long and voice control says "click Delete"; and dropping the label.
-
-### 2.5 Perf readiness predicate (D-29z631)
-Three perf specs wait for `add instanceof HTMLButtonElement && !add.disabled && wave !== null` [K9]. After this round `add.disabled` is always false.
-- B measured both forms on the video track: the old predicate is `true` on the sketch, which is vacuous, and the new one is `false` [K14].
-- Each of the three lines changes only `!add.disabled` → `add.getAttribute('aria-disabled') !== 'true'`.
-- `perf/**` is checked by `npm run typecheck` (L30; Biome does not cover `perf/`).
-
-### 2.6 Side effects of native `disabled` for the three new users (L49)
-| Effect | Ruling | Row |
+## 2. The contract
+### 2.1 Fixed waits: one ruling per site (D-29z637) [K1]
+| Site at HEAD | Ruling | After |
 |---|---|---|
-| Not focusable | dropped on purpose | B-TAB-2 |
-| Click suppressed | kept (wrapper) | SDU2, LPA1, LPA4, B-NOOP-2 |
-| `:disabled` CSS variants | moved to `aria-disabled:` / `not-aria-disabled:` | UI11, LPS1, DXG5, V-LOOK-2 |
-| AX "unavailable" | kept | B-AX-2 |
-| No mouse focus | kept for Preview and Add; **dropped for the metronome** (variant X) | LPA1, UI12, B-VARIANT-X |
-| Global press scale `:not([aria-disabled="true"])` | kept (stage 1 already covers `[aria-disabled]` [K8]) | V-PRESS-2 |
-| Playwright `click()` actionability | Playwright also waits on `aria-disabled`; probes click soft-disabled buttons with `page.mouse.click` at the box centre | harness note |
+| 1a l.574, 1b-i l.637 (after load) [K1] | replace | `waitForCollectionReady(page, result.problems, 'after load')` |
+| 1b-ii l.524 (after load, before the forced GC and the ready-heap read) [K1] | **keep** | B measured that `res.mem.used-ready-mib` depends on the time since load: 5.3 at HEAD, 5.6–5.8 with a quiet wait (v1), 5.9–6.0 with the status wait (v2). The fixed 1000 ms is part of that measurement's definition, so it stays. Sketch v3 keeps it, and 1b-ii is then equivalent (§4) |
+| 1a l.668 (after Play, before the group fader) [K1] | replace | `waitForPlaybackSettled(page, result.problems, 'play for fader.group.playing')` |
+| 1b-i l.703 (after Play with 30 clips, before the fade drag) [K1] | replace | `waitForPlaybackSettled(page, result.problems, \`play with ${clipsTarget} clips\`)` |
+| 1b-ii l.279 (300 ms after the export dialog's primary is enabled, before the click) [K1] | replace | `waitForStudioQuiet(page, result.problems, \`export ${clips}: dialog open\`)` |
+| 1a l.579 (2000 ms after the Add click) [K1] | **keep** | It defines the `harness.hook-live` window [K13]. `tech-lead` (keep; doc 168's hygiene ruling [K15]) over `performance-optimizer` (replace as a named exception): keep, so this round has no named exception |
+| 1a l.597 (1 s after Play, before the 5 s idle window) [K1] | **keep** | It defines where the `play.idle-*` window starts; the spec sequence and `budgets.json` notes say "1 s settle" [K10]. Both consults: keep |
+| 1a l.600 [K1] | **keep** | It is the idle measurement window itself |
+| 1b-ii l.180 (300 ms after forced GC) [K1] | **keep** | GC completion has no page-side signal |
+| 1b-ii l.342 (`observerSettleMs` after the export window) [K1] | **keep** | A flush wait after the window closes; it feeds only wallclock long-task/LoAF rows. `performance-optimizer` proposed a double-rAF replacement; not adopted, because a rAF does not guarantee that buffered observer callbacks have run |
+| 1b-ii l.659, `page.ts` l.40/l.53 [K1] | out of scope | poll intervals, not settles |
 
-### 2.7 Out of scope (recorded, not built)
-- The preview wave slider (`aria-disabled={!isReady}` on a `div`) is already focus-correct (`tabIndex -1` when not ready) [K6]: unchanged.
-- B-R275-FOCUS-REASON-VISIBLE is revisited now that stage 2 is planned. It stays in `deferred_low_polish` for the polish pass.
-- B-R276-CURSOR-UNLAYERED-GLOBAL stays deferred: the natively disabled buttons elsewhere.
-- B-R275-SPLIT-HELD-ENTER stays deferred.
+`idleSettleMs` stays declared in all three specs [K2]: 1a l.597, 1b-i l.527, 1b-ii l.524 [K16].
+
+### 2.2 New helpers in `perf/lib/page.ts`
+- `QuietWaitResult { at: number; capped: boolean }` and `waitForQuietState(page, from, minMs)`: the old `waitForQuiet` loop, which also reports whether it stopped because the 3 s cap was hit [K7]. The quiet test, cap and poll interval are unchanged.
+- `waitForQuiet(page, from, minMs)` keeps its signature and returns `waitForQuietState(...).at`. Every existing caller is unchanged.
+- `waitForStudioQuiet(page, problems, label)`: quiet from now with `minMs` 0. If the cap was hit it pushes `${label}: no 200 ms without commits or start() calls within 3000 ms` to `problems`. A cap hit is never silent.
+- `waitForCollectionReady(page, problems, label)`: `expect(getByTestId('arrangement-status')).toHaveText(perfCollectionReadyPattern, { timeout: 15000 })`, then `waitForStudioQuiet`.
+- `waitForPlaybackSettled(page, problems, label)`: `expect.poll(() => isPlaying(page), { timeout: 15000 }).toBe(true)`, then `waitForStudioQuiet`.
+
+`perf/lib/app-labels.ts` exports `perfCollectionReadyPattern`: `^` + the escaped `workspaceCollectionCopy('demo').ready`, imported from `app/lib/arrangement/collection.ts` [K14]. The pattern is anchored at the start because `settledCollectionStatus` may append text after the ready sentence [K14]. The status line has one `data-testid="arrangement-status"` [K17]. The status text is never written into the harness by hand.
+
+### 2.3 GATE214-S2: the deselect lane (D-29z254, re-ruled here)
+`emptyLanePoint(page, 'stems')` [K3] becomes `emptyLanePointAfterClip(clip)`:
+- it starts from `clip.closest('[data-track-id]')`;
+- it walks the `[data-track-id]` lanes in DOM order **after** that lane, skipping a lane that contains or is contained by it;
+- it uses the same probe as before: an `elementFromPoint` scan every 8 px at the lane's middle y, right half of the window only, not inside a clip, button, input or slider;
+- it throws if no later lane has such a point, and also if the chosen lane is the clip's own lane.
+
+B's probe at `873d835` (`b-round-278/probe/lane.json`): the DOM order is video, music, stems, sfx. Add lands on music, which has no free right-half point. The first later lane with one is stems (x 724 at 1440×900, x 644 at 1280×720). So behaviour is unchanged, and the 1b-i sequence text "empty Stems lane click" [K4] and the `budgets.interactions.json` note stay true and unchanged (D-29z640).
+
+The old `emptyLanePoint` is deleted. It has no other caller in `perf`, `app` or `e2e` [SW-A].
+
+### 2.4 GATE223-S2: release on every path [K6]
+In `measureExport` (1b-ii), the observer install, the `timeOrigin` read, the poll-loop start and the download listener move inside the `try` whose `finally` releases them. Their order is unchanged: install → `timeOrigin` → poll loop → download listener → click.
+- `pollLoop` is declared before the `try` as `let pollLoop: Promise<void> = Promise.resolve();` and assigned inside it.
+- `let observerInstalled = false;` is set to `true` right after the install `evaluate` resolves.
+- The `finally` reports `the "WAV created" observer was not released` only when `observerInstalled && !released`.
+
+`performance-optimizer` found the wider leak: a throw between the old install and the old `try` also left the poll loop polling `cdp` every 50 ms after the context closed.
+
+### 2.5 Equivalence contract (D-29z640)
+**Oracle:** `b-round-278/baseline-results/latest*.json`. This is B's run at `873d835` on a `git archive`: 3/3 pass in 15.2 min. 1b-i took 5.5 min, 1b-ii 1.1 min and 1a 8.4 min. `complete` is true, `failures` and `problems` are empty. Its 1a (166) and 1b-i (106) deterministic medians are identical to `c-round-259/latest*.json`. Its 1b-ii differs from round 259 only in 3 DOM rows and 4 JS-bytes rows, moved by app rounds 260–278.
+
+**Pass on A's tree:** run `python3 -I ../tmp/studio-real-loop/b-round-222/scripts/equiv-check.py <oracle> <new>` from `store/`, for each of the three reports. Each must exit **0 with 0 problems**:
+- same envelope (sequence included), row ids and order, and row fields (`note` included);
+- every deterministic median identical;
+- every assert row's pass identical;
+- `complete: true`, `failures: []`, and no pass with `abortedAt`, `pageErrors` or `problems`.
+
+**There is no named exception.** A deterministic row that moves is a STOP (§10), not a re-baseline. b-ii-2 owns the re-baseline of the export window.
+
+**Same-machine HEAD re-run clause** (the round-223 rule, `consults_round_223`): each cloud job runs on a fresh machine, and B measured that `res.mem.used-ready-mib` shifts with half a second of timing. A deterministic difference counts against A only if a `git archive 873d835` run **on the same machine** reproduces the oracle's value for that row. Run it alone (L38), with the same command, and give it its own Vite `cacheDir` if a dev server is involved (L38). If HEAD reproduces A's value instead, the row is machine-sensitive: record it as data, not a FAIL, and it becomes a candidate for b-ii-2's exception list.
 
 ## 3. Consults and rulings
-- **`product-designer`:**
-  - Q-A: wrap the label in a span and dim the child.
-  - Q-B: the five Add titles.
-  - Q-C: include Preview.
-  - Q-D: `Delete` as the no-target name.
-  - Q-E: confirmed the cursor `!`.
-  - Variant X for the metronome draft click.
 - **`tech-lead`:**
-  - file and names (§2.1);
-  - the wrapper over inline guards;
-  - the exact tokens and the compiled `!` rule;
-  - the perf predicate;
-  - the collisions (all granted, §5).
-- **The one disagreement, Preview in or out:** `tech-lead` would keep Preview native this stage. `product-designer` would include it: Preview and Add sit side by side, and Tab would stop on one and skip the other. **Ruling: include** (product-designer decides user-visible trade-offs, policy 2026-10-30). Cost: one more button in the same file, already in B's sketch. Benefit: the shared `LIBRARY_SURFACE_FILL` test constant stays one list instead of splitting.
-- **Status writes (note_retro275):** the sketch adds no `setStatus`. Evidence line for ARCH-CHECKPOINT-SYS6-STATUS-TAG: "SYS-5 stage 2 adds no status write; variant X reuses the existing tempo and metronome writes".
-- **L51 for variant X:** the existing order is tempo commit (`Tempo 120 BPM …`), then `Metronome is on — …`. The final text is the metronome text, measured at HEAD and on the sketch [K15]. No new write, so no new lifetime.
+  - helpers in `page.ts` as a thin wrapper over `waitForQuiet`, returning `capped`;
+  - keep l.579, and rule l.597 [K1];
+  - no new unit rows, because `vitest.config.ts` includes `app/**` only [K9] (ROOT-REQ-VITEST-PERF-INCLUDE stays open);
+  - grants, and the frozen config and budgets;
+  - **split (b) into its own round**;
+  - the poll loop is also before the `try`;
+  - file the timeout request now;
+  - architecture signal B-R279-PERF-READY-WAIT-DUP (recorded, not scheduled).
+- **`performance-optimizer`:**
+  - the per-site table;
+  - the poll-loop leak and the installed flag;
+  - the lane guard;
+  - "filter `kind` deterministic, then compare";
+  - the mutant ideas;
+  - 25 min for the timeout;
+  - the b-ii-2 design (clock-offset probe, sample midpoints, keep ≥ 5).
+- **Disagreements:**
+  - **l.579:** keep (tech-lead) [K1].
+  - **l.342:** keep (B, reason in §2.1) [K1].
+  - Both are recorded in `backlog.json` `consults_round_279`.
+- **Advisor:** used before writing.
 
-## 4. Neighbour risk
-- **Transport handoff.** The handlers are rewrapped. Covered by FL3–FL10 and SD1–SD7, plus mutant G.
-- **Tab order.** It grows by the metronome when there is no BPM, and by Preview/Add while unavailable. Covered by B-TAB-2.
-- **Library add from the keyboard.** HA1–HA6 in `held-enter-add` are unchanged. HA5's available-state read gains an `aria-disabled` check.
-- **Perf harness ready time.** §2.5 and B-PERF-PREDICATE.
-- **Look.**
-  - The metronome fill and the Add border and fill are no longer dimmed with the button.
-  - B measured ΔE2000 against HEAD on the sketch (`b-round-277/probe/sketch.json`, method `avg()` in `probe/sketch.cjs`): metronome mean 1.57, brightest 1.76, edge 1.57; Add on the video track mean 2.83, brightest 2.31, border 1.88.
-  - Boxes are equal: metronome 77×16 px, Add 128×34 px [K14].
-  - This is the stage-1 Q3 trade-off and is accepted at ≤ 3.
+## 4. B's pre-check (L23: the sketch is pre-applied and measured)
+B applied all of §2 to a `git archive` copy of `873d835` (`/tmp/b278-sketch`, node_modules symlinked), saved as `b-round-278/sketch.diff`.
 
-## 5. Grants (exact; also in `b-round-277-r278-grants.txt`)
+**Sketch v1** (quiet-only wait after load):
+- `tsc` rc 0;
+- perf 3/3 run: 1a and 1b-i passed, and 1b-ii failed its own determinism check on `res.mem.used-ready-mib` (`b-round-278/sketch-perf-run.log`);
+- equiv-check against the oracle: 1a 1 problem and 1b-i 1 problem (`hook-live` 2 → 3); 1b-ii 2 problems (`used-ready-mib`). Every other deterministic row was identical, including `fader.group.playing.*`, `interact.drag.fade.30.playing.*`, the export rows after the dialog-open wait, and the clip-click rows after the lane change.
+
+That result is why §2.1 uses `waitForCollectionReady` after load.
+
+**Sketch v2** (status wait after load at all three load sites):
+- `tsc` rc 0, and perf 3/3 pass in 15.0 min (1b-i 5.4, 1b-ii 1.1, 1a 8.2 min) (`b-round-278/sketch2-perf-run.log`);
+- equiv-check: 1a **0 problems** and 1b-i **0 problems** (`sketch2-results/`). `hook-live` is back to 2;
+- 1b-ii had 1 problem: `res.mem.used-ready-mib` 5.3 → 5.9–6.0.
+
+**Sketch v3 = this task's sketch** (v2 with 1b-ii l.524 kept, §2.1) [K1]:
+- `tsc` rc 0;
+- 1b-ii re-run alone: 1 passed, equiv-check **0 problems** (`sketch3-perf-run.log`, `sketch3-results/`);
+- 1a and 1b-i are byte-identical between v2 and v3, so their v2 results stand.
+
+The final files are in `b-round-278/sketch-final/`, and `sketch.diff` is regenerated from them.
+
+**Mutants B ran on v3** (scratch copies, removed afterwards; logs `b-round-278/mutant-*.log`):
+- **MU-OBS-2: red.** Both passes shown: `abortedAt` `export 1 clip`, problems `the "WAV created" observer was not released`.
+- **MU-OBS-3, the control: green.** Only `aborted at export 1 clip: MU-OBS-2`.
+- **MU-LANE: red.** `abortedAt` `clip click`: "no lane after the clip's lane music has an empty timeline point".
+
+MU-READY, MU-CAP and MU-PLAY are left to A and C.
+
+**Re-measurement (policy: "re-measures"):** B's HEAD run (§2.5) is the oracle. PERF-1a took 8.4 min at HEAD and 8.2 min on the sketch, so the state waits save about 2 % (`performance-optimizer` estimated about 3 %).
+
+## 5. Grants (exact; also in `b-round-278-r279-grants.txt`)
 | Path | What may change |
 |---|---|
-| `app/components/arrangement/studio-soft-disabled.ts` | new, §2.1 |
-| `app/components/arrangement/ArrangementTransport.tsx` | remove the local helper and the `MouseEvent` import, import the shared one, wrap the seven guards, the cursor `!` token, Delete's `aria-label` (§2.1, §2.4). Nothing else |
-| `app/components/arrangement/ArrangementTempoRow.tsx` | the metronome button only (§2.3) + the import |
-| `app/components/arrangement/ArrangementLibraryPreview.tsx` | the Preview and Add buttons, the two title constants (§2.2) + the import |
-| `app/lib/arrangement/strings.ts` | eight keys in `studioLibraryPanelStrings` (§1 texts; names as in the sketch) |
-| `app/lib/arrangement/__tests__/metronome-ui.test.tsx` | UI1, UI2, UI6 and UI11 reads/tokens as in the sketch; new UI12–UI14 (§6.2) |
-| `app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx` | DXT4 metronome branch and the DXT8 `TEMPO_ROW_PATH` counts, as in the sketch. The round-276 clause "TEMPO_ROW_PATH byte-identical" is **reversed** for this round: the metronome's on-string moves to `not-aria-disabled:` |
-| `app/lib/arrangement/__tests__/library-preview.test.tsx` | l.251 as in the sketch; new LPA1–LPA5 (§6.2) |
-| `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` | `LIBRARY_SURFACE_FILL` and the two `disabled:opacity-40` tokens, as in the sketch |
-| `app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx` | the DXG5 Add token, as in the sketch |
-| `app/lib/arrangement/__tests__/self-disabling-focus.test.tsx` | SD7's cursor token, as in the sketch; new SD8, SD9 (§6.2) |
-| `app/lib/arrangement/__tests__/transport-centre-ui.test.tsx` | TC1's Delete name, as in the sketch |
-| `app/lib/arrangement/__tests__/strings.test.ts` | ST49 keys, literals, length 24 → 32, as in the sketch |
-| `app/lib/arrangement/__tests__/held-enter-add.test.tsx` | HA5: add `expect(add.hasAttribute('aria-disabled')).toBe(false);` after l.270 [K16]. Nothing else |
-| `app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx` | new, §6.2 SDU1–SDU4 (renders plain buttons, no workspace, so the factory rule does not apply) |
-| `perf/studio-lab-interactions.perf.spec.ts`, `perf/studio-lab.perf.spec.ts`, `perf/studio-lab-resources.perf.spec.ts` | the one predicate line each (§2.5) |
-| `docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md` | **l.4** → exactly `**სტატუსი:** Completed (C round 278 PASS)` (L28, final stage); **l.9** `მეორე ეტაპი (277)` → `მეორე ეტაპი (278)`; **l.65** `(რაუნდი 277)` → `(რაუნდი 278)` [K11]. Nothing else |
-| `docs/implementation/2026/quarter-IV/207-sys-5-disabled-reasons-stage-2.md` | new [K12]; l.4 exactly `**სტატუსი:** Completed (C round 278 PASS)`; the seven TEMPLATE headings (L26); every cited row id exists |
+| `perf/lib/page.ts` | §2.2 helpers; `waitForQuiet` becomes the wrapper. The import line from `./app-labels`. Nothing else |
+| `perf/lib/app-labels.ts` | the `workspaceCollectionCopy` import and `perfCollectionReadyPattern` (§2.2). Nothing else |
+| `perf/studio-lab.perf.spec.ts` | the l.574 and l.668 replacements and the import list |
+| `perf/studio-lab-interactions.perf.spec.ts` | the l.637 and l.703 replacements, §2.3 (`emptyLanePoint` → `emptyLanePointAfterClip` and its call), the import list |
+| `perf/studio-lab-resources.perf.spec.ts` | the l.279 replacement, §2.4, the import list. l.524 and `idleSettleMs` stay |
+| `docs/implementation/2026/quarter-IV/208-perf-harness-state-waits.md` | new [K11]. l.4 exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 279 PASS)` (L28 multi-stage). The seven TEMPLATE headings (L26). Every cited row or mutant id exists in this task |
+| `docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md` | the whole `### Helper-ების რუკა (\`perf/lib/page.ts\`)` section (L34: the new helpers), the whole `### GATE214-S2: …` section (now done in round 279), and the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` |
+| `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only |
+| `docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only (GATE223-S2 done; R216 → b-ii-2) |
+| `docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only |
 
-**Frozen:** the manifest is the authority. It includes `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `shortcuts.ts`, `app.css`, `utilities.css`, `e2e/**`, `package.json`, `package-lock.json`, `fader-style-ui.test.tsx` and `navigation-strings-ui.test.tsx`.
+**Frozen:** the manifest is the authority. It includes all of `app/**` (no app change: `collection.ts` is imported, never edited), `perf/budgets*.json`, `perf/lib/{report,determinism,instrumentation,budgets,stats}.ts`, `perf/lib/report.test.ts`, `playwright.perf.config.ts`, `vitest.config.ts`, `package.json` and `package-lock.json`. **No `test.setTimeout` anywhere** (D-29z638).
 
 **Protected auth/purchase (never touched):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token*`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`.
 
 ## 6. Tests
-### 6.1 Collisions, pre-applied by B (L23, no assertion lost; equal or stronger)
-B applied the whole of §2 plus these test edits on a scratch copy of `42872cf`:
-- targeted: 13 files, 181/181 pass (`b-round-277/sketch2-vitest.log`);
-- full `npx vitest run`: 220 files, 3294 tests pass (`b-round-277/sketch-full-vitest.log`). The variant-X edit landed during that run, and the four tempo-row files were re-run after it: 38/38;
-- `tsc --noEmit` rc 0 (`sketch-tsc.log`); Biome clean on the 5 source and 8 test files (`sketch-biome.log`).
+There is no vitest change: `perf/**` is outside the vitest include [K9]. The proof is the real perf run, the equivalence check and the named mutants.
 
-| File | Edit (sketch) |
-|---|---|
-| `metronome-ui` | UI1/UI2/UI6/UI11: `.disabled` → `aria-disabled` `'true'`/absent, **plus** `hasAttribute('disabled') === false`; the tokens move to the §2.3 set |
-| `mode-toggle-colour-ui` | DXT4: metronome on → `TRANSPORT_ON_TOKENS` + `not-aria-disabled:hover:text-foreground`. DXT8: the old on-string count for `TEMPO_ROW_PATH` 1 → 0, plus a new count 1 for the `not-aria-disabled` on-string |
-| `library-preview` | l.251 → `aria-disabled` `'true'` + no `disabled` + the exact title `Add — make an audio track active first` |
-| `library-row-strings-ui` | `LIBRARY_SURFACE_FILL` → the `not-aria-disabled` pair + `aria-disabled:cursor-not-allowed!`; `disabled:opacity-40` → `aria-disabled:*:opacity-40` (×2) |
-| `drag-feedback-colour-ui` | DXG5 Add token → `aria-disabled:*:opacity-40` |
-| `self-disabling-focus` | SD7 cursor token → `aria-disabled:cursor-not-allowed!` |
-| `transport-centre-ui` | TC1 (no target) Delete name → `Delete`. The old label stays asserted in its clip-selected state in SD4 and NS1 (unchanged files/lines) |
-| `strings.test.ts` | ST49 expected object, key list and length 24 → 32 |
+### 6.1 What A runs (speed rules; L38: perf alone, nothing else running)
+1. `npm run typecheck` (it covers `perf/**`; Biome does not, L30) and `npm run lint` (app scope, should be unchanged).
+2. `CI=true npx playwright test --config playwright.perf.config.ts` once on the final tree, **alone**. Then the three `equiv-check.py` runs of §2.5. Report each spec's time from the Playwright list lines.
+3. The mutants of §6.2, each on a scratch copy outside `store/` (the a-round-223 method: `git archive` + A's diff + the mutant, node_modules symlinked). Run only the spec named in the row. A spec may be stopped once its first pass's report shows the red signal (the report is written after every pass).
+4. `code-reviewer` (more than 3 files). Pass its Architecture note to B.
 
-**Mutants B ran on the sketch** (each red; logs in `b-round-277/mutant-*.log`; files restored):
-- **G:** the wrapper's guard deleted → SD2 and SD2b red;
-- **C:** cursor without `!` → SD7 red;
-- **D:** Delete label reverted → TC1 red;
-- **A:** the video branch returns `addTitle` → library-preview l.251 red;
-- **M:** `disabled:opacity-50` back on the metronome → UI11 red.
+**L31:** the harness test is above 50 % of its 15-min timeout (1a 8.4 min = 56 %). This is ruled: ROOT-REQ-PERF-TIMEOUT is filed, and this round adds no row and no pass. It is not a STOP for A unless 1a goes **above 9.4 min** (more than 1 min over B's run). Report the time either way.
 
-### 6.2 New rows (A writes; B's sketch does not contain them)
-| Row | File | Start → action → expected | Red-proof (mutant) |
+### 6.2 Named mutants (each must be red; the signal is fixed in advance)
+| Id | Mutant (scratch only) | Spec to run | Red signal |
 |---|---|---|---|
-| SDU1 | `studio-soft-disabled.test.tsx` | render `<button {...softDisabledButtonProps(true)}>` → `aria-disabled="true"`, `fireEvent.mouseDown` returns `false`; `(false)` → no `aria-disabled` attribute, mouseDown returns `true` | props always `{}` |
-| SDU2 | same | `onClick={guardSoftDisabledClick(spy)}` with `aria-disabled="true"` → click: spy 0 calls; without → 1 call, receiving the event whose `currentTarget` is the button | G |
-| SDU3 | same | `isSoftDisabledButton`: `"true"` → true; `"false"` → false; absent → false | compare with `!== null` |
-| SDU4 | same | a wrapped button whose `aria-disabled` is removed by a rerender between two clicks → the first click 0 calls, the second 1 (the guard reads the DOM at click time) | guard closes over a prop |
-| UI12 | `metronome-ui` | no tempo: `toggle.focus()` makes it `document.activeElement`; its first element child is a `SPAN` with text `Metronome`; `fireEvent.click` → `aria-pressed` `'false'`, status text unchanged, Play schedules no metronome; `fireEvent.mouseDown(toggle)` returns **`true`** (variant X) | TempoRow uses `softDisabledButtonProps` → mouseDown `false` |
-| UI13 | `metronome-ui` | variant X in jsdom, browser order: change the field to `120` (no Enter), `fireEvent.mouseDown(toggle)`, `act(() => toggle.focus())` (the field blurs and commits), `fireEvent.click(toggle)` → field `120`, `aria-pressed` `'true'`, no `aria-disabled`, status = `metronomeStatusMessage(120)` | on a scratch copy, `handleTempoBlur` stops committing → red. (A guard deletion stays green because of the workspace no-op [K5], L52. The preventDefault half is proven by UI12 in jsdom and by B-VARIANT-X in the browser) |
-| UI14 | `metronome-ui` | same sequence with `abc` → `aria-pressed` `'false'`, `aria-disabled` `'true'`, status = the tempo-invalid text, `document.activeElement` is the toggle (L47: never BODY) | — (records the state) |
-| LPA1 | `library-preview` | video track active, sound ready: Add soft-disabled; `fireEvent.mouseDown(add)` returns `false`; click → clip count unchanged **and** `api.current.status` unchanged (an unguarded click writes the video-lane refusal [K7]) | G (status changes) |
-| LPA2 | `library-preview` | audio track active, sound ready: Add has no `aria-disabled`, title `Add to the active track at the insert marker`; click → +1 clip | — |
-| LPA3 | `library-preview` | the no-sound, loading and failed states: exact Preview and Add titles of §1, both `aria-disabled="true"`. A state that `mountPreview` cannot produce in jsdom is listed in `a-round-278.md` with the reason (the SD5b precedent); C checks the statement against the fixture | title chain reordered |
-| LPA4 | `library-preview` | soft-disabled Preview (a not-ready state from LPA3) → click → `libraryPreviewSourceId` stays `null` | G |
-| LPA5 | `library-preview` | Add focused while soft-disabled (video track) → `setActiveTrack` to an audio track → `aria-disabled` removed, `document.activeElement` is still Add, a click adds exactly one clip | — |
-| SD8 | `self-disabling-focus` | no target: Delete `aria-label` === `studioEditStrings.deleteButton` (`Delete`), title `deleteNeedsTargetTitle`; after `selectClip` → `deleteClipLabel`; with a range → the range hint | D |
-| SD9 | `self-disabling-focus` | source scan of `ArrangementTempoRow.tsx` and `ArrangementLibraryPreview.tsx`: 0 `enabled:` tokens, 0 `disabled:` tokens, 0 `(^\|\s)disabled=\{` props; the two library buttons and the metronome render `aria-disabled:cursor-not-allowed!` | C (any file) |
+| MU-READY | `perfCollectionReadyPattern` built from `.empty` instead of `.ready` (a copy the demo never shows; `.loading` is not used, because the status can still read the loading text when the wait starts, so it could match at once) | 1b-i | pass 1 `abortedAt` = `load` (the `toHaveText` times out after 15 s) |
+| MU-CAP | in `waitForQuietState`, the evaluate argument `quietFor: quietMs` → `quietFor: 10000` (no window can be quiet; every wait runs to its 3 s cap) | 1b-ii | pass 1 `problems` contains `export 1: dialog open: no 200 ms without commits or start() calls within 3000 ms` |
+| MU-PLAY | `waitForPlaybackSettled` polls `.toBe(false)` | 1b-i | pass 1 (1×) `abortedAt` = `play with 30 clips` |
+| MU-LANE | `emptyLanePointAfterClip` walks only `[ownLane]` | 1b-i | pass 1 `abortedAt` = `clip click`, and the error text names `music` |
+| MU-OBS-1 | `throw new Error('MU-OBS-1')` right after `observerInstalled = true;` | 1b-ii | pass 1 `abortedAt` = `export 1 clip`, and `problems` has **no** `was not released` (the `finally` released it) |
+| MU-OBS-2 | MU-OBS-1's throw moved to the first line of the `try`, **and** `observerInstalled &&` removed from the `finally` | 1b-ii | `problems` **has** `was not released` (proves the flag) |
+| MU-OBS-3 | MU-OBS-2's throw with the flag kept (A's code) | 1b-ii | `problems` has **no** `was not released`; this is the control for MU-OBS-2 |
 
-For UI13, the red-proof is not a guard deletion (L52: that one stays green). A uses the honest one stated in the row.
+MU-OBS-3 is a control, not a mutant, and must be green on that line. "Delete the wait" mutants are not used; on a fast runner they can stay green (advisor).
 
-### 6.3 What A runs (speed rules; no full suite)
-1. `npm run typecheck` (covers `perf/**`) and `npm run lint`.
-2. `npx vitest run` on these files under `app/lib/arrangement/__tests__/`: `studio-soft-disabled`, `metronome-ui`, `mode-toggle-colour-ui`, `library-preview`, `library-row-strings-ui`, `drag-feedback-colour-ui`, `self-disabling-focus`, `transport-centre-ui`, `strings`, `held-enter-add`, `navigation-strings-ui`, `transport-surface-ui`, `tempo-ui`, `waveform-zoom`.
-3. Then `code-reviewer` (more than 3 files). Pass its Architecture note to B.
-
-**L31 (timeouts):** at gate 277 the slowest of these files is `drag-feedback-colour-ui`, 7 tests in 6.7 s. `metronome-ui` runs 11 tests in 3.35 s under a 15 s describe timeout. No covering test is near 50 %.
-
-### 6.4 Mutants (A runs each on a scratch copy; C re-runs G and the UI12 variant)
-G, C, D, A and M (§6.1), plus the red-proofs of SDU1, SDU3, SDU4, UI12, UI13 and SD9. Report red/green per row.
-
-## 7. B's pre-check (L23, L29, L50)
-- **Sweep [SW-A]** (the amended L23 form, every assertion form, roots `app`, `perf`, `e2e`): 49 files.
-  - The consumer filter by the buttons' testids, accessible names and accessors leaves 10 files [SW-A].
-  - Each is granted (§5) or ruled [K16]. `navigation-strings-ui` l.434 is Loop (stage 1, unchanged). `held-enter-add` l.270 is granted to strengthen. Perf l.230/l.278 (`toBeEnabled`) read a fader and the export primary, so they are an exclusion.
-- **Sweep [SW-B]** (old literals and old tokens): 7 hits.
-  - **granted:** `self-disabling-focus` l.652, `metronome-ui` l.523/l.524, `transport-centre-ui` l.193;
-  - **clip-selected state, unchanged:** `navigation-strings-ui` l.231;
-  - **the string's own unit, unchanged:** `strings.test.ts` l.420;
-  - **Clip Gain fader, an exclusion:** `fader-style-ui` l.426.
-- **Focus origins (L50):** `grep -cE 'onPointerDown(Capture)?|onBlur|settleEditor\(|\.focus\(|^\s*\{[^}]*(\.map\(|&&|\?)'` gives 5 hits each in TempoRow, LibraryPreview and Transport [K13]. Rulings:
-  - TempoRow l.141/l.146 (ruler pointer) and l.169/l.197 (ruler render): out of scope, nothing unmounts;
-  - TempoRow l.306 (the BPM field `onBlur`): the variant-X path, rows UI13, UI14 and B-VARIANT-X;
-  - LibraryPreview l.235/l.238/l.258/l.265/l.314: text and SVG renders, out of scope;
-  - Transport l.144 (handoff `.focus()`): FL rows and SD5;
-  - Transport l.210/l.234/l.274/l.346: prop spreads and text, out of scope.
-
-  No action in this round unmounts a focused element. LPA5 and B-ADD-ENABLE cover a focused Add that becomes available.
-- **Browser baseline at HEAD and on the sketch:**
-  - `b-round-277/probe/baseline.cjs` → `baseline.json`;
-  - `probe/sketch.cjs` → `sketch.json` (a second dev server on the scratch copy at :5174);
-  - `probe/variantx.cjs` → `variantx.json` [K14][K15].
-
-## 8. C rows (Chromium, `/studio-lab`, 1440×900 and 1280×720, fresh anonymous contexts)
-Wait for `Demo collection ready` first (L48).
-- Click a soft-disabled button with `page.mouse.click` at the box centre. Playwright's `click()` waits forever on `aria-disabled`, as B found.
-- Make the video track active with its header button `[data-track-id="video"] [data-testid="arrangement-track-header"] button[aria-label*="— set as the active track"]`.
-- The status line is `[data-testid="arrangement-status"]`.
-- HEAD control values come from `b-round-277/probe/*.json`. A second server at `42872cf` is optional.
-
-**Scope, claims, tests**
-| Row | Check |
-|---|---|
-| SOURCE-SCOPE | `sha256sum -c b-round-277-r278-tree-sha256.txt` rc 0. `git status --short` lists only §5 paths: 3 new (`??`), the rest `M` |
-| HUNK-SCOPE | the §5 files differ from `b-round-277/planning-copies/` only as in §2/§6. Source hunks equal `b-round-277/sketch.diff` (formatting aside). Doc 206 changes only l.4, l.9 and l.65, with l.4 byte-exact |
-| CLAIMS | `bash ../tmp/studio-real-loop/b-round-277/claims.sh` from `store/` on a scratch copy with the planning copies put back, which must equal `b-round-277/claims-output-at-42872cf.txt`. Plus the L29 sweep over this task |
-| SWEEP | re-run SW-A and SW-B on A's tree. Every hit has a §5 grant or a §7 ruling |
-| TESTS-TARGETED, TEST-CHANGES, MUTANTS | the §6.3 files pass. No assertion lost (read the diff against §6.1). Re-run G (SD2, SDU2, LPA1 red) and the UI12 mutant (red) |
-
-**Browser behaviour**
-| Row | Recipe | Expected |
-|---|---|---|
-| B-TAB-2 | empty demo (no BPM): Tab from the document start ×140; then make the video track active and Tab to Add. Backward: End, then Shift+Tab | Metronome is a Tab stop with `aria-disabled="true"` and a visible ring (`:focus-visible`, outline ≥ 1 px, brass). Add on the video track is a stop with `aria-disabled="true"`. At HEAD the metronome was never reached [K14] |
-| B-AX-2 | CDP `Accessibility.getFullAXTree` on Metronome (no BPM) and Add (video track) | each is a button, `disabled: true`, description = its §1 title, name `Metronome` / `Add` |
-| B-NOOP-2 | the metronome is focused (no BPM): Enter. Add on the video track: Tab + Enter, then a mouse click | metronome `aria-pressed` stays `false`, status unchanged. Add: no clip, status unchanged, Undo title unchanged. After the mouse click on Add, `document.activeElement` is the element focused before (the video header button in B's run), not Add, not BODY |
-| B-VARIANT-X | empty demo: click the BPM field, type `120` (no Enter), mouse-click Metronome | field `120`; `aria-pressed="true"`; no `aria-disabled`; status = `Metronome is on — 120 BPM, 4/4: a click on every beat, louder on the first beat of each bar. Not included in the export.` (equal to HEAD [K15]). Then with `abc`: status `Tempo must be 20–999 BPM (e.g. 90 or 92.5) — not changed.`, `aria-pressed="false"`, focus on the toggle |
-| B-ADD-TITLES | hover 1.5 s: Add on an audio track (a sound selected) → `Add to the active track at the insert marker`; on the video track → `Add — make an audio track active first`. The no-sound/loading/failed titles are jsdom rows (LPA3). C records whether any is reachable in the demo (data only) | native tooltip text = the title |
-| B-ADD-ENABLE | video track active, focus Add (Tab), then click the audio track's header button with the mouse, then Shift+Tab back to Add and press Enter | `aria-disabled` absent and the title is the available text; Enter adds exactly one clip |
-| B-CURSOR | hover the soft-disabled Split, Delete, Loop, Metronome and Add (video track); control: Fit, and Add on an audio track | computed `cursor` is `not-allowed` on each soft-disabled button and `pointer` on the controls. Closes C-R276-01 |
-| B-DELETE-NAME | empty demo; then select a clip; then make a range | AX name `Delete` → `Delete — the selected clip; leaves a gap` → the range hint; the description is the title in each state |
-| B-PERF-PREDICATE | on A's tree, evaluate the new perf predicate (§2.5) in the page: on a fresh load poll every 100 ms until `Demo collection ready`; then with the video track active; then with an audio track active | false before Add is available, false on the video track, true on an audio track with the wave drawn. The old predicate is `true` on the video track (vacuous), recorded as data |
-| B-HANDOFF-REG | stage-1 B-HANDOFF-DELETE and B-HANDOFF-UNDO, re-run once each at both viewports (the guards were rewrapped) | focus on Undo / Redo as in round 276 |
-| STUDIO-SMOKE-278 | the round-277 smoke (play/stop, the playhead moves, live RMS > 0.001, export WAV) | export sha256 equals `1fea093b…f94` (no audio path changed) |
-
-**Look**
-| Row | Check |
-|---|---|
-| V-LOOK-2 | Metronome (no BPM) and Add (video track) at rest, sampled with B's `avg()` method (`b-round-277/probe/sketch.cjs`). Pass: ΔE2000 against HEAD's values in `probe/sketch.json` ≤ 3 for mean, brightest and left-edge-mid. Boxes ±0 px (77×16 and 128×34). This is the measured §4 trade-off |
-| V-HOVER-2 | hover the soft-disabled Metronome, Add and Preview (when reachable) | computed `background-color` equals the rest value |
-| V-HOVER-ENABLED-2 | hover and press the available Metronome (on and off), Add and Preview | backgrounds equal HEAD's in the same state (data from a HEAD run or a second server) |
-| V-PRESS-2 | mousedown and hold on the soft-disabled Add | computed `transform` is `none` |
-| V-RING-2 | keyboard-focus Metronome (no BPM) and Add (video track) | the outline is painted at full strength (not dimmed by the child opacity) and ring vs background ≥ 3:1 (measured) |
-| SCREEN-BUDGET | persistent text lines outside the timeline, empty demo and demo with a clip, HEAD vs new | equal (L39) |
-
-**Guards and docs**
-| Row | Check |
-|---|---|
-| C-R276-02-KEEP | focus the BPM field and type `9` (no Enter); mouse-click a soft-disabled **transport** button (Split) | the field keeps focus and its draft (the stage-1 keep ruling still holds outside the metronome) |
-| G278-AUTH | `/studio-lab` anonymous with the badge "Demo collection — no sign-in required". `/studio/middle-east` signed out shows "Sign in required" with 0 `audio[src]`. `/api/studio-token` with no header → 401, no token |
-| DOC-206-207 | doc 206: l.4 byte-exact `**სტატუსი:** Completed (C round 278 PASS)`, l.9 and l.65 say 278, nothing else changed. Doc 207: l.4 byte-exact, the seven TEMPLATE headings in order (L26), every cited row id exists in its test file |
-| gate | full vitest, typecheck, build, Biome, `npm run verify`, `test:e2e:smoke`: **gate** rows, not claimed in `passed` |
-
-**Ableton conformance**, separate from the CZABA requirement:
-- the APG point: confirmed;
-- Live's metronome: never unavailable (§19.4), so CZABA's unavailable state is a listed Saba-decision deviation;
-- Live's treatment of unavailable controls: unconfirmed (LIVE-MEAS-SYS5-DISABLED);
-- variant X: matches HEAD (measured), and Live's behaviour is unconfirmed.
-
-## 9. Claims (L29). Run `bash ../tmp/studio-real-loop/b-round-277/claims.sh` from `store/` at HEAD `42872cf`
-B's output is `b-round-277/claims-output-at-42872cf.txt`.
+## 7. B's claims and sweeps (L29). Run `bash ../tmp/studio-real-loop/b-round-278/claims.sh` from `store/` at HEAD `873d835`
+B's output is `b-round-278/claims-output-at-873d835.txt`.
 
 | Tag | What | Expected |
 |---|---|---|
-| K1 | the local helper and the guards in `ArrangementTransport.tsx` | definitions at l.60, 64 and 70; guards at l.167, 186, 205, 227, 341, 395 and 416 |
-| K2 | `aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40` in Transport | 1 (l.53) |
-| K3 | Delete's `aria-label` | l.241, `rangeDeleteHint ?? studioEditStrings.deleteClipLabel` |
-| K4 | metronome: `onClick`, the `disabled` prop, the bare label | l.316, l.317 and l.328 |
-| K5 | `toggleMetronome` returns on a null tempo | 1 |
-| K6 | library: `canAdd` l.111; Preview `disabled` l.307; Add `onClick` l.327; Add `disabled` l.333; the wave slider's `tabIndex={isReady ? 0 : -1}` (its `aria-disabled` is l.244) | as listed |
-| K7 | `setStatus(` writes in `addSourceToActiveTrack` l.1625–1651 | 3 |
-| K8 | `app.css` `button { cursor:pointer }`; the press-scale selectors with `:not([aria-disabled="true"])` | l.483; app.css l.380–381, utilities.css l.73–74 |
-| K9 | perf `!add.disabled` | interactions l.561, resources l.197, studio-lab l.521 |
-| K10 | metronome in `shortcuts.ts` | 0 |
-| K11 | doc 206 l.4, l.9 (contains `(277)`) and l.65 (`(რაუნდი 277)`) | as listed |
-| K12 | last doc in quarter-IV | `206-sys-5-disabled-reasons-stage-1.md` |
-| K13 | the L50 grep counts for TempoRow, LibraryPreview and Transport | 5, 5, 5 |
-| K14 | browser, HEAD: `probe/baseline.json` and the `head@*` entries of `probe/sketch.json` | **Metronome:** `disabled: true`, not reached by Tab, `cursor: pointer`. **Add:** natively disabled on the video track, `title` empty. **Split/Delete soft-disabled:** `cursor: pointer`. **Delete label:** `Delete — the selected clip; leaves a gap`. **Perf predicate on the video track:** old `false` |
-| K15 | browser, HEAD: `probe/variantx.json` `head` | `120` then click: `aria-pressed` `true`, status `Metronome is on — 120 BPM, …`. `abc`: status invalid, focus BODY |
-| SW-A | the assertion-form sweep, then the consumer filter | 49 files, then the 10 listed in `claims-output-at-42872cf.txt` |
-| SW-B | old literals and tokens | 7 hits (§7) |
-| K16 | the sweep-ruled lines | `navigation-strings-ui` l.434 is the Loop `hasAttribute('disabled')` read; `held-enter-add` l.270 is HA5's read; perf l.230 is the fader locator and l.278 the export primary (counts 1, 1) |
+| K1 | `waitForTimeout(` in `perf/*.ts`, `perf/lib/*.ts` | 14 lines: interactions l.637/l.703; resources l.180/l.279/l.342/l.524/l.659; 1a l.574/l.579/l.597/l.600/l.668; page.ts l.40/l.53 |
+| K2 | `const idleSettleMs` | interactions l.45, resources l.50, 1a l.50 |
+| K3 | `emptyLanePoint(` | definition l.188; the call l.467 with `'stems'` |
+| K4 | sequence text "empty Stems lane click" | interactions l.58 |
+| K5 | `perfFixtureTracks` | music, stems, sfx (app-labels l.96–98) |
+| K6 | resources: `new MutationObserver` l.287, `const timeOrigin =` l.296, `const pollLoop =` l.301, the export `try {` l.321, `was not released` l.445 | as listed |
+| K7 | `waitForQuiet` returns on the cap as if quiet | page.ts l.48 (`… \|\| now - start >= cap`), l.52 |
+| K8 | perf timeout | `playwright.perf.config.ts` l.10, 15 min |
+| K9 | vitest include | `app/**/*.test.{ts,tsx}` only |
+| K10 | `budgets.json` notes with "1 s settle", "2 s after the Add" or 2000 | count 4 |
+| K11 | last doc in quarter-IV | `207-sys-5-disabled-reasons-stage-2.md` |
+| K12 | docs that describe these waits | 163, 168, 169, 175, 176 |
+| K13 | the 1a hook-live window | l.579 `waitForTimeout(2000)` |
+| K14 | `collection.ts`: `ready:` copy lines and the prefix-append branch | l.19 (demo `ready:`), l.33 (purchased), l.60 (`${settled} ${current.slice(…)}`), l.65 `workspaceCollectionCopy` |
+| K15 | doc 168's ruling on the 1a Add wait | doc 168 l.209: the `waitForTimeout(2000)` after Add is the `harness.hook-live` window and stays |
+| K16 | every `idleSettleMs` use | 11 lines (interactions l.45/527/637/703; resources l.50/524; 1a l.50/81/574/597/668) |
+| K17 | the status testid in `app/components` | 1 |
+| SW-A | `emptyLanePoint\|idleSettleMs\|waitForQuiet\b` in `perf`, `app`, `e2e` outside the specs and `page.ts` | 0 hits |
+| K-LANE | browser recipe, `b-round-278/probe/lane.cjs` (run with `NODE_PATH=$PWD/node_modules` from `store/`) | `lane.json`: lanes video, music, stems, sfx; the clip on music; the first later empty lane is stems at both viewports |
+| K-TAIL | browser recipe, `b-round-278/probe/load-tail.json` (the probe spec is kept as `/tmp/b278-probe/zz-probe.perf.spec.ts`, copy in `b-round-278/probe/`) | ready commit at ~1.06–1.13 s, status commit 470–510 ms later, 0 `start()` calls |
+
+**Focus origins (L50):** not applicable. No app code, no focus change.
+
+## 8. C rows (C runs nothing else while a perf spec runs, L38)
+| Row | Check |
+|---|---|
+| SOURCE-SCOPE | `sha256sum -c b-round-278-r279-tree-sha256.txt` rc 0. `git status --short` lists only §5 paths (1 `??`: doc 208) |
+| HUNK-SCOPE | the five perf code files (`page.ts`, `app-labels.ts` and the three specs) equal `b-round-278/sketch.diff` applied to `873d835`. Formatting may differ (Biome does not cover `perf/`); state any semantic difference. The doc hunks stay inside the §5 sections |
+| CLAIMS | `claims.sh` on a clean `873d835` archive equals `claims-output-at-873d835.txt`. Plus the L29 sweep over this task |
+| SWEEP | SW-A on A's tree: 0 hits. Also `grep -rn "test.setTimeout" perf` = 0 |
+| KEEP-WAITS | on A's tree, 1a still has `waitForTimeout(2000)` (the hook-live window), `waitForTimeout(idleSettleMs)` once (the idle settle) and `waitForTimeout(idleMeasureMs)`. 1b-ii still has `waitForTimeout(idleSettleMs)` once (before the ready heap), l.180's 300 ms GC wait and `observerSettleMs`. 1b-i has no `waitForTimeout(idleSettleMs)` |
+| TYPECHECK | `npm run typecheck` rc 0 (it covers `perf/**`) |
+| PERF-RUN | `CI=true npx playwright test --config playwright.perf.config.ts` alone on A's tree: 3/3 pass. Record each spec's time and Chromium version |
+| EQUIV | §2.5: the three `equiv-check.py` runs against `b-round-278/baseline-results/` exit 0 with 0 problems. On a deterministic difference, apply §2.5's same-machine HEAD re-run clause before calling it a FAIL. An environment-invalid run (overlap, machine load) is kept and replaced at most twice (L38) |
+| MUTANTS | re-run MU-LANE, MU-OBS-2, MU-OBS-3 and MU-READY (fast: their passes abort early; 1b-ii is about 1 min). Each gives its §6.2 signal |
+| TIMEOUT-DATA | PERF-1a time on A's tree, against 15 min. Data for ROOT-REQ-PERF-TIMEOUT, not a pass/fail row unless above 9.4 min |
+| LANE-BROWSER | run `b-round-278/probe/lane.cjs` against :5173: the same order, and stems as the first later empty lane at both viewports |
+| G279-AUTH | `/studio-lab` anonymous with the badge "Demo collection — no sign-in required". `/studio/middle-east` signed out shows "Sign in required" with 0 `audio[src]`. `/api/studio-token` with no header → 401, no token. **Both viewports** (this is the round's browser row besides the perf run) |
+| DOC-208 | doc 208 l.4 byte-exact `**სტატუსი:** In Progress (stage 1 of 2; C round 279 PASS)`. The seven TEMPLATE headings in order (L26). The 175 helper table lists the §2.2 helpers as they are in `page.ts`. The four TODO bullets say what round 279 did and that R216 goes to b-ii-2 |
+| gate | full vitest, typecheck, build, Biome, `npm run verify`, `test:e2e:smoke`: **gate** rows, not claimed in `passed` |
+
+`browserVerified` is about the real browser rows: PERF-RUN, MUTANTS, LANE-BROWSER and G279-AUTH. All of them run in the cloud; none needs the backend.
+
+**Ableton conformance:** not applicable (test-only harness round).
+
+## 9. Neighbour risk
+- **Every deterministic perf row.** EQUIV covers them all; sketch v2 measured it (§4).
+- **A future change to the collection-ready copy.** The pattern follows the copy through the import, so a wording change cannot break the wait silently. A removed status write would make `waitForCollectionReady` time out (MU-READY shows that failure mode), which is loud.
+- **App code.** None is touched.
 
 ## 10. STOP conditions (L11)
-- A test outside §5 fails.
-- A §6.2 row cannot go red with its stated mutant. Write a STOP; do not drop the row.
-- tailwind-merge drops a `not-aria-disabled:` / `aria-disabled:` token in a rendered class.
-- A covering test goes above 50 % of its timeout.
-- Any change is needed in a frozen file.
-- Variant X does not reproduce in jsdom with the §6.2 UI13 order. STOP with the event trace; do not switch the metronome to `softDisabledButtonProps`.
+- Any EQUIV problem: a deterministic median, an assert, the envelope or a note. Report the row and the samples. If you can, also give the same-machine HEAD re-run value (§2.5). **Do not re-baseline**, and do not rule an exception yourself.
+- A §6.2 mutant that does not give its red signal: write a STOP, do not drop the row.
+- Any change needed in a frozen file (budgets, config, report/determinism, app).
+- PERF-1a above 9.4 min, or any spec failing.
 
-## 11. Outcome, fixed in advance (D-29z632)
-| C result | B at the round-279 planning |
+## 11. Outcome, fixed in advance (D-29z641)
+| C result | B at the round-280 planning |
 |---|---|
-| PASS, gate publishes, planning before 2026-11-02 | SYS-5 is **მზადაა**. It closes ROOT-R66-L3 (disabled-reason half; the 16 px target half stays in `deferred_low_polish`), C-R130-ADD-DISABLED-NO-REASON, C-R276-01, C-R276-02 (row kept), A-R276-REVIEW-DELETE-NAME and A-R276-ARCH-GUARD-IN-HELPER. Round 279 = the next STUDIO-PERFORMANCE task (PERF b-ii, per the queue), with the `performance-optimizer` and `tech-lead` consult first |
-| PASS, planning on or after 2026-11-02 | REGRESSION round first (the 3-day rule) |
-| A behaviour or look row fails at Medium+ | a bounded fix-up of that row, same grants |
+| PASS, gate publishes, planning before 2026-11-02 | b-ii-1 is **მზადაა**. It closes GATE214-S1, GATE214-S2, GATE223-S2 and C-R223-01-GATE214-S2-PREMISE. Round 280 = b-ii-2 (R216-MEM-POLLS-HEADROOM, re-baseline with named exceptions), with the consults first |
+| PASS, planning on or after 2026-11-02 | REGRESSION round first (the 3-day rule); b-ii-2 after it |
+| EQUIV fails on a load-settle row only (sketch v3 was equivalent, so this would mean machine sensitivity) | a bounded fix-up: that site goes back to a kept fixed wait with a recorded reason; same grants |
 | SOURCE-SCOPE fails | stop; root inspects; nothing is published |
-| Gate fails | one bounded fix-up with its cause recorded (the round-277 shape) |
+| Gate fails | one bounded fix-up with its cause recorded |
+| Root applies ROOT-REQ-PERF-TIMEOUT before C | C's TIMEOUT-DATA row also reports the percentage against the new limit, and PERF-1A-TIMEOUT-HEADROOM closes when it is ≤ 50 % |
 
 ## 12. Deliverables
 - **A:**
-  - the §2/§6 changes and the two docs;
-  - `a-round-278.md`: changed files; commands with results; the mutants table; the LPA3 reachability statement; the code-reviewer result and its Architecture note.
+  - the §2 changes and doc 208 plus the granted doc sections;
+  - `a-round-279.md`: changed files; commands with results; the perf times; the three equiv-check outputs; the mutants table; the code-reviewer result and its Architecture note.
 - **C:**
-  - `c-round-278.md`;
-  - `c-round-278.json` (`taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`);
-  - evidence under `c-round-278/`.
+  - `c-round-279.md`;
+  - `c-round-279.json` (`taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`);
+  - evidence under `c-round-279/`.
 
 ## 13. Root notes
-- No dependency change, no root request.
-- The architecture checkpoint addenda (`b-round-274-checkpoint-addendum.md` and earlier) stand and are non-blocking.
-- **SYS-5 feature boundary:** B's request for a bounded checkpoint is in `b-round-277.md` §5. It is optional and non-blocking.
-- After C PASS, SYS-5 (stages 1 and 2) is ready for the gate. That is not a release.
+- No dependency change.
+- **ROOT-REQ-PERF-TIMEOUT** (`b-round-278-root-request-perf-timeout.md`) is open and non-blocking. ROOT-REQ-VITEST-PERF-INCLUDE (`b-round-223-root-request-vitest.md`) is still open.
+- **SYS-5 is complete** (gate 278). ARCH-CHECKPOINT-SYS5-SOFT-DISABLED (`b-round-277.md` §5) stays optional and non-blocking.
+- After C PASS, b-ii-1 is ready for the gate. That is not a release.

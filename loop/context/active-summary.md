@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-30T22:00:25.424Z)
+# Active loop summary (2026-10-30T23:26:08.007Z)
 
-- backlog.json 2638 KB -> active view 369 KB
-- status: G_ROOT_GATE round 277
-- servers: `{"checkedUtc":"2026-10-30T21:43:11.7158922Z","round":277,"attempt":1,"store":200}`
-- last publication: 42872cf11351b2536e7eef233a0b7871eb6f37a9 (rounds 275-277)
-- last root gate: round 277 published - commit 42872cf11351b2536e7eef233a0b7871eb6f37a9 pushed
+- backlog.json 2646 KB -> active view 370 KB
+- status: G_ROOT_GATE round 278
+- servers: `{"checkedUtc":"2026-10-30T22:49:25.9591189Z","round":278,"attempt":1,"store":200}`
+- last publication: 873d83524fb4529811893e366115b1b1ac89551d (rounds 278-278)
+- last root gate: round 278 published - commit 873d83524fb4529811893e366115b1b1ac89551d pushed
 
 ## Current items: -
 
@@ -676,10 +676,12 @@
 - INFO-C274-01 / info / info (D-29z606): folded into A-R274-GROUP-NUDGE-FLOAT-DRIFT (deferred Low) / A-R274-GROUP-NUDGE-FLOAT-DRIFT is model-only: Snap-off group nudge x4 shows data-clip-start 0.100..0.400 and exact texts in the browser
 - INFO-C274-02 / info / info (D-29z606): folded into GATE274-S3-GROUP-ANCHOR-GUARD (deferred Low) / group status write guarded by if (before && after), beyond section 2.2; no reachable path found
 - GATE274-S1-HELD-REPEAT-ANNOUNCE / medium / open_tech_lead_manual (D-29z606): per-step announcement is the round-274 contract (SK13, doc 205); the only remaining step is a real screen-reader check (2026-10-23 root clarification: does not block); manual row TLM-R274-SR-HELD-REPEAT, deadline RETRO 290 (L46). If Saba reproduces it, it becomes a normal Medium: announce the final start on settle, rewrite SK13, LT21 unchanged / a held ArrowRight on one clip writes a new nudge text on every key repeat (function form, new start each step), so the aria-live span is re-
-- GATE276-T1 / medium / open: round 277 fix-up (D-29z618) / gate 276 failed: NS1 (navigation-strings-ui l.222 old Split title), NS6 (l.429 hasAttribute('disabled')), TC9 (transport-centre-ui l.404 toH
-- C-R276-01 / low / scheduled: SYS-5 stage 2 round 278 (D-29z619), transport part; app-wide part -> B-R276-CURSOR-UNLAYERED-GLOBAL deferred / soft-disabled transport buttons compute cursor pointer, not not-allowed (unlayered app.css button{cursor:pointer}); pre-existing at HEAD
-- C-R276-02 / low / ruled keep (D-29z620); stage 2 adds the explicit row / a click on a soft-disabled button no longer blurs/commits a focused text field (HEAD native disabled did)
-- A-R276-REVIEW-DELETE-NAME / low / scheduled: SYS-5 stage 2 round 278 (D-29z621) / soft-disabled Delete's aria-label says 'the selected clip' while its title says select a clip first; newly Tab-reachable
+- C-R276-01 / low / dispatched round 278 (D-29z630): aria-disabled:cursor-not-allowed! on all soft-disabled buttons; B sketch measured not-allowed (b-round-277/probe/sketch.json); app-wide form stays B-R276-CURSOR-UNLAYERED-GLOBAL (deferred) / soft-disabled transport buttons compute cursor pointer, not not-allowed (unlayered app.css button{cursor:pointer}); pre-existing at HEAD
+- C-R276-02 / low / ruled keep (D-29z620); round 278 row C-R276-02-KEEP; narrow exception for the metronome only (variant X, D-29z628: HEAD-equivalent, measured b-round-277/probe/variantx.json) / a click on a soft-disabled button no longer blurs/commits a focused text field (HEAD native disabled did)
+- A-R276-REVIEW-DELETE-NAME / low / dispatched round 278 (D-29z629): no-target aria-label 'Delete' (product-designer) / soft-disabled Delete's aria-label says 'the selected clip' while its title says select a clip first; newly Tab-reachable
+- INFO-C277-DOC206-STAGE2-ROUND / info / scheduled: round 278 grant doc 206 l.9/l.65 (D-29z633) / doc 206 l.9 and l.65 still say stage 2 = round 277
+- INFO-C277-ENV-LOAD-TIMEOUT / info / environment note, no action / first fresh context of C run 1 timed out (150 s) waiting for Demo collection ready during the cold dev-server compile; rerun passed
+- B-R277-METRONOME-DRAFT-CLICK / info / designed out in round 278 (variant X, D-29z628) / the shared soft-disabled pattern (mousedown preventDefault) would make a click on Metronome with an uncommitted BPM draft a dead click; HEAD
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,92 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+Not implemented: navigation to another Document
+Not implemented: navigation to another Document
+ [31m❯[39m app/lib/arrangement/__tests__/metronome-ui.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1652[2mms[22m[39m
+     [32m✓[39m UI1 is disabled and unpressed without a tempo, and Play schedules no metronome[32m 243[2mms[22m[39m
+     [32m✓[39m UI2 turns on at 120 BPM with its status and Play schedules a click on every beat[32m 173[2mms[22m[39m
+     [32m✓[39m UI3 turning it off while playing forces one resync without a metronome[32m 139[2mms[22m[39m
+     [32m✓[39m UI4 turning it on while playing resyncs once with clicks from the live position[32m 113[2mms[22m[39m
+     [32m✓[39m UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed[32m 129[2mms[22m[39m
+     [32m✓[39m UI6 clearing the tempo turns it off and setting a tempo again does not re-enable it[32m 133[2mms[22m[39m
+     [32m✓[39m UI7 plans the clicks for loop iteration 0 and appends them for every refilled iteration[32m 122[2mms[22m[39m
+     [32m✓[39m UI8 is not part of history: Undo title, arrangement and Ctrl+Z leave it unchanged[32m 115[2mms[22m[39m
+     [32m✓[39m UI9 export never receives the metronome: two arguments and the same buffers[32m 117[2mms[22m[39m
+     [32m✓[39m UI10 Space on the focused toggle starts playback and does not toggle the metronome[32m 99[2mms[22m[39m
+     [32m✓[39m UI11 gives the toggle the borderless 8 px fill with its disabled cue, keeps the on-fill on hover and press, and rounds the BPM field (D-29z132)[32m 90[2mms[22m[39m
+[31m     [31m×[31m UI12 without a tempo the soft-disabled toggle is focusable, dims its label span, ignores a click and keeps mouse focus (variant X, D-29z628)[39m[32m 62[2mms[22m[39m
+[31m     [31m×[31m UI13 a typed 120 without Enter commits on the toggle mousedown blur and the same click turns the metronome on (variant X)[39m[32m 60[2mms[22m[39m
+[31m     [31m×[31m UI14 an invalid typed tempo keeps the toggle unavailable and unpressed, and focus stays on the toggle, never BODY (variant X)[39m[32m 54[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/metronome-ui.test.tsx[2m > [22mSRW-15 stage 2 metronome toggle and live clicks (D-29z31)[2m > [22mUI12 without a tempo the soft-disabled toggle is focusable, dims its label span, ignores a click and keeps mouse focus (variant X, D-29z628)
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/metronome-ui.test.tsx:[2m578:41[22m[39m
+    [90m576| [39m    [34mexpect[39m(toggle[33m.[39m[34mgetAttribute[39m([32m'aria-disabled'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m577| [39m    [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m578| [39m    [34mexpect[39m(fireEvent[33m.[39m[34mmouseDown[39m(toggle))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m579| [39m    [34mplay[39m(api)[33m;[39m
+    [90m580| [39m    [34mexpect[39m([34mlastScheduleOptions[39m()[33m.[39mmetronome)[33m.[39m[34mtoBeUndefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/metronome-ui.test.tsx[2m > [22mSRW-15 stage 2 metronome toggle and live clicks (D-29z31)[2m > [22mUI13 a typed 120 without Enter commits on the toggle mousedown blur and the same click turns the metronome on (variant X)
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/metronome-ui.test.tsx:[2m591:41[22m[39m
+    [90m589| [39m    fireEvent[33m.[39m[34mchange[39m(input[33m,[39m { target[33m:[39m { value[33m:[39m [32m'120'[39m } })[33m;[39m
+    [90m590| [39m    [34mexpect[39m(toggle[33m.[39m[34mgetAttribute[39m([32m'aria-disabled'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m591| [39m    [34mexpect[39m(fireEvent[33m.[39m[34mmouseDown[39m(toggle))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m592| [39m    [34mact[39m(() [33m=>[39m toggle[33m.[39m[34mfocus[39m())[33m;[39m
+    [90m593| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(toggle)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/metronome-ui.test.tsx[2m > [22mSRW-15 stage 2 metronome toggle and live clicks (D-29z31)[2m > [22mUI14 an invalid typed tempo keeps the toggle unavailable and unpressed, and focus stays on the toggle, never BODY (variant X)
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/metronome-ui.test.tsx:[2m607:41[22m[39m
+    [90m605| [39m    [34mact[39m(() [33m=>[39m input[33m.[39m[34mfocus[39m())[33m;[39m
+    [90m606| [39m    fireEvent[33m.[39m[34mchange[39m(input[33m,[39m { target[33m:[39m { value[33m:[39m [32m'abc'[39m } })[33m;[39m
+    [90m607| [39m    [34mexpect[39m(fireEvent[33m.[39m[34mmouseDown[39m(toggle))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m608| [39m    [34mact[39m(() [33m=>[39m toggle[33m.[39m[34mfocus[39m())[33m;[39m
+    [90m609| [39m    fireEvent[33m.[39m[34mclick[39m(toggle)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 22:37:52
+[2m   Duration [22m 3.96s[2m (transform 1.21s, setup 0ms, import 1.74s, tests 1.65s, environment 425ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/metronome-ui.test.tsx,title=app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI12 without a tempo the soft-disabled toggle is focusable%2C dims its label span%2C ignores a click and keeps mouse focus (variant X%2C D-29z628),line=578,column=41::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:578:41%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/metronome-ui.test.tsx,title=app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI13 a typed 120 without Enter commits on the toggle mousedown blur and the same click turns the metronome on (variant X),line=591,column=41::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:591:41%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/metronome-ui.test.tsx,title=app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI14 an invalid typed tempo keeps the toggle unavailable and unpressed%2C and focus stays on the toggle%2C never BODY (variant X),line=607,column=41::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:607:41%0A%0A

@@ -1,0 +1,47 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1024[2mms[22m[39m
+     [32m✓[39m FL1: a keyboard 0 dB reset moves focus to the Clip Gain input, and a fresh Enter there adds no clip[32m 290[2mms[22m[39m
+     [32m✓[39m FL2: a mouse 0 dB reset never focuses the button and leaves focus on BODY[32m 124[2mms[22m[39m
+     [32m✓[39m FL3: Undo keeps focus while history remains and hands it to Redo on the last step[32m 22[2mms[22m[39m
+     [32m✓[39m FL4: Redo keeps focus while redo entries remain and hands it to Undo on the last step[32m 28[2mms[22m[39m
+     [32m✓[39m FL5: Delete on the selected clip hands focus to Undo, which now undoes the delete[32m 14[2mms[22m[39m
+     [32m✓[39m FL6: Zoom back on its last history step hands focus to Fit[32m 14[2mms[22m[39m
+     [32m✓[39m FL7: Undo clicked without holding focus never moves focus[32m 15[2mms[22m[39m
+     [32m✓[39m FL8: an Undo refused during a pointer gesture keeps Undo enabled and focused[32m 21[2mms[22m[39m
+     [32m✓[39m FL9: enabled Undo, Redo, Delete and Zoom back prevent a repeated Enter and allow a fresh one; a repeated Space is untouched[32m 19[2mms[22m[39m
+     [32m✓[39m FL10: when the browser already dropped focus to BODY before the commit, Zoom back still hands focus to Fit[32m 14[2mms[22m[39m
+     [32m✓[39m SD1: in an empty arrangement the seven unavailable buttons are aria-disabled, focusable and titled with their reason[32m 16[2mms[22m[39m
+     [32m✓[39m SD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom[32m 20[2mms[22m[39m
+     [32m✓[39m SD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)[32m 12[2mms[22m[39m
+     [32m✓[39m SD3: mousedown on a soft-disabled button is default-prevented, on Fit it is not[32m 10[2mms[22m[39m
+     [32m✓[39m SD4: a selected clip or a range makes Split and Delete available with their action titles[32m 11[2mms[22m[39m
+     [32m✓[39m SD5: after one edit, Undo hands focus to Redo when it becomes soft-disabled, and Redo hands it back[32m 20[2mms[22m[39m
+     [32m✓[39m SD6: a focused soft-disabled Redo becomes available in place after Ctrl+Z, and a click then redoes[32m 14[2mms[22m[39m
+[31m     [31m×[31m SD7: the transport source has no enabled:/disabled: tokens or disabled props, and the rendered Undo keeps the aria-disabled tokens[39m[32m 16[2mms[22m[39m
+     [32m✓[39m SD8: with no target Delete is named plainly; a selected clip and a range keep their own names (A-R276-REVIEW-DELETE-NAME)[32m 16[2mms[22m[39m
+     [33m[2m✓[22m[39m SD9: the tempo row and library preview sources have no enabled:/disabled: tokens or disabled props, and the metronome, Preview and Add render the layered not-allowed cursor [33m 326[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22mSYS-5 stage 1: soft-disabled transport buttons (D-29z615)[2m > [22mSD7: the transport source has no enabled:/disabled: tokens or disabled props, and the rendered Undo keeps the aria-disabled tokens
+[31m[1mAssertionError[22m: expected [ 'inline-flex', 'h-8', …(18) ] to include 'aria-disabled:cursor-not-allowed!'[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m665:22[22m[39m
+    [90m663| [39m      [32m'aria-disabled:*:opacity-40'[39m[33m,[39m
+    [90m664| [39m    ]) {
+    [90m665| [39m      [34mexpect[39m(tokens)[33m.[39m[34mtoContain[39m(token)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m666| [39m    }
+    [90m667| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m19 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 22:36:59
+[2m   Duration [22m 3.36s[2m (transform 1.23s, setup 0ms, import 1.76s, tests 1.02s, environment 435ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > SYS-5 stage 1%3A soft-disabled transport buttons (D-29z615) > SD7%3A the transport source has no enabled%3A/disabled%3A tokens or disabled props%2C and the rendered Undo keeps the aria-disabled tokens,line=665,column=22::AssertionError: expected [ 'inline-flex', 'h-8', …(18) ] to include 'aria-disabled:cursor-not-allowed!'%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:665:22%0A%0A

@@ -1,0 +1,43 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m11 skipped[39m[2m)[22m[32m 60[2mms[22m[39m
+     [2m[90m↓[39m[22m reserves exactly two clamped lines for the active-lane row on an audio lane (C-R16-01)
+     [2m[90m↓[39m[22m keeps the video note in the title and visible text when the video lane is active (C-R16-01)
+     [2m[90m↓[39m[22m titles the row with a dash when no lane is active (C-R16-01)
+     [2m[90m↓[39m[22m advances the library-preview cursor without rendering LibraryInsertMarkerText (M-R10-1/M2)
+     [2m[90m↓[39m[22m HT1 held Enter on the preview toggle prevents only the repeats (B-R98-H1-PREVIEW-TOGGLE-HOLD)
+     [2m[90m↓[39m[22m HT2 fresh Enter presses on the preview toggle keep their default (B-R98-H1-PREVIEW-TOGGLE-HOLD)
+     [2m[90m↓[39m[22m HT3 the preview toggle guard is Enter-only and keeps propagation (B-R98-H1-PREVIEW-TOGGLE-HOLD)
+     [2m[90m↓[39m[22m LPA1 a soft-disabled Add on the video track blocks mouse focus, adds no clip and writes no status (SYS-5 stage 2)
+     [2m[90m↓[39m[22m LPA2 Add on an audio track is available, titled for the insert marker, and a click adds one clip
+     [2m[90m↓[39m[22m LPA3 the no-sound, loading and failed states give Preview and Add their exact reasons and soft-disable both
+[31m     [31m×[31m LPA4 a click on a soft-disabled Preview starts no preview[39m[32m 58[2mms[22m[39m
+     [2m[90m↓[39m[22m LPA5 a focused soft-disabled Add keeps focus when an audio track becomes active, and a click then adds exactly one clip
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview.test.tsx[2m > [22mArrangementLibraryPreview active-lane row and insert-marker memo (C-R16-01, M-R10-1/M2, C-R250-01)[2m > [22mLPA4 a click on a soft-disabled Preview starts no preview
+[31m[1mAssertionError[22m: expected '“Song” has not loaded yet.' to be 'Loading the demo collection…' // Object.is equality[39m
+
+Expected: [32m"Loading the demo collection…"[39m
+Received: [31m"“Song” has not loaded yet."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview.test.tsx:[2m441:33[22m[39m
+    [90m439| [39m    fireEvent[33m.[39m[34mclick[39m(preview)[33m;[39m
+    [90m440| [39m    [34mexpect[39m([34mliveApi[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m441| [39m    [34mexpect[39m([34mliveApi[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m442| [39m    [34mexpect[39m(preview[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'Preview'[39m)[33m;[39m
+    [90m443| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m11 skipped[39m[90m (12)[39m
+[2m   Start at [22m 22:36:57
+[2m   Duration [22m 1.42s[2m (transform 525ms, setup 0ms, import 778ms, tests 60ms, environment 434ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/library-preview.test.tsx,title=app/lib/arrangement/__tests__/library-preview.test.tsx > ArrangementLibraryPreview active-lane row and insert-marker memo (C-R16-01%2C M-R10-1/M2%2C C-R250-01) > LPA4 a click on a soft-disabled Preview starts no preview,line=441,column=33::AssertionError: expected '“Song” has not loaded yet.' to be 'Loading the demo collection…' // Object.is equality%0A%0AExpected: "Loading the demo collection…"%0AReceived: "“Song” has not loaded yet."%0A%0A ❯ app/lib/arrangement/__tests__/library-preview.test.tsx:441:33%0A%0A

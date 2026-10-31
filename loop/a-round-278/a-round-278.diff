@@ -1,0 +1,1173 @@
+diff --git a/app/components/arrangement/ArrangementLibraryPreview.tsx b/app/components/arrangement/ArrangementLibraryPreview.tsx
+index f0a1e52..f62619c 100644
+--- a/app/components/arrangement/ArrangementLibraryPreview.tsx
++++ b/app/components/arrangement/ArrangementLibraryPreview.tsx
+@@ -17,6 +17,7 @@ import {
+ import { normalizePeakColumns } from '~/lib/arrangement/peaks';
+ import { studioLibraryPanelStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
++import { guardSoftDisabledClick, softDisabledButtonProps } from './studio-soft-disabled';
+ 
+ const PREVIEW_WAVE_COLUMNS = 96;
+ const PREVIEW_KEY_STEP_SECONDS = 1;
+@@ -109,6 +110,22 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+   const isPreviewing = source !== null && libraryPreviewSourceId === source.id;
+   const activeTrack = arrangement.tracks.find((track) => track.id === activeTrackId);
+   const canAdd = isReady && activeTrack?.kind === 'audio';
++  const previewUnavailableTitle = !source
++    ? studioLibraryPanelStrings.previewNeedsSoundTitle
++    : state?.status === 'error'
++      ? studioLibraryPanelStrings.previewFailedTitle
++      : isReady
++        ? null
++        : studioLibraryPanelStrings.previewLoadingTitle;
++  const addTitle = !source
++    ? studioLibraryPanelStrings.addNeedsSoundTitle
++    : state?.status === 'error'
++      ? studioLibraryPanelStrings.addFailedTitle
++      : !isReady
++        ? studioLibraryPanelStrings.addLoadingTitle
++        : activeTrack?.kind !== 'audio'
++          ? studioLibraryPanelStrings.addNeedsAudioTrackTitle
++          : studioLibraryPanelStrings.addTitle;
+   const activeLaneName = activeTrack ? activeTrack.name : '—';
+   const activeLaneVideoNote =
+     activeTrack?.kind === 'video' ? studioLibraryPanelStrings.videoTrackNote : '';
+@@ -289,7 +306,7 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+       <div className="flex gap-2">
+         <button
+           type="button"
+-          onClick={() => {
++          onClick={guardSoftDisabledClick(() => {
+             if (!source) {
+               return;
+             }
+@@ -298,15 +315,16 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+             } else {
+               startLibraryPreview(source.id, 0);
+             }
+-          }}
++          })}
+           onKeyDown={(event) => {
+             if (event.key === 'Enter' && event.repeat) {
+               event.preventDefault();
+             }
+           }}
+-          disabled={!isReady}
++          {...softDisabledButtonProps(!isReady)}
++          title={previewUnavailableTitle ?? undefined}
+           className={cn(
+-            'flex flex-1 items-center justify-center gap-0.75 rounded-md border border-transparent bg-foreground/5 px-2 py-1.5 text-sm font-medium motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:cursor-not-allowed disabled:opacity-40',
++            'flex flex-1 items-center justify-center gap-0.75 rounded-md border border-transparent bg-foreground/5 px-2 py-1.5 text-sm font-medium motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40',
+             isPreviewing ? 'border-foreground text-foreground' : 'text-foreground',
+           )}
+           data-testid="arrangement-library-preview-toggle"
+@@ -324,14 +342,19 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+         </button>
+         <button
+           type="button"
+-          onClick={() => source && addSourceToActiveTrack(source.id)}
++          onClick={guardSoftDisabledClick(() => {
++            if (source) {
++              addSourceToActiveTrack(source.id);
++            }
++          })}
+           onKeyDown={(event) => {
+             if (event.key === 'Enter' && event.repeat) {
+               event.preventDefault();
+             }
+           }}
+-          disabled={!canAdd}
+-          className="flex flex-1 items-center justify-center gap-0.75 rounded-md border border-outline-strong bg-foreground/5 px-2 py-1.5 text-sm font-medium text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:cursor-not-allowed disabled:opacity-40"
++          {...softDisabledButtonProps(!canAdd)}
++          title={addTitle}
++          className="flex flex-1 items-center justify-center gap-0.75 rounded-md border border-outline-strong bg-foreground/5 px-2 py-1.5 text-sm font-medium text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40"
+         >
+           <Plus className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+           <span>{studioLibraryPanelStrings.add}</span>
+diff --git a/app/components/arrangement/ArrangementTempoRow.tsx b/app/components/arrangement/ArrangementTempoRow.tsx
+index fdef2d5..acd4756 100644
+--- a/app/components/arrangement/ArrangementTempoRow.tsx
++++ b/app/components/arrangement/ArrangementTempoRow.tsx
+@@ -26,6 +26,7 @@ import type { TimelineView } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from './ArrangementLane';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
++import { guardSoftDisabledClick } from './studio-soft-disabled';
+ 
+ interface ArrangementTempoRowProps {
+   seconds: number;
+@@ -313,19 +314,19 @@ export function ArrangementTempoRow({
+         <span className="tabular-nums">{`${TEMPO_BEATS_PER_BAR}/4`}</span>
+         <button
+           type="button"
+-          onClick={onMetronomeToggle}
+-          disabled={tempoBpm === null}
++          onClick={guardSoftDisabledClick(onMetronomeToggle)}
++          aria-disabled={tempoBpm === null ? 'true' : undefined}
+           aria-pressed={metronomeOn}
+           title={tempoBpm === null ? METRONOME_NEEDS_TEMPO_TITLE : METRONOME_TITLE}
+           className={cn(
+-            'h-4 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-xs leading-none text-muted motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-muted',
++            'h-4 shrink-0 rounded-md border border-transparent bg-foreground/5 px-1 text-xs leading-none text-muted motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 not-aria-disabled:hover:text-foreground aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-50',
+             metronomeOn &&
+-              'border-foreground bg-foreground/20 text-foreground enabled:hover:bg-foreground/20 enabled:active:bg-foreground/20',
++              'border-foreground bg-foreground/20 text-foreground not-aria-disabled:hover:bg-foreground/20 not-aria-disabled:active:bg-foreground/20',
+             STUDIO_FOCUS_RING_INSET_CLASS,
+           )}
+           data-testid="arrangement-metronome-toggle"
+         >
+-          {studioMetronomeStrings.toggleLabel}
++          <span>{studioMetronomeStrings.toggleLabel}</span>
+         </button>
+       </div>
+       <ArrangementBarsRuler
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index 923ad75..11c5b60 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -9,7 +9,7 @@ import {
+   Square,
+   Undo2,
+ } from 'lucide-react';
+-import { type KeyboardEvent, type MouseEvent, useCallback, useId, useRef } from 'react';
++import { type KeyboardEvent, useCallback, useId, useRef } from 'react';
+ import {
+   formatArrangementTime,
+   useArrangement,
+@@ -33,6 +33,11 @@ import {
+ } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import { STUDIO_NEUTRAL_SLIDER_CLASS } from './studio-fader';
++import {
++  guardSoftDisabledClick,
++  isSoftDisabledButton,
++  softDisabledButtonProps,
++} from './studio-soft-disabled';
+ 
+ export interface ArrangementTransportNavigation {
+   followMode: TimelineFollowMode;
+@@ -50,26 +55,7 @@ interface ArrangementTransportProps {
+ }
+ 
+ const toolButtonClass =
+-  'inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed aria-disabled:*:opacity-40';
+-
+-interface SoftDisabledButtonProps {
+-  'aria-disabled'?: 'true';
+-  onMouseDown?: (event: MouseEvent<HTMLButtonElement>) => void;
+-}
+-
+-function preventSoftDisabledMouseFocus(event: MouseEvent<HTMLButtonElement>) {
+-  event.preventDefault();
+-}
+-
+-function softDisabledButtonProps(isUnavailable: boolean): SoftDisabledButtonProps {
+-  return isUnavailable
+-    ? { 'aria-disabled': 'true', onMouseDown: preventSoftDisabledMouseFocus }
+-    : {};
+-}
+-
+-function isSoftDisabledButton(button: HTMLButtonElement): boolean {
+-  return button.getAttribute('aria-disabled') === 'true';
+-}
++  'inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40';
+ 
+ function ArrangementTransportPosition() {
+   const positionStore = useArrangementPositionStore();
+@@ -163,13 +149,10 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         <button
+           ref={undoButtonRef}
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, redoButtonRef.current);
+             undo();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!undoLabel)}
+           title={studioEditStrings.undoTitle(undoLabel)}
+@@ -182,13 +165,10 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         <button
+           ref={redoButtonRef}
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, undoButtonRef.current);
+             redo();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!redoLabel)}
+           title={studioEditStrings.redoTitle(redoLabel)}
+@@ -201,12 +181,9 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         <div className="mx-1 h-6 w-px bg-outline" />
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             splitSelection();
+-          }}
++          })}
+           {...softDisabledButtonProps(!range && !selectedClipId)}
+           title={
+             range
+@@ -223,13 +200,10 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         </button>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, undoButtonRef.current);
+             deleteSelection();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!range && !selectedClipId)}
+           title={
+@@ -238,7 +212,10 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+               ? studioEditStrings.deleteClipTitle
+               : studioEditStrings.deleteNeedsTargetTitle)
+           }
+-          aria-label={rangeDeleteHint ?? studioEditStrings.deleteClipLabel}
++          aria-label={
++            rangeDeleteHint ??
++            (selectedClipId ? studioEditStrings.deleteClipLabel : studioEditStrings.deleteButton)
++          }
+           aria-keyshortcuts={studioShortcutAria('delete')}
+           className={cn(toolButtonClass, 'gap-0.5', range && 'border-foreground')}
+         >
+@@ -337,12 +314,9 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         </button>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             toggleLoopSelection();
+-          }}
++          })}
+           {...softDisabledButtonProps(!range && !loop)}
+           aria-pressed={loop?.enabled === true}
+           title={
+@@ -391,12 +365,9 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         </label>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             navigation.onZoomToRange();
+-          }}
++          })}
+           {...softDisabledButtonProps(!range)}
+           aria-label={studioViewStrings.zoomToSelectionLabel}
+           aria-keyshortcuts="Z"
+@@ -412,13 +383,10 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+         </button>
+         <button
+           type="button"
+-          onClick={(event) => {
+-            if (isSoftDisabledButton(event.currentTarget)) {
+-              return;
+-            }
++          onClick={guardSoftDisabledClick((event) => {
+             armFocusHandoff(event.currentTarget, fitButtonRef.current);
+             navigation.onZoomBack();
+-          }}
++          })}
+           onKeyDown={preventRepeatedEnterKeyDown}
+           {...softDisabledButtonProps(!navigation.canZoomBack)}
+           aria-keyshortcuts="X"
+diff --git a/app/components/arrangement/studio-soft-disabled.ts b/app/components/arrangement/studio-soft-disabled.ts
+new file mode 100644
+index 0000000..aebdee9
+--- /dev/null
++++ b/app/components/arrangement/studio-soft-disabled.ts
+@@ -0,0 +1,31 @@
++import type { MouseEvent } from 'react';
++
++export interface SoftDisabledButtonProps {
++  'aria-disabled'?: 'true';
++  onMouseDown?: (event: MouseEvent<HTMLButtonElement>) => void;
++}
++
++function preventSoftDisabledMouseFocus(event: MouseEvent<HTMLButtonElement>) {
++  event.preventDefault();
++}
++
++export function softDisabledButtonProps(isUnavailable: boolean): SoftDisabledButtonProps {
++  return isUnavailable
++    ? { 'aria-disabled': 'true', onMouseDown: preventSoftDisabledMouseFocus }
++    : {};
++}
++
++export function isSoftDisabledButton(button: HTMLButtonElement): boolean {
++  return button.getAttribute('aria-disabled') === 'true';
++}
++
++export function guardSoftDisabledClick(
++  handler: (event: MouseEvent<HTMLButtonElement>) => void,
++): (event: MouseEvent<HTMLButtonElement>) => void {
++  return (event) => {
++    if (isSoftDisabledButton(event.currentTarget)) {
++      return;
++    }
++    handler(event);
++  };
++}
+diff --git a/app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx b/app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx
+index 9b62ef5..f137db9 100644
+--- a/app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-feedback-colour-ui.test.tsx
+@@ -465,7 +465,7 @@ describe('DUX-R-5b-3b drag feedback and import / Add colour', { timeout: 15_000
+     expect(brassTokens(full)).toEqual([]);
+ 
+     const add = libraryAddButton(view);
+-    expectDragTokens(add, [...neutral, 'disabled:opacity-40'], forbidden, 'Preview Add');
++    expectDragTokens(add, [...neutral, 'aria-disabled:*:opacity-40'], forbidden, 'Preview Add');
+     expect(brassTokens(add)).toEqual([]);
+ 
+     fireEvent.click(view.getByRole('button', { name: studioLaneStrings.foldLabel('ვიდეო') }));
+diff --git a/app/lib/arrangement/__tests__/held-enter-add.test.tsx b/app/lib/arrangement/__tests__/held-enter-add.test.tsx
+index 9563813..25d5a5c 100644
+--- a/app/lib/arrangement/__tests__/held-enter-add.test.tsx
++++ b/app/lib/arrangement/__tests__/held-enter-add.test.tsx
+@@ -268,6 +268,7 @@ describe('B-R98-HELD-ENTER-MULTI-ADD — one held Enter adds one clip (D-29z64)'
+     fireEvent.click(option('first'));
+     const add = view.getByRole('button', { name: 'Add' });
+     expect(add.hasAttribute('disabled')).toBe(false);
++    expect(add.hasAttribute('aria-disabled')).toBe(false);
+     act(() => add.focus());
+     expect(document.activeElement).toBe(add);
+     const before = clipCount();
+diff --git a/app/lib/arrangement/__tests__/library-preview.test.tsx b/app/lib/arrangement/__tests__/library-preview.test.tsx
+index 85c6520..869204e 100644
+--- a/app/lib/arrangement/__tests__/library-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview.test.tsx
+@@ -248,7 +248,10 @@ describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R1
+     expect(row.getAttribute('title')).toBe('Active track: ვიდეო (audio is not added here)');
+     expect(row.getAttribute('title')).toBe(row.textContent?.split('·')[0].trim());
+     expect(row.textContent).toContain('· insert marker 00:00.000');
+-    expect(view.getByRole('button', { name: 'Add' }).hasAttribute('disabled')).toBe(true);
++    const add = view.getByRole('button', { name: 'Add' });
++    expect(add.getAttribute('aria-disabled')).toBe('true');
++    expect(add.hasAttribute('disabled')).toBe(false);
++    expect(add.title).toBe('Add — make an audio track active first');
+     act(() => api.current?.setActiveTrack('sfx'));
+     expect(activeLaneRow(view).getAttribute('title')).toBe('Active track: SFX');
+     expect(activeLaneRow(view)).toBe(row);
+@@ -323,4 +326,134 @@ describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R1
+     }
+     expect(seen).toEqual([{ key: 'Enter', repeat: true }]);
+   });
++
++  async function mountPreviewFor(
++    loadSource: WorkspaceCollection['loadSource'],
++    sourceId: string | null,
++  ) {
++    const api: PreviewApiRef = { current: null };
++    const view = render(
++      <ArrangementProvider
++        collection={{ ...previewCollection, loadSource }}
++        initialArrangement={previewArrangement()}
++      >
++        <ArrangementLibraryPreview sourceId={sourceId} />
++        <PreviewApiProbe api={api} />
++      </ArrangementProvider>,
++    );
++    await act(async () => {
++      await Promise.resolve();
++      await Promise.resolve();
++    });
++    return { api, view };
++  }
++
++  function liveApi(api: PreviewApiRef): ArrangementContextValue {
++    if (!api.current) {
++      throw new Error('provider not mounted');
++    }
++    return api.current;
++  }
++
++  function previewToggle(view: ReturnType<typeof render>): HTMLElement {
++    return view.getByTestId('arrangement-library-preview-toggle');
++  }
++
++  it('LPA1 a soft-disabled Add on the video track blocks mouse focus, adds no clip and writes no status (SYS-5 stage 2)', async () => {
++    const { api, view } = await mountPreview();
++    act(() => liveApi(api).setActiveTrack('video'));
++    const add = view.getByRole('button', { name: 'Add' });
++    expect(add.getAttribute('aria-disabled')).toBe('true');
++    const clipsBefore = liveApi(api).arrangement.clips.length;
++    const statusBefore = liveApi(api).status;
++    expect(fireEvent.mouseDown(add)).toBe(false);
++    fireEvent.click(add);
++    expect(liveApi(api).arrangement.clips.length).toBe(clipsBefore);
++    expect(liveApi(api).status).toBe(statusBefore);
++  });
++
++  it('LPA2 Add on an audio track is available, titled for the insert marker, and a click adds one clip', async () => {
++    const { api, view } = await mountPreview();
++    const add = view.getByRole('button', { name: 'Add' });
++    expect(add.hasAttribute('aria-disabled')).toBe(false);
++    expect(add.hasAttribute('disabled')).toBe(false);
++    expect(add.title).toBe('Add to the active track at the insert marker');
++    const clipsBefore = liveApi(api).arrangement.clips.length;
++    fireEvent.click(add);
++    expect(liveApi(api).arrangement.clips.length).toBe(clipsBefore + 1);
++  });
++
++  it('LPA3 the no-sound, loading and failed states give Preview and Add their exact reasons and soft-disable both', async () => {
++    const cases: Array<{
++      label: string;
++      loadSource: WorkspaceCollection['loadSource'];
++      sourceId: string | null;
++      previewTitle: string;
++      addTitle: string;
++    }> = [
++      {
++        label: 'no sound',
++        loadSource: previewCollection.loadSource,
++        sourceId: null,
++        previewTitle: 'Preview — select a sound in the list first',
++        addTitle: 'Add — select a sound in the list first',
++      },
++      {
++        label: 'loading',
++        loadSource: () => new Promise<AudioBuffer>(() => undefined),
++        sourceId: 'song',
++        previewTitle: 'Preview — wait for the sound to load',
++        addTitle: 'Add — wait for the sound to load',
++      },
++      {
++        label: 'failed',
++        loadSource: () => Promise.reject(new Error('decode failed')),
++        sourceId: 'song',
++        previewTitle: 'Preview — this sound could not load; choose another',
++        addTitle: 'Add — this sound could not load; choose another',
++      },
++    ];
++    for (const entry of cases) {
++      const { view } = await mountPreviewFor(entry.loadSource, entry.sourceId);
++      const preview = previewToggle(view);
++      const add = view.getByRole('button', { name: 'Add' });
++      expect(preview.getAttribute('aria-disabled'), entry.label).toBe('true');
++      expect(preview.hasAttribute('disabled'), entry.label).toBe(false);
++      expect(preview.title, entry.label).toBe(entry.previewTitle);
++      expect(add.getAttribute('aria-disabled'), entry.label).toBe('true');
++      expect(add.hasAttribute('disabled'), entry.label).toBe(false);
++      expect(add.title, entry.label).toBe(entry.addTitle);
++      view.unmount();
++    }
++  });
++
++  it('LPA4 a click on a soft-disabled Preview starts no preview', async () => {
++    const { api, view } = await mountPreviewFor(
++      () => new Promise<AudioBuffer>(() => undefined),
++      'song',
++    );
++    const preview = previewToggle(view);
++    expect(preview.getAttribute('aria-disabled')).toBe('true');
++    const statusBefore = liveApi(api).status;
++    expect(fireEvent.mouseDown(preview)).toBe(false);
++    fireEvent.click(preview);
++    expect(liveApi(api).libraryPreviewSourceId).toBeNull();
++    expect(liveApi(api).status).toBe(statusBefore);
++    expect(preview.textContent).toBe('Preview');
++  });
++
++  it('LPA5 a focused soft-disabled Add keeps focus when an audio track becomes active, and a click then adds exactly one clip', async () => {
++    const { api, view } = await mountPreview();
++    act(() => liveApi(api).setActiveTrack('video'));
++    const add = view.getByRole('button', { name: 'Add' });
++    act(() => add.focus());
++    expect(document.activeElement).toBe(add);
++    expect(add.getAttribute('aria-disabled')).toBe('true');
++    act(() => liveApi(api).setActiveTrack('music'));
++    expect(add.hasAttribute('aria-disabled')).toBe(false);
++    expect(document.activeElement).toBe(add);
++    const clipsBefore = liveApi(api).arrangement.clips.length;
++    fireEvent.click(add);
++    expect(liveApi(api).arrangement.clips.length).toBe(clipsBefore + 1);
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx b/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+index dbb1eb3..3dc057e 100644
+--- a/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+@@ -488,8 +488,9 @@ const LIBRARY_SURFACE_MOTION = [
+ 
+ const LIBRARY_SURFACE_FILL = [
+   'bg-foreground/5',
+-  'enabled:hover:bg-foreground/8',
+-  'enabled:active:bg-foreground/12',
++  'not-aria-disabled:hover:bg-foreground/8',
++  'not-aria-disabled:active:bg-foreground/12',
++  'aria-disabled:cursor-not-allowed!',
+ ];
+ 
+ function libraryClassTokens(element: HTMLElement): string[] {
+@@ -543,7 +544,7 @@ describe('library button surfaces (V-3c-4c-1)', () => {
+       'text-foreground',
+       'font-medium',
+       'gap-0.75',
+-      'disabled:opacity-40',
++      'aria-disabled:*:opacity-40',
+     ];
+     const toggleOffExcluded = ['border-outline', 'hover:border-brand', 'rounded-sm'];
+     expect(toggle.textContent).toBe('Preview');
+@@ -583,7 +584,7 @@ describe('library button surfaces (V-3c-4c-1)', () => {
+         ...LIBRARY_SURFACE_FILL,
+         'rounded-md',
+         ...LIBRARY_SURFACE_MOTION,
+-        'disabled:opacity-40',
++        'aria-disabled:*:opacity-40',
+       ],
+       [
+         'bg-brand/10',
+diff --git a/app/lib/arrangement/__tests__/metronome-ui.test.tsx b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+index b5ea534..fc1bb27 100644
+--- a/app/lib/arrangement/__tests__/metronome-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+@@ -22,7 +22,7 @@ import {
+   planMetronomeClicks,
+ } from '../metronome';
+ import { createArrangement } from '../model';
+-import { tempoStatusMessage } from '../tempo';
++import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -287,7 +287,8 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     const toggle = metronomeToggle(view);
+     expect(toggle.textContent).toBe('Metronome');
+     expect(toggle.type).toBe('button');
+-    expect(toggle.disabled).toBe(true);
++    expect(toggle.getAttribute('aria-disabled')).toBe('true');
++    expect(toggle.hasAttribute('disabled')).toBe(false);
+     expect(toggle.getAttribute('aria-pressed')).toBe('false');
+     expect(toggle.title).toBe(METRONOME_NEEDS_TEMPO_TITLE);
+     expect(toggle.title).toBe('Metronome — set a BPM first');
+@@ -301,7 +302,8 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     const { api, view } = await mountMetronomeWorkspace();
+     commitTempo(view, '120');
+     const toggle = metronomeToggle(view);
+-    expect(toggle.disabled).toBe(false);
++    expect(toggle.hasAttribute('aria-disabled')).toBe(false);
++    expect(toggle.hasAttribute('disabled')).toBe(false);
+     expect(toggle.title).toBe(METRONOME_TITLE);
+     expect(toggle.title).toBe(
+       'Metronome — a click on every beat during playback (4/4, the first beat of each bar is louder). Master volume and Mute also apply to it. Not included in the export.',
+@@ -399,10 +401,11 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('true');
+     commitTempo(view, '');
+     expect(statusText(view)).toBe(tempoStatusMessage(null));
+-    expect(metronomeToggle(view).disabled).toBe(true);
++    expect(metronomeToggle(view).getAttribute('aria-disabled')).toBe('true');
++    expect(metronomeToggle(view).hasAttribute('disabled')).toBe(false);
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('false');
+     commitTempo(view, '120');
+-    expect(metronomeToggle(view).disabled).toBe(false);
++    expect(metronomeToggle(view).hasAttribute('aria-disabled')).toBe(false);
+     expect(metronomeToggle(view).getAttribute('aria-pressed')).toBe('false');
+     play(api);
+     expect(lastScheduleOptions().metronome).toBeUndefined();
+@@ -506,8 +509,8 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+       'border',
+       'border-transparent',
+       'bg-foreground/5',
+-      'enabled:hover:bg-foreground/8',
+-      'enabled:active:bg-foreground/12',
++      'not-aria-disabled:hover:bg-foreground/8',
++      'not-aria-disabled:active:bg-foreground/12',
+       'rounded-md',
+       'motion-safe:transition-[background-color,color]!',
+       'motion-safe:duration-180!',
+@@ -515,20 +518,21 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+       'motion-reduce:transition-none!',
+     ];
+     const toggle = metronomeToggle(view);
+-    expect(toggle.disabled).toBe(true);
++    expect(toggle.getAttribute('aria-disabled')).toBe('true');
++    expect(toggle.hasAttribute('disabled')).toBe(false);
+     const offTokens = tokensOf(toggle);
+     for (const token of [
+       ...SURF,
+-      'disabled:cursor-not-allowed',
+-      'disabled:opacity-50',
+-      'disabled:hover:text-muted',
++      'aria-disabled:cursor-not-allowed!',
++      'aria-disabled:*:opacity-50',
++      'not-aria-disabled:hover:text-foreground',
+     ]) {
+       expect(offTokens).toContain(token);
+     }
+     expect(offTokens).not.toContain('border-outline');
+     expect(offTokens).not.toContain('rounded-sm');
+     commitTempo(view, '120');
+-    expect(toggle.disabled).toBe(false);
++    expect(toggle.hasAttribute('aria-disabled')).toBe(false);
+     clickMetronome(view);
+     expect(toggle.getAttribute('aria-pressed')).toBe('true');
+     const onTokens = tokensOf(toggle);
+@@ -536,17 +540,17 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+       'border-foreground',
+       'bg-foreground/20',
+       'text-foreground',
+-      'enabled:hover:bg-foreground/20',
+-      'enabled:active:bg-foreground/20',
+-      'hover:text-foreground',
++      'not-aria-disabled:hover:bg-foreground/20',
++      'not-aria-disabled:active:bg-foreground/20',
++      'not-aria-disabled:hover:text-foreground',
+     ]) {
+       expect(onTokens).toContain(token);
+     }
+     for (const token of [
+       'bg-foreground/5',
+       'border-transparent',
+-      'enabled:hover:bg-foreground/8',
+-      'enabled:active:bg-foreground/12',
++      'not-aria-disabled:hover:bg-foreground/8',
++      'not-aria-disabled:active:bg-foreground/12',
+       'hover:text-accent',
+       'text-muted',
+     ]) {
+@@ -557,4 +561,56 @@ describe('SRW-15 stage 2 metronome toggle and live clicks (D-29z31)', { timeout:
+     expect(inputTokens).toContain('border-outline-strong');
+     expect(inputTokens).not.toContain('rounded-sm');
+   });
++
++  it('UI12 without a tempo the soft-disabled toggle is focusable, dims its label span, ignores a click and keeps mouse focus (variant X, D-29z628)', async () => {
++    const { api, view } = await mountMetronomeWorkspace();
++    const toggle = metronomeToggle(view);
++    const statusBefore = statusText(view);
++    act(() => toggle.focus());
++    expect(document.activeElement).toBe(toggle);
++    const label = toggle.firstElementChild;
++    expect(label?.tagName).toBe('SPAN');
++    expect(label?.textContent).toBe('Metronome');
++    fireEvent.click(toggle);
++    expect(toggle.getAttribute('aria-pressed')).toBe('false');
++    expect(toggle.getAttribute('aria-disabled')).toBe('true');
++    expect(statusText(view)).toBe(statusBefore);
++    expect(fireEvent.mouseDown(toggle)).toBe(true);
++    play(api);
++    expect(lastScheduleOptions().metronome).toBeUndefined();
++    expect(startedSources.some((source) => isClickBuffer(source.buffer))).toBe(false);
++  });
++
++  it('UI13 a typed 120 without Enter commits on the toggle mousedown blur and the same click turns the metronome on (variant X)', async () => {
++    const { view } = await mountMetronomeWorkspace();
++    const input = tempoInput(view);
++    const toggle = metronomeToggle(view);
++    act(() => input.focus());
++    fireEvent.change(input, { target: { value: '120' } });
++    expect(toggle.getAttribute('aria-disabled')).toBe('true');
++    expect(fireEvent.mouseDown(toggle)).toBe(true);
++    act(() => toggle.focus());
++    expect(document.activeElement).toBe(toggle);
++    fireEvent.click(toggle);
++    expect(input.value).toBe('120');
++    expect(toggle.hasAttribute('aria-disabled')).toBe(false);
++    expect(toggle.getAttribute('aria-pressed')).toBe('true');
++    expect(statusText(view)).toBe(metronomeStatusMessage(120));
++  });
++
++  it('UI14 an invalid typed tempo keeps the toggle unavailable and unpressed, and focus stays on the toggle, never BODY (variant X)', async () => {
++    const { view } = await mountMetronomeWorkspace();
++    const input = tempoInput(view);
++    const toggle = metronomeToggle(view);
++    act(() => input.focus());
++    fireEvent.change(input, { target: { value: 'abc' } });
++    expect(fireEvent.mouseDown(toggle)).toBe(true);
++    act(() => toggle.focus());
++    fireEvent.click(toggle);
++    expect(toggle.getAttribute('aria-pressed')).toBe('false');
++    expect(toggle.getAttribute('aria-disabled')).toBe('true');
++    expect(statusText(view)).toBe(TEMPO_INVALID_MESSAGE);
++    expect(document.activeElement).toBe(toggle);
++    expect(document.activeElement).not.toBe(document.body);
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+index 257a902..b9ebc3f 100644
+--- a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+@@ -373,11 +373,16 @@ describe('DUX-R-5b-2b mode toggles go neutral (D-29z142)', () => {
+       expectModeTokens(toggle, `${testId} off`, ['text-muted'], ['border-foreground']);
+       fireEvent.click(toggle);
+       expect(byModeTestId(view, testId).getAttribute('aria-pressed'), `${testId} on`).toBe('true');
++      const isMetronome = testId === 'arrangement-metronome-toggle';
+       expectModeTokens(
+         byModeTestId(view, testId),
+         `${testId} on`,
+-        [...ON_TOKENS, 'text-foreground', 'hover:text-foreground'],
+-        [...DROPPED_TOKENS, 'text-muted', 'hover:text-accent'],
++        isMetronome
++          ? [...TRANSPORT_ON_TOKENS, 'text-foreground', 'not-aria-disabled:hover:text-foreground']
++          : [...ON_TOKENS, 'text-foreground', 'hover:text-foreground'],
++        isMetronome
++          ? [...TRANSPORT_DROPPED_TOKENS, 'text-muted', 'hover:text-accent']
++          : [...DROPPED_TOKENS, 'text-muted', 'hover:text-accent'],
+       );
+     }
+   });
+@@ -500,7 +505,12 @@ describe('DUX-R-5b-2b mode toggles go neutral (D-29z142)', () => {
+     const transportOn =
+       "'border-foreground bg-foreground/20 not-aria-disabled:hover:bg-foreground/20 not-aria-disabled:active:bg-foreground/20'";
+     expectCount(WORKSPACE_PATH, fullOn, 2);
+-    expectCount(TEMPO_ROW_PATH, fullOn, 1);
++    expectCount(TEMPO_ROW_PATH, fullOn, 0);
++    expectCount(
++      TEMPO_ROW_PATH,
++      "'border-foreground bg-foreground/20 text-foreground not-aria-disabled:hover:bg-foreground/20 not-aria-disabled:active:bg-foreground/20'",
++      1,
++    );
+     expectCount(TRANSPORT_PATH, transportOn, 2);
+     expectCount(WORKSPACE_PATH, "'border-foreground bg-foreground/20'", 1);
+     expectCount(LOOP_BRACE_PATH, "'border-foreground bg-foreground/20'", 1);
+diff --git a/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx b/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+index 81c2fee..2e592d8 100644
+--- a/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
++++ b/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx
+@@ -420,6 +420,16 @@ const SOFT_DISABLED_TRANSPORT_SOURCE = resolve(
+   '../../../components/arrangement/ArrangementTransport.tsx',
+ );
+ 
++const SOFT_DISABLED_TEMPO_ROW_SOURCE = resolve(
++  __dirname,
++  '../../../components/arrangement/ArrangementTempoRow.tsx',
++);
++
++const SOFT_DISABLED_LIBRARY_PREVIEW_SOURCE = resolve(
++  __dirname,
++  '../../../components/arrangement/ArrangementLibraryPreview.tsx',
++);
++
+ function emptyTransportArrangement(): Arrangement {
+   return {
+     ...createArrangement([
+@@ -649,10 +659,56 @@ describe('SYS-5 stage 1: soft-disabled transport buttons (D-29z615)', () => {
+     for (const token of [
+       'not-aria-disabled:hover:bg-foreground/8',
+       'not-aria-disabled:active:bg-foreground/12',
+-      'aria-disabled:cursor-not-allowed',
++      'aria-disabled:cursor-not-allowed!',
+       'aria-disabled:*:opacity-40',
+     ]) {
+       expect(tokens).toContain(token);
+     }
+   });
++
++  it('SD8: with no target Delete is named plainly; a selected clip and a range keep their own names (A-R276-REVIEW-DELETE-NAME)', async () => {
++    const { api, remove } = await mountSoftDisabledTransport(focusArrangement());
++    expect(remove().getAttribute('aria-disabled')).toBe('true');
++    expect(remove().getAttribute('aria-label')).toBe(studioEditStrings.deleteButton);
++    expect(studioEditStrings.deleteButton).toBe('Delete');
++    expect(remove().title).toBe(studioEditStrings.deleteNeedsTargetTitle);
++    act(() => live(api).selectClip('music-1'));
++    expect(remove().getAttribute('aria-label')).toBe(studioEditStrings.deleteClipLabel);
++    expect(remove().title).toBe(studioEditStrings.deleteClipTitle);
++    act(() => live(api).setTimeRange({ start: 3, end: 5, trackId: 'music' }));
++    expect(remove().getAttribute('aria-label')).toBe(studioEditStrings.deleteRangeHint);
++    expect(remove().title).toBe(studioEditStrings.deleteRangeHint);
++  });
++
++  it('SD9: the tempo row and library preview sources have no enabled:/disabled: tokens or disabled props, and the metronome, Preview and Add render the layered not-allowed cursor', async () => {
++    for (const path of [SOFT_DISABLED_TEMPO_ROW_SOURCE, SOFT_DISABLED_LIBRARY_PREVIEW_SOURCE]) {
++      const source = readFileSync(path, 'utf8');
++      expect(source.match(/(^|[^a-z-])enabled:/gm) ?? [], path).toHaveLength(0);
++      expect(source.match(/(^|[^a-z-])disabled:/gm) ?? [], path).toHaveLength(0);
++      expect(source.match(/(^|\s)disabled=\{/gm) ?? [], path).toHaveLength(0);
++    }
++    const api: FocusApiRef = { current: null };
++    const view = render(
++      <ArrangementProvider
++        collection={focusCollection}
++        initialArrangement={emptyTransportArrangement()}
++      >
++        <StudioWorkspace />
++        <FocusProbe api={api} />
++      </ArrangementProvider>,
++    );
++    await settle();
++    const metronome = asButton(view.getByTestId('arrangement-metronome-toggle'), 'metronome');
++    const preview = asButton(view.getByTestId('arrangement-library-preview-toggle'), 'preview');
++    const add = asButton(view.getByRole('button', { name: 'Add' }), 'add');
++    for (const { name, button } of [
++      { name: 'Metronome', button: metronome },
++      { name: 'Preview', button: preview },
++      { name: 'Add', button: add },
++    ]) {
++      expect(button.className.split(/\s+/), name).toContain('aria-disabled:cursor-not-allowed!');
++      expect(button.hasAttribute('disabled'), name).toBe(false);
++    }
++    expect(metronome.getAttribute('aria-disabled')).toBe('true');
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index a04338e..7f5186e 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -2568,7 +2568,15 @@ const EXPECTED_LIBRARY_PANEL_STRINGS: Record<string, string> = {
+   insertMarker: 'insert marker',
+   previewPlay: 'Preview',
+   previewStop: 'Stop',
++  previewNeedsSoundTitle: 'Preview — select a sound in the list first',
++  previewLoadingTitle: 'Preview — wait for the sound to load',
++  previewFailedTitle: 'Preview — this sound could not load; choose another',
+   add: 'Add',
++  addTitle: 'Add to the active track at the insert marker',
++  addNeedsSoundTitle: 'Add — select a sound in the list first',
++  addLoadingTitle: 'Add — wait for the sound to load',
++  addFailedTitle: 'Add — this sound could not load; choose another',
++  addNeedsAudioTrackTitle: 'Add — make an audio track active first',
+ };
+ 
+ describe('V-0.5b library panel strings', () => {
+@@ -2577,6 +2585,11 @@ describe('V-0.5b library panel strings', () => {
+       [
+         'activeTrack',
+         'add',
++        'addFailedTitle',
++        'addLoadingTitle',
++        'addNeedsAudioTrackTitle',
++        'addNeedsSoundTitle',
++        'addTitle',
+         'all',
+         'clearSearch',
+         'collapse',
+@@ -2589,7 +2602,10 @@ describe('V-0.5b library panel strings', () => {
+         'listLabel',
+         'noResults',
+         'previewEmpty',
++        'previewFailedTitle',
+         'previewLabel',
++        'previewLoadingTitle',
++        'previewNeedsSoundTitle',
+         'previewPlay',
+         'previewStop',
+         'previewWaveLabel',
+@@ -2601,7 +2617,7 @@ describe('V-0.5b library panel strings', () => {
+         'widthLabel',
+       ].sort(),
+     );
+-    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(24);
++    expect(Object.keys(EXPECTED_LIBRARY_PANEL_STRINGS)).toHaveLength(32);
+     for (const [key, value] of Object.entries(studioLibraryPanelStrings)) {
+       expect(value, key).toBe(EXPECTED_LIBRARY_PANEL_STRINGS[key]);
+       expect(value, key).not.toMatch(GEORGIAN_CODEPOINT);
+diff --git a/app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx b/app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx
+new file mode 100644
+index 0000000..583e400
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx
+@@ -0,0 +1,106 @@
++import { fireEvent, render } from '@testing-library/react';
++import type { MouseEvent } from 'react';
++import { describe, expect, it, vi } from 'vitest';
++import {
++  guardSoftDisabledClick,
++  isSoftDisabledButton,
++  softDisabledButtonProps,
++} from '~/components/arrangement/studio-soft-disabled';
++
++function soleButton(container: HTMLElement): HTMLButtonElement {
++  const button = container.querySelector('button');
++  if (!(button instanceof HTMLButtonElement)) {
++    throw new Error('button missing');
++  }
++  return button;
++}
++
++describe('SYS-5 stage 2 shared soft-disabled helper (D-29z627)', () => {
++  it('SDU1 marks an unavailable button aria-disabled and blocks its mouse focus; an available button gets nothing', () => {
++    const unavailable = render(
++      <button type="button" {...softDisabledButtonProps(true)}>
++        Off
++      </button>,
++    );
++    const off = soleButton(unavailable.container);
++    expect(off.getAttribute('aria-disabled')).toBe('true');
++    expect(fireEvent.mouseDown(off)).toBe(false);
++    unavailable.unmount();
++
++    const available = render(
++      <button type="button" {...softDisabledButtonProps(false)}>
++        On
++      </button>,
++    );
++    const on = soleButton(available.container);
++    expect(on.hasAttribute('aria-disabled')).toBe(false);
++    expect(fireEvent.mouseDown(on)).toBe(true);
++    expect(softDisabledButtonProps(false)).toEqual({});
++  });
++
++  it('SDU2 the click wrapper drops a click on an aria-disabled button and passes the event through otherwise', () => {
++    const handler = vi.fn<(event: MouseEvent<HTMLButtonElement>) => void>();
++    const blocked = render(
++      <button type="button" aria-disabled="true" onClick={guardSoftDisabledClick(handler)}>
++        Off
++      </button>,
++    );
++    fireEvent.click(soleButton(blocked.container));
++    expect(handler).toHaveBeenCalledTimes(0);
++    blocked.unmount();
++
++    let receivedTarget: EventTarget | null = null;
++    handler.mockImplementation((event) => {
++      receivedTarget = event.currentTarget;
++    });
++    const open = render(
++      <button type="button" onClick={guardSoftDisabledClick(handler)}>
++        On
++      </button>,
++    );
++    const button = soleButton(open.container);
++    fireEvent.click(button);
++    expect(handler).toHaveBeenCalledTimes(1);
++    expect(receivedTarget).toBe(button);
++  });
++
++  it('SDU3 reads only aria-disabled="true" as soft-disabled', () => {
++    const view = render(
++      <div>
++        <button type="button" aria-disabled="true">
++          True
++        </button>
++        <button type="button" aria-disabled="false">
++          False
++        </button>
++        <button type="button">Absent</button>
++      </div>,
++    );
++    const [isTrue, isFalse, isAbsent] = Array.from(view.container.querySelectorAll('button'));
++    expect(isSoftDisabledButton(isTrue)).toBe(true);
++    expect(isSoftDisabledButton(isFalse)).toBe(false);
++    expect(isSoftDisabledButton(isAbsent)).toBe(false);
++  });
++
++  it('SDU4 the wrapper reads the DOM at click time, so a rerender that clears aria-disabled lets the next click through', () => {
++    const handler = vi.fn();
++    const wrapped = guardSoftDisabledClick(handler);
++    const view = render(
++      <button type="button" {...softDisabledButtonProps(true)} onClick={wrapped}>
++        Toggle
++      </button>,
++    );
++    const button = soleButton(view.container);
++    fireEvent.click(button);
++    expect(handler).toHaveBeenCalledTimes(0);
++    view.rerender(
++      <button type="button" {...softDisabledButtonProps(false)} onClick={wrapped}>
++        Toggle
++      </button>,
++    );
++    expect(soleButton(view.container)).toBe(button);
++    expect(button.hasAttribute('aria-disabled')).toBe(false);
++    fireEvent.click(button);
++    expect(handler).toHaveBeenCalledTimes(1);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx b/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+index 4582f2a..9be32cd 100644
+--- a/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+@@ -190,7 +190,7 @@ describe(
+         'Undo',
+         'Redo',
+         'Split',
+-        'Delete — the selected clip; leaves a gap',
++        'Delete',
+       ]);
+       expect(Array.from(centre.querySelectorAll('button')).map(buttonName)).toEqual([
+         'Follow',
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 936fd8d..0fe5a60 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -866,7 +866,15 @@ export const studioLibraryPanelStrings = {
+   insertMarker: 'insert marker',
+   previewPlay: 'Preview',
+   previewStop: 'Stop',
++  previewNeedsSoundTitle: 'Preview — select a sound in the list first',
++  previewLoadingTitle: 'Preview — wait for the sound to load',
++  previewFailedTitle: 'Preview — this sound could not load; choose another',
+   add: 'Add',
++  addTitle: 'Add to the active track at the insert marker',
++  addNeedsSoundTitle: 'Add — select a sound in the list first',
++  addLoadingTitle: 'Add — wait for the sound to load',
++  addFailedTitle: 'Add — this sound could not load; choose another',
++  addNeedsAudioTrackTitle: 'Add — make an audio track active first',
+ };
+ 
+ export const studioVideoDockStrings = {
+diff --git a/docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md b/docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md
+index d8b3f1e..6664438 100644
+--- a/docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md
++++ b/docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md
+@@ -1,12 +1,12 @@
+ # SYS-5 ეტაპი 1 — transport-ის მიუწვდომელი ღილაკები keyboard-ით მისაწვდომი რჩება და მიზეზს ასახელებს
+ 
+ **თარიღი:** 2026-10-30
+-**სტატუსი:** In Progress (stage 1 of 2; C round 276 PASS; gate 276 test fix-up round 277)
++**სტატუსი:** Completed (C round 278 PASS)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+ 
+-Transport-ის შვიდი ღილაკი — Undo, Redo, Split, Delete, Loop, Zoom to selection და Zoom back — მიუწვდომელ მდგომარეობაში native `disabled`-ს იყენებდა. ბრაუზერი ასეთ ღილაკს Tab-ის რიგიდან იღებს, ამიტომ keyboard-ისა და screen reader-ის მომხმარებელი ვერ აღწევდა `title`-მდე, სადაც მიზეზი ეწერა (C-R229-01, GATE229-S1). ოთხ ღილაკს (Undo, Redo, Split, Delete) `title`-ში მიზეზი საერთოდ არ ჰქონდა, მხოლოდ მოქმედების სახელი. ეს Saba-ს დამტკიცებული DUX-R-4(b)-ის გაგრძელებაა (2026-10-25). SYS-5 ორ ეტაპად იყოფა: ეს რაუნდი (276) შვიდ transport-ის ღილაკს ეხება, მეორე ეტაპი (277) — metronome toggle-სა და ბიბლიოთეკის Add ღილაკს.
++Transport-ის შვიდი ღილაკი — Undo, Redo, Split, Delete, Loop, Zoom to selection და Zoom back — მიუწვდომელ მდგომარეობაში native `disabled`-ს იყენებდა. ბრაუზერი ასეთ ღილაკს Tab-ის რიგიდან იღებს, ამიტომ keyboard-ისა და screen reader-ის მომხმარებელი ვერ აღწევდა `title`-მდე, სადაც მიზეზი ეწერა (C-R229-01, GATE229-S1). ოთხ ღილაკს (Undo, Redo, Split, Delete) `title`-ში მიზეზი საერთოდ არ ჰქონდა, მხოლოდ მოქმედების სახელი. ეს Saba-ს დამტკიცებული DUX-R-4(b)-ის გაგრძელებაა (2026-10-25). SYS-5 ორ ეტაპად იყოფა: ეს რაუნდი (276) შვიდ transport-ის ღილაკს ეხება, მეორე ეტაპი (278) — metronome toggle-სა და ბიბლიოთეკის Add ღილაკს.
+ 
+ ## მიდგომა
+ 
+@@ -62,7 +62,7 @@ flowchart TD
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- SYS-5 ეტაპი 2 (რაუნდი 277): metronome toggle (`ArrangementTempoRow.tsx`) და ბიბლიოთეკის Add ღილაკი; helper საერთო ფაილში გადადის.
++- SYS-5 ეტაპი 2 (რაუნდი 278): metronome toggle (`ArrangementTempoRow.tsx`) და ბიბლიოთეკის Add ღილაკი; helper საერთო ფაილში გადადის.
+ - მიუწვდომელ ღილაკზე `cursor: not-allowed` (B-ის გადაწყვეტილება, იხ. ზემოთ).
+ - B-R275-FOCUS-REASON-VISIBLE (Low): keyboard focus-ზე მიზეზი ვიზუალურად არ ჩანს (`title` focus-ზე არ ჩნდება).
+ - B-R275-SPLIT-HELD-ENTER (Low): ხელმისაწვდომ Split/Loop/Zoom to selection-ზე Enter-ის დაჭერით გაჩერება.
+diff --git a/docs/implementation/2026/quarter-IV/207-sys-5-disabled-reasons-stage-2.md b/docs/implementation/2026/quarter-IV/207-sys-5-disabled-reasons-stage-2.md
+new file mode 100644
+index 0000000..35ac0ab
+--- /dev/null
++++ b/docs/implementation/2026/quarter-IV/207-sys-5-disabled-reasons-stage-2.md
+@@ -0,0 +1,77 @@
++# SYS-5 ეტაპი 2 — metronome, ბიბლიოთეკის Preview და Add keyboard-ით მისაწვდომი რჩება, soft-disabled helper საერთო ფაილშია
++
++**თარიღი:** 2026-10-30
++**სტატუსი:** Completed (C round 278 PASS)
++**შეცვლილი პროექტი:** Store
++
++## კონტექსტი
++
++SYS-5-ის პირველმა ეტაპმა (doc 206, რაუნდები 276–277) transport-ის შვიდი ღილაკი native `disabled`-დან `aria-disabled`-ზე გადაიყვანა. დარჩა სამი ღილაკი, რომლებიც მიუწვდომელ მდგომარეობაში ისევ native `disabled`-ს იყენებდა და ამიტომ Tab-ის რიგიდან ქრებოდა:
++
++- **Metronome** — BPM-ის გარეშე მიუწვდომელია; მიზეზი (`Metronome — set a BPM first`) მხოლოდ მაუსის hover-ზე ჩანდა (ROOT-R66-L3, მიზეზის ნაწილი).
++- **Add** — ვიდეოს ხაზზე მიუწვდომელია და `title` საერთოდ არ ჰქონდა (C-R130-ADD-DISABLED-NO-REASON).
++- **Preview** — Add-ის გვერდით იგივე ნიმუშით, title-ის გარეშე.
++
++პირველი ეტაპიდან დარჩა სამი საკითხი: soft-disabled ღილაკზე ბრაუზერი `cursor: pointer`-ს აჩვენებდა (C-R276-01), მიზნის გარეშე Delete-ის accessible name ისევ „Delete — the selected clip; leaves a gap“ იყო (A-R276-REVIEW-DELETE-NAME), helper და შვიდი ხელით დაწერილი guard კი `ArrangementTransport.tsx`-ში ლოკალურად იდგა (A-R276-ARCH-GUARD-IN-HELPER). ეს Saba-ს დამტკიცებული DUX-R-4(b)-ის დასკვნითი ეტაპია.
++
++## მიდგომა
++
++- **საერთო helper:** ახალი ფაილი `app/components/arrangement/studio-soft-disabled.ts` (`studio-focus.ts`-ისა და `studio-fader.ts`-ის მეზობელი) აექსპორტებს `SoftDisabledButtonProps`-ს, `softDisabledButtonProps`-ს, `isSoftDisabledButton`-სა და ახალ `guardSoftDisabledClick(handler)`-ს. wrapper click-ის მომენტში DOM-ის `aria-disabled`-ს კითხულობს და მიუწვდომელ ღილაკზე handler-ს არ იძახებს. `onClick` `softDisabledButtonProps`-ში არ ჩაიდო, რადგან შემდეგ დაწერილი `onClick` prop მას ჩუმად გადაფარავდა (`tech-lead`, D-29z627).
++- **Transport:** ლოკალური ასლები წაიშალა; შვიდივე guard ახლა `guardSoftDisabledClick(...)`-ით არის შეფუთული, `armFocusHandoff` ისევ action-მდე სრულდება.
++- **Preview და Add:** native `disabled`-ის ნაცვლად `softDisabledButtonProps(...)` (Preview — `!isReady`, Add — `!canAdd`) და შეფუთული `onClick`. click, Enter ან Space მიუწვდომელ ღილაკზე არაფერს აკეთებს და status-ს არ წერს, თუმცა `addSourceToActiveTrack` და `startLibraryPreview` უარის შემთხვევაში status-ს წერენ. Keyboard-ის სხვა გზები (Enter ბიბლიოთეკის სტრიქონზე, გლობალური Enter, preview wave-ის Space/Enter) უცვლელია.
++- **მიზეზები `title`-ში:** რიგი იმეორებს `addSourceToActiveTrack`-ის უარის რიგს: ხმა არ არის → ჩატვირთვა ჩავარდა → ჯერ იტვირთება → აქტიური ხაზი audio არ არის. ამიტომ title არასოდეს ეწინააღმდეგება keyboard-ის გზით დაწერილ status-ს. Accessible name-ები (`Add`, `Preview`/`Stop`, `Metronome`) არ შეცვლილა. ეკრანზე მუდმივი ახალი ტექსტი არ დამატებულა (L39).
++- **Metronome, variant X:** `aria-disabled` და შეფუთული `onClick`, მაგრამ **`onMouseDown` preventDefault-ის გარეშე**. B-მ HEAD-ზე გაზომა: მომხმარებელი BPM ველში წერს `120`-ს Enter-ის გარეშე და აჭერს Metronome-ს. mousedown ველს blur-ს უკეთებს, tempo commit-დება, ღილაკი click-მდე ხელმისაწვდომი ხდება და იგივე click metronome-ს რთავს. საერთო ნიმუში (preventDefault) ამ click-ს მკვდრად აქცევდა. ეს C-R276-02-ის ვიწრო გამონაკლისია (`product-designer`, D-29z628).
++- **Cursor:** ყველა soft-disabled ღილაკს აქვს `aria-disabled:cursor-not-allowed!`. layered `!important` სჯობს `app.css`-ის unlayered `button { cursor:pointer }` წესს (D-29z630).
++- **Delete-ის სახელი:** მიზნის გარეშე `aria-label` = `Delete`; კლიპის მონიშვნისას — `deleteClipLabel`, range-ისას — range-ის hint (D-29z629).
++- **Perf predicate:** სამ perf spec-ში `!add.disabled` → `add.getAttribute('aria-disabled') !== 'true'`, რადგან `add.disabled` ახლა ყოველთვის false-ია.
++- **უარყოფილი ალტერნატივები:** Preview-ის native-ზე დატოვება (Tab ერთ ღილაკზე გაჩერდებოდა და მეზობელს გამოტოვებდა); metronome-ზე `softDisabledButtonProps` (ზემოთ აღწერილი dead click); მიზეზის status line-ში ჩაწერა (stage-1 Q1).
++
++## არქიტექტურა
++
++```mermaid
++flowchart TD
++  H[studio-soft-disabled.ts] --> T[ArrangementTransport: 7 ღილაკი]
++  H --> L[ArrangementLibraryPreview: Preview, Add]
++  H --> M[ArrangementTempoRow: Metronome — მხოლოდ guardSoftDisabledClick]
++  C[click / Enter / Space] --> G{aria-disabled = true click-ის მომენტში?}
++  G -->|კი| X[return — status, clips, preview უცვლელი]
++  G -->|არა| A[handler]
++  MD[mousedown] --> K{რომელი ღილაკი?}
++  K -->|transport, Preview, Add| PD[preventDefault — focus რჩება]
++  K -->|Metronome| BL[BPM ველის blur → tempo commit → იგივე click მუშაობს]
++```
++
++## შეცვლილი ფაილები
++
++- `app/components/arrangement/studio-soft-disabled.ts` — ახალი: საერთო soft-disabled helper და click wrapper
++- `app/components/arrangement/ArrangementTransport.tsx` — ლოკალური helper-ის წაშლა, import, შვიდი შეფუთული guard, cursor `!`, Delete-ის `aria-label`
++- `app/components/arrangement/ArrangementTempoRow.tsx` — Metronome ღილაკი (`aria-disabled`, wrapper, label `<span>`-ში, class token-ები)
++- `app/components/arrangement/ArrangementLibraryPreview.tsx` — Preview და Add ღილაკები, ორი title კონსტანტა
++- `app/lib/arrangement/strings.ts` — `studioLibraryPanelStrings`-ში რვა ახალი key
++- `perf/studio-lab-interactions.perf.spec.ts`, `perf/studio-lab.perf.spec.ts`, `perf/studio-lab-resources.perf.spec.ts` — Add-ის ready predicate
++- ტესტები: `studio-soft-disabled.test.tsx` (ახალი), `metronome-ui`, `library-preview`, `self-disabling-focus`, `held-enter-add`, `mode-toggle-colour-ui`, `library-row-strings-ui`, `drag-feedback-colour-ui`, `transport-centre-ui`, `strings.test.ts`
++- `docs/implementation/2026/quarter-IV/206-sys-5-disabled-reasons-stage-1.md` — სტატუსი და რაუნდის ნომრები
++
++## პრობლემები და გადაწყვეტები
++
++- **Problem:** `aria-disabled:cursor-not-allowed` ბრაუზერში არ მოქმედებდა (`button { cursor:pointer }` unlayered-ია). **Solution:** `!` ფორმა; SD7 და SD9 ამოწმებს token-ს, C კი computed `cursor`-ს ბრაუზერში.
++- **Problem:** LPA4-ის საწყისი ვერსია (`libraryPreviewSourceId` რჩება `null`) guard-ის წაშლაზე მწვანე რჩებოდა, რადგან `startLibraryPreview` ჩაუტვირთავ ხმაზე თავადაც ჩერდება. **Solution:** LPA4-ს დაემატა status-ის უცვლელობის შემოწმება — guard-ის გარეშე `startLibraryPreview` „not loaded“ status-ს წერს და ტესტი წითლდება.
++- **Problem:** UI13-ისთვის guard-ის წაშლა წითელ ტესტს არ იძლევა, რადგან workspace-ის `toggleMetronome` tempo-ს გარეშე თავადაც ჩერდება (L52). **Solution:** UI13-ის red-proof არის `handleTempoBlur`-ის commit-ის გათიშვა; preventDefault-ის ნაწილს UI12 ამოწმებს (`mouseDown` აბრუნებს `true`-ს).
++- **Problem:** `aria-disabled:` შეიცავს `disabled:` ქვესტრიქონს. **Solution:** SD9-ის regex `(^|[^a-z-])disabled:` მხოლოდ თავისუფალ `disabled:` token-ს ითვლის.
++
++## ტესტირება
++
++- `studio-soft-disabled.test.tsx`: SDU1 (props და mousedown), SDU2 (wrapper ბლოკავს/ატარებს click-ს, `currentTarget` ღილაკია), SDU3 (მხოლოდ `"true"`), SDU4 (wrapper DOM-ს click-ის მომენტში კითხულობს).
++- `metronome-ui.test.tsx`: UI1, UI2, UI6, UI11 გადავიდა `aria-disabled`-ზე; ახალი UI12 (focusable, `<span>` label, click no-op, mousedown არ არის default-prevented), UI13 (variant X: `120` Enter-ის გარეშე → იგივე click რთავს), UI14 (`abc` → უარი, focus toggle-ზე, არა BODY).
++- `library-preview.test.tsx`: LPA1 (ვიდეოს ხაზზე Add: clip და status უცვლელი), LPA2 (audio ხაზზე Add ხელმისაწვდომი, title, +1 clip), LPA3 (no sound / loading / failed — ზუსტი title-ები, ყველა jsdom-ში მიღწევადია), LPA4 (Preview click ჩაუტვირთავ ხმაზე: preview და status უცვლელი), LPA5 (focused Add ხელმისაწვდომი ხდება ადგილზე).
++- `self-disabling-focus.test.tsx`: SD7 (cursor `!`), SD8 (Delete-ის სახელი სამ მდგომარეობაში), SD9 (TempoRow და LibraryPreview source-ში 0 `enabled:`/`disabled:` token და 0 `disabled={`; rendered ღილაკებზე cursor `!`).
++- `held-enter-add.test.tsx` HA5: ხელმისაწვდომ Add-ს `aria-disabled` არ აქვს.
++- Mutant-ები (G, C ×3 ფაილი, D, A, M, SDU1, SDU3, SDU4, UI12, UI13, SD9) წითელია; დეტალები A-ის ანგარიშშია (`a-round-278.md`).
++- ბრაუზერის შემოწმება (Tab, AX tree, cursor, variant X, ΔE) C-ის რაუნდ 278-ის ანგარიშშია.
++
++## TODO / შემდეგი ნაბიჯები
++
++- B-R276-CURSOR-UNLAYERED-GLOBAL: app-ის სხვა native disabled ღილაკებზე `cursor` ისევ unlayered წესს ემორჩილება (`deferred_low_polish`).
++- B-R275-FOCUS-REASON-VISIBLE (Low): keyboard focus-ზე მიზეზი ვიზუალურად არ ჩანს.
++- ROOT-R66-L3-ის 16 px target-ის ნაწილი `deferred_low_polish`-ში რჩება.
++- LIVE-MEAS-SYS5-DISABLED: Live-ში მიუწვდომელი control-ების ქცევა ჯერ გაუზომავია.
+diff --git a/perf/studio-lab-interactions.perf.spec.ts b/perf/studio-lab-interactions.perf.spec.ts
+index 6259787..5bebaea 100644
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -558,7 +558,7 @@ async function measureLoadReady(page: Page, result: InteractionPassResult): Prom
+         (button) => button.textContent?.trim() === addLabel,
+       );
+       const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && !add.disabled && wave !== null
++      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null
+         ? performance.now()
+         : 0;
+     },
+diff --git a/perf/studio-lab-resources.perf.spec.ts b/perf/studio-lab-resources.perf.spec.ts
+index 219aa3b..2c1f2b5 100644
+--- a/perf/studio-lab-resources.perf.spec.ts
++++ b/perf/studio-lab-resources.perf.spec.ts
+@@ -194,7 +194,7 @@ async function measureLoadReady(page: Page): Promise<void> {
+         (button) => button.textContent?.trim() === addLabel,
+       );
+       const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && !add.disabled && wave !== null;
++      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null;
+     },
+     perfLibraryAddLabel,
+     { polling: 'raf', timeout: 90000 },
+diff --git a/perf/studio-lab.perf.spec.ts b/perf/studio-lab.perf.spec.ts
+index e1889c4..4c1e8e7 100644
+--- a/perf/studio-lab.perf.spec.ts
++++ b/perf/studio-lab.perf.spec.ts
+@@ -518,7 +518,7 @@ async function measureLoad(page: Page, result: PassResult): Promise<void> {
+         (button) => button.textContent?.trim() === addLabel,
+       );
+       const wave = document.querySelector('[data-testid="arrangement-library-preview-wave"] rect');
+-      return add instanceof HTMLButtonElement && !add.disabled && wave !== null
++      return add instanceof HTMLButtonElement && add.getAttribute('aria-disabled') !== 'true' && wave !== null
+         ? performance.now()
+         : 0;
+     },

@@ -1,0 +1,15 @@
+# B round 278 -> 279 planning checkpoint (2026-10-30)
+- Inputs read: current-task.md (r278), a-round-278.md, c-round-278.md/.json (PASS, browserVerified/realVerified true, 0 bugs), gate-round-278.json (published 873d835), gates/round-278/review.md (4 Lows/info + 2 arch signals).
+- tasks/round-278.md archived (copy). Backups in b-round-278/*-before-279.*
+- Decision: round 279 = PERF-HARNESS-SHARED-LIB-b-ii (test-only perf harness).
+- Baseline perf run at 873d835 on /tmp/b278-scratch started (log b-round-278/head-perf-run.log). L38: no other jobs until it exits.
+- Consults in flight: performance-optimizer, tech-lead (read-only, told not to run heavy jobs).
+- Advisor consulted once (approach).
+- Next: read oss-adoption.md, harness docs; after perf run: copy results to b-round-278/baseline-results, check :5173 + vite metadata, GATE214-S2 lane probe; claims.sh; grants + manifest; write task; backlog/feature-status/lessons; b-round-278.md; b-next.json.
+- [23:55] HEAD run done: 3/3 PASS 15.2 min (1a 8.4 min = 56 %). baseline-results/ saved. :5173 200, vite metadata mtime unchanged.
+- Consults done (tech-lead: split (b) to round 280, keep l.579; perf-optimizer: table + mutants). Root request b-round-278-root-request-perf-timeout.md written.
+- Lane probe: video,music,stems,sfx; clip on music; stems first after (probe/lane.json).
+- Sketch v1 (/tmp/b278-sketch, sketch.diff): tsc rc 0. Perf run: 1b-i pass-1 hook-live 2->3 (load tail commit spilled into Add window with quiet-only wait). Next: wait run end, probe load tail (/tmp/b278-probe/zz-probe.perf.spec.ts), sketch v2 waits for collection-ready status then quiet; rerun.
+- backlog-update.py written, NOT applied yet.
+- [final] task, grants, manifest, backlog (v242), feature-status, lessons L38, b-round-278.md, b-next.json written. Store clean.
+- advisor fixes applied (MU-READY .empty, HEAD re-run clause, five files). Done.

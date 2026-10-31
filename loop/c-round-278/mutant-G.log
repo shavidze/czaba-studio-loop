@@ -1,0 +1,151 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c278-mut[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 62[2mms[22m[39m
+     [32m✓[39m SDU1 marks an unavailable button aria-disabled and blocks its mouse focus; an available button gets nothing[32m 30[2mms[22m[39m
+[31m     [31m×[31m SDU2 the click wrapper drops a click on an aria-disabled button and passes the event through otherwise[39m[32m 10[2mms[22m[39m
+     [32m✓[39m SDU3 reads only aria-disabled="true" as soft-disabled[32m 14[2mms[22m[39m
+[31m     [31m×[31m SDU4 the wrapper reads the DOM at click time, so a rerender that clears aria-disabled lets the next click through[39m[32m 4[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 664[2mms[22m[39m
+     [32m✓[39m reserves exactly two clamped lines for the active-lane row on an audio lane (C-R16-01)[32m 80[2mms[22m[39m
+     [32m✓[39m keeps the video note in the title and visible text when the video lane is active (C-R16-01)[32m 194[2mms[22m[39m
+     [32m✓[39m titles the row with a dash when no lane is active (C-R16-01)[32m 25[2mms[22m[39m
+     [32m✓[39m advances the library-preview cursor without rendering LibraryInsertMarkerText (M-R10-1/M2)[32m 67[2mms[22m[39m
+     [32m✓[39m HT1 held Enter on the preview toggle prevents only the repeats (B-R98-H1-PREVIEW-TOGGLE-HOLD)[32m 33[2mms[22m[39m
+     [32m✓[39m HT2 fresh Enter presses on the preview toggle keep their default (B-R98-H1-PREVIEW-TOGGLE-HOLD)[32m 17[2mms[22m[39m
+     [32m✓[39m HT3 the preview toggle guard is Enter-only and keeps propagation (B-R98-H1-PREVIEW-TOGGLE-HOLD)[32m 18[2mms[22m[39m
+[31m     [31m×[31m LPA1 a soft-disabled Add on the video track blocks mouse focus, adds no clip and writes no status (SYS-5 stage 2)[39m[32m 68[2mms[22m[39m
+     [32m✓[39m LPA2 Add on an audio track is available, titled for the insert marker, and a click adds one clip[32m 49[2mms[22m[39m
+     [32m✓[39m LPA3 the no-sound, loading and failed states give Preview and Add their exact reasons and soft-disable both[32m 70[2mms[22m[39m
+[31m     [31m×[31m LPA4 a click on a soft-disabled Preview starts no preview[39m[32m 6[2mms[22m[39m
+     [32m✓[39m LPA5 a focused soft-disabled Add keeps focus when an audio track becomes active, and a click then adds exactly one clip[32m 34[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1017[2mms[22m[39m
+     [32m✓[39m FL1: a keyboard 0 dB reset moves focus to the Clip Gain input, and a fresh Enter there adds no clip[32m 299[2mms[22m[39m
+     [32m✓[39m FL2: a mouse 0 dB reset never focuses the button and leaves focus on BODY[32m 120[2mms[22m[39m
+     [32m✓[39m FL3: Undo keeps focus while history remains and hands it to Redo on the last step[32m 25[2mms[22m[39m
+     [32m✓[39m FL4: Redo keeps focus while redo entries remain and hands it to Undo on the last step[32m 24[2mms[22m[39m
+     [32m✓[39m FL5: Delete on the selected clip hands focus to Undo, which now undoes the delete[32m 13[2mms[22m[39m
+     [32m✓[39m FL6: Zoom back on its last history step hands focus to Fit[32m 13[2mms[22m[39m
+     [32m✓[39m FL7: Undo clicked without holding focus never moves focus[32m 19[2mms[22m[39m
+     [32m✓[39m FL8: an Undo refused during a pointer gesture keeps Undo enabled and focused[32m 14[2mms[22m[39m
+     [32m✓[39m FL9: enabled Undo, Redo, Delete and Zoom back prevent a repeated Enter and allow a fresh one; a repeated Space is untouched[32m 19[2mms[22m[39m
+     [32m✓[39m FL10: when the browser already dropped focus to BODY before the commit, Zoom back still hands focus to Fit[32m 11[2mms[22m[39m
+     [32m✓[39m SD1: in an empty arrangement the seven unavailable buttons are aria-disabled, focusable and titled with their reason[32m 16[2mms[22m[39m
+[31m     [31m×[31m SD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom[39m[32m 24[2mms[22m[39m
+[31m     [31m×[31m SD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)[39m[32m 12[2mms[22m[39m
+     [32m✓[39m SD3: mousedown on a soft-disabled button is default-prevented, on Fit it is not[32m 12[2mms[22m[39m
+     [32m✓[39m SD4: a selected clip or a range makes Split and Delete available with their action titles[32m 15[2mms[22m[39m
+     [32m✓[39m SD5: after one edit, Undo hands focus to Redo when it becomes soft-disabled, and Redo hands it back[32m 16[2mms[22m[39m
+     [32m✓[39m SD6: a focused soft-disabled Redo becomes available in place after Ctrl+Z, and a click then redoes[32m 13[2mms[22m[39m
+     [32m✓[39m SD7: the transport source has no enabled:/disabled: tokens or disabled props, and the rendered Undo keeps the aria-disabled tokens[32m 11[2mms[22m[39m
+     [32m✓[39m SD8: with no target Delete is named plainly; a selected clip and a range keep their own names (A-R276-REVIEW-DELETE-NAME)[32m 18[2mms[22m[39m
+     [33m[2m✓[22m[39m SD9: the tempo row and library preview sources have no enabled:/disabled: tokens or disabled props, and the metronome, Preview and Add render the layered not-allowed cursor [33m 320[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview.test.tsx[2m > [22mArrangementLibraryPreview active-lane row and insert-marker memo (C-R16-01, M-R10-1/M2, C-R250-01)[2m > [22mLPA1 a soft-disabled Add on the video track blocks mouse focus, adds no clip and writes no status (SYS-5 stage 2)
+[31m[1mAssertionError[22m: expected 'Choose an audio track (music, stems o…' to be 'Demo collection ready. Drag a sound o…' // Object.is equality[39m
+
+Expected: [32m"[7mDemo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts[27m."[39m
+Received: [31m"[7mChoose an audio track (music, stems or SFX) — audio is not added to the video track[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview.test.tsx:[2m372:33[22m[39m
+    [90m370| [39m    fireEvent[33m.[39m[34mclick[39m(add)[33m;[39m
+    [90m371| [39m    [34mexpect[39m([34mliveApi[39m(api)[33m.[39marrangement[33m.[39mclips[33m.[39mlength)[33m.[39m[34mtoBe[39m(clipsBefore)[33m;[39m
+    [90m372| [39m    [34mexpect[39m([34mliveApi[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m373| [39m  })[33m;[39m
+    [90m374| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview.test.tsx[2m > [22mArrangementLibraryPreview active-lane row and insert-marker memo (C-R16-01, M-R10-1/M2, C-R250-01)[2m > [22mLPA4 a click on a soft-disabled Preview starts no preview
+[31m[1mAssertionError[22m: expected '“Song” has not loaded yet.' to be 'Loading the demo collection…' // Object.is equality[39m
+
+Expected: [32m"Loading the demo collection…"[39m
+Received: [31m"“Song” has not loaded yet."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview.test.tsx:[2m441:33[22m[39m
+    [90m439| [39m    fireEvent[33m.[39m[34mclick[39m(preview)[33m;[39m
+    [90m440| [39m    [34mexpect[39m([34mliveApi[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m441| [39m    [34mexpect[39m([34mliveApi[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m442| [39m    [34mexpect[39m(preview[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'Preview'[39m)[33m;[39m
+    [90m443| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22mSYS-5 stage 1: soft-disabled transport buttons (D-29z615)[2m > [22mSD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom
+[31m[1mAssertionError[22m: Split: expected 'To split, click inside a clip to sele…' to be 'SD2 known status.' // Object.is equality[39m
+
+Expected: [32m"[7mSD2 known status[27m."[39m
+Received: [31m"[7mTo split, click inside a clip to select it and place the insert marker, or make a time selection[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m550:38[22m[39m
+    [90m548| [39m    [35mfor[39m ([35mconst[39m { name[33m,[39m button } [35mof[39m [34msoftDisabledSeven[39m()) {
+    [90m549| [39m      fireEvent[33m.[39m[34mclick[39m(button)[33m;[39m
+    [90m550| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus[33m,[39m name)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m551| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatusSequence[33m,[39m name)[33m.[39m[34mtoBe[39m(sequenceBefore)[33m;[39m
+    [90m552| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel[33m,[39m name)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22mSYS-5 stage 1: soft-disabled transport buttons (D-29z615)[2m > [22mSD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)
+[31m[1mAssertionError[22m: Undo: expected 'Undo/Redo does not work while draggin…' to be 'SD2b known status.' // Object.is equality[39m
+
+Expected: [32m"[7mSD2b known status[27m."[39m
+Received: [31m"[7mUndo/Redo does not work while dragging — let go first[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m578:38[22m[39m
+    [90m576| [39m    [35mfor[39m ([35mconst[39m { name[33m,[39m button } [35mof[39m [34msoftDisabledSeven[39m()) {
+    [90m577| [39m      fireEvent[33m.[39m[34mclick[39m(button)[33m;[39m
+    [90m578| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus[33m,[39m name)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m579| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mstatusSequence[33m,[39m name)[33m.[39m[34mtoBe[39m(sequenceBefore)[33m;[39m
+    [90m580| [39m      [34mexpect[39m(spies[33m.[39monZoomToRange[33m,[39m name)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx[2m > [22mSYS-5 stage 2 shared soft-disabled helper (D-29z627)[2m > [22mSDU2 the click wrapper drops a click on an aria-disabled button and passes the event through otherwise
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called +0 times, but got 1 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx:[2m49:21[22m[39m
+    [90m 47| [39m    )[33m;[39m
+    [90m 48| [39m    fireEvent[33m.[39m[34mclick[39m([34msoleButton[39m(blocked[33m.[39mcontainer))[33m;[39m
+    [90m 49| [39m    [34mexpect[39m(handler)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m 50| [39m    blocked[33m.[39m[34munmount[39m()[33m;[39m
+    [90m 51| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx[2m > [22mSYS-5 stage 2 shared soft-disabled helper (D-29z627)[2m > [22mSDU4 the wrapper reads the DOM at click time, so a rerender that clears aria-disabled lets the next click through
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called +0 times, but got 1 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx:[2m95:21[22m[39m
+    [90m 93| [39m    [35mconst[39m button [33m=[39m [34msoleButton[39m(view[33m.[39mcontainer)[33m;[39m
+    [90m 94| [39m    fireEvent[33m.[39m[34mclick[39m(button)[33m;[39m
+    [90m 95| [39m    [34mexpect[39m(handler)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m 96| [39m    view[33m.[39m[34mrerender[39m(
+    [90m 97| [39m      <button type="button" {...softDisabledButtonProps(false)} onClic…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m30 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 22:50:36
+[2m   Duration [22m 4.02s[2m (transform 2.04s, setup 0ms, import 3.60s, tests 1.74s, environment 2.02s)[22m
+
+
+::error file=/tmp/c278-mut/app/lib/arrangement/__tests__/library-preview.test.tsx,title=app/lib/arrangement/__tests__/library-preview.test.tsx > ArrangementLibraryPreview active-lane row and insert-marker memo (C-R16-01%2C M-R10-1/M2%2C C-R250-01) > LPA1 a soft-disabled Add on the video track blocks mouse focus%2C adds no clip and writes no status (SYS-5 stage 2),line=372,column=33::AssertionError: expected 'Choose an audio track (music, stems o…' to be 'Demo collection ready. Drag a sound o…' // Object.is equality%0A%0AExpected: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0AReceived: "Choose an audio track (music, stems or SFX) — audio is not added to the video track."%0A%0A ❯ app/lib/arrangement/__tests__/library-preview.test.tsx:372:33%0A%0A
+
+::error file=/tmp/c278-mut/app/lib/arrangement/__tests__/library-preview.test.tsx,title=app/lib/arrangement/__tests__/library-preview.test.tsx > ArrangementLibraryPreview active-lane row and insert-marker memo (C-R16-01%2C M-R10-1/M2%2C C-R250-01) > LPA4 a click on a soft-disabled Preview starts no preview,line=441,column=33::AssertionError: expected '“Song” has not loaded yet.' to be 'Loading the demo collection…' // Object.is equality%0A%0AExpected: "Loading the demo collection…"%0AReceived: "“Song” has not loaded yet."%0A%0A ❯ app/lib/arrangement/__tests__/library-preview.test.tsx:441:33%0A%0A
+
+::error file=/tmp/c278-mut/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > SYS-5 stage 1%3A soft-disabled transport buttons (D-29z615) > SD2%3A a click on each soft-disabled button changes no status%2C history%2C range%2C loop%2C clips or zoom,line=550,column=38::AssertionError: Split: expected 'To split, click inside a clip to sele…' to be 'SD2 known status.' // Object.is equality%0A%0AExpected: "SD2 known status."%0AReceived: "To split, click inside a clip to select it and place the insert marker, or make a time selection."%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:550:38%0A%0A
+
+::error file=/tmp/c278-mut/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > SYS-5 stage 1%3A soft-disabled transport buttons (D-29z615) > SD2b%3A during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO),line=578,column=38::AssertionError: Undo: expected 'Undo/Redo does not work while draggin…' to be 'SD2b known status.' // Object.is equality%0A%0AExpected: "SD2b known status."%0AReceived: "Undo/Redo does not work while dragging — let go first."%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:578:38%0A%0A
+
+::error file=/tmp/c278-mut/app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx,title=app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx > SYS-5 stage 2 shared soft-disabled helper (D-29z627) > SDU2 the click wrapper drops a click on an aria-disabled button and passes the event through otherwise,line=49,column=21::AssertionError: expected "vi.fn()" to be called +0 times, but got 1 times%0A ❯ app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx:49:21%0A%0A
+
+::error file=/tmp/c278-mut/app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx,title=app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx > SYS-5 stage 2 shared soft-disabled helper (D-29z627) > SDU4 the wrapper reads the DOM at click time%2C so a rerender that clears aria-disabled lets the next click through,line=95,column=21::AssertionError: expected "vi.fn()" to be called +0 times, but got 1 times%0A ❯ app/lib/arrangement/__tests__/studio-soft-disabled.test.tsx:95:21%0A%0A

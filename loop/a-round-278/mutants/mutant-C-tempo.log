@@ -1,0 +1,78 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx [2m([22m[2m20 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1282[2mms[22m[39m
+     [33m[2m✓[22m[39m FL1: a keyboard 0 dB reset moves focus to the Clip Gain input, and a fresh Enter there adds no clip [33m 339[2mms[22m[39m
+     [32m✓[39m FL2: a mouse 0 dB reset never focuses the button and leaves focus on BODY[32m 174[2mms[22m[39m
+     [32m✓[39m FL3: Undo keeps focus while history remains and hands it to Redo on the last step[32m 38[2mms[22m[39m
+     [32m✓[39m FL4: Redo keeps focus while redo entries remain and hands it to Undo on the last step[32m 37[2mms[22m[39m
+     [32m✓[39m FL5: Delete on the selected clip hands focus to Undo, which now undoes the delete[32m 16[2mms[22m[39m
+     [32m✓[39m FL6: Zoom back on its last history step hands focus to Fit[32m 14[2mms[22m[39m
+     [32m✓[39m FL7: Undo clicked without holding focus never moves focus[32m 31[2mms[22m[39m
+     [32m✓[39m FL8: an Undo refused during a pointer gesture keeps Undo enabled and focused[32m 25[2mms[22m[39m
+     [32m✓[39m FL9: enabled Undo, Redo, Delete and Zoom back prevent a repeated Enter and allow a fresh one; a repeated Space is untouched[32m 27[2mms[22m[39m
+     [32m✓[39m FL10: when the browser already dropped focus to BODY before the commit, Zoom back still hands focus to Fit[32m 13[2mms[22m[39m
+     [32m✓[39m SD1: in an empty arrangement the seven unavailable buttons are aria-disabled, focusable and titled with their reason[32m 26[2mms[22m[39m
+     [32m✓[39m SD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom[32m 19[2mms[22m[39m
+     [32m✓[39m SD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)[32m 13[2mms[22m[39m
+     [32m✓[39m SD3: mousedown on a soft-disabled button is default-prevented, on Fit it is not[32m 12[2mms[22m[39m
+     [32m✓[39m SD4: a selected clip or a range makes Split and Delete available with their action titles[32m 18[2mms[22m[39m
+     [32m✓[39m SD5: after one edit, Undo hands focus to Redo when it becomes soft-disabled, and Redo hands it back[32m 19[2mms[22m[39m
+     [32m✓[39m SD6: a focused soft-disabled Redo becomes available in place after Ctrl+Z, and a click then redoes[32m 17[2mms[22m[39m
+     [32m✓[39m SD7: the transport source has no enabled:/disabled: tokens or disabled props, and the rendered Undo keeps the aria-disabled tokens[32m 15[2mms[22m[39m
+     [32m✓[39m SD8: with no target Delete is named plainly; a selected clip and a range keep their own names (A-R276-REVIEW-DELETE-NAME)[32m 26[2mms[22m[39m
+[31m     [31m×[31m SD9: the tempo row and library preview sources have no enabled:/disabled: tokens or disabled props, and the metronome, Preview and Add render the layered not-allowed cursor[39m[33m 401[2mms[22m[39m
+Not implemented: navigation to another Document
+Not implemented: navigation to another Document
+ [31m❯[39m app/lib/arrangement/__tests__/metronome-ui.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2005[2mms[22m[39m
+     [33m[2m✓[22m[39m UI1 is disabled and unpressed without a tempo, and Play schedules no metronome [33m 301[2mms[22m[39m
+     [32m✓[39m UI2 turns on at 120 BPM with its status and Play schedules a click on every beat[32m 243[2mms[22m[39m
+     [32m✓[39m UI3 turning it off while playing forces one resync without a metronome[32m 195[2mms[22m[39m
+     [32m✓[39m UI4 turning it on while playing resyncs once with clicks from the live position[32m 134[2mms[22m[39m
+     [32m✓[39m UI5 a tempo change while it is on resyncs once with the new beat and keeps it pressed[32m 209[2mms[22m[39m
+     [32m✓[39m UI6 clearing the tempo turns it off and setting a tempo again does not re-enable it[32m 169[2mms[22m[39m
+     [32m✓[39m UI7 plans the clicks for loop iteration 0 and appends them for every refilled iteration[32m 130[2mms[22m[39m
+     [32m✓[39m UI8 is not part of history: Undo title, arrangement and Ctrl+Z leave it unchanged[32m 115[2mms[22m[39m
+     [32m✓[39m UI9 export never receives the metronome: two arguments and the same buffers[32m 112[2mms[22m[39m
+     [32m✓[39m UI10 Space on the focused toggle starts playback and does not toggle the metronome[32m 98[2mms[22m[39m
+[31m     [31m×[31m UI11 gives the toggle the borderless 8 px fill with its disabled cue, keeps the on-fill on hover and press, and rounds the BPM field (D-29z132)[39m[32m 62[2mms[22m[39m
+     [32m✓[39m UI12 without a tempo the soft-disabled toggle is focusable, dims its label span, ignores a click and keeps mouse focus (variant X, D-29z628)[32m 67[2mms[22m[39m
+     [32m✓[39m UI13 a typed 120 without Enter commits on the toggle mousedown blur and the same click turns the metronome on (variant X)[32m 93[2mms[22m[39m
+     [32m✓[39m UI14 an invalid typed tempo keeps the toggle unavailable and unpressed, and focus stays on the toggle, never BODY (variant X)[32m 68[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/metronome-ui.test.tsx[2m > [22mSRW-15 stage 2 metronome toggle and live clicks (D-29z31)[2m > [22mUI11 gives the toggle the borderless 8 px fill with its disabled cue, keeps the on-fill on hover and press, and rounds the BPM field (D-29z132)
+[31m[1mAssertionError[22m: expected [ 'h-4', 'shrink-0', …(18) ] to include 'aria-disabled:cursor-not-allowed!'[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/metronome-ui.test.tsx:[2m530:25[22m[39m
+    [90m528| [39m      [32m'not-aria-disabled:hover:text-foreground'[39m[33m,[39m
+    [90m529| [39m    ]) {
+    [90m530| [39m      [34mexpect[39m(offTokens)[33m.[39m[34mtoContain[39m(token)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m531| [39m    }
+    [90m532| [39m    [34mexpect[39m(offTokens)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'border-outline'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22mSYS-5 stage 1: soft-disabled transport buttons (D-29z615)[2m > [22mSD9: the tempo row and library preview sources have no enabled:/disabled: tokens or disabled props, and the metronome, Preview and Add render the layered not-allowed cursor
+[31m[1mAssertionError[22m: Metronome: expected [ 'h-4', 'shrink-0', …(18) ] to include 'aria-disabled:cursor-not-allowed!'[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m709:51[22m[39m
+    [90m707| [39m      { name[33m:[39m [32m'Add'[39m[33m,[39m button[33m:[39m add }[33m,[39m
+    [90m708| [39m    ]) {
+    [90m709| [39m      expect(button.className.split(/\s+/), name).toContain('aria-disa…
+    [90m   | [39m                                                  [31m^[39m
+    [90m710| [39m      [34mexpect[39m(button[33m.[39m[34mhasAttribute[39m([32m'disabled'[39m)[33m,[39m name)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m711| [39m    }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m32 passed[39m[22m[90m (34)[39m
+[2m   Start at [22m 22:37:03
+[2m   Duration [22m 4.62s[2m (transform 2.54s, setup 0ms, import 3.84s, tests 3.29s, environment 1.00s)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/metronome-ui.test.tsx,title=app/lib/arrangement/__tests__/metronome-ui.test.tsx > SRW-15 stage 2 metronome toggle and live clicks (D-29z31) > UI11 gives the toggle the borderless 8 px fill with its disabled cue%2C keeps the on-fill on hover and press%2C and rounds the BPM field (D-29z132),line=530,column=25::AssertionError: expected [ 'h-4', 'shrink-0', …(18) ] to include 'aria-disabled:cursor-not-allowed!'%0A ❯ app/lib/arrangement/__tests__/metronome-ui.test.tsx:530:25%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > SYS-5 stage 1%3A soft-disabled transport buttons (D-29z615) > SD9%3A the tempo row and library preview sources have no enabled%3A/disabled%3A tokens or disabled props%2C and the metronome%2C Preview and Add render the layered not-allowed cursor,line=709,column=51::AssertionError: Metronome: expected [ 'h-4', 'shrink-0', …(18) ] to include 'aria-disabled:cursor-not-allowed!'%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:709:51%0A%0A

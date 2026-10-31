@@ -1,0 +1,352 @@
+diff -ru -x test-results -x zz-probe.perf.spec.ts a/perf/lib/app-labels.ts b/perf/lib/app-labels.ts
+--- a/perf/lib/app-labels.ts	2026-10-30 23:26:04.000000000 +0000
++++ b/perf/lib/app-labels.ts	2026-10-30 23:59:34.726134457 +0000
+@@ -8,6 +8,7 @@
+   studioPlaybackStrings,
+   studioViewStrings,
+ } from '../../app/lib/arrangement/strings';
++import { workspaceCollectionCopy } from '../../app/lib/arrangement/collection';
+ 
+ const sentinel = '\u0000';
+ 
+@@ -28,6 +29,9 @@
+ export const perfRangeBodyTitle = studioClipStrings.rangeBodyTitle;
+ export const perfTrimStartTitle = studioClipStrings.trimStartLabel;
+ export const perfLibraryAddLabel = studioLibraryPanelStrings.add;
++export const perfCollectionReadyPattern = new RegExp(
++  `^${escapeRegExp(workspaceCollectionCopy('demo').ready)}`,
++);
+ export const perfActiveTrackLabel = (name: string): string =>
+   studioLaneStrings.activeTrackLabel(name);
+ 
+diff -ru -x test-results -x zz-probe.perf.spec.ts a/perf/lib/page.ts b/perf/lib/page.ts
+--- a/perf/lib/page.ts	2026-10-30 23:26:04.000000000 +0000
++++ b/perf/lib/page.ts	2026-10-30 23:59:34.726502407 +0000
+@@ -1,5 +1,5 @@
+ import { expect, type Locator, type Page } from '@playwright/test';
+-import { perfPlayLabel } from './app-labels';
++import { perfCollectionReadyPattern, perfPlayLabel } from './app-labels';
+ import type { PerfWindowSnapshot } from './instrumentation';
+ 
+ const quietMs = 200;
+@@ -36,24 +36,50 @@
+     if (active instanceof HTMLElement) active.blur();
+   });
+ 
+-export async function waitForQuiet(page: Page, from: number, minMs: number): Promise<number> {
++export interface QuietWaitResult {
++  at: number;
++  capped: boolean;
++}
++
++export async function waitForQuietState(
++  page: Page,
++  from: number,
++  minMs: number,
++): Promise<QuietWaitResult> {
+   await page.waitForTimeout(minMs);
+   for (;;) {
+-    const quiet = await page.evaluate(
++    const state = await page.evaluate(
+       ({ start, quietFor, cap }) => {
+-        const state = window.__czabaPerf;
++        const perf = window.__czabaPerf;
+         const now = performance.now();
+-        const lastCommit = state?.commits.at(-1)?.t ?? 0;
+-        const lastStart = state?.starts.at(-1)?.t ?? 0;
+-        return now - Math.max(lastCommit, lastStart) >= quietFor || now - start >= cap;
++        const lastCommit = perf?.commits.at(-1)?.t ?? 0;
++        const lastStart = perf?.starts.at(-1)?.t ?? 0;
++        const quiet = now - Math.max(lastCommit, lastStart) >= quietFor;
++        return { quiet, capped: !quiet && now - start >= cap };
+       },
+       { start: from, quietFor: quietMs, cap: settleCapMs },
+     );
+-    if (quiet) return nowIn(page);
++    if (state.quiet || state.capped) return { at: await nowIn(page), capped: state.capped };
+     await page.waitForTimeout(50);
+   }
+ }
+ 
++export async function waitForQuiet(page: Page, from: number, minMs: number): Promise<number> {
++  return (await waitForQuietState(page, from, minMs)).at;
++}
++
++export async function waitForStudioQuiet(
++  page: Page,
++  problems: string[],
++  label: string,
++): Promise<number> {
++  const quiet = await waitForQuietState(page, await nowIn(page), 0);
++  if (quiet.capped) {
++    problems.push(`${label}: no ${quietMs} ms without commits or start() calls within ${settleCapMs} ms`);
++  }
++  return quiet.at;
++}
++
+ export function reactRendererProblem(versions: readonly string[]): string | null {
+   if (versions.length === 0) return 'no React renderer was injected into the devtools hook';
+   if (versions.every((version) => version.split('.')[0] === expectedReactMajor)) return null;
+@@ -79,6 +105,26 @@
+   });
+ }
+ 
++export async function waitForCollectionReady(
++  page: Page,
++  problems: string[],
++  label: string,
++): Promise<number> {
++  await expect(page.getByTestId('arrangement-status')).toHaveText(perfCollectionReadyPattern, {
++    timeout: 15000,
++  });
++  return waitForStudioQuiet(page, problems, label);
++}
++
++export async function waitForPlaybackSettled(
++  page: Page,
++  problems: string[],
++  label: string,
++): Promise<number> {
++  await expect.poll(() => isPlaying(page), { timeout: 15000 }).toBe(true);
++  return waitForStudioQuiet(page, problems, label);
++}
++
+ export function startTasks(starts: readonly { task: number }[]): Record<string, number | string> {
+   const perTask = new Map<number, number>();
+   for (const start of starts) perTask.set(start.task, (perTask.get(start.task) ?? 0) + 1);
+diff -ru -x test-results -x zz-probe.perf.spec.ts a/perf/studio-lab-interactions.perf.spec.ts b/perf/studio-lab-interactions.perf.spec.ts
+--- a/perf/studio-lab-interactions.perf.spec.ts	2026-10-30 23:26:04.000000000 +0000
++++ b/perf/studio-lab-interactions.perf.spec.ts	2026-10-30 23:59:34.730980338 +0000
+@@ -23,6 +23,8 @@
+   setPlayback,
+   snapshot,
+   startTasks,
++  waitForCollectionReady,
++  waitForPlaybackSettled,
+   waitForQuiet,
+ } from './lib/page';
+ import { buildPerfReportCore, formatLimit, type PerfSample } from './lib/report';
+@@ -185,28 +187,41 @@
+   }
+ }
+ 
+-async function emptyLanePoint(page: Page, trackId: string): Promise<GrabPoint> {
+-  const laneLocator = page.locator(`[data-track-id=${quotedAttributeValue(trackId)}]`);
+-  const point = await laneLocator.evaluate((lane) => {
+-    const box = lane.getBoundingClientRect();
+-    const y = box.top + box.height / 2;
+-    const right = Math.min(box.right, window.innerWidth) - 4;
+-    for (let x = Math.max(box.left, 0) + 4; x <= right; x += 8) {
+-      const hit = document.elementFromPoint(x, y);
+-      if (
+-        hit !== null &&
+-        hit.closest('[data-track-id]') === lane &&
+-        hit.closest('[data-clip-id]') === null &&
+-        hit.closest('button, input, [role="slider"]') === null &&
+-        x > window.innerWidth * 0.5
+-      ) {
+-        return { x, y };
++async function emptyLanePointAfterClip(clip: Locator): Promise<GrabPoint> {
++  const found = await clip.evaluate((clipElement) => {
++    const ownLane = clipElement.closest('[data-track-id]');
++    if (ownLane === null) return { point: null, ownTrack: null };
++    const lanes = [...document.querySelectorAll('[data-track-id]')];
++    for (const lane of lanes.slice(lanes.indexOf(ownLane) + 1)) {
++      if (lane.contains(ownLane) || ownLane.contains(lane)) continue;
++      const box = lane.getBoundingClientRect();
++      const y = box.top + box.height / 2;
++      const right = Math.min(box.right, window.innerWidth) - 4;
++      for (let x = Math.max(box.left, 0) + 4; x <= right; x += 8) {
++        const hit = document.elementFromPoint(x, y);
++        if (
++          hit !== null &&
++          hit.closest('[data-track-id]') === lane &&
++          hit.closest('[data-clip-id]') === null &&
++          hit.closest('button, input, [role="slider"]') === null &&
++          x > window.innerWidth * 0.5
++        ) {
++          return {
++            point: { x, y, trackId: lane.getAttribute('data-track-id') },
++            ownTrack: ownLane.getAttribute('data-track-id'),
++          };
++        }
+       }
+     }
+-    return null;
++    return { point: null, ownTrack: ownLane.getAttribute('data-track-id') };
+   });
+-  if (!point) throw new Error(`lane ${trackId} has no empty timeline point`);
+-  return point;
++  if (found.point === null) {
++    throw new Error(`no lane after the clip's lane ${found.ownTrack} has an empty timeline point`);
++  }
++  if (found.point.trackId === found.ownTrack) {
++    throw new Error(`the empty point is on the clip's own lane ${found.ownTrack}`);
++  }
++  return { x: found.point.x, y: found.point.y };
+ }
+ 
+ async function clipHeaderPoint(clip: Locator): Promise<GrabPoint> {
+@@ -464,7 +479,7 @@
+   const fader = clipGainFader(page);
+   const selectedAfterAdd = await fader.isEnabled();
+   const emptyFrom = await nowIn(page);
+-  const empty = await emptyLanePoint(page, 'stems');
++  const empty = await emptyLanePointAfterClip(clip);
+   await page.mouse.click(empty.x, empty.y);
+   await waitForQuiet(page, emptyFrom, settleMs);
+   const deselected = await fader.isDisabled();
+@@ -634,7 +649,7 @@
+     result.reactRenderer = rendererVersions.join(', ');
+     const rendererProblem = reactRendererProblem(rendererVersions);
+     if (rendererProblem) result.problems.push(rendererProblem);
+-    await page.waitForTimeout(idleSettleMs);
++    await waitForCollectionReady(page, result.problems, 'after load');
+ 
+     step = 'library Add';
+     const addStart = await nowIn(page);
+@@ -700,7 +715,7 @@
+       await measureZoom(page, 30, result);
+       step = `play with ${clipsTarget} clips`;
+       await setPlayback(page, true);
+-      await page.waitForTimeout(idleSettleMs);
++      await waitForPlaybackSettled(page, result.problems, `play with ${clipsTarget} clips`);
+       step = `drag fade playing with ${clipsTarget} clips`;
+       await measureDrag(
+         page,
+diff -ru -x test-results -x zz-probe.perf.spec.ts a/perf/studio-lab-resources.perf.spec.ts b/perf/studio-lab-resources.perf.spec.ts
+--- a/perf/studio-lab-resources.perf.spec.ts	2026-10-30 23:26:04.000000000 +0000
++++ b/perf/studio-lab-resources.perf.spec.ts	2026-10-31 00:15:09.121997237 +0000
+@@ -32,6 +32,7 @@
+   reactRendererProblem,
+   snapshot,
+   waitForQuiet,
++  waitForStudioQuiet,
+ } from './lib/page';
+ import { buildPerfReportCore, formatLimit, type PerfSample } from './lib/report';
+ import { roundTo } from './lib/stats';
+@@ -276,49 +277,52 @@
+   await expect(page.getByTestId('arrangement-export-format-wav')).toBeChecked();
+   const primary = dialog.getByRole('button', { name: perfExportWavLabel, exact: true });
+   await expect(primary).toBeEnabled();
+-  await page.waitForTimeout(300);
++  await waitForStudioQuiet(page, result.problems, `export ${clips}: dialog open`);
+ 
+   const textBefore = (await dialog.textContent()) ?? '';
+   if (textBefore.includes(perfWavDoneMarker)) {
+     throw new Error(`export ${clips}: the dialog shows "${perfWavDoneName}" before the click`);
+   }
+-  await page.evaluate((doneMarker) => {
+-    window.__czabaExportDoneAt = null;
+-    const observer = new MutationObserver(() => {
+-      const text = document.querySelector('[role="dialog"]')?.textContent ?? '';
+-      if (!text.includes(doneMarker)) return;
+-      window.__czabaExportDoneAt = performance.now();
+-      observer.disconnect();
+-    });
+-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+-    window.__czabaExportObserver = observer;
+-  }, perfWavDoneMarker);
+-  const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+-
+   const heapSamples: HeapSample[] = [];
+   let heapErrors = 0;
+   let polling = true;
+-  const pollLoop = (async () => {
+-    while (polling) {
+-      const sentAt = Date.now();
+-      try {
+-        const heap = await readHeap(cdp);
+-        if (heap)
+-          heapSamples.push({ sentAt, receivedAt: Date.now(), backingBytes: heap.backingBytes });
+-        else heapErrors += 1;
+-      } catch {
+-        heapErrors += 1;
+-      }
+-      const wait = Math.max(0, heapPollMs - (Date.now() - sentAt));
+-      await new Promise((resolve) => setTimeout(resolve, wait));
+-    }
+-  })();
+-
+-  const downloadPromise = page
+-    .waitForEvent('download', { timeout: downloadTimeoutMs })
+-    .catch(() => null);
++  let pollLoop: Promise<void> = Promise.resolve();
++  let observerInstalled = false;
+   let t1: number | null = null;
+   try {
++    await page.evaluate((doneMarker) => {
++      window.__czabaExportDoneAt = null;
++      const observer = new MutationObserver(() => {
++        const text = document.querySelector('[role="dialog"]')?.textContent ?? '';
++        if (!text.includes(doneMarker)) return;
++        window.__czabaExportDoneAt = performance.now();
++        observer.disconnect();
++      });
++      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
++      window.__czabaExportObserver = observer;
++    }, perfWavDoneMarker);
++    observerInstalled = true;
++    const timeOrigin = await page.evaluate(() => performance.timeOrigin);
++
++    pollLoop = (async () => {
++      while (polling) {
++        const sentAt = Date.now();
++        try {
++          const heap = await readHeap(cdp);
++          if (heap)
++            heapSamples.push({ sentAt, receivedAt: Date.now(), backingBytes: heap.backingBytes });
++          else heapErrors += 1;
++        } catch {
++          heapErrors += 1;
++        }
++        const wait = Math.max(0, heapPollMs - (Date.now() - sentAt));
++        await new Promise((resolve) => setTimeout(resolve, wait));
++      }
++    })();
++
++    const downloadPromise = page
++      .waitForEvent('download', { timeout: downloadTimeoutMs })
++      .catch(() => null);
+     const beforeClick = await nowIn(page);
+     await primary.click();
+     const download = await downloadPromise;
+@@ -441,7 +445,7 @@
+         return observer !== undefined;
+       })
+       .catch(() => false);
+-    if (!released) {
++    if (observerInstalled && !released) {
+       result.problems.push(`export ${clips}: the "${perfWavDoneName}" observer was not released`);
+     }
+   }
+diff -ru -x test-results -x zz-probe.perf.spec.ts a/perf/studio-lab.perf.spec.ts b/perf/studio-lab.perf.spec.ts
+--- a/perf/studio-lab.perf.spec.ts	2026-10-30 23:26:04.000000000 +0000
++++ b/perf/studio-lab.perf.spec.ts	2026-10-30 23:59:34.730314567 +0000
+@@ -30,6 +30,8 @@
+   setPlayback,
+   snapshot,
+   startTasks,
++  waitForCollectionReady,
++  waitForPlaybackSettled,
+   waitForQuiet,
+ } from './lib/page';
+ import { buildPerfReportCore, formatLimit, type PerfSample } from './lib/report';
+@@ -571,7 +573,7 @@
+     result.reactRenderer = rendererVersions.join(', ');
+     const rendererProblem = reactRendererProblem(rendererVersions);
+     if (rendererProblem) result.problems.push(rendererProblem);
+-    await page.waitForTimeout(idleSettleMs);
++    await waitForCollectionReady(page, result.problems, 'after load');
+ 
+     step = 'library Add';
+     const addStart = await nowIn(page);
+@@ -665,7 +667,7 @@
+     await measureFader(page, 'group', 'stopped', result);
+     step = 'play for fader.group.playing';
+     await setPlayback(page, true);
+-    await page.waitForTimeout(idleSettleMs);
++    await waitForPlaybackSettled(page, result.problems, 'play for fader.group.playing');
+     step = 'fader.group.playing';
+     await measureFader(page, 'group', 'playing', result);
+     step = 'select Clip Gain members';
