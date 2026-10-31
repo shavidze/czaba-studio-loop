@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T18:20:41.117Z)
+# Active loop summary (2026-10-31T19:05:31.148Z)
 
-- backlog.json 2851 KB -> active view 391 KB
-- status: G_ROOT_GATE round 297
-- servers: `{"checkedUtc":"2026-10-31T18:06:18.8459783Z","round":297,"attempt":1,"store":200}`
-- last publication: 77d5341cf1da61595cc20de7477435b130e7c3d7 (rounds 297-297)
-- last root gate: round 297 published - commit 77d5341cf1da61595cc20de7477435b130e7c3d7 pushed
+- backlog.json 2861 KB -> active view 391 KB
+- status: G_ROOT_GATE round 298
+- servers: `{"checkedUtc":"2026-10-31T18:46:20.5931029Z","round":298,"attempt":1,"store":200}`
+- last publication: ece19e30df65a8983e195564517570162c4a8c35 (rounds 298-298)
+- last root gate: round 298 published - commit ece19e30df65a8983e195564517570162c4a8c35 pushed
 
 ## Current items: -
 
@@ -719,9 +719,11 @@
 - INFO-C294-STORE-NO-MAIN-LANDMARK / info / routed (D-29z741): acceptance row for STORE-2b (layout restyle owns root/Store layout); not scheduled alone / / and /store render no <main>/role=main at HEAD (WCAG 1.3.1/2.4.1)
 - INFO-C294-TOKEN-POST-405-STACK / info / routed (D-29z741): risk line for SRW-21-PLAN (protected route review); loop does not edit the file / dev-server POST /api/studio-token 405 body includes a Remix stack trace (no token); protected file; production unverified
 - SABA-Q-STUDIO-LINK / info / awaiting_user (non-blocking; defaults applied) / STUDIO-LINK defaults to confirm: (1) product-sidebar text link under title/artist; (2) hide the link on products without a Studio source; (3
-- A-R296-REVIEW-1 / medium / in fix (D-29z753): round 297 LH3/LH4; C round 296 COLD row covered it in the real browser meanwhile / SSR -> hydrateRoot path of the ?preview= focus untested (LK5-LK7 use createRoot)
-- A-R296-REVIEW-2 / medium / in fix (D-29z753): round 297 LH1 on a reordered demo collection; B sketch mutant e turns LH1+LH3 red / route prop wiring initialSelectedSourceId={previewSourceId} mutation-vacuous (demo-middle-east is sources[0])
-- A-R296-REVIEW-5 / low / in fix (D-29z753): round 297 LH4 covers narrow hydrate + later widening (mutant g red). B's mutant f (guard removed) stays green on every path: the guard is unreachable because a narrow hydrated route unmounts the workspace before the effect runs -> recorded as an equivalent mutant, not a test gap / LK7 cannot fail on the route's !isWide focus guard
+- GATE297-F1 / medium / in fix (D-29z760): round 298 STUDIO-LINK-a3 / LH3's hydration-warning assertion is vacuous when studio-link-hydrate-ui.test.tsx runs whole: React prints one prop-mismatch warning per loa
+- GATE297-S2 / low / in fix (D-29z760): round 298, regex /did not match|Expected server HTML|Hydration failed/i / warning regex /hydrat/ also matches React's server-only 'non-hydrated' useLayoutEffect warning; excluded only by spy order
+- GATE297-S3 / low / in fix (D-29z760): round 298, tracked unmounts in afterEach / a failing LH row leaves its hydrated root mounted into the next row
+- INFO-C297-01 / info / in fix (D-29z759): round 298 doc grant (= gate-297 S4) / doc 220 TODO still says STUDIO-LINK-b (round 297)
+- INFO-C297-02 / info / noted (D-29z761): STUDIO-LINK-DYNAMIC row / browser cold row cannot distinguish prop wiring from the default selection
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

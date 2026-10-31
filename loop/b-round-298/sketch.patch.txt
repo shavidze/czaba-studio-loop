@@ -1,0 +1,192 @@
+--- a/app/lib/arrangement/__tests__/studio-link-hydrate-ssr-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-link-hydrate-ssr-ui.test.tsx
+@@ -96,17 +96,25 @@
+   return document.querySelector('[role="option"]')?.getAttribute('data-source-id') ?? null;
+ }
+ 
++const HYDRATION_WARNING_PATTERN =
++  /did not match|Extra attributes from the server|Did not expect server HTML|Expected server HTML|Hydration failed/i;
++
+ function hydrationWarnings(calls: unknown[][]): string[][] {
+   return calls
+     .map((args) => args.map((arg) => String(arg)))
+-    .filter((args) =>
+-      args.some((arg) => /did not match|Expected server HTML|Hydration failed/i.test(arg)),
+-    );
++    .filter((args) => args.some((arg) => HYDRATION_WARNING_PATTERN.test(arg)));
++}
++
++function applyBrowserParsedMutedState(container: HTMLElement): void {
++  for (const video of container.querySelectorAll('video')) {
++    video.muted = video.defaultMuted;
++  }
+ }
+ 
+ function mountServerHtml(): HTMLDivElement {
+   const container = document.createElement('div');
+   container.innerHTML = renderToString(<StudioLabRoute />);
++  applyBrowserParsedMutedState(container);
+   document.body.appendChild(container);
+   return container;
+ }
+@@ -115,9 +123,6 @@
+ 
+ async function hydrateRoute(container: HTMLDivElement = mountServerHtml()): Promise<() => void> {
+   let root: ReturnType<typeof hydrateRoot> | null = null;
+-  await act(async () => {
+-    root = hydrateRoot(container, <StudioLabRoute />);
+-  });
+   const unmount = () => {
+     const mounted = root;
+     root = null;
+@@ -126,6 +131,9 @@
+     });
+   };
+   mountedRouteUnmounts.push(unmount);
++  await act(async () => {
++    root = hydrateRoot(container, <StudioLabRoute />);
++  });
+   return unmount;
+ }
+ 
+@@ -157,7 +165,7 @@
+ });
+ 
+ describe(
+-  'STUDIO-LINK deep link server HTML hydration, alone in its file (round 298)',
++  'STUDIO-LINK deep link server HTML hydration, alone in its file (rounds 298-299)',
+   { timeout: 15_000 },
+   () => {
+     it('LH3: hydrating the server HTML on a wide window with ?preview= focuses the option without a hydration mismatch', async () => {
+@@ -177,9 +185,7 @@
+       expect(selectedSourceId()).toBe(PREVIEW_SOURCE_ID);
+       expect(focusedSourceId()).toBe(PREVIEW_SOURCE_ID);
+       expect(document.activeElement?.getAttribute('aria-selected')).toBe('true');
+-      const warnings = hydrationWarnings(consoleError.mock.calls);
+-      expect(warnings.filter((args) => args[1] !== 'muted')).toEqual([]);
+-      expect(warnings.length).toBeLessThanOrEqual(1);
++      expect(hydrationWarnings(consoleError.mock.calls)).toEqual([]);
+       unmount();
+     });
+   },
+--- a/app/lib/arrangement/__tests__/studio-link-hydrate-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-link-hydrate-ui.test.tsx
+@@ -107,9 +107,6 @@
+ 
+ async function hydrateRoute(container: HTMLDivElement = mountServerHtml()): Promise<() => void> {
+   let root: ReturnType<typeof hydrateRoot> | null = null;
+-  await act(async () => {
+-    root = hydrateRoot(container, <StudioLabRoute />);
+-  });
+   const unmount = () => {
+     const mounted = root;
+     root = null;
+@@ -118,6 +115,9 @@
+     });
+   };
+   mountedRouteUnmounts.push(unmount);
++  await act(async () => {
++    root = hydrateRoot(container, <StudioLabRoute />);
++  });
+   return unmount;
+ }
+ 
+--- a/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
+@@ -73,6 +73,12 @@
+   };
+ }
+ 
++function applyBrowserParsedMutedState(container: HTMLElement): void {
++  for (const video of container.querySelectorAll('video')) {
++    video.muted = video.defaultMuted;
++  }
++}
++
+ function testId(id: string): HTMLElement | null {
+   return document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+ }
+@@ -382,6 +388,7 @@
+     const html = renderToString(<StudioLabRoute />);
+     const container = document.createElement('div');
+     container.innerHTML = html;
++    applyBrowserParsedMutedState(container);
+     document.body.appendChild(container);
+     const consoleError = vi.spyOn(console, 'error');
+ 
+@@ -395,9 +402,14 @@
+     expect(document.activeElement).toBe(document.body);
+     const hydrationWarnings = consoleError.mock.calls
+       .map((args) => args.map((arg) => String(arg)))
+-      .filter((args) => args.some((arg) => /hydrat|did not match|didn't match/i.test(arg)));
+-    expect(hydrationWarnings.filter((args) => args[1] !== 'muted')).toEqual([]);
+-    expect(hydrationWarnings.length).toBeLessThanOrEqual(1);
++      .filter((args) =>
++        args.some((arg) =>
++          /did not match|Extra attributes from the server|Did not expect server HTML|Expected server HTML|Hydration failed/i.test(
++            arg,
++          ),
++        ),
++      );
++    expect(hydrationWarnings).toEqual([]);
+     act(() => {
+       root?.unmount();
+     });
+--- a/docs/implementation/2026/quarter-IV/220-studio-link-deep-link.md
++++ b/docs/implementation/2026/quarter-IV/220-studio-link-deep-link.md
+@@ -1,7 +1,7 @@
+ # პროდუქტის გვერდიდან Studio-ში: "Try it in the Studio" (STUDIO-LINK-a)
+ 
+ **თარიღი:** 2026-10-31
+-**სტატუსი:** In Progress (stage 1 of 2; C round 296 PASS; tests rounds 297–298)
++**სტატუსი:** In Progress (stage 1 of 2; C round 296 PASS; tests rounds 297–299)
+ **შეცვლილი პროექტი:** Store
+ 
+ ## კონტექსტი
+@@ -42,17 +42,18 @@
+ - `app/components/product/ProductSidebar.tsx` — "Try it in the Studio" link (`data-testid="product-studio-link"`).
+ - `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` — `@remix-run/react` mock-ში `useSearchParams`.
+ - `app/lib/arrangement/__tests__/ssr-layout-effect.test.tsx` — იგივე mock line.
+-- `app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx` — იგივე mock line.
++- `app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx` — იგივე mock line; round 299-ში NG9 server HTML-ს `applyBrowserParsedMutedState`-ით ამზადებს და warning-ს `muted`-ის გამონაკლისის გარეშე ამოწმებს.
+ - `app/lib/arrangement/__tests__/default-track-names-ssr.test.tsx` — იგივე mock line.
+ - `app/lib/arrangement/__tests__/studio-link-ui.test.tsx` — ახალი: LK1–LK7.
+-- `app/lib/arrangement/__tests__/studio-link-hydrate-ui.test.tsx` — ახალი: LH1–LH4 (round 297); round 298-ში LH3 ცალკე ფაილში გადავიდა, unmount-ები `afterEach`-ში.
+-- `app/lib/arrangement/__tests__/studio-link-hydrate-ssr-ui.test.tsx` — ახალი: LH3 თავის ფაილში (round 298).
++- `app/lib/arrangement/__tests__/studio-link-hydrate-ui.test.tsx` — ახალი: LH1–LH4 (round 297); round 298-ში LH3 ცალკე ფაილში გადავიდა, unmount-ები `afterEach`-ში; round 299-ში unmount hydration-მდე რეგისტრირდება.
++- `app/lib/arrangement/__tests__/studio-link-hydrate-ssr-ui.test.tsx` — ახალი: LH3 თავის ფაილში (round 298); round 299-ში warning-ის სრული regex, ნულოვანი tolerance და `applyBrowserParsedMutedState`.
+ - `docs/implementation/2026/quarter-IV/220-studio-link-deep-link.md` — ეს დოკუმენტი.
+ 
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **Problem:** route-მა `useSearchParams` რომ გამოიძახა, ოთხივე route test ფაილი ჩავარდა, რადგან მათ `@remix-run/react` mock-ს ეს ფუნქცია არ ჰქონდა. **Solution:** თითო ფაილში ერთი mock line ცარიელი `URLSearchParams`-ით; assertion-ები არ შეცვლილა.
+ - **Problem:** object literal lookup-ზე `__proto__`, `constructor` და `toString` prototype-იდან მნიშვნელობას აბრუნებს. **Solution:** `Map`, რომელიც ამ key-ებზე `null`-ს იძლევა (LK1).
++- **Problem:** jsdom-ის hydration ტესტებში video dock-ის ორი `<video muted>` ``Prop `muted` did not match. Server: "false" Client: "true"`` warning-ს ბეჭდავდა (GATE297-S5-VIDEO-MUTED-SSR). Server HTML-ში `muted=""` attribute არის, მაგრამ React `muted`-ს property-ით ადარებს, ხოლო jsdom attribute-იდან `muted` property-ს არ აყენებს (`defaultMuted` არის `true`, `muted` — `false`). Chromium HTML spec-ის მიხედვით property-ს attribute-იდან აყენებს, ამიტომ ბრაუზერში warning არ ჩანს (C round 298: 0). ტესტებში ეს warning React-ის ერთჯერად flag-ს ხარჯავდა და dock-ის შემდეგ hydrate-ებული mismatch-ები არ ჩანდა. **Solution (round 299):** production კოდი არ შეცვლილა. ტესტის helper `applyBrowserParsedMutedState` server HTML-ის ყოველ `<video>`-ს hydration-მდე `muted = defaultMuted`-ს უწერს, როგორც ბრაუზერის parser აკეთებს. `suppressHydrationWarning` უარყოფილია, რადგან ის `<video>`-ის სხვა attribute-ების ნამდვილ mismatch-ებსაც დამალავდა.
+ - **Problem:** `demo-middle-east` demo collection-ში პირველია, ამიტომ მისი მონიშვნა default-ისგან ბრაუზერში არ განსხვავდება. **Solution:** ბრაუზერში დაკვირვებადი კონტრაქტი focus-ია (LK5), ხოლო `initialSelectedSourceId` jsdom-ში მოწმდება სამ-source collection-ზე, სადაც სამიზნე პირველი არ არის (LK4).
+ 
+ ## ტესტირება
+@@ -65,18 +66,20 @@
+   - LK5 — wide `?preview=middle-east`: option focused, `aria-selected="true"`, `tabindex="0"`.
+   - LK6 — param-ის გარეშე, unmapped და `__proto__`: focus BODY-ზე, default არჩევანი.
+   - LK7 — narrow: narrow heading, option focused არ არის.
+-- Covering set: 9 ფაილი, 89 ტესტი გადის.
++- Covering set (round 296): 9 ფაილი, 89 ტესტი გადის. Round 298–299-ის covering set: 7 ფაილი, 58 ტესტი.
+ - ოთხი mutant scratch ასლზე: focus-ის მოხსნა (LK5 წითელი), `find`-ის მოხსნა (LK4 `second`/`third` წითელი), object literal (LK1-ის სამი prototype key წითელი), link ყოველთვის (LK3 წითელი).
+ - ბრაუზერის შემოწმება C-ის რაუნდ 296-ის რიგებშია.
+ - რაუნდ 297-ში `studio-link-hydrate-ui.test.tsx` (LH1–LH4) `~/data/studio-lab-demo`-ს რეალურ collection-ს `sources`-ის შებრუნებული რიგით იყენებს, ამიტომ `demo-middle-east` პირველი აღარ არის, და ყოველი row `renderToString` → `hydrateRoot` გზით გადის. LH1 — wide `?preview=middle-east`: მონიშნული და focused არის `demo-middle-east` და არა პირველი option. LH2 — param-ის გარეშე პირველი option მონიშნულია, focus BODY-ზეა. LH3 — server HTML-ში option უკვე `aria-selected="true"`-ია და hydration-ის შემდეგ focused-ია (round 298-დან hydration warning-ის შემოწმება ცალკე ფაილშია, იხ. ქვემოთ). LH4 — narrow hydrate: focus BODY-ზე, გაფართოების შემდეგ მხოლოდ `arrangement-exit`. Mutant-ები scratch ასლზე: (e) `initialSelectedSourceId`-ის prop-ის მოხსნა — LH1 და LH3 წითელი; (g) settle line-ის მოხსნა — LH4 წითელი; (f) `!isWide` guard-ის მოხსნა — მწვანე, equivalent mutant, რადგან hydrated narrow route workspace-ის mount-მდე `StudioNarrowScreen`-ს აბრუნებს და option, რომელსაც effect ეძებს, არ არსებობს.
+ 
+-- რაუნდ 298-ში LH3 გადავიდა `studio-link-hydrate-ssr-ui.test.tsx`-ში, რადგან React 18 ერთ load-ზე prop mismatch-ის მხოლოდ ერთ warning-ს ბეჭდავს (`didWarnInvalidHydration`): ძველ ფაილში LH1-ის hydration ამ flag-ს ხარჯავდა და LH3-ის შემოწმება ვერაფერს იჭერდა. ახალ ფაილში LH3 ერთადერთი hydration-ია. Warning-ის regex შევიწროვდა `/did not match|Expected server HTML|Hydration failed/i`-მდე, ამიტომ server-ის "useLayoutEffect does nothing on the server" warning აღარ ითვლება. Root-ები `afterEach`-ში ყოველთვის unmount-დება, row-ის ჩავარდნის შემთხვევაშიც. Mutant-ები scratch ასლზე: (h) option-ზე server/client-ით განსხვავებული attribute — ახალ ფაილში LH3 წითელი, HEAD-ის ძველ ფაილში ოთხივე მწვანე იყო; (e) — LH1 და LH3 წითელი; (g) — LH4 წითელი; reorder-ის მოხსნა — LH3 წითელი. შეზღუდვა: video dock-ის `muted` mismatch (GATE297-S5-VIDEO-MUTED-SSR) იგივე flag-ს ხარჯავს, ამიტომ LH3 იჭერს მხოლოდ იმ mismatch-ებს, რომლებიც dock-ზე ადრე hydrate-დება; library მათ შორისაა.
++- რაუნდ 298-ში LH3 გადავიდა `studio-link-hydrate-ssr-ui.test.tsx`-ში, რადგან React 18 ერთ load-ზე prop mismatch-ის მხოლოდ ერთ warning-ს ბეჭდავს (`didWarnInvalidHydration`): ძველ ფაილში LH1-ის hydration ამ flag-ს ხარჯავდა და LH3-ის შემოწმება ვერაფერს იჭერდა. ახალ ფაილში LH3 ერთადერთი hydration-ია. Warning-ის regex შევიწროვდა `/did not match|Expected server HTML|Hydration failed/i`-მდე, ამიტომ server-ის "useLayoutEffect does nothing on the server" warning აღარ ითვლება. `afterEach` unmount-ს უკეთებს ყოველ root-ს, რომლის hydration დასრულდა. Mutant-ები scratch ასლზე: (h) option-ზე server/client-ით განსხვავებული attribute — ახალ ფაილში LH3 წითელი, HEAD-ის ძველ ფაილში ოთხივე მწვანე იყო; (e) — LH1 და LH3 წითელი; (g) — LH4 წითელი; reorder-ის მოხსნა — LH3 წითელი. შეზღუდვა round 298-ში: jsdom-ში video dock-ის `muted` warning (GATE297-S5-VIDEO-MUTED-SSR) იგივე flag-ს ხარჯავდა, ხოლო regex server-ის მხოლოდ ზედმეტ attribute-ს ("Extra attributes from the server") ვერ იჭერდა (C-R298-01).
++
++- რაუნდ 299-ში (C-R298-01) LH3-ისა და NG9-ის regex React 18.3.1-ის ყველა hydration warning-ს ფარავს, რომელიც `didWarnInvalidHydration`-ს აყენებს: `/did not match|Extra attributes from the server|Did not expect server HTML|Expected server HTML|Hydration failed/i`. `applyBrowserParsedMutedState`-ის შემდეგ jsdom-ში `muted` warning აღარ ჩნდება, ამიტომ LH3 და NG9 ნებისმიერ hydration warning-ზე წითლდება (`toEqual([])`, `muted`-ის გამონაკლისის გარეშე). `hydrateRoute` unmount-ს hydration-მდე არეგისტრირებს, ამიტომ hydration-ის throw-ის შემთხვევაშიც root `afterEach`-ში იხსნება. Mutant-ები scratch ასლზე: (x) option-ზე მხოლოდ server-ის attribute — LH3 და NG9 წითელი (HEAD-ზე 20-ვე მწვანე იყო); (v) იგივე standby `<video>`-ზე — LH3 და NG9 წითელი (HEAD-ზე მწვანე); (y) მხოლოდ server-ის node — LH3, NG9 და NG9c წითელი; (h) — LH3 და NG9 წითელი; (r) და (r2) helper-ის გამოძახების მოხსნა — შესაბამისად LH3 და NG9 წითელი; (e) — LH1 და LH3 წითელი; (g) — LH4 წითელი; reorder-ის მოხსნა — LH3 წითელი. LH1 და NG9c warning-ს არ ამოწმებენ და helper-ს არ იყენებენ.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- STUDIO-LINK-b (რაუნდი 299): library option-ზე "View in store" და `?` sheet-ის row.
++- STUDIO-LINK-b (რაუნდი 300): library option-ზე "View in store" და `?` sheet-ის row.
+ - STUDIO-LINK-DYNAMIC: ნებისმიერი პროდუქტის preview, R2 CORS-ის რეალურ ბრაუზერში დადასტურების შემდეგ.
+ - `?preview=`-ის შეცვლა იმავე mounted route-ზე არჩევანს არ ცვლის (lazy initializer და ერთჯერადი focus); STUDIO-LINK-b-მ ეს back navigation-ისას გაითვალისწინოს.
+ - GATE296-ARCH-ROUTE-DOM-FOCUS (signal): option-ის focus library-ის `optionRefs`-ით და არა route-ის DOM query-ით.
+-- GATE297-S5-VIDEO-MUTED-SSR: `<video muted>`-ის server/client mismatch video dock-ში; სანამ ის არსებობს, dock-ის შემდეგ hydrate-ებული mismatch-ები ტესტებში არ ჩანს.
++- A-R298-ARCH-HYDRATE-HARNESS (signal): ორ hydrate ფაილს ~120 საერთო ხაზი აქვს; საერთო test helper-ის (`applyBrowserParsedMutedState`-ის ჩათვლით) გამოყოფა architecture checkpoint-ის საკითხია.
+ - NAME-AND-HINT: სახელი "CZABA Studio" (`<title>`, nav, header) და ერთჯერადი hint.

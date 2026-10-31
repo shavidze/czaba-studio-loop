@@ -1,0 +1,108 @@
+{
+ "round": 298,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T18:46:20.5931029Z",
+  "round": 298,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "UNIT-VACUITY",
+  "UNIT-CLEANUP",
+  "B-COLD-DEEPLINK",
+  "G298-AUTH",
+  "DOC-220"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "gate: full suite, build, Biome, verify, test:e2e:smoke (root gate)"
+ ],
+ "notPassed": [
+  {
+   "row": "CLAIMS",
+   "reason": "equal except K11: MISSING b-round-297/sketch.patch (gitignored loop/**/*.patch); origin B planning/environment, not A",
+   "finding": "C-R298-02"
+  }
+ ],
+ "rows": {
+  "CLAIMS": "not passed - equal to after-sketch except K1 (allowed HEAD line), K2 3 lines (allowed), K11 MISSING sketch.patch; c-round-298/claims-after.txt",
+  "SOURCE-SCOPE": "PASS - 3 paths, cmp-equal to sketches, sha256 fails only on 2 modified; re-checked after all C work, no drift",
+  "TYPECHECK": "PASS rc 0",
+  "UNIT": "PASS 7 files 58 tests; LH3 840ms (new file, 15s timeout), LH1 686, LH2 415, LH4 497, NG5 2042ms/15s; none >50%",
+  "UNIT-MUTANTS": "PASS h->LH3 red; e->LH1+LH3 red; g->LH4 red; i green; control h+HEAD file 4/4 green; restores cmp-equal; scratch /tmp/c298-scratch cacheDir /tmp/c298-vite-cache",
+  "UNIT-VACUITY": "PASS LH3 red at l.176 firstOptionSourceId",
+  "UNIT-CLEANUP": "PASS by reading + LH3 double unmount run; caveat A-R298-REVIEW-4",
+  "B-COLD-DEEPLINK": "PASS both viewports; attempt 1 env-invalid (legacy route cold compile timeout), replaced after warm-up",
+  "G298-AUTH": "PASS 401 no token; Sign in required; 0 audio[src]; auth_user null",
+  "DOC-220": "PASS with info INFO-C298-02"
+ },
+ "bugs": [
+  {
+   "id": "C-R298-01",
+   "severity": "medium",
+   "origin": "A-reviewer A-R298-REVIEW-1, confirmed by C; regex from B sketch (S2)",
+   "steps": [
+    "scratch copy of HEAD + round-298 test files",
+    "ArrangementLibrary.tsx option: add data-probe={document.body.childElementCount > 0 ? undefined : 'detached'} (server-only attribute)",
+    "npx vitest run studio-link-hydrate-ssr-ui.test.tsx studio-link-hydrate-ui.test.tsx"
+   ],
+   "expected": "LH3 red (server/client HTML mismatch before the dock)",
+   "actual": "4/4 green; stderr 'Extra attributes from the server: data-probe' not matched by /did not match|Expected server HTML|Hydration failed/i; GATE297-F1 only partly closed. Extra-node mutant y does turn LH3 red.",
+   "evidence": "c-round-298/mutant-x-extra-attr.log, c-round-298/mutant-y-extra-node.log"
+  },
+  {
+   "id": "C-R298-02",
+   "severity": "low",
+   "origin": "B (planning/environment)",
+   "steps": [
+    "bash ../tmp/studio-real-loop/b-round-297/claims-298.sh from store/",
+    "compare K11 with claims-298-after-sketch.txt"
+   ],
+   "expected": "K11 all 14 artifacts ok",
+   "actual": "MISSING:b-round-297/sketch.patch; .gitignore:14 loop/**/*.patch drops it at job hand-over (L56 class, 3rd)",
+   "evidence": "c-round-298/claims-after.txt"
+  }
+ ],
+ "info": [
+  {
+   "id": "INFO-C298-01",
+   "origin": "C",
+   "note": "/middle-east.mp3 net::ERR_ABORTED on every /studio-lab load (server 200, 4054080 B); pre-existing client media abort, newly logged"
+  },
+  {
+   "id": "INFO-C298-02",
+   "origin": "B sketch (A-R298-REVIEW-7)",
+   "note": "doc 220 l.68 still '9 ფაილი, 89 ტესტი'; cleanup sentence overstates (A-R298-REVIEW-4); l.73 limit sentence overstates (C-R298-01)"
+  }
+ ],
+ "manifestPaths": [
+  "b-round-297/sketch-studio-link-hydrate-ssr-ui.test.tsx.txt",
+  "b-round-297/sketch-studio-link-hydrate-ui.test.tsx.txt",
+  "b-round-297/sketch-220-studio-link-deep-link.md.txt",
+  "b-round-297/sketch.patch",
+  "b-round-297/sketch-covering-run.log",
+  "b-round-297/sketch-tsc.log",
+  "b-round-297/mutant-h-option-mismatch.py",
+  "b-round-297/mutant-h-option-mismatch.log",
+  "b-round-297/mutant-h-at-head-file.log",
+  "b-round-297/mutant-e-no-prop.log",
+  "b-round-297/mutant-g-no-settle.log",
+  "b-round-297/vacuity-identity-order.log",
+  "b-round-297/mutant-i-spy-before-render.log",
+  "b-round-297/product-designer-studio-link-b.md"
+ ],
+ "missingPaths": [
+  "b-round-297/sketch.patch"
+ ],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "evidence": "c-round-298/ (claims-after.txt, covering.log, tsc.log, mutant-*.log, browser.json, shots/), c-browse.json"
+}
