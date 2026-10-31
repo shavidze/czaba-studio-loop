@@ -1,0 +1,166 @@
+--- b279-head/perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:28:01.000000000 +0000
++++ b279-sketch2/perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:39:28.404609169 +0000
+@@ -58,6 +58,8 @@
+ const pathTimeoutMs = 30000;
+ const observerSettleMs = 200;
+ const passGuardMs = 8 * 60 * 1000;
++const clockProbeCount = 5;
++const clockProbeMaxRttMs = 20;
+ const expectedWavName = 'czaba-studio-lab.wav';
+ const wavSampleRate = 48000;
+ const wavBytesPerFrame = 6;
+@@ -176,6 +178,38 @@
+   return { backingBytes, usedBytes };
+ }
+ 
++interface PageClock {
++  offsetMs: number;
++  rttMs: number;
++}
++
++async function probePageClock(page: Page): Promise<PageClock> {
++  let best: PageClock | null = null;
++  for (let probe = 0; probe < clockProbeCount; probe += 1) {
++    const sentAt = Date.now();
++    const pageNow = await page.evaluate(() => performance.now());
++    const receivedAt = Date.now();
++    const rttMs = receivedAt - sentAt;
++    if (best === null || rttMs < best.rttMs) {
++      best = { offsetMs: (sentAt + receivedAt) / 2 - pageNow, rttMs };
++    }
++  }
++  if (best === null) throw new Error('the page clock probe took no reading');
++  return best;
++}
++
++function heapSamplesInWindow(
++  samples: readonly HeapSample[],
++  offsetMs: number,
++  from: number,
++  to: number,
++): HeapSample[] {
++  return samples.filter((sample) => {
++    const midpoint = (sample.sentAt + sample.receivedAt) / 2 - offsetMs;
++    return midpoint >= from && midpoint <= to;
++  });
++}
++
+ async function readHeapAfterGc(cdp: CDPSession, page: Page): Promise<HeapReading | null> {
+   await cdp.send('HeapProfiler.collectGarbage');
+   await page.waitForTimeout(300);
+@@ -303,6 +337,12 @@
+     }, perfWavDoneMarker);
+     observerInstalled = true;
+     const timeOrigin = await page.evaluate(() => performance.timeOrigin);
++    const clock = await probePageClock(page);
++    if (clock.rttMs > clockProbeMaxRttMs) {
++      result.problems.push(
++        `export ${clips}: the page clock probe's best round trip was ${clock.rttMs} ms (limit ${clockProbeMaxRttMs} ms)`,
++      );
++    }
+ 
+     pollLoop = (async () => {
+       while (polling) {
+@@ -381,12 +421,17 @@
+     }
+     const windowStartEpoch = timeOrigin + t0;
+     const windowEndEpoch = timeOrigin + windowEnd;
+-    const inWindow = heapSamples.filter(
++    const endpointRule = heapSamples.filter(
+       (sample) => sample.sentAt >= windowStartEpoch && sample.receivedAt <= windowEndEpoch,
+-    );
++    ).length;
++    const inWindow = heapSamplesInWindow(heapSamples, clock.offsetMs, t0, windowEnd);
+     putLive(`mem-polls-${clips}`, inWindow.length, {
+       errors: heapErrors,
+       allSamples: heapSamples.length,
++      endpointRule,
++      clockOffsetMs: roundTo(clock.offsetMs - timeOrigin, 2),
++      clockRttMs: clock.rttMs,
++      expectedPolls: roundTo((windowEnd - t0) / heapPollMs, 1),
+     });
+     if (inWindow.length < 5) {
+       result.problems.push(
+@@ -401,7 +446,7 @@
+           samples: inWindow.length,
+           windowPeakMib: toMebibytes(windowPeak - readyBackingBytes),
+           endSampleMib: toMebibytes(endHeap.backingBytes - readyBackingBytes),
+-          endSampleLagMs: roundTo(endSentAt - windowEndEpoch, 0),
++          endSampleLagMs: roundTo(endSentAt - clock.offsetMs - windowEnd, 0),
+         },
+       });
+     } else if (t1 !== null) {
+--- b279-head/perf/budgets.resources.json	2026-10-31 01:28:01.000000000 +0000
++++ b279-sketch2/perf/budgets.resources.json	2026-10-31 01:39:28.405191589 +0000
+@@ -162,7 +162,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+   },
+   {
+     "id": "res.export.1.bytes",
+@@ -228,7 +228,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+   },
+   {
+     "id": "res.export.2.bytes",
+@@ -309,7 +309,7 @@
+       "value": 5
+     },
+     "owner": "PERF-1b-ii",
+-    "note": "1x pass. Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 7–9."
++    "note": "1x pass. Liveness. Valid backingStorageSize samples whose request-response midpoint, on the page clock, falls in the export window (round 280). Timing-dependent poll count, so wallclock (round 217, D-29z219); observed ranges are in doc 209."
+   },
+   {
+     "id": "res.harness.mem-polls-2",
+@@ -323,7 +323,7 @@
+       "value": 5
+     },
+     "owner": "PERF-1b-ii",
+-    "note": "1x pass. Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 13–15."
++    "note": "1x pass. Liveness. Valid backingStorageSize samples whose request-response midpoint, on the page clock, falls in the export window (round 280). Timing-dependent poll count, so wallclock (round 217, D-29z219); observed ranges are in doc 209."
+   },
+   {
+     "id": "res.export.1.wall-ms.6x",
+@@ -378,7 +378,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+   },
+   {
+     "id": "res.export.1.bytes.6x",
+@@ -444,7 +444,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize polled in the window (at most every 50 ms) plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+   },
+   {
+     "id": "res.export.2.bytes.6x",
+@@ -525,7 +525,7 @@
+       "value": 5
+     },
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 9–12."
++    "note": "6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples whose request-response midpoint, on the page clock, falls in the export window (round 280). Timing-dependent poll count, so wallclock (round 217, D-29z219); observed ranges are in doc 209."
+   },
+   {
+     "id": "res.harness.mem-polls-2.6x",
+@@ -539,7 +539,7 @@
+       "value": 5
+     },
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: 17–20."
++    "note": "6x pass (CPU throttle on after ready and Add). Liveness. Valid backingStorageSize samples whose request-response midpoint, on the page clock, falls in the export window (round 280). Timing-dependent poll count, so wallclock (round 217, D-29z219); observed ranges are in doc 209."
+   },
+   {
+     "id": "res.js.studio-lab.encoded-bytes",

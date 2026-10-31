@@ -1,0 +1,11 @@
+--- /tmp/b279-sketch2/perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:39:28.404609169 +0000
++++ perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:44:13.444519172 +0000
+@@ -424,7 +424,7 @@
+     const endpointRule = heapSamples.filter(
+       (sample) => sample.sentAt >= windowStartEpoch && sample.receivedAt <= windowEndEpoch,
+     ).length;
+-    const inWindow = heapSamplesInWindow(heapSamples, clock.offsetMs, t0, windowEnd);
++    const inWindow = heapSamples.filter((sample) => sample.sentAt >= windowStartEpoch && sample.receivedAt <= windowEndEpoch);
+     putLive(`mem-polls-${clips}`, inWindow.length, {
+       errors: heapErrors,
+       allSamples: heapSamples.length,

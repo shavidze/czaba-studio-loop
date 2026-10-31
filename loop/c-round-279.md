@@ -1,0 +1,42 @@
+# C round 279: PERF-HARNESS-SHARED-LIB-b-ii-1 verification (test-only)
+
+**Verdict: PASS.** browserVerified = realVerified = true. 0 bugs. Evidence: `c-round-279/`.
+
+This is a perf-harness, test-only round. Ableton conformance and the reference/screen-budget rules do not apply (task §8, §0). A's claims were not trusted: every row was re-run on this machine.
+
+## Environment
+- `env-status.json`: store 200 (round 279, attempt 1).
+- Playwright 1.57.0 with Chromium 143.0.7499.4 (from the report `chromium` field). The runner has 4 CPUs.
+- L38: each perf and mutant run ran alone. I ran nothing else while a Playwright perf spec was running.
+
+## Rows
+| Row | Result | Evidence |
+|---|---|---|
+| SOURCE-SCOPE | PASS | `sha256sum -c b-round-278-r279-tree-sha256.txt` rc 0, both at the start and after all of C's runs. `git status --short` shows 9 M and 1 `??` (doc 208), all of them §5 paths. C changed no source |
+| HUNK-SCOPE | PASS | All five perf files are `cmp`-equal to `b-round-278/sketch-final/`. They are also equal to `sketch.diff` applied by C to a fresh `git archive 873d835` (`/tmp/c279-head`). There is no semantic or formatting difference. The doc hunks stay inside the §5 sections (TODO bullets in 168/169/176; in 175 the helper map, the GATE214-S2 section and the TODO bullet) |
+| CLAIMS | PASS | `claims.sh` on a clean `git archive 873d835` is byte-equal to `claims-output-at-873d835.txt` (`c-round-279/claims-at-873d835.txt`). L29 sweep over the task: 31 untagged hits, all grant-table rows, the claims block itself or acceptance rows. None is an untagged fact about current code (`l29-untagged.txt`) |
+| SWEEP | PASS | SW-A on A's tree: 0 hits. `grep -rn test.setTimeout perf`: 0 |
+| KEEP-WAITS | PASS | 1a: l.581 `waitForTimeout(2000)`, l.599 `idleSettleMs` (once), l.602 `idleMeasureMs`. 1b-ii: l.181 300 ms, l.346 `observerSettleMs`, l.528 `idleSettleMs` (once). 1b-i: no `waitForTimeout` at all |
+| TYPECHECK | PASS | `npm run typecheck` rc 0 (`typecheck.log`) |
+| PERF-RUN | PASS | `CI=true npx playwright test --config playwright.perf.config.ts`, run alone: **3 passed (12.8 min)**. 1b-i 5.1 min, 1b-ii 1.1 min, 1a 6.5 min (`perf-run-1.log`, reports in `results-1/`) |
+| EQUIV | PASS | `equiv-check.py` against `b-round-278/baseline-results/`: 1a rows 316, det 166, **0 problems**; 1b-i 144/106, **0**; 1b-ii 61/37, **0** (all rc 0, `equiv-*.txt`). All three reports have `complete: true`, `failures: []`, and no pass with `abortedAt`, `problems` or `pageErrors`. The same-machine HEAD re-run clause was not needed. A's result replicates on a second fresh machine |
+| MUTANTS | PASS | C's runner (`run-mutant.sh`) builds a `git archive 873d835`, applies C's own `c-perf.diff` (identical to A's diff) and the mutant, and runs only the named spec. **MU-LANE** (1b-i): pass 1 `abortedAt` `clip click`, "no lane after the clip's lane music has an empty timeline point". **MU-READY** (1b-i): pass 1 `abortedAt` `load`, `toHaveText` failed. **MU-OBS-2** (1b-ii): problems include `export 1: the "WAV created" observer was not released`. **MU-OBS-3** (control): problems only `aborted at export 1 clip: MU-OBS-3`, with no "not released" in any pass. Each gave its §6.2 signal (`mutants/<id>/`) |
+| TIMEOUT-DATA | data | PERF-1a 6.5 min = 43 % of 15 min, under the 9.4 min STOP. ROOT-REQ-PERF-TIMEOUT has not been applied (the config still says 15 min). This is the second run in a row at ≤ 50 % (A 6.4, C 6.5), against B's 8.4 min on its machine |
+| LANE-BROWSER | PASS | `b-round-278/probe/lane.cjs` against :5173: the lanes are video, music, stems, sfx at both viewports; the clip is on music; the first later empty lane is **stems** at x 724 / y 477.5 (1440×900) and x 644 / y 498.5 (1280×720), the same as B's `lane.json` (`lane.json`). Attempt 1 timed out after 60 s waiting for "Demo collection ready" on the cold dev server (`lane-attempt1-timeout.err`). This was environment-invalid and is kept as evidence. Attempt 2 passed |
+| G279-AUTH | PASS (both viewports) | This used a new context with no cookies and no storage (0 and 0). `/studio-lab` shows the workspace and the badge "Demo collection — no sign-in required" (count 1), with `auth_user` null. `/studio/middle-east` signed out shows "Sign in required" with 0 `audio[src]` and no workspace (`auth-guard-*.png`). `/api/studio-token` with no header returned **401** `{"error":"Please sign in to access Studio."}`; with a fake bearer it returned 500 `Unable to prepare Studio access`, with no token or URL in either body. The page made no `studio-token` call (`c279-smoke.json`). Premium auth is not bypassed |
+| STUDIO-SMOKE (extra regression, C-owned) | PASS (both viewports) | Ran on `/studio-lab`: Add the pulse stem, then Space to play. `data-playing` went false>true>false, the playhead advanced and then held, and the tapped output RMS was 0.0199 while playing. Export WAV was 16.000 s, 48 kHz / 24-bit / stereo, 0 NaN, peak 0.2967, −24.9 dB in every second, and sha256 identical to round 278's `1fea093b…`. App code is unchanged, and the render output is bit-identical |
+| DOC-208 | PASS | l.4 is byte-exact `**სტატუსი:** In Progress (stage 1 of 2; C round 279 PASS)`. The seven TEMPLATE headings are in order (კონტექსტი, მიდგომა, არქიტექტურა, შეცვლილი ფაილები, პრობლემები და გადაწყვეტები, ტესტირება, TODO). The 175 helper map lists `QuietWaitResult`/`waitForQuietState`, `waitForQuiet`, `waitForStudioQuiet`, `waitForCollectionReady` and `waitForPlaybackSettled` as they are in `page.ts`, and their consumers match a grep of the specs. The four TODO bullets say what round 279 did and that R216 goes to b-ii-2 |
+| gate | gate | Full vitest, build, Biome, `npm run verify` and `test:e2e:smoke` belong to the root gate. They are not claimed here |
+
+## Notes for B (no bug)
+- **INFO-C279-LANE-PROBE-TIMEOUT (info, environment; cause is a hypothesis).** C's first `lane.cjs` run after the mutant runs waited more than 60 s for "Demo collection ready" on :5173. A `curl` right after it returned 200 in 1.4 s, and attempt 2 passed. **Confirmed:** the timeout happened, and the server was alive afterwards. **Not confirmed:** the cause. Two hypotheses remain: a cold dev-server load (round 278 also needed a 150 s timeout), or a transient Vite re-optimise after the four mutant builds that symlinked `store/node_modules`, the risk L38's `cacheDir` clause describes. The :5173 dev-server log is not reachable from C's phase, so I could not grep it for `504` or `Outdated Optimize Dep`. Suggestion: probes should warm :5173 first or use ≥ 150 s, and mutant scratch copies could set their own Vite `cacheDir`.
+- **Task §2.4 overstates the leak at HEAD; doc 208 is correct.** C read the HEAD archive (`/tmp/c279-clean`, resources spec l.285–322). After the observer install, the only `await` before the poll loop starts is the `timeOrigin` `page.evaluate`. A throw there leaves the observer installed, but the poll loop has not started yet. Between `const pollLoop =` and `try {` there is only the synchronous `page.waitForEvent(...).catch(...)` and `let t1`, so nothing there can realistically throw. Doc 208 (as fixed after A's code-reviewer #1) says exactly this. The "wider leak" sentence in task §2.4 is a task-text note for B. It is not a defect in A's work, and the code change is still correct and covered by MU-OBS-1/2/3.
+- **A's code-reviewer Lows, as C checked them:**
+  - #2 confirmed: `emptyLanePointAfterClip` returns `ownTrack: null` when the clip has no lane, and the thrown text then reads "lane null" (interactions spec, about l.193 and l.219).
+  - #4 confirmed: the long line and the import order in `page.ts`.
+  - #5 confirmed: `waitForQuietState` and `QuietWaitResult` are used only inside `perf/lib/page.ts`.
+  - #6 confirmed: doc 175 l.64 (GATE214-S3, outside this round's grant) still says the lane selector uses `quotedAttributeValue`, but only `clipById` (spec l.107) uses it now.
+
+  All of them are Low or doc-only and outside the behaviour this round verifies. They are for B to defer.
+- **DOC-208 ids:** every id cited in doc 208 (MU-READY, MU-CAP, MU-PLAY, MU-LANE, MU-OBS-1/2/3, GATE214-S1/S2, GATE223-S2, R216-MEM-POLLS-HEADROOM, D-29z254/636/637/640) appears in `current-task.md`.
+- **TIMEOUT-DATA:** two fresh cloud machines measured PERF-1a at 6.4 and 6.5 min (≤ 50 %). This is input for ROOT-REQ-PERF-TIMEOUT and PERF-1A-TIMEOUT-HEADROOM. It does not close them, because the limit was not changed.

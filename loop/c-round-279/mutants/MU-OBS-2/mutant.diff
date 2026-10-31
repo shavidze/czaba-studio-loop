@@ -1,0 +1,19 @@
+--- /home/runner/czaba-project/store/perf/studio-lab-resources.perf.spec.ts	2026-10-31 00:28:03.828648658 +0000
++++ /tmp/c279-mut/MU-OBS-2/perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:14:52.474060930 +0000
+@@ -290,6 +290,7 @@
+   let observerInstalled = false;
+   let t1: number | null = null;
+   try {
++    throw new Error('MU-OBS-2');
+     await page.evaluate((doneMarker) => {
+       window.__czabaExportDoneAt = null;
+       const observer = new MutationObserver(() => {
+@@ -445,7 +446,7 @@
+         return observer !== undefined;
+       })
+       .catch(() => false);
+-    if (observerInstalled && !released) {
++    if (!released) {
+       result.problems.push(`export ${clips}: the "${perfWavDoneName}" observer was not released`);
+     }
+   }

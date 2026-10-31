@@ -1,0 +1,11 @@
+--- /home/runner/czaba-project/store/perf/studio-lab-interactions.perf.spec.ts	2026-10-31 00:28:03.828551957 +0000
++++ /tmp/a279-mut/MU-LANE/perf/studio-lab-interactions.perf.spec.ts	2026-10-31 00:46:45.187982718 +0000
+@@ -192,7 +192,7 @@
+     const ownLane = clipElement.closest('[data-track-id]');
+     if (ownLane === null) return { point: null, ownTrack: null };
+     const lanes = [...document.querySelectorAll('[data-track-id]')];
+-    for (const lane of lanes.slice(lanes.indexOf(ownLane) + 1)) {
++    for (const lane of [ownLane]) {
+       if (lane.contains(ownLane) || ownLane.contains(lane)) continue;
+       const box = lane.getBoundingClientRect();
+       const y = box.top + box.height / 2;

@@ -1,0 +1,13 @@
+# C round 279 checkpoint
+- SOURCE-SCOPE: sha256 -c rc 0; status 9 M + 1 ?? (doc 208), all §5 paths. DONE PASS
+- HUNK-SCOPE: 5 perf files cmp-equal to sketch-final AND to sketch.diff applied on git archive 873d835 (/tmp/c279-head). DONE PASS
+- next: CLAIMS, SWEEP, KEEP-WAITS, TYPECHECK, then PERF-RUN alone
+- CLAIMS: claims.sh on clean git archive 873d835 == claims-output-at-873d835.txt (claims-at-873d835.txt). L29 sweep: 31 untagged hits, all grants/claims-block/acceptance rows (l29-untagged.txt), no untagged code fact. PASS
+- SWEEP: SW-A 0, test.setTimeout 0. PASS. KEEP-WAITS: 1a l.581 2000, l.599 idleSettleMs, l.602 idleMeasureMs; 1b-ii l.181 300, l.346 observerSettleMs, l.528 idleSettleMs; 1b-i none. PASS
+- TYPECHECK rc 0 (typecheck.log). PASS
+- DOC-208: l.4 exact, 7 headings in TEMPLATE order; 175 table matches page.ts and consumers; TODO bullets 168/169/175/176 state b-ii-1 done + R216 -> b-ii-2. PASS
+- PERF-RUN started (perf-run-1.log), results to results-1/. Then: equiv x3, mutants MU-LANE/OBS-2/OBS-3/READY, lane.cjs, c279-smoke.cjs (auth+smoke)
+- PERF-RUN: 3 passed (12.8m) 1b-i 5.1m, 1b-ii 1.1m, 1a 6.5m (43% of 15m); Chromium 143.0.7499.4, Playwright 1.57.0. PASS. TIMEOUT-DATA 6.5m < 9.4.
+- EQUIV: 1a 0/166, 1b-i 0/106, 1b-ii 0/37 problems; complete true, failures [], no aborted/problems/pageErrors. PASS
+- MUTANTS running (mutants-run.log, mutants/<id>/), c-perf.diff == A diff
+- ALL ROWS DONE; report + json written

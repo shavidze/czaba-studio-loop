@@ -1,0 +1,82 @@
+--- b279-head/perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:28:01.000000000 +0000
++++ b279-sketch/perf/studio-lab-resources.perf.spec.ts	2026-10-31 01:35:11.686997161 +0000
+@@ -58,6 +58,8 @@
+ const pathTimeoutMs = 30000;
+ const observerSettleMs = 200;
+ const passGuardMs = 8 * 60 * 1000;
++const clockProbeCount = 5;
++const clockProbeMaxRttMs = 20;
+ const expectedWavName = 'czaba-studio-lab.wav';
+ const wavSampleRate = 48000;
+ const wavBytesPerFrame = 6;
+@@ -176,6 +178,38 @@
+   return { backingBytes, usedBytes };
+ }
+ 
++interface PageClock {
++  offsetMs: number;
++  rttMs: number;
++}
++
++async function probePageClock(page: Page): Promise<PageClock> {
++  let best: PageClock | null = null;
++  for (let probe = 0; probe < clockProbeCount; probe += 1) {
++    const sentAt = Date.now();
++    const pageNow = await page.evaluate(() => performance.now());
++    const receivedAt = Date.now();
++    const rttMs = receivedAt - sentAt;
++    if (best === null || rttMs < best.rttMs) {
++      best = { offsetMs: (sentAt + receivedAt) / 2 - pageNow, rttMs };
++    }
++  }
++  if (best === null) throw new Error('the page clock probe took no reading');
++  return best;
++}
++
++export function heapSamplesInWindow(
++  samples: readonly HeapSample[],
++  offsetMs: number,
++  from: number,
++  to: number,
++): HeapSample[] {
++  return samples.filter((sample) => {
++    const midpoint = (sample.sentAt + sample.receivedAt) / 2 - offsetMs;
++    return midpoint >= from && midpoint <= to;
++  });
++}
++
+ async function readHeapAfterGc(cdp: CDPSession, page: Page): Promise<HeapReading | null> {
+   await cdp.send('HeapProfiler.collectGarbage');
+   await page.waitForTimeout(300);
+@@ -303,6 +337,12 @@
+     }, perfWavDoneMarker);
+     observerInstalled = true;
+     const timeOrigin = await page.evaluate(() => performance.timeOrigin);
++    const clock = await probePageClock(page);
++    if (clock.rttMs > clockProbeMaxRttMs) {
++      result.problems.push(
++        `export ${clips}: the page clock probe's best round trip was ${clock.rttMs} ms (limit ${clockProbeMaxRttMs} ms)`,
++      );
++    }
+ 
+     pollLoop = (async () => {
+       while (polling) {
+@@ -381,12 +421,17 @@
+     }
+     const windowStartEpoch = timeOrigin + t0;
+     const windowEndEpoch = timeOrigin + windowEnd;
+-    const inWindow = heapSamples.filter(
++    const edgeRule = heapSamples.filter(
+       (sample) => sample.sentAt >= windowStartEpoch && sample.receivedAt <= windowEndEpoch,
+     );
++    const inWindow = heapSamplesInWindow(heapSamples, clock.offsetMs, t0, windowEnd);
+     putLive(`mem-polls-${clips}`, inWindow.length, {
+       errors: heapErrors,
+       allSamples: heapSamples.length,
++      offsetMs: roundTo(clock.offsetMs - timeOrigin, 2),
++      probeRttMs: clock.rttMs,
++      edgeRule: edgeRule.length,
++      expected: roundTo((windowEnd - t0) / heapPollMs, 1),
+     });
+     if (inWindow.length < 5) {
+       result.problems.push(

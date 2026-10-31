@@ -1,9 +1,9 @@
 {
- "version": 242,
- "updated": "2026-10-30 B round 278 -> 279 planning",
+ "version": 243,
+ "updated": "2026-10-31 B round 279 -> 280 planning",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 279, D-29z634..D-29z641; PERF-HARNESS-SHARED-LIB-b-ii stage 1 (b-ii-1, test-only perf harness): state waits for the fixed settles outside measurement windows (GATE214-S1), the deselect lane = first lane after the clip lane (GATE214-S2), export observer + poll loop inside try with an installed flag (GATE223-S2); baseline 873d835 clean; grants b-round-278-r279-grants.txt; frozen b-round-278-r279-tree-sha256.txt; oracle b-round-278/baseline-results)",
+ "current_task": "current-task.md (round 280, D-29z642..D-29z649; PERF-HARNESS-SHARED-LIB-b-ii-2, test-only: export heap samples counted on the page clock by request-response midpoint with a 5-probe clock offset (best RTT, limit 20 ms -> named problem), endpointRule/clockOffsetMs/clockRttMs/expectedPolls in the mem-polls detail, endSampleLagMs on one clock, 8 budget notes; heapPollMs 50 and >= 5 unchanged; baseline 1dbf3af clean; grants b-round-279-r280-grants.txt; frozen b-round-279-r280-tree-sha256.txt; oracle b-round-279/head-results-1; EQUIV-B2 named exceptions: 8 notes + res.export.{1,2}.peak-backing-delta-mib +-0.1)",
  "advisor_used_by_B": "round 276 -> 277 planning: available and consulted (before the approach and before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -10915,11 +10915,21 @@
    "round": 279,
    "task": "current-task.md",
    "decision": "D-29z634..D-29z641",
-   "status": "dispatched",
+   "status": "done (D-29z642): C round 279 PASS (c-round-279.json, browserVerified/realVerified true, 12 rows) + gate 279 published 1dbf3af (both remotes); 0 bugs",
    "type": "STUDIO-PERFORMANCE PERF-HARNESS-SHARED-LIB-b-ii stage 1 (b-ii-1), test-only",
    "note": "baseline 873d835 clean (1142 tracked); grants 10 (1 new doc); frozen 1133; B HEAD perf run 3/3 PASS 15.2 min (1a 8.4 min = 56 % of 15 min); B sketch v3 (b-round-278/sketch.diff, sketch-final/): tsc rc 0; perf 1a+1b-i (v2) and 1b-ii (v3) equiv-check 0 problems vs baseline-results; v1 (quiet-only after load) moved hook-live 2->3 and used-ready-mib, v2 moved used-ready-mib only -> 1b-ii l.524 kept; mutants MU-OBS-2 red, MU-OBS-3 control green, MU-LANE red",
    "next": "C PASS + gate -> round 280 = b-ii-2 (R216-MEM-POLLS-HEADROOM) unless REGRESSION due (on/after 2026-11-02, it goes first)",
    "added": "2026-10-30 B round 278 -> 279 planning"
+  },
+  {
+   "round": 280,
+   "task": "current-task.md",
+   "decision": "D-29z642..D-29z649",
+   "status": "dispatched",
+   "type": "STUDIO-PERFORMANCE PERF-HARNESS-SHARED-LIB-b-ii stage 2 (b-ii-2, final), test-only",
+   "note": "baseline 1dbf3af clean (1143 tracked); grants 8 (1 new doc 209); frozen 1136; B HEAD 1b-ii run 1 passed 1.3 min (oracle head-results-1); experiment v1 x2 + final sketch: offset vs timeOrigin -0.5..-2.2 ms, RTT 1-3 ms, midpoint +0..+2 per export (sum 11/12/11 per run), 1x export-1 peak 65 -> 65.1 in 2 of 3 runs; EQUIV-B2 0 problems 1 tolerated; mutants MU-SIGN red, MU-RTT red, MU-ENDPOINT sum 0, MU-ORIGIN control green, MU-PROBE-THROW red",
+   "next": "C PASS + gate -> round 281 = GATE279-S1 + B-R280-CLICK-LIVE-LANE-ID + A-R279-REVIEW-LANE-NULL unless REGRESSION due (on/after 2026-11-02, it goes first)",
+   "added": "2026-10-31 B round 279 -> 280 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -13315,7 +13325,7 @@
   },
   {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress (D-29z636): resumed after SYS-5; round 279 = PERF-HARNESS-SHARED-LIB-b-ii-1, round 280 = b-ii-2, then PERF-2.. per execution_order_d29z636 | order note D-29z324: after SABA-B-9/10/11 (in progress from 11a), SABA-B-7 (awaiting_user) and SYS-5 | order note D-29z319: after SABA-B-7, SABA-B-9/10/11 (six stages) and SYS-5 | in_progress, paused: round 233 GATE232-S1 follow-up, then REGRESSION if due, SABA-B-7-ENVELOPE-DB, SYS-5; next PERF task b-ii after those (D-29z318) | in_progress, paused for SABA-B-8 CALM-3 (round 232); then REGRESSION if due, SABA-B-7-ENVELOPE-DB, SYS-5; next PERF task b-ii after those (D-29z308) | in_progress, paused for SABA-B-8 (RETRO 230, CALM-2b 231, CALM-3 232), then SABA-B-7-ENVELOPE-DB, then SYS-5; next PERF task b-ii after those (D-29z296) | in_progress, paused for SABA-B-8 (CALM-2a 229, RETRO 230, CALM-2b, CALM-3); next PERF task b-ii after CALM-3 (D-29z286) | in_progress, paused for SABA-B-8 (CALM-1b 228, CALM-2, RETRO 230, CALM-3); next PERF task b-ii after CALM-3 (D-29z278) | in_progress, paused for SABA-B-8 (CALM-1a fix-up 227, CALM-1b 228, CALM-2 229, RETRO 230, CALM-3); next PERF task b-ii after CALM-3 (D-29z272) | in_progress, paused for SABA-B-8 (rounds 226-229): PERF-HARNESS-SHARED-LIB-b-i done (C round 225 PASS, 80fbb3b); next PERF task b-ii after CALM-3 (D-29z262, D-29z267) | in_progress, paused for SABA-B-8 after round 225: round 224 PERF-HARNESS-SHARED-LIB-b-i C PASS published bbaea50 with 2 Medium + 1 Low findings -> round 225 fix-up (D-29z259..D-29z261); then CALM-1..3 (D-29z262); then b-ii, PERF-2.. per execution_order_d29z262 | in_progress: round 223 PERF-HARNESS-SHARED-LIB done (C PASS, published e140ab4; D-29z251) except GATE214-S2 (ruled into b-ii, D-29z254); round 224 = PERF-HARNESS-SHARED-LIB-b-i (D-29z252/D-29z256); then b-ii unless REGRESSION due (on/after 2026-10-30), then PERF-2.. per execution_order_d29z252 | in_progress: round 222 B-R220-LEGACY-EXPORT-NO-STEMS done (C PASS, published 2d4a93f; D-29z243); round 223 = PERF-HARNESS-SHARED-LIB (D-29z245); then PERF-HARNESS-SHARED-LIB-b (D-29z244) unless REGRESSION due (on/after 2026-10-30), then PERF-2.. per execution_order_d29z215 | in_progress: PERF-16 complete (16b-ii round 221 C PASS, published 6dd45a1; D-29z239); round 222 = B-R220-LEGACY-EXPORT-NO-STEMS (Medium, D-29z237); export-pipeline checkpoint requested (b-round-221-checkpoint-request.md, D-29z240, non-blocking); then PERF-HARNESS-SHARED-LIB (REGRESSION first if due on/after 2026-10-30), execution_order_d29z215 | in_progress: PERF-16b-i done (round 220 C PASS, published c4e6c9d; D-29z232); PERF-16b-ii dispatched round 221 (D-29z235; @ffmpeg remove request filed); then round 222 = B-R220-LEGACY-EXPORT-NO-STEMS (Medium, D-29z236) unless REGRESSION due (on/after 2026-10-30), export-pipeline checkpoint request at round-222 planning, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: OSS-LIC done (round 219 C PASS, published c54a534; D-29z227); PERF-16b split (D-29z229): 16b-i dispatched round 220, then 16b-ii (deps removal) unless REGRESSION due (on/after 2026-10-30), PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: PERF-16a done (round 218 C PASS, published da5ad69; D-29z223); OSS-LIC dispatched round 219 (D-29z225); then REGRESSION if due (on/after 2026-10-30), PERF-16b, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: ... PERF-1b done (rounds 214, 216-217; 8873ece); PERF-16 split (D-29z221): PERF-16a round 218 (deps requested), then OSS-LIC (219 unless REGRESSION due), PERF-16b, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: PERF-1a, SABA-B-6, PERF-FADER-a0/a/b/c, PERF-1b-i done; RETRO 215 RT-FIX C PASS round 216; PERF-1b-ii round 216 C FAIL on two Lows (C-R216-01/02) -> fix-up round 217 (D-29z218); then REGRESSION if due (on/after 2026-10-30), PERF-16, OSS-LIC, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: PERF-1a, SABA-B-6, PERF-FADER-a0/a/b/c, PERF-1b-i done; RETRO 215 (round 215 C FAIL RT-NUM Low, corrected; RT-FIX in 216); PERF-1b-ii dispatched round 216 (D-29z217); then PERF-16 (after REGRESSION 217 if due), OSS-LIC, PERF-HARNESS-SHARED-LIB, then execution_order_d29z215 | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i done (214, eb9e76e); RETRO 215 (round 215); PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i dispatched round 214 (D-29z206/207); RETRO 215; PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (209-210, 180dd2e); PERF-FADER-b done (211, 28a274c); PERF-FADER-c dispatched round 212 (D-29z197); checkpoint requested (D-29z195, non-blocking); then PERF-1b, PERF-16, OSS-LIC, PERF-2..15 | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (rounds 209-210, C round 210 PASS browserVerified=true, published 180dd2e); PERF-FADER-b dispatched round 211 (D-29z189); then frontend-architect checkpoint request (non-blocking), PERF-1b, PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped, D-29z194) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a dispatched round 209 (D-29z179, pan included); then PERF-FADER-b, PERF-1b | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
+   "status": "in_progress (D-29z645): round 279 b-ii-1 done; round 280 = b-ii-2 (final stage of b-ii and of PERF-HARNESS-SHARED-LIB-b); round 281 = GATE279-S1 + B-R280-CLICK-LIVE-LANE-ID + A-R279-REVIEW-LANE-NULL; then PERF-2.. per execution_order_d29z645 | in_progress (D-29z636): resumed after SYS-5; round 279 = PERF-HARNESS-SHARED-LIB-b-ii-1, round 280 = b-ii-2, then PERF-2.. per execution_order_d29z636 | order note D-29z324: after SABA-B-9/10/11 (in progress from 11a), SABA-B-7 (awaiting_user) and SYS-5 | order note D-29z319: after SABA-B-7, SABA-B-9/10/11 (six stages) and SYS-5 | in_progress, paused: round 233 GATE232-S1 follow-up, then REGRESSION if due, SABA-B-7-ENVELOPE-DB, SYS-5; next PERF task b-ii after those (D-29z318) | in_progress, paused for SABA-B-8 CALM-3 (round 232); then REGRESSION if due, SABA-B-7-ENVELOPE-DB, SYS-5; next PERF task b-ii after those (D-29z308) | in_progress, paused for SABA-B-8 (RETRO 230, CALM-2b 231, CALM-3 232), then SABA-B-7-ENVELOPE-DB, then SYS-5; next PERF task b-ii after those (D-29z296) | in_progress, paused for SABA-B-8 (CALM-2a 229, RETRO 230, CALM-2b, CALM-3); next PERF task b-ii after CALM-3 (D-29z286) | in_progress, paused for SABA-B-8 (CALM-1b 228, CALM-2, RETRO 230, CALM-3); next PERF task b-ii after CALM-3 (D-29z278) | in_progress, paused for SABA-B-8 (CALM-1a fix-up 227, CALM-1b 228, CALM-2 229, RETRO 230, CALM-3); next PERF task b-ii after CALM-3 (D-29z272) | in_progress, paused for SABA-B-8 (rounds 226-229): PERF-HARNESS-SHARED-LIB-b-i done (C round 225 PASS, 80fbb3b); next PERF task b-ii after CALM-3 (D-29z262, D-29z267) | in_progress, paused for SABA-B-8 after round 225: round 224 PERF-HARNESS-SHARED-LIB-b-i C PASS published bbaea50 with 2 Medium + 1 Low findings -> round 225 fix-up (D-29z259..D-29z261); then CALM-1..3 (D-29z262); then b-ii, PERF-2.. per execution_order_d29z262 | in_progress: round 223 PERF-HARNESS-SHARED-LIB done (C PASS, published e140ab4; D-29z251) except GATE214-S2 (ruled into b-ii, D-29z254); round 224 = PERF-HARNESS-SHARED-LIB-b-i (D-29z252/D-29z256); then b-ii unless REGRESSION due (on/after 2026-10-30), then PERF-2.. per execution_order_d29z252 | in_progress: round 222 B-R220-LEGACY-EXPORT-NO-STEMS done (C PASS, published 2d4a93f; D-29z243); round 223 = PERF-HARNESS-SHARED-LIB (D-29z245); then PERF-HARNESS-SHARED-LIB-b (D-29z244) unless REGRESSION due (on/after 2026-10-30), then PERF-2.. per execution_order_d29z215 | in_progress: PERF-16 complete (16b-ii round 221 C PASS, published 6dd45a1; D-29z239); round 222 = B-R220-LEGACY-EXPORT-NO-STEMS (Medium, D-29z237); export-pipeline checkpoint requested (b-round-221-checkpoint-request.md, D-29z240, non-blocking); then PERF-HARNESS-SHARED-LIB (REGRESSION first if due on/after 2026-10-30), execution_order_d29z215 | in_progress: PERF-16b-i done (round 220 C PASS, published c4e6c9d; D-29z232); PERF-16b-ii dispatched round 221 (D-29z235; @ffmpeg remove request filed); then round 222 = B-R220-LEGACY-EXPORT-NO-STEMS (Medium, D-29z236) unless REGRESSION due (on/after 2026-10-30), export-pipeline checkpoint request at round-222 planning, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: OSS-LIC done (round 219 C PASS, published c54a534; D-29z227); PERF-16b split (D-29z229): 16b-i dispatched round 220, then 16b-ii (deps removal) unless REGRESSION due (on/after 2026-10-30), PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: PERF-16a done (round 218 C PASS, published da5ad69; D-29z223); OSS-LIC dispatched round 219 (D-29z225); then REGRESSION if due (on/after 2026-10-30), PERF-16b, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: ... PERF-1b done (rounds 214, 216-217; 8873ece); PERF-16 split (D-29z221): PERF-16a round 218 (deps requested), then OSS-LIC (219 unless REGRESSION due), PERF-16b, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: PERF-1a, SABA-B-6, PERF-FADER-a0/a/b/c, PERF-1b-i done; RETRO 215 RT-FIX C PASS round 216; PERF-1b-ii round 216 C FAIL on two Lows (C-R216-01/02) -> fix-up round 217 (D-29z218); then REGRESSION if due (on/after 2026-10-30), PERF-16, OSS-LIC, PERF-HARNESS-SHARED-LIB, execution_order_d29z215 | in_progress: PERF-1a, SABA-B-6, PERF-FADER-a0/a/b/c, PERF-1b-i done; RETRO 215 (round 215 C FAIL RT-NUM Low, corrected; RT-FIX in 216); PERF-1b-ii dispatched round 216 (D-29z217); then PERF-16 (after REGRESSION 217 if due), OSS-LIC, PERF-HARNESS-SHARED-LIB, then execution_order_d29z215 | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i done (214, eb9e76e); RETRO 215 (round 215); PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207); PERF-FADER-a0/a/b/c done (208 f535ab3, 209-210 180dd2e, 211 28a274c, 212-213 fe556fd); PERF-1b-i dispatched round 214 (D-29z206/207); RETRO 215; PERF-1b-ii round 216; then PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (209-210, 180dd2e); PERF-FADER-b done (211, 28a274c); PERF-FADER-c dispatched round 212 (D-29z197); checkpoint requested (D-29z195, non-blocking); then PERF-1b, PERF-16, OSS-LIC, PERF-2..15 | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a done (rounds 209-210, C round 210 PASS browserVerified=true, published 180dd2e); PERF-FADER-b dispatched round 211 (D-29z189); then frontend-architect checkpoint request (non-blocking), PERF-1b, PERF-16, OSS-LIC, PERF-2..15 (PERF-6 dropped, D-29z194) | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER-a0 done (208, f535ab3); PERF-FADER-a dispatched round 209 (D-29z179, pan included); then PERF-FADER-b, PERF-1b | in_progress: PERF-1a done (206, 60c82ed); SABA-B-6 done (207, d2a920c); PERF-FADER split a0/a/b (D-29z176): a0 dispatched round 208; then a (209), b, then PERF-1b | in_progress: PERF-1a done (round 206 C PASS, published 60c82ed); round 207 = SABA-B-6 inserted (D-29z173, Saba order: before PERF-1, missed at 206 planning); next PERF-FADER (round 208), then PERF-1b | in_progress: PERF-1a dispatched round 206 (D-29z171) | 2026-10-27 B round 205 -> 206 planning (D-29z172, Saba 2026-10-27 queue move) | was: not_started",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -13628,15 +13638,22 @@
      "id": "PERF-HARNESS-SHARED-LIB-b-ii-1",
      "what": "state waits (waitForCollectionReady / waitForPlaybackSettled / waitForStudioQuiet in perf/lib/page.ts, cap hit = problem) for 1a l.574/l.668, 1b-i l.637/l.703, 1b-ii l.279; keep 1a l.579 (hook-live window), l.597 (idle window) and 1b-ii l.524 (defines the ready-heap read); GATE214-S2 emptyLanePointAfterClip; GATE223-S2 observer + timeOrigin + pollLoop inside try, installed flag; doc 208",
      "target": "every deterministic median identical to b-round-278/baseline-results (equiv-check.py, 0 problems); named mutants red",
-     "status": "dispatched round 279 (D-29z636)",
+     "status": "done (D-29z642): C round 279 PASS (c-round-279.json, browserVerified/realVerified true, 12 rows) + gate 279 published 1dbf3af (both remotes) | dispatched round 279 (D-29z636)",
      "added": "2026-10-30 B round 278 -> 279 planning"
     },
     {
      "id": "PERF-HARNESS-SHARED-LIB-b-ii-2",
      "what": "R216-MEM-POLLS-HEADROOM: page-timestamped export window (clock-offset probe, sample midpoints), heapPollMs re-ruled; named exceptions mem-polls (wallclock) and res.export.*.peak-backing-delta-mib (+-0.1); budgets.resources.json notes; >= 5 threshold kept (performance-optimizer Q2)",
      "target": "mem-polls headroom at 1x and 6x; named exceptions only",
-     "status": "not_started (round 280)",
+     "status": "dispatched round 280 (D-29z645); design D-29z646 (heapPollMs 50 kept, R216 headroom measured +0..+2, not claimed); equivalence D-29z647 | not_started (round 280)",
      "added": "2026-10-30 B round 278 -> 279 planning"
+    },
+    {
+     "id": "PERF-HARNESS-DIAG-281",
+     "what": "GATE279-S1 (Medium: waitForCollectionReady waits for ready OR failed; a failed demo source pushes a named problem \"<label>: demo collection failed: <status text>\" and throws; pattern built from workspaceCollectionCopy(demo).failed with the count as \\d+), B-R280-CLICK-LIVE-LANE-ID (the chosen deselect lane id in the interact.harness.click-live detail, D-29z254 leftover; detail field, named in the equivalence contract), A-R279-REVIEW-LANE-NULL (the \"lane null\" error text); perf/lib/page.ts + perf/lib/app-labels.ts + interactions spec; re-run 1a + 1b-i equivalence",
+     "target": "three tightly related harness-diagnostics bugs (tech-lead ruling D-29z645)",
+     "status": "not_started (round 281, D-29z645)",
+     "added": "2026-10-31 B round 279 -> 280 planning"
     }
    ],
    "perf_fader_constraints_d29z174": "Before any event-share-16 row flips to assert: replace the metric (per-move frame/LoAF with liveness red-proof > 0 on a slow drag) or prove it live (C-R206-01); rewrite doc 163 l.60 and budgets.json event-share notes; drag changes the value at both ends (I-206-d); consult performance-optimizer + tech-lead and re-measure before dispatch",
@@ -13702,7 +13719,14 @@
     "advisor": "used before writing: sequencing (L38), oracle at 873d835, claims regenerated, invert-predicate mutants, grants/frozen, root request in outcome table, bookkeeping from round-278 evidence only",
     "re_measurement": "B HEAD run at 873d835 on a git archive: 3/3 PASS 15.2 min (1b-i 5.5, 1b-ii 1.1, 1a 8.4 min); 1a and 1b-i deterministic medians identical to c-round-259; 1b-ii differs only in 3 DOM and 4 JS-bytes rows moved by app rounds 260-278 (equiv-check vs c-round-259)"
    },
-   "execution_order_d29z636": "... -> PERF-HARNESS-SHARED-LIB-b-ii-1 (279) -> PERF-HARNESS-SHARED-LIB-b-ii-2 (280) -> PERF-2 -> PERF-3 -> PERF-COMMIT-RESCHEDULE -> PERF-4 -> PERF-5 -> PERF-7 -> PERF-8 -> PERF-DRAG-PREVIEW -> PERF-9 -> PERF-10 -> PERF-11 -> PERF-12 -> PERF-13 -> PERF-14 -> PERF-15 (PERF-6 dropped). REGRESSION first whenever due (on/after 2026-11-02); RETRO at 290. Supersedes execution_order_d29z262."
+   "execution_order_d29z636": "... -> PERF-HARNESS-SHARED-LIB-b-ii-1 (279) -> PERF-HARNESS-SHARED-LIB-b-ii-2 (280) -> PERF-2 -> PERF-3 -> PERF-COMMIT-RESCHEDULE -> PERF-4 -> PERF-5 -> PERF-7 -> PERF-8 -> PERF-DRAG-PREVIEW -> PERF-9 -> PERF-10 -> PERF-11 -> PERF-12 -> PERF-13 -> PERF-14 -> PERF-15 (PERF-6 dropped). REGRESSION first whenever due (on/after 2026-11-02); RETRO at 290. Supersedes execution_order_d29z262.",
+   "execution_order_d29z645": "... -> PERF-HARNESS-SHARED-LIB-b-ii-1 (279, done) -> PERF-HARNESS-SHARED-LIB-b-ii-2 (280) -> PERF-HARNESS-DIAG-281 (281: GATE279-S1 Medium, B-R280-CLICK-LIVE-LANE-ID, A-R279-REVIEW-LANE-NULL; re-run 1a + 1b-i) -> PERF-2 -> PERF-3 -> PERF-COMMIT-RESCHEDULE -> PERF-4 -> PERF-5 -> PERF-7 -> PERF-8 -> PERF-DRAG-PREVIEW -> PERF-9 -> PERF-10 -> PERF-11 -> PERF-12 -> PERF-13 -> PERF-14 -> PERF-15 (PERF-6 dropped). REGRESSION first whenever due (on/after 2026-11-02); RETRO at 290. Supersedes execution_order_d29z636.",
+   "consults_round_280": {
+    "tech-lead": "280 = b-ii-2 only; GATE279-S1 + click-live lane id + lane-null text -> 281 (three tightly related harness-diagnostics bugs); cap-hit last-commit text stays a watch; new doc 209 (208 status/TODO only); grants resources spec + budgets.resources.json + docs, no perf/lib; hard limits (t0/t1/windowEnd/wall-ms/observer/observerSettleMs/snapshot/readyBackingBytes/idleSettleMs/GC wait unchanged); probe before the poll loop, never in the window, smallest RTT, named problem; heapPollMs 50 (never below 25); mutants sign flip, endpoint restored, probe throws; offset-0 control (not adopted: the offset is an epoch value, B uses MU-ORIGIN)",
+    "performance-optimizer": "5 probes min RTT, offset = mid - page performance.now(); midpoint predicate; heapPollMs 50 (CDP main-thread work inside the measured window); expected 0 movement at 1x and drop the +-0.1 (not adopted: B measured 65 -> 65.1); midpoint adds ~RTT/50 per edge so R216 stays open (confirmed by measurement); live mutants weak except sign flip, unit-test fixture suggested (not adopted: perf/** outside vitest include, ROOT-REQ-VITEST-PERF-INCLUDE open); fold-in -> separate round 281; ready|failed regex with \\d+; notes from A run, C extends",
+    "disagreements": "headroom (tech-lead yes vs performance-optimizer ~+1): measured +0..+2 -> performance-optimizer; peak movement (performance-optimizer 0 vs queued +-0.1): measured 65.1 -> +-0.1 kept for the two 1x rows (D-29z646/D-29z647)",
+    "advisor": "used before the approach: bookkeeping, GATE279-S1 placement, D-29z254 home, page.ts freeze decides pre-check cost, oracle, equiv script with exceptions proven, measure before widening, consults, claims regenerated"
+   }
   },
   {
    "id": "STORE-REDESIGN",
@@ -24568,7 +24592,7 @@
    "severity": "info",
    "origin": "A round 216 / C round 216",
    "title": "res.harness.mem-polls-1 at 1x is 7-9 samples against >= 5 (C confirmed min 7); a slower machine could fail the liveness assert",
-   "status": "queued PERF-HARNESS-SHARED-LIB-b-ii-2 (round 280, D-29z636) | watch: queued PERF-HARNESS-SHARED-LIB-b-ii (D-29z252) | watch: moved to PERF-HARNESS-SHARED-LIB-b (D-29z244; the export-window filter also feeds peak-backing-delta-mib, so not in the equivalence round) | watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220)",
+   "status": "dispatched round 280 (b-ii-2, D-29z646): window made correct (page clock, midpoint), headroom measured +0..+2 per export (sum 11/12/11 per run; b-round-279/precheck-equiv-mutants.txt); after C PASS -> watch with doc 209 data, reopen as a task if any run shows mem-polls-1 < 7 | queued PERF-HARNESS-SHARED-LIB-b-ii-2 (round 280, D-29z636) | watch: queued PERF-HARNESS-SHARED-LIB-b-ii (D-29z252) | watch: moved to PERF-HARNESS-SHARED-LIB-b (D-29z244; the export-window filter also feeds peak-backing-delta-mib, so not in the equivalence round) | watch: attached to PERF-HARNESS-SHARED-LIB (page-timestamped export-window helper); not scheduled | round 217 (A and C): -1 7-8, -2 14-16, -1.6x 12-13, -2.6x 21-22, all >= 5; notes keep 'observed in round 216' ranges; widen ranges only in PERF-HARNESS-SHARED-LIB (D-29z220)",
    "evidence": "c-round-216.json needsBRuling; a-round-216.md l.109",
    "added": "2026-10-28 B round 216 -> 217 planning"
   },
@@ -24803,7 +24827,7 @@
    "severity": "info",
    "origin": "B round 222 -> 223 planning",
    "title": "PERF-1a runs 7-9 min against a 15-min Playwright timeout (47-58 %); B planning run 424.6 s",
-   "status": "root request ROOT-REQ-PERF-TIMEOUT filed (D-29z638): B run at 873d835 1a 8.4 min = 56 % of 15 min (b-round-278/head-perf-run.log); closes when root applies 25 min and a run shows <= 50 % | watch: round 224 A 5.8 min, C 8.0 min (53 % of 15 min, after C's build and 1b runs) -> above the 50 % rule; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch: round 223 A 7.1 min, C 7.1 min (new) / 7.4 min (HEAD) of 15; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch (D-29z250): listed, not a STOP, in round 223; candidate for PERF-HARNESS-SHARED-LIB-b or a root playwright.perf.config.ts change",
+   "status": "data (D-29z644): round 279 PERF-1a 6.4 min (A) and 6.5 min (C) = 43 % of 15 min on two fresh cloud machines; config unchanged, so not closed | root request ROOT-REQ-PERF-TIMEOUT filed (D-29z638): B run at 873d835 1a 8.4 min = 56 % of 15 min (b-round-278/head-perf-run.log); closes when root applies 25 min and a run shows <= 50 % | watch: round 224 A 5.8 min, C 8.0 min (53 % of 15 min, after C's build and 1b runs) -> above the 50 % rule; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch: round 223 A 7.1 min, C 7.1 min (new) / 7.4 min (HEAD) of 15; queued PERF-HARNESS-SHARED-LIB-b-ii (measure after GATE214-S1; root playwright.perf.config.ts request if still > 50 %) | watch (D-29z250): listed, not a STOP, in round 223; candidate for PERF-HARNESS-SHARED-LIB-b or a root playwright.perf.config.ts change",
    "evidence": "b-round-222/baseline-perf-run.log; earlier durationMs 452731-523524 in loop folder runs",
    "added": "2026-10-28 B round 222 -> 223 planning"
   },
@@ -24812,7 +24836,7 @@
    "severity": "low",
    "origin": "C round 223 (confirms A STOP)",
    "title": "task premise false: the Add clip lands on lane music (no empty right-half point), not stems; implementing GATE214-S2 as written aborts all 6 PERF-1b-i passes",
-   "status": "ruled D-29z254 (B's own task error, round-223 section 3): GATE214-S2 re-scoped into b-ii; A's revert accepted; not an A defect",
+   "status": "closed (D-29z642): C round 279 PASS (c-round-279.json, browserVerified/realVerified true, 12 rows) + gate 279 published 1dbf3af (both remotes); GATE214-S2 done by emptyLanePointAfterClip (LANE-BROWSER, MU-LANE) | ruled D-29z254 (B's own task error, round-223 section 3): GATE214-S2 re-scoped into b-ii; A's revert accepted; not an A defect",
    "evidence": "c-round-223/g223.json; a-round-223/run-1/perf-run.log",
    "added": "2026-10-28 B round 223 -> 224 planning"
   },
@@ -27297,6 +27321,47 @@
    "title": "C's HEAD dev server shared node_modules/.vite and broke :5173 (504 Outdated Optimize Dep); a second Vite server needs its own cacheDir",
    "source": "c-round-278.json notes",
    "added": "2026-10-30 B round 278 -> 279 planning"
+  },
+  {
+   "id": "GATE279-S1",
+   "severity": "medium",
+   "status": "open - scheduled round 281 (PERF-HARNESS-DIAG-281, D-29z645)",
+   "title": "perf/lib/page.ts waitForCollectionReady waits 15 s for the ready text only; a failed demo source shows copy.failed(n) and the pass aborts on \"load\" with a generic toHaveText timeout, so \"fixture broken\" and \"wait too slow\" look the same",
+   "source": "gates/round-279/review.md suggestion 1 (Medium)",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "B-R280-CLICK-LIVE-LANE-ID",
+   "severity": "low",
+   "status": "open - scheduled round 281 (PERF-HARNESS-DIAG-281, D-29z645)",
+   "title": "D-29z254 leftover: the chosen deselect lane id is not written into the interact.harness.click-live detail (round 279 equivalence contract forbade row-field changes; doc 208 l.88)",
+   "source": "a-round-279.md known gaps; doc 208 TODO",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "GATE279-S2",
+   "severity": "info",
+   "status": "watch (D-29z643)",
+   "title": "a capped quiet wait while playing may flake on a slower runner (cap hit is now a problem by design); if it shows up, name the last commit in the problem text instead of loosening the cap",
+   "source": "gates/round-279/review.md suggestion 2; a-round-279.md code-reviewer #3",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "INFO-C279-LANE-PROBE-TIMEOUT",
+   "severity": "info",
+   "status": "recorded (cause unconfirmed; method note in round 280 G280-AUTH row)",
+   "title": "C's lane.cjs attempt 1 waited > 60 s for Demo collection ready on :5173 after mutant runs; attempt 2 passed. Hypotheses: cold dev server, or a Vite re-optimise after symlinked-node_modules builds (not confirmed)",
+   "source": "c-round-279.json info",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "B-R280-TASK-2.4-OVERSTATED",
+   "severity": "info",
+   "origin": "B (claims accuracy; counted at RETRO 290)",
+   "status": "recorded",
+   "title": "round 279 task section 2.4 said a throw before the try also leaked the poll loop; at 873d835 nothing between the poll-loop start and the try could realistically throw (only the timeOrigin evaluate, observer only). Code change still correct; doc 208 states it right",
+   "source": "c-round-279.json INFO-C279-TASK-2.4-OVERSTATED; a-round-279.md code-reviewer #1",
+   "added": "2026-10-31 B round 279 -> 280 planning"
   }
  ],
  "tech_lead_notes": [
@@ -29540,6 +29605,20 @@
    "text": "the load-ready waitForFunction body is copied in 3 specs (1a measureLoad, 1b-i/1b-ii measureLoadReady) and settleMs/idleSettleMs constants are duplicated; candidate to move into perf/lib",
    "status": "recorded (not scheduled)",
    "added": "2026-10-30 B round 278 -> 279 planning"
+  },
+  {
+   "id": "A-R279-ARCH-IDLESETTLE-ROLES",
+   "source": "a-round-279.md code-reviewer Architecture note",
+   "text": "kept measurement-defining waits look like settle waits; idleSettleMs is declared 3 times with two meanings; proposal: rename by role (hookLiveWindowMs, playIdleSettleMs, readyHeapSettleMs), accepted when equivalence shows 0 problems",
+   "status": "recorded (not scheduled)",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "GATE279-ARCH-COPY-STRINGS",
+   "source": "gates/round-279/review.md suggestion 5 + Architecture note signal 2",
+   "text": "perf/lib/app-labels.ts imports app/lib/arrangement/collection.ts at runtime; proposal: move the demo/purchased WorkspaceCollectionCopy objects into app/lib/arrangement/strings.ts and re-export, so the harness no longer imports collection.ts (keep today)",
+   "status": "recorded (not scheduled)",
+   "added": "2026-10-31 B round 279 -> 280 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -33072,7 +33151,7 @@
   {
    "id": "GATE214-S1",
    "severity": "low",
-   "status": "dispatched round 279 (PERF-HARNESS-SHARED-LIB-b-ii-1, D-29z636) | queued PERF-HARNESS-SHARED-LIB-b-ii (D-29z252)",
+   "status": "closed (D-29z642): C round 279 PASS (c-round-279.json, browserVerified/realVerified true, 12 rows) + gate 279 published 1dbf3af (both remotes), rows EQUIV/MUTANTS/LANE-BROWSER/KEEP-WAITS | dispatched round 279 (PERF-HARNESS-SHARED-LIB-b-ii-1, D-29z636) | queued PERF-HARNESS-SHARED-LIB-b-ii (D-29z252)",
    "title": "studio-lab-interactions.perf.spec.ts:712 and :778 use fixed waitForTimeout(idleSettleMs) outside measurement windows (state wait suggested)",
    "source": "gates/round-214/review.md Suggestions",
    "added": "2026-10-28 B round 214 -> 215 planning",
@@ -33081,7 +33160,7 @@
   {
    "id": "GATE214-S2",
    "severity": "low",
-   "status": "dispatched round 279 (PERF-HARNESS-SHARED-LIB-b-ii-1, D-29z636) | ruled D-29z254 (L10): premise false (C-R223-01: the Add clip is on lane music, which has no empty right-half point); re-scoped to 'first lane after the measured clip's lane in DOM order with an empty right-half point' (fixture -> stems), scheduled in PERF-HARNESS-SHARED-LIB-b-ii",
+   "status": "closed (D-29z642): C round 279 PASS (c-round-279.json, browserVerified/realVerified true, 12 rows) + gate 279 published 1dbf3af (both remotes), rows EQUIV/MUTANTS/LANE-BROWSER/KEEP-WAITS | dispatched round 279 (PERF-HARNESS-SHARED-LIB-b-ii-1, D-29z636) | ruled D-29z254 (L10): premise false (C-R223-01: the Add clip is on lane music, which has no empty right-half point); re-scoped to 'first lane after the measured clip's lane in DOM order with an empty right-half point' (fixture -> stems), scheduled in PERF-HARNESS-SHARED-LIB-b-ii",
    "title": "emptyLanePoint(page, 'stems') hardcodes the fixture track id (:542)",
    "source": "gates/round-214/review.md Suggestions",
    "added": "2026-10-28 B round 214 -> 215 planning",
@@ -33333,7 +33412,7 @@
   {
    "id": "GATE223-S2",
    "severity": "low",
-   "status": "dispatched round 279 (PERF-HARNESS-SHARED-LIB-b-ii-1, D-29z636) | queued PERF-HARNESS-SHARED-LIB-b-ii (D-29z252)",
+   "status": "closed (D-29z642): C round 279 PASS (c-round-279.json, browserVerified/realVerified true, 12 rows) + gate 279 published 1dbf3af (both remotes), rows EQUIV/MUTANTS/LANE-BROWSER/KEEP-WAITS | dispatched round 279 (PERF-HARNESS-SHARED-LIB-b-ii-1, D-29z636) | queued PERF-HARNESS-SHARED-LIB-b-ii (D-29z252)",
    "title": "perf/studio-lab-resources.perf.spec.ts: export observer attached at l.291 before the try that starts at l.327; if the timeOrigin evaluate (l.302) throws, nothing releases it (scope limited to one pass context)",
    "source": "gates/round-223/review.md suggestion 2",
    "added": "2026-10-28 B round 223 -> 224 planning"
@@ -34469,6 +34548,56 @@
    "repro": "mutant: remove the metronome wrapper -> UI12 stays green",
    "deferred_reason": "user decision 2026-10-23: open Lows no longer block; fixed in the polish pass before release; final acceptance requires each fixed and C-verified",
    "added": "2026-10-30 B round 278 -> 279 planning"
+  },
+  {
+   "id": "A-R279-REVIEW-LANE-NULL",
+   "severity": "low",
+   "status": "open - scheduled round 281 with GATE279-S1 (owned code, cheap; D-29z645)",
+   "title": "emptyLanePointAfterClip error text reads \"lane null\" when the clip has no data-track-id (merged with gate-279 suggestion 3)",
+   "evidence": "a-round-279.md code-reviewer #2; gates/round-279/review.md suggestion 3; C confirmed (c-round-279.md)",
+   "repro": "source read, perf/studio-lab-interactions.perf.spec.ts emptyLanePointAfterClip",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block; fixed in the polish pass before release; final acceptance requires each fixed and C-verified",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "A-R279-REVIEW-PAGE-STYLE",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "title": "perf/lib/page.ts has a ~105-char line and an out-of-order collection import (Biome does not cover perf/)",
+   "evidence": "a-round-279.md code-reviewer #4; C confirmed",
+   "repro": "source read",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block; fixed in the polish pass before release; final acceptance requires each fixed and C-verified",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "A-R279-REVIEW-LIB-EXPORTS",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "title": "waitForQuietState / QuietWaitResult are exported but used only inside perf/lib/page.ts",
+   "evidence": "a-round-279.md code-reviewer #5; C confirmed",
+   "repro": "grep",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block; fixed in the polish pass before release; final acceptance requires each fixed and C-verified",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "A-R279-REVIEW-DOC175-STALE",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "title": "doc 175 GATE214-S3 entry still says quotedAttributeValue builds the lane selector; only clipById uses it now",
+   "evidence": "a-round-279.md code-reviewer #6; C confirmed doc 175 l.64",
+   "repro": "source read",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block; fixed in the polish pass before release; final acceptance requires each fixed and C-verified",
+   "added": "2026-10-31 B round 279 -> 280 planning"
+  },
+  {
+   "id": "GATE279-S4",
+   "severity": "low",
+   "status": "open - Lows batch",
+   "title": "export observer: if observe() succeeded but the evaluate threw before window.__czabaExportObserver was assigned, the observer would stay attached unreported (theoretical; same synchronous block). Optional: assign the handle before observe()",
+   "evidence": "gates/round-279/review.md suggestion 4",
+   "repro": "source read",
+   "deferred_reason": "user decision 2026-10-23: open Lows no longer block; fixed in the polish pass before release; final acceptance requires each fixed and C-verified",
+   "added": "2026-10-31 B round 279 -> 280 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -38776,6 +38905,46 @@
    "id": "D-29z641",
    "date": "2026-10-30",
    "text": "Round 279 outcome table (current-task.md section 11). Doc 208 l.4 = In Progress (stage 1 of 2; C round 279 PASS) (L28 multi-stage)."
+  },
+  {
+   "id": "D-29z642",
+   "date": "2026-10-31",
+   "text": "Round 279 closed: C PASS (12 rows, browserVerified/realVerified true, 0 bugs), gate 279 published 1dbf3af. PERF-HARNESS-SHARED-LIB-b-ii-1 done. Closed: GATE214-S1, GATE214-S2, GATE223-S2, C-R223-01-GATE214-S2-PREMISE."
+  },
+  {
+   "id": "D-29z643",
+   "date": "2026-10-31",
+   "text": "Gate 279 and A/C notes: GATE279-S1 (Medium, harness diagnostics) -> round 281; Lows A-R279-REVIEW-PAGE-STYLE, -LIB-EXPORTS, -DOC175-STALE, GATE279-S4 -> deferred_low_polish; A-R279-REVIEW-LANE-NULL (merged gate S3) scheduled 281; watch GATE279-S2; info INFO-C279-LANE-PROBE-TIMEOUT (cause unconfirmed) and B-R280-TASK-2.4-OVERSTATED (origin B); architecture signals A-R279-ARCH-IDLESETTLE-ROLES, GATE279-ARCH-COPY-STRINGS recorded, not scheduled."
+  },
+  {
+   "id": "D-29z644",
+   "date": "2026-10-31",
+   "text": "TIMEOUT-DATA (A 6.4, C 6.5 min = 43 %) appended to ROOT-REQ-PERF-TIMEOUT and PERF-1A-TIMEOUT-HEADROOM; not closed because the config limit did not change."
+  },
+  {
+   "id": "D-29z645",
+   "date": "2026-10-31",
+   "text": "Round 280 = PERF-HARNESS-SHARED-LIB-b-ii-2 only (tech-lead; performance-optimizer agrees on a separate round). Round 281 = PERF-HARNESS-DIAG-281: GATE279-S1 + B-R280-CLICK-LIVE-LANE-ID + A-R279-REVIEW-LANE-NULL (page.ts + app-labels + interactions spec; 1a + 1b-i re-run). Supersedes execution_order_d29z636."
+  },
+  {
+   "id": "D-29z646",
+   "date": "2026-10-31",
+   "text": "b-ii-2 design: 5-probe page clock (best RTT, limit 20 ms -> named problem, probe before the poll loop), midpoint predicate on the page clock, endpointRule/clockOffsetMs/clockRttMs/expectedPolls in the mem-polls detail, endSampleLagMs on one clock; heapPollMs 50 and >= 5 unchanged (both consults). R216 headroom measured +0..+2 per export: not claimed; R216 becomes a watch after PASS (reopen if mem-polls-1 < 7)."
+  },
+  {
+   "id": "D-29z647",
+   "date": "2026-10-31",
+   "text": "Round 280 equivalence: oracle b-round-279/head-results-1 (1dbf3af); EQUIV-B2 (b-round-279/scripts/equiv-check-b2.py) with named exceptions only: the notes of the 8 mem-polls/peak-backing rows and res.export.{1,2}.peak-backing-delta-mib +-0.1 (B measured 65 -> 65.1, windowPeakMib 65.1). PERF-1a/1b-i untouched, not re-run."
+  },
+  {
+   "id": "D-29z648",
+   "date": "2026-10-31",
+   "text": "Docs: new doc 209-perf-export-window-page-clock.md (Completed (C round 280 PASS)); L28 final stage: doc 208 and doc 176 l.4 -> Completed (C round 280 PASS); doc 169 Export metrics section granted whole (L34)."
+  },
+  {
+   "id": "D-29z649",
+   "date": "2026-10-31",
+   "text": "Round 280 outcome table (current-task.md section 11)."
   }
  ],
  "retro_candidates": [
@@ -38920,7 +39089,8 @@
    "decision": "D-29z638",
    "blocking": false,
    "status": "open",
-   "added": "2026-10-30 B round 278 -> 279 planning"
+   "added": "2026-10-30 B round 278 -> 279 planning",
+   "data_round_279": "PERF-1a A 6.4 min, C 6.5 min (43 % of 15 min); B 873d835 run 8.4 min (56 %). Machine variance; still open (D-29z644)"
   }
  ],
  "retro_inputs_round_230": [

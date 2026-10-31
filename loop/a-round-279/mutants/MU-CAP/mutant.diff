@@ -1,0 +1,11 @@
+--- /home/runner/czaba-project/store/perf/lib/page.ts	2026-10-31 00:28:03.828551957 +0000
++++ /tmp/a279-mut/MU-CAP/perf/lib/page.ts	2026-10-31 00:44:12.714611654 +0000
+@@ -57,7 +57,7 @@
+         const quiet = now - Math.max(lastCommit, lastStart) >= quietFor;
+         return { quiet, capped: !quiet && now - start >= cap };
+       },
+-      { start: from, quietFor: quietMs, cap: settleCapMs },
++      { start: from, quietFor: 10000, cap: settleCapMs },
+     );
+     if (state.quiet || state.capped) return { at: await nowIn(page), capped: state.capped };
+     await page.waitForTimeout(50);

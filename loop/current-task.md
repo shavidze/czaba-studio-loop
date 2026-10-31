@@ -1,275 +1,223 @@
-# Round 279: PERF-HARNESS-SHARED-LIB-b-ii stage 1 (b-ii-1, test-only). The perf harness waits for real states instead of fixed settles outside its measurement windows, picks the deselect lane from the DOM instead of a hard-coded id, and always releases the export observer and heap poll loop
+# Round 280: PERF-HARNESS-SHARED-LIB-b-ii-2 (test-only, final stage of b-ii). The export heap samples are counted on the page clock by their request-response midpoint, with a measured clock probe, and the mem-polls rows record what the old endpoint rule would have counted
 
-**Planned by:** B, at the round 278 → 279 planning, 2026-10-30/31. **Decisions:**
-- D-29z634: round 278 closed (C PASS, gate 278 published `873d835`). SYS-5 is **მზადაა**.
-- D-29z635: the gate-278 and A/C notes are recorded (Lows deferred, info, architecture signals).
-- D-29z636: round 279 = b-ii-1. Stage b-ii is split (`tech-lead`): R216-MEM-POLLS-HEADROOM moves to b-ii-2 (round 280). Nothing is dropped.
-- D-29z637: the per-site wait rulings of §2.1.
-- D-29z638: PERF-1A-TIMEOUT-HEADROOM goes to root as ROOT-REQ-PERF-TIMEOUT (`b-round-278-root-request-perf-timeout.md`). A does not touch the timeout.
-- D-29z640: the equivalence contract of §2.5.
-- D-29z641: the outcome table of §11.
+**Planned by:** B, at the round 279 → 280 planning, 2026-10-31. **Decisions:**
+- D-29z642: round 279 closed (C PASS, gate 279 published `1dbf3af`). b-ii-1 is **მზადაა**.
+- D-29z643: the gate-279 and A/C notes are recorded (GATE279-S1 Medium → round 281; Lows deferred; info; architecture signals).
+- D-29z644: TIMEOUT-DATA goes to ROOT-REQ-PERF-TIMEOUT as data. It does not close.
+- D-29z645: round 280 = b-ii-2 only. Round 281 = GATE279-S1 + B-R280-CLICK-LIVE-LANE-ID + A-R279-REVIEW-LANE-NULL (`tech-lead`; `performance-optimizer` agrees on a separate round).
+- D-29z646: the design rulings of §2 (`heapPollMs` stays 50; R216 headroom measured, not claimed).
+- D-29z647: the equivalence contract of §2.5 (named exceptions only).
+- D-29z648: docs. New doc 209; L28 final stage, so 208 and 176 l.4 become `Completed (C round 280 PASS)` [K12].
+- D-29z649: the outcome table of §11.
 
-**Kind of round:** performance-harness, test-only. Reference-first, the AGREE note, the YouTube request, `product-designer` and the screen budget do not apply (policy 2026-10-27/28: "pure performance, refactor, test-only … rounds"). No app source changes. `oss-adoption.md` was read: no new dependency.
+**Kind of round:** performance-harness, test-only. Reference-first, the AGREE note, the YouTube request, `product-designer` and the screen budget do not apply (policy 2026-10-27/28: "pure performance, refactor, test-only … rounds"). No app source changes. `oss-adoption.md`: no new dependency.
 
-**Owner:** A (one implementer). **Verifier:** C. **Grants:** §5 and `b-round-278-r279-grants.txt`. **Frozen list:** `b-round-278-r279-tree-sha256.txt` (every tracked file except the grants).
+**Owner:** A (one implementer). **Verifier:** C. **Grants:** §5 and `b-round-279-r280-grants.txt`. **Frozen list:** `b-round-279-r280-tree-sha256.txt` (1136 files: every tracked file except the 7 tracked grant paths).
 
-## Baseline: HEAD `873d835`, clean tree
-`gates/gate-round-278.json` is `published`, commit `873d835`. At planning, `git status --short` was empty and `git ls-files | wc -l` was 1142 (`b-round-278/git-status-at-planning.txt`).
+## Baseline: HEAD `1dbf3af`, clean tree
+`gates/gate-round-279.json` is `published`, commit `1dbf3af`. At planning, `git status --short` was empty and `git ls-files | wc -l` was 1143 (`b-round-279/git-status-at-planning.txt`, `head-at-planning.txt`).
 
 ## 0. Read first
-1. `lessons.md`, every role. Especially L11, L23 (the deleted-export and `perf/**` grep-root clauses), L29, L30, L31, L34, L37 and **L38 (perf runs alone)**.
+1. `lessons.md`, every role. Especially L11, L23, L28, L29, L30, L34, L37 and **L38 (perf runs alone; a second dev server gets its own `cacheDir`)**.
 2. This task.
-3. B's sketch: `b-round-278/sketch.diff` (v2, §4).
+3. B's sketch: `b-round-279/sketch.diff` (apply with `patch -p1` from `store/`; it touches the two code/data files only, not the docs).
 
-**Primitives for A:** `AGENT_DISCOVERABLE_CODE.md` (new exports), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`; `.claude/prompts/new-test.md` does not apply (no new test file).
+**Primitives for A:** `AGENT_DISCOVERABLE_CODE.md` (new names), `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`. `.claude/prompts/new-test.md` does not apply (no new test file).
 
 ## 1. What changes, and why
-The three perf specs wait a fixed `idleSettleMs` (1000 ms) at several places outside their measurement windows [K1][K2] (GATE214-S1). A fixed wait either wastes time or, on a slow machine, lets late work spill into the next window. The deselect click picks the lane by the hard-coded id `'stems'` [K3] (GATE214-S2). The export spec installs its "WAV created" observer and starts its heap poll loop before the `try` whose `finally` releases them [K6] (GATE223-S2).
+R216-MEM-POLLS-HEADROOM (info): the liveness row `res.harness.mem-polls-1` counts 7–11 samples against an assert of `>= 5`. Today a heap sample counts only when its CDP request was **sent** after the window start and its response **received** before the window end [K4]. The window is converted to the epoch with the page's `performance.timeOrigin` [K3][K4], while the samples carry node `Date.now()` stamps [K2][K3]. So two clocks are compared, and a sample whose round trip straddles an edge is dropped even when it was read inside the window. `endSampleLagMs` mixes the same two clocks [K6].
 
-**B measured why a plain "quiet" wait is not enough after load** (`b-round-278/probe/load-tail.json`, 3 loads of the production build):
-- the readiness predicate commits at about 1.06–1.13 s;
-- the collection-ready status commits about 470–510 ms later ("Demo collection ready…").
+**What B measured at `1dbf3af`** (HEAD run `b-round-279/head-results-1/`, experiment `sketch-v1-experiment.diff` ×2, final sketch `mutants/SKETCH/`):
+- the node-to-page clock offset differs from `timeOrigin` by only −0.5 … −2.2 ms; the best probe round trip is 1–3 ms (both CPU rates);
+- the midpoint rule counts **0 to +2** more samples per export than the endpoint rule. The sum over the 12 exports of a run is +11, +12 and +11 in three runs;
+- at 1×, export 1 counts 9–10 against about 9.3–10.3 expected polls (window ÷ 50 ms); at 6× it counts 13–15 against about 21–22, because the CDP round trip under throttling is longer than 50 ms;
+- `res.export.1.peak-backing-delta-mib` moved 65 → 65.1 in two of three sketch runs: with the midpoint rule a sample just before the "WAV created" text can land inside the window, and its peak (`windowPeakMib` 65.1) is above the end sample (65). `res.export.2.peak-backing-delta-mib` stayed 129.9. HEAD's own 6× row already showed 65.1 once.
 
-The 200 ms quiet window returns between the two. B's sketch v1 used it and the late status commit landed in the Add window: `harness.hook-live` and `interact.harness.hook-live` went from 2 to 3, and `res.mem.used-ready-mib` became nondeterministic (5.6–5.8 against 5.3) (`b-round-278/sketch1-results/`). The fixed 1000 ms had been hiding this. Sketch v2 waits for the collection-ready status text, then for quiet (§2.1).
+So the honest result is: this round makes the window **correct** (one clock, both edges handled the same way, a named problem when the clock probe is bad) and adds the data that shows the headroom. It does **not** create much headroom: about +1 sample per export. R216 stays open as a watch with this data (D-29z646). `heapPollMs` stays 50 (both consults): a shorter period doubles the CDP work on the main thread inside the window that `wall-ms`, `longtask-*` and `loaf-blocking-max` measure, and it would not make the peak more deterministic.
 
 ## 2. The contract
-### 2.1 Fixed waits: one ruling per site (D-29z637) [K1]
-| Site at HEAD | Ruling | After |
-|---|---|---|
-| 1a l.574, 1b-i l.637 (after load) [K1] | replace | `waitForCollectionReady(page, result.problems, 'after load')` |
-| 1b-ii l.524 (after load, before the forced GC and the ready-heap read) [K1] | **keep** | B measured that `res.mem.used-ready-mib` depends on the time since load: 5.3 at HEAD, 5.6–5.8 with a quiet wait (v1), 5.9–6.0 with the status wait (v2). The fixed 1000 ms is part of that measurement's definition, so it stays. Sketch v3 keeps it, and 1b-ii is then equivalent (§4) |
-| 1a l.668 (after Play, before the group fader) [K1] | replace | `waitForPlaybackSettled(page, result.problems, 'play for fader.group.playing')` |
-| 1b-i l.703 (after Play with 30 clips, before the fade drag) [K1] | replace | `waitForPlaybackSettled(page, result.problems, \`play with ${clipsTarget} clips\`)` |
-| 1b-ii l.279 (300 ms after the export dialog's primary is enabled, before the click) [K1] | replace | `waitForStudioQuiet(page, result.problems, \`export ${clips}: dialog open\`)` |
-| 1a l.579 (2000 ms after the Add click) [K1] | **keep** | It defines the `harness.hook-live` window [K13]. `tech-lead` (keep; doc 168's hygiene ruling [K15]) over `performance-optimizer` (replace as a named exception): keep, so this round has no named exception |
-| 1a l.597 (1 s after Play, before the 5 s idle window) [K1] | **keep** | It defines where the `play.idle-*` window starts; the spec sequence and `budgets.json` notes say "1 s settle" [K10]. Both consults: keep |
-| 1a l.600 [K1] | **keep** | It is the idle measurement window itself |
-| 1b-ii l.180 (300 ms after forced GC) [K1] | **keep** | GC completion has no page-side signal |
-| 1b-ii l.342 (`observerSettleMs` after the export window) [K1] | **keep** | A flush wait after the window closes; it feeds only wallclock long-task/LoAF rows. `performance-optimizer` proposed a double-rAF replacement; not adopted, because a rAF does not guarantee that buffered observer callbacks have run |
-| 1b-ii l.659, `page.ts` l.40/l.53 [K1] | out of scope | poll intervals, not settles |
+### 2.1 Clock probe (D-29z646)
+Two new module constants, next to `passGuardMs`: `clockProbeCount = 5` and `clockProbeMaxRttMs = 20`.
 
-`idleSettleMs` stays declared in all three specs [K2]: 1a l.597, 1b-i l.527, 1b-ii l.524 [K16].
+`interface PageClock { offsetMs: number; rttMs: number }` and `async function probePageClock(page)` (module-local, not exported):
+- 5 probes in a row: `sentAt = Date.now()`, `pageNow = await page.evaluate(() => performance.now())`, `receivedAt = Date.now()`;
+- keeps the probe with the smallest `receivedAt − sentAt`, and its `offsetMs = (sentAt + receivedAt) / 2 − pageNow`, so a node stamp `x` is `x − offsetMs` on the page clock;
+- throws `the page clock probe took no reading` if it has none.
 
-### 2.2 New helpers in `perf/lib/page.ts`
-- `QuietWaitResult { at: number; capped: boolean }` and `waitForQuietState(page, from, minMs)`: the old `waitForQuiet` loop, which also reports whether it stopped because the 3 s cap was hit [K7]. The quiet test, cap and poll interval are unchanged.
-- `waitForQuiet(page, from, minMs)` keeps its signature and returns `waitForQuietState(...).at`. Every existing caller is unchanged.
-- `waitForStudioQuiet(page, problems, label)`: quiet from now with `minMs` 0. If the cap was hit it pushes `${label}: no 200 ms without commits or start() calls within 3000 ms` to `problems`. A cap hit is never silent.
-- `waitForCollectionReady(page, problems, label)`: `expect(getByTestId('arrangement-status')).toHaveText(perfCollectionReadyPattern, { timeout: 15000 })`, then `waitForStudioQuiet`.
-- `waitForPlaybackSettled(page, problems, label)`: `expect.poll(() => isPlaying(page), { timeout: 15000 }).toBe(true)`, then `waitForStudioQuiet`.
+In `measureExport` it runs once per export, inside the `try`, right after the `timeOrigin` read [K3] and **before** the poll loop starts. No probe runs inside the export window (`tech-lead`). If `clock.rttMs > clockProbeMaxRttMs`, push exactly `` `export ${clips}: the page clock probe's best round trip was ${clock.rttMs} ms (limit ${clockProbeMaxRttMs} ms)` `` to `result.problems`. Never fall back silently to another offset.
 
-`perf/lib/app-labels.ts` exports `perfCollectionReadyPattern`: `^` + the escaped `workspaceCollectionCopy('demo').ready`, imported from `app/lib/arrangement/collection.ts` [K14]. The pattern is anchored at the start because `settledCollectionStatus` may append text after the ready sentence [K14]. The status line has one `data-testid="arrangement-status"` [K17]. The status text is never written into the harness by hand.
+### 2.2 Window rule
+`function heapSamplesInWindow(samples, offsetMs, from, to)` (module-local): keeps a sample when `midpoint = (sentAt + receivedAt) / 2 − offsetMs` satisfies `from <= midpoint && midpoint <= to`. `measureExport` calls it with `clock.offsetMs`, `t0` and `windowEnd` [K7]. `inWindow` (the mem-polls value and the peak input) is its result.
 
-### 2.3 GATE214-S2: the deselect lane (D-29z254, re-ruled here)
-`emptyLanePoint(page, 'stems')` [K3] becomes `emptyLanePointAfterClip(clip)`:
-- it starts from `clip.closest('[data-track-id]')`;
-- it walks the `[data-track-id]` lanes in DOM order **after** that lane, skipping a lane that contains or is contained by it;
-- it uses the same probe as before: an `elementFromPoint` scan every 8 px at the lane's middle y, right half of the window only, not inside a clip, button, input or slider;
-- it throws if no later lane has such a point, and also if the chosen lane is the clip's own lane.
+**Unchanged** (`tech-lead` hard limits): `t0`, `t1`, `windowEnd`, `wall-ms` [K7]; the observer install and release; `observerSettleMs` [K1]; `snapshot`/`blockingFramesIn`; `readyBackingBytes`; `heapPollMs` 50 [K1]; the poll loop body; the `< 5` problem text and the no-peak problem text [K5]; every other row.
 
-B's probe at `873d835` (`b-round-278/probe/lane.json`): the DOM order is video, music, stems, sfx. Add lands on music, which has no free right-half point. The first later lane with one is stems (x 724 at 1440×900, x 644 at 1280×720). So behaviour is unchanged, and the 1b-i sequence text "empty Stems lane click" [K4] and the `budgets.interactions.json` note stay true and unchanged (D-29z640).
+### 2.3 Detail fields (detail only; no row field changes)
+The `mem-polls-${clips}` detail [K5] becomes, in this order: `errors`, `allSamples` (both unchanged), `endpointRule` (the count the HEAD rule [K4] gives on the same samples; keep `windowStartEpoch`/`windowEndEpoch` for it), `clockOffsetMs` (`roundTo(clock.offsetMs − timeOrigin, 2)`), `clockRttMs`, `expectedPolls` (`roundTo((windowEnd − t0) / heapPollMs, 1)`).
 
-The old `emptyLanePoint` is deleted. It has no other caller in `perf`, `app` or `e2e` [SW-A].
+`clockOffsetMs` is the probe's offset **minus `performance.timeOrigin`**, so it reads as a small number (B: −0.5 … −2.2 ms). It is a diagnostic of how far the probe and `timeOrigin` disagree; it is **not** the value the filter uses (the filter uses the epoch-sized `clock.offsetMs`).
 
-### 2.4 GATE223-S2: release on every path [K6]
-In `measureExport` (1b-ii), the observer install, the `timeOrigin` read, the poll-loop start and the download listener move inside the `try` whose `finally` releases them. Their order is unchanged: install → `timeOrigin` → poll loop → download listener → click.
-- `pollLoop` is declared before the `try` as `let pollLoop: Promise<void> = Promise.resolve();` and assigned inside it.
-- `let observerInstalled = false;` is set to `true` right after the install `evaluate` resolves.
-- The `finally` reports `the "WAV created" observer was not released` only when `observerInstalled && !released`.
+`endSampleLagMs` [K6] becomes `roundTo(endSentAt − clock.offsetMs − windowEnd, 0)`: one clock. It is a detail field. Because `clock.offsetMs` differs from `timeOrigin` by about the probe RTT, the expected shift against HEAD is ≤ 3 ms; values staying about 30–60 ms (B's runs: 33–59) is the evidence that nothing else moved. A 1–3 ms difference is not a defect.
 
-`performance-optimizer` found the wider leak: a throw between the old install and the old `try` also left the poll loop polling `cdp` every 50 ms after the context closed.
+### 2.4 Budget notes (`perf/budgets.resources.json`, the `note` field only, exact text)
+- The four `peak-backing-delta-mib` rows [K8][K9]: replace the phrase `polled in the window (at most every 50 ms) plus one window-end sample` with `over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample`. The rest of each note is unchanged.
+- The four `mem-polls` rows [K8][K9]: replace `Valid backingStorageSize samples polled in the export window. Timing-dependent poll count, so wallclock (round 217, D-29z219); observed across A and C runs in round 216: N–M.` with `Valid backingStorageSize samples whose request-response midpoint, on the page clock, falls in the export window (round 280). Timing-dependent poll count, so wallclock (round 217, D-29z219); observed ranges are in doc 209.` The `1x pass. ` / `6x pass (CPU throttle on after ready and Add). ` prefix is unchanged.
 
-### 2.5 Equivalence contract (D-29z640)
-**Oracle:** `b-round-278/baseline-results/latest*.json`. This is B's run at `873d835` on a `git archive`: 3/3 pass in 15.2 min. 1b-i took 5.5 min, 1b-ii 1.1 min and 1a 8.4 min. `complete` is true, `failures` and `problems` are empty. Its 1a (166) and 1b-i (106) deterministic medians are identical to `c-round-259/latest*.json`. Its 1b-ii differs from round 259 only in 3 DOM rows and 4 JS-bytes rows, moved by app rounds 260–278.
+`id`, `kind`, `mode`, `budget`, `owner` of every row are unchanged [K9] (`>= 5` stays).
 
-**Pass on A's tree:** run `python3 -I ../tmp/studio-real-loop/b-round-222/scripts/equiv-check.py <oracle> <new>` from `store/`, for each of the three reports. Each must exit **0 with 0 problems**:
-- same envelope (sequence included), row ids and order, and row fields (`note` included);
-- every deterministic median identical;
-- every assert row's pass identical;
-- `complete: true`, `failures: []`, and no pass with `abortedAt`, `pageErrors` or `problems`.
+### 2.5 Equivalence contract (D-29z647)
+**Oracle:** `b-round-279/head-results-1/latest-resources.json` (B's HEAD run at `1dbf3af`, 1 passed, 1.3 min). A's and C's round-279 `latest-resources.json` ran the same perf code (`cmp`-equal), so they are same-code witnesses for the wallclock ranges.
 
-**There is no named exception.** A deterministic row that moves is a STOP (§10), not a re-baseline. b-ii-2 owns the re-baseline of the export window.
+**Pass on A's tree:** from `store/`:
 
-**Same-machine HEAD re-run clause** (the round-223 rule, `consults_round_223`): each cloud job runs on a fresh machine, and B measured that `res.mem.used-ready-mib` shifts with half a second of timing. A deterministic difference counts against A only if a `git archive 873d835` run **on the same machine** reproduces the oracle's value for that row. Run it alone (L38), with the same command, and give it its own Vite `cacheDir` if a dev server is involved (L38). If HEAD reproduces A's value instead, the row is machine-sensitive: record it as data, not a FAIL, and it becomes a candidate for b-ii-2's exception list.
+```
+python3 -I ../tmp/studio-real-loop/b-round-279/scripts/equiv-check-b2.py <oracle> <new latest-resources.json> \
+  --note-exempt res.export.1.peak-backing-delta-mib res.export.2.peak-backing-delta-mib res.export.1.peak-backing-delta-mib.6x res.export.2.peak-backing-delta-mib.6x res.harness.mem-polls-1 res.harness.mem-polls-2 res.harness.mem-polls-1.6x res.harness.mem-polls-2.6x \
+  --tol res.export.1.peak-backing-delta-mib=0.1 res.export.2.peak-backing-delta-mib=0.1
+```
+
+It must exit **0 with 0 problems**: envelope and sequence identical, row ids and order identical, every row field identical except the 8 named notes, every deterministic median identical except the two named ±0.1 tolerances, every assert pass identical, `complete: true`, `failures: []`, and no pass with `abortedAt`, `pageErrors` or `problems`. B's sketch: 0 problems, 1 tolerated (`65 → 65.1`) (`b-round-279/precheck-equiv-mutants.txt`). The script was proven on the sketch and on MU-ORIGIN (rc 0) and fails without the exceptions (`precheck-equiv-strict.txt`: 9 problems, the 8 notes and the 65.1).
+
+The new notes must equal §2.4 byte for byte (EQUIV checks the other fields; C's BUDGET-NOTES row checks these).
+
+**PERF-1a and PERF-1b-i are not affected:** only the resources spec reads `budgets.resources.json`, and no other spec or config imports the resources spec [K18]; `perf/lib/**` is frozen. They are not re-run by A or C.
+
+**Same-machine HEAD re-run clause** (round-223 rule): a deterministic difference outside the two tolerances counts against A only if a `git archive 1dbf3af` run of 1b-ii **on the same machine** reproduces the oracle's value. Run it alone (L38). If HEAD reproduces A's value instead, the row is machine-sensitive: record it as data, not a FAIL.
 
 ## 3. Consults and rulings
-- **`tech-lead`:**
-  - helpers in `page.ts` as a thin wrapper over `waitForQuiet`, returning `capped`;
-  - keep l.579, and rule l.597 [K1];
-  - no new unit rows, because `vitest.config.ts` includes `app/**` only [K9] (ROOT-REQ-VITEST-PERF-INCLUDE stays open);
-  - grants, and the frozen config and budgets;
-  - **split (b) into its own round**;
-  - the poll loop is also before the `try`;
-  - file the timeout request now;
-  - architecture signal B-R279-PERF-READY-WAIT-DUP (recorded, not scheduled).
-- **`performance-optimizer`:**
-  - the per-site table;
-  - the poll-loop leak and the installed flag;
-  - the lane guard;
-  - "filter `kind` deterministic, then compare";
-  - the mutant ideas;
-  - 25 min for the timeout;
-  - the b-ii-2 design (clock-offset probe, sample midpoints, keep ≥ 5).
-- **Disagreements:**
-  - **l.579:** keep (tech-lead) [K1].
-  - **l.342:** keep (B, reason in §2.1) [K1].
-  - Both are recorded in `backlog.json` `consults_round_279`.
+- **`tech-lead`:** 280 = b-ii-2 only; GATE279-S1, the click-live lane id and the "lane null" text go to 281 (three tightly related harness-diagnostics bugs in `page.ts` and the interactions spec). New doc 209. Grants: the resources spec and its budgets plus docs, no `perf/lib/**`. Hard limits of §2.2. Probe before the poll loop, never inside the window; smallest RTT; named problem on a bad probe. `heapPollMs` stays 50. Mutants: sign flip, endpoint rule restored, probe throws.
+- **`performance-optimizer`:** the probe and the midpoint predicate; `heapPollMs` stays 50; expected movement 0 at 1×; the midpoint rule adds only about RTT/50 polls per edge, so R216 stays open; live mutants are weak except the sign flip; notes from A's run, C extends.
+- **Disagreements, settled by measurement (D-29z646):**
+  - headroom: `tech-lead` expected the window fix to give headroom, `performance-optimizer` about +1. B measured +0…+2 per export (sum +11/+12/+11 per run): `performance-optimizer` is right; R216 stays a watch.
+  - peak movement: `performance-optimizer` expected 0 and proposed dropping the ±0.1. B measured 65 → 65.1 in two of three sketch runs (`windowPeakMib` 65.1): the ±0.1 stays, for the two 1× rows only.
+  - `tech-lead`'s "offset forced to 0 stays green" control does not hold: the offset is an epoch value, so 0 drops every sample. B's control is MU-ORIGIN (offset = `timeOrigin`, the HEAD conversion): green with the same counts.
 - **Advisor:** used before writing.
 
 ## 4. B's pre-check (L23: the sketch is pre-applied and measured)
-B applied all of §2 to a `git archive` copy of `873d835` (`/tmp/b278-sketch`, node_modules symlinked), saved as `b-round-278/sketch.diff`.
+B applied §2.1–2.4 to a `git archive 1dbf3af` copy (`/tmp/b279-sketch2`, node_modules symlinked), saved as `b-round-279/sketch.diff`. `npx tsc --noEmit -p .` rc 0. Every run below ran alone (L38); the consults were read-only and ran no jobs.
 
-**Sketch v1** (quiet-only wait after load):
-- `tsc` rc 0;
-- perf 3/3 run: 1a and 1b-i passed, and 1b-ii failed its own determinism check on `res.mem.used-ready-mib` (`b-round-278/sketch-perf-run.log`);
-- equiv-check against the oracle: 1a 1 problem and 1b-i 1 problem (`hook-live` 2 → 3); 1b-ii 2 problems (`used-ready-mib`). Every other deterministic row was identical, including `fader.group.playing.*`, `interact.drag.fade.30.playing.*`, the export rows after the dialog-open wait, and the clip-click rows after the lane change.
+| Run | Result | Evidence |
+|---|---|---|
+| HEAD 1b-ii | 1 passed (1.3 min); oracle | `b-round-279/head-results-1/`, `head-res-run1.log` |
+| Experiment v1 ×2 (same rule, diagnostic names) | passed ×2; offset −0.5…−1.5 ms, RTT 1–2 ms; +0…+2 per export; run 2 1× peak 65.1 ×3 | `sketch-v1-experiment.diff`, `sketch1-results-{1,2}/` |
+| SKETCH (final) | 1 passed (1.3 min); EQUIV-B2 0 problems, 1 tolerated; Σ(value − endpointRule) = 11 | `mutants/SKETCH/`, `precheck-equiv-mutants.txt` |
+| MU-SIGN | red: every mem-polls 0, 32 failures, problems `only 0 valid backingStorageSize samples` + `no peak` | `mutants/MU-SIGN/` |
+| MU-RTT | red: 12 failures, problem `the page clock probe's best round trip was 1 ms (limit -1 ms)` in every export | `mutants/MU-RTT/` |
+| MU-ENDPOINT | passes the specs (as expected), but Σ(value − endpointRule) = **0** | `mutants/MU-ENDPOINT/` |
+| MU-ORIGIN (control) | green: EQUIV-B2 0 problems, Σ = 12 | `mutants/MU-ORIGIN/` |
+| MU-PROBE-THROW | red: every pass `abortedAt` `export 1 clip`, problems only `aborted at export 1 clip: MU-PROBE-THROW` (no `was not released`) | `mutants/MU-PROBE-THROW/` |
 
-That result is why §2.1 uses `waitForCollectionReady` after load.
+Runner: `b-round-279/scripts/run-mutant.sh <ID>` (git archive + `sketch.diff` + the mutant; edit `DIFF=` to A's diff to reuse it). Σ is printed by `b-round-279/scripts/mempolls-diff.py <latest-resources.json>`.
 
-**Sketch v2** (status wait after load at all three load sites):
-- `tsc` rc 0, and perf 3/3 pass in 15.0 min (1b-i 5.4, 1b-ii 1.1, 1a 8.2 min) (`b-round-278/sketch2-perf-run.log`);
-- equiv-check: 1a **0 problems** and 1b-i **0 problems** (`sketch2-results/`). `hook-live` is back to 2;
-- 1b-ii had 1 problem: `res.mem.used-ready-mib` 5.3 → 5.9–6.0.
-
-**Sketch v3 = this task's sketch** (v2 with 1b-ii l.524 kept, §2.1) [K1]:
-- `tsc` rc 0;
-- 1b-ii re-run alone: 1 passed, equiv-check **0 problems** (`sketch3-perf-run.log`, `sketch3-results/`);
-- 1a and 1b-i are byte-identical between v2 and v3, so their v2 results stand.
-
-The final files are in `b-round-278/sketch-final/`, and `sketch.diff` is regenerated from them.
-
-**Mutants B ran on v3** (scratch copies, removed afterwards; logs `b-round-278/mutant-*.log`):
-- **MU-OBS-2: red.** Both passes shown: `abortedAt` `export 1 clip`, problems `the "WAV created" observer was not released`.
-- **MU-OBS-3, the control: green.** Only `aborted at export 1 clip: MU-OBS-2`.
-- **MU-LANE: red.** `abortedAt` `clip click`: "no lane after the clip's lane music has an empty timeline point".
-
-MU-READY, MU-CAP and MU-PLAY are left to A and C.
-
-**Re-measurement (policy: "re-measures"):** B's HEAD run (§2.5) is the oracle. PERF-1a took 8.4 min at HEAD and 8.2 min on the sketch, so the state waits save about 2 % (`performance-optimizer` estimated about 3 %).
-
-## 5. Grants (exact; also in `b-round-278-r279-grants.txt`)
+## 5. Grants (exact; also in `b-round-279-r280-grants.txt`)
 | Path | What may change |
 |---|---|
-| `perf/lib/page.ts` | §2.2 helpers; `waitForQuiet` becomes the wrapper. The import line from `./app-labels`. Nothing else |
-| `perf/lib/app-labels.ts` | the `workspaceCollectionCopy` import and `perfCollectionReadyPattern` (§2.2). Nothing else |
-| `perf/studio-lab.perf.spec.ts` | the l.574 and l.668 replacements and the import list |
-| `perf/studio-lab-interactions.perf.spec.ts` | the l.637 and l.703 replacements, §2.3 (`emptyLanePoint` → `emptyLanePointAfterClip` and its call), the import list |
-| `perf/studio-lab-resources.perf.spec.ts` | the l.279 replacement, §2.4, the import list. l.524 and `idleSettleMs` stay |
-| `docs/implementation/2026/quarter-IV/208-perf-harness-state-waits.md` | new [K11]. l.4 exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 279 PASS)` (L28 multi-stage). The seven TEMPLATE headings (L26). Every cited row or mutant id exists in this task |
-| `docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md` | the whole `### Helper-ების რუკა (\`perf/lib/page.ts\`)` section (L34: the new helpers), the whole `### GATE214-S2: …` section (now done in round 279), and the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` |
-| `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only |
-| `docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only (GATE223-S2 done; R216 → b-ii-2) |
-| `docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only |
+| `perf/studio-lab-resources.perf.spec.ts` | §2.1–2.3 only: the two constants, `PageClock`/`probePageClock`/`heapSamplesInWindow`, and inside `measureExport` the probe and its problem, the window filter, the mem-polls detail and `endSampleLagMs` |
+| `perf/budgets.resources.json` | the `note` field of the 8 rows of §2.4, to the exact texts |
+| `docs/implementation/2026/quarter-IV/209-perf-export-window-page-clock.md` | new [K11]. l.4 exactly `**სტატუსი:** Completed (C round 280 PASS)`. The seven TEMPLATE headings (L26). It records: the rule, the probe, B's and A's measurements (offset, RTT, Σ, the mem-polls ranges of A's run per row, the peak values), why `heapPollMs` stays 50, R216's residual risk, the mutants with A's results, and in TODO round 281's three items and the two architecture signals (A-R279-ARCH-IDLESETTLE-ROLES, GATE279-ARCH-COPY-STRINGS). Every cited id exists in this task or in `backlog.json` |
+| `docs/implementation/2026/quarter-IV/208-perf-harness-state-waits.md` | l.13 (the b-ii split sentence) stays: it describes history. l.4 → exactly `**სტატუსი:** Completed (C round 280 PASS)` (L28 final stage) [K12]; the TODO bullet at l.85 (b-ii-2 done, doc 209) and the one at l.88 (the lane id goes to round 281, B-R280-CLICK-LIVE-LANE-ID) [K15][K17] |
+| `docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md` | l.4 → exactly `**სტატუსი:** Completed (C round 280 PASS)` (L28: b-i was stage 1 of b; b-ii-2 is its last stage) [K12]; the b-ii TODO bullet at l.153 [K15] |
+| `docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md` | the whole `### Export-ის მეტრიკები` section, l.30–41 (L34: the `peak-backing-delta-mib` and `mem-polls-N` rows describe the window rule) [K16][SW-C]; the b-ii TODO bullet at l.213 [K15] |
+| `docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md` | the b-ii TODO bullet at l.132 only [K15] |
+| `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md` | the b-ii TODO bullet at l.253 only [K15] |
 
-**Frozen:** the manifest is the authority. It includes all of `app/**` (no app change: `collection.ts` is imported, never edited), `perf/budgets*.json`, `perf/lib/{report,determinism,instrumentation,budgets,stats}.ts`, `perf/lib/report.test.ts`, `playwright.perf.config.ts`, `vitest.config.ts`, `package.json` and `package-lock.json`. **No `test.setTimeout` anywhere** (D-29z638).
+**Frozen:** the manifest is the authority. It includes all of `app/**`, `perf/lib/**` (including `page.ts`: GATE279-S1 is round 281), the other two perf specs, `perf/budgets.json`, `perf/budgets.interactions.json`, `playwright.perf.config.ts`, `vitest.config.ts` [K13], `package.json`, `package-lock.json`. **No `test.setTimeout` anywhere.**
 
 **Protected auth/purchase (never touched):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token*`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`.
 
 ## 6. Tests
-There is no vitest change: `perf/**` is outside the vitest include [K9]. The proof is the real perf run, the equivalence check and the named mutants.
+No vitest change: `perf/**` is outside the vitest include [K13]. A pure-function unit test for `heapSamplesInWindow` was considered (`performance-optimizer`) and not adopted: it would run only under a scratch config while ROOT-REQ-VITEST-PERF-INCLUDE is open, and the live mutants below give observable signals. The proof is the real perf run, EQUIV-B2 and the named mutants.
 
 ### 6.1 What A runs (speed rules; L38: perf alone, nothing else running)
 1. `npm run typecheck` (it covers `perf/**`; Biome does not, L30) and `npm run lint` (app scope, should be unchanged).
-2. `CI=true npx playwright test --config playwright.perf.config.ts` once on the final tree, **alone**. Then the three `equiv-check.py` runs of §2.5. Report each spec's time from the Playwright list lines.
-3. The mutants of §6.2, each on a scratch copy outside `store/` (the a-round-223 method: `git archive` + A's diff + the mutant, node_modules symlinked). Run only the spec named in the row. A spec may be stopped once its first pass's report shows the red signal (the report is written after every pass).
+2. `CI=true npx playwright test --config playwright.perf.config.ts studio-lab-resources` on the final tree, **alone**, **twice** (two reports for the doc-209 ranges). EQUIV-B2 (§2.5) on each. `mempolls-diff.py` on each.
+3. The mutants of §6.2 on scratch copies outside `store/` (`run-mutant.sh` with `DIFF=` A's diff). Run only 1b-ii.
 4. `code-reviewer` (more than 3 files). Pass its Architecture note to B.
 
-**L31:** the harness test is above 50 % of its 15-min timeout (1a 8.4 min = 56 %). This is ruled: ROOT-REQ-PERF-TIMEOUT is filed, and this round adds no row and no pass. It is not a STOP for A unless 1a goes **above 9.4 min** (more than 1 min over B's run). Report the time either way.
+### 6.2 Named mutants (signals fixed in advance)
+| Id | Mutant (scratch only) | Signal |
+|---|---|---|
+| MU-SIGN | in `heapSamplesInWindow`, `- offsetMs` → `+ offsetMs` | red: every `mem-polls` sample 0; problems `export 1: only 0 valid backingStorageSize samples in the window (0 invalid)` and `export 1: no peak (0 window samples, end sample read)` |
+| MU-RTT | `clockProbeMaxRttMs = -1` | red: every export has the problem `the page clock probe's best round trip was N ms (limit -1 ms)` |
+| MU-ENDPOINT | `inWindow` = the HEAD endpoint filter | specs pass; `mempolls-diff.py` Σ(value − endpointRule) = **0**. On A's tree Σ must be **≥ 3** (B: 11, 12, 11) |
+| MU-ORIGIN (control) | `heapSamplesInWindow(heapSamples, timeOrigin, …)` | green: EQUIV-B2 0 problems; Σ ≥ 3. Shows the probe agrees with `timeOrigin` within a few ms |
+| MU-PROBE-THROW | `throw new Error('MU-PROBE-THROW')` as the first statement of `probePageClock` | red: every pass `abortedAt` `export 1 clip`; problems contain `MU-PROBE-THROW` and **no** `was not released` |
 
-### 6.2 Named mutants (each must be red; the signal is fixed in advance)
-| Id | Mutant (scratch only) | Spec to run | Red signal |
-|---|---|---|---|
-| MU-READY | `perfCollectionReadyPattern` built from `.empty` instead of `.ready` (a copy the demo never shows; `.loading` is not used, because the status can still read the loading text when the wait starts, so it could match at once) | 1b-i | pass 1 `abortedAt` = `load` (the `toHaveText` times out after 15 s) |
-| MU-CAP | in `waitForQuietState`, the evaluate argument `quietFor: quietMs` → `quietFor: 10000` (no window can be quiet; every wait runs to its 3 s cap) | 1b-ii | pass 1 `problems` contains `export 1: dialog open: no 200 ms without commits or start() calls within 3000 ms` |
-| MU-PLAY | `waitForPlaybackSettled` polls `.toBe(false)` | 1b-i | pass 1 (1×) `abortedAt` = `play with 30 clips` |
-| MU-LANE | `emptyLanePointAfterClip` walks only `[ownLane]` | 1b-i | pass 1 `abortedAt` = `clip click`, and the error text names `music` |
-| MU-OBS-1 | `throw new Error('MU-OBS-1')` right after `observerInstalled = true;` | 1b-ii | pass 1 `abortedAt` = `export 1 clip`, and `problems` has **no** `was not released` (the `finally` released it) |
-| MU-OBS-2 | MU-OBS-1's throw moved to the first line of the `try`, **and** `observerInstalled &&` removed from the `finally` | 1b-ii | `problems` **has** `was not released` (proves the flag) |
-| MU-OBS-3 | MU-OBS-2's throw with the flag kept (A's code) | 1b-ii | `problems` has **no** `was not released`; this is the control for MU-OBS-2 |
-
-MU-OBS-3 is a control, not a mutant, and must be green on that line. "Delete the wait" mutants are not used; on a fast runner they can stay green (advisor).
-
-## 7. B's claims and sweeps (L29). Run `bash ../tmp/studio-real-loop/b-round-278/claims.sh` from `store/` at HEAD `873d835`
-B's output is `b-round-278/claims-output-at-873d835.txt`.
+## 7. B's claims and sweeps (L29). Run `bash ../tmp/studio-real-loop/b-round-279/claims.sh` from `store/` at HEAD `1dbf3af` (or a clean archive)
+B's output is `b-round-279/claims-output-at-1dbf3af.txt` (identical on `store/` and on the archive).
 
 | Tag | What | Expected |
 |---|---|---|
-| K1 | `waitForTimeout(` in `perf/*.ts`, `perf/lib/*.ts` | 14 lines: interactions l.637/l.703; resources l.180/l.279/l.342/l.524/l.659; 1a l.574/l.579/l.597/l.600/l.668; page.ts l.40/l.53 |
-| K2 | `const idleSettleMs` | interactions l.45, resources l.50, 1a l.50 |
-| K3 | `emptyLanePoint(` | definition l.188; the call l.467 with `'stems'` |
-| K4 | sequence text "empty Stems lane click" | interactions l.58 |
-| K5 | `perfFixtureTracks` | music, stems, sfx (app-labels l.96–98) |
-| K6 | resources: `new MutationObserver` l.287, `const timeOrigin =` l.296, `const pollLoop =` l.301, the export `try {` l.321, `was not released` l.445 | as listed |
-| K7 | `waitForQuiet` returns on the cap as if quiet | page.ts l.48 (`… \|\| now - start >= cap`), l.52 |
-| K8 | perf timeout | `playwright.perf.config.ts` l.10, 15 min |
-| K9 | vitest include | `app/**/*.test.{ts,tsx}` only |
-| K10 | `budgets.json` notes with "1 s settle", "2 s after the Add" or 2000 | count 4 |
-| K11 | last doc in quarter-IV | `207-sys-5-disabled-reasons-stage-2.md` |
-| K12 | docs that describe these waits | 163, 168, 169, 175, 176 |
-| K13 | the 1a hook-live window | l.579 `waitForTimeout(2000)` |
-| K14 | `collection.ts`: `ready:` copy lines and the prefix-append branch | l.19 (demo `ready:`), l.33 (purchased), l.60 (`${settled} ${current.slice(…)}`), l.65 `workspaceCollectionCopy` |
-| K15 | doc 168's ruling on the 1a Add wait | doc 168 l.209: the `waitForTimeout(2000)` after Add is the `harness.hook-live` window and stays |
-| K16 | every `idleSettleMs` use | 11 lines (interactions l.45/527/637/703; resources l.50/524; 1a l.50/81/574/597/668) |
-| K17 | the status testid in `app/components` | 1 |
-| SW-A | `emptyLanePoint\|idleSettleMs\|waitForQuiet\b` in `perf`, `app`, `e2e` outside the specs and `page.ts` | 0 hits |
-| K-LANE | browser recipe, `b-round-278/probe/lane.cjs` (run with `NODE_PATH=$PWD/node_modules` from `store/`) | `lane.json`: lanes video, music, stems, sfx; the clip on music; the first later empty lane is stems at both viewports |
-| K-TAIL | browser recipe, `b-round-278/probe/load-tail.json` (the probe spec is kept as `/tmp/b278-probe/zz-probe.perf.spec.ts`, copy in `b-round-278/probe/`) | ready commit at ~1.06–1.13 s, status commit 470–510 ms later, 0 `start()` calls |
+| K1 | `heapPollMs`, `observerSettleMs` | l.52 (50), l.59 (200) |
+| K2 | `HeapSample` | l.106–109: `sentAt`, `receivedAt`, `backingBytes` |
+| K3 | `timeOrigin` read, poll-loop `Date.now()` stamps | l.305, l.309, l.313 |
+| K4 | epoch window and the endpoint filter | l.382, l.383, l.385 |
+| K5 | mem-polls `putLive`, `< 5` problem, no-peak problem | l.387, l.391, l.409 |
+| K6 | `endSampleLagMs` against `windowEndEpoch` | l.404 |
+| K7 | `t0`, `windowEnd`, `wall-ms` | l.355, l.356, l.365 |
+| K8 | budget-note phrases | 4 peak-backing notes with `polled in the window (at most every 50 ms) plus one window-end sample`; 4 mem-polls notes with `observed across A and C runs in round 216: N–M.` |
+| K9 | the 8 rows' kind/mode/budget | 1× peak-backing deterministic record; 6× peak-backing wallclock record; 4 mem-polls wallclock assert `>= 5` |
+| K10 | the resources spec does not call `waitForCollectionReady` | 0 |
+| K11 | last doc in quarter-IV | `208-perf-harness-state-waits.md` |
+| K12 | `In Progress (stage` lines | doc 176 l.4 and doc 208 l.4 only |
+| K13 | vitest include | `app/**/*.test.{ts,tsx}` only |
+| K14 | docs that name mem-polls or the window rule | 168, 169, 175, 176, 208 |
+| K15 | b-ii TODO bullets | 168 l.253, 169 l.213, 175 l.132, 176 l.153, 208 l.85 |
+| K16 | doc 169 headings | `### Export-ის მეტრიკები` l.30, next heading l.42 |
+| K17 | doc 208 D-29z254 leftover | l.88 |
+| SW-B | names this round adds, roots `perf`, `app`, `e2e` | 0 hits at HEAD; on A's tree only in the resources spec |
+| SW-C | consumers of `allSamples` / `endSampleLagMs` outside the spec, roots `perf`, `app`, `e2e`, `docs` | 1 hit: doc 169 l.38 (granted section) |
+| K18 | readers of `budgets.resources.json` and importers of the resources spec, roots `perf`, `playwright*.ts` | 1 hit: the resources spec itself, l.43 |
 
 **Focus origins (L50):** not applicable. No app code, no focus change.
 
 ## 8. C rows (C runs nothing else while a perf spec runs, L38)
 | Row | Check |
 |---|---|
-| SOURCE-SCOPE | `sha256sum -c b-round-278-r279-tree-sha256.txt` rc 0. `git status --short` lists only §5 paths (1 `??`: doc 208) |
-| HUNK-SCOPE | the five perf code files (`page.ts`, `app-labels.ts` and the three specs) equal `b-round-278/sketch.diff` applied to `873d835`. Formatting may differ (Biome does not cover `perf/`); state any semantic difference. The doc hunks stay inside the §5 sections |
-| CLAIMS | `claims.sh` on a clean `873d835` archive equals `claims-output-at-873d835.txt`. Plus the L29 sweep over this task |
-| SWEEP | SW-A on A's tree: 0 hits. Also `grep -rn "test.setTimeout" perf` = 0 |
-| KEEP-WAITS | on A's tree, 1a still has `waitForTimeout(2000)` (the hook-live window), `waitForTimeout(idleSettleMs)` once (the idle settle) and `waitForTimeout(idleMeasureMs)`. 1b-ii still has `waitForTimeout(idleSettleMs)` once (before the ready heap), l.180's 300 ms GC wait and `observerSettleMs`. 1b-i has no `waitForTimeout(idleSettleMs)` |
-| TYPECHECK | `npm run typecheck` rc 0 (it covers `perf/**`) |
-| PERF-RUN | `CI=true npx playwright test --config playwright.perf.config.ts` alone on A's tree: 3/3 pass. Record each spec's time and Chromium version |
-| EQUIV | §2.5: the three `equiv-check.py` runs against `b-round-278/baseline-results/` exit 0 with 0 problems. On a deterministic difference, apply §2.5's same-machine HEAD re-run clause before calling it a FAIL. An environment-invalid run (overlap, machine load) is kept and replaced at most twice (L38) |
-| MUTANTS | re-run MU-LANE, MU-OBS-2, MU-OBS-3 and MU-READY (fast: their passes abort early; 1b-ii is about 1 min). Each gives its §6.2 signal |
-| TIMEOUT-DATA | PERF-1a time on A's tree, against 15 min. Data for ROOT-REQ-PERF-TIMEOUT, not a pass/fail row unless above 9.4 min |
-| LANE-BROWSER | run `b-round-278/probe/lane.cjs` against :5173: the same order, and stems as the first later empty lane at both viewports |
-| G279-AUTH | `/studio-lab` anonymous with the badge "Demo collection — no sign-in required". `/studio/middle-east` signed out shows "Sign in required" with 0 `audio[src]`. `/api/studio-token` with no header → 401, no token. **Both viewports** (this is the round's browser row besides the perf run) |
-| DOC-208 | doc 208 l.4 byte-exact `**სტატუსი:** In Progress (stage 1 of 2; C round 279 PASS)`. The seven TEMPLATE headings in order (L26). The 175 helper table lists the §2.2 helpers as they are in `page.ts`. The four TODO bullets say what round 279 did and that R216 goes to b-ii-2 |
+| SOURCE-SCOPE | `sha256sum -c b-round-279-r280-tree-sha256.txt` rc 0. `git status --short` lists only §5 paths (1 `??`: doc 209) |
+| HUNK-SCOPE | the two code/data files equal `b-round-279/sketch.diff` applied to `1dbf3af`, or state each semantic difference (Biome does not cover `perf/`). The doc hunks stay inside the §5 sections |
+| CLAIMS | `claims.sh` on a clean `1dbf3af` archive equals `claims-output-at-1dbf3af.txt`. Plus the L29 sweep over this task |
+| SWEEP | SW-B on A's tree: hits only in `perf/studio-lab-resources.perf.spec.ts`. `grep -rn "test.setTimeout" perf` = 0 |
+| KEEP | on A's tree: `heapPollMs = 50`, `observerSettleMs = 200`, the `< 5` and no-peak problem texts, `t0`/`windowEnd`/`wall-ms` lines unchanged from K1/K5/K7; the probe runs before the poll loop starts and outside the click-to-text window |
+| TYPECHECK | `npm run typecheck` rc 0 |
+| PERF-RUN | `CI=true npx playwright test --config playwright.perf.config.ts studio-lab-resources` alone on A's tree: passed. Record time and Chromium version |
+| EQUIV | §2.5 EQUIV-B2 against `b-round-279/head-results-1/`: rc 0, 0 problems. Report the `tolerated` lines (the actual peak values). On another deterministic difference apply the same-machine clause before a FAIL. An environment-invalid run (overlap, load) is kept and replaced at most twice (L38) |
+| CLOCK-DATA | `mempolls-diff.py` on C's report: every export has `clockRttMs` ≤ 20, `|clockOffsetMs|` ≤ 20, and `value ≥ endpointRule`; Σ ≥ 3. Report all values |
+| BUDGET-NOTES | the 8 notes equal §2.4 byte for byte; `id`/`kind`/`mode`/`budget`/`owner` of all 61 rows unchanged (EQUIV covers them) |
+| MUTANTS | re-run MU-SIGN, MU-ENDPOINT, MU-ORIGIN and MU-PROBE-THROW (each about 1.3 min). Each gives its §6.2 signal; for MU-ENDPOINT the signal is Σ(value − endpointRule) = **0 exactly** |
+| G280-AUTH | `/studio-lab` anonymous with the badge "Demo collection — no sign-in required". `/studio/middle-east` signed out shows "Sign in required" with 0 `audio[src]`. `/api/studio-token` with no header → 401, no token. **Both viewports**. A probe against :5173 warms the page first or waits ≥ 150 s for "Demo collection ready" (INFO-C279-LANE-PROBE-TIMEOUT) |
+| DOC-209 | doc 209 l.4 byte-exact `**სტატუსი:** Completed (C round 280 PASS)`; the seven TEMPLATE headings in order (L26); its mem-polls ranges equal A's two reports; every cited id exists. Docs 208 and 176 l.4 byte-exact `**სტატუსი:** Completed (C round 280 PASS)`. `grep -rn 'In Progress (stage' docs/implementation` = 0 hits. Doc 169's `### Export-ის მეტრიკები` section matches the live code (L34). The four TODO bullets say what round 280 did; 208 l.88's bullet names round 281 |
 | gate | full vitest, typecheck, build, Biome, `npm run verify`, `test:e2e:smoke`: **gate** rows, not claimed in `passed` |
 
-`browserVerified` is about the real browser rows: PERF-RUN, MUTANTS, LANE-BROWSER and G279-AUTH. All of them run in the cloud; none needs the backend.
+`browserVerified` is about the real browser rows: PERF-RUN, CLOCK-DATA, MUTANTS and G280-AUTH. All of them run in the cloud; none needs the backend.
 
 **Ableton conformance:** not applicable (test-only harness round).
 
 ## 9. Neighbour risk
-- **Every deterministic perf row.** EQUIV covers them all; sketch v2 measured it (§4).
-- **A future change to the collection-ready copy.** The pattern follows the copy through the import, so a wording change cannot break the wait silently. A removed status write would make `waitForCollectionReady` time out (MU-READY shows that failure mode), which is loud.
+- **The export deterministic rows.** `wall-ms` and the window are unchanged; only the sample filter moves. EQUIV covers all 37 deterministic rows; the only allowed move is the two 1× peak rows by ≤ 0.1.
+- **The long-task rows inside the window.** No new CDP or page work runs inside the window (the probe runs before the click). They are wallclock anyway.
+- **PERF-1a / 1b-i.** Untouched files (frozen).
 - **App code.** None is touched.
 
 ## 10. STOP conditions (L11)
-- Any EQUIV problem: a deterministic median, an assert, the envelope or a note. Report the row and the samples. If you can, also give the same-machine HEAD re-run value (§2.5). **Do not re-baseline**, and do not rule an exception yourself.
-- A §6.2 mutant that does not give its red signal: write a STOP, do not drop the row.
-- Any change needed in a frozen file (budgets, config, report/determinism, app).
-- PERF-1a above 9.4 min, or any spec failing.
+- Any EQUIV problem outside the two named tolerances: report the row, the samples and, if you can, the same-machine HEAD value. **Do not re-baseline**, and do not rule an exception yourself.
+- A §6.2 mutant without its signal, or Σ < 3 on A's tree: write a STOP; do not drop the row.
+- `clockRttMs` > 20 on A's tree in any export (the named problem would fail the pass): STOP with the values.
+- Any change needed in a frozen file.
 
-## 11. Outcome, fixed in advance (D-29z641)
-| C result | B at the round-280 planning |
+## 11. Outcome, fixed in advance (D-29z649)
+| C result | B at the round-281 planning |
 |---|---|
-| PASS, gate publishes, planning before 2026-11-02 | b-ii-1 is **მზადაა**. It closes GATE214-S1, GATE214-S2, GATE223-S2 and C-R223-01-GATE214-S2-PREMISE. Round 280 = b-ii-2 (R216-MEM-POLLS-HEADROOM, re-baseline with named exceptions), with the consults first |
-| PASS, planning on or after 2026-11-02 | REGRESSION round first (the 3-day rule); b-ii-2 after it |
-| EQUIV fails on a load-settle row only (sketch v3 was equivalent, so this would mean machine sensitivity) | a bounded fix-up: that site goes back to a kept fixed wait with a recorded reason; same grants |
+| PASS, gate publishes, planning before 2026-11-02 | b-ii-2 is **მზადაა**, so PERF-HARNESS-SHARED-LIB-b-ii and PERF-HARNESS-SHARED-LIB-b are **მზადაა**. R216-MEM-POLLS-HEADROOM → watch with doc 209's data (reopen as a task if any run shows `mem-polls-1` < 7). Round 281 = GATE279-S1 + B-R280-CLICK-LIVE-LANE-ID + A-R279-REVIEW-LANE-NULL, with the consults first |
+| PASS, planning on or after 2026-11-02 | REGRESSION round first (the 3-day rule); 281's scope after it |
+| EQUIV fails only on a peak row by more than 0.1, and the same-machine HEAD re-run shows the same | machine-sensitive: B rules the tolerance with the data; same grants |
 | SOURCE-SCOPE fails | stop; root inspects; nothing is published |
 | Gate fails | one bounded fix-up with its cause recorded |
-| Root applies ROOT-REQ-PERF-TIMEOUT before C | C's TIMEOUT-DATA row also reports the percentage against the new limit, and PERF-1A-TIMEOUT-HEADROOM closes when it is ≤ 50 % |
 
 ## 12. Deliverables
-- **A:**
-  - the §2 changes and doc 208 plus the granted doc sections;
-  - `a-round-279.md`: changed files; commands with results; the perf times; the three equiv-check outputs; the mutants table; the code-reviewer result and its Architecture note.
-- **C:**
-  - `c-round-279.md`;
-  - `c-round-279.json` (`taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`);
-  - evidence under `c-round-279/`.
+- **A:** the §2 changes, doc 209 and the granted doc lines; `a-round-280.md`: changed files; commands with results; the two perf runs' times; both EQUIV-B2 outputs; both `mempolls-diff.py` outputs; the mutants table; the code-reviewer result and its Architecture note.
+- **C:** `c-round-280.md`; `c-round-280.json` (`taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `blocked`, `gate`, `rows`); evidence under `c-round-280/`.
 
 ## 13. Root notes
 - No dependency change.
-- **ROOT-REQ-PERF-TIMEOUT** (`b-round-278-root-request-perf-timeout.md`) is open and non-blocking. ROOT-REQ-VITEST-PERF-INCLUDE (`b-round-223-root-request-vitest.md`) is still open.
-- **SYS-5 is complete** (gate 278). ARCH-CHECKPOINT-SYS5-SOFT-DISABLED (`b-round-277.md` §5) stays optional and non-blocking.
-- After C PASS, b-ii-1 is ready for the gate. That is not a release.
+- **ROOT-REQ-PERF-TIMEOUT** stays open and non-blocking. New data from round 279: PERF-1a 6.4 min (A) and 6.5 min (C) = 43 % of 15 min on two fresh cloud machines (B's 873d835 run: 8.4 min). ROOT-REQ-VITEST-PERF-INCLUDE stays open.
+- After C PASS, b-ii-2 is ready for the gate. It closes PERF-HARNESS-SHARED-LIB-b. It is not a release.

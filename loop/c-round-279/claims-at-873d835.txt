@@ -1,0 +1,79 @@
+== K1 fixed waits in perf/**
+perf/studio-lab-interactions.perf.spec.ts:637:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab-interactions.perf.spec.ts:703:      await page.waitForTimeout(idleSettleMs);
+perf/studio-lab-resources.perf.spec.ts:180:  await page.waitForTimeout(300);
+perf/studio-lab-resources.perf.spec.ts:279:  await page.waitForTimeout(300);
+perf/studio-lab-resources.perf.spec.ts:342:    await page.waitForTimeout(observerSettleMs);
+perf/studio-lab-resources.perf.spec.ts:524:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab-resources.perf.spec.ts:659:      await page.waitForTimeout(100);
+perf/studio-lab.perf.spec.ts:574:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab.perf.spec.ts:579:    await page.waitForTimeout(2000);
+perf/studio-lab.perf.spec.ts:597:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab.perf.spec.ts:600:    await page.waitForTimeout(idleMeasureMs);
+perf/studio-lab.perf.spec.ts:668:    await page.waitForTimeout(idleSettleMs);
+perf/lib/page.ts:40:  await page.waitForTimeout(minMs);
+perf/lib/page.ts:53:    await page.waitForTimeout(50);
+== K2 idleSettleMs constants
+perf/studio-lab-interactions.perf.spec.ts:45:const idleSettleMs = 1000;
+perf/studio-lab-resources.perf.spec.ts:50:const idleSettleMs = 1000;
+perf/studio-lab.perf.spec.ts:50:const idleSettleMs = 1000;
+== K3 hardcoded lane
+perf/studio-lab-interactions.perf.spec.ts:188:async function emptyLanePoint(page: Page, trackId: string): Promise<GrabPoint> {
+perf/studio-lab-interactions.perf.spec.ts:467:  const empty = await emptyLanePoint(page, 'stems');
+== K4 sequence text names the Stems lane
+perf/studio-lab-interactions.perf.spec.ts:58:  'clip click: empty Stems lane click deselects (Clip Gain fader disabled), then a click on the clip header (interact.click.*, interact.harness.click-live)',
+== K5 fixture tracks
+96:  music: 'Music',
+97:  stems: 'Stems',
+98:  sfx: 'SFX',
+== K6 export observer / timeOrigin / pollLoop / try
+141:  try {
+287:    const observer = new MutationObserver(() => {
+296:  const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+301:  const pollLoop = (async () => {
+321:  try {
+445:      result.problems.push(`export ${clips}: the "${perfWavDoneName}" observer was not released`);
+508:  try {
+622:  try {
+== K7 waitForQuiet cap returns like quiet
+48:        return now - Math.max(lastCommit, lastStart) >= quietFor || now - start >= cap;
+52:    if (quiet) return nowIn(page);
+== K8 perf timeout
+10:  timeout: 15 * 60 * 1000,
+== K9 vitest include
+9:    include: ['app/**/*.test.{ts,tsx}'],
+== K10 budgets notes naming the settle and the 2 s window
+4
+== K11 last implementation doc
+207-sys-5-disabled-reasons-stage-2.md
+== K12 docs that describe these waits
+docs/implementation/2026/quarter-IV/163-studio-perf-harness.md
+docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md
+docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md
+docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md
+docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md
+== SW-A identifiers this round renames or removes, roots perf app e2e
+(end SW-A)
+== K13 1a hook-live window
+579:    await page.waitForTimeout(2000);
+== K14 collection ready copy and prefix-append
+19:  ready:
+33:  ready:
+60:    return `${settled} ${current.slice(loadingPrefix.length)}`;
+65:export function workspaceCollectionCopy(origin: WorkspaceOrigin): WorkspaceCollectionCopy {
+== K15 doc 168 hygiene ruling on the 1a 2000 ms wait
+209:- **GATE211-S4 (fixed wait).** `selectClipGainMembers`-ში `waitForTimeout(2000)` შეიცვალა state wait-ით: 2 audio clip და 2 `arrangement-clip-waveform` (ის მხოლოდ peaks-ის მზადყოფნის შემდეგ იხატება). Add-ის შემდეგ `waitForTimeout(2000)` (`harness.hook-live`-ის საზომი ფანჯარა) ruling-ის მიხედვით უცვლელია.
+== K16 idleSettleMs uses
+perf/studio-lab-interactions.perf.spec.ts:45:const idleSettleMs = 1000;
+perf/studio-lab-interactions.perf.spec.ts:527:  const tEnd = await waitForQuiet(page, t0, idleSettleMs);
+perf/studio-lab-interactions.perf.spec.ts:637:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab-interactions.perf.spec.ts:703:      await page.waitForTimeout(idleSettleMs);
+perf/studio-lab-resources.perf.spec.ts:50:const idleSettleMs = 1000;
+perf/studio-lab-resources.perf.spec.ts:524:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab.perf.spec.ts:50:const idleSettleMs = 1000;
+perf/studio-lab.perf.spec.ts:81:  `settle ${idleSettleMs} ms, then ${idleMeasureMs} ms idle playback (play.idle-*)`,
+perf/studio-lab.perf.spec.ts:574:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab.perf.spec.ts:597:    await page.waitForTimeout(idleSettleMs);
+perf/studio-lab.perf.spec.ts:668:    await page.waitForTimeout(idleSettleMs);
+== K17 status testid
+1

@@ -1,0 +1,31 @@
+20:1. `lessons.md`, every role. Especially L11, L23 (the deleted-export and `perf/**` grep-root clauses), L29, L30, L31, L34, L37 and **L38 (perf runs alone)**.
+53:### 2.2 New helpers in `perf/lib/page.ts`
+152:| `perf/lib/page.ts` | §2.2 helpers; `waitForQuiet` becomes the wrapper. The import line from `./app-labels`. Nothing else |
+153:| `perf/lib/app-labels.ts` | the `workspaceCollectionCopy` import and `perfCollectionReadyPattern` (§2.2). Nothing else |
+154:| `perf/studio-lab.perf.spec.ts` | the l.574 and l.668 replacements and the import list |
+155:| `perf/studio-lab-interactions.perf.spec.ts` | the l.637 and l.703 replacements, §2.3 (`emptyLanePoint` → `emptyLanePointAfterClip` and its call), the import list |
+156:| `perf/studio-lab-resources.perf.spec.ts` | the l.279 replacement, §2.4, the import list. l.524 and `idleSettleMs` stay |
+158:| `docs/implementation/2026/quarter-IV/175-perf-harness-shared-lib.md` | the whole `### Helper-ების რუკა (\`perf/lib/page.ts\`)` section (L34: the new helpers), the whole `### GATE214-S2: …` section (now done in round 279), and the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` |
+159:| `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only |
+160:| `docs/implementation/2026/quarter-IV/169-perf-resources-baseline.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only (GATE223-S2 done; R216 → b-ii-2) |
+161:| `docs/implementation/2026/quarter-IV/176-perf-determinism-contract.md` | the `PERF-HARNESS-SHARED-LIB-b-ii` bullet of `## TODO` only |
+163:**Frozen:** the manifest is the authority. It includes all of `app/**` (no app change: `collection.ts` is imported, never edited), `perf/budgets*.json`, `perf/lib/{report,determinism,instrumentation,budgets,stats}.ts`, `perf/lib/report.test.ts`, `playwright.perf.config.ts`, `vitest.config.ts`, `package.json` and `package-lock.json`. **No `test.setTimeout` anywhere** (D-29z638).
+165:**Protected auth/purchase (never touched):** `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token*`, `app/lib/auth.ts`, `app/contexts/AuthContext.tsx`.
+171:1. `npm run typecheck` (it covers `perf/**`; Biome does not, L30) and `npm run lint` (app scope, should be unchanged).
+196:| K1 | `waitForTimeout(` in `perf/*.ts`, `perf/lib/*.ts` | 14 lines: interactions l.637/l.703; resources l.180/l.279/l.342/l.524/l.659; 1a l.574/l.579/l.597/l.600/l.668; page.ts l.40/l.53 |
+197:| K2 | `const idleSettleMs` | interactions l.45, resources l.50, 1a l.50 |
+198:| K3 | `emptyLanePoint(` | definition l.188; the call l.467 with `'stems'` |
+199:| K4 | sequence text "empty Stems lane click" | interactions l.58 |
+200:| K5 | `perfFixtureTracks` | music, stems, sfx (app-labels l.96–98) |
+201:| K6 | resources: `new MutationObserver` l.287, `const timeOrigin =` l.296, `const pollLoop =` l.301, the export `try {` l.321, `was not released` l.445 | as listed |
+202:| K7 | `waitForQuiet` returns on the cap as if quiet | page.ts l.48 (`… \|\| now - start >= cap`), l.52 |
+203:| K8 | perf timeout | `playwright.perf.config.ts` l.10, 15 min |
+204:| K9 | vitest include | `app/**/*.test.{ts,tsx}` only |
+208:| K13 | the 1a hook-live window | l.579 `waitForTimeout(2000)` |
+209:| K14 | `collection.ts`: `ready:` copy lines and the prefix-append branch | l.19 (demo `ready:`), l.33 (purchased), l.60 (`${settled} ${current.slice(…)}`), l.65 `workspaceCollectionCopy` |
+210:| K15 | doc 168's ruling on the 1a Add wait | doc 168 l.209: the `waitForTimeout(2000)` after Add is the `harness.hook-live` window and stays |
+211:| K16 | every `idleSettleMs` use | 11 lines (interactions l.45/527/637/703; resources l.50/524; 1a l.50/81/574/597/668) |
+212:| K17 | the status testid in `app/components` | 1 |
+226:| KEEP-WAITS | on A's tree, 1a still has `waitForTimeout(2000)` (the hook-live window), `waitForTimeout(idleSettleMs)` once (the idle settle) and `waitForTimeout(idleMeasureMs)`. 1b-ii still has `waitForTimeout(idleSettleMs)` once (before the ready heap), l.180's 300 ms GC wait and `observerSettleMs`. 1b-i has no `waitForTimeout(idleSettleMs)` |
+227:| TYPECHECK | `npm run typecheck` rc 0 (it covers `perf/**`) |
+234:| DOC-208 | doc 208 l.4 byte-exact `**სტატუსი:** In Progress (stage 1 of 2; C round 279 PASS)`. The seven TEMPLATE headings in order (L26). The 175 helper table lists the §2.2 helpers as they are in `page.ts`. The four TODO bullets say what round 279 did and that R216 goes to b-ii-2 |
