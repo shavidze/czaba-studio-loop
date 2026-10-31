@@ -1,0 +1,132 @@
+{
+ "round": 297,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-10-31T18:06:18.8459783Z",
+  "round": 297,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "findings": [
+  {
+   "id": "INFO-C297-01",
+   "severity": "info",
+   "origin": "A",
+   "summary": "doc 220 TODO l.72 still says STUDIO-LINK-b (round 297); moved to 298 by D-29z753; A reported it, the §3.2 grant forbade the edit",
+   "evidence": "git diff docs/implementation/2026/quarter-IV/220-studio-link-deep-link.md"
+  },
+  {
+   "id": "INFO-C297-02",
+   "severity": "info",
+   "origin": "C",
+   "summary": "the browser cold row cannot distinguish the prop wiring from the default selection (demo-middle-east is sources[0]); the wiring proof is unit-only (LH1/LH3 under mutant e)",
+   "evidence": "c-round-297/cold.json firstOption"
+  },
+  {
+   "id": "INFO-C297-03",
+   "severity": "info",
+   "origin": "C/env",
+   "summary": "154 s Vite re-optimise on the untimed 1440 warm-up after scratch vitest runs that shared node_modules/.vite through the symlink (L38); recovered; measured rows ran after it",
+   "evidence": "c-round-297/cold.json warmupMs"
+  },
+  {
+   "id": "INFO-C297-04",
+   "severity": "info",
+   "origin": "C",
+   "summary": "React dedupes identical warnings per process; the muted warning logs in LH1, so LH3's spy sees none; a different mismatch is still caught",
+   "evidence": "c-round-297/covering.log stderr headers"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "UNIT-VACUITY",
+  "B-COLD-DEEPLINK",
+  "G297-AUTH",
+  "DOC-220"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full test suite",
+  "build",
+  "biome",
+  "verify",
+  "test:e2e:smoke"
+ ],
+ "rows": {
+  "CLAIMS": {
+   "status": "PASS",
+   "evidence": "c-round-297/claims-after.txt"
+  },
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "evidence": "git status 2 paths; sha256sum -c fails only doc 220; cmp sketch ok"
+  },
+  "TYPECHECK": {
+   "status": "PASS",
+   "evidence": "c-round-297/tsc.log"
+  },
+  "UNIT": {
+   "status": "PASS",
+   "evidence": "c-round-297/covering.log",
+   "files": 6,
+   "tests": 58,
+   "lhMs": {
+    "LH1": 684,
+    "LH2": 449,
+    "LH3": 356,
+    "LH4": 441
+   },
+   "slowestMs": 1768,
+   "stderr": "2 'did not match' (muted: LH1, NG9); 0 act() in LH rows; 18 act() in pre-existing LK5/LK6/NG2/NG5/NG6, same as B's sketch run"
+  },
+  "UNIT-MUTANTS": {
+   "status": "PASS",
+   "evidence": "c-round-297/mutant-{e,g,f}.log",
+   "e": "2/24 failed LH1,LH3",
+   "g": "1/24 failed LH4",
+   "f": "24/24 green (equivalent)"
+  },
+  "UNIT-VACUITY": {
+   "status": "PASS",
+   "evidence": "c-round-297/vacuity-identity.log",
+   "result": "2/4 failed LH1 l.154, LH2 l.166"
+  },
+  "B-COLD-DEEPLINK": {
+   "status": "PASS",
+   "browser": true,
+   "viewports": [
+    "1440x900",
+    "1280x720"
+   ],
+   "evidence": "c-round-297/cold.json, shots/cold-*.png, shots/plain-*.png"
+  },
+  "G297-AUTH": {
+   "status": "PASS",
+   "browser": true,
+   "evidence": "c-round-297/auth.json, shots/auth-lab-1440.png, shots/auth-legacy-1440.png"
+  },
+  "DOC-220": {
+   "status": "PASS",
+   "evidence": "doc 220 l.4, headings l.7-72"
+  },
+  "gate": {
+   "status": "gate",
+   "evidence": "gates/gate-round-297.json (root)"
+  }
+ },
+ "manifestPaths": [
+  "app/lib/arrangement/__tests__/studio-link-hydrate-ui.test.tsx",
+  "docs/implementation/2026/quarter-IV/220-studio-link-deep-link.md"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2
+}
