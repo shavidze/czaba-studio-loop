@@ -1,9 +1,9 @@
 {
- "version": 252,
- "updated": "2026-10-31 B round 291 -> 292 planning",
+ "version": 253,
+ "updated": "2026-10-31 B round 292 -> 293 planning",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 292, D-29z723..D-29z726; FIX-PD-1c: /studio-lab narrow-window state below 900 px (F8 Medium) with native preview player and Send link, route-level gate above ArrangementProvider, latched narrowing keeps the arrangement; + R5 LRS4 describe timeout; baseline 88b23dd, frozen b-round-291-r292-tree-sha256.txt 1158)",
+ "current_task": "current-task.md (round 293, D-29z727..D-29z731; FIX-PD-1c2: C-R292-01 fix-up, StopPlaybackOnNarrow also calls stopLibraryPreview; NG5c; doc 218 l.4 -> C round 293 PASS; baseline 88b23dd + A round-292 tree, frozen b-round-292-r293-tree-sha256.txt 1162)",
  "advisor_used_by_B": "round 283 -> 284 planning: available and consulted (before the approach; before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -11017,9 +11017,19 @@
    "task": "current-task.md",
    "decision": "D-29z723..D-29z726",
    "type": "FIX-PD-1c (F8 narrow-window state) + LRS4 timeout ruling R5",
-   "status": "dispatched",
+   "status": "c_fail",
    "note": "baseline 88b23dd clean; 9 grants; frozen b-round-291-r292-tree-sha256.txt (1158); claims b-round-291/claims-292.sh",
-   "added": "2026-10-31 B round 291 -> 292 planning"
+   "added": "2026-10-31 B round 291 -> 292 planning",
+   "result": "C FAIL (c-round-292.json: browserVerified/realVerified true, 20 specified rows PASS, extra probe X-LIBRARY-PREVIEW FAIL = C-R292-01 Medium); gate 292 skipped, nothing published; A tree (9 paths) kept as round-293 baseline (D-29z727)"
+  },
+  {
+   "round": 293,
+   "task": "current-task.md",
+   "decision": "D-29z727..D-29z731",
+   "type": "FIX-PD-1c2 fix-up of C-R292-01 (latched narrow state also stops the library preview)",
+   "status": "dispatched",
+   "note": "baseline 88b23dd + A round-292 tree (9 paths); 3 grants (studio-lab.tsx, studio-narrow-gate-ui NG5c, doc 218); frozen b-round-292-r293-tree-sha256.txt (1162); claims b-round-292/claims-293.sh",
+   "added": "2026-10-31 B round 292 -> 293 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -13415,7 +13425,7 @@
   },
   {
    "id": "PD-REVIEW-2026-10-31",
-   "status": "in_progress (D-29z725): FIX-PD-1b2 done (291, 88b23dd); FIX-PD-1c dispatched round 292 | in_progress (D-29z720): RETRO 290 ran (C FAIL only on C-R290-01, Low, retro text; fixed at planning); FIX-PD-1b2 dispatched round 291 with RT-FIX-291 | in_progress (D-29z710): FIX-PD-1b done (289, 5a911ff); RETRO 290 next, then FIX-PD-1b2 | in_progress (D-29z709): FIX-PD-1a2 done (288, c345def); FIX-PD-1b dispatched round 289 | in_progress (D-29z704): FIX-PD-1a2 fix-up round 288 (C-R287-01 + A-R287-PREMIUM-UNVALIDATED) | in_progress (D-29z700): FIX-PD-1a done as scoped (286, 096fa4b); FIX-PD-1a2 (F9 remainder) dispatched round 287 | in_progress (D-29z692): FIX-PD-1a dispatched round 286",
+   "status": "in_progress (D-29z729): FIX-PD-1c round 292 C FAIL on C-R292-01 (Medium, library preview on narrow); fix-up FIX-PD-1c2 dispatched round 293 | in_progress (D-29z725): FIX-PD-1b2 done (291, 88b23dd); FIX-PD-1c dispatched round 292 | in_progress (D-29z720): RETRO 290 ran (C FAIL only on C-R290-01, Low, retro text; fixed at planning); FIX-PD-1b2 dispatched round 291 with RT-FIX-291 | in_progress (D-29z710): FIX-PD-1b done (289, 5a911ff); RETRO 290 next, then FIX-PD-1b2 | in_progress (D-29z709): FIX-PD-1a2 done (288, c345def); FIX-PD-1b dispatched round 289 | in_progress (D-29z704): FIX-PD-1a2 fix-up round 288 (C-R287-01 + A-R287-PREMIUM-UNVALIDATED) | in_progress (D-29z700): FIX-PD-1a done as scoped (286, 096fa4b); FIX-PD-1a2 (F9 remainder) dispatched round 287 | in_progress (D-29z692): FIX-PD-1a dispatched round 286",
    "requested": "Saba 2026-10-31 (agent-workflow.md \"Whole-product design review: Saba's decisions and new tasks\"); review docs/technical/studio-real-workspace/product-design-review-2026-10-31.md (product-designer, master 000da42)",
    "saba_decisions": {
     "Q1": "SRW-21 mount = first Studio product priority after STUDIO-PERFORMANCE; protected files stay outside the loop; B writes SRW-21-PLAN only; STUDIO-LINK until then",
@@ -28162,6 +28172,24 @@
    "title": "narrow state has no 'Continue anyway' escape, unlike the legacy MobileBlocker (1024 px); below 900 px the workspace layout is broken",
    "status": "awaiting_user (D-29z725): listed deviation; non-blocking",
    "added": "2026-10-31 B round 291 -> 292 planning"
+  },
+  {
+   "id": "C-R292-01",
+   "severity": "medium",
+   "origin": "B spec (round-292 §3.3 named only togglePlayback) + A self-check (L11: reported as a known gap, not a STOP); caused by round 292",
+   "title": "library preview keeps playing behind the latched narrow screen (<900 px) with no control to stop it; widening shows the library toggle still 'Stop'; native narrow Play mixes with it",
+   "evidence": "c-round-292.md; c-round-292/c292.json rows X-LIBRARY-PREVIEW, X-PREVIEW-LIFETIME; mix-probe.json; shots/libpreview-1440-narrow.png, libpreview-1280-narrow.png, libpreview-390-after-narrow.png",
+   "repro": "1440x900 or 1280x720 /studio-lab, library Bass, Preview, resize to 899 or 390: master-tap RMS 0.102 @0.3 s ... 0.103 @10 s",
+   "status": "scheduled round 293 (D-29z729): StopPlaybackOnNarrow also calls stopLibraryPreview; NG5c (B scratch pre-run: green with fix, red with the effect removed)",
+   "added": "2026-10-31 B round 292 -> 293 planning"
+  },
+  {
+   "id": "A-R292-REVIEW-SAFARI-LEGACY-MQ",
+   "severity": "info",
+   "origin": "A round-292 code-reviewer Low",
+   "title": "useStudioWideViewport has no MediaQueryList.addListener fallback for Safari < 14",
+   "status": "recorded (D-29z728), not scheduled",
+   "added": "2026-10-31 B round 292 -> 293 planning"
   }
  ],
  "tech_lead_notes": [
@@ -30472,6 +30500,16 @@
    "added": "2026-10-31 B round 291 -> 292 planning",
    "text": "gate-291 reviewer: run-grouping region ArrangementLibrary.tsx:198-217/:668-694 changed in rounds 289 and 291; if a third round touches it, extract the pure run computation into lib/arrangement with unit tests and render one constant parent for grouped and flat branches (would also fix B-R290-LIB-SHAPE-SWITCH-FOCUS, C-R291-01, GATE291-S2). Cost low. Must keep roving focus, resultIds order, LG1-LG9",
    "status": "signal (D-29z724): not scheduled; bundle candidate for the deferred_low_polish pass (LIB-RUNS-POLISH: closes B-R290-LIB-SHAPE-SWITCH-FOCUS, C-R291-01, GATE291-S1, GATE291-S2); no frontend-architect checkpoint now (no third round scheduled)"
+  },
+  {
+   "id": "A-R292-ARCH-DEFER-SOURCE-LOAD",
+   "added": "2026-10-31 B round 292 -> 293 planning",
+   "text": "round-292 reviewer Architecture note (signal 4: new lifecycle in studio-lab.tsx, keep): proposal - defer collection source loading (fetch, main-thread SFX synthesis, synth worker) until a wide state is confirmed, e.g. a collection wrapper whose loadSource waits; owner ArrangementContext/demo data; value medium, risk low. Extends B-R291-NARROW-PREFETCH (deferred Low). Not scheduled (D-29z728)."
+  },
+  {
+   "id": "A-R292-REVIEW-RENDER-REF",
+   "added": "2026-10-31 B round 292 -> 293 planning",
+   "text": "watch: studio-lab.tsx writes the wasWide latch ref during render (spec required a useRef latch); safe today (idempotent true-only write), revisit if the route adopts concurrent features. Not scheduled (D-29z728)."
   }
  ],
  "vitest_floor_round46": 1357,
@@ -35821,6 +35859,39 @@
    "repro": "Playwright 390x844 /studio-lab, record .mp3 requestfinished",
    "deferred_reason": "Low (pre-existing, data cost only) -> deferred_low_polish (D-29z725); a fix needs ArrangementContext deferral, out of round 292 grants",
    "added": "2026-10-31 B round 291 -> 292 planning"
+  },
+  {
+   "id": "A-R292-REVIEW-L-NARROW-REMOUNT",
+   "severity": "low",
+   "status": "deferred",
+   "origin": "A round-292 code-reviewer Low",
+   "title": "after a phone hydration the narrow screen remounts (never-wide branch replaces the hidden one), so a native Play pressed before hydration stops",
+   "evidence": "a-round-292.md code-reviewer section",
+   "repro": "slow-network 390x844 /studio-lab, press native Play before hydration completes",
+   "deferred_reason": "Low -> deferred_low_polish (D-29z728); A's stable-key attempt left a hidden player sounding behind the workspace on never-wide -> wide, so the fix needs design",
+   "added": "2026-10-31 B round 292 -> 293 planning"
+  },
+  {
+   "id": "A-R292-REVIEW-L-TH4-TITLE",
+   "severity": "low",
+   "status": "deferred",
+   "origin": "A round-292 code-reviewer Low",
+   "title": "studio-theme-obsidian TH4 test title still says the marker is only on StudioWorkspace; the map now also lists StudioNarrowScreen",
+   "evidence": "a-round-292.md",
+   "repro": "grep TH4 title in studio-theme-obsidian.test.tsx",
+   "deferred_reason": "Low, test title only -> deferred_low_polish (D-29z728)",
+   "added": "2026-10-31 B round 292 -> 293 planning"
+  },
+  {
+   "id": "A-R292-REVIEW-L-ERROR-NOT-ANNOUNCED",
+   "severity": "low",
+   "status": "deferred",
+   "origin": "A round-292 code-reviewer Low",
+   "title": "narrow screen 'Preview unavailable.' replaces the player outside the live status region, so a screen reader is not told",
+   "evidence": "a-round-292.md; C B-AUDIO-ERROR PASS (text present)",
+   "repro": "390x844, abort /middle-east.mp3, listen with a screen reader",
+   "deferred_reason": "Low -> deferred_low_polish (D-29z728)",
+   "added": "2026-10-31 B round 292 -> 293 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -40580,6 +40651,31 @@
    "id": "D-29z726",
    "date": "2026-10-31",
    "text": "Order after 292: REGRESSION when the 293 planning is on/after 2026-11-02 (regression-last 2026-10-30, round 258), else SYS-VACUOUS-ROWS -> STUDIO-LINK -> NAME-AND-HINT -> PERF-3c and the rest of STUDIO-PERFORMANCE -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase-2 entries (skip rule). SRW-21-PLAN stays parallel planning. regression-last.json untouched. Next RETRO at round 305."
+  },
+  {
+   "id": "D-29z727",
+   "date": "2026-10-31",
+   "text": "Round 292 (FIX-PD-1c) closed C FAIL: c-round-292.json taskStatus FAIL, browserVerified/realVerified true, 20 specified rows PASS (incl. B-DESK-SAME 0 px, NG mutants 9/9), extra probe X-LIBRARY-PREVIEW FAIL -> C-R292-01 Medium (caused by round 292). Gate 292 skipped (C FAIL); HEAD stays 88b23dd; A's 9 uncommitted paths kept as round-293 baseline (policy 6). FIX-PD-1c stays ბაგია. tasks/round-292.md = copy of the round-292 task (cmp identical)."
+  },
+  {
+   "id": "D-29z728",
+   "date": "2026-10-31",
+   "text": "Rulings: A D1 <output> status accepted (footer pattern, AX status); D2 server-snapshot mutant maps to NG9c; D3 K14 gains studio-narrow-gate-ui accepted; D4 NG9 jsdom muted tolerance accepted (Chromium 0 warnings). C INFO recipe vacuous acknowledged (B spec) -> B-RESIZE-KEEP split into sound (unmuted) and state clauses. Doc 218 l.4 granted -> 'Completed (C round 293 PASS)'. Reviewer Lows -> deferred_low_polish A-R292-REVIEW-L-NARROW-REMOUNT, -L-TH4-TITLE, -L-ERROR-NOT-ANNOUNCED; info A-R292-REVIEW-SAFARI-LEGACY-MQ; architecture_signals A-R292-ARCH-DEFER-SOURCE-LOAD (extends B-R291-NARROW-PREFETCH), A-R292-REVIEW-RENDER-REF. A's 'known gap' was an L11 STOP (no new A lesson)."
+  },
+  {
+   "id": "D-29z729",
+   "date": "2026-10-31",
+   "text": "Round 293 = FIX-PD-1c2 (bug gate, Medium first): StopPlaybackOnNarrow also calls stopLibraryPreview once on mount; NG5c (demo-soft-impact preview, assert Stop before narrowing, Preview + source stop after widen); doc 218. Grants 3 (route, gate test, doc 218). Never-wide branch already safe via provider unmount cleanup (ArrangementContext l.3937). SWEEP of sound sources under the provider: graph (togglePlayback), preview (new), video dock (unmounts with StudioWorkspace). B scratch pre-run: NG5c green with fix (16/16), red without ('expected 1 to be +0'). Browser rows: B-NARROW-PREVIEW both viewports + 390, B-NARROW-MIX, B-RESIZE-KEEP rewritten, B-NARROW-WIDE, B-DESK-SAME, B-NARROW-LOAD short, G293-AUTH, DOC-218; other 292 rows carried via SOURCE-SCOPE byte identity. Advisor consulted (available)."
+  },
+  {
+   "id": "D-29z730",
+   "date": "2026-10-31",
+   "text": "lessons.md L49 gains a clause: a task that unmounts or replaces a subtree while its provider stays mounted sweeps (grep, SWEEP tag) every running process that subtree controlled (sound sources, timers, workers) and gives each a stop row. Evidence C-R292-01 (1x). No new line; file stays 59 lines."
+  },
+  {
+   "id": "D-29z731",
+   "date": "2026-10-31",
+   "text": "Order after 293: REGRESSION when the 294 planning is on/after 2026-11-02 (regression-last 2026-10-30, round 258), else SYS-VACUOUS-ROWS -> STUDIO-LINK -> NAME-AND-HINT -> PERF-3c and the rest of STUDIO-PERFORMANCE -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase-2 entries (skip rule). SRW-21-PLAN parallel planning. RETRO due at round 305. Unchanged from D-29z726."
   }
  ],
  "retro_candidates": [

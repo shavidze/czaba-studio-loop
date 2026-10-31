@@ -1,0 +1,35 @@
+26:3. `/home/runner/czaba-project/docs/technical/studio-real-workspace/product-design-review-2026-10-31.md` §F8.
+53:  - Figma: a staff forum reply says the editor is not optimised for mobile browsers and the app is for viewing and commenting ([forum](https://forum.figma.com/t/why-cant-i-edit-my-figma-files-in-mobile-app/62244)). This is not a help-centre article.
+66:### 3.1 New hook `app/hooks/useStudioWideViewport.ts`
+74:- Export both hooks from `app/hooks/index.ts` (one added line).
+76:### 3.2 New component `app/components/arrangement/StudioNarrowScreen.tsx` (export it from `components/arrangement/index.ts`)
+85:1. A `Link to="/"` that reads `← CZABA`, with an `ArrowLeft` icon (`aria-hidden`) and `data-testid="studio-narrow-exit"`. It uses a new test id so the SSR HTML never has two `arrangement-exit` elements.
+86:2. `<h1 tabIndex={-1} data-testid="studio-narrow-heading">The Studio works on a computer</h1>`.
+88:4. A label `Middle East — public preview` (`id` used by the audio element's `aria-labelledby`), then `<audio controls preload="metadata" src="/middle-east.mp3" className="… scheme-dark">`.
+91:5. A `<button type="button">Send link</button>`, then a status line `<p role="status" aria-live="polite">`, empty at rest.
+108:### 3.3 `app/routes/studio-lab.tsx`
+137:**New file `app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx`.**
+159:  - Wide render; click `Mute — Music` (`aria-pressed` true); flip to narrow.
+161:  - Flip to wide: `Mute — Music` `aria-pressed` is still true, and `document.activeElement` is `arrangement-exit`.
+163:  - Mutants: the provider rendered only in the wide branch → `aria-pressed` false; heading focus removed → activeElement `body`.
+179:**`app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` (R6, exact, sketch-tested `b-round-291/sketch-route-theme.diff`, `sketch-tests.log` 5 files / 89 tests):**
+184:**`app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` (R5):**
+190:- l.4 is exactly `**სტატუსი:** Completed (C round 292 PASS)` (L28).
+211:| `app/routes/studio-lab.tsx` | §3.3 |
+212:| `app/hooks/useStudioWideViewport.ts` | new, §3.1 |
+213:| `app/hooks/index.ts` | one export line |
+214:| `app/components/arrangement/StudioNarrowScreen.tsx` | new, §3.2 |
+215:| `app/components/arrangement/index.ts` | one export line |
+216:| `app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx` | new, §3.5 |
+217:| `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` | TH4 + TH10 only (R6) |
+218:| `app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx` | the describe options only (R5) |
+219:| `docs/implementation/2026/quarter-IV/218-fix-pd-narrow-studio-state.md` | new |
+222:- `StudioWorkspace.tsx`, `ArrangementContext.tsx`, `studio-lab-demo.ts`, `strings.ts`, `collection.ts`, `MobileWarning.tsx` and `app/styles/app.css`;
+245:| CLAIMS | claims script on A's tree | Differences only where expected: K2 = 9 lines; K3 rc1, failing only on the 5 granted existing paths; K5 = `<new line count> 2 0` (the hooks live in `app/hooks/`, so the route's `useSyncExternalStore`/`matchMedia` count stays 0); K7 the TH lines move; K8 `timeout` count 1; K11 `218 1`; K12 `exists exists 2`; K13 the `data-studio-theme=` count becomes 2. Other K lines identical. L29 grep over this task: no untagged fact about store code |
+264:| DOC-218 | doc | l.4 byte-exact; TEMPLATE headings in order; only existing test ids cited; limitation and both Saba questions recorded |
+314:| K6 | `StudioWorkspace.tsx` window keydown listener at l.2607, `data-testid="arrangement-exit"` at l.2761 |
+315:| K7 | `studio-theme-obsidian.test.tsx` TH4 map line l.192, TH10 `name: 'h1'` at l.377 |
+316:| K8 | `library-row-strings-ui.test.tsx` describe at l.180, LRS4 at l.264, 0 `timeout` |
+318:| K10 | `studio-lab-demo.ts` l.20 `'demo-middle-east': '/middle-east.mp3'`; title `Middle East — public preview` once |
+321:| K13 | `app.css` global `:focus-visible` rule at l.386; `body:has([data-studio-theme="obsidian"])` at l.3906; 1 `data-studio-theme=` attribute line in non-test `.tsx` |
+323:| K15 | `useArrangement` at l.4220; `isPlaying: boolean` l.299 and `togglePlayback: () => void` l.311 in the context type |

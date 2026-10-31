@@ -1,10 +1,10 @@
-# Active loop summary (2026-10-31T14:05:58.811Z)
+# Active loop summary (2026-10-31T15:15:46.990Z)
 
-- backlog.json 2798 KB -> active view 387 KB
-- status: G_ROOT_GATE round 291
-- servers: `{"checkedUtc":"2026-10-31T13:49:56.6323366Z","round":291,"attempt":1,"store":200}`
+- backlog.json 2808 KB -> active view 386 KB
+- status: G_ROOT_GATE round 292
+- servers: `{"checkedUtc":"2026-10-31T14:58:37.6596181Z","round":292,"attempt":1,"store":200}`
 - last publication: 88b23dd028581a4926cdbf6bdcb0694b41e115ba (rounds 290-291)
-- last root gate: round 291 published - commit 88b23dd028581a4926cdbf6bdcb0694b41e115ba pushed
+- last root gate: round 292 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -572,7 +572,7 @@
 - GATE238-S1 / low / deferred_low_polish (D-29z353): B rates Low, not Medium: the transient loading text is the only loss; the settled ready/failed text is still announced 1-2 s later, and the seed still advances the sequence; no persistent fact is lost; cloud browser cannot measure screen-reader output. Fix candidate rides with A-R237-ARCH-STATUS-PARTS (explicit announce flag) or a one-line provider-internal announce action / the mount 'Loading the demo collection…' text is no longer announced: the provider's mount write is now functional, and the reducer returns 
 - GATE238-S2 / low / deferred_low_polish (D-29z353): docs/code consistency; reachable only with a mount seed plus a load failure, which /studio-lab cannot produce (empty start); decide code-or-doc in the polish pass / doc 185 says failed(n) always replaces the status, but settledCollectionStatus keeps the seed tail after failed(n) when the status starts wi
 - GATE238-S3 / low / deferred_low_polish (D-29z353): reviewer calls it accepted (better than HEAD, where the seed was lost); kept for the polish pass and the status-parts signal / when ready replaces the loading prefix, the whole line (ready + seed + Snap on) is announced again, so the seed text is read twice
-- A-R238-LRS4-HEADROOM / info / ruled (D-29z354): no row is added to library-row-strings-ui; the next round that owns that file declares { timeout: 15_000 } on its describe (L31); C round 238 ran it green; watch at each gate verify.log / library-row-strings-ui LRS4 at 2,654 ms = 53 % of the 5 s vitest default (A first covering run); 47 % in A final run; 36 % at gate 236
+- A-R238-LRS4-HEADROOM / info / dispatched round 292 (D-29z724): R5 grants { timeout: 15_000 } on the describe; gate 291 LRS4 2496 ms, C 291 2707 ms, A 291 2609 ms | ruled (D-29z354): no row is added to library-row-strings-ui; the next round that owns that file declares { timeout: 15_000 } on its describe (L31); C round 238 ran it green; watch at each gate verify.log / library-row-strings-ui LRS4 at 2,654 ms = 53 % of the 5 s vitest default (A first covering run); 47 % in A final run; 36 % at gate 236
 - A-R238-ARCH-STATUS-PREFIX / info / signal, not scheduled (D-29z355): folded into A-R237-ARCH-STATUS-PARTS and addendum 4 of b-round-234-checkpoint-request.md; both reviewers say keep for now / the 'equals prefix or starts with prefix + space' rule exists twice (collection.ts loading, ArrangementContext.tsx refusal); the status line
 - SABA-Q-11B-READOUT / info / awaiting_user (D-29z358): non-blocking; round 239 ships without a new readout / Live 12 shows the grid spacing readout above the time ruler, lower-right corner (manual 6.10; GRGG 0:00); CZABA keeps the pick in the existi
 - SABA-Q-11B-DENSITY / info / awaiting_user (D-29z358): non-blocking; one constant (GRID_ADAPTIVE_MIN_SPACING_PX) if Saba wants denser or sparser lines / adaptive grid density: Live 12 does not publish its spacing threshold; CZABA uses lines >= 24 px apart (WCAG 2.5.8 minimum target; keeps 1 s
@@ -703,18 +703,17 @@
 - A-R288-ARCH-LEADING-SPANS / info / signal (D-29z708): not scheduled; candidate for STORE-4 price component / three hand-matched leading-* 'Price unavailable' spans (store.tsx, ProductCard.tsx, VersionSelector) each copy the known line box by hand; o
 - INFO-C288-FIXTURE-COUNT / info / noted (D-29z708): B task text said 10 active fixtures, the mock has 11; C checked all 11; L29 already covers counts as tagged claims / round-288 task fixture count 10 vs 11
 - SABA-Q-FIXPD1B-NAMES / info / awaiting_user (D-29z709): non-blocking; round 289 ships the defaults / Demo stem names: 'Pulse' (default) or 'Rhythm' for the pulse stem; 'Melody' (default, translation of მელოდია) or 'Lead' for the lead stem
-- GATE289-S1-HEADING-SR-DOUBLE / medium / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): fix-up FIX-PD-1b2, round 291 (aria-hidden on the heading div; aria-labelledby still resolves); C checks the Chromium accessibility tree / library group heading div is plain text inside listbox > group; screen readers may read it as a stray item and again as the group name
-- GATE289-S2-DOC216-ALWAYS / medium / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): doc half fixed in FIX-PD-1b2 round 291; product half = SABA-Q-LIB-SINGLE-RUN (awaiting_user) / doc 216 l.17 says the collection always shows; false for a one-collection search and for purchased libraries (hover title only)
 - SABA-Q-LIB-SINGLE-RUN / info / awaiting_user (D-29z711): paired with SR-275-6 in user-review/screen-review-290.md; non-blocking / when a search or a purchased library shows one collection, should one heading still name it? (today: none; collection only in the hover titl
 - BACKEND-EVIDENCE-F7 / info / open_backend_evidence (D-29z711): later backend-enabled check; not a reason to call round 289 unverified / purchased /studio/$productId library with one run: no heading, short names (unit LG5 carries it)
 - C-R289-INFO-01 / info / counted at RETRO 290 (D-29z712) as an artifact-cited-but-absent finding (2nd: C-R283-02); experiment EXP-R290-ARTIFACT-MANIFEST / task 289 section 5 cites b-round-288/sketch.patch as kept; the file does not exist
-- GATE289-S3-RUN-KEYS / low / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): fixed early in FIX-PD-1b2 round 291 (same owner, one line; bug-gate exception "round already owns that code and it costs little") / group keys use runIndex; an option moving to another run remounts and focus falls to body
-- A-R289-REVIEW-L2 / low / dispatched round 291 FIX-PD-1b2 (D-29z720) | open (D-29z711): fixed early in FIX-PD-1b2 round 291 (rename only) / ST47/ST51 test names still say "keeps only the sound titles" while the array is empty
 - GATE289-S4-BIOME-IGNORE / info / noted (D-29z711) / new biome-ignore (ruled in task 289, precedent K12)
 - GATE289-S6-LIBRARY-TEST-GEORGIAN / info / noted (D-29z711) / library.test.ts keeps its own Georgian fixtures (ruled in task 289; doc 216 TODO)
 - INFO-C290-01 / info / noted (D-29z719): next RETRO inventory greps retro[ _-]?<N> case-insensitive (C method, c-round-290/rt/inventory-c.txt) / retro290-mention-ids.txt missed the hyphen spelling RETRO-290 (D-29z692, PD-REVIEW order_rule) and the retro_policy/final_acceptance hits; C
 - INFO-C290-02 / info / noted (D-29z719): no app bug / first G290-AUTH attempt timed out on the cold dev server (L38 warm-up class); first smoke script stopped with a second Play click (Play is n
-- B-R290-S3-FIRST-ID-KEY-PARTIAL / info / ruled (D-29z720): task 291 requires the behaviour (LG8 both cases); sketch uses `${label}#${occurrence}` / the gate reviewer's S3 fix key={results[run.start].id} keeps focus only when a whole run before the focused option disappears; when the firs
+- INFO-C291-LRS4-HEADROOM / info / ruled (D-29z724): R5 in round 292 declares { timeout: 15_000 } on the describe; no rows added / library-row-strings-ui LRS4 2707 ms (C), 2609 ms (A), 2496 ms (gate 291) against the 5000 ms default
+- INFO-C291-K5-WORDING / info / noted (D-29z723); no lesson (one-line wording slip) / task 291 section 6 K5 said 3 headingId lines; correct is 2 (key replaced)
+- SABA-Q-FIXPD1C-COPY / info / awaiting_user (D-29z725): approved copy shipped in round 292; non-blocking / narrow-state copy: Saba-approved 'The Studio works on a computer. Listen here, or send yourself the link.' vs product-designer 'The Studio n
+- SABA-Q-FIXPD1C-ESCAPE / info / awaiting_user (D-29z725): listed deviation; non-blocking / narrow state has no 'Continue anyway' escape, unlike the legacy MobileBlocker (1024 px); below 900 px the workspace layout is broken
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

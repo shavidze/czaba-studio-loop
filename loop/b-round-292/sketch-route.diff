@@ -1,0 +1,14 @@
+--- app/routes/studio-lab.tsx	2026-10-31 14:57:58.368036262 +0000
++++ /tmp/b293-scratch/app/routes/studio-lab.tsx	2026-10-31 15:19:47.282397549 +0000
+@@ -24,7 +24,10 @@
+ ]);
+ 
+ function StopPlaybackOnNarrow() {
+-  const { isPlaying, togglePlayback } = useArrangement();
++  const { isPlaying, togglePlayback, stopLibraryPreview } = useArrangement();
++  useEffect(() => {
++    stopLibraryPreview();
++  }, [stopLibraryPreview]);
+   useEffect(() => {
+     if (isPlaying) {
+       togglePlayback();

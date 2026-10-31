@@ -1,0 +1,31 @@
+--- app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx	2026-10-31 14:52:42.083611479 +0000
++++ /tmp/b293-scratch/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx	2026-10-31 15:19:34.869867015 +0000
+@@ -215,6 +215,28 @@
+     expect(document.querySelectorAll('[data-clip-id]')).toHaveLength(1);
+   });
+ 
++  it('NG5c: narrowing while a library preview plays stops the preview', async () => {
++    vi.stubGlobal('AudioBuffer', class extends FakeAudioBuffer { copyToChannel() {} });
++    const viewport = installViewportStub(true);
++    render(<StudioLabRoute />);
++    await act(async () => { await Promise.resolve(); });
++    const option = document.querySelector<HTMLElement>('[data-source-id="demo-soft-impact"]');
++    if (!option) throw new Error('missing');
++    act(() => { fireEvent.click(option); });
++    const toggle = () => screen.getAllByRole('button').find((b) => b.textContent === 'Preview' || b.textContent === 'Stop' && b.closest('[data-playing]') === null && !b.hasAttribute('data-playing'));
++    const before = screen.getAllByRole('button').filter((b) => b.textContent === 'Preview');
++    expect(before.length).toBeGreaterThan(0);
++    act(() => { fireEvent.click(before[0]); });
++    const stopNow = screen.getAllByRole('button').filter((b) => b.textContent === 'Stop' && !b.hasAttribute('data-playing'));
++    console.log('STOP-LABELS-BEFORE-NARROW', stopNow.length);
++    expect(stopNow.length).toBe(1);
++    viewport.setWide(false);
++    viewport.setWide(true);
++    const after = screen.getAllByRole('button').filter((b) => b.textContent === 'Stop' && !b.hasAttribute('data-playing'));
++    expect(after.length).toBe(0);
++    void toggle;
++  });
++
+   it('NG6: in the latched narrow state Space and Delete on Send link never reach the workspace transport', () => {
+     const viewport = installViewportStub(true);
+     render(<StudioLabRoute />);

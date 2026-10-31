@@ -1,9 +1,9 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 291 (FIX-PD-1b2 + RT-FIX-291) C PASS with browserVerified/realVerified true (14 rows, 0 failed) and gate 291 published 88b23dd on both remotes; GATE289-S1/S2/S3, A-R289-REVIEW-L2, C-R290-01 closed. A's STOP ruled: LRS4 timeout granted as R5 in round 292; C-R291-01 and gate-291 Lows S1/S2 -> deferred_low_polish. Next is the open Medium F8 (FIX-PD-1c) under the bug gate; regression not due until 2026-11-02. Planned with product-designer + tech-lead consults and a scratch sketch at 88b23dd (desktop 0/0 px diff, SSR tests green with TH4/TH10 grants, narrow at 390/768/899, resize keeps clips). Not COMPLETE: F8 Medium open and most queued scope not done. Not BLOCKED: nothing external missing. Advisor available and consulted twice (pre-handoff fixes applied: hydration-safe latch, max-[900px], Biome rule check).",
- "nextTask": "Round 292: FIX-PD-1c, baseline 88b23dd (frozen b-round-291-r292-tree-sha256.txt, 1158). A: route-level width gate in app/routes/studio-lab.tsx above ArrangementProvider (new useStudioWideViewport hook, server snapshot wide, latch only after hydration); new StudioNarrowScreen ('The Studio works on a computer', native Middle East preview with scheme-dark and preload=metadata, Send link via share/clipboard/manual field, audio-error state); latched narrowing keeps the provider, unmounts StudioWorkspace, stops playback, focus to the narrow h1, widening focuses arrangement-exit; NG1-NG8 tests, TH4/TH10 grants, LRS4 describe timeout (R5), doc 218, code-reviewer. C: CLAIMS, SOURCE-SCOPE, UNIT + mutants, browser rows at 390/768/899/900 and 1280/1440 (desktop 0 px diff), resize keep/stop/focus, Send link paths, audio error, journey, G292-AUTH, DOC-218. See current-task.md.",
+ "reason": "Round 292 (FIX-PD-1c) C FAIL with browserVerified/realVerified true: 20 specified rows PASS, but C-R292-01 (Medium, caused by the round) - the library preview keeps sounding behind the latched narrow screen. Gate 292 skipped; HEAD 88b23dd; A's 9 paths kept. Bug gate: fix the Medium first. Round 293 is a 3-path fix-up (StopPlaybackOnNarrow also calls stopLibraryPreview, NG5c pre-run on a scratch copy: green with the fix, red without). Regression not due until 2026-11-02. Not COMPLETE: C-R292-01 open and most queued scope not done. Not BLOCKED: nothing external missing. Advisor available and consulted.",
+ "nextTask": "Round 293: FIX-PD-1c2, baseline 88b23dd + A round-292 tree (frozen b-round-292-r293-tree-sha256.txt, 1162; claims b-round-292/claims-293.sh). A: studio-lab.tsx StopPlaybackOnNarrow also calls stopLibraryPreview once on mount; NG5c in studio-narrow-gate-ui (demo-soft-impact preview, Stop before narrowing, Preview + source stop after widening, mutant red); doc 218 l.4 -> Completed (C round 293 PASS) + Problem/Solution. C: CLAIMS, SOURCE-SCOPE, TYPECHECK, UNIT + 3 mutants, B-NARROW-PREVIEW (1440/1280 + 390, RMS 0 within 300 ms), B-NARROW-MIX, B-RESIZE-KEEP rewritten (sound unmuted + state), B-NARROW-WIDE, B-DESK-SAME 0 px, B-NARROW-LOAD short, G293-AUTH, DOC-218. Root publishes 292+293 together. See current-task.md.",
  "remaining": [
-  "FIX-PD-1c (round 292: F8 narrow-window state + R5 LRS4 timeout)",
+  "FIX-PD-1c2 (round 293: C-R292-01 Medium fix-up, library preview stop on narrow; closes FIX-PD-1c)",
   "SYS-VACUOUS-ROWS (systemic test-only, after FIX-PD-1c)",
   "STUDIO-LINK",
   "NAME-AND-HINT",
@@ -62,6 +62,10 @@
   "B-R291-NARROW-PREFETCH (deferred_low_polish)",
   "LIB-RUNS-POLISH (bundle candidate, signal)",
   "SABA-Q-FIXPD1C-COPY (awaiting_user, non-blocking)",
-  "SABA-Q-FIXPD1C-ESCAPE (awaiting_user, non-blocking)"
+  "SABA-Q-FIXPD1C-ESCAPE (awaiting_user, non-blocking)",
+  "A-R292-REVIEW-L-NARROW-REMOUNT (deferred_low_polish)",
+  "A-R292-REVIEW-L-TH4-TITLE (deferred_low_polish)",
+  "A-R292-REVIEW-L-ERROR-NOT-ANNOUNCED (deferred_low_polish)",
+  "A-R292-ARCH-DEFER-SOURCE-LOAD (signal)"
  ]
 }
