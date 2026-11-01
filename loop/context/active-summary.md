@@ -1,8 +1,8 @@
-# Active loop summary (2026-10-31T19:49:15.711Z)
+# Active loop summary (2026-10-31T20:21:42.970Z)
 
-- backlog.json 2874 KB -> active view 393 KB
-- status: G_ROOT_GATE round 299
-- servers: `{"checkedUtc":"2026-10-31T19:35:51.3974944Z","round":299,"attempt":1,"store":200}`
+- backlog.json 2884 KB -> active view 392 KB
+- status: ENV_CHECK round 300
+- servers: `{"checkedUtc":"2026-10-31T20:21:42.7587662Z","round":300,"attempt":2,"store":200}`
 - last publication: 61c37d8e638167d404c0cc44820df4b144249fa8 (rounds 299-299)
 - last root gate: round 299 published - commit 61c37d8e638167d404c0cc44820df4b144249fa8 pushed
 
@@ -719,13 +719,12 @@
 - INFO-C294-STORE-NO-MAIN-LANDMARK / info / routed (D-29z741): acceptance row for STORE-2b (layout restyle owns root/Store layout); not scheduled alone / / and /store render no <main>/role=main at HEAD (WCAG 1.3.1/2.4.1)
 - INFO-C294-TOKEN-POST-405-STACK / info / routed (D-29z741): risk line for SRW-21-PLAN (protected route review); loop does not edit the file / dev-server POST /api/studio-token 405 body includes a Remix stack trace (no token); protected file; production unverified
 - SABA-Q-STUDIO-LINK / info / awaiting_user (non-blocking; defaults applied) / STUDIO-LINK defaults to confirm: (1) product-sidebar text link under title/artist; (2) hide the link on products without a Studio source; (3
-- GATE297-F1 / medium / partly closed (D-29z764): prop-value and structural mismatches before the dock caught since round 298; the attribute gap is C-R298-01, in fix round 299 | in fix (D-29z760): round 298 STUDIO-LINK-a3 / LH3's hydration-warning assertion is vacuous when studio-link-hydrate-ui.test.tsx runs whole: React prints one prop-mismatch warning per loa
 - INFO-C297-02 / info / noted (D-29z761): STUDIO-LINK-DYNAMIC row / browser cold row cannot distinguish prop wiring from the default selection
-- C-R298-01 / medium / in fix (D-29z766): round 299 STUDIO-LINK-a4 / LH3's narrowed regex misses 'Extra attributes from the server' (and 'Did not expect server HTML'), so a server-only extra attribute on the l
-- GATE298-S3 / low / in fix (D-29z766): round 299 / hydrateRoute pushes the unmount after await act; a throw inside hydration leaves the root mounted
-- GATE298-S1 / low / in fix (D-29z766): round 299 doc grant / doc 220 overstates cleanup and the LH3 limit; l.68 count is the round-296 set
-- A-R298-REVIEW-5 / low / in fix (D-29z765): round 299 removes the muted tolerance and the <=1 line / toBeLessThanOrEqual(1) cannot fail
 - INFO-C298-01 / info / signal (D-29z765): pre-existing client media abort, no task / /middle-east.mp3 net::ERR_ABORTED on every /studio-lab load (server 200)
+- INFO-C299-01 / info / info (D-29z770): no task / role=button /video/i click did not open a file chooser; C used setInputFiles on arrangement-video-input
+- INFO-C299-02 / info / info (D-29z770): see A-R299-REVIEW-1 (deferred Low) / NG9 is today the first hydrateRoot in studio-narrow-gate-ui.test.tsx; a hydrate test above it would make it vacuous
+- B-R299-IM24-LOAD-SIGNAL / info / signal (D-29z773): watch; a failure in a run alone is a STOP / insert-marker-ui IM24 failed once under concurrent dev-server + Playwright load; passes alone 3/3 and in gate 299
+- SABA-Q-STUDIO-LINK-B / info / awaiting_user (D-29z773) / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
