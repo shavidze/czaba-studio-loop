@@ -1,0 +1,44 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a304/scratch[39m
+
+ [31m❯[39m perf/lib/zoom-probe.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 33[2mms[22m[39m
+[31m     [31m×[31m ZP1: counts waveform d rewrites and ruler child mutations only[39m[32m 23[2mms[22m[39m
+     [32m✓[39m ZP2: a non-d attribute on the waveform path does not count[32m 2[2mms[22m[39m
+     [32m✓[39m ZP3: reset zeroes the counts and keeps counting afterwards[32m 1[2mms[22m[39m
+     [32m✓[39m ZP4: after disconnect nothing counts and the probe reports disconnected[32m 3[2mms[22m[39m
+     [32m✓[39m ZP6: a second install disconnects the first probe and counts once[32m 1[2mms[22m[39m
+     [32m✓[39m ZP5: read without install reports disconnected zeros[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m perf/lib/zoom-probe.test.ts[2m > [22mzoom probe (PERF-3c)[2m > [22mZP1: counts waveform d rewrites and ruler child mutations only
+[31m[1mAssertionError[22m: expected { pathRewrites: 2, …(2) } to deeply equal { pathRewrites: 1, …(2) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "connected": true,[22m
+[32m-   "pathRewrites": 1,[39m
+[31m+   "pathRewrites": 2,[39m
+[2m    "rulerMutations": 2,[22m
+[2m  }[22m
+
+[36m [2m❯[22m perf/lib/zoom-probe.test.ts:[2m48:29[22m[39m
+    [90m 46| [39m    fixture[33m.[39moutside[33m.[39m[34mappend[39m(document[33m.[39m[34mcreateElement[39m([32m'span'[39m))[33m;[39m
+    [90m 47| [39m
+    [90m 48| [39m    expect(readZoomProbe()).toEqual({ pathRewrites: 1, rulerMutations:…
+    [90m   | [39m                            [31m^[39m
+    [90m 49| [39m  })[33m;[39m
+    [90m 50| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 22:18:08
+[2m   Duration [22m 734ms[2m (transform 47ms, setup 0ms, import 61ms, tests 33ms, environment 490ms)[22m
+
+
+::error file=/tmp/a304/scratch/perf/lib/zoom-probe.test.ts,title=perf/lib/zoom-probe.test.ts > zoom probe (PERF-3c) > ZP1%3A counts waveform d rewrites and ruler child mutations only,line=48,column=29::AssertionError: expected { pathRewrites: 2, …(2) } to deeply equal { pathRewrites: 1, …(2) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "connected": true,%0A-   "pathRewrites": 1,%0A+   "pathRewrites": 2,%0A    "rulerMutations": 2,%0A  }%0A%0A ❯ perf/lib/zoom-probe.test.ts:48:29%0A%0A

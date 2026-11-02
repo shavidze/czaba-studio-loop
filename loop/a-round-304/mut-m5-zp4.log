@@ -1,0 +1,69 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a304/scratch[39m
+
+ [31m❯[39m perf/lib/zoom-probe.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 39[2mms[22m[39m
+     [32m✓[39m ZP1: counts waveform d rewrites and ruler child mutations only[32m 19[2mms[22m[39m
+     [32m✓[39m ZP2: a non-d attribute on the waveform path does not count[32m 3[2mms[22m[39m
+     [32m✓[39m ZP3: reset zeroes the counts and keeps counting afterwards[32m 2[2mms[22m[39m
+[31m     [31m×[31m ZP4: after disconnect nothing counts and the probe reports disconnected[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m ZP6: a second install disconnects the first probe and counts once[39m[32m 5[2mms[22m[39m
+     [32m✓[39m ZP5: read without install reports disconnected zeros[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m perf/lib/zoom-probe.test.ts[2m > [22mzoom probe (PERF-3c)[2m > [22mZP4: after disconnect nothing counts and the probe reports disconnected
+[31m[1mAssertionError[22m: expected { pathRewrites: 2, …(2) } to deeply equal { pathRewrites: +0, …(2) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "connected": false,[22m
+[32m-   "pathRewrites": 0,[39m
+[32m-   "rulerMutations": 0,[39m
+[31m+   "pathRewrites": 2,[39m
+[31m+   "rulerMutations": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m perf/lib/zoom-probe.test.ts:[2m82:29[22m[39m
+    [90m 80| [39m    [35mawait[39m [35mnew[39m [33mPromise[39m((resolve) [33m=>[39m [34msetTimeout[39m(resolve[33m,[39m [34m0[39m))[33m;[39m
+    [90m 81| [39m
+    [90m 82| [39m    expect(readZoomProbe()).toEqual({ pathRewrites: 0, rulerMutations:…
+    [90m   | [39m                            [31m^[39m
+    [90m 83| [39m  })[33m;[39m
+    [90m 84| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m perf/lib/zoom-probe.test.ts[2m > [22mzoom probe (PERF-3c)[2m > [22mZP6: a second install disconnects the first probe and counts once
+[31m[1mAssertionError[22m: expected { pathRewrites: 1, rulerMutations: +0 } to deeply equal { Object (pathRewrites, rulerMutations) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "pathRewrites": 0,[39m
+[31m+   "pathRewrites": 1,[39m
+[2m    "rulerMutations": 0,[22m
+[2m  }[22m
+
+[36m [2m❯[22m perf/lib/zoom-probe.test.ts:[2m95:32[22m[39m
+    [90m 93| [39m
+    [90m 94| [39m    [34mexpect[39m(firstProbe[33m?.[39mconnected)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m 95| [39m    expect(firstProbe?.counts).toEqual({ pathRewrites: 0, rulerMutatio…
+    [90m   | [39m                               [31m^[39m
+    [90m 96| [39m    expect(readZoomProbe()).toEqual({ pathRewrites: 1, rulerMutations:…
+    [90m 97| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 22:18:07
+[2m   Duration [22m 736ms[2m (transform 47ms, setup 0ms, import 60ms, tests 39ms, environment 483ms)[22m
+
+
+::error file=/tmp/a304/scratch/perf/lib/zoom-probe.test.ts,title=perf/lib/zoom-probe.test.ts > zoom probe (PERF-3c) > ZP4%3A after disconnect nothing counts and the probe reports disconnected,line=82,column=29::AssertionError: expected { pathRewrites: 2, …(2) } to deeply equal { pathRewrites: +0, …(2) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "connected": false,%0A-   "pathRewrites": 0,%0A-   "rulerMutations": 0,%0A+   "pathRewrites": 2,%0A+   "rulerMutations": 1,%0A  }%0A%0A ❯ perf/lib/zoom-probe.test.ts:82:29%0A%0A
+
+::error file=/tmp/a304/scratch/perf/lib/zoom-probe.test.ts,title=perf/lib/zoom-probe.test.ts > zoom probe (PERF-3c) > ZP6%3A a second install disconnects the first probe and counts once,line=95,column=32::AssertionError: expected { pathRewrites: 1, rulerMutations: +0 } to deeply equal { Object (pathRewrites, rulerMutations) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "pathRewrites": 0,%0A+   "pathRewrites": 1,%0A    "rulerMutations": 0,%0A  }%0A%0A ❯ perf/lib/zoom-probe.test.ts:95:32%0A%0A

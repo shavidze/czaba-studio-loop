@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-02T21:22:27.822Z)
+# Active loop summary (2026-11-02T23:08:03.375Z)
 
-- backlog.json 2916 KB -> active view 396 KB
-- status: G_ROOT_GATE round 303
-- servers: `{"checkedUtc":"2026-11-02T21:04:40.9352202Z","round":303,"attempt":1,"store":200}`
-- last publication: 53fc8dfe371f362fcc2b76ef74a8029c1d6dcd42 (rounds 303-303)
-- last root gate: round 303 published - commit 53fc8dfe371f362fcc2b76ef74a8029c1d6dcd42 pushed
+- backlog.json 2928 KB -> active view 398 KB
+- status: G_ROOT_GATE round 304
+- servers: `{"checkedUtc":"2026-11-02T22:40:39.4501296Z","round":304,"attempt":1,"store":200}`
+- last publication: adf959d135ee12588f10325890371dfb871ae4de (rounds 304-304)
+- last root gate: round 304 published - commit adf959d135ee12588f10325890371dfb871ae4de pushed
 
 ## Current items: -
 
@@ -731,6 +731,8 @@
 - SABA-Q-NAME-TESTIMONIAL / info / awaiting_user (D-29z786) / 
 - A-R302-INFO-CZABA-DOUBLE-READOUT / info / awaiting_user candidate for the RETRO 305 screen review (D-29z789) / 
 - SABA-Q-NAME-HINT-LIFETIME / info / awaiting_user (D-29z791) / 
+- SABA-Q-NAME-HINT-KEYBOARD / info / awaiting_user (D-29z794) / 
+- B-R303-PERF-HARNESS-METRIC-FAMILY / info / architecture signal (D-29z797), non-blocking / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

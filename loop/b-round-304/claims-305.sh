@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Claims for task round 305 (L29 + L56). Run from the loop root: bash b-round-304/claims-305.sh
+S=/home/runner/czaba-project/store
+echo "K1 $(python3 -I -c "import json;g=json.load(open('gates/gate-round-304.json'));print(g['status'],g['commit'][:7])")"
+echo "K2 $(wc -c < b-round-304/git-status-at-planning.txt) $(cut -c1-7 b-round-304/head-at-planning.txt)"
+echo "K3 $(wc -l < b-round-304-r305-tree-sha256.txt)"
+echo "K4 $(for f in 'app/routes/studio.$productId.tsx' app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/__tests__/download-routes.test.ts app/lib/auth.ts app/contexts/AuthContext.tsx app/entry.server.tsx; do grep -cF "  $f" b-round-304-r305-tree-sha256.txt; done | tr '\n' ' ')"
+echo "K5 $(grep -n 'data-playing' $S/app/components/arrangement/ArrangementTransport.tsx | tr -s ' ') | $(grep -n 'playLabel' $S/app/lib/arrangement/strings.ts | tr -s ' ')"
+echo "K6 $(python3 -I -c "import json;d=json.load(open('b-round-304/screens/screen305.json'));print({k:len(v) for k,v in d['screens'].items()}, d.get('laneErrors'))")"
+echo "K7 $(wc -l < lessons.md)"
+echo "K8 $(for p in b-round-304/backlog-before-305.json b-round-304/lessons-before-305.md b-round-304/lessons-diff.txt b-round-304/feature-status-before-305.md b-round-304/b-next-before-305.json b-round-304/current-task-before-305.md b-round-304/collect.py b-round-304/collect.txt b-round-304/rounds-290-304.json b-round-304/cost.py b-round-304/cost.txt b-round-304/cost-rows.json b-round-304/retro-numbers.py b-round-304/retro-numbers.txt b-round-304/fails-detail.py b-round-304/fails-detail.txt b-round-304/gate-reviews.py b-round-304/gate-reviews.txt b-round-304/classify.py b-round-304/classify.txt b-round-304/classify-out.json b-round-304/window-findings.py b-round-304/window-findings.txt b-round-304/totals.py b-round-304/totals.txt b-round-304/deferred-totals.txt b-round-304/open-medium-plus.txt b-round-304/claims-count.txt b-round-304/manifest-fields.py b-round-304/manifest-fields.txt b-round-304/awaiting-user.py b-round-304/awaiting-user.txt b-round-304/retro305-mentions.py b-round-304/retro305-mentions.txt b-round-304/retro305-mention-ids.txt b-round-304/fails-cause-hand.txt b-round-304/claims-findings-hand.txt b-round-304/stops.txt b-round-304/update-backlog.py b-round-304/screens/capture.mjs b-round-304/screens/capture.log b-round-304/screens/screen305.json b-round-304/screens/counts.txt b-round-304/mock.log b-round-304/git-status-at-planning.txt b-round-304/head-at-planning.txt retros/retro-305.md user-review/screen-review-305.md tasks/round-304.md; do test -f $p || echo MISSING $p; done; echo done)"
+echo "K9 $(ls b-round-304/screens/*.png | wc -l)"
+echo "K10 $(python3 -I -c "import json;b=json.load(open('backlog.json'));print(b['version'],b['decisions_log_b'][-1]['id'])")"
+echo "K11 $(grep -l '"manifestPaths"' c-round-29[0-9].json c-round-30[0-4].json | tr '\n' ' ')"
+echo "K12 $(python3 -I -c "import json;d=json.load(open('b-round-304/screens/screen305.json'))['journey'];print([(k,v['studioUrl'].split('5173')[1],v['positionAfterPlay'],len(v['clips'])) for k,v in d.items()])")"
+echo "K13 $(grep -nE '^\s*bpm:' $S/app/data/studio-lab-demo.ts | cut -d: -f1 | tr '\n' ' ')| middle-east block bpm: $(awk 'NR>=45 && NR<=51' $S/app/data/studio-lab-demo.ts | grep -c bpm) | id l.45: $(sed -n 45p $S/app/data/studio-lab-demo.ts | tr -s ' ')"
+echo "K14 $(grep -c 'Test Files .*1 failed' gates/round-293/verify.log) $(grep -n 'FAIL .*store-theme-tokens.test.ts' gates/round-293/verify.log | cut -d: -f1)"
+echo "K15 $(for n in 300 301 302 303 304; do grep -ci 'manifestPaths\|HR-C-MANIFEST' tasks/round-$n.md; done | tr '\n' ' ')"
+echo "K16 $(grep -il 'post-frame\|postFrame' c-round-29[0-9].json c-round-30[0-4].json tasks/round-29[0-9].md tasks/round-30[0-4].md | wc -l)"
+echo "K17 $(grep -oE '^[0-9]+\.' lessons.md | tr -d . | sort -n | tr '\n' ' ')"
+echo "K18 $(sed -n 9p $S/vitest.config.ts | tr -s ' ')"
+echo "K19 $(cmp tasks/round-304.md b-round-304/current-task-before-305.md && echo archive-equal)"

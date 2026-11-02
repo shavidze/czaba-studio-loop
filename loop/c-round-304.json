@@ -1,0 +1,93 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-02T22:40:39.4501296Z",
+  "round": 304,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R304-01",
+   "severity": "low",
+   "steps": [
+    "Read perf/budgets.interactions.json notes of interact.zoom.30.{in,out,wheel}.loaf-max-ms",
+    "Compare with task \u00a72 'maximum LoAF duration in the key windows'",
+    "Inspect c-round-304/perf/latest-interactions.json out.loaf-max-ms pass 3 perKey"
+   ],
+   "expected": "B-ruled window rule for LoAF rows",
+   "actual": "A uses an overlap rule (deviation, documented in notes); pass 3 out key 3 keydown 56 ms but LoAF 0 (frame <50 ms)",
+   "evidence": "a-round-304.md deviation; c-round-304/perf/latest-interactions.json",
+   "note": "was INFO-C304-LOAF-OVERLAP in c-round-304.md; Low for B ruling, not blocking"
+  },
+  {
+   "id": "C-R304-02",
+   "severity": "low",
+   "steps": [
+    "Open c-round-304/perf/latest-interactions.json 'sequence'"
+   ],
+   "expected": "sequence lists the new zoom in/out/wheel steps",
+   "actual": "new steps not listed (outside grant)",
+   "evidence": "c-round-304/perf/latest-interactions.json sequence",
+   "note": "was INFO-C304-SEQUENCE in c-round-304.md; Low, outside grant"
+  }
+ ],
+ "info": [
+  {
+   "id": "INFO-C304-REVIEW-POSTFIX",
+   "note": "A's post-review changes (overlap rule, ZP4 async, ZP6) not re-reviewed by code-reviewer; covered by C perf run, A m5 and C unit re-run; gate review should look at runZoomProbeSteps",
+   "evidence": "a-round-304.md A-REVIEW"
+  },
+  {
+   "id": "INFO-C304-AUTH-ATTEMPT1",
+   "note": "cold-start document.body null on /studio/middle-east recurred (as INFO-C303-AUTH-ATTEMPT1); environment-invalid attempt replaced once; C script now waits for non-empty body",
+   "evidence": "c-round-304/logs/auth-1-invalid.log, auth-2.log, auth/g304-auth.json"
+  },
+  {
+   "id": "INFO-C304-FAKEBEARER-500",
+   "note": "fake bearer -> 500 'Unable to prepare Studio access' (r303: 403) with mock :5199 not running; no token in any body; backend-dependent, not a bypass",
+   "evidence": "c-round-304/auth/g304-auth.json api.fakeBearer"
+  },
+  {
+   "id": "INFO-C304-LESSONS-MISSING",
+   "note": "lessons.md not found anywhere under /home/runner/czaba-project (find -iname 'lessons*'); policy requires it every round",
+   "evidence": "find output in C session"
+  },
+  {
+   "id": "INFO-C304-C303-SHOT",
+   "note": "C re-ran c-round-303/auth/probe.cjs, which rewrote c-round-303/auth/shots/probe-legacy.png (same state: Sign in required, 0 audio)",
+   "evidence": "c-round-303/auth/shots/probe-legacy.png mtime 22:56"
+  }
+ ],
+ "passed": [
+  "PERF-RUN",
+  "PROBE-EQUIV",
+  "EXIT",
+  "G304-AUTH",
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "DOC",
+  "MUTANTS"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "npm run verify"
+ ],
+ "blocked": [],
+ "exitDecision": {
+  "met": false,
+  "inKeydownMaxMedian": 24,
+  "outKeydownMaxMedian": 80,
+  "commitsDetailMax": {
+   "in": 1,
+   "out": 1,
+   "wheel": 1
+  },
+  "next": "PERF-3d"
+ },
+ "abletonConformance": "not_applicable",
+ "interactionsDurationMs": 333679
+}
