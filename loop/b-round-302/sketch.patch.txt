@@ -1,0 +1,96 @@
+--- app/contexts/ArrangementContext.tsx	2026-11-02 20:11:22.690298098 +0000
++++ /tmp/b302-scratch/app/contexts/ArrangementContext.tsx	2026-11-02 20:34:20.739387559 +0000
+@@ -679,6 +679,7 @@
+   const [isPlaying, setIsPlaying] = useState(false);
+   const [pxPerSecond, setPxPerSecondState] = useState(TIMELINE_ZOOM_DEFAULT);
+   const gestureCountRef = useRef(0);
++  const nameBarHintShownRef = useRef(false);
+   const [statusEntry, setStatus] = useReducer(
+     (previous: ArrangementStatusEntry, next: ArrangementStatusUpdate) =>
+       reduceArrangementStatus(previous, next, gestureCountRef.current > 0),
+@@ -1627,6 +1628,14 @@
+     [setSelectedSourceId],
+   );
+ 
++  const withNameBarHint = useCallback((text: string): string => {
++    if (nameBarHintShownRef.current) {
++      return text;
++    }
++    nameBarHintShownRef.current = true;
++    return `${text} ${studioLibraryStrings.nameBarHint}`;
++  }, []);
++
+   const addSourceToActiveTrack = useCallback(
+     (sourceId?: string) => {
+       if (refuseEditDuringGesture()) {
+@@ -1670,15 +1679,24 @@
+       setRange(null);
+       const moved = Math.abs(result.clip.start - desired) > ARRANGEMENT_EPS;
+       setStatus(
+-        studioLibraryStrings.clipAdded({
+-          title: source.title,
+-          track: track.name,
+-          time: formatArrangementTime(result.clip.start),
+-          suffix: moved ? studioLibraryStrings.nearestFreeSpot : '',
+-        }),
++        withNameBarHint(
++          studioLibraryStrings.clipAdded({
++            title: source.title,
++            track: track.name,
++            time: formatArrangementTime(result.clip.start),
++            suffix: moved ? studioLibraryStrings.nearestFreeSpot : '',
++          }),
++        ),
+       );
+     },
+-    [applyEdit, collection.sources, refuseEditDuringGesture, setRange, setSelectedClipId],
++    [
++      applyEdit,
++      collection.sources,
++      refuseEditDuringGesture,
++      setRange,
++      setSelectedClipId,
++      withNameBarHint,
++    ],
+   );
+ 
+   const beginLibraryDrag = useCallback((sourceId: string) => {
+@@ -1737,12 +1755,14 @@
+       setSelectedClipId(result.clip.id);
+       setRange(null);
+       setStatus(
+-        studioLibraryStrings.clipAdded({
+-          title: dragged.title,
+-          track: track.name,
+-          time: formatArrangementTime(result.clip.start),
+-          suffix: '',
+-        }),
++        withNameBarHint(
++          studioLibraryStrings.clipAdded({
++            title: dragged.title,
++            track: track.name,
++            time: formatArrangementTime(result.clip.start),
++            suffix: '',
++          }),
++        ),
+       );
+       return true;
+     },
+@@ -1753,6 +1773,7 @@
+       setActiveTrackId,
+       setRange,
+       setSelectedClipId,
++      withNameBarHint,
+     ],
+   );
+ 
+--- app/lib/arrangement/strings.ts	2026-11-02 20:12:48.116939555 +0000
++++ /tmp/b302-scratch/app/lib/arrangement/strings.ts	2026-11-02 20:34:16.388280639 +0000
+@@ -290,6 +290,7 @@
+     time: string;
+     suffix: string;
+   }): string => `“${title}” added to the ${track} track at ${time}${suffix}.`,
++  nameBarHint: 'Drag a clip by its name bar to move it.',
+   kindMusic: 'Music',
+   kindStem: 'Stem',
+   folderMusic: 'Music',
