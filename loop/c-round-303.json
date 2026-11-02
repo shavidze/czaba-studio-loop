@@ -1,0 +1,79 @@
+{
+  "round": 303,
+  "task": "NAME-AND-HINT-b",
+  "taskStatus": "PASS",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {
+    "checkedUtc": "2026-11-02T21:04:40.9352202Z",
+    "round": 303,
+    "attempt": 1,
+    "store": 200
+  },
+  "bugs": [],
+  "info": [
+    {
+      "id": "INFO-C303-K9K10-LINESHIFT",
+      "note": "A's STOP: CLAIMS K9/K10 are at l.709/710 instead of HEAD l.708/709. The content is byte-identical. The +1 shift follows directly from grant 2, which requires strings.ts to be byte-equal to B's sketch, and that sketch inserts nameBarHint above them. This is a contradiction inside the task, not a defect in A's work. C ruled that the content must match and the line numbers may move. B should confirm the ruling.",
+      "evidence": "c-round-303/claims-c.txt vs b-round-302/claims-303-output.txt"
+    },
+    {
+      "id": "INFO-C303-AUTH-ATTEMPT1",
+      "note": "The first run of the G303-AUTH script failed in /studio/middle-east: document.body was null (cold-start navigation). This attempt is environment-invalid. It is kept as evidence and was replaced once. A separate probe and the second run were both clean.",
+      "evidence": "c-round-303/logs/auth-1-invalid.log, auth-2.log, auth/g303-auth.json"
+    },
+    {
+      "id": "INFO-C303-CLIPBAR-TERM",
+      "note": "The Live 12 manual §6.7 calls it the 'clip bar'. Saba's approved copy says 'name bar'. The copy was kept verbatim, as the task records."
+    },
+    {
+      "id": "INFO-C303-SECOND-REGEX",
+      "note": "In rows2.json, second.plainExact=false is a false negative: the probe regex assumed a 'Hero Music' title, but the real title is 'CZABA hero — public preview'. C re-evaluated it with a title-agnostic plain clipAdded regex: plainExactGeneric=true at both viewports. In main.json, firstEnter.second.plainMatch=false is correct by design: that second source (demo-stem-pulse) has a BPM, so the existing seed text is appended after the plain sentence, with no hint. The no-BPM run in rows2 is the H-SECOND evidence.",
+      "evidence": "c-round-303/rows2.json second.plainExactGeneric"
+    },
+    {
+      "id": "INFO-C303-A-STOP",
+      "note": "A's 'STOP — needs B ruling' header concerns only K9/K10 (INFO-C303-K9K10-LINESHIFT). All of A's work is complete in the tree. Root should not read A's report as an unfinished round once B confirms the ruling."
+    },
+    {
+      "id": "INFO-C303-WAV-PEAK",
+      "note": "The journey WAV peak is 1.0 at 24-bit. A re-export of the single unmoved Middle East clip has 30 full-scale samples in 9,729,792 (3e-6), each run 1 sample long. These are isolated peaks, which fits a source normalised to 0 dBFS, not sustained clipping. Pre-existing and unrelated to round 303's text-only change. Not a bug.",
+      "evidence": "c-round-303/peak.json, peak.cjs"
+    }
+  ],
+  "passed": [
+    "H-FIRST-ENTER",
+    "H-SECOND",
+    "H-FIRST-DROP",
+    "H-SEED",
+    "H-UNDO",
+    "H-RELOAD",
+    "H-VIDEO-FIRST",
+    "H-BEHAVIOUR",
+    "H-BOX",
+    "H-SR",
+    "H-BUDGET",
+    "H-JOURNEY",
+    "RV-EN",
+    "G303-AUTH",
+    "SOURCE-SCOPE",
+    "CLAIMS (K9/K10 content-equal, +1 line shift forced by byte-equal grant 2; B ruling pending)",
+    "DOC",
+    "NB1-NB9+NB4b (C re-run)",
+    "collision rows TU2 TU5 TU9 SD1 SD2 DE1 DE2 DE3 LT15 LT19 FS7 ST10 (C re-run)"
+  ],
+  "gate": [
+    "full vitest",
+    "build",
+    "npm run verify"
+  ],
+  "blocked": [
+    "purchased workspace first add in a browser: backend unavailable in cloud (SRW-21 deferred_user; no route mounts it)"
+  ],
+  "ableton": {
+    "move by clip bar only (Live 12 manual §6.7)": "confirmed: the name bar moves the clip (+100 px), cursor grab",
+    "body drag = time selection (§6.9)": "confirmed: range appears, clip left unchanged, cursor text",
+    "one-time hint": "deliberate difference: a CZABA-only aid by Saba's decision Q5; Live has no such hint"
+  },
+  "evidence": "c-round-303.md; c-round-303/main.json, rows2.json, auth/g303-auth.json, shots/, logs/"
+}

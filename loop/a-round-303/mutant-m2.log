@@ -1,0 +1,166 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a303-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx [2m([22m[2m9 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[33m 1384[2mms[22m[39m
+[31m     [31m×[31m NB1 Enter on a ready no-BPM source appends the hint to the first clip-added text[39m[33m 454[2mms[22m[39m
+[31m     [31m×[31m NB2 a second add shows the plain clip-added text[39m[32m 175[2mms[22m[39m
+[31m     [31m×[31m NB3 a library drop as the first add appends the hint[39m[32m 104[2mms[22m[39m
+[31m     [31m×[31m NB4 refused adds show no hint and do not use it up; the next success has it[39m[32m 185[2mms[22m[39m
+[31m     [31m×[31m NB5 Undo of the first add does not re-arm the hint[39m[32m 118[2mms[22m[39m
+[31m     [31m×[31m NB6 a BPM first add puts the hint between the add sentence and the tempo seed text[39m[32m 143[2mms[22m[39m
+[31m     [31m×[31m NB7 a first add at the nearest free spot keeps the suffix before the hint[39m[32m 122[2mms[22m[39m
+[31m     [31m×[31m NB8 a video import neither shows nor uses up the hint; the next library add has it[39m[32m 81[2mms[22m[39m
+     [32m✓[39m NB9 the hint string is the exact approved sentence[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 8 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB1 Enter on a ready no-BPM source appends the hint to the first clip-added text
+[31m[1mAssertionError[22m: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality[39m
+
+Expected: [32m"“Song” added to the Music track at 00:00.000.[7m Drag a clip by its name bar to move it.[27m"[39m
+Received: [31m"“Song” added to the Music track at 00:00.000."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m239:32[22m[39m
+    [90m237| [39m      [34menterOn[39m([32m'song'[39m)[33m;[39m
+    [90m238| [39m      expect(view.container.querySelectorAll('[data-clip-id]')).toHave…
+    [90m239| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m(
+    [90m   | [39m                               [31m^[39m
+    [90m240| [39m        `${addedText('Song', 'Music', '00:00.000')} ${studioLibraryStr…
+    [90m241| [39m      )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB2 a second add shows the plain clip-added text
+[31m[1mAssertionError[22m: expected '“Song” added to the Music track at 00…' to contain 'Drag a clip by its name bar to move i…'[39m
+
+Expected: [32m"[7mDrag a clip by its name bar to move it[27m."[39m
+Received: [31m"[7m“Song” added to the Music track at 00:00.000[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m251:32[22m[39m
+    [90m249| [39m      [35mconst[39m { api[33m,[39m view[33m,[39m enterOn } [33m=[39m [35mawait[39m [34mmountHintWorkspace[39m()[33m;[39m
+    [90m250| [39m      [34menterOn[39m([32m'song'[39m)[33m;[39m
+    [90m251| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoContain[39m([33mHINT[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m252| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34msetActiveTrack[39m([32m'sfx'[39m))[33m;[39m
+    [90m253| [39m      [34menterOn[39m([32m'hit'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB3 a library drop as the first add appends the hint
+[31m[1mAssertionError[22m: expected '“Hit” added to the SFX track at 00:02…' to be '“Hit” added to the SFX track at 00:02…' // Object.is equality[39m
+
+Expected: [32m"“Hit” added to the SFX track at 00:02.000.[7m Drag a clip by its name bar to move it.[27m"[39m
+Received: [31m"“Hit” added to the SFX track at 00:02.000."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m265:32[22m[39m
+    [90m263| [39m      [34mexpect[39m(clips[[34m0[39m][33m?.[39mtrackId)[33m.[39m[34mtoBe[39m([32m'sfx'[39m)[33m;[39m
+    [90m264| [39m      [34mexpect[39m(clips[[34m0[39m][33m?.[39mstart)[33m.[39m[34mtoBeCloseTo[39m([34m2[39m[33m,[39m [34m9[39m)[33m;[39m
+    [90m265| [39m      expect(statusText(view)).toBe(`${addedText('Hit', 'SFX', '00:02.…
+    [90m   | [39m                               [31m^[39m
+    [90m266| [39m      [34mexpect[39m([34mstatusText[39m(view)[33m?.[39m[34mendsWith[39m([32m`. [39m[36m${[39m[33mHINT[39m[36m}[39m[32m`[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m267| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB4 refused adds show no hint and do not use it up; the next success has it
+[31m[1mAssertionError[22m: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality[39m
+
+Expected: [32m"“Song” added to the Music track at 00:00.000.[7m Drag a clip by its name bar to move it.[27m"[39m
+Received: [31m"“Song” added to the Music track at 00:00.000."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m281:32[22m[39m
+    [90m279| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34msetActiveTrack[39m([32m'music'[39m))[33m;[39m
+    [90m280| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'song'[39m))[33m;[39m
+    [90m281| [39m      expect(statusText(view)).toBe(`${addedText('Song', 'Music', '00:…
+    [90m   | [39m                               [31m^[39m
+    [90m282| [39m    })[33m;[39m
+    [90m283| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB5 Undo of the first add does not re-arm the hint
+[31m[1mAssertionError[22m: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality[39m
+
+Expected: [32m"“Song” added to the Music track at 00:00.000.[7m Drag a clip by its name bar to move it.[27m"[39m
+Received: [31m"“Song” added to the Music track at 00:00.000."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m287:32[22m[39m
+    [90m285| [39m      [35mconst[39m { api[33m,[39m view[33m,[39m enterOn } [33m=[39m [35mawait[39m [34mmountHintWorkspace[39m()[33m;[39m
+    [90m286| [39m      [34menterOn[39m([32m'song'[39m)[33m;[39m
+    [90m287| [39m      expect(statusText(view)).toBe(`${addedText('Song', 'Music', '00:…
+    [90m   | [39m                               [31m^[39m
+    [90m288| [39m      [34mpressUndo[39m()[33m;[39m
+    [90m289| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips)[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB6 a BPM first add puts the hint between the add sentence and the tempo seed text
+[31m[1mAssertionError[22m: expected '“Slow stem” added to the Music track …' to be '“Slow stem” added to the Music track …' // Object.is equality[39m
+
+Expected: [32m"“Slow stem” added to the Music track at 00:00.000.[7m Drag a clip by its name bar to move it.[27m Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"[39m
+Received: [31m"“Slow stem” added to the Music track at 00:00.000. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m300:32[22m[39m
+    [90m298| [39m      [34menterOn[39m([32m'stem-90'[39m)[33m;[39m
+    [90m299| [39m      expect(view.getByTestId('arrangement-tempo-input')).toHaveProper…
+    [90m300| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m(
+    [90m   | [39m                               [31m^[39m
+    [90m301| [39m        `${addedText('Slow stem', 'Music', '00:00.000')} ${HINT} ${stu…
+    [90m302| [39m      )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB7 a first add at the nearest free spot keeps the suffix before the hint
+[31m[1mAssertionError[22m: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality[39m
+
+Expected: [32m"“Song” added to the Music track at 00:04.000 (nearest free spot).[7m Drag a clip by its name bar to move it.[27m"[39m
+Received: [31m"“Song” added to the Music track at 00:04.000 (nearest free spot)."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m319:32[22m[39m
+    [90m317| [39m      [34mexpect[39m(added)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m318| [39m      [34mexpect[39m(added[[34m0[39m][33m?.[39mstart)[33m.[39m[34mtoBeCloseTo[39m([34m4[39m[33m,[39m [34m9[39m)[33m;[39m
+    [90m319| [39m      [34mexpect[39m([34mstatusText[39m(view))[33m.[39m[34mtoBe[39m(
+    [90m   | [39m                               [31m^[39m
+    [90m320| [39m        `${addedText('Song', 'Music', '00:04.000', studioLibraryString…
+    [90m321| [39m      )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx[2m > [22mNAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5)[2m > [22mNB8 a video import neither shows nor uses up the hint; the next library add has it
+[31m[1mAssertionError[22m: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality[39m
+
+Expected: [32m"“Song” added to the Music track at 00:00.000.[7m Drag a clip by its name bar to move it.[27m"[39m
+Received: [31m"“Song” added to the Music track at 00:00.000."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:[2m349:32[22m[39m
+    [90m347| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34msetActiveTrack[39m([32m'music'[39m))[33m;[39m
+    [90m348| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'song'[39m))[33m;[39m
+    [90m349| [39m      expect(statusText(view)).toBe(`${addedText('Song', 'Music', '00:…
+    [90m   | [39m                               [31m^[39m
+    [90m350| [39m    })[33m;[39m
+    [90m351| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m8 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 20:56:10
+[2m   Duration [22m 3.57s[2m (transform 1.04s, setup 0ms, import 1.55s, tests 1.38s, environment 475ms)[22m
+
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB1 Enter on a ready no-BPM source appends the hint to the first clip-added text,line=239,column=32::AssertionError: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality%0A%0AExpected: "“Song” added to the Music track at 00:00.000. Drag a clip by its name bar to move it."%0AReceived: "“Song” added to the Music track at 00:00.000."%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:239:32%0A%0A
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB2 a second add shows the plain clip-added text,line=251,column=32::AssertionError: expected '“Song” added to the Music track at 00…' to contain 'Drag a clip by its name bar to move i…'%0A%0AExpected: "Drag a clip by its name bar to move it."%0AReceived: "“Song” added to the Music track at 00:00.000."%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:251:32%0A%0A
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB3 a library drop as the first add appends the hint,line=265,column=32::AssertionError: expected '“Hit” added to the SFX track at 00:02…' to be '“Hit” added to the SFX track at 00:02…' // Object.is equality%0A%0AExpected: "“Hit” added to the SFX track at 00:02.000. Drag a clip by its name bar to move it."%0AReceived: "“Hit” added to the SFX track at 00:02.000."%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:265:32%0A%0A
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB4 refused adds show no hint and do not use it up; the next success has it,line=281,column=32::AssertionError: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality%0A%0AExpected: "“Song” added to the Music track at 00:00.000. Drag a clip by its name bar to move it."%0AReceived: "“Song” added to the Music track at 00:00.000."%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:281:32%0A%0A
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB5 Undo of the first add does not re-arm the hint,line=287,column=32::AssertionError: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality%0A%0AExpected: "“Song” added to the Music track at 00:00.000. Drag a clip by its name bar to move it."%0AReceived: "“Song” added to the Music track at 00:00.000."%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:287:32%0A%0A
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB6 a BPM first add puts the hint between the add sentence and the tempo seed text,line=300,column=32::AssertionError: expected '“Slow stem” added to the Music track …' to be '“Slow stem” added to the Music track …' // Object.is equality%0A%0AExpected: "“Slow stem” added to the Music track at 00:00.000. Drag a clip by its name bar to move it. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"%0AReceived: "“Slow stem” added to the Music track at 00:00.000. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:300:32%0A%0A
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB7 a first add at the nearest free spot keeps the suffix before the hint,line=319,column=32::AssertionError: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality%0A%0AExpected: "“Song” added to the Music track at 00:04.000 (nearest free spot). Drag a clip by its name bar to move it."%0AReceived: "“Song” added to the Music track at 00:04.000 (nearest free spot)."%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:319:32%0A%0A
+
+::error file=/tmp/a303-scratch/app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx,title=app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx > NAME-AND-HINT-b one-time name bar hint after the first add (Saba Q5) > NB8 a video import neither shows nor uses up the hint; the next library add has it,line=349,column=32::AssertionError: expected '“Song” added to the Music track at 00…' to be '“Song” added to the Music track at 00…' // Object.is equality%0A%0AExpected: "“Song” added to the Music track at 00:00.000. Drag a clip by its name bar to move it."%0AReceived: "“Song” added to the Music track at 00:00.000."%0A%0A ❯ app/lib/arrangement/__tests__/name-bar-hint-ui.test.tsx:349:32%0A%0A
