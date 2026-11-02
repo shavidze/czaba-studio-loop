@@ -1,0 +1,48 @@
+COMMIT: OK (no blocking issues; the change touches no auth, purchase or download code)
+
+## Code Review: STUDIO-LINK-b "View in store" (round 300)
+
+**What I checked:** the diff of the 9 candidate paths, the new `ArrangementLibraryMenu.tsx` and its test file (VS1–VS8), the shared `armGridMenuDismissClickSwallow`, the keydown/keyup listeners in `StudioWorkspace.tsx:2586-2608`, and the global `:focus-visible` rule in `app/styles/app.css:386`. The tail of `verify.log` shows 230 test files and 3437 tests passing. Its lint output only flags files outside this diff. This reviews the diff only, not the whole module.
+
+### Critical Issues
+- None.
+
+### Suggestions (ranked)
+1. **Focus can be lost when the menu is closed by the effect.** `ArrangementLibrary.tsx:467-471` calls `setLibraryMenu(null)` when the option is filtered out or the library collapses. It doesn't move focus anywhere. The focused `<a>` is removed, so focus falls to `body`. Today this is almost impossible to trigger, because outside presses and keys are stopped while the menu is open. A future collapse shortcut or an async change to `collection.sources` would hit it.
+   **Fix:** before clearing, check whether `document.activeElement` is inside the menu. If so, focus the option if it's still connected. Otherwise focus `librarySearchInputRef` or the expand button.
+2. **The native context menu is blocked on the link itself.** `ArrangementLibraryMenu.tsx:122-125` cancels the browser menu on the whole menu, including the `<a>`. So "Copy link address" and "Open in new window" are gone, which weakens doc 220's reason for using a real `<a>`.
+   **Fix:** skip `preventDefault` when the event target is inside the `a` (`closest('a')`), the same check `onMouseDown` already uses. Keep `stopPropagation`.
+3. **The link can be dragged.** The `<a>` in `ArrangementLibraryMenu.tsx:129-139` is draggable by default. Dropping it on the search input inserts the URL. The stray-drag handler in `StudioWorkspace.tsx:2596` only handles `Files`.
+   **Fix:** add `draggable={false}`.
+4. **Screen-reader users can't discover the menu.** Mapped options give no hint that the menu exists; the row only appears in the `?` sheet. Leaving `aria-haspopup` off the option is correct, since ARIA 1.2 doesn't allow it on `role=option`.
+   **Fix:** add `aria-keyshortcuts="Shift+F10"` to mapped options only, in `ArrangementLibrary.tsx:110-123`. The option is memoized, so pass a boolean prop `hasStoreLink` to keep re-render cost unchanged.
+5. **Small cleanup.** `closeLibraryOptionMenu` (`ArrangementLibrary.tsx:350`) ignores the `reason` argument, so `LibraryMenuCloseReason` is exported for nothing. It's fine under strict TS. Either use the reason (for example, skip refocus on `'window'`) or drop the export.
+
+### Real-browser event ordering (reasoned through, no blockers)
+- **Windows ContextMenu key:** the `contextmenu` event fires on keyup. By then focus is on the `<a>`, so the menu's `onContextMenu` suppresses the native menu. ✓
+- **Space:** keydown calls `click()` and focus returns to the option. The keyup then lands on the option `<button>`. The keyup handler in `StudioWorkspace.tsx:2586` cancels it, and the keydown wasn't on that button, so it doesn't activate twice and transport doesn't toggle. ✓
+- **Enter or click:** the click unmounts the `<a>`. The HTML spec still lets a disconnected `<a>` navigate, and the click's user activation allows the new tab. The `blur` from the new tab arrives after the listeners are removed. ✓
+- **Right-click outside the menu:** no `click` follows. The dismiss-click swallow is released on `pointerup` with `setTimeout(0)`, so it doesn't eat the next real click. ✓
+- **Listener and timer leaks:** none. All three window listeners are removed in cleanup, and `key={session}` re-runs the lifecycle each time the menu opens.
+
+### Good Practices Found
+- Uses a real `<a target="_blank" rel="noopener noreferrer">`, so Ctrl-click, middle-click and the URL preview work. No `window.open` and no popup-blocker risk.
+- The reverse map is built from the same `ReadonlyMap`, and `encodeURIComponent` is applied to the handle. `__proto__` and `constructor` are tested (VS1).
+- Unmapped sources keep the browser's menu (VS3), and a held key doesn't reopen the menu (VS4b).
+- The new handler goes through the existing ref-forwarding pattern, so the memoized options don't re-render.
+- Only design tokens are used (`rounded-panel`, `bg-surface`, `border-outline`, `hover:bg-elevated`). The `style` prop is only for dynamic positioning. No `any` and no type assertions.
+- No auth, purchase or download code is touched. `/products/:handle` is a public page.
+
+### Architecture note
+- **Signal 2 (coupling):** `ArrangementLibraryMenu.tsx:4` imports `armGridMenuDismissClickSwallow` from `ArrangementGridMenu`. That's a third menu depending on another component file for a shared behaviour. Signal 1 also applies: the marker menu and the library menu duplicate the clamp, outside-press, window-blur/resize and Escape/Tab logic (lines 20-106).
+  - **Keep for now:** it's one lifecycle, the duplication is about 60 lines, the tests pin the behaviour, and it has no audio or Undo impact. Low cost to leave as is.
+  - **Proposal for the planner (adds to B-R299-LIBRARY-MENU-DUPLICATION):** one bounded `frontend-architect` checkpoint task. Move `armGridMenuDismissClickSwallow` and the shared dismissal effect into `app/components/arrangement/studio-menu-dismiss.ts`. Leave each menu's item semantics alone: the marker menu prevents Enter, while the library menu needs native `<a>` activation.
+  - **Acceptance:** VS1–VS8, the marker menu and grid menu tests stay green, and no behaviour changes.
+  - This is a proposal, not a fix for this round.
+
+### Alternative Approach (critical UX flow: leaving the Studio)
+- **Current:** a temporary context menu on mapped options, with one `<a>` that opens a new tab.
+- **Alternative:** a small "↗" store link shown inside the row for mapped options.
+- **Verdict:** keep the current approach. An inline link would put a second tab stop inside `role=option` (an invalid listbox structure). It would also show on screen all the time, which doc 220 rules out. The trade-off is weaker discoverability, which suggestion 4 partly fixes.
+
+### Score: 8.5/10

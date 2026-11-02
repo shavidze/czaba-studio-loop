@@ -1,0 +1,82 @@
+{
+ "round": 300,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-02T16:07:26.6164923Z",
+  "round": 300,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R300-01",
+   "severity": "low",
+   "steps": [
+    "Open /studio-lab",
+    "Press ?",
+    "Read the Library group row 'View in store (new tab)'",
+    "Focus option demo-middle-east and press the ContextMenu key"
+   ],
+   "expected": "The shortcut sheet lists every key that opens the menu (Right-click, Shift+F10, ContextMenu)",
+   "actual": "The row lists Right-click and Shift+F10 only; the ContextMenu key also opens the menu (B-KBD). Conforms to task \u00a72.2 microcopy; discoverability polish (= A-R300-REVIEW-3)",
+   "evidence": "c-round-300/shots/b-sheet-1440x900.png, c-round-300/rows.json B_SHEET and B_KBD_ContextMenu"
+  }
+ ],
+ "info": [
+  {
+   "id": "C-R300-INFO-02",
+   "note": "macOS Ctrl+click anchor (A-R300-REVIEW-2) and real window blur on new-tab focus are not reproducible in headless Linux Chromium; Tech Lead real-Chrome/macOS list"
+  },
+  {
+   "id": "C-R300-INFO-03",
+   "note": "bare GET /api/studio-token returns 400 (validation before auth); with product+file params 401; forged Bearer 500 (backend down); no token in any body. Future auth rows should name the parameterised request"
+  }
+ ],
+ "passed": [
+  "B-MENU",
+  "B-NEWTAB",
+  "B-KBD",
+  "B-CLOSE",
+  "B-SPACE",
+  "B-UNMAPPED",
+  "B-PREVIEW-PARITY",
+  "B-ADD-INTACT",
+  "B-SHEET",
+  "B-SCREEN-BUDGET",
+  "B-JOURNEY",
+  "G300-AUTH",
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "TYPECHECK",
+  "UNIT",
+  "UNIT-MUTANTS",
+  "L50-FOCUS",
+  "DOC-220"
+ ],
+ "gate": [
+  "full test suite",
+  "build",
+  "biome",
+  "npm run verify",
+  "test:e2e:smoke"
+ ],
+ "blocked": [],
+ "notes": {
+  "B-JOURNEY": "product-page half ran on mock-api fixtures (C started and stopped mock-api/server.mjs on :5199); not backend evidence",
+  "viewports": [
+   "1440x900",
+   "1280x720"
+  ],
+  "ableton": {
+   "context-menu-view-origin": "unconfirmed (destination)",
+   "reveal-in-context-menu": "pattern confirmed (manual 4.7.7/4.7.8)",
+   "keyboard-open": "not applicable",
+   "unmapped-native-menu": "deliberate difference (SABA-Q-STUDIO-LINK-B q1)",
+   "right-click-selects": "deliberate difference (SABA-Q-STUDIO-LINK-B q2)"
+  }
+ },
+ "report": "c-round-300.md",
+ "evidenceDir": "c-round-300/"
+}
