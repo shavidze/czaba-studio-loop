@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-02T16:30:19.552Z)
+# Active loop summary (2026-11-02T19:50:26.336Z)
 
-- backlog.json 2884 KB -> active view 392 KB
-- status: G_ROOT_GATE round 300
-- servers: `{"checkedUtc":"2026-11-02T16:07:26.6164923Z","round":300,"attempt":1,"store":200}`
+- backlog.json 2895 KB -> active view 392 KB
+- status: G_ROOT_GATE round 301
+- servers: `{"checkedUtc":"2026-11-02T16:45:23.4520796Z","round":301,"attempt":1,"store":200}`
 - last publication: aa7a6ef27333fba8377e3ee06ee43024e24ce3c0 (rounds 300-300)
-- last root gate: round 300 published - commit aa7a6ef27333fba8377e3ee06ee43024e24ce3c0 pushed
+- last root gate: round 301 skipped - no real changes
 
 ## Current items: -
 
@@ -725,6 +725,7 @@
 - INFO-C299-02 / info / info (D-29z770): see A-R299-REVIEW-1 (deferred Low) / NG9 is today the first hydrateRoot in studio-narrow-gate-ui.test.tsx; a hydrate test above it would make it vacuous
 - B-R299-IM24-LOAD-SIGNAL / info / signal (D-29z773): watch; a failure in a run alone is a STOP / insert-marker-ui IM24 failed once under concurrent dev-server + Playwright load; passes alone 3/3 and in gate 299
 - SABA-Q-STUDIO-LINK-B / info / awaiting_user (D-29z773) / 
+- C-R300-INFO-03-AUTH-ROW-WORDING / info / process_rule (D-29z776): every G-AUTH row names the parameterised request GET /api/studio-token?product=middle-east&file=mix.wav (401 without a header); a bare GET returns 400 (validation before auth) and is recorded, not a finding / 
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

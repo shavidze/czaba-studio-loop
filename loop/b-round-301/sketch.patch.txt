@@ -1,0 +1,239 @@
+--- a/app/routes/studio-lab.tsx
++++ b/app/routes/studio-lab.tsx
+@@ -14,7 +14,7 @@
+ export const links: LinksFunction = () => [{ rel: 'stylesheet', href: STUDIO_FONTS_HREF }];
+ 
+ export const meta: MetaFunction = () => [
+-  { title: 'Studio Lab — Demo workspace | CZABA' },
++  { title: 'CZABA Studio — Demo collection' },
+   { name: 'robots', content: 'noindex' },
+ ];
+ 
+--- a/app/lib/arrangement/collection.ts
++++ b/app/lib/arrangement/collection.ts
+@@ -13,7 +13,7 @@
+ }
+ 
+ const demoWorkspaceCollectionCopy: WorkspaceCollectionCopy = {
+-  heading: 'CZABA Studio Lab',
++  heading: 'CZABA Studio',
+   badge: 'Demo collection — no sign-in required',
+   loading: 'Loading the demo collection…',
+   ready:
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -663,7 +663,6 @@
+   joinStudioTimeTextParts(studioTimeTextParts.selectedClipDetail(detail));
+ 
+ export const studioWorkspaceStrings = {
+-  headingSuffix: '· Workspace',
+   rangeReadout: (range: StudioWorkspaceRangeText): string =>
+     joinStudioTimeTextParts(studioTimeTextParts.rangeReadout(range)),
+   rangeDeleteHint: 'Delete = delete, the gap remains · Ctrl+Shift+X = Cut Time',
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -2764,8 +2764,7 @@
+             CZABA
+           </Link>
+           <h1 className="text-sm font-medium">
+-            {`${workspaceCollectionCopy(collection.origin).heading} `}
+-            <span className="font-normal text-muted">{studioWorkspaceStrings.headingSuffix}</span>
++            {workspaceCollectionCopy(collection.origin).heading}
+           </h1>
+         </div>
+         <div className="flex items-center gap-3">
+--- a/app/components/home/StudioShowcase.tsx
++++ b/app/components/home/StudioShowcase.tsx
+@@ -1,6 +1,6 @@
+ /**
+  * Studio Showcase
+- * Displays the Personal Mixdown Studio with CSS-rendered mockup
++ * Displays CZABA Studio with CSS-rendered mockup
+  * No images needed - fully responsive, always matches real UI
+  */
+ 
+@@ -93,7 +93,7 @@
+           </motion.div>
+ 
+           <h2 className="mb-4 font-serif text-4xl font-semibold tracking-tight text-foreground md:text-5xl lg:text-6xl">
+-            Personal Mixdown <span className="text-glow">Studio</span>
++            CZABA <span className="text-glow">Studio</span>
+           </h2>
+           <p className="mx-auto mb-4 max-w-4xl text-lg text-muted">
+             More than just files. A complete production toolkit.
+--- a/app/components/home/StudioMockup.tsx
++++ b/app/components/home/StudioMockup.tsx
+@@ -1,5 +1,5 @@
+ /**
+- * StudioMockup - Static visual representation of Personal Mixdown Studio
++ * StudioMockup - Static visual representation of CZABA Studio
+  * For homepage showcase - no functionality, just the look
+  */
+ 
+@@ -164,9 +164,7 @@
+             <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-yellow-500" />
+             <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500" />
+           </div>
+-          <span className="text-neutral-400 text-xs md:text-sm font-medium ml-2">
+-            Personal Mixdown Studio
+-          </span>
++          <span className="text-neutral-400 text-xs md:text-sm font-medium ml-2">CZABA Studio</span>
+         </div>
+ 
+         {/* Transport Controls */}
+--- a/app/routes/checkout.success.tsx
++++ b/app/routes/checkout.success.tsx
+@@ -103,7 +103,7 @@
+ const STEPS = [
+   'A confirmation email is on its way',
+   'Your downloads are ready in your account',
+-  'Access your Personal Mixdown Studio anytime',
++  'Access CZABA Studio anytime',
+ ];
+ 
+ export default function CheckoutSuccess() {
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -1776,7 +1776,6 @@
+ };
+ 
+ const EXPECTED_WORKSPACE_PLAIN_STRINGS: Record<string, string> = {
+-  headingSuffix: '· Workspace',
+   rangeDeleteHint: 'Delete = delete, the gap remains · Ctrl+Shift+X = Cut Time',
+   clipLabel: 'Clip:',
+ };
+@@ -1853,7 +1852,6 @@
+     expect(Object.keys(ws).sort()).toEqual([
+       'clipLabel',
+       'clipsSelected',
+-      'headingSuffix',
+       'rangeDeleteHint',
+       'rangeReadout',
+       'selectedClipDetail',
+@@ -2261,7 +2259,7 @@
+       .filter((line) => GEORGIAN_CODEPOINT.test(line))
+       .map((line) => line.trim());
+     expect(georgianLines).toEqual([]);
+-    expect(route).toContain("{ title: 'Studio Lab — Demo workspace | CZABA' },");
++    expect(route).toContain("{ title: 'CZABA Studio — Demo collection' },");
+     for (const name of ["name: 'Video'", "name: 'Music'", "name: 'Stems'", "name: 'SFX'"]) {
+       expect(route, name).toContain(name);
+     }
+--- a/app/lib/arrangement/__tests__/collection.test.ts
++++ b/app/lib/arrangement/__tests__/collection.test.ts
+@@ -374,7 +374,7 @@
+   it('PC9 copy: demo returns the published demo texts; purchased returns the purchased texts', () => {
+     const demo = workspaceCollectionCopy('demo');
+     expect({ ...demo, failed: demo.failed(2) }).toStrictEqual({
+-      heading: 'CZABA Studio Lab',
++      heading: 'CZABA Studio',
+       badge: 'Demo collection — no sign-in required',
+       loading: 'Loading the demo collection…',
+       ready:
+--- a/app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx
+@@ -28,14 +28,14 @@
+ 
+ const renderWavMock = vi.mocked(renderArrangementWav);
+ 
+-const PURCHASED_HEADING = 'CZABA Studio · Workspace';
++const PURCHASED_HEADING = 'CZABA Studio';
+ const PURCHASED_BADGE = 'Purchased collection';
+ const PURCHASED_LOADING = 'Loading the purchased collection…';
+ const PURCHASED_READY =
+   'Purchased collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
+ const PURCHASED_ONE_FAILED =
+   '1 sound in the purchased collection failed to load — details are in the library.';
+-const DEMO_HEADING = 'CZABA Studio Lab · Workspace';
++const DEMO_HEADING = 'CZABA Studio';
+ const DEMO_BADGE = 'Demo collection — no sign-in required';
+ const DEMO_READY =
+   'Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.';
+--- /dev/null
++++ b/app/lib/__tests__/studio-naming.test.tsx
+@@ -0,0 +1,85 @@
++import { readdirSync, readFileSync, statSync } from 'node:fs';
++import { join, relative, resolve } from 'node:path';
++import { render } from '@testing-library/react';
++import { MotionGlobalConfig } from 'framer-motion';
++import { MemoryRouter } from 'react-router-dom';
++import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioShowcase } from '~/components/home/StudioShowcase';
++
++const APP_ROOT = resolve(__dirname, '../..');
++const RETIRED_NAMES = /Personal Mixdown|Studio Lab|Lab · Workspace|Demo workspace|headingSuffix/;
++
++function listSourceFiles(dir: string): string[] {
++  const files: string[] = [];
++  for (const entry of readdirSync(dir)) {
++    const path = join(dir, entry);
++    if (statSync(path).isDirectory()) {
++      if (entry !== '__tests__') {
++        files.push(...listSourceFiles(path));
++      }
++    } else if (/\.(ts|tsx)$/.test(entry)) {
++      files.push(path);
++    }
++  }
++  return files;
++}
++
++class FakeIntersectionObserver {
++  observe(): void {}
++  unobserve(): void {}
++  disconnect(): void {}
++  takeRecords(): IntersectionObserverEntry[] {
++    return [];
++  }
++}
++
++describe('NAME-AND-HINT-a one product name: CZABA Studio', () => {
++  const initialSkipAnimations = MotionGlobalConfig.skipAnimations;
++
++  beforeAll(() => {
++    MotionGlobalConfig.skipAnimations = true;
++  });
++
++  afterAll(() => {
++    MotionGlobalConfig.skipAnimations = initialSkipAnimations;
++  });
++
++  beforeEach(() => {
++    vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
++  });
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it('NM1 repo scan: no app source file outside __tests__ uses a retired Studio name', () => {
++    const files = listSourceFiles(APP_ROOT);
++    expect(files.length).toBeGreaterThan(100);
++    const hits = files
++      .flatMap((file) =>
++        readFileSync(file, 'utf-8')
++          .split(/\r?\n/)
++          .map((line, index) => ({ file, line, index }))
++          .filter(({ line }) => RETIRED_NAMES.test(line)),
++      )
++      .map(({ file, line, index }) => `${relative(APP_ROOT, file)}:${index + 1}: ${line.trim()}`);
++    expect(hits).toEqual([]);
++  });
++
++  it('NM2 home showcase: the heading reads CZABA Studio with the glow on Studio, and the mockup title matches', () => {
++    const view = render(
++      <MemoryRouter>
++        <StudioShowcase />
++      </MemoryRouter>,
++    );
++    const heading = view.getByRole('heading', { level: 2, name: 'CZABA Studio' });
++    expect(heading.textContent).toBe('CZABA Studio');
++    const glow = heading.querySelector('span');
++    expect(glow?.textContent).toBe('Studio');
++    expect(view.getAllByText('CZABA Studio', { exact: true }).map((node) => node.tagName)).toEqual(
++      expect.arrayContaining(['SPAN']),
++    );
++    expect(view.container.textContent).not.toMatch(RETIRED_NAMES);
++    view.unmount();
++  });
++});

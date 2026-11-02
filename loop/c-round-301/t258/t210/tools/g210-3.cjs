@@ -1,0 +1,59 @@
+// C round 210 — G210-3 (copied from c-round-209 g209-3.cjs; output names only)
+// C round 209 — G209-3 (copied from c-round-208 g208-3.cjs; output names only)
+// C round 208 — G208-3 (copied from c-round-206 g206-3.cjs; output names only)
+// C round 206 — G206-3 (copied from c-round-205 g205-3.cjs; output names only)
+// C round 205 — G205-3 (copied from c-round-204 g204-3.cjs; output names + LeadMagnet-absent check on /studio-lab)
+// C round 204 (copied from c-round-203 g203-3.cjs; output names and lib path only)
+// C round 202 — G202-3 (copied from c-round-201 g201-3.cjs; output names only)
+// C round 200 — G200-3 (copied from c-round-199 g210-3.cjs; output names + a 1280 /studio-lab fresh-context check added)
+// C round 196 — G196-3 (copied from c-round-195 g194-3.cjs; output names only)
+// C round 193 — G193-3 (copied from c-round-192 g192-3.cjs; output names only)
+// C round 192 — G193-3 (copied from c-round-191 g191-3.cjs; output names only)
+// C round 191 — G191-3 (copied from c-round-190 g190-3.cjs; output names only)
+// C round 190 — G190-3 (copied from c-round-189 g189-3.cjs; output names only)
+// C round 186 — G186-3 (copied from c-round-185/tools/g185-3.cjs; output names only).
+// C round 184 — G184-3 (copied from c-round-183/tools/g183-3.cjs; lib path and output names only).
+// C round 182 — G182-3 (copied from c-round-181/tools/g181-3.cjs; output names only).
+// C round 181 — G181-3 (copied from c-round-180/tools/g180-3.cjs; paths and output names only).
+// C round 179 — G179-3 (copied from c-round-178/tools/g178-3.cjs, output names only). Fresh context, no credentials.
+// C round 177 — G177-3 (copied from c-round-176 g176-3.cjs, output names only)
+// C round 176 — G176-3 (copied from c-round-175 g175-3.cjs, output names only) (copied from c-round-174/tools/g174-3.cjs, output names only) (copied from c-round-173/tools/g173-3.cjs, output names only) (copied from c-round-172/tools/g172-3.cjs, output names only) (copied from c-round-171/tools/g171-3.cjs, output names only) (copied from c-round-170/tools/g170-3.cjs, output names only) (copied from c-round-169/tools/g169-3.cjs; adds fontsWait on the lab page) (copied from c-round-167/tools/g167-3.cjs, output names only). Fresh context, no credentials; run alone and last.
+const L = require('./glib.cjs');
+const path = require('path');
+const ev = async (pg, fn) => { for (let i = 0; i < 10; i++) { try { await pg.waitForFunction(() => document.body && document.body.innerText.length > 20, null, { timeout: 30000 }); return await pg.evaluate(fn); } catch (e) { if (i === 9) throw e; await L.sleep(1500); } } };
+(async () => {
+  const browser = await L.launch();
+  const res = { utc: new Date().toISOString() };
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  const forbidden = [], auth = [], errors = [], hyd = [];
+  page.on('request', (q) => { if (/studio-token|\/api\/recording-|\/api\/download|r2\.dev|r2\.cloudflarestorage|r2-proxy|workers\.dev|shopify|identitytoolkit|securetoken|brevo|sendinblue/i.test(q.url())) forbidden.push(q.url()); if (q.headers().authorization) auth.push(q.url()); });
+  page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
+  page.on('console', (m) => { if (/hydrat|did not match|server rendered/i.test(m.text())) hyd.push(m.text().slice(0, 200)); });
+  await page.goto(`${L.BASE}/studio-lab`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid=arrangement-grid-control]', { timeout: 90000 });
+  await L.sleep(2000);
+  res.fonts = await L.fontsWait(page);
+  res.lab = await page.evaluate(() => ({ authUser: localStorage.getItem('auth_user'), cookies: document.cookie.length, url: location.pathname, workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), demoBadge: document.body.innerText.includes('Demo collection — no sign-in required'), anyGeorgianBadge: document.body.innerText.includes('დემო კოლექცია'), loader: document.querySelectorAll('[data-testid=entrance-loader]').length, ss: sessionStorage.getItem('czaba_entrance_seen') }));
+  await page.mouse.move(700, 400); await page.mouse.wheel(0, 2000); await L.sleep(9000); await page.mouse.move(700, 1, { steps: 4 }); await page.mouse.move(700, -20); await L.sleep(800);
+  res.labLeadMagnet = await page.evaluate(() => ({ freeDownload: /FREE DOWNLOAD/.test(document.body.innerText), lmDialog: !![...document.querySelectorAll('[role=dialog]')].find((d) => /FREE DOWNLOAD|mystery pack|CLAIM YOUR OFFER/.test(d.innerText)), lmKey: localStorage.getItem('czaba_lead_magnet') }));
+  await page.screenshot({ path: path.join(__dirname, '..', 'shots', 'g210-3-lab-1440.png') });
+  await page.goto(`${L.BASE}/studio/middle-east`, { waitUntil: "load" }); await page.waitForFunction(() => document.body && document.body.innerText.length > 20, null, { timeout: 60000 });
+  await L.sleep(5000);
+  res.protected = await ev(page, () => ({ url: location.pathname, workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), audioSrc: document.querySelectorAll('audio[src]').length, signInRequired: /sign in required/i.test(document.body.innerText), text: document.body.innerText.replace(/\s+/g, ' ').slice(0, 300) }));
+  await page.screenshot({ path: path.join(__dirname, '..', 'shots', 'g210-3-protected-1440.png') });
+  const r = await ctx.request.get(`${L.BASE}/api/studio-token?product=middle-east&file=stem1.wav`, { failOnStatusCode: false });
+  res.token = { status: r.status(), body: (await r.text()).slice(0, 200) };
+  const r2 = await ctx.request.get(`${L.BASE}/api/studio-token?product=middle-east&file=stem1.wav`, { failOnStatusCode: false, headers: { Authorization: 'Bearer fake' } }); res.fakeBearer = { status: r2.status(), body: (await r2.text()).slice(0, 200), setCookie: r2.headers()['set-cookie'] || null }; res.ctxCookiesAfter = (await ctx.cookies()).length;
+  const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 720 } }); const p2 = await ctx2.newPage(); await p2.goto(`${L.BASE}/studio/middle-east`, { waitUntil: "load" }); await p2.waitForFunction(() => document.body && document.body.innerText.length > 20, null, { timeout: 60000 }); await L.sleep(5000); res.protected1280 = await ev(p2, () => ({ workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), audioSrc: document.querySelectorAll('audio[src]').length, signInRequired: /sign in required/i.test(document.body.innerText) })); await p2.screenshot({ path: path.join(__dirname, '..', 'shots', 'g210-3-protected-1280.png') }); await ctx2.close();
+  { const ctx3 = await browser.newContext({ viewport: { width: 1280, height: 720 } }); const p3 = await ctx3.newPage(); const f3 = [], a3 = [];
+    p3.on('request', (q) => { if (/studio-token|\/api\/recording-|\/api\/download|r2\.dev|r2\.cloudflarestorage|r2-proxy|workers\.dev|shopify|identitytoolkit|securetoken|brevo|sendinblue/i.test(q.url())) f3.push(q.url()); if (q.headers().authorization) a3.push(q.url()); });
+    await p3.goto(`${L.BASE}/studio-lab`, { waitUntil: 'domcontentloaded' }); await p3.waitForSelector('[data-testid=arrangement-grid-control]', { timeout: 90000 }); await L.sleep(2000);
+    res.lab1280 = await p3.evaluate(() => ({ authUser: localStorage.getItem('auth_user'), cookies: document.cookie.length, url: location.pathname, workspace: !!document.querySelector('[data-testid=arrangement-grid-control]'), demoBadge: document.body.innerText.includes('Demo collection — no sign-in required') }));
+    res.lab1280.forbidden = f3; res.lab1280.auth = a3; res.lab1280.ctxCookies = (await ctx3.cookies()).length;
+    await p3.screenshot({ path: path.join(__dirname, '..', 'shots', 'g210-3-lab-1280.png') }); await ctx3.close(); }
+  res.pageForbidden = forbidden; res.pageAuth = auth; res.errors = errors; res.hydration = hyd;
+  await browser.close();
+  L.save(require('path').join(__dirname,'..','out'), 'g210-3.json', res);
+  console.log(JSON.stringify(res, null, 1));
+})();

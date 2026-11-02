@@ -1,0 +1,4 @@
+const L = require('./lib.cjs');
+(async () => { const browser = await L.launch(); for (const p of ['/store', '/about', '/products/middle-east']) { const { page, ctx } = await L.newPage(browser, 1280); await page.goto('http://127.0.0.1:5173' + p, { waitUntil: 'load', timeout: 180000 }); await L.sleep(3000); await L.declineCookies(page); await L.sleep(300);
+  const r = await page.evaluate(() => { const tab = [...document.querySelectorAll('a[href],button,input,select,textarea,[tabindex]')].filter((e) => e.tabIndex >= 0 && !e.disabled && getComputedStyle(e).display !== 'none' && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden'); return { footer: !!document.querySelector('footer'), n: tab.length, names: tab.map((e) => (e.getAttribute('aria-label') || e.textContent || '').trim().slice(0, 12)) }; });
+  console.log(p, r.footer, r.n, r.names.join(' | ')); await ctx.close(); } await browser.close(); })();
