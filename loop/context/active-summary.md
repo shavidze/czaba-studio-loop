@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T13:53:39.345Z)
+# Active loop summary (2026-11-03T14:47:31.141Z)
 
-- backlog.json 3065 KB -> active view 416 KB
-- status: G_ROOT_GATE round 316
-- servers: `{"checkedUtc":"2026-11-03T13:30:12.5175824Z","round":316,"attempt":1,"store":200}`
-- last publication: c136dfd83935d3939c83cd597ea34af388b1dd32 (rounds 315-315)
-- last root gate: round 316 skipped - C taskStatus FAIL
+- backlog.json 3072 KB -> active view 417 KB
+- status: G_ROOT_GATE round 317
+- servers: `{"checkedUtc":"2026-11-03T14:13:36.4423230Z","round":317,"attempt":1,"store":200}`
+- last publication: a5a9c9734e6d6f8b51d86d17d11b5cee7c01ccc5 (rounds 316-317)
+- last root gate: round 317 published - commit a5a9c9734e6d6f8b51d86d17d11b5cee7c01ccc5 pushed
 
 ## Current items: -
 
@@ -769,6 +769,8 @@
 - A-R314-REVIEW-L2 / info / signal (D-29z849): harness detail; candidate for the next perf-spec round (record scrollWidth/clientWidth in the guard detail) / the timeline scroll guard cannot tell 'not scrollable' from 'did not scroll'
 - GATE315-S4 / info / signal (D-29z854): PERF-10 / SRW-21-PLAN; N collection sources ready during playback give N graph restarts (unreachable in /studio-lab: no initial clips); fix candidate: coalesce restarts per frame / N sources ready while playing -> N graph restarts
 - C-R315-VIDEO-END-NO-FADE / info / signal (D-29z854) -> T12-ADVANCED T12.13 micro fades; byte-identical at HEAD / a video's own sound is cut at the video duration with no fade (last samples ~0.50)
+- C-R316-01 / medium / open, fix dispatched round 317 (D-29z857); confirmed by B (D-29z856) / 4 mirrored Playfair Display woff2 are Google kit variants, not the files browsers load at HEAD; /store heading differs by 2,015 px
+- A-R316-REVIEW-P4 / info / signal (D-29z857): a future CSP needs font-src 'self' data: (2 inlined Noto stubs; C confirmed 4 data:font/woff2 refs in fonts-*.css); owner: whoever adds a CSP / CSP font-src data:
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

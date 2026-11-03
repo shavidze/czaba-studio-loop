@@ -1,0 +1,69 @@
+{
+ "round": 317,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T14:13:36.4423230Z",
+  "round": 317,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "BYTE-IDENTITY",
+  "UNIT",
+  "FONT-BYTES",
+  "FONT-PIXEL",
+  "FONT-NET",
+  "FONT-PRELOAD",
+  "FONT-CACHE",
+  "FCP",
+  "PERF-LOAD",
+  "DOC",
+  "G317-AUTH"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build (store/)",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "observations": [
+  "/studio-lab HEAD-vs-HEAD control at 1440 showed 4 px (x=260, y=606-609) in one pair. The control rerun (head3) measured 0 px vs HEAD1 and 0 px vs A at both viewports (c-round-317/pxdiff-rerun.txt).",
+  "/ home pixel row: report only (animated hero). Control 95,014/94,883 px; HEAD vs A 122,876 (1440) / 32,017 (1280) px, all at y>=81; FONT-BYTES covers it (identical woff2 bodies, equal document.fonts set).",
+  "/studio-lab FCP-DCL on A is 269-334 ms (HEAD 159-293). This is report-only and owned by PERF-11: A's DCL is lower, while FCP stays at 0.96-0.98 x HEAD.",
+  "The perf warm-up script (c-round-314/warm.cjs) timed out on 'collection ready' at 303,613 ms. This is pre-existing and was the same in rounds 315/316. The perf spec itself passed.",
+  "The first G317-AUTH attempt timed out on a cold dev-server compile of /studio/middle-east (environment-invalid, L38; kept as g317-auth-attempt1-coldstart.log). A direct probe then rendered 'Sign in required' in 4 s, and the replacement run passed at both viewports.",
+  "BYTE-IDENTITY was run with two UAs: the Playwright Chromium 143 UA and B's pinned Chrome 141 UA. Both gave 25/25 identical and 0 kit URLs. The HEAD CSS URLs were derived independently via git grep on c136dfd.",
+  "UNIT and the mutants ran on /tmp/c317u with store/node_modules symlinked, so vitest/Vite caches may have been written under store/node_modules/.vite (cache only, untracked; git status unchanged start→end). A disclosed the same thing."
+ ],
+ "manifestPaths": [
+  "c-round-317.md",
+  "c-round-317.json",
+  "c-round-317/"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 0.02,
+ "assertsSpecified": 1,
+ "mutantsRecorded": 13,
+ "mutantRedOnSketch": 13,
+ "cOwnMutants": [
+  {
+   "id": "MU-C-KIT-BACK-VIETNAMESE",
+   "result": "red FN3"
+  },
+  {
+   "id": "MU-C-SWAP-LATIN-CYRILLIC",
+   "result": "red FN3"
+  }
+ ],
+ "abletonConformance": "not applicable (byte fix-up in a performance round; no user-visible behaviour, no reference)",
+ "originNote": "no findings this round"
+}

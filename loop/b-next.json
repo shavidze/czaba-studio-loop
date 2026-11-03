@@ -1,10 +1,10 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 316 (PERF-7) C FAIL on one Medium, C-R316-01 (origin B): the 4 mirrored Playfair woff2 were Google /l/font?kit= variants, not the files browsers load at HEAD; /store heading differed by 2,015 px. 13 other rows PASS, browserVerified/realVerified true; gate 316 skipped, so baseline stays c136dfd + A's 40-entry tree. B confirmed independently (Chrome-UA sweep 21/25 -> 25/25 after re-fetching the /s/ files, 0 kit URLs) and pre-checked the fix on a scratch: 87/87, mutants equal, MU-KIT-BACK red, /store and /studio-lab 0 px vs HEAD at both viewports, per-route woff2 body sha equal on 4 routes. PERF-7 is not done until round 317 C PASS + gate. REGRESSION due on/after 2026-11-05; RETRO at 320. Many scoped items remain; nothing external blocks.",
- "nextTask": "Round 317 PERF-7 fix-up (C-R316-01): A cp's the 4 Playfair woff2 from b-round-316/fonts-src/files (sha256 -c fonts-sha256.txt 25 OK), cp's b-round-316/sketch-self-hosted-fonts.test.ts.txt (4 FN3 pins), sets doc 229 l.4 to round 317 and adds the kit-variant Problem/Solution entry; nothing else; short required code-review. C: SOURCE-SCOPE (40 entries; tree-316-sha256.txt 34 OK / 6 FAILED), CLAIMS (claims-317.sh), BYTE-IDENTITY 25/25 + 0 kit, UNIT + 13 mutants, FONT-BYTES on 4 routes, FONT-PIXEL /store + /studio-lab 0 px both viewports, FONT-NET/PRELOAD/CACHE + FCP/PERF-LOAD confirmation, DOC, G317-AUTH both viewports.",
+ "reason": "Round 317 (PERF-7 fix-up) C PASS 13/13, 0 findings, browserVerified/realVerified true; gate 317 published a5a9c97 -> PERF-7 done, C-R316-01 closed. REGRESSION not due (regression-last 2026-11-02 -> on/after 2026-11-05); RETRO at 320. Next STUDIO-PERFORMANCE stage is PERF-8, split 8a (range store) / 8b (selection store) after performance-optimizer + tech-lead consults. zustand@5.0.16 requested via root-deps-request.json (allowlisted); A STOPs if it did not land. Many scoped items remain; nothing external blocks.",
+ "nextTask": "Round 318 PERF-8a: range leaves the ArrangementContext value into a per-provider zustand/vanilla store (app/lib/arrangement/range-store.ts, ArrangementRangeContext, useArrangementRange(selector)); setRange keeps its rewriteStoppedTruth branch; all event-time reads via getState(); per-clip selectors return the stored reference or null; 22 test files change only their range read path (expect( >= 3,139); 5 range budget rows -> assert (<=15 components/move and max, playing restarts 0); notices regenerated for zustand; doc 230 + doc 168 metrics section. C: SOURCE-SCOPE, CLAIMS K1-K16, UNIT RS1-RS7 + 4 mutants, EXPECT, PERF-RANGE (baseline control ~108 vs A <=15) + PERF-LOAD alone, R-DRAG/ALLTRACKS/CLEAR/SPACE/SPLIT/DELETE/CUT-TIME/LOOP/ZOOM/EXPORT/DETAIL/BG/MARQUEE/TRANSPORT at 1440 and 1280, G318-AUTH.",
  "remaining": [
-  "PERF-7",
-  "PERF-8",
+  "PERF-8a",
+  "PERF-8b",
   "PERF-DRAG-PREVIEW",
   "PERF-9",
   "PERF-10",
