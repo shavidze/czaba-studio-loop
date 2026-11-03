@@ -1,0 +1,91 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T18:36:51.6970102Z",
+  "round": 320,
+  "attempt": 1,
+  "store": 200
+ },
+ "aStatus": "no STOP; A scope complete",
+ "assertsSpecified": 8,
+ "mutantsRecorded": 6,
+ "mutantRedOnSketch": "on A's tree: MU-RANGE-IN-VALUE->RS4; MU-LANE-NEW-OBJECT->RS4/RS5/RS6; MU-NO-STATUS-REWRITE->RS6; MU-STALE-LATESTREF->RS7; C-MU-DETAIL-IGNORE-PROP->RS8(a)/(b); MU-DETAIL-IGNORE-STORE->RS8(c); C-own C-MU-OVERLAY-IGNORE-TRACK->RS5 red; C-own memo-removal probes (Playhead, PeakPath, Waveform, Readout) survive 103/103 (C-R320-01); restored green",
+ "bugs": [
+  {
+   "id": "C-R320-01",
+   "severity": "low",
+   "origin": "B spec (§2.2/§4 test grants; per-move budget 15 has headroom over the no-memo tree's 14.15)",
+   "steps": [
+    "cp A tree to scratch /tmp/c320m",
+    "replace 'const ArrangementDetailPlayhead = memo(ArrangementDetailPlayheadInner);' with 'const ArrangementDetailPlayhead = ArrangementDetailPlayheadInner;' (likewise PeakPath, DetailWaveform, RangeReadout, one at a time)",
+    "npx vitest run render-budget.test.tsx clip-gain-pointer-preview.test.tsx range-store.test.tsx detail-panel.test.tsx track-layout.test.tsx"
+   ],
+   "expected": "Some row turns red when a memo boundary added by this round is removed (§0: memo boundaries with honest test probes)",
+   "actual": "All four mutants pass 103/103. The prod budget would not catch it either: the round-319 tree (this tree without the memos) measured 14.15 per move / max 32, inside <=15 / <=35. The memo bails are real in the browser (PERF-NAMED: main 7 + layout 2), but nothing guards them. The round-319 tree is this tree without the memos (A reverted its wrappers in 319). §0 makes honest memo probes a purpose of the round; the probes are live (NAME-LIVE) but none tests the bail, so B may promote this to a required row as C-R319-03 became RS8",
+   "evidence": "tmp/studio-real-loop/c-round-320/mutants.txt, mut-C-MU-*-NO-MEMO.log, c-round-320/cmut.py, runmut.sh; c-round-319/perf-a-interactions.log"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "UNIT",
+  "NAME-LIVE",
+  "EXPECT",
+  "PERF-RANGE",
+  "PERF-NAMED",
+  "PERF-LOAD",
+  "R-WAVEFORM",
+  "R-DRAG",
+  "R-DETAIL",
+  "R-ALLTRACKS",
+  "R-CLEAR",
+  "R-SPACE",
+  "R-SPLIT",
+  "R-DELETE",
+  "R-CUT-TIME",
+  "R-LOOP",
+  "R-ZOOM",
+  "R-EXPORT",
+  "R-BG",
+  "R-MARQUEE",
+  "R-TRANSPORT",
+  "G320-AUTH"
+ ],
+ "gate": [
+  "full vitest",
+  "build in store/",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "info": [
+  "INFO-C320-EXPORT-ESC-FLAKE: A 1280-reload attempt 1 crashed at the project export (dialog overlay intercepted the Export click); retry rc 0; targeted probe 6/6 closed on both builds",
+  "INFO-C320-LONGTASK: prod load.longtask-max median 0->69 (wall-clock, 12-commit loads)",
+  "INFO-C320-COLD: baseline dev warm-up and G320-AUTH attempt 1 timed out on cold dev compiles; each replaced once",
+  "C-R318-06 pre-existing: reproduced on both builds at 1280 without reload"
+ ],
+ "numbers": {
+  "rangePerMove": {
+   "baseline": 108.167,
+   "a": 9.233
+  },
+  "rangeMax": {
+   "baseline": 105,
+   "a": 30
+  },
+  "playingMoveRestarts": 0,
+  "dragRangeLive": 1,
+  "failures": [],
+  "nonRangeRises": 0,
+  "loadMatched12": {
+   "baseline": 1126,
+   "a": 1109
+  },
+  "wavByteIdentical": 4
+ },
+ "evidence": "tmp/studio-real-loop/c-round-320.md, tmp/studio-real-loop/c-round-320/",
+ "notes": "SOURCE-SCOPE also covers the doc 230/168, notices and budgets checks (details in c-round-320.md). UNIT = 46 files 970/970 incl. TL5 + perf/** 40/40 + 6 required mutants red + C-own C-MU-OVERLAY-IGNORE-TRACK red"
+}

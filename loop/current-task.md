@@ -1,268 +1,158 @@
-# Round 320: PERF-8a fix-up 2. Memo naming ruling, the explicit-range guard, and the missing deliverables
+# Round 321: RETRO 321 (ninth retrospective, rounds 305–320) + whole-screen and journey review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
 
-**Planned by:** B, at the round 319 → 320 planning, 2026-11-03.
+**Planned by:** B, at the round 320 → 321 planning, 2026-11-03.
 
-**Decisions** (all in `backlog.json` v279 → `decisions_log_b`):
-- **D-29z872: round 319 ruled (L10).**
-  - C round 319: FAIL, `browserVerified` and `realVerified` true. A stopped on §6 bullet 4 (`a-round-319.md`, `c-round-319.json`). Gate 319 `skipped` [K1].
-  - A's handed-off tree (37 status entries [K2]) behaves exactly like the baseline in every browser row at both viewports. All 4 WAV exports are byte-identical. In production it already measures **14.15 per move, max 32**, `failures` [] (`c-round-319.md`, `perf-a-interactions.log`).
-  - **This round continues on that tree.** A does not revert, re-create or duplicate rounds 318–319.
-- **D-29z873: C-R319-01 (memo naming) is ruled: option O1, the project's `XInner` convention, for all five memo components.**
-  - The form is `function XInner(…) { … }` followed by `const X = memo(XInner);`. `ArrangementPeakPath` keeps the `export` on the const.
-  - **Why O1:** the store already has six `memo(XInner)` boundaries (`ArrangementClipViewInner`, `ArrangementOverviewInner`, `ArrangementDetailContentInner`, `ArrangementLibraryOptionInner`, `ArrangementBarsRulerInner`, `ArrangementRulerTicksInner`). The tests already key on `…Inner` runtime names. A module-level `function XInner` is not shadowed, so esbuild does not rename it to `X2`.
-  - **O2 is rejected** (`XMemo = memo(X)`). It has one precedent (`LibraryInsertMarkerTextMemo`). It leaves the exported `ArrangementPeakPath` pointing at the function that is not memoised, so a later caller silently loses the boundary.
-  - **O3 is rejected** (`keepNames`): a config change that affects every module.
-  - **O4 is rejected** (no memos): 0.85 of headroom on per move is not a budget.
-  - **Test grant (outside round 318's 27):** five string literals change from `'X'` to `'XInner'` and nothing else changes:
-    - `render-budget.test.tsx` l.439, l.454, l.469: `'ArrangementDetailPlayhead'` → `'ArrangementDetailPlayheadInner'`;
-    - `clip-gain-pointer-preview.test.tsx` l.224 (`PARENT_NAMES`): `'ArrangementDetailWaveform'` → `'ArrangementDetailWaveformInner'`;
-    - the same file, l.557: `'ArrangementPeakPath'` → `'ArrangementPeakPathInner'`.
+**Decisions** (all in `backlog.json` v280 → `decisions_log_b`):
+- D-29z880: round 320 accepted; **PERF-8a is done**; C-R318-01/02/03/04 and C-R319-01/02/03 closed; C-R320-01 becomes a required PERF-10 row.
+- D-29z881: gate-320 triage.
+- D-29z882: RETRO 321 outputs.
+- D-29z883: lessons.
+- D-29z884: EXP-R305-SKETCH-MUTANT verdict and the successor EXP-R321-PRECHECK-GATES.
+- D-29z885: screen and journey review.
+- D-29z886: systemic task SYS-R2-FAKE-FIDELITY.
+- D-29z887: architecture checkpoint request ARCH-CHECKPOINT-PERF8-STORE-PATTERN.
+- D-29z888: what comes next.
+- D-29z889: retro candidates and the inventory dispositions.
 
-    No assertion is removed, and each file keeps its `expect(` count (88 / 184) [K27].
-  - **B's L23 pre-check, measured on a scratch copy** (`b-round-319/sketch-o1.patch.txt`, `sketch-o1.py`):
-    - the five files with O1 applied: `render-budget`, `clip-gain-pointer-preview`, `detail-panel`, `track-layout` and `range-store` pass, 5 files / 100 tests;
-    - `tsc --noEmit` is clean.
-    - **Name liveness (L52):** in CP1's setup window, all five new names are rendered with a count > 0: `ArrangementPeakPathInner`, `ArrangementClipRangeOverlayInner`, `ArrangementRangeReadoutInner`, `ArrangementDetailWaveformInner` and `ArrangementDetailPlayheadInner` (`b-round-319/sketch-name-liveness.txt`). So the renamed `toBe(0)` guards can fail.
-- **D-29z874: C-R319-03 (the unguarded explicit `range` prop) is closed by a new unit row, RS8**, inside `detail-panel.test.tsx` (already in round 318's 27). C's mutant `C-MU-DETAIL-IGNORE-PROP` becomes a required red mutant.
-- **D-29z875: C-R319-02 (incomplete deliverables) is closed by this round:** K14 = 5, K19, notices, doc 168, doc 230, A-PERF, A-MUTANTS and the full A-REVIEW.
-  - A's **ChevronRight hoist** (beyond §1's ChevronDown) is accepted: same props, same output, inside the grant.
-- **D-29z876: four rows of round 319 were mis-specified by B. They are rewritten here, with the same strength.**
-  - R-WAVEFORM: the clip `d` does not change with zoom at the baseline either. The row now compares `d` with the baseline at each zoom step. The late-peaks sub-check is dropped, because `/studio-lab` has no mechanism for it: the demo peaks are ready before Add. The in-place mutation risk moves to A-REVIEW as a grep.
-  - R-DETAIL: at 1280×720 the panel starts collapsed, and Space went to the focused toggle. The script now moves the focus off the toggle before Space. The playhead sub-check is required at **both** viewports.
-  - PERF-LOAD: the harness has no per-commit breakdown. The row uses the matched-commit-count totals, and the dev profiler gives the per-commit check.
-  - Named-fiber rule: the production bundle minifies names (C round 319), so attribution runs on **dev** only and counts `ArrangementClipRangeOverlayInner`.
-- **D-29z877: RETRO moves from 320 to 321.** Its window becomes 305–320.
-  - Reason: C's Medium findings come first, and the tree is mid-round and unpublished. A RETRO now would go through a gate that cannot pass (TL5 is red).
-  - REGRESSION is not due: `regression-last` is 2026-11-02, so the next falls on or after 2026-11-05 [K9]. After RETRO 321 comes REGRESSION if its planning falls on or after 2026-11-05, otherwise PERF-8b.
-- **D-29z878:** `lessons.md` L23 gains the runtime-name clause (A's §7 proposal, C-R319-01). No new line.
-- **D-29z879:** two architecture signals are recorded and **not** scheduled:
-  - A-R319-ARCH-DETAIL-SUBSCRIPTION: move the panel's range subscription into `ArrangementDetailContent`, so that resize and collapse state are not re-rendered during range drags;
-  - SIG-R320-WAVEFORM-VIDEO-NONBAIL: `ArrangementDetailWaveform` receives a fresh `videoClipGainReason` node for video selections, so its memo does not bail there.
+**Rules:**
+- **Policy:**
+  - "Retrospective: stop, look back, improve" (Saba, 2026-10-26);
+  - "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28);
+  - the product-designer rule (2026-10-30);
+  - the RETRO journey step (2026-10-31);
+  - `backlog.json` → `retro_policy`.
+- **Window:** D-29z877 moved this RETRO from 320 to 321, so it covers 305–320 (16 rounds).
+- **Read first:** `lessons.md`. This planning revised it, and the revision applies from round 321:
+  - L16 is merged into L3 (alias L16);
+  - **L58** is new: an asserted number, name or byte pin is the saved output of C's own command on B's sketch;
+  - L54 and L57 gain one clause each;
+  - line 3 is now a pointer to the full history.
+- **L57 (whole list, per its new clause):** C's JSON carries **all** L57 fields: `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, an `origin` per finding, `assertsSpecified`, `mutantsRecorded` and `mutantRedOnSketch`. In this RETRO round the last three are `null` with the reason "RETRO: no assert specified". The EXP-R321 fields (`gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`) start in round 322.
+- **L29 note:** untagged code text below is a row id, a loop-artifact path or a description of what C runs. Every fact about a `store/` file carries a `[K#]` tag (§8).
+- **Loop path:** `tmp/studio-real-loop` is a symlink. Search it with `find -L` (L38).
 
-  Both go to PERF-10.
-
-**Read first:** `lessons.md`. These apply directly:
-- L10: rulings;
-- L11: STOP;
-- L23: sketch, now with the runtime-name clause;
-- L29: claims;
-- L34: doc section;
-- L35: notices;
-- L37: budget headroom;
-- L38: perf runs alone;
-- L52: mutants and asserts that can fail;
-- L56: artifacts;
-- L57: C's fields.
-
-**L29 note:** untagged code text below is an expected value or a new name. Facts about `store/` carry `[K#]` (§9).
-
-## Baseline
-- **HEAD `50662e1`** plus **A's handed-off tree: 37 status entries** [K2]. That is round 318's 36 plus `ArrangementDetailPanel.tsx`.
-- **Already in place** [K4–K7, K11–K13, K15, K18, K23]:
-  - the range store;
-  - `range` out of the context value;
-  - the clip overlay as a child subscriber;
-  - the readout memo;
-  - the detail wrapper removed, with the panel subscribing itself and `range` optional;
-  - both chevrons hoisted.
-- Under the old `memo(function X` form there are 2 sites [K24]: the overlay and the readout.
-- **Protected files:** `b-round-318/protected-sha256.txt`, 11/11 OK [K8].
-- **C's comparison baseline:** a `git archive` of `50662e1`, unchanged.
+## Baseline: HEAD `53c5c79`, clean tree
+- **Gate:** gate 320 published `53c5c79…` on both remotes [K1]. That commit is the round-321 baseline.
+- **Tree:** `git status --short --untracked-files=all` was empty at planning, and HEAD was `53c5c79` [K2].
+- **Frozen:** every tracked file, **1,226** entries, is listed in `b-round-320-r321-tree-sha256.txt` [K3].
+  - Check from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-320-r321-tree-sha256.txt`.
+  - B ran it after the last consult: rc 0.
+  - Each of the 11 protected files of `b-round-318/protected-sha256.txt` appears exactly once [K4].
+- **Grants: none.** No file in `store/` may change in this round.
 
 ## 0. Why this round
-- Round 319 measured that the range store already meets the user-facing goal in production: 108.167 → 14.15 components per move. What is missing is the work that makes it safe to publish:
-  - the asserted budgets;
-  - the memo boundaries with honest test probes;
-  - the notices (the gate's full vitest is red on TL5 without them);
-  - the docs;
-  - A's own measurement and mutants.
-- **Expected effect of the three memos** (B's projection, not measured; C's PERF-RANGE decides it):
-  - main commit 9 → 7, because PeakPath and Playhead bail;
-  - layout commit 5 → 2, because Waveform, PeakPath and Playhead bail;
-  - so about **9 per move**. The max (32) can only fall.
-- **What changes for the user: nothing visible.** Only the render work per drag move drops.
-- **Not applicable:** reference-first, `product-designer`, the screen budget and the journey row. This is a pure performance round with no visible change.
-- **Consults:** round 318's `performance-optimizer` and `tech-lead` conclusions still hold (`b-round-318.md` §3). This round only rules a naming form, which the codebase convention settles, so no new consult was needed.
+- **Round 320 passed** (`c-round-320.json`: 24 rows, `browserVerified` and `realVerified` true, 1 Low). Gate 320 published `53c5c79`. **PERF-8a is done:** range drag 108.167 → 9.233 components per move in production, max 30, 4 WAVs byte-identical.
+- **Round-320 findings (D-29z880):**
+  - **C-R320-01** (Low, B spec: the memo boundaries have no guard that can fail) becomes a **required row in PERF-10**, not `deferred_low_polish`. `tech-lead`: PERF-10 owns the same boundaries (L8).
+  - A-R320-REVIEW-WAVEFORM-NAME-POSITIVE is folded into that row. A-R320-REVIEW-EXPORT-RENDER-READ goes to `deferred_low_polish`. A's `useDetailRange` note is an architecture signal for PERF-10.
+- **Gate-320 triage (D-29z881):**
+  - Finding 1 (Critical, "COMMIT: BLOCK" on the `useArrangement()` shape) is **closed**: the grant is in `tasks/round-318.md` l.102, and root published. The missing doc 230 decision line is GATE320-L1-DOC230-GRANT-LINE (Low), which rides PERF-8b.
+  - **GATE320-S2** (`setRange(null)` before the selection write after an `await`): `open_low_provisional`. PERF-8b carries a browser experiment row (`tech-lead`'s method).
+  - GATE320-S3 → PERF-10 record row. GATE320-S4 → `deferred_low_polish`. Finding 5 = SIG-R319-DEVOPTIONAL-NOTICES (root). GATE320-S6 → ARCH-CHECKPOINT-PERF8-STORE-PATTERN.
+- **RETRO is due:** `retro_policy.next_due` was "round 320 …", and D-29z877 moved it to 321.
+- **REGRESSION is not due yet.** `regression-last.json` says 2026-11-02 [K14], so the next one is due on or after 2026-11-05.
+- **No open Critical or High.** The parked Mediums are unchanged: A-R73-SAFARI-FLAG-FOCUS, GATE128-S1-MIXED-LANGUAGE, R80-RECORDINGS-FIELD-BORDERS, GATE232-S2, GATE271-S1-NO-REALIGN, GATE274-S1-HELD-REPEAT-ANNOUNCE and GATE304-M1 (root). None is a security or data-loss bug.
+- **Reference first / Ableton / product-designer design step:** not applicable (RETRO round). **Screen budget:** nothing visible changes.
 
-## 1. Rulings
-| Id | Ruling |
+## 1. What B already produced (the objects under test)
+| File | Content |
 |---|---|
-| Keep | Everything in the 37-entry tree stays. A changes it only where a row below requires it |
-| Memo form (D-29z873) | Five components use `function XInner(…)` + `const X = memo(XInner);`: `ArrangementClipRangeOverlay` and `ArrangementPeakPath` (`export const`) in `ArrangementClip.tsx`; `ArrangementRangeReadout` in `StudioWorkspace.tsx`; `ArrangementDetailPlayhead` and `ArrangementDetailWaveform` in `ArrangementDetailPanel.tsx`. The bodies are byte-equal to the current functions; only the declaration line and the closing line change. After the change, `memo(function` occurs 0 times in the three files [K24]. Call sites stay as they are |
-| Test keys (D-29z873) | Exactly the five literals listed in D-29z873, in `render-budget.test.tsx` and `clip-gain-pointer-preview.test.tsx`. Nothing else changes in those two files |
-| RS8 (D-29z874) | See §2.2 |
-| Untouched | `ArrangementTransport.tsx` (K22 sha), `ArrangementDetailClipGain`, the start/end layout effect (K15 = 1), and `applyDetailRange`'s documented render-time read |
+| `retros/retro-321.md` | The analysis, in Georgian with English terms, for Saba. Window 305–320 |
+| `lessons.md` | **59 lines** (≤ 60) [K7], three parts. Before-copy: `b-round-320/lessons-before-321.md`. Diff: `b-round-320/lessons-diff.txt` |
+| `user-review/screen-review-321.md` | Candidates **SR-321-1…6**. Captures in `b-round-320/screens/`: `capture.mjs`, `capture.log`, `screen321.json` and the 12 PNGs [K9] |
+| `b-round-320/*.py`, `*.txt`, `*.json` | The scripts and data behind every number. <ul><li>Hand file: `fails-cause-hand.txt`.</li><li>`l57-fields.txt`, `stops-count.txt`, `task-titles.txt`, `b-running-median.txt` and `unfailable-assert-fields.txt` came from one-line shell or python commands. Each command is in `b-round-320.md` §3.</li><li>`retro321-mentions.py` (with its two `.txt` outputs) is the "RETRO 320/321" inventory.</li><li>`update-backlog.py` holds this planning's backlog edits.</li></ul> |
+| `backlog.json` (version 280) | Decisions D-29z880…D-29z889 [K10]. <ul><li>`retro_runs` 321 and `retro_policy`.</li><li>`screen_review_candidates` SR-321-*.</li><li>`systemic_tasks` SYS-R2-FAKE-FIDELITY.</li><li>`architecture_checkpoint_requests` ARCH-CHECKPOINT-PERF8-STORE-PATTERN.</li><li>The C-320 and gate-320 ids and the retro-candidate dispositions.</li></ul> Before-copy: `b-round-320/backlog-before-321.json` |
+| `feature-status.md` | Rows 320 and 321, the next line, the STUDIO-PERFORMANCE row, RETRO 305 and RETRO 321 |
 
-## 2. Contract
+**Order of work (the C-R215-01 lesson):**
+- The analysis scripts read the **before** copy.
+- Run them from the loop root as `python3 -I b-round-320/<script>.py`: first `collect.py`, then `cost.py`, then the others.
+- `cost.py` prints to stdout; B saved that output as `cost.txt`.
+- `update-backlog.py` is **not** re-runnable: it refuses to run twice. Do not run it.
+- **One post-script correction:** after `update-backlog.py`, B corrected one number by hand in `RC-R275-STOP-ROUTES-TO-B.status` ($77.52 → $78.18; `b-round-320.md` §3). C checks the corrected value.
 
-### 2.1 Files (grants, §4)
-**Edited this round:**
-- `app/components/arrangement/ArrangementClip.tsx`, `StudioWorkspace.tsx`, `ArrangementDetailPanel.tsx`: the memo form only.
-- `app/lib/arrangement/__tests__/render-budget.test.tsx` and `clip-gain-pointer-preview.test.tsx`: the five literals only.
-- `app/lib/arrangement/__tests__/detail-panel.test.tsx`: RS8 added.
-- `perf/budgets.interactions.json`: the 5 rows of §2.3.
-- `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md`: the whole `## მეტრიკები` section (L34). One paragraph names the 5 asserted rows, with owner PERF-8a and the measured values.
-- `THIRD_PARTY_NOTICES.md`: regenerated (§2.4).
+## 2. A: nothing to implement
+1. From `store/`, confirm three things:
+   - HEAD = `53c5c79…`;
+   - `git status --short --untracked-files=all` is empty;
+   - the frozen sha check prints nothing.
+2. Write `a-round-321.md` with the three results and "no change, by RETRO policy". Do not run typecheck, lint, vitest or the code-reviewer.
+3. Do not edit `retros/`, `lessons.md`, `user-review/` or any B file. If you disagree with a lesson in the A part, or with L58 (it changes what B hands you), write it under "Lesson feedback".
 
-**New:** `docs/implementation/2026/quarter-IV/230-perf-range-store.md` (§2.5).
+## 3. C: what to verify
+C writes `c-round-321.md` and `c-round-321.json` as it goes, with **all** L57 fields (see Rules).
 
-**Expected K2 after A:** `50662e1 43`. That is the 37 entries, plus budgets, doc 168, notices, doc 230, `render-budget` and `clip-gain-pointer-preview`.
-
-### 2.2 Unit rows
-- RS1–RS7 stay as in `tasks/round-318.md` §2.2, and they must pass.
-- **RS8 (new, explicit `range` prop wins)** goes in `detail-panel.test.tsx`, follows `.claude/prompts/new-test.md` and has `RS8` in its title [K26]. Inside an `ArrangementProvider`, with an audio clip selection:
-  - **(a)** The store holds a range r inside the clip, and the panel gets `range={null}`. The panel shows the no-range state: the From/To fields and the waveform range overlay follow `null`, not r.
-  - **(b)** The store holds `null`, and the panel gets `range={r}`. The panel shows r.
-  - **(c)** With the prop omitted, the panel follows the store, and it updates when `setRange` runs (no remount).
-  - A names the observable it uses (input values or the overlay testid) and states how the store is driven.
-  - **Mutant `C-MU-DETAIL-IGNORE-PROP`** (`rangeOverride === undefined ? storeRange : rangeOverride` → `… : storeRange`) turns RS8 red. A second mutant, **`MU-DETAIL-IGNORE-STORE`** (always use the prop), turns RS8(c) red.
-
-### 2.3 Budgets (`perf/budgets.interactions.json`). Unchanged from round 319
-| Row | Change |
-|---|---|
-| `interact.drag.range.stopped.move-components-per-move` | `mode: "assert"`, budget `<= 15`, `owner: "PERF-8a"` |
-| `interact.drag.range.playing.move-components-per-move` | same |
-| `interact.drag.range.stopped.move-components-max` | `mode: "assert"`, budget `<= 35`, `owner: "PERF-8a"`. The note says that the max is the first-move null→range commit including the transport flip (D-29z864) |
-| `interact.drag.range.playing.move-components-max` | same |
-| `interact.drag.range.playing.move-restarts` | `mode: "assert"`, budget `== 0`, `owner: "PERF-8a"` |
-
-- Use the existing `"op"` spelling.
-- The `commits-per-move` rows and the `.6x` rows stay `record`.
-- `interact.harness.drag-range-live` stays an assert `== 1`.
-
-### 2.4 Notices (L35, D-29z866). Unchanged from round 319
-Run `npx vitest run app/lib/__tests__/third-party-licenses.test.ts -u` after the code changes.
-
-**Expected:**
-- exactly 4 new rows: `zustand | 5.0.16 | MIT`, `@types/react | 18.3.27`, `@types/prop-types | 15.7.15` and `csstype | 3.2.3`, each with its licence as the lock reports it;
-- the heading `(560)` becomes `(564)` [K20];
-- no other line changes;
-- the licence test file does not change.
-
-### 2.5 Doc 230 (Georgian, technical terms in English; TEMPLATE's 7 headings)
-- **l.4:** `**სტატუსი:** In Progress (stage 1 of 2; C round 320 PASS)` (L28).
-- **Contents:**
-  - the mechanism (`tasks/round-318.md` §0.2);
-  - the store and the selector rule;
-  - the memo boundaries and the `XInner` naming rule, with its reason: esbuild renames to `X2` and the tests key on runtime names;
-  - the rulings D-29z864, D-29z866 and D-29z873;
-  - the measured numbers: 108.167 → round 318 21.033 → round 319 14.15 → this round.
-- **Testing:** names RS1–RS8, the mutants and C's rows. Cite only tests that exist (L26).
-
-## 3. Acceptance
-
-### 3.1 A's rows
-| Row | Expected |
-|---|---|
-| A-CLAIMS | Before editing, run `bash b-round-319/claims-320.sh`. Its output equals `b-round-319/claims-320-head-output.txt`. Any difference is a STOP |
-| A-IMPL | §1 and §2 |
-| A-CLAIMS-AFTER | K2 `50662e1 43`; K4 0, K5 0, K6 8, K7 0, K8 11, K11 0, K13 1, **K14 5**, K15 1, K16 12/12, **K17 1 / 1**, K18 1, **K19 1+1 / 1+1 / 1+1 / 1+1**, **K20 `(564)` and 1**, **K21 1**, K22 `b7528ac5ab192b8d`, K23 0, **K24 0**, **K25 `0+0+0 / 3+1+1`**, **K26 ≥ 1**, **K27 88 / 184** |
-| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0, with no new warning in a changed file |
-| A-UNIT | `npx vitest run` on round 319's 45 files (`a-round-319/unit-files.txt`) plus `app/lib/__tests__/third-party-licenses.test.ts`. All pass, **TL5 included**. Also run `perf/lib/report.test.ts` through a scratch vitest config that includes `perf/**` (rounds 312–313). A reports the counts |
-| A-EXPECT | `python3 -I b-round-317/expect-count.py <store>` gives 22 files, with no file lower. `detail-panel.test.tsx` (one of the 22) grows by RS8's asserts, so TOTAL is 3,139 + RS8's count; every other file keeps its count. `render-budget` and `clip-gain-pointer-preview` keep 88 / 184 [K27] |
-| A-MUTANTS | On a scratch copy, never in `store/`: MU-RANGE-IN-VALUE, MU-LANE-NEW-OBJECT, MU-NO-STATUS-REWRITE and MU-STALE-LATESTREF (as `tasks/round-318.md` §2.2), plus C-MU-DETAIL-IGNORE-PROP and MU-DETAIL-IGNORE-STORE (RS8). Each turns its row red. Restored, they are green |
-| A-PERF (alone, L38) | Production build on a scratch copy, then `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts` once. Report the §2.3 rows, `drag-range-live` and `failures`, which must be `[]` with the new asserts. Also give a per-component breakdown, on a dev serve, of one steady move and of the max commit, using A's round-318 profiler (names are `…Inner`) |
-| A-REVIEW | `code-reviewer` on the **final** tree (3+ files). It checks: no selector builds a new object; no event-time read uses a render snapshot, except the documented `applyDetailRange`; each memo boundary has stable props or is listed as not bailing (the Waveform on video selections, SIG-R320-WAVEFORM-VIDEO-NONBAIL); the memo bodies are byte-equal; the two renamed test files differ only in the five literals; peaks arrays are never mutated in place (grep `app/lib/arrangement` and `app/components/arrangement` for index writes or `.push`/`.fill`/`.set` on a peaks value); RS8 can fail. A Medium+ finding inside the grants is fixed and re-reviewed (L11). Architecture notes are passed to B |
-
-### 3.2 C's rows
-C writes `c-round-320.md` and `c-round-320.json` as it goes, with the L57 fields:
-- `assertsSpecified` = 8 (RS1–RS8);
-- `mutantsRecorded` = 6;
-- `mutantRedOnSketch` (on A's tree).
-
-Each finding carries an `origin`.
-
-**Builds.** Production builds of the baseline (a `git archive` of `50662e1`) and of A's tree, each in its own scratch. Never build inside `store/`. Keep both interactions JSONs.
-
-**Browser rows** run at 1440×900 and 1280×720 on `/studio-lab`. Each compares A's build with the baseline: the same visible result and the same status text. C may reuse `c-round-319/c319-rows.mjs`, `c319-wave.mjs` and `c319-diag.mjs`.
-
-| Row | Action | Expected |
+| Row | Check | PASS means |
 |---|---|---|
-| SOURCE-SCOPE | `git status`; protected sha | The only changes beyond the 37 entries are the §2.1 paths and doc 230. In the three source files, the diff vs the 37-entry tree is the memo form only. The two test files differ only in the five literals. Protected 11/11 OK |
-| CLAIMS | `claims-320.sh` | As A-CLAIMS-AFTER |
-| UNIT | A-UNIT's files on C's scratch, the 6 mutants and at least one mutant of C's own | All pass, TL5 included. Each mutant is red. Restored, they are green |
-| NAME-LIVE (L52) | On C's scratch, a temporary log of `renderLog.counts` in CP1's setup window and in R11-P1e before its first `clear()` | All five `…Inner` names appear with a count > 0. A name that never appears is a finding (a vacuous guard) |
-| EXPECT | `expect-count.py` HEAD vs A | No file loses an `expect(`. K27 is 88 / 184 |
-| PERF-RANGE (alone, L38) | Interactions spec on both production builds | **Baseline control:** range per move ≈ 108 (it must be > 15, or the row is vacuous). **A:** stopped and playing per move ≤ 15, max ≤ 35, `drag-range-live` = 1, playing move-restarts 0, `failures` [], and the 5 rows asserted (K14 5). **Non-range rows:** every drag, click, zoom and play/pause row satisfies A ≤ baseline + N (the named-fiber rule, D-29z865). C checks the rows of `c-round-319/rowcmp-interactions.txt` |
-| PERF-NAMED (dev) | `c319-diag.mjs`, adapted to the `…Inner` names, on a dev serve of the baseline and of A, each with its own `cacheDir` | For clip click, name-bar move and zoom30, every added fiber is `ArrangementClipRangeOverlayInner`: N = 0 on click, 1 per move, 1 per clip on zoom. The range steady move gives the main and layout commit lists. Any rise not explained by the overlay is a finding |
-| PERF-LOAD (alone) | `studio-lab.perf.spec.ts` on both builds, then the row compare | `failures` []. No rise in a fader or interaction row. `load.components` is compared at **matched commit counts** (the harness has no per-commit breakdown). On the dev profiler, one load gives per-commit lists: a commit may grow only by the readout's one mount and one overlay mount per clip mounted in it |
-| R-WAVEFORM | Add a clip. Zoom in and out twice (`=` / `-`). Select the clip. Open the detail panel | At every zoom step, the clip waveform path (`arrangement-clip-waveform`) is non-empty and its `d` equals the baseline's. The detail waveform `d` equals the baseline's |
-| R-DRAG | Body-drag a time selection across a clip | The label updates during the drag, snaps as at the baseline (Snap on and off, Alt), and stays after release. The overlay box's left and width equal the baseline's |
-| R-DETAIL | Select a clip with a selection. Type From/To. Drag the range with the panel open. Then **move the focus off the detail toggle** (for example click an empty ruler-free area, or `blur()` the toggle) and press Space over the selected clip | The fields follow the drag; typing moves the range; the status text equals the baseline. The detail playhead moves during playback **at both viewports** |
-| R-ALLTRACKS / R-CLEAR / R-SPACE | As in round 319 | As at the baseline |
-| R-SPLIT / R-DELETE / R-CUT-TIME | Ctrl+E, Delete, Ctrl+Shift+X on a selection, then Undo/Redo | The same clips and status as at the baseline (C-R318-06 is pre-existing; note it if seen, do not count it) |
-| R-LOOP / R-ZOOM / R-EXPORT | As in round 319 | The same loop brace and zoom. The range WAV and project WAV exports are byte-identical to the baseline's (round 319: 279,600 frames) |
-| R-BG / R-MARQUEE / R-TRANSPORT | As in round 319 | As at the baseline. Transport titles and enabled state are equal with and without a range |
-| G320-AUTH | As G319-AUTH, both viewports (L38 warm-up in a browser) | `/studio-lab`: anonymous workspace + demo badge, `auth_user` null. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. `/api/studio-token` with no header → 401 |
+| **SOURCE-SCOPE** | At the start and the end: HEAD `53c5c79`, a clean status, and the frozen list with rc 0 | Nothing in `store/` changed. Any change fails the round, whoever made it |
+| **CLAIMS** | Run `bash b-round-320/claims-321.sh` from the loop root, **first** (L56). Compare its output with `b-round-320/claims-321-output.txt` | Every line is equal. K8 prints `done` with no `MISSING` |
+| **RT-NUM** | Recompute **every number** in `retro-321.md` §1, §2, §3, §9 and §12 from its named file or script. C may copy the scripts to `c-round-321/`; run them from the loop root. At least: <ul><li>**Totals:** $192.26 / $110.06 / $92.42 / $394.74; the round median $24.46; the phase medians B $12.12, A $6.84, C $5.42; the FAIL-round cost $150.14; the B share 49%.</li><li>**Groups:** $19.79 / $202.23 / $64.63 / $108.09; the fix-ups 18.59 / 24.97 / 13.59 / 26.80 / 24.14; the STOP-round sum $78.18.</li><li>**Counts:** C PASS/FAIL 10/6; gate 10/6/0; C `bugs[]` Medium 8, Low 10; 10 review.md files with 51 findings; the `classify.txt` origin sums C 41, gate 29, A 27, B 7 and 75 + 29 = 104; 574 / 34; 82 awaiting_user ids; 3 STOPs; first feature stages 3 of 7.</li><li>**§9:** the running B median above $11.70 from round 305 (`b-running-median.txt`); the manifest fields absent in 313/315/318/320 [K11]; L23 5,058 bytes and line 3 808 bytes, both by `sed -n Np lessons.md | wc -c` [K15].</li></ul> | Each number matches its source, or the difference is ≤ $0.01 rounding |
+| **RT-CAUSE** | For each row of §3 and each fact in §9, open the quoted source: <ul><li>`c-round-305.json`, `c-round-312.json`, `c-round-313.json`, `c-round-316.json`, `c-round-318.json`, `c-round-319.json`, `c-round-320.json` (`bugs[].origin`);</li><li>`a-round-313.md`, `a-round-318.md`, `a-round-319.md` (the STOP lines);</li><li>`tasks/round-318.md` l.102 (the grant behind GATE320-C1);</li><li>`tasks/round-313.md`, `-314`, `-315`, `-318`, `-320` (the L57 field lists), `tasks/round-319.md` l.233;</li><li>`gates/round-320/review.md` (findings 1–6).</li></ul> | Each stated cause is what the source says; no cause is invented. The EXP-R305 verdict follows from its written rule in `retros/retro-305.md` §10. Consultant opinions are labelled as opinions |
+| **RT-IDS** | <ul><li>**Round 320 closure:** PERF-8a status starts with `done (D-29z880)`. C-R318-01/02/03/04 and C-R319-01/02/03 start with `closed (D-29z880)`. C-R320-01 is `open, scheduled` with PERF-10, and PERF-10 has `required_rows_d29z880`.</li><li>**Gate-320 ids:** GATE320-C1-HOOK-SHAPE closed; GATE320-L1-DOC230-GRANT-LINE open (rides PERF-8b); GATE320-S2-POST-AWAIT-ORDER `open_low_provisional`; GATE320-S3 scheduled; GATE320-S4 in `deferred_low_polish`; GATE320-S6 requested.</li><li>**Systemic task:** SYS-R2-FAKE-FIDELITY exists in `systemic_tasks` and in the STUDIO-PERFORMANCE stages, and its four closed ids carry "scheduled in SYS-R2-FAKE-FIDELITY".</li><li>**Inventory (D-29z889):** every id in `b-round-320/retro321-mention-ids.txt` has a disposition in `retro-321.md` §8. Also grep the **before** copy for `retro[ -_]?32[01]` case-insensitive, `RETRO \(32[01]\)` and `round 32[01]` to catch other spellings. An entry with no disposition is a finding.</li><li>**Candidates:** RC-R305-CAPTURE-TEXT-SLICE adopted; RC-R305-LESSON-CHAR-CAP partly adopted; RC-R308-SPLICE-PROBE retired; RC-R275-STOP-ROUTES-TO-B carries $78.18.</li></ul> | All present as stated |
+| **RT-LESSONS** | `lessons.md`: <ul><li>≤ 60 lines, with the three parts;</li><li>`diff b-round-320/lessons-before-321.md lessons.md` touches only l.3, L3 (now with alias L16), L16 (removed from the C part), L54, L57 and the new L58;</li><li>L3, L54 and L57 start with their old text byte for byte (prefix compare) and only append;</li><li>L3 keeps every evidence id of the old L16 (C-R142-01, C-R145-01, C-R146-01);</li><li>the old line 3 is byte-equal to l.3 of `b-round-320/lessons-before-321.md`, which the new line 3 names;</li><li>no other line changed; the id list equals K13</li></ul> | As stated. A lost clause or evidence id is a finding |
+| **RT-SABA** | `retro-321.md` §12 and `screen-review-321.md`: every rule change and screen candidate is phrased as a **proposal or question** | SR-321-2, -3 and -5 are questions. SR-321-5's monitor/lane variant says it is a position move that needs Saba. RC-R275 is a proposal |
+| **RT-SCREEN (browser)** | Every SR-321 candidate names a screenshot that exists and shows what it describes; C opens the PNGs. C then re-runs `b-round-320/screens/capture.mjs` (or an equivalent) **with the mock backend** at both viewports, writing to `c-round-321/screens/`. First check `http://127.0.0.1:5199/__mock/health`: if it answers, use the running instance and do not stop it; otherwise start your own (`node mock-api/server.mjs`, log under `c-round-321/`) and stop it afterwards. Check: <ul><li>`laneErrors` is none;</li><li>the journey reaches `/studio-lab?preview=middle-east` with the preview selected [K12];</li><li>the position after Play is ≥ 00:01.000;</li><li>the persistent-line counts (`outsideTimelineLib` in the log) are within ±2 of 97 / 124 / 86 / 101;</li><li>SR-321-1's file name: export one WAV in the browser and read the download's `suggestedFilename` (it rests on PD's code reading, so it gets a real check here).</li></ul> Per L54's new clause, any claim about cut or overflowing text is checked on the screenshot or with `scrollWidth` vs `clientWidth` | Each candidate is as described. A mismatch is a finding against the review, not against the app |
+| **G321-AUTH (browser)** | A fresh anonymous context at 1440×900 and 1280×720 (warm up in a browser first, L38; wait for a non-empty body): <ul><li>`/studio-lab` shows the workspace and the demo badge; `localStorage.auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>`/api/studio-token` returns 401 with no header. A fake bearer gives 403 with the mock running, or a 500 that fails closed without it.</li></ul> | As stated. No token in any body |
+| **STUDIO-SMOKE-321 (browser)** | On `/studio-lab` at both viewports, after `Demo collection ready` (L48): <ul><li>add `Bass` (Enter);</li><li>Play, then after 1.5 s `[data-testid=arrangement-position]` reads ≥ `00:01.000`;</li><li>Play's `data-playing` goes `false` → `true` → `false` [K5];</li><li>body-drag a time selection across the clip and release: the range readout shows a non-empty label (PERF-8a's store path);</li><li>export a WAV: RIFF/WAVE, 48 kHz, length 16.000 s, non-silent (peak > 0)</li></ul> | As stated. A hash compare is not required |
 
-**Gate rows.** C does not claim these; they go under `"gate"`: full vitest, the build in `store/`, Biome, `npm run verify` and the e2e smoke.
+- **Gate rows:** the full vitest, typecheck, build, Biome, `npm run verify` and the e2e smoke. List them under `"gate"`, never under `"passed"`.
+- **`browserVerified`:** true only if G321-AUTH, STUDIO-SMOKE-321 and the RT-SCREEN re-run all ran at both viewports. The other RT rows are document checks.
+- **Consults (optional):** `consequence-tester` may review L58 and EXP-R321-PRECHECK-GATES for checkability. Record any disagreement as a finding against the retro.
 
-**Browser flags.** `browserVerified` is true only if every row from PERF-RANGE through G320-AUTH ran.
+## 4. Outcome, fixed in advance (D-29z888)
+| C result | B at the round-322 planning |
+|---|---|
+| All rows PASS, planning on or after 2026-11-05 | Round 322 is **REGRESSION** (one short check per done or `c_pass` item, both viewports, smoke), with the C-R318-06 repro and root-cause row carried (L6). `regression-last.json` is updated when it closes |
+| All rows PASS, planning before 2026-11-05 | Round 322 is **PERF-8b** (selection store). <ul><li>B consults `performance-optimizer` and `tech-lead` and re-measures HEAD first (L37).</li><li>Every asserted row follows L58: C's command run on B's sketch, output saved.</li><li>It carries the GATE320-S2 browser experiment row and the GATE320-L1 doc 230 line.</li><li>It reads ARCH-CHECKPOINT-PERF8-STORE-PATTERN if root has answered; otherwise it follows D-29z193 (zustand).</li></ul> |
+| An RT row fails (an untraceable number, an invented cause, a missing disposition, a lost clause, a candidate not as described) | B corrects the files at the round-322 planning. The next C round re-checks only the changed lines (RT-FIX, as rounds 216, 231, 246, 261, 276, 291 and 306), together with the round-322 task |
+| G321-AUTH, STUDIO-SMOKE-321 or RT-SCREEN finds a Medium or worse in the app | It is fixed first (2026-10-23 bug gate). A Low goes to `deferred_low_polish` |
+| SOURCE-SCOPE fails | Stop. Root inspects. Nothing is published |
 
-**Ableton conformance:** not applicable. The behaviour is unchanged, and there is no new reference.
+**After that:** PERF-DRAG-PREVIEW / PERF-9 / PERF-10 (with the C-R320-01 row) … PERF-15 → SYS-R2-FAKE-FIDELITY → STEM-LANES → SYS-1…3 → STORE-2b…5 → REVIEW-RECOMMENDATIONS → T12-ADVANCED → the phase-2 entries (skip rule).
 
-## 4. Grants
-A edits only the §2.1 paths and creates doc 230.
-- **Nothing else:**
-  - not `ArrangementTransport.tsx`;
-  - not `package.json` or the lock;
-  - no other `app/**` or `perf/**` file;
-  - no test file beyond round 318's 27 plus the two literal-only files;
-  - no config;
-  - no protected file.
-- **If another file seems to need changing**, A STOPs and names it.
+## 5. Neighbour risk
+App code carries none: no source file changes. The risk is in the process:
+- **L58** makes B run C's exact command on the sketch before any asserted row, which costs B time. EXP-R321's stop is a B median above $13.94; the countermetric is A's cost per round.
+- **L57's new clause** asks C for three more fields from round 322, and forbids subset lists in tasks.
+- **The L16 → L3 merge** must keep L16's evidence ids. **Line 3** is now a pointer, so its history must stay byte-equal in the before-copy. RT-LESSONS checks both.
+- **The screen review goes to Saba.** RT-SCREEN re-runs the capture, and checks SR-321-1 in a real download.
 
-## 5. Neighbouring behaviour at risk (C probes)
-- **PeakPath memo:** the clip and detail waveforms draw as at the baseline at every zoom (R-WAVEFORM). Peaks are never mutated in place (A-REVIEW grep).
-- **Waveform memo:** the detail range overlay still follows the drag (R-DETAIL).
-- **Playhead memo:** the detail playhead still moves. It writes through `useArrangementPositionWriter`, not through props (R-DETAIL, both viewports).
-- **Overlay and readout renamed to Inner:** no visible change. Their geometry and label equal the baseline's (R-DRAG).
-- **The explicit `range` prop:** RS8.
-- **Renamed test keys:** NAME-LIVE.
+## 6. Deliverables
+- **A:** `a-round-321.md`.
+- **C:** `c-round-321.md` and `c-round-321.json`, with evidence under `c-round-321/`. The JSON carries:
+  - `taskStatus`, `browserVerified`, `realVerified`;
+  - `passed`, `failed`, `blocked`, `gate`, `rows`;
+  - all L57 fields.
 
-## 6. STOP conditions
-A writes "STOP — needs B ruling" at the top of `a-round-320.md` and changes nothing else when:
-- A-CLAIMS differs from the head output;
-- the per move > 15 or the max > 35 (A reports the breakdown);
-- a non-range interaction row rises above the baseline by more than N and the cause is outside the grants;
-- a test assertion would have to be removed, or a test file outside §2.1 would have to change;
-- the notices regeneration differs from the 4 rows of §2.4 and the count 564.
+## 7. Root notes
+- **Nothing to publish from `store/`.** A change there is itself a FAIL. The loop-state commit records the retro.
+- **For Saba:**
+  - `user-review/screen-review-321.md`: 6 candidates; the weakest step is still SR-305-3;
+  - `retro-321.md` §12: RC-R275-STOP-ROUTES-TO-B, raised for the fourth time (3 STOPped rounds reached C, all FAIL, $78.18);
+  - 82 awaiting-user ids.
+- **For root:**
+  - **ARCH-CHECKPOINT-PERF8-STORE-PATTERN** (new, non-blocking): a bounded `frontend-architect` checkpoint at the PERF-8 boundary, per `store/.claude/references/architecture-checkpoint.md`. Questions are in `b-round-320.md` §5. Best answered before the PERF-8b planning.
+  - ROOT-REQ-VITEST-PERF-INCLUDE (= GATE304-M1) is still open.
 
-## 7. Next
-- **After C PASS and gate 320:** PERF-8a is done.
-- **Round 321:** RETRO (window 305–320, D-29z877).
-- **Then:** REGRESSION if its planning falls on or after 2026-11-05, with the C-R318-06 repro row; otherwise PERF-8b.
-- **Signals carried:**
-  - `SIG-R319-TRANSPORT-FLIP`, `SIG-R319-CLIPGAIN-PROPS`, `A-R319-ARCH-DETAIL-SUBSCRIPTION` and `SIG-R320-WAVEFORM-VIDEO-NONBAIL` → PERF-10;
-  - `SIG-R319-DEVOPTIONAL-NOTICES` → root/OSS-LIC.
+## 8. Claims (L29 + L56 form)
+Run `bash b-round-320/claims-321.sh` from the loop root. The expected output is `b-round-320/claims-321-output.txt`.
 
-## 8. Commit readiness
-After C PASS and gate 320, root publishes the round 318–320 paths together, on top of `50662e1`. The tree is mid-round until then; root does not publish it.
-
-## 9. Claims (L29 + L56)
-Run `bash b-round-319/claims-320.sh` (`CLAIMS_STORE` may override the path). The head output, taken on the 37-entry tree, is `b-round-319/claims-320-head-output.txt`.
-
-| Tag | Claim | Now | After A |
-|---|---|---|---|
-| K1 | gate 319 | skipped (C FAIL) | same |
-| K2 | HEAD, status entries | 50662e1 37 | 50662e1 43 |
-| K3 | zustand in package.json / lock | 1 / 1 | same |
-| K4 / K5 / K7 / K11 | range in the value, `latestRef`, `useState`, lane `clipRange` | 0 / 0 / 0 / 0 | same |
-| K6 | `.range` in StudioWorkspace | 8 | 8 |
-| K8 | protected OK | 11 | 11 |
-| K9 | regression-last | 2026-11-02 | same |
-| K12 / K13 | zustand importers / store module | 2 / 1 | ≥ 1 / 1 |
-| K14 | range budget rows asserted | 0 | 5 |
-| K15 | detail start/end layout effect | 1 | 1 |
-| K16 | cited artifacts | 12/12 | 12/12 |
-| K17 | `function ArrangementRangeReadoutInner(` / `const ArrangementRangeReadout = memo(ArrangementRangeReadoutInner);` | 0 / 0 | 1 / 1 |
-| K18 | `selectArrangementClipRange(state.range,` lines | 1 | 1 |
-| K19 | Inner + memo lines: PeakPath / ClipRangeOverlay / DetailPlayhead / DetailWaveform | 0+0 each | 1+1 each |
-| K20 | notices heading; zustand row | (560); 0 | (564); 1 |
-| K21 | doc 230 | 0 | 1 |
-| K22 | `ArrangementTransport.tsx` sha prefix | b7528ac5ab192b8d | same |
-| K23 | `ArrangementRangeDetailPanel` in StudioWorkspace | 0 | 0 |
-| K24 | `memo(function` in the three source files | 2 | 0 |
-| K25 | old name keys / new `Inner` keys (render-budget Playhead + CP PeakPath + CP Waveform) | 3+1+1 / 0+0+0 | 0+0+0 / 3+1+1 |
-| K26 | `RS8` in detail-panel.test.tsx | 0 | ≥ 1 |
-| K27 | `expect(` in render-budget / clip-gain-pointer-preview | 88 / 184 | 88 / 184 |
+| Tag | Claim | Expected (from the output file) |
+|---|---|---|
+| K1 | gate 320 published `53c5c79` | `published 53c5c79` |
+| K2 | clean tree and HEAD at planning | `0 53c5c79` |
+| K3 | 1,226 frozen entries | `1226` |
+| K4 | each protected file appears once | eleven `1` |
+| K5 | Play's playing signal and name in `store/` | `274: data-playing=…` and `233: playLabel: 'Play',` |
+| K6 | screen-capture element counts; no lane errors | `{'1440x900-S0': 138, '1440x900-DEMO': 168, '1280x720-S0': 118, '1280x720-DEMO': 144} None` |
+| K7 | lessons line count | `59` |
+| K8 | every cited artifact exists (L56) | `done` |
+| K9 | the screenshots exist | `12` |
+| K10 | backlog version and last decision | `280 D-29z889` |
+| K11 | C JSONs in 305–320 without `manifestPaths` | `313 315 318 320` |
+| K12 | journey facts | `/studio-lab?preview=middle-east`, `00:01.483` / `00:01.471`, 4 clips, at both viewports |
+| K13 | lesson ids after the merge (no 16, new 58) | the id list in the output file |
+| K14 | regression-last date | `2026-11-02` |
+| K15 | L23 and line 3 length in bytes (`wc -c`, locale-free) | `5058 808` |
+| K16 | the round-320 archive equals the old task | `archive-equal` |
+| K17 | B median and window total | `12.12 394.74` |

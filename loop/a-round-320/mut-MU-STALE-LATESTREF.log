@@ -1,0 +1,54 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a320m[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/range-store.test.tsx [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 58[2mms[22m[39m
+     [32m✓[39m RS1: starts empty and stores the exact range reference[32m 2[2mms[22m[39m
+     [32m✓[39m RS2: notifies once per new value and not for the same reference[32m 1[2mms[22m[39m
+     [32m✓[39m RS3: two stores and two providers hold independent ranges[32m 26[2mms[22m[39m
+     [32m✓[39m RS4: during a pointer gesture setTimeRange does not re-render useArrangement() consumers[32m 7[2mms[22m[39m
+     [32m✓[39m RS5: a clip subscriber re-renders only when the range overlaps its clip[32m 5[2mms[22m[39m
+     [32m✓[39m RS6: setTimeRange rewrites a stopped Insert Marker status only outside a pointer gesture[32m 4[2mms[22m[39m
+[31m     [31m×[31m RS7: an event-time action reads the range written just before it, with no render between[39m[32m 11[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/range-store.test.tsx[2m > [22mArrangementProvider range store[2m > [22mRS7: an event-time action reads the range written just before it, with no render between
+[31m[1mAssertionError[22m: expected [ [ +0, 16 ] ] to deeply equal [ [ +0, 4 ], [ 4, 2 ], [ 6, 10 ] ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    [[22m
+[2m      0,[22m
+[32m-     4,[39m
+[32m-   ],[39m
+[32m-   [[39m
+[32m-     4,[39m
+[32m-     2,[39m
+[32m-   ],[39m
+[32m-   [[39m
+[32m-     6,[39m
+[32m-     10,[39m
+[31m+     16,[39m
+[2m    ],[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/range-store.test.tsx:[2m257:62[22m[39m
+    [90m255| [39m    })[33m;[39m
+    [90m256| [39m    const clips = liveApi(probes.api).arrangement.clips.filter((clip) …
+    [90m257| [39m    [34mexpect[39m(clips[33m.[39m[34mmap[39m((clip) [33m=>[39m [clip[33m.[39mstart[33m,[39m clip[33m.[39mduration]))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                                             [31m^[39m
+    [90m258| [39m      [[34m0[39m[33m,[39m [34m4[39m][33m,[39m
+    [90m259| [39m      [[34m4[39m[33m,[39m [34m2[39m][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 18:26:54
+[2m   Duration [22m 1.44s[2m (transform 469ms, setup 0ms, import 654ms, tests 58ms, environment 494ms)[22m
+
+
+::error file=/tmp/a320m/app/lib/arrangement/__tests__/range-store.test.tsx,title=app/lib/arrangement/__tests__/range-store.test.tsx > ArrangementProvider range store > RS7%3A an event-time action reads the range written just before it%2C with no render between,line=257,column=62::AssertionError: expected [ [ +0, 16 ] ] to deeply equal [ [ +0, 4 ], [ 4, 2 ], [ 6, 10 ] ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    [%0A      0,%0A-     4,%0A-   ],%0A-   [%0A-     4,%0A-     2,%0A-   ],%0A-   [%0A-     6,%0A-     10,%0A+     16,%0A    ],%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/range-store.test.tsx:257:62%0A%0A

@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T17:58:01.464Z)
+# Active loop summary (2026-11-03T19:38:41.062Z)
 
-- backlog.json 3088 KB -> active view 420 KB
-- status: G_ROOT_GATE round 319
-- servers: `{"checkedUtc":"2026-11-03T17:15:13.9943655Z","round":319,"attempt":1,"store":200}`
-- last publication: a5a9c9734e6d6f8b51d86d17d11b5cee7c01ccc5 (rounds 316-317)
-- last root gate: round 319 skipped - C taskStatus FAIL
+- backlog.json 3093 KB -> active view 422 KB
+- status: G_ROOT_GATE round 320
+- servers: `{"checkedUtc":"2026-11-03T18:36:51.6970102Z","round":320,"attempt":1,"store":200}`
+- last publication: 53c5c79676e41c951f651f89e5be2fc24cf89112 (rounds 318-320)
+- last root gate: round 320 published - commit 53c5c79676e41c951f651f89e5be2fc24cf89112 pushed
 
 ## Current items: -
 
@@ -779,6 +779,11 @@
 - SIG-R319-TRANSPORT-FLIP / info / signal -> PERF-10 / first range commit re-renders ArrangementTransport + icons (~20 fibers) on the null->range flip
 - SIG-R319-CLIPGAIN-PROPS / info / signal -> PERF-10 / fader work / ArrangementDetailClipGain receives ~10 unstable callbacks + 2 fresh arrays; memo cannot bail
 - SIG-R319-DEVOPTIONAL-NOTICES / info / signal for root/OSS-LIC (no B action) / devOptional lock entries (@types/react, @types/prop-types, csstype) now listed as runtime notices
+- C-R319-01 / medium / ruled D-29z873 (O1 Inner form + 5 literal test grant); fix in round 320 / memo(function X) form renames to X2 under esbuild; breaks R11-P1e / CP1 and blinds name-keyed guards
+- C-R319-02 / medium / to be closed by round 320 deliverables (D-29z875) / round 319 deliverables incomplete (K14 0, K19 0/0, notices 560/TL5 red, docs 168/230, A-PERF, A-MUTANTS, review partial)
+- A-R319-ARCH-DETAIL-SUBSCRIPTION / info / signal -> PERF-10 (D-29z879), not scheduled / move the detail panel range subscription into ArrangementDetailContent so resize/collapse state is not re-rendered during range drags
+- SIG-R320-WAVEFORM-VIDEO-NONBAIL / info / signal -> PERF-10 (D-29z879) / ArrangementDetailWaveform memo does not bail on video selections (fresh videoClipGainReason node)
+- INFO-C319-R-ROWS-MISSPEC / info / corrected in round 320 task (D-29z876) / R-WAVEFORM late-peaks/zoom-d premises false at baseline; R-DETAIL 1280 focus; PERF-LOAD per-commit not exposed
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,18 @@
+Hand file for retro-321 §3. Each cause is quoted from the named source; origin = the finding's "origin" field in c-round-N.json (b-round-320/manifest-fields.txt).
+
+305 FAIL  C-R305-01 low   origin "B (screen review written from the capture JSON, whose textLines() cuts every text to 120 chars, not from the screenshot)"  source c-round-305.json bugs[0]; fix RT-FIX round 306
+312 FAIL  C-R312-01 medium origin "B spec / B pre-check"  source c-round-312.json bugs[0]: peaks off the main thread removed the last LoAF of the 1x load, so harness.loaf-scripts fired; perf/** not granted
+313 FAIL  C-R313-01 medium origin "pre-existing (predates round 313 ...)"  source c-round-313.json bugs[0]: bimodal commit count 91/1 vs 92/2; A STOP (a-round-313.md); cause named at round-314 planning = held-back Follow page turn (D-29z842, L37 clause)
+316 FAIL  C-R316-01 medium origin "B pre-check / B spec (fonts-src fetched Playfair via Google's /l/font?kit= endpoint)"  source c-round-316.json bugs[0]
+318 FAIL  C-R318-02 medium origin "B spec / A STOP"  per move 21.033 > 15 unreachable inside §4 grants (layout-effect commit not deducted, L37 budget-headroom clause D-29z871); C-R318-03/04 medium = deliverables skipped because of the STOP
+319 FAIL  C-R319-01 medium origin "B spec (K19/§1 memo form) + B sketch pre-check"  memo(function X) renamed X2 by esbuild; name-keyed tests red; A STOP; C-R319-02 medium origin "A STOP" (deliverables missing)
+320 PASS  C-R320-01 low   origin "B spec (§2.2/§4 test grants; per-move budget 15 has headroom over the no-memo tree's 14.15)"
+
+Chains (fix-up rounds after a C FAIL of the same feature stage, from task titles b-round-320/task-titles.txt):
+  PERF-5a  312 FAIL -> 313 FAIL -> 314 PASS   (2 fix-ups; first origin B spec / B pre-check)
+  PERF-7   316 FAIL -> 317 PASS               (1 fix-up; origin B pre-check / B spec)
+  PERF-8a  318 FAIL -> 319 FAIL -> 320 PASS   (2 fix-ups; origins B spec / A STOP, then B spec + B sketch pre-check)
+  RETRO305 305 FAIL -> RT-FIX inside 306      (no separate round)
+
+A STOP rounds (grep -c 'STOP — needs B ruling' a-round-N.md, b-round-320/stops-count.txt): 313, 318, 319 = 3. All three reached C.
+Gate: 0 failed in the window; 6 skipped = the 6 C FAIL rounds (gates/gate-round-N.json).

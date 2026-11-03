@@ -1,0 +1,41 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a320m[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/range-store.test.tsx [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 57[2mms[22m[39m
+     [32m✓[39m RS1: starts empty and stores the exact range reference[32m 2[2mms[22m[39m
+     [32m✓[39m RS2: notifies once per new value and not for the same reference[32m 1[2mms[22m[39m
+     [32m✓[39m RS3: two stores and two providers hold independent ranges[32m 26[2mms[22m[39m
+[31m     [31m×[31m RS4: during a pointer gesture setTimeRange does not re-render useArrangement() consumers[39m[32m 12[2mms[22m[39m
+     [32m✓[39m RS5: a clip subscriber re-renders only when the range overlaps its clip[32m 5[2mms[22m[39m
+     [32m✓[39m RS6: setTimeRange rewrites a stopped Insert Marker status only outside a pointer gesture[32m 4[2mms[22m[39m
+     [32m✓[39m RS7: an event-time action reads the range written just before it, with no render between[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/range-store.test.tsx[2m > [22mArrangementProvider range store[2m > [22mRS4: during a pointer gesture setTimeRange does not re-render useArrangement() consumers
+[31m[1mAssertionError[22m: expected 4 to be 3 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 3[39m
+[31m+ 4[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/range-store.test.tsx:[2m209:41[22m[39m
+    [90m207| [39m    [35mconst[39m first[33m:[39m [33mTimeRange[39m [33m=[39m { start[33m:[39m [34m1[39m[33m,[39m end[33m:[39m [34m2[39m[33m,[39m trackId[33m:[39m [32m'music'[39m }[33m;[39m
+    [90m208| [39m    [34mact[39m(() [33m=>[39m [34mliveApi[39m(probes[33m.[39mapi)[33m.[39m[34msetTimeRange[39m(first))[33m;[39m
+    [90m209| [39m    [34mexpect[39m(probes[33m.[39mcontextCount[33m.[39mrenders)[33m.[39m[34mtoBe[39m(contextBefore)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m210| [39m    [34mexpect[39m(probes[33m.[39mrangeCount[33m.[39mrenders)[33m.[39m[34mtoBe[39m(rangeBefore [33m+[39m [34m1[39m)[33m;[39m
+    [90m211| [39m    [34mexpect[39m(probes[33m.[39mseen[33m.[39mrange)[33m.[39m[34mtoBe[39m(first)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 18:26:48
+[2m   Duration [22m 1.35s[2m (transform 483ms, setup 0ms, import 656ms, tests 57ms, environment 492ms)[22m
+
+
+::error file=/tmp/a320m/app/lib/arrangement/__tests__/range-store.test.tsx,title=app/lib/arrangement/__tests__/range-store.test.tsx > ArrangementProvider range store > RS4%3A during a pointer gesture setTimeRange does not re-render useArrangement() consumers,line=209,column=41::AssertionError: expected 4 to be 3 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 3%0A+ 4%0A%0A ❯ app/lib/arrangement/__tests__/range-store.test.tsx:209:41%0A%0A

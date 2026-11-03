@@ -1,0 +1,38 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a320m[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/range-store.test.tsx [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 58[2mms[22m[39m
+     [32m✓[39m RS1: starts empty and stores the exact range reference[32m 2[2mms[22m[39m
+     [32m✓[39m RS2: notifies once per new value and not for the same reference[32m 1[2mms[22m[39m
+     [32m✓[39m RS3: two stores and two providers hold independent ranges[32m 26[2mms[22m[39m
+     [32m✓[39m RS4: during a pointer gesture setTimeRange does not re-render useArrangement() consumers[32m 8[2mms[22m[39m
+     [32m✓[39m RS5: a clip subscriber re-renders only when the range overlaps its clip[32m 3[2mms[22m[39m
+[31m     [31m×[31m RS6: setTimeRange rewrites a stopped Insert Marker status only outside a pointer gesture[39m[32m 11[2mms[22m[39m
+     [32m✓[39m RS7: an event-time action reads the range written just before it, with no render between[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/range-store.test.tsx[2m > [22mArrangementProvider range store[2m > [22mRS6: setTimeRange rewrites a stopped Insert Marker status only outside a pointer gesture
+[31m[1mAssertionError[22m: expected 'Stopped — Space plays from the time s…' to be 'Stopped — Space plays from the time s…' // Object.is equality[39m
+
+Expected: [32m"Stopped — Space plays from the time selection start at 00:0[7m3[27m.000."[39m
+Received: [31m"Stopped — Space plays from the time selection start at 00:0[7m2[27m.000."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/range-store.test.tsx:[2m246:40[22m[39m
+    [90m244| [39m
+    [90m245| [39m    act(() => liveApi(probes.api).setTimeRange({ start: 3, end: 5, tra…
+    [90m246| [39m    expect(liveApi(probes.api).status).toBe(studioPlaybackStrings.sele…
+    [90m   | [39m                                       [31m^[39m
+    [90m247| [39m  })[33m;[39m
+    [90m248| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 18:26:52
+[2m   Duration [22m 1.33s[2m (transform 450ms, setup 0ms, import 629ms, tests 58ms, environment 488ms)[22m
+
+
+::error file=/tmp/a320m/app/lib/arrangement/__tests__/range-store.test.tsx,title=app/lib/arrangement/__tests__/range-store.test.tsx > ArrangementProvider range store > RS6%3A setTimeRange rewrites a stopped Insert Marker status only outside a pointer gesture,line=246,column=40::AssertionError: expected 'Stopped — Space plays from the time s…' to be 'Stopped — Space plays from the time s…' // Object.is equality%0A%0AExpected: "Stopped — Space plays from the time selection start at 00:03.000."%0AReceived: "Stopped — Space plays from the time selection start at 00:02.000."%0A%0A ❯ app/lib/arrangement/__tests__/range-store.test.tsx:246:40%0A%0A

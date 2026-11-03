@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Claims for task round 321 (L29 + L56). Run from the loop root: bash b-round-320/claims-321.sh
+S=${CLAIMS_STORE:-/home/runner/czaba-project/store}
+echo "K1 $(python3 -I -c "import json;g=json.load(open('gates/gate-round-320.json'));print(g['status'],g['commit'][:7])")"
+echo "K2 $(wc -c < b-round-320/git-status-at-planning.txt) $(cut -c1-7 b-round-320/head-at-planning.txt)"
+echo "K3 $(wc -l < b-round-320-r321-tree-sha256.txt)"
+echo "K4 $(awk '{print $2}' b-round-318/protected-sha256.txt | while read f; do grep -cF "  $f" b-round-320-r321-tree-sha256.txt; done | tr '\n' ' ')"
+echo "K5 $(grep -n 'data-playing' $S/app/components/arrangement/ArrangementTransport.tsx | tr -s ' ' | cut -c1-80) | $(grep -n "playLabel: 'Play'" $S/app/lib/arrangement/strings.ts | tr -s ' ')"
+echo "K6 $(python3 -I -c "import json;d=json.load(open('b-round-320/screens/screen321.json'));print({k:len(v) for k,v in d['screens'].items()}, d.get('laneErrors'))")"
+echo "K7 $(wc -l < lessons.md)"
+echo "K8 $(for p in b-round-320/backlog-before-321.json b-round-320/lessons-before-321.md b-round-320/lessons-diff.txt b-round-320/feature-status-before-321.md b-round-320/b-next-before-321.json b-round-320/current-task-before-321.md b-round-320/regression-last-before-321.json b-round-320/collect.py b-round-320/collect.txt b-round-320/rounds-305-320.json b-round-320/cost.py b-round-320/cost.txt b-round-320/cost-rows.json b-round-320/retro-numbers.py b-round-320/retro-numbers.txt b-round-320/fails-detail.py b-round-320/fails-detail.txt b-round-320/gate-reviews.py b-round-320/gate-reviews.txt b-round-320/classify.py b-round-320/classify.txt b-round-320/classify-out.json b-round-320/window-findings.py b-round-320/window-findings.txt b-round-320/totals.py b-round-320/totals.txt b-round-320/deferred-totals.txt b-round-320/open-medium-plus.txt b-round-320/manifest-fields.py b-round-320/manifest-fields.txt b-round-320/l57-fields.txt b-round-320/stops-count.txt b-round-320/task-titles.txt b-round-320/b-running-median.txt b-round-320/unfailable-assert-fields.txt b-round-320/awaiting-user.py b-round-320/awaiting-user.txt b-round-320/retro321-mentions.py b-round-320/retro321-mentions.txt b-round-320/retro321-mention-ids.txt b-round-320/fails-cause-hand.txt b-round-320/update-backlog.py b-round-320/screens/capture.mjs b-round-320/screens/capture.log b-round-320/screens/screen321.json b-round-320/mock.log b-round-320/git-status-at-planning.txt b-round-320/head-at-planning.txt retros/retro-321.md user-review/screen-review-321.md tasks/round-320.md; do test -f $p || echo MISSING $p; done; echo done)"
+echo "K9 $(ls b-round-320/screens/*.png | wc -l)"
+echo "K10 $(python3 -I -c "import json;b=json.load(open('backlog.json'));print(b['version'],b['decisions_log_b'][-1]['id'])")"
+echo "K11 $(for n in $(seq 305 320); do grep -q '"manifestPaths"' c-round-$n.json || printf '%s ' $n; done)"
+echo "K12 $(python3 -I -c "import json;d=json.load(open('b-round-320/screens/screen321.json'))['journey'];print([(k,v['studioUrl'].split('5173')[1],v['positionAfterPlay'],len(v['clips'])) for k,v in d.items()])")"
+echo "K13 $(grep -oE '^[0-9]+\.' lessons.md | tr -d . | sort -n | tr '\n' ' ')"
+echo "K14 $(python3 -I -c "import json;print(json.load(open('regression-last.json'))['date'])")"
+echo "K15 $(sed -n 16p lessons.md | wc -c) $(sed -n 3p lessons.md | wc -c)"
+echo "K16 $(cmp tasks/round-320.md b-round-320/current-task-before-321.md && echo archive-equal)"
+echo "K17 $(python3 -I -c "import json;from statistics import median;R=json.load(open('b-round-320/cost-rows.json'));print(round(median(x[1] for x in R),2), round(sum((x[1] or 0)+x[2]+x[3] for x in R),2))")"

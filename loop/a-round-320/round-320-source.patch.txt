@@ -1,0 +1,142 @@
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -319,7 +319,7 @@
+   testId?: string;
+ }
+ 
+-export function ArrangementPeakPath({
++function ArrangementPeakPathInner({
+   clip,
+   peaks,
+   columns,
+@@ -353,6 +353,8 @@
+   );
+ }
+ 
++export const ArrangementPeakPath = memo(ArrangementPeakPathInner);
++
+ interface ArrangementClipRangeOverlayProps {
+   trackId: string;
+   start: number;
+@@ -360,7 +362,7 @@
+   pxPerSecond: number;
+ }
+ 
+-const ArrangementClipRangeOverlay = memo(function ArrangementClipRangeOverlay({
++function ArrangementClipRangeOverlayInner({
+   trackId,
+   start,
+   duration,
+@@ -391,7 +393,9 @@
+       </span>
+     </div>
+   );
+-});
++}
++
++const ArrangementClipRangeOverlay = memo(ArrangementClipRangeOverlayInner);
+ 
+ function ArrangementClipViewInner({
+   clip,
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -554,7 +554,7 @@
+   );
+ }
+ 
+-const ArrangementRangeReadout = memo(function ArrangementRangeReadout() {
++function ArrangementRangeReadoutInner() {
+   const range = useArrangementRange((state) => state.range);
+   if (!range) {
+     return null;
+@@ -576,7 +576,9 @@
+       </span>
+     </p>
+   );
+-});
++}
++
++const ArrangementRangeReadout = memo(ArrangementRangeReadoutInner);
+ 
+ export function StudioWorkspace() {
+   const workspace = useArrangement();
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -157,7 +157,7 @@
+   return (gainDb ?? 0).toFixed(1);
+ }
+ 
+-function ArrangementDetailPlayhead({
++function ArrangementDetailPlayheadInner({
+   clipStart,
+   clipDuration,
+ }: {
+@@ -197,7 +197,9 @@
+   );
+ }
+ 
+-function ArrangementDetailWaveform({
++const ArrangementDetailPlayhead = memo(ArrangementDetailPlayheadInner);
++
++function ArrangementDetailWaveformInner({
+   selection,
+   peaks,
+   range,
+@@ -250,6 +252,8 @@
+   );
+ }
+ 
++const ArrangementDetailWaveform = memo(ArrangementDetailWaveformInner);
++
+ interface ArrangementDetailClipGainProps {
+   clipIds: readonly string[] | null;
+   isGroup: boolean;
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -436,7 +436,7 @@
+     act(() => api.current?.selectClip('music-1'));
+     fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
+     expect(renderLog.counts.get('ArrangementDetailContentInner') ?? 0).toBeGreaterThan(0);
+-    expect(renderLog.counts.get('ArrangementDetailPlayhead') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBeGreaterThan(0);
+     const detailPlayhead = view.getByTestId('arrangement-detail-playhead');
+     renderLog.counts.clear();
+     const lefts: number[] = [];
+@@ -451,7 +451,7 @@
+     act(() => store.current?.setPosition(25));
+     expect(detailPlayhead.style.display).toBe('none');
+     expect(renderLog.counts.get('ArrangementDetailContentInner') ?? 0).toBe(0);
+-    expect(renderLog.counts.get('ArrangementDetailPlayhead') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBe(0);
+     act(() => api.current?.seekTo(0));
+     renderLog.counts.clear();
+     fireEvent.click(view.getByRole('button', { name: 'Play' }));
+@@ -466,7 +466,7 @@
+     expect(api.current?.isPlaying).toBe(true);
+     expect(renderLog.counts.get('ArrangementDetailPanel') ?? 0).toBeGreaterThan(0);
+     expect(renderLog.counts.get('ArrangementDetailContentInner') ?? 0).toBe(0);
+-    expect(renderLog.counts.get('ArrangementDetailPlayhead') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBe(0);
+     expect(countsOf(WATCHED_LISTS)).toEqual({
+       ArrangementClipViewInner: 0,
+       ArrangementOverviewInner: 0,
+--- a/app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx
+@@ -221,7 +221,7 @@
+   'StudioWorkspace',
+   'ArrangementDetailPanel',
+   'ArrangementDetailContentInner',
+-  'ArrangementDetailWaveform',
++  'ArrangementDetailWaveformInner',
+   'ArrangementClipViewInner',
+   'ArrangementLane',
+   'PreviewProbe',
+@@ -554,7 +554,7 @@
+     expect(clipGainCalls(setClipGain, 'cx')).toEqual([]);
+     expect(parentRenders()).toBe(0);
+     expect(renderLog.counts.get('ArrangementDetailClipGain') ?? 0).toBe(deltas.length);
+-    expect(renderLog.counts.get('ArrangementPeakPath') ?? 0).toBe(deltas.length * 2);
++    expect(renderLog.counts.get('ArrangementPeakPathInner') ?? 0).toBe(deltas.length * 2);
+     expect(applyScheduleMock.mock.calls.length).toBe(1);
+     windowPointer('pointerup', 21, 30);
+     act(() => live(api).togglePlayback());
