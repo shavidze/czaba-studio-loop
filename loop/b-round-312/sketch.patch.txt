@@ -1,0 +1,197 @@
+--- a/perf/studio-lab.perf.spec.ts
++++ b/perf/studio-lab.perf.spec.ts
+@@ -38,6 +38,7 @@
+ import {
+   buildPerfReportCore,
+   formatLimit,
++  injectedLoafEntries,
+   loafScriptsProblem,
+   type PerfSample,
+ } from './lib/report';
+@@ -61,6 +62,8 @@
+ const slowPaintMs = 16;
+ const clipNudgePx = 40;
+ const injectedBusyMs = 30;
++const injectedLoafBusyMs = 80;
++const loafLivenessWaitMs = 500;
+ const membersSourceTitle = perfMembersSourceTitle;
+ 
+ const crossRateMetrics = new Set([
+@@ -80,6 +83,7 @@
+ 
+ const passSequence = [
+   'load until ready (load.*)',
++  `1x only: one injected ${injectedLoafBusyMs} ms timer callback after settled (harness.loaf-scripts-live)`,
+   'library Add click (harness.hook-live)',
+   'fader.track.stopped',
+   'fader.pan.stopped',
+@@ -536,19 +540,57 @@
+ async function measureSettled(page: Page, result: PassResult, settledMs: number): Promise<void> {
+   const settled = await snapshot(page, 0, settledMs);
+   const scriptMaxes = settled.loafs.map((entry) => entry.scriptMax ?? 0);
+-  const loafProblem = loafScriptsProblem(settled.loafs);
+-  if (loafProblem !== null) {
+-    result.problems.push(loafProblem);
+-  }
+   const longest = settled.longtasks.reduce((max, entry) => Math.max(max, entry.duration), 0);
+   result.samples.set('load.settled-ms', { value: roundTo(settledMs, 0) });
+-  result.samples.set('load.script-max', { value: roundTo(Math.max(0, ...scriptMaxes), 0) });
++  result.samples.set('load.script-max', {
++    value: roundTo(Math.max(0, ...scriptMaxes), 0),
++    detail: { loafEntries: settled.loafs.length },
++  });
+   result.samples.set('load.settled.longtask-max', { value: roundTo(longest, 0) });
+   result.samples.set('load.settled.longtasks-over-50', {
+     value: settled.longtasks.filter((entry) => entry.duration > 50).length,
+   });
+ }
+ 
++async function measureLoafLiveness(page: Page, result: PassResult): Promise<void> {
++  const callback = await page.evaluate(
++    (busyMs) =>
++      new Promise<{ start: number; end: number; spins: number }>((resolve) => {
++        window.setTimeout(() => {
++          const start = performance.now();
++          const until = start + busyMs;
++          let spins = 0;
++          while (performance.now() < until) spins += 1;
++          const end = performance.now();
++          window.setTimeout(() => resolve({ start, end, spins }), 0);
++        }, 0);
++      }),
++    injectedLoafBusyMs,
++  );
++  await page.waitForTimeout(loafLivenessWaitMs);
++  const all = await snapshot(page, 0, await nowIn(page));
++  const loafs = injectedLoafEntries(all.loafs, callback.start, callback.end);
++  const problem = loafScriptsProblem(loafs);
++  if (problem !== null) result.problems.push(problem);
++  if (loafs.length !== 1) {
++    result.problems.push(
++      `harness.loaf-scripts-live: ${loafs.length} long-animation-frame entries contain the injected callback`,
++    );
++  }
++  const scriptMax = loafs.reduce((max, entry) => Math.max(max, entry.scriptMax ?? 0), 0);
++  result.samples.set('harness.loaf-scripts-live', {
++    value: roundTo(scriptMax, 0),
++    detail: {
++      injectedBusyMs: injectedLoafBusyMs,
++      callbackMs: roundTo(callback.end - callback.start, 1),
++      spins: callback.spins,
++      loafEntries: loafs.length,
++      scriptCount: loafs.reduce((sum, entry) => sum + (entry.scriptCount ?? 0), 0),
++      frameStartedBeforeCallback: loafs.filter((entry) => entry.t < callback.start).length,
++    },
++  });
++}
++
+ async function runPass(browser: Browser, cpuRate: number, pass: number): Promise<PassResult> {
+   const result: PassResult = {
+     cpuRate,
+@@ -583,7 +625,11 @@
+     const rendererProblem = reactRendererProblem(rendererVersions);
+     if (rendererProblem) result.problems.push(rendererProblem);
+     const settledMs = await waitForCollectionReady(page, result.problems, 'after load');
+-    if (record) await measureSettled(page, result, settledMs);
++    if (record) {
++      await measureSettled(page, result, settledMs);
++      step = 'harness.loaf-scripts-live';
++      await measureLoafLiveness(page, result);
++    }
+ 
+     step = 'library Add';
+     const addStart = await nowIn(page);
+--- a/perf/budgets.json
++++ b/perf/budgets.json
+@@ -189,6 +189,20 @@
+     "note": "Longest single script in any long-animation-frame entry from navigation start to settled. HEAD 000da42: the demo synth effect, 363-367 ms (b-round-281 LoAF probe)."
+   },
+   {
++    "id": "harness.loaf-scripts-live",
++    "scenario": "1x only, right after load.settled and before library Add: one injected 80 ms setTimeout callback in the page; the row reads the long-animation-frame entry that contains the callback (injectedLoafEntries)",
++    "metric": "script-max",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "assert",
++    "budget": {
++      "op": ">=",
++      "value": 50
++    },
++    "owner": "C-R312-01",
++    "note": "Liveness of load.script-max (C-R312-01): exactly one LoAF entry must contain the injected callback and carry script timings (else the pass gets harness.loaf-scripts or a containing-entry count problem). The settled load window itself may hold no LoAF entry (PERF-5a); load.script-max detail loafEntries records how many it held. From library Add on, the 1x pass has this extra 80 ms block in its history; the 6x passes do not."
++  },
++  {
+     "id": "load.settled.longtask-max",
+     "scenario": "fresh /studio-lab until the demo collection is ready and quiet",
+     "metric": "longtask-max",
+--- a/perf/lib/report.ts
++++ b/perf/lib/report.ts
+@@ -56,6 +56,20 @@
+   return loafs.some((entry) => (entry.scriptCount ?? 0) > 0) ? null : LOAF_SCRIPTS_PROBLEM;
+ }
+ 
++export const LOAF_EDGE_TOLERANCE_MS = 1;
++
++export function injectedLoafEntries(
++  loafs: readonly PerfTimedEntry[],
++  callbackStart: number,
++  callbackEnd: number,
++): PerfTimedEntry[] {
++  return loafs.filter(
++    (entry) =>
++      entry.t <= callbackStart + LOAF_EDGE_TOLERANCE_MS &&
++      entry.t + entry.duration >= callbackEnd - LOAF_EDGE_TOLERANCE_MS,
++  );
++}
++
+ export function rateRowId(base: string, cpuRate: number): string {
+   return cpuRate === 1 ? base : `${base}.${cpuRate}x`;
+ }
+--- a/perf/lib/report.test.ts
++++ b/perf/lib/report.test.ts
+@@ -7,6 +7,7 @@
+ import {
+   buildPerfReportCore,
+   LOAF_SCRIPTS_PROBLEM,
++  injectedLoafEntries,
+   loafScriptsProblem,
+   type PerfReportCoreOptions,
+   type PerfReportPass,
+@@ -427,4 +428,37 @@
+   ])('LOAF1: harness.loaf-scripts with $label', ({ loafs, problem }) => {
+     expect(loafScriptsProblem(loafs)).toBe(problem);
+   });
++  it.each([
++    {
++      label: 'a frame that starts before the callback and ends after it',
++      loafs: [{ t: 990, duration: 100, name: 'long-animation-frame', scriptMax: 80, scriptCount: 1 }],
++      kept: [990],
++    },
++    {
++      label: 'an app frame that overlaps the start but ends inside the callback',
++      loafs: [{ t: 950, duration: 80, name: 'long-animation-frame', scriptMax: 70, scriptCount: 1 }],
++      kept: [],
++    },
++    {
++      label: 'a frame that starts after the callback started',
++      loafs: [{ t: 1010, duration: 120, name: 'long-animation-frame', scriptMax: 60, scriptCount: 1 }],
++      kept: [],
++    },
++    {
++      label: 'edges within 1 ms',
++      loafs: [{ t: 1001, duration: 78, name: 'long-animation-frame', scriptMax: 79, scriptCount: 1 }],
++      kept: [1001],
++    },
++    {
++      label: 'an app frame before the callback beside the containing frame',
++      loafs: [
++        { t: 500, duration: 300, name: 'long-animation-frame', scriptMax: 250, scriptCount: 1 },
++        { t: 995, duration: 90, name: 'long-animation-frame', scriptMax: 80, scriptCount: 1 },
++      ],
++      kept: [995],
++    },
++    { label: 'no entries', loafs: [], kept: [] },
++  ])('LOAF2: injectedLoafEntries keeps only frames containing the callback: $label', ({ loafs, kept }) => {
++    expect(injectedLoafEntries(loafs, 1000, 1080).map((entry) => entry.t)).toEqual(kept);
++  });
+ });

@@ -1,0 +1,3 @@
+--- app/lib/arrangement/peaks.client.ts
+- if (job.next >= job.buffer.length && job.inFlight === 0) {
++ if (job.next + Math.round(job.buffer.sampleRate * PEAKS_CHUNK_SECONDS) >= job.buffer.length && job.inFlight === 0 && (job.next = job.buffer.length)) {

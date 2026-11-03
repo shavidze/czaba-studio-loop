@@ -1,0 +1,82 @@
+{
+ "round": 312,
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "C-R312-01",
+   "severity": "medium",
+   "origin": "B spec / B pre-check",
+   "steps": [
+    "Stop all other jobs (L38)",
+    "cd store && npx playwright test --config playwright.perf.config.ts perf/studio-lab.perf.spec.ts",
+    "Repeat in the HEAD copy (/tmp/c312head, B recipe)"
+   ],
+   "expected": "PK-PERF-HARNESS: the PERF-1a spec passes, assert rows within budget",
+   "actual": "A's tree fails 2/2: 'harness.loaf-scripts: no long-animation-frame entry carried script timings' (run1 1x passes 1,3; run2 1x passes 1,2,3); load.script-max median 0, load.longtask-max 0. HEAD copy passes 1/1 (script-max median 32). Peaks off the main thread removed the last LoAF of the 1x load, so loafScriptsProblem (perf/lib/report.ts) fires. perf/** was not granted to A; B's pre-check did not run the perf spec on the sketch. App code is correct; needs a B harness-contract ruling/grant.",
+   "evidence": "c-round-312/perf-run.log, perf-run-2.log, perf-run-head.log, perf-a-run1.json, perf-a-run2.json, perf-head.json"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "PK-UNIT",
+  "TESTS-READ",
+  "DOC",
+  "PK-MAIN-THREAD",
+  "PK-IDENTITY",
+  "PK-CLIP-PATHS",
+  "PK-READY-ORDER",
+  "PK-VIDEO",
+  "PK-COPY-BOUND",
+  "PK-ABORT",
+  "G312-AUTH"
+ ],
+ "failed": [
+  "PK-PERF-HARNESS"
+ ],
+ "blocked": [],
+ "notRunnableHere": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T06:40:27.0393590Z",
+  "round": 312,
+  "attempt": 1,
+  "store": 200
+ },
+ "notes": [
+  "All app-code rows pass; do not re-dispatch the app work. Doc 228 line 4 says 'C round 312 PASS' (as A-DOC specified) and is now false: fix in the fix-up.",
+  "Surviving C mutants: C-MU-POOL-NOT-CLEARED (equivalent, Info), C-MU-LAST-CHUNK-DROPPED (equivalent, Info), C-MU-VIDEO-GUARD-REMOVED and C-MU-STALL-ONLY-AT-BEGIN (C evidence for existing A-R312-REVIEW-L4; no new id).",
+  "G312-AUTH attempt 1 timed out cold on /studio/middle-east (environment-invalid, L38), kept as c-round-312/g312-auth-attempt1-cold.log; passed after browser warm-up.",
+  "C perf runs created only git-ignored store/test-results and store/build."
+ ],
+ "assertsSpecified": 14,
+ "mutantsRecorded": 13,
+ "mutantRedOnSketch": 12,
+ "countMismatches": [
+  "A file has 17 rows (B 14 + PW12 + PW13x2 from review fixes) and 17 mutants (B 12 + MU-CONTEXT-BYPASS + 4 A-own); no row weakened; C reproduced all 17 red, restored 17/17 green (c-round-312/mutants/a-mutants-rerun.txt)"
+ ],
+ "manifestPaths": [
+  "b-round-311/claims-312.sh",
+  "b-round-311/claims-312-head-output.txt",
+  "b-round-311/claims-312-sketch-output.txt",
+  "b-round-311/probe/peaks-identity.cjs",
+  "b-round-311/probe/identity-head.json",
+  "b-round-311/sketch/sketch-mutants.txt",
+  "b-round-311-r312-tree-sha256.txt",
+  "c-round-311/g311-auth.cjs",
+  "c-round-303/main.cjs",
+  "a-round-312/scripts/mutants-a.py",
+  "a-round-312/claims-after-raw.txt"
+ ],
+ "missingPaths": [],
+ "claimCheckMinutes": 3,
+ "evidence": "c-round-312/"
+}

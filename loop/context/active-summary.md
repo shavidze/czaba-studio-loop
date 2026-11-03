@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T05:46:03.154Z)
+# Active loop summary (2026-11-03T07:16:45.031Z)
 
-- backlog.json 3008 KB -> active view 409 KB
-- status: G_ROOT_GATE round 311
-- servers: `{"checkedUtc":"2026-11-03T05:27:39.8490771Z","round":311,"attempt":1,"store":200}`
+- backlog.json 3020 KB -> active view 407 KB
+- status: G_ROOT_GATE round 312
+- servers: `{"checkedUtc":"2026-11-03T06:40:27.0393590Z","round":312,"attempt":1,"store":200}`
 - last publication: dfa45028c11aae533aa44e14ef74b0f76958cd7d (rounds 311-311)
-- last root gate: round 311 published - commit dfa45028c11aae533aa44e14ef74b0f76958cd7d pushed
+- last root gate: round 312 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -754,9 +754,6 @@
 - SABA-Q-PERF4-STUDIO-CACHE / info / awaiting_user (D-29z821); blocks PERF-4b only / Purchased Studio stems: allow the buyer browser to keep them on disk (private, no-cache + ETag, every reuse re-authorized; faster re-open) o
 - SABA-Q-WORKER-DEPLOYED / info / awaiting_user (D-29z823); non-blocking (both copies edited in lockstep) / Which R2 worker copy is deployed: workers/r2-proxy.js (has the cover-image route) or cloudflare/r2-worker.js? After the answer a bounded tas
 - WK-STORE-PREVIEW-LIVE / info / not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) | D-29z827: post-deploy list extended by PERF-4d (Safari 206, OOB branch on real R2, CDN must not store 416, TTFB p50/p95 + Class B metrics, onlyIf option) | D-29z831: post-deploy list adds: bytes=0-<huge> and bytes=-<huge> give 206 on real R2 (open offset); If-Range re-read + If-None-Match 304 / ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a
-- GATE310-M1 / medium / scheduled round 311 PERF-4e (D-29z829) / client Range values reach R2 unclamped; a non-safe-integer length/suffix could 500 where b65febe served 206 (suffix/length overflow itself i
-- GATE310-L3 / low / scheduled round 311 PERF-4e (D-29z829) / If-Range re-read compares If-None-Match with the first object
-- C-R310-01 / low / scheduled round 311 PERF-4e PR17 (D-29z829) / throw-path If-Range re-read ETag not pinned by any row (mutant survived 69/69)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

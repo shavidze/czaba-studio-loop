@@ -1,0 +1,48 @@
+
+ RUN  v4.0.16 /tmp/a312s
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts (17 tests | 1 failed) 351ms
+     ✓ PW1 equals computePeaks byte for byte across rates, lengths, chunk sizes and channel counts  310ms
+     ✓ PW1b keeps NaN, -0 and infinity handling identical 0ms
+     ✓ PW2 bucket count matches computePeaks, including empty and invalid input 0ms
+     ✓ accumulates chunks, acks with the same arrays and transfers the peaks on end 3ms
+     ✓ cancel drops the job without a done reply 0ms
+     ✓ PW4 streams bounded, reused chunks to one worker and delivers its peaks 9ms
+     ✓ PW5 delivers the worker reply object itself (no main-thread recompute) 1ms
+     ✓ PW6 without Worker computes synchronously on the main thread 0ms
+     ✓ PW7 abort drops the job, posts cancel and runs the next job 2ms
+     ✓ PW7b an abort after the last chunk drops the done reply 0ms
+     ✓ PW8 a worker error falls back to main-thread peaks for pending jobs 1ms
+     ✓ PW9 a stalled worker falls back after the stall timeout 1ms
+     ✓ PW10 runs jobs one at a time in request order 0ms
+     × PW11 the source becomes ready only after done, with the worker peaks as its sourcePeaks 16ms
+     ✓ PW12 a request made inside onPeaks keeps every queued job and delivers all of them in order 0ms
+     ✓ PW13 a throwing postMessage on begin falls back to main-thread peaks at once and turns the worker off 2ms
+     ✓ PW13 a throwing postMessage on chunk falls back to main-thread peaks at once and turns the worker off 1ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  06:39:53
+   Duration  1.09s (transform 285ms, setup 0ms, import 389ms, tests 351ms, environment 262ms)
+
+
+::error file=/tmp/a312s/app/lib/arrangement/__tests__/peaks-worker.test.ts,title=app/lib/arrangement/__tests__/peaks-worker.test.ts > PW11 context keeps "ready" after the worker peaks > PW11 the source becomes ready only after done%2C with the worker peaks as its sourcePeaks,line=471,column=52::AssertionError: expected 'ready' to be 'loading' // Object.is equality%0A%0AExpected: "loading"%0AReceived: "ready"%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:471:52%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW11 context keeps "ready" after the worker peaks > PW11 the source becomes ready only after done, with the worker peaks as its sourcePeaks
+AssertionError: expected 'ready' to be 'loading' // Object.is equality
+
+Expected: "loading"
+Received: "ready"
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:471:52
+    469|       await settle(50);
+    470|     });
+    471|     expect(api.current?.sourceStates.tone?.status).toBe('loading');
+       |                                                    ^
+    472|     expect(api.current?.sourcePeaks.has('tone')).toBe(false);
+    473|     expect(FakePeaksWorker.instances).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

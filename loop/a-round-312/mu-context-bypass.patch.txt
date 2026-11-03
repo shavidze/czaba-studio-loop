@@ -1,0 +1,28 @@
+--- ctx-orig.tsx	2026-11-03 06:39:36.232650689 +0000
++++ /tmp/a312s/app/contexts/ArrangementContext.tsx	2026-11-03 06:39:53.574819976 +0000
+@@ -134,6 +134,7 @@
+   trackPanValue,
+   undoHistory,
+ } from '~/lib/arrangement/model';
++import { computePeaks, PEAK_BUCKETS_PER_SECOND } from '~/lib/arrangement/peaks';
+ import {
+   createSourcePeaksComputer,
+   type SourcePeaksComputer,
+@@ -2504,7 +2505,7 @@
+         }
+         const buffer = result.buffer;
+         buffersRef.current.set(sourceId, buffer);
+-        requestSourcePeaks(buffer, signal, (peaks) => {
++        ((onPeaks: (peaks: Float32Array) => void) => onPeaks(computePeaks(Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i)), buffer.sampleRate, PEAK_BUCKETS_PER_SECOND)))((peaks) => {
+           if (signal.aborted || !videoSourcesRef.current.has(sourceId)) {
+             return;
+           }
+@@ -3922,7 +3923,7 @@
+             return;
+           }
+           buffersRef.current.set(source.id, buffer);
+-          requestSourcePeaks(buffer, controller.signal, (peaks) => {
++          ((onPeaks: (peaks: Float32Array) => void) => onPeaks(computePeaks(Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i)), buffer.sampleRate, PEAK_BUCKETS_PER_SECOND)))((peaks) => {
+             if (controller.signal.aborted) {
+               return;
+             }

@@ -1,334 +1,317 @@
-# Round 312: PERF-5a. Waveform peaks leave the main thread: a shared peaks worker fed with bounded, recycled chunks, output byte-identical, "ready" still means the bars are drawn
+# Round 313: PERF-5a fix-up. The PERF-1a harness proves LoAF liveness with its own injected frame, so `load.script-max` may honestly read 0 (C-R312-01)
 
-**Planned by:** B, at the round 311 → 312 planning, 2026-11-03.
+**Planned by:** B, at the round 312 → 313 planning, 2026-11-03.
 
-**Decisions** (all in `backlog.json` v271 → `decisions_log_b`):
-- **D-29z832: round 311 is closed.** C PASS, and gate 311 published `dfa4502`. PERF-4e is done. GATE310-M1, GATE310-L3, C-R310-01 and A-R310-REVIEW-L1 are closed.
-- **D-29z833: the new worker-test Lows are deferred.** C-R311-01, A-R311-REVIEW-L4 and GATE311-L1 go to `deferred_low_polish` as one batch. They close with the next worker round that owns `r2-proxy.test.mjs`.
-- **D-29z834: PERF-5 is split, and nothing is dropped.**
-  - **5a** (this round): the peaks move off the main thread.
-  - **5b:** the rAF/`startTransition` batching of peaks and state updates, with its own premise re-measure.
-  - **The power-of-two pyramid** goes to PERF-14, where its first consumer lives.
-- **D-29z835:** the mechanism rulings, the contract (§4), the test rows (§6) and the 12 mutants.
-- **D-29z836:** requests and bookkeeping (§10).
+**Decisions** (all in `backlog.json` v272 → `decisions_log_b`):
+- **D-29z837: round 312 ruled.** C FAIL on one row only (PK-PERF-HARNESS → C-R312-01, Medium, origin B spec / B pre-check). Every app-code row passed with `browserVerified`/`realVerified` true. Gate 312 is `skipped` [K1], so HEAD stays `dfa4502` and A's round-312 tree stays in place, uncommitted [K2]. **The app work is not re-dispatched.**
+- **D-29z838: harness-contract ruling for C-R312-01** (§4). The vacuity guard `harness.loaf-scripts` moves off the measured load window onto one injected frame: a new 1×-only liveness step that reads **the LoAF entry containing an injected 80 ms callback** (new pure selector `injectedLoafEntries`), and a budget row `harness.loaf-scripts-live` (assert `>= 50`). `load.script-max` stays measured on `[0, settled]` and may read 0.
+- **D-29z839: Lows deferred.** A-R312-REVIEW-L1…L5 go to `deferred_low_polish` as one PERF-5 batch; A-R312-REVIEW-L6, C-MU-POOL-NOT-CLEARED and C-MU-LAST-CHUNK-DROPPED are recorded as info. The batch closes in PERF-5b, which owns `peaks.client.ts` and `peaks-worker.test.ts` again. This round grants no app file.
+- **D-29z840:** bookkeeping, the L37 clause, requests (§10).
 
 **Read first:** `lessons.md`. These apply directly:
 - L11: STOP.
-- L23: sketch and full suite on the sketch.
-- L26/L28: the doc.
-- L29/L56: claims.
-- L37: the premise was re-measured.
-- L38: probes run alone, and a second dev server gets its own `cacheDir`.
-- L49: a replaced call keeps its side effects.
+- L23 / L37: B ran the perf spec on the final sketch this time (§2).
+- L26 / L28: docs.
+- L29 / L56: claims.
+- L30: `perf/**` has no Biome coverage, so use `npm run typecheck`.
+- L34: whole doc sections.
+- L38: perf runs alone; a second server gets its own `cacheDir`; warm up in a browser first.
 - L52: asserts must be able to fail.
+- L57: harness fields.
 
 **L29 note:** untagged code text in this task is an expected value or a new name, not a fact about current code. Facts about `store/` carry `[K#]`.
 
-## Baseline: HEAD `dfa4502`, clean tree
-- Gate 311 published `dfa4502` on both remotes [K1]. HEAD is `dfa4502`, and `git status` is empty [K2].
-- **Frozen list:** `b-round-311-r312-tree-sha256.txt`, 1,184 entries [K3]. Each of the 7 protected auth/purchase files appears once [K4].
-- After A's change, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-311-r312-tree-sha256.txt`, run from `store/`, fails only on the 2 modified paths of §5. The 5 new files of §5 are the only new files.
+## Baseline: HEAD `dfa4502` + A's round-312 tree (uncommitted)
+- **Gate 312:** `skipped`, "C taskStatus FAIL" [K1]. HEAD is `dfa4502`, and `git status` shows 7 entries: round 312's 2 M + 5 ?? [K2].
+- **App code frozen at C round 312's state:**
+  - `b-round-312/a312-app-code-sha256.txt` hashes the 6 round-312 code paths: `ArrangementContext.tsx`, `peaks.ts`, `peaks.client.ts`, `peaks.worker-protocol.ts`, `peaks.worker.ts`, `__tests__/peaks-worker.test.ts`.
+  - All 6 are OK now [K3] and must still be OK after A.
+  - That is how round 312's PASS rows carry over (§3.2 CARRY-312).
+- **Harness files at HEAD:**
+  - `b-round-312/head-perf-sha256.txt` covers `perf/studio-lab.perf.spec.ts`, `perf/budgets.json`, `perf/lib/report.ts`, `perf/lib/report.test.ts`, `perf/lib/instrumentation.ts` and doc 163. All 6 are OK at planning [K4].
+  - After A, `instrumentation.ts` must still pass.
+- **Protected and config files:**
+  - `b-round-312/protected-sha256.txt` lists 11 paths: the 7 auth/purchase files, `download-routes.test.ts`, `package.json`, `biome.json` and `vite.config.ts`.
+  - All 11 are OK [K21] and must stay OK.
 
 ## 0. Why this round
 
-### 0.1 Premise re-measured at HEAD (L37)
-Measured on the dev server, Chromium 143, with a CDP CPU profile at 100 µs, fresh `/studio-lab`, 9 demo sources.
-- **Main-thread inclusive time in `computePeaks`:** 55–86 ms per load over 5 loads. Single calls were 0.9 to 25.9 ms. Every call comes from the collection-load `.then` [K11].
-- **No peaks worker exists:** the only worker created is `demo-synth.worker.ts` [K11].
-- **Call sites:** `computePeaks` is called twice in `app/contexts/ArrangementContext.tsx`, in the video-import decode and in the collection load, and each call is followed by `setSourcePeaks` [K5][K6].
-- **Not owned here:** the largest load long task (65–78 ms) is the synth worker's `onmessage` handler. `synthesizeDemoSamples` for the 2 SFX still runs on the main thread (about 20 ms). Both are recorded as a PERF-2 remainder signal (§10), not this round's scope.
-
-**Mechanism measurement (D-29z835).** Chromium, a 5-minute 48 kHz stereo `AudioBuffer`, `b-round-311/probe/browser-copy.txt` [K20]:
-
-| Main-thread work | Total | Largest single slice |
-|---|---|---|
-| `computePeaks`, today | 29.6–32.6 ms | the same (one call) |
-| `copyFromChannel` into **fresh** `Float32Array`s (any chunk size) | **58–82 ms** | 1.4–63 ms |
-| `copyFromChannel` into **one reused** buffer set | **5.6–9.3 ms** | 0.1–3.5 ms |
-| Main-thread time-sliced compute | 43–47 ms | 3.8–6 ms |
-
-**Ruling:** a worker fed with freshly allocated copies costs the main thread **more** than today, so the chunk buffers must be recycled; recycling is required, not optional. The worker sends each chunk's arrays back with its ack, and the client reuses them. In-flight chunks are bounded, which caps the transient memory at about 8 × 2 s of one channel (≈ 3 MB at 48 kHz).
+### 0.1 What failed and why (C-R312-01, evidence `c-round-312/`)
+- **The guard and its window.** In `measureSettled`, the spec calls `loafScriptsProblem` on the `[0, settled]` load window [K5], and sets `load.script-max` from the same window [K6].
+- **Why the guard exists.** It was added in round 283 for A-R283-REVIEW-LOAF-SCRIPTS. Without it, a LoAF observer without `scripts` attribution would pass `load.script-max < 100` as "0 ms".
+- **What PERF-5a changed.** PERF-5a took the peaks off the main thread. The settled load window now often holds no LoAF that carries a script, and that is the improvement. The guard read this good result as a dead instrument:
+  - A's tree failed 2/2;
+  - the guard string appears 4 times in C's run-1 log;
+  - the HEAD copy passed with 0 failures [K17].
+- **Root cause (B).** Round 312 §3.2 required "spec passes", but B's pre-check never ran the perf spec on the sketch (the L23/L37 class). B ran it this time (§2).
 
 ### 0.2 What changes for the user
-Nothing visible. The waveforms are byte-identical. "Demo collection ready" and every source's ready state still arrive only after that source's peaks exist, so "ready" still means the bars are drawn. The main thread stops computing peaks.
+Nothing. Only the perf harness and two docs change. No app file changes [K3].
 
-### 0.3 Consults (read-only) and rulings (D-29z835)
-**performance-optimizer:**
-- Stream 2 s chunks to one shared, lazily created worker that keeps a running bucket state. The result stays byte-identical because max is order-free.
-- Bound the in-flight chunks and use the ack for backpressure.
-- Pyramid → PERF-14.
-- On worker failure, do not return to a long synchronous task.
-- **Correction from B's measurement:** the consult estimated fresh-copy cost at memcpy speed and called recycling optional. §0.1 measures fresh copies at 58–82 ms per 5-min stem, so recycling is required.
-- **Its proposal "mark ready immediately and let the waveform fill in later" is rejected** (see tech-lead).
+### 0.3 Reference / screen budget
+This is a perf-harness, test-only round, so the reference rule does not apply (policy "Reference first: not in scope"). Nothing persistent is added to the screen.
 
-**tech-lead:**
-- Use `peaks.client.ts` + `peaks.worker.ts`, in the `demo-synth.client.ts` pattern, with one shared worker and job ids.
-- **Keep "ready" after the peaks:** `perf/lib/page.ts` `waitForLibraryReady` waits for the preview `rect` [K23], and the context's ready consumers assume the peaks exist.
-- Use a stall timeout of about 3 s, not the synth's 10 s [K21].
-- Guard both call sites against abort after the await.
-- Defer the batching and the pyramid.
-- Keep the Worker code out of the context body.
-- **It warned that 3 test files wait only 2 microtasks** [K22]. **Ruling:** the client takes a callback that runs **synchronously** when `Worker` is undefined (jsdom), so those files keep HEAD timing and need no edit. B's full suite on the sketch shows this: 235 files, 3490 tests passed [K19].
+### 0.4 Consults (read-only)
+- **tech-lead.** Verdict: **change (small)**, and it is adopted.
+  - **The hole it found:** B's first final sketch kept every LoAF that *overlaps* the stamp (`t + duration >= start`). An app LoAF that only overlaps the stamp, with its own script ≥ 50 ms, would then satisfy the row even if the injected frame carried no `scripts`.
+  - **Fix (adopted):** the callback stamps `start`/`end` itself. A new pure selector `injectedLoafEntries(loafs, start, end)` in `report.ts` keeps only frames that **contain** the callback (with a 1 ms edge tolerance). The spec also requires exactly 1 containing entry.
+  - **Unit rows:** LOAF2 covers the selection, the part that failed in run 1.
+  - **Kept as it is:** `loafScriptsProblem`, so LOAF1 is unchanged.
+  - **Later rows:** the effect is negligible. Every later window starts fresh, and the windows that start at 0 are read before the injection. One caveat: the 1× pass's history differs from the 6× pass's from library Add onward. That caveat is written into the row's `note`.
+- **Not consulted:** performance-optimizer. This is not a new perf task; PERF-5b's consults come at its planning.
 
-**Disagreement ruled:** "ready" after the peaks (tech-lead) wins over "ready first" (performance-optimizer), because it is the smallest observable change and it keeps the harness and test contracts.
+## 1. Rulings on round 312 (D-29z837, D-29z839)
+| Id | Severity | Ruling |
+|---|---|---|
+| C-R312-01 | Medium | **This round** (§4) |
+| Doc 228 l.4 "C round 312 PASS" (C's note) | — | Rewritten as `C round 313 PASS` (L28 re-dispatch grant, §5) [K9] |
+| A-R312-REVIEW-L1 (the 3 s stall also covers the worker's cold start) | Low | `deferred_low_polish`. A round-312 §4 rule; re-ruled with a measurement in PERF-5b |
+| A-R312-REVIEW-L2 (`onPeaks` throw: try/finally) | Low | `deferred_low_polish`, PERF-5 batch. Not reachable today |
+| A-R312-REVIEW-L3 (buffer visible before its peaks) | Low | `deferred_low_polish`, PERF-5 batch. Documented in doc 228 |
+| A-R312-REVIEW-L4, with C's evidence C-MU-VIDEO-GUARD-REMOVED and C-MU-STALL-ONLY-AT-BEGIN | Low | `deferred_low_polish`, PERF-5 batch. The missing PW rows go into PERF-5b's test grant |
+| A-R312-REVIEW-L5 (PW13 `end`/`cancel` throws, timer count) | Low | Same batch |
+| A-R312-REVIEW-L6, C-MU-POOL-NOT-CLEARED, C-MU-LAST-CHUNK-DROPPED | info | Recorded (equivalent or safe) |
+| Reviewer Architecture note (keep; a `useSourcePeaksComputer` hook if a second consumer appears) | signal | Recorded, not scheduled |
 
-**On worker error or stall:** the pending jobs fall back to the HEAD computation (`computePeaks` on the main thread, once per job). This is HEAD behaviour, so it cannot regress the load. A peaks failure never marks a source `error`.
+## 2. B's pre-check (L23, L37)
+**Scratch.** `/tmp/b312s` is a tar copy of A's real round-312 tree:
+- `node_modules` is symlinked;
+- the copy's `vite.config.ts` gets `cacheDir: '/tmp/b312s-vite-cache'`;
+- every perf run ran alone (L38).
 
-### 0.4 Reference / screen budget
-Not applicable. This is a pure performance round: there is no new UI, no new text, and the pixels are byte-identical (policy: performance rounds have no reference section).
+**Final sketch:** `b-round-312/sketch.patch.txt`, with full copies in `sketch-studio-lab.perf.spec.ts.txt`, `sketch-budgets.json.txt`, `sketch-report.ts.txt` and `sketch-report.test.ts.txt`. From `store/`, `git apply --check` succeeds on A's tree.
 
-## 1. Rulings on round 311 (D-29z832, D-29z833)
-- **C round 311:** PASS. 12 rows passed. `browserVerified`/`realVerified` are true. 1 Low (C-R311-01, deferred). Gate 311 review: COMMIT OK, 8.5/10.
-- **The worker-test Lows** C-R311-01 (= A-R311-REVIEW-L2/L3), A-R311-REVIEW-L4 and gate-311 #1 (GATE311-L1) → `deferred_low_polish`, as one batch for the next worker round. The code is correct today.
-- **gate-311 #2/#3:** recorded as GATE311-I2 and GATE311-I3.
-- **INFO-C311-ASSERT-MINUS-LINE:** B's round-311 wording conflicted with B's own sketch, and C ruled on the intent. L4 already says "no assertion lost; equal or stronger replacements allowed", and this task uses that wording (§3.2).
-- **`tasks/round-311.md`:** archived as a byte copy of the old `current-task.md` [K15].
+**Static and unit checks:**
+- `tsc --noEmit` rc 0 (`precheck-tsc.log`).
+- `report.test.ts` passes **29/29** through the scratch `vitest.perf-scratch.config.ts`: 23 old rows plus 6 LOAF2 cases (`precheck-loaf1.log`) [K11]. The same file's budgets test reads `perf/budgets.json`, so it covers the new row's shape.
+- **Unit mutants** (`b-round-312/unit-mutants.sh`; output `precheck-unit-mutants.txt`, and a scripted re-run in `precheck-unit-mutants-script.txt` with the same result) [K24]. Restored: 29 passed.
 
-## 2. B's pre-check (L23)
-- **Sketch** (`b-round-311/sketch/`):
-  - `sketch.patch.txt`, the full diff against HEAD;
-  - the files `sketch-peaks.ts.txt`, `sketch-peaks.client.ts.txt`, `sketch-peaks.worker.ts.txt` and `sketch-peaks.worker-protocol.ts.txt`;
-  - the test file `sketch-peaks-worker.test.ts.txt`.
-- **Results:**
-  - `tsc` rc 0 (`sketch-tsc.log`).
-  - Biome is clean on all 6 files.
-  - **The full suite on the sketch passed: 235 files, 3490 tests** (`precheck-full.log`) [K19]. Gate 311 had 234 and 3478 [K10]. The full run was made before PW7b was added; the file has 13 rows now, and the restored mutant run passed 13/13.
-  - **12 named mutants, every one red; the restored code passes 13/13** [K13] (`sketch-mutants.txt`, `mutants.py`). One equivalent mutant is recorded and dropped, with its reason.
-- **Browser, on the sketch** (second dev server with its own `cacheDir`, L38; `b-round-311/probe/peaks-identity.cjs`):
-  - Main-thread `computePeaks`/`accumulatePeakChunk` time is **0** (HEAD: 79 and 85.6 ms).
-  - `peaks.worker.ts` is created (HEAD: none).
-  - All 9 library preview waveforms are **byte-identical** to HEAD.
-  - 0 page errors [K12].
-- **Not sketched, and A writes it: PW11** (the context row, §6). Its red-proof is the named mutant MU-CONTEXT-BYPASS, which A runs.
+  | Mutant | Red |
+  |---|---|
+  | MU-OVERLAP-ONLY (start condition removed) | 1 |
+  | MU-START-INSIDE (`t >= start`) | 3 |
+  | MU-NO-TOLERANCE (tolerance 0) | 1 |
+
+**Browser runs, in order:**
+- **Run 1, start-inside window.** The injected frame was found in only 1 of 3 passes: samples `[79, 0, 0]`, LoAF entries `[1, 0, 0]` [K13].
+  - **Finding:** a LoAF's `startTime` is the start of its frame, and it can precede the injection.
+- **Run 2, overlap rule.** The spec passes. Samples are `[79, 79, 80]`, and the frame started before the stamp in 3 of 3 passes [K13b]. This confirms the finding. tech-lead then showed the overlap rule's hole (§0.4).
+- **Run 3, final containment rule.** The spec **passes** with 0 failures. Live samples are `[79, 79, 80]`. In each pass exactly 1 entry contains the callback, with `scriptCount` 1, and its frame started before the callback (`frameStartedBeforeCallback` 1) [K12]. `load.script-max` read `[37, 0, 0]`, so a 0 is a real result here.
+- **Mutant MU-LIVE-BUSY0.** `injectedLoafBusyMs = 0` on `/tmp/b312m`, which has its own `cacheDir`, run on the final sketch. The spec fails with 7 failures: the `harness.loaf-scripts` problem in every 1× pass, the "0 entries contain the injected callback" problem in every 1× pass, and `assert failed harness.loaf-scripts-live` [K14].
+
+**Claims.** Run on A's tree and on the sketch: `claims-313-head-output.txt` and `claims-313-sketch-output.txt`. The sketch's deltas are all expected:
+- **K4 `2`:** the spec, `budgets.json`, `report.ts` and `report.test.ts` changed.
+- **K5:** empty.
+- **K6:** unchanged at `545`; the removed block and the added import cancel out.
+- **K7:** lists `budgets.json` and the spec.
+- **K8 `321`.**
+- **K20:** adds `budgets.json`.
+- **K21 `10`:** only because the scratch has its own `cacheDir` line.
+- **K23:** lists `budgets.json` (its note names the selector), `report.ts`, `report.test.ts` and the spec.
+- **K25:** `21 2`.
+
+**Not run: the full vitest suite.** No `app/**` file changes, and `perf/**` tests are outside the vitest include [K26]. LOAF1/LOAF2 run through the scratch config.
 
 ## 3. Acceptance
 
 ### 3.1 A's rows
 | Row | Expected |
 |---|---|
-| A-CLAIMS | Before editing, from the loop root, `bash b-round-311/claims-312.sh` equals `b-round-311/claims-312-head-output.txt`. A difference is a STOP |
-| A-UNIT | `npx vitest run app/lib/arrangement/__tests__/peaks-worker.test.ts app/lib/arrangement/__tests__/peaks.test.ts app/lib/arrangement/__tests__/waveform-zoom.test.tsx app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx app/lib/arrangement/__tests__/content-colour-ui.test.tsx app/lib/arrangement/__tests__/demo-synth-worker.test.ts app/lib/arrangement/__tests__/collection-load-status.test.tsx app/lib/arrangement/__tests__/status-lifetime.test.tsx` passes: peaks-worker has ≥ 14 rows (PW1–PW11), and every other file passes unchanged. Report the times |
-| A-MUTANTS | Run `b-round-311/sketch/mutants.py` on a scratch copy of A's tree (never in `store/`): the 12 mutants are each red on at least the rows in `sketch-mutants.txt`, and the restored code is green. Add **MU-CONTEXT-BYPASS**: in both context call sites, replace the `requestSourcePeaks(...)` call with a direct `computePeaks` and an immediate callback. It must turn PW11 red. Logs and `.patch.txt` files go under `a-round-312/` |
-| A-TYPE/LINT | `npm run typecheck` rc 0. `npm run lint` rc 0 with no new finding (gate 311: 205 warnings + 1 info) |
-| A-REVIEW | `code-reviewer` on the 7 paths. Ask about: byte identity (NaN, −0, fractional samples per bucket); buffer recycling and the in-flight bound; abort/cancel and late replies; worker error/stall fallback; dispose on unmount; the "ready after peaks" order; no type assertions. A Medium+ inside the grants: fix it, then re-review the changed lines (L11). A Medium+ outside the grants: STOP. The Architecture note goes to B |
-| A-DOC | New `docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md`, in Georgian with technical terms in English. TEMPLATE's 7 `## ` headings in order (L26). Line 4 is exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 312 PASS)` (L28: PERF-5 has a stage 5b). Content: §0.1 (both tables, verbatim numbers), §0.3's rulings, §4, the rows and mutants, and what 5b and PERF-14 keep. It cites only tests that exist |
+| A-CLAIMS | Before editing, from the loop root, `bash b-round-312/claims-313.sh` equals `b-round-312/claims-313-head-output.txt`. A difference is a STOP |
+| A-APPLY | From `store/`: `git apply ../tmp/studio-real-loop/b-round-312/sketch.patch.txt`. The 4 files are then byte-equal (`cmp`) to the matching `sketch-*.txt` copies. Any other change to them is a STOP |
+| A-TYPE | `npm run typecheck` rc 0. Under L30, this is the `perf/**` check |
+| A-LOAF | On a scratch copy, never in `store/`: write `vitest.perf-scratch.config.ts` with `test.include: ['perf/**/*.test.ts']`, then run `npx vitest run --config vitest.perf-scratch.config.ts perf/lib/report.test.ts`. 29 tests pass. Re-run B's 3 unit mutants with `bash ../tmp/studio-real-loop/b-round-312/unit-mutants.sh` from inside the scratch copy (it edits that copy's `perf/lib/report.ts`, then restores it). The output must equal `b-round-312/precheck-unit-mutants.txt` |
+| A-PERF | Run `npx playwright test --config playwright.perf.config.ts perf/studio-lab.perf.spec.ts` once, **alone** (L38). The spec passes. `harness.loaf-scripts-live` has 3 samples, each ≥ 50, with `loafEntries` 1 and `scriptCount` ≥ 1. Copy `test-results/perf/latest.json` to `a-round-313/perf-a.json` and the console output to `a-round-313/perf-a.log` |
+| A-REVIEW | Run `code-reviewer` on the 6 changed files (4 perf files + docs 163 and 228). Ask about: vacuity of the liveness row; the containment rule and its tolerance; interference with later steps of the same pass; the accuracy of the docs. A Medium+ inside the grants is fixed and re-reviewed (L11). A §4 rule change is a STOP |
+| A-DOC | **Doc 163:** see §5. **Doc 228:** l.4 is exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 313 PASS)` (L28). Add one Problem → Solution entry for C-R312-01 under `## პრობლემები და გადაწყვეტები`, and one line under `## ტესტირება` that names `harness.loaf-scripts-live` and LOAF2. Write in Georgian with technical terms in English, and cite only rows that exist (L26) |
 
 ### 3.2 C's rows
-C writes `c-round-312.md` and `c-round-312.json` as it goes, with the L57 fields:
-- `assertsSpecified` = 14 (PW1, PW1b, PW2, PW3 ×2, PW4–PW7, PW7b, PW8–PW11);
-- `mutantsRecorded` = 13 (12 + MU-CONTEXT-BYPASS);
-- `mutantRedOnSketch` = 12.
+C writes `c-round-313.md` and `c-round-313.json` as it goes, with the L57 fields:
+- `assertsSpecified` = 3: the `harness.loaf-scripts-live` budget assert, the spec's "exactly 1 containing entry" check, and LOAF2;
+- `mutantsRecorded` = 4: MU-LIVE-BUSY0, MU-OVERLAP-ONLY, MU-START-INSIDE and MU-NO-TOLERANCE;
+- `mutantRedOnSketch` = 4.
 
 Each finding carries an `origin`.
 
-**Browser rows.** Real Chromium, under L38: nothing else runs during a probe, and a warm-up load in a browser comes first.
-- C copies `b-round-311/probe/peaks-identity.cjs` into `c-round-312/` (`peaks-probe.cjs` is optional, B's per-call LoAF/profile probe).
-- **HEAD side.** By the time C runs, `:5173` serves A's tree, and C must not stash. C uses B's recipe:
-  1. `tar` a copy of `store/` with `node_modules`, `build` and `.git` excluded;
-  2. restore HEAD's versions of the 7 §5 paths with `git show HEAD:<path>`, and delete the 5 new ones;
-  3. symlink `node_modules`;
-  4. add `cacheDir: '/tmp/<name>-vite-cache'` to **the copy's** `vite.config.ts`;
-  5. run `npx remix vite:dev --port <≠5173> --host 127.0.0.1`.
-
-  Only one probe runs at a time (L38). B's HEAD outputs (`b-round-311/probe/identity-head.json`) are the reference, if C's own HEAD run cannot start.
-
 | Row | Action | Expected |
 |---|---|---|
-| PK-MAIN-THREAD | `node peaks-identity.cjs http://127.0.0.1:5173 <out>` on A's tree, 3 fresh loads at 1440×900 | `mainPeaksMs` is empty (0 ms in `computePeaks` and `accumulatePeakChunk`) on all 3 loads. `workers` contains `peaks.worker.ts` exactly once per load. 0 page errors. HEAD control (the same script on HEAD): `computePeaks` > 0 ms and no peaks worker. This proves the row tells the trees apart |
-| PK-IDENTITY | The same runs | Each of the 9 library options' preview-wave `sha` equals HEAD's (`b-round-311/probe/identity-head.json`), and every `rects` is 96 |
-| PK-CLIP-PATHS | A fresh load at **1440×900 and 1280×720**. Add every library source with Enter onto the first audio lane that accepts it. Read `d` of every `[data-testid="arrangement-clip-waveform"] path` and of the detail waveform for each selected clip | Byte-equal to the same steps on HEAD. Zoom in twice (`+`) and read again: still equal |
-| PK-READY-ORDER | Fresh load. Poll every animation frame until ready | The first frame whose status reads "Demo collection ready" already has a preview-wave `rect`. No library option is enabled (Add) without its peaks. Equal to HEAD |
-| PK-VIDEO | Import `store/public/videos/hero/1.mp4` (method of `c-round-303/main.cjs`) on A's tree and on HEAD, 1440×900 | The video source's audio state (`ready` or `none`) is equal to HEAD. If `ready`: its clip waveform `d` is equal to HEAD, and the status line is equal. 0 page errors |
-| PK-COPY-BOUND | `addInitScript` wraps `AudioBuffer.prototype.copyFromChannel` and records `destination.length` and the duration of each call. Fresh load of A's tree | Every `destination.length` ≤ 2 × the buffer's `sampleRate`. Record the total and the max call ms per load. **No browser identity count.** Transfer detaches each array, and the ack returns new `Float32Array` objects over the same buffers, so in-page object identity cannot show recycling. Recycling's identity proof is PW4 + MU-FRESH-BUFFERS; its browser evidence is the main-thread copy time only |
-| PK-ABORT | Load, then within 200 ms of the first `copyFromChannel` call navigate away to `/` and back to `/studio-lab` | No page error. The second load reaches ready with 9 identical waves. The old provider's worker is terminated (the `page.on('worker')` close event, or the worker count) |
-| PK-PERF-HARNESS | `npx playwright test --config playwright.perf.config.ts perf/studio-lab.perf.spec.ts`, **alone** (L38) | The spec passes, every `assert` row is within budget, and `load.*` rows are recorded. Report `load.ready-ms`, `load.settled-ms`, `load.script-max` and `load.longtask-max` next to round 306's values (`c-round-306/perf/`). This is a trend, not a gate on wall-clock values |
-| G312-AUTH | As G311-AUTH (copy `c-round-311/g311-auth.cjs`), **both viewports** | `/studio-lab`: workspace and the demo badge, `auth_user` null, 0 page errors. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. `/api/studio-token` with no header → 401. No token in any body |
+| SOURCE-SCOPE | `git status --short --untracked-files=all`. Then, from `store/`, `sha256sum -c` of `b-round-312/a312-app-code-sha256.txt`, `head-perf-sha256.txt` and `protected-sha256.txt` | 12 entries: round 312's 7, plus M on `perf/studio-lab.perf.spec.ts`, `perf/budgets.json`, `perf/lib/report.ts`, `perf/lib/report.test.ts` and doc 163. Doc 228 stays `??`. App code: 6/6 OK. Head-perf: only `instrumentation.ts` stays OK. Protected: 11/11 OK |
+| CLAIMS | Re-run `claims-313.sh` | Equals `claims-313-sketch-output.txt` on K5, K6, K7, K8, K20, K23 and K25. K4 becomes `1`: doc 163 is now changed too. K9 becomes the round-313 l.4. **K10 is expected to change** (A edits doc 163's granted sections): its first number becomes ≥ 2 and the heading lines may shift. The DOC row checks those sections by heading, not by line number. K21 stays `11`. K2 becomes `12 dfa4502`. K19 stays `1` and K22 stays `228-perf-peaks-worker.md`. Any other difference is a planning FAIL |
+| CARRY-312 | Read `c-round-312.json` | Valid only if SOURCE-SCOPE shows app code 6/6 OK. Then round 312's 13 passed rows stand for the app code without a re-run. If any app path changed, CARRY-312 fails, and every PK-* row in `tasks/round-312.md` §3.2 must be re-run |
+| HARNESS-PASS | Perf spec on A's tree, **alone**, after a browser warm-up (L38). **2 runs** | Both runs pass with `failures` empty. `harness.loaf-scripts-live`: all 3 samples ≥ 50, each detail with `loafEntries` 1 and `scriptCount` ≥ 1. `load.script-max` is recorded with a `loafEntries` detail; 0 is allowed. Report `load.ready-ms`, `load.settled-ms`, `load.script-max` and `load.settled.longtask-max` next to C round 312's `perf-a-run1/2.json`. This is a trend, not a gate |
+| HARNESS-HEAD-CONTROL | One run on a copy with HEAD's app code and the new harness: tar copy; `git show HEAD:` for the 2 M app paths; delete the 5 new app files; keep A's 4 changed `perf/` files; symlink `node_modules`; give the copy its own `cacheDir` | The spec passes. Record `load.script-max`; C round 312 measured a median of 32 at HEAD. This shows the new harness does not hide a real main-thread script on a tree that has one |
+| MU-LIVE-BUSY0 | On a scratch copy of A's tree, set `injectedLoafBusyMs = 0` and run once | The spec fails, with `harness.loaf-scripts: no long-animation-frame entry carried script timings` in every 1× pass and `assert failed harness.loaf-scripts-live` |
+| LOAF | As A-LOAF, on C's own scratch (`b-round-312/unit-mutants.sh`), plus at least one mutant of C's own on `injectedLoafEntries` | 29 tests pass. The script output equals `precheck-unit-mutants.txt`. Record C's own mutant result |
+| PK-SANITY | `b-round-311/probe/peaks-identity.cjs` on A's tree, 1 fresh load at 1440×900 | `mainPeaksMs` is empty, `peaks.worker.ts` appears once, 9/9 shas equal `b-round-311/probe/identity-head.json`, 0 page errors. This is a cheap live check that `:5173` still serves the tree C verified in round 312 |
+| DOC | Check doc 163's two granted sections against the live spec, `budgets.json` and `report.ts` (L34). Check doc 228's l.4 byte for byte, and that the 7 TEMPLATE headings appear in order (L26) | Doc 163 names the liveness step at its real position, has a `harness.loaf-scripts-live` metrics row (callback-containing frame, 1 ms tolerance, budget `>= 50`), and its `load.script-max` row no longer claims the settled-window guard |
+| G313-AUTH | As G312-AUTH (copy `c-round-311/g311-auth.cjs`), **both viewports** | `/studio-lab`: workspace and demo badge, `auth_user` null, 0 page errors. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. `/api/studio-token` with no header → 401. No token in any body |
 
-**Offline rows:**
-- **PK-UNIT.** C re-runs A-UNIT's file list. This is C's own row, not a gate row.
-- **SOURCE-SCOPE.**
-  - `git status --short --untracked-files=all` lists exactly the 2 modified §5 paths and the 5 new ones. `sha256sum -c` fails only on the 2.
-  - These have no diff: the 7 protected files, `perf/**`, `package.json` and `biome.json`.
-  - **No assertion is lost; equal or stronger replacements are allowed** (L4). No existing test file is changed (the sketch needs none, §0.3).
-- **CLAIMS.** Re-run `claims-312.sh`. After A, the values that change equal `b-round-311/claims-312-sketch-output.txt` for K5 (empty: no import, no call), K6 (`2511 3929` in the sketch; compared by content per L56, not line number), K7, K8 (adds `peaks.worker.ts`) and K9:
-  - In the sketch run, K2, K10 and K16 are empty because `/tmp/b311s` is a scratch git with no gate history.
-  - On A's real tree these also change, and the expected values are: **K2 → `7 dfa4502`** (2 modified + 5 untracked, as in SOURCE-SCOPE); **K16 → `1 228-perf-peaks-worker.md`**; **K17 → `1`** (doc 228's `In Progress (stage 1 of 2` line). K10 stays `234 3478`, because it reads gate 311's log.
-  - If A's code differs from the sketch, A writes the values to `a-round-312/claims-after.txt` with the reason, and C checks the reason against §4.
-- **TESTS-READ.** PW1–PW11 follow §6 and can fail (L52): A's mutant logs show the listed reds. C adds at least one mutant of its own, for example a pool that never empties between jobs or an off-by-one at the last chunk.
-- **DOC.** Doc 228 per A-DOC.
-- **Gate rows** (C does not claim them; they go under `"gate"`): full vitest, build, Biome, `npm run verify` and the e2e smoke.
+**Gate rows.** C does not claim these; they go under `"gate"`: full vitest, build, Biome, `npm run verify` and the e2e smoke.
 
-`browserVerified` is true only if PK-MAIN-THREAD, PK-IDENTITY, PK-CLIP-PATHS, PK-READY-ORDER, PK-VIDEO, PK-COPY-BOUND, PK-ABORT and G312-AUTH all ran. PK-PERF-HARNESS is wanted, but it is environment-heavy: if it cannot run (a build failure for environment reasons), list it under `"notRunnableHere"` with the log; it does not make `browserVerified` false.
+**Browser flags.**
+- `browserVerified` is true only if HARNESS-PASS, PK-SANITY and G313-AUTH all ran.
+- HARNESS-HEAD-CONTROL and MU-LIVE-BUSY0 are wanted. If the environment stops them (a build failure for environment reasons), list them under `"notRunnableHere"` with the log.
 
-## 4. Contract (D-29z835)
+## 4. Contract (D-29z838)
 
-### 4.1 `peaks.ts` (append only; `computePeaks` and every existing export byte-unchanged)
-- `peakBucketCount(length, sampleRate, bucketsPerSecond)` equals `computePeaks(...).length` for every input, including 0 and invalid input.
-- `accumulatePeakChunk(peaks, chunk, chunkStart, chunkLength, sampleRate, bucketsPerSecond)`:
-  - It folds samples `[chunkStart, chunkStart + chunkLength)` into `peaks`, using the same bucket edges as `computePeaks`: `floor(b × sampleRate / bucketsPerSecond)`.
-  - It never reads a chunk index ≥ `chunkLength`, because recycled arrays hold stale samples past the copied length.
-  - Folding any chunking of a signal gives the same bytes as `computePeaks`. This includes NaN, −0 and fractional samples per bucket (22050 Hz).
+### 4.1 `perf/lib/report.ts` (append only; every existing export byte-unchanged)
+- New `LOAF_EDGE_TOLERANCE_MS = 1`.
+- New `injectedLoafEntries(loafs, callbackStart, callbackEnd)`. It keeps the entries with `t <= callbackStart + 1` and `t + duration >= callbackEnd - 1`, that is, the frames that **contain** the callback.
+- `loafScriptsProblem` and `LOAF_SCRIPTS_PROBLEM` stay unchanged.
 
-### 4.2 `peaks.worker-protocol.ts` + `peaks.worker.ts`
-- **Requests:** `begin {jobId, length, sampleRate, bucketsPerSecond}`, `chunk {jobId, start, length, channels}`, `end {jobId}` and `cancel {jobId}`.
-- **Replies:**
-  - `ack {jobId, channels}` returns the **same** arrays, with their buffers in the transfer list. It is sent for every chunk, including a stale job's chunk, so the client gets its buffers back.
-  - `done {jobId, peaks}` transfers `peaks.buffer`. A cancelled or unknown job gets no `done`.
-- **Pure handler:** `handlePeaksWorkerRequest(state, request, post)` is exported for unit tests. The worker file only wires it to `self`.
+### 4.2 `perf/studio-lab.perf.spec.ts` (exactly the sketch hunks)
+- **Constants:** `injectedLoafBusyMs = 80` (above the 50 ms LoAF floor) and `loafLivenessWaitMs = 500`.
+- **Import:** `injectedLoafEntries`.
+- **`passSequence`:** a second entry for the liveness step.
+- **`measureSettled`:**
+  - drops the `loafScriptsProblem(settled.loafs)` block [K5];
+  - `load.script-max` gains `detail: { loafEntries }`.
+- **New `measureLoafLiveness`:**
+  1. A `setTimeout(0)` callback in the page stamps `start`, busy-loops for 80 ms, stamps `end`, and resolves on the next `setTimeout(0)` with `{ start, end, spins }`.
+  2. Wait 500 ms.
+  3. Read `snapshot(page, 0, now).loafs` and select the frames with `injectedLoafEntries`.
+  4. Push `loafScriptsProblem(selected)` when it is non-null.
+  5. Push a problem when `selected.length !== 1`.
+  6. Record `harness.loaf-scripts-live` = the rounded largest `scriptMax`. Detail: `injectedBusyMs`, `callbackMs`, `spins`, `loafEntries`, `scriptCount`, `frameStartedBeforeCallback`.
+- **`runPass`:** in the 1× branch, `measureSettled` is followed by `step = 'harness.loaf-scripts-live'` and `measureLoafLiveness`, before `library Add`. The 6× passes are unchanged.
 
-### 4.3 `peaks.client.ts`: `createSourcePeaksComputer()` → `{ request(buffer, signal, onPeaks), dispose() }`
-- **No worker** (`typeof Worker === 'undefined'`), a failed construct, or an empty buffer: `onPeaks(computePeaks(...))` runs **synchronously**, inside `request`. This is HEAD behaviour and HEAD timing.
-- **The worker path:**
-  - **Worker and jobs:** one lazily created module worker per computer. Jobs run one at a time, in request order.
-  - **Chunks:** each is `round(2 × sampleRate)` samples (`PEAKS_CHUNK_SECONDS = 2`), copied with `copyFromChannel` into arrays from the recycle pool.
-  - **In flight:** at most `PEAKS_CHUNKS_IN_FLIGHT = 4` chunks.
-  - **Recycling:** acked arrays go back to the pool, and the pool is cleared between jobs.
-- **The stall timer:** `PEAKS_WORKER_STALL_TIMEOUT_MS = 3000` from the last reply. On a stall, `onerror` or `onmessageerror`:
-  1. terminate the worker and release its handlers;
-  2. deliver every pending job through the synchronous path, skipping aborted jobs;
-  3. later requests use the synchronous path.
-- **Abort:** an aborted job posts `cancel` and is dropped, and `onPeaks` is never called for it, even if `done` arrives later.
-- **`dispose()`:** clears the timer, the queue and the pool, then terminates the worker.
-- **Replies are read with a validator** (`readPeaksWorkerReply`), with no type assertion.
+### 4.3 `perf/budgets.json`
+- **New row** right after `load.script-max`:
+  - `id`: `harness.loaf-scripts-live`;
+  - `metric`: `script-max`; `unit`: `ms`; `kind`: `wallclock`;
+  - `mode`: `assert`, with `budget` `>= 50`;
+  - `owner`: `C-R312-01`;
+  - `scenario` and `note` as in the sketch. The note includes the tech-lead caveat about the 1×/6× history.
+- **Every other row** is byte-unchanged. The file goes from 320 to 321 `"id"` lines [K8].
 
-### 4.4 `ArrangementContext.tsx` (only these hunks)
-- **The import:** the `computePeaks` / `PEAK_BUCKETS_PER_SECOND` import [K5] is replaced by `createSourcePeaksComputer` and its type.
-- **The computer:** one is held in a ref, created lazily by a stable `requestSourcePeaks` callback and disposed on provider unmount.
-- **The collection load** [K5]:
-  - `setSourcePeaks`, `patchSourceState(... 'ready' ...)` and `settle(false)` move, **unchanged and in the same order**, into the callback.
-  - The callback first returns when `controller.signal.aborted`.
-  - The `.catch` (decode failure → `error`) is unchanged.
-- **The video import** [K5]:
-  - `setSourcePeaks`, `settle({audio:'ready'})` and the `syncPlayback` re-sync move, unchanged and in the same order, into the callback.
-  - The callback first returns when `signal.aborted` or when the video source is no longer in `videoSourcesRef`. This is the same condition `settle` already checks.
-- **The dependency arrays** gain `requestSourcePeaks`.
-- **Nothing else changes in the context.**
+### 4.4 `perf/lib/report.test.ts`
+- Import `injectedLoafEntries`.
+- Add one `it.each` named `LOAF2` with 6 cases, as in the sketch:
+  1. containing frame;
+  2. overlapping app frame that ends inside the callback;
+  3. frame that starts after the callback;
+  4. edges within 1 ms;
+  5. an app frame beside the containing one;
+  6. empty.
+- No existing row changes (L4: no assertion is lost).
 
-**L49 side effects of the replaced block, ruled.** The block is "channels → `computePeaks` → `setSourcePeaks` → ready → settle/sync". Every effect is **kept**, in the same order, inside the callback:
-- PW11 and PK-READY-ORDER pin "ready after peaks";
-- PK-CLIP-PATHS and PK-IDENTITY pin the peaks values;
-- PK-VIDEO pins the video re-sync and its status.
-
-No effect is dropped.
-
-### 4.5 Not in this round (kept in the backlog, D-29z834)
-- **PERF-5b:** rAF/`startTransition` batching of `setSourcePeaks`. It gets its own premise measurement, because `load.commits` is a wall-clock row that races the synth worker.
-- **PERF-14:** the power-of-two pyramid. Its consumer, the canvas tiles, arrives there, and 5a's reply is an object, so a level can be added later.
-- **Long-stem browser scenario** (5-minute stems): the harness has no long fixture in the demo. It is covered by §0.1's measured microbenchmark and the unit rows. It goes to PERF-13's harness.
-- **The PERF-2 remainder** (SFX synth on the main thread; the synth `onmessage` handler is the largest load long task): recorded as signal PERF2-REMAINDER-SFX-SYNTH.
+### 4.5 Unchanged, and the SWEEP
+- **Unchanged:** `perf/lib/instrumentation.ts`, `perf/lib/page.ts` and the other two perf specs.
+- **SWEEP** of `app perf e2e` for `loafScriptsProblem|LOAF_SCRIPTS_PROBLEM|harness.loaf-scripts`:
+  - at HEAD: `report.ts`, `report.test.ts` and the spec;
+  - on the sketch: also `budgets.json` [K20].
+- No other spec uses the guard.
+- **Rejected options:**
+  - dropping the guard (it reintroduces A-R283);
+  - a warning only (a dead observer would pass);
+  - injecting inside `[0, settled]` (it pollutes `load.script-max`);
+  - the overlap rule (tech-lead's hole);
+  - changing `loafScriptsProblem` (LOAF1 would change for no gain).
 
 ## 5. Grants
 A edits only:
-1. `app/lib/arrangement/peaks.ts`: append `peakBucketCount` and `accumulatePeakChunk`. The existing lines are unchanged.
-2. `app/contexts/ArrangementContext.tsx`: only the §4.4 hunks.
+1. `perf/studio-lab.perf.spec.ts`: §4.2.
+2. `perf/budgets.json`: §4.3.
+3. `perf/lib/report.ts`: §4.1, append only.
+4. `perf/lib/report.test.ts`: §4.4, append only.
+5. `docs/implementation/2026/quarter-IV/163-studio-perf-harness.md`, these whole sections only (L34) [K10]:
+   - `### Pass-ის თანმიმდევრობა (ინტერპრეტაცია)`: from its heading to the next heading, `## არქიტექტურა`;
+   - `## მეტრიკების განმარტება და ზღვრები`: from its heading up to `## შეცვლილი ფაილები`.
 
-A creates:
-
-3. `app/lib/arrangement/peaks.client.ts`;
-4. `app/lib/arrangement/peaks.worker-protocol.ts`;
-5. `app/lib/arrangement/peaks.worker.ts`;
-6. `app/lib/arrangement/__tests__/peaks-worker.test.ts`;
-7. `docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md`.
+   Update the `load.script-max` row and add the `harness.loaf-scripts-live` row and the pass step.
+6. `docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md` (A's own new file): l.4, `## პრობლემები და გადაწყვეტები` and `## ტესტირება`.
 
 **Nothing else:**
-- no existing test file;
-- not `perf/**`, `package.json`, `biome.json`, `vite.config.ts`, or any protected file;
+- no `app/**` file (the 6 code paths stay byte-equal [K3]);
+- not `perf/lib/instrumentation.ts`, `perf/lib/page.ts` or the other two perf specs;
+- no other existing test file;
+- not `package.json`, `biome.json`, `vite.config.ts`, `playwright.perf.config.ts` or any protected file;
 - no dependency change.
 
 ## 6. Specified test rows (L52)
-The target file is `b-round-311/sketch/sketch-peaks-worker.test.ts.txt`. A may extend it; it must not weaken any row.
+| Assert | Red-proof |
+|---|---|
+| `harness.loaf-scripts-live` budget row | MU-LIVE-BUSY0 (browser, [K14]) |
+| "exactly 1 containing entry" problem | MU-LIVE-BUSY0, which yields 0 entries |
+| LOAF2 | MU-OVERLAP-ONLY, MU-START-INSIDE and MU-NO-TOLERANCE (unit, [K24]) |
 
-| Row | What it pins | Red-proof (mutant, `sketch-mutants.txt`) |
-|---|---|---|
-| PW1 | the streamed kernel equals `computePeaks` byte for byte for 48000/44100/22050/8000/96000 Hz × lengths 1/479/480/481/2205/2.37 s × 1/2/6 channels × chunk sizes 1/7/221/480/2 s/whole, with chunk arrays **padded with 1.0** past the copied length | MU-KERNEL-INIT-ZERO, MU-KERNEL-CHUNK-END |
-| PW1b | NaN, −0 and −Infinity give the same bytes | MU-KERNEL-INIT-ZERO |
-| PW2 | `peakBucketCount` equals `computePeaks(...).length`, including 0 and an invalid rate | — (an identity row) |
-| PW3 | protocol: acks return the same arrays with their buffers transferred; a stale `jobId` chunk is acked and not folded; `done` is byte-equal and transfers `peaks.buffer`; cancel → no `done` | MU-ACK-NEW-ARRAYS, MU-KERNEL-INIT-ZERO |
-| PW4 | client (a FakeWorker running the real handler): one worker; chunk count = ceil(length / 2 s); in flight ≤ 4; every copy length = 2 s; distinct arrays ≤ 8; transfer lists; result byte-equal; `dispose` terminates | MU-WORKER-PATH-DELETED, MU-FRESH-BUFFERS, MU-UNBOUNDED-INFLIGHT, MU-ACK-NEW-ARRAYS, MU-KERNEL-CHUNK-END, MU-DISPOSE-NO-TERMINATE |
-| PW5 | the worker's reply object itself reaches `onPeaks` (`toBe` a marker array) | MU-WORKER-PATH-DELETED |
-| PW6 | with no `Worker`, `onPeaks` runs before `request` returns, with `computePeaks`'s bytes | — (HEAD timing guard) |
-| PW7 | abort → `cancel` posted, no callback, the next job still runs | MU-NO-CANCEL, MU-PARALLEL-JOBS |
-| PW7b | an abort after `end` is posted drops the late `done` | MU-ABORT-DELIVERS |
-| PW8 | `onerror` → every pending job is delivered by the synchronous path, the worker is terminated, and the next request is synchronous with no new worker | MU-NO-FALLBACK-ON-ERROR, MU-PARALLEL-JOBS |
-| PW9 | no reply for 3000 ms → fallback; at 2999 ms → nothing yet | MU-NO-STALL, MU-NO-FALLBACK-ON-ERROR |
-| PW10 | jobs run in request order, one `begin` at a time | MU-PARALLEL-JOBS |
-| **PW11 (A writes)** | context: with `globalThis.Worker` stubbed by a fake that answers `done` with a marker array, an `ArrangementProvider` over a 1-source collection (fake buffer with `copyFromChannel`) ends with `sourcePeaks.get(id)` **being** the marker, and the source `ready` only after `done` (it is not ready before the fake replies) | **MU-CONTEXT-BYPASS** (A runs it) |
-
-### 6.1 Changed contracts
-None. No existing test file changes, and no assert is removed.
+Each mutant was run on the final sketch. The start-inside rule also has a recorded browser negative control: run 1 [K13].
 
 ## 7. A's order of work
 1. A-CLAIMS.
-2. `peaks.ts`, the protocol and the worker.
-3. The client, then the test file PW1–PW10, run until green.
-4. The context hunks, then PW11, then A-UNIT.
-5. A-MUTANTS, including MU-CONTEXT-BYPASS.
-6. Typecheck and lint.
-7. Doc 228.
-8. `code-reviewer`.
-9. Write `a-round-312.md` as you go.
+2. A-APPLY.
+3. A-TYPE.
+4. A-LOAF, on a scratch copy.
+5. A-PERF, alone.
+6. Docs.
+7. A-REVIEW (re-review any fix).
+8. `a-round-313.md`: the changed files, the rows, and "Next C checks".
 
 ## 8. Neighbouring behaviour at risk (C probes)
-- **Collection status and the ready line:** PK-READY-ORDER, `collection-load-status` and `status-lifetime` (a covering run).
-- **Waveforms everywhere:** the lane, detail and library preview; zoom (PERF-3's quantized shapes); clip-gain redraw. PK-CLIP-PATHS, PK-IDENTITY, `waveform-zoom` and `clip-gain-waveform`.
-- **Video import:** the audio-ready state and the playback re-sync (PK-VIDEO).
-- **Unmount and navigation:** the worker is terminated, with no late `setState` (PK-ABORT).
-- **The perf harness:** `waitForLibraryReady` and the `load.*` rows (PK-PERF-HARNESS).
-- **Purchase protection:** G312-AUTH. The legacy `/studio/:productId` route does not use `ArrangementContext` and is untouched.
+- **Later rows of the 1× pass.** The 80 ms injection happens after settled and before library Add. `harness.hook-live` and the fader rows read windows that start later. HARNESS-PASS compares them with round 312 as a trend.
+- **`load.*` rows** keep their windows. Only a detail is added.
+- **The 6× passes** do not run the step.
 
 ## 9. STOP conditions
-A writes "STOP — needs B ruling" at the top of `a-round-312.md` and changes nothing else when:
+A writes "STOP — needs B ruling" at the top of `a-round-313.md` and changes nothing else when:
 - A-CLAIMS differs from the HEAD output;
-- a change is needed outside §5, or in an existing test file;
-- a covering test fails or rises above 50 % of its timeout (L11);
-- any assert must be removed;
-- a mutant stays green;
-- typecheck fails, or lint has a new finding;
-- the reviewer reports a Medium+ outside the grants;
-- a §4 rule (chunk size, in-flight bound, stall time, "ready after peaks") would have to change. That is a STOP, not a deviation (L11, RETRO 305).
+- `git apply` fails, or a change is needed outside §5;
+- A-PERF fails in two valid runs (an overlapped run is environment-invalid, L38);
+- a §4 rule would have to change: busy time, wait, containment rule, tolerance, budget;
+- typecheck fails;
+- the reviewer reports a Medium+ outside the grants.
 
-## 10. Next, and requests (D-29z836)
-- **C PASS + gate:** PERF-5a is done. PERF-5 stays in progress until 5b.
-- **Next:** **REGRESSION** if the round-313 planning falls on or after **2026-11-05** [K14]. Otherwise **PERF-5b**, with its own premise measurement: commits per load with peaks async, deterministic or not. If 5b shows no HEAD-red deterministic row, B closes it on evidence and moves to PERF-7.
-- **RETRO** at round 320.
-- **For Saba** (unchanged): SABA-Q-WORKER-DEPLOYED and SABA-Q-PERF4-STUDIO-CACHE.
+## 10. Next, and requests (D-29z840)
+- **After C PASS and the gate:** root publishes round 312's 7 paths and round 313's 5 changed files together. PERF-5a is then done; PERF-5 stays in progress until 5b.
+- **Next round:**
+  - **REGRESSION**, if the round-314 planning falls on or after **2026-11-05** [K16];
+  - otherwise **PERF-5b**, with its own premise measurement and the deferred PERF-5 Low batch (D-29z839).
+- **RETRO:** at round 320.
+- **For Saba (unchanged):** SABA-Q-WORKER-DEPLOYED and SABA-Q-PERF4-STUDIO-CACHE.
 - **For root:**
-  - ROOT-REQ-VERIFY-WORKER-TESTS (the R2 worker `node --test`) and ROOT-REQ-VITEST-PERF-INCLUDE are still open and non-blocking.
-  - No new checkpoint request: three are open and non-blocking. The new peaks orchestration sits in `peaks.client.ts`, and the context gains about 20 lines, per tech-lead.
-- **Signals (not scheduled):**
-  - **PERF2-REMAINDER-SFX-SYNTH:** main-thread SFX synth (~20 ms) and the synth `onmessage` handler (65–78 ms long task).
-  - **SOURCE-PEAKS-NEVER-PRUNED:** tech-lead: `sourcePeaks` entries are only added. Unverified, so it is a hypothesis; check it in PERF-13.
+  - **ROOT-REQ-VITEST-PERF-INCLUDE** stays open, and this round shows its cost again. `report.test.ts` runs only through a scratch config, and `npm run test:perf` is not a gate row, so a broken harness self-check is invisible to the gate.
+  - **ROOT-REQ-VERIFY-WORKER-TESTS** stays open.
+  - No new checkpoint request.
+- **L37 gains one clause** (D-29z840): a PERF task whose change can remove the work a perf row or guard measures runs the perf spec on the sketch in B's pre-check. A vacuity guard proves liveness with its own synthetic signal, selected by containment, not with app work.
 
 ## 11. Commit readiness
-After C PASS and the gate, root publishes the 2 modified paths and the 5 new files. There is no deploy step.
+After C PASS and the gate, root publishes:
+- from round 312: 2 M + 5 new paths;
+- from round 313: M on the spec, `budgets.json`, `report.ts`, `report.test.ts` and doc 163.
+
+There is no deploy step.
 
 ## 12. Claims (L29 + L56)
-`bash b-round-311/claims-312.sh` from the loop root. Outputs:
-- `b-round-311/claims-312-head-output.txt` (HEAD);
-- `b-round-311/claims-312-sketch-output.txt` (sketch, `CLAIMS_STORE=/tmp/b311s`).
+Run `bash b-round-312/claims-313.sh` from the loop root. Outputs:
+- `b-round-312/claims-313-head-output.txt`: A's round-312 tree at planning;
+- `b-round-312/claims-313-sketch-output.txt`: `CLAIMS_STORE=/tmp/b312s`, the final sketch.
 
-| Tag | Claim | Expected at HEAD |
+| Tag | Claim | Expected at planning |
 |---|---|---|
-| K1 | gate 311 published `dfa4502` | `published dfa4502` |
-| K2 | clean tree, HEAD | `0 dfa4502` |
-| K3 | frozen entries | `1184` |
-| K4 | each protected file appears once | `1 1 1 1 1 1 1` |
-| K5 | in `ArrangementContext.tsx`: the line of the `computePeaks` import; `computePeaks(` call lines | `137 2492 3909` |
-| K6 | `setSourcePeaks(` call lines in `ArrangementContext.tsx` | `2493 3910` |
-| K7 | `peaks.client.ts`, `peaks.worker.ts`, `peaks.worker-protocol.ts` and the test file exist | `0 0 0 0` (sketch `1 1 1 1`) |
-| K8 | workers under `app/lib/arrangement/` | `demo-synth.worker.ts export-wav.worker.ts` (sketch adds `peaks.worker.ts`) |
-| K9 | `app/**/__tests__` + `perf/**` files that match `computePeaks\|sourcePeaks\|setSourcePeaks` (SWEEP) | `5` at HEAD (sketch `6`, adding peaks-worker) |
-| K10 | gate-311 `verify.log` files and tests | `234 3478` |
-| K11 | B's HEAD probe: main-thread `computePeaks` ms; peaks worker count | from `probe/identity-head.json` |
-| K12 | sketch probe: main-thread peaks entries; peaks worker; waves equal | `0 1 9/9` |
-| K13 | sketch mutant lines; restored 13 passed; mutants with 0 red | `12 1 0` |
-| K14 | last regression date | `2026-11-02` |
-| K15 | the round-311 archive equals the copy | `archive-equal-311` |
-| K16 | doc 228 absent; the last doc | `0 227-perf-r2-worker-range-guard.md` |
-| K17 | `In Progress (stage` hits in `docs/implementation` (L28) | `0` |
-| K18 | every cited `b-round-311/` artifact exists (L56) | `done` |
-| K19 | `precheck-full.log` summary | `235 3490` |
-| K20 | `browser-copy.txt` holds the computePeaks, reused-copy and fresh-copy numbers | `1` |
-| K21 | `DEMO_SYNTH_WORKER_STALL_TIMEOUT_MS = 10_000` in `demo-synth.client.ts` | `1` |
-| K22 | 2-microtask `flushLoads` in `waveform-zoom.test.tsx` and `clip-gain-waveform.test.tsx` | `1 1` |
-| K23 | `waitForLibraryReady` in `perf/lib/page.ts` polls the preview-wave `rect` | `1` |
+| K1 | gate 312 status | `skipped C taskStatus FAIL` |
+| K2 | `git status` entries, HEAD | `7 dfa4502` |
+| K3 | the 6 round-312 app code paths still match C 312's state | `6` |
+| K4 | harness files + doc 163 at HEAD bytes | `6` (sketch `2`) |
+| K5 | line of `const loafProblem = loafScriptsProblem(settled.loafs);` in the spec | `539` (sketch: none) |
+| K6 | line of `result.samples.set('load.script-max'` in the spec | `545` (sketch `545`: the removed block and the added import cancel out; compare by content, L56) |
+| K7 | files in `app perf e2e` naming `harness.loaf-scripts-live` | none (sketch: `perf/budgets.json perf/studio-lab.perf.spec.ts`) |
+| K8 | `"id":` lines in `perf/budgets.json` | `320` (sketch `321`) |
+| K9 | doc 228 l.4 | `**სტატუსი:** In Progress (stage 1 of 2; C round 312 PASS)` |
+| K10 | doc 163: `harness.loaf-scripts` hits; then the lines of `## მეტრიკების…`, `## შეცვლილი ფაილები`, `### Pass-ის თანმიმდევრობა` and `## არქიტექტურა` | `1 58 87 20 39` (the sketch does not edit docs; after A, the first number is ≥ 2 and the lines may shift) |
+| K11 | B's `report.test.ts` scratch run | `29` |
+| K12 | B's run 3 (final): failures; live samples; loafEntries; scriptCount; frameStartedBeforeCallback | `0 [79, 79, 80] [1, 1, 1] [1, 1, 1] [1, 1, 1]` |
+| K13 | B's run 1 (start-inside): live samples; loafEntries | `[79, 0, 0] [1, 0, 0]` |
+| K13b | B's run 2 (overlap): failures; samples; started before the stamp | `0 [79, 79, 80] [1, 1, 1]` |
+| K14 | MU-LIVE-BUSY0 on the final sketch: guard-problem failures; assert failure; total | `3 1 7` (the other 3 are the "0 entries contain the injected callback" problems) |
+| K15 | round-312 archive equals the copy | `archive-equal-312` |
+| K16 | last regression date | `2026-11-02` |
+| K17 | C 312: guard string count in `perf-run.log`; HEAD-copy failures | `4 0` |
+| K18 | every cited `b-round-312/` artifact exists (L56) | `done` |
+| K19 | `In Progress (stage` hits in `docs/implementation` | `1` (doc 228; PERF-5b open) |
+| K20 | SWEEP: files in `app perf e2e` naming `loafScriptsProblem\|LOAF_SCRIPTS_PROBLEM\|harness.loaf-scripts` | `perf/lib/report.test.ts perf/lib/report.ts perf/studio-lab.perf.spec.ts` (sketch adds `perf/budgets.json`) |
+| K21 | the 11 protected/config files at planning bytes | `11` (sketch `10`: the scratch's own `cacheDir`) |
+| K22 | last doc in quarter IV | `228-perf-peaks-worker.md` |
+| K23 | files naming `injectedLoafEntries\|LOAF_EDGE_TOLERANCE_MS` | none (sketch: `perf/budgets.json perf/lib/report.test.ts perf/lib/report.ts perf/studio-lab.perf.spec.ts`; the row's note names the selector) |
+| K24 | unit mutants: 0-red count; mutant lines; restored | `0 3 restored: 29 passed` |
+| K25 | `report.test.ts`: `it.each`/`it(` lines; LOAF1/LOAF2 labels | `20 1` (sketch `21 2`) |
+| K26 | `vitest.config.ts` includes `app/**/*.test.{ts,tsx}` only | `1` |

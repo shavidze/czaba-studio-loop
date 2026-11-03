@@ -1,0 +1,2 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+(async () => { const b = await chromium.launch(); for (const base of process.argv.slice(2)) { const p = await (await b.newContext()).newPage(); const t=Date.now(); await p.goto(base + '/studio-lab', { timeout: 300000 }); await p.waitForFunction(() => /collection ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent || ''), null, { timeout: 300000 }); console.log(base, 'ready', Date.now()-t); } await b.close(); })();

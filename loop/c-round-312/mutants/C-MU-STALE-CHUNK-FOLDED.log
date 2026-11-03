@@ -1,0 +1,64 @@
+
+ RUN  v4.0.16 /tmp/c312s
+
+ ✓ app/lib/arrangement/__tests__/peaks.test.ts (5 tests) 9ms
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts (17 tests | 1 failed) 436ms
+     ✓ PW1 equals computePeaks byte for byte across rates, lengths, chunk sizes and channel counts  384ms
+     ✓ PW1b keeps NaN, -0 and infinity handling identical 0ms
+     ✓ PW2 bucket count matches computePeaks, including empty and invalid input 0ms
+     × accumulates chunks, acks with the same arrays and transfers the peaks on end 17ms
+     ✓ cancel drops the job without a done reply 0ms
+     ✓ PW4 streams bounded, reused chunks to one worker and delivers its peaks 9ms
+     ✓ PW5 delivers the worker reply object itself (no main-thread recompute) 1ms
+     ✓ PW6 without Worker computes synchronously on the main thread 1ms
+     ✓ PW7 abort drops the job, posts cancel and runs the next job 2ms
+     ✓ PW7b an abort after the last chunk drops the done reply 0ms
+     ✓ PW8 a worker error falls back to main-thread peaks for pending jobs 1ms
+     ✓ PW9 a stalled worker falls back after the stall timeout 1ms
+     ✓ PW10 runs jobs one at a time in request order 0ms
+     ✓ PW11 the source becomes ready only after done, with the worker peaks as its sourcePeaks 15ms
+     ✓ PW12 a request made inside onPeaks keeps every queued job and delivers all of them in order 1ms
+     ✓ PW13 a throwing postMessage on begin falls back to main-thread peaks at once and turns the worker off 1ms
+     ✓ PW13 a throwing postMessage on chunk falls back to main-thread peaks at once and turns the worker off 1ms
+ ✓ app/lib/arrangement/__tests__/collection-load-status.test.tsx (10 tests) 737ms
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 31 passed (32)
+   Start at  07:12:02
+   Duration  2.36s (transform 1.12s, setup 0ms, import 1.68s, tests 1.18s, environment 1.20s)
+
+
+::error file=/tmp/c312s/app/lib/arrangement/__tests__/peaks-worker.test.ts,title=app/lib/arrangement/__tests__/peaks-worker.test.ts > PW3 worker protocol > accumulates chunks%2C acks with the same arrays and transfers the peaks on end,line=178,column=40::AssertionError: expected [ +0, +0, 128, 63, 144, 141, …(1198) ] to deeply equal [ 80, 222, 127, 63, 144, 141, …(1198) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -1,9 +1,9 @@%0A  [%0A-   80,%0A-   222,%0A-   127,%0A+   0,%0A+   0,%0A+   128,%0A    63,%0A    144,%0A    141,%0A    127,%0A    63,%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:178:40%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW3 worker protocol > accumulates chunks, acks with the same arrays and transfers the peaks on end
+AssertionError: expected [ +0, +0, 128, 63, 144, 141, …(1198) ] to deeply equal [ 80, 222, 127, 63, 144, 141, …(1198) ]
+
+- Expected
++ Received
+
+@@ -1,9 +1,9 @@
+  [
+-   80,
+-   222,
+-   127,
++   0,
++   0,
++   128,
+    63,
+    144,
+    141,
+    127,
+    63,
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:178:40
+    176|       return;
+    177|     }
+    178|     expect(bytes(done.response.peaks)).toEqual(
+       |                                        ^
+    179|       bytes(computePeaks([data], 22050, PEAK_BUCKETS_PER_SECOND)),
+    180|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

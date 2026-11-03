@@ -1,0 +1,96 @@
+l > PW1 equals computePeaks byte for byte across rates%2C lengths%2C chunk sizes and channel counts,line=100,column=66::AssertionError: expected [ +0, +0, +0, +0 ] to deeply equal [ 113, 53, 71, 63 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   113,%0A-   53,%0A-   71,%0A-   63,%0A+   0,%0A+   0,%0A+   0,%0A+   0,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:100:66%0A%0A
+
+::error file=/tmp/c312s/app/lib/arrangement/__tests__/peaks-worker.test.ts,title=app/lib/arrangement/__tests__/peaks-worker.test.ts > PW1-PW2 streaming peak kernel > PW1b keeps NaN%2C -0 and infinity handling identical,line=112,column=58::AssertionError: expected [ +0, +0, +0, +0, +0, +0, +0, +0 ] to deeply equal [ +0, +0, +0, 63, +0, +0, 128, 127 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    0,%0A    0,%0A    0,%0A-   63,%0A    0,%0A    0,%0A-   128,%0A-   127,%0A+   0,%0A+   0,%0A+   0,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:112:58%0A%0A
+
+::error file=/tmp/c312s/app/lib/arrangement/__tests__/peaks-worker.test.ts,title=app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW4 streams bounded%2C reused chunks to one worker and delivers its peaks,line=275,column=31::AssertionError: expected [ 137, 223, 123, 63, 84, 82, …(4398) ] to deeply equal [ 137, 223, 123, 63, 84, 82, …(4398) ]%0A%0A- Expected%0A+ Received%0A%0A@@ -4397,10 +4397,10 @@%0A    63,%0A    216,%0A    186,%0A    127,%0A    63,%0A-   56,%0A-   65,%0A-   77,%0A+   148,%0A+   99,%0A+   28,%0A    63,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:275:31%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW1-PW2 streaming peak kernel > PW1 equals computePeaks byte for byte across rates, lengths, chunk sizes and channel counts
+AssertionError: expected [ +0, +0, +0, +0 ] to deeply equal [ 113, 53, 71, 63 ]
+
+- Expected
++ Received
+
+  [
+-   113,
+-   53,
+-   71,
+-   63,
++   0,
++   0,
++   0,
++   0,
+  ]
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:100:66
+     98|               continue;
+     99|             }
+    100|             expect(bytes(streamed(channels, sampleRate, chunk))).toEqu…
+       |                                                                  ^
+    101|           }
+    102|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW1-PW2 streaming peak kernel > PW1b keeps NaN, -0 and infinity handling identical
+AssertionError: expected [ +0, +0, +0, +0, +0, +0, +0, +0 ] to deeply equal [ +0, +0, +0, 63, +0, +0, 128, 127 ]
+
+- Expected
++ Received
+
+  [
+    0,
+    0,
+    0,
+-   63,
+    0,
+    0,
+-   128,
+-   127,
++   0,
++   0,
++   0,
+  ]
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:112:58
+    110|     const expected = computePeaks([left, right], 400, PEAK_BUCKETS_PER…
+    111|     for (const chunk of [1, 3, 8]) {
+    112|       expect(bytes(streamed([left, right], 400, chunk))).toEqual(bytes…
+       |                                                          ^
+    113|     }
+    114|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW4 streams bounded, reused chunks to one worker and delivers its peaks
+AssertionError: expected [ 137, 223, 123, 63, 84, 82, …(4398) ] to deeply equal [ 137, 223, 123, 63, 84, 82, …(4398) ]
+
+- Expected
++ Received
+
+@@ -4397,10 +4397,10 @@
+    63,
+    216,
+    186,
+    127,
+    63,
+-   56,
+-   65,
+-   77,
++   148,
++   99,
++   28,
+    63,
+  ]
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:275:31
+    273|     expect(FakePeaksWorker.instances).toHaveLength(1);
+    274|     expect(results).toHaveLength(1);
+    275|     expect(bytes(results[0])).toEqual(bytes(computePeaks(channels, rat…
+       |                               ^
+    276|     const worker = FakePeaksWorker.instances[0];
+    277|     const chunks = worker.posted.filter((entry) => entry.message.type …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+

@@ -1,0 +1,2 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+(async () => { const b = await chromium.launch(); const p = await (await b.newContext()).newPage(); const t = Date.now(); await p.goto('http://127.0.0.1:5173/studio/middle-east', { timeout: 300000 }).catch((e) => console.log('goto', String(e).slice(0, 100))); await p.waitForTimeout(15000); console.log('len', (await p.evaluate(() => document.body?.innerText.length)), Date.now() - t); await b.close(); })();
