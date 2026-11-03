@@ -1,0 +1,512 @@
+TAP version 13
+# Subtest: proxy: exact purchased file succeeds
+ok 1 - proxy: exact purchased file succeeds
+  ---
+  duration_ms: 22.790374
+  type: 'test'
+  ...
+# Subtest: proxy: denies token reuse at download/mall/premium.zip
+ok 2 - proxy: denies token reuse at download/mall/premium.zip
+  ---
+  duration_ms: 2.170863
+  type: 'test'
+  ...
+# Subtest: proxy: denies token reuse at studio/mall/standart.zip
+not ok 3 - proxy: denies token reuse at studio/mall/standart.zip
+  ---
+  duration_ms: 1.168844
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:39:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    500 !== 403
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:41:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy: denies token reuse at download/other/standart.zip
+ok 4 - proxy: denies token reuse at download/other/standart.zip
+  ---
+  duration_ms: 1.832363
+  type: 'test'
+  ...
+# Subtest: proxy: denies token reuse at download/mall/folder%2Fstandart.zip
+ok 5 - proxy: denies token reuse at download/mall/folder%2Fstandart.zip
+  ---
+  duration_ms: 1.456564
+  type: 'test'
+  ...
+# Subtest: proxy: Studio allows only signed files
+not ok 6 - proxy: Studio allows only signed files
+  ---
+  duration_ms: 0.658109
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:45:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    500 !== 200
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:47:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy: supports UTF-8 resource names
+not ok 7 - proxy: supports UTF-8 resource names
+  ---
+  duration_ms: 0.449549
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:51:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    500 !== 200
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:54:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy: rejects malformed scope {"version":1}
+ok 8 - proxy: rejects malformed scope {"version":1}
+  ---
+  duration_ms: 0.460208
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"expiresAt":1793677502504}
+ok 9 - proxy: rejects malformed scope {"expiresAt":1793677502504}
+  ---
+  duration_ms: 0.839615
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"expiresAt":"never"}
+ok 10 - proxy: rejects malformed scope {"expiresAt":"never"}
+  ---
+  duration_ms: 0.579307
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"expiresAt":1793763902505}
+ok 11 - proxy: rejects malformed scope {"expiresAt":1793763902505}
+  ---
+  duration_ms: 0.424515
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"resourceKeys":null}
+ok 12 - proxy: rejects malformed scope {"resourceKeys":null}
+  ---
+  duration_ms: 0.290001
+  type: 'test'
+  ...
+# Subtest: proxy: rejects tampered resource and missing secret
+ok 13 - proxy: rejects tampered resource and missing secret
+  ---
+  duration_ms: 4.907551
+  type: 'test'
+  ...
+# Subtest: proxy: recording token opens only its signed recording
+not ok 14 - proxy: recording token opens only its signed recording
+  ---
+  duration_ms: 2.327361
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:72:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    studio/mall/01_Parking.m4a
+    
+    500 !== 403
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:82:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy: recording path rejects download and Studio tokens
+ok 15 - proxy: recording path rejects download and Studio tokens
+  ---
+  duration_ms: 2.258346
+  type: 'test'
+  ...
+# Subtest: proxy: recording token lifetime is capped at fifteen minutes
+ok 16 - proxy: recording token lifetime is capped at fifteen minutes
+  ---
+  duration_ms: 0.424191
+  type: 'test'
+  ...
+# Subtest: proxy: recording supports byte ranges for seeking
+ok 17 - proxy: recording supports byte ranges for seeking
+  ---
+  duration_ms: 1.306216
+  type: 'test'
+  ...
+# Subtest: proxy: downloads ignore Range and keep full responses
+ok 18 - proxy: downloads ignore Range and keep full responses
+  ---
+  duration_ms: 2.369104
+  type: 'test'
+  ...
+# Subtest: proxy: original uses exact private scope and byte ranges
+ok 19 - proxy: original uses exact private scope and byte ranges
+  ---
+  duration_ms: 3.47766
+  type: 'test'
+  ...
+# Subtest: proxy: originals reject other purposes, excessive expiry and missing files
+ok 20 - proxy: originals reject other purposes, excessive expiry and missing files
+  ---
+  duration_ms: 2.69355
+  type: 'test'
+  ...
+# Subtest: proxy: PR1 preview 200 carries ETag and exposes headers
+ok 21 - proxy: PR1 preview 200 carries ETag and exposes headers
+  ---
+  duration_ms: 1.45667
+  type: 'test'
+  ...
+# Subtest: proxy: PR2 matching If-None-Match gives 304 without a body read
+ok 22 - proxy: PR2 matching If-None-Match gives 304 without a body read
+  ---
+  duration_ms: 0.817577
+  type: 'test'
+  ...
+# Subtest: proxy: PR3 single range gives 206 with Content-Range
+ok 23 - proxy: PR3 single range gives 206 with Content-Range
+  ---
+  duration_ms: 1.391313
+  type: 'test'
+  ...
+# Subtest: proxy: PR4 unsatisfiable range gives 416 before any R2 read
+ok 24 - proxy: PR4 unsatisfiable range gives 416 before any R2 read
+  ---
+  duration_ms: 0.647894
+  type: 'test'
+  ...
+# Subtest: proxy: PR5 invalid or multi range and If-Range mismatch give the full 200
+ok 25 - proxy: PR5 invalid or multi range and If-Range mismatch give the full 200
+  ---
+  duration_ms: 2.723806
+  type: 'test'
+  ...
+# Subtest: proxy: PR6 HEAD reads no body
+ok 26 - proxy: PR6 HEAD reads no body
+  ---
+  duration_ms: 0.516678
+  type: 'test'
+  ...
+# Subtest: proxy: PR7 missing preview keeps its 404 text
+ok 27 - proxy: PR7 missing preview keeps its 404 text
+  ---
+  duration_ms: 0.349092
+  type: 'test'
+  ...
+# Subtest: proxy: PR8 studio stays private no-store and ignores If-None-Match
+not ok 28 - proxy: PR8 studio stays private no-store and ignores If-None-Match
+  ---
+  duration_ms: 0.489157
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:223:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    304 !== 200
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 304
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:226:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy: PR9 cover image ETag and 304, 404 text kept, no range
+ok 29 - proxy: PR9 cover image ETag and 304, 404 text kept, no range
+  ---
+  duration_ms: 0.879627
+  type: 'test'
+  ...
+# Subtest: alternate: exact purchased file succeeds
+ok 30 - alternate: exact purchased file succeeds
+  ---
+  duration_ms: 5.441128
+  type: 'test'
+  ...
+# Subtest: alternate: denies token reuse at download/mall/premium.zip
+ok 31 - alternate: denies token reuse at download/mall/premium.zip
+  ---
+  duration_ms: 3.850315
+  type: 'test'
+  ...
+# Subtest: alternate: denies token reuse at studio/mall/standart.zip
+not ok 32 - alternate: denies token reuse at studio/mall/standart.zip
+  ---
+  duration_ms: 0.874391
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:39:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    500 !== 403
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:41:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: alternate: denies token reuse at download/other/standart.zip
+ok 33 - alternate: denies token reuse at download/other/standart.zip
+  ---
+  duration_ms: 1.232101
+  type: 'test'
+  ...
+# Subtest: alternate: denies token reuse at download/mall/folder%2Fstandart.zip
+ok 34 - alternate: denies token reuse at download/mall/folder%2Fstandart.zip
+  ---
+  duration_ms: 0.705787
+  type: 'test'
+  ...
+# Subtest: alternate: Studio allows only signed files
+not ok 35 - alternate: Studio allows only signed files
+  ---
+  duration_ms: 1.015192
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:45:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    500 !== 200
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:47:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: alternate: supports UTF-8 resource names
+not ok 36 - alternate: supports UTF-8 resource names
+  ---
+  duration_ms: 0.476484
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:51:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    500 !== 200
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:54:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: alternate: rejects malformed scope {"version":1}
+ok 37 - alternate: rejects malformed scope {"version":1}
+  ---
+  duration_ms: 0.299088
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"expiresAt":1793677502505}
+ok 38 - alternate: rejects malformed scope {"expiresAt":1793677502505}
+  ---
+  duration_ms: 0.218232
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"expiresAt":"never"}
+ok 39 - alternate: rejects malformed scope {"expiresAt":"never"}
+  ---
+  duration_ms: 0.212798
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"expiresAt":1793763902506}
+ok 40 - alternate: rejects malformed scope {"expiresAt":1793763902506}
+  ---
+  duration_ms: 0.321157
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"resourceKeys":null}
+ok 41 - alternate: rejects malformed scope {"resourceKeys":null}
+  ---
+  duration_ms: 0.170487
+  type: 'test'
+  ...
+# Subtest: alternate: rejects tampered resource and missing secret
+ok 42 - alternate: rejects tampered resource and missing secret
+  ---
+  duration_ms: 2.097907
+  type: 'test'
+  ...
+# Subtest: alternate: recording token opens only its signed recording
+not ok 43 - alternate: recording token opens only its signed recording
+  ---
+  duration_ms: 1.876516
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:72:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    studio/mall/01_Parking.m4a
+    
+    500 !== 403
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:82:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: alternate: recording path rejects download and Studio tokens
+ok 44 - alternate: recording path rejects download and Studio tokens
+  ---
+  duration_ms: 2.503636
+  type: 'test'
+  ...
+# Subtest: alternate: recording token lifetime is capped at fifteen minutes
+ok 45 - alternate: recording token lifetime is capped at fifteen minutes
+  ---
+  duration_ms: 0.264108
+  type: 'test'
+  ...
+# Subtest: alternate: recording supports byte ranges for seeking
+ok 46 - alternate: recording supports byte ranges for seeking
+  ---
+  duration_ms: 0.761558
+  type: 'test'
+  ...
+# Subtest: alternate: downloads ignore Range and keep full responses
+ok 47 - alternate: downloads ignore Range and keep full responses
+  ---
+  duration_ms: 0.728646
+  type: 'test'
+  ...
+# Subtest: alternate: original uses exact private scope and byte ranges
+ok 48 - alternate: original uses exact private scope and byte ranges
+  ---
+  duration_ms: 2.68345
+  type: 'test'
+  ...
+# Subtest: alternate: originals reject other purposes, excessive expiry and missing files
+ok 49 - alternate: originals reject other purposes, excessive expiry and missing files
+  ---
+  duration_ms: 1.795882
+  type: 'test'
+  ...
+# Subtest: alternate: PR1 preview 200 carries ETag and exposes headers
+ok 50 - alternate: PR1 preview 200 carries ETag and exposes headers
+  ---
+  duration_ms: 0.36471
+  type: 'test'
+  ...
+# Subtest: alternate: PR2 matching If-None-Match gives 304 without a body read
+ok 51 - alternate: PR2 matching If-None-Match gives 304 without a body read
+  ---
+  duration_ms: 0.433767
+  type: 'test'
+  ...
+# Subtest: alternate: PR3 single range gives 206 with Content-Range
+ok 52 - alternate: PR3 single range gives 206 with Content-Range
+  ---
+  duration_ms: 0.572663
+  type: 'test'
+  ...
+# Subtest: alternate: PR4 unsatisfiable range gives 416 before any R2 read
+ok 53 - alternate: PR4 unsatisfiable range gives 416 before any R2 read
+  ---
+  duration_ms: 0.227023
+  type: 'test'
+  ...
+# Subtest: alternate: PR5 invalid or multi range and If-Range mismatch give the full 200
+ok 54 - alternate: PR5 invalid or multi range and If-Range mismatch give the full 200
+  ---
+  duration_ms: 0.521475
+  type: 'test'
+  ...
+# Subtest: alternate: PR6 HEAD reads no body
+ok 55 - alternate: PR6 HEAD reads no body
+  ---
+  duration_ms: 0.206735
+  type: 'test'
+  ...
+# Subtest: alternate: PR7 missing preview keeps its 404 text
+ok 56 - alternate: PR7 missing preview keeps its 404 text
+  ---
+  duration_ms: 0.192321
+  type: 'test'
+  ...
+# Subtest: alternate: PR8 studio stays private no-store and ignores If-None-Match
+not ok 57 - alternate: PR8 studio stays private no-store and ignores If-None-Match
+  ---
+  duration_ms: 0.317895
+  type: 'test'
+  location: '/tmp/a309/workers/r2-proxy.test.mjs:223:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    304 !== 200
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 304
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a309/workers/r2-proxy.test.mjs:226:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..57
+# tests 57
+# suites 0
+# pass 47
+# fail 10
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 148.029317

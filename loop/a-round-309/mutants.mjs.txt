@@ -1,0 +1,56 @@
+import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { execSync, spawnSync } from 'node:child_process';
+const store = '/home/runner/czaba-project/store';
+const out = '/home/runner/czaba-project/tmp/studio-real-loop/a-round-309';
+const scratch = '/tmp/a309';
+mkdirSync(`${scratch}/workers`, { recursive: true });
+mkdirSync(`${scratch}/cloudflare`, { recursive: true });
+const files = { proxy: 'workers/r2-proxy.js', alt: 'cloudflare/r2-worker.js' };
+const orig = { proxy: readFileSync(`${store}/${files.proxy}`, 'utf8'), alt: readFileSync(`${store}/${files.alt}`, 'utf8') };
+const headAlt = execSync('git show HEAD:cloudflare/r2-worker.js', { cwd: store, encoding: 'utf8' });
+copyFileSync(`${store}/workers/r2-proxy.test.mjs`, `${scratch}/workers/r2-proxy.test.mjs`);
+const both = (from, to) => ({ proxy: [[from, to]], alt: [[from, to]] });
+const studioLine = "return await handleProtected(request, path, 'Studio-Assets', env, corsHeaders);";
+const mutants = {
+  'MU-NO-INM': both("if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {", 'if (false) {'),
+  'MU-RANGE-200': both("const range = rangeAllowed ? parseSingleRange(request.headers.get('Range'), meta.size) : null;", 'const range = null;'),
+  'MU-416-PASS': both('  if (start >= size) return { unsatisfiable: true };\n', ''),
+  'MU-IFRANGE-IGNORED': both("const rangeAllowed = allowRange && (!ifRange || (meta.httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === meta.httpEtag));", 'const rangeAllowed = allowRange;'),
+  'MU-HEAD-READS': { proxy: [["  if (request.method === 'HEAD') return new Response(null, { headers });\n", ''], ["    if (request.method === 'HEAD') return new Response(null, { status: 206, headers });\n", '']], alt: [["  if (request.method === 'HEAD') return new Response(null, { headers });\n", ''], ["    if (request.method === 'HEAD') return new Response(null, { status: 206, headers });\n", '']] },
+  'MU-NO-EXPOSE': both("  headers.set('Access-Control-Expose-Headers', PUBLIC_EXPOSE_HEADERS);\n", ''),
+  'MU-STUDIO-CONDITIONAL': both(studioLine, "return (await servePublicObject(request, path.slice('/studio/'.length), env, corsHeaders, 'public, max-age=86400', 'audio/wav', true)) ?? await handleProtected(request, path, 'Studio-Assets', env, corsHeaders);"),
+  'MU-ONE-COPY': { proxy: [], alt: 'HEAD' },
+};
+function run(label) {
+  const r = spawnSync('node', ['--test', 'workers/r2-proxy.test.mjs'], { cwd: scratch, encoding: 'utf8' });
+  writeFileSync(`${out}/${label}.log`, r.stdout + r.stderr);
+  const red = [...r.stdout.matchAll(/^not ok \d+ - (.*)$/gm)].map((m) => m[1]).sort();
+  const summary = (r.stdout.match(/# tests \d+[\s\S]*?# fail \d+/) || [''])[0].replace(/\n/g, ' ');
+  return { red, summary };
+}
+const results = [];
+for (const [id, spec] of Object.entries(mutants)) {
+  const text = {};
+  for (const key of ['proxy', 'alt']) {
+    if (spec[key] === 'HEAD') { text[key] = headAlt; continue; }
+    let t = orig[key];
+    for (const [from, to] of spec[key]) {
+      if (!t.includes(from)) throw new Error(`${id}: pattern not found in ${key}: ${from}`);
+      t = t.split(from).join(to);
+    }
+    text[key] = t;
+  }
+  let patch = '';
+  for (const key of ['proxy', 'alt']) {
+    writeFileSync(`${scratch}/${files[key]}`, text[key]);
+    writeFileSync(`/tmp/a309-orig-${key}.js`, orig[key]);
+    patch += spawnSync('diff', ['-u', '--label', `a/${files[key]}`, '--label', `b/${files[key]}`, `/tmp/a309-orig-${key}.js`, `${scratch}/${files[key]}`], { encoding: 'utf8' }).stdout;
+  }
+  writeFileSync(`${out}/${id}.patch.txt`, patch);
+  const m = run(id);
+  for (const key of ['proxy', 'alt']) writeFileSync(`${scratch}/${files[key]}`, orig[key]);
+  const g = run(`${id}-restored`);
+  results.push({ id, red: m.red, mutantSummary: m.summary, restoredSummary: g.summary, restoredRed: g.red.length });
+}
+writeFileSync(`${out}/mutants.json`, JSON.stringify(results, null, 2));
+for (const r of results) console.log(`${r.id} -> ${r.red.length} red: ${JSON.stringify(r.red)} | restored: ${r.restoredSummary}`);

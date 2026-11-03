@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T03:24:05.517Z)
+# Active loop summary (2026-11-03T04:06:53.573Z)
 
-- backlog.json 2976 KB -> active view 406 KB
-- status: G_ROOT_GATE round 308
-- servers: `{"checkedUtc":"2026-11-03T03:03:08.3060133Z","round":308,"attempt":1,"store":200}`
-- last publication: 738df737a56529a5b18e2ef915b9171c596e59ee (rounds 308-308)
-- last root gate: round 308 published - commit 738df737a56529a5b18e2ef915b9171c596e59ee pushed
+- backlog.json 2988 KB -> active view 407 KB
+- status: G_ROOT_GATE round 309
+- servers: `{"checkedUtc":"2026-11-03T03:53:42.7658341Z","round":309,"attempt":1,"store":200}`
+- last publication: b65febe93c18979150328864d0295cba7817b275 (rounds 309-309)
+- last root gate: round 309 published - commit b65febe93c18979150328864d0295cba7817b275 pushed
 
 ## Current items: -
 
@@ -750,6 +750,10 @@
 - GATE307-F3-SPLICE-CONTINUITY / info / answered for today runtime by CONT rows (round 308); replace-splice probe in doc 224 TODO for any future caller / splice continuity needs stop/start in one batch; probe the sounding-clip case
 - GATE307-F4-GAINDB-TWICE / info / moot without wiring (D-29z817); doc 224 TODO / gainDb exclusion rule written in reschedule.ts and scheduleKey
 - GATE307-F5-SHAPES-OPTIONAL / low / scheduled round 308 (required fields, D-29z818) / ReplaceClipShapes optional fade/envelope maps delete on {}
+- GATE308-L1-DOC-TMP-EVIDENCE / low / deferred_low_polish (D-29z820) / doc 224 cites tmp/studio-real-loop evidence outside the repository; key numbers are copied into the doc
+- SABA-Q-PERF4-STUDIO-CACHE / info / awaiting_user (D-29z821); blocks PERF-4b only / Purchased Studio stems: allow the buyer browser to keep them on disk (private, no-cache + ETag, every reuse re-authorized; faster re-open) o
+- SABA-Q-WORKER-DEPLOYED / info / awaiting_user (D-29z823); non-blocking (both copies edited in lockstep) / Which R2 worker copy is deployed: workers/r2-proxy.js (has the cover-image route) or cloudflare/r2-worker.js? After the answer a bounded tas
+- WK-STORE-PREVIEW-LIVE / info / not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) / ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

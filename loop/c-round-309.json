@@ -1,0 +1,110 @@
+{
+ "taskStatus": "PASS",
+ "round": 309,
+ "task": "PERF-4a R2 worker public routes ETag/304 + Range 206/416",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T03:53:42.7658341Z",
+  "round": 309,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "WK-BROWSER-PROXY",
+  "WK-BROWSER-ALT",
+  "WK-HEAD-CONTROL",
+  "G309-AUTH",
+  "WK-UNIT",
+  "PROTECTED-UNCHANGED",
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "TESTS-READ",
+  "DOC"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "production build",
+  "Biome check",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "notRunnableHere": [
+  "WK-STORE-PREVIEW-LIVE: the cloud mock API serves local /…mp3 previews, not worker URLs [K13], and the deployed worker is not reachable; Safari 206 is not measurable here"
+ ],
+ "viewportNote": "Worker network rows ran once at 1440x900 under the task's explicit §3.2 exemption (network behaviour does not depend on viewport). G309-AUTH ran at 1440x900 and 1280x720.",
+ "bugs": [],
+ "info": [
+  {
+   "id": "INFO-C309-AUTH-COLD",
+   "origin": "environment",
+   "detail": "G309-AUTH attempt 1 timed out at 120 s waiting for 'Demo collection ready' on a cold dev server (curl warm-up only fetched HTML). Kept as g309-auth-attempt1-cold.log. One replacement after a browser warm-up (ready in 7.75 s) passed. Per L38 this attempt is environment-invalid. Lesson note: warm with a browser, not curl."
+  },
+  {
+   "id": "INFO-C309-416-PUBLIC-CACHE",
+   "origin": "A review (Low #2) / B spec §4.2",
+   "detail": "A 416 and a 304 carry public Cache-Control and ETag, as the contract requires. C's own probe (cache416-1440.json): in Chromium 143, a default-cache plain GET after a 416 went to the server and got 200 with 5,760,044 bytes, so the browser cache was not poisoned. A later 206 and plain GET were served from the browser cache (0 server lines). Shared or CDN caches are not measurable here; worth one row in the post-deploy list."
+  },
+  {
+   "id": "INFO-C309-RACE-PRERULED",
+   "origin": "A review (Medium #1) / B spec §4.5",
+   "detail": "The head→get race without onlyIf is pre-ruled in §4.5 (recorded, fixed by 4c). Not a round bug; C did not reproduce a failure. B: reconfirm, or open the reviewer's Alternative B as a bounded follow-up."
+  },
+  {
+   "id": "INFO-C309-PREVIEW-NO-SAFE-NAME",
+   "origin": "pre-existing",
+   "detail": "Reviewer Low #9: handlePreview has no isSafeFileName and the 404 body echoes the R2 key. This is unchanged from HEAD (PR7 pins the text). Candidate for B; not gating."
+  }
+ ],
+ "assertsSpecified": 9,
+ "mutantsRecorded": 8,
+ "mutantRedOnSketch": 8,
+ "cOwnMutants": {
+  "C-MU-NO-CLAMP": "red PR3 x2",
+  "C-MU-WEAK-IFRANGE": "red PR5 x2",
+  "C-MU-304-CL": "red PR2 x2",
+  "restored": "57/57"
+ },
+ "manifestPaths": [
+  "c-round-309/proxy-1440.json",
+  "c-round-309/proxy-server.log",
+  "c-round-309/alt-1440.json",
+  "c-round-309/alt-server.log",
+  "c-round-309/headctl-1440.json",
+  "c-round-309/headctl-server.log",
+  "c-round-309/head-r2-proxy.mjs",
+  "c-round-309/g309-auth.json",
+  "c-round-309/g309-auth.log",
+  "c-round-309/g309-auth-attempt1-cold.log",
+  "c-round-309/g309-auth.cjs",
+  "c-round-309/warm.cjs",
+  "c-round-309/shots/lab-1440x900.png",
+  "c-round-309/shots/lab-1280x720.png",
+  "c-round-309/shots/legacy-1440x900.png",
+  "c-round-309/shots/legacy-1280x720.png",
+  "c-round-309/wk-unit.log",
+  "c-round-309/vitest.log",
+  "c-round-309/sha256.log",
+  "c-round-309/protected-unchanged.txt",
+  "c-round-309/claims-after.txt",
+  "c-round-309/C-MU-NO-CLAMP.log",
+  "c-round-309/C-MU-NO-CLAMP.patch.txt",
+  "c-round-309/C-MU-WEAK-IFRANGE.log",
+  "c-round-309/C-MU-WEAK-IFRANGE.patch.txt",
+  "c-round-309/C-MU-304-CL.log",
+  "c-round-309/C-MU-304-CL.patch.txt",
+  "c-round-309/cache416-probe.cjs",
+  "c-round-309/cache416-1440.json",
+  "c-round-309/c416-server.log",
+  "c-round-309/worker-server.mjs",
+  "c-round-309/browser-probe.cjs"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 0.02,
+ "sourceChangedByC": false,
+ "aRowsRechecked": [
+  "A-PARITY: empty diff; both workers cmp-identical to B sketch; node --check OK"
+ ]
+}

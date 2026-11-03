@@ -1,324 +1,423 @@
-# Round 309: PERF-4a. The R2 worker's public routes (previews and covers) get ETag → 304 and real byte ranges (206/416), in both worker copies. Purchased routes stay exactly as they are
+# Round 310: PERF-4d. One R2 read per public GET. Every `<audio>` seek and every 304 makes one R2 call, and a 416 is `no-store`. Purchased routes are unchanged
 
-**Planned by:** B, at the round 308 → 309 planning, 2026-11-03.
+**Planned by:** B, at the round 309 → 310 planning, 2026-11-03.
 
 **Decisions** (all in `backlog.json` → `decisions_log_b`):
-- D-29z820: round 308 closure. C PASS, gate 308 published `738df73`. **PERF-COMMIT-RESCHEDULE is closed on evidence** (`closed_on_evidence_c308`). The gate-308 review and C's INFO notes are ruled in §1.
-- D-29z821: **PERF-4 is split into three stages, and nothing is dropped.**
-  - **4a** is this round.
-  - **4b**, studio caching, is `awaiting_user`. It needs Saba's answer, and its client half lives in protected files.
-  - **4c**, immutable versioned keys, is a backend/upload handoff.
-  
-  §0.3 gives the reasons.
-- D-29z822: the PERF-4a contract (§4) and its 9 specified test rows (§6).
-- D-29z823: root requests and Saba questions (§10).
+- D-29z824: round 309 closure. C PASS, gate 309 published `b65febe`. **PERF-4a is done on evidence.** §1 rules on C's INFO notes and the A-review Lows.
+- D-29z825: **gate-309 Medium GATE309-M1 is fixed now** (bug gate 2026-10-23), together with GATE309-L2 and GATE309-L3. The three are tightly related findings in one owner's code. This is PERF-4d, a new PERF-4 stage. PERF-5 follows (§10).
+- D-29z826: the PERF-4d contract (§4), the 15 specified rows (§6), the 2 changed contracts PR2 and PR4 (§6.1), and the consult rulings (§0.4).
+- D-29z827: requests, the L38 lesson clause and the deferred items (§10).
 
-**Read first:** `lessons.md`. These apply directly: L11 (STOP), L23 (sketch before dispatch), L26/L28 (doc), L29/L56 (claims), L30 (Biome ignores `workers/`), L38 (probes run alone) and L52 (asserts that can fail).
-- **L29 note:** untagged code text in this task is an expected value or a new name, not a fact about current code. Facts about `store/` carry `[K#]`.
-- **Loop path:** `tmp/studio-real-loop` is a symlink, so search it with `find -L`.
+**Read first:** `lessons.md`. These apply directly:
+- L11: STOP.
+- L23: sketch before dispatch.
+- L26/L28: the doc.
+- L29/L56: claims.
+- L30: Biome ignores `workers/`.
+- L38: probes run alone; warm up in a browser.
+- L52: asserts that can fail.
 
-## Baseline: HEAD `738df73`, clean tree
-- Gate 308 published `738df73` [K1]. HEAD is `738df73` and `git status` is empty [K2].
-- **Frozen list:** `b-round-308-r309-tree-sha256.txt`, **1,181** entries [K3]. Each of the 7 protected auth/purchase files appears once [K4].
-- From `store/`, after A's change, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-308-r309-tree-sha256.txt` fails only on the 3 modified paths of §5. The new doc is the one new file.
+**L29 note:** untagged code text in this task is an expected value or a new name, not a fact about current code. Facts about `store/` carry `[K#]`. `tmp/studio-real-loop` is a symlink, so search it with `find -L`.
+
+## Baseline: HEAD `b65febe`, clean tree
+- Gate 309 published `b65febe` on both remotes [K1]. HEAD is `b65febe` and `git status` is empty [K2].
+- **Frozen list:** `b-round-309-r310-tree-sha256.txt`, **1,182** entries [K3]. Each of the 7 protected auth/purchase files appears once [K4].
+- From `store/`, after A's change, `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-309-r310-tree-sha256.txt` fails only on the 3 modified paths of §5. The new doc 226 is the only new file.
 
 ## 0. Why this round
 
-### 0.1 Queue
-- Round 308 closed with C PASS (10 rows, `browserVerified`/`realVerified` true, 0 bugs). No Critical, High or Medium finding is open on the Studio.
-- REGRESSION is due on or after 2026-11-05 [K15], so it is not due today. The next RETRO is at round 320.
-- The next STUDIO-PERFORMANCE stage is **PERF-4** in `docs/technical/performance/perf-plan.md`: "R2 worker: ETag → 304, Range → 206 on previews, immutable hashed keys, stable studio asset URLs (auth outside the URL); purchased files stay `private`". Its target is "worker unit tests: 304, 206 + Content-Range, headers".
-- As the perf plan requires, B consulted `performance-optimizer` and `tech-lead` (§0.4).
+### 0.1 The finding
+The gate-309 review (`gates/round-309/review.md`, "COMMIT: OK", 8.5/10) raised **Medium #1**: every 200 and 206 on a public route makes two R2 calls, `head` then `get`.
+- That doubles the paid R2 operations on the common path.
+- It also adds a round trip before the first byte on **every `<audio>` seek**, the very path PERF-4a set out to speed up.
+
+The same lines carry two Lows:
+- **L2:** the head/get race can mix two versions of a file.
+- **L3:** a 416 can be cached publicly for a day.
+
+Under the 2026-10-23 bug gate, a Medium is fixed before new scope. Three tightly related findings in one helper block make one round. For round 309, the reviewer wrote "keep it as is for this round"; the follow-up task is what it asked for.
+
+A's reviewer Medium in round 309 (the race) is a different finding. Task 309 §4.5 pre-ruled it (INFO-C309-RACE-PRERULED). With one read per response, the race is gone (§4.6), and that ruling is superseded.
 
 ### 0.2 Premise measured at HEAD (L37)
-B served each worker copy through a Node HTTP adapter over an in-memory R2 fake and drove it with real Chromium 143.
-- Fixture: a 60 s WAV of 5,760,044 bytes.
-- Probe: `b-round-308/probe/worker-server.mjs` + `browser-probe.cjs`.
-- Output: `probe/head-proxy-1440.json` and `probe/head-alt-1440.json` [K14].
+**Probe setup:**
+- `b-round-309/probe/worker-server.mjs`: round 308's adapter, plus per-request R2 op counts (`heads/gets/cancels`) and `R2_OOB=throw|short`.
+- `browser-probe.cjs`: unchanged.
+- Real Chromium 143; a 60 s WAV of 5,760,044 bytes; each run alone at 1440×900.
 
-What the server logged, identically for both copies:
-- **No `ETag`.** A `fetch(…, {cache: 'no-cache'})` revalidation downloads all **5,760,044** bytes again with status 200.
-- **Range is ignored.** `Range: bytes=1000-1999` returns 200 with 5,760,044 bytes, but the preview still advertises `Accept-Ranges: bytes`.
-- **An unsatisfiable range** (`bytes=999999999-`) returns 200 with the full body.
-- **An `<audio>` seek to 50 s** sends `Range: bytes=4784128-` and gets **200 with all 5,760,044 bytes**. The seek still works because Chromium reads the full body.
-- **A cover image** (the `workers/` copy only) has no `ETag`, so its revalidation is a full 200 too.
+Per request, as `status:hHEADSgGETScCANCELS` [K13]:
 
-**On B's sketch** (§2), with the same probe (`probe/sketch-*-1440.json`):
-- the revalidation is a **304 with 0 body bytes**;
-- the range request is a **206** with `bytes 1000-1999/5760044` and 1,000 bytes;
-- the unsatisfiable range is a **416** with `bytes */5760044`;
-- the seek request is a **206** carrying **975,916** bytes (5,760,044 − 4,784,128), and playback advances from 50.0 s to 51.46 s;
-- the cover revalidation is a **304**.
+| Step | HEAD `b65febe` | Sketch, R2 throws on out-of-range | Sketch, R2 returns a short object |
+|---|---|---|---|
+| revalidate (`If-None-Match`) | 304:h1g0c0 | 304:h0g1c1 | 304:h0g1c1 |
+| range `bytes=1000-1999` | 206:**h1g1** | 206:**h0g1** | 206:h0g1 |
+| unsatisfiable `bytes=999999999-` | 416:h1g0, `public, max-age=86400` | 416:h1g1, **`no-store`** | 416:h0g1c1, **`no-store`** |
+| `<audio>` seek to 50 s (each request) | 206:**h1g1** | 206:**h0g1** | 206:h0g1 |
+| HEAD | 200:h1g0 | 200:h1g0 | 200:h1g0 |
 
-### 0.3 Why only the public routes this round (D-29z821)
-Both consults agree that `/studio/` caching should not ship now:
-- **No payoff yet.** The legacy stem client adds `?token=` to every stem URL [K12, `app/routes/studio.$productId.tsx` l.254, a protected file]. A new token per session means a new URL, and so a new cache key. ETag/304 on `/studio/` would almost never match.
-- **The client half is protected.** "Auth outside the URL" means changing how the protected route sends the token. `<audio>` and WaveSurfer cannot send an `Authorization` header, so it needs a cookie or a fetch-to-blob design. That belongs in **SRW-21-PLAN**, which root and Saba apply outside the loop.
-- **A security trade-off for Saba (L44).**
-  - `private, no-cache` + ETag would let a buyer's browser keep purchased stems on disk, with every reuse re-authorized.
-  - `private, no-store`, today's value [K6], re-downloads on every open.
-  - Which one CZABA wants on shared machines is Saba's call (SABA-Q-PERF4-STUDIO-CACHE), not B's.
-- **Immutable hashed keys** need versioned R2 keys written by the upload pipeline, which is not in this repository [K20: no wrangler config, no app import of either worker]. The product API would also have to return that version. This is a backend handoff (PERF-4c). The worker-side `?v=` rule (send `immutable` only when `v` equals the object's ETag) is part of 4c.
+- **Every 206 on every run:** the streamed bytes equal `Content-Length` (0 mismatches in `probe/summary.txt`), and the seek plays from 50.0 s to 51.46 s with `error` null.
+- **Covers (`workers/` copy):** 200:h1g1 / 304:h1g0 → 200:h0g1 / 304:h0g1c1.
+- **The `cloudflare/` copy:** matches on every preview step (`sketch-alt-{throw,short}-1440.json`). Its covers are 404/404, because that copy has no image route [round 309 K5]. So the alternate cover path cannot be probed; this is existing behaviour, not a gap of this round.
+- **Files:** `probe/head-proxy-throw-1440.json`, `sketch-{proxy,alt}-{throw,short}-1440.json`, the `*-server.log` files and `summary.txt`. The first sketch's runs are kept in `probe/v1/`.
 
-So **4a** delivers everything the worker can do safely on the public routes now. 4b and 4c stay in the backlog with their owners. **Downloads, recordings and originals keep `private, no-store`.** Both consults said so: they are one-off or short-lived, and caching them gains little.
+### 0.3 R2 facts (doc versus inference)
+Source: the Cloudflare R2 Workers API reference, `https://developers.cloudflare.com/r2/api/workers/workers-api-reference/` ("Last updated Jul 31, 2026"), read by B on 2026-11-03.
 
-### 0.4 Consults (round 308 → 309 planning)
-- **performance-optimizer:**
-  - ETag from `object.httpEtag`, 304 support and a real single-range 206 on previews; ETag/304 on covers.
-  - 416 with `bytes */SIZE` when the start is at or past the size; multi-range or bad syntax → ignore and send 200; clamp the end.
-  - If-None-Match wins over Range. If-Range must match strongly, otherwise send 200.
-  - A 304 carries `ETag`, `Cache-Control` and CORS, with no body and no full-size `Content-Length`.
-  - `Access-Control-Expose-Headers: ETag, Content-Range, Accept-Ranges, Content-Length`.
-  - No `immutable` without versioned keys.
-  - Proof method: a Node adapter + Chromium, judged by the **server log** (JS `fetch` reports a 304 as 200), plus an audio seek.
-- **tech-lead:**
-  - Edit both copies the same way. There is no `wrangler.toml`, so we cannot know which copy is deployed.
-  - The existing both-copies loop in `r2-proxy.test.mjs` proves parity. Image rows run only on `workers/r2-proxy.js`, because `cloudflare/r2-worker.js` has no image route [K5].
-  - Keep `/studio/` at `no-store`.
-  - Check for a missing `body` after a failed precondition. Set `ETag` only when a value exists.
-  - The protected path must still return 401/403 before any R2 read when `If-None-Match` is present.
-  - Neighbours: `api.proxy.audio.ts` (§8) and ProductCard's `<audio>`.
-- **Where they differ, and the ruling.** performance-optimizer would let `/studio/` use `private, no-cache`; tech-lead would keep `no-store`. Both agree it gains nothing today. Ruling: keep `no-store` and ask Saba (D-29z821).
+**Documented:**
+- `get(key, { range })` takes `{ offset, length }`, `{ offset }` or `{ suffix }`.
+- On `length`: "If more bytes are requested than exist in the object, fewer bytes than this number may be returned."
+- `R2ObjectBody` has `size`, `httpEtag` (quoted, "so as to be returned as a header") and `body` (a `ReadableStream`).
+- `onlyIf` accepts `R2Conditional | Headers` ("All conditional headers aside from `If-Range` are supported"). A failed precondition returns an `R2Object` with `body` undefined.
 
-### 0.5 Sources for the HTTP and R2 facts
-- **Cloudflare R2 Workers API reference** (`https://developers.cloudflare.com/r2/api/workers/workers-api-reference/`, read by B on 2026-11-03, sections "Bucket method definitions", "R2Object definition" and "R2GetOptions › Ranged reads"):
-  - `head(key)` returns `R2Object | null` with metadata only.
-  - `get(key, { range })` accepts `{ offset, length }` or a `suffix`.
-  - When an `onlyIf` precondition fails, `get` returns an object whose `body` is undefined.
-  - `httpEtag` is the quoted ETag for headers.
-- **Inference, not a doc quote:** how real R2 answers a `range` past the end of the object. The contract therefore validates the range **before** any R2 read (§4.3), so the behaviour does not depend on that inference.
-- **RFC 9110:**
-  - §13.1.2 If-None-Match uses weak comparison, and `*` matches.
-  - §13.1.5 If-Range uses strong comparison. A weak or date validator is treated as a mismatch here.
-  - §13.2.2 evaluates If-None-Match before Range.
-  - §14.1/§14.2 cover Range syntax. A server MAY ignore Range, so ignoring multi-range and invalid syntax is allowed.
-  - §14.4 covers Content-Range.
-  - §15.4.5 covers 304.
-  - §15.5.17 covers 416.
-  
-  B did not fetch the RFC text in this session. If a row and the RFC disagree, A or C cite the section text in their report, and B rules.
-- **Reference first / Ableton:** not in scope, because this is a performance round on a server worker. **Screen budget:** nothing visible changes.
+**Not documented (inference):**
+- What R2 does with an `offset` at or past the size: does it throw, or return an empty body?
+- Whether `onlyIf` compares `If-None-Match` weakly and accepts a list or `*`.
+- Whether `object.range` is the clamped range or the requested one.
+- What R2 does with a `suffix` larger than the size. B's probe fake clamps it in both modes, so `R2_OOB` covers only an out-of-range `offset`. The unit fake also clamps (PR11 `bytes=-500`). The suffix axis is a post-deploy check (§11).
 
-## 1. Rulings on round 308 (D-29z820)
-- **PERF-COMMIT-RESCHEDULE** → `closed_on_evidence_c308`, because C reproduced B's continuity evidence (CONT-1 6/6, CONT-30 6/6, no click). Stage b-ii is not opened.
-- **Gate-308 review** (`gates/round-308/review.md`, "COMMIT: OK"):
-  - **GATE308-L1 (Low):** doc 224 cites `tmp/` evidence that lives outside the repo. Its key numbers are already in the doc. → `deferred_low_polish`.
-  - **GATE308-S2 (suggestion):** compute `when ?? ctx.currentTime` once in `stop()`. → It joins the PERF-RESCHEDULE-UNUSED-CODE signal, with the reviewer Low's `Math.max(when ?? now, now)` bound from round 308. It is done before any `replaceClips` caller.
-  - **GATE308-S3 (suggestion):** RC13 should use `toBe(2)` for the click count. → `deferred_low_polish`.
-- **C's INFO notes:**
-  - INFO-C308-SAME-WHEN and INFO-C308-POSCTL-INCONCLUSIVE become one retro candidate, RC-R308-SPLICE-PROBE: an audio-splice probe saves raw captures, adds a random pre-release delay and carries a positive control. Doc 224 is published and is not reopened.
-  - INFO-C308-COLD-DEV: recorded. C warms each route up first.
-- **A's Architecture note:** the same source-registry signal as round 307 (A-R307-ARCH-SOURCE-REGISTRY). Its count goes up by one; there is no new request.
+The contract therefore:
+- handles **both** out-of-range behaviours, and the tests run both;
+- computes `Content-Range` from `object.size`, not from `object.range`;
+- keeps the worker's own `etagMatches` (§4.3).
+
+Which branch fires on real R2 is a post-deploy observation (§11), not a correctness risk.
+
+### 0.4 Consults (round 309 → 310 planning) and rulings
+- **tech-lead:** the single-`get` design is sound, the protected routes are byte-identical, and this should go before PERF-5. Its findings and how each was handled:
+  - **Two Low defects in B's first sketch (now fixed):**
+    - (A) In the throw path, a failed `If-Range` returned 416. RFC 9110 says Range is then ignored, so the answer must be a full 200.
+    - (B) In the throw path, a matching `If-None-Match` returned 416. If-None-Match is evaluated before Range, so the answer must be 304.
+    
+    Rows PR14/PR15 are red on the first sketch (`sketch/sketch-tests-on-v1.txt`: 4 red) and green on the revised one.
+  - **Hardening (adopted):** `releaseBody` swallows a rejected `cancel()`, so a 304 never turns into a 500.
+  - **Mutants (adopted):** MU-REFETCH-STALE-ETAG, MU-INM-STRONG, MU-THROW-NO-INM, MU-THROW-NO-IFRANGE and MU-RELEASE-THROWS.
+  - **Suggestion not taken:** building Content-Range from `object.range`. R2 does not document whether that field is clamped, and the computed value is deterministic. PR11 checks bytes = Content-Length on a short R2 answer.
+  - **Known asymmetry (B checked the code):** the frozen `handleProtected` does build its Content-Range from `object.range` (`workers/r2-proxy.js` l.127–130, where R2 parses `range: request.headers`). The public helper computes it from the parsed request and `object.size`. Two reasons: the public path must answer 416 and clamp the same way in both R2 out-of-range modes, and the protected path is frozen this round. A reviewer Low about the difference is answered by this line and is not a STOP.
+  - **Remaining race:** "If-None-Match is compared with the first object, not the re-read one". That is the same race class, but only on the rare If-Range re-read. Recorded as Low and accepted until 4c.
+  - **ROOT-REQ-VERIFY-WORKER-TESTS** should land before or with this change. That is root's step, not a grant to A; C's WK-UNIT runs the worker tests meanwhile.
+- **performance-optimizer:** cancelling for a 304 costs the same one Class B operation, with no egress fee and only a little added latency. Seeks are the hot path, so do this before PERF-5.
+  - **Where the two consults differ:** performance-optimizer suggests `onlyIf: { etagDoesNotMatch }`, so that a 304 never opens a body, with `etagMatches` kept as a fallback. tech-lead calls the cancel path right and `onlyIf` optional.
+    - **Ruling:** keep the cancel path for this round. R2's weak/list/`*` semantics are undocumented, and the op count is the same.
+    - `onlyIf` goes on the post-deploy list as an option for once a live check confirms R2's semantics.
+  - **Real-R2 staging run, TTFB p50/p95 and R2 Class B metrics:** not available in the cloud (no bucket, no credentials). They go on the post-deploy list (§11). This does not block the commit, because the worker is not deployed by the loop.
+  - **Probe gap:** "the alternate copy's cover was never probed". That copy has no image route (see §0.2).
+- **PERF-5 input** (recorded for the next planning): `computePeaks` runs on the main thread at `ArrangementContext.tsx:2492` (video import) and `:3909` (per stem in `loadSource`). Each result goes into `setSourcePeaks(new Map…)` (`:2493`, `:3910`), followed by `patchSourceState`/`settle`, so there are at least 2 context updates per stem. `getChannelData` views cannot be transferred without detaching the buffer, so the worker needs chunked `copyFromChannel` or a copy.
+
+### 0.5 Reference / screen budget
+Not in scope: this is a performance round on a server worker, and nothing on screen changes.
+
+## 1. Rulings on round 309 (D-29z824)
+**PERF-4a → done** on evidence: `c-round-309.json` (PASS, `browserVerified`/`realVerified` true, 10 rows, 0 bugs) and gate 309 published `b65febe` on both remotes.
+
+**C's INFO notes:**
+- **INFO-C309-AUTH-COLD** (environment) → L38's warm-up clause gains "in a browser, not with curl" (D-29z827).
+- **INFO-C309-416-PUBLIC-CACHE** → superseded by GATE309-L3. The 416 becomes `no-store` this round, and doc 226's post-deploy list gets the CDN check.
+- **INFO-C309-RACE-PRERULED** → closed by this round (§4.6).
+- **INFO-C309-PREVIEW-NO-SAFE-NAME** (pre-existing; reviewer Low #9) → **B-R309-PREVIEW-SAFE-NAME (Low)**, `deferred_low_polish`. B read the code:
+  - The 404 body `'File Not Found: ' + r2Key` is built from a string with no explicit `Content-Type` [K8], which defaults to `text/plain;charset=UTF-8`. It is not an HTML reflection.
+  - R2 keys are literal strings, so `..` cannot reach another prefix.
+  - It is on other lines (`handlePreview`), and this round already holds three findings.
+
+**A-review Lows from round 309:**
+- #2 and #3 → this round (GATE309-L3, §4.2).
+- #4/#5/#6 (test gaps) → partly covered by PR4/PR10–PR15. The rest stay as candidate rows on **A-R309-REVIEW-TEST-GAPS (Low, deferred)**.
+- #7 = GATE308-L1 (already deferred).
+- #8 → frozen (§4.7).
+- #9 = B-R309-PREVIEW-SAFE-NAME.
+
+**Gate-309 notes:**
+- **#4** (worker tests not in `verify`) → ROOT-REQ-VERIFY-WORKER-TESTS, now marked "should land before the next worker change". It is non-blocking, and C's WK-UNIT is the runner.
+- **#5** (Safari after deploy) → doc 226's post-deploy list.
+- **Architecture note** (gate + A): the helper block is duplicated. → The R2-WORKER-TWO-COPIES signal count is now 3. The bounded follow-up waits for SABA-Q-WORKER-DEPLOYED: delete the copy that is not deployed, point the test loop at the one left, and combine with ROOT-REQ-VERIFY-WORKER-TESTS. It is not scheduled until Saba answers.
 
 ## 2. B's pre-check (L23)
-- **Sketch** on a scratch copy (`/tmp/b309`, never in `store/`). Kept in the loop folder:
-  - `b-round-308/sketch.patch.txt` (both workers);
-  - `sketch-r2-proxy.js.txt` and `sketch-r2-worker.js.txt`;
-  - `sketch-public.sketch.test.mjs.txt`, the §6 rows as a separate file.
-- **Run:** `node --test` on the sketch rows + the existing file gave **57/57** (40 existing + 17 new).
-- **Mutants** (`b-round-308/sketch-mutants.txt` [K18]). Each was red on the rows listed in §6:
-  - MU-NO-INM, MU-RANGE-200, MU-416-PASS, MU-IFRANGE-IGNORED, MU-HEAD-READS, MU-NO-EXPOSE;
-  - MU-STUDIO-CONDITIONAL, which also turns 8 existing protected rows red;
-  - MU-ONE-COPY, where the `cloudflare/` copy is left at HEAD and the 6 `alternate:` rows turn red.
-- **Browser:** `probe/sketch-proxy-1440.json` and `sketch-alt-1440.json` (§0.2).
-- **No collisions.** No existing row tests a public route [K9: 40 rows, all protected], so no existing assert changes. `getContentType` and the protected handler are untouched.
-- A may copy the sketch. It is a proposal, not a grant beyond §5.
+- **Sketch** on scratch (`/tmp/b309`, never in `store/`). Kept in the loop folder:
+  - `b-round-309/sketch/helper-block.js.txt` (final; the first version is `helper-block-v1.js.txt`);
+  - `sketch-r2-proxy.js.txt` and `sketch-r2-worker.js.txt` (HEAD plus the new block, byte-identical in both);
+  - `sketch-r2-proxy.test.mjs.txt` (the whole test file as A should leave it).
+- **Run:** `node --test` on the sketch: **69/69**.
+- **Red on HEAD:** the same test file on the HEAD workers gives **15 red** (`sketch/sketch-tests-on-head.txt` [K19]): PR2, PR3, PR4, PR10, PR12, PR14 and PR15 in both copies, plus PR9. PR11 and PR13 are guard rows; their mutants turn them red.
+- **Mutants** (`sketch/mutants.py`; output `sketch/sketch-mutants.txt`; logs `sketch/mutant-logs/`): **13/13 red**, restored 69/69 [K17]. They are listed in §6.2.
+- **Browser:** §0.2.
+- **Collisions with existing rows:**
+  - PR2 and PR4 change contract (§6.1).
+  - PR3 and PR9 gain asserts.
+  - PR1 and PR5–PR8 are unchanged, and so are all 40 protected rows.
+- **Fake change:** `publicRequest` returns a `ReadableStream` body with a cancel record. The old `Uint8Array` body would make `.cancel()` throw. This touches the setup of every PR row, but no PR1/PR5–PR8 assert.
+- A may copy the sketch. It is a proposal and grants nothing beyond §5.
 
 ## 3. Acceptance
 
 ### 3.1 A's rows
 | Row | Expected |
 |---|---|
-| A-CLAIMS | Before editing, from the loop root, `bash b-round-308/claims-309.sh` equals `b-round-308/claims-309-head-output.txt`. A difference is a STOP |
-| A-UNIT | Rows PR1–PR9 (§6) are added to `workers/r2-proxy.test.mjs` inside the existing `for (const [name, worker] …)` loop. PR9 runs for `proxy` only. Then `node --test workers/r2-proxy.test.mjs` reports **57 tests, 57 pass, 0 fail**. Also run `npx vitest run app/lib/__tests__/r2-tokens.server.test.ts app/lib/__tests__/download-routes.test.ts` (both unchanged; they must stay green). Report the times |
-| A-MUTANTS | The 8 mutants of §6, on a scratch copy (never in `store/`). Each is red on its listed rows and green when restored. Logs and `.patch.txt` diffs go under `a-round-309/` |
-| A-PARITY | `diff <(sed -n '/^const PUBLIC_EXPOSE_HEADERS/,$p' workers/r2-proxy.js) <(sed -n '/^const PUBLIC_EXPOSE_HEADERS/,$p' cloudflare/r2-worker.js)` is empty: the helper block is byte-identical in both copies |
-| A-TYPE/LINT | `npm run typecheck` rc 0 and `npm run lint` rc 0, with no new finding. Biome does not process `workers/` or `cloudflare/` [K10] (L30), so A also runs `node --check` on both workers |
-| A-REVIEW | `code-reviewer` on the 4 paths. Ask it to check security: no leak on the protected routes, and no header injection. For a Medium+ inside the grants, fix it and re-review the changed lines. A Medium+ outside the grants is a STOP. The Architecture note goes to B |
-| A-DOC | The new doc `docs/implementation/2026/quarter-IV/225-perf-r2-worker-cache-range.md`. It is in Georgian, with technical terms in English, and its `## ` headings contain TEMPLATE's 7 headings in order (L26). l.4 is exactly `**სტატუსი:** Completed (C round 309 PASS)` (L28). Content: the §0.2 numbers with their files; the §4 contract; the §0.3 split with the 4b/4c owners; the R2 doc facts versus the inference (§0.5); the rows and mutants; and the deploy note (§11). It cites only rows and files that exist |
+| A-CLAIMS | Before editing, from the loop root, `bash b-round-309/claims-310.sh` equals `b-round-309/claims-310-head-output.txt`. A difference is a STOP |
+| A-UNIT | `workers/r2-proxy.test.mjs` per §6, then `node --test workers/r2-proxy.test.mjs`: **69 tests, 69 pass, 0 fail**. Also `npx vitest run app/lib/__tests__/r2-tokens.server.test.ts app/lib/__tests__/download-routes.test.ts`: unchanged, 32/32. Report the times |
+| A-RED-ON-HEAD | Copy the finished test file next to the **HEAD** workers on scratch (`git show HEAD:…`) and run it. The result must equal the 15 red rows of `sketch-tests-on-head.txt`, or a superset with the reason. Log: `a-round-310/tests-on-head.txt` |
+| A-MUTANTS | The 13 mutants of §6.2, on scratch (never in `store/`). Each must be red on at least its listed rows and green when restored. Logs and `.patch.txt` go under `a-round-310/` |
+| A-PARITY | `diff <(sed -n '/^const PUBLIC_EXPOSE_HEADERS/,$p' workers/r2-proxy.js) <(sed -n '/^const PUBLIC_EXPOSE_HEADERS/,$p' cloudflare/r2-worker.js)` is empty |
+| A-TYPE/LINT | `npm run typecheck` rc 0. `npm run lint` rc 0 with no new finding (205 warnings + 1 info, as in round 309). `node --check` passes on both workers (L30) |
+| A-REVIEW | `code-reviewer` on the 4 paths. Ask about: header leakage between 304/416/206/200; Content-Length versus the streamed bytes; the ETag after the If-Range re-read; the throw path's preconditions; HEAD; the protected routes. A Medium+ inside the grants: fix it, then re-review the changed lines. A Medium+ outside the grants: STOP. The Architecture note goes to B |
+| A-DOC | New `docs/implementation/2026/quarter-IV/226-perf-r2-worker-single-read.md`, in Georgian with technical terms in English. TEMPLATE's 7 `## ` headings in order (L26). l.4 exactly `**სტატუსი:** Completed (C round 310 PASS)` (L28). Content: the §0.2 table and its files; the §4 contract; the §0.3 doc facts versus inference; the 2 changed contracts (§6.1) with the reviewer's reason; the consult rulings (§0.4); rows and mutants; the post-deploy list (§11). It cites only files that exist. Doc 225 is **not** edited |
 
 ### 3.2 C's rows
-C writes `c-round-309.md` and `c-round-309.json` as it goes, with the L57 fields:
-- `assertsSpecified` = 9 (PR1–PR9);
-- `mutantsRecorded` = 8;
-- `mutantRedOnSketch` = 8 (B's `sketch-mutants.txt`).
+C writes `c-round-310.md` and `c-round-310.json` as it goes, with the L57 fields:
+- `assertsSpecified` = 15 (PR1–PR15);
+- `mutantsRecorded` = 13;
+- `mutantRedOnSketch` = 13.
 
 Each finding carries an `origin`.
 
-**Browser rows.** Real Chromium, on A's tree. L38 applies: nothing else runs during the probe.
-- **Viewport:** network behaviour does not depend on it, so each row runs once at 1440×900, and the task says so (this is not a skipped viewport).
-- **Fixture caveat:** the fake R2 in `worker-server.mjs` follows the doc facts in §0.5. For an out-of-range read it throws, which is an inference. The worker never reaches that path, because PR4 shows 0 reads.
+**Browser rows.** Real Chromium on A's tree, under L38 (nothing else runs during a probe).
+- Network behaviour does not depend on the viewport, so each worker row runs once at 1440×900. This is stated here and is not a skipped viewport.
+- C copies `b-round-309/probe/worker-server.mjs` and `browser-probe.cjs` into `c-round-310/`.
+- The verdict comes from the **server log** (`status`, `r2.heads/gets/cancels`, `bodyBytes`, `contentLength`, `cacheControl`), not from the JS `fetch` status.
 
-| Row | Action | Expected (from the **server log**, not from JS `fetch` status) |
+| Row | Action | Expected |
 |---|---|---|
-| WK-BROWSER-PROXY | Copy `b-round-308/probe/worker-server.mjs` and `browser-probe.cjs` to `c-round-309/`. Run `node worker-server.mjs <store>/workers/r2-proxy.js <port> <log>`, then `node browser-probe.cjs http://127.0.0.1:<port> <log> <out> 1440x900` | `revalidate`: one GET, status **304**, bodyBytes 0, `inm` present. `rangeFetch`: **206**, `bytes 1000-1999/5760044`, bodyBytes 1000. `unsatisfiable`: **416**, `bytes */5760044`, bodyBytes 0. `head`: 200 with `content-length` 5760044 and bodyBytes 0. `audioSeek`: `advanced` true, `error` null, every line 206, and at least one line whose Content-Range start is > 0 and whose bodyBytes equals 5,760,044 − start. `coverTwice`: second status **304**. The JS side reads `etag` as a quoted string (Expose-Headers works across origins) |
-| WK-BROWSER-ALT | As above with `<store>/cloudflare/r2-worker.js` | The same as WK-BROWSER-PROXY, except `coverTwice`, which stays **404/404** (this copy has no image route [K5]) |
-| WK-HEAD-CONTROL | The same probe on `git show HEAD:workers/r2-proxy.js` saved to C's scratch | It reproduces `probe/head-proxy-1440.json`: revalidate 200 with 5,760,044 bytes, range 200, unsatisfiable 200, seek 200. This proves the probe can tell the two trees apart |
-| G309-AUTH | As G308-AUTH (`c-round-308/g308-auth.cjs`, copied; a fresh anonymous context; warm each route first), both viewports | `/studio-lab` shows the workspace + the demo badge with `auth_user` null. `/studio/middle-east` shows "Sign in required" and 0 `audio[src]`. `/api/studio-token` with no header returns 401. No token appears in any body |
+| WK-OPS-PROXY-THROW | `R2_OOB=throw node worker-server.mjs <store>/workers/r2-proxy.js <port> <log>`, then `node browser-probe.cjs http://127.0.0.1:<port> <log> <out> 1440x900` | `firstFetch` 200 h0g1. `revalidate` **304 h0g1c1**, bodyBytes 0. `rangeFetch` **206 h0g1**, `bytes 1000-1999/5760044`, 1,000 bytes. `unsatisfiable` **416**, `bytes */5760044`, `cache-control` **no-store**, h1g1, 0 bytes. `head` 200 h1g0. `audioSeek`: advanced true, error null, **every line 206 h0g1**, bodyBytes = contentLength on every line. `coverTwice` 200 h0g1, then **304 h0g1c1**. The JS side reads `etag` as a quoted string |
+| WK-OPS-PROXY-SHORT | As above with `R2_OOB=short` | As above, except `unsatisfiable` is **416 h0g1c1** with `no-store` |
+| WK-OPS-ALT | `R2_OOB=throw` and `R2_OOB=short` on `<store>/cloudflare/r2-worker.js` | Every preview step as in the two proxy rows. `coverTwice` 404/404 h0g0 |
+| WK-HEAD-CONTROL | `R2_OOB=throw` on `git show HEAD:workers/r2-proxy.js`, saved as `.mjs` in C's scratch | Reproduces `probe/head-proxy-throw-1440.json`: every seek line **h1g1**, revalidate 304 h1g0, unsatisfiable 416 h1g0 with `public, max-age=86400`. This proves the probe tells the trees apart |
+| G310-AUTH | As G309-AUTH (`c-round-309/g309-auth.cjs`, copied): a fresh anonymous context, with `/studio-lab` and `/studio/middle-east` warmed **in a browser** first (L38). **Both viewports** | `/studio-lab`: workspace and demo badge, `auth_user` null, 0 page errors. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. `/api/studio-token` with no header → 401. No token in any body |
 
 **Offline rows:**
-- **WK-UNIT.** C re-runs `node --test workers/r2-proxy.test.mjs`: 57/57. This is C's own row, **not** a gate row, because `npm run verify` does not run it [K10, K11]. Also run the two vitest files of A-UNIT.
-- **PROTECTED-UNCHANGED.** In both workers, these are byte-identical to HEAD:
-  - the `fetch` router (`export default { … };`);
-  - `handleProtected`, `isSafeFileName` and `validateToken`;
-  - `getContentType`.
-  
-  Check with `git show HEAD:<file>` and the same `awk` function extraction on both sides. PR8 is green, and MU-STUDIO-CONDITIONAL is red in A's log.
-- **SOURCE-SCOPE.** `git status --short --untracked-files=all` lists exactly the 3 modified §5 paths and the 1 new doc. `sha256sum -c` fails only on the 3. The 7 protected files, `api.proxy.audio.ts`, `r2.config.ts`, `r2-tokens.server.ts`, `package.json` and `biome.json` have no diff. In `r2-proxy.test.mjs`, `git diff` shows added lines only, all before the loop's closing `}`: no line is removed, so no `assert` line and no `test(` row is removed or changed.
-- **CLAIMS.** Re-run `claims-309.sh`. After A, the expected changes are:
-  - K2 `4 738df73`;
-  - K5–K8: equal to `b-round-308/claims-309-sketch-output.txt` (B ran the script on the sketch with `CLAIMS_STORE=/tmp/b309`): K5 `66/73/83 | 57/66` with the same 3 + 2 functions, K6 `0 0 0 1 1` (the public values move into the helper call sites; the two `private, no-store` lines stay), K7 `6 3 4`, K8 `69 2 2`. If A's code differs from the sketch, A writes the values to `a-round-309/claims-after.txt` with the reason. C checks the reason against §4. The function sets in K5 and the `2 2` counts in K8 must hold in every case. In that sketch run, K2, K10–K13, K17 and K21 are empty or wrong, because `/tmp/b309` has no git, `app/` or config files. K9 shows 40, because the sketch rows sit in a separate file. None of these is drift;
-  - K9 `# tests 57 # pass 57 # fail 0`;
-  - K17 `1 225-perf-r2-worker-cache-range.md`.
-  
-  Every other K equals the HEAD output. A different value is a `countMismatches` entry with its K.
-- **TESTS-READ.** PR1–PR9 follow §6, and their asserts can fail (L52): A's mutant log shows each listed row red. C may add its own mutant.
-- **DOC.** Doc 225 per A-DOC.
-- **Gate rows** (C does not claim them; list them under `"gate"`): full vitest, build, Biome, `npm run verify` and the e2e smoke.
+- **WK-UNIT.** C re-runs `node --test workers/r2-proxy.test.mjs` (69/69) and the 2 vitest files (32/32). This is C's own row, not a gate row [K10].
+- **RED-ON-HEAD.** C runs A's final test file on the HEAD workers in scratch. It must show the 15 rows of `sketch-tests-on-head.txt`, or A's reported superset.
+- **PROTECTED-UNCHANGED.** In both workers, everything above the line `const PUBLIC_EXPOSE_HEADERS` is byte-identical to HEAD: `diff <(git show HEAD:<f> | sed -n '1,/^const PUBLIC_EXPOSE_HEADERS/p') <(sed -n '1,/^const PUBLIC_EXPOSE_HEADERS/p' <f>)` is empty for each file. That covers the router, `handleImage`, `handlePreview`, `handleProtected`, `validateToken`, `isSafeFileName` and `getContentType`. PR8 stays green.
+- **SOURCE-SCOPE.**
+  - `git status --short --untracked-files=all` lists exactly the 3 modified §5 paths and the 1 new doc, and `sha256sum -c` fails only on the 3.
+  - These have no diff: the 7 protected files, `api.proxy.audio.ts`, `r2.config.ts`, `r2-tokens.server.ts`, `package.json` and `biome.json`.
+  - In `r2-proxy.test.mjs`, the diff stays inside `publicRequest` and the PR rows. The 40 protected rows, `request` and `tokenFor` are unchanged.
+  - Every removed assert line is one of those named in §6.1.
+- **CLAIMS.** Re-run `claims-310.sh`. After A, the expected changes are:
+  - K2 `4 b65febe`;
+  - K5–K7 equal to `claims-310-sketch-output.txt`: K5 `198 160 314 276`, K6 `2 4 2 4`, K7 `1 1 1 1`;
+  - K9 `# tests 69 # pass 69 # fail 0`;
+  - K16 `1 226-perf-r2-worker-single-read.md`.
 
-`browserVerified` is true only if WK-BROWSER-PROXY, WK-BROWSER-ALT, WK-HEAD-CONTROL and G309-AUTH all ran.
+  K11 stays `0` (parity) and K12 stays `0 0` (no `onlyIf`). Every other K equals the HEAD output.
+  - In the sketch run, K2, K10 and K16 are empty, because `/tmp/b309` has no git, `package.json` or docs; that is not drift.
+  - If A's code differs from the sketch, A writes the values to `a-round-310/claims-after.txt` with the reason, and C checks the reason against §4.
+  - A value that differs without a reason is a `countMismatches` entry with its K.
+- **TESTS-READ.** PR1–PR15 follow §6 and can fail (L52): A's mutant logs show the listed reds. C adds at least one mutant of its own.
+- **DOC.** Doc 226 per A-DOC.
+- **Gate rows** (not claimed by C; listed under `"gate"`): full vitest, build, Biome, `npm run verify` and the e2e smoke.
 
-**Not runnable here (not BLOCKED, not PASS):** a Store-page row in which ProductCard's `<audio>` plays a real worker preview. The cloud mock API serves local `/…mp3` previews, not worker URLs [K13], and the deployed worker is not reachable. C lists it under `"notRunnableHere"` and B keeps it as later evidence (WK-STORE-PREVIEW-LIVE).
+`browserVerified` is true only if WK-OPS-PROXY-THROW, WK-OPS-PROXY-SHORT, WK-OPS-ALT, WK-HEAD-CONTROL and G310-AUTH all ran.
 
-## 4. Contract (D-29z822)
-Make the same change in **both** `workers/r2-proxy.js` and `cloudflare/r2-worker.js`.
+**Not runnable here** (neither BLOCKED nor PASS; listed under `"notRunnableHere"`): WK-STORE-PREVIEW-LIVE (the deployed worker and real R2; Safari 206).
 
-### 4.1 One shared helper block
-Append it at the end of each file, byte-identical in both (A-PARITY). It holds:
-- `PUBLIC_EXPOSE_HEADERS`;
-- `etagMatches(header, httpEtag)` (weak comparison; `*` matches; a list is split on commas);
-- `parseSingleRange(header, size)`;
-- `servePublicObject(request, r2Key, env, corsHeaders, cacheControl, contentType, allowRange)`.
+## 4. Contract (D-29z826)
+Make the same change in **both** `workers/r2-proxy.js` and `cloudflare/r2-worker.js`, inside the helper block only, from `const PUBLIC_EXPOSE_HEADERS` to the end of the file. Everything above that line stays byte-identical (PROTECTED-UNCHANGED).
 
-The names may differ from the sketch, but the block stays identical in both files.
+### 4.1 Calls per request
+| Public-route request | R2 calls |
+|---|---|
+| GET without `Range` (preview or cover); also a cover GET with `Range` (ignored) | one `get(r2Key)` |
+| GET with one `bytes=` range (previews) | one `get(r2Key, { range })`, with the range as written: `a-b` → `{ offset: a, length: b − a + 1 }`; `a-` → `{ offset: a }`; `-n` (n > 0) → `{ suffix: n }` |
+| GET with `bytes=-0`, a range list, another unit, `b < a` or an empty spec | one `get(r2Key)`, no range |
+| GET with an `If-Range` that is not a strong match | the range `get`, its body cancelled, then a **second** `get(r2Key)` (rare; listed) |
+| GET whose ranged `get` **throws** | that `get`, then one `head(r2Key)` (2 calls). On an `If-Range` mismatch (§4.4 step 3), one more `get(r2Key)`: 3 calls, rare. Only PR14 pins this path; no browser probe step sends `If-Range` (§8) |
+| HEAD | one `head(r2Key)` and nothing else (unchanged) |
 
-### 4.2 Order inside `servePublicObject`
-1. `head(r2Key)`. If it returns null, the caller returns its **existing** 404 response, with the same text and status: `'File Not Found: ' + r2Key` for previews and `'Image Not Found'` for covers [K8].
-2. Headers: the existing CORS headers, `Access-Control-Expose-Headers: ETag, Content-Range, Accept-Ranges, Content-Length`, the route's **existing** `Cache-Control` value (`public, max-age=86400` for previews, `public, max-age=604800` for covers; no `immutable`, no `stale-while-revalidate`), and `ETag` = `httpEtag` **only when it is present**.
-3. If `If-None-Match` matches → **304** with no body. It carries the headers of step 2 and no `Content-Type` or `Content-Length`. This comes before any Range handling and before any body read.
-4. Set `Content-Type` (existing `getContentType`), and set `Accept-Ranges: bytes` on previews only.
-5. Previews only: if `If-Range` is present and is not strongly equal to `httpEtag` (a weak or date value counts as not equal), ignore Range.
-6. Parse a **single** `bytes=` range:
-   - `a-b`, `a-` and `-n` are valid;
-   - a list, another unit, `b < a` or an empty spec → ignore it and serve the full 200;
-   - `a ≥ size`, or `-0`, or `size` 0 → **416** with `Content-Range: bytes */<size>`, no body and no R2 `get`;
-   - clamp `b` to `size − 1`. For `-n` with n > size, the answer is a **206** with `Content-Range: bytes 0-<size−1>/<size>`, as in the sketch, not a 200.
-7. For a range: **206** with `Content-Range: bytes <first>-<last>/<size>` and `Content-Length` = the slice length. GET reads `get(r2Key, { range: { offset, length } })`. **HEAD reads nothing.**
-8. Otherwise **200** with `Content-Length` = size. GET reads `get(r2Key)`. **HEAD reads nothing.** If a `get` returns null in step 7 or 8 (the object was deleted between head and get), the helper returns `null` as in step 1, and the caller returns its own 404. So the helper itself contains no 404 text (K8 `2 2`).
+No `onlyIf` anywhere [K12 `0 0`].
 
-### 4.3 Covers (`workers/r2-proxy.js` only)
-`handleImage` uses the helper with `allowRange` false. A Range header on a cover is ignored, and the response is the full 200 (or a 304).
+### 4.2 Order (no throw)
+1. Call `get` (or `head` for HEAD) as in §4.1. If it returns null, the helper returns `null`, and the caller keeps its **existing** 404 text [K8].
+2. Set the headers: the existing CORS headers, `Access-Control-Expose-Headers: ETag, Content-Range, Accept-Ranges, Content-Length`, the route's existing `Cache-Control`, and `ETag` = `httpEtag` only when it is present.
+3. If `If-None-Match` matches (the existing `etagMatches`: weak comparison, `*`, a comma list): **cancel the body**, then send **304** with no `Content-Type`, `Content-Length` or `Content-Range`. This comes before any range handling.
+4. Set `Content-Type`, and set `Accept-Ranges: bytes` on previews only.
+5. `If-Range` must match strongly; a weak or date value is a mismatch. On a mismatch, Range is ignored. For a GET that already read a range, cancel that body and read `get(r2Key)` again. `ETag`, size and body all come from the **second** object; if it has no ETag, remove the header.
+6. Resolve the range against `object.size`, never against the request alone. Clamp `b` to `size − 1`. For a suffix, start = `size − min(n, size)`.
+7. **416** when start ≥ size, the suffix is 0, or size is 0:
+   - cancel any body;
+   - `Content-Range: bytes */<size>`;
+   - **`Cache-Control: no-store`**;
+   - no `Content-Type`, no `Content-Length`, no body;
+   - `ETag` is kept.
+8. **206** with `Content-Range: bytes <first>-<last>/<size>` and `Content-Length` = last − first + 1, carrying the ranged `get`'s body. `Content-Length` must equal the bytes streamed, including when R2 returns fewer bytes than were asked for (PR11).
+9. Otherwise **200** with `Content-Length` = size and the body.
+10. **HEAD:** steps 2–9 from `head`'s metadata, never with a body. A 416 on HEAD is also `no-store`.
 
-### 4.4 Not in this round (frozen)
-- `/studio/`, `/download/`, `/recordings/`, `/originals/`: no `onlyIf`, no ETag, no 304. They keep `private, no-store`, their Range rules and the order "token → scope → R2 read" (PR8, PROTECTED-UNCHANGED).
-- The `fetch` router, CORS `Allow-*` headers, `OPTIONS`, `validateToken`, `isSafeFileName` and `getContentType` are unchanged.
-- No new route and no `?v=` handling (that is 4c).
-- `Access-Control-Allow-Headers` stays `Authorization, Content-Type, Range`. It does not need `If-None-Match`/`If-Range`, because the browser itself adds those headers (cache revalidation, an `<audio>` seek). Page JS never sets them, so there is no preflight.
+### 4.3 Why not `onlyIf` for the 304
+The R2 doc does not say how it compares `If-None-Match` (weak or strong, a list, `*`). `etagMatches` is already proven by the PR2 matrix.
+- The cost is one R2 `get` either way, and R2 has no egress fee.
+- Opening the body and cancelling it only affects the time to the first byte, and a 304 has no body.
+- `onlyIf: { etagDoesNotMatch }` is a post-deploy option (§11), not part of this round.
+
+`releaseBody` swallows a rejected `cancel()` (PR15).
+
+### 4.4 A throwing ranged `get` (one of the two possible R2 behaviours)
+Call `head(r2Key)`, then:
+1. If `head` is null → `null` (the caller's 404).
+2. Set `ETag` from `head.httpEtag`. If `If-None-Match` matches → **304**, with no body read (PR14).
+3. If `If-Range` is present and is not a strong match → Range is ignored. Do one `get(r2Key)` and send a full **200** from that object, with its ETag (removed if it has none) and `Content-Length` = size. Set `Content-Type` and `Accept-Ranges: bytes` as in §4.2 step 4; this path exists only on previews, because a ranged `get` happens only when `allowRange` is true (PR14).
+4. Otherwise: if the range is unsatisfiable against `head.size` → the 416 of §4.2 step 7. If it is satisfiable, **rethrow**, so the router's existing `catch` returns its existing `500 Internal Error` [K8] (PR13).
+
+A `get` that throws **without** a range is rethrown unchanged (500). If R2 instead returns an object for an out-of-range offset, §4.2 decides from `object.size`.
+
+### 4.5 Covers (`workers/r2-proxy.js` only)
+`allowRange` stays false: one `get`, Range ignored, a 200 or a 304 (the 304 cancels the body).
+
+### 4.6 The race (GATE309-L2)
+Each response now comes from one R2 read, so its ETag, size and bytes belong to one object version. The If-Range re-read takes all three from the second object. One narrow window is left: If-None-Match is compared with the first object, and only on that rare re-read. It is recorded as **B-R309-REFETCH-INM-WINDOW (Low)** and is removed by 4c. INFO-C309-RACE-PRERULED and task 309 §4.5 are superseded.
+
+### 4.7 Not in this round (frozen)
+- `/studio/`, `/download/`, `/recordings/` and `/originals/`:
+  - their code is unchanged;
+  - they keep `private, no-store` and their Range rules;
+  - they keep the order "token → scope → R2 read".
+- The router, the CORS `Allow-*` headers, `OPTIONS`, `validateToken`, `isSafeFileName`, `getContentType`, `handleImage` and `handlePreview` are unchanged. Everything above the helper block is byte-identical.
+- No `?v=` handling (that is 4c) and no `immutable`. The existing `public` max-ages stay on 200/206/304.
 - `api.proxy.audio.ts`, `r2.config.ts`, ProductCard and every `app/` file are unchanged.
 
-### 4.5 Known race (accepted, recorded in the doc)
-`head` then `get` is two R2 operations. If an object is replaced between them, a range could come from the new version under the old ETag. Keys are replaced rarely, and 4c (versioned keys) removes the race. This is recorded, not fixed.
-
 ## 5. Grants
-A edits only these paths:
-1. `workers/r2-proxy.js`: `handleImage` and `handlePreview` bodies, and the appended helper block (§4.1–4.3).
-2. `cloudflare/r2-worker.js`: the `handlePreview` body and the appended helper block.
-3. `workers/r2-proxy.test.mjs`: inside the existing `for` loop, a new `publicRequest` helper (a fake R2 with `head` and `get` that honours `{ offset, length }`, records reads and heads, and can return null). Then rows PR1–PR9 appended at the end of the loop. Existing rows, the `request` helper and `tokenFor` stay unchanged.
-4. **New:** `docs/implementation/2026/quarter-IV/225-perf-r2-worker-cache-range.md`.
+A edits only:
+1. `workers/r2-proxy.js`: the helper block only (from `const PUBLIC_EXPOSE_HEADERS` to the end).
+2. `cloudflare/r2-worker.js`: the same block, byte-identical.
+3. `workers/r2-proxy.test.mjs`: the `publicRequest` fake and the PR rows, per §6. The 40 protected rows, `request` and `tokenFor` stay unchanged.
+4. **New:** `docs/implementation/2026/quarter-IV/226-perf-r2-worker-single-read.md`.
 
-Nothing else: not `package.json`, `biome.json`, `api.proxy.audio.ts`, `r2.config.ts`, `r2-tokens.server.ts`, `app/**`, and no protected file. No dependency changes, so L35 does not apply.
+Nothing else: not `package.json`, `biome.json`, `app/**` or any protected file. No dependency change.
 
 ## 6. Specified test rows (L52)
-The fake object is 100 bytes `[0..99]` with `httpEtag` `"etag-1"`. `heads` and `reads` record the R2 calls.
+**The fake object:** 100 bytes `[0..99]`, `etag` `etag-1`, `httpEtag` `"etag-1"`.
+
+**The fake call:** `publicRequest(path, { method, headers, missing, outOfRange: 'throw'|'short', failGet, changedOnSecondRead, empty, cancelRejects })`. It records:
+- `heads`;
+- `reads`, as `{ key, range, onlyIf }`;
+- `opened`, one `{ cancelled }` per body.
+
+**What the fake `get` does:**
+- it honours `{ offset, length }`, `{ offset }` and `{ suffix }`, and clamps `length` at the end;
+- for an offset ≥ size, it throws (`throw`) or returns an empty body (`short`);
+- with `changedOnSecondRead`, the second read returns `"etag-2"`;
+- with `failGet`, it always throws;
+- with `empty`, it uses a 0-byte object;
+- with `cancelRejects`, `cancel` rejects.
+
+Bodies are `ReadableStream`s. The sketch file is the reference.
 
 | Row | Steps | Expected |
 |---|---|---|
-| PR1 | GET preview | 200; `ETag` `"etag-1"`; `Cache-Control` `public, max-age=86400`; `Content-Length` 100; body 100 bytes; `Access-Control-Expose-Headers` exactly `ETag, Content-Range, Accept-Ranges, Content-Length` |
-| PR2 | `If-None-Match` set to `"etag-1"`, `W/"etag-1"`, `"x", "etag-1"` and `*`, each **with** `Range: bytes=0-9` | 304 each; body null; `reads` 0; `ETag` present; no `Content-Length`; no `Content-Type`; `Access-Control-Allow-Origin` `*`. `If-None-Match: "other"` → 200 |
-| PR3 | Range `bytes=10-19`, `bytes=90-`, `bytes=-5`, `bytes=95-500` | 206; `Content-Range` `bytes 10-19/100`, `90-99/100`, `95-99/100`, `95-99/100`; `Content-Length` and body length 10, 10, 5, 5; the first byte equals the start |
-| PR4 | Range `bytes=100-`, `bytes=500-600`, `bytes=-0` | 416; `Content-Range` `bytes */100`; `reads` 0 |
-| PR5 | Range `bytes=5-2`; `bytes=0-1,5-6`; `items=0-1`; `bytes=0-9` with `If-Range: "other"`; `bytes=0-9` with `If-Range: W/"etag-1"` | 200 each, with the full 100-byte body and no `Content-Range`. `bytes=0-9` with `If-Range: "etag-1"` → 206 |
-| PR6 | HEAD without a range; HEAD with `bytes=0-9` | 200 with `Content-Length` 100, then 206 with `Content-Length` 10; `reads` 0 in both |
-| PR7 | Preview whose `head` returns null | 404 with the body `File Not Found: mall/Preview/none.wav` |
-| PR8 | `/studio/` with a valid studio token and `If-None-Match: "etag-1"`; then with a bad token and the same header | 200, `Cache-Control` `private, no-store`, no `ETag`, `heads` 0. Then 401 with `reads` + `heads` = 0 |
-| PR9 (proxy only) | Cover GET; with `If-None-Match`; with `Range: bytes=0-9`; with `head` null | 200 with `ETag` and `public, max-age=604800`; 304; 200 (Range ignored); 404 with the body `Image Not Found` |
+| PR1 | unchanged | unchanged |
+| PR2 (**changed**, §6.1) | `If-None-Match` = `"etag-1"`, `W/"etag-1"`, `"x", "etag-1"`, `*`, each **with** `Range: bytes=0-9` and **without** a Range | 304; body null; `reads` 1; `heads` 0; `opened` `[cancelled]`; `ETag` `"etag-1"`; `Cache-Control` `public, max-age=86400`; no `Content-Length`, `Content-Type` or `Content-Range`; ACAO `*`. `"other"` → 200 |
+| PR3 (+ asserts) | as in round 309 | as in round 309, plus `reads` 1 and `heads` 0 for each case |
+| PR4 (**changed**, §6.1) | `bytes=100-`, `bytes=500-600`, `bytes=-0`, each in `throw` and `short` mode | 416; `Content-Range` `bytes */100`; **`Cache-Control` `no-store`**; no `Content-Length` or `Content-Type`; `ETag` `"etag-1"`; body null; `reads` 1; every opened body cancelled; `heads` 1 and `opened` 0 for `throw` with an offset, otherwise `heads` 0 and `opened` 1 |
+| PR5, PR6, PR7, PR8 | unchanged | unchanged |
+| PR9 (+ asserts; proxy only) | as in round 309 | as in round 309, plus: the first cover GET has `heads` 0 and `reads` 1, and the 304 cancels its one body |
+| PR10 (new) | GET with no Range, `bytes=50-`, `bytes=10-19`, `bytes=-5`, `bytes=0-1,5-6`; then HEAD with `bytes=0-9` | Each GET: `heads` 0, exactly one read with range `null`, `{offset:50}`, `{offset:10,length:10}`, `{suffix:5}` and `null` respectively; `onlyIf` null; the body is not cancelled. HEAD: `heads` 1, `reads` 0 |
+| PR11 (new) | `short` mode, `bytes=95-500`, `bytes=-500`, `bytes=99-` | 206, and body length = `Content-Length` |
+| PR12 (new) | `bytes=0-9` with `If-Range: "etag-1"`; then `If-Range: "old"` with `changedOnSecondRead` | The first: 206, one call in total, 10 bytes. The second: 200, 100 bytes, no `Content-Range`, `ETag` `"etag-2"`, reads `[{offset:0,length:10}, null]`, opened `[true, false]`, `heads` 0 |
+| PR13 (new) | `failGet` with `bytes=0-9`; then `failGet` without a range | 500 with the body `Internal Error` and `heads` 1; then 500 |
+| PR14 (new) | In each mode, `bytes=500-` with `If-None-Match: "etag-1"`; then `bytes=500-` with `If-Range: "old"` | The first: 304, body null, no `Content-Type` or `Content-Range`, `reads` 1, `heads` 1 (throw) or 0 (short), opened bodies cancelled. The second: 200, 100 bytes, `Content-Length` 100, no `Content-Range`, `public, max-age=86400`, reads `[{offset:500}, null]`, `heads` 1 (throw) or 0 (short) |
+| PR15 (new) | `empty`, `bytes=0-` and `bytes=-5` in each mode; then `cancelRejects` with `If-None-Match: "etag-1"` | 416, `bytes */0`, `no-store`, body null; then **304** (not 500), with one body cancelled |
 
-**Mutants** (A, on scratch; the expected reds are B's sketch result [K18]):
+### 6.1 Changed contracts (listed, with the reason)
+- **PR2:** round 309 asserted `reads` 0 for a 304 with a Range. Now `reads` is 1, the body is cancelled, and 0 body bytes are sent. The row now also covers the no-Range case.
+- **PR4:** round 309 asserted `reads` 0 for a 416. Now `reads` is 1, any opened body is cancelled, and the response is `no-store`, in both R2 modes.
+- **Reason:** gate-309 Medium #1. The reviewer's own words on the single-get alternative: "you lose the '416 before any read' guarantee". That trade-off is accepted:
+  - a 304 or 416 costs one R2 operation, as the `head` did;
+  - every 200/206 costs one R2 operation instead of two.
+- **No assert is removed without a stronger one replacing it:** `heads` 0, `opened`/`cancelled`, `body` null and the exact headers. The old row titles may change, as in the sketch.
 
-| Mutant | Change | Red rows |
+### 6.2 Mutants (A, on scratch; the expected reds are in `b-round-309/sketch/sketch-mutants.txt`)
+| Mutant | Change | Red rows (at least) |
 |---|---|---|
-| MU-NO-INM | ignore If-None-Match | PR2 (both), PR9 |
-| MU-RANGE-200 | ignore Range | PR3, PR4, PR5, PR6 (both) |
-| MU-416-PASS | drop the `start ≥ size` check | PR4 (both) |
-| MU-IFRANGE-IGNORED | serve the range whatever If-Range says | PR5 (both) |
-| MU-HEAD-READS | HEAD falls through to `get` | PR6 (both) |
-| MU-NO-EXPOSE | drop Expose-Headers | PR1 (both) |
-| MU-STUDIO-CONDITIONAL | route `/studio/` through the public helper first | PR8 + the existing Studio/recording/UTF-8 rows (both) |
-| MU-ONE-COPY | leave `cloudflare/r2-worker.js` at HEAD | the 6 `alternate:` rows PR1–PR6 |
+| MU-HEAD-FIRST | GET calls `head` before `get` | PR2, PR3, PR4, PR10, PR12, PR13, PR14 (both); PR9 |
+| MU-416-PUBLIC | the 416 keeps the public Cache-Control | PR4, PR15 (both) |
+| MU-304-NO-RELEASE | a 304 without the cancel | PR2, PR14, PR15 (both); PR9 |
+| MU-NO-CLAMP | `b` is not clamped | PR3, PR11 (both) |
+| MU-IFRANGE-NO-REFETCH | an If-Range mismatch serves the ranged body as the 200 | PR5, PR12, PR14 (both) |
+| MU-THROW-UNHANDLED | a throwing ranged `get` is rethrown without the `head` | PR4, PR13, PR14, PR15 (both) |
+| MU-CL-FROM-REQUEST | the 206 Content-Length comes from the request | PR3, PR11 (both) |
+| MU-THROW-NO-INM | the throw path skips If-None-Match | PR14 (both) |
+| MU-THROW-NO-IFRANGE | the throw path ignores If-Range | PR14 (both) |
+| MU-REFETCH-STALE-ETAG | the re-read keeps the first object's ETag | PR12 (both) |
+| MU-INM-STRONG | `etagMatches` stops stripping `W/` | PR2 (both) |
+| MU-RELEASE-THROWS | `releaseBody` lets a rejected cancel through | PR15 (both) |
+| MU-ONE-COPY | `cloudflare/r2-worker.js` is left at HEAD | the 7 `alternate:` rows PR2, PR3, PR4, PR10, PR12, PR14, PR15 |
 
 ## 7. A's order of work
 1. A-CLAIMS.
-2. The §4 helper in `workers/r2-proxy.js`, then the same block in `cloudflare/r2-worker.js`, then A-PARITY.
-3. PR1–PR9, then A-UNIT.
+2. The helper in `workers/r2-proxy.js`, then the same block in `cloudflare/r2-worker.js`, then A-PARITY and `node --check`.
+3. The test file, then A-UNIT, then A-RED-ON-HEAD.
 4. A-MUTANTS.
-5. Typecheck and lint, plus `node --check`.
-6. Doc 225.
+5. Typecheck and lint.
+6. Doc 226.
 7. `code-reviewer`.
-8. Write `a-round-309.md` as you go: per-row results, the mutant table, the claims after the change, and the Architecture note.
+8. Write `a-round-310.md` as you go.
 
 ## 8. Neighbouring behaviour at risk (C probes)
-- **Protected routes:** covered by PR8, PROTECTED-UNCHANGED, the existing 40 rows and G309-AUTH.
-- **`<audio>` previews** (ProductCard, the player): now 206 on seek. WK-BROWSER-* checks playback after a 206 seek in Chromium. **Safari** is stricter about 206, and that is not measurable here. Doc 225 records it as a check after deploy.
-- **`app/routes/api.proxy.audio.ts`** re-fetches a preview without Range or If-None-Match [K13], so it keeps getting a 200 and its behaviour does not change. It also sets `public, max-age=31536000` on keys that are not versioned [K13]. That is pre-existing and not touched here, recorded as **B-R308-PROXY-AUDIO-YEAR-CACHE (Low)** → `deferred_low_polish`.
-- **The deployed worker is not updated by this round.** Root publishes git only, so §11 applies.
+- **Protected routes:** PROTECTED-UNCHANGED, PR8, the 40 protected rows and G310-AUTH.
+- **`<audio>` after a seek:** the WK-OPS rows check `advanced` true, and bytes = Content-Length on every 206.
+- **The router's 500 path:** PR13.
+- **The throw-path preconditions** (If-None-Match → 304, If-Range mismatch → full 200 with 3 R2 calls): unit rows PR14 only. The browser probe has no `If-Range` step, so C does not look for a browser row for them.
+- **`api.proxy.audio.ts`:** it sends no Range and no If-None-Match, so it gets one `get` and a 200. Its behaviour does not change.
+- **Production:** unchanged until Saba deploys (§11).
 
 ## 9. STOP conditions
-A writes "STOP — needs B ruling" at the top of `a-round-309.md` and changes nothing else when:
-- A-CLAIMS differs from `claims-309-head-output.txt`;
-- a change is needed outside §5;
-- an existing row in `r2-proxy.test.mjs` turns red, or needs an assert change;
+A writes "STOP — needs B ruling" at the top of `a-round-310.md` and changes nothing else when:
+- A-CLAIMS differs from the HEAD output;
+- a change is needed outside §5 or above the helper line;
+- a protected row turns red;
+- an assert outside §6.1 must be removed;
 - a mutant stays green;
 - A-PARITY is not empty;
-- typecheck fails or lint has a new finding;
-- the reviewer reports a Medium+ outside the grants or any leak on a protected route.
+- typecheck fails, or lint has a new finding;
+- the reviewer reports a Medium+ outside the grants, or any leak on a protected route.
 
-## 10. Next, and requests (D-29z823)
-- C PASS + gate → PERF-4a is done. **Next: PERF-5** (peaks in a worker), after the consults and a premise re-measure. **REGRESSION** comes first when it is due (on or after 2026-11-05).
-- **For Saba:**
-  - **SABA-Q-PERF4-STUDIO-CACHE:** for purchased Studio stems, either let the buyer's browser keep them on disk (`private, no-cache` + ETag, each reuse re-authorized; faster re-opens) or keep `no-store` (re-download on every open; nothing left on a shared machine). It pays off only after the token leaves the URL (SRW-21-PLAN).
-  - **SABA-Q-WORKER-DEPLOYED:** which copy is deployed, `workers/r2-proxy.js` or `cloudflare/r2-worker.js`? After the answer, a bounded task can remove the other copy.
+## 10. Next, and requests (D-29z827)
+- **C PASS + gate:** PERF-4d is done, and GATE309-M1/L2/L3 close.
+- **Next:** REGRESSION if it is due. It falls due on or after **2026-11-05** [K14], and the round-311 planning checks the date first.
+- **Otherwise PERF-5** (peaks in a worker), after:
+  - the performance-optimizer + tech-lead consults;
+  - the L37 premise re-measure at the new HEAD;
+  - a ruling on whether the power-of-two pyramid (`oss-adoption.md`, PERF-5/14) lands in 5a or in a 5b;
+  - deterministic rows (`perf/lib/determinism.ts`), not wall-clock only.
+
+  The §0.4 input is the starting point.
+- **RETRO** at round 320.
+- **For Saba** (unchanged): SABA-Q-WORKER-DEPLOYED and SABA-Q-PERF4-STUDIO-CACHE. Deploying the worker is outside the loop.
 - **For root:**
-  - **ROOT-REQ-VERIFY-WORKER-TESTS:** add `node --test workers/r2-proxy.test.mjs` to `npm run verify` (today 0 lines of `verify.log` mention it [K11]). Until then, C runs it as WK-UNIT. It is non-blocking and sits next to ROOT-REQ-VITEST-PERF-INCLUDE.
-  - The checkpoint requests (ARCH-CHECKPOINT-STUDIO-LINK, D-29z811 and `b-round-306-checkpoint-request.md`) are still unanswered and non-blocking.
-- **PERF-4b / 4c owners:** 4b is `awaiting_user` (SABA-Q-PERF4-STUDIO-CACHE) and its client half goes into SRW-21-PLAN. 4c is a backend/upload handoff; doc 225's TODO carries it.
+  - **ROOT-REQ-VERIFY-WORKER-TESTS**, now "before or with the next worker change": the gate reviewer and tech-lead both ask for it. It is non-blocking, and C's WK-UNIT runs the tests meanwhile.
+  - ROOT-REQ-VITEST-PERF-INCLUDE is still open.
+  - The three checkpoint requests are unanswered and non-blocking. No new one: this is a bounded fix-up in the same block.
 
 ## 11. Commit readiness and deploy
-- After C PASS and the gate, root publishes the 4 §5 paths.
-- **Deploying the Cloudflare Worker is outside the loop.** Saba (or root on his instruction) deploys it after confirming which copy is live (SABA-Q-WORKER-DEPLOYED). Doc 225 lists the checks to run after deploy: a 304 on revalidation, a 206 on an `<audio>` seek in Chrome and Safari, and the cover 304. Until it is deployed, production behaviour is unchanged.
+After C PASS and the gate, root publishes the 3 modified paths and the new doc 226. Deploying the Cloudflare Worker stays outside the loop.
+
+Doc 226's post-deploy list, against real R2:
+- a 304 on revalidation;
+- a 206 seek in Chrome **and Safari**, with the bytes equal to Content-Length;
+- the cover 304;
+- **which out-of-range branch R2 takes**: send one request with `Range: bytes=<size>-` and check whether a `head` follows the `get`. Also send `Range: bytes=-<size+1>` and check for a 206 with the whole object and bytes equal to Content-Length;
+- **whether a CDN or shared cache stores the 416** (it must not, because of `no-store`);
+- **TTFB p50/p95 per seek and per 304** (HEAD tree versus this change), plus R2 Class B operation counts from R2 metrics;
+- the `onlyIf: { etagDoesNotMatch }` option of §4.3, once R2's weak/list semantics are confirmed.
 
 ## 12. Claims (L29 + L56)
-Run `bash b-round-308/claims-309.sh` from the loop root (K1–K21). Sketch output: `b-round-308/claims-309-sketch-output.txt`. HEAD output: `b-round-308/claims-309-head-output.txt`.
+`bash b-round-309/claims-310.sh` from the loop root (K1–K19). Outputs: `b-round-309/claims-310-head-output.txt` (HEAD) and `b-round-309/claims-310-sketch-output.txt` (sketch, `CLAIMS_STORE=/tmp/b309`).
 
 | Tag | Claim | Expected at HEAD |
 |---|---|---|
-| K1 | gate 308 published `738df73` | `published 738df73` |
-| K2 | clean tree, HEAD | `0 738df73` |
-| K3 | frozen entries | `1181` |
-| K4 | each protected file once | `1 1 1 1 1 1 1` |
-| K5 | handlers: `workers/` image 66, preview 84, protected 106; `cloudflare/` preview 57, protected 78 | as output |
-| K6 | literal Cache-Control lines: preview ×2 copies, image, no-store ×2 | `1 1 1 1 1` |
-| K7 | ETag/If-None-Match/Content-Range mentions (`workers/`); ETag/INM (`cloudflare/`); Content-Range (`cloudflare/`) | `1 0 1` (sketch `6 3 4`) |
-| K8 | `'Image Not Found'` line; `'File Not Found: ' + r2Key` count per copy | `72 2 2` |
-| K9 | `node --test workers/r2-proxy.test.mjs` | `# tests 40 # pass 40 # fail 0` |
-| K10 | `package.json` has no `node --test workers`; Biome includes | `0 "includes": ["app/**/*.ts", "app/**/*.tsx"]` |
-| K11 | gate-308 `verify.log` mentions `r2-proxy` | `0` |
-| K12 | the legacy client appends `?token=` | `254` |
-| K13 | mock previews are local paths (8); `api.proxy.audio.ts` refetch line; 1-year cache | `8 1 1` |
-| K14 | B's probes, HEAD vs sketch (`workers/` copy) | as output |
-| K15 | last regression date | `2026-11-02` |
-| K16 | round-308 archive equals the old task | `archive-equal-308` |
-| K17 | doc 225 absent; last doc | `0 224-perf-commit-reschedule.md` |
-| K18 | B's sketch mutants listed, red lines | 8 names, `7` (the MU-ONE-COPY line prints its red rows without the word "red") |
-| K19 | every cited `b-round-308/` artifact exists, `claims-309-sketch-output.txt` included (L56) | `done` |
-| K20 | app/package files naming either worker; wrangler files | `0 0` |
-| K21 | `tsconfig.json` has `allowJs` but includes only `**/*.ts(x)`, so `npm run typecheck` does not check `workers/*.js` (A-TYPE/LINT adds `node --check`) | `1 "include": ["**/*.ts", "**/*.tsx"]` |
+| K1 | gate 309 published `b65febe` | `published b65febe` |
+| K2 | clean tree, HEAD | `0 b65febe` |
+| K3 | frozen entries | `1182` |
+| K4 | each protected file appears once | `1 1 1 1 1 1 1` |
+| K5 | helper start line `workers/`, `cloudflare/`; file lengths | `198 160 255 217` (sketch `198 160 314 276`) |
+| K6 | `R2_BUCKET.head(r2Key)` / `R2_BUCKET.get(r2Key` per copy (the protected handler holds one `get`) | `1 3 1 3` (sketch `2 4 2 4`) |
+| K7 | `'no-store'` and `'private, no-store'` literals per copy | `0 0 1 1` (sketch `1 1 1 1`) |
+| K8 | `'Image Not Found'`; `'File Not Found: ' + r2Key` per copy; `'Internal Error'` per copy | `1 2 2 1 1` |
+| K9 | `node --test workers/r2-proxy.test.mjs` | `# tests 57 # pass 57 # fail 0` (sketch 69/69) |
+| K10 | `package.json` has no `node --test workers`; gate-309 `verify.log` mentions of `r2-proxy` | `0 0` |
+| K11 | helper parity diff lines | `0` |
+| K12 | `onlyIf` per copy | `0 0` |
+| K13 | B's probe op counts, HEAD vs sketch | as in the output |
+| K14 | last regression date | `2026-11-02` |
+| K15 | the round-309 archive equals the old task | `archive-equal-309` |
+| K16 | doc 226 absent; the last doc | `0 225-perf-r2-worker-cache-range.md` |
+| K17 | sketch mutant lines; restored 69/69 | `13 1` |
+| K18 | every cited `b-round-309/` artifact exists (L56) | `done` |
+| K19 | sketch tests red on the HEAD workers | `15` |
