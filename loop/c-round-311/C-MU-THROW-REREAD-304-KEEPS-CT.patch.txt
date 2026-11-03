@@ -1,0 +1,10 @@
+--- /home/runner/czaba-project/store/workers/r2-proxy.js	2026-11-03 05:18:14.983671478 +0000
++++ /tmp/c311-mut/workers/r2-proxy.js	2026-11-03 05:34:55.213629848 +0000
+@@ -284,6 +284,7 @@
+       else headers.delete('ETag');
+       if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+         await releaseBody(object);
++        headers.set('Content-Type', contentType);
+         return new Response(null, { status: 304, headers });
+       }
+       headers.set('Content-Type', contentType);

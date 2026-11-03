@@ -1,0 +1,105 @@
+{
+ "taskStatus": "PASS",
+ "round": 311,
+ "task": "PERF-4e R2 worker safe-integer Range guard + If-None-Match after If-Range re-read (GATE310-M1, GATE310-L3, C-R310-01)",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T05:27:39.8490771Z",
+  "round": 311,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "WK-GUARD-PROXY",
+  "WK-GUARD-ALT",
+  "WK-OPS-REGRESSION",
+  "WK-HEAD-CONTROL",
+  "G311-AUTH",
+  "WK-UNIT",
+  "RED-ON-HEAD",
+  "PROTECTED-UNCHANGED",
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "TESTS-READ",
+  "DOC"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "production build",
+  "Biome check",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "notRunnableHere": [
+  "WK-STORE-PREVIEW-LIVE: deployed worker + real R2 not reachable from the cloud; whether real R2 rejects non-safe-integer range values is still an inference (doc 227 post-deploy list); Safari 206"
+ ],
+ "viewportNote": "Worker network rows ran once at 1440x900 per task §3.2 (network behaviour is viewport-independent). G311-AUTH ran at 1440x900 and 1280x720.",
+ "bugs": [
+  {
+   "id": "C-R311-01",
+   "severity": "low",
+   "origin": "B spec (PR17 row set); confirms A-R311-REVIEW-L2 and A-R311-REVIEW-L3",
+   "steps": [
+    "Copy store workers/r2-proxy.js, cloudflare/r2-worker.js, workers/r2-proxy.test.mjs to scratch",
+    "Mutant A (C-MU-REREAD-NO-ETAG-DELETE): in both workers' normal-path If-Range re-read, delete the line `else headers.delete('ETag');`",
+    "Mutant B (C-MU-REREAD-304-NO-CORS): make the normal-path re-read 304 return `new Headers({ ETag, 'Cache-Control' })` only (drops Access-Control-Allow-Origin / Expose-Headers)",
+    "node --test workers/r2-proxy.test.mjs (runner: python3 -I c-round-311/c-mutants.py <store> <scratch> <out>)"
+   ],
+   "expected": "§4.2 says the re-read deletes the ETag when the second object has none, and the 304 keeps ETag, Cache-Control and the CORS headers (doc 227 l.76 states it); a row should turn red when either is broken.",
+   "actual": "Both mutants survive 75/75. The code is correct today (browser probe: re-read 304 carries the swap ETag and public Cache-Control), but neither the ETag-delete branch (fake always returns httpEtag) nor CORS on the re-read 304 is pinned. Candidate for deferred_low_polish / next worker round (add a no-httpEtag second object and assert ACAO/Expose-Headers in PR17).",
+   "evidence": "c-round-311/C-MU-REREAD-NO-ETAG-DELETE.patch.txt/.log, C-MU-REREAD-304-NO-CORS.patch.txt/.log, c-round-311/c-mutants.txt"
+  }
+ ],
+ "info": [
+  {
+   "id": "INFO-C311-ASSERT-MINUS-LINE",
+   "origin": "B spec",
+   "detail": "§3.2 SOURCE-SCOPE literally says the test diff has no '-' line holding assert. There is one (PR13 `assert.equal((await publicRequest(... failGet: true })).response.status, 500)`), and it comes from B's own sketch patch. It is replaced in place by the same assert on `whole.response.status` (500) plus a new `whole.heads.length` 0 assert, so no assertion is lost or weakened; §6.1's intent holds. C rules SOURCE-SCOPE PASS on the intent. Per L4 the row should be worded 'no assertion lost; equal or stronger replacements allowed'. Evidence: c-round-311/test-diff.txt."
+  },
+  {
+   "id": "INFO-C311-WARM-STATUS-NULL",
+   "origin": "environment",
+   "detail": "As in round 310: the untimed browser warm-up (warm.cjs) saw #arrangement-status null for ~300 s on the cold dev server, then loaded the legacy route. Not an acceptance row; the timed G311-AUTH that followed reached 'Demo collection ready' at both viewports with 0 page errors (g311-auth.json, shots/lab-*.png). No screenshot of the warm-up page exists; do not read it as an observed UI state."
+  },
+  {
+   "id": "INFO-C311-AUDIOSEEK-LINES",
+   "origin": "environment",
+   "detail": "WK-OPS-REGRESSION audioSeek issued 2 range lines in throw mode and 3 in short mode (round 310: 3); every line 206 h0g1, bytes = CL, advanced true. The line count is Chromium media-element buffering, not worker behaviour."
+  }
+ ],
+ "manifestPaths": [
+  "c-round-311/wk-summary-311.txt",
+  "c-round-311/wk-summary-ops.txt",
+  "c-round-311/*-server.log",
+  "c-round-311/*-1440.json",
+  "c-round-311/g311-auth.json",
+  "c-round-311/shots/",
+  "c-round-311/wk-unit.txt",
+  "c-round-311/vitest.log",
+  "c-round-311/red-on-head.txt",
+  "c-round-311/protected-unchanged.txt",
+  "c-round-311/git-status.txt",
+  "c-round-311/sha256.log",
+  "c-round-311/test-diff.txt",
+  "c-round-311/claims-after.txt",
+  "c-round-311/c-mutants.txt",
+  "c-round-311/c-browse.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 18,
+ "mutantsRecorded": 25,
+ "mutantRedOnSketch": 25,
+ "cMutants": {
+  "run": 5,
+  "red": 3,
+  "survived": [
+   "C-MU-REREAD-NO-ETAG-DELETE",
+   "C-MU-REREAD-304-NO-CORS"
+  ]
+ },
+ "abletonConformance": "not applicable (server worker fix-up, no Studio UI change)"
+}

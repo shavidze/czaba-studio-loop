@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T04:57:05.914Z)
+# Active loop summary (2026-11-03T05:46:03.154Z)
 
-- backlog.json 2997 KB -> active view 408 KB
-- status: G_ROOT_GATE round 310
-- servers: `{"checkedUtc":"2026-11-03T04:40:07.6762536Z","round":310,"attempt":1,"store":200}`
-- last publication: 8946431f8619713bcc8ef1ca624980baf4e0b1f0 (rounds 310-310)
-- last root gate: round 310 published - commit 8946431f8619713bcc8ef1ca624980baf4e0b1f0 pushed
+- backlog.json 3008 KB -> active view 409 KB
+- status: G_ROOT_GATE round 311
+- servers: `{"checkedUtc":"2026-11-03T05:27:39.8490771Z","round":311,"attempt":1,"store":200}`
+- last publication: dfa45028c11aae533aa44e14ef74b0f76958cd7d (rounds 311-311)
+- last root gate: round 311 published - commit dfa45028c11aae533aa44e14ef74b0f76958cd7d pushed
 
 ## Current items: -
 
@@ -753,10 +753,10 @@
 - GATE308-L1-DOC-TMP-EVIDENCE / low / deferred_low_polish (D-29z820) / doc 224 cites tmp/studio-real-loop evidence outside the repository; key numbers are copied into the doc
 - SABA-Q-PERF4-STUDIO-CACHE / info / awaiting_user (D-29z821); blocks PERF-4b only / Purchased Studio stems: allow the buyer browser to keep them on disk (private, no-cache + ETag, every reuse re-authorized; faster re-open) o
 - SABA-Q-WORKER-DEPLOYED / info / awaiting_user (D-29z823); non-blocking (both copies edited in lockstep) / Which R2 worker copy is deployed: workers/r2-proxy.js (has the cover-image route) or cloudflare/r2-worker.js? After the answer a bounded tas
-- WK-STORE-PREVIEW-LIVE / info / not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) | D-29z827: post-deploy list extended by PERF-4d (Safari 206, OOB branch on real R2, CDN must not store 416, TTFB p50/p95 + Class B metrics, onlyIf option) / ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a
-- GATE309-M1 / medium / scheduled round 310 PERF-4d (D-29z825) / every public 200/206 makes two R2 ops (head then get), incl. each <audio> seek
-- GATE309-L2 / low / scheduled round 310 PERF-4d (single read; D-29z825) / head/get race can mix two object versions
-- GATE309-L3 / low / scheduled round 310 PERF-4d (no-store; D-29z825) / 416 carries public, max-age=86400 and is storable by shared caches
+- WK-STORE-PREVIEW-LIVE / info / not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) | D-29z827: post-deploy list extended by PERF-4d (Safari 206, OOB branch on real R2, CDN must not store 416, TTFB p50/p95 + Class B metrics, onlyIf option) | D-29z831: post-deploy list adds: bytes=0-<huge> and bytes=-<huge> give 206 on real R2 (open offset); If-Range re-read + If-None-Match 304 / ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a
+- GATE310-M1 / medium / scheduled round 311 PERF-4e (D-29z829) / client Range values reach R2 unclamped; a non-safe-integer length/suffix could 500 where b65febe served 206 (suffix/length overflow itself i
+- GATE310-L3 / low / scheduled round 311 PERF-4e (D-29z829) / If-Range re-read compares If-None-Match with the first object
+- C-R310-01 / low / scheduled round 311 PERF-4e PR17 (D-29z829) / throw-path If-Range re-read ETag not pinned by any row (mutant survived 69/69)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

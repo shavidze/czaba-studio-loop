@@ -1,0 +1,8 @@
+--- cloudflare/r2-worker.js
+-  if (isHead) {
+    object = await env.R2_BUCKET.head(r2Key);
+  } else {
++  if (isHead || !(await env.R2_BUCKET.head(r2Key)) || true) {
+    object = isHead ? await env.R2_BUCKET.head(r2Key) : undefined;
+  }
+  if (!isHead) {
