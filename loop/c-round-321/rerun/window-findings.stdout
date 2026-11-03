@@ -1,0 +1,106 @@
+## open_findings
+C-R305-01 | low | closed (D-29z812): C round 306 PASS, gate ecb832a | fixed_by | SR-305-4 said the add status is cut at 1440; it is not (scrollWidth == clientWidth at 1440 and 1280)
+INFO-C305-SR3-NOTHING-TO-PLAY | info | folded into SR-305-3 (D-29z807); RT-FIX checks it | Play on the empty arrival writes "Nothing to play — add a clip from the library first."; the review did not mention it
+INFO-C305-AUTH-ATTEMPTS | info | recorded (L38 warm-up already covers it) | G305-AUTH attempt 1 cold-start timeout, attempt 2 crashed with output lost; attempts 3-4 passed
+GATE306-S1-LAYOUT-READ-PER-CLIP | low | deferred_low_polish (D-29z812): ruled Low (reviewer 'Low/Med | getTimelineViewportPx reads scroller.clientWidth inside each clip's useSyncExternalStore snapshot (30x per notify, incl. Follow scroll frames)
+GATE306-S2-BUDGET-VIEWPORT-DEP | low | deferred_low_polish (D-29z812): note text or a '< 60' guard  | out/wheel path-rewrites == 3/2 depend on the pinned 1440x900 viewport, header width and clip length
+GATE306-S4-DOC223-ZOOM-PATH | info | deferred_low_polish (D-29z812) | doc 223: add one line that a zoom path bypassing applyTimelineView reads the old scroll until the next scroll/recheck
+GATE306-ARCH-TIMELINE-WINDOW | info | signal (D-29z812): on the end-of-STUDIO-PERFORMANCE checkpoi | timeline window contract passed in two shapes (lane object, ruler callbacks); proposal TimelineWindowProvider + useTimelineSpanInWindow, Ruler/TempoRo
+B-R306-CONTINUITY-PROBE-INVALID | info | recorded; input to PERF-COMMIT-RESCHEDULE-b | B's audio-continuity probe captured 0 restarts (clip-2 fade drag did not commit); invalid, kept as evidence; stage b needs a fixed probe
+INFO-C306-AUTH-ATTEMPT | info | recorded (L38 warm-up covers it) | G306-AUTH attempt 1 cold dev-route timeout; attempt 2 valid
+GATE307-F1-STOP-LATER | low | scheduled round 308 (D-29z818, RC12/RC13) | stop(when) can move a stop set by replaceClips later (Chromium: later stop wins, b-round-307/probe/onended-probe.json); no caller today
+GATE307-F2-ENDED-PRESTART | info | resolved for Chromium (onended-probe.json stopBeforeStart 0. | prune relies on ended firing for a source stopped before its start
+GATE307-F3-SPLICE-CONTINUITY | info | answered for today runtime by CONT rows (round 308); replace | splice continuity needs stop/start in one batch; probe the sounding-clip case
+GATE307-F4-GAINDB-TWICE | info | moot without wiring (D-29z817); doc 224 TODO | gainDb exclusion rule written in reschedule.ts and scheduleKey
+GATE307-F5-SHAPES-OPTIONAL | low | scheduled round 308 (required fields, D-29z818) | ReplaceClipShapes optional fade/envelope maps delete on {}
+INFO-C307-K14-COUNT | info | closed: claims-308.sh K10 counts RC rows by name | claims K14 regex counted it( in an appended top-level describe
+INFO-C307-RC1-WORDING | info | recorded; archive not edited; A assert correct | task section 6 RC1 wording vs b starting at 10 s (when 11)
+INFO-C307-COLD-DEV | info | recorded (L38 warm-up) | first cold dev load timed out
+GATE308-L1-DOC-TMP-EVIDENCE | low | deferred_low_polish (D-29z820) | doc 224 cites tmp/studio-real-loop evidence outside the repository; key numbers are copied into the doc
+INFO-C308-SAME-WHEN | info | recorded -> RC-R308-SPLICE-PROBE (D-29z820) | continuity probe runs repeat splice positions (ms-quantized release); no raw captures saved
+INFO-C308-POSCTL-INCONCLUSIVE | info | recorded -> RC-R308-SPLICE-PROBE (D-29z820) | positive control could not prove the click rule sensitivity (Stop disconnects the tap)
+INFO-C308-COLD-DEV | info | recorded | two cold-compile timeouts before measurement; rows reran valid after warm-up
+GATE309-M1 | medium | closed (D-29z828): fixed by PERF-4d, C round 310 PASS, gate  | every public 200/206 makes two R2 ops (head then get), incl. each <audio> seek
+GATE309-L2 | low | closed (D-29z828): fixed by PERF-4d, C round 310 PASS, gate  | head/get race can mix two object versions
+GATE309-L3 | low | closed (D-29z828): fixed by PERF-4d, C round 310 PASS, gate  | 416 carries public, max-age=86400 and is storable by shared caches
+INFO-C309-AUTH-COLD | info | recorded (D-29z824) | cold dev server timeout with curl warm-up; replaced after browser warm-up -> L38 clause (D-29z827)
+INFO-C309-416-PUBLIC-CACHE | info | recorded (D-29z824) | Chromium cache not poisoned by 416; superseded by GATE309-L3
+INFO-C309-RACE-PRERULED | info | recorded (D-29z824) | superseded: round 310 single read (D-29z824)
+INFO-C309-PREVIEW-NO-SAFE-NAME | info | recorded (D-29z824) | -> B-R309-PREVIEW-SAFE-NAME deferred Low
+GATE310-M1 | medium | closed (D-29z832): PERF-4e C round 311 PASS (WK-GUARD hugeEn | client Range values reach R2 unclamped; a non-safe-integer length/suffix could 500 where b65febe served 206 (suffix/length overflow itself is document
+GATE310-L3 | low | closed (D-29z832): PERF-4e C round 311 PASS (rereadInm/rerea | If-Range re-read compares If-None-Match with the first object
+C-R310-01 | low | closed (D-29z832): PR17 + MU-THROW-REREAD-KEEPS-HEAD-ETAG re | throw-path If-Range re-read ETag not pinned by any row (mutant survived 69/69)
+GATE310-S4 | low | recorded (D-29z831): same R2 op count; onlyIf on the post-de | a 304 opens the body then cancels it
+GATE310-S5 | info | recorded (D-29z831): rare, harmless | bytes=-0 reads the whole object to answer 416
+INFO-C310-WARM-STATUS-NULL | info | recorded (D-29z828) | untimed warm-up saw null #arrangement-status for 300 s on a cold server; only warm.log, no screenshot; not an observed UI state; timed G310-AUTH ready
+INFO-C310-OVERSIZED-RANGE | info | recorded (D-29z828) | -> GATE310-M1
+INFO-C310-HEAD-STEP10 | info | recorded (D-29z828) | HEAD + unsatisfiable -> 416 no-store and HEAD + If-None-Match -> 304 verified by curl on the probe server; HEAD+INM unit row PR18 in round 311
+INFO-C311-ASSERT-MINUS-LINE | info | recorded (D-29z832): RC note on B wording, no lesson change  | SOURCE-SCOPE row said 'no - line holding assert'; B's own sketch replaced the PR13 assert in place with an equal + stronger one; C ruled PASS on inten
+INFO-C311-WARM-STATUS-NULL | info | recorded (D-29z832) | untimed warm-up saw #arrangement-status null on the cold dev server (as round 310); timed G311-AUTH ready at both viewports
+INFO-C311-AUDIOSEEK-LINES | info | recorded (D-29z832) | audioSeek range-line count 2 (throw) / 3 (short); Chromium media buffering, every line 206 h0g1
+GATE311-I2 | info | recorded (D-29z832); optional consistency with 304 when a wo | the 416 response keeps Accept-Ranges: bytes (unsatisfiableResponse deletes only Content-Type/Length); RFC-allowed, same as before
+GATE311-I3 | info | recorded (D-29z832) | unsafe start with small length still reaches R2; ends 416 either way, never the satisfiable rethrow
+C-R312-01 | medium | closed (D-29z845): C round 314 PASS + gate 314 abfcf78 | fix | PERF-1a harness.loaf-scripts self-check fails on A's PERF-5a tree: the settled load window holds no LoAF with script timings once peaks leave the main
+A-R312-REVIEW-M1 | medium | closed: fixed in round 312 (PW12), C round 312 PK-UNIT/TESTS | request() inside onPeaks lost a queued job
+A-R312-REVIEW-M2 | medium | closed: fixed in round 312 (PW13), C round 312 PASS (D-29z83 | postMessage throw unguarded in peaks.client.ts
+A-R312-REVIEW-L6 | info | recorded (D-29z839) | dispose() inside onPeaks during failWorker loop still delivers remaining jobs; callers check signal.aborted
+A-R312-REVIEW-L1 | low | scheduled round 315 (D-29z847) | deferred_low_polish (D-29z8 | 3000 ms peaks stall also covers worker cold start; a slow first start disables the worker for the session (demo-synth uses 10 s)
+A-R312-REVIEW-L2 | low | scheduled round 315 (D-29z847) | deferred_low_polish (D-29z8 | onPeaks throwing skips startNext in handleReply / loses later jobs in failWorker loop; fix try/finally (not reachable today)
+A-R312-REVIEW-L3 | low | scheduled round 315 (D-29z847) | deferred_low_polish (D-29z8 | buffersRef set before the peaks request: syncPlayback/export can see a still-loading source's buffer (library preview guarded)
+A-R312-REVIEW-L4 | low | scheduled round 315 (D-29z847) | deferred_low_polish (D-29z8 | missing PW rows: video call site (ready after peaks, videoSourcesRef guard), empty buffer; stall armed only at begin passes PW9; video callback except
+A-R312-REVIEW-L5 | low | scheduled round 315 (D-29z847) | deferred_low_polish (D-29z8 | PW13 does not cover a throw on end or cancel, and has no timer-count assert
+C-R313-01 | medium | closed (D-29z845): C round 314 PASS + gate 314 abfcf78 | sch | fader.clipgain.playing 6x commits/release-commits flip 91/1 vs 92/2 across passes; the extra release commit is the ruler re-render from a held-back Fo
+INFO-C314-DOC-PENDING-SENTENCE | info | scheduled round 315 (D-29z845) | docs 163/228 still say 'C-ის შემოწმება მოლოდინშია' after C 314 PASS
+B-R314-EXPORT-LOADING-GATE | info | signal (D-29z849): revisit at SRW-21-PLAN | export has no gate for a collection source still 'loading'; its clip is silently omitted (not reachable in /studio-lab: no initial clips)
+A-R314-REVIEW-L2 | info | signal (D-29z849): harness detail; candidate for the next pe | the timeline scroll guard cannot tell 'not scrollable' from 'did not scroll'
+A-R314-REVIEW-L3 | info | recorded (D-29z849): the idle bracket would catch a page tur | Follow starting 'paused' leaves a short 'on' gap between the two clicks
+A-R314-REVIEW-L4 | info | recorded (D-29z849): by design (D-29z843, one place for the  | budgets.json playing-fader scenario text does not say 'Follow off'
+A-R314-WARM-SCRIPT-COLD | info | recorded (D-29z849): loop helper only (c-round-313/warm.cjs  | warm-up helper crashes on a cold dev server
+GATE315-S4 | info | signal (D-29z854): PERF-10 / SRW-21-PLAN; N collection sourc | N sources ready while playing -> N graph restarts
+GATE315-S5 | info | merged into B-R314-EXPORT-LOADING-GATE (D-29z854) -> SRW-21- | loading collection sources are left out of export without warning
+C-R315-VIDEO-END-NO-FADE | info | signal (D-29z854) -> T12-ADVANCED T12.13 micro fades; byte-i | a video's own sound is cut at the video duration with no fade (last samples ~0.50)
+INFO-C315-K8-BYDESIGN | info | recorded (D-29z854): K8 also listed peaks-worker-video.test. | claim K8 by-design omission
+C-R316-01 | medium | closed (D-29z859): fixed in round 317; C round 317 BYTE-IDEN | 4 mirrored Playfair Display woff2 are Google kit variants, not the files browsers load at HEAD; /store heading differs by 2,015 px
+A-R316-REVIEW-P4 | info | signal (D-29z857): a future CSP needs font-src 'self' data:  | CSP font-src data:
+INFO-C317-WARMUP-TIMEOUT | info | open info (D-29z862): the perf warm-up script (c-round-314/w | perf warm-up collection-ready timeout
+C-R318-02 | medium | ruled (D-29z864): grant widened, per move <= 15 kept, max <= | range drag 21.033/move, max 39 > 15 inside round-318 grants
+C-R318-01 | low | ruled (D-29z865): readout memo, detail wrapper removed (pane | +2 fibers per StudioWorkspace commit from unmemoized range wrappers
+C-R318-03 | medium | ruled (D-29z866): accept 4 notices rows, count 564; regenera | THIRD_PARTY_NOTICES not regenerated (TL5 red)
+C-R318-04 | medium | ruled (D-29z869): closed by round 319 deliverables pending C | K14 0, doc 230, A-REVIEW, A-MUTANTS missing
+C-R318-05 | low | closed (D-29z867): b-round-318/protected-sha256.txt 11/11 OK | protected sha baseline stale after root deps commit
+C-R318-06 | low (provisi | open_low_provisional (D-29z870): repro + root-cause row in R | 1280x720: Ctrl+E after Space/Space/Home on a re-dragged selection says 'Could not split at the time selection.'
+C-R319-01 | medium | ruled D-29z873 (O1 Inner form + 5 literal test grant); fix i | memo(function X) form renames to X2 under esbuild; breaks R11-P1e / CP1 and blinds name-keyed guards
+C-R319-02 | medium | to be closed by round 320 deliverables (D-29z875) | round 319 deliverables incomplete (K14 0, K19 0/0, notices 560/TL5 red, docs 168/230, A-PERF, A-MUTANTS, review partial)
+C-R319-03 | low | fixed in round 320 by RS8 (D-29z874); owned by the current r | explicit range prop on ArrangementDetailPanel unguarded: C-MU-DETAIL-IGNORE-PROP survives
+A-R319-ARCH-DETAIL-SUBSCRIPTION | info | signal -> PERF-10 (D-29z879), not scheduled | move the detail panel range subscription into ArrangementDetailContent so resize/collapse state is not re-rendered during range drags
+INFO-C319-R-ROWS-MISSPEC | info | corrected in round 320 task (D-29z876) | R-WAVEFORM late-peaks/zoom-d premises false at baseline; R-DETAIL 1280 focus; PERF-LOAD per-commit not exposed
+## deferred_low_polish
+GATE306-S1-LAYOUT-READ-PER-CLIP | low | deferred_low_polish (D-29z812): ruled Low (reviewer 'Low/Med | getTimelineViewportPx reads scroller.clientWidth inside each clip's useSyncExternalStore snapshot (30x per notify, incl. Follow scroll frames)
+GATE306-S2-BUDGET-VIEWPORT-DEP | low | deferred_low_polish (D-29z812): note text or a '< 60' guard  | out/wheel path-rewrites == 3/2 depend on the pinned 1440x900 viewport, header width and clip length
+GATE306-S4-DOC223-ZOOM-PATH | info | deferred_low_polish (D-29z812) | doc 223: add one line that a zoom path bypassing applyTimelineView reads the old scroll until the next scroll/recheck
+GATE308-L1-DOC-TMP-EVIDENCE | low | deferred_low_polish (D-29z820) | doc 224: mark tmp/ evidence paths as temporary or copy the probe summaries into docs/
+GATE308-S3-RC13-EXACT-COUNT | low | deferred_low_polish (D-29z820) | graph.test.ts RC13: expect(clicks.length).toBe(2) instead of >= 1
+B-R308-PROXY-AUDIO-YEAR-CACHE | low | deferred_low_polish (D-29z821); revisit with PERF-4c version | the dev audio proxy caches previews for a year; a replaced preview stays stale in browsers
+B-R309-PREVIEW-SAFE-NAME | low | deferred_low_polish (D-29z824) | handlePreview has no isSafeFileName and the 404 body echoes the R2 key
+A-R309-REVIEW-TEST-GAPS | low | deferred_low_polish (D-29z824); PR4/PR10-PR15 cover part | D | candidate rows: 403/404 protected routes with If-None-Match, Bytes= case and whitespace, If-None-Match * without httpEtag, get null after head
+B-R309-REFETCH-INM-WINDOW | low | closed (D-29z832): fixed as GATE310-L3 in PERF-4e, C round 3 | on the rare If-Range re-read, If-None-Match was compared with the first object, not the second
+B-R310-HEAD-RANGE-RFC | low | deferred_low_polish (D-29z830); a change needs PR6 rewritten | HEAD + Range answers 206/416; RFC 9110 14.2 says a server MUST ignore Range on non-GET methods, while 9.3.2 asks HEAD to carry the GET headers
+B-R310-RANGE-PRECISION | low | deferred_low_polish (D-29z830) | digit strings above 2^53 are rounded, so an invalid range (last < first) can pass the order check and get 416 instead of being ignored
+C-R311-01 | low | deferred_low_polish (D-29z833): closes with the next worker  | two mutants survive 75/75: the normal-path re-read `else headers.delete('ETag')` branch (the fake always returns httpEtag) and CORS (ACAO/Expose-Heade
+A-R311-REVIEW-L4 | low | deferred_low_polish (D-29z833): same worker-test batch as C- | PR15 `opened.every(o => o.cancelled)` is vacuous in throw mode (no body opened); meaningful only in short mode (doc 227 says so)
+GATE311-L1 | low | deferred_low_polish (D-29z833): same worker-test batch as C- | the fake throws its TypeError before the outOfRange check, so PR16's far case always takes the throw path even in short mode; far.heads 1 describes th
+A-R312-REVIEW-L1 | low | closed (D-29z850): C round 315 PASS, gate 315 published c136 | 3000 ms peaks stall also covers worker cold start; a slow first start disables the worker for the session (demo-synth uses 10 s)
+A-R312-REVIEW-L2 | low | closed (D-29z850): C round 315 PASS, gate 315 published c136 | onPeaks throwing skips startNext in handleReply / loses later jobs in failWorker loop; fix try/finally (not reachable today)
+A-R312-REVIEW-L3 | low | closed (D-29z850): C round 315 PASS, gate 315 published c136 | buffersRef set before the peaks request: syncPlayback/export can see a still-loading source's buffer (library preview guarded)
+A-R312-REVIEW-L4 | low | closed (D-29z850): C round 315 PASS, gate 315 published c136 | missing PW rows: video call site (ready after peaks, videoSourcesRef guard), empty buffer; stall armed only at begin passes PW9; video callback except
+A-R312-REVIEW-L5 | low | closed (D-29z850): C round 315 PASS, gate 315 published c136 | PW13 does not cover a throw on end or cancel, and has no timer-count assert
+C-R315-T1 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | PW14 is relative to PEAKS_WORKER_COLD_START_TIMEOUT_MS; C-MU-COLD-START-VALUE (5_000) survives
+C-R315-T2 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | no row: an unparsable message before the first reply does not end the cold-start budget (C-MU-REPLIED-ON-GARBAGE survives)
+A-R315-REVIEW-L1 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | dispose() does not reset workerReplied (unreachable from the context: ref nulled on unmount)
+A-R315-REVIEW-L2 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | computePeaksOnMainThread throw outside try stops the failWorker fallback loop; later jobs stay loading
+A-R315-REVIEW-L3 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | no row for 'no Worker + throwing onPeaks' (request() does not throw; error rethrown on a timer)
+A-R315-REVIEW-L4 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | PW12-PW13 describe afterEach lacks vi.useRealTimers(); a failing PW13b/PW16/PW17 leaks fake timers
+GATE315-S2 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | PW18 unmounts only when it passes
+GATE315-S8 | low | deferred_low_polish (D-29z854): fix home PERF-14 (next owner | doc 228 credits the stage-1 browser rows to C round 314; they ran in C round 312
+A-R316-REVIEW-P1 | low | deferred_low_polish (D-29z857): fix home STORE-2c (rewrites  | FN4 checks only the generic OFL 1.1 header; swapped licence texts would pass
+A-R316-REVIEW-P2 | low | deferred_low_polish (D-29z857): fix home STORE-2c (rewrites  | FN1 scans only app/** .ts/.tsx/.css, not public/, vite.config.ts or *.html

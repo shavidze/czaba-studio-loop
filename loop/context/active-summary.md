@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T19:38:41.062Z)
+# Active loop summary (2026-11-03T20:28:08.049Z)
 
-- backlog.json 3093 KB -> active view 422 KB
-- status: G_ROOT_GATE round 320
-- servers: `{"checkedUtc":"2026-11-03T18:36:51.6970102Z","round":320,"attempt":1,"store":200}`
+- backlog.json 3113 KB -> active view 423 KB
+- status: G_ROOT_GATE round 321
+- servers: `{"checkedUtc":"2026-11-03T20:17:24.3318314Z","round":321,"attempt":1,"store":200}`
 - last publication: 53c5c79676e41c951f651f89e5be2fc24cf89112 (rounds 318-320)
-- last root gate: round 320 published - commit 53c5c79676e41c951f651f89e5be2fc24cf89112 pushed
+- last root gate: round 321 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -771,19 +771,21 @@
 - C-R315-VIDEO-END-NO-FADE / info / signal (D-29z854) -> T12-ADVANCED T12.13 micro fades; byte-identical at HEAD / a video's own sound is cut at the video duration with no fade (last samples ~0.50)
 - A-R316-REVIEW-P4 / info / signal (D-29z857): a future CSP needs font-src 'self' data: (2 inlined Noto stubs; C confirmed 4 data:font/woff2 refs in fonts-*.css); owner: whoever adds a CSP / CSP font-src data:
 - INFO-C317-WARMUP-TIMEOUT / info / open info (D-29z862): the perf warm-up script (c-round-314/warm.cjs) times out on 'collection ready' at ~303 s; the perf spec itself passes; fix home: the next harness touch / perf warm-up collection-ready timeout
-- C-R318-02 / medium / ruled (D-29z864): grant widened, per move <= 15 kept, max <= 35; fixed by round 319 pending C / range drag 21.033/move, max 39 > 15 inside round-318 grants
-- C-R318-01 / low / ruled (D-29z865): readout memo, detail wrapper removed (panel subscribes), overlay memo child with primitive props; named-fiber tolerance; checked by round 319 PERF-RANGE/PERF-LOAD / +2 fibers per StudioWorkspace commit from unmemoized range wrappers
-- C-R318-03 / medium / ruled (D-29z866): accept 4 notices rows, count 564; regenerated in round 319 / THIRD_PARTY_NOTICES not regenerated (TL5 red)
-- C-R318-04 / medium / ruled (D-29z869): closed by round 319 deliverables pending C / K14 0, doc 230, A-REVIEW, A-MUTANTS missing
 - C-R318-06 / low (provisional) / open_low_provisional (D-29z870): repro + root-cause row in REGRESSION-ROUND-2026-11-05; severity may rise on repro / 1280x720: Ctrl+E after Space/Space/Home on a re-dragged selection says 'Could not split at the time selection.'
 - SIG-R319-TRANSPORT-FLIP / info / signal -> PERF-10 / first range commit re-renders ArrangementTransport + icons (~20 fibers) on the null->range flip
 - SIG-R319-CLIPGAIN-PROPS / info / signal -> PERF-10 / fader work / ArrangementDetailClipGain receives ~10 unstable callbacks + 2 fresh arrays; memo cannot bail
 - SIG-R319-DEVOPTIONAL-NOTICES / info / signal for root/OSS-LIC (no B action) / devOptional lock entries (@types/react, @types/prop-types, csstype) now listed as runtime notices
-- C-R319-01 / medium / ruled D-29z873 (O1 Inner form + 5 literal test grant); fix in round 320 / memo(function X) form renames to X2 under esbuild; breaks R11-P1e / CP1 and blinds name-keyed guards
-- C-R319-02 / medium / to be closed by round 320 deliverables (D-29z875) / round 319 deliverables incomplete (K14 0, K19 0/0, notices 560/TL5 red, docs 168/230, A-PERF, A-MUTANTS, review partial)
 - A-R319-ARCH-DETAIL-SUBSCRIPTION / info / signal -> PERF-10 (D-29z879), not scheduled / move the detail panel range subscription into ArrangementDetailContent so resize/collapse state is not re-rendered during range drags
 - SIG-R320-WAVEFORM-VIDEO-NONBAIL / info / signal -> PERF-10 (D-29z879) / ArrangementDetailWaveform memo does not bail on video selections (fresh videoClipGainReason node)
 - INFO-C319-R-ROWS-MISSPEC / info / corrected in round 320 task (D-29z876) / R-WAVEFORM late-peaks/zoom-d premises false at baseline; R-DETAIL 1280 focus; PERF-LOAD per-commit not exposed
+- C-R320-01 / low / open, scheduled (D-29z880): required row in PERF-10 (tech-lead: L8, PERF-10 owns the same boundaries); not deferred / the round's four memo boundaries (Playhead, PeakPath, DetailWaveform, RangeReadout) have no guard that can fail; budget <= 15 is met by the 
+- INFO-C320-EXPORT-ESC-FLAKE / info / noted (D-29z880): harness timing, not an app bug / one 1280-reload run crashed at the project export (dialog overlay intercepted the Export click); 0/6 in a targeted probe on both builds
+- INFO-C320-LONGTASK / info / noted (D-29z880): wall-clock row, info only / prod load.longtask-max median 0 -> 69 (wall-clock, 12-commit loads; baseline 12-commit sample had 99 ms)
+- INFO-C320-COLD / info / noted (D-29z880): L38 warm-up / baseline dev warm-up and G320-AUTH attempt 1 timed out on cold dev compiles; each replaced once
+- GATE320-L1-DOC230-GRANT-LINE / low / open (D-29z881): rides PERF-8b (same feature PERF-8; one granted doc line; bug-gate exception, costs little) / doc 230 'გადაწყვეტილებები' lacks the D-ID line that range leaves useArrangement() (read with useArrangementRange)
+- GATE320-S2-POST-AWAIT-ORDER / low (provisional) / open_low_provisional (D-29z881): tech-lead: mechanism real (add-video path), final state correct; Medium only if the intermediate frame paints or an effect fires on it. PERF-8b carries a browser experiment row (per-commit logger + rAF marker; control unstable_batchedUpdates on scratch) / setRange(null) now runs before setSelectedClipId/setSelection; after an await (add video, library clip load) the store write commits at Sync
+- GATE320-S3-ALL-LANES-DRAG / info / scheduled (D-29z881): record row in PERF-10 (required_rows_d29z880) / all-tracks drag re-renders every lane per move; not covered by an asserted row
+- GATE320-S6-TWO-STORE-PATTERNS / info / requested (D-29z887): ARCH-CHECKPOINT-PERF8-STORE-PATTERN / zustand range store next to hand-written useSyncExternalStore stores
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

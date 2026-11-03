@@ -86,7 +86,7 @@
 - **origin, ფანჯარა (open + deferred):** C 41, gate reviewer 29, A 27, B 7.
 - **severity, open_findings-ში:** Medium 12, Low 20, info 43; deferred-ში Low 28, info 1.
 - **კატეგორია:** ყველაზე დიდია tests/harness (open 9 + deferred 14) და timing/audio (11 + 3). უკატეგორიოა 34 + 7 (ძირითადად info და PERF-ის სიგნალები).
-- ფანჯრის ყველა Medium performance-ის რაუნდებიდანაა. focus/keyboard-ის კლასი, რომელიც retro 245–290-ში დომინირებდა, აქ თითქმის აღარ ჩანს (7 + 2). ეს ფანჯრის შინაარსს ასახავს (PERF) და არა გაუმჯობესების მტკიცებულებას.
+- ფანჯრის ყველა Medium performance-ის რაუნდებიდანაა. focus/keyboard-ის კლასი, რომელიც retro 245–290-ში დომინირებდა, აქ თითქმის აღარ ჩანს (9 + 2: ღია ფანჯარაში focus 7 + keyboard 2 = 9, deferred-ში focus 1 + keyboard 1 = 2; `classify.txt` `cat_window`; RT-FIX, C-R321-03). ეს ფანჯრის შინაარსს ასახავს (PERF) და არა გაუმჯობესების მტკიცებულებას.
 
 ## 5. რას აიცილებდა უკეთესი spec, A-ს self-check ან shared helper
 - **უკეთესი spec (B):** 312, 316, 318, 319, 320 — ხუთივე L58-ის ფორმაა (§3).
@@ -104,8 +104,8 @@
 - **Gate 320, suggestion 6 (store-ის ორი pattern):** `tech-lead`: შეზღუდული `frontend-architect` checkpoint PERF-8-ის საზღვარზე. მიმართულება უკვე D-29z193-შია (zustand). **გადაწყვეტილება:** root-ისთვის მოთხოვნა ARCH-CHECKPOINT-PERF8-STORE-PATTERN (D-29z887). ის PERF-8b-ს არ აჩერებს: თუ პასუხი PERF-8b-ის დაგეგმვამდე არ მოვა, PERF-8b D-29z193-ს მიჰყვება.
 - **EXP-R305:** `consequence-tester`-ის აზრით, დიზაინი ჩავარდა უფრო ადრე, ვიდრე ჰიპოთეზის შემოწმება მოხერხდებოდა (§9). ვერდიქტი მაინც ლიტერალურია; მისი შენიშვნა ცალკეა ჩაწერილი.
 
-## 8. ღია კანდიდატების ბედი (inventory: `retro321-mention-ids.txt`, `retro321-mentions.txt`)
-regex `retro[ -_]?32[01]`, before-ასლზე. 10 id და 2 string:
+## 8. ღია კანდიდატების ბედი (inventory: `retro321-mention-ids.txt`, `retro321-mentions.txt`; RT-FIX: `b-round-321/retro321-mention-ids-v2.txt`, `b-round-321/retro321-mentions-v2.txt`)
+regex `retro[ -_]?32[01]`, before-ასლზე. 10 id და 2 string. **RT-FIX (C-R321-02):** `b-round-321/retro321-mentions-v2.py` იმავე before-ასლზე იყენებს regex-ს `retro[ -_]?32[01]|RETRO \(32[01]\)|round 32[01]` (case-insensitive) და parent-ის საკუთარ ველებსაც ამოწმებს: 18 id და 4 string. ძველი 9 id-ის გარდა ახალი 9 id ცხრილის ბოლო ორ სტრიქონშია; ახალი string-ები `current_task` და `advisor_used_by_B` round 320-ის იმპლემენტაციის რაუნდს ასახელებენ, ცვლილება არ სჭირდება:
 | id / ადგილი | ბედი |
 |---|---|
 | `post_current_stage_queue` STUDIO-PERFORMANCE | სტატუსი განახლდა (PERF-8a done; შემდეგი PERF-8b ან REGRESSION) |
@@ -116,11 +116,13 @@ regex `retro[ -_]?32[01]`, before-ასლზე. 10 id და 2 string:
 | RC-R308-SPLICE-PROBE | **გაუქმებულია:** 309–320-ში აღარ განმეორებულა (1×). ტექსტი ისტორიისთვის რჩება |
 | `retro_policy.next_due` | → „round 336 ან STUDIO-PERFORMANCE-ის დასრულება“ (D-29z882) |
 | `retro_policy.signals_for_next_retro` (EXP-R305) | §9-ში დაიხურა; EXP-R321 დაემატა |
+| D-29z801 (RT-FIX, C-R321-02) | ისტორიული ჩანაწერი (RETRO 305-ის გადაწყვეტილება: „next RETRO round 320 or end of STUDIO-PERFORMANCE“). D-29z877-მა 321-ზე გადაიტანა და ახლა ტარდება; ახალი ვადა D-29z882-შია. ცვლილება არ სჭირდება |
+| PERF-8a, C-R319-01, C-R319-02, C-R319-03, INFO-C319-R-ROWS-MISSPEC, D-29z872, D-29z875 (RT-FIX) | „round 320“ აქ PERF-8a-ს fix-up-ის რაუნდს ნიშნავს და არა RETRO-ს. ყველა დაიხურა D-29z880-ით (PERF-8a done; C-R319-01/02/03 closed); INFO-C319 შესწორდა round 320-ის დავალებაში (D-29z876). ცვლილება არ სჭირდება |
 
 ## 9. retro 305-ის ექსპერიმენტი: EXP-R305-SKETCH-MUTANT (`l57-fields.txt`, `unfailable-assert-fields.txt`, `b-running-median.txt`)
 - **წესი:** უარყოფილია, თუ ≥ 2 finding-ია ისეთ assert-ზე, რომელსაც ჩაწერილი წითელი mutant ჰქონდა და მაინც ვერ ჩავარდებოდა, ან თუ ≥ 1 ჯაჭვია ≥ 2 fix-up-ით, რომლის წყაროც B spec-ია. stop: B-ის მედიანა > $11.70, ან C ველებს 2 რაუნდში ცარიელს ტოვებს. null: < 3 რაუნდი.
 - **ფაქტები:**
-  - null არ არის: 16-ივე რაუნდი ასახელებს assert-ებს (7–18).
+  - null არ არის: 16-დან 15 რაუნდი ასახელებს assert-ებს (305, RETRO, `null`), დიაპაზონი 1–19 (`b-round-321/asserts-specified-305-320.txt`, C-ის ბრძანება; RT-FIX, C-R321-01). 7–18 მხოლოდ 310/311/319/320-ის დიაპაზონი იყო (`unfailable-assert-fields.txt`).
   - **stop შესრულდა:** B-ის მედიანა $12.12 > $11.70. მიმდინარე მედიანა 305-იდანვე ზღვარს ზემოთაა ($14.23).
   - (b) შესრულდა ორჯერ: 312 → 313 → 314 და 318 → 319 → 320.
   - (a) არ შესრულდა: 0. C-R310-01, C-R311-01, C-R319-03 და C-R320-01 C-ის საკუთარი mutant-ები იყო, რომლებიც გადარჩა იმ row-ებზე, რომლებიც B-ს არ მოუწერია. ესენი assert-ის ნაკლებობაა და არა ჩავარდნის შეუძლებლობა. ერთადერთი ნამდვილი შემთხვევა C-R319-01-ია (CP1/R11-P1e), და იმაზე B-ის mutant საერთოდ არ იყო ჩაწერილი.
