@@ -1,0 +1,38 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a306/scratch[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG0 spanInTimelineWindow keeps every span without a window and includes touching edges[32m 3[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG1 an unmeasured viewport rebuilds every clip at the new band[33m 340[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG2 a band crossing rebuilds only the clips inside the window[32m 178[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG3 a scroll that brings a stale clip into the window rebuilds it at the new band[32m 161[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG4 zooming back while the stale clip is outside keeps it at its old band[32m 213[2mms[22m[39m
+ [31m×[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG5 a real anchored zoom gates by the pending view, not the old scroll[32m 170[2mms[22m[39m
+[31m   → expected 4096 to be 1250 // Object.is equality[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG5 a real anchored zoom gates by the pending view, not the old scroll
+[31m[1mAssertionError[22m: expected 4096 to be 1250 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1250[39m
+[31m+ 4096[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx:[2m281:37[22m[39m
+    [90m279| [39m    expect(view.getByTestId(SCROLLER_TEST_ID).scrollLeft).toBeCloseTo(…
+    [90m280| [39m    expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, zoomed…
+    [90m281| [39m    [34mexpect[39m([34mcolumnsOf[39m(view[33m,[39m [32m'near'[39m))[33m.[39m[34mtoBe[39m([34mwaveformPeakColumns[39m([34m50[39m[33m,[39m [34m20[39m))[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m282| [39m  })[33m;[39m
+    [90m283| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 00:53:34
+[2m   Duration [22m 3.31s[2m (transform 1.07s, setup 0ms, import 1.60s, tests 1.07s, environment 483ms)[22m
+

@@ -1,0 +1,39 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a306/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 868[2mms[22m[39m
+     [32m✓[39m WG0 spanInTimelineWindow keeps every span without a window and includes touching edges[32m 3[2mms[22m[39m
+     [33m[2m✓[22m[39m WG1 an unmeasured viewport rebuilds every clip at the new band [33m 335[2mms[22m[39m
+     [32m✓[39m WG2 a band crossing rebuilds only the clips inside the window[32m 175[2mms[22m[39m
+[31m     [31m×[31m WG3 a scroll that brings a stale clip into the window rebuilds it once[39m[32m 159[2mms[22m[39m
+     [32m✓[39m WG4 zooming back while the stale clip is outside keeps it at its old band[32m 194[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG3 a scroll that brings a stale clip into the window rebuilds it once
+[31m[1mAssertionError[22m: expected 4096 to be 1250 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1250[39m
+[31m+ 4096[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx:[2m246:36[22m[39m
+    [90m244| [39m    [34mexpect[39m([34mcolumnsOf[39m(view[33m,[39m [32m'far'[39m))[33m.[39m[34mtoBe[39m([34mwaveformPeakColumns[39m([34m50[39m[33m,[39m [34m40[39m))[33m;[39m
+    [90m245| [39m    [34mscrollTo[39m(view[33m,[39m [34m3000[39m)[33m;[39m
+    [90m246| [39m    [34mexpect[39m([34mcolumnsOf[39m(view[33m,[39m [32m'far'[39m))[33m.[39m[34mtoBe[39m([34mwaveformPeakColumns[39m([34m50[39m[33m,[39m [34m20[39m))[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m247| [39m    [34mexpect[39m([34mcolumnsOf[39m(view[33m,[39m [32m'near'[39m))[33m.[39m[34mtoBe[39m([34mwaveformPeakColumns[39m([34m50[39m[33m,[39m [34m20[39m))[33m;[39m
+    [90m248| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 00:37:52
+[2m   Duration [22m 3.16s[2m (transform 1.13s, setup 0ms, import 1.64s, tests 868ms, environment 479ms)[22m
+
+
+::error file=/tmp/a306/scratch/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx,title=app/lib/arrangement/__tests__/waveform-window-ui.test.tsx > PERF-3d waveform columns follow the visible window > WG3 a scroll that brings a stale clip into the window rebuilds it once,line=246,column=36::AssertionError: expected 4096 to be 1250 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1250%0A+ 4096%0A%0A ❯ app/lib/arrangement/__tests__/waveform-window-ui.test.tsx:246:36%0A%0A

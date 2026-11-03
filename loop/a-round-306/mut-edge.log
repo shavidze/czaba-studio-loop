@@ -1,0 +1,39 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a306/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 900[2mms[22m[39m
+[31m     [31m×[31m WG0 spanInTimelineWindow keeps every span without a window and includes touching edges[39m[32m 9[2mms[22m[39m
+     [33m[2m✓[22m[39m WG1 an unmeasured viewport rebuilds every clip at the new band [33m 350[2mms[22m[39m
+     [32m✓[39m WG2 a band crossing rebuilds only the clips inside the window[32m 184[2mms[22m[39m
+     [32m✓[39m WG3 a scroll that brings a stale clip into the window rebuilds it once[32m 150[2mms[22m[39m
+     [32m✓[39m WG4 zooming back while the stale clip is outside keeps it at its old band[32m 205[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx[2m > [22mPERF-3d waveform columns follow the visible window[2m > [22mWG0 spanInTimelineWindow keeps every span without a window and includes touching edges
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/waveform-window-ui.test.tsx:[2m216:73[22m[39m
+    [90m214| [39m  it('WG0 spanInTimelineWindow keeps every span without a window and i…
+    [90m215| [39m    [34mexpect[39m([34mspanInTimelineWindow[39m([34m5000[39m[33m,[39m [34m6000[39m[33m,[39m undefined))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m216| [39m    expect(spanInTimelineWindow(0, 1000, { fromPx: 1000, toPx: 2000 })…
+    [90m   | [39m                                                                        [31m^[39m
+    [90m217| [39m    expect(spanInTimelineWindow(2000, 3000, { fromPx: 1000, toPx: 2000…
+    [90m218| [39m    expect(spanInTimelineWindow(2001, 3000, { fromPx: 1000, toPx: 2000…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 00:37:59
+[2m   Duration [22m 3.17s[2m (transform 1.11s, setup 0ms, import 1.62s, tests 900ms, environment 495ms)[22m
+
+
+::error file=/tmp/a306/scratch/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx,title=app/lib/arrangement/__tests__/waveform-window-ui.test.tsx > PERF-3d waveform columns follow the visible window > WG0 spanInTimelineWindow keeps every span without a window and includes touching edges,line=216,column=73::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/waveform-window-ui.test.tsx:216:73%0A%0A

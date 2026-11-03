@@ -1,0 +1,2 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async () => { const b = await chromium.launch(); for (const base of process.argv.slice(2)) { const p = await b.newPage(); await p.goto(base + '/studio-lab', { waitUntil: 'load', timeout: 120000 }); await p.getByTestId('arrangement-status').filter({ hasText: /^Demo collection ready/ }).waitFor({ timeout: 60000 }); console.log('warm', base); await p.close(); } await b.close(); })();

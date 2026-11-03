@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-02T23:45:20.775Z)
+# Active loop summary (2026-11-03T01:33:49.035Z)
 
-- backlog.json 2947 KB -> active view 402 KB
-- status: G_ROOT_GATE round 305
-- servers: `{"checkedUtc":"2026-11-02T23:33:09.1835450Z","round":305,"attempt":1,"store":200}`
-- last publication: adf959d135ee12588f10325890371dfb871ae4de (rounds 304-304)
-- last root gate: round 305 skipped - C taskStatus FAIL
+- backlog.json 2953 KB -> active view 403 KB
+- status: G_ROOT_GATE round 306
+- servers: `{"checkedUtc":"2026-11-03T00:59:51.7659843Z","round":306,"attempt":1,"store":200}`
+- last publication: ecb832aaa8da3ff0374bc7375f38905861931ad3 (rounds 305-306)
+- last root gate: round 306 published - commit ecb832aaa8da3ff0374bc7375f38905861931ad3 pushed
 
 ## Current items: -
 
@@ -734,14 +734,15 @@
 - SABA-Q-NAME-HINT-LIFETIME / info / awaiting_user (D-29z791) / 
 - SABA-Q-NAME-HINT-KEYBOARD / info / awaiting_user (D-29z794) / 
 - B-R303-PERF-HARNESS-METRIC-FAMILY / info / architecture signal (D-29z797), non-blocking / 
-- C-R304-02 / low / open (D-29z799): fixed early in PERF-3d round 306 (same file perf/studio-lab-interactions.perf.spec.ts, one string; bug-gate exception) / interactionSequence report text does not list the new zoom in/out/wheel steps
+- C-R304-02 / low / dispatched round 306 (D-29z809); closes on C PASS | open (D-29z799): fixed early in PERF-3d round 306 (same file perf/studio-lab-interactions.perf.spec.ts, one string; bug-gate exception) / interactionSequence report text does not list the new zoom in/out/wheel steps
 - INFO-C304-C303-SHOT / info / noted (D-29z799): L38 clause "C scripts write only under c-round-N/" / C re-ran c-round-303/auth/probe.cjs and rewrote c-round-303/auth/shots/probe-legacy.png (same state)
 - INFO-C304-AUTH-ATTEMPT1 / info / noted (D-29z799): harness flake, not an app bug / cold-start document.body null on /studio/middle-east (2nd time after INFO-C303-AUTH-ATTEMPT1); C now waits for a non-empty body
 - INFO-C304-FAKEBEARER-500 / info / noted (D-29z799): backend-dependent, fails closed; not a bypass / fake bearer -> 500 "Unable to prepare Studio access" with the mock :5199 not running (r303: 403); no token in any body
 - GATE304-M1-PERF-LIB-NOT-IN-GATE / medium / open_root (D-29z800): = ROOT-REQ-VITEST-PERF-INCLUDE (vitest.config.ts is outside loop grants); non-blocking for the loop (as the 2026-10-23 root clarification for root/manual-only Mediums); until root lands it, every PERF task cites the scratch-config command for perf/lib tests as an A and C row / vitest.config.ts includes app/** only, so perf/lib/report.test.ts and zoom-probe.test.ts (ZP1-ZP6) never run in the gate; only scratch-confi
-- GATE304-M2-EQ60-TRIPWIRE / medium / open (D-29z800): fixed in PERF-3d round 306: the task grants both budget rows and names their post-fix expected values, changed in the same commit / interact.zoom.30.out.path-rewrites and wheel.path-rewrites assert == 60, which the PERF-3d fix will turn red; nothing says the red is expect
-- GATE304-L3-PROBE-IN-WINDOW / low / open (D-29z800): note "measured with the zoom probe connected" added in PERF-3d (same budgets file, cheap) / the zoom probe observer runs inside the measured window; keydown/LoAF rows not strictly comparable with key-window-longest-ms
-- GATE304-INFO-REMOUNT / info / noted (D-29z800): PERF-3d planning considers it / suggestion: also count childList additions of path inside the waveform so a remount is visible to in.path-rewrites == 0
+- GATE304-M2-EQ60-TRIPWIRE / medium / dispatched round 306 (D-29z809); closes on C PASS | open (D-29z800): fixed in PERF-3d round 306: the task grants both budget rows and names their post-fix expected values, changed in the same commit / interact.zoom.30.out.path-rewrites and wheel.path-rewrites assert == 60, which the PERF-3d fix will turn red; nothing says the red is expect
+- GATE304-L3-PROBE-IN-WINDOW / low / dispatched round 306 (D-29z809); closes on C PASS | open (D-29z800): note "measured with the zoom probe connected" added in PERF-3d (same budgets file, cheap) / the zoom probe observer runs inside the measured window; keydown/LoAF rows not strictly comparable with key-window-longest-ms
+- GATE304-INFO-REMOUNT / info / considered (D-29z810): not added in PERF-3d (svg stays mounted); harness candidate with PERF-3D-SCROLL-HARNESS-ROW | noted (D-29z800): PERF-3d planning considers it / suggestion: also count childList additions of path inside the waveform so a remount is visible to in.path-rewrites == 0
+- INFO-C305-SR3-NOTHING-TO-PLAY / info / folded into SR-305-3 (D-29z807); RT-FIX checks it / Play on the empty arrival writes "Nothing to play — add a clip from the library first."; the review did not mention it
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
