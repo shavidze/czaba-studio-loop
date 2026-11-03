@@ -1,0 +1,160 @@
+
+ RUN  v4.0.16 /tmp/a307/scratch
+
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS1 an unchanged deep copy has no changed clips 1ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS2 a clip gain change is not a schedule change 0ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS3 a fade-in change marks only that clip 0ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS4 envelope, move and trim each mark only their clip 1ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS5 an added or moved loop needs a full rebuild 0ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS6 an added or removed clip needs a full rebuild 0ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS7 an added track or a new track order needs a full rebuild 0ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > diffClipSchedule > RS8 a track mix change or a clip reorder is not a schedule change 0ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > planChangedClips > RS9 plans a changed clip from inside it 1ms
+ ✓ app/lib/arrangement/__tests__/reschedule.test.ts > planChangedClips > RS10 drops ended clips and keeps a future clip whole 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > starts each source at startAt + (when - from) with offset and duration 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > wires clip -> clipGain -> trackGain -> pan -> master -> destination 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > gives muted and non-soloed tracks gain 0 and still creates their sources 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > setTrackGain ramps the track gain without restarting sources 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > setTrackGain uses the short de-click constant for mute and unmute 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds the last target from construction: muted track unmutes with the short constant 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds the last target from construction: audible track volume change keeps smoothing 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > seeds a track silenced by another track solo so unsolo uses the short constant 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > keeps the last target per track: muting sfx does not change music smoothing 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > same-target re-sends keep their class and never restart sources 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > stop() stops every source and activeSourceCount returns to 0 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > a scheduled stop keeps sources active until the handoff time 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > counts sources that ended naturally as inactive 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > creates a video trackGain and plays video-track clips through it 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > keeps a muted video clip scheduled with track gain 0 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > solo on the video lane silences audio lanes and vice versa 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > appendPlan schedules a loop iteration on the same track gains and releases ended sources 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > skips clips without a loaded buffer 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > applySchedule > renderArrangementWav uses the same applySchedule as live playback 0ms
+ × app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC1 stops only the replaced clip at startAt and starts one new source 6ms
+   → expected [ 2.9 ] to deeply equal [ 3 ]
+ × app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC2 a sounding clip resumes at the same source offset 1ms
+   → expected [ 2.9 ] to deeply equal [ 3 ]
+ × app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC3 a clip that has not started yet is stopped and rescheduled 1ms
+   → expected [ 2.9 ] to deeply equal [ 3 ]
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC4 new fade shapes replace the old ones and an absent shape removes the fade 1ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC5 only items whose clip id is replaced are started 0ms
+ × app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC6 counts the replaced source until its stop and prunes ended states 0ms
+   → expected 3 to be 4 // Object.is equality
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC7 a replaced clip gain is the new target for later gain changes 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC8 a disconnected handle ignores a replace 0ms
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC9 a later appendPlan uses the replaced fade shape 0ms
+ × app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC10 a repeated replace pulls a later stop forward and keeps an earlier one 1ms
+   → expected [ 2.9 ] to deeply equal [ 3 ]
+ ✓ app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC11 new envelope shapes replace the old ones and an absent shape removes the envelope 1ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 35 passed (40)
+   Start at  02:10:13
+   Duration  709ms (transform 354ms, setup 0ms, import 419ms, tests 23ms, environment 647ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC1 stops only the replaced clip at startAt and starts one new source
+AssertionError: expected [ 2.9 ] to deeply equal [ 3 ]
+
+- Expected
++ Received
+
+  [
+-   3,
++   2.9,
+  ]
+
+ ❯ app/lib/arrangement/__tests__/graph.test.ts:484:24
+    482|     handle.replaceClips(['b'], planChangedClips(next, ['b'], 2), 2, 3,…
+    483|     const [oldB, newB] = sourcesOf(ctx, 'src-b');
+    484|     expect(oldB.stops).toEqual([3]);
+       |                        ^
+    485|     for (const id of ['src-a', 'src-c']) {
+    486|       const [source] = sourcesOf(ctx, id);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC2 a sounding clip resumes at the same source offset
+AssertionError: expected [ 2.9 ] to deeply equal [ 3 ]
+
+- Expected
++ Received
+
+  [
+-   3,
++   2.9,
+  ]
+
+ ❯ app/lib/arrangement/__tests__/graph.test.ts:502:24
+    500|     const [oldA, newA] = sourcesOf(ctx, 'src-a');
+    501|     expect(oldA.starts).toEqual([[1, 0, 10]]);
+    502|     expect(oldA.stops).toEqual([3]);
+       |                        ^
+    503|     expect(newA.starts).toHaveLength(1);
+    504|     expect(newA.starts[0][0]).toBe(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC3 a clip that has not started yet is stopped and rescheduled
+AssertionError: expected [ 2.9 ] to deeply equal [ 3 ]
+
+- Expected
++ Received
+
+  [
+-   3,
++   2.9,
+  ]
+
+ ❯ app/lib/arrangement/__tests__/graph.test.ts:518:24
+    516|     const [oldB, newB] = sourcesOf(ctx, 'src-b');
+    517|     expect(oldB.starts).toEqual([[11, 1, 10]]);
+    518|     expect(oldB.stops).toEqual([3]);
+       |                        ^
+    519|     expect(newB.starts).toEqual([[3 + (10 - 2), 1.5, 10]]);
+    520|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC6 counts the replaced source until its stop and prunes ended states
+AssertionError: expected 3 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 3
+
+ ❯ app/lib/arrangement/__tests__/graph.test.ts:573:40
+    571|     const next = fixtureWith('a', { fadeOut: 2 });
+    572|     handle.replaceClips(['a'], planChangedClips(next, ['a'], 2), 2, 3,…
+    573|     expect(handle.activeSourceCount()).toBe(4);
+       |                                        ^
+    574|     ctx.currentTime = 3.1;
+    575|     expect(handle.activeSourceCount()).toBe(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC10 a repeated replace pulls a later stop forward and keeps an earlier one
+AssertionError: expected [ 2.9 ] to deeply equal [ 3 ]
+
+- Expected
++ Received
+
+  [
+-   3,
++   2.9,
+  ]
+
+ ❯ app/lib/arrangement/__tests__/graph.test.ts:657:24
+    655|     handle.replaceClips(['b'], planChangedClips(next, ['b'], 2.5), 2.5…
+    656|     const [oldB, middleB, lastB] = sourcesOf(ctx, 'src-b');
+    657|     expect(oldB.stops).toEqual([3]);
+       |                        ^
+    658|     expect(middleB.stops).toEqual([3.5]);
+    659|     expect(lastB.stops).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+

@@ -1,0 +1,26 @@
+--- -	2026-11-03 02:10:13.819280728 +0000
++++ /tmp/a307/scratch/app/lib/arrangement/graph.client.ts	2026-11-03 02:10:13.816851546 +0000
+@@ -219,6 +219,7 @@
+   const clipEnvelopeTargets = new Map<string, ClipEnvelopeShape>(options.clipEnvelopes ?? []);
+   let sources: ScheduledSourceState<TBuffer>[] = [];
+   let disconnected = false;
++  const mutantStarts = new Map<unknown, number>();
+   const startPlan = (items: readonly ScheduledClip[], from: number, startAt: number) => {
+     for (const item of items) {
+       const buffer = options.buffers.get(item.sourceId);
+@@ -261,6 +262,7 @@
+       };
+       source.start(startAt + (item.when - from), item.sourceOffset, item.duration);
+       sources.push(state);
++      mutantStarts.set(state, startAt + (item.when - from));
+     }
+   };
+   startPlan(plan, options.from, options.startAt);
+@@ -433,6 +435,7 @@
+         if (
+           state.ended ||
+           !ids.has(state.clipId) ||
++          (mutantStarts.get(state) ?? 0) > startAt ||
+           (state.stopAt !== null && state.stopAt <= startAt)
+         ) {
+           continue;

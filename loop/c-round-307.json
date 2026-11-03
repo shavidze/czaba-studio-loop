@@ -1,0 +1,99 @@
+{
+ "round": 307,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T02:12:38.1635745Z",
+  "round": 307,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "NO-CHANGE",
+  "PLAY-SMOKE-307",
+  "G307-AUTH",
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "TESTS-READ",
+  "DOC"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "rows": {
+  "NO-CHANGE": "PASS: A tree prod build (C scratch, replaceClips in studio-lab bundle) :5190; 1440 and 1280: clips 30, playingAtStart true, 12/12 releases starts 30, playing true, loafMax 0, pos advancing = class of B head-1440/head-1280",
+  "PLAY-SMOKE-307": "PASS both vp (attempt 2; attempt 1 dev demo-ready timeout, environment): Bass via Enter, 00:01.471 after 1.5 s; fade-in drag while playing committed (data-fade-in 0.000->3.000), data-playing true, position +1.8 s in 1.5 s; 1 live start 2 ms after pointerup at playhead+0.05; destination-tap RMS 0.05-0.11 before and after; WAV RIFF/WAVE 48 kHz 24-bit stereo 768000 frames = 16.000 s, peak 0.217, NaN 0, fade-in ramp visible in RMS",
+  "G307-AUTH": "PASS both vp (attempt 2; attempt 1 cold /studio/middle-east, environment): studio-lab auth_user null + workspace + badge; /studio/middle-east Sign in required, 0 audio[src]; studio-token 401 no header, 500 fake bearer, 400 bare, no token",
+  "SOURCE-SCOPE": "PASS: 5 paths (2 M + 3 new); sha -c fails on exactly 2; protected, ArrangementContext.tsx, schedule.ts no diff; graph.test.ts 0 removed lines, import + top-level describe append; graph.client.ts edits only the granted parts",
+  "CLAIMS": "PASS except B-spec K14: 30 711 (task expected 19); K2/K6/K10/K11/K16 as specified; K5/K15 moved by content",
+  "TESTS-READ": "PASS: RS1-RS10, RC1-RC9 per section 6 (+RC10/RC11 reviewer rows); covering 10 files 185 green re-run by C; A mutant logs red on listed rows; C mutants C-MU-GAINDB->RS2, C-MU-NO-GAIN->RC7 red, restored green",
+  "DOC": "PASS: doc 224 l.4 exact, 7 TEMPLATE headings in order, cites existing rows and mutants"
+ },
+ "findings": [
+  {
+   "id": "INFO-C307-K14-COUNT",
+   "severity": "info",
+   "origin": "B spec",
+   "detail": "claims K14 counts ^  it\\( which also matches it( in a top-level appended describe: 30 711 vs expected 19"
+  },
+  {
+   "id": "INFO-C307-RC1-WORDING",
+   "severity": "info",
+   "origin": "B spec",
+   "detail": "section 6 RC1 says new b starts [3,...] and still covers from1=2, but b starts at 10; correct when = 11 (as RC3); A asserts [[11,1,9]]"
+  },
+  {
+   "id": "INFO-C307-COLD-DEV",
+   "severity": "info",
+   "origin": "environment",
+   "detail": "first dev-server load of studio-lab smoke and of /studio/middle-east timed out (cold compile); warm-up then valid"
+  }
+ ],
+ "notesForB": [
+  "K14 claim regex for appended top-level describes",
+  "RC1 wording vs RC3",
+  "stage b: browser-check ended firing for sources stopped before start (doc 224 TODO trap b)"
+ ],
+ "manifestPaths": 23,
+ "missingPaths": 0,
+ "countMismatches": 1,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 19,
+ "mutantsRecorded": 7,
+ "mutantRedOnSketch": 0,
+ "mutantRedOnSketchReason": "B ran no sketch this round (task section 2)",
+ "consults": "none",
+ "attempts": {
+  "PLAY-SMOKE-307": "1 environment-invalid (dev demo-ready timeout, smoke/attempt1-timeout.log), 1 valid",
+  "G307-AUTH": "1 environment-invalid (cold legacy route, auth/attempt1-cold.log), 1 valid",
+  "NO-CHANGE": "1 valid per viewport"
+ },
+ "ableton": "not applicable (performance round)",
+ "evidence": [
+  "c-round-307/checkpoints.md",
+  "c-round-307/claims-output.txt",
+  "c-round-307/sha256-check.txt",
+  "c-round-307/covering-subset.log",
+  "c-round-307/mut-C-GAINDB.log",
+  "c-round-307/mut-C-NOGAIN.log",
+  "c-round-307/probe/release-probe.cjs",
+  "c-round-307/probe/a-1440.json",
+  "c-round-307/probe/a-1280.json",
+  "c-round-307/probe/a-build.log",
+  "c-round-307/smoke/smoke307.cjs",
+  "c-round-307/smoke/smoke307.json",
+  "c-round-307/smoke/attempt1-timeout.log",
+  "c-round-307/auth/g307-auth.cjs",
+  "c-round-307/auth/g307-auth.json",
+  "c-round-307/auth/attempt1-cold.log",
+  "c-round-307/c-browse.json"
+ ]
+}
