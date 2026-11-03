@@ -1,0 +1,8 @@
+import { defineConfig, devices } from '@playwright/test';
+export default defineConfig({
+  testDir: '.', testMatch: '*.perf.spec.ts', workers: 1, retries: 0, timeout: 10 * 60 * 1000, reporter: [['list']],
+  outputDir: '/tmp/b315-artifacts',
+  use: { baseURL: 'http://127.0.0.1:5191', trace: 'off' },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } } }],
+  webServer: { command: 'cd .. && npm run build && npx remix-serve build/server/index.js', url: 'http://127.0.0.1:5191/studio-lab', reuseExistingServer: false, env: { PORT: '5191' }, timeout: 300000 },
+});

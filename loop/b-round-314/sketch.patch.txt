@@ -1,0 +1,440 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -2503,11 +2503,11 @@
+           return;
+         }
+         const buffer = result.buffer;
+-        buffersRef.current.set(sourceId, buffer);
+         requestSourcePeaks(buffer, signal, (peaks) => {
+           if (signal.aborted || !videoSourcesRef.current.has(sourceId)) {
+             return;
+           }
++          buffersRef.current.set(sourceId, buffer);
+           setSourcePeaks((previous) => new Map(previous).set(sourceId, peaks));
+           settle({ audio: 'ready', audioNote: null });
+           const present = historyRef.current.present;
+@@ -3921,11 +3921,11 @@
+           if (controller.signal.aborted) {
+             return;
+           }
+-          buffersRef.current.set(source.id, buffer);
+           requestSourcePeaks(buffer, controller.signal, (peaks) => {
+             if (controller.signal.aborted) {
+               return;
+             }
++            buffersRef.current.set(source.id, buffer);
+             setSourcePeaks((previous) => new Map(previous).set(source.id, peaks));
+             patchSourceState(source.id, {
+               status: 'ready',
+@@ -3933,6 +3933,10 @@
+               error: null,
+             });
+             settle(false);
++            const present = historyRef.current.present;
++            if (present.clips.some((clip) => clip.sourceId === source.id)) {
++              syncPlayback(present, undefined, true);
++            }
+           });
+         })
+         .catch((error: unknown) => {
+@@ -3949,7 +3953,7 @@
+         });
+     }
+     return () => controller.abort();
+-  }, [collection, getDecodeContext, patchSourceState, requestSourcePeaks]);
++  }, [collection, getDecodeContext, patchSourceState, requestSourcePeaks, syncPlayback]);
+ 
+   useEffect(() => {
+     return () => {
+--- a/app/lib/arrangement/peaks.client.ts
++++ b/app/lib/arrangement/peaks.client.ts
+@@ -4,6 +4,7 @@
+ export const PEAKS_CHUNK_SECONDS = 2;
+ export const PEAKS_CHUNKS_IN_FLIGHT = 4;
+ export const PEAKS_WORKER_STALL_TIMEOUT_MS = 3_000;
++export const PEAKS_WORKER_COLD_START_TIMEOUT_MS = 10_000;
+ 
+ export type SourcePeaksCallback = (peaks: Float32Array) => void;
+ 
+@@ -59,15 +60,26 @@
+ export function createSourcePeaksComputer(): SourcePeaksComputer {
+   let worker: Worker | null = null;
+   let workerFailed = false;
++  let workerReplied = false;
+   let nextJobId = 1;
+   let active: PeaksJob | null = null;
+   const queue: PeaksJob[] = [];
+   const pool: Float32Array<ArrayBuffer>[][] = [];
+   let stallTimer = 0;
+ 
++  const deliver = (job: PeaksJob, peaks: Float32Array) => {
++    try {
++      job.onPeaks(peaks);
++    } catch (error) {
++      window.setTimeout(() => {
++        throw error;
++      }, 0);
++    }
++  };
++
+   const deliverOnMainThread = (job: PeaksJob) => {
+     if (!job.signal.aborted) {
+-      job.onPeaks(computePeaksOnMainThread(job.buffer));
++      deliver(job, computePeaksOnMainThread(job.buffer));
+     }
+   };
+ 
+@@ -105,7 +117,10 @@
+ 
+   const armStall = () => {
+     window.clearTimeout(stallTimer);
+-    stallTimer = window.setTimeout(failWorker, PEAKS_WORKER_STALL_TIMEOUT_MS);
++    stallTimer = window.setTimeout(
++      failWorker,
++      workerReplied ? PEAKS_WORKER_STALL_TIMEOUT_MS : PEAKS_WORKER_COLD_START_TIMEOUT_MS,
++    );
+   };
+ 
+   const chunkLength = (buffer: AudioBuffer) =>
+@@ -184,6 +199,9 @@
+ 
+   const handleReply = (event: MessageEvent<unknown>) => {
+     const reply = readPeaksWorkerReply(event.data);
++    if (reply) {
++      workerReplied = true;
++    }
+     const job = active;
+     if (!reply || !job || reply.jobId !== job.jobId) {
+       return;
+@@ -197,7 +215,7 @@
+     }
+     active = null;
+     if (!job.signal.aborted) {
+-      job.onPeaks(reply.peaks);
++      deliver(job, reply.peaks);
+     }
+     if (!active) {
+       startNext();
+--- a/app/lib/arrangement/__tests__/peaks-worker.test.ts
++++ b/app/lib/arrangement/__tests__/peaks-worker.test.ts
+@@ -7,6 +7,7 @@
+   useArrangement,
+ } from '~/contexts/ArrangementContext';
+ import type { WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
+ import {
+   accumulatePeakChunk,
+   computePeaks,
+@@ -17,6 +18,7 @@
+   createSourcePeaksComputer,
+   PEAKS_CHUNK_SECONDS,
+   PEAKS_CHUNKS_IN_FLIGHT,
++  PEAKS_WORKER_COLD_START_TIMEOUT_MS,
+   PEAKS_WORKER_STALL_TIMEOUT_MS,
+ } from '../peaks.client';
+ import {
+@@ -381,19 +383,82 @@
+     expect(FakePeaksWorker.instances).toHaveLength(1);
+   });
+ 
+-  it('PW9 a stalled worker falls back after the stall timeout', () => {
++  it('PW20 an empty buffer gets its peaks at once on the main thread and starts no worker', () => {
++    const results: Float32Array[] = [];
++    createSourcePeaksComputer().request(
++      new FakeAudioBuffer([new Float32Array(0)], 1000),
++      new AbortController().signal,
++      (p) => results.push(p),
++    );
++    expect(results).toHaveLength(1);
++    expect(bytes(results[0])).toEqual(
++      bytes(computePeaks([new Float32Array(0)], 1000, PEAK_BUCKETS_PER_SECOND)),
++    );
++    expect(FakePeaksWorker.instances).toHaveLength(0);
++  });
++
++  it('PW9 after the first reply, a stalled worker falls back after the stall timeout', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const results: Float32Array[] = [];
++    createSourcePeaksComputer().request(
++      new FakeAudioBuffer([signal(6, 7000)], 1000),
++      new AbortController().signal,
++      (p) => results.push(p),
++    );
++    const worker = FakePeaksWorker.instances[0];
++    worker.run(worker.posted[0].message);
++    worker.run(worker.posted[1].message);
++    expect(results).toHaveLength(0);
++    vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS - 1);
++    expect(results).toHaveLength(0);
++    vi.advanceTimersByTime(1);
++    expect(results).toHaveLength(1);
++    expect(worker.terminated).toBe(1);
++    expect(vi.getTimerCount()).toBe(0);
++  });
++
++  it('PW14 a worker that has not replied yet gets the cold-start budget, not the stall timeout', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const results: Float32Array[] = [];
++    createSourcePeaksComputer().request(
++      new FakeAudioBuffer([signal(14, 700)], 1000),
++      new AbortController().signal,
++      (p) => results.push(p),
++    );
++    vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS);
++    expect(results).toHaveLength(0);
++    vi.advanceTimersByTime(PEAKS_WORKER_COLD_START_TIMEOUT_MS - PEAKS_WORKER_STALL_TIMEOUT_MS - 1);
++    expect(results).toHaveLength(0);
++    expect(FakePeaksWorker.instances[0].terminated).toBe(0);
++    vi.advanceTimersByTime(1);
++    expect(results).toHaveLength(1);
++    expect(FakePeaksWorker.instances[0].terminated).toBe(1);
++    expect(vi.getTimerCount()).toBe(0);
++  });
++
++  it('PW15 every worker reply re-arms the stall timer', () => {
+     vi.useFakeTimers();
+     FakePeaksWorker.auto = false;
+     const results: Float32Array[] = [];
+     createSourcePeaksComputer().request(
+-      new FakeAudioBuffer([signal(6, 700)], 1000),
++      new FakeAudioBuffer([signal(15, 20000)], 1000),
+       new AbortController().signal,
+       (p) => results.push(p),
+     );
++    const worker = FakePeaksWorker.instances[0];
++    worker.run(worker.posted[0].message);
++    for (let step = 1; step <= 3; step++) {
++      vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS - 1);
++      worker.run(worker.posted[step].message);
++    }
+     vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS - 1);
+     expect(results).toHaveLength(0);
++    expect(worker.terminated).toBe(0);
+     vi.advanceTimersByTime(1);
+     expect(results).toHaveLength(1);
++    expect(worker.terminated).toBe(1);
+   });
+ 
+   it('PW10 runs jobs one at a time in request order', async () => {
+@@ -487,7 +552,120 @@
+   });
+ });
+ 
++class RecordingSource {
++  static started: unknown[] = [];
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  connect(destination: unknown) {
++    return destination;
++  }
++  disconnect() {}
++  start() {
++    RecordingSource.started.push(this.buffer);
++  }
++  stop() {}
++}
++
++class RecordingAudioContext {
++  state = 'running';
++  sampleRate = 48000;
++  currentTime = 0;
++  destination = { connect: () => undefined, disconnect: () => undefined };
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return {
++      gain: { value: 0, setTargetAtTime() {} },
++      connect: (d: unknown) => d,
++      disconnect() {},
++    };
++  }
++  createStereoPanner() {
++    return { pan: { value: 0, setTargetAtTime() {} }, connect: (d: unknown) => d, disconnect() {} };
++  }
++  createBufferSource() {
++    return new RecordingSource();
++  }
++}
++
++describe('PW18 a source buffer reaches playback only together with "ready"', () => {
++  beforeEach(() => {
++    FakePeaksWorker.instances = [];
++    FakePeaksWorker.auto = false;
++    FakePeaksWorker.marker = null;
++    RecordingSource.started = [];
++    vi.stubGlobal('Worker', FakePeaksWorker);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioContext', RecordingAudioContext);
++  });
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it('PW18 playback started while peaks run leaves the clip out, then re-syncs it in when the source is ready', async () => {
++    const buffer = new FakeAudioBuffer([signal(18, 1500)], 1000);
++    const collection: WorkspaceCollection = {
++      id: 'peaks-buffer',
++      label: 'peaks-buffer',
++      origin: 'demo',
++      sources: [
++        {
++          id: 'tone',
++          title: 'Tone',
++          collectionLabel: 'peaks-buffer',
++          kind: 'music',
++          origin: 'demo',
++        },
++      ],
++      loadSource: async () => buffer,
++    };
++    const base = createArrangement([
++      { id: 'video', kind: 'video', name: 'Video' },
++      { id: 'music', kind: 'audio', name: 'Music' },
++    ]);
++    const initialArrangement = {
++      ...base,
++      clips: [
++        { id: 'c1', trackId: 'music', sourceId: 'tone', start: 0, sourceOffset: 0, duration: 1.5 },
++      ],
++    };
++    const api: PeaksProbeRef = { current: null };
++    const view = render(
++      createElement(
++        ArrangementProvider,
++        { collection, initialArrangement },
++        createElement(PeaksProbe, { api }),
++      ),
++    );
++    await act(async () => {
++      await settle(50);
++    });
++    expect(api.current?.sourceStates.tone?.status).toBe('loading');
++    await act(async () => {
++      api.current?.togglePlayback();
++      await settle(50);
++    });
++    expect(api.current?.isPlaying).toBe(true);
++    expect(RecordingSource.started).not.toContain(buffer);
++    const worker = FakePeaksWorker.instances[0];
++    await act(async () => {
++      for (let index = 0; index < worker.posted.length; index++) {
++        worker.run(worker.posted[index].message);
++      }
++      await settle(50);
++    });
++    expect(api.current?.sourceStates.tone?.status).toBe('ready');
++    expect(RecordingSource.started).toContain(buffer);
++    view.unmount();
++  });
++});
++
+ const POST_FAILURE_TYPES: PeaksWorkerRequest['type'][] = ['begin', 'chunk'];
++const LATE_POST_FAILURE_TYPES: PeaksWorkerRequest['type'][] = ['end', 'cancel'];
+ 
+ describe('PW12-PW13 peaks client robustness (A-R312 review)', () => {
+   beforeEach(() => {
+@@ -550,4 +728,98 @@
+     expect(results).toHaveLength(2);
+     expect(FakePeaksWorker.instances).toHaveLength(1);
+   });
++  it.each(
++    LATE_POST_FAILURE_TYPES,
++  )('PW13b a throwing postMessage on %s turns the worker off without a stray timer', async (type) => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const channels = [signal(13, 2500)];
++    const controller = new AbortController();
++    const results: Float32Array[] = [];
++    createSourcePeaksComputer().request(
++      new FakeAudioBuffer(channels, 1000),
++      controller.signal,
++      (p) => results.push(p),
++    );
++    const worker = FakePeaksWorker.instances[0];
++    worker.run(worker.posted[0].message);
++    if (type === 'cancel') {
++      controller.abort();
++    } else {
++      worker.run(worker.posted[1].message);
++    }
++    FakePeaksWorker.throwOn = type;
++    const last = type === 'cancel' ? 1 : 2;
++    expect(() => worker.run(worker.posted[last].message)).not.toThrow();
++    expect(worker.terminated).toBe(1);
++    expect(vi.getTimerCount()).toBe(0);
++    if (type === 'end') {
++      expect(results).toHaveLength(1);
++      expect(bytes(results[0])).toEqual(
++        bytes(computePeaks(channels, 1000, PEAK_BUCKETS_PER_SECOND)),
++      );
++    } else {
++      expect(results).toHaveLength(0);
++    }
++    vi.useRealTimers();
++  });
++
++  it('PW16 a throwing onPeaks still starts and delivers the next job and rethrows on a timer', () => {
++    FakePeaksWorker.auto = false;
++    const computer = createSourcePeaksComputer();
++    const results: string[] = [];
++    computer.request(
++      new FakeAudioBuffer([signal(16, 700)], 1000),
++      new AbortController().signal,
++      () => {
++        results.push('first');
++        throw new Error('first onPeaks failed');
++      },
++    );
++    computer.request(
++      new FakeAudioBuffer([signal(17, 700)], 1000),
++      new AbortController().signal,
++      () => results.push('second'),
++    );
++    const worker = FakePeaksWorker.instances[0];
++    worker.run(worker.posted[0].message);
++    worker.run(worker.posted[1].message);
++    vi.useFakeTimers();
++    expect(() => worker.run(worker.posted[2].message)).not.toThrow();
++    expect(results).toEqual(['first']);
++    const begins = worker.posted.filter((entry) => entry.message.type === 'begin');
++    expect(begins.map((entry) => entry.message.jobId)).toEqual([1, 2]);
++    for (let index = 3; index < worker.posted.length; index++) {
++      worker.run(worker.posted[index].message);
++    }
++    expect(results).toEqual(['first', 'second']);
++    expect(() => vi.runOnlyPendingTimers()).toThrow('first onPeaks failed');
++    vi.useRealTimers();
++  });
++
++  it('PW17 a worker failure delivers every pending job even when one onPeaks throws, and rethrows on a timer', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const computer = createSourcePeaksComputer();
++    const results: string[] = [];
++    computer.request(
++      new FakeAudioBuffer([signal(18, 700)], 1000),
++      new AbortController().signal,
++      () => {
++        results.push('first');
++        throw new Error('fallback onPeaks failed');
++      },
++    );
++    computer.request(
++      new FakeAudioBuffer([signal(19, 700)], 1000),
++      new AbortController().signal,
++      () => results.push('second'),
++    );
++    const worker = FakePeaksWorker.instances[0];
++    expect(() => worker.onerror?.(new Event('error'))).not.toThrow();
++    expect(results).toEqual(['first', 'second']);
++    expect(worker.terminated).toBe(1);
++    expect(() => vi.runOnlyPendingTimers()).toThrow('fallback onPeaks failed');
++    vi.useRealTimers();
++  });
+ });

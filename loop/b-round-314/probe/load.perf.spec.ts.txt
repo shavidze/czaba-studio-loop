@@ -1,0 +1,32 @@
+import { test } from '@playwright/test';
+import { writeFileSync } from 'node:fs';
+import { installPerfInstrumentation } from '../perf/lib/instrumentation';
+import { snapshot, waitForCollectionReady, waitForLibraryReady } from '../perf/lib/page';
+
+const out = process.env.B315_OUT ?? '/tmp/b315-load.json';
+const rate = Number(process.env.B315_RATE ?? '1');
+test('load commits around peaks', async ({ browser }) => {
+  const runs: unknown[] = [];
+  for (let pass = 0; pass < 3; pass += 1) {
+    const context = await browser.newContext();
+    await context.addInitScript(() => { localStorage.setItem('czaba_analytics_consent', 'denied'); });
+    await context.addInitScript(installPerfInstrumentation);
+    const page = await context.newPage();
+    const cdp = await context.newCDPSession(page);
+    if (rate > 1) await cdp.send('Emulation.setCPUThrottlingRate', { rate });
+    await page.goto('/studio-lab', { waitUntil: 'load', timeout: 120000 });
+    const readyMs = await waitForLibraryReady(page);
+    const problems: string[] = [];
+    const settledMs = await waitForCollectionReady(page, problems, 'probe');
+    const snap = await snapshot(page, 0, settledMs);
+    const marks = await page.evaluate(() => performance.getEntriesByType('mark').filter((m) => m.name.startsWith('b315')).map((m) => ({ name: m.name, t: Math.round(m.startTime) })));
+    runs.push({
+      pass, rate, readyMs: Math.round(readyMs), settledMs: Math.round(settledMs), problems,
+      marks,
+      commits: snap.commits.map((c) => ({ t: Math.round(c.t), rendered: c.rendered, names: (c as { names?: string[] }).names?.slice(0, 400) })),
+      longtasks: snap.longtasks.map((l) => ({ t: Math.round(l.t), d: Math.round(l.duration) })),
+    });
+    await context.close();
+  }
+  writeFileSync(out, JSON.stringify(runs, null, 1));
+});

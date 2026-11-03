@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T09:33:11.219Z)
+# Active loop summary (2026-11-03T11:30:32.821Z)
 
-- backlog.json 3032 KB -> active view 411 KB
-- status: G_ROOT_GATE round 313
-- servers: `{"checkedUtc":"2026-11-03T08:36:17.0713471Z","round":313,"attempt":1,"store":200}`
-- last publication: dfa45028c11aae533aa44e14ef74b0f76958cd7d (rounds 311-311)
-- last root gate: round 313 skipped - C taskStatus FAIL
+- backlog.json 3038 KB -> active view 413 KB
+- status: G_ROOT_GATE round 314
+- servers: `{"checkedUtc":"2026-11-03T10:56:59.4323906Z","round":314,"attempt":1,"store":200}`
+- last publication: abfcf784e7e166e4de1fa361436587a4c1110c5f (rounds 312-314)
+- last root gate: round 314 published - commit abfcf784e7e166e4de1fa361436587a4c1110c5f pushed
 
 ## Current items: -
 
@@ -754,12 +754,15 @@
 - SABA-Q-PERF4-STUDIO-CACHE / info / awaiting_user (D-29z821); blocks PERF-4b only / Purchased Studio stems: allow the buyer browser to keep them on disk (private, no-cache + ETag, every reuse re-authorized; faster re-open) o
 - SABA-Q-WORKER-DEPLOYED / info / awaiting_user (D-29z823); non-blocking (both copies edited in lockstep) / Which R2 worker copy is deployed: workers/r2-proxy.js (has the cover-image route) or cloudflare/r2-worker.js? After the answer a bounded tas
 - WK-STORE-PREVIEW-LIVE / info / not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) | D-29z827: post-deploy list extended by PERF-4d (Safari 206, OOB branch on real R2, CDN must not store 416, TTFB p50/p95 + Class B metrics, onlyIf option) | D-29z831: post-deploy list adds: bytes=0-<huge> and bytes=-<huge> give 206 on real R2 (open offset); If-Range re-read + If-None-Match 304 / ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a
-- C-R312-01 / medium / scheduled round 313 (D-29z838) / PERF-1a harness.loaf-scripts self-check fails on A's PERF-5a tree: the settled load window holds no LoAF with script timings once peaks leav
+- C-R312-01 / medium / fix applied round 313 (C harness rows PASS, round 313); closes when round 314 C PASS + gate (D-29z841) | scheduled round 313 (D-29z838) / PERF-1a harness.loaf-scripts self-check fails on A's PERF-5a tree: the settled load window holds no LoAF with script timings once peaks leav
 - A-R312-REVIEW-L1 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / 3000 ms peaks stall also covers worker cold start; a slow first start disables the worker for the session (demo-synth uses 10 s)
 - A-R312-REVIEW-L2 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / onPeaks throwing skips startNext in handleReply / loses later jobs in failWorker loop; fix try/finally (not reachable today)
 - A-R312-REVIEW-L3 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / buffersRef set before the peaks request: syncPlayback/export can see a still-loading source's buffer (library preview guarded)
 - A-R312-REVIEW-L4 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / missing PW rows: video call site (ready after peaks, videoSourcesRef guard), empty buffer; stall armed only at begin passes PW9; video callb
 - A-R312-REVIEW-L5 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / PW13 does not cover a throw on end or cancel, and has no timer-count assert
+- C-R313-01 / medium / scheduled round 314 (D-29z842) / fader.clipgain.playing 6x commits/release-commits flip 91/1 vs 92/2 across passes; the extra release commit is the ruler re-render from a he
+- R313-METER-OVER-LATCH-WATCH / info / watch: never seen in any run; if a fader row varies with a meter component in the commit, add a before/after over-state guard like the scroll guard / meter over flags latch once (ArrangementMaster.tsx:58, ArrangementTrackMeter.tsx:25, meter.ts:88); if the fixture ever clips with a fader ne
+- R313-FOLLOW-PAGE-TURN-COVERAGE / info / signal, not scheduled: candidate playback row for a later PERF task (decide at PERF-5b or PERF-7 planning) / signal: with Follow off in the fader scenarios and play.idle seeing no page turn, no perf row measures a Follow page turn's own cost
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

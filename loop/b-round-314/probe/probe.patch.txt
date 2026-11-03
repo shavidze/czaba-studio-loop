@@ -1,0 +1,85 @@
+--- /home/runner/czaba-project/store/app/contexts/ArrangementContext.tsx	2026-11-03 10:35:39.924466608 +0000
++++ app/contexts/ArrangementContext.tsx	2026-11-03 11:33:58.853937444 +0000
+@@ -3921,11 +3921,13 @@
+           if (controller.signal.aborted) {
+             return;
+           }
++          performance.mark(`b315-decoded:${source.id}`);
+           buffersRef.current.set(source.id, buffer);
+           requestSourcePeaks(buffer, controller.signal, (peaks) => {
+             if (controller.signal.aborted) {
+               return;
+             }
++            performance.mark(`b315-peaks:${source.id}`);
+             setSourcePeaks((previous) => new Map(previous).set(source.id, peaks));
+             patchSourceState(source.id, {
+               status: 'ready',
+--- /home/runner/czaba-project/store/vite.config.ts	2026-11-03 10:34:35.239165272 +0000
++++ vite.config.ts	2026-11-03 11:33:46.522295589 +0000
+@@ -23,6 +23,8 @@
+   ssr: {
+     external: ['firebase-admin', 'wavesurfer.js'],
+   },
++  cacheDir: '/tmp/b315s-vite-cache',
++  build: { minify: false },
+   optimizeDeps: {
+     exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
+   },
+--- /home/runner/czaba-project/store/perf/lib/instrumentation.ts	2026-11-03 10:34:34.977142845 +0000
++++ perf/lib/instrumentation.ts	2026-11-03 11:33:58.842150436 +0000
+@@ -1,5 +1,6 @@
+ export interface PerfFiber {
+   tag: number;
++  type?: unknown;
+   flags: number;
+   child: PerfFiber | null;
+   sibling: PerfFiber | null;
+@@ -13,6 +14,7 @@
+ export interface PerfCommitRecord {
+   t: number;
+   rendered: number;
++  names?: string[];
+ }
+ 
+ export interface PerfStartRecord {
+@@ -105,8 +107,22 @@
+ 
+   const componentTags = new Set([0, 1, 11, 14, 15]);
+   const performedWork = 1;
++  let probeNames: string[] = [];
++  const fiberName = (fiber: PerfFiber): string => {
++    const type = fiber.type;
++    if (typeof type === 'function') {
++      const named = type as { displayName?: string; name?: string };
++      return named.displayName ?? named.name ?? '?fn';
++    }
++    if (typeof type === 'object' && type !== null) {
++      const obj = type as { displayName?: string; render?: { displayName?: string; name?: string }; type?: { displayName?: string; name?: string } };
++      return obj.displayName ?? obj.render?.displayName ?? obj.render?.name ?? obj.type?.displayName ?? obj.type?.name ?? '?obj';
++    }
++    return `?tag${fiber.tag}`;
++  };
+   const countRenderedComponents = (root: PerfFiberRoot): number => {
+     let rendered = 0;
++    probeNames = [];
+     const visit = (fiber: PerfFiber): void => {
+       let child = fiber.child;
+       while (child) {
+@@ -114,6 +130,7 @@
+         const didWork = (child.flags & performedWork) === performedWork;
+         if (componentTags.has(child.tag) && (alternate === null || didWork)) {
+           rendered += 1;
++          probeNames.push(fiberName(child));
+         }
+         if (alternate === null || child.child !== alternate.child || didWork) {
+           visit(child);
+@@ -145,7 +162,8 @@
+     checkDCE(): void {},
+     onScheduleFiberRoot(): void {},
+     onCommitFiberRoot(_rendererId: number, root: PerfFiberRoot): void {
+-      state.commits.push({ t: performance.now(), rendered: countRenderedComponents(root) });
++      const rendered = countRenderedComponents(root);
++      state.commits.push({ t: performance.now(), rendered, names: probeNames });
+     },
+     onCommitFiberUnmount(): void {},
+     onPostCommitFiberRoot(): void {},
