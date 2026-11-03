@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T11:30:32.821Z)
+# Active loop summary (2026-11-03T12:55:52.969Z)
 
-- backlog.json 3038 KB -> active view 413 KB
-- status: G_ROOT_GATE round 314
-- servers: `{"checkedUtc":"2026-11-03T10:56:59.4323906Z","round":314,"attempt":1,"store":200}`
-- last publication: abfcf784e7e166e4de1fa361436587a4c1110c5f (rounds 312-314)
-- last root gate: round 314 published - commit abfcf784e7e166e4de1fa361436587a4c1110c5f pushed
+- backlog.json 3049 KB -> active view 415 KB
+- status: G_ROOT_GATE round 315
+- servers: `{"checkedUtc":"2026-11-03T12:27:30.9881454Z","round":315,"attempt":1,"store":200}`
+- last publication: c136dfd83935d3939c83cd597ea34af388b1dd32 (rounds 315-315)
+- last root gate: round 315 published - commit c136dfd83935d3939c83cd597ea34af388b1dd32 pushed
 
 ## Current items: -
 
@@ -684,7 +684,7 @@
 - B-R281-RESOURCES-READY-FAILED / low / signal (D-29z657, narrowed; not scheduled): adding a status wait to 1b-ii moves time-since-load rows such as res.mem.used-ready-mib (round 279 measured) | signal (D-29z652; not scheduled): tech-lead (b) - different ready signal, a change would not be byte-identical / PERF-1b-ii has no status wait: when a NON-selected demo source fails after the library is ready (Add enabled + waveform), it continues and m
 - B-R281-GATE279-S1-PREMISE / info / RETRO 290 (D-29z718): counted in retro-290 section 8 / claims-findings-hand.txt (B-found before damage; not in the experiment baseline) | recorded (D-29z657) / GATE279-S1 named waitForCollectionReady as the wait that times out on a failed demo source; the first wait that times out is the 90 s librar
 - PERF2-FIRST-FRAME-LONGTASK / info / signal (D-29z662): not scheduled; candidates PERF-11 (root diet) and PERF-7 (fonts); B re-measures with LoAF attribution when planning those / the first load frame is a long task of 77-131 ms with no script over 5 ms (parse/style/layout before hydration); it keeps load.longtask-max 
-- PERF2-STEREO-COPY / low / signal (D-29z661): not in round 282 (code = measured sketch); fold into PERF-5 (peaks in a worker) planning / loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) before copyToChannel; calling copyToChannel t
+- PERF2-STEREO-COPY / low / moved to PERF-13 (D-29z846) | signal (D-29z661): not in round 282 (code = measured sketch); fold into PERF-5 (peaks in a worker) planning / loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) before copyToChannel; calling copyToChannel t
 - INFO-B282-CONSULT-FALSE-CLAIMS / info / RETRO 290 (D-29z718): counted in retro-290 section 8 / claims-findings-hand.txt (B-found before damage; not in the experiment baseline) | recorded (D-29z661): consult output is data; count at RETRO 290 / performance-optimizer consult (round 282 planning) stated perf-plan.md does not exist and that no export sha check exists; both false
 - GATE281-S2 / low / re-dispatched round 283 (D-29z666): doc 169 B-R281 TODO bullet; round 282 did not write it / doc 169 / doc 210: B-R281-RESOURCES-READY-FAILED should say that in the measured runs a failed non-selected source usually aborts PERF-1b-ii
 - GATE281-ARCH-COLLECTION-STATE-ATTR / info / architecture signal (D-29z659): recorded, not scheduled / proposal: the app sets data-collection-state="loading|ready|failed" on arrangement-status and the three perf waits read it instead of text p
@@ -754,15 +754,19 @@
 - SABA-Q-PERF4-STUDIO-CACHE / info / awaiting_user (D-29z821); blocks PERF-4b only / Purchased Studio stems: allow the buyer browser to keep them on disk (private, no-cache + ETag, every reuse re-authorized; faster re-open) o
 - SABA-Q-WORKER-DEPLOYED / info / awaiting_user (D-29z823); non-blocking (both copies edited in lockstep) / Which R2 worker copy is deployed: workers/r2-proxy.js (has the cover-image route) or cloudflare/r2-worker.js? After the answer a bounded tas
 - WK-STORE-PREVIEW-LIVE / info / not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) | D-29z827: post-deploy list extended by PERF-4d (Safari 206, OOB branch on real R2, CDN must not store 416, TTFB p50/p95 + Class B metrics, onlyIf option) | D-29z831: post-deploy list adds: bytes=0-<huge> and bytes=-<huge> give 206 on real R2 (open offset); If-Range re-read + If-None-Match 304 / ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a
-- C-R312-01 / medium / fix applied round 313 (C harness rows PASS, round 313); closes when round 314 C PASS + gate (D-29z841) | scheduled round 313 (D-29z838) / PERF-1a harness.loaf-scripts self-check fails on A's PERF-5a tree: the settled load window holds no LoAF with script timings once peaks leav
-- A-R312-REVIEW-L1 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / 3000 ms peaks stall also covers worker cold start; a slow first start disables the worker for the session (demo-synth uses 10 s)
-- A-R312-REVIEW-L2 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / onPeaks throwing skips startNext in handleReply / loses later jobs in failWorker loop; fix try/finally (not reachable today)
-- A-R312-REVIEW-L3 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / buffersRef set before the peaks request: syncPlayback/export can see a still-loading source's buffer (library preview guarded)
-- A-R312-REVIEW-L4 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / missing PW rows: video call site (ready after peaks, videoSourcesRef guard), empty buffer; stall armed only at begin passes PW9; video callb
-- A-R312-REVIEW-L5 / low / deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / PW13 does not cover a throw on end or cancel, and has no timer-count assert
-- C-R313-01 / medium / scheduled round 314 (D-29z842) / fader.clipgain.playing 6x commits/release-commits flip 91/1 vs 92/2 across passes; the extra release commit is the ruler re-render from a he
+- A-R312-REVIEW-L1 / low / scheduled round 315 (D-29z847) | deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / 3000 ms peaks stall also covers worker cold start; a slow first start disables the worker for the session (demo-synth uses 10 s)
+- A-R312-REVIEW-L2 / low / scheduled round 315 (D-29z847) | deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / onPeaks throwing skips startNext in handleReply / loses later jobs in failWorker loop; fix try/finally (not reachable today)
+- A-R312-REVIEW-L3 / low / scheduled round 315 (D-29z847) | deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / buffersRef set before the peaks request: syncPlayback/export can see a still-loading source's buffer (library preview guarded)
+- A-R312-REVIEW-L4 / low / scheduled round 315 (D-29z847) | deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / missing PW rows: video call site (ready after peaks, videoSourcesRef guard), empty buffer; stall armed only at begin passes PW9; video callb
+- A-R312-REVIEW-L5 / low / scheduled round 315 (D-29z847) | deferred_low_polish (D-29z839): PERF-5 batch, closes in PERF-5b / PW13 does not cover a throw on end or cancel, and has no timer-count assert
 - R313-METER-OVER-LATCH-WATCH / info / watch: never seen in any run; if a fader row varies with a meter component in the commit, add a before/after over-state guard like the scroll guard / meter over flags latch once (ArrangementMaster.tsx:58, ArrangementTrackMeter.tsx:25, meter.ts:88); if the fixture ever clips with a fader ne
-- R313-FOLLOW-PAGE-TURN-COVERAGE / info / signal, not scheduled: candidate playback row for a later PERF task (decide at PERF-5b or PERF-7 planning) / signal: with Follow off in the fader scenarios and play.idle seeing no page turn, no perf row measures a Follow page turn's own cost
+- R313-FOLLOW-PAGE-TURN-COVERAGE / info / decided (D-29z846): deferred to PERF-10 planning | signal, not scheduled: candidate playback row for a later PERF task (decide at PERF-5b or PERF-7 planning) / signal: with Follow off in the fader scenarios and play.idle seeing no page turn, no perf row measures a Follow page turn's own cost
+- INFO-C314-DOC-PENDING-SENTENCE / info / scheduled round 315 (D-29z845) / docs 163/228 still say 'C-ის შემოწმება მოლოდინშია' after C 314 PASS
+- R314-PEAKS-COMMIT-COMPONENTS / info / signal (D-29z846): PERF-10 / each peaks delivery commits the whole provider subtree: 9 x 94 components per /studio-lab load
+- R314-DEMO-BUFFER-LONGTASK-6X / info / signal (D-29z846): PERF-13 (with PERF2-STEREO-COPY) / a 142-168 ms long task at 6x just before the demo stems' buffers appear; hypothesis (unconfirmed): AudioBuffer creation + channel copies in 
+- B-R314-EXPORT-LOADING-GATE / info / signal (D-29z849): revisit at SRW-21-PLAN / export has no gate for a collection source still 'loading'; its clip is silently omitted (not reachable in /studio-lab: no initial clips)
+- ARCH-R314-FENCE-FADER-WINDOW / info / signal, not scheduled (D-29z849): keep runPass/dragFader linear; if a fourth guard round comes, propose a bounded task folding the per-drag preconditions into one fenceFaderWindow helper with the same problem strings / perf harness per-drag preconditions accumulate in dragFader/runPass
+- A-R314-REVIEW-L2 / info / signal (D-29z849): harness detail; candidate for the next perf-spec round (record scrollWidth/clientWidth in the guard detail) / the timeline scroll guard cannot tell 'not scrollable' from 'did not scroll'
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

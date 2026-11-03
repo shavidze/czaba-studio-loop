@@ -1,0 +1,85 @@
+{
+ "taskStatus": "PASS",
+ "round": 315,
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T12:27:30.9881454Z",
+  "round": 315,
+  "attempt": 1,
+  "store": 200
+ },
+ "assertsSpecified": 9,
+ "mutantsRecorded": 12,
+ "mutantRedOnSketch": 10,
+ "cOwnMutants": {
+  "recorded": 4,
+  "red": [
+   "C-MU-DELIVER-MICROTASK (PW16,PW17)",
+   "C-MU-FALLBACK-NO-DELIVER (PW17)"
+  ],
+  "survived": [
+   "C-MU-COLD-START-VALUE",
+   "C-MU-REPLIED-ON-GARBAGE"
+  ]
+ },
+ "bugs": [
+  {
+   "id": "C-R315-T1",
+   "severity": "low",
+   "origin": "C",
+   "kind": "test-coverage",
+   "steps": [
+    "On a scratch copy set PEAKS_WORKER_COLD_START_TIMEOUT_MS = 5_000",
+    "npx vitest run app/lib/arrangement/__tests__/peaks-worker.test.ts"
+   ],
+   "expected": "a row pins the 10,000 ms cold-start value",
+   "actual": "25/25 pass; PW14 is relative to the constant. The value is verified only by the browser (worker terminated at 10,000 ms with a 12 s hold)",
+   "evidence": "c-round-315/c-own-mutants.txt, c-round-315/cold-a-1440-hold12s.json"
+  },
+  {
+   "id": "C-R315-T2",
+   "severity": "low",
+   "origin": "C",
+   "kind": "test-coverage",
+   "steps": [
+    "On a scratch copy replace `if (reply) { workerReplied = true; }` with `workerReplied = true;`",
+    "npx vitest run app/lib/arrangement/__tests__/peaks-worker.test.ts"
+   ],
+   "expected": "a row shows an unparsable message does not end the cold-start budget",
+   "actual": "25/25 pass",
+   "evidence": "c-round-315/c-own-mutants.txt"
+  }
+ ],
+ "info": [
+  "K8 also lists peaks-worker-video.test.tsx (follows from PW19's fake Worker; not in the task's by-design list)",
+  "doc 228 credits stage-1 browser rows to C round 314; they were run in C round 312 (PERF-5a closed in 314)",
+  "pre-existing: video sound cut at video duration without fade (last samples ~0.50); export byte-equal to HEAD; belongs to T12.13 micro fades"
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "SKETCH-EQUAL",
+  "UNIT",
+  "PK-LOAD",
+  "PK-COLD-START",
+  "PK-VIDEO-SOUND",
+  "PK-PERF-LOAD",
+  "DOC",
+  "G315-AUTH"
+ ],
+ "notRunnableHere": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "environmentInvalidAttempts": [
+  "G315-AUTH attempt 1: cold compile timeout on /studio/middle-east (replaced after warm-up)",
+  "perf warm-up script timed out on dev-server cold compile (302 s); perf run itself valid, 164/164 rows equal"
+ ],
+ "evidenceDir": "c-round-315/"
+}

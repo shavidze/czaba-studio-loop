@@ -1,0 +1,1029 @@
+--- a/app/root.tsx
++++ b/app/root.tsx
+@@ -20,6 +20,7 @@
+ import { GA4_MEASUREMENT_ID } from '~/lib/analytics';
+ import { FB_PIXEL_ID } from '~/lib/facebook-pixel';
+ import { useFocusSourceAttribute } from '~/lib/focus-source';
++import fontStyles from './assets/fonts/fonts.css?url';
+ import { AudioProvider } from './contexts/AudioContext';
+ import { AuthProvider } from './contexts/AuthContext';
+ import { CartProvider } from './contexts/CartContext';
+@@ -31,12 +32,7 @@
+ import appStyles from './styles/app.css?url';
+ 
+ export const links: LinksFunction = () => [
+-  { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+-  { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+-  {
+-    rel: 'stylesheet',
+-    href: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap',
+-  },
++  { rel: 'stylesheet', href: fontStyles },
+   { rel: 'stylesheet', href: appStyles },
+ ];
+ 
+--- a/app/styles/app.css
++++ b/app/styles/app.css
+@@ -1,4 +1,3 @@
+-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+ @import "tailwindcss";
+ @import "./base/utilities.css";
+ 
+--- a/app/routes/studio-lab.tsx
++++ b/app/routes/studio-lab.tsx
+@@ -1,6 +1,8 @@
+ import type { LinksFunction, MetaFunction } from '@remix-run/node';
+ import { useSearchParams } from '@remix-run/react';
+ import { useEffect, useRef } from 'react';
++import ibmPlexMonoLatinFont from '~/assets/fonts/ibm-plex-mono-latin.woff2?url';
++import instrumentSansLatinFont from '~/assets/fonts/instrument-sans-latin.woff2?url';
+ import { StudioNarrowScreen, StudioWorkspace } from '~/components/arrangement';
+ import { ArrangementProvider, useArrangement } from '~/contexts/ArrangementContext';
+ import { studioLabDemoCollection } from '~/data/studio-lab-demo';
+@@ -8,10 +10,22 @@
+ import { useStudioHydrated, useStudioWideViewport } from '~/hooks/useStudioWideViewport';
+ import { createArrangement } from '~/lib/arrangement/model';
+ 
+-const STUDIO_FONTS_HREF =
+-  'https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+Georgian:wght@400;500&display=swap';
+-
+-export const links: LinksFunction = () => [{ rel: 'stylesheet', href: STUDIO_FONTS_HREF }];
++export const links: LinksFunction = () => [
++  {
++    rel: 'preload',
++    href: instrumentSansLatinFont,
++    as: 'font',
++    type: 'font/woff2',
++    crossOrigin: 'anonymous',
++  },
++  {
++    rel: 'preload',
++    href: ibmPlexMonoLatinFont,
++    as: 'font',
++    type: 'font/woff2',
++    crossOrigin: 'anonymous',
++  },
++];
+ 
+ export const meta: MetaFunction = () => [
+   { title: 'CZABA Studio — Demo collection' },
+--- a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+@@ -17,6 +17,7 @@
+ 
+ const APP_ROOT = resolve(__dirname, '../../..');
+ const APP_CSS_PATH = resolve(APP_ROOT, 'styles/app.css');
++const FONTS_CSS_PATH = resolve(APP_ROOT, 'assets/fonts/fonts.css');
+ const STYLES_ROOT = resolve(APP_ROOT, 'styles');
+ const ARRANGEMENT_COMPONENTS_ROOT = resolve(APP_ROOT, 'components/arrangement');
+ const LOOP_BRACE_PATH = resolve(ARRANGEMENT_COMPONENTS_ROOT, 'ArrangementLoopBrace.tsx');
+@@ -247,20 +248,30 @@
+     expect(countOccurrences(source, 'bg-accent/30')).toBe(0);
+   });
+ 
+-  it('TH7: the route links exactly one Google Fonts stylesheet for the Studio families', () => {
+-    const href =
+-      'https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+Georgian:wght@400;500&display=swap';
+-
++  it('TH7: the route preloads exactly the self-hosted latin Instrument Sans and IBM Plex Mono files', () => {
+     const descriptors = links();
+-    expect(descriptors).toEqual([{ rel: 'stylesheet', href }]);
+-    const [descriptor] = descriptors;
+-    const linkedHref = descriptor && 'href' in descriptor ? descriptor.href : undefined;
+-    expect(linkedHref).toContain('display=swap');
+-    expect(linkedHref).not.toContain('700');
+-    expect(linkedHref).not.toMatch(/IBM\+Plex\+Mono:wght@[^&]*500/);
+-    for (const family of ['Cormorant', 'Inter', 'Playfair']) {
+-      expect(linkedHref).not.toContain(family);
+-    }
++    expect(descriptors).toHaveLength(2);
++    const fontsCss = readFileSync(FONTS_CSS_PATH, 'utf8');
++    const expected = [
++      ['instrument-sans-latin.woff2', 'Instrument Sans'],
++      ['ibm-plex-mono-latin.woff2', 'IBM Plex Mono'],
++    ];
++    expected.forEach(([file, family], index) => {
++      const descriptor = descriptors[index];
++      expect(descriptor).toMatchObject({
++        rel: 'preload',
++        as: 'font',
++        type: 'font/woff2',
++        crossOrigin: 'anonymous',
++      });
++      const href = descriptor && 'href' in descriptor ? descriptor.href : undefined;
++      expect(href).toMatch(new RegExp(`/${file}$`));
++      const face = (fontsCss.match(/@font-face \{[^}]*\}/g) ?? []).find(
++        (block) =>
++          block.includes(`url('./${file}')`) && block.includes(`font-family: '${family}';`),
++      );
++      expect(face, file).toContain('font-weight: 400;');
++    });
+   });
+ 
+   it('TH8: BPM, master and track volume numerals use font-mono, the pan readout stays sans', () => {
+--- /dev/null
++++ b/app/lib/__tests__/self-hosted-fonts.test.ts
+@@ -0,0 +1,216 @@
++import { createHash } from 'node:crypto';
++import { readdirSync, readFileSync, statSync } from 'node:fs';
++import { join, relative, resolve } from 'node:path';
++import { describe, expect, it } from 'vitest';
++import { links as rootLinks } from '~/root';
++
++const APP_ROOT = resolve(__dirname, '../..');
++const FONTS_DIR = resolve(APP_ROOT, 'assets/fonts');
++const FONTS_CSS_PATH = resolve(FONTS_DIR, 'fonts.css');
++const LICENSES_DIR = resolve(FONTS_DIR, 'licenses');
++const ROOT_PATH = resolve(APP_ROOT, 'root.tsx');
++const APP_CSS_PATH = resolve(APP_ROOT, 'styles/app.css');
++const GOOGLE_FONT_HOST_PATTERN = /fonts\.(googleapis|gstatic)\.com/;
++
++const SELF_HOSTED_FONT_SHA256: ReadonlyArray<readonly [string, string]> = [
++  [
++    'ibm-plex-mono-cyrillic-ext.woff2',
++    'f8c22ec1804bd6966b70f43ac7c327025645b4c09597117fca2a5a6c750106fe',
++  ],
++  [
++    'ibm-plex-mono-cyrillic.woff2',
++    '7635422bd10ddbbcb0e0caa1154b928298f5c8319b8c00b30978d4395f4783ce',
++  ],
++  [
++    'ibm-plex-mono-latin-ext.woff2',
++    '6bc0f226a5b7884a8170e3f62c63d7675609d4631bdc5931b5cdab81821f00eb',
++  ],
++  ['ibm-plex-mono-latin.woff2', '08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7'],
++  [
++    'ibm-plex-mono-vietnamese.woff2',
++    '62632b6375305e70ddcafdd895218e6ae41a184fcd280a69c739460604ca00a9',
++  ],
++  [
++    'instrument-sans-latin-ext.woff2',
++    'c4fcfea41f2c1cfeea9211fa43679845454a1d0e0d7e95e069c7e73c4ae302d2',
++  ],
++  [
++    'instrument-sans-latin.woff2',
++    '2ee17598a98d8a59e4df8152d015bec9ab8e4d5672cc0ab42bef806b568e3971',
++  ],
++  ['inter-cyrillic-ext.woff2', 'ca157063339ac4ad418f214f3abfed119b0798ab4d377386ce5c9e5a7a435ebd'],
++  ['inter-cyrillic.woff2', '71d5ee93cc1e9f1d520a3a8b66456de18c7879d8df09d57fcd2eaff75fef0075'],
++  ['inter-greek-ext.woff2', '6e9e020a25f9b56d418f2c085b1d3c09725a4da23fe693a5b463064606732190'],
++  ['inter-greek.woff2', '1be3448e292fbf05ffe176fe1e43f135013d50b1e7d324ad1a558f623d3bb6f6'],
++  ['inter-latin-ext.woff2', '34b9c504cab7a73e37b746343a449132e56cf7b5481af2cb81dc74dcff25c956'],
++  ['inter-latin.woff2', '3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62'],
++  ['inter-vietnamese.woff2', '5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2'],
++  [
++    'noto-sans-georgian-cyrillic-ext.woff2',
++    '1ac64c50da07536fa25de905de4f7b741ace69fcdb5ee8557b7631750552a6fc',
++  ],
++  [
++    'noto-sans-georgian-georgian.woff2',
++    '3fc0dec93921c7b8032a09d7ae93856c4bf6391c135dc80b61fd24c9ea1ab449',
++  ],
++  [
++    'noto-sans-georgian-greek-ext.woff2',
++    '1ac64c50da07536fa25de905de4f7b741ace69fcdb5ee8557b7631750552a6fc',
++  ],
++  [
++    'noto-sans-georgian-latin-ext.woff2',
++    'cf65951efa1e3e85dcf4be4fe400543633372c1fdf62f20a7ab1b4333d849f14',
++  ],
++  [
++    'noto-sans-georgian-latin.woff2',
++    'eb8ee9bbda6bd81fe3d4cbb772b1c159ce699e63ba59730932b6635367d089a7',
++  ],
++  [
++    'noto-sans-georgian-math.woff2',
++    'bc20e9dbdb704a6e509d6438249f8511f0a5188f01526d5031ba953bc22f1b5b',
++  ],
++  [
++    'noto-sans-georgian-symbols.woff2',
++    '4172da02687da351d59e2c52bc098112afc8c9691617680f8d3df44671cda192',
++  ],
++  [
++    'playfair-display-cyrillic.woff2',
++    '252fb6cf590f4bccb1cdd2ab5a4c1239c1b4f1376d408edb16031826c7cba763',
++  ],
++  [
++    'playfair-display-latin-ext.woff2',
++    '685362647a14434b23ab0a6c5ca04343f8350ccbadd20d492084b834a7808d60',
++  ],
++  [
++    'playfair-display-latin.woff2',
++    'f0f65d35bd09524f127809d65959e95bc9baa53e4a6d3bca138915797b49a503',
++  ],
++  [
++    'playfair-display-vietnamese.woff2',
++    '857eda4dfad5b47f4ebb2801547af929b7f63455d07c99ef306ba55f8e40ed21',
++  ],
++];
++
++const SELF_HOSTED_FONT_FAMILIES = [
++  'IBM Plex Mono',
++  'Instrument Sans',
++  'Inter',
++  'Noto Sans Georgian',
++  'Playfair Display',
++];
++
++const SELF_HOSTED_FONT_LICENSES = [
++  'OFL-ibm-plex-mono.txt',
++  'OFL-instrument-sans.txt',
++  'OFL-inter.txt',
++  'OFL-noto-sans-georgian.txt',
++  'OFL-playfair-display.txt',
++];
++
++function listSourceFiles(root: string): string[] {
++  const files: string[] = [];
++  for (const entry of readdirSync(root)) {
++    const path = join(root, entry);
++    if (statSync(path).isDirectory()) {
++      if (entry !== '__tests__') files.push(...listSourceFiles(path));
++    } else if (/\.(tsx?|css)$/.test(entry) && !/\.test\.tsx?$/.test(entry)) {
++      files.push(path);
++    }
++  }
++  return files;
++}
++
++function readFontFaceBlocks(css: string): string[] {
++  return css.match(/@font-face \{[^}]*\}/g) ?? [];
++}
++
++function readDeclaration(block: string, property: string): string | null {
++  const match = block.match(new RegExp(`${property}: ([^;]+);`));
++  return match?.[1] ?? null;
++}
++
++function sha256Of(path: string): string {
++  return createHash('sha256').update(readFileSync(path)).digest('hex');
++}
++
++describe('Self-hosted fonts (PERF-7)', () => {
++  it('FN1: no app source or stylesheet names a Google Fonts host, and fonts.css is not imported as a side effect', () => {
++    const files = listSourceFiles(APP_ROOT);
++    expect(files.length).toBeGreaterThanOrEqual(100);
++    const offenders = files
++      .filter((path) => GOOGLE_FONT_HOST_PATTERN.test(readFileSync(path, 'utf8')))
++      .map((path) => relative(APP_ROOT, path));
++    expect(offenders).toEqual([]);
++    const fontsCssImporters = files
++      .filter((path) => /fonts\.css(?!\?url)/.test(readFileSync(path, 'utf8')))
++      .map((path) => relative(APP_ROOT, path));
++    expect(fontsCssImporters).toEqual([]);
++  });
++
++  it('FN2: fonts.css has 83 swap faces for the 5 families, every url is a local file and every woff2 is used', () => {
++    const css = readFileSync(FONTS_CSS_PATH, 'utf8');
++    const blocks = readFontFaceBlocks(css);
++    expect(blocks).toHaveLength(83);
++    const families = new Set(blocks.map((block) => readDeclaration(block, 'font-family')));
++    expect([...families].sort()).toEqual(SELF_HOSTED_FONT_FAMILIES.map((family) => `'${family}'`));
++    for (const block of blocks) {
++      expect(readDeclaration(block, 'font-display')).toBe('swap');
++      expect(readDeclaration(block, 'unicode-range')).not.toBeNull();
++    }
++    const urls = new Set(
++      [...css.matchAll(/url\('\.\/([^']+)'\) format\('woff2'\)/g)].map((match) => match[1]),
++    );
++    expect(blocks.every((block) => /url\('\.\/[^']+\.woff2'\) format\('woff2'\)/.test(block))).toBe(
++      true,
++    );
++    const woff2Files = readdirSync(FONTS_DIR).filter((entry) => entry.endsWith('.woff2'));
++    expect([...urls].sort()).toEqual([...woff2Files].sort());
++    expect(css).not.toMatch(/@import/);
++  });
++
++  it('FN3: every shipped woff2 is byte-identical to the pinned Google Fonts file', () => {
++    const woff2Files = readdirSync(FONTS_DIR)
++      .filter((entry) => entry.endsWith('.woff2'))
++      .sort();
++    expect(woff2Files).toEqual(SELF_HOSTED_FONT_SHA256.map(([name]) => name));
++    for (const [name, sha256] of SELF_HOSTED_FONT_SHA256) {
++      expect(sha256Of(resolve(FONTS_DIR, name)), name).toBe(sha256);
++    }
++  });
++
++  it('FN4: every family named by the font tokens in app.css has a face, and each family ships its OFL licence', () => {
++    const appCss = readFileSync(APP_CSS_PATH, 'utf8');
++    const tokenFamilies = new Set<string>();
++    for (const match of appCss.matchAll(/--font-(?:sans|serif|mono): ([^;]+);/g)) {
++      for (const name of (match[1] ?? '').matchAll(/'([^']+)'/g)) {
++        if (name[1]) tokenFamilies.add(name[1]);
++      }
++    }
++    expect([...tokenFamilies].sort()).toEqual(SELF_HOSTED_FONT_FAMILIES);
++    const css = readFileSync(FONTS_CSS_PATH, 'utf8');
++    for (const family of tokenFamilies) {
++      expect(css, family).toContain(`font-family: '${family}';`);
++    }
++    expect(readdirSync(LICENSES_DIR).sort()).toEqual(SELF_HOSTED_FONT_LICENSES);
++    for (const license of SELF_HOSTED_FONT_LICENSES) {
++      expect(readFileSync(resolve(LICENSES_DIR, license), 'utf8'), license).toContain(
++        'SIL OPEN FONT LICENSE Version 1.1',
++      );
++    }
++  });
++
++  it('FN5: root links exactly the local font stylesheet, then app.css, with no external URL', () => {
++    const source = readFileSync(ROOT_PATH, 'utf8');
++    expect(source).toContain("import fontStyles from './assets/fonts/fonts.css?url';");
++    const linksBlock = source.match(/export const links: LinksFunction = \(\) => \[([\s\S]*?)\];/);
++    expect(linksBlock?.[1]?.trim()).toBe(
++      "{ rel: 'stylesheet', href: fontStyles },\n  { rel: 'stylesheet', href: appStyles },",
++    );
++    const descriptors = rootLinks();
++    expect(descriptors).toHaveLength(2);
++    for (const descriptor of descriptors) {
++      const href = 'href' in descriptor ? descriptor.href : undefined;
++      expect(href ?? '').not.toMatch(/^https?:/);
++    }
++  });
++});
+--- /dev/null
++++ b/app/assets/fonts/fonts.css
+@@ -0,0 +1,684 @@
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 300;
++  font-display: swap;
++  src: url('./inter-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 300;
++  font-display: swap;
++  src: url('./inter-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 300;
++  font-display: swap;
++  src: url('./inter-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 300;
++  font-display: swap;
++  src: url('./inter-greek.woff2') format('woff2');
++  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 300;
++  font-display: swap;
++  src: url('./inter-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 300;
++  font-display: swap;
++  src: url('./inter-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 300;
++  font-display: swap;
++  src: url('./inter-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./inter-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./inter-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./inter-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./inter-greek.woff2') format('woff2');
++  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./inter-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./inter-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./inter-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./inter-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./inter-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./inter-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./inter-greek.woff2') format('woff2');
++  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./inter-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./inter-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./inter-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./inter-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./inter-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./inter-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./inter-greek.woff2') format('woff2');
++  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./inter-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./inter-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./inter-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./inter-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./inter-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./inter-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./inter-greek.woff2') format('woff2');
++  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./inter-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./inter-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./inter-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 800;
++  font-display: swap;
++  src: url('./inter-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 800;
++  font-display: swap;
++  src: url('./inter-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 800;
++  font-display: swap;
++  src: url('./inter-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 800;
++  font-display: swap;
++  src: url('./inter-greek.woff2') format('woff2');
++  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 800;
++  font-display: swap;
++  src: url('./inter-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 800;
++  font-display: swap;
++  src: url('./inter-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Inter';
++  font-style: normal;
++  font-weight: 800;
++  font-display: swap;
++  src: url('./inter-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./playfair-display-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./playfair-display-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./playfair-display-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./playfair-display-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./playfair-display-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./playfair-display-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./playfair-display-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 500;
++  font-display: swap;
++  src: url('./playfair-display-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./playfair-display-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./playfair-display-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./playfair-display-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 600;
++  font-display: swap;
++  src: url('./playfair-display-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./playfair-display-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./playfair-display-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./playfair-display-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Playfair Display';
++  font-style: normal;
++  font-weight: 700;
++  font-display: swap;
++  src: url('./playfair-display-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'IBM Plex Mono';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./ibm-plex-mono-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'IBM Plex Mono';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./ibm-plex-mono-cyrillic.woff2') format('woff2');
++  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
++}
++@font-face {
++  font-family: 'IBM Plex Mono';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./ibm-plex-mono-vietnamese.woff2') format('woff2');
++  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
++}
++@font-face {
++  font-family: 'IBM Plex Mono';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./ibm-plex-mono-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'IBM Plex Mono';
++  font-style: normal;
++  font-weight: 400;
++  font-display: swap;
++  src: url('./ibm-plex-mono-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Instrument Sans';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./instrument-sans-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Instrument Sans';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./instrument-sans-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Instrument Sans';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./instrument-sans-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Instrument Sans';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./instrument-sans-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Instrument Sans';
++  font-style: normal;
++  font-weight: 600;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./instrument-sans-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Instrument Sans';
++  font-style: normal;
++  font-weight: 600;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./instrument-sans-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-georgian.woff2') format('woff2');
++  unicode-range: U+0589, U+10A0-10FF, U+1C90-1CBA, U+1CBD-1CBF, U+205A, U+2D00-2D2F, U+2E31;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-math.woff2') format('woff2');
++  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-209F, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-symbols.woff2') format('woff2');
++  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0, U+21F3, U+2218-2219, U+2299, U+22C4-22C6, U+2300-243F, U+2440-244A, U+2460-24FF, U+25A0-27BF, U+2800-28FF, U+2921-2922, U+2981, U+29BF, U+29EB, U+2B00-2BFF, U+4DC0-4DFF, U+FFF9-FFFB, U+10140-1018E, U+10190-1019C, U+101A0, U+101D0-101FD, U+102E0-102FB, U+10E60-10E7E, U+1D2C0-1D2D3, U+1D2E0-1D37F, U+1F000-1F0FF, U+1F100-1F1AE, U+1F1E6-1F1FF, U+1F30D-1F30F, U+1F315, U+1F31C, U+1F31E, U+1F320-1F32C, U+1F336, U+1F378, U+1F37D, U+1F382, U+1F393-1F39F, U+1F3A7-1F3A8, U+1F3AC-1F3AF, U+1F3C2, U+1F3C4-1F3C6, U+1F3CA-1F3CE, U+1F3D4-1F3E0, U+1F3ED, U+1F3F1-1F3F3, U+1F3F5-1F3F7, U+1F408, U+1F415, U+1F41F, U+1F426, U+1F43F, U+1F441-1F442, U+1F444, U+1F446-1F449, U+1F44C-1F44E, U+1F453, U+1F46A, U+1F47D, U+1F4A3, U+1F4B0, U+1F4B3, U+1F4B9, U+1F4BB, U+1F4BF, U+1F4C8-1F4CB, U+1F4D6, U+1F4DA, U+1F4DF, U+1F4E3-1F4E6, U+1F4EA-1F4ED, U+1F4F7, U+1F4F9-1F4FB, U+1F4FD-1F4FE, U+1F503, U+1F507-1F50B, U+1F50D, U+1F512-1F513, U+1F53E-1F54A, U+1F54F-1F5FA, U+1F610, U+1F650-1F67F, U+1F687, U+1F68D, U+1F691, U+1F694, U+1F698, U+1F6AD, U+1F6B2, U+1F6B9-1F6BA, U+1F6BC, U+1F6C6-1F6CF, U+1F6D3-1F6D7, U+1F6E0-1F6EA, U+1F6F0-1F6F3, U+1F6F7-1F6FC, U+1F700-1F80B, U+1F810-1F847, U+1F850-1F859, U+1F860-1F887, U+1F890-1F8AD, U+1F8B0-1F8BB, U+1F8C0-1F8C1, U+1F8D0-1F8D8, U+1F900-1F90B, U+1F93B, U+1F946, U+1F984, U+1F996, U+1F9E9, U+1FA00-1FA6F, U+1FA70-1FA7C, U+1FA80-1FAC6, U+1FAC8, U+1FACC-1FADD, U+1FADF-1FAEB, U+1FAEF-1FAFA, U+1FB00-1FBFF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 400;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-cyrillic-ext.woff2') format('woff2');
++  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-georgian.woff2') format('woff2');
++  unicode-range: U+0589, U+10A0-10FF, U+1C90-1CBA, U+1CBD-1CBF, U+205A, U+2D00-2D2F, U+2E31;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-greek-ext.woff2') format('woff2');
++  unicode-range: U+1F00-1FFF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-math.woff2') format('woff2');
++  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-209F, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-symbols.woff2') format('woff2');
++  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0, U+21F3, U+2218-2219, U+2299, U+22C4-22C6, U+2300-243F, U+2440-244A, U+2460-24FF, U+25A0-27BF, U+2800-28FF, U+2921-2922, U+2981, U+29BF, U+29EB, U+2B00-2BFF, U+4DC0-4DFF, U+FFF9-FFFB, U+10140-1018E, U+10190-1019C, U+101A0, U+101D0-101FD, U+102E0-102FB, U+10E60-10E7E, U+1D2C0-1D2D3, U+1D2E0-1D37F, U+1F000-1F0FF, U+1F100-1F1AE, U+1F1E6-1F1FF, U+1F30D-1F30F, U+1F315, U+1F31C, U+1F31E, U+1F320-1F32C, U+1F336, U+1F378, U+1F37D, U+1F382, U+1F393-1F39F, U+1F3A7-1F3A8, U+1F3AC-1F3AF, U+1F3C2, U+1F3C4-1F3C6, U+1F3CA-1F3CE, U+1F3D4-1F3E0, U+1F3ED, U+1F3F1-1F3F3, U+1F3F5-1F3F7, U+1F408, U+1F415, U+1F41F, U+1F426, U+1F43F, U+1F441-1F442, U+1F444, U+1F446-1F449, U+1F44C-1F44E, U+1F453, U+1F46A, U+1F47D, U+1F4A3, U+1F4B0, U+1F4B3, U+1F4B9, U+1F4BB, U+1F4BF, U+1F4C8-1F4CB, U+1F4D6, U+1F4DA, U+1F4DF, U+1F4E3-1F4E6, U+1F4EA-1F4ED, U+1F4F7, U+1F4F9-1F4FB, U+1F4FD-1F4FE, U+1F503, U+1F507-1F50B, U+1F50D, U+1F512-1F513, U+1F53E-1F54A, U+1F54F-1F5FA, U+1F610, U+1F650-1F67F, U+1F687, U+1F68D, U+1F691, U+1F694, U+1F698, U+1F6AD, U+1F6B2, U+1F6B9-1F6BA, U+1F6BC, U+1F6C6-1F6CF, U+1F6D3-1F6D7, U+1F6E0-1F6EA, U+1F6F0-1F6F3, U+1F6F7-1F6FC, U+1F700-1F80B, U+1F810-1F847, U+1F850-1F859, U+1F860-1F887, U+1F890-1F8AD, U+1F8B0-1F8BB, U+1F8C0-1F8C1, U+1F8D0-1F8D8, U+1F900-1F90B, U+1F93B, U+1F946, U+1F984, U+1F996, U+1F9E9, U+1FA00-1FA6F, U+1FA70-1FA7C, U+1FA80-1FAC6, U+1FAC8, U+1FACC-1FADD, U+1FADF-1FAEB, U+1FAEF-1FAFA, U+1FB00-1FBFF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-latin-ext.woff2') format('woff2');
++  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
++}
++@font-face {
++  font-family: 'Noto Sans Georgian';
++  font-style: normal;
++  font-weight: 500;
++  font-stretch: 100%;
++  font-display: swap;
++  src: url('./noto-sans-georgian-latin.woff2') format('woff2');
++  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
++}

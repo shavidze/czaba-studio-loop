@@ -1,311 +1,333 @@
-# Round 315: PERF-5b. Batching closes on evidence; the peaks client survives a slow worker start, a callback error never stops or relabels other jobs, and a source's buffer reaches playback together with "ready" (A-R312-REVIEW-L1…L5)
+# Round 316: PERF-7. Self-hosted fonts: no Google Fonts request and no render-blocking third-party request on any route; every face byte-identical to today
 
-**Planned by:** B, at the round 314 → 315 planning, 2026-11-03.
+**Planned by:** B, at the round 315 → 316 planning, 2026-11-03.
 
-**Decisions** (all in `backlog.json` v274 → `decisions_log_b`):
-- **D-29z845: round 314 ruled.** C PASS: 10 rows, `browserVerified`/`realVerified` true, 0 bugs. Gate 314 published `abfcf78` on both remotes [K1]. **PERF-5a is done.** C-R312-01 and C-R313-01 are closed. INFO-C314-DOC-PENDING-SENTENCE is granted in this round (§5 item 5).
-- **D-29z846: PERF-5b's batching closes on evidence** (§0.1; L37 premise). No deterministic row is red at HEAD. Signals are recorded, not scheduled (§0.3).
-- **D-29z847: round 315 = PERF-5b, reshaped to the PERF-5 robustness batch.** It closes A-R312-REVIEW-L1, L2, L3, L4 and L5, all in the peaks client, its two context call sites and its tests. One owner.
-- **D-29z848:** consults: performance-optimizer and tech-lead (§0.4).
-- **D-29z849:** bookkeeping and signals (§10). `lessons.md` is unchanged.
+**Decisions** (all in `backlog.json` v275 → `decisions_log_b`):
+- **D-29z850: round 315 ruled.** C PASS: 10 rows, `browserVerified`/`realVerified` true, 0 app defects, 2 Low test-coverage findings (C-R315-T1/T2). Gate 315 published `c136dfd` on both remotes [K1]. **PERF-5 is done** (5a + 5b). A-R312-REVIEW-L1…L5 are closed.
+- **D-29z851: PERF-7's target is split on evidence** (§0.1). PERF-7 owns "0 render-blocking third-party requests" on every route and "FCP − DCL < 150 ms" on `/` and `/store`. On `/studio-lab`, first paint waits for hydration because of the SSR `opacity:0` page transition [K17]. Fonts cannot move it, so that part of the target goes to **PERF-11**, which already owns "no framer-motion page transition on `/studio*`".
+- **D-29z852: round 316 = PERF-7.** All 25 woff2 files that Google serves today are mirrored byte-identical into `app/assets/fonts/`, with the same 83 `@font-face` rules and the families' OFL licences. Grants are narrow:
+  - `root.tsx`: one import and one links entry replace 2 preconnects and the Playfair link (precedent: D-29z166);
+  - `app.css`: deletion of l.1 only.
+
+  Local files are used, not `@fontsource/*`: no dependency or `root-deps-request.json` is needed.
+- **D-29z853:** consults: performance-optimizer and tech-lead (§0.4).
+- **D-29z854:** bookkeeping and signals (§10). The round-315 Lows and the gate-315 review items go to `deferred_low_polish`, with PERF-14 (the next owner of `peaks.client.ts`) as the fix home. `lessons.md` is unchanged.
 
 **Read first:** `lessons.md`. These apply directly:
-- L4: one element, one rule (the PW9 ruling line in §1).
-- L11: STOP, and re-review after any change.
-- L23: B pre-applied the change and ran the covering files (§2).
-- L26 / L28 / L34: docs.
-- L29 / L56: claims.
-- L37: the premise was measured (§0.1).
-- L49: a moved call keeps its side effects (§4.2).
-- L52: asserts must be able to fail.
+- L3 / L20: a font change gets box and glyph rows. Here the bytes are identical, so the rows are exact equalities (§3.2 FONT-PIXEL, FONT-GLYPHS).
+- L23: B applied the change on a scratch copy and ran the covering files (§2).
+- L29 / L56: claims and artifacts.
+- L30: Biome includes only `app/**/*.ts(x)` [K11], so `fonts.css` is checked by FN2, not by Biome.
+- L35: notices are granted (§5).
+- L38: perf runs alone.
+- L52: every new assert has a mutant (§6).
+- L26 / L28 / L34: the doc.
 - L57: C's harness fields.
 
 **L29 note:** untagged code text in this task is an expected value or a new name, not a fact about current code. Facts about `store/` carry `[K#]`.
 
-## Baseline: HEAD `abfcf78`, clean tree
-- **Gate 314:** `published`, commit `abfcf78` [K1]. `git status` shows 0 entries [K2].
-- **Protected and config files:** `b-round-312/protected-sha256.txt`, 11/11 OK [K18]. They must stay OK.
-- **Last implementation doc in quarter IV:** `228-perf-peaks-worker.md` [K19]. No new doc number is needed.
+## Baseline: HEAD `c136dfd`, clean tree
+- **Gate 315:** `published`, commit `c136dfd` [K1]. `git status` shows 0 entries [K2].
+- **Protected and config files:** `b-round-312/protected-sha256.txt`, 11/11 OK [K13]. They must stay OK.
+- **Last implementation doc in quarter IV:** `228-perf-peaks-worker.md` [K9]. The new doc is **229**.
 
 ## 0. Why this round
 
-### 0.1 PERF-5b's batching: premise measured, closed on evidence (D-29z846)
-The backlog stage read: "rAF/startTransition batching of setSourcePeaks + source state updates; own L37 premise measure; close on evidence if no HEAD-red deterministic row".
+### 0.1 Measured premise (L37; `b-round-315/probe/`)
+**Probe.** Production builds of HEAD (port 5316) and of B's sketch (port 5317), Playwright Chromium at 1440×900, 3 fresh loads per route. Data: `fonts-5316.json`, `fonts-5317.json`.
 
-**B's probe** (`b-round-314/probe/`): a scratch production build of HEAD with commit component names and a `performance.mark` per peaks delivery. 3 loads at CPU 1× and 3 at 6×.
+**Fonts at HEAD** [K3]:
+- `root.tsx` has 2 preconnects and the Playfair Display stylesheet from Google [K4];
+- `app.css` l.1 is `@import` of Inter 300–800 from Google [K5];
+- `studio-lab.tsx` links Instrument Sans, IBM Plex Mono and Noto Sans Georgian from Google [K6].
 
-| | 1× (3 loads) | 6× (3 loads) |
-|---|---|---|
-| peaks deliveries per load | 9 | 9 |
-| commits from the first delivery to settled | 9 | 9 |
-| components per commit | 94 each (ArrangementProvider → StudioWorkspace) | 94 each |
-| delivery gaps under 16 ms (could share a frame) | 3, 3, 2 of 8 | 0, 0, 0 of 8 |
-| long tasks over 50 ms from a peaks commit | 0 | 0 |
+| Route | HEAD: render-blocking 3rd-party / Google requests | Sketch | HEAD FCP − DCL (ms) | Sketch FCP − DCL (ms) |
+|---|---|---|---|---|
+| `/studio-lab` | 3 / 6 | **0 / 0** | 131, 135, 216 | 228, 240, 301 |
+| `/` | 2 / 4 | **0 / 0** | 2, 11, −1 | −1, 6, 1 |
+| `/store` | 2 / 4 | **0 / 0** | 6, 5, 13 | 8, 56, 3 |
+| `/studio/middle-east` (sign-in guard) | 2 / 3 | **0 / 0** | 104, 79, 78 | 129, 116, 105 |
 
-[K12]. React 18 already merges `setSourcePeaks` and `patchSourceState` into one commit per delivery. The worker runs jobs one at a time [K22], so deliveries rarely land in the same frame.
-- **A rAF coalescer** would save at most 2–3 of 9 commits at 1×, and none at 6× where it would matter. The count would also become timing-dependent (wallclock).
-- **`startTransition`** can hold back `status: 'ready'`. The library preview gates on that status [K21], and D-29z835 keeps ready after peaks.
-- **No deterministic row is red at HEAD.** performance-optimizer agrees: close it.
+The `document.fonts` loaded set is equal per route in both builds: on `/studio-lab`, Instrument Sans 400/500, IBM Plex Mono 400 and Noto Sans Georgian 400. The font request count per route is also equal: 3, 2, 2 and 1.
 
-### 0.2 What this round fixes (the PERF-5 robustness batch, A-R312-REVIEW-L1…L5)
-| Id | Problem at HEAD | Fix (sketch) |
-|---|---|---|
-| L1 | One 3,000 ms stall timer [K3] also covers the worker's cold start (module fetch while the main thread is busy). A slow first start turns the worker off for the whole session; demo-synth allows 10 s | 10,000 ms until the worker's first reply, then 3,000 ms per reply |
-| L2 | `onPeaks` is called directly in `handleReply` and in the main-thread fallback [K3]. A throwing callback skips `startNext` (the stall timer later turns the worker off) or stops the `failWorker` loop (later jobs are lost). A synchronous throw from `request()` would also reach the collection `.catch` and could mark a source `error` after it was already `ready` | One `deliver` helper. A callback error is rethrown on a timer; it never stops the queue and never reaches the caller |
-| L3 | `buffersRef.current.set` runs before the peaks request in both call sites [K4]. Playback and export can read the buffer of a source that still shows `loading` | The set moves into the peaks callback, after its guard and before `setSourcePeaks`. The collection callback re-syncs playback when a clip uses the source, as the video callback already does [K5] |
-| L4 | No row covers the video call site, an empty buffer, or a stall re-armed per reply | PW15, PW19 (A), PW20 |
-| L5 | PW13 covers no throw on `end` or `cancel`, and asserts no timer count | PW13b |
+**Why `/studio-lab`'s FCP − DCL did not fall** (D-29z851):
+- In the sketch, DCL fell from 116–217 ms to 59–152 ms, but FCP stayed at about 300–380 ms in both builds.
+- The SSR HTML wraps the page in `<div class="page-transition-wrapper" style="opacity:0;transform:translateY(8px)">` [K17].
+- `/studio-lab` has no header outside that wrapper, so nothing paints until hydration runs the transition. `/` and `/store` paint their header at once.
+- The fonts are not the bottleneck. PERF-11 owns the page transition on `/studio*`. performance-optimizer agrees.
+
+### 0.2 What this round does
+- **Same files, same rules, new host.** Google's CSS API returns 83 `@font-face` rules over 25 unique woff2 files (variable fonts, one file per unicode subset). B fetched them all (`fonts-src/manifest.json`, sha256 in `fonts-sha256.txt`).
+  - `fonts.css` carries those rules unchanged, except that each URL becomes `url('./<file>.woff2')` and Google's subset comments are dropped [K14].
+  - Vite hashes the files into `build/client/assets/`. The two 1,760 B Noto stubs (cyrillic-ext, greek-ext) are inlined as `data:` URIs by Vite's default limit (`vite.config.ts` is frozen).
+- **`root.tsx`** links `fonts.css` before `app.css`. The 2 preconnects and the Playfair link are removed.
+- **`app.css`** loses only l.1.
+- **`/studio-lab`** preloads the two files used on first paint (`instrument-sans-latin`, one variable file for 400/500/600; `ibm-plex-mono-latin`) with `crossOrigin: 'anonymous'`. Fonts are always fetched in CORS mode, so without it the preload would not match and the file would download twice.
+- **Licences.** The 5 families are SIL OFL 1.1 [K19]. Their `OFL.txt` files go to `app/assets/fonts/licenses/`, and `THIRD_PARTY_NOTICES.md` gains a fonts section.
 
 ### 0.3 What changes for the user
-- **Normal load: nothing visible.** 9 sources, 9 waveforms, the same commits.
-- **Slow machine or slow network:** the worker is no longer dropped after 3 s of cold start. Waveforms still arrive, and the main thread is not used for fallback peaks.
-- **A source that is still computing peaks** no longer plays or exports before it shows `ready`; when it becomes ready during playback, it joins the playing mix. This is reachable in the browser through a video's own sound (the video clip exists before its audio peaks). `/studio-lab` starts with no clips [K20], so the collection path matters only for an initial project with clips (tests, and later SRW-21).
+- **Nothing visible.** `/studio-lab` is pixel-identical at 1440 and 1280 (`probe/pxdiff.txt`: 0 px). `/` and `/store` differ only where HEAD also differs from itself (hero animation and one animated band; `probe/pxdiff-head-vs-head.txt`).
+- **No request to Google** on any page, so the visitor's IP no longer reaches a third party on page load.
+- Fonts come from our origin with `Cache-Control: public, max-age=31536000, immutable` [K12]. DCL is earlier on every route.
+- **Store pages keep Inter and Playfair.** STORE-2c later removes them (spec: the store adopts Instrument Sans and Plex Mono) and then deletes their files from `app/assets/fonts/`. PERF-7 does not restyle the store.
 
-### 0.4 Consults (read-only)
-- **performance-optimizer:** close batching. Do not use `startTransition`. The 94 components per delivery belong to PERF-10: a peaks-only store would not change the count while `sourceStates` stays in the provider. **Hazard found:** a synchronous rethrow in `failWorker` can reach the collection `.catch` and mark the wrong source `error` → adopted as the timer rethrow. With L3, the collection path also needs the playback re-sync → adopted.
-- **tech-lead:** the plan holds, with corrections, all adopted:
-  - carry the reply flag per worker and set it on any parsed reply, before the job-id filter;
-  - one `deliver` helper so that no callback error touches the scheduler state;
-  - keep `if (!active)` after the delivery (PW12);
-  - leave an exception inside the video callback uncaught, not relabelled (`deliver` now reports it on a timer);
-  - PW9 must be rewritten.
+### 0.4 Consults (read-only; D-29z853)
+- **performance-optimizer:**
+  - D-29z851 is right; measure absolute FCP as the no-regression row, not the delta.
+  - The preloads are right, and `crossOrigin` is required. The preload `?url` and the CSS `url()` resolve to the same hashed file. No preloaded file may be small enough to inline.
+  - Do not trim subsets: the browser downloads only matching unicode ranges, so the bytes cost the repo, not users.
+  - `remix-serve` already serves `/assets/*` as immutable [K12]; add a header row.
+  - Deterministic rows: Google requests = 0, render-blocking 3rd-party = 0, font file set and bytes per route, the loaded set.
+- **tech-lead:**
+  - `app/assets/fonts/` with `?url` is the right home. A file that holds only `@font-face` rules does not break "Tailwind-first", because Tailwind cannot declare font sources.
+  - Licences go in a `licenses/` subfolder. The notices must state "unmodified, as served by Google Fonts, sha256-pinned". Never re-subset, re-encode or rename: "Playfair Display" and "Plex" are Reserved Font Names, and the risk turns on "unmodified".
+  - Tests to add: FN3 (sha256 pin in the repo), FN4 (every family in the `--font-*` tokens has a face), a TH7 preload-to-face link, and the root links order. All adopted (§6).
+  - No double load unless `fonts.css` is also imported as a side effect or from `app.css`: FN1 and FN2 assert neither.
+  - The legacy `/studio/$productId` route and the e2e smoke are not at risk.
+- **Not consulted:** product-designer and ableton-arrangement-expert. Nothing user-visible changes.
 
-  Readers of `buffersRef`: the graph build [K22], the library preview (already gated on `ready` [K21]) and export [K21].
-  - Video export is refused while the video's audio is `decoding` [K21], so for video L3 changes playback only.
-  - The only remover of a video source runs before decode is called [K20], so the `videoSourcesRef` guard is not reachable today.
-  - There is no buffer prune anywhere [K22] (pre-existing; PERF-13's SOURCE-PEAKS-NEVER-PRUNED).
-  - Export of a clip whose collection source is still `loading` has no gate → signal B-R314-EXPORT-LOADING-GATE (§10), not this round.
-- **Not consulted:** product-designer and ableton-arrangement-expert. Nothing user-visible changes shape; reference-first does not apply (§0.5).
-
-### 0.5 Reference / screen budget
-This is a performance and robustness round with no new user-visible behaviour, so the reference rule does not apply. Nothing persistent is added to the screen.
+### 0.5 Reference / screen budget / journey
+- This is a performance round with no visible change, so the reference rule does not apply. Nothing persistent is added to the screen.
+- L54 (journey) does not apply: no entry, exit or hand-off changes. G316-AUTH covers the shared `root.tsx` path on the store, Studio and guard pages.
 
 ## 1. Rulings
-| Id | Severity | Ruling |
-|---|---|---|
-| A-R312-REVIEW-L1 | Low | This round: `PEAKS_WORKER_COLD_START_TIMEOUT_MS = 10_000` until the first parsed reply of the session's worker; 3,000 ms per reply after it |
-| A-R312-REVIEW-L2 | Low | This round: `deliver` with a timer rethrow, used by the worker path and the main-thread fallback |
-| A-R312-REVIEW-L3 | Low | This round: the set moves into both callbacks; the collection callback re-syncs playback |
-| A-R312-REVIEW-L4 | Low | This round: PW15, PW19, PW20. The video-callback exception bullet is ruled by L2's contract (reported on a timer, never relabelled); no extra row |
-| A-R312-REVIEW-L5 | Low | This round: PW13b (`end`, `cancel`, `vi.getTimerCount() === 0`) |
-| A-R312-REVIEW-L6 | info | Unchanged (callers check `signal.aborted`) |
-| PERF2-STEREO-COPY | low signal | Moved to PERF-13, together with R314-DEMO-BUFFER-LONGTASK-6X (§10) |
-| R313-FOLLOW-PAGE-TURN-COVERAGE | signal | Decided now: deferred to PERF-10's planning. A page turn's cost is render work of the timeline-scroll subscribers, which PERF-10's context split changes; a row today would measure code that PERF-10 rewrites |
-| INFO-C314-DOC-PENDING-SENTENCE | info | This round, §5 item 5 |
-
-**Ruling line (L4).** PW9: L1's contract wins over PW9's old assertion ("no reply → fallback at 3,000 ms"). The old assertion is replaced by two stronger rows: PW14 (no reply yet → fallback exactly at 10,000 ms, not before) and PW9 (after the first reply → fallback exactly at 3,000 ms). No other existing assertion changes.
+| Id | Ruling |
+|---|---|
+| PERF-7 target | Split (D-29z851). PERF-7 closes on: 0 Google and 0 render-blocking 3rd-party requests on `/`, `/store`, `/studio-lab` and `/studio/middle-east`; FCP − DCL < 150 ms (median) on `/` and `/store`; `/studio-lab` absolute FCP no worse than HEAD (median, +30 % wallclock margin). `/studio-lab` FCP − DCL < 150 ms moves to PERF-11 |
+| Subsets | **Mirror all 25 files; no trimming, re-encoding or renaming.** Cyrillic, Greek, Vietnamese, math and symbols stay. They are unicode-range gated, cost no user bytes, and dropping one would change fallback glyphs |
+| Inter / Playfair | Self-hosted now, unchanged. STORE-2c deletes them when the store adopts the Studio type (handoff recorded in STORE-2c) |
+| Preloads | Exactly 2, only on `/studio-lab`. No preload on store pages (STORE-2c owns store font loading). Nothing unicode-range gated is preloaded |
+| `root.tsx` grant (D-29z852) | Allowed: the `fontStyles` import line, and the 2 preconnects + Playfair entry replaced by `{ rel: 'stylesheet', href: fontStyles }` before `appStyles`. Byte-equal to `sketch-root.tsx.txt`. Basis: Saba-approved perf-plan PERF-7 (self-hosting is impossible while root links Google) and D-29z166's narrow `root.tsx` precedent. The STORE-2c request in `b-round-191.md` §8 (fonts + Lenis + restyle) stays open for STORE-2c |
+| `app.css` grant | Delete l.1 only; every other byte unchanged (TH2 still binds the obsidian block) |
+| `public/**` | Not used. The hashed `app/assets/` path needs no grant to `public/` |
 
 ## 2. B's pre-check (L23, L37)
-On the scratch `/tmp/b315k` (HEAD plus `b-round-314/sketch.patch.txt`, own Vite `cacheDir`):
+On the scratch `/tmp/b316s` (HEAD + `b-round-315/sketch.patch.txt` + the 25 woff2 + 5 licences):
 | Check | Result |
 |---|---|
-| `tsc --noEmit` | rc 0 (`precheck-tsc.log`) |
-| `biome check` on the 3 files | clean (`precheck-biome.log`) |
-| `peaks-worker.test.ts` | 25/25 tests (HEAD 17). `it`/`it.each` lines 16 → 23 [K11] |
-| Mutants (`unit-mutants.py`) | 11 mutants: 10 red on the rows named in §6; MU-REPLIED-AFTER-FILTER is equivalent by design; restored 25 passed [K13] (`precheck-unit-mutants.txt`) |
-| The 8 covering files named by tech-lead | 8 files, 97/97 [K14] (`precheck-covering.log`) |
-| Full unit suite on the scratch (B's own check; not an A or C row) | 235 files, 3502/3502, rc 0 [K14] (`precheck-full-suite.log`; run before PW20 was added; PW20 is test-only and is in the covering run) |
-| Perf spec on the sketch, alone (`precheck-perf.json`/`.log`) | rc 0, `failures` empty; 164/164 deterministic rows equal `c-round-314/perf-harness-1.json` [K24] |
-| Browser cold-start probe (prod builds, `probe/cold-start.cjs`, first peaks reply held for 4 s) | HEAD: the peaks worker is terminated exactly 3,000 ms after creation (316 → 3316 ms). Sketch: not terminated at 1440×900 or 1280×720 (180 replies). Both builds reach ready with 0 page errors; without the delay neither terminates (`probe/cold-start-summary.txt`) |
+| `tsc --noEmit` | rc 0 |
+| `biome check` on `root.tsx`, `studio-lab.tsx`, `self-hosted-fonts.test.ts`, `studio-theme-obsidian.test.tsx` | clean (3 pre-existing `noDangerouslySetInnerHtml` warnings in `root.tsx`) |
+| Build | rc 0. 23 hashed woff2 in `build/client/assets/`, 2 inlined `data:font`, `fonts-*.css` 36.67 kB (4.20 kB gzip) |
+| `self-hosted-fonts.test.ts` + `studio-theme-obsidian.test.tsx` | 17/17 |
+| Covering files (§7 step 4: the 15 files that import `~/routes/studio-lab`, `~/root` or read `styles/app.css`, plus `third-party-licenses.test.ts`) | 16 files, 233/233 |
+| Mutants (`unit-mutants-316.py`) | 12/12 red, restored 17 passed (`precheck-unit-mutants-316.txt`) |
+| Browser probe (`probe/`) | §0.1 table; pixel diff §0.3; `curl -I` on a hashed woff2: `Cache-Control: public, max-age=31536000, immutable`, `Content-Type: font/woff2` |
+| Perf spec `perf/studio-lab.perf.spec.ts` on the sketch, alone | rc 0 (5.9 min), `failures` empty, `harness.loaf-scripts-live` 80; `rowcmp.py c-round-315/perf-harness.json precheck-perf.json`: 164/164 deterministic rows equal, 0 differ, 0 extra [K20] |
 
-`git apply --check b-round-314/sketch.patch.txt` succeeds on HEAD.
+`git apply --check b-round-315/sketch.patch.txt` succeeds on HEAD.
 
 ## 3. Acceptance
 
 ### 3.1 A's rows
 | Row | Expected |
 |---|---|
-| A-CLAIMS | Before editing, from the loop root, `bash b-round-314/claims-315.sh` equals `b-round-314/claims-315-head-output.txt`. A difference is a STOP |
-| A-APPLY | From `store/`: `git apply ../tmp/studio-real-loop/b-round-314/sketch.patch.txt`. Then `peaks.client.ts` is byte-equal (`cmp`) to `b-round-314/sketch-peaks.client.ts.txt` and `ArrangementContext.tsx` to `sketch-ArrangementContext.tsx.txt`. A change to either beyond the sketch is a STOP |
-| A-TESTS | Write PW19 (§6) in the new file `app/lib/arrangement/__tests__/peaks-worker-video.test.tsx`. `peaks-worker.test.ts` keeps the sketch rows; A may only append to it |
+| A-CLAIMS | Before editing, from the loop root, `bash b-round-315/claims-316.sh` equals `b-round-315/claims-316-head-output.txt`. A difference is a STOP |
+| A-APPLY | From `store/`: `git apply ../tmp/studio-real-loop/b-round-315/sketch.patch.txt`. Then copy `b-round-315/fonts-src/files/*.woff2` into `app/assets/fonts/` and `fonts-src/licenses/*.txt` into `app/assets/fonts/licenses/` with `cp` (no other tool touches them). In `app/assets/fonts`, `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-315/fonts-src/fonts-sha256.txt` gives 25 OK; in `app/assets/fonts/licenses`, `sha256sum -c /home/runner/czaba-project/tmp/studio-real-loop/b-round-315/fonts-src/licenses-sha256.txt` gives 5 OK. The six patched files are `cmp`-equal to the `sketch-*.txt` copies |
+| A-NOTICES | §4.2: the fonts section in `third-party-licenses.ts`, TL10 in `third-party-licenses.test.ts`, then regenerate `THIRD_PARTY_NOTICES.md` with `npx vitest run app/lib/__tests__/third-party-licenses.test.ts -u`. TL5 passes without `-u` afterwards |
 | A-TYPE | `npm run typecheck` rc 0 |
 | A-LINT | `npm run lint` rc 0 |
-| A-UNIT | `npx vitest run app/lib/arrangement/__tests__/peaks-worker.test.ts app/lib/arrangement/__tests__/peaks-worker-video.test.tsx` plus the 8 covering files (§7). All pass |
-| A-MUTANTS | On a scratch copy of A's tree (never in `store/`), `python3 -I b-round-314/unit-mutants.py <scratch>` prints the same red rows as `b-round-314/precheck-unit-mutants.txt`. Then A's own MU-VIDEO-BUFFER-BEFORE-PEAKS (§6) is red on PW19 |
-| A-DOC | §5 items 4 and 5, in Georgian with technical terms in English. Cite only rows that exist (L26). Edit whole granted sections (L34) |
-| A-REVIEW | Run `code-reviewer` on the changed files. Ask about: the `deliver` contract (no callback error reaches the scheduler or a caller), the cold-start flag, the moved `buffersRef.set` and its side effects (L49), the new `syncPlayback` dependency of the load effect, and the doc's accuracy. A Medium+ inside the grants is fixed and re-reviewed (L11). A §4 rule change is a STOP |
+| A-UNIT | §7 step 4's 16 files. All pass |
+| A-MUTANTS | On a scratch copy of A's tree (never in `store/`), `python3 -I b-round-315/unit-mutants-316.py <scratch>` prints the same lines as `precheck-unit-mutants-316.txt`. Then A's own MU-NOTICES-DROP-FAMILY (§6) is red on TL10 |
+| A-DOC | §4.3, in Georgian with technical terms in English. Cite only rows that exist (L26) |
+| A-REVIEW | `code-reviewer` on the changed files (3+ files). Ask about: the narrow `root.tsx` and `app.css` edits, CSS order, preload/CORS matching, the notices wording (unmodified, RFN), and FN1–FN5/TL10 strength. A Medium+ inside the grants is fixed and re-reviewed (L11). A change to a §4.1 file beyond the sketch is a STOP |
 
 ### 3.2 C's rows
-C writes `c-round-315.md` and `c-round-315.json` as it goes, with the L57 fields:
-- `assertsSpecified` = 9: PW9, PW13b, PW14, PW15, PW16, PW17, PW18, PW19, PW20;
-- `mutantsRecorded` = 12: the 11 in `unit-mutants.py` plus A's MU-VIDEO-BUFFER-BEFORE-PEAKS;
-- `mutantRedOnSketch` = 10 (MU-REPLIED-AFTER-FILTER is equivalent by design: the protocol cannot deliver a stale reply first; A's video mutant is not in the sketch).
+C writes `c-round-316.md` and `c-round-316.json` as it goes, with the L57 fields:
+- `assertsSpecified` = 7: FN1, FN2, FN3, FN4, FN5, TH7, TL10;
+- `mutantsRecorded` = 13: the 12 in `unit-mutants-316.py` plus A's MU-NOTICES-DROP-FAMILY;
+- `mutantRedOnSketch` = 12.
 
 Each finding carries an `origin`.
 
+**Builds.** HEAD `c136dfd`: `git -C store archive c136dfd | tar -x -C <scratch-head>`, symlink `node_modules`, `npm run build`, `PORT=<p1> npx remix-serve build/server/index.js`. A's tree: a tar copy of `store/` built the same way on `<p2>`. Never build inside `store/`. The probe scripts are in `b-round-315/probe/` (`fonts-probe.cjs <base> <paths> <runs>`, `shots.cjs <base> <tag>`, `pxdiff.cjs`); C may copy and extend them.
+
 | Row | Action | Expected |
 |---|---|---|
-| SOURCE-SCOPE | `git status --short --untracked-files=all`; `sha256sum -c b-round-312/protected-sha256.txt` from `store/` | Exactly: M `app/contexts/ArrangementContext.tsx`, M `app/lib/arrangement/peaks.client.ts`, M `app/lib/arrangement/__tests__/peaks-worker.test.ts`, M doc 228, M doc 163, ?? `app/lib/arrangement/__tests__/peaks-worker-video.test.tsx`. Protected 11/11 OK |
-| CLAIMS | Re-run `claims-315.sh` | Equals `claims-315-sketch-output.txt` except by design: K2 `6 abfcf78`; K9 the round-315 l.4; K10 `0 0`; K11 may grow by A's appended rows; K7 may also list the new video test file; K18 `11` (A's tree has no scratch `cacheDir`). K3–K6, K12–K17 and K19–K24 equal the sketch output |
-| SKETCH-EQUAL | `cmp` the two app files with the `sketch-*.txt` copies; `diff b-round-314/sketch-peaks-worker.test.ts.txt app/lib/arrangement/__tests__/peaks-worker.test.ts` | The app files are equal. The test-file diff has only added lines (`>`), none removed or changed (§4.3) |
-| UNIT | A-UNIT's file list on C's own scratch copy (own `cacheDir`); then `unit-mutants.py` on that scratch, plus A's video mutant, plus at least one mutant of C's own on `deliver` or the cold-start flag | All pass. Red rows equal `precheck-unit-mutants.txt`. Record C's own mutant |
-| PK-LOAD | Browser, production build of A's tree, both viewports: load `/studio-lab` 3 times | Status reaches the demo ready text; 9 sources ready; the library preview wave draws; 0 page errors; exactly one peaks worker is constructed and it is not terminated (wrap `window.Worker` as `probe/cold-start.cjs` does, with the delay 0). The demo-synth worker terminates itself after its one reply, as at HEAD; that is expected |
-| PK-COLD-START | Browser, both builds, each with its own build and port. **HEAD build:** `git -C /home/runner/czaba-project/store archive abfcf78 \| tar -x -C <scratch-head>`, symlink `node_modules`, give its `vite.config.ts` its own `cacheDir`, `npm run build`, then `PORT=<port> npx remix-serve build/server/index.js`; never touch `store/`. **A's tree:** a tar copy of `store/` built the same way (or the perf spec's own build). Run `node b-round-314/probe/cold-start.cjs http://127.0.0.1:<port> 4000 <out.json> <WxH>` with the first peaks reply held for 4,000 ms, at 1440×900; A's tree also at 1280×720 | HEAD: the peaks worker is terminated about 3 s after its creation (the old stall). A's tree: it is not terminated; every source still reaches ready; 0 page errors. Report each worker's created / first-reply / terminated times. Note: the probe's `firstReply` is the native arrival time, before the 4 s hold; the app sees the reply only after the hold (B's HEAD run: created 316, firstReply 377, terminated 3316) |
-| PK-VIDEO-SOUND | Browser, A's tree, 1440×900: import a short local video that has an audio track (generate one with the browser's MediaRecorder or a committed-free fixture made at test time), press Play as soon as the clip appears, then wait | The video's own sound plays once its audio shows ready (Original sound audible: an AnalyserNode on the master or the existing meter shows non-zero level after ready); no page error. If the environment cannot produce a video with audio, write the reason under `notRunnableHere`; PW19 still covers the contract |
-| PK-PERF-LOAD | Perf spec `perf/studio-lab.perf.spec.ts` on A's tree, **alone**, after a browser warm-up (L38), 1 run; then `python3 -I c-round-314/rowcmp.py c-round-314/perf-harness-1.json <run json>` | `failures` empty; `harness.loaf-scripts-live` ≥ 50; every `deterministic` row equals C round 314's run: 164/164, 0 differ, 0 extra (B's sketch run: the same [K24]). A differing row is reported with its id |
-| DOC | Doc 228 l.4 byte for byte; the 7 TEMPLATE headings in order (L26); the granted sections against the code. Doc 163: its one "C-ის შემოწმება მოლოდინშია" sentence [K10] now reads "C round 314 PASS", and nothing else changed (`git diff` shows one changed line) | Doc 228 l.4 is `**სტატუსი:** Completed (C round 315 PASS)`; its TODO no longer lists PERF-5b as open and names where each signal went; each claimed test row exists |
-| G315-AUTH | As G314-AUTH (copy `c-round-314/g314-auth.cjs`), **both viewports** | `/studio-lab`: workspace and demo badge, `auth_user` null, 0 page errors. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. `/api/studio-token` with no header → 401. No token in any body |
+| SOURCE-SCOPE | `git status --short --untracked-files=all`; `sha256sum -c b-round-312/protected-sha256.txt` from `store/` | Exactly 40 entries. M: `app/root.tsx`, `app/styles/app.css`, `app/routes/studio-lab.tsx`, `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx`, `app/lib/third-party-licenses.ts`, `app/lib/__tests__/third-party-licenses.test.ts`, `THIRD_PARTY_NOTICES.md`. ??: `app/lib/__tests__/self-hosted-fonts.test.ts`, `app/assets/fonts/fonts.css`, 25 `app/assets/fonts/*.woff2`, 5 `app/assets/fonts/licenses/OFL-*.txt`, doc 229. Protected 11/11 OK |
+| CLAIMS | Re-run `claims-316.sh` | Equals `claims-316-sketch-output.txt` except by design: K2 `40 c136dfd`; K9 `229-perf-self-hosted-fonts.md`; K10 gains the `## Fonts (SIL Open Font License 1.1)` heading |
+| SKETCH-EQUAL | `cmp` the six §4.1 files with `sketch-*.txt`; sha256 of the woff2 and licences against the `fonts-src` lists | All equal; 25 + 5 OK |
+| UNIT | §7 step 4's 16 files on C's own scratch (own `cacheDir`); `unit-mutants-316.py` on that scratch; A's MU-NOTICES-DROP-FAMILY; at least one mutant of C's own | All pass. Mutant lines equal `precheck-unit-mutants-316.txt`. Record C's own mutant |
+| FONT-NET | Browser, both builds, 1440×900, 3 fresh loads each of `/studio-lab`, `/`, `/store`, `/studio/middle-east`; `/studio-lab` also at 1280×720 | A's tree: 0 requests to `fonts.googleapis.com`/`fonts.gstatic.com` and 0 third-party `renderBlockingStatus === 'blocking'` resources on every route (HEAD: 3/2/2/2 blocking). The loaded `document.fonts` set per route equals HEAD's. The woff2 files fetched per route are exactly: `/studio-lab` instrument-sans-latin, ibm-plex-mono-latin, noto-sans-georgian-latin; `/` and `/store` inter-latin, playfair-display-latin; `/studio/middle-east` inter-latin. Each is fetched once (no duplicate from the preload). 0 console warnings about preload. With cache disabled, the decoded body bytes of the woff2 responses on `/studio-lab` total 69,732 (30,092 + 14,708 + 24,932; content-fixed whatever the transport encoding) |
+| FONT-PRELOAD | A's tree: SSR HTML of `/studio-lab` and the network log | Exactly 2 `<link rel="preload" as="font" type="font/woff2" crossorigin="anonymous">` in `<head>`. Their hrefs are the same hashed URLs the page fetches (the instrument-sans-latin and ibm-plex-mono-latin entries of the FONT-NET row). No other route has a font preload |
+| FONT-CACHE | `curl -sI` on A's build: one hashed woff2 and the hashed `fonts-*.css` | `Cache-Control: public, max-age=31536000, immutable`; woff2 `Content-Type: font/woff2` |
+| FONT-PIXEL | Screenshots of HEAD and A's tree (`reducedMotion: 'reduce'`, after `document.fonts.ready` + 3 s, videos paused), `/studio-lab`, `/`, `/store`, both viewports; first a HEAD-vs-HEAD control pair | `/studio-lab`: 0 px differ at 1440 and 1280. `/` and `/store`: every region that differs between HEAD and A also differs in the HEAD-vs-HEAD control (B's run: home hero and one `/store` band move by themselves). A region that differs only HEAD vs A is a finding |
+| FONT-GLYPHS (L20) | CDP `CSS.getPlatformFontsForNode` on every element with direct text on `/studio-lab` (both viewports) and `/store` (1440), both builds | The per-node list of `{familyName, glyphCount}` is equal between HEAD and A's tree. Report the non-ASCII glyphs on screen and their platform font (this also shows which glyph pulls `noto-sans-georgian-latin` on `/studio-lab`) |
+| FCP | From FONT-NET's loads: FCP and DCL per load, median of 3 per route and build | Gate rows: FCP − DCL < 150 ms on `/` and `/store` in A's tree; `/studio-lab` absolute FCP median ≤ 1.3 × HEAD's median. Reported only (owned by PERF-11): `/studio-lab` FCP − DCL. These are wallclock rows: an out-of-margin result gets up to 2 replacement runs (L38), then it is a finding |
+| PERF-LOAD | `perf/studio-lab.perf.spec.ts` on A's tree, **alone**, after a browser warm-up (L38), 1 run; `python3 -I c-round-314/rowcmp.py c-round-315/perf-harness.json <run json>` | `failures` empty; `harness.loaf-scripts-live` ≥ 50; deterministic rows equal C round 315's run (B's sketch run: §12 K20). A differing row is reported with its id |
+| NOTICES | Read `THIRD_PARTY_NOTICES.md` and §4.2 | The fonts section exists once, after the LAME section; it names the 5 families, each licence path (each file exists), "unmodified", Google Fonts, sha256, and the two Reserved Font Names. No `@fontsource` or `fonts.googleapis.com` row |
+| DOC | Doc 229 | l.4 is `**სტატუსი:** Completed (C round 316 PASS)`; the 7 TEMPLATE headings in order (L26); every cited test row exists; the D-29z851 split and the STORE-2c handoff are stated |
+| G316-AUTH | As G315-AUTH (copy `c-round-315/g315-auth*.cjs` if present, else `c-round-314/g314-auth.cjs`), **both viewports**, on the dev server `http://127.0.0.1:5173` | `/studio-lab`: workspace and demo badge, `auth_user` null, 0 page errors. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. `/api/studio-token` with no header → 401. No token in any body |
 
 **Gate rows.** C does not claim these; they go under `"gate"`: full vitest, build, Biome, `npm run verify` and the e2e smoke.
 
-**Browser flags.** `browserVerified` is true only if PK-LOAD, PK-COLD-START, PK-PERF-LOAD and G315-AUTH all ran. PK-VIDEO-SOUND is wanted; when the environment cannot produce a video with an audio track, it goes under `"notRunnableHere"` with the reason, and it does not make `browserVerified` false.
+**Browser flags.** `browserVerified` is true only if FONT-NET, FONT-PRELOAD, FONT-PIXEL, FONT-GLYPHS, FCP, PERF-LOAD and G316-AUTH all ran.
 
-## 4. Contract (D-29z847)
+## 4. Contract (D-29z852)
 
-### 4.1 `app/lib/arrangement/peaks.client.ts`: exactly the sketch
-- New export `PEAKS_WORKER_COLD_START_TIMEOUT_MS = 10_000`. `PEAKS_WORKER_STALL_TIMEOUT_MS` stays `3_000`.
-- `workerReplied` is set on every parsed reply, before the job-id filter. `armStall` picks 3,000 ms once it is set, otherwise 10,000 ms. A worker is created at most once per computer (`workerFailed` stays true after a failure [K22]), so the flag needs no reset.
-- `deliver(job, peaks)`: calls `job.onPeaks(peaks)`. If the callback throws, the error is rethrown from `window.setTimeout(..., 0)`. Nothing else catches or swallows it. `handleReply`, `deliverOnMainThread` and so the `failWorker` loop all use it; the abort checks stay where they are; `if (!active) startNext()` stays after the delivery.
-- Peaks computation (`computePeaksOnMainThread`) stays outside the `try`: a failure to compute is not a callback error.
+### 4.1 Files equal to the sketch (`cmp`)
+| File | Sketch copy | Change |
+|---|---|---|
+| `app/root.tsx` | `sketch-root.tsx.txt` | `import fontStyles from './assets/fonts/fonts.css?url';`; links = `[{ rel: 'stylesheet', href: fontStyles }, { rel: 'stylesheet', href: appStyles }]` |
+| `app/styles/app.css` | `sketch-app.css.txt` | l.1 (Inter `@import`) deleted; nothing else |
+| `app/routes/studio-lab.tsx` | `sketch-studio-lab.tsx.txt` | `STUDIO_FONTS_HREF` removed; 2 `?url` imports; links = 2 preloads (`as: 'font'`, `type: 'font/woff2'`, `crossOrigin: 'anonymous'`), Instrument Sans first |
+| `app/assets/fonts/fonts.css` (new) | `sketch-fonts.css.txt` | 83 faces, 25 local URLs, `font-display: swap` everywhere, no comments |
+| `app/lib/__tests__/self-hosted-fonts.test.ts` (new) | `sketch-self-hosted-fonts.test.ts.txt` | FN1–FN5 |
+| `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx` | `sketch-studio-theme-obsidian.test.tsx.txt` | TH7 rewritten + the `FONTS_CSS_PATH` constant; no other row changed |
 
-### 4.2 `app/contexts/ArrangementContext.tsx`: exactly the sketch hunks
-- **Video call site** [K4]: `buffersRef.current.set(sourceId, buffer)` moves from before `requestSourcePeaks` into its callback, after the `signal.aborted || !videoSourcesRef.current.has(sourceId)` guard and before `setSourcePeaks`. The existing re-sync stays after it.
-- **Collection call site** [K4]: the set moves the same way, after the `controller.signal.aborted` guard. After `settle(false)`, when `historyRef.current.present` has a clip with that `sourceId`, it calls `syncPlayback(present, undefined, true)`, the same call the video callback makes [K5].
-- The load effect's dependency list gains `syncPlayback` [K5]. `syncPlayback` is stable: its only dependency is `startGraph`, whose three helpers have empty dependency lists [K6]. So the effect does not re-run and the collection does not reload.
-- **L49, side effects of the moved call:** the only effect of `buffersRef.current.set` is to make the buffer visible to its three readers (graph build, library preview, export). It is kept, only later. No other line changes.
+The 25 woff2 and 5 licence files are byte copies of `fonts-src/files/` and `fonts-src/licenses/`.
 
-### 4.3 `app/lib/arrangement/__tests__/peaks-worker.test.ts`: the sketch rows
-- PW9 rewritten (§1 ruling line);
-- new rows PW13b, PW14, PW15, PW16, PW17, PW18 and PW20 as in the sketch;
-- every other row byte-unchanged.
+### 4.2 Notices (A writes)
+In `app/lib/third-party-licenses.ts`:
+- Add a static section constant rendered by `renderThirdPartyNotices` **right after the LAME section**. Its heading is exactly `## Fonts (SIL Open Font License 1.1)`.
+- It says that the store ships web font files as served by Google Fonts, unmodified (not re-subset, re-encoded or renamed) and pinned by sha256 in `app/lib/__tests__/self-hosted-fonts.test.ts`.
+- One bullet per family, alphabetical: family name, licence file path, upstream project URL.
 
-A may append rows; A changes no sketch row.
+| Family | Licence file | Upstream |
+|---|---|---|
+| IBM Plex Mono | `app/assets/fonts/licenses/OFL-ibm-plex-mono.txt` | https://github.com/IBM/plex |
+| Instrument Sans | `app/assets/fonts/licenses/OFL-instrument-sans.txt` | https://github.com/Instrument/instrument-sans |
+| Inter | `app/assets/fonts/licenses/OFL-inter.txt` | https://github.com/rsms/inter |
+| Noto Sans Georgian | `app/assets/fonts/licenses/OFL-noto-sans-georgian.txt` | https://github.com/notofonts/georgian |
+| Playfair Display | `app/assets/fonts/licenses/OFL-playfair-display.txt` | https://github.com/clauseggers/Playfair-Display |
+
+- One sentence names the Reserved Font Names: "Playfair Display" and "Plex".
+- Plain ASCII apart from the family names; lines ≤ 100 characters.
+- Say "Google Fonts" in words. Never write the host names `fonts.googleapis.com` or `fonts.gstatic.com`: FN1 scans every non-test file under `app/`, including `third-party-licenses.ts`.
+
+**TL10** in `third-party-licenses.test.ts` (new describe or inside TL6), on the rendered notices for the real lock:
+- the section exists exactly once and comes after `## LAME MP3 Encoder`;
+- it names all 5 families and each licence path, and each path exists on disk (`readFileSync` relative to the repo root);
+- it contains `unmodified`, `Google Fonts`, `sha256`, `Playfair Display` and `Plex`.
+
+Then regenerate `THIRD_PARTY_NOTICES.md` (§3.1 A-NOTICES). No other row in either file changes.
+
+### 4.3 Doc 229 (A writes)
+`docs/implementation/2026/quarter-IV/229-perf-self-hosted-fonts.md`, following `docs/implementation/TEMPLATE.md`:
+- Header block, as doc 228: l.1 `# ` title; l.3 `**თარიღი:** 2026-11-03` (or the day A writes it); l.4 exactly `**სტატუსი:** Completed (C round 316 PASS)` (L28); l.5 `**შეცვლილი პროექტი:** Store (…the changed paths…)`. Then the 7 TEMPLATE headings in order.
+- Context: PERF-7, the §0.1 premise table, and D-29z851's split with its evidence (SSR `opacity:0` wrapper; PERF-11).
+- Approach: mirror versus `@fontsource` versus trimming, and why.
+- Files.
+- Problems: CORS preload, inlined stubs, RFN.
+- Testing: FN1–FN5, TH7, TL10, and C's browser rows.
+- TODO: STORE-2c deletes Inter/Playfair; PERF-11 owns `/studio-lab` first paint.
 
 ### 4.4 Unchanged
-- `peaks.worker.ts`, `peaks.worker-protocol.ts`, `peaks.ts`;
-- `perf/**` (no harness change; `budgets.json` stays);
-- every other app file.
+- `public/**`, `vite.config.ts`, `package.json`, `package-lock.json`, `biome.json` and every protected file;
+- `perf/**` (no harness change);
+- every other app file, including `PageTransition.tsx`, the store routes and the legacy Studio route.
 
-## 5. Grants
+## 5. Grants (D-29z852)
 A edits only:
-1. `app/lib/arrangement/peaks.client.ts`: §4.1.
-2. `app/contexts/ArrangementContext.tsx`: §4.2.
-3. `app/lib/arrangement/__tests__/peaks-worker.test.ts`: §4.3, append only after the sketch.
-4. New file `app/lib/arrangement/__tests__/peaks-worker-video.test.tsx`: PW19 (§6).
-5. Docs:
-   - `docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md`:
-     - l.4 exactly `**სტატუსი:** Completed (C round 315 PASS)` (L28);
-     - the whole sections `## მიდგომა`, `## არქიტექტურა`, `## შეცვლილი ფაილები`, `## პრობლემები და გადაწყვეტები`, `## ტესტირება` and `## TODO / შემდეგი ნაბიჯები` (L34);
-     - the batching premise and its closure (§0.1), the L1–L5 contracts, PW9/PW13b–PW20, and where each signal went;
-     - the sentence "C-ის შემოწმება მოლოდინშია" is removed [K10];
-     - `## არქიტექტურა` describes the two stall budgets and the `deliver` path; `## შეცვლილი ფაილები` lists the new test file.
-   - `docs/implementation/2026/quarter-IV/163-studio-perf-harness.md`: only the one sentence "C-ის შემოწმება მოლოდინშია" in `## ტესტირება` [K10], replaced by "C round 314 PASS". Nothing else in doc 163.
+1. `app/root.tsx`: §4.1, byte-equal to the sketch (narrow grant on a global_forbidden file).
+2. `app/styles/app.css`: deletion of l.1 only, byte-equal to the sketch (narrow grant on a global_forbidden file).
+3. `app/routes/studio-lab.tsx`: §4.1.
+4. New `app/assets/fonts/fonts.css`, the 25 `app/assets/fonts/*.woff2`, and the 5 `app/assets/fonts/licenses/OFL-*.txt`: byte copies.
+5. New `app/lib/__tests__/self-hosted-fonts.test.ts`: the sketch.
+6. `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx`: the sketch (TH7 + one constant).
+7. `app/lib/third-party-licenses.ts`, `app/lib/__tests__/third-party-licenses.test.ts`, `THIRD_PARTY_NOTICES.md`: §4.2 only (L35).
+8. New doc `docs/implementation/2026/quarter-IV/229-perf-self-hosted-fonts.md`: §4.3.
 
 **Nothing else:**
 - no other `app/**` file;
-- no `perf/**` file;
-- not `package.json`, `biome.json`, `vite.config.ts`, `vitest.config.ts`, any Playwright config, or any protected file;
-- no dependency change.
+- no `perf/**`, `public/**` or config file;
+- no dependency change;
+- no protected file.
 
 ## 6. Specified test rows (L52)
-| Assert | Red-proof |
+| Assert | Red-proof (`unit-mutants-316.py`) |
 |---|---|
-| PW9 (after the first reply, fallback exactly at 3,000 ms; timer count 0) | MU-NEVER-REPLIED, MU-STALL-ONLY-AT-BEGIN |
-| PW13b (`end` / `cancel` post throws → worker off, no stray timer; `end` still delivers byte-equal main-thread peaks) | MU-FAIL-KEEPS-TIMER |
-| PW14 (no reply yet → no fallback at 3,000 or 9,999 ms; fallback at 10,000 ms) | MU-COLD-START-SAME |
-| PW15 (each reply re-arms: 4 replies 2,999 ms apart do not fall back) | MU-STALL-ONLY-AT-BEGIN, MU-NEVER-REPLIED |
-| PW16 (a throwing `onPeaks` in `handleReply`: the next job begins and delivers; the error surfaces on a timer) | MU-DELIVER-NO-CATCH, MU-DELIVER-SWALLOW, MU-DELIVER-SYNC-THROW |
-| PW17 (worker `onerror` with two pending jobs, the first callback throws: both deliver, nothing throws synchronously, the error surfaces on a timer) | the same three |
-| PW18 (context: a clip on a `loading` source is not started while peaks run; after `ready` the playing graph is re-synced and starts it) | MU-BUFFER-BEFORE-PEAKS, MU-NO-COLLECTION-RESYNC |
-| PW20 (an empty buffer: delivered at once on the main thread, byte-equal to `computePeaks`, no Worker constructed) | MU-EMPTY-TO-WORKER |
-| **PW19 (A writes, new file)** | **MU-VIDEO-BUFFER-BEFORE-PEAKS** (A's own: the video set moved back before `requestSourcePeaks`) |
+| FN1: no non-test `app/**` `.ts`/`.tsx`/`.css` names a Google Fonts host; nothing imports `fonts.css` except as `?url` | MU-GOOGLE-LINK-BACK, MU-INTER-IMPORT-BACK, MU-SIDE-EFFECT-IMPORT |
+| FN2: 83 faces; the 5 families; `font-display: swap` and a `unicode-range` on every face; every `url()` is a local woff2 that exists; every woff2 in the folder is used; no `@import` | MU-DROP-FACE, MU-SWAP-BLOCK, MU-DELETE-WOFF2, MU-RENAME-FAMILY |
+| FN3: every woff2 matches its pinned sha256, and the file list equals the pin list | MU-ALTER-BYTE, MU-DELETE-WOFF2 |
+| FN4: the families named in `--font-sans`/`--font-serif`/`--font-mono` in `app.css` are exactly the 5, each has a face, and each family's OFL file exists and is OFL 1.1 | MU-RENAME-FAMILY, MU-LICENSE-MISSING |
+| FN5: `root.tsx` imports `fonts.css?url` and links exactly `fontStyles` then `appStyles`; `links()` has 2 entries and no `http(s)` href | MU-GOOGLE-LINK-BACK, MU-ROOT-ORDER |
+| TH7 (rewritten): exactly 2 preloads with `as`/`type`/`crossOrigin`, hrefs ending in the two files, and each file is a weight-400 face of its family in `fonts.css` | MU-PRELOAD-NO-CORS, MU-PRELOAD-WRONG-FILE, MU-RENAME-FAMILY |
+| **TL10 (A writes)** | **MU-NOTICES-DROP-FAMILY** (A's own: remove one family bullet from the section constant; TL10 red) |
 
-**PW19 recipe.**
-- **Setup.** Copy the mocks and fakes of `video-import-status-ui.test.tsx`: `video.client` with `probeVideoFile`/`decodeVideoAudio` as `vi.fn()`, `graph.client`'s `renderArrangementWav`, `mp3-encoder.client`, `@remix-run/react`. Use a fake peaks Worker in manual mode, the same shape as `FakePeaksWorker` in `peaks-worker.test.ts`. Use an `AudioContext` whose buffer sources record `start()` with their `buffer`, as PW18's `RecordingAudioContext` does.
-- **Steps.**
-  1. Mount with the empty collection and a video + music arrangement.
-  2. `importVideoFiles([file])`; resolve the probe; let `decodeVideoAudio` resolve with `{ buffer }`.
-  3. Before running the worker, assert:
-     - the video source's `audio` is still `decoding`;
-     - `sourcePeaks` lacks it;
-     - after `togglePlayback()`, no started source has that buffer.
-  4. Run the worker's posted messages.
-  5. Assert:
-     - `audio` is `ready`;
-     - `sourcePeaks` has the source;
-     - a started source has the buffer (the existing re-sync).
-- **Why step 5 holds.** A video clip is scheduled like any clip: the schedule plan has no kind filter, and the graph looks its buffer up by `sourceId`, and `createArrangement` creates tracks unmuted [K23].
-- **Red-proof.** MU-VIDEO-BUFFER-BEFORE-PEAKS must turn it red at step 3. If the import path cannot reach step 3 or step 5 in jsdom, that is a STOP with the observed state, not a weaker row.
+**Note.** In vitest, a CSS `?url` import resolves to `""`. That is why FN5 checks the order by source and the runtime only for the count and the absence of `http`. The browser rows check the real hrefs.
 
 ## 7. A's order of work
 1. A-CLAIMS.
-2. A-APPLY.
+2. A-APPLY (patch, then the byte copies, then the sha checks).
 3. A-TYPE and A-LINT.
-4. Run the covering files on the sketch:
-   - `peaks-worker.test.ts`, `clip-gain-waveform.test.tsx`, `content-colour-ui.test.tsx`, `clip-gain-pointer-preview.test.tsx`, `waveform-zoom.test.tsx`, `failed-source-refusal.test.tsx`, `video-import-status-ui.test.tsx`, `export-mp3.test.tsx`, all under `app/lib/arrangement/__tests__/`;
-   - B's run: 8 files, 97/97 [K14] (`precheck-covering.log`).
-5. Write PW19 and show its mutant red.
+4. Covering files, all of them: `app/lib/__tests__/audio-preview-player.test.tsx`, `self-hosted-fonts.test.ts`, `store-focus-fixups.test.tsx`, `store-focus-ring.test.ts`, `store-theme-tokens.test.ts`, `third-party-licenses.test.ts`; and under `app/lib/arrangement/__tests__/`: `default-track-names-ssr.test.tsx`, `panel-radius-ui.test.tsx`, `ssr-layout-effect.test.tsx`, `studio-focus-ring.test.ts`, `studio-link-hydrate-ssr-ui.test.tsx`, `studio-link-hydrate-ui.test.tsx`, `studio-link-ui.test.tsx`, `studio-link-view-in-store-ui.test.tsx`, `studio-narrow-gate-ui.test.tsx`, `studio-theme-obsidian.test.tsx`. B's run: 16 files, 233/233.
+5. A-NOTICES (TL10, regenerate, rerun `third-party-licenses.test.ts` without `-u`).
 6. A-MUTANTS.
 7. A-DOC.
-8. A-REVIEW, fix inside the grants, re-review.
-9. Write `a-round-315.md` with every row actually run.
+8. A-REVIEW; fix inside the grants; re-review.
+9. Write `a-round-316.md` with every row actually run.
 
 ## 8. Neighbouring behaviour at risk (C probes)
-- **The load:** 9 sources, ready order (ready only after peaks, D-29z835), the library preview wave. A collection reload loop would show as repeated `loading` and is caught by PK-LOAD.
-- **Playback restarts:** the new collection re-sync fires only when a clip uses a source that becomes ready while playing. `/studio-lab` starts with no clips [K20], so the demo load must show no graph restart. PK-PERF-LOAD's `play.*` rows and `harness.restart-live` cover it.
-- **Video:** import, its sound, and the export refusal while audio is `decoding` [K21].
-- **Auth:** purchased Studio protection (G315-AUTH).
+- **Store pages** (Inter + Playfair) and the legacy guard page (Inter via `app.css` `--font-sans` [K5]): same fonts loaded and the same pixels (FONT-NET, FONT-PIXEL).
+- **CSS order:** `fonts.css` before `app.css`. The two do not share selectors, but the cascade order of `@font-face` matters only for duplicate families, and there are none.
+- **Double fetch:** a preload without a matching CORS mode, or `fonts.css` loaded twice (FONT-NET counts each file once).
+- **Inlined stubs:** the two 1,760 B Noto files become `data:` URIs. They are never preloaded and are fetched by no request.
+- **Auth:** `root.tsx` is shared by every route (G316-AUTH).
 
 ## 9. STOP conditions
-A writes "STOP — needs B ruling" at the top of `a-round-315.md` and changes nothing else when:
+A writes "STOP — needs B ruling" at the top of `a-round-316.md` and changes nothing else when:
 - A-CLAIMS differs from the HEAD output;
-- `git apply` fails, or a change is needed outside §5;
+- `git apply` fails, a sha check fails, or a change is needed outside §5;
 - a covering test fails, or one runs above 50 % of its timeout (L11);
-- PW19 cannot reach its step 3 or its step 5 in jsdom;
-- a §4 contract would have to change (the two budgets, the timer rethrow, the moved set, the re-sync);
-- the reviewer reports a Medium+ outside the grants.
+- the reviewer asks for a change to a §4.1 file (trimming, renaming, another preload, a different `root.tsx` shape);
+- the reviewer reports a Medium+ outside the grants;
+- regenerating `THIRD_PARTY_NOTICES.md` changes anything other than inserting the fonts section (for example a `## Runtime packages` row). That would mean the notices were already stale at HEAD, which is a separate finding.
 
-## 10. Next, and requests (D-29z849)
-- **After C PASS and the gate:** PERF-5 is done (5a + 5b). Root publishes the 6 paths.
-- **Next round:**
-  - **REGRESSION**, if the round-316 planning falls on or after **2026-11-05** [K15];
-  - otherwise **PERF-7** (self-hosted fonts), after the performance-optimizer and tech-lead consults and B's own measurement.
+## 10. Next, and requests (D-29z854)
+- **After C PASS and the gate:** PERF-7 is done. Root publishes the 40 paths (§11).
+- **Next round (317):**
+  - **REGRESSION**, if the round-317 planning falls on or after **2026-11-05** [K18];
+  - otherwise **PERF-8** (range and selection in an external store). It needs `zustand@5.0.16` (oss-adoption.md). B files `root-deps-request.json` in the same planning step that dispatches PERF-8, and grants the notices files in that task (L35).
 - **RETRO:** at round 320.
-- **Signals recorded (not scheduled):**
-  - R314-PEAKS-COMMIT-COMPONENTS → PERF-10: 9 deliveries × 94 components per load (846). PERF-10's row is components per peaks delivery.
-  - R314-DEMO-BUFFER-LONGTASK-6X → PERF-13 (with PERF2-STEREO-COPY): a 142–168 ms task at 6× just before the demo stems' buffers appear. Hypothesis, not confirmed: AudioBuffer creation and the channel copies in `loadDemoSource`. Attribution probe: `performance.mark`/`measure` around the buffer creation per source.
-  - PERF2-FIRST-FRAME-LONGTASK (exists) → PERF-11. PERF-5's plan target "load long tasks > 50 ms = 0" is not met by PERF-5: the remaining 53–61 ms task at 1× is the first frame (no script over 5 ms), not peaks. PERF-5 closes on its own scope (main-thread peaks).
-  - B-R314-EXPORT-LOADING-GATE (info): export has no gate for a collection source that is still `loading`; its clip is silently left out. Not reachable in `/studio-lab` today [K20]. Revisit at SRW-21-PLAN.
-  - R313-FOLLOW-PAGE-TURN-COVERAGE → PERF-10 planning (§1).
+- **Moved to `deferred_low_polish`** (D-29z854; fix home PERF-14, the next round that owns `peaks.client.ts` and its tests):
+  - C-R315-T1: PW14 does not pin 10,000 ms;
+  - C-R315-T2: no row for "an unparsable message does not end the cold start";
+  - A-R315-REVIEW-L1: `dispose()` keeps `workerReplied`;
+  - A-R315-REVIEW-L2 = GATE315-S6: a main-thread compute throw stops the fallback loop;
+  - A-R315-REVIEW-L3: no "no Worker + throwing `onPeaks`" row;
+  - A-R315-REVIEW-L4 = GATE315-S1: the `afterEach` of the PW12–PW13 describe lacks `vi.useRealTimers()`;
+  - GATE315-S2: PW18 unmounts only on pass;
+  - GATE315-S8: doc 228 credits the stage-1 browser rows to round 314 instead of 312.
+- **Signals (not scheduled):**
+  - GATE315-S4 / A-R315 info: N sources ready during playback give N graph restarts (unreachable in `/studio-lab`) → PERF-10 / SRW-21-PLAN.
+  - GATE315-S5: = B-R314-EXPORT-LOADING-GATE → SRW-21-PLAN.
+  - ARCH-R315-COMMIT-DECODED-SOURCE: the reviewer's proposal to extract the duplicated "source ready" sequence into one local `useCallback` → keep as a signal; decided at PERF-10 planning.
+  - C-R315 observation: a video's own sound ends with no fade at the video's duration → T12-ADVANCED (T12.13 micro fades).
+  - STORE-2c handoff: delete the Inter and Playfair files and faces when the store adopts the Studio type.
 - **For Saba (unchanged):** SABA-Q-WORKER-DEPLOYED and SABA-Q-PERF4-STUDIO-CACHE.
-- **For root (unchanged):** ROOT-REQ-VITEST-PERF-INCLUDE and ROOT-REQ-VERIFY-WORKER-TESTS. No new checkpoint request: one owner, small diff.
-- **`lessons.md`:** unchanged. No new failure class this round.
+- **For root (unchanged):** ROOT-REQ-VITEST-PERF-INCLUDE and ROOT-REQ-VERIFY-WORKER-TESTS. No architecture checkpoint: one small owner set.
 
 ## 11. Commit readiness
-After C PASS and the gate, root publishes:
-- M `ArrangementContext.tsx`, `peaks.client.ts`, `peaks-worker.test.ts`, docs 228 and 163;
-- the new `peaks-worker-video.test.tsx`.
+After C PASS and the gate, root publishes 40 paths:
+- M `app/root.tsx`, `app/styles/app.css`, `app/routes/studio-lab.tsx`, `app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx`, `app/lib/third-party-licenses.ts`, `app/lib/__tests__/third-party-licenses.test.ts`, `THIRD_PARTY_NOTICES.md`;
+- new: `app/lib/__tests__/self-hosted-fonts.test.ts`, `app/assets/fonts/fonts.css`, the 25 woff2, the 5 licences, doc 229.
 
-There is no deploy step.
+The woff2 files are binary; root's diff review uses their sha256 against `fonts-src/fonts-sha256.txt`. There is no deploy step.
 
 ## 12. Claims (L29 + L56)
-Run `bash b-round-314/claims-315.sh` from the loop root. Outputs:
-- `b-round-314/claims-315-head-output.txt`: HEAD at planning;
-- `b-round-314/claims-315-sketch-output.txt`: `CLAIMS_STORE=/tmp/b315k`, the final sketch.
+Run `bash b-round-315/claims-316.sh` from the loop root. Outputs:
+- `b-round-315/claims-316-head-output.txt`: HEAD at planning;
+- `b-round-315/claims-316-sketch-output.txt`: `CLAIMS_STORE=/tmp/b316s`.
 
-| Tag | Claim | Expected at planning (HEAD) | Sketch |
+| Tag | Claim | HEAD | Sketch |
 |---|---|---|---|
-| K1 | gate 314 status, commit | `published abfcf78` | same |
-| K2 | `git status` entries, HEAD | `0 abfcf78` | (none: the scratch has no git) |
-| K3 | in `peaks.client.ts`: the 3,000 ms stall line; the 10,000 ms cold-start line; `job.onPeaks(` calls; `window.setTimeout(` calls | `1 0 2 1` | `1 1 1 2` |
-| K4 | lines of `buffersRef.current.set(` \| lines of `requestSourcePeaks(buffer` in the context | `2506 3924 \| 2507 3925` (set before the request) | `2510 3928 \| 2506 3924` (set inside the callback) |
-| K5 | `syncPlayback(present, undefined, true);` count; the old load-effect dependency line; the new one | `1 1 0` | `2 0 1` |
-| K6 | dependency lists of `syncPlayback`, `startGraph` and its three helpers | `[startGraph], [fillLoopIterations,fillMetronomeHorizon,releaseRetiredGraphs], },[]); },[]); },[]);` | same |
-| K7 | files naming the stall/cold-start constants or `createSourcePeaksComputer` | the context, `peaks-worker.test.ts`, `peaks.client.ts` | same (after A: plus the new video test file if it names them) |
-| K8 | test files that stub `Worker` | 5 files (`sfx-export`, `demo-synth-worker`, `export-cancel`, `export-wav`, `peaks-worker`) | same |
-| K9 | doc 228 l.4 | `**სტატუსი:** In Progress (stage 1 of 2; C round 314 PASS)` | same (after A: `Completed (C round 315 PASS)`) |
-| K10 | "C-ის შემოწმება მოლოდინშია" in docs 228 and 163 | `1 1` | same (after A: `0 0`) |
-| K11 | `it`/`it.each` lines and row ids in `peaks-worker.test.ts` | `16`, PW1…PW13 | `23`, plus PW13b, PW14–PW18, PW20 |
-| K12 | probe per load: deliveries / commits from the first delivery / components per commit / gaps under 16 ms / long tasks overlapping a delivery→commit window / other long tasks after the first delivery | 1×: `9/9/94/3/[]/[]`, `9/9/94/3/[]/[]`, `9/9/94/2/[]/[]`; 6×: `9/9/94/0/[]/[168]`, `[151]`, `[142]` | — |
-| K13 | unit mutants: 0-red lines; red lines; restored | — | `1 10 restored: 25 passed` |
-| K14 | covering run \| full suite on the scratch | — | `Tests 97 passed (97) \| Test Files 235 passed (235) Tests 3502 passed (3502)` |
-| K15 | last regression date | `2026-11-02` | same |
-| K16 | round-314 archive equals the copy | `archive-equal-314` | same |
-| K17 | every cited `b-round-314/` artifact exists (L56) | `done` | same |
-| K18 | the 11 protected/config files | `11` | `10` (the scratch's own `cacheDir` in `vite.config.ts`) |
-| K19 | last doc in quarter IV | `228-perf-peaks-worker.md` | same |
-| K20 | `clips` in `routes/studio-lab.tsx`; line of the video decode call; line of the only video-source removal | `0 2621 2599` | same |
-| K21 | `status !== 'ready'` checks; `audio === 'decoding'` export refusals; `renderArrangementWav(arrangement, buffersRef.current` calls | `3 2 3` | same |
-| K22 | in `peaks.client.ts`: `workerFailed = true;` sites; the `if (workerFailed \|\|` guard; `const job = queue.shift();` (one job at a time); in the context: the graph-build `buffers: buffersRef.current,`; `buffersRef.current.delete` | `2 1 1 1 0` | same |
-| K23 | `planSchedule`: `.filter(` calls and `kind` mentions (no kind filter); the graph's buffer lookup by `sourceId` in `graph.client.ts`; `mute: false` in `createArrangement` | `3 0 1 1` | same |
-| K24 | B's perf run on the sketch: failures; row comparison with C round 314's run | — | `0 ref-det 164 run-det 164 equal 164 differ 0 [] extra []` |
+| K1 | gate 315 status, commit | `published c136dfd` | same |
+| K2 | `git status` entries, HEAD | `0 c136dfd` | (no git) |
+| K3 | non-test `app/**` files naming a Google Fonts host; line count | `app/root.tsx app/routes/studio-lab.tsx app/styles/app.css`, 5 | none, 0 |
+| K4 | `root.tsx`: preconnects, `fontStyles` import, `fontStyles` link, `appStyles` link line | `2 0 0 40` | `0 1 1 36` |
+| K5 | `app.css` l.1 | the Inter Google `@import` | `@import "tailwindcss";` |
+| K6 | `studio-lab.tsx`: `STUDIO_FONTS_HREF`, preloads, woff2 `?url` imports | `2 0 0` | `0 2 2` |
+| K7 | TH7 line | l.250, Google stylesheet | l.251, preloads |
+| K8 | `app/assets/fonts` | absent | 25 woff2, css present |
+| K9 | last quarter-IV doc | `228-perf-peaks-worker.md` | same (after A: 229) |
+| K10 | `THIRD_PARTY_NOTICES.md` `##` headings | LAME, MPL-2.0, exceptions, runtime packages (560) | same (after A: plus the fonts heading) |
+| K11 | Biome `files.includes` | `app/**/*.ts`, `app/**/*.tsx` | same |
+| K12 | `remix-serve` `immutable: true` | 1 | same |
+| K13 | protected OK | 11 | 11 |
+| K14 | staged fonts: faces, families, urls, woff2, sha OK, licences OK, `fonts.css` sha OK, swap, comments | `83 5 25 25 25 5 1 83 0` | same |
+| K15 | cited artifacts exist | all 1 | all 1 |
+| K16 | test files naming a Google Fonts host | `studio-theme-obsidian.test.tsx` | none |
+| K17 | `root.tsx` `<PageTransition key={location.pathname}>`; `opacity: 0` lines in `PageTransition.tsx` | `1; 3` | same |
+| K18 | `regression-last.json` date | `2026-11-02` | same |
+| K19 | OFL 1.1 header in each staged licence | `11111` | same |
+| K20 | `python3 -I c-round-314/rowcmp.py c-round-315/perf-harness.json b-round-315/precheck-perf.json` | — | `ref-det 164 run-det 164 equal 164 differ 0 [] extra []` |
