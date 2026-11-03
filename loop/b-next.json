@@ -1,9 +1,11 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 317 (PERF-7 fix-up) C PASS 13/13, 0 findings, browserVerified/realVerified true; gate 317 published a5a9c97 -> PERF-7 done, C-R316-01 closed. REGRESSION not due (regression-last 2026-11-02 -> on/after 2026-11-05); RETRO at 320. Next STUDIO-PERFORMANCE stage is PERF-8, split 8a (range store) / 8b (selection store) after performance-optimizer + tech-lead consults. zustand@5.0.16 requested via root-deps-request.json (allowlisted); A STOPs if it did not land. Many scoped items remain; nothing external blocks.",
- "nextTask": "Round 318 PERF-8a: range leaves the ArrangementContext value into a per-provider zustand/vanilla store (app/lib/arrangement/range-store.ts, ArrangementRangeContext, useArrangementRange(selector)); setRange keeps its rewriteStoppedTruth branch; all event-time reads via getState(); per-clip selectors return the stored reference or null; 22 test files change only their range read path (expect( >= 3,139); 5 range budget rows -> assert (<=15 components/move and max, playing restarts 0); notices regenerated for zustand; doc 230 + doc 168 metrics section. C: SOURCE-SCOPE, CLAIMS K1-K16, UNIT RS1-RS7 + 4 mutants, EXPECT, PERF-RANGE (baseline control ~108 vs A <=15) + PERF-LOAD alone, R-DRAG/ALLTRACKS/CLEAR/SPACE/SPLIT/DELETE/CUT-TIME/LOOP/ZOOM/EXPORT/DETAIL/BG/MARQUEE/TRANSPORT at 1440 and 1280, G318-AUTH.",
+ "reason": "Round 318 (PERF-8a) C FAIL with browserVerified/realVerified true: A stopped (range drag 21.033/move, max 39 > 15 inside the grants; notices/doc/budgets/review deferred). A's partial tree is behaviour-identical to baseline in every browser row; gate 318 skipped. Ruled (D-29z863..D-29z871): grant widened to ArrangementDetailPanel internals, per move <= 15 kept (B scratch sketch measured 13/move, max 33), max <= 35 for the one-time null->range transport flip, readout memoized + detail wrapper removed + overlay memo child under a named-fiber rule (C-R318-01), notices 564 accepted per the generator's devOptional rule, protected list re-baselined (11/11). Round 319 = PERF-8a fix-up on the existing tree. Many scoped items remain; nothing external blocks.",
+ "nextTask": "Round 319 PERF-8a fix-up: continue on A's round-318 tree (no revert). Clip range overlay into a child subscriber; memo() on ArrangementPeakPath, ArrangementDetailPlayhead, ArrangementDetailWaveform, chevron hoisted; memo() on ArrangementRangeReadout; ArrangementRangeDetailPanel removed (panel subscribes itself, optional range prop); overlay memo child with primitive props; named-fiber tolerance on non-range rows; transport frozen; layout effect unchanged. Budgets assert per move <= 15, max <= 35, playing restarts 0. Notices regenerated (4 rows, 564). Doc 230 + doc 168 metrics. Claims b-round-318/claims-319.sh K1-K23. C: SOURCE-SCOPE, CLAIMS, UNIT (TL5 green) + 4 mutants, EXPECT, PERF-RANGE (baseline control; 37 interaction rows A <= baseline + named overlay renders), PERF-LOAD per-commit, R-WAVEFORM (new), R-DRAG/ALLTRACKS/CLEAR/SPACE/SPLIT/DELETE/CUT-TIME/LOOP/ZOOM/EXPORT/DETAIL/BG/MARQUEE/TRANSPORT at 1440 and 1280, G319-AUTH.",
  "remaining": [
   "PERF-8a",
+  "RETRO-320",
+  "REGRESSION-ROUND-2026-11-05",
   "PERF-8b",
   "PERF-DRAG-PREVIEW",
   "PERF-9",
@@ -15,8 +17,6 @@
   "PERF-15",
   "PERF-4b",
   "PERF-4c",
-  "REGRESSION-ROUND-2026-11-05",
-  "RETRO-320",
   "STEM-LANES",
   "SRW-21-PLAN",
   "SYS-1",
@@ -36,6 +36,7 @@
   "STUDIO-AGENT-COMMANDS",
   "RECORDING-META-S1",
   "deferred_low_polish",
+  "C-R318-06",
   "SRW-21"
  ]
 }

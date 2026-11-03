@@ -1,0 +1,141 @@
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementClip.tsx	2026-11-03 15:14:03.136293561 +0000
++++ app/components/arrangement/ArrangementClip.tsx	2026-11-03 16:36:51.597173470 +0000
+@@ -319,7 +319,7 @@
+   testId?: string;
+ }
+ 
+-export function ArrangementPeakPath({
++export const ArrangementPeakPath = memo(function ArrangementPeakPath({
+   clip,
+   peaks,
+   columns,
+@@ -351,6 +351,32 @@
+       <path d={peakShape.path} fill="currentColor" />
+     </svg>
+   );
++});
++
++function ArrangementClipRangeOverlay({ clip, pxPerSecond }: { clip: ArrangementClip; pxPerSecond: number }) {
++  const range = useArrangementRange((state) => selectArrangementClipRange(state.range, clip));
++  if (!range) {
++    return null;
++  }
++  const rangeLeft = (range.start - clip.start) * pxPerSecond;
++  const rangeWidth = (range.end - range.start) * pxPerSecond;
++  return (
++            <div
++              className="pointer-events-none absolute inset-y-0 border-x-2 border-foreground bg-foreground/30"
++              style={{ left: rangeLeft, width: Math.max(2, rangeWidth) }}
++            >
++              <span className="absolute top-0 left-0 whitespace-nowrap rounded-br-sm bg-foreground px-1 text-xs font-medium text-background">
++                <span className="font-mono font-normal tabular-nums">
++                  {formatArrangementTime(range.start)}
++                </span>{' '}
++                –{' '}
++                <span className="font-mono font-normal tabular-nums">
++                  {formatArrangementTime(range.end)}
++                </span>{' '}
++                · {studioClipStrings.seconds((range.end - range.start).toFixed(3))}
++              </span>
++            </div>
++  );
+ }
+ 
+ function ArrangementClipViewInner({
+@@ -383,7 +409,6 @@
+   timelineSeconds = Number.POSITIVE_INFINITY,
+   timelineWindow,
+ }: ArrangementClipViewProps) {
+-  const range = useArrangementRange((state) => selectArrangementClipRange(state.range, clip));
+   const rootRef = useRef<HTMLDivElement>(null);
+   const gestureRef = useRef<ClipGesture | null>(null);
+   const lastFadeDragRef = useRef<{ edge: ClipFadeEdge; at: number } | null>(null);
+@@ -879,8 +904,6 @@
+     }
+   };
+ 
+-  const rangeLeft = range ? (range.start - clip.start) * pxPerSecond : 0;
+-  const rangeWidth = range ? (range.end - range.start) * pxPerSecond : 0;
+   const fadeInSeconds = clipFadeIn(clip);
+   const fadeOutSeconds = clipFadeOut(clip);
+   const fadeInPx = fadeInSeconds * pxPerSecond;
+@@ -1020,23 +1043,7 @@
+               {audioNote}
+             </span>
+           ) : null}
+-          {range ? (
+-            <div
+-              className="pointer-events-none absolute inset-y-0 border-x-2 border-foreground bg-foreground/30"
+-              style={{ left: rangeLeft, width: Math.max(2, rangeWidth) }}
+-            >
+-              <span className="absolute top-0 left-0 whitespace-nowrap rounded-br-sm bg-foreground px-1 text-xs font-medium text-background">
+-                <span className="font-mono font-normal tabular-nums">
+-                  {formatArrangementTime(range.start)}
+-                </span>{' '}
+-                –{' '}
+-                <span className="font-mono font-normal tabular-nums">
+-                  {formatArrangementTime(range.end)}
+-                </span>{' '}
+-                · {studioClipStrings.seconds((range.end - range.start).toFixed(3))}
+-              </span>
+-            </div>
+-          ) : null}
++          <ArrangementClipRangeOverlay clip={clip} pxPerSecond={pxPerSecond} />
+           {showFadeHandles
+             ? fadeHandles.map(({ edge, side, offset, active }) => (
+                 <div
+--- /home/runner/czaba-project/store/app/components/arrangement/StudioWorkspace.tsx	2026-11-03 15:16:06.529860994 +0000
++++ app/components/arrangement/StudioWorkspace.tsx	2026-11-03 16:37:16.669339058 +0000
+@@ -9,6 +9,7 @@
+   useRef,
+   useState,
+   useSyncExternalStore,
++  memo,
+ } from 'react';
+ import {
+   formatArrangementTime,
+@@ -554,7 +555,7 @@
+   );
+ }
+ 
+-function ArrangementRangeReadout() {
++const ArrangementRangeReadout = memo(function ArrangementRangeReadout() {
+   const range = useArrangementRange((state) => state.range);
+   if (!range) {
+     return null;
+@@ -576,12 +577,12 @@
+       </span>
+     </p>
+   );
+-}
++});
+ 
+-function ArrangementRangeDetailPanel(props: Omit<ArrangementDetailPanelProps, 'range'>) {
++const ArrangementRangeDetailPanel = memo(function ArrangementRangeDetailPanel(props: Omit<ArrangementDetailPanelProps, 'range'>) {
+   const range = useArrangementRange((state) => state.range);
+   return <ArrangementDetailPanel {...props} range={range} />;
+-}
++});
+ 
+ export function StudioWorkspace() {
+   const workspace = useArrangement();
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementDetailPanel.tsx	2026-11-03 15:06:50.789738014 +0000
++++ app/components/arrangement/ArrangementDetailPanel.tsx	2026-11-03 16:36:51.596783299 +0000
+@@ -149,7 +149,7 @@
+   return (gainDb ?? 0).toFixed(1);
+ }
+ 
+-function ArrangementDetailPlayhead({
++const ArrangementDetailPlayhead = memo(function ArrangementDetailPlayhead({
+   clipStart,
+   clipDuration,
+ }: {
+@@ -187,7 +187,7 @@
+       <div className="absolute inset-y-0 left-0 w-px bg-accent" />
+     </div>
+   );
+-}
++});
+ 
+ function ArrangementDetailWaveform({
+   selection,

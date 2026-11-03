@@ -1,293 +1,326 @@
-# Round 318: PERF-8a. The time selection (`range`) moves out of the ArrangementContext value into a per-provider zustand store; range drag ≤ 15 components per move
+# Round 319: PERF-8a fix-up. Finish the range store on A's round-318 tree; range drag ≤ 15 components per move
 
-**Planned by:** B, at the round 317 → 318 planning, 2026-11-03.
+**Planned by:** B, at the round 318 → 319 planning, 2026-11-03.
 
-**Decisions** (all in `backlog.json` v277 → `decisions_log_b`):
-- **D-29z859: round 317 ruled.** C PASS: 13/13 rows, 0 findings, `browserVerified` and `realVerified` true (`c-round-317.json`). Gate 317 `published` `a5a9c97` on both remotes [K1]. **PERF-7 is done.** C-R316-01 is closed by C round 317's BYTE-IDENTITY, FONT-BYTES and FONT-PIXEL rows.
-- **D-29z860: round 318 = PERF-8a.** PERF-8 is split into two stages:
-  - **8a (this round):** `range` only. It is the measured scenario.
-  - **8b (later):** `selectedClipIds` into a selection store. Its row measures components in the pointerdown/select commit.
-  - Clip click (102 components) and play/pause stay with PERF-10 (`scope_addition_d29z215`).
-  - PERF-DRAG-PREVIEW stays a separate task. It changes `history.present`, not a transient overlay (tech-lead).
-- **D-29z861: dependency.** B filed `root-deps-request.json` = `{"add": ["zustand"], "remove": []}`. `zustand` 5.0.16 is on root's allowlist (`cloud/deps-allowlist.json`, seen by B). Per L35, this task grants `THIRD_PARTY_NOTICES.md`, which A regenerates.
-- **D-29z862: bookkeeping.**
-  - REGRESSION is not due: `regression-last.json` is 2026-11-02, so the next falls on or after 2026-11-05 [K9].
+**Decisions** (all in `backlog.json` v278 → `decisions_log_b`):
+- **D-29z863: round 318 ruled (L10).**
+  - C round 318: FAIL, but `browserVerified` and `realVerified` are true. A stopped on §6 bullet 3 (`c-round-318.json`, `a-round-318.md`). Gate 318 was `skipped` [K1].
+  - In every browser row, A's partial tree behaves **exactly like the baseline** at 1440×900 and 1280×720 (`c-round-318/rows-*.json`, `diffrows.txt`). Range and project WAV exports are byte-identical.
+  - **So this round continues on that tree.** A does not revert, re-create or duplicate the round-318 work.
+- **D-29z864: C-R318-02 (A's STOP, ≤ 15) is ruled. The grant widens (A's option 1); the per-move target stays.**
+  - `ArrangementDetailPanel.tsx` internals are now granted (§4).
+  - The per-move budget stays **≤ 15**.
+  - The **max** budget becomes **≤ 35**. Reason: the largest commit in the move window is the one-time null→range transition on the first move. In that commit `ArrangementTransport` and its lucide icons re-render (about 20 fibers), because `hasRange` flips the transport's titles and enabled state (R-TRANSPORT). It happens once per gesture, not on every move.
+  - The transport stays **unchanged** this round (tech-lead: wrapping its buttons in subscriber components risks remounting a focused button). Its split is recorded as a PERF-10 signal (`SIG-R319-TRANSPORT-FLIP`).
+  - B's scratch sketch measured both numbers (§0.2).
+- **D-29z865: C-R318-01 (+2 fibers on 37 interaction rows) is ruled. The named-fiber rule applies.**
+  - **Readout wrapper:** `ArrangementRangeReadout` gets `memo()`. It has no props, so it renders only on mount and on a range change.
+  - **Detail wrapper:** `ArrangementRangeDetailPanel` is **removed**.
+    - `ArrangementDetailPanel` subscribes to the store itself, unconditionally. `range` becomes an **optional** prop, and an explicit value wins.
+    - The two direct-render tests pass `range={null}` inside an `ArrangementProvider`, so they stay untouched.
+    - Reason: `detailSelection`'s `useMemo` depends on `selectedClip` [`StudioWorkspace.tsx` ~2727–2738], so a memoised wrapper would still re-render on every clip edit.
+  - **Clip overlay:** it becomes a `memo()` child with **primitive props** (track id, start, duration, `pxPerSecond`). The selector takes `Pick<ArrangementClip, 'trackId' | 'start' | 'duration'>`.
+    - It bails when its clip's geometry is unchanged (click, selection, mute).
+    - It renders whenever that geometry or the zoom changes (clip move, trim, zoom). That cost is inherent and named.
+  - **Tolerance (named fibers).** Each non-range interaction row must satisfy A ≤ baseline + N, where N is the count of `ArrangementClipRangeOverlay` renders in that row's window. Each render is one fiber, only on commits where its clip's geometry or the zoom changed.
+    - A's report gives the profiler breakdown for every row that rises.
+    - C confirms the breakdown on at least 2 rising rows.
+    - **Any rise not explained by the overlay is a finding.**
+  - **PERF-LOAD:** the same rule, read **per load commit**. A load commit may grow only by the readout's one mount and one overlay mount per mounted clip. C states the per-commit numbers.
+- **D-29z866: C-R318-03 (notices) is ruled. Accept the generator's output as is: 4 new rows, count 560 → 564.**
+  - The file's own header defines a runtime entry as every lock entry without `dev: true`. TL2 asserts that `devOptional` entries are kept.
+  - Root's deps commit flipped `@types/react` 18.3.27, `@types/prop-types` 15.7.15 and `csstype` 3.2.3 from `dev` to `devOptional` (zustand's optional peer).
+  - So the 4 rows are the generator working correctly, not a defect. Changing what counts as runtime is a licence-policy question for root/OSS-LIC (`SIG-R319-DEVOPTIONAL-NOTICES`), not a B ruling.
+- **D-29z867: C-R318-05 is ruled. The protected list is re-baselined.**
+  - New file: `b-round-318/protected-sha256.txt`. It holds `package.json` at `50662e1`; the other 10 hashes are unchanged.
+  - Claims K8 = 11/11 OK [K8].
+  - The round-312 file is kept as history.
+- **D-29z868: A's two round-318 exception items are accepted. C's SOURCE-SCOPE and EXPECT rows do not flag them again.**
+  - `gesture-reentry.test.tsx`: the `range={null}` prop literal is removed, because `ArrangementClipView` no longer takes `range`. Its `expect(` count stays 37.
+  - `mode-toggle-colour-ui.test.tsx` DXT8: the needle becomes `hasRange && 'border-foreground'`. Its count stays 1 and the class string is unchanged.
+  - A's alternative is rejected: B does not name a variable just to satisfy a test's source-text needle.
+- **D-29z869: C-R318-04 (incomplete deliverables) is closed by this round:** K14 = 5, notices, doc 230, A-MUTANTS and A-REVIEW.
+- **D-29z870: C-R318-06 is pre-existing.**
+  - It shows only at 1280, and C reproduced it on the baseline: "Could not split at the time selection." after Space/Space/Home.
+  - It is recorded as a **Low (provisional)** in `open_findings`; its severity may rise once it is reproduced.
+  - The REGRESSION round (on or after 2026-11-05) gets a repro and root-cause row for it. It is **not** in this round. Note that the Undo that follows correctly undoes the last real edit (the Add), because the split did not happen.
+- **D-29z871: bookkeeping.**
+  - REGRESSION is not due: `regression-last` is 2026-11-02, so the next falls on or after 2026-11-05 [K9].
   - RETRO is at round 320.
-  - `lessons.md` is unchanged.
+  - `lessons.md` gains two clauses (L37), with no new lines.
 
 **Read first:** `lessons.md`. These apply directly:
+- L10: rulings;
 - L11: STOP;
-- L23: B's inventory (grep only; see §0.3);
+- L23: sketch;
 - L29: claims;
-- L34: the doc section of a changed budget;
+- L34: doc section;
 - L35: notices;
-- L37: commit counts are wallclock;
+- L37: budget headroom (new clause);
 - L38: perf runs alone;
-- L49: `setRange`'s side effects;
 - L52: mutants that can fail;
 - L56: artifacts;
 - L57: C's fields.
 
-**L29 note:** untagged code text in this task is an expected value or a new name, not a fact about current code. Facts about `store/` carry `[K#]` (§9).
+**L29 note:** untagged code text below is an expected value or a new name. Facts about `store/` carry `[K#]` (§9).
 
 ## Baseline
-- **HEAD `a5a9c97`** with a clean tree [K2]. Root's job step then adds `zustand@5.0.16` as a `chore(deps): …` commit.
-- **Baseline rule (oss-adoption.md):** a root `chore(deps)` commit directly on `a5a9c97` that changes only `package.json` and `package-lock.json` counts as the baseline. A and C do not stop on it.
-- **Precondition, STOP if missing:** at A's start, `package.json` has `"zustand": "5.0.16"` and the lock has `node_modules/zustand` [K3 is 0/0 now; expected 1/1]. If either is missing, A writes the STOP (§6) and changes nothing. oss-adoption mandates zustand for PERF-8; **a hand-rolled store is not an allowed fallback**.
-- **Protected files:** `b-round-312/protected-sha256.txt`, 11/11 OK [K8].
+- **HEAD `50662e1`**, which is root's `chore(deps): add zustand@5.0.16` on `a5a9c97`, **plus A's round-318 working tree: 36 status entries** [K2]. That is 34 modified files plus the untracked `app/lib/arrangement/range-store.ts` and `app/lib/arrangement/__tests__/range-store.test.tsx`. C listed them in `c-round-318/git-status-end.txt`.
+- **Already in place on that tree** [K3–K7, K11–K13]:
+  - zustand is 1/1;
+  - `range` is out of the value memo, its deps, `latestRef` and the provider `useState` (K4 = K5 = K7 = 0);
+  - the lane's `clipRange` is gone (K11 = 0);
+  - the store module exists.
+- **Protected files:** `b-round-318/protected-sha256.txt`, 11/11 OK [K8].
+- **C's comparison baseline for PERF and R-rows:** a `git archive` of `50662e1`, unchanged.
 
 ## 0. Why this round
 
-### 0.1 The measurement (L37: premise re-measured)
-Source: C's production-build interactions run on 2026-11-03, `c-round-306/perf/perf-1b-i-2026-11-03T01-00-39-178Z.json` (HEAD `ecb832a`). Rounds 307–317 did not touch the range path; C's baseline control in PERF-RANGE (§3.2) re-measures it on the real baseline.
+### 0.1 Where round 318 stopped
+A's production measurement, reproduced exactly by C:
+- **Per move: 21.033** components (baseline control 108.167).
+- **Max: 39** (baseline 105).
+- Playing restarts: 0. `drag-range-live`: 1.
 
-**Range body drag** (time selection on a clip body, 60 moves, stopped and playing alike):
+A's per-component breakdown (`a-round-318.md` §2.1):
+- **Main commit, 16 fibers:**
+  - clip, 5: `ArrangementClipViewInner`, `GripVertical` and its forwardRef, `ArrangementPeakPath`, `ArrangementClipEnvelope`;
+  - detail panel, 9: the wrapper, the panel, the chevron and its forwardRef, `ContentInner`, `Waveform`, `PeakPath`, `Playhead`, `ClipGain`;
+  - readout, 2.
+- **Layout-effect commit, 5 fibers:** `ContentInner`, `Waveform`, `PeakPath`, `Playhead`, `ClipGain`.
 
-| Metric | Value |
-|---|---|
-| components per move | **108.167** (`componentsSum` 6,490) |
-| commits per move | 1.983 (119 commits / 60 moves; wallclock, D-29z259) |
-| largest commit | **105** components |
-| playing restarts | 0 |
+**Why the round-318 target broke:** B's ≤ 15 never subtracted the 5 fibers of the layout-effect commit that the task declared unchanged. The new L37 clause covers this.
 
-So each move makes one large commit (~105 components) and one small one (6,490 − 60×105 = 190, about 3 per move).
+### 0.2 B's scratch sketch (L23): measured, not projected
+- **Setup:**
+  - a tar copy of A's tree at `/tmp/b319s`, with `node_modules` symlinked;
+  - its own vite `cacheDir`, served by a dev server on :5196;
+  - A's profiler `a-round-318/diag-range-components-from-down.mjs`.
+- **Sketch changes:**
+  - (i) `memo()` on `ArrangementRangeReadout` and `ArrangementRangeDetailPanel`. The task removes the latter instead (D-29z865);
+  - (ii) the clip's range overlay moved into a child `ArrangementClipRangeOverlay({ clip, pxPerSecond })`, which holds the existing `selectArrangementClipRange` selector;
+  - (iii) `memo()` on `ArrangementDetailPlayhead` and on `ArrangementPeakPath`.
+- **Evidence:**
+  - `b-round-318/sketch.patch.txt` (diff against A's tree);
+  - `sketch.py` and `sketch2.py`;
+  - `sketch-diag-dev.json`.
+- **Result** (30 moves; histogram 29 × 3, 28 × 10, 1 × 33, plus the pointerdown commit of 91, which is outside the harness window):
+  - **steady state per move = 10 + 3 = 13**;
+  - **first-move commit = 33**.
+  - Main commit (10): overlay 1, wrapper 1, panel 1, chevron 2, ContentInner 1, Waveform 1, ClipGain 1, readout 2.
+  - Layout commit (3): ContentInner, Waveform, ClipGain.
+- **A's round-318 cross-check:** A found the dev totals equal to production (21/39). B expects the same, but production is C's PERF-RANGE row.
 
-### 0.2 Mechanism (consults, FACT unless marked)
-**Per move:**
-- `ArrangementClip` `handlePointerMove` calls `setTimeRange({...})`. This goes through `setTimeRange` → `setRange` → `setRangeState`.
-- `range` is a field of the one context value `useMemo` and of its dependency array [K4 = 2 lines].
-- So each move rebuilds the value and every `useArrangement()` consumer re-renders.
+**Headroom (new L37 clause).** The 3-fiber layout commit is subtracted first: 15 − 3 = 12 for the main commit, against 10 measured.
+- §1 adds three more cuts:
+  - the chevron hoisted (−2 in the main commit);
+  - the detail wrapper removed, with the panel subscribing itself (−1 in the main commit);
+  - `memo()` on `Waveform` (−1 in the layout commit).
+- B's expectation is about **9 per move**: 4 below the sketch, 6 below the budget.
 
-**During the drag:**
-- `setRange` skips its `setStatus(rewriteStoppedTruth)` branch, because `gestureCountRef > 0`: `claimPointerGesture` → `beginPointerGesture`.
+**What the sketch did not measure.** It measured only the range drag. The non-range rows are governed by the named-fiber rule (D-29z865).
 
-**The small second commit:**
-- It is `ArrangementDetailContentInner`'s layout effect, which calls `setStartText`/`setEndText` [K15].
-- It stays: this round does not touch it, and commits per move is a wallclock row.
+**Max.** 33 was measured in **dev**, without the chevron hoist. The bridge to production is A's round-318 cross-check, which found dev equal to prod (21/39). The ≤ 35 budget therefore has about 4 fibers of headroom, before the hoist.
 
-**Readers of `range`:**
-- From the context: `StudioWorkspace`, `ArrangementTransport`, `ArrangementLane`, `ArrangementMarkerRow` (inside callbacks only) and `ArrangementExportDialog`.
-- Through props: `ArrangementClip`/`ArrangementClipView`, which renders the per-clip range label the harness reads, and `ArrangementDetailPanel`.
+**PeakPath memo.** It gains nothing on a clip drag, where the whole `clip` prop changes. It helps only on the range drag and on the detail panel's layout commit. A does not chase it further.
 
-**Imperative reads:**
-- `latestRef.current.range` [K5 = 7];
-- `StudioWorkspace` `.range` [K6 = 6].
+### 0.3 What changes for the user
+**Nothing visible.** The time selection looks, snaps, labels, plays, splits, deletes, exports and announces exactly as at the baseline. The waveforms of the clip and the detail panel draw exactly as before. Only the render work per drag move drops.
 
-**The lane passes a new object to every overlapping clip on every move** [K11]: `const clipRange = isRangeInClip(clip) ? range : null;`.
-
-### 0.3 B's pre-check (L23): an inventory, not a scratch build
-zustand is not installed yet [K3], so B could not build a scratch sketch. B ran this inventory instead:
-- **22 test files** read `.range` off the context value [K10]. The list is `b-round-317/range-test-files.txt`. Together they hold 3,139 `expect(` calls (`b-round-317/expect-count-head.txt`).
-- **Destructured `range`** in app code: `ArrangementClip`, `ArrangementDetailPanel`, `ArrangementExportDialog`, `ArrangementLane`, `ArrangementMarkerRow`, `ArrangementTransport`, `StudioWorkspace` and `ArrangementContext`.
-- **Imperative reads:** 7 + 6 [K5, K6].
-
-Removing `range` from the `ArrangementContextValue` type makes TypeScript flag every remaining context reader. That is A's completeness check.
-
-### 0.4 What changes for the user
-**Nothing visible.** The time selection looks, snaps, labels, plays, splits, deletes, exports and announces exactly as at the baseline. Only the render work per drag move drops.
-
-### 0.5 Consults / reference / screen budget
-- **Consults (D-29z860):**
-  - `performance-optimizer` and `tech-lead` (summaries in `b-round-317.md` §3).
-  - They agree on the split, the per-provider store, `getState()` for event-time reads, and selectors that return either the stored reference or primitives.
-  - tech-lead's top risk: a missed imperative read compiles but acts on a stale range. It is covered by RS7 and C's R-rows.
+### 0.4 Consults, reference and screen budget
+- **Consults (D-29z864):** `performance-optimizer` and `tech-lead`, summarised in `b-round-318.md` §3. B adopted their conclusions:
+  - `ArrangementDetailClipGain` will not bail under `memo()` without about 10 `useCallback`s and 2 `useMemo`s. It stays as it is: 1 fiber in each commit. It is recorded as a signal.
+  - The Playhead and PeakPath memos are safe, since their props are numbers or stable references.
+  - `Waveform` re-renders by design in the main commit, because it draws the range overlay. In the layout commit its props are unchanged.
+  - The clip's `range` is read only at render time, so moving it to a child carries no stale-closure risk.
+  - All props that StudioWorkspace passes to the detail wrapper are memoised or callbacks, except `detailPeaks`, whose identity is unconfirmed (INFERENCE). C's interaction rows decide it.
+  - Leave the transport to PERF-10.
 - **Not applicable:** reference-first, `product-designer`, the screen budget and the journey row. This is a pure performance round: no visible change and no new persistent element.
 
 ## 1. Rulings
 | Id | Ruling |
 |---|---|
-| Store location | New module `app/lib/arrangement/range-store.ts`, built on `createStore` from `zustand/vanilla` |
-| Store lifetime | One store per `ArrangementProvider`, created with `useState(() => …)` like `mixDraftStore`. **Never a module singleton** (SSR, two providers in tests) |
-| Exposure | A new `ArrangementRangeContext` carries the store instance. New hooks (names A may refine; names follow `AGENT_DISCOVERABLE_CODE.md`): `useArrangementRangeStore()` returns the store; `useArrangementRange(selector)` uses `useStore(store, selector)`. Both throw outside the provider, like the existing store hooks |
-| `range` in the context | Removed from `ArrangementContextValue`, from the value `useMemo` and from its dependency array (K4 → 0). Removed from the `latestRef` shape (K5 → 0). The provider's `useState<TimeRange \| null>` goes (K7 → 0) |
-| Writers | `setTimeRange` and `setRange` stay as stable callbacks with the same signatures. `setRange` writes the store, and **keeps its `rewriteStoppedTruth` branch exactly** (when `gestureCountRef.current === 0`) (L49) |
-| Event-time reads | Every imperative read (the 7 `latestRef` reads, the 6 `StudioWorkspace` reads and any other event handler) reads `store.getState().range` at event time |
-| Selectors | Each selector returns either the stored reference, `null` or primitives. **None returns a freshly built object.** Per clip, the selector returns the store's range when it overlaps that clip, else `null`, so a clip outside the range does not re-render. `useShallow` is allowed for tuples. Transport selects only what it renders (e.g. whether a range exists, `allTracks`, start/end) |
-| Where subscriptions sit | `ArrangementLane` subscribes only to what it draws itself (the all-lanes/background overlay; `null` during a clip-body drag). It no longer passes a per-move `clipRange` object down [K11 → 0]. Each clip reads its own range at clip level. `StudioWorkspace` does not subscribe to the range object at its top level. Each of its render-time range uses (the `arrangement-range` readout, the `hidden` flag, the detail-panel prop) becomes a small subscriber component or selector, so a move does not re-render the workspace subtree |
-| Ordering with selection | When one handler clears both range and selection, write the range store first, then call `setSelection` (tech-lead risk 1) |
-| Detail panel | `ArrangementDetailPanel` keeps receiving `range` as a prop, from a subscriber. Its start/end layout effect is unchanged (K15 stays 1) |
-| PERF-DRAG-PREVIEW / 8b | Not in this round |
+| Keep | All round-318 work stays: the store, hooks, provider changes, event-time `getState()` reads, the range-then-selection ordering and the 27 test-file read paths. A changes it only where a row below requires it |
+| Clip overlay | In `ArrangementClip.tsx`, the clip-level `useArrangementRange(... selectArrangementClipRange(state.range, …))` moves into a `memo()` child component with primitive props (track id, start, duration, `pxPerSecond`; the selector accepts the `Pick`). The child renders the existing overlay JSX and label, byte for byte. `ArrangementClipViewInner` no longer subscribes to the range. The selector line count stays 1 (K18) |
+| PeakPath | `ArrangementPeakPath` becomes `memo()` (it is exported from `ArrangementClip.tsx`). Its props and output stay the same |
+| Readout | `ArrangementRangeReadout` in `StudioWorkspace.tsx` becomes `memo()` (K17 = 1) |
+| Detail wrapper removed | `ArrangementRangeDetailPanel` is deleted (K23 = 0). StudioWorkspace renders `<ArrangementDetailPanel …>` directly, without a `range` prop. In `ArrangementDetailPanelProps`, `range` becomes optional. The panel always calls `useArrangementRange((state) => state.range)` and uses the prop when it is not `undefined`, else the store value. The two direct-render tests (`detail-panel.test.tsx` CapHarness, `track-layout.test.tsx` R24-F) pass `range={null}` inside a provider and stay untouched. K6 becomes 8 (the wrapper's selector goes) |
+| Detail panel internals | In `ArrangementDetailPanel.tsx`: `ArrangementDetailPlayhead` becomes `memo()`; `ArrangementDetailWaveform` becomes `memo()`; the header's `ChevronDown` element is hoisted into a module-level constant (or a memo wrapper) with the same props and output. The start/end layout effect is **unchanged** (K15 stays 1). `applyDetailRange`'s render-time `range` read stays: it is correct because `ContentInner` still re-renders on every range change. `ArrangementDetailClipGain` is **not** changed |
+| Transport | `ArrangementTransport.tsx` is **not edited** this round. K22 is its sha, which must stay the same |
+| Names | New component names follow `AGENT_DISCOVERABLE_CODE.md` (e.g. `ArrangementClipRangeOverlay`) |
 
 ## 2. Contract
 
 ### 2.1 Files (grants, §4)
-**New:**
-- `app/lib/arrangement/range-store.ts`
-- `app/lib/arrangement/__tests__/range-store.test.tsx` (it may be split into a `.ts` and a `.tsx` file)
-- `docs/implementation/2026/quarter-IV/230-perf-range-store.md`
+**Edited this round:**
+- `app/components/arrangement/ArrangementClip.tsx`
+- `app/components/arrangement/StudioWorkspace.tsx`
+- `app/components/arrangement/ArrangementDetailPanel.tsx`, now internals as §1 (D-29z864)
+- `perf/budgets.interactions.json`: the 5 rows of §2.3
+- `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md`: the whole `## მეტრიკები` section (L34). One paragraph names the 5 asserted rows, with owner PERF-8a and the measured values.
+- `THIRD_PARTY_NOTICES.md`: regenerated (§2.4)
 
-**Edited:**
+**New:** `docs/implementation/2026/quarter-IV/230-perf-range-store.md`.
+
+**Already changed in round 318, unchanged unless a row requires it:**
 - `app/contexts/ArrangementContext.tsx`
-- `app/components/arrangement/`:
-  - `StudioWorkspace.tsx`
-  - `ArrangementLane.tsx`
-  - `ArrangementClip.tsx`
-  - `ArrangementTransport.tsx`
-  - `ArrangementExportDialog.tsx`
-  - `ArrangementMarkerRow.tsx`
-  - `ArrangementDetailPanel.tsx` (prop type only, if needed)
-- The 22 test files in `b-round-317/range-test-files.txt` [K10]. **Only how they read `range` changes**; every assertion stays (§2.4).
-- `perf/budgets.interactions.json`: the 5 rows of §2.5.
-- `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md`: the whole `## მეტრიკები` section (L34). One paragraph names the rows that are now asserted, with owner PERF-8a.
-- `THIRD_PARTY_NOTICES.md`: regenerated (§2.6).
+- `ArrangementLane.tsx`, `ArrangementExportDialog.tsx`, `ArrangementMarkerRow.tsx`, `ArrangementTransport.tsx` (frozen this round)
+- `range-store.ts` and its test
+- the 27 test files of round 318
 
-### 2.2 Range store behaviour (unit rows, new test file)
-| Row | Asserts |
-|---|---|
-| RS1 | `createArrangementRangeStore()` starts with `range: null`. `setRange(r)` stores exactly `r` by reference, and `getState().range === r` |
-| RS2 | Subscribers are notified once per `setRange` call with a new value; setting the same reference again does not notify |
-| RS3 | Two stores are independent. Two providers in one render tree hold different ranges |
-| RS4 (provider re-render guard) | Inside `ArrangementProvider`, **with a pointer gesture active** (begun through the context's pointer-gesture API or a driven pointerdown, as in the harness drag), a probe that calls only `useArrangement()` and counts renders (React `Profiler` or a render counter) **does not re-render** on `setTimeRange({...})`. The precondition exists because outside a gesture `setRange` may legitimately change `status` (RS6). A states which way the gesture is begun. A probe on `useArrangementRange(s => s.range)` re-renders exactly once per call. Mutant MU-RANGE-IN-VALUE (put `range` back into the value and its deps) turns RS4 red |
-| RS5 (per-clip selector) | A clip-level subscriber whose clip does not overlap the new range does not re-render when the range moves elsewhere. The overlapping one does. Mutant MU-LANE-NEW-OBJECT (the selector returns `{ ...range }`) turns RS5 red or makes it loop; A records which |
-| RS6 (status branch, L49) | `setTimeRange` outside a gesture still rewrites a stopped Insert-Marker status, with the same text as the baseline. Inside a pointer gesture it does not. Mutant MU-NO-STATUS-REWRITE (drop the branch) turns RS6 red |
-| RS7 (stale read) | After `setTimeRange(r)` and with no re-render in between, an event-time action that reads the range (the context's split-at-range path or Space-from-range-start, whichever A can drive in jsdom) uses `r`. Mutant MU-STALE-LATESTREF (one event-time read takes a render-time snapshot) turns RS7 red |
+### 2.2 Unit rows
+- RS1–RS7 stay as in `tasks/round-318.md` §2.2, and they must pass.
+- No new unit row is required. The memo changes are measured by PERF-RANGE.
+- If A adds a test, it follows `.claude/prompts/new-test.md`.
 
-### 2.3 Completeness (claims after A)
-K4 = 0, K5 = 0, K7 = 0, K11 = 0, K12 ≥ 1, K13 = 1. K6 becomes the count of `.range` reads A left in `StudioWorkspace`. Each one must read `getState()` or a selector value, and A lists them in the report. `npm run typecheck` rc 0 proves no context reader is left.
-
-### 2.4 Test files (the 10a rule)
-- In each of the 22 files, only the way the test reaches `range` changes: a probe that also calls the new hook, or `getState()` on the store. The `expect(` count per file stays the same or grows.
-- **A test whose only change is a removed assertion is a Medium.**
-- A runs `python3 -I b-round-317/expect-count.py <store>` before and after. The head output is `b-round-317/expect-count-head.txt`: 22 files, TOTAL 3,139.
-
-### 2.5 Budgets (`perf/budgets.interactions.json`)
+### 2.3 Budgets (`perf/budgets.interactions.json`)
 | Row | Change |
 |---|---|
-| `interact.drag.range.stopped.move-components-per-move` | `mode: "assert"`, `budget: {"op": "<=", "value": 15}`, `owner: "PERF-8a"` |
+| `interact.drag.range.stopped.move-components-per-move` | `mode: "assert"`, budget `<= 15`, `owner: "PERF-8a"` |
 | `interact.drag.range.playing.move-components-per-move` | same |
-| `interact.drag.range.stopped.move-components-max` | `mode: "assert"`, `budget: {"op": "<=", "value": 15}`, `owner: "PERF-8a"` |
+| `interact.drag.range.stopped.move-components-max` | `mode: "assert"`, budget `<= 35`, `owner: "PERF-8a"`. The note says that the max is the first-move null→range commit including the transport flip (D-29z864) |
 | `interact.drag.range.playing.move-components-max` | same |
-| `interact.drag.range.playing.move-restarts` | `mode: "assert"`, `budget: {"op": "==", "value": 0}`, `owner: "PERF-8a"` |
+| `interact.drag.range.playing.move-restarts` | `mode: "assert"`, budget `== 0`, `owner: "PERF-8a"` |
 
-- The `commits-per-move` rows stay `record` (wallclock, D-29z259, L37).
-- The `.6x` rows stay `record`.
+- Use the existing `"op"` spelling (grep it in the budgets files).
+- The `commits-per-move` rows (wallclock) and the `.6x` rows stay `record`.
 - `interact.harness.drag-range-live` stays an assert `== 1`.
-- If the harness validates the `budget.op` vocabulary, A uses the existing spelling (grep `"op"` in the budgets files). The meaning stays as above.
 
-### 2.6 Notices (L35)
-After root's deps commit, run `npx vitest run app/lib/__tests__/third-party-licenses.test.ts -u`, which is `THIRD_PARTY_NOTICES_REGENERATE_COMMAND`.
+### 2.4 Notices (L35, D-29z866)
+After the code changes, run `npx vitest run app/lib/__tests__/third-party-licenses.test.ts -u`.
 
 **Expected:**
-- `THIRD_PARTY_NOTICES.md` gains exactly one table row, `zustand | 5.0.16 | MIT | …`, and the runtime package count in the heading grows by 1. Today it is 560. A records the exact count; a transitive addition is reported, not hidden.
+- **Exactly 4 new table rows:**
+  - `zustand | 5.0.16 | MIT`
+  - `@types/react | 18.3.27`
+  - `@types/prop-types | 15.7.15`
+  - `csstype | 3.2.3`
+  
+  The three `@types`/`csstype` rows carry their licence as the lock reports it.
+- The heading `## Runtime packages (560)` becomes `(564)` [K20].
 - No other line changes.
 - The licence test file does not change.
 
-### 2.7 Doc 230 (Georgian, technical terms in English; TEMPLATE's 7 headings)
-- **l.4:** `**სტატუსი:** In Progress (stage 1 of 2; C round 318 PASS)` (L28).
-- **Contents:** the mechanism (§0.2), the store, the selector rule and the measured before/after numbers.
-- **Testing:** it names RS1–RS7, the mutants and C's rows.
+### 2.5 Doc 230 (Georgian, technical terms in English; TEMPLATE's 7 headings)
+- **l.4:** `**სტატუსი:** In Progress (stage 1 of 2; C round 319 PASS)` (L28).
+- **Contents:**
+  - the mechanism (`tasks/round-318.md` §0.2);
+  - the store and the selector rule;
+  - the memo boundaries of this round;
+  - both STOP rulings (D-29z864, D-29z866);
+  - the measured before/after numbers (108.167 → round 318's 21.033 → this round).
+- **Testing:** names RS1–RS7, the mutants and C's rows. Cite only tests that exist (L26).
 
 ## 3. Acceptance
 
 ### 3.1 A's rows
 | Row | Expected |
 |---|---|
-| A-CLAIMS | Before editing, run `bash b-round-317/claims-318.sh`. Its output equals `claims-318-head-output.txt`, except K2 (the deps commit) and K3, which must be 1/1. Any other difference is a STOP |
-| A-IMPL | §1, §2.2–§2.7 |
-| A-CLAIMS-AFTER | K4 0, K5 0, K7 0, K11 0, K12 ≥ 1, K13 1, K14 3 (it counts 3 of the 5 rows; all 5 must change), K15 1, K8 11 |
-| A-TYPE / A-LINT | `npm run typecheck` rc 0; `npm run lint` rc 0 |
-| A-UNIT | `npx vitest run` on: the new range-store test file(s), the 22 files of `range-test-files.txt`, `gesture-reentry`, `status-lifetime`, `meta-shortcuts-ui`, `shortcuts.test.ts`, `export-range-ui`, `insert-marker-ui`, and `app/lib/__tests__/third-party-licenses.test.ts`. All pass. Also `perf/lib/report.test.ts`: it reads `budgets.interactions.json` (e.g. DC-KINDS), so A runs it through a scratch vitest config that includes `perf/**`, as in rounds 312–313. A reports the counts |
-| A-EXPECT | `expect-count.py` after ≥ head for every file |
-| A-MUTANTS | On a scratch copy, never in `store/`: MU-RANGE-IN-VALUE, MU-LANE-NEW-OBJECT, MU-NO-STATUS-REWRITE and MU-STALE-LATESTREF each turn their row red. Restored, they are green |
-| A-PERF (alone, L38) | Production build on a scratch copy, then `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts` once. Report the §2.5 rows plus `drag-range-live`, and `failures` |
-| A-REVIEW | `code-reviewer` (3+ files). It checks: no selector builds a new object; no event-time read uses a render snapshot; the provider never holds `range` state; the store is per provider; the test diffs only change the read path. A Medium+ inside the grants is fixed and re-reviewed (L11). Architecture notes are passed to B |
+| A-CLAIMS | Before editing, run `bash b-round-318/claims-319.sh`. Its output equals `b-round-318/claims-319-head-output.txt`. Any difference is a STOP |
+| A-IMPL | §1, §2.3–§2.5 |
+| A-CLAIMS-AFTER | K4 0, K5 0, K7 0, K8 11, K11 0, K12 ≥ 1, K13 1, **K14 5**, K15 1, K16 10/10, **K17 1**, K18 1, **K19 1 / 1**, **K20 `(564)` and 1**, **K21 1**, **K22 unchanged** (`b7528ac5ab192b8d`), **K23 0**, **K2 `50662e1 41`**. K6 is 8: A lists its `.range` reads, which are round 318's 9 minus the removed wrapper's selector |
+| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0, with no new warning in a changed file |
+| A-UNIT | `npx vitest run` on: `range-store.test.tsx`; the 22 files of `b-round-317/range-test-files.txt`; `gesture-reentry`, `status-lifetime`, `meta-shortcuts-ui`, `insert-marker-ui`, `mode-toggle-colour-ui`; `shortcuts.test.ts`, `export-range-ui`; `detail-panel`, `detail-panel-polish`, `track-layout`, `clip-gain-pointer-preview`, `clip-envelope-ui`, `clip-fades-ui`; `app/lib/__tests__/third-party-licenses.test.ts`. All pass, **TL5 included**. Also run `perf/lib/report.test.ts` through a scratch vitest config that includes `perf/**`, as in rounds 312–313. A reports the counts |
+| A-EXPECT | `python3 -I b-round-317/expect-count.py <store>` gives 22 files and TOTAL 3,139 (no file lower). The 5 extra files keep their round-318 counts |
+| A-MUTANTS | On a scratch copy, never in `store/`: MU-RANGE-IN-VALUE, MU-LANE-NEW-OBJECT, MU-NO-STATUS-REWRITE and MU-STALE-LATESTREF each turn their RS row red (as `tasks/round-318.md` §2.2). Restored, they are green |
+| A-PERF (alone, L38) | Production build on a scratch copy, then `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts` once. Report the §2.3 rows, `drag-range-live` and `failures` (which must be `[]` with the new asserts). Also give a per-component breakdown of one steady move and of the max commit, with A's round-318 profiler |
+| A-REVIEW | `code-reviewer` (3+ files). It checks: no selector builds a new object; no event-time read uses a render snapshot, except the documented `applyDetailRange`; each memo boundary has stable props or is listed as not bailing; the overlay JSX is byte-equal; the test diffs only change the read path. A Medium+ inside the grants is fixed and re-reviewed (L11). Architecture notes are passed to B |
 
 ### 3.2 C's rows
-C writes `c-round-318.md` and `c-round-318.json` as it goes, with the L57 fields:
-- `assertsSpecified` = 7: RS1–RS7.
-- `mutantsRecorded` = 4.
-- `mutantRedOnSketch`: on A's tree.
+C writes `c-round-319.md` and `c-round-319.json` as it goes, with the L57 fields:
+- `assertsSpecified` = 7 (RS1–RS7);
+- `mutantsRecorded` = 4;
+- `mutantRedOnSketch` (on A's tree).
 
 Each finding carries an `origin`.
 
-**Builds.** Production builds of the baseline (`git archive` of the deps commit, or `a5a9c97` + root's two package files) and of A's tree, each in its own scratch. Never build inside `store/`.
+**Builds.** Production builds of the baseline (a `git archive` of `50662e1`) and of A's tree, each in its own scratch. Never build inside `store/`. C re-keeps the baseline interactions JSON this time; in round 318 it was lost.
 
-**Browser rows run at 1440×900 and 1280×720 on `/studio-lab` (dev server `:5173` or A's production build).** Each behaviour row compares A's build with the baseline: same visible result and the same status text.
+**Browser rows** run at 1440×900 and 1280×720 on `/studio-lab`. Each compares A's build with the baseline: the same visible result and the same status text. C's `c-round-318/c318-rows.mjs` may be reused.
 
 | Row | Action | Expected |
 |---|---|---|
-| SOURCE-SCOPE | `git status`, protected sha, the deps commit diff | Only the §2.1 paths changed beyond the deps commit, which touches only `package.json` and the lock. Protected 11/11 OK |
-| CLAIMS | `claims-318.sh` | As A-CLAIMS-AFTER |
-| UNIT | A-UNIT's files on C's scratch; the 4 mutants; at least one mutant of C's own | All pass; each mutant red; restored green |
+| SOURCE-SCOPE | `git status`; protected sha (`b-round-318/protected-sha256.txt`) | Changes beyond round 318's 36 entries are only the §2.1 "edited this round" paths and doc 230. Protected 11/11 OK. D-29z868's two items are accepted |
+| CLAIMS | `claims-319.sh` | As A-CLAIMS-AFTER |
+| UNIT | A-UNIT's files on C's scratch, the 4 mutants and at least one mutant of C's own | All pass, TL5 included; each mutant red; restored green |
 | EXPECT | `expect-count.py` HEAD vs A | No file loses an `expect(` |
-| PERF-RANGE (alone, L38) | Interactions spec on both builds | **Baseline control:** range move-components-per-move ≈ 108 (it must be > 15, or the row is vacuous). **A:** stopped and playing move-components-per-move ≤ 15; move-components-max ≤ 15; `drag-range-live` = 1; playing move-restarts 0; `failures` []. Other deterministic rows: **any rise in a drag, click, zoom or play/pause row is a finding**. A *load-time* row may rise by at most the number of new always-mounted components (the range Provider and subscriber components), which A names and counts in its report and C checks. Lower rows are listed |
-| PERF-LOAD (alone) | `studio-lab.perf.spec.ts` on A's build, then `rowcmp.py` against the baseline run | `failures` []; the same tolerance as PERF-RANGE: no rise in a fader or interaction row; a load-time row rises by at most A's named new always-mounted component count |
-| R-DRAG | Body-drag a time selection across a clip | The label (`mm:ss.mmm – mm:ss.mmm · n s`) updates during the drag, snaps as at the baseline (Snap on and off, Alt), and stays after release |
-| R-ALLTRACKS | Ctrl+Shift+L on a selection | The all-lanes overlay appears (`data-range-start`/`data-range-end`); then Ctrl+Shift+L or Esc behaves as at the baseline |
-| R-CLEAR | Click with no move on a clip body; Esc; click an empty lane | The range clears and the playhead or insert marker lands as at the baseline |
-| R-SPACE | Space with a selection; Space again | Playback starts at the selection start, as in SABA-B-10a |
-| R-SPLIT / R-DELETE / R-CUT-TIME | Ctrl+E, Delete, Ctrl+Shift+X on a selection, then Undo/Redo | The same clips and status as at the baseline; undo restores |
-| R-LOOP / R-ZOOM | The loop-to-selection action and Z (zoom to the time selection) | The same loop brace and zoom as at the baseline |
-| R-EXPORT | Export dialog with and without a selection | The range option's enabled state and the exported length match the baseline (WAV duration ±1 sample) |
-| R-DETAIL | Select a clip with a selection; type From/To in the detail panel | The fields follow the drag; typing moves the range; the status text equals the baseline (RS6 in the browser) |
-| R-BG / R-MARQUEE | Background time selection on an empty lane (11c); Ctrl+drag marquee | As at the baseline |
-| R-TRANSPORT | Transport controls that depend on a selection (titles, enabled state) with and without a range | As at the baseline |
-| G318-AUTH | As G317-AUTH, both viewports | `/studio-lab` anonymous workspace + demo badge, `auth_user` null; `/studio/middle-east` "Sign in required", 0 `audio[src]`; `/api/studio-token` with no header → 401 |
+| PERF-RANGE (alone, L38) | Interactions spec on both builds | **Baseline control:** range per move ≈ 108 (it must be > 15, or the row is vacuous). **A:** stopped and playing per move ≤ 15, max ≤ 35, `drag-range-live` = 1, playing move-restarts 0, `failures` []. **Every non-range drag, click, zoom and play/pause row: A ≤ baseline + N**, where N is the number of `ArrangementClipRangeOverlay` renders in that row's window (the named-fiber rule, D-29z865). C checks the 37 rows of `c-round-318/rowcmp-interactions.txt` plus any other deterministic interaction row. For at least 2 rising rows (clip name-bar drag and clip click), C runs A's round-318 profiler (`a-round-318/diag-range-components*.mjs`, adapted) on A's build and confirms that the only added fiber is the overlay. Any rise not explained by the overlay is a finding. Clip click and the other geometry-unchanged rows are expected to show N = 0. Lower rows are listed |
+| PERF-LOAD (alone) | `studio-lab.perf.spec.ts` on both builds, then the row compare | `failures` []. No rise in a fader or interaction row. `load.components` is read per load commit: a commit may grow only by the readout's one mount and one overlay mount per clip mounted in it. C states the per-commit numbers (D-29z865) |
+| R-WAVEFORM (new; PeakPath memo) | Add a clip; zoom in and out twice (the toolbar zoom or Z); select the clip; open the detail panel | The clip waveform path (`arrangement-clip-waveform`) is non-empty, and its `d` changes with zoom exactly as at the baseline (compare `d` strings at the same zoom). The detail waveform (`arrangement-detail-waveform`) path equals the baseline's. A late peaks load (fresh profile, empty cache) draws the waveform without a reload |
+| R-DRAG | Body-drag a time selection across a clip | The label (`mm:ss.mmm – mm:ss.mmm · n s`) updates during the drag, snaps as at the baseline (Snap on and off, Alt), and stays after release. The overlay box's left and width are equal to the baseline's |
+| R-ALLTRACKS / R-CLEAR / R-SPACE | As in round 318 | As at the baseline |
+| R-SPLIT / R-DELETE / R-CUT-TIME | Ctrl+E, Delete, Ctrl+Shift+X on a selection, then Undo/Redo | The same clips and status as at the baseline |
+| R-LOOP / R-ZOOM / R-EXPORT | As in round 318 | The same loop brace and zoom. Range WAV export ±1 sample of the baseline (round 318: 279,600 frames) |
+| R-DETAIL | Select a clip with a selection; type From/To; drag the range while the detail panel is open | The fields follow the drag (the layout effect is still there); typing moves the range; the status text equals the baseline. The detail playhead moves during playback over the selected clip, as at the baseline (Playhead memo) |
+| R-BG / R-MARQUEE / R-TRANSPORT | As in round 318 | As at the baseline. Transport titles and enabled state are equal with and without a range |
+| G319-AUTH | As G318-AUTH, both viewports | `/studio-lab`: anonymous workspace + demo badge, `auth_user` null. `/studio/middle-east`: "Sign in required", 0 `audio[src]`. `/api/studio-token` with no header → 401 |
 
 **Gate rows.** C does not claim these; they go under `"gate"`: full vitest, the build in `store/`, Biome, `npm run verify` and the e2e smoke.
 
-**Browser flags.** `browserVerified` is true only if every row from PERF-RANGE through G318-AUTH ran.
+**Browser flags.** `browserVerified` is true only if every row from PERF-RANGE through G319-AUTH ran.
 
 **Ableton conformance:** not applicable. The behaviour is unchanged, and there is no new reference.
 
-## 4. Grants (D-29z860)
-A edits only the §2.1 paths.
+## 4. Grants (D-29z864)
+A edits only the §2.1 "edited this round" paths and creates doc 230.
 - **Nothing else:**
+  - not `ArrangementTransport.tsx`;
   - not `package.json` or the lock;
-  - no other `app/**` file;
-  - no other `perf/**` file;
+  - no other `app/**` or `perf/**` file;
+  - no test file beyond round 318's 27;
   - no config;
   - no protected file.
-- **If another file seems to need changing** (a reader outside the list, or a test outside the 22), A STOPs and names it. Exception: when typecheck flags a test for `range` on `ArrangementContextValue` (a read, or a constructed value literal such as in `detail-panel-reason`, `grid-snap-keys` or `library-focus-handoff`) and the test is missing from `range-test-files.txt`, A may change only that `range` read or literal field, and must list the file. The §2.4 `expect(` rule applies to it too.
+- **If another file seems to need changing**, A STOPs and names it.
 
 ## 5. Neighbouring behaviour at risk (C probes)
-- **A stale `range` in event handlers:** Space, Ctrl+E, Delete, Ctrl+Shift+X, export, Z, loop.
-- **One frame of range vs selection mismatch:** a handler that clears both.
-- **Status text:** RS6 and R-DETAIL.
-- **The all-lanes overlay in `ArrangementLane`.**
-- **Undo clearing a range:** the existing undo path clears it; it must clear the store.
-- **The fader stores (`mixDraftStore`) and `positionStore`:** they must not change. PERF-LOAD's fader rows show this.
+- **PeakPath memo:** a peaks array mutated in place would leave a stale waveform (R-WAVEFORM covers the late load).
+- **Waveform memo:** the detail range overlay must still follow the drag (R-DETAIL).
+- **Playhead memo:** the detail playhead must still move. It writes through `useArrangementPositionWriter`, not through props.
+- **The clip overlay as a child:** its box geometry and label must equal the baseline (R-DRAG). Clips outside the range must not draw an overlay.
+- **The detail panel's own subscription:** selection or group changes and range moves must still reach the panel (R-DETAIL; select another clip; drag a range).
+- **The explicit `range` prop:** in the two direct-render tests it still wins over the store.
+- **The 37 interaction rows:** they may rise only by the named overlay fibers (PERF-RANGE).
 
 ## 6. STOP conditions
-A writes "STOP — needs B ruling" at the top of `a-round-318.md` and changes nothing else when:
-- zustand is missing (Baseline);
-- A-CLAIMS differs beyond K2/K3;
-- the ≤ 15 target cannot be met without touching a file outside §4 (A reports the per-component breakdown from the profiler);
-- a test assertion would have to be removed;
-- the notices regeneration changes more than the zustand row and the count.
+A writes "STOP — needs B ruling" at the top of `a-round-319.md` and changes nothing else when:
+- A-CLAIMS differs from the head output;
+- the per move > 15 or the max > 35 after §1 (A reports the breakdown);
+- any non-range interaction row rises above the baseline and the cause is outside the grants;
+- a test assertion would have to be removed, or a test outside round 318's 27 would have to change;
+- the notices regeneration differs from the 4 rows of §2.4 and the count 564.
 
 ## 7. Next
-- **After C PASS and gate 318:** PERF-8a is done.
-- **Round 319:** REGRESSION if its planning falls on or after 2026-11-05; otherwise PERF-8b (selection store).
-- **RETRO:** round 320.
+- **After C PASS and gate 319:** PERF-8a is done.
+- **Round 320:** RETRO (it is due at 320). Then REGRESSION if its planning falls on or after 2026-11-05 (with the C-R318-06 repro row), otherwise PERF-8b.
 - **Signals carried:**
-  - C-R317 observation: `/studio-lab` FCP − DCL → PERF-11.
-  - The perf warm-up "collection ready" timeout → `INFO-C317-WARMUP-TIMEOUT` (fix home: the next harness touch).
-  - The source of the noto-sans-georgian-latin glyph remains undetermined.
+  - `SIG-R319-TRANSPORT-FLIP` → PERF-10;
+  - `SIG-R319-CLIPGAIN-PROPS` (the detail clip gain's unstable props) → PERF-10/PERF-FADER;
+  - `SIG-R319-DEVOPTIONAL-NOTICES` → root/OSS-LIC;
+  - `INFO-C317-WARMUP-TIMEOUT`.
 
 ## 8. Commit readiness
-After C PASS and the gate, root publishes the §2.1 paths on top of the deps commit.
+After C PASS and gate 319, root publishes the round-318 and round-319 paths together, on top of `50662e1`. The tree is mid-round until then; root does not publish it.
 
 ## 9. Claims (L29 + L56)
-Run `bash b-round-317/claims-318.sh` (`CLAIMS_STORE` may override the path). The head output is `b-round-317/claims-318-head-output.txt`.
+Run `bash b-round-318/claims-319.sh` (`CLAIMS_STORE` may override the path). The head output is `b-round-318/claims-319-head-output.txt`.
 
-| Tag | Claim | Now (`a5a9c97`) | After A |
+| Tag | Claim | Now | After A |
 |---|---|---|---|
-| K1 | gate 317 | published a5a9c97 | same |
-| K2 | HEAD, status entries | a5a9c97 0 | deps commit, §2.1 count |
-| K3 | zustand in package.json / lock | 0 / 0 | 1 / 1 |
-| K4 | `range,` lines in the value memo/deps | 2 | 0 |
-| K5 | `latestRef.current.range` | 7 | 0 |
-| K6 | `.range` in StudioWorkspace | 6 | listed by A |
-| K7 | provider `useState<TimeRange \| null>(null)` | 1 | 0 |
-| K8 | protected OK | 11 | 11 |
+| K1 | gate 318 | skipped (C FAIL) | same |
+| K2 | HEAD, status entries | 50662e1 36 | 50662e1 41 (+ `ArrangementDetailPanel.tsx`, `perf/budgets.interactions.json`, doc 168, `THIRD_PARTY_NOTICES.md`, doc 230; round 318's 36 do not include the detail panel) |
+| K3 | zustand in package.json / lock | 1 / 1 | same |
+| K4 / K5 / K7 / K11 | range in the value, `latestRef`, `useState`, lane `clipRange` | 0 / 0 / 0 / 0 | same |
+| K6 | `.range` in StudioWorkspace | 9 | 8 (listed) |
+| K8 | protected OK (re-baselined) | 11 | 11 |
 | K9 | regression-last | 2026-11-02 | same |
-| K10 | test files reading `.range` off the context | 22 | — |
-| K11 | lane `clipRange` line | 1 | 0 |
-| K12 | files importing zustand in `app/` | 0 | ≥ 1 |
-| K13 | `range-store.ts` exists | 0 | 1 |
-| K14 | range budget rows asserted (3 checked) | 0 | 3 |
-| K15 | detail panel start/end effect | 1 | 1 |
-| K16 | cited artifacts exist (L56) | 4 | 4 |
-
-**Artifacts** (all exist): `b-round-317/claims-318.sh`, `claims-318-head-output.txt`, `range-test-files.txt`, `expect-count.py`, `expect-count-head.txt`.
+| K12 / K13 | zustand importers / store module | 2 / 1 | ≥ 1 / 1 |
+| K14 | range budget rows asserted (all 5) | 0 | 5 |
+| K15 | detail start/end layout effect | 1 | 1 |
+| K16 | cited artifacts | 10/10 | 10/10 |
+| K17 | memo() on `ArrangementRangeReadout` | 0 | 1 |
+| K18 | `selectArrangementClipRange(state.range,` lines in ArrangementClip.tsx | 1 | 1 (now inside the memo child) |
+| K19 | memo() on DetailPlayhead / PeakPath | 0 / 0 | 1 / 1 |
+| K20 | notices heading; zustand row | (560); 0 | (564); 1 |
+| K21 | doc 230 | 0 | 1 |
+| K22 | `ArrangementTransport.tsx` sha prefix | b7528ac5ab192b8d | same |
+| K23 | `ArrangementRangeDetailPanel` occurrences in StudioWorkspace | 2 | 0 |
