@@ -1,0 +1,53 @@
+import json
+env=json.load(open('env-status.json'))
+d={
+ "taskStatus":"FAIL",
+ "browserVerified":False,"realVerified":False,
+ "envStatus":env,
+ "aStatus":"STOP — needs B ruling (§6: render-budget.test.tsx positive control)",
+ "bugs":[
+  {"id":"C-R322-01","origin":"B spec (type-only sketch hid the render-budget positive control) / A STOP","severity":"medium",
+   "steps":["Scratch copy of A's tree (store working tree, node_modules symlinked) at /tmp/c322/atree","npx vitest run app/lib/arrangement/__tests__/render-budget.test.tsx","Then run A's 111-file A-UNIT list"],
+   "expected":"All A-UNIT files pass with no assertion removed; PERF-8b deliverables complete (SS1–SS7 file, 4 mutants, §2.5 harness rows K19 ≥ 5, docs 168/230/231, A-PERF, A-REVIEW)",
+   "actual":"render-budget.test.tsx 7/8: l.617 expect(api.current).not.toBe(valueAtPlay) fails after selectClip('music-1'), because PERF-8b removes exactly that coupling. It is a behaviour assertion, not a selection-field read, so the §2.4 exception does not cover it. A-UNIT 110/111 files, 1704/1705 tests. Deliverables missing: SS test file, mutants, harness rows (K19 0), docs (K13 still lists doc 230), A-PERF, code-reviewer. A's option (a) (selectClip keeps the value identical, Ruler/Library 0 renders, positive control via setStatus) gave 8/8 on C's scratch copy, +3 expect(, none removed",
+   "evidence":"tmp/studio-real-loop/c-round-322/render-budget-atree.log, render-budget-option-a.log, unit-c.log, claims-c.txt; a-round-322.md §1"},
+  {"id":"C-R322-02","origin":"B spec","severity":"low",
+   "steps":["node c-round-322/probe/click-hooks-probe.mjs http://127.0.0.1:5197 <out> same-lane on HEAD 53c5c79 (scratch dev server)","Read click-original-again"],
+   "expected":"SELECT-NAMES: on A, click-original-again has 0 commits",
+   "actual":"HEAD itself gives 2 commits (92 components, then a trailing commit with 0); A gives 1 commit with 0 components. Read literally, the row cannot pass on any tree. A's proposed reword (0 components rendered, ≤ 1 commit) fits the measured intent",
+   "evidence":"tmp/studio-real-loop/c-round-322/probe/selnames-summary.txt, select-same-lane-head-c.json, select-same-lane-a-c.json"}
+ ],
+ "info":[
+  "INFO-C322-WRAPPER-RISE: on Ctrl+D, A's commit renders 112 components vs HEAD 110 (+ArrangementSelectedClipReadoutInner, +ArrangementDetailPanelWithSelection; probe/selnames-diff.txt). ArrangementDetailPanelWithSelection and ArrangementGroupHeaderWithSelection are not memoised (StudioWorkspace.tsx l.694/724), the C-R318-01 pattern. PERF-SELECT/PERF-LOAD must check it after A resumes",
+  "INFO-C322-S-GROUP-PREMISE: the demo /studio-lab state has no group header (arrangement-group-fold count 0), and the library adds every demo item to the Music lane, so S-GROUP ('collapse the Stems group with a selected clip') and S-CLICK's '3 clips over 2 lanes' cannot be set up as written. C used 3 clips on one lane",
+  "INFO-C322-SHIFT-ESC: on both HEAD and A, Shift+click on a third clip does not add it, and Esc does not clear a clip selection. Identical on both trees, so not a PERF-8b regression; noted for B only"
+ ],
+ "passed":["RT-FIX","SOURCE-SCOPE","EXPECT","G322-AUTH"],
+ "provisional_on_stopped_tree":["S-CLICK (one lane)","S-EDIT","S-DETAIL","S-TRANSPORT","S-RANGE","S2-VIDEO (HEAD 2, A 0)","SELECT-NAMES name/provider part (HEAD 10/10 names, A 0/10, providerRendered false)"],
+ "failed":["CLAIMS (K19 0 < 5; K13 still lists doc 230)","UNIT (render-budget red; SS file and mutants absent)"],
+ "blocked":["A STOP — needs B ruling on render-budget.test.tsx (§6); C does not mark rows of a stopped tree as passed",
+  "PERF-SELECT: not runnable, §2.5 harness scenario and rows absent (K19 0)",
+  "PERF-LOAD: not run; meaningless before the final tree and the A-PERF control",
+  "SELECT-NAMES mutant MU-SELECTION-IN-VALUE and the UNIT mutants: A wrote no mutant set / SS file",
+  "S-GROUP: no group exists in the demo state (INFO-C322-S-GROUP-PREMISE)"],
+ "gate":["full vitest","build in store/","Biome","typecheck","npm run verify","e2e smoke"],
+ "manifestPaths":["a-round-322/claims-after-stop.txt","a-round-322/a-unit-1.log","a-round-322/expect-count-before.txt","a-round-322/expect-count-after.txt","a-round-322/probe/select-same-lane-a.json","a-round-322/probe/s2-video-a.json","a-round-322/smoke-1440.png"],
+ "missingPaths":[],
+ "countMismatches":[],
+ "claimCheckMinutes":0.02,
+ "assertsSpecified":7,
+ "mutantsRecorded":4,
+ "mutantRedOnSketch":None,
+ "mutantRedOnSketchReason":"B built a type-only sketch; mutants not run on a B sketch (D-29z893)",
+ "mutantRedOnTree":None,
+ "mutantRedOnTreeReason":"A STOPped before writing the SS1–SS7 file and the 4 mutants; nothing to run red",
+ "gateChecksNamed":6,
+ "gateChecksRunOnSketch":2,
+ "gateChecksRunOnSketchDetail":{"typecheck":"b-round-321/sketch-type-tsc.log","full vitest":"b-round-321/precheck-full.log"},
+ "chainHeadGateRunGreen":None,
+ "chainHeadGateRunGreenReason":"not a fix-up chain",
+ "closes":["C-R321-01","C-R321-02","C-R321-03 (RT-FIX PASS)"],
+ "abletonConformance":"not applicable (no behaviour change, no new reference)"
+}
+json.dump(d,open('c-round-322.json','w'),ensure_ascii=False,indent=1)
+print('ok')

@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T20:28:08.049Z)
+# Active loop summary (2026-11-03T22:10:09.795Z)
 
-- backlog.json 3113 KB -> active view 423 KB
-- status: G_ROOT_GATE round 321
-- servers: `{"checkedUtc":"2026-11-03T20:17:24.3318314Z","round":321,"attempt":1,"store":200}`
+- backlog.json 3119 KB -> active view 424 KB
+- status: G_ROOT_GATE round 322
+- servers: `{"checkedUtc":"2026-11-03T21:23:39.5873950Z","round":322,"attempt":1,"store":200}`
 - last publication: 53c5c79676e41c951f651f89e5be2fc24cf89112 (rounds 318-320)
-- last root gate: round 321 skipped - C taskStatus FAIL
+- last root gate: round 322 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -782,10 +782,13 @@
 - INFO-C320-EXPORT-ESC-FLAKE / info / noted (D-29z880): harness timing, not an app bug / one 1280-reload run crashed at the project export (dialog overlay intercepted the Export click); 0/6 in a targeted probe on both builds
 - INFO-C320-LONGTASK / info / noted (D-29z880): wall-clock row, info only / prod load.longtask-max median 0 -> 69 (wall-clock, 12-commit loads; baseline 12-commit sample had 99 ms)
 - INFO-C320-COLD / info / noted (D-29z880): L38 warm-up / baseline dev warm-up and G320-AUTH attempt 1 timed out on cold dev compiles; each replaced once
-- GATE320-L1-DOC230-GRANT-LINE / low / open (D-29z881): rides PERF-8b (same feature PERF-8; one granted doc line; bug-gate exception, costs little) / doc 230 'გადაწყვეტილებები' lacks the D-ID line that range leaves useArrangement() (read with useArrangementRange)
-- GATE320-S2-POST-AWAIT-ORDER / low (provisional) / open_low_provisional (D-29z881): tech-lead: mechanism real (add-video path), final state correct; Medium only if the intermediate frame paints or an effect fires on it. PERF-8b carries a browser experiment row (per-commit logger + rAF marker; control unstable_batchedUpdates on scratch) / setRange(null) now runs before setSelectedClipId/setSelection; after an await (add video, library clip load) the store write commits at Sync
+- GATE320-L1-DOC230-GRANT-LINE / low / scheduled (D-29z892): round 322 grants the doc 230 rulings line | open (D-29z881): rides PERF-8b (same feature PERF-8; one granted doc line; bug-gate exception, costs little) / doc 230 'გადაწყვეტილებები' lacks the D-ID line that range leaves useArrangement() (read with useArrangementRange)
+- GATE320-S2-POST-AWAIT-ORDER / low (provisional) / open_low_provisional (D-29z892): HEAD probe b-round-321/s2-video-head.json shows the mechanism in the DOM (2 commits, range cleared + old selection, ~8 ms) with 0 rAF frames observed; PERF-8b S2-VIDEO row on A tree must show 0 mixed commits, else Medium | open_low_provisional (D-29z881): tech-lead: mechanism real (add-video path), final state correct; Medium only if the intermediate frame paints or an effect fires on it. PERF-8b carries a browser experiment row (per-commit logger + rAF marker; control unstable_batchedUpdates on scratch) / setRange(null) now runs before setSelectedClipId/setSelection; after an await (add video, library clip load) the store write commits at Sync
 - GATE320-S3-ALL-LANES-DRAG / info / scheduled (D-29z881): record row in PERF-10 (required_rows_d29z880) / all-tracks drag re-renders every lane per move; not covered by an asserted row
 - GATE320-S6-TWO-STORE-PATTERNS / info / requested (D-29z887): ARCH-CHECKPOINT-PERF8-STORE-PATTERN / zustand range store next to hand-written useSyncExternalStore stores
+- C-R321-01 / low / open (D-29z890): corrected in retros/retro-321.md at round 322 planning; closes on the round-322 RT-FIX row PASS / retro-321.md section 9 said all 16 rounds name asserts (7-18); source: 15 of 16 (305 null), range 1-19
+- C-R321-02 / low / open (D-29z890): corrected in retros/retro-321.md at round 322 planning; closes on the round-322 RT-FIX row PASS / RETRO 320/321 inventory regex missed D-29z801 ('RETRO round 320'); no section 8 disposition
+- C-R321-03 / low / open (D-29z890): corrected in retros/retro-321.md at round 322 planning; closes on the round-322 RT-FIX row PASS / retro-321.md section 4 '7 + 2' mixed open focus with open keyboard (should be 9 + 2)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

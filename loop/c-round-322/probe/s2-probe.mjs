@@ -1,0 +1,57 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+import { writeFileSync } from 'node:fs';
+const base = process.argv[2] ?? 'http://127.0.0.1:5173';
+const out = process.argv[3] ?? 's2-head.json';
+const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+await context.addInitScript(() => {
+  localStorage.setItem('czaba_analytics_consent', 'denied');
+  const st = { recording: false, log: [] };
+  window.__s2 = st;
+  const snap = () => ({ range: (document.querySelector('[data-testid="arrangement-range"]')?.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 40), selected: [...document.querySelectorAll('[data-clip-id]')].filter((e) => /(^|\s)ring-2(\s|$)/.test(e.className) || e.querySelector(':scope > .ring-2') !== null).map((e) => e.getAttribute('data-clip-id').slice(0, 8)).join(','), clips: document.querySelectorAll('[data-clip-kind="audio"]').length });
+  const frame = (t) => { if (st.recording) st.log.push({ kind: 'frame', t: Math.round(t * 10) / 10, ...snap() }); requestAnimationFrame(frame); };
+  requestAnimationFrame(frame);
+  window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = { supportsFiber: true, isDisabled: false, renderers: new Map(), inject(r) { const id = this.renderers.size + 1; this.renderers.set(id, r); return id; }, checkDCE() {}, onScheduleFiberRoot() {}, onPostCommitFiberRoot() {}, onCommitFiberUnmount() {},
+    onCommitFiberRoot(_id, root) { if (st.recording) st.log.push({ kind: 'commit', t: Math.round(performance.now() * 10) / 10, lanes: root.current.lanes ?? null, ...snap() }); } };
+});
+const page = await context.newPage();
+await page.goto(`${base}/studio-lab`, { waitUntil: 'load', timeout: 120000 });
+await page.waitForFunction(() => /ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent ?? ''), null, { timeout: 120000 });
+await page.waitForTimeout(1000);
+await page.getByRole('button', { name: 'Add', exact: true }).first().click();
+await page.locator('[data-clip-kind="audio"]').first().waitFor();
+await page.waitForTimeout(1500);
+const body = await page.locator('[data-clip-kind="audio"]').first().getByTitle('drag = time selection · click = insert marker', { exact: true }).boundingBox();
+const y = body.y + body.height * 0.6;
+await page.mouse.move(body.x + 60, y); await page.mouse.down(); await page.mouse.move(body.x + 260, y, { steps: 8 }); await page.mouse.up(); await page.waitForTimeout(500);
+const before = await page.evaluate(() => ({ range: document.querySelector('[data-testid="arrangement-range"]')?.textContent ?? null, selectedAttr: [...document.querySelectorAll('[data-clip-id]')].map((e) => [e.getAttribute('data-clip-id').slice(0, 8), e.getAttribute('aria-selected'), e.getAttribute('data-selected')]) }));
+if (process.argv[4] === 'video') {
+  const clipHdr = await page.locator('[data-clip-kind="audio"]').first().getByTitle(/ — drag to move$/).boundingBox();
+  await page.mouse.click(clipHdr.x + 120, clipHdr.y + clipHdr.height / 2); await page.waitForTimeout(300);
+  await page.mouse.move(body.x + 60, y); await page.mouse.down(); await page.mouse.move(body.x + 260, y, { steps: 8 }); await page.mouse.up(); await page.waitForTimeout(500);
+  const vmid = await page.evaluate(() => document.querySelector('[data-testid="arrangement-range"]')?.textContent ?? null);
+  page.on('filechooser', async (fc) => { await fc.setFiles('/home/runner/czaba-project/store/public/videos/hero/1.mp4'); });
+  await page.waitForTimeout(500);
+  await page.evaluate(() => { window.__s2.log = []; window.__s2.recording = true; });
+  await page.getByRole('button', { name: /Your own video/ }).first().click();
+  await page.waitForTimeout(6000);
+  const vlog = await page.evaluate(() => { window.__s2.recording = false; return window.__s2.log; });
+  const vres = { vmid, status: await page.locator('[data-testid="arrangement-status"]').textContent(), commits: vlog.filter((e) => e.kind === 'commit'), frames: vlog.filter((e, i, a2) => e.kind === 'frame' && i > 0 && JSON.stringify([a2[i - 1].range, a2[i - 1].selected]) !== JSON.stringify([e.range, e.selected])) };
+  writeFileSync(out, JSON.stringify(vres, null, 1));
+  console.log(JSON.stringify({ ...vres, commits: vres.commits.length }, null, 1));
+  await browser.close();
+  process.exit(0);
+}
+const hdr = page.getByTestId('arrangement-track-header').filter({ hasText: 'Stems' }).first();
+await hdr.getByText(/^Stems/).first().click(); await page.waitForTimeout(250);
+await page.getByTestId('arrangement-library-list').getByRole('option', { name: /Bass/ }).first().click(); await page.waitForTimeout(250);
+const mid = await page.evaluate(() => document.querySelector('[data-testid="arrangement-range"]')?.textContent ?? null);
+await page.evaluate(() => { window.__s2.log = []; window.__s2.recording = true; });
+await page.keyboard.press('Enter');
+await page.waitForTimeout(3000);
+const log = await page.evaluate(() => { window.__s2.recording = false; return window.__s2.log; });
+const status = await page.locator('[data-testid="arrangement-status"]').textContent();
+const res = { before, mid, status, commits: log.filter((e) => e.kind === 'commit'), framesWithChange: log.filter((e, i, a) => e.kind === 'frame' && i > 0 && JSON.stringify([a[i - 1].range, a[i - 1].selected, a[i - 1].clips]) !== JSON.stringify([e.range, e.selected, e.clips])), frameCount: log.filter((e) => e.kind === 'frame').length };
+writeFileSync(out, JSON.stringify(res, null, 1));
+console.log(JSON.stringify({ ...res, commits: res.commits.length }, null, 1));
+await browser.close();
