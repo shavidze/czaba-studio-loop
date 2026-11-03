@@ -1,0 +1,74 @@
+{
+ "round": 313,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T08:36:17.0713471Z",
+  "round": 313,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R313-01",
+   "severity": "medium",
+   "origin": "pre-existing (predates round 313; harness contract or app behaviour — not separated); not the round-313 patch",
+   "steps": [
+    "On this job's runner (nproc 4, AMD EPYC 7763, Chromium 143.0.7499.4), run `npx playwright test --config playwright.perf.config.ts perf/studio-lab.perf.spec.ts` alone, with HEAD's 4 perf files (scratch /tmp/c313h, own cacheDir) and with the sketch harness (store tree)",
+    "Read fader.clipgain.playing.components-per-commit.6x details[].commits and fader.clipgain.playing.release-commits.6x samples"
+   ],
+   "expected": "The 6x clip-gain counts are the same for every pass and every machine (the exact-equality determinism contract), or the contract allows the known pre-paint release commit",
+   "actual": "The rows are bimodal: 91 commits + 1 release commit, or 92 + 2. Earlier job: 7/7 runs 91/1 (C312 ×3 HEAD+A app, B312 ×4 sketch). This job: C's HEAD harness ×2 = 92/2 in all passes, sketch ×2 = 92/2, head-app control = 92/2, MU-BUSY0 = 92/2; A's control HEAD harness = 91/1, A's 2 store runs mixed 91/92 inside one run -> nondeterministic FAIL. A value that flips between passes of one run fails the whole spec. Same tree, same HEAD harness, same runner: 91/1 at 08:19 (A control) and 92/2 at 08:51 and 09:07 (C) — varies across runs on one machine. Recorded per-pass details are identical for both values (endsCase max, valueStart 24, valueLow -13.8, valueHigh/valueMax 24, releaseComponentsMax 3); settleMs 91-passes 606–637, 92-passes 628–653 (overlap). The recorded end value does not differ, so the 'committed value changed' hypothesis is not supported by these fields; contract vs app behaviour stays open for B.",
+   "evidence": "tmp/studio-real-loop/c-round-313/perf-headharness-{1,2}.json (HEAD harness, 92/2), perf-sketch-store-{1,2}.json, a-round-313/perf-a-run{1,2}.json (mixed), a-round-313/perf-control-headharness.json (91/1), c-round-312/perf-*.json; tally c-round-313/tally.py, per-pass detail table c-round-313/clipgain-details.txt"
+  }
+ ],
+ "passed": [
+  "CARRY-312",
+  "HARNESS-PASS",
+  "HARNESS-HEAD-CONTROL",
+  "MU-LIVE-BUSY0",
+  "LOAF",
+  "PK-SANITY",
+  "G313-AUTH"
+ ],
+ "failed": [
+  "DOC (A-DOC not done: A §9 STOP)",
+  "A-REVIEW not done (A STOP)",
+  "A-PERF (A's 2 runs failed on C-R313-01; C's 2 runs passed)"
+ ],
+ "partial": [
+  "SOURCE-SCOPE: app 6/6 OK, protected 11/11 OK, instrumentation.ts OK, 4 perf files == sketch; 11 entries not 12 and doc 163 unchanged because A-DOC was not done",
+  "CLAIMS: every sketch claim matches; K2 '11 dfa4502', K4 2, K9 and K10 unchanged — all from A-DOC not done"
+ ],
+ "blocked": [],
+ "notRunnableHere": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "assertsSpecified": 3,
+ "mutantsRecorded": 4,
+ "mutantRedOnSketch": 4,
+ "cOwnMutants": {
+  "C-MU-END-STRICT-PLUS-TOL": "1 red",
+  "C-MU-START-BOUND-IS-END": "1 red",
+  "C-MU-TOLERANCE-50": "2 red",
+  "C-MU-FIRST-ONLY": "1 red"
+ },
+ "discriminator": {
+  "headHarnessThisJob": [
+   "92/2 x3",
+   "92/2 x3"
+  ],
+  "sketchThisJob": [
+   "92/2 x3",
+   "92/2 x3"
+  ],
+  "verdict": "92/2 appears under the HEAD harness (no injection) -> the round-313 patch is cleared as the cause (A's own criterion)"
+ },
+ "forB": "A's STOP was correct under §9. Rule C-R313-01 (row contract / re-run budget, separate task or a bounded grant) and re-dispatch A for A-DOC + A-REVIEW; app code and the 4 perf files need no change."
+}

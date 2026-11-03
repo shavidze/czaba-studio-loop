@@ -1,0 +1,154 @@
+--- a/perf/studio-lab.perf.spec.ts
++++ b/perf/studio-lab.perf.spec.ts
+@@ -34,6 +34,7 @@
+   waitForLibraryReady,
+   waitForPlaybackSettled,
+   waitForQuiet,
++  waitForStudioQuiet,
+ } from './lib/page';
+ import {
+   buildPerfReportCore,
+@@ -41,6 +42,7 @@
+   injectedLoafEntries,
+   loafScriptsProblem,
+   type PerfSample,
++  timelineScrollProblem,
+ } from './lib/report';
+ import { frameIntervals, median, percentile, roundTo } from './lib/stats';
+ 
+@@ -91,6 +93,7 @@
+   'fader.clipgain.stopped (click selects the added clip first)',
+   'Space -> playing (harness.audio-running)',
+   `settle ${idleSettleMs} ms, then ${idleMeasureMs} ms idle playback (play.idle-*)`,
++  'Follow off (click arrangement-follow until data-follow-mode="off", blur, quiet; stays off through stop/play); timeline scrollLeft unchanged from idle start',
+   'fader.track.playing',
+   'fader.pan.playing',
+   'fader.master.playing',
+@@ -226,6 +229,21 @@
+   releaseComponentsMax: number;
+ }
+ 
++async function timelineScrollLeft(page: Page): Promise<number> {
++  return page.getByTestId('arrangement-timeline-scroller').evaluate((node) => node.scrollLeft);
++}
++
++async function setFollowOff(page: Page, problems: string[], label: string): Promise<void> {
++  const follow = page.getByTestId('arrangement-follow');
++  for (let click = 0; click < 2; click += 1) {
++    if ((await follow.getAttribute('data-follow-mode')) === 'off') break;
++    await follow.click();
++  }
++  await expect(follow).toHaveAttribute('data-follow-mode', 'off');
++  await blurActive(page);
++  await waitForStudioQuiet(page, problems, label);
++}
++
+ async function dragFader(
+   page: Page,
+   fader: FaderName,
+@@ -250,6 +268,13 @@
+   if (maxAttribute === null) throw new Error(`fader ${fader} has no max attribute`);
+   const valueMax = Number(maxAttribute);
+   const y = box.y + box.height / 2;
++  if (state === 'playing') {
++    const followMode = await page
++      .getByTestId('arrangement-follow')
++      .getAttribute('data-follow-mode');
++    if (followMode !== 'off') problems.push(`Follow is ${followMode} before ${label}`);
++  }
++  const scrollBefore = await timelineScrollLeft(page);
+   const t0 = await nowIn(page);
+   await page.mouse.move(box.x + box.width * 0.5, y);
+   await page.mouse.down();
+@@ -261,6 +286,8 @@
+   await page.mouse.up();
+   const tUp = await nowIn(page);
+   const tEnd = await waitForQuiet(page, tUp, settleMs);
++  const scrollProblem = timelineScrollProblem(label, scrollBefore, await timelineScrollLeft(page));
++  if (scrollProblem !== null) problems.push(scrollProblem);
+   const strict = valueLow < valueStart && valueStart < valueHigh;
+   const atMax = valueLow < valueStart && valueStart === valueMax && valueHigh === valueMax;
+   if (!strict && !atMax) {
+@@ -654,6 +681,7 @@
+     await setPlayback(page, true);
+     await page.waitForTimeout(idleSettleMs);
+     const running = await isPlaying(page);
++    const idleScrollLeft = await timelineScrollLeft(page);
+     const idleStart = await nowIn(page);
+     await page.waitForTimeout(idleMeasureMs);
+     const idleEnd = await nowIn(page);
+@@ -674,6 +702,15 @@
+       });
+     }
+ 
++    step = 'Follow off for the playing faders';
++    await setFollowOff(page, result.problems, step);
++    const idleScrollProblem = timelineScrollProblem(
++      'idle playback and Follow off',
++      idleScrollLeft,
++      await timelineScrollLeft(page),
++    );
++    if (idleScrollProblem !== null) result.problems.push(idleScrollProblem);
++
+     for (const fader of ungroupedFaders) {
+       step = `fader.${fader}.playing`;
+       await measureFader(page, fader, 'playing', result);
+--- a/perf/lib/report.ts
++++ b/perf/lib/report.ts
+@@ -70,6 +70,16 @@
+   );
+ }
+ 
++export function timelineScrollProblem(
++  label: string,
++  before: number,
++  after: number,
++): string | null {
++  return before === after
++    ? null
++    : `timeline scrolled during ${label}: scrollLeft ${before} -> ${after}`;
++}
++
+ export function rateRowId(base: string, cpuRate: number): string {
+   return cpuRate === 1 ? base : `${base}.${cpuRate}x`;
+ }
+--- a/perf/lib/report.test.ts
++++ b/perf/lib/report.test.ts
+@@ -14,6 +14,7 @@
+   type PerfSample,
+   rateRowId,
+   rowRate,
++  timelineScrollProblem,
+ } from './report';
+ 
+ type Detail = Record<string, number | string | boolean>;
+@@ -461,4 +462,29 @@
+   ])('LOAF2: injectedLoafEntries keeps only frames containing the callback: $label', ({ loafs, kept }) => {
+     expect(injectedLoafEntries(loafs, 1000, 1080).map((entry) => entry.t)).toEqual(kept);
+   });
++
++  it.each([
++    { label: 'unchanged at 0', before: 0, after: 0, problem: null },
++    { label: 'unchanged after a page turn', before: 812, after: 812, problem: null },
++    {
++      label: 'one Follow page turn',
++      before: 0,
++      after: 812,
++      problem: 'timeline scrolled during fader.clipgain.playing: scrollLeft 0 -> 812',
++    },
++    {
++      label: 'a sub-pixel change',
++      before: 812,
++      after: 812.5,
++      problem: 'timeline scrolled during fader.clipgain.playing: scrollLeft 812 -> 812.5',
++    },
++    {
++      label: 'a scroll back',
++      before: 812,
++      after: 0,
++      problem: 'timeline scrolled during fader.clipgain.playing: scrollLeft 812 -> 0',
++    },
++  ])('SCROLL1: timelineScrollProblem flags any timeline scroll in a fader window: $label', ({ before, after, problem }) => {
++    expect(timelineScrollProblem('fader.clipgain.playing', before, after)).toBe(problem);
++  });
+ });
