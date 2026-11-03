@@ -1,9 +1,9 @@
 {
- "version": 267,
- "updated": "2026-11-03 B round 307 -> 308 planning",
+ "version": 268,
+ "updated": "2026-11-03 B round 308 -> 309 planning",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 308, D-29z816..D-29z819; PERF-COMMIT-RESCHEDULE-b-close: C reproduces B continuity evidence CONT-1/CONT-30 + ENDED + NO-CHANGE on a production build; A hardens unused replaceClips (stop never later in both stop() loops, clipFades/clipEnvelopes required, TODO), RC12/RC13, 3 mutants, doc 224 Completed; baseline d8e5ce5, frozen 1181, 3 modified granted)",
+ "current_task": "current-task.md (round 309, D-29z820..D-29z823; PERF-4a: R2 worker public routes ETag/304 + single-range 206/416 + Expose-Headers in both worker copies; protected routes frozen; PR1-PR9, 8 mutants; doc 225; baseline 738df73, frozen 1181, 3 modified + 1 new granted)",
  "advisor_used_by_B": "round 297 -> 298 planning: advisor available and consulted (before writing and before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -13726,7 +13726,8 @@
      "status": "not_started (planning task, parallel)",
      "risks": [
       "INFO-C294-TOKEN-POST-405-STACK (D-29z741): POST /api/studio-token returns a dev stack trace; plan states production behaviour"
-     ]
+     ],
+     "input_d29z821": "PERF-4b client half: send the studio token outside the URL (cookie or fetch-to-blob; <audio>/WaveSurfer cannot send Authorization) so stem URLs are stable cache keys; depends on SABA-Q-PERF4-STUDIO-CACHE"
     },
     {
      "id": "COPY-PD",
@@ -13751,7 +13752,7 @@
   },
   {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress (D-29z817): PERF-COMMIT-RESCHEDULE-a done (307, d8e5ce5); stage b closes on evidence, b-close round 308 (C reproduces continuity, A hardens unused path); next PERF-4 after consults; REGRESSION first when due (on/after 2026-11-05); RETRO at 320 | in_progress (D-29z813): PERF-3 done (3d C round 306 PASS, gate ecb832a, EXIT met); PERF-COMMIT-RESCHEDULE split, stage a dispatched round 307 | in_progress (D-29z808): RETRO 305 done (C FAIL Low only, RT-FIX 306); PERF-3d dispatched round 306 | in_progress (D-29z805): PERF-3c done (304); RETRO 305; PERF-3d round 306 | in_progress (D-29z795): PERF-3c round 304 (harness + exit decision), PERF-3d after RETRO 305 | in_progress (D-29z692): PERF-3a/3b done; paused for PD-REVIEW fix-ups FIX-PD-1a (round 286), FIX-PD-1b, FIX-PD-1c, STUDIO-LINK, NAME-AND-HINT (\"between PERF tasks\", Saba 2026-10-31); REGRESSION when due (on/after 2026-11-02) takes precedence; RETRO at 290; then PERF-3c | in_progress (D-29z685): PERF-3a done (round 284); round 285 = PERF-3b; then REGRESSION if due (on/after 2026-11-02), then PERF-3c; RETRO at 290 | in_progress (D-29z673): PERF-2 done (round 283, 54a3fcc); PERF-3 split -> PERF-3a round 284 (dispatched), PERF-3b next PERF round; REGRESSION first when due (on/after 2026-11-02); RETRO at 290",
+   "status": "in_progress (D-29z821): PERF-COMMIT-RESCHEDULE closed on evidence (C round 308 PASS, gate 738df73); PERF-4a dispatched round 309; 4b awaiting_user, 4c backend handoff; next PERF-5; REGRESSION first when due (on/after 2026-11-05); RETRO at 320 | in_progress (D-29z817): PERF-COMMIT-RESCHEDULE-a done (307, d8e5ce5); stage b closes on evidence, b-close round 308 (C reproduces continuity, A hardens unused path); next PERF-4 after consults; REGRESSION first when due (on/after 2026-11-05); RETRO at 320 | in_progress (D-29z813): PERF-3 done (3d C round 306 PASS, gate ecb832a, EXIT met); PERF-COMMIT-RESCHEDULE split, stage a dispatched round 307 | in_progress (D-29z808): RETRO 305 done (C FAIL Low only, RT-FIX 306); PERF-3d dispatched round 306 | in_progress (D-29z805): PERF-3c done (304); RETRO 305; PERF-3d round 306 | in_progress (D-29z795): PERF-3c round 304 (harness + exit decision), PERF-3d after RETRO 305 | in_progress (D-29z692): PERF-3a/3b done; paused for PD-REVIEW fix-ups FIX-PD-1a (round 286), FIX-PD-1b, FIX-PD-1c, STUDIO-LINK, NAME-AND-HINT (\"between PERF tasks\", Saba 2026-10-31); REGRESSION when due (on/after 2026-11-02) takes precedence; RETRO at 290; then PERF-3c | in_progress (D-29z685): PERF-3a done (round 284); round 285 = PERF-3b; then REGRESSION if due (on/after 2026-11-02), then PERF-3c; RETRO at 290 | in_progress (D-29z673): PERF-2 done (round 283, 54a3fcc); PERF-3 split -> PERF-3a round 284 (dispatched), PERF-3b next PERF round; REGRESSION first when due (on/after 2026-11-02); RETRO at 290",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -13961,7 +13962,13 @@
     {
      "id": "PERF-4",
      "what": "see perf-plan.md task outline",
-     "status": "not_started"
+     "status": "in_progress (D-29z821): split 4a/4b/4c; 4a dispatched round 309 | not_started",
+     "split_d29z821": {
+      "PERF-4a": "round 309: public routes ETag/304 + single-range 206/416 + Expose-Headers in both worker copies; PR1-PR9; doc 225",
+      "PERF-4b": "awaiting_user SABA-Q-PERF4-STUDIO-CACHE: /studio/ private,no-cache + ETag/304 after auth; client half (auth outside the URL) in protected studio.$productId.tsx -> SRW-21-PLAN",
+      "PERF-4c": "backend/upload handoff: immutable versioned keys + worker ?v= rule (immutable only when v equals the object ETag); product API returns the version"
+     },
+     "premise_round_308": "b-round-308/probe/head-proxy-1440.json, head-alt-1440.json (no ETag; revalidate 200 5,760,044 B; Range ignored; seek 200 full); sketch-*-1440.json (304/0, 206/1000, 416, seek 206/975,916, cover 304)"
     },
     {
      "id": "PERF-5",
@@ -14032,7 +14039,7 @@
      "target": "interact.drag.fade.30.playing.release-restarts == 1 (baseline 30), same for trim/move at 30 clips; playback position and mix unchanged; exported mix unchanged",
      "source": "doc 168 PERF candidates (fade 30-clip release restarts 30); tech-lead consult 2026-10-28",
      "note": "restarting every clip during playback may be audible: hypothesis, not measured; the stage measures it before claiming it",
-     "status": "closing_on_evidence (D-29z817): final on C round 308 CONT-1/CONT-30 PASS; reopens as b-ii wiring on a click | in_progress (D-29z813): split a/b; stage a dispatched round 307 | not_started (queued D-29z215)",
+     "status": "closed_on_evidence_c308 (D-29z820): C round 308 CONT-1 6/6 and CONT-30 6/6 no click, ENDED, NO-CHANGE; gate 308 published 738df73 | closing_on_evidence (D-29z817): final on C round 308 CONT-1/CONT-30 PASS; reopens as b-ii wiring on a click | in_progress (D-29z813): split a/b; stage a dispatched round 307 | not_started (queued D-29z215)",
      "added": "2026-10-28 B round 215 -> 216 planning",
      "premise_round_306": "b-round-306/probe/head-1440.json, head-1280.json: 30 clips, 30 start() per release (fade, trim, undo), burst 0.4-0.8 ms, LoAF 0, Event Timing <= 32 ms -> main-thread cost immaterial; audio churn/continuity unmeasured (continuity attempt invalid)",
      "split_d29z813": {
@@ -14130,14 +14137,32 @@
     {
      "id": "PERF-COMMIT-RESCHEDULE-b",
      "what": "syncPlayback wiring + harness rows + continuity row + asserts <= 1, or close on evidence",
-     "status": "not_dispatched: replaced by b-close (D-29z817); reopens only if C round 308 CONT shows a click | not_started (after 307 C PASS + gate; REGRESSION first if due)",
+     "status": "closed (D-29z820): not needed, b-close evidence shows no click | not_dispatched: replaced by b-close (D-29z817); reopens only if C round 308 CONT shows a click | not_started (after 307 C PASS + gate; REGRESSION first if due)",
      "added": "2026-11-03 B round 306 -> 307 planning"
     },
     {
      "id": "PERF-COMMIT-RESCHEDULE-b-close",
      "what": "C reproduces B's continuity/ended evidence on a production build; A hardens the unused replaceClips path (stop never later, required shapes, TODO), RC12/RC13, doc 224 Completed",
-     "status": "dispatched round 308 (D-29z817/D-29z818)",
+     "status": "done (D-29z820): C round 308 PASS browserVerified/realVerified true; gate 308 published 738df73 | dispatched round 308 (D-29z817/D-29z818)",
      "added": "2026-11-03 B round 307 -> 308 planning"
+    },
+    {
+     "id": "PERF-4a",
+     "what": "R2 worker public routes: ETag/304, single-range 206/416, Expose-Headers, both copies; protected routes frozen",
+     "status": "dispatched round 309 (D-29z821/D-29z822)",
+     "added": "2026-11-03 B round 308 -> 309 planning"
+    },
+    {
+     "id": "PERF-4b",
+     "what": "studio stem caching: private,no-cache + ETag/304 after auth; auth outside the URL (client in protected files)",
+     "status": "awaiting_user (SABA-Q-PERF4-STUDIO-CACHE, D-29z821); client half via SRW-21-PLAN",
+     "added": "2026-11-03 B round 308 -> 309 planning"
+    },
+    {
+     "id": "PERF-4c",
+     "what": "immutable versioned R2 keys (upload pipeline + product API version) and worker ?v= immutable rule",
+     "status": "handoff_backend (D-29z821): outside this repository; worker half planned when the version field exists",
+     "added": "2026-11-03 B round 308 -> 309 planning"
     }
    ],
    "perf_fader_constraints_d29z174": "Before any event-share-16 row flips to assert: replace the metric (per-move frame/LoAF with liveness red-proof > 0 on a slow drag) or prove it live (C-R206-01); rewrite doc 163 l.60 and budgets.json event-share notes; drag changes the value at both ends (I-206-d); consult performance-optimizer + tech-lead and re-measure before dispatch",
@@ -29133,6 +29158,67 @@
    "repro": "-",
    "status": "recorded (L38 warm-up)",
    "added": "2026-11-03 B round 307 -> 308 planning"
+  },
+  {
+   "id": "GATE308-L1-DOC-TMP-EVIDENCE",
+   "severity": "low",
+   "origin": "gate reviewer",
+   "source": "gates/round-308/review.md suggestion 1",
+   "title": "doc 224 cites tmp/studio-real-loop evidence outside the repository; key numbers are copied into the doc",
+   "repro": "doc reading",
+   "status": "deferred_low_polish (D-29z820)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "INFO-C308-SAME-WHEN",
+   "severity": "info",
+   "origin": "B spec",
+   "title": "continuity probe runs repeat splice positions (ms-quantized release); no raw captures saved",
+   "source": "c-round-308.json findings",
+   "status": "recorded -> RC-R308-SPLICE-PROBE (D-29z820)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "INFO-C308-POSCTL-INCONCLUSIVE",
+   "severity": "info",
+   "origin": "environment",
+   "title": "positive control could not prove the click rule sensitivity (Stop disconnects the tap)",
+   "source": "c-round-308.json findings",
+   "status": "recorded -> RC-R308-SPLICE-PROBE (D-29z820)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "INFO-C308-COLD-DEV",
+   "severity": "info",
+   "origin": "environment",
+   "title": "two cold-compile timeouts before measurement; rows reran valid after warm-up",
+   "source": "c-round-308.json findings",
+   "status": "recorded",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "SABA-Q-PERF4-STUDIO-CACHE",
+   "severity": "info",
+   "origin": "B + performance-optimizer/tech-lead (round 309 planning)",
+   "title": "Purchased Studio stems: allow the buyer browser to keep them on disk (private, no-cache + ETag, every reuse re-authorized; faster re-open) or keep private, no-store (re-download each open, nothing left on shared machines)? Pays off only after the token leaves the URL (SRW-21-PLAN)",
+   "status": "awaiting_user (D-29z821); blocks PERF-4b only",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "SABA-Q-WORKER-DEPLOYED",
+   "severity": "info",
+   "origin": "tech-lead consult (round 309 planning)",
+   "title": "Which R2 worker copy is deployed: workers/r2-proxy.js (has the cover-image route) or cloudflare/r2-worker.js? After the answer a bounded task removes the other copy",
+   "status": "awaiting_user (D-29z823); non-blocking (both copies edited in lockstep)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "WK-STORE-PREVIEW-LIVE",
+   "severity": "info",
+   "origin": "B",
+   "title": "ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a",
+   "status": "not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
   }
  ],
  "tech_lead_notes": [
@@ -31520,7 +31606,8 @@
    "source": "a-round-307.md code-reviewer Architecture note",
    "text": "applySchedule closure has append/stop/replace lifecycle ops, a copied prune block and two mutable maps; after a caller of replaceClips exists, extract a source registry (prune, stopAt, active count) inside graph.client.ts with RC6/RC10-style tests",
    "status": "signal (attached to b-round-306-checkpoint-request.md, D-29z815; no new request)",
-   "added": "2026-11-03 B round 307 -> 308 planning"
+   "added": "2026-11-03 B round 307 -> 308 planning",
+   "count_note_d29z820": "repeated by A round 308 (2x)"
   },
   {
    "id": "GATE307-ARCH-SHARED-RECORDING-FAKES",
@@ -31534,7 +31621,15 @@
    "source": "B round 307 planning (advisor)",
    "text": "reschedule.ts and ScheduleHandle.replaceClips stay as prepared code with no caller (D-29z818); revisit keep-vs-remove at the end of phase 2 if still unused",
    "status": "signal",
-   "added": "2026-11-03 B round 307 -> 308 planning"
+   "added": "2026-11-03 B round 307 -> 308 planning",
+   "note_d29z820": "before any replaceClips caller also: compute at = when ?? ctx.currentTime once in stop() (GATE308-S2) and bound it with Math.max(at, ctx.currentTime) (A-R308 reviewer Low)"
+  },
+  {
+   "id": "R2-WORKER-TWO-COPIES",
+   "source": "tech-lead + performance-optimizer consults, round 309 planning",
+   "text": "workers/r2-proxy.js and cloudflare/r2-worker.js are two copies of one worker and have drifted (cover route only in workers/); PERF-4a keeps them in lockstep with a byte-identical helper block; remove one after SABA-Q-WORKER-DEPLOYED",
+   "status": "signal (D-29z823)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -37270,6 +37365,36 @@
    "repro": "doc reading",
    "status": "deferred_low_polish (D-29z812)",
    "added": "2026-11-03 B round 306 -> 307 planning"
+  },
+  {
+   "id": "GATE308-L1-DOC-TMP-EVIDENCE",
+   "severity": "low",
+   "origin": "gate reviewer",
+   "source": "gates/round-308/review.md suggestion 1",
+   "title": "doc 224: mark tmp/ evidence paths as temporary or copy the probe summaries into docs/",
+   "repro": "doc reading",
+   "status": "deferred_low_polish (D-29z820)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "GATE308-S3-RC13-EXACT-COUNT",
+   "severity": "low",
+   "origin": "gate reviewer",
+   "source": "gates/round-308/review.md suggestion 3",
+   "title": "graph.test.ts RC13: expect(clicks.length).toBe(2) instead of >= 1",
+   "repro": "test reading",
+   "status": "deferred_low_polish (D-29z820)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
+  },
+  {
+   "id": "B-R308-PROXY-AUDIO-YEAR-CACHE",
+   "severity": "low",
+   "origin": "tech-lead consult (pre-existing)",
+   "source": "app/routes/api.proxy.audio.ts (Cache-Control public, max-age=31536000 on unversioned preview keys)",
+   "title": "the dev audio proxy caches previews for a year; a replaced preview stays stale in browsers",
+   "repro": "GET /api/proxy/audio?url=<worker preview> -> Cache-Control public, max-age=31536000",
+   "status": "deferred_low_polish (D-29z821); revisit with PERF-4c versioned keys",
+   "added": "2026-11-03 B round 308 -> 309 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -42562,6 +42687,26 @@
    "id": "D-29z819",
    "date": "2026-11-03",
    "text": "Not measured, recorded as inferences (policy rule 8): edit on a sounding clip among many simultaneously sounding clips (inferred ~ Play cost); ended in Firefox/Safari; a gain-changing edit at the playhead (legitimate step on either path). Doc 224 carries them labelled."
+  },
+  {
+   "id": "D-29z820",
+   "date": "2026-11-03",
+   "text": "Round 308 closure from C evidence (c-round-308.json: PASS, browserVerified/realVerified true, 10 rows, 0 bugs; CONT-1 6/6 and CONT-30 6/6 valid runs, no click; ENDED; NO-CHANGE both viewports; G308-AUTH both viewports) and gate 308 published 738df73 (both remotes). PERF-COMMIT-RESCHEDULE closed_on_evidence_c308 (D-29z817 condition met); b-ii not opened. Gate-308 review COMMIT OK: GATE308-L1 (doc 224 cites tmp/ evidence) and GATE308-S3 (RC13 toBe(2)) -> deferred_low_polish; GATE308-S2 (compute when ?? now once) + A-R308 reviewer Low (Math.max bound) -> attached to PERF-RESCHEDULE-UNUSED-CODE, before any replaceClips caller. INFO-C308-SAME-WHEN + INFO-C308-POSCTL-INCONCLUSIVE -> retro candidate RC-R308-SPLICE-PROBE. A architecture note = A-R307-ARCH-SOURCE-REGISTRY (count +1, no new request)."
+  },
+  {
+   "id": "D-29z821",
+   "date": "2026-11-03",
+   "text": "PERF-4 split, nothing dropped: 4a (round 309) public routes (previews + covers) ETag/304, single-range 206/416, Expose-Headers, both worker copies; 4b studio caching (private,no-cache + ETag after auth, auth outside the URL) awaiting_user SABA-Q-PERF4-STUDIO-CACHE, client half is protected (studio.$productId.tsx l.254 appends ?token=) -> SRW-21-PLAN; 4c immutable versioned keys + worker ?v= rule -> backend/upload handoff (no upload pipeline or wrangler config in the repo). Downloads/recordings/originals keep private,no-store (both consults). Consults: performance-optimizer and tech-lead agree on 4a; they differ on /studio/ (no-cache vs no-store), ruled: keep no-store, ask Saba (L44). Premise at HEAD 738df73 (b-round-308/probe/head-*-1440.json): no ETag, revalidation 5,760,044 bytes, Range ignored, seek 200 full body; sketch: 304/0, 206/1000, 416, seek 206/975,916."
+  },
+  {
+   "id": "D-29z822",
+   "date": "2026-11-03",
+   "text": "PERF-4a contract (current-task.md section 4): head() first; If-None-Match (weak, *) -> 304 before Range and before any body read; If-Range strong only; single bytes= range, invalid/multi -> 200, a>=size or -0 -> 416 bytes */size with no R2 read; HEAD reads nothing; existing Cache-Control values and 404 texts kept; no immutable/stale-while-revalidate; helper block byte-identical in both copies; protected handler, router, validateToken, isSafeFileName, getContentType byte-identical. R2 facts quoted from the Workers API reference (2026-11-03); out-of-range R2 behaviour is inference, avoided by validating first. Accepted race head->get recorded (4c removes it). Rows PR1-PR9, mutants MU-NO-INM, MU-RANGE-200, MU-416-PASS, MU-IFRANGE-IGNORED, MU-HEAD-READS, MU-NO-EXPOSE, MU-STUDIO-CONDITIONAL, MU-ONE-COPY: all red on B sketch (b-round-308/sketch-mutants.txt); sketch 57/57. Amended after the advisor review: a null get after head returns null to the caller (route keeps its own 404 text; K8 2 2); -n with n > size -> 206 bytes 0-(size-1)/size; CLAIMS K5-K8 equal b-round-308/claims-309-sketch-output.txt; K21 tsconfig include excludes workers/*.js (node --check added)."
+  },
+  {
+   "id": "D-29z823",
+   "date": "2026-11-03",
+   "text": "Requests: ROOT-REQ-VERIFY-WORKER-TESTS (npm run verify does not run node --test workers/r2-proxy.test.mjs; gate-308 verify.log 0 mentions) non-blocking, C runs it as WK-UNIT meanwhile. Saba questions SABA-Q-PERF4-STUDIO-CACHE and SABA-Q-WORKER-DEPLOYED (which copy is live; then a bounded dedupe task). Worker deploy is outside the loop. Architecture checkpoint requests (ARCH-CHECKPOINT-STUDIO-LINK, D-29z811, b-round-306-checkpoint-request.md) still unanswered, non-blocking; no new request (PERF-4a is one bounded server-side change)."
   }
  ],
  "retro_candidates": [
@@ -42747,6 +42892,12 @@
    "text": "a screen-review claim about truncation or overflow rests on the screenshot or an untruncated DOM measurement (scrollWidth vs clientWidth), never on capture JSON that slices text (capture.mjs textLines slice(0,120))",
    "status": "candidate for RETRO 320 (D-29z811); evidence C-R305-01 (1x)",
    "added": "2026-11-03 B round 305 -> 306 planning"
+  },
+  {
+   "id": "RC-R308-SPLICE-PROBE",
+   "text": "an audio-splice continuity probe saves raw captures, adds a random pre-release delay (avoid ms-quantized identical runs) and carries a positive control that is proven to flag a deliberate discontinuity",
+   "status": "candidate for RETRO 320 (D-29z820); evidence INFO-C308-SAME-WHEN, INFO-C308-POSCTL-INCONCLUSIVE (1x)",
+   "added": "2026-11-03 B round 308 -> 309 planning"
   }
  ],
  "root_requests_b": [
@@ -42767,6 +42918,14 @@
    "added": "2026-10-30 B round 278 -> 279 planning",
    "data_round_279": "PERF-1a A 6.4 min, C 6.5 min (43 % of 15 min); B 873d835 run 8.4 min (56 %). Machine variance; still open (D-29z644)",
    "data_round_280_planning": "B sketch run at 145f6c1 (round 281 planning): PERF-1a 6.8 min (45 %), PERF-1b-i 5.1 min; still open (D-29z651)"
+  },
+  {
+   "id": "ROOT-REQ-VERIFY-WORKER-TESTS",
+   "file": "b-round-308.md (For root)",
+   "decision": "D-29z823",
+   "blocking": false,
+   "status": "open: add node --test workers/r2-proxy.test.mjs to npm run verify (gate-308 verify.log 0 mentions); until then C runs it as WK-UNIT",
+   "added": "2026-11-03 B round 308 -> 309 planning"
   }
  ],
  "retro_inputs_round_230": [

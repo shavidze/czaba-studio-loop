@@ -1,0 +1,103 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/tmp/a308-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/graph.test.ts [2m([22m[2m32 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 31[2mms[22m[39m
+     [32m✓[39m starts each source at startAt + (when - from) with offset and duration[32m 3[2mms[22m[39m
+     [32m✓[39m wires clip -> clipGain -> trackGain -> pan -> master -> destination[32m 1[2mms[22m[39m
+     [32m✓[39m gives muted and non-soloed tracks gain 0 and still creates their sources[32m 1[2mms[22m[39m
+     [32m✓[39m setTrackGain ramps the track gain without restarting sources[32m 1[2mms[22m[39m
+     [32m✓[39m setTrackGain uses the short de-click constant for mute and unmute[32m 0[2mms[22m[39m
+     [32m✓[39m seeds the last target from construction: muted track unmutes with the short constant[32m 0[2mms[22m[39m
+     [32m✓[39m seeds the last target from construction: audible track volume change keeps smoothing[32m 0[2mms[22m[39m
+     [32m✓[39m seeds a track silenced by another track solo so unsolo uses the short constant[32m 0[2mms[22m[39m
+     [32m✓[39m keeps the last target per track: muting sfx does not change music smoothing[32m 1[2mms[22m[39m
+     [32m✓[39m same-target re-sends keep their class and never restart sources[32m 1[2mms[22m[39m
+     [32m✓[39m stop() stops every source and activeSourceCount returns to 0[32m 0[2mms[22m[39m
+     [32m✓[39m a scheduled stop keeps sources active until the handoff time[32m 0[2mms[22m[39m
+     [32m✓[39m counts sources that ended naturally as inactive[32m 0[2mms[22m[39m
+     [32m✓[39m creates a video trackGain and plays video-track clips through it[32m 1[2mms[22m[39m
+     [32m✓[39m keeps a muted video clip scheduled with track gain 0[32m 0[2mms[22m[39m
+     [32m✓[39m solo on the video lane silences audio lanes and vice versa[32m 0[2mms[22m[39m
+     [32m✓[39m appendPlan schedules a loop iteration on the same track gains and releases ended sources[32m 1[2mms[22m[39m
+     [32m✓[39m skips clips without a loaded buffer[32m 0[2mms[22m[39m
+     [32m✓[39m renderArrangementWav uses the same applySchedule as live playback[32m 0[2mms[22m[39m
+     [32m✓[39m RC1 stops only the replaced clip at startAt and starts one new source[32m 1[2mms[22m[39m
+     [32m✓[39m RC2 a sounding clip resumes at the same source offset[32m 1[2mms[22m[39m
+     [32m✓[39m RC3 a clip that has not started yet is stopped and rescheduled[32m 0[2mms[22m[39m
+     [32m✓[39m RC4 new fade shapes replace the old ones and an absent shape removes the fade[32m 1[2mms[22m[39m
+     [32m✓[39m RC5 only items whose clip id is replaced are started[32m 0[2mms[22m[39m
+     [32m✓[39m RC6 counts the replaced source until its stop and prunes ended states[32m 0[2mms[22m[39m
+     [32m✓[39m RC7 a replaced clip gain is the new target for later gain changes[32m 0[2mms[22m[39m
+     [32m✓[39m RC8 a disconnected handle ignores a replace[32m 0[2mms[22m[39m
+     [32m✓[39m RC9 a later appendPlan uses the replaced fade shape[32m 1[2mms[22m[39m
+     [32m✓[39m RC10 a repeated replace pulls a later stop forward and keeps an earlier one[32m 1[2mms[22m[39m
+     [32m✓[39m RC11 new envelope shapes replace the old ones and an absent shape removes the envelope[32m 2[2mms[22m[39m
+     [32m✓[39m RC12 a later stop(when) never moves a stop set by a replace[32m 0[2mms[22m[39m
+[31m     [31m×[31m RC13 stop(when) moves clip and click stops earlier only[39m[32m 9[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/metronome.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 29[2mms[22m[39m
+     [32m✓[39m M1 plans 8 clicks at 120 BPM over 0–4 s with accents on each bar downbeat[32m 3[2mms[22m[39m
+     [32m✓[39m M2 computes every beat time from its index, never by accumulation[32m 3[2mms[22m[39m
+     [32m✓[39m M3 keeps only the beats inside the window and never plays the tail of an earlier click[32m 1[2mms[22m[39m
+     [32m✓[39m M4 includes a beat that lies within ARRANGEMENT_EPS before the window start, clamped to it[32m 1[2mms[22m[39m
+     [32m✓[39m M5 truncates the last click at the window end[32m 1[2mms[22m[39m
+     [32m✓[39m M6 returns no clicks for an invalid tempo or an empty window[32m 0[2mms[22m[39m
+     [32m✓[39m M7 generates a short decaying click: 1600 Hz accent at 0.5, 1000 Hz beat at 0.25[32m 2[2mms[22m[39m
+     [32m✓[39m M8 writes the on/off status and the two toggle titles verbatim[32m 1[2mms[22m[39m
+     [32m✓[39m M9 routes every click through one metronome gain into the master gain only[32m 4[2mms[22m[39m
+[31m     [31m×[31m M10 appends clicks, honours stop(when), counts clips only and disconnects everything[39m[32m 12[2mms[22m[39m
+     [32m✓[39m M11 creates exactly the existing nodes without a metronome and appendClicks does nothing[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/graph.test.ts[2m > [22mreplaceClips[2m > [22mRC13 stop(when) moves clip and click stops earlier only
+[31m[1mAssertionError[22m: expected [ 3 ] to deeply equal [ 3, undefined ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    3,[22m
+[32m-   undefined,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/graph.test.ts:[2m766:28[22m[39m
+    [90m764| [39m    handle[33m.[39m[34mstop[39m()[33m;[39m
+    [90m765| [39m    [35mfor[39m ([35mconst[39m source [35mof[39m ctx[33m.[39msources) {
+    [90m766| [39m      [34mexpect[39m(source[33m.[39mstops)[33m.[39m[34mtoEqual[39m([[34m3[39m[33m,[39m undefined])[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m767| [39m    }
+    [90m768| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/metronome.test.ts[2m > [22mSRW-15 stage 2 metronome plan, sound and graph (D-29z31)[2m > [22mM10 appends clicks, honours stop(when), counts clips only and disconnects everything
+[31m[1mAssertionError[22m: expected [ 21 ] to deeply equal [ 21, undefined ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    21,[22m
+[32m-   undefined,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/metronome.test.ts:[2m336:28[22m[39m
+    [90m334| [39m    handle[33m.[39m[34mstop[39m()[33m;[39m
+    [90m335| [39m    [35mfor[39m ([35mconst[39m source [35mof[39m clicks[33m.[39m[34mslice[39m([34m1[39m)) {
+    [90m336| [39m      [34mexpect[39m(source[33m.[39mstops)[33m.[39m[34mtoEqual[39m([[34m21[39m[33m,[39m undefined])[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m337| [39m    }
+    [90m338| [39m    [35mconst[39m metronomeGain [33m=[39m clicks[[34m1[39m][33m.[39moutputs[[34m0[39m][33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m41 passed[39m[22m[90m (43)[39m
+[2m   Start at [22m 02:57:19
+[2m   Duration [22m 1.02s[2m (transform 512ms, setup 0ms, import 667ms, tests 60ms, environment 968ms)[22m
+
+
+::error file=/home/runner/czaba-project/tmp/a308-scratch/app/lib/arrangement/__tests__/graph.test.ts,title=app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC13 stop(when) moves clip and click stops earlier only,line=766,column=28::AssertionError: expected [ 3 ] to deeply equal [ 3, undefined ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    3,%0A-   undefined,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/graph.test.ts:766:28%0A%0A
+
+::error file=/home/runner/czaba-project/tmp/a308-scratch/app/lib/arrangement/__tests__/metronome.test.ts,title=app/lib/arrangement/__tests__/metronome.test.ts > SRW-15 stage 2 metronome plan%2C sound and graph (D-29z31) > M10 appends clicks%2C honours stop(when)%2C counts clips only and disconnects everything,line=336,column=28::AssertionError: expected [ 21 ] to deeply equal [ 21, undefined ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    21,%0A-   undefined,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/metronome.test.ts:336:28%0A%0A

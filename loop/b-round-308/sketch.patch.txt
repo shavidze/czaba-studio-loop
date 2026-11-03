@@ -1,0 +1,198 @@
+--- /home/runner/czaba-project/store/workers/r2-proxy.js	2026-11-03 02:54:16.825064364 +0000
++++ workers/r2-proxy.js	2026-11-03 03:38:33.135536143 +0000
+@@ -65,19 +65,8 @@
+ // Handle public images (cover images)
+ async function handleImage(request, path, env, corsHeaders) {
+   const r2Key = path.slice(1); // Remove leading slash: "handle/cover.jpg"
+-
+-  const object = await env.R2_BUCKET.get(r2Key);
+-
+-  if (!object) {
+-    return new Response('Image Not Found', { status: 404, headers: corsHeaders });
+-  }
+-
+-  const headers = new Headers(corsHeaders);
+-  headers.set('Content-Type', getContentType(r2Key));
+-  headers.set('Cache-Control', 'public, max-age=604800'); // 7 days cache
+-  headers.set('Content-Length', object.size.toString());
+-
+-  return new Response(request.method === 'HEAD' ? null : object.body, { headers });
++  const response = await servePublicObject(request, r2Key, env, corsHeaders, 'public, max-age=604800', getContentType(r2Key), false);
++  return response ?? new Response('Image Not Found', { status: 404, headers: corsHeaders });
+ }
+ 
+ // Handle public preview files (audio previews)
+@@ -86,20 +75,8 @@
+   const productHandle = parts[0];
+   const fileName = decodeURIComponent(parts.slice(1).join('/'));
+   const r2Key = productHandle + '/Preview/' + fileName;
+-
+-  const object = await env.R2_BUCKET.get(r2Key);
+-
+-  if (!object) {
+-    return new Response('File Not Found: ' + r2Key, { status: 404, headers: corsHeaders });
+-  }
+-
+-  const headers = new Headers(corsHeaders);
+-  headers.set('Content-Type', getContentType(fileName));
+-  headers.set('Cache-Control', 'public, max-age=86400'); // 1 day cache
+-  headers.set('Content-Length', object.size.toString());
+-  headers.set('Accept-Ranges', 'bytes');
+-
+-  return new Response(request.method === 'HEAD' ? null : object.body, { headers });
++  const response = await servePublicObject(request, r2Key, env, corsHeaders, 'public, max-age=86400', getContentType(fileName), true);
++  return response ?? new Response('File Not Found: ' + r2Key, { status: 404, headers: corsHeaders });
+ }
+ 
+ // Handle protected files (studio assets, downloads)
+@@ -217,3 +194,62 @@
+   };
+   return types[ext] || 'application/octet-stream';
+ }
++
++const PUBLIC_EXPOSE_HEADERS = 'ETag, Content-Range, Accept-Ranges, Content-Length';
++
++function etagMatches(header, httpEtag) {
++  if (!header || !httpEtag) return false;
++  const opaque = (tag) => tag.trim().replace(/^W\//, '');
++  return header.split(',').some((tag) => tag.trim() === '*' || opaque(tag) === opaque(httpEtag));
++}
++
++function parseSingleRange(header, size) {
++  const match = /^bytes=(\d*)-(\d*)$/.exec((header || '').trim());
++  if (!match || (match[1] === '' && match[2] === '')) return null;
++  if (match[1] === '') {
++    const suffix = Number(match[2]);
++    if (suffix === 0 || size === 0) return { unsatisfiable: true };
++    const length = Math.min(suffix, size);
++    return { offset: size - length, length };
++  }
++  const start = Number(match[1]);
++  if (match[2] !== '' && Number(match[2]) < start) return null;
++  if (start >= size) return { unsatisfiable: true };
++  const end = match[2] === '' ? size - 1 : Math.min(Number(match[2]), size - 1);
++  return { offset: start, length: end - start + 1 };
++}
++
++async function servePublicObject(request, r2Key, env, corsHeaders, cacheControl, contentType, allowRange) {
++  const meta = await env.R2_BUCKET.head(r2Key);
++  if (!meta) return null;
++  const headers = new Headers(corsHeaders);
++  headers.set('Access-Control-Expose-Headers', PUBLIC_EXPOSE_HEADERS);
++  headers.set('Cache-Control', cacheControl);
++  if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
++  if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
++    return new Response(null, { status: 304, headers });
++  }
++  headers.set('Content-Type', contentType);
++  if (allowRange) headers.set('Accept-Ranges', 'bytes');
++  const ifRange = request.headers.get('If-Range');
++  const rangeAllowed = allowRange && (!ifRange || (meta.httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === meta.httpEtag));
++  const range = rangeAllowed ? parseSingleRange(request.headers.get('Range'), meta.size) : null;
++  if (range && range.unsatisfiable) {
++    headers.set('Content-Range', 'bytes */' + meta.size);
++    headers.delete('Content-Type');
++    return new Response(null, { status: 416, headers });
++  }
++  if (range) {
++    headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + meta.size);
++    headers.set('Content-Length', range.length.toString());
++    if (request.method === 'HEAD') return new Response(null, { status: 206, headers });
++    const part = await env.R2_BUCKET.get(r2Key, { range: { offset: range.offset, length: range.length } });
++    if (!part) return null;
++    return new Response(part.body, { status: 206, headers });
++  }
++  headers.set('Content-Length', meta.size.toString());
++  if (request.method === 'HEAD') return new Response(null, { headers });
++  const object = await env.R2_BUCKET.get(r2Key);
++  if (!object) return null;
++  return new Response(object.body, { headers });
++}
+--- /home/runner/czaba-project/store/cloudflare/r2-worker.js	2026-11-03 02:54:16.476981087 +0000
++++ cloudflare/r2-worker.js	2026-11-03 03:38:33.135991750 +0000
+@@ -59,20 +59,8 @@
+   const productHandle = parts[0];
+   const fileName = decodeURIComponent(parts.slice(1).join('/'));
+   const r2Key = productHandle + '/Preview/' + fileName;
+-
+-  const object = await env.R2_BUCKET.get(r2Key);
+-
+-  if (!object) {
+-    return new Response('File Not Found: ' + r2Key, { status: 404, headers: corsHeaders });
+-  }
+-
+-  const headers = new Headers(corsHeaders);
+-  headers.set('Content-Type', getContentType(fileName));
+-  headers.set('Cache-Control', 'public, max-age=86400');
+-  headers.set('Content-Length', object.size.toString());
+-  headers.set('Accept-Ranges', 'bytes');
+-
+-  return new Response(request.method === 'HEAD' ? null : object.body, { headers });
++  const response = await servePublicObject(request, r2Key, env, corsHeaders, 'public, max-age=86400', getContentType(fileName), true);
++  return response ?? new Response('File Not Found: ' + r2Key, { status: 404, headers: corsHeaders });
+ }
+ 
+ async function handleProtected(request, path, folder, env, corsHeaders) {
+@@ -168,3 +156,62 @@
+   const ext = (fileName.split('.').pop() || '').toLowerCase();
+   return { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac', zip: 'application/zip', pdf: 'application/pdf' }[ext] || 'application/octet-stream';
+ }
++
++const PUBLIC_EXPOSE_HEADERS = 'ETag, Content-Range, Accept-Ranges, Content-Length';
++
++function etagMatches(header, httpEtag) {
++  if (!header || !httpEtag) return false;
++  const opaque = (tag) => tag.trim().replace(/^W\//, '');
++  return header.split(',').some((tag) => tag.trim() === '*' || opaque(tag) === opaque(httpEtag));
++}
++
++function parseSingleRange(header, size) {
++  const match = /^bytes=(\d*)-(\d*)$/.exec((header || '').trim());
++  if (!match || (match[1] === '' && match[2] === '')) return null;
++  if (match[1] === '') {
++    const suffix = Number(match[2]);
++    if (suffix === 0 || size === 0) return { unsatisfiable: true };
++    const length = Math.min(suffix, size);
++    return { offset: size - length, length };
++  }
++  const start = Number(match[1]);
++  if (match[2] !== '' && Number(match[2]) < start) return null;
++  if (start >= size) return { unsatisfiable: true };
++  const end = match[2] === '' ? size - 1 : Math.min(Number(match[2]), size - 1);
++  return { offset: start, length: end - start + 1 };
++}
++
++async function servePublicObject(request, r2Key, env, corsHeaders, cacheControl, contentType, allowRange) {
++  const meta = await env.R2_BUCKET.head(r2Key);
++  if (!meta) return null;
++  const headers = new Headers(corsHeaders);
++  headers.set('Access-Control-Expose-Headers', PUBLIC_EXPOSE_HEADERS);
++  headers.set('Cache-Control', cacheControl);
++  if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
++  if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
++    return new Response(null, { status: 304, headers });
++  }
++  headers.set('Content-Type', contentType);
++  if (allowRange) headers.set('Accept-Ranges', 'bytes');
++  const ifRange = request.headers.get('If-Range');
++  const rangeAllowed = allowRange && (!ifRange || (meta.httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === meta.httpEtag));
++  const range = rangeAllowed ? parseSingleRange(request.headers.get('Range'), meta.size) : null;
++  if (range && range.unsatisfiable) {
++    headers.set('Content-Range', 'bytes */' + meta.size);
++    headers.delete('Content-Type');
++    return new Response(null, { status: 416, headers });
++  }
++  if (range) {
++    headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + meta.size);
++    headers.set('Content-Length', range.length.toString());
++    if (request.method === 'HEAD') return new Response(null, { status: 206, headers });
++    const part = await env.R2_BUCKET.get(r2Key, { range: { offset: range.offset, length: range.length } });
++    if (!part) return null;
++    return new Response(part.body, { status: 206, headers });
++  }
++  headers.set('Content-Length', meta.size.toString());
++  if (request.method === 'HEAD') return new Response(null, { headers });
++  const object = await env.R2_BUCKET.get(r2Key);
++  if (!object) return null;
++  return new Response(object.body, { headers });
++}

@@ -1,0 +1,92 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/tmp/a308-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/graph.test.ts [2m([22m[2m32 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 33[2mms[22m[39m
+     [32m✓[39m starts each source at startAt + (when - from) with offset and duration[32m 2[2mms[22m[39m
+     [32m✓[39m wires clip -> clipGain -> trackGain -> pan -> master -> destination[32m 1[2mms[22m[39m
+     [32m✓[39m gives muted and non-soloed tracks gain 0 and still creates their sources[32m 1[2mms[22m[39m
+     [32m✓[39m setTrackGain ramps the track gain without restarting sources[32m 1[2mms[22m[39m
+     [32m✓[39m setTrackGain uses the short de-click constant for mute and unmute[32m 0[2mms[22m[39m
+     [32m✓[39m seeds the last target from construction: muted track unmutes with the short constant[32m 0[2mms[22m[39m
+     [32m✓[39m seeds the last target from construction: audible track volume change keeps smoothing[32m 0[2mms[22m[39m
+     [32m✓[39m seeds a track silenced by another track solo so unsolo uses the short constant[32m 0[2mms[22m[39m
+     [32m✓[39m keeps the last target per track: muting sfx does not change music smoothing[32m 1[2mms[22m[39m
+     [32m✓[39m same-target re-sends keep their class and never restart sources[32m 1[2mms[22m[39m
+     [32m✓[39m stop() stops every source and activeSourceCount returns to 0[32m 0[2mms[22m[39m
+     [32m✓[39m a scheduled stop keeps sources active until the handoff time[32m 0[2mms[22m[39m
+     [32m✓[39m counts sources that ended naturally as inactive[32m 0[2mms[22m[39m
+     [32m✓[39m creates a video trackGain and plays video-track clips through it[32m 0[2mms[22m[39m
+     [32m✓[39m keeps a muted video clip scheduled with track gain 0[32m 0[2mms[22m[39m
+     [32m✓[39m solo on the video lane silences audio lanes and vice versa[32m 0[2mms[22m[39m
+     [32m✓[39m appendPlan schedules a loop iteration on the same track gains and releases ended sources[32m 1[2mms[22m[39m
+     [32m✓[39m skips clips without a loaded buffer[32m 0[2mms[22m[39m
+     [32m✓[39m renderArrangementWav uses the same applySchedule as live playback[32m 0[2mms[22m[39m
+     [32m✓[39m RC1 stops only the replaced clip at startAt and starts one new source[32m 2[2mms[22m[39m
+     [32m✓[39m RC2 a sounding clip resumes at the same source offset[32m 1[2mms[22m[39m
+     [32m✓[39m RC3 a clip that has not started yet is stopped and rescheduled[32m 0[2mms[22m[39m
+     [32m✓[39m RC4 new fade shapes replace the old ones and an absent shape removes the fade[32m 1[2mms[22m[39m
+     [32m✓[39m RC5 only items whose clip id is replaced are started[32m 0[2mms[22m[39m
+     [32m✓[39m RC6 counts the replaced source until its stop and prunes ended states[32m 0[2mms[22m[39m
+     [32m✓[39m RC7 a replaced clip gain is the new target for later gain changes[32m 0[2mms[22m[39m
+     [32m✓[39m RC8 a disconnected handle ignores a replace[32m 0[2mms[22m[39m
+     [32m✓[39m RC9 a later appendPlan uses the replaced fade shape[32m 1[2mms[22m[39m
+     [32m✓[39m RC10 a repeated replace pulls a later stop forward and keeps an earlier one[32m 1[2mms[22m[39m
+     [32m✓[39m RC11 new envelope shapes replace the old ones and an absent shape removes the envelope[32m 1[2mms[22m[39m
+[31m     [31m×[31m RC12 a later stop(when) never moves a stop set by a replace[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m RC13 stop(when) moves clip and click stops earlier only[39m[32m 2[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/metronome.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/graph.test.ts[2m > [22mreplaceClips[2m > [22mRC12 a later stop(when) never moves a stop set by a replace
+[31m[1mAssertionError[22m: expected [ 3, 3.5 ] to deeply equal [ 3 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    3,[22m
+[31m+   3.5,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/graph.test.ts:[2m727:24[22m[39m
+    [90m725| [39m    handle[33m.[39m[34mstop[39m([34m3.5[39m)[33m;[39m
+    [90m726| [39m    [35mconst[39m [oldB[33m,[39m newB] [33m=[39m [34msourcesOf[39m(ctx[33m,[39m [32m'src-b'[39m)[33m;[39m
+    [90m727| [39m    [34mexpect[39m(oldB[33m.[39mstops)[33m.[39m[34mtoEqual[39m([[34m3[39m])[33m;[39m
+    [90m   | [39m                       [31m^[39m
+    [90m728| [39m    [34mexpect[39m(newB[33m.[39mstops)[33m.[39m[34mtoEqual[39m([[34m3.5[39m])[33m;[39m
+    [90m729| [39m    [35mfor[39m ([35mconst[39m id [35mof[39m [[32m'src-a'[39m[33m,[39m [32m'src-c'[39m]) {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/graph.test.ts[2m > [22mreplaceClips[2m > [22mRC13 stop(when) moves clip and click stops earlier only
+[31m[1mAssertionError[22m: expected [ 3, 3.5 ] to deeply equal [ 3 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    3,[22m
+[31m+   3.5,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/graph.test.ts:[2m761:28[22m[39m
+    [90m759| [39m    handle[33m.[39m[34mstop[39m([34m3.5[39m)[33m;[39m
+    [90m760| [39m    [35mfor[39m ([35mconst[39m source [35mof[39m ctx[33m.[39msources) {
+    [90m761| [39m      [34mexpect[39m(source[33m.[39mstops)[33m.[39m[34mtoEqual[39m([[34m3[39m])[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m762| [39m    }
+    [90m763| [39m    ctx[33m.[39mcurrentTime [33m=[39m [34m2.95[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m41 passed[39m[22m[90m (43)[39m
+[2m   Start at [22m 02:57:16
+[2m   Duration [22m 1.00s[2m (transform 565ms, setup 0ms, import 677ms, tests 53ms, environment 917ms)[22m
+
+
+::error file=/home/runner/czaba-project/tmp/a308-scratch/app/lib/arrangement/__tests__/graph.test.ts,title=app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC12 a later stop(when) never moves a stop set by a replace,line=727,column=24::AssertionError: expected [ 3, 3.5 ] to deeply equal [ 3 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    3,%0A+   3.5,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/graph.test.ts:727:24%0A%0A
+
+::error file=/home/runner/czaba-project/tmp/a308-scratch/app/lib/arrangement/__tests__/graph.test.ts,title=app/lib/arrangement/__tests__/graph.test.ts > replaceClips > RC13 stop(when) moves clip and click stops earlier only,line=761,column=28::AssertionError: expected [ 3, 3.5 ] to deeply equal [ 3 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    3,%0A+   3.5,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/graph.test.ts:761:28%0A%0A

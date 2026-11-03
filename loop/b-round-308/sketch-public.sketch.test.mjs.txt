@@ -1,0 +1,94 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
+import proxy from './r2-proxy.js';
+import alternate from '../cloudflare/r2-worker.js';
+
+const BYTES = new Uint8Array(100).map((_, i) => i);
+const ETAG = '"etag-1"';
+const secret = 'unit-test-secret';
+function studioToken(files) {
+  const payload = { version: 2, purpose: 'studio', productHandle: 'mall', userId: 'buyer', expiresAt: Date.now() + 600000, resourceKeys: files.map((f) => `mall/Studio-Assets/${f}`) };
+  const data = JSON.stringify([2, 'studio', 'mall', 'buyer', payload.expiresAt, payload.resourceKeys]);
+  payload.signature = createHmac('sha256', secret).update(data).digest('base64');
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
+}
+for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+  async function publicRequest(path, { method = 'GET', headers = {}, missing = false } = {}) {
+    const reads = []; const heads = [];
+    const env = { TOKEN_SECRET: secret, R2_BUCKET: {
+      head: async (key) => { heads.push(key); return missing ? null : { size: BYTES.length, httpEtag: ETAG }; },
+      get: async (key, options) => {
+        reads.push({ key, range: options?.range ?? null });
+        if (missing) return null;
+        const r = options?.range; const slice = r ? BYTES.slice(r.offset, r.offset + r.length) : BYTES;
+        if (r && (r.offset >= BYTES.length)) throw new Error('R2 invalid range');
+        return { body: slice, size: BYTES.length, httpEtag: ETAG, range: r };
+      } } };
+    const response = await worker.fetch(new Request(`https://r2.example/${path}`, { method, headers }), env);
+    const body = response.body ? new Uint8Array(await response.arrayBuffer()) : null;
+    return { response, body, reads, heads };
+  }
+  test(`${name}: PR1 preview 200 carries ETag and exposes headers`, async () => {
+    const { response, body } = await publicRequest('preview/mall/a.wav');
+    assert.equal(response.status, 200); assert.equal(response.headers.get('ETag'), ETAG);
+    assert.equal(response.headers.get('Cache-Control'), 'public, max-age=86400');
+    assert.equal(response.headers.get('Content-Length'), '100'); assert.equal(body.length, 100);
+    assert.equal(response.headers.get('Access-Control-Expose-Headers'), 'ETag, Content-Range, Accept-Ranges, Content-Length');
+  });
+  test(`${name}: PR2 matching If-None-Match gives 304 without a body read`, async () => {
+    for (const inm of [ETAG, `W/${ETAG}`, '"x", ' + ETAG, '*']) {
+      const { response, body, reads } = await publicRequest('preview/mall/a.wav', { headers: { 'If-None-Match': inm, Range: 'bytes=0-9' } });
+      assert.equal(response.status, 304, inm); assert.equal(body, null); assert.equal(reads.length, 0);
+      assert.equal(response.headers.get('ETag'), ETAG); assert.equal(response.headers.get('Content-Length'), null);
+      assert.equal(response.headers.get('Content-Type'), null); assert.equal(response.headers.get('Access-Control-Allow-Origin'), '*');
+    }
+    assert.equal((await publicRequest('preview/mall/a.wav', { headers: { 'If-None-Match': '"other"' } })).response.status, 200);
+  });
+  test(`${name}: PR3 single range gives 206 with Content-Range`, async () => {
+    const cases = [['bytes=10-19', 'bytes 10-19/100', 10, 10], ['bytes=90-', 'bytes 90-99/100', 90, 10], ['bytes=-5', 'bytes 95-99/100', 95, 5], ['bytes=95-500', 'bytes 95-99/100', 95, 5]];
+    for (const [range, cr, first, len] of cases) {
+      const { response, body } = await publicRequest('preview/mall/a.wav', { headers: { Range: range } });
+      assert.equal(response.status, 206, range); assert.equal(response.headers.get('Content-Range'), cr);
+      assert.equal(response.headers.get('Content-Length'), String(len)); assert.equal(body.length, len); assert.equal(body[0], first);
+    }
+  });
+  test(`${name}: PR4 unsatisfiable range gives 416 before any R2 read`, async () => {
+    for (const range of ['bytes=100-', 'bytes=500-600', 'bytes=-0']) {
+      const { response, reads } = await publicRequest('preview/mall/a.wav', { headers: { Range: range } });
+      assert.equal(response.status, 416, range); assert.equal(response.headers.get('Content-Range'), 'bytes */100'); assert.equal(reads.length, 0);
+    }
+  });
+  test(`${name}: PR5 invalid or multi range and If-Range mismatch give the full 200`, async () => {
+    for (const headers of [{ Range: 'bytes=5-2' }, { Range: 'bytes=0-1,5-6' }, { Range: 'items=0-1' }, { Range: 'bytes=0-9', 'If-Range': '"other"' }, { Range: 'bytes=0-9', 'If-Range': `W/${ETAG}` }]) {
+      const { response, body } = await publicRequest('preview/mall/a.wav', { headers });
+      assert.equal(response.status, 200, JSON.stringify(headers)); assert.equal(body.length, 100); assert.equal(response.headers.get('Content-Range'), null);
+    }
+    assert.equal((await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=0-9', 'If-Range': ETAG } })).response.status, 206);
+  });
+  test(`${name}: PR6 HEAD reads no body`, async () => {
+    const full = await publicRequest('preview/mall/a.wav', { method: 'HEAD' });
+    assert.equal(full.response.status, 200); assert.equal(full.response.headers.get('Content-Length'), '100'); assert.equal(full.reads.length, 0);
+    const part = await publicRequest('preview/mall/a.wav', { method: 'HEAD', headers: { Range: 'bytes=0-9' } });
+    assert.equal(part.response.status, 206); assert.equal(part.response.headers.get('Content-Length'), '10'); assert.equal(part.reads.length, 0);
+  });
+  test(`${name}: PR7 missing preview keeps its 404 text`, async () => {
+    const { response, body } = await publicRequest('preview/mall/none.wav', { missing: true });
+    assert.equal(response.status, 404); assert.equal(new TextDecoder().decode(body), 'File Not Found: mall/Preview/none.wav');
+  });
+  test(`${name}: PR8 studio stays private no-store and ignores If-None-Match`, async () => {
+    const token = studioToken(['a.wav']);
+    const ok = await publicRequest(`studio/mall/a.wav?token=${encodeURIComponent(token)}`, { headers: { 'If-None-Match': ETAG } });
+    assert.equal(ok.response.status, 200); assert.equal(ok.response.headers.get('Cache-Control'), 'private, no-store'); assert.equal(ok.response.headers.get('ETag'), null); assert.equal(ok.heads.length, 0);
+    const bad = await publicRequest('studio/mall/a.wav?token=bad', { headers: { 'If-None-Match': ETAG } });
+    assert.equal(bad.response.status, 401); assert.equal(bad.reads.length + bad.heads.length, 0);
+  });
+  if (name === 'proxy') test(`${name}: PR9 cover image ETag and 304, 404 text kept, no range`, async () => {
+    const first = await publicRequest('mall/cover.jpg');
+    assert.equal(first.response.status, 200); assert.equal(first.response.headers.get('ETag'), ETAG); assert.equal(first.response.headers.get('Cache-Control'), 'public, max-age=604800');
+    assert.equal((await publicRequest('mall/cover.jpg', { headers: { 'If-None-Match': ETAG } })).response.status, 304);
+    assert.equal((await publicRequest('mall/cover.jpg', { headers: { Range: 'bytes=0-9' } })).response.status, 200);
+    const missing = await publicRequest('mall/cover.jpg', { missing: true });
+    assert.equal(missing.response.status, 404); assert.equal(new TextDecoder().decode(missing.body), 'Image Not Found');
+  });
+}

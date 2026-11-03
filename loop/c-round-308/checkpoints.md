@@ -1,0 +1,11 @@
+# C round 308 checkpoints
+- [x] orientation (current-task, a-round-308, lessons L38/L52/L57)
+- [x] SOURCE-SCOPE: 3 M paths, 0 new; sha -c fails on exactly those 3; ArrangementContext/reschedule/metronome.test no diff; graph.test.ts 0 removed expect(, 0 removed it(, first hunk after l.399 (inside describe replaceClips)
+- [x] CLAIMS: claims-output.txt == a-round-308/claims-after.txt; deltas vs HEAD only K2/K5/K6/K7/K9/K10/K11/K18 as specified; 0 s
+- [x] TESTS-READ: RC12/RC13 read; covering 12 files 211 green (covering.log); A mutant logs red as listed
+- [x] DOC: l.4 exact, 7 headings in order, TODO list complete
+- [x] prod build of A tree in /tmp/c308/s (build.log), served :5190
+- [x] CONT-1 6/6 valid, no click (cont-1.json)
+- [x] CONT-30 6/6 valid, starts 30, no click (cont-30.json); INFO identical `when` across runs
+- [x] ENDED, NO-CHANGE (both vp), PLAY-SMOKE-308 (both vp), G308-AUTH (attempt 2, both vp); posctl experiment inconclusive (INFO)
+- [x] report + json written; store tree unchanged by C (3 A paths)

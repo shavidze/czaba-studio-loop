@@ -1,0 +1,90 @@
+{
+ "round": 308,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T03:03:08.3060133Z",
+  "round": 308,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CONT-1",
+  "CONT-30",
+  "ENDED",
+  "NO-CHANGE",
+  "PLAY-SMOKE-308",
+  "G308-AUTH",
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "TESTS-READ",
+  "DOC"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "rows": {
+  "CONT-1": "PASS: production build of A's tree (C scratch /tmp/c308/s, served on :5190, warmed); 1440 3/3 and 1280 3/3 valid runs with clips 1 and starts 1; spliceMaxDiff 0.0013-0.0015 < baseP999 0.003537 in every run; |at| 45-408 samples; zeroRun 0; RMS ratio 0.78-1.07; no click. 0 invalid runs. c-round-308/cont-1.json",
+  "CONT-30": "PASS: same build; 6/6 valid runs, clips 30, starts 30; spliceMaxDiff 0.0014-0.0015 < baseP999 0.003537; |at| 45-246; zeroRun 0; RMS ratio 0.90-1.07; no click. c-round-308/cont-30.json (see INFO-C308-SAME-WHEN)",
+  "ENDED": "PASS: stopBeforeStart 0.311 (ended fired), stopTwiceLaterWins 0.908 >= 0.85, secondStopThrew false (HeadlessChrome 143). c-round-308/onended-probe.json",
+  "NO-CHANGE": "PASS: release-probe.cjs on :5190 at 1440x900 and 1280x720 once each; clips 30, playingAtStart true, 12/12 releases starts 30, playing true, loafMax 0, posAfter > posBefore in all, Event Timing max 32 ms; same class as c-round-307/probe/a-1440.json/a-1280.json. c-round-308/nc-1440.json, nc-1280.json",
+  "PLAY-SMOKE-308": "PASS both viewports on the dev server :5173: Bass added via Enter; position 00:01.471/00:01.483 after 1.5 s; fade-in drag while playing committed 0.000->3.000; data-playing true after the edit; position advancing (2.731->3.442->4.562); 1 live start 2-9 ms after pointerup with a 0.05 s lead; tap RMS 0.04-0.12 before and 0.05-0.10 after; Stop then WAV export RIFF/WAVE PCM 24-bit stereo 48000 Hz, 768000 frames = 16.000 s, peak 0.217, NaN 0, nonzero 99.99 %, fade-in ramp visible in the first 2 s RMS (0.0027->0.0483). c-round-308/smoke308.json",
+  "G308-AUTH": "PASS both viewports (attempt 2; attempt 1 was a cold-compile timeout on /studio/middle-east, environment, kept as g308-auth-attempt1-cold.log, route warmed then rerun): fresh anonymous context; /studio-lab workspace + demo badge with auth_user null; /studio/middle-east shows Sign in required, 0 audio[src], no workspace; /api/studio-token with no header 401, fake bearer 500, bare 400, no token in any body. c-round-308/g308-auth.json",
+  "SOURCE-SCOPE": "PASS: git status shows exactly 3 M paths (graph.client.ts, graph.test.ts, doc 224), none new; sha256sum -c fails only on those 3; ArrangementContext.tsx, reschedule.ts, metronome.test.ts and the protected files have no diff; graph.test.ts: first hunk at l.399 inside describe('replaceClips'), 0 removed expect( lines, 0 removed it( rows; graph.client.ts diff limited to section 4.1 (both loops), 4.2 (required fields + dropped ?.) and 4.3 (TODO line, 89 chars)",
+  "CLAIMS": "PASS: claims-308.sh output identical to a-round-308/claims-after.txt; deltas vs HEAD only K2 '3 d8e5ce5', K5 empty (new guard present 2x), K6 clipFades/clipEnvelopes required, clipGains? unchanged (line 91->92 because of the TODO), K7 418 443 (moved by content), K9 '397 0 19', K10 '13 2', K11 Completed (C round 308 PASS), K18 '1 0'; all other K equal HEAD",
+  "TESTS-READ": "PASS: RC12 and RC13 follow section 6 (startFixture leaves the clock at 2.9; RC13 asserts >= 1 click source and the [3] then [3, undefined] stops); the covering set (12 files, 211 tests) re-run green by C (c-round-308/covering.log; max file 7.8 s fader-pointer-preview); A's mutant logs: MU-CLIP-STOP-LATER red RC12+RC13, MU-CLICK-STOP-LATER red RC13, MU-STOP-ONCE red RC13+M10, restored 43/43 green",
+  "DOC": "PASS: doc 224 l.4 byte-exact '**სტატუსი:** Completed (C round 308 PASS)'; TEMPLATE's 7 headings in order; contains B's section 0 numbers with files, the close decision and its condition, the not-measured inferences, the stop guard with RC12/RC13 and the mutants, and the TODO list (old full-rebuild list, replace-splice probe, gainDb F4, ended Firefox/Safari, source registry); every cited loop path exists (C test -e)"
+ },
+ "findings": [
+  {
+   "id": "INFO-C308-SAME-WHEN",
+   "severity": "info",
+   "origin": "B spec",
+   "detail": "the release lands on ms-quantized AudioContext times, so runs repeat splice positions (CONT-1: 4 distinct `when` values in 6 runs; CONT-30: 2 distinct values, 5 of 6 runs identical in every reported field incl. contiguity [-2967, 550.8] ms at when 2.9902). The first run of each set differs, so nothing is replayed from disk; the identical runs fit a deterministic headless audio sink rendering the same stem at the same splice position, but the probe saves no raw captures, so C cannot exclude a stale capture after the fact. B's own runs show the same pattern (5/6 at 2.9815). Not a FAIL (validity rule met, the PASS is defined by the click rule). For the future replace-splice probe: add a random pre-release delay and save the raw captures"
+  },
+  {
+   "id": "INFO-C308-POSCTL-INCONCLUSIVE",
+   "severity": "info",
+   "origin": "environment",
+   "detail": "C experiment outside the rows: a positive control (a hard Stop during playback through the same tap, c-round-308/posctl-probe.cjs) could not show the click rule's sensitivity, because Stop disconnects the tapped nodes and the capture ends at the stop (splicedInCapture false, contiguous span [-2569, 0] ms). The probe's ability to flag a real splice discontinuity therefore remains unproven in the browser; the CONT PASS rests on the rule as B specified it. A future replace-splice probe (doc 224 TODO) should include a positive control, e.g. a deliberately unfaded restart"
+  },
+  {
+   "id": "INFO-C308-COLD-DEV",
+   "severity": "info",
+   "origin": "environment",
+   "detail": "two cold-compile timeouts on the dev server, both before any measurement: the first /studio-lab warm-up (120 s) and G308-AUTH attempt 1 on /studio/middle-east (60 s). Each route was warmed, then the row ran valid. Same as INFO-C307-COLD-DEV"
+  }
+ ],
+ "notesForB": [
+  "PERF-COMMIT-RESCHEDULE may close on evidence (D-29z817): C reproduced B's continuity numbers on a production build, with no click at 1 or 30 clips and no invalid runs.",
+  "A's code-reviewer Low (a past `when` re-stops a state) is accepted by A and is unreachable today; B may adopt the Math.max bound before any replaceClips caller (doc 224 TODO).",
+  "root-pre-push-review.md and publication-checkpoint.json were read (headings and open-item grep): their remaining findings are historical (rounds 37-65 checkpoints, Lows already routed to B) and none concerns this round's 3 paths; no new item to carry"
+ ],
+ "manifestPaths": [
+  "tmp/studio-real-loop/b-round-306/consults.md",
+  "tmp/studio-real-loop/b-round-306/probe/release-probe.cjs",
+  "tmp/studio-real-loop/b-round-307/probe/continuity-probe.cjs",
+  "tmp/studio-real-loop/b-round-307/probe/continuity-head-dev.json",
+  "tmp/studio-real-loop/b-round-307/probe/continuity-head-dev-30.json",
+  "tmp/studio-real-loop/b-round-307/probe/onended-probe.json",
+  "tmp/studio-real-loop/a-round-307/mut-*.log|diff",
+  "tmp/studio-real-loop/a-round-308/mutant-*.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 0,
+ "assertsSpecified": 2,
+ "mutantsRecorded": 3,
+ "mutantRedOnSketch": 0,
+ "mutantRedOnSketchNote": "B ran no sketch this round (task section 2), so no mutant could be red on a sketch",
+ "evidence": "tmp/studio-real-loop/c-round-308/ (cont-1.json, cont-30.json, onended-probe.json, nc-1440.json, nc-1280.json, smoke308.json, g308-auth.json, covering.log, build.log, claims-output.txt, checkpoints.md, posctl.json)",
+ "sideEffects": "no app source change by C; production build only in /tmp/c308/s (copy); :5190 server stopped before the dev-server rows; browser state limited to fresh demo contexts"
+}

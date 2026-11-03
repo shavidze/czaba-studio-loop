@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T02:29:42.896Z)
+# Active loop summary (2026-11-03T03:24:05.517Z)
 
-- backlog.json 2966 KB -> active view 404 KB
-- status: G_ROOT_GATE round 307
-- servers: `{"checkedUtc":"2026-11-03T02:12:38.1635745Z","round":307,"attempt":1,"store":200}`
-- last publication: d8e5ce52adaadffdb09bf2f01b0499c9298b9cbb (rounds 307-307)
-- last root gate: round 307 published - commit d8e5ce52adaadffdb09bf2f01b0499c9298b9cbb pushed
+- backlog.json 2976 KB -> active view 406 KB
+- status: G_ROOT_GATE round 308
+- servers: `{"checkedUtc":"2026-11-03T03:03:08.3060133Z","round":308,"attempt":1,"store":200}`
+- last publication: 738df737a56529a5b18e2ef915b9171c596e59ee (rounds 308-308)
+- last root gate: round 308 published - commit 738df737a56529a5b18e2ef915b9171c596e59ee pushed
 
 ## Current items: -
 
@@ -746,6 +746,10 @@
 - GATE306-ARCH-TIMELINE-WINDOW / info / signal (D-29z812): on the end-of-STUDIO-PERFORMANCE checkpoint list (D-29z811) and question 3 of b-round-306-checkpoint-request.md (D-29z815); not scheduled / timeline window contract passed in two shapes (lane object, ruler callbacks); proposal TimelineWindowProvider + useTimelineSpanInWindow, Rul
 - PERF-3D-SCROLL-HARNESS-ROW / info / candidate (D-29z812), not scheduled / perf harness row for lazy waveform upgrades on manual scroll and on playback Follow page flips
 - PERF-3D-VERTICAL-GATE / info / signal, not scheduled / waveform window gating is horizontal only; all lanes count as vertically visible
+- GATE307-F1-STOP-LATER / low / scheduled round 308 (D-29z818, RC12/RC13) / stop(when) can move a stop set by replaceClips later (Chromium: later stop wins, b-round-307/probe/onended-probe.json); no caller today
+- GATE307-F3-SPLICE-CONTINUITY / info / answered for today runtime by CONT rows (round 308); replace-splice probe in doc 224 TODO for any future caller / splice continuity needs stop/start in one batch; probe the sounding-clip case
+- GATE307-F4-GAINDB-TWICE / info / moot without wiring (D-29z817); doc 224 TODO / gainDb exclusion rule written in reschedule.ts and scheduleKey
+- GATE307-F5-SHAPES-OPTIONAL / low / scheduled round 308 (required fields, D-29z818) / ReplaceClipShapes optional fade/envelope maps delete on {}
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
