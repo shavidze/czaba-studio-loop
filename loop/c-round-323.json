@@ -1,0 +1,104 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T22:37:32.1579514Z",
+  "round": 323,
+  "attempt": 1,
+  "store": 200
+ },
+ "aStatus": "STOP — needs B ruling (render-budget.test.tsx R11-P1e l.467, broken by the §2 ruling-1 memo of ArrangementDetailPanelWithSelection)",
+ "bugs": [
+  {
+   "id": "C-R323-01",
+   "origin": "B spec (L58 grep covered only R9-L2; the §2 memo was not re-checked against consumer-count positive controls) / A STOP",
+   "severity": "medium",
+   "steps": [
+    "Scratch copy of A's tree at /tmp/c323/atree (node_modules symlinked)",
+    "npx vitest run app/lib/arrangement/__tests__/render-budget.test.tsx"
+   ],
+   "expected": "All A-UNIT files pass with no assertion removed; PERF-8b deliverables complete (SS1–SS7 file, 4 mutants, §2.5 harness rows K19 ≥ 5, docs 168/230/231 with K33 2, A-PERF, A-REVIEW)",
+   "actual": "render-budget 7/8: R11-P1e l.467 expect(counts.get('ArrangementDetailPanel')).toBeGreaterThan(0) fails ('expected 0 to be greater than 0') because the memoised detail wrapper no longer re-renders on Play→Stop→Play. Outside the §1 grant, so A stopped. A's option (a) (positive control → ArrangementTransport > 0, plus ArrangementDetailPanel toBe(0)) on C's scratch copy: 8/8, expect( 92, none removed; un-memo mutant red at the new l.468 ('expected 3 to be +0'). Deliverables still missing: SS file, mutants, harness rows (K19 0), docs (K13 lists doc 230, K33 0), A-PERF, review",
+   "evidence": "tmp/studio-real-loop/c-round-323/render-budget-atree.log, option-a-c.log, option-a-mutant-nomemo-c.log, claims-c.txt; a-round-323.md §1, c-round-323/unit-c.log (C's own 111-file run: 110/111 files, 1704/1705 tests, only l.467 fails)"
+  },
+  {
+   "id": "C-R323-02",
+   "origin": "B spec / A (test gap, memo added by §2 ruling 1 without a pinning test)",
+   "severity": "low",
+   "steps": [
+    "Scratch /tmp/c323/atree: replace 'const ArrangementGroupHeaderWithSelection = memo(ArrangementGroupHeaderWithSelectionInner);' with 'const ArrangementGroupHeaderWithSelection = ArrangementGroupHeaderWithSelectionInner;'",
+    "npx vitest run render-budget.test.tsx (with option (a) applied) + the 8 files in c-mutant-group-files.txt"
+   ],
+   "expected": "At least one test turns red when the group-header memo is removed (L52: a mutant that can fail)",
+   "actual": "9/9 files, 110/110 tests green with the memo removed; nothing pins the ArrangementGroupHeaderWithSelection memo",
+   "evidence": "tmp/studio-real-loop/c-round-323/c-mutant-group-nomemo.log, c-mutant-group-files.txt. Note: render-budget.test.tsx in this run had A's option (a) applied deliberately (A's version is red at l.467 regardless and would mask the result)"
+  }
+ ],
+ "info": [
+  "INFO-C322-SHIFT resolved: Shift+click adds a clip on HEAD and A, same-lane (c8, locator modifiers Shift → 3 selected) and cross-lane (c4, keyboard.down Shift → 2 selected). Cause of round 322's non-add unexplained (hypothesis only: third clip off-screen at ~202 s; 322 did not record visibility). Drop the C-R322-SHIFT-ADD candidate",
+  "INFO-C323-S-GROUP-PREMISE: S-GROUP is partly vacuous as written. At gs1 the click on an already-selected Music clip keeps the 3-clip selection, and folding clears the clip selection on both trees, so the folded-overview screenshot never contains a selected clip. The byte-identical PNGs are valid HEAD-vs-A evidence, but B should redefine or drop the row. 'Fold clears clip selection' is a pre-existing candidate for the REGRESSION round, not A's",
+  "INFO-C322-ESC: Esc does not clear a 3-clip selection on HEAD; A equals HEAD (K36 0). Not a finding",
+  "Folding a group clears the clip selection on both trees (pre-existing, gs2/gs3); see INFO-C323-S-GROUP-PREMISE",
+  "DUP-NAMES: Ctrl+D edit commit HEAD 110 vs A 112; added names only ArrangementDetailPanelWithSelectionInner and ArrangementSelectedClipReadoutInner, once each (within the §2 tolerance)"
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "G323-AUTH"
+ ],
+ "provisional_on_stopped_tree": [
+  "DUP-NAMES",
+  "SELECT-NAMES §3 clause (HEAD 2 commits 92/0, A 1 commit 0 components, providerRendered false)",
+  "S2-VIDEO (HEAD 2, A 0)",
+  "S-CLICK (2 lanes)",
+  "S-EDIT",
+  "S-DETAIL",
+  "S-TRANSPORT",
+  "S-RANGE",
+  "S-GROUP (byte-identical PNGs both viewports)",
+  "project WAV export byte-identical HEAD vs A both viewports",
+  "EXPECT (29 list files TOTAL 4021 = HEAD, every file equal; render-budget 88→91 by K28, no line removed)"
+ ],
+ "failed": [
+  "CLAIMS (K19 0 < 5; K13 still lists doc 230; K33 0 ≠ 2)",
+  "UNIT (C's own 111-file run: 110/111 files, 1704/1705 tests; render-budget R11-P1e l.467 red; SS file and 4 mutants absent)"
+ ],
+ "blocked": [
+  "A STOP — needs B ruling on render-budget.test.tsx R11-P1e; C does not mark rows of a stopped tree as passed",
+  "PERF-SELECT: §2.5 harness scenario and rows absent (K19 0)",
+  "PERF-LOAD: not run; A-PERF absent, tree not final",
+  "SELECT-NAMES mutant MU-SELECTION-IN-VALUE and the 4 UNIT mutants: A wrote no mutant set / SS file"
+ ],
+ "gate": [
+  "full vitest",
+  "build in store/",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "manifestPaths": [
+  "a-round-323/claims-before.txt",
+  "a-round-323/claims-after-stop.txt",
+  "a-round-323/a-unit-stop.log",
+  "a-round-323/option-a-r11p1e.patch.txt",
+  "a-round-323/option-a-scratch.log",
+  "a-round-323/option-a-mutant-nomemo.log",
+  "a-round-323/library-preview.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 7,
+ "mutantsRecorded": 4,
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "B built a type-only sketch; mutants not run on a B sketch (D-29z893)",
+ "mutantRedOnTree": null,
+ "mutantRedOnTreeReason": "A's 4 mutants not written (STOP). C ran 2 mutants on A's tree: un-memo detail wrapper with option (a) → red at l.468; un-memo group header → green (C-R323-02)",
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 2,
+ "chainHeadGateRunGreen": null,
+ "chainHeadGateRunGreenReason": "chain 322→323: gate 322 skipped on C FAIL; no gate ran on the chain head yet",
+ "abletonConformance": "not applicable",
+ "browserVerifiedReason": "PERF-SELECT and PERF-LOAD could not run (no harness rows, A STOP); all other browser rows ran at both viewports"
+}

@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T22:10:09.795Z)
+# Active loop summary (2026-11-03T23:06:39.581Z)
 
-- backlog.json 3119 KB -> active view 424 KB
-- status: G_ROOT_GATE round 322
-- servers: `{"checkedUtc":"2026-11-03T21:23:39.5873950Z","round":322,"attempt":1,"store":200}`
+- backlog.json 3126 KB -> active view 423 KB
+- status: G_ROOT_GATE round 323
+- servers: `{"checkedUtc":"2026-11-03T22:37:32.1579514Z","round":323,"attempt":1,"store":200}`
 - last publication: 53c5c79676e41c951f651f89e5be2fc24cf89112 (rounds 318-320)
-- last root gate: round 322 skipped - C taskStatus FAIL
+- last root gate: round 323 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -786,9 +786,8 @@
 - GATE320-S2-POST-AWAIT-ORDER / low (provisional) / open_low_provisional (D-29z892): HEAD probe b-round-321/s2-video-head.json shows the mechanism in the DOM (2 commits, range cleared + old selection, ~8 ms) with 0 rAF frames observed; PERF-8b S2-VIDEO row on A tree must show 0 mixed commits, else Medium | open_low_provisional (D-29z881): tech-lead: mechanism real (add-video path), final state correct; Medium only if the intermediate frame paints or an effect fires on it. PERF-8b carries a browser experiment row (per-commit logger + rAF marker; control unstable_batchedUpdates on scratch) / setRange(null) now runs before setSelectedClipId/setSelection; after an await (add video, library clip load) the store write commits at Sync
 - GATE320-S3-ALL-LANES-DRAG / info / scheduled (D-29z881): record row in PERF-10 (required_rows_d29z880) / all-tracks drag re-renders every lane per move; not covered by an asserted row
 - GATE320-S6-TWO-STORE-PATTERNS / info / requested (D-29z887): ARCH-CHECKPOINT-PERF8-STORE-PATTERN / zustand range store next to hand-written useSyncExternalStore stores
-- C-R321-01 / low / open (D-29z890): corrected in retros/retro-321.md at round 322 planning; closes on the round-322 RT-FIX row PASS / retro-321.md section 9 said all 16 rounds name asserts (7-18); source: 15 of 16 (305 null), range 1-19
-- C-R321-02 / low / open (D-29z890): corrected in retros/retro-321.md at round 322 planning; closes on the round-322 RT-FIX row PASS / RETRO 320/321 inventory regex missed D-29z801 ('RETRO round 320'); no section 8 disposition
-- C-R321-03 / low / open (D-29z890): corrected in retros/retro-321.md at round 322 planning; closes on the round-322 RT-FIX row PASS / retro-321.md section 4 '7 + 2' mixed open focus with open keyboard (should be 9 + 2)
+- C-R322-01 / medium / open (D-29z897): option (a) granted in round 323; closes on round-323 UNIT PASS / render-budget.test.tsx positive control (selectClip -> value changes, every consumer renders) contradicts PERF-8b; not covered by the 2.4 ex
+- C-R322-02 / low / open (D-29z898): reworded in round 323; closes on SELECT-NAMES PASS / SELECT-NAMES 'click-original-again has 0 commits' cannot pass on any tree (HEAD has a trailing empty commit)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
