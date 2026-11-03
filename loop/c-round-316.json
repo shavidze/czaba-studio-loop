@@ -1,0 +1,83 @@
+{
+ "round": 316,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T13:30:12.5175824Z",
+  "round": 316,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R316-01",
+   "severity": "medium",
+   "origin": "B pre-check / B spec (fonts-src fetched Playfair via Google's /l/font?kit= endpoint)",
+   "steps": [
+    "Load / on the HEAD c136dfd prod build in Chromium; log the gstatic URLs: Playfair = /s/playfairdisplay/v40/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgA.woff2 (38,404 B)",
+    "cmp that file with app/assets/fonts/playfair-display-latin.woff2 (39,172 B): different",
+    "Fetch the 3 HEAD Google CSS URLs with a Chrome UA, map the faces through fonts-src/manifest.json, cmp: 21/25 identical, 4/25 (all Playfair) differ",
+    "Download manifest kit URL /l/font?kit=... for playfair-display-latin: byte-identical to the mirror (root cause)",
+    "Screenshot /store HEAD x2 and A (reducedMotion, fonts.ready + 3 s): HEAD vs HEAD 0 px; HEAD vs A 2,015 px on the Playfair heading at 1440 and 1280"
+   ],
+   "expected": "Every mirrored woff2 is byte-identical to the file browsers receive from Google at HEAD; /store pixel-equal to HEAD outside regions that differ in the HEAD-vs-HEAD control",
+   "actual": "4 Playfair files (latin, latin-ext, cyrillic, vietnamese) are Google's kit variants (400-700 axis instance, different rasterization at 500-700: max alpha diff 62/255); /store heading differs by 2,015 px; FN3 pins the wrong sha256; FN3's test name, doc 229 (title, l.24, l.54) and the notices claim byte-identity/unmodified-as-served",
+   "evidence": "tmp/studio-real-loop/c-round-316/byte-identity-all.txt, gfonts-dl/, playfair-compare.json, pxdiff.txt, store-heading-crop-head1-a-head2.png"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "SKETCH-EQUAL",
+  "UNIT",
+  "FONT-NET",
+  "FONT-PRELOAD",
+  "FONT-CACHE",
+  "FONT-GLYPHS",
+  "FCP",
+  "PERF-LOAD",
+  "NOTICES",
+  "DOC",
+  "G316-AUTH"
+ ],
+ "failed": [
+  "FONT-PIXEL"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build (store/)",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "observations": [
+  "/ home pixel row inconclusive: HEAD-vs-HEAD differs over the whole hero area (animation)",
+  "Which glyph pulls noto-sans-georgian-latin on /studio-lab not determined (no visible node renders in it; same at HEAD)",
+  "/studio-lab FCP-DCL (PERF-11-owned, report only): A 199 ms @1440, 149 ms @1280",
+  "perf warm-up script times out on 'collection ready' (pre-existing, same as round 315)",
+  "A-R316-REVIEW-P4 confirmed: 4 data:font/woff2 refs in fonts-*.css"
+ ],
+ "manifestPaths": [
+  "c-round-316.md",
+  "c-round-316.json",
+  "c-round-316/"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 0.02,
+ "assertsSpecified": 7,
+ "mutantsRecorded": 13,
+ "mutantRedOnSketch": 12,
+ "cOwnMutants": [
+  {
+   "id": "MU-C-FONTS-BEFORE-LAME",
+   "result": "red TL5 + TL10 (after LAME)"
+  }
+ ],
+ "abletonConformance": "not applicable (performance round, no reference behaviour)",
+ "notes": [
+  "DOC and NOTICES pass on structure and wording rows. Their content accuracy (the 'byte-identical' and 'unmodified as served' claims) is restored by the C-R316-01 byte fix alone; do not file a separate finding against the text."
+ ]
+}

@@ -1,0 +1,28 @@
+== A MU-NOTICES-DROP-FAMILY (drop Inter bullet)
+[31m     [31m×[31m TL5 renderThirdPartyNotices(real lock) matches the committed file[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m TL10 it names each family with its licence path, and each licence file exists[39m[32m 5[2mms[22m[39m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m app/lib/__tests__/third-party-licenses.test.ts[2m > [22mTL5 THIRD_PARTY_NOTICES.md is in sync with package-lock.json[2m > [22mTL5 renderThirdPartyNotices(real lock) matches the committed file
+[41m[1m FAIL [22m[49m app/lib/__tests__/third-party-licenses.test.ts[2m > [22mTL10 the fonts section on the real lock[2m > [22mTL10 it names each family with its licence path, and each licence file exists
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m68 passed[39m[22m[90m (70)[39m
+== C MU-C-FONTS-BEFORE-LAME (move fonts section before LAME in render order)
+export function renderThirdPartyNotices(
+  lock: unknown,
+  exceptions: readonly ThirdPartyLicenseException[] = THIRD_PARTY_LICENSE_EXCEPTIONS,
+): string {
+  const runtimePackages = listRuntimeLockPackages(lock);
+  const sections = [
+    NOTICES_INTRO_SECTION,
+    NOTICES_LAME_SECTION,
+    NOTICES_FONTS_SECTION,
+    renderMplSourcesSection(runtimePackages),
+    renderExceptionsSection(exceptions),
+    renderPackagesTable(runtimePackages, exceptions),
+  ];
+[31m     [31m×[31m TL5 renderThirdPartyNotices(real lock) matches the committed file[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m TL10 the section exists exactly once and comes after the LAME section[39m[32m 3[2mms[22m[39m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m68 passed[39m[22m[90m (70)[39m
+== restored
+[2m      Tests [22m [1m[32m70 passed[39m[22m[90m (70)[39m
+restored-equal

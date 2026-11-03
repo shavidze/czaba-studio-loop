@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T12:55:52.969Z)
+# Active loop summary (2026-11-03T13:53:39.345Z)
 
-- backlog.json 3049 KB -> active view 415 KB
-- status: G_ROOT_GATE round 315
-- servers: `{"checkedUtc":"2026-11-03T12:27:30.9881454Z","round":315,"attempt":1,"store":200}`
+- backlog.json 3065 KB -> active view 416 KB
+- status: G_ROOT_GATE round 316
+- servers: `{"checkedUtc":"2026-11-03T13:30:12.5175824Z","round":316,"attempt":1,"store":200}`
 - last publication: c136dfd83935d3939c83cd597ea34af388b1dd32 (rounds 315-315)
-- last root gate: round 315 published - commit c136dfd83935d3939c83cd597ea34af388b1dd32 pushed
+- last root gate: round 316 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -767,6 +767,8 @@
 - B-R314-EXPORT-LOADING-GATE / info / signal (D-29z849): revisit at SRW-21-PLAN / export has no gate for a collection source still 'loading'; its clip is silently omitted (not reachable in /studio-lab: no initial clips)
 - ARCH-R314-FENCE-FADER-WINDOW / info / signal, not scheduled (D-29z849): keep runPass/dragFader linear; if a fourth guard round comes, propose a bounded task folding the per-drag preconditions into one fenceFaderWindow helper with the same problem strings / perf harness per-drag preconditions accumulate in dragFader/runPass
 - A-R314-REVIEW-L2 / info / signal (D-29z849): harness detail; candidate for the next perf-spec round (record scrollWidth/clientWidth in the guard detail) / the timeline scroll guard cannot tell 'not scrollable' from 'did not scroll'
+- GATE315-S4 / info / signal (D-29z854): PERF-10 / SRW-21-PLAN; N collection sources ready during playback give N graph restarts (unreachable in /studio-lab: no initial clips); fix candidate: coalesce restarts per frame / N sources ready while playing -> N graph restarts
+- C-R315-VIDEO-END-NO-FADE / info / signal (D-29z854) -> T12-ADVANCED T12.13 micro fades; byte-identical at HEAD / a video's own sound is cut at the video duration with no fade (last samples ~0.50)
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video
