@@ -1,0 +1,10 @@
+--- cloudflare/r2-worker.js
++++ cloudflare/r2-worker.js (mutant)
+@@ -248,7 +248,6 @@
+   if (!object) return null;
+   if (object.httpEtag) headers.set('ETag', object.httpEtag);
+   if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+-    await releaseBody(object);
+     return new Response(null, { status: 304, headers });
+   }
+   headers.set('Content-Type', contentType);

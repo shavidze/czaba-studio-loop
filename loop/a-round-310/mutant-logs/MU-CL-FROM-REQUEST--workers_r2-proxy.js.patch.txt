@@ -1,0 +1,11 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -306,7 +306,7 @@
+   }
+   if (range) {
+     headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + object.size);
+-    headers.set('Content-Length', range.length.toString());
++    headers.set('Content-Length', String(spec.end === null || spec.end === undefined ? range.length : spec.end - spec.start + 1));
+     return new Response(isHead ? null : object.body, { status: 206, headers });
+   }
+   headers.set('Content-Length', object.size.toString());

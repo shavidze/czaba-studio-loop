@@ -1,0 +1,488 @@
+TAP version 13
+# Subtest: proxy: exact purchased file succeeds
+ok 1 - proxy: exact purchased file succeeds
+  ---
+  duration_ms: 32.893199
+  type: 'test'
+  ...
+# Subtest: proxy: denies token reuse at download/mall/premium.zip
+ok 2 - proxy: denies token reuse at download/mall/premium.zip
+  ---
+  duration_ms: 1.738797
+  type: 'test'
+  ...
+# Subtest: proxy: denies token reuse at studio/mall/standart.zip
+ok 3 - proxy: denies token reuse at studio/mall/standart.zip
+  ---
+  duration_ms: 1.252479
+  type: 'test'
+  ...
+# Subtest: proxy: denies token reuse at download/other/standart.zip
+ok 4 - proxy: denies token reuse at download/other/standart.zip
+  ---
+  duration_ms: 1.37075
+  type: 'test'
+  ...
+# Subtest: proxy: denies token reuse at download/mall/folder%2Fstandart.zip
+ok 5 - proxy: denies token reuse at download/mall/folder%2Fstandart.zip
+  ---
+  duration_ms: 1.937017
+  type: 'test'
+  ...
+# Subtest: proxy: Studio allows only signed files
+ok 6 - proxy: Studio allows only signed files
+  ---
+  duration_ms: 2.836227
+  type: 'test'
+  ...
+# Subtest: proxy: supports UTF-8 resource names
+ok 7 - proxy: supports UTF-8 resource names
+  ---
+  duration_ms: 2.515137
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"version":1}
+ok 8 - proxy: rejects malformed scope {"version":1}
+  ---
+  duration_ms: 0.837164
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"expiresAt":1793680281996}
+ok 9 - proxy: rejects malformed scope {"expiresAt":1793680281996}
+  ---
+  duration_ms: 0.882538
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"expiresAt":"never"}
+ok 10 - proxy: rejects malformed scope {"expiresAt":"never"}
+  ---
+  duration_ms: 0.857231
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"expiresAt":1793766681997}
+ok 11 - proxy: rejects malformed scope {"expiresAt":1793766681997}
+  ---
+  duration_ms: 0.62667
+  type: 'test'
+  ...
+# Subtest: proxy: rejects malformed scope {"resourceKeys":null}
+ok 12 - proxy: rejects malformed scope {"resourceKeys":null}
+  ---
+  duration_ms: 0.416108
+  type: 'test'
+  ...
+# Subtest: proxy: rejects tampered resource and missing secret
+ok 13 - proxy: rejects tampered resource and missing secret
+  ---
+  duration_ms: 5.764221
+  type: 'test'
+  ...
+# Subtest: proxy: recording token opens only its signed recording
+ok 14 - proxy: recording token opens only its signed recording
+  ---
+  duration_ms: 4.091932
+  type: 'test'
+  ...
+# Subtest: proxy: recording path rejects download and Studio tokens
+ok 15 - proxy: recording path rejects download and Studio tokens
+  ---
+  duration_ms: 1.473291
+  type: 'test'
+  ...
+# Subtest: proxy: recording token lifetime is capped at fifteen minutes
+ok 16 - proxy: recording token lifetime is capped at fifteen minutes
+  ---
+  duration_ms: 0.3583
+  type: 'test'
+  ...
+# Subtest: proxy: recording supports byte ranges for seeking
+ok 17 - proxy: recording supports byte ranges for seeking
+  ---
+  duration_ms: 1.722847
+  type: 'test'
+  ...
+# Subtest: proxy: downloads ignore Range and keep full responses
+ok 18 - proxy: downloads ignore Range and keep full responses
+  ---
+  duration_ms: 1.605398
+  type: 'test'
+  ...
+# Subtest: proxy: original uses exact private scope and byte ranges
+ok 19 - proxy: original uses exact private scope and byte ranges
+  ---
+  duration_ms: 4.100779
+  type: 'test'
+  ...
+# Subtest: proxy: originals reject other purposes, excessive expiry and missing files
+ok 20 - proxy: originals reject other purposes, excessive expiry and missing files
+  ---
+  duration_ms: 9.127426
+  type: 'test'
+  ...
+# Subtest: proxy: PR1 preview 200 carries ETag and exposes headers
+ok 21 - proxy: PR1 preview 200 carries ETag and exposes headers
+  ---
+  duration_ms: 3.060245
+  type: 'test'
+  ...
+# Subtest: proxy: PR2 matching If-None-Match gives 304 from one R2 get with the body released
+ok 22 - proxy: PR2 matching If-None-Match gives 304 from one R2 get with the body released
+  ---
+  duration_ms: 3.893531
+  type: 'test'
+  ...
+# Subtest: proxy: PR3 single range gives 206 with Content-Range
+not ok 23 - proxy: PR3 single range gives 206 with Content-Range
+  ---
+  duration_ms: 2.246335
+  type: 'test'
+  location: '/tmp/a310m/workers/r2-proxy.test.mjs:199:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '406' !== '5'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '5'
+  actual: '406'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a310m/workers/r2-proxy.test.mjs:207:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy: PR4 unsatisfiable range gives a no-store 416 with no body bytes in both R2 out-of-range modes
+ok 24 - proxy: PR4 unsatisfiable range gives a no-store 416 with no body bytes in both R2 out-of-range modes
+  ---
+  duration_ms: 1.707077
+  type: 'test'
+  ...
+# Subtest: proxy: PR5 invalid or multi range and If-Range mismatch give the full 200
+ok 25 - proxy: PR5 invalid or multi range and If-Range mismatch give the full 200
+  ---
+  duration_ms: 2.138744
+  type: 'test'
+  ...
+# Subtest: proxy: PR6 HEAD reads no body
+ok 26 - proxy: PR6 HEAD reads no body
+  ---
+  duration_ms: 0.456081
+  type: 'test'
+  ...
+# Subtest: proxy: PR7 missing preview keeps its 404 text
+ok 27 - proxy: PR7 missing preview keeps its 404 text
+  ---
+  duration_ms: 1.016669
+  type: 'test'
+  ...
+# Subtest: proxy: PR8 studio stays private no-store and ignores If-None-Match
+ok 28 - proxy: PR8 studio stays private no-store and ignores If-None-Match
+  ---
+  duration_ms: 6.083671
+  type: 'test'
+  ...
+# Subtest: proxy: PR10 every public GET makes exactly one R2 get and no head
+ok 29 - proxy: PR10 every public GET makes exactly one R2 get and no head
+  ---
+  duration_ms: 2.57538
+  type: 'test'
+  ...
+# Subtest: proxy: PR11 short R2 range body length equals Content-Length
+not ok 30 - proxy: PR11 short R2 range body length equals Content-Length
+  ---
+  duration_ms: 0.938122
+  type: 'test'
+  location: '/tmp/a310m/workers/r2-proxy.test.mjs:281:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    bytes=95-500
+    
+    5 !== 406
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 406
+  actual: 5
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a310m/workers/r2-proxy.test.mjs:285:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy: PR12 If-Range mismatch releases the range read and serves the full current object
+ok 31 - proxy: PR12 If-Range mismatch releases the range read and serves the full current object
+  ---
+  duration_ms: 1.867527
+  type: 'test'
+  ...
+# Subtest: proxy: PR13 an R2 get failure on a satisfiable range stays a 500
+ok 32 - proxy: PR13 an R2 get failure on a satisfiable range stays a 500
+  ---
+  duration_ms: 0.909258
+  type: 'test'
+  ...
+# Subtest: proxy: PR14 out-of-range preconditions: If-None-Match wins, a failed If-Range serves the full object
+ok 33 - proxy: PR14 out-of-range preconditions: If-None-Match wins, a failed If-Range serves the full object
+  ---
+  duration_ms: 1.888647
+  type: 'test'
+  ...
+# Subtest: proxy: PR15 empty object ranges give 416 and a failing body cancel still gives 304
+ok 34 - proxy: PR15 empty object ranges give 416 and a failing body cancel still gives 304
+  ---
+  duration_ms: 1.241399
+  type: 'test'
+  ...
+# Subtest: proxy: PR9 cover image ETag and 304, 404 text kept, no range
+ok 35 - proxy: PR9 cover image ETag and 304, 404 text kept, no range
+  ---
+  duration_ms: 1.529547
+  type: 'test'
+  ...
+# Subtest: alternate: exact purchased file succeeds
+ok 36 - alternate: exact purchased file succeeds
+  ---
+  duration_ms: 8.901717
+  type: 'test'
+  ...
+# Subtest: alternate: denies token reuse at download/mall/premium.zip
+ok 37 - alternate: denies token reuse at download/mall/premium.zip
+  ---
+  duration_ms: 0.856168
+  type: 'test'
+  ...
+# Subtest: alternate: denies token reuse at studio/mall/standart.zip
+ok 38 - alternate: denies token reuse at studio/mall/standart.zip
+  ---
+  duration_ms: 0.9848
+  type: 'test'
+  ...
+# Subtest: alternate: denies token reuse at download/other/standart.zip
+ok 39 - alternate: denies token reuse at download/other/standart.zip
+  ---
+  duration_ms: 0.999256
+  type: 'test'
+  ...
+# Subtest: alternate: denies token reuse at download/mall/folder%2Fstandart.zip
+ok 40 - alternate: denies token reuse at download/mall/folder%2Fstandart.zip
+  ---
+  duration_ms: 1.683631
+  type: 'test'
+  ...
+# Subtest: alternate: Studio allows only signed files
+ok 41 - alternate: Studio allows only signed files
+  ---
+  duration_ms: 2.349257
+  type: 'test'
+  ...
+# Subtest: alternate: supports UTF-8 resource names
+ok 42 - alternate: supports UTF-8 resource names
+  ---
+  duration_ms: 2.481995
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"version":1}
+ok 43 - alternate: rejects malformed scope {"version":1}
+  ---
+  duration_ms: 0.279061
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"expiresAt":1793680281997}
+ok 44 - alternate: rejects malformed scope {"expiresAt":1793680281997}
+  ---
+  duration_ms: 0.223478
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"expiresAt":"never"}
+ok 45 - alternate: rejects malformed scope {"expiresAt":"never"}
+  ---
+  duration_ms: 0.196477
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"expiresAt":1793766681998}
+ok 46 - alternate: rejects malformed scope {"expiresAt":1793766681998}
+  ---
+  duration_ms: 0.237434
+  type: 'test'
+  ...
+# Subtest: alternate: rejects malformed scope {"resourceKeys":null}
+ok 47 - alternate: rejects malformed scope {"resourceKeys":null}
+  ---
+  duration_ms: 0.240168
+  type: 'test'
+  ...
+# Subtest: alternate: rejects tampered resource and missing secret
+ok 48 - alternate: rejects tampered resource and missing secret
+  ---
+  duration_ms: 2.959096
+  type: 'test'
+  ...
+# Subtest: alternate: recording token opens only its signed recording
+ok 49 - alternate: recording token opens only its signed recording
+  ---
+  duration_ms: 3.069522
+  type: 'test'
+  ...
+# Subtest: alternate: recording path rejects download and Studio tokens
+ok 50 - alternate: recording path rejects download and Studio tokens
+  ---
+  duration_ms: 1.200682
+  type: 'test'
+  ...
+# Subtest: alternate: recording token lifetime is capped at fifteen minutes
+ok 51 - alternate: recording token lifetime is capped at fifteen minutes
+  ---
+  duration_ms: 0.343962
+  type: 'test'
+  ...
+# Subtest: alternate: recording supports byte ranges for seeking
+ok 52 - alternate: recording supports byte ranges for seeking
+  ---
+  duration_ms: 1.416656
+  type: 'test'
+  ...
+# Subtest: alternate: downloads ignore Range and keep full responses
+ok 53 - alternate: downloads ignore Range and keep full responses
+  ---
+  duration_ms: 0.822767
+  type: 'test'
+  ...
+# Subtest: alternate: original uses exact private scope and byte ranges
+ok 54 - alternate: original uses exact private scope and byte ranges
+  ---
+  duration_ms: 3.933456
+  type: 'test'
+  ...
+# Subtest: alternate: originals reject other purposes, excessive expiry and missing files
+ok 55 - alternate: originals reject other purposes, excessive expiry and missing files
+  ---
+  duration_ms: 1.518605
+  type: 'test'
+  ...
+# Subtest: alternate: PR1 preview 200 carries ETag and exposes headers
+ok 56 - alternate: PR1 preview 200 carries ETag and exposes headers
+  ---
+  duration_ms: 0.696401
+  type: 'test'
+  ...
+# Subtest: alternate: PR2 matching If-None-Match gives 304 from one R2 get with the body released
+ok 57 - alternate: PR2 matching If-None-Match gives 304 from one R2 get with the body released
+  ---
+  duration_ms: 1.891121
+  type: 'test'
+  ...
+# Subtest: alternate: PR3 single range gives 206 with Content-Range
+not ok 58 - alternate: PR3 single range gives 206 with Content-Range
+  ---
+  duration_ms: 1.218045
+  type: 'test'
+  location: '/tmp/a310m/workers/r2-proxy.test.mjs:199:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '406' !== '5'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '5'
+  actual: '406'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a310m/workers/r2-proxy.test.mjs:207:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: alternate: PR4 unsatisfiable range gives a no-store 416 with no body bytes in both R2 out-of-range modes
+ok 59 - alternate: PR4 unsatisfiable range gives a no-store 416 with no body bytes in both R2 out-of-range modes
+  ---
+  duration_ms: 1.119801
+  type: 'test'
+  ...
+# Subtest: alternate: PR5 invalid or multi range and If-Range mismatch give the full 200
+ok 60 - alternate: PR5 invalid or multi range and If-Range mismatch give the full 200
+  ---
+  duration_ms: 1.118448
+  type: 'test'
+  ...
+# Subtest: alternate: PR6 HEAD reads no body
+ok 61 - alternate: PR6 HEAD reads no body
+  ---
+  duration_ms: 0.257702
+  type: 'test'
+  ...
+# Subtest: alternate: PR7 missing preview keeps its 404 text
+ok 62 - alternate: PR7 missing preview keeps its 404 text
+  ---
+  duration_ms: 0.284912
+  type: 'test'
+  ...
+# Subtest: alternate: PR8 studio stays private no-store and ignores If-None-Match
+ok 63 - alternate: PR8 studio stays private no-store and ignores If-None-Match
+  ---
+  duration_ms: 3.257313
+  type: 'test'
+  ...
+# Subtest: alternate: PR10 every public GET makes exactly one R2 get and no head
+ok 64 - alternate: PR10 every public GET makes exactly one R2 get and no head
+  ---
+  duration_ms: 1.375779
+  type: 'test'
+  ...
+# Subtest: alternate: PR11 short R2 range body length equals Content-Length
+not ok 65 - alternate: PR11 short R2 range body length equals Content-Length
+  ---
+  duration_ms: 0.312925
+  type: 'test'
+  location: '/tmp/a310m/workers/r2-proxy.test.mjs:281:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    bytes=95-500
+    
+    5 !== 406
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 406
+  actual: 5
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/a310m/workers/r2-proxy.test.mjs:285:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: alternate: PR12 If-Range mismatch releases the range read and serves the full current object
+ok 66 - alternate: PR12 If-Range mismatch releases the range read and serves the full current object
+  ---
+  duration_ms: 0.448017
+  type: 'test'
+  ...
+# Subtest: alternate: PR13 an R2 get failure on a satisfiable range stays a 500
+ok 67 - alternate: PR13 an R2 get failure on a satisfiable range stays a 500
+  ---
+  duration_ms: 0.595402
+  type: 'test'
+  ...
+# Subtest: alternate: PR14 out-of-range preconditions: If-None-Match wins, a failed If-Range serves the full object
+ok 68 - alternate: PR14 out-of-range preconditions: If-None-Match wins, a failed If-Range serves the full object
+  ---
+  duration_ms: 0.726868
+  type: 'test'
+  ...
+# Subtest: alternate: PR15 empty object ranges give 416 and a failing body cancel still gives 304
+ok 69 - alternate: PR15 empty object ranges give 416 and a failing body cancel still gives 304
+  ---
+  duration_ms: 0.896313
+  type: 'test'
+  ...
+1..69
+# tests 69
+# suites 0
+# pass 65
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 231.95311

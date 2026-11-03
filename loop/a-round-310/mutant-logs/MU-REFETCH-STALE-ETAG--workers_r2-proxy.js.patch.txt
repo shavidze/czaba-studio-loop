@@ -1,0 +1,11 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -296,8 +296,6 @@
+     await releaseBody(object);
+     object = await env.R2_BUCKET.get(r2Key);
+     if (!object) return null;
+-    if (object.httpEtag) headers.set('ETag', object.httpEtag);
+-    else headers.delete('ETag');
+   }
+   const range = rangeAllowed ? resolveRangeSpec(spec, object.size) : null;
+   if (range && range.unsatisfiable) {

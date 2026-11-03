@@ -1,0 +1,11 @@
+--- cloudflare/r2-worker.js
++++ cloudflare/r2-worker.js (mutant)
+@@ -224,7 +224,7 @@
+     try {
+       object = await env.R2_BUCKET.get(r2Key, wanted ? { range: wanted } : undefined);
+     } catch (error) {
+-      if (!wanted) throw error;
++      throw error;
+       const meta = await env.R2_BUCKET.head(r2Key);
+       if (!meta) return null;
+       if (meta.httpEtag) headers.set('ETag', meta.httpEtag);

@@ -1,9 +1,9 @@
 {
- "version": 269,
- "updated": "2026-11-03 B round 309 -> 310 planning",
+ "version": 270,
+ "updated": "2026-11-03 B round 310 -> 311 planning",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 310, D-29z824..D-29z827; PERF-4d: one R2 get per public GET in both worker copies (seek/304/200 h0g1), 416 no-store, throw/short out-of-range both handled, If-None-Match before 416 and If-Range re-read on the throw path; PR1-PR15 (PR2/PR4 contracts changed with gate reason), 13 mutants; doc 226; baseline b65febe, frozen 1182, 3 modified + 1 new granted)",
+ "current_task": "current-task.md (round 311, D-29z828..D-29z831; PERF-4e: gate-310 fix-up in the worker helper block, both copies byte-identical: a Range length/suffix that is not a safe integer goes to R2 as {offset}/{offset:0} (GATE310-M1 residual, A-R310-REVIEW-L1); If-None-Match re-checked after both If-Range re-reads -> 304 (GATE310-L3 = B-R309-REFETCH-INM-WINDOW); throw-path re-read ETag pinned (C-R310-01 = A-R310-REVIEW-L2); PR16-PR18 + PR13/PR15 asserts (A-R310-REVIEW-L3 part), 75 tests, 25 mutants; doc 227; baseline 8946431, frozen 1183, 3 modified + 1 new granted)",
  "advisor_used_by_B": "round 297 -> 298 planning: advisor available and consulted (before writing and before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -11170,9 +11170,18 @@
    "task": "current-task.md",
    "decision": "D-29z824..D-29z827",
    "type": "PERF-4d: one R2 get per public GET (GATE309-M1) + race closed (GATE309-L2) + 416 no-store (GATE309-L3); throw-path preconditions; PR1-PR15, 13 mutants, doc 226",
-   "status": "dispatched",
+   "status": "c_pass_published (C round 310 PASS browserVerified/realVerified true, 1 Low C-R310-01; gate 310 published 8946431)",
    "note": "baseline b65febe clean; frozen b-round-309-r310-tree-sha256.txt (1182); claims b-round-309/claims-310.sh K1-K19; 3 modified (both workers helper block, r2-proxy.test.mjs) + doc 226 new",
    "added": "2026-11-03 B round 309 -> 310 planning"
+  },
+  {
+   "round": 311,
+   "task": "current-task.md",
+   "decision": "D-29z828..D-29z831",
+   "type": "PERF-4e: gate-310 fix-up: unsafe-integer Range values (GATE310-M1), If-None-Match after If-Range re-read (GATE310-L3), throw-path re-read ETag test (C-R310-01); PR16-PR18, 25 mutants, doc 227",
+   "status": "dispatched",
+   "note": "baseline 8946431 clean; frozen b-round-310-r311-tree-sha256.txt (1183); claims b-round-310/claims-311.sh K1-K22; 3 modified + 1 new granted",
+   "added": "2026-11-03 B round 310 -> 311 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -13769,7 +13778,7 @@
   },
   {
    "id": "STUDIO-PERFORMANCE",
-   "status": "in_progress (D-29z825): PERF-4a done (C round 309 PASS, gate b65febe); gate-309 Medium GATE309-M1 + L2/L3 -> PERF-4d round 310 (one R2 read per public GET); 4b awaiting_user, 4c backend handoff; next PERF-5 (REGRESSION first when due on/after 2026-11-05); RETRO at 320 | in_progress (D-29z821): PERF-COMMIT-RESCHEDULE closed on evidence (C round 308 PASS, gate 738df73); PERF-4a dispatched round 309; 4b awaiting_user, 4c backend handoff; next PERF-5; REGRESSION first when due (on/after 2026-11-05); RETRO at 320 | in_progress (D-29z817): PERF-COMMIT-RESCHEDULE-a done (307, d8e5ce5); stage b closes on evidence, b-close round 308 (C reproduces continuity, A hardens unused path); next PERF-4 after consults; REGRESSION first when due (on/after 2026-11-05); RETRO at 320 | in_progress (D-29z813): PERF-3 done (3d C round 306 PASS, gate ecb832a, EXIT met); PERF-COMMIT-RESCHEDULE split, stage a dispatched round 307 | in_progress (D-29z808): RETRO 305 done (C FAIL Low only, RT-FIX 306); PERF-3d dispatched round 306 | in_progress (D-29z805): PERF-3c done (304); RETRO 305; PERF-3d round 306 | in_progress (D-29z795): PERF-3c round 304 (harness + exit decision), PERF-3d after RETRO 305 | in_progress (D-29z692): PERF-3a/3b done; paused for PD-REVIEW fix-ups FIX-PD-1a (round 286), FIX-PD-1b, FIX-PD-1c, STUDIO-LINK, NAME-AND-HINT (\"between PERF tasks\", Saba 2026-10-31); REGRESSION when due (on/after 2026-11-02) takes precedence; RETRO at 290; then PERF-3c | in_progress (D-29z685): PERF-3a done (round 284); round 285 = PERF-3b; then REGRESSION if due (on/after 2026-11-02), then PERF-3c; RETRO at 290 | in_progress (D-29z673): PERF-2 done (round 283, 54a3fcc); PERF-3 split -> PERF-3a round 284 (dispatched), PERF-3b next PERF round; REGRESSION first when due (on/after 2026-11-02); RETRO at 290",
+   "status": "in_progress (D-29z829): PERF-4d done (C round 310 PASS, gate 8946431); gate-310 Medium GATE310-M1 + GATE310-L3 + C-R310-01 -> PERF-4e round 311; 4b awaiting_user, 4c backend handoff; next REGRESSION when due (on/after 2026-11-05), else PERF-5; RETRO at 320 | in_progress (D-29z825): PERF-4a done (C round 309 PASS, gate b65febe); gate-309 Medium GATE309-M1 + L2/L3 -> PERF-4d round 310 (one R2 read per public GET); 4b awaiting_user, 4c backend handoff; next PERF-5 (REGRESSION first when due on/after 2026-11-05); RETRO at 320 | in_progress (D-29z821): PERF-COMMIT-RESCHEDULE closed on evidence (C round 308 PASS, gate 738df73); PERF-4a dispatched round 309; 4b awaiting_user, 4c backend handoff; next PERF-5; REGRESSION first when due (on/after 2026-11-05); RETRO at 320 | in_progress (D-29z817): PERF-COMMIT-RESCHEDULE-a done (307, d8e5ce5); stage b closes on evidence, b-close round 308 (C reproduces continuity, A hardens unused path); next PERF-4 after consults; REGRESSION first when due (on/after 2026-11-05); RETRO at 320 | in_progress (D-29z813): PERF-3 done (3d C round 306 PASS, gate ecb832a, EXIT met); PERF-COMMIT-RESCHEDULE split, stage a dispatched round 307 | in_progress (D-29z808): RETRO 305 done (C FAIL Low only, RT-FIX 306); PERF-3d dispatched round 306 | in_progress (D-29z805): PERF-3c done (304); RETRO 305; PERF-3d round 306 | in_progress (D-29z795): PERF-3c round 304 (harness + exit decision), PERF-3d after RETRO 305 | in_progress (D-29z692): PERF-3a/3b done; paused for PD-REVIEW fix-ups FIX-PD-1a (round 286), FIX-PD-1b, FIX-PD-1c, STUDIO-LINK, NAME-AND-HINT (\"between PERF tasks\", Saba 2026-10-31); REGRESSION when due (on/after 2026-11-02) takes precedence; RETRO at 290; then PERF-3c | in_progress (D-29z685): PERF-3a done (round 284); round 285 = PERF-3b; then REGRESSION if due (on/after 2026-11-02), then PERF-3c; RETRO at 290 | in_progress (D-29z673): PERF-2 done (round 283, 54a3fcc); PERF-3 split -> PERF-3a round 284 (dispatched), PERF-3b next PERF round; REGRESSION first when due (on/after 2026-11-02); RETRO at 290",
    "requested": "2026-10-26 (Saba, agent-workflow policy section \"Saba's bug and the performance queue\")",
    "instruction": "After REVIEW-RECOMMENDATIONS and before T12-ADVANCED. Outline and baseline: docs/technical/performance/perf-plan.md. Before dispatching each PERF task, B consults performance-optimizer and tech-lead, re-measures, and writes the task in full detail. PERF-1 (the harness) comes first. The 2026-10-23 bug gate applies.",
    "prerequisites": [
@@ -13979,7 +13988,7 @@
     {
      "id": "PERF-4",
      "what": "see perf-plan.md task outline",
-     "status": "in_progress (D-29z825): 4a done (309, b65febe); 4d dispatched round 310; 4b awaiting_user; 4c handoff_backend | in_progress (D-29z821): split 4a/4b/4c; 4a dispatched round 309 | not_started",
+     "status": "in_progress (D-29z829): 4a done (309), 4d done (310, 8946431); 4e dispatched round 311; 4b awaiting_user; 4c handoff_backend | in_progress (D-29z825): 4a done (309, b65febe); 4d dispatched round 310; 4b awaiting_user; 4c handoff_backend | in_progress (D-29z821): split 4a/4b/4c; 4a dispatched round 309 | not_started",
      "split_d29z821": {
       "PERF-4a": "round 309: public routes ETag/304 + single-range 206/416 + Expose-Headers in both worker copies; PR1-PR9; doc 225",
       "PERF-4b": "awaiting_user SABA-Q-PERF4-STUDIO-CACHE: /studio/ private,no-cache + ETag/304 after auth; client half (auth outside the URL) in protected studio.$productId.tsx -> SRW-21-PLAN",
@@ -14184,7 +14193,12 @@
     {
      "id": "PERF-4d",
      "what": "gate-309 fix-up: one R2 get per public GET (seek, 304, 200), 416 no-store, both out-of-range R2 behaviours, throw-path If-None-Match/If-Range, If-Range re-read from the second object; closes GATE309-M1/L2/L3",
-     "status": "dispatched round 310 (D-29z825/D-29z826)"
+     "status": "done (D-29z828): C round 310 PASS browserVerified/realVerified true; gate 310 published 8946431 | dispatched round 310 (D-29z825/D-29z826)"
+    },
+    {
+     "id": "PERF-4e",
+     "what": "gate-310 fix-up: Range length/suffix beyond a safe integer sent as an open offset (no 500 on a valid header), If-None-Match re-checked after the If-Range re-read on both paths, throw-path re-read ETag pinned; closes GATE310-M1, GATE310-L3 (=B-R309-REFETCH-INM-WINDOW), C-R310-01 (=A-R310-REVIEW-L2), A-R310-REVIEW-L1",
+     "status": "dispatched round 311 (D-29z829/D-29z830)"
     }
    ],
    "perf_fader_constraints_d29z174": "Before any event-share-16 row flips to assert: replace the metric (per-move frame/LoAF with liveness red-proof > 0 on a slow drag) or prove it live (C-R206-01); rewrite doc 163 l.60 and budgets.json event-share notes; drag changes the value at both ends (I-206-d); consult performance-optimizer + tech-lead and re-measure before dispatch",
@@ -14299,6 +14313,9 @@
     "performance-optimizer": "cancel-for-304 acceptable (same Class B op, no egress); suggests onlyIf etagDoesNotMatch with etagMatches fallback; wants real-R2 TTFB/Class B run (not available in cloud -> post-deploy list); do before PERF-5; PERF-5 input: computePeaks main thread ArrangementContext.tsx:2492/:3909, setSourcePeaks :2493/:3910 + patchSourceState/settle -> >=2 context updates per stem; getChannelData views not transferable",
     "tech-lead": "single-get sound, protected routes byte-identical; two Low defects in first sketch (throw path: failed If-Range must give 200, matching If-None-Match must give 304) -> fixed + PR14/PR15; releaseBody try/catch; 5 extra mutants; object.range suggestion not adopted; ROOT-REQ-VERIFY-WORKER-TESTS before/with this change; do before PERF-5",
     "ruling": "D-29z826"
+   },
+   "consults_round_311": {
+    "tech-lead": "no blocking defect; RFC order and 304 headers correct; safe-integer requests unchanged; {offset:0} for unsafe suffix correct; reviewer retry not needed. Medium HEAD+Range (pre-existing, RFC 9110 14.2) -> ruled out of scope, deferred B-R310-HEAD-RANGE-RFC; Lows: PR16 title/far reads (fixed), fake strictness is inference (worded), Number() precision (deferred B-R310-RANGE-PRECISION)"
    }
   },
   {
@@ -29244,7 +29261,7 @@
    "severity": "info",
    "origin": "B",
    "title": "ProductCard <audio> against the deployed worker (304 on revalidate, 206 on seek in Chrome and Safari) after Saba deploys PERF-4a",
-   "status": "not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) | D-29z827: post-deploy list extended by PERF-4d (Safari 206, OOB branch on real R2, CDN must not store 416, TTFB p50/p95 + Class B metrics, onlyIf option)",
+   "status": "not runnable in the cloud (mock API serves local previews; worker not deployed); later evidence (D-29z821) | D-29z827: post-deploy list extended by PERF-4d (Safari 206, OOB branch on real R2, CDN must not store 416, TTFB p50/p95 + Class B metrics, onlyIf option) | D-29z831: post-deploy list adds: bytes=0-<huge> and bytes=-<huge> give 206 on real R2 (open offset); If-Range re-read + If-None-Match 304",
    "added": "2026-11-03 B round 308 -> 309 planning"
   },
   {
@@ -29252,7 +29269,7 @@
    "severity": "medium",
    "origin": "gate reviewer (gates/round-309/review.md #1)",
    "title": "every public 200/206 makes two R2 ops (head then get), incl. each <audio> seek",
-   "status": "scheduled round 310 PERF-4d (D-29z825)",
+   "status": "closed (D-29z828): fixed by PERF-4d, C round 310 PASS, gate 310 published 8946431 | scheduled round 310 PERF-4d (D-29z825)",
    "added": "2026-11-03 B round 309 -> 310 planning"
   },
   {
@@ -29260,7 +29277,7 @@
    "severity": "low",
    "origin": "gate reviewer #2 (= A-review Medium #1 race)",
    "title": "head/get race can mix two object versions",
-   "status": "scheduled round 310 PERF-4d (single read; D-29z825)",
+   "status": "closed (D-29z828): fixed by PERF-4d, C round 310 PASS, gate 310 published 8946431 | scheduled round 310 PERF-4d (single read; D-29z825)",
    "added": "2026-11-03 B round 309 -> 310 planning"
   },
   {
@@ -29268,7 +29285,7 @@
    "severity": "low",
    "origin": "gate reviewer #3 (= A-review Low #2, INFO-C309-416-PUBLIC-CACHE)",
    "title": "416 carries public, max-age=86400 and is storable by shared caches",
-   "status": "scheduled round 310 PERF-4d (no-store; D-29z825)",
+   "status": "closed (D-29z828): fixed by PERF-4d, C round 310 PASS, gate 310 published 8946431 | scheduled round 310 PERF-4d (no-store; D-29z825)",
    "added": "2026-11-03 B round 309 -> 310 planning"
   },
   {
@@ -29302,6 +29319,70 @@
    "title": "-> B-R309-PREVIEW-SAFE-NAME deferred Low",
    "status": "recorded (D-29z824)",
    "added": "2026-11-03 B round 309 -> 310 planning"
+  },
+  {
+   "id": "GATE310-M1",
+   "severity": "medium",
+   "origin": "gate reviewer (gates/round-310/review.md #1) + A-R310-REVIEW-L1 + INFO-C310-OVERSIZED-RANGE",
+   "title": "client Range values reach R2 unclamped; a non-safe-integer length/suffix could 500 where b65febe served 206 (suffix/length overflow itself is documented by R2)",
+   "status": "scheduled round 311 PERF-4e (D-29z829)",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "GATE310-L3",
+   "severity": "low",
+   "origin": "gate reviewer #3 (= B-R309-REFETCH-INM-WINDOW)",
+   "title": "If-Range re-read compares If-None-Match with the first object",
+   "status": "scheduled round 311 PERF-4e (D-29z829)",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "C-R310-01",
+   "severity": "low",
+   "origin": "C round 310 (B spec gap; = A-R310-REVIEW-L2)",
+   "title": "throw-path If-Range re-read ETag not pinned by any row (mutant survived 69/69)",
+   "status": "scheduled round 311 PERF-4e PR17 (D-29z829)",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "GATE310-S4",
+   "severity": "low",
+   "origin": "gate reviewer #4",
+   "title": "a 304 opens the body then cancels it",
+   "status": "recorded (D-29z831): same R2 op count; onlyIf on the post-deploy list",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "GATE310-S5",
+   "severity": "info",
+   "origin": "gate reviewer #5",
+   "title": "bytes=-0 reads the whole object to answer 416",
+   "status": "recorded (D-29z831): rare, harmless",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "INFO-C310-WARM-STATUS-NULL",
+   "severity": "info",
+   "origin": "C round 310",
+   "title": "untimed warm-up saw null #arrangement-status for 300 s on a cold server; only warm.log, no screenshot; not an observed UI state; timed G310-AUTH ready at both viewports",
+   "status": "recorded (D-29z828)",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "INFO-C310-OVERSIZED-RANGE",
+   "severity": "info",
+   "origin": "C round 310",
+   "title": "-> GATE310-M1",
+   "status": "recorded (D-29z828)",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "INFO-C310-HEAD-STEP10",
+   "severity": "info",
+   "origin": "C round 310",
+   "title": "HEAD + unsatisfiable -> 416 no-store and HEAD + If-None-Match -> 304 verified by curl on the probe server; HEAD+INM unit row PR18 in round 311",
+   "status": "recorded (D-29z828)",
+   "added": "2026-11-03 B round 310 -> 311 planning"
   }
  ],
  "tech_lead_notes": [
@@ -31711,7 +31792,7 @@
    "id": "R2-WORKER-TWO-COPIES",
    "source": "tech-lead + performance-optimizer consults, round 309 planning",
    "text": "workers/r2-proxy.js and cloudflare/r2-worker.js are two copies of one worker and have drifted (cover route only in workers/); PERF-4a keeps them in lockstep with a byte-identical helper block; remove one after SABA-Q-WORKER-DEPLOYED",
-   "status": "signal x3 (D-29z827: A round 309 + gate-309 reviewer); bounded follow-up after SABA-Q-WORKER-DEPLOYED: delete the undeployed copy, point the test loop at one worker, combine with ROOT-REQ-VERIFY-WORKER-TESTS | signal (D-29z823)",
+   "status": "signal x4 (D-29z831: gate-310 reviewer, rounds 309/310/311 edit both copies); dedupe waits for SABA-Q-WORKER-DEPLOYED | signal x3 (D-29z827: A round 309 + gate-309 reviewer); bounded follow-up after SABA-Q-WORKER-DEPLOYED: delete the undeployed copy, point the test loop at one worker, combine with ROOT-REQ-VERIFY-WORKER-TESTS | signal (D-29z823)",
    "added": "2026-11-03 B round 308 -> 309 planning"
   }
  ],
@@ -37496,7 +37577,7 @@
    "source": "workers/r2-proxy.test.mjs",
    "title": "candidate rows: 403/404 protected routes with If-None-Match, Bytes= case and whitespace, If-None-Match * without httpEtag, get null after head",
    "repro": "see a-round-309.md code-reviewer findings #4-#6",
-   "status": "deferred_low_polish (D-29z824); PR4/PR10-PR15 cover part",
+   "status": "deferred_low_polish (D-29z824); PR4/PR10-PR15 cover part | D-29z831: round 311 adds PR13 heads 0, PR15 ETag+cancel, PR18 HEAD+INM; PR14 opened.every in throw mode still trivially true (open)",
    "added": "2026-11-03 B round 309 -> 310 planning"
   },
   {
@@ -37506,8 +37587,28 @@
    "source": "helper block (PERF-4d) If-Range re-read",
    "title": "on the rare If-Range re-read, If-None-Match was compared with the first object, not the second",
    "repro": "object replaced between the two gets of an If-Range mismatch with a matching If-None-Match",
-   "status": "deferred_low_polish (D-29z827); removed by PERF-4c versioned keys",
+   "status": "scheduled round 311 PERF-4e as GATE310-L3 (D-29z829) | deferred_low_polish (D-29z827); removed by PERF-4c versioned keys",
    "added": "2026-11-03 B round 309 -> 310 planning"
+  },
+  {
+   "id": "B-R310-HEAD-RANGE-RFC",
+   "severity": "low",
+   "origin": "tech-lead consult round 311 planning (pre-existing)",
+   "source": "workers/r2-proxy.js + cloudflare/r2-worker.js servePublicObject (allowRange && HEAD)",
+   "title": "HEAD + Range answers 206/416; RFC 9110 14.2 says a server MUST ignore Range on non-GET methods, while 9.3.2 asks HEAD to carry the GET headers",
+   "repro": "HEAD /preview/mall/a.wav with Range: bytes=0-9 -> 206 (PR6 pins it)",
+   "status": "deferred_low_polish (D-29z830); a change needs PR6 rewritten with a reason",
+   "added": "2026-11-03 B round 310 -> 311 planning"
+  },
+  {
+   "id": "B-R310-RANGE-PRECISION",
+   "severity": "low",
+   "origin": "tech-lead consult round 311 planning (pre-existing)",
+   "source": "parseRangeSpec Number() on >2^53 digit strings",
+   "title": "digit strings above 2^53 are rounded, so an invalid range (last < first) can pass the order check and get 416 instead of being ignored",
+   "repro": "Range: bytes=9007199254740993-9007199254740992 -> 416 (RFC 9110 14.2 allows ignore or reject)",
+   "status": "deferred_low_polish (D-29z830)",
+   "added": "2026-11-03 B round 310 -> 311 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -42840,6 +42941,26 @@
    "id": "D-29z827",
    "date": "2026-11-03",
    "text": "Requests and bookkeeping: ROOT-REQ-VERIFY-WORKER-TESTS now \"before or with the next worker change\" (gate-309 #4 + tech-lead), non-blocking, C WK-UNIT meanwhile; ROOT-REQ-VITEST-PERF-INCLUDE still open; three architect checkpoint requests unanswered, no new one. R2-WORKER-TWO-COPIES signal count 3; bounded dedupe follow-up waits for SABA-Q-WORKER-DEPLOYED. L38 warm-up clause gains \"in a browser, not curl\" (INFO-C309-AUTH-COLD); lessons.md 59 lines. New deferred Lows: B-R309-PREVIEW-SAFE-NAME, A-R309-REVIEW-TEST-GAPS, B-R309-REFETCH-INM-WINDOW. Post-deploy list (doc 226): Safari 206, which OOB branch real R2 takes, CDN not storing 416, TTFB p50/p95 + Class B metrics, onlyIf option. Regression due on/after 2026-11-05; RETRO 320."
+  },
+  {
+   "id": "D-29z828",
+   "date": "2026-11-03",
+   "text": "Round 310 closure: C PASS (c-round-310.json 12 rows passed, browserVerified/realVerified true, 1 Low C-R310-01, 0 Medium+) and gate 310 published 8946431 on both remotes -> PERF-4d done on evidence; GATE309-M1/L2/L3 closed. INFO-C310-WARM-STATUS-NULL recorded (environment, no screenshot; not an observed UI state); INFO-C310-OVERSIZED-RANGE and A-R310-REVIEW-L1 -> folded into GATE310-M1; INFO-C310-HEAD-STEP10 recorded (curl on probe server; unit row for HEAD+INM added in round 311 PR18). WK-STORE-PREVIEW-LIVE stays notRunnableHere (post-deploy)."
+  },
+  {
+   "id": "D-29z829",
+   "date": "2026-11-03",
+   "text": "Ruling on gate-310 review #1 (Medium, \"a suffix larger than the file could now 500\"): the stated premise (\"R2 docs only promise length overflow\") is contradicted by the primary source: R2 Workers API reference (fetched 2026-11-03, kept as b-round-310/r2-workers-api-reference-2026-11-03.md.txt l.231/l.233) documents BOTH length and suffix overflow as \"fewer bytes than this number may be returned\". The residual is real: a syntactically valid header with a non-safe-integer end/suffix (e.g. bytes=0-<400 nines> -> length Infinity) is sent to R2 unclamped; at b65febe it was clamped via head and served 206. With an R2 fake that rejects non-safe integers (an inference, not documented R2 behaviour), real Chromium on HEAD 8946431 gets 500 h1g1, the sketch gets 206 h0g1 (b-round-310/probe/summary.txt). Severity stays Medium (possible 500 on a valid request that HEAD-before served), fixed now under the 2026-10-23 bug gate as PERF-4e with GATE310-L3 (=B-R309-REFETCH-INM-WINDOW) and C-R310-01 (=A-R310-REVIEW-L2): three related findings in one helper block. Reviewer alternative (retry in catch with head-clamped range) rejected: documented overflow needs no retry, it adds a third R2 op and a head/get race; tech-lead consult agreed."
+  },
+  {
+   "id": "D-29z830",
+   "date": "2026-11-03",
+   "text": "PERF-4e contract (task section 4): r2RangeOf sends {suffix} / {offset,length} only when the value is a safe integer, else {offset:0} / {offset:start}; start values are unchanged (a far start reaches the existing 416 in both R2 modes); after the If-Range re-read on the normal path and on the throw path the worker sets ETag from the second object, then If-None-Match match -> releaseBody + 304 with no Content-Type/Content-Length/Content-Range/Accept-Ranges (Content-Type and Accept-Ranges move after the re-read block); HEAD, protected routes, everything above const PUBLIC_EXPOSE_HEADERS unchanged. Tests: fake rejects non-safe range values with TypeError; PR16 (unsafe length/suffix -> open offset 206, far start 416), PR17 (re-read ETag from second object + 304 on both paths, both modes), PR18 (HEAD + If-None-Match -> 304, one head); PR13 + heads 0 for un-ranged throw; PR15 + ETag + body cancelled on 416. No assert removed. 25 mutants (12 carried + 13 new; MU-HEAD-INM-SKIPPED, MU-UNRANGED-THROW-HEAD, MU-416-NO-ETAG, MU-416-NO-RELEASE added after the advisor check showed MU-HEAD-FIRST does not reach PR18), all red on the sketch. Tech-lead consult: Medium \"HEAD+Range should be ignored (RFC 9110 14.2)\" ruled pre-existing and out of scope (PR6 already pins HEAD+Range 206; RFC 9110 9.3.2 asks HEAD to carry GET headers) -> the 416 half of PR18 dropped, B-R310-HEAD-RANGE-RFC deferred Low; Low PR16 title/far-read assert -> fixed in the sketch; Low fake strictness is inference -> wording in the task; Low Number() precision on >2^53 digits -> B-R310-RANGE-PRECISION deferred Low. performance-optimizer not consulted: no R2 op count or byte-path change (K6 unchanged, safe-path probe steps h0g1 on both trees)."
+  },
+  {
+   "id": "D-29z831",
+   "date": "2026-11-03",
+   "text": "Requests and bookkeeping: ROOT-REQ-VERIFY-WORKER-TESTS re-raised \"with this worker change\" (gate-310 review #2 confirms the file is not in verify.log; third worker round in a row) - non-blocking, C WK-UNIT meanwhile. R2-WORKER-TWO-COPIES signal x4 (gate-310 architecture note); dedupe still waits for SABA-Q-WORKER-DEPLOYED; no new checkpoint request (three open, non-blocking). gate-310 #4 (304 opens the body then cancels) and #5 (bytes=-0 full read for a 416) -> post-deploy onlyIf follow-up / info. Remaining A-R310-REVIEW-L3 items (PR14 opened.every trivially true in throw mode) stay under A-R309-REVIEW-TEST-GAPS. Regression due on/after 2026-11-05 (not due today 2026-11-03). Next after PERF-4e: REGRESSION if due, else PERF-5 with performance-optimizer + tech-lead consults and an L37 premise re-measure."
   }
  ],
  "retro_candidates": [
@@ -43057,7 +43178,7 @@
    "file": "b-round-308.md (For root)",
    "decision": "D-29z823",
    "blocking": false,
-   "status": "open (D-29z827): should land before or with the next worker change (gate-309 #4 + tech-lead round 310 consult); non-blocking, C WK-UNIT runs it | open: add node --test workers/r2-proxy.test.mjs to npm run verify (gate-308 verify.log 0 mentions); until then C runs it as WK-UNIT",
+   "status": "open (D-29z831): re-raised \"with this worker change\" (gate-310 #2: r2-proxy.test.mjs absent from verify.log); non-blocking, C WK-UNIT runs it | open (D-29z827): should land before or with the next worker change (gate-309 #4 + tech-lead round 310 consult); non-blocking, C WK-UNIT runs it | open: add node --test workers/r2-proxy.test.mjs to npm run verify (gate-308 verify.log 0 mentions); until then C runs it as WK-UNIT",
    "added": "2026-11-03 B round 308 -> 309 planning"
   }
  ],

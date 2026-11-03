@@ -1,0 +1,9 @@
+--- cloudflare/r2-worker.js
+-      object = await env.R2_BUCKET.get(r2Key);
+      if (!object) return null;
+      if (object.httpEtag) headers.set('ETag', object.httpEtag);
+      else headers.delete('ETag');
+
++      object = await env.R2_BUCKET.get(r2Key);
+      if (!object) return null;
+

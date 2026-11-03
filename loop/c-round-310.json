@@ -1,0 +1,124 @@
+{
+ "taskStatus": "PASS",
+ "round": 310,
+ "task": "PERF-4d one R2 read per public GET; 416 no-store (GATE309-M1/L2/L3)",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T04:40:07.6762536Z",
+  "round": 310,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "WK-OPS-PROXY-THROW",
+  "WK-OPS-PROXY-SHORT",
+  "WK-OPS-ALT",
+  "WK-HEAD-CONTROL",
+  "G310-AUTH",
+  "WK-UNIT",
+  "RED-ON-HEAD",
+  "PROTECTED-UNCHANGED",
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "TESTS-READ",
+  "DOC"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "production build",
+  "Biome check",
+  "npm run verify",
+  "npm run test:e2e:smoke"
+ ],
+ "notRunnableHere": [
+  "WK-STORE-PREVIEW-LIVE: deployed worker + real R2 not reachable from the cloud; Safari 206, real out-of-range/oversized-suffix branch, CDN 416 caching and TTFB are post-deploy (doc 226 list)"
+ ],
+ "viewportNote": "Worker network rows ran once at 1440x900 under task §3.2 (network behaviour is viewport-independent). G310-AUTH ran at 1440x900 and 1280x720.",
+ "bugs": [
+  {
+   "id": "C-R310-01",
+   "severity": "low",
+   "origin": "B spec (PR14 does not pin the throw-path re-read ETag); confirms A-R310-REVIEW-L2",
+   "steps": [
+    "Copy store workers/r2-proxy.js, cloudflare/r2-worker.js, workers/r2-proxy.test.mjs to scratch",
+    "In both workers, in the catch path after `object = await env.R2_BUCKET.get(r2Key);` delete the two lines that set/delete ETag from the re-read object",
+    "node --test workers/r2-proxy.test.mjs (runner: python3 -I c-round-310/c-mutants.py <store> <scratch> <out>)"
+   ],
+   "expected": "At least one PR row (PR14) turns red, because the throw-path If-Range re-read must send the second object's ETag (§4.2 step 5 / §4.4 step 3).",
+   "actual": "69/69 green: the mutant survives. The code itself is correct today (curl probe: If-Range old -> 200 full, gets 2), but nothing guards it. Suggest a PR14 sub-case with changedOnSecondRead in throw mode asserting ETag \"etag-2\". Candidate for A-R309-REVIEW-TEST-GAPS / deferred_low_polish.",
+   "evidence": "c-round-310/C-MU-THROW-REREAD-KEEPS-HEAD-ETAG.patch.txt, .log, c-round-310/c-mutants.txt"
+  }
+ ],
+ "info": [
+  {
+   "id": "INFO-C310-WARM-STATUS-NULL",
+   "origin": "environment",
+   "detail": "The browser warm-up (warm.cjs, default 1280x720) saw 'Loading the demo collection…' then a null #arrangement-status for 300 s (likely a Vite dep re-optimise reload on the cold server); it was untimed and not an acceptance row. The timed G310-AUTH that followed reached 'Demo collection ready' at both viewports with 0 page errors. No app source changed this round. warm.log kept. No screenshot or page-error capture of the warm-up page exists (only warm.log); do not read it as an observed UI state."
+  },
+  {
+   "id": "INFO-C310-OVERSIZED-RANGE",
+   "origin": "A review (A-R310-REVIEW-L1)",
+   "detail": "C agrees with A's Low: r2RangeOf passes the client's suffix/length to R2 unclamped. With the probe fake (which clamps), `bytes=-99999999` gives 206 with the whole 5,760,044 bytes and CL = bytes (headx.txt). Whether real R2 throws here (=> 500 through the rethrow) is undocumented and only checkable post-deploy. Not reproducible in the cloud; B rules."
+  },
+  {
+   "id": "INFO-C310-HEAD-STEP10",
+   "origin": "C extra probe",
+   "detail": "Doc 226 step 10 claims, untested in unit rows (A-R310-REVIEW-L3), verified by curl on the probe server: HEAD + bytes=999999999- -> 416 no-store, bytes */5760044, h1g0; HEAD + If-None-Match -> 304 h1g0; GET Range+If-Range \"old\" -> 200 full, gets 2, cancels 1 (headx.txt)."
+  }
+ ],
+ "assertsSpecified": 15,
+ "mutantsRecorded": 13,
+ "mutantRedOnSketch": 13,
+ "cOwnMutants": {
+  "C-MU-THROW-REREAD-KEEPS-HEAD-ETAG": "GREEN (0 red) -> C-R310-01",
+  "C-MU-416-KEEPS-CONTENT-TYPE": "red PR4 x2",
+  "C-MU-416-NO-RELEASE": "red PR4 x2",
+  "C-MU-HEAD-416-PUBLIC (misnamed: 416 keeps public Cache-Control on GET and HEAD)": "red PR4, PR15 x2",
+  "restored": "69/69"
+ },
+ "manifestPaths": [
+  "c-round-310/proxy-throw-1440.json",
+  "c-round-310/proxy-throw-server.log",
+  "c-round-310/proxy-short-1440.json",
+  "c-round-310/proxy-short-server.log",
+  "c-round-310/alt-throw-1440.json",
+  "c-round-310/alt-throw-server.log",
+  "c-round-310/alt-short-1440.json",
+  "c-round-310/alt-short-server.log",
+  "c-round-310/headctl-1440.json",
+  "c-round-310/headctl-server.log",
+  "c-round-310/head-r2-proxy.mjs",
+  "c-round-310/wk-summary-proxy-throw.txt",
+  "c-round-310/wk-summary-rest.txt",
+  "c-round-310/g310-auth.json",
+  "c-round-310/g310-auth.log",
+  "c-round-310/g310-auth.cjs",
+  "c-round-310/warm.log",
+  "c-round-310/shots/lab-1440x900.png",
+  "c-round-310/shots/lab-1280x720.png",
+  "c-round-310/shots/legacy-1440x900.png",
+  "c-round-310/shots/legacy-1280x720.png",
+  "c-round-310/wk-unit.txt",
+  "c-round-310/vitest.log",
+  "c-round-310/tests-on-head.txt",
+  "c-round-310/red-on-head.txt",
+  "c-round-310/protected-unchanged.txt",
+  "c-round-310/sha256.log",
+  "c-round-310/test-diff.txt",
+  "c-round-310/claims-after.txt",
+  "c-round-310/c-mutants.py",
+  "c-round-310/c-mutants.txt",
+  "c-round-310/C-MU-THROW-REREAD-KEEPS-HEAD-ETAG.patch.txt",
+  "c-round-310/C-MU-THROW-REREAD-KEEPS-HEAD-ETAG.log",
+  "c-round-310/headx.txt",
+  "c-round-310/headx-server.log",
+  "c-round-310/c-browse.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "claimsNote": "claims-after.txt differs from the HEAD output only in K2 `4 b65febe`, K5 `198 160 314 276`, K6 `2 4 2 4`, K7 `1 1 1 1`, K9 69/69, K16 `1 226-perf-r2-worker-single-read.md`; identical to a-round-310/claims-after.txt. A's three source files are byte-identical (cmp) to B's sketch files.",
+ "sourceScopeNote": "All 12 test-diff hunks carry the public-loop context line; test counts close: HEAD 57 = 40 protected + 8x2 + PR9, now 69 = 40 + 14x2 + PR9."
+}

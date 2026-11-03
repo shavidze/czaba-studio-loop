@@ -1,0 +1,10 @@
+--- cloudflare/r2-worker.js
+-  if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+    await releaseBody(object);
+    return new Response(null, { status: 304, headers });
+  }
+  const rangeAllowed
++  if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+    return new Response(null, { status: 304, headers });
+  }
+  const rangeAllowed

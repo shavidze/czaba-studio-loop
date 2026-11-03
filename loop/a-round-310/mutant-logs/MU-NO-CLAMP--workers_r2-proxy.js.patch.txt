@@ -1,0 +1,11 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -220,7 +220,7 @@
+     return { offset: size - length, length };
+   }
+   if (spec.start >= size) return { unsatisfiable: true };
+-  const end = spec.end === null ? size - 1 : Math.min(spec.end, size - 1);
++  const end = spec.end === null ? size - 1 : spec.end;
+   return { offset: spec.start, length: end - spec.start + 1 };
+ }
+ 

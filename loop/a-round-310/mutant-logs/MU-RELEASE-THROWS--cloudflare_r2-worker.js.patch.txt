@@ -1,0 +1,15 @@
+--- cloudflare/r2-worker.js
++++ cloudflare/r2-worker.js (mutant)
+@@ -193,11 +193,7 @@
+ 
+ async function releaseBody(object) {
+   if (!object || !object.body || typeof object.body.cancel !== 'function') return;
+-  try {
+-    await object.body.cancel();
+-  } catch {
+-    return;
+-  }
++  await object.body.cancel();
+ }
+ 
+ function unsatisfiableResponse(headers, size) {

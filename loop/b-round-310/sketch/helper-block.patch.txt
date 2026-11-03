@@ -1,0 +1,58 @@
+--- head-helper-block.js.txt	2026-11-03 05:00:42.231518008 +0000
++++ helper-block.js.txt	2026-11-03 05:00:53.120253811 +0000
+@@ -28,8 +28,13 @@
+ }
+ 
+ function r2RangeOf(spec) {
+-  if (spec.suffix !== undefined) return spec.suffix === 0 ? null : { suffix: spec.suffix };
+-  return spec.end === null ? { offset: spec.start } : { offset: spec.start, length: spec.end - spec.start + 1 };
++  if (spec.suffix !== undefined) {
++    if (spec.suffix === 0) return null;
++    return Number.isSafeInteger(spec.suffix) ? { suffix: spec.suffix } : { offset: 0 };
++  }
++  if (spec.end === null) return { offset: spec.start };
++  const length = spec.end - spec.start + 1;
++  return Number.isSafeInteger(length) ? { offset: spec.start, length } : { offset: spec.start };
+ }
+ 
+ async function releaseBody(object) {
+@@ -78,10 +83,14 @@
+       }
+       object = await env.R2_BUCKET.get(r2Key);
+       if (!object) return null;
+-      headers.set('Content-Type', contentType);
+-      headers.set('Accept-Ranges', 'bytes');
+       if (object.httpEtag) headers.set('ETag', object.httpEtag);
+       else headers.delete('ETag');
++      if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
++        await releaseBody(object);
++        return new Response(null, { status: 304, headers });
++      }
++      headers.set('Content-Type', contentType);
++      headers.set('Accept-Ranges', 'bytes');
+       headers.set('Content-Length', object.size.toString());
+       return new Response(object.body, { headers });
+     }
+@@ -92,8 +101,6 @@
+     await releaseBody(object);
+     return new Response(null, { status: 304, headers });
+   }
+-  headers.set('Content-Type', contentType);
+-  if (allowRange) headers.set('Accept-Ranges', 'bytes');
+   const rangeAllowed = spec !== null && ifRangeHolds(object.httpEtag);
+   if (spec && !rangeAllowed && !isHead && wanted) {
+     await releaseBody(object);
+@@ -101,7 +108,13 @@
+     if (!object) return null;
+     if (object.httpEtag) headers.set('ETag', object.httpEtag);
+     else headers.delete('ETag');
++    if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
++      await releaseBody(object);
++      return new Response(null, { status: 304, headers });
++    }
+   }
++  headers.set('Content-Type', contentType);
++  if (allowRange) headers.set('Accept-Ranges', 'bytes');
+   const range = rangeAllowed ? resolveRangeSpec(spec, object.size) : null;
+   if (range && range.unsatisfiable) {
+     await releaseBody(object);

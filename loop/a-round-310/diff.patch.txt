@@ -1,0 +1,517 @@
+diff --git a/cloudflare/r2-worker.js b/cloudflare/r2-worker.js
+index 8832e3f..912f007 100644
+--- a/cloudflare/r2-worker.js
++++ b/cloudflare/r2-worker.js
+@@ -165,53 +165,112 @@ function etagMatches(header, httpEtag) {
+   return header.split(',').some((tag) => tag.trim() === '*' || opaque(tag) === opaque(httpEtag));
+ }
+ 
+-function parseSingleRange(header, size) {
++function parseRangeSpec(header) {
+   const match = /^bytes=(\d*)-(\d*)$/.exec((header || '').trim());
+   if (!match || (match[1] === '' && match[2] === '')) return null;
+-  if (match[1] === '') {
+-    const suffix = Number(match[2]);
+-    if (suffix === 0 || size === 0) return { unsatisfiable: true };
+-    const length = Math.min(suffix, size);
+-    return { offset: size - length, length };
+-  }
++  if (match[1] === '') return { suffix: Number(match[2]) };
+   const start = Number(match[1]);
+   if (match[2] !== '' && Number(match[2]) < start) return null;
+-  if (start >= size) return { unsatisfiable: true };
+-  const end = match[2] === '' ? size - 1 : Math.min(Number(match[2]), size - 1);
+-  return { offset: start, length: end - start + 1 };
++  return { start, end: match[2] === '' ? null : Number(match[2]) };
++}
++
++function resolveRangeSpec(spec, size) {
++  if (size === 0) return { unsatisfiable: true };
++  if (spec.suffix !== undefined) {
++    if (spec.suffix === 0) return { unsatisfiable: true };
++    const length = Math.min(spec.suffix, size);
++    return { offset: size - length, length };
++  }
++  if (spec.start >= size) return { unsatisfiable: true };
++  const end = spec.end === null ? size - 1 : Math.min(spec.end, size - 1);
++  return { offset: spec.start, length: end - spec.start + 1 };
++}
++
++function r2RangeOf(spec) {
++  if (spec.suffix !== undefined) return spec.suffix === 0 ? null : { suffix: spec.suffix };
++  return spec.end === null ? { offset: spec.start } : { offset: spec.start, length: spec.end - spec.start + 1 };
++}
++
++async function releaseBody(object) {
++  if (!object || !object.body || typeof object.body.cancel !== 'function') return;
++  try {
++    await object.body.cancel();
++  } catch {
++    return;
++  }
++}
++
++function unsatisfiableResponse(headers, size) {
++  headers.set('Cache-Control', 'no-store');
++  headers.set('Content-Range', 'bytes */' + size);
++  headers.delete('Content-Type');
++  headers.delete('Content-Length');
++  return new Response(null, { status: 416, headers });
+ }
+ 
+ async function servePublicObject(request, r2Key, env, corsHeaders, cacheControl, contentType, allowRange) {
+-  const meta = await env.R2_BUCKET.head(r2Key);
+-  if (!meta) return null;
++  const isHead = request.method === 'HEAD';
++  const spec = allowRange ? parseRangeSpec(request.headers.get('Range')) : null;
++  const wanted = spec ? r2RangeOf(spec) : null;
+   const headers = new Headers(corsHeaders);
+   headers.set('Access-Control-Expose-Headers', PUBLIC_EXPOSE_HEADERS);
+   headers.set('Cache-Control', cacheControl);
+-  if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
+-  if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
++  const ifRange = request.headers.get('If-Range');
++  const ifRangeHolds = (httpEtag) => !ifRange || Boolean(httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === httpEtag);
++  let object;
++  if (isHead) {
++    object = await env.R2_BUCKET.head(r2Key);
++  } else {
++    try {
++      object = await env.R2_BUCKET.get(r2Key, wanted ? { range: wanted } : undefined);
++    } catch (error) {
++      if (!wanted) throw error;
++      const meta = await env.R2_BUCKET.head(r2Key);
++      if (!meta) return null;
++      if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
++      if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
++        return new Response(null, { status: 304, headers });
++      }
++      if (ifRangeHolds(meta.httpEtag)) {
++        if (!resolveRangeSpec(spec, meta.size).unsatisfiable) throw error;
++        return unsatisfiableResponse(headers, meta.size);
++      }
++      object = await env.R2_BUCKET.get(r2Key);
++      if (!object) return null;
++      headers.set('Content-Type', contentType);
++      headers.set('Accept-Ranges', 'bytes');
++      if (object.httpEtag) headers.set('ETag', object.httpEtag);
++      else headers.delete('ETag');
++      headers.set('Content-Length', object.size.toString());
++      return new Response(object.body, { headers });
++    }
++  }
++  if (!object) return null;
++  if (object.httpEtag) headers.set('ETag', object.httpEtag);
++  if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
++    await releaseBody(object);
+     return new Response(null, { status: 304, headers });
+   }
+   headers.set('Content-Type', contentType);
+   if (allowRange) headers.set('Accept-Ranges', 'bytes');
+-  const ifRange = request.headers.get('If-Range');
+-  const rangeAllowed = allowRange && (!ifRange || (meta.httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === meta.httpEtag));
+-  const range = rangeAllowed ? parseSingleRange(request.headers.get('Range'), meta.size) : null;
++  const rangeAllowed = spec !== null && ifRangeHolds(object.httpEtag);
++  if (spec && !rangeAllowed && !isHead && wanted) {
++    await releaseBody(object);
++    object = await env.R2_BUCKET.get(r2Key);
++    if (!object) return null;
++    if (object.httpEtag) headers.set('ETag', object.httpEtag);
++    else headers.delete('ETag');
++  }
++  const range = rangeAllowed ? resolveRangeSpec(spec, object.size) : null;
+   if (range && range.unsatisfiable) {
+-    headers.set('Content-Range', 'bytes */' + meta.size);
+-    headers.delete('Content-Type');
+-    return new Response(null, { status: 416, headers });
++    await releaseBody(object);
++    return unsatisfiableResponse(headers, object.size);
+   }
+   if (range) {
+-    headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + meta.size);
++    headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + object.size);
+     headers.set('Content-Length', range.length.toString());
+-    if (request.method === 'HEAD') return new Response(null, { status: 206, headers });
+-    const part = await env.R2_BUCKET.get(r2Key, { range: { offset: range.offset, length: range.length } });
+-    if (!part) return null;
+-    return new Response(part.body, { status: 206, headers });
+-  }
+-  headers.set('Content-Length', meta.size.toString());
+-  if (request.method === 'HEAD') return new Response(null, { headers });
+-  const object = await env.R2_BUCKET.get(r2Key);
+-  if (!object) return null;
+-  return new Response(object.body, { headers });
++    return new Response(isHead ? null : object.body, { status: 206, headers });
++  }
++  headers.set('Content-Length', object.size.toString());
++  return new Response(isHead ? null : object.body, { headers });
+ }
+diff --git a/workers/r2-proxy.js b/workers/r2-proxy.js
+index e2e3d76..0da4886 100644
+--- a/workers/r2-proxy.js
++++ b/workers/r2-proxy.js
+@@ -203,53 +203,112 @@ function etagMatches(header, httpEtag) {
+   return header.split(',').some((tag) => tag.trim() === '*' || opaque(tag) === opaque(httpEtag));
+ }
+ 
+-function parseSingleRange(header, size) {
++function parseRangeSpec(header) {
+   const match = /^bytes=(\d*)-(\d*)$/.exec((header || '').trim());
+   if (!match || (match[1] === '' && match[2] === '')) return null;
+-  if (match[1] === '') {
+-    const suffix = Number(match[2]);
+-    if (suffix === 0 || size === 0) return { unsatisfiable: true };
+-    const length = Math.min(suffix, size);
+-    return { offset: size - length, length };
+-  }
++  if (match[1] === '') return { suffix: Number(match[2]) };
+   const start = Number(match[1]);
+   if (match[2] !== '' && Number(match[2]) < start) return null;
+-  if (start >= size) return { unsatisfiable: true };
+-  const end = match[2] === '' ? size - 1 : Math.min(Number(match[2]), size - 1);
+-  return { offset: start, length: end - start + 1 };
++  return { start, end: match[2] === '' ? null : Number(match[2]) };
++}
++
++function resolveRangeSpec(spec, size) {
++  if (size === 0) return { unsatisfiable: true };
++  if (spec.suffix !== undefined) {
++    if (spec.suffix === 0) return { unsatisfiable: true };
++    const length = Math.min(spec.suffix, size);
++    return { offset: size - length, length };
++  }
++  if (spec.start >= size) return { unsatisfiable: true };
++  const end = spec.end === null ? size - 1 : Math.min(spec.end, size - 1);
++  return { offset: spec.start, length: end - spec.start + 1 };
++}
++
++function r2RangeOf(spec) {
++  if (spec.suffix !== undefined) return spec.suffix === 0 ? null : { suffix: spec.suffix };
++  return spec.end === null ? { offset: spec.start } : { offset: spec.start, length: spec.end - spec.start + 1 };
++}
++
++async function releaseBody(object) {
++  if (!object || !object.body || typeof object.body.cancel !== 'function') return;
++  try {
++    await object.body.cancel();
++  } catch {
++    return;
++  }
++}
++
++function unsatisfiableResponse(headers, size) {
++  headers.set('Cache-Control', 'no-store');
++  headers.set('Content-Range', 'bytes */' + size);
++  headers.delete('Content-Type');
++  headers.delete('Content-Length');
++  return new Response(null, { status: 416, headers });
+ }
+ 
+ async function servePublicObject(request, r2Key, env, corsHeaders, cacheControl, contentType, allowRange) {
+-  const meta = await env.R2_BUCKET.head(r2Key);
+-  if (!meta) return null;
++  const isHead = request.method === 'HEAD';
++  const spec = allowRange ? parseRangeSpec(request.headers.get('Range')) : null;
++  const wanted = spec ? r2RangeOf(spec) : null;
+   const headers = new Headers(corsHeaders);
+   headers.set('Access-Control-Expose-Headers', PUBLIC_EXPOSE_HEADERS);
+   headers.set('Cache-Control', cacheControl);
+-  if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
+-  if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
++  const ifRange = request.headers.get('If-Range');
++  const ifRangeHolds = (httpEtag) => !ifRange || Boolean(httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === httpEtag);
++  let object;
++  if (isHead) {
++    object = await env.R2_BUCKET.head(r2Key);
++  } else {
++    try {
++      object = await env.R2_BUCKET.get(r2Key, wanted ? { range: wanted } : undefined);
++    } catch (error) {
++      if (!wanted) throw error;
++      const meta = await env.R2_BUCKET.head(r2Key);
++      if (!meta) return null;
++      if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
++      if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
++        return new Response(null, { status: 304, headers });
++      }
++      if (ifRangeHolds(meta.httpEtag)) {
++        if (!resolveRangeSpec(spec, meta.size).unsatisfiable) throw error;
++        return unsatisfiableResponse(headers, meta.size);
++      }
++      object = await env.R2_BUCKET.get(r2Key);
++      if (!object) return null;
++      headers.set('Content-Type', contentType);
++      headers.set('Accept-Ranges', 'bytes');
++      if (object.httpEtag) headers.set('ETag', object.httpEtag);
++      else headers.delete('ETag');
++      headers.set('Content-Length', object.size.toString());
++      return new Response(object.body, { headers });
++    }
++  }
++  if (!object) return null;
++  if (object.httpEtag) headers.set('ETag', object.httpEtag);
++  if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
++    await releaseBody(object);
+     return new Response(null, { status: 304, headers });
+   }
+   headers.set('Content-Type', contentType);
+   if (allowRange) headers.set('Accept-Ranges', 'bytes');
+-  const ifRange = request.headers.get('If-Range');
+-  const rangeAllowed = allowRange && (!ifRange || (meta.httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === meta.httpEtag));
+-  const range = rangeAllowed ? parseSingleRange(request.headers.get('Range'), meta.size) : null;
++  const rangeAllowed = spec !== null && ifRangeHolds(object.httpEtag);
++  if (spec && !rangeAllowed && !isHead && wanted) {
++    await releaseBody(object);
++    object = await env.R2_BUCKET.get(r2Key);
++    if (!object) return null;
++    if (object.httpEtag) headers.set('ETag', object.httpEtag);
++    else headers.delete('ETag');
++  }
++  const range = rangeAllowed ? resolveRangeSpec(spec, object.size) : null;
+   if (range && range.unsatisfiable) {
+-    headers.set('Content-Range', 'bytes */' + meta.size);
+-    headers.delete('Content-Type');
+-    return new Response(null, { status: 416, headers });
++    await releaseBody(object);
++    return unsatisfiableResponse(headers, object.size);
+   }
+   if (range) {
+-    headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + meta.size);
++    headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + object.size);
+     headers.set('Content-Length', range.length.toString());
+-    if (request.method === 'HEAD') return new Response(null, { status: 206, headers });
+-    const part = await env.R2_BUCKET.get(r2Key, { range: { offset: range.offset, length: range.length } });
+-    if (!part) return null;
+-    return new Response(part.body, { status: 206, headers });
+-  }
+-  headers.set('Content-Length', meta.size.toString());
+-  if (request.method === 'HEAD') return new Response(null, { headers });
+-  const object = await env.R2_BUCKET.get(r2Key);
+-  if (!object) return null;
+-  return new Response(object.body, { headers });
++    return new Response(isHead ? null : object.body, { status: 206, headers });
++  }
++  headers.set('Content-Length', object.size.toString());
++  return new Response(isHead ? null : object.body, { headers });
+ }
+diff --git a/workers/r2-proxy.test.mjs b/workers/r2-proxy.test.mjs
+index 2e335f4..6e3a986 100644
+--- a/workers/r2-proxy.test.mjs
++++ b/workers/r2-proxy.test.mjs
+@@ -134,26 +134,39 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+   });
+   const BYTES = new Uint8Array(100).map((_, i) => i);
+   const ETAG = '"etag-1"';
+-  async function publicRequest(path, { method = 'GET', headers = {}, missing = false } = {}) {
++  async function publicRequest(path, { method = 'GET', headers = {}, missing = false, outOfRange = 'throw', failGet = false, changedOnSecondRead = false, empty = false, cancelRejects = false } = {}) {
++    const DATA = empty ? new Uint8Array(0) : BYTES;
+     const reads = [];
+     const heads = [];
++    const opened = [];
+     const env = { TOKEN_SECRET: secret, R2_BUCKET: {
+       head: async (key) => {
+         heads.push(key);
+-        return missing ? null : { size: BYTES.length, httpEtag: ETAG };
++        return missing ? null : { size: DATA.length, etag: 'etag-1', httpEtag: ETAG };
+       },
+       get: async (key, options) => {
+-        reads.push({ key, range: options?.range ?? null });
++        reads.push({ key, range: options?.range ?? null, onlyIf: options?.onlyIf ?? null });
++        if (failGet) throw new Error('R2 unavailable');
+         if (missing) return null;
++        const second = changedOnSecondRead && reads.length > 1;
++        const etag = second ? 'etag-2' : 'etag-1';
+         const range = options?.range;
+-        if (range && range.offset >= BYTES.length) throw new Error('R2 invalid range');
+-        const slice = range ? BYTES.slice(range.offset, range.offset + range.length) : BYTES;
+-        return { body: slice, size: BYTES.length, httpEtag: ETAG, range };
++        let slice = DATA;
++        if (range) {
++          const offset = range.suffix !== undefined ? Math.max(0, DATA.length - range.suffix) : range.offset;
++          if (offset >= DATA.length && outOfRange === 'throw') throw new Error('R2 invalid range');
++          const end = range.length === undefined ? DATA.length : Math.min(DATA.length, offset + range.length);
++          slice = DATA.slice(Math.min(offset, DATA.length), end);
++        }
++        const state = { cancelled: false };
++        opened.push(state);
++        const body = new ReadableStream({ start(controller) { controller.enqueue(slice); controller.close(); }, cancel() { state.cancelled = true; if (cancelRejects) throw new Error('cancel failed'); } });
++        return { body, size: DATA.length, etag, httpEtag: `"${etag}"`, range };
+       },
+     } };
+     const response = await worker.fetch(new Request(`https://r2.example/${path}`, { method, headers }), env);
+     const body = response.body ? new Uint8Array(await response.arrayBuffer()) : null;
+-    return { response, body, reads, heads };
++    return { response, body, reads, heads, opened };
+   }
+   test(`${name}: PR1 preview 200 carries ETag and exposes headers`, async () => {
+     const { response, body } = await publicRequest('preview/mall/a.wav');
+@@ -164,23 +177,31 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+     assert.equal(body.length, 100);
+     assert.equal(response.headers.get('Access-Control-Expose-Headers'), 'ETag, Content-Range, Accept-Ranges, Content-Length');
+   });
+-  test(`${name}: PR2 matching If-None-Match gives 304 without a body read`, async () => {
+-    for (const inm of [ETAG, `W/${ETAG}`, `"x", ${ETAG}`, '*']) {
+-      const { response, body, reads } = await publicRequest('preview/mall/a.wav', { headers: { 'If-None-Match': inm, Range: 'bytes=0-9' } });
+-      assert.equal(response.status, 304, inm);
+-      assert.equal(body, null);
+-      assert.equal(reads.length, 0);
+-      assert.equal(response.headers.get('ETag'), ETAG);
+-      assert.equal(response.headers.get('Content-Length'), null);
+-      assert.equal(response.headers.get('Content-Type'), null);
+-      assert.equal(response.headers.get('Access-Control-Allow-Origin'), '*');
++  test(`${name}: PR2 matching If-None-Match gives 304 from one R2 get with the body released`, async () => {
++    for (const extra of [{ Range: 'bytes=0-9' }, {}]) {
++      for (const inm of [ETAG, `W/${ETAG}`, `"x", ${ETAG}`, '*']) {
++        const { response, body, reads, heads, opened } = await publicRequest('preview/mall/a.wav', { headers: { 'If-None-Match': inm, ...extra } });
++        assert.equal(response.status, 304, inm);
++        assert.equal(body, null);
++        assert.equal(reads.length, 1);
++        assert.equal(heads.length, 0);
++        assert.deepEqual(opened.map((o) => o.cancelled), [true]);
++        assert.equal(response.headers.get('ETag'), ETAG);
++        assert.equal(response.headers.get('Cache-Control'), 'public, max-age=86400');
++        assert.equal(response.headers.get('Content-Length'), null);
++        assert.equal(response.headers.get('Content-Type'), null);
++        assert.equal(response.headers.get('Content-Range'), null);
++        assert.equal(response.headers.get('Access-Control-Allow-Origin'), '*');
++      }
+     }
+     assert.equal((await publicRequest('preview/mall/a.wav', { headers: { 'If-None-Match': '"other"' } })).response.status, 200);
+   });
+   test(`${name}: PR3 single range gives 206 with Content-Range`, async () => {
+     const cases = [['bytes=10-19', 'bytes 10-19/100', 10, 10], ['bytes=90-', 'bytes 90-99/100', 90, 10], ['bytes=-5', 'bytes 95-99/100', 95, 5], ['bytes=95-500', 'bytes 95-99/100', 95, 5]];
+     for (const [range, contentRange, first, length] of cases) {
+-      const { response, body } = await publicRequest('preview/mall/a.wav', { headers: { Range: range } });
++      const { response, body, reads, heads } = await publicRequest('preview/mall/a.wav', { headers: { Range: range } });
++      assert.equal(reads.length, 1);
++      assert.equal(heads.length, 0);
+       assert.equal(response.status, 206, range);
+       assert.equal(response.headers.get('Content-Range'), contentRange);
+       assert.equal(response.headers.get('Content-Length'), String(length));
+@@ -188,12 +209,24 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+       assert.equal(body[0], first);
+     }
+   });
+-  test(`${name}: PR4 unsatisfiable range gives 416 before any R2 read`, async () => {
+-    for (const range of ['bytes=100-', 'bytes=500-600', 'bytes=-0']) {
+-      const { response, reads } = await publicRequest('preview/mall/a.wav', { headers: { Range: range } });
+-      assert.equal(response.status, 416, range);
+-      assert.equal(response.headers.get('Content-Range'), 'bytes */100');
+-      assert.equal(reads.length, 0);
++  test(`${name}: PR4 unsatisfiable range gives a no-store 416 with no body bytes in both R2 out-of-range modes`, async () => {
++    for (const outOfRange of ['throw', 'short']) {
++      for (const range of ['bytes=100-', 'bytes=500-600', 'bytes=-0']) {
++        const { response, body, reads, heads, opened } = await publicRequest('preview/mall/a.wav', { headers: { Range: range }, outOfRange });
++        const label = `${outOfRange} ${range}`;
++        assert.equal(response.status, 416, label);
++        assert.equal(response.headers.get('Content-Range'), 'bytes */100', label);
++        assert.equal(response.headers.get('Cache-Control'), 'no-store', label);
++        assert.equal(response.headers.get('Content-Length'), null, label);
++        assert.equal(response.headers.get('Content-Type'), null, label);
++        assert.equal(response.headers.get('ETag'), ETAG, label);
++        assert.equal(body, null, label);
++        assert.equal(reads.length, 1, label);
++        assert.ok(opened.every((o) => o.cancelled), label);
++        const threw = outOfRange === 'throw' && range !== 'bytes=-0';
++        assert.equal(heads.length, threw ? 1 : 0, label);
++        assert.equal(opened.length, threw ? 0 : 1, label);
++      }
+     }
+   });
+   test(`${name}: PR5 invalid or multi range and If-Range mismatch give the full 200`, async () => {
+@@ -231,13 +264,94 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+     assert.equal(bad.response.status, 401);
+     assert.equal(bad.reads.length + bad.heads.length, 0);
+   });
++  test(`${name}: PR10 every public GET makes exactly one R2 get and no head`, async () => {
++    const cases = [[{}, null], [{ Range: 'bytes=50-' }, { offset: 50 }], [{ Range: 'bytes=10-19' }, { offset: 10, length: 10 }], [{ Range: 'bytes=-5' }, { suffix: 5 }], [{ Range: 'bytes=0-1,5-6' }, null]];
++    for (const [headers, range] of cases) {
++      const { response, reads, heads, opened } = await publicRequest('preview/mall/a.wav', { headers });
++      assert.ok(response.status === 200 || response.status === 206, JSON.stringify(headers));
++      assert.equal(heads.length, 0, JSON.stringify(headers));
++      assert.deepEqual(reads.map((r) => r.range), [range], JSON.stringify(headers));
++      assert.deepEqual(reads.map((r) => r.onlyIf), [null]);
++      assert.deepEqual(opened.map((o) => o.cancelled), [false]);
++    }
++    const head = await publicRequest('preview/mall/a.wav', { method: 'HEAD', headers: { Range: 'bytes=0-9' } });
++    assert.equal(head.heads.length, 1);
++    assert.equal(head.reads.length, 0);
++  });
++  test(`${name}: PR11 short R2 range body length equals Content-Length`, async () => {
++    for (const range of ['bytes=95-500', 'bytes=-500', 'bytes=99-']) {
++      const { response, body } = await publicRequest('preview/mall/a.wav', { headers: { Range: range }, outOfRange: 'short' });
++      assert.equal(response.status, 206, range);
++      assert.equal(body.length, Number(response.headers.get('Content-Length')), range);
++    }
++  });
++  test(`${name}: PR12 If-Range mismatch releases the range read and serves the full current object`, async () => {
++    const { response, body, reads, heads, opened } = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=0-9', 'If-Range': ETAG }, changedOnSecondRead: false });
++    assert.equal(response.status, 206);
++    assert.equal(reads.length + heads.length, 1);
++    assert.equal(body.length, 10);
++    assert.equal(opened.length, 1);
++    const stale = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=0-9', 'If-Range': '"old"' }, changedOnSecondRead: true });
++    assert.equal(stale.response.status, 200);
++    assert.equal(stale.body.length, 100);
++    assert.equal(stale.response.headers.get('Content-Range'), null);
++    assert.equal(stale.response.headers.get('ETag'), '"etag-2"');
++    assert.deepEqual(stale.reads.map((r) => r.range), [{ offset: 0, length: 10 }, null]);
++    assert.deepEqual(stale.opened.map((o) => o.cancelled), [true, false]);
++    assert.equal(stale.heads.length, 0);
++  });
++  test(`${name}: PR13 an R2 get failure on a satisfiable range stays a 500`, async () => {
++    const { response, body, heads } = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=0-9' }, failGet: true });
++    assert.equal(response.status, 500);
++    assert.equal(new TextDecoder().decode(body), 'Internal Error');
++    assert.equal(heads.length, 1);
++    assert.equal((await publicRequest('preview/mall/a.wav', { failGet: true })).response.status, 500);
++  });
++  test(`${name}: PR14 out-of-range preconditions: If-None-Match wins, a failed If-Range serves the full object`, async () => {
++    for (const outOfRange of ['throw', 'short']) {
++      const fresh = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=500-', 'If-None-Match': ETAG }, outOfRange });
++      assert.equal(fresh.response.status, 304, outOfRange);
++      assert.equal(fresh.body, null);
++      assert.equal(fresh.response.headers.get('Content-Type'), null);
++      assert.equal(fresh.response.headers.get('Content-Range'), null);
++      assert.equal(fresh.reads.length, 1);
++      assert.equal(fresh.heads.length, outOfRange === 'throw' ? 1 : 0);
++      assert.ok(fresh.opened.every((o) => o.cancelled));
++      const stale = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=500-', 'If-Range': '"old"' }, outOfRange });
++      assert.equal(stale.response.status, 200, outOfRange);
++      assert.equal(stale.body.length, 100);
++      assert.equal(stale.response.headers.get('Content-Length'), '100');
++      assert.equal(stale.response.headers.get('Content-Range'), null);
++      assert.equal(stale.response.headers.get('Cache-Control'), 'public, max-age=86400');
++      assert.deepEqual(stale.reads.map((r) => r.range), [{ offset: 500 }, null]);
++      assert.equal(stale.heads.length, outOfRange === 'throw' ? 1 : 0);
++    }
++  });
++  test(`${name}: PR15 empty object ranges give 416 and a failing body cancel still gives 304`, async () => {
++    for (const outOfRange of ['throw', 'short']) {
++      for (const range of ['bytes=0-', 'bytes=-5']) {
++        const { response, body } = await publicRequest('preview/mall/a.wav', { headers: { Range: range }, outOfRange, empty: true });
++        assert.equal(response.status, 416, `${outOfRange} ${range}`);
++        assert.equal(response.headers.get('Content-Range'), 'bytes */0');
++        assert.equal(response.headers.get('Cache-Control'), 'no-store');
++        assert.equal(body, null);
++      }
++    }
++    const rejected = await publicRequest('preview/mall/a.wav', { headers: { 'If-None-Match': ETAG }, cancelRejects: true });
++    assert.equal(rejected.response.status, 304);
++    assert.deepEqual(rejected.opened.map((o) => o.cancelled), [true]);
++  });
+   if (name === 'proxy') {
+     test(`${name}: PR9 cover image ETag and 304, 404 text kept, no range`, async () => {
+       const first = await publicRequest('mall/cover.jpg');
+       assert.equal(first.response.status, 200);
+       assert.equal(first.response.headers.get('ETag'), ETAG);
+       assert.equal(first.response.headers.get('Cache-Control'), 'public, max-age=604800');
+-      assert.equal((await publicRequest('mall/cover.jpg', { headers: { 'If-None-Match': ETAG } })).response.status, 304);
++      assert.equal(first.heads.length, 0);
++      assert.equal(first.reads.length, 1);
++      const revalidated = await publicRequest('mall/cover.jpg', { headers: { 'If-None-Match': ETAG } });
++      assert.equal(revalidated.response.status, 304);
++      assert.deepEqual(revalidated.opened.map((o) => o.cancelled), [true]);
+       assert.equal((await publicRequest('mall/cover.jpg', { headers: { Range: 'bytes=0-9' } })).response.status, 200);
+       const missing = await publicRequest('mall/cover.jpg', { missing: true });
+       assert.equal(missing.response.status, 404);

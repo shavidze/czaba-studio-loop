@@ -1,0 +1,12 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -266,9 +266,6 @@
+       const meta = await env.R2_BUCKET.head(r2Key);
+       if (!meta) return null;
+       if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
+-      if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
+-        return new Response(null, { status: 304, headers });
+-      }
+       if (ifRangeHolds(meta.httpEtag)) {
+         if (!resolveRangeSpec(spec, meta.size).unsatisfiable) throw error;
+         return unsatisfiableResponse(headers, meta.size);

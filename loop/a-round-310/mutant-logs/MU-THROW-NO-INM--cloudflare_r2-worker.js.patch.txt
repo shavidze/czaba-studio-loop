@@ -1,0 +1,12 @@
+--- cloudflare/r2-worker.js
++++ cloudflare/r2-worker.js (mutant)
+@@ -228,9 +228,6 @@
+       const meta = await env.R2_BUCKET.head(r2Key);
+       if (!meta) return null;
+       if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
+-      if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
+-        return new Response(null, { status: 304, headers });
+-      }
+       if (ifRangeHolds(meta.httpEtag)) {
+         if (!resolveRangeSpec(spec, meta.size).unsatisfiable) throw error;
+         return unsatisfiableResponse(headers, meta.size);

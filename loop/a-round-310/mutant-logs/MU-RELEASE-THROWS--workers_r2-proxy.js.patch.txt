@@ -1,0 +1,15 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -231,11 +231,7 @@
+ 
+ async function releaseBody(object) {
+   if (!object || !object.body || typeof object.body.cancel !== 'function') return;
+-  try {
+-    await object.body.cancel();
+-  } catch {
+-    return;
+-  }
++  await object.body.cancel();
+ }
+ 
+ function unsatisfiableResponse(headers, size) {

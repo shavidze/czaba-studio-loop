@@ -1,0 +1,11 @@
+--- cloudflare/r2-worker.js
++++ cloudflare/r2-worker.js (mutant)
+@@ -258,8 +258,6 @@
+     await releaseBody(object);
+     object = await env.R2_BUCKET.get(r2Key);
+     if (!object) return null;
+-    if (object.httpEtag) headers.set('ETag', object.httpEtag);
+-    else headers.delete('ETag');
+   }
+   const range = rangeAllowed ? resolveRangeSpec(spec, object.size) : null;
+   if (range && range.unsatisfiable) {

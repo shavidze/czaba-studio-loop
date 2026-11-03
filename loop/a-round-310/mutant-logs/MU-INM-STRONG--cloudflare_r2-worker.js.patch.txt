@@ -1,0 +1,11 @@
+--- cloudflare/r2-worker.js
++++ cloudflare/r2-worker.js (mutant)
+@@ -161,7 +161,7 @@
+ 
+ function etagMatches(header, httpEtag) {
+   if (!header || !httpEtag) return false;
+-  const opaque = (tag) => tag.trim().replace(/^W\//, '');
++  const opaque = (tag) => tag.trim();
+   return header.split(',').some((tag) => tag.trim() === '*' || opaque(tag) === opaque(httpEtag));
+ }
+ 

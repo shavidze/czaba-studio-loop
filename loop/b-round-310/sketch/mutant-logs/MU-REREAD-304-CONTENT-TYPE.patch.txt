@@ -1,0 +1,21 @@
+--- cloudflare/r2-worker.js
+-    else headers.delete('ETag');
+    if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+      await releaseBody(object);
+      return new Response(null, { status: 304, headers });
+    }
+  }
+  headers.set('Content-Type', contentType);
+  if (allowRange) headers.set('Accept-Ranges', 'bytes');
+
++    else headers.delete('ETag');
+    headers.set('Content-Type', contentType);
+    headers.set('Accept-Ranges', 'bytes');
+    if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+      await releaseBody(object);
+      return new Response(null, { status: 304, headers });
+    }
+  }
+  headers.set('Content-Type', contentType);
+  if (allowRange) headers.set('Accept-Ranges', 'bytes');
+

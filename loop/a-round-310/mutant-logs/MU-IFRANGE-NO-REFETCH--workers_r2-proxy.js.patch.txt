@@ -1,0 +1,11 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -293,8 +293,6 @@
+   if (allowRange) headers.set('Accept-Ranges', 'bytes');
+   const rangeAllowed = spec !== null && ifRangeHolds(object.httpEtag);
+   if (spec && !rangeAllowed && !isHead && wanted) {
+-    await releaseBody(object);
+-    object = await env.R2_BUCKET.get(r2Key);
+     if (!object) return null;
+     if (object.httpEtag) headers.set('ETag', object.httpEtag);
+     else headers.delete('ETag');

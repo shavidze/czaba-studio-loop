@@ -1,0 +1,130 @@
+const PUBLIC_EXPOSE_HEADERS = 'ETag, Content-Range, Accept-Ranges, Content-Length';
+
+function etagMatches(header, httpEtag) {
+  if (!header || !httpEtag) return false;
+  const opaque = (tag) => tag.trim().replace(/^W\//, '');
+  return header.split(',').some((tag) => tag.trim() === '*' || opaque(tag) === opaque(httpEtag));
+}
+
+function parseRangeSpec(header) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec((header || '').trim());
+  if (!match || (match[1] === '' && match[2] === '')) return null;
+  if (match[1] === '') return { suffix: Number(match[2]) };
+  const start = Number(match[1]);
+  if (match[2] !== '' && Number(match[2]) < start) return null;
+  return { start, end: match[2] === '' ? null : Number(match[2]) };
+}
+
+function resolveRangeSpec(spec, size) {
+  if (size === 0) return { unsatisfiable: true };
+  if (spec.suffix !== undefined) {
+    if (spec.suffix === 0) return { unsatisfiable: true };
+    const length = Math.min(spec.suffix, size);
+    return { offset: size - length, length };
+  }
+  if (spec.start >= size) return { unsatisfiable: true };
+  const end = spec.end === null ? size - 1 : Math.min(spec.end, size - 1);
+  return { offset: spec.start, length: end - spec.start + 1 };
+}
+
+function r2RangeOf(spec) {
+  if (spec.suffix !== undefined) {
+    if (spec.suffix === 0) return null;
+    return Number.isSafeInteger(spec.suffix) ? { suffix: spec.suffix } : { offset: 0 };
+  }
+  if (spec.end === null) return { offset: spec.start };
+  const length = spec.end - spec.start + 1;
+  return Number.isSafeInteger(length) ? { offset: spec.start, length } : { offset: spec.start };
+}
+
+async function releaseBody(object) {
+  if (!object || !object.body || typeof object.body.cancel !== 'function') return;
+  try {
+    await object.body.cancel();
+  } catch {
+    return;
+  }
+}
+
+function unsatisfiableResponse(headers, size) {
+  headers.set('Cache-Control', 'no-store');
+  headers.set('Content-Range', 'bytes */' + size);
+  headers.delete('Content-Type');
+  headers.delete('Content-Length');
+  return new Response(null, { status: 416, headers });
+}
+
+async function servePublicObject(request, r2Key, env, corsHeaders, cacheControl, contentType, allowRange) {
+  const isHead = request.method === 'HEAD';
+  const spec = allowRange ? parseRangeSpec(request.headers.get('Range')) : null;
+  const wanted = spec ? r2RangeOf(spec) : null;
+  const headers = new Headers(corsHeaders);
+  headers.set('Access-Control-Expose-Headers', PUBLIC_EXPOSE_HEADERS);
+  headers.set('Cache-Control', cacheControl);
+  const ifRange = request.headers.get('If-Range');
+  const ifRangeHolds = (httpEtag) => !ifRange || Boolean(httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === httpEtag);
+  let object;
+  if (isHead) {
+    object = await env.R2_BUCKET.head(r2Key);
+  } else {
+    try {
+      object = await env.R2_BUCKET.get(r2Key, wanted ? { range: wanted } : undefined);
+    } catch (error) {
+      if (!wanted) throw error;
+      const meta = await env.R2_BUCKET.head(r2Key);
+      if (!meta) return null;
+      if (meta.httpEtag) headers.set('ETag', meta.httpEtag);
+      if (etagMatches(request.headers.get('If-None-Match'), meta.httpEtag)) {
+        return new Response(null, { status: 304, headers });
+      }
+      if (ifRangeHolds(meta.httpEtag)) {
+        if (!resolveRangeSpec(spec, meta.size).unsatisfiable) throw error;
+        return unsatisfiableResponse(headers, meta.size);
+      }
+      object = await env.R2_BUCKET.get(r2Key);
+      if (!object) return null;
+      if (object.httpEtag) headers.set('ETag', object.httpEtag);
+      else headers.delete('ETag');
+      if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+        await releaseBody(object);
+        return new Response(null, { status: 304, headers });
+      }
+      headers.set('Content-Type', contentType);
+      headers.set('Accept-Ranges', 'bytes');
+      headers.set('Content-Length', object.size.toString());
+      return new Response(object.body, { headers });
+    }
+  }
+  if (!object) return null;
+  if (object.httpEtag) headers.set('ETag', object.httpEtag);
+  if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+    await releaseBody(object);
+    return new Response(null, { status: 304, headers });
+  }
+  const rangeAllowed = spec !== null && ifRangeHolds(object.httpEtag);
+  if (spec && !rangeAllowed && !isHead && wanted) {
+    await releaseBody(object);
+    object = await env.R2_BUCKET.get(r2Key);
+    if (!object) return null;
+    if (object.httpEtag) headers.set('ETag', object.httpEtag);
+    else headers.delete('ETag');
+    if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+      await releaseBody(object);
+      return new Response(null, { status: 304, headers });
+    }
+  }
+  headers.set('Content-Type', contentType);
+  if (allowRange) headers.set('Accept-Ranges', 'bytes');
+  const range = rangeAllowed ? resolveRangeSpec(spec, object.size) : null;
+  if (range && range.unsatisfiable) {
+    await releaseBody(object);
+    return unsatisfiableResponse(headers, object.size);
+  }
+  if (range) {
+    headers.set('Content-Range', 'bytes ' + range.offset + '-' + (range.offset + range.length - 1) + '/' + object.size);
+    headers.set('Content-Length', range.length.toString());
+    return new Response(isHead ? null : object.body, { status: 206, headers });
+  }
+  headers.set('Content-Length', object.size.toString());
+  return new Response(isHead ? null : object.body, { headers });
+}

@@ -1,0 +1,16 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -256,9 +256,10 @@
+   const ifRange = request.headers.get('If-Range');
+   const ifRangeHolds = (httpEtag) => !ifRange || Boolean(httpEtag && !ifRange.startsWith('W/') && ifRange.trim() === httpEtag);
+   let object;
+-  if (isHead) {
+-    object = await env.R2_BUCKET.head(r2Key);
+-  } else {
++  if (isHead || !(await env.R2_BUCKET.head(r2Key)) || true) {
++    object = isHead ? await env.R2_BUCKET.head(r2Key) : undefined;
++  }
++  if (!isHead) {
+     try {
+       object = await env.R2_BUCKET.get(r2Key, wanted ? { range: wanted } : undefined);
+     } catch (error) {

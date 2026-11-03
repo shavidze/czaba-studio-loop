@@ -1,0 +1,10 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -286,7 +286,6 @@
+   if (!object) return null;
+   if (object.httpEtag) headers.set('ETag', object.httpEtag);
+   if (etagMatches(request.headers.get('If-None-Match'), object.httpEtag)) {
+-    await releaseBody(object);
+     return new Response(null, { status: 304, headers });
+   }
+   headers.set('Content-Type', contentType);

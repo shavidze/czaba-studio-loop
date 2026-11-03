@@ -1,0 +1,11 @@
+--- workers/r2-proxy.js
++++ workers/r2-proxy.js (mutant)
+@@ -199,7 +199,7 @@
+ 
+ function etagMatches(header, httpEtag) {
+   if (!header || !httpEtag) return false;
+-  const opaque = (tag) => tag.trim().replace(/^W\//, '');
++  const opaque = (tag) => tag.trim();
+   return header.split(',').some((tag) => tag.trim() === '*' || opaque(tag) === opaque(httpEtag));
+ }
+ 
