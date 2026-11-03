@@ -1,0 +1,52 @@
+--- app/components/arrangement/ArrangementClip.tsx	2026-11-03 17:09:35.617485894 +0000
++++ app/components/arrangement/ArrangementClip.tsx (memo variant)	2026-11-03 17:09:35.602421776 +0000
+@@ -319,7 +319,7 @@
+   testId?: string;
+ }
+ 
+-export function ArrangementPeakPath({
++export const ArrangementPeakPath = memo(function ArrangementPeakPath({
+   clip,
+   peaks,
+   columns,
+@@ -351,7 +351,7 @@
+       <path d={peakShape.path} fill="currentColor" />
+     </svg>
+   );
+-}
++});
+ 
+ interface ArrangementClipRangeOverlayProps {
+   trackId: string;
+--- app/components/arrangement/ArrangementDetailPanel.tsx	2026-11-03 17:09:35.618003124 +0000
++++ app/components/arrangement/ArrangementDetailPanel.tsx (memo variant)	2026-11-03 17:09:35.604017767 +0000
+@@ -157,7 +157,7 @@
+   return (gainDb ?? 0).toFixed(1);
+ }
+ 
+-function ArrangementDetailPlayhead({
++const ArrangementDetailPlayhead = memo(function ArrangementDetailPlayhead({
+   clipStart,
+   clipDuration,
+ }: {
+@@ -195,9 +195,9 @@
+       <div className="absolute inset-y-0 left-0 w-px bg-accent" />
+     </div>
+   );
+-}
++});
+ 
+-function ArrangementDetailWaveform({
++const ArrangementDetailWaveform = memo(function ArrangementDetailWaveform({
+   selection,
+   peaks,
+   range,
+@@ -248,7 +248,7 @@
+       <ArrangementDetailPlayhead clipStart={clip.start} clipDuration={clip.duration} />
+     </div>
+   );
+-}
++});
+ 
+ interface ArrangementDetailClipGainProps {
+   clipIds: readonly string[] | null;

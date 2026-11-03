@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-03T16:31:05.389Z)
+# Active loop summary (2026-11-03T17:58:01.464Z)
 
-- backlog.json 3079 KB -> active view 417 KB
-- status: G_ROOT_GATE round 318
-- servers: `{"checkedUtc":"2026-11-03T15:34:17.6977547Z","round":318,"attempt":1,"store":200}`
+- backlog.json 3088 KB -> active view 420 KB
+- status: G_ROOT_GATE round 319
+- servers: `{"checkedUtc":"2026-11-03T17:15:13.9943655Z","round":319,"attempt":1,"store":200}`
 - last publication: a5a9c9734e6d6f8b51d86d17d11b5cee7c01ccc5 (rounds 316-317)
-- last root gate: round 318 skipped - C taskStatus FAIL
+- last root gate: round 319 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -771,6 +771,14 @@
 - C-R315-VIDEO-END-NO-FADE / info / signal (D-29z854) -> T12-ADVANCED T12.13 micro fades; byte-identical at HEAD / a video's own sound is cut at the video duration with no fade (last samples ~0.50)
 - A-R316-REVIEW-P4 / info / signal (D-29z857): a future CSP needs font-src 'self' data: (2 inlined Noto stubs; C confirmed 4 data:font/woff2 refs in fonts-*.css); owner: whoever adds a CSP / CSP font-src data:
 - INFO-C317-WARMUP-TIMEOUT / info / open info (D-29z862): the perf warm-up script (c-round-314/warm.cjs) times out on 'collection ready' at ~303 s; the perf spec itself passes; fix home: the next harness touch / perf warm-up collection-ready timeout
+- C-R318-02 / medium / ruled (D-29z864): grant widened, per move <= 15 kept, max <= 35; fixed by round 319 pending C / range drag 21.033/move, max 39 > 15 inside round-318 grants
+- C-R318-01 / low / ruled (D-29z865): readout memo, detail wrapper removed (panel subscribes), overlay memo child with primitive props; named-fiber tolerance; checked by round 319 PERF-RANGE/PERF-LOAD / +2 fibers per StudioWorkspace commit from unmemoized range wrappers
+- C-R318-03 / medium / ruled (D-29z866): accept 4 notices rows, count 564; regenerated in round 319 / THIRD_PARTY_NOTICES not regenerated (TL5 red)
+- C-R318-04 / medium / ruled (D-29z869): closed by round 319 deliverables pending C / K14 0, doc 230, A-REVIEW, A-MUTANTS missing
+- C-R318-06 / low (provisional) / open_low_provisional (D-29z870): repro + root-cause row in REGRESSION-ROUND-2026-11-05; severity may rise on repro / 1280x720: Ctrl+E after Space/Space/Home on a re-dragged selection says 'Could not split at the time selection.'
+- SIG-R319-TRANSPORT-FLIP / info / signal -> PERF-10 / first range commit re-renders ArrangementTransport + icons (~20 fibers) on the null->range flip
+- SIG-R319-CLIPGAIN-PROPS / info / signal -> PERF-10 / fader work / ArrangementDetailClipGain receives ~10 unstable callbacks + 2 fresh arrays; memo cannot bail
+- SIG-R319-DEVOPTIONAL-NOTICES / info / signal for root/OSS-LIC (no B action) / devOptional lock entries (@types/react, @types/prop-types, csstype) now listed as runtime notices
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

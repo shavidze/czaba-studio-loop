@@ -1,0 +1,83 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c319m[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/render-budget.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 5242[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play [33m 1817[2mms[22m[39m
+     [33m[2m✓[22m[39m RB-IM keeps the insert marker line as the same node over Play → Stop → Play [33m 1342[2mms[22m[39m
+     [33m[2m✓[22m[39m moves the playhead, ruler handle and transport time on playback frames without React renders [33m 740[2mms[22m[39m
+[31m     [31m×[31m does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e)[39m[32m 105[2mms[22m[39m
+     [32m✓[39m shows the seek position immediately when stopped and after a zoom change[32m 110[2mms[22m[39m
+     [32m✓[39m writes only transform on the detail playhead per frame and never left, width or height (R9-D3, C-R8-01)[32m 80[2mms[22m[39m
+     [32m✓[39m keeps the library insert-marker text on 60 position frames and writes marker moves without rendering LibraryInsertMarkerText (R9-L1, C-R6-02, C-R250-01)[32m 86[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02) [33m 962[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx [2m([22m[2m25 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 14360[2mms[22m[39m
+[31m     [31m×[31m CP1: a single Clip Gain drag writes no history and re-renders no parent per move; the model stays put while the live gain and both drawings follow[39m[33m 532[2mms[22m[39m
+     [32m✓[39m CP2: pointerup writes one Clip Gain entry with the exact last previewed dB; Undo restores the model, the live gain and the lane drawing[32m 269[2mms[22m[39m
+     [32m✓[39m CP3 pointercancel: a members drag follows clipGainShiftTargets live; the cancel restores every member gain, both lane drawings and the block with no entry[32m 143[2mms[22m[39m
+     [32m✓[39m CP4 stolen claim: a members drag follows clipGainShiftTargets live; the steal restores every member gain, both lane drawings and the block with no entry[32m 255[2mms[22m[39m
+     [32m✓[39m CP5-members fader blur: a members drag follows clipGainShiftTargets live; the blur restores every member gain, both lane drawings and the block with no entry[32m 127[2mms[22m[39m
+     [32m✓[39m CP5: a fader blur mid single drag cancels with no entry and restores the display and the live gain[32m 75[2mms[22m[39m
+     [32m✓[39m CP5b: a pointercancel mid single drag restores the field, the fader, the draft and the live gain with no entry[32m 69[2mms[22m[39m
+     [32m✓[39m CP6: a members commit writes one entry, sets the members status exactly as the pending path does and stores the pending result for the same anchor[32m 142[2mms[22m[39m
+     [32m✓[39m CP7: playing, a stop and start or a forced resync mid-drag builds the new graph with the dragged clip gain[32m 144[2mms[22m[39m
+     [32m✓[39m CP8: playing a short loop, a late loop wrap mid-drag rebuilds the graph with the dragged clip gain[32m 130[2mms[22m[39m
+     [32m✓[39m CP9: fader keyboard steps, double-click reset, the typed field and the reset button keep their values, labels and statuses[32m 252[2mms[22m[39m
+     [32m✓[39m CP10: mid-drag the field shows the draft with no pending marker and the reset button follows the draft; after release both show the committed state[32m 95[2mms[22m[39m
+     [32m✓[39m CP10b: a selection change mid members-drag to clips that include a video clip shows the stored disabled state, not the draft[32m 82[2mms[22m[39m
+     [32m✓[39m CP11: unmounting mid-drag clears the override and every draft entry and leaves no window pointer listener[32m 108[2mms[22m[39m
+     [32m✓[39m CP12-COVER: the slider chunks list every tenth of a dB from CLIP_GAIN_MIN_DB to CLIP_GAIN_MAX_DB once, in order, with no gap and no overlap[32m 1[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12a: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -600 to tenth -391 [33m 3776[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12b: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -390 to tenth -181 [33m 2609[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12c: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -180 to tenth 29 [33m 2493[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12d: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth 30 to tenth 240 [33m 2456[2mms[22m[39m
+     [32m✓[39m CP12e: Shift-fine pointer and pending commits agree, and three members anchors including both clamps commit the same gains by pointer and by pending onChange[32m 176[2mms[22m[39m
+     [32m✓[39m CP13: at waveform zoom 2 the lane drawing during a drag is the shape for draft × 2; the detail drawing ignores the zoom[32m 67[2mms[22m[39m
+     [32m✓[39m CP14: dragging back to the start value shows the stored value mid-gesture, writes no entry and clears every draft[32m 90[2mms[22m[39m
+     [32m✓[39m CP15: releasing a value-changing single drag from a typed −12 dB commits the Clip Gain block once, never with the pending state[32m 86[2mms[22m[39m
+     [32m✓[39m CP16: after a release, Undo, Redo, typing then Escape and the reset button re-sync the field and the pending state as before[32m 112[2mms[22m[39m
+     [32m✓[39m CP17: a members drag builds the range from the drafts and the stored gains passed as props; a mid-drag selection change shows the new selection’s stored gains[32m 67[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx[2m > [22mPERF-FADER-b Clip Gain pointer preview (D-29z189)[2m > [22mCP1: a single Clip Gain drag writes no history and re-renders no parent per move; the model stays put while the live gain and both drawings follow
+[31m[1mAssertionError[22m: expected +0 to be 8 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 8[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx:[2m557:62[22m[39m
+    [90m555| [39m    [34mexpect[39m([34mparentRenders[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m556| [39m    expect(renderLog.counts.get('ArrangementDetailClipGain') ?? 0).toB…
+    [90m557| [39m    expect(renderLog.counts.get('ArrangementPeakPath') ?? 0).toBe(delt…
+    [90m   | [39m                                                             [31m^[39m
+    [90m558| [39m    [34mexpect[39m(applyScheduleMock[33m.[39mmock[33m.[39mcalls[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m559| [39m    [34mwindowPointer[39m([32m'pointerup'[39m[33m,[39m [34m21[39m[33m,[39m [34m30[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/render-budget.test.tsx[2m > [22mPlay render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)[2m > [22mdoes not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e)
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/render-budget.test.tsx:[2m439:68[22m[39m
+    [90m437| [39m    fireEvent[33m.[39m[34mclick[39m(view[33m.[39m[34mgetByTestId[39m([32m'arrangement-detail-toggle'[39m))[33m;[39m
+    [90m438| [39m    expect(renderLog.counts.get('ArrangementDetailContentInner') ?? 0)…
+    [90m439| [39m    expect(renderLog.counts.get('ArrangementDetailPlayhead') ?? 0).toB…
+    [90m   | [39m                                                                   [31m^[39m
+    [90m440| [39m    const detailPlayhead = view.getByTestId('arrangement-detail-playhe…
+    [90m441| [39m    renderLog[33m.[39mcounts[33m.[39m[34mclear[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m31 passed[39m[22m[90m (33)[39m
+[2m   Start at [22m 17:16:58
+[2m   Duration [22m 17.01s[2m (transform 2.33s, setup 0ms, import 3.67s, tests 19.60s, environment 1.07s)[22m
+
+
+::error file=/tmp/c319m/app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx,title=app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP1%3A a single Clip Gain drag writes no history and re-renders no parent per move; the model stays put while the live gain and both drawings follow,line=557,column=62::AssertionError: expected +0 to be 8 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 8%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx:557:62%0A%0A
+
+::error file=/tmp/c319m/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e),line=439,column=68::AssertionError: expected 0 to be greater than 0%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:439:68%0A%0A
+rc=1

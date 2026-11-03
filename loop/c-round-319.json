@@ -1,0 +1,184 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-03T17:15:13.9943655Z",
+  "round": 319,
+  "attempt": 1,
+  "store": 200
+ },
+ "aStatus": "STOP — needs B ruling (§6 bullet 4: memo naming vs name-keyed tests R11-P1e / CP1)",
+ "assertsSpecified": 7,
+ "mutantsRecorded": 4,
+ "mutantRedOnSketch": "on A's handed-off tree: MU-RANGE-IN-VALUE->RS4; MU-LANE-NEW-OBJECT->RS4/RS5/RS6; MU-NO-STATUS-REWRITE->RS6; MU-STALE-LATESTREF (approximation)->RS7; C-MU-OVERLAY-IGNORE-TRACK->RS5 red; C-MU-DETAIL-IGNORE-PROP survived (C-R319-03); restored green 67/67",
+ "bugs": [
+  {
+   "id": "C-R319-01",
+   "origin": "B spec (K19/§1 memo form) + B sketch pre-check",
+   "severity": "medium",
+   "steps": [
+    "cp A tree to scratch; patch -p0 < a-round-319/memo-wrappers.patch.txt",
+    "npx vitest run app/lib/arrangement/__tests__/render-budget.test.tsx app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx"
+   ],
+   "expected": "The §1 memo wrappers (PeakPath, DetailPlayhead, DetailWaveform) in the K19 form keep all covering tests green",
+   "actual": "2 failed / 31 passed: R11-P1e l.439 'expected 0 to be greater than 0', CP1 l.557 'expected +0 to be 8'. esbuild transformSync emits function ArrangementPeakPath2 / ArrangementDetailPlayhead2 / ArrangementDetailWaveform2 / ArrangementClipRangeOverlay2. Under the rename, CP1 PARENT_NAMES 'ArrangementDetailWaveform' and R11-P1e l.454/l.469 toBe(0) can no longer fail (vacuous). C's O2 experiment (XMemo = memo(X), call sites switched) keeps both files 33/33 green; O2's bail effect not measured",
+   "evidence": "tmp/studio-real-loop/c-round-319/stop-repro-memo.log, stop-repro-a.log, o2-experiment.log; a-round-319.md §1-§2"
+  },
+  {
+   "id": "C-R319-02",
+   "origin": "A STOP",
+   "severity": "medium",
+   "steps": [
+    "bash b-round-318/claims-319.sh",
+    "npx vitest run app/lib/__tests__/third-party-licenses.test.ts (scratch of A tree)"
+   ],
+   "expected": "A-CLAIMS-AFTER: K14 5, K19 1/1, K20 (564)/1, K21 1, K2 50662e1 41; TL5 green; doc 168 metrics + doc 230; A-PERF prod and A-MUTANTS run by A; full A-REVIEW",
+   "actual": "K14 0, K19 0/0, K20 (560)/0, K21 0, K2 50662e1 37; TL5 red (1 failed / 69 passed) so the gate's full vitest would fail; docs not written; A-PERF prod / A-MUTANTS not run by A; code review partial (kept tree only)",
+   "evidence": "tmp/studio-real-loop/c-round-319/claims-c.txt, unit-licenses.log"
+  },
+  {
+   "id": "C-R319-03",
+   "origin": "A tests / B §5 neighbour row",
+   "severity": "low",
+   "steps": [
+    "In a scratch copy of A tree change ArrangementDetailPanel.tsx 'rangeOverride === undefined ? storeRange : rangeOverride' to '... : storeRange'",
+    "npx vitest run app/lib/arrangement/__tests__/detail-panel.test.tsx app/lib/arrangement/__tests__/track-layout.test.tsx"
+   ],
+   "expected": "Some test turns red, because the explicit range prop must win over the store (§5)",
+   "actual": "60/60 green. Mutant survives: both direct-render tests pass range={null} while the store range is also null, so the override contract is unguarded (L52)",
+   "evidence": "tmp/studio-real-loop/c-round-319/mutants.txt (C-MU-DETAIL-IGNORE-PROP)"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "EXPECT",
+  "PERF-LOAD",
+  "R-WAVEFORM",
+  "R-DRAG",
+  "R-ALLTRACKS",
+  "R-CLEAR",
+  "R-SPACE",
+  "R-SPLIT",
+  "R-DELETE",
+  "R-CUT-TIME",
+  "R-LOOP",
+  "R-ZOOM",
+  "R-EXPORT",
+  "R-DETAIL",
+  "R-BG",
+  "R-MARQUEE",
+  "R-TRANSPORT",
+  "G319-AUTH"
+ ],
+ "failed": [
+  "CLAIMS (K14/K19/K20/K21/K2 not at A-CLAIMS-AFTER values)",
+  "UNIT (TL5 red; 897/897 on A's 45 files)",
+  "A-IMPL deliverables (C-R319-02)",
+  "PERF-RANGE (measurement part met: per move 14.15, max 32, drag-range-live 1, playing restarts 0, failures []; named-fiber rule met: click N=0, move +1 overlay/move, zoom30 +30 overlays, no unexplained rise; asserts absent, K14 0)"
+ ],
+ "perf": {
+  "baseline": {
+   "rangePerMove": 108.167,
+   "rangeMax": 105
+  },
+  "aHandedOff": {
+   "rangePerMove": 14.15,
+   "rangeMax": 32,
+   "dragRangeLive": 1,
+   "playingMoveRestarts": 0,
+   "failures": []
+  },
+  "rises": {
+   "interact.zoom.30.components-per-key": [
+    247,
+    275
+   ]
+  },
+  "loadByCommitCount": {
+   "7": [
+    656,
+    649
+   ],
+   "12": [
+    1126,
+    1109
+   ]
+  }
+ },
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build in store/",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "partial": {
+  "R-WAVEFORM": "late-peaks load sub-check not exercisable: path drawn 3-6 ms after Add in a fresh context; the PeakPath memo it guards is not on this tree. Equality with baseline holds at every zoom step; clip d is zoom-invariant on both builds",
+  "R-DETAIL": "detail-playhead-moves sub-check not exercised at 1280x720 (harness: the panel started collapsed there, C's script clicked the toggle, so Space most likely went to the focused toggle button); equal to baseline. Exercised and moving at 1440x900",
+  "PERF-LOAD": "per-commit breakdown not exposed by the harness (details [null,null,null]); matched-commit-count totals are the proxy (7: 656->649, 12: 1126->1109); 'no per-commit rise' is inferred from those",
+  "UNIT": "perf/lib/report.test.ts via a scratch perf config not run (budgets unchanged, same as A)"
+ },
+ "notes": {
+  "STOP-REPRO": "A's STOP cause independently reproduced (stop-repro-memo.log); O2 experiment 33/33 green (o2-experiment.log), bail effect and lint unmeasured",
+  "environment": [
+   "INFO-C319-AUTH-COLD: first G319-AUTH attempt timed out on a cold dev compile of /studio/middle-east; replaced by one retry (pass) per L38 warm-up clause",
+   "INFO-C319-DIAG-COLD: first baseline click profiler run timed out on the cold :5197 dev server; replaced by one retry"
+  ],
+  "preExisting": "C-R318-06 reproduced on both builds at 1280x720 (no reload)"
+ },
+ "manifestPaths": [
+  "c-round-319.md",
+  "c-round-319.json",
+  "c-round-319/build-a.log",
+  "c-round-319/build-h.log",
+  "c-round-319/c319-diag.mjs",
+  "c-round-319/c319-rows.mjs",
+  "c-round-319/c319-wave.mjs",
+  "c-round-319/claims-c.txt",
+  "c-round-319/dev-h.log",
+  "c-round-319/diffrows.txt",
+  "c-round-319/expect-count-a.txt",
+  "c-round-319/expect-count-h.txt",
+  "c-round-319/g319-auth.cjs",
+  "c-round-319/g319-auth.json",
+  "c-round-319/g319-auth.log",
+  "c-round-319/mutants.txt",
+  "c-round-319/o2-experiment.log",
+  "c-round-319/perf-a-interactions.log",
+  "c-round-319/perf-a-studio-lab.log",
+  "c-round-319/perf-driver.sh",
+  "c-round-319/perf-driver.status",
+  "c-round-319/perf-h-interactions.log",
+  "c-round-319/perf-h-studio-lab.log",
+  "c-round-319/rowcmp-interactions.txt",
+  "c-round-319/rowcmp-load.txt",
+  "c-round-319/rows-a-1280r.log",
+  "c-round-319/rows-a-1280x720-reload.json",
+  "c-round-319/rows-a-1280x720.json",
+  "c-round-319/rows-a-1280x720.log",
+  "c-round-319/rows-a-1440x900.json",
+  "c-round-319/rows-a-1440x900.log",
+  "c-round-319/rows-h-1280r.log",
+  "c-round-319/rows-h-1280x720-reload.json",
+  "c-round-319/rows-h-1280x720.json",
+  "c-round-319/rows-h-1280x720.log",
+  "c-round-319/rows-h-1440x900.json",
+  "c-round-319/rows-h-1440x900.log",
+  "c-round-319/rows-summary.txt",
+  "c-round-319/serve-a.log",
+  "c-round-319/serve-h.log",
+  "c-round-319/stop-repro-a.log",
+  "c-round-319/stop-repro-memo.log",
+  "c-round-319/unit-c.log",
+  "c-round-319/unit-licenses.log",
+  "c-round-319/wave-a.json",
+  "c-round-319/wave-a.log",
+  "c-round-319/wave-h.json",
+  "c-round-319/wave-h.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1
+}
