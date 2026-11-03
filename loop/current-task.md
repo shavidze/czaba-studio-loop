@@ -1,172 +1,197 @@
-# Round 305: RETRO 305 (eighth retrospective, rounds 290–304) + whole-screen and journey review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
+# Round 306: PERF-3d. Rebuild a clip waveform at a zoom band crossing only when the clip is inside the timeline window (meets the PERF-3 exit), plus GATE304-M2/L3, C-R304-02 and the RT-FIX of SR-305-4
 
-**Planned by:** B, at the round 304 → 305 planning, 2026-11-02.
+**Planned by:** B, at the round 305 → 306 planning, 2026-11-03.
 
 **Decisions** (all in `backlog.json` → `decisions_log_b`):
-- D-29z799: round 304 accepted; PERF-3c is done; C-R304-01 ruled and closed; C-R304-02 goes to PERF-3d.
-- D-29z800: gate-304 triage. GATE304-M1 → root; GATE304-M2/L3 → PERF-3d.
-- D-29z801: RETRO 305 outputs.
-- D-29z802: screen and journey review.
-- D-29z803: lessons.
-- D-29z804: experiments and candidates.
-- D-29z805: what comes next.
-- D-29z806: inventory of every entry that names "RETRO 305".
+- D-29z807: round 305 closure. RETRO 305 is accepted except C-R305-01, which B fixed in the review file (RT-FIX row below).
+- D-29z808: PERF-3d mechanism = viewport gating on the existing timeline page window. Options (a) integer path and (d) lower cap are not used; (b) per-source cache is rejected as the gate fix.
+- D-29z809: the two `== 60` rows become `== 3` (out) and `== 2` (wheel), the values of two saved sketch runs (GATE304-M2). GATE304-L3 note text. C-R304-02 text.
+- D-29z810: rulings of §4 (state pattern, vertical axis not gated, visible paths byte-identical, doc 222 section grant).
 
-**Rules:**
-- **Policy:**
-  - "Retrospective: stop, look back, improve" (Saba, 2026-10-26);
-  - "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28);
-  - the product-designer rule (2026-10-30);
-  - the RETRO journey step (2026-10-31);
-  - `backlog.json` → `retro_policy`.
-- **Window:** retro 290 covered 275–289, so this one covers 290–304. Precedent: rounds 275 and 290.
-- **Read first:** `lessons.md`. This planning revised it, and the revision applies from round 305:
-  - L43 is merged into L44;
-  - **L57** is new: C writes the harness fields every round;
-  - L11, L23, L38 and L56 gain one clause each.
-
-  This task uses L56 itself: every `b-round-304/` file it cites is checked by a `test -f` claim (K8).
-- **L29 note:** untagged grep hits in this task are expected values, row ids, loop-artifact paths or descriptions of what C runs. They are not facts about current code; every fact about a `store/` file carries a `[K#]` tag.
-- **Loop path:** `tmp/studio-real-loop` is a symlink to `/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop`. Search it with `find -L` (L38). `lessons.md` is there.
+**Read first:** `lessons.md` (59 lines). L23 (full suite on the sketch), L29/L56 (claims), L37 (premise re-measured), L38 (perf runs alone), L52 (asserts that can fail), L57 (C harness fields) apply directly.
+- **L29 note:** untagged grep hits in this task are expected values, new ids, new-file names, grant text or descriptions of C's actions, not facts about current code. Facts about `store/` files carry `[K#]`.
+- **Line-number ruling (D-29z793):** a claim that names a line in a file that a §5 grant edits is compared by **content** after A's change.
+- **Loop path:** `tmp/studio-real-loop` is a symlink; search it with `find -L` (L38).
 
 ## Baseline: HEAD `adf959d`, clean tree
-- **Gate:** gate 304 published `adf959d…` on both remotes [K1]. That commit is the round-305 baseline.
-- **Tree:** `git status --short --untracked-files=all` was empty at planning, and HEAD was `adf959d` [K2].
-- **Frozen:** every tracked file, **1,176** entries, is listed in `b-round-304-r305-tree-sha256.txt` [K3].
-  - Check from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-304-r305-tree-sha256.txt`.
-  - B ran it after the last consult: rc 0.
-  - Each of the 7 protected auth and purchase files appears exactly once [K4].
-- **Grants: none.** No file in `store/` may change in this round.
+- Gate 304 published `adf959d`; gate 305 was `skipped` (C FAIL on a document Low), so the baseline does not move [K1]. HEAD is `adf959d`, `git status` is empty [K2].
+- **Frozen list:** `b-round-305-r306-tree-sha256.txt`, **1,176** entries [K3]; each of the 7 protected auth/purchase files appears once [K4]. From `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-305-r306-tree-sha256.txt` fails only on the §5 modified paths after A's change.
 
 ## 0. Why this round
-- **Round 304 passed.**
-  - C: 8 rows, `browserVerified` and `realVerified` both true, 2 Lows.
-  - Gate 304 published `adf959d`.
-  - **PERF-3c is done.** The EXIT decision: the PERF-3 target is **not met**. `out` keydown-max median is 80 ms (≥ 50), so PERF-3 stays `in_progress` and PERF-3d fixes it.
-- **Round-304 findings (D-29z799):**
-  - **C-R304-01 ruling:** the LoAF overlap rule is accepted as the contract. Closed. Its process half becomes the new L11 clause.
-  - **C-R304-02** (`interactionSequence` text) is fixed early in PERF-3d. Same file, cheap.
-  - **INFO-C304-LESSONS-MISSING** was a false alarm: the loop folder is a symlink.
-  - **INFO-C304-REVIEW-POSTFIX** is closed: the gate review covered the whole diff, including `runZoomProbeSteps`.
-- **Gate-304 triage (D-29z800):**
-  - **GATE304-M1 (Medium):** the gate never runs the `perf/lib` tests. It is `open_root`, the same item as ROOT-REQ-VITEST-PERF-INCLUDE: the fix is in `vitest.config.ts`, outside loop grants [K18]. It does not block the loop. Until root lands it, PERF tasks cite the scratch-config run.
-  - **GATE304-M2 (Medium):** the two `== 60` budget rows. **GATE304-L3:** the probe-connected note. Both are fixed in **PERF-3d, round 306**.
-  - **L5 cosmetics** go to `deferred_low_polish`.
-- **The Mediums wait one round.** RETRO changes no code, so "Medium before new scope" still holds: the first code round after this one, PERF-3d, fixes M2.
-- **RETRO is due:** `retro_policy.next_due` was "round 305".
-- **REGRESSION is not due yet.** `regression-last.json` says 2026-11-02 (round 301), so the next one is due on or after 2026-11-05.
-- **No open Critical or High.** The parked Mediums are unchanged:
-  - A-R73-SAFARI-FLAG-FOCUS, GATE128-S1, R80-RECORDINGS-FIELD-BORDERS;
-  - GATE232-S2, GATE271-S1, GATE274-S1.
+- **Round 305 (RETRO) closed with C FAIL on one Low** (C-R305-01, origin B): SR-305-4 said the status line is cut at 1440; C measured it is not. Everything else passed, `browserVerified` and `realVerified` true. B corrected the sentence in `user-review/screen-review-305.md` (before-copy and diff in `b-round-305/`) and added C's note to SR-305-3. C re-checks only those lines (RT-FIX), as rounds 216, 231, 246, 261, 276 and 291 did.
+- **PERF-3 exit is not met at HEAD.** C round 304: `out` keydown max 80 ms (≥ 50). The archived task fixed round 306 as PERF-3d (D-29z805). No Critical/High is open; the Mediums GATE304-M2 (this round) and GATE304-M1 (`open_root`) are the only new ones. REGRESSION is due on or after 2026-11-05 (`regression-last.json`: round 301, 2026-11-02), so not now.
+- **Reference first / Ableton:** not in scope (performance round). **Screen budget:** nothing persistent is added; the visible waveform pixels do not change (row VIS-EQUIV).
 
-  None is a security or data-loss bug.
-- **Reference first / Ableton:** not applicable (RETRO round). **Screen budget:** nothing visible changes.
+## 1. Premise, re-measured at HEAD (L37)
+All files under `b-round-305/probe/` unless named.
 
-## 1. What B already produced (the objects under test)
-| File | Content |
+| Measurement | Result |
 |---|---|
-| `retros/retro-305.md` | The analysis, in Georgian with English terms, for Saba. Window 290–304 |
-| `lessons.md` | **59 lines** (≤ 60) [K7], three parts. Before-copy: `b-round-304/lessons-before-305.md`. Diff: `b-round-304/lessons-diff.txt` |
-| `user-review/screen-review-305.md` | Candidates **SR-305-1…10**. Captures in `b-round-304/screens/`: `capture.mjs`, `capture.log`, `screen305.json`, `counts.txt` and the 12 PNGs [K9] |
-| `b-round-304/*.py`, `*.txt`, `*.json` | The scripts and data behind every number. <ul><li>Hand files: `fails-cause-hand.txt`, `claims-findings-hand.txt`, `stops.txt`.</li><li>`claims-count.txt` comes from a shell loop; its command is in `b-round-304.md` §3.</li><li>`manifest-fields.py`, `awaiting-user.py` and `retro305-mentions.py` (with the `.txt` outputs) hold the field table, the awaiting-user list and the "RETRO 305" inventory.</li><li>`update-backlog.py` holds this planning's backlog edits.</li></ul> |
-| `backlog.json` (version 264) | Decisions D-29z799…D-29z806 [K10]. <ul><li>`retro_runs` 305 and `retro_policy`.</li><li>HR-C-MANIFEST-FIELDS moved into L57.</li><li>`screen_review_candidates` SR-305-*.</li><li>The gate-304 and C-304 ids, and the retro-candidate dispositions.</li></ul> Before-copy: `b-round-304/backlog-before-305.json` |
-| `feature-status.md` | Rows 304 and 305, the next line, and the STUDIO-PERFORMANCE row |
+| Attribution, dev server, 1440 (`out-1440-1.json`, `wheel-out-1440-1.json`; script `zoom-attr.cjs` = round-303 probe + LoAF breakdown, viewBox columns, `d` length) | The slow steps are exactly the band crossings: 4096 ↔ 2534 columns per clip, 30 rewrites, `d` total 2.64 MB at 4096. Crossing up: keydown 104 ms, LoAF 90 = **script 84** (forced style/layout 14), render 1.3. Crossing down: 56 ms. Wheel: LoAF 54 / 86, script 50 / 79. Non-crossing keys 24 ms. Only 1–2 of the 30 clips are inside the viewport there (`scrollWidth` 80–123 k px) |
+| Production builds of HEAD and of B's sketch (`prod-head-*.json`, `prod-sketch-*.json`) | HEAD out keydown per key `[16,16,56,24,16,16,16,80,16,16]`, LoAF 77 at key 8. Sketch `[16,16,16,16,24,16,16,16,16,16]`, LoAF 0, rewrites `[0,0,1,1,0,0,0,1,0,0]` at 1440 and `[0,0,1,0,1,0,0,1,0,0]` at 1280; wheel rewrites `[0,0,0,1,0,0,1,0,0,0]` at both, LoAF 0 |
+| Microbench (`path-bench.json`, 30 paths × 4096 columns) | Build with `toFixed(3)`: 32–55 ms; integer + relative `h1`: 8–12 ms; `setAttribute('d')`: 12–15 ms in every format |
+| Scroll after a crossing (`scroll-after-crossing.cjs`; `scroll-head-1440.json`, `scroll-sketch-1440.json`, `scroll-sketch-1280.json`) | Sketch: 29 lazy rebuilds over the whole width, **max 1 per scroll step**, LoAF 0, scroll→2 rAF max 33.4 ms (HEAD 32.6). At the end every clip has the same column count (`2534`) |
+| Visible paths (`visible-d.cjs`, `vis-*.json`, `visible-d-compare.txt`) | `d` and `viewBox` of every waveform inside the viewport, at 0–3 `-` keys and back, are **byte-identical** between HEAD and the sketch at 1440 and 1280 (clip ids are random and excluded) |
 
-**Order of work (the C-R215-01 lesson):**
-- The analysis scripts read the **before** copy.
-- Run them from the loop root as `python3 -I b-round-304/<script>.py`: first `collect.py`, then `cost.py`, then the others.
-- `cost.py` prints to stdout; B saved that output as `cost.txt`.
-- `update-backlog.py` is **not** re-runnable: it refuses to run twice. Do not run it.
+**Consults** (both read-only, D-29z808):
+- `performance-optimizer`: (a) alone ≈ 65–75 ms (still fails); (c) gating ≈ 30–38 ms; (d) 2048 cap ≈ 70 ms. Compute visibility in the parent from scroll position, not an IntersectionObserver (its callback would add a second commit).
+- `tech-lead`: same order; (a) would need four test-file grants (`waveform-outline-path` PO1–PO4, `clip-gain-waveform`, `clip-gain-pointer-preview`, `waveform-zoom` pin `toFixed(3)`, absolute `H` and viewBox `0 0 N 2`) for no exit progress. Unmeasured viewport must mean "everything visible".
 
-## 2. A: nothing to implement
-1. From `store/`, confirm three things:
-   - HEAD = `adf959d…`;
-   - `git status --short --untracked-files=all` is empty;
-   - the frozen sha check prints nothing.
-2. Write `a-round-305.md` with the three results and "no change, by RETRO policy". Do not run typecheck, lint, vitest or the code-reviewer.
-3. Do not edit `retros/`, `lessons.md`, `user-review/` or any B file. If you disagree with a lesson in the A part (L11's new clause in particular), write it under "Lesson feedback".
+**Mechanism chosen:** the clip waveform reuses the **timeline page window** that the seconds ruler and the bars ruler already use (PERF-3b): `readTimelinePage` / `timelinePageWindow` in `app/lib/arrangement/view.ts` [K8] read through `getTimelineView` (which returns the pending zoom view during the zoom render) and `subscribeTimelineScroll` from `StudioWorkspace.tsx` [K9]. A clip whose pixel span intersects the window builds at the new band; a clip outside keeps the path it has, which `preserveAspectRatio="none"` [K29] still scales to the clip box, until a scroll brings it into the window.
 
-## 3. C: what to verify
-C writes `c-round-305.md` and `c-round-305.json` as it goes.
+## 2. B's pre-check on the sketch (L23, L56)
+- **Sketch:** `b-round-305/sketch.patch.txt` (7 files: the four app files, the new test, the budgets file and the spec), applied to a scratch copy of `adf959d`. `npx tsc --noEmit` rc 0; Biome clean on the app paths.
+- **Full suite on the sketch:** `b-round-305/precheck-full.log`: **232 files, 3,449 tests, all passed** (286 s).
+- **Covering set on the sketch:** `b-round-305/covering-sketch.txt`: 11 files, 169 tests, all passed.
+- **Perf on the sketch, alone:** `perf-sketch-run1.log/.json` (budgets unchanged): the only failures are `out.path-rewrites` 3 [3,3,3] and `wheel.path-rewrites` 2 [2,2,2] against `== 60`. `perf-sketch-run2.log/.json` (budgets as §5): **rc 0, `failures` []**, 5.4 min (36 % of the 15-minute timeout). Values: in/out keydown max medians 24/24, LoAF 0/0/0, commits per key/step 1, `zoom.30.components-per-key` 247 (C round 304 at HEAD: 247).
+- **The other two perf specs were not run on the sketch.** They only count the waveform elements with `toHaveCount` [K30], and the gate never unmounts or adds a waveform SVG (it changes only the column count of off-window clips; at load every clip starts at its target value). A-PERF-RUN and PERF-RUN run all three.
+- **Specified test rows run on the sketch** (`b-round-305/waveform-window-ui.test.sketch.tsx.txt`): WG0–WG4 green. **Mutants** (`b-round-305/mutants.txt`), each red on its rows: MU-GATE-OFF (WG2, WG3, WG4), MU-NO-SCROLL (WG3), MU-FALLBACK (WG0, WG1), MU-EDGE (WG0). At HEAD the file is red on WG0, WG2, WG3, WG4 and green on WG1 by design (`b-round-305/wg-at-head.txt`).
 
-**The JSON carries the L57 fields:**
-- `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`;
-- an `origin` per finding;
-- `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch`. These three are `null`, with the reason "RETRO: no assert specified".
+## 3. Acceptance
 
-| Row | Check | PASS means |
-|---|---|---|
-| **SOURCE-SCOPE** | At the start and the end: HEAD `adf959d`, a clean status, and the frozen list with rc 0 | Nothing in `store/` changed. Any change fails the round, whoever made it |
-| **CLAIMS** | Run `bash b-round-304/claims-305.sh` from the loop root, **first** (L56). Compare its output with `b-round-304/claims-305-output.txt` | Every line is equal. K8 prints `done` with no `MISSING` |
-| **RT-NUM** | Recompute **every number** in `retro-305.md` §1, §2, §9 and §10 from its named file or script. C may copy the scripts to `c-round-305/`; run them from the loop root. At least: <ul><li>**Totals:** $146.29 / $71.43 / $86.42 / $304.14; the round median $18.39; the phase medians B $9.75, A $3.70, C $3.86; the FAIL-round cost $52.14; the B share 48%.</li><li>**Groups:** $19.95 / $35.36 / $115.23 / $44.31 / $15.96 / $73.33; the fix-ups 12.98 / 14.60 / 11.43 / 18.39 / 15.93; the 297–299 chain $45.75.</li><li>**Counts:** gate 11 / 3 / 1; C `bugs[]` Medium 2, Low 11; 11 review.md files with 51 findings; the `classify.txt` origin and category counts; 544 / 28 / 516; 70 awaiting_user ids.</li><li>**Origins in §4:** C 29, gate 25, A 23, B 9 (the `open_findings` + `deferred_low_polish` window sums).</li><li>**Other:** 3 STOPs; `[K#]` range 4–29; manifest fields in 290–299 only [K11, K15].</li></ul> | Each number matches its source, or the difference is ≤ $0.01 rounding |
-| **RT-CAUSE** | For each row of §3 and each item of §9, open the quoted source: <ul><li>`c-round-290.json`;</li><li>`c-round-292.json` (`bugs[0].origin`);</li><li>`gates/round-293/verify.log` [K14];</li><li>`b-round-296.md` … `b-round-298.md`, `gates/round-297/review.md` (Critical 1);</li><li>`c-round-298.json`;</li><li>`c-round-295.json`, `a-round-295.md`, `a-round-303.md`;</li><li>`a-round-304.md` l.19–23 and l.107.</li></ul> | Each stated cause is what the source says; no cause is invented. The EXP-R290 verdict follows from its written rule in `retros/retro-290.md` §10 |
-| **RT-IDS** | <ul><li>**Round 304 closure:** PERF-3c is `done (D-29z799)`. PERF-3 is `in_progress`. C-R304-01 is `closed by ruling`. C-R304-02 is `open`, named in PERF-3d.</li><li>**Gate-304 ids:** GATE304-M1 is Medium `open_root`. GATE304-M2 is Medium `open`, named in PERF-3d's status. GATE304-L3 is `open`. GATE304-L5-COSMETIC is in `deferred_low_polish`. GATE304-ARCH-ZOOM-LIVE-RULE is in `architecture_signals`.</li><li>**Inventory (D-29z806):** every id in `b-round-304/retro305-mention-ids.txt` has a disposition in `retro-305.md` §8, §10 or §12. Also grep the **before** copy for `retro[ -_]?305` case-insensitive, `RETRO (305)` and `round 305` to catch other spellings. Any entry with no disposition is a finding.</li><li>**Candidates:** RC-R290-PRECHECK-FULL-SUITE is adopted; RC-R295 is merged; RC-R284, RC-R290-AX-TREE-ROW and RC-R290-L50 are retired; RC-R305-LESSON-CHAR-CAP is added.</li></ul> | All present as stated |
-| **RT-LESSONS** | `lessons.md`: <ul><li>≤ 60 lines, with the three parts;</li><li>`diff b-round-304/lessons-before-305.md lessons.md` touches only l.3, L11, L23, L38, L43 (removed), L44, L56 and the new L57;</li><li>L11, L23, L38, L44 and L56 start with their old text byte for byte (prefix compare) and only append;</li><li>L44 keeps every evidence id of the old L43;</li><li>no other line changed</li></ul> | As stated. A lost clause or evidence id is a finding |
-| **RT-SABA** | `retro-305.md` §12 and `screen-review-305.md`: every rule change and screen candidate is phrased as a **proposal or question** | SR-305-2, -3, -7 and -9 are questions. SR-305-6's collapse variant says it is a position move that needs Saba. The CLAUDE.md tagline is a proposal only |
-| **RT-SCREEN (browser)** | Every SR-305 candidate names a screenshot that exists and shows what it describes; C opens the PNGs. C then re-runs `b-round-304/screens/capture.mjs` (or an equivalent) **with the mock backend** at both viewports, writing to `c-round-305/screens/`. First check `http://127.0.0.1:5199/__mock/health`: if it answers, use the running instance and do not stop it; otherwise start your own (`node mock-api/server.mjs`, log under `c-round-305/`) and stop it afterwards. Check: <ul><li>`laneErrors` is none;</li><li>the journey reaches `/studio-lab?preview=middle-east` with the preview selected;</li><li>the timeline is empty on arrival (SR-305-3);</li><li>the position after Play is ≥ 00:01.000;</li><li>the persistent-line counts are within ±2 of `counts.txt`.</li></ul> **SR-305-7** rests on the source [K13], not on the screenshots | Each candidate is as described. A mismatch is a finding against the review, not against the app |
-| **G305-AUTH (browser)** | A fresh anonymous context at 1440×900 and 1280×720 (wait for a non-empty body; INFO-C304-AUTH-ATTEMPT1): <ul><li>`/studio-lab` shows the workspace and the demo badge; `localStorage.auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>`/api/studio-token` returns 401 with no header. A fake bearer gives 403 with the mock running, or a 500 that fails closed without it.</li></ul> | As stated. No token in any body |
-| **STUDIO-SMOKE-305 (browser)** | On `/studio-lab` at both viewports, after `Demo collection ready` (L48): <ul><li>add `Bass` (Enter);</li><li>Play, then after 1.5 s `[data-testid=arrangement-position]` reads ≥ `00:01.000`;</li><li>Play's `data-playing` goes `false` → `true` → `false` [K5];</li><li>export a WAV: RIFF/WAVE, 48 kHz, length 16.000 s, non-silent (peak > 0)</li></ul> | As stated. A hash compare is not required |
-
-- **Gate rows:** the full vitest, typecheck, build, Biome, `npm run verify` and the e2e smoke. List them under `"gate"`, never under `"passed"`.
-- **`browserVerified`:** true only if G305-AUTH, STUDIO-SMOKE-305 and the RT-SCREEN re-run all ran at both viewports. The other RT rows are document checks.
-- **Consults (optional):** `consequence-tester` may review L57 and EXP-R305-SKETCH-MUTANT for checkability. Record any disagreement as a finding against the retro.
-
-## 4. Outcome, fixed in advance (D-29z805)
-| C result | B at the round-306 planning |
+### 3.1 A's rows
+| Row | Expected |
 |---|---|
-| All rows PASS | Round 306 is **PERF-3d**, the band-crossing fix. <ul><li>B consults `performance-optimizer` and `tech-lead` and re-measures HEAD first (policy; L37). C's data: wheel step 4 has LoAF 0 and step 7 has 70–80, both with 30 rewrites.</li><li>The task grants both `== 60` budget rows with their post-fix values (GATE304-M2), adds the probe-connected note (GATE304-L3), and fixes `interactionSequence` (C-R304-02).</li><li>The `perf/lib` tests are cited with the scratch config until root lands ROOT-REQ-VITEST-PERF-INCLUDE.</li><li>The L23 full suite on the sketch applies if PERF-3d changes `app/**`.</li></ul> |
-| An RT row fails (an untraceable number, an invented cause, a missing disposition, a lost clause, a candidate not as described) | B corrects the files at the round-306 planning. The next C round re-checks only the changed lines (RT-FIX, as rounds 216, 231, 246, 261, 276 and 291), together with PERF-3d |
-| G305-AUTH, STUDIO-SMOKE-305 or RT-SCREEN finds a Medium or worse in the app | It is fixed first (2026-10-23 bug gate). A Low goes to `deferred_low_polish` |
-| SOURCE-SCOPE fails | Stop. Root inspects. Nothing is published |
+| A-CLAIMS | Before editing, from the loop root: `bash b-round-305/claims-306.sh` equals `b-round-305/claims-306-head-output.txt`. A difference is a STOP |
+| A-UNIT | New `app/lib/arrangement/__tests__/waveform-window-ui.test.tsx` with rows **WG0–WG4** as specified in §6 (A may start from the sketch file; row ids and assertion semantics stay). Then the covering set: the new file, `view.test.ts`, `tempo-window-ui.test.tsx`, `render-budget.test.tsx` and every `app/**` hit of the K17 and K18 sweeps (`clip-gain-pointer-preview`, `clip-gain-waveform`, `content-colour-ui`, `waveform-zoom`, `clip-envelope-ui`, `video-fades-ui`, `waveform-outline-path`). All green. Report each file's time; a test above 50 % of its declared timeout is a STOP (L31) |
+| A-MUTANTS | On A's own scratch copy (never in `store/`), the four mutants of §6, each red on its listed rows and green when restored. Log under `a-round-306/` |
+| A-PERF-RUN | `npm run test:perf` once, **alone** (L38): rc 0, every report `failures` [], 0 problems. Report `interact.zoom.30.in/out.keydown-max-ms`, `*.loaf-max-ms`, `*.commits-per-key` / `commits-per-step` (with `detail.max`), `*.path-rewrites`, `zoom.30.components-per-key` and the interactions runtime |
+| A-PERF-LIB | `vitest.config.ts` includes `app/**` only [K14], so run `perf/lib/report.test.ts` and `perf/lib/zoom-probe.test.ts` with a scratch config outside `store/` (as rounds 295 and 304). Green |
+| A-TYPE/LINT | `npm run typecheck` rc 0 (covers `perf/**`, L30). `npm run lint`: no new finding in a granted path |
+| A-REVIEW | `code-reviewer` on the §5 paths (≥ 3 files). Medium+ inside the grants: fix, then **re-run the reviewer on the changed lines** (L11 RETRO-305 clause). A Medium+ regression outside the grants is a STOP. The Architecture note goes to B |
+| A-DOC | New `docs/implementation/2026/quarter-IV/223-perf-waveform-window.md` (223 is free [K20]): TEMPLATE's 7 headings in order (L26), l.4 exactly `**სტატუსი:** Completed (C round 306 PASS)` (L28), the §1 numbers with their files, the mechanism, the rejected options with reasons, WG0–WG4 and the mutants. Doc 222: only its `## მიდგომა` section [K21] (L34) gains one line after the bullet that names `out.path-rewrites == 60`, exactly: ``- **PERF-3d (doc 223):** band crossing-ზე მხოლოდ timeline window-ში მყოფი clip-ის waveform იგება, ამიტომ `out.path-rewrites` = 3 და `wheel.path-rewrites` = 2 (1440×900).`` |
 
-**After that:** REGRESSION (on or after 2026-11-05) → the rest of STUDIO-PERFORMANCE → STEM-LANES → SYS-1…3 → STORE-2b…5 (direction gate) → REVIEW-RECOMMENDATIONS → T12-ADVANCED → the phase-2 entries (skip rule).
+### 3.2 C's rows
+C writes `c-round-306.md` and `c-round-306.json` as it goes. The JSON carries the L57 fields; here `assertsSpecified` = 5 (WG0–WG4), `mutantsRecorded` = 4, `mutantRedOnSketch` = 4 (B's `mutants.txt`), and an `origin` per finding.
 
-## 5. Neighbour risk
-App code carries none: no source file changes. The risk is in the process:
-- **L57** asks C for three new fields every round. EXP-R305-SKETCH-MUTANT stops if C leaves them blank in 2 rounds.
-- **L23's full-suite clause** adds about 5 minutes to B's pre-check on `app/**` tasks. The EXP stop is a B median above $11.70.
-- **L43 → L44 merge** must keep the old L43 evidence. RT-LESSONS checks this.
-- **The screen review goes to Saba.** RT-SCREEN re-runs the capture, because SR-305-3 rests on it.
-
-## 6. Deliverables
-- **A:** `a-round-305.md`.
-- **C:** `c-round-305.md` and `c-round-305.json`, with evidence under `c-round-305/`. The JSON carries:
-  - `taskStatus`, `browserVerified`, `realVerified`;
-  - `passed`, `failed`, `blocked`, `gate`, `rows`;
-  - the L57 fields.
-
-## 7. Root notes
-- **Nothing to publish from `store/`.** A change there is itself a FAIL. The loop-state commit records the retro.
-- **For Saba:**
-  - `user-review/screen-review-305.md`: 10 candidates; the weakest step is SR-305-3;
-  - `retro-305.md` §12: RC-R275-STOP-ROUTES-TO-B, raised for the third time (3 STOPped rounds reached C);
-  - the CLAUDE.md tagline proposal;
-  - 70 awaiting-user ids.
-- **For root:**
-  - ROOT-REQ-VITEST-PERF-INCLUDE (= GATE304-M1), before PERF-3d if possible.
-  - No new frontend-architect checkpoint: PERF-3c was a test-only change on one owner, so GATE304-ARCH-ZOOM-LIVE-RULE stays a signal. ARCH-CHECKPOINT-STUDIO-LINK is still unanswered and non-blocking.
-
-## 8. Claims (L29 + L56 form)
-Run `bash b-round-304/claims-305.sh` from the loop root. The expected output is `b-round-304/claims-305-output.txt`.
-
-| Tag | Claim | Expected (from the output file) |
+**Browser rows** (real Chromium; production builds on their own ports; L38: warm-up load first, nothing else running):
+| Row | Action | Expected |
 |---|---|---|
-| K1 | gate 304 published `adf959d` | `published adf959d` |
-| K2 | clean tree and HEAD at planning | `0 adf959d` |
-| K3 | 1,176 frozen entries | `1176` |
-| K4 | each protected file appears once | `1 1 1 1 1 1 1` |
-| K5 | Play's playing signal and name in `store/` | `272: data-playing=…` and `233: playLabel: 'Play',` |
-| K6 | screen-capture element counts; no lane errors | `{'1440x900-S0': 138, '1440x900-DEMO': 168, '1280x720-S0': 118, '1280x720-DEMO': 144} None` |
-| K7 | lessons line count | `59` |
-| K8 | every cited artifact exists (L56) | `done` |
-| K9 | the screenshots exist | `12` |
-| K10 | backlog version and last decision | `264 D-29z806` |
-| K11 | manifest fields only in 290–299 | `c-round-290.json` … `c-round-299.json` (10 files) |
-| K12 | journey facts | `/studio-lab?preview=middle-east`, `00:01.483` / `00:01.471`, 4 clips, at both viewports |
-| K13 | demo data: `bpm` only at l.79 and l.89 of `app/data/studio-lab-demo.ts`; none in the Middle East block | `79 89 \| middle-east block bpm: 0 \| id l.45: id: 'demo-middle-east',` |
-| K14 | gate 293's failing file | `1 3069` |
-| K15 | tasks 300–304 do not name the manifest rule | `0 0 0 0 0` |
-| K16 | no post-frame recurrence in the window | `0` |
-| K17 | lesson ids after the merge (no 43, new 57) | the id list in the output file |
-| K18 | vitest include is `app/**` only | `include: ['app/**/*.test.{ts,tsx}'],` |
-| K19 | the round-304 archive equals the old task | `archive-equal` |
+| PERF-RUN | `npm run test:perf` once, alone, on A's tree | rc 0; all three reports `complete` true, `failures` [], 0 problems, 0 page errors. `in.path-rewrites` = 0, `out.path-rewrites` = 3, `wheel.path-rewrites` = 2, every other assert row PASS (the `interact.drag.fade.30.*` rows included). `zoom.30.components-per-key` within ±5 % of 247 |
+| EXIT | From PERF-RUN | The PERF-3 exit decision with numbers. **Met** only if `in` and `out` `keydown-max-ms` medians are < 50, `wheel.loaf-max-ms` median is < 50, and every `commits` `detail.max` (in, out, wheel) is ≤ 1. B expects met (sketch: 24 / 24 / 0 / 1). Not met = FAIL of this round |
+| PROBE | Copy `b-round-305/probe/zoom-attr.cjs` to `c-round-306/` and run it on a production build of A's tree, modes `out` and `wheel-out`, at **1440×900 and 1280×720**, 1 run each | No step has keydown (out) or wheel→2 rAF (wheel-out) ≥ 50 ms, and no step has LoAF ≥ 50. Per-step rewrites at 1440 equal the harness `detail.perKey`/`perStep` and B's sketch (`[0,0,1,1,0,0,0,1,0,0]`, `[0,0,0,1,0,0,1,0,0,0]`); at 1280 each step rewrites ≤ 1 and the total ≤ 3 |
+| SCROLL-UPGRADE | Copy `scroll-after-crossing.cjs`; run it on A's build at both viewports, and once on a HEAD build at 1440 | After the crossing and before scrolling, the `viewBox` widths hold two values (`2534`, `4096`); after the script's 200 viewport steps (its cap; the timeline keeps extending, so HEAD and the sketch both stop there) they hold **one** value, `2534`. Max rewrites per scroll step ≤ 1; total ≤ 29; LoAF max < 50; scroll→2 rAF max within +10 ms of the HEAD build run |
+| VIS-EQUIV | Copy `visible-d.cjs`; run it on a HEAD build and on A's build at both viewports, 3 keys; compare with `b-round-305/probe/compare-visible-d.py` | For every step and the return, the list of `(viewBox, d)` of the waveforms inside the viewport is byte-identical between HEAD and A (clip ids excluded) |
+| PLAY-SMOKE-306 | On `/studio-lab` (dev server) at both viewports, after `Demo collection ready` (L48): add `Bass` (Enter), Play; after 1.5 s `[data-testid=arrangement-position]` [K26] ≥ `00:01.000`; export a WAV | RIFF/WAVE, 48 kHz, 16.000 s, peak > 0 |
+| G306-AUTH | As G305-AUTH (fresh anonymous context, both viewports, wait for a non-empty body) | `/studio-lab` works with `auth_user` null; `/studio/middle-east` shows "Sign in required" and 0 `audio[src]`; `/api/studio-token` with no header 401; no token in any body |
+
+**Offline rows:**
+- **SOURCE-SCOPE.** `git status --short --untracked-files=all` lists exactly the §5 paths (7 modified, 2 new). `sha256sum -c` fails only on the 7 modified paths. Protected files: no diff. `ArrangementClip.tsx`: `buildPeakShape` and `ArrangementPeakPath` are byte-identical to HEAD (compare the two function bodies). `perf/budgets.interactions.json`: the diff touches only the 9 rows of §5. The spec: only the `interactionSequence` entry [K12]. Doc 222: only the one added line in `## მიდგომა`.
+- **CLAIMS.** Re-run `claims-306.sh` from the loop root. The expected output after A's change is **`b-round-305/claims-306-sketch-output.txt`**: B ran the same script on the sketch-applied scratch (`CLAIMS_STORE=/tmp/b305/sketch`, with the doc-222 line and a stub doc 223) (L56). Every K that reads `store/` equals that file, by content where a granted file moved lines (D-29z793: K7, K8, K10). Exceptions: **K15** depends on A's exact code, so it only needs to be > 0 (the sketch has 27). **K2** is an environment claim: `9 adf959d` (the scratch is not a git repository). **K1, K3, K19, K22, K25** read the loop folder and keep their HEAD values.
+- **TESTS-READ.** WG0–WG4 exist with the §6 semantics; A's mutant log shows each listed row red.
+- **DOC.** Doc 223 per A-DOC, cites only rows that exist (L26); doc 222 one-line change.
+- **RT-FIX (document).** `user-review/screen-review-305.md`: SR-305-4 no longer says the status is cut (K22 first value 0), says density, cites C's measurement and `c-round-305/screens/sr-probe-status-1440x900.png`; SR-305-3's paragraph names the "Nothing to play — add a clip from the library first." status. `diff b-round-305/screen-review-305-before.md user-review/screen-review-305.md` touches only those two lines. Nothing else in the review or in `retro-305.md` changed.
+- **Gate rows** (not claimed by C; list under `"gate"`): full vitest, build, Biome, `npm run verify`, e2e smoke.
+
+`browserVerified` is true only if PERF-RUN, PROBE, SCROLL-UPGRADE, VIS-EQUIV, PLAY-SMOKE-306 and G306-AUTH all ran (PROBE/SCROLL/VIS/SMOKE/AUTH at both viewports). **BLOCKED:** none expected; `/studio-lab` needs no backend.
+
+## 4. Rulings
+- **Mechanism (D-29z808).** Visibility comes from the existing page window (§1), read through `useSyncExternalStore` with a **per-clip boolean snapshot**, so a scroll re-renders only clips whose in-window state flips. No IntersectionObserver, no `startTransition`/`useDeferredValue`, no per-clip `getBoundingClientRect`, no new scroll listener.
+- **Which columns a clip shows.** In the window: `waveformPeakColumns(clip.duration, pxPerSecond)` (today's value [K6]). Outside: the column count it showed last. The sketch keeps it with React's "adjust state while rendering" pattern (`useState` + a guarded `setState` during render), which re-renders before commit and adds no commit. A may use an equivalent; whatever it uses must keep `commits` `detail.max` ≤ 1 and components per key within ±5 % of 247. Writing a ref during render is not allowed.
+- **Unmeasured viewport = everything in the window** (`readTimelinePage` returns null when the viewport width is not > 0, so `timelinePageWindow` gives `undefined` [K8]). This keeps jsdom tests and SSR unchanged (WG1).
+- **Window bounds are inclusive at both edges** (WG0). The window is the rulers' three-viewport window, unchanged; no new margin constant.
+- **Vertical axis not gated.** All lanes count as visible vertically; lanes are few and the 30-clip scenario is one lane. Recorded as a signal (`PERF-3D-VERTICAL-GATE`), not a task.
+- **Visible paths byte-identical (VIS-EQUIV).** `buildPeakShape` and `ArrangementPeakPath` [K7] do not change; the path format, `toFixed(3)` and the viewBox stay (option (a) is not used). The detail panel's `ArrangementPeakPath` with its own columns [K16] is untouched.
+- **Budgets (GATE304-M2, D-29z809).** `interact.zoom.30.out.path-rewrites` `==` 3 and `interact.zoom.30.wheel.path-rewrites` `==` 2, from `perf-sketch-run1.json` and `-run2.json` (3 samples each, stable). Both stay deterministic asserts: they turn red if the gating is lost (60) or a visible clip stops rebuilding (fewer). `in.path-rewrites` stays `== 0`.
+- **Ruling line (L4):** `ArrangementClip.tsx`: "`buildPeakShape`/`ArrangementPeakPath` byte-identical" wins over "gate the columns in the clip view"; the gating lives in `ArrangementClipViewInner` only.
+- **Not in this round:** a perf-harness scroll row (performance-optimizer's suggestion) and a distinct-sources variant; SCROLL-UPGRADE and the WG rows cover the behaviour. Recorded as candidate `PERF-3D-SCROLL-HARNESS-ROW`.
+
+## 5. Grants
+A edits only these paths.
+
+**Modified (7):**
+1. `app/components/arrangement/ArrangementClip.tsx`: in `ArrangementClipViewInner` only, replace the `peakColumns` line [K6] with the gating of §4; add the optional prop `timelineWindow?: TimelineWindowSource` to `ArrangementClipViewProps` and its destructuring; the React imports and the `view` import this needs; two module-level helpers (no-op subscription, always-true server snapshot).
+2. `app/components/arrangement/ArrangementLane.tsx`: optional prop `timelineWindow?: TimelineWindowSource`, passed to `ArrangementClipView` next to `timelineSeconds={laneSeconds}` [K10]; the type import.
+3. `app/components/arrangement/StudioWorkspace.tsx`: one `useMemo` building `{ getTimelineView, getTimelineViewportPx, subscribeTimelineScroll }` from the existing callbacks [K9], and `timelineWindow={…}` on the `<ArrangementLane` element [K10]. Nothing else.
+4. `app/lib/arrangement/view.ts`: add `export interface TimelineWindowSource` (the three members above) and `export function spanInTimelineWindow(fromPx, toPx, timelineWindow?: TimelinePxWindow): boolean` (undefined → true; inclusive edges). Existing exports unchanged.
+5. `perf/budgets.interactions.json`, 9 rows:
+   - `interact.zoom.30.out.path-rewrites`: value 3; `note` exactly: `1x only. Waveform path d rewrites over the 10 keys (MutationObserver from perf/lib/zoom-probe.ts: attribute d on a path inside [data-testid="arrangement-clip-waveform"]; fade and envelope paths do not count). detail.perKey lists them. The out-first path crosses the 25 px/s column band on key 3 and back on key 8. Since PERF-3d (doc 223) a crossing rebuilds only the waveforms inside the three-viewport timeline window; a clip outside keeps its previous path until a scroll brings it into the window. At 1440x900 with 30 clips: key 3 rewrites 1, key 4 rewrites 1 (the anchored scroll brings one stale clip into the window), key 8 rewrites 1. Was 60 before PERF-3d (each crossing rewrote all 30).`
+   - `interact.zoom.30.wheel.path-rewrites`: value 2; `note` exactly: `1x only. Waveform path d rewrites over the 10 wheel steps (zoom probe). The path crosses the 25 px/s column band on step 4 and back on step 7. Since PERF-3d (doc 223) only the waveforms inside the three-viewport timeline window rebuild: at 1440x900 with 30 clips, 1 on step 4 and 1 on step 7. detail.perStep lists them. Was 60 before PERF-3d.`
+   - GATE304-L3: append exactly ` Measured with the zoom probe (perf/lib/zoom-probe.ts) connected, so not strictly comparable with interact.zoom.30.key-window-longest-ms, which is measured without it.` to the `note` of `interact.zoom.30.in.keydown-max-ms`, `.in.keydown-median-ms`, `.in.loaf-max-ms`, `.out.keydown-max-ms`, `.out.keydown-median-ms`, `.out.loaf-max-ms` and `.wheel.loaf-max-ms`. Premise: `measureZoom` runs without the probe; only `runZoomProbeSteps` installs it [K13].
+6. `perf/studio-lab-interactions.perf.spec.ts`: the last `interactionSequence` entry [K12] (C-R304-02) only; the part `zoom with ${clipsTarget} clips (interact.zoom.30.*), Space` becomes exactly `zoom with ${clipsTarget} clips: keys, then the in-first path (5 x "=", 5 x "-"), the out-first path (5 x "-", 5 x "=") and Ctrl+wheel out-first (5 x deltaY +100, 5 x -100) with the zoom probe (interact.zoom.30.*, interact.zoom.30.in/out/wheel.*), Space`.
+7. `docs/implementation/2026/quarter-IV/222-perf-zoom-harness-rows.md`: the one line of A-DOC inside `## მიდგომა` [K21].
+
+**New (2):**
+8. `app/lib/arrangement/__tests__/waveform-window-ui.test.tsx` (WG0–WG4, §6).
+9. `docs/implementation/2026/quarter-IV/223-perf-waveform-window.md`.
+
+Nothing else: not `peaks.ts`, `ArrangementDetailPanel.tsx`, `ArrangementRuler.tsx`, `ArrangementTempoRow.tsx`, `perf/lib/**`, `vitest.config.ts`, `playwright.perf.config.ts`, `package.json`, other docs, or any protected file.
+
+## 6. Specified test rows (L23, L52)
+File `waveform-window-ui.test.tsx`, built like `tempo-window-ui.test.tsx` (fake audio graph, `FakeResizeObserver`, and a `clientWidth` stub on the scroller returning `VIEWPORT_PX + HEADER_PX` = 1216 + 224 [K27], so the timeline viewport is 1216 px). Collection: one source, 200 s at sample rate 100. Clips on the music lane: `near` at 0 s and `far` at 150 s, both `duration` 50. Columns are read from the `viewBox` of `[data-clip-id=…]` [K28] `[data-testid="arrangement-clip-waveform"]`; expected values come from `waveformPeakColumns(50, pxPerSecond)` (4096 at 40 px/s, 1250 at 20 px/s).
+
+| Row | Steps | Assert (`toBe`) |
+|---|---|---|
+| WG0 | `spanInTimelineWindow` | undefined window → true; `(0,1000)` and `(2000,3000)` vs `{1000,2000}` → true; `(2001,3000)` and `(0,999)` → false |
+| WG1 | Unmeasured viewport (`clientWidth` 0); mount at 40; `setPxPerSecond(20)` | both clips at the 20 px/s value |
+| WG2 | Measured; mount at 40 (both at the 40 value, and the two values differ); `setPxPerSecond(20)` | `near` at 20's value, `far` still at 40's |
+| WG3 | Measured; 40 → 20; scroll the scroller to 3000 and fire `scroll` | `far` now at 20's value; `near` at 20's value |
+| WG4 | Measured; 40 → 20 → 40 (both at 40's); 20 again; scroll to 4000; 40 | `near` keeps 20's value (outside the window), `far` at 40's |
+
+**Mutants** (A on scratch; B's results in `b-round-305/mutants.txt`):
+- MU-GATE-OFF: the clip always uses the target columns → WG2, WG3, WG4 red.
+- MU-NO-SCROLL: the clip subscribes to a no-op instead of `subscribeTimelineScroll` → WG3 red.
+- MU-FALLBACK: `spanInTimelineWindow(…, undefined)` returns false → WG0, WG1 red.
+- MU-EDGE: exclusive edges → WG0 red.
+
+## 7. A's order of work
+1. A-CLAIMS. 2. Edit §5 items 1–4, then the test (§6). 3. Typecheck, lint, A-UNIT, A-PERF-LIB. 4. A-MUTANTS on scratch. 5. A-PERF-RUN alone. 6. Docs. 7. `code-reviewer` (re-review after any later change). 8. Write `a-round-306.md` as you go: per-row results, the perf values, mutant table, claims after the change, the reviewer's Architecture note.
+
+## 8. Neighbouring behaviour at risk (C probes)
+- **Scroll and Follow:** a page flip during playback (Follow) re-renders only the clips that enter or leave the window; the existing `play.*` and `drag.*` perf asserts (PERF-RUN) cover idle commits. SCROLL-UPGRADE covers manual scroll.
+- **Edits on an off-screen clip** (trim, Ctrl+D, gain) keep the old column count until it enters the window; the path still covers the clip box. Visible clips are unchanged (VIS-EQUIV).
+- **Detail panel waveform** and the **video lane** use their own columns; PLAY-SMOKE-306 opens the Studio after the change.
+- **Tests that pin the waveform** (K17, K18 sweeps): all ran green on the sketch (§2); none is granted, so a red one is a STOP.
+
+## 9. STOP conditions
+A writes "STOP — needs B ruling" at the top of `a-round-306.md` and changes nothing else when:
+- A-CLAIMS differs from `claims-306-head-output.txt`;
+- a change is needed outside §5, or `buildPeakShape`/`ArrangementPeakPath` must change;
+- any existing test or perf assert turns red, or a new deterministic value is not stable over the 3 passes;
+- the harness's `out.path-rewrites`/`wheel.path-rewrites` differ from 3/2, or `commits` `detail.max` > 1, or components per key differ from 247 by more than 5 %;
+- `in`/`out` keydown-max median ≥ 50 or wheel LoAF median ≥ 50 in A-PERF-RUN;
+- a covering test above 50 % of its timeout; typecheck fails; lint has a new finding in a granted path; a mutant stays green; the reviewer reports a Medium+ regression.
+
+## 10. Next
+- C PASS + gate → **PERF-3 is done** (EXIT met). The REGRESSION round (due on or after 2026-11-05) comes next when due; STUDIO-PERFORMANCE then continues with its next stage.
+- A C FAIL on a Medium+ comes first; a Low goes to `deferred_low_polish` unless this round owns the code.
+- For root: ROOT-REQ-VITEST-PERF-INCLUDE (= GATE304-M1) is still open; ARCH-CHECKPOINT-STUDIO-LINK is still unanswered. **No new frontend-architect checkpoint now:** this is one bounded change (one prop passed through two components plus a gate in the clip view); signals GATE304-ARCH-ZOOM-LIVE-RULE and `PERF-3D-VERTICAL-GATE` are recorded. A checkpoint request is due at the end of STUDIO-PERFORMANCE (feature boundary), with `StudioWorkspace.tsx` size and the prop chain to the clip view on the list.
+
+## 11. Commit readiness
+After C PASS and the gate, root publishes the §5 paths. The loop-state commit carries the round-305 RT-FIX edit to `user-review/screen-review-305.md`.
+
+## 12. Claims (L29 + L56)
+Run `bash b-round-305/claims-306.sh` from the loop root. HEAD output: `b-round-305/claims-306-head-output.txt`. Output on B's sketch (the expected values after A's change): `b-round-305/claims-306-sketch-output.txt`.
+
+| Tag | Claim | Expected at HEAD |
+|---|---|---|
+| K1 | gate 304 published `adf959d`; gate 305 skipped | `published adf959d \| skipped` |
+| K2 | clean tree, HEAD | `0 adf959d` |
+| K3 | frozen entries | `1176` |
+| K4 | each protected file once | `1 1 1 1 1 1 1` |
+| K5 | `peaks.ts`: cap 4096 (l.3), band factor 4 (l.5), `waveformPeakColumns` (l.7) | three hits |
+| K6 | the clip view's `peakColumns` line | `366: … waveformPeakColumns(clip.duration, pxPerSecond);` |
+| K7 | `ArrangementPeakPath` memo deps | `312: [peaks, clip.sourceOffset, clip.duration, columns, scale],` |
+| K8 | `view.ts` page helpers | `TimelinePxWindow` l.233, `readTimelinePage` l.243, `timelinePageKey` l.257, `timelinePageWindow` l.273 |
+| K9 | the three workspace callbacks | l.1246, l.1276, l.1281 |
+| K10 | one `<ArrangementLane` element; the lane passes `timelineSeconds={laneSeconds}` | `1 1035: …` |
+| K11 | path-rewrite budgets | `('in', '==', 0) ('out', '==', 60) ('wheel', '==', 60)` |
+| K12 | `interactionSequence` entry | l.73 |
+| K13 | probe installed only in `runZoomProbeSteps` | `527 423:async function measureZoom 517:async function runZoomProbeSteps` |
+| K14 | vitest include | `include: ['app/**/*.test.{ts,tsx}'],` |
+| K15 | new identifiers absent | `0` |
+| K16 | the detail panel's own columns | `231` |
+| K17 | SWEEP `arrangement-clip-waveform` in `app/**` tests, `perf/**`, `e2e/**` | 10 files (output file) |
+| K18 | SWEEP viewBox/path pins in `app/**` tests | 6 files (output file) |
+| K19 | round-305 archive equals the old task | `archive-equal-305` |
+| K20 | last doc number; 223 free | `222-perf-zoom-harness-rows.md 0` |
+| K21 | doc 222 `## მიდგომა` l.13 up to `## არქიტექტურა` l.30; the `== 60` bullet; l.4 | `13-30 1 **სტატუსი:** Completed (C round 304 PASS)` |
+| K22 | RT-FIX: old truncation phrase, density word, SR-305-3 status | `0 1 1` |
+| K23 | new test absent at HEAD | `absent` |
+| K24 | no `In Progress (stage` doc | `0` |
+| K25 | every cited artifact exists (L56) | `done` |
+| K26 | `arrangement-position` testid and the `Demo collection ready` status, each defined once in `app/**` (non-test) | `1 1` |
+| K27 | `tempo-window-ui.test.tsx`: `HEADER_PX = 224`, `VIEWPORT_PX = 1216`, `layout` | `204 205 206` |
+| K28 | the clip root carries `data-clip-id={clip.id}` | `1` |
+| K29 | `preserveAspectRatio="none"` in `ArrangementClip.tsx` | `2` |
+| K30 | the other two perf specs only count waveforms | `perf/studio-lab.perf.spec.ts:168 perf/studio-lab-resources.perf.spec.ts:579` |

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Round 306 claims (B round 305 -> 306 planning). Run from the loop root: bash b-round-305/claims-306.sh
+L=$(pwd); S=${CLAIMS_STORE:-/home/runner/czaba-project/store}
+echo "K1 $(python3 -I -c "import json;g=json.load(open('gates/gate-round-304.json'));print(g['status'],g['commit'][:7])") | $(python3 -I -c "import json;g=json.load(open('gates/gate-round-305.json'));print(g['status'])")"
+echo "K2 $(git -C $S status --short --untracked-files=all | wc -l) $(git -C $S rev-parse --short=7 HEAD)"
+echo "K3 $(wc -l < b-round-305-r306-tree-sha256.txt)"
+echo "K4 $(for f in app/routes/studio.\$productId.tsx app/routes/api.studio-token.ts app/routes/account.downloads.tsx app/lib/auth.ts app/contexts/AuthContext.tsx app/lib/firebase.client.ts app/services/api/client.ts; do grep -c "  $f\$" b-round-305-r306-tree-sha256.txt; done | tr '\n' ' ')"
+echo "K5 $(grep -nE '^export const PEAK_SHAPE_MAX_COLUMNS|^const PEAK_COLUMN_BAND_FACTOR|^export function waveformPeakColumns' $S/app/lib/arrangement/peaks.ts | tr '\n' '|')"
+echo "K6 $(grep -n 'const peakColumns = waveformPeakColumns(clip.duration, pxPerSecond);' $S/app/components/arrangement/ArrangementClip.tsx)"
+echo "K7 $(grep -n '\[peaks, clip.sourceOffset, clip.duration, columns, scale\]' $S/app/components/arrangement/ArrangementClip.tsx)"
+echo "K8 $(grep -nE '^export function (readTimelinePage|timelinePageWindow|timelinePageKey)|^export interface TimelinePxWindow' $S/app/lib/arrangement/view.ts | tr '\n' '|')"
+echo "K9 $(grep -nE 'const (getTimelineView|getTimelineViewportPx|subscribeTimelineScroll) = useCallback' $S/app/components/arrangement/StudioWorkspace.tsx | tr '\n' '|')"
+echo "K10 $(grep -c '<ArrangementLane$' $S/app/components/arrangement/StudioWorkspace.tsx) $(grep -n 'timelineSeconds={laneSeconds}' $S/app/components/arrangement/ArrangementLane.tsx)"
+echo "K11 $(python3 -I -c "
+import json
+r={x['id']:x for x in json.load(open('$S/perf/budgets.interactions.json'))}
+print(*[(i.split('.')[3],r[i]['budget']['op'],r[i]['budget']['value']) for i in ['interact.zoom.30.in.path-rewrites','interact.zoom.30.out.path-rewrites','interact.zoom.30.wheel.path-rewrites']])")"
+echo "K12 $(grep -n 'zoom with \${clipsTarget} clips (interact.zoom.30.\*), Space' $S/perf/studio-lab-interactions.perf.spec.ts | cut -c1-12)"
+echo "K13 $(grep -n 'page.evaluate(installZoomProbe)' $S/perf/studio-lab-interactions.perf.spec.ts | cut -d: -f1) $(grep -nE '^async function (measureZoom|runZoomProbeSteps)\(' $S/perf/studio-lab-interactions.perf.spec.ts | cut -d'(' -f1 | tr '\n' ' ')"
+echo "K14 $(grep -n 'include:' $S/vitest.config.ts | tr -s ' ')"
+echo "K15 $(grep -rn 'timelineWindow\|spanInTimelineWindow\|TimelineWindowSource' $S/app $S/perf | wc -l)"
+echo "K16 $(grep -n 'ArrangementPeakPath clip={clip} peaks={peaks} columns={DETAIL_PEAK_COLUMNS}' $S/app/components/arrangement/ArrangementDetailPanel.tsx | cut -d: -f1)"
+echo "K17 SWEEP arrangement-clip-waveform in test roots: $( { grep -rlE 'arrangement-clip-waveform' $S/app --include='*.test.ts' --include='*.test.tsx'; grep -rlE 'arrangement-clip-waveform' $S/perf $S/e2e; } 2>/dev/null | sed "s#$S/##" | sort -u | tr '\n' ' ')"
+echo "K18 SWEEP viewBox/path pins in tests: $(grep -rlE "viewBox|V\(\\\\d|getAttribute\('d'\)|buildPeakShape|waveformPeakColumns" $S/app --include='*.test.ts' --include='*.test.tsx' 2>/dev/null | sed "s#$S/##" | sort | tr '\n' ' ')"
+echo "K19 $(cmp -s current-task.md tasks/round-306.md 2>/dev/null && echo archive-equal-306 || (cmp -s tasks/round-305.md b-round-305/round-305-task-copy.md && echo archive-equal-305))"
+echo "K20 $(ls $S/docs/implementation/2026/quarter-IV | sort -V | tail -1) $(ls $S/docs/implementation/2026/quarter-IV | grep -c '^223-')"
+echo "K21 $(grep -n '^## მიდგომა' $S/docs/implementation/2026/quarter-IV/222-perf-zoom-harness-rows.md | cut -d: -f1)-$(grep -n '^## არქიტექტურა' $S/docs/implementation/2026/quarter-IV/222-perf-zoom-harness-rows.md | cut -d: -f1) $(grep -c 'out.path-rewrites == 60' $S/docs/implementation/2026/quarter-IV/222-perf-zoom-harness-rows.md) $(sed -n 4p $S/docs/implementation/2026/quarter-IV/222-perf-zoom-harness-rows.md)"
+echo "K22 $(grep -c 'snap) და 1440-ზე წყდება' user-review/screen-review-305.md) $(grep -c 'სიმჭიდროვის' user-review/screen-review-305.md) $(grep -c 'Nothing to play — add a clip from the library first.' user-review/screen-review-305.md)"
+echo "K23 $(test -f $S/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx && echo present || echo absent)"
+echo "K24 $(grep -rn 'In Progress (stage' $S/docs/implementation | wc -l)"
+echo "K26 $(grep -rn 'data-testid="arrangement-position"' $S/app --include=*.tsx | grep -v __tests__ | wc -l) $(grep -rn "Demo collection ready" $S/app --include=*.ts --include=*.tsx | grep -v __tests__ | wc -l)"
+echo "K27 $(grep -nE '^const (HEADER_PX = 224|VIEWPORT_PX = 1216);|^const layout = \{ scrollerWidth: VIEWPORT_PX \+ HEADER_PX' $S/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx | cut -d: -f1 | tr '\n' ' ')"
+echo "K28 $(grep -c 'data-clip-id={clip.id}' $S/app/components/arrangement/ArrangementClip.tsx)"
+echo "K29 $(grep -c 'preserveAspectRatio="none"' $S/app/components/arrangement/ArrangementClip.tsx)"
+echo "K30 $(grep -n "getByTestId('arrangement-clip-waveform')).toHaveCount" $S/perf/studio-lab.perf.spec.ts $S/perf/studio-lab-resources.perf.spec.ts | sed "s#$S/##" | cut -d: -f1,2 | tr '\n' ' ')"
+printf 'K25 '; for f in b-round-305/sketch.patch.txt b-round-305/precheck-full.log b-round-305/perf-sketch-run1.json b-round-305/perf-sketch-run1.log b-round-305/perf-sketch-run2.json b-round-305/perf-sketch-run2.log b-round-305/mutants.txt b-round-305/wg-at-head.txt b-round-305/waveform-window-ui.test.sketch.tsx.txt b-round-305/probe/zoom-attr.cjs b-round-305/probe/scroll-after-crossing.cjs b-round-305/probe/path-bench.cjs b-round-305/probe/path-bench.json b-round-305/probe/out-1440-1.json b-round-305/probe/wheel-out-1440-1.json b-round-305/probe/prod-head-out-1440-1.json b-round-305/probe/prod-sketch-out-1440-1.json b-round-305/probe/prod-head-wheel-out-1440-1.json b-round-305/probe/prod-sketch-wheel-out-1440-1.json b-round-305/probe/scroll-head-1440.json b-round-305/probe/scroll-sketch-1440.json b-round-305/probe/scroll-sketch-1280.json b-round-305/screen-review-305-before.md b-round-305/screen-review-305-diff.txt c-round-304/perf/latest-interactions.json b-round-305-r306-tree-sha256.txt b-round-305/covering-sketch.txt b-round-305/claims-306-head-output.txt b-round-305/probe/visible-d.cjs b-round-305/probe/vis-head-1440.json b-round-305/probe/vis-sketch-1440.json b-round-305/probe/vis-head-1280.json b-round-305/probe/vis-sketch-1280.json b-round-305/probe/visible-d-compare.txt b-round-305/probe/prod-sketch-out-1280-1.json b-round-305/probe/prod-sketch-wheel-out-1280-1.json b-round-305/probe/prod-head-out-1440-2.json b-round-305/probe/prod-sketch-out-1440-2.json b-round-305/claims-306-sketch-output.txt b-round-305/probe/compare-visible-d.py; do test -f "$f" || echo "MISSING $f"; done; echo done

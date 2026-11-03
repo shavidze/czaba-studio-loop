@@ -1,0 +1,26 @@
+# B round 305 -> 306 checkpoint
+- [x] tasks/round-305.md archived (cmp equal)
+- [x] SR-305-4 reworded + SR-305-3 note (C-R305-01); before copy + diff in b-round-305/
+- [ ] HEAD re-measure with attribution probe (b-round-305/probe/)
+- [ ] consults performance-optimizer + tech-lead
+- [ ] scratch sketch + precheck-full + perf spec on sketch
+- [ ] task, claims, backlog, feature-status, b-round-305.md, b-next.json
+- [x] HEAD attribution: probe/out-1440-1.json, wheel-out-1440-1.json (dev); prod-head-*.json (prod build). Crossing = script-bound (84 ms script, 14 forced)
+- [x] path-bench.json: toFixed build 32-55 ms; intRel 8-12; setAttribute 12-15 any format
+- [x] consults: performance-optimizer + tech-lead -> option (c) viewport gating via existing timeline page window; (a) not needed (4 test grants, 65-75 ms alone)
+- [x] sketch on /tmp/b305/sketch (sketch.patch.txt): prod-sketch-*.json crossing keys 16-24 ms, LoAF 0, rewrites out 3 / wheel 2; scroll-sketch-*.json 29 upgrades max 1/step, final all 2534
+- [x] precheck-full.log: 232 files / 3449 tests pass on sketch
+- [ ] perf spec on sketch (budget values)
+- [x] perf-sketch-run1.json/.log: only the two == 60 rows fail (out 3, wheel 2); out keydown max 24, LoAF 0, commits 1, components 247 (= HEAD c-round-304)
+- [x] WG0-WG4 sketch test (waveform-window-ui.test.sketch.tsx.txt) green; mutants.txt 4/4 red on target rows; wg-at-head.txt red at HEAD (WG1 green by design)
+- [ ] budgets applied on sketch + perf rerun; then task/claims/backlog/status/report
+- [x] perf-sketch-run2.json/.log: budgets applied on sketch, spec PASS, failures []
+- [x] sketch.patch.txt = app + perf diff (6 files)
+- [x] claims-306.sh + claims-306-head-output.txt; frozen b-round-305-r306-tree-sha256.txt (1176)
+- [x] covering-sketch.txt 11 files/169 tests green; probe/visible-d-compare.txt equal at 1440/1280; prod-sketch-*-1280-1.json
+- [ ] write current-task.md (306), update-backlog.py, feature-status, b-round-305.md, b-next.json
+- [x] current-task.md (306) written; claims-306-head-output.txt refreshed (K25 done)
+- [x] backlog v265 (update-backlog.py one-shot; before-copy backlog-before-306.json); feature-status updated (before-copy)
+- [ ] b-round-305.md, b-next.json, advisor final
+- [x] b-round-305.md, b-next.json written; claims stable; store clean
+- [x] advisor fixes: claims-306-sketch-output.txt (L56), K26-K30 tags (L29), SCROLL wording, other perf specs note; claims stable; store clean

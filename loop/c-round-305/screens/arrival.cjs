@@ -1,0 +1,5 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async()=>{const b=await chromium.launch();const out={};for(const [w,h] of [[1440,900],[1280,720]]){const c=await b.newContext({viewport:{width:w,height:h}});const p=await c.newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab?preview=middle-east',{waitUntil:'load'});await p.waitForFunction(()=>/ready|selected|preview/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent||''),null,{timeout:120000});await p.waitForTimeout(1500);
+out[`${w}x${h}`]=await p.evaluate(()=>({clips:document.querySelectorAll('[data-clip-id]').length,status:document.querySelector('[data-testid="arrangement-status"]')?.textContent,selected:document.querySelector('[role="option"][aria-selected="true"]')?.textContent.replace(/\s+/g,' ').trim()}));await c.close();}
+console.log(JSON.stringify(out,null,1));require('fs').writeFileSync(__dirname+'/arrival.json',JSON.stringify(out,null,1));await b.close();})();

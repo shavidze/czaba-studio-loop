@@ -1,0 +1,47 @@
+{
+  "round": 305,
+  "taskStatus": "FAIL",
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {"checkedUtc": "2026-11-02T23:33:09.1835450Z", "round": 305, "attempt": 1, "store": 200},
+  "bugs": [
+    {
+      "id": "C-R305-01",
+      "severity": "low",
+      "origin": "B (screen review written from the capture JSON, whose textLines() cuts every text to 120 chars, not from the screenshot)",
+      "steps": [
+        "Open user-review/screen-review-305.md, row SR-305-4: 'status ... 1440-ზე წყდება' (the status sentence is cut at 1440).",
+        "Open B's own b-round-304/screens/screen305-full-DEMO-1440x900.png and C's c-round-305/screens/screen305-full-DEMO-1440x900.png: the status sentence is shown in full on one line, ending 'Snap on — grid 1/2 (G)'.",
+        "Run c-round-305/screens/sr-probe.cjs: on /studio-lab?preview=middle-east add Bass (Enter), read [data-testid=arrangement-status] (the longest status: added + name-bar hint + tempo + grid + snap)."
+      ],
+      "expected": "Each SR candidate is as described (RT-SCREEN): the screenshot SR-305-4 names shows a cut status line at 1440.",
+      "actual": "The status is not cut at 1440 or 1280: scrollWidth == clientWidth (1416/1416 at 1440, 1256/1256 at 1280), height 16 px (one line), no element with text-overflow ellipsis or overflow; both screenshots show the full sentence. The only place it is cut is screen305.json (text.slice(0,120) in capture.mjs ends at '... Gri'). The rest of SR-305-4 (five facts in one sentence; the SABA-B-8 constraint) is correct.",
+      "evidence": "c-round-305/screens/sr-probe.json, c-round-305/screens/sr-probe-status-1440x900.png, sr-probe-status-1280x720.png, c-round-305/screens/screen305-full-DEMO-1440x900.png, b-round-304/screens/screen305-full-DEMO-1440x900.png, b-round-304/screens/capture.mjs (slice(0, 120))"
+    }
+  ],
+  "passed": ["SOURCE-SCOPE", "CLAIMS", "RT-NUM", "RT-CAUSE", "RT-IDS", "RT-LESSONS", "RT-SABA", "G305-AUTH", "STUDIO-SMOKE-305"],
+  "failed": ["RT-SCREEN (C-R305-01: SR-305-4 not as described; browser re-run itself matched)"],
+  "blocked": [],
+  "gate": ["full vitest", "typecheck", "build", "Biome", "npm run verify", "e2e smoke"],
+  "rows": {
+    "SOURCE-SCOPE": "PASS start+end: HEAD adf959d, status empty, sha256 -c rc 0",
+    "CLAIMS": "PASS: claims-305.sh output byte-identical to claims-305-output.txt (c-round-305/claims-output.txt); K8 done, no MISSING",
+    "RT-NUM": "PASS: all scripts re-run on copies (c-round-305/rtb); every §1/§2/§4/§9/§10 number matches; cost.txt identical except dict order; rounds-290-304.json differs only in round 304 b_cost (B's own 305 planning now exists), which cost.py does not read",
+    "RT-CAUSE": "PASS: §3 rows and §9 match c-round-290/292/295/298.json, gates/round-293/verify.log l.3069/3093, gates/round-297/review.md Critical 1 (LH3/LH1), a-round-295/303 STOP lines, a-round-304 l.19-23/l.107; EXP-R290 verdict follows retro-290 §10 rule",
+    "RT-IDS": "PASS: round-304 closure, GATE304-* ids (full ids GATE304-M1-PERF-LIB-NOT-IN-GATE, -M2-EQ60-TRIPWIRE, -L3-PROBE-IN-WINDOW), candidates as stated; inventory 10 ids all disposed; extended grep of the before copy found only scheduling notes plus ids already disposed",
+    "RT-LESSONS": "PASS: 59 lines, 3 parts; only l.3, L11/L23/L38/L44/L56 (prefix-equal, appended), L43 removed, L57 added; L44 carries old L43 text and evidence verbatim",
+    "RT-SABA": "PASS: §12 items are proposals; SR-305-2/-3/-7/-9 marked as questions; SR-305-6 collapse variant named a position move for Saba; CLAUDE.md tagline proposal only",
+    "RT-SCREEN": "FAIL (document): browser re-run at both viewports with own mock: laneErrors none, journey reaches /studio-lab?preview=middle-east with preview selected+focused, arrival 0 clips, position after Play 00:01.483/00:01.471, counts identical to counts.txt (138/168/118/144; outside 97/124/86/101); all named PNGs exist; SR-305-4 'cut at 1440' not as described (C-R305-01)",
+    "G305-AUTH": "PASS both viewports (attempts 3 and 4; attempt 1 cold-start timeout, attempt 2 crashed with output lost — environment)",
+    "STUDIO-SMOKE-305": "PASS both viewports: Bass via Enter, position 00:01.471 after 1.5 s, data-playing false->true->false, WAV RIFF/WAVE 48 kHz 24-bit stereo 768000 frames = 16.000 s, peak 0.217, NaN 0"
+  },
+  "manifestPaths": 61,
+  "missingPaths": 0,
+  "countMismatches": 0,
+  "claimCheckMinutes": 2,
+  "assertsSpecified": null,
+  "mutantsRecorded": null,
+  "mutantRedOnSketch": null,
+  "nullReason": "RETRO: no assert specified",
+  "consults": "none (consequence-tester optional; not consulted)"
+}
