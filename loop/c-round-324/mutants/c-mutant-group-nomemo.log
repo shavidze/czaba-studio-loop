@@ -1,0 +1,118 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c324/atree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 4326[2mms[22m[39m
+[31m     [31m×[31m SS8a a folded group header does not re-render on a workspace commit that changes none of its props[39m[33m 2666[2mms[22m[39m
+     [33m[2m✓[22m[39m SS8b selecting every clip re-renders the folded group header and marks each overview block selected [33m 1657[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/render-budget.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 10946[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play [33m 3304[2mms[22m[39m
+     [33m[2m✓[22m[39m RB-IM keeps the insert marker line as the same node over Play → Stop → Play [33m 2083[2mms[22m[39m
+     [33m[2m✓[22m[39m moves the playhead, ruler handle and transport time on playback frames without React renders [33m 1332[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e) [33m 2181[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02) [33m 1481[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/group-volume-db.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 8163[2mms[22m[39m
+     [33m[2m✓[22m[39m GV1: the group fader uses the lane dB range and texts; the row text stays the name only [33m 1566[2mms[22m[39m
+     [33m[2m✓[22m[39m GV2: a −25 px drag stores F(−15) exactly with one entry; Undo clears, Redo restores [33m 931[2mms[22m[39m
+     [33m[2m✓[22m[39m GV3: a drag past the left end stores exactly 0, shows −∞ dB and silences only the members [33m 824[2mms[22m[39m
+     [33m[2m✓[22m[39m GV4: a press without a move, or a move back to the start, keeps a context-set 0.72 and writes no entry [33m 771[2mms[22m[39m
+     [33m[2m✓[22m[39m GV5: a keyboard change plus key-up writes F(dB) with one entry; a double-click resets with one entry [33m 820[2mms[22m[39m
+     [33m[2m✓[22m[39m GV6: Shift makes the group fader ten times finer and a mid-drag Shift press re-anchors without a jump [33m 867[2mms[22m[39m
+     [33m[2m✓[22m[39m GV7: Shift −20 px on the video lane Volume gives F(−1.2) from 0 dB [33m 680[2mms[22m[39m
+     [33m[2m✓[22m[39m GV8: a group drag during playback starts no new source and the live gains follow the stored mix [33m 833[2mms[22m[39m
+     [33m[2m✓[22m[39m GV9 must-not: Pan ignores Shift, while Clip Gain keeps its ten times finer drag [33m 867[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-groups-ui.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 20294[2mms[22m[39m
+     [33m[2m✓[22m[39m TG1 plain, Shift and Ctrl clicks shape the track selection while the active lane follows [33m 3051[2mms[22m[39m
+     [33m[2m✓[22m[39m TG2 Ctrl+G renders one indented group above its members, with Undo and Redo [33m 776[2mms[22m[39m
+     [33m[2m✓[22m[39m TG2 after Undo removes the selected group, the stale selection is filtered, not reused [33m 803[2mms[22m[39m
+     [33m[2m✓[22m[39m TG3 nesting by clicks and keys stacks the outer header, then the inner one [33m 1363[2mms[22m[39m
+     [33m[2m✓[22m[39m TG4 Ctrl+Shift+G dissolves only the selected group and refuses a track-only selection [33m 2145[2mms[22m[39m
+     [33m[2m✓[22m[39m TG5 refusals leave history, rows and selection untouched with an English status [33m 2840[2mms[22m[39m
+     [33m[2m✓[22m[39m TG6 F2 renames the group inline; Escape cancels; empty keeps the name; editor keys stay local [33m 2470[2mms[22m[39m
+     [33m[2m✓[22m[39m TG7 plain g still toggles Snap and Ctrl+G inside the BPM field or library search is ignored [33m 448[2mms[22m[39m
+     [33m[2m✓[22m[39m TG8 a clip dragged onto a group header row keeps its previous lane target (G10) [33m 988[2mms[22m[39m
+     [33m[2m✓[22m[39m TG8 without groups the old first/last fallback still applies [33m 369[2mms[22m[39m
+     [33m[2m✓[22m[39m TG8b group rows never carry data-track-id and share one parent with the lane rows [33m 1442[2mms[22m[39m
+     [33m[2m✓[22m[39m TG9 a Ctrl marquee across a group header row selects clips on both sides [33m 818[2mms[22m[39m
+     [33m[2m✓[22m[39m TG10 auto-fit reserves the group header rows (0, 1 and 2 groups) [33m 2035[2mms[22m[39m
+     [33m[2m✓[22m[39m TG11 grouping and ungrouping while playing restarts no sources and the position advances [33m 742[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 27247[2mms[22m[39m
+     [33m[2m✓[22m[39m UM1 controls render expanded and collapsed, add no text and keep the 28 px row [33m 3482[2mms[22m[39m
+     [33m[2m✓[22m[39m UM2 group Mute silences the members live with one history entry and no restart [33m 1492[2mms[22m[39m
+     [33m[2m✓[22m[39m UM3 group Volume: drag, keyboard, blur and double-click each write one entry; cancel reverts [33m 3427[2mms[22m[39m
+     [33m[2m✓[22m[39m UM4 group Solo: exclusive, cleared by a lane solo, Ctrl additive, half-solo on the parent [33m 3390[2mms[22m[39m
+     [33m[2m✓[22m[39m UM5 R17-G3: inner controls stay adjustable under a muted outer group [33m 2378[2mms[22m[39m
+     [33m[2m✓[22m[39m UM6 Ctrl+G, group M/S/Volume and Ctrl+Shift+G while playing restart no sources [33m 1909[2mms[22m[39m
+     [33m[2m✓[22m[39m UM7 ungrouping a muted group makes its members audible; Undo mutes them again [33m 1520[2mms[22m[39m
+     [33m[2m✓[22m[39m UM8 the export dialog video-sound line uses the group-aware rule [33m 929[2mms[22m[39m
+     [33m[2m✓[22m[39m UM9 X1: collapsing blurs a hidden focused fader, commits a pending preview and focuses the group [33m 3698[2mms[22m[39m
+     [33m[2m✓[22m[39m UM10 Space, m and u on a focused group M/S behave as on a lane M/S [33m 1633[2mms[22m[39m
+     [33m[2m✓[22m[39m UM11 group Mute/Solo use the 5 % fill, on and mixed keep their fills, fold, name and rename get 8 px [33m 3384[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/library-group-heading-ui.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 3368[2mms[22m[39m
+     [33m[2m✓[22m[39m LG1: the All view shows one labelled group per collection, no per-option collection line, options in source order [33m 833[2mms[22m[39m
+     [33m[2m✓[22m[39m LG2: headings take no focus and are not options; ArrowDown/ArrowUp walk the options in resultIds order [33m 556[2mms[22m[39m
+     [33m[2m✓[22m[39m LG3: a selected collection node or folder shows the options flat in the listbox, with no group [33m 361[2mms[22m[39m
+     [33m[2m✓[22m[39m LG4: search shows groups only when the results span two collections [33m 325[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-group-mix.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/groups.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-group-collapse.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx [2m([22m[2m30 tests[22m[2m)[22m[33m 36640[2mms[22m[39m
+     [33m[2m✓[22m[39m UC1 the fold button hides the member lanes, shows an overview and writes no history [33m 2823[2mms[22m[39m
+     [33m[2m✓[22m[39m UC2 plain U toggles the selected groups and refuses a track-only selection [33m 1134[2mms[22m[39m
+     [33m[2m✓[22m[39m UC2 U is ignored in text fields, with modifiers and while repeating [33m 921[2mms[22m[39m
+     [33m[2m✓[22m[39m UC2 U and the fold button are refused during a pointer gesture and a pending fader preview [33m 2432[2mms[22m[39m
+     [33m[2m✓[22m[39m UC3 nested collapse keeps the inner group collapsed when the outer one expands [33m 1983[2mms[22m[39m
+     [33m[2m✓[22m[39m UC3 a collapsed group nested by Ctrl+G stays collapsed and ungrouping shows its children [33m 1680[2mms[22m[39m
+     [33m[2m✓[22m[39m UC4 hidden lane controls are unreachable and the collapsed label carries the clip count [33m 1763[2mms[22m[39m
+     [33m[2m✓[22m[39m UC4 F3 a collapse moves focus from a hidden lane to the collapsing group name [33m 1991[2mms[22m[39m
+     [33m[2m✓[22m[39m UC5 collapsing prunes hidden clip, row and lane-range selections, keeps an all-lanes range [33m 3472[2mms[22m[39m
+     [33m[2m✓[22m[39m UC5 Ctrl+A while collapsed selects every clip and marks the overview blocks [33m 742[2mms[22m[39m
+     [33m[2m✓[22m[39m UC6 auto-fit uses the visible lanes only and writes heights back by track id [33m 867[2mms[22m[39m
+     [33m[2m✓[22m[39m UC6 a hidden lane keeps its manual height across collapse and expand [33m 898[2mms[22m[39m
+     [33m[2m✓[22m[39m UC6 nested: an outer collapse leaves one lane and one group row to fit [33m 1801[2mms[22m[39m
+     [33m[2m✓[22m[39m UC7 a hidden active lane marks its collapsed group and still receives library adds [33m 1415[2mms[22m[39m
+     [33m[2m✓[22m[39m UC8 Undo shows the lanes, Redo restores the collapsed group without pruning [33m 1526[2mms[22m[39m
+     [33m[2m✓[22m[39m UC9 F1 focus moves to the new group name after Ctrl+G so F2 works at once [33m 911[2mms[22m[39m
+     [33m[2m✓[22m[39m UC9 F1 from BODY, and F2 after Ctrl+Shift+G focus lands on the first child, never BODY [33m 1169[2mms[22m[39m
+     [33m[2m✓[22m[39m UC10 a clip dragged onto a collapsed group row keeps its music lane target [33m 1119[2mms[22m[39m
+     [33m[2m✓[22m[39m UC10b a Ctrl marquee across a collapsed middle group never selects its hidden clips [33m 343[2mms[22m[39m
+     [33m[2m✓[22m[39m UC11 collapsing while playing restarts no sources and leaves the arrangement untouched [33m 438[2mms[22m[39m
+     [33m[2m✓[22m[39m UC1 Space on the focused fold button toggles the group and does not start playback [33m 427[2mms[22m[39m
+     [33m[2m✓[22m[39m UC12 the shortcut sheet lists the group keys and track fold stays independent [33m 342[2mms[22m[39m
+     [33m[2m✓[22m[39m LGH1 the group fold is a chevron, the group mark is Layers and no glyph text remains [33m 570[2mms[22m[39m
+     [33m[2m✓[22m[39m GF1 Undo: Group Tracks on the focused group name lands on its first member, never BODY [33m 525[2mms[22m[39m
+     [33m[2m✓[22m[39m GF2 Redo: Ungroup Tracks by Ctrl+Shift+Z and by Ctrl+Y lands on the first former member [33m 1084[2mms[22m[39m
+     [33m[2m✓[22m[39m GF3 focus on the fold, mute or volume control of the removed row moves the same way [33m 896[2mms[22m[39m
+     [33m[2m✓[22m[39m GF4 a folded group removed by Undo hands focus to its first member, now shown [33m 655[2mms[22m[39m
+     [33m[2m✓[22m[39m GF5 nested: the removed outer group hands focus to its first child; the kept inner one keeps it [33m 1075[2mms[22m[39m
+     [33m[2m✓[22m[39m GF6 focus that was not inside the removed row is not moved [33m 709[2mms[22m[39m
+     [33m[2m✓[22m[39m GF7 Ctrl+Shift+G keeps its own focus target when it also removes the focused row [33m 927[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx[2m > [22mPERF-8b selection wrappers render only on their own inputs (SS8, C-R323-02)[2m > [22mSS8a a folded group header does not re-render on a workspace commit that changes none of its props
+[31m[1mAssertionError[22m: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx:[2m344:85[22m[39m
+    [90m342| [39m      expect(view.getByTestId('arrangement-status').textContent).toCon…
+    [90m343| [39m      expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBeGr…
+    [90m344| [39m      expect(renderLog.counts.get('ArrangementGroupHeaderWithSelection…
+    [90m   | [39m                                                                                    [31m^[39m
+    [90m345| [39m    }[33m,[39m
+    [90m346| [39m  )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m111 passed[39m[22m[90m (112)[39m
+[2m   Start at [22m 00:26:21
+[2m   Duration [22m 40.35s[2m (transform 5.62s, setup 0ms, import 13.75s, tests 111.05s, environment 9.36s)[22m
+
+
+::error file=/tmp/c324/atree/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx,title=app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-8b selection wrappers render only on their own inputs (SS8%2C C-R323-02) > SS8a a folded group header does not re-render on a workspace commit that changes none of its props,line=344,column=85::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx:344:85%0A%0A

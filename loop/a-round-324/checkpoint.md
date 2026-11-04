@@ -1,0 +1,12 @@
+# A round 324 checkpoint
+- A-CLAIMS before: PASS (equal to planning output).
+- §1 render-budget edit applied.
+- SS8 file 2/2, SS1–SS7 file 7/7 written
+- harness scenario+5 rows written, typecheck rc0. K19 grep gives 4 (live row id lacks prefix) — to rule
+- A-UNIT 113/113 files, 1714 tests (a-unit.log); perf report 34/34; no it >50% timeout
+- 6 mutants red at their rows, SS8b green under group-header mutant; scratch restored equal
+- next: A-PERF (HEAD control /tmp/a324h + A /tmp/a324s), docs, review, claims-after
+- docs 230/231 written (231 perf numbers pending); report §1–§2 written; reviewer + perf running
+- perf run1: new step found no 2nd visible header (HEAD); spec fixed with zoom-out loop; rerunning
+- perf run2 OK both; rises only subscriber names (probe/names-diff.txt); spec Medium1/Low3 fix applied after run2 (needs re-review)
+- report final

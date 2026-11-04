@@ -1,0 +1,162 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-04T00:18:19.4409107Z",
+  "round": 324,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R324-01",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "bash b-round-323/claims-324.sh from the loop root",
+    "read K19 (grep -c '\"interact\\.select' perf/budgets.interactions.json)",
+    "compare with tasks/round-322.md §2.5 l.173-177 row ids"
+   ],
+   "expected": "K19 >= 5 (A-CLAIMS-AFTER), meaning the five §2.5 rows are present",
+   "actual": "K19 = 4: B's own §2.5 id 'interact.harness.select-same-lane-live' does not match the grep. The five ids are present byte-for-byte and the diff only adds lines (0 removed). The grep -cE '\"id\": \"interact\\.(select|harness\\.select)' gives 5 (HEAD 0). A STOPped on this one claim value and changed nothing to satisfy the grep",
+   "evidence": "tmp/studio-real-loop/c-round-324/claims-c.txt; git diff 53c5c79 -- perf/budgets.interactions.json; a-round-324.md top"
+  }
+ ],
+ "passed": [
+  "CLAIMS (every A-CLAIMS-AFTER value except K19; K19 intent verified directly, see C-R324-01)",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "A-MUTANTS (6/6 red on C's run)",
+  "C group-header mutant (red at SS8a; closes C-R323-02)",
+  "EXPECT",
+  "PERF-SELECT",
+  "PERF-LOAD",
+  "SELECT-NAMES (incl. MU-SELECTION-IN-VALUE; closes C-R322-02)",
+  "DUP-NAMES",
+  "S2-VIDEO",
+  "S-CLICK",
+  "S-EDIT",
+  "S-DETAIL",
+  "S-TRANSPORT",
+  "S-RANGE",
+  "WAV export byte-compare HEAD vs A",
+  "S-GROUP (redefined §4; closes INFO-C323-S-GROUP-PREMISE)",
+  "G324-AUTH",
+  "L28 doc 230/231 l.4",
+  "SS8a",
+  "SS8b",
+  "doc 168 ## მეტრიკები rows",
+  "doc 230 GATE320-L1 line",
+  "perf/lib report unit 34/34 (+ zoom-probe 6/6)"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build in store/",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "closes": [
+  "C-R322-01 (UNIT)",
+  "C-R323-01 (UNIT, R11-P1e + MU-DETAIL-NO-MEMO)",
+  "C-R322-02 (SELECT-NAMES)",
+  "C-R323-02 (SS8 + mutant)",
+  "INFO-C323-S-GROUP-PREMISE (S-GROUP)"
+ ],
+ "info": [
+  "CAND-R323-FOLD-CLEARS-SELECTION re-observed on both trees (fold -> 0 selected blocks, readout cleared); not asserted",
+  "27 perf rises (click +3, fade/trim/move drag +2 per edit commit) consist only of the subscriber Inners, <= 1 per name per commit (C's extended probe incl. trim and move)",
+  "A ran A-PERF on the pre-re-review spec; C ran the final spec (cmp-equal to the store): same numbers",
+  "HEAD dev warm-up and mutant dev warm-up each timed out once on the cold compile (L38 environment), replaced by a second warm-up; no timed probe was affected"
+ ],
+ "measurements": {
+  "perfSelect": {
+   "controlSameLane": 107,
+   "aSameLane": 25,
+   "ratio": 0.234,
+   "controlReclick": {
+    "commits": 2,
+    "components": 92
+   },
+   "aReclick": {
+    "commits": 1,
+    "components": 0
+   },
+   "live": [
+    1,
+    1,
+    1
+   ]
+  },
+  "perfLoad": {
+   "deterministicEqual": 164,
+   "rises": 0,
+   "failures": []
+  },
+  "export": {
+   "sha256": "5046a9876383ef22052ddba2b0ace6eba2f590806a560afb7335462dcb2e57d2",
+   "durationS": 304.056,
+   "rate": 48000,
+   "bits": 24,
+   "channels": 2,
+   "identicalFiles": 4
+  },
+  "sGroup": {
+   "blocks": 3,
+   "selectedAfterFold": 0,
+   "selectedAfterCtrlA": 3,
+   "ariaExpandedAfterCtrlA": "false",
+   "pngByteIdentical": true
+  }
+ },
+ "manifestPaths": [
+  "a-round-324/claims-after.txt",
+  "a-round-324/unit-files.txt",
+  "a-round-324/mutants.py",
+  "a-round-324/perf-rowcmp.txt",
+  "a-round-324/probe/drag-names-probe.mjs",
+  "a-round-323/option-a-r11p1e.patch.txt",
+  "b-round-323/claims-324.sh",
+  "b-round-323/claims-324-planning-output.txt",
+  "b-round-321/expect-count.py",
+  "b-round-321/expect-count-head.txt",
+  "b-round-321/click-hooks-probe.mjs",
+  "b-round-321/s2-probe.mjs",
+  "c-round-323/c323-rows.mjs",
+  "c-round-323/c323-group.mjs",
+  "c-round-323/g323-auth.cjs",
+  "c-round-323/c-mutant-group-files.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [
+  "K19: 4 vs >= 5 (C-R324-01, B spec)"
+ ],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 9,
+ "mutantsRecorded": 6,
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "B built a type-only sketch; mutants not run on a B sketch (D-29z893)",
+ "mutantRedOnTree": {
+  "MU-NO-EQUAL-GUARD": "red SS2,SS5",
+  "MU-UNORDERED-GUARD": "red SS2,SS7",
+  "MU-SELECTION-IN-VALUE": "red SS4 (expected 5 to be 4); dev: K15 names 10/10 back",
+  "MU-STALE-SELECTION-READ": "red SS6",
+  "MU-DETAIL-NO-MEMO": "red R11-P1e l.468 (expected 3 to be +0)",
+  "MU-GROUP-HEADER-NO-MEMO": "red SS8a l.344 (expected 1 to be +0), SS8b green",
+  "C-group-header-mutant-wide": "1 failed (SS8a) / 111 passed over render-budget + SS8 + 8 group files"
+ },
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 2,
+ "chainHeadGateRunGreen": null,
+ "chainHeadGateRunGreenReason": "chain 322->323->324: gates 322 and 323 skipped on C FAIL; no gate ran on the chain head yet",
+ "abletonConformance": "not applicable (performance refactor, no behaviour change)",
+ "viewports": [
+  "1440x900",
+  "1280x720"
+ ],
+ "manifestCheck": "c-round-324/manifest-check.txt (16/16 exist)"
+}

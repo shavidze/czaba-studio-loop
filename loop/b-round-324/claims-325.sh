@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Round 325 claims (L29 + L56). Run from the loop root. CLAIMS_STORE may override the store path.
+L=$(pwd); S=${CLAIMS_STORE:-/home/runner/czaba-project/store}
+CTX=$S/app/contexts/ArrangementContext.tsx; CLIP=$S/app/components/arrangement/ArrangementClip.tsx
+LANE=$S/app/components/arrangement/ArrangementLane.tsx; WS=$S/app/components/arrangement/StudioWorkspace.tsx
+D230=$S/docs/implementation/2026/quarter-IV/230-perf-range-store.md; D231=$S/docs/implementation/2026/quarter-IV/231-perf-selection-store.md
+echo "K1 $(python3 -I -c "import json;a=json.load(open('gates/gate-round-324.json'));print(a['status'],a['commit'][:7])")"
+echo "K2 $(git -C $S rev-parse --short HEAD) $(git -C $S status --short --untracked-files=all | wc -l)"
+echo "K3 $(grep -c -F 'updateHistory({ ...historyRef.current, present: next });' $CTX)"
+echo "K4 $(grep -c -F 'commitArrangement(getArrangement(),' $CLIP)"
+echo "K5 $(grep -c -E 'previewArrangement\((next|gesture\.before)\);' $CLIP)"
+echo "K6 $(grep -c -F 'const [statusEntry, setStatus] = useReducer(' $CTX) $(grep -c -F 'const [clipLaneDrag, setClipLaneDrag] = useState<ClipLaneDragState | null>(null);' $CTX)"
+echo "K7 $(cd $S && grep -rn -E 'previewArrangement\(' app --include=*.tsx --include=*.ts | grep -v __tests__ | grep -v -E 'previewArrangement: \(' | cut -d: -f1 | sort | uniq -c | sed "s#app/##" | tr -s ' ' | tr '\n' ';')"
+echo "K8 $(cd $S && sha256sum -c $L/b-round-318/protected-sha256.txt 2>/dev/null | grep -c ': OK$')"
+echo "K9 $(python3 -I -c "import json;print(json.load(open('regression-last.json'))['date'])")"
+echo "K10 $(awk '/^export function ArrangementLane|^function ArrangementLane/{f=1} f&&/^  \} = useArrangement\(\);$/{print n+0; exit} f&&/^    arrangement,$/{n++}' $LANE)"
+echo "K11 $(grep -c -F 'Math.max(projectEnd + TIMELINE_TAIL_SECONDS, viewportSeconds)' $WS)"
+echo "K12 $(grep -c -F 'syncPlayback(historyRef.current.present, undefined, true)' $CTX) $(grep -c -F 'previewActiveRef.current && !signal.aborted' $CTX)"
+echo "K13 $(grep -rn 'In Progress (stage' $S/docs/implementation | sed "s#$S/##")"
+echo "K14 $(for f in b-round-324/head-drag-names.txt b-round-324/head-drag-perf-rows.txt b-round-324-checkpoint-request.md c-round-324/probe/c324-names-probe.mjs c-round-324/probe/names-a.json c-round-324/perf-atree-results/latest-interactions.json tasks/round-324.md; do test -f $f || echo MISSING:$f; done; echo checked)"
+echo "K15 $(python3 -I -c "import json,re;d=json.load(open('$S/perf/budgets.interactions.json'));r=d if isinstance(d,list) else d['rows'];x=[e for e in r if re.match(r'interact\.drag\.(trim|move)\.',e['id'])];print(len(x),sum(e['mode']=='record' for e in x))")"
+echo "K16 $(grep -c -F 'claim K19' $D231) $(grep -c -E '^- D-29z860 \(`tasks/round-318.md`' $D230)"
+echo "K17 $(test -f $S/app/lib/arrangement/preview-store.ts && echo present || echo absent) $(ls $S/docs/implementation/2026/quarter-IV/ | grep -c '^232-')"
+echo "K18 $(cd $S && grep -rln -E 'previewArrangement' app --include=*.tsx --include=*.ts | grep -c __tests__)"
+echo "K19 $(cmp -s tasks/round-324.md b-round-324/before-current-task.md && echo archive-equal)"
+echo "K20 $(grep -c -F 'studioClipStrings.fadePreview(' $CLIP) $(grep -c -F 'publishLaneGhosts(gesture, []);' $CLIP)"
+echo "K21 $(grep -c -F 'resolveSnapStep(snapSeconds, gridSeconds, event.altKey)' $CLIP)"
+echo "K22 $(cd $S && grep -rln "fireEvent.pointerMove\|pointerMove(\|userEvent.pointer\|new PointerEvent('pointermove'\|'pointermove'" app --include=*.ts --include=*.tsx | sort | diff - $L/b-round-324/pointer-move-test-files.txt >/dev/null && echo same) $(wc -l < b-round-324/pointer-move-test-files.txt)"
+echo "K23 $(grep -c -F 'data-clip-start={clip.start.toFixed(3)}' $CLIP) $(grep -c -F "element.getAttribute('data-clip-start')" $S/perf/studio-lab-interactions.perf.spec.ts)"
+echo "K24 $(grep -c -F 'if (isSameArrangement(before, next)) {' $S/app/lib/arrangement/model.ts) $(grep -c -F 'return before === history.present ? history : { ...history, present: before };' $S/app/lib/arrangement/model.ts)"
+echo "K25 $(grep -c -E '^export function ArrangementLane\(' $LANE) $(grep -c -E 'memo\(ArrangementLane' $LANE)"
+echo "K26 $(grep -c -F 'clips: arrangement.clips.map((clip) => (clip.id === next.id ? next : clip)),' $S/app/lib/arrangement/model.ts)"
+echo "K27 $(awk '/const previewArrangement = useCallback/{f=1} f&&/syncPlayback/{c++} f&&/^  \);$/{print c+0; exit}' $CTX) $(awk '/const previewLoopArrangement = useCallback/{f=1} f&&/syncPlayback\(next\)/{c++} f&&/^  \);$/{print c+0; exit}' $CTX)"
+echo "K28 $(grep -c -F 'historyRef.current.present' $CTX)"
+echo "K29 $(cd $S && grep -rn -E "counts\.get\('[A-Za-z]+'\) \?\? 0\)\.toBeGreaterThan\(0\)" app --include=*.tsx | wc -l)"
+echo "K30 $(awk '/const finishGesture = /{f=1} f&&/gesture\.release\(\);/{if(!r)r=NR} f&&/commitArrangement\(getArrangement\(\), label/{print (r<NR?"release-before-commit":"commit-first"); exit}' $CLIP)"

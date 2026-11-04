@@ -1,0 +1,41 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a324s[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/selection-store.test.tsx [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 57[2mms[22m[39m
+     [32m✓[39m SS1: starts at NO_SELECTION and stores new content by reference[32m 2[2mms[22m[39m
+     [32m✓[39m SS2: keeps the old reference for the same ordered ids and notifies on a new order[32m 1[2mms[22m[39m
+     [32m✓[39m SS3: two stores and two providers hold independent selections[32m 27[2mms[22m[39m
+[31m     [31m×[31m SS4: moving the selection between two clips on one track re-renders only the selection subscriber[39m[32m 12[2mms[22m[39m
+     [32m✓[39m SS5: selecting the already-selected clip renders neither probe[32m 3[2mms[22m[39m
+     [32m✓[39m SS6: an event-time delete right after a selection change uses the new selection[32m 4[2mms[22m[39m
+     [32m✓[39m SS7: the primary clip is the last one added, and re-adding a clip moves it to the end[32m 6[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 23:37:58
+[2m   Duration [22m 1.39s[2m (transform 496ms, setup 0ms, import 682ms, tests 57ms, environment 491ms)[22m
+
+
+::error file=/tmp/a324s/app/lib/arrangement/__tests__/selection-store.test.tsx,title=app/lib/arrangement/__tests__/selection-store.test.tsx > ArrangementProvider selection store > SS4%3A moving the selection between two clips on one track re-renders only the selection subscriber,line=203,column=41::AssertionError: expected 5 to be 4 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 4%0A+ 5%0A%0A ❯ app/lib/arrangement/__tests__/selection-store.test.tsx:203:41%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/selection-store.test.tsx[2m > [22mArrangementProvider selection store[2m > [22mSS4: moving the selection between two clips on one track re-renders only the selection subscriber
+[31m[1mAssertionError[22m: expected 5 to be 4 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 4[39m
+[31m+ 5[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/selection-store.test.tsx:[2m203:41[22m[39m
+    [90m201| [39m    [34mact[39m(() [33m=>[39m [34mliveApi[39m(probes[33m.[39mapi)[33m.[39m[34mselectClip[39m([32m'm2'[39m))[33m;[39m
+    [90m202| [39m    [34mexpect[39m(probes[33m.[39mseen[33m.[39mids)[33m.[39m[34mtoEqual[39m([[32m'm2'[39m])[33m;[39m
+    [90m203| [39m    [34mexpect[39m(probes[33m.[39mcontextCount[33m.[39mrenders)[33m.[39m[34mtoBe[39m(contextBefore)[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m204| [39m    [34mexpect[39m(probes[33m.[39mselectionCount[33m.[39mrenders)[33m.[39m[34mtoBe[39m(selectionBefore [33m+[39m [34m1[39m)[33m;[39m
+    [90m205| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
