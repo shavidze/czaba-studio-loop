@@ -1,0 +1,16 @@
+--- sketch/perf/studio-lab-interactions.perf.spec.ts
++++ mutant/perf/studio-lab-interactions.perf.spec.ts
+@@ -709,12 +709,7 @@
+     return null;
+   }
+   const again = await clipHeaderPoint(clip);
+-  await page.keyboard.down('Control');
+-  try {
+-    await page.mouse.click(again.x, again.y);
+-  } finally {
+-    await page.keyboard.up('Control');
+-  }
++  void again;
+   await waitForQuiet(page, await nowIn(page), settleMs);
+   return { clip, copy: clipById(page, copyId), undoBefore, before };
+ }

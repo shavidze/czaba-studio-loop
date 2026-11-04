@@ -1,0 +1,13 @@
+# B round 338 -> 339 planning checkpoint
+- 2026-11-04 21:4xZ: oriented. C 338 PASS (10 rows, browserVerified/realVerified true, 0 bugs); gate 338 published 662ed42 (= store HEAD, clean). context/head-sha.txt stale (bbc281f).
+- tasks/round-338.md archived (cmp OK). Backups *-before-339 written.
+- Regression not due (11-02 -> 11-04 = 2 days); round 340 planning will be >= 11-05 -> REGRESSION.
+- Advisor consulted once (available). Plan: round 339 = PERF-DRAG-PREVIEW c4-i (group/selection cross-lane + blocked-move harness rows, record; HEAD premise), c4-ii fix later.
+- Premise probe at HEAD done (probe/head-1440.json, head-1280.json; collapse run shows no track group in demo). Group same-lane 104-106/move with provider+workspace.
+- Sketch v1 perf: rc0, 219 rows, 139 EQUAL, 0 DIFF, 18 NEW, 45/45 asserts; group 74.781/move (renamed *-v1). Mutant v1 red (live 0, 50 failures).
+- tech-lead review done -> v2 (apply-sketch-v2.py) + v3 (quotes). Patches regenerated (sketch/*.patch.txt), apply --check OK, tsc rc0, biome format equal. perf-lib 34/34.
+- Side observation: blocked same-lane position keeps last lane target (keptGhosts) -> info only (probe/back-lane-*.json).
+- Next: final perf v3 + mutant v3, then sketch-review.md, claims outputs, task, b-round, backlog script run, feature-status, b-next.
+- backlog v298 written (update-backlog.done), feature-status updated, current-task.md written (cmp archive OK). Next: b-round-338.md, b-next.json, final advisor.
+- b-round-338.md and b-next.json written. Pending: final advisor call.
+- Final advisor call done: A-PERF/C-PERF wallclock wording and GROUP-NAMES field list fixed in current-task.md and draft. DONE.

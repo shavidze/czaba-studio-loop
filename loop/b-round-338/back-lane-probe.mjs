@@ -1,0 +1,44 @@
+// B338 probe: single-clip name-bar drag own lane -> next lane -> own lane, with or without another clip selected first.
+// Usage: node back-lane-probe.mjs <base-url> <out.json> <width> <height> <withCopySelected:0|1>
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+import { writeFileSync } from 'node:fs';
+const [base, out, w, h, sel] = [process.argv[2], process.argv[3], Number(process.argv[4] ?? 1440), Number(process.argv[5] ?? 900), process.argv[6] === '1'];
+const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const context = await browser.newContext({ viewport: { width: w, height: h } });
+await context.addInitScript(() => localStorage.setItem('czaba_analytics_consent', 'denied'));
+const page = await context.newPage();
+const errors = []; page.on('pageerror', (e) => errors.push(String(e)));
+await page.goto(`${base}/studio-lab`, { waitUntil: 'load', timeout: 120000 });
+await page.waitForFunction(() => /Demo collection ready/.test(document.body.textContent ?? ''), null, { timeout: 120000 });
+await page.waitForTimeout(800);
+await page.getByRole('button', { name: 'Add', exact: true }).first().click();
+const first = page.locator('[data-clip-kind="audio"]').first();
+await first.waitFor(); await page.waitForTimeout(1000);
+const bar = () => first.getByTitle(/ — drag to move$/).boundingBox();
+let b0 = await bar();
+await page.mouse.click(b0.x + 200, b0.y + b0.height / 2); await page.waitForTimeout(300);
+if (sel) { await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur()); await page.keyboard.press('Control+d'); await page.waitForTimeout(800); }
+const res = { viewport: `${w}x${h}`, withCopySelected: sel, clips: await page.locator('[data-clip-kind="audio"]').count() };
+const empty = await first.evaluate((el) => { const own = el.closest('[data-track-id]'); const lanes = [...document.querySelectorAll('[data-track-id]')]; for (const lane of lanes.slice(lanes.indexOf(own) + 1)) { if (lane.contains(own) || own.contains(lane)) continue; const b = lane.getBoundingClientRect(); if (b.height < 10) continue; return { y: b.top + b.height / 2, track: lane.getAttribute('data-track-id') }; } return null; });
+const ghosts = () => page.evaluate(() => [...document.querySelectorAll('[data-testid="arrangement-lane-move-ghost"]')].map((g) => g.closest('[data-track-id]')?.getAttribute('data-track-id')));
+const lane = () => first.evaluate((el) => el.closest('[data-track-id]')?.getAttribute('data-track-id'));
+b0 = await bar();
+const x = b0.x + 200, y = b0.y + b0.height / 2;
+res.before = { lane: await lane(), start: await first.getAttribute('data-clip-start') };
+await page.mouse.move(x, y); await page.mouse.down();
+await page.mouse.move(x + 40, y, { steps: 10 });
+await page.mouse.move(x + 40, empty.y, { steps: 1 });
+await page.mouse.move(x + 80, empty.y, { steps: 10 });
+res.crossGhosts = await ghosts();
+await page.mouse.move(x + 80, y, { steps: 1 });
+await page.mouse.move(x + 120, y, { steps: 10 });
+await page.waitForTimeout(100);
+res.backGhosts = await ghosts();
+res.hintBack = await page.evaluate(() => document.querySelector('[data-testid="arrangement-lane-move-hint"]')?.textContent ?? null);
+await page.mouse.up(); await page.waitForTimeout(600);
+res.after = { lane: await lane(), start: await first.getAttribute('data-clip-start') };
+res.undoTitle = await page.getByRole('button', { name: /^Undo/ }).first().getAttribute('title');
+res.pageErrors = errors;
+writeFileSync(out, JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res));
+await browser.close();

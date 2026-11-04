@@ -1,0 +1,311 @@
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -2103,7 +2103,7 @@
+       "value": 1
+     },
+     "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58). Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338); (e) the target-lane ghost start advances from the entry read to the cross read."
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338); (e) the target-lane ghost start advances from the entry read to the cross read."
+   },
+   {
+     "id": "interact.drag.lane.stopped.move-components-per-move.6x",
+@@ -2249,6 +2249,298 @@
+       "value": 1
+     },
+     "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58). Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338); (e) the target-lane ghost start advances from the entry read to the cross read."
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338); (e) the target-lane ghost start advances from the entry read to the cross read."
++  },
++  {
++    "id": "interact.drag.group.stopped.move-components-per-move",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++  },
++  {
++    "id": "interact.drag.group.stopped.move-components-max",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.group.stopped.release-commits",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.group.stopped.cross-components-per-move",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.group.stopped.lane-components-per-move",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.group.playing.move-components-per-move",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++  },
++  {
++    "id": "interact.drag.group.playing.move-components-max",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.group.playing.release-commits",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.group.playing.cross-components-per-move",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.group.playing.lane-components-per-move",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.group.playing.move-restarts",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing",
++    "metric": "move-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.group.playing.release-restarts",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing",
++    "metric": "release-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls from the in-page pointerup until quiet; detail groups them by task."
++  },
++  {
++    "id": "interact.harness.drag-group-live",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane)",
++    "metric": "drag-group-live",
++    "unit": "boolean (1 = true)",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). 1 only when, in both the stopped and the playing drag, (f) the Ctrl+D copy's data-clip-start moved at the own-lane read, (a) the next lane holds exactly two non-blocked lane-move ghosts at the cross read, (e) the first target-lane ghost start advances from the entry read to the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release both clips stay on their own lane and moved right by the same delta, and (d) after the reset a re-read gives both clips' start states, each on its own lane. A failed group setup writes 0. Asserted from PERF-DRAG-PREVIEW stage c4-i (round 339): B sketch 1 in all passes; mutant MU-GROUP-SINGLE (Ctrl+click skipped) 0."
++  },
++  {
++    "id": "interact.drag.group.stopped.move-components-per-move.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped (6x CPU throttle)",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++  },
++  {
++    "id": "interact.drag.group.stopped.move-components-max.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped (6x CPU throttle)",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.group.stopped.release-commits.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped (6x CPU throttle)",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.group.stopped.cross-components-per-move.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped (6x CPU throttle)",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.group.stopped.lane-components-per-move.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), stopped (6x CPU throttle)",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.group.playing.move-components-per-move.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing (6x CPU throttle)",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++  },
++  {
++    "id": "interact.drag.group.playing.move-components-max.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing (6x CPU throttle)",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.group.playing.release-commits.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing (6x CPU throttle)",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.group.playing.cross-components-per-move.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing (6x CPU throttle)",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.group.playing.lane-components-per-move.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing (6x CPU throttle)",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.group.playing.move-restarts.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing (6x CPU throttle)",
++    "metric": "move-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.group.playing.release-restarts.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane), playing (6x CPU throttle)",
++    "metric": "release-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls from the in-page pointerup until quiet; detail groups them by task."
++  },
++  {
++    "id": "interact.harness.drag-group-live.6x",
++    "scenario": "two-clip group name bar move drag (own lane, next lane, own lane) (6x CPU throttle)",
++    "metric": "drag-group-live",
++    "unit": "boolean (1 = true)",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-i",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). 1 only when, in both the stopped and the playing drag, (f) the Ctrl+D copy's data-clip-start moved at the own-lane read, (a) the next lane holds exactly two non-blocked lane-move ghosts at the cross read, (e) the first target-lane ghost start advances from the entry read to the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release both clips stay on their own lane and moved right by the same delta, and (d) after the reset a re-read gives both clips' start states, each on its own lane. A failed group setup writes 0. Asserted from PERF-DRAG-PREVIEW stage c4-i (round 339): B sketch 1 in all passes; mutant MU-GROUP-SINGLE (Ctrl+click skipped) 0."
+   }
+ ]

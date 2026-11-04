@@ -1,0 +1,42 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/c338-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 14[2mms[22m[39m
+[31m     [31m×[31m CL1 setDrag keeps the state object for the same drag and notifies once per new drag[39m[32m 11[2mms[22m[39m
+     [32m✓[39m CL2 selectLaneDragGhosts returns one shared empty array when there is no drag or no ghost on the lane[32m 1[2mms[22m[39m
+     [32m✓[39m CL3 selectLaneMoveSourceKey keeps the lane clip order and ignores blocked ghosts[32m 0[2mms[22m[39m
+     [32m✓[39m CL4 selectLaneMoveRefusal returns the first blocked ghost message, else null[32m 0[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m52 tests[22m[2m)[22m[33m 4583[2mms[22m[39m
+     [33m[2m✓[22m[39m DP32 a clip that differs only in an overview-ignored field renders the same overview markup [33m 322[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts[2m > [22mclip-lane-drag-store[2m > [22mCL1 setDrag keeps the state object for the same drag and notifies once per new drag
+[31m[1mAssertionError[22m: expected { drag: null, …(1) } to be { drag: null, …(1) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { drag: null, …(1) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts:[2m34:30[22m[39m
+    [90m 32| [39m    [34mexpect[39m(initial[33m.[39mdrag)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m 33| [39m    store[33m.[39m[34mgetState[39m()[33m.[39m[34msetDrag[39m([35mnull[39m)[33m;[39m
+    [90m 34| [39m    [34mexpect[39m(store[33m.[39m[34mgetState[39m())[33m.[39m[34mtoBe[39m(initial)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m 35| [39m    store[33m.[39m[34mgetState[39m()[33m.[39m[34msetDrag[39m(drag)[33m;[39m
+    [90m 36| [39m    store[33m.[39m[34mgetState[39m()[33m.[39m[34msetDrag[39m(drag)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m55 passed[39m[22m[90m (56)[39m
+[2m   Start at [22m 21:28:09
+[2m   Duration [22m 6.61s[2m (transform 1.16s, setup 0ms, import 1.59s, tests 4.60s, environment 853ms)[22m
+
+
+::error file=/home/runner/c338-scratch/app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts,title=app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts > clip-lane-drag-store > CL1 setDrag keeps the state object for the same drag and notifies once per new drag,line=34,column=30::AssertionError: expected { drag: null, …(1) } to be { drag: null, …(1) } // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: { drag: null, …(1) }%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts:34:30%0A%0A
