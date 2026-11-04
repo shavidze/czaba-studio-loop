@@ -1,0 +1,15 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const p=await b.newPage({viewport:{width:1440,height:900}});
+await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'networkidle'});
+await p.waitForSelector('[data-testid="arrangement-timeline-scroller"]',{timeout:120000});
+await p.getByText('Demo collection ready').first().waitFor({timeout:120000}).catch(()=>{});
+await p.getByRole('button',{name:'All'}).first().click().catch(()=>{});
+await p.getByTestId('arrangement-library-list').getByRole('option',{name:/Bass/}).first().click();
+await p.keyboard.press('Enter'); await p.waitForTimeout(900);
+console.log(await p.evaluate(()=>{const c=document.querySelector('[data-clip-id]');const out=[];out.push(c.outerHTML.replace(/<svg[\s\S]*?<\/svg>/g,'').slice(0,1500));const tr=c.closest('[data-track-id]');out.push('track '+tr?.getAttribute('data-track-id'));out.push([...document.querySelectorAll('[data-track-id]')].map(e=>e.getAttribute('data-track-id')+':'+e.tagName+':'+Math.round(e.getBoundingClientRect().top)+'-'+Math.round(e.getBoundingClientRect().bottom)).join(' | '));return out.join('\n')}));
+await p.getByRole('button',{name:/^Export/}).first().click(); await p.waitForTimeout(600);
+console.log(await p.getByRole('dialog').first().evaluate(d=>[...d.querySelectorAll('button')].map(b=>(b.getAttribute('data-testid')||'')+'|'+b.textContent.trim().slice(0,40)).join('\n')));
+console.log(await p.locator('[data-testid="arrangement-undo"], button[title^="Undo"]').first().getAttribute('title').catch(()=>null));
+await b.close();

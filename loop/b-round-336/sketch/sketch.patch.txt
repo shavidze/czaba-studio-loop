@@ -1,0 +1,257 @@
+diff --git a/perf/studio-lab-interactions.perf.spec.ts b/perf/studio-lab-interactions.perf.spec.ts
+index fcfe342..8020219 100644
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -49,6 +49,8 @@ const cpuRates = [1, 6];
+ const viewport = { width: 1440, height: 900 };
+ const dragSteps = 60;
+ const dragDistancePx = 120;
++const laneSegmentSteps = 10;
++const laneSegmentPx = 40;
+ const settleMs = 600;
+ const keySettleMs = 300;
+ const idleSettleMs = 1000;
+@@ -68,12 +70,12 @@ const interactionSequence = [
+   'clip click: empty Stems lane click deselects (Clip Gain fader disabled), then a click on the clip header (interact.click.*, interact.harness.click-live)',
+   `zoom with 1 clip: ${zoomKeyCount} x "=" then ${zoomKeyCount} x "-", one window per key (interact.zoom.1.*, interact.harness.zoom-live)`,
+   `drags stopped: range, fade-in, trim start, move; ${dragSteps} steps, +${dragDistancePx} px; reset after each (interact.drag.<d>.stopped.*)`,
+-  `lane drag stopped: press on the clip name bar; ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; 1 step down into the next lane, then ${dragSteps / 6} steps +${dragDistancePx / 3} px there; 1 step back up, then ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; release; reset with Ctrl+Z (interact.drag.lane.stopped.*, interact.harness.drag-lane-live)`,
++  `lane drag stopped: press on the clip name bar; ${laneSegmentSteps} steps +${laneSegmentPx} px on its own lane; 1 step down into the next lane, then ${laneSegmentSteps} steps +${laneSegmentPx} px there; 1 step back up, then ${laneSegmentSteps} steps +${laneSegmentPx} px on its own lane; release; reset with Ctrl+Z (interact.drag.lane.stopped.*, interact.harness.drag-lane-live)`,
+   'Home (seek to 0), then Space -> playing (interact.play.start-*, 1x: interact.harness.audio-running)',
+   'drags playing, each after Home (seek to 0): range, fade-in, trim start, move (interact.drag.<d>.playing.*)',
+-  `lane drag playing, after Home (seek to 0): press on the clip name bar; ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; 1 step down into the next lane, then ${dragSteps / 6} steps +${dragDistancePx / 3} px there; 1 step back up, then ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; release; reset with Ctrl+Z (interact.drag.lane.playing.*, interact.harness.drag-lane-live)`,
++  `lane drag playing, after Home (seek to 0): press on the clip name bar; ${laneSegmentSteps} steps +${laneSegmentPx} px on its own lane; 1 step down into the next lane, then ${laneSegmentSteps} steps +${laneSegmentPx} px there; 1 step back up, then ${laneSegmentSteps} steps +${laneSegmentPx} px on its own lane; release; reset with Ctrl+Z (interact.drag.lane.playing.*, interact.harness.drag-lane-live)`,
+   'Space -> stopped (interact.play.stop-*)',
+-  `1x only: click the clip header, Ctrl+D x ${clipsTarget - 1} (interact.harness.clips-30), zoom with ${clipsTarget} clips: keys, then the in-first path (5 x "=", 5 x "-"), the out-first path (5 x "-", 5 x "=") and Ctrl+wheel out-first (5 x deltaY +100, 5 x -100) with the zoom probe (interact.zoom.30.*, interact.zoom.30.in/out/wheel.*), Space, Home, fade-in drag on the first clip (interact.drag.fade.30.playing.*), Space`,
++  `1x only: click the clip header, Ctrl+D x ${clipsTarget - 1} (interact.harness.clips-30), zoom with ${clipsTarget} clips: keys, then the in-first path (5 x "=", 5 x "-") and the out-first path (5 x "-", 5 x "=") with the zoom probe (interact.zoom.30.*, interact.zoom.30.in/out.*), Space, Home, fade-in drag on the first clip (interact.drag.fade.30.playing.*), Space, then Ctrl+wheel out-first (5 x deltaY +100, 5 x -100) with the zoom probe (interact.zoom.30.wheel.*)`,
+   `1x only, measured last: "-" until 2 clip name bars are visible (at most ${selectZoomOutKeyLimit}), click one name bar (setup), then click the name bar of a visible, unselected clip on the selected clip's lane, then click it again (interact.select.same-lane.${clipsTarget}.*, interact.select.reclick.${clipsTarget}.*, interact.harness.select-same-lane-live)`,
+ ];
+ 
+@@ -289,6 +291,62 @@ function moveToPaintP95(whole: PerfWindowSnapshot, tUp: number): number {
+   return roundTo(percentile(latencies, 0.95), 1);
+ }
+ 
++interface DragWindow {
++  moves: number[];
++  firstMove: number;
++  up: number;
++  commits: PerfWindowSnapshot['commits'];
++  release: PerfWindowSnapshot['commits'];
++  moveStarts: PerfWindowSnapshot['starts'];
++  releaseStarts: PerfWindowSnapshot['starts'];
++}
++
++function dragWindow(whole: PerfWindowSnapshot): DragWindow | null {
++  const downAt = whole.downs.at(-1);
++  const up = downAt === undefined ? undefined : whole.ups.find((t) => t > downAt);
++  if (downAt === undefined || up === undefined) return null;
++  const moves = whole.moves.filter((t) => t > downAt && t < up);
++  const firstMove = moves.at(0);
++  if (firstMove === undefined) return null;
++  const inWhole = (t: number): boolean => t > firstMove && t < up;
++  return {
++    moves,
++    firstMove,
++    up,
++    commits: whole.commits.filter((commit) => inWhole(commit.t)),
++    release: whole.commits.filter((commit) => commit.t >= up),
++    moveStarts: whole.starts.filter((entry) => inWhole(entry.t)),
++    releaseStarts: whole.starts.filter((entry) => entry.t >= up),
++  };
++}
++
++const componentsPerMove = (commits: readonly { rendered: number }[], count: number): number =>
++  roundTo(count ? sumRendered(commits) / count : 0, 3);
++
++const rowWriter =
++  (result: InteractionPassResult, baseId: string) =>
++  (metric: string, sample: PerfSample): void => {
++    result.samples.set(rateRowId(`${baseId}.${metric}`, result.cpuRate), sample);
++  };
++
++async function pressedGesture<T>(
++  page: Page,
++  grab: GrabPoint,
++  gesture: () => Promise<T>,
++): Promise<T> {
++  await page.mouse.move(grab.x, grab.y);
++  await page.mouse.down();
++  let value: T;
++  try {
++    value = await gesture();
++  } catch (error) {
++    await page.mouse.up().catch(() => undefined);
++    throw error;
++  }
++  await page.mouse.up();
++  return value;
++}
++
+ async function resetAfterDrag(
+   page: Page,
+   clip: Locator,
+@@ -352,13 +410,12 @@ async function measureDrag(
+   const undoBefore = await undoTitle(page);
+   const before = await readClipState(clip);
+   const t0 = await nowIn(page);
+-  await page.mouse.move(grab.x, grab.y);
+-  await page.mouse.down();
+-  await page.mouse.move(grab.x + dragDistancePx / 2, grab.y, { steps: dragSteps / 2 });
+-  const mid = await readClipState(clip);
+-  await page.mouse.move(grab.x + dragDistancePx, grab.y, { steps: dragSteps / 2 });
+-  const end = await readClipState(clip);
+-  await page.mouse.up();
++  const { mid, end } = await pressedGesture(page, grab, async () => {
++    await page.mouse.move(grab.x + dragDistancePx / 2, grab.y, { steps: dragSteps / 2 });
++    const midState = await readClipState(clip);
++    await page.mouse.move(grab.x + dragDistancePx, grab.y, { steps: dragSteps / 2 });
++    return { mid: midState, end: await readClipState(clip) };
++  });
+   const tUp = await nowIn(page);
+   const tEnd = await waitForQuiet(page, tUp, settleMs);
+   const whole = await snapshot(page, t0, tEnd);
+@@ -377,27 +434,18 @@ async function measureDrag(
+     result.problems.push(`playback not running after ${label}`);
+   }
+ 
+-  const downAt = whole.downs.at(-1);
+-  const up = downAt === undefined ? undefined : whole.ups.find((t) => t > downAt);
+-  const moves =
+-    downAt === undefined || up === undefined ? [] : whole.moves.filter((t) => t > downAt && t < up);
+-  const firstMove = moves.at(0);
+-  if (downAt === undefined || up === undefined || firstMove === undefined) {
++  const pointerSpan = dragWindow(whole);
++  if (pointerSpan === null) {
+     result.problems.push(`${label}: no in-page pointerdown, pointermove and pointerup sequence`);
+   } else {
+-    const inWindow = whole.commits.filter((commit) => commit.t > firstMove && commit.t < up);
+-    const release = whole.commits.filter((commit) => commit.t >= up);
+-    const moveStarts = whole.starts.filter((entry) => entry.t > firstMove && entry.t < up);
+-    const releaseStarts = whole.starts.filter((entry) => entry.t >= up);
+-    const put = (metric: string, sample: PerfSample): void => {
+-      result.samples.set(rateRowId(`${baseId}.${metric}`, result.cpuRate), sample);
+-    };
++    const { moves, commits: inWindow, release, moveStarts, releaseStarts } = pointerSpan;
++    const put = rowWriter(result, baseId);
+     const windowDetail = {
+       movesInWindow: moves.length,
+       windowCommits: inWindow.length,
+       settleMs: roundTo(tEnd - tUp, 0),
+     };
+-    const perMove = roundTo(moves.length ? sumRendered(inWindow) / moves.length : 0, 3);
++    const perMove = componentsPerMove(inWindow, moves.length);
+     if (measure.rows === 'all') {
+       put('commits-per-move', {
+         value: roundTo(moves.length ? inWindow.length / moves.length : 0, 3),
+@@ -473,23 +521,25 @@ async function measureLaneDrag(
+   const target = await emptyLanePointAfterClip(clip);
+   const undoBefore = await undoTitle(page);
+   const before = await readClipState(clip);
+-  const s = dragSteps / 6;
+-  const d = dragDistancePx / 3;
+-
+   const t0 = await nowIn(page);
+-  await page.mouse.move(grab.x, grab.y);
+-  await page.mouse.down();
+-  await page.mouse.move(grab.x + d, grab.y, { steps: s });
+-  const t1 = await nowIn(page);
+-  await page.mouse.move(grab.x + d, target.y, { steps: 1 });
+-  await page.mouse.move(grab.x + 2 * d, target.y, { steps: s });
+-  const crossGhosts = await readLaneGhosts(page, target.trackId);
+-  const t2 = await nowIn(page);
+-  await page.mouse.move(grab.x + 2 * d, grab.y, { steps: 1 });
+-  await page.mouse.move(grab.x + 3 * d, grab.y, { steps: s });
+-  const backGhosts = await readLaneGhosts(page, target.trackId);
+-  const t3 = await nowIn(page);
+-  await page.mouse.up();
++  const { t1, crossGhosts, t2, backGhosts, t3 } = await pressedGesture(page, grab, async () => {
++    await page.mouse.move(grab.x + laneSegmentPx, grab.y, { steps: laneSegmentSteps });
++    const crossStart = await nowIn(page);
++    await page.mouse.move(grab.x + laneSegmentPx, target.y, { steps: 1 });
++    await page.mouse.move(grab.x + 2 * laneSegmentPx, target.y, { steps: laneSegmentSteps });
++    const cross = await readLaneGhosts(page, target.trackId);
++    const crossEnd = await nowIn(page);
++    await page.mouse.move(grab.x + 2 * laneSegmentPx, grab.y, { steps: 1 });
++    await page.mouse.move(grab.x + 3 * laneSegmentPx, grab.y, { steps: laneSegmentSteps });
++    const back = await readLaneGhosts(page, target.trackId);
++    return {
++      t1: crossStart,
++      crossGhosts: cross,
++      t2: crossEnd,
++      backGhosts: back,
++      t3: await nowIn(page),
++    };
++  });
+   const tUp = await nowIn(page);
+   const tEnd = await waitForQuiet(page, tUp, settleMs);
+   const whole = await snapshot(page, t0, tEnd);
+@@ -499,36 +549,26 @@ async function measureLaneDrag(
+     result.problems.push(`playback not running after ${label}`);
+   }
+ 
+-  const downAt = whole.downs.at(-1);
+-  const up = downAt === undefined ? undefined : whole.ups.find((t) => t > downAt);
+-  const moves =
+-    downAt === undefined || up === undefined ? [] : whole.moves.filter((t) => t > downAt && t < up);
+-  const firstMove = moves.at(0);
+-  if (downAt === undefined || up === undefined || firstMove === undefined) {
++  const pointerSpan = dragWindow(whole);
++  if (pointerSpan === null) {
+     result.problems.push(`${label}: no in-page pointerdown, pointermove and pointerup sequence`);
+   } else {
+-    const inWhole = (t: number): boolean => t > firstMove && t < up;
++    const { moves, firstMove, up, commits: wholeCommits, release } = pointerSpan;
+     const inCross = (t: number): boolean => t > t1 && t < t2;
+     const inLane = (t: number): boolean => (t > firstMove && t < t1) || (t > t2 && t < up);
+-    const wholeCommits = whole.commits.filter((commit) => inWhole(commit.t));
+     const crossCommits = whole.commits.filter((commit) => inCross(commit.t));
+     const crossMoves = whole.moves.filter(inCross);
+     const laneCommits = whole.commits.filter((commit) => inLane(commit.t));
+     const laneMoves = whole.moves.filter(inLane);
+-    const release = whole.commits.filter((commit) => commit.t >= up);
+-    const put = (metric: string, sample: PerfSample): void => {
+-      result.samples.set(rateRowId(`${baseId}.${metric}`, result.cpuRate), sample);
+-    };
++    const put = rowWriter(result, baseId);
+     const settle = roundTo(tEnd - tUp, 0);
+-    const perMove = (commits: readonly { rendered: number }[], count: number): number =>
+-      roundTo(count ? sumRendered(commits) / count : 0, 3);
+     const wholeDetail = {
+       movesInWindow: moves.length,
+       windowCommits: wholeCommits.length,
+       settleMs: settle,
+     };
+     put('move-components-per-move', {
+-      value: perMove(wholeCommits, moves.length),
++      value: componentsPerMove(wholeCommits, moves.length),
+       detail: { ...wholeDetail, componentsSum: sumRendered(wholeCommits) },
+     });
+     put('move-components-max', { value: maxRendered(wholeCommits), detail: wholeDetail });
+@@ -537,7 +577,7 @@ async function measureLaneDrag(
+       detail: { releaseComponentsMax: maxRendered(release) },
+     });
+     put('cross-components-per-move', {
+-      value: perMove(crossCommits, crossMoves.length),
++      value: componentsPerMove(crossCommits, crossMoves.length),
+       detail: {
+         movesInWindow: crossMoves.length,
+         windowCommits: crossCommits.length,
+@@ -545,7 +585,7 @@ async function measureLaneDrag(
+       },
+     });
+     put('lane-components-per-move', {
+-      value: perMove(laneCommits, laneMoves.length),
++      value: componentsPerMove(laneCommits, laneMoves.length),
+       detail: {
+         movesInWindow: laneMoves.length,
+         windowCommits: laneCommits.length,
+@@ -554,8 +594,7 @@ async function measureLaneDrag(
+       },
+     });
+     if (state === 'playing') {
+-      const moveStarts = whole.starts.filter((entry) => inWhole(entry.t));
+-      const releaseStarts = whole.starts.filter((entry) => entry.t >= up);
++      const { moveStarts, releaseStarts } = pointerSpan;
+       put('move-restarts', { value: moveStarts.length, detail: startTasks(moveStarts) });
+       put('release-restarts', { value: releaseStarts.length, detail: startTasks(releaseStarts) });
+     }
