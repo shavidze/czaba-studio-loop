@@ -1,0 +1,49 @@
+--- /tmp/tmp.j9XXlaL4VB/app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-04 14:43:47.272729837 +0000
++++ app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-04 14:41:41.540027412 +0000
+@@ -17,6 +17,7 @@
+   WorkspaceSource,
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { DETAIL_RANGE_INVALID_MESSAGE } from '../panels';
+ import { insertMarkerStatusKind } from '../playback-start';
+ import {
+   type ArrangementPreviewStore,
+@@ -1301,7 +1302,9 @@
+       act(() => live(api).setTimeRange({ start: 3, end: 5.5, trackId: 'music' }));
+       expect(detailRangeInputs(view).start.value).toBe('3');
+       expect(detailRangeInputs(view).end.value).toBe('5.5');
++      renderLog.counts.clear();
+       act(() => live(api).setTimeRange({ start: 3, end: 6, trackId: 'music' }));
++      expect(rendersOf('ArrangementDetailContentInner')).toBe(1);
+       expect(detailRangeInputs(view).start.value).toBe('3');
+       expect(detailRangeInputs(view).end.value).toBe('6');
+       act(() => live(api).setTimeRange({ start: 1, end: 1.5, trackId: 'sfx' }));
+@@ -1319,7 +1322,10 @@
+       const { start, end } = detailRangeInputs(view);
+       fireEvent.change(start, { target: { value: '3.25' } });
+       fireEvent.change(end, { target: { value: '6.5' } });
++      expect(textOf(view, 'arrangement-status')).not.toContain('00:03.250');
+       fireEvent.keyDown(start, { key: 'Enter' });
++      expect(textOf(view, 'arrangement-status')).toContain('00:03.250');
++      expect(textOf(view, 'arrangement-status')).toContain('00:06.500');
+       expect(detailRangeInputs(view).start.value).toBe('3.25');
+       expect(detailRangeInputs(view).end.value).toBe('6.5');
+       fireEvent.keyDown(detailRangeInputs(view).start, { key: 'Enter' });
+@@ -1327,6 +1333,7 @@
+       fireEvent.change(detailRangeInputs(view).start, { target: { value: '1' } });
+       fireEvent.keyDown(detailRangeInputs(view).start, { key: 'Enter' });
+       expect(detailRangeInputs(view).start.value).toBe('1');
++      expect(textOf(view, 'arrangement-status')).toBe(DETAIL_RANGE_INVALID_MESSAGE);
+     } finally {
+       view.unmount();
+     }
+@@ -1353,7 +1360,8 @@
+     try {
+       act(() => live(api).selectClip('c1'));
+       const { start } = detailRangeInputs(view);
+-      start.focus();
++      act(() => start.focus());
++      expect(document.activeElement).toBe(start);
+       fireEvent.change(start, { target: { value: '3.5' } });
+       const { root, header } = clipParts('c1');
+       pointerDownAt(header, 1, 0);

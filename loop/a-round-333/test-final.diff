@@ -1,0 +1,208 @@
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index b44f7d3..06dac5c 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -17,6 +17,7 @@ import type {
+   WorkspaceSource,
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { DETAIL_RANGE_INVALID_MESSAGE } from '../panels';
+ import { insertMarkerStatusKind } from '../playback-start';
+ import {
+   type ArrangementPreviewStore,
+@@ -1181,3 +1182,195 @@ describe('PERF-DRAG-PREVIEW stage c2b-i — the overview and the track meters sk
+     expect(await mountedOverviewMarkup(C1_FIELD_VARIANTS.start)).not.toBe(baseMarkup);
+   });
+ });
++
++function detailRangeInputs(view: PreviewView) {
++  const start = view.getByTestId('arrangement-detail-start');
++  const end = view.getByTestId('arrangement-detail-end');
++  if (!(start instanceof HTMLInputElement) || !(end instanceof HTMLInputElement)) {
++    throw new Error('detail range inputs missing');
++  }
++  return { start, end };
++}
++
++describe('PERF-DRAG-PREVIEW stage c2b-ii — the detail Start/End text follows the clip in render', () => {
++  it('DP33 a same-lane move renders the detail content once per pointermove and shows the new Start/End', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const { root, header } = clipParts('c1');
++      pointerDownAt(header, 1, 0);
++      pointerMoveTo(root, 1, 40);
++      renderLog.counts.clear();
++      pointerMoveTo(root, 1, 80);
++      expect(rendersOf('ArrangementDetailContentInner')).toBe(1);
++      expect(detailRangeInputs(view).start.value).toBe('4');
++      expect(detailRangeInputs(view).end.value).toBe('10');
++      pointerUpAt(root, 1, 80);
++      expect(detailRangeInputs(view).start.value).toBe('4');
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP34 a trimStart move renders the detail content once per pointermove and shows the trimmed Start', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const { root, trimStart } = clipParts('c1');
++      pointerDownAt(trimStart, 1, 0);
++      pointerMoveTo(root, 1, 40);
++      renderLog.counts.clear();
++      pointerMoveTo(root, 1, 80);
++      expect(rendersOf('ArrangementDetailContentInner')).toBe(1);
++      expect(detailRangeInputs(view).start.value).toBe('4');
++      expect(detailRangeInputs(view).end.value).toBe('8');
++      pointerUpAt(root, 1, 80);
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP35 typed Start/End text survives a committed change that keeps the clip start and duration', async () => {
++    const { api, view } = await mountPreviewWorkspace();
++    try {
++      act(() => live(api).selectClip('c1'));
++      const { start, end } = detailRangeInputs(view);
++      fireEvent.change(start, { target: { value: '3.5' } });
++      fireEvent.change(end, { target: { value: '5.25' } });
++      renderLog.counts.clear();
++      commitClipVariant(api, C1_FIELD_VARIANTS.gainDb);
++      expect(rendersOf('ArrangementDetailContentInner')).toBeGreaterThan(0);
++      expect(detailRangeInputs(view).start.value).toBe('3.5');
++      expect(detailRangeInputs(view).end.value).toBe('5.25');
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP36 typed Start/End text is replaced when the clip start changes, as the layout effect did', async () => {
++    const { api, view } = await mountPreviewWorkspace();
++    try {
++      act(() => live(api).selectClip('c1'));
++      const { start, end } = detailRangeInputs(view);
++      fireEvent.change(start, { target: { value: '3.5' } });
++      fireEvent.change(end, { target: { value: '5.25' } });
++      commitClipVariant(api, C1_FIELD_VARIANTS.start);
++      expect(detailRangeInputs(view).start.value).toBe('3');
++      expect(detailRangeInputs(view).end.value).toBe('9');
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP37 a deselect empties the disabled inputs as at HEAD; reselecting the same clip shows its Start/End', async () => {
++    const { api, view } = await mountPreviewWorkspace();
++    try {
++      act(() => live(api).selectClip('c1'));
++      fireEvent.change(detailRangeInputs(view).start, { target: { value: '3.5' } });
++      act(() => live(api).selectClip(null));
++      expect(detailRangeInputs(view).start.disabled).toBe(true);
++      expect(detailRangeInputs(view).start.value).toBe('');
++      act(() => live(api).selectClip('c1'));
++      expect(detailRangeInputs(view).start.disabled).toBe(false);
++      expect(detailRangeInputs(view).start.value).toBe('2');
++      expect(detailRangeInputs(view).end.value).toBe('8');
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP38 a trimEnd move shows the new End and keeps the Start', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const { root, trimEnd } = clipParts('c1');
++      pointerDownAt(trimEnd, 1, 320);
++      pointerMoveTo(root, 1, 300);
++      renderLog.counts.clear();
++      pointerMoveTo(root, 1, 280);
++      expect(rendersOf('ArrangementDetailContentInner')).toBe(1);
++      expect(detailRangeInputs(view).start.value).toBe('2');
++      expect(detailRangeInputs(view).end.value).toBe('7');
++      pointerUpAt(root, 1, 280);
++      expect(detailRangeInputs(view).end.value).toBe('7');
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP39 a time selection on the clip fills Start/End; one on another lane falls back to the clip bounds', async () => {
++    const { api, view } = await mountPreviewWorkspace();
++    try {
++      act(() => live(api).selectClip('c1'));
++      act(() => live(api).setTimeRange({ start: 3, end: 5.5, trackId: 'music' }));
++      expect(detailRangeInputs(view).start.value).toBe('3');
++      expect(detailRangeInputs(view).end.value).toBe('5.5');
++      renderLog.counts.clear();
++      act(() => live(api).setTimeRange({ start: 3, end: 6, trackId: 'music' }));
++      expect(rendersOf('ArrangementDetailContentInner')).toBe(1);
++      expect(detailRangeInputs(view).start.value).toBe('3');
++      expect(detailRangeInputs(view).end.value).toBe('6');
++      act(() => live(api).setTimeRange({ start: 1, end: 1.5, trackId: 'sfx' }));
++      expect(detailRangeInputs(view).start.value).toBe('2');
++      expect(detailRangeInputs(view).end.value).toBe('8');
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP40 Enter applies a typed range inside the clip; an invalid one keeps the typed text', async () => {
++    const { api, view } = await mountPreviewWorkspace();
++    try {
++      act(() => live(api).selectClip('c1'));
++      const { start, end } = detailRangeInputs(view);
++      fireEvent.change(start, { target: { value: '3.25' } });
++      fireEvent.change(end, { target: { value: '6.5' } });
++      expect(textOf(view, 'arrangement-status')).not.toContain('00:03.250');
++      fireEvent.keyDown(start, { key: 'Enter' });
++      expect(textOf(view, 'arrangement-status')).toContain('00:03.250');
++      expect(textOf(view, 'arrangement-status')).toContain('00:06.500');
++      expect(detailRangeInputs(view).start.value).toBe('3.25');
++      expect(detailRangeInputs(view).end.value).toBe('6.5');
++      fireEvent.keyDown(detailRangeInputs(view).start, { key: 'Enter' });
++      expect(detailRangeInputs(view).start.value).toBe('3.25');
++      fireEvent.change(detailRangeInputs(view).start, { target: { value: '1' } });
++      fireEvent.keyDown(detailRangeInputs(view).start, { key: 'Enter' });
++      expect(detailRangeInputs(view).start.value).toBe('1');
++      expect(textOf(view, 'arrangement-status')).toBe(DETAIL_RANGE_INVALID_MESSAGE);
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP41 Undo after a move puts the Start/End text back to the restored clip', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const { root, header } = clipParts('c1');
++      pointerDownAt(header, 1, 0);
++      pointerMoveTo(root, 1, 80);
++      pointerUpAt(root, 1, 80);
++      expect(detailRangeInputs(view).start.value).toBe('4');
++      act(() => live(api).undo());
++      expect(detailRangeInputs(view).start.value).toBe('2');
++      expect(detailRangeInputs(view).end.value).toBe('8');
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP42 typed text in a focused Start input is replaced by the dragged clip start, as at HEAD', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    try {
++      act(() => live(api).selectClip('c1'));
++      const { start } = detailRangeInputs(view);
++      act(() => start.focus());
++      expect(document.activeElement).toBe(start);
++      fireEvent.change(start, { target: { value: '3.5' } });
++      const { root, header } = clipParts('c1');
++      pointerDownAt(header, 1, 0);
++      pointerMoveTo(root, 1, 80);
++      expect(detailRangeInputs(view).start.value).toBe('4');
++      pointerUpAt(root, 1, 80);
++      expect(detailRangeInputs(view).start.value).toBe('4');
++    } finally {
++      view.unmount();
++    }
++  });
++});

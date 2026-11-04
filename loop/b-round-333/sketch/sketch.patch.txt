@@ -1,0 +1,304 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index 530db58..68e4883 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -49,7 +49,7 @@ import {
+   type TimelineWindowSource,
+   timelinePageWindow,
+ } from '~/lib/arrangement/view';
+-import { clipWaveformScale } from '~/lib/arrangement/waveform-zoom';
++import { waveformScaleForGainDb } from '~/lib/arrangement/waveform-zoom';
+ import { cn } from '~/lib/utils';
+ import type { Arrangement, ArrangementClip, TimeRange } from '~/types/arrangement';
+ import {
+@@ -313,7 +313,10 @@ export function buildPeakShape(
+ }
+ 
+ interface ArrangementPeakPathProps {
+-  clip: ArrangementClip;
++  clipId: string;
++  sourceOffset: number;
++  duration: number;
++  gainDb: number | undefined;
+   peaks: Float32Array | undefined;
+   columns: number;
+   isVideo?: boolean;
+@@ -322,22 +325,21 @@ interface ArrangementPeakPathProps {
+ }
+ 
+ function ArrangementPeakPathInner({
+-  clip,
++  clipId,
++  sourceOffset,
++  duration,
++  gainDb,
+   peaks,
+   columns,
+   isVideo = false,
+   zoom = 1,
+   testId,
+ }: ArrangementPeakPathProps) {
+-  const draftGainDb = useMixDraftValue(clipGainDraftKey(clip.id));
+-  const scale = clipWaveformScale(
+-    draftGainDb === undefined ? clip : { ...clip, gainDb: draftGainDb },
+-    isVideo,
+-    zoom,
+-  );
++  const draftGainDb = useMixDraftValue(clipGainDraftKey(clipId));
++  const scale = waveformScaleForGainDb(draftGainDb ?? gainDb, isVideo, zoom);
+   const peakShape = useMemo(
+-    () => buildPeakShape(peaks, clip.sourceOffset, clip.duration, columns, scale),
+-    [peaks, clip.sourceOffset, clip.duration, columns, scale],
++    () => buildPeakShape(peaks, sourceOffset, duration, columns, scale),
++    [peaks, sourceOffset, duration, columns, scale],
+   );
+   if (!peakShape) {
+     return null;
+@@ -1011,7 +1013,10 @@ function ArrangementClipViewInner({
+           onPointerDown={(event) => beginGesture('range', event)}
+         >
+           <ArrangementPeakPath
+-            clip={clip}
++            clipId={clip.id}
++            sourceOffset={clip.sourceOffset}
++            duration={clip.duration}
++            gainDb={clip.gainDb}
+             peaks={peaks}
+             columns={peakColumns}
+             isVideo={isVideo}
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index 7fadab8..b0c7785 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -238,7 +238,14 @@ function ArrangementDetailWaveformInner({
+           {videoClipGainReason}
+         </div>
+       ) : (
+-        <ArrangementPeakPath clip={clip} peaks={peaks} columns={DETAIL_PEAK_COLUMNS} />
++        <ArrangementPeakPath
++          clipId={clip.id}
++          sourceOffset={clip.sourceOffset}
++          duration={clip.duration}
++          gainDb={clip.gainDb}
++          peaks={peaks}
++          columns={DETAIL_PEAK_COLUMNS}
++        />
+       )}
+       {overlay ? (
+         <div
+diff --git a/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx b/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx
+index 2ec5751..400ebfe 100644
+--- a/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx
+@@ -579,4 +579,47 @@ describe('lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a)', (
+     expect(live(api).isPlaying).toBe(true);
+     act(() => live(api).togglePlayback());
+   });
++
++  it('WG9: the detail panel draws a clip with a source offset from that offset', async () => {
++    const { api, detail, expectedShape, select } = await mountWaveformWorkspace();
++    select(['s1']);
++    const panel = detail();
++    const s1 = clipOf(api, 's1');
++    const fromStart = buildPeakShape(
++      live(api).sourcePeaks.get(s1.sourceId),
++      0,
++      s1.duration,
++      480,
++      1,
++    );
++    expect(s1.sourceOffset).toBe(0.5);
++    expect(panel.d).toBe(expectedShape('s1', 480, 1));
++    expect(panel.d).not.toBe(fromStart?.path);
++  });
++
++  it('WG10: a committed source offset change with the same duration redraws the lane and the detail panel', async () => {
++    const { api, lane, detail, expectedShape, select } = await mountWaveformWorkspace();
++    select(['s1']);
++    const laneBefore = lane('s1');
++    const detailBefore = detail().d;
++    const before = live(api).arrangement;
++    act(() => {
++      live(api).commitArrangement(
++        {
++          ...before,
++          clips: before.clips.map((clip) =>
++            clip.id === 's1' ? { ...clip, sourceOffset: 1.5 } : clip,
++          ),
++        },
++        'Slip',
++        before,
++      );
++    });
++    const laneAfter = lane('s1');
++    expect(laneAfter.columns).toBe(laneBefore.columns);
++    expect(laneAfter.d).not.toBe(laneBefore.d);
++    expect(laneAfter.d).toBe(expectedShape('s1', laneAfter.columns, 1));
++    expect(detail().d).not.toBe(detailBefore);
++    expect(detail().d).toBe(expectedShape('s1', 480, 1));
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index 06dac5c..874a15b 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -1374,3 +1374,114 @@ describe('PERF-DRAG-PREVIEW stage c2b-ii — the detail Start/End text follows t
+     }
+   });
+ });
++
++describe('PERF-DRAG-PREVIEW stage c2b-iii — the peak paths skip moves that keep their drawn fields', () => {
++  it('DP43 an audio fade-in move renders no peak path while the clip view redraws', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const audio = clipParts('c1');
++      pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++      pointerMoveTo(audio.root, 1, 40);
++      renderLog.counts.clear();
++      pointerMoveTo(audio.root, 1, 80);
++      pointerMoveTo(audio.root, 1, 120);
++      expect(rendersOf('ArrangementClipViewInner')).toBe(2);
++      expect(audio.root.dataset.fadeIn).toBe('3.000');
++      expect(rendersOf('ArrangementPeakPathInner')).toBe(0);
++      pointerUpAt(audio.root, 1, 120);
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP44 a same-lane move renders no peak path in the lane or the detail panel', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const { root, header } = clipParts('c1');
++      pointerDownAt(header, 1, 0);
++      pointerMoveTo(root, 1, 40);
++      renderLog.counts.clear();
++      pointerMoveTo(root, 1, 80);
++      pointerMoveTo(root, 1, 120);
++      expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
++      expect(rendersOf('ArrangementDetailContentInner')).toBe(2);
++      expect(detailRangeInputs(view).start.value).toBe('5');
++      expect(rendersOf('ArrangementPeakPathInner')).toBe(0);
++      pointerUpAt(root, 1, 120);
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP45 a trimStart move redraws both peak paths once per pointermove', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const { root, trimStart } = clipParts('c1');
++      pointerDownAt(trimStart, 1, 0);
++      pointerMoveTo(root, 1, 40);
++      renderLog.counts.clear();
++      pointerMoveTo(root, 1, 80);
++      pointerMoveTo(root, 1, 120);
++      expect(rendersOf('ArrangementPeakPathInner')).toBe(4);
++      pointerUpAt(root, 1, 120);
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP46 a trimEnd move redraws both peak paths once per pointermove', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    try {
++      const { root, trimEnd } = clipParts('c1');
++      pointerDownAt(trimEnd, 1, 0);
++      pointerMoveTo(root, 1, -40);
++      renderLog.counts.clear();
++      pointerMoveTo(root, 1, -80);
++      pointerMoveTo(root, 1, -120);
++      expect(rendersOf('ArrangementPeakPathInner')).toBe(4);
++      pointerUpAt(root, 1, -120);
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP48 a video fade-in move renders no peak path on the video lane', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++    try {
++      const video = clipParts('v1');
++      const fade = video.root.querySelector<HTMLElement>(
++        '[data-testid="arrangement-video-fade-in-handle"]',
++      );
++      if (!fade) {
++        throw new Error('video fade handle missing');
++      }
++      pointerDownAt(fade, 3, 40, 50);
++      pointerMoveTo(video.root, 3, 80, 50);
++      renderLog.counts.clear();
++      pointerMoveTo(video.root, 3, 120, 50);
++      expect(rendersOf('ArrangementProvider')).toBe(1);
++      expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
++      expect(rendersOf('ArrangementPeakPathInner')).toBe(0);
++      pointerUpAt(video.root, 3, 120, 50);
++    } finally {
++      view.unmount();
++    }
++  });
++
++  it('DP47 a committed gain change redraws both peak paths; a committed fade-only change redraws none', async () => {
++    const { api, view } = await mountPreviewWorkspace();
++    try {
++      act(() => live(api).selectClip('c1'));
++      const c1 = clipIn(live(api).arrangement, 'c1');
++      renderLog.counts.clear();
++      commitClipVariant(api, { ...c1, fadeIn: 1 });
++      expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
++      expect(rendersOf('ArrangementPeakPathInner')).toBe(0);
++      renderLog.counts.clear();
++      commitClipVariant(api, { ...clipIn(live(api).arrangement, 'c1'), gainDb: -6 });
++      expect(rendersOf('ArrangementPeakPathInner')).toBe(2);
++    } finally {
++      view.unmount();
++    }
++  });
++});
+diff --git a/app/lib/arrangement/model.ts b/app/lib/arrangement/model.ts
+index 94ad55c..3c5e9e6 100644
+--- a/app/lib/arrangement/model.ts
++++ b/app/lib/arrangement/model.ts
+@@ -524,7 +524,11 @@ export function setClipGainDb(
+ }
+ 
+ export function clipLinearGain(clip: ArrangementClip): number {
+-  return clip.gainDb === undefined ? 1 : 10 ** (clip.gainDb / 20);
++  return gainDbLinearGain(clip.gainDb);
++}
++
++export function gainDbLinearGain(gainDb: number | undefined): number {
++  return gainDb === undefined ? 1 : 10 ** (gainDb / 20);
+ }
+ 
+ export function clipLinearGains(arrangement: Arrangement): Map<string, number> {
+diff --git a/app/lib/arrangement/waveform-zoom.ts b/app/lib/arrangement/waveform-zoom.ts
+index 6856639..62ec253 100644
+--- a/app/lib/arrangement/waveform-zoom.ts
++++ b/app/lib/arrangement/waveform-zoom.ts
+@@ -1,5 +1,5 @@
+ import type { ArrangementClip } from '~/types/arrangement';
+-import { clipLinearGain } from './model';
++import { gainDbLinearGain } from './model';
+ import { studioViewStrings } from './strings';
+ 
+ export const WAVEFORM_ZOOM_LEVELS: readonly number[] = [0.5, 1, 2, 4, 8];
+@@ -24,7 +24,15 @@ export function waveformZoomStatus(level: number): string {
+ }
+ 
+ export function clipWaveformScale(clip: ArrangementClip, isVideo: boolean, zoom: number): number {
+-  const gain = clipLinearGain(clip);
++  return waveformScaleForGainDb(clip.gainDb, isVideo, zoom);
++}
++
++export function waveformScaleForGainDb(
++  gainDb: number | undefined,
++  isVideo: boolean,
++  zoom: number,
++): number {
++  const gain = gainDbLinearGain(gainDb);
+   if (isVideo) {
+     return gain;
+   }

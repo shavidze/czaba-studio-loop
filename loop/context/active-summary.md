@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-04T13:51:45.576Z)
+# Active loop summary (2026-11-04T15:29:51.782Z)
 
-- backlog.json 2486 KB -> active view 242 KB
-- status: G_ROOT_GATE round 332
-- servers: `{"checkedUtc":"2026-11-04T13:15:00.6114696Z","round":332,"attempt":1,"store":200}`
-- last publication: de28ccae07e375c4d60f9c972ca28abb9443b095 (rounds 332-332)
-- last root gate: round 332 published - commit de28ccae07e375c4d60f9c972ca28abb9443b095 pushed
+- backlog.json 2489 KB -> active view 243 KB
+- status: G_ROOT_GATE round 333
+- servers: `{"checkedUtc":"2026-11-04T14:44:54.3335384Z","round":333,"attempt":1,"store":200}`
+- last publication: 3f945e370af5d03db1502e8b9ae98017b3789563 (rounds 333-333)
+- last root gate: round 333 published - commit 3f945e370af5d03db1502e8b9ae98017b3789563 pushed
 
 ## Current items: -
 

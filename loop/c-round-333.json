@@ -1,0 +1,83 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-04T14:44:54.3335384Z",
+  "round": 333,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "MUTANT",
+  "DRAG-NAMES",
+  "PERF",
+  "DETAIL-TEXT",
+  "D-ROWS",
+  "G333-AUTH",
+  "DOCS"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "manifestPaths": [
+  "c-round-333/claims.txt",
+  "c-round-333/claims-end.txt",
+  "c-round-333/unit-1.log",
+  "c-round-333/mutants-b.txt",
+  "c-round-333/mutant-c.txt",
+  "c-round-333/names-a.json",
+  "c-round-333/names-compare.txt",
+  "c-round-333/perf-rowcmp-vs-c332.txt",
+  "c-round-333/perf-interactions-atree-results/latest-interactions.json",
+  "c-round-333/detail-a.json",
+  "c-round-333/detail-head.json",
+  "c-round-333/detail-compare.txt",
+  "c-round-333/rows/rows-diff.txt",
+  "c-round-333/g333-auth.json",
+  "c-round-333/g333-auth-attempt1-timeout.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": 15,
+ "assertsRun": 15,
+ "mutantsRecorded": 6,
+ "mutantRedOnSketch": true,
+ "mutantRedOnTree": true,
+ "cOwnMutant": {
+  "id": "MU-C333-END-FALLBACK-DURATION-ONLY",
+  "change": "onClipEnd fallback uses clipDuration instead of clipStart + clipDuration",
+  "red": [
+   "DP33",
+   "DP34",
+   "DP36",
+   "DP37",
+   "DP38",
+   "DP39",
+   "DP41"
+  ],
+  "restored": true
+ },
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 1,
+ "chainHeadGateRunGreen": true,
+ "findingsOrigin": [],
+ "notes": [
+  "PERF: prod build, rc 0, complete, failures [], 36/36 asserted pass, 103 EQUAL, 18 DIFF = exactly B's 18 rows, values equal to B's sketch (trim 21.633, move 26.233, range 7.267, click commits 2 / components 100, select 22); hook-live = 1 (SIG-R333-HOOK-LIVE-MARGIN recorded, at its >=1 bound).",
+  "DETAIL-TEXT: A == HEAD at all 23 samples per viewport, both viewports. At 1280x720 the Clip details panel starts collapsed (fit rule) and was expanded with a real click first.",
+  "Limitations (honest): step 5 'range on another lane' did not visibly change the inputs on either tree (A==HEAD; jsdom DP39 covers the fallback). At 1280x720 the step-2 trim-edge drag landed on the fade handle (Undo: Fade In) on both trees; the trim-edge path is covered at 1440x900, by DRAG-NAMES and by DP34/DP38. First G333-AUTH attempt timed out on a cold /studio/middle-east compile (environment-invalid, kept); second attempt passed.",
+  "DP42 focus premise (A-R333-DP42-FOCUS-PREMISE): in the browser the clip pointerdown also moves focus off Start in both trees (focus null during the drag, identical on HEAD).",
+  "Export WAV sha256 453d1a04... identical on A and HEAD at both viewports."
+ ]
+}

@@ -1,0 +1,10 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+const b = await chromium.launch(); const p = await (await b.newContext({viewport:{width:1280,height:720}})).newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'load'});
+await p.waitForFunction(() => /ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent ?? ''),null,{timeout:120000});
+await p.getByRole('button',{name:'Add',exact:true}).first().click(); await p.locator('[data-clip-kind="audio"]').first().waitFor(); await p.waitForTimeout(1500);
+const log=async(l)=>console.log(l, await p.evaluate(()=>{const s=document.querySelector('[data-testid="arrangement-detail-start"]');const r=s?.getBoundingClientRect();return [r?.width,r?.height,[...document.querySelectorAll('button')].filter(b=>/^(Expand|Collapse)/.test(b.textContent.trim())).map(b=>b.textContent.trim())]}));
+await log('after add'); await p.mouse.click(1234,649); await p.waitForTimeout(500); await log('after expand');
+const nb = p.locator('[data-clip-kind="audio"]').first().getByTitle(/ — drag to move$/).first(); const bb = await nb.boundingBox();
+await p.mouse.click(bb.x+30,bb.y+bb.height/2); await p.waitForTimeout(500); await log('after select');
+await p.screenshot({path:'shots/probe2.png'}); await b.close();
