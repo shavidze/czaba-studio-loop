@@ -1,0 +1,360 @@
+diff --git a/app/components/arrangement/ArrangementTrackMeter.tsx b/app/components/arrangement/ArrangementTrackMeter.tsx
+index 8281bb7..f49fb78 100644
+--- a/app/components/arrangement/ArrangementTrackMeter.tsx
++++ b/app/components/arrangement/ArrangementTrackMeter.tsx
+@@ -1,4 +1,4 @@
+-import { useCallback, useRef, useSyncExternalStore } from 'react';
++import { memo, useCallback, useRef, useSyncExternalStore } from 'react';
+ import { useTrackMeterStore, useTrackMeterWriter } from '~/contexts/ArrangementContext';
+ import {
+   formatMeterDbAttribute,
+@@ -20,7 +20,7 @@ function trackMeterTitle(trackName: string, peakText: string, over: boolean): st
+     : studioMeterStrings.trackPeakTitle({ name: trackName, peak: peakText });
+ }
+ 
+-export function ArrangementTrackMeter({ trackId, trackName }: ArrangementTrackMeterProps) {
++function ArrangementTrackMeterInner({ trackId, trackName }: ArrangementTrackMeterProps) {
+   const store = useTrackMeterStore();
+   const over = useSyncExternalStore(
+     store.subscribeTrackMeters,
+@@ -105,3 +105,5 @@ export function ArrangementTrackMeter({ trackId, trackName }: ArrangementTrackMe
+     </>
+   );
+ }
++
++export const ArrangementTrackMeter = memo(ArrangementTrackMeterInner);
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index d72f06c..96e68d6 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -108,6 +108,7 @@ import {
+ import { insertMarkerStatusKind } from '~/lib/arrangement/playback-start';
+ import {
+   type ArrangementPreviewState,
++  sameOverviewArrangementShownFields,
+   sameSelectedClipShownFields,
+   sameSelectedClipsShownFields,
+   selectPreviewClip,
+@@ -846,8 +847,12 @@ function ArrangementOverviewWithPreviewInner({
+   committedProjectEnd,
+   ...overviewProps
+ }: ArrangementOverviewWithPreviewProps) {
+-  const shownArrangement = useArrangementPreview((state) =>
+-    selectPreviewOrCommittedArrangement(state.preview, arrangement),
++  const shownArrangement = useArrangementPreview(
++    useEqualityStableSelector(
++      (state: ArrangementPreviewState) =>
++        selectPreviewOrCommittedArrangement(state.preview, arrangement),
++      sameOverviewArrangementShownFields,
++    ),
+   );
+   const projectEnd = useArrangementPreview((state) =>
+     selectPreviewProjectEnd(state.preview, committedProjectEnd),
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index 81d85a4..b44f7d3 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -18,7 +18,11 @@ import type {
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { insertMarkerStatusKind } from '../playback-start';
+-import { type ArrangementPreviewStore, SELECTED_CLIP_FIELD_ROLES } from '../preview-store';
++import {
++  type ArrangementPreviewStore,
++  OVERVIEW_CLIP_FIELD_ROLES,
++  SELECTED_CLIP_FIELD_ROLES,
++} from '../preview-store';
+ import { studioClipStrings, studioPlaybackStrings } from '../strings';
+ 
+ interface ProbeFiber {
+@@ -971,10 +975,12 @@ function shownSelectionMarkup(view: PreviewView): string {
+ 
+ async function mountedSelectionMarkup(clip: ArrangementClip): Promise<string> {
+   const { api, view } = await mountPreviewWorkspace([clip, AUDIO_CLIPS[1]]);
+-  act(() => live(api).selectClip(clip.id));
+-  const markup = shownSelectionMarkup(view);
+-  view.unmount();
+-  return markup;
++  try {
++    act(() => live(api).selectClip(clip.id));
++    return shownSelectionMarkup(view);
++  } finally {
++    view.unmount();
++  }
+ }
+ 
+ function commitClipVariant(api: PreviewApiRef, variant: ArrangementClip) {
+@@ -1062,21 +1068,116 @@ describe('PERF-DRAG-PREVIEW stage c2a — selected-clip readers that do not show
+         continue;
+       }
+       const { api, view } = await mountPreviewWorkspace();
+-      act(() => live(api).selectClip('c1'));
+-      const clipRoot = view.container.querySelector<HTMLElement>('[data-clip-id="c1"]');
+-      const clipBefore = clipRoot?.outerHTML;
+-      const shownBefore = shownSelectionMarkup(view);
+-      commitClipVariant(api, variant);
+-      expect({ field, committed: clipIn(live(api).arrangement, 'c1') }).toEqual({
+-        field,
+-        committed: variant,
+-      });
+-      expect({ field, clipChanged: clipRoot?.outerHTML !== clipBefore }).toEqual({
+-        field,
+-        clipChanged: true,
+-      });
+-      expect({ field, shown: shownSelectionMarkup(view) }).toEqual({ field, shown: shownBefore });
+-      view.unmount();
++      try {
++        act(() => live(api).selectClip('c1'));
++        const clipRoot = view.container.querySelector<HTMLElement>('[data-clip-id="c1"]');
++        const clipBefore = clipRoot?.outerHTML;
++        const shownBefore = shownSelectionMarkup(view);
++        commitClipVariant(api, variant);
++        expect({ field, committed: clipIn(live(api).arrangement, 'c1') }).toEqual({
++          field,
++          committed: variant,
++        });
++        expect({ field, clipChanged: clipRoot?.outerHTML !== clipBefore }).toEqual({
++          field,
++          clipChanged: true,
++        });
++        expect({ field, shown: shownSelectionMarkup(view) }).toEqual({ field, shown: shownBefore });
++      } finally {
++        view.unmount();
++      }
++    }
++  });
++});
++
++function ignoredFields(roles: Record<keyof ArrangementClip, 'shown' | 'ignored'>): string[] {
++  return Object.entries(roles)
++    .filter(([, role]) => role === 'ignored')
++    .map(([field]) => field);
++}
++
++function overviewMarkup(view: PreviewView): string {
++  return view.getByTestId('arrangement-overview').outerHTML.replace(/:r[0-9a-z]+:/g, ':id:');
++}
++
++async function mountedOverviewMarkup(clip: ArrangementClip): Promise<string> {
++  const { view } = await mountPreviewWorkspace([clip, AUDIO_CLIPS[1]]);
++  try {
++    return overviewMarkup(view);
++  } finally {
++    view.unmount();
++  }
++}
++
++describe('PERF-DRAG-PREVIEW stage c2b-i — the overview and the track meters skip unchanged fields', () => {
++  it('DP29 an audio fade-in move renders neither the overview nor the track meters', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    const fade = fadeHandleOf(audio.root);
++    pointerDownAt(fade, 1, 0);
++    pointerMoveTo(audio.root, 1, 40);
++    const overviewAtFirstMove = overviewMarkup(view);
++    renderLog.counts.clear();
++    pointerMoveTo(audio.root, 1, 80);
++    pointerMoveTo(audio.root, 1, 120);
++    expect(rendersOf('ArrangementClipViewInner')).toBe(2);
++    expect(rendersOf('ArrangementLane')).toBeGreaterThan(0);
++    expect(audio.root.dataset.fadeIn).toBe('3.000');
++    expect(previewOf(api)).not.toBeNull();
++    expect(rendersOf('ArrangementOverviewWithPreviewInner')).toBe(0);
++    expect(rendersOf('ArrangementOverviewInner')).toBe(0);
++    expect(rendersOf('ArrangementTrackMeterInner')).toBe(0);
++    expect(overviewMarkup(view)).toBe(overviewAtFirstMove);
++    pointerUpAt(audio.root, 1, 120);
++    expect(clipIn(live(api).arrangement, 'c1').fadeIn).toBe(3);
++    expect(overviewMarkup(view)).toBe(overviewAtFirstMove);
++  });
++
++  it('DP30 a same-lane move redraws the overview bar but not the track meters', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    const { root, header } = clipParts('c1');
++    pointerDownAt(header, 1, 0);
++    pointerMoveTo(root, 1, 40);
++    const barsFirst = overviewBarLefts(view);
++    renderLog.counts.clear();
++    pointerMoveTo(root, 1, 80);
++    expect(rendersOf('ArrangementLane')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementDetailWaveformInner')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementOverviewInner')).toBeGreaterThan(0);
++    expect(overviewBarLefts(view)).not.toBe(barsFirst);
++    expect(rendersOf('ArrangementTrackMeterInner')).toBe(0);
++    pointerUpAt(root, 1, 80);
++    expect(textOf(view, 'arrangement-selected-clip')).toContain('00:04.000');
++  });
++
++  it('DP31 a trimStart move redraws the peak paths and the overview bar but not the track meters', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    const { root, trimStart } = clipParts('c1');
++    pointerDownAt(trimStart, 1, 0);
++    pointerMoveTo(root, 1, 40);
++    const barsFirst = overviewBarLefts(view);
++    renderLog.counts.clear();
++    pointerMoveTo(root, 1, 80);
++    expect(rendersOf('ArrangementPeakPathInner')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementOverviewInner')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementTrackMeterInner')).toBe(0);
++    expect(overviewBarLefts(view)).not.toBe(barsFirst);
++    pointerUpAt(root, 1, 80);
++  });
++
++  it('DP32 a clip that differs only in an overview-ignored field renders the same overview markup', async () => {
++    const ignored = ignoredFields(OVERVIEW_CLIP_FIELD_ROLES);
++    expect(ignored.length).toBeGreaterThan(0);
++    const baseMarkup = await mountedOverviewMarkup(AUDIO_CLIPS[0]);
++    for (const [field, variant] of Object.entries(C1_FIELD_VARIANTS)) {
++      if (ignored.includes(field)) {
++        expect({ field, shown: await mountedOverviewMarkup(variant) }).toEqual({
++          field,
++          shown: baseMarkup,
++        });
++      }
+     }
++    expect(await mountedOverviewMarkup(C1_FIELD_VARIANTS.start)).not.toBe(baseMarkup);
+   });
+ });
+diff --git a/app/lib/arrangement/__tests__/preview-store.test.ts b/app/lib/arrangement/__tests__/preview-store.test.ts
+index 1c3c8fc..1b89f39 100644
+--- a/app/lib/arrangement/__tests__/preview-store.test.ts
++++ b/app/lib/arrangement/__tests__/preview-store.test.ts
+@@ -12,7 +12,10 @@ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/
+ import { createArrangement, moveClip } from '../model';
+ import {
+   createArrangementPreviewStore,
++  OVERVIEW_CLIP_FIELD_ROLES,
+   SELECTED_CLIP_FIELD_ROLES,
++  sameOverviewArrangementShownFields,
++  sameOverviewClipShownFields,
+   sameSelectedClipShownFields,
+   sameSelectedClipsShownFields,
+   selectPreviewClip,
+@@ -221,3 +224,61 @@ describe('PERF-DRAG-PREVIEW stage c2a — selected-clip shown fields', () => {
+     expect(sameSelectedClipShownFields(ROLE_BASE, undefined)).toBe(false);
+   });
+ });
++
++function rolesSplit(roles: Record<keyof ArrangementClip, 'shown' | 'ignored'>): {
++  shown: string[];
++  ignored: string[];
++} {
++  const shown: string[] = [];
++  const ignored: string[] = [];
++  for (const [field, role] of Object.entries(roles)) {
++    (role === 'shown' ? shown : ignored).push(field);
++  }
++  return { shown: shown.sort(), ignored: ignored.sort() };
++}
++
++describe('PERF-DRAG-PREVIEW stage c2b-i — overview shown fields', () => {
++  it('PS-OVR-ROLES the overview record classifies every clip field and its equality ignores exactly the ignored ones', () => {
++    const fields = Object.keys(ROLE_VARIANTS);
++    expect(Object.keys(OVERVIEW_CLIP_FIELD_ROLES).sort()).toEqual([...fields].sort());
++    const { shown, ignored } = rolesSplit(OVERVIEW_CLIP_FIELD_ROLES);
++    expect(shown).toEqual(['duration', 'id', 'start', 'trackId']);
++    for (const [field, variant] of Object.entries(ROLE_VARIANTS)) {
++      expect({ field, equal: sameOverviewClipShownFields(ROLE_BASE, variant) }).toEqual({
++        field,
++        equal: ignored.includes(field),
++      });
++    }
++  });
++
++  it('PS-OVR-ARR compares arrangements by track reference, clip count, order and overview fields', () => {
++    const other: ArrangementClip = { ...ROLE_BASE, id: 'b1', start: 9 };
++    const base = {
++      ...createArrangement([
++        { id: 'video', kind: 'video', name: 'Video' },
++        { id: 'a', kind: 'audio', name: 'A' },
++      ]),
++      clips: [ROLE_BASE, other],
++    };
++    expect(sameOverviewArrangementShownFields(base, base)).toBe(true);
++    expect(
++      sameOverviewArrangementShownFields(base, { ...base, clips: [ROLE_VARIANTS.fadeIn, other] }),
++    ).toBe(true);
++    expect(
++      sameOverviewArrangementShownFields(base, { ...base, clips: [ROLE_VARIANTS.gainDb, other] }),
++    ).toBe(true);
++    expect(
++      sameOverviewArrangementShownFields(base, { ...base, clips: [ROLE_VARIANTS.start, other] }),
++    ).toBe(false);
++    expect(
++      sameOverviewArrangementShownFields(base, { ...base, clips: [ROLE_VARIANTS.duration, other] }),
++    ).toBe(false);
++    expect(sameOverviewArrangementShownFields(base, { ...base, clips: [other, ROLE_BASE] })).toBe(
++      false,
++    );
++    expect(sameOverviewArrangementShownFields(base, { ...base, clips: [ROLE_BASE] })).toBe(false);
++    expect(sameOverviewArrangementShownFields(base, { ...base, tracks: [...base.tracks] })).toBe(
++      false,
++    );
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/track-meter-ui.test.tsx b/app/lib/arrangement/__tests__/track-meter-ui.test.tsx
+index d3f48c9..c7af582 100644
+--- a/app/lib/arrangement/__tests__/track-meter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-meter-ui.test.tsx
+@@ -587,19 +587,19 @@ describe('per-track meters in the lane headers (SRW-13 stage 2b, D-29r)', () =>
+     runFrames(30);
+     expect(meter('music').getAttribute('data-level-db')).toBe('-12.0');
+     expect(renderLog.counts.get('ArrangementLane') ?? 0).toBe(0);
+-    expect(renderLog.counts.get('ArrangementTrackMeter') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementTrackMeterInner') ?? 0).toBe(0);
+     setTrackLevel('sfx', 1.5);
+     runFrames(1);
+     expect(meter('sfx').getAttribute('data-state')).toBe('over');
+-    expect(renderLog.counts.get('ArrangementTrackMeter') ?? 0).toBe(1);
++    expect(renderLog.counts.get('ArrangementTrackMeterInner') ?? 0).toBe(1);
+     expect(renderLog.counts.get('ArrangementLane') ?? 0).toBe(0);
+     setTrackLevel('sfx', MINUS_12_DBFS);
+     renderLog.counts.clear();
+     runFrames(10);
+-    expect(renderLog.counts.get('ArrangementTrackMeter') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementTrackMeterInner') ?? 0).toBe(0);
+     fireEvent.click(masterPeak);
+     expect(meter('sfx').getAttribute('data-state')).toBe('clear');
+-    expect(renderLog.counts.get('ArrangementTrackMeter') ?? 0).toBe(1);
++    expect(renderLog.counts.get('ArrangementTrackMeterInner') ?? 0).toBe(1);
+     expect(renderLog.counts.get('ArrangementLane') ?? 0).toBe(0);
+     act(() => live(api).togglePlayback());
+   });
+diff --git a/app/lib/arrangement/preview-store.ts b/app/lib/arrangement/preview-store.ts
+index 8490708..728b107 100644
+--- a/app/lib/arrangement/preview-store.ts
++++ b/app/lib/arrangement/preview-store.ts
+@@ -104,3 +104,32 @@ export function sameSelectedClipsShownFields(
+     (a.length === b.length && a.every((clip, index) => sameSelectedClipShownFields(clip, b[index])))
+   );
+ }
++
++export const OVERVIEW_CLIP_FIELD_ROLES: Record<keyof ArrangementClip, PreviewClipFieldRole> = {
++  id: 'shown',
++  trackId: 'shown',
++  sourceId: 'ignored',
++  start: 'shown',
++  sourceOffset: 'ignored',
++  duration: 'shown',
++  gainDb: 'ignored',
++  fadeIn: 'ignored',
++  fadeOut: 'ignored',
++  envelope: 'ignored',
++};
++
++export function sameOverviewClipShownFields(a: ArrangementClip, b: ArrangementClip): boolean {
++  return (
++    a === b ||
++    (a.id === b.id && a.trackId === b.trackId && a.start === b.start && a.duration === b.duration)
++  );
++}
++
++export function sameOverviewArrangementShownFields(a: Arrangement, b: Arrangement): boolean {
++  return (
++    a === b ||
++    (a.tracks === b.tracks &&
++      a.clips.length === b.clips.length &&
++      a.clips.every((clip, index) => sameOverviewClipShownFields(clip, b.clips[index])))
++  );
++}

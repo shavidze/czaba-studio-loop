@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-04T10:24:01.356Z)
+# Active loop summary (2026-11-04T12:08:09.984Z)
 
-- backlog.json 2479 KB -> active view 416 KB
-- status: G_ROOT_GATE round 330
-- servers: `{"checkedUtc":"2026-11-04T09:49:46.8582732Z","round":330,"attempt":1,"store":200}`
-- last publication: 1e5f552e0d8a9705aa60d2cf0c520b276cb8a97a (rounds 329-330)
-- last root gate: round 330 published - commit 1e5f552e0d8a9705aa60d2cf0c520b276cb8a97a pushed
+- backlog.json 2481 KB -> active view 417 KB
+- status: G_ROOT_GATE round 331
+- servers: `{"checkedUtc":"2026-11-04T11:27:53.9657032Z","round":331,"attempt":1,"store":200}`
+- last publication: c1d3fbf25788d39f136b4ed650233ea4d314b283 (rounds 331-331)
+- last root gate: round 331 published - commit c1d3fbf25788d39f136b4ed650233ea4d314b283 pushed
 
 ## Current items: -
 
@@ -779,15 +779,14 @@
 - C-R326-01 / low / deferred_low_polish (D-29z929); fix with SYS-CLOCK-DETERMINISM / IM24 playing-state tail ("No more markers after the playhead" + Playing at 16) is unreachable in the browser: playback auto-stops at the pro
 - INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER / info / ruled (D-29z930): matches tasks/round-252/253 planner contract; LIVE-MEAS-MARKER-STEP-PLAYING requested / Ctrl+Right while playing also moves the insert marker
 - SIG-R326-END-STOP-STATUS / info / signal (D-29z930); not scheduled / after the project-end auto-stop (also natural end) the status keeps the previous text, no stopped text
-- SIG-R326-READOUT-PRIMITIVE / info / signal (D-29z935); stage c candidate, measure first (L37) / selected-clip readout re-renders per fade move; select primitives (sourceId, start, duration, sourceOffset) instead of the clip object
-- SIG-R326-DETAIL-IGNORES-FADE / info / signal (D-29z935); stage c candidate / detail panel re-renders per fade move although it shows no fade field; an equality that ignores fadeIn/fadeOut needs a stale-guard test
+- SIG-R326-READOUT-PRIMITIVE / info / dispatched round 331 (stage c2a, D-29z969): closes on C PASS + gate publish / selected-clip readout re-renders per fade move; select primitives (sourceId, start, duration, sourceOffset) instead of the clip object
+- SIG-R326-DETAIL-IGNORES-FADE / info / dispatched round 331 (stage c2a, D-29z969): closes on C PASS + gate publish / detail panel re-renders per fade move although it shows no fade field; an equality that ignores fadeIn/fadeOut needs a stale-guard test
 - SIG-R326-SKIP-UNCHANGED-FADE / info / signal (D-29z935); stage c candidate / setFade builds a new arrangement when the rounded fade seconds did not change (sub-pixel moves)
 - LIVE-MEAS-MARKER-STEP-PLAYING / info / requested_from_root (D-29z930): user-review/live-checks.md / root measures in Live 12: while playing, does Ctrl+Right (Win) / Alt+Right (Mac) to the next locator move playback, the insert marker, or bo
 - A-R327-REVIEW-SAME-TEXT-REMOUNT / low / ruled (D-29z938): merged into C-R327-02; A STOP answered / = C-R327-02
 - A-R327-REVIEW-SETTLE-ORDER / low / deferred_low_polish (D-29z940); a later fix must keep the settle -> flush order / settle writes lastNonRefusalStatusRef before setStatus and the flush overwrites it; outcome equals HEAD but depends on ordering
 - SIG-R327-NOBPM-RULER-CLICK / info / signal (D-29z941): one probe in the next REGRESSION round against the SABA-B-11a contract / no-BPM project: Alt-click on the 20 px bars ruler did not move the insert marker (A and HEAD)
 - SIG-R327-HARNESS-PER-COMMIT / info / signal (D-29z941); not scheduled / perf harness reports only the release max components; per-commit counts would measure the second stopped release commit
-- C-R328-01 / low / DP20 verified by C round 329 (UNIT x3, MU-CLEAR-ANY-PREVIEW red); round 329 not published (C FAIL on C-R329-01); closes on round 330 C PASS + gate publish (D-29z961) / 'a newer preview written after the flush is kept' had no test; mutant C-MU-CLEAR-ANY-PREVIEW survived
 - C-R328-02 / low / deferred_low_polish (D-29z947) / fade release-commits stopped 2 -> 3 (1 at round 325), playing 1 -> 2; releaseComponentsMax 96 unchanged; not user-visible
 - A-R328-REVIEW-SAME-TEXT-RACE / low (hypothesis) / open, not reproduced (D-29z948): browser probe in the next REGRESSION round; severity on repro / a non-sync committed setStatus('X') adopting preview N, then previewStatus('X') before its commit, writes N+1 and may re-announce the same t
 - A-R328-ARCH-STATUS-HOOK / info / signal (D-29z949): b-round-328-checkpoint-addendum.md; trigger not met / extract useArrangementStatus(statusPreviewStore) if a third round touches the status-preview block
@@ -796,10 +795,13 @@
 - GATE328-S3 / low / deferred_low_polish (D-29z953) / fade budget rows <= 24 vs measured 21.633/22: 2 components of headroom; add a note in doc 168
 - GATE328-S4 / info / signal (D-29z953) / DP18 restores IS_REACT_ACT_ENVIRONMENT by hand and waits 50 ms on a real timer
 - GATE328-ARCH-STATUS-STORE / info / signal (D-29z953): b-round-328-checkpoint-addendum.md / move status ownership into lib/arrangement/status-store.ts with getShownStatus(); five inline getStatusPreviewText() ?? status reads
-- C-R329-01 / low / fix dispatched round 330: memo leaf + DP23 (D-29z955); closes on C PASS / the non-memo ArrangementProjectEndText leaf adds one component to every ArrangementTransport render (range max 30->31, click 106->107, zoom 
-- C-R329-02 / low / fix dispatched round 330 as DP24 (D-29z956); closes on C PASS / the loop part of the overview extent is unguarded in jsdom
 - A-R329-REVIEW-VIEWPORT-BOUND / low / deferred_low_polish (D-29z957); browser row C-VIEWPORT-BOUND runs in round 330 / no jsdom DP row covers the viewport-bound timelineSeconds branch (clientWidth 0, fake ResizeObserver)
 - INFO-C329-FULLSCALE / info / signal (D-29z959), linked to C-R178-EXPORT-CLIPS-AT-0DB; not scheduled / demo export WAV has 20 full-scale 24-bit samples, identical at HEAD
+- GATE330-S1 / low / dispatched round 331 §1.3 (D-29z964) / doc 232 test-file entry (l.128) stops at 'round 329-ში DP20–DP22'
+- GATE330-S2 / low / dispatched round 331 §1.3 (D-29z964) / doc 232 item 22 says memo was not added; item 23 reverses it
+- SIG-R331-OVERVIEW-FADE / info / signal (D-29z966): held per tech-lead (signal-3 churn region, checkpoint D-29z915); c2b candidate / overview wrapper + inner re-render on every fade move (2/move) although the overview draws no fade
+- SIG-R331-DETAIL-PICK / info / signal (D-29z967): rejected for c2a (ripple into ArrangementClip.tsx PeakPath props, model.ts clipLinearGain, waveform-zoom.ts); revisit at T12-ADVANCED micro fades / narrow ArrangementDetailSelection.clip to a Pick<ArrangementClip,...> so a stale field is a compile error
+- PERF-CAND-FADE-BUDGET / info / candidate (D-29z969): red proof pre-fix 21.633/22 (c-round-330), sketch 13.767/14 (b-round-330/perf-rowcmp-vs-c330.txt); needs a loaded replicate (L37) / tighten interact.drag.fade.* move-components budgets (<= 24 today) after c5
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

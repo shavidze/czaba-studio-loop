@@ -1,205 +1,257 @@
-# Round 331: PERF-DRAG-PREVIEW stage c2a. The selected-clip readout and the detail panel stop re-rendering for fields they do not show
+# Round 332: PERF-DRAG-PREVIEW stage c2b-i. The overview and the track meters stop re-rendering for fields they do not draw
 
-**Planned by:** B, at the round 330 → 331 planning, 2026-11-04.
+**Planned by:** B, at the round 331 → 332 planning, 2026-11-04.
 
-**Decisions** (all in `backlog.json` → `decisions_log_b`, v290; D-29z962…D-29z971):
-- **D-29z962: round 330 closed as PASS, from C's evidence.** C round 330 is `taskStatus` PASS with `browserVerified`/`realVerified` true and 11/11 rows. Gate 330 published `1e5f552` (rounds 329 + 330) on both remotes [K1].
-  - **PERF-DRAG-PREVIEW stage c1 → done.**
-  - Closed: C-R329-01 (memo leaf; click 106, range max 30), C-R329-02 (DP24; MU-OVERVIEW-NO-LOOP red), C-R328-01 (DP20) and A-R329-REVIEW-LOOP-EXTENT (merged into C-R329-02).
-- **D-29z963: INFO-C330-DP21-GRANT is accepted.** A's 7 DP21 Undo lines stay. C's mutant MU-C330-MEMO-IGNORES-END-DECREASE is red on them (`c-round-330/mutant-c.txt`), so they guard a real regression.
-- **D-29z964: the gate-330 review Lows.**
-  - **GATE330-S1** (doc 232's test-file entry stops at DP22) and **GATE330-S2** (item 22 still says that `memo` was not added) are fixed in this round's doc edit, §1.3. Same file, owned, low cost.
-  - **GATE330-S3** (= INFO-C330-DP24-FAR: DP24's far move would pass without the loop) → `deferred_low_polish`. The loop is already proven by the `20.000` assertions and MU-OVERVIEW-NO-LOOP. Pinning a new exact value would need its own sketch run (L58).
-- **D-29z965: the gate-330 Architecture proposal** (memo `ArrangementLane`, lanes read the timeline width from a store; removes the 107/108 crossing commit) → `architecture_signals` as ARCH-R330-LANE-MEMO-WIDTH, linked to the pending checkpoint D-29z915. Not scheduled.
-- **D-29z966: stage c2 is split into c2a and c2b; consult disagreement ruled.**
-  - `performance-optimizer` wanted the overview and `memo(ArrangementTrackMeter)` in c2a.
-  - `tech-lead` wanted the overview held: its wrapper is in the signal-3 churn region, and D-29z915 should decide whether overview and lane geometry come from a store.
-  - **B follows tech-lead on the overview** (2 renders per fade move; it stays as residual SIG-R331-OVERVIEW-FADE). **B moves the TrackMeter memo to c2b** with the lane-side pieces.
-  - c2a (this round) touches only the two selected-clip readers in `StudioWorkspace.tsx`, plus pure helpers in `preview-store.ts`.
-  - **c2b** (the next PERF round): the overview with the same equality, if D-29z915 is answered or still has no answer when c2b is planned; `memo(ArrangementTrackMeter)`; a field comparator for `ArrangementPeakPath`; and the detail start/end text derived in render instead of in the layout effect (the extra 2-component commit on trim and move).
-- **D-29z967: tech-lead's `Pick<ArrangementClip, …>` projection is rejected for c2a.** `ArrangementDetailPanel` passes the clip to `ArrangementPeakPath` (props typed `ArrangementClip`) and `clipWaveformScale` → `clipLinearGain` (both typed `ArrangementClip`) [K21]. The Pick would therefore ripple into `ArrangementClip.tsx`, `waveform-zoom.ts` and `model.ts`, which is lane code shared by every clip. c2a uses the exhaustive roles record plus the PS-ROLES and DP27 guards instead. The Pick stays as signal SIG-R331-DETAIL-PICK for T12-ADVANCED (micro fades), when the panel first shows a fade field.
-- **D-29z968: the hook's home.** `useEqualityStableSelector` lives in `StudioWorkspace.tsx`, next to its two callers. It is the same ref-held-selector pattern as zustand's own `useShallow` (`node_modules/zustand/esm/react/shallow.mjs`) [K22], so the ref write inside the selector is the library's documented shape, not a render side effect. If c2b needs it in a second file, c2b extracts it to `app/hooks/` first.
-- **D-29z969: signals.**
-  - SIG-R326-DETAIL-IGNORES-FADE and SIG-R326-READOUT-PRIMITIVE close when this round gets C PASS and the gate publishes it.
-  - SIG-R326-SKIP-UNCHANGED-FADE stays a signal.
-  - New candidate PERF-CAND-FADE-BUDGET: tighten the fade budget from `≤ 24` once c5 is done (D-29z950 conversion step). Its red proof is already in hand: the pre-fix tree measured 21.633 per move / max 22 (C round 330), and the sketch measures 13.767 / 14.
-  - B's hypothesis "the readout render on a move is legitimate" was wrong: during a move the readout shows the lane-move hint. The sketch's DP26 found that before dispatch (L58 worked; no new lesson).
-- **D-29z970: this task.**
-- **D-29z971: the next round** is REGRESSION if it is planned on or after 2026-11-05 (`regression-last` 2026-11-02 [K14]). Otherwise it is stage c2b.
+**Decisions** (all in `backlog.json` → `decisions_log_b`, v291; D-29z972…D-29z983):
+- **D-29z972: round 331 closed as PASS, from C's evidence.** `c-round-331.json`: `taskStatus` PASS, `browserVerified`/`realVerified` true, 14/14 rows. Gate 331 published `c1d3fbf` on both remotes [K1].
+  - **Stage c2a → done.** The fade item target (≤ 15 per move, D-29z935) is met: 13.767 per move, max 14.
+  - Closed: SIG-R326-DETAIL-IGNORES-FADE, SIG-R326-READOUT-PRIMITIVE, GATE330-S1 and GATE330-S2.
+- **D-29z973: A-R331-REVIEW-STALE-CLIP is re-rated.** It was a latent Medium; it is now an info design signal merged into SIG-R331-DETAIL-PICK.
+  - It has no reproducible failure. A, C and the gate-331 reviewer each traced every reader and action of the held clip, and none found a fade or envelope reader or a spread write-back (`a-round-331.md`, the findings in `c-round-331.md`, `gates/round-331/review.md` "What I checked").
+  - PS-ROLES, DP27 and DP28 force any new clip field to be classified.
+  - L46 deadline: T12-ADVANCED micro fades (the first fade field the panel shows), or one question at RETRO 336, whichever comes first.
+- **D-29z974: C-R331-01** (Low, pre-existing, identical on HEAD) → `deferred_low_polish`. Its fix must carry a hit-target row at the smallest lane height (52 px, at 1280×720 with the panel open).
+- **D-29z975: the gate-331 Lows.**
+  - **GATE331-S1** (the roles record is not used at runtime): keep the hand-written equalities, including the new overview one. Deriving them from the record needs a key list or a cast under TS strict. PS-ROLES and PS-OVR-ROLES pin each record to its equality, field by field. Doc 232 records the choice (§1.3).
+  - **GATE331-S2** (doc 232: the title lacks c2a, the TODO's "c2" wording is stale, item 30 omits `sourceOffset`): fixed in §1.3.
+  - **GATE331-S3** (DP28 and `mountedSelectionMarkup` leak a mount on failure): try/finally, already in the sketch.
+  - **GATE331-S4** (DP25's exact `toBe(2)`): kept. It is the positive control of the 0-render asserts, so a change in clip-view renders must surface and be ruled.
+- **D-29z976: stage c2b is split into c2b-i (this round) and c2b-ii.**
+  - c2b-i: the overview equality and `memo` on the track meter. One mechanism: skip fields that are not drawn.
+  - c2b-ii (after REGRESSION): the detail Start/End text derived in render instead of the layout effect in `ArrangementDetailPanel.tsx` [K9]. The text is editable input state, so c2b-ii uses the existing `clipGainText` sentinel pattern keyed on the raw numbers.
+  - `performance-optimizer` and `tech-lead` both recommended the split.
+  - `tech-lead` also advised holding the overview until checkpoint D-29z915. B keeps D-29z966 and proceeds:
+    - the equality only skips renders;
+    - a changed `tracks` reference falls back to a render;
+    - DP29, DP30, DP32 and five overview mutants guard it.
+- **D-29z977: the track meter's memo uses `ArrangementTrackMeterInner`** with `export const ArrangementTrackMeter = memo(ArrangementTrackMeterInner);`. `track-meter-ui.test.tsx` gets a 4-string name grant.
+  - `performance-optimizer` suggested a named function expression instead. B measured that esbuild renames it `ArrangementTrackMeter2` [K22]. The name-keyed probe at `track-meter-ui.test.tsx` l.590–602 then silently counts 0, so the suggestion is rejected.
+- **D-29z978: NOTE-C331-OFFSET-ONLY-GUARD closed as accepted.** PS-ROLES guards the readout equality (C's mutant was red on it), and no gesture changes `sourceOffset` alone. A's round-331 reviewer Lows on DP27's scope and the zero-peak fixture → `deferred_low_polish` (A-R331-REVIEW-DP27-SCOPE).
+- **D-29z979: architecture.**
+  - The gate-331 note → ARCH-R331-PREVIEW-READERS; A's note → ARCH-R331-PREVIEW-ISEQUAL. Both are signals and not scheduled.
+  - Signal 3 has recurred in rounds 328–332 on `StudioWorkspace.tsx` l.637–864. B asks root to run checkpoint D-29z915 after this round publishes and before c3 (`b-round-331-checkpoint-addendum.md`). Non-blocking.
+- **D-29z980:** SIG-C331-FADE-COLLAPSES-GROUP is a candidate Live-reference question for the next fade feature round, not a task. Pointer-down on a fade handle collapses a multi-selection, identically on HEAD.
+- **D-29z983: the `ArrangementPeakPath` field comparator is dropped from c2b-i, after B measured it.**
+  - A custom `memo` comparator turns the simple memo into a MemoComponent wrapper fiber plus the inner fiber, and both probes count both.
+  - In B's v1 sketch, trim therefore rose 24.583 → 25.567 per move (max 23 → 24), while fade fell to 9.833 and move to 26.233 (`b-round-331/perf-rowcmp-vs-c331-v1-comparator.txt`). `names-sketch-v1-comparator.json` shows `ArrangementPeakPathInner` twice per instance.
+  - `tech-lead` had rated the comparator low value, because `useMemo` already caches the path.
+  - Successor: PERF-CAND-PEAK-PRIMITIVE-PROPS. With primitive props, the default memo skips without a wrapper. It is decided at c2b-ii planning, because it touches `ArrangementDetailPanel.tsx`, which c2b-ii opens.
+- **D-29z981: this task.**
+- **D-29z982: the next round is REGRESSION.** It will be planned on or after 2026-11-05 (`regression-last` 2026-11-02 [K14]). Its scope additions now include one c2b-i row. c2b-ii follows it.
 
-**Read first:** `lessons.md`: L23, L29, L31, L37, L56, L57, L58. A also reads `.claude/prompts/new-hook.md` (D-29z968 overrides its `app/hooks/` location for this round) and the primitives `AGENT_DISCOVERABLE_CODE.md` (new exports) and `AUDIO_ARCHITECTURE.md` (Studio).
+**Read first:** `lessons.md`: L23, L29, L31, L37, L38, L56, L57, L58. A also reads the primitives `AGENT_DISCOVERABLE_CODE.md` (new exports), `FORWARDREF_COMPONENT.md` (the memo export of an existing component) and `AUDIO_ARCHITECTURE.md` (Studio).
 
 **L29 note:** untagged code text in this task is an expected value, a new name, a row id or a loop-artifact path. Facts about `store/` carry `[K#]` (§7).
 
 ## Baseline
-- HEAD is `1e5f552` (gate 330, published), with a clean tree: 0 entries in `git status` [K2]. Protected files: 11/11 OK [K13]. No dependency change.
+- HEAD is `c1d3fbf` (gate 331, published), with a clean tree: 0 entries in `git status` [K2]. Protected files: 11/11 OK [K13]. No dependency change.
 
 ## 0. Why this round, and B's evidence
-- **What renders today on every in-second pointermove** (C round 330, `c-round-330/names-a.json`, 1440×900): fade 22, trim 23 (+ 2), move 23 (+ 2) components.
-- **Which of these show a value that changed** (`performance-optimizer` table, checked by B):
-
-| Component | fade | trim | move |
-|---|---|---|---|
-| `ArrangementSelectedClipReadoutInner` + `ArrangementTimeText` | waste | shown change | **waste** (the lane-move hint replaces the readout while a move is active [K5]) |
-| `ArrangementDetailPanelWithSelectionInner` → `ArrangementDetailPanel` → `…ContentInner` → `…WaveformInner` → `ArrangementPeakPathInner` + host | waste: the panel reads no fade or envelope field [K6] | shown change | shown change (start) |
-| overview pair | waste | shown change | shown change |
-| lane + `ArrangementTrackMeter`, clip view, status text, project end text | lane/meter waste (c2b); the rest show changes | | |
-
-- **The cut.** One equality, `sameSelectedClipShownFields`, compares exactly the clip fields that the readout and the detail panel show or act on: `id`, `trackId`, `sourceId`, `start`, `sourceOffset`, `duration`, `gainDb`. `fadeIn`, `fadeOut` and `envelope` are ignored.
-  - The field list is an exhaustive `Record<keyof ArrangementClip, 'shown' | 'ignored'>` (`SELECTED_CLIP_FIELD_ROLES`). `ArrangementClip` has 10 fields today [K7]. A new field is a compile error until it is classified.
-  - `useArrangementPreview` takes no equality function [K8], so a small ref-held selector applies the equality (D-29z968).
-  - The readout selects nothing while `clipLaneDrag` is set, because it then renders the hint and not the clip.
-- **B's sketch** (`b-round-330/sketch/sketch.patch.txt`; scratch `/home/runner/b330-scratch`; `git apply --check` is clean on `store/`). Four files, 291 insertions and 5 deletions:
-  - `preview-store.ts`: `PreviewClipFieldRole`, `SELECTED_CLIP_FIELD_ROLES`, `sameSelectedClipShownFields`, `sameSelectedClipsShownFields`.
-  - `StudioWorkspace.tsx`: the `useShallow` import is removed (its only use was the detail wrapper [K3]). The new `useEqualityStableSelector` hook is added. The readout selector becomes `selectPreviewClip(state.preview, arrangement, clipLaneDrag ? null : primaryClipId)` with `sameSelectedClipShownFields`, and the detail wrapper's `useShallow(selectPreviewClipsAmong …)` becomes the same hook with `sameSelectedClipsShownFields` [K4].
-  - `drag-preview-render.test.tsx`: DP25–DP28 (§2.1). `preview-store.test.ts`: PS-ROLES and PS-LIST.
-- **jsdom on the sketch:** the 17 covering files (`b-round-330/covering-files.txt`) are green (`covering-unit.log`). Full vitest is green (`precheck-full.log`) [K18]. Typecheck rc 0. Biome is clean on the four files.
-- **Mutants** (`b-round-330/run-mutants.py`, `mutants-summary.txt`). All 7 are red on the rows below, and the files are byte-restored afterwards [K19]:
+- **What renders today on each fade pointermove:** 14 components (C round 331, `c-round-331/names-a.json`, 1440×900).
+  - **Shown changes:**
+    - the clip view (`ArrangementClipViewInner` + 2 hosts) and `ArrangementClipEnvelope`;
+    - `ArrangementStatusTextInner`;
+    - the lane (`ArrangementLane` + 4 hosts);
+    - `ArrangementPeakPathInner`. The path does not change, but it is not skipped this round (D-29z983).
+  - **Waste:**
+    - `ArrangementOverviewWithPreviewInner` + `ArrangementOverviewInner`. The overview draws only the clip `id`, `trackId`, `start` and `duration`, the track order and kind, and the clip count. It reads no fade, envelope, gain, source or offset field [K7].
+    - `ArrangementTrackMeter`. Its props are `trackId` and `trackName` [K4], and it is not memoised, so every lane render re-renders it, including the workspace renders (click, play, zoom, the move's crossing commit).
+- **The cut.** One new exhaustive roles record and two equalities, all in `preview-store.ts`:
+  - `OVERVIEW_CLIP_FIELD_ROLES`: shown = `id`, `trackId`, `start`, `duration`; the other 6 fields are ignored. `ArrangementClip` has 10 fields [K10], so a new field is a compile error until the record classifies it.
+  - `sameOverviewClipShownFields` compares the four shown fields.
+  - `sameOverviewArrangementShownFields` also requires `tracks` to be the same reference, and the clip count and order to be equal.
+- **The overview wrapper.** Its first selector goes through the existing `useEqualityStableSelector` [K3] with `sameOverviewArrangementShownFields`. `useArrangementPreview` still takes no equality [K8]. The `projectEnd` selector and the extent are unchanged.
+- **`ArrangementTrackMeter.tsx`:** the function becomes `ArrangementTrackMeterInner`, exported as `memo(ArrangementTrackMeterInner)`. Its call site in `ArrangementLane.tsx` is unchanged [K4]. The meter keeps its own subscriptions (`useSyncExternalStore` for the over latch, `useTrackMeterWriter`), so a latch still re-renders it. B traced the latch render under memo (`b-round-331/meter-name-probe.txt`), and `track-meter-ui.test.tsx` pins it.
+- **Not changed:** `ArrangementPeakPath` (still `memo(ArrangementPeakPathInner)`, with no comparator [K5]) and the detail layout effect [K9].
+- **B's sketch** (`b-round-331/sketch/sketch.patch.txt`; scratch `/home/runner/b331-scratch`; `git apply --check` is clean on `store/`). 6 files, 226 insertions and 28 deletions:
+  - `preview-store.ts` (+29): the record and two equalities.
+  - `StudioWorkspace.tsx`: the overview selector and its import.
+  - `ArrangementTrackMeter.tsx`: memo.
+  - `drag-preview-render.test.tsx`: DP29–DP32 and the GATE331-S3 try/finally.
+  - `preview-store.test.ts`: PS-OVR-ROLES and PS-OVR-ARR.
+  - `track-meter-ui.test.tsx`: the 4 name strings `'ArrangementTrackMeter'` → `'ArrangementTrackMeterInner'` [K12].
+- **jsdom on the sketch:**
+  - the 30 covering files (`b-round-331/covering-files.txt`) are green, 438/438 (`covering-unit.log`) [K19];
+  - typecheck rc 0 (`sketch-typecheck.log`);
+  - Biome is clean on all 6 files.
+- **Mutants** (`b-round-331/run-mutants.py`, `mutants-summary.txt`). All 6 are red on the rows below, and the files are byte-restored afterwards [K20]:
 
 | Mutant | Change | Red on |
 |---|---|---|
-| MU-DETAIL-SHALLOW | the detail equality reverts to HEAD's `useShallow` semantics (element identity) | DP25 |
-| MU-READOUT-IDENTITY | the readout equality becomes `===` | DP25 |
-| MU-READOUT-HINT-SELECTS | the readout keeps selecting the clip during a lane move | DP26 |
-| MU-EQUAL-IGNORES-START | `start` drops out of the equality | DP26, PS-ROLES, PS-LIST |
-| MU-ROLE-GAIN-IGNORED | `gainDb` is reclassified as `ignored` | DP27, DP28, PS-ROLES |
-| MU-DETAIL-SHOWS-FADE | the detail panel prints `fadeIn` as text | DP27 |
-| MU-DETAIL-FADE-ATTR | the detail waveform gets a `data-fade-in` attribute (markup only, no text) | DP27 |
+| MU-OVR-IDENTITY | the overview equality becomes `===` | DP29 |
+| MU-OVR-IGNORES-START | `start` drops out of the overview clip equality | DP30, PS-OVR-ARR, PS-OVR-ROLES |
+| MU-OVR-IGNORES-COUNT | the clip-count check goes | PS-OVR-ARR |
+| MU-OVR-IGNORES-TRACKS | the `tracks` reference check goes | PS-OVR-ARR |
+| MU-OVR-ROLE-SOURCE-SHOWN | `sourceId` is reclassified `shown` in the overview record | PS-OVR-ROLES |
+| MU-METER-NO-MEMO | the meter export loses `memo` | DP29, DP30, DP31 |
 
-  B's first DP27 compared the markup before and after a committed change in one mount. Both fade-display mutants survived it, because the equality itself freezes the stale markup. DP27 therefore compares fresh mounts (base clip vs the variant clip), and the same-mount case is kept as DP28.
-- **Perf, production build of the sketch, the interactions spec alone** (`b-round-330/perf-sketch-results/latest-interactions.json`, compared by `b-round-329/perf-rowcmp.py` with C round 330's run: `b-round-330/perf-rowcmp-vs-c330.txt`) [K20]:
-  - rc 0, `failures` [], 167 rows; all 36 asserted rows pass.
-  - **104 non-wallclock rows are EQUAL** to C round 330. That includes every trim, range, click, zoom and play row.
-  - **17 differ, all of them fade or move component rows:**
-    - fade ×9: `interact.drag.fade.{stopped,playing}.move-components-per-move` (+ `.6x`) and `interact.drag.fade.30.playing.move-components-per-move` go 21.633 → **13.767**; `-max` (+ `.6x`) go 22 → **14**;
-    - move ×8: `interact.drag.move.{stopped,playing}.move-components-per-move` (+ `.6x`) go 30.367 → **29.4**; `-max` (+ `.6x`) go 108 → **107**.
-  - The app code measured here is the code in the final patch; only test hunks changed after the perf run.
-- **Browser names probe on the sketch** (dev server :5198, own `cacheDir`; `b-round-330/names-sketch.json`, `names-compare.txt`). The first attempt timed out on the cold compile; it is environment-invalid and kept (`names-sketch-attempt1-coldcompile.log`).
-  - `fade-moves` [14, 14, 14, 14] (was [22 ×4]). Each commit lost exactly `ArrangementDetailPanelWithSelectionInner`, `ArrangementDetailPanel`, `ArrangementDetailContentInner`, `ArrangementDetailWaveformInner`, `ArrangementPeakPathInner`, one host, `ArrangementSelectedClipReadoutInner` and `ArrangementTimeText`.
-  - `move-moves` [22, 2, 22, 2, 107, 2, 22, 2] (was [23, 2, 23, 2, 108, 2, 23, 2]); each lost only `ArrangementSelectedClipReadoutInner`.
-  - `trim-moves` and `harness-clip-click` [104, 2, 0] are equal to C round 330 in counts and names.
-- **L58 positive-control sweep:** 3 count-greater-than-zero controls name these readers [K16]:
-  - DP6 (trim): still true, because trim changes `start` (shown).
-  - `render-budget.test.tsx` l.438–439 (select + open the detail panel): a selection change, not a fade [K16].
+- **What the sketch caught before dispatch (L58).**
+  - DP32's `duration` control equalled the base, because the clip is clamped to its source length. It was dropped; the `start` control stays.
+  - The comparator finding (D-29z983). Its v1 rows (DP33, PS-PEAK-ROLES, 3 MU-PEAK mutants) are kept in `sketch/sketch-v1-comparator.patch.txt` and `mutants-summary-v1-comparator.txt` for PERF-CAND-PEAK-PRIMITIVE-PROPS.
+- **Perf** [K21]. A production build of the sketch ran the interactions spec alone: `b-round-331/perf-sketch-results/latest-interactions.json`, compared by `b-round-329/perf-rowcmp.py` with C round 331's run in `b-round-331/perf-rowcmp-vs-c331.txt`.
+  - rc 0, `complete` true, `failures` [], 167 rows; all 36 asserted rows pass.
+  - **83 non-wallclock rows are EQUAL** to C round 331, including every range row and every fader and clip-gain row.
+  - **38 rows DIFF, and every one is lower.** The `.6x` replicate of each pair equals its 1× value (L37):
 
-  All 3 are green on the sketch.
-- **Consults:** `performance-optimizer` and `tech-lead` (read-only, this planning). The disagreement and the rulings are D-29z966 and D-29z967.
-- **Reference-first, product-designer, screen budget:** not applicable. This is a perf round, and nothing visible or audible changes.
+| Rows | C round 331 | Sketch |
+|---|---|---|
+| `interact.drag.fade.{stopped,playing}.move-components-per-move` (+ `.6x`), `interact.drag.fade.30.playing.move-components-per-move` | 13.767 | **10.817** |
+| `interact.drag.fade.{stopped,playing}.move-components-max` (+ `.6x`) | 14 | **11** |
+| `interact.drag.trim.{stopped,playing}.move-components-per-move` (+ `.6x`) | 24.583 | **23.6** |
+| `interact.drag.trim.{stopped,playing}.move-components-max` (+ `.6x`) | 23 | **22** |
+| `interact.drag.move.{stopped,playing}.move-components-per-move` (+ `.6x`) | 29.4 | **28.2** |
+| `interact.drag.move.{stopped,playing}.move-components-max` (+ `.6x`) | 107 | **103** |
+| `interact.click.components` (+ `.6x`) | 106 | **102** |
+| `interact.play.{start,stop}-components` (+ `.6x`) | 90 | **86** |
+| `interact.zoom.1.components-{max,per-key}` (+ `.6x`) | 99 | **95** |
+| `interact.zoom.30.components-{max,per-key}` | 244 | **240** |
+| `interact.select.same-lane.30.components` | 25 | **24** |
+
+- **Browser names probe on the sketch.** A dev server with its own `cacheDir` served the sketch, and a warm-up run (`names-warmup.json`) came first. Output: `b-round-331/names-sketch.json` and `names-compare.txt`. Compared with C round 331's `names-a.json`, the sketch only loses names and gains none:
+  - `fade-moves` [11, 11, 11, 11] (was [14 ×4]). Each commit lost `ArrangementOverviewWithPreviewInner`, `ArrangementOverviewInner` and one `ArrangementTrackMeter`.
+  - `trim-moves` [22, 2 …] (was [23, 2 …]); each move commit lost one `ArrangementTrackMeter`.
+  - `move-moves` [21, 2, 21, 2, 103, 2, 21, 2] (was [22, 2, 22, 2, 107, 2, 22, 2]). The 103 commit lost 4 `ArrangementTrackMeter`; the others lost 1.
+  - `harness-clip-click` [100, 2, 0] (was [104, 2, 0]): lost 4 `ArrangementTrackMeter`.
+  - `ArrangementTrackMeterInner` appears in no measured commit.
+- **Consults:** `performance-optimizer` and `tech-lead` (read-only, this planning). Their rulings are D-29z976, D-29z977 and D-29z983.
+- **Not applicable:** reference-first, product-designer, the screen budget and the YouTube request. This is a perf round, and nothing visible or audible changes.
 
 ## 1. Contract
-**Apply `b-round-330/sketch/sketch.patch.txt` with `git apply` from `store/`.** §1.1–§1.2 describe that patch. Do not retype it: the mutants and the claims match its exact lines. §1.3 (doc 232) is the only edit by hand. If the patch does not apply, STOP.
+**Apply `b-round-331/sketch/sketch.patch.txt` with `git apply` from `store/`.** §1.1–§1.2 describe that patch. Do not retype it: the mutants and the claims match its exact lines. §1.3 (doc 232) is the only edit by hand. If the patch does not apply, STOP.
 
-1. **`app/lib/arrangement/preview-store.ts`:** the four new exports are appended; the existing exports are unchanged.
-2. **`app/components/arrangement/StudioWorkspace.tsx`:**
-   - the readout and the detail wrapper selectors, as in §0;
-   - `useEqualityStableSelector` is defined just above `ArrangementSelectedClipReadoutProps`;
-   - the `useShallow` import goes;
-   - nothing else changes. The overview wrapper, the group header and the `timelineSeconds` selector stay exactly as at HEAD.
+1. **Code:**
+   - `preview-store.ts` appends the new exports and leaves the existing ones unchanged.
+   - `StudioWorkspace.tsx` changes only the overview wrapper's first selector and the import.
+   - `ArrangementTrackMeter.tsx` changes only the function name, the `memo` import and the export.
+2. **Tests:** as in §0. **Grant (L23):** in `track-meter-ui.test.tsx`, only the 4 `renderLog.counts.get('ArrangementTrackMeter')` strings become `'ArrangementTrackMeterInner'`. No `expect(` is removed or weakened in any file [K11, K12].
 3. **Doc 232** (`docs/implementation/2026/quarter-IV/232-perf-drag-preview.md`):
-   - l.4 becomes exactly `**სტატუსი:** In Progress (stage c2a of a, b, c1, c2a, c2b, c3–c5; round 331, C verifies)` [K11].
-   - **GATE330-S1:** the test-file entry under `## შეცვლილი ფაილები` (the line containing `round 329-ში DP20–DP22` [K12]) gains `; round 330-ში DP23–DP24, fixture/mount `loop` პარამეტრი; round 331-ში DP25–DP28 და preview-store.test.ts-ში PS-ROLES/PS-LIST`.
-   - **GATE330-S2:** item 22 (the one containing `memo\` არ დაემატა` [K12]) ends with ` (round 330-ში შეიცვალა, იხ. item 23)`.
-   - A new `### ეტაპი c2a: არჩეული კლიპის მკითხველები (round 331, D-29z966)`, placed after the c1 section and before `### განხილული ალტერნატივები`. It covers the shown-field equality, the exhaustive roles record, the hook (zustand `useShallow` pattern) and the lane-move hint branch.
-   - `### განხილული ალტერნატივები` gains the rejected `Pick` (D-29z967) and the held overview (D-29z966).
-   - `## შეცვლილი ფაილები` lists `preview-store.ts`.
-   - `## პრობლემები და გადაწყვეტები` gains one Problem → Solution entry. Problem: a fade drag re-rendered the detail panel and the readout although none of their fields changed. Solution: the shown-field equality; DP25 and DP27 guard it.
-   - `## ტესტირება` names DP25–DP28, PS-ROLES, PS-LIST and the perf numbers, cited to B's sketch (`b-round-330/perf-rowcmp-vs-c330.txt`). C measures the real ones. Name only rows that exist (L26).
-   - `## TODO` lists c2b (overview, `memo(ArrangementTrackMeter)`, the `ArrangementPeakPath` comparator, the detail text in render), SIG-R331-DETAIL-PICK and PERF-CAND-FADE-BUDGET.
+   - **l.1 (the title):** inside its parentheses, after `ეტაპი c1 — project end`, add `, ეტაპი c2a — არჩეული კლიპის მკითხველები, ეტაპი c2b-i — overview და meter` (GATE331-S2).
+   - **l.4** becomes exactly `**სტატუსი:** In Progress (stage c2b-i of a, b, c1, c2a, c2b-i, c2b-ii, c3–c5; round 332, C verifies)` [K16].
+   - **Item 30:** the field list becomes ``(`id`, `trackId`, `start`, `sourceOffset`, `duration`, `gainDb`)`` (GATE331-S2) [K17].
+   - **Item 27** gains one sentence: the equalities are hand-written on purpose (under TS strict without a cast, deriving them needs a key list), and the PS rows pin every record to its equality, field by field (GATE331-S1).
+   - **New section** `### ეტაპი c2b-i: overview და meter (round 332, D-29z976)`, placed after the c2a section and before `### განხილული ალტერნატივები`. It covers the overview record, the `tracks` reference rule, and the meter memo with the `Inner` name (D-29z977).
+   - **`### განხილული ალტერნატივები`** gains four entries:
+     - the `ArrangementPeakPath` comparator, measured and dropped (D-29z983, with the v1 numbers and `perf-rowcmp-vs-c331-v1-comparator.txt`);
+     - the named function expression, rejected (D-29z977);
+     - holding the overview until D-29z915, not followed (D-29z976);
+     - the detail text in this round, moved to c2b-ii (D-29z976).
+   - **`## შეცვლილი ფაილები`:**
+     - the `preview-store.ts` entry gains the c2b-i exports;
+     - the `StudioWorkspace.tsx` entry gains the overview selector;
+     - `ArrangementTrackMeter.tsx` (c2b-i) is added as an entry;
+     - the test-file entry gains `; round 332-ში DP29–DP32, PS-OVR-ROLES/PS-OVR-ARR და track-meter-ui.test.tsx-ის 4 სახელი`.
+   - **`## პრობლემები და გადაწყვეტები`** gains two Problem → Solution entries:
+     - a fade drag re-rendered the overview and the meters; solved by the record and memo, guarded by DP29;
+     - the named memo function was renamed `ArrangementTrackMeter2` by esbuild; solved by the `Inner` name.
+   - **`## ტესტირება`** names DP29–DP32, PS-OVR-ROLES and PS-OVR-ARR, plus the perf numbers cited to B's sketch (`b-round-331/perf-rowcmp-vs-c331.txt`). C measures the real ones. Name only rows that exist (L26).
+   - **`## TODO`:**
+     - the c2b bullet becomes c2b-ii only: the detail Start/End text in render (sentinel keyed on raw numbers), plus PERF-CAND-PEAK-PRIMITIVE-PROPS;
+     - in the stage-c bullet, the `დარჩენილია c2 (…)` clause becomes `c2 დასრულდა c2b-ii-ის გარდა` (GATE331-S2) [K17];
+     - add ARCH-R331-PREVIEW-READERS and ARCH-R331-PREVIEW-ISEQUAL as checkpoint signals.
    - The seven TEMPLATE headings stay in order.
 
-**Ownership:** A edits exactly these 5 files. `ArrangementDetailPanel.tsx`, `ArrangementOverview.tsx`, `ArrangementClip.tsx`, `ArrangementLane.tsx`, `ArrangementContext.tsx`, `perf/**` and every protected file stay untouched. A may strengthen the new rows, never weaken them. No `expect(` is removed from any existing row.
+**Ownership:** A edits exactly these 7 files: the 6 patch files and doc 232. These stay untouched:
+- `ArrangementLane.tsx`, `ArrangementOverview.tsx`, `ArrangementClip.tsx`, `ArrangementDetailPanel.tsx` and `ArrangementContext.tsx`;
+- `perf/**`;
+- every protected file.
+
+A may strengthen the new rows, never weaken them.
 
 **Neighbour behaviour that could break** (C covers each one in §2.2):
-- a shown value going stale: trim and move readouts, the group detail after a gain change, and the state after release and Undo;
-- the lane-move hint;
-- the export sound;
-- the anonymous `/studio-lab` and purchase protection.
+- **The overview going stale:** its bars after a move, a trim, Undo, an add or a delete.
+- **The meter:** the level, the over latch and its `sr-only` text, and the reset.
+- **The export sound.**
+- **Access:** the anonymous `/studio-lab` and purchase protection.
 
 ## 2. Acceptance
 
 ### 2.1 A's rows
 | Row | Expected |
 |---|---|
-| A-CLAIMS | Before editing, run `bash b-round-330/claims-331.sh` from the loop root. The output must equal `b-round-330/claims-331-planning-output.txt`. Any difference is a STOP |
-| A-IMPL | `git apply b-round-330/sketch/sketch.patch.txt`, then §1.3 by hand |
-| A-CLAIMS-AFTER | Save as `a-round-331/claims-after.txt`. It must equal `b-round-330/claims-331-sketch-output.txt` except:<ul><li>K2: A's line is `1e5f552 5`;</li><li>K11: the new l.4;</li><li>K12: A's line is `1 1 1 1` (both gate-330 strings still present once, and both additions present once; the sketch and HEAD print `1 1 0 0`);</li><li>K13: A's line is `11`;</li><li>K10: higher only if A strengthens a row</li></ul> |
-| A-SCOPE | `git status --short` lists exactly 5 modified files (the 4 patch files + doc 232) and nothing untracked |
-| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0, and K15 stays **16**. `npx biome check` on the four code files is clean |
-| A-UNIT | `npx vitest run $(cat <loop>/b-round-330/covering-files.txt)` (17 files): all green, 247 or more. List any test above 50 % of its timeout (L31). On the sketch the new rows take 0–277 ms against the 5 s default timeout (DP27 277 ms, DP28 206 ms; `b-round-330/new-rows-durations.txt`) |
-| A-MUTANT | On a scratch copy, never in `store/`: `python3 -I b-round-330/run-mutants.py <scratch>`. All 7 are red on the rows in §0, and `restored` is true |
-| A-REVIEW | code-reviewer on the 5 files. Its Architecture note goes to B |
+| A-CLAIMS | Before editing, run `bash b-round-331/claims-332.sh` from the loop root. The output must equal `b-round-331/claims-332-planning-output.txt`. Any difference is a STOP |
+| A-IMPL | `git apply b-round-331/sketch/sketch.patch.txt`, then §1.3 by hand |
+| A-CLAIMS-AFTER | Save as `a-round-332/claims-after.txt`. It must equal `b-round-331/claims-332-sketch-output.txt` except:<ul><li>K2: A's line is `c1d3fbf 7`.</li><li>K13: A's line is `11`. The sketch prints 10 only because B's scratch `vite.config.ts` carries a private `cacheDir`.</li><li>K16: the new l.4.</li><li>K17: A's line is `1 0 0 1`; HEAD and the sketch print `0 1 1 0`.</li><li>K11: higher only if A strengthens a row.</li></ul> |
+| A-SCOPE | `git status --short` lists exactly 7 modified files and nothing untracked |
+| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0, and K15 stays **16**. `npx biome check` on the 6 patch files is clean |
+| A-UNIT | `npx vitest run $(cat <loop>/b-round-331/covering-files.txt)` (30 files): all green, 438 or more. List any test above 50 % of its timeout (L31). On the sketch the slowest new row is DP32 at 890 ms against the 5 s default (`b-round-331/new-rows-durations.txt`) |
+| A-MUTANT | On a scratch copy, never in `store/`: `python3 -I b-round-331/run-mutants.py <scratch>`. All 6 are red on the rows in §0, and `restored` is true |
+| A-REVIEW | code-reviewer on the 7 files. Its Architecture note goes to B |
 
-**DP rows** (they are in the patch; listed here so C can check them):
-- **DP25:** a fade-in move. Positive control first: `ArrangementClipViewInner` renders 2 times over two moves, `data-fade-in` follows, and a preview exists. Then the readout, `ArrangementTimeText`, the detail wrapper, `ArrangementDetailPanel`, `…ContentInner` and `…WaveformInner` each render 0 times. The readout and detail text are unchanged during the drag and after the release, and the committed `fadeIn` is 3.
-- **DP26:** a same-lane move. The hint is shown, the readout renders 0 times and is absent, the detail panel renders and its text follows `00:04.000`. After the release the readout shows `00:04.000`.
-- **DP27:** for every field classified `ignored`, a fresh mount with the variant clip renders the same readout and detail-panel markup as the base clip (`outerHTML`, with `useId` values normalised). Control: the `start` variant's markup differs.
-- **DP28:** for every `ignored` field, a committed change in one mount changes the clip view's markup, keeps the readout and detail markup, and stores the variant.
-- **PS-ROLES:** the roles record has exactly the 10 clip fields; `ignored` = {envelope, fadeIn, fadeOut}; the equality is true exactly for the ignored-field variants.
-- **PS-LIST:** list order, length and shown-field changes; `undefined` handling.
+**DP and PS rows** (they are in the patch; listed here so C can check them):
+- **DP29: a fade-in move.**
+  - Positive controls first: `ArrangementClipViewInner` renders 2 times over two moves, `ArrangementLane` renders, `data-fade-in` follows, and a preview exists.
+  - Then `ArrangementOverviewWithPreviewInner`, `ArrangementOverviewInner` and `ArrangementTrackMeterInner` each render 0 times.
+  - The overview markup is unchanged during the drag and after the release, and the committed `fadeIn` is 3.
+- **DP30: a same-lane move.**
+  - The lane, the clip view, the detail waveform and `ArrangementOverviewInner` render, and the overview bar lefts change.
+  - The meter renders 0 times.
+  - After the release the readout shows `00:04.000`.
+- **DP31: a trim-start move.** The peak path and the overview render, and the bar lefts change. The meter renders 0 times.
+- **DP32:** for every overview-ignored field, a fresh mount with the variant clip renders the same overview markup as the base. Control: the `start` variant differs.
+- **PS-OVR-ROLES:** the record has exactly the 10 clip fields; shown = {duration, id, start, trackId}; the clip equality is true exactly for the ignored-field variants.
+- **PS-OVR-ARR:**
+  - Equal: the same object, and the ignored-field variants (fadeIn, gainDb).
+  - Not equal: `start`, `duration`, order, count, and a new `tracks` reference.
 
 A does not run a browser or perf row; C runs them.
 
 ### 2.2 C's rows
-C writes `c-round-331.md` and `c-round-331.json` as it goes, with **all L57 fields**:
+C writes `c-round-332.md` and `c-round-332.json` as it goes, with **all L57 fields**:
 - `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, and an `origin` for each finding;
-- `assertsSpecified` = 6 (DP25–DP28, PS-ROLES, PS-LIST) + 7 browser or perf rows (DRAG-NAMES, PERF, FADE-SHOWN, TRIM-SHOWN, MOVE-HINT, GROUP-SHOWN, D-ROWS) + G331-AUTH = 14;
-- `mutantsRecorded` = 7, the `run-mutants.py` set; `mutantRedOnSketch` = true, evidence `b-round-330/mutants-summary.txt`; `mutantRedOnTree` from C's own run;
-- `gateChecksNamed` = 6; `gateChecksRunOnSketch` = 2 (full vitest `b-round-330/precheck-full.log`, typecheck `b-round-330/sketch-typecheck.log`);
-- `chainHeadGateRunGreen` = true, evidence `gates/gate-round-330.json`.
+- `assertsSpecified` = 12: 6 jsdom rows (DP29–DP32, PS-OVR-ROLES, PS-OVR-ARR), 5 browser or perf rows (DRAG-NAMES, PERF, OVERVIEW-SHOWN, METER-SHOWN, D-ROWS) and G332-AUTH;
+- `mutantsRecorded` = 6, the `run-mutants.py` set; `mutantRedOnSketch` = true, evidence `b-round-331/mutants-summary.txt`; `mutantRedOnTree` from C's own run;
+- `gateChecksNamed` = 6; `gateChecksRunOnSketch` = 1 (typecheck, `b-round-331/sketch-typecheck.log`). B did not run the full suite on this sketch; it stays a gate row;
+- `chainHeadGateRunGreen` = true, evidence `gates/gate-round-331.json` and `gates/round-331/verify.log`.
 
-**Browser rows** compare A's tree (:5173) with HEAD `1e5f552` on a second dev server that has its own Vite `cacheDir` (L38), at **1440×900 and 1280×720**, unless the row says otherwise. A cold-compile timeout is environment-invalid; replace it and keep the original.
+**Browser rows** compare A's tree (:5173) with HEAD `c1d3fbf` on a second dev server that has its own Vite `cacheDir` (L38), at **1440×900 and 1280×720**, unless the row says otherwise. A cold-compile timeout is environment-invalid: replace it and keep the original.
 
 | Row | Action | Expected |
 |---|---|---|
-| CLAIMS | `bash b-round-330/claims-331.sh`, first (L56) | Equal to A-CLAIMS-AFTER |
-| SOURCE-SCOPE | `git status`; `git diff --stat`; protected sha | 5 modified files, nothing untracked. `git apply -R --check b-round-330/sketch/sketch.patch.txt` passes (only test hunks may differ, and only if A strengthened a row with no `expect(` removed). `git diff --quiet -- app/components/arrangement/ArrangementDetailPanel.tsx` passes. Protected 11/11 |
-| UNIT | On C's scratch: `drag-preview-render`, `preview-store`, `status-preview-store`, ×3 | Green on every run; DP25–DP28, PS-ROLES and PS-LIST present |
+| CLAIMS | `bash b-round-331/claims-332.sh`, first (L56) | Equal to A-CLAIMS-AFTER |
+| SOURCE-SCOPE | `git status`; `git diff --stat`; protected sha | <ul><li>7 modified files, nothing untracked.</li><li>`git apply -R --check b-round-331/sketch/sketch.patch.txt` passes. Only test hunks may differ, and only if A strengthened a row with no `expect(` removed.</li><li>`git diff --quiet` passes for `ArrangementLane.tsx`, `ArrangementOverview.tsx`, `ArrangementClip.tsx` and `ArrangementDetailPanel.tsx`.</li><li>Protected files 11/11.</li></ul> |
+| UNIT | On C's scratch: `drag-preview-render`, `preview-store`, `track-meter-ui`, ×3 | Green on every run; DP29–DP32, PS-OVR-ROLES and PS-OVR-ARR present once each |
 | MUTANT | `run-mutants.py` on C's scratch, plus one mutant of C's own | As A-MUTANT. C's own mutant is red on the row C names |
-| **DRAG-NAMES (browser)** | `node b-round-328/names-probe.mjs <A base> <out>` on A's tree, warm server, 1440×900 | Per-commit counts and names equal `b-round-330/names-sketch.json`:<ul><li>`fade-moves` [14, 14, 14, 14]. Each commit's name multiset equals `names-sketch.json`: no `ArrangementDetail*`, `ArrangementSelectedClipReadoutInner` or `ArrangementTimeText`; `ArrangementPeakPathInner` and `tag11` each appear once fewer than in C round 330 (the lane clip's copies stay);</li><li>`move-moves` [22, 2, 22, 2, 107, 2, 22, 2], with no `ArrangementSelectedClipReadoutInner` in any move commit;</li><li>`trim-moves` and `harness-clip-click` [104, 2, 0] equal to C round 330</li></ul> |
-| **PERF** | Production build of A's tree. Run `perf/studio-lab-interactions.perf.spec.ts` **alone**, after a browser warm-up (L38). Compare with `python3 -I b-round-329/perf-rowcmp.py c-round-330/perf-interactions-atree-results/latest-interactions.json <C's latest-interactions.json>` | <ul><li>rc 0, `failures` [], all 36 asserted rows pass.</li><li>Every non-wallclock row other than the 17 named in §0 is `EQUAL` to C round 330 (B's sketch: 104 equal). Any other `DIFF` is a finding, reported with its number.</li><li>The 17 rows are **record for the equality clause** this round; the four `interact.drag.fade.{stopped,playing}.move-components-{per-move,max}` rows keep their spec budget (≤ 24) and stay inside the 36 asserted rows. Finding thresholds:<ul><li>fade per-move above 14.5 or max above 14;</li><li>move per-move above 30 or max above 107.</li></ul>A value over a threshold is reported as a finding with its number, not as a FAIL of this row. B's sketch measured 13.767 / 14 and 29.4 / 107. No loaded replicate was run (L37), so these are not exact asserts</li></ul> |
-| **FADE-SHOWN (browser)** | Select the demo's first music clip, open the detail panel, then drag its fade-in handle 4 moves of 10 px. Record the readout text and `title`, and the detail-content text, after every move, after the release and after Ctrl+Z | During the drag, the readout and detail values equal their pre-drag values. After the release and after Undo, A's values equal HEAD's at every sample. The clip's `data-fade-in` follows the drag on both trees |
-| **TRIM-SHOWN (browser)** | The same clip: trim-start drag, 4 moves | The readout and detail text change on each move and equal HEAD's at every sample (the equality must not hold back a shown change) |
-| **MOVE-HINT (browser)** | The same clip: drag by its name bar, 4 moves on the same lane | During the drag the lane-move hint is shown and `arrangement-selected-clip` is absent on both trees. After the release the readout equals HEAD's |
-| **GROUP-SHOWN (browser)** | Click the first music clip, then Shift+click a second audio clip (Shift adds to the selection [K23]), so the detail panel shows the group view. Drag one member's fade-in and release. Then type a value into the group's Clip Gain input and commit it (in the group view it sets all members) | A equals HEAD at every step, in the group detail text and in the gain range text, which updates after the gain commit. **Listed L29 deviation:** B took this recipe from the code (K23) and did not run it in the browser at the baseline; no loop artifact holds a browser multi-select recipe (B grepped `tasks/round-301.md` and `b-round-328/rows.mjs`). If the group view cannot be reached at HEAD, C records the state it reached and compares that state. That is not a FAIL of A |
-| **D-ROWS (browser)** | `ROWS_DIR=<absolute c-round-331/rows dir> node b-round-328/rows.mjs <base> <tag>` on A and on HEAD, then `python3 b-round-328/rows-diff.py <dir>/rows-head.json <dir>/rows-a.json` | `DIFFS 0`; no page errors on either tree; the EXPORT WAV sha equals HEAD's at both viewports |
-| G331-AUTH | As G330-AUTH (`c-round-330/g330-auth.cjs`), at both viewports, in fresh anonymous contexts | `/studio-lab`: the anonymous workspace and the demo badge, `auth_user` null. `/studio/middle-east`: "Sign in required" and 0 `audio[src]`. `/api/studio-token` with no header → 401 |
-| DOCS | Read doc 232 | Matches §1.3: l.4 is byte-exact, both gate-330 Lows are fixed, the c2a section exists, the 7 headings are in TEMPLATE order, and every DP/PS id the doc cites exists as an `it(` row |
+| **DRAG-NAMES (browser)** | `node b-round-328/names-probe.mjs <A base> <out>` on A's tree, warm server, 1440×900 | Per-commit counts and name multisets equal `b-round-331/names-sketch.json`:<ul><li>`fade-moves` [11, 11, 11, 11], with no `ArrangementOverview*` or `ArrangementTrackMeter*` in any commit;</li><li>`trim-moves` [22, 2, 22, 2, 22, 2, 22, 2];</li><li>`move-moves` [21, 2, 21, 2, 103, 2, 21, 2];</li><li>`harness-clip-click` [100, 2, 0].</li></ul>Compared with `c-round-331/names-a.json`, names are only lost, as listed in §0 |
+| **PERF** | Production build of A's tree. Run `perf/studio-lab-interactions.perf.spec.ts` **alone**, after a browser warm-up (L38). Compare with `python3 -I b-round-329/perf-rowcmp.py c-round-331/perf-interactions-atree-results/latest-interactions.json <C's latest-interactions.json>` | <ul><li>rc 0, `failures` [], all 36 asserted rows pass.</li><li>Every non-wallclock row other than the 38 named in §0 is `EQUAL` to C round 331 (83 on B's sketch). Any other `DIFF` is a finding, reported with its number.</li><li>The 38 rows are **record** this round. A value at or below B's sketch value in the §0 table passes the row; a value above it is a finding with its number, not a FAIL of this row. 1× and 6× agreed on the sketch, so these are deterministic.</li><li>The four asserted `interact.drag.fade.*.move-components-*` rows keep their spec budget (≤ 24).</li></ul> |
+| **OVERVIEW-SHOWN (browser)** | The demo's first music clip, in this order:<ol><li>a fade-in drag of 4 moves of 10 px;</li><li>a name-bar drag of 4 moves on the same lane;</li><li>a trim-start drag of 4 moves.</li></ol>Release and Ctrl+Z after each. Then add a second library sound and delete it. Record the overview's bar `left`/`width` styles and `data-extent` after every move, release, Undo, add and delete | <ul><li>During the fade drag, the overview values equal their pre-drag values.</li><li>During the move and the trim, the bar `left`/`width` change on every move. `data-extent` changes only if the project end moves, so it is recorded and compared with HEAD only.</li><li>A equals HEAD at every sample on both viewports.</li></ul> |
+| **METER-SHOWN (browser)** | <ol><li>Play the demo. For 2 s while playing, read each lane meter's `data-level-db` and `data-peak`; do the same during a fade drag, a name-bar drag and a lane Volume fader drag, with playback continuing.</li><li>Raise a lane's Volume and Clip Gain until it clips, or use any demo state that latches over. Check `data-state="over"` and the `sr-only` over text.</li><li>Click Master Peak to reset.</li></ol> | <ul><li>The meters move while playing and during every drag.</li><li>Over latches, its `sr-only` text exists, and the reset clears it.</li><li>A equals HEAD in the state sequence. Levels are wallclock, so compare them as "moving / not moving", not by value.</li><li>If the over latch cannot be reached at HEAD, record the state reached and compare that; it is not a FAIL of A.</li></ul> |
+| **D-ROWS (browser)** | `ROWS_DIR=<absolute c-round-332/rows dir> node b-round-328/rows.mjs <base> <tag>` on A and on HEAD, then `python3 b-round-328/rows-diff.py <dir>/rows-head.json <dir>/rows-a.json` | `DIFFS 0`; no page errors on either tree; the EXPORT WAV sha equals HEAD's at both viewports |
+| G332-AUTH | As G330-AUTH (`c-round-330/g330-auth.cjs`), at both viewports, in fresh anonymous contexts | <ul><li>`/studio-lab`: the anonymous workspace and the demo badge, `auth_user` null.</li><li>`/studio/middle-east`: "Sign in required" and 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401.</li></ul> |
+| DOCS | Read doc 232 | Matches §1.3:<ul><li>l.1 and l.4 are byte-exact;</li><li>the three GATE331-S2 fixes and the S1 sentence are present;</li><li>the c2b-i section and the four alternatives exist;</li><li>the 7 headings are in TEMPLATE order;</li><li>every DP/PS id the doc cites exists as an `it(` row.</li></ul> |
 
 **Gate rows** (not claimed by C): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
 
 **Ableton conformance:** not applicable. This is a perf round, and the behaviour is held to HEAD.
 
 ## 3. Not in scope
-- The overview, the lanes, `ArrangementTrackMeter`, `ArrangementPeakPath` and the detail layout-effect text (c2b).
-- Cross-lane ghosts (c3), group moves (c4), video clips (c5).
-- Budget changes in `perf/budgets.interactions.json`.
-- Protected files: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx` and the rest of `b-round-318/protected-sha256.txt`.
-- Commits and pushes (root only).
+- **Later stages:** the detail Start/End text and PERF-CAND-PEAK-PRIMITIVE-PROPS (c2b-ii), cross-lane ghosts (c3), group moves (c4), video clips (c5).
+- **For checkpoint D-29z915:** `memo(ArrangementLane)`, the lanes reading the timeline width from a store, and moving the preview readers to another file.
+- **Other:**
+  - budget changes in `perf/budgets.interactions.json`;
+  - protected files: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx` and the rest of `b-round-318/protected-sha256.txt`;
+  - commits and pushes (root only).
 
 ## 7. Claims
-Run `bash b-round-330/claims-331.sh` from the loop root (`CLAIMS_STORE=<dir>` points it at another tree). Expected output at HEAD: `b-round-330/claims-331-planning-output.txt`. On B's sketch: `b-round-330/claims-331-sketch-output.txt`.
-- K1 gate 330 published, commit `1e5f552`.
+Run `bash b-round-331/claims-332.sh` from the loop root (`CLAIMS_STORE=<dir>` points it at another tree). Expected output at HEAD: `b-round-331/claims-332-planning-output.txt`. On B's sketch: `b-round-331/claims-332-sketch-output.txt`.
+- K1 gate 331 published, commit `c1d3fbf`.
 - K2 HEAD short hash and the `git status` entry count.
-- K3 `useShallow` occurrences in `StudioWorkspace.tsx` and its import line.
-- K4 the readout selector (HEAD form / sketch form) and the detail `useShallow(selectPreviewClipsAmong …)` line.
-- K5 the readout's `return clipLaneDrag ? (` branch and the hint testid.
-- K6 `fadeIn|fadeOut|envelope` occurrences in `ArrangementDetailPanel.tsx` (0) and the `sourceOffset` readout line.
-- K7 the field count of `ArrangementClip`.
+- K3 the overview selector (HEAD form / sketch form) and the hook definition.
+- K4 the meter export (HEAD form / sketch form) and its call site in `ArrangementLane.tsx`.
+- K5 the peak path export is still `memo(ArrangementPeakPathInner)` (1 at HEAD and on the sketch), 0 comparator names, and its call sites in `ArrangementClip.tsx` and `ArrangementDetailPanel.tsx`.
+- K6 what the peak path reads (`buildPeakShape` args, the draft key, `clipLinearGain`), for PERF-CAND-PEAK-PRIMITIVE-PROPS.
+- K7 the fields the overview reads (no fade, envelope, gain, source or offset; the trackId filter; start; duration).
 - K8 `useArrangementPreview` = `useStore(store, selector)`, with no equality parameter.
-- K9 the new exports and the hook (0 at HEAD, 1 each on the sketch).
-- K10 `expect(` and DP-row counts in `drag-preview-render.test.tsx` and `preview-store.test.ts`.
-- K11 doc 232 l.4.
-- K12 the two gate-330 strings in doc 232, and the two §1.3 additions.
+- K9 the detail layout effect (c2b-ii, untouched).
+- K10 the field count of `ArrangementClip`.
+- K11 `expect(` and row counts in the three test files (HEAD `205 30 0 31 0 84`, sketch `229 34 4 42 2 84`).
+- K12 the meter name strings in `track-meter-ui.test.tsx` (HEAD `4 0`, sketch `0 4`).
 - K13 protected files OK count.
 - K14 the `regression-last` date.
 - K15 Biome lint diagnostics in the Studio folders.
-- K16 count-greater-than-zero controls on the readers.
-- K17 cited artifacts exist.
-- K18 full vitest totals and rc on the sketch.
-- K19 mutants killed / restored.
-- K20 perf EQUAL / DIFF counts.
-- K21 `ArrangementPeakPath` and `clipLinearGain` take `ArrangementClip`.
-- K22 zustand's `useShallow` source holds the previous value in a ref.
-- K23 a Shift+pointerdown on a clip calls `toggleClipSelection(clip.id, 'add')` (Ctrl/Cmd toggles).
-
-On the sketch output, K2 shows the scratch repo's own hash and K13 is `10`, because the scratch's `vite.config.ts` carries B's private Vite `cacheDir`. That edit is not in the patch, and A's lines are fixed by A-CLAIMS-AFTER. K16 rises 3 → 5 because DP26 adds two positive controls.
+- K16 doc 232 l.4.
+- K17 the doc 232 strings for GATE331-S2 and the new section.
+- K18 cited artifacts exist.
+- K19 covering-unit totals and file count.
+- K20 mutants killed / restored.
+- K21 perf EQUAL / DIFF counts.
+- K22 the esbuild rename evidence for the named function expression.

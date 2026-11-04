@@ -1,0 +1,161 @@
+{
+ "round": 331,
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-04T11:27:53.9657032Z",
+  "round": 331,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R331-01",
+   "severity": "low",
+   "origin": "C",
+   "preExisting": true,
+   "regression": false,
+   "title": "INFO-C331-TRIM-FADE-OVERLAP: fade-in handle covers the trim-left edge's vertical centre at 1280x720 with the detail panel open",
+   "steps": [
+    "Open /studio-lab at 1280x720 in a fresh context",
+    "Add the first library sound (Add button)",
+    "Click the clip's name bar; detail panel open (lane 52 px)",
+    "Press at the vertical middle of the clip's left edge (trim edge box 513,371 8x50; y 396) and drag right 4x10 px",
+    "Release"
+   ],
+   "expected": "The left-edge trim zone is reachable at its centre: the gesture trims (Undo label 'Trim — left edge')",
+   "actual": "elementFromPoint at the trim centre is the fade-in handle ('Fade In — drag · double-click = 0'); the gesture changes fade-in and the Undo label is 'Fade In'. Same on HEAD 1e5f552; clear at 1440x900 (72 px lane)",
+   "evidence": "c-round-331/shown/attempt1/a-1280x720-dbg.json (trim-grab), shown/attempt1/{a,head}-1280x720.json trim-release undo 'Undo: Fade In (Ctrl+Z)'"
+  }
+ ],
+ "passed": [
+  "DP25",
+  "DP26",
+  "DP27",
+  "DP28",
+  "PS-ROLES",
+  "PS-LIST",
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "MUTANT",
+  "DRAG-NAMES",
+  "PERF",
+  "FADE-SHOWN",
+  "TRIM-SHOWN",
+  "MOVE-HINT",
+  "GROUP-SHOWN",
+  "D-ROWS",
+  "G331-AUTH",
+  "DOCS"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "carriedFindings": [
+  {
+   "id": "A-R331-REVIEW-STALE-CLIP",
+   "severity": "medium",
+   "origin": "A code-reviewer",
+   "status": "open, latent, not reproducible; C independently found no spread/write-back of the held clip in ArrangementDetailPanel.tsx (actions are id-based setClipGain/setClipGainMembers)"
+  }
+ ],
+ "notes": [
+  {
+   "id": "NOTE-C331-OFFSET-ONLY-GUARD",
+   "origin": "C",
+   "text": "C's mutant MU-C331-EQUAL-IGNORES-OFFSET is red only on PS-ROLES; no DP render row isolates a sourceOffset-only change"
+  },
+  {
+   "id": "INFO-C331-ENV",
+   "origin": "C",
+   "text": "G331-AUTH attempt 1 (ready-status timeout) and attempt 2 (blank legacy page at 1440, first client compile) environment-invalid, kept; attempts 3 and 4 clean. Shown-probe attempt 1 (trim grab hit fade handle at 1280) probe-invalid, kept in shown/attempt1"
+  }
+ ],
+ "perf": {
+  "rc": 0,
+  "rows": 167,
+  "failures": [],
+  "asserted": 36,
+  "assertedPass": 36,
+  "equalVsC330": 104,
+  "diffVsC330": 17,
+  "fadePerMove": 13.767,
+  "fadeMax": 14,
+  "movePerMove": 29.4,
+  "moveMax": 107,
+  "moveRestartsPlaying": 0
+ },
+ "wavSha256": "453d1a04637760b499c373cb4da17aff0adc93e49f19e526b007d5eb8fdac567",
+ "manifestPaths": [
+  "c-round-331.md",
+  "c-round-331/claims.txt",
+  "c-round-331/claims-end.txt",
+  "c-round-331/scope.txt",
+  "c-round-331/source-sha-start.txt",
+  "c-round-331/source-sha-end.txt",
+  "c-round-331/unit-1.log",
+  "c-round-331/unit-2.log",
+  "c-round-331/unit-3.log",
+  "c-round-331/mutants-b.txt",
+  "c-round-331/mutant-c.txt",
+  "c-round-331/names-a.json",
+  "c-round-331/names-head.json",
+  "c-round-331/names-compare.txt",
+  "c-round-331/perf-interactions-atree-results/latest-interactions.json",
+  "c-round-331/perf-rowcmp-vs-c330.txt",
+  "c-round-331/perf-interactions-atree.log",
+  "c-round-331/shown-probe.mjs",
+  "c-round-331/shown-compare.py",
+  "c-round-331/shown/compare.txt",
+  "c-round-331/shown/a-1440x900.json",
+  "c-round-331/shown/head-1440x900.json",
+  "c-round-331/shown/a-1280x720.json",
+  "c-round-331/shown/head-1280x720.json",
+  "c-round-331/shown/attempt1/a-1280x720-dbg.json",
+  "c-round-331/rows/rows-a.json",
+  "c-round-331/rows/rows-head.json",
+  "c-round-331/rows/rows-diff.txt",
+  "c-round-331/g331-auth.json",
+  "c-round-331/g331-auth-attempt3.json",
+  "c-round-331/g331-auth-attempt1.log",
+  "c-round-331/auth-attempt2/g331-auth.json",
+  "c-round-331/shots/legacy-1440x900.png"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 0.02,
+ "assertsSpecified": 14,
+ "assertsRun": 14,
+ "mutantsRecorded": 7,
+ "mutantRedOnSketch": true,
+ "mutantRedOnSketchEvidence": "b-round-330/mutants-summary.txt",
+ "mutantRedOnTree": true,
+ "mutantRedOnTreeEvidence": "c-round-331/mutants-b.txt",
+ "cOwnMutant": {
+  "id": "MU-C331-EQUAL-IGNORES-OFFSET",
+  "red": [
+   "PS-ROLES"
+  ],
+  "evidence": "c-round-331/mutant-c.txt"
+ },
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 2,
+ "gateChecksRunOnSketchEvidence": [
+  "b-round-330/precheck-full.log",
+  "b-round-330/sketch-typecheck.log"
+ ],
+ "chainHeadGateRunGreen": true,
+ "chainHeadGateEvidence": "gates/gate-round-330.json (published 1e5f552, both remotes); gates/round-330/verify.log",
+ "sourceUnchangedDuringC": true,
+ "head": "1e5f552",
+ "gitStatus": "5 M, 0 untracked",
+ "ableton": "not applicable (perf round; behaviour held to HEAD)"
+}

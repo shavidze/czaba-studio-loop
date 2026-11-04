@@ -1,0 +1,47 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c331s[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/preview-store.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 48[2mms[22m[39m
+     [32m✓[39m DP1 setPreview of the same value notifies once and clearPreview notifies once[32m 2[2mms[22m[39m
+     [32m✓[39m DP1 a lane-B selector sees an equal slice when only a lane-A clip changes[32m 1[2mms[22m[39m
+     [32m✓[39m DP1 project end, clip and arrangement selectors fall back to the committed value[32m 1[2mms[22m[39m
+     [32m✓[39m DP1 previewClipGeometry on a lane-A clip renders the lane-A hook only[32m 30[2mms[22m[39m
+[31m     [31m×[31m PS-ROLES every clip field is classified, and the equality ignores exactly the ignored fields[39m[32m 12[2mms[22m[39m
+     [32m✓[39m PS-LIST compares clip lists by length, order and shown fields[32m 1[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m30 tests[22m[2m)[22m[33m 3725[2mms[22m[39m
+     [33m[2m✓[22m[39m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace [33m 322[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/preview-store.test.ts[2m > [22mPERF-DRAG-PREVIEW stage c2a — selected-clip shown fields[2m > [22mPS-ROLES every clip field is classified, and the equality ignores exactly the ignored fields
+[31m[1mAssertionError[22m: expected { field: 'sourceOffset', equal: true } to deeply equal { field: 'sourceOffset', equal: false }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "equal": false,[39m
+[31m+   "equal": true,[39m
+[2m    "field": "sourceOffset",[22m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/preview-store.test.ts:[2m203:81[22m[39m
+    [90m201| [39m    [34mexpect[39m(ignored[33m.[39m[34msort[39m())[33m.[39m[34mtoEqual[39m([[32m'envelope'[39m[33m,[39m [32m'fadeIn'[39m[33m,[39m [32m'fadeOut'[39m])[33m;[39m
+    [90m202| [39m    [35mfor[39m ([35mconst[39m [field[33m,[39m variant] [35mof[39m [33mObject[39m[33m.[39m[34mentries[39m([33mROLE_VARIANTS[39m)) {
+    [90m203| [39m      expect({ field, equal: sameSelectedClipShownFields(ROLE_BASE, va…
+    [90m   | [39m                                                                                [31m^[39m
+    [90m204| [39m        field[33m,[39m
+    [90m205| [39m        equal[33m:[39m ignored[33m.[39m[34mincludes[39m(field)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m35 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 11:31:21
+[2m   Duration [22m 6.24s[2m (transform 1.82s, setup 0ms, import 2.72s, tests 3.77s, environment 1.13s)[22m
+
+
+::error file=/tmp/c331s/app/lib/arrangement/__tests__/preview-store.test.ts,title=app/lib/arrangement/__tests__/preview-store.test.ts > PERF-DRAG-PREVIEW stage c2a — selected-clip shown fields > PS-ROLES every clip field is classified%2C and the equality ignores exactly the ignored fields,line=203,column=81::AssertionError: expected { field: 'sourceOffset', equal: true } to deeply equal { field: 'sourceOffset', equal: false }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "equal": false,%0A+   "equal": true,%0A    "field": "sourceOffset",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/preview-store.test.ts:203:81%0A%0A
+rc=1
+RESTORED-EQUAL
