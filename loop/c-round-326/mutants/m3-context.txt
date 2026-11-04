@@ -1,0 +1,10 @@
+      const playingVisits: number[] = [];
+      for (let step = 0; step < 5; step += 1) {
+        key(ctrlRight);
+        if (step === 4) {
+          const spinUntil = performance.now() + 60;
+          while (performance.now() < spinUntil) {}
+        }
+        playingVisits.push(Math.round(live(mounted.api).getLivePosition() * 1000) / 1000);
+      }
+      expect(playingVisits).toEqual([2, 6, 10, 16, 16]);

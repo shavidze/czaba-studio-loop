@@ -1,0 +1,110 @@
+{
+ "round": 326,
+ "task": "GATE325-IM24-WALLCLOCK",
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-04T03:54:21.1643142Z",
+  "round": 326,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R326-01",
+   "severity": "low",
+   "origin": "B row text + jsdom test-fake fidelity (pre-existing IM24 expectation); not caused by round 326",
+   "steps": [
+    "Fresh anonymous context, /studio-lab at 1440x900 and at 1280x720",
+    "Select library 'Pulse' (demo-stem-pulse), Add -> clip 0-16 s on Music",
+    "Alt-click bars ruler at 2 s, M, Enter; Alt-click at 6 s, M, Enter (markers 00:02.000, 00:06.000)",
+    "Home, Space (Playing)",
+    "Ctrl+Right x6 while playing"
+   ],
+   "expected": "B-IM24 row / IM24: after the last marker, status 'No more markers after the playhead' and the transport still Playing (IM24 asserts [2,6,10,16,16] with isPlaying true)",
+   "actual": "Sequence 2.06/2.07 -> 6.06 -> 16.000 (project end = clip edge, adjacentMarkerTarget markers.ts:162) and the rAF tick (ArrangementContext.tsx:1263-1269) stops playback at the end: playing=false. Later presses give the stopped text 'No more markers after the insert marker'. Synchronous double keydown probe: 'No more markers after the playhead' does render, but within 50 ms the transport is Stopped at 00:16.000. Stopping at the project end is the agreed, browser-verified contract (c-round-272 B-ATEND). IM24's playing-state tail is therefore unreachable in the real product; in jsdom the end-stop tick never runs.",
+   "evidence": "c-round-326/b-im24.json, shots/bim24-{1440x900,1280x720}-03-ctrlright-{1..6}.png, probe-sync-ctrlright.json, shots/probe-sync-*.png",
+   "routeTo": "SYS-R2-FAKE-FIDELITY (IM24 tail should assert the end-stop, or use a fixture whose last stop is before projectEnd); deferred_low_polish per the 2026-10-23 bug gate"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "MUTANT",
+  "EXPECT",
+  "DOCS",
+  "G326-AUTH",
+  "CARRY-325"
+ ],
+ "partial": {
+  "B-IM24": "core passed at both viewports (observed playing sequence 2.069/2.060 -> 6.060, contains 2 then 6 in order, each press lands on the next stop); tail (Playing + 'after the playhead' after the last marker) not met in the real browser -> C-R326-01 (Low). Not listed in passed."
+ },
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome/lint",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "info": [
+  "INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER: during playback a Ctrl+Right step also moves the insert marker (library panel 'insert marker 00:06.000', shots/bim24-1280x720-03-ctrlright-2.png). B to confirm against the SABA-B-10a marker/playhead contract (D-29z436); not ruled a bug here.",
+  "INFO-C326-END-STOP-STALE-STATUS: after the auto-stop at the project end (reached via Ctrl+Right) the status kept 'Marker “Marker 2” added at 00:06.000.' (no stopped text). Observation only; same class as SYS-6 status lifetime. Probe probe-natural-end.json (1280x720): natural end of playback also keeps the previous status -> consistent, stays info.",
+  "Environment-invalid replacements: b-im24 attempt 1 and g326-auth attempt 1 timed out on the dev server's cold first compile (logs *-attempt1-*.log); 1 replacement each, within budget.",
+  "noclip variant (b-im24-noclip.json) is context only: with no clip, Alt-clicks clamp the insert marker to 0 and Space says 'Nothing to play'."
+ ],
+ "manifestPaths": [
+  "b-round-325/claims-326.sh",
+  "b-round-325/claims-326-planning-output.txt",
+  "b-round-325/app-perf-changed-files.txt",
+  "b-round-325/sketch/mu-delay-60.patch.txt",
+  "b-round-325/sketch/im24-fix.patch.txt",
+  "b-round-325/sketch/run-head-mu-delay-60.log",
+  "b-round-325/sketch/run-fix-mu-delay-60.log",
+  "b-round-325/sketch/run-fix-file-1.log",
+  "b-round-325/sketch/run-fix-file-2.log",
+  "b-round-325/sketch/run-fix-file-3.log",
+  "b-round-325/sketch/summary.txt",
+  "gates/gate-round-325.json",
+  "c-round-325.json",
+  "a-round-326/claims-after.txt",
+  "a-round-326/typecheck.log",
+  "a-round-326/lint.log",
+  "a-round-326/biome-scoped.log",
+  "a-round-326/unit-run-1.log",
+  "a-round-326/unit-run-2.log",
+  "a-round-326/unit-run-3.log",
+  "a-round-326/mutant-prefix-mu-delay-60.log",
+  "a-round-326/mutant-fixed-mu-delay-60.log",
+  "tasks/round-325.md",
+  "lessons.md",
+  "regression-last.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "countChecks": {
+  "A IM24 ms 93/98/92": "matches a-round-326/unit-run-1..3.log",
+  "A mutant prefix 16.018": "matches mutant-prefix-mu-delay-60.log",
+  "B sketch 16.021": "matches run-head-mu-delay-60.log",
+  "expect( count": "204 HEAD = 204 tree"
+ },
+ "claimCheckMinutes": 0,
+ "assertsSpecified": 1,
+ "mutantsRecorded": 1,
+ "mutantRedOnSketch": true,
+ "mutantRedOnSketchEvidence": "b-round-325/sketch/run-head-mu-delay-60.log re-read: 1 failed, 16.021",
+ "mutantRedOnTree": true,
+ "mutantRedOnTreeEvidence": "c-round-326/mutants/m1-prefix-mu-delay-60.log (16.019); fixed tree green m2/m3/m4; C mutants m5 (no spy) red 16.019, m6 (app: no seek while playing) red [0,0,0,0,0]; restored file 29/29",
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 0,
+ "gateChecksRunOnSketchReason": "B ran only the touched file",
+ "chainHeadGateRunGreen": null,
+ "chainHeadGateRunGreenReason": "not a fix-up chain; gate 326 is the first re-run",
+ "ableton": {
+  "requirement": "n/a (test-only round)",
+  "conformance": "not applicable; note: Live keeps playing past the arrangement end, CZABA stops at project end (existing agreed difference, not re-ruled here)"
+ }
+}

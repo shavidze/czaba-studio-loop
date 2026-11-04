@@ -46,3 +46,13 @@ Purpose: CZABA's library now shows a collection heading above grouped search res
 3. Hover one result (and open the Info View, Shift+?). Record whether the location is shown there.
 
 **What to write:** the Live version, OS, the answer for each step and a screenshot per step. A result that contradicts the heading goes to Saba as a question; it does not silently change round 289.
+
+## LIVE-MEAS-MARKER-STEP-PLAYING (B, 2026-11-04, round 326 → 327 planning; INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER, D-29z930) — non-blocking
+**Why:** CZABA moves the playhead **and** the insert marker when Ctrl+→ steps to the next marker while playing (planner contract, `tasks/round-252.md` IM24, `tasks/round-253.md`). The Live 12 manual (Arrangement View 6.9, "the insert marker can be moved … Holding Ctrl (Win) / Option (Mac) while pressing the left and right arrow keys snaps the insert marker to locators and the edges of clips") does not say what happens to playback while the transport runs.
+**Setup:** Live 12, Arrangement View, one audio clip 0–16 bars, locators at bar 3 and bar 7, playback started from bar 1.
+**Steps:**
+1. While playing, press Ctrl+→ (Win) / Option+→ (Mac) once. Record: does playback jump to bar 3, does only the insert marker move, or both? Screenshot.
+2. Press it again. Record the same for bar 7.
+3. Stop. Record where the insert marker is and where the next Space starts.
+
+**What to write:** the Live version, OS and the result of each step. A result that differs from CZABA goes to Saba as one question (L44); it does not change the shipped contract by itself.

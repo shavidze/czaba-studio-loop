@@ -1,0 +1,1029 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -187,6 +187,13 @@
+   reduceArrangementStatus,
+ } from '~/lib/arrangement/status-announcement';
+ import {
++  type ArrangementStatusPreview,
++  type ArrangementStatusPreviewState,
++  type ArrangementStatusPreviewStore,
++  createArrangementStatusPreviewStore,
++  statusPreviewKey,
++} from '~/lib/arrangement/status-preview-store';
++import {
+   studioClipStrings,
+   studioEditStrings,
+   studioExportStrings,
+@@ -319,6 +326,7 @@
+   pxPerSecond: number;
+   status: string;
+   statusSequence: number;
++  statusKey: string;
+   sourceStates: Record<string, SourceLoadState>;
+   sourcePeaks: ReadonlyMap<string, Float32Array>;
+   sourceDurations: ReadonlyMap<string, number>;
+@@ -376,6 +384,8 @@
+   getArrangement: () => Arrangement;
+   previewArrangement: (next: Arrangement) => void;
+   previewClipGeometry: (next: Arrangement) => void;
++  previewStatus: (text: string) => void;
++  getStatusPreviewText: () => string | null;
+   commitArrangement: (next: Arrangement, label: string, before: Arrangement) => boolean;
+   nudgeSelectedClip: (delta: number, options?: { readonly keyRepeat?: boolean }) => void;
+   splitSelection: () => void;
+@@ -540,6 +550,15 @@
+ const ArrangementRangeContext = createContext<ArrangementRangeStore | null>(null);
+ const ArrangementSelectionContext = createContext<ArrangementSelectionStore | null>(null);
+ const ArrangementPreviewContext = createContext<ArrangementPreviewStore | null>(null);
++const ArrangementStatusPreviewContext = createContext<ArrangementStatusPreviewStore | null>(null);
++
++interface ProviderStatusEntry extends ArrangementStatusEntry {
++  readonly previewKey: string | null;
++}
++
++type ProviderStatusAction =
++  | ArrangementStatusUpdate
++  | { readonly adoptPreview: ArrangementStatusPreview };
+ 
+ const ArrangementMeterContext = createContext<MasterMeterStore | null>(null);
+ 
+@@ -698,21 +717,63 @@
+   const [rangeStore] = useState(() => createArrangementRangeStore());
+   const [selectionStore] = useState(() => createArrangementSelectionStore());
+   const [previewStore] = useState(() => createArrangementPreviewStore());
++  const [statusPreviewStore] = useState(() => createArrangementStatusPreviewStore());
+   const [meterStore] = useState(() => createMasterMeterStore());
+   const [trackMeterStore] = useState(() => createTrackMeterStore());
+   const [isPlaying, setIsPlaying] = useState(false);
+   const [pxPerSecond, setPxPerSecondState] = useState(TIMELINE_ZOOM_DEFAULT);
+   const gestureCountRef = useRef(0);
+   const nameBarHintShownRef = useRef(false);
+-  const [statusEntry, setStatus] = useReducer(
+-    (previous: ArrangementStatusEntry, next: ArrangementStatusUpdate) =>
+-      reduceArrangementStatus(previous, next, gestureCountRef.current > 0),
++  const [statusEntry, dispatchStatus] = useReducer(
++    (previous: ProviderStatusEntry, action: ProviderStatusAction): ProviderStatusEntry => {
++      if (typeof action === 'object') {
++        return {
++          text: action.adoptPreview.text,
++          sequence: previous.sequence + 1,
++          previewKey: statusPreviewKey(action.adoptPreview),
++        };
++      }
++      const next = reduceArrangementStatus(previous, action, gestureCountRef.current > 0);
++      return next === previous ? previous : { ...next, previewKey: null };
++    },
+     collection.origin,
+-    (origin) => createArrangementStatusEntry(workspaceCollectionCopy(origin).loading),
++    (origin): ProviderStatusEntry => ({
++      ...createArrangementStatusEntry(workspaceCollectionCopy(origin).loading),
++      previewKey: null,
++    }),
+   );
+   const status = statusEntry.text;
+   const statusSequence = statusEntry.sequence;
++  const statusKey = statusEntry.previewKey ?? String(statusSequence);
+   const lastNonRefusalStatusRef = useRef(status);
++  const flushStatusPreview = useCallback(() => {
++    const pending = statusPreviewStore.getState().preview;
++    if (!pending) {
++      return;
++    }
++    statusPreviewStore.getState().clearPreview();
++    if (gestureRefusalPrefix(pending.text) === null) {
++      lastNonRefusalStatusRef.current = pending.text;
++    }
++    dispatchStatus({ adoptPreview: pending });
++  }, [statusPreviewStore]);
++  const setStatus = useCallback(
++    (update: ArrangementStatusUpdate) => {
++      flushStatusPreview();
++      dispatchStatus(update);
++    },
++    [flushStatusPreview],
++  );
++  const previewStatus = useCallback(
++    (text: string) => {
++      statusPreviewStore.getState().showPreview(text);
++    },
++    [statusPreviewStore],
++  );
++  const getStatusPreviewText = useCallback(
++    () => statusPreviewStore.getState().preview?.text ?? null,
++    [statusPreviewStore],
++  );
+   useIsomorphicLayoutEffect(() => {
+     if (gestureRefusalPrefix(status) === null) {
+       lastNonRefusalStatusRef.current = status;
+@@ -903,7 +964,7 @@
+         setStatus(rewriteStoppedTruth);
+       }
+     },
+-    [rangeStore, rewriteStoppedTruth],
++    [rangeStore, rewriteStoppedTruth, setStatus],
+   );
+ 
+   const writeInsertMarker = useCallback(
+@@ -925,7 +986,7 @@
+         return describeSpaceStart();
+       });
+     },
+-    [describeSpaceStart, insertMarkerStore],
++    [describeSpaceStart, insertMarkerStore, setStatus],
+   );
+ 
+   const placeInsertMarker = useCallback(
+@@ -944,7 +1005,7 @@
+       return true;
+     }
+     return false;
+-  }, []);
++  }, [setStatus]);
+ 
+   const patchVideoSource = useCallback((source: WorkspaceVideoSource) => {
+     const next = new Map(videoSourcesRef.current).set(source.id, source);
+@@ -1429,7 +1490,7 @@
+       void ctx.resume().catch(() => undefined);
+     }
+     return ctx;
+-  }, []);
++  }, [setStatus]);
+ 
+   const stopLibraryPreview = useCallback(() => {
+     previewPlayerRef.current?.stopLibraryPreview();
+@@ -1480,7 +1541,15 @@
+         audioPumpTimerRef.current = window.setInterval(pumpPlaybackAudio, AUDIO_PUMP_INTERVAL_MS);
+       }
+     },
+-    [ensureAudioContext, pumpPlaybackAudio, startGraph, stopLibraryPreview, tick, updatePosition],
++    [
++      ensureAudioContext,
++      pumpPlaybackAudio,
++      startGraph,
++      stopLibraryPreview,
++      tick,
++      updatePosition,
++      setStatus,
++    ],
+   );
+ 
+   const togglePlayback = useCallback(() => {
+@@ -1535,7 +1604,7 @@
+       libraryPreviewSourceRef.current = sourceId;
+       setLibraryPreviewSourceId(sourceId);
+     },
+-    [collection.sources, ensureAudioContext, stopLibraryPreview, stopPlayback],
++    [collection.sources, ensureAudioContext, stopLibraryPreview, stopPlayback, setStatus],
+   );
+ 
+   const getLibraryPreviewOffset = useCallback(
+@@ -1550,7 +1619,7 @@
+       }
+       setStatus(message);
+     },
+-    [stopPlayback],
++    [stopPlayback, setStatus],
+   );
+ 
+   const seekTo = useCallback(
+@@ -1583,7 +1652,7 @@
+       lastScrubRescheduleRef.current = null;
+       updatePosition(target);
+     },
+-    [placeInsertMarker, updatePosition],
++    [placeInsertMarker, updatePosition, setStatus],
+   );
+ 
+   const returnToStart = useCallback(() => {
+@@ -1600,7 +1669,7 @@
+     const target = Math.max(0, Math.round(livePosition() * 1000) / 1000);
+     placeInsertMarker(target);
+     setStatus(studioPlaybackStrings.insertMarkerToPlayhead(formatArrangementTime(target)));
+-  }, [livePosition, placeInsertMarker]);
++  }, [livePosition, placeInsertMarker, setStatus]);
+ 
+   const playFrom = useCallback(
+     (time: number) => {
+@@ -1625,7 +1694,7 @@
+       seekTo(target);
+       startPlaybackAt(target, 'insert-marker');
+     },
+-    [seekTo, startPlaybackAt, stopLibraryPreview, placeInsertMarker],
++    [seekTo, startPlaybackAt, stopLibraryPreview, placeInsertMarker, setStatus],
+   );
+ 
+   const scrubPlayhead = useCallback(
+@@ -1743,6 +1812,7 @@
+       setRange,
+       setSelectedClipId,
+       withNameBarHint,
++      setStatus,
+     ],
+   );
+ 
+@@ -1821,6 +1891,7 @@
+       setRange,
+       setSelectedClipId,
+       withNameBarHint,
++      setStatus,
+     ],
+   );
+ 
+@@ -1891,7 +1962,7 @@
+         );
+       }
+     };
+-  }, [rewriteStoppedTruth, updateHistory]);
++  }, [rewriteStoppedTruth, updateHistory, setStatus]);
+ 
+   const claimPointerGesture = useCallback(
+     (pointerId: number, abort: () => void): (() => void) | null => {
+@@ -2011,7 +2082,7 @@
+       enabling ? studioLoopStrings.historyOn : studioLoopStrings.historyOff,
+     );
+     setStatus(enabling ? studioLoopStrings.on : studioLoopStrings.off);
+-  }, [applyEdit, rangeStore, refuseEditDuringGesture]);
++  }, [applyEdit, rangeStore, refuseEditDuringGesture, setStatus]);
+ 
+   const previewLoopArrangement = useCallback(
+     (next: Arrangement) => {
+@@ -2042,7 +2113,7 @@
+         setStatus(`Loop: ${formatLoopSpan(loop)}${loop.enabled ? '' : ' · off'}.`);
+       }
+     },
+-    [commitArrangement, syncPlayback],
++    [commitArrangement, syncPlayback, setStatus],
+   );
+ 
+   const stepLoopRange = useCallback(
+@@ -2072,7 +2143,7 @@
+         setStatus(`Loop: ${formatLoopSpan(next.loop)}${next.loop.enabled ? '' : ' · off'}.`);
+       }
+     },
+-    [applyEdit],
++    [applyEdit, setStatus],
+   );
+ 
+   const nudgeSelectedClip = useCallback(
+@@ -2128,7 +2199,7 @@
+       const text = studioMoveStrings.nudged(formatArrangementTime(moved?.start ?? target));
+       setStatus(keyRepeat ? () => text : text);
+     },
+-    [applyEdit, primarySelectedClipId, setRange, getSelectedClipIds],
++    [applyEdit, primarySelectedClipId, setRange, getSelectedClipIds, setStatus],
+   );
+ 
+   const splitSelection = useCallback(() => {
+@@ -2196,6 +2267,7 @@
+     setSelectedClipId,
+     setSelection,
+     getSelectedClipIds,
++    setStatus,
+   ]);
+ 
+   const deleteSelection = useCallback(() => {
+@@ -2258,6 +2330,7 @@
+     setSelectedClipId,
+     setSelection,
+     getSelectedClipIds,
++    setStatus,
+   ]);
+ 
+   const extendRangeToAllTracks = useCallback(() => {
+@@ -2278,7 +2351,7 @@
+         end: formatArrangementTime(Math.max(range.start, range.end)),
+       }),
+     );
+-  }, [rangeStore, refuseEditDuringGesture, setRange]);
++  }, [rangeStore, refuseEditDuringGesture, setRange, setStatus]);
+ 
+   const trackLabel = useCallback(
+     (trackId: string | null): string =>
+@@ -2326,6 +2399,7 @@
+     setSelection,
+     trackLabel,
+     getSelectedClipIds,
++    setStatus,
+   ]);
+ 
+   const copySelection = useCallback(() => {
+@@ -2360,7 +2434,7 @@
+     }
+     clipboardRef.current = clipboard;
+     setStatus(studioEditStrings.copyClipsDone(clipboard.items.length));
+-  }, [rangeStore, refuseEditDuringGesture, trackLabel, getSelectedClipIds]);
++  }, [rangeStore, refuseEditDuringGesture, trackLabel, getSelectedClipIds, setStatus]);
+ 
+   const cutSelection = useCallback(() => {
+     if (refuseEditDuringGesture()) {
+@@ -2383,7 +2457,15 @@
+     setRange(null);
+     setSelection(NO_SELECTION);
+     setStatus(studioEditStrings.cutDone(clipboard.items.length));
+-  }, [applyEdit, rangeStore, refuseEditDuringGesture, setRange, setSelection, getSelectedClipIds]);
++  }, [
++    applyEdit,
++    rangeStore,
++    refuseEditDuringGesture,
++    setRange,
++    setSelection,
++    getSelectedClipIds,
++    setStatus,
++  ]);
+ 
+   const cutTimeSelection = useCallback(() => {
+     if (refuseEditDuringGesture()) {
+@@ -2439,6 +2521,7 @@
+     setSelection,
+     updatePosition,
+     writeInsertMarker,
++    setStatus,
+   ]);
+ 
+   const pasteClipboard = useCallback(() => {
+@@ -2483,7 +2566,7 @@
+           : '',
+       }),
+     );
+-  }, [applyEdit, refuseEditDuringGesture, setRange, setSelection, trackLabel]);
++  }, [applyEdit, refuseEditDuringGesture, setRange, setSelection, trackLabel, setStatus]);
+ 
+   const restoreHistory = useCallback(
+     (next: ArrangementHistory, message: string) => {
+@@ -2501,7 +2584,7 @@
+       }
+       setStatus(message);
+     },
+-    [setRange, setSelection, syncPlayback, updateHistory, getSelectedClipIds],
++    [setRange, setSelection, syncPlayback, updateHistory, getSelectedClipIds, setStatus],
+   );
+ 
+   const undo = useCallback(() => {
+@@ -2516,7 +2599,7 @@
+     if (label) {
+       restoreHistory(undoHistory(historyRef.current), `Undo: ${label}`);
+     }
+-  }, [flushPendingClipGain, flushPendingMaster, flushPendingVolume, restoreHistory]);
++  }, [flushPendingClipGain, flushPendingMaster, flushPendingVolume, restoreHistory, setStatus]);
+ 
+   const redo = useCallback(() => {
+     if (gestureCountRef.current > 0) {
+@@ -2530,7 +2613,7 @@
+     if (label) {
+       restoreHistory(redoHistory(historyRef.current), `Redo: ${label}`);
+     }
+-  }, [flushPendingClipGain, flushPendingMaster, flushPendingVolume, restoreHistory]);
++  }, [flushPendingClipGain, flushPendingMaster, flushPendingVolume, restoreHistory, setStatus]);
+ 
+   const decodeVideoSourceAudio = useCallback(
+     async (file: File, sourceId: string, duration: number, signal: AbortSignal) => {
+@@ -2681,6 +2764,7 @@
+       setRange,
+       setSelectedClipId,
+       stopPlayback,
++      setStatus,
+     ],
+   );
+ 
+@@ -2698,7 +2782,7 @@
+           );
+         });
+     },
+-    [runVideoImport],
++    [runVideoImport, setStatus],
+   );
+ 
+   const toggleTrackMute = useCallback(
+@@ -3491,7 +3575,7 @@
+         setStatus(formatClipGainMembersStatus(span));
+       }
+     },
+-    [applyEdit, takeClipGainOverride],
++    [applyEdit, takeClipGainOverride, setStatus],
+   );
+ 
+   const commitClipGainFader = useCallback(
+@@ -4003,7 +4087,7 @@
+         });
+     }
+     return () => controller.abort();
+-  }, [collection, getDecodeContext, patchSourceState, requestSourcePeaks, syncPlayback]);
++  }, [collection, getDecodeContext, patchSourceState, requestSourcePeaks, syncPlayback, setStatus]);
+ 
+   useEffect(() => {
+     return () => {
+@@ -4082,6 +4166,7 @@
+       pxPerSecond,
+       status,
+       statusSequence,
++      statusKey,
+       sourceStates,
+       sourcePeaks,
+       sourceDurations,
+@@ -4134,6 +4219,8 @@
+       getArrangement,
+       previewArrangement,
+       previewClipGeometry,
++      previewStatus,
++      getStatusPreviewText,
+       commitArrangement,
+       nudgeSelectedClip,
+       splitSelection,
+@@ -4199,6 +4286,7 @@
+       pxPerSecond,
+       status,
+       statusSequence,
++      statusKey,
+       sourceStates,
+       sourcePeaks,
+       sourceDurations,
+@@ -4250,6 +4338,8 @@
+       getArrangement,
+       previewArrangement,
+       previewClipGeometry,
++      previewStatus,
++      getStatusPreviewText,
+       commitArrangement,
+       nudgeSelectedClip,
+       splitSelection,
+@@ -4300,6 +4390,7 @@
+       exportMp3,
+       resetExportState,
+       cancelExport,
++      setStatus,
+     ],
+   );
+ 
+@@ -4310,13 +4401,15 @@
+           <ArrangementRangeContext.Provider value={rangeStore}>
+             <ArrangementSelectionContext.Provider value={selectionStore}>
+               <ArrangementPreviewContext.Provider value={previewStore}>
+-                <ArrangementMeterContext.Provider value={meterStore}>
+-                  <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
+-                    <ArrangementContext.Provider value={value}>
+-                      {children}
+-                    </ArrangementContext.Provider>
+-                  </ArrangementTrackMeterContext.Provider>
+-                </ArrangementMeterContext.Provider>
++                <ArrangementStatusPreviewContext.Provider value={statusPreviewStore}>
++                  <ArrangementMeterContext.Provider value={meterStore}>
++                    <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
++                      <ArrangementContext.Provider value={value}>
++                        {children}
++                      </ArrangementContext.Provider>
++                    </ArrangementTrackMeterContext.Provider>
++                  </ArrangementMeterContext.Provider>
++                </ArrangementStatusPreviewContext.Provider>
+               </ArrangementPreviewContext.Provider>
+             </ArrangementSelectionContext.Provider>
+           </ArrangementRangeContext.Provider>
+@@ -4400,6 +4493,16 @@
+   return useStore(useArrangementPreviewStore(), selector);
+ }
+ 
++export function useArrangementStatusPreview<Selected>(
++  selector: (state: ArrangementStatusPreviewState) => Selected,
++): Selected {
++  const store = useContext(ArrangementStatusPreviewContext);
++  if (!store) {
++    throw new Error('useArrangementStatusPreview must be used within an ArrangementProvider');
++  }
++  return useStore(store, selector);
++}
++
+ export function useArrangementPreviewLaneClips(
+   committed: Arrangement,
+   trackId: string,
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -26,6 +26,7 @@
+   useArrangementRange,
+   useArrangementRangeStore,
+   useArrangementSelection,
++  useArrangementStatusPreview,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { workspaceCollectionCopy } from '~/lib/arrangement/collection';
+@@ -118,6 +119,7 @@
+   selectedClipIdsKeyAmong,
+ } from '~/lib/arrangement/selection-store';
+ import { findStudioShortcut } from '~/lib/arrangement/shortcuts';
++import { statusPreviewKey } from '~/lib/arrangement/status-preview-store';
+ import {
+   studioClipEnvelopeStrings,
+   studioEditStrings,
+@@ -818,6 +820,17 @@
+ 
+ const ArrangementOverviewWithPreview = memo(ArrangementOverviewWithPreviewInner);
+ 
++function ArrangementStatusTextInner({ status, statusKey }: { status: string; statusKey: string }) {
++  const preview = useArrangementStatusPreview((state) => state.preview);
++  return preview ? (
++    <span key={statusPreviewKey(preview)}>{preview.text}</span>
++  ) : (
++    <span key={statusKey}>{status}</span>
++  );
++}
++
++const ArrangementStatusText = memo(ArrangementStatusTextInner);
++
+ export function StudioWorkspace() {
+   const workspace = useArrangement();
+   const {
+@@ -826,7 +839,7 @@
+     projectEnd: committedProjectEnd,
+     pxPerSecond,
+     status,
+-    statusSequence,
++    statusKey,
+     setInsertMarker,
+     scrubPlayhead,
+     endPlayheadScrub,
+@@ -2211,10 +2224,8 @@
+         setFollowMode('on');
+       }
+       const current = workspaceRef.current;
+-      if (
+-        insertMarkerStatusKind(current.status) !== null ||
+-        current.status === FOLLOW_PAUSED_MESSAGE
+-      ) {
++      const shownStatus = current.getStatusPreviewText() ?? current.status;
++      if (insertMarkerStatusKind(shownStatus) !== null || shownStatus === FOLLOW_PAUSED_MESSAGE) {
+         current.setStatus(current.describeSpaceStart());
+       }
+       return;
+@@ -2838,7 +2849,10 @@
+         }
+         const target = adjacentGridLine(anchor.start, gridSecondsRef.current, direction);
+         if (target === null) {
+-          if (!event.repeat || current.status !== NUDGE_AT_TIME_START_MESSAGE) {
++          if (
++            !event.repeat ||
++            (current.getStatusPreviewText() ?? current.status) !== NUDGE_AT_TIME_START_MESSAGE
++          ) {
+             current.setStatus(NUDGE_AT_TIME_START_MESSAGE);
+           }
+           return;
+@@ -3358,7 +3372,7 @@
+           aria-live="polite"
+           data-testid="arrangement-status"
+         >
+-          <span key={statusSequence}>{status}</span>
++          <ArrangementStatusText status={status} statusKey={statusKey} />
+         </output>
+         <ArrangementRangeReadout />
+         <ArrangementSelectionCount />
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -124,6 +124,7 @@
+   getArrangement: () => Arrangement;
+   previewArrangement: (next: Arrangement) => void;
+   previewClipGeometry?: (next: Arrangement) => void;
++  previewStatus?: (text: string) => void;
+   commitArrangement: (next: Arrangement, label: string, before: Arrangement) => boolean;
+   selectClip: (clipId: string | null) => void;
+   toggleClipSelection: (clipId: string, mode: SelectionToggleMode) => void;
+@@ -411,6 +412,7 @@
+   getArrangement,
+   previewArrangement,
+   previewClipGeometry,
++  previewStatus,
+   commitArrangement,
+   selectClip,
+   toggleClipSelection,
+@@ -600,14 +602,17 @@
+         Math.max(0, roundTime(startSeconds + (fadeEdge === 'in' ? delta : -delta))),
+       );
+       const next = setFade(gesture.before, gesture.original.id, fadeEdge, seconds);
+-      previewArrangement(next);
++      previewGeometry(next);
+       const faded = next.clips.find((entry) => entry.id === gesture.original.id);
+-      setStatus(
+-        studioClipStrings.fadePreview(
+-          fadeLabels[fadeEdge],
+-          (faded ? clipFadeSeconds(faded, fadeEdge) : 0).toFixed(3),
+-        ),
++      const text = studioClipStrings.fadePreview(
++        fadeLabels[fadeEdge],
++        (faded ? clipFadeSeconds(faded, fadeEdge) : 0).toFixed(3),
+       );
++      if (previewStatus && !isVideo) {
++        previewStatus(text);
++      } else {
++        setStatus(text);
++      }
+       return;
+     }
+     const step = resolveSnapStep(snapSeconds, gridSeconds, event.altKey);
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -193,6 +193,7 @@
+     getArrangement,
+     previewArrangement,
+     previewClipGeometry,
++    previewStatus,
+     commitArrangement,
+     selectClip,
+     toggleClipSelection,
+@@ -1029,6 +1030,7 @@
+               getArrangement={getArrangement}
+               previewArrangement={previewArrangement}
+               previewClipGeometry={previewClipGeometry}
++              previewStatus={previewStatus}
+               commitArrangement={commitArrangement}
+               selectClip={selectClip}
+               toggleClipSelection={toggleClipSelection}
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -158,6 +158,7 @@
+     playFrom,
+     status,
+     setStatus,
++    getStatusPreviewText,
+     isPointerGestureActive,
+     claimPointerGesture,
+   } = useArrangement();
+@@ -282,7 +283,7 @@
+           : direction === 1
+             ? studioMarkerStrings.noneAfterInsertMarker
+             : studioMarkerStrings.noneBeforeInsertMarker;
+-        if (options?.keyRepeat !== true || status !== message) {
++        if (options?.keyRepeat !== true || (getStatusPreviewText() ?? status) !== message) {
+           setStatus(message);
+         }
+         return;
+@@ -292,7 +293,16 @@
+         setSelectedMarkerId(target.marker.id);
+       }
+     },
+-    [getArrangement, getLocatorPosition, isPlaying, projectEnd, seekTo, setStatus, status],
++    [
++      getArrangement,
++      getLocatorPosition,
++      isPlaying,
++      projectEnd,
++      seekTo,
++      setStatus,
++      status,
++      getStatusPreviewText,
++    ],
+   );
+ 
+   const closeMenu = useCallback(() => {
+@@ -454,7 +464,7 @@
+     const result = moveMarker(before, markerId, time);
+     if (result.kind === 'conflict') {
+       const message = studioMarkerStrings.existsAtTime(result.other.name);
+-      if (!keyRepeat || status !== message) {
++      if (!keyRepeat || (getStatusPreviewText() ?? status) !== message) {
+         setStatus(message);
+       }
+       return false;
+@@ -482,7 +492,7 @@
+     }
+     setSelectedMarkerId(current.id);
+     if (direction === -1 && current.time < MARKER_TIME_EPS) {
+-      if (!keyRepeat || status !== MARKER_AT_TIME_START_MESSAGE) {
++      if (!keyRepeat || (getStatusPreviewText() ?? status) !== MARKER_AT_TIME_START_MESSAGE) {
+         setStatus(MARKER_AT_TIME_START_MESSAGE);
+       }
+       return;
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -5,6 +5,7 @@
+ import {
+   type ArrangementContextValue,
+   ArrangementProvider,
++  GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
+   useArrangementPreviewStore,
+ } from '~/contexts/ArrangementContext';
+@@ -344,6 +345,14 @@
+     .join(' ');
+ }
+ 
++function fadeHandleOf(root: HTMLElement): HTMLElement {
++  const fade = root.querySelector<HTMLElement>(`[title="${FADE_IN_TITLE}"]`);
++  if (!fade) {
++    throw new Error('fade handle missing');
++  }
++  return fade;
++}
++
+ function rendersOf(name: string): number {
+   return renderLog.counts.get(name) ?? 0;
+ }
+@@ -537,22 +546,40 @@
+     expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 2, trackId: 'music' });
+   });
+ 
+-  it('DP9 a fade-in drag and a video clip move keep the provider path and status', async () => {
+-    const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++  it('DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
+     const audio = clipParts('c1');
+-    const fade = audio.root.querySelector<HTMLElement>(`[title="${FADE_IN_TITLE}"]`);
+-    if (!fade) {
+-      throw new Error('fade handle missing');
+-    }
++    const fade = fadeHandleOf(audio.root);
+     pointerDownAt(fade, 1, 0);
+     pointerMoveTo(audio.root, 1, 40);
+     renderLog.counts.clear();
+     pointerMoveTo(audio.root, 1, 80);
+     pointerMoveTo(audio.root, 1, 120);
+-    expect(rendersOf('ArrangementProvider')).toBe(2);
++    expect(rendersOf('ArrangementProvider')).toBe(0);
++    expect(rendersOf('StudioWorkspace')).toBe(0);
++    expect(rendersOf('ArrangementTransport')).toBe(0);
++    expect(rendersOf('ArrangementLibrary')).toBe(0);
++    expect(rendersOf('ArrangementClipViewInner')).toBe(2);
++    expect(rendersOf('ArrangementStatusTextInner')).toBe(2);
++    expect(audio.root.dataset.fadeIn).toBe('3.000');
+     expect(textOf(view, 'arrangement-status')).toBe('Fade In: 3.000 s');
+-    expect(previewOf(api)).toBeNull();
++    expect(previewOf(api)).not.toBeNull();
++    expect(clipIn(live(api).arrangement, 'c1').fadeIn ?? 0).toBe(0);
+     pointerUpAt(audio.root, 1, 120);
++    expect(live(api).undoLabel).toBe('Fade In');
++    expect(previewOf(api)).toBeNull();
++    expect(live(api).arrangement).toBe(live(api).getArrangement());
++    expect(clipIn(live(api).arrangement, 'c1').fadeIn).toBe(3);
++    expect(textOf(view, 'arrangement-status')).toBe(
++      studioClipStrings.fadeCommitted('Fade In', '3.000'),
++    );
++    act(() => live(api).undo());
++    expect(live(api).undoLabel).toBeNull();
++    expect(clipIn(live(api).arrangement, 'c1').fadeIn ?? 0).toBe(0);
++  });
++
++  it('DP9b a video clip move keeps the provider path', async () => {
++    const { api, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
+     const video = clipParts('v1');
+     pointerDownAt(video.header, 2, 40, 50);
+     pointerMoveTo(video.root, 2, 80, 50);
+@@ -565,4 +592,103 @@
+     pointerUpAt(video.root, 2, 160, 50);
+     expect(live(api).undoLabel).toBe('Move clip');
+   });
++
++  it('DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    const region = view.getByTestId('arrangement-status');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 40);
++    expect(region.textContent).toBe('Fade In: 1.000 s');
++    const first = region.firstElementChild;
++    pointerMoveTo(audio.root, 1, 80);
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    const second = region.firstElementChild;
++    expect(second).not.toBe(first);
++    pointerMoveTo(audio.root, 1, 80.01);
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    expect(region.firstElementChild).toBe(second);
++    expect(region.childElementCount).toBe(1);
++    pointerUpAt(audio.root, 1, 80.01);
++  });
++
++  it('DP11 a pointercancel mid-fade reverts the fade and keeps the last readout span', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    const region = view.getByTestId('arrangement-status');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 40);
++    pointerMoveTo(audio.root, 1, 80);
++    const span = region.firstElementChild;
++    fireEvent.pointerCancel(audio.root, { pointerId: 1, clientX: 80, clientY: MUSIC_LANE_Y });
++    expect(audio.root.dataset.fadeIn).toBe('0.000');
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    expect(region.firstElementChild).toBe(span);
++    expect(live(api).undoLabel).toBeNull();
++    expect(previewOf(api)).toBeNull();
++    expect(live(api).status).toBe('Fade In: 2.000 s');
++  });
++
++  it('DP12 a committed write mid-fade wins; release after a refusal restores the last readout', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    const region = view.getByTestId('arrangement-status');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 40);
++    act(() => live(api).setStatus('Committed mid-drag.'));
++    expect(region.textContent).toBe('Committed mid-drag.');
++    pointerMoveTo(audio.root, 1, 80);
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    act(() => live(api).addSourceToActiveTrack('song'));
++    expect(region.textContent).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
++    fireEvent.pointerCancel(audio.root, { pointerId: 1, clientX: 80, clientY: MUSIC_LANE_Y });
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    expect(live(api).status).toBe('Fade In: 2.000 s');
++    expect(previewOf(api)).toBeNull();
++  });
++
++  it('DP13 a video fade drag keeps the provider path and the committed status', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++    const video = clipParts('v1');
++    const fade = video.root.querySelector<HTMLElement>(
++      '[data-testid="arrangement-video-fade-in-handle"]',
++    );
++    if (!fade) {
++      throw new Error('video fade handle missing');
++    }
++    pointerDownAt(fade, 3, 40, 50);
++    pointerMoveTo(video.root, 3, 80, 50);
++    renderLog.counts.clear();
++    pointerMoveTo(video.root, 3, 120, 50);
++    expect(rendersOf('ArrangementProvider')).toBe(1);
++    expect(previewOf(api)).toBeNull();
++    expect(live(api).status).toBe(textOf(view, 'arrangement-status'));
++    pointerUpAt(video.root, 3, 120, 50);
++  });
++
++  it('DP14 a fade dragged back to 0 adds no entry, empties the store and reports no change', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 40);
++    pointerMoveTo(audio.root, 1, 0);
++    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 0.000 s');
++    pointerUpAt(audio.root, 1, 0);
++    expect(live(api).undoLabel).toBeNull();
++    expect(previewOf(api)).toBeNull();
++    expect(audio.root.dataset.fadeIn).toBe('0.000');
++    expect(textOf(view, 'arrangement-status')).toBe(studioClipStrings.historyUnchanged('Fade In'));
++    expect(live(api).status).toBe(studioClipStrings.historyUnchanged('Fade In'));
++  });
++
++  it('DP15 the status preview getter returns the shown readout during the drag and null after it', async () => {
++    const { api, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    expect(live(api).getStatusPreviewText()).toBeNull();
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 80);
++    expect(live(api).getStatusPreviewText()).toBe('Fade In: 2.000 s');
++    pointerUpAt(audio.root, 1, 80);
++    expect(live(api).getStatusPreviewText()).toBeNull();
++  });
+ });
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -335,10 +335,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 24
++    },
++    "owner": "PERF-DRAG-PREVIEW-b",
++    "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
+   },
+   {
+     "id": "interact.drag.fade.stopped.move-components-max",
+@@ -346,10 +349,13 @@
+     "metric": "move-components-max",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Largest single commit in the move window."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 24
++    },
++    "owner": "PERF-DRAG-PREVIEW-b",
++    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
+   },
+   {
+     "id": "interact.drag.fade.stopped.release-commits",
+@@ -390,10 +396,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 24
++    },
++    "owner": "PERF-DRAG-PREVIEW-b",
++    "note": "Sum of rendered components in the move window / pointermoves in that window (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
+   },
+   {
+     "id": "interact.drag.fade.playing.move-components-max",
+@@ -401,10 +410,13 @@
+     "metric": "move-components-max",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Largest single commit in the move window."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 24
++    },
++    "owner": "PERF-DRAG-PREVIEW-b",
++    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
+   },
+   {
+     "id": "interact.drag.fade.playing.release-commits",
+@@ -434,10 +446,13 @@
+     "metric": "move-restarts",
+     "unit": "start() calls",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "start() calls on a non-offline context inside the move window."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 0
++    },
++    "owner": "PERF-DRAG-PREVIEW-b",
++    "note": "start() calls on a non-offline context inside the move window. Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
+   },
+   {
+     "id": "interact.drag.fade.playing.release-restarts",
+--- /dev/null
++++ b/app/lib/arrangement/status-preview-store.ts
+@@ -0,0 +1,33 @@
++import { createStore, type StoreApi } from 'zustand/vanilla';
++
++export interface ArrangementStatusPreview {
++  readonly text: string;
++  readonly sequence: number;
++}
++
++export interface ArrangementStatusPreviewState {
++  preview: ArrangementStatusPreview | null;
++  written: number;
++  showPreview: (text: string) => void;
++  clearPreview: () => void;
++}
++
++export type ArrangementStatusPreviewStore = StoreApi<ArrangementStatusPreviewState>;
++
++export function createArrangementStatusPreviewStore(): ArrangementStatusPreviewStore {
++  return createStore<ArrangementStatusPreviewState>()((set) => ({
++    preview: null,
++    written: 0,
++    showPreview: (text) =>
++      set((state) =>
++        state.preview?.text === text
++          ? state
++          : { preview: { text, sequence: state.written + 1 }, written: state.written + 1 },
++      ),
++    clearPreview: () => set((state) => (state.preview === null ? state : { preview: null })),
++  }));
++}
++
++export function statusPreviewKey(preview: ArrangementStatusPreview): string {
++  return `preview-${preview.sequence}`;
++}
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/status-preview-store.test.ts
+@@ -0,0 +1,30 @@
++import { describe, expect, it } from 'vitest';
++import { createArrangementStatusPreviewStore, statusPreviewKey } from '../status-preview-store';
++
++describe('status preview store', () => {
++  it('SP1 a new text replaces the preview and an equal text keeps the same object', () => {
++    const store = createArrangementStatusPreviewStore();
++    expect(store.getState().preview).toBeNull();
++    store.getState().showPreview('Fade In: 1.000 s');
++    const first = store.getState().preview;
++    expect(first).toEqual({ text: 'Fade In: 1.000 s', sequence: 1 });
++    store.getState().showPreview('Fade In: 1.000 s');
++    expect(store.getState().preview).toBe(first);
++    store.getState().showPreview('Fade In: 2.000 s');
++    expect(store.getState().preview).toEqual({ text: 'Fade In: 2.000 s', sequence: 2 });
++  });
++
++  it('SP2 the sequence keeps counting after a clear, so a later key never repeats', () => {
++    const store = createArrangementStatusPreviewStore();
++    store.getState().showPreview('a');
++    store.getState().clearPreview();
++    expect(store.getState().preview).toBeNull();
++    store.getState().showPreview('a');
++    expect(store.getState().preview?.sequence).toBe(2);
++  });
++
++  it('SP3 the key is derived from the sequence and differs per write', () => {
++    expect(statusPreviewKey({ text: 'x', sequence: 3 })).toBe('preview-3');
++    expect(statusPreviewKey({ text: 'x', sequence: 4 })).not.toBe('preview-3');
++  });
++});

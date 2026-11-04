@@ -1,9 +1,9 @@
 {
- "version": 285,
- "updated": "2026-11-04 B round 325 -> 326 planning (D-29z920..D-29z927)",
+ "version": 286,
+ "updated": "2026-11-04 B round 326 -> 327 planning (D-29z928..D-29z936)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 326, D-29z920..D-29z927; GATE325-IM24-WALLCLOCK test-only fix-up: freeze Date.now in insert-marker-ui IM24 so the playing-state live-position reads are deterministic; MU-DELAY-60 red->green; one doc-232 bullet; round-325 tree otherwise frozen (K11/K12); baseline b925434 + round-325 working tree)",
+ "current_task": "current-task.md (round 327, D-29z928..D-29z936; PERF-DRAG-PREVIEW stage b: audio fade-handle drag via previewClipGeometry + a per-provider status-preview store (setStatus wrapper flushes the preview first; adopt keeps the aria-live span); six status-text comparison reads use getStatusPreviewText() ?? status; 5 fade budget rows assert; baseline 234ccdd)",
  "advisor_used_by_B": "round 323 -> 324 planning: advisor available and used (before writing; before finishing)",
  "baseline": {
   "tsc_errors": 0,
@@ -11300,6 +11300,31 @@
    "status": "dispatched",
    "note": "baseline 53c5c79; claims b-round-323/claims-324.sh",
    "added": "2026-11-03 B round 323 -> 324 planning"
+  },
+  {
+   "round": 325,
+   "task": "tasks/round-325.md",
+   "decision": "D-29z913..D-29z919, D-29z920",
+   "type": "PERF-DRAG-PREVIEW stage a",
+   "status": "done (C PASS; gate 325 failed on IM24; published with round 326 in 234ccdd, D-29z928)",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "round": 326,
+   "task": "tasks/round-326.md",
+   "decision": "D-29z920..D-29z927",
+   "type": "GATE325-IM24-WALLCLOCK test-only fix-up",
+   "status": "done (C PASS, gate 326 published 234ccdd, D-29z928)",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "round": 327,
+   "task": "current-task.md",
+   "decision": "D-29z928..D-29z936",
+   "type": "PERF-DRAG-PREVIEW stage b (audio fade drag + status-preview store)",
+   "status": "dispatched",
+   "note": "baseline 234ccdd; claims b-round-326/claims-327.sh",
+   "added": "2026-11-04 B round 326 -> 327 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -14256,7 +14281,7 @@
      "preview_paths": "ArrangementClip.tsx:503 / :674 / :634 previewArrangement -> ArrangementContext.tsx:1588 previewArrangement -> updateHistory",
      "source": "doc 168 PERF candidates; tech-lead consult 2026-10-28",
      "note": "goes right after PERF-8 (same ArrangementContext region ~l.1572-1588; may reuse its external store; B may merge with PERF-8 at its planning)",
-     "status": "in_progress (D-29z920): stage a c_pass_unpublished (C round 325 PASS, browserVerified true; gate 325 failed on IM24 flake, fix-up round 326) | in_progress (D-29z916): stage a dispatched round 325 (audio trimStart/trimEnd + same-lane single-clip move; contract A D-29z919; budgets record D-29z917) | not_started (queued D-29z215)",
+     "status": "in_progress (D-29z931): stage a done (C round 325 PASS, gate 326 published 234ccdd, D-29z928); stage b dispatched round 327 | in_progress (D-29z920): stage a c_pass_unpublished (C round 325 PASS, browserVerified true; gate 325 failed on IM24 flake, fix-up round 326) | in_progress (D-29z916): stage a dispatched round 325 (audio trimStart/trimEnd + same-lane single-clip move; contract A D-29z919; budgets record D-29z917) | not_started (queued D-29z215)",
      "added": "2026-10-28 B round 215 -> 216 planning",
      "merge_ruling_d29z860": "kept separate from PERF-8 (tech-lead consult round 318: it changes history.present, the document, not a transient overlay); goes after PERF-8b",
      "split_d29z916": {
@@ -14270,7 +14295,8 @@
       "prod_head_b925434": "trim 106.2/move max 106, move 105.317/move max 107, commits-per-move 1.967, move-restarts 0, release-restarts 1",
       "evidence": "b-round-324/head-drag-perf-rows.txt, b-round-324/head-drag-names.txt (from c-round-324)",
       "consults": "tech-lead + performance-optimizer round 324->325 planning (b-round-324.md section 3)"
-     }
+     },
+     "stage_b_contract_d29z931": "current-task.md round 327; sketch b-round-326/sketch/; budgets D-29z932; tests D-29z933; doc D-29z934; remaining gap D-29z935"
     },
     {
      "id": "PERF-HARNESS-SHARED-LIB",
@@ -29007,7 +29033,7 @@
    "severity": "info",
    "origin": "B round 300 planning (sketch covering run under concurrent load)",
    "title": "insert-marker-ui IM24 failed once under concurrent dev-server + Playwright load; passes alone 3/3 and in gate 299",
-   "status": "reproduced in gate 325 (D-29z921); superseded by GATE325-IM24-WALLCLOCK, closes with round 326 C PASS | signal (D-29z773): watch; a failure in a run alone is a STOP",
+   "status": "closed (D-29z928): fixed by GATE325-IM24-WALLCLOCK, published 234ccdd | reproduced in gate 325 (D-29z921); superseded by GATE325-IM24-WALLCLOCK, closes with round 326 C PASS | signal (D-29z773): watch; a failure in a run alone is a STOP",
    "evidence": "b-round-299/sketch-covering-run-final.log; b-round-299/im24-sketch-alone.txt",
    "added": "2026-10-31 B round 299 -> 300 planning"
   },
@@ -30326,7 +30352,7 @@
    "title": "insert-marker-ui IM24 reads the live position while playing on the wall-clock fake; > 50 ms of load between the last seek and the read gives 16.001 and fails the gate",
    "evidence": "gates/round-325/verify.log (IM24, 16.001); b-round-325/sketch/run-head-mu-delay-60.log (red 16.021), run-fix-mu-delay-60.log, run-fix-file-{1,2,3}.log",
    "repro": "b-round-325/sketch/mu-delay-60.patch.txt on the current tree, npx vitest run insert-marker-ui -t IM24",
-   "status": "scheduled: round 326 (D-29z921)",
+   "status": "done (D-29z928): C round 326 PASS, gate 326 published 234ccdd | scheduled: round 326 (D-29z921)",
    "added": "2026-11-04 B round 325 -> 326 planning"
   },
   {
@@ -30344,6 +30370,63 @@
    "title": "interact.drag.{trim,move}.playing.move-restarts asserts would count loop-wrap restarts if the harness scenario ever enables a loop",
    "status": "harness signal (D-29z925)",
    "added": "2026-11-04 B round 325 -> 326 planning"
+  },
+  {
+   "id": "C-R326-01",
+   "severity": "low",
+   "origin": "B spec (round-326 B-IM24 row; tasks/round-253.md l.208 had ruled the tail jsdom-only)",
+   "title": "IM24 playing-state tail (\"No more markers after the playhead\" + Playing at 16) is unreachable in the browser: playback auto-stops at the project end",
+   "evidence": "c-round-326.json, c-round-326/b-im24.json, probe-sync-ctrlright.json",
+   "status": "deferred_low_polish (D-29z929); fix with SYS-CLOCK-DETERMINISM",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER",
+   "severity": "info",
+   "origin": "C round 326",
+   "title": "Ctrl+Right while playing also moves the insert marker",
+   "status": "ruled (D-29z930): matches tasks/round-252/253 planner contract; LIVE-MEAS-MARKER-STEP-PLAYING requested",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "SIG-R326-END-STOP-STATUS",
+   "severity": "info",
+   "origin": "C round 326 (INFO-C326-END-STOP-STALE-STATUS)",
+   "title": "after the project-end auto-stop (also natural end) the status keeps the previous text, no stopped text",
+   "status": "signal (D-29z930); not scheduled",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "SIG-R326-READOUT-PRIMITIVE",
+   "severity": "info",
+   "origin": "performance-optimizer consult (round 327 planning)",
+   "title": "selected-clip readout re-renders per fade move; select primitives (sourceId, start, duration, sourceOffset) instead of the clip object",
+   "status": "signal (D-29z935); stage c candidate, measure first (L37)",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "SIG-R326-DETAIL-IGNORES-FADE",
+   "severity": "info",
+   "origin": "performance-optimizer consult (round 327 planning)",
+   "title": "detail panel re-renders per fade move although it shows no fade field; an equality that ignores fadeIn/fadeOut needs a stale-guard test",
+   "status": "signal (D-29z935); stage c candidate",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "SIG-R326-SKIP-UNCHANGED-FADE",
+   "severity": "info",
+   "origin": "performance-optimizer consult (round 327 planning)",
+   "title": "setFade builds a new arrangement when the rounded fade seconds did not change (sub-pixel moves)",
+   "status": "signal (D-29z935); stage c candidate",
+   "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "LIVE-MEAS-MARKER-STEP-PLAYING",
+   "severity": "info",
+   "origin": "B (L44)",
+   "title": "root measures in Live 12: while playing, does Ctrl+Right (Win) / Alt+Right (Mac) to the next locator move playback, the insert marker, or both",
+   "status": "requested_from_root (D-29z930): user-review/live-checks.md",
+   "added": "2026-11-04 B round 326 -> 327 planning"
   }
  ],
  "tech_lead_notes": [
@@ -32803,7 +32886,8 @@
    "origin": "A code-reviewer round 325",
    "note": "new preview state in the provider (previewStore, publishedHistoryRef, convergence in the release closure); reviewer verdict keep; optional small lib object owning historyRef/publishedHistoryRef/store so 'ref != React state only while the store holds a preview' is unit-testable",
    "status": "signal (D-29z925); joins the open checkpoint request D-29z915; not a task",
-   "added": "2026-11-04 B round 325 -> 326 planning"
+   "added": "2026-11-04 B round 325 -> 326 planning",
+   "note_d29z936": "round 327 adds the status-preview store to ArrangementContext.tsx; see b-round-326-checkpoint-addendum.md"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -38846,6 +38930,15 @@
    "evidence": "a-round-325.md code review pass 1 Low 4c; c-round-325.json INFO-C325-LOW4C",
    "status": "deferred_low_polish (D-29z923); re-examine in PERF-DRAG-PREVIEW stage c",
    "added": "2026-11-04 B round 325 -> 326 planning"
+  },
+  {
+   "id": "C-R326-01",
+   "severity": "low",
+   "origin": "B spec (round-326 B-IM24 row; tasks/round-253.md l.208 had ruled the tail jsdom-only)",
+   "title": "IM24 playing-state tail (\"No more markers after the playhead\" + Playing at 16) is unreachable in the browser: playback auto-stops at the project end",
+   "evidence": "c-round-326.json, c-round-326/b-im24.json, probe-sync-ctrlright.json",
+   "status": "deferred_low_polish (D-29z929); fix with SYS-CLOCK-DETERMINISM",
+   "added": "2026-11-04 B round 326 -> 327 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -40732,7 +40825,8 @@
    "closes": [
     "GATE148-S2-VDS3-WALLCLOCK",
     "GATE77-S4-EN10-CLOCK",
-    "ROOT-R70-L4-BW5-WALLCLOCK"
+    "ROOT-R70-L4-BW5-WALLCLOCK",
+    "C-R326-01"
    ],
    "related": [
     "B-R184-FAKECLOCK-UNASSERTED",
@@ -40740,7 +40834,8 @@
    ],
    "root_cause": "FakeAudioContext.currentTime follows the wall clock and positionAt holds 50 ms after a seek, so loaded runs drift",
    "place": "end of STUDIO-PERFORMANCE, next to SYS-R2-FAKE-FIDELITY",
-   "status": "not_started"
+   "status": "not_started",
+   "note_d29z929": "also fixes the IM24 playing tail (end-stop never runs in jsdom): assert the end-stop or use a fixture whose last forward stop is before projectEnd"
   }
  ],
  "retro_runs": [
@@ -44738,6 +44833,51 @@
    "id": "D-29z927",
    "date": "2026-11-04",
    "text": "Why we missed GATE325-IM24: B-R299-IM24-LOAD-SIGNAL (round 299) was watched with the condition 'a failure in a run alone is a STOP', which a load-only flake can never meet; the gate is a loaded run. lessons.md L48 gains the clause: a jsdom timing flake with a known wall-clock mechanism is fixed when first seen (frozen clock + delay mutant), not watched. Line count unchanged."
+  },
+  {
+   "id": "D-29z928",
+   "date": "2026-11-04",
+   "text": "Rounds 325 + 326 closed from evidence: C round 326 PASS (c-round-326.json browserVerified/realVerified true); gate 326 published 234ccdd (rounds 325 + 326, both remotes). PERF-DRAG-PREVIEW stage a -> done; GATE325-IM24-WALLCLOCK -> done; B-R299-IM24-LOAD-SIGNAL -> closed."
+  },
+  {
+   "id": "D-29z929",
+   "date": "2026-11-04",
+   "text": "C-R326-01 (Low, origin B spec): the round-326 B-IM24 row asked the browser for the playing \"after the playhead\" tail that tasks/round-253.md l.208 had already ruled jsdom-only (playback auto-stops at the project end). -> deferred_low_polish; the IM24 tail (assert the end-stop or use a fixture whose last stop is before projectEnd) joins SYS-CLOCK-DETERMINISM (jsdom fake fidelity), not SYS-R2-FAKE-FIDELITY (R2 worker fake) as C suggested. lessons L29 gains it as evidence (state-recipe premise not probed at baseline)."
+  },
+  {
+   "id": "D-29z930",
+   "date": "2026-11-04",
+   "text": "INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER: matches the recorded planner contract (tasks/round-252.md l.254/l.322 IM24 + C-NAV-ORIGIN-252, tasks/round-253.md l.224: Ctrl+Right moves the insert marker during playback). Live 12 behaviour while playing unverified -> LIVE-MEAS-MARKER-STEP-PLAYING appended to user-review/live-checks.md (L44); a differing Live result becomes one Saba question. INFO-C326-END-STOP-STALE-STATUS -> signal SIG-R326-END-STOP-STATUS (status lifetime after the project-end auto-stop; not scheduled)."
+  },
+  {
+   "id": "D-29z931",
+   "date": "2026-11-04",
+   "text": "Round 327 = PERF-DRAG-PREVIEW stage b (current-task.md): audio fade moves use previewClipGeometry; the per-move fade text goes to a new per-provider zustand status-preview store rendered by a memo footer subscriber; setStatus becomes a wrapper that flushes (adopts) a pending preview before every committed write, so updaters, refusals and stops see the shown text as at HEAD; adopt keeps the preview span key (no second aria-live announcement); six status-text comparison reads (StudioWorkspace stop effect + nudge, ArrangementMarkerRow x3) read getStatusPreviewText() ?? status. Video fades stay on the provider path (stage c). Consults: tech-lead (drop baseSequence, wrap setStatus, flush once via release, keep the key on adopt), performance-optimizer (expected 22-26/move; assert per-move/max/restarts with tolerance). B sketch: fade 103.25 -> 21.633/move, max 105 -> 22, restarts 0, stopped release-commits 1 -> 2 (second commit 0 components); full suite 3555/3555; 7 jsdom + 1 combined perf mutant red."
+  },
+  {
+   "id": "D-29z932",
+   "date": "2026-11-04",
+   "text": "Budgets: interact.drag.fade.{stopped,playing}.move-components-per-move <= 24, .move-components-max <= 24, interact.drag.fade.playing.move-restarts == 0 become assert (owner PERF-DRAG-PREVIEW-b; .6x copies stay record, stage-a convention). The stage-a trim/move per-move conversion (D-29z922) moves to stage c with the move rows (no trim perf mutant run yet, L58)."
+  },
+  {
+   "id": "D-29z933",
+   "date": "2026-11-04",
+   "text": "DP9 (stage-a pin of the fade provider path) rewritten, not deleted: DP9a (fade: provider 0, store non-null mid-drag, same status text, one entry, Undo) + DP9b (video move unchanged) + DP10-DP15; expect( 68 -> 112 on the sketch; no assertion lost."
+  },
+  {
+   "id": "D-29z934",
+   "date": "2026-11-04",
+   "text": "Doc 232 is the PERF-DRAG-PREVIEW feature doc for all three stages; stage b rewrites its sections; l.4 -> In Progress (stage 2 of 3; C round 327 PASS). Doc 168 PERF-DRAG-PREVIEW paragraph block granted whole (L34)."
+  },
+  {
+   "id": "D-29z935",
+   "date": "2026-11-04",
+   "text": "Item target unchanged (<= 15 components per move for fade/trim/move). Stage b sketch reaches 21.633; the remainder carries to stage c with three unscheduled signals from the performance-optimizer consult: SIG-R326-READOUT-PRIMITIVE (selected-clip readout selects primitives), SIG-R326-DETAIL-IGNORES-FADE (detail panel equality ignores fadeIn/fadeOut, needs a stale-guard test), SIG-R326-SKIP-UNCHANGED-FADE (no new arrangement when the rounded fade value is unchanged)."
+  },
+  {
+   "id": "D-29z936",
+   "date": "2026-11-04",
+   "text": "Next round: REGRESSION if its planning falls on or after 2026-11-05 (regression-last 2026-11-02 round 301), else PERF-DRAG-PREVIEW stage c. regression-last.json unchanged. Checkpoint request D-29z915 stays open; round 327 adds a fourth per-provider store to ArrangementContext.tsx (noted in b-round-326-checkpoint-addendum.md)."
   }
  ],
  "retro_candidates": [

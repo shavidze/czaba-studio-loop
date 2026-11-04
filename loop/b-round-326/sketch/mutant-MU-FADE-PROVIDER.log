@@ -1,0 +1,51 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b326-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m17 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1705[2mms[22m[39m
+     [32m✓[39m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace[32m 231[2mms[22m[39m
+     [32m✓[39m DP3 the release adds exactly one history entry, Undo restores, the store is empty[32m 123[2mms[22m[39m
+     [32m✓[39m DP4 a window blur mid-trim puts the clip back with no history entry[32m 84[2mms[22m[39m
+     [32m✓[39m DP5 a same-lane move keeps the ref on the preview while React holds the original[32m 122[2mms[22m[39m
+     [32m✓[39m DP6 the readout, the detail panel and the overview bar follow the trim preview[32m 106[2mms[22m[39m
+     [32m✓[39m DP7 a trimEnd drag past the project end updates the project-end readout live[32m 104[2mms[22m[39m
+     [32m✓[39m DP8a a release with no commit converges React state to the preview and clears the store[32m 64[2mms[22m[39m
+     [32m✓[39m DP8b a move back to the start adds no entry and leaves the store empty[32m 104[2mms[22m[39m
+     [32m✓[39m DP5b same lane → other lane → back → release: one entry at the final place, store empty[32m 122[2mms[22m[39m
+[31m     [31m×[31m DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry[39m[32m 78[2mms[22m[39m
+     [32m✓[39m DP9b a video clip move keeps the provider path[32m 88[2mms[22m[39m
+     [32m✓[39m DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing[32m 105[2mms[22m[39m
+     [32m✓[39m DP11 a pointercancel mid-fade reverts the fade and keeps the last readout span[32m 77[2mms[22m[39m
+     [32m✓[39m DP12 a committed write mid-fade wins; release after a refusal restores the last readout[32m 81[2mms[22m[39m
+     [32m✓[39m DP13 a video fade drag keeps the provider path and the committed status[32m 75[2mms[22m[39m
+     [32m✓[39m DP14 a fade dragged back to 0 adds no entry, empties the store and reports no change[32m 74[2mms[22m[39m
+     [32m✓[39m DP15 the status preview getter returns the shown readout during the drag and null after it[32m 64[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry
+[31m[1mAssertionError[22m: expected 2 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m558:46[22m[39m
+    [90m556| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m80[39m)[33m;[39m
+    [90m557| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m120[39m)[33m;[39m
+    [90m558| [39m    [34mexpect[39m([34mrendersOf[39m([32m'ArrangementProvider'[39m))[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m559| [39m    [34mexpect[39m([34mrendersOf[39m([32m'StudioWorkspace'[39m))[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m560| [39m    [34mexpect[39m([34mrendersOf[39m([32m'ArrangementTransport'[39m))[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (17)[39m
+[2m   Start at [22m 05:01:49
+[2m   Duration [22m 3.53s[2m (transform 921ms, setup 0ms, import 1.32s, tests 1.70s, environment 385ms)[22m
+
+
+::error file=/home/runner/b326-scratch/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry,line=558,column=46::AssertionError: expected 2 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:558:46%0A%0A

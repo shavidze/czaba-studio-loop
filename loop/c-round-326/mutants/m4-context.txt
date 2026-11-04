@@ -1,0 +1,10 @@
+      const playingVisits: number[] = [];
+      for (let step = 0; step < 5; step += 1) {
+        key(ctrlRight);
+        const spinUntilC = performance.now() + 200;
+        while (performance.now() < spinUntilC) {}
+        playingVisits.push(Math.round(live(mounted.api).getLivePosition() * 1000) / 1000);
+      }
+      expect(playingVisits).toEqual([2, 6, 10, 16, 16]);
+      expect(live(mounted.api).isPlaying).toBe(true);
+      expect(statusText(mounted)).toBe('No more markers after the playhead');

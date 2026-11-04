@@ -1,0 +1,33 @@
+import { createStore, type StoreApi } from 'zustand/vanilla';
+
+export interface ArrangementStatusPreview {
+  readonly text: string;
+  readonly sequence: number;
+}
+
+export interface ArrangementStatusPreviewState {
+  preview: ArrangementStatusPreview | null;
+  written: number;
+  showPreview: (text: string) => void;
+  clearPreview: () => void;
+}
+
+export type ArrangementStatusPreviewStore = StoreApi<ArrangementStatusPreviewState>;
+
+export function createArrangementStatusPreviewStore(): ArrangementStatusPreviewStore {
+  return createStore<ArrangementStatusPreviewState>()((set) => ({
+    preview: null,
+    written: 0,
+    showPreview: (text) =>
+      set((state) =>
+        state.preview?.text === text
+          ? state
+          : { preview: { text, sequence: state.written + 1 }, written: state.written + 1 },
+      ),
+    clearPreview: () => set((state) => (state.preview === null ? state : { preview: null })),
+  }));
+}
+
+export function statusPreviewKey(preview: ArrangementStatusPreview): string {
+  return `preview-${preview.sequence}`;
+}
