@@ -1,302 +1,267 @@
-# Round 334: PERF-DRAG-PREVIEW stage c2b-iii. ArrangementPeakPath takes primitive props, so fade and move drags stop redrawing the waveform
+# Round 335: PERF-DRAG-PREVIEW stage c3-i. A cross-lane move row in the interactions perf harness, recorded at HEAD
 
-**Planned by:** B, at the round 333 → 334 planning, 2026-11-04.
+**Planned by:** B, at the round 334 → 335 planning, 2026-11-04.
 
-**Decisions** (all in `backlog.json` → `decisions_log_b`, v293; D-29z995…D-29z1003):
-- **D-29z995: round 333 closed as PASS, from C's evidence.** `c-round-333.json`: `taskStatus` PASS, `browserVerified`/`realVerified` true, 10 rows, 0 bugs. Gate 333 published `3f945e3` on both remotes, review 9/10 [K1].
-  - **Stage c2b-ii → done.** C measured trim 21.633, move 26.233 and range 7.267 per move, and 2 commits per click, all equal to B's sketch. The detail Start/End text equals HEAD at 23 samples per viewport.
-  - **A-R333-DP42-FOCUS-PREMISE → info.** It is HEAD behaviour; C saw the same on A and HEAD in the browser.
-- **D-29z996: the gate-333 review.**
-  - Suggestions 1 and 2 need no fix → info GATE333-S1-S2.
-  - Suggestion 3 is GATE333-S3-TYPED-TEXT-DRAG (DP42: text typed into the Start field is replaced when a drag starts). It is HEAD behaviour and the same thing as A-R333-DP42-FOCUS-PREMISE. It goes to `deferred_low_polish` as a question for Saba, because changing it would change behaviour.
-  - Suggestion 4 (doc 232 cites B's sketch numbers for c2b-ii) is fixed in this round's doc edit (§1.3).
-  - The Architecture note "keep" is added as evidence to ARCH-R331-PREVIEW-READERS.
-- **D-29z997: REGRESSION timing, re-checked.** Today is 2026-11-04, 2 days after `regression-last` (2026-11-02) [K9]. The speed rule needs 3 days, so round 334 is new scope. REGRESSION-ROUND-2026-11-05 stays the first round B plans on or after 2026-11-05. Its c2b-ii `scope_additions` row drops "if published", because round 333 shipped in `3f945e3`.
-- **D-29z998: the stage c2b-iii contract,** §0–§1 below.
-- **D-29z999: the consult rulings** (§0.1).
-- **D-29z1000: a custom memo comparator is not an allowed alternative.** Round 331 measured one: its wrapper fiber is counted, so trim got +1 per move (`b-round-331/perf-rowcmp-vs-c331-v1-comparator.txt`).
-- **D-29z1001: the 17 lower perf rows stay record this round.** The fade rows that are already asserted keep their spec budget (≤ 24). Tightening them stays with PERF-CAND-FADE-BUDGET, after c5. The move rows belong to PERF-1b-i and stay record.
-- **D-29z1002: no wait for checkpoint D-29z915.** This round touches neither `StudioWorkspace.tsx` nor the context, so it does not wait for D-29z915, which still has no answer.
-- **D-29z1003: this task.**
+**Decisions** (all in `backlog.json` → `decisions_log_b`; D-29z1004…D-29z1010):
+- **D-29z1004: round 334 closed as PASS, from C's evidence.**
+  - `c-round-334.json`: `taskStatus` PASS, `browserVerified` and `realVerified` true, 13 rows, 0 bugs.
+  - Gate 334 published `0d22ab9` on both remotes [K1].
+  - **Stage c2b-iii → done**, and PERF-CAND-PEAK-PRIMITIVE-PROPS with it. C measured fade 9.833 per move (max 10) and move 24.267 (max 101), equal to B's sketch (`c-round-334/perf-rowcmp-vs-c333.txt`).
+- **D-29z1005: the gate-334 review.**
+  - Finding 1 (`clipWaveformScale` has no production caller) is added as evidence to SIG-R334-CLIPWAVEFORMSCALE-TEST-ONLY.
+  - Finding 2 (the inline dB formula in the context) is added as evidence to SIG-R334-INLINE-DB-GAIN.
+  - Info 3 (doc 232 quotes the sketch numbers) is closed as GATE334-I3: C's measured values equal them.
+  - Info 4 (DP43–DP48 pin exact counts) is accepted as GATE334-I4.
+  - The Architecture note (move `ArrangementPeakPath` into its own file after c3–c5) becomes signal ARCH-R334-PEAKPATH-FILE. It is not scheduled.
+- **D-29z1006: A's three review Lows go to `deferred_low_polish`:** A-R334-REVIEW-WG9-UNDEF, A-R334-REVIEW-DP-ORDER and A-R334-REVIEW-DP43-DETAIL. This round does not own those test files.
+- **D-29z1007: checkpoint D-29z915 is still unanswered**, after rounds 332–334 were published without it. B applies the recorded default, **keep**, as was done for ARCH-R207 (D-29z182):
+  - c3 goes ahead;
+  - moving the preview readers out stays a separate no-behaviour task after c5.
+  - The request stays open (`b-round-334-checkpoint-addendum.md`).
+- **D-29z1008: c3 splits into c3-i and c3-ii,** under L37 and L58.
+  - The harness has no cross-lane scenario today [K3, K5], so no c3 row can be asserted.
+  - **c3-i (this round)** adds the row and records HEAD's values.
+  - **c3-ii** moves `clipLaneDrag` out of provider state [K7] and is measured against c3-i.
+- **D-29z1009: rounds 336 and 337.**
+  - If the round-336 planning falls on or after 2026-11-05, round 336 is the REGRESSION round (speed rule) and round 337 is RETRO.
+  - If it falls before 2026-11-05, round 336 is RETRO, and REGRESSION is the first round planned on or after 2026-11-05.
+  - c3-ii follows both.
+- **D-29z1010: this task.**
 
 **Read first:**
-- From `lessons.md`: L11, L23, L29, L31, L38, L52, L56, L57, L58.
-- A also reads these primitives:
-  - `AGENT_DISCOVERABLE_CODE.md`, for the new exports;
-  - `FORWARDREF_COMPONENT.md`, for the existing component;
-  - `AUDIO_ARCHITECTURE.md`, for Studio.
+- From `lessons.md`: L10, L11, L29, L30, L34, L37, L38, L56, L57, L58.
+- Primitives: `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md` (test creation), and `GEORGIAN_DOCS.md` (docs).
+- This is a test-only change. No component, context or audio code is touched.
 
 **L29 note:** untagged code text in this task is an expected value, a new name, a row id or a loop-artifact path. Facts about `store/` carry `[K#]` (§7).
 
 ## Baseline
-HEAD is `3f945e3` (gate 333, published), with a clean tree: 0 entries in `git status` [K2]. Protected files: 11/11 OK [K8]. No dependency changes.
+- HEAD is `0d22ab9` (gate 334, published), with a clean tree: 0 entries in `git status` [K2].
+- Protected files: 11/11 OK [K8]. No dependency changes.
+- The interactions budget file has 167 rows, and no row or function named for a lane drag exists in `perf/` or `app/` [K5].
+- C round 334's perf result has 167 rows, `complete` true and 0 failures [K16]. 121 of its rows are non-wallclock: `c-round-334/perf-rowcmp-vs-c333.txt` has 121 EQUAL/DIFF lines.
 
 ## 0. Why this round, and B's evidence
-- **What renders today.** In C round 333 (`c-round-333/names-a.json`, 1440×900), every fade move and every same-lane move re-renders `ArrangementPeakPathInner`, although nothing it draws has changed:
-  - each fade commit has 11 components, one of them `ArrangementPeakPathInner` (the lane);
-  - each move commit has 21 components (103 at the second crossing), two of them `ArrangementPeakPathInner` (the lane and the detail panel).
-- **The cause.** `ArrangementPeakPath` is wrapped in `memo` [K5], but it takes the whole `clip` object [K3]. A preview builds a new clip object on every move, so the shallow compare always fails.
-  - From the clip it draws only `clip.id` (the draft-gain key), `clip.sourceOffset`, `clip.duration` and `clip.gainDb` [K3, K5].
-  - Its other inputs are `peaks`, `columns`, `isVideo` and `zoom`.
-- **The cut** (B's sketch, 4 source files and 2 test files):
-  - `model.ts`: a new `gainDbLinearGain(gainDb: number | undefined): number`. `clipLinearGain` delegates to it [K3].
-  - `waveform-zoom.ts`: a new `waveformScaleForGainDb(gainDb, isVideo, zoom)`, with the body of today's `clipWaveformScale`. `clipWaveformScale` delegates to it, so its WZ1 rows stay untouched [K3, K6].
-  - `ArrangementClip.tsx`:
-    - `ArrangementPeakPathProps` swaps `clip: ArrangementClip` for `clipId`, `sourceOffset`, `duration` and `gainDb`;
-    - the inner function keeps the name `ArrangementPeakPathInner`, because the names probe and `renderLog` key on it;
-    - the scale becomes `waveformScaleForGainDb(draftGainDb ?? gainDb, isVideo, zoom)`, which equals HEAD's `{ ...clip, gainDb: draftGainDb }` branch;
-    - the lane call site passes the 4 fields.
-  - `ArrangementDetailPanel.tsx`: the detail call site passes the same 4 fields [K4].
-  - `drag-preview-render.test.tsx`: a new describe block with DP43–DP48.
-  - `clip-gain-waveform.test.tsx`: WG9 and WG10, inside the existing `lane and detail waveforms follow Clip Gain` describe.
-- **Why the drawing cannot change.** The peak shape is `buildPeakShape(peaks, sourceOffset, duration, columns, scale)` before and after; only the source of the 4 values changes. The Clip Gain draft is still read by clip id. Three checks back this:
-  - **jsdom:** the existing WZ, WG and CP rows and the new WG9/WG10 go red under the gain, offset and memo-dependency mutants (below).
-  - **Browser:** the `d` of every lane and detail path equals HEAD at 22 samples per viewport, at both viewports (`b-round-333/wd-compare.txt`, `DIFFS 0` twice) [K19].
-  - **Export:** the export sound does not use this component.
-- **Consults (read-only, this planning):** §0.1.
-- **Not applicable:** `product-designer`, `ableton-arrangement-expert`, reference-first, the screen budget and the YouTube request. This is a perf round, and nothing visible or audible changes.
-- **B's sketch:** `b-round-333/sketch/sketch.patch.txt`.
-  - Scratch: `/home/runner/b333-scratch/sc`, a git repo whose tree equals `3f945e3^{tree}`.
-  - Size: 6 files, 194 insertions, 16 deletions.
-  - `git apply --check` is clean on `store/`.
-- **jsdom on the sketch:**
-  - the covering set (`b-round-333/covering-files.txt`, 155 files) is green, 2459/2459 [K15]. It holds every test that imports `model`, plus the waveform, Clip Gain, detail and drag-preview tests;
-  - typecheck rc 0 (`sketch-typecheck.log`); Biome is clean on the 6 files (`biome-sketch.log`);
-  - the new rows take 39–67 ms against the 5 s default (`new-rows-durations.txt`, L31).
-- **The new rows on HEAD's source** (the sketch's tests with HEAD's 4 source files):
-  - **red:** DP43, DP44, DP47 and DP48. On 2 moves HEAD renders 2 PeakPaths for a fade, 4 for a plain move and 1 for a video fade, plus 1 on a committed fade-only change;
-  - **green, as HEAD pins:** DP45 and DP46 (4 = 2 paths × 2 trim moves), and WG9 and WG10.
-- **Mutants** (`b-round-333/run-mutants.py`, `mutants-summary.txt`). All 9 are red, and every file is byte-restored [K16]:
+**The premise was measured at HEAD,** on the dev server at 1440×900, with `b-round-334/cross-lane-probe.mjs`. It is the round-328 names probe with a cross-lane path. Two runs were identical (`b-round-334/cross-head-stability.txt`); the counts are in `b-round-334/cross-head-1440-summary.txt` [K14].
+- The gesture is a press on the first music clip's name bar, then:
+  - 4 moves of 10 px on its own lane;
+  - 1 move down into the next lane (`stems`), then 4 moves there;
+  - 1 move back up, then 4 moves on its own lane;
+  - release, then Ctrl+Z.
+- **Own lane:** 4 commits of 19, 19, 101 and 19 components. `ArrangementProvider` does not render, and there is no ghost. This equals round 334's `move-moves`.
+- **Entering the other lane:** 2 commits of 101 and 91. The provider renders in the second.
+- **On the other lane:** 4 commits of **87** components each. **The provider renders on every move.** Its hooks 0 and 35 change on every move. B did not map which hooks those are; c3-ii planning maps them.
+  - One ghost is visible in the `stems` lane, `data-blocked="false"`, and its start moves from 1.100 to 2.100.
+- **Back on the own lane:** the ghost is gone, and the commits are again 19, 19, 101 and 19.
+- **Release:** 1 commit of 93. The clip stays on `music`, and Undo reads "Undo: Move clip". Ctrl+Z restores it.
+- **Conclusion:** a cross-lane move costs about 4.5× a same-lane move, and the provider re-renders on every move.
+  - The ghosts live in provider `useState` [K7], published from the clip's pointer handler [K7].
+  - The rendered ghost carries `data-testid="arrangement-lane-move-ghost"` and `data-blocked` [K6].
+  - The perf harness cannot see any of this today. Its `move` drag is horizontal only (`dragNames` [K3]), and its commit records carry only a time and a count [K10]. That is why c3-i comes first.
 
-| Mutant | Change | Red on |
+**Not applicable:** `product-designer`, `ableton-arrangement-expert`, reference-first, the screen budget and the YouTube request. This round changes only test code and docs, and nothing visible or audible.
+
+**Consults:** none this round. The scenario follows the existing `measureDrag` pattern. c3-ii, which changes the store, will consult `performance-optimizer` and `tech-lead`.
+
+## 1. What A changes (ownership)
+A owns exactly these 4 files. Nothing else changes:
+1. `perf/studio-lab-interactions.perf.spec.ts`
+2. `perf/budgets.interactions.json`
+3. `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md`
+4. `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md`, only the sections named in §1.3
+
+`app/**`, `perf/lib/**`, the other perf specs and budget files, `package.json`, the lock file and the protected files (`b-round-318/protected-sha256.txt`, including `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts` and `app/routes/account.downloads.tsx`) stay untouched [K15].
+
+### 1.1 The scenario (`perf/studio-lab-interactions.perf.spec.ts`)
+- **Function.** Add `measureLaneDrag(page, state, clip, result)`.
+  - It runs once in the stopped block, right after the stopped `for (const drag of dragNames)` loop.
+  - It runs once in the playing block, right after the playing loop and before `step = 'pause'`.
+  - Set `step` to `drag lane stopped` and `drag lane playing`.
+  - It runs in every pass and at both CPU rates, like the other drags, so the `.6x` copies exist.
+  - Do not add `'lane'` to `DragName` or `dragNames` [K3]. The existing drags and their row ids stay as they are.
+- **Playing.** As `measureDrag` does: Home, then wait for quiet, then check that playback is running. Push a problem if it is not running before or after.
+- **Grab.** `const grab = await clipHeaderPoint(clip)`, the name bar, and `const target = await emptyLanePointAfterClip(clip)` [K4].
+  - The target lane is `target.trackId`. The clip's lane is `target.clipTrackId`.
+  - Read `undoBefore` and `before = readClipState(clip)`.
+- **Gesture.** Let `s = dragSteps / 6` (10 steps) and `d = dragDistancePx / 3` (40 px) [K3]. Take an in-page timestamp (`nowIn`) at each of `t0` … `t3`:
+  1. **Own lane, out:** `t0`; down at `grab`; move to `(grab.x + d, grab.y)` in `s` steps.
+  2. **Cross:** `t1`; move to `(grab.x + d, target.y)` in 1 step, then to `(grab.x + 2d, target.y)` in `s` steps. Read the ghosts, then `t2`.
+  3. **Own lane, back:** move to `(grab.x + 2d, grab.y)` in 1 step, then to `(grab.x + 3d, grab.y)` in `s` steps. Read the ghosts, then `t3`.
+  4. **Release:** up, `tUp`, then wait for quiet, then `tEnd`, then `snapshot(page, t0, tEnd)`.
+- **Ghost read** (in-page).
+  - **Settle first.** Before each read, settle with one double-`requestAnimationFrame` `page.evaluate`, or with a `locator.waitFor` on the ghost with a timeout of 2 s or less. This keeps a ghost commit that lands late at 6× from becoming a false problem.
+  - Do **not** use `waitForQuiet` here. It can pull a Follow page turn into the whole window (L37).
+  - Then count `[data-testid="arrangement-lane-move-ghost"]` [K6] inside the lane element whose `data-track-id` equals `target.trackId` and whose `data-blocked` is `false`. Also count every lane-move ghost in the document.
+- **Windows.** `firstMove` is the first in-page pointermove after the down, as in `measureDrag`.
+  - The **whole** window is the same as in `measureDrag` [K4]: `firstMove < t < up`.
+  - The **cross** window is the commits and pointermoves with `t1 < t < t2`.
+  - The **lane** window is `firstMove < t < t1` together with `t2 < t < up`. It starts at `firstMove`, not `t0`, so the pointerdown commit (select, active track, range clear) is excluded.
+- **Metric names.** No new row may use the metric `commits-per-move`. DC-KINDS in `perf/lib/report.test.ts` requires every `commits-per-move` row to match `interact.drag.(range|fade|trim|move)…` [K18].
+- **Rows** (`base = interact.drag.lane.<state>`). Each is written through `rateRowId`, as the drag rows are:
+
+| Row | Kind | Value |
 |---|---|---|
-| MU-PEAK-CLIP-PROP-BACK | HEAD's 4 source files | DP43, DP44, DP47, DP48 |
-| MU-PEAK-NO-MEMO (perf mutant) | `ArrangementPeakPath` without `memo` | DP43, DP44, DP46, DP47, DP48 |
-| MU-PEAK-LANE-GAIN-DROPPED | the lane passes `gainDb={undefined}` | CP13, CP14, DP47, WG3, WG5, WZ3 |
-| MU-PEAK-DETAIL-GAIN-DROPPED | the detail panel passes `gainDb={undefined}` | DP47, WG6 |
-| MU-PEAK-DRAFT-IGNORED | the scale ignores the draft gain | CP1, CP3, CP4, CP13, WG4, WG8, WZ3 |
-| MU-PEAK-COMMITTED-WINS | `gainDb ?? draftGainDb` | CP1, CP3, CP4, CP13, WZ3 |
-| MU-PEAK-LANE-OFFSET-ZERO | the lane passes `sourceOffset={0}` | WG3, WG5, WG10, WZ2 |
-| MU-PEAK-DETAIL-OFFSET-ZERO | the detail panel passes `sourceOffset={0}` | WG9, WG10 |
-| MU-PEAK-MEMO-DEPS-STALE | `useMemo` drops `sourceOffset` and `duration` from its dependencies | WG10 |
+| `<base>.move-components-per-move` | deterministic | the whole window's rendered-component sum ÷ its pointermoves (the `measureDrag` formula) |
+| `<base>.move-components-max` | deterministic | the largest commit in the whole window |
+| `<base>.release-commits` | deterministic | commits with `t >= up` |
+| `<base>.cross-components-per-move` | wallclock | the cross window's sum ÷ its pointermoves |
+| `<base>.lane-components-per-move` | wallclock | the lane window's sum ÷ its pointermoves |
+| `<base>.move-restarts` (playing only) | deterministic | starts with `firstMove < t < up` |
+| `<base>.release-restarts` (playing only) | deterministic | starts with `t >= up` |
 
-- **Production perf on the sketch.** The spec ran alone, with nothing else running (L38). `b-round-333/perf-rowcmp-vs-c333.txt` compares it with `c-round-333/perf-interactions-atree-results`:
-  - rc 0, `failures` [], `complete` true, 167 rows, and 36/36 asserted rows pass;
-  - 104 rows are EQUAL and 17 are DIFF [K17], every DIFF lower:
+  Each row's detail holds the move and commit counts of its window, as `windowDetail` does.
 
-| Rows | C round 333 | Sketch |
-|---|---|---|
-| `interact.drag.fade.{stopped,playing}.move-components-per-move` (asserted) (+ `.6x`, and `fade.30.playing`) | 10.817 | **9.833** |
-| `interact.drag.fade.{stopped,playing}.move-components-max` (asserted) (+ `.6x`) | 11 | **10** |
-| `interact.drag.move.{stopped,playing}.move-components-per-move` (+ `.6x`) | 26.233 | **24.267** |
-| `interact.drag.move.{stopped,playing}.move-components-max` (+ `.6x`) | 103 | **101** |
+- **Liveness: `interact.harness.drag-lane-live`.** Use `setLive`, which merges the two states. Call it **after** the reset. (`measureDrag` calls `setLive` before `resetAfterDrag`; the lane drag does not.) The value is 1 only when all four hold:
+  - (a) at the cross read, the target-lane non-blocked ghost count is ≥ 1;
+  - (b) at the back read, the document ghost count is 0;
+  - (c) after the release, the clip's closest `[data-track-id]` equals `target.clipTrackId`, and its `data-clip-start` differs from `before.start`;
+  - (d) after the reset, a re-read gives a clip state equal to `before` (start, fade-in, width, no range) and a lane equal to `target.clipTrackId`. (d) is this re-read. It is not a check of the `problems` array.
 
-  These rows are EQUAL: trim, range, click, select and `interact.harness.hook-live` (1). The loaded `.6x` replicate moves the same way (L37). This perf run was on the sketch before WG9, WG10 and DP48 were added; those are test-only, so the source it measured is the same as the final patch.
-- **Browser names probe on the sketch.** A dev server with its own `cacheDir` ran on :5198. The warm-up attempt crashed on a cold compile; it is environment-invalid and kept as `names-warmup.log`. The output is `b-round-333/names-sketch.json`, and `names-compare.txt` compares it with C round 333:
-  - `harness-clip-click` [100, 0], unchanged;
-  - `fade-moves` [10, 10, 10, 10], was [11 ×4]. Each commit loses one `ArrangementPeakPathInner`;
-  - `trim-moves` [22, 22, 22, 22], unchanged;
-  - `move-moves` [19, 19, 101, 19], was [21, 21, 103, 21]. Each commit loses two `ArrangementPeakPathInner`.
+  When any of these fails, push a problem that names the failed letter and the values.
+  - Every pushed problem becomes a run failure: `buildPerfReport` copies each pass's `problems` into `failures` [K17].
+  - So a correct run has `failures` [], and a mutant run has a non-empty `failures` that names the condition.
+- **Reset.** Ctrl+Z, as `resetAfterDrag` does for the non-range drags.
+  - The same restored check applies: start, fade-in, width, no range, and the Undo title back at `undoBefore`.
+  - It also checks that the clip's lane `data-track-id` equals `target.clipTrackId`.
+  - A may call `resetAfterDrag` and add the lane check after it, or extend it with an optional lane argument. The other drags' behaviour must not change.
+- **Sequence text.** Add the lane drag to `interactionSequence`: one new entry after the stopped drags and one after the playing drags. Use the exact gesture words of the steps above.
+- **Kind ruling (L37).** The segment windows are bounded by in-page timestamps, so their rows are `wallclock`. The whole-window rows use the same bounds as the existing drag rows, which are `deterministic` [K13].
+  - **Pre-ruled (L10):** if a `deterministic` row of the table above varies across the 3 passes of one rate in A's run (the determinism check fails), A changes that row's kind to `wallclock` and reports the values per pass.
+  - That is the only allowed kind change; it is not a STOP. Any other determinism failure is a STOP.
 
-  No commit gains a name.
-- **Browser waveform probe on the sketch.** The probe is `b-round-333/waveform-d-probe.mjs`; its outputs `wd-{sketch,head}-{1440,1280}.json` are compared by `wd-compare.py` → `wd-compare.txt`.
-  - It reads every lane and detail `path d` and the zoom value at 22 samples:
-    - selected;
-    - fade, move, trim-start and trim-end, each mid-drag, after release and after Undo;
-    - typed Clip Gain `-3`;
-    - a Clip Gain fader drag: mid-drag, release and Undo;
-    - zoom 2×, and a move at 2×;
-    - back to 1×, with Undo.
-  - The sketch equals HEAD at every sample, with 0 page errors.
-  - **Known limit:** the probe's trim-end drag did not change the clip at either viewport (`changed False`). The clip's right edge is probably outside the view on the long demo clip. At 1280×720 the trim-start drag did not change it either, as C also saw in round 333. Trim-end in the browser is therefore C's own sample (§2.2 WAVEFORM-D); in jsdom, DP46 and WG10 cover it.
+### 1.2 Budgets (`perf/budgets.interactions.json`)
+- Add exactly 26 rows, all `mode: "record"` with `budget: null` and owner `PERF-DRAG-PREVIEW-c3-i`:
+  - stopped: 5 rows;
+  - playing: 7 rows;
+  - `interact.harness.drag-lane-live` (`deterministic`, `record`);
+  - the `.6x` copy of each of these 13.
+- Each `note` says the scenario in one sentence, and the window for the window rows.
+- Why the liveness row is `record`, unlike `interact.harness.drag-move-live` (assert `== 1`) [K13]: L58 says an assert ships only from C's command run on B's sketch, and B has not run this spec on a sketch. c3-ii converts it to assert `== 1` after C round 335 measures it.
+- The existing 167 rows are unchanged, byte for byte [K5].
 
-### 0.1 Consults (D-29z999)
-- **`performance-optimizer`:** safe to land.
-  - `draftGainDb ?? gainDb` equals HEAD, because `useMixDraftValue` returns `number | undefined` (`ArrangementMixFader.tsx:30`) and the draft key is unchanged.
-  - The detail call site rightly passes no `isVideo` or `zoom`: it renders only in the `!selection.isVideo` branch.
-  - DP43 and DP44 also guard the identity of `peaks`, `peakColumns` and `waveformZoom`.
-  - The 17 rows stay record (D-29z1001).
-  - `gainDbLinearGain` belongs in `model.ts`, so the waveform and the audio gain share one formula.
-  - Gaps it found, now closed:
-    - the render counts alone could not catch a stale path → MU-PEAK-MEMO-DEPS-STALE + WG10;
-    - the detail offset wiring was not proven → MU-PEAK-DETAIL-OFFSET-ZERO + WG9. Both mutants survived B's first sketch; both are red now.
-  - Noted: DP45 is not red under MU-PEAK-NO-MEMO (its parents render once per move anyway), so DP45 is a HEAD pin, not a memo row.
-- **`tech-lead`:** approve, with additions.
-  - Keep both names; they follow `masterLinearGain` and `clipLinearGain`.
-  - The helpers belong in lib.
-  - The 6-file scope is right for one bounded round.
-  - The detail offset mutant (added) and a video fade row (DP48, added).
-  - STOP conditions (§1, adopted).
-  - It also offered a `Pick<ArrangementClip, 'gainDb'>` widening instead of the two new exports. B keeps the helpers (D-29z999): `performance-optimizer` preferred one dB formula in `model.ts`, the widening changes two existing signatures, and the measured evidence is on the helper version.
-- **Both consults:**
-  - `clipWaveformScale` keeps no production caller (only `waveform-zoom.test.tsx`). It stays as a test-used delegate this round, and doc 232 records it as a known test-only export (§1.3). Removing it means editing `waveform-zoom.test.tsx`, which is out of scope.
-  - A third inline `10 ** (gainDb / 20)` sits in `ArrangementContext.tsx:3402`. It is a doc 232 TODO and the signal SIG-R334-INLINE-DB-GAIN; it is not in this round.
+### 1.3 Docs
+**Doc 232:**
+- **l.1:** append `, ეტაპი c3-i — cross-lane move-ის perf row` inside the parentheses.
+- **l.4:** exactly `**სტატუსი:** In Progress (stage c3-i of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4, c5; C round 335 PASS)` (L28).
+- **l.5:** add `perf/studio-lab-interactions.perf.spec.ts` to the list.
+- **New section** `### ეტაპი c3-i: cross-lane move-ის perf row (round 335, D-29z1008)`, after the c2b-iii section. It says, in Georgian:
+  - the HEAD premise from §0, with its numbers;
+  - the gesture and its three windows;
+  - the 26 rows and why they are `record`;
+  - that c3-ii moves `clipLaneDrag` out of provider state and is measured against these rows.
+- **Other sections:**
+  - one entry each under files, testing and problems (the whole-window vs segment-window kind ruling);
+  - TODO: c3-ii with the liveness-row conversion.
+- The `^## ` heading count stays 7 [K12].
 
-## 1. Contract
-**Apply `b-round-333/sketch/sketch.patch.txt` with `git apply` from `store/`.** §1.1–§1.2 describe that patch. Do not retype it, because the mutants and the claims match its exact lines. §1.3 (doc 232) is the only edit by hand. If the patch does not apply, STOP.
+**Doc 168 (L34):** these three sections are granted and must match the live spec after the edit:
+- `### Pass-ის თანმიმდევრობა`: the lane drag in both blocks.
+- `### Liveness-ის წესები`: one row for `interact.harness.drag-lane-live`, conditions (a)–(d).
+- `## მეტრიკები`: a short paragraph on the `interact.drag.lane.*` rows (kinds, windows, record, owner).
 
-1. **Code.**
-   - `app/lib/arrangement/model.ts`: adds `gainDbLinearGain` directly below `clipLinearGain`. `clipLinearGain` returns `gainDbLinearGain(clip.gainDb)`.
-   - `app/lib/arrangement/waveform-zoom.ts`: imports `gainDbLinearGain` instead of `clipLinearGain` and adds `waveformScaleForGainDb`. `clipWaveformScale` returns `waveformScaleForGainDb(clip.gainDb, isVideo, zoom)`.
-   - `app/components/arrangement/ArrangementClip.tsx`:
-     - the props interface;
-     - the inner function's parameters (`clipId`, `sourceOffset`, `duration`, `gainDb`);
-     - the scale line and the `useMemo` dependencies;
-     - the import;
-     - the lane call site.
-   - `app/components/arrangement/ArrangementDetailPanel.tsx`: the detail call site only.
-
-   Nothing else in these files changes. `StudioWorkspace.tsx`, `ArrangementLane.tsx`, `ArrangementContext.tsx` and `perf/**` stay untouched [K18].
-2. **Tests.** No existing `it(` or `expect(` changes [K7].
-   - `drag-preview-render.test.tsx` gets the describe `PERF-DRAG-PREVIEW stage c2b-iii — the peak paths skip moves that keep their drawn fields`:
-     - **DP43:** two fade-in moves redraw the clip view (2 renders, `data-fade-in` `3.000`) and render `ArrangementPeakPathInner` 0 times.
-     - **DP44:** two same-lane moves render the detail content twice (Start reads `5`) and render `ArrangementPeakPathInner` 0 times.
-     - **DP45 (HEAD pin):** two trim-start moves render `ArrangementPeakPathInner` exactly 4 times (lane + detail, on each move).
-     - **DP46 (HEAD pin):** the same for two trim-end moves.
-     - **DP48:** a video fade-in move keeps the provider path (`ArrangementProvider` renders once) and renders `ArrangementPeakPathInner` 0 times.
-     - **DP47:**
-       - a committed change of `fadeIn` only renders the clip view and 0 PeakPaths;
-       - a committed `gainDb: -6` renders exactly 2 (lane + detail).
-   - `clip-gain-waveform.test.tsx`, inside the existing describe:
-     - **WG9 (HEAD pin):** with `s1` selected (`sourceOffset` 0.5), the detail `d` equals `buildPeakShape` from offset 0.5 at 480 columns, and differs from the offset-0 shape.
-     - **WG10 (HEAD pin):** a committed `sourceOffset` 1.5 on `s1`, with the same duration, keeps the lane's column count. It changes both `d` strings, and each equals its expected shape.
-3. **Doc 232** (`docs/implementation/2026/quarter-IV/232-perf-drag-preview.md`):
-   - **l.1:** inside the parentheses, after `ეტაპი c2b-ii — Clip details-ის Start/End ტექსტი`, add `, ეტაპი c2b-iii — waveform-ის primitive props`.
-   - **l.4** becomes exactly `**სტატუსი:** In Progress (stage c2b-iii of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3–c5; C round 334 PASS)` [K11]. This is the L28 post-PASS form. It replaces the old `round 333, C verifies` wording, which was the other half of gate-333 suggestion 4 (D-29z996).
-   - **l.5:** add `` `app/lib/arrangement/waveform-zoom.ts`, `app/lib/arrangement/model.ts` `` to the file list [K12].
-   - **New section** `### ეტაპი c2b-iii: ArrangementPeakPath-ის primitive props (round 334, D-29z998)`, after the c2b-ii section and before `### განხილული ალტერნატივები`. Items 39–42:
-     - **39, the problem:** a new clip object on every preview move breaks the memo; the counts from C round 333;
-     - **40, the props:** the four props, the inner name kept, and `draftGainDb ?? gainDb`;
-     - **41, the helpers:** the two helpers, and `clipWaveformScale` kept as a test-used delegate with no production caller;
-     - **42, the pins:** the trim pins (DP45, DP46), WG9/WG10, and the browser `d` equality.
-   - **`### განხილული ალტერნატივები`** gains three entries:
-     - a custom `memo` comparator (rejected, D-29z1000: the wrapper fiber is counted, trim +1 per move);
-     - passing `clip` and comparing selected fields inside the component (rejected: the same comparator problem);
-     - `Pick<ArrangementClip, 'gainDb'>` parameters instead of the new helpers (not chosen, D-29z999).
-   - **`## შეცვლილი ფაილები`:**
-     - add `app/lib/arrangement/waveform-zoom.ts (ეტაპი c2b-iii: waveformScaleForGainDb)` and `app/lib/arrangement/model.ts (ეტაპი c2b-iii: gainDbLinearGain)`;
-     - the `ArrangementClip.tsx` entry gains ` (ეტაპი c2b-iii: ArrangementPeakPath-ის primitive props)`;
-     - the `ArrangementDetailPanel.tsx` entry gains `; ეტაპი c2b-iii: PeakPath-ის call site`;
-     - the test-file entry gains `; round 334-ში DP43–DP48 და clip-gain-waveform.test.tsx-ში WG9–WG10`.
-   - **`## პრობლემები და გადაწყვეტები`** gains one Problem → Solution entry: the PeakPath render on every fade and move. It is solved by primitive props and guarded by DP43, DP44, DP47 and DP48.
-   - **`## ტესტირება`:**
-     - in the c2b-ii perf entry, the last sentence `რეალურ მნიშვნელობებს C ზომავს ამ რაუნდში.` becomes ``C round 333-მა იგივე მნიშვნელობები გაზომა (`c-round-333/perf-rowcmp-vs-c332.txt`, `names-compare.txt`).`` (gate-333 suggestion 4, D-29z996);
-     - a new entry names DP43–DP48 and WG9–WG10, plus the perf, names and waveform numbers cited to B's sketch (`b-round-333/perf-rowcmp-vs-c333.txt`, `names-compare.txt`, `wd-compare.txt`). C measures the real ones. Name only rows that exist (L26).
-   - **`## TODO`:**
-     - remove the c2b-iii bullet;
-     - in the stage-c bullet, `c2 დასრულდა c2b-iii-ის გარდა` becomes `c2 დასრულდა`;
-     - add GATE333-S3-TYPED-TEXT-DRAG as a question for Saba (a deferred Low; HEAD behaviour);
-     - add SIG-R334-INLINE-DB-GAIN (`ArrangementContext.tsx` → `gainDbLinearGain`) and the test-only `clipWaveformScale`.
-   - The seven TEMPLATE headings stay in order (`^## ` count 7) [K12].
-
-**Ownership:** A edits exactly these 7 files: the 6 patch files and doc 232. These stay untouched:
-- every other component, the context and `perf/**`;
-- every protected file.
-
-A may strengthen the new rows, never weaken them.
-
-**STOP conditions** (L11): write "STOP — needs B ruling" at the top of `a-round-334.md` and change nothing else when:
-- the patch does not apply, or A-CLAIMS differs from the planning output;
-- any existing CP, WG1–WG8, WZ or DP1–DP42 expectation would have to change;
-- a covering test is red, or above 50 % of its timeout;
-- a mutant is not red on its rows;
-- a type assertion or a fake `ArrangementClip` object becomes necessary;
-- a third `<ArrangementPeakPath` call site appears, or removing `clipWaveformScale` looks necessary.
-
-**Neighbour behaviour that could break** (C covers each one in §2.2):
-- the lane and detail waveforms during fade, move, trim, Clip Gain (typed and fader drag), zoom and Undo;
-- the video clip's drawing (gain only, zoom ignored);
-- the export sound;
-- anonymous `/studio-lab` access and purchase protection.
+No other section of doc 168 changes.
 
 ## 2. Acceptance
 
-### 2.1 A's rows
-| Row | Expected |
-|---|---|
-| A-CLAIMS | Before editing, run `bash b-round-333/claims-334.sh` from the loop root. The output must equal `b-round-333/claims-334-planning-output.txt`. Any difference is a STOP |
-| A-IMPL | `git apply b-round-333/sketch/sketch.patch.txt`, then §1.3 by hand |
-| A-CLAIMS-AFTER | Save as `a-round-334/claims-after.txt`. It must equal `b-round-333/claims-334-sketch-output.txt` except:<ul><li>K2: `3f945e3 7`.</li><li>K11: the new l.4.</li><li>K12: `1 1 1 7` (HEAD and the sketch print `0 0 0 7`).</li><li>K7: higher only if A strengthens a row.</li></ul> |
-| A-SCOPE | `git status --short` lists exactly 7 modified files and nothing untracked |
-| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0, and K10 stays **16**. `npx biome check` on the 6 patch files is clean |
-| A-UNIT | `npx vitest run $(cat <loop>/b-round-333/covering-files.txt)` (155 files): all green, 2459 or more. List any test above 50 % of its timeout (L31) |
-| A-MUTANT | On a scratch copy, never in `store/`, run `python3 -I b-round-333/run-mutants.py <scratch>`.<ul><li>The scratch must be a git repo whose HEAD tree is `3f945e3^{tree}`, because MU-PEAK-CLIP-PROP-BACK reads `git show HEAD:`.</li><li>Use `git add -f public/middle-east.mp3` (A-333 note).</li><li>All 9 must be red on the rows in §0, with `restored` true.</li></ul> |
-| A-REVIEW | Required: 7 changed files. Run the real `code-reviewer` subagent on the 7 files and pass its findings and Architecture note to B |
-
-A does not run browser or perf rows; C runs them.
-
-### 2.2 C's rows
-C writes `c-round-334.md` and `c-round-334.json` as it goes, with **all L57 fields**:
-- `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, and an `origin` for each finding;
-- `assertsSpecified` = 14:
-  - 8 jsdom rows: DP43–DP48, WG9 and WG10;
-  - 4 browser or perf rows: DRAG-NAMES, PERF, WAVEFORM-D and D-ROWS;
-  - VIDEO-WAVE and G334-AUTH;
-- `mutantsRecorded` = 9, the `run-mutants.py` set; `mutantRedOnSketch` = true, evidence `b-round-333/mutants-summary.txt`; `mutantRedOnTree` from C's own run;
-- `gateChecksNamed` = 6; `gateChecksRunOnSketch` = 1 (typecheck, `b-round-333/sketch-typecheck.log`). The full suite stays a gate row;
-- `chainHeadGateRunGreen` = true, evidence `gates/gate-round-333.json` and `gates/round-333/verify.log`.
-
-**Browser rows** compare A's tree (:5173) with HEAD `3f945e3` on a second dev server that has its own Vite `cacheDir` (L38), at **1440×900 and 1280×720**, unless the row says otherwise. A cold-compile timeout is environment-invalid: replace it and keep the original.
-
-| Row | Action | Expected |
+### 2.1 A rows (A writes `a-round-335.md` and `a-round-335/`)
+| Row | Command | Pass |
 |---|---|---|
-| CLAIMS | `bash b-round-333/claims-334.sh`, first (L56) | Equal to A-CLAIMS-AFTER |
-| SOURCE-SCOPE | `git status`; `git diff --stat`; protected sha | <ul><li>7 modified files, nothing untracked.</li><li>`git apply -R --check b-round-333/sketch/sketch.patch.txt` passes. Only test hunks may differ, and only if A strengthened a row with no `expect(` removed.</li><li>`git diff --quiet` passes for `StudioWorkspace.tsx`, `ArrangementLane.tsx`, `ArrangementContext.tsx` and `perf/`.</li><li>Protected files 11/11.</li></ul> |
-| UNIT | On C's scratch, run `drag-preview-render`, `clip-gain-waveform`, `waveform-zoom` and `clip-gain-pointer-preview` ×3 | Green on every run; DP43–DP48, WG9 and WG10 present once each |
-| MUTANT | `run-mutants.py` on C's scratch (git HEAD tree = `3f945e3^{tree}`), plus one mutant of C's own | As A-MUTANT. C's own mutant is red on the row C names |
-| **DRAG-NAMES (browser)** | `node b-round-328/names-probe.mjs <A base> <out>` on A's tree, warm server, 1440×900 | Per-commit counts and name multisets equal `b-round-333/names-sketch.json`:<ul><li>`harness-clip-click` [100, 0];</li><li>`fade-moves` [10, 10, 10, 10];</li><li>`trim-moves` [22, 22, 22, 22];</li><li>`move-moves` [19, 19, 101, 19].</li></ul>Compared with `c-round-333/names-a.json`, only `ArrangementPeakPathInner` is lost (1 per fade commit, 2 per move commit), and nothing is gained |
-| **PERF** | Production build of A's tree. Run `perf/studio-lab-interactions.perf.spec.ts` **alone**, after a browser warm-up (L38). Compare with `python3 -I b-round-329/perf-rowcmp.py c-round-333/perf-interactions-atree-results/latest-interactions.json <C's latest-interactions.json>` | <ul><li>rc 0, `failures` [], all asserted rows pass.</li><li>`interact.harness.hook-live` reads 1 (SIG-R333-HOOK-LIVE-MARGIN). 0 is a FAIL.</li><li>Every non-wallclock row outside the 17 in §0 is `EQUAL` to C round 333 (104 on B's sketch). Any other `DIFF` is a finding, reported with its number.</li><li>The 17 rows are **record** this round, except the asserted fade rows, which keep their spec budget. A value at or below B's sketch value passes; a value above it is a finding, reported with its number.</li></ul> |
-| **WAVEFORM-D (browser)** | Run `node b-round-333/waveform-d-probe.mjs <base> <out> <w> <h>` on A and on HEAD, at both viewports, then `python3 -I b-round-333/wd-compare.py <dir>`. The script reads `wd-sketch-*` and `wd-head-*`, so name A's files `wd-sketch-*`.<br>**Plus C's own trim-end sample:** scroll or zoom until the first music clip's right edge is in view. Drag the trim-end edge 3 moves of 10 px to the left. Read the lane and detail `d` mid-drag, after release and after Ctrl+Z, on A and on HEAD | <ul><li>`DIFFS 0` at both viewports; 0 page errors; 22 samples each.</li><li>The trim-end sample changes the clip (a `data-*` attribute or the style differs), and its `d` strings equal HEAD's at all three points.</li><li>If C cannot reach the trim-end edge, C reports it as a limit with the attempts, not as a PASS.</li></ul> |
-| **VIDEO-WAVE (browser)** | The demo library has no video source. Add one as `b-round-328/rows.mjs` does: `page.setInputFiles('[data-testid="arrangement-video-input"]', '/home/runner/czaba-project/store/public/videos/hero/1.mp4')`, on A and on HEAD. Read the video clip's `arrangement-clip-waveform` `d` at zoom 1× and 4×, after a move and after Undo, on A and on HEAD | A equals HEAD at every sample. The video `d` at 1× equals the one at 4× (video ignores zoom), as WZ4 asserts in jsdom. If the video lane draws no waveform, record that it does so on both trees |
-| **D-ROWS (browser)** | `ROWS_DIR=<absolute c-round-334/rows dir> node b-round-328/rows.mjs <base> <tag>` on A and on HEAD, then `python3 b-round-328/rows-diff.py <dir>/rows-head.json <dir>/rows-a.json` | `DIFFS 0`; no page errors on either tree; the EXPORT WAV sha equals HEAD's at both viewports |
-| G334-AUTH | As G330-AUTH (`c-round-330/g330-auth.cjs`), at both viewports, in fresh anonymous contexts | <ul><li>`/studio-lab`: the anonymous workspace and the demo badge, `auth_user` null.</li><li>`/studio/middle-east`: "Sign in required" and 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401.</li></ul> |
-| DOCS | Read doc 232 | Matches §1.3:<ul><li>l.1 and l.4 are byte-exact, and l.5 names both lib files.</li><li>The c2b-iii section has items 39–42.</li><li>These are all present:<ul><li>the three alternatives;</li><li>the files entries;</li><li>the problem entry;</li><li>the c2b-ii testing sentence;</li><li>the new testing entry;</li><li>the TODO changes.</li></ul></li><li>The 7 headings are in TEMPLATE order.</li><li>Every DP, WZ, WG and CP id the doc cites exists as an `it(` row.</li></ul> |
+| A-CLAIMS | `bash b-round-334/claims-335.sh` before any edit | Equals `b-round-334/claims-335-planning-output.txt` (empty diff). A mismatch is a STOP |
+| A-TYPE | `npm run typecheck` (it covers `perf/`; Biome does not, L30) | rc 0 |
+| A-LINT | `npm run lint` | rc 0, diagnostic count unchanged |
+| A-PERF | Production perf, **alone** (L38), once: `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts` | <ul><li>rc 0, `failures` [], `complete` true, **193** rows.</li><li>`interact.harness.drag-lane-live` and its `.6x` copy read 1 in every pass.</li><li>`python3 -I b-round-329/perf-rowcmp.py c-round-334/perf-results/latest-interactions.json <A's latest-interactions.json>` prints `EQUAL` for every one of the 121 pre-existing non-wallclock rows, 0 `DIFF`, and 18 `NEW`.</li><li>Save the results and the rowcmp output under `a-round-335/`.</li></ul> |
+| A-PREMISE | From A's results | <ul><li>**STOP row:** at 1×, stopped and playing, `cross-components-per-move` > `lane-components-per-move`. If this fails, write a STOP with the numbers: the harness is not seeing the cross-lane cost B measured in §0.</li><li>**Report only:** `interact.drag.lane.<state>.move-components-max` against `interact.drag.move.<state>.move-components-max`. B did not map the dev probe's 101-component enter commit, so this is not a STOP.</li><li>Report all values.</li></ul> |
+| A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs perf/lib/report.test.ts`. This is the scratch config outside `store/` (GATE304-M1) | 34/34 pass, as at HEAD (`b-round-334/perf-lib-report-head.log`) [K19]. DC-KINDS must stay green with the 26 new rows |
+| A-MUTANT (liveness red-proof) | <ul><li>A scratch copy of A's tree, not `store/`.</li><li>Mutant MU-LANE-NO-CROSS: in the cross step, use `grab.y` in place of `target.y`.</li><li>Run the spec once, alone.</li></ul> | <ul><li>`interact.harness.drag-lane-live` reads 0.</li><li>A problem naming condition (a) is pushed.</li><li>The scratch is discarded.</li><li>Save the log and results under `a-round-335/mutant/`.</li></ul> |
+| A-SCOPE | `git status --short` | Exactly the 4 files of §1, 0 untracked; `app/` and `perf/lib/` clean [K15] |
+| A-REVIEW | The real `code-reviewer` subagent on the 4 changed files (the 3+ files rule) | <ul><li>Report its score and findings.</li><li>A Medium+ finding inside the grants is fixed and then re-reviewed.</li><li>Code changed after the review goes back to the reviewer (L11).</li></ul> |
 
-**Gate rows** (not claimed by C): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
+A does not run the full vitest suite or `npm run verify` (gate rows).
 
-**Ableton conformance:** not applicable. This is a perf round, and the drawing is held to HEAD.
+### 2.2 C rows (C writes `c-round-335.md`, `c-round-335.json` and `c-round-335/`)
+| Row | How | Pass |
+|---|---|---|
+| CLAIMS | `bash b-round-334/claims-335.sh` at start and end | The differences from `claims-335-planning-output.txt` are exactly these:<ul><li>K2: `0d22ab9 4`;</li><li>K5: `193` plus a non-zero hit count;</li><li>K11: the new l.4;</li><li>K12: `1 1 1 7 11 ≥1`.</li></ul>K17–K20 are unchanged. Anything else is a finding |
+| SOURCE-SCOPE | `git status`, `git diff --stat` | <ul><li>Exactly the 4 files; 0 untracked.</li><li>`app/` and `perf/lib/` unchanged [K15]; protected 11 OK [K8].</li><li>`DragName` and `dragNames` unchanged [K3].</li><li>The 167 old budget rows are byte-equal: compare them by id with `git show HEAD:perf/budgets.interactions.json`.</li></ul> |
+| PERF | Production build of A's tree. Run the spec alone, after a browser warm-up (L38), then run `perf-rowcmp.py` vs `c-round-334/perf-results/latest-interactions.json` | <ul><li>rc 0, `failures` [], `complete` true, 193 rows, and every asserted row passes.</li><li>All 121 pre-existing non-wallclock rows are `EQUAL`. Any `DIFF` is a finding, reported with its number.</li><li>18 rows print `NEW`.</li><li>`interact.harness.drag-lane-live` (and `.6x`) reads 1 in all 3 passes.</li><li>`interact.harness.hook-live` reads 1.</li></ul> |
+| PREMISE | From C's results | <ul><li>At 1× and 6×, stopped and playing: `cross-components-per-move` > `lane-components-per-move`.</li><li>`move-components-max`, lane against move: record only.</li><li>Record every new row's 3 pass values in `c-round-335/lane-rows.txt`. That file becomes c3-ii's baseline.</li><li>A deterministic new row that varies across passes is a finding, unless A ruled it `wallclock` under §1.1.</li></ul> |
+| MUTANT | <ul><li>C re-runs MU-LANE-NO-CROSS on its own scratch.</li><li>C adds one mutant of its own, for example dropping condition (b)'s document count or skipping the release lane check, chosen so it fails a different condition.</li></ul> | Both make the live row 0 with a problem naming the condition. Files are restored (`cmp`) |
+| CROSS-NAMES (browser) | `node b-round-334/cross-lane-probe.mjs <base> <out>` on A's tree (:5173) and on HEAD (git archive, own Vite `cacheDir`, L38), at 1440×900 | <ul><li>Both equal `b-round-334/cross-head-1440.json` in commit counts, rendered counts, ghosts, tracks and the Undo title.</li><li>The app is unchanged, so A's tree must draw the same.</li><li>The provider renders on each of the 4 cross-lane moves on both trees.</li></ul> |
+| HARNESS-READ | Read the new function against §1.1 | <ul><li>The gesture, all three windows (lane from `firstMove`) and the four liveness conditions are present as specified.</li><li>The ghost reads settle with rAF or `waitFor`, not `waitForQuiet`.</li><li>`setLive` comes after the reset, and (d) is a re-read.</li><li>The reset checks the lane.</li><li>The other drags' code paths are unchanged in the diff.</li></ul> |
+| PERF-LIB | The A-PERF-LIB command | 34/34 pass; DC-KINDS green |
+| G335-AUTH | As G334-AUTH (`c-round-330/g330-auth.cjs`), at both viewports, in fresh anonymous contexts | <ul><li>`/studio-lab` shows the anonymous workspace and demo badge, with `auth_user` null.</li><li>`/studio/middle-east` shows "Sign in required" and 0 `audio[src]`.</li><li>`/api/studio-token` with no header returns 401.</li></ul> |
+| DOCS | Read doc 232 and doc 168 | <ul><li>§1.3 is matched: l.1, l.4 (byte-exact) and l.5.</li><li>The c3-i section has the §0 numbers.</li><li>The files, testing, problems and TODO entries are present.</li><li>Seven `## ` headings, in TEMPLATE order.</li><li>Doc 168's three granted sections match the live spec and budgets (L34).</li><li>Nothing else in doc 168 changed: `git diff` shows hunks only inside those sections.</li></ul> |
 
-## 3. Not in scope
-- **Later stages:**
-  - the ArrangementDetailClipGain memo (signal PERF-CAND-DETAIL-CLIPGAIN-MEMO);
-  - c3: cross-lane ghosts;
-  - c4: group moves;
-  - c5: video clips;
-  - the record → assert conversions (PERF-CAND-FADE-BUDGET).
-- **For checkpoint D-29z915:** the preview-readers module, the overview `Pick` projection (SIG-R332-OVERVIEW-PICK), `memo(ArrangementLane)` and the timeline width from a store.
-- **Other:**
-  - GATE333-S3-TYPED-TEXT-DRAG (a question for Saba; no behaviour change);
-  - SIG-R334-INLINE-DB-GAIN (the context's inline dB conversion);
-  - removing `clipWaveformScale`;
-  - `perf/budgets.interactions.json`, including the hook-live margin;
-  - the protected files: `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts`, `app/routes/account.downloads.tsx` and the rest of `b-round-318/protected-sha256.txt`;
-  - commits and pushes (root only).
+**L57 fields:** C writes all of them:
+- `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`;
+- an `origin` per finding;
+- `assertsSpecified`, `mutantsRecorded`;
+- `mutantRedOnSketch`: `null`, with the reason "B ran no sketch; c3-i rows are record, L58";
+- `mutantRedOnTree`;
+- `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`.
+
+**Gate rows** (not claimed by C): full vitest, build, Biome, typecheck, `npm run verify` and e2e smoke.
+
+**browserVerified:** CROSS-NAMES, PERF and G335-AUTH are real browser rows that can run here. None needs the backend.
+
+**Ableton conformance:** not applicable. This round adds a measurement and changes no behaviour.
+
+## 3. Neighbouring behaviour that could break
+- **Pre-existing perf rows**, for example through state left behind by the new drag. PERF requires all 121 to be `EQUAL`.
+- **Later rows in the pass** (`play`, `pause`, the 30-clip block, `select`) if the reset leaves the clip elsewhere. The reset's lane check and the `EQUAL` rows cover this.
+- **The harness's own vacuity.** A cross step that never leaves the lane would record same-lane numbers. Liveness condition (a) and MU-LANE-NO-CROSS cover this.
+
+## 4. STOP conditions (A)
+- A-CLAIMS mismatch.
+- Any pre-existing row `DIFF`.
+- A-PREMISE fails.
+- The mutant does not turn the live row 0.
+- Any change needed outside the 4 files.
+- A determinism failure other than the pre-ruled kind change.
+
+## 5. Not in scope
+- **c3-ii:**
+  - the `clipLaneDrag` store;
+  - the provider hooks seen in §0;
+  - converting the c3-i rows to assert;
+  - jsdom DP rows for ghosts.
+- **Later stages:** c4 (groups), c5 (video), PERF-CAND-FADE-BUDGET.
+- **For checkpoint D-29z915:** the preview-readers module, ARCH-R334-PEAKPATH-FILE, SIG-R334-INLINE-DB-GAIN and removing `clipWaveformScale`.
+- **Deferred Lows:** A-R334-REVIEW-WG9-UNDEF, -DP-ORDER and -DP43-DETAIL.
+- **Root only:**
+  - `vitest.config.ts`: GATE304-M1. Nothing in `perf/lib` changes, so no scratch-config row is needed;
+  - commits and pushes.
 
 ## 7. Claims
-Run `bash b-round-333/claims-334.sh` from the loop root (`CLAIMS_STORE=<dir>` points it at another tree). The expected output at HEAD is `b-round-333/claims-334-planning-output.txt`. On B's sketch it is `b-round-333/claims-334-sketch-output.txt`, where K2 shows the scratch's own commit and 6 entries.
-- **K1:** gate 333 is published, commit `3f945e3`.
+Run `bash b-round-334/claims-335.sh` from the loop root (`CLAIMS_STORE=<dir>` points it at another tree). The expected output at HEAD is `b-round-334/claims-335-planning-output.txt`.
+- **K1:** gate 334 is published, commit `0d22ab9`.
 - **K2:** HEAD's short hash and the `git status` entry count.
-- **K3:**
-  - in `ArrangementPeakPathProps`, the `clip: ArrangementClip;` line (1 → 0) and the 4 new primitive lines (0 → 4);
-  - the scale line (0 → 1);
-  - `export function waveformScaleForGainDb(` (0 → 1);
-  - `export function gainDbLinearGain(` (0 → 1).
-- **K4:** the detail call site `<ArrangementPeakPath clip={clip} … />` (1 → 0); `clipId={clip.id}` in the lane file (0 → 1) and in the detail file (0 → 1).
-- **K5:** the `ArrangementPeakPath` memo export and the draft-gain read, both unchanged (1 1).
-- **K6:** the non-test files that reference `clipWaveformScale` (HEAD: `ArrangementClip.tsx` and `waveform-zoom.ts`; sketch: `waveform-zoom.ts` only).
-- **K7:**
-  - in `drag-preview-render.test.tsx`: the `expect(` count, the DP `it(` count and the DP43–DP48 count;
-  - in `clip-gain-waveform.test.tsx`: the `expect(` count and the WG9/WG10 count.
-  - HEAD prints `271 44 0 57 0`; the sketch prints `286 50 6 65 2`.
+- **K3:** these lines in the spec, one each:
+  - `type DragName = 'range' | 'fade' | 'trim' | 'move';`;
+  - the `dragNames` array;
+  - `dragSteps = 60`;
+  - `dragDistancePx = 120`.
+- **K4:** these, one each:
+  - `emptyLanePointAfterClip`;
+  - `measureDrag`;
+  - the whole-window filter `commit.t > firstMove && commit.t < up`.
+- **K5:** the budget row count (167), and hits for `interact.drag.lane`, `drag-lane-live` or `measureLaneDrag` in `perf/` and `app/` (0).
+- **K6:** the ghost testid and its `data-blocked` attribute in `ArrangementLane.tsx` (1 1).
+- **K7:** the provider `useState` for `clipLaneDrag` in `ArrangementContext.tsx`, and `setClipLaneDrag({ ghosts, timeLocked })` in `ArrangementClip.tsx` (1 1).
 - **K8:** protected sha, 11 OK.
-- **K9:** the `regression-last` date.
-- **K10:** the Biome lint diagnostic count (16).
+- **K9:** the `regression-last` date (2026-11-02).
+- **K10:** `PerfCommitRecord` has 2 fields (`t`, `rendered`) in `perf/lib/instrumentation.ts`.
 - **K11:** doc 232 l.4.
-- **K12:** doc 232: c2b-iii in l.1; `waveform-zoom.ts` in l.5; the c2b-iii section; the `## ` heading count.
-- **K13:** the `interact.harness.hook-live` budget (`assert >= 1`).
+- **K12:** these doc counts:
+  - doc 232: c3-i in l.1, the spec in l.5, the c3-i section, and the `## ` count;
+  - doc 168: the `## ` count, and its `drag-lane-live` hits.
+- **K13:** kind and mode of the move rows (`deterministic/record` ×3) and of `interact.harness.drag-move-live` (`deterministic/assert`).
 - **K14:** every cited artifact exists (L56).
-- **K15:** B's covering run and file count.
-- **K16:** mutants: the `restored` count (9) and the empty-red count (0).
-- **K17:** perf EQUAL/DIFF counts vs C round 333 (104/17).
-- **K18:** the `<ArrangementPeakPath` call sites in `app/` outside tests (2), and the 4 untouched paths are clean.
-- **K19:** `wd-compare.txt`: `DIFFS 0` lines (2) and `EQUAL` samples (44).
+- **K15:** `app/` and `perf/lib/` have no diff against HEAD.
+- **K16:** C round 334's perf result: 167 rows, `complete` True, 0 failures.
+- **K17:** `perf/lib/report.ts` puts each pass's `problems` into `failures` (the `pass.problems.map(` line, 1).
+- **K18:** `perf/lib/report.test.ts`:
+  - the DC-KINDS regex line for `interact\.drag\.(range|fade|trim|move)\.(stopped|playing)\.commits-per-move`, 1;
+  - its `toHaveLength(16)`, 1.
+- **K19:** the perf/lib report test at HEAD through the scratch config: `Tests 34 passed (34)` in `b-round-334/perf-lib-report-head.log`.
+- **K20 (L23 sweep):** `budgets.interactions` is referenced only by the spec and `perf/lib/report.test.ts` in `app/`, `perf/` and `e2e/`; K18 covers the latter. `owner` is read in `perf/lib/budgets.ts`, which takes any non-empty string; no test enumerates owners.
