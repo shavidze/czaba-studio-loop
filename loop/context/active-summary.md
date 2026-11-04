@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-04T04:16:46.480Z)
+# Active loop summary (2026-11-04T06:10:45.386Z)
 
-- backlog.json 3151 KB -> active view 427 KB
-- status: G_ROOT_GATE round 326
-- servers: `{"checkedUtc":"2026-11-04T03:54:21.1643142Z","round":326,"attempt":1,"store":200}`
+- backlog.json 3160 KB -> active view 429 KB
+- status: G_ROOT_GATE round 327
+- servers: `{"checkedUtc":"2026-11-04T05:39:28.1724401Z","round":327,"attempt":1,"store":200}`
 - last publication: 234ccdd9569c2948060798fbff8dee430f569010 (rounds 325-326)
-- last root gate: round 326 published - commit 234ccdd9569c2948060798fbff8dee430f569010 pushed
+- last root gate: round 327 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -723,7 +723,6 @@
 - INFO-C298-01 / info / signal (D-29z765): pre-existing client media abort, no task / /middle-east.mp3 net::ERR_ABORTED on every /studio-lab load (server 200)
 - INFO-C299-01 / info / info (D-29z770): no task / role=button /video/i click did not open a file chooser; C used setInputFiles on arrangement-video-input
 - INFO-C299-02 / info / info (D-29z770): see A-R299-REVIEW-1 (deferred Low) / NG9 is today the first hydrateRoot in studio-narrow-gate-ui.test.tsx; a hydrate test above it would make it vacuous
-- B-R299-IM24-LOAD-SIGNAL / info / reproduced in gate 325 (D-29z921); superseded by GATE325-IM24-WALLCLOCK, closes with round 326 C PASS | signal (D-29z773): watch; a failure in a run alone is a STOP / insert-marker-ui IM24 failed once under concurrent dev-server + Playwright load; passes alone 3/3 and in gate 299
 - SABA-Q-STUDIO-LINK-B / info / awaiting_user (D-29z773) / 
 - C-R300-INFO-03-AUTH-ROW-WORDING / info / process_rule (D-29z776): every G-AUTH row names the parameterised request GET /api/studio-token?product=middle-east&file=mix.wav (401 without a header); a bare GET returns 400 (validation before auth) and is recorded, not a finding / 
 - B-R301-PERF-ORACLE-DELTAS / info / ruled (D-29z783) / 
@@ -794,9 +793,15 @@
 - GATE324-S5 / info / signal (D-29z913): PERF-10 note / ArrangementDetailPanelWithSelection reads the whole selection array (correct: primary clip .at(-1)); do not narrow to length
 - GATE324-S6 / low / scheduled (D-29z913): round 325 section 5 / doc 230 new ruling line in English without the - **D-ID:** format (GEORGIAN_DOCS)
 - SIG-R324-OTHER-PREVIEW-CALLERS / info / signal (D-29z916): outside PERF-DRAG-PREVIEW scope; candidate after stage c, measure first (L37) / marker drag, envelope point drag and loop brace preview also re-render the whole provider per move via previewArrangement
-- GATE325-IM24-WALLCLOCK / medium / scheduled: round 326 (D-29z921) / insert-marker-ui IM24 reads the live position while playing on the wall-clock fake; > 50 ms of load between the last seek and the read gives
 - INFO-C325-MOVE-COMMITS / info / re-measure in PERF-DRAG-PREVIEW stage c (D-29z925) / interact.drag.move.*.commits-per-move (wallclock, record) 1.967 -> 2; dev probe 8 vs 8; cause unverified
 - A-R325-REVIEW-RESTART-LOOP / info / harness signal (D-29z925) / interact.drag.{trim,move}.playing.move-restarts asserts would count loop-wrap restarts if the harness scenario ever enables a loop
+- C-R326-01 / low / deferred_low_polish (D-29z929); fix with SYS-CLOCK-DETERMINISM / IM24 playing-state tail ("No more markers after the playhead" + Playing at 16) is unreachable in the browser: playback auto-stops at the pro
+- INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER / info / ruled (D-29z930): matches tasks/round-252/253 planner contract; LIVE-MEAS-MARKER-STEP-PLAYING requested / Ctrl+Right while playing also moves the insert marker
+- SIG-R326-END-STOP-STATUS / info / signal (D-29z930); not scheduled / after the project-end auto-stop (also natural end) the status keeps the previous text, no stopped text
+- SIG-R326-READOUT-PRIMITIVE / info / signal (D-29z935); stage c candidate, measure first (L37) / selected-clip readout re-renders per fade move; select primitives (sourceId, start, duration, sourceOffset) instead of the clip object
+- SIG-R326-DETAIL-IGNORES-FADE / info / signal (D-29z935); stage c candidate / detail panel re-renders per fade move although it shows no fade field; an equality that ignores fadeIn/fadeOut needs a stale-guard test
+- SIG-R326-SKIP-UNCHANGED-FADE / info / signal (D-29z935); stage c candidate / setFade builds a new arrangement when the rounded fade seconds did not change (sub-pixel moves)
+- LIVE-MEAS-MARKER-STEP-PLAYING / info / requested_from_root (D-29z930): user-review/live-checks.md / root measures in Live 12: while playing, does Ctrl+Right (Win) / Alt+Right (Mac) to the next locator move playback, the insert marker, or bo
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

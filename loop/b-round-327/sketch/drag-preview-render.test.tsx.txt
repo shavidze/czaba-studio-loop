@@ -1,0 +1,793 @@
+import { act, fireEvent, render } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+import {
+  type ArrangementContextValue,
+  ArrangementProvider,
+  GESTURE_EDIT_BLOCKED_MESSAGE,
+  useArrangement,
+  useArrangementPreviewStore,
+} from '~/contexts/ArrangementContext';
+import type {
+  Arrangement,
+  ArrangementClip,
+  WorkspaceCollection,
+  WorkspaceSource,
+} from '~/types/arrangement';
+import { createArrangement } from '../model';
+import { insertMarkerStatusKind } from '../playback-start';
+import type { ArrangementPreviewStore } from '../preview-store';
+import { studioClipStrings, studioPlaybackStrings } from '../strings';
+
+interface ProbeFiber {
+  type: unknown;
+  memoizedProps: unknown;
+  memoizedState: unknown;
+  alternate: ProbeFiber | null;
+  child: ProbeFiber | null;
+  sibling: ProbeFiber | null;
+}
+
+const renderLog = vi.hoisted(() => {
+  const counts = new Map<string, number>();
+  const seen = new WeakMap<object, { props: unknown; state: unknown }>();
+  const componentName = (type: unknown): string | null =>
+    typeof type === 'function' && 'name' in type && typeof type.name === 'string'
+      ? type.name
+      : null;
+  const recordCommit = (root: ProbeFiber) => {
+    const stack: ProbeFiber[] = [root];
+    while (stack.length > 0) {
+      const fiber = stack.pop();
+      if (!fiber) {
+        continue;
+      }
+      const name = componentName(fiber.type);
+      if (name) {
+        const previous =
+          seen.get(fiber) ?? (fiber.alternate ? seen.get(fiber.alternate) : undefined);
+        if (
+          !previous ||
+          previous.props !== fiber.memoizedProps ||
+          previous.state !== fiber.memoizedState
+        ) {
+          counts.set(name, (counts.get(name) ?? 0) + 1);
+        }
+        seen.set(fiber, { props: fiber.memoizedProps, state: fiber.memoizedState });
+        if (fiber.alternate) {
+          seen.delete(fiber.alternate);
+        }
+      }
+      if (fiber.sibling) {
+        stack.push(fiber.sibling);
+      }
+      if (fiber.child) {
+        stack.push(fiber.child);
+      }
+    }
+  };
+  Object.defineProperty(globalThis, '__REACT_DEVTOOLS_GLOBAL_HOOK__', {
+    configurable: true,
+    value: {
+      isDisabled: false,
+      supportsFiber: true,
+      renderers: new Map(),
+      inject: () => 1,
+      checkDCE: () => undefined,
+      onCommitFiberRoot: (_rendererId: number, root: { current: ProbeFiber }) =>
+        recordCommit(root.current),
+      onCommitFiberUnmount: () => undefined,
+      onPostCommitFiberRoot: () => undefined,
+    },
+  });
+  return { counts };
+});
+
+vi.mock('@remix-run/react', () => ({
+  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
+const fakeClock = { base: 0 };
+
+class FakeParam {
+  value = 0;
+  setTargetAtTime(target: number) {
+    this.value = target;
+  }
+}
+
+class FakeNode {
+  connect(destination: FakeNode) {
+    return destination;
+  }
+  disconnect() {}
+}
+
+class FakeGain extends FakeNode {
+  gain = new FakeParam();
+}
+
+class FakePanner extends FakeNode {
+  pan = new FakeParam();
+}
+
+class FakeSource extends FakeNode {
+  buffer: unknown = null;
+  onended: (() => void) | null = null;
+  start() {}
+  stop() {}
+}
+
+class FakeAudioContext {
+  state = 'running';
+  destination = new FakeNode();
+  sampleRate = 48000;
+  get currentTime() {
+    return Date.now() / 1000 - fakeClock.base;
+  }
+  resume() {
+    return Promise.resolve();
+  }
+  close() {
+    return Promise.resolve();
+  }
+  createGain() {
+    return new FakeGain();
+  }
+  createStereoPanner() {
+    return new FakePanner();
+  }
+  createBufferSource() {
+    return new FakeSource();
+  }
+}
+
+class FakeOfflineAudioContext {}
+
+class FakeAudioBuffer {
+  readonly length: number;
+  readonly numberOfChannels: number;
+  readonly sampleRate: number;
+  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+    this.length = options.length;
+    this.numberOfChannels = options.numberOfChannels;
+    this.sampleRate = options.sampleRate;
+  }
+  get duration() {
+    return this.length / this.sampleRate;
+  }
+  getChannelData() {
+    return new Float32Array(this.length);
+  }
+}
+
+class FakeResizeObserver {
+  observe() {}
+  disconnect() {}
+}
+
+const PX_PER_SECOND = 40;
+const LANE_HEIGHT_PX = 100;
+const MUSIC_LANE_Y = 150;
+const SFX_LANE_Y = 250;
+const TRIM_START_TITLE = 'Trim — left edge';
+const TRIM_END_TITLE = 'Trim — right edge';
+const FADE_IN_TITLE = 'Fade In — drag · double-click = 0';
+const SOURCE_LENGTHS: Record<string, number> = { song: 4000, hit: 800, film: 4000 };
+
+const previewCollection: WorkspaceCollection = {
+  id: 'drag-preview',
+  label: 'drag-preview',
+  origin: 'demo',
+  sources: [
+    { id: 'song', title: 'Song', collectionLabel: 'drag-preview', kind: 'music', origin: 'demo' },
+    { id: 'hit', title: 'Hit', collectionLabel: 'drag-preview', kind: 'sfx', origin: 'demo' },
+  ],
+  loadSource: async (source: WorkspaceSource) =>
+    new AudioBuffer({
+      length: SOURCE_LENGTHS[source.id] ?? 100,
+      numberOfChannels: 1,
+      sampleRate: 100,
+    }),
+};
+
+const AUDIO_CLIPS: ArrangementClip[] = [
+  { id: 'c1', trackId: 'music', sourceId: 'song', start: 2, sourceOffset: 0, duration: 6 },
+  { id: 'c2', trackId: 'sfx', sourceId: 'hit', start: 1, sourceOffset: 0, duration: 2 },
+];
+
+const VIDEO_CLIP: ArrangementClip = {
+  id: 'v1',
+  trackId: 'video',
+  sourceId: 'film',
+  start: 1,
+  sourceOffset: 0,
+  duration: 4,
+};
+
+function dragPreviewFixture(clips: ArrangementClip[]): Arrangement {
+  return {
+    ...createArrangement([
+      { id: 'video', kind: 'video', name: 'Video' },
+      { id: 'music', kind: 'audio', name: 'Music' },
+      { id: 'sfx', kind: 'audio', name: 'SFX' },
+    ]),
+    clips,
+  };
+}
+
+interface PreviewApiRef {
+  current: ArrangementContextValue | null;
+  store: ArrangementPreviewStore | null;
+}
+
+function PreviewProbe({ api }: { api: PreviewApiRef }) {
+  api.current = useArrangement();
+  api.store = useArrangementPreviewStore();
+  return null;
+}
+
+function live(api: PreviewApiRef): ArrangementContextValue {
+  if (!api.current) {
+    throw new Error('provider not mounted');
+  }
+  return api.current;
+}
+
+function previewOf(api: PreviewApiRef): Arrangement | null {
+  if (!api.store) {
+    throw new Error('preview store not mounted');
+  }
+  return api.store.getState().preview;
+}
+
+function stubCapture(element: HTMLElement) {
+  Object.defineProperty(element, 'setPointerCapture', { configurable: true, value: () => {} });
+  Object.defineProperty(element, 'hasPointerCapture', { configurable: true, value: () => false });
+  Object.defineProperty(element, 'releasePointerCapture', { configurable: true, value: () => {} });
+}
+
+async function mountPreviewWorkspace(clips: ArrangementClip[] = AUDIO_CLIPS) {
+  const api: PreviewApiRef = { current: null, store: null };
+  const view = render(
+    <ArrangementProvider
+      collection={previewCollection}
+      initialArrangement={dragPreviewFixture(clips)}
+    >
+      <StudioWorkspace />
+      <PreviewProbe api={api} />
+    </ArrangementProvider>,
+  );
+  for (
+    let tick = 0;
+    tick < 10 && ['song', 'hit'].some((id) => !live(api).sourceDurations.has(id));
+    tick++
+  ) {
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+  }
+  act(() => live(api).setPxPerSecond(PX_PER_SECOND));
+  view.container.querySelectorAll<HTMLElement>('[data-track-id]').forEach((row, index) => {
+    const top = index * LANE_HEIGHT_PX;
+    Object.defineProperty(row, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => new DOMRect(0, top, 800, LANE_HEIGHT_PX),
+    });
+  });
+  const clipParts = (clipId: string) => {
+    const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
+    const header = root?.firstElementChild;
+    const trimStart = root?.querySelector<HTMLElement>(`[title="${TRIM_START_TITLE}"]`);
+    const trimEnd = root?.querySelector<HTMLElement>(`[title="${TRIM_END_TITLE}"]`);
+    if (!root || !(header instanceof HTMLElement) || !trimStart || !trimEnd) {
+      throw new Error(`clip ${clipId} not rendered`);
+    }
+    stubCapture(root);
+    return { root, header, trimStart, trimEnd };
+  };
+  return { api, view, clipParts };
+}
+
+type PreviewView = Awaited<ReturnType<typeof mountPreviewWorkspace>>['view'];
+
+const press = { button: 0, buttons: 1 };
+
+function pointerDownAt(
+  handle: HTMLElement,
+  pointerId: number,
+  clientX = 0,
+  clientY = MUSIC_LANE_Y,
+) {
+  stubCapture(handle);
+  fireEvent.pointerDown(handle, { ...press, pointerId, clientX, clientY });
+}
+
+function pointerMoveTo(
+  root: HTMLElement,
+  pointerId: number,
+  clientX: number,
+  clientY = MUSIC_LANE_Y,
+) {
+  fireEvent.pointerMove(root, { pointerId, clientX, clientY });
+}
+
+function pointerUpAt(
+  root: HTMLElement,
+  pointerId: number,
+  clientX: number,
+  clientY = MUSIC_LANE_Y,
+) {
+  fireEvent.pointerUp(root, { pointerId, clientX, clientY });
+}
+
+function clipIn(arrangement: Arrangement, clipId: string): ArrangementClip {
+  const clip = arrangement.clips.find((entry) => entry.id === clipId);
+  if (!clip) {
+    throw new Error(`clip ${clipId} missing`);
+  }
+  return clip;
+}
+
+function textOf(view: PreviewView, testId: string): string {
+  return view.getByTestId(testId).textContent ?? '';
+}
+
+function overviewBarLefts(view: PreviewView): string {
+  return Array.from(view.getByTestId('arrangement-overview').querySelectorAll<HTMLElement>('div'))
+    .map((element) => element.style.left)
+    .filter((left) => left.endsWith('%'))
+    .join(' ');
+}
+
+function fadeHandleOf(root: HTMLElement): HTMLElement {
+  const fade = root.querySelector<HTMLElement>(`[title="${FADE_IN_TITLE}"]`);
+  if (!fade) {
+    throw new Error('fade handle missing');
+  }
+  return fade;
+}
+
+function rendersOf(name: string): number {
+  return renderLog.counts.get(name) ?? 0;
+}
+
+beforeEach(() => {
+  fakeClock.base = Date.now() / 1000;
+  renderLog.counts.clear();
+  vi.stubGlobal('AudioContext', FakeAudioContext);
+  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+  vi.stubGlobal('requestAnimationFrame', () => 1);
+  vi.stubGlobal('cancelAnimationFrame', () => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe('PERF-DRAG-PREVIEW stage a — trim and same-lane move previews', () => {
+  it('DP2 a trimStart move renders only the dragged lane and its clip, not the workspace', async () => {
+    const { clipParts } = await mountPreviewWorkspace();
+    const { root, trimStart } = clipParts('c1');
+    pointerDownAt(trimStart, 1);
+    pointerMoveTo(root, 1, 40);
+    renderLog.counts.clear();
+    pointerMoveTo(root, 1, 80);
+    pointerMoveTo(root, 1, 120);
+    expect(rendersOf('ArrangementProvider')).toBe(0);
+    expect(rendersOf('StudioWorkspace')).toBe(0);
+    expect(rendersOf('ArrangementTransport')).toBe(0);
+    expect(rendersOf('ArrangementLibrary')).toBe(0);
+    expect(rendersOf('ArrangementLane')).toBe(2);
+    expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
+    expect(rendersOf('ArrangementClipViewInner')).toBe(2);
+    expect(root.dataset.clipStart).toBe('5.000');
+    pointerUpAt(root, 1, 120);
+  });
+
+  it('DP3 the release adds exactly one history entry, Undo restores, the store is empty', async () => {
+    const { api, clipParts } = await mountPreviewWorkspace();
+    const { root, trimStart } = clipParts('c1');
+    pointerDownAt(trimStart, 1);
+    pointerMoveTo(root, 1, 40);
+    pointerMoveTo(root, 1, 80);
+    pointerMoveTo(root, 1, 120);
+    expect(previewOf(api)).not.toBeNull();
+    pointerUpAt(root, 1, 120);
+    expect(live(api).undoLabel).toBe(studioClipStrings.trimStartLabel);
+    expect(previewOf(api)).toBeNull();
+    expect(live(api).arrangement).toBe(live(api).getArrangement());
+    expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 5, duration: 3 });
+    act(() => live(api).undo());
+    expect(live(api).undoLabel).toBeNull();
+    expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 2, duration: 6 });
+    expect(root.dataset.clipStart).toBe('2.000');
+  });
+
+  it('DP4 a window blur mid-trim puts the clip back with no history entry', async () => {
+    const { api, clipParts } = await mountPreviewWorkspace();
+    const { root, trimStart } = clipParts('c1');
+    pointerDownAt(trimStart, 1);
+    pointerMoveTo(root, 1, 40);
+    pointerMoveTo(root, 1, 80);
+    expect(root.dataset.clipStart).toBe('4.000');
+    act(() => {
+      window.dispatchEvent(new Event('blur'));
+    });
+    expect(root.dataset.clipStart).toBe('2.000');
+    expect(clipIn(live(api).getArrangement(), 'c1')).toMatchObject({ start: 2, duration: 6 });
+    expect(live(api).undoLabel).toBeNull();
+    expect(live(api).isArrangementPreviewActive()).toBe(false);
+    expect(previewOf(api)).toBeNull();
+  });
+
+  it('DP5 a same-lane move keeps the ref on the preview while React holds the original', async () => {
+    const { api, clipParts } = await mountPreviewWorkspace();
+    const { root, header } = clipParts('c1');
+    pointerDownAt(header, 1, 40);
+    pointerMoveTo(root, 1, 80);
+    pointerMoveTo(root, 1, 120);
+    pointerMoveTo(root, 1, 160);
+    expect(clipIn(live(api).getArrangement(), 'c1').start).toBe(5);
+    expect(clipIn(live(api).arrangement, 'c1').start).toBe(2);
+    expect(root.dataset.clipStart).toBe('5.000');
+    pointerUpAt(root, 1, 160);
+    expect(clipIn(live(api).getArrangement(), 'c1').start).toBe(5);
+    expect(clipIn(live(api).arrangement, 'c1').start).toBe(5);
+    expect(live(api).undoLabel).toBe('Move clip');
+  });
+
+  it('DP6 the readout, the detail panel and the overview bar follow the trim preview', async () => {
+    const { view, clipParts } = await mountPreviewWorkspace();
+    const { root, trimStart } = clipParts('c1');
+    pointerDownAt(trimStart, 1);
+    pointerMoveTo(root, 1, 40);
+    const readoutFirst = textOf(view, 'arrangement-selected-clip');
+    const detailFirst = textOf(view, 'arrangement-detail-content');
+    const overviewFirst = overviewBarLefts(view);
+    renderLog.counts.clear();
+    pointerMoveTo(root, 1, 80);
+    pointerMoveTo(root, 1, 120);
+    expect(textOf(view, 'arrangement-selected-clip')).not.toBe(readoutFirst);
+    expect(textOf(view, 'arrangement-selected-clip')).toContain('00:05.000');
+    expect(textOf(view, 'arrangement-detail-content')).not.toBe(detailFirst);
+    expect(textOf(view, 'arrangement-detail-content')).toContain('00:05.000');
+    expect(overviewBarLefts(view)).not.toBe(overviewFirst);
+    expect(rendersOf('ArrangementOverviewWithPreviewInner')).toBeGreaterThan(0);
+    expect(rendersOf('ArrangementSelectedClipReadoutInner')).toBeGreaterThan(0);
+    expect(rendersOf('ArrangementDetailPanelWithSelectionInner')).toBeGreaterThan(0);
+    pointerUpAt(root, 1, 120);
+  });
+
+  it('DP7 a trimEnd drag past the project end updates the project-end readout live', async () => {
+    const { view, clipParts } = await mountPreviewWorkspace();
+    const { root, trimEnd } = clipParts('c1');
+    pointerDownAt(trimEnd, 1, 240);
+    pointerMoveTo(root, 1, 280);
+    const endFirst = textOf(view, 'arrangement-project-end');
+    pointerMoveTo(root, 1, 320);
+    pointerMoveTo(root, 1, 360);
+    expect(textOf(view, 'arrangement-project-end')).not.toBe(endFirst);
+    expect(textOf(view, 'arrangement-project-end')).toContain('00:11.000');
+    pointerUpAt(root, 1, 360);
+  });
+
+  it('DP8a a release with no commit converges React state to the preview and clears the store', async () => {
+    const { api } = await mountPreviewWorkspace();
+    const before = live(api).getArrangement();
+    const next: Arrangement = {
+      ...before,
+      clips: before.clips.map((clip) => (clip.id === 'c1' ? { ...clip, start: 9 } : clip)),
+    };
+    let release: (() => void) | null = null;
+    act(() => {
+      release = live(api).claimPointerGesture(7, () => undefined);
+      live(api).previewClipGeometry(next);
+    });
+    expect(live(api).arrangement).toBe(before);
+    expect(previewOf(api)).toBe(next);
+    act(() => {
+      if (release) {
+        release();
+      }
+    });
+    expect(live(api).arrangement).toBe(next);
+    expect(live(api).getArrangement()).toBe(next);
+    expect(previewOf(api)).toBeNull();
+    expect(live(api).undoLabel).toBeNull();
+  });
+
+  it('DP8b a move back to the start adds no entry and leaves the store empty', async () => {
+    const { api, clipParts } = await mountPreviewWorkspace();
+    const { root, header } = clipParts('c1');
+    pointerDownAt(header, 1, 40);
+    pointerMoveTo(root, 1, 80);
+    pointerMoveTo(root, 1, 120);
+    pointerMoveTo(root, 1, 40);
+    pointerUpAt(root, 1, 40);
+    expect(live(api).undoLabel).toBeNull();
+    expect(previewOf(api)).toBeNull();
+    expect(live(api).arrangement).toBe(live(api).getArrangement());
+    expect(clipIn(live(api).arrangement, 'c1').start).toBe(2);
+  });
+
+  it('DP5b same lane → other lane → back → release: one entry at the final place, store empty', async () => {
+    const { api, clipParts } = await mountPreviewWorkspace();
+    const { root, header } = clipParts('c1');
+    pointerDownAt(header, 1, 40);
+    pointerMoveTo(root, 1, 80);
+    expect(clipIn(live(api).getArrangement(), 'c1').start).toBe(3);
+    pointerMoveTo(root, 1, 80, SFX_LANE_Y);
+    expect(live(api).clipLaneDrag?.ghosts[0]?.trackId).toBe('sfx');
+    expect(previewOf(api)).toBeNull();
+    expect(clipIn(live(api).arrangement, 'c1').start).toBe(2);
+    expect(clipIn(live(api).getArrangement(), 'c1')).toMatchObject({ start: 2, trackId: 'music' });
+    pointerMoveTo(root, 1, 120);
+    expect(live(api).clipLaneDrag?.ghosts ?? []).toHaveLength(0);
+    expect(clipIn(live(api).getArrangement(), 'c1')).toMatchObject({ start: 4, trackId: 'music' });
+    pointerUpAt(root, 1, 120);
+    expect(live(api).undoLabel).toBe('Move clip');
+    expect(previewOf(api)).toBeNull();
+    expect(live(api).arrangement).toBe(live(api).getArrangement());
+    expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 4, trackId: 'music' });
+    act(() => live(api).undo());
+    expect(live(api).undoLabel).toBeNull();
+    expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 2, trackId: 'music' });
+  });
+
+  it('DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const fade = fadeHandleOf(audio.root);
+    pointerDownAt(fade, 1, 0);
+    pointerMoveTo(audio.root, 1, 40);
+    renderLog.counts.clear();
+    pointerMoveTo(audio.root, 1, 80);
+    pointerMoveTo(audio.root, 1, 120);
+    expect(rendersOf('ArrangementProvider')).toBe(0);
+    expect(rendersOf('StudioWorkspace')).toBe(0);
+    expect(rendersOf('ArrangementTransport')).toBe(0);
+    expect(rendersOf('ArrangementLibrary')).toBe(0);
+    expect(rendersOf('ArrangementClipViewInner')).toBe(2);
+    expect(rendersOf('ArrangementStatusTextInner')).toBe(2);
+    expect(audio.root.dataset.fadeIn).toBe('3.000');
+    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 3.000 s');
+    expect(previewOf(api)).not.toBeNull();
+    expect(clipIn(live(api).arrangement, 'c1').fadeIn ?? 0).toBe(0);
+    pointerUpAt(audio.root, 1, 120);
+    expect(live(api).undoLabel).toBe('Fade In');
+    expect(previewOf(api)).toBeNull();
+    expect(live(api).arrangement).toBe(live(api).getArrangement());
+    expect(clipIn(live(api).arrangement, 'c1').fadeIn).toBe(3);
+    expect(textOf(view, 'arrangement-status')).toBe(
+      studioClipStrings.fadeCommitted('Fade In', '3.000'),
+    );
+    act(() => live(api).undo());
+    expect(live(api).undoLabel).toBeNull();
+    expect(clipIn(live(api).arrangement, 'c1').fadeIn ?? 0).toBe(0);
+  });
+
+  it('DP9b a video clip move keeps the provider path', async () => {
+    const { api, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
+    const video = clipParts('v1');
+    pointerDownAt(video.header, 2, 40, 50);
+    pointerMoveTo(video.root, 2, 80, 50);
+    renderLog.counts.clear();
+    pointerMoveTo(video.root, 2, 120, 50);
+    pointerMoveTo(video.root, 2, 160, 50);
+    expect(rendersOf('ArrangementProvider')).toBe(2);
+    expect(clipIn(live(api).arrangement, 'v1').start).toBe(4);
+    expect(previewOf(api)).toBeNull();
+    pointerUpAt(video.root, 2, 160, 50);
+    expect(live(api).undoLabel).toBe('Move clip');
+  });
+
+  it('DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing', async () => {
+    const { view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const region = view.getByTestId('arrangement-status');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 40);
+    expect(region.textContent).toBe('Fade In: 1.000 s');
+    const first = region.firstElementChild;
+    pointerMoveTo(audio.root, 1, 80);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    const second = region.firstElementChild;
+    expect(second).not.toBe(first);
+    pointerMoveTo(audio.root, 1, 80.01);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    expect(region.firstElementChild).toBe(second);
+    expect(region.childElementCount).toBe(1);
+    pointerUpAt(audio.root, 1, 80.01);
+  });
+
+  it('DP11 a pointercancel mid-fade reverts the fade and keeps the last readout span', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const region = view.getByTestId('arrangement-status');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 40);
+    pointerMoveTo(audio.root, 1, 80);
+    const span = region.firstElementChild;
+    fireEvent.pointerCancel(audio.root, { pointerId: 1, clientX: 80, clientY: MUSIC_LANE_Y });
+    expect(audio.root.dataset.fadeIn).toBe('0.000');
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    expect(region.firstElementChild).toBe(span);
+    expect(live(api).undoLabel).toBeNull();
+    expect(previewOf(api)).toBeNull();
+    expect(live(api).status).toBe('Fade In: 2.000 s');
+  });
+
+  it('DP12 a committed write mid-fade wins; release after a refusal restores the last readout', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const region = view.getByTestId('arrangement-status');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 40);
+    act(() => live(api).setStatus('Committed mid-drag.'));
+    expect(region.textContent).toBe('Committed mid-drag.');
+    pointerMoveTo(audio.root, 1, 80);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    act(() => live(api).addSourceToActiveTrack('song'));
+    expect(region.textContent).toBe(GESTURE_EDIT_BLOCKED_MESSAGE);
+    fireEvent.pointerCancel(audio.root, { pointerId: 1, clientX: 80, clientY: MUSIC_LANE_Y });
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    expect(live(api).status).toBe('Fade In: 2.000 s');
+    expect(previewOf(api)).toBeNull();
+  });
+
+  it('DP13 a video fade drag keeps the provider path and the committed status', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
+    const video = clipParts('v1');
+    const fade = video.root.querySelector<HTMLElement>(
+      '[data-testid="arrangement-video-fade-in-handle"]',
+    );
+    if (!fade) {
+      throw new Error('video fade handle missing');
+    }
+    pointerDownAt(fade, 3, 40, 50);
+    pointerMoveTo(video.root, 3, 80, 50);
+    renderLog.counts.clear();
+    pointerMoveTo(video.root, 3, 120, 50);
+    expect(rendersOf('ArrangementProvider')).toBe(1);
+    expect(previewOf(api)).toBeNull();
+    expect(live(api).status).toBe(textOf(view, 'arrangement-status'));
+    pointerUpAt(video.root, 3, 120, 50);
+  });
+
+  it('DP14 a fade dragged back to 0 adds no entry, empties the store and reports no change', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 40);
+    pointerMoveTo(audio.root, 1, 0);
+    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 0.000 s');
+    pointerUpAt(audio.root, 1, 0);
+    expect(live(api).undoLabel).toBeNull();
+    expect(previewOf(api)).toBeNull();
+    expect(audio.root.dataset.fadeIn).toBe('0.000');
+    expect(textOf(view, 'arrangement-status')).toBe(studioClipStrings.historyUnchanged('Fade In'));
+    expect(live(api).status).toBe(studioClipStrings.historyUnchanged('Fade In'));
+  });
+
+  it('DP15 the status preview getter returns the shown readout during the drag and null after it', async () => {
+    const { api, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    expect(live(api).getStatusPreviewText()).toBeNull();
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 80);
+    expect(live(api).getStatusPreviewText()).toBe('Fade In: 2.000 s');
+    pointerUpAt(audio.root, 1, 80);
+    expect(live(api).getStatusPreviewText()).toBeNull();
+  });
+
+  it('DP16 a stop mid-fade reads the shown readout, so the insert-marker rewrite stays off as at HEAD', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    fireEvent.keyDown(document.body, { key: ' ', code: 'Space' });
+    expect(live(api).isPlaying).toBe(true);
+    act(() => live(api).setStatus(studioPlaybackStrings.playingFrom('00:00.000')));
+    expect(insertMarkerStatusKind(live(api).status)).toBe('playing-from');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 80);
+    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 2.000 s');
+    act(() => live(api).togglePlayback());
+    expect(live(api).isPlaying).toBe(false);
+    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 2.000 s');
+    expect(live(api).getStatusPreviewText()).toBe('Fade In: 2.000 s');
+    pointerUpAt(audio.root, 1, 80);
+    expect(live(api).undoLabel).toBe('Fade In');
+    expect(textOf(view, 'arrangement-status')).toBe(
+      studioClipStrings.fadeCommitted('Fade In', '2.000'),
+    );
+  });
+
+  it('DP17 a same-text committed write mid-fade, then a same-value move, keeps the status span node as at HEAD', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const region = view.getByTestId('arrangement-status');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 80);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    const held = region.firstElementChild;
+    act(() => live(api).setStatus((current) => current));
+    expect(region.firstElementChild).toBe(held);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    pointerMoveTo(audio.root, 1, 80.01);
+    expect(region.firstElementChild).toBe(held);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    expect(live(api).getStatusPreviewText()).toBeNull();
+    pointerMoveTo(audio.root, 1, 120);
+    expect(region.textContent).toBe('Fade In: 3.000 s');
+    expect(region.firstElementChild).not.toBe(held);
+    pointerUpAt(audio.root, 1, 120);
+    expect(region.textContent).toBe(studioClipStrings.fadeCommitted('Fade In', '3.000'));
+  });
+
+  it('DP18 a same-text updater from a timer mid-fade adds and removes no status node', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const region = view.getByTestId('arrangement-status');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 80);
+    const held = region.firstElementChild;
+    const seen: string[] = [];
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          seen.push(`+${node.textContent}`);
+        }
+        for (const node of record.removedNodes) {
+          seen.push(`-${node.textContent}`);
+        }
+      }
+    });
+    observer.observe(region, { childList: true, subtree: true, characterData: true });
+    const flag = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean };
+    flag.IS_REACT_ACT_ENVIRONMENT = false;
+    const current = live(api);
+    try {
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          current.setStatus((text) => text);
+          resolve();
+        }, 0);
+      });
+      await new Promise<void>((resolve) => setTimeout(resolve, 50));
+    } finally {
+      flag.IS_REACT_ACT_ENVIRONMENT = true;
+      observer.disconnect();
+    }
+    expect(seen).toEqual([]);
+    expect(region.firstElementChild).toBe(held);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    pointerUpAt(audio.root, 1, 80);
+    expect(region.textContent).toBe(studioClipStrings.fadeCommitted('Fade In', '2.000'));
+  });
+
+  it('DP19 two committed writes in one batch mid-fade adopt the readout once, so the second updater sees the first write', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 80);
+    act(() => {
+      live(api).setStatus('First write.');
+      live(api).setStatus((current) => `${current} Second write.`);
+    });
+    expect(textOf(view, 'arrangement-status')).toBe('First write. Second write.');
+    expect(live(api).getStatusPreviewText()).toBeNull();
+    pointerUpAt(audio.root, 1, 80);
+  });
+});

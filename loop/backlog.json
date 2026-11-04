@@ -1,10 +1,10 @@
 {
- "version": 286,
- "updated": "2026-11-04 B round 326 -> 327 planning (D-29z928..D-29z936)",
+ "version": 287,
+ "updated": "2026-11-04 B round 327 -> 328 planning (D-29z937..D-29z944)",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "current-task.md (round 327, D-29z928..D-29z936; PERF-DRAG-PREVIEW stage b: audio fade-handle drag via previewClipGeometry + a per-provider status-preview store (setStatus wrapper flushes the preview first; adopt keeps the aria-live span); six status-text comparison reads use getStatusPreviewText() ?? status; 5 fade budget rows assert; baseline 234ccdd)",
- "advisor_used_by_B": "round 323 -> 324 planning: advisor available and used (before writing; before finishing)",
+ "current_task": "current-task.md (round 328, D-29z937..D-29z944; PERF-DRAG-PREVIEW stage b fix-up on the uncommitted round-327 tree: flushStatusPreview no longer clears the status-preview store synchronously (adopt once per preview sequence; a provider layout effect clears an adopted preview after the commit) + previewStatus skips a same-text write when the store is empty (C-R327-01 Medium, C-R327-02 Low, A-R327-REVIEW-SAME-TEXT-REMOUNT); DP17-DP19; baseline 234ccdd + 11-entry tree)",
+ "advisor_used_by_B": "yes (round 327 -> 328 planning: advisor consulted before the ruling and the sketch)",
  "baseline": {
   "tsc_errors": 0,
   "vitest_files": 32,
@@ -11319,12 +11319,21 @@
   },
   {
    "round": 327,
-   "task": "current-task.md",
+   "task": "tasks/round-327.md",
    "decision": "D-29z928..D-29z936",
    "type": "PERF-DRAG-PREVIEW stage b (audio fade drag + status-preview store)",
-   "status": "dispatched",
+   "status": "C FAIL (C-R327-01 Medium); gate 327 skipped; tree kept for fix-up round 328 (D-29z937)",
    "note": "baseline 234ccdd; claims b-round-326/claims-327.sh",
    "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "round": 328,
+   "task": "current-task.md",
+   "decision": "D-29z937..D-29z944",
+   "type": "PERF-DRAG-PREVIEW stage b fix-up (C-R327-01/02)",
+   "status": "dispatched",
+   "note": "baseline 234ccdd + round-327 tree (11 entries); claims b-round-327/claims-328.sh",
+   "added": "2026-11-04 B round 327 -> 328 planning"
   }
  ],
  "post_current_stage_queue": [
@@ -14281,7 +14290,7 @@
      "preview_paths": "ArrangementClip.tsx:503 / :674 / :634 previewArrangement -> ArrangementContext.tsx:1588 previewArrangement -> updateHistory",
      "source": "doc 168 PERF candidates; tech-lead consult 2026-10-28",
      "note": "goes right after PERF-8 (same ArrangementContext region ~l.1572-1588; may reuse its external store; B may merge with PERF-8 at its planning)",
-     "status": "in_progress (D-29z931): stage a done (C round 325 PASS, gate 326 published 234ccdd, D-29z928); stage b dispatched round 327 | in_progress (D-29z920): stage a c_pass_unpublished (C round 325 PASS, browserVerified true; gate 325 failed on IM24 flake, fix-up round 326) | in_progress (D-29z916): stage a dispatched round 325 (audio trimStart/trimEnd + same-lane single-clip move; contract A D-29z919; budgets record D-29z917) | not_started (queued D-29z215)",
+     "status": "in_progress (D-29z937): stage a done; stage b C round 327 FAIL on C-R327-01 (Medium), fix-up round 328 dispatched (D-29z943); not done | in_progress (D-29z931): stage a done (C round 325 PASS, gate 326 published 234ccdd, D-29z928); stage b dispatched round 327 | in_progress (D-29z920): stage a c_pass_unpublished (C round 325 PASS, browserVerified true; gate 325 failed on IM24 flake, fix-up round 326) | in_progress (D-29z916): stage a dispatched round 325 (audio trimStart/trimEnd + same-lane single-clip move; contract A D-29z919; budgets record D-29z917) | not_started (queued D-29z215)",
      "added": "2026-10-28 B round 215 -> 216 planning",
      "merge_ruling_d29z860": "kept separate from PERF-8 (tech-lead consult round 318: it changes history.present, the document, not a transient overlay); goes after PERF-8b",
      "split_d29z916": {
@@ -14296,7 +14305,8 @@
       "evidence": "b-round-324/head-drag-perf-rows.txt, b-round-324/head-drag-names.txt (from c-round-324)",
       "consults": "tech-lead + performance-optimizer round 324->325 planning (b-round-324.md section 3)"
      },
-     "stage_b_contract_d29z931": "current-task.md round 327; sketch b-round-326/sketch/; budgets D-29z932; tests D-29z933; doc D-29z934; remaining gap D-29z935"
+     "stage_b_contract_d29z931": "current-task.md round 327; sketch b-round-326/sketch/; budgets D-29z932; tests D-29z933; doc D-29z934; remaining gap D-29z935",
+     "stage_b_fixup_d29z938": "current-task.md round 328; sketch b-round-327/sketch/; probes b-round-327/probe-*.mjs"
     },
     {
      "id": "PERF-HARNESS-SHARED-LIB",
@@ -30427,6 +30437,56 @@
    "title": "root measures in Live 12: while playing, does Ctrl+Right (Win) / Alt+Right (Mac) to the next locator move playback, the insert marker, or both",
    "status": "requested_from_root (D-29z930): user-review/live-checks.md",
    "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "C-R327-01",
+   "severity": "medium",
+   "origin": "B sketch design (tasks/round-327.md §1.2.3 flush-then-dispatch), applied verbatim by A; A code-reviewer finding 1",
+   "title": "collection settle mid fade drag swaps the stale pre-drag sentence into the aria-live status for ~6 ms, then re-adds the fade text as a new span",
+   "evidence": "c-round-327.json; c-round-327/probe-settle-{a,head}.json; b-round-327/probe-settle-atree.json (control repro)",
+   "status": "open -> fix-up round 328 (D-29z938)",
+   "added": "2026-11-04 B round 327 -> 328 planning"
+  },
+  {
+   "id": "C-R327-02",
+   "severity": "low",
+   "origin": "B sketch design (§1.1/§1.2.4); = A-R327-REVIEW-SAME-TEXT-REMOUNT",
+   "title": "after a same-text committed write mid fade drag, a same-value move remounts the status span",
+   "evidence": "c-round-327/probe-settle-a.json afterSameValueMove; a-round-327/probe/zz-a.log",
+   "status": "open -> fixed with C-R327-01 in round 328 (same root; owned code, low cost)",
+   "added": "2026-11-04 B round 327 -> 328 planning"
+  },
+  {
+   "id": "A-R327-REVIEW-SAME-TEXT-REMOUNT",
+   "severity": "low",
+   "origin": "A code-reviewer round 327 finding 2",
+   "title": "= C-R327-02",
+   "status": "ruled (D-29z938): merged into C-R327-02; A STOP answered",
+   "added": "2026-11-04 B round 327 -> 328 planning"
+  },
+  {
+   "id": "A-R327-REVIEW-SETTLE-ORDER",
+   "severity": "low",
+   "origin": "A code-reviewer round 327 finding 3",
+   "title": "settle writes lastNonRefusalStatusRef before setStatus and the flush overwrites it; outcome equals HEAD but depends on ordering",
+   "status": "deferred_low_polish (D-29z940); a later fix must keep the settle -> flush order",
+   "added": "2026-11-04 B round 327 -> 328 planning"
+  },
+  {
+   "id": "SIG-R327-NOBPM-RULER-CLICK",
+   "severity": "info",
+   "origin": "C round 327 INFO-C327-ALT-CLICK-MARKER",
+   "title": "no-BPM project: Alt-click on the 20 px bars ruler did not move the insert marker (A and HEAD)",
+   "status": "signal (D-29z941): one probe in the next REGRESSION round against the SABA-B-11a contract",
+   "added": "2026-11-04 B round 327 -> 328 planning"
+  },
+  {
+   "id": "SIG-R327-HARNESS-PER-COMMIT",
+   "severity": "info",
+   "origin": "C round 327 INFO-C327-RELEASE-2ND-COMMIT",
+   "title": "perf harness reports only the release max components; per-commit counts would measure the second stopped release commit",
+   "status": "signal (D-29z941); not scheduled",
+   "added": "2026-11-04 B round 327 -> 328 planning"
   }
  ],
  "tech_lead_notes": [
@@ -32888,6 +32948,13 @@
    "status": "signal (D-29z925); joins the open checkpoint request D-29z915; not a task",
    "added": "2026-11-04 B round 325 -> 326 planning",
    "note_d29z936": "round 327 adds the status-preview store to ArrangementContext.tsx; see b-round-326-checkpoint-addendum.md"
+  },
+  {
+   "id": "A-R327-ARCH-STATUS-ONE-SOURCE",
+   "origin": "A code-reviewer round 327 (architecture note)",
+   "note": "signal 4 at ArrangementContext.tsx (fourth per-provider store and an ordering rule between it and the status reducer); signal 3 (docs 168/232 keep reshaping the status region). Reviewer verdict keep; proposal: move the committed status entry into the status store so footer and getter read one source",
+   "status": "signal (D-29z942) -> b-round-327-checkpoint-addendum.md (D-29z915); not scheduled",
+   "added": "2026-11-04 B round 327 -> 328 planning"
   }
  ],
  "vitest_floor_round46": 1357,
@@ -38939,6 +39006,14 @@
    "evidence": "c-round-326.json, c-round-326/b-im24.json, probe-sync-ctrlright.json",
    "status": "deferred_low_polish (D-29z929); fix with SYS-CLOCK-DETERMINISM",
    "added": "2026-11-04 B round 326 -> 327 planning"
+  },
+  {
+   "id": "A-R327-REVIEW-SETTLE-ORDER",
+   "severity": "low",
+   "origin": "A code-reviewer round 327 finding 3",
+   "title": "settle writes lastNonRefusalStatusRef before setStatus and the flush overwrites it; outcome equals HEAD but depends on ordering",
+   "status": "deferred_low_polish (D-29z940); a later fix must keep the settle -> flush order",
+   "added": "2026-11-04 B round 327 -> 328 planning"
   }
  ],
  "baseline_tree_at_round108": {
@@ -44878,6 +44953,46 @@
    "id": "D-29z936",
    "date": "2026-11-04",
    "text": "Next round: REGRESSION if its planning falls on or after 2026-11-05 (regression-last 2026-11-02 round 301), else PERF-DRAG-PREVIEW stage c. regression-last.json unchanged. Checkpoint request D-29z915 stays open; round 327 adds a fourth per-provider store to ArrangementContext.tsx (noted in b-round-326-checkpoint-addendum.md)."
+  },
+  {
+   "id": "D-29z937",
+   "date": "2026-11-04",
+   "text": "Round 327 closed from evidence as FAIL: C round 327 taskStatus FAIL (browserVerified/realVerified true; 13 rows PASS incl. PERF fade 21.633/22/0 and all B-FADE-* at both viewports) on C-R327-01 (Medium). Gate 327 skipped (\"C taskStatus FAIL\"); nothing published; baseline HEAD stays 234ccdd (gate 326). A's 11-entry uncommitted tree is kept and is the base of round 328 (no revert, no re-apply). PERF-DRAG-PREVIEW stays in_progress; stage b is not done."
+  },
+  {
+   "id": "D-29z938",
+   "date": "2026-11-04",
+   "text": "Ruling on A's STOP A-R327-REVIEW-SAME-TEXT-REMOUNT together with C-R327-01/02 (same trigger, same root: B sketch v3 §1.2.3 clears the store inside flushStatusPreview, a uSES sync re-render, while the adoptPreview dispatch is still pending in the default lane; origin B spec). A's option (b) alone is rejected (covers only 02). Contract: flush never writes the store; it adopts each preview sequence once (adoptedPreviewSequenceRef) and dispatches adoptPreview; a provider layout effect on statusEntry clears the store when the stored preview sequence <= the adopted one (a newer preview is kept); previewStatus skips showPreview when the store is empty and the text equals the committed status text (committedStatusTextRef, set in the existing status layout effect) = HEAD's gestureActive same-text rule. StudioWorkspace footer unchanged. Not chosen now: moving the committed status into the store (A's architecture note) -> checkpoint addendum to D-29z915; flushSync (stop effect calls setStatus from an effect)."
+  },
+  {
+   "id": "D-29z939",
+   "date": "2026-11-04",
+   "text": "B sketch (b-round-327/sketch/sketch.patch.txt on A's tree, 2 files): browser C probe probe-settle-remount.mjs on the sketch = HEAD at both viewports (settle: 0 mutations, same node; same-value move: 0 mutations, same node; next move and release equal HEAD); control on A's tree reproduces both findings. New probe probe-refusal-mid-drag.mjs (Delete mid-drag -> refusal, then move, release): sketch == HEAD at both viewports. Full vitest 3559/3559 and typecheck rc 0 on the sketch. jsdom: DP17 (same-text write then same-value move keeps the node), DP18 (timer same-text updater: 0 mutations), DP19 (two writes in one batch adopt once); all three pass on a HEAD copy (getter asserts removed). Mutants: MU-NO-SAME-TEXT-GUARD red DP17; MU-READOPT red DP19; MU-NO-LAYOUT-CLEAR red DP9a,12,14,15,16,17,18,19; MU-SYNC-CLEAR (the C-R327-01 bug) stays GREEN in jsdom -> its row is browser-only (C probe), recorded honestly."
+  },
+  {
+   "id": "D-29z940",
+   "date": "2026-11-04",
+   "text": "Reviewer finding 3 (settle writes lastNonRefusalStatusRef before setStatus; flush overwrites it) -> A-R327-REVIEW-SETTLE-ORDER, Low, deferred_low_polish; any later fix must keep the settle -> flush order. Reviewer finding 4 (previewStatus optional prop) -> closed, ruled by tasks/round-327.md §1.3."
+  },
+  {
+   "id": "D-29z941",
+   "date": "2026-11-04",
+   "text": "INFO-C327-ALT-CLICK-MARKER -> SIG-R327-NOBPM-RULER-CLICK (signal): in a no-BPM (SFX-only) project the bars ruler renders 20 px and Alt-click on it did not move the insert marker (A and HEAD alike). Not ruled a bug; the REGRESSION round (due >= 2026-11-05) adds one probe against the SABA-B-11a no-BPM ruler contract. INFO-C327-RELEASE-2ND-COMMIT -> SIG-R327-HARNESS-PER-COMMIT (harness reports only the release max; per-commit component counts would make the 0-component second commit measurable); PERF harness candidate, not scheduled."
+  },
+  {
+   "id": "D-29z942",
+   "date": "2026-11-04",
+   "text": "A's architecture note round 327 (signal 4: fourth per-provider store + an ordering rule in ArrangementContext.tsx; proposal: committed status entry inside the status store so footer and getter read one source) -> A-R327-ARCH-STATUS-ONE-SOURCE, added to the open checkpoint D-29z915 via b-round-327-checkpoint-addendum.md. Non-blocking; stage c does not wait."
+  },
+  {
+   "id": "D-29z943",
+   "date": "2026-11-04",
+   "text": "Round 328 = PERF-DRAG-PREVIEW stage b fix-up (current-task.md). Grants: ArrangementContext.tsx (the status-preview block only), drag-preview-render.test.tsx (DP17-DP19 appended), doc 232 (stage-b sections + one problem/solution entry; l.4 -> In Progress (stage 2 of 3; C round 328 PASS)). Chain: chainHeadGateRunGreen applies. Lesson candidate (RETRO owns lessons.md): a status/announcement change that moves a write between a store and a reducer gets a browser async-writer probe in B's sketch before dispatch (jsdom cannot reproduce the lane split)."
+  },
+  {
+   "id": "D-29z944",
+   "date": "2026-11-04",
+   "text": "Next after round 328: REGRESSION (regression-last 2026-11-02; due on or after 2026-11-05) if planned then, carrying C-R318-06, CAND-R323-FOLD-CLEARS-SELECTION and SIG-R327-NOBPM-RULER-CLICK; else PERF-DRAG-PREVIEW stage c. regression-last.json unchanged."
   }
  ],
  "retro_candidates": [

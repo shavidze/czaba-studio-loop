@@ -1,0 +1,122 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c327s[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/status-preview-store.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m18 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 1246[2mms[22m[39m
+     [32m✓[39m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace[32m 185[2mms[22m[39m
+     [32m✓[39m DP3 the release adds exactly one history entry, Undo restores, the store is empty[32m 93[2mms[22m[39m
+     [32m✓[39m DP4 a window blur mid-trim puts the clip back with no history entry[32m 64[2mms[22m[39m
+     [32m✓[39m DP5 a same-lane move keeps the ref on the preview while React holds the original[32m 88[2mms[22m[39m
+     [32m✓[39m DP6 the readout, the detail panel and the overview bar follow the trim preview[32m 75[2mms[22m[39m
+     [32m✓[39m DP7 a trimEnd drag past the project end updates the project-end readout live[32m 74[2mms[22m[39m
+     [32m✓[39m DP8a a release with no commit converges React state to the preview and clears the store[32m 44[2mms[22m[39m
+     [32m✓[39m DP8b a move back to the start adds no entry and leaves the store empty[32m 72[2mms[22m[39m
+     [32m✓[39m DP5b same lane → other lane → back → release: one entry at the final place, store empty[32m 98[2mms[22m[39m
+[31m     [31m×[31m DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry[39m[32m 52[2mms[22m[39m
+     [32m✓[39m DP9b a video clip move keeps the provider path[32m 67[2mms[22m[39m
+[31m     [31m×[31m DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing[39m[32m 37[2mms[22m[39m
+     [32m✓[39m DP11 a pointercancel mid-fade reverts the fade and keeps the last readout span[32m 51[2mms[22m[39m
+[31m     [31m×[31m DP12 a committed write mid-fade wins; release after a refusal restores the last readout[39m[32m 47[2mms[22m[39m
+     [32m✓[39m DP13 a video fade drag keeps the provider path and the committed status[32m 60[2mms[22m[39m
+[31m     [31m×[31m DP14 a fade dragged back to 0 adds no entry, empties the store and reports no change[39m[32m 43[2mms[22m[39m
+     [32m✓[39m DP15 the status preview getter returns the shown readout during the drag and null after it[32m 46[2mms[22m[39m
+[31m     [31m×[31m DP16 a stop mid-fade reads the shown readout, so the insert-marker rewrite stays off as at HEAD[39m[32m 48[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry
+[31m[1mAssertionError[22m: expected 'Demo collection ready. Drag a sound o…' to be 'Fade In: 3.000 s' // Object.is equality[39m
+
+Expected: [32m"Fade In: 3.000 s"[39m
+Received: [31m"Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m566:48[22m[39m
+    [90m564| [39m    [34mexpect[39m([34mrendersOf[39m([32m'ArrangementStatusTextInner'[39m))[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m565| [39m    [34mexpect[39m(audio[33m.[39mroot[33m.[39mdataset[33m.[39mfadeIn)[33m.[39m[34mtoBe[39m([32m'3.000'[39m)[33m;[39m
+    [90m566| [39m    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 3.000 s'…
+    [90m   | [39m                                               [31m^[39m
+    [90m567| [39m    [34mexpect[39m([34mpreviewOf[39m(api))[33m.[39mnot[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m568| [39m    [34mexpect[39m([34mclipIn[39m([34mlive[39m(api)[33m.[39marrangement[33m,[39m [32m'c1'[39m)[33m.[39mfadeIn [33m??[39m [34m0[39m)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP10 every changed fade readout replaces the status span once; an unchanged one adds nothing
+[31m[1mAssertionError[22m: expected 'Demo collection ready. Drag a sound o…' to be 'Fade In: 1.000 s' // Object.is equality[39m
+
+Expected: [32m"Fade In: 1.000 s"[39m
+Received: [31m"Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m603:32[22m[39m
+    [90m601| [39m    [34mpointerDownAt[39m([34mfadeHandleOf[39m(audio[33m.[39mroot)[33m,[39m [34m1[39m[33m,[39m [34m0[39m)[33m;[39m
+    [90m602| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m40[39m)[33m;[39m
+    [90m603| [39m    [34mexpect[39m(region[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'Fade In: 1.000 s'[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m604| [39m    [35mconst[39m first [33m=[39m region[33m.[39mfirstElementChild[33m;[39m
+    [90m605| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m80[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP12 a committed write mid-fade wins; release after a refusal restores the last readout
+[31m[1mAssertionError[22m: expected 'Committed mid-drag.' to be 'Fade In: 2.000 s' // Object.is equality[39m
+
+Expected: [32m"Fade In: 2.000 s"[39m
+Received: [31m"Committed mid-drag."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m642:32[22m[39m
+    [90m640| [39m    [34mexpect[39m(region[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'Committed mid-drag.'[39m)[33m;[39m
+    [90m641| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m80[39m)[33m;[39m
+    [90m642| [39m    [34mexpect[39m(region[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'Fade In: 2.000 s'[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m643| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'song'[39m))[33m;[39m
+    [90m644| [39m    [34mexpect[39m(region[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP14 a fade dragged back to 0 adds no entry, empties the store and reports no change
+[31m[1mAssertionError[22m: expected 'Demo collection ready. Drag a sound o…' to be 'Fade In: 0.000 s' // Object.is equality[39m
+
+Expected: [32m"Fade In: 0.000 s"[39m
+Received: [31m"Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m676:48[22m[39m
+    [90m674| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m40[39m)[33m;[39m
+    [90m675| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m0[39m)[33m;[39m
+    [90m676| [39m    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 0.000 s'…
+    [90m   | [39m                                               [31m^[39m
+    [90m677| [39m    [34mpointerUpAt[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m0[39m)[33m;[39m
+    [90m678| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP16 a stop mid-fade reads the shown readout, so the insert-marker rewrite stays off as at HEAD
+[31m[1mAssertionError[22m: expected 'Playing from 00:00.000.' to be 'Fade In: 2.000 s' // Object.is equality[39m
+
+Expected: [32m"[7mFade In: 2[27m.000[7m s[27m"[39m
+Received: [31m"[7mPlaying from 00:00[27m.000[7m.[27m"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m705:48[22m[39m
+    [90m703| [39m    [34mpointerDownAt[39m([34mfadeHandleOf[39m(audio[33m.[39mroot)[33m,[39m [34m1[39m[33m,[39m [34m0[39m)[33m;[39m
+    [90m704| [39m    [34mpointerMoveTo[39m(audio[33m.[39mroot[33m,[39m [34m1[39m[33m,[39m [34m80[39m)[33m;[39m
+    [90m705| [39m    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 2.000 s'…
+    [90m   | [39m                                               [31m^[39m
+    [90m706| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mtogglePlayback[39m())[33m;[39m
+    [90m707| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39misPlaying)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (21)[39m
+[2m   Start at [22m 05:41:00
+[2m   Duration [22m 2.75s[2m (transform 824ms, setup 0ms, import 1.19s, tests 1.25s, environment 624ms)[22m
+
+
+::error file=/tmp/c327s/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry,line=566,column=48::AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Fade In: 3.000 s' // Object.is equality%0A%0AExpected: "Fade In: 3.000 s"%0AReceived: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:566:48%0A%0A
+
+::error file=/tmp/c327s/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing,line=603,column=32::AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Fade In: 1.000 s' // Object.is equality%0A%0AExpected: "Fade In: 1.000 s"%0AReceived: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:603:32%0A%0A
+
+::error file=/tmp/c327s/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP12 a committed write mid-fade wins; release after a refusal restores the last readout,line=642,column=32::AssertionError: expected 'Committed mid-drag.' to be 'Fade In: 2.000 s' // Object.is equality%0A%0AExpected: "Fade In: 2.000 s"%0AReceived: "Committed mid-drag."%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:642:32%0A%0A
+
+::error file=/tmp/c327s/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP14 a fade dragged back to 0 adds no entry%2C empties the store and reports no change,line=676,column=48::AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Fade In: 0.000 s' // Object.is equality%0A%0AExpected: "Fade In: 0.000 s"%0AReceived: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:676:48%0A%0A
+
+::error file=/tmp/c327s/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP16 a stop mid-fade reads the shown readout%2C so the insert-marker rewrite stays off as at HEAD,line=705,column=48::AssertionError: expected 'Playing from 00:00.000.' to be 'Fade In: 2.000 s' // Object.is equality%0A%0AExpected: "Fade In: 2.000 s"%0AReceived: "Playing from 00:00.000."%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:705:48%0A%0A

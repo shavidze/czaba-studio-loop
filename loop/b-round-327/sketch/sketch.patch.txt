@@ -1,0 +1,132 @@
+--- a/app/contexts/ArrangementContext.tsx	2026-11-04 05:14:45.301614228 +0000
++++ b/app/contexts/ArrangementContext.tsx	2026-11-04 06:27:22.060010132 +0000
+@@ -746,12 +746,14 @@
+   const statusSequence = statusEntry.sequence;
+   const statusKey = statusEntry.previewKey ?? String(statusSequence);
+   const lastNonRefusalStatusRef = useRef(status);
++  const committedStatusTextRef = useRef(status);
++  const adoptedPreviewSequenceRef = useRef(0);
+   const flushStatusPreview = useCallback(() => {
+     const pending = statusPreviewStore.getState().preview;
+-    if (!pending) {
++    if (!pending || pending.sequence <= adoptedPreviewSequenceRef.current) {
+       return;
+     }
+-    statusPreviewStore.getState().clearPreview();
++    adoptedPreviewSequenceRef.current = pending.sequence;
+     if (gestureRefusalPrefix(pending.text) === null) {
+       lastNonRefusalStatusRef.current = pending.text;
+     }
+@@ -766,6 +768,10 @@
+   );
+   const previewStatus = useCallback(
+     (text: string) => {
++      const pending = statusPreviewStore.getState().preview;
++      if (pending === null && text === committedStatusTextRef.current) {
++        return;
++      }
+       statusPreviewStore.getState().showPreview(text);
+     },
+     [statusPreviewStore],
+@@ -775,10 +781,17 @@
+     [statusPreviewStore],
+   );
+   useIsomorphicLayoutEffect(() => {
++    committedStatusTextRef.current = status;
+     if (gestureRefusalPrefix(status) === null) {
+       lastNonRefusalStatusRef.current = status;
+     }
+   }, [status]);
++  useIsomorphicLayoutEffect(() => {
++    const pending = statusPreviewStore.getState().preview;
++    if (pending && pending.sequence <= adoptedPreviewSequenceRef.current) {
++      statusPreviewStore.getState().clearPreview();
++    }
++  }, [statusEntry, statusPreviewStore]);
+   const [sourceStates, setSourceStatesState] = useState<Record<string, SourceLoadState>>({});
+   const [sourcePeaks, setSourcePeaks] = useState<ReadonlyMap<string, Float32Array>>(new Map());
+   const peaksComputerRef = useRef<SourcePeaksComputer | null>(null);
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-04 05:27:03.417656460 +0000
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-04 06:26:58.051122307 +0000
+@@ -713,4 +713,81 @@
+       studioClipStrings.fadeCommitted('Fade In', '2.000'),
+     );
+   });
++
++  it('DP17 a same-text committed write mid-fade, then a same-value move, keeps the status span node as at HEAD', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    const region = view.getByTestId('arrangement-status');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 80);
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    const held = region.firstElementChild;
++    act(() => live(api).setStatus((current) => current));
++    expect(region.firstElementChild).toBe(held);
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    pointerMoveTo(audio.root, 1, 80.01);
++    expect(region.firstElementChild).toBe(held);
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    expect(live(api).getStatusPreviewText()).toBeNull();
++    pointerMoveTo(audio.root, 1, 120);
++    expect(region.textContent).toBe('Fade In: 3.000 s');
++    expect(region.firstElementChild).not.toBe(held);
++    pointerUpAt(audio.root, 1, 120);
++    expect(region.textContent).toBe(studioClipStrings.fadeCommitted('Fade In', '3.000'));
++  });
++
++  it('DP18 a same-text updater from a timer mid-fade adds and removes no status node', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    const region = view.getByTestId('arrangement-status');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 80);
++    const held = region.firstElementChild;
++    const seen: string[] = [];
++    const observer = new MutationObserver((records) => {
++      for (const record of records) {
++        for (const node of record.addedNodes) {
++          seen.push(`+${node.textContent}`);
++        }
++        for (const node of record.removedNodes) {
++          seen.push(`-${node.textContent}`);
++        }
++      }
++    });
++    observer.observe(region, { childList: true, subtree: true, characterData: true });
++    const flag = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean };
++    flag.IS_REACT_ACT_ENVIRONMENT = false;
++    const current = live(api);
++    try {
++      await new Promise<void>((resolve) => {
++        setTimeout(() => {
++          current.setStatus((text) => text);
++          resolve();
++        }, 0);
++      });
++      await new Promise<void>((resolve) => setTimeout(resolve, 50));
++    } finally {
++      flag.IS_REACT_ACT_ENVIRONMENT = true;
++      observer.disconnect();
++    }
++    expect(seen).toEqual([]);
++    expect(region.firstElementChild).toBe(held);
++    expect(region.textContent).toBe('Fade In: 2.000 s');
++    pointerUpAt(audio.root, 1, 80);
++    expect(region.textContent).toBe(studioClipStrings.fadeCommitted('Fade In', '2.000'));
++  });
++
++  it('DP19 two committed writes in one batch mid-fade adopt the readout once, so the second updater sees the first write', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 80);
++    act(() => {
++      live(api).setStatus('First write.');
++      live(api).setStatus((current) => `${current} Second write.`);
++    });
++    expect(textOf(view, 'arrangement-status')).toBe('First write. Second write.');
++    expect(live(api).getStatusPreviewText()).toBeNull();
++    pointerUpAt(audio.root, 1, 80);
++  });
+ });

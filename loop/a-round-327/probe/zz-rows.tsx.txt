@@ -1,0 +1,56 @@
+  it('ZZ1 probe: an async setStatus mid-fade, outside act', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const region = view.getByTestId('arrangement-status');
+    act(() => live(api).setStatus('Before drag.'));
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 80);
+    expect(region.textContent).toBe('Fade In: 2.000 s');
+    const seen: string[] = [];
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          seen.push(`+${node.textContent}`);
+        }
+        for (const node of record.removedNodes) {
+          seen.push(`-${node.textContent}`);
+        }
+        if (record.type === 'characterData') {
+          seen.push(`~${record.target.textContent}`);
+        }
+      }
+    });
+    observer.observe(region, { childList: true, subtree: true, characterData: true });
+    const flag = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean };
+    flag.IS_REACT_ACT_ENVIRONMENT = false;
+    const api0 = live(api);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        api0.setStatus('Async write.');
+        resolve();
+      }, 0);
+    });
+    await new Promise<void>((resolve) => setTimeout(resolve, 50));
+    flag.IS_REACT_ACT_ENVIRONMENT = true;
+    observer.disconnect();
+    console.log('ZZSEEN=' + JSON.stringify(seen) + ' FINAL=' + region.textContent);
+    pointerUpAt(audio.root, 1, 80);
+  });
+
+  it('ZZ2 probe: a same-text updater write mid-fade, then a same-value move', async () => {
+    const { api, view, clipParts } = await mountPreviewWorkspace();
+    const audio = clipParts('c1');
+    const region = view.getByTestId('arrangement-status');
+    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
+    pointerMoveTo(audio.root, 1, 80);
+    const before = region.firstElementChild;
+    const seqBefore = live(api).statusSequence;
+    act(() => live(api).setInsertMarker(1));
+    const afterWrite = region.firstElementChild;
+    pointerMoveTo(audio.root, 1, 80.01);
+    const afterMove = region.firstElementChild;
+    console.log('ZZ2 text=' + region.textContent + ' sameAfterWrite=' + (afterWrite === before) + ' sameAfterMove=' + (afterMove === afterWrite) + ' seq ' + seqBefore + '->' + live(api).statusSequence + ' marker=' + live(api).insertMarker);
+    pointerUpAt(audio.root, 1, 80.01);
+  });
+
+});

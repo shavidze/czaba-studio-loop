@@ -1,0 +1,128 @@
+{
+ "round": 327,
+ "task": "PERF-DRAG-PREVIEW stage b",
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-04T05:39:28.1724401Z",
+  "round": 327,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R327-01",
+   "severity": "medium",
+   "origin": "B sketch design (§1.2.3 flush-then-dispatch ordering), applied verbatim by A; flagged by A's code-reviewer as finding 1 (not reproduced in jsdom)",
+   "steps": [
+    "Fresh anonymous context, /studio-lab at 1440x900 and at 1280x720; public-preview MP3s still loading (slow network; probe holds /middle-east.mp3 and /videos/hero/hero-music.mp3 via page.route), status 'Loading the demo collection…'",
+    "Select 'Pulse' (demo-stem-pulse), Add",
+    "Drag its Fade In handle 40 px and hold still (status 'Fade In: 1.250 s')",
+    "The last MP3 arrives -> collection settles (settledCollectionStatus updater setStatus) while the pointer is held"
+   ],
+   "expected": "As at HEAD (§4 'every status write during a drag behaves as at HEAD'): 0 mutations in [data-testid=arrangement-status], same span node",
+   "actual": "A tree, both viewports, 3/3 runs: '-Fade In: 1.250 s', '+“Night Pulse · Pulse” added to the Music track at 00:00.000. Drag a clip…' (stale committed text), ~6 ms later '-…added…', '+Fade In: 1.250 s' (new span). rAF sampler (240 frames) never saw the stale text at a frame boundary (visible flash unlikely, not excluded), but the aria-live DOM gets a stale node and a re-inserted identical text (key-remount = the project's re-announce mechanism). Screen-reader speech of the stale text is unverified (no screen reader in cloud). HEAD: [] and the same node.",
+   "evidence": "c-round-327/probe-settle-{a,head}.json (afterSettle.rec), probe-settle-{a,head}-frames.json, shots/probe-settle-*-after-settle.png, probe-settle-remount.mjs",
+   "routeTo": "B (rule together with A's STOP A-R327-REVIEW-SAME-TEXT-REMOUNT; A's option (b) does not cover this)",
+   "reachability": "Inference: public/middle-east.mp3 4.05 MB + hero-music.mp3 3.61 MB need ~3-6 s at 10 Mbit/s after load; add-then-drag takes a few seconds, so the window is comparable on an ordinary connection. The video import (the other async setStatus path) was probed and equals HEAD (deferred to release or done before the drag): probe-video-import-{a,head}.json. The collection settle is the only async writer found to reach it."
+  },
+  {
+   "id": "C-R327-02",
+   "severity": "low",
+   "origin": "B sketch design (§1.1/§1.2.4); = A-R327-REVIEW-SAME-TEXT-REMOUNT, now browser-confirmed",
+   "steps": [
+    "Fresh anonymous context, /studio-lab at 1440x900 and at 1280x720; public-preview MP3s still loading (slow network; probe holds /middle-east.mp3 and /videos/hero/hero-music.mp3 via page.route), status 'Loading the demo collection…'",
+    "Select 'Pulse' (demo-stem-pulse), Add",
+    "Drag its Fade In handle 40 px and hold still (status 'Fade In: 1.250 s')",
+    "The last MP3 arrives -> collection settles (settledCollectionStatus updater setStatus) while the pointer is held",
+    "Move the pointer vertically only (+6 px), fade value stays 1.250"
+   ],
+   "expected": "HEAD: 0 mutations, same node",
+   "actual": "A: '-Fade In: 1.250 s', '+Fade In: 1.250 s', sameNode=false, both viewports; the next real move and release equal HEAD",
+   "evidence": "c-round-327/probe-settle-a.json afterSameValueMove; probe-settle-head.json",
+   "routeTo": "B (same root/fix as C-R327-01)",
+   "fixCriterion": "On a collection settle during a fade drag: 0 status-region mutations and the same node, before and after a same-value move, as at HEAD (probe-settle-remount.mjs A vs HEAD)."
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "MUTANT",
+  "PERF",
+  "B-FADE-STATUS",
+  "B-FADE-CANCEL",
+  "B-FADE-END-STOP",
+  "B-FADE-PLAYING",
+  "B-FADE-EXPORT",
+  "B-VIDEO-FADE",
+  "G327-AUTH",
+  "DOCS"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome/lint",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "info": [
+  "A's STOP (a-round-327.md l.1, A-R327-REVIEW-SAME-TEXT-REMOUNT) remains open; C-R327-02 is its browser confirmation and C-R327-01 shares its trigger.",
+  "INFO-C327-ALT-CLICK-MARKER: no-BPM (SFX-only) setup: the bars ruler is rendered (20 px, BPM empty) but C's Alt-click on it did not move the insert marker, on A and HEAD alike; whether a no-BPM bars ruler should take that click was not established (possibly a C script assumption). Not a round-327 change.",
+  "INFO-C327-RELEASE-2ND-COMMIT: stopped release-commits 2 recorded; second-commit component count not measured by C (harness reports only max 96); the 0 figure is B's probe.",
+  "B-FADE-END-STOP start deviation: ~2 s before the end instead of ~1 s; the drag began during playback and continued past the auto-stop, which is the row's purpose.",
+  "Environment-invalid: first warm-up of both dev servers timed out on cold compile; videoFade attempt 1 on A used the wrong handle selector (C script error) and was replaced.",
+  "Video-import async status path probed (probe-video-import-{a,head}.json): equal to HEAD at both viewports."
+ ],
+ "manifestPaths": [
+  "b-round-326/claims-327.sh",
+  "b-round-326/claims-327-planning-output.txt",
+  "b-round-326/claims-327-sketch-output.txt",
+  "b-round-326/sketch/sketch.patch.txt",
+  "b-round-326/sketch/mutants-summary.txt",
+  "b-round-326/perf-mutant-results/latest-interactions.json",
+  "b-round-326/perf-sketch-results",
+  "b-round-326/perf-sketch-probe-results",
+  "b-round-326/precheck-full-v3.log",
+  "b-round-326/sketch/head-parity-dp10-14.log",
+  "b-round-326/sketch/run-mutants.sh",
+  "b-round-326/sketch/run-mutants-2.sh",
+  "b-round-326/sketch/status-preview-store.ts.txt",
+  "b-round-326/sketch/drag-preview-render.test.tsx.txt",
+  "b-round-326/sketch/status-preview-store.test.ts.txt",
+  "c-round-325/perf-interactions-atree-results/latest-interactions.json",
+  "a-round-327/claims-after.txt",
+  "a-round-327/perf-a-results/latest-interactions.json",
+  "a-round-327/mutants/mutants-summary.txt",
+  "a-round-327/head-parity-dp16.log",
+  "a-round-327/probe/zz-a.log",
+  "a-round-327/probe/zz-head.log",
+  "a-round-327/probe/option-b-scratch.log",
+  "a-round-327/unit-final.log",
+  "gates/gate-round-326.json",
+  "lessons.md",
+  "regression-last.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 0.02,
+ "assertsSpecified": 18,
+ "assertsSpecifiedNote": "5 budget rows + DP9a–DP15 (10) + SP1–SP3 (3); A added DP16 beyond the 18",
+ "mutantsRecorded": 8,
+ "mutantRedOnSketch": true,
+ "mutantRedOnSketchEvidence": [
+  "b-round-326/sketch/mutants-summary.txt",
+  "b-round-326/perf-mutant-results/latest-interactions.json"
+ ],
+ "mutantRedOnTree": true,
+ "mutantRedOnTreeEvidence": "c-round-327/mutants/summary.txt (MU-FADE-PROVIDER->DP9a; MU-NO-FLUSH->DP9a,DP11,DP12,DP14,DP15,DP16; C-MU-FOOTER-IGNORES-PREVIEW->DP9a,DP10,DP12,DP14,DP16; C-MU-STORE-NO-DEDUPE->SP1,DP10; restored 21/21)",
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 2,
+ "gateChecksRunOnSketchReason": "B ran the full vitest (precheck-full-v3.log) and the typecheck",
+ "chainHeadGateRunGreen": null,
+ "chainHeadGateRunGreenReason": "not a fix-up chain",
+ "ableton": "not applicable (perf round; behaviour held to HEAD)"
+}

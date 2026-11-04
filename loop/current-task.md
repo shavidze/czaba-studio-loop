@@ -1,256 +1,196 @@
-# Round 327: PERF-DRAG-PREVIEW stage b. The audio fade-handle drag leaves React history and the provider status during the gesture
+# Round 328: PERF-DRAG-PREVIEW stage b fix-up. A status write mid-drag shows no stale text and remounts no span (C-R327-01, C-R327-02)
 
-**Planned by:** B, at the round 326 → 327 planning, 2026-11-04.
+**Planned by:** B, at the round 327 → 328 planning, 2026-11-04.
 
-**Decisions** (all in `backlog.json` → `decisions_log_b`, v286):
-- **D-29z928: rounds 325 and 326 are closed from evidence.** C round 326 PASS (`c-round-326.json`: `browserVerified`/`realVerified` true). Gate 326 published `234ccdd` (rounds 325 + 326) [K1].
-  - PERF-DRAG-PREVIEW stage a → done.
-  - GATE325-IM24-WALLCLOCK → done.
-  - B-R299-IM24-LOAD-SIGNAL → closed.
-- **D-29z929: C-R326-01** (Low, origin **B spec**) → `deferred_low_polish`.
-  - Round 253's task had already ruled the playing "after the playhead" tail jsdom-only (`tasks/round-253.md` l.208), and B's round-326 B-IM24 row asked for it anyway.
-  - The IM24 tail goes to SYS-CLOCK-DETERMINISM (jsdom fake fidelity: the end-stop tick never runs there). C suggested SYS-R2-FAKE-FIDELITY, but that task covers the R2 worker fake.
-  - L29 gains this as evidence.
-- **D-29z930: the two round-326 infos.**
-  - INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER matches the recorded contract: Ctrl+→ moves the marker during playback (`tasks/round-252.md` l.254/l.322, `tasks/round-253.md` l.224). That contract was set by the planner, not by Saba, and Live 12's behaviour while playing is unverified. B therefore adds LIVE-MEAS-MARKER-STEP-PLAYING to `user-review/live-checks.md` (L44). A different Live result goes to Saba as one question.
-  - INFO-C326-END-STOP-STALE-STATUS becomes the signal SIG-R326-END-STOP-STATUS (status lifetime, not scheduled).
-- **D-29z931: round 327 = PERF-DRAG-PREVIEW stage b**, with the contract in §1. Consults: `tech-lead` and `performance-optimizer` (`b-round-326.md` §3).
-- **D-29z932: budgets.**
-  - Five 1× fade rows become `assert`, with owner `PERF-DRAG-PREVIEW-b`. Their `.6x` copies stay `record`, as in stage a.
-  - The stage-a trim/move per-move rows stay `record`. Converting them (D-29z922) moves to stage c, together with the move rows. B has no perf mutant run for trim, and L58 does not allow an assert without one.
-- **D-29z933: DP9 is rewritten, not deleted.**
-  - Its fade half becomes DP9a, with the provider expectation inverted and stronger asserts.
-  - Its video half becomes DP9b, unchanged.
-  - DP10–DP15 are added. No assertion is lost: `expect(` goes from 68 to 112 on the sketch [K10].
-- **D-29z934:** doc 232 is the feature doc for all three stages. Stage b rewrites its sections, and l.4 becomes `**სტატუსი:** In Progress (stage 2 of 3; C round 327 PASS)`.
-- **D-29z935: the item target stays at ≤ 15 components per move.** The sketch reaches 21.633 for fade. The gap carries to stage c, with three unscheduled signals:
-  - SIG-R326-READOUT-PRIMITIVE;
-  - SIG-R326-DETAIL-IGNORES-FADE;
-  - SIG-R326-SKIP-UNCHANGED-FADE.
-- **D-29z936: the next round** is REGRESSION if its planning falls on or after 2026-11-05 (`regression-last` is 2026-11-02 [K9]). Otherwise it is PERF-DRAG-PREVIEW stage c.
+**Decisions** (all in `backlog.json` → `decisions_log_b`, v287):
+- **D-29z937: round 327 closed as FAIL.**
+  - C round 327: FAIL, with `browserVerified`/`realVerified` true. 13 rows passed: PERF (fade 21.633 per move, max 22, 0 restarts), every B-FADE-* row at both viewports, the WAV sha and G327-AUTH. The one failure is **C-R327-01** (Medium).
+  - Gate 327 was skipped [K1]. Nothing was published, and HEAD stays `234ccdd`.
+  - **A's 11-entry uncommitted tree is the base of this round.** Do not revert it, re-apply it or reset it [K2].
+- **D-29z938: one ruling covers A's STOP (A-R327-REVIEW-SAME-TEXT-REMOUNT), C-R327-01 and C-R327-02.**
+  - They share one trigger and one root, which is B's round-327 §1.2.3. `flushStatusPreview` cleared the status-preview store synchronously, which is a `useSyncExternalStore` sync re-render. The `adoptPreview` dispatch was still pending in the default lane at that moment. So for about 6 ms the footer showed the committed pre-drag sentence, and then a new span with the fade text.
+  - The origin is **B's spec**, not A's work.
+  - A's option (b) alone is rejected, because it fixes only C-R327-02.
+- **D-29z939:** B's sketch and its evidence (§0).
+- **D-29z940:** reviewer finding 3 (the settle order) is A-R327-REVIEW-SETTLE-ORDER, Low → `deferred_low_polish`. Reviewer finding 4 is closed: `tasks/round-327.md` §1.3 already rules it.
+- **D-29z941:** two infos become signals and are not scheduled.
+  - INFO-C327-ALT-CLICK-MARKER → SIG-R327-NOBPM-RULER-CLICK. The next REGRESSION round probes it.
+  - INFO-C327-RELEASE-2ND-COMMIT → SIG-R327-HARNESS-PER-COMMIT.
+- **D-29z942:** A's architecture note becomes A-R327-ARCH-STATUS-ONE-SOURCE, filed in `b-round-327-checkpoint-addendum.md` (D-29z915). It does not block anything.
+- **D-29z943:** this task.
+- **D-29z944:** the next round is REGRESSION if it is planned on or after 2026-11-05. Otherwise it is stage c.
 
-**Read first:** `lessons.md`: L4, L11, L23, L26, L28, L29, L31, L34, L37, L49, L51, L52, L56, L57, L58.
+**Read first:** `lessons.md`: L4, L11, L23, L26, L29, L31, L34, L37, L38, L56, L57, L58.
 
-**L29 note:** untagged code text in this task is an expected value, a new name, a row id or a loop-artifact path. Facts about `store/` carry `[K#]` (§8).
+**L29 note:** untagged code text in this task is an expected value, a new name, a row id or a loop-artifact path. Facts about `store/` carry `[K#]` (§7).
 
 ## Baseline
-- **HEAD `234ccdd`**, tree clean (0 status entries) [K2].
+- HEAD is `234ccdd`, plus round 327's tree: 9 modified files and 2 new files [K2].
+- `b-round-327/tree-327-sha256.txt` holds the sha256 of all 11 files at planning. After A's work, only the three files granted in §3 may differ.
 - Protected files: 11/11 OK [K8].
-- No dependency change: `zustand` is already a dependency, used by `preview-store.ts`.
+- No dependency change.
 
-## 0. Why this round
-- **Measured at HEAD.** C round 325's production run was on the tree that is now HEAD. The fade-in drag renders **103.25 components per move** (max 105), with 0 graph restarts during the move and 1 at release [K19].
-- **Two writes per move cause it.** The fade branch of `handlePointerMove` does both of these on every move:
-  - it calls `previewArrangement(next)`, which runs setHistory [K3, first value 2: the fade line and the group line];
-  - it calls `setStatus(studioClipStrings.fadePreview(…))` [K3, second value].
+## 0. Why this round, and B's evidence
+- **C-R327-01 (Medium, origin B spec).** A user's public previews are still downloading. They add "Pulse", drag its Fade In handle and hold still, and then the collection settles.
+  - The settle runs `setStatus((current) => settledCollectionStatus(current, copy, failedCount))`; it is the l.4049 region of `ArrangementContext.tsx` [K7].
+  - On A's tree, `aria-live` gets the stale "“Night Pulse · Pulse” added…" span, and about 6 ms later a new "Fade In: 1.250 s" span. HEAD has 0 mutations.
+  - B re-ran C's probe on A's tree as a control and reproduced it at both viewports (`b-round-327/probe-settle-atree.json`).
+- **C-R327-02 (Low).** After that write, a vertical-only move (same fade value) remounts the span on A's tree; HEAD keeps the node. It is fixed here because the round already owns this code and the fix costs one guard.
+- **B's sketch** (`b-round-327/sketch/sketch.patch.txt`; it applies cleanly with `git apply` on A's tree; scratch `/home/runner/b327-scratch`). Only two files change: `ArrangementContext.tsx` and `drag-preview-render.test.tsx`.
+  - **Browser, C's own probe** (`b-round-327/probe-settle-remount.mjs`, a copy of `c-round-327/probe-settle-remount.mjs` whose output dir is set by `PROBE_DIR`). The sketch dev server on :5198 equals HEAD on :5197 at 1440×900 and 1280×720:
+    - after the settle: `rec` [] and the same node;
+    - after the same-value move: `rec` [] and the same node;
+    - the next real move and the release give the same texts as HEAD.
 
-  `status` is a provider `useReducer`, and the footer renders `<span key={statusSequence}>{status}</span>` from the context value [K4]. Rerouting only the geometry would leave about 100 components.
-- **B's sketch** (`b-round-326/sketch/sketch.patch.txt`, 9 files; scratch `/home/runner/b326-scratch`; apply scripts `apply-sketch.py`, `apply-sketch-getter.py`, `apply-budgets.py`):
-  - **Perf, measured with C's command** (the perf spec on a production build) [K20]:
-    - fade **21.633 per move**, stopped and playing, and the same in the 6× replicate;
-    - max 22;
-    - 0 move restarts;
-    - stopped `release-commits` 2, playing 1. B's probe shows that the second stopped commit renders **0 components**, 5–9 ms after the 96-component release commit (`b-round-326/perf-sketch-probe-results/`).
-  - **Perf mutant run** [K21]: the fade status back on the provider plus a resync in `previewClipGeometry` give 110.133 per move and 59 restarts.
-  - The perf runs used sketch v2. v3 only adds the six comparison reads of §1.6, which render nothing, so A-PERF and C re-measure the final tree.
-  - **Full suite on the final sketch:** 3555/3555 [K23].
-  - **jsdom mutants:** 7/7 red on their rows, and the restored file is green [K22] (`b-round-326/sketch/mutants-summary.txt`).
-  - **HEAD parity:** the behaviour rows DP10, DP11, DP12 and DP14 also pass on a HEAD copy (`b-round-326/sketch/head-parity-dp10-14.log`), so they pin today's behaviour.
-- **Why not "status only at release":** it would change what `aria-live` announces mid-drag, and a perf round cannot rule on that. The per-move text stays.
-- **Reference-first, product-designer, screen budget:** not applicable. This is a perf round with nothing visible or audible changed, and every state is pinned to HEAD (§2).
+    Evidence: `probe-settle-sketch-final.json` and `probe-settle-head.json`. The 1440 run first timed out on the cold compile (environment-invalid) and was re-run: `probe-settle-sketch-1440-rerun.json`.
+  - **Browser, a text-changing write mid-drag** (`b-round-327/probe-refusal-mid-drag.mjs`): press Delete mid-drag, which gives the refusal; then move; then release. Sketch, HEAD and A's tree are identical at both viewports. The sequence is one removed and one added span per text change, then "Fade In: 1.875 s." and the Undo title "Undo: Fade In (Ctrl+Z)" (`probe-refusal-{sketch-final,head,atree}.json`).
+  - **Full vitest on the sketch: 3559/3559**, and typecheck rc 0 [K16].
+  - **HEAD parity:** DP17–DP19 pass on a `234ccdd` copy once their getter asserts are removed (`head-parity-dp17-19.log`).
+  - **jsdom mutants** (`run-mutants.sh`, results in `mutants-summary.txt`) [K17]:
+    - MU-NO-SAME-TEXT-GUARD → red on DP17.
+    - MU-READOPT → red on DP19.
+    - MU-NO-LAYOUT-CLEAR → red on DP9a, DP12, DP14, DP15, DP16, DP17, DP18 and DP19.
+    - **MU-SYNC-CLEAR, which is C-R327-01 itself, stays green in jsdom.** jsdom does not reproduce the lane split; A's ZZ1 and B's DP18 both show this. **The C-R327-01 row is therefore browser-only.** DP18 is kept as the jsdom guard for the same-text timer path.
+- **Not chosen:**
+  - Moving the committed status into the store. That is the architecture checkpoint's question (D-29z942).
+  - `flushSync`. The stop effect calls `setStatus` from an effect.
+  - Changing the footer. The sketch tried `preview && key !== statusKey`, but no row needed it, so `StudioWorkspace.tsx` stays as it is.
+- **Reference-first, product-designer, screen budget:** not applicable. This is a perf fix-up, and behaviour is held to HEAD.
 
-## 1. Contract
-1. **New module `app/lib/arrangement/status-preview-store.ts`** (`zustand/vanilla`, the same shape as `preview-store.ts`). Use the sketch file `b-round-326/sketch/status-preview-store.ts.txt` as is.
-   - State: `preview: { text, sequence } | null`, plus `written: number`, a counter that never resets.
-   - `showPreview(text)` does not notify when the text equals the current preview text. Otherwise it writes `{ text, sequence: written + 1 }`.
-   - `clearPreview()`.
-   - The pure helper `statusPreviewKey(preview)` returns `` `preview-${sequence}` ``.
-2. **`ArrangementContext.tsx`:**
-   1. **Store.** Add a per-provider `statusPreviewStore` behind its own context. The hook `useArrangementStatusPreview(selector)` throws outside a provider, as `useArrangementPreview` does.
-   2. **Status reducer.** Rename the `useReducer` dispatch to `dispatchStatus` [K4, second value → 0]. Its state gains `previewKey: string | null`.
-      - A new internal action `{ adoptPreview }` sets `text` to the preview text, increments `sequence` and sets `previewKey = statusPreviewKey(preview)`.
-      - Every other action goes through `reduceArrangementStatus` unchanged. A changed result gets `previewKey: null`; an unchanged result returns the same object.
-      - `status-announcement.ts` does not change.
-   3. **`setStatus` becomes a stable wrapper.** It first runs `flushStatusPreview()`, then `dispatchStatus(update)`. Its context name, its type and its callers do not change.
-      - When a preview exists, `flushStatusPreview` clears the store, sets `lastNonRefusalStatusRef.current` to the preview text when that text is not a refusal (`gestureRefusalPrefix`), and then dispatches `{ adoptPreview }`.
-      - So any committed write during a drag (updaters, refusals, a playback stop) sees and replaces the shown text, as at HEAD.
-   4. **Two new stable context functions:**
-      - `previewStatus(text)` calls `statusPreviewStore.showPreview(text)`;
-      - `getStatusPreviewText()` returns the current preview text or `null`.
-   5. **A new context value `statusKey`** = `previewKey ?? String(statusSequence)`. `statusSequence` stays in the value with today's meaning.
-   6. **The gesture release closure** (`beginPointerGesture`, `if (gestureCountRef.current === 0)` [K7]) does not change. Its existing `setStatus((current) => rewriteStoppedTruth(statusAfterGestureRelease(current, lastNonRefusalStatusRef.current)))` now flushes first through the wrapper, so the updater sees the last preview text, as at HEAD.
-   7. **Dependency arrays.** Add `setStatus` (and `getStatusPreviewText` where it is used) to every hook dependency array that Biome's `useExhaustiveDependencies` now flags. Nothing else in those arrays changes, and the rule's count for this file stays **0** [K12]. The sketch made exactly this change with `biome lint --write --unsafe --only=correctness/useExhaustiveDependencies`.
-3. **`ArrangementClip.tsx`, fade branch only.**
-   - `previewArrangement(next)` becomes `previewGeometry(next)`, the existing local, which stays `previewArrangement` for video [K3, first value → 1].
-   - The text goes to `previewStatus(text)` when `previewStatus` is given and the clip is not video. Otherwise it goes to `setStatus(text)`, as today.
-   - Add the optional prop `previewStatus?: (text: string) => void`.
-   - Nothing else changes: `endStaleClipGesture`, `finishGesture`, the double-click reset and the group/cross-lane lines stay as they are.
-4. **`ArrangementLane.tsx`** passes `previewStatus` from the context to the clip, next to `previewClipGeometry` [K6 → `1 2`].
-5. **`StudioWorkspace.tsx`:**
-   - The footer `<span key={statusSequence}>{status}</span>` [K4] becomes `<ArrangementStatusText status={status} statusKey={statusKey} />`. Use the project form `function ArrangementStatusTextInner` + `const ArrangementStatusText = memo(…)` (L23, runtime name).
-   - The component renders `<span key={statusPreviewKey(preview)}>{preview.text}</span>` while a preview exists, else `<span key={statusKey}>{status}</span>`.
-   - The `<output aria-live="polite" data-testid="arrangement-status">` wrapper, its classes and its position do not change.
-   - The workspace destructures `statusKey` instead of `statusSequence`.
-6. **Every read that compares the status text reads the shown text:** `getStatusPreviewText() ?? <committed status>`. There are exactly six such reads [K25 → `0 0 0 0`, K24 → `3 2`]:
-   - in `StudioWorkspace.tsx`:
-     - the stop effect's `insertMarkerStatusKind(current.status)` and `current.status === FOLLOW_PAUSED_MESSAGE` (one `shownStatus` const);
-     - the nudge `current.status !== NUDGE_AT_TIME_START_MESSAGE`;
-   - in `ArrangementMarkerRow.tsx`: `status !== message` ×2 and `status !== MARKER_AT_TIME_START_MESSAGE`.
+## 1. Contract (`app/contexts/ArrangementContext.tsx`, the status-preview block only)
+**Apply `b-round-327/sketch/sketch.patch.txt` with `git apply` on the tree** (from `store/`; verified clean at planning with `git apply --check`). §1.1–§1.8 describe that patch. Do not retype it: `run-mutants.sh` and K3–K6/K10 match its exact lines. §1.9 (doc 232) is the only edit by hand. If the patch does not apply, STOP.
 
-   Why: at HEAD, each of these saw "Fade In: x s" during a fade drag; without the change it would see the pre-drag text. The stop effect is reachable, because playback can reach the project end mid-drag (the C-R326 B-IM24 observation). **Ruling:** all six are changed the same way, with no per-site exception.
-7. **Budgets (`perf/budgets.interactions.json`).** Edit the file in place; do not reflow it. The sketch diff touches 5 rows. Each row gets `mode: "assert"`, `owner: "PERF-DRAG-PREVIEW-b"` and the note suffix ` Asserted since PERF-DRAG-PREVIEW stage b (round 327).` [K11 → `5 12`]:
+1. **Two new refs**, next to `lastNonRefusalStatusRef`:
+   - `const committedStatusTextRef = useRef(status);`
+   - `const adoptedPreviewSequenceRef = useRef(0);`
+2. **`flushStatusPreview` never writes the store** [K3 → first value 0].
+   1. If there is no pending preview, or `pending.sequence <= adoptedPreviewSequenceRef.current`, return.
+   2. Otherwise set `adoptedPreviewSequenceRef.current = pending.sequence`.
+   3. Keep the existing `lastNonRefusalStatusRef` update.
+   4. Dispatch `{ adoptPreview: pending }`.
 
-   | Row | Budget |
-   |---|---|
-   | `interact.drag.fade.stopped.move-components-per-move` | `<= 24` |
-   | `interact.drag.fade.playing.move-components-per-move` | `<= 24` |
-   | `interact.drag.fade.stopped.move-components-max` | `<= 24` |
-   | `interact.drag.fade.playing.move-components-max` | `<= 24` |
-   | `interact.drag.fade.playing.move-restarts` | `== 0` |
-
-   - **Headroom (L37):** the sketch measured 21.633 per move and 22 max. The headroom is therefore 2.37 and 2 components, both deterministic, and 6× equals 1×.
-   - The `.6x` copies and every other row do not change.
-8. **Tests:**
-   - In `drag-preview-render.test.tsx`, DP9 [K17] is replaced by **DP9a, DP9b, DP10, DP11, DP12, DP13, DP14 and DP15**, and the helper `fadeHandleOf` is added. Take them from `b-round-326/sketch/drag-preview-render.test.tsx.txt`. A may strengthen them, never weaken them.
-   - The new file `app/lib/arrangement/__tests__/status-preview-store.test.ts` gets **SP1–SP3** (`b-round-326/sketch/status-preview-store.test.ts.txt`).
-9. **Docs:**
-   - **Doc 232.** Stage b rewrites the whole doc except the l.4 rule (L34), in Georgian with English terms.
-     - l.4 becomes exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 327 PASS)` [K13].
-     - The seven TEMPLATE headings stay in order (L26).
-     - Add stage b to `## მიდგომა`, `## არქიტექტურა` (the status-preview path), `## შეცვლილი ფაილები`, `## პრობლემები და გადაწყვეტები` and `## ტესტირება`. Update `## TODO` with stage c and the D-29z935 signals.
-     - Cite only rows that exist (L26).
-   - **Doc 168.** The whole PERF-DRAG-PREVIEW paragraph block is granted: from the paragraph that starts `**PERF-DRAG-PREVIEW-ის ეტაპ a-დან` [K18] to the next `**` paragraph or heading. Add one stage-b paragraph there with A's measured numbers: HEAD 103.25 → A, and stopped `release-commits` 1 → 2 with a 0-component second commit.
-10. **Out of scope** (these stay unchanged):
-    - video fades and video moves (stage c);
-    - the group move, the cross-lane move and the project-end move;
-    - marker, envelope and loop-brace drags (SIG-R324-OTHER-PREVIEW-CALLERS);
-    - the readout, detail-panel and skip-unchanged ideas (D-29z935);
-    - `status-announcement.ts`, `preview-store.ts` and every other status writer.
+   "Adopt once per preview sequence" is required. Without it, two `setStatus` calls in one batch adopt twice, and the second updater sees the preview text instead of the first write (DP19).
+3. **A new `useIsomorphicLayoutEffect` with deps `[statusEntry, statusPreviewStore]`** [K6]. When the store's preview exists and its `sequence <= adoptedPreviewSequenceRef.current`, call `clearPreview()`. A newer preview, written after the flush, is kept.
+   - The adopted entry carries `previewKey` = the preview's key, so the committed span and the preview span have the same key and text. React keeps the node, which gives 0 mutations.
+   - The existing reducer, `adoptPreview` and `statusKey` do not change.
+4. **`previewStatus(text)`:** when the store's preview is `null` and `text === committedStatusTextRef.current`, return without writing [K5]. Otherwise call `showPreview(text)`.
+   - This mirrors HEAD's rule `gestureActive && next === previous.text` in `reduceArrangementStatus`.
+5. **The existing status layout effect** (deps `[status]`) also sets `committedStatusTextRef.current = status`, before the refusal check. Its other line does not change.
+6. **These do not change:**
+   - `getStatusPreviewText`, `setStatus`'s wrapper shape, the reducer and the settle code (l.4044–4049 [K7]);
+   - `StudioWorkspace.tsx`, including the footer [K13];
+   - `status-preview-store.ts`, `ArrangementClip.tsx`, `ArrangementLane.tsx` and `ArrangementMarkerRow.tsx`;
+   - the budgets, and every other file.
+7. **Biome:** the `useExhaustiveDependencies` count for the context stays **0** [K12]. The sketch was clean with `biome lint`.
+8. **Tests:** append **DP17, DP18 and DP19** to `drag-preview-render.test.tsx`, verbatim from `b-round-327/sketch/drag-preview-render.test.tsx.txt` (the sketch patch's test hunk). A may strengthen them, never weaken them. No other test changes.
+9. **Doc 232** (whole doc, L34):
+   - l.4 becomes exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 328 PASS)` [K11].
+   - The seven TEMPLATE headings stay in order (L26).
+   - In `### ეტაპი b`, `## არქიტექტურა` and `## ტესტირება`, describe the adopt-once flush, the layout-effect clear and the same-text guard, plus DP17–DP19.
+   - In `## პრობლემები და გადაწყვეტები`, add one Problem → Solution entry for C-R327-01/02. It must state that the flush cleared the store before the reducer committed, and that MU-SYNC-CLEAR is green in jsdom, so the bug's row is a browser probe.
+   - Cite only rows that exist.
 
 ## 2. Acceptance
 
 ### 2.1 A's rows
 | Row | Expected |
 |---|---|
-| A-CLAIMS | Before editing, run `bash b-round-326/claims-327.sh` from the loop root. The output must equal `b-round-326/claims-327-planning-output.txt`. Any difference is a STOP |
-| A-IMPL | §1.1–§1.9 |
-| A-CLAIMS-AFTER | Every line equals planning except: K2 `234ccdd 11` (9 modified + 2 untracked); K3 `1 1`; K4 `0 0`; K5 `present`; K6 `1 2`; K10 ≥ `112 17`; K11 `5 12`; K13 the new l.4; K16 `11 7`; K17 `0 6`; K18 `1 ≥1`; K24 `3 2`; K25 `0 0 0 0`. K12 stays `0`. Save the output as `a-round-327/claims-after.txt`. Compare it with `b-round-326/claims-327-sketch-output.txt`. K2, K13 and K18 differ there by design: the scratch is not a git repo, and the docs were not sketched |
-| A-TYPE / A-LINT | `npm run typecheck` rc 0; `npm run lint` rc 0. The Biome warning count for `app/lib/arrangement app/contexts app/components/arrangement` stays **15** (HEAD = sketch) |
-| A-UNIT | `npx vitest run` on these files: `drag-preview-render`, `status-preview-store`, `status-announcement-ui`, `status-announcement`, `status-lifetime`, `clip-fades-ui`, `video-fades-ui`, `affordance-colour-ui`, `clip-envelope-ui`, `track-header-stacking`, `insert-marker-ui`, `markers-ui` and `self-disabling-focus`. These are the L23 sweep hits [K16] plus the marker and status readers. All green. List any test above 50 % of its timeout (L31) |
-| A-MUTANT | Re-run B's 7 jsdom mutants (`b-round-326/sketch/run-mutants.sh`, `run-mutants-2.sh`), adapted to A's tree, on a scratch copy, never in `store/`. Each is red on the rows in `mutants-summary.txt`, and the restored file is green. Add one mutant of A's own for §1.6 (for example, drop the getter in the marker-row reads), and name the row that goes red or say why jsdom cannot reach it |
-| A-PERF | `npm run test:perf -- perf/studio-lab-interactions.perf.spec.ts`, run **alone** (L38): `failures` []. Report the five asserted rows, plus stopped/playing `release-commits` with `releaseComponentsMax` |
-| A-REVIEW | code-reviewer (more than 3 files). Its Architecture note goes to B |
+| A-CLAIMS | Before editing, run `bash b-round-327/claims-328.sh` from the loop root. The output must equal `b-round-327/claims-328-planning-output.txt`. Any difference is a STOP |
+| A-IMPL | `git apply b-round-327/sketch/sketch.patch.txt` (§1.1–§1.8), then §1.9 by hand |
+| A-CLAIMS-AFTER | Save as `a-round-328/claims-after.txt`. Every line equals planning except: K3 `0 1`; K4 `1 1`; K5 `1 1`; K6 `1`; K10 `135 21 3` (more only if A strengthens a row); K11 the new l.4. K2 stays `234ccdd 11`. Compare with `b-round-327/claims-328-sketch-output.txt`: K2, K8 and K11 differ there by design (the scratch is not a git repo, its `vite.config.ts` has a `cacheDir`, and the doc was not sketched) |
+| A-SCOPE | `sha256sum -c b-round-327/tree-327-sha256.txt` (run from `store/`) fails only for `ArrangementContext.tsx`, `drag-preview-render.test.tsx` and doc 232 |
+| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0. The Biome warning count for `app/lib/arrangement app/contexts app/components/arrangement` stays **15** |
+| A-UNIT | Run `npx vitest run` on round 327's 13 files: `drag-preview-render`, `status-preview-store`, `status-announcement-ui`, `status-announcement`, `status-lifetime`, `clip-fades-ui`, `video-fades-ui`, `affordance-colour-ui`, `clip-envelope-ui`, `track-header-stacking`, `insert-marker-ui`, `markers-ui` and `self-disabling-focus`. All must be green. List any test that runs above 50 % of its timeout (L31) |
+| A-MUTANT | On a scratch copy, never in `store/`: `b-round-327/run-mutants.sh <scratch>`. MU-NO-SAME-TEXT-GUARD → red on DP17. MU-READOPT → red on DP19. MU-NO-LAYOUT-CLEAR → red on DP17, DP18 and DP19 (and others). MU-SYNC-CLEAR is expected **green**: record it, it is not a STOP. Restored: green |
+| A-REVIEW | code-reviewer. Its Architecture note goes to B |
+
+A does not run a browser or perf row; C runs them.
 
 ### 2.2 C's rows
-C writes `c-round-327.md` and `c-round-327.json` as it goes, with **all L57 fields**:
-- `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, and an `origin` per finding;
-- `assertsSpecified` = 18: the 5 budget rows, the 10 rows DP9a–DP15 and the 3 rows SP1–SP3;
-- `mutantsRecorded` = 8: 7 jsdom mutants and 1 perf run with two combined mutants;
-- `mutantRedOnSketch` = true, with evidence `b-round-326/sketch/mutants-summary.txt` and `b-round-326/perf-mutant-results/latest-interactions.json`;
-- `mutantRedOnTree` (from C's own run);
+C writes `c-round-328.md` and `c-round-328.json` as it goes, with **all L57 fields**:
+- `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, and an `origin` for each finding;
+- `assertsSpecified` = 3 (DP17–DP19) + 2 browser probes = 5;
+- `mutantsRecorded` = 4, the `run-mutants.sh` set;
+- `mutantRedOnSketch` = true for 3 of the 4, with evidence `b-round-327/mutants-summary.txt`; MU-SYNC-CLEAR is green in jsdom by design and is covered by SETTLE-REMOUNT;
+- `mutantRedOnTree`, from C's own run;
 - `gateChecksNamed` = 6;
-- `gateChecksRunOnSketch` = 2: B ran the full vitest (`precheck-full-v3.log`) and the typecheck;
-- `chainHeadGateRunGreen` = `null`, with the reason "not a fix-up chain".
+- `gateChecksRunOnSketch` = 2: the full vitest and the typecheck (`b-round-327/precheck-full.log`, `sketch-typecheck.log`);
+- **`chainHeadGateRunGreen`**: this is a fix-up chain on an unpublished tree. Set it to `null`, with the reason "no gate ran on the chain head: gate 327 skipped on C FAIL".
 
 | Row | Action | Expected |
 |---|---|---|
-| CLAIMS | `bash b-round-326/claims-327.sh`, first (L56) | As A-CLAIMS-AFTER |
-| SOURCE-SCOPE | `git status`; protected sha | 11 entries: §3's 9 modified files and 2 new files, nothing else. Protected 11/11 |
-| UNIT | On C's scratch: `drag-preview-render` and `status-preview-store` ×3 | All green on every run |
-| MUTANT | On C's scratch: MU-FADE-PROVIDER and MU-NO-FLUSH (from `run-mutants.sh`), plus one mutant of C's own | MU-FADE-PROVIDER is red on DP9a. MU-NO-FLUSH is red on DP9a, DP11, DP12, DP14 and DP15. C's own mutant is red on its named row. Restored: green |
-| PERF | Production build, the interactions spec **alone**, after a browser warm-up (L38) | <ul><li>The 5 assert rows pass: fade ≤ 24 per move at 1×, and 6× equals 1×.</li><li>trim/move/range rows equal C round 325's run [K19] (the HEAD tree) within the determinism contract. A worse row is a finding, reported with its number.</li><li>Stopped `release-commits` = 2, with every commit after the first at 0 components; playing = 1. Record these; they are not a FAIL. A non-zero second commit is a finding</li></ul> |
-| B-FADE-STATUS (browser) | `/studio-lab` at 1440×900 and 1280×720, fresh anonymous context. Add a demo clip and drag its Fade In handle about 120 px in steps. Watch `[data-testid="arrangement-status"]` with a MutationObserver (added nodes per step), on A's tree **and** on HEAD. HEAD runs on a second dev server with its own Vite `cacheDir` (L38) | <ul><li>For the same pointer path, the status text at each step equals HEAD, with one added span per changed text.</li><li>The final text after release and the Undo button title equal HEAD.</li><li>Ctrl+Z restores the fade: `data-fade-in` goes back to its start value.</li><li>Screenshots of each state</li></ul> |
-| B-FADE-CANCEL (browser) | Mid-drag, blur the window (Alt+Tab or `window.dispatchEvent(new Event('blur'))`). Both viewports, A vs HEAD | The fade returns to its start value, and no history entry is added. The status text equals HEAD. A's tree adds 0 spans after the blur; record HEAD's count |
-| B-FADE-END-STOP (browser) | Use a short clip (≤ 4 s). Start playing about 1 s before the end and begin a fade drag before playback reaches the end; keep moving past the end. A vs HEAD, both viewports | The status text while playing, at the auto-stop and after release equals HEAD (§1.6). The transport shows Stopped on both |
-| B-FADE-PLAYING (browser) | Drag a fade while playing | No audible restart: the `AudioBufferSourceNode.start` count during the move is 0 (from a page probe or the harness counter). Playback continues, and the release behaves as at HEAD |
-| B-FADE-EXPORT | On A's tree, set Fade In to 2.000 s by dragging. On HEAD, set the same value with the same pointer path. Export WAV from both | sha256 equal |
-| B-VIDEO-FADE (browser) | Load a short video into the Video lane and drag its Fade In handle | The status text at each step and the final text equal HEAD. Video stays on the provider path |
-| G327-AUTH | As G326-AUTH, both viewports | <ul><li>`/studio-lab`: anonymous workspace and demo badge, `auth_user` null.</li><li>`/studio/middle-east`: "Sign in required" and 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401</li></ul> |
-| DOCS | Check doc 232 and doc 168 against §1.9 | l.4 is byte-equal. The 7 headings are in order. Every DP/SP id the doc cites exists (L26). Doc 168's numbers equal A's report |
+| CLAIMS | `bash b-round-327/claims-328.sh`, first (L56) | Equal to A-CLAIMS-AFTER |
+| SOURCE-SCOPE | `git status`; `sha256sum -c b-round-327/tree-327-sha256.txt`; protected sha | 11 entries, the same set as round 327. Only the three granted files differ from the planning hashes. Protected files 11/11 |
+| UNIT | On C's scratch: `drag-preview-render` and `status-preview-store`, ×3 | Green on every run, and DP17–DP19 are present |
+| MUTANT | `b-round-327/run-mutants.sh` on C's scratch, plus one mutant of C's own | As A-MUTANT. C's own mutant is red on the row C names |
+| **SETTLE-REMOUNT (browser; closes C-R327-01 and C-R327-02)** | `PROBE_DIR=/home/runner/czaba-project/tmp/studio-real-loop/c-round-328 node b-round-327/probe-settle-remount.mjs <A> a` (create the dir first) and the same against HEAD on a second dev server with its own Vite `cacheDir` (L38). Run 3 times on A's tree, at both viewports | On every run and at both viewports:<ul><li>`afterSettle.rec` is [] and `sameNodeAsHold` is true;</li><li>`afterSameValueMove.rec` is [] and `sameNode` is true;</li><li>the `afterNextMove` texts and `afterRelease.status` equal HEAD.</li></ul>An environment-invalid run (a cold-compile timeout) is replaced, within the budget |
+| REFUSAL-MID-DRAG (browser) | `PROBE_DIR=<same absolute dir> node b-round-327/probe-refusal-mid-drag.mjs <base> <tag>`, A vs HEAD; the script covers both viewports | Every recorded field equals HEAD: `atHold`, `afterKey` (one removed + one added span, the refusal text), `afterMove`, and `afterRelease` (text and Undo title) |
+| B-FADE-STATUS, B-FADE-CANCEL, B-FADE-END-STOP, B-FADE-PLAYING, B-VIDEO-FADE (browser) | As in `tasks/round-327.md` §2.2. C may reuse `c-round-327/c327-rows.mjs`. A vs HEAD, both viewports | As in round 327: every step's text, the added spans, the cancel, the end-stop, 0 `start` calls during the move, and the video texts equal HEAD |
+| B-FADE-EXPORT | As in round 327: Fade In set to 2.000 s by dragging, on A and on HEAD | WAV sha256 equal |
+| PERF | Production build. Run the interactions spec **alone**, after a browser warm-up (L38) | <ul><li>The 5 asserted fade rows pass (≤ 24 per move and max, 0 restarts).</li><li>The fade, trim, move and range rows equal C round 327's run (`c-round-327/perf-interactions-atree-results/latest-interactions.json`) within the determinism contract.</li><li>Record the stopped and playing `release-commits`. A rise is a finding, reported with its number</li></ul> |
+| G328-AUTH | As G327-AUTH, at both viewports | <ul><li>`/studio-lab`: the anonymous workspace and the demo badge, with `auth_user` null.</li><li>`/studio/middle-east`: "Sign in required" and 0 `audio[src]`.</li><li>`/api/studio-token` with no header → 401</li></ul> |
+| DOCS | Check doc 232 against §1.9 | l.4 is byte-equal. The 7 headings are in order. The problem entry exists. Every cited DP or SP id exists |
 
-**Gate rows.** C does not claim these; they go under `"gate"`: the full vitest, the build, Biome, typecheck, `npm run verify` and the e2e smoke.
+**Gate rows.** C does not claim these: the full vitest, the build, Biome, typecheck, `npm run verify` and the e2e smoke.
 
-**Browser flags.** `browserVerified` is true only if B-FADE-STATUS, B-FADE-CANCEL, B-FADE-END-STOP, B-FADE-PLAYING, B-VIDEO-FADE and G327-AUTH ran at both viewports, and B-FADE-EXPORT ran at least once (export does not depend on the viewport).
+**Browser flags.** `browserVerified` is true only if all of these ran at both viewports: SETTLE-REMOUNT, REFUSAL-MID-DRAG, B-FADE-STATUS, B-FADE-CANCEL, B-FADE-END-STOP, B-FADE-PLAYING, B-VIDEO-FADE and G328-AUTH; and B-FADE-EXPORT ran at least once.
 
-**Ableton conformance:** not applicable. Behaviour is held to HEAD, and nothing changes for the user.
+**Ableton conformance:** not applicable. Behaviour is held to HEAD.
 
 ## 3. Grants
 A edits only:
-- `app/lib/arrangement/status-preview-store.ts` (new);
-- `app/lib/arrangement/__tests__/status-preview-store.test.ts` (new);
-- `app/contexts/ArrangementContext.tsx` (§1.2);
-- `app/components/arrangement/ArrangementClip.tsx` (§1.3: the fade branch, the prop and the destructure only);
-- `app/components/arrangement/ArrangementLane.tsx` (§1.4);
-- `app/components/arrangement/StudioWorkspace.tsx` (§1.5, §1.6);
-- `app/components/arrangement/ArrangementMarkerRow.tsx` (§1.6: the three reads, the destructure and the deps array);
-- `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` (§1.8);
-- `perf/budgets.interactions.json` (the 5 rows);
-- `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` (whole doc, §1.9);
-- `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md` (the PERF-DRAG-PREVIEW block).
+- `app/contexts/ArrangementContext.tsx`: §1.1–§1.5 only, inside the status-preview block (round 327's l.748–783 region);
+- `app/lib/arrangement/__tests__/drag-preview-render.test.tsx`: append DP17–DP19 only;
+- `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` (§1.9).
 
-Nothing else may change: not `preview-store.ts`, not `status-announcement.ts`, no other test, no perf spec, not `package.json`, the lock file or config, no protected file, and no loop artifact outside `a-round-327*`.
+Nothing else may change:
+- no other file of round 327's tree;
+- not `StudioWorkspace.tsx`, `status-preview-store.ts`, `status-announcement.ts` or `perf/*`;
+- no other test;
+- not the package, lock or config files;
+- no protected file;
+- no loop artifact outside `a-round-328*`.
 
 ## 4. Neighbouring behaviour at risk (C probes)
-- **Every status write.** Any write during a drag must behave as at HEAD: refusals, the playback start and stop texts, the insert-marker rewrite and the restore at gesture release. Covering rows: DP12, SU5 in `status-announcement-ui`, and `status-lifetime`.
-- **The `aria-live` re-announce rule.** HEAD's key-remount behaviour is pinned by `expectOneAnnouncementPerPress`, SU5 and SU6 in `status-announcement-ui`. DP10 and DP11 add the fade cases.
-- **Trim and same-lane move** (stage a): their rows do not change, and the PERF row compares them.
-- **Video fade and video move** still take the provider path (DP9b, DP13, B-VIDEO-FADE).
-- **The double-click fade reset** (`resetClipFade`) and its 0.000 text do not change; `clip-fades-ui` covers them.
+- **Every committed status write during a drag:** refusals, the playback start and stop texts, the insert-marker rewrite, and the gesture-release restore. Covering rows: DP12, DP16, SU5/SU6, `status-lifetime`, REFUSAL-MID-DRAG, B-FADE-END-STOP.
+- **The `aria-live` re-announce rule:** a changed text remounts, and the same text does not. Covering rows: DP10, DP11, DP17, SETTLE-REMOUNT.
+- **The getter `getStatusPreviewText`.** Between a flush and its commit, it still returns the preview text, as HEAD's provider status would. It returns `null` after the commit. Covering rows: DP15, DP17, DP19.
+- **Video fade and video move** stay on the provider path (DP9b, DP13, B-VIDEO-FADE).
 
 ## 5. STOP conditions
-A writes "STOP — needs B ruling" at the top of `a-round-327.md` and leaves the tree consistent when:
+A writes "STOP — needs B ruling" at the top of `a-round-328.md` and leaves the tree consistent when:
 - A-CLAIMS differs from planning;
-- any covering test fails, or a test runs above 50 % of its timeout (L11);
-- a mutant is not red on its row;
-- A-PERF fails an assert, or a trim/move row gets worse;
-- Biome flags anything beyond the dependency arrays of §1.2.7, or another file seems to need a change;
-- the reviewer's fix would change a ruled formula or clause (L11).
+- a covering test fails, or a test runs above 50 % of its timeout (L11);
+- a mutant other than MU-SYNC-CLEAR is not red on its row;
+- Biome flags anything new;
+- another file seems to need a change;
+- the reviewer's fix would change a clause ruled here (L11).
 
-## 6. Next and commit readiness
-- **After C PASS:** the gate runs verify and publishes round 327. PERF-DRAG-PREVIEW stays in progress at stage 2 of 3.
-- **Next round:** REGRESSION if its planning is on or after 2026-11-05. It carries C-R318-06 and CAND-R323-FOLD-CLEARS-SELECTION, with its Live 12 reference question. Otherwise the next round is stage c.
-- **Stage c:** the group move, the cross-lane move, video, the project-end move and the trim/move asserts (D-29z922/D-29z932).
-  - It reads the answer to the open frontend-architect checkpoint **D-29z915** (`b-round-324-checkpoint-request.md`). This round adds to that request, because `ArrangementContext.tsx` grows again with a fourth per-provider store.
-  - Stage c does not wait for the answer if none arrives.
-- **Later:** PERF-9 … PERF-15, SYS-R2-FAKE-FIDELITY, SYS-CLOCK-DETERMINISM (which now includes C-R326-01), then the rest of the queue.
+## 6. Next, and commit readiness
+- **After C PASS:** the gate runs verify and publishes rounds 327 and 328 together. PERF-DRAG-PREVIEW stays in progress (stage 2 of 3 done).
+- **Next round:** REGRESSION if it is planned on or after 2026-11-05 (regression-last is 2026-11-02 [K9]). It carries C-R318-06, CAND-R323-FOLD-CLEARS-SELECTION and SIG-R327-NOBPM-RULER-CLICK. Otherwise the next round is stage c, which reads the D-29z915 checkpoint answer if one exists and does not wait for it.
 
-## 7. Open items carried (not this round)
-- C-R326-01 (deferred Low).
-- A-R325-REVIEW-L4C (deferred Low; stage c).
-- INFO-C325-MOVE-COMMITS (stage c).
-- SIG-R326-END-STOP-STATUS.
-- SIG-R326-READOUT-PRIMITIVE, SIG-R326-DETAIL-IGNORES-FADE and SIG-R326-SKIP-UNCHANGED-FADE (stage c candidates).
-- LIVE-MEAS-MARKER-STEP-PLAYING (root measures it in Live).
+## 7. Claims (L29 + L56)
+Run `bash b-round-327/claims-328.sh` from the loop root. `CLAIMS_STORE` may override the store path.
+- Planning output: `b-round-327/claims-328-planning-output.txt`.
+- Sketch output: `b-round-327/claims-328-sketch-output.txt`.
 
-## 8. Claims (L29 + L56)
-Run `bash b-round-326/claims-327.sh` from the loop root. `CLAIMS_STORE` may override the store path.
-- Planning output: `b-round-326/claims-327-planning-output.txt`.
-- Output on B's sketch: `b-round-326/claims-327-sketch-output.txt`. The scratch is not a git repo, so K2 differs there.
-
-| Tag | Claim | Now (HEAD) | After A |
+| Tag | Claim | Now | After A |
 |---|---|---|---|
-| K1 | gate 326 status, commit | published 234ccdd | same |
-| K2 | HEAD, status entries | 234ccdd 0 | 234ccdd 11 |
-| K3 | `      previewArrangement(next);` in ArrangementClip; `studioClipStrings.fadePreview(` | 2 1 | 1 1 |
-| K4 | the footer `<span key={statusSequence}>{status}</span>`; `const [statusEntry, setStatus] = useReducer(` | 1 1 | 0 0 |
-| K5 | `status-preview-store.ts` | absent | present |
-| K6 | `previewClipGeometry={previewClipGeometry}` in the lane; `previewStatus` in the lane | 1 0 | 1 2 |
-| K7 | `if (gestureCountRef.current === 0) {` lines; the release updater line | 2 1 | same |
+| K1 | gate 327 status; gate 326 status, commit | skipped; published 234ccdd | same |
+| K2 | HEAD, status entries | 234ccdd 11 | same |
+| K3 | `clearPreview()` inside `flushStatusPreview`; `statusPreviewStore.getState().clearPreview();` in the file | 1 1 | 0 1 |
+| K4 | `adoptedPreviewSequenceRef` decl; `committedStatusTextRef` decl | 0 0 | 1 1 |
+| K5 | the same-text guard line; the adopt-once guard line | 0 0 | 1 1 |
+| K6 | `}, [statusEntry, statusPreviewStore]);` | 0 | 1 |
+| K7 | the settle `lastNonRefusalStatusRef` line; the settle updater line | 1 1 | same |
 | K8 | protected files OK | 11 | 11 |
 | K9 | regression-last date | 2026-11-02 | same |
-| K10 | `expect(` lines; `it('DP` rows in drag-preview-render | 68 10 | ≥ 112, ≥ 17 |
-| K11 | asserted fade rows; asserted drag rows | 0 7 | 5 12 |
-| K12 | Biome `useExhaustiveDependencies` hits in the context | 0 | 0 |
-| K13 | doc 232 l.4 | `**სტატუსი:** In Progress (stage 1 of 3; C round 325 PASS)` | `**სტატუსი:** In Progress (stage 2 of 3; C round 327 PASS)` |
+| K10 | `expect(` lines; `it('DP` rows; DP17–19 rows | 120 18 0 | ≥ 135, ≥ 21, 3 |
+| K11 | doc 232 l.4 | `… (stage 2 of 3; C round 327 PASS)` | `**სტატუსი:** In Progress (stage 2 of 3; C round 328 PASS)` |
+| K12 | Biome `useExhaustiveDependencies` in the context | 0 | 0 |
+| K13 | the footer `<ArrangementStatusText …/>`; `return preview ? (` | 1 1 | same |
 | K14 | cited artifacts exist | checked | checked |
-| K15 | `tasks/round-326.md` equals the before-copy | archive-equal | same |
-| K16 | fade sweep files (`app` tests, `perf`, `e2e`); files with `statusSequence` | 10 8 | 11 7 |
-| K17 | the old DP9 title; the rows DP9a/9b/10/11/12/13 | 1 0 | 0 6 (K10 counts DP14/15) |
-| K18 | the doc-168 stage-a paragraph; `ეტაპ b` in doc 168 | 1 0 | 1 ≥1 |
-| K19 | C round 325 (= HEAD) fade: per move, max, move restarts, stopped release-commits | 103.25 105 0 1 | same (artifact) |
-| K20 | B's sketch fade: stopped/playing per move, max ×2, restarts, stopped release-commits | 21.633 21.633 22 22 0 2 | same (artifact) |
-| K21 | B's mutant run: fade per move, restarts | 110.133 59 | same |
-| K22 | red mutant lines; green sketch/restored lines | 7 2 | same |
-| K23 | B's full vitest on the final sketch | `Tests 3555 passed (3555)` | same |
-| K24 | `getStatusPreviewText() ?? ` in MarkerRow; in the workspace | 0 0 | 3 2 |
-| K25 | the old comparison reads (stop effect, nudge, marker ×2, marker start) | 1 1 2 1 | 0 0 0 0 |
+| K15 | `tasks/round-327.md` equals the before-copy | archive-equal | same |
+| K16 | B's full vitest on the sketch; typecheck rc 0 lines | `Tests 3559 passed (3559)` 1 | same |
+| K17 | DP17–19 FAIL lines in the mutant summary; MU-SYNC-CLEAR green | 5 1 | same |
