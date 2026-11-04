@@ -1,136 +1,126 @@
-# Round 329: PERF-DRAG-PREVIEW stage c1. A move that pushes the project end re-renders only what shows the end (+ C-R328-01 test row)
+# Round 330: PERF-DRAG-PREVIEW stage c1 fix-up. Memoise the project-end leaf (C-R329-01) and guard the loop part of the overview extent (C-R329-02)
 
-**Planned by:** B, at the round 328 → 329 planning, 2026-11-04.
+**Planned by:** B, at the round 329 → 330 planning, 2026-11-04.
 
-**Decisions** (all in `backlog.json` → `decisions_log_b`, v288; D-29z945…D-29z953):
-- **D-29z945: round 328 closed as PASS.** C round 328: PASS, `browserVerified`/`realVerified` true, 15 rows passed. C-R327-01 and C-R327-02 are closed by SETTLE-REMOUNT at both viewports, with a positive control. Gate 328 published `dae81bf` on both remotes [K1]. Stage b is done (published). The fade per-move value stays 21.633 against the item target ≤ 15 (D-29z935 carries).
-- **D-29z946: C-R328-01 (Low) is fixed here as a test row (DP20).** The round already owns `drag-preview-render.test.tsx` and the cost is one row. No context code changes.
-- **D-29z947: C-R328-02 (Low)** → `deferred_low_polish`, with its numbers (fade stopped `release-commits` 1 at round 325 → 3; playing 1 → 2).
-- **D-29z948: A-R328-REVIEW-SAME-TEXT-RACE** (Low, hypothesis, not reproduced) → open finding; its browser probe goes into the next REGRESSION round.
-- **D-29z949:** A's architecture note → `b-round-328-checkpoint-addendum.md` (D-29z915). Its trigger is not met: this round changes no line of the status-preview block.
-- **D-29z950: stage c is split** (order from the `performance-optimizer` consult; `tech-lead` preferred the group move first, see `b-round-328.md` §5):
-  - c1 = the project-end path (this round);
-  - c2 = the shared in-second remainder (~23 per move for trim, fade and move: the detail panel, the selected-clip readout and the overview select only the fields they show; it absorbs SIG-R326-READOUT-PRIMITIVE and SIG-R326-DETAIL-IGNORES-FADE);
-  - c3 = cross-lane ghosts (`clipLaneDrag` provider state → a store; a same-lane → cross-lane → same-lane row);
-  - c4 = the group move (including the collapsed-group overview reader and the blocked-move status);
-  - c5 = video clips;
-  - then the record → assert conversions of the trim/move rows, each only after a sketch perf run and a red perf mutant (L58).
-- **D-29z951:** this task.
-- **D-29z953: gate 328's review** (`gates/round-328/review.md`, 8/10, no Critical or Medium) is triaged. GATE328-S1 (Low, a browser-only lane-ordering case), GATE328-S2 and GATE328-S3 → `deferred_low_polish`; S1 also gets a REGRESSION probe. S4 is a signal. The Architecture note GATE328-ARCH-STATUS-STORE is filed in the checkpoint addendum. None of them changes this round.
-- **D-29z952: the next round** is REGRESSION if it is planned on or after 2026-11-05 (`regression-last` is 2026-11-02 [K9]). Otherwise it is stage c2a.
+**Decisions** (all in `backlog.json` → `decisions_log_b`, v289; D-29z954…D-29z961):
+- **D-29z954: round 329 closed as FAIL, from C's evidence.** C round 329 is `taskStatus` FAIL with `browserVerified`/`realVerified` true. Every behaviour and browser row passed and equals HEAD: CLAIMS, SOURCE-SCOPE, UNIT ×3, MUTANT, END-LIVE, DRAG-NAMES, D-ROWS with the export sha, C's own viewport-bound probe, G329-AUTH and DOCS. Only PERF bullet 2 (the equality clause) failed. Gate 329 was skipped ("C taskStatus FAIL"), so nothing was published. HEAD stays `dae81bf`. A's 4-file tree is kept and is the base of this round: no revert, no re-apply. Stage c1 is **not done**.
+- **D-29z955: the ruling on C-R329-01 (Low, origin B spec).** The leaf gets `memo`; the alternative, "accept +1 as the new baseline", is rejected.
+  - B's round-329 sketch had added a non-memo leaf and asserted "equal to round 328" without running the perf spec (an L58 breach). The leaf re-renders on every `ArrangementTransport` render (click, play toggle, zoom, range start).
+  - Accepting the +1 would keep an avoidable render on every transport render, and it would rewrite a row to fit the result.
+  - The shape follows the file's existing convention (`function XInner` + `const X = memo(XInner)`, as for the 7 memo wrappers in `StudioWorkspace.tsx`). The render-log key therefore becomes `ArrangementProjectEndTextInner`.
+  - B found that an inline `memo(function ArrangementProjectEndText …)` stops the jsdom render log from seeing the leaf at all: DP21's `toBe(2)` read 0 (`b-round-329/inline-memo-attempt.txt`). That would make DP21/DP23 vacuous, so the inline form is not allowed.
+- **D-29z956: C-R329-02 (Low, test gap; = A-R329-REVIEW-LOOP-EXTENT)** is fixed here as DP24. `dragPreviewFixture` and `mountPreviewWorkspace` gain an optional `loop` parameter (default `null`, so every existing caller is unchanged).
+- **D-29z957: A-R329-REVIEW-VIEWPORT-BOUND (Low, jsdom test gap)** → `deferred_low_polish`. C's browser probe C-VIEWPORT-BOUND covers that branch at both viewports (round 329 PASS, `c-round-329/vp/vp-summary.txt`), and it runs again here. A jsdom row would need resize plumbing that is outside this fix-up.
+- **D-29z958: doc 232 l.4.** C flagged that the round-329 wording ("C round 329 PASS") is untrue. The new line states only what is true when A writes it: `**სტატუსი:** In Progress (stage c1 of a, b, c1–c5; round 330 fix-up, C verifies)`.
+- **D-29z959: signals.** A's Architecture note ("keep: state lives where it is rendered") is a signal only; no checkpoint trigger is met. INFO-C329-FULLSCALE (20 full-scale samples in the demo export, the same at HEAD) → signal, linked to C-R178-EXPORT-CLIPS-AT-0DB; not scheduled.
+- **D-29z960: this task.**
+- **D-29z961: the next round** is REGRESSION if it is planned on or after 2026-11-05 (`regression-last` 2026-11-02 [K9]). Otherwise it is stage c2 (D-29z950). C-R328-01 (DP20) closes when this round gets C PASS and the gate publishes it.
 
-**Read first:** `lessons.md`: L4, L11, L23, L29, L31, L34, L37, L56, L58.
+**Read first:** `lessons.md`: L11, L23, L29, L31, L37, L56, L57, L58 (L58 gained the C-R329-01 clause in this planning).
 
 **L29 note:** untagged code text in this task is an expected value, a new name, a row id or a loop-artifact path. Facts about `store/` carry `[K#]` (§7).
 
 ## Baseline
-- HEAD is `dae81bf` with a clean tree [K2]. Protected files: 11/11 OK [K8]. No dependency change.
+- HEAD is `dae81bf` (gate 328, published). The tree is **A's round-329 tree**: 4 modified files (`StudioWorkspace.tsx`, `ArrangementTransport.tsx`, `drag-preview-render.test.tsx`, doc 232), nothing untracked [K1, K2]. Protected files: 11/11 OK [K8]. No dependency change.
+- Round 330 publishes rounds 329 and 330 together after C PASS. C therefore re-runs every browser and perf row on the final tree, not only the changed ones.
 
 ## 0. Why this round, and B's evidence
-- **The premise, re-measured at HEAD** (L37). C's names probe (`b-round-328/names-probe.mjs`, a copy of `c-round-324/probe/c324-names-probe.mjs`) at `dae81bf`, 1440×900: an audio clip header move renders **105–107 components per move** (`names-head-dae81bf.json`, `move-moves`), and the provider does not render. Trim renders 23 and fade 22.
-  - The cause: `StudioWorkspace` subscribes to the raw preview project end [K3], which changes on every move that pushes the end. It feeds `timelineSeconds` (ceil of end + 30 s or the viewport) and the overview `extent` [K4]. `ArrangementTransport` subscribes to the same value for its project-end readout [K5].
-  - **End-bound, not viewport-bound** (`b-round-328/end-bound-probe.mjs` → `end-bound-head-dae81bf.json`): with the harness gesture (60 steps, +120 px, 40 px/s), the end changes on 60 of 61 samples, `data-extent` on 60, and the ruler width only 3 times (5280 → 5400 px), at both viewports.
-- **B's sketch** (`b-round-328/sketch/sketch.patch.txt`; scratch `/home/runner/b328-scratch`; `git apply --check` is clean on `dae81bf`). Three files: `StudioWorkspace.tsx`, `ArrangementTransport.tsx` and `drag-preview-render.test.tsx`.
-  - **Browser, names probe on the sketch** (dev server :5198 with its own `cacheDir`; `names-sketch-final.json`): move commits **[23, 2, 23, 2, 108, 2, 23, 2]**. The in-second commits now equal trim. The one 108 is the move that widens the ruler. Fade and trim are unchanged. The first sketch run timed out on the cold compile; it was environment-invalid and replaced (`names-sketch-attempts.txt`).
-  - **Browser, end probe on the sketch** (`end-bound-sketch-final.json`): every sample (end text, ruler width, scroll width, clip start and width, overview `data-extent` and `aria-valuetext`) and the state after release **equal HEAD** at 1440×900 and 1280×720 (`head-vs-sketch.txt`).
-  - **Browser, C's stage-a rows** (`b-round-328/rows.mjs`, a copy of `c-round-325/c325-rows.mjs` whose output dir is `ROWS_DIR`, default `b-round-328/rows/`): D-TRIM, D-MOVE, D-MIXED, D-ABORT, D-UNDO, D-NOFLASH, D-OLDPATH, D-LOOP and EXPORT, HEAD :5173 vs sketch :5198, both viewports: **0 differences** (`rows/rows-diff.txt`; B's files are `rows-head-b.json` and `rows-sketch-b.json`). This ran before the two tech-lead tweaks: the props alias is erased at compile time, and the extra DP22 assert is test-only, so the runtime is the same. The names and end probes were re-run on the final sketch.
-  - **Full vitest on the sketch: 3562/3562** (243 files), typecheck rc 0 [K16]. Biome is clean on the three files.
-  - **HEAD parity:** DP20 passes on a `dae81bf` copy; DP21 and DP22 fail there (the fix's red proof) [K18].
-  - **jsdom mutants** (`b-round-328/run-mutants.sh`; `mutants-summary.txt`) [K17], every one red:
-    - MU-WORKSPACE-RAW-END (the selector without `Math.ceil`) → DP21, DP22.
-    - MU-WORKSPACE-COMMITTED-END (the selector ignores the preview) → DP22.
-    - MU-OVERVIEW-COMMITTED-END (the overview extent ignores the preview) → DP21, DP22.
-    - MU-TRANSPORT-SUBSCRIBES (`ArrangementTransport` subscribes to the preview again) → DP2, DP9a, DP21.
-    - MU-CLEAR-ANY-PREVIEW (C's C-R328-01 mutant: the layout-effect clear drops the sequence guard [K7]) → DP20.
-  - **Not run by B:** the perf spec on a production build. The move rows therefore stay `record` (L58). The expected harness value is an inference, not an assert: at most about (57 × 25 + 3 × 110) / 60 ≈ **29** components per move (from 106.85); slightly less, because moves under the drag threshold commit nothing (`performance-optimizer`). An assert at the item target (≤ 15) would fail on the 23-component in-second floor, which is stage c2.
-- **Consults** (`b-round-328.md` §5): `tech-lead` (keep the ownership and the inline selector; named prop alias; add a provider-render assert to DP22: both applied to the sketch) and `performance-optimizer` (no correctness risk in the selector closure, zustand 5 `useStore`; ship the move rows as `record`; next cut is the shared in-second floor).
-- **Not chosen:**
-  - A `selectPreviewTimelineSeconds` helper in `preview-store.ts`. The tail constant and the viewport are layout policy, not preview state (tech-lead).
-  - Lanes reading the timeline width from a store. The crossing commit (108) happens 3 times per harness gesture; it is a later candidate (§6).
-  - `memo` on the new readout leaf. Its only prop is a primitive and its parent no longer renders on a move; a no-memo mutant stayed green, so it would be an unguarded line.
-- **Reference-first, product-designer, screen budget:** not applicable. This is a perf round and nothing visible changes.
+- **The failed clause** (C round 329, `c-round-329/perf-rowcmp-vs-c328.txt`): range `move-components-max` 30 → 31 and `-per-move` 9.233 → 9.25; click 106 → 107; zoom.1 99 → 100; zoom.30 244 → 245; play start/stop 90 → 91. C traced the cause in the browser: the clip-click commit renders 105 on A and 104 at HEAD, and the only extra name is `ArrangementProjectEndText` (`c-round-329/click-names-vs-head.txt`).
+- **B's sketch** (`b-round-329/sketch/sketch.patch.txt`; scratch `/home/runner/b329-scratch`, a copy of A's tree; `git apply --check` is clean on `store/`). Two files:
+  - `ArrangementTransport.tsx`: `memo` joins the `react` import [K3]. The leaf is renamed `ArrangementProjectEndTextInner`, and `const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner);` follows it [K4]. The JSX use and the span are unchanged.
+  - `drag-preview-render.test.tsx`: `ArrangementLoop` joins the type import. The fixture and the mount get an optional `loop` parameter. DP21's three `rendersOf('ArrangementProjectEndText')` keys become `…Inner` (a rename; no `expect(` is removed). DP23 (with a positive control that the leaf rendered at mount) and DP24 are appended [K6].
+- **jsdom, on the sketch:** the 10 covering files (the 9 of `b-round-328/k13-covering-files.txt` plus `status-preview-store.test.ts`): **119/119** (`sketch-unit.log`). Typecheck rc 0. Biome is clean on the two files.
+- **Full vitest on the sketch:** **3564/3564** (243 files; round 329's 3562 plus DP23 and DP24), `b-round-329/precheck-full.log` [K14].
+- **HEAD parity (A's round-329 tree + only the sketch's test hunk):** run on A's round-329 transport with only the sketch's test hunk (`head-parity-dp23-24.log`): DP21 and DP23 are red and DP24 is green. DP21 is red because its key is now `…Inner`. DP23 is red on its positive control (the leaf must appear in the render log at mount). Without that control, B's first parity run showed DP23 passing vacuously against a name that does not exist, so the control is part of the row. DP24 is green because round 329 already passes the loop through; its red proof is MU-OVERVIEW-NO-LOOP [K16].
+- **Mutants** (`b-round-329/run-mutants.sh`; `mutants-summary.txt`) [K15], every one red:
+  - B328's five, unchanged: MU-WORKSPACE-RAW-END → DP21, DP22; MU-WORKSPACE-COMMITTED-END → DP22; MU-OVERVIEW-COMMITTED-END → DP21, DP22, DP24; MU-CLEAR-ANY-PREVIEW → DP20; MU-TRANSPORT-SUBSCRIBES → DP2, DP9a, DP21.
+  - **MU-ENDTEXT-NO-MEMO** (the round-329 code: `const ArrangementProjectEndText = ArrangementProjectEndTextInner;`) → DP23.
+  - **MU-OVERVIEW-NO-LOOP** (C's C-MU-OVERVIEW-NO-LOOP: the wrapper passes no loop) → DP24.
+  - Restored: 26/26.
+- **L58 memo re-check** (every positive control the new memo could silence): `grep` finds no `ArrangementProjectEndText…).toBeGreaterThan` anywhere in `app/**/__tests__` [K11]. The 4 test files that read the leaf or its testid are all in the covering set and green.
+- **Perf, on a production build of the sketch** (C's command, the interactions spec alone, its own Vite `cacheDir`): `b-round-329/perf-sketch-results/latest-interactions.json`, compared by `b-round-329/perf-rowcmp.py` with C round 328's run (`perf-rowcmp-vs-c328.txt`). rc 0, `failures` [], 167 rows, all **36 asserted rows pass**. Of the non-wallclock rows, **113 are equal** to round 328: every range, fade, trim, click, zoom.1, zoom.30 and play start/stop row, so C-R329-01's rises are gone. **8 differ, all move record rows**: `interact.drag.move.{stopped,playing}.move-components-per-move` (and `.6x`) 106.85 → **30.367**, and `-max` (and `.6x`) 107 → **108**. The 108 is the ruler-crossing commit, where the end changes, so the leaf renders there legitimately [K17].
+- **Browser names probe on the sketch** (dev server :5198, own `cacheDir`): `b-round-329/names-sketch.json`, `names-compare.txt`. The 240 s warm-up timed out on the cold compile; the probe itself then ran to completion. `harness-clip-click` is **[104, 2, 0]**, equal to HEAD in counts and names; round 329 was [105, 2, 0]. `move-moves` is [23, 2, 23, 2, 108, 2, 23, 2] (= round 329). Only commit #4 (108) names `StudioWorkspace`, `ArrangementTransport`, `ArrangementRuler` and `ArrangementLibrary`, and every 23 and the 108 name `ArrangementProjectEndTextInner`. `fade-moves` [22×4] and `trim-moves` equal HEAD.
+- **Consults:** none this round. This is a one-line fix-up of a ruled perf contract with B's own measurements; `tech-lead` and `performance-optimizer` set the c1 contract at round 328 and nothing in it changes.
+- **Reference-first, product-designer, screen budget:** not applicable. This is a perf fix-up and nothing visible changes.
 
 ## 1. Contract
-**Apply `b-round-328/sketch/sketch.patch.txt` with `git apply` from `store/`.** §1.1–§1.4 describe that patch. Do not retype it: `run-mutants.sh` and the claims match its exact lines. §1.5 (doc 232) is the only edit by hand. If the patch does not apply, STOP.
+**Apply `b-round-329/sketch/sketch.patch.txt` with `git apply` from `store/`, on top of A's round-329 tree.** §1.1–§1.2 describe that patch. Do not retype it: the mutants and the claims match its exact lines. §1.3 (doc 232) is the only edit by hand. If the patch does not apply, STOP.
 
-1. **`StudioWorkspace.tsx`, the workspace body:**
-   - the raw `const projectEnd = useArrangementPreview(…)` subscription after the `workspace` destructuring is removed [K3];
-   - `timelineSeconds` becomes its own primitive selector: `useArrangementPreview((state) => Math.ceil(Math.max(selectPreviewProjectEnd(state.preview, committedProjectEnd) + TIMELINE_TAIL_SECONDS, viewportSeconds)))`, at the place of the old line [K3]. The value equals HEAD's for every input;
-   - the `extent` `useMemo` is removed, and the overview receives `committedProjectEnd={committedProjectEnd}` instead of `extent={extent}` [K4].
-   - `fitTimeline` keeps reading the committed end through `workspaceRef` [K7]; it refuses during a gesture, as now.
-2. **`StudioWorkspace.tsx`, the overview wrapper:** a named type `ArrangementOverviewWithPreviewProps` (the overview's props without `extent`, plus `committedProjectEnd: number`). `ArrangementOverviewWithPreviewInner` subscribes to `selectPreviewProjectEnd(state.preview, committedProjectEnd)` and passes `extent={timelineExtent(projectEnd, arrangement.loop)}` [K4]. The loop comes from the committed arrangement, as at HEAD. The names `ArrangementOverviewWithPreviewInner` and `ArrangementOverviewWithPreview` do not change (render-log keys, L23).
-3. **`ArrangementTransport.tsx`:** a plain function component `ArrangementProjectEndText({ committedProjectEnd })` subscribes to the preview end and renders the same `<span data-testid="arrangement-project-end">` [K5]. `ArrangementTransport` renders it in place of the span and no longer subscribes to the preview. No other line of the transport changes.
-4. **Tests** (`drag-preview-render.test.tsx`), appended verbatim from `b-round-328/sketch/drag-preview-render.test.tsx.txt`; A may strengthen them, never weaken them:
-   - **DP20** (closes C-R328-01): mid-fade, `setStatus('Committed write.')` and a move to the next fade value run in one `act`. The footer and `getStatusPreviewText()` show "Fade In: 3.000 s"; the release shows the committed fade text.
-   - **DP21:** a header move that pushes the end of `LATE_AUDIO_CLIPS` (c1 at 6 s) inside one timeline second. Over two moves: Provider, `StudioWorkspace`, `ArrangementRuler` and `ArrangementTransport` render 0 times; `ArrangementProjectEndText` 2, `ArrangementLane` 2, `ArrangementOverviewWithPreviewInner` 2. The end text is 00:12.750, `data-extent` 12.750, and the ruler width is unchanged; the release keeps both values.
-   - **DP22:** the move into the next second renders the Provider 0 times, `StudioWorkspace` and `ArrangementRuler` once, the ruler grows by exactly one second of pixels, and `data-extent` is 13.250.
-5. **Doc 232** (the whole doc, L34):
-   - l.4 becomes exactly `**სტატუსი:** In Progress (stage c1 of a, b, c1–c5; C round 329 PASS)` [K11].
-   - The title names stage c1. The seven TEMPLATE headings stay in order (L26). Add a `### ეტაპი c1` section under `## მიდგომა`, the new subscriptions under `## არქიტექტურა`, the two files under `## შეცვლილი ფაილები`, and DP20–DP22 and the HEAD → sketch names numbers (105 → 23 per in-second move, the 108 crossing) under `## ტესტირება`.
-   - `## პრობლემები და გადაწყვეტები`: one Problem → Solution entry. The raw end selector re-rendered the workspace on every move; the fix selects the ceil'd timeline width and moves the end readers into leaves.
-   - `## TODO`: replace the stage-c line with c2–c5 and the assert conversions (D-29z950); note that A's status-hook trigger was checked and is not met (D-29z949). Cite only rows that exist.
+1. **`ArrangementTransport.tsx`:** `memo` is added to the `react` import. `function ArrangementProjectEndText(…)` becomes `function ArrangementProjectEndTextInner(…)` with the same body, followed by `const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner);`. No other line changes. Do **not** use the inline form `memo(function ArrangementProjectEndText …)`: the render log cannot see it (D-29z955).
+2. **`drag-preview-render.test.tsx`:**
+   - `dragPreviewFixture(clips, loop = null)` sets `loop`; `mountPreviewWorkspace(clips = AUDIO_CLIPS, loop = null)` passes it on.
+   - DP21: the three `rendersOf('ArrangementProjectEndText')` keys become `rendersOf('ArrangementProjectEndTextInner')`. The values do not change.
+   - **DP23** (closes C-R329-01): on `LATE_AUDIO_CLIPS`, a positive control first: after the mount, `ArrangementProjectEndTextInner` has rendered (> 0). Then `selectClip('c1')` and `selectClip(null)` each render `ArrangementTransport` (> 0) and `ArrangementProjectEndTextInner` 0 times, and the end text is unchanged.
+   - **DP24** (closes C-R329-02): with `loop` {start 2, end 20, enabled}, `data-extent` is `20.000` at rest and after a move that pushes the end to 12.750 (the end text shows it). A move far past the loop gives an extent above 20.
+   - A may strengthen these rows, never weaken them.
+3. **Doc 232:**
+   - l.4 becomes exactly `**სტატუსი:** In Progress (stage c1 of a, b, c1–c5; round 330 fix-up, C verifies)` [K7].
+   - Under `### ეტაპი c1`, add one item: the leaf is memoised (`ArrangementProjectEndTextInner` + `memo`), because a plain child re-rendered on every transport render.
+   - `## პრობლემები და გადაწყვეტები`: one Problem → Solution entry. Problem: C round 329 measured +1 component on every transport render (click 106 → 107, range max 30 → 31). Solution: `memo` on the leaf; DP23 guards it.
+   - `## ტესტირება`: DP23, DP24 and the perf numbers C measures this round. Name only rows that exist.
+   - `## TODO`: add the A-R329-REVIEW-VIEWPORT-BOUND jsdom gap (deferred, D-29z957). The seven TEMPLATE headings stay in order.
 
 ## 2. Acceptance
 
 ### 2.1 A's rows
 | Row | Expected |
 |---|---|
-| A-CLAIMS | Before editing, run `bash b-round-328/claims-329.sh` from the loop root. The output must equal `b-round-328/claims-329-planning-output.txt`. Any difference is a STOP |
-| A-IMPL | `git apply b-round-328/sketch/sketch.patch.txt` (§1.1–§1.4), then §1.5 by hand |
-| A-CLAIMS-AFTER | Save as `a-round-329/claims-after.txt`. Compare with `b-round-328/claims-329-sketch-output.txt`: they must be equal except K2 (the scratch is not a git repo: A's line is `dae81bf 4`), K8 (the scratch's `vite.config.ts` has a `cacheDir`: A's line is `11`), K10 (more only if A strengthens a row) and K11 (the new l.4) |
-| A-SCOPE | `git status --short` lists exactly 4 modified files: the 3 patch files and doc 232 |
-| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0. The Biome diagnostic count for `app/lib/arrangement app/contexts app/components/arrangement` (K12 command) stays **16**. `npx biome check` on the three code files is clean |
-| A-UNIT | `npx vitest run` on the 9 files of `b-round-328/k13-covering-files.txt` plus `app/lib/arrangement/__tests__/status-preview-store.test.ts`. All green. List any test above 50 % of its timeout (L31) |
-| A-MUTANT | On a scratch copy, never in `store/`: `b-round-328/run-mutants.sh <scratch>`. Each of the five mutants is red on the rows listed in §0; restored: 24/24 green |
-| A-REVIEW | code-reviewer (4 files). Its Architecture note goes to B |
+| A-CLAIMS | Before editing, run `bash b-round-329/claims-330.sh` from the loop root. The output must equal `b-round-329/claims-330-planning-output.txt`. Any difference is a STOP |
+| A-IMPL | `git apply b-round-329/sketch/sketch.patch.txt` (§1.1–§1.2), then §1.3 by hand |
+| A-CLAIMS-AFTER | Save as `a-round-330/claims-after.txt`. It must equal `b-round-329/claims-330-sketch-output.txt` except K2 (A's line is `dae81bf 4`), K7 (the new l.4), K8 (A's line is `11`) and K6 (more only if A strengthens a row) |
+| A-SCOPE | `git status --short` lists exactly the same 4 modified files as round 329, and nothing untracked |
+| A-TYPE / A-LINT | `npm run typecheck` rc 0. `npm run lint` rc 0. K10 stays **16**. `npx biome check` on the three code files is clean |
+| A-UNIT | `npx vitest run` on the 9 files of `b-round-328/k13-covering-files.txt` plus `app/lib/arrangement/__tests__/status-preview-store.test.ts`: all green, 119 or more. List any test above 50 % of its timeout (L31) |
+| A-MUTANT | On a scratch copy, never in `store/`: `bash b-round-329/run-mutants.sh <scratch>`. Each of the seven mutants is red on the rows in §0. Restored: 26/26 |
+| A-REVIEW | code-reviewer (the 4 files of the round). Its Architecture note goes to B |
 
 A does not run a browser or perf row; C runs them.
 
 ### 2.2 C's rows
-C writes `c-round-329.md` and `c-round-329.json` as it goes, with **all L57 fields**:
+C writes `c-round-330.md` and `c-round-330.json` as it goes, with **all L57 fields**:
 - `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, and an `origin` for each finding;
-- `assertsSpecified` = 3 (DP20–DP22) + 3 browser rows (END-LIVE, DRAG-NAMES, D-ROWS) = 6;
-- `mutantsRecorded` = 5, the `run-mutants.sh` set; `mutantRedOnSketch` = true, evidence `b-round-328/mutants-summary.txt`; `mutantRedOnTree` from C's own run;
-- `gateChecksNamed` = 6; `gateChecksRunOnSketch` = 2 (full vitest `b-round-328/precheck-full.log`, typecheck `b-round-328/sketch-typecheck.log`);
-- `chainHeadGateRunGreen` = true, evidence `gates/gate-round-328.json` (the baseline is a published gate commit).
+- `assertsSpecified` = 5 (DP20–DP24) + 6 browser or perf rows (END-LIVE, VIEWPORT-BOUND, DRAG-NAMES, D-ROWS, PERF, G330-AUTH) = 11;
+- `mutantsRecorded` = 7, the `run-mutants.sh` set; `mutantRedOnSketch` = true, evidence `b-round-329/mutants-summary.txt`; `mutantRedOnTree` from C's own run;
+- `gateChecksNamed` = 6; `gateChecksRunOnSketch` = 2 (full vitest `b-round-329/precheck-full.log`, typecheck `b-round-329/sketch-typecheck.log`);
+- `chainHeadGateRunGreen` = true, evidence `gates/gate-round-328.json` (the baseline is a published gate commit; gate 329 was skipped and published nothing).
 
 | Row | Action | Expected |
 |---|---|---|
-| CLAIMS | `bash b-round-328/claims-329.sh`, first (L56) | Equal to A-CLAIMS-AFTER |
-| SOURCE-SCOPE | `git status`; `git diff --stat`; protected sha | 4 modified files (the 3 patch files + doc 232), nothing untracked; `git apply -R --check b-round-328/sketch/sketch.patch.txt` passes unless A strengthened a test (then only the test hunk may differ, with no `expect(` removed); protected 11/11 |
-| UNIT | On C's scratch: `drag-preview-render` and `status-preview-store`, ×3 | Green on every run; DP20–DP22 present |
-| MUTANT | `b-round-328/run-mutants.sh` on C's scratch, plus one mutant of C's own | As A-MUTANT. C's own mutant is red on the row C names |
-| **END-LIVE (browser)** | `node b-round-328/end-bound-probe.mjs <base> <absolute out path>` against A's tree (:5173) and HEAD `dae81bf` on a second dev server with its own Vite `cacheDir` (L38) | At 1440×900 and 1280×720, the whole output equals HEAD's: every sample's end text, ruler width, scroll width, clip start and width, overview `data-extent` and `aria-valuetext`; `distinctEnds` 60, `distinctExtents` 60, 4 ruler widths; `afterRelease` equal |
-| **DRAG-NAMES (browser)** | `node b-round-328/names-probe.mjs <A base> <out>` on A's tree, warm server (a cold-compile timeout is environment-invalid and replaced) | `move-moves`: no commit that does not change the ruler width contains `StudioWorkspace`, `ArrangementTransport`, `ArrangementRuler` or `ArrangementLibrary`, and those commits contain `ArrangementProjectEndText`. The per-commit counts equal `b-round-328/names-sketch-final.json` ([23, 2, 23, 2, 108, 2, 23, 2]; the index of the 108 may shift with the start pixel). `fade-moves` and `trim-moves` equal `names-head-dae81bf.json` |
-| **D-ROWS (browser)** | `ROWS_DIR=<absolute c-round-329/rows dir> node b-round-328/rows.mjs <base> <tag>` on A and on HEAD (both viewports by default; tags `a` and `head`), then `python3 b-round-328/rows-diff.py <dir>/rows-head.json <dir>/rows-a.json` | `DIFFS 0`; no page errors on either tree. Covers D-TRIM, D-MOVE (left, right past the end, snap, Alt), D-MIXED, D-ABORT, D-UNDO, D-NOFLASH, D-OLDPATH (fade, 2-clip group move, video move), D-LOOP and the EXPORT sha |
-| PERF | Production build. Run the interactions spec **alone**, after a browser warm-up (L38) | <ul><li>The 5 asserted fade rows pass (≤ 24 per move and max, 0 restarts); the move restart rows pass.</li><li>Record `interact.drag.move.{stopped,playing}.move-components-per-move` and `-max` (B's inference ≈ 29 per move, max ≈ 110; a record row, no budget).</li><li>The range, fade and trim rows equal C round 328's run (`c-round-328/perf-interactions-atree-results/latest-interactions.json`) within the determinism contract. Any other rise is a finding, reported with its number</li></ul> |
-| G329-AUTH | As G328-AUTH (`c-round-328/g328-auth.cjs`), at both viewports | `/studio-lab`: the anonymous workspace and the demo badge, `auth_user` null. `/studio/middle-east`: "Sign in required" and 0 `audio[src]`. `/api/studio-token` with no header → 401 |
-| DOCS | Check doc 232 against §1.5 | l.4 byte-equal; 7 headings in order; the c1 section, the problem entry and the TODO split exist; every cited DP id exists in the test files |
+| CLAIMS | `bash b-round-329/claims-330.sh`, first (L56) | Equal to A-CLAIMS-AFTER |
+| SOURCE-SCOPE | `git status`; `git diff --stat`; protected sha | 4 modified files, nothing untracked; `git apply -R --check b-round-329/sketch/sketch.patch.txt` passes, so the round-330 hunks are verbatim (unless A strengthened a test: then only test hunks may differ, with no `expect(` removed). `StudioWorkspace.tsx` keeps its round-329 content: `git apply -R --check b-round-328/sketch/sketch.patch.txt --include='*StudioWorkspace.tsx'` passes (B checked it at planning). Protected 11/11 |
+| UNIT | On C's scratch: `drag-preview-render` and `status-preview-store`, ×3 | Green on every run; DP20–DP24 present |
+| MUTANT | `b-round-329/run-mutants.sh` on C's scratch, plus one mutant of C's own | As A-MUTANT. C's own mutant is red on the row C names |
+| **END-LIVE (browser)** | `node b-round-328/end-bound-probe.mjs <base> <absolute out path>` against A's tree (:5173) and HEAD `dae81bf` on a second dev server with its own Vite `cacheDir` (L38) | At 1440×900 and 1280×720 the whole output equals HEAD's, as in round 329: `distinctEnds` 60, `distinctExtents` 60, 4 ruler widths, `afterRelease` equal |
+| **VIEWPORT-BOUND (browser)** | C's round-329 probe `c-round-329/vp-bound-probe.mjs`, A vs HEAD | Every sample, `pre` and `afterRelease` equal HEAD at both viewports |
+| **DRAG-NAMES (browser)** | `node b-round-328/names-probe.mjs <A base> <out>` on A's tree, warm server (a cold-compile timeout is environment-invalid and replaced) | <ul><li>`harness-clip-click` per-commit counts equal `b-round-329/names-sketch.json` ([104, 2, 0]), and the click commits contain no `ArrangementProjectEndText` or `ArrangementProjectEndTextInner` (= HEAD `b-round-328/names-head-dae81bf.json`).</li><li>`move-moves`: no commit that does not change the ruler width contains `StudioWorkspace`, `ArrangementTransport`, `ArrangementRuler` or `ArrangementLibrary`; the 23-commits contain `ArrangementProjectEndTextInner`; the counts equal [23, 2, 23, 2, 108, 2, 23, 2] (the index of the 108 may shift with the start pixel).</li><li>`fade-moves` and `trim-moves` equal HEAD.</li></ul> |
+| **D-ROWS (browser)** | `ROWS_DIR=<absolute c-round-330/rows dir> node b-round-328/rows.mjs <base> <tag>` on A and on HEAD (tags `a` and `head`), then `python3 b-round-328/rows-diff.py <dir>/rows-head.json <dir>/rows-a.json` | `DIFFS 0`; no page errors on either tree; the EXPORT WAV sha equals HEAD's at both viewports |
+| **PERF** | Production build of A's tree. Run `perf/studio-lab-interactions.perf.spec.ts` **alone**, after a browser warm-up (L38). Compare with `python3 -I b-round-329/perf-rowcmp.py c-round-328/perf-interactions-atree-results/latest-interactions.json <C's latest-interactions.json>` | <ul><li>rc 0, `failures` [], all 36 asserted rows pass.</li><li>Every non-wallclock row except the 8 move record rows is `EQUAL` to round 328 (B's sketch: 113 equal). This includes range `move-components-max` 30 and `-per-move` 9.233, `click.components` 106, zoom.1 99, zoom.30 244, play start/stop 90.</li><li>The 8 move rows (`interact.drag.move.{stopped,playing}.move-components-{per-move,max}` and `.6x`) are **record only** this round, with no equality clause: C reports its values. B's sketch measured 30.367 and 108; C round 329 measured 30.383 and 108 on A's tree. A per-move value above 31 or a max above 108 is a finding, reported with its number, not a FAIL of this row.</li><li>Any `DIFF` on a row other than those 8 is a finding, reported with its number.</li></ul> |
+| G330-AUTH | As G328-AUTH (`c-round-328/g328-auth.cjs`), at both viewports | `/studio-lab`: the anonymous workspace and the demo badge, `auth_user` null. `/studio/middle-east`: "Sign in required" and 0 `audio[src]`. `/api/studio-token` with no header → 401 |
+| DOCS | Check doc 232 against §1.3 | l.4 byte-equal; 7 headings in order; the memo item, the problem entry, DP23/DP24 and the TODO line exist; every cited DP id exists in the test file |
 
 **Gate rows.** C does not claim these: the full vitest, the build, Biome, typecheck, `npm run verify` and the e2e smoke.
 
-**Browser flags.** `browserVerified` is true only if END-LIVE, D-ROWS and G329-AUTH ran at both viewports and DRAG-NAMES ran once.
+**Browser flags.** `browserVerified` is true only if END-LIVE, VIEWPORT-BOUND, D-ROWS and G330-AUTH ran at both viewports, and DRAG-NAMES and PERF ran once.
 
 **Ableton conformance:** not applicable. Behaviour is held to HEAD.
 
 ## 3. Grants
 A edits only:
-- `app/components/arrangement/StudioWorkspace.tsx`: the overview wrapper and its props type, the removed raw subscription, the `timelineSeconds` line and the overview's props (§1.1–§1.2);
-- `app/components/arrangement/ArrangementTransport.tsx`: the new leaf and the replaced span/subscription (§1.3);
-- `app/lib/arrangement/__tests__/drag-preview-render.test.tsx`: append DP20–DP22 and `LATE_AUDIO_CLIPS` (§1.4);
-- `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` (§1.5).
+- `app/components/arrangement/ArrangementTransport.tsx`: the `react` import and the leaf (§1.1);
+- `app/lib/arrangement/__tests__/drag-preview-render.test.tsx`: the type import, the fixture and mount parameters, the DP21 key rename, and DP23–DP24 appended (§1.2);
+- `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` (§1.3).
 
-Nothing else may change: not `ArrangementContext.tsx`, `preview-store.ts`, `ArrangementOverview.tsx`, `perf/*`, any other test, the package, lock or config files, any protected file, or a loop artifact outside `a-round-329*`.
+`StudioWorkspace.tsx` keeps A's round-329 content and must not change in this round. Nothing else may change: not `ArrangementContext.tsx`, `preview-store.ts`, `ArrangementOverview.tsx`, `perf/*`, any other test, the package, lock or config files, any protected file, or a loop artifact outside `a-round-330*`.
 
 ## 4. Neighbouring behaviour at risk (C probes)
-- **Every reader of the project end:** the transport readout, the overview extent (its frame, playhead, `aria-valuetext` and `data-extent` [K19]), the ruler, lane and scroll widths, Fit (`fitTimeline` reads the committed end). Covering rows: DP7, DP21, DP22, END-LIVE, D-MOVE, D-UNDO.
-- **The viewport-bound case** (a short project at a wide window): `timelineSeconds` comes from the viewport and must not change on a move. Covering: the selector is the HEAD formula (K3), D-ROWS at both viewports.
-- **Playback while moving:** the transport no longer renders on a move; the Play state and position still update (D-ROWS playing samples, PERF move restarts 0).
-- **The fade status path** (DP9a–DP20) stays as published in `dae81bf`.
+- **The project-end readout during a move**: with `memo`, the leaf must still update on every preview end change. Covering: DP21 (2 renders over 2 moves), END-LIVE (60 distinct ends), C-MU-ENDTEXT-COMMITTED from round 329.
+- **The readout after Undo, a load and a committed change**: its prop `committedProjectEnd` changes, so memo lets it render. Covering: D-UNDO, D-ROWS, DP7.
+- **The overview extent with a loop**: DP24 and D-LOOP.
+- **Every round-329 behaviour** (the ruler width, scroll width, Fit, playback while moving): END-LIVE, VIEWPORT-BOUND, D-ROWS, PERF move restarts 0.
 
 ## 5. STOP conditions
-A writes "STOP — needs B ruling" at the top of `a-round-329.md` and leaves the tree consistent when:
-- A-CLAIMS differs from planning, or the patch does not apply;
+A writes "STOP — needs B ruling" at the top of `a-round-330.md` and leaves the tree consistent when:
+- A-CLAIMS differs from planning beyond the allowed lines, or the patch does not apply;
 - a covering test fails, or a test runs above 50 % of its timeout (L11);
 - a mutant is not red on its rows;
 - Biome flags anything new;
@@ -138,32 +128,29 @@ A writes "STOP — needs B ruling" at the top of `a-round-329.md` and leaves the
 - the reviewer's fix would change a clause ruled here (L11).
 
 ## 6. Next, and commit readiness
-- **After C PASS:** the gate runs verify and publishes round 329. PERF-DRAG-PREVIEW stays in progress (stage c1 done).
-- **Next round:** REGRESSION if it is planned on or after 2026-11-05 [K9]. It carries C-R318-06, CAND-R323-FOLD-CLEARS-SELECTION, SIG-R327-NOBPM-RULER-CLICK, the A-R328-REVIEW-SAME-TEXT-RACE probe and one short row per item finished since round 301 (stage b and c1 included). Otherwise stage c2 (the shared in-second remainder, D-29z950).
-- **Candidate, recorded and not scheduled:** lanes reading the timeline width from a store (the 108 crossing commit, about 4 per move). It only pays once `ArrangementLane` can be memoised.
+- **After C PASS:** the gate runs verify and publishes rounds 329 and 330 together. Stage c1 is then done; PERF-DRAG-PREVIEW stays in progress.
+- **Next round:** REGRESSION if it is planned on or after 2026-11-05 [K9]. It carries C-R318-06, CAND-R323-FOLD-CLEARS-SELECTION, SIG-R327-NOBPM-RULER-CLICK, the A-R328-REVIEW-SAME-TEXT-RACE and GATE328-S1 probes, and one short row per item finished since round 301 (stage b and c1 included). Otherwise stage c2 (the shared in-second remainder, D-29z950).
 
 ## 7. Claims (L29 + L56)
-Run `bash b-round-328/claims-329.sh` from the loop root. `CLAIMS_STORE` may override the store path.
-- Planning output: `b-round-328/claims-329-planning-output.txt`. Sketch output: `b-round-328/claims-329-sketch-output.txt`.
+Run `bash b-round-329/claims-330.sh` from the loop root. `CLAIMS_STORE` may override the store path.
+- Planning output: `b-round-329/claims-330-planning-output.txt`. Sketch output: `b-round-329/claims-330-sketch-output.txt`.
 
 | Tag | Claim | Now | After A |
 |---|---|---|---|
-| K1 | gate 328 status, commit | published dae81bf | same |
-| K2 | HEAD, status entries | dae81bf 0 | dae81bf 4 |
-| K3 | in `StudioWorkspace.tsx`: `const projectEnd = useArrangementPreview((state) =>`; `const timelineSeconds = useArrangementPreview((state) =>`; the HEAD `timelineSeconds = Math.ceil(Math.max(projectEnd + …` line | 1 0 1 | 1 1 0 (the remaining one is in the overview wrapper) |
-| K4 | `extent={extent}`; `committedProjectEnd={committedProjectEnd}`; `extent={timelineExtent(projectEnd, arrangement.loop)}`; the `extent` useMemo line | 1 0 0 1 | 0 1 1 0 |
-| K5 | in `ArrangementTransport.tsx`: the preview-end subscription; the `ArrangementProjectEndText` declaration; the `arrangement-project-end` span; its use | 1 0 1 0 | 1 1 1 1 |
-| K6 | `TIMELINE_TAIL_SECONDS = 30`; `TIMELINE_MIN_EXTENT_SECONDS = 10`; the `timelineExtent` body | 1 1 1 | same |
-| K7 | `fitTimeline`'s committed-end line; the context's layout-effect guard (C-R328-01) | 1 1 | same |
+| K1 | gate 329 status, commit; gate 328 status, commit | skipped - published dae81bf | same |
+| K2 | HEAD, status entries | dae81bf 4 | dae81bf 4 |
+| K3 | `react` import without `memo`; with `memo` (transport) | 1 0 | 0 1 |
+| K4 | in `ArrangementTransport.tsx`: `function ArrangementProjectEndText({…`; `function ArrangementProjectEndTextInner({…`; `const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner);`; the end span; its use | 1 0 0 1 1 | 0 1 1 1 1 |
+| K5 | in `StudioWorkspace.tsx`: the overview `extent={timelineExtent(projectEnd, arrangement.loop)}`; the `timelineSeconds` selector (round-329 lines, unchanged) | 1 1 | same |
+| K6 | `expect(` lines; `it('DP` rows; DP23–24 rows; `rendersOf('ArrangementProjectEndText')`; `rendersOf('ArrangementProjectEndTextInner')`; the optional `loop` parameters | 163 24 0 1 0 0 | 173 26 2 0 4 2 (more only if A strengthens a row) |
+| K7 | doc 232 l.4 | `… (stage c1 of a, b, c1–c5; C round 329 PASS)` | `**სტატუსი:** In Progress (stage c1 of a, b, c1–c5; round 330 fix-up, C verifies)` |
 | K8 | protected files OK | 11 | 11 |
 | K9 | regression-last date | 2026-11-02 | same |
-| K10 | `expect(` lines; `it('DP` rows; DP20–22 rows | 137 21 0 | 163 24 3 (more only if A strengthens a row) |
-| K11 | doc 232 l.4 | `… (stage 2 of 3; C round 328 PASS)` | `**სტატუსი:** In Progress (stage c1 of a, b, c1–c5; C round 329 PASS)` |
-| K12 | Biome diagnostics in the three folders | 16 | 16 |
-| K13 | test/perf/e2e files naming the touched render-log names, the end testid or the extent (`SWEEP`, roots `app/**`, `perf/**`, `e2e/**`) | 9 (`k13-covering-files.txt`) | same |
-| K14 | cited artifacts exist | checked | checked |
-| K15 | `tasks/round-328.md` equals the before-copy | archive-equal | same |
-| K16 | B's full vitest on the sketch; typecheck rc 0 lines | `Tests 3562 passed (3562)` 1 | same |
-| K17 | `×` lines in the mutant summary; restored 24 passed | 9 1 | same |
-| K18 | HEAD-parity `×` lines; DP21/DP22 among them | 2 2 | same |
-| K19 | in `ArrangementOverview.tsx`: `extent` feeds the frame, the `aria-valuetext`, the playhead and `data-extent` | 1 1 1 1 | same |
+| K10 | Biome diagnostics in the three folders | 16 | 16 |
+| K11 | test/perf/e2e files naming the leaf or its testid; positive controls `ArrangementProjectEndText…).toBeGreaterThan` | 4 0 | 4 1 (DP23's own control) |
+| K12 | cited artifacts exist | checked | checked |
+| K13 | `tasks/round-329.md` equals the before-copy | archive-equal | same |
+| K14 | B's full vitest on the sketch; typecheck rc 0 lines | `Tests 3564 passed (3564)` 1 | same |
+| K15 | `×` lines in the mutant summary; restored 26 passed | 12 1 | same |
+| K16 | HEAD-parity `×` lines; DP23 among them | 2 1 | same |
+| K17 | B's perf compare vs round 328: `EQUAL` rows; `DIFF` rows (the 8 move record rows) | 113 8 | same |

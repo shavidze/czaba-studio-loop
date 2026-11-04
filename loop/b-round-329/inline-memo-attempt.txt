@@ -1,0 +1,10 @@
+B329 sketch attempt 1 (replaced): inline form
+  const ArrangementProjectEndText = memo(function ArrangementProjectEndText({ committedProjectEnd }: {...}) { ... });
+npx vitest run app/lib/arrangement/__tests__/drag-preview-render.test.tsx on /home/runner/b329-scratch:
+  × DP21 a move that extends the project end inside one timeline second renders no workspace
+  AssertionError: expected +0 to be 2  (line 851: expect(rendersOf('ArrangementProjectEndText')).toBe(2))
+  DP23 (then asserting ArrangementProjectEndText 0) passed -> vacuous: the render log never saw the leaf under that form.
+  Tests 1 failed | 25 passed (26)
+Replaced by the file convention (function ArrangementProjectEndTextInner + const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner)),
+render-log key ArrangementProjectEndTextInner: 26/26 green; MU-ENDTEXT-NO-MEMO red on DP23 (mutants-summary.txt).
+Cause not investigated further (inference: the transpiler renames the inner function expression that shadows the const binding).

@@ -1,0 +1,132 @@
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index 94916c5..e0a8471 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -9,7 +9,7 @@ import {
+   Square,
+   Undo2,
+ } from 'lucide-react';
+-import { type KeyboardEvent, useCallback, useId, useRef } from 'react';
++import { type KeyboardEvent, memo, useCallback, useId, useRef } from 'react';
+ import {
+   formatArrangementTime,
+   useArrangement,
+@@ -77,13 +77,15 @@ function ArrangementTransportPosition() {
+   );
+ }
+ 
+-function ArrangementProjectEndText({ committedProjectEnd }: { committedProjectEnd: number }) {
++function ArrangementProjectEndTextInner({ committedProjectEnd }: { committedProjectEnd: number }) {
+   const projectEnd = useArrangementPreview((state) =>
+     selectPreviewProjectEnd(state.preview, committedProjectEnd),
+   );
+   return <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>;
+ }
+ 
++const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner);
++
+ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTransportProps) {
+   const {
+     isPlaying,
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index 8547078..c9b7406 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -12,6 +12,7 @@ import {
+ import type {
+   Arrangement,
+   ArrangementClip,
++  ArrangementLoop,
+   WorkspaceCollection,
+   WorkspaceSource,
+ } from '~/types/arrangement';
+@@ -210,7 +211,10 @@ const VIDEO_CLIP: ArrangementClip = {
+   duration: 4,
+ };
+ 
+-function dragPreviewFixture(clips: ArrangementClip[]): Arrangement {
++function dragPreviewFixture(
++  clips: ArrangementClip[],
++  loop: ArrangementLoop | null = null,
++): Arrangement {
+   return {
+     ...createArrangement([
+       { id: 'video', kind: 'video', name: 'Video' },
+@@ -218,6 +222,7 @@ function dragPreviewFixture(clips: ArrangementClip[]): Arrangement {
+       { id: 'sfx', kind: 'audio', name: 'SFX' },
+     ]),
+     clips,
++    loop,
+   };
+ }
+ 
+@@ -252,12 +257,15 @@ function stubCapture(element: HTMLElement) {
+   Object.defineProperty(element, 'releasePointerCapture', { configurable: true, value: () => {} });
+ }
+ 
+-async function mountPreviewWorkspace(clips: ArrangementClip[] = AUDIO_CLIPS) {
++async function mountPreviewWorkspace(
++  clips: ArrangementClip[] = AUDIO_CLIPS,
++  loop: ArrangementLoop | null = null,
++) {
+   const api: PreviewApiRef = { current: null, store: null };
+   const view = render(
+     <ArrangementProvider
+       collection={previewCollection}
+-      initialArrangement={dragPreviewFixture(clips)}
++      initialArrangement={dragPreviewFixture(clips, loop)}
+     >
+       <StudioWorkspace />
+       <PreviewProbe api={api} />
+@@ -840,7 +848,7 @@ describe('PERF-DRAG-PREVIEW stage c1 — the project end during a same-lane move
+     expect(rendersOf('StudioWorkspace')).toBe(0);
+     expect(rendersOf('ArrangementRuler')).toBe(0);
+     expect(rendersOf('ArrangementTransport')).toBe(0);
+-    expect(rendersOf('ArrangementProjectEndText')).toBe(2);
++    expect(rendersOf('ArrangementProjectEndTextInner')).toBe(2);
+     expect(rendersOf('ArrangementLane')).toBe(2);
+     expect(rendersOf('ArrangementOverviewWithPreviewInner')).toBe(2);
+     expect(textOf(view, 'arrangement-project-end')).toContain('00:12.750');
+@@ -875,3 +883,42 @@ describe('PERF-DRAG-PREVIEW stage c1 — the project end during a same-lane move
+     expect(ruler.style.width).not.toBe(rulerWidth);
+   });
+ });
++
++const LOOPED_LATE_AUDIO_CLIPS_LOOP_END = 20;
++
++describe('PERF-DRAG-PREVIEW stage c1 — readers that do not follow the moved end', () => {
++  it('DP23 a selection change renders the transport but not the project-end readout', async () => {
++    const { api, view } = await mountPreviewWorkspace(LATE_AUDIO_CLIPS);
++    const endText = textOf(view, 'arrangement-project-end');
++    expect(rendersOf('ArrangementProjectEndTextInner')).toBeGreaterThan(0);
++    renderLog.counts.clear();
++    act(() => live(api).selectClip('c1'));
++    expect(rendersOf('ArrangementTransport')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementProjectEndTextInner')).toBe(0);
++    expect(textOf(view, 'arrangement-project-end')).toBe(endText);
++    renderLog.counts.clear();
++    act(() => live(api).selectClip(null));
++    expect(rendersOf('ArrangementTransport')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementProjectEndTextInner')).toBe(0);
++  });
++
++  it('DP24 the overview extent keeps a loop that ends past the moved project end', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace(LATE_AUDIO_CLIPS, {
++      start: 2,
++      end: LOOPED_LATE_AUDIO_CLIPS_LOOP_END,
++      enabled: true,
++    });
++    const { root, header } = clipParts('c1');
++    const overview = view.getByTestId('arrangement-overview');
++    expect(overview.dataset.extent).toBe('20.000');
++    pointerDownAt(header, 1, 40);
++    pointerMoveTo(root, 1, 70);
++    expect(textOf(view, 'arrangement-project-end')).toContain('00:12.750');
++    expect(overview.dataset.extent).toBe('20.000');
++    pointerMoveTo(root, 1, 400);
++    expect(Number.parseFloat(overview.dataset.extent ?? '')).toBeGreaterThan(
++      LOOPED_LATE_AUDIO_CLIPS_LOOP_END,
++    );
++    pointerUpAt(root, 1, 400);
++  });
++});

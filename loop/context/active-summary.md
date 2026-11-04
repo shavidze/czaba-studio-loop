@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-04T07:35:57.479Z)
+# Active loop summary (2026-11-04T09:06:15.529Z)
 
-- backlog.json 3169 KB -> active view 431 KB
-- status: G_ROOT_GATE round 328
-- servers: `{"checkedUtc":"2026-11-04T06:55:31.5079468Z","round":328,"attempt":1,"store":200}`
+- backlog.json 3182 KB -> active view 434 KB
+- status: G_ROOT_GATE round 329
+- servers: `{"checkedUtc":"2026-11-04T08:37:37.4851679Z","round":329,"attempt":1,"store":200}`
 - last publication: dae81bf3b07de64ab245fee0755b1fa4c85a638c (rounds 327-328)
-- last root gate: round 328 published - commit dae81bf3b07de64ab245fee0755b1fa4c85a638c pushed
+- last root gate: round 329 skipped - C taskStatus FAIL
 
 ## Current items: -
 
@@ -802,12 +802,19 @@
 - SIG-R326-DETAIL-IGNORES-FADE / info / signal (D-29z935); stage c candidate / detail panel re-renders per fade move although it shows no fade field; an equality that ignores fadeIn/fadeOut needs a stale-guard test
 - SIG-R326-SKIP-UNCHANGED-FADE / info / signal (D-29z935); stage c candidate / setFade builds a new arrangement when the rounded fade seconds did not change (sub-pixel moves)
 - LIVE-MEAS-MARKER-STEP-PLAYING / info / requested_from_root (D-29z930): user-review/live-checks.md / root measures in Live 12: while playing, does Ctrl+Right (Win) / Alt+Right (Mac) to the next locator move playback, the insert marker, or bo
-- C-R327-01 / medium / open -> fix-up round 328 (D-29z938) / collection settle mid fade drag swaps the stale pre-drag sentence into the aria-live status for ~6 ms, then re-adds the fade text as a new s
-- C-R327-02 / low / open -> fixed with C-R327-01 in round 328 (same root; owned code, low cost) / after a same-text committed write mid fade drag, a same-value move remounts the status span
 - A-R327-REVIEW-SAME-TEXT-REMOUNT / low / ruled (D-29z938): merged into C-R327-02; A STOP answered / = C-R327-02
 - A-R327-REVIEW-SETTLE-ORDER / low / deferred_low_polish (D-29z940); a later fix must keep the settle -> flush order / settle writes lastNonRefusalStatusRef before setStatus and the flush overwrites it; outcome equals HEAD but depends on ordering
 - SIG-R327-NOBPM-RULER-CLICK / info / signal (D-29z941): one probe in the next REGRESSION round against the SABA-B-11a contract / no-BPM project: Alt-click on the 20 px bars ruler did not move the insert marker (A and HEAD)
 - SIG-R327-HARNESS-PER-COMMIT / info / signal (D-29z941); not scheduled / perf harness reports only the release max components; per-commit counts would measure the second stopped release commit
+- C-R328-01 / low / fix scheduled round 329 as DP20 (D-29z946); closes on C PASS of round 329 / 'a newer preview written after the flush is kept' had no test; mutant C-MU-CLEAR-ANY-PREVIEW survived
+- C-R328-02 / low / deferred_low_polish (D-29z947) / fade release-commits stopped 2 -> 3 (1 at round 325), playing 1 -> 2; releaseComponentsMax 96 unchanged; not user-visible
+- A-R328-REVIEW-SAME-TEXT-RACE / low (hypothesis) / open, not reproduced (D-29z948): browser probe in the next REGRESSION round; severity on repro / a non-sync committed setStatus('X') adopting preview N, then previewStatus('X') before its commit, writes N+1 and may re-announce the same t
+- A-R328-ARCH-STATUS-HOOK / info / signal (D-29z949): b-round-328-checkpoint-addendum.md; trigger not met / extract useArrangementStatus(statusPreviewStore) if a third round touches the status-preview block
+- GATE328-S1 / low / deferred_low_polish (D-29z953); browser probe in REGRESSION-ROUND-2026-11-05 with A-R328-REVIEW-SAME-TEXT-RACE / updater-only sync setStatus during a pending default-lane settle can render text from the old committed status for one frame (adopt ref adva
+- GATE328-S2 / low / deferred_low_polish (D-29z953) / status reducer uses typeof action === 'object' to detect adoptPreview; an object-form ArrangementStatusUpdate would be misread ('adoptPrevie
+- GATE328-S3 / low / deferred_low_polish (D-29z953) / fade budget rows <= 24 vs measured 21.633/22: 2 components of headroom; add a note in doc 168
+- GATE328-S4 / info / signal (D-29z953) / DP18 restores IS_REACT_ACT_ENVIRONMENT by hand and waits 50 ms on a real timer
+- GATE328-ARCH-STATUS-STORE / info / signal (D-29z953): b-round-328-checkpoint-addendum.md / move status ownership into lib/arrangement/status-store.ts with getShownStatus(); five inline getStatusPreviewText() ?? status reads
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,115 @@
+{
+ "round": 329,
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-04T08:37:37.4851679Z",
+  "round": 329,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R329-01",
+   "severity": "low",
+   "origin": "B spec (sketch assumption; PERF bullet 2 not met)",
+   "steps": [
+    "Production build of A's tree in a scratch copy",
+    "npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts (alone)",
+    "Compare with c-round-328/perf-interactions-atree-results/latest-interactions.json"
+   ],
+   "expected": "§2.2 PERF bullet 2: range, fade and trim rows equal C round 328's run",
+   "actual": "range move-components-max 30->31 and per-move 9.233->9.25 (within budgets); click 106->107, zoom.1 99->100, zoom.30 244->245, play start/stop 90->91. Cause measured: the non-memo ArrangementProjectEndText leaf renders on every ArrangementTransport render (click commit 105 vs 104, only extra name ArrangementProjectEndText)",
+   "evidence": "c-round-329/perf-rowcmp-vs-c328.txt; c-round-329/click-names-vs-head.txt; c-round-329/perf-interactions-atree-results/latest-interactions.json"
+  },
+  {
+   "id": "C-R329-02",
+   "severity": "low",
+   "origin": "C own mutant; corroborates A-R329-REVIEW-LOOP-EXTENT (test gap)",
+   "steps": [
+    "On the scratch replace extent={timelineExtent(projectEnd, arrangement.loop)} with timelineExtent(projectEnd, null)",
+    "npx vitest run drag-preview-render.test.tsx"
+   ],
+   "expected": "a c1 row guards the loop part of the overview extent",
+   "actual": "24/24 green; mutant survives. Browser D-LOOP equals HEAD, so no measured defect",
+   "evidence": "c-round-329/mutants/c-summary.txt; c-round-329/rows/rows-diff.txt"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "MUTANT",
+  "END-LIVE",
+  "DRAG-NAMES",
+  "D-ROWS",
+  "G329-AUTH",
+  "DOCS"
+ ],
+ "failed": [
+  "PERF (bullet 2 equality: range rows +1; bullets 1 and 3 hold)"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome/lint",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "manifestPaths": [
+  "b-round-328/claims-329.sh",
+  "b-round-328/claims-329-planning-output.txt",
+  "b-round-328/claims-329-sketch-output.txt",
+  "b-round-328/sketch/sketch.patch.txt",
+  "b-round-328/run-mutants.sh",
+  "b-round-328/mutants-summary.txt",
+  "b-round-328/end-bound-probe.mjs",
+  "b-round-328/end-bound-head-dae81bf.json",
+  "b-round-328/names-probe.mjs",
+  "b-round-328/names-head-dae81bf.json",
+  "b-round-328/names-sketch-final.json",
+  "b-round-328/rows.mjs",
+  "b-round-328/rows-diff.py",
+  "b-round-328/precheck-full.log",
+  "b-round-328/sketch-typecheck.log",
+  "b-round-328/k13-covering-files.txt",
+  "c-round-328/g328-auth.cjs",
+  "c-round-328/perf-interactions-atree-results/latest-interactions.json",
+  "gates/gate-round-328.json",
+  "a-round-329/claims-after.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 6,
+ "mutantsRecorded": 5,
+ "mutantRedOnSketch": true,
+ "mutantRedOnSketchEvidence": "b-round-328/mutants-summary.txt",
+ "mutantRedOnTree": true,
+ "mutantRedOnTreeEvidence": "c-round-329/mutants-b.txt",
+ "ownMutants": {
+  "C-MU-ENDTEXT-COMMITTED": "red DP7, DP21",
+  "C-MU-OVERVIEW-NO-LOOP": "survives (C-R329-02)"
+ },
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 2,
+ "chainHeadGateRunGreen": true,
+ "chainHeadGateEvidence": "gates/gate-round-328.json",
+ "perfRecorded": {
+  "interact.drag.move.stopped.move-components-per-move": 30.383,
+  "interact.drag.move.playing.move-components-per-move": 30.383,
+  "interact.drag.move.stopped.move-components-max": 108,
+  "interact.drag.move.playing.move-components-max": 108
+ },
+ "info": [
+  "INFO-C329-FULLSCALE: export WAV has 20 full-scale samples, identical at HEAD (pre-existing)",
+  "INFO-C329-HEAD-WARM / AUTH-ATTEMPT1 / VP-ATTEMPT1: environment-invalid or probe-error first attempts, replaced and kept"
+ ],
+ "ownProbes": {
+  "C-VIEWPORT-BOUND": "PASS both viewports, equal to HEAD (c-round-329/vp/vp-summary.txt)"
+ },
+ "determinismContract": "perf/lib/determinism.ts: components unit exact; move-components-per-move ratio componentsSum/movesInWindow"
+}
