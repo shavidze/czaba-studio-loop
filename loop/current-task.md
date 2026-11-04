@@ -1,267 +1,174 @@
-# Round 335: PERF-DRAG-PREVIEW stage c3-i. A cross-lane move row in the interactions perf harness, recorded at HEAD
+# Round 336: RETRO 336 (tenth retrospective, rounds 321–335) + whole-screen and journey review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
 
-**Planned by:** B, at the round 334 → 335 planning, 2026-11-04.
+**Planned by:** B, at the round 335 → 336 planning, 2026-11-04.
 
-**Decisions** (all in `backlog.json` → `decisions_log_b`; D-29z1004…D-29z1010):
-- **D-29z1004: round 334 closed as PASS, from C's evidence.**
-  - `c-round-334.json`: `taskStatus` PASS, `browserVerified` and `realVerified` true, 13 rows, 0 bugs.
-  - Gate 334 published `0d22ab9` on both remotes [K1].
-  - **Stage c2b-iii → done**, and PERF-CAND-PEAK-PRIMITIVE-PROPS with it. C measured fade 9.833 per move (max 10) and move 24.267 (max 101), equal to B's sketch (`c-round-334/perf-rowcmp-vs-c333.txt`).
-- **D-29z1005: the gate-334 review.**
-  - Finding 1 (`clipWaveformScale` has no production caller) is added as evidence to SIG-R334-CLIPWAVEFORMSCALE-TEST-ONLY.
-  - Finding 2 (the inline dB formula in the context) is added as evidence to SIG-R334-INLINE-DB-GAIN.
-  - Info 3 (doc 232 quotes the sketch numbers) is closed as GATE334-I3: C's measured values equal them.
-  - Info 4 (DP43–DP48 pin exact counts) is accepted as GATE334-I4.
-  - The Architecture note (move `ArrangementPeakPath` into its own file after c3–c5) becomes signal ARCH-R334-PEAKPATH-FILE. It is not scheduled.
-- **D-29z1006: A's three review Lows go to `deferred_low_polish`:** A-R334-REVIEW-WG9-UNDEF, A-R334-REVIEW-DP-ORDER and A-R334-REVIEW-DP43-DETAIL. This round does not own those test files.
-- **D-29z1007: checkpoint D-29z915 is still unanswered**, after rounds 332–334 were published without it. B applies the recorded default, **keep**, as was done for ARCH-R207 (D-29z182):
-  - c3 goes ahead;
-  - moving the preview readers out stays a separate no-behaviour task after c5.
-  - The request stays open (`b-round-334-checkpoint-addendum.md`).
-- **D-29z1008: c3 splits into c3-i and c3-ii,** under L37 and L58.
-  - The harness has no cross-lane scenario today [K3, K5], so no c3 row can be asserted.
-  - **c3-i (this round)** adds the row and records HEAD's values.
-  - **c3-ii** moves `clipLaneDrag` out of provider state [K7] and is measured against c3-i.
-- **D-29z1009: rounds 336 and 337.**
-  - If the round-336 planning falls on or after 2026-11-05, round 336 is the REGRESSION round (speed rule) and round 337 is RETRO.
-  - If it falls before 2026-11-05, round 336 is RETRO, and REGRESSION is the first round planned on or after 2026-11-05.
-  - c3-ii follows both.
-- **D-29z1010: this task.**
+**Decisions** (all in `backlog.json` v295 → `decisions_log_b`):
+- D-29z1011: round 335 accepted; **PERF-DRAG-PREVIEW c3-i is done**; baseline `f1def9c`.
+- D-29z1012: gate-335 rulings.
+- D-29z1013: A-R335-REVIEW-WHOLE-NOTE → `deferred_low_polish`.
+- D-29z1014: RETRO 336 outputs.
+- D-29z1015: lessons.
+- D-29z1016: EXP-R321-PRECHECK-GATES interim reading.
+- D-29z1017: screen and journey review.
+- D-29z1018: L46 deadlines and the split candidates.
+- D-29z1019: systemic task SYS-R336-PERF-DRAG-WINDOW.
+- D-29z1020: retro-candidate dispositions.
+- D-29z1021: what comes next.
+- D-29z1022: this task.
 
-**Read first:**
-- From `lessons.md`: L10, L11, L29, L30, L34, L37, L38, L56, L57, L58.
-- Primitives: `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md` (test creation), and `GEORGIAN_DOCS.md` (docs).
-- This is a test-only change. No component, context or audio code is touched.
+**Rules:**
+- **Policy:**
+  - "Retrospective: stop, look back, improve" (Saba, 2026-10-26);
+  - "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28);
+  - the RETRO journey step (2026-10-31);
+  - `backlog.json` → `retro_policy`.
+- **Window:** 321–335 (15 rounds), as `retro_policy.next_due` set it (D-29z882). D-29z1009 chose RETRO for round 336 because this planning date (2026-11-04) is before 2026-11-05.
+- **Read first:** `lessons.md`. This planning revised it, and the revision applies from round 336:
+  - L58 gains the record wording and the sketch-review clause;
+  - **L22 gains the STOP-with-diff short route;**
+  - L57 gains `affectedChecksNamed` and `affectedChecksRunOnSketch` from round 337;
+  - line 3 now points to retro-336.
+- **L57 (all fields):** C's JSON carries **all** L57 fields:
+  - `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, an `origin` per finding;
+  - `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch`;
+  - `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`.
 
-**L29 note:** untagged code text in this task is an expected value, a new name, a row id or a loop-artifact path. Facts about `store/` carry `[K#]` (§7).
+  In this RETRO round, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch`, `gateChecksRunOnSketch` and `chainHeadGateRunGreen` are `null` with the reason "RETRO: no assert specified". `gateChecksNamed` lists the gate rows below. The affected-check fields start in round 337.
+- **L29 note:** untagged code text below is a row id, a loop-artifact path or a description of what C runs. Every fact about a `store/` file carries a `[K#]` tag (§8).
+- **Loop path:** `tmp/studio-real-loop` may be a symlink. Search it with `find -L` (L38).
 
-## Baseline
-- HEAD is `0d22ab9` (gate 334, published), with a clean tree: 0 entries in `git status` [K2].
-- Protected files: 11/11 OK [K8]. No dependency changes.
-- The interactions budget file has 167 rows, and no row or function named for a lane drag exists in `perf/` or `app/` [K5].
-- C round 334's perf result has 167 rows, `complete` true and 0 failures [K16]. 121 of its rows are non-wallclock: `c-round-334/perf-rowcmp-vs-c333.txt` has 121 EQUAL/DIFF lines.
+## Baseline: HEAD `f1def9c`, clean tree
+- **Gate:** gate 335 published `f1def9c…` on both remotes [K1]. That commit is the round-336 baseline.
+- **Tree:** `git status --short --untracked-files=all` was empty at planning, and HEAD was `f1def9c` [K2].
+- **Frozen:** every tracked file, **1,236** entries, is listed in `b-round-335-r336-tree-sha256.txt` [K3].
+  - Check from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-335-r336-tree-sha256.txt`.
+  - B ran it after both consults: rc 0.
+  - Each of the 11 protected files of `b-round-318/protected-sha256.txt` appears exactly once [K4].
+- **Grants: none.** No file in `store/` may change in this round.
 
-## 0. Why this round, and B's evidence
-**The premise was measured at HEAD,** on the dev server at 1440×900, with `b-round-334/cross-lane-probe.mjs`. It is the round-328 names probe with a cross-lane path. Two runs were identical (`b-round-334/cross-head-stability.txt`); the counts are in `b-round-334/cross-head-1440-summary.txt` [K14].
-- The gesture is a press on the first music clip's name bar, then:
-  - 4 moves of 10 px on its own lane;
-  - 1 move down into the next lane (`stems`), then 4 moves there;
-  - 1 move back up, then 4 moves on its own lane;
-  - release, then Ctrl+Z.
-- **Own lane:** 4 commits of 19, 19, 101 and 19 components. `ArrangementProvider` does not render, and there is no ghost. This equals round 334's `move-moves`.
-- **Entering the other lane:** 2 commits of 101 and 91. The provider renders in the second.
-- **On the other lane:** 4 commits of **87** components each. **The provider renders on every move.** Its hooks 0 and 35 change on every move. B did not map which hooks those are; c3-ii planning maps them.
-  - One ghost is visible in the `stems` lane, `data-blocked="false"`, and its start moves from 1.100 to 2.100.
-- **Back on the own lane:** the ghost is gone, and the commits are again 19, 19, 101 and 19.
-- **Release:** 1 commit of 93. The clip stays on `music`, and Undo reads "Undo: Move clip". Ctrl+Z restores it.
-- **Conclusion:** a cross-lane move costs about 4.5× a same-lane move, and the provider re-renders on every move.
-  - The ghosts live in provider `useState` [K7], published from the clip's pointer handler [K7].
-  - The rendered ghost carries `data-testid="arrangement-lane-move-ghost"` and `data-blocked` [K6].
-  - The perf harness cannot see any of this today. Its `move` drag is horizontal only (`dragNames` [K3]), and its commit records carry only a time and a count [K10]. That is why c3-i comes first.
+## 0. Why this round
+- **Round 335 passed** (`c-round-335.json`: 11 rows, `browserVerified` and `realVerified` true, 0 bugs). Gate 335 published `f1def9c`. **PERF-DRAG-PREVIEW c3-i is done.** `c-round-335/lane-rows.txt` is the c3-ii baseline.
+- **Round-335 findings:**
+  - A-R335-REVIEW-WHOLE-NOTE (Low) → `deferred_low_polish` (D-29z1013).
+  - The gate-335 suggestions (D-29z1012):
+    - S1, S3 and S4 → Lows;
+    - S2 → closed info;
+    - the Architecture note → ARCH-R335-DRAG-WINDOW-HELPER;
+    - A's pre-existing Info → INFO-A335-SEQUENCE-ORDER.
 
-**Not applicable:** `product-designer`, `ableton-arrangement-expert`, reference-first, the screen budget and the YouTube request. This round changes only test code and docs, and nothing visible or audible.
+    The Lows, the Info and the signal are all scheduled in **SYS-R336-PERF-DRAG-WINDOW** (D-29z1019).
+- **RETRO is due:** `retro_policy.next_due` = round 336 (D-29z882). D-29z1009 fixed the order: if this planning is before 2026-11-05, round 336 is RETRO.
+- **REGRESSION is not due yet.** `regression-last.json` says 2026-11-02 [K14], so the next one is due on or after 2026-11-05.
+- **No open Critical or High.** The open Mediums are root-only or manual (A-R73-SAFARI-FLAG-FOCUS, GATE232-S2, GATE271-S1-NO-REALIGN, GATE274-S1-HELD-REPEAT-ANNOUNCE, GATE304-M1), and the 2026-10-23 clarification says they do not block. None is a security or data-loss bug.
+- **Not applicable in a RETRO round:**
+  - reference first, Ableton and the product-designer design step;
+  - the screen budget, because nothing visible changes.
 
-**Consults:** none this round. The scenario follows the existing `measureDrag` pattern. c3-ii, which changes the store, will consult `performance-optimizer` and `tech-lead`.
+## 1. What B already produced (the objects under test)
+| File | Content |
+|---|---|
+| `retros/retro-336.md` | The analysis, in Georgian with English terms, for Saba. Window 321–335 |
+| `lessons.md` | **59 lines** (≤ 60) [K7], three parts. Before-copy: `b-round-335/lessons-before-336.md`. Diff: `b-round-335/lessons-diff.txt` (four lines change: l.3, L22, L57, L58) |
+| `user-review/screen-review-336.md` | Candidates **SR-336-1 and SR-336-2** [K19]. Captures are in `b-round-335/screens/`: `capture.mjs`, `capture.log`, `screen336.json`, `compare-321-336.txt` and the 12 PNGs [K9] |
+| `b-round-335/*.py`, `*.txt`, `*.json` | The scripts and data behind every number (`retro-336.md` header). The hand files are `fails-cause-hand.txt` and `gate-reviews-hand.txt`. `update-backlog.py` holds this planning's backlog edits |
+| `backlog.json` (version 295) | <ul><li>Decisions D-29z1011…D-29z1022 [K10].</li><li>`retro_runs` 336 and `retro_policy`.</li><li>`screen_review_candidates` SR-336-*.</li><li>`systemic_tasks` SYS-R336-PERF-DRAG-WINDOW.</li><li>The gate-335 ids and the retro-candidate dispositions.</li></ul> Before-copy: `b-round-335/backlog-before-336.json` |
+| `feature-status.md` | <ul><li>Rows 335 and 336, and the next line.</li><li>The STUDIO-PERFORMANCE row.</li><li>RETRO 321, now done (RT-FIX PASS in C round 322).</li><li>RETRO 336.</li></ul> |
 
-## 1. What A changes (ownership)
-A owns exactly these 4 files. Nothing else changes:
-1. `perf/studio-lab-interactions.perf.spec.ts`
-2. `perf/budgets.interactions.json`
-3. `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md`
-4. `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md`, only the sections named in §1.3
+**Order of work (the C-R215-01 lesson):**
+- The analysis scripts read the **before** copy.
+- Run them from the loop root as `python3 -I b-round-335/<script>.py`: first `collect.py`, then `cost.py`, then the others.
+- `cost.py` prints to stdout; B saved that output as `cost.txt`. `retro-numbers.py` reads `cost-rows.json` and `rounds-321-335.json`.
+- `retro336-mentions.py` takes two arguments: `b-round-335/backlog-before-336.json` and an output folder. C should give its own folder, e.g. `c-round-336`.
+- `misc-outputs.sh` re-creates `task-titles.txt`, `stops-count.txt`, `deferred-totals.txt`, `open-medium-plus.txt`, `archived-mediums.txt` and `c-models.txt`. Run it as `bash b-round-335/misc-outputs.sh c-round-336` and `cmp` the results.
+- `candidates.txt` was consult input only; no retro number comes from it.
+- `update-backlog.py` is **not** re-runnable: it refuses when `b-round-335/update-backlog.done` exists. Do not run it.
 
-`app/**`, `perf/lib/**`, the other perf specs and budget files, `package.json`, the lock file and the protected files (`b-round-318/protected-sha256.txt`, including `app/routes/studio.$productId.tsx`, `app/routes/api.studio-token.ts` and `app/routes/account.downloads.tsx`) stay untouched [K15].
+## 2. A: nothing to implement
+1. From `store/`, confirm three things:
+   - HEAD = `f1def9c…`;
+   - `git status --short --untracked-files=all` is empty;
+   - the frozen sha check prints nothing.
+2. Write `a-round-336.md` with the three results and "no change, by RETRO policy".
+   - Do not run typecheck, lint, vitest or the code-reviewer.
+3. Do not edit `retros/`, `lessons.md`, `user-review/` or any B file.
+   - If you disagree with a lesson in the A part, write it under "Lesson feedback". The same goes for L58's new sketch-review clause or the record wording, which change what B hands you.
 
-### 1.1 The scenario (`perf/studio-lab-interactions.perf.spec.ts`)
-- **Function.** Add `measureLaneDrag(page, state, clip, result)`.
-  - It runs once in the stopped block, right after the stopped `for (const drag of dragNames)` loop.
-  - It runs once in the playing block, right after the playing loop and before `step = 'pause'`.
-  - Set `step` to `drag lane stopped` and `drag lane playing`.
-  - It runs in every pass and at both CPU rates, like the other drags, so the `.6x` copies exist.
-  - Do not add `'lane'` to `DragName` or `dragNames` [K3]. The existing drags and their row ids stay as they are.
-- **Playing.** As `measureDrag` does: Home, then wait for quiet, then check that playback is running. Push a problem if it is not running before or after.
-- **Grab.** `const grab = await clipHeaderPoint(clip)`, the name bar, and `const target = await emptyLanePointAfterClip(clip)` [K4].
-  - The target lane is `target.trackId`. The clip's lane is `target.clipTrackId`.
-  - Read `undoBefore` and `before = readClipState(clip)`.
-- **Gesture.** Let `s = dragSteps / 6` (10 steps) and `d = dragDistancePx / 3` (40 px) [K3]. Take an in-page timestamp (`nowIn`) at each of `t0` … `t3`:
-  1. **Own lane, out:** `t0`; down at `grab`; move to `(grab.x + d, grab.y)` in `s` steps.
-  2. **Cross:** `t1`; move to `(grab.x + d, target.y)` in 1 step, then to `(grab.x + 2d, target.y)` in `s` steps. Read the ghosts, then `t2`.
-  3. **Own lane, back:** move to `(grab.x + 2d, grab.y)` in 1 step, then to `(grab.x + 3d, grab.y)` in `s` steps. Read the ghosts, then `t3`.
-  4. **Release:** up, `tUp`, then wait for quiet, then `tEnd`, then `snapshot(page, t0, tEnd)`.
-- **Ghost read** (in-page).
-  - **Settle first.** Before each read, settle with one double-`requestAnimationFrame` `page.evaluate`, or with a `locator.waitFor` on the ghost with a timeout of 2 s or less. This keeps a ghost commit that lands late at 6× from becoming a false problem.
-  - Do **not** use `waitForQuiet` here. It can pull a Follow page turn into the whole window (L37).
-  - Then count `[data-testid="arrangement-lane-move-ghost"]` [K6] inside the lane element whose `data-track-id` equals `target.trackId` and whose `data-blocked` is `false`. Also count every lane-move ghost in the document.
-- **Windows.** `firstMove` is the first in-page pointermove after the down, as in `measureDrag`.
-  - The **whole** window is the same as in `measureDrag` [K4]: `firstMove < t < up`.
-  - The **cross** window is the commits and pointermoves with `t1 < t < t2`.
-  - The **lane** window is `firstMove < t < t1` together with `t2 < t < up`. It starts at `firstMove`, not `t0`, so the pointerdown commit (select, active track, range clear) is excluded.
-- **Metric names.** No new row may use the metric `commits-per-move`. DC-KINDS in `perf/lib/report.test.ts` requires every `commits-per-move` row to match `interact.drag.(range|fade|trim|move)…` [K18].
-- **Rows** (`base = interact.drag.lane.<state>`). Each is written through `rateRowId`, as the drag rows are:
+## 3. C: what to verify
+C writes `c-round-336.md` and `c-round-336.json` as it goes, with **all** L57 fields (see Rules).
 
-| Row | Kind | Value |
+| Row | Check | PASS means |
 |---|---|---|
-| `<base>.move-components-per-move` | deterministic | the whole window's rendered-component sum ÷ its pointermoves (the `measureDrag` formula) |
-| `<base>.move-components-max` | deterministic | the largest commit in the whole window |
-| `<base>.release-commits` | deterministic | commits with `t >= up` |
-| `<base>.cross-components-per-move` | wallclock | the cross window's sum ÷ its pointermoves |
-| `<base>.lane-components-per-move` | wallclock | the lane window's sum ÷ its pointermoves |
-| `<base>.move-restarts` (playing only) | deterministic | starts with `firstMove < t < up` |
-| `<base>.release-restarts` (playing only) | deterministic | starts with `t >= up` |
+| **SOURCE-SCOPE** | At the start and the end: HEAD `f1def9c`, a clean status, and the frozen list with rc 0 | Nothing in `store/` changed. Any change fails the round, whoever made it |
+| **CLAIMS** | Run `bash b-round-335/claims-336.sh` from the loop root, **first** (L56). Compare its output with `b-round-335/claims-336-output.txt` | Every line is equal. K8 prints `done` with no `MISSING` |
+| **RT-NUM** | Recompute **every number** in `retro-336.md` §1, §2, §3, §9 and §10 from its named file or script. C may copy the scripts to `c-round-336/`; run them from the loop root. At least: <ul><li>**Totals:** $150.61 / $112.15 / $77.00 / $339.76; the round median $20.23; the phase medians B $9.20, A $5.44, C $5.90; the FAIL-round cost $117.06; the B share 44%.</li><li>**Groups:** $25.54 / $212.93 / $86.26 / $15.03, and fix-ups total $101.29. Per fix-up: 323 16.35, 324 36.20, 326 15.03, 328 18.14, 330 15.57.</li><li>**STOP rounds:** $65.40 (322 + 323 + 327).</li><li>**Counts:** <ul><li>C PASS/FAIL 10/5; gate 9/5/1; C `bugs[]` Medium 3, Low 13;</li><li>9 review.md files with 42 findings (38 by script + 4 by hand for 334);</li><li>the `classify.txt` origin sums gate 20, A 15, C 8, B 1 and 28 + 16 = 44;</li><li>592 deferred; 88 awaiting_user ids; 4 STOPs; first feature stages 3 of 9.</li></ul></li><li>**Medians:** B 322–335 $8.685; A $7.655 / $4.54; C $6.32 / $1.23.</li><li>**§9:** `gateChecksRunOnSketch` 0–2 of 6 in 322–335 (`exp-fields.txt`).</li><li>**§10:** L23 5058 bytes and L58 2803 bytes, both by `sed -n Np lessons.md \| wc -c` [K15]. L22's "C $19.04" is the sum of the C costs of 322, 323 and 327 in `cost.txt`.</li></ul> | Each number matches its source, or the difference is ≤ $0.01 rounding |
+| **RT-CAUSE** | For each row of §3 and each fact in §7 and §9, open the quoted source: <ul><li>`c-round-321.json`, `c-round-322.json`, `c-round-323.json`, `c-round-324.json`, `c-round-327.json`, `c-round-329.json` (`bugs[].origin`);</li><li>`a-round-322.md`, `a-round-323.md`, `a-round-324.md`, `a-round-327.md` (the STOP lines);</li><li>`gates/round-325/verify.log` l.733 and l.4918; `tasks/round-326.md` (title);</li><li>`b-round-321.md` l.56 (the type-sketch collision lists);</li><li>`gates/round-335/review.md` (suggestions 1–4 and the Architecture note);</li><li>`c-round-322.md` row RT-FIX (RETRO 321 now done);</li><li>the closure of C-R322-01, C-R323-01 and C-R327-01: `tasks/round-323.md`, `tasks/round-324.md`, `tasks/round-328.md` (titles), `c-round-324.json` and `c-round-328.json` (`taskStatus` PASS);</li><li>the two Mediums missing from the active view: `b-round-335/archived-mediums.txt`, made from `archive/findings-archived.json`;</li><li>the model change: `b-round-335/c-models.txt`.</li></ul> | <ul><li>Each stated cause is what the source says; no cause is invented.</li><li>The EXP-R321 interim reading follows from its written rule in `retros/retro-321.md` §10.</li><li>Consultant opinions are labelled as opinions.</li><li>The model change is a fact (`c-models.txt`); that the cost drop is due **only** to it is labelled as an inference.</li></ul> |
+| **RT-IDS** | <ul><li>**Round 335 closure:** PERF-DRAG-PREVIEW status starts with `in_progress (D-29z1011)` and says c3-i done. `rounds[335].status` starts with `c_pass_published f1def9c`.</li><li>**Gate-335 ids:** GATE335-S1-MOUSE-UP-FINALLY, -S3-LANE-SEGMENT-CONSTANTS, -S4-REPEATED-NOTES (Low, in `deferred_low_polish` and `open_findings`, "scheduled in SYS-R336-PERF-DRAG-WINDOW"); GATE335-S2-PERMOVE-DENOMINATOR `closed_info`; INFO-A335-SEQUENCE-ORDER; ARCH-R335-DRAG-WINDOW-HELPER in `architecture_signals`.</li><li>A-R335-REVIEW-WHOLE-NOTE is in `deferred_low_polish`.</li><li>**Systemic task:** SYS-R336-PERF-DRAG-WINDOW exists in `systemic_tasks` (its `closes` list has the six ids) and in the STUDIO-PERFORMANCE stages.</li><li>**Inventory (D-29z1018…D-29z1020):** every id in `b-round-335/retro336-mention-ids-v2.txt` has a disposition in `retro-336.md` §8. Also grep the **before** copy for `retro[ -_]?33[56]` case-insensitive, `RETRO \(33[56]\)`, `round 33[56]` and `RETRO-336` to catch other spellings. An entry with no disposition is a finding.</li><li>**Candidates:** RC-R321-RECORD-WORDING adopted; RC-R275 status names L22; RC-R305-LESSON-CHAR-CAP watches L58 too; RC-R332-COMPARATOR-BRANCH and RC-R333-STALE-DERIVED-MUTANT exist.</li><li>`retro_runs[-2]` (321) status starts with `done`.</li></ul> | All present as stated |
+| **RT-LESSONS** | `lessons.md`: <ul><li>≤ 60 lines, with the three parts;</li><li>`diff b-round-335/lessons-before-336.md lessons.md` touches only l.3, L22, L57 and L58;</li><li>L22, L57 and L58 start with their old text byte for byte (prefix compare) and only append;</li><li>line 3 changes only in the sources span (`retro-321.md` → `retro-336.md`, `305–320` → `321–335`) and the appended RETRO 336 sentence;</li><li>no other line changed; the id list equals K13</li></ul> | As stated. A lost clause or evidence id is a finding |
+| **RT-SABA** | `retro-336.md` §12 and `screen-review-336.md`: every rule change and screen candidate is phrased as a **proposal, information or question** | SR-336-1 and SR-336-2 are questions. §12.1 says the L22 mitigation is loop-local and asks for no runner change now. §12.5 is a proposal |
+| **RT-SCREEN (browser)** | Every SR-336 candidate names a screenshot that exists and shows what it describes; C opens the PNGs. Then C re-runs `b-round-335/screens/capture.mjs` (or an equivalent) **with the mock backend** at both viewports, writing to `c-round-336/screens/`: <ul><li>First check `http://127.0.0.1:5199/__mock/health`. If it answers, use the running instance and do not stop it. Otherwise start your own (`node mock-api/server.mjs`, log under `c-round-336/`) and stop it afterwards.</li></ul> Check: <ul><li>`laneErrors` is none;</li><li>the journey reaches `/studio-lab?preview=middle-east` [K12];</li><li>the position after Play is ≥ 00:01.000;</li><li>the visible row counts equal 138 / 168 / 118 / 144 [K6], or differ only by dynamic text you name;</li><li>for SR-336-2, measure in the browser that the library list's first visible option is cut at the top: its top is above the list's top, read from `getBoundingClientRect`;</li><li>per L54, any claim about cut or overflowing text is checked on the screenshot or by measurement</li></ul> | Each candidate is as described. A mismatch is a finding against the review, not against the app |
+| **G336-AUTH (browser)** | A fresh anonymous context at 1440×900 and 1280×720 (warm up in a browser first, L38; wait for a non-empty body): <ul><li>`/studio-lab` shows the workspace and the demo badge; `localStorage.auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>`/api/studio-token` returns 401 with no header. A fake bearer gives 403 with the mock running, or a 500 that fails closed without it</li></ul> | As stated. No token in any body |
+| **STUDIO-SMOKE-336 (browser)** | On `/studio-lab` at both viewports, after `Demo collection ready` (L48): <ul><li>add `Bass` (Enter);</li><li>Play, then after 1.5 s `[data-testid=arrangement-position]` reads ≥ `00:01.000`;</li><li>Play's `data-playing` goes `false` → `true` → `false` [K5];</li><li>drag the clip by its name bar one lane **down**, to the lane directly below the one the clip landed on (if it landed on the last audio lane, one lane up instead; record the start and target `[data-track-id]`), and release: the clip's `[data-track-id]` lane is the target and the Undo title reads "Undo: Move clip" (the c3-i path);</li><li>Ctrl+Z restores the lane;</li><li>export a WAV: RIFF/WAVE, 48 kHz, length 16.000 s, non-silent (peak > 0)</li></ul> | As stated. A hash compare is not required |
 
-  Each row's detail holds the move and commit counts of its window, as `windowDetail` does.
+- **Gate rows:** the full vitest, typecheck, build, Biome, `npm run verify` and the e2e smoke. List them under `"gate"` and in `gateChecksNamed`, never under `"passed"`.
+- **`browserVerified`:** true only if G336-AUTH, STUDIO-SMOKE-336 and the RT-SCREEN re-run all ran at both viewports. The other RT rows are document checks.
+- **Consults (optional):** `product-designer` in review mode on SR-336-1/2 (at most 7 findings). Record any disagreement as a finding against the review.
 
-- **Liveness: `interact.harness.drag-lane-live`.** Use `setLive`, which merges the two states. Call it **after** the reset. (`measureDrag` calls `setLive` before `resetAfterDrag`; the lane drag does not.) The value is 1 only when all four hold:
-  - (a) at the cross read, the target-lane non-blocked ghost count is ≥ 1;
-  - (b) at the back read, the document ghost count is 0;
-  - (c) after the release, the clip's closest `[data-track-id]` equals `target.clipTrackId`, and its `data-clip-start` differs from `before.start`;
-  - (d) after the reset, a re-read gives a clip state equal to `before` (start, fade-in, width, no range) and a lane equal to `target.clipTrackId`. (d) is this re-read. It is not a check of the `problems` array.
+## 4. Outcome, fixed in advance (D-29z1021)
+| C result | B at the round-337 planning |
+|---|---|
+| All rows PASS, planning on or after 2026-11-05 | Round 337 is **REGRESSION** (REGRESSION-ROUND-2026-11-05): <ul><li>one short check per done or `c_pass` item, at both viewports, plus the smoke;</li><li>every `scope_additions` entry as a named row (L6), including the C-R318-06 repro and root-cause row.</li></ul> `regression-last.json` is updated when it closes. Then SYS-R336-PERF-DRAG-WINDOW |
+| All rows PASS, planning before 2026-11-05 | Round 337 is **SYS-R336-PERF-DRAG-WINDOW** (test-only; acceptance in `systemic_tasks`): <ul><li>B runs the perf spec on its sketch first (L58);</li><li>B runs the code-reviewer on the sketch diff (the new L58 clause);</li><li>B writes the affected-check fields (L57).</li></ul> |
+| An RT row fails (an untraceable number, an invented cause, a missing disposition, a lost clause, a candidate not as described) | B corrects the files at the round-337 planning. The next C round re-checks only the changed lines (RT-FIX, as rounds 216, 231, 246, 261, 276, 291, 306 and 322), together with the round-337 task |
+| G336-AUTH, STUDIO-SMOKE-336 or RT-SCREEN finds a Medium or worse in the app | It is fixed first (2026-10-23 bug gate). A Low goes to `deferred_low_polish` |
+| SOURCE-SCOPE fails | Stop. Root inspects. Nothing is published |
 
-  When any of these fails, push a problem that names the failed letter and the values.
-  - Every pushed problem becomes a run failure: `buildPerfReport` copies each pass's `problems` into `failures` [K17].
-  - So a correct run has `failures` [], and a mutant run has a non-empty `failures` that names the condition.
-- **Reset.** Ctrl+Z, as `resetAfterDrag` does for the non-range drags.
-  - The same restored check applies: start, fade-in, width, no range, and the Undo title back at `undoBefore`.
-  - It also checks that the clip's lane `data-track-id` equals `target.clipTrackId`.
-  - A may call `resetAfterDrag` and add the lane check after it, or extend it with an optional lane argument. The other drags' behaviour must not change.
-- **Sequence text.** Add the lane drag to `interactionSequence`: one new entry after the stopped drags and one after the playing drags. Use the exact gesture words of the steps above.
-- **Kind ruling (L37).** The segment windows are bounded by in-page timestamps, so their rows are `wallclock`. The whole-window rows use the same bounds as the existing drag rows, which are `deterministic` [K13].
-  - **Pre-ruled (L10):** if a `deterministic` row of the table above varies across the 3 passes of one rate in A's run (the determinism check fails), A changes that row's kind to `wallclock` and reports the values per pass.
-  - That is the only allowed kind change; it is not a STOP. Any other determinism failure is a STOP.
+**After that:** SYS-R336 (if not yet run) → PERF-DRAG-PREVIEW c3-ii (with the liveness assert) → c4 → c5 → the record → assert conversions → PERF-9…15 → SYS-R2-FAKE-FIDELITY → SYS-CLOCK-DETERMINISM → STEM-LANES → SYS-1…3 → STORE-2b…5 → REVIEW-RECOMMENDATIONS → T12-ADVANCED → the phase-2 entries (skip rule).
 
-### 1.2 Budgets (`perf/budgets.interactions.json`)
-- Add exactly 26 rows, all `mode: "record"` with `budget: null` and owner `PERF-DRAG-PREVIEW-c3-i`:
-  - stopped: 5 rows;
-  - playing: 7 rows;
-  - `interact.harness.drag-lane-live` (`deterministic`, `record`);
-  - the `.6x` copy of each of these 13.
-- Each `note` says the scenario in one sentence, and the window for the window rows.
-- Why the liveness row is `record`, unlike `interact.harness.drag-move-live` (assert `== 1`) [K13]: L58 says an assert ships only from C's command run on B's sketch, and B has not run this spec on a sketch. c3-ii converts it to assert `== 1` after C round 335 measures it.
-- The existing 167 rows are unchanged, byte for byte [K5].
+## 5. Neighbour risk
+App code carries no risk: no source file changes. The risk is in the process:
+- **L58's sketch-review clause** adds one code-reviewer run to B's planning. The countermetric is B's median; it was $8.685 in 322–335.
+- **L22's short route** could hide a real defect when A STOPs on a ruled clause. The clause keeps the auth guard and the STOP's own check. A claim-value STOP keeps the full run (round 324).
+- **SYS-R336 before c3-ii** risks changing row values mid-stage. Its acceptance pins every deterministic row EQUAL to C round 335's run.
+- **The screen review goes to Saba.** RT-SCREEN re-runs the capture and measures SR-336-2.
 
-### 1.3 Docs
-**Doc 232:**
-- **l.1:** append `, ეტაპი c3-i — cross-lane move-ის perf row` inside the parentheses.
-- **l.4:** exactly `**სტატუსი:** In Progress (stage c3-i of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4, c5; C round 335 PASS)` (L28).
-- **l.5:** add `perf/studio-lab-interactions.perf.spec.ts` to the list.
-- **New section** `### ეტაპი c3-i: cross-lane move-ის perf row (round 335, D-29z1008)`, after the c2b-iii section. It says, in Georgian:
-  - the HEAD premise from §0, with its numbers;
-  - the gesture and its three windows;
-  - the 26 rows and why they are `record`;
-  - that c3-ii moves `clipLaneDrag` out of provider state and is measured against these rows.
-- **Other sections:**
-  - one entry each under files, testing and problems (the whole-window vs segment-window kind ruling);
-  - TODO: c3-ii with the liveness-row conversion.
-- The `^## ` heading count stays 7 [K12].
+## 6. Deliverables
+- **A:** `a-round-336.md`.
+- **C:** `c-round-336.md` and `c-round-336.json`, with evidence under `c-round-336/`. The JSON carries:
+  - `taskStatus`, `browserVerified`, `realVerified`;
+  - `passed`, `failed`, `blocked`, `gate`, `rows`;
+  - all L57 fields.
 
-**Doc 168 (L34):** these three sections are granted and must match the live spec after the edit:
-- `### Pass-ის თანმიმდევრობა`: the lane drag in both blocks.
-- `### Liveness-ის წესები`: one row for `interact.harness.drag-lane-live`, conditions (a)–(d).
-- `## მეტრიკები`: a short paragraph on the `interact.drag.lane.*` rows (kinds, windows, record, owner).
+## 7. Root notes
+- **Nothing to publish from `store/`.** A change there is itself a FAIL. The loop-state commit records the retro.
+- **For Saba:**
+  - `user-review/screen-review-336.md`: 2 new candidates; the weakest step is still SR-305-3;
+  - `retro-336.md` §12: the STOP-routing mitigation is now loop-local (information);
+  - 88 awaiting-user ids.
+- **For root:**
+  - checkpoint D-29z915 is still unanswered, with the SIG-R331/SIG-R332 L46 questions added (`b-round-335.md` §8);
+  - ROOT-REQ-VITEST-PERF-INCLUDE (= GATE304-M1) is still open.
 
-No other section of doc 168 changes.
+## 8. Claims (L29 + L56 form)
+Run `bash b-round-335/claims-336.sh` from the loop root. The expected output is `b-round-335/claims-336-output.txt`.
 
-## 2. Acceptance
-
-### 2.1 A rows (A writes `a-round-335.md` and `a-round-335/`)
-| Row | Command | Pass |
+| Tag | Claim | Expected (from the output file) |
 |---|---|---|
-| A-CLAIMS | `bash b-round-334/claims-335.sh` before any edit | Equals `b-round-334/claims-335-planning-output.txt` (empty diff). A mismatch is a STOP |
-| A-TYPE | `npm run typecheck` (it covers `perf/`; Biome does not, L30) | rc 0 |
-| A-LINT | `npm run lint` | rc 0, diagnostic count unchanged |
-| A-PERF | Production perf, **alone** (L38), once: `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts` | <ul><li>rc 0, `failures` [], `complete` true, **193** rows.</li><li>`interact.harness.drag-lane-live` and its `.6x` copy read 1 in every pass.</li><li>`python3 -I b-round-329/perf-rowcmp.py c-round-334/perf-results/latest-interactions.json <A's latest-interactions.json>` prints `EQUAL` for every one of the 121 pre-existing non-wallclock rows, 0 `DIFF`, and 18 `NEW`.</li><li>Save the results and the rowcmp output under `a-round-335/`.</li></ul> |
-| A-PREMISE | From A's results | <ul><li>**STOP row:** at 1×, stopped and playing, `cross-components-per-move` > `lane-components-per-move`. If this fails, write a STOP with the numbers: the harness is not seeing the cross-lane cost B measured in §0.</li><li>**Report only:** `interact.drag.lane.<state>.move-components-max` against `interact.drag.move.<state>.move-components-max`. B did not map the dev probe's 101-component enter commit, so this is not a STOP.</li><li>Report all values.</li></ul> |
-| A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs perf/lib/report.test.ts`. This is the scratch config outside `store/` (GATE304-M1) | 34/34 pass, as at HEAD (`b-round-334/perf-lib-report-head.log`) [K19]. DC-KINDS must stay green with the 26 new rows |
-| A-MUTANT (liveness red-proof) | <ul><li>A scratch copy of A's tree, not `store/`.</li><li>Mutant MU-LANE-NO-CROSS: in the cross step, use `grab.y` in place of `target.y`.</li><li>Run the spec once, alone.</li></ul> | <ul><li>`interact.harness.drag-lane-live` reads 0.</li><li>A problem naming condition (a) is pushed.</li><li>The scratch is discarded.</li><li>Save the log and results under `a-round-335/mutant/`.</li></ul> |
-| A-SCOPE | `git status --short` | Exactly the 4 files of §1, 0 untracked; `app/` and `perf/lib/` clean [K15] |
-| A-REVIEW | The real `code-reviewer` subagent on the 4 changed files (the 3+ files rule) | <ul><li>Report its score and findings.</li><li>A Medium+ finding inside the grants is fixed and then re-reviewed.</li><li>Code changed after the review goes back to the reviewer (L11).</li></ul> |
-
-A does not run the full vitest suite or `npm run verify` (gate rows).
-
-### 2.2 C rows (C writes `c-round-335.md`, `c-round-335.json` and `c-round-335/`)
-| Row | How | Pass |
-|---|---|---|
-| CLAIMS | `bash b-round-334/claims-335.sh` at start and end | The differences from `claims-335-planning-output.txt` are exactly these:<ul><li>K2: `0d22ab9 4`;</li><li>K5: `193` plus a non-zero hit count;</li><li>K11: the new l.4;</li><li>K12: `1 1 1 7 11 ≥1`.</li></ul>K17–K20 are unchanged. Anything else is a finding |
-| SOURCE-SCOPE | `git status`, `git diff --stat` | <ul><li>Exactly the 4 files; 0 untracked.</li><li>`app/` and `perf/lib/` unchanged [K15]; protected 11 OK [K8].</li><li>`DragName` and `dragNames` unchanged [K3].</li><li>The 167 old budget rows are byte-equal: compare them by id with `git show HEAD:perf/budgets.interactions.json`.</li></ul> |
-| PERF | Production build of A's tree. Run the spec alone, after a browser warm-up (L38), then run `perf-rowcmp.py` vs `c-round-334/perf-results/latest-interactions.json` | <ul><li>rc 0, `failures` [], `complete` true, 193 rows, and every asserted row passes.</li><li>All 121 pre-existing non-wallclock rows are `EQUAL`. Any `DIFF` is a finding, reported with its number.</li><li>18 rows print `NEW`.</li><li>`interact.harness.drag-lane-live` (and `.6x`) reads 1 in all 3 passes.</li><li>`interact.harness.hook-live` reads 1.</li></ul> |
-| PREMISE | From C's results | <ul><li>At 1× and 6×, stopped and playing: `cross-components-per-move` > `lane-components-per-move`.</li><li>`move-components-max`, lane against move: record only.</li><li>Record every new row's 3 pass values in `c-round-335/lane-rows.txt`. That file becomes c3-ii's baseline.</li><li>A deterministic new row that varies across passes is a finding, unless A ruled it `wallclock` under §1.1.</li></ul> |
-| MUTANT | <ul><li>C re-runs MU-LANE-NO-CROSS on its own scratch.</li><li>C adds one mutant of its own, for example dropping condition (b)'s document count or skipping the release lane check, chosen so it fails a different condition.</li></ul> | Both make the live row 0 with a problem naming the condition. Files are restored (`cmp`) |
-| CROSS-NAMES (browser) | `node b-round-334/cross-lane-probe.mjs <base> <out>` on A's tree (:5173) and on HEAD (git archive, own Vite `cacheDir`, L38), at 1440×900 | <ul><li>Both equal `b-round-334/cross-head-1440.json` in commit counts, rendered counts, ghosts, tracks and the Undo title.</li><li>The app is unchanged, so A's tree must draw the same.</li><li>The provider renders on each of the 4 cross-lane moves on both trees.</li></ul> |
-| HARNESS-READ | Read the new function against §1.1 | <ul><li>The gesture, all three windows (lane from `firstMove`) and the four liveness conditions are present as specified.</li><li>The ghost reads settle with rAF or `waitFor`, not `waitForQuiet`.</li><li>`setLive` comes after the reset, and (d) is a re-read.</li><li>The reset checks the lane.</li><li>The other drags' code paths are unchanged in the diff.</li></ul> |
-| PERF-LIB | The A-PERF-LIB command | 34/34 pass; DC-KINDS green |
-| G335-AUTH | As G334-AUTH (`c-round-330/g330-auth.cjs`), at both viewports, in fresh anonymous contexts | <ul><li>`/studio-lab` shows the anonymous workspace and demo badge, with `auth_user` null.</li><li>`/studio/middle-east` shows "Sign in required" and 0 `audio[src]`.</li><li>`/api/studio-token` with no header returns 401.</li></ul> |
-| DOCS | Read doc 232 and doc 168 | <ul><li>§1.3 is matched: l.1, l.4 (byte-exact) and l.5.</li><li>The c3-i section has the §0 numbers.</li><li>The files, testing, problems and TODO entries are present.</li><li>Seven `## ` headings, in TEMPLATE order.</li><li>Doc 168's three granted sections match the live spec and budgets (L34).</li><li>Nothing else in doc 168 changed: `git diff` shows hunks only inside those sections.</li></ul> |
-
-**L57 fields:** C writes all of them:
-- `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`;
-- an `origin` per finding;
-- `assertsSpecified`, `mutantsRecorded`;
-- `mutantRedOnSketch`: `null`, with the reason "B ran no sketch; c3-i rows are record, L58";
-- `mutantRedOnTree`;
-- `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`.
-
-**Gate rows** (not claimed by C): full vitest, build, Biome, typecheck, `npm run verify` and e2e smoke.
-
-**browserVerified:** CROSS-NAMES, PERF and G335-AUTH are real browser rows that can run here. None needs the backend.
-
-**Ableton conformance:** not applicable. This round adds a measurement and changes no behaviour.
-
-## 3. Neighbouring behaviour that could break
-- **Pre-existing perf rows**, for example through state left behind by the new drag. PERF requires all 121 to be `EQUAL`.
-- **Later rows in the pass** (`play`, `pause`, the 30-clip block, `select`) if the reset leaves the clip elsewhere. The reset's lane check and the `EQUAL` rows cover this.
-- **The harness's own vacuity.** A cross step that never leaves the lane would record same-lane numbers. Liveness condition (a) and MU-LANE-NO-CROSS cover this.
-
-## 4. STOP conditions (A)
-- A-CLAIMS mismatch.
-- Any pre-existing row `DIFF`.
-- A-PREMISE fails.
-- The mutant does not turn the live row 0.
-- Any change needed outside the 4 files.
-- A determinism failure other than the pre-ruled kind change.
-
-## 5. Not in scope
-- **c3-ii:**
-  - the `clipLaneDrag` store;
-  - the provider hooks seen in §0;
-  - converting the c3-i rows to assert;
-  - jsdom DP rows for ghosts.
-- **Later stages:** c4 (groups), c5 (video), PERF-CAND-FADE-BUDGET.
-- **For checkpoint D-29z915:** the preview-readers module, ARCH-R334-PEAKPATH-FILE, SIG-R334-INLINE-DB-GAIN and removing `clipWaveformScale`.
-- **Deferred Lows:** A-R334-REVIEW-WG9-UNDEF, -DP-ORDER and -DP43-DETAIL.
-- **Root only:**
-  - `vitest.config.ts`: GATE304-M1. Nothing in `perf/lib` changes, so no scratch-config row is needed;
-  - commits and pushes.
-
-## 7. Claims
-Run `bash b-round-334/claims-335.sh` from the loop root (`CLAIMS_STORE=<dir>` points it at another tree). The expected output at HEAD is `b-round-334/claims-335-planning-output.txt`.
-- **K1:** gate 334 is published, commit `0d22ab9`.
-- **K2:** HEAD's short hash and the `git status` entry count.
-- **K3:** these lines in the spec, one each:
-  - `type DragName = 'range' | 'fade' | 'trim' | 'move';`;
-  - the `dragNames` array;
-  - `dragSteps = 60`;
-  - `dragDistancePx = 120`.
-- **K4:** these, one each:
-  - `emptyLanePointAfterClip`;
-  - `measureDrag`;
-  - the whole-window filter `commit.t > firstMove && commit.t < up`.
-- **K5:** the budget row count (167), and hits for `interact.drag.lane`, `drag-lane-live` or `measureLaneDrag` in `perf/` and `app/` (0).
-- **K6:** the ghost testid and its `data-blocked` attribute in `ArrangementLane.tsx` (1 1).
-- **K7:** the provider `useState` for `clipLaneDrag` in `ArrangementContext.tsx`, and `setClipLaneDrag({ ghosts, timeLocked })` in `ArrangementClip.tsx` (1 1).
-- **K8:** protected sha, 11 OK.
-- **K9:** the `regression-last` date (2026-11-02).
-- **K10:** `PerfCommitRecord` has 2 fields (`t`, `rendered`) in `perf/lib/instrumentation.ts`.
-- **K11:** doc 232 l.4.
-- **K12:** these doc counts:
-  - doc 232: c3-i in l.1, the spec in l.5, the c3-i section, and the `## ` count;
-  - doc 168: the `## ` count, and its `drag-lane-live` hits.
-- **K13:** kind and mode of the move rows (`deterministic/record` ×3) and of `interact.harness.drag-move-live` (`deterministic/assert`).
-- **K14:** every cited artifact exists (L56).
-- **K15:** `app/` and `perf/lib/` have no diff against HEAD.
-- **K16:** C round 334's perf result: 167 rows, `complete` True, 0 failures.
-- **K17:** `perf/lib/report.ts` puts each pass's `problems` into `failures` (the `pass.problems.map(` line, 1).
-- **K18:** `perf/lib/report.test.ts`:
-  - the DC-KINDS regex line for `interact\.drag\.(range|fade|trim|move)\.(stopped|playing)\.commits-per-move`, 1;
-  - its `toHaveLength(16)`, 1.
-- **K19:** the perf/lib report test at HEAD through the scratch config: `Tests 34 passed (34)` in `b-round-334/perf-lib-report-head.log`.
-- **K20 (L23 sweep):** `budgets.interactions` is referenced only by the spec and `perf/lib/report.test.ts` in `app/`, `perf/` and `e2e/`; K18 covers the latter. `owner` is read in `perf/lib/budgets.ts`, which takes any non-empty string; no test enumerates owners.
+| K1 | gate 335 published `f1def9c` | `published f1def9c` |
+| K2 | clean tree and HEAD at planning | `0 f1def9c` |
+| K3 | 1,236 frozen entries | `1236` |
+| K4 | each protected file appears once | eleven `1` |
+| K5 | Play's playing signal and name in `store/` | the `data-playing` line in `ArrangementTransport.tsx` and `playLabel: 'Play',` in `strings.ts` |
+| K6 | screen-capture row counts; no lane errors | `{'1440x900-S0': 138, '1440x900-DEMO': 168, '1280x720-S0': 118, '1280x720-DEMO': 144} None` |
+| K7 | lessons line count | `59` |
+| K8 | every cited artifact exists (L56) | `done` |
+| K9 | the screenshots exist | `12` |
+| K10 | backlog version and last decision | `295 D-29z1022` |
+| K11 | C JSONs in 321–335 without `manifestPaths` | `none-missing` |
+| K12 | journey facts | `/studio-lab?preview=middle-east`, the positions and clip counts in the output file |
+| K13 | lesson ids | the id list in the output file |
+| K14 | regression-last date | `2026-11-02` |
+| K15 | L23 and L58 length in bytes (`wc -c`) | `5058 2803` |
+| K16 | the round-335 archive equals the old task | `archive-equal` |
+| K17 | B median 322–335 and window total | `8.685 339.76` |
+| K18 | rounds with an A STOP line | `322 323 324 327` |
+| K19 | SR-336 ids in the review equal the backlog ids | `sr-ids-equal` |

@@ -1,0 +1,625 @@
+diff --git a/docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md b/docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md
+index 1bc6119..99c9a26 100644
+--- a/docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md
++++ b/docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md
+@@ -22,11 +22,12 @@ SABA-B-5-ის მოთხოვნაა: "B checks the other continuous drag
+ 2. 6×-ზე throttle ირთვება.
+ 3. clip click (`interact.click.*`, `interact.harness.click-live`).
+ 4. zoom 1 clip-ით: 5 × `=` და 5 × `-`, თითო key თავისი ფანჯრით (`interact.zoom.1.*`, `interact.harness.zoom-live`).
+-5. ოთხი drag, stopped: range, fade-in, trim start, move; ყოველის შემდეგ reset.
++5. ოთხი drag, stopped: range, fade-in, trim start, move; ყოველის შემდეგ reset. შემდეგ cross-lane move (round 335-იდან, `measureLaneDrag`): clip-ის name bar-ზე press, 10 step +40 px საკუთარ lane-ზე, 1 step ქვემოთ შემდეგ lane-ზე და იქ 10 step +40 px, 1 step უკან და 10 step +40 px საკუთარ lane-ზე, release, reset Ctrl+Z-ით (`interact.drag.lane.stopped.*`, `interact.harness.drag-lane-live`).
+ 6. Home (seek 0), შემდეგ Space → playing (`interact.play.start-*`, 1×: `interact.harness.audio-running`).
+-7. ოთხი drag, playing; ყოველის წინ Home (seek 0), რომ Follow-მა timeline არ გადაახვიოს და playhead clip-ის შიგნით დარჩეს.
++7. ოთხი drag, playing; ყოველის წინ Home (seek 0), რომ Follow-მა timeline არ გადაახვიოს და playhead clip-ის შიგნით დარჩეს. შემდეგ იგივე cross-lane move, Home-ის შემდეგ (`interact.drag.lane.playing.*`).
+ 8. Space → stopped (`interact.play.stop-*`).
+-9. მხოლოდ 1×: clip-ის header click, Ctrl+D × 29 (`interact.harness.clips-30`), zoom 30 clip-ით (`interact.zoom.30.*`), Space, Home, fade-in drag პირველ clip-ზე (`interact.drag.fade.30.playing.*`), Space.
++9. მხოლოდ 1×: clip-ის header click, Ctrl+D × 29 (`interact.harness.clips-30`), zoom 30 clip-ით: key-ები (`interact.zoom.30.*`), in-first და out-first გზა (`interact.zoom.30.in.*`, `interact.zoom.30.out.*`), Space, Home, fade-in drag პირველ clip-ზე (`interact.drag.fade.30.playing.*`), Space, Ctrl+wheel out-first (`interact.zoom.30.wheel.*`).
++10. მხოლოდ 1×, ბოლოს: "-" მანამ, სანამ 2 კლიპის name bar გამოჩნდება, click ერთზე (setup), შემდეგ click იმავე lane-ის სხვა კლიპის name bar-ზე და ხელახლა იმავეზე (`interact.select.same-lane.30.*`, `interact.select.reclick.30.*`, `interact.harness.select-same-lane-live`).
+ 
+ ზუსტი სია JSON-ის `sequence` ველშია.
+ 
+@@ -46,6 +47,7 @@ SABA-B-5-ის მოთხოვნაა: "B checks the other continuous drag
+ | `interact.harness.drag-fade-live`, `interact.harness.drag-fade-30-live` | `data-fade-in` იზრდება დასაწყისიდან შუამდე და შუიდან ბოლომდე |
+ | `interact.harness.drag-trim-live`, `interact.harness.drag-move-live` | `data-clip-start` იცვლება დასაწყისიდან შუამდე და შუიდან ბოლომდე |
+ | `interact.harness.audio-running` | Play ღილაკის `data-playing` = `true` (round 259-იდან), tracked context = `running` და Space-იდან "სიჩუმემდე" ≥ 1 `start()` (GATE206-S6-ის იგივე წესი) |
++| `interact.harness.drag-lane-live` | round 335-იდან (`record`, owner `PERF-DRAG-PREVIEW-c3-i`). 1 მხოლოდ მაშინ, როცა stopped და playing ორივეში: (a) cross-ის წაკითხვაზე შემდეგ lane-ში (`data-track-id` = ცარიელი წერტილის lane) ≥ 1 `arrangement-lane-move-ghost`-ია `data-blocked="false"`-ით; (b) უკან დაბრუნების წაკითხვაზე document-ში 0 ghost-ია; (c) release-ის შემდეგ clip-ის უახლოესი `[data-track-id]` საკუთარი lane-ია და `data-clip-start` შეიცვალა; (d) reset-ის შემდეგ ხელახალი წაკითხვა start-ს, fade-in-ს, width-ს, range-ის არარსებობასა და საკუთარ lane-ს აბრუნებს. ghost-ის წაკითხვამდე double-`requestAnimationFrame` settle-ია. ჩავარდნილი პირობა problem-ად იწერება თავისი ასოთი და მნიშვნელობებით. `setLive` reset-ის შემდეგ იძახება |
+ | `interact.harness.clips-30` | Ctrl+D-ის ყოველი დაჭერის შემდეგ clip-ების რაოდენობა = დაჭერა + 1; ბოლოს 30 და 30 განსხვავებული `data-clip-start` |
+ 
+ drag-ის liveness სტრიქონი 1 მხოლოდ მაშინაა, როცა stopped და playing ორივე ცოცხალია. 0 liveness ასევე failure-ს წერს.
+@@ -106,6 +108,8 @@ round 224-იდან PERF-1b-i ბირთვს გადასცემს
+ 
+ **PERF-DRAG-PREVIEW-ის ეტაპ b-დან (status preview store, `232-perf-drag-preview.md`)** ხუთი fade row assert-ია (owner `PERF-DRAG-PREVIEW-b`): `interact.drag.fade.stopped.move-components-per-move`, `interact.drag.fade.playing.move-components-per-move`, `interact.drag.fade.stopped.move-components-max` და `interact.drag.fade.playing.move-components-max` `<= 24`, `interact.drag.fade.playing.move-restarts` `== 0`; `.6x` ასლები `record` რჩება, trim/move-ის per-move row-ები კი `record`-ია ეტაპ c-მდე (D-29z932). A-ის production run-ში (round 327, 1× და 6×, სამი pass, `failures` []): fade `move-components-per-move` HEAD `234ccdd` 103.25 → A 21.633 (stopped და playing), `move-components-max` 105 → 22, `move-restarts` 0. stopped `release-commits` 1 → 2 (`releaseComponentsMax` 96; B-ის probe-ით მეორე commit 0 component-ს render-ავს), playing 1 → 1. trim, move და range-ის row-ები HEAD-ის run-ს უდრის.
+ 
++**PERF-DRAG-PREVIEW-ის ეტაპ c3-i-დან (round 335, `232-perf-drag-preview.md`) 26 `interact.drag.lane.*` / `interact.harness.drag-lane-live` სტრიქონი** (owner `PERF-DRAG-PREVIEW-c3-i`, ყველა `record`, `budget: null`): თითო state-ზე `move-components-per-move` (ratio `componentsSum`/`movesInWindow`), `move-components-max` და `release-commits` deterministic-ია და whole window-ს იყენებს (`firstMove < t < up`, როგორც სხვა drag-ებში); `cross-components-per-move` (step-ი შემდეგ lane-ზე → ghost-ის წაკითხვა) და `lane-components-per-move` (`firstMove < t < t1` და `t2 < t < up`; პირველი pointermove move-ად არ ითვლება, მისი commit კი ითვლება) wallclock-ია, რადგან საზღვრები in-page timestamp-ებია (L37); playing-ზე დამატებით `move-restarts` და `release-restarts` (deterministic); liveness და ყოველის `.6x` ასლი. `commits-per-move` metric არ გამოიყენება. `record` რჩება, სანამ C-ის გაზომვა არ არსებობს (L58); c3-ii (`clipLaneDrag` store) ამ row-ებს ადარებს.
++
+ ## შედეგები (A, round 214: ორი საბოლოო run, საბოლოო tree)
+ 
+ run 1: `durationMs` 313989 (5.2 min), run 2: 299362 (5.0 min); ორივე exit 0, `complete: true`, `failures: []`, `reactRenderer` 18.3.1. სრული ცხრილი (1× / 6× მედიანები, run 1 / run 2):
+diff --git a/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md b/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md
+index 1765410..bd16cfa 100644
+--- a/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md
++++ b/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md
+@@ -1,8 +1,8 @@
+-# კლიპის drag-ის preview გავიდა React history-დან (PERF-DRAG-PREVIEW: ეტაპი a — trim და same-lane move, ეტაპი b — audio fade, ეტაპი c1 — project end, ეტაპი c2a — არჩეული კლიპის მკითხველები, ეტაპი c2b-i — overview და meter, ეტაპი c2b-ii — Clip details-ის Start/End ტექსტი, ეტაპი c2b-iii — waveform-ის primitive props)
++# კლიპის drag-ის preview გავიდა React history-დან (PERF-DRAG-PREVIEW: ეტაპი a — trim და same-lane move, ეტაპი b — audio fade, ეტაპი c1 — project end, ეტაპი c2a — არჩეული კლიპის მკითხველები, ეტაპი c2b-i — overview და meter, ეტაპი c2b-ii — Clip details-ის Start/End ტექსტი, ეტაპი c2b-iii — waveform-ის primitive props, ეტაპი c3-i — cross-lane move-ის perf row)
+ 
+ **თარიღი:** 2026-11-04
+-**სტატუსი:** In Progress (stage c2b-iii of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3–c5; C round 334 PASS)
+-**შეცვლილი პროექტი:** Store (`app/lib/arrangement/preview-store.ts`, `app/lib/arrangement/status-preview-store.ts`, `app/contexts/ArrangementContext.tsx`, `app/components/arrangement/ArrangementClip.tsx`, `ArrangementLane.tsx`, `StudioWorkspace.tsx`, `ArrangementTrackMeter.tsx`, `ArrangementDetailPanel.tsx`, `ArrangementTransport.tsx`, `ArrangementMarkerRow.tsx`, `perf/budgets.interactions.json`, `app/lib/arrangement/waveform-zoom.ts`, `app/lib/arrangement/model.ts`)
++**სტატუსი:** In Progress (stage c3-i of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4, c5; C round 335 PASS)
++**შეცვლილი პროექტი:** Store (`app/lib/arrangement/preview-store.ts`, `app/lib/arrangement/status-preview-store.ts`, `app/contexts/ArrangementContext.tsx`, `app/components/arrangement/ArrangementClip.tsx`, `ArrangementLane.tsx`, `StudioWorkspace.tsx`, `ArrangementTrackMeter.tsx`, `ArrangementDetailPanel.tsx`, `ArrangementTransport.tsx`, `ArrangementMarkerRow.tsx`, `perf/budgets.interactions.json`, `app/lib/arrangement/waveform-zoom.ts`, `app/lib/arrangement/model.ts`, `perf/studio-lab-interactions.perf.spec.ts`)
+ 
+ ## კონტექსტი
+ 
+@@ -79,6 +79,13 @@
+ 41. **ორი helper.** `model.ts`-ში `gainDbLinearGain(gainDb)` დაემატა `clipLinearGain`-ის ქვემოთ, და `clipLinearGain` მას იძახებს, რომ waveform-მა და აუდიოს gain-მა ერთი dB ფორმულა გამოიყენონ. `waveform-zoom.ts`-ში `waveformScaleForGainDb(gainDb, isVideo, zoom)`-ს აქვს `clipWaveformScale`-ის ძველი body, `clipWaveformScale` კი მას იძახებს. `clipWaveformScale`-ს production caller აღარ აქვს; ის რჩება როგორც მხოლოდ `waveform-zoom.test.tsx`-ის (WZ1) მიერ გამოყენებული delegate. მისი წაშლა ამ ტესტის რედაქტირებას მოითხოვს და ამ რაუნდის ფარგლებს გარეთაა.
+ 42. **Pin-ები.** DP45 და DP46 (trim-start და trim-end: ორ move-ზე `ArrangementPeakPathInner` ზუსტად 4-ჯერ, lane + detail თითო move-ზე) HEAD-ზეც მწვანეა და HEAD-ის ქცევას იცავს, რადგან trim `sourceOffset`-ს ან `duration`-ს ცვლის. WG9 (detail panel-ის `d` offset 0.5-დან) და WG10 (committed `sourceOffset` 1.5, იგივე duration: lane-ისა და detail-ის `d` იცვლება) HEAD pin-ებია, რომ offset-ის wiring და `useMemo`-ს dependency-ები დაცული იყოს. ბრაუზერში B-ის sketch-ზე lane-ისა და detail-ის ყველა path-ის `d` HEAD-ის ტოლია 22 sample-ზე ორივე viewport-ზე (`b-round-333/wd-compare.txt`).
+ 
++### ეტაპი c3-i: cross-lane move-ის perf row (round 335, D-29z1008)
++
++43. **პრობლემა HEAD `0d22ab9`-ზე (B-ის dev probe, `b-round-334/cross-head-1440-summary.txt`, 1440×900, ორი იდენტური run).** პირველი music კლიპის name bar-ზე press, 4 move საკუთარ lane-ზე, 1 move ქვემოთ `stems` lane-ზე და იქ 4 move, 1 move უკან და 4 move საკუთარ lane-ზე, release, Ctrl+Z. საკუთარ lane-ზე: 4 commit, 19, 19, 101 და 19 component, `ArrangementProvider` არ render-დება და ghost არ ჩანს (round 334-ის `move-moves`-ის ტოლი). სხვა lane-ში შესვლა: 2 commit, 101 და 91, provider მეორეში render-დება. სხვა lane-ზე: 4 commit, თითო **87** component, provider **ყოველ** move-ზე render-დება (hook-ები 0 და 35 იცვლება). `stems` lane-ში ჩანს ერთი ghost, `data-blocked="false"`, start 1.100 → 2.100. უკან დაბრუნებისას ghost ქრება და commit-ები ისევ 19, 19, 101, 19-ია. release: 1 commit, 93; კლიპი `music`-ზე რჩება, Undo "Undo: Move clip"-ია. დასკვნა: cross-lane move დაახლოებით 4.5-ჯერ ძვირია same-lane move-ზე, რადგან ghost-ები provider-ის `useState`-შია (`clipLaneDrag`). harness ამას დღეს ვერ ხედავს: მისი `move` drag მხოლოდ ჰორიზონტალურია.
++44. **სცენარი `measureLaneDrag`.** spec-ში ერთხელ stopped ბლოკში (ოთხი drag-ის შემდეგ) და ერთხელ playing ბლოკში (ოთხი drag-ის შემდეგ, `pause`-მდე), ყოველ pass-ში და ორივე CPU rate-ზე. `DragName` და `dragNames` უცვლელია. gesture: name bar-ზე press, 10 step +40 px საკუთარ lane-ზე; 1 step ქვემოთ შემდეგ lane-ზე (`emptyLanePointAfterClip`-ის `y`) და 10 step +40 px იქ; ghost-ის წაკითხვა; 1 step უკან და 10 step +40 px საკუთარ lane-ზე; ghost-ის წაკითხვა; release; reset Ctrl+Z-ით (`resetAfterDrag` + lane-ის შემოწმება). ghost-ის წაკითხვამდე double-`requestAnimationFrame` settle (არა `waitForQuiet`, L37). სამი window: **whole** (`firstMove < t < up`, როგორც `measureDrag`-ში), **cross** (`t1 < t < t2`: step-ი შემდეგ lane-ზე → ghost-ის წაკითხვა) და **lane** (`firstMove < t < t1` და `t2 < t < up`; `firstMove`-დან, რომ pointerdown-ის commit არ შევიდეს).
++45. **26 row, ყველა `record`, owner `PERF-DRAG-PREVIEW-c3-i`.** stopped: `move-components-per-move`, `move-components-max`, `release-commits` (deterministic, whole window), `cross-components-per-move` და `lane-components-per-move` (wallclock, რადგან მათ საზღვრებს in-page timestamp-ები ადგენს); playing: იგივე ხუთი და `move-restarts`, `release-restarts`; `interact.harness.drag-lane-live` და თითოეულის `.6x` ასლი. `commits-per-move` metric არ გამოიყენება (DC-KINDS მას მხოლოდ range/fade/trim/move-ისთვის უშვებს). liveness 1-ია მხოლოდ მაშინ, როცა ორივე state-ში: (a) cross-ის წაკითხვაზე target lane-ში ≥ 1 non-blocked ghost-ია; (b) უკან დაბრუნების წაკითხვაზე document-ში 0 ghost-ია; (c) release-ის შემდეგ კლიპი საკუთარ lane-ზეა და `data-clip-start` შეიცვალა; (d) reset-ის შემდეგ ხელახალი წაკითხვა საწყის მდგომარეობას საკუთარ lane-ზე აჩვენებს. ჩავარდნილი პირობა problem-ად იწერება (ასოთი), ამიტომ run-ის `failures` ცარიელი აღარ არის. row-ები `record`-ია, რადგან B-ს ეს spec sketch-ზე არ გაუშვია (L58); liveness `interact.harness.drag-move-live`-ის მსგავსად assert `== 1` გახდება c3-ii-ში, C round 335-ის გაზომვის შემდეგ.
++46. **c3-ii.** `clipLaneDrag` provider-ის state-იდან გადადის (preview store), და c3-ii იზომება ამ row-ების წინააღმდეგ (C round 335-ის `c-round-335/lane-rows.txt`).
++
+ ### განხილული ალტერნატივები
+ 
+ - **flag `previewArrangement`-ში** ცალკე ფუნქციის ნაცვლად (`tech-lead`): უარყოფილია; ცალკე ფუნქცია ცხადად აჩვენებს, რომელი call site გადავიდა.
+@@ -171,7 +178,8 @@ flowchart LR
+ - `app/components/arrangement/ArrangementMarkerRow.tsx` (ეტაპი b)
+ - `app/lib/arrangement/waveform-zoom.ts` (ეტაპი c2b-iii: waveformScaleForGainDb)
+ - `app/lib/arrangement/model.ts` (ეტაპი c2b-iii: gainDbLinearGain)
+-- `perf/budgets.interactions.json` (ეტაპი a: `interact.drag.trim.playing.move-restarts` და `interact.drag.move.playing.move-restarts` → assert `== 0`; ეტაპი b: ხუთი fade row → assert)
++- `perf/budgets.interactions.json` (ეტაპი a: `interact.drag.trim.playing.move-restarts` და `interact.drag.move.playing.move-restarts` → assert `== 0`; ეტაპი b: ხუთი fade row → assert; ეტაპი c3-i: 26 `interact.drag.lane.*` და `interact.harness.drag-lane-live` row, `record`)
++- `perf/studio-lab-interactions.perf.spec.ts` (ეტაპი c3-i: `measureLaneDrag`, `readLaneGhosts`, `clipLaneTrackId`, `interactionSequence`-ის ორი ჩანაწერი)
+ - ტესტები: `app/lib/arrangement/__tests__/preview-store.test.ts`, `drag-preview-render.test.tsx` (ახალი, ეტაპი a; ეტაპ b-ში ეტაპ a-ს fade/video row-ის ნაცვლად DP9a/DP9b და დაემატა DP10–DP16; round 328-ში DP17–DP19; round 329-ში DP20–DP22; round 330-ში DP23–DP24, fixture/mount `loop` პარამეტრი; round 331-ში DP25–DP28 და preview-store.test.ts-ში PS-ROLES/PS-LIST; round 332-ში DP29–DP32, PS-OVR-ROLES/PS-OVR-ARR და track-meter-ui.test.tsx-ის 4 სახელი; round 333-ში DP33–DP42; round 334-ში DP43–DP48 და clip-gain-waveform.test.tsx-ში WG9–WG10), `status-preview-store.test.ts` (ახალი, ეტაპი b); `grid-snap-ui.test.tsx`, `grid-snap-edit.test.tsx`, `gesture-guard.test.tsx` (pattern P1, ეტაპი a)
+ 
+ ## პრობლემები და გადაწყვეტები
+@@ -210,6 +218,9 @@ flowchart LR
+ - **Problem (ეტაპი c2b-iii, round 334):** audio fade-ისა და same-lane move-ის ყოველ move-ზე `ArrangementPeakPathInner` render-დებოდა (fade-ზე lane, move-ზე lane და detail panel), თუმცა path-ის დახატული ველი არ იცვლებოდა: `memo` მთელ `clip` object-ს ადარებდა, preview კი ყოველ move-ზე ახალს ქმნიდა.
+   **Solution:** ოთხი primitive prop (`clipId`, `sourceOffset`, `duration`, `gainDb`) და `waveformScaleForGainDb`. DP43, DP44, DP47 და DP48 ამტკიცებს, რომ fade, move, video fade და committed fade-only ცვლილება PeakPath-ს 0-ჯერ render-ავს; B-ის 9 jsdom mutant (`b-round-333/run-mutants.py`) წითელია.
+ 
++- **Problem (ეტაპი c3-i, round 335):** cross-lane move-ის segment-ების commit-ები in-page timestamp-ებით შემოსაზღვრულ window-შია და 6×-ზე ან load-ის დროს commit-ი საზღვარზე შეიძლება გადავიდეს (L37).
++  **Solution:** whole-window row-ები იგივე საზღვრებს იყენებს, რასაც არსებული drag row-ები (`firstMove < t < up`), ამიტომ `deterministic`-ია; cross და lane window-ის row-ები `wallclock`-ია. pre-ruling (L10): თუ deterministic row 3 pass-ში განსხვავდება, ის `wallclock`-ზე გადადის და მნიშვნელობები pass-ების მიხედვით იწერება.
++
+ ## ტესტირება
+ 
+ - `preview-store.test.ts` (DP1): store-ის notify-ები, lane selector-ის shallow თანასწორობა და provider-ით გავლილი lane hook (lane B არ render-დება).
+@@ -230,6 +241,7 @@ flowchart LR
+ - Production perf, ეტაპი c2b-ii, B-ის sketch (`b-round-332/perf-rowcmp-vs-c332.txt`, C round 332-თან შედარებით): 103 non-wallclock row ტოლია, 18 row დაბალია: `interact.drag.trim.*.move-components-per-move` 23.6 → 21.633, `interact.drag.move.*.move-components-per-move` 28.2 → 26.233, `interact.drag.range.*.move-components-per-move` 9.233 → 7.267, `interact.click.commits` 3 → 2, `interact.click.components` 102 → 100, `interact.select.same-lane.30.components` 24 → 22, `interact.harness.hook-live` 2 → 1 (budget assert ≥ 1, SIG-R333-HOOK-LIVE-MARGIN). Dev names probe, B-ის sketch (`b-round-332/names-compare.txt`): `harness-clip-click` [100, 2, 0] → [100, 0], `trim-moves` → [22, 22, 22, 22], `move-moves` → [21, 21, 103, 21], `fade-moves` [11, 11, 11, 11] უცვლელი. C round 333-მა იგივე მნიშვნელობები გაზომა (`c-round-333/perf-rowcmp-vs-c332.txt`, `names-compare.txt`).
+ - `drag-preview-render.test.tsx`, round 334 (ეტაპი c2b-iii): DP43 (ორი fade-in move: clip view 2-ჯერ, `data-fade-in` `3.000`, `ArrangementPeakPathInner` 0-ჯერ), DP44 (ორი same-lane move: detail content 2-ჯერ, Start `5`, `ArrangementPeakPathInner` 0-ჯერ), DP45 (HEAD pin: ორი trim-start move — `ArrangementPeakPathInner` ზუსტად 4-ჯერ), DP46 (HEAD pin: იგივე trim-end-ზე), DP47 (committed fade-only ცვლილება clip view-ს render-ავს და PeakPath-ს 0-ჯერ; committed `gainDb: -6` ზუსტად 2-ჯერ, lane + detail), DP48 (video fade-in move provider-ის გზაზე რჩება, `ArrangementProvider` 1-ჯერ, `ArrangementPeakPathInner` 0-ჯერ). `clip-gain-waveform.test.tsx`: WG9 (HEAD pin: detail-ის `d` offset 0.5-დან 480 column-ზე, offset 0-ის shape-ისგან განსხვავდება), WG10 (HEAD pin: committed `sourceOffset` 1.5 იგივე duration-ით lane-ის column-ების რაოდენობას ინარჩუნებს და ორივე `d`-ს ცვლის მოსალოდნელ shape-ზე).
+ - Production perf, ეტაპი c2b-iii, B-ის sketch (`b-round-333/perf-rowcmp-vs-c333.txt`, C round 333-თან შედარებით): 36 assert row გადის, 104 non-wallclock row ტოლია, 17 row დაბალია: `interact.drag.fade.*.move-components-per-move` 10.817 → 9.833, `-max` 11 → 10; `interact.drag.move.*.move-components-per-move` 26.233 → 24.267, `-max` 103 → 101. Dev names probe, B-ის sketch (`b-round-333/names-compare.txt`): `fade-moves` [11, 11, 11, 11] → [10, 10, 10, 10], `move-moves` [21, 21, 103, 21] → [19, 19, 101, 19], `trim-moves` [22, 22, 22, 22] და `harness-clip-click` [100, 0] უცვლელი. ბრაუზერის waveform probe (`b-round-333/wd-compare.txt`): `DIFFS 0` ორივე viewport-ზე, 22 sample თითოზე. რეალურ მნიშვნელობებს C ზომავს ამ რაუნდში.
++- Production perf, ეტაპი c3-i (A, round 335, მარტო; `a-round-335/perf-results/latest-interactions.json`): rc 0, `complete` true, 193 row, `failures` [], 36 assert row გადის; C round 334-თან შედარებით 121 non-wallclock row ტოლია, 0 `DIFF`, 18 `NEW` (`a-round-335/perf-rowcmp-vs-c334.txt`). ახალი row-ები სამივე pass-ში და 1×-ზეც და 6×-ზეც ერთნაირია, stopped = playing: `move-components-per-move` 58.969 (1887 component / 32 move), `move-components-max` 101 (= `interact.drag.move.*.move-components-max` 101), `release-commits` 1, `cross-components-per-move` 96.545 (1062 / 11), `lane-components-per-move` 41.25 (825 / 20; whole-ის 32 move = პირველი move + lane 20 + cross 11, რადგან lane window `t > firstMove`-ით იწყება), `move-restarts` 0, `release-restarts` 1, `interact.harness.drag-lane-live` 1 (ghost target lane-ში 1, უკან დაბრუნებისას 0, release-ის შემდეგ `music`-ზე start 3.000, reset-ის შემდეგ 0.000). cross > lane, ანუ harness B-ის §43-ის cross-lane ღირებულებას ხედავს. kind-ის pre-ruling არ გააქტიურებულა. Mutant MU-LANE-NO-CROSS (cross step-ში `target.y`-ის ნაცვლად `grab.y`, scratch copy, მარტო): `interact.harness.drag-lane-live` და `.6x` სამივე pass-ში 0-ია, და ყოველ pass-სა და state-ში problem "lane-drag liveness (a) target-lane stems non-blocked ghosts 0 at the cross read" იწერება (`a-round-335/mutant/`).
+ - `status-preview-store.test.ts`: SP1 (ახალი ტექსტი preview-ს ცვლის, იგივე ტექსტი იგივე object-ს ტოვებს), SP2 (`clearPreview`-ის შემდეგ sequence აგრძელებს თვლას, ამიტომ key არ მეორდება), SP3 (`statusPreviewKey` sequence-იდან გამოდის და ყოველ write-ზე განსხვავდება).
+ - Mutant-ები, ეტაპი a: 7 (`a-round-325/mutants.py`), თითოეული თავის row-ს წითლად აქცევს. ეტაპი b: B-ის 7 jsdom mutant A-ის tree-ზე (scratch copy) წითელია თავის row-ებზე; A-ის MU-A-STOP-EFFECT-NO-GETTER წითელია DP16-ზე; აღდგენის შემდეგ 18/18 მწვანეა.
+ - Production perf, ეტაპი a (`perf/studio-lab-interactions.perf.spec.ts`, HEAD `b925434` vs A, scratch build-ები, თითო ერთხელ, მარტო; `failures` [] ორივეზე, 6 pass-ში problem არ არის):
+@@ -269,6 +281,7 @@ flowchart LR
+ - Checkpoint-ის სიგნალები D-29z915-ისთვის: ARCH-R331-PREVIEW-READERS და ARCH-R331-PREVIEW-ISEQUAL.
+ - SIG-R331-DETAIL-PICK: `Pick<ArrangementClip, …>` projection T12-ADVANCED-ისთვის (micro fades), როცა panel პირველად აჩვენებს fade-ის ველს.
+ - PERF-CAND-FADE-BUDGET: fade budget-ის `≤ 24`-დან დამკაცრება c5-ის შემდეგ (D-29z950); წითელი მტკიცებულება: pre-fix 21.633 / 22, sketch 13.767 / 14.
++- ეტაპი c3-ii (D-29z1008): `clipLaneDrag` provider-ის `useState`-იდან store-ში; provider-ის hook-ები 0 და 35 (§43) დაგეგმვისას დაიმაპება; `interact.harness.drag-lane-live` (და `.6x`) `record` → assert `== 1` C round 335-ის გაზომვის შემდეგ, row-ების შედარება `c-round-335/lane-rows.txt`-თან.
+ - ეტაპი c (D-29z950): c1 (project end) დასრულდა round 330-ში. c2 დასრულდა; დარჩენილია c3 (cross-lane ghost-ები: `clipLaneDrag` store-ში), c4 (group move, collapsed group-ის overview reader და blocked-move status), c5 (video კლიპები), შემდეგ trim/move row-ების record → assert გადაყვანა, თითო მხოლოდ sketch perf run-ისა და წითელი perf mutant-ის შემდეგ (L58). architecture checkpoint D-29z915-ის პასუხი რჩება; A-ის status-hook-ის trigger შემოწმდა და არ სრულდება (D-29z949: ეს რაუნდი status-preview-ის ბლოკს არ ეხება).
+ - კანდიდატი: lane-ები timeline-ის სიგანეს store-იდან კითხულობენ (წამის გადაკვეთის 108-component commit); ღირს მხოლოდ `ArrangementLane`-ის memo-სთან ერთად.
+ - fade-ის item target ≤ 15 component თითო move-ზე (D-29z935): ეტაპ b-ის შემდეგ ~21.6 რჩება. კანდიდატები: SIG-R326-READOUT-PRIMITIVE, SIG-R326-DETAIL-IGNORES-FADE, SIG-R326-SKIP-UNCHANGED-FADE.
+diff --git a/perf/budgets.interactions.json b/perf/budgets.interactions.json
+index 706ef1c..0cb327d 100644
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -1943,5 +1943,291 @@
+     "budget": null,
+     "owner": "PERF-8b",
+     "note": "record — not run on sketch: B built a type-only sketch"
++  },
++  {
++    "id": "interact.drag.lane.stopped.move-components-per-move",
++    "scenario": "clip name bar cross-lane move drag, stopped",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.stopped.move-components-max",
++    "scenario": "clip name bar cross-lane move drag, stopped",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.stopped.release-commits",
++    "scenario": "clip name bar cross-lane move drag, stopped",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.lane.stopped.cross-components-per-move",
++    "scenario": "clip name bar cross-lane move drag, stopped",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.lane.stopped.lane-components-per-move",
++    "scenario": "clip name bar cross-lane move drag, stopped",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.lane.playing.move-components-per-move",
++    "scenario": "clip name bar cross-lane move drag, playing",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.playing.move-components-max",
++    "scenario": "clip name bar cross-lane move drag, playing",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.playing.release-commits",
++    "scenario": "clip name bar cross-lane move drag, playing",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.lane.playing.cross-components-per-move",
++    "scenario": "clip name bar cross-lane move drag, playing",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.lane.playing.lane-components-per-move",
++    "scenario": "clip name bar cross-lane move drag, playing",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.lane.playing.move-restarts",
++    "scenario": "clip name bar cross-lane move drag, playing",
++    "metric": "move-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.playing.release-restarts",
++    "scenario": "clip name bar cross-lane move drag, playing",
++    "metric": "release-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. start() calls from the in-page pointerup until quiet; detail groups them by task."
++  },
++  {
++    "id": "interact.harness.drag-lane-live",
++    "scenario": "clip name bar cross-lane move drag",
++    "metric": "drag-lane-live",
++    "unit": "boolean (1 = true)",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58)."
++  },
++  {
++    "id": "interact.drag.lane.stopped.move-components-per-move.6x",
++    "scenario": "clip name bar cross-lane move drag, stopped (6x CPU throttle)",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.stopped.move-components-max.6x",
++    "scenario": "clip name bar cross-lane move drag, stopped (6x CPU throttle)",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.stopped.release-commits.6x",
++    "scenario": "clip name bar cross-lane move drag, stopped (6x CPU throttle)",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.lane.stopped.cross-components-per-move.6x",
++    "scenario": "clip name bar cross-lane move drag, stopped (6x CPU throttle)",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.lane.stopped.lane-components-per-move.6x",
++    "scenario": "clip name bar cross-lane move drag, stopped (6x CPU throttle)",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.lane.playing.move-components-per-move.6x",
++    "scenario": "clip name bar cross-lane move drag, playing (6x CPU throttle)",
++    "metric": "move-components-per-move",
++    "unit": "components / move",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.playing.move-components-max.6x",
++    "scenario": "clip name bar cross-lane move drag, playing (6x CPU throttle)",
++    "metric": "move-components-max",
++    "unit": "components",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Largest single commit in the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.playing.release-commits.6x",
++    "scenario": "clip name bar cross-lane move drag, playing (6x CPU throttle)",
++    "metric": "release-commits",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Commits from the in-page pointerup until quiet (min 600 ms)."
++  },
++  {
++    "id": "interact.drag.lane.playing.cross-components-per-move.6x",
++    "scenario": "clip name bar cross-lane move drag, playing (6x CPU throttle)",
++    "metric": "cross-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the cross window: after the in-page timestamp before the step into the next lane, before the in-page timestamp after the ghost read there."
++  },
++  {
++    "id": "interact.drag.lane.playing.lane-components-per-move.6x",
++    "scenario": "clip name bar cross-lane move drag, playing (6x CPU throttle)",
++    "metric": "lane-components-per-move",
++    "unit": "components / move",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. Sum of rendered components / pointermoves in the lane window: after the first pointermove until the cross start, and after the cross end until the in-page pointerup (the first pointermove itself is not counted as a move; its commit is)."
++  },
++  {
++    "id": "interact.drag.lane.playing.move-restarts.6x",
++    "scenario": "clip name bar cross-lane move drag, playing (6x CPU throttle)",
++    "metric": "move-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++  },
++  {
++    "id": "interact.drag.lane.playing.release-restarts.6x",
++    "scenario": "clip name bar cross-lane move drag, playing (6x CPU throttle)",
++    "metric": "release-restarts",
++    "unit": "start() calls",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. start() calls from the in-page pointerup until quiet; detail groups them by task."
++  },
++  {
++    "id": "interact.harness.drag-lane-live.6x",
++    "scenario": "clip name bar cross-lane move drag (6x CPU throttle)",
++    "metric": "drag-lane-live",
++    "unit": "boolean (1 = true)",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-DRAG-PREVIEW-c3-i",
++    "note": "Gesture: press on the first clip name bar, 10 steps +40 px on its own lane, 1 step down into the next lane and 10 steps +40 px there, 1 step back up and 10 steps +40 px on its own lane, release, reset with Ctrl+Z. 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58)."
+   }
+ ]
+diff --git a/perf/studio-lab-interactions.perf.spec.ts b/perf/studio-lab-interactions.perf.spec.ts
+index 13bb2dc..fcfe342 100644
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -68,8 +68,10 @@ const interactionSequence = [
+   'clip click: empty Stems lane click deselects (Clip Gain fader disabled), then a click on the clip header (interact.click.*, interact.harness.click-live)',
+   `zoom with 1 clip: ${zoomKeyCount} x "=" then ${zoomKeyCount} x "-", one window per key (interact.zoom.1.*, interact.harness.zoom-live)`,
+   `drags stopped: range, fade-in, trim start, move; ${dragSteps} steps, +${dragDistancePx} px; reset after each (interact.drag.<d>.stopped.*)`,
++  `lane drag stopped: press on the clip name bar; ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; 1 step down into the next lane, then ${dragSteps / 6} steps +${dragDistancePx / 3} px there; 1 step back up, then ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; release; reset with Ctrl+Z (interact.drag.lane.stopped.*, interact.harness.drag-lane-live)`,
+   'Home (seek to 0), then Space -> playing (interact.play.start-*, 1x: interact.harness.audio-running)',
+   'drags playing, each after Home (seek to 0): range, fade-in, trim start, move (interact.drag.<d>.playing.*)',
++  `lane drag playing, after Home (seek to 0): press on the clip name bar; ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; 1 step down into the next lane, then ${dragSteps / 6} steps +${dragDistancePx / 3} px there; 1 step back up, then ${dragSteps / 6} steps +${dragDistancePx / 3} px on its own lane; release; reset with Ctrl+Z (interact.drag.lane.playing.*, interact.harness.drag-lane-live)`,
+   'Space -> stopped (interact.play.stop-*)',
+   `1x only: click the clip header, Ctrl+D x ${clipsTarget - 1} (interact.harness.clips-30), zoom with ${clipsTarget} clips: keys, then the in-first path (5 x "=", 5 x "-"), the out-first path (5 x "-", 5 x "=") and Ctrl+wheel out-first (5 x deltaY +100, 5 x -100) with the zoom probe (interact.zoom.30.*, interact.zoom.30.in/out/wheel.*), Space, Home, fade-in drag on the first clip (interact.drag.fade.30.playing.*), Space`,
+   `1x only, measured last: "-" until 2 clip name bars are visible (at most ${selectZoomOutKeyLimit}), click one name bar (setup), then click the name bar of a visible, unselected clip on the selected clip's lane, then click it again (interact.select.same-lane.${clipsTarget}.*, interact.select.reclick.${clipsTarget}.*, interact.harness.select-same-lane-live)`,
+@@ -422,6 +424,192 @@ async function measureDrag(
+   await resetAfterDrag(page, clip, drag, grab, undoBefore, before, label, result.problems);
+ }
+ 
++interface LaneGhostRead {
++  targetLane: number;
++  document: number;
++}
++
++async function readLaneGhosts(page: Page, trackId: string): Promise<LaneGhostRead> {
++  await page.evaluate(
++    () =>
++      new Promise<void>((resolve) => {
++        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
++      }),
++  );
++  return page.evaluate((laneTrackId) => {
++    const ghosts = [...document.querySelectorAll('[data-testid="arrangement-lane-move-ghost"]')];
++    return {
++      targetLane: ghosts.filter(
++        (ghost) =>
++          ghost.closest('[data-track-id]')?.getAttribute('data-track-id') === laneTrackId &&
++          ghost.getAttribute('data-blocked') === 'false',
++      ).length,
++      document: ghosts.length,
++    };
++  }, trackId);
++}
++
++const clipLaneTrackId = (clip: Locator): Promise<string | null> =>
++  clip.evaluate(
++    (element) => element.closest('[data-track-id]')?.getAttribute('data-track-id') ?? null,
++  );
++
++async function measureLaneDrag(
++  page: Page,
++  state: PlaybackState,
++  clip: Locator,
++  result: InteractionPassResult,
++): Promise<void> {
++  const baseId = `interact.drag.lane.${state}`;
++  const label = `${baseId} (${result.cpuRate}x)`;
++  if (state === 'playing') {
++    const from = await nowIn(page);
++    await blurActive(page);
++    await page.keyboard.press('Home');
++    await waitForQuiet(page, from, settleMs);
++    if (!(await isPlaying(page))) result.problems.push(`playback not running before ${label}`);
++  }
++  const grab = await clipHeaderPoint(clip);
++  const target = await emptyLanePointAfterClip(clip);
++  const undoBefore = await undoTitle(page);
++  const before = await readClipState(clip);
++  const s = dragSteps / 6;
++  const d = dragDistancePx / 3;
++
++  const t0 = await nowIn(page);
++  await page.mouse.move(grab.x, grab.y);
++  await page.mouse.down();
++  await page.mouse.move(grab.x + d, grab.y, { steps: s });
++  const t1 = await nowIn(page);
++  await page.mouse.move(grab.x + d, target.y, { steps: 1 });
++  await page.mouse.move(grab.x + 2 * d, target.y, { steps: s });
++  const crossGhosts = await readLaneGhosts(page, target.trackId);
++  const t2 = await nowIn(page);
++  await page.mouse.move(grab.x + 2 * d, grab.y, { steps: 1 });
++  await page.mouse.move(grab.x + 3 * d, grab.y, { steps: s });
++  const backGhosts = await readLaneGhosts(page, target.trackId);
++  const t3 = await nowIn(page);
++  await page.mouse.up();
++  const tUp = await nowIn(page);
++  const tEnd = await waitForQuiet(page, tUp, settleMs);
++  const whole = await snapshot(page, t0, tEnd);
++  const released = await readClipState(clip);
++  const releasedTrackId = await clipLaneTrackId(clip);
++  if (state === 'playing' && !(await isPlaying(page))) {
++    result.problems.push(`playback not running after ${label}`);
++  }
++
++  const downAt = whole.downs.at(-1);
++  const up = downAt === undefined ? undefined : whole.ups.find((t) => t > downAt);
++  const moves =
++    downAt === undefined || up === undefined ? [] : whole.moves.filter((t) => t > downAt && t < up);
++  const firstMove = moves.at(0);
++  if (downAt === undefined || up === undefined || firstMove === undefined) {
++    result.problems.push(`${label}: no in-page pointerdown, pointermove and pointerup sequence`);
++  } else {
++    const inWhole = (t: number): boolean => t > firstMove && t < up;
++    const inCross = (t: number): boolean => t > t1 && t < t2;
++    const inLane = (t: number): boolean => (t > firstMove && t < t1) || (t > t2 && t < up);
++    const wholeCommits = whole.commits.filter((commit) => inWhole(commit.t));
++    const crossCommits = whole.commits.filter((commit) => inCross(commit.t));
++    const crossMoves = whole.moves.filter(inCross);
++    const laneCommits = whole.commits.filter((commit) => inLane(commit.t));
++    const laneMoves = whole.moves.filter(inLane);
++    const release = whole.commits.filter((commit) => commit.t >= up);
++    const put = (metric: string, sample: PerfSample): void => {
++      result.samples.set(rateRowId(`${baseId}.${metric}`, result.cpuRate), sample);
++    };
++    const settle = roundTo(tEnd - tUp, 0);
++    const perMove = (commits: readonly { rendered: number }[], count: number): number =>
++      roundTo(count ? sumRendered(commits) / count : 0, 3);
++    const wholeDetail = {
++      movesInWindow: moves.length,
++      windowCommits: wholeCommits.length,
++      settleMs: settle,
++    };
++    put('move-components-per-move', {
++      value: perMove(wholeCommits, moves.length),
++      detail: { ...wholeDetail, componentsSum: sumRendered(wholeCommits) },
++    });
++    put('move-components-max', { value: maxRendered(wholeCommits), detail: wholeDetail });
++    put('release-commits', {
++      value: release.length,
++      detail: { releaseComponentsMax: maxRendered(release) },
++    });
++    put('cross-components-per-move', {
++      value: perMove(crossCommits, crossMoves.length),
++      detail: {
++        movesInWindow: crossMoves.length,
++        windowCommits: crossCommits.length,
++        componentsSum: sumRendered(crossCommits),
++      },
++    });
++    put('lane-components-per-move', {
++      value: perMove(laneCommits, laneMoves.length),
++      detail: {
++        movesInWindow: laneMoves.length,
++        windowCommits: laneCommits.length,
++        componentsSum: sumRendered(laneCommits),
++        backMoves: whole.moves.filter((t) => t > t2 && t < t3).length,
++      },
++    });
++    if (state === 'playing') {
++      const moveStarts = whole.starts.filter((entry) => inWhole(entry.t));
++      const releaseStarts = whole.starts.filter((entry) => entry.t >= up);
++      put('move-restarts', { value: moveStarts.length, detail: startTasks(moveStarts) });
++      put('release-restarts', { value: releaseStarts.length, detail: startTasks(releaseStarts) });
++    }
++  }
++
++  await resetAfterDrag(page, clip, 'move', grab, undoBefore, before, label, result.problems);
++  const reset = await readClipState(clip);
++  const resetTrackId = await clipLaneTrackId(clip);
++  if (resetTrackId !== target.clipTrackId) {
++    result.problems.push(
++      `${label}: reset left the clip on lane ${resetTrackId}, not ${target.clipTrackId}`,
++    );
++  }
++
++  const failed: string[] = [];
++  if (crossGhosts.targetLane < 1) {
++    failed.push(
++      `(a) target-lane ${target.trackId} non-blocked ghosts ${crossGhosts.targetLane} at the cross read`,
++    );
++  }
++  if (backGhosts.document !== 0) {
++    failed.push(`(b) document ghosts ${backGhosts.document} at the back read`);
++  }
++  if (releasedTrackId !== target.clipTrackId || released.start === before.start) {
++    failed.push(
++      `(c) after release lane ${releasedTrackId} (want ${target.clipTrackId}), start ${released.start} (before ${before.start})`,
++    );
++  }
++  const resetRestored =
++    reset.start === before.start &&
++    reset.fadeIn === before.fadeIn &&
++    reset.width === before.width &&
++    reset.rangeEnd === null &&
++    reset.rangeElements === 0 &&
++    resetTrackId === target.clipTrackId;
++  if (!resetRestored) {
++    failed.push(
++      `(d) after reset ${JSON.stringify(reset)} on lane ${resetTrackId}, want ${JSON.stringify(before)} on lane ${target.clipTrackId}`,
++    );
++  }
++  const live = failed.length === 0;
++  setLive(result, rateRowId('interact.harness.drag-lane-live', result.cpuRate), live, {
++    [`${state}TargetLaneGhosts`]: crossGhosts.targetLane,
++    [`${state}BackDocumentGhosts`]: backGhosts.document,
++    [`${state}ReleasedTrack`]: releasedTrackId ?? '',
++    [`${state}ReleasedStart`]: released.start,
++    [`${state}Before`]: JSON.stringify(before),
++    [`${state}Reset`]: JSON.stringify(reset),
++  });
++  for (const failure of failed) {
++    result.problems.push(`${label}: lane-drag liveness ${failure}`);
++  }
++}
++
+ async function measureZoom(
+   page: Page,
+   clipCount: 1 | 30,
+@@ -1049,6 +1237,8 @@ async function runInteractionPass(
+         result,
+       );
+     }
++    step = 'drag lane stopped';
++    await measureLaneDrag(page, 'stopped', clip, result);
+     step = 'play';
+     await measurePlayback(page, true, result);
+     for (const drag of dragNames) {
+@@ -1066,6 +1256,8 @@ async function runInteractionPass(
+         result,
+       );
+     }
++    step = 'drag lane playing';
++    await measureLaneDrag(page, 'playing', clip, result);
+     step = 'pause';
+     await measurePlayback(page, false, result);
+ 

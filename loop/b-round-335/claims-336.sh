@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Claims for task round 336 (L29 + L56). Run from the loop root: bash b-round-335/claims-336.sh
+S=${CLAIMS_STORE:-/home/runner/czaba-project/store}
+echo "K1 $(python3 -I -c "import json;g=json.load(open('gates/gate-round-335.json'));print(g['status'],g['commit'][:7])")"
+echo "K2 $(wc -c < b-round-335/git-status-at-planning.txt) $(cut -c1-7 b-round-335/head-at-planning.txt)"
+echo "K3 $(wc -l < b-round-335-r336-tree-sha256.txt)"
+echo "K4 $(awk '{print $2}' b-round-318/protected-sha256.txt | while read f; do grep -cF "  $f" b-round-335-r336-tree-sha256.txt; done | tr '\n' ' ')"
+echo "K5 $(grep -n 'data-playing' $S/app/components/arrangement/ArrangementTransport.tsx | tr -s ' ' | cut -c1-80) | $(grep -n "playLabel: 'Play'" $S/app/lib/arrangement/strings.ts | tr -s ' ')"
+echo "K6 $(python3 -I -c "import json;d=json.load(open('b-round-335/screens/screen336.json'));print({k:len(v) for k,v in d['screens'].items()}, d.get('laneErrors'))")"
+echo "K7 $(wc -l < lessons.md)"
+echo "K8 $(for p in $(cat b-round-335/cited-artifacts.txt); do test -e "$p" || printf 'MISSING %s ' "$p"; done; echo done)"
+echo "K9 $(ls b-round-335/screens/*.png | wc -l)"
+echo "K10 $(python3 -I -c "import json;b=json.load(open('backlog.json'));print(b['version'],b['decisions_log_b'][-1]['id'])")"
+echo "K11 $(for n in $(seq 321 335); do grep -q '"manifestPaths"' c-round-$n.json || printf '%s ' $n; done)none-missing"
+echo "K12 $(python3 -I -c "import json;d=json.load(open('b-round-335/screens/screen336.json'))['journey'];print([(k,v['studioUrl'].split('5173')[1],v['positionAfterPlay'],len(v['clips'])) for k,v in d.items()])")"
+echo "K13 $(grep -oE '^[0-9]+\.' lessons.md | tr -d . | sort -n | tr '\n' ' ')"
+echo "K14 $(python3 -I -c "import json;print(json.load(open('regression-last.json'))['date'])")"
+echo "K15 $(sed -n 16p lessons.md | wc -c) $(sed -n 41p lessons.md | wc -c)"
+echo "K16 $(cmp tasks/round-335.md b-round-335/current-task-before-336.md && echo archive-equal)"
+echo "K17 $(python3 -I -c "import json;from statistics import median;R=json.load(open('b-round-335/cost-rows.json'));print(round(median(x[1] for x in R if x[0]>=322),3), round(sum((x[1] or 0)+x[2]+x[3] for x in R),2))")"
+echo "K18 $(cat b-round-335/stops-count.txt | awk '$2>0{printf "%s ",$1}')"
+echo "K19 $(diff <(sed 's/SR-/\nSR-/g' user-review/screen-review-336.md | grep -oE '^SR-336-[0-9]+' | sort -u | tr '\n' ' ') <(python3 -I -c "import json;print(' '.join(sorted(x['id'] for x in json.load(open('backlog.json'))['screen_review_candidates'] if x['id'].startswith('SR-336'))),end=' ')") >/dev/null && echo sr-ids-equal)"
