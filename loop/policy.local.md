@@ -486,3 +486,24 @@ Five optimizations to keep agents fast as the project grows. Root enforces these
 - State transfer between phases is exclusively through files: `current-task.md`, `a-round-N.md`, `c-round-N.md`, `c-round-N.json`, `context/active-backlog.json`, `context/active-summary.md`.
 - No phase should assume knowledge from a previous phase's context — read the files.
 - When the watchdog restarts an agent mid-phase, the agent reads its own partial output file and continues from there, never re-derives from context memory.
+
+### 6. MCP tool pruning (Saba, 2026-11-04)
+Consult agents trimmed based on actual usage audit (last 20 rounds):
+- **B planner:** 10 → 4 (kept: product-designer, tech-lead, performance-optimizer, ableton-arrangement-expert)
+- **C verifier:** 11 → 3 (kept: code-reviewer, performance-optimizer, product-designer)
+- Dropped agents are still available in store/.claude/agents/ if B/C need to consult them manually.
+- When the loop moves to STORE-REDESIGN or STEM-LANES, root adds back design-philosopher, flow-sage, first-visit-host as needed.
+
+### 7. Token usage logging
+- `run.sh` records per-round token delta to `loop/context/token-usage.jsonl`.
+- Root reviews monthly. Anomalous rounds (>2x baseline) are flagged.
+
+### 8. Cheaper model for verification
+- C (verifier) and code-reviewer now run on **Sonnet 5.5** instead of Opus 5.5.
+- B (planner) and A (implementer) stay on Opus 5.5 — planning and code generation need the stronger model.
+- If C's quality drops, root switches back and records the reason.
+
+### 9. Pre-downloaded context
+- `run.sh` writes git status, diff stat, log and HEAD sha to `loop/context/` before the round.
+- Agents read these files instead of running git commands (saves 1-2 LLM turns per phase).
+- Files: `context/git-status.txt`, `context/git-diff-stat.txt`, `context/git-log-recent.txt`, `context/head-sha.txt`.

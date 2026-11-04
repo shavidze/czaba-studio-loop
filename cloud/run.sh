@@ -32,6 +32,23 @@ save_state() {
   set +e
   [ -n "${WATCH_PID:-}" ] && kill "$WATCH_PID" 2>/dev/null
   [ -n "${MOCK_PID:-}" ] && kill "$MOCK_PID" 2>/dev/null
+  # Log token usage delta for this round
+  if [ -f "$HOME/.claude/usage.json" ] && [ -f "${USAGE_BEFORE:-/dev/null}" ]; then
+    python3 -I -c "
+import json, sys
+from datetime import datetime
+try:
+    before = json.load(open(sys.argv[1]))
+    after = json.load(open(sys.argv[2]))
+    delta = {k: after.get(k, 0) - before.get(k, 0) for k in set(list(after.keys()) + list(before.keys())) if isinstance(after.get(k, 0), (int, float))}
+    delta['round'] = int(sys.argv[3])
+    delta['utc'] = datetime.utcnow().isoformat() + 'Z'
+    with open(sys.argv[4], 'a') as f:
+        f.write(json.dumps(delta) + '\n')
+except Exception as e:
+    print(f'token-usage: {e}', file=sys.stderr)
+" "$USAGE_BEFORE" "$HOME/.claude/usage.json" "$ROUND" "$USAGE_LOG" 2>/dev/null || true
+  fi
   log "saving state (loop exit $rc)"
   mkdir -p "$STATE/worktree"
   local plain="${RUNNER_TEMP:-/tmp}/loop-worktree.patch"
@@ -207,6 +224,31 @@ fi
 
 # ---------- kit config for this runner ----------
 sed "s#__CZ__#$CZ#g" "$STATE/cloud/config.template.json" > "$CFG"
+
+# ---------- replace kit's build-context.mjs with our optimized version ----------
+# The kit calls build-context.mjs before every phase (B, A, C). Our version archives
+# closed findings, compresses done items, and produces a leaner active-backlog.json.
+# Without this, the kit's own generator overwrites our compacted version.
+cp "$STATE/cloud/build-context-optimized.mjs" "$KIT/tools/build-context.mjs"
+log "replaced kit build-context.mjs with optimized version"
+
+# ---------- pre-download context data for agents (saves 1-2 LLM turns per phase) ----------
+mkdir -p "$LOOP/context"
+git -C "$STORE" status --short --untracked-files=normal 2>/dev/null | head -30 > "$LOOP/context/git-status.txt"
+git -C "$STORE" diff --stat HEAD 2>/dev/null | tail -20 > "$LOOP/context/git-diff-stat.txt"
+git -C "$STORE" log --oneline -5 2>/dev/null > "$LOOP/context/git-log-recent.txt"
+git -C "$STORE" rev-parse HEAD 2>/dev/null > "$LOOP/context/head-sha.txt"
+log "pre-downloaded git context for agents"
+
+# ---------- token usage logging (Saba, 2026-11-04) ----------
+# Record per-round token usage for cost tracking. Claude Code writes usage to ~/.claude/usage.json.
+USAGE_LOG="$LOOP/context/token-usage.jsonl"
+USAGE_BEFORE="${RUNNER_TEMP:-/tmp}/usage-before.json"
+if [ -f "$HOME/.claude/usage.json" ]; then
+  cp "$HOME/.claude/usage.json" "$USAGE_BEFORE"
+else
+  echo '{}' > "$USAGE_BEFORE"
+fi
 
 trap save_state EXIT
 # Store verification: the loop's own mock backend (STORE-0) stands in for the .NET API on :5199 when it exists.
