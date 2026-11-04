@@ -1,0 +1,220 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b337-scratch/sc[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m52 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m49 skipped[39m[2m)[22m[33m 684[2mms[22m[39m
+     [2m[90m↓[39m[22m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace
+     [2m[90m↓[39m[22m DP3 the release adds exactly one history entry, Undo restores, the store is empty
+     [2m[90m↓[39m[22m DP4 a window blur mid-trim puts the clip back with no history entry
+     [2m[90m↓[39m[22m DP5 a same-lane move keeps the ref on the preview while React holds the original
+     [2m[90m↓[39m[22m DP6 the readout, the detail panel and the overview bar follow the trim preview
+     [2m[90m↓[39m[22m DP7 a trimEnd drag past the project end updates the project-end readout live
+     [2m[90m↓[39m[22m DP8a a release with no commit converges React state to the preview and clears the store
+     [2m[90m↓[39m[22m DP8b a move back to the start adds no entry and leaves the store empty
+     [33m[2m✓[22m[39m DP5b same lane → other lane → back → release: one entry at the final place, store empty [33m 388[2mms[22m[39m
+     [32m✓[39m DP49 cross-lane moves render neither the provider nor the workspace; release adds one entry on the target lane[32m 149[2mms[22m[39m
+[31m     [31m×[31m DP50 a refused cross-lane move shows the refusal in the readout from the store; release keeps the clip[39m[32m 145[2mms[22m[39m
+     [2m[90m↓[39m[22m DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry
+     [2m[90m↓[39m[22m DP9b a video clip move keeps the provider path
+     [2m[90m↓[39m[22m DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing
+     [2m[90m↓[39m[22m DP11 a pointercancel mid-fade reverts the fade and keeps the last readout span
+     [2m[90m↓[39m[22m DP12 a committed write mid-fade wins; release after a refusal restores the last readout
+     [2m[90m↓[39m[22m DP13 a video fade drag keeps the provider path and the committed status
+     [2m[90m↓[39m[22m DP14 a fade dragged back to 0 adds no entry, empties the store and reports no change
+     [2m[90m↓[39m[22m DP15 the status preview getter returns the shown readout during the drag and null after it
+     [2m[90m↓[39m[22m DP16 a stop mid-fade reads the shown readout, so the insert-marker rewrite stays off as at HEAD
+     [2m[90m↓[39m[22m DP17 a same-text committed write mid-fade, then a same-value move, keeps the status span node as at HEAD
+     [2m[90m↓[39m[22m DP18 a same-text updater from a timer mid-fade adds and removes no status node
+     [2m[90m↓[39m[22m DP19 two committed writes in one batch mid-fade adopt the readout once, so the second updater sees the first write
+     [2m[90m↓[39m[22m DP20 a committed write and a newer readout in one batch mid-fade keep the newer readout
+     [2m[90m↓[39m[22m DP21 a move that extends the project end inside one timeline second renders no workspace
+     [2m[90m↓[39m[22m DP22 a move that crosses into the next timeline second renders the workspace once and widens the ruler
+     [2m[90m↓[39m[22m DP23 a selection change renders the transport but not the project-end readout
+     [2m[90m↓[39m[22m DP24 the overview extent keeps a loop that ends past the moved project end
+     [2m[90m↓[39m[22m DP25 an audio fade-in move renders neither the detail panel nor the selected-clip readout
+     [2m[90m↓[39m[22m DP26 a same-lane move shows the lane-move hint without rendering the readout; the detail panel follows the start
+     [2m[90m↓[39m[22m DP27 a clip that differs only in an ignored field renders the same readout and detail panel markup
+     [2m[90m↓[39m[22m DP28 a committed change of an ignored field keeps the shown markup while the clip view redraws
+     [2m[90m↓[39m[22m DP29 an audio fade-in move renders neither the overview nor the track meters
+     [2m[90m↓[39m[22m DP30 a same-lane move redraws the overview bar but not the track meters
+     [2m[90m↓[39m[22m DP31 a trimStart move redraws the peak paths and the overview bar but not the track meters
+     [2m[90m↓[39m[22m DP32 a clip that differs only in an overview-ignored field renders the same overview markup
+     [2m[90m↓[39m[22m DP33 a same-lane move renders the detail content once per pointermove and shows the new Start/End
+     [2m[90m↓[39m[22m DP34 a trimStart move renders the detail content once per pointermove and shows the trimmed Start
+     [2m[90m↓[39m[22m DP35 typed Start/End text survives a committed change that keeps the clip start and duration
+     [2m[90m↓[39m[22m DP36 typed Start/End text is replaced when the clip start changes, as the layout effect did
+     [2m[90m↓[39m[22m DP37 a deselect empties the disabled inputs as at HEAD; reselecting the same clip shows its Start/End
+     [2m[90m↓[39m[22m DP38 a trimEnd move shows the new End and keeps the Start
+     [2m[90m↓[39m[22m DP39 a time selection on the clip fills Start/End; one on another lane falls back to the clip bounds
+     [2m[90m↓[39m[22m DP40 Enter applies a typed range inside the clip; an invalid one keeps the typed text
+     [2m[90m↓[39m[22m DP41 Undo after a move puts the Start/End text back to the restored clip
+     [2m[90m↓[39m[22m DP42 typed text in a focused Start input is replaced by the dragged clip start, as at HEAD
+     [2m[90m↓[39m[22m DP43 an audio fade-in move renders no peak path while the clip view redraws
+     [2m[90m↓[39m[22m DP44 a same-lane move renders no peak path in the lane or the detail panel
+     [2m[90m↓[39m[22m DP45 a trimStart move redraws both peak paths once per pointermove
+     [2m[90m↓[39m[22m DP46 a trimEnd move redraws both peak paths once per pointermove
+     [2m[90m↓[39m[22m DP48 a video fade-in move renders no peak path on the video lane
+     [2m[90m↓[39m[22m DP47 a committed gain change redraws both peak paths; a committed fade-only change redraws none
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[2m | [22m[33m49 skipped[39m[90m (52)[39m
+[2m   Start at [22m 20:43:16
+[2m   Duration [22m 3.12s[2m (transform 1.26s, setup 0ms, import 1.78s, tests 684ms, environment 491ms)[22m
+
+
+::error file=/home/runner/b337-scratch/sc/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP50 a refused cross-lane move shows the refusal in the readout from the store; release keeps the clip,line=361,column=15::TestingLibraryElementError: Unable to find an element by: [data-testid="arrangement-lane-move-refusal"]%0A%0AIgnored nodes: comments, script, style%0A<body>%0A  <div>%0A    <div%0A      class="studio-container flex h-screen flex-col overflow-hidden bg-background text-foreground"%0A      data-lenis-prevent="true"%0A      data-studio-theme="obsidian"%0A    >%0A      <header%0A        class="flex items-center justify-between border-b border-outline bg-surface px-3 py-1.5"%0A      >%0A        <div%0A          class="flex items-center gap-3"%0A        >%0A          <a%0A            class="inline-flex items-center gap-0.75 rounded-sm px-1 text-sm font-medium text-muted hover:text-foreground"%0A            href="/"%0A          >%0A            <svg%0A              aria-hidden="true"%0A              class="lucide lucide-arrow-left size-3 shrink-0"%0A              fill="none"%0A              height="24"%0A              stroke="currentColor"%0A              stroke-linecap="round"%0A              stroke-linejoin="round"%0A              stroke-width="2"%0A              viewBox="0 0 24 24"%0A              width="24"%0A              xmlns="http://www.w3.org/2000/svg"%0A            >%0A              <path%0A                d="m12 19-7-7 7-7"%0A              />%0A              <path%0A                d="M19 12H5"%0A              />%0A            </svg>%0A            CZABA%0A          </a>%0A          <h1%0A            class="text-sm font-medium"%0A          >%0A            CZABA Studio%0A          </h1>%0A        </div>%0A        <div%0A          class="flex items-center gap-3"%0A        >%0A          <span%0A            class="rounded-sm border border-outline-strong px-2 py-0.5 text-xs text-muted"%0A          >%0A            Demo collection — no sign-in required%0A          </span>%0A        </div>%0A      </header>%0A      <div%0A        class="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 border-b border-outline bg-surface px-3 py-2 [grid-template-areas:'centre_centre'_'edit_view'] min-[1408px]:grid-cols-[1fr_auto_1fr] min-[1408px]:[grid-template-areas:none]"%0A        data-testid="arrangement-transport"%0A      >%0A        <div%0A          class="flex items-center gap-1.5 justify-self-start [grid-area:edit] min-[1408px]:[grid-area:auto]"%0A          data-testid="arrangement-transport-edit"%0A        >%0A          <button%0A            aria-disabled="true"%0A            aria-keyshortcuts="Control+Z Meta+Z"%0A            class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40 w-28"%0A            title="Undo — nothing to undo yet (Ctrl+Z)"%0A            type="button"%0A          >%0A            <svg%0A              aria-hidden="true"%0A              class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"%0A              fill="none"%0A              height="24"%0A              stroke="currentColor"%0A              stroke-linecap="round"%0A              stroke-linejoin="round"%0A              stroke-width="2"%0A              viewBox="0 0 24 24"%0A              width="24"%0A              xmlns="http://www.w3.org/2000/svg"%0A            >%0A              <path%0A                d="M9 14 4 9l5-5"%0A              />%0A              <path%0A                d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A              />%0A            </svg>%0A            <span%0A              class="truncate"%0A            >%0A              Undo%0A            </span>%0A          </button>%0A          <button%0A            aria-disabled="true"%0A            aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"%0A            class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40 w-28"%0A            title="Redo — nothing to redo (Ctrl+Shift+Z)"%0A            type="button"%0A          >%0A            <svg%0A              aria-hidden="true"%0A              class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"%0A              fill="none"%0A              height="24"%0A              stroke="currentColor"%0A              stroke-linecap="round"%0A              stroke-linejoin="round"%0A              stroke-width="2"%0A              viewBox="0 0 24 24"%0A              width="24"%0A              xmlns="http://www.w3.org/2000/svg"%0A            >%0A              <path%0A                d="m15 14 5-5-5-5"%0A              />%0A              <path%0A                d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"%0A              />%0A            </svg>%0A            <span%0A              class="truncate"%0A            >%0A              Redo%0A            </span>%0A          </button>%0A          <div%0A            class="mx-1 h-6 w-px bg-outline"%0A          />%0A          <button%0A            aria-keyshortcuts=...%0A ❯ Object.getElementError ../../czaba-project/store/node_modules/@testing-library/dom/dist/config.js:37:19%0A ❯ ../../czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:76:38%0A ❯ ../../czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:52:17%0A ❯ ../../czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:95:19%0A ❯ textOf app/lib/arrangement/__tests__/drag-preview-render.test.tsx:361:15%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:616:12%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP50 a refused cross-lane move shows the refusal in the readout from the store; release keeps the clip
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element by: [data-testid="arrangement-lane-move-refusal"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"studio-container flex h-screen flex-col overflow-hidden bg-background text-foreground"[39m
+      [33mdata-lenis-prevent[39m=[32m"true"[39m
+      [33mdata-studio-theme[39m=[32m"obsidian"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"flex items-center justify-between border-b border-outline bg-surface px-3 py-1.5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-3"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"inline-flex items-center gap-0.75 rounded-sm px-1 text-sm font-medium text-muted hover:text-foreground"[39m
+            [33mhref[39m=[32m"/"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-arrow-left size-3 shrink-0"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m12 19-7-7 7-7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 12H5"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [0mCZABA[0m
+          [36m</a>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"text-sm font-medium"[39m
+          [36m>[39m
+            [0mCZABA Studio[0m
+          [36m</h1>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-3"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"rounded-sm border border-outline-strong px-2 py-0.5 text-xs text-muted"[39m
+          [36m>[39m
+            [0mDemo collection — no sign-in required[0m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"grid grid-cols-2 items-center gap-x-3 gap-y-1.5 border-b border-outline bg-surface px-3 py-2 [grid-template-areas:'centre_centre'_'edit_view'] min-[1408px]:grid-cols-[1fr_auto_1fr] min-[1408px]:[grid-template-areas:none]"[39m
+        [33mdata-testid[39m=[32m"arrangement-transport"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-1.5 justify-self-start [grid-area:edit] min-[1408px]:[grid-area:auto]"[39m
+          [33mdata-testid[39m=[32m"arrangement-transport-edit"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-disabled[39m=[32m"true"[39m
+            [33maria-keyshortcuts[39m=[32m"Control+Z Meta+Z"[39m
+            [33mclass[39m=[32m"inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40 w-28"[39m
+            [33mtitle[39m=[32m"Undo — nothing to undo yet (Ctrl+Z)"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M9 14 4 9l5-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"truncate"[39m
+            [36m>[39m
+              [0mUndo[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33maria-disabled[39m=[32m"true"[39m
+            [33maria-keyshortcuts[39m=[32m"Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"[39m
+            [33mclass[39m=[32m"inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40 w-28"[39m
+            [33mtitle[39m=[32m"Redo — nothing to redo (Ctrl+Shift+Z)"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m15 14 5-5-5-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"truncate"[39m
+            [36m>[39m
+              [0mRedo[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mx-1 h-6 w-px bg-outline"[39m
+          [36m/>[39m
+          [36m<button[39m
+            [33maria-keyshortcuts[39m=[3...
+[90m [2m❯[22m Object.getElementError ../../czaba-project/store/node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m ../../czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m ../../czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m ../../czaba-project/store/node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m textOf app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m361:15[22m[39m
+    [90m359| [39m
+    [90m360| [39m[35mfunction[39m [34mtextOf[39m(view[33m:[39m [33mPreviewView[39m[33m,[39m testId[33m:[39m string)[33m:[39m string {
+    [90m361| [39m  [35mreturn[39m view[33m.[39m[34mgetByTestId[39m(testId)[33m.[39mtextContent [33m??[39m [32m''[39m[33m;[39m
+    [90m   | [39m              [31m^[39m
+    [90m362| [39m}
+    [90m363| [39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m616:12[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

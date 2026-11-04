@@ -1,0 +1,800 @@
+diff -ruN headfull/app/components/arrangement/ArrangementClip.tsx sc/app/components/arrangement/ArrangementClip.tsx
+--- a/app/components/arrangement/ArrangementClip.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/components/arrangement/ArrangementClip.tsx	2026-11-04 20:43:11.875974684 +0000
+@@ -10,12 +10,8 @@
+   useState,
+   useSyncExternalStore,
+ } from 'react';
+-import {
+-  type ClipLaneDragState,
+-  type ClipLaneGhost,
+-  formatArrangementTime,
+-  useArrangementRange,
+-} from '~/contexts/ArrangementContext';
++import { formatArrangementTime, useArrangementRange } from '~/contexts/ArrangementContext';
++import type { ClipLaneDragState, ClipLaneGhost } from '~/lib/arrangement/clip-lane-drag-store';
+ import { formatClipEnvelopeData } from '~/lib/arrangement/envelope';
+ import { type ClipFadeEdge, clipFadeIn, clipFadeOut, setClipFade } from '~/lib/arrangement/fades';
+ import {
+@@ -719,7 +715,7 @@
+           };
+           gesture.blocked = false;
+           gesture.laneRefusal = null;
+-          previewArrangement(gesture.before);
++          previewGeometry(gesture.before);
+           publishLaneGhosts(gesture, laneGhostsFrom(plan.placements, false, null));
+           return;
+         }
+diff -ruN headfull/app/components/arrangement/ArrangementLane.tsx sc/app/components/arrangement/ArrangementLane.tsx
+--- a/app/components/arrangement/ArrangementLane.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/components/arrangement/ArrangementLane.tsx	2026-11-04 20:43:15.603626594 +0000
+@@ -12,17 +12,23 @@
+   useRef,
+   useState,
+ } from 'react';
++import { useShallow } from 'zustand/react/shallow';
+ import {
+   formatArrangementTime,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   type LibraryDragSource,
+   useArrangement,
++  useArrangementClipLaneDrag,
+   useArrangementMixDraftStore,
+   useArrangementPreviewLaneClips,
+   useArrangementRange,
+   useArrangementSelection,
+ } from '~/contexts/ArrangementContext';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
++import {
++  selectLaneDragGhosts,
++  selectLaneMoveSourceKey,
++} from '~/lib/arrangement/clip-lane-drag-store';
+ import { FADER_SHIFT_FINE_DIVISOR } from '~/lib/arrangement/fader';
+ import {
+   clipEdgeTargets,
+@@ -219,7 +225,6 @@
+     claimPointerGesture,
+     getLibraryDragSource,
+     dropLibrarySource,
+-    clipLaneDrag,
+     setClipLaneDrag,
+   } = useArrangement();
+   const [isFileDragOver, setIsFileDragOver] = useState(false);
+@@ -258,7 +263,19 @@
+   const isVideo = track.kind === 'video';
+   const mixLabel = isVideo ? VIDEO_MIX_LABEL : track.name;
+   const storedPan = trackPanValue(track);
+-  const laneGhosts = clipLaneDrag?.ghosts.filter((ghost) => ghost.trackId === track.id) ?? [];
++  const laneGhosts = useArrangementClipLaneDrag(
++    useShallow((state) => selectLaneDragGhosts(state.drag, track.id)),
++  );
++  const laneMoveSourceKey = useArrangementClipLaneDrag((state) =>
++    selectLaneMoveSourceKey(
++      state.drag,
++      clips.map((clip) => clip.id),
++    ),
++  );
++  const laneMoveSourceIds = useMemo(
++    () => new Set(laneMoveSourceKey === '' ? [] : laneMoveSourceKey.split('\n')),
++    [laneMoveSourceKey],
++  );
+   const sourceTitle = (sourceId: string) =>
+     videoSources.get(sourceId)?.name ??
+     collection.sources.find((source) => source.id === sourceId)?.title ??
+@@ -1022,10 +1039,7 @@
+               }
+               pxPerSecond={pxPerSecond}
+               isSelected={laneSelectedClipIds.has(clip.id)}
+-              isLaneMoveSource={
+-                clipLaneDrag?.ghosts.some((ghost) => ghost.clipId === clip.id && !ghost.blocked) ??
+-                false
+-              }
++              isLaneMoveSource={laneMoveSourceIds.has(clip.id)}
+               sourceDurations={sourceDurations}
+               getArrangement={getArrangement}
+               previewArrangement={previewArrangement}
+diff -ruN headfull/app/components/arrangement/StudioWorkspace.tsx sc/app/components/arrangement/StudioWorkspace.tsx
+--- a/app/components/arrangement/StudioWorkspace.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/components/arrangement/StudioWorkspace.tsx	2026-11-04 20:43:04.552809776 +0000
+@@ -13,11 +13,11 @@
+   useSyncExternalStore,
+ } from 'react';
+ import {
+-  type ClipLaneDragState,
+   formatArrangementTime,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   NUDGE_AT_TIME_START_MESSAGE,
+   useArrangement,
++  useArrangementClipLaneDrag,
+   useArrangementInsertMarkerStore,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+@@ -28,6 +28,7 @@
+   useArrangementStatusPreview,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
++import { selectLaneMoveRefusal } from '~/lib/arrangement/clip-lane-drag-store';
+ import { workspaceCollectionCopy } from '~/lib/arrangement/collection';
+ import {
+   clipEdgeTimesOnTracks,
+@@ -652,39 +653,38 @@
+ }
+ 
+ interface ArrangementSelectedClipReadoutProps {
+-  clipLaneDrag: ClipLaneDragState | null;
+-  laneMoveRefusal: string | null;
+   arrangement: Arrangement;
+   collection: WorkspaceCollection;
+   videoSources: ReadonlyMap<string, WorkspaceVideoSource>;
+ }
+ 
+ function ArrangementSelectedClipReadoutInner({
+-  clipLaneDrag,
+-  laneMoveRefusal,
+   arrangement,
+   collection,
+   videoSources,
+ }: ArrangementSelectedClipReadoutProps) {
+   const primaryClipId = useArrangementSelection((state) => state.selectedClipIds.at(-1) ?? null);
++  const laneDragActive = useArrangementClipLaneDrag((state) => state.drag !== null);
++  const laneDragTimeLocked = useArrangementClipLaneDrag((state) => state.drag?.timeLocked ?? false);
++  const laneMoveRefusal = useArrangementClipLaneDrag((state) => selectLaneMoveRefusal(state.drag));
+   const selectedClip = useArrangementPreview(
+     useEqualityStableSelector(
+       (state: ArrangementPreviewState) =>
+-        selectPreviewClip(state.preview, arrangement, clipLaneDrag ? null : primaryClipId),
++        selectPreviewClip(state.preview, arrangement, laneDragActive ? null : primaryClipId),
+       sameSelectedClipShownFields,
+     ),
+   );
+   const selectedTitle = selectedClip
+     ? selectedClipSourceTitle(selectedClip, videoSources, collection)
+     : null;
+-  return clipLaneDrag ? (
++  return laneDragActive ? (
+     <p className="min-w-0 flex-1 truncate text-muted" data-testid="arrangement-lane-move-hint">
+       {laneMoveRefusal ? (
+         <span className="font-medium text-foreground" data-testid="arrangement-lane-move-refusal">
+           {laneMoveRefusal} ·{' '}
+         </span>
+       ) : null}
+-      {clipLaneDrag.timeLocked ? CLIP_LANE_SHIFT_LOCKED_HINT : CLIP_LANE_SHIFT_HINT}
++      {laneDragTimeLocked ? CLIP_LANE_SHIFT_LOCKED_HINT : CLIP_LANE_SHIFT_HINT}
+     </p>
+   ) : selectedClip ? (
+     <p
+@@ -893,7 +893,6 @@
+     endPlayheadScrub,
+     videoSources,
+     claimPointerGesture,
+-    clipLaneDrag,
+     isPlaying,
+     sourcePeaks,
+     setTimeRange,
+@@ -3007,8 +3006,6 @@
+       setTimelineZoomFromSlider,
+     ],
+   );
+-  const laneMoveRefusal =
+-    clipLaneDrag?.ghosts.find((ghost) => ghost.blocked && ghost.message)?.message ?? null;
+   const measureTimelineFit = useCallback(() => {
+     const scroller = scrollerRef.current;
+     const timeline = timelineRef.current;
+@@ -3426,8 +3423,6 @@
+         <ArrangementSelectionCount />
+         <div className="flex min-w-0 basis-full items-center gap-x-4">
+           <ArrangementSelectedClipReadout
+-            clipLaneDrag={clipLaneDrag}
+-            laneMoveRefusal={laneMoveRefusal}
+             arrangement={arrangement}
+             collection={collection}
+             videoSources={videoSources}
+diff -ruN headfull/app/contexts/ArrangementContext.tsx sc/app/contexts/ArrangementContext.tsx
+--- a/app/contexts/ArrangementContext.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/contexts/ArrangementContext.tsx	2026-11-04 20:43:23.009459086 +0000
+@@ -23,6 +23,12 @@
+   setClipGainsDb,
+ } from '~/lib/arrangement/clip-gain-multi';
+ import {
++  type ArrangementClipLaneDragStore,
++  type ArrangementClipLaneDragStoreState,
++  type ClipLaneDragState,
++  createArrangementClipLaneDragStore,
++} from '~/lib/arrangement/clip-lane-drag-store';
++import {
+   type ArrangementClipboard,
+   copyClipsToClipboard,
+   copyRangeToClipboard,
+@@ -293,20 +299,6 @@
+   duration: number;
+ }
+ 
+-export interface ClipLaneGhost {
+-  clipId: string;
+-  trackId: string;
+-  start: number;
+-  duration: number;
+-  blocked: boolean;
+-  message: string | null;
+-}
+-
+-export interface ClipLaneDragState {
+-  ghosts: readonly ClipLaneGhost[];
+-  timeLocked: boolean;
+-}
+-
+ export interface ArrangementPlaybackClock {
+   ctxTime: number;
+   holdUntil: number;
+@@ -333,7 +325,6 @@
+   videoSources: ReadonlyMap<string, WorkspaceVideoSource>;
+   exportState: ArrangementExportState;
+   exportProgress: ArrangementExportProgressStore;
+-  clipLaneDrag: ClipLaneDragState | null;
+   setClipLaneDrag: (next: ClipLaneDragState | null) => void;
+   togglePlayback: () => void;
+   continuePlayback: () => void;
+@@ -548,6 +539,7 @@
+ 
+ const ArrangementMixDraftContext = createContext<ArrangementMixDraftStore | null>(null);
+ const ArrangementRangeContext = createContext<ArrangementRangeStore | null>(null);
++const ArrangementClipLaneDragContext = createContext<ArrangementClipLaneDragStore | null>(null);
+ const ArrangementSelectionContext = createContext<ArrangementSelectionStore | null>(null);
+ const ArrangementPreviewContext = createContext<ArrangementPreviewStore | null>(null);
+ const ArrangementStatusPreviewContext = createContext<ArrangementStatusPreviewStore | null>(null);
+@@ -818,7 +810,11 @@
+   });
+   const [exportProgress] = useState(() => createArrangementExportProgressStore());
+   const exportAbortRef = useRef<AbortController | null>(null);
+-  const [clipLaneDrag, setClipLaneDrag] = useState<ClipLaneDragState | null>(null);
++  const [clipLaneDragStore] = useState(() => createArrangementClipLaneDragStore());
++  const setClipLaneDrag = useCallback(
++    (next: ClipLaneDragState | null) => clipLaneDragStore.getState().setDrag(next),
++    [clipLaneDragStore],
++  );
+   const clipboardRef = useRef<ArrangementClipboard | null>(null);
+ 
+   const historyRef = useRef(history);
+@@ -1942,6 +1938,11 @@
+   const previewClipGeometry = useCallback(
+     (next: Arrangement) => {
+       previewActiveRef.current = true;
++      if (next === publishedHistoryRef.current.present) {
++        historyRef.current = publishedHistoryRef.current;
++        previewStore.getState().clearPreview();
++        return;
++      }
+       historyRef.current = { ...historyRef.current, present: next };
+       previewStore.getState().setPreview(next);
+     },
+@@ -4186,7 +4187,6 @@
+       videoSources,
+       exportState,
+       exportProgress,
+-      clipLaneDrag,
+       setClipLaneDrag,
+       togglePlayback,
+       continuePlayback,
+@@ -4306,7 +4306,7 @@
+       videoSources,
+       exportState,
+       exportProgress,
+-      clipLaneDrag,
++      setClipLaneDrag,
+       togglePlayback,
+       continuePlayback,
+       setInsertMarker,
+@@ -4412,19 +4412,21 @@
+       <ArrangementInsertMarkerContext.Provider value={insertMarkerStore}>
+         <ArrangementMixDraftContext.Provider value={mixDraftStore}>
+           <ArrangementRangeContext.Provider value={rangeStore}>
+-            <ArrangementSelectionContext.Provider value={selectionStore}>
+-              <ArrangementPreviewContext.Provider value={previewStore}>
+-                <ArrangementStatusPreviewContext.Provider value={statusPreviewStore}>
+-                  <ArrangementMeterContext.Provider value={meterStore}>
+-                    <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
+-                      <ArrangementContext.Provider value={value}>
+-                        {children}
+-                      </ArrangementContext.Provider>
+-                    </ArrangementTrackMeterContext.Provider>
+-                  </ArrangementMeterContext.Provider>
+-                </ArrangementStatusPreviewContext.Provider>
+-              </ArrangementPreviewContext.Provider>
+-            </ArrangementSelectionContext.Provider>
++            <ArrangementClipLaneDragContext.Provider value={clipLaneDragStore}>
++              <ArrangementSelectionContext.Provider value={selectionStore}>
++                <ArrangementPreviewContext.Provider value={previewStore}>
++                  <ArrangementStatusPreviewContext.Provider value={statusPreviewStore}>
++                    <ArrangementMeterContext.Provider value={meterStore}>
++                      <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
++                        <ArrangementContext.Provider value={value}>
++                          {children}
++                        </ArrangementContext.Provider>
++                      </ArrangementTrackMeterContext.Provider>
++                    </ArrangementMeterContext.Provider>
++                  </ArrangementStatusPreviewContext.Provider>
++                </ArrangementPreviewContext.Provider>
++              </ArrangementSelectionContext.Provider>
++            </ArrangementClipLaneDragContext.Provider>
+           </ArrangementRangeContext.Provider>
+         </ArrangementMixDraftContext.Provider>
+       </ArrangementInsertMarkerContext.Provider>
+@@ -4478,6 +4480,20 @@
+   return useStore(useArrangementRangeStore(), selector);
+ }
+ 
++export function useArrangementClipLaneDragStore(): ArrangementClipLaneDragStore {
++  const store = useContext(ArrangementClipLaneDragContext);
++  if (!store) {
++    throw new Error('useArrangementClipLaneDragStore must be used within an ArrangementProvider');
++  }
++  return store;
++}
++
++export function useArrangementClipLaneDrag<Selected>(
++  selector: (state: ArrangementClipLaneDragStoreState) => Selected,
++): Selected {
++  return useStore(useArrangementClipLaneDragStore(), selector);
++}
++
+ export function useArrangementSelectionStore(): ArrangementSelectionStore {
+   const store = useContext(ArrangementSelectionContext);
+   if (!store) {
+diff -ruN headfull/app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts sc/app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts
+--- a/app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/__tests__/clip-lane-drag-store.test.ts	2026-11-04 20:40:58.757498211 +0000
+@@ -0,0 +1,88 @@
++import { describe, expect, it } from 'vitest';
++import {
++  type ClipLaneDragState,
++  type ClipLaneGhost,
++  createArrangementClipLaneDragStore,
++  selectLaneDragGhosts,
++  selectLaneMoveRefusal,
++  selectLaneMoveSourceKey,
++} from '../clip-lane-drag-store';
++
++function ghost(overrides: Partial<ClipLaneGhost>): ClipLaneGhost {
++  return {
++    clipId: 'c1',
++    trackId: 'sfx',
++    start: 2,
++    duration: 4,
++    blocked: false,
++    message: null,
++    ...overrides,
++  };
++}
++
++describe('clip-lane-drag-store', () => {
++  it('CL1 setDrag keeps the state object for the same drag and notifies once per new drag', () => {
++    const store = createArrangementClipLaneDragStore();
++    let notified = 0;
++    const unsubscribe = store.subscribe(() => {
++      notified += 1;
++    });
++    const drag: ClipLaneDragState = { ghosts: [ghost({})], timeLocked: false };
++    const initial = store.getState();
++    expect(initial.drag).toBeNull();
++    store.getState().setDrag(null);
++    expect(store.getState()).toBe(initial);
++    store.getState().setDrag(drag);
++    store.getState().setDrag(drag);
++    expect(store.getState().drag).toBe(drag);
++    expect(notified).toBe(1);
++    store.getState().setDrag(null);
++    expect(store.getState().drag).toBeNull();
++    expect(notified).toBe(2);
++    unsubscribe();
++  });
++
++  it('CL2 selectLaneDragGhosts returns one shared empty array when there is no drag or no ghost on the lane', () => {
++    const none = selectLaneDragGhosts(null, 'sfx');
++    expect(none).toHaveLength(0);
++    expect(selectLaneDragGhosts(null, 'music')).toBe(none);
++    const drag: ClipLaneDragState = {
++      ghosts: [ghost({ clipId: 'c1', trackId: 'sfx' }), ghost({ clipId: 'c2', trackId: 'music' })],
++      timeLocked: false,
++    };
++    expect(selectLaneDragGhosts(drag, 'sfx').map((entry) => entry.clipId)).toEqual(['c1']);
++    expect(selectLaneDragGhosts(drag, 'music').map((entry) => entry.clipId)).toEqual(['c2']);
++    expect(selectLaneDragGhosts(drag, 'video')).toEqual([]);
++  });
++
++  it('CL3 selectLaneMoveSourceKey keeps the lane clip order and ignores blocked ghosts', () => {
++    expect(selectLaneMoveSourceKey(null, ['c1', 'c2'])).toBe('');
++    const drag: ClipLaneDragState = {
++      ghosts: [
++        ghost({ clipId: 'c2', trackId: 'sfx' }),
++        ghost({ clipId: 'c1', trackId: 'sfx' }),
++        ghost({ clipId: 'c3', trackId: 'sfx', blocked: true, message: 'Not enough room' }),
++      ],
++      timeLocked: false,
++    };
++    expect(selectLaneMoveSourceKey(drag, ['c1', 'c2', 'c3'])).toBe('c1\nc2');
++    expect(selectLaneMoveSourceKey(drag, ['c3'])).toBe('');
++    expect(selectLaneMoveSourceKey(drag, [])).toBe('');
++  });
++
++  it('CL4 selectLaneMoveRefusal returns the first blocked ghost message, else null', () => {
++    expect(selectLaneMoveRefusal(null)).toBeNull();
++    expect(selectLaneMoveRefusal({ ghosts: [ghost({})], timeLocked: true })).toBeNull();
++    expect(
++      selectLaneMoveRefusal({
++        ghosts: [
++          ghost({ clipId: 'c1' }),
++          ghost({ clipId: 'c2', blocked: true, message: null }),
++          ghost({ clipId: 'c3', blocked: true, message: 'Not enough room' }),
++          ghost({ clipId: 'c4', blocked: true, message: 'Second' }),
++        ],
++        timeLocked: false,
++      }),
++    ).toBe('Not enough room');
++  });
++});
+diff -ruN headfull/app/lib/arrangement/__tests__/drag-preview-render.test.tsx sc/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-04 20:41:41.842582748 +0000
+@@ -7,8 +7,13 @@
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
++  useArrangementClipLaneDrag,
+   useArrangementPreviewStore,
+ } from '~/contexts/ArrangementContext';
++import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
++
++type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -24,6 +29,7 @@
+   OVERVIEW_CLIP_FIELD_ROLES,
+   SELECTED_CLIP_FIELD_ROLES,
+ } from '../preview-store';
++import { CLIP_LANE_REFUSAL_MESSAGES } from '../selection';
+ import { studioClipStrings, studioPlaybackStrings } from '../strings';
+ 
+ interface ProbeFiber {
+@@ -232,17 +238,20 @@
+ }
+ 
+ interface PreviewApiRef {
+-  current: ArrangementContextValue | null;
++  current: LaneDragProbeValue | null;
+   store: ArrangementPreviewStore | null;
+ }
+ 
+ function PreviewProbe({ api }: { api: PreviewApiRef }) {
+-  api.current = useArrangement();
++  api.current = {
++    ...useArrangement(),
++    clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
++  };
+   api.store = useArrangementPreviewStore();
+   return null;
+ }
+ 
+-function live(api: PreviewApiRef): ArrangementContextValue {
++function live(api: PreviewApiRef): LaneDragProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+@@ -560,6 +569,64 @@
+     expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 2, trackId: 'music' });
+   });
+ 
++  it('DP49 cross-lane moves render neither the provider nor the workspace; release adds one entry on the target lane', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const { root, header } = clipParts('c1');
++    pointerDownAt(header, 1, 40);
++    pointerMoveTo(root, 1, 80, SFX_LANE_Y);
++    expect(live(api).clipLaneDrag?.ghosts[0]).toMatchObject({ trackId: 'sfx', start: 3 });
++    expect(previewOf(api)).toBeNull();
++    expect(live(api).getArrangement()).toBe(live(api).arrangement);
++    expect(live(api).isArrangementPreviewActive()).toBe(true);
++    renderLog.counts.clear();
++    pointerMoveTo(root, 1, 120, SFX_LANE_Y);
++    pointerMoveTo(root, 1, 160, SFX_LANE_Y);
++    expect(live(api).clipLaneDrag?.ghosts[0]).toMatchObject({ trackId: 'sfx', start: 5 });
++    expect(rendersOf('ArrangementProvider')).toBe(0);
++    expect(rendersOf('StudioWorkspace')).toBe(0);
++    expect(rendersOf('ArrangementTransport')).toBe(0);
++    expect(rendersOf('ArrangementLibrary')).toBe(0);
++    expect(rendersOf('ArrangementLane')).toBe(2);
++    expect(textOf(view, 'arrangement-lane-move-hint')).toBe(
++      'Shift — lock the time; only the track changes',
++    );
++    expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 2, trackId: 'music' });
++    pointerUpAt(root, 1, 160, SFX_LANE_Y);
++    expect(live(api).undoLabel).toBe('Move to track — SFX');
++    expect(live(api).clipLaneDrag).toBeNull();
++    expect(previewOf(api)).toBeNull();
++    expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 5, trackId: 'sfx' });
++  });
++
++  it('DP50 a refused cross-lane move shows the refusal in the readout from the store; release keeps the clip', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const { root, header } = clipParts('c1');
++    pointerDownAt(header, 1, 40);
++    pointerMoveTo(root, 1, 40, SFX_LANE_Y);
++    expect(live(api).clipLaneDrag?.ghosts).toEqual([
++      {
++        clipId: 'c1',
++        trackId: 'sfx',
++        start: 2,
++        duration: 6,
++        blocked: true,
++        message: CLIP_LANE_REFUSAL_MESSAGES.overlap,
++      },
++    ]);
++    expect(textOf(view, 'arrangement-lane-move-refusal')).toBe(
++      `${CLIP_LANE_REFUSAL_MESSAGES.overlap} · `,
++    );
++    expect(textOf(view, 'arrangement-lane-move-hint')).toBe(
++      `${CLIP_LANE_REFUSAL_MESSAGES.overlap} · Shift — lock the time; only the track changes`,
++    );
++    expect(textOf(view, 'arrangement-status')).toBe(CLIP_LANE_REFUSAL_MESSAGES.overlap);
++    pointerUpAt(root, 1, 40, SFX_LANE_Y);
++    expect(live(api).undoLabel).toBeNull();
++    expect(live(api).clipLaneDrag).toBeNull();
++    expect(view.queryByTestId('arrangement-lane-move-refusal')).toBeNull();
++    expect(clipIn(live(api).arrangement, 'c1')).toMatchObject({ start: 2, trackId: 'music' });
++  });
++
+   it('DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry', async () => {
+     const { api, view, clipParts } = await mountPreviewWorkspace();
+     const audio = clipParts('c1');
+diff -ruN headfull/app/lib/arrangement/__tests__/gesture-guard.test.tsx sc/app/lib/arrangement/__tests__/gesture-guard.test.tsx
+--- a/app/lib/arrangement/__tests__/gesture-guard.test.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/lib/arrangement/__tests__/gesture-guard.test.tsx	2026-11-04 20:40:58.748945137 +0000
+@@ -7,7 +7,12 @@
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
++  useArrangementClipLaneDrag,
+ } from '~/contexts/ArrangementContext';
++import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
++
++type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { trackVolumeFromDb } from '../track-volume-db';
+@@ -60,11 +65,14 @@
+ const SFX_LANE_Y = 120;
+ 
+ interface GuardApiRef {
+-  current: ArrangementContextValue | null;
++  current: LaneDragProbeValue | null;
+ }
+ 
+ function GuardProbe({ api }: { api: GuardApiRef }) {
+-  api.current = useArrangement();
++  api.current = {
++    ...useArrangement(),
++    clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
++  };
+   return null;
+ }
+ 
+@@ -127,7 +135,7 @@
+   return { api, view, clipParts, brace };
+ }
+ 
+-function live(api: GuardApiRef): ArrangementContextValue {
++function live(api: GuardApiRef): LaneDragProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff -ruN headfull/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx sc/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+--- a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx	2026-11-04 20:40:58.745661650 +0000
+@@ -6,7 +6,12 @@
+   type ArrangementContextValue,
+   ArrangementProvider,
+   useArrangement,
++  useArrangementClipLaneDrag,
+ } from '~/contexts/ArrangementContext';
++import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
++
++type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { STUDIO_SHORTCUT_GROUPS } from '../shortcuts';
+@@ -130,15 +135,18 @@
+ const press = { button: 0, buttons: 1 };
+ 
+ interface SheetApiRef {
+-  current: ArrangementContextValue | null;
++  current: LaneDragProbeValue | null;
+ }
+ 
+ function SheetProbe({ api }: { api: SheetApiRef }) {
+-  api.current = useArrangement();
++  api.current = {
++    ...useArrangement(),
++    clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
++  };
+   return null;
+ }
+ 
+-function live(api: SheetApiRef): ArrangementContextValue {
++function live(api: SheetApiRef): LaneDragProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff -ruN headfull/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx sc/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+--- a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx	2026-11-04 20:40:58.749843795 +0000
+@@ -7,8 +7,10 @@
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
++  useArrangementClipLaneDrag,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
++import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -163,14 +165,21 @@
+   };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = ArrangementContextValue & {
++  range: TimeRange | null;
++  clipLaneDrag: ClipLaneDragState | null;
++};
+ 
+ interface GroupsApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function GroupsProbe({ api }: { api: GroupsApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = {
++    ...useArrangement(),
++    range: useArrangementRange((state) => state.range),
++    clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
++  };
+   return null;
+ }
+ 
+diff -ruN headfull/app/lib/arrangement/__tests__/track-groups-ui.test.tsx sc/app/lib/arrangement/__tests__/track-groups-ui.test.tsx
+--- a/app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/lib/arrangement/__tests__/track-groups-ui.test.tsx	2026-11-04 20:40:58.746041641 +0000
+@@ -7,7 +7,12 @@
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
++  useArrangementClipLaneDrag,
+ } from '~/contexts/ArrangementContext';
++import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
++
++type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -160,15 +165,18 @@
+ }
+ 
+ interface GroupsApiRef {
+-  current: ArrangementContextValue | null;
++  current: LaneDragProbeValue | null;
+ }
+ 
+ function GroupsProbe({ api }: { api: GroupsApiRef }) {
+-  api.current = useArrangement();
++  api.current = {
++    ...useArrangement(),
++    clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
++  };
+   return null;
+ }
+ 
+-function live(api: GroupsApiRef): ArrangementContextValue {
++function live(api: GroupsApiRef): LaneDragProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff -ruN headfull/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx sc/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx
+--- a/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx	2026-11-04 20:02:34.000000000 +0000
++++ b/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx	2026-11-04 20:40:58.746833401 +0000
+@@ -6,7 +6,12 @@
+   type ArrangementContextValue,
+   ArrangementProvider,
+   useArrangement,
++  useArrangementClipLaneDrag,
+ } from '~/contexts/ArrangementContext';
++import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
++
++type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ 
+@@ -131,15 +136,18 @@
+ const press = { button: 0, buttons: 1 };
+ 
+ interface StringsApiRef {
+-  current: ArrangementContextValue | null;
++  current: LaneDragProbeValue | null;
+ }
+ 
+ function StringsProbe({ api }: { api: StringsApiRef }) {
+-  api.current = useArrangement();
++  api.current = {
++    ...useArrangement(),
++    clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
++  };
+   return null;
+ }
+ 
+-function live(api: StringsApiRef): ArrangementContextValue {
++function live(api: StringsApiRef): LaneDragProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff -ruN headfull/app/lib/arrangement/clip-lane-drag-store.ts sc/app/lib/arrangement/clip-lane-drag-store.ts
+--- a/app/lib/arrangement/clip-lane-drag-store.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/clip-lane-drag-store.ts	2026-11-04 20:43:19.363647093 +0000
+@@ -0,0 +1,54 @@
++import { createStore, type StoreApi } from 'zustand/vanilla';
++
++export interface ClipLaneGhost {
++  clipId: string;
++  trackId: string;
++  start: number;
++  duration: number;
++  blocked: boolean;
++  message: string | null;
++}
++
++export interface ClipLaneDragState {
++  ghosts: readonly ClipLaneGhost[];
++  timeLocked: boolean;
++}
++
++export interface ArrangementClipLaneDragStoreState {
++  drag: ClipLaneDragState | null;
++  setDrag: (next: ClipLaneDragState | null) => void;
++}
++
++export type ArrangementClipLaneDragStore = StoreApi<ArrangementClipLaneDragStoreState>;
++
++const NO_LANE_GHOSTS: readonly ClipLaneGhost[] = [];
++
++export function createArrangementClipLaneDragStore(): ArrangementClipLaneDragStore {
++  return createStore<ArrangementClipLaneDragStoreState>()((set) => ({
++    drag: null,
++    setDrag: (next) => set((state) => (Object.is(state.drag, next) ? state : { drag: next })),
++  }));
++}
++
++export function selectLaneDragGhosts(
++  drag: ClipLaneDragState | null,
++  trackId: string,
++): readonly ClipLaneGhost[] {
++  return drag ? drag.ghosts.filter((ghost) => ghost.trackId === trackId) : NO_LANE_GHOSTS;
++}
++
++export function selectLaneMoveSourceKey(
++  drag: ClipLaneDragState | null,
++  clipIds: readonly string[],
++): string {
++  if (!drag) {
++    return '';
++  }
++  return clipIds
++    .filter((clipId) => drag.ghosts.some((ghost) => ghost.clipId === clipId && !ghost.blocked))
++    .join('\n');
++}
++
++export function selectLaneMoveRefusal(drag: ClipLaneDragState | null): string | null {
++  return drag?.ghosts.find((ghost) => ghost.blocked && ghost.message)?.message ?? null;
++}

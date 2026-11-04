@@ -1,0 +1,125 @@
+--- a/perf/budgets.interactions.json	2026-11-04 20:02:34.000000000 +0000
++++ b/perf/budgets.interactions.json	2026-11-04 20:40:57.867030344 +0000
+@@ -1950,10 +1950,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 25
++    },
++    "owner": "PERF-DRAG-PREVIEW-c3-ii",
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included. Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338): the cross-lane ghosts left the provider (B sketch 24.906/move at 1x and 6x; HEAD 58.969; mutant A, the per-move history write restored, 25.25)."
+   },
+   {
+     "id": "interact.drag.lane.stopped.move-components-max",
+@@ -1972,10 +1975,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c3-ii",
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338): one commit after the in-page pointerup, one history entry per gesture."
+   },
+   {
+     "id": "interact.drag.lane.stopped.cross-components-per-move",
+@@ -2005,10 +2011,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 25
++    },
++    "owner": "PERF-DRAG-PREVIEW-c3-ii",
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included. Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338): the cross-lane ghosts left the provider (B sketch 24.906/move at 1x and 6x; HEAD 58.969; mutant A, the per-move history write restored, 25.25)."
+   },
+   {
+     "id": "interact.drag.lane.playing.move-components-max",
+@@ -2027,10 +2036,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c3-ii",
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338): one commit after the in-page pointerup, one history entry per gesture."
+   },
+   {
+     "id": "interact.drag.lane.playing.cross-components-per-move",
+@@ -2060,10 +2072,13 @@
+     "metric": "move-restarts",
+     "unit": "start() calls",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 0
++    },
++    "owner": "PERF-DRAG-PREVIEW-c3-ii",
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup. Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338): a cross-lane move preview never restarts the playing graph."
+   },
+   {
+     "id": "interact.drag.lane.playing.release-restarts",
+@@ -2082,10 +2097,13 @@
+     "metric": "drag-lane-live",
+     "unit": "boolean (1 = true)",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
+     "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58)."
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58). Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338); (e) the target-lane ghost start advances from the entry read to the cross read."
+   },
+   {
+     "id": "interact.drag.lane.stopped.move-components-per-move.6x",
+@@ -2225,9 +2243,12 @@
+     "metric": "drag-lane-live",
+     "unit": "boolean (1 = true)",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
+     "owner": "PERF-DRAG-PREVIEW-c3-i",
+-    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58)."
++    "note": "Lane drag (gesture: the 'lane drag' entries of interactionSequence; doc 168). 1 only when, in both the stopped and the playing drag, (a) the next lane holds at least one non-blocked lane-move ghost at the cross read, (b) the document holds no lane-move ghost at the back read, (c) after release the clip stays on its own lane with a changed data-clip-start, and (d) after the reset a re-read gives the start state on its own lane. Record until C measures it (L58). Asserted since PERF-DRAG-PREVIEW stage c3-ii (round 338); (e) the target-lane ghost start advances from the entry read to the cross read."
+   }
+ ]

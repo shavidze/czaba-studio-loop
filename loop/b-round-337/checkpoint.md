@@ -1,0 +1,13 @@
+# B round 337 -> 338 planning checkpoint
+- 2026-11-04: oriented. C 337 PASS, gate 337 published bbc281f (= store HEAD, clean). Regression not due (last 2026-11-02; due on/after 11-05).
+- Round 338 = PERF-DRAG-PREVIEW c3-ii. Premise: cross-lane move changes provider hooks 0 (history useState via previewArrangement(gesture.before) in ArrangementClip cross-lane single-clip branch) and 35 (clipLaneDrag useState).
+- Plan: sketch in /home/runner/b337-scratch/sc: lane-drag-store.ts; context store+hooks; lane/workspace/readout selectors; clip cross-lane restore guarded via previewGeometry; 6 test probes {...useArrangement(), clipLaneDrag: useArrangementLaneDrag(s=>s.drag)}.
+- Advisor consulted once (available).
+- Next: sketch, typecheck, covering tests, perf alone, mutants, then write task.
+- Sketch v2 applied (b-round-337/apply-sketch.py + DP49 hand-added; patch b-round-337/sketch.patch.txt regenerate after DP49). typecheck rc0; covering 17 files 441/441; unit mutants 4/4 red (unit-mutants/summary.txt). tasks/round-337.md archived (cmp equal). Backups *-before-338 written.
+- Perf sketch run started (perf-sketch.log). tech-lead + performance-optimizer consults launched (read-only).
+- Consults back (b-round-337/sketch-review.md). TL-1 Medium applied in v3 (always previewGeometry). v3 = apply-sketch-v3.py (+DP49 preview-null/active asserts, liveness (e), 7 asserts). Perf run 1 (v2): lane 58.969->24.906, move 24.267->22.8, 131 EQUAL. Perf run 2 (v3): 43/43 asserts pass, same DIFF set, ids-equal 193, liveness [1,1,1] both rates, entry 1 -> cross 2.
+- Unit mutants 5/5 red. Perf mutant AE (A=HEAD previewArrangement line, E=ghost start 0) running in /home/runner/b337-scratch/muA -> b-round-337/perf-mutant-AE/.
+- After: apply-sketch-v4-rename.py + sketch-files/clip-lane-drag-store.test.ts, rerun typecheck/covering/new test, final sketch.patch.txt + budgets.patch.txt, claims outputs, then write task/b-round/backlog/feature-status/b-next.
+- DONE writing: current-task.md (round 338), b-round-337.md, b-next.json, backlog v297, feature-status; claims outputs final. Pending: final advisor call.
+- attempt 2: verified artifacts, second advisor call done, b-round §10 appended. DONE.

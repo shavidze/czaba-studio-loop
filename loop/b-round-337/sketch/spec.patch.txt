@@ -1,0 +1,106 @@
+--- a/perf/studio-lab-interactions.perf.spec.ts	2026-11-04 20:02:34.000000000 +0000
++++ b/perf/studio-lab-interactions.perf.spec.ts	2026-11-04 20:23:52.265891447 +0000
+@@ -475,6 +475,7 @@
+ interface LaneGhostRead {
+   targetLane: number;
+   document: number;
++  targetStart: number | null;
+ }
+ 
+ async function readLaneGhosts(page: Page, trackId: string): Promise<LaneGhostRead> {
+@@ -486,13 +487,16 @@
+   );
+   return page.evaluate((laneTrackId) => {
+     const ghosts = [...document.querySelectorAll('[data-testid="arrangement-lane-move-ghost"]')];
++    const target = ghosts.filter(
++      (ghost) =>
++        ghost.closest('[data-track-id]')?.getAttribute('data-track-id') === laneTrackId &&
++        ghost.getAttribute('data-blocked') === 'false',
++    );
++    const start = target.at(0)?.getAttribute('data-ghost-start');
+     return {
+-      targetLane: ghosts.filter(
+-        (ghost) =>
+-          ghost.closest('[data-track-id]')?.getAttribute('data-track-id') === laneTrackId &&
+-          ghost.getAttribute('data-blocked') === 'false',
+-      ).length,
++      targetLane: target.length,
+       document: ghosts.length,
++      targetStart: start === undefined || start === null ? null : Number(start),
+     };
+   }, trackId);
+ }
+@@ -522,24 +526,30 @@
+   const undoBefore = await undoTitle(page);
+   const before = await readClipState(clip);
+   const t0 = await nowIn(page);
+-  const { t1, crossGhosts, t2, backGhosts, t3 } = await pressedGesture(page, grab, async () => {
+-    await page.mouse.move(grab.x + laneSegmentPx, grab.y, { steps: laneSegmentSteps });
+-    const crossStart = await nowIn(page);
+-    await page.mouse.move(grab.x + laneSegmentPx, target.y, { steps: 1 });
+-    await page.mouse.move(grab.x + 2 * laneSegmentPx, target.y, { steps: laneSegmentSteps });
+-    const cross = await readLaneGhosts(page, target.trackId);
+-    const crossEnd = await nowIn(page);
+-    await page.mouse.move(grab.x + 2 * laneSegmentPx, grab.y, { steps: 1 });
+-    await page.mouse.move(grab.x + 3 * laneSegmentPx, grab.y, { steps: laneSegmentSteps });
+-    const back = await readLaneGhosts(page, target.trackId);
+-    return {
+-      t1: crossStart,
+-      crossGhosts: cross,
+-      t2: crossEnd,
+-      backGhosts: back,
+-      t3: await nowIn(page),
+-    };
+-  });
++  const { t1, entryGhosts, crossGhosts, t2, backGhosts, t3 } = await pressedGesture(
++    page,
++    grab,
++    async () => {
++      await page.mouse.move(grab.x + laneSegmentPx, grab.y, { steps: laneSegmentSteps });
++      const crossStart = await nowIn(page);
++      await page.mouse.move(grab.x + laneSegmentPx, target.y, { steps: 1 });
++      const entry = await readLaneGhosts(page, target.trackId);
++      await page.mouse.move(grab.x + 2 * laneSegmentPx, target.y, { steps: laneSegmentSteps });
++      const cross = await readLaneGhosts(page, target.trackId);
++      const crossEnd = await nowIn(page);
++      await page.mouse.move(grab.x + 2 * laneSegmentPx, grab.y, { steps: 1 });
++      await page.mouse.move(grab.x + 3 * laneSegmentPx, grab.y, { steps: laneSegmentSteps });
++      const back = await readLaneGhosts(page, target.trackId);
++      return {
++        t1: crossStart,
++        entryGhosts: entry,
++        crossGhosts: cross,
++        t2: crossEnd,
++        backGhosts: back,
++        t3: await nowIn(page),
++      };
++    },
++  );
+   const tUp = await nowIn(page);
+   const tEnd = await waitForQuiet(page, tUp, settleMs);
+   const whole = await snapshot(page, t0, tEnd);
+@@ -615,6 +625,15 @@
+       `(a) target-lane ${target.trackId} non-blocked ghosts ${crossGhosts.targetLane} at the cross read`,
+     );
+   }
++  if (
++    entryGhosts.targetStart === null ||
++    crossGhosts.targetStart === null ||
++    !(crossGhosts.targetStart > entryGhosts.targetStart)
++  ) {
++    failed.push(
++      `(e) target-lane ghost start ${entryGhosts.targetStart} at the entry read, ${crossGhosts.targetStart} at the cross read; want it to advance`,
++    );
++  }
+   if (backGhosts.document !== 0) {
+     failed.push(`(b) document ghosts ${backGhosts.document} at the back read`);
+   }
+@@ -638,6 +657,8 @@
+   const live = failed.length === 0;
+   setLive(result, rateRowId('interact.harness.drag-lane-live', result.cpuRate), live, {
+     [`${state}TargetLaneGhosts`]: crossGhosts.targetLane,
++    [`${state}EntryGhostStart`]: entryGhosts.targetStart ?? '',
++    [`${state}CrossGhostStart`]: crossGhosts.targetStart ?? '',
+     [`${state}BackDocumentGhosts`]: backGhosts.document,
+     [`${state}ReleasedTrack`]: releasedTrackId ?? '',
+     [`${state}ReleasedStart`]: released.start,

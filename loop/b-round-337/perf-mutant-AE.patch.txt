@@ -1,0 +1,23 @@
+diff -ruN sc/app/components/arrangement/ArrangementClip.tsx muA/app/components/arrangement/ArrangementClip.tsx
+--- sc/app/components/arrangement/ArrangementClip.tsx	2026-11-04 20:26:12.380379230 +0000
++++ muA/app/components/arrangement/ArrangementClip.tsx	2026-11-04 20:33:49.458522951 +0000
+@@ -719,7 +719,7 @@
+           };
+           gesture.blocked = false;
+           gesture.laneRefusal = null;
+-          previewGeometry(gesture.before);
++          previewArrangement(gesture.before);
+           publishLaneGhosts(gesture, laneGhostsFrom(plan.placements, false, null));
+           return;
+         }
+--- sc/perf/studio-lab-interactions.perf.spec.ts	2026-11-04 20:23:52.265891447 +0000
++++ muA/perf/studio-lab-interactions.perf.spec.ts	2026-11-04 20:34:01.426093819 +0000
+@@ -496,7 +496,7 @@
+     return {
+       targetLane: target.length,
+       document: ghosts.length,
+-      targetStart: start === undefined || start === null ? null : Number(start),
++      targetStart: start === undefined || start === null ? null : 0,
+     };
+   }, trackId);
+ }
