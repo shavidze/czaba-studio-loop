@@ -1,0 +1,80 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/render-budget.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 10290[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play [33m 2965[2mms[22m[39m
+     [33m[2m✓[22m[39m RB-IM keeps the insert marker line as the same node over Play → Stop → Play [33m 1956[2mms[22m[39m
+     [33m[2m✓[22m[39m moves the playhead, ruler handle and transport time on playback frames without React renders [33m 1250[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e) [33m 2025[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02) [33m 1440[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 12471[2mms[22m[39m
+     [33m[2m✓[22m[39m FP1: a track pointer drag writes no history and re-renders no parent per move; the model stays put while the live gain follows [33m 1998[2mms[22m[39m
+     [33m[2m✓[22m[39m FP2: pointerup writes exactly one Volume entry with the last previewed volume; Undo restores the model and the live gain [33m 631[2mms[22m[39m
+     [33m[2m✓[22m[39m FP3: a group drag drives every member live gain; pointercancel restores every member gain and display with no entry [33m 684[2mms[22m[39m
+     [33m[2m✓[22m[39m FP4: a stolen claim mid-drag reverts every group member gain and the display with no entry [33m 390[2mms[22m[39m
+     [33m[2m✓[22m[39m FP5: a fader blur during the gesture cancels with no entry and restores the display [33m 413[2mms[22m[39m
+     [33m[2m✓[22m[39m FP6: a Master drag previews on the readout and the live master gain, then commits one Master Volume entry [33m 597[2mms[22m[39m
+     [33m[2m✓[22m[39m FP7: playing, a stop and start or a forced resync mid-drag builds the new graph with the dragged value [33m 371[2mms[22m[39m
+     [33m[2m✓[22m[39m FP9: keyboard steps, Shift fine drag and double-click reset keep their values, labels and pending behaviour [33m 1381[2mms[22m[39m
+     [33m[2m✓[22m[39m FP10: a Pan drag shows the draft in the leaf without re-rendering the lane, then commits one Pan entry [33m 1048[2mms[22m[39m
+     [33m[2m✓[22m[39m FP12: for every slider dB the committed pointer value equals the pending onChange value (track and Master) [33m 1569[2mms[22m[39m
+     [33m[2m✓[22m[39m FP13: a native Pan change after a stolen claim shows no draft, adds no live pan write after the restore by the steal and leaves the model unchanged (D-29z186) [33m 658[2mms[22m[39m
+     [33m[2m✓[22m[39m FP14a pointercancel: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) [33m 787[2mms[22m[39m
+     [33m[2m✓[22m[39m FP14b fader blur mid-drag: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) [33m 778[2mms[22m[39m
+     [33m[2m✓[22m[39m FP14c stolen claim: a Pan cancel restores the live pan, clears the draft and writes no entry (D-29z187) [33m 680[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/transport-centre-ui.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 13274[2mms[22m[39m
+     [33m[2m✓[22m[39m TC1 the three groups are edit, centre and view in DOM order, with the clock between Follow and Play [33m 1220[2mms[22m[39m
+     [33m[2m✓[22m[39m TC2 Play while stopped plays from the insert marker; Play while playing neither stops nor restarts [33m 558[2mms[22m[39m
+     [33m[2m✓[22m[39m TC3 Stop while playing stops at the stop point and keeps the insert marker; Space then plays from it [33m 936[2mms[22m[39m
+     [33m[2m✓[22m[39m TC4 a single Stop click while stopped changes nothing [33m 827[2mms[22m[39m
+     [33m[2m✓[22m[39m TC5 a Stop double-click returns marker and playhead to 0, stopped and while playing, never restarting [33m 1581[2mms[22m[39m
+     [33m[2m✓[22m[39m TC6 Play and Stop keep constant names, titles and Space shortcuts; no Pause button exists [33m 1100[2mms[22m[39m
+     [33m[2m✓[22m[39m TC7 Space on a focused Play or Stop toggles once per press and ignores key repeat [33m 571[2mms[22m[39m
+     [33m[2m✓[22m[39m TC8 Enter on Stop while playing stops once; held Enter on Stop and on Play adds nothing [33m 706[2mms[22m[39m
+     [33m[2m✓[22m[39m TC9 focus stays on Stop after its double-click, and the Undo → Redo handoff still works [33m 990[2mms[22m[39m
+     [33m[2m✓[22m[39m TC10 Play and Stop share a Playing or Stopped description that follows every toggle [33m 4162[2mms[22m[39m
+     [33m[2m✓[22m[39m TC11 the playback state element is one hidden, non-live, unfocusable node in the centre group [33m 620[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/tempo-window-ui.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 4876[2mms[22m[39m
+     [33m[2m✓[22m[39m BU1 an unmeasured viewport renders the whole ruler [33m 759[2mms[22m[39m
+     [33m[2m✓[22m[39m BU2 a measured viewport renders only the three-viewport window at load [33m 455[2mms[22m[39m
+     [33m[2m✓[22m[39m BU3 a scroll into another page moves the window with one viewport of margin [33m 464[2mms[22m[39m
+     [33m[2m✓[22m[39m BU4 scrolling inside a page renders nothing; the next page renders once [33m 405[2mms[22m[39m
+     [33m[2m✓[22m[39m BU5 the first render after a keyboard zoom already uses the new view [33m 325[2mms[22m[39m
+     [33m[2m✓[22m[39m BU6 a resize notification re-measures the viewport [33m 353[2mms[22m[39m
+     [33m[2m✓[22m[39m SR6 a Follow page flip moves both ruler windows before any scroll event [33m 365[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 3709[2mms[22m[39m
+     [33m[2m✓[22m[39m NS1 without a time selection the transport, tempo field and metronome read in English [33m 596[2mms[22m[39m
+     [33m[2m✓[22m[39m NS3 Z, X, Fit and Follow write their English statuses and switch the button titles [33m 419[2mms[22m[39m
+     [33m[2m✓[22m[39m NS5 the transport titles and aria-keyshortcuts come from the shortcut source [33m 1799[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 6660[2mms[22m[39m
+     [33m[2m✓[22m[39m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace [33m 673[2mms[22m[39m
+     [33m[2m✓[22m[39m DP3 the release adds exactly one history entry, Undo restores, the store is empty [33m 379[2mms[22m[39m
+     [33m[2m✓[22m[39m DP5 a same-lane move keeps the ref on the preview while React holds the original [33m 337[2mms[22m[39m
+     [33m[2m✓[22m[39m DP6 the readout, the detail panel and the overview bar follow the trim preview [33m 304[2mms[22m[39m
+     [33m[2m✓[22m[39m DP5b same lane → other lane → back → release: one entry at the final place, store empty [33m 334[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/panel-radius-ui.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1839[2mms[22m[39m
+     [33m[2m✓[22m[39m PNR3a: the video box (compact and floating, with a loaded video) and the floating placeholder take rounded-panel [33m 645[2mms[22m[39m
+     [33m[2m✓[22m[39m PNR3c: the Grid menu and the Marker menu containers take rounded-panel; their rows keep rounded-sm [33m 382[2mms[22m[39m
+     [33m[2m✓[22m[39m PNR5: the transport readout and the Library preview wave take rounded-md; the exit link keeps rounded-sm (V-3c-5b, D-29z138) [33m 324[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 3818[2mms[22m[39m
+     [33m[2m✓[22m[39m SS8a a folded group header does not re-render on a workspace commit that changes none of its props [33m 2288[2mms[22m[39m
+     [33m[2m✓[22m[39m SS8b selecting every clip re-renders the folded group header and marks each overview block selected [33m 1527[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/status-preview-store.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx [2m([22m[2m25 tests[22m[2m)[22m[33m 33415[2mms[22m[39m
+     [33m[2m✓[22m[39m CP1: a single Clip Gain drag writes no history and re-renders no parent per move; the model stays put while the live gain and both drawings follow [33m 944[2mms[22m[39m
+     [33m[2m✓[22m[39m CP2: pointerup writes one Clip Gain entry with the exact last previewed dB; Undo restores the model, the live gain and the lane drawing [33m 528[2mms[22m[39m
+     [33m[2m✓[22m[39m CP3 pointercancel: a members drag follows clipGainShiftTargets live; the cancel restores every member gain, both lane drawings and the block with no entry [33m 360[2mms[22m[39m
+     [33m[2m✓[22m[39m CP4 stolen claim: a members drag follows clipGainShiftTargets live; the steal restores every member gain, both lane drawings and the block with no entry [33m 421[2mms[22m[39m
+     [33m[2m✓[22m[39m CP5-members fader blur: a members drag follows clipGainShiftTargets live; the blur restores every member gain, both lane drawings and the block with no entry [33m 312[2mms[22m[39m
+     [33m[2m✓[22m[39m CP6: a members commit writes one entry, sets the members status exactly as the pending path does and stores the pending result for the same anchor [33m 322[2mms[22m[39m
+     [33m[2m✓[22m[39m CP9: fader keyboard steps, double-click reset, the typed field and the reset button keep their values, labels and statuses [33m 555[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12a: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -600 to tenth -391 [33m 9324[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12b: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -390 to tenth -181 [33m 9720[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12c: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -180 to tenth 29 [33m 4257[2mms[22m[39m
+     [33m[2m✓[22m[39m CP12d: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth 30 to tenth 240 [33m 4319[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[32m119 passed[39m[22m[90m (119)[39m
+[2m   Start at [22m 09:45:29
+[2m   Duration [22m 37.01s[2m (transform 5.07s, setup 0ms, import 15.34s, tests 90.36s, environment 9.57s)[22m
+

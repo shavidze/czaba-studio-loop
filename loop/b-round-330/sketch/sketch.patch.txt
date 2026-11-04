@@ -1,0 +1,373 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 0dd8527..d72f06c 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -12,7 +12,6 @@ import {
+   useState,
+   useSyncExternalStore,
+ } from 'react';
+-import { useShallow } from 'zustand/react/shallow';
+ import {
+   type ClipLaneDragState,
+   formatArrangementTime,
+@@ -108,6 +107,9 @@ import {
+ } from '~/lib/arrangement/panels';
+ import { insertMarkerStatusKind } from '~/lib/arrangement/playback-start';
+ import {
++  type ArrangementPreviewState,
++  sameSelectedClipShownFields,
++  sameSelectedClipsShownFields,
+   selectPreviewClip,
+   selectPreviewClipsAmong,
+   selectPreviewOrCommittedArrangement,
+@@ -632,6 +634,22 @@ function ArrangementSelectionCountInner() {
+ 
+ const ArrangementSelectionCount = memo(ArrangementSelectionCountInner);
+ 
++function useEqualityStableSelector<State, Selected>(
++  selector: (state: State) => Selected,
++  isEqual: (previous: Selected, next: Selected) => boolean,
++): (state: State) => Selected {
++  const heldRef = useRef<{ value: Selected } | null>(null);
++  return (state) => {
++    const next = selector(state);
++    const held = heldRef.current;
++    if (held && isEqual(held.value, next)) {
++      return held.value;
++    }
++    heldRef.current = { value: next };
++    return next;
++  };
++}
++
+ interface ArrangementSelectedClipReadoutProps {
+   clipLaneDrag: ClipLaneDragState | null;
+   laneMoveRefusal: string | null;
+@@ -648,8 +666,12 @@ function ArrangementSelectedClipReadoutInner({
+   videoSources,
+ }: ArrangementSelectedClipReadoutProps) {
+   const primaryClipId = useArrangementSelection((state) => state.selectedClipIds.at(-1) ?? null);
+-  const selectedClip = useArrangementPreview((state) =>
+-    selectPreviewClip(state.preview, arrangement, primaryClipId),
++  const selectedClip = useArrangementPreview(
++    useEqualityStableSelector(
++      (state: ArrangementPreviewState) =>
++        selectPreviewClip(state.preview, arrangement, clipLaneDrag ? null : primaryClipId),
++      sameSelectedClipShownFields,
++    ),
+   );
+   const selectedTitle = selectedClip
+     ? selectedClipSourceTitle(selectedClip, videoSources, collection)
+@@ -744,7 +766,11 @@ function ArrangementDetailPanelWithSelectionInner({
+ }: ArrangementDetailPanelWithSelectionProps) {
+   const selectedClipIds = useArrangementSelection((state) => state.selectedClipIds);
+   const selectedClips = useArrangementPreview(
+-    useShallow((state) => selectPreviewClipsAmong(state.preview, arrangement, selectedClipIds)),
++    useEqualityStableSelector(
++      (state: ArrangementPreviewState) =>
++        selectPreviewClipsAmong(state.preview, arrangement, selectedClipIds),
++      sameSelectedClipsShownFields,
++    ),
+   );
+   const primaryClipId = selectedClipIds.at(-1) ?? null;
+   const selectedClip = selectedClips.find((clip) => clip.id === primaryClipId);
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index 2cdcc32..81d85a4 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -18,7 +18,7 @@ import type {
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { insertMarkerStatusKind } from '../playback-start';
+-import type { ArrangementPreviewStore } from '../preview-store';
++import { type ArrangementPreviewStore, SELECTED_CLIP_FIELD_ROLES } from '../preview-store';
+ import { studioClipStrings, studioPlaybackStrings } from '../strings';
+ 
+ interface ProbeFiber {
+@@ -928,3 +928,155 @@ describe('PERF-DRAG-PREVIEW stage c1 — readers that do not follow the moved en
+     pointerUpAt(root, 1, 400);
+   });
+ });
++
++function shownSelectionText(view: PreviewView): string {
++  const readout = view.getByTestId('arrangement-selected-clip');
++  const detail = view.getByTestId('arrangement-detail-content');
++  const values = Array.from(detail.querySelectorAll('input')).map((input) => input.value);
++  return [
++    readout.textContent ?? '',
++    readout.getAttribute('title') ?? '',
++    detail.textContent ?? '',
++    values.join('|'),
++  ].join('\n');
++}
++
++const C1_FIELD_VARIANTS: { [Field in keyof ArrangementClip]-?: ArrangementClip } = {
++  id: { ...AUDIO_CLIPS[0], id: 'c9' },
++  trackId: { ...AUDIO_CLIPS[0], trackId: 'sfx' },
++  sourceId: { ...AUDIO_CLIPS[0], sourceId: 'hit' },
++  start: { ...AUDIO_CLIPS[0], start: 3 },
++  sourceOffset: { ...AUDIO_CLIPS[0], sourceOffset: 0.5 },
++  duration: { ...AUDIO_CLIPS[0], duration: 5 },
++  gainDb: { ...AUDIO_CLIPS[0], gainDb: -6 },
++  fadeIn: { ...AUDIO_CLIPS[0], fadeIn: 1.25 },
++  fadeOut: { ...AUDIO_CLIPS[0], fadeOut: 2.5 },
++  envelope: {
++    ...AUDIO_CLIPS[0],
++    envelope: [
++      { time: 0, gain: 1 },
++      { time: 3, gain: 0.25 },
++    ],
++  },
++};
++
++function shownSelectionMarkup(view: PreviewView): string {
++  return [
++    view.getByTestId('arrangement-selected-clip').outerHTML,
++    view.getByTestId('arrangement-detail-panel').outerHTML,
++  ]
++    .join('\n')
++    .replace(/:r[0-9a-z]+:/g, ':id:');
++}
++
++async function mountedSelectionMarkup(clip: ArrangementClip): Promise<string> {
++  const { api, view } = await mountPreviewWorkspace([clip, AUDIO_CLIPS[1]]);
++  act(() => live(api).selectClip(clip.id));
++  const markup = shownSelectionMarkup(view);
++  view.unmount();
++  return markup;
++}
++
++function commitClipVariant(api: PreviewApiRef, variant: ArrangementClip) {
++  const before = live(api).arrangement;
++  const next: Arrangement = {
++    ...before,
++    clips: before.clips.map((clip) => (clip.id === variant.id ? variant : clip)),
++  };
++  act(() => {
++    live(api).commitArrangement(next, 'Variant', before);
++  });
++}
++
++describe('PERF-DRAG-PREVIEW stage c2a — selected-clip readers that do not show fades', () => {
++  it('DP25 an audio fade-in move renders neither the detail panel nor the selected-clip readout', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    const fade = fadeHandleOf(audio.root);
++    pointerDownAt(fade, 1, 0);
++    pointerMoveTo(audio.root, 1, 40);
++    const shownAtFirstMove = shownSelectionText(view);
++    renderLog.counts.clear();
++    pointerMoveTo(audio.root, 1, 80);
++    pointerMoveTo(audio.root, 1, 120);
++    expect(rendersOf('ArrangementClipViewInner')).toBe(2);
++    expect(audio.root.dataset.fadeIn).toBe('3.000');
++    expect(previewOf(api)).not.toBeNull();
++    expect(rendersOf('ArrangementSelectedClipReadoutInner')).toBe(0);
++    expect(rendersOf('ArrangementTimeText')).toBe(0);
++    expect(rendersOf('ArrangementDetailPanelWithSelectionInner')).toBe(0);
++    expect(rendersOf('ArrangementDetailPanel')).toBe(0);
++    expect(rendersOf('ArrangementDetailContentInner')).toBe(0);
++    expect(rendersOf('ArrangementDetailWaveformInner')).toBe(0);
++    expect(shownSelectionText(view)).toBe(shownAtFirstMove);
++    pointerUpAt(audio.root, 1, 120);
++    expect(clipIn(live(api).arrangement, 'c1').fadeIn).toBe(3);
++    expect(shownSelectionText(view)).toBe(shownAtFirstMove);
++  });
++
++  it('DP26 a same-lane move shows the lane-move hint without rendering the readout; the detail panel follows the start', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace();
++    const { root, header } = clipParts('c1');
++    pointerDownAt(header, 1, 0);
++    pointerMoveTo(root, 1, 40);
++    expect(view.getByTestId('arrangement-lane-move-hint')).toBeTruthy();
++    const detailFirst = textOf(view, 'arrangement-detail-content');
++    renderLog.counts.clear();
++    pointerMoveTo(root, 1, 80);
++    expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementSelectedClipReadoutInner')).toBe(0);
++    expect(view.getByTestId('arrangement-lane-move-hint')).toBeTruthy();
++    expect(view.queryByTestId('arrangement-selected-clip')).toBeNull();
++    expect(rendersOf('ArrangementDetailPanelWithSelectionInner')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementDetailContentInner')).toBeGreaterThan(0);
++    expect(textOf(view, 'arrangement-detail-content')).not.toBe(detailFirst);
++    expect(textOf(view, 'arrangement-detail-content')).toContain('00:04.000');
++    pointerUpAt(root, 1, 80);
++    expect(textOf(view, 'arrangement-selected-clip')).toContain('00:04.000');
++  });
++
++  it('DP27 a clip that differs only in an ignored field renders the same readout and detail panel markup', async () => {
++    const ignored = Object.entries(SELECTED_CLIP_FIELD_ROLES)
++      .filter(([, role]) => role === 'ignored')
++      .map(([field]) => field);
++    expect(ignored.length).toBeGreaterThan(0);
++    const baseMarkup = await mountedSelectionMarkup(AUDIO_CLIPS[0]);
++    expect(baseMarkup).toContain('Song');
++    for (const [field, variant] of Object.entries(C1_FIELD_VARIANTS)) {
++      if (ignored.includes(field)) {
++        expect({ field, shown: await mountedSelectionMarkup(variant) }).toEqual({
++          field,
++          shown: baseMarkup,
++        });
++      }
++    }
++    expect(await mountedSelectionMarkup(C1_FIELD_VARIANTS.start)).not.toBe(baseMarkup);
++  });
++
++  it('DP28 a committed change of an ignored field keeps the shown markup while the clip view redraws', async () => {
++    const ignored = Object.entries(SELECTED_CLIP_FIELD_ROLES)
++      .filter(([, role]) => role === 'ignored')
++      .map(([field]) => field);
++    for (const [field, variant] of Object.entries(C1_FIELD_VARIANTS)) {
++      if (!ignored.includes(field)) {
++        continue;
++      }
++      const { api, view } = await mountPreviewWorkspace();
++      act(() => live(api).selectClip('c1'));
++      const clipRoot = view.container.querySelector<HTMLElement>('[data-clip-id="c1"]');
++      const clipBefore = clipRoot?.outerHTML;
++      const shownBefore = shownSelectionMarkup(view);
++      commitClipVariant(api, variant);
++      expect({ field, committed: clipIn(live(api).arrangement, 'c1') }).toEqual({
++        field,
++        committed: variant,
++      });
++      expect({ field, clipChanged: clipRoot?.outerHTML !== clipBefore }).toEqual({
++        field,
++        clipChanged: true,
++      });
++      expect({ field, shown: shownSelectionMarkup(view) }).toEqual({ field, shown: shownBefore });
++      view.unmount();
++    }
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/preview-store.test.ts b/app/lib/arrangement/__tests__/preview-store.test.ts
+index 3002ddb..1c3c8fc 100644
+--- a/app/lib/arrangement/__tests__/preview-store.test.ts
++++ b/app/lib/arrangement/__tests__/preview-store.test.ts
+@@ -12,6 +12,9 @@ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/
+ import { createArrangement, moveClip } from '../model';
+ import {
+   createArrangementPreviewStore,
++  SELECTED_CLIP_FIELD_ROLES,
++  sameSelectedClipShownFields,
++  sameSelectedClipsShownFields,
+   selectPreviewClip,
+   selectPreviewLaneClips,
+   selectPreviewOrCommittedArrangement,
+@@ -159,3 +162,62 @@ describe('PERF-DRAG-PREVIEW stage a — lane hook through the provider (DP1)', (
+     expect(api.starts.get('b')).toBe('2');
+   });
+ });
++
++const ROLE_BASE: ArrangementClip = {
++  id: 'a1',
++  trackId: 'a',
++  sourceId: 's',
++  start: 1,
++  sourceOffset: 0.5,
++  duration: 4,
++  gainDb: -2,
++  fadeIn: 0.25,
++  fadeOut: 0.5,
++  envelope: [{ time: 0, gain: 1 }],
++};
++
++const ROLE_VARIANTS: { [Field in keyof ArrangementClip]-?: ArrangementClip } = {
++  id: { ...ROLE_BASE, id: 'a2' },
++  trackId: { ...ROLE_BASE, trackId: 'b' },
++  sourceId: { ...ROLE_BASE, sourceId: 't' },
++  start: { ...ROLE_BASE, start: 1.001 },
++  sourceOffset: { ...ROLE_BASE, sourceOffset: 0.75 },
++  duration: { ...ROLE_BASE, duration: 4.5 },
++  gainDb: { ...ROLE_BASE, gainDb: -3 },
++  fadeIn: { ...ROLE_BASE, fadeIn: 1 },
++  fadeOut: { ...ROLE_BASE, fadeOut: 1 },
++  envelope: { ...ROLE_BASE, envelope: [{ time: 0, gain: 0.5 }] },
++};
++
++describe('PERF-DRAG-PREVIEW stage c2a — selected-clip shown fields', () => {
++  it('PS-ROLES every clip field is classified, and the equality ignores exactly the ignored fields', () => {
++    const fields = Object.keys(ROLE_VARIANTS);
++    expect(Object.keys(SELECTED_CLIP_FIELD_ROLES).sort()).toEqual([...fields].sort());
++    const shown: string[] = [];
++    const ignored: string[] = [];
++    for (const [field, role] of Object.entries(SELECTED_CLIP_FIELD_ROLES)) {
++      (role === 'shown' ? shown : ignored).push(field);
++    }
++    expect(ignored.sort()).toEqual(['envelope', 'fadeIn', 'fadeOut']);
++    for (const [field, variant] of Object.entries(ROLE_VARIANTS)) {
++      expect({ field, equal: sameSelectedClipShownFields(ROLE_BASE, variant) }).toEqual({
++        field,
++        equal: ignored.includes(field),
++      });
++    }
++  });
++
++  it('PS-LIST compares clip lists by length, order and shown fields', () => {
++    const other: ArrangementClip = { ...ROLE_BASE, id: 'b1', start: 9 };
++    expect(sameSelectedClipsShownFields([ROLE_BASE, other], [ROLE_VARIANTS.fadeIn, other])).toBe(
++      true,
++    );
++    expect(sameSelectedClipsShownFields([ROLE_BASE, other], [ROLE_VARIANTS.start, other])).toBe(
++      false,
++    );
++    expect(sameSelectedClipsShownFields([ROLE_BASE, other], [other, ROLE_BASE])).toBe(false);
++    expect(sameSelectedClipsShownFields([ROLE_BASE], [ROLE_BASE, other])).toBe(false);
++    expect(sameSelectedClipShownFields(undefined, undefined)).toBe(true);
++    expect(sameSelectedClipShownFields(ROLE_BASE, undefined)).toBe(false);
++  });
++});
+diff --git a/app/lib/arrangement/preview-store.ts b/app/lib/arrangement/preview-store.ts
+index da87e31..8490708 100644
+--- a/app/lib/arrangement/preview-store.ts
++++ b/app/lib/arrangement/preview-store.ts
+@@ -58,3 +58,49 @@ export function selectPreviewClipsAmong(
+ ): ArrangementClip[] {
+   return (preview ?? committed).clips.filter((clip) => clipIds.includes(clip.id));
+ }
++
++export type PreviewClipFieldRole = 'shown' | 'ignored';
++
++export const SELECTED_CLIP_FIELD_ROLES: Record<keyof ArrangementClip, PreviewClipFieldRole> = {
++  id: 'shown',
++  trackId: 'shown',
++  sourceId: 'shown',
++  start: 'shown',
++  sourceOffset: 'shown',
++  duration: 'shown',
++  gainDb: 'shown',
++  fadeIn: 'ignored',
++  fadeOut: 'ignored',
++  envelope: 'ignored',
++};
++
++export function sameSelectedClipShownFields(
++  a: ArrangementClip | undefined,
++  b: ArrangementClip | undefined,
++): boolean {
++  if (a === b) {
++    return true;
++  }
++  if (!a || !b) {
++    return false;
++  }
++  return (
++    a.id === b.id &&
++    a.trackId === b.trackId &&
++    a.sourceId === b.sourceId &&
++    a.start === b.start &&
++    a.sourceOffset === b.sourceOffset &&
++    a.duration === b.duration &&
++    a.gainDb === b.gainDb
++  );
++}
++
++export function sameSelectedClipsShownFields(
++  a: readonly ArrangementClip[],
++  b: readonly ArrangementClip[],
++): boolean {
++  return (
++    a === b ||
++    (a.length === b.length && a.every((clip, index) => sameSelectedClipShownFields(clip, b[index])))
++  );
++}

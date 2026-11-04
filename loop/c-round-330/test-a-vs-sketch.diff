@@ -1,0 +1,12 @@
+836c836
+<     const { view, clipParts } = await mountPreviewWorkspace(LATE_AUDIO_CLIPS);
+---
+>     const { api, view, clipParts } = await mountPreviewWorkspace(LATE_AUDIO_CLIPS);
+839a840,841
+>     const endAtRest = textOf(view, 'arrangement-project-end');
+>     const extentAtRest = overview.dataset.extent;
+859a862,865
+>     act(() => live(api).undo());
+>     expect(textOf(view, 'arrangement-project-end')).toBe(endAtRest);
+>     expect(textOf(view, 'arrangement-project-end')).not.toContain('00:12.750');
+>     expect(overview.dataset.extent).toBe(extentAtRest);
