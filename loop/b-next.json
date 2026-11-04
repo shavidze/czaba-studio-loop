@@ -1,7 +1,7 @@
 {
  "decision": "CONTINUE",
- "reason": "C round 327 FAIL (browserVerified/realVerified true) on C-R327-01 (Medium) + C-R327-02 (Low), both rooted in B's round-327 sketch (store cleared synchronously before the adoptPreview commit); gate 327 skipped, baseline HEAD stays 234ccdd with A's 11-entry tree kept. B's fix sketch equals HEAD on C's own browser probe at both viewports, full suite 3559/3559, 3 of 4 mutants red (the bug's own mutant is green in jsdom, so its row is browser-only). PERF-DRAG-PREVIEW stage b is not done. Regression not due until 2026-11-05. Many scoped items remain; nothing external blocks.",
- "nextTask": "Round 328: PERF-DRAG-PREVIEW stage b fix-up on A's round-327 tree (234ccdd + 11 entries). ArrangementContext.tsx status-preview block only: flushStatusPreview no longer clears the store (adopt once per preview sequence), a layout effect on statusEntry clears an adopted preview after the commit, previewStatus skips a same-text write when the store is empty; DP17-DP19 appended; doc 232 l.4 -> C round 328 PASS. C: claims, scope hashes, unit x3, 4 mutants (MU-SYNC-CLEAR green by design), SETTLE-REMOUNT browser probe x3 A vs HEAD both viewports (0 mutations, same node), REFUSAL-MID-DRAG, all B-FADE-* and B-VIDEO-FADE, export sha, PERF alone, G328-AUTH, docs.",
+ "reason": "C round 328 PASS (browserVerified/realVerified true), gate 328 published dae81bf: PERF-DRAG-PREVIEW stage b done, C-R327-01/02 closed. PERF-DRAG-PREVIEW item not done (fade 21.633/move vs target <= 15; stage c remains). New Lows: C-R328-01 fixed next round as DP20, C-R328-02 deferred, A-R328-REVIEW-SAME-TEXT-RACE open hypothesis. Regression not due until 2026-11-05. Many scoped items remain; nothing external blocks. Gate 328 review: no Critical/Medium; GATE328-S1/S2/S3 Lows deferred (D-29z953).",
+ "nextTask": "Round 329: PERF-DRAG-PREVIEW stage c1 on dae81bf. git apply b-round-328/sketch/sketch.patch.txt: StudioWorkspace selects the ceil'd timelineSeconds primitive instead of the raw preview end, the overview wrapper computes extent from its own preview subscription, the transport project-end readout becomes the leaf ArrangementProjectEndText; DP20 (C-R328-01), DP21, DP22; doc 232 by hand. C: claims, scope, unit x3, 5 mutants + own, END-LIVE and D-ROWS A vs HEAD at both viewports, DRAG-NAMES, PERF alone (move rows record, ~<=29/move), G329-AUTH, docs.",
  "remaining": [
   "PERF-DRAG-PREVIEW",
   "REGRESSION-ROUND-2026-11-05",
@@ -36,6 +36,8 @@
   "RECORDING-META-S1",
   "deferred_low_polish",
   "C-R318-06",
+  "C-R328-01",
+  "A-R328-REVIEW-SAME-TEXT-RACE",
   "SRW-21"
  ]
 }

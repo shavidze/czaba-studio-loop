@@ -1,0 +1,195 @@
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -808,14 +808,31 @@
+ 
+ const ArrangementDetailPanelWithSelection = memo(ArrangementDetailPanelWithSelectionInner);
+ 
++type ArrangementOverviewWithPreviewProps = Omit<
++  ComponentProps<typeof ArrangementOverview>,
++  'extent'
++> & {
++  committedProjectEnd: number;
++};
++
+ function ArrangementOverviewWithPreviewInner({
+   arrangement,
++  committedProjectEnd,
+   ...overviewProps
+-}: ComponentProps<typeof ArrangementOverview>) {
++}: ArrangementOverviewWithPreviewProps) {
+   const shownArrangement = useArrangementPreview((state) =>
+     selectPreviewOrCommittedArrangement(state.preview, arrangement),
+   );
+-  return <ArrangementOverview {...overviewProps} arrangement={shownArrangement} />;
++  const projectEnd = useArrangementPreview((state) =>
++    selectPreviewProjectEnd(state.preview, committedProjectEnd),
++  );
++  return (
++    <ArrangementOverview
++      {...overviewProps}
++      arrangement={shownArrangement}
++      extent={timelineExtent(projectEnd, arrangement.loop)}
++    />
++  );
+ }
+ 
+ const ArrangementOverviewWithPreview = memo(ArrangementOverviewWithPreviewInner);
+@@ -852,9 +869,6 @@
+     setStatus,
+     isPointerGestureActive,
+   } = workspace;
+-  const projectEnd = useArrangementPreview((state) =>
+-    selectPreviewProjectEnd(state.preview, committedProjectEnd),
+-  );
+   const positionStore = useArrangementPositionStore();
+   const rangeStore = useArrangementRangeStore();
+   const [isExportOpen, setIsExportOpen] = useState(false);
+@@ -2932,13 +2946,16 @@
+     [arrangement, trackSelection],
+   );
+   const viewportSeconds = Math.max(0, viewportWidth - ARRANGEMENT_HEADER_WIDTH_PX) / pxPerSecond;
+-  const timelineSeconds = Math.ceil(Math.max(projectEnd + TIMELINE_TAIL_SECONDS, viewportSeconds));
++  const timelineSeconds = useArrangementPreview((state) =>
++    Math.ceil(
++      Math.max(
++        selectPreviewProjectEnd(state.preview, committedProjectEnd) + TIMELINE_TAIL_SECONDS,
++        viewportSeconds,
++      ),
++    ),
++  );
+   const timelineWidth = timelineSeconds * pxPerSecond;
+   timelineSecondsRef.current = timelineSeconds;
+-  const extent = useMemo(
+-    () => timelineExtent(projectEnd, arrangement.loop),
+-    [projectEnd, arrangement.loop],
+-  );
+   const transportNavigation = useMemo(
+     () => ({
+       followMode,
+@@ -3032,7 +3049,7 @@
+               ) : (
+                 <ArrangementOverviewWithPreview
+                   arrangement={arrangement}
+-                  extent={extent}
++                  committedProjectEnd={committedProjectEnd}
+                   pxPerSecond={pxPerSecond}
+                   getTimelineView={getTimelineView}
+                   getTimelineViewportPx={getTimelineViewportPx}
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -77,6 +77,13 @@
+   );
+ }
+ 
++function ArrangementProjectEndText({ committedProjectEnd }: { committedProjectEnd: number }) {
++  const projectEnd = useArrangementPreview((state) =>
++    selectPreviewProjectEnd(state.preview, committedProjectEnd),
++  );
++  return <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>;
++}
++
+ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTransportProps) {
+   const {
+     isPlaying,
+@@ -93,9 +100,6 @@
+     arrangement,
+     toggleLoopSelection,
+   } = useArrangement();
+-  const projectEnd = useArrangementPreview((state) =>
+-    selectPreviewProjectEnd(state.preview, committedProjectEnd),
+-  );
+   const hasRange = useArrangementRange((state) => state.range !== null);
+   const hasSelectedClip = useArrangementSelection((state) => state.selectedClipIds.length > 0);
+   const isRangeAllTracks = useArrangementRange((state) => state.range?.allTracks === true);
+@@ -262,7 +266,7 @@
+           <ArrangementTransportPosition />
+           <span className="text-xs text-muted">
+             {studioPlaybackStrings.projectEndPrefix}{' '}
+-            <span data-testid="arrangement-project-end">{formatArrangementTime(projectEnd)}</span>
++            <ArrangementProjectEndText committedProjectEnd={committedProjectEnd} />
+           </span>
+         </div>
+         <button
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -798,4 +798,80 @@
+       studioClipStrings.fadeCommitted('Fade In', '2.000'),
+     );
+   });
++
++  it('DP20 a committed write and a newer readout in one batch mid-fade keep the newer readout', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace();
++    const audio = clipParts('c1');
++    pointerDownAt(fadeHandleOf(audio.root), 1, 0);
++    pointerMoveTo(audio.root, 1, 80);
++    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 2.000 s');
++    act(() => {
++      live(api).setStatus('Committed write.');
++      pointerMoveTo(audio.root, 1, 120);
++    });
++    expect(textOf(view, 'arrangement-status')).toBe('Fade In: 3.000 s');
++    expect(live(api).getStatusPreviewText()).toBe('Fade In: 3.000 s');
++    pointerUpAt(audio.root, 1, 120);
++    expect(textOf(view, 'arrangement-status')).toBe(
++      studioClipStrings.fadeCommitted('Fade In', '3.000'),
++    );
++  });
++});
++
++const LATE_AUDIO_CLIPS: ArrangementClip[] = [
++  { id: 'c1', trackId: 'music', sourceId: 'song', start: 6, sourceOffset: 0, duration: 6 },
++  { id: 'c2', trackId: 'sfx', sourceId: 'hit', start: 1, sourceOffset: 0, duration: 2 },
++];
++
++describe('PERF-DRAG-PREVIEW stage c1 — the project end during a same-lane move', () => {
++  it('DP21 a move that extends the project end inside one timeline second renders no workspace', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace(LATE_AUDIO_CLIPS);
++    const { root, header } = clipParts('c1');
++    const ruler = view.getByTestId('arrangement-ruler');
++    const overview = view.getByTestId('arrangement-overview');
++    pointerDownAt(header, 1, 40);
++    pointerMoveTo(root, 1, 50);
++    expect(textOf(view, 'arrangement-project-end')).toContain('00:12.250');
++    const rulerWidth = ruler.style.width;
++    renderLog.counts.clear();
++    pointerMoveTo(root, 1, 60);
++    pointerMoveTo(root, 1, 70);
++    expect(rendersOf('ArrangementProvider')).toBe(0);
++    expect(rendersOf('StudioWorkspace')).toBe(0);
++    expect(rendersOf('ArrangementRuler')).toBe(0);
++    expect(rendersOf('ArrangementTransport')).toBe(0);
++    expect(rendersOf('ArrangementProjectEndText')).toBe(2);
++    expect(rendersOf('ArrangementLane')).toBe(2);
++    expect(rendersOf('ArrangementOverviewWithPreviewInner')).toBe(2);
++    expect(textOf(view, 'arrangement-project-end')).toContain('00:12.750');
++    expect(overview.dataset.extent).toBe('12.750');
++    expect(ruler.style.width).toBe(rulerWidth);
++    pointerUpAt(root, 1, 70);
++    expect(textOf(view, 'arrangement-project-end')).toContain('00:12.750');
++    expect(overview.dataset.extent).toBe('12.750');
++  });
++
++  it('DP22 a move that crosses into the next timeline second renders the workspace once and widens the ruler', async () => {
++    const { view, clipParts } = await mountPreviewWorkspace(LATE_AUDIO_CLIPS);
++    const { root, header } = clipParts('c1');
++    const ruler = view.getByTestId('arrangement-ruler');
++    pointerDownAt(header, 1, 40);
++    pointerMoveTo(root, 1, 50);
++    const rulerWidth = ruler.style.width;
++    renderLog.counts.clear();
++    pointerMoveTo(root, 1, 80);
++    expect(rendersOf('StudioWorkspace')).toBe(0);
++    expect(ruler.style.width).toBe(rulerWidth);
++    pointerMoveTo(root, 1, 90);
++    expect(rendersOf('ArrangementProvider')).toBe(0);
++    expect(rendersOf('StudioWorkspace')).toBe(1);
++    expect(rendersOf('ArrangementRuler')).toBe(1);
++    expect(ruler.style.width).not.toBe(rulerWidth);
++    expect(Number.parseFloat(ruler.style.width) - Number.parseFloat(rulerWidth)).toBe(
++      PX_PER_SECOND,
++    );
++    expect(view.getByTestId('arrangement-overview').dataset.extent).toBe('13.250');
++    pointerUpAt(root, 1, 90);
++    expect(ruler.style.width).not.toBe(rulerWidth);
++  });
+ });

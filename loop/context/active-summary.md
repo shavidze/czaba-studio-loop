@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-04T06:10:45.386Z)
+# Active loop summary (2026-11-04T07:35:57.479Z)
 
-- backlog.json 3160 KB -> active view 429 KB
-- status: G_ROOT_GATE round 327
-- servers: `{"checkedUtc":"2026-11-04T05:39:28.1724401Z","round":327,"attempt":1,"store":200}`
-- last publication: 234ccdd9569c2948060798fbff8dee430f569010 (rounds 325-326)
-- last root gate: round 327 skipped - C taskStatus FAIL
+- backlog.json 3169 KB -> active view 431 KB
+- status: G_ROOT_GATE round 328
+- servers: `{"checkedUtc":"2026-11-04T06:55:31.5079468Z","round":328,"attempt":1,"store":200}`
+- last publication: dae81bf3b07de64ab245fee0755b1fa4c85a638c (rounds 327-328)
+- last root gate: round 328 published - commit dae81bf3b07de64ab245fee0755b1fa4c85a638c pushed
 
 ## Current items: -
 
@@ -802,6 +802,12 @@
 - SIG-R326-DETAIL-IGNORES-FADE / info / signal (D-29z935); stage c candidate / detail panel re-renders per fade move although it shows no fade field; an equality that ignores fadeIn/fadeOut needs a stale-guard test
 - SIG-R326-SKIP-UNCHANGED-FADE / info / signal (D-29z935); stage c candidate / setFade builds a new arrangement when the rounded fade seconds did not change (sub-pixel moves)
 - LIVE-MEAS-MARKER-STEP-PLAYING / info / requested_from_root (D-29z930): user-review/live-checks.md / root measures in Live 12: while playing, does Ctrl+Right (Win) / Alt+Right (Mac) to the next locator move playback, the insert marker, or bo
+- C-R327-01 / medium / open -> fix-up round 328 (D-29z938) / collection settle mid fade drag swaps the stale pre-drag sentence into the aria-live status for ~6 ms, then re-adds the fade text as a new s
+- C-R327-02 / low / open -> fixed with C-R327-01 in round 328 (same root; owned code, low cost) / after a same-text committed write mid fade drag, a same-value move remounts the status span
+- A-R327-REVIEW-SAME-TEXT-REMOUNT / low / ruled (D-29z938): merged into C-R327-02; A STOP answered / = C-R327-02
+- A-R327-REVIEW-SETTLE-ORDER / low / deferred_low_polish (D-29z940); a later fix must keep the settle -> flush order / settle writes lastNonRefusalStatusRef before setStatus and the flush overwrites it; outcome equals HEAD but depends on ordering
+- SIG-R327-NOBPM-RULER-CLICK / info / signal (D-29z941): one probe in the next REGRESSION round against the SABA-B-11a contract / no-BPM project: Alt-click on the 20 px bars ruler did not move the insert marker (A and HEAD)
+- SIG-R327-HARNESS-PER-COMMIT / info / signal (D-29z941); not scheduled / perf harness reports only the release max components; per-commit counts would measure the second stopped release commit
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

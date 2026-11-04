@@ -1,0 +1,11 @@
+# Checkpoint addendum to D-29z915 (B, round 328 → 329 planning, 2026-11-04). Non-blocking
+
+This adds one signal to the open frontend-architect checkpoint request (`b-round-324-checkpoint-request.md`; earlier addenda `b-round-326-checkpoint-addendum.md` and `b-round-327-checkpoint-addendum.md`). It is not a new request, and it blocks neither round 329 nor the rest of stage c. As of this planning the checkpoint has no recorded answer.
+
+- **Signal (D-29z949, A-R328-ARCH-STATUS-HOOK).** A's code-reviewer in round 328 noted that the status-preview region of `ArrangementContext.tsx` (about l.727–794 at `dae81bf`) was reworked in two consecutive rounds (327, 328). If a third round has to change that block, A proposes one bounded task: extract a `useArrangementStatus(statusPreviewStore)` hook (reducer, flush, `previewStatus`, the layout-effect clear), with `setStatus`, `previewStatus`, `getStatusPreviewText` and `statusKey` behaving exactly as now and DP9a–DP20 and SP1–SP3 unchanged.
+- **Trigger not met.** Round 329 adds a test row (DP20) for that block but changes no line of it. B does not schedule the extraction.
+- **Related open items** for the same question (round 327 addendum): A-R327-ARCH-STATUS-ONE-SOURCE (move the committed status into the store), C-R328-02 (one extra fade release commit from the layout-effect clear, deferred Low), A-R328-REVIEW-SAME-TEXT-RACE (Low hypothesis, not reproduced).
+- **Question for the checkpoint** (same scope as before, ≤ 3 sentences): would a `useArrangementStatus` hook, or one status store, remove the release commit of C-R328-02 and the race hypothesis together, and is it worth a bounded task before PERF-10?
+
+## Gate 328 review (D-29z953)
+- **GATE328-ARCH-STATUS-STORE.** The gate reviewer of `dae81bf` makes the same proposal in a concrete form: move status ownership into `lib/arrangement/status-store.ts` with a provider-internal hook and one `getShownStatus()` helper, which would replace the five inline `getStatusPreviewText() ?? status` reads (two in `StudioWorkspace.tsx`, three in `ArrangementMarkerRow.tsx`, per the review). `useArrangement()` keeps its shape. It would be done when DP9a–DP20 and SP1–SP3 pass unchanged, plus a browser probe for GATE328-S1. The reviewer's verdict is "keep it for now". Deciding not to refactor is also acceptable.
