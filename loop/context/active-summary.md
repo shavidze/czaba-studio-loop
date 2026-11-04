@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-04T01:30:01.497Z)
+# Active loop summary (2026-11-04T03:36:19.169Z)
 
-- backlog.json 3133 KB -> active view 426 KB
-- status: G_ROOT_GATE round 324
-- servers: `{"checkedUtc":"2026-11-04T00:18:19.4409107Z","round":324,"attempt":1,"store":200}`
+- backlog.json 3143 KB -> active view 426 KB
+- status: G_ROOT_GATE round 325
+- servers: `{"checkedUtc":"2026-11-04T02:36:05.0792649Z","round":325,"attempt":1,"store":200}`
 - last publication: b9254349e298bd733cd87af9fe7283f060da25fb (rounds 321-324)
-- last root gate: round 324 published - commit b9254349e298bd733cd87af9fe7283f060da25fb pushed
+- last root gate: round 325 failed - verify exit 1 (gates/round-325/verify.log)
 
 ## Current items: -
 
@@ -786,12 +786,14 @@
 - GATE320-S2-POST-AWAIT-ORDER / low (provisional) / open_low_provisional (D-29z892): HEAD probe b-round-321/s2-video-head.json shows the mechanism in the DOM (2 commits, range cleared + old selection, ~8 ms) with 0 rAF frames observed; PERF-8b S2-VIDEO row on A tree must show 0 mixed commits, else Medium | open_low_provisional (D-29z881): tech-lead: mechanism real (add-video path), final state correct; Medium only if the intermediate frame paints or an effect fires on it. PERF-8b carries a browser experiment row (per-commit logger + rAF marker; control unstable_batchedUpdates on scratch) / setRange(null) now runs before setSelectedClipId/setSelection; after an await (add video, library clip load) the store write commits at Sync
 - GATE320-S3-ALL-LANES-DRAG / info / scheduled (D-29z881): record row in PERF-10 (required_rows_d29z880) / all-tracks drag re-renders every lane per move; not covered by an asserted row
 - GATE320-S6-TWO-STORE-PATTERNS / info / requested (D-29z887): ARCH-CHECKPOINT-PERF8-STORE-PATTERN / zustand range store next to hand-written useSyncExternalStore stores
-- C-R322-01 / medium / open (D-29z897, D-29z904): round-323 R9-L2 edit applied by A and green in A's and C's runs (c-round-323/unit-c.log), but UNIT did not PASS (R11-P1e, C-R323-01); closes on round-324 UNIT PASS / render-budget.test.tsx positive control (selectClip -> value changes, every consumer renders) contradicts PERF-8b; not covered by the 2.4 ex
-- C-R322-02 / low / open (D-29z898): round-323 reworded clause met provisionally on the stopped tree (c-round-323/probe/dup-summary.txt); closes on round-324 SELECT-NAMES PASS incl. MU-SELECTION-IN-VALUE / SELECT-NAMES 'click-original-again has 0 commits' cannot pass on any tree (HEAD has a trailing empty commit)
-- C-R323-01 / medium / open (D-29z904): option (a) granted in round 324; closes on round-324 UNIT PASS / render-budget.test.tsx R11-P1e positive control (ArrangementDetailPanel > 0 on Play/Stop/Play) false once the round-323 detail-wrapper memo 
-- C-R323-02 / low / open (D-29z906): SS8 + MU-GROUP-HEADER-NO-MEMO in round 324 (fixed now, not deferred); if not buildable within grants -> deferred_low_polish / ArrangementGroupHeaderWithSelection memo not pinned by any test (un-memo mutant green 110/110)
-- INFO-C323-S-GROUP-PREMISE / info / open (D-29z907): S-GROUP redefined on Ctrl+A in a folded group; closes on round-324 S-GROUP PASS / round-323 S-GROUP partly vacuous: fold clears the clip selection, so the folded overview never showed a selected clip
 - CAND-R323-FOLD-CLEARS-SELECTION / info / candidate (D-29z909): REGRESSION round question with a Live 12 reference; not a confirmed bug / folding a group clears the clip selection (HEAD and A)
+- GATE324-S1 / low / scheduled (D-29z913): round 325 section 5 (doc 231 problems section records D-29z912) / doc 231 l.4 Completed while l.71-72 still lists K19 as awaiting B
+- GATE324-S2 / low / scheduled (D-29z913): round 325 section 5 doc half (doc 230 line rewritten, doc 231 async rule); code half is a rule only, also in checkpoint request Q3 / doc 230 D-29z860 line implies PERF-8b fixes async commit split; async select-after-await rule missing
+- GATE324-S3 / info / signal (D-29z913): PERF-10 / selection-store.ts:41 candidateClipIds.includes inside filter, O(selected x clips) per lane per selection change
+- GATE324-S4 / low / scheduled (D-29z913): round 325 section 5 (doc 231 approach sentence) / selector key joins ids with U+0000; assumption undocumented
+- GATE324-S5 / info / signal (D-29z913): PERF-10 note / ArrangementDetailPanelWithSelection reads the whole selection array (correct: primary clip .at(-1)); do not narrow to length
+- GATE324-S6 / low / scheduled (D-29z913): round 325 section 5 / doc 230 new ruling line in English without the - **D-ID:** format (GEORGIAN_DOCS)
+- SIG-R324-OTHER-PREVIEW-CALLERS / info / signal (D-29z916): outside PERF-DRAG-PREVIEW scope; candidate after stage c, measure first (L37) / marker drag, envelope point drag and loop brace preview also re-render the whole provider per move via previewArrangement
 
 ## Other open items
 - SRW-03 [c_pass_tech_lead_manual (C-R6-02 open_tech_lead_quiet_chrome; round 112 cloud measurement section 5 row 'FAIL, no app attribution'; D-29z78)] Unified transport for video and audio; mute original video sound without stopping video

@@ -1,0 +1,128 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-04T02:36:05.0792649Z",
+  "round": 325,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "A-MUTANTS (7/7 red on C's run)",
+  "C own mutants C-MU-VIDEO-NEW-PATH (DP9) and C-MU-DETAIL-NO-SHALLOW",
+  "EXPECT",
+  "DRAG-NAMES",
+  "PERF-DRAG",
+  "PERF-LOAD",
+  "D-TRIM",
+  "D-MOVE",
+  "D-MIXED",
+  "D-ABORT",
+  "D-UNDO",
+  "D-NOFLASH",
+  "D-OLDPATH",
+  "D-LOOP",
+  "EXPORT",
+  "DOCS",
+  "G325-AUTH"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "build in store/",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "info": [
+  {
+   "id": "INFO-C325-LOW4C",
+   "origin": "A",
+   "text": "A's code-review Low 4c (unmount mid-drag converges in passive cleanup; possible one-frame split) remains for a B ruling; not reproduced by C. The window-only pointerup setTimeout abort path (ArrangementContext.tsx:1921-1924) reverts via updateHistory to gesture.before, so store clear and setHistory land on the same geometry by construction; not driven in the browser"
+  },
+  {
+   "id": "INFO-C325-MOVE-COMMITS",
+   "origin": "A",
+   "text": "interact.drag.move.*.commits-per-move (wallclock, record) 1.967 -> 2; dev probe shows equal move commit counts (8/8); cause unverified; doc 168's '118 -> 120' sentence states the number without a verified cause"
+  },
+  {
+   "id": "INFO-C325-MIXED1280-REPLACED",
+   "origin": "environment",
+   "text": "D-MIXED (ii) at 1280 was vacuous on both trees in the sequential run (header off-screen); replaced by a fresh-setup run, 0 diffs"
+  },
+  {
+   "id": "INFO-C325-WARM",
+   "origin": "environment",
+   "text": "HEAD dev server first browser warm-up timed out on cold compile (L38); second warm-up OK; no timed probe affected"
+  },
+  {
+   "id": "INFO-C325-SRCMARK-RERUN",
+   "origin": "C harness",
+   "text": "first D-MIXED runs did not capture the opacity-40 source mark; fresh rerun with class and opacity on both trees and viewports: 0 diffs"
+  }
+ ],
+ "measurements": {
+  "perfDrag": {
+   "trimPerMoveHead": 106.2,
+   "trimPerMoveA": 24.583,
+   "ratio": 0.231,
+   "trimMaxHead": 106,
+   "trimMaxA": 23,
+   "movePerMoveHead": 105.317,
+   "movePerMoveA": 106.85,
+   "moveRestartAsserts": [
+    0,
+    0
+   ],
+   "live": {
+    "trim": 1,
+    "move": 1
+   },
+   "deterministic": {
+    "equal": 94,
+    "lower": 8,
+    "rise": 19,
+    "riseExplainedBy": "ArrangementOverviewWithPreviewInner x1 per commit (probe)"
+   }
+  },
+  "perfLoad": {
+   "deterministicEqual": 164,
+   "rise": 0,
+   "lower": 0
+  },
+  "exportSha256": "453d1a04637760b499c373cb4da17aff0adc93e49f19e526b007d5eb8fdac567",
+  "exportWav": {
+   "channels": 2,
+   "rate": 48000,
+   "bits": 24,
+   "durationSec": 118.815,
+   "firstAudibleSec": 41.91
+  },
+  "behaviourDiffsHeadVsA": 0
+ },
+ "manifestPaths": 9,
+ "missingPaths": [],
+ "countMismatches": [
+  "K22 prints the saved list length 50; live list 51 (+drag-preview-render.test.tsx), as A reported"
+ ],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 13,
+ "mutantsRecorded": 7,
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "B built no feature sketch; mutants are run on A's tree (D-29z917)",
+ "mutantRedOnTree": "7/7 named mutants red on their rows + 2 C mutants red; restored 14/14 green",
+ "gateChecksNamed": 6,
+ "gateChecksRunOnSketch": 0,
+ "gateChecksRunOnSketchReason": "no B sketch",
+ "chainHeadGateRunGreen": null,
+ "chainHeadGateRunGreenReason": "not a fix-up chain",
+ "ableton": "not applicable (no behaviour change; HEAD equality is the reference)",
+ "manifestPathsMethod": "backticked a-round-325/ paths in a-round-325.md (9); 4 unprefixed citations also exist"
+}

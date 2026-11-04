@@ -1,0 +1,37 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c325m[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1590[2mms[22m[39m
+     [33m[2m✓[22m[39m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace [33m 345[2mms[22m[39m
+     [32m✓[39m DP3 the release adds exactly one history entry, Undo restores, the store is empty[32m 172[2mms[22m[39m
+     [32m✓[39m DP4 a window blur mid-trim puts the clip back with no history entry[32m 114[2mms[22m[39m
+     [32m✓[39m DP5 a same-lane move keeps the ref on the preview while React holds the original[32m 137[2mms[22m[39m
+     [32m✓[39m DP6 the readout, the detail panel and the overview bar follow the trim preview[32m 145[2mms[22m[39m
+[31m     [31m×[31m DP7 a trimEnd drag past the project end updates the project-end readout live[39m[32m 114[2mms[22m[39m
+     [32m✓[39m DP8a a release with no commit converges React state to the preview and clears the store[32m 84[2mms[22m[39m
+     [32m✓[39m DP8b a move back to the start adds no entry and leaves the store empty[32m 119[2mms[22m[39m
+     [32m✓[39m DP5b same lane → other lane → back → release: one entry at the final place, store empty[32m 151[2mms[22m[39m
+     [32m✓[39m DP9 a fade-in drag and a video clip move keep the provider path and status[32m 207[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 02:42:01
+[2m   Duration [22m 4.19s[2m (transform 1.34s, setup 0ms, import 1.92s, tests 1.59s, environment 529ms)[22m
+
+
+::error file=/tmp/c325m/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP7 a trimEnd drag past the project end updates the project-end readout live,line=472,column=57::AssertionError: expected '00:08.000' not to be '00:08.000' // Object.is equality%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:472:57%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP7 a trimEnd drag past the project end updates the project-end readout live
+[31m[1mAssertionError[22m: expected '00:08.000' not to be '00:08.000' // Object.is equality[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m472:57[22m[39m
+    [90m470| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m320[39m)[33m;[39m
+    [90m471| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m360[39m)[33m;[39m
+    [90m472| [39m    [34mexpect[39m([34mtextOf[39m(view[33m,[39m [32m'arrangement-project-end'[39m))[33m.[39mnot[33m.[39m[34mtoBe[39m(endFirst)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m473| [39m    expect(textOf(view, 'arrangement-project-end')).toContain('00:11.0…
+    [90m474| [39m    [34mpointerUpAt[39m(root[33m,[39m [34m1[39m[33m,[39m [34m360[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

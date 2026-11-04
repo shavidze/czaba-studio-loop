@@ -1,0 +1,135 @@
+diff --git a/app/lib/arrangement/__tests__/gesture-guard.test.tsx b/app/lib/arrangement/__tests__/gesture-guard.test.tsx
+index 738fc0a..5c3738f 100644
+--- a/app/lib/arrangement/__tests__/gesture-guard.test.tsx
++++ b/app/lib/arrangement/__tests__/gesture-guard.test.tsx
+@@ -138,6 +138,12 @@ function clipStart(api: GuardApiRef, clipId: string): number | undefined {
+   return live(api).arrangement.clips.find((clip) => clip.id === clipId)?.start;
+ }
+ 
++function previewClipStart(api: GuardApiRef, clipId: string): number | undefined {
++  return live(api)
++    .getArrangement()
++    .clips.find((clip) => clip.id === clipId)?.start;
++}
++
+ const press = { button: 0, buttons: 1 };
+ 
+ function volumeSlider(view: ReturnType<typeof render>, trackName: string): HTMLInputElement {
+@@ -256,14 +262,14 @@ describe('D-26 one edit gesture at a time (C-R5-02, R26-U)', () => {
+     const impact = clipParts('impact');
+     fireEvent.pointerDown(music.header, { ...press, pointerId: 7, clientX: 100, clientY: 0 });
+     fireEvent.pointerMove(music.root, { pointerId: 7, clientX: 180, clientY: 0 });
+-    expect(clipStart(api, 'music-1')).toBe(4);
++    expect(previewClipStart(api, 'music-1')).toBe(4);
+     fireEvent.pointerDown(impact.header, {
+       ...press,
+       pointerId: 7,
+       clientX: 340,
+       clientY: SFX_LANE_Y,
+     });
+-    expect(clipStart(api, 'music-1')).toBe(2);
++    expect(previewClipStart(api, 'music-1')).toBe(2);
+     fireEvent.pointerMove(impact.root, { pointerId: 7, clientX: 380, clientY: SFX_LANE_Y });
+     fireEvent.pointerUp(impact.root, { pointerId: 7, clientX: 380, clientY: SFX_LANE_Y });
+     expect(clipStart(api, 'music-1')).toBe(2);
+@@ -341,7 +347,7 @@ describe('D-26 one edit gesture at a time (C-R5-02, R26-U)', () => {
+     const impact = clipParts('impact');
+     fireEvent.pointerDown(music.header, { ...press, pointerId: 31, clientX: 100, clientY: 0 });
+     fireEvent.pointerMove(music.root, { pointerId: 31, clientX: 180, clientY: 0 });
+-    expect(clipStart(api, 'music-1')).toBe(4);
++    expect(previewClipStart(api, 'music-1')).toBe(4);
+     fireEvent.pointerUp(window, { pointerId: 31 });
+     await act(async () => {
+       await new Promise((resolve) => setTimeout(resolve, 0));
+diff --git a/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx b/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+index c8a3570..f16b3ff 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-edit.test.tsx
+@@ -239,6 +239,16 @@ function clipOf(api: EditApiRef, clipId: string): ArrangementClip {
+   return clip;
+ }
+ 
++function previewClipOf(api: EditApiRef, clipId: string): ArrangementClip {
++  const clip = live(api)
++    .getArrangement()
++    .clips.find((entry) => entry.id === clipId);
++  if (!clip) {
++    throw new Error(`clip ${clipId} missing`);
++  }
++  return clip;
++}
++
+ function clipEnd(api: EditApiRef, clipId: string): number {
+   const clip = clipOf(api, clipId);
+   return Math.round((clip.start + clip.duration) * 1000) / 1000;
+@@ -389,7 +399,7 @@ describe('SRW-14 stage 2 trim edges on the grid', () => {
+     const parts = clipParts('m1');
+     dragFrom(parts.trimStart, parts.root, 2, [{ dx: -40 }], { release: false });
+     expect(statusText(view)).toBe(TRIM_START_BLOCKED);
+-    expect(clipOf(api, 'm1').start).toBeCloseTo(7.05, 9);
++    expect(previewClipOf(api, 'm1').start).toBeCloseTo(7.05, 9);
+     fireEvent.pointerUp(parts.root, { pointerId: 1, clientX: -38, clientY: MUSIC_LANE_Y });
+     expect(parts.root.dataset.clipStart).toBe('7.050');
+     expect(clipOf(api, 'm1').sourceOffset).toBeCloseTo(0, 9);
+@@ -417,7 +427,7 @@ describe('SRW-14 stage 2 trim edges on the grid', () => {
+     pressG();
+     const parts = clipParts('m1');
+     dragFrom(parts.trimStart, parts.root, 2, [{ dx: -10 }], { release: false });
+-    expect(clipOf(api, 'm1').start).toBeCloseTo(7.6, 9);
++    expect(previewClipOf(api, 'm1').start).toBeCloseTo(7.6, 9);
+     expect(statusText(view)).toBe(TRIM_START_BLOCKED);
+     fireEvent.pointerUp(parts.root, { pointerId: 1, clientX: -8, clientY: MUSIC_LANE_Y });
+     expect(parts.root.dataset.clipStart).toBe('7.600');
+@@ -541,7 +551,7 @@ describe('SRW-14 stage 2 Alt bypass and temporary enable', () => {
+     dragFrom(parts.header, parts.root, 100, [{ dx: 20 }, { dx: 37, altKey: true }], {
+       release: false,
+     });
+-    expect(clipOf(api, 'm1').start).toBe(7.925);
++    expect(previewClipOf(api, 'm1').start).toBe(7.925);
+     fireEvent.pointerUp(parts.root, { pointerId: 1, clientX: 137, clientY: MUSIC_LANE_Y });
+     expect(clipOf(api, 'm1').start).toBe(7.925);
+     expect(live(api).undoLabel).toBe('Move clip');
+diff --git a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+index eab24cf..1111145 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-ui.test.tsx
+@@ -131,6 +131,16 @@ function clipOf(api: GridApiRef, clipId: string): ArrangementClip {
+   return clip;
+ }
+ 
++function previewClipOf(api: GridApiRef, clipId: string): ArrangementClip {
++  const clip = live(api)
++    .getArrangement()
++    .clips.find((entry) => entry.id === clipId);
++  if (!clip) {
++    throw new Error(`clip ${clipId} missing`);
++  }
++  return clip;
++}
++
+ function snapToggle(view: ReturnType<typeof render>): HTMLButtonElement {
+   const button = view.getByTestId('arrangement-snap-toggle');
+   if (!(button instanceof HTMLButtonElement)) {
+@@ -533,7 +543,7 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+       clientY: MUSIC_LANE_Y,
+     });
+     fireEvent.pointerMove(parts.root, { pointerId: 5, clientX: 120, clientY: MUSIC_LANE_Y });
+-    expect(clipOf(api, 'm1').start).toBe(7.5);
++    expect(previewClipOf(api, 'm1').start).toBe(7.5);
+     pressG();
+     fireEvent.pointerMove(parts.root, { pointerId: 5, clientX: 137, clientY: MUSIC_LANE_Y });
+     fireEvent.pointerUp(parts.root, { pointerId: 5, clientX: 137, clientY: MUSIC_LANE_Y });
+@@ -554,11 +564,11 @@ describe('SRW-14 stage 1 snapping of clip moves', { timeout: 15_000 }, () => {
+       clientY: MUSIC_LANE_Y,
+     });
+     fireEvent.pointerMove(parts.root, { pointerId: 6, clientX: 156, clientY: MUSIC_LANE_Y });
+-    expect(clipOf(api, 'm1').start).toBe(8.5);
++    expect(previewClipOf(api, 'm1').start).toBe(8.5);
+     expect(view.getByTestId('arrangement-status').textContent).not.toBe(MOVE_BLOCKED_STATUS);
+     fireEvent.pointerMove(parts.root, { pointerId: 6, clientX: 176, clientY: MUSIC_LANE_Y });
+     expect(view.getByTestId('arrangement-status').textContent).toBe(MOVE_BLOCKED_STATUS);
+-    expect(clipOf(api, 'm1').start).toBe(8.5);
++    expect(previewClipOf(api, 'm1').start).toBe(8.5);
+     fireEvent.pointerUp(parts.root, { pointerId: 6, clientX: 176, clientY: MUSIC_LANE_Y });
+     const moved = clipOf(api, 'm1');
+     const neighbour = clipOf(api, 'm2');

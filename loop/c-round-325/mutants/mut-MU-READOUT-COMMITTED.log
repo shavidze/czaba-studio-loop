@@ -1,0 +1,37 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c325m[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1779[2mms[22m[39m
+     [33m[2m✓[22m[39m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace [33m 373[2mms[22m[39m
+     [32m✓[39m DP3 the release adds exactly one history entry, Undo restores, the store is empty[32m 188[2mms[22m[39m
+     [32m✓[39m DP4 a window blur mid-trim puts the clip back with no history entry[32m 123[2mms[22m[39m
+     [32m✓[39m DP5 a same-lane move keeps the ref on the preview while React holds the original[32m 179[2mms[22m[39m
+[31m     [31m×[31m DP6 the readout, the detail panel and the overview bar follow the trim preview[39m[32m 138[2mms[22m[39m
+     [32m✓[39m DP7 a trimEnd drag past the project end updates the project-end readout live[32m 142[2mms[22m[39m
+     [32m✓[39m DP8a a release with no commit converges React state to the preview and clears the store[32m 91[2mms[22m[39m
+     [32m✓[39m DP8b a move back to the start adds no entry and leaves the store empty[32m 144[2mms[22m[39m
+     [32m✓[39m DP5b same lane → other lane → back → release: one entry at the final place, store empty[32m 186[2mms[22m[39m
+     [32m✓[39m DP9 a fade-in drag and a video clip move keep the provider path and status[32m 213[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 02:41:55
+[2m   Duration [22m 4.48s[2m (transform 1.41s, setup 0ms, import 2.03s, tests 1.78s, environment 519ms)[22m
+
+
+::error file=/tmp/c325m/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP6 the readout%2C the detail panel and the overview bar follow the trim preview,line=453,column=59::AssertionError: expected 'Clip: Song · start 00:02.000 · length…' not to be 'Clip: Song · start 00:02.000 · length…' // Object.is equality%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:453:59%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP6 the readout, the detail panel and the overview bar follow the trim preview
+[31m[1mAssertionError[22m: expected 'Clip: Song · start 00:02.000 · length…' not to be 'Clip: Song · start 00:02.000 · length…' // Object.is equality[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m453:59[22m[39m
+    [90m451| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m80[39m)[33m;[39m
+    [90m452| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m120[39m)[33m;[39m
+    [90m453| [39m    expect(textOf(view, 'arrangement-selected-clip')).not.toBe(readout…
+    [90m   | [39m                                                          [31m^[39m
+    [90m454| [39m    expect(textOf(view, 'arrangement-selected-clip')).toContain('00:05…
+    [90m455| [39m    expect(textOf(view, 'arrangement-detail-content')).not.toBe(detail…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

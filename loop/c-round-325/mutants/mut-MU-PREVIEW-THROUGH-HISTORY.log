@@ -1,0 +1,97 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c325m[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1738[2mms[22m[39m
+[31m     [31m×[31m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace[39m[33m 360[2mms[22m[39m
+     [32m✓[39m DP3 the release adds exactly one history entry, Undo restores, the store is empty[32m 200[2mms[22m[39m
+     [32m✓[39m DP4 a window blur mid-trim puts the clip back with no history entry[32m 131[2mms[22m[39m
+[31m     [31m×[31m DP5 a same-lane move keeps the ref on the preview while React holds the original[39m[32m 155[2mms[22m[39m
+     [32m✓[39m DP6 the readout, the detail panel and the overview bar follow the trim preview[32m 153[2mms[22m[39m
+     [32m✓[39m DP7 a trimEnd drag past the project end updates the project-end readout live[32m 162[2mms[22m[39m
+[31m     [31m×[31m DP8a a release with no commit converges React state to the preview and clears the store[39m[32m 76[2mms[22m[39m
+     [32m✓[39m DP8b a move back to the start adds no entry and leaves the store empty[32m 146[2mms[22m[39m
+     [32m✓[39m DP5b same lane → other lane → back → release: one entry at the final place, store empty[32m 158[2mms[22m[39m
+     [32m✓[39m DP9 a fade-in drag and a video clip move keep the provider path and status[32m 193[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 02:41:41
+[2m   Duration [22m 4.32s[2m (transform 1.30s, setup 0ms, import 1.87s, tests 1.74s, environment 531ms)[22m
+
+
+::error file=/tmp/c325m/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP2 a trimStart move renders only the dragged lane and its clip%2C not the workspace,line=379,column=46::AssertionError: expected 2 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:379:46%0A%0A
+
+::error file=/tmp/c325m/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP5 a same-lane move keeps the ref on the preview while React holds the original,line=434,column=55::AssertionError: expected 5 to be 2 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 2%0A+ 5%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:434:55%0A%0A
+
+::error file=/tmp/c325m/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage a — trim and same-lane move previews > DP8a a release with no commit converges React state to the preview and clears the store,line=489,column=35::AssertionError: expected { tracks: [ { …(6) }, …(2) ], …(3) } to be { tracks: [ { …(6) }, …(2) ], …(3) } // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -3,11 +3,11 @@%0A      {%0A        "duration": 6,%0A        "id": "c1",%0A        "sourceId": "song",%0A        "sourceOffset": 0,%0A-       "start": 2,%0A+       "start": 9,%0A        "trackId": "music",%0A      },%0A      {%0A        "duration": 2,%0A        "id": "c2",%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:489:35%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP2 a trimStart move renders only the dragged lane and its clip, not the workspace
+[31m[1mAssertionError[22m: expected 2 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m379:46[22m[39m
+    [90m377| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m80[39m)[33m;[39m
+    [90m378| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m120[39m)[33m;[39m
+    [90m379| [39m    [34mexpect[39m([34mrendersOf[39m([32m'ArrangementProvider'[39m))[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m380| [39m    [34mexpect[39m([34mrendersOf[39m([32m'StudioWorkspace'[39m))[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m381| [39m    [34mexpect[39m([34mrendersOf[39m([32m'ArrangementTransport'[39m))[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP5 a same-lane move keeps the ref on the preview while React holds the original
+[31m[1mAssertionError[22m: expected 5 to be 2 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 5[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m434:55[22m[39m
+    [90m432| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m160[39m)[33m;[39m
+    [90m433| [39m    [34mexpect[39m([34mclipIn[39m([34mlive[39m(api)[33m.[39m[34mgetArrangement[39m()[33m,[39m [32m'c1'[39m)[33m.[39mstart)[33m.[39m[34mtoBe[39m([34m5[39m)[33m;[39m
+    [90m434| [39m    [34mexpect[39m([34mclipIn[39m([34mlive[39m(api)[33m.[39marrangement[33m,[39m [32m'c1'[39m)[33m.[39mstart)[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                                                      [31m^[39m
+    [90m435| [39m    [34mexpect[39m(root[33m.[39mdataset[33m.[39mclipStart)[33m.[39m[34mtoBe[39m([32m'5.000'[39m)[33m;[39m
+    [90m436| [39m    [34mpointerUpAt[39m(root[33m,[39m [34m1[39m[33m,[39m [34m160[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage a — trim and same-lane move previews[2m > [22mDP8a a release with no commit converges React state to the preview and clears the store
+[31m[1mAssertionError[22m: expected { tracks: [ { …(6) }, …(2) ], …(3) } to be { tracks: [ { …(6) }, …(2) ], …(3) } // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -3,11 +3,11 @@[39m
+[2m      {[22m
+[2m        "duration": 6,[22m
+[2m        "id": "c1",[22m
+[2m        "sourceId": "song",[22m
+[2m        "sourceOffset": 0,[22m
+[32m-       "start": 2,[39m
+[31m+       "start": 9,[39m
+[2m        "trackId": "music",[22m
+[2m      },[22m
+[2m      {[22m
+[2m        "duration": 2,[22m
+[2m        "id": "c2",[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m489:35[22m[39m
+    [90m487| [39m      [34mlive[39m(api)[33m.[39m[34mpreviewClipGeometry[39m(next)[33m;[39m
+    [90m488| [39m    })[33m;[39m
+    [90m489| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement)[33m.[39m[34mtoBe[39m(before)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m490| [39m    [34mexpect[39m([34mpreviewOf[39m(api))[33m.[39m[34mtoBe[39m(next)[33m;[39m
+    [90m491| [39m    [34mact[39m(() [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
