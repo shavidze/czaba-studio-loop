@@ -1,0 +1,54 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c332s[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/preview-store.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 49[2mms[22m[39m
+     [32m✓[39m DP1 setPreview of the same value notifies once and clearPreview notifies once[32m 2[2mms[22m[39m
+     [32m✓[39m DP1 a lane-B selector sees an equal slice when only a lane-A clip changes[32m 1[2mms[22m[39m
+     [32m✓[39m DP1 project end, clip and arrangement selectors fall back to the committed value[32m 1[2mms[22m[39m
+     [32m✓[39m DP1 previewClipGeometry on a lane-A clip renders the lane-A hook only[32m 30[2mms[22m[39m
+     [32m✓[39m PS-ROLES every clip field is classified, and the equality ignores exactly the ignored fields[32m 2[2mms[22m[39m
+     [32m✓[39m PS-LIST compares clip lists by length, order and shown fields[32m 0[2mms[22m[39m
+[31m     [31m×[31m PS-OVR-ROLES the overview record classifies every clip field and its equality ignores exactly the ignored ones[39m[32m 10[2mms[22m[39m
+     [32m✓[39m PS-OVR-ARR compares arrangements by track reference, clip count, order and overview fields[32m 0[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-meter-ui.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 3361[2mms[22m[39m
+     [33m[2m✓[22m[39m creates 1 + N stereo splitters and 2 + 2N analysers on Play, master first, and passes every track tap [33m 499[2mms[22m[39m
+     [33m[2m✓[22m[39m reuses the same track taps after Pause/Play and after a reschedule edit while playing [33m 407[2mms[22m[39m
+     [33m[2m✓[22m[39m meters each track independently: music −12, SFX −6, video silent [33m 390[2mms[22m[39m
+     [33m[2m✓[22m[39m latches an over on the SFX track only (+3.5, warning, sr-only text) and leaves music clear [33m 301[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the track latch through quiet frames and Pause/Play [33m 421[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m34 tests[22m[2m)[22m[33m 4643[2mms[22m[39m
+     [33m[2m✓[22m[39m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace [33m 367[2mms[22m[39m
+     [33m[2m✓[22m[39m DP32 a clip that differs only in an overview-ignored field renders the same overview markup [33m 374[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/preview-store.test.ts[2m > [22mPERF-DRAG-PREVIEW stage c2b-i — overview shown fields[2m > [22mPS-OVR-ROLES the overview record classifies every clip field and its equality ignores exactly the ignored ones
+[31m[1mAssertionError[22m: expected { field: 'trackId', equal: true } to deeply equal { field: 'trackId', equal: false }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "equal": false,[39m
+[31m+   "equal": true,[39m
+[2m    "field": "trackId",[22m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/preview-store.test.ts:[2m247:81[22m[39m
+    [90m245| [39m    [34mexpect[39m(shown)[33m.[39m[34mtoEqual[39m([[32m'duration'[39m[33m,[39m [32m'id'[39m[33m,[39m [32m'start'[39m[33m,[39m [32m'trackId'[39m])[33m;[39m
+    [90m246| [39m    [35mfor[39m ([35mconst[39m [field[33m,[39m variant] [35mof[39m [33mObject[39m[33m.[39m[34mentries[39m([33mROLE_VARIANTS[39m)) {
+    [90m247| [39m      expect({ field, equal: sameOverviewClipShownFields(ROLE_BASE, va…
+    [90m   | [39m                                                                                [31m^[39m
+    [90m248| [39m        field[33m,[39m
+    [90m249| [39m        equal[33m:[39m ignored[33m.[39m[34mincludes[39m(field)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m52 passed[39m[22m[90m (53)[39m
+[2m   Start at [22m 13:17:14
+[2m   Duration [22m 7.57s[2m (transform 2.68s, setup 0ms, import 4.87s, tests 8.05s, environment 2.25s)[22m
+
+
+::error file=/tmp/c332s/app/lib/arrangement/__tests__/preview-store.test.ts,title=app/lib/arrangement/__tests__/preview-store.test.ts > PERF-DRAG-PREVIEW stage c2b-i — overview shown fields > PS-OVR-ROLES the overview record classifies every clip field and its equality ignores exactly the ignored ones,line=247,column=81::AssertionError: expected { field: 'trackId', equal: true } to deeply equal { field: 'trackId', equal: false }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "equal": false,%0A+   "equal": true,%0A    "field": "trackId",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/preview-store.test.ts:247:81%0A%0A
