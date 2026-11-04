@@ -168,6 +168,13 @@ for P in $(ls "$STATE"/cloud/root-commits/*.patch 2>/dev/null | sort); do
   fi
 done
 
+# ---------- root backlog optimization step (Saba, 2026-11-04: context diet) ----------
+# Archives closed findings, old baselines/vitests, old decisions and rounds.
+# Then regenerates a leaner active-backlog.json for agents.
+log "optimizing backlog"
+python3 -I "$STATE/cloud/optimize-backlog.py" "$LOOP" || log "optimize-backlog: failed (non-fatal)"
+python3 -I "$STATE/cloud/compact-active-backlog.py" "$LOOP" || log "compact-active-backlog: failed (non-fatal)"
+
 # ---------- root YouTube search step (Saba, 2026-10-28: reference-first includes the best tutorials) ----------
 # B writes loop/youtube-request.json ({"task": "...", "queries": [...]}); root lists ranked candidates in
 # loop/reference/youtube/<task>.md. Runners cannot read transcripts; root reads those on Saba's computer.

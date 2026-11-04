@@ -451,3 +451,38 @@ Saba accepted **all five recommended defaults (Q1–Q5)** and the review's UX re
 - Every RETRO screen review looked only at `/studio-lab` stills and counted clutter. No phase walked the buyer's journey across Store and Studio.
 - F2, the stems not playing together, is a product-model gap. The workspace plan fixed four lanes in round 1, and no consult asked "can the stems of one track play together?".
 - B adds to `lessons.md` (merge or drop an old lesson to stay within 60 lines): **L47, test the journey and not just the screen**, and **L48, check the product promise against the model** ("Personal Mixdown" means the stems play together).
+
+## Context optimization rules (Saba, 2026-11-04)
+
+Five optimizations to keep agents fast as the project grows. Root enforces these before each round via `cloud/optimize-backlog.py` and `cloud/compact-active-backlog.py`.
+
+### 1. Backlog file diet
+- `cloud/optimize-backlog.py` runs before every round. It archives closed/done/resolved findings, old baseline trees (keeps last 5), old vitest floors (keeps last 5), old decisions (keeps last 50), and old rounds (keeps last 20).
+- Archived data goes to `loop/archive/` for traceability. Nothing is deleted.
+- B still reads `backlog.json` for planning but it is ~700 KB leaner.
+
+### 2. Active-backlog compaction
+- `cloud/compact-active-backlog.py` regenerates `context/active-backlog.json` with aggressive filtering:
+  - Closed/done/resolved findings are excluded entirely.
+  - Low/info findings become one-line summaries (id + severity + status).
+  - Done queue items become `{"id": "...", "status": "done"}` — no evidence chain.
+  - Only last 10 rounds are included.
+- Target: active view under 200 KB (was 442 KB).
+
+### 3. Tool output truncation (agent discipline)
+- B, A, C must pipe verbose tool output through filters: `| head -50` for npm/vitest, `| grep -E 'FAIL|ERROR|WARN'` for test logs.
+- Screenshot evidence goes to `c-round-N/` files, not inline in the report.
+- `git status` output in reports: max 20 lines. `git diff --stat` instead of full diff when possible.
+- Full output is always in the round folder files; the report references it by filename.
+
+### 4. Memory pointer pattern
+- Any tool output > 10 KB must be saved to a file and referenced by path, not pasted inline.
+- C writes evidence to `c-round-N/` and references it: "see `c-round-N/rows.json` B_MENU" instead of pasting the full JSON.
+- A writes logs to `a-round-N/` and references them: "see `a-round-N/typecheck.log` rc 0".
+- B references: "evidence in `c-round-N.md` section 3, row RG-14" instead of quoting the row.
+
+### 5. Phase boundary reset
+- Each phase (B, A, C) starts with a clean context. The kit's watchdog already does this.
+- State transfer between phases is exclusively through files: `current-task.md`, `a-round-N.md`, `c-round-N.md`, `c-round-N.json`, `context/active-backlog.json`, `context/active-summary.md`.
+- No phase should assume knowledge from a previous phase's context — read the files.
+- When the watchdog restarts an agent mid-phase, the agent reads its own partial output file and continues from there, never re-derives from context memory.
