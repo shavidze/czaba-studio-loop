@@ -1,0 +1,7 @@
+267c267,270
+<   const sourceId = useVideoSourceIdAtPlayhead(videoLane);
+---
+>   const readGapSourceId = () =>
+>     findVideoClipAt(videoLane.readVideoLaneArrangement(), positionStore.getPosition())?.clip
+>       .sourceId ?? null;
+>   const sourceId = useSyncExternalStore(positionStore.subscribePosition, readGapSourceId, readGapSourceId);

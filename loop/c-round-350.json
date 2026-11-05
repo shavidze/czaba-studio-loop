@@ -1,0 +1,72 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "C-R350-01",
+   "severity": "low",
+   "steps": [
+    "Scratch copy of HEAD + A's 3 files; apply M-B2 (dock body calls useArrangementPreviewLaneClips(arrangement, videoTrackId) again, result unused)",
+    "npx vitest run drag-preview-render.test.tsx -t 'DP6[6-9]|DP7[01]'"
+   ],
+   "expected": "Task \u00a71.2/\u00a72.2: M-B2 turns DP66, DP67 and DP71 red",
+   "actual": "DP66 and DP67 red, DP71 passes (2 failed, 4 passed). useArrangementPreviewLaneClips is shallow-deduped, so an audio-only drag never re-renders the dock even with the mutant. Same finding as A's STOP; reproduced independently. DP71 is only a HEAD-equivalent regression guard, not a guard for the new reader. Spec defect (B), not a product defect",
+   "evidence": "c-round-350/mutant-M-B2.log, a-round-350/mutant-M-B2.log; B must rule: use M-B2prime (non-shallow subscribe) or A-M5, or keep DP71 with no mutant row"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "READ(partial: diff-level only; patch reverse-applies, 3 files)",
+  "UNIT 143/143",
+  "MUTANT M-B1 (DP69 red; browser release probe at 1440 shows opacity mutation with oldValue 1.000)",
+  "MUTANT M-B3 (DP68 red)",
+  "MUTANT M-B4 (DP70 red)",
+  "MUTANT M-B2 half (DP66+DP67 red)",
+  "PERF (complete, 252 rows, 70/70 asserted, 0 failures, 9 DIFF = exactly sketch values, durationMs 458650)",
+  "NAMES 1440 (trim 13, fade 3, move 11; no ArrangementVideo*/Maximize2 in move commits)",
+  "NAMES 1280 fade 3, move 11",
+  "BEHAVIOUR 1440x900 equals B baseline",
+  "BEHAVIOUR 1280x720 equals B baseline and HEAD (with trim grab at y+8; centre grab hits fade handle on HEAD too)",
+  "RELEASE both viewports (0 opacity/currentTime/src writes, Undo restores)",
+  "PLAY-SYNC both viewports (|drift|<=0.014 s with trim/fade/move drags+Undo between windows)",
+  "G350-AUTH both viewports (demo page opens, auth_user null, /studio/1 Sign in required, 0 audio[src], /api/studio-token 400 GET/405 POST)",
+  "DOCS (l.4, one section, 7 headings, no 'C round 349 pending')"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "notes": [
+  "Observation (not A's regression, pre-existing on HEAD): at 1280x720 with the clip zoomed to >=480px, the fade-in handle (10px) covers the centre of the trim-left-edge handle, so a drag started at its vertical centre grabs the fade handle; trim is reachable at the top of the edge. Candidate Low for B.",
+  "NAMES 1280 trim not measured: B's probe grabs the centre at 1280 and hit the fade handle (names rendered 3); trim name counts only verified at 1440.",
+  "video-move 4th sample renders whole tree (82) same as HEAD, outside task.",
+  "Reviewer note A-R350-REVIEW-SEEK-TEST (no jsdom seek-target row) stays a B candidate; covered by browser BEHAVIOUR/RELEASE here.",
+  "Ableton conformance: not applicable (perf round)."
+ ],
+ "mutantRedOnSketch": true,
+ "affectedChecksNamed": [
+  "drag-preview-render.test.tsx",
+  "studio-lab-interactions.perf.spec.ts",
+  "video-names/behaviour/release probes"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-349/sketch-covering-vitest.log",
+  "b-round-349/perf-sketch-results/latest-interactions.json",
+  "video-names-sketch.json",
+  "video-behaviour-sketch.json",
+  "video-release-sketch2.json"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T14:45:28.4943985Z",
+  "round": 350,
+  "attempt": 1,
+  "store": 200
+ }
+}

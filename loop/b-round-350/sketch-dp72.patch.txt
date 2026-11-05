@@ -1,0 +1,61 @@
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-05 15:11:12.845277883 +0000
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx	2026-11-05 15:12:03.370789341 +0000
+@@ -2240,4 +2240,58 @@
+       pointerUpAt(audio.root, 15, 200);
+     }
+   });
++  it('DP72 a stopped video move drag seeks the frame to the previewed clip before release', async () => {
++    probeVideoMock.mockResolvedValue({ url: 'blob:film', duration: 4, width: 640, height: 360 });
++    decodeVideoMock.mockImplementation(() => new Promise(() => undefined));
++    const seeks: number[] = [];
++    vi.spyOn(HTMLMediaElement.prototype, 'currentTime', 'set').mockImplementation(
++      (value: number) => {
++        seeks.push(value);
++      },
++    );
++    const { api, view } = await mountPreviewWorkspace([...AUDIO_CLIPS]);
++    await act(async () => {
++      live(api).importVideoFiles([new File(['x'], 'film.mp4', { type: 'video/mp4' })]);
++    });
++    await waitFor(() =>
++      expect(live(api).arrangement.clips.some((clip) => clip.trackId === 'video')).toBe(true),
++    );
++    const imported = live(api).arrangement.clips.find((clip) => clip.trackId === 'video');
++    if (!imported) {
++      throw new Error('imported video clip missing');
++    }
++    const playhead = imported.start + 2;
++    act(() => live(api).seekTo(playhead));
++    await waitFor(() =>
++      expect(seeks.at(-1)).toBeCloseTo(playhead - imported.start + imported.sourceOffset, 3),
++    );
++    const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${imported.id}"]`);
++    const header = root?.firstElementChild;
++    if (!root || !(header instanceof HTMLElement)) {
++      throw new Error('imported video clip not rendered');
++    }
++    stubCapture(root);
++    const pressX = imported.start * PX_PER_SECOND;
++    pointerDownAt(header, 10, pressX, 50);
++    pointerMoveTo(root, 10, pressX + 20, 50);
++    pointerMoveTo(root, 10, pressX + 40, 50);
++    const shown = previewOf(api);
++    if (!shown) {
++      throw new Error('video move preview missing');
++    }
++    const shownStart = clipIn(shown, imported.id).start;
++    expect(clipIn(live(api).arrangement, imported.id).start).toBe(imported.start);
++    expect(shownStart).toBeGreaterThan(imported.start);
++    expect(shownStart).toBeLessThan(playhead);
++    const previewTarget = playhead - shownStart + imported.sourceOffset;
++    try {
++      await waitFor(() => expect(seeks.at(-1)).toBeCloseTo(previewTarget, 3));
++    } finally {
++      pointerUpAt(root, 10, pressX + 40, 50);
++    }
++    act(() => live(api).undo());
++    await waitFor(() =>
++      expect(seeks.at(-1)).toBeCloseTo(playhead - imported.start + imported.sourceOffset, 3),
++    );
++  });
+ });

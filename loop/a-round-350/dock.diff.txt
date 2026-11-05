@@ -1,0 +1,236 @@
+diff --git a/app/components/arrangement/ArrangementVideoDock.tsx b/app/components/arrangement/ArrangementVideoDock.tsx
+index 6024cd8..02252d5 100644
+--- a/app/components/arrangement/ArrangementVideoDock.tsx
++++ b/app/components/arrangement/ArrangementVideoDock.tsx
+@@ -17,7 +17,7 @@ import {
+   useArrangement,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+-  useArrangementPreviewLaneClips,
++  useArrangementPreviewStore,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import {
+@@ -26,6 +26,7 @@ import {
+   type FloatingVideoViewport,
+   stepFloatingVideoRect,
+ } from '~/lib/arrangement/panels';
++import { selectPreviewLaneClips } from '~/lib/arrangement/preview-store';
+ import { studioVideoDockStrings } from '~/lib/arrangement/strings';
+ import { findVideoClipAt, resolveVideoTarget } from '~/lib/arrangement/video';
+ import { videoFadeOpacityAt } from '~/lib/arrangement/video-fades';
+@@ -188,25 +189,71 @@ function waitForVideoSeekIdle(video: HTMLVideoElement, signal: AbortSignal): Pro
+ }
+ 
+ interface ArrangementVideoCaptionProps {
+-  arrangement: Arrangement;
++  videoLane: VideoLanePreviewReader;
+   videoSources: ReadonlyMap<string, WorkspaceVideoSource>;
+ }
+ 
+-function useVideoLaneArrangement(arrangement: Arrangement): Arrangement {
+-  const videoTrackId = arrangement.tracks.find((track) => track.kind === 'video')?.id ?? '';
+-  const videoLaneClips = useArrangementPreviewLaneClips(arrangement, videoTrackId);
+-  return useMemo(() => ({ ...arrangement, clips: videoLaneClips }), [arrangement, videoLaneClips]);
++interface VideoLanePreviewReader {
++  readVideoLaneArrangement: () => Arrangement;
++  subscribeVideoLanePreview: (onChange: () => void) => () => void;
+ }
+ 
+-function useVideoSourceIdAtPlayhead(arrangement: Arrangement): string | null {
++function sameClipList(a: readonly ArrangementClip[], b: readonly ArrangementClip[]): boolean {
++  return a.length === b.length && a.every((clip, index) => clip === b[index]);
++}
++
++function useVideoLanePreviewReader(
++  arrangement: Arrangement,
++  getArrangement: () => Arrangement,
++): VideoLanePreviewReader {
++  const previewStore = useArrangementPreviewStore();
++  return useMemo(() => {
++    const videoTrackId = arrangement.tracks.find((track) => track.kind === 'video')?.id ?? '';
++    let cachedBase: Arrangement | null = null;
++    let cachedPreview: Arrangement | null = null;
++    let cachedLane: Arrangement | null = null;
++    const readVideoLaneArrangement = () => {
++      const base = getArrangement();
++      const preview = previewStore.getState().preview;
++      if (cachedLane !== null && cachedBase === base && cachedPreview === preview) {
++        return cachedLane;
++      }
++      const clips = selectPreviewLaneClips(preview, base, videoTrackId);
++      cachedBase = base;
++      cachedPreview = preview;
++      if (cachedLane === null || !sameClipList(cachedLane.clips, clips)) {
++        cachedLane = { ...base, clips };
++      }
++      return cachedLane;
++    };
++    return {
++      readVideoLaneArrangement,
++      subscribeVideoLanePreview: (onChange) => previewStore.subscribe(onChange),
++    };
++  }, [arrangement, getArrangement, previewStore]);
++}
++
++function useVideoSourceIdAtPlayhead(videoLane: VideoLanePreviewReader): string | null {
+   const positionStore = useArrangementPositionStore();
++  const subscribe = useCallback(
++    (onChange: () => void) => {
++      const stopPosition = positionStore.subscribePosition(onChange);
++      const stopPreview = videoLane.subscribeVideoLanePreview(onChange);
++      return () => {
++        stopPosition();
++        stopPreview();
++      };
++    },
++    [positionStore, videoLane],
++  );
+   const readSourceId = () =>
+-    findVideoClipAt(arrangement, positionStore.getPosition())?.clip.sourceId ?? null;
+-  return useSyncExternalStore(positionStore.subscribePosition, readSourceId, readSourceId);
++    findVideoClipAt(videoLane.readVideoLaneArrangement(), positionStore.getPosition())?.clip
++      .sourceId ?? null;
++  return useSyncExternalStore(subscribe, readSourceId, readSourceId);
+ }
+ 
+-function ArrangementVideoCaption({ arrangement, videoSources }: ArrangementVideoCaptionProps) {
+-  const sourceId = useVideoSourceIdAtPlayhead(arrangement);
++function ArrangementVideoCaption({ videoLane, videoSources }: ArrangementVideoCaptionProps) {
++  const sourceId = useVideoSourceIdAtPlayhead(videoLane);
+   const source = sourceId === null ? undefined : videoSources.get(sourceId);
+   return (
+     <p className="min-w-0 flex-1 truncate text-right" data-testid="arrangement-video-caption">
+@@ -215,9 +262,9 @@ function ArrangementVideoCaption({ arrangement, videoSources }: ArrangementVideo
+   );
+ }
+ 
+-function ArrangementVideoGapCaption({ arrangement }: { arrangement: Arrangement }) {
++function ArrangementVideoGapCaption({ videoLane }: { videoLane: VideoLanePreviewReader }) {
+   const positionStore = useArrangementPositionStore();
+-  const sourceId = useVideoSourceIdAtPlayhead(arrangement);
++  const sourceId = useVideoSourceIdAtPlayhead(videoLane);
+   const timeRef = useRef<HTMLSpanElement>(null);
+   const writeGapTime = useCallback((position: number) => {
+     if (timeRef.current) {
+@@ -245,32 +292,39 @@ function videoFadeOverlayOpacity(pictureOpacity: string): string {
+   return (1 - Number(pictureOpacity)).toFixed(3);
+ }
+ 
+-function ArrangementVideoFadeOverlay({ arrangement }: { arrangement: Arrangement }) {
++function ArrangementVideoFadeOverlay({ videoLane }: { videoLane: VideoLanePreviewReader }) {
+   const positionStore = useArrangementPositionStore();
+   const overlayRef = useRef<HTMLDivElement>(null);
+-  const arrangementRef = useRef(arrangement);
+-  arrangementRef.current = arrangement;
+   const [initialOpacity] = useState(() =>
+-    videoFadeOpacityAt(arrangement, positionStore.getPosition()).toFixed(3),
++    videoFadeOpacityAt(videoLane.readVideoLaneArrangement(), positionStore.getPosition()).toFixed(
++      3,
++    ),
+   );
+   const writtenOpacityRef = useRef(initialOpacity);
+-  const writeVideoFade = useCallback((position: number) => {
+-    const overlay = overlayRef.current;
+-    if (!overlay) {
+-      return;
+-    }
+-    const pictureOpacity = videoFadeOpacityAt(arrangementRef.current, position).toFixed(3);
+-    if (pictureOpacity === writtenOpacityRef.current) {
+-      return;
+-    }
+-    writtenOpacityRef.current = pictureOpacity;
+-    overlay.dataset.videoOpacity = pictureOpacity;
+-    overlay.style.opacity = videoFadeOverlayOpacity(pictureOpacity);
+-  }, []);
++  const writeVideoFade = useCallback(
++    (position: number) => {
++      const overlay = overlayRef.current;
++      if (!overlay) {
++        return;
++      }
++      const pictureOpacity = videoFadeOpacityAt(
++        videoLane.readVideoLaneArrangement(),
++        position,
++      ).toFixed(3);
++      if (pictureOpacity === writtenOpacityRef.current) {
++        return;
++      }
++      writtenOpacityRef.current = pictureOpacity;
++      overlay.dataset.videoOpacity = pictureOpacity;
++      overlay.style.opacity = videoFadeOverlayOpacity(pictureOpacity);
++    },
++    [videoLane],
++  );
+   useArrangementPositionWriter(writeVideoFade);
+   useIsomorphicLayoutEffect(() => {
+     writeVideoFade(positionStore.getPosition());
+-  }, [arrangement, positionStore, writeVideoFade]);
++    return videoLane.subscribeVideoLanePreview(() => writeVideoFade(positionStore.getPosition()));
++  }, [videoLane, positionStore, writeVideoFade]);
+   return (
+     <div
+       ref={overlayRef}
+@@ -321,7 +375,7 @@ export function ArrangementVideoDock({
+ 
+   const videoTrackId = arrangement.tracks.find((track) => track.kind === 'video')?.id;
+   const hasVideoClips = arrangement.clips.some((clip) => clip.trackId === videoTrackId);
+-  const videoLaneArrangement = useVideoLaneArrangement(arrangement);
++  const videoLane = useVideoLanePreviewReader(arrangement, getArrangement);
+ 
+   useEffect(() => {
+     const first = firstVideoRef.current;
+@@ -725,7 +779,10 @@ export function ArrangementVideoDock({
+       }
+       const active = state.slots[state.activeIndex];
+       const video = active.element;
+-      const target = resolveVideoTarget(videoLaneArrangement, positionStore.getPosition());
++      const target = resolveVideoTarget(
++        videoLane.readVideoLaneArrangement(),
++        positionStore.getPosition(),
++      );
+       const url = target ? (videoSources.get(target.clip.sourceId)?.url ?? null) : null;
+       const key = target && url ? `${url}|${target.mediaTime}` : 'none';
+       if (key === stoppedKeyRef.current) {
+@@ -749,8 +806,13 @@ export function ArrangementVideoDock({
+         .catch(() => undefined);
+     };
+     syncStoppedVideo();
+-    return positionStore.subscribePosition(syncStoppedVideo);
+-  }, [videoLaneArrangement, isPlaying, positionStore, videoSources]);
++    const stopPosition = positionStore.subscribePosition(syncStoppedVideo);
++    const stopPreview = videoLane.subscribeVideoLanePreview(syncStoppedVideo);
++    return () => {
++      stopPosition();
++      stopPreview();
++    };
++  }, [videoLane, isPlaying, positionStore, videoSources]);
+ 
+   const [floatRect, setFloatRect] = useState<FloatingVideoRect | null>(videoFloatAnchor);
+   const [floatAnchor, setFloatAnchor] = useState<FloatingVideoRect | null>(videoFloatAnchor);
+@@ -896,7 +958,7 @@ export function ArrangementVideoDock({
+     >
+       <div className="flex min-w-0 flex-1 flex-col justify-end gap-1 self-stretch">
+         <div className="flex min-h-4 items-baseline text-xs leading-4 text-muted">
+-          <ArrangementVideoCaption arrangement={videoLaneArrangement} videoSources={videoSources} />
++          <ArrangementVideoCaption videoLane={videoLane} videoSources={videoSources} />
+         </div>
+         {overview}
+       </div>
+@@ -958,14 +1020,14 @@ export function ArrangementVideoDock({
+           data-testid="arrangement-video"
+           data-video-role="standby"
+         />
+-        <ArrangementVideoFadeOverlay arrangement={videoLaneArrangement} />
++        <ArrangementVideoFadeOverlay videoLane={videoLane} />
+         {hasVideoClips ? null : (
+           <div
+             className="absolute inset-0 z-20 bg-background"
+             data-testid="arrangement-video-empty"
+           />
+         )}
+-        {hasVideoClips ? <ArrangementVideoGapCaption arrangement={videoLaneArrangement} /> : null}
++        {hasVideoClips ? <ArrangementVideoGapCaption videoLane={videoLane} /> : null}
+         <div className="absolute top-1 right-1 z-30 flex gap-1">
+           {isVideoFloating ? (
+             <button
