@@ -1,0 +1,37 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+import { writeFileSync } from 'node:fs';
+const outDir = process.argv[2];
+const base = 'http://127.0.0.1:5173';
+const browser = await chromium.launch();
+const out = {};
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  await ctx.addInitScript(() => localStorage.setItem('czaba_analytics_consent', 'denied'));
+  const page = await ctx.newPage();
+  const r = {};
+  await page.goto(`${base}/studio-lab`, { waitUntil: 'load', timeout: 240000 });
+  await page.waitForFunction(() => /ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent ?? ''), null, { timeout: 240000 });
+  r.labStatus = await page.locator('[data-testid="arrangement-status"]').textContent();
+  r.authUser = await page.evaluate(() => localStorage.getItem('auth_user'));
+  r.bodyHasDemo = /demo/i.test(await page.locator('body').innerText());
+  r.hasWorkspace = (await page.getByTestId('arrangement-track-fold').count()) > 0;
+  await page.screenshot({ path: `${outDir}/auth-lab-${w}.png` });
+  const audioReq = [];
+  page.on('request', (q) => { if (/\.(mp3|wav|m4a)|r2|stems/i.test(q.url())) audioReq.push(q.url()); });
+  await page.goto(`${base}/studio/c346-test-product`, { waitUntil: 'load', timeout: 120000 });
+  await page.waitForTimeout(2500);
+  r.studioText = (await page.locator('body').innerText()).slice(0, 300);
+  r.signInRequired = /sign in required/i.test(r.studioText);
+  r.audioSrcCount = await page.locator('audio[src]').count();
+  r.audioRequests = audioReq;
+  await page.screenshot({ path: `${outDir}/auth-studio-${w}.png` });
+  const tok = await page.request.get(`${base}/api/studio-token?productId=c346-test-product`).catch((e) => ({ status: () => `err ${e.message}`, text: async () => '' }));
+  r.tokenGet = tok.status();
+  const tokP = await page.request.post(`${base}/api/studio-token`, { data: { productId: 'c346-test-product' } }).catch((e) => ({ status: () => `err ${e.message}`, text: async () => '' }));
+  r.tokenPost = tokP.status();
+  out[w] = r;
+  await ctx.close();
+}
+writeFileSync(`${outDir}/auth.json`, JSON.stringify(out, null, 1));
+console.log(JSON.stringify(out, null, 1));
+await browser.close();

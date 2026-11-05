@@ -1,0 +1,11 @@
+# B round 346 -> 347 checkpoint
+- [x] orientation; gate 346 published 4895732 = baseline; C 346 PASS browserVerified true
+- [x] tasks/round-346.md archived (cmp OK); backups in b-round-346/
+- [x] advisor call 1 done (plan: close 346, c6-ii shape (b) stable hook vs (a), sketch both halves, split ClipGain to c6-iii if needed)
+- [ ] scratch sketch /home/runner/b346-scratch/sc
+- [ ] backlog update script, feature-status, current-task, b-round-346.md, b-next.json
+- sketch c6-ii applied in /home/runner/b346-scratch/sc (apply-source.py + apply-source-clipgain.py); DP65 proto green; mutants memo/handler/clipgain memo/array all red; stale pan readout mutant caught by track-pan tests; covering vitest + dev :5197 names probe running
+- covering 104 files 1670/1670 PASS on sketch (with DP65 proto); names sketch fade4 trim15 move12 (82) click83; claims-347.sh + planning/sketch outputs written; consults tech-lead + perf-optimizer running
+- consults done (tech-lead: approve, drop JSDoc, JSON key for gains, per-half rows; perf-opt: fader spec rows, Master/GroupHeader inline handlers candidate, trim assert suggestion). sketch amended+rebuilt; patch regenerated APPLY-OK; 36 files 720/720; interactions perf on sketch: 0 higher/0 new/60 asserts pass (b-round-346/sketch-perf-rowcmp-vs-c346.txt). Next: fader spec perf on sketch, then backlog script/feature-status/current-task/b-round-346/b-next
+- fader spec on sketch: complete, 321 rows, 94/94 asserts, 0 fader components/commits/restarts DIFF vs c-round-341, 0 higher, durationMs 472717 (b-round-346/sketch-fader-perf-rowcmp-vs-c341.txt). backlog v308 + feature-status applied. Next: write current-task.md (draft ready), b-round-346.md, b-next.json
+- DONE: current-task.md, b-round-346.md, b-next.json written; store clean

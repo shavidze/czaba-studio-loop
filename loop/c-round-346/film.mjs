@@ -1,0 +1,32 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+import { writeFileSync } from 'node:fs';
+const [base, label, outDir] = process.argv.slice(2);
+const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+await ctx.addInitScript(() => localStorage.setItem('czaba_analytics_consent', 'denied'));
+const page = await ctx.newPage();
+await page.goto(`${base}/studio-lab`, { waitUntil: 'load', timeout: 240000 });
+await page.waitForFunction(() => /ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent ?? ''), null, { timeout: 240000 });
+const b64 = await page.evaluate(async () => {
+  const c = document.createElement('canvas'); c.width = 160; c.height = 90;
+  const g = c.getContext('2d'); const stream = c.captureStream(15);
+  const rec = new MediaRecorder(stream, { mimeType: 'video/webm' }); const chunks = [];
+  rec.ondataavailable = (e) => chunks.push(e.data);
+  const done = new Promise((r) => (rec.onstop = r)); rec.start();
+  for (let i = 0; i < 30; i++) { g.fillStyle = `hsl(${i * 10},60%,40%)`; g.fillRect(0, 0, 160, 90); await new Promise((r) => setTimeout(r, 66)); }
+  rec.stop(); await done;
+  const buf = new Uint8Array(await new Blob(chunks).arrayBuffer()); let s = ''; for (const x of buf) s += String.fromCharCode(x); return btoa(s);
+});
+const buffer = Buffer.from(b64, 'base64'); writeFileSync(`${outDir}/synthetic-film.webm`, buffer);
+const input = page.locator('input[type="file"][accept*="video"]').first();
+console.log('inputs', await page.locator('input[type="file"]').count());
+await input.setInputFiles({ name: 'film.webm', mimeType: 'video/webm', buffer });
+await page.waitForTimeout(5000);
+const r = {};
+r.videoClips = await page.locator('[data-clip-kind="video"]').count();
+r.videoHeader = await page.evaluate(() => [...document.querySelectorAll('[data-clip-kind="video"] [title$="drag to move"]')].map((e) => e.querySelector('svg')?.outerHTML ?? null));
+r.status = await page.locator('[data-testid="arrangement-status"]').textContent();
+await page.screenshot({ path: `${outDir}/${label}-film-1440.png` });
+writeFileSync(`${outDir}/film-${label}.json`, JSON.stringify(r, null, 1));
+console.log(label, JSON.stringify(r).slice(0, 400));
+await browser.close();
