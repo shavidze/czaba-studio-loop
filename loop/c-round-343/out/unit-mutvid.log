@@ -1,0 +1,143 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-343/scratch-mutvid[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/grid-snap-ui.test.tsx [2m([22m[2m30 tests[22m[2m | [22m[33m29 skipped[39m[2m)[22m[32m 275[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m58 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m52 skipped[39m[2m)[22m[33m 666[2mms[22m[39m
+     [2m[90m↓[39m[22m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace
+     [2m[90m↓[39m[22m DP3 the release adds exactly one history entry, Undo restores, the store is empty
+     [2m[90m↓[39m[22m DP4 a window blur mid-trim puts the clip back with no history entry
+     [2m[90m↓[39m[22m DP5 a same-lane move keeps the ref on the preview while React holds the original
+     [2m[90m↓[39m[22m DP6 the readout, the detail panel and the overview bar follow the trim preview
+     [2m[90m↓[39m[22m DP7 a trimEnd drag past the project end updates the project-end readout live
+     [2m[90m↓[39m[22m DP8a a release with no commit converges React state to the preview and clears the store
+     [2m[90m↓[39m[22m DP8b a move back to the start adds no entry and leaves the store empty
+     [2m[90m↓[39m[22m DP5b same lane → other lane → back → release: one entry at the final place, store empty
+     [2m[90m↓[39m[22m DP49 cross-lane moves render neither the provider nor the workspace; release adds one entry on the target lane
+     [2m[90m↓[39m[22m DP50 a refused cross-lane move shows the refusal in the readout from the store; release keeps the clip
+     [2m[90m↓[39m[22m DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry
+     [2m[90m↓[39m[22m DP9b a video clip move keeps the provider path
+     [2m[90m↓[39m[22m DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing
+     [2m[90m↓[39m[22m DP11 a pointercancel mid-fade reverts the fade and keeps the last readout span
+     [2m[90m↓[39m[22m DP12 a committed write mid-fade wins; release after a refusal restores the last readout
+     [2m[90m↓[39m[22m DP13 a video fade drag keeps the provider path and the committed status
+     [2m[90m↓[39m[22m DP14 a fade dragged back to 0 adds no entry, empties the store and reports no change
+     [2m[90m↓[39m[22m DP15 the status preview getter returns the shown readout during the drag and null after it
+     [2m[90m↓[39m[22m DP16 a stop mid-fade reads the shown readout, so the insert-marker rewrite stays off as at HEAD
+     [2m[90m↓[39m[22m DP17 a same-text committed write mid-fade, then a same-value move, keeps the status span node as at HEAD
+     [2m[90m↓[39m[22m DP18 a same-text updater from a timer mid-fade adds and removes no status node
+     [2m[90m↓[39m[22m DP19 two committed writes in one batch mid-fade adopt the readout once, so the second updater sees the first write
+     [2m[90m↓[39m[22m DP20 a committed write and a newer readout in one batch mid-fade keep the newer readout
+     [2m[90m↓[39m[22m DP21 a move that extends the project end inside one timeline second renders no workspace
+     [2m[90m↓[39m[22m DP22 a move that crosses into the next timeline second renders the workspace once and widens the ruler
+     [2m[90m↓[39m[22m DP23 a selection change renders the transport but not the project-end readout
+     [2m[90m↓[39m[22m DP24 the overview extent keeps a loop that ends past the moved project end
+     [2m[90m↓[39m[22m DP25 an audio fade-in move renders neither the detail panel nor the selected-clip readout
+     [2m[90m↓[39m[22m DP26 a same-lane move shows the lane-move hint without rendering the readout; the detail panel follows the start
+     [2m[90m↓[39m[22m DP27 a clip that differs only in an ignored field renders the same readout and detail panel markup
+     [2m[90m↓[39m[22m DP28 a committed change of an ignored field keeps the shown markup while the clip view redraws
+     [2m[90m↓[39m[22m DP29 an audio fade-in move renders neither the overview nor the track meters
+     [2m[90m↓[39m[22m DP30 a same-lane move redraws the overview bar but not the track meters
+     [2m[90m↓[39m[22m DP31 a trimStart move redraws the peak paths and the overview bar but not the track meters
+     [2m[90m↓[39m[22m DP32 a clip that differs only in an overview-ignored field renders the same overview markup
+     [2m[90m↓[39m[22m DP33 a same-lane move renders the detail content once per pointermove and shows the new Start/End
+     [2m[90m↓[39m[22m DP34 a trimStart move renders the detail content once per pointermove and shows the trimmed Start
+     [2m[90m↓[39m[22m DP35 typed Start/End text survives a committed change that keeps the clip start and duration
+     [2m[90m↓[39m[22m DP36 typed Start/End text is replaced when the clip start changes, as the layout effect did
+     [2m[90m↓[39m[22m DP37 a deselect empties the disabled inputs as at HEAD; reselecting the same clip shows its Start/End
+     [2m[90m↓[39m[22m DP38 a trimEnd move shows the new End and keeps the Start
+     [2m[90m↓[39m[22m DP39 a time selection on the clip fills Start/End; one on another lane falls back to the clip bounds
+     [2m[90m↓[39m[22m DP40 Enter applies a typed range inside the clip; an invalid one keeps the typed text
+     [2m[90m↓[39m[22m DP41 Undo after a move puts the Start/End text back to the restored clip
+     [2m[90m↓[39m[22m DP42 typed text in a focused Start input is replaced by the dragged clip start, as at HEAD
+     [2m[90m↓[39m[22m DP43 an audio fade-in move renders no peak path while the clip view redraws
+     [2m[90m↓[39m[22m DP44 a same-lane move renders no peak path in the lane or the detail panel
+     [2m[90m↓[39m[22m DP45 a trimStart move redraws both peak paths once per pointermove
+     [2m[90m↓[39m[22m DP46 a trimEnd move redraws both peak paths once per pointermove
+     [2m[90m↓[39m[22m DP48 a video fade-in move renders no peak path on the video lane
+     [2m[90m↓[39m[22m DP47 a committed gain change redraws both peak paths; a committed fade-only change redraws none
+     [32m✓[39m DP51 a same-lane group move renders neither the provider nor the workspace; release adds one Move (2) entry[32m 267[2mms[22m[39m
+     [32m✓[39m DP52 a cross-lane group move renders no provider; release puts both clips on the target lane in one entry[32m 95[2mms[22m[39m
+[31m     [31m×[31m DP53 a group with a video clip keeps the history preview, as at HEAD[39m[32m 83[2mms[22m[39m
+     [32m✓[39m DP54 a collapsed group overview follows a group move of its hidden clip without a workspace render[32m 104[2mms[22m[39m
+     [32m✓[39m DP55 a blocked group move shows the blocked status and leaves both clips in place[32m 59[2mms[22m[39m
+     [32m✓[39m DP56 a window blur mid group move puts both clips back with no history entry[32m 56[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-DRAG-PREVIEW stage c4-ii — a group move previews through the store[2m > [22mDP53 a group with a video clip keeps the history preview, as at HEAD
+[31m[1mAssertionError[22m: expected { tracks: [ { …(6) }, …(2) ], …(3) } to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+{
+  "clips": [
+    {
+      "duration": 6,
+      "id": "c1",
+      "sourceId": "song",
+      "sourceOffset": 0,
+      "start": 5,
+      "trackId": "music",
+    },
+    {
+      "duration": 4,
+      "id": "v1",
+      "sourceId": "film",
+      "sourceOffset": 0,
+      "start": 4,
+      "trackId": "video",
+    },
+  ],
+  "loop": null,
+  "master": {
+    "gainDb": 0,
+    "mute": false,
+  },
+  "tracks": [
+    {
+      "id": "video",
+      "kind": "video",
+      "mute": false,
+      "name": "Video",
+      "solo": false,
+      "volume": 1,
+    },
+    {
+      "id": "music",
+      "kind": "audio",
+      "mute": false,
+      "name": "Music",
+      "solo": false,
+      "volume": 1,
+    },
+    {
+      "id": "sfx",
+      "kind": "audio",
+      "mute": false,
+      "name": "SFX",
+      "solo": false,
+      "volume": 1,
+    },
+  ],
+}
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m1635:28[22m[39m
+    [90m1633| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m40[39m)[33m;[39m
+    [90m1634| [39m    [34mpointerMoveTo[39m(root[33m,[39m [34m1[39m[33m,[39m [34m120[39m)[33m;[39m
+    [90m1635| [39m    [34mexpect[39m([34mpreviewOf[39m(api))[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m1636| [39m    [34mexpect[39m([34mclipIn[39m([34mlive[39m(api)[33m.[39marrangement[33m,[39m [32m'c1'[39m)[33m.[39mstart)[33m.[39m[34mtoBe[39m([34m5[39m)[33m;[39m
+    [90m1637| [39m    [34mexpect[39m([34mclipIn[39m([34mlive[39m(api)[33m.[39marrangement[33m,[39m [32m'v1'[39m)[33m.[39mstart)[33m.[39m[34mtoBe[39m([34m4[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[2m | [22m[33m81 skipped[39m[90m (88)[39m
+[2m   Start at [22m 04:39:44
+[2m   Duration [22m 2.35s[2m (transform 1.70s, setup 0ms, import 2.52s, tests 941ms, environment 624ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-343/scratch-mutvid/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-DRAG-PREVIEW stage c4-ii — a group move previews through the store > DP53 a group with a video clip keeps the history preview%2C as at HEAD,line=1635,column=28::AssertionError: expected { tracks: [ { …(6) }, …(2) ], …(3) } to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A{%0A  "clips": [%0A    {%0A      "duration": 6,%0A      "id": "c1",%0A      "sourceId": "song",%0A      "sourceOffset": 0,%0A      "start": 5,%0A      "trackId": "music",%0A    },%0A    {%0A      "duration": 4,%0A      "id": "v1",%0A      "sourceId": "film",%0A      "sourceOffset": 0,%0A      "start": 4,%0A      "trackId": "video",%0A    },%0A  ],%0A  "loop": null,%0A  "master": {%0A    "gainDb": 0,%0A    "mute": false,%0A  },%0A  "tracks": [%0A    {%0A      "id": "video",%0A      "kind": "video",%0A      "mute": false,%0A      "name": "Video",%0A      "solo": false,%0A      "volume": 1,%0A    },%0A    {%0A      "id": "music",%0A      "kind": "audio",%0A      "mute": false,%0A      "name": "Music",%0A      "solo": false,%0A      "volume": 1,%0A    },%0A    {%0A      "id": "sfx",%0A      "kind": "audio",%0A      "mute": false,%0A      "name": "SFX",%0A      "solo": false,%0A      "volume": 1,%0A    },%0A  ],%0A}%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:1635:28%0A%0A
