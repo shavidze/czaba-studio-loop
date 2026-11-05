@@ -1,180 +1,169 @@
-# CURRENT TASK — Round 352: PERF-CAND-VIDEO-TRIM-FADE-COST stage 1, fix-up 2. DP72 gets its release and Undo halves (C-R351-01)
+# Round 353: RETRO 353 (eleventh retrospective, rounds 336–352) + whole-screen and journey review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
 
-Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-05, at the round 351 → 352 planning.
+**Planned by:** B, at the round 352 → 353 planning, 2026-11-05.
 
-**Decisions** (`backlog.json` → `decisions_log_b`, v313 → v314, D-29z1123…D-29z1126):
-- **D-29z1123: round 351 is closed as C FAIL "STOPPED — routed to B", with origin B spec.** A stopped at A-REVIEW. The reviewer's F1 (Medium) found that DP72 asserts nothing between release and Undo. C confirmed it by reading (C-R351-01) and passed CLAIMS, SOURCE-SCOPE and G351-AUTH. The mutant and names rows did not run, so `browserVerified` is false. Gate 351 was skipped. This was B's fault: the L58 sketch-review clause was not applied in round 350. It was not A's fault.
-- **D-29z1124: the ruling on C-R351-01** is in §0.1.
-- **D-29z1125: the doc 232 l.4 form.** Keep this doc's published convention, `…; C round N pending)`. HEAD reads `C round 349 pending`. This round grants exactly `C round 352 pending`. The conflict with L28 goes to RETRO 353 as RC-R351-L28-PENDING-FORM. Answer to A's round-351 observation: the task text wins here.
-- **D-29z1126:** this task. RETRO moves from 352 to 353, its second move. The window is now 336–352, and ROOT-REQ-PERF-TIMEOUT moves with it (L46).
+**Decisions** (all in `backlog.json` v314 → v316, `decisions_log_b`):
+- D-29z1127: round 352 accepted; **PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 is done**; baseline `a55543b`.
+- D-29z1128: round-352 Lows and the gate-352 suggestions routed.
+- D-29z1129: the architecture checkpoint is requested from root now. It is non-blocking.
+- D-29z1130: RETRO 353 outputs.
+- D-29z1131: lessons.
+- D-29z1132: the systemic task SYS-R353-DP-TEST-POLISH.
+- D-29z1133: EXP-R321 closed, candidate dispositions, screen review.
+- D-29z1134: this task and what comes next.
 
-**Read first:**
-- `lessons.md` items 10, 11, 22, 26, 28, 52, 56, 57 and 58. C also reads 38, 59 and 60.
-- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md`.
-- `AUDIO_ARCHITECTURE.md`, read only, for the dock's stopped-video seek path.
+**Rules:**
+- **Policy:**
+  - "Retrospective: stop, look back, improve" (Saba, 2026-10-26);
+  - "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28);
+  - the RETRO journey step (2026-10-31);
+  - `backlog.json` → `retro_policy`.
+- **Window:** 336–352 (17 rounds). RETRO slipped twice from 351 so that the open Mediums closed first (D-29z1122, D-29z1126).
+- **Read first:** `lessons.md`. This planning revised it, and the revision applies from round 353:
+  - L58's sketch-review clause is replaced: sha256 plus per-row mutant logs;
+  - L57 gains the checker `tools/l57-check.py`;
+  - L28 gains the no-`pending` clause;
+  - line 3 points to retro-353.
+- **L57 (all fields, and the new checker):** C's JSON carries **all** L57 fields:
+  - `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, an `origin` per finding;
+  - `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch`;
+  - `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`;
+  - `affectedChecksNamed`, `affectedChecksRunOnSketch`.
 
-**L29 note:** untagged code text is an expected value, a row id or a loop-artifact path. Every fact about a `store/` file carries `[K#]` (§7).
+  In this RETRO round, every field except `gateChecksNamed` and the four manifest fields is `null` with the reason "RETRO: no assert specified". `gateChecksNamed` lists the gate rows below. **Before hand-off, C runs `python3 -I tools/l57-check.py c-round-353.json c-round-353/l57-check.txt` and fixes its own JSON until it exits 0** (new L57 clause). An absence is C's bookkeeping to fix, not a row FAIL.
+- **L29 note:** untagged code text below is a row id, a loop-artifact path or a description of what C runs. Every fact about a `store/` file carries a `[K#]` tag (§8).
+- **Loop path:** `tmp/studio-real-loop` may be a symlink. Search it with `find -L` (L38). Destructive commands stay inside `c-round-353/` (L60).
+- **L59:** run every row until it has a result. Write `c-round-353/progress.json` after each row.
 
-**What does not apply:** reference-first, product-designer, the screen budget and the YouTube request. This is a test-and-docs fix-up of a pure performance round, and nothing the user sees or hears changes. `ArrangementVideoDock.tsx` and `ArrangementContext.tsx` must stay byte-identical [K3].
+## Baseline: HEAD `a55543b`, clean tree
+- **Gate:** gate 352 published `a55543b…` on both remotes [K1]. That commit is the round-353 baseline.
+- **Tree:** `git status --short --untracked-files=all` was empty at planning, and HEAD was `a55543b` [K2] [K22].
+- **Frozen:** every tracked file, **1,242** entries, is listed in `b-round-352/r353-tree-sha256.txt` [K3].
+  - Check from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-352/r353-tree-sha256.txt`.
+  - B ran it after the consults: rc 0.
+  - Each of the 11 protected files of `b-round-318/protected-sha256.txt` appears exactly once [K4].
+- **Grants: none.** No file in `store/` may change in this round.
 
-## Baseline
-- HEAD is `7f56989` (gate 349, published). Gates 350 and 351 were skipped [K1].
-- `git status` shows exactly 3 files [K2]:
-  - the dock, with sha256 `037f62faf9e69844…`, equal to the round-349 sketch [K3];
-  - `drag-preview-render.test.tsx`, which is the round-350 copy plus `b-round-350/sketch-dp72.patch.txt` (`54+0-`) [K5];
-  - doc 232, with A's round-351 edits [K6].
-- Protected files: 11/11 OK [K7]. No dependency change.
+## 0. Why this round
+- **Round 352 passed** (`c-round-352.json`: 9 rows, `browserVerified` and `realVerified` true, 0 bugs). Gate 352 published `a55543b`. PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 is done.
+- **Five findings closed:** C-R351-01 and A-R350-REVIEW-SEEK-TEST (Medium), and C-R350-01, A-R351-REVIEW-GLOBAL-SPY and A-R351-REVIEW-TRY-SPAN (Low).
+- **New Lows:** A-R352-REVIEW-COMMIT-EXACT, -DRAG-DISTANCE and -WINDOW-PRECONDITION, plus GATE352-S1 and S2, go to `deferred_low_polish`. The gate-352 Architecture note becomes the signal GATE352-ARCH-DOCK-LIFECYCLE (D-29z1128).
+- **RETRO is overdue.** `retro_policy.next_due` was round 351, and it slipped twice.
+- **REGRESSION is not due yet.** `regression-last.json` says 2026-11-05 [K14], so the next one is due on or after 2026-11-08.
+- **No open Critical or High.** The open Mediums are root-only or manual (A-R73-SAFARI-FLAG-FOCUS, GATE232-S2, GATE271-S1-NO-REALIGN, GATE274-S1-HELD-REPEAT-ANNOUNCE, GATE304-M1). The 2026-10-23 clarification says they do not block. None is a security or data-loss bug.
+- **Not applicable in a RETRO round:**
+  - reference first, Ableton and the product-designer design step;
+  - the screen budget, because nothing visible changes.
 
-## 0. Ruling and B's evidence
+## 1. What B already produced (the objects under test)
+| File | Content |
+|---|---|
+| `retros/retro-353.md` | The analysis, in Georgian with English terms, for Saba. Window 336–352, 13 sections |
+| `lessons.md` | **60 lines** (≤ 60) [K7], three parts. Before-copy: `b-round-352/lessons-before-353.md`. Diff: `b-round-352/lessons-diff.txt`. Four lines change: l.3, L58 (l.41), L28 (l.50) and L57 (l.58) [K20] |
+| `tools/l57-check.py` | The L57 checker. On `c-round-352.json` it exits 1 with 9 absent fields [K11] (`b-round-352/l57-check-c352.txt`) |
+| `user-review/screen-review-353.md` | Candidates **SR-353-1 … SR-353-5** [K19], with the `product-designer` section. Captures are in `b-round-352/screens/`: `capture.mjs`, `capture.log`, `screen353.json`, `compare-336-353.txt` and the 12 PNGs [K9] |
+| `b-round-352/*.py`, `*.txt`, `*.json` | The scripts and data behind every number. `retro-numbers-353.txt` indexes each number with its source, and `claims-data.txt` gives a recompute command per number. The hand files are `fails-cause-hand.txt`, `stops.txt`, `gate-reviews-hand.txt`, `rc-recurrence.txt` and `exp-r321-final.txt` |
+| `backlog.json` (version 316) [K10] | <ul><li>D-29z1127…D-29z1134.</li><li>`retro_runs` 353 and `retro_policy` (`next_due` round 368).</li><li>`screen_review_candidates` SR-353-*.</li><li>`systemic_tasks` SYS-R353-DP-TEST-POLISH.</li><li>The candidate dispositions, ROOT-REQ-B-CONSULT-CODE-REVIEWER and the ARCH checkpoint request.</li></ul> Before-copy: `b-round-352/backlog-before-353.json`. Edits: `update-backlog.py` (part 1, v315) and `update-backlog-part2.py` (v316) |
+| `feature-status.md` | Round 352 is now done, the next line is updated, and a RETRO 353 row is added. Edit script: `b-round-352/update-feature-status.py` |
+| `b-round-352/root-request-arch-checkpoint.md` | The non-blocking request for root (question 4 is new) |
 
-### 0.1 C-R351-01 → DP72 release and Undo halves (D-29z1124)
-**The sketch:** `b-round-351/sketch-dp72-release.patch.txt`. It adds 17 lines and removes 9 on the current tree (`git apply --numstat`), and `git apply --check` is clean. The whole sketched file is `b-round-351/drag-preview-render.test.sketch352.tsx`. Against the r350 copy it reads `62+0-` [K5].
+**Order of work (the C-R215-01 lesson, and RC-R336-SCRIPT-OUTPUT-DIR):**
+- The analysis scripts read the **before** copy, `b-round-352/backlog-before-353.json`.
+- **First copy the scripts to `c-round-353/scripts/` and run them there.** `collect.py`, `classify.py` and `awaiting-user.py` (and possibly others) write into `b-round-352/` by default. Change the output paths in your copies so they never overwrite B's files, then `cmp` or diff your outputs against B's.
+- Order: `collect.py`, then `cost.py` (stdout = `cost.txt`), then the others. `retro-numbers.py` reads `cost-rows.json` and `rounds-336-352.json`. `misc-outputs.sh` and `retro353-mentions.py` take an output folder argument: give them `c-round-353`.
+- `update-backlog*.py`, `update-feature-status.py` and `edit-lessons.py` are **not** re-runnable: the `.done` markers refuse, and `edit-lessons.py` would fail its asserts. Do not run them.
 
-**What changes in DP72:**
-1. **F2:** the `currentTime` setter spy is a `function (this: HTMLMediaElement, value: number)`. It records a write only when `this instanceof HTMLVideoElement`.
-2. **F3:** the `try/finally` around the preview `waitFor` is removed, as in DP64.
-3. **F7:** a blank line now separates DP71 from DP72.
-4. **F1, the release half:**
-   - B records `const writesBeforeRelease = seeks.length;` before `pointerUpAt`.
-   - After a 20 ms real-timer settle inside `act`, `expect(seeks).toHaveLength(writesBeforeRelease)`. A correct release keeps the seek key, so it writes nothing.
-   - Then the committed start `toBeCloseTo(shownStart, 6)`.
-5. **The Undo-write half:** after Undo, `waitFor` `seeks.length > writesBeforeRelease`, then the existing pre-drag media-time `waitFor`.
+## 2. A: nothing to implement
+1. From `store/`, confirm three things:
+   - HEAD = `a55543b…`;
+   - `git status --short --untracked-files=all` is empty;
+   - the frozen sha check prints nothing.
+2. Write `a-round-353.md` with the three results and "no change, by RETRO policy".
+   - Do not run typecheck, lint, vitest or the code-reviewer.
+3. Do not edit `retros/`, `lessons.md`, `tools/`, `user-review/` or any B file.
+   - If you disagree with a lesson in the A part, write it under "Lesson feedback". The same goes for the new L28 clause, which changes the doc l.4 string you write.
 
-**B's sketch runs.** Scratch is `/home/runner/b352-scratch/sk`; mutant runs use `-t 'DP6[6-9]|DP7[0-2]'`. Logs are in `b-round-351/`.
+## 3. C: what to verify
+C writes `c-round-353.md` and `c-round-353.json` as it goes, with **all** L57 fields (see Rules).
 
-| Run | Red tests (DP72's failing line) | Log |
+| Row | Check | PASS means |
 |---|---|---|
-| control | none; 7/7 | `mutant-control.log` |
-| M-B2 (`b-round-350/mutant-M-B2.diff.txt`) | DP66, DP67 | `mutant-M-B2.log` |
-| M-B2′ (`b-round-350/mutant-M-B2prime.diff.txt`) | DP66, DP67, DP71 | `mutant-M-B2prime.log` |
-| A-M5 (`b-round-350/mutant-A-M5.diff.txt`) | DP71 | `mutant-A-M5.log` |
-| M-B5 (`b-round-350/mutant-M-B5.diff.txt`) | DP72 (the preview `waitFor`: `expected 2 to be close to 1`) | `mutant-M-B5.log` |
-| **M-B1** (`b-round-351/mutant-M-B1.diff.txt`; the reader's base is `arrangement`) | DP69, **DP72** (`expected [ +0, 2, 1, 1 ] to have a length of 3 but got 4`: release writes) | `mutant-M-B1.log` |
-| M-B1 on the **round-351** DP72 | DP69 only; DP72 **green**. This is the gap the reviewer named, made concrete | `mutant-M-B1-on-dp72-r351.log` |
-| **M-B6** (`b-round-351/mutant-M-B6.diff.txt`; `commitArrangement` commits `before`) | DP66–DP70, DP72 (the committed-start line) | `mutant-M-B6.log` |
-| **M-B7** (`b-round-351/mutant-M-B7.diff.txt`; the seek effect's deps drop `videoLane`) | **DP72 only** (`expected 3 to be greater than 3`: Undo writes nothing) | `mutant-M-B7.log` |
+| **SOURCE-SCOPE** | At the start and the end: HEAD `a55543b`, a clean status, and the frozen list with rc 0 | Nothing in `store/` changed. Any change fails the round, whoever made it |
+| **CLAIMS** | Run `bash b-round-352/claims-353.sh` from the loop root, **first** (L56). Compare its output with `b-round-352/claims-353-output.txt` | Every line is equal. K8 prints `done` with no `MISSING` |
+| **RT-NUM** | Recompute **every number** in `retro-353.md` §1, §2, §3, §9 and §10 from its named file or script (`retro-numbers-353.txt`, `claims-data.txt`). At least: <ul><li>**Totals:** $160.75 / $86.52 / $30.38 / $277.65; the round median $17.01; the phase medians B $11.51, A $5.93, C $0.95; the B share 57.9%; the B median for 337–352 $9.98 [K17].</li><li>**Groups:** RETRO $14.17, REGRESSION $29.51, feature $212.05, fix-up $21.92 (351 $9.91, 352 $12.01); the chain cost $43.44; FAIL/STOP rounds $31.43; the top five rounds.</li><li>**Counts:** <ul><li>C PASS/FAIL/BLOCKED 14/2/1; gate 11/6/0; `bugs[]` Medium 1, Low 6; 1 of 7 with `origin`;</li><li>11 review.md files, 49 items (28 by script + 21 by hand);</li><li>classify: open 26 (C 8, A 12, gate 6) + deferred 35 (A 24, gate 8, C 3), and the severity and category counts in §4;</li><li>634 deferred; 90 awaiting_user; STOPs 350, 351 [K18]; first-time C fail 1 of 11.</li></ul></li><li>**L57:** 5 of 16 JSONs complete (337, 338, 339, 341, 344) in `l57-coverage.txt`.</li><li>**§9:** B median 322–337 $9.93; A median $5.35.</li><li>**§10:** L23 5058 and L58 2803 → 2908 bytes, by `sed -n Np \| wc -c` on the before and after files [K15].</li><li>**The retro-336 comparison column:** each value equals `retros/retro-336.md` §1/§2 or `tasks/round-336.md` RT-NUM.</li></ul> | Each number matches its source, or the difference is ≤ $0.01 rounding |
+| **RT-CAUSE** | For each row of §3 and each fact in §5, §7 and §9, open the quoted source: <ul><li>`c-round-340.json`, `c-round-341.json`, `c-round-350.json`, `c-round-351.json`, `c-round-352.json` (bugs, status, `browserVerified`);</li><li>`a-round-350.md` l.3 and `a-round-351.md` l.3 (the STOP lines), and `a-round-351/review.md` F1;</li><li>`c-round-340.md` l.3 and l.7; `c-round-351.md` l.1–3 (the short route);</li><li>`b-round-349/` (no M-B2 log; list the folder);</li><li>`decisions_log_b` D-29z1123 (sketch review skipped in round 350);</li><li>`gates/round-352/review.md` (suggestions 1–3 and the Architecture note);</li><li>`b-round-352/c-models.txt` (model facts);</li><li>`retros/retro-321.md` §10 (the EXP rule);</li><li>the consult attributions in §7 and §10, to `tech-lead` and `product-designer`. B reports them; C checks that every consultant opinion is labelled as an opinion</li></ul> | <ul><li>Each stated cause is what the source says; no cause is invented.</li><li>The EXP-R321 verdict follows from its written rule.</li><li>Inferences are labelled: the C cost drop vs the model, the B-share reading in §2, the 350 STOP-route reading, the RC-R333 2× reading, the §4 root-cause groups.</li></ul> |
+| **RT-IDS** | <ul><li>**Round 352 closure:** `rounds[352].status` starts with `c_pass_published a55543b`. C-R351-01, A-R350-REVIEW-SEEK-TEST, C-R350-01, A-R351-REVIEW-GLOBAL-SPY and A-R351-REVIEW-TRY-SPAN have a status starting `closed (D-29z1127)`.</li><li>**New ids:** A-R352-REVIEW-COMMIT-EXACT, -DRAG-DISTANCE, -WINDOW-PRECONDITION, GATE352-S1 and GATE352-S2 are in `deferred_low_polish` and `open_findings`. GATE352-ARCH-DOCK-LIFECYCLE is in `architecture_signals`. ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE has `question_4_d29z1129`.</li><li>**Systemic task:** SYS-R353-DP-TEST-POLISH is in `systemic_tasks` (its `closes` list has the four ids) and in the STUDIO-PERFORMANCE stages. The four ids carry "scheduled in SYS-R353-DP-TEST-POLISH".</li><li>**Inventory:** every id in `b-round-352/retro353-mention-ids-v2.txt` has a disposition in `retro-353.md` §8. Also grep the **before** copy, case-insensitive, for `retro[ -_]?35[123]`, `RETRO \(35[123]\)`, `round 35[123]` and `RETRO-35[123]`, to catch other spellings. An entry with no disposition is a finding.</li><li>**Candidates:** the eight `retro_candidates` statuses start as §8 says. ROOT-REQ-PERF-TIMEOUT's status starts with `question to Saba`. ROOT-REQ-B-CONSULT-CODE-REVIEWER exists.</li><li>`retro_runs[-1]` is 353; `retro_policy.next_due` names round 368.</li></ul> | All present as stated |
+| **RT-LESSONS** | `lessons.md`: <ul><li>≤ 60 lines, with the three parts;</li><li>`diff b-round-352/lessons-before-353.md lessons.md` touches only l.3, l.41 (L58), l.50 (L28) and l.58 (L57) [K20];</li><li>L28 and L57 keep their old text byte for byte and each only adds one clause. each appends its clause at the end of the line;</li><li>L58: the "B's sketch is reviewed before dispatch" clause is replaced by the RETRO 353 clause, which keeps its rule (an unruled Medium that A's reviewer finds is a planning FAIL) and its evidence (C-R327-01, A-R327-REVIEW-SAME-TEXT-REMOUNT); elsewhere only wording is trimmed. List every removed word. **No evidence id and no rule may be lost**;</li><li>line 3 changes only the sources span and the RETRO note;</li><li>the id list equals K13</li></ul> | As stated. A lost clause or evidence id is a finding |
+| **RT-L57** | Run `python3 -I tools/l57-check.py c-round-352.json c-round-353/l57-c352.txt`: rc 1 with 9 absent, as K11. Then a mutant check: a copy of `c-round-339.json` (rc 0 at planning) with one field deleted, saved under `c-round-353/`, makes it exit 1. Finally your own `c-round-353.json` exits 0 | The checker does what L57 says |
+| **RT-SABA** | `retro-353.md` §12 and `screen-review-353.md`: every rule change and screen candidate is phrased as a **proposal, information or question** | SR-353-1…5 are questions or proposals. §12.1 is one question. §12.4 and §12.5 are proposals |
+| **RT-SCREEN (browser)** | Every SR-353 candidate names a screenshot that exists and shows what it describes; C opens the PNGs. Then C re-runs `b-round-352/screens/capture.mjs` (or an equivalent) **with the mock backend** at both viewports, writing to `c-round-353/screens/`: <ul><li>First check `http://127.0.0.1:5199/__mock/health`. If it answers, use the running instance and do not stop it. Otherwise start your own (`node mock-api/server.mjs`, log under `c-round-353/`) and stop it afterwards.</li></ul> Check: <ul><li>`laneErrors` is none;</li><li>the journey reaches `/studio-lab?preview=middle-east` [K12];</li><li>the position after Play is ≥ 00:01.000;</li><li>the visible row counts equal 138 / 168 / 118 / 144 [K6], or differ only by dynamic text you name;</li><li>for SR-353-1, measure in the browser that the last-added clip's left edge is beyond the timeline's visible right edge at both viewports (`getBoundingClientRect`);</li><li>for SR-353-4, measure at 1280×720 whether the export dialog's Range options lie outside the dialog's visible area (scrollHeight vs clientHeight, or bottom vs viewport). The review says "not DOM-measured"; record the result;</li><li>per L54, any claim about cut or overflowing text is checked on the screenshot or by measurement</li></ul> | Each candidate is as described. A mismatch is a finding against the review, not against the app |
+| **G353-AUTH (browser)** | A fresh anonymous context at 1440×900 and 1280×720 (warm up in a browser first, L38; wait for a non-empty body): <ul><li>`/studio-lab` shows the workspace and the demo badge; `localStorage.auth_user` is null;</li><li>`/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`;</li><li>`/api/studio-token` returns 401 with no header. A fake bearer gives 403 with the mock running, or a 500 that fails closed without it</li></ul> | As stated. No token in any body |
+| **STUDIO-SMOKE-353 (browser)** | On `/studio-lab` at both viewports, after `Demo collection ready` (L48) [K5]: <ul><li>add `Bass` (Enter);</li><li>Play, then after 1.5 s `[data-testid=arrangement-position]` reads ≥ `00:01.000`;</li><li>Play's `data-playing` goes `false` → `true` → `false` [K5];</li><li>drag the clip by its name bar one lane **down**, to the lane directly below the one it landed on (if it landed on the last audio lane, one lane up instead; record the start and target `[data-track-id]`), and release: the clip's lane is the target and the Undo title reads "Undo: Move clip";</li><li>Ctrl+Z restores the lane;</li><li>export a WAV: RIFF/WAVE, 48 kHz, non-silent (peak > 0); record its length</li></ul> | As stated. A hash compare is not required |
 
-**Other sketch checks:**
-- The whole file: 74/74 in 9.98 s (`sketch-file.log`).
-- `tsc --noEmit`: rc 0 with 0 lines (`sketch-tsc.log`).
-- Biome on the file: clean (`sketch-biome.log`).
-- DP72 alone: 3/3 green, about 0.53 s each (`sketch-dp72-replicates.log`; L31).
+- **Gate rows:** the full vitest, typecheck, build, Biome, `npm run verify` and the e2e smoke. List them under `"gate"` and in `gateChecksNamed`, never under `"passed"`.
+- **`browserVerified`:** true only if G353-AUTH, STUDIO-SMOKE-353 and the RT-SCREEN re-run all ran at both viewports. The other RT rows are document checks.
+- **Consults (optional):** `product-designer` in review mode on SR-353-1…5 (at most 7 findings). Record any disagreement as a finding against the review.
 
-**Why a fixed 20 ms settle, and why it is not a "no-write" proof by `waitFor`.** A positive `waitFor` returns on the first poll that passes, so it cannot prove that no later write happens. In jsdom `video.seeking` is false, so a pending seek lands within microtasks of the sync. 20 ms of real time covers that with a wide margin. Under M-B1 the extra write does land inside the window (the log above). This is the rationale A applies unchanged.
+## 4. Outcome, fixed in advance (D-29z1134)
+| C result | B at the round-354 planning |
+|---|---|
+| All rows PASS, planning before 2026-11-08 | Round 354 is **PERF-CAND-VIDEO-TRIM-FADE-COST stage 2**: <ul><li>the 22 video rows go from record to assert at C round 350 values: budgets only, and no new interactions-spec rows while ROOT-REQ-PERF-TIMEOUT is open;</li><li>doc 232 l.4 moves to the L28 form;</li><li>B runs the perf spec on its sketch (L58), saves `sketch-review.md` with the sha256 and the mutant logs (the new L58), and runs `tools/l57-check.py` on `c-round-353.json`</li></ul> |
+| All rows PASS, planning on or after 2026-11-08 | Round 354 is **REGRESSION** in two parts, with the mock API health as the first row. Stage 2 follows |
+| An RT row fails (an untraceable number, an invented cause, a missing disposition, a lost clause, a candidate not as described) | B corrects the files at the round-354 planning. The next C round re-checks only the changed lines (RT-FIX, as rounds 306 and 322), together with the round-354 task |
+| G353-AUTH, STUDIO-SMOKE-353 or RT-SCREEN finds a Medium or worse in the app | It is fixed first (2026-10-23 bug gate). A Low goes to `deferred_low_polish` |
+| SOURCE-SCOPE fails | Stop. Root inspects. Nothing is published |
 
-**Sketch review before dispatch (L58).** `tech-lead` reviewed it (`b-round-351/sketch-review.md`). `code-reviewer` is not on B's consult list. tech-lead reviewed the first form of the sketch; the only change since is its own Low 1 (the count check), so the exact dispatched diff was not re-reviewed.
-- Result: 0 Medium+.
-- Low 1 asked for a count check, not a last-value check, after release. It is applied, and it is what turns M-B1 red.
-- Low 2 says the Undo length check is redundant with the final value check. It is kept as documentation, because it is the line M-B7 turns red on its own.
-- The `this`-typed spy: tech-lead found no `any` and no type assertion; Biome's `useArrowFunction` ignores functions that use `this`.
+**After that:** stage 2 → REGRESSION (due ≥ 2026-11-08) → SYS-R353-DP-TEST-POLISH → PERF-CAND-MASTER-GROUP-FADER-PROPS → PERF-CAND-FADE-RELEASE-COMMITS → PERF-9…15 → SYS-R2-FAKE-FIDELITY → SYS-CLOCK-DETERMINISM → STEM-LANES → SYS-1…3 → STORE-2b…5 → REVIEW-RECOMMENDATIONS → T12-ADVANCED → the phase-2 entries (skip rule).
 
-**What A's code-reviewer may still raise:** a finding that only repeats Low 1 or Low 2 is already ruled here and is not a STOP. Any other Medium+ that asks to change DP72 is a STOP (§4).
-
-## 1. Scope (A)
-
-### 1.1 Files (exactly 2 edited)
-| # | File | Change |
-|---|---|---|
-| 1 | `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | `git apply ../tmp/studio-real-loop/b-round-351/sketch-dp72-release.patch.txt`, unchanged. Afterwards the file is byte-equal to `b-round-351/drag-preview-render.test.sketch352.tsx` [K5]. DP66–DP71 are untouched |
-| 2 | `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` | `git apply ../tmp/studio-real-loop/b-round-351/sketch-doc232.patch.txt`, unchanged (§1.2) |
-
-**Untouched:** `ArrangementVideoDock.tsx` (sha256 `037f62faf9e69844…`), `ArrangementContext.tsx` (sha256 `ff46799c5a35e17c…`) [K3], every other `app/` file, `perf/`, `e2e`, config and the protected files.
-
-### 1.2 Doc 232 (Georgian, technical terms in English; this is the content of `sketch-doc232.patch.txt`)
-- **l.4:** `C round 351 pending` becomes `C round 352 pending` (D-29z1125).
-- **The changed-files line:** `(DP66–DP71; DP72 — round 351)` becomes `(DP66–DP71; DP72 — rounds 351–352)`.
-- **The DP72 testing bullet is replaced.** It now starts `` - `drag-preview-render.test.tsx`, rounds 351–352 (A-R350-REVIEW-SEEK-TEST, D-29z1120; C-R351-01, D-29z1124): DP72 ``. It names:
-  - the video-only spy;
-  - the preview, release (no new write, committed start) and Undo halves;
-  - mutants M-B5, M-B1 (green on the round-351 DP72), M-B6 and M-B7.
-- **The `## ` count stays 7** [K6].
-
-## 2. Acceptance
-
-### 2.1 A rows
-| Row | Command / check | Pass |
-|---|---|---|
-| A-CLAIMS pre | `bash b-round-351/claims-352.sh` from the loop root | equals `b-round-351/claims-352-planning-output.txt` |
-| A-CLAIMS final | same | K1, K3, K7, K9, K10 and K11 equal the planning output. K2 = `7f56989 3`. K4, K5 and K6 equal `b-round-351/claims-352-sketch-output.txt`. K8 = `0 untracked 0` |
-| A-TYPE / A-LINT | `npm run typecheck`, `npm run lint` | rc 0; lint warnings ≤ 205 |
-| A-UNIT | `npx vitest run app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | 74/74 |
-| A-MUTANT | on a scratch copy, never in `store/`: control plus the 7 mutants of §0.1, each with `-t 'DP6[6-9]\|DP7[0-2]'` | the red sets exactly as in §0.1; logs in `a-round-352/` |
-| A-REVIEW | `code-reviewer` on the test diff | 0 unruled Medium+ (§0.1 lists the ruled Lows) |
-
-### 2.2 C rows
-The dock and the context are byte-identical to the files C verified in round 350 [K3]. C's round-350 PERF, BEHAVIOUR, RELEASE and PLAY-SYNC evidence (`c-round-350/`) therefore stands for this tree, and SOURCE-SCOPE proves that it applies.
-
-| Row | How | Pass |
-|---|---|---|
-| CLAIMS | `bash b-round-351/claims-352.sh` | equals A's final |
-| SOURCE-SCOPE | `git status --short --untracked-files=all`; `sha256sum` of the dock and the context; `cmp` of the store test file against `b-round-351/drag-preview-render.test.sketch352.tsx` | exactly 3 files modified and 0 untracked; dock `037f62faf9e698441f0f0ed913c7397d6b2fc9c70840eb4a47d906317cd15e96`; context unchanged from HEAD; the test file is byte-equal |
-| READ | the DP72 hunk | asserts as §0.1 items 1–5; DP66–DP71 unchanged |
-| UNIT | A-UNIT's command | 74/74 |
-| MUTANT (jsdom) | control plus the 7 mutants on C's own scratch (L60) | red sets exactly as §0.1. In particular: M-B1 → DP72 red at the release length; M-B7 → DP72 alone; M-B5 → DP72 |
-| MUTANT (browser, M-B2′) | a scratch dev server with M-B2′ applied and its own Vite `cacheDir` (L38); then `node b-round-349/video-names-probe.mjs http://127.0.0.1:<port> c-round-352/names-M-B2prime.json` | `ArrangementVideoDock` appears in the trim, fade and move commits per move. Stop and delete the scratch server afterwards. Never run in rounds 350 or 351 |
-| NAMES smoke (browser, dev, 1440×900, this tree) | `node b-round-349/video-names-probe.mjs http://127.0.0.1:5173 c-round-352/names.json` | video-trim 13, video-fade 3, video-move 11 on its first 3 moves; no `ArrangementVideo*` or `Maximize2` in any move commit (equal to `c-round-350/names.json`) |
-| G352-AUTH (browser, 1440×900 and 1280×720) | a fresh anonymous context (`c-round-351/auth.mjs`, copied to `c-round-352/`) | `/studio-lab` opens the workspace with the demo badge, and `auth_user` is null. `/studio/<id>` shows "Sign in required" with 0 `audio[src]`. `/api/studio-token` refuses (401, 400 or 405). A 500 is allowed only when the mock on :5199 is down; that case is listed under `blocked` |
-| DOCS | doc 232 | l.4 ends `video-trim-fade-cost-1; C round 352 pending)`; the bullet and the changed-files line as §1.2; 7 `## ` |
-
-**Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
-
-**browserVerified:** MUTANT (browser), NAMES smoke and G352-AUTH can all run here, and none needs the backend. If any of them does not run, `browserVerified` is false.
-
-**Ableton conformance:** not applicable (test and docs only).
-
-**L57: write all L57 fields** in `c-round-352.json`.
-- `mutantRedOnSketch`: `b-round-351/mutant-M-B1.log`, `mutant-M-B5.log`, `mutant-M-B6.log`, `mutant-M-B7.log`, `mutant-M-B2prime.log` and `mutant-A-M5.log`.
-- `mutantRedOnTree`: C's own runs.
-- `gateChecksRunOnSketch`: `b-round-351/sketch-file.log`, `sketch-tsc.log` and `sketch-biome.log`.
-- `affectedChecksNamed`: `drag-preview-render.test.tsx` and the names probe.
-
-## 3. Neighbouring behaviour that could break
-- **Other tests in the file:** the spy is now a `function` with a `this` filter, and it is restored by `afterEach` `vi.restoreAllMocks()` [K4]. The whole file passed 74/74 on the sketch.
-- **The 20 ms settle:** it adds about 20 ms to DP72. DP72 runs in about 0.53 s against the 5 s default.
-- **Doc 232:** only the three places in §1.2 change.
-
-## 4. STOP conditions (A)
-- A-CLAIMS pre mismatch, or a final mismatch outside §2.1.
-- A patch does not apply, or DP72 fails on the tree.
-- An existing test fails.
-- A change outside the 2 edited files is needed.
-- A mutant's red set differs from §0.1.
-- A review Medium+ that is not ruled in §0.1 asks to change DP72, the dock or the context.
-
-## 5. Routed, not in scope
-- **These close on C round 352 PASS:**
-  - C-R351-01 (Medium);
-  - A-R351-REVIEW-GLOBAL-SPY and A-R351-REVIEW-TRY-SPAN (Low, fixed in the sketch);
-  - C-R350-01 (ruled in D-29z1119);
-  - A-R350-REVIEW-SEEK-TEST.
-- **RETRO 353** (window 336–352). It takes:
-  - candidates RC-R350-MUTANT-PAIR-UNRUN, RC-R351-SKETCH-REVIEW-SKIPPED (proposed: `b-round-N/sketch-review.md` becomes a K10 artifact) and RC-R351-L28-PENDING-FORM;
-  - ROOT-REQ-PERF-TIMEOUT to Saba (L46).
-- **Unchanged from round 351:**
-  - A-R350-REVIEW-CACHED-TRACKS, A-R350-REVIEW-TEST-NITS and C-R350-OBS-FADE-COVERS-TRIM stay in `deferred_low_polish`.
-  - A-R350-ARCH-PREVIEW-READER is a signal held under ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE.
+## 5. Neighbour risk
+App code carries no risk, because no source file changes. The risk is in the process:
+- **The new L58 form** adds a sha256 line and per-mutant logs to B's planning. The countermetric is B's median: $9.98 in 337–352, with a stop line of $13.94. L58 grew 2803 → 2908 bytes (the retro-353 §7 reason); the RC-R305 trigger is 5500.
+- **The L57 checker** could make C spend time on bookkeeping. It does not fail rounds: an absence is fixed before hand-off.
+- **L28's no-`pending` rule** changes the l.4 string A writes for doc 232 in the next stage. Round 354's task grants that line explicitly.
+- **The screen review goes to Saba.** RT-SCREEN re-runs the capture and measures SR-353-1 and SR-353-4.
 
 ## 6. Deliverables
-- **A:** the 2 edited files; `a-round-352.md`; logs and mutant outputs in `a-round-352/`.
-- **C:** `c-round-352.md`, `c-round-352.json` and `c-round-352/`.
+- **A:** `a-round-353.md`.
+- **C:** `c-round-353.md` and `c-round-353.json`, with evidence under `c-round-353/` and `c-round-353/progress.json`. The JSON carries:
+  - `taskStatus`, `browserVerified`, `realVerified`;
+  - `passed`, `failed`, `blocked`, `gate`, `rows`;
+  - all L57 fields, with `tools/l57-check.py` at rc 0.
 
-## 7. Claims
-Run `bash b-round-351/claims-352.sh` from the loop root. `CLAIMS_STORE=<dir>` points it at another tree.
+## 7. Root notes
+- **Nothing to publish from `store/`.** A change there is itself a FAIL. The loop-state commit records the retro.
+- **For Saba:**
+  - `retros/retro-353.md` §12.1: ROOT-REQ-PERF-TIMEOUT, asked once (raise the limit, or split the spec);
+  - `user-review/screen-review-353.md`: 5 new candidates;
+  - 90 awaiting-user ids.
+- **For root:**
+  - `b-round-352/root-request-arch-checkpoint.md`: the frontend-architect checkpoint, now at a feature boundary. It is non-blocking;
+  - ROOT-REQ-B-CONSULT-CODE-REVIEWER: add `code-reviewer` to B's consult list (a proposal);
+  - ROOT-REQ-VITEST-PERF-INCLUDE (= GATE304-M1) is still open.
 
-**Expected outputs:**
-- `b-round-351/claims-352-planning-output.txt`: the current tree.
-- `b-round-351/claims-352-sketch-output.txt`: B's scratch with both patches applied. K2 reads `no-git 0` there, and K8 is not meaningful there.
+## 8. Claims (L29 + L56 form)
+Run `bash b-round-352/claims-353.sh` from the loop root. The expected output is `b-round-352/claims-353-output.txt`, and stderr is empty (`claims-353-stderr.txt`).
 
-| Claim | What it checks |
-|---|---|
-| K1 | gate 349 `published` `7f56989`; gates 350 and 351 `skipped` |
-| K2 | HEAD and the `git status` count |
-| K3 | the dock's sha256 (16 hex digits) equals the round-349 sketch; the context sha256 `ff46799c5a35e17c`; mutant anchors present once each: the seek preview subscription, the seek effect deps, `return applyEdit(next, label, before);` |
-| K4 | DP66–DP71 count; DP72 and its title; the setter spy; the `HTMLVideoElement` filter; `writesBeforeRelease`; the release length check; the Undo write check; `vi.restoreAllMocks();` |
-| K5 | the test file's numstat against `b-round-350/drag-preview-render.test.r350.tsx` (`62+0-` after the patch); byte-equality with the sketch file |
-| K6 | doc 232: `## ` count; `C round 351 pending`; `C round 352 pending`; `rounds 351–352`; `D-29z1124`; `M-B5`; `M-B6`; `M-B7` |
-| K7 | protected files OK |
-| K8 | diff lines in `app`, `perf`, `e2e` and `docs` outside the 3 files; untracked files |
-| K9 | the `regression-last` date |
-| K10 | the kept `b-round-351` artifacts (23 files) |
-| K11 | the lane hook's `useShallow` line; `PX_PER_SECOND = 40`; DP64 |
+| Tag | Claim | Expected (from the output file) |
+|---|---|---|
+| K1 | gate 352 published `a55543b` | `published a55543b` |
+| K2 | clean tree and HEAD at planning | `0 a55543b` |
+| K3 | 1,242 frozen entries | `1242` |
+| K4 | each protected file appears once | eleven `1` |
+| K5 | Play's playing signal, its name, and the ready text in `store/` | `ArrangementTransport.tsx` l.286 `data-playing`, `strings.ts` l.233 `playLabel: 'Play',`, and 1 `'Demo collection ready.` line in `collection.ts` |
+| K6 | screen-capture row counts; no lane errors | `{'1440x900-S0': 138, '1440x900-DEMO': 168, '1280x720-S0': 118, '1280x720-DEMO': 144} None` |
+| K7 | lessons line count | `60` |
+| K8 | every cited artifact exists (L56; list `b-round-352/cited-artifacts.txt`) | `done` |
+| K9 | the screenshots exist | `12` |
+| K10 | backlog version and last decision | `316 D-29z1134` |
+| K11 | the L57 checker on `c-round-352.json` | `L57 INCOMPLETE rc=1` |
+| K12 | journey facts | `/studio-lab?preview=middle-east`, positions `00:01.483` / `00:01.491`, 4 clips each |
+| K13 | lesson ids | the id list in the output file |
+| K14 | regression-last date | `2026-11-05` |
+| K15 | L23 and L58 length in bytes (`wc -c`) | `5058 2908` |
+| K16 | the round-352 archive equals the old task | `archive-equal` |
+| K17 | B median 337–352 and the window total | `9.98 277.65` |
+| K18 | rounds with an A STOP line | `350 351` |
+| K19 | SR-353 ids in the review equal the backlog ids | `sr-ids-equal` |
+| K20 | the lessons diff hunks | `3c3 41c41 50c50 58c58` |
+| K21 | implementation docs with the `C round N pending` form at HEAD | only `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` |
+| K22 | HEAD and status count when the claims run | `a55543b 0` |

@@ -1,0 +1,10 @@
+B median 322-337 (EXP-R321 stop rule) 9.93 16
+A median 322-337 5.35
+# EXP-R321-PRECHECK-GATES final verdict (window 322-337). Rule verbatim from retros/retro-321.md §10:
+#  refuted if >= 1 chain with >= 2 fix-ups whose head check B ran green on the sketch, or >= 2 chains despite full pre-check coverage;
+#  stop: B median > $13.94, or result files missing in 2 rounds; null: fewer than 3 rounds name a gate check; countermetric: A cost per round.
+# Data: 322-335 from retro-336 §9 (chains 322-324, 325-326, 327-328, 329-330; gateChecksRunOnSketch 0-2 of 6). 336: gateChecksRunOnSketch null (RETRO). 337: named [typecheck, lint, perf-lib], run on sketch [typecheck, perf-lib] (2 of 3), chainHeadGateRunGreen true, C PASS (exp-fields.txt). No chain starts in 336-337.
+# B median 322-337 = 9.93 (<= 13.94, stop not hit); fields present in every JSON 322-337 (stop not hit); not null (>= 3 rounds name gate checks).
+# (a) not met: the only >= 2 fix-up chain (322-324) started from a check B ran red on purpose (retro-336 §9). (b) not met: no round had full coverage.
+# Verdict (B reading, inference): neither confirmed nor refuted - NOT EVALUABLE AS SPECIFIED, because the treatment (all named gate checks run on the sketch) was never delivered in any round. Countermetric: A median 322-337 $5.35, no shift to A.
+# Successor (affectedChecksNamed/RunOnSketch from 337): fields absent in 8 / 9 of 16 rounds 337-352 (l57-coverage.txt) -> by the analogous stop rule (files missing in 2 rounds) the successor measurement is itself not usable; the window's 1 chain (350-352) had affectedChecksRunOnSketch present at its head (350: covering vitest, perf spec, names/behaviour/release probes) but its failing check was a mutant pair B did not run (fails-cause-hand.txt).

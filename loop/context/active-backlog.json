@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-05T15:31:32.781Z",
-  "current_task": "current-task.md (round 351: PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 fix-up)",
+  "_generatedUtc": "2026-11-05T16:19:04.675Z",
+  "current_task": "current-task.md (round 352: PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 fix-up 2, C-R351-01)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -5729,7 +5729,7 @@
     {
       "id": "C-R350-01",
       "severity": "low",
-      "status": "ruled (D-29z1119): M-B2prime + A-M5 guard DP71; closes on C ",
+      "status": "ruled (D-29z1119); closes on the next C PASS of the fix-up (",
       "title": "task 350 section 1.2/2.2 named M-B2 as red on DP71; DP71 passes on M-B2 (shallow-deduped lane hook)"
     },
     {
@@ -5738,7 +5738,7 @@
       "origin": "A round 350 code-reviewer",
       "title": "no jsdom test drives the stopped-video seek path through the reader and the preview subscription",
       "evidence": "a-round-350.md review findings",
-      "status": "in_progress round 351 (D-29z1120): DP72, mutant M-B5; closes on C round 351 PASS",
+      "status": "in_progress round 352 (D-29z1124): DP72 with release and Undo halves, mutants M-B1/M-B5/M-B6/M-B7; closes on C round 352 PASS",
       "added": "2026-11-05 B round 350 -> 351 planning"
     },
     {
@@ -5758,18 +5758,30 @@
       "severity": "low",
       "status": "deferred_low_polish (D-29z1121): compare with Live clip-corn",
       "title": "at 1280x720 with a clip >= 480 px wide, the 10 px fade-in handle covers the centre of the trim-left-"
+    },
+    {
+      "id": "C-R351-01",
+      "severity": "medium",
+      "origin": "B spec (C round 351; = A-R351-REVIEW-RELEASE-ASSERT)",
+      "title": "DP72 has no assert between release and Undo; a release seek-back or an Undo that writes nothing is hidden",
+      "evidence": "a-round-351/review.md F1; c-round-351.md; b-round-351/mutant-M-B1-on-dp72-r351.log (round-351 DP72 green under the stale-base reader that writes on release)",
+      "status": "in_progress round 352 (D-29z1124): sketch b-round-351/sketch-dp72-release.patch.txt; closes on C round 352 PASS",
+      "added": "2026-11-05 B round 351 -> 352 planning"
+    },
+    {
+      "id": "A-R351-REVIEW-GLOBAL-SPY",
+      "severity": "low",
+      "status": "in_progress round 352 (D-29z1124): spy filters HTMLVideoElem",
+      "title": "DP72 currentTime spy records writes from every media element"
+    },
+    {
+      "id": "A-R351-REVIEW-TRY-SPAN",
+      "severity": "low",
+      "status": "in_progress round 352 (D-29z1124): try/finally removed in th",
+      "title": "DP72 try/finally covers only one waitFor"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 342,
-      "task": "current-task.md",
-      "decision": "D-29z1067..D-29z1074",
-      "type": "REGRESSION-ROUND-2026-11-05 part 3: closed remainder list (WK, PRICE, RS-1280, RG22-NARROW, parked RP rows, POSCTL record, auth)",
-      "status": "closed PASS (D-29z1075): 12/12 rows with an allowed result (9 PASS, 3 recorded), 0 bugs, browserVerified true; gate skipped (no change); regression done | dispatched",
-      "note": "baseline 99a5912 clean; frozen tree b-round-339/r340-tree-sha256.txt; claims b-round-339/claims-r340.sh; next = c4-ii (round 343) or a fix-up",
-      "added": "2026-11-05 B round 341 -> 342 planning"
-    },
     {
       "round": 343,
       "task": "current-task.md",
@@ -5847,9 +5859,18 @@
       "task": "current-task.md",
       "decision": "D-29z1118..D-29z1122",
       "type": "PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 fix-up (C-R350-01 mutant ruling + DP72 seek test)",
-      "status": "dispatched",
+      "status": "c_fail_stop_spec (D-29z1123): A STOP at A-REVIEW (F1 Medium, DP72 release half unguarded); C FAIL STOPPED routed to B, browserVerified false; gate 351 skipped; tree kept for round 352",
       "note": "baseline 7f56989 + A round-350 three files; claims b-round-350/claims-351.sh; sketch b-round-350/sketch-dp72.patch.txt",
       "added": "2026-11-05 B round 350 -> 351 planning"
+    },
+    {
+      "round": 352,
+      "task": "current-task.md",
+      "decision": "D-29z1123..D-29z1126",
+      "type": "PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 fix-up 2 (C-R351-01: DP72 release + Undo halves)",
+      "status": "dispatched",
+      "note": "baseline 7f56989 + 3 files; claims b-round-351/claims-352.sh; sketch b-round-351/sketch-dp72-release.patch.txt + sketch-doc232.patch.txt",
+      "added": "2026-11-05 B round 351 -> 352 planning"
     }
   ],
   "other_keys": [

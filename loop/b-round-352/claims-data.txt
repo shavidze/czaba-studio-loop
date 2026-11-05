@@ -1,0 +1,14 @@
+# Run from the loop root. Each line: number -> command.
+rounds/C status/gate/costs/medians/top5 -> python3 -I b-round-352/collect.py > /tmp/x && python3 -I b-round-352/cost.py   (collect writes b-round-352/rounds-336-352.json; cost writes b-round-352/cost-rows.json)
+phase medians, groups, chain, STOP cost, B median 337-352, A impl median, B share, bugs by severity -> python3 -I b-round-352/retro-numbers.py
+B/A median 322-337 (EXP) -> python3 -I -c "import json,statistics as st;cr=json.load(open('b-round-335/cost-rows.json'))+json.load(open('b-round-352/cost-rows.json'));print(st.median([x[1] for x in cr if 322<=x[0]<=337]),st.median([x[2] for x in cr if 322<=x[0]<=337]))"
+gate review numbered items (script part, 28) -> python3 -I b-round-352/gate-reviews.py   (hand part 21: b-round-352/gate-reviews-hand.txt line refs)
+C bug details -> python3 -I b-round-352/fails-detail.py
+classify sums (26 / 35) -> python3 -I b-round-352/classify.py
+window ids 62 -> see b-round-352/window-ids.txt (inline script; regex ^(A-R|C-R|GATE|B-R|INFO-C|INFO-A|INFO-B)(33[6-9]|34\d|35[0-2]))
+EXP/L57 fields per round -> python3 -I b-round-352/exp-fields.py ; python3 -I b-round-352/manifest-fields.py ; python3 -I b-round-352/l57-coverage.py
+awaiting_user 90 -> python3 -I b-round-352/awaiting-user.py
+mentions 34 lines / 27 ids -> python3 -I b-round-352/retro353-mentions.py b-round-352/backlog-before-353.json <outdir>
+task titles, STOP counts, deferred totals 634/1022, open Medium+, C models -> bash b-round-352/misc-outputs.sh <outdir>
+lessons 60 lines, L23 5058, L58 2803 -> wc -l < lessons.md; sed -n 16p lessons.md | wc -c; sed -n 41p lessons.md | wc -c   (on b-round-352/lessons-before-353.md copy: use b-round-352/lessons-before-353.md)
+RC recurrence -> b-round-352/rc-recurrence.txt (inline script in this file's generation; regex comparator|derived mutant|stale ...)

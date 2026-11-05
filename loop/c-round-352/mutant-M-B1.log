@@ -1,0 +1,122 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/c352-scratch/sk[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/drag-preview-render.test.tsx [2m([22m[2m74 tests[22m[2m | [22m[31m2 failed[39m[2m | [22m[33m67 skipped[39m[2m)[22m[33m 1335[2mms[22m[39m
+     [2m[90m↓[39m[22m DP2 a trimStart move renders only the dragged lane and its clip, not the workspace
+     [2m[90m↓[39m[22m DP3 the release adds exactly one history entry, Undo restores, the store is empty
+     [2m[90m↓[39m[22m DP4 a window blur mid-trim puts the clip back with no history entry
+     [2m[90m↓[39m[22m DP5 a same-lane move keeps the ref on the preview while React holds the original
+     [2m[90m↓[39m[22m DP6 the readout, the detail panel and the overview bar follow the trim preview
+     [2m[90m↓[39m[22m DP7 a trimEnd drag past the project end updates the project-end readout live
+     [2m[90m↓[39m[22m DP8a a release with no commit converges React state to the preview and clears the store
+     [2m[90m↓[39m[22m DP8b a move back to the start adds no entry and leaves the store empty
+     [2m[90m↓[39m[22m DP5b same lane → other lane → back → release: one entry at the final place, store empty
+     [2m[90m↓[39m[22m DP49 cross-lane moves render neither the provider nor the workspace; release adds one entry on the target lane
+     [2m[90m↓[39m[22m DP50 a refused cross-lane move shows the refusal in the readout from the store; release keeps the clip
+     [2m[90m↓[39m[22m DP9a an audio fade-in move renders neither the provider nor the workspace; release adds one entry
+     [2m[90m↓[39m[22m DP9b a video clip move previews through the store; release adds one Move clip entry
+     [2m[90m↓[39m[22m DP10 every changed fade readout replaces the status span once; an unchanged one adds nothing
+     [2m[90m↓[39m[22m DP11 a pointercancel mid-fade reverts the fade and keeps the last readout span
+     [2m[90m↓[39m[22m DP12 a committed write mid-fade wins; release after a refusal restores the last readout
+     [2m[90m↓[39m[22m DP13 a video fade drag previews through the store and the status readout; release adds one entry
+     [2m[90m↓[39m[22m DP14 a fade dragged back to 0 adds no entry, empties the store and reports no change
+     [2m[90m↓[39m[22m DP15 the status preview getter returns the shown readout during the drag and null after it
+     [2m[90m↓[39m[22m DP16 a stop mid-fade reads the shown readout, so the insert-marker rewrite stays off as at HEAD
+     [2m[90m↓[39m[22m DP17 a same-text committed write mid-fade, then a same-value move, keeps the status span node as at HEAD
+     [2m[90m↓[39m[22m DP18 a same-text updater from a timer mid-fade adds and removes no status node
+     [2m[90m↓[39m[22m DP19 two committed writes in one batch mid-fade adopt the readout once, so the second updater sees the first write
+     [2m[90m↓[39m[22m DP20 a committed write and a newer readout in one batch mid-fade keep the newer readout
+     [2m[90m↓[39m[22m DP21 a move that extends the project end inside one timeline second renders no workspace
+     [2m[90m↓[39m[22m DP22 a move that crosses into the next timeline second renders the workspace once and widens the ruler
+     [2m[90m↓[39m[22m DP23 a selection change renders the transport but not the project-end readout
+     [2m[90m↓[39m[22m DP24 the overview extent keeps a loop that ends past the moved project end
+     [2m[90m↓[39m[22m DP25 an audio fade-in move renders neither the detail panel nor the selected-clip readout
+     [2m[90m↓[39m[22m DP26 a same-lane move shows the lane-move hint without rendering the readout; the detail panel follows the start
+     [2m[90m↓[39m[22m DP27 a clip that differs only in an ignored field renders the same readout and detail panel markup
+     [2m[90m↓[39m[22m DP28 a committed change of an ignored field keeps the shown markup while the clip view redraws
+     [2m[90m↓[39m[22m DP29 an audio fade-in move renders neither the overview nor the track meters
+     [2m[90m↓[39m[22m DP30 a same-lane move redraws the overview bar but not the track meters
+     [2m[90m↓[39m[22m DP31 a trimStart move redraws the peak paths and the overview bar but not the track meters
+     [2m[90m↓[39m[22m DP32 a clip that differs only in an overview-ignored field renders the same overview markup
+     [2m[90m↓[39m[22m DP33 a same-lane move renders the detail content once per pointermove and shows the new Start/End
+     [2m[90m↓[39m[22m DP34 a trimStart move renders the detail content once per pointermove and shows the trimmed Start
+     [2m[90m↓[39m[22m DP35 typed Start/End text survives a committed change that keeps the clip start and duration
+     [2m[90m↓[39m[22m DP36 typed Start/End text is replaced when the clip start changes, as the layout effect did
+     [2m[90m↓[39m[22m DP37 a deselect empties the disabled inputs as at HEAD; reselecting the same clip shows its Start/End
+     [2m[90m↓[39m[22m DP38 a trimEnd move shows the new End and keeps the Start
+     [2m[90m↓[39m[22m DP39 a time selection on the clip fills Start/End; one on another lane falls back to the clip bounds
+     [2m[90m↓[39m[22m DP40 Enter applies a typed range inside the clip; an invalid one keeps the typed text
+     [2m[90m↓[39m[22m DP41 Undo after a move puts the Start/End text back to the restored clip
+     [2m[90m↓[39m[22m DP42 typed text in a focused Start input is replaced by the dragged clip start, as at HEAD
+     [2m[90m↓[39m[22m DP43 an audio fade-in move renders no peak path while the clip view redraws
+     [2m[90m↓[39m[22m DP44 a same-lane move renders no peak path in the lane or the detail panel
+     [2m[90m↓[39m[22m DP45 a trimStart move redraws both peak paths once per pointermove
+     [2m[90m↓[39m[22m DP46 a trimEnd move redraws both peak paths once per pointermove
+     [2m[90m↓[39m[22m DP48 a video fade-in move renders no peak path on the video lane
+     [2m[90m↓[39m[22m DP47 a committed gain change redraws both peak paths; a committed fade-only change redraws none
+     [2m[90m↓[39m[22m DP51 a same-lane group move renders neither the provider nor the workspace; release adds one Move (2) entry
+     [2m[90m↓[39m[22m DP52 a cross-lane group move renders no provider; release puts both clips on the target lane in one entry
+     [2m[90m↓[39m[22m DP53 a group with a video clip previews through the store; release adds one Move (2) entry
+     [2m[90m↓[39m[22m DP57 a video trimEnd move previews through the store; release adds one Trim entry
+     [2m[90m↓[39m[22m DP58 the video gap caption follows a stopped video move from the store
+     [2m[90m↓[39m[22m DP59 the video fade overlay follows a stopped video fade drag from the store
+     [2m[90m↓[39m[22m DP60 an audio move with a video clip present renders no video dock
+     [2m[90m↓[39m[22m DP61 a pointercancel mid video fade reverts the fade and the overlay with no entry; the readout stays
+     [2m[90m↓[39m[22m DP62 a video move while playing renders no provider; release adds one Move clip entry
+     [2m[90m↓[39m[22m DP54 a collapsed group overview follows a group move of its hidden clip without a workspace render
+     [2m[90m↓[39m[22m DP55 a blocked group move shows the blocked status and leaves both clips in place
+     [2m[90m↓[39m[22m DP56 a window blur mid group move puts both clips back with no history entry
+     [2m[90m↓[39m[22m DP63 a stopped trim, move and fade re-render no lane fold or clip header icon
+     [2m[90m↓[39m[22m DP64 the dock caption follows a stopped video move from the store
+     [2m[90m↓[39m[22m DP65 a stopped trim, move and fade re-render no lane mix fader and no detail clip gain
+     [33m[2m✓[22m[39m DP66 a video trimStart move renders no dock component; the clip shows the preview; release adds one Trim entry [33m 381[2mms[22m[39m
+     [32m✓[39m DP67 a video fade-in move renders no dock component; the overlay follows the preview inside the fade[32m 175[2mms[22m[39m
+     [32m✓[39m DP68 a video trimStart that uncovers the playhead shows the gap during the preview; it stays after release; Undo removes it[32m 157[2mms[22m[39m
+[31m     [31m×[31m DP69 the fade release never writes the pre-drag opacity back to the overlay[39m[32m 134[2mms[22m[39m
+     [32m✓[39m DP70 Undo and Redo of a committed video fade rewrite the overlay with no preview[32m 124[2mms[22m[39m
+     [32m✓[39m DP71 an audio move with a video clip present renders no dock component and writes no video opacity[32m 106[2mms[22m[39m
+[31m     [31m×[31m DP72 a stopped video move drag seeks the frame to the previewed clip before release[39m[32m 255[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the drag preview without rendering[2m > [22mDP69 the fade release never writes the pre-drag opacity back to the overlay
+[31m[1mAssertionError[22m: expected [ '0.500', '1.000' ] to not include '1.000'[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m2176:60[22m[39m
+    [90m2174| [39m      [35mconst[39m finalOpacity [33m=[39m overlay[33m.[39mdataset[33m.[39mvideoOpacity[33m;[39m
+    [90m2175| [39m      const writtenValues = [...records.slice(1).map((record) => recor…
+    [90m2176| [39m      expect(records.map((record) => record.oldValue)).not.toContain('…
+    [90m   | [39m                                                           [31m^[39m
+    [90m2177| [39m      [34mexpect[39m(writtenValues)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'1.000'[39m)[33m;[39m
+    [90m2178| [39m      [34mexpect[39m(finalOpacity)[33m.[39m[34mtoBe[39m(shownBeforeRelease)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/drag-preview-render.test.tsx[2m > [22mPERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the drag preview without rendering[2m > [22mDP72 a stopped video move drag seeks the frame to the previewed clip before release
+[31m[1mAssertionError[22m: expected [ +0, 2, 1, 1 ] to have a length of 3 but got 4[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 3[39m
+[31m+ 4[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/drag-preview-render.test.tsx:[2m2297:19[22m[39m
+    [90m2295| [39m      [35mawait[39m [35mnew[39m [33mPromise[39m((resolve) [33m=>[39m [34msetTimeout[39m(resolve[33m,[39m [34m20[39m))[33m;[39m
+    [90m2296| [39m    })[33m;[39m
+    [90m2297| [39m    [34mexpect[39m(seeks)[33m.[39m[34mtoHaveLength[39m(writesBeforeRelease)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m2298| [39m    expect(clipIn(live(api).arrangement, imported.id).start).toBeClose…
+    [90m2299| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mundo[39m())[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[2m | [22m[33m67 skipped[39m[90m (74)[39m
+[2m   Start at [22m 16:00:33
+[2m   Duration [22m 3.96s[2m (transform 1.39s, setup 0ms, import 1.96s, tests 1.33s, environment 500ms)[22m
+
+
+::error file=/home/runner/c352-scratch/sk/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the drag preview without rendering > DP69 the fade release never writes the pre-drag opacity back to the overlay,line=2176,column=60::AssertionError: expected [ '0.500', '1.000' ] to not include '1.000'%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:2176:60%0A%0A
+
+::error file=/home/runner/c352-scratch/sk/app/lib/arrangement/__tests__/drag-preview-render.test.tsx,title=app/lib/arrangement/__tests__/drag-preview-render.test.tsx > PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the drag preview without rendering > DP72 a stopped video move drag seeks the frame to the previewed clip before release,line=2297,column=19::AssertionError: expected [ +0, 2, 1, 1 ] to have a length of 3 but got 4%0A%0A- Expected%0A+ Received%0A%0A- 3%0A+ 4%0A%0A ❯ app/lib/arrangement/__tests__/drag-preview-render.test.tsx:2297:19%0A%0A

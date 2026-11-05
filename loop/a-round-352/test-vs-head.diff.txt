@@ -1,0 +1,273 @@
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index 89d5d1f..82c60ea 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -32,6 +32,7 @@ import {
+ } from '../preview-store';
+ import { CLIP_LANE_REFUSAL_MESSAGES, GROUP_MOVE_BLOCKED_MESSAGE } from '../selection';
+ import { studioClipStrings, studioPlaybackStrings } from '../strings';
++import { videoFadeOpacityAt } from '../video-fades';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -2045,3 +2046,260 @@ describe('PERF-DRAG-PREVIEW stage c6-i — header icons skip drag moves; the doc
+     }
+   });
+ });
++
++const VIDEO_DOCK_COMPONENTS = [
++  'ArrangementVideoDock',
++  'ArrangementVideoCaption',
++  'ArrangementVideoFadeOverlay',
++  'ArrangementVideoGapCaption',
++];
++
++function videoDockRenders(): Record<string, number> {
++  return Object.fromEntries(VIDEO_DOCK_COMPONENTS.map((name) => [name, rendersOf(name)]));
++}
++
++const NO_VIDEO_DOCK_RENDERS = Object.fromEntries(VIDEO_DOCK_COMPONENTS.map((name) => [name, 0]));
++
++function videoFadeHandleOf(root: HTMLElement): HTMLElement {
++  const fade = root.querySelector<HTMLElement>('[data-testid="arrangement-video-fade-in-handle"]');
++  if (!fade) {
++    throw new Error('video fade handle missing');
++  }
++  return fade;
++}
++
++function observeVideoOpacity(overlay: HTMLElement): MutationObserver {
++  const observer = new MutationObserver(() => undefined);
++  observer.observe(overlay, {
++    attributes: true,
++    attributeOldValue: true,
++    attributeFilter: ['data-video-opacity'],
++  });
++  return observer;
++}
++
++describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the drag preview without rendering', () => {
++  it('DP66 a video trimStart move renders no dock component; the clip shows the preview; release adds one Trim entry', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++    act(() => live(api).seekTo(4));
++    const video = clipParts('v1');
++    expect(rendersOf('ArrangementVideoDock')).toBeGreaterThan(0);
++    pointerDownAt(video.trimStart, 11, 40, 50);
++    pointerMoveTo(video.root, 11, 80, 50);
++    renderLog.counts.clear();
++    pointerMoveTo(video.root, 11, 100, 50);
++    pointerMoveTo(video.root, 11, 120, 50);
++    expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
++    expect(videoDockRenders()).toEqual(NO_VIDEO_DOCK_RENDERS);
++    expect(video.root.dataset.clipStart).toBe('3.000');
++    expect(clipIn(live(api).arrangement, 'v1').start).toBe(1);
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
++    const undoBefore = live(api).undoLabel;
++    pointerUpAt(video.root, 11, 120, 50);
++    expect(undoBefore).not.toBe(studioClipStrings.trimStartLabel);
++    expect(live(api).undoLabel).toBe(studioClipStrings.trimStartLabel);
++    expect(previewOf(api)).toBeNull();
++    expect(clipIn(live(api).arrangement, 'v1').start).toBe(3);
++    act(() => live(api).undo());
++    expect(clipIn(live(api).arrangement, 'v1').start).toBe(1);
++    expect(live(api).undoLabel).toBe(undoBefore);
++  });
++
++  it('DP67 a video fade-in move renders no dock component; the overlay follows the preview inside the fade', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++    act(() => live(api).seekTo(2));
++    const overlay = view.getByTestId('arrangement-video-fade');
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
++    const video = clipParts('v1');
++    pointerDownAt(videoFadeHandleOf(video.root), 12, 40, 50);
++    pointerMoveTo(video.root, 12, 80, 50);
++    renderLog.counts.clear();
++    pointerMoveTo(video.root, 12, 100, 50);
++    const firstPreview = previewOf(api);
++    if (!firstPreview) {
++      throw new Error('video fade preview missing');
++    }
++    const firstOpacity = overlay.dataset.videoOpacity;
++    expect(firstOpacity).toBe(videoFadeOpacityAt(firstPreview, 2).toFixed(3));
++    pointerMoveTo(video.root, 12, 120, 50);
++    const secondPreview = previewOf(api);
++    if (!secondPreview) {
++      throw new Error('video fade preview missing');
++    }
++    const secondOpacity = overlay.dataset.videoOpacity;
++    expect(secondOpacity).toBe(videoFadeOpacityAt(secondPreview, 2).toFixed(3));
++    expect(Number(firstOpacity)).toBeLessThan(1);
++    expect(Number(secondOpacity)).toBeLessThan(Number(firstOpacity));
++    expect(clipIn(live(api).arrangement, 'v1').fadeIn ?? 0).toBe(0);
++    expect(videoDockRenders()).toEqual(NO_VIDEO_DOCK_RENDERS);
++    pointerUpAt(video.root, 12, 120, 50);
++    expect(live(api).undoLabel).toBe('Video Fade In');
++    expect(overlay.dataset.videoOpacity).toBe(secondOpacity);
++  });
++
++  it('DP68 a video trimStart that uncovers the playhead shows the gap during the preview; it stays after release; Undo removes it', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++    act(() => live(api).seekTo(1.5));
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
++    const video = clipParts('v1');
++    pointerDownAt(video.trimStart, 13, 40, 50);
++    pointerMoveTo(video.root, 13, 60, 50);
++    pointerMoveTo(video.root, 13, 80, 50);
++    expect(video.root.dataset.clipStart).toBe('2.000');
++    expect(clipIn(live(api).arrangement, 'v1').start).toBe(1);
++    expect(view.queryByTestId('arrangement-video-gap')).not.toBeNull();
++    pointerUpAt(video.root, 13, 80, 50);
++    expect(clipIn(live(api).arrangement, 'v1').start).toBe(2);
++    expect(view.queryByTestId('arrangement-video-gap')).not.toBeNull();
++    act(() => live(api).undo());
++    expect(clipIn(live(api).arrangement, 'v1').start).toBe(1);
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
++  });
++
++  it('DP69 the fade release never writes the pre-drag opacity back to the overlay', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++    act(() => live(api).seekTo(2));
++    const overlay = view.getByTestId('arrangement-video-fade');
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
++    const video = clipParts('v1');
++    pointerDownAt(videoFadeHandleOf(video.root), 14, 40, 50);
++    pointerMoveTo(video.root, 14, 80, 50);
++    pointerMoveTo(video.root, 14, 120, 50);
++    const shownBeforeRelease = overlay.dataset.videoOpacity;
++    expect(shownBeforeRelease).not.toBe('1.000');
++    const observer = observeVideoOpacity(overlay);
++    try {
++      pointerUpAt(video.root, 14, 120, 50);
++      const records = observer.takeRecords();
++      const finalOpacity = overlay.dataset.videoOpacity;
++      const writtenValues = [...records.slice(1).map((record) => record.oldValue), finalOpacity];
++      expect(records.map((record) => record.oldValue)).not.toContain('1.000');
++      expect(writtenValues).not.toContain('1.000');
++      expect(finalOpacity).toBe(shownBeforeRelease);
++      expect(clipIn(live(api).arrangement, 'v1').fadeIn ?? 0).toBeGreaterThan(0);
++      expect(previewOf(api)).toBeNull();
++    } finally {
++      observer.disconnect();
++    }
++  });
++
++  it('DP70 Undo and Redo of a committed video fade rewrite the overlay with no preview', async () => {
++    const { api, view } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
++    act(() => live(api).seekTo(2));
++    const overlay = view.getByTestId('arrangement-video-fade');
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
++    const committedCaption = textOf(view, 'arrangement-video-caption');
++    const committedGap = view.queryByTestId('arrangement-video-gap') === null;
++    const before = live(api).getArrangement();
++    const faded: Arrangement = {
++      ...before,
++      clips: before.clips.map((clip) => (clip.id === 'v1' ? { ...clip, fadeIn: 2 } : clip)),
++    };
++    const fadedOpacity = videoFadeOpacityAt(faded, 2).toFixed(3);
++    expect(fadedOpacity).not.toBe('1.000');
++    act(() => {
++      live(api).commitArrangement(faded, 'Video Fade In', before);
++    });
++    expect(previewOf(api)).toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
++    act(() => live(api).undo());
++    expect(previewOf(api)).toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
++    expect(textOf(view, 'arrangement-video-caption')).toBe(committedCaption);
++    expect(view.queryByTestId('arrangement-video-gap') === null).toBe(committedGap);
++    act(() => live(api).redo());
++    expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
++  });
++
++  it('DP71 an audio move with a video clip present renders no dock component and writes no video opacity', async () => {
++    const { api, view, clipParts } = await mountPreviewWorkspace([
++      ...AUDIO_CLIPS,
++      { ...VIDEO_CLIP, fadeIn: 2 },
++      PROJECT_END_CLIP,
++    ]);
++    act(() => live(api).seekTo(2));
++    const overlay = view.getByTestId('arrangement-video-fade');
++    const restingOpacity = overlay.dataset.videoOpacity;
++    expect(restingOpacity).not.toBe('1.000');
++    const audio = clipParts('c1');
++    expect(rendersOf('ArrangementVideoDock')).toBeGreaterThan(0);
++    pointerDownAt(audio.header, 15, 80);
++    pointerMoveTo(audio.root, 15, 120);
++    renderLog.counts.clear();
++    const observer = observeVideoOpacity(overlay);
++    try {
++      pointerMoveTo(audio.root, 15, 160);
++      pointerMoveTo(audio.root, 15, 200);
++      expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
++      expect(audio.root.dataset.clipStart).toBe('5.000');
++      expect(videoDockRenders()).toEqual(NO_VIDEO_DOCK_RENDERS);
++      expect(observer.takeRecords()).toHaveLength(0);
++      expect(overlay.dataset.videoOpacity).toBe(restingOpacity);
++    } finally {
++      observer.disconnect();
++      pointerUpAt(audio.root, 15, 200);
++    }
++  });
++
++  it('DP72 a stopped video move drag seeks the frame to the previewed clip before release', async () => {
++    probeVideoMock.mockResolvedValue({ url: 'blob:film', duration: 4, width: 640, height: 360 });
++    decodeVideoMock.mockImplementation(() => new Promise(() => undefined));
++    const seeks: number[] = [];
++    vi.spyOn(HTMLMediaElement.prototype, 'currentTime', 'set').mockImplementation(function (
++      this: HTMLMediaElement,
++      value: number,
++    ) {
++      if (this instanceof HTMLVideoElement) {
++        seeks.push(value);
++      }
++    });
++    const { api, view } = await mountPreviewWorkspace([...AUDIO_CLIPS]);
++    await act(async () => {
++      live(api).importVideoFiles([new File(['x'], 'film.mp4', { type: 'video/mp4' })]);
++    });
++    await waitFor(() =>
++      expect(live(api).arrangement.clips.some((clip) => clip.trackId === 'video')).toBe(true),
++    );
++    const imported = live(api).arrangement.clips.find((clip) => clip.trackId === 'video');
++    if (!imported) {
++      throw new Error('imported video clip missing');
++    }
++    const playhead = imported.start + 2;
++    act(() => live(api).seekTo(playhead));
++    await waitFor(() =>
++      expect(seeks.at(-1)).toBeCloseTo(playhead - imported.start + imported.sourceOffset, 3),
++    );
++    const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${imported.id}"]`);
++    const header = root?.firstElementChild;
++    if (!root || !(header instanceof HTMLElement)) {
++      throw new Error('imported video clip not rendered');
++    }
++    stubCapture(root);
++    const pressX = imported.start * PX_PER_SECOND;
++    pointerDownAt(header, 10, pressX, 50);
++    pointerMoveTo(root, 10, pressX + 20, 50);
++    pointerMoveTo(root, 10, pressX + 40, 50);
++    const shown = previewOf(api);
++    if (!shown) {
++      throw new Error('video move preview missing');
++    }
++    const shownStart = clipIn(shown, imported.id).start;
++    expect(clipIn(live(api).arrangement, imported.id).start).toBe(imported.start);
++    expect(shownStart).toBeGreaterThan(imported.start);
++    expect(shownStart).toBeLessThan(playhead);
++    const previewTarget = playhead - shownStart + imported.sourceOffset;
++    await waitFor(() => expect(seeks.at(-1)).toBeCloseTo(previewTarget, 3));
++    const writesBeforeRelease = seeks.length;
++    pointerUpAt(root, 10, pressX + 40, 50);
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 20));
++    });
++    expect(seeks).toHaveLength(writesBeforeRelease);
++    expect(clipIn(live(api).arrangement, imported.id).start).toBeCloseTo(shownStart, 6);
++    act(() => live(api).undo());
++    await waitFor(() => expect(seeks.length).toBeGreaterThan(writesBeforeRelease));
++    await waitFor(() =>
++      expect(seeks.at(-1)).toBeCloseTo(playhead - imported.start + imported.sourceOffset, 3),
++    );
++  });
++});
