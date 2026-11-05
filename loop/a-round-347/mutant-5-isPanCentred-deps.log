@@ -1,0 +1,82 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/a347-scratch/sc[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/track-pan.test.tsx [2m([22m[2m26 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1560[2mms[22m[39m
+       [32m✓[39m setArrangementTrackPan(-1) changes only that track pan and leaves volume, mute, solo, clips and master[32m 3[2mms[22m[39m
+       [32m✓[39m setting 0 removes the key so the arrangement equals a never-changed one[32m 1[2mms[22m[39m
+       [32m✓[39m clamps to ±1 and rounds to 1/50 steps[32m 1[2mms[22m[39m
+       [32m✓[39m returns the same object for NaN, an unknown id, the video track and an unchanged value[32m 1[2mms[22m[39m
+       [32m✓[39m formatTrackPan shows C, NL and NR in 1…50 units[32m 0[2mms[22m[39m
+       [32m✓[39m tracks with pan seed that panner and leave the others at 0 without new nodes[32m 2[2mms[22m[39m
+       [32m✓[39m setTrackPan ramps only that track panner with τ 0.015 and ignores a repeated value[32m 1[2mms[22m[39m
+       [32m✓[39m an unknown track and a disconnected handle do nothing[32m 1[2mms[22m[39m
+       [32m✓[39m renderArrangementWav keeps the same applySchedule call and never calls setTrackPan[32m 1[2mms[22m[39m
+       [32m✓[39m setTrackPan commits one Pan entry; Undo removes the key and Redo re-applies it[32m 27[2mms[22m[39m
+       [32m✓[39m a pan change while playing does not reschedule and ramps the music panner; Undo too[32m 13[2mms[22m[39m
+       [32m✓[39m starts the graph with the stored pan on that panner only[32m 4[2mms[22m[39m
+       [32m✓[39m begin → previews leave history untouched; commit makes exactly one entry[32m 8[2mms[22m[39m
+       [32m✓[39m cancel makes no entry and pushes the stored pan back to the live panner[32m 5[2mms[22m[39m
+       [32m✓[39m a window pointercancel cancels and a window pointerup commits the gesture[32m 4[2mms[22m[39m
+       [32m✓[39m a reschedule during a preview keeps the dragged pan on the new graph panner[32m 5[2mms[22m[39m
+       [32m✓[39m refuses during another pointer gesture, and a pan gesture blocks a second claim[32m 4[2mms[22m[39m
+       [33m[2m✓[22m[39m audio lanes show Pan and its reset; the video lane and a folded lane do not [33m 395[2mms[22m[39m
+       [32m✓[39m row 1 DOM order is fold, name, Pan, readout[32m 136[2mms[22m[39m
+[31m       [31m×[31m a pointer drag follows the draft live without history, then commits one entry showing NL[39m[32m 232[2mms[22m[39m
+       [32m✓[39m each keyboard value change is one entry immediately[32m 155[2mms[22m[39m
+[31m       [31m×[31m the readout click returns to C with one entry and is disabled afterwards[39m[32m 104[2mms[22m[39m
+       [32m✓[39m a blur during a drag makes no entry and shows the stored pan again[32m 146[2mms[22m[39m
+       [32m✓[39m a window pointercancel during a drag clears the draft without an entry[32m 108[2mms[22m[39m
+       [32m✓[39m Delete and Backspace on the focused Pan slider do not delete the selected clip[32m 96[2mms[22m[39m
+       [32m✓[39m Space on the focused Pan slider toggles playback like Volume[32m 105[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/fader-click.test.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 2249[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m50 passed[39m[22m[90m (52)[39m
+[2m   Start at [22m 09:49:28
+[2m   Duration [22m 4.82s[2m (transform 2.37s, setup 0ms, import 3.69s, tests 3.81s, environment 1.09s)[22m
+
+
+::error file=/home/runner/a347-scratch/sc/app/lib/arrangement/__tests__/track-pan.test.tsx,title=app/lib/arrangement/__tests__/track-pan.test.tsx > Track Pan (SRW-13 stage 4a%2C FB-05%2C R13-M2) > lane header UI > a pointer drag follows the draft live without history%2C then commits one entry showing NL,line=748,column=32::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/track-pan.test.tsx:748:32%0A%0A
+
+::error file=/home/runner/a347-scratch/sc/app/lib/arrangement/__tests__/track-pan.test.tsx,title=app/lib/arrangement/__tests__/track-pan.test.tsx > Track Pan (SRW-13 stage 4a%2C FB-05%2C R13-M2) > lane header UI > the readout click returns to C with one entry and is disabled afterwards,line=776,column=32::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/track-pan.test.tsx:776:32%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/track-pan.test.tsx[2m > [22mTrack Pan (SRW-13 stage 4a, FB-05, R13-M2)[2m > [22mlane header UI[2m > [22ma pointer drag follows the draft live without history, then commits one entry showing NL
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/track-pan.test.tsx:[2m748:32[22m[39m
+    [90m746| [39m      [34mexpect[39m([34mslider[39m()[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m'-30'[39m)[33m;[39m
+    [90m747| [39m      [34mexpect[39m([34mreset[39m()[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'30L'[39m)[33m;[39m
+    [90m748| [39m      [34mexpect[39m([34mreset[39m()[33m.[39mdisabled)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m749| [39m      [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mundo[39m())[33m;[39m
+    [90m750| [39m      [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBe[39m([33mMUTE_SFX_LABEL[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/track-pan.test.tsx[2m > [22mTrack Pan (SRW-13 stage 4a, FB-05, R13-M2)[2m > [22mlane header UI[2m > [22mthe readout click returns to C with one entry and is disabled afterwards
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/track-pan.test.tsx:[2m776:32[22m[39m
+    [90m774| [39m      fireEvent[33m.[39m[34mchange[39m([34mslider[39m()[33m,[39m { target[33m:[39m { value[33m:[39m [32m'-25'[39m } })[33m;[39m
+    [90m775| [39m      [34mexpect[39m([34mreset[39m()[33m.[39mtextContent)[33m.[39m[34mtoBe[39m([32m'25L'[39m)[33m;[39m
+    [90m776| [39m      [34mexpect[39m([34mreset[39m()[33m.[39mdisabled)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m777| [39m      [34mreset[39m()[33m.[39m[34mfocus[39m()[33m;[39m
+    [90m778| [39m      fireEvent[33m.[39m[34mclick[39m([34mreset[39m())[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

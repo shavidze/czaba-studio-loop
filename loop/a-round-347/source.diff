@@ -1,0 +1,417 @@
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index b0c7785..ec40169 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -25,6 +25,7 @@ import {
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
++import { useStableHandler } from '~/hooks/useStableHandler';
+ import {
+   clipGainMemberSpan,
+   formatClipGainMembersStatus,
+@@ -302,6 +303,13 @@ function parseClipGainIdsKey(idsKey: string): string[] {
+   return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+ }
+ 
++function parseClipGainDbKey(dbKey: string): number[] {
++  const parsed: unknown = JSON.parse(dbKey);
++  return Array.isArray(parsed)
++    ? parsed.filter((db): db is number => typeof db === 'number' && Number.isFinite(db))
++    : [];
++}
++
+ function useClipGainDraftSnapshot(clipIds: readonly string[] | null): string {
+   const store = useArrangementMixDraftStore();
+   const idsKey = clipIds === null ? '' : JSON.stringify(clipIds);
+@@ -341,7 +349,7 @@ function draftedClipGains(
+   });
+ }
+ 
+-const ArrangementDetailClipGain = forwardRef<HTMLInputElement, ArrangementDetailClipGainProps>(
++const ArrangementDetailClipGainInner = forwardRef<HTMLInputElement, ArrangementDetailClipGainProps>(
+   (
+     {
+       clipIds,
+@@ -493,7 +501,9 @@ const ArrangementDetailClipGain = forwardRef<HTMLInputElement, ArrangementDetail
+   },
+ );
+ 
+-ArrangementDetailClipGain.displayName = 'ArrangementDetailClipGain';
++ArrangementDetailClipGainInner.displayName = 'ArrangementDetailClipGain';
++
++const ArrangementDetailClipGain = memo(ArrangementDetailClipGainInner);
+ 
+ interface DetailRangeTextSource {
+   onClipStart: number | null;
+@@ -752,7 +762,7 @@ function ArrangementDetailContentInner({
+     setClipGainText(currentText);
+   };
+ 
+-  const handleClipGainKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
++  const handleClipGainKeyDown = useStableHandler((event: KeyboardEvent<HTMLInputElement>) => {
+     if (event.key === 'Enter') {
+       event.preventDefault();
+       if (!event.repeat) {
+@@ -762,13 +772,26 @@ function ArrangementDetailContentInner({
+       event.preventDefault();
+       setClipGainText(displayedClipGainText);
+     }
+-  };
++  });
+ 
+   const clipGainInputRef = useRef<HTMLInputElement>(null);
+   const clipGainDragIdsRef = useRef<readonly string[] | null>(null);
+-  const selectedClipGainIds: readonly string[] | null = clip
+-    ? [clip.id]
+-    : (clipGainGroup?.clipIds ?? null);
++  const selectedClipGainIdsKey = clip
++    ? JSON.stringify([clip.id])
++    : clipGainGroup
++      ? JSON.stringify(clipGainGroup.clipIds)
++      : null;
++  const selectedClipGainIds: readonly string[] | null = useMemo(
++    () => (selectedClipGainIdsKey === null ? null : parseClipGainIdsKey(selectedClipGainIdsKey)),
++    [selectedClipGainIdsKey],
++  );
++  const storedClipGainsDbKey = JSON.stringify(
++    clipGainGroup ? clipGainGroup.clipGainsDb : [clipGainDb ?? 0],
++  );
++  const storedClipGainsDb: readonly number[] = useMemo(
++    () => parseClipGainDbKey(storedClipGainsDbKey),
++    [storedClipGainsDbKey],
++  );
+   const isClipGainFaderEnabled =
+     clipGainReason === null &&
+     selectedClipGainIds !== null &&
+@@ -829,14 +852,16 @@ function ArrangementDetailContentInner({
+     refuseGesture: () => setStatus(GESTURE_EDIT_BLOCKED_MESSAGE),
+   });
+ 
+-  const handleClipGainFaderPointerDown = (event: ReactPointerEvent<HTMLInputElement>) => {
+-    if (!isClipGainFaderEnabled) {
+-      return;
+-    }
+-    clipGainFaderDrag.onPointerDown(event);
+-  };
++  const handleClipGainFaderPointerDown = useStableHandler(
++    (event: ReactPointerEvent<HTMLInputElement>) => {
++      if (!isClipGainFaderEnabled) {
++        return;
++      }
++      clipGainFaderDrag.onPointerDown(event);
++    },
++  );
+ 
+-  const commitClipGainFaderValue = () => {
++  const commitClipGainFaderValue = useStableHandler(() => {
+     const clipIds = clipGainTargetIds();
+     const [firstId] = clipIds ?? [];
+     if (clipIds !== null && clipIds.length > 1) {
+@@ -844,9 +869,9 @@ function ArrangementDetailContentInner({
+     } else if (firstId !== undefined) {
+       commitClipGainFader?.(firstId);
+     }
+-  };
++  });
+ 
+-  const blurClipGainFaderValue = () => {
++  const blurClipGainFaderValue = useStableHandler(() => {
+     const clipIds = clipGainTargetIds();
+     const [firstId] = clipIds ?? [];
+     if (clipIds !== null && clipIds.length > 1) {
+@@ -854,7 +879,7 @@ function ArrangementDetailContentInner({
+     } else if (firstId !== undefined) {
+       blurClipGainFader?.(firstId);
+     }
+-  };
++  });
+ 
+   const resetClipGainMembers = (
+     clipIds: readonly string[],
+@@ -869,7 +894,7 @@ function ArrangementDetailContentInner({
+     return isReset;
+   };
+ 
+-  const resetClipGainFader = () => {
++  const resetClipGainFader = useStableHandler(() => {
+     const [firstId] = selectedClipGainIds ?? [];
+     if (!isClipGainFaderEnabled || selectedClipGainIds === null || firstId === undefined) {
+       return;
+@@ -884,7 +909,7 @@ function ArrangementDetailContentInner({
+     }
+     previewClipGainFader?.(firstId, 0);
+     commitClipGainFader?.(firstId);
+-  };
++  });
+ 
+   const resetClipGain = (resetButton: HTMLButtonElement) => {
+     if (clipGainReason !== null) {
+@@ -917,6 +942,31 @@ function ArrangementDetailContentInner({
+     }
+   };
+ 
++  const handleClipGainFieldChange = useStableHandler((event: ChangeEvent<HTMLInputElement>) => {
++    setClipGainText(event.target.value);
++  });
++
++  const handleClipGainFieldBlur = useStableHandler(() => {
++    commitClipGain('blur');
++  });
++
++  const handleClipGainFaderChange = useStableHandler((event: ChangeEvent<HTMLInputElement>) => {
++    const clipIds = clipGainTargetIds();
++    if (isClipGainFaderEnabled && clipIds !== null) {
++      previewClipGainTargets(clipIds, Number(event.target.value));
++    }
++  });
++
++  const handleClipGainFaderKeyUp = useStableHandler(() => {
++    if (!isPointerGestureActive()) {
++      commitClipGainFaderValue();
++    }
++  });
++
++  const handleClipGainResetClick = useStableHandler((event: MouseEvent<HTMLButtonElement>) => {
++    resetClipGain(event.currentTarget);
++  });
++
+   const isGroupState = !clip && group !== null;
+   const isNoneState = !clip && group === null;
+   const rangeReasonNode = inputsReason ? (
+@@ -1068,7 +1118,7 @@ function ArrangementDetailContentInner({
+         storedClipGainDb={clipGainDb}
+         storedMinDb={clipGainMinDb}
+         storedMaxDb={clipGainMaxDb}
+-        storedClipGainsDb={clipGainGroup ? clipGainGroup.clipGainsDb : [clipGainDb ?? 0]}
++        storedClipGainsDb={storedClipGainsDb}
+         reason={clipGainReason}
+         reasonId={clipGainReasonId}
+         pendingId={clipGainPendingId}
+@@ -1080,26 +1130,17 @@ function ArrangementDetailContentInner({
+         inputClass={inputClass}
+         fieldRef={clipGainInputRef}
+         fieldText={clipGainText}
+-        onFieldChange={(event) => setClipGainText(event.target.value)}
++        onFieldChange={handleClipGainFieldChange}
+         onFieldKeyDown={handleClipGainKeyDown}
+-        onFieldBlur={() => commitClipGain('blur')}
++        onFieldBlur={handleClipGainFieldBlur}
+         isFaderEnabled={isClipGainFaderEnabled}
+-        onFaderChange={(event) => {
+-          const clipIds = clipGainTargetIds();
+-          if (isClipGainFaderEnabled && clipIds !== null) {
+-            previewClipGainTargets(clipIds, Number(event.target.value));
+-          }
+-        }}
++        onFaderChange={handleClipGainFaderChange}
+         onFaderPointerDown={handleClipGainFaderPointerDown}
+         onFaderDoubleClick={resetClipGainFader}
+         onFaderPointerUp={commitClipGainFaderValue}
+-        onFaderKeyUp={() => {
+-          if (!isPointerGestureActive()) {
+-            commitClipGainFaderValue();
+-          }
+-        }}
++        onFaderKeyUp={handleClipGainFaderKeyUp}
+         onFaderBlur={blurClipGainFaderValue}
+-        onResetClick={(event) => resetClipGain(event.currentTarget)}
++        onResetClick={handleClipGainResetClick}
+         reasonNode={isNoneState ? clipGainReasonNode : null}
+       />
+     </div>
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 9e3a824..87f9894 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -25,6 +25,7 @@ import {
+   useArrangementSelection,
+ } from '~/contexts/ArrangementContext';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
++import { useStableHandler } from '~/hooks/useStableHandler';
+ import {
+   selectLaneDragGhosts,
+   selectLaneMoveSourceKey,
+@@ -511,12 +512,12 @@ export function ArrangementLane({
+     [attachPanFaderDrag],
+   );
+ 
+-  const resetTrackVolume = () => {
++  const resetTrackVolume = useStableHandler(() => {
+     previewTrackVolume(track.id, trackVolumeFromDb(TRACK_VOLUME_DB_DEFAULT));
+     commitTrackVolume(track.id);
+-  };
++  });
+ 
+-  const handlePanChange = (event: ChangeEvent<HTMLInputElement>) => {
++  const handlePanChange = useStableHandler((event: ChangeEvent<HTMLInputElement>) => {
+     if (panBlurSuppressionCleanupRef.current) {
+       return;
+     }
+@@ -527,18 +528,18 @@ export function ArrangementLane({
+     }
+     panDragCleanupRef.current?.();
+     setTrackPan(track.id, pan);
+-  };
++  });
+ 
+-  const handlePanPointerEnd = (event: PointerEvent<HTMLInputElement>) => {
++  const handlePanPointerEnd = useStableHandler((event: PointerEvent<HTMLInputElement>) => {
+     const dragPointer = panDragPointerRef.current;
+     if (dragPointer !== null && event.pointerId !== dragPointer) {
+       return;
+     }
+     commitTrackPan(track.id);
+     panDragCleanupRef.current?.();
+-  };
++  });
+ 
+-  const handlePanBlur = () => {
++  const handlePanBlur = useStableHandler(() => {
+     if (panDragCleanupRef.current) {
+       const cancelledPointer = panDragPointerRef.current;
+       if (cancelledPointer !== null) {
+@@ -547,30 +548,58 @@ export function ArrangementLane({
+       cancelTrackPan(track.id);
+       panDragCleanupRef.current();
+     }
+-  };
++  });
+ 
+-  const handlePanKeyDown = () => {
++  const handlePanKeyDown = useStableHandler(() => {
+     panBlurSuppressionCleanupRef.current?.();
+-  };
++  });
+ 
+-  const renderPanReadout = (pan: number) => (
+-    <button
+-      type="button"
+-      onClick={() => {
+-        if (setTrackPan(track.id, 0)) {
+-          panSliderRef.current?.focus();
+-        }
+-      }}
+-      disabled={storedPan === 0}
+-      aria-label={studioLaneStrings.panResetLabel(track.name)}
+-      title="Pan → C"
+-      className="w-7 shrink-0 rounded-md text-right text-xs tabular-nums text-muted enabled:hover:text-foreground"
+-      data-testid="arrangement-track-pan-reset"
+-    >
+-      {formatTrackPan(pan)}
+-    </button>
++  const handlePanDoubleClick = useStableHandler(() => {
++    setTrackPan(track.id, 0);
++  });
++
++  const trackId = track.id;
++  const trackName = track.name;
++  const isPanCentred = storedPan === 0;
++  const renderPanReadout = useCallback(
++    (pan: number) => (
++      <button
++        type="button"
++        onClick={() => {
++          if (setTrackPan(trackId, 0)) {
++            panSliderRef.current?.focus();
++          }
++        }}
++        disabled={isPanCentred}
++        aria-label={studioLaneStrings.panResetLabel(trackName)}
++        title="Pan → C"
++        className="w-7 shrink-0 rounded-md text-right text-xs tabular-nums text-muted enabled:hover:text-foreground"
++        data-testid="arrangement-track-pan-reset"
++      >
++        {formatTrackPan(pan)}
++      </button>
++    ),
++    [isPanCentred, setTrackPan, trackId, trackName],
+   );
+ 
++  const handleVolumeChange = useStableHandler((event: ChangeEvent<HTMLInputElement>) => {
++    previewTrackVolume(track.id, trackVolumeFromDb(Number(event.target.value)));
++  });
++
++  const handleVolumePointerEnd = useStableHandler(() => {
++    commitTrackVolume(track.id);
++  });
++
++  const handleVolumeKeyUp = useStableHandler(() => {
++    if (!isPointerGestureActive()) {
++      commitTrackVolume(track.id);
++    }
++  });
++
++  const handleVolumeBlur = useStableHandler(() => {
++    blurTrackVolume(track.id);
++  });
++
+   const isOverLaneBody = (event: DragEvent<HTMLDivElement>) => {
+     const body = laneBodyRef.current;
+     const header = trackHeaderRef.current;
+@@ -852,7 +881,7 @@ export function ArrangementLane({
+               onLostPointerCapture={handlePanPointerEnd}
+               onBlur={handlePanBlur}
+               onKeyDown={handlePanKeyDown}
+-              onDoubleClick={() => setTrackPan(track.id, 0)}
++              onDoubleClick={handlePanDoubleClick}
+               className={`h-4 w-12 shrink-0 touch-none ${STUDIO_NEUTRAL_SLIDER_CLASS}`}
+               data-testid="arrangement-track-pan"
+             />
+@@ -881,19 +910,13 @@ export function ArrangementLane({
+               max={TRACK_VOLUME_DB_MAX}
+               step={TRACK_VOLUME_DB_STEP}
+               aria-label={`Volume — ${mixLabel}`}
+-              onChange={(event) =>
+-                previewTrackVolume(track.id, trackVolumeFromDb(Number(event.target.value)))
+-              }
++              onChange={handleVolumeChange}
+               onPointerDown={volumeFaderDrag.onPointerDown}
+               onDoubleClick={resetTrackVolume}
+-              onPointerUp={() => commitTrackVolume(track.id)}
+-              onLostPointerCapture={() => commitTrackVolume(track.id)}
+-              onKeyUp={() => {
+-                if (!isPointerGestureActive()) {
+-                  commitTrackVolume(track.id);
+-                }
+-              }}
+-              onBlur={() => blurTrackVolume(track.id)}
++              onPointerUp={handleVolumePointerEnd}
++              onLostPointerCapture={handleVolumePointerEnd}
++              onKeyUp={handleVolumeKeyUp}
++              onBlur={handleVolumeBlur}
+               className={`h-4 min-w-0 flex-1 touch-none ${STUDIO_LEVEL_FADER_CLASS}`}
+             />
+           </div>
+diff --git a/app/components/arrangement/ArrangementMixFader.tsx b/app/components/arrangement/ArrangementMixFader.tsx
+index 28fac99..9d5f5f5 100644
+--- a/app/components/arrangement/ArrangementMixFader.tsx
++++ b/app/components/arrangement/ArrangementMixFader.tsx
+@@ -1,6 +1,7 @@
+ import {
+   forwardRef,
+   type InputHTMLAttributes,
++  memo,
+   type ReactNode,
+   useCallback,
+   useSyncExternalStore,
+@@ -37,7 +38,7 @@ export function useMixDraftValue(draftKey: string): number | undefined {
+   return useSyncExternalStore(subscribe, read, () => undefined);
+ }
+ 
+-const ArrangementMixFader = forwardRef<HTMLInputElement, ArrangementMixFaderProps>(
++const ArrangementMixFaderInner = forwardRef<HTMLInputElement, ArrangementMixFaderProps>(
+   (
+     {
+       draftKey,
+@@ -79,7 +80,9 @@ const ArrangementMixFader = forwardRef<HTMLInputElement, ArrangementMixFaderProp
+   },
+ );
+ 
+-ArrangementMixFader.displayName = 'ArrangementMixFader';
++ArrangementMixFaderInner.displayName = 'ArrangementMixFader';
++
++const ArrangementMixFader = memo(ArrangementMixFaderInner);
+ 
+ export { ArrangementMixFader };
+ export type { ArrangementMixFaderProps };

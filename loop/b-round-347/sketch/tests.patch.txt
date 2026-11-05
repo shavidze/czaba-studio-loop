@@ -1,0 +1,74 @@
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index d9b2eed..89d5d1f 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -1949,16 +1949,24 @@ describe('PERF-DRAG-PREVIEW stage c6-i — header icons skip drag moves; the doc
+       const parts = clipParts('c1');
+       const { root } = parts;
+       pointerDownAt(gesture.handle(parts), 1, gesture.from);
+-      pointerMoveTo(root, 1, gesture.from + 40);
+-      renderLog.counts.clear();
+-      pointerMoveTo(root, 1, gesture.from + 80);
+-      pointerMoveTo(root, 1, gesture.from + 120);
+-      expect(rendersOf('ArrangementClipViewInner'), gesture.label).toBeGreaterThan(0);
+-      expect(rendersOf('GripVertical'), gesture.label).toBe(0);
+-      expect(rendersOf('ChevronDown'), gesture.label).toBe(0);
+-      expect(rendersOf('ChevronRight'), gesture.label).toBe(0);
+-      pointerUpAt(root, 1, gesture.from + 120);
+-      act(() => live(api).undo());
++      let released = false;
++      try {
++        pointerMoveTo(root, 1, gesture.from + 40);
++        renderLog.counts.clear();
++        pointerMoveTo(root, 1, gesture.from + 80);
++        pointerMoveTo(root, 1, gesture.from + 120);
++        expect(rendersOf('ArrangementClipViewInner'), gesture.label).toBeGreaterThan(0);
++        expect(rendersOf('GripVertical'), gesture.label).toBe(0);
++        expect(rendersOf('ChevronDown'), gesture.label).toBe(0);
++        expect(rendersOf('ChevronRight'), gesture.label).toBe(0);
++        pointerUpAt(root, 1, gesture.from + 120);
++        released = true;
++        act(() => live(api).undo());
++      } finally {
++        if (!released) {
++          pointerUpAt(root, 1, gesture.from + 120);
++        }
++      }
+     }
+   });
+ 
+@@ -2016,16 +2024,24 @@ describe('PERF-DRAG-PREVIEW stage c6-i — header icons skip drag moves; the doc
+       const parts = clipParts('c1');
+       const { root } = parts;
+       pointerDownAt(gesture.handle(parts), 1, gesture.from);
+-      pointerMoveTo(root, 1, gesture.from + 40);
+-      expect(live(api).getSelectedClipIds(), gesture.label).toEqual(['c1']);
+-      renderLog.counts.clear();
+-      pointerMoveTo(root, 1, gesture.from + 80);
+-      pointerMoveTo(root, 1, gesture.from + 120);
+-      expect(rendersOf('ArrangementClipViewInner'), gesture.label).toBeGreaterThan(0);
+-      expect(rendersOf('ArrangementMixFader'), gesture.label).toBe(0);
+-      expect(rendersOf('ArrangementDetailClipGain'), gesture.label).toBe(0);
+-      pointerUpAt(root, 1, gesture.from + 120);
+-      act(() => live(api).undo());
++      let released = false;
++      try {
++        pointerMoveTo(root, 1, gesture.from + 40);
++        expect(live(api).getSelectedClipIds(), gesture.label).toEqual(['c1']);
++        renderLog.counts.clear();
++        pointerMoveTo(root, 1, gesture.from + 80);
++        pointerMoveTo(root, 1, gesture.from + 120);
++        expect(rendersOf('ArrangementClipViewInner'), gesture.label).toBeGreaterThan(0);
++        expect(rendersOf('ArrangementMixFader'), gesture.label).toBe(0);
++        expect(rendersOf('ArrangementDetailClipGain'), gesture.label).toBe(0);
++        pointerUpAt(root, 1, gesture.from + 120);
++        released = true;
++        act(() => live(api).undo());
++      } finally {
++        if (!released) {
++          pointerUpAt(root, 1, gesture.from + 120);
++        }
++      }
+     }
+   });
+ });

@@ -1,0 +1,28 @@
+2005a2006,2032
+> 
+>   it('DP65 a stopped trim, move and fade re-render no lane mix fader', async () => {
+>     const { api, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, PROJECT_END_CLIP]);
+>     expect(rendersOf('ArrangementMixFader')).toBeGreaterThan(0);
+>     expect(rendersOf('ArrangementDetailClipGain')).toBeGreaterThan(0);
+>     type ClipParts = ReturnType<typeof clipParts>;
+>     const gestures: { label: string; handle: (parts: ClipParts) => HTMLElement; from: number }[] = [
+>       { label: 'trimStart', handle: (parts) => parts.trimStart, from: 0 },
+>       { label: 'move', handle: (parts) => parts.header, from: 80 },
+>       { label: 'fade', handle: (parts) => fadeHandleOf(parts.root), from: 0 },
+>     ];
+>     for (const gesture of gestures) {
+>       const parts = clipParts('c1');
+>       const { root } = parts;
+>       pointerDownAt(gesture.handle(parts), 1, gesture.from);
+>       pointerMoveTo(root, 1, gesture.from + 40);
+>       renderLog.counts.clear();
+>       pointerMoveTo(root, 1, gesture.from + 80);
+>       pointerMoveTo(root, 1, gesture.from + 120);
+>       console.log('DP65', gesture.label, JSON.stringify([...renderLog.counts.entries()]));
+>       expect(rendersOf('ArrangementClipViewInner'), gesture.label).toBeGreaterThan(0);
+>       expect(rendersOf('ArrangementMixFader'), gesture.label).toBe(0);
+>       expect(rendersOf('ArrangementDetailClipGain'), gesture.label).toBe(0);
+>       pointerUpAt(root, 1, gesture.from + 120);
+>       act(() => live(api).undo());
+>     }
+>   });

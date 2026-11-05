@@ -1,0 +1,240 @@
+diff --git a/perf/budgets.interactions.json b/perf/budgets.interactions.json
+index b769b1e..969fd43 100644
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -338,10 +338,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 24
++      "value": 4
+     },
+-    "owner": "PERF-DRAG-PREVIEW-b",
+-    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW stage b (round 327). Tightened from <= 24 at PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 3.933."
+   },
+   {
+     "id": "interact.drag.fade.stopped.move-components-max",
+@@ -352,10 +352,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 24
++      "value": 4
+     },
+-    "owner": "PERF-DRAG-PREVIEW-b",
+-    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW stage b (round 327). Tightened from <= 24 at PERF-DRAG-PREVIEW conversions (round 348): C round 347 value 4 (deterministic row, no headroom by design)."
+   },
+   {
+     "id": "interact.drag.fade.stopped.release-commits",
+@@ -399,10 +399,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 24
++      "value": 4
+     },
+-    "owner": "PERF-DRAG-PREVIEW-b",
+-    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW stage b (round 327). Tightened from <= 24 at PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 3.933."
+   },
+   {
+     "id": "interact.drag.fade.playing.move-components-max",
+@@ -413,10 +413,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 24
++      "value": 4
+     },
+-    "owner": "PERF-DRAG-PREVIEW-b",
+-    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW stage b (round 327)."
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW stage b (round 327). Tightened from <= 24 at PERF-DRAG-PREVIEW conversions (round 348): C round 347 value 4 (deterministic row, no headroom by design)."
+   },
+   {
+     "id": "interact.drag.fade.playing.release-commits",
+@@ -496,10 +496,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 15
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 14.75 (c6-ii; target <= 15 met)."
+   },
+   {
+     "id": "interact.drag.trim.stopped.move-components-max",
+@@ -507,10 +510,13 @@
+     "metric": "move-components-max",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Largest single commit in the move window."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 15
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 15 (deterministic row, no headroom by design)."
+   },
+   {
+     "id": "interact.drag.trim.stopped.release-commits",
+@@ -518,10 +524,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW conversions (round 348): the trim release commits once (C round 347: 1)."
+   },
+   {
+     "id": "interact.drag.trim.stopped.move-to-paint-p95",
+@@ -551,10 +560,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 15
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 14.75 (c6-ii; target <= 15 met)."
+   },
+   {
+     "id": "interact.drag.trim.playing.move-components-max",
+@@ -562,10 +574,13 @@
+     "metric": "move-components-max",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Largest single commit in the move window."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 15
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Largest single commit in the move window. Asserted since PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 15 (deterministic row, no headroom by design)."
+   },
+   {
+     "id": "interact.drag.trim.playing.release-commits",
+@@ -573,10 +588,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW conversions (round 348): the trim release commits once (C round 347: 1)."
+   },
+   {
+     "id": "interact.drag.trim.playing.move-to-paint-p95",
+@@ -645,10 +663,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 16
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 15.317; it includes the one project-end crossing commit (82 components; steady commits 12), so the <= 15 target is met only in steady state until the crossing is addressed."
+   },
+   {
+     "id": "interact.drag.move.stopped.move-components-max",
+@@ -667,10 +688,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW conversions (round 348): the move release commits once (C round 347: 1)."
+   },
+   {
+     "id": "interact.drag.move.stopped.move-to-paint-p95",
+@@ -700,10 +724,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 16
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Sum of rendered components in the move window / all pointermoves between the in-page pointerdown and pointerup, the first one included (per-move sum; per-commit sizes are bimodal). Asserted since PERF-DRAG-PREVIEW conversions (round 348): ceil of the C round 347 value 15.317; it includes the one project-end crossing commit (82 components; steady commits 12), so the <= 15 target is met only in steady state until the crossing is addressed."
+   },
+   {
+     "id": "interact.drag.move.playing.move-components-max",
+@@ -722,10 +749,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-conv",
++    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW conversions (round 348): the move release commits once (C round 347: 1)."
+   },
+   {
+     "id": "interact.drag.move.playing.move-to-paint-p95",

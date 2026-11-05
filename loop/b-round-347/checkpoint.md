@@ -1,0 +1,6 @@
+- [x] archive, snapshots, advisor 1; sketch budgets b-round-347/sketch/apply-budgets.py (14 rows, 70 asserts), budgets.patch.txt APPLY-OK; mutant trees built; perf runs started (run-sketch-perf.sh)
+- current-task-draft.md written (placeholders: MUTANT_TABLE, UNIT); claims-348.sh + planning output; tests sketch td tree + tests.patch.txt APPLY-OK; update-feature-status.py ready (not run); waiting perf runs; then: summarize-perf.py, vitest on td (after perf), sketch claims output, code-reviewer on sketch diff (L58), backlog script, finalize
+- sketch perf PASS 70/70, 0 higher, durationMs 439301 (perf-sketch-results); consults tech-lead + perf-optimizer done (fade release keep record; move numbers corrected in draft); waiting mutant runs (brvgwef6s)
+- mutants all red as designed (mutant-ruling.txt); sketch vitest 67/67; claims sketch output written; draft finalized. Next: backlog script, feature-status, install current-task, b-round-347.md, b-next
+- DONE: backlog v309, feature-status, current-task.md, b-round-347.md, b-next.json; store clean
+- part2 v310 (D-29z1105), task fixes per advisor 2; done

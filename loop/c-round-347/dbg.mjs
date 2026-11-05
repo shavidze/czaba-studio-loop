@@ -1,0 +1,17 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+const b = await chromium.launch();
+const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load' });
+await p.waitForFunction(() => /ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent ?? ''));
+await p.getByRole('button', { name: 'Add', exact: true }).first().click();
+await p.waitForTimeout(1200);
+await p.getByRole('button', { name: 'Add', exact: true }).first().click();
+await p.waitForTimeout(1500);
+await p.getByRole('button', { name: 'Fit', exact: true }).first().click(); await p.waitForTimeout(1000);
+console.log(await p.evaluate(() => [...document.querySelectorAll('[data-clip-kind]')].map(e=>[e.dataset.clipKind, e.getBoundingClientRect().x|0, e.getBoundingClientRect().width|0, [...e.querySelectorAll('[title]')].map(t=>t.title).slice(0,2)])));
+console.log('clips', await p.locator('[data-clip-kind="audio"]').count());
+await p.locator('[data-clip-kind="audio"]').first().getByTitle(/ — drag to move$/).first().click();
+await p.waitForTimeout(600);
+console.log(await p.evaluate(() => ({ w: document.querySelector('[data-testid="arrangement-detail-clip-gain-fader"]')?.getBoundingClientRect().width, reason: document.querySelector('[data-testid="arrangement-detail-clip-gain-reason"]')?.innerText, status: document.querySelector('[data-testid="arrangement-status"]')?.innerText })));
+await p.screenshot({ path: '/home/runner/czaba-project/tmp/studio-real-loop/c-round-347/dbg.png' });
+await b.close();

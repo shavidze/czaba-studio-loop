@@ -1,133 +1,94 @@
-# CURRENT TASK — Round 347: PERF-DRAG-PREVIEW stage c6-ii. Lane mix faders and the detail clip gain stop re-rendering during a clip drag; one round-346 Low is closed
+# CURRENT TASK — Round 348: PERF-DRAG-PREVIEW conversions. The trim, move and fade 1x drag rows become asserts at the measured ceiling; DP63/DP65 release the pointer in a finally
 
-Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-05, at the round 346 → 347 planning.
+Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-05, at the round 347 → 348 planning.
 
-**Decisions** (`backlog.json` → `decisions_log_b`, v307 → v308, D-29z1095…D-29z1099):
-- **D-29z1095:** round 346 closed as PASS from C's evidence (`c-round-346.json`: PASS, `browserVerified`/`realVerified` true, 11 rows, 0 bugs). Gate 346 `published` **`4895732`** on both remotes [K1]. **Baseline = `4895732`**, clean tree [K2]. Stage c6-i → done. New perf oracle: `c-round-346/perf-results/latest-interactions.json`.
-- **D-29z1096:** round-346 notes routed.
-  - **Fixed in this round:** GATE346-L1 (= A-R346-REVIEW-L3, DP64's fixed 5-tick loop) and GATE346-INFO3 (doc 232 status).
-  - **Signal only:** the gate's harness-extraction note → ARCH-R346-DP-HARNESS-EXTRACT.
-  - **Correction:** PERF-LIB is **40/40** (report 34 + zoom-probe 6), not the 34 that round 346's task said.
-- **D-29z1097:** the c6-ii shape is option **(b)**: one small `useStableHandler` hook plus `memo`. Rejected: per-site `useCallback` with deps, and extracting a memoised lane header (that is checkpoint question 3). Both halves ship in one round, with acceptance reported per half (`tech-lead`).
-- **D-29z1098:** not in this round (recorded):
-  - Master and GroupHeader inline fader handlers → PERF-CAND-MASTER-GROUP-FADER-PROPS.
-  - The conversions are the next stage.
-  - The ClipGain memo does not hold in the no-selection state (`reasonNode`); this is a known limit, since nothing is dragged there.
-  - ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE is still due with root and does not block this round.
-- **D-29z1099:** this task.
+**Decisions** (`backlog.json` → `decisions_log_b`, v308 → v310, D-29z1100…D-29z1105):
+- **D-29z1100:** round 347 closed as PASS from C's evidence (`c-round-347.json`: PASS, `browserVerified`/`realVerified` true, 14 rows, 0 bugs, 0 blocked). Gate 347 `published` **`95774e6`** on both remotes [K1]. **Baseline = `95774e6`**, clean tree [K2]. Stage c6-ii → done. New oracles: `c-round-347/perf-results/latest-interactions.json` (interactions) and `c-round-347/fader-perf-results/latest.json` (faders).
+- **D-29z1101:** round-347 notes routed (§5).
+- **D-29z1102:** the conversion shape (§0.2): 14 rows, owner `PERF-DRAG-PREVIEW-conv`. Fade `release-commits` stays `record`; move max and the 6x copies stay `record`.
+- **D-29z1103:** GATE347-S2 (DP65 has no `try/finally`) is fixed in this round, together with DP63, which has the same loop. Both are test-only and the round already owns the file.
+- **D-29z1104:** this task.
+- **D-29z1105:** L7 close-out. PERF-CAND-DETAIL-CLIPGAIN-MEMO is closed (c6-ii did it). PERF-CAND-FADE-BUDGET is done by this round.
 
 **Read first:**
-- `lessons.md` items 10, 11, 12, 22, 23, 29, 37, 38, 56, 57, 58. For C, also 59 and 60 (destructive commands only inside `c-round-347/`, with absolute paths).
-- Primitives:
-  - `AUDIO_ARCHITECTURE.md` (Studio);
-  - `FORWARDREF_COMPONENT.md` (the two memoised components);
-  - `AGENT_DISCOVERABLE_CODE.md` (new hook name, no JSDoc);
-  - `REACT_CONTEXT.md` (handlers read context functions);
-  - `TESTING_QUALITY_GATES.md` and `BUG_HUNTING_TESTS.md`;
-  - `GEORGIAN_DOCS.md` (doc 232).
-- `.claude/prompts/new-hook.md` (new hook) and `.claude/prompts/studio-feature.md`.
+- `lessons.md` items 10, 11, 22, 29, 34, 37, 38, 56, 57 and 58. For C, also 59 and 60 (destructive commands only inside `c-round-348/`, with absolute paths).
+- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md` (doc 232). No app source changes, so `AUDIO_ARCHITECTURE.md` is background only.
 
-**L29 note:** untagged code text below is an expected value, a new name, a row id or a loop-artifact path. Every fact about a `store/` file carries `[K#]` (§7).
+**L29 note:** untagged code text below is an expected value, a row id or a loop-artifact path. Every fact about a `store/` file carries `[K#]` (§7).
 
-**Reference-first, product-designer, the screen budget and the YouTube request do not apply.** This is a performance round. The DOM output is identical: same inputs, attributes, readouts and buttons. No text, layout, colour, behaviour or audio change.
+**Reference-first, product-designer, the screen budget and the YouTube request do not apply.** This is a performance-budget and test-hygiene round. App source, DOM, audio and behaviour do not change.
 
 ## Baseline
-- HEAD `4895732` (gate 346, published), clean tree [K2]. Protected files 11/11 OK [K8]. No dependency change.
-- **Interactions oracle:** `c-round-346/perf-results/latest-interactions.json`, with 230 rows, `complete`, 0 failures and 60/60 asserted rows passing [K12]. Per move: trim 17.7 (max 18), move 18.467 (max 89), fade 5.9 (max 6).
-- **Fader oracle:** `c-round-341/perf-results/latest.json`, the last full run of `perf/studio-lab.perf.spec.ts` (321 rows, `complete`, 0 failures). The `fader.*.move-components-per-move` rows are track 0.75, pan 0.875/0.65, group 0.75, master 0.792/0.742 and clipgain 2.75/2.25 (stopped/playing). All are `assert`.
+- HEAD `95774e6` (gate 347, published), clean tree [K2]. Protected files 11/11 OK [K8]. No dependency change.
+- **Oracle:** `c-round-347/perf-results/latest-interactions.json`: 230 rows, `complete`, 0 failures, 60/60 asserted rows pass [K3]. 1x per move, stopped and playing alike: trim 14.75 (max 15), move 15.317 (max 82), fade 3.933 (max 4). Release commits: trim 1, move 1, fade 3 stopped / 2 playing.
 
 ## 0. Why, and B's evidence
 
-### 0.1 Premise at HEAD (L37)
-C's round-346 NAMES (`c-round-346/names.json`, dev :5173, `4895732`) show the components per pointermove commit:
-- **fade** 6: `ArrangementLane`, 2× `ArrangementMixFader`, `ArrangementClipViewInner`, `ArrangementClipEnvelope`, `ArrangementStatusTextInner`;
-- **trim** 18: the same list without the status text, plus the overview, peak path, range overlay, the detail chain, **`ArrangementDetailClipGain`**, and the readouts;
-- **move** 15 (89 at the project-end crossing).
+### 0.1 Premise
+D-29z1092 set the order: c6-i, then c6-ii, then conversions. Both c6 stages passed (C rounds 346 and 347). The trim and move component rows are still `record` [K3], and the fade rows still assert the stage-b ceiling of 24 [K3]. A regression back to the provider path would pass every trim and move row today.
 
-The two lane faders and the detail clip gain draw nothing the drag changes. They re-render because their parents pass new closures on every render [K3, K4, K5]:
-- **Lane:** about 12 per-render closures (pan change, pointer end, blur, keydown, double-click, `renderPanReadout`, and five inline volume arrows).
-- **Detail panel:** four inline arrows, plus named handlers rebuilt on each render and a new `storedClipGainsDb` array literal.
+### 0.2 The conversion (`b-round-347/sketch/apply-budgets.py` → `b-round-347/sketch/budgets.patch.txt`)
+Each budget is the ceiling of C's round-347 value, which is the same at 1x stopped and 1x playing:
 
-### 0.2 B's sketch (`b-round-346/sketch/`, scratch `git archive 4895732` at `/home/runner/b346-scratch/sc`)
-- **`source.patch.txt`,** made by `apply-source.py` and then `apply-source-clipgain.py`, both followed by `biome check --write`. It changes 4 files:
-  - **New `app/hooks/useStableHandler.ts`:** `export function useStableHandler<Args extends unknown[], Result>(handler)`. It stores the latest handler in a ref, written in `useIsomorphicLayoutEffect`, and returns `useCallback((...args) => handlerRef.current(...args), [])`. No JSDoc: the contract goes into doc 232 (`tech-lead`, `AGENT_DISCOVERABLE_CODE.md` §8).
-  - **`ArrangementMixFader.tsx`:** the forwardRef becomes `ArrangementMixFaderInner`, keeping `displayName = 'ArrangementMixFader'`. The export is `const ArrangementMixFader = memo(ArrangementMixFaderInner);`. The component name, exported type and props are unchanged.
-  - **`ArrangementLane.tsx`:** 10 handlers are wrapped in `useStableHandler`. Four are new named handlers replacing the inline volume arrows (`handleVolumeChange`, `handleVolumePointerEnd`, `handleVolumeKeyUp`, `handleVolumeBlur`); `handlePanDoubleClick` replaces the inline pan double-click. **`renderPanReadout` is a `useCallback` with deps `[isPanCentred, setTrackPan, trackId, trackName]`, not a stable handler, because `ArrangementMixFader` calls it during render.**
-  - **`ArrangementDetailPanel.tsx`:**
-    - `ArrangementDetailClipGainInner` keeps `displayName = 'ArrangementDetailClipGain'` and is wrapped in `memo`.
-    - `selectedClipGainIds` and `storedClipGainsDb` are memoised by a JSON string key. A new `parseClipGainDbKey` keeps only finite numbers, so there is no `[]` → `[0]` round trip; clip gain is −60…+24 dB.
-    - 10 handlers use `useStableHandler`: 5 existing named ones plus 5 replacing inline arrows (`handleClipGainFieldChange`, `handleClipGainFieldBlur`, `handleClipGainFaderChange`, `handleClipGainFaderKeyUp`, `handleClipGainResetClick`).
-  - `git apply --check` is clean on `store/`. Typecheck rc 0 (`b-round-346/sketch-tsc.log`). Biome is clean on all 4 files.
-- **Names on the sketch** (dev :5197 with a private Vite `cacheDir`, stopped afterwards; `b-round-346/names-sketch-v2.json`). Components are only removed, never added:
-  - fade [6×4] → **[4×4]**;
-  - trim [18×4] → **[15×4]**;
-  - move [15, 15, 89, 15] → **[12, 12, 82, 12]**;
-  - click [88, 0] → **[83, 0]**.
+| Row (1x, `stopped` and `playing`) | Now [K3] | After |
+|---|---|---|
+| `interact.drag.trim.<state>.move-components-per-move` | record | `<= 15` (14.75) |
+| `interact.drag.trim.<state>.move-components-max` | record | `<= 15` (15) |
+| `interact.drag.trim.<state>.release-commits` | record | `== 1` |
+| `interact.drag.move.<state>.move-components-per-move` | record | `<= 16` (15.317) |
+| `interact.drag.move.<state>.release-commits` | record | `== 1` |
+| `interact.drag.fade.<state>.move-components-per-move` | assert `<= 24` | `<= 4` (3.933) |
+| `interact.drag.fade.<state>.move-components-max` | assert `<= 24` | `<= 4` (4) |
 
-  The crossing commit still holds `ArrangementMaster` and its fader, because Master passes inline props (D-29z1098).
-- **Interactions perf on the sketch build** (production, run alone; `b-round-346/sketch-perf-results/latest-interactions.json`, `b-round-346/sketch-perf-rowcmp-vs-c346.txt`):
-  - `complete`, 0 failures, 230 rows, 60/60 asserted rows pass, 0 NEW, **0 rows higher**. `durationMs` 468516.
-  - Per move: trim 17.7 → **14.75** (max 15), move 18.467 → **15.317** (max 82), fade 5.9 → **3.933** (max 4).
-  - Also lower: lane 20.531 → 17.344, group 21.219 → 18.031, video stopped 17.717 → 15.75, range 7.267 → 6.283, click 88 → 83, play start/stop 76 → 70, zoom 83 → 77.
-- **Fader perf on the sketch build** (`perf/studio-lab.perf.spec.ts`): see §0.3.
-- **Unit tests on the sketch:** the covering run of 104 files passed 1670/1670 (`b-round-346/sketch-covering-vitest.log`; list in `b-round-346/covering-files.txt`). The final sketch's 36 fader, clip-gain and drag-preview files passed 720/720 (`b-round-346/sketch-final-vitest.log`), together with B's DP65 prototype (`b-round-346/sketch/dp65-prototype.test.tsx.txt`; it holds a `console.log` that A must not copy).
-- **B's mutants on the DP65 prototype:**
-  - `memo` removed from MixFader → red ("trimStart: expected 4 to be +0");
-  - the lane volume `onBlur` inline again → red;
-  - `memo` removed from ClipGain → red;
-  - the `storedClipGainsDb` array literal inline again → red.
+That is 14 rows; asserted rows go from 60 to 70. The `max` rows have no headroom on purpose, because they are deterministic.
 
-  Separately, dropping `isPanCentred` from the `renderPanReadout` deps (a stale pan-reset `disabled`) turns 2 `track-pan.test.tsx` tests red.
+**Window-commit margin (`tech-lead`).** Every per-move sample in C round 347, at 1x and at 6x, has `movesInWindow` 60 and `windowCommits` 59 (`componentsSum` trim 885, fade 236, move 919). One more commit in the window (60 of 60 moves) gives trim 900 / 60 = 15.0, fade 240 / 60 = 4.0 and move about 933 / 60 = 15.55, all still in budget. A trim or fade per-move failure therefore needs more components per commit, not just one more window commit. If one of these rows fails, read its `windowCommits` and `componentsSum` detail before calling it a regression.
 
-### 0.3 Fader drag (SABA-B-5 path)
-`memo` cannot stop the fader's own `useSyncExternalStore` draft re-render, so a fader's own drag still updates its value and readout. B ran `perf/studio-lab.perf.spec.ts` on the sketch build (production, alone; `b-round-346/sketch-fader-perf-results/latest.json`, `b-round-346/sketch-fader-perf-rowcmp-vs-c341.txt`):
-- `complete`, 0 failures, 321 rows, **94/94 asserted rows pass**, 0 NEW. `durationMs` 472717.
-- **No `fader.*` components, commits or restarts row differs** from the round-341 oracle, and no row is higher.
+Unchanged:
+- **Move max** stays `record` (82, the project-end crossing commit; D-29z1092).
+- **The 6x copies** stay `record` (36 rows [K4]; D-29z1092).
+- **Fade `release-commits`** stays `record` [K4]. It is 3 when stopped and 2 when playing, the same in C rounds 346 and 347. B could not explain the asymmetry at planning, so it is not pinned as a budget. Recorded as PERF-CAND-FADE-RELEASE-COMMITS. D-29z1092's `== 1` rule applies to trim and move only.
+
+**Move and the ≤ 15 target.** ceil(15.317) is 16. In C's round-347 run, every move per-move sample has 60 moves and 59 window commits with a `componentsSum` of 919. That sum includes the one project-end crossing commit of 82 components, so the other 58 commits average 14.43. The "steady 12" from the names probe is a dev-build count; the production harness counts more fibres per commit. The item target "≤ 15 per move" is met by trim (885 / 60) and fade (236 / 60). Move does not meet it while the crossing is counted; that needs checkpoint question 1 or PERF-CAND-MASTER-GROUP-FADER-PROPS. A PASS of this round does **not** make PERF-DRAG-PREVIEW done.
+
+### 0.3 B's sketch runs (production, run alone, one after another; `b-round-347/run-sketch-perf.sh`)
+Each mutant tree is HEAD plus the new budgets, made by `b-round-347/sketch/make-mutants.py`:
+
+| Run | Change | rc | Red rows among the 14 (stopped and playing alike) | Other red asserts |
+|---|---|---|---|---|
+| **Sketch** | none (HEAD source, new budgets) | 0 | none: **70/70** asserted pass, 0 NEW, 0 deterministic rows higher than C347, `durationMs` 439301 | none |
+| **MU-FINE-CLIPGAIN** | `memo` removed from `ArrangementDetailClipGain` (+1 component per trim/move commit) | 1 | trim per-move 15.733, trim max 16, move per-move 16.3 (6 failures) | none |
+| **MU-GROSS-PREVIEW** | `previewGeometry` always `previewArrangement` in `ArrangementClip.tsx` [K5] (the provider path) | 1 | all 10 component asserts: fade 76.7 / 77, trim 82.6 / 84, move 80.75 | 7 existing lane, group and video per-move asserts (17 failures) |
+| **MU-COMBO** | `memo` removed from `ArrangementMixFader` [K6] + `flushSync` around the trim/move release `commitArrangement` [K5] | 1 | fade per-move 5.9 and max 6, trim per-move 16.717 and max 17, move per-move 17.483, trim and move `release-commits` 2 | 8 existing lane, group and video `release-commits` asserts, which use the same release line (22 failures) |
+
+Evidence: `b-round-347/perf-summary.txt` (made by `b-round-347/summarize-perf.py`), the logs `b-round-347/perf-<run>.log` and the results `b-round-347/perf-<run>-results/latest-interactions.json`. Fade's own `release-commits` stays 3 / 2 in every run except MU-GROSS-PREVIEW (2 / 2). That is more evidence that the fade release count depends on the preview path and is not yet understood (PERF-CAND-FADE-RELEASE-COMMITS). `performance-optimizer`: the second fade commit is the `statusPreviewStore.clearPreview()` layout effect, which only fade uses; the third commit, when stopped, is unexplained.
+
+### 0.4 Test hygiene (`b-round-347/sketch/apply-tests.py` → `b-round-347/sketch/tests.patch.txt`)
+DP63 and DP65 loop over three gestures. Each loop body presses, moves, asserts, releases and undoes; with no `finally`, a failed assertion leaves the pointer pressed. The sketch wraps the body after `pointerDownAt` in `try { … released = true; undo } finally { if (!released) pointerUpAt(…) }`. Assertions and their order do not change. On the sketch, `finally` goes from 21 to 23 and `let released = false;` from 0 to 2 [K7].
+
+On the sketch tree, `drag-preview-render.test.tsx` passed 67/67 (`b-round-347/sketch-vitest.log`) and Biome was clean. `tech-lead` reviewed both patches (it stands in for the code-reviewer, which is not on the planner's consult list) and found no Medium+ in the patches. Its two Medium notes are handled: the window-commit margin is in §0.2, and the move numbers are corrected there.
 
 ## 1. Scope (A)
 
-### 1.1 Files (exactly 7)
+### 1.1 Files (exactly 3)
 | # | File | Change |
 |---|---|---|
-| 1 | `app/hooks/useStableHandler.ts` (new) | From `source.patch.txt`. |
-| 2 | `app/hooks/__tests__/useStableHandler.test.ts` (new) | §1.2.1. |
-| 3 | `app/components/arrangement/ArrangementMixFader.tsx` | Apply `source.patch.txt`. |
-| 4 | `app/components/arrangement/ArrangementLane.tsx` | Apply `source.patch.txt`. |
-| 5 | `app/components/arrangement/ArrangementDetailPanel.tsx` | Apply `source.patch.txt`. |
-| 6 | `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | §1.2.2 and §1.2.3. |
-| 7 | `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` | §1.3. |
+| 1 | `perf/budgets.interactions.json` | `git apply b-round-347/sketch/budgets.patch.txt` (or `python3 -I b-round-347/sketch/apply-budgets.py <store>`; same bytes) |
+| 2 | `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | `git apply b-round-347/sketch/tests.patch.txt` |
+| 3 | `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` | §1.2 |
 
-Untouched:
-- `ArrangementMaster.tsx`, `ArrangementGroupHeader.tsx` (PERF-CAND-MASTER-GROUP-FADER-PROPS), `ArrangementContext.tsx`, `useRelativeFaderDrag.ts` and `app/hooks/index.ts` (the new hook is not re-exported, like `useRelativeFaderDrag`);
-- `perf/budgets*.json`, the perf specs, `perf/lib`, `e2e`, config, and the protected files.
+Untouched: all of `app/` except file 2, `perf/*.spec.ts`, `perf/lib`, `perf/budgets.json`, `perf/budgets.resources.json`, `e2e`, config and the protected files. The mutants live only in scratch copies.
 
-### 1.2 Tests
-1. **`useStableHandler.test.ts`** (`renderHook` with `initialProps`; style as in `useIsomorphicLayoutEffect.test.ts`). Test names start with `SH1:` … `SH4:`; K6 counts `it('SH`:
-   - **SH1:** the returned function keeps its identity across `rerender` with a new handler.
-   - **SH2:** after `rerender`, calling it runs the new handler, not the old one.
-   - **SH3:** arguments and the return value pass through.
-   - **SH4:** the handler is never called by rendering alone. Its call count equals the number of explicit calls after mount and two rerenders.
-   - **Red proof (A, scratch copy):** a hook that returns `handler` directly makes SH1 red, and a hook that never updates the ref makes SH2 red.
-2. **DP65** "a stopped trim, move and fade re-render no lane mix fader and no detail clip gain". It goes in the c6-i describe block; **no new describe**, because of ARCH-R346-DP-HARNESS-EXTRACT.
-   - Mount `[...AUDIO_CLIPS, PROJECT_END_CLIP]`.
-   - **Positive control:** after mount, `rendersOf('ArrangementMixFader') > 0` and `rendersOf('ArrangementDetailClipGain') > 0`.
-   - For trimStart, the header move and the fade-in handle on `c1`, use the same gesture table and steps as DP63: press, one move, `renderLog.counts.clear()`, two more moves. Then:
-     - `rendersOf('ArrangementClipViewInner') > 0`;
-     - `rendersOf('ArrangementMixFader') === 0`;
-     - `rendersOf('ArrangementDetailClipGain') === 0`.
-   - Release, then Undo.
-   - B's prototype is in `b-round-346/sketch/dp65-prototype.test.tsx.txt`. Drop its `console.log`.
-3. **DP64 waitFor** (closes GATE346-L1): replace the `for (let tick = 0; tick < 5; tick++)` loop with `await waitFor(() => expect(live(api).arrangement.clips.some((clip) => clip.trackId === 'video')).toBe(true));`. Add `waitFor` to the `@testing-library/react` import. The rest of DP64 is unchanged.
-
-### 1.3 Doc 232 (Georgian, technical terms in English)
-- **l.4 status:** `In Progress (stage c6-ii of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4-i, c4-ii, c5-i, c5-ii, c6-i, c6-ii, conversions; C round 347 pending)`. This closes GATE346-INFO3: the "C round 346 pending" text is gone.
-- **Title line:** append `, ეტაპი c6-ii — fader-ებისა და clip gain-ის memo`.
-- **New section** `### ეტაპი c6-ii: MixFader და DetailClipGain memo (round 347, D-29z1097)` after the c6-i section. It covers:
-  - the premise (§0.1) and the names/perf numbers (§0.2, §0.3);
-  - the `useStableHandler` contract: stable identity; calls the latest handler; **never call it during render**, which is why `renderPanReadout` stays a dep-ful `useCallback`;
-  - the rejected options;
-  - the known limits (`reasonNode` in the no-selection state; Master and GroupHeader still pass inline props).
-- **Changed files, testing and TODO:** add the hook and its test, DP65, the DP64 `waitFor`, and A's perf runs. TODO: conversions → PERF-CAND-VIDEO-TRIM-FADE-ROWS → PERF-CAND-MASTER-GROUP-FADER-PROPS.
+### 1.2 Doc 232 (Georgian, technical terms in English)
+L34: the task grants the doc's whole budget-contract text, so every place in doc 232 that states a trim, move or fade budget or its mode is updated to the live file.
+- **l.4 status:** `In Progress (stage conversions of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4-i, c4-ii, c5-i, c5-ii, c6-i, c6-ii, conversions; C round 348 pending)`. "C round 347 pending" is gone [K11].
+- **Title line:** append `, ეტაპი conversions — trim/move/fade row-ები assert-ზე`.
+- **New section** `### ეტაპი conversions: trim/move/fade row-ები assert-ზე (round 348, D-29z1102)`, after the c6-ii section. It covers:
+  - the table in §0.2 and the ceiling rule;
+  - the move-crossing caveat (≤ 15 met only in steady state);
+  - why fade `release-commits` stays `record` (PERF-CAND-FADE-RELEASE-COMMITS);
+  - B's three mutants with their red rows (§0.3) and A's run.
+- **Testing, changed files and TODO:** add the budgets file, A's perf run and mutants, and the DP63/DP65 `finally`. In TODO, replace the c6-ii line with: PERF-CAND-VIDEO-TRIM-FADE-ROWS (next stage) → PERF-CAND-MASTER-GROUP-FADER-PROPS → PERF-CAND-FADE-RELEASE-COMMITS. Mark the old c6-ii TODO entry done, and mark PERF-CAND-FADE-BUDGET (this round) and PERF-CAND-DETAIL-CLIPGAIN-MEMO (done by c6-ii) done (D-29z1105).
 - **The `## ` count stays 7** [K11].
 
 ## 2. Acceptance
@@ -135,86 +96,79 @@ Untouched:
 ### 2.1 A rows
 | Row | Command / check | Pass |
 |---|---|---|
-| A-CLAIMS pre | `bash b-round-346/claims-347.sh` from the loop root | equals `b-round-346/claims-347-planning-output.txt` |
-| A-CLAIMS final | same | K3, K4 and K5 equal `b-round-346/claims-347-sketch-output.txt`. K2 = `4895732 7` (5 modified + 2 untracked). K6 = `hook present export 1 test present SH-it 4`. K7 = `DP it( 67 DP64 1 DP65 1 tick-loop 0 waitFor ≥ 1`. K8 11. K10 = `0` lines and `untracked 0` (the K10 untracked count excludes the hook files). K11 = `7 1 0`. K12 = `230 60` |
+| A-CLAIMS pre | `bash b-round-347/claims-348.sh` from the loop root | equals `b-round-347/claims-348-planning-output.txt` |
+| A-CLAIMS final | same | K3, K4, K5, K6, K7, K12 and K13 equal `b-round-347/claims-348-sketch-output.txt`. K2 = `95774e6 3`. K8 = 11. K10 = `0` and `untracked 0`. K11 = `7 1 0 1` |
 | A-TYPE / A-LINT | `npm run typecheck`, `npm run lint` | rc 0; lint warnings ≤ 205 |
-| /check | Biome on the 6 changed code files | rc 0 |
-| A-UNIT | `npx vitest run app/hooks/__tests__/useStableHandler.test.ts app/lib/arrangement/__tests__/drag-preview-render.test.tsx` plus the fader/clip-gain files: `fader-click`, `fader-guards`, `fader-pointer-preview`, `fader-touch`, `fader-style-ui`, `track-pan`, `pan-release-recovery`, `master-ui`, `track-group-mix-ui`, `group-volume-db`, `clip-gain`, `clip-gain-fader`, `clip-gain-multi`, `clip-gain-pointer-preview`, `detail-panel`, `lane-strings-ui` (all `app/lib/arrangement/__tests__/<name>.test.tsx`) | all pass; drag-preview-render 67/67; SH 4/4 |
-| A-MUTANT (scratch copy only, L59/L60) | (1) `memo` removed from MixFader; (2) the lane volume `onChange` inline again; (3) `memo` removed from ClipGain; (4) `storedClipGainsDb` array literal inline again; (5) `isPanCentred` dropped from the `renderPanReadout` deps (and `disabled={storedPan === 0}`); (6) the SH red proofs (§1.2.1) | (1)–(4) turn DP65 red; (5) turns at least one `track-pan` or `fader-click` test red; (6) SH1 and SH2 red. Files restored; `store/` `git status` is unchanged by the mutants |
-| A-PERF | Production perf **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`, then `python3 -I b-round-329/perf-rowcmp.py c-round-346/perf-results/latest-interactions.json <A's result>` | rc 0; `complete`; `failures` []; 230 rows; 60/60 asserted pass; 0 NEW. Every DIFF in a `deterministic` components or commits row is **lower**, never higher. Expected about trim 14.75, move 15.317, fade 3.933 per move (B's sketch run). A different value is recorded and explained; only a higher value is a STOP. `durationMs` recorded |
-| A-FADER-PERF | Production, alone: `npx playwright test -c playwright.perf.config.ts perf/studio-lab.perf.spec.ts`, then the same rowcmp script: `c-round-341/perf-results/latest.json` against A's `test-results/perf/latest.json` | rc 0; `complete`; `failures` []; 321 rows; 94/94 asserted pass; 0 NEW; no `fader.*` deterministic components, commits or restarts row **higher** than the oracle. On B's sketch every such row was equal (§0.3); a lower value is recorded, not a STOP |
-| A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs` | 40/40 (report 34 + zoom-probe 6) |
-| A-REVIEW | `code-reviewer` (7 files) | 0 Medium+ open; Architecture note passed to B |
+| /check | `npx biome check app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | rc 0. Biome does not process `perf/` (L30); the JSON is checked by `perf/lib/budgets.ts` when the spec loads it |
+| A-UNIT | `npx vitest run app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | 67/67 |
+| A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs` | 40/40. `perf/lib/report.test.ts` reads `budgets.interactions.json`; it is the only test hit of a `budgets.interactions` grep over `app`, `perf`, `e2e` and `scripts`. It passed 40/40 on B's sketch (`b-round-347/sketch-perf-lib.log`) |
+| A-PERF | Production, **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`, then `python3 -I b-round-329/perf-rowcmp.py c-round-347/perf-results/latest-interactions.json <A's test-results/perf/latest-interactions.json>` | rc 0; `complete`; `failures` []; 230 rows; **70/70** asserted pass; 0 NEW; no deterministic components or commits row higher than C347. `durationMs` recorded |
+| A-MUTANT (perf, scratch copies only, L59/L60) | Make the scratch first: `mkdir -p /home/runner/a348-scratch/sc && git -C /home/runner/czaba-project/store archive HEAD | tar -x -C /home/runner/a348-scratch/sc && cd /home/runner/czaba-project/store && git diff HEAD | git -C /home/runner/a348-scratch/sc apply && ln -s /home/runner/czaba-project/store/node_modules /home/runner/a348-scratch/sc/node_modules` (the `node_modules` symlink is required: `make-mutants.py` copies symlinks as symlinks). Then run `python3 -I b-round-347/sketch/make-mutants.py /home/runner/a348-scratch/sc /home/runner/a348-scratch/mu` (it refuses the store path), and run the interactions spec alone in each mutant tree | Each is red on exactly the rows in §0.3's table (the 14 conversion rows and the listed other asserts), with the same values. `store/` `git status` is unchanged by the mutants. A may run MU-GROSS-PREVIEW and MU-COMBO only and cite B's MU-FINE-CLIPGAIN run, if the job's time is short; this is written in the report |
+| A-REVIEW | `code-reviewer` (3 files) | 0 Medium+ open; Architecture note passed to B |
 
 ### 2.2 C rows
-Each row reports the **lane half** and the **ClipGain half** separately where both apply (D-29z1097).
-
 | Row | How | Pass |
 |---|---|---|
-| CLAIMS | `bash b-round-346/claims-347.sh` | equals A's final |
-| SOURCE-SCOPE | `git status --short --untracked-files=all` and `git apply -R --check b-round-346/sketch/source.patch.txt` | 5 modified + 2 untracked (the hook and its test); the patch reverse-applies |
-| READ | read the diff | Only the changes in §0.2; DOM attributes unchanged; `renderPanReadout` is not a stable handler; no JSDoc, `any`, `as` or `@ts-ignore` |
-| UNIT | A-UNIT's files | all pass |
-| MUTANT | C's own, on a scratch copy: (1) the lane pan double-click inline again → DP65 red; (2) `handleClipGainFaderChange` inline again → DP65 red; (3) the `useStableHandler` body returns `handler` directly → SH1 red | all three red |
-| NAMES (browser, dev :5173) | `node b-round-346/names-probe-v2.mjs http://127.0.0.1:5173 c-round-347/names.json` after a browser warm-up (L38) | fade [4×4]; trim [15×4]; move [12, 12, 82, 12] (the crossing position may vary; non-crossing commits are 12); click [83, 0]. No `ArrangementMixFader` or `ArrangementDetailClipGain` in any fade, trim or non-crossing move commit. The crossing commit may hold Master's fader (D-29z1098) |
-| FADER-LANE (browser, 1440×900 and 1280×720) | `/studio-lab` demo, Music lane | (a) The Volume drag readout follows mid-drag; the value commits on release with one undo entry. (b) Keyboard ArrowUp/Down and key-up commit the volume. (c) Double-click resets Volume to 0 dB. (d) A Pan drag follows; double-click centres it; the pan-reset button is enabled after a non-zero pan, disabled after reset, and focus returns to the Pan slider. (e) A blur during a pan drag cancels it (pan-release-recovery behaviour). C may trigger the blur by script mid-drag (`element.blur()` or a window blur), because a captured pointer makes Tab hard to reproduce. (f) The video lane Volume fader keeps its title and works (no clip needed) |
-| FADER-CLIPGAIN (browser, both viewports) | select a clip, Clip details open | (a) A clip-gain fader drag previews and commits, for one clip and for a 2-clip selection. (b) Double-click resets to 0 dB. (c) Select clip A, then clip B, type a value, press Escape: the field shows **B's** value (latest-closure check). (d) Enter and blur commit a typed value. (e) The reset button works and keeps focus. (f) The fader is disabled when a reason applies (a video clip selected; import a local synthetic video as in round 346) and enabled again on an audio clip |
-| VISUAL (browser, both viewports) | the lane Volume and Pan `input` `outerHTML` plus the readouts, and the detail clip-gain `input` plus its field, before (HEAD) and after | identical `outerHTML` at rest |
-| PERF | production, alone; A-PERF's rows | as A-PERF |
-| FADER-PERF | production, alone; A-FADER-PERF | as A-FADER-PERF |
+| CLAIMS | `bash b-round-347/claims-348.sh` | equals A's final |
+| SOURCE-SCOPE | `git status --short --untracked-files=all`; `git apply -R --check` of both `b-round-347/sketch/*.patch.txt` | 3 modified, 0 untracked; both patches reverse-apply |
+| READ | read the diff | Only the 14 budget rows (mode, budget, owner, note) and the two `finally` wrappers; no assertion removed, reordered or weakened in DP63/DP65; no other row touched |
+| UNIT | `npx vitest run app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | 67/67 |
+| PERF (browser, production, alone) | A-PERF's command | as A-PERF: 70/70 asserted pass, 0 NEW, none higher |
+| MUTANT (C's own, scratch, predicted before running) | A mutant not among B's three, run on the interactions spec alone. Example: hoisted icons back inline in `ArrangementLane.tsx` (c6-i undone: predicted trim, move and fade per-move red), or `memo` removed from `ArrangementMixFader` only (predicted: trim, move and fade per-move red, release rows green) | red on the predicted rows; scratch deleted; `store/` unchanged |
 | PERF-LIB | A-PERF-LIB | 40/40 |
-| G347-AUTH | fresh anonymous context at both viewports | `/studio-lab` opens with the workspace and demo badge, `auth_user` is null; `/studio/<id>` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` refuses (401/400; 500 only when the mock on :5199 is down, and then it is listed under `blocked`) |
-| DOCS | doc 232 | l.4 as in §1.3; one `### ეტაპი c6-ii` section; 7 `## `; no "C round 346 pending" |
+| G348-AUTH (browser, both viewports) | fresh anonymous context | `/studio-lab` opens with the workspace and demo badge, `auth_user` is null; `/studio/<id>` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` refuses (401/400/405; 500 only when the mock on :5199 is down, and then it is listed under `blocked`) |
+| DRAG-SMOKE (browser, 1440×900 and 1280×720, dev :5173) | `/studio-lab` demo: trim, move and fade-in one clip with the mouse, then Undo each | each gesture previews during the drag, commits one history entry on release, and Undo restores it (no behaviour change; guards against an environment where the asserted rows pass vacuously) |
+| DOCS | doc 232 | l.4 as in §1.2; one `### ეტაპი conversions` section; 7 `## `; 0 "C round 347 pending"; every trim/move/fade budget the doc states matches the live file (L34) |
 
 **Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
-**browserVerified:** NAMES, FADER-LANE, FADER-CLIPGAIN, VISUAL, PERF, FADER-PERF and G347-AUTH all run here; none needs the backend.
-**Ableton conformance:** not applicable (performance change; behaviour identical).
+**browserVerified:** PERF, MUTANT, G348-AUTH and DRAG-SMOKE all run here; none needs the backend.
+**Ableton conformance:** not applicable (budget change; behaviour identical).
+**All L57 fields** go in `c-round-348.json`. `mutantRedOnSketch` = `b-round-347/perf-mu-*-results/latest-interactions.json`.
 
 ## 3. Neighbouring behaviour that could break
-- **Stale handlers.** Every wrapped handler reads values at call time through the ref. The risky ones are the Escape restore (`displayedClipGainText`), the fader-enabled guard (`isClipGainFaderEnabled`), the reset after a selection change (`selectedClipGainIds`) and the pan reset. FADER-LANE (d) and FADER-CLIPGAIN (c) and (f) cover them.
-- **Render-time callbacks.** `renderPanReadout` and `renderTrackVolumeReadout` run during render, so they must not go through `useStableHandler`. READ checks this.
-- **The fader's own drag (SABA-B-5).** It is still driven by the draft store subscription. FADER-PERF guards it.
-- **Master and GroupHeader.** These call sites now receive a memoised component but still pass inline props, so their behaviour is unchanged and they simply never skip. FADER-PERF covers the master and group rows.
-- **Render-count tests.** `clip-gain-pointer-preview.test.tsx` pins exact ClipGain counts, and `fader-pointer-preview.test.tsx` pins MixFader ≥ 4. Both passed on the sketch.
+- **Flaky asserts.** The new rows are deterministic component counts and whole-window release counts, with three equal samples in C rounds 346 and 347 and on B's sketch. `commits-per-move` stays `record`, because it is a windowed wallclock count (L37).
+- **Fade `release-commits`** is not asserted, so a fade release that adds a commit is not caught. That is a known gap (PERF-CAND-FADE-RELEASE-COMMITS).
+- **The 6x copies** are not asserted. A regression that shows only under CPU throttling is not caught.
+- **DP63/DP65.** The `finally` must not swallow an assertion failure; READ checks that the assertions stay inside `try` with no `catch`.
 
 ## 4. STOP conditions (A)
-- A-CLAIMS pre mismatch, or a final mismatch outside the values in §2.1.
-- The patch does not apply, or a change is needed outside the 7 files (L22: STOP with the diff).
-- Any asserted perf row fails, any deterministic component or commit row goes higher, or any NEW row appears, in either spec.
-- A mutant stays green.
-- **ClipGain half fails on its own** (one of its tests or FADER rows cannot be made green without touching another file): revert only the `ArrangementDetailPanel.tsx` hunks (`apply-source-clipgain.py`). Ship the lane half, the hook and DP65 **without** its two `ArrangementDetailClipGain` assertions (the positive control and the per-gesture `=== 0`), which go with the reverted hunks. Report the attempt with its log. The ClipGain half then becomes c6-iii. This is not a round failure.
+- A-CLAIMS pre mismatch, or a final mismatch outside §2.1.
+- A patch does not apply, or a change is needed outside the 3 files.
+- A-PERF: any asserted row fails, any NEW row, or any deterministic components or commits row higher than C347.
+- A mutant that stays green on a row §0.3 lists as red, or that is red on a row §0.3 lists as green. The exact red id list per run is in `b-round-347/perf-summary.txt` (`RED` lines); compare against that file, id by id.
 
-## 5. Not in scope (recorded)
-- **Conversions:** trim/move/fade rows → `assert` at ceil(value), with gross, fine and `flushSync`-release mutants (D-29z1092). The oracle is C's round-347 run. `performance-optimizer` suggested converting trim now at 17; this is kept for the conversions round, so all three families share one mutant set (D-29z1098).
-- **PERF-CAND-MASTER-GROUP-FADER-PROPS,** PERF-CAND-CHROME-ICONS and PERF-CAND-VIDEO-TRIM-FADE-ROWS.
-- **ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE:** root, with frontend-architect.
-- **ARCH-R346-FADER-DRAG-OPTIONS-EFFECT** and ARCH-R346-DP-HARNESS-EXTRACT: signals only.
-- **Deliberate doc placement:** `tech-lead` pointed the hook's "never call during render" contract at `docs/technical/`. In this 7-file round it lives only in doc 232 (`docs/implementation/`), so the round stays within its files. The next round that touches `docs/technical/` may move it. This is not a miss for the code-reviewer.
-- **Root only:** `vitest.config.ts` (GATE304-M1), `playwright.perf.config.ts` (ROOT-REQ-PERF-TIMEOUT), commits and pushes.
+## 5. Routed from round 347 (D-29z1101), not in scope
+- **GATE347-S1 = A-R347-REVIEW-L2** (Low): `parseClipGainDbKey` drops non-finite values, so a non-finite gain would shift later entries. It is unreachable today (gains are clamped to −60…+24 dB). Fix: the reviewer's length-preserving `map` to 0. → `deferred_low_polish`, or earlier in the next round that owns `ArrangementDetailPanel.tsx`.
+- **A-R347-REVIEW-L1** (Low): `useStableHandler` updates its ref in a layout effect, so a sibling layout effect in the same commit could call the previous handler. No current path does this. → `deferred_low_polish`.
+- **GATE347-S3** (info): is `setTrackPan` stable? It is a `useCallback` with deps `[applyEdit, refuseEditDuringGesture]` [K12], and C's NAMES show no `ArrangementMixFader` in fade, trim or non-crossing move commits. → closed_info.
+- **GATE347-S4** (info): the hook's "never call during render" contract lives only in doc 232. → kept with the round-347 deliberate placement note: it moves to `docs/technical/` in the next round that touches that folder.
+- **C-R347-HELD-ARROW-HISTORY** (Low, C's note): a held arrow key on a lane Volume fader adds one history entry per key-up, the same as at HEAD. Live's behaviour is not verified. → `deferred_low_polish`.
+- **C-R347-VISUAL-ID-STRIPPED** (info): VISUAL compared `outerHTML` after stripping `id` and `aria-describedby` (React `useId` values). → closed_info; READ showed no JSX attribute change.
+- **Architecture signals** (not scheduled):
+  - ARCH-R347-LANE-HEADER-MIX (gate signal 4): extract a memoised lane-header mix child. It joins ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE question 3.
+  - ARCH-R347-DETAIL-PANEL-REPEAT (gate signal 3): `ArrangementDetailPanel.tsx` keeps changing under the heavy harness.
+  - A's note on two latest-callback mechanisms (`useRelativeFaderDrag` uses a passive effect, `useStableHandler` a layout effect) folds into ARCH-R346-FADER-DRAG-OPTIONS-EFFECT.
+- **ROOT-REQ-PERF-TIMEOUT:** round 347's durations were 440477 ms (C) and 432344 ms (A), both under the L31 bound of 450000. Recorded as evidence.
+- **Feature boundary.** After this round, PERF-DRAG-PREVIEW's core work is done, apart from the move crossing and the video trim/fade rows. ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE (root, frontend-architect) is now wanted before PERF-CAND-MASTER-GROUP-FADER-PROPS or any crossing work. It does not block this round or PERF-CAND-VIDEO-TRIM-FADE-ROWS.
+- **Later, recorded:** PERF-CAND-FADE-RELEASE-COMMITS, PERF-CAND-VIDEO-TRIM-FADE-ROWS (next stage), PERF-CAND-MASTER-GROUP-FADER-PROPS, PERF-CAND-CHROME-ICONS, and ARCH-R346-DP-HARNESS-EXTRACT (this round adds no describe block).
 
 ## 6. Deliverables
-- **A:** the 7 files; `a-round-347.md` with the A rows; logs in `a-round-347/`.
-- **C:** `c-round-347.md`, `c-round-347.json` and `c-round-347/`.
+- **A:** the 3 files; `a-round-348.md` with the A rows; logs in `a-round-348/`.
+- **C:** `c-round-348.md`, `c-round-348.json` and `c-round-348/`.
 
 ## 7. Claims
-Run `bash b-round-346/claims-347.sh` from the loop root. `CLAIMS_STORE=<dir>` points it at another tree; a scratch tree with a private Vite `cacheDir` shows K8 10.
-- **Expected outputs:** `b-round-346/claims-347-planning-output.txt` (HEAD) and `b-round-346/claims-347-sketch-output.txt` (B's sketch: source only, no test or doc change).
-- **K1:** gate 346 `published` `4895732`.
+Run `bash b-round-347/claims-348.sh` from the loop root. `CLAIMS_STORE=<dir>` points it at another tree.
+- **Expected outputs:** `b-round-347/claims-348-planning-output.txt` (HEAD) and `b-round-347/claims-348-sketch-output.txt` (B's sketch `/home/runner/b347-scratch/td`: budgets and tests applied, no doc change; K2 reads `no-git` there).
+- **K1:** gate 347 `published` `95774e6`.
 - **K2:** HEAD and the `git status` entry count.
-- **K3:** `ArrangementMixFader.tsx`: the memo export, the inner `displayName`, and the plain forwardRef export count.
-- **K4:** `ArrangementLane.tsx`:
-  - the `useStableHandler(` count (sketch 10);
-  - `renderPanReadout = useCallback(`;
-  - the inline pan double-click, volume pointer-up and volume blur counts.
-- **K5:** `ArrangementDetailPanel.tsx`:
-  - the memo export and the inner `displayName`;
-  - the `useStableHandler(` count (sketch 10);
-  - the `storedClipGainsDb={storedClipGainsDb}` prop;
-  - the inline array, field-change and reset-click counts.
-- **K6:** the hook file, its export, the test file and the SH `it(` count.
-- **K7:** test file: DP `it(` count, DP64, DP65, the tick loop and `waitFor(`.
+- **K3:** budgets: row count, asserted count, and the conversion-owned rows with their budgets.
+- **K4:** fade `release-commits` and move max modes; the trim/move/fade 6x row count and how many are asserted.
+- **K5:** `ArrangementClip.tsx`: the mutant anchors (the `previewGeometry` line, the trim/move release `commitArrangement` line, the lucide import) and the `flushSync` count.
+- **K6:** the `memo` exports of `ArrangementMixFader` and `ArrangementDetailClipGain`.
+- **K7:** test file: DP `it(` count, `} finally {` count, and the `released` flag count.
 - **K8:** protected files OK.
 - **K9:** `regression-last` date.
-- **K10:** `app/`, `perf/`, `e2e/` and `docs/` diff lines outside the 5 tracked files, and untracked files other than the hook.
-- **K11:** doc 232 `## ` count, the c6-ii section, and "C round 346 pending".
-- **K12:** budgets rows and asserted rows.
+- **K10:** `app/`, `perf/`, `e2e/` and `docs/` diff lines outside the 3 files; untracked files.
+- **K11:** doc 232 `## ` count, the conversions section, "C round 347 pending" and "C round 348 pending".
+- **K12:** `setTrackPan` in `ArrangementContext.tsx` is a `useCallback` with deps `[applyEdit, refuseEditDuringGesture]` (GATE347-S3).
+- **K13:** the kept B artifacts exist (`test -f`, 9 files).
