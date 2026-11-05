@@ -1,0 +1,139 @@
+--- a/perf/studio-lab-interactions.perf.spec.ts	2026-11-05 12:41:05.000000000 +0000
++++ b/perf/studio-lab-interactions.perf.spec.ts	2026-11-05 12:44:58.839334326 +0000
+@@ -61,6 +61,8 @@
+ 
+ type DragName = 'range' | 'fade' | 'trim' | 'move';
+ type PlaybackState = 'stopped' | 'playing';
++type ClipKind = 'audio' | 'video';
++type VideoDrag = 'move' | 'trim' | 'fade';
+ 
+ const dragNames: DragName[] = ['range', 'fade', 'trim', 'move'];
+ 
+@@ -81,7 +83,7 @@
+   'group teardown: Ctrl+Z (the Ctrl+D copy is removed; 1 clip, Undo back at its start entry)',
+   `1x only: click the clip header, Ctrl+D x ${clipsTarget - 1} (interact.harness.clips-30), zoom with ${clipsTarget} clips: keys, then the in-first path (5 x "=", 5 x "-") and the out-first path (5 x "-", 5 x "=") with the zoom probe (interact.zoom.30.*, interact.zoom.30.in/out.*), Space, Home, fade-in drag on the first clip (interact.drag.fade.30.playing.*), Space, then Ctrl+wheel out-first (5 x deltaY +100, 5 x -100) with the zoom probe (interact.zoom.30.wheel.*)`,
+   `1x only, after the 30-clip block: "-" until 2 clip name bars are visible (at most ${selectZoomOutKeyLimit}), click one name bar (setup), then click the name bar of a visible, unselected clip on the selected clip's lane, then click it again (interact.select.same-lane.${clipsTarget}.*, interact.select.reclick.${clipsTarget}.*, interact.harness.select-same-lane-live)`,
+-  '1x only, measured last: import public/videos/hero/1.mp4 through the video lane input (1 video clip at 0, Undo "Add video"), "=" until its name bar is at least 480 px wide (at most 16 keys), move drag on the video clip name bar stopped, then Space and the same drag after Home (seek to 0), Space; reset after each with Ctrl+Z; teardown Ctrl+Z (0 video clips, Undo back at its start entry) (interact.drag.video.*, interact.harness.drag-video-live)',
++  '1x only, measured last: import public/videos/hero/1.mp4 through the video lane input (1 video clip at 0, Undo "Add video"), "=" until its name bar is at least 480 px wide (at most 16 keys); stopped: move drag on the video clip name bar, trim-start drag, fade-in drag; then Space and the same three drags, each after Home (seek to 0), Space; reset after each with Ctrl+Z; teardown Ctrl+Z (0 video clips, Undo back at its start entry) (interact.drag.video.*, interact.drag.video-trim.*, interact.drag.video-fade.*, interact.harness.drag-video-live, interact.harness.drag-video-trim-live, interact.harness.drag-video-fade-live)',
+ ];
+ 
+ interface InteractionPassResult {
+@@ -148,12 +150,14 @@
+ const undoTitle = (page: Page): Promise<string | null> =>
+   page.getByRole('button', { name: perfUndoButtonPattern }).first().getAttribute('title');
+ 
+-function dragTarget(clip: Locator, drag: DragName): Locator {
++function dragTarget(clip: Locator, drag: DragName, kind: ClipKind = 'audio'): Locator {
+   switch (drag) {
+     case 'range':
+       return clip.getByTitle(perfRangeBodyTitle, { exact: true });
+     case 'fade':
+-      return clip.getByTestId('arrangement-clip-fade-in-handle');
++      return clip.getByTestId(
++        kind === 'video' ? 'arrangement-video-fade-in-handle' : 'arrangement-clip-fade-in-handle',
++      );
+     case 'trim':
+       return clip.getByTitle(perfTrimStartTitle, { exact: true });
+     case 'move':
+@@ -404,6 +408,7 @@
+   baseId: string;
+   liveId: string;
+   rows: 'all' | 'all-but-ratio' | 'thirty';
++  kind?: ClipKind;
+ }
+ 
+ async function measureDrag(
+@@ -420,7 +425,7 @@
+     await waitForQuiet(page, from, settleMs);
+     if (!(await isPlaying(page))) result.problems.push(`playback not running before ${label}`);
+   }
+-  const target = dragTarget(clip, drag);
++  const target = dragTarget(clip, drag, measure.kind ?? 'audio');
+   const grab = await visibleGrabPoint(target, grabOptions(drag));
+   const undoBefore = await undoTitle(page);
+   const before = await readClipState(clip);
+@@ -813,6 +818,24 @@
+   return { clip, undoBefore, zoomKeys };
+ }
+ 
++const videoDrags: VideoDrag[] = ['move', 'trim', 'fade'];
++
++const videoDragBaseId = (drag: VideoDrag): string =>
++  drag === 'move' ? 'interact.drag.video' : `interact.drag.video-${drag}`;
++
++const videoDragLiveId = (drag: VideoDrag): string =>
++  drag === 'move' ? 'interact.harness.drag-video-live' : `interact.harness.drag-video-${drag}-live`;
++
++const videoDragMeasure = (drag: VideoDrag, state: PlaybackState, clip: Locator): DragMeasure => ({
++  drag,
++  state,
++  clip,
++  baseId: `${videoDragBaseId(drag)}.${state}`,
++  liveId: videoDragLiveId(drag),
++  rows: 'all-but-ratio',
++  kind: 'video',
++});
++
+ async function teardownVideoClip(
+   page: Page,
+   video: VideoClip,
+@@ -1726,42 +1749,28 @@
+       step = 'video setup';
+       const video = await setupVideoClip(page, result);
+       if (video !== null) {
+-        step = 'drag video stopped';
+-        await measureDrag(
+-          page,
+-          {
+-            drag: 'move',
+-            state: 'stopped',
+-            clip: video.clip,
+-            baseId: 'interact.drag.video.stopped',
+-            liveId: 'interact.harness.drag-video-live',
+-            rows: 'all-but-ratio',
+-          },
+-          result,
+-        );
+-        step = 'play for the video drag';
++        for (const drag of videoDrags) {
++          step = `drag ${videoDragBaseId(drag)} stopped`;
++          await measureDrag(page, videoDragMeasure(drag, 'stopped', video.clip), result);
++        }
++        step = 'play for the video drags';
+         await setPlayback(page, true);
+-        await waitForPlaybackSettled(page, result.problems, 'play for the video drag');
+-        step = 'drag video playing';
+-        await measureDrag(
+-          page,
+-          {
+-            drag: 'move',
+-            state: 'playing',
+-            clip: video.clip,
+-            baseId: 'interact.drag.video.playing',
+-            liveId: 'interact.harness.drag-video-live',
+-            rows: 'all-but-ratio',
+-          },
+-          result,
+-        );
+-        setLive(result, 'interact.harness.drag-video-live', true, { zoomKeys: video.zoomKeys });
+-        step = 'stop after the video drag';
++        await waitForPlaybackSettled(page, result.problems, 'play for the video drags');
++        for (const drag of videoDrags) {
++          step = `drag ${videoDragBaseId(drag)} playing`;
++          await measureDrag(page, videoDragMeasure(drag, 'playing', video.clip), result);
++        }
++        for (const drag of videoDrags) {
++          setLive(result, videoDragLiveId(drag), true, { zoomKeys: video.zoomKeys });
++        }
++        step = 'stop after the video drags';
+         await setPlayback(page, false);
+         step = 'video teardown';
+         await teardownVideoClip(page, video, result);
+       } else {
+-        setLive(result, 'interact.harness.drag-video-live', false, { setup: 'failed' });
++        for (const drag of videoDrags) {
++          setLive(result, videoDragLiveId(drag), false, { setup: 'failed' });
++        }
+       }
+     }
+   } catch (error) {
