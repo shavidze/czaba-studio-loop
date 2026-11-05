@@ -1,0 +1,48 @@
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -2240,15 +2240,19 @@
+       pointerUpAt(audio.root, 15, 200);
+     }
+   });
++
+   it('DP72 a stopped video move drag seeks the frame to the previewed clip before release', async () => {
+     probeVideoMock.mockResolvedValue({ url: 'blob:film', duration: 4, width: 640, height: 360 });
+     decodeVideoMock.mockImplementation(() => new Promise(() => undefined));
+     const seeks: number[] = [];
+-    vi.spyOn(HTMLMediaElement.prototype, 'currentTime', 'set').mockImplementation(
+-      (value: number) => {
++    vi.spyOn(HTMLMediaElement.prototype, 'currentTime', 'set').mockImplementation(function (
++      this: HTMLMediaElement,
++      value: number,
++    ) {
++      if (this instanceof HTMLVideoElement) {
+         seeks.push(value);
+-      },
+-    );
++      }
++    });
+     const { api, view } = await mountPreviewWorkspace([...AUDIO_CLIPS]);
+     await act(async () => {
+       live(api).importVideoFiles([new File(['x'], 'film.mp4', { type: 'video/mp4' })]);
+@@ -2284,12 +2288,16 @@
+     expect(shownStart).toBeGreaterThan(imported.start);
+     expect(shownStart).toBeLessThan(playhead);
+     const previewTarget = playhead - shownStart + imported.sourceOffset;
+-    try {
+-      await waitFor(() => expect(seeks.at(-1)).toBeCloseTo(previewTarget, 3));
+-    } finally {
+-      pointerUpAt(root, 10, pressX + 40, 50);
+-    }
++    await waitFor(() => expect(seeks.at(-1)).toBeCloseTo(previewTarget, 3));
++    const writesBeforeRelease = seeks.length;
++    pointerUpAt(root, 10, pressX + 40, 50);
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 20));
++    });
++    expect(seeks).toHaveLength(writesBeforeRelease);
++    expect(clipIn(live(api).arrangement, imported.id).start).toBeCloseTo(shownStart, 6);
+     act(() => live(api).undo());
++    await waitFor(() => expect(seeks.length).toBeGreaterThan(writesBeforeRelease));
+     await waitFor(() =>
+       expect(seeks.at(-1)).toBeCloseTo(playhead - imported.start + imported.sourceOffset, 3),
+     );

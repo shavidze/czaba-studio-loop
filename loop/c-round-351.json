@@ -1,0 +1,47 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "C-R351-01",
+   "severity": "medium",
+   "steps": [
+    "Read app/lib/arrangement/__tests__/drag-preview-render.test.tsx DP72 (l.2243-2288)",
+    "After pointerUpAt the test calls undo() and asserts the pre-drag media time with no assert in between"
+   ],
+   "expected": "DP72 guards the release half: after release the last currentTime write stays at the previewed target, so Undo's write is observable",
+   "actual": "A release that seeks back to the old position, or an Undo that writes nothing, leaves the last write at 2 s and DP72 still passes (read-based, no mutant run)",
+   "evidence": "a-round-351/review.md F1; c-round-351.md; origin B spec"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "G351-AUTH"
+ ],
+ "blocked": [],
+ "gate": [
+  "A-TYPE",
+  "A-LINT",
+  "full vitest/verify"
+ ],
+ "notRun": [
+  "UNIT",
+  "MUTANT jsdom (C own)",
+  "MUTANT browser M-B2prime",
+  "NAMES smoke",
+  "DOCS full read"
+ ],
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T15:26:11.2312168Z",
+  "round": 351,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifest": {
+  "note": "STOP round; L57 fields not applicable beyond FAIL",
+  "mutantRedOnTree": "not run by C",
+  "assertsSpecified": false
+ }
+}
