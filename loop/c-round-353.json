@@ -1,0 +1,103 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T16:41:07.0406144Z",
+  "round": 353,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R353-01",
+   "severity": "low",
+   "origin": "B (lessons edit)",
+   "steps": [
+    "diff b-round-352/lessons-before-353.md lessons.md, line 41 (L58)",
+    "compare the old clause 'B's sketch is reviewed before dispatch' with the new 'Review and mutant logs are claims (RETRO 353)'"
+   ],
+   "expected": "RT-LESSONS: no rule lost; only wording trimmed",
+   "actual": "The old alternative 'each Medium+ finding is fixed in the sketch or ruled by id in the task' is gone. The new text only says sketch-review.md 'rules each Medium+ by id'. The explicit duty 'B runs the code-reviewer on the sketch diff' is now a parenthetical ('code-reviewer, or tech-lead while off B's list'). Both rule and evidence ids C-R327-01 / A-R327-REVIEW-SAME-TEXT-REMOUNT and 'planning FAIL' are kept.",
+   "evidence": "c-round-353/lessons-diff.txt; word-level diff in c-round-353.md \u00a7RT-LESSONS"
+  },
+  {
+   "id": "C-R353-02",
+   "severity": "low",
+   "origin": "B (task text)",
+   "steps": [
+    "STUDIO-SMOKE-353: drag a clip one lane down, read Undo title",
+    "G353-AUTH: GET /api/studio-token with no header"
+   ],
+   "expected": "Task text: Undo title 'Undo: Move clip'; /api/studio-token 401 with no header",
+   "actual": "Cross-lane move gives 'Undo: Move to track \u2014 SFX (Ctrl+Z)' (strings.ts historyMoveToTrack; 'Move clip' is the same-lane label). /api/studio-token with no query returns 400 'Invalid product or file parameters' before the auth check; with ?product=middle-east&file=stem.wav it returns 401 (no header) and 403 (fake bearer, mock running). The app is correct in both cases; the task wording was imprecise.",
+   "evidence": "c-round-353/rows.json (undoTitleAfter, tokenNoHeader), c-round-353/token-with-params.txt"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "RT-NUM",
+  "RT-CAUSE",
+  "RT-IDS",
+  "RT-L57",
+  "RT-SABA",
+  "RT-SCREEN",
+  "G353-AUTH",
+  "STUDIO-SMOKE-353",
+  "RT-LESSONS (with C-R353-01 Low)"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": "PASS start+end HEAD a55543b, 0 status lines, sha256 rc 0",
+  "CLAIMS": "PASS output identical to claims-353-output.txt, stderr empty",
+  "RT-NUM": "PASS all recomputed numbers equal (c-round-353/out/*; only difference: b_cost of round 352 in collect.txt, B's snapshot 0 vs 13.25 now because b-round-352-result.json was written afterwards; cost.py uses the planning file so totals are equal)",
+  "RT-CAUSE": "PASS sampled sources match; inferences labelled",
+  "RT-IDS": "PASS (D-ids covered by \u00a78 line 'D-29z1094 \u2026 D-29z1126 historical')",
+  "RT-L57": "PASS c352 rc1/9 absent; c339 rc0; mutant rc1; own JSON rc0",
+  "RT-SABA": "PASS SR-353 are questions/proposals; \u00a712.1 one question",
+  "RT-SCREEN": "PASS row counts 138/168/118/144, laneErrors none, SR-353-1 confirmed (last clip left 2432 > scroller right 1440/1280), SR-353-4 confirmed (1280x720 dialog scrollHeight 691 > clientHeight 646; Time selection row partly hidden until scroll; 1440x900 no overflow)",
+  "G353-AUTH": "PASS",
+  "STUDIO-SMOKE-353": "PASS WAV 48 kHz 24-bit stereo 16.000 s peak 0.2171 RIFF sizes consistent"
+ },
+ "manifestPaths": [
+  "c-round-353/rows.json",
+  "c-round-353/capture.log",
+  "c-round-353/claims-out.txt",
+  "c-round-353/out/",
+  "c-round-353/lessons-diff.txt",
+  "c-round-353/l57-c352.txt",
+  "c-round-353/token-with-params.txt",
+  "c-round-353/export-1440x900.wav",
+  "c-round-353/export-1280x720.wav",
+  "c-round-353/screens/"
+ ],
+ "missingPaths": [],
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "nullReason": "RETRO: no assert specified (fields except gateChecksNamed and manifest fields)"
+}
