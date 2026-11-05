@@ -1,0 +1,94 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T22:15:36.2125382Z",
+  "round": 357,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R357-01",
+   "severity": "medium",
+   "origin": "B spec (leaf design not ruled for remount) / A STOP confirmed",
+   "steps": [
+    "Open /studio-lab at 1440x900 (dev), wait for 'Demo collection ready'",
+    "Select 'Night Pulse · Full mix', Enter (adds clip; Tempo 120 BPM seed text appended)",
+    "Space (play), click the bottom strip of the bars ruler at 50% width while playing ('Insert marker at 00:23.000 ...')",
+    "Space (stop): status becomes 'Insert marker (00:23.000) is past the end of the project (00:16.000)...'",
+    "Resize to 800x900 (StudioWorkspace unmounts, StopPlaybackOnNarrow shows), then back to 1440x900 (remount under live provider)"
+   ],
+   "expected": "Status after remount identical to HEAD d49536b (a-round-357 sketch should not change status behaviour): HEAD text = 'Insert marker (00:23.000) is past the end ... Home returns to 0.' with no appended Tempo sentence",
+   "actual": "HEAD: status ends '...Home returns to 0.'. A's tree: same sentence followed by 'Tempo 120 BPM from “Night Pulse · Full mix” — ... Grid only: audio is not stretched. Snap on — grid 1/2 (G)' (tempo-seed append survives because the leaf effect runs before the tempo-seed effect and writes a functional update, HEAD wrote a string that replaced it). Announcement/sequence half not observable (span identity resets on remount in both).",
+   "evidence": "c-round-357/remount3-head.json vs c-round-357/remount3-atree.json (and .log); A's static trace a-round-357.md STOP section. Pre-existing side issue (not C-attributed): tempo-seed re-appends on every narrow->wide remount (A-R357-TEMPO-SEED-REMOUNT-DUP; HEAD run c-round-357/remount3-head.json shows the append is lost on HEAD in this state, so on HEAD there is no visible duplicate here)."
+  }
+ ],
+ "passed": [
+  "CLAIMS (c-round-357/claims.txt equals a-round-357/claims-final.txt, rc 0)",
+  "SOURCE-SCOPE (56 status entries = A's; no perf/** or package.json entries; K6 protected 11/11 via claims; doc 234 l.4 byte-exact, 7 '## ' headings, 0 'C round N pending' files)",
+  "G357-AUTH both viewports: /studio-lab demo workspace with auth_user null; /studio/middle-east shows Sign in required, 0 audio[src]; studio-token no header 401; no token in body",
+  "STOP named check reproduced in real browser: remount status differs from HEAD (C-R357-01)"
+ ],
+ "failed": [
+  "A-REVIEW unruled Medium (A STOP) - confirmed in browser; task cannot pass until B rules (a) accept + add remount regression row or (b) restore HEAD text/order"
+ ],
+ "blocked": [
+  "G357-AUTH fake-bearer: token route 500 (fails closed), mock backend :5199 down in cloud; 403 not observable"
+ ],
+ "notRun": [
+  "PERF production 84/84",
+  "MUTANT (C own)",
+  "PLAY-BEHAVIOUR",
+  "FOLLOW",
+  "VIDEO-SYNC",
+  "VIDEO-FAIL-STOP",
+  "NARROW",
+  "READ",
+  "UNIT - skipped per L22 (A STOP on an unruled finding with a diff: SOURCE-SCOPE, CLAIMS, auth guard and the STOP's named check only); A's own PERF/COVER/MUTANT figures (play rows 70->28, 1273/1273, M-B1..4 red) are A-reported and NOT independently verified by C"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "abletonConformance": "not applicable (performance round)",
+ "manifestPaths": [
+  "c-round-357/claims.txt",
+  "c-round-357/auth.json",
+  "c-round-357/remount3-head.json",
+  "c-round-357/remount3-atree.json",
+  "c-round-357/remount-head.json",
+  "c-round-357/remount-atree.json",
+  "c-round-357/progress.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": [
+  "M-B1..M-B4 (B/A); C own mutant not run (L22)"
+ ],
+ "mutantRedOnSketch": "b-round-356/mutants/mutant-m-b{1,2,3,4}.log (B); a-round-357/mutant-m-b*.log (A); not re-run by C",
+ "gateChecksRunOnSketch": "b-round-356/precheck-full.log (B)",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "remount WIDE->NARROW->WIDE status",
+  "auth guard"
+ ],
+ "affectedChecksRunOnSketch": "remount probe on A's tree and HEAD (C, dev servers :5173 and scratch :5190 with own cacheDir; worktree removed)",
+ "nullReason": "assertsSpecified none this round; claimCheckMinutes not timed; chainHeadGateRunGreen belongs to the gate",
+ "notes": "Short FAIL 'STOPPED - routed to B' per L22. B must rule on the remount status deviation (accept as intended + add remount regression row, or require HEAD text). Probe caveat: the first HEAD run timed out on a cold Vite cache (environment-invalid, rerun warm). Tree untouched by C.",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ]
+}

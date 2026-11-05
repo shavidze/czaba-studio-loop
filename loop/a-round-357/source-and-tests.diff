@@ -1,0 +1,2876 @@
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 59a8cbb..d461e03 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -15,6 +15,7 @@ import {
+   formatArrangementTime,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
++  useArrangementPlaybackStore,
+   useArrangementRangeStore,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+@@ -151,7 +152,6 @@ export const ArrangementMarkerRow = forwardRef<
+     projectEnd,
+     getArrangement,
+     getLocatorPosition,
+-    isPlaying,
+     previewArrangement,
+     commitArrangement,
+     seekTo,
+@@ -162,6 +162,7 @@ export const ArrangementMarkerRow = forwardRef<
+     isPointerGestureActive,
+     claimPointerGesture,
+   } = useArrangement();
++  const playbackStore = useArrangementPlaybackStore();
+   const rangeStore = useArrangementRangeStore();
+   const markers = arrangementMarkers(arrangement);
+   const [editor, setEditor] = useState<MarkerEditor | null>(null);
+@@ -276,7 +277,7 @@ export const ArrangementMarkerRow = forwardRef<
+         edgeTimes,
+       );
+       if (!target) {
+-        const message = isPlaying
++        const message = playbackStore.getState().isPlaying
+           ? direction === 1
+             ? studioMarkerStrings.noneAfter
+             : studioMarkerStrings.noneBefore
+@@ -296,7 +297,7 @@ export const ArrangementMarkerRow = forwardRef<
+     [
+       getArrangement,
+       getLocatorPosition,
+-      isPlaying,
++      playbackStore,
+       projectEnd,
+       seekTo,
+       setStatus,
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index e0a8471..5de6365 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -13,6 +13,7 @@ import { type KeyboardEvent, memo, useCallback, useId, useRef } from 'react';
+ import {
+   formatArrangementTime,
+   useArrangement,
++  useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+   useArrangementPreview,
+@@ -87,8 +88,8 @@ function ArrangementProjectEndTextInner({ committedProjectEnd }: { committedProj
+ const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner);
+ 
+ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTransportProps) {
++  const isPlaying = useArrangementIsPlaying();
+   const {
+-    isPlaying,
+     projectEnd: committedProjectEnd,
+     undoLabel,
+     redoLabel,
+diff --git a/app/components/arrangement/ArrangementVideoDock.tsx b/app/components/arrangement/ArrangementVideoDock.tsx
+index 02252d5..a1d66bb 100644
+--- a/app/components/arrangement/ArrangementVideoDock.tsx
++++ b/app/components/arrangement/ArrangementVideoDock.tsx
+@@ -15,6 +15,7 @@ import {
+   type ArrangementPlaybackClock,
+   formatArrangementTime,
+   useArrangement,
++  useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+   useArrangementPreviewStore,
+@@ -354,13 +355,13 @@ export function ArrangementVideoDock({
+ }: ArrangementVideoDockProps) {
+   const {
+     arrangement,
+-    isPlaying,
+     videoSources,
+     pausePlaybackWithStatus,
+     getLivePosition,
+     getPlaybackClock,
+     getArrangement,
+   } = useArrangement();
++  const isPlaying = useArrangementIsPlaying();
+   const rootRef = useRef<HTMLElement>(null);
+   const firstVideoRef = useRef<HTMLVideoElement>(null);
+   const secondVideoRef = useRef<HTMLVideoElement>(null);
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 93b20de..4a5e5cd 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -2,6 +2,7 @@ import { Link } from '@remix-run/react';
+ import { ArrowLeft } from 'lucide-react';
+ import {
+   type ComponentProps,
++  type MutableRefObject,
+   memo,
+   type MouseEvent as ReactMouseEvent,
+   type PointerEvent as ReactPointerEvent,
+@@ -19,6 +20,7 @@ import {
+   useArrangement,
+   useArrangementClipLaneDrag,
+   useArrangementInsertMarkerStore,
++  useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+   useArrangementPreview,
+@@ -907,6 +909,27 @@ function ArrangementStatusTextInner({ status, statusKey }: { status: string; sta
+ 
+ const ArrangementStatusText = memo(ArrangementStatusTextInner);
+ 
++interface ArrangementPlaybackFollowSyncProps {
++  committedRef: MutableRefObject<boolean>;
++  onPlayingChange: (isPlaying: boolean) => void;
++}
++
++function ArrangementPlaybackFollowSyncInner({
++  committedRef,
++  onPlayingChange,
++}: ArrangementPlaybackFollowSyncProps) {
++  const isPlaying = useArrangementIsPlaying();
++  useIsomorphicLayoutEffect(() => {
++    committedRef.current = isPlaying;
++  }, [committedRef, isPlaying]);
++  useEffect(() => {
++    onPlayingChange(isPlaying);
++  }, [isPlaying, onPlayingChange]);
++  return null;
++}
++
++const ArrangementPlaybackFollowSync = memo(ArrangementPlaybackFollowSyncInner);
++
+ export function StudioWorkspace() {
+   const workspace = useArrangement();
+   const {
+@@ -921,7 +944,6 @@ export function StudioWorkspace() {
+     endPlayheadScrub,
+     videoSources,
+     claimPointerGesture,
+-    isPlaying,
+     sourcePeaks,
+     setTimeRange,
+     setStatus,
+@@ -1017,6 +1039,7 @@ export function StudioWorkspace() {
+   const zoomHistoryRef = useRef<TimelineView[]>([]);
+   const followModeRef = useRef<TimelineFollowMode>('on');
+   const autoScrollLeftRef = useRef(0);
++  const committedIsPlayingRef = useRef(false);
+   const scrollListenersRef = useRef(new Set<() => void>());
+   const viewportWidthRef = useRef(0);
+   const lastScrollLeftRef = useRef(0);
+@@ -1671,7 +1694,7 @@ export function StudioWorkspace() {
+   }, [pxPerSecond]);
+ 
+   const pauseFollowForNavigation = useCallback(() => {
+-    if (workspaceRef.current.isPlaying && followModeRef.current === 'on') {
++    if (committedIsPlayingRef.current && followModeRef.current === 'on') {
+       setFollowMode('paused');
+       workspaceRef.current.setStatus(FOLLOW_PAUSED_MESSAGE);
+     }
+@@ -1785,7 +1808,7 @@ export function StudioWorkspace() {
+   const playFromRuler = useCallback(
+     (time: number) => {
+       const current = workspaceRef.current;
+-      const resuming = current.isPlaying && followModeRef.current === 'paused';
++      const resuming = committedIsPlayingRef.current && followModeRef.current === 'paused';
+       if (resuming) {
+         autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+       }
+@@ -1800,7 +1823,7 @@ export function StudioWorkspace() {
+   const placeInsertMarkerFromRuler = useCallback(
+     (time: number) => {
+       const current = workspaceRef.current;
+-      const pausing = current.isPlaying && followModeRef.current === 'on';
++      const pausing = committedIsPlayingRef.current && followModeRef.current === 'on';
+       setInsertMarker(time);
+       if (pausing) {
+         setFollowMode('paused');
+@@ -2211,7 +2234,7 @@ export function StudioWorkspace() {
+         closeGridMenu();
+         return;
+       }
+-      if (scroller && workspaceRef.current.isPlaying && followModeRef.current === 'on') {
++      if (scroller && committedIsPlayingRef.current && followModeRef.current === 'on') {
+         const left = scroller.scrollLeft;
+         const clampedByBrowser =
+           left < autoScrollLeftRef.current &&
+@@ -2247,14 +2270,14 @@ export function StudioWorkspace() {
+       left < autoScrollLeftRef.current &&
+       left >= scroller.scrollWidth - scroller.clientWidth - FOLLOW_SCROLL_TOLERANCE_PX;
+     const followAutoScroll =
+-      workspaceRef.current.isPlaying &&
++      committedIsPlayingRef.current &&
+       followModeRef.current === 'on' &&
+       (clampedByBrowser ||
+         Math.abs(left - autoScrollLeftRef.current) <= FOLLOW_SCROLL_TOLERANCE_PX);
+     if (left !== previousLeft && !followAutoScroll) {
+       markerRowRef.current?.closeMenu();
+     }
+-    if (!workspaceRef.current.isPlaying || clampedByBrowser) {
++    if (!committedIsPlayingRef.current || clampedByBrowser) {
+       autoScrollLeftRef.current = left;
+     } else if (
+       followModeRef.current === 'on' &&
+@@ -2290,23 +2313,36 @@ export function StudioWorkspace() {
+     }
+   }, []);
+ 
+-  useEffect(() => {
+-    if (!isPlaying) {
++  const syncFollowWithPlayback = useCallback(
++    (isPlaying: boolean) => {
++      if (!isPlaying) {
++        if (followModeRef.current === 'paused') {
++          setFollowMode('on');
++        }
++        const current = workspaceRef.current;
++        const previewText = current.getStatusPreviewText();
++        const shownStatus = previewText ?? current.status;
++        if (insertMarkerStatusKind(shownStatus) === null && shownStatus !== FOLLOW_PAUSED_MESSAGE) {
++          return;
++        }
++        if (previewText !== null) {
++          current.setStatus(current.describeSpaceStart());
++          return;
++        }
++        current.setStatus((text) =>
++          insertMarkerStatusKind(text) !== null || text === FOLLOW_PAUSED_MESSAGE
++            ? current.describeSpaceStart()
++            : text,
++        );
++        return;
++      }
++      autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+       if (followModeRef.current === 'paused') {
+         setFollowMode('on');
+       }
+-      const current = workspaceRef.current;
+-      const shownStatus = current.getStatusPreviewText() ?? current.status;
+-      if (insertMarkerStatusKind(shownStatus) !== null || shownStatus === FOLLOW_PAUSED_MESSAGE) {
+-        current.setStatus(current.describeSpaceStart());
+-      }
+-      return;
+-    }
+-    autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+-    if (followModeRef.current === 'paused') {
+-      setFollowMode('on');
+-    }
+-  }, [isPlaying, setFollowMode]);
++    },
++    [setFollowMode],
++  );
+ 
+   useEffect(
+     () =>
+@@ -2316,7 +2352,7 @@ export function StudioWorkspace() {
+         if (
+           !scroller ||
+           followModeRef.current !== 'on' ||
+-          !current.isPlaying ||
++          !committedIsPlayingRef.current ||
+           current.isPointerGestureActive()
+         ) {
+           return;
+@@ -3448,6 +3484,10 @@ export function StudioWorkspace() {
+         >
+           <ArrangementStatusText status={status} statusKey={statusKey} />
+         </output>
++        <ArrangementPlaybackFollowSync
++          committedRef={committedIsPlayingRef}
++          onPlayingChange={syncFollowWithPlayback}
++        />
+         <ArrangementRangeReadout />
+         <ArrangementSelectionCount />
+         <div className="flex min-w-0 basis-full items-center gap-x-4">
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 8db1cee..f17f374 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -152,6 +152,10 @@ import {
+   resolvePlaybackStart,
+   resolveSpaceStartPoint,
+ } from '~/lib/arrangement/playback-start';
++import {
++  type ArrangementPlaybackStore,
++  createArrangementPlaybackStore,
++} from '~/lib/arrangement/playback-store';
+ import {
+   type ArrangementPositionStore,
+   createArrangementPositionStore,
+@@ -314,7 +318,6 @@ interface ArrangementContextValue {
+   redoLabel: string | null;
+   selectedSourceId: string | null;
+   activeTrackId: string | null;
+-  isPlaying: boolean;
+   pxPerSecond: number;
+   status: string;
+   statusSequence: number;
+@@ -543,6 +546,7 @@ const ArrangementClipLaneDragContext = createContext<ArrangementClipLaneDragStor
+ const ArrangementSelectionContext = createContext<ArrangementSelectionStore | null>(null);
+ const ArrangementPreviewContext = createContext<ArrangementPreviewStore | null>(null);
+ const ArrangementStatusPreviewContext = createContext<ArrangementStatusPreviewStore | null>(null);
++const ArrangementPlaybackContext = createContext<ArrangementPlaybackStore | null>(null);
+ 
+ interface ProviderStatusEntry extends ArrangementStatusEntry {
+   readonly previewKey: string | null;
+@@ -712,7 +716,7 @@ export function ArrangementProvider({
+   const [statusPreviewStore] = useState(() => createArrangementStatusPreviewStore());
+   const [meterStore] = useState(() => createMasterMeterStore());
+   const [trackMeterStore] = useState(() => createTrackMeterStore());
+-  const [isPlaying, setIsPlaying] = useState(false);
++  const [playbackStore] = useState(() => createArrangementPlaybackStore());
+   const [pxPerSecond, setPxPerSecondState] = useState(TIMELINE_ZOOM_DEFAULT);
+   const gestureCountRef = useRef(0);
+   const nameBarHintShownRef = useRef(false);
+@@ -1233,7 +1237,7 @@ export function ArrangementProvider({
+       scrubbingRef.current = false;
+       lastScrubRescheduleRef.current = null;
+       isPlayingRef.current = false;
+-      setIsPlaying(false);
++      playbackStore.getState().setPlaying(false);
+       if (frameRef.current !== null) {
+         cancelAnimationFrame(frameRef.current);
+         frameRef.current = null;
+@@ -1248,7 +1252,7 @@ export function ArrangementProvider({
+       trackMeterStatesRef.current = floorTrackMeterFrames(trackMeterStatesRef.current);
+       trackMeterStore.publishTrackMeterFrames(trackMeterStatesRef.current);
+     },
+-    [livePosition, meterStore, stopGraph, trackMeterStore, updatePosition],
++    [livePosition, meterStore, playbackStore, stopGraph, trackMeterStore, updatePosition],
+   );
+ 
+   const sampleMasterMeter = useCallback(() => {
+@@ -1533,7 +1537,7 @@ export function ArrangementProvider({
+       playbackEndedAtRef.current = null;
+       const from = plan.from;
+       isPlayingRef.current = true;
+-      setIsPlaying(true);
++      playbackStore.getState().setPlaying(true);
+       setStatus((text) =>
+         insertMarkerStatusKind(text) === 'stopped'
+           ? studioPlaybackStrings.playingFrom(formatArrangementTime(from))
+@@ -1552,6 +1556,7 @@ export function ArrangementProvider({
+     },
+     [
+       ensureAudioContext,
++      playbackStore,
+       pumpPlaybackAudio,
+       startGraph,
+       stopLibraryPreview,
+@@ -4176,7 +4181,6 @@ export function ArrangementProvider({
+       redoLabel: history.future[0]?.label ?? null,
+       selectedSourceId,
+       activeTrackId,
+-      isPlaying,
+       pxPerSecond,
+       status,
+       statusSequence,
+@@ -4295,7 +4299,6 @@ export function ArrangementProvider({
+       history.future,
+       selectedSourceId,
+       activeTrackId,
+-      isPlaying,
+       pxPerSecond,
+       status,
+       statusSequence,
+@@ -4416,13 +4419,15 @@ export function ArrangementProvider({
+               <ArrangementSelectionContext.Provider value={selectionStore}>
+                 <ArrangementPreviewContext.Provider value={previewStore}>
+                   <ArrangementStatusPreviewContext.Provider value={statusPreviewStore}>
+-                    <ArrangementMeterContext.Provider value={meterStore}>
+-                      <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
+-                        <ArrangementContext.Provider value={value}>
+-                          {children}
+-                        </ArrangementContext.Provider>
+-                      </ArrangementTrackMeterContext.Provider>
+-                    </ArrangementMeterContext.Provider>
++                    <ArrangementPlaybackContext.Provider value={playbackStore}>
++                      <ArrangementMeterContext.Provider value={meterStore}>
++                        <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
++                          <ArrangementContext.Provider value={value}>
++                            {children}
++                          </ArrangementContext.Provider>
++                        </ArrangementTrackMeterContext.Provider>
++                      </ArrangementMeterContext.Provider>
++                    </ArrangementPlaybackContext.Provider>
+                   </ArrangementStatusPreviewContext.Provider>
+                 </ArrangementPreviewContext.Provider>
+               </ArrangementSelectionContext.Provider>
+@@ -4522,6 +4527,18 @@ export function useArrangementPreview<Selected>(
+   return useStore(useArrangementPreviewStore(), selector);
+ }
+ 
++export function useArrangementPlaybackStore(): ArrangementPlaybackStore {
++  const store = useContext(ArrangementPlaybackContext);
++  if (!store) {
++    throw new Error('useArrangementPlaybackStore must be used within an ArrangementProvider');
++  }
++  return store;
++}
++
++export function useArrangementIsPlaying(): boolean {
++  return useStore(useArrangementPlaybackStore(), (state) => state.isPlaying);
++}
++
+ export function useArrangementStatusPreview<Selected>(
+   selector: (state: ArrangementStatusPreviewState) => Selected,
+ ): Selected {
+diff --git a/app/lib/arrangement/__tests__/ArrangementContext.test.ts b/app/lib/arrangement/__tests__/ArrangementContext.test.ts
+index b1f5e81..dc7e0db 100644
+--- a/app/lib/arrangement/__tests__/ArrangementContext.test.ts
++++ b/app/lib/arrangement/__tests__/ArrangementContext.test.ts
+@@ -3,17 +3,16 @@ import { createElement, type ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementLoopBrace } from '~/components/arrangement/ArrangementLoopBrace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   GESTURE_UNDO_BLOCKED_MESSAGE,
+   playPastEndMessage,
+-  useArrangement,
+   WEB_AUDIO_UNAVAILABLE_MESSAGE,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement, deleteTime } from '../model';
+ import { studioEditStrings, studioPlaybackStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface FakeStart {
+   calledAt: number;
+@@ -166,7 +165,7 @@ describe('ArrangementProvider', () => {
+ 
+   describe('Undo/Redo during a pointer gesture (D-20, R4-B1)', () => {
+     it('refuses undo and redo while a gesture is active and keeps the history', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(loopedArrangement()),
+       });
+       await flushLoads();
+@@ -192,7 +191,7 @@ describe('ArrangementProvider', () => {
+     });
+ 
+     it('reports an active gesture until every nested gesture is released', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(loopedArrangement()),
+       });
+       await flushLoads();
+@@ -214,7 +213,7 @@ describe('ArrangementProvider', () => {
+ 
+   describe('aborted gestures clear the preview-active flag (D-20, R4-B2)', () => {
+     it('clears the flag when the last gesture is released without a commit', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(loopedArrangement()),
+       });
+       await flushLoads();
+@@ -229,9 +228,9 @@ describe('ArrangementProvider', () => {
+     });
+ 
+     it('ends an uncaptured brace gesture on a pointerup anywhere and reverts its preview', async () => {
+-      let api: ArrangementContextValue | null = null;
++      let api: WorkspaceProbeValue | null = null;
+       function Probe() {
+-        api = useArrangement();
++        api = useWorkspaceProbe();
+         return null;
+       }
+       const view = render(
+@@ -250,7 +249,7 @@ describe('ArrangementProvider', () => {
+           throw new Error('capture failed');
+         },
+       });
+-      const current = (): ArrangementContextValue => {
++      const current = (): WorkspaceProbeValue => {
+         if (!api) {
+           throw new Error('provider not mounted');
+         }
+@@ -274,9 +273,9 @@ describe('ArrangementProvider', () => {
+     });
+ 
+     it('releases the gesture and the preview flag when the brace unmounts mid-drag', async () => {
+-      let api: ArrangementContextValue | null = null;
++      let api: WorkspaceProbeValue | null = null;
+       function Probe() {
+-        api = useArrangement();
++        api = useWorkspaceProbe();
+         return null;
+       }
+       function Harness({ showBrace }: { showBrace: boolean }) {
+@@ -297,7 +296,7 @@ describe('ArrangementProvider', () => {
+       });
+       fireEvent.pointerDown(brace, { button: 0, buttons: 1, pointerId: 4, clientX: 100 });
+       fireEvent.pointerMove(brace, { pointerId: 4, clientX: 180 });
+-      const current = (): ArrangementContextValue => {
++      const current = (): WorkspaceProbeValue => {
+         if (!api) {
+           throw new Error('provider not mounted');
+         }
+@@ -317,7 +316,7 @@ describe('ArrangementProvider', () => {
+   describe('Web Audio unavailable (L8, R4-B6)', () => {
+     it('shows the reason, stays stopped and refuses export without throwing', async () => {
+       vi.stubGlobal('AudioContext', ThrowingAudioContext);
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(loopedArrangement()),
+       });
+       await flushLoads();
+@@ -344,7 +343,7 @@ describe('ArrangementProvider', () => {
+         return stalledFrames.length;
+       });
+       vi.stubGlobal('cancelAnimationFrame', () => undefined);
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(loopedArrangement()),
+       });
+       await flushLoads();
+@@ -404,7 +403,7 @@ describe('SRW-07/09 edit commands in the provider', () => {
+   });
+ 
+   async function mountEditProvider() {
+-    const view = renderHook(() => useArrangement(), {
++    const view = renderHook(() => useWorkspaceProbe(), {
+       wrapper: providerWrapper(editArrangement()),
+     });
+     await flushLoads();
+@@ -635,7 +634,7 @@ describe('D-27 Play past the project end keeps the insert position (R27-U)', ()
+   }
+ 
+   async function mountImpact(loop: Arrangement['loop'] = null) {
+-    const view = renderHook(() => useArrangement(), {
++    const view = renderHook(() => useWorkspaceProbe(), {
+       wrapper: providerWrapper(impactArrangement(loop)),
+     });
+     await flushLoads();
+diff --git a/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx b/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx
+index 06e7107..2757553 100644
+--- a/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/background-time-selection-ui.test.tsx
+@@ -3,9 +3,7 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+-  useArrangement,
+   useArrangementPositionStore,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+@@ -19,6 +17,7 @@ import type {
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+ import { studioEditStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -73,7 +72,7 @@ function backgroundArrangement(
+   return { ...base, clips, markers };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface BackgroundApiRef {
+   current: ArrangementRangeProbeValue | null;
+@@ -81,7 +80,7 @@ interface BackgroundApiRef {
+ }
+ 
+ function BackgroundProbe({ api }: { api: BackgroundApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   api.position = useArrangementPositionStore();
+   return null;
+ }
+diff --git a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+index 66cc2ab..068240d 100644
+--- a/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/bars-ruler-ui.test.tsx
+@@ -3,17 +3,16 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   formatArrangementTime,
+   playPastEndMessage,
+-  useArrangement,
+   useArrangementPositionStore,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+ import { studioPlaybackStrings, studioTempoStrings, studioViewStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+ 
+ const barsMarksCalls = vi.hoisted(() => ({ count: 0 }));
+@@ -83,17 +82,17 @@ function barsArrangement(clips: ArrangementClip[]): Arrangement {
+ }
+ 
+ interface BarsApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+   position: ArrangementPositionStore | null;
+ }
+ 
+ function BarsProbe({ api }: { api: BarsApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   api.position = useArrangementPositionStore();
+   return null;
+ }
+ 
+-function live(api: BarsApiRef): ArrangementContextValue {
++function live(api: BarsApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+@@ -632,6 +631,34 @@ describe(
+       expect(live(mounted.api).statusSequence).toBe(sequence + 1);
+     });
+ 
++    it('FW-PB1 a stop from outside a React event keeps its message after a Follow pause (PERF-10a)', async () => {
++      const mounted = await mountTempo90SnapOn();
++      clickStrip(mounted, 2.1);
++      expect(live(mounted.api).isPlaying).toBe(true);
++      pauseFollowByScroll(mounted);
++      expect(followButton(mounted.view).dataset.followMode).toBe('paused');
++      expect(statusText(mounted.view)).toBe(studioViewStrings.followPaused);
++      const pause = live(mounted.api).pausePlaybackWithStatus;
++      const previousActEnvironment = Reflect.get(globalThis, 'IS_REACT_ACT_ENVIRONMENT');
++      Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', false);
++      try {
++        await new Promise<void>((resolve) => {
++          setTimeout(() => {
++            pause('Probe stop message.');
++            resolve();
++          }, 0);
++        });
++        await new Promise<void>((resolve) => {
++          setTimeout(resolve, 50);
++        });
++      } finally {
++        Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', previousActEnvironment);
++      }
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expect(followButton(mounted.view).dataset.followMode).toBe('on');
++      expect(statusText(mounted.view)).toBe('Probe stop message.');
++    });
++
+     it('FW9 with Follow off a stop after a lower-zone click replaces the playing status and keeps Follow off', async () => {
+       const mounted = await mountTempo90SnapOn();
+       clickStrip(mounted, 2.1);
+diff --git a/app/lib/arrangement/__tests__/clip-gain-fader.test.tsx b/app/lib/arrangement/__tests__/clip-gain-fader.test.tsx
+index b133baf..2173b55 100644
+--- a/app/lib/arrangement/__tests__/clip-gain-fader.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-gain-fader.test.tsx
+@@ -2,16 +2,12 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { trackVolumeFromDb } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -160,15 +156,15 @@ function faderArrangement(): Arrangement {
+ }
+ 
+ interface FaderApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function FaderProbe({ api }: { api: FaderApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: FaderApiRef): ArrangementContextValue {
++function live(api: FaderApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/clip-gain-multi.test.tsx b/app/lib/arrangement/__tests__/clip-gain-multi.test.tsx
+index 2da547c..6f12479 100644
+--- a/app/lib/arrangement/__tests__/clip-gain-multi.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-gain-multi.test.tsx
+@@ -2,12 +2,7 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import {
+@@ -18,6 +13,7 @@ import {
+ } from '../clip-gain-multi';
+ import { createArrangement } from '../model';
+ import { trackVolumeFromDb } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -168,15 +164,15 @@ function faderArrangement(gains: Readonly<Record<string, number>> = {}): Arrange
+ }
+ 
+ interface FaderApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function FaderProbe({ api }: { api: FaderApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: FaderApiRef): ArrangementContextValue {
++function live(api: FaderApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx b/app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx
+index 4f411b4..eeff53c 100644
+--- a/app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx
+@@ -3,12 +3,7 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { buildPeakShape } from '~/components/arrangement/ArrangementClip';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementMixDraftStore,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementMixDraftStore } from '~/contexts/ArrangementContext';
+ import { applySchedule, type ScheduleHandle } from '~/lib/arrangement/graph.client';
+ import { type ArrangementMixDraftStore, clipGainDraftKey } from '~/lib/arrangement/mix-draft-store';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+@@ -21,6 +16,7 @@ import {
+ } from '../clip-gain-multi';
+ import { FADER_SHIFT_FINE_DIVISOR, relativeFaderValue } from '../fader';
+ import { CLIP_GAIN_MAX_DB, CLIP_GAIN_MIN_DB, createArrangement, setClipGainDb } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -281,17 +277,17 @@ function previewArrangement(
+ }
+ 
+ interface PreviewApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+   drafts: ArrangementMixDraftStore | null;
+ }
+ 
+ function PreviewProbe({ api }: { api: PreviewApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   api.drafts = useArrangementMixDraftStore();
+   return null;
+ }
+ 
+-function live(api: PreviewApiRef): ArrangementContextValue {
++function live(api: PreviewApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx b/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx
+index 400ebfe..784cec1 100644
+--- a/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx
+@@ -4,16 +4,13 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { buildPeakShape } from '~/components/arrangement/ArrangementClip';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { addClipEnvelopePoint } from '../envelope';
+ import { setClipFade } from '../fades';
+ import { createArrangement } from '../model';
+ import { trackVolumeFromDb } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -224,15 +221,15 @@ function waveformArrangement(gains: Readonly<Record<string, number>> = {}): Arra
+ }
+ 
+ interface WaveformApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function WaveformProbe({ api }: { api: WaveformApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: WaveformApiRef): ArrangementContextValue {
++function live(api: WaveformApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/clip-gain.test.tsx b/app/lib/arrangement/__tests__/clip-gain.test.tsx
+index a7b6050..d3c0cd9 100644
+--- a/app/lib/arrangement/__tests__/clip-gain.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-gain.test.tsx
+@@ -4,12 +4,7 @@ import { act, fireEvent, render, renderHook } from '@testing-library/react';
+ import { createElement, type ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import type {
+   Arrangement,
+@@ -36,6 +31,7 @@ import {
+   splitClipAt,
+   trimClipStart,
+ } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -254,15 +250,15 @@ function sourceAtOffset(sources: readonly FakeSource[], offset: number): FakeSou
+ }
+ 
+ interface GainApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function GainProbe({ api }: { api: GainApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: GainApiRef): ArrangementContextValue {
++function live(api: GainApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+@@ -547,7 +543,7 @@ describe('Clip Gain (SRW-13 stage 3, FB-04, R13-M1)', () => {
+ 
+   describe('provider', () => {
+     it('setClipGain commits one Clip Gain entry; Undo removes the key and Redo re-applies it', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(gainArrangement()),
+       });
+       await flushLoads();
+@@ -567,7 +563,7 @@ describe('Clip Gain (SRW-13 stage 3, FB-04, R13-M1)', () => {
+     });
+ 
+     it('an unchanged value or a video clip returns false and adds no entry', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(gainArrangement()),
+       });
+       await flushLoads();
+@@ -584,7 +580,7 @@ describe('Clip Gain (SRW-13 stage 3, FB-04, R13-M1)', () => {
+     });
+ 
+     it('starts the graph with clipGains from the arrangement', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(gainArrangement()),
+       });
+       await flushLoads();
+@@ -598,7 +594,7 @@ describe('Clip Gain (SRW-13 stage 3, FB-04, R13-M1)', () => {
+     });
+ 
+     it('a gain change while playing does not reschedule and ramps the clip gain node; Undo too', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(gainArrangement()),
+       });
+       await flushLoads();
+@@ -633,7 +629,7 @@ describe('Clip Gain (SRW-13 stage 3, FB-04, R13-M1)', () => {
+     });
+ 
+     it('refuses during a pointer gesture with the gesture status and no entry', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(gainArrangement()),
+       });
+       await flushLoads();
+@@ -653,7 +649,7 @@ describe('Clip Gain (SRW-13 stage 3, FB-04, R13-M1)', () => {
+     });
+ 
+     it('a pending track Volume preview is flushed beneath the Clip Gain entry', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(gainArrangement()),
+       });
+       await flushLoads();
+diff --git a/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx b/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx
+index 81c1de4..2ba079c 100644
+--- a/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/delete-selection-ui.test.tsx
+@@ -3,15 +3,14 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, TimeRange, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { studioEditStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -179,21 +178,21 @@ async function flushLoads() {
+ 
+ async function mountGapProvider() {
+   const view = renderHook(
+-    () => ({ ...useArrangement(), range: useArrangementRange((state) => state.range) }),
++    () => ({ ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) }),
+     { wrapper: providerWrapper },
+   );
+   await flushLoads();
+   return view.result;
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface GapApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function GapProbe({ api }: { api: GapApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/detail-panel.test.tsx b/app/lib/arrangement/__tests__/detail-panel.test.tsx
+index 483a256..4e68fae 100644
+--- a/app/lib/arrangement/__tests__/detail-panel.test.tsx
++++ b/app/lib/arrangement/__tests__/detail-panel.test.tsx
+@@ -4,14 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementDetailPanel } from '~/components/arrangement/ArrangementDetailPanel';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, TimeRange, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -130,14 +129,14 @@ function detailArrangement(): Arrangement {
+ const INVALID_RANGE_TEXT =
+   'The time selection must stay inside the clip, and its end must be after its start.';
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface DetailApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function DetailProbe({ api }: { api: DetailApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index c321687..aa84971 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -3,17 +3,15 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementClipLaneDrag,
+   useArrangementPreviewStore,
+ } from '~/contexts/ArrangementContext';
+ import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ 
+-type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++type LaneDragProbeValue = WorkspaceProbeValue & { clipLaneDrag: ClipLaneDragState | null };
+ 
+ import type {
+   Arrangement,
+@@ -33,6 +31,7 @@ import {
+ import { CLIP_LANE_REFUSAL_MESSAGES, GROUP_MOVE_BLOCKED_MESSAGE } from '../selection';
+ import { studioClipStrings, studioPlaybackStrings } from '../strings';
+ import { videoFadeOpacityAt } from '../video-fades';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -264,7 +263,7 @@ interface PreviewApiRef {
+ 
+ function PreviewProbe({ api }: { api: PreviewApiRef }) {
+   api.current = {
+-    ...useArrangement(),
++    ...useWorkspaceProbe(),
+     clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
+   };
+   api.store = useArrangementPreviewStore();
+diff --git a/app/lib/arrangement/__tests__/export-dialog-focus.test.tsx b/app/lib/arrangement/__tests__/export-dialog-focus.test.tsx
+index 002798a..27ea773 100644
+--- a/app/lib/arrangement/__tests__/export-dialog-focus.test.tsx
++++ b/app/lib/arrangement/__tests__/export-dialog-focus.test.tsx
+@@ -3,14 +3,11 @@ import { type ReactNode, useState } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementExportDialog } from '~/components/arrangement/ArrangementExportDialog';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { studioExportStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -148,15 +145,15 @@ function focusArrangement(withClips: boolean): Arrangement {
+ }
+ 
+ interface FocusApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function FocusProbe({ api }: { api: FocusApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: FocusApiRef): ArrangementContextValue {
++function live(api: FocusApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/fader-guards.test.tsx b/app/lib/arrangement/__tests__/fader-guards.test.tsx
+index c4269f9..588bb90 100644
+--- a/app/lib/arrangement/__tests__/fader-guards.test.tsx
++++ b/app/lib/arrangement/__tests__/fader-guards.test.tsx
+@@ -3,10 +3,8 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementPositionStore,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+@@ -20,6 +18,7 @@ import { createArrangement, trackPanValue } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+ import { studioEditStrings } from '../strings';
+ import { trackVolumeFromDb } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -177,7 +176,7 @@ function musicPanner(): FakePanner {
+   return music;
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface FaderApiRef {
+   current: ArrangementRangeProbeValue | null;
+@@ -188,7 +187,7 @@ interface PositionStoreRef {
+ }
+ 
+ function FaderProbe({ api, store }: { api: FaderApiRef; store: PositionStoreRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   store.current = useArrangementPositionStore();
+   return null;
+ }
+diff --git a/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx b/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx
+index 8dbb579..02318e9 100644
+--- a/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx
+@@ -2,12 +2,7 @@ import { act, fireEvent, render, renderHook } from '@testing-library/react';
+ import { createElement, type ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementMixDraftStore,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementMixDraftStore } from '~/contexts/ArrangementContext';
+ import { applySchedule, type ScheduleHandle } from '~/lib/arrangement/graph.client';
+ import {
+   type ArrangementMixDraftStore,
+@@ -35,6 +30,7 @@ import {
+   trackVolumeFromDb,
+   trackVolumeSliderDb,
+ } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -273,17 +269,17 @@ function previewArrangement(loop = false): Arrangement {
+ }
+ 
+ interface PreviewApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+   drafts: ArrangementMixDraftStore | null;
+ }
+ 
+ function PreviewProbe({ api }: { api: PreviewApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   api.drafts = useArrangementMixDraftStore();
+   return null;
+ }
+ 
+-function live(api: PreviewApiRef): ArrangementContextValue {
++function live(api: PreviewApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+@@ -832,7 +828,7 @@ describe('PERF-FADER-a pointer fader preview (D-29z179)', { timeout: 20_000 }, (
+         { collection: previewCollection, initialArrangement: previewArrangement() },
+         children,
+       );
+-    const { result } = renderHook(() => useArrangement(), { wrapper });
++    const { result } = renderHook(() => useWorkspaceProbe(), { wrapper });
+     await act(async () => {
+       await Promise.resolve();
+       await Promise.resolve();
+diff --git a/app/lib/arrangement/__tests__/floating-video.test.tsx b/app/lib/arrangement/__tests__/floating-video.test.tsx
+index 5037264..841dbf1 100644
+--- a/app/lib/arrangement/__tests__/floating-video.test.tsx
++++ b/app/lib/arrangement/__tests__/floating-video.test.tsx
+@@ -3,13 +3,10 @@ import type { ReactNode } from 'react';
+ import { flushSync } from 'react-dom';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -168,15 +165,15 @@ function mockLibraryLayoutRects() {
+ }
+ 
+ interface FloatApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function FloatProbe({ api }: { api: FloatApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: FloatApiRef): ArrangementContextValue {
++function live(api: FloatApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+index f99652d..2a6a39a 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-menu.test.tsx
+@@ -2,12 +2,7 @@ import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementRange,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementRange } from '~/contexts/ArrangementContext';
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -18,6 +13,7 @@ import type {
+ import { formatGridDivision, GRID_DIVISIONS_SECONDS } from '../grid';
+ import { groupSelectedRows } from '../groups';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -142,14 +138,14 @@ function menuArrangement(): Arrangement {
+   return { ...base, clips: DEFAULT_CLIPS, loop: LOOP_FIXTURE };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface MenuApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function MenuProbe({ api }: { api: MenuApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx b/app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx
+index 7ffc96c..355726b 100644
+--- a/app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/header-meter-envelope-strings-ui.test.tsx
+@@ -2,14 +2,11 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -169,15 +166,15 @@ function stringsArrangement(): Arrangement {
+ }
+ 
+ interface StringsApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function StringsProbe({ api }: { api: StringsApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: StringsApiRef): ArrangementContextValue {
++function live(api: StringsApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx b/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+index a159566..2d55eba 100644
+--- a/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+@@ -4,11 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ARRANGEMENT_HEADER_WIDTH_PX } from '~/components/arrangement/ArrangementLane';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   formatArrangementTime,
+   playPastEndMessage,
+-  useArrangement,
+   useArrangementInsertMarkerStore,
+   useArrangementPositionStore,
+   useArrangementRange,
+@@ -22,6 +20,7 @@ import type {
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+ import { studioEditStrings, studioMarkerStrings, studioPlaybackStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -65,7 +64,7 @@ function markerArrangement(): Arrangement {
+   return { ...base, clips: SFX_CLIPS, markers: [{ id: 'm1', name: 'Hit point', time: 10 }] };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface MarkerApiRef {
+   current: ArrangementRangeProbeValue | null;
+@@ -74,7 +73,7 @@ interface MarkerApiRef {
+ }
+ 
+ function MarkerProbe({ api }: { api: MarkerApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   api.position = useArrangementPositionStore();
+   api.insertMarker = useArrangementInsertMarkerStore();
+   return null;
+diff --git a/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx b/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
+index 3c361be..7c13f5a 100644
+--- a/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
+@@ -3,10 +3,8 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+ import type {
+@@ -16,6 +14,7 @@ import type {
+   WorkspaceCollection,
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -153,14 +152,14 @@ function edgeArrangement(extraClips: Arrangement['clips'] = []): Arrangement {
+   };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface EdgeApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function EdgeProbe({ api }: { api: EdgeApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/markers-move-ui.test.tsx b/app/lib/arrangement/__tests__/markers-move-ui.test.tsx
+index e7c302b..4baf484 100644
+--- a/app/lib/arrangement/__tests__/markers-move-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-move-ui.test.tsx
+@@ -2,14 +2,10 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementMarker, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -137,15 +133,15 @@ function markerArrangement(markers?: ArrangementMarker[]): Arrangement {
+   return markers ? { ...arrangement, markers } : arrangement;
+ }
+ interface MarkerApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function MarkerProbe({ api }: { api: MarkerApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: MarkerApiRef): ArrangementContextValue {
++function live(api: MarkerApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/markers-ui.test.tsx b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+index fb9b401..a0a7e3a 100644
+--- a/app/lib/arrangement/__tests__/markers-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/markers-ui.test.tsx
+@@ -3,10 +3,8 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+ import type {
+@@ -17,6 +15,7 @@ import type {
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { studioEditStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -150,14 +149,14 @@ const THREE_MARKERS: ArrangementMarker[] = [
+   { id: 'k40', time: 40, name: 'Outro' },
+ ];
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface MarkerApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function MarkerProbe({ api }: { api: MarkerApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/master-hold-tick.test.tsx b/app/lib/arrangement/__tests__/master-hold-tick.test.tsx
+index 0d56c4b..59373f2 100644
+--- a/app/lib/arrangement/__tests__/master-hold-tick.test.tsx
++++ b/app/lib/arrangement/__tests__/master-hold-tick.test.tsx
+@@ -1,14 +1,11 @@
+ import { act, render } from '@testing-library/react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementMaster } from '~/components/arrangement/ArrangementMaster';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { METER_CEILING_DB, METER_FLOOR_DB } from '~/lib/arrangement/meter';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ const TOP_CLAMPED_HOLD_TRANSFORM = 'translateX(calc(100% - 1px))';
+ const fakeClock = { base: 0 };
+@@ -140,15 +137,15 @@ function holdTickArrangement(): Arrangement {
+ }
+ 
+ interface HoldTickApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function HoldTickProbe({ api }: { api: HoldTickApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: HoldTickApiRef): ArrangementContextValue {
++function live(api: HoldTickApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/master-ui.test.tsx b/app/lib/arrangement/__tests__/master-ui.test.tsx
+index b7445e0..e5cc37e 100644
+--- a/app/lib/arrangement/__tests__/master-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/master-ui.test.tsx
+@@ -6,12 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementExportDialog } from '~/components/arrangement/ArrangementExportDialog';
+ import { ArrangementMaster } from '~/components/arrangement/ArrangementMaster';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementMixDraftStore,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementMixDraftStore } from '~/contexts/ArrangementContext';
+ import {
+   applySchedule,
+   renderArrangementWav,
+@@ -25,6 +20,7 @@ import {
+ } from '~/lib/arrangement/strings';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -233,15 +229,15 @@ function providerWrapper(initial: Arrangement) {
+ }
+ 
+ interface MasterApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function MasterProbe({ api }: { api: MasterApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: MasterApiRef): ArrangementContextValue {
++function live(api: MasterApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+@@ -322,7 +318,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+ 
+   describe('context and history', () => {
+     it('toggleMasterMute commits one Master Mute entry that Undo and Redo restore, with no status text', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -342,7 +338,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+     });
+ 
+     it('applies a master change while playing to the live graph without creating a new one', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -367,7 +363,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+     });
+ 
+     it('starts a new graph with the current master gain', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -379,7 +375,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+ 
+     it('a Master fader pointer drag with several previews gives exactly one Master Volume entry', async () => {
+       const { result } = renderHook(
+-        () => ({ ...useArrangement(), mixDraftStore: useArrangementMixDraftStore() }),
++        () => ({ ...useWorkspaceProbe(), mixDraftStore: useArrangementMixDraftStore() }),
+         {
+           wrapper: providerWrapper(masterArrangement()),
+         },
+@@ -410,7 +406,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+     });
+ 
+     it('keyboard steps commit one Master Volume entry per key-up, and a pending preview is flushed by Undo', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -429,7 +425,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+     });
+ 
+     it('cancels a Master drag on blur and restores the value without an entry', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -444,7 +440,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+     });
+ 
+     it('refuses Master edits during another pointer gesture and keeps track Volume labelled Volume', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -466,7 +462,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+ 
+     it('reverts a Master drag on pointercancel without an entry', async () => {
+       const { result } = renderHook(
+-        () => ({ ...useArrangement(), mixDraftStore: useArrangementMixDraftStore() }),
++        () => ({ ...useWorkspaceProbe(), mixDraftStore: useArrangementMixDraftStore() }),
+         {
+           wrapper: providerWrapper(masterArrangement()),
+         },
+@@ -486,7 +482,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+     });
+ 
+     it('refuses a Master drag while another pointer owns a gesture, and keeps that gesture', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -510,7 +506,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+     });
+ 
+     it('removes the Master drag window listeners when the provider unmounts mid-drag', async () => {
+-      const { result, unmount } = renderHook(() => useArrangement(), {
++      const { result, unmount } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -541,7 +537,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+         peak: 1.1,
+         clippedSamples: 3,
+       });
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -563,7 +559,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+ 
+     it('has no warning key after a clean render, and renders with the current master', async () => {
+       renderWavMock.mockResolvedValue({ blob: new Blob(['x']), peak: 0.5, clippedSamples: 0 });
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+@@ -579,7 +575,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+ 
+     it('still exports while Master is muted and says the file is silence', async () => {
+       renderWavMock.mockResolvedValue({ blob: new Blob(['x']), peak: 0, clippedSamples: 0 });
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(masterArrangement()),
+       });
+       await flushLoads();
+diff --git a/app/lib/arrangement/__tests__/meter-ui.test.tsx b/app/lib/arrangement/__tests__/meter-ui.test.tsx
+index 3f2d1aa..9742a23 100644
+--- a/app/lib/arrangement/__tests__/meter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/meter-ui.test.tsx
+@@ -4,15 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementExportDialog } from '~/components/arrangement/ArrangementExportDialog';
+ import { ArrangementMaster } from '~/components/arrangement/ArrangementMaster';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import { studioExportStrings, studioShortcutSheetStrings } from '~/lib/arrangement/strings';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -246,15 +243,15 @@ function meterArrangement(): Arrangement {
+ }
+ 
+ interface MeterApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function MeterProbe({ api }: { api: MeterApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: MeterApiRef): ArrangementContextValue {
++function live(api: MeterApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx b/app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx
+index 9fde955..040c377 100644
+--- a/app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx
+@@ -2,11 +2,7 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import {
+   type ApplyScheduleOptions,
+   applySchedule,
+@@ -15,6 +11,7 @@ import {
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { type MetronomeClick, planMetronomeClicks } from '../metronome';
+ import { ARRANGEMENT_EPS, createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -153,15 +150,15 @@ function horizonArrangement(): Arrangement {
+ }
+ 
+ interface HorizonApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function HorizonProbe({ api }: { api: HorizonApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: HorizonApiRef): ArrangementContextValue {
++function live(api: HorizonApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/metronome-ui.test.tsx b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+index fc1bb27..69fa977 100644
+--- a/app/lib/arrangement/__tests__/metronome-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/metronome-ui.test.tsx
+@@ -2,11 +2,7 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import {
+   type ApplyScheduleOptions,
+   applySchedule,
+@@ -23,6 +19,7 @@ import {
+ } from '../metronome';
+ import { createArrangement } from '../model';
+ import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -161,15 +158,15 @@ function metronomeArrangement(): Arrangement {
+ }
+ 
+ interface MetronomeApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function MetronomeProbe({ api }: { api: MetronomeApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: MetronomeApiRef): ArrangementContextValue {
++function live(api: MetronomeApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+index fc1474e..d8164ca 100644
+--- a/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mode-toggle-colour-ui.test.tsx
+@@ -4,14 +4,10 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementRange,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementRange } from '~/contexts/ArrangementContext';
+ import type { Arrangement, TimeRange, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -130,14 +126,14 @@ function modeToggleArrangement(): Arrangement {
+ 
+ const MUSIC_RANGE = { start: 3, end: 5, trackId: 'music' };
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface ModeToggleApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function ModeToggleProbe({ api }: { api: ModeToggleApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+index d1368db..7704e90 100644
+--- a/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/navigation-strings-ui.test.tsx
+@@ -2,16 +2,12 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementRange,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementRange } from '~/contexts/ArrangementContext';
+ import type { Arrangement, TimeRange, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { findStudioShortcut, type StudioShortcutId, studioShortcutAria } from '../shortcuts';
+ import { studioEditStrings, studioLoopStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -125,14 +121,14 @@ function navigationArrangement(): Arrangement {
+ 
+ const MUSIC_RANGE = { start: 3, end: 5, trackId: 'music' };
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface NavigationApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function NavigationProbe({ api }: { api: NavigationApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/peaks-worker-video.test.tsx b/app/lib/arrangement/__tests__/peaks-worker-video.test.tsx
+index f46626d..2d3a12e 100644
+--- a/app/lib/arrangement/__tests__/peaks-worker-video.test.tsx
++++ b/app/lib/arrangement/__tests__/peaks-worker-video.test.tsx
+@@ -1,11 +1,7 @@
+ import { act, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+@@ -14,6 +10,7 @@ import {
+   type PeaksWorkerRequest,
+   type PeaksWorkerState,
+ } from '../peaks.worker-protocol';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
+@@ -150,15 +147,15 @@ function emptyVideoArrangement(): Arrangement {
+ }
+ 
+ interface PeaksVideoApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function PeaksVideoProbe({ api }: { api: PeaksVideoApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: PeaksVideoApiRef): ArrangementContextValue {
++function live(api: PeaksVideoApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/peaks-worker.test.ts b/app/lib/arrangement/__tests__/peaks-worker.test.ts
+index bdf2ff2..f998b14 100644
+--- a/app/lib/arrangement/__tests__/peaks-worker.test.ts
++++ b/app/lib/arrangement/__tests__/peaks-worker.test.ts
+@@ -1,11 +1,7 @@
+ import { act, render } from '@testing-library/react';
+ import { createElement } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import {
+@@ -27,6 +23,7 @@ import {
+   type PeaksWorkerResponse,
+   type PeaksWorkerState,
+ } from '../peaks.worker-protocol';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ class FakeAudioBuffer implements AudioBuffer {
+   readonly length: number;
+@@ -486,11 +483,11 @@ describe('PW4-PW10 peaks client', () => {
+ });
+ 
+ interface PeaksProbeRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function PeaksProbe({ api }: { api: PeaksProbeRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 6024fb1..91e6c90 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -14,6 +14,7 @@ import {
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -216,11 +217,16 @@ const POSITION_CONSUMERS = [
+ ] as const;
+ 
+ interface BudgetApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function BudgetProbe({ api }: { api: BudgetApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
++  return null;
++}
++
++function RawContextProbe({ value }: { value: { current: ArrangementContextValue | null } }) {
++  value.current = useArrangement();
+   return null;
+ }
+ 
+@@ -288,17 +294,19 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+ 
+   async function mountWorkspace() {
+     const api: BudgetApiRef = { current: null };
++    const raw: { current: ArrangementContextValue | null } = { current: null };
+     const view = render(
+       <ArrangementProvider collection={budgetCollection} initialArrangement={budgetArrangement()}>
+         <StudioWorkspace />
+         <BudgetProbe api={api} />
++        <RawContextProbe value={raw} />
+       </ArrangementProvider>,
+     );
+     await act(async () => {
+       await Promise.resolve();
+       await Promise.resolve();
+     });
+-    return { api, view };
++    return { api, raw, view };
+   }
+ 
+   function runFrames() {
+@@ -331,12 +339,18 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       fireEvent.click(view.getByRole('button', { name: 'Play' }));
+       await waitReal(260);
+       expect(api.current?.isPlaying).toBe(true);
+-      for (const parent of [
+-        'ArrangementTransport',
+-        'ArrangementRuler',
+-        'ArrangementLibrary',
+-        'ArrangementLane',
+-      ]) {
++      expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBeGreaterThan(0);
++      for (const parent of ['ArrangementRuler', 'ArrangementLibrary', 'ArrangementLane']) {
++        expect(renderLog.counts.get(parent) ?? 0).toBe(0);
++      }
++      expect(countsOf(WATCHED_LISTS)).toEqual({
++        ArrangementClipViewInner: 0,
++        ArrangementOverviewInner: 0,
++        ArrangementLibraryOptionInner: 0,
++        ArrangementRulerTicksInner: 0,
++      });
++      act(() => api.current?.setStatus('Positive control'));
++      for (const parent of ['ArrangementRuler', 'ArrangementLibrary', 'ArrangementLane']) {
+         expect(renderLog.counts.get(parent) ?? 0).toBeGreaterThan(0);
+       }
+       expect(countsOf(WATCHED_LISTS)).toEqual({
+@@ -594,10 +608,66 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(view.getByTestId('arrangement-library-insert-marker')).toBe(libraryText);
+   });
+ 
+-  it('keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)', async () => {
++  it('RB-PB1 keeps the context value object over Play → Stop → Play (PERF-10a)', async () => {
++    const value: { current: ArrangementContextValue | null } = { current: null };
++    const view = render(
++      <ArrangementProvider collection={budgetCollection} initialArrangement={budgetArrangement()}>
++        <StudioWorkspace />
++        <RawContextProbe value={value} />
++      </ArrangementProvider>,
++    );
++    await act(async () => {
++      await Promise.resolve();
++      await Promise.resolve();
++    });
++    const beforePlay = value.current;
++    expect(beforePlay).not.toBeNull();
++    fireEvent.click(view.getByRole('button', { name: 'Play' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    expect(value.current).toBe(beforePlay);
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
++    expect(value.current).toBe(beforePlay);
++    fireEvent.click(view.getByRole('button', { name: 'Play' }));
++    expect(value.current).toBe(beforePlay);
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++  });
++
++  it('RB-PB2 renders only the transport and the follow leaf on Play → Stop → Play (PERF-10a)', async () => {
+     const { api, view } = await mountWorkspace();
++    renderLog.counts.clear();
++    fireEvent.click(view.getByRole('button', { name: 'Play' }));
++    expect(api.current?.isPlaying).toBe(true);
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
++    fireEvent.click(view.getByRole('button', { name: 'Play' }));
++    expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
++    expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementPlaybackFollowSyncInner') ?? 0).toBeGreaterThan(0);
++    expect(
++      countsOf([
++        'StudioWorkspace',
++        'ArrangementRuler',
++        'ArrangementLibrary',
++        'ArrangementLane',
++        'ArrangementDetailPanel',
++      ]),
++    ).toEqual({
++      StudioWorkspace: 0,
++      ArrangementRuler: 0,
++      ArrangementLibrary: 0,
++      ArrangementLane: 0,
++      ArrangementDetailPanel: 0,
++    });
++    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
++  });
++
++  it('keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)', async () => {
++    const { api, raw, view } = await mountWorkspace();
+     fireEvent.click(view.getByRole('button', { name: 'Play' }));
+     const valueAtPlay = api.current;
++    const rawAtPlay = raw.current;
+     expect(valueAtPlay?.isPlaying).toBe(true);
+     expect(valueAtPlay?.getLivePosition()).toBe(0);
+     renderLog.counts.clear();
+@@ -607,6 +677,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     }
+     expect(api.current?.getLivePosition() ?? 0).toBeGreaterThan(0.3);
+     expect(api.current).toBe(valueAtPlay);
++    expect(raw.current).toBe(rawAtPlay);
+     expect(countsOf(CONTEXT_CONSUMERS)).toEqual({
+       ArrangementTransport: 0,
+       ArrangementRuler: 0,
+@@ -616,10 +687,12 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     });
+     act(() => api.current?.selectClip('music-1'));
+     expect(api.current).toBe(valueAtPlay);
++    expect(raw.current).toBe(rawAtPlay);
+     expect(renderLog.counts.get('ArrangementRuler') ?? 0).toBe(0);
+     expect(renderLog.counts.get('ArrangementLibrary') ?? 0).toBe(0);
+     act(() => api.current?.setStatus('Positive control'));
+     expect(api.current).not.toBe(valueAtPlay);
++    expect(raw.current).not.toBe(rawAtPlay);
+     for (const name of CONTEXT_CONSUMERS) {
+       expect(renderLog.counts.get(name) ?? 0).toBeGreaterThan(0);
+     }
+diff --git a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+index 71d371b..c8a7838 100644
+--- a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+@@ -2,19 +2,15 @@ import { act, fireEvent, render, within } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementClipLaneDrag,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementClipLaneDrag } from '~/contexts/ArrangementContext';
+ import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
+ 
+-type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++type LaneDragProbeValue = WorkspaceProbeValue & { clipLaneDrag: ClipLaneDragState | null };
+ 
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { STUDIO_SHORTCUT_GROUPS } from '../shortcuts';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -140,7 +136,7 @@ interface SheetApiRef {
+ 
+ function SheetProbe({ api }: { api: SheetApiRef }) {
+   api.current = {
+-    ...useArrangement(),
++    ...useWorkspaceProbe(),
+     clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
+   };
+   return null;
+diff --git a/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx b/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
+index b8a151d..5981e50 100644
+--- a/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/status-announcement-ui.test.tsx
+@@ -3,10 +3,8 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, TimeRange, WorkspaceCollection } from '~/types/arrangement';
+@@ -18,6 +16,7 @@ import {
+   studioMoveStrings,
+   studioPlaybackStrings,
+ } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -141,14 +140,14 @@ function emptyArrangement(): Arrangement {
+   ]);
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface AnnouncementApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function AnnouncementProbe({ api }: { api: AnnouncementApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/status-lifetime.test.tsx b/app/lib/arrangement/__tests__/status-lifetime.test.tsx
+index 17ec655..bec670c 100644
+--- a/app/lib/arrangement/__tests__/status-lifetime.test.tsx
++++ b/app/lib/arrangement/__tests__/status-lifetime.test.tsx
+@@ -3,11 +3,9 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   formatArrangementTime,
+   playPastEndMessage,
+-  useArrangement,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+ import type {
+@@ -19,6 +17,7 @@ import type {
+ } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { studioLibraryStrings, studioPlaybackStrings, studioViewStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -64,14 +63,14 @@ function lifetimeArrangement(loop: ArrangementLoop | null): Arrangement {
+   return { ...base, clips: PULSE_CLIPS, loop };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface LifetimeApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function LifetimeProbe({ api }: { api: LifetimeApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/tempo-ui.test.tsx b/app/lib/arrangement/__tests__/tempo-ui.test.tsx
+index b715f73..b604ded 100644
+--- a/app/lib/arrangement/__tests__/tempo-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/tempo-ui.test.tsx
+@@ -2,15 +2,12 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import { TEMPO_INVALID_MESSAGE, tempoStatusMessage } from '../tempo';
+ import { sliderPositionFromZoom } from '../view';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -129,15 +126,15 @@ function tempoArrangement(clips: ArrangementClip[]): Arrangement {
+ }
+ 
+ interface TempoApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function TempoProbe({ api }: { api: TempoApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: TempoApiRef): ArrangementContextValue {
++function live(api: TempoApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx b/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx
+index 8f3a3f2..50b0dd3 100644
+--- a/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/tempo-window-ui.test.tsx
+@@ -2,17 +2,13 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-  useArrangementPositionStore,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, useArrangementPositionStore } from '~/contexts/ArrangementContext';
+ import type { BarsRulerMark, BarsRulerWindow } from '~/lib/arrangement/tempo';
+ import { rulerTickMarks, type TimelinePxWindow } from '~/lib/arrangement/view';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -228,7 +224,7 @@ function windowArrangement(): Arrangement {
+ }
+ 
+ interface WindowApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function WindowProbe({
+@@ -238,12 +234,12 @@ function WindowProbe({
+   api: WindowApiRef;
+   store: { current: ArrangementPositionStore | null };
+ }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   store.current = useArrangementPositionStore();
+   return null;
+ }
+ 
+-function live(api: WindowApiRef): ArrangementContextValue {
++function live(api: WindowApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+index 60748fb..828139d 100644
+--- a/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx
+@@ -3,10 +3,8 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementClipLaneDrag,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+@@ -23,6 +21,7 @@ import { createArrangement } from '../model';
+ import { fitLaneHeights } from '../panels';
+ import { findStudioShortcut } from '../shortcuts';
+ import { trackVolumeFromDb } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -165,7 +164,7 @@ function labArrangement(): Arrangement {
+   };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & {
++type ArrangementRangeProbeValue = WorkspaceProbeValue & {
+   range: TimeRange | null;
+   clipLaneDrag: ClipLaneDragState | null;
+ };
+@@ -176,7 +175,7 @@ interface GroupsApiRef {
+ 
+ function GroupsProbe({ api }: { api: GroupsApiRef }) {
+   api.current = {
+-    ...useArrangement(),
++    ...useWorkspaceProbe(),
+     range: useArrangementRange((state) => state.range),
+     clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
+   };
+diff --git a/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx b/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
+index 575bd00..8e454ce 100644
+--- a/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
+@@ -4,12 +4,7 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -20,6 +15,7 @@ import { arrangementGroups } from '../groups';
+ import { createArrangement, toggleSolo } from '../model';
+ import { isTrackAudibleWithGroups, trackEffectiveGains } from '../schedule';
+ import { trackVolumeFromDb } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -159,15 +155,15 @@ function labArrangement(): Arrangement {
+ }
+ 
+ interface MixApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function MixProbe({ api }: { api: MixApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: MixApiRef): ArrangementContextValue {
++function live(api: MixApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/track-groups-ui.test.tsx b/app/lib/arrangement/__tests__/track-groups-ui.test.tsx
+index 4b4ae18..ffc0173 100644
+--- a/app/lib/arrangement/__tests__/track-groups-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-groups-ui.test.tsx
+@@ -3,15 +3,13 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementClipLaneDrag,
+ } from '~/contexts/ArrangementContext';
+ import type { ClipLaneDragState } from '~/lib/arrangement/clip-lane-drag-store';
+ 
+-type LaneDragProbeValue = ArrangementContextValue & { clipLaneDrag: ClipLaneDragState | null };
++type LaneDragProbeValue = WorkspaceProbeValue & { clipLaneDrag: ClipLaneDragState | null };
+ 
+ import type {
+   Arrangement,
+@@ -22,6 +20,7 @@ import type {
+ import { trackGroupRefusalMessage } from '../groups';
+ import { createArrangement } from '../model';
+ import { fitLaneHeights } from '../panels';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -170,7 +169,7 @@ interface GroupsApiRef {
+ 
+ function GroupsProbe({ api }: { api: GroupsApiRef }) {
+   api.current = {
+-    ...useArrangement(),
++    ...useWorkspaceProbe(),
+     clipLaneDrag: useArrangementClipLaneDrag((state) => state.drag),
+   };
+   return null;
+diff --git a/app/lib/arrangement/__tests__/track-layout.test.tsx b/app/lib/arrangement/__tests__/track-layout.test.tsx
+index 3bd5fc3..7c5e43e 100644
+--- a/app/lib/arrangement/__tests__/track-layout.test.tsx
++++ b/app/lib/arrangement/__tests__/track-layout.test.tsx
+@@ -5,10 +5,8 @@ import { ArrangementDetailPanel } from '~/components/arrangement/ArrangementDeta
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from '~/components/arrangement/studio-focus';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+   useArrangementPositionStore,
+   useArrangementRange,
+ } from '~/contexts/ArrangementContext';
+@@ -16,6 +14,7 @@ import type { Arrangement, TimeRange, WorkspaceCollection } from '~/types/arrang
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+ import { studioShortcutSheetStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -184,14 +183,14 @@ function layoutArrangement(): Arrangement {
+   };
+ }
+ 
+-type ArrangementRangeProbeValue = ArrangementContextValue & { range: TimeRange | null };
++type ArrangementRangeProbeValue = WorkspaceProbeValue & { range: TimeRange | null };
+ 
+ interface LayoutApiRef {
+   current: ArrangementRangeProbeValue | null;
+ }
+ 
+ function LayoutProbe({ api }: { api: LayoutApiRef }) {
+-  api.current = { ...useArrangement(), range: useArrangementRange((state) => state.range) };
++  api.current = { ...useWorkspaceProbe(), range: useArrangementRange((state) => state.range) };
+   return null;
+ }
+ 
+diff --git a/app/lib/arrangement/__tests__/track-meter-ui.test.tsx b/app/lib/arrangement/__tests__/track-meter-ui.test.tsx
+index c7af582..71444c3 100644
+--- a/app/lib/arrangement/__tests__/track-meter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-meter-ui.test.tsx
+@@ -3,9 +3,7 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+-  useArrangement,
+   useMasterMeterStore,
+   useTrackMeterStore,
+ } from '~/contexts/ArrangementContext';
+@@ -13,6 +11,7 @@ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import type { MasterMeterStore, TrackMeterStore } from '~/lib/arrangement/meter';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ProbeFiber {
+   type: unknown;
+@@ -250,11 +249,11 @@ function trackArrangement(): Arrangement {
+ }
+ 
+ interface ApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function TrackProbe({ api }: { api: ApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+@@ -269,7 +268,7 @@ function StoreProbe({ stores }: { stores: StoreRef }) {
+   return null;
+ }
+ 
+-function live(api: ApiRef): ArrangementContextValue {
++function live(api: ApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/track-pan.test.tsx b/app/lib/arrangement/__tests__/track-pan.test.tsx
+index dd21232..79e9a79 100644
+--- a/app/lib/arrangement/__tests__/track-pan.test.tsx
++++ b/app/lib/arrangement/__tests__/track-pan.test.tsx
+@@ -4,12 +4,7 @@ import { act, fireEvent, render, renderHook } from '@testing-library/react';
+ import { createElement, type ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  GESTURE_EDIT_BLOCKED_MESSAGE,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import type {
+   Arrangement,
+@@ -25,6 +20,7 @@ import {
+   TRACK_PAN_STEPS,
+   trackPanValue,
+ } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -229,7 +225,7 @@ function latestPanners(): { video: FakePanner; music: FakePanner; sfx: FakePanne
+ }
+ 
+ interface PanApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ interface PointerClaimHolder {
+@@ -237,11 +233,11 @@ interface PointerClaimHolder {
+ }
+ 
+ function PanProbe({ api }: { api: PanApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: PanApiRef): ArrangementContextValue {
++function live(api: PanApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+@@ -463,7 +459,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+ 
+   describe('provider', () => {
+     it('setTrackPan commits one Pan entry; Undo removes the key and Redo re-applies it', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(panArrangement()),
+       });
+       await flushLoads();
+@@ -495,7 +491,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+     });
+ 
+     it('a pan change while playing does not reschedule and ramps the music panner; Undo too', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(panArrangement()),
+       });
+       await flushLoads();
+@@ -526,7 +522,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+     });
+ 
+     it('starts the graph with the stored pan on that panner only', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(setArrangementTrackPan(panArrangement(), 'music', 0.5)),
+       });
+       await flushLoads();
+@@ -537,7 +533,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+     });
+ 
+     it('begin → previews leave history untouched; commit makes exactly one entry', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(panArrangement()),
+       });
+       await flushLoads();
+@@ -568,7 +564,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+     });
+ 
+     it('cancel makes no entry and pushes the stored pan back to the live panner', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(setArrangementTrackPan(panArrangement(), 'music', 0.2)),
+       });
+       await flushLoads();
+@@ -589,7 +585,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+     });
+ 
+     it('a window pointercancel cancels and a window pointerup commits the gesture', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(panArrangement()),
+       });
+       await flushLoads();
+@@ -615,7 +611,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+     });
+ 
+     it('a reschedule during a preview keeps the dragged pan on the new graph panner', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(panArrangement()),
+       });
+       await flushLoads();
+@@ -638,7 +634,7 @@ describe('Track Pan (SRW-13 stage 4a, FB-05, R13-M2)', () => {
+     });
+ 
+     it('refuses during another pointer gesture, and a pan gesture blocks a second claim', async () => {
+-      const { result } = renderHook(() => useArrangement(), {
++      const { result } = renderHook(() => useWorkspaceProbe(), {
+         wrapper: providerWrapper(panArrangement()),
+       });
+       await flushLoads();
+diff --git a/app/lib/arrangement/__tests__/track-volume-db.test.tsx b/app/lib/arrangement/__tests__/track-volume-db.test.tsx
+index 1681695..258b5c2 100644
+--- a/app/lib/arrangement/__tests__/track-volume-db.test.tsx
++++ b/app/lib/arrangement/__tests__/track-volume-db.test.tsx
+@@ -2,11 +2,7 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { applySchedule } from '~/lib/arrangement/graph.client';
+ import type { Arrangement, ArrangementTrack, WorkspaceCollection } from '~/types/arrangement';
+ import { arrangementGroups } from '../groups';
+@@ -20,6 +16,7 @@ import {
+   trackVolumeReadoutDb,
+   trackVolumeSliderDb,
+ } from '../track-volume-db';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -163,15 +160,15 @@ function volumeArrangement(volumes: Partial<Record<string, number>> = { music: 0
+ }
+ 
+ interface VolumeApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function VolumeProbe({ api }: { api: VolumeApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: VolumeApiRef): ArrangementContextValue {
++function live(api: VolumeApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx b/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+index 9be32cd..f2fd722 100644
+--- a/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+@@ -3,9 +3,7 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+-  type ArrangementContextValue,
+   ArrangementProvider,
+-  useArrangement,
+   useArrangementInsertMarkerStore,
+   useArrangementPositionStore,
+ } from '~/contexts/ArrangementContext';
+@@ -14,6 +12,7 @@ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+ import { studioShortcutAria } from '../shortcuts';
+ import { studioPlaybackStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -54,19 +53,19 @@ function centreArrangement(): Arrangement {
+ }
+ 
+ interface CentreApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+   position: ArrangementPositionStore | null;
+   insertMarker: ArrangementPositionStore | null;
+ }
+ 
+ function CentreProbe({ api }: { api: CentreApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   api.position = useArrangementPositionStore();
+   api.insertMarker = useArrangementInsertMarkerStore();
+   return null;
+ }
+ 
+-function live(api: CentreApiRef): ArrangementContextValue {
++function live(api: CentreApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx b/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx
+index d451e1f..885cc39 100644
+--- a/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx
+@@ -2,14 +2,11 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
+@@ -140,15 +137,15 @@ function mockLibraryLayoutRects() {
+ }
+ 
+ interface DockApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function DockProbe({ api }: { api: DockApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: DockApiRef): ArrangementContextValue {
++function live(api: DockApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/lib/arrangement/__tests__/waveform-zoom.test.tsx b/app/lib/arrangement/__tests__/waveform-zoom.test.tsx
+index 3552f76..d5c0e81 100644
+--- a/app/lib/arrangement/__tests__/waveform-zoom.test.tsx
++++ b/app/lib/arrangement/__tests__/waveform-zoom.test.tsx
+@@ -3,11 +3,7 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { buildPeakShape } from '~/components/arrangement/ArrangementClip';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+-import {
+-  type ArrangementContextValue,
+-  ArrangementProvider,
+-  useArrangement,
+-} from '~/contexts/ArrangementContext';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { clipLinearGain, createArrangement } from '../model';
+@@ -21,6 +17,7 @@ import {
+   waveformZoomPercent,
+   waveformZoomStatus,
+ } from '../waveform-zoom';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ const graphLog = vi.hoisted(() => ({ setClipGain: 0 }));
+ 
+@@ -257,15 +254,15 @@ function zoomArrangement(): Arrangement {
+ }
+ 
+ interface ZoomApiRef {
+-  current: ArrangementContextValue | null;
++  current: WorkspaceProbeValue | null;
+ }
+ 
+ function ZoomProbe({ api }: { api: ZoomApiRef }) {
+-  api.current = useArrangement();
++  api.current = useWorkspaceProbe();
+   return null;
+ }
+ 
+-function live(api: ZoomApiRef): ArrangementContextValue {
++function live(api: ZoomApiRef): WorkspaceProbeValue {
+   if (!api.current) {
+     throw new Error('provider not mounted');
+   }
+diff --git a/app/routes/studio-lab.tsx b/app/routes/studio-lab.tsx
+index d580fa4..0f8ab2a 100644
+--- a/app/routes/studio-lab.tsx
++++ b/app/routes/studio-lab.tsx
+@@ -4,7 +4,11 @@ import { useEffect, useRef } from 'react';
+ import ibmPlexMonoLatinFont from '~/assets/fonts/ibm-plex-mono-latin.woff2?url';
+ import instrumentSansLatinFont from '~/assets/fonts/instrument-sans-latin.woff2?url';
+ import { StudioNarrowScreen, StudioWorkspace } from '~/components/arrangement';
+-import { ArrangementProvider, useArrangement } from '~/contexts/ArrangementContext';
++import {
++  ArrangementProvider,
++  useArrangement,
++  useArrangementIsPlaying,
++} from '~/contexts/ArrangementContext';
+ import { studioLabDemoCollection } from '~/data/studio-lab-demo';
+ import { resolveStudioLabPreviewSourceId, STUDIO_LAB_PREVIEW_PARAM } from '~/data/studio-lab-links';
+ import { useStudioHydrated, useStudioWideViewport } from '~/hooks/useStudioWideViewport';
+@@ -40,7 +44,8 @@ const studioLabInitialArrangement = createArrangement([
+ ]);
+ 
+ function StopPlaybackOnNarrow() {
+-  const { isPlaying, togglePlayback, stopLibraryPreview } = useArrangement();
++  const { togglePlayback, stopLibraryPreview } = useArrangement();
++  const isPlaying = useArrangementIsPlaying();
+   useEffect(() => {
+     stopLibraryPreview();
+   }, [stopLibraryPreview]);

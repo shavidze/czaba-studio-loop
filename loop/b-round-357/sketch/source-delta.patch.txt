@@ -1,0 +1,49 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 4a5e5cd..4eb1916 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -919,10 +919,15 @@ function ArrangementPlaybackFollowSyncInner({
+   onPlayingChange,
+ }: ArrangementPlaybackFollowSyncProps) {
+   const isPlaying = useArrangementIsPlaying();
++  const syncedRef = useRef(isPlaying);
+   useIsomorphicLayoutEffect(() => {
+     committedRef.current = isPlaying;
+   }, [committedRef, isPlaying]);
+   useEffect(() => {
++    if (syncedRef.current === isPlaying) {
++      return;
++    }
++    syncedRef.current = isPlaying;
+     onPlayingChange(isPlaying);
+   }, [isPlaying, onPlayingChange]);
+   return null;
+@@ -2314,7 +2319,7 @@ export function StudioWorkspace() {
+   }, []);
+ 
+   const syncFollowWithPlayback = useCallback(
+-    (isPlaying: boolean) => {
++    (isPlaying: boolean, atMount = false) => {
+       if (!isPlaying) {
+         if (followModeRef.current === 'paused') {
+           setFollowMode('on');
+@@ -2325,7 +2330,7 @@ export function StudioWorkspace() {
+         if (insertMarkerStatusKind(shownStatus) === null && shownStatus !== FOLLOW_PAUSED_MESSAGE) {
+           return;
+         }
+-        if (previewText !== null) {
++        if (previewText !== null || atMount) {
+           current.setStatus(current.describeSpaceStart());
+           return;
+         }
+@@ -2344,6 +2349,10 @@ export function StudioWorkspace() {
+     [setFollowMode],
+   );
+ 
++  useEffect(() => {
++    syncFollowWithPlayback(committedIsPlayingRef.current, true);
++  }, [syncFollowWithPlayback]);
++
+   useEffect(
+     () =>
+       positionStore.subscribePosition(() => {

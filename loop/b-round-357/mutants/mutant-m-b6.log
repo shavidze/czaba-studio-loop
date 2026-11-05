@@ -1,0 +1,54 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b357-scratch/sc[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/follow-remount-ui.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 402[2mms[22m[39m
+[31m     [31m×[31m RM1 a remount with a tempo-source clip keeps the stopped insert-marker text, with no tempo append[39m[32m 275[2mms[22m[39m
+[31m     [31m×[31m RM2 a remount re-writes the unchanged stopped text once, so the status is announced again[39m[32m 126[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/follow-remount-ui.test.tsx[2m > [22mFollow sync on a workspace remount under a live provider[2m > [22mRM1 a remount with a tempo-source clip keeps the stopped insert-marker text, with no tempo append
+[31m[1mAssertionError[22m: expected 'Insert marker (00:20.000) is past the…' to be 'Insert marker (00:20.000) is past the…' // Object.is equality[39m
+
+Expected: [32m"Insert marker (00:20.000) is past the end of the project (00:06.000) — there is nothing to play here. Home returns to 0."[39m
+Received: [31m"Insert marker (00:20.000) is past the end of the project (00:06.000) — there is nothing to play here. Home returns to 0.[7m Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)[27m"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/follow-remount-ui.test.tsx:[2m132:30[22m[39m
+    [90m130| [39m    [34mexpect[39m([34minsertMarkerStatusKind[39m(stoppedText))[33m.[39m[34mtoBe[39m([32m'stopped'[39m)[33m;[39m
+    [90m131| [39m    [35mawait[39m [34mremount[39m()[33m;[39m
+    [90m132| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m(stoppedText)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m133| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39mnot[33m.[39m[34mtoContain[39m(
+    [90m134| [39m      studioTempoStrings[33m.[39m[34mseeded[39m({ bpm[33m:[39m [32m'90'[39m[33m,[39m title[33m:[39m [32m'Slow stem'[39m })[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/follow-remount-ui.test.tsx[2m > [22mFollow sync on a workspace remount under a live provider[2m > [22mRM2 a remount re-writes the unchanged stopped text once, so the status is announced again
+[31m[1mAssertionError[22m: expected 2 to be 3 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 3[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/follow-remount-ui.test.tsx:[2m145:38[22m[39m
+    [90m143| [39m    [35mawait[39m [34mremount[39m()[33m;[39m
+    [90m144| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m(stoppedText)[33m;[39m
+    [90m145| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatusSequence)[33m.[39m[34mtoBe[39m(before [33m+[39m [34m1[39m)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m146| [39m  })[33m;[39m
+    [90m147| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m   Start at [22m 22:30:26
+[2m   Duration [22m 2.41s[2m (transform 1.05s, setup 0ms, import 1.50s, tests 402ms, environment 389ms)[22m
+
+
+::error file=/home/runner/b357-scratch/sc/app/lib/arrangement/__tests__/follow-remount-ui.test.tsx,title=app/lib/arrangement/__tests__/follow-remount-ui.test.tsx > Follow sync on a workspace remount under a live provider > RM1 a remount with a tempo-source clip keeps the stopped insert-marker text%2C with no tempo append,line=132,column=30::AssertionError: expected 'Insert marker (00:20.000) is past the…' to be 'Insert marker (00:20.000) is past the…' // Object.is equality%0A%0AExpected: "Insert marker (00:20.000) is past the end of the project (00:06.000) — there is nothing to play here. Home returns to 0."%0AReceived: "Insert marker (00:20.000) is past the end of the project (00:06.000) — there is nothing to play here. Home returns to 0. Tempo 90 BPM from “Slow stem” — bars ruler on. Grid only: audio is not stretched. Snap on — grid 1/4 (G)"%0A%0A ❯ app/lib/arrangement/__tests__/follow-remount-ui.test.tsx:132:30%0A%0A
+
+::error file=/home/runner/b357-scratch/sc/app/lib/arrangement/__tests__/follow-remount-ui.test.tsx,title=app/lib/arrangement/__tests__/follow-remount-ui.test.tsx > Follow sync on a workspace remount under a live provider > RM2 a remount re-writes the unchanged stopped text once%2C so the status is announced again,line=145,column=38::AssertionError: expected 2 to be 3 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 3%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/follow-remount-ui.test.tsx:145:38%0A%0A
