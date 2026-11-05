@@ -1,0 +1,184 @@
+diff --git a/perf/budgets.interactions.json b/perf/budgets.interactions.json
+index 4b93185..7bba852 100644
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -2257,10 +2257,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 27
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included. Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the group move preview left the provider history (B sketch 26.969/move at 1x and 6x, stopped and playing; HEAD 74.781; the lane drag is 24.906)."
+   },
+   {
+     "id": "interact.drag.group.stopped.move-components-max",
+@@ -2279,10 +2282,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.group.stopped.cross-components-per-move",
+@@ -2312,10 +2318,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 27
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included. Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the group move preview left the provider history (B sketch 26.969/move at 1x and 6x, stopped and playing; HEAD 74.781; the lane drag is 24.906)."
+   },
+   {
+     "id": "interact.drag.group.playing.move-components-max",
+@@ -2334,10 +2343,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.group.playing.cross-components-per-move",
+@@ -2367,10 +2379,13 @@
+     "metric": "move-restarts",
+     "unit": "start() calls",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 0
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup. Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): a group move preview never restarts the playing graph."
+   },
+   {
+     "id": "interact.drag.group.playing.release-restarts",
+@@ -2403,10 +2418,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 27
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included. Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the group move preview left the provider history (B sketch 26.969/move at 1x and 6x, stopped and playing; HEAD 74.781; the lane drag is 24.906)."
+   },
+   {
+     "id": "interact.drag.group.stopped.move-components-max.6x",
+@@ -2425,10 +2443,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.group.stopped.cross-components-per-move.6x",
+@@ -2458,10 +2479,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 27
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Sum of rendered components in the commits after the first pointermove and before the in-page pointerup / all pointermoves between the in-page pointerdown and pointerup, the first one included. Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the group move preview left the provider history (B sketch 26.969/move at 1x and 6x, stopped and playing; HEAD 74.781; the lane drag is 24.906)."
+   },
+   {
+     "id": "interact.drag.group.playing.move-components-max.6x",
+@@ -2480,10 +2504,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.group.playing.cross-components-per-move.6x",
+@@ -2513,10 +2540,13 @@
+     "metric": "move-restarts",
+     "unit": "start() calls",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c4-i",
+-    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 0
++    },
++    "owner": "PERF-DRAG-PREVIEW-c4-ii",
++    "note": "Group drag (gesture: the 'group drag' entries of interactionSequence; doc 168; two selected clips, the first pressed on its name bar). start() calls on a non-offline context inside the whole window. Whole window: after the first pointermove that follows the in-page pointerdown, before the in-page pointerup. Asserted since PERF-DRAG-PREVIEW stage c4-ii (round 343): a group move preview never restarts the playing graph."
+   },
+   {
+     "id": "interact.drag.group.playing.release-restarts.6x",
