@@ -1,0 +1,31 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {"checkedUtc": "2026-11-05T18:50:54.9600751Z", "round": 355, "attempt": 1, "store": 200},
+ "bugs": [],
+ "passed": ["CLAIMS", "SOURCE-SCOPE", "ASSERT-LOSS", "UNIT 74/74", "MUTANT (M-B1-LATE, FX-SHORTDRAG, M-B9 equal B; own OWN-1 and OWN-2 executed)", "FAKE-TIMER-LEAK (seed1 DP72 at 28/74 with 46 after; seed2 last; 74/74 both)", "STUDIO-SMOKE-355 1440x900", "STUDIO-SMOKE-355 1280x720", "G355-AUTH (lab anon demo, auth_user null; /studio/middle-east Sign in required, 0 audio[src]; token route 401 without header; no token in body)", "DOCS"],
+ "failed": [],
+ "blocked": ["G355-AUTH fake-bearer: token route 500 (fails closed) because mock backend :5199 is down in cloud; 403 not observable"],
+ "gate": ["full vitest", "typecheck", "build", "Biome", "npm run verify", "e2e smoke"],
+ "notes": [
+  "First G355-AUTH attempt timed out waiting for 'ready' (cold dev server, environment); identical rerun alone passed. Both probes equal c-round-354 modulo blob src.",
+  "OWN-1 (remove vi.useRealTimers from finally, scratch): DP72 red (test timeout 5000 ms), 73/74 pass; the leak did not spread to other tests in file order. Caught.",
+  "OWN-2 (50ms->200ms late seek variant of M-B1-LATE): sketch red DP69+DP72, head red DP69 only: same as B. The sed replaced the script's single 50, result identical to M-B1-LATE.",
+  "ASSERT-LOSS: removed caption check (ruled, DP64 guards), writtenValues (replaced by records length 0), toBeCloseTo (toBe, earlier), 20ms sleep (fake timer drain). No other assert removed.",
+  "Scratch deleted under c-round-355/ only; store git status = 2 modified files. Ableton conformance: not applicable (test-only)."
+ ],
+ "manifestPaths": ["c-round-355/claims.txt", "c-round-355/mut/mutant-summary.txt", "c-round-355/mut2/mutant-summary.txt", "c-round-355/shuffle-seed1.log", "c-round-355/shuffle-seed2.log", "c-round-355/auth.json", "c-round-355/behaviour-1440x900.json", "c-round-355/behaviour-y8-1280x720.json", "c-round-355/lab-1440x900.png", "c-round-355/lab-1280x720.png", "c-round-355/predict.txt"],
+ "missingPaths": [],
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": ["DP69 records length 0", "DP70 gap/overlay after trim, Undo, Undo, Redo, Redo", "DP72 shownStart-start > 0.01", "DP72 start toBe(shownStart) before seek count", "DP72 timer drain", "DP70 caption removed (ruled)"],
+ "mutantsRecorded": ["M-B1-LATE", "FX-SHORTDRAG", "M-B9", "OWN-1", "OWN-2"],
+ "mutantRedOnSketch": "c-round-355/mut/mutant-summary.txt equals B lines for M-B1-LATE, FX-SHORTDRAG, M-B9 (control 74/74)",
+ "gateChecksNamed": ["full vitest", "typecheck", "build", "Biome", "npm run verify", "e2e smoke"],
+ "gateChecksRunOnSketch": "b-round-354/sketch/sketch-typecheck.log, sketch-biome.log, mut-control-sketch.json (B; not re-run by C)",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": ["drag-preview-render.test.tsx", "video behaviour probes", "auth guard"],
+ "affectedChecksRunOnSketch": "74/74 on tree and in both shuffles",
+ "nullReason": "claimCheckMinutes not timed; chainHeadGateRunGreen belongs to the gate"
+}

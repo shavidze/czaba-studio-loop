@@ -1,0 +1,22 @@
+sketch: rc 0 complete True rows 252 asserted 84 pass 84 NEW 0 durationMs 449712 failures 0
+  row interact.drag.video.stopped.move-components-per-move assert samples [9.883, 9.883, 9.883] pass True c354 [9.883, 9.883, 9.883]
+  row interact.drag.video.stopped.move-components-max assert samples [13, 13, 13] pass True c354 [13, 13, 13]
+  row interact.drag.video.playing.move-components-max assert samples [12, 12, 12] pass True c354 [12, 12, 12]
+  row interact.drag.video.playing.move-components-per-move record samples [9.883, 9.95, 9.883] pass None c354 [9.95, 9.95, 9.95]
+  deterministic components/commits rows higher than C354: 0
+mu-b2: rc 1 complete True rows 252 asserted 84 pass 75 NEW 0 durationMs 430319 failures 9
+  RED interact.drag.video.stopped.move-components-per-move median 15.75 samples [15.75, 15.75, 15.75] budget <=10
+  RED interact.drag.video.stopped.move-components-max median 17 samples [17, 17, 17] budget <=13
+  RED interact.drag.video.playing.move-components-max median 17 samples [17, 17, 17] budget <=12
+  RED interact.drag.video-trim.stopped.move-components-per-move median 18.683 samples [18.683, 18.683, 18.683] budget <=13
+  RED interact.drag.video-trim.stopped.move-components-max median 19 samples [19, 19, 19] budget <=15
+  RED interact.drag.video-trim.playing.move-components-max median 19 samples [19, 19, 19] budget <=15
+  RED interact.drag.video-fade.stopped.move-components-per-move median 8.85 samples [8.85, 8.85, 8.85] budget <=3
+  RED interact.drag.video-fade.stopped.move-components-max median 9 samples [9, 9, 9] budget <=3
+  RED interact.drag.video-fade.playing.move-components-max median 9 samples [9, 9, 9] budget <=3
+  row interact.drag.video.stopped.move-components-per-move assert samples [15.75, 15.75, 15.75] pass False c354 [9.883, 9.883, 9.883]
+  row interact.drag.video.stopped.move-components-max assert samples [17, 17, 17] pass False c354 [13, 13, 13]
+  row interact.drag.video.playing.move-components-max assert samples [17, 17, 17] pass False c354 [12, 12, 12]
+  row interact.drag.video.playing.move-components-per-move record samples [15.783, 15.783, 15.75] pass None c354 [9.95, 9.95, 9.95]
+  deterministic components/commits rows higher than C354: 9 | interact.drag.video.stopped.move-components-per-move 9.883->15.75; interact.drag.video.stopped.move-components-max 13->17; interact.drag.video.playing.move-components-max 12->17; interact.drag.video-trim.stopped.move-components-per-move 12.817->18.683; interact.drag.video-trim.stopped.move-components-max 15->19; interact.drag.video-trim.playing.move-components-max 15->19; interact.drag.video-fade.stopped.move-components-per-move 2.95->8.85; interact.drag.video-fade.stopped.move-components-max 3->9; interact.drag.video-fade.playing.move-components-max 3->9
+note: measured sketch budgets file differs from the dispatched one only in the note of interact.drag.video.stopped.move-components-per-move (TL-R356-2 wording); the harness does not read note (TL-R356-4). run1 patch kept as sketch/budgets.patch.run1.txt, sha sketch/budgets-run1.sha256

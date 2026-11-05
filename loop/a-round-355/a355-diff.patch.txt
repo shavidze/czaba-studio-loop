@@ -1,0 +1,169 @@
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index 82c60ea..c321687 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -2156,7 +2156,7 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
+   });
+ 
+-  it('DP69 the fade release never writes the pre-drag opacity back to the overlay', async () => {
++  it('DP69 the fade release writes nothing to the overlay, so the pre-drag opacity never returns', async () => {
+     const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
+     act(() => live(api).seekTo(2));
+     const overlay = view.getByTestId('arrangement-video-fade');
+@@ -2171,11 +2171,9 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     try {
+       pointerUpAt(video.root, 14, 120, 50);
+       const records = observer.takeRecords();
+-      const finalOpacity = overlay.dataset.videoOpacity;
+-      const writtenValues = [...records.slice(1).map((record) => record.oldValue), finalOpacity];
+       expect(records.map((record) => record.oldValue)).not.toContain('1.000');
+-      expect(writtenValues).not.toContain('1.000');
+-      expect(finalOpacity).toBe(shownBeforeRelease);
++      expect(records).toHaveLength(0);
++      expect(overlay.dataset.videoOpacity).toBe(shownBeforeRelease);
+       expect(clipIn(live(api).arrangement, 'v1').fadeIn ?? 0).toBeGreaterThan(0);
+       expect(previewOf(api)).toBeNull();
+     } finally {
+@@ -2183,13 +2181,12 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     }
+   });
+ 
+-  it('DP70 Undo and Redo of a committed video fade rewrite the overlay with no preview', async () => {
++  it('DP70 Undo and Redo of a committed video fade and trim rewrite the overlay and the gap with no preview', async () => {
+     const { api, view } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
+     act(() => live(api).seekTo(2));
+     const overlay = view.getByTestId('arrangement-video-fade');
+     expect(overlay.dataset.videoOpacity).toBe('1.000');
+-    const committedCaption = textOf(view, 'arrangement-video-caption');
+-    const committedGap = view.queryByTestId('arrangement-video-gap') === null;
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
+     const before = live(api).getArrangement();
+     const faded: Arrangement = {
+       ...before,
+@@ -2202,13 +2199,33 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     });
+     expect(previewOf(api)).toBeNull();
+     expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
++    const trimmed: Arrangement = {
++      ...faded,
++      clips: faded.clips.map((clip) =>
++        clip.id === 'v1' ? { ...clip, start: 2.5, sourceOffset: 1.5, duration: 2.5 } : clip,
++      ),
++    };
++    act(() => {
++      live(api).commitArrangement(trimmed, studioClipStrings.trimStartLabel, faded);
++    });
++    expect(view.queryByTestId('arrangement-video-gap')).not.toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
++    act(() => live(api).undo());
++    expect(previewOf(api)).toBeNull();
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
+     act(() => live(api).undo());
+     expect(previewOf(api)).toBeNull();
+     expect(overlay.dataset.videoOpacity).toBe('1.000');
+-    expect(textOf(view, 'arrangement-video-caption')).toBe(committedCaption);
+-    expect(view.queryByTestId('arrangement-video-gap') === null).toBe(committedGap);
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
+     act(() => live(api).redo());
++    expect(previewOf(api)).toBeNull();
+     expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
++    act(() => live(api).redo());
++    expect(previewOf(api)).toBeNull();
++    expect(view.queryByTestId('arrangement-video-gap')).not.toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
+   });
+ 
+   it('DP71 an audio move with a video clip present renders no dock component and writes no video opacity', async () => {
+@@ -2285,17 +2302,22 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     }
+     const shownStart = clipIn(shown, imported.id).start;
+     expect(clipIn(live(api).arrangement, imported.id).start).toBe(imported.start);
+-    expect(shownStart).toBeGreaterThan(imported.start);
++    expect(shownStart - imported.start).toBeGreaterThan(0.01);
+     expect(shownStart).toBeLessThan(playhead);
+     const previewTarget = playhead - shownStart + imported.sourceOffset;
+     await waitFor(() => expect(seeks.at(-1)).toBeCloseTo(previewTarget, 3));
+     const writesBeforeRelease = seeks.length;
+-    pointerUpAt(root, 10, pressX + 40, 50);
+-    await act(async () => {
+-      await new Promise((resolve) => setTimeout(resolve, 20));
+-    });
++    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
++    try {
++      pointerUpAt(root, 10, pressX + 40, 50);
++      await act(async () => {
++        await vi.runAllTimersAsync();
++      });
++    } finally {
++      vi.useRealTimers();
++    }
++    expect(clipIn(live(api).arrangement, imported.id).start).toBe(shownStart);
+     expect(seeks).toHaveLength(writesBeforeRelease);
+-    expect(clipIn(live(api).arrangement, imported.id).start).toBeCloseTo(shownStart, 6);
+     act(() => live(api).undo());
+     await waitFor(() => expect(seeks.length).toBeGreaterThan(writesBeforeRelease));
+     await waitFor(() =>
+diff --git a/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md b/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md
+index 2428951..22a7c67 100644
+--- a/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md
++++ b/docs/implementation/2026/quarter-IV/232-perf-drag-preview.md
+@@ -1,7 +1,7 @@
+-# კლიპის drag-ის preview გავიდა React history-დან (PERF-DRAG-PREVIEW: ეტაპი a — trim და same-lane move, ეტაპი b — audio fade, ეტაპი c1 — project end, ეტაპი c2a — არჩეული კლიპის მკითხველები, ეტაპი c2b-i — overview და meter, ეტაპი c2b-ii — Clip details-ის Start/End ტექსტი, ეტაპი c2b-iii — waveform-ის primitive props, ეტაპი c3-i — cross-lane move-ის perf row, ეტაპი c3-ii — cross-lane ghost-ები store-ში, ეტაპი c4-i — group move-ის perf row, ეტაპი c4-ii — group move-ის preview store-ში, ეტაპი c5-i — video კლიპის move-ის perf row, ეტაპი c5-ii — video კლიპის preview store-ში, ეტაპი c6-i — lucide icon-ების hoist, ეტაპი c6-ii — fader-ებისა და clip gain-ის memo, ეტაპი conversions — trim/move/fade row-ები assert-ზე, ეტაპი video-trim-fade — video კლიპის trim/fade-ის perf row-ები, ეტაპი video-trim-fade-cost — video dock-ის per-move render-ის მოხსნა, ეტაპი video-trim-fade-cost-2 — video trim/fade row-ები assert-ზე)
++# კლიპის drag-ის preview გავიდა React history-დან (PERF-DRAG-PREVIEW: ეტაპი a — trim და same-lane move, ეტაპი b — audio fade, ეტაპი c1 — project end, ეტაპი c2a — არჩეული კლიპის მკითხველები, ეტაპი c2b-i — overview და meter, ეტაპი c2b-ii — Clip details-ის Start/End ტექსტი, ეტაპი c2b-iii — waveform-ის primitive props, ეტაპი c3-i — cross-lane move-ის perf row, ეტაპი c3-ii — cross-lane ghost-ები store-ში, ეტაპი c4-i — group move-ის perf row, ეტაპი c4-ii — group move-ის preview store-ში, ეტაპი c5-i — video კლიპის move-ის perf row, ეტაპი c5-ii — video კლიპის preview store-ში, ეტაპი c6-i — lucide icon-ების hoist, ეტაპი c6-ii — fader-ებისა და clip gain-ის memo, ეტაპი conversions — trim/move/fade row-ები assert-ზე, ეტაპი video-trim-fade — video კლიპის trim/fade-ის perf row-ები, ეტაპი video-trim-fade-cost — video dock-ის per-move render-ის მოხსნა, ეტაპი video-trim-fade-cost-2 — video trim/fade row-ები assert-ზე, ეტაპი dp-test-polish — DP69/DP70/DP72-ის გამკაცრება)
+ 
+ **თარიღი:** 2026-11-04
+-**სტატუსი:** In Progress (stage conversions of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4-i, c4-ii, c5-i, c5-ii, c6-i, c6-ii, conversions, video-trim-fade, video-trim-fade-cost-1, video-trim-fade-cost-2; C round 354 PASS)
++**სტატუსი:** In Progress (stage conversions of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4-i, c4-ii, c5-i, c5-ii, c6-i, c6-ii, conversions, video-trim-fade, video-trim-fade-cost-1, video-trim-fade-cost-2, dp-test-polish; C round 355 PASS)
+ **შეცვლილი პროექტი:** Store (`app/lib/arrangement/preview-store.ts`, `app/lib/arrangement/status-preview-store.ts`, `app/lib/arrangement/clip-lane-drag-store.ts`, `app/contexts/ArrangementContext.tsx`, `app/components/arrangement/ArrangementClip.tsx`, `ArrangementLane.tsx`, `StudioWorkspace.tsx`, `ArrangementTrackMeter.tsx`, `ArrangementDetailPanel.tsx`, `ArrangementTransport.tsx`, `ArrangementMarkerRow.tsx`, `perf/budgets.interactions.json`, `app/lib/arrangement/waveform-zoom.ts`, `app/lib/arrangement/model.ts`, `perf/studio-lab-interactions.perf.spec.ts`, `app/components/arrangement/ArrangementVideoDock.tsx`)
+ 
+ ## კონტექსტი
+@@ -229,6 +229,17 @@
+ 107. **margin (`tech-lead`).** stopped-ში ყველა sample-ს 60 move-ზე 59 window commit აქვს: trim 769 / 60, fade 177 / 60. კიდევ ერთი სრული commit trim-ს 13.03-ზე აიყვანს, fade-ს 4-component-იანი commit — 3.0-ზე მეტზე. ეს სწორი სიგნალია: stopped-ში საათი არ მუშაობს, ამიტომ დამატებითი commit drag-ზე ზედმეტ render-ს ნიშნავს. წითელი per-move row ჯერ `windowCommits`-ისა და `componentsSum`-ის detail-ით უნდა შემოწმდეს.
+ 108. **B-ის sketch-ის გაზომვა (production, მარტო; `b-round-353/perf-summary.txt`).** sketch: rc 0, 252 row, 82/82 assert გადის, 0 NEW, C round 350-ზე მაღალი deterministic row 0, `durationMs` 488086. mutant M-B2′ (`b-round-350/mutant-M-B2prime.diff.txt`, dock-ი preview store-ს ისევ იწერს): rc 1, 16 წითელი row — 6 ახალი video component row (trim stopped per-move 18.683, max 19 / 19; fade stopped per-move 8.85, max 9 / 9) და audio trim/fade/move-ის 10 არსებული row; release, restart და live row-ები მწვანეა. mutant M-B2 (`b-round-350/mutant-M-B2.diff.txt`, dock-ი video lane-ის preview კლიპებს ირჩევს): rc 1, წითელია მხოლოდ ეს 6 ახალი row, audio-ს ყველა assert მწვანეა — ანუ ამ ეტაპამდე ასეთ regression-ს არცერთი row არ იჭერდა. M-B2-ის დროს video move-ის per-move 9.883 → 15.75 გაიზარდა და არსებულმა `<= 24`-მა ვერ დაიჭირა (PERF-CAND-VIDEO-MOVE-BUDGET, შემდეგი ეტაპი).
+ 
++### ეტაპი dp-test-polish: DP69, DP70 და DP72 ვეღარ გაივლის ცარიელად (round 355, D-29z1142)
++
++109. **რატომ.** code-reviewer-მა (A rounds 350 და 352) და gate 352-ის review-მ ოთხი Low იპოვა (SYS-R353-DP-TEST-POLISH, D-29z1132): A-R350-REVIEW-TEST-NITS, A-R352-REVIEW-COMMIT-EXACT, A-R352-REVIEW-DRAG-DISTANCE და A-R352-REVIEW-WINDOW-PRECONDITION. ყველა ერთ ფაილს ეხება, `drag-preview-render.test.tsx`-ს; app-ის კოდი არ იცვლება.
++110. **ცვლილებები (B-ის `b-round-354/sketch/test.patch.txt`, უცვლელად).**
++    - **DP69:** `writtenValues` ზედმეტი იყო (ძველი მნიშვნელობები და საბოლოო მნიშვნელობა უკვე ფარავდა). მის ნაცვლად release-ის შემდეგ `MutationObserver`-ის ჩანაწერები 0-ია: release overlay-ზე არაფერს წერს. ეს უფრო მკაცრია — A-M5 (overlay-ის თანაბარი მნიშვნელობის skip წაშლილი) ახლა DP69-საც აწითლებს. სათაური შესაბამისად შეიცვალა.
++    - **DP70:** ამ fixture-ში video source რეგისტრირებული არ არის, ამიტომ caption ყველა მდგომარეობაში ცარიელია, ხოლო fade-ის commit gap-ს არ ცვლის — ორივე check ვერ ჩავარდებოდა. caption-ის check წაიშალა (caption-ს DP64 იცავს, `film.mp4`); gap-ის check-ის ნაცვლად fade-ის შემდეგ committed trimStart-ია (start 2.5, playhead 2 s ღიაა): gap ჩნდება და overlay `1.000`-ია, Undo gap-ს აქრობს და faded-ს აბრუნებს, მეორე Undo → `1.000`, Redo → faded და gap არაა, მეორე Redo → gap და `1.000`; ყოველ ნაბიჯზე preview `null`-ია.
++    - **DP72:** (ა) drag-ის მანძილი: `shownStart − imported.start > 0.01` (seek-ის სიზუსტე 3 ციფრია); (ბ) committed start `toBe(shownStart)`, seek-ების რაოდენობის check-ამდე, რომ commit-ის შეცდომა commit-ის შეცდომად გამოჩნდეს; (გ) 20 ms-იანი რეალური ლოდინის ნაცვლად `vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })` release-მდე, `act`-ში `vi.runAllTimersAsync()` და `finally`-ში `vi.useRealTimers()`.
++    - `'Video Fade In'`-ის literal რჩება (DP13, DP67, DP70): `VIDEO_FADE_LABELS` `ArrangementClip.tsx`-ში export-ირებული არ არის, export კი app-ის კოდის ცვლილებაა.
++111. **დაფარვის საზღვარი (A-R352-REVIEW-WINDOW-PRECONDITION).** DP72-ის „release-ის შემდეგ ჩანაწერი არ არის“ ფარავს microtask-ებს და `setTimeout`-ით ნებისმიერი დაყოვნებით დაგეგმილ ჩანაწერს. არ ფარავს: `requestAnimationFrame`-ით დაგეგმილს (ფაილში ის stub-ია, `() => 1`, ამიტომ playing-ის გზაც არ სრულდება), `setTimeout`-ის იმ reference-ს, რომელიც მოდულმა ჩატვირთვისას შეინახა (`tech-lead`, TL-R355), და jsdom-ის `readyState` 0-ის მიღმა ქცევას. playing-ის გზას ბრაუზერის perf row-ები და C-ის video probe ამოწმებს.
++112. **B-ის mutant-ები (scratch, `b-round-354/sketch/mutant-summary.txt`; sketch და HEAD-ის ტესტი ერთსა და იმავე app კოდზე).** M-B1-LATE (M-B1 + stopped seek 50 ms-იანი timer-ით) → sketch-ზე DP72 წითელია seek-ების რაოდენობაზე, HEAD-ზე მწვანე (20 ms ვერ ხედავდა); FX-SHORTDRAG (DP72-ის drag 0.3 px) → sketch-ზე წითელი მანძილის ხაზზე (0.008), HEAD-ზე მწვანე; M-B6 → DP72-ის პირველი წითელი ხაზი ახლა `toBe(shownStart)`-ია; A-M5 → sketch-ზე DP69 და DP71, HEAD-ზე მხოლოდ DP71; M-B9 (GapCaption მხოლოდ position-ს იწერს და memo მას არასოდეს ხელახლა არ ხატავს) → sketch-ზე DP70 წითელია trim-ის commit-ის შემდეგ gap-ის ხაზზე, HEAD-ზე DP70 მწვანე; M-B8 (gap mount-ზე იყინება) → sketch-ზე DP70 წითელი. M-B1, M-B3, M-B4 და M-B7-ის წითელი ტესტები უცვლელია. ტესტების რაოდენობა 74.
++
+ ### განხილული ალტერნატივები
+ 
+ - **flag `previewArrangement`-ში** ცალკე ფუნქციის ნაცვლად (`tech-lead`): უარყოფილია; ცალკე ფუნქცია ცხადად აჩვენებს, რომელი call site გადავიდა.
+@@ -351,6 +362,7 @@ flowchart LR
+ - ეტაპი video-trim-fade (round 349): `perf/studio-lab-interactions.perf.spec.ts` (`dragTarget`-ის `kind`, `DragMeasure.kind`, video ბლოკის move/trim/fade ციკლი, `videoDrags`, `videoDragBaseId`, `videoDragLiveId`, `videoDragMeasure`), `perf/budgets.interactions.json` (22 `record` row, owner `PERF-CAND-VIDEO-TRIM-FADE-ROWS`), ეს doc
+ - ეტაპი video-trim-fade-cost (round 350): `app/components/arrangement/ArrangementVideoDock.tsx` (`VideoLanePreviewReader`, `useVideoLanePreviewReader`, `sameClipList`; `useVideoLaneArrangement` წაიშალა), `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` (DP66–DP71; DP72 — rounds 351–352).
+ - ეტაპი video-trim-fade-cost-2 (round 354): `perf/budgets.interactions.json` (12 row, იხ. ეტაპი video-trim-fade-cost-2).
++- ეტაპი dp-test-polish (round 355): `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` (DP69, DP70, DP72; იხ. ეტაპი dp-test-polish).
+ - ტესტები: `app/lib/arrangement/__tests__/preview-store.test.ts`, `drag-preview-render.test.tsx` (ახალი, ეტაპი a; ეტაპ b-ში ეტაპ a-ს fade/video row-ის ნაცვლად DP9a/DP9b და დაემატა DP10–DP16; round 328-ში DP17–DP19; round 329-ში DP20–DP22; round 330-ში DP23–DP24, fixture/mount `loop` პარამეტრი; round 331-ში DP25–DP28 და preview-store.test.ts-ში PS-ROLES/PS-LIST; round 332-ში DP29–DP32, PS-OVR-ROLES/PS-OVR-ARR და track-meter-ui.test.tsx-ის 4 სახელი; round 333-ში DP33–DP42; round 334-ში DP43–DP48 და clip-gain-waveform.test.tsx-ში WG9–WG10; round 338-ში DP49–DP50; round 343-ში DP51–DP56 და `PROJECT_END_CLIP` fixture), `status-preview-store.test.ts` (ახალი, ეტაპი b); `clip-lane-drag-store.test.ts` (ახალი, ეტაპი c3-ii); `gesture-guard.test.tsx`, `shortcut-sheet-ui.test.tsx`, `track-groups-ui.test.tsx`, `workspace-strings-ui.test.tsx`, `track-group-collapse-ui.test.tsx` (ეტაპი c3-ii: probe-ი drag-ს store-იდან კითხულობს); `grid-snap-ui.test.tsx`, `grid-snap-edit.test.tsx`, `gesture-guard.test.tsx` (pattern P1, ეტაპი a); `grid-snap-ui.test.tsx` GS5b (ეტაპი c4-ii: `shownClipOf`)
+ 
+ ## პრობლემები და გადაწყვეტები
+@@ -479,8 +491,8 @@ flowchart LR
+ - Production perf, ეტაპი conversions (A, round 348, მარტო; `a-round-348/perf-store-results/latest-interactions.json`, `a-round-348/perf-rowcmp-vs-c347.txt`): rc 0, `complete` true, 230 row, `failures` [], **70/70** assert row გადის; C round 347-თან შედარებით 165 EQUAL, 0 DIFF, 0 NEW. trim 14.75 / 15, move 15.317 (max 82, `record`), fade 3.933 / 4; release: trim 1, move 1, fade 3 stopped / 2 playing (`record`). `durationMs` 453013.
+ - Production perf mutant-ები, ეტაპი conversions (A, round 348, scratch copy, თითო მარტო; `a-round-348/perf-summary.txt`, `a-round-348/mutant-red-vs-b.txt`): MU-FINE-CLIPGAIN 6 failure, MU-GROSS-PREVIEW 17, MU-COMBO 22; სამივეში წითელი row-ების id-ები და მნიშვნელობები B-ის `b-round-347/perf-summary.txt`-ს ზუსტად ემთხვევა. store-ის `git status` mutant-ებმა არ შეცვალა.
+ - Production perf, ეტაპი video-trim-fade (A, round 349, მარტო; `a-round-349/perf-results/latest-interactions.json`, `a-round-349/perf-rowcmp-vs-c348.txt`, `a-round-349/perf-checks.txt`): rc 0, `complete` true, 252 row, `failures` [], 6 pass-ში `abortedAt` და problem არ არის, **70/70** assert row გადის; C round 348-თან შედარებით 165 EQUAL, 0 DIFF, 22 NEW (ზუსტად ამ ეტაპის id-ები). ახალი deterministic row-ები სამივე pass-ში ერთნაირია: video trim per move 18.683 (stopped; playing — wallclock row, median 18.683, sample-ები 18.683 / 18.683 / 18.717), max 19, release-commits 1, playing-ზე move-restarts 0, release-restarts 31; video fade per move 8.85, max 9, release-commits 2, move-restarts 0, release-restarts 31. ორივე liveness row 3/3-ში 1 (`data-clip-start` 0.000 → 1.500 → 3.000, `data-fade-in` 0.000 → 1.500 → 3.000). `durationMs` 490693 (ზღვარი 540000). PERF-LIB 40/40, `npm run typecheck` rc 0, `npm run lint` rc 0 (205 warning).
+-- `drag-preview-render.test.tsx`, round 350 (ეტაპი video-trim-fade-cost): DP66 (video trimStart, playhead 4 s: ორ move-ზე `ArrangementVideoDock`, `ArrangementVideoCaption`, `ArrangementVideoFadeOverlay`, `ArrangementVideoGapCaption` 0 render, `data-clip-start` `3.000`, release-ზე ერთი Trim entry, Undo აბრუნებს), DP67 (video fade-in, playhead 2 s: იგივე ოთხი component 0, overlay ყოველ move-ზე `videoFadeOpacityAt(preview, 2)`-ს უდრის და ეცემა), DP68 (trimStart playhead-ს 1.5 s-ზე ხსნის: `arrangement-video-gap` preview-შივე ჩნდება, release-ის შემდეგ რჩება, Undo აქრობს), DP69 (fade release: `MutationObserver` `attributeOldValue`-ით — არც ერთი ჩანაწერის ძველი ან ახალი მნიშვნელობა არ არის `1.000`, საბოლოო = release-მდე ნაჩვენები), DP70 (preview-ს გარეშე committed video fade: overlay faded, Undo → `1.000`, caption/gap committed მდგომარეობაში, Redo → faded), DP71 (audio move video-სთან ერთად: ოთხი component 0 render, `data-video-opacity`-ის 0 mutation). jsdom mutant-ები (A, scratch copy, `a-round-350/mutant-*.log`): M-B1 (base = render-ის `arrangement`) → DP69 წითელი; M-B2 (body-ში ისევ `useArrangementPreviewLaneClips`) → DP66 და DP67 წითელი; DP71 მწვანე რჩება, რადგან hook `useShallow`-ით audio drag-ზე video lane-ის სიას არ ცვლის, ამიტომ B-ის ruling-ით (round 351, D-29z1119) DP71-ს იცავს M-B2′ (render-ის ნახევარი) და A-M5 (`data-video-opacity`-ის mutation-ის ნახევარი); M-B3 (GapCaption მხოლოდ position store-ს იწერს) → DP68 წითელი; M-B4 (reader memo `arrangement`-ის გარეშე) → DP70 წითელი; დამატებით A-M5 (overlay-ის თანაბარი მნიშვნელობის skip წაშლილი) → DP71 წითელი და M-B2′ (body-ში `useArrangementPreview((state) => state.preview)`) → DP66, DP67, DP71 წითელი.
+-- `drag-preview-render.test.tsx`, rounds 351–352 (A-R350-REVIEW-SEEK-TEST, D-29z1120; C-R351-01, D-29z1124): DP72 (import-ილი video, playhead clip-ში 2 s-ზე, stopped move drag; spy მხოლოდ `HTMLVideoElement`-ის `currentTime` ჩანაწერებს ითვლის. preview-ის დროს, release-მდე, ბოლო ჩანაწერი = `playhead − preview start + sourceOffset`; release ახალ ჩანაწერს არ წერს (20 ms settle-ის შემდეგ ჩანაწერების რაოდენობა უცვლელია) და committed start = preview start; Undo ახალ ჩანაწერს წერს და drag-მდე მნიშვნელობას აბრუნებს). mutant-ები: M-B5 (stopped seek effect-ს `subscribeVideoLanePreview` წაშლილი) → DP72 წითელი preview-ის ნაწილზე; M-B1 (reader-ის base = `arrangement`) → DP72 წითელი release-ის ნაწილზე (round 351-ის DP72 მასზე მწვანე იყო); M-B6 (`commitArrangement` `before`-ს აკომიტებს) → DP72 წითელი committed start-ზე; M-B7 (seek effect-ის deps-დან `videoLane` წაშლილი) → მხოლოდ DP72 წითელი, Undo-ს ჩანაწერის ხაზზე.
++- `drag-preview-render.test.tsx`, round 350 (ეტაპი video-trim-fade-cost): DP66 (video trimStart, playhead 4 s: ორ move-ზე `ArrangementVideoDock`, `ArrangementVideoCaption`, `ArrangementVideoFadeOverlay`, `ArrangementVideoGapCaption` 0 render, `data-clip-start` `3.000`, release-ზე ერთი Trim entry, Undo აბრუნებს), DP67 (video fade-in, playhead 2 s: იგივე ოთხი component 0, overlay ყოველ move-ზე `videoFadeOpacityAt(preview, 2)`-ს უდრის და ეცემა), DP68 (trimStart playhead-ს 1.5 s-ზე ხსნის: `arrangement-video-gap` preview-შივე ჩნდება, release-ის შემდეგ რჩება, Undo აქრობს), DP69 (fade release: `MutationObserver` `attributeOldValue`-ით — არც ერთი ძველი მნიშვნელობა არ არის `1.000`, release-ის შემდეგ 0 ჩანაწერი, საბოლოო = release-მდე ნანახი; round 355), DP70 (preview-ს გარეშე committed video fade და trimStart: overlay faded, trim → gap და `1.000`, Undo → gap არაა და faded, Undo → `1.000`, Redo → faded, Redo → gap; round 355), DP71 (audio move video-სთან ერთად: ოთხი component 0 render, `data-video-opacity`-ის 0 mutation). jsdom mutant-ები (A, scratch copy, `a-round-350/mutant-*.log`): M-B1 (base = render-ის `arrangement`) → DP69 წითელი; M-B2 (body-ში ისევ `useArrangementPreviewLaneClips`) → DP66 და DP67 წითელი; DP71 მწვანე რჩება, რადგან hook `useShallow`-ით audio drag-ზე video lane-ის სიას არ ცვლის, ამიტომ B-ის ruling-ით (round 351, D-29z1119) DP71-ს იცავს M-B2′ (render-ის ნახევარი) და A-M5 (`data-video-opacity`-ის mutation-ის ნახევარი); M-B3 (GapCaption მხოლოდ position store-ს იწერს) → DP68 წითელი; M-B4 (reader memo `arrangement`-ის გარეშე) → DP70 წითელი; დამატებით A-M5 (overlay-ის თანაბარი მნიშვნელობის skip წაშლილი) → DP71 წითელი და M-B2′ (body-ში `useArrangementPreview((state) => state.preview)`) → DP66, DP67, DP71 წითელი.
++- `drag-preview-render.test.tsx`, rounds 351–352 (A-R350-REVIEW-SEEK-TEST, D-29z1120; C-R351-01, D-29z1124): DP72 (import-ილი video, playhead clip-ში 2 s-ზე, stopped move drag; spy მხოლოდ `HTMLVideoElement`-ის `currentTime` ჩანაწერებს ითვლის. preview-ის დროს, release-მდე, ბოლო ჩანაწერი = `playhead − preview start + sourceOffset`; drag-ის მანძილი > 0.01 s; committed start ზუსტად = preview start; release ახალ ჩანაწერს არ წერს (fake `setTimeout`-ის სრული გასუფთავების შემდეგ ჩანაწერების რაოდენობა უცვლელია, round 355); Undo ახალ ჩანაწერს წერს და drag-მდე მნიშვნელობას აბრუნებს). mutant-ები: M-B5 (stopped seek effect-ს `subscribeVideoLanePreview` წაშლილი) → DP72 წითელი preview-ის ნაწილზე; M-B1 (reader-ის base = `arrangement`) → DP72 წითელი release-ის ნაწილზე (round 351-ის DP72 მასზე მწვანე იყო); M-B6 (`commitArrangement` `before`-ს აკომიტებს) → DP72 წითელი committed start-ზე; M-B7 (seek effect-ის deps-დან `videoLane` წაშლილი) → მხოლოდ DP72 წითელი, Undo-ს ჩანაწერის ხაზზე.
+ - Production perf, ეტაპი video-trim-fade-cost (A, round 350, მარტო; `a-round-350/perf-results/latest-interactions.json`, `a-round-350/perf-rowcmp-vs-c349.txt`): rc 0, `complete` true, 252 row, `failures` [], 70/70 assert გადის, 0 NEW, 172 EQUAL, 9 deterministic DIFF — ზუსტად B-ის sketch-ის სიმრავლე და მნიშვნელობები (video trim stopped per move 18.683 → 12.817, max 19 → 15, playing max 19 → 15; video fade stopped per move 8.85 → 2.95, max 9 → 3, playing max 9 → 3; video move stopped per move 15.75 → 9.883 (assert ≤ 24), max 17 → 13, playing max 17 → 12); playing per-move (wallclock) trim 12.883, fade 2.95, move 9.883; `release-commits`, `move-restarts` და `release-restarts` უცვლელია; video-ის სამი liveness row 3/3-ში 1; `durationMs` 475397 (timeout-ის 52.8 %).
+ 
+ ## TODO / შემდეგი ნაბიჯები
+@@ -496,7 +508,8 @@ flowchart LR
+ - ~~conversions (round 348)~~: დასრულდა; C round 348 PASS (D-29z1106).
+ - ~~video-trim-fade (round 349)~~: დასრულდა; C round 349 PASS (D-29z1111).
+ - ~~video-trim-fade-cost (rounds 350–352)~~: დასრულდა; C round 352 PASS (D-29z1127).
+-- video-trim-fade-cost-2 (round 354): 12 video row assert-ზე. შემდეგი რიგი: PERF-CAND-MASTER-GROUP-FADER-PROPS → PERF-CAND-FADE-RELEASE-COMMITS (video fade-ის `release-commits` 2/2-ის ჩათვლით). interactions spec-ს ახალი row არ ემატება ROOT-REQ-PERF-TIMEOUT-ის პასუხამდე ან spec-ის გაყოფამდე (D-29z1108). move-ის გადაკვეთის commit-ისა და PERF-CAND-MASTER-GROUP-FADER-PROPS-ის წინ საჭიროა ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE. `useStableHandler`-ის კონტრაქტის `docs/technical/`-ში გადატანა შემდეგ რაუნდს, რომელიც იქ შეეხება.
++- ~~video-trim-fade-cost-2 (round 354)~~: დასრულდა; C round 354 PASS (D-29z1140); 12 video row assert-ზე.
++- dp-test-polish (round 355): DP69/DP70/DP72 გამკაცრდა. შემდეგი რიგი (D-29z1144): PERF-CAND-VIDEO-MOVE-BUDGET (budgets-only, GATE354-S1-ის ჩათვლით) → PERF-CAND-MASTER-GROUP-FADER-PROPS → PERF-CAND-FADE-RELEASE-COMMITS (video fade-ის `release-commits` 2/2-ის ჩათვლით). interactions spec-ს ახალი row არ ემატება ROOT-REQ-PERF-TIMEOUT-ის პასუხამდე ან spec-ის გაყოფამდე (D-29z1108). move-ის გადაკვეთის commit-ისა და PERF-CAND-MASTER-GROUP-FADER-PROPS-ის წინ საჭიროა ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE. `useStableHandler`-ის კონტრაქტის `docs/technical/`-ში გადატანა შემდეგ რაუნდს, რომელიც იქ შეეხება.
+ - c5-ii (დასრულდა round 345-ში): video კლიპების preview store-ში, მათ შორის video-იანი group-ები, და გაზომვა ეტაპ c5-i-ის 11 row-ის წინააღმდეგ (C round 344-ის `c-round-344/video-rows.txt`). input-ები: `ArrangementClip.tsx`-ის `isVideo` შტო `previewArrangement`-ის ნაცვლად `previewClipGeometry`-ზე; `ArrangementVideoDock.tsx`-ის stopped-sync effect-ი, caption, gap caption და fade overlay preview-ს კითხულობენ (playing-ის ნაბიჯი უკვე `getArrangement()`-ს კითხულობს); group-ის `hasVideo` fallback იშლება (ARCH-R343-THREE-PREVIEW-PATHS); video trim-ისა და fade-ის jsdom row-ები; video row-ები `record` → `assert` მხოლოდ B-ის sketch run-ისა და წითელი mutant-ის შემდეგ (L58). სიგნალები c4-ii-დან: SIG-R340-GROUP-PERMOVE-CPU, SIG-R340-FADER-EDIT-DURING-DRAG, SIG-R340-UNMOUNT-RELEASE-PUBLISHES. ცალკე, მოგვიანებით: SIG-R338-GHOST-LAYER (lane-ის ghost layer-ი ცალკე memo child-ად, რომ ghost-ის ცვლილება მთელ lane-ს არ render-ავდეს) და ARCH-R339-DRAG-MEASURE-EXTRACT.
+ - ეტაპი c (D-29z950): c1 (project end) დასრულდა round 330-ში. c2 დასრულდა; c3 დასრულდა round 338-ში (cross-lane ghost-ები store-ში); c4-i (group-ის perf row) round 339-შია; c4-ii (group move store-ში, collapsed group-ის overview reader) round 343-შია; c5-i (video-ის perf row) round 344-შია; c5-ii (video კლიპების preview store-ში) round 345-შია; c6-i/c6-ii round 346–347-შია; conversions (trim/move/fade row-ების assert-ზე გადაყვანა) round 348-შია; PERF-CAND-VIDEO-TRIM-FADE-ROWS (video trim-ისა და fade-ის harness row-ები, `record`) round 349-შია; დარჩენილია PERF-CAND-VIDEO-TRIM-FADE-COST, მისი assert-ები მხოლოდ sketch perf run-ისა და წითელი perf mutant-ის შემდეგ (L58). architecture checkpoint D-29z915-ის პასუხი რჩება; A-ის status-hook-ის trigger შემოწმდა და არ სრულდება (D-29z949: ეს რაუნდი status-preview-ის ბლოკს არ ეხება).
+ - კანდიდატი: lane-ები timeline-ის სიგანეს store-იდან კითხულობენ (წამის გადაკვეთის 108-component commit); ღირს მხოლოდ `ArrangementLane`-ის memo-სთან ერთად.

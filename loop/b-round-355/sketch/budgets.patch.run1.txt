@@ -1,0 +1,197 @@
+diff --git a/perf/budgets.interactions.json b/perf/budgets.interactions.json
+index 8e66c57..f62285b 100644
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -2612,10 +2612,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 24
++      "value": 10
+     },
+-    "owner": "PERF-DRAG-PREVIEW-c5-ii",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the video clip preview left the provider history (B sketch 23.617/move (round 345 planning, b-round-344/perf-sketch-results); HEAD 98.35 (C round 344); the audio lane move is 22.8)."
++    "owner": "PERF-CAND-VIDEO-MOVE-BUDGET",
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the video clip preview left the provider history (B sketch 23.617/move (round 345 planning, b-round-344/perf-sketch-results); HEAD 98.35 (C round 344); the audio lane move is 22.8). Tightened (round 356, D-29z1147): <= 10, the ceiling of 9.883 (C round 350, B round 353 sketch and C round 354 (three equal samples in each run, 1x)); 593 of 600 components over 60 moves, so one more window commit of 8 or more components turns it red; mutant M-B2 (dock re-renders on video preview writes) measured 15.75 and passed the old <= 24."
+   },
+   {
+     "id": "interact.drag.video.stopped.move-components-max",
+@@ -2623,10 +2623,13 @@
+     "metric": "move-components-max",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Stage c5-ii (round 345): B sketch 25 (HEAD 100); record, as every move/lane/group max row."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 13
++    },
++    "owner": "PERF-CAND-VIDEO-MOVE-BUDGET",
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Stage c5-ii (round 345): B sketch 25 (HEAD 100). Asserted (round 356, D-29z1147): <= 13, the value 13 (C round 350, B round 353 sketch and C round 354 (three equal samples in each run, 1x); no headroom, deterministic max). Unlike the audio move/lane/group max rows, which stay record, this 1x single-clip scenario repeated exactly; mutant M-B2 measured 17."
+   },
+   {
+     "id": "interact.drag.video.stopped.release-commits",
+@@ -2640,7 +2643,7 @@
+       "value": 1
+     },
+     "owner": "PERF-DRAG-PREVIEW-c5-ii",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the release commits once (B sketch and HEAD 1)."
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.video.stopped.move-to-paint-p95",
+@@ -2670,10 +2673,13 @@
+     "metric": "move-components-max",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Stage c5-ii (round 345): B sketch 25 (HEAD 100); record, as every move/lane/group max row."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 12
++    },
++    "owner": "PERF-CAND-VIDEO-MOVE-BUDGET",
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Stage c5-ii (round 345): B sketch 25 (HEAD 100). Asserted (round 356, D-29z1147): <= 12, the value 12 (C round 350, B round 353 sketch and C round 354 (three equal samples in each run, 1x); no headroom, deterministic max). Unlike the audio move/lane/group max rows, which stay record, this 1x single-clip scenario repeated exactly; mutant M-B2 measured 17."
+   },
+   {
+     "id": "interact.drag.video.playing.release-commits",
+@@ -2687,7 +2693,7 @@
+       "value": 1
+     },
+     "owner": "PERF-DRAG-PREVIEW-c5-ii",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the release commits once (B sketch and HEAD 1)."
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.video.playing.move-to-paint-p95",
+@@ -2712,7 +2718,7 @@
+       "value": 0
+     },
+     "owner": "PERF-DRAG-PREVIEW-c5-ii",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): no graph restart while a video clip is dragged during playback (B sketch and HEAD 0)."
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): no graph restart while a video clip is dragged during playback (B sketch and HEAD 0)."
+   },
+   {
+     "id": "interact.drag.video.playing.release-restarts",
+@@ -2737,7 +2743,7 @@
+       "value": 1
+     },
+     "owner": "PERF-DRAG-PREVIEW-c5-ii",
+-    "note": "1x only. 1 only when both the stopped and the playing video drag were live: the video clip's data-clip-start changes from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Record until C measures it (L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): both video drags change data-clip-start start -> mid -> end from the store preview (B sketch 1 in 3/3 passes)."
++    "note": "1x only. 1 only when both the stopped and the playing video drag were live: the video clip's data-clip-start changes from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): both video drags change data-clip-start start -> mid -> end from the store preview (B sketch 1 in 3/3 passes)."
+   },
+   {
+     "id": "interact.drag.video-trim.stopped.move-components-per-move",
+@@ -2751,7 +2757,7 @@
+       "value": 13
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.stopped.move-components-per-move. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.move-components-per-move. Stage 2 (round 354, D-29z1138): assert <= 13, the ceiling of the C round 350 value 12.817 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.stopped.move-components-per-move. Kind copied from interact.drag.video.stopped.move-components-per-move. Stage 2 (round 354, D-29z1138): assert <= 13, the ceiling of the C round 350 value 12.817 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-trim.stopped.move-components-max",
+@@ -2765,7 +2771,7 @@
+       "value": 15
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.stopped.move-components-max. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 15, the ceiling of the C round 350 value 15 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.stopped.move-components-max. Kind copied from interact.drag.video.stopped.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 15, the ceiling of the C round 350 value 15 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-trim.stopped.release-commits",
+@@ -2779,7 +2785,7 @@
+       "value": 1
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.stopped.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.release-commits. Stage 2 (round 354, D-29z1138): assert == 1; C round 350 value 1 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.stopped.release-commits. Kind copied from interact.drag.video.stopped.release-commits. Stage 2 (round 354, D-29z1138): assert == 1; C round 350 value 1 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-trim.stopped.move-to-paint-p95",
+@@ -2815,7 +2821,7 @@
+       "value": 15
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.playing.move-components-max. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 15, the ceiling of the C round 350 value 15 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.playing.move-components-max. Kind copied from interact.drag.video.playing.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 15, the ceiling of the C round 350 value 15 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-trim.playing.release-commits",
+@@ -2829,7 +2835,7 @@
+       "value": 1
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.playing.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.release-commits. Stage 2 (round 354, D-29z1138): assert == 1; C round 350 value 1 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.playing.release-commits. Kind copied from interact.drag.video.playing.release-commits. Stage 2 (round 354, D-29z1138): assert == 1; C round 350 value 1 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-trim.playing.move-to-paint-p95",
+@@ -2854,7 +2860,7 @@
+       "value": 0
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.playing.move-restarts. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.move-restarts. Stage 2 (round 354, D-29z1138): assert == 0; C round 350 value 0 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.trim.playing.move-restarts. Kind copied from interact.drag.video.playing.move-restarts. Stage 2 (round 354, D-29z1138): assert == 0; C round 350 value 0 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-trim.playing.release-restarts",
+@@ -2879,7 +2885,7 @@
+       "value": 3
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.move-components-per-move. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.move-components-per-move. Stage 2 (round 354, D-29z1138): assert <= 3, the ceiling of the C round 350 value 2.95 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.move-components-per-move. Kind copied from interact.drag.video.stopped.move-components-per-move. Stage 2 (round 354, D-29z1138): assert <= 3, the ceiling of the C round 350 value 2.95 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-fade.stopped.move-components-max",
+@@ -2893,7 +2899,7 @@
+       "value": 3
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.move-components-max. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 3, the ceiling of the C round 350 value 3 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.move-components-max. Kind copied from interact.drag.video.stopped.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 3, the ceiling of the C round 350 value 3 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-fade.stopped.release-commits",
+@@ -2940,7 +2946,7 @@
+       "value": 3
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.move-components-max. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 3, the ceiling of the C round 350 value 3 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.move-components-max. Kind copied from interact.drag.video.playing.move-components-max. Stage 2 (round 354, D-29z1138): assert <= 3, the ceiling of the C round 350 value 3 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-fade.playing.release-commits",
+@@ -2976,7 +2982,7 @@
+       "value": 0
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.move-restarts. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.move-restarts. Stage 2 (round 354, D-29z1138): assert == 0; C round 350 value 0 (three equal samples, 1x)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.move-restarts. Kind copied from interact.drag.video.playing.move-restarts. Stage 2 (round 354, D-29z1138): assert == 0; C round 350 value 0 (three equal samples, 1x)."
+   },
+   {
+     "id": "interact.drag.video-fade.playing.release-restarts",
+@@ -3001,7 +3007,7 @@
+       "value": 1
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only. 1 only when both the stopped and the playing video clip trim-start drag were live: data-clip-start changes from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Record until C measures it (L58). Stage 2 (round 354, D-29z1138): assert == 1; C round 350: 1 (the drag was live in all three passes)."
++    "note": "1x only. 1 only when both the stopped and the playing video clip trim-start drag were live: data-clip-start changes from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Stage 2 (round 354, D-29z1138): assert == 1; C round 350: 1 (the drag was live in all three passes)."
+   },
+   {
+     "id": "interact.harness.drag-video-fade-live",
+@@ -3015,6 +3021,6 @@
+       "value": 1
+     },
+     "owner": "PERF-CAND-VIDEO-TRIM-FADE-COST-2",
+-    "note": "1x only. 1 only when both the stopped and the playing video clip fade-in drag were live: data-fade-in grows from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Record until C measures it (L58). Stage 2 (round 354, D-29z1138): assert == 1; C round 350: 1 (the drag was live in all three passes)."
++    "note": "1x only. 1 only when both the stopped and the playing video clip fade-in drag were live: data-fade-in grows from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Stage 2 (round 354, D-29z1138): assert == 1; C round 350: 1 (the drag was live in all three passes)."
+   }
+ ]
