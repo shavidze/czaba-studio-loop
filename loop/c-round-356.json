@@ -1,0 +1,84 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T19:48:24.2483742Z",
+  "round": 356,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS (equals A final)",
+  "SOURCE-SCOPE (2 M, 0 untracked, both patches reverse-apply, budgets sha256 7053aee8\u2026, doc232 cmp equal)",
+  "READ (19 changed/233 equal; field sets note x16, budget,mode,note,owner x2, budget,note,owner x1; no asserted note has 'Record until')",
+  "PERF production alone: rc 0, complete, failures [], 252 rows, 84/84 asserted pass, 0 NEW, 0 DIFF vs C354, durationMs 479512 (<=540000)",
+  "Changed rows measured: stopped per-move 9.883x3 (<=10), stopped max 13x3 (<=13), playing max 12x3 (<=12)",
+  "MUTANT M-C1 (own, scratch deleted): predicted red on all 3 before run; measured 10.867 / 14 / 13, all red; 19 asserts red incl. trim/fade/audio move rows",
+  "PERF-LIB 40/40",
+  "VIDEO-DRAG-SMOKE 1440x900 and 1280x720 equal to C354 except blob src",
+  "G356-AUTH both viewports: /studio-lab demo workspace, auth_user null; /studio/middle-east Sign in required, 0 audio[src]; studio-token no header 401; no token in body",
+  "DOCS: l.4 ends dp-test-polish, video-move-budget; C round 356 PASS); 1 video-move-budget section; 7 '## '; 0 'C round N pending' files; doc values 10/13/12 match live file"
+ ],
+ "failed": [],
+ "blocked": [
+  "G356-AUTH fake-bearer: token route returned 500 (fails closed) because mock backend :5199 is down in cloud; 403 not observable"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "abletonConformance": "not applicable (budget change; behaviour identical)",
+ "manifestPaths": [
+  "c-round-356/claims.txt",
+  "c-round-356/read-diff.txt",
+  "c-round-356/perf.log",
+  "c-round-356/perf-results/latest-interactions.json",
+  "c-round-356/rowcmp.txt",
+  "c-round-356/perf-mutant.log",
+  "c-round-356/mutant-red.txt",
+  "c-round-356/perf-mutant-results/latest-interactions.json",
+  "c-round-356/perf-lib.log",
+  "c-round-356/behaviour-1440x900.json",
+  "c-round-356/behaviour-y8-1280x720.json",
+  "c-round-356/auth.json",
+  "c-round-356/progress.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": [
+  "interact.drag.video.stopped.move-components-per-move",
+  "interact.drag.video.stopped.move-components-max",
+  "interact.drag.video.playing.move-components-max"
+ ],
+ "mutantsRecorded": [
+  "M-B2 (B; A re-ran; C cites B/A, not re-run)",
+  "M-C1 (C own: unmemoized null child in ArrangementClipViewInner, scratch only)"
+ ],
+ "mutantRedOnSketch": "b-round-355/perf-mu-b2-results/latest-interactions.json (9 red, matches A a-round-356/mu-b2-red.txt); C's M-C1: c-round-356/perf-mutant-results/latest-interactions.json",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": "b-round-355/perf-sketch.log and b-round-355/sketch-perf-lib.log (B; C re-ran PERF-LIB 40/40 and the perf spec 84/84)",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "perf/lib tests",
+  "video behaviour probes",
+  "auth guard"
+ ],
+ "affectedChecksRunOnSketch": "perf spec 84/84 and perf-lib 40/40 on the applied tree (C)",
+ "nullReason": "claimCheckMinutes not timed; chainHeadGateRunGreen belongs to the gate",
+ "notes": "First auth.mjs attempt timed out waiting for ready status on a cold dev server (no result); rerun after warm-up passed. Not a bug."
+}

@@ -1,0 +1,8 @@
+B round 356 -> 357 perf (production, alone, L38). Oracle: c-round-356/perf-results/latest-interactions.json (252 rows, 84/84).
+sketch v0 (pre-review): perf-sketch-results  rc 0 complete, failures [], 84/84, durationMs 482035
+  DIFF play.start/stop-components 70 -> 28 x3 (1x and 6x); every other non-wallclock row EQUAL (perf-rowcmp-sketch-vs-c356.txt)
+mu-b1 (provider re-subscribes, on v0): perf-mu-b1-results  rc 0, 84/84; play.start/stop-components 28 -> 71 x3 (1x, 6x) (perf-rowcmp-mu-b1-vs-sketch.txt)
+sketch v1 (review fix, always-functional status write): perf-sketch-final-v1-results  play.stop-commits 1 -> 2 (1x, 6x) -> rejected (perf-rowcmp-final-v1-vs-c356.txt)
+sketch FINAL (dispatched, patches.sha256): perf-sketch-final-results  rc 0 complete, failures [], 252 rows, 84/84, durationMs 488158
+  DIFF play.start-components 70 -> 28 [28,28,28]; .6x 70 -> 28; play.stop-components 70 -> 28; .6x 70 -> 28
+  play.start-commits 1, play.stop-commits 1, play.start-sources 1 (EQUAL); every other non-wallclock row EQUAL (perf-rowcmp-final-vs-c356.txt)

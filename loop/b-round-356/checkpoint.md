@@ -1,0 +1,38 @@
+# B round 356 -> 357 planning checkpoint
+- [x] tasks/round-356.md archived (cmp equal)
+- [x] read c-round-356.json PASS browserVerified true; gate 356 published d49536b
+- [x] advisor consulted (1): pick PERF-CAND-FADE-RELEASE-COMMITS; PERF-9 dependency note (no network stem path in /studio-lab)
+- [ ] l57-check on c-round-356.json
+- [ ] probe: name fade release commits at HEAD d49536b
+- [ ] consults performance-optimizer + tech-lead
+- [ ] backlog/feature-status updates, current-task.md, b-round-356.md, b-next.json
+- [x] FADE-RELEASE probe done: commit 2 = ArrangementStatusTextInner (status preview clear, 1 comp), commit 3 = 0-component commit after the click event (stopped always; playing intermittent in probe). Files fade-release-*.json/.mjs. Decision: close candidate named/no-fix; next = PERF-10 stage 1 (isPlaying out of context)
+- [x] play/click names probe: play start/stop 70 comps, provider hook 12 (isPlaying) only; click 83 comps (hook 2). play-click-names-head.json
+- [x] l57-check c356 rc 0 (l57-check-c356.txt)
+- [x] claims-357.sh + planning output; cited-artifacts.txt
+- [ ] waiting: performance-optimizer + tech-lead consults (PERF-10a slice; FADE-RELEASE close)
+- design note: 262 test lines read api.isPlaying -> prefer a getter on the stable context value (no test sweep) + useArrangementIsPlaying() for render consumers; new app/lib/arrangement/playback-store.ts per the existing *-store.ts pattern
+- [x] performance-optimizer: isPlaying slice right; expect ~28 comps after 10a (Transport subtree 22 floor -> 10b); assert start/stop-commits <=1; components record until measured; follow effect via a memo leaf (not store.subscribe; timing), committed-mirror ref for the 7 workspaceRef.isPlaying reads; MarkerRow getState in callback; mutant = provider keeps useStore isPlaying in value deps; ~230 test asserts on .isPlaying (getter keeps them)
+- [x] tech-lead: agree close FADE-RELEASE (commit 3 only partly named); suggests <=3 asserts later; PERF-10a safe w/o checkpoint under 4 conditions (no high-tree subscription; one writer ref+store; data-playing kept; dock stopped-frame effect identical except isPlaying source); prefers removing the field (46 files/262 reads) vs B's getter -> B ruling: getter + guard (record dissent)
+- [x] sketch in /home/runner/b356-scratch/sc (git base b61245b): playback-store.ts, context getter+provider+hooks, Transport hook, MarkerRow getState, VideoDock hook, studio-lab hook, StudioWorkspace follow leaf + committedIsPlayingRef; tsc 0, biome 0
+- [ ] full vitest on sketch running -> precheck-full.log; then perf spec on sketch (alone) + mutant
+- [x] getter variant FAILED on spread probes (TG11 etc.: `...useArrangement()` snapshots the getter) -> switched to tech-lead's removal: isPlaying out of ArrangementContextValue; test helper app/lib/arrangement/__tests__/helpers/workspace-probe.ts (WorkspaceProbeValue, useWorkspaceProbe); scripted sweep of 46 test files (probe-sweep-log.txt, tsc-removal-files.txt); tsc 0, biome 0 on 75 files
+- [ ] full vitest on removal sketch running (precheck-full.log); killed getter-variant log kept as precheck-full-getter-variant-killed.log
+- [x] task draft b-round-356/current-task-draft.md; update-backlog.py / update-feature-status.py written (not run)
+- [x] new rows PS1-3, RB-PB1/2 + render-budget positive-control ruling in sketch; 13/13 pass (alone)
+- [x] mutants built /home/runner/b356-scratch/mu/m-b{1,2,3} (mutants/make-mutants.py); not yet run (waiting full suite)
+- [x] sketch/source.patch.txt + sketch/tests.patch.txt saved, apply --check OK on store HEAD; patches.sha256
+- [ ] after full run: run mutants (jsdom), then perf spec on sketch alone, then M-B1 perf alone
+- [x] precheck-full.log: 3625/3626, only the ruled render-budget positive control red (pre-ruling); after ruling sketch-new-rows.log 13/13
+- [x] mutants: M-B1 red clips+RB-PB1+RB-PB2; M-B2 red clips+RB-PB2; M-B3 red 17 Follow tests (mutants/*.log)
+- [ ] perf sketch + M-B1 running (run-perf.sh, alone) -> perf-sketch*.log, perf-mu-b1*.log
+- [x] b-round-356.md drafted ({{EVIDENCE}} pending), b-next.json written (prev saved b-next-before-357.json); tech-lead sketch review running
+- [x] tech-lead sketch review: 3 Medium fixed in sketch (status order defensive fix + FW-PB1 + M-B4; clips positive control via setStatus; R9-L2 raw identity), Lows 5/6 fixed, 4/7 info, 8 routed; mutants rerun on fixed sketch; perf pre-fix sketch 70->28, M-B1 71
+- [ ] run-final.sh: perf-sketch-final + precheck-full-final running
+- [x] v1 fix (functional setStatus always) raised stop-commits 1->2 (perf-sketch-final-v1-*); narrowed: pre-check shown status as HEAD, functional only when HEAD would write. M-B4 redefined (no early return + always describe): red on FW-PB1, FW6, FW10, LT15, LT21, DP16, render rows. Covering 48/48 962.
+- [x] final patches: source 4f977508..., tests ca027765...; apply --check OK
+- [ ] run-final.sh (perf-sketch-final + precheck-full-final) running; then fill §0.3 / EVIDENCE, sketch-review sha, claims outputs, apply backlog/feature-status scripts, copy to current-task.md
+- [x] final: perf-sketch-final 70->28, stop-commits 1, 84/84; precheck-full-final 246/3632 pass; patches source 4f977508 / tests ca027765
+- [x] backlog v320 (update-backlog.done), feature-status (update-feature-status.done), current-task.md = current-task-draft.md, b-round-356.md, b-next.json, claims outputs regenerated (K11 37/0)
+- [ ] advisor final check
+- [x] advisor final: scratch-path headings repointed to loop-folder patches; getter text already correct; apply --check OK on d49536b
