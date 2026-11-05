@@ -1,0 +1,119 @@
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -93,7 +93,7 @@
+   anchorTime: number;
+   moved: boolean;
+   blocked: boolean;
+-  group: { ids: readonly string[]; bounds: GroupMoveBounds } | null;
++  group: { ids: readonly string[]; bounds: GroupMoveBounds; hasVideo: boolean } | null;
+   laneTarget: ClipLaneTarget | null;
+   laneRefusal: string | null;
+   captureElement: HTMLElement;
+@@ -397,6 +397,14 @@
+ 
+ const ArrangementClipRangeOverlay = memo(ArrangementClipRangeOverlayInner);
+ 
++function groupHasVideoClip(arrangement: Arrangement, ids: readonly string[]): boolean {
++  const videoTrackIds = new Set(
++    arrangement.tracks.filter((track) => track.kind === 'video').map((track) => track.id),
++  );
++  const groupIds = new Set(ids);
++  return arrangement.clips.some((clip) => groupIds.has(clip.id) && videoTrackIds.has(clip.trackId));
++}
++
+ function ArrangementClipViewInner({
+   clip,
+   title,
+@@ -530,7 +538,13 @@
+       anchorTime: clip.start + (event.clientX - rect.left) / pxPerSecond,
+       moved: false,
+       blocked: false,
+-      group: groupIds ? { ids: groupIds, bounds: groupMoveBounds(before, groupIds) } : null,
++      group: groupIds
++        ? {
++            ids: groupIds,
++            bounds: groupMoveBounds(before, groupIds),
++            hasVideo: groupHasVideoClip(before, groupIds),
++          }
++        : null,
+       laneTarget: null,
+       laneRefusal: null,
+       captureElement,
+@@ -625,6 +639,7 @@
+         : original.trackId;
+     const isCrossLane = hoverTrackId !== original.trackId;
+     if (gesture.group) {
++      const previewGroup = gesture.group.hasVideo ? previewArrangement : previewGeometry;
+       const { requested, allowed } = groupDeltaOnGrid(
+         original,
+         delta,
+@@ -648,7 +663,7 @@
+             placements: plan.placements,
+           };
+           gesture.blocked = false;
+-          previewArrangement(gesture.before);
++          previewGroup(gesture.before);
+           publishLaneGhosts(gesture, laneGhostsFrom(plan.placements, false, null));
+           return;
+         }
+@@ -676,7 +691,7 @@
+       }
+       const next = moveClips(gesture.before, gesture.group.ids, allowed);
+       if (next) {
+-        previewArrangement(next);
++        previewGroup(next);
+       }
+       return;
+     }
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -724,12 +724,40 @@
+   'overviewClips'
+ > & {
+   overviewClips: readonly TrackGroupOverviewClip[];
++  overviewGroupId: string;
+ };
+ 
++function sameTrackGroupOverviewClips(
++  a: readonly TrackGroupOverviewClip[],
++  b: readonly TrackGroupOverviewClip[],
++): boolean {
++  return (
++    a === b ||
++    (a.length === b.length &&
++      a.every(
++        (clip, index) =>
++          clip.clipId === b[index].clipId &&
++          clip.trackId === b[index].trackId &&
++          clip.start === b[index].start &&
++          clip.duration === b[index].duration,
++      ))
++  );
++}
++
+ function ArrangementGroupHeaderWithSelectionInner({
+-  overviewClips,
++  overviewClips: committedOverviewClips,
++  overviewGroupId,
+   ...headerProps
+ }: ArrangementGroupHeaderWithSelectionProps) {
++  const overviewClips = useArrangementPreview(
++    useEqualityStableSelector(
++      (state: ArrangementPreviewState) =>
++        headerProps.collapsed && state.preview !== null
++          ? trackGroupOverviewClips(state.preview, overviewGroupId)
++          : committedOverviewClips,
++      sameTrackGroupOverviewClips,
++    ),
++  );
+   const selectionKey = useArrangementSelection((state) =>
+     selectedClipIdsKeyAmong(
+       state.selectedClipIds,
+@@ -3340,6 +3368,7 @@
+                       trackGroupDescendantTrackIds(arrangement, row.id).includes(activeTrackId)
+                     }
+                     overviewClips={trackGroupOverviews.get(row.id) ?? NO_TRACK_GROUP_OVERVIEW_CLIPS}
++                    overviewGroupId={row.id}
+                     pxPerSecond={pxPerSecond}
+                     onSelectGroup={selectTrackRow}
+                     onRenameGroup={renameTrackGroupRow}
