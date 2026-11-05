@@ -1,0 +1,118 @@
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -2579,10 +2579,13 @@
+     "metric": "move-components-per-move",
+     "unit": "components / move",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 24
++    },
++    "owner": "PERF-DRAG-PREVIEW-c5-ii",
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the video clip preview left the provider history (B sketch 23.617/move (round 345 planning, b-round-344/perf-sketch-results); HEAD 98.35 (C round 344); the audio lane move is 22.8)."
+   },
+   {
+     "id": "interact.drag.video.stopped.move-components-max",
+@@ -2593,7 +2596,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58)."
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Stage c5-ii (round 345): B sketch 25 (HEAD 100); record, as every move/lane/group max row."
+   },
+   {
+     "id": "interact.drag.video.stopped.release-commits",
+@@ -2601,10 +2604,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c5-ii",
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.video.stopped.move-to-paint-p95",
+@@ -2626,7 +2632,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Wallclock: sketch v2 summed 5903, 5901, 5903 components over 60 moves (b-round-343/perf-sketch-v2.log); playback ticks inside the window (L37)."
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Wallclock: sketch v2 summed 5903, 5901, 5903 components over 60 moves (b-round-343/perf-sketch-v2.log); playback ticks inside the window (L37). Stage c5-ii (round 345): still wallclock, B sketch passes 23.617, 23.617, 23.65 (HEAD 98.35)."
+   },
+   {
+     "id": "interact.drag.video.playing.move-components-max",
+@@ -2637,7 +2643,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58)."
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Stage c5-ii (round 345): B sketch 25 (HEAD 100); record, as every move/lane/group max row."
+   },
+   {
+     "id": "interact.drag.video.playing.release-commits",
+@@ -2645,10 +2651,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c5-ii",
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): the release commits once (B sketch and HEAD 1)."
+   },
+   {
+     "id": "interact.drag.video.playing.move-to-paint-p95",
+@@ -2667,10 +2676,13 @@
+     "metric": "move-restarts",
+     "unit": "start() calls",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 0
++    },
++    "owner": "PERF-DRAG-PREVIEW-c5-ii",
++    "note": "1x only, measured last (after the 30-clip block). Video clip name bar move drag (public/videos/hero/1.mp4 imported through the video lane input): same windows and definition as interact.drag.move.<state>.<metric>. Record until c5-ii moves the video preview off history (PERF-DRAG-PREVIEW c5-i, L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): no graph restart while a video clip is dragged during playback (B sketch and HEAD 0)."
+   },
+   {
+     "id": "interact.drag.video.playing.release-restarts",
+@@ -2689,9 +2701,12 @@
+     "metric": "drag-video-live",
+     "unit": "boolean (1 = true)",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-DRAG-PREVIEW-c5-i",
+-    "note": "1x only. 1 only when both the stopped and the playing video drag were live: the video clip's data-clip-start changes from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Record until C measures it (L58)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-DRAG-PREVIEW-c5-ii",
++    "note": "1x only. 1 only when both the stopped and the playing video drag were live: the video clip's data-clip-start changes from the start to mid-drag and from mid-drag to the end; 0 when the video setup failed. Record until C measures it (L58). Asserted since PERF-DRAG-PREVIEW stage c5-ii (round 345): both video drags change data-clip-start start -> mid -> end from the store preview (B sketch 1 in 3/3 passes)."
+   }
+ ]

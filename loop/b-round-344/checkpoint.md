@@ -1,0 +1,12 @@
+# B round 344 -> 345 planning checkpoint
+- tasks/round-344.md archived (cmp equal). Backups *-before-345.* in b-round-344/.
+- Part 1 close-out applied (backlog v304, D-29z1084, D-29z1085). Baseline c79642c.
+- Next: c5-ii source sketch on scratch, perf run, then task.
+- Sketch: b-round-344/sketch/apply-source.py + apply-tests.py on /home/runner/b344-scratch/sc (git archive c79642c). typecheck rc 0. drag-preview-render 62/62. Mutants: HEAD source 7 red (DP9b,13,48,53,57,58,59); dock committed 2 red (DP58,59); dock whole preview 1 red (DP60). Logs b-round-344/unit-mut-*.log
+- Next: targeted video test files, patches, typecheck full, prod perf alone, video probe on prod sketch, budgets assert.
+- Perf on prod sketch (pre-rename source, rename-only diff in sketch/source-perf-run-vs-final.diff): rc 0, 230 rows, 162 EQUAL, 3 DIFF (video stopped per-move 98.35->23.617, max 100->25 x2), 55/55, durationMs 471935.
+- Consults done: tech-lead (no C/H; added DP61, DP62, DP53 c1, rename), perf-optimizer (assert 5 rows; maxima record; c5-iii trim/fade rows).
+- Final sketch: 64/64 drag-preview, 119 files 1800 tests, tsc 0, biome 0, 4 unit mutants red, budgets 60 asserted (eval file), perf-lib 34/34, dock probe HEAD==sketch both viewports, video probe on prod (names minified -> provider/ws/dock columns invalid on prod).
+- Next: claims-345.sh, current-task.md, backlog part 2, feature-status, b-round-344.md, b-next.json.
+- DONE: backlog v305, feature-status, current-task (round 345), b-round-344.md, b-next.json; awaiting final advisor
+- advisor fixes applied (RENDERS ruling, scratch-only mutants, harness fact), backlog v306; DONE

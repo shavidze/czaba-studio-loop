@@ -1,0 +1,107 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R344-PERF-DURATION",
+   "severity": "low",
+   "origin": "pre-existing/B spec (video block adds ~85 s)",
+   "steps": [
+    "npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts on a production build, alone"
+   ],
+   "expected": "durationMs <= 450000 (50% of the 15 min spec timeout, L31)",
+   "actual": "durationMs 466839 (A: 469442 and 463678; B: 382525-417845)",
+   "evidence": "c-round-344/perf-results/latest-interactions.json; c-round-344/perf.log. Same finding as A-R344-PERF-DURATION; evidence for ROOT-REQ-PERF-TIMEOUT (root only), not a STOP"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "PERF",
+  "PREMISE",
+  "MUTANT",
+  "VIDEO-PREMISE",
+  "HARNESS-READ",
+  "PERF-LIB",
+  "G344-AUTH",
+  "DOCS"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T06:02:42.1066293Z",
+  "round": 344,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": [
+  "current-task.md",
+  "a-round-344.md",
+  "b-round-343/claims-344.sh",
+  "b-round-343/sketch/spec.patch.txt",
+  "b-round-343/sketch/budgets.patch.txt",
+  "b-round-343/video-probe.mjs",
+  "b-round-343/probe/head-1440.json",
+  "b-round-343/probe/head-1280.json",
+  "c-round-343/perf-results/latest-interactions.json",
+  "c-round-343/tools/g343-auth.cjs",
+  "b-round-334/vitest.perf-lib.config.mjs",
+  "b-round-329/perf-rowcmp.py"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 5,
+ "mutantsRecorded": [
+  "MU-C344-GRABWIDTH-5000: videoGrabWidthPx=5000 on a scratch copy (deleted); predicted: setup problem + drag-video-live 0 + run red; observed: 3 problems 'video setup: name bar 3090 px wide after 16 zoom-in keys; want 5000', 9 'row not measured 3 times' failures, drag-video-live samples [0,0,0], rc 1"
+ ],
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "B ran no mutant; c5-i rows are record (c3-i precedent); sketch v1 is the natural no-zoom failure",
+ "mutantRedOnTree": true,
+ "gateChecksNamed": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": [
+  "typecheck"
+ ],
+ "chainHeadGateRunGreen": "gates/gate-round-343.json published 0aa317f (K1 claim equal)",
+ "affectedChecksNamed": [
+  "interactions perf spec",
+  "perf-rowcmp",
+  "perf-lib report test",
+  "video probe"
+ ],
+ "affectedChecksRunOnSketch": [
+  "interactions perf spec",
+  "perf-rowcmp",
+  "perf-lib report test",
+  "video probe"
+ ],
+ "measurements": {
+  "perf": "complete true, failures [], 230 rows, 55/55 asserted pass, 157 EQUAL 0 DIFF 8 NEW (98.35,100,1,100,1,0,31,1 as 0.3), 3 wallclock video rows reported",
+  "premise": "video stopped 98.35 > audio move stopped 22.8",
+  "probe": "1440/1280 stopped exact vs head; playing providers/workspace/dock 59, max exact, perMove 99.5 vs 99.467 (+-0.1), release 1-3; pageErrors []",
+  "auth": "anonymous /studio-lab workspace+demo badge, auth_user null; /studio/middle-east Sign in required, 0 audio[src]; /api/studio-token 401/400/403 with mock health 200"
+ },
+ "deferredLowNotes": [
+  "A-R344-REVIEW-FAILED-SETUP-STATE",
+  "A-R344-REVIEW-RATEROWID",
+  "A-R344-REVIEW-ALL-BUT-RATIO-NAME",
+  "A-R344-REVIEW-LIVE-SCENARIO",
+  "A-R344-REVIEW-SEQ-TEXT",
+  "A-R344-REVIEW-PARTIAL-LIVE"
+ ]
+}

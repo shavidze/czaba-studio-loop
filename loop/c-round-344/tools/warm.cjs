@@ -1,0 +1,2 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1440,height:900}});const p=await c.newPage();await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'networkidle',timeout:120000}).catch(e=>console.log('warn',e.message));await p.waitForTimeout(3000);console.log(await p.title());await b.close();})();

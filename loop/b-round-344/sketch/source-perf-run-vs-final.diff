@@ -1,0 +1,64 @@
+106c106
+< @@ -190,6 +192,15 @@
+---
+> @@ -190,6 +192,12 @@
+110c110
+< +function useShownVideoArrangement(arrangement: Arrangement): Arrangement {
+---
+> +function useVideoLaneArrangement(arrangement: Arrangement): Arrangement {
+112,116c112,113
+< +  const shownVideoClips = useArrangementPreviewLaneClips(arrangement, videoTrackId);
+< +  return useMemo(
+< +    () => ({ ...arrangement, clips: shownVideoClips }),
+< +    [arrangement, shownVideoClips],
+< +  );
+---
+> +  const videoLaneClips = useArrangementPreviewLaneClips(arrangement, videoTrackId);
+> +  return useMemo(() => ({ ...arrangement, clips: videoLaneClips }), [arrangement, videoLaneClips]);
+122c119
+< @@ -313,6 +324,7 @@
+---
+> @@ -313,6 +321,7 @@
+126c123
+< +  const shownVideoArrangement = useShownVideoArrangement(arrangement);
+---
+> +  const videoLaneArrangement = useVideoLaneArrangement(arrangement);
+130c127
+< @@ -716,7 +728,7 @@
+---
+> @@ -716,7 +725,7 @@
+135c132
+< +      const target = resolveVideoTarget(shownVideoArrangement, positionStore.getPosition());
+---
+> +      const target = resolveVideoTarget(videoLaneArrangement, positionStore.getPosition());
+139c136
+< @@ -741,7 +753,7 @@
+---
+> @@ -741,7 +750,7 @@
+144c141
+< +  }, [shownVideoArrangement, isPlaying, positionStore, videoSources]);
+---
+> +  }, [videoLaneArrangement, isPlaying, positionStore, videoSources]);
+148c145
+< @@ -887,7 +899,10 @@
+---
+> @@ -887,7 +896,7 @@
+153,156c150
+< +          <ArrangementVideoCaption
+< +            arrangement={shownVideoArrangement}
+< +            videoSources={videoSources}
+< +          />
+---
+> +          <ArrangementVideoCaption arrangement={videoLaneArrangement} videoSources={videoSources} />
+160c154
+< @@ -949,14 +964,14 @@
+---
+> @@ -949,14 +958,14 @@
+165c159
+< +        <ArrangementVideoFadeOverlay arrangement={shownVideoArrangement} />
+---
+> +        <ArrangementVideoFadeOverlay arrangement={videoLaneArrangement} />
+173c167
+< +        {hasVideoClips ? <ArrangementVideoGapCaption arrangement={shownVideoArrangement} /> : null}
+---
+> +        {hasVideoClips ? <ArrangementVideoGapCaption arrangement={videoLaneArrangement} /> : null}
