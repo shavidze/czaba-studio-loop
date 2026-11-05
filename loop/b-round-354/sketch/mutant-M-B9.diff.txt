@@ -1,0 +1,15 @@
+0a1
+> import { memo as memo } from 'react';
+265c266,268
+< function ArrangementVideoGapCaption({ videoLane }: { videoLane: VideoLanePreviewReader }) {
+---
+> const ArrangementVideoGapCaption = memo(ArrangementVideoGapCaptionInner, () => true);
+> 
+> function ArrangementVideoGapCaptionInner({ videoLane }: { videoLane: VideoLanePreviewReader }) {
+267c270,273
+<   const sourceId = useVideoSourceIdAtPlayhead(videoLane);
+---
+>   const readGapSourceId = () =>
+>     findVideoClipAt(videoLane.readVideoLaneArrangement(), positionStore.getPosition())?.clip
+>       .sourceId ?? null;
+>   const sourceId = useSyncExternalStore(positionStore.subscribePosition, readGapSourceId, readGapSourceId);

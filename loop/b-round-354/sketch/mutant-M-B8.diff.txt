@@ -1,0 +1,8 @@
+267c267,271
+<   const sourceId = useVideoSourceIdAtPlayhead(videoLane);
+---
+>   const [sourceId] = useState(
+>     () =>
+>       findVideoClipAt(videoLane.readVideoLaneArrangement(), positionStore.getPosition())?.clip
+>         .sourceId ?? null,
+>   );

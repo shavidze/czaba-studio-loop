@@ -1,0 +1,79 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T17:52:07.5586903Z",
+  "round": 354,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "READ",
+  "PERF (82/82 asserted, 0 NEW, none higher than C350, durationMs 478956)",
+  "PERF-LIB 40/40",
+  "VIDEO-DRAG-SMOKE 1440x900",
+  "VIDEO-DRAG-SMOKE 1280x720",
+  "G354-AUTH (lab anon demo, /studio/middle-east Sign in required 0 audio[src], token route 401 no header)",
+  "RT-FIX-354",
+  "DOCS",
+  "MUTANT (own, executed; green with numbers, see notes)"
+ ],
+ "failed": [],
+ "blocked": [
+  "G354-AUTH fake-bearer: token route returned 500 (fails closed) because mock backend :5199 is down in cloud; 403 not observable"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notes": [
+  "Own mutant C-MUT-1 (sameClipList always false in scratch dock): rc 0, 82/82 asserted pass, every row EQUAL to unmutated run (c-round-354/rowcmp-mutant.txt). It did not raise any value, so it is not a finding against B's budgets; it also means this mutant is vacuous and is NOT evidence that the 12 rows catch regressions. The only red-evidence for the 12 rows is A's M-B2 re-run (6 red) cited from A/B, which C did not re-run.",
+  "First 1440x900 behaviour probe crashed on cold start (environment-invalid, replaced by an identical second run; both 354 behaviour JSONs equal C350 modulo blob src).",
+  "Scoped DOCS: budget values in doc 232 table match live file (<=13,<=15,==1,==0,<=3,==1)."
+ ],
+ "manifestPaths": [
+  "c-round-354/claims.txt",
+  "c-round-354/read.txt",
+  "c-round-354/rowcmp.txt",
+  "c-round-354/rowcmp-mutant.txt",
+  "c-round-354/perf-results/latest-interactions.json",
+  "c-round-354/perf-mut-latest.json",
+  "c-round-354/behaviour-1440x900.json",
+  "c-round-354/behaviour-y8-1280x720.json",
+  "c-round-354/auth.json",
+  "c-round-354/perf-lib.log",
+  "c-round-354/mutant-prediction.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": 82,
+ "mutantsRecorded": 1,
+ "mutantRedOnSketch": "b-round-353/perf-summary.txt (mu-b2 6 red; mu-b2prime 16 red) - B's file, not re-run by C",
+ "mutantRedOnTree": "C-MUT-1 green (0 red)",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "perf interactions spec",
+  "PERF-LIB",
+  "video behaviour probes"
+ ],
+ "affectedChecksRunOnSketch": "b-round-353/perf-summary.txt (sketch 82/82), sketch-perf-lib.log",
+ "nullReason": "claimCheckMinutes not timed; gate fields not applicable (gate runs them)"
+}

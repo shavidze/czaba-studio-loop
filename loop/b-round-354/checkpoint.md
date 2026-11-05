@@ -1,0 +1,21 @@
+# B round 354 checkpoint
+- step1: archived current-task.md -> tasks/round-354.md (copy)
+- step2: sketch written (b-round-354/sketch/test.patch.txt), 74/74 green on scratch; mutant run started 18:22
+- predictions (written before the mutant run):
+  - control: sketch 74/74, head 74/74
+  - M-B1: sketch red DP69 (records length / oldValue line) + DP72 (seeks length line); head red DP69, DP72
+  - M-B1-LATE: sketch red DP69 + DP72 (seeks length, via timer drain); head DP72 GREEN (20 ms sleep misses the 50 ms write) -> WINDOW-PRECONDITION proof
+  - M-B3: sketch red DP70 at a gap line (gap stale after commit/undo) ; head DP70 green (unknown)
+  - M-B4: sketch red DP70 (overlay after commit); head red DP70
+  - M-B6: sketch DP72 first red line = the new toBe(shownStart) line (before the length line); head DP72 red at toBeCloseTo l.2298
+  - M-B7: DP72 red at Undo write both
+  - A-M5: sketch DP69 red (records length 0) + DP71; head DP71 only
+  - FX-SHORTDRAG: sketch DP72 red at the distance line; head DP72 green or red elsewhere (unknown)
+- prediction M-B8 (GapCaption sourceId frozen at mount via useState): sketch DP70 red at the gap-after-trim-commit line (+ DP58/DP68); head DP70 GREEN
+- prediction M-B9 (M-B3 position-only gap subscription + GapCaption memo that never re-renders): sketch DP70 red at the gap line after the trim commit (l.~2211); head DP70 GREEN
+- step3: TL-R355-1/3/4 applied to sketch (v2); v1 kept as *-v1; rerun all mutants on v2 (same predictions, line numbers shift)
+- step4: doc232.patch.txt, claims-355.sh, cited-artifacts written; next: sketch-review.md, claims outputs, task, backlog
+- step5: backlog v318 applied (b-round-354/update-backlog.py; backup backlog-before-355.json)
+- step6: current-task.md (round 355) written; shuffle runs 74/74 x2; claims re-run (K11 24 listed)
+- step7: b-round-354.md + b-next.json written; pending final advisor
+- step8: closing advisor applied (patch byte reproduction, shuffle order proof, doc TODO single next line, §3 abort note); claims re-run; DONE

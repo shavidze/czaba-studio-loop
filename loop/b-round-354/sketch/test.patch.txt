@@ -1,0 +1,108 @@
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index 82c60ea..c321687 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -2156,7 +2156,7 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
+   });
+ 
+-  it('DP69 the fade release never writes the pre-drag opacity back to the overlay', async () => {
++  it('DP69 the fade release writes nothing to the overlay, so the pre-drag opacity never returns', async () => {
+     const { api, view, clipParts } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
+     act(() => live(api).seekTo(2));
+     const overlay = view.getByTestId('arrangement-video-fade');
+@@ -2171,11 +2171,9 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     try {
+       pointerUpAt(video.root, 14, 120, 50);
+       const records = observer.takeRecords();
+-      const finalOpacity = overlay.dataset.videoOpacity;
+-      const writtenValues = [...records.slice(1).map((record) => record.oldValue), finalOpacity];
+       expect(records.map((record) => record.oldValue)).not.toContain('1.000');
+-      expect(writtenValues).not.toContain('1.000');
+-      expect(finalOpacity).toBe(shownBeforeRelease);
++      expect(records).toHaveLength(0);
++      expect(overlay.dataset.videoOpacity).toBe(shownBeforeRelease);
+       expect(clipIn(live(api).arrangement, 'v1').fadeIn ?? 0).toBeGreaterThan(0);
+       expect(previewOf(api)).toBeNull();
+     } finally {
+@@ -2183,13 +2181,12 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     }
+   });
+ 
+-  it('DP70 Undo and Redo of a committed video fade rewrite the overlay with no preview', async () => {
++  it('DP70 Undo and Redo of a committed video fade and trim rewrite the overlay and the gap with no preview', async () => {
+     const { api, view } = await mountPreviewWorkspace([...AUDIO_CLIPS, VIDEO_CLIP]);
+     act(() => live(api).seekTo(2));
+     const overlay = view.getByTestId('arrangement-video-fade');
+     expect(overlay.dataset.videoOpacity).toBe('1.000');
+-    const committedCaption = textOf(view, 'arrangement-video-caption');
+-    const committedGap = view.queryByTestId('arrangement-video-gap') === null;
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
+     const before = live(api).getArrangement();
+     const faded: Arrangement = {
+       ...before,
+@@ -2202,13 +2199,33 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     });
+     expect(previewOf(api)).toBeNull();
+     expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
++    const trimmed: Arrangement = {
++      ...faded,
++      clips: faded.clips.map((clip) =>
++        clip.id === 'v1' ? { ...clip, start: 2.5, sourceOffset: 1.5, duration: 2.5 } : clip,
++      ),
++    };
++    act(() => {
++      live(api).commitArrangement(trimmed, studioClipStrings.trimStartLabel, faded);
++    });
++    expect(view.queryByTestId('arrangement-video-gap')).not.toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
++    act(() => live(api).undo());
++    expect(previewOf(api)).toBeNull();
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
+     act(() => live(api).undo());
+     expect(previewOf(api)).toBeNull();
+     expect(overlay.dataset.videoOpacity).toBe('1.000');
+-    expect(textOf(view, 'arrangement-video-caption')).toBe(committedCaption);
+-    expect(view.queryByTestId('arrangement-video-gap') === null).toBe(committedGap);
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
+     act(() => live(api).redo());
++    expect(previewOf(api)).toBeNull();
+     expect(overlay.dataset.videoOpacity).toBe(fadedOpacity);
++    expect(view.queryByTestId('arrangement-video-gap')).toBeNull();
++    act(() => live(api).redo());
++    expect(previewOf(api)).toBeNull();
++    expect(view.queryByTestId('arrangement-video-gap')).not.toBeNull();
++    expect(overlay.dataset.videoOpacity).toBe('1.000');
+   });
+ 
+   it('DP71 an audio move with a video clip present renders no dock component and writes no video opacity', async () => {
+@@ -2285,17 +2302,22 @@ describe('PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 — the video dock reads the dr
+     }
+     const shownStart = clipIn(shown, imported.id).start;
+     expect(clipIn(live(api).arrangement, imported.id).start).toBe(imported.start);
+-    expect(shownStart).toBeGreaterThan(imported.start);
++    expect(shownStart - imported.start).toBeGreaterThan(0.01);
+     expect(shownStart).toBeLessThan(playhead);
+     const previewTarget = playhead - shownStart + imported.sourceOffset;
+     await waitFor(() => expect(seeks.at(-1)).toBeCloseTo(previewTarget, 3));
+     const writesBeforeRelease = seeks.length;
+-    pointerUpAt(root, 10, pressX + 40, 50);
+-    await act(async () => {
+-      await new Promise((resolve) => setTimeout(resolve, 20));
+-    });
++    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
++    try {
++      pointerUpAt(root, 10, pressX + 40, 50);
++      await act(async () => {
++        await vi.runAllTimersAsync();
++      });
++    } finally {
++      vi.useRealTimers();
++    }
++    expect(clipIn(live(api).arrangement, imported.id).start).toBe(shownStart);
+     expect(seeks).toHaveLength(writesBeforeRelease);
+-    expect(clipIn(live(api).arrangement, imported.id).start).toBeCloseTo(shownStart, 6);
+     act(() => live(api).undo());
+     await waitFor(() => expect(seeks.length).toBeGreaterThan(writesBeforeRelease));
+     await waitFor(() =>
