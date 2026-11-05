@@ -1,0 +1,16 @@
+# B round 349 -> 350 checkpoint
+- [x] orientation; gate 349 published 7f56989 (on top of docs-only aca59b3) = baseline; C 349 PASS browserVerified true
+- [x] tasks/round-349.md archived; backups in b-round-349/
+- names probe (dev, b-round-349/video-names-probe.mjs -> video-names-dev.json): video trim 19/move (dock subtree 6 of 19), fade 9 (dock subtree 6), move 17; cause: ArrangementVideoDock subscribes useArrangementPreviewLaneClips in its body (l.324) and passes a new videoLaneArrangement to Caption/GapCaption/FadeOverlay
+- behaviour probe baseline (video-behaviour-dev.json): trim inside -> currentTime unchanged; trim past playhead -> gap live during preview; fade inside -> data-video-opacity follows (1.000/0.469/0.242); undo restores
+- sketch /home/runner/b349-scratch/sk (useVideoLaneReader memo [arrangement, previewStore]); tsc 0, biome 0 warn; diff b-round-349/sketch-dock.diff.txt; dev :5197; names probe on sketch running; consults perf-opt + tech-lead launched
+- sketch names: trim 13, fade 3, move 11 (video-names-sketch.json)
+- consults: tech-lead + perf-opt both High: release ordering (read used render-time arrangement). sketch2 reads getArrangement(), shallow-reuse lane; release probe video-release-probe.mjs: sketch1 mutant red (opacity old 1.000), sketch2/HEAD 0 writes
+- sketch2 names trim13 fade3 move11; behaviour SAME; covering 107 files 1768/1768 PASS
+- perf production run on sketch started (perf-sketch.log)
+- claims-350.sh + planning/sketch outputs written (K13 waits on perf results); mutant file kept
+- update-backlog.py written (format indent=2 ascii, matches current file); current-task-draft.md written; waiting perf
+- perf sketch rc0 252 rows 70/70 0 NEW 9 DIFF (all video lower) durationMs 490450 (perf-rowcmp-sketch-vs-c349.txt)
+- current-task.md installed; backlog v312 + feature-status applied
+- b-round-349.md + b-next.json written; store clean
+- advisor 2 applied: patch form sketch/dock.patch.txt (git apply --check OK), rendersOf verified generic, PLAY-SYNC HEAD baseline |drift|<=0.014; claims regenerated K13 15/15

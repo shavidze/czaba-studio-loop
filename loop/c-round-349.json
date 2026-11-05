@@ -1,0 +1,68 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T13:21:23.9457515Z",
+  "round": 349,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "READ",
+  "PERF",
+  "GRAB-PROBE",
+  "MUTANT",
+  "PERF-LIB",
+  "G349-AUTH",
+  "VIDEO-SMOKE",
+  "DOCS"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [],
+ "manifestPaths": [
+  "c-round-349/perf.log",
+  "c-round-349/perf-results/latest-interactions.json",
+  "c-round-349/perf-rowcmp.txt",
+  "c-round-349/mutant.log",
+  "c-round-349/mutant-results.json",
+  "c-round-349/smoke.mjs",
+  "c-round-349/smoke-results.json",
+  "c-round-349/auth-studio-lab-1440x900.png",
+  "c-round-349/video-trim-during-1440x900.png",
+  "c-round-349/perf-lib.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": 70,
+ "mutantsRecorded": 1,
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "record rows; no B mutant; C's harness mutant is in mutantRedOnTree",
+ "mutantRedOnTree": true,
+ "affectedChecksNamed": [
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "perf/lib/report.test.ts"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-348/perf-sketch-results/latest-interactions.json",
+  "b-round-348/perf-head-results/latest-interactions.json"
+ ],
+ "origin": {},
+ "notes": [
+  "Baseline advanced 70751a5 -> aca59b3 (docs-only root commit); K2 = aca59b3 3 as A reported.",
+  "C PERF durationMs 491771 (54.6% of 900000; under the 540000 STOP).",
+  "Cold first Vite load gave hydration 'useState of null' errors once in the first smoke attempt (dev optimize-deps reload); warm rerun: 0 errors in both viewports. Environment noise, not an app bug.",
+  "info: interact.harness.drag-video-trim-live has 3 samples (1) in the mutant even though the playing trim never ran, because setLive is also fed by the stopped drag; the abort is still reported loudly via failures."
+ ]
+}

@@ -1,0 +1,37 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+import { writeFileSync } from 'node:fs';
+const base = process.argv[2] ?? 'http://127.0.0.1:5173';
+const out = process.argv[3] ?? 'video-behaviour.json';
+const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+await context.addInitScript(() => {
+  localStorage.setItem('czaba_analytics_consent', 'denied');
+  const log = { on: false, writes: [] };
+  window.__b349 = log;
+  const d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime');
+  Object.defineProperty(HTMLMediaElement.prototype, 'currentTime', { configurable: true, get() { return d.get.call(this); }, set(v) { if (log.on) log.writes.push({ kind: 'seek', role: this.getAttribute('data-video-role'), v: Number(Number(v).toFixed(3)) }); d.set.call(this, v); } });
+  const sd = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src');
+  Object.defineProperty(HTMLMediaElement.prototype, 'src', { configurable: true, get() { return sd.get.call(this); }, set(v) { if (log.on) log.writes.push({ kind: 'src', role: this.getAttribute('data-video-role') }); sd.set.call(this, v); } });
+  new MutationObserver((ms) => { if (!log.on) return; for (const m of ms) { const t = m.target; if (t.getAttribute && t.getAttribute('data-testid') === 'arrangement-video-fade') log.writes.push({ kind: 'opacity', old: m.oldValue, v: t.getAttribute('data-video-opacity') }); } }).observe(document, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['data-video-opacity'] });
+});
+const page = await context.newPage();
+await page.goto(`${base}/studio-lab`, { waitUntil: 'load', timeout: 120000 });
+await page.waitForFunction(() => /ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent ?? ''), null, { timeout: 120000 });
+await page.waitForTimeout(1000);
+await page.getByTestId('arrangement-video-input').setInputFiles('/home/runner/czaba-project/store/public/videos/hero/1.mp4');
+const clip = page.locator('[data-clip-kind="video"]').first();
+await clip.waitFor(); await page.waitForTimeout(1500);
+await page.evaluate(() => document.activeElement?.blur?.());
+for (let i = 0; i < 16; i++) { const b = await clip.getByTitle(/ — drag to move$/).boundingBox(); if ((b?.width ?? 0) >= 480) break; await page.keyboard.press('='); await page.waitForTimeout(400); }
+const snap = () => page.evaluate(() => { const v = document.querySelector('[data-testid="arrangement-video"][data-video-role="active"]'); const c = document.querySelector('[data-clip-kind="video"]'); return { pos: document.querySelector('[data-testid="arrangement-position"]')?.textContent, currentTime: v ? Number(v.currentTime.toFixed(3)) : null, src: v?.getAttribute('src')?.slice(0, 30) ?? null, gap: !!document.querySelector('[data-testid="arrangement-video-gap"]'), caption: document.querySelector('[data-testid="arrangement-video-caption"]')?.textContent ?? null, opacity: document.querySelector('[data-testid="arrangement-video-fade"]')?.getAttribute('data-video-opacity'), clipStart: c?.getAttribute('data-clip-start'), fadeIn: c?.getAttribute('data-fade-in') }; });
+const result = {};
+const seekX = async (dx) => { const rb = await page.getByTestId('arrangement-ruler').boundingBox(); const cb = await clip.boundingBox(); await page.mouse.click(cb.x + dx, rb.y + rb.height - 4); await page.waitForTimeout(800); };
+const drag = async (label, loc, steps) => { const b = await loc.first().boundingBox({ timeout: 5000 }); const x = b.x + Math.min(b.width / 2, 40), y = b.y + b.height / 2; const s = [await snap()]; await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + 4, y); await page.waitForTimeout(400); for (const d of steps) { await page.mouse.move(x + 4 + d, y); await page.waitForTimeout(700); s.push(await snap()); } await page.mouse.up(); await page.waitForTimeout(700); s.push({ after: 'release', ...(await snap()) }); await page.keyboard.press('Control+KeyZ'); await page.waitForTimeout(700); s.push({ after: 'undo', ...(await snap()) }); result[label] = s; };
+const releaseProbe = async (label, loc, dx) => { const b = await loc.first().boundingBox({ timeout: 5000 }); const x = b.x + Math.min(b.width / 2, 40), y = b.y + b.height / 2; await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + 4, y); await page.waitForTimeout(300); for (let i = 1; i <= 6; i++) { await page.mouse.move(x + 4 + (dx * i) / 6, y); await page.waitForTimeout(150); } await page.waitForTimeout(900); const before = await snap(); await page.evaluate(() => { window.__b349.writes = []; window.__b349.on = true; }); await page.mouse.up(); await page.waitForTimeout(1200); const writes = await page.evaluate(() => { window.__b349.on = false; return window.__b349.writes; }); const after = await snap(); await page.keyboard.press('Control+KeyZ'); await page.waitForTimeout(900); result[label] = { before, writes, after, undo: await snap() }; };
+const cb = await clip.boundingBox();
+await seekX(30); result.seekR1 = await snap();
+await releaseProbe('fade-release', clip.getByTestId('arrangement-video-fade-in-handle'), 120);
+await seekX(cb.width * 0.6); result.seekR2 = await snap();
+await releaseProbe('move-release', clip.getByTitle(/ — drag to move$/), 120);
+writeFileSync(out, JSON.stringify(result, null, 1));
+await browser.close();

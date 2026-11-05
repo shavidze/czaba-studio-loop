@@ -1,109 +1,156 @@
-# CURRENT TASK — Round 349: PERF-CAND-VIDEO-TRIM-FADE-ROWS. The interactions harness measures a video clip's trim-start and fade-in drags (22 new `record` rows)
+# CURRENT TASK — Round 350: PERF-CAND-VIDEO-TRIM-FADE-COST stage 1. The video dock stops re-rendering on every pointermove of a video clip's trim, fade or move drag
 
-Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-05, at the round 348 → 349 planning.
+Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-05, at the round 349 → 350 planning.
 
-**Decisions** (`backlog.json` → `decisions_log_b`, v310 → v311, D-29z1106…D-29z1110):
-- **D-29z1106:** round 348 closed as PASS from C's evidence (`c-round-348.json`: PASS, `browserVerified`/`realVerified` true, 10 rows, 0 bugs, 0 blocked). Gate 348 `published` **`70751a5`** on both remotes [K1]. **Baseline = `70751a5`**, clean tree [K2]. Stage conversions → done. Oracle: `c-round-348/perf-store-results/latest-interactions.json` (230 rows, 70/70 asserted pass).
-- **D-29z1107:** round-348 notes routed (§5).
-- **D-29z1108:** the L31 ruling for this round (§0.3). ROOT-REQ-PERF-TIMEOUT is overdue under L46.
-- **D-29z1109:** the shape (§0.2). 22 rows, all `record`, owner `PERF-CAND-VIDEO-TRIM-FADE-ROWS`.
-- **D-29z1110:** this task.
+**Decisions** (`backlog.json` → `decisions_log_b`, v311 → v312, D-29z1111…D-29z1116):
+- **D-29z1111:** round 349 is closed as PASS from C's evidence:
+  - `c-round-349.json`: PASS, `browserVerified`/`realVerified` true, 10 rows, 0 bugs, 0 blocked.
+  - Gate 349 `published` **`7f56989`** on both remotes [K1].
+  - **Baseline = `7f56989`**, clean tree [K2].
+  - Stage video-trim-fade → done.
+  - Root's docs-only `aca59b3` (store direction decision) sits between 348 and 349 and is part of the baseline.
+- **D-29z1112:** the round-349 notes are routed (§5).
+- **D-29z1113:** the cause and the shape (§0).
+- **D-29z1114:** the release-order ruling (§0.3, both consults' High).
+- **D-29z1115:** the rows stay `record` this round (§0.4). There are no new interactions rows (the D-29z1108 freeze holds).
+- **D-29z1116:** this task.
 
 **Read first:**
-- `lessons.md` items 10, 11, 22, 29, 34, 37, 38, 56, 57 and 58. For C, also 59 and 60 (destructive commands only inside `c-round-349/`, with absolute paths).
-- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md` and `GEORGIAN_DOCS.md` (doc 232). No app source changes, so `AUDIO_ARCHITECTURE.md` is background only.
+- `lessons.md` items 10, 11, 29, 34, 38, 49, 52, 56, 57 and 58. C also reads 59 and 60.
+- Primitives:
+  - `AUDIO_ARCHITECTURE.md` (the video dock is the Studio's video layer);
+  - `REACT_CONTEXT.md`;
+  - `AGENT_DISCOVERABLE_CODE.md` (new names);
+  - `TESTING_QUALITY_GATES.md`;
+  - `BUG_HUNTING_TESTS.md`;
+  - `GEORGIAN_DOCS.md` (doc 232).
 
 **L29 note:** untagged code text below is an expected value, a row id or a loop-artifact path. Every fact about a `store/` file carries `[K#]` (§7).
 
-**Reference-first, product-designer, the screen budget and the YouTube request do not apply.** This is a perf-harness round. App source, DOM, audio and behaviour do not change.
+**Reference-first, product-designer, the screen budget and the YouTube request do not apply.** This is a pure performance round. What the user sees and hears does not change, and C proves that in the browser (§2.2).
 
 ## Baseline
-- HEAD `70751a5` (gate 348, published), clean tree [K2]. Protected files 11/11 OK [K8]. No dependency change.
-- **Oracle:** `c-round-348/perf-store-results/latest-interactions.json`. It has 230 rows, is `complete`, has 0 failures, and its 70 asserted rows all pass [K3]. The video block measures only the name-bar move drag (`interact.drag.video.*`, 10 rows, plus `interact.harness.drag-video-live`) [K3][K4].
+- HEAD `7f56989` (gate 349, published), clean tree [K2]. Protected files 11/11 OK [K8]. No dependency change.
+- **Oracle:** `c-round-349/perf-results/latest-interactions.json`. It has 252 rows, is `complete` and has 0 failures, and its 70 asserted rows all pass [K6]. These rows are owned by `PERF-CAND-VIDEO-TRIM-FADE-ROWS`, all `record` [K6]:
+  - `interact.drag.video-trim.*` and `interact.drag.video-fade.*`;
+  - `interact.harness.drag-video-trim-live` and `interact.harness.drag-video-fade-live`.
 
 ## 0. Why, and B's evidence
 
-### 0.1 Premise
-D-29z1088 and D-29z1104 queued PERF-CAND-VIDEO-TRIM-FADE-ROWS right after the conversions. They asked for record rows first and asserts after C has measured them (L58). Video clips have trim edges and fade handles:
-- the fade handle's testid is `arrangement-video-fade-in-handle` [K5];
-- the trim-start edge has the same title as on audio clips [K5];
-- the handles render when the clip is at least 24 px wide [K5];
-- the fade preview goes through the same `previewGeometry` path as audio [K5].
+### 0.1 Cause (D-29z1113)
+C round 349 measured, per pointermove:
 
-The harness has never dragged any of these. Its fade target is hard-coded to the audio testid [K4]. No other test file consumes `drag.video` ids. The sweep over `app`, `perf` and `e2e` hits only the spec [K12]. `report.test.ts` pins only the 16 windowed `commits-per-move` rows, and this task adds none [K6].
+| Drag | Components per move | Comparison |
+|---|---|---|
+| Video trim-start | 18.683 | item target ≤ 15 |
+| Video fade-in | 8.85 | audio fade-in asserts ≤ 4 |
+| Video move (name bar) | 15.75 | |
 
-### 0.2 The change (`b-round-348/sketch/`)
-- **Spec** (`spec.patch.txt`, made by `apply-spec.py`):
-  - `dragTarget` gets a `kind` argument (`'audio'` by default) and picks the video fade testid for video;
-  - `DragMeasure` gets an optional `kind`;
-  - the 1×-only video block loops over move, trim and fade: stopped first, then Space, then playing (each playing drag after Home), then Space;
-  - each drag is reset with Ctrl+Z, as before;
-  - helpers `videoDrags`, `videoDragBaseId`, `videoDragLiveId` and `videoDragMeasure`;
-  - the sequence text is updated.
+B's names probe on the HEAD dev server (`b-round-349/video-names-probe.mjs` → `video-names-dev.json`) renders per move:
+- **trim, 19:** `ArrangementVideoDock`, `ArrangementVideoCaption`, `ArrangementVideoFadeOverlay`, `ArrangementVideoGapCaption`, `Maximize2` and its forwardRef. That is 6 dock components, plus 13 shared preview consumers: overview ×2, lane, clip view, peak path, range overlay, the 5 detail-panel components, the selected-clip readout and the time text.
+- **fade, 9:** the same 6 dock components, plus the lane, the clip view and the status text.
+- **move, 17.**
 
-  The move drag keeps its ids, its `liveId` and `rows: 'all-but-ratio'`.
-- **Budgets** (`budgets.patch.txt`, made by `apply-budgets.py`): 22 rows are inserted after `interact.harness.drag-video-live`, all `record`, with budget `null` and owner `PERF-CAND-VIDEO-TRIM-FADE-ROWS`:
-  - `interact.drag.video-trim.<state>.*` and `interact.drag.video-fade.<state>.*`. Each has the four rows `move-components-per-move`, `move-components-max`, `release-commits` and `move-to-paint-p95`, and the playing state adds `move-restarts` and `release-restarts`. That makes 10 rows per gesture. Each row copies its `kind` from the matching `interact.drag.video.<state>.<metric>` row.
-  - `interact.harness.drag-video-trim-live` and `interact.harness.drag-video-fade-live`. Each is 1 only when both the stopped and the playing drag were live.
+The cause is that `ArrangementVideoDock` subscribes to the preview store in its **body**. At l.195–198, `useVideoLaneArrangement` calls `useArrangementPreviewLaneClips` [K3]. The dock then passes a new `videoLaneArrangement` object to Caption, GapCaption and FadeOverlay [K3]. Every preview change therefore re-renders the whole dock subtree.
 
-  Rows go from 230 to 252. Asserted rows stay at 70 [K3].
+That subscription carries real behaviour, and it must be kept. B's behaviour probe (`video-behaviour-probe.mjs` → `video-behaviour-dev.json`, HEAD, stopped, 1440×900) recorded:
+- **Trim with the playhead inside the clip (7.781 s):** the `<video>` `currentTime` stays at 7.781 while the clip start moves 0 → 0.6 → 1.6 → 3.1. A trim-start keeps the media time under the playhead.
+- **Trim past the playhead (0.3 s):** the gap caption `arrangement-video-gap` **appears during the preview**, the caption empties, and both stay after release. Undo restores them.
+- **Fade-in with the playhead at 0.75 s:** `data-video-opacity` follows the preview (1.000 → 1.000 → 0.469 → 0.242), stays at 0.242 after release, and returns to 1.000 on Undo.
 
-### 0.3 B's runs and the L31 ruling (D-29z1108)
-Both runs used a production build, ran alone, one after the other (`b-round-348/run-sketch-perf.sh`), and are summarised by `b-round-348/summarize-perf.py` in `b-round-348/perf-summary.txt`:
+### 0.2 The change (B's sketch as an applicable patch, `b-round-349/sketch/dock.patch.txt`; full file `b-round-349/sketch-ArrangementVideoDock.tsx`)
+The work is in one source file, `ArrangementVideoDock.tsx`:
+- **The `useVideoLaneArrangement` → `useArrangementPreviewLaneClips` body subscription is removed** [K3]. It is replaced by `useVideoLanePreviewReader(arrangement, getArrangement)`, which returns a `VideoLanePreviewReader` with two members:
+  - `readVideoLaneArrangement()`: the video-lane arrangement, built from `getArrangement()` and the preview store's current `preview`. It is cached on the identity of both. When the filtered clip list is element-wise equal, the previous object is reused, so an audio-only drag yields the same object.
+  - `subscribeVideoLanePreview(onChange)` = `previewStore.subscribe`.
 
-| Run | rc | Rows | Asserted pass | NEW | Deterministic rows ≠ C348 | `durationMs` |
-|---|---|---|---|---|---|---|
-| HEAD control (`perf-head-results/`) | 0 | 230 | 70/70 | 0 | 0 | 459503 |
-| Sketch (`perf-sketch-results/`) | 0 | 252 | 70/70 | 22 (all expected) | 0 | 496938 |
+  The reader is memoised on `[arrangement, getArrangement, previewStore]`. Its identity changes on commit (including Undo and Redo, which do not notify the preview store), and never per move.
+- **Caption and GapCaption** read `sourceId` with `useSyncExternalStore`. The subscribe function covers the position store and the preview store, and the snapshot is a string. They re-render only when the source under the playhead changes, for example when the gap appears.
+- **FadeOverlay** writes `data-video-opacity` and `style.opacity` imperatively. It writes from the position writer, as at HEAD, and from a preview-store subscription. It has no per-move render.
+- **The stopped-video seek effect** (l.716–753 at HEAD) reads `readVideoLaneArrangement()` and also subscribes to the preview store. Its deps are `[videoLane, isPlaying, positionStore, videoSources]`.
+- **Unchanged:** the playing sync path (it reads `getArrangement()`), the floating box, all markup, all testids and all strings.
 
-New rows on the sketch. Every deterministic row was identical in all 3 passes, and the two liveness rows read 1 in 3/3 passes:
+A applies the patch byte for byte (`git apply --check` is clean on `7f56989`). That makes K3 and the §2.3 values exact by construction, as in rounds 348 and 349. The names follow `AGENT_DISCOVERABLE_CODE.md`. If the code-reviewer asks for a change to the patched code, it is a STOP for B's ruling (§4). It is not a silent edit.
 
-| Gesture | per-move (stopped / playing) | max | release-commits | move-restarts | release-restarts |
-|---|---|---|---|---|---|
-| video trim-start | 18.683 / 18.717 | 19 | 1 | 0 | 31 |
-| video fade-in | 8.85 / 8.85 | 9 | 2 | 0 | 31 |
-| (existing) video move | 15.75 / 15.783 | 17 | 1 | 0 | 31 |
+### 0.3 The release-order ruling (D-29z1114)
+`tech-lead` and `performance-optimizer` reviewed B's first sketch independently. Both found the same **High** issue.
+- **The first sketch:** its reader took the base from the render-time `arrangement` captured in the memo.
+- **The release order today:** on pointerup, `updateHistory` does `historyRef.current = next`, then a batched `setHistory(next)`, then `previewStore.getState().clearPreview()` [K4].
+- **The problem:** `clearPreview` notifies subscribers at once. The overlay and the seek listener then read "preview null + the pre-drag committed clips". As a result:
+  - the overlay wrote the pre-drag opacity for a moment;
+  - the stopped seek could seek to, or load, the pre-drag target.
 
-The sketch's budget notes differ from the run's bytes in one word ("video video clip" → "video clip", reviewer L2). Notes are not read by the harness.
+**Ruling:** the reader's base is `getArrangement()`, which returns `historyRef.current.present` [K4] and is updated before `clearPreview`.
 
-**L31 ruling.**
-- The declared limit is 900000 ms (`playwright.perf.config.ts`) [K7], so the L31 bound is 450000 ms.
-- The HEAD control took 459503 ms (51 %) and C round 348 took 454664 ms. The bound was already crossed before this round.
-- The new rows add a measured +37435 ms on the same machine, so the sketch took 496938 ms (55 %).
-- Ruled: accepted for this round, because 55 % leaves 45 % headroom and one pass takes about 2.5 min.
-- **A STOP** if any A run has `durationMs` > **540000** (60 %).
-- **No further interactions-spec rows are added after this round** until root applies ROOT-REQ-PERF-TIMEOUT (`timeout: 25 * 60 * 1000`) or a split lands. B cannot split the spec now: the shared drag measurers are question 3 of the unanswered ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE (ARCH-R339-DRAG-MEASURE-EXTRACT). The request is overdue under L46; see `b-round-348.md` "For root".
+B's release probe (`video-release-probe.mjs`) logs every `data-video-opacity` mutation (with `oldValue`) and every `<video>` `currentTime`/`src` write from pointerup to 1.2 s later:
 
-**What the numbers mean (recorded, not a budget).** The video trim moves render 18.683 components per move, above the item's ≤ 15 target. The video fade renders 8.85 per move, against 3.933 for the audio fade. A video edit released during playback restarts the graph (31 `start()` calls), the same as the video move. These go to PERF-CAND-VIDEO-TRIM-FADE-COST, the next stage, and assert rows follow once C has measured them (L58).
+| Tree | Fade release (playhead 0.75 s) | Move release (playhead 7.781 s) |
+|---|---|---|
+| HEAD (`video-release-head.json`) | 0 writes | 0 writes |
+| Fixed sketch (`video-release-sketch2.json`) | 0 writes | 0 writes |
+| First sketch, kept as mutant M-B1 (`mutant-sketch1-read-render-arrangement.tsx`, `video-release-sketch1-mutant.json`) | **2 opacity mutations, one with `oldValue` 1.000** (the overlay was written back to the pre-drag value) | — |
 
-**Sketch review (L58).** `tech-lead` stood in for the code-reviewer, which is not on the planner's consult list. Its findings and B's rulings:
-- **M1 (Medium):** the trim and fade grabs need timeline x ≈ 0 on screen, and the zoom keys anchor on the playhead. **Ruled (no change):** the sketch grabbed live in 6/6 drags × 3 passes (liveness 1, 3/3). A missing grab throws inside the pass (after the locator's `toHaveCount(1)` wait), so the pass aborts at that step. The rows of every later step get no sample. For the asserted rows this is `interact.drag.video.playing.release-commits` and `.move-restarts`, which `report.ts` then reports as failed asserts with no samples [K14]. The run also reports `N rows short of 3 samples because a pass aborted` [K14]. The failure is loud, not vacuous. `interact.harness.drag-video-live` keeps the sample of the stopped move, which ran first. Adding Home before the zoom-in loop would change the setup state of the asserted video move rows, so it is not done in this round. If C or the gate sees an aborted video step, it is a finding against this ruling.
-- **L1:** `report.ts` checks determinism on `record` rows too. The new deterministic rows were identical 3/3 on the sketch.
-- **L2:** typo, fixed.
-- **L3:** the spec line is 100 characters. Biome does not process `perf/` (L30), and `npm run typecheck` covers it.
+This becomes the A unit guard DP69 and C's RELEASE row.
+
+### 0.4 B's measurements on the fixed sketch (D-29z1115)
+| Check | Result | Evidence |
+|---|---|---|
+| Names per move (dev) | trim 19 → **13**, fade 9 → **3**, move 17 → **11**; no `ArrangementVideo*` name and no `Maximize2` in any move commit. The 4th move sample renders the whole tree (82) on HEAD and on the sketch alike, a project-end crossing outside this task (PERF-CAND-MASTER-GROUP-FADER-PROPS) | `video-names-dev.json`, `video-names-sketch.json` |
+| Behaviour (dev, 1440×900) | identical to HEAD in all 6 groups (ignoring `src`, a blob URL) | `video-behaviour-sketch.json` |
+| Release order | 0 writes, as HEAD | `video-release-sketch2.json` |
+| Covering vitest | the 107 test files that mount the workspace or the dock, **1768/1768 PASS** | `covering-files.txt`, `sketch-covering-vitest.log` |
+| `tsc --noEmit`, Biome on the file | rc 0, 0 warnings | — |
+| Interactions perf (production, alone) | rc 0; `complete`; 252 rows; **70/70** asserted pass; 0 NEW; 9 deterministic DIFF, all video component rows and all lower (§2.3); the playing per-move rows (wallclock) are lower too; the 3 video liveness rows are 1 in 3/3; `durationMs` **490450** (54.5 %, under the 540000 STOP) | `perf-sketch-results/`, `perf-rowcmp-sketch-vs-c349.txt` |
+
+**The rows stay `record` this round.** L58 says an asserted number is C's own saved output. `performance-optimizer` advised recording first. The 22 rows are converted after C's round-350 measurement, in the next PERF-CAND task, as a budgets-only change. No interactions-spec row is added (D-29z1108 freeze). `budgets.interactions.json` is **not** touched.
 
 ## 1. Scope (A)
 
 ### 1.1 Files (exactly 3)
 | # | File | Change |
 |---|---|---|
-| 1 | `perf/studio-lab-interactions.perf.spec.ts` | `git apply b-round-348/sketch/spec.patch.txt` (or `python3 -I b-round-348/sketch/apply-spec.py <store> --allow-store`; same bytes) |
-| 2 | `perf/budgets.interactions.json` | `git apply b-round-348/sketch/budgets.patch.txt` (or `python3 -I b-round-348/sketch/apply-budgets.py <store> --allow-store`; same bytes) |
-| 3 | `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` | §1.2 |
+| 1 | `app/components/arrangement/ArrangementVideoDock.tsx` | `git apply b-round-349/sketch/dock.patch.txt`, unchanged (§0.2 and §0.3) |
+| 2 | `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` | add DP66–DP71 (§1.2); existing DP tests unchanged |
+| 3 | `docs/implementation/2026/quarter-IV/232-perf-drag-preview.md` | §1.3 |
 
-Untouched: all of `app/`, `perf/lib`, the other perf specs and budget files, `e2e`, config (including `playwright.perf.config.ts`) and the protected files.
+**Untouched:**
+- `ArrangementContext.tsx`, `preview-store.ts` and every other `app/` file;
+- `perf/` (spec, budgets, lib);
+- `e2e`, config and the protected files.
 
-### 1.2 Doc 232 (Georgian, technical terms in English)
-L34: the task grants the doc's whole harness-contract text, so every place that lists the video block's steps or rows is updated.
-- **l.4 status:** `In Progress (stage conversions of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4-i, c4-ii, c5-i, c5-ii, c6-i, c6-ii, conversions, video-trim-fade; C round 349 pending)`. "C round 348 pending" is removed [K11].
-- **Title line:** append `, ეტაპი video-trim-fade — video კლიპის trim/fade-ის perf row-ები`.
-- **New section** `### ეტაპი video-trim-fade: video კლიპის trim და fade-ის perf row-ები (round 349, D-29z1109)`, after the conversions section. It covers:
-  - the new rows (record);
-  - the table in §0.3;
-  - the L31 ruling and the no-more-rows rule;
-  - the M1 ruling;
-  - the cost finding (PERF-CAND-VIDEO-TRIM-FADE-COST).
-- **Testing, changed files and TODO:** add A's run. In TODO, mark the conversions line done (C round 348 PASS), and replace "PERF-CAND-VIDEO-TRIM-FADE-ROWS (შემდეგი ეტაპი)" with PERF-CAND-VIDEO-TRIM-FADE-COST (next stage) → PERF-CAND-MASTER-GROUP-FADER-PROPS → PERF-CAND-FADE-RELEASE-COMMITS.
+`useArrangementPreviewLaneClips` keeps its export, because `ArrangementLane.tsx` still uses it [K12]. If A finds that a change outside the 3 files is needed, that is a STOP (§4).
+
+### 1.2 New tests in `drag-preview-render.test.tsx`
+Use the file's existing `mountPreviewWorkspace`, `renderLog`/`rendersOf`, `pointerDownAt`/`pointerMoveTo`/`pointerUpAt`, `live`, `previewOf` and `clipIn` helpers, as DP58–DP60 do [K5]. Each test must fail on the mutant named next to it.
+
+| Test | Behaviour | Red on |
+|---|---|---|
+| DP66 | A video trimStart move, with the playhead inside the clip after the new start, renders `ArrangementVideoDock`, `ArrangementVideoCaption`, `ArrangementVideoFadeOverlay` and `ArrangementVideoGapCaption` **0 times** over 2 pointermoves (count after `renderLog.counts.clear()`). The clip's `data-clip-start` shows the preview. Release adds one Trim entry | M-B2 |
+| DP67 | A video fade-in move renders the same four components 0 times over 2 pointermoves. The overlay value follows the preview when the playhead is inside the fade | M-B2 |
+| DP68 | A video trimStart that uncovers the playhead: `arrangement-video-gap` appears **during** the preview, before release. It stays after release. Undo removes it | M-B3 |
+| DP69 | Release order: playhead inside the fade, fade-in drag. A `MutationObserver` (`attributeOldValue`, filter `data-video-opacity`) on the overlay runs from just before `pointerUpAt` until after it. No record's `oldValue` or new value equals the pre-drag `'1.000'`, and the final value equals the value shown before release | M-B1 |
+| DP70 | No preview, commit only. After a committed video fade, Undo puts the overlay back to `'1.000'` and the gap/caption to the committed state, and Redo restores the faded value. This proves the reader is rebuilt on commit | M-B4 |
+| DP71 | An audio clip move with a video clip present renders the four dock components 0 times, and causes 0 `data-video-opacity` mutations (extends DP60) | M-B2 |
+
+**Mutants:** A and C each apply these to a scratch copy, never to `store/`. Each one is a semantic edit of the patched file. B's `mutant-sketch1-read-render-arrangement.tsx` is evidence only and is not copied over A's tree.
+- **M-B1:** in `readVideoLaneArrangement`, `const base = getArrangement();` becomes `const base = arrangement;`. The release probe showed the same fault on B's first sketch (`video-release-sketch1-mutant.json`).
+- **M-B2:** the dock body calls `useArrangementPreviewLaneClips(arrangement, videoTrackId)` again, with the result unused.
+- **M-B3:** GapCaption's subscribe covers the position store only.
+- **M-B4:** the reader memo drops `arrangement` from its deps.
+- The element-wise reuse (tech-lead's Medium) saves work on audio drags, but it is not observable in the DOM, because the overlay skips equal values. It has no mutant row. It is covered by READ and A-REVIEW.
+
+### 1.3 Doc 232 (Georgian, technical terms in English)
+- **l.4 status:** `In Progress (stage conversions of a, b, c1, c2a, c2b-i, c2b-ii, c2b-iii, c3-i, c3-ii, c4-i, c4-ii, c5-i, c5-ii, c6-i, c6-ii, conversions, video-trim-fade, video-trim-fade-cost-1; C round 350 pending)`. "C round 349 pending" is removed [K11].
+- **Title line:** append `, ეტაპი video-trim-fade-cost — video dock-ის per-move render-ის მოხსნა`.
+- **New section** `### ეტაპი video-trim-fade-cost: video dock აღარ ხატავს ყოველ move-ზე (round 350, D-29z1113)`, placed after the video-trim-fade section. It covers:
+  - the cause (§0.1);
+  - the reader;
+  - the release-order ruling (§0.3);
+  - B's measurements table (§0.4);
+  - the "record now, assert next" rule.
+- **Changed files, testing, TODO:**
+  - Add the dock and DP66–DP71 to the changed-files and testing lists.
+  - In TODO, video-trim-fade is done (C round 349 PASS). The queue becomes: the conversion of the 22 rows → PERF-CAND-MASTER-GROUP-FADER-PROPS → PERF-CAND-FADE-RELEASE-COMMITS.
 - **The `## ` count stays 7** [K11].
 
 ## 2. Acceptance
@@ -111,80 +158,109 @@ L34: the task grants the doc's whole harness-contract text, so every place that 
 ### 2.1 A rows
 | Row | Command / check | Pass |
 |---|---|---|
-| A-CLAIMS pre | `bash b-round-348/claims-349.sh` from the loop root | equals `b-round-348/claims-349-planning-output.txt` |
-| A-CLAIMS final | same | K3, K4, K5, K6, K7, K12, K13 and K14 equal `b-round-348/claims-349-sketch-output.txt`. K2 = `70751a5 3`. K8 = 11. K10 = `0` and `untracked 0`. K11 = `7 1 0 1` |
-| A-TYPE / A-LINT | `npm run typecheck`, `npm run lint` | rc 0; lint warnings ≤ 205 (the ceiling is exactly met at HEAD, see `a-round-348.md`; `perf/` is not linted) |
-| A-PERF | Production, **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`, then `python3 -I b-round-329/perf-rowcmp.py c-round-348/perf-store-results/latest-interactions.json <A's test-results/perf/latest-interactions.json>` | rc 0; `complete`; `failures` []; 252 rows; **70/70** asserted pass; NEW = exactly the 22 ids of §0.2; 0 existing deterministic rows that differ from C348; both new liveness rows 1 in 3/3 passes; each new deterministic row identical across its 3 passes; `durationMs` ≤ 540000 and recorded |
-| A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs` | 40/40 (reads `budgets.interactions.json`) |
-| A-REVIEW | `code-reviewer` (3 files) | 0 Medium+ open, or each one ruled by id in §0.3 (M1); Architecture note passed to B |
-
-No `app/` file changes, so A runs no `app/**` vitest file; the spec is checked by A-PERF and `npm run typecheck`.
+| A-CLAIMS pre | `bash b-round-349/claims-350.sh` from the loop root | equals `b-round-349/claims-350-planning-output.txt` |
+| A-CLAIMS final | same | K3 equals `claims-350-sketch-output.txt` K3 (`body-preview-sub 0`, `useVideoLaneArrangement 0`, `videoLaneArrangement 0`); K4, K6, K7, K12 equal the sketch output; K2 = `7f56989 3`; K5 `DP66+` = 6; K8 = 11; K10 = `0`, `untracked 0`; K11 = `7 1 0 1` |
+| A-TYPE / A-LINT | `npm run typecheck`, `npm run lint` | rc 0; lint warnings ≤ 205, the HEAD count (`a-round-349.md`) |
+| A-UNIT | `npx vitest run app/lib/arrangement/__tests__/drag-preview-render.test.tsx app/lib/arrangement/__tests__/video-fades-ui.test.tsx app/lib/arrangement/__tests__/floating-video.test.tsx app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx app/lib/arrangement/__tests__/render-budget.test.tsx` | all pass, including DP66–DP71 |
+| A-COVER | the 107 files in `b-round-349/covering-files.txt` (`npx vitest run $(cat …)`) | all pass (B's sketch: 1768/1768 plus A's 6 new tests) |
+| A-MUTANT | M-B1…M-B4 on a scratch copy, each run against `drag-preview-render.test.tsx` only | each red on its §1.2 test; logs in `a-round-350/` |
+| A-PERF | Production, **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`, then `python3 -I b-round-329/perf-rowcmp.py c-round-349/perf-results/latest-interactions.json <A's test-results/perf/latest-interactions.json>` | rc 0; `complete`; `failures` []; 252 rows; **70/70** asserted pass; 0 NEW; deterministic DIFF exactly the §2.3 rows at the §2.3 values (`b-round-349/perf-rowcmp-sketch-vs-c349.txt`); the 3 video liveness rows 1 in 3/3; `durationMs` ≤ 540000 and recorded |
+| A-REVIEW | `code-reviewer` (3 files) | 0 Medium+ open, or each one ruled by id; Architecture note passed to B |
 
 ### 2.2 C rows
 | Row | How | Pass |
 |---|---|---|
-| CLAIMS | `bash b-round-348/claims-349.sh` | equals A's final |
-| SOURCE-SCOPE | `git status --short --untracked-files=all`; `git apply -R --check` of both `b-round-348/sketch/*.patch.txt` | 3 modified, 0 untracked; both patches reverse-apply |
-| READ | read the diff | Existing video move ids, `liveId` and `rows` unchanged; the audio `dragTarget` calls still default to `'audio'`; 22 budget rows added, all `record`, 0 existing rows changed (python diff of the JSON vs HEAD) |
-| PERF (browser, production, alone) | A-PERF's command | as A-PERF; values within the §0.3 table for the deterministic new rows (identical, or any difference listed as a finding with its `details`) |
-| GRAB-PROBE (browser, production run's own results) | from C's PERF result, read each new row's `details` (`stoppedBefore`/`Mid`/`End`, `playingBefore`/…) on the two liveness rows | trim: `data-clip-start` grows start → mid → end; fade: `data-fade-in` grows start → mid → end, in all 3 passes. This proves the new rows measure the real gestures, not an aborted step |
-| MUTANT (C's own, scratch, predicted before running) | One harness mutant on a scratch copy (L59/L60), run alone. Suggested: `dragTarget`'s video branch returns the audio fade testid. Predicted: rc 1; each 1× pass has `abortedAt` = `drag interact.drag.video-fade stopped` (after the `toHaveCount(1)` wait); `passes[].problems` records the abort; `failures` lists `rows short of 3 samples because a pass aborted` and failed asserts with no samples on `interact.drag.video.playing.release-commits` and `interact.drag.video.playing.move-restarts`; `interact.harness.drag-video-live` stays 1 and passes (stopped move sample); the video-trim stopped rows have 3 samples; the video-fade and all playing video rows have 0. The 6× rows are unchanged | red as predicted; scratch deleted; `store/` unchanged |
-| PERF-LIB | A-PERF-LIB | 40/40 |
-| G349-AUTH (browser, both viewports) | fresh anonymous context | `/studio-lab` opens with the workspace and demo badge, `auth_user` is null; `/studio/<id>` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` refuses (401/400/405; 500 only when the mock on :5199 is down, and then it is listed under `blocked`) |
-| VIDEO-SMOKE (browser, 1440×900 and 1280×720, dev :5173) | `/studio-lab`: import `public/videos/hero/1.mp4` via the video lane, zoom in, drag its trim-start edge and its fade-in handle with the mouse, then Undo each | each previews during the drag, commits one history entry on release, and Undo restores it (no behaviour change; checks that the measured gestures are real user gestures) |
-| DOCS | doc 232 | l.4 as in §1.2; one `### ეტაპი video-trim-fade` section; 7 `## `; 0 "C round 348 pending"; every row count and value the doc states matches the live file and A's run (L34) |
+| CLAIMS | `bash b-round-349/claims-350.sh` | equals A's final |
+| SOURCE-SCOPE | `git status --short --untracked-files=all`; `git apply -R --check b-round-349/sketch/dock.patch.txt` | exactly the 3 files modified, 0 untracked; the dock patch reverse-applies |
+| READ | read the diff | the dock no longer calls `useArrangementPreviewLaneClips`; the reader's base is `getArrangement()`; markup, testids, strings and the playing sync effect unchanged; the 6 DP tests present and asserting as §1.2 |
+| UNIT | A-UNIT's command | all pass |
+| MUTANT (B's, predicted) | M-B1 and M-B2 on a scratch copy (L59/L60) against `drag-preview-render.test.tsx`; M-B1 also against the browser RELEASE probe on a scratch dev server | M-B1: DP69 red, and the release probe logs an opacity mutation with `oldValue` `'1.000'` (as `video-release-sketch1-mutant.json`). M-B2: DP66, DP67 and DP71 red, and the names probe (on a scratch dev server) shows `ArrangementVideoDock` per move. Scratch deleted; `store/` unchanged |
+| PERF (browser, production, alone) | A-PERF's command | as A-PERF; the deterministic rows in §2.3 equal A's run, or each difference listed with its `details` |
+| NAMES (browser, dev) | `node b-round-349/video-names-probe.mjs http://127.0.0.1:5173 <c-round-350/names.json>` | per move: video-trim 13, video-fade 3, video-move 11 on its first 3 moves; no `ArrangementVideo*` or `Maximize2` name in any trim, fade or move commit (the release commits may contain them) |
+| BEHAVIOUR (browser, dev, 1440×900 and 1280×720) | `video-behaviour-probe.mjs` at both viewports (C adds a viewport argument in its own copy under `c-round-350/`) | at 1440×900, every group equals `b-round-349/video-behaviour-dev.json` except `src`; at 1280×720, the same qualitative results: trim-inside `currentTime` unchanged, trim-early gap appears during the preview, fade opacity strictly falls during the drag and is 1.000 after Undo |
+| RELEASE (browser, dev, both viewports) | `video-release-probe.mjs` (C's copy with a viewport argument) | fade release and move release: 0 `data-video-opacity` mutations and 0 `<video>` `currentTime`/`src` writes after pointerup; the final values equal the pre-release values; Undo restores |
+| PLAY-SYNC (browser, dev, both viewports) | C's copy of `b-round-349/video-playsync-probe.mjs`: import the video, then two windows of Home, Space, 3 s and Space. Between the two windows, C inserts a stopped trim-start drag, a fade-in drag and a move drag, each followed by Undo | in both windows, at 1 s, 2 s and 3 s, the `<video>` `currentTime` minus the transport position (drift) is within ±0.3 s. **HEAD baseline** (B, no drags; `video-playsync-head-1440x900.json` and `-1280x720.json`): \|drift\| ≤ 0.014 s at both viewports. L24: a drift or stall that also appears in a HEAD control run on the same machine is listed with that HEAD result and does not fail the round. No console error other than the cloud-expected ones |
+| G350-AUTH (browser, both viewports) | fresh anonymous context | `/studio-lab` opens with the workspace and demo badge, `auth_user` null; `/studio/<id>` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` refuses (401/400/405; 500 only when the mock on :5199 is down, then listed under `blocked`) |
+| DOCS | doc 232 | l.4 as in §1.3; one `### ეტაპი video-trim-fade-cost`; 7 `## `; 0 "C round 349 pending"; every number the doc states matches A's run and B's §0.4 (L34) |
 
 **Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
-**browserVerified:** PERF, GRAB-PROBE, MUTANT, G349-AUTH and VIDEO-SMOKE all run here; none needs the backend.
-**Ableton conformance:** not applicable (harness only; behaviour identical).
-**All L57 fields** go in `c-round-349.json`. `mutantRedOnSketch` = null with the reason "record rows; no B mutant; C's harness mutant is in `mutantRedOnTree`". `affectedChecksNamed` = the interactions perf spec and `perf/lib/report.test.ts`; `affectedChecksRunOnSketch` = `b-round-348/perf-sketch-results/latest-interactions.json`, `b-round-348/perf-head-results/latest-interactions.json`.
+**browserVerified:** PERF, NAMES, BEHAVIOUR, RELEASE, PLAY-SYNC, MUTANT (M-B1 browser half) and G350-AUTH all run here, and none needs the backend.
+**Ableton conformance:** not applicable. This is a perf round, and the behaviour is unchanged by construction and by the rows above.
+**L57 fields** in `c-round-350.json`:
+- `mutantRedOnSketch` = true: M-B1 was red on the release probe on B's first sketch at planning.
+- `affectedChecksNamed` = `drag-preview-render.test.tsx`, the interactions perf spec, and the three probes.
+- `affectedChecksRunOnSketch` = `b-round-349/sketch-covering-vitest.log`, `b-round-349/perf-sketch-results/latest-interactions.json`, `video-names-sketch.json`, `video-behaviour-sketch.json` and `video-release-sketch2.json`.
+
+### 2.3 Perf rows expected to change
+The rows in the table below differ from C349 on B's sketch (`b-round-349/perf-rowcmp-sketch-vs-c349.txt`). Every other row is EQUAL (172 EQUAL; the remainder are wallclock rows inside their usual noise). A's and C's run must show the deterministic values exactly, or list each difference with its `details`:
+
+| Row | C349 | B sketch | Mode |
+|---|---|---|---|
+| `interact.drag.video-trim.stopped.move-components-per-move` | 18.683 | **12.817** | record |
+| `interact.drag.video-trim.stopped.move-components-max` | 19 | **15** | record |
+| `interact.drag.video-trim.playing.move-components-max` | 19 | **15** | record |
+| `interact.drag.video-trim.playing.move-components-per-move` (wallclock) | 18.683 | 12.817 (12.817–12.883) | record |
+| `interact.drag.video-fade.stopped.move-components-per-move` | 8.85 | **2.95** | record |
+| `interact.drag.video-fade.stopped.move-components-max` | 9 | **3** | record |
+| `interact.drag.video-fade.playing.move-components-max` | 9 | **3** | record |
+| `interact.drag.video-fade.playing.move-components-per-move` (wallclock) | 8.85 | 2.95 | record |
+| `interact.drag.video.stopped.move-components-per-move` | 15.75 | **9.883** | **assert ≤ 24 (passes)** |
+| `interact.drag.video.stopped.move-components-max` | 17 | **13** | record |
+| `interact.drag.video.playing.move-components-max` | 17 | **12** | record |
+| `interact.drag.video.playing.move-components-per-move` (wallclock) | 15.75 | 9.883 (9.883–9.95) | record |
+
+Unchanged on the sketch:
+- every `release-commits`: video 1, trim 1, fade 2;
+- every `move-restarts` (0) and `release-restarts` (31);
+- every non-video row.
+
+A rise in any row is a STOP for A and a finding for C.
 
 ## 3. Neighbouring behaviour that could break
-- **The asserted video move rows** run in the same block. On the sketch they were unchanged against C348 (0 deterministic differences). If a trim or fade step aborts, they lose their samples (M1).
-- **The spec's duration** goes up by about 37 s (§0.3).
-- **The 6× passes** do not run the video block, so nothing changes there.
-- **`report.ts` determinism check** now covers 22 more rows. They were all 3/3 identical on the sketch.
+- **The stopped video frame:**
+  - after a seek, a click on the ruler, or an Undo/Redo of a video edit (BEHAVIOUR, DP70);
+  - when a video clip is added or removed (the reader is rebuilt on commit).
+- **The gap caption and the source caption** at clip edges and in gaps (DP58, DP68).
+- **The fade overlay** at rest, during playback, and in the floating box (`video-fades-ui`, `floating-video`).
+- **Playback sync** (PLAY-SYNC). The playing path is unchanged.
+- **Audio drags with a video present:** no new work per move (DP71).
+- **SSR:** `getServerSnapshot` reads the same function, and the preview is null on the server.
 
 ## 4. STOP conditions (A)
 - A-CLAIMS pre mismatch, or a final mismatch outside §2.1.
-- A patch does not apply, or a change is needed outside the 3 files.
-- A-PERF: any asserted row fails; any NEW row outside the 22; any existing deterministic row that differs from C348; a liveness row below 1; a new deterministic row that differs across its passes (`report.ts` reports it); an aborted step; or `durationMs` > 540000.
+- A needed change outside the 3 files, or the dock patch does not apply, or a review finding needs a change to the patched code.
+- An existing test fails.
+- A mutant cannot be made red on its test.
+- A-PERF: any asserted row fails, any NEW row, a DIFF outside §2.3, a liveness row below 1, an aborted step, or `durationMs` > 540000.
 
-## 5. Routed from round 348 (D-29z1107), not in scope
-- **GATE348-S1 = A-R348-REVIEW-L1** (Low): in DP63/DP65, if `pointerUpAt` inside `try` throws, the `finally` calls it again and can hide the first error. → `deferred_low_polish`, joined to ARCH-R348-DP-GESTURE-CYCLE.
-- **GATE348-S2** (Low): after a failed assertion, the `finally` releases the pointer but skips `undo()`. → `deferred_low_polish`, joined to ARCH-R348-DP-GESTURE-CYCLE.
-- **GATE348-S3/S4/S5** (info): zero headroom on `max` rows (intended), the move `<= 16` hides about 1.5 components of steady-state regression (tracked by PERF-CAND-MASTER-GROUP-FADER-PROPS), and the doc is consistent. → closed_info.
-- **A-R348-REVIEW-INFO** ("ceil of 15" wording in a note) → closed_info.
-- **C-R348-PERF-DURATION** (C's note: 454664 ms > 450000) → evidence on ROOT-REQ-PERF-TIMEOUT, ruled in D-29z1108.
-- **Architecture signals** (not scheduled):
-  - ARCH-R348-DP-GESTURE-CYCLE: the gate proposes a `runGestureCycle` helper for DP63/DP65 (rounds 346–348 all edited these blocks). It joins ARCH-R346-DP-HARNESS-EXTRACT.
-  - The crossing-commit note is already ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE.
-- **Later, recorded:** PERF-CAND-VIDEO-TRIM-FADE-COST (next stage), PERF-CAND-MASTER-GROUP-FADER-PROPS, PERF-CAND-FADE-RELEASE-COMMITS and PERF-CAND-CHROME-ICONS.
+## 5. Routed from round 349 (D-29z1112), not in scope
+- **GATE349-S1** (Low): interactions spec run time (`durationMs` 490693, 91 % of the STOP). This is evidence on ROOT-REQ-PERF-TIMEOUT (overdue, L46; deadline RETRO 351) → closed_info.
+- **GATE349-S2** (Low): the video trim/fade grabs depend on the timeline at x≈0. It was ruled in D-29z1108 M1. If it ever flakes, add Home before the first playing video drag → `deferred_low_polish`.
+- **GATE349-S3/S4** (info): `setLive` is honest, and the record rows are as intended → closed_info.
+- **C-R349-INFO-LIVE** (info): the trim liveness row is also fed by the stopped drag, and an abort stays loud through `failures` → closed_info.
+- **C-R349-COLD-VITE** (info): a cold Vite dep-optimize reload once. Environment noise → closed_info.
+- **Architecture signals** (not scheduled): A-R349-ARCH-VIDEO-SPEC-SPLIT and GATE349-ARCH-SPEC-SPLIT. Both say: move the video block into its own spec with its own timeout, and share `measureDrag`/`dragTarget` from `perf/lib`. Both join ARCH-R339-DRAG-MEASURE-EXTRACT, which is question 3 of ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE (still unanswered).
+- **New candidate, recorded:** the video move's 4th probe sample renders the whole tree (82) on HEAD. This is the project-end crossing, and it joins PERF-CAND-MASTER-GROUP-FADER-PROPS / the crossing.
 
 ## 6. Deliverables
-- **A:** the 3 files; `a-round-349.md` with the A rows; logs in `a-round-349/`.
-- **C:** `c-round-349.md`, `c-round-349.json` and `c-round-349/`.
+- **A:** the 3 files; `a-round-350.md` with the A rows; logs and mutant outputs in `a-round-350/`.
+- **C:** `c-round-350.md`, `c-round-350.json` and `c-round-350/`.
 
 ## 7. Claims
-Run `bash b-round-348/claims-349.sh` from the loop root. `CLAIMS_STORE=<dir>` points it at another tree.
-- **Expected outputs:** `b-round-348/claims-349-planning-output.txt` (HEAD) and `b-round-348/claims-349-sketch-output.txt` (B's sketch `/home/runner/b348-scratch/sk`: spec and budgets applied, no doc change; K2 reads `no-git` there).
-- **K1:** gate 348 `published` `70751a5`.
+Run `bash b-round-349/claims-350.sh` from the loop root. `CLAIMS_STORE=<dir>` points it at another tree.
+- **Expected outputs:**
+  - `b-round-349/claims-350-planning-output.txt` (HEAD);
+  - `b-round-349/claims-350-sketch-output.txt` (B's sketch `/home/runner/b349-scratch/sk`, where K2 reads `no-git` and the tests and doc are unchanged).
+- **K1:** gate 349 `published` `7f56989`.
 - **K2:** HEAD and the `git status` entry count.
-- **K3:** budgets: row count, asserted count, the rows this task owns (all `record`), and the video-trim, video-fade, liveness and video-move row counts.
-- **K4:** spec: the video and audio fade testids, the `videoDrags` constant, the old literal move `liveId`, and the `rows: 'all-but-ratio'` count.
-- **K5:** `ArrangementClip.tsx`:
-  - the fade testid prefix line;
-  - the trim-start title, rendered once for both kinds;
-  - `FADE_HANDLE_MIN_CLIP_PX = 24`;
-  - `data-fade-in`;
-  - `setFade` picks the video setter;
-  - the `previewGeometry` line.
-- **K6:** `report.test.ts` pins 16 windowed drag rows and reads `budgets.interactions.json`.
-- **K7:** `playwright.perf.config.ts` timeout is `15 * 60 * 1000`.
+- **K3:** the dock's counts of `useArrangementPreviewLaneClips`, `useVideoLaneArrangement`, `videoLaneArrangement`, `useArrangementPreviewStore` and `getArrangement`.
+- **K4:** `ArrangementContext.tsx`: the `getArrangement` line reads `historyRef.current.present`; the count of `clearPreview()` calls; the `useArrangementPreviewLaneClips` export.
+- **K5:** DP58, DP59, DP60 and DP65 exist; the count of DP66+.
+- **K6:** budgets: 252 rows, 70 assert, the 22 owned rows all `record`.
+- **K7:** the `playwright.perf.config.ts` timeout is `15 * 60 * 1000`.
 - **K8:** protected files OK.
-- **K9:** `regression-last` date.
-- **K10:** `app/`, `perf/`, `e2e/` and `docs/` diff lines outside the 3 files; untracked files.
-- **K11:** doc 232 `## ` count, the video-trim-fade section, "C round 348 pending" and "C round 349 pending".
-- **K12:** the `SWEEP` of `drag\.video|drag-video` over `app`, `perf` and `e2e`, excluding the budgets JSON: only the spec.
-- **K13:** the kept B artifacts exist (`test -f`, 7 files).
-- **K14:** `perf/lib/report.ts`: an assert row is reported when the run is `complete`, even with no samples, and an aborted pass adds the "rows short" failure (two line greps).
+- **K9:** the `regression-last` date.
+- **K10:** diff lines in `app`, `perf`, `e2e` and `docs` outside the 3 files; untracked files.
+- **K11:** doc 232: the `## ` count, the cost section, "C round 349 pending" and "C round 350 pending".
+- **K12:** the non-test files that call `useArrangementPreviewLaneClips(`.
+- **K13:** the kept B artifacts exist (15 files, including `sketch/dock.patch.txt` and `video-playsync-probe.mjs`).
