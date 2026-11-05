@@ -1,0 +1,15 @@
+const X = require('./lib122.cjs'); const { L, sleep } = X; const vp = process.argv[2];
+(async () => { const b = await L.launch(); const net = []; const res = {};
+  const { page: p } = await L.openStudio(b, X.VPS[vp], `RP-RANGE-timing-${vp}`, net);
+  await L.setSnapOff(p); await L.addAt(p, 'demo-synth-mix', 'music', 0); await L.addAt(p, 'demo-stem-pulse', 'stems', 2); await L.addAt(p, 'demo-soft-impact', 'sfx', 4);
+  const st = (await L.clipsDom(p)).find((c) => c.lane === 'stems'); await L.selectClip(p, st.id);
+  const box = async () => p.evaluate((id) => { const r = document.querySelector(`[data-clip-id="${id}"]`).getBoundingClientRect(); const d = document.querySelector('[data-testid=arrangement-detail-panel]').getBoundingClientRect(); return { y: +r.y.toFixed(1), h: +r.height.toFixed(1), panelH: +d.height.toFixed(1), ex: document.querySelector('[data-testid=arrangement-detail-toggle]').getAttribute('aria-expanded') }; }, st.id);
+  res.before = await box();
+  const y = await X.bodyY(p, st.id); const x0 = await X.tx(p, 5), x1 = await X.tx(p, 8);
+  await p.mouse.move(x0, y); await p.mouse.down(); await sleep(150); res.afterDown = await box();
+  await p.mouse.move((x0 + x1) / 2, y, { steps: 6 }); await sleep(150); res.mid = await box();
+  await p.mouse.move(x1, y, { steps: 6 }); await sleep(150); res.beforeUp = await box();
+  const hitBeforeUp = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e && e.closest('[data-track-id]') ? e.closest('[data-track-id]').dataset.trackId : null; }, [x1, y]);
+  await p.mouse.up(); await sleep(100); res.up100 = await box(); await sleep(600); res.up700 = await box(); res.hitBeforeUp = hitBeforeUp;
+  res.range = await p.evaluate(() => [document.querySelector('[data-testid=arrangement-detail-start]').value, document.querySelector('[data-testid=arrangement-detail-end]').value]);
+  console.log(JSON.stringify(res)); L.save(L.OUT, `RP-RANGE-timing-${vp}.json`, res); await b.close(); })();

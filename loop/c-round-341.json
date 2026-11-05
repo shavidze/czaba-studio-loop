@@ -1,0 +1,392 @@
+{
+ "round": 341,
+ "taskStatus": "PASS",
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T00:42:24.0591403Z",
+  "round": 341,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SOURCE-SCOPE",
+  "G341-AUTH",
+  "R340-WAVEFORM",
+  "R340-DETAIL-TEXT",
+  "R340-SHOWN-READERS",
+  "R340-PROJECT-END",
+  "R340-FADE-STATUS+R340-DRAG-A",
+  "R340-SELECTION",
+  "R340-RANGE",
+  "R340-PERF3D",
+  "R340-NAME",
+  "RR-PERF",
+  "RG-SMOKE",
+  "RG-01..24,RG-T1..T4B",
+  "R301-MENU",
+  "R301-LINK",
+  "R301-LOAF",
+  "R301-NAMES",
+  "R301-WORKER",
+  "R301-DISABLED",
+  "R301-STATUS-LIFETIME",
+  "R301-REL-SNAP",
+  "R301-TAPER",
+  "R301-ALTGR",
+  "R301-CONTRACTS",
+  "R301-HIDDEN-GRID-BG",
+  "R301-MASTER",
+  "R301-NARROW",
+  "R301-PERF3 ruler/flip",
+  "RP-NOBPM-RULER",
+  "RP-METRO-MUTE/SPACE-EMPTY/VIDEO-MARKER/NARROW"
+ ],
+ "partial": [
+  "R340-OVERVIEW-METER (SA-14 L sub-check not run)",
+  "R340-PEAKS (ran load, video, cold start)",
+  "R340-RESCHEDULE (NO-CHANGE posctl inconclusive)",
+  "R340-JOURNEY (store half; see C-R341-02)",
+  "R340-FONTS (FONT-PIXEL not decidable)",
+  "R340-WORKER-R2 (GUARD and HEAD-CONTROL not run)",
+  "RV/RR/RS (s186 at 1280 crashed; RS-LM/HIDDEN/4B/2A individual rows not located)"
+ ],
+ "failed": [],
+ "inconclusive": [
+  "R340-FONTS FONT-PIXEL",
+  "R340-RESCHEDULE NO-CHANGE posctl",
+  "RS-1A..1D 1280 (s186 script crash)",
+  "RP-C318-06 root cause undetermined (Low)"
+ ],
+ "blocked": [],
+ "carried": [
+  "G340-AUTH",
+  "R340-GROUP-MOVE",
+  "R340-CROSS-LANE",
+  "R340-HINT",
+  "R340-RESCHEDULE CONT-1",
+  "R340-JOURNEY Studio half"
+ ],
+ "notRun": [
+  "R340-OVERVIEW-METER SA-14 'press L after fade/move preview' (no script; row text does not define L)",
+  "R340-WORKER-R2 WK-GUARD-PROXY, WK-HEAD-CONTROL",
+  "R301-PRICE (mock-c288 pair)",
+  "RS-1A..1D at 1280 (s186 script crash x2, mock catalogue lacks the 'Gift Card' item the script reads)",
+  "RG-22-390 narrow half (rg22n.cjs writes into c-round-301/, not replayed)",
+  "Parked: RP-MENU-SHEET, RP-LINK-NATIVE-MENU, RP-LINK-DRAG (rp301.cjs not replayed), RP-C301-01, RP-FOLD-SELECTION, RP-SAME-TEXT-RACE, RP-GATE328-S1, RP-C331-01, SA-19 carried",
+  "RR-OSS full licence suite (single test file only; the full suite is a gate row)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "bugs": [
+  {
+   "id": "C-R341-01",
+   "severity": "low",
+   "steps": [
+    "1280x720 fresh context, /studio-lab, add 'Middle East — public preview' (Music lane, 10 s)",
+    "run the c320-rows.mjs sequence without a page reload: time selection 12.5-18.325 s, all-tracks command, Esc, Space, Space, Home",
+    "press Ctrl+E"
+   ],
+   "expected": "the clip under the selection is split, or the message says why nothing was split",
+   "actual": "status 'Could not split at the time selection.'; overlay is on the Stems lane only while the clip sits on Music; nothing changed; Undo then removes the Add. At 1440 and at 1280 after a reload the same sequence splits normally.",
+   "evidence": "c-round-341/out/b2/rows-n-1280x720.json (SPLIT_range, SPLIT_do) vs rows-n-1440x900.json and rows-n-1280x720-reload.json; regression: no (pre-existing C-R318-06, last 'pass' none; also seen in c-round-320.md l.38); root cause undetermined; origin: pre-existing"
+  },
+  {
+   "id": "C-R341-02",
+   "severity": "low",
+   "steps": [
+    "fresh context, 1440x900, mock API running, open /products/middle-east, wait 2.5 s",
+    "click 'Try it in the Studio' (product-studio-link)",
+    "wait 9 s on /studio-lab?preview=middle-east and read the console"
+   ],
+   "expected": "no console warnings (round 301 B-JOURNEY console was [])",
+   "actual": "two warnings: 'The resource .../instrument-sans-latin.woff2 (and ibm-plex-mono-latin.woff2) was preloaded using link preload but not used within a few seconds from the window's load event'. Direct load of /studio-lab has none. Reproduced on the dev server and on a production build (vite build of HEAD, :5192), both viewports.",
+   "evidence": "c-round-341/out/preload-warn.json (dev), out/preload-warn-prod.json (prod), t301/r296/probe-a.json (console.B-JOURNEY); regression: yes - PERF-7 (rounds 316/317) added the preloads; round 301 passed with []; round 317 measured direct loads only; origin: B spec gap (client navigation not in the PERF-7 rows)"
+  }
+ ],
+ "observations": [
+  "INFO-C341-DELETE-MISTAKE (C's own error): a find -delete for *.wav >100 KB meant for c-round-341/ ran in the loop root after a failed cd and removed untracked WAV files across the loop folder (old rounds' ignored evidence WAVs; examples are the RG-13/18/20/T3A WAVs under c-round-301/t258/out and similar). The only tracked casualty, loop/media/tone-2s.wav, was restored with git checkout. No WAV is read by an oracle comparison in this round (all comparisons used JSON info/sha); the earlier-round WAVs cannot be recovered and are regenerable. store/ untouched.",
+  "INFO-C341-EXPORT-ESC-FLAKE: 1 of 5 c320-rows 1440 runs crashed with the export dialog still open after Esc; export-esc probe 5/5 closes. Not reproduced, kept.",
+  "INFO-C341-SLASH-S: R340-FONTS says woff2 from /s/; the build serves /assets/ (round 317 oracle too).",
+  "INFO-C341-STORE-WEIGHT: /store now loads Inter 700 in addition to the round-317 set; same woff2 bytes.",
+  "INFO-C341-R252: r252 followPause@1280x720 passes now (oracle false).",
+  "INFO-C341-LATCH-SR: latch 1440 sr-only overload text present in 3 samples (oracle []); transient live region.",
+  "C stopped because the remaining rows had no replayable script or an undefined definition, not because of a runner cap."
+ ],
+ "rows": {
+  "G340-AUTH": {
+   "status": "CARRIED-PASS",
+   "text": "Carried from round 340 per task 3a; not re-run.",
+   "evidence": "c-round-340/"
+  },
+  "R340-GROUP-MOVE": {
+   "status": "CARRIED-PASS",
+   "text": "Carried from round 340 per task 3a; not re-run.",
+   "evidence": "c-round-340/"
+  },
+  "R340-CROSS-LANE": {
+   "status": "CARRIED-PASS",
+   "text": "Carried from round 340 per task 3a; not re-run.",
+   "evidence": "c-round-340/"
+  },
+  "R340-HINT": {
+   "status": "CARRIED-PASS",
+   "text": "Carried from round 340 per task 3a; not re-run.",
+   "evidence": "c-round-340/"
+  },
+  "R340-RESCHEDULE-CONT-1": {
+   "status": "CARRIED-PASS",
+   "text": "Carried from round 340 per task 3a; not re-run.",
+   "evidence": "c-round-340/"
+  },
+  "R340-JOURNEY-studio-half": {
+   "status": "CARRIED-PASS",
+   "text": "Carried from round 340 per task 3a; not re-run.",
+   "evidence": "c-round-340/"
+  },
+  "SOURCE-SCOPE": {
+   "status": "PASS",
+   "text": "Start and end: HEAD 99a5912, git status empty, protected 11/11, tree sha 0 failures of 1239, claims K1-K9 as expected (K6 000 at the end because C stopped its own mock). No store/ file changed by C.",
+   "evidence": "claims output in this run; c-round-341/progress.json"
+  },
+  "G341-AUTH": {
+   "status": "PASS",
+   "text": "Fresh incognito contexts, no credentials, both viewports: /studio-lab opens the demo (workspace, demo badge, no auth_user, no sign-in wall); /studio/middle-east shows 'Sign in required' with no workspace and no audio; /api/studio-token: no header 401, fake Bearer 403 (mock running), bare 400. Premium auth not bypassed.",
+   "evidence": "c-round-341/out/g341-auth.json"
+  },
+  "R340-WAVEFORM": {
+   "status": "PASS",
+   "text": "WAVEFORM-D 22 samples/vp equal to c-round-334 wd-sketch (0 DIFF both vp); trim-end lane/detail equal (only clip uuids differ); VIDEO-WAVE json equal.",
+   "evidence": "out/wd-*.json trimend-*.json video-*.json cmp/batch1-cmp.txt"
+  },
+  "R340-DETAIL-TEXT": {
+   "status": "PASS",
+   "text": "detail-text.mjs 24 samples/vp equal to c-round-333 accepted run modulo uuids.",
+   "evidence": "out/b3/detail-n.json"
+  },
+  "R340-SHOWN-READERS": {
+   "status": "PASS",
+   "text": "29 samples/vp normalised-equal to c-round-331 accepted run.",
+   "evidence": "out/shown-*.json"
+  },
+  "R340-OVERVIEW-METER": {
+   "status": "PASS-PARTIAL",
+   "text": "23 samples/vp: extent/state/bars/nClips/fade equal (0 differing); meters move in playing/fade/move/volume drags; latch.mjs 1280 equal to oracle; latch 1440 differs only in the transient sr-only text list (the overload announcement was captured now, [] in the oracle: live-region timing, not a state difference). The SA-14 'press L after a preview' sub-check has no script in round 332 and the row text does not define what L does (loop?): NOT run.",
+   "evidence": "out/ovr-*.json out/b4/latch-*.json"
+  },
+  "R340-PROJECT-END": {
+   "status": "PASS",
+   "text": "end-bound-probe output equal to c-round-330/end-bound-a.json.",
+   "evidence": "out/end-bound.json"
+  },
+  "R340-FADE-STATUS+R340-DRAG-A": {
+   "status": "PASS",
+   "text": "rows.mjs head341 vs c-round-334 rows-a: rows-diff DIFFS 0; EXPORT WAV sha256 453d1a04637760b499c373cb4da17aff0adc93e49f19e526b007d5eb8fdac567, duration 118.815 s, identical to the oracle at 1440 and 1280. c325-rows and c328-rows (D-NOFLASH/D-MIXED/srcmark): equal except playhead timing and the new source-ghost mark 'src=true|op=0.4' during cross-lane drags (a changed UI fact).",
+   "evidence": "rows/rows-head341.json out/b4/r325 r328"
+  },
+  "R340-SELECTION": {
+   "status": "PASS",
+   "text": "c324-rows and c324-group equal to the c-round-324 accepted run (group identical modulo uuids; rows differ only in the WAV path). WAV compared by header info (304.056 s, 24-bit/48 kHz, same dataSize/peak/nonzero count), not byte-compared (the oracle WAV is gone); the byte-level check is the D-ROWS sha above.",
+   "evidence": "out/b2/rows-n.json group-n.json"
+  },
+  "R340-RANGE": {
+   "status": "PASS",
+   "text": "c320-rows 1440/1280/1280-reload and c320-wave equal to c-round-320 except playhead timing (translateX 0.967 vs 0.979 %, wave first-draw t). R-EXPORT range at 1440: 5.825 s, dataSize 1677600, peak 0.4684, nonzero 79872 identical. One crash at 1440 (export dialog still intercepting after Esc, attempt 1); attempts 2-4 passed; export-esc probe closes on Esc 5/5.",
+   "evidence": "out/b2/"
+  },
+  "R340-PEAKS": {
+   "status": "PASS-PARTIAL",
+   "text": "pk-load --play 2 loads/vp (1 clip, 2 workers, level peak 0.3416-0.3431, 1 start) and pk-video-sound (held decoding/0 starts, released level ~0.50, 1 start) equal to round 315; cold-start with a 4000 ms held first reply: peaks worker survives (180 replies), previewWave 96, 0 page errors.",
+   "evidence": "out/b3/pkplay-*.json pkvid-*.json out/b4/cold-1440.json"
+  },
+  "R340-RESCHEDULE": {
+   "status": "PASS-PARTIAL",
+   "text": "CONT-1 and CONT-30 (valid, seams<=1, ratio 0.052-0.056, zeroRun 0), release probe (30 starts within ~1.5 ms of release), ended probe (identical numbers) equal to round 308. NO-CHANGE posctl probe: oracle itself valid=false; inconclusive.",
+   "evidence": "out/b3/"
+  },
+  "R340-PERF3D": {
+   "status": "PASS",
+   "text": "SCROLL-UPGRADE 200 steps, rewrites 29, maxStep 1, loaf 0 (oracle 29/1/0); VIS-EQUIV d+viewBox equal; PLAY-SMOKE-306: pos 00:01.471 after 1.5 s, play false-true-false, export 768000 frames 16.000 s peak 0.217 nonzero 0.9999 (= round 306) at both vp; perf3 ruler steps and flips exactly equal to round 285 (1440 in [76,62,50,40,64,40,50,62,76,94], flips 4/5, gap runs []).",
+   "evidence": "out/b3/scroll-*.json visd-*.json t301/smoke t301/perf3/out"
+  },
+  "R340-NAME": {
+   "status": "PASS",
+   "text": "round-302 main.cjs equal to main.json except live clock/playhead jitter; budget/budget2: text lines 95/78 now vs 96/79 (removed 'CZABA Studio Lab' and '· Workspace', added 'CZABA Studio').",
+   "evidence": "out/b3/name/main.json"
+  },
+  "R340-JOURNEY": {
+   "status": "PASS-PARTIAL",
+   "text": "Store half (mock): journey301 equal to round 301 except the intended hint 'Drag a clip by its name bar to move it.' after the first add (read as once per page load, D-29z1062). Title 'CZABA Studio — Demo collection'. c296 'a' journey confirmed link href /studio-lab?preview=middle-east, export, exit. Console shows font-preload warning, see C-R341-02.",
+   "evidence": "out/b3/journey301.json t301/r296"
+  },
+  "R340-FONTS": {
+   "status": "PASS-PARTIAL",
+   "text": "Prod build :5192 (vite build from HEAD archive in /tmp): 0 Google requests, 0 render-blocking third-party, 2 CORS preloads on /studio-lab, woff2 files immutable cache, same sha as round 317 (served from /assets/, as in round 317; the task's '/s/' wording is wrong). FONT-PIXEL not decidable: round-317 pixel oracle predates later UI changes; screenshots saved.",
+   "evidence": "out/fonts/"
+  },
+  "R340-WORKER-R2": {
+   "status": "PASS-PARTIAL",
+   "text": "WK-BROWSER-PROXY with R2_SWAP+R2_STRICT, OOB throw and short: 0 diffs vs round 311 (ignoring timestamps and port). WK-GUARD-PROXY and WK-HEAD-CONTROL (head-r2-proxy) not run.",
+   "evidence": "out/wk/"
+  },
+  "RR-PERF": {
+   "status": "PASS",
+   "text": "npm run test:perf alone: rc 0, 3 passed (13.5 m), complete true in latest/latest-interactions/latest-resources; 219 interactions rows, 45 asserted all pass; interact.harness.drag-lane-live=1 and drag-group-live=1; perf-rowcmp vs c-round-339: 0 DIFF. latest.json/latest-resources.json vs c-round-301/perf not compared (report only).",
+   "evidence": "perf-results/ out/perf.log"
+  },
+  "RG-SMOKE": {
+   "status": "PASS",
+   "text": "npm run test:e2e:smoke alone: 2 passed, rc 0.",
+   "evidence": "out/smoke.log"
+  },
+  "RG-01..24,RG-T1..T4B": {
+   "status": "PASS",
+   "text": "t258 driver run3 at 1440 and 1280 (57 outputs): 50 pass directly; RG-03/04/06/18 fail only with the old scripts and pass with the round-301 accepted variants (rg03m, rg04-258 all 10 flags true, rows1c Ctrl+drag marquee, STEM=demo-stem-pad); RG-14 sub 5 flags true; RG-22 desktop half pass; adapt3 identical true/false set to oracle. RG-03 drift median 5.3 ms, max 16.3 ms.",
+   "evidence": "t258/out/ rg-run3-summary.json"
+  },
+  "RV/RR/RS": {
+   "status": "PASS-PARTIAL",
+   "text": "Normalised logs equal to round 301 (30 of 38 store/other logs equal, 8 explained): RV-EN, TOKENS, ICONS, M, SABA-1-2, SABA-3-4, MARKER-ENTER, REVEAL; RR-TRANSPORT (c256/c257), RR-BLINK (c254/c255), RR-TEMPO/STRIP/ADAPT (grid258), RR-SHEET, RR-OVERVIEW, RR-HIDDEN-SNAP, RR-MENU, RR-SEEDRACE, RR-FOCUS-ORIGINS, RR-MARKER, RR-CURSOR, RR-FADER, RR-LEGACY, RR-MP3 (real 1440: 4,055,208 B, Xing, walk clean, decoded 101.376 s RMS -15.29 dBFS, 0 ffmpeg/unpkg), RR-OSS (70 tests pass in third-party-licenses.test.ts). Store RS rows s187/s190/s188/t203-t205 equal where an oracle exists; s186 at 1280 crashed twice (script screenshot clip), s190 cls/dur differ by timing only, s188 foreignHosts now [] (Google hosts gone).",
+   "evidence": "t258/logs t258/sNNN/logs"
+  },
+  "R301-MENU": {
+   "status": "PASS",
+   "text": "r300 rows.json 0 diffs, audio.json equal except start timestamps",
+   "evidence": "t301/r300"
+  },
+  "R301-LINK": {
+   "status": "PASS",
+   "text": "c296 tag a equal except hint text, English names, preload warning",
+   "evidence": "t301/r296"
+  },
+  "R301-LOAF": {
+   "status": "PASS",
+   "text": "c295: 0 LoAF entries now (oracle 6); title name change",
+   "evidence": "t301/r295"
+  },
+  "R301-NAMES": {
+   "status": "PASS",
+   "text": "probe.mjs equal except title/hint",
+   "evidence": "t301/r289"
+  },
+  "R301-WORKER": {
+   "status": "PASS",
+   "text": "library-probe 0 diffs; export-probe equal; worker-probe loaf 0 vs oracle 6",
+   "evidence": "t301/r283 r282"
+  },
+  "R301-DISABLED": {
+   "status": "PASS",
+   "text": "c276/c278 equal except hint text, ms; tab@375x812 timed out in c276 (narrow viewport shows 'works on a computer', no workspace to wait for)",
+   "evidence": "t301/r276 r278"
+  },
+  "R301-STATUS-LIFETIME": {
+   "status": "PASS",
+   "text": "c274 equal except playhead jitter",
+   "evidence": "t301/r274"
+  },
+  "R301-REL-SNAP": {
+   "status": "PASS",
+   "text": "c271-ui equal except hint text and wav paths",
+   "evidence": "t301/r271"
+  },
+  "R301-TAPER": {
+   "status": "PASS",
+   "text": "c269 export analysis 0 diffs: -15.003/-29.999/-44.999 dB at 25/50/75 %, UI drag 25 % shows -15.0 dB and bottom -inf",
+   "evidence": "t301/r269"
+  },
+  "R301-ALTGR": {
+   "status": "PASS",
+   "text": "c268 equal except names/hint",
+   "evidence": "t301/r268"
+  },
+  "R301-CONTRACTS": {
+   "status": "PASS",
+   "text": "cc.mjs equal except hint text",
+   "evidence": "t301/r264"
+  },
+  "R301-HIDDEN-GRID-BG": {
+   "status": "PASS",
+   "text": "hgbg and hgbg-music flags true both vp",
+   "evidence": "t301/hgbg"
+  },
+  "R301-MASTER": {
+   "status": "PASS",
+   "text": "audio-keys booleans equal, dB values within live jitter; layout run",
+   "evidence": "t301/r262"
+  },
+  "R301-NARROW": {
+   "status": "PASS",
+   "text": "c293 run: all flags as oracle except B-DESK-SAME pixel compare against a round-291 reference image (721/728 px, box x12-292 left column): the reference is stale (name change round 302, library copy); recorded as lookup, not a finding",
+   "evidence": "t301/r293"
+  },
+  "R301-PRICE": {
+   "status": "NOT-RUN",
+   "text": "product-probe/mock-c288 not replayed; probe.cjs exited rc 1 without the paired mock mode.",
+   "evidence": "t301/r288"
+  },
+  "R301-PERF3 ruler/flip": {
+   "status": "PASS",
+   "text": "see R340-PERF3D",
+   "evidence": "t301/perf3/out"
+  },
+  "RP-NOBPM-RULER": {
+   "status": "PASS (matches contract)",
+   "text": "SFX-only project: bars strip present (h 20 px, empty), click inert (playhead 0, marker 0.000, not playing, status unchanged), min:sec ruler present; round-258 task l.189 says 'with no tempo, the bars ruler is inert' and grid258 noTempoInert true: conforms. No invented BPM.",
+   "evidence": "out/nobpm.json"
+  },
+  "RP-C318-06": {
+   "status": "OBSERVED-LOW",
+   "text": "Reproduced at 1280x720 without reload (not at 1440, not after reload): selection overlay lands on the Stems lane while the clip is on Music; Ctrl+E says 'Could not split at the time selection.'; no clip changed; next Undo undoes the Add (expected). Root cause UNDETERMINED (lead: selection lane after the all-tracks toggle/Esc sequence); classification Low because no clip or history entry was altered.",
+   "evidence": "out/b2/rows-n-1280x720.json"
+  },
+  "RP-METRO-MUTE/SPACE-EMPTY/VIDEO-MARKER/NARROW": {
+   "status": "PASS (record)",
+   "text": "rp.cjs and narrow.cjs logs identical to round 301 (0 diff lines) at both vp.",
+   "evidence": "t301/rp-*.log t258/logs/narrow.log"
+  }
+ },
+ "invalidRuns": [
+  "batch1 first run (cold-start timeout, two overlapping batches): replaced by a clean serial rerun",
+  "g341-auth first attempt (legacy route cold start)",
+  "c320-rows 1440 attempt 1 (flake)",
+  "c257/store rows first pass (missing output dirs)"
+ ],
+ "lookups": [
+  "hint 'Drag a clip by its name bar to move it.'",
+  "title 'CZABA Studio'",
+  "playhead/clock jitter",
+  "new cross-lane source mark src=true|op=0.4",
+  "dev vs prod worker URLs",
+  "B-DESK-SAME reference image stale"
+ ],
+ "stopSignal": "none: C ended the phase because every remaining row either had no replayable script, an undefined definition (SA-14), or was record-only parked; no runner cap or job kill was seen. browserVerified=false because those browser rows that could run in principle were not run.",
+ "manifestPaths": [
+  "c-round-341/progress.json",
+  "c-round-341/out/",
+  "c-round-341/t258/",
+  "c-round-341/t301/",
+  "c-round-341/perf-results/"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "mutantRedOnTree": null,
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "l57Note": "sketch fields null: no sketch and no code change this round",
+ "originPerFinding": {
+  "C-R341-01": "pre-existing",
+  "C-R341-02": "B spec gap (PERF-7 rows)"
+ }
+}

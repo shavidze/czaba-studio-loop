@@ -1,142 +1,109 @@
-# CURRENT TASK — Round 341: REGRESSION-ROUND-2026-11-05, continued. C runs every row that round 340 did not run. A changes nothing
+# CURRENT TASK — Round 342: REGRESSION-ROUND-2026-11-05, part 3. C runs a closed list of the remaining rows. A changes nothing
 
-Dispatcher: B · Implementer: A (no change; baseline report only) · Verifier: C · Planned 2026-11-05 (after the round 340 C phase).
-Decisions: **D-29z1059 … D-29z1066** (`backlog.json` → `decisions_log_b`, `rounds[341]`, `regression_rounds` id `REGRESSION-ROUND-2026-11-05`).
+Dispatcher: B · Implementer: A (no change; baseline report only) · Verifier: C · Planned 2026-11-05 (after the round 341 C phase).
+Decisions: **D-29z1067 … D-29z1074** (`backlog.json` v301 → `decisions_log_b`, `rounds[342]`, `regression_rounds` id `REGRESSION-ROUND-2026-11-05`).
 
 **Read first:**
 - `lessons.md` in full, especially:
-  - L38: perf runs alone, warm up first;
+  - L38: perf runs alone;
   - L57: all harness fields;
-  - **L59 (new): do not end the C phase early.**
-- **The full row definitions are in `tasks/round-340.md`.** This is the exact copy of the round-340 task: §2 method and changed UI facts, §3, §4/§4.S/§4b/§4c, §4d, §5, §6, §8 and §9. **This task lists only what differs from it. Where they differ, this task wins.**
-- Round 340's partial C run: `c-round-340.md`, `c-round-340.json` and `c-round-340/`. B's reasoning: `b-round-340.md`.
+  - L59: do not end the C phase early (now 2×);
+  - **L60 (new): destructive commands stay inside `c-round-342/`, with absolute paths.**
+- Row definitions:
+  - `tasks/round-340.md` (§4d l.110 WORKER-R2; §5 l.117–127 parked rows);
+  - `tasks/round-301.md` (l.101 R301-PRICE);
+  - `tasks/round-258.md` (§4.S l.168–174);
+  - `tasks/round-341.md` §2 (the setup rules: mock as step 2, one dev server, warm-up, copying scripts, budget).
+- Round 341's run: `c-round-341.md`, `c-round-341.json`, `c-round-341/`. B's reasoning: `b-round-341.md`.
 
 ## Baseline: unchanged, HEAD `99a5912`, clean tree
-- Gate 340 was `skipped` ("C taskStatus BLOCKED", `gates/gate-round-340.json`), so nothing new was published. The baseline stays the published `99a5912` of gate 339.
-- `context/head-sha.txt` = `99a5912…` and `context/git-status.txt` is empty. A confirmed both in `a-round-340.md`, and B re-read HEAD `99a5912` at planning.
-- The frozen tree `b-round-339/r340-tree-sha256.txt` (1239 entries) and the claims script `b-round-339/claims-r340.sh` stay valid for this round. Run `sha256sum -c` from `store/` at start and at end (0 failures), and re-run the claims at start and at end (only K6, the mock port, may differ once you have started the mock).
-- Protected files: `b-round-318/protected-sha256.txt`, 11/11 OK.
+- Gate 341 is `skipped` ("no real changes", `gates/gate-round-341.json`), so nothing was published. The baseline is still `99a5912`, the gate-339 publication.
+- At start and at end, from `store/`:
+  - `sha256sum -c ../tmp/studio-real-loop/b-round-339/r340-tree-sha256.txt` (0 failures);
+  - the claims `b-round-339/claims-r340.sh` (only K6, the mock port, may differ once the mock is up);
+  - protected files `b-round-318/protected-sha256.txt` (11/11 OK).
 
-## 0. Why this round (D-29z1059, D-29z1060)
-- **Round 340 ran 6 rows and stopped.** C's report gives "time/budget" as the reason, but `c-round-340-result.json` shows `terminal_reason: completed` / `stop_reason: end_turn` after about 13 minutes (00:16 → 00:29 UTC) at $0.79. The job limit did not stop it. Round 301, in one C phase, ran 133 rows in about 3 hours. No turn or time cap appears in the runner files visible to B: C used 31 turns, against 272 in round 301 and 40 in round 339. This is a C-process observation (`INFO-C340-EARLY-END`), not an app bug. If a runner cap that B cannot see stopped it, C names that cap as the stop signal.
-- **Task §7 of round 340 fixed the outcome in advance** (D-29z1058): rows that did not run continue first, `regression-last.json` is not updated, and c4-ii follows.
-- **No bug was found.** No Critical or High finding is open. The open Mediums are root-only or manual-only, so they do not block (2026-10-23 clarification). Nothing outranks this round.
-- **Not split into two rounds** (advisor). One C phase has already done the whole sweep (round 301). If a real job limit stops C, `progress.json` lets the next job resume the same phase.
+## 0. Why this round (D-29z1067, D-29z1074)
+Rounds 340 and 341 ran the bulk of the regression: every run row PASS, 0 Medium+, 2 Low. But C ended round 341 itself (`stopSignal: none`) with rows that had a script still unrun, so `browserVerified` is false.
+
+Under the round-341 outcome table this is "a browser row that could run here did not run", not "every row has a result". So `regression-last.json` is **not** updated yet, and the remainder runs now. Ruling these rows away would shrink the regression after the fact.
+
+PERF-DRAG-PREVIEW c4-ii moves to round 343. Its three patches still apply cleanly on `99a5912` (B checked with `git apply --check`).
 
 ## 1. A — no code or doc change
-This is the same as round 340 §1.
-- From `store/`: HEAD must be `99a5912…` and `git status --short --untracked-files=all` must be empty. Otherwise, write "STOP — baseline differs" in `a-round-341.md` and change nothing.
-- Write `a-round-341.md` with the HEAD, the status output and "no change by design (REGRESSION round continued, D-29z1059)".
-- Run no checks. Do not restart the dev server.
+- From `store/`: HEAD must be `99a5912…` and `git status --short --untracked-files=all` must be empty. Otherwise, write "STOP — baseline differs" in `a-round-342.md` and change nothing.
+- Write `a-round-342.md` with the HEAD, the status output and "no change by design (REGRESSION remainder, D-29z1074)".
+- Run no checks. Do not touch :5173, the mock or a browser.
 
-## 2. C — how to run this round (changes to round 340 §2)
-1. **Do not end the phase early (L59).** Run rows until every row in §3 has a result (PASS, FAIL, inconclusive after the budget, BLOCKED with a cloud-backend reason, or carried with a stated reason), or until the job's real time limit stops you.
-   - "Not run" is valid only for a row that is still queued when the job is killed.
-   - `taskStatus` BLOCKED for time needs the real stop signal; ending the phase yourself is not one.
-2. **Write `c-round-341/progress.json` after every row** (`done`, `next`, `invalid`). Round 340 had none. Also update `c-round-341.json` and `c-round-341.md` after every row. On resume, continue from `next` and do not repeat finished rows.
-3. **Start order:**
-   1. SOURCE-SCOPE start: HEAD, status, protected 11/11, `sha256sum -c b-round-339/r340-tree-sha256.txt`, and the claims;
-   2. **the mock API, as step 2.** First check `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5199/__mock/health`. If it returns 200 (for example `cloud/run.sh` started it), use that mock, record "started by runner" and do not stop it. Only on a non-200: start it from the loop folder with `node mock-api/server.mjs > c-round-341/mock.log 2>&1 &`, write its PID to `c-round-341/mock.pid`, and re-check until 200. Do this before any store, NAME or JOURNEY row. At the end, stop only a PID you started. Mock data is client-path evidence only.
-   
-   A store row that did not run because you did not start the mock is **not** "backend unavailable in cloud". It must not be listed under `blocked`.
-4. **One server rule (D-29z1057, unchanged):** every dev row runs on :5173. Never start a second dev server. The production-build rows (R340-FONTS) use the scratch build in §2.6.
-5. **Warm up in a browser** before the first timed probe, and again after any build or perf run (L38).
-6. **Production build for the font rows (D-29z1063).**
-   - Steps:
-     1. `rm -rf /tmp/r341-build && mkdir /tmp/r341-build`;
-     2. `git -C /home/runner/czaba-project/store archive HEAD | tar -x -C /tmp/r341-build`;
-     3. `ln -s /home/runner/czaba-project/store/node_modules /tmp/r341-build/node_modules`;
-     4. in `/tmp/r341-build`, run `npx remix vite:build > <c-round-341>/build.log 2>&1`;
-     5. `PORT=5192 npx remix-serve ./build/server/index.js > <c-round-341>/serve.log 2>&1 &`, with its PID saved.
-   - Nothing is written under `store/`. A vite build does not use the dev deps optimiser.
-   - Do not build while perf runs (L38). Stop the server by its PID after the font rows.
-   - If the build fails for an environment reason, the row is inconclusive with the log. It is not a FAIL of the app.
-7. **Copy every script you use into `c-round-341/tools/`** and write outputs only under `c-round-341/`. Never write into an earlier round's folder. A script adapted only for a changed UI fact from round 340 §2 is a **lookup, not a deviation**.
-8. **Budget per row:** this is unchanged. At most 2 replacement attempts, for environment-invalid runs only, and thresholds are not relaxed.
-
-## 3. C — rows to run
-### 3a. Carried from round 340 (PASS; do not re-run)
-G340-AUTH, R340-GROUP-MOVE, R340-CROSS-LANE (B accepts C's own playing run, `c-round-340/out/exp340.json`, as the "while playing" half; D-29z1061), R340-HINT (ruling below), R340-RESCHEDULE CONT-1, and the Studio half of the journey (Export WAV). The evidence is `c-round-340/`. They count toward the round as PASS.
-
-**R340-HINT ruling (D-29z1062).** The round-303 contract is "once per page load" (`tasks/round-303.md` l.32/l.57: per mount of the Studio provider in this tab). H-RELOAD expects "the hint is back" (l.129), and C round 303 passed it. The words "once per profile … not after reload" in round 340 §2 and §4d were B's wording error. C's observation matches the contract, so the row is PASS and there is no finding. **In this round, read the round-340 R340-JOURNEY step "hint once" as "once in this page load".** The question to Saba stays SABA-Q-NAME-HINT-LIFETIME (`awaiting_user`, D-29z791).
-
-### 3b. §4d rows still to run (newest risk first). Script → oracle
-"Oracle" means the accepted output of that round. Compare your run on :5173 (HEAD `99a5912`) with it. Every difference must be explained by a changed UI fact listed in round 340 §2 (lookup); otherwise it is a finding.
-
-| Row (round 340 §4d) | Script(s) to copy and run | Oracle |
-|---|---|---|
-| R340-WAVEFORM | `b-round-333/waveform-d-probe.mjs` (WAVEFORM-D); `c-round-334/trim-end.mjs` (trim-end); `c-round-334/video-wave.mjs` (VIDEO-WAVE) | `c-round-334/` (`trimend-a-<w>.json`, `video-a-<w>.json`); `c-round-334/wd-sketch-<w>.json` (C's accepted run; `wd-head-<w>.json` is the control), compared with `b-round-333/wd-compare.py` (as `c-round-334/wd-compare.txt`) |
-| R340-DETAIL-TEXT | `c-round-333/detail-text.mjs` (+ `c-round-333/warm.mjs`) | the accepted A-run outputs in `c-round-333/` |
-| R340-OVERVIEW-METER (+ SA-14 L-toggle) | `c-round-332/ovr-probe.mjs`, `latch.mjs`, `lib.mjs`; compare with `c-round-332/cmp-ovr.py` | the accepted A-run outputs in `c-round-332/` |
-| R340-SHOWN-READERS | `c-round-331/shown-probe.mjs`; compare with `shown-compare.py` | the accepted A-run outputs in `c-round-331/` |
-| R340-PROJECT-END | `node b-round-328/end-bound-probe.mjs http://127.0.0.1:5173 <abs out>` | `c-round-330/end-bound-a.json` |
-| R340-FADE-STATUS + R340-DRAG-A (one harness: D-ROWS) | `ROWS_DIR=<abs c-round-341/rows> node b-round-328/rows.mjs http://127.0.0.1:5173 head341`, then `python3 -I b-round-328/rows-diff.py c-round-334/rows/rows-a.json <dir>/rows-head341.json`. For D-NOFLASH, D-MIXED and the srcmark rows that rows.mjs does not cover, use `c-round-325/c325-rows.mjs` and `c-round-328/c328-rows.mjs` | `c-round-334/rows/rows-a.json` (the latest accepted D-ROWS); `c-round-325/rows-a*.json`; `c-round-328/`. The EXPORT WAV sha equals the oracle's (1440 only) |
-| R340-SELECTION | `c-round-324/c324-rows.mjs`, `c324-group.mjs` (+ `warm.cjs`) | the accepted A-run outputs in `c-round-324/`; WAV byte-compare at 1440 only |
-| R340-RANGE | `c-round-320/c320-rows.mjs`, `c320-wave.mjs`, `c320-export-esc.mjs` (driver `rows.sh`; compare with `diffrows.py`) | the accepted A-run outputs in `c-round-320/`; R-EXPORT at 1440 only |
-| R340-FONTS (all four) | `c-round-317/fontnet.cjs`, `font-bytes.cjs`, `pxdiff.cjs`, `shots.cjs` against the §2.6 build on :5192 (FONT-NET, FONT-PRELOAD, FONT-CACHE: `/s/` path and 2 CORS preloads; FONT-PIXEL). The :5173 0-Google-request half is already done (`c-round-340/out/font.json`) | `c-round-317/fontnet-a-<w>.json`, `font-bytes-a.json`, and the A screenshots in `c-round-317/` |
-| R340-PEAKS | `c-round-315/pk-load.cjs`, `pk-video-sound.cjs`; cold start per `b-round-314/probe/cold-start.cjs` (+ `c-round-314/warm.cjs`) | the accepted outputs in `c-round-315/` |
-| R340-WORKER-R2 | `c-round-311/run-wk.sh` with `worker-server.mjs`, `head-r2-proxy.mjs` and `browser-probe-311.cjs` (local worker proxy, as in round 311) | the accepted outputs in `c-round-311/`. If the proxy cannot start here, mark the row BLOCKED with the log; do not FAIL it |
-| R340-RESCHEDULE (CONT-30, ENDED, NO-CHANGE) | `c-round-308/continuity-probe.cjs` (30 clips), `onended-probe.cjs`, `release-probe.cjs`, `posctl-probe.cjs` | the accepted outputs in `c-round-308/` |
-| R340-PERF3D | `c-round-306/probe/scroll-after-crossing.cjs` (SCROLL-UPGRADE); `visible-d.cjs` + `compare-visible-d.py` (VIS-EQUIV); the PLAY-SMOKE-306 steps in `c-round-306.md` l.17 | `c-round-306/probe/scroll-a-<w>.json`, `a-out-<w>.json` |
-| R340-NAME (mock) | `c-round-302/main.cjs` (+ `budget.cjs` / `budget2.cjs` for N-NARROW) | `c-round-302/main.json` |
-| R340-JOURNEY (store half, mock) | `c-round-301/tools/journey/journey301.cjs`, extended by the "CZABA Studio" title check and the hint text (read as in §3a) | `c-round-301/tools/journey/journey301.json` |
-
-Where a round kept no script for a sub-row, rebuild it from the row text in that `c-round-N.md` and record a lookup.
-
-### 3c. Round 301 sections (unchanged definitions: round 340 §3, §4, §4.S, §4b, §4c)
-- Run them by replaying round 301's bundle:
-  - `c-round-301/tools/rNNN` and the round-specific probes;
-  - `c-round-301/t258/tools/` (the §4b driver is `run-4b.sh`; redirect every output and report sink into `c-round-341/`, as round 301 did).
-- Rows:
-  - §3: RG-01 … RG-24 and RG-T1 … RG-T4B, at both viewports (RG-03 at 1440 only);
-  - §4 and §4.S, with the mock API for the store rows;
-  - §4b: RR-*;
-  - §4c: R301-MASTER … R301-JOURNEY. R301-JOURNEY is covered by R340-JOURNEY above.
-- Compare against round 301's accepted outputs. Round 301's own lookups (`c-round-301.json` → `lookups`) remain valid lookups.
-- NO-SHIFT-203 stays carried, unless you start a reference server.
-
-### 3d. §5 parked rows and §6
-- **§5 parked rows** (round 301's seven + RP-C301-01, RP-C318-06, RP-FOLD-SELECTION, RP-NOBPM-RULER, RP-SAME-TEXT-RACE, RP-GATE328-S1, RP-C331-01): as in round 340 §5. RP-C318-06 and RP-NOBPM-RULER can open a Medium; the rest are record only unless stated.
-- **RR-PERF:** as in round 340 §6, alone, after §5:
-  - rc 0, 3/3 specs, every budget row passes, `complete` true, 0 aborts and 0 page errors;
-  - `interact.harness.drag-lane-live` = 1 and `interact.harness.drag-group-live` = 1;
-  - `python3 -I b-round-329/perf-rowcmp.py` against `c-round-339/perf-results/latest-interactions.json` expects **0 DIFF**;
-  - `latest.json` and `latest-resources.json` against `c-round-301/perf/` are report only.
-- **RG-SMOKE:** `npm run test:e2e:smoke` in `store/`, alone, after RR-PERF.
-- **G341-AUTH** at the end: copy `c-round-340/tools/g340-auth.cjs`. With the mock running, a fake Bearer is expected to give **403** (round 301). 500 is expected only without the mock.
-- **SOURCE-SCOPE end**, as at start.
-
-## 4. Outcome, fixed in advance (D-29z1064)
-| C result | B at the 341 → 342 planning |
+## 2. B rulings that close round-341 rows (do not re-run these; D-29z1068)
+| Row | Ruling |
 |---|---|
-| Every row in §3 has a result, with no Medium+ finding (Lows → `deferred_low_polish`) | `regression-last.json` = `{"date": <C's completion date>, "round": 341, "note": "REGRESSION-ROUND-2026-11-05 ran in rounds 340+341"}`. Round 342 = **PERF-DRAG-PREVIEW c4-ii** from `b-round-339/current-task-c4-ii-draft.md`, with its carry-forward note applied to round 342 |
-| Any Critical, High or Medium finding, including a regression | Round 342 = a bounded fix-up (≤ 3 related bugs, Critical first), and C re-runs the failed rows. `regression-last.json` is still updated when every row ran. c4-ii follows, re-checked first on the new HEAD |
-| A job limit stops C with rows queued | The same phase resumes from `progress.json`. If the round still closes incomplete, round 342 continues with the remainder, and `regression-last.json` is not updated |
-| A browser row that could run here did not run | `browserVerified=false`; B re-plans that half |
+| R340-OVERVIEW-METER sub-check "press L" | **VOID.** This was B's spec defect. `SA-14` is the tag of RR-STRIP (`tasks/round-258.md` l.189), and the Studio has no bare `L` key: loop is `Ctrl+L` (`app/lib/arrangement/shortcuts.ts` l.49–52). C's 23-sample OVERVIEW PASS already covers the invariant (a fade preview leaves the overview alone, a move preview moves its bar) |
+| R340-FONTS FONT-PIXEL | **Retired as a regression row.** The round-317 pixel oracle predates later UI changes. C's `c-round-341/out/fonts/` screenshots on `99a5912` become the baseline for the next regression. "/s/" was B's wording: the build serves woff2 from `/assets/`, as in round 317 |
+| RR-OSS full licence suite | Gate row (`gates/round-N/verify.log`); it is not a C gap |
+| RP-NOBPM-RULER, C-R341-01 (= C-R318-06) | Done in round 341. C-R318-06 is now in `deferred_low_polish` with C's evidence (D-29z1069) |
 
-Item status does not change from a failed row by itself; a failed row opens a finding linked to the item. No item becomes "მზადაა" from this round.
+## 3. C — the closed row list
+**Every row below names its script, its output redirect and its oracle. "No replayable script" and "row not defined" are not available statuses.** The only allowed results are:
+- PASS;
+- FAIL (opens a finding);
+- inconclusive after the budget (2 replacement attempts for environment-invalid runs only), with the logs;
+- BLOCKED, where the row says it is allowed;
+- **recorded**, for the record rows 7, 8 and 9. A recorded observation is a complete result.
+
+The run order, rules and mock handling are as in `tasks/round-341.md` §2.
+
+Setup:
+- **Mock as step 2:** check `/__mock/health` on :5199. Use the runner's mock if it returns 200; otherwise start it yourself and save its PID to `c-round-342/mock.pid`.
+- **One dev server only:** :5173.
+- **Warm up in a browser** first.
+- **Write all outputs under `c-round-342/`.** Copy every script into `c-round-342/tools/` before you run it. Changing a script's output path or `__dirname` sink to point into `c-round-342/` is a **lookup**, not a deviation. Never write into an older round's folder.
+- **Write `c-round-342/progress.json` after every row.**
+
+| # | Row | Script → output | Oracle / pass rule | Allowed non-PASS |
+|---|---|---|---|---|
+| 1 | SOURCE-SCOPE start | as Baseline | 0 failures, 11/11 | FAIL only |
+| 2 | **R342-WK-GUARD** (WK-GUARD-PROXY) | No new run is needed if C's own round-341 outputs `c-round-341/out/wk/proxy-{throw,short}-1440.json` (produced by `browser-probe-311.cjs` against the local worker proxy) are the WK-GUARD-PROXY probe. C confirms that by reading `c-round-311.md` l.12 and the probe source, then compares each step with l.12. If they are not that probe, run it: copy `c-round-311/run-wk.sh`, set `C=` to `c-round-342/wk` (lookup) and run the proxy tags as in round 311 | Every step equals `c-round-311.md` l.12 and `c-round-311/proxy-{throw,short}-1440.json`, ignoring timestamps and the port | BLOCKED only if the proxy cannot start (attach the log) |
+| 3 | **R342-WK-HEAD-CONTROL** | the copied `run-wk.sh` with `c-round-311/head-r2-proxy.mjs` as the worker path, tag `headctl-throw`, probe 311. Take the `R2_*` env values from `c-round-311.md` and `c-round-311/wk-summary-311.txt`, and from the `proxy-throw-server.out` header. If the round-311 invocation cannot be recovered, the row is **inconclusive** with the log, never "undefined" | It equals `c-round-311/headctl-throw-1440.json` and `c-round-311.md` l.15: hugeEnd, hugeEnd20 and hugeSuffix give 500 h1g1; rereadInm 200 h0g2c1; rereadFarInm 200 h1g2c0. It is a control: it must **differ** from row 2 | as row 2 |
+| 4 | **R342-RS-1280** (RS-1A … RS-1D at 1280) | copy `c-round-301/t258/s186/tools/` and run `c186-store.cjs 1280` (the 1280 line of `t258/tools/run-store.sh`). The mock has no gift-card product, which round 301 already recorded as noise (`rec-rs1.cjs`). Guard the gift-card screenshot step so a missing element is recorded as "absent in mock" instead of crashing; that is a lookup | the RS-1A … 1D-1280 rows of `c-round-301.md` and their t258 logs. Only diffs explained by the round-340 §2 UI facts (lookups) are allowed | inconclusive after the budget |
+| 5 | **R342-RS-MAP** (RS-2A, RS-4B, RS-HIDDEN, RS-LM; both viewports) | Round 341 ran these logs (`c-round-341/t258/`) but did not map rows. Map each one using `c-round-301.md` l.165–174: RS-2A ← s195 rs2a + guest195; RS-4B ← t203 sweep/errborder + mousering; RS-HIDDEN ← t204; RS-LM ← t205. Re-run a log only if it is missing | 0 normalised diff lines vs round 301, as the c-round-301 lines state | inconclusive |
+| 6 | **R342-RG22-NARROW** (RG-22-390 narrow half) | copy `c-round-301/tools/narrow/rg22n.cjs`; its sink `path.join(__dirname,'rg22n.json')` becomes `c-round-342/out/rg22n.json` | `c-round-301/tools/narrow/rg22n.json` | inconclusive |
+| 7 | **R342-RP301** (RP-MENU-SHEET, RP-LINK-NATIVE-MENU, RP-LINK-DRAG; record) | copy `c-round-301/tools/rp301/rp301.cjs`; sink → `c-round-342/out/rp301.json` | `c-round-301/tools/rp301/rp301.json`. Record; a difference is a finding only if it changes behaviour | — |
+| 8 | **R342-RP-BUILT** (RP-C301-01, RP-FOLD-SELECTION, RP-SAME-TEXT-RACE, RP-GATE328-S1, RP-C331-01; record) | build one small Playwright script per row from its row text in `tasks/round-340.md` l.121–127 (state → exact action → read). Save the scripts under `c-round-342/tools/rp/` | Record what you observe, as each row says (Low unless the row says otherwise). For RP-FOLD-SELECTION record the observation only; no Live parity claim | — |
+| 9 | **R342-POSCTL** (NO-CHANGE posctl, record) | copy `c-round-308/posctl-probe.cjs`; run it once per viewport on HEAD | The `c-round-308` oracle is `valid=false` (D-29z1068). Record your run, including its `valid` flag, as the new oracle for the next regression. It is not a decision row | — |
+| 10 | **R342-PRICE** (R301-PRICE, mock; **the last store row**) | `c-round-301/tools/price/` (`mock-c288.mjs`, `product-probe.cjs`), as in `c-round-301.md` l.42: stop the standard mock **by its PID**. If you did not start it, find the runner's PID with `lsof -t -i :5199` or `pgrep -f mock-api/server.mjs`; stopping it is allowed for this row only, and you record the PID, start `mock-c288.mjs` on :5199, run the c288 `probe.cjs` replay and the c286 product-probe (known), then **restart the standard mock** and check health 200 before row 11 | B-KNOWN: door-slams $9.00, middle-east $29.00, no `$0.00`. B-UNKNOWN/B-VERSION-CARD: priceless-track shows "Price unavailable" and Add/Buy are `aria-disabled=true`. B-FREE: free-pack $0 and its buttons are enabled. Both viewports. Mock-only client path | inconclusive |
+| 11 | **G342-AUTH** | copy `c-round-340/tools/g340-auth.cjs` | Anonymous `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`. `/api/studio-token`: no header 401, bare 400, fake Bearer **403** with the mock. No token in any body. `/studio-lab` opens anonymously with the demo badge | FAIL only |
+| 12 | SOURCE-SCOPE end | as row 1; stop only the PIDs you started | 0 failures | FAIL only |
+
+RR-PERF and RG-SMOKE are not re-run: round 341 passed both on this unchanged HEAD.
+
+## 4. Outcome, fixed in advance (D-29z1074)
+| C result | B at the 342 → 343 planning |
+|---|---|
+| Rows 1–12 all have an allowed result and there is no Medium+ finding (Lows go to `deferred_low_polish`) | `regression-last.json` = `{"date": <C's completion date>, "round": 342, "note": "REGRESSION-ROUND-2026-11-05 ran in rounds 340-342"}`. Round 343 = **PERF-DRAG-PREVIEW c4-ii** from `b-round-339/current-task-c4-ii-draft.md`. Its carry-forward is applied to 343: the last published gate is still 339, so K1 stays `gate-round-339.json`. "round 340" becomes 343, and the budget notes are regenerated with `apply-budgets.py` |
+| Any Critical, High or Medium finding | Round 343 = a bounded fix-up (≤ 3 related bugs), with re-runs of the failed rows. `regression-last.json` is still updated if every row has a result. c4-ii follows, re-checked on the new HEAD |
+| A job limit kills C with rows queued | The same phase resumes from `progress.json` |
+| C ends the phase itself with a row still queued | `browserVerified` is false and B re-plans that row. The stop must be named in `stopSignal` |
+
+No item changes status from this round, and nothing becomes "მზადაა".
 
 ## 5. Neighbour risk
 | Risk | Check |
 |---|---|
-| The scratch build or the :5192 server writes into `store/` or disturbs :5173 | It is built in `/tmp/r341-build` only; SOURCE-SCOPE and `sha256sum -c` at start and at end; the :5173 warm-up after the build |
-| Perf or smoke overlaps another browser job | Serial order; L38 |
-| The mock overrides the auth expectations | The fake-Bearer expectation in G341-AUTH (403 with the mock) |
-| A pre-302 script reports a retired name or the first-add hint | The round 340 §2 changed UI facts, recorded as lookups |
-| The phase ends early again | L59, `progress.json`, the stop signal named in the report |
+| The PRICE mock swap leaves :5199 down or on the c288 data for later rows | PRICE is the last store row; the standard mock is restarted, and health is 200 before G342-AUTH |
+| The worker proxy port collides with :5173 or :5199 | Use the round-311 ports, or another free port (lookup) |
+| A replayed script writes into an old round folder, or a cleanup deletes evidence | L60: sinks are redirected into `c-round-342/`; `rm` and `find` use absolute paths under `c-round-342/` only |
+| The store tree changes | SOURCE-SCOPE and `sha256sum -c` at start and at end |
 
 ## 6. Deliverables
-- **A:** `a-round-341.md` (baseline only).
-- **C:**
-  - `c-round-341.json`, with `taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `inconclusive`, `blocked`, `carried` (the §3a rows with `c-round-340/` paths), `notRun`, `gate`, `bugs`, `observations`, `invalidRuns`, `lookups`, `stopSignal`, and **all L57 fields**: `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, an `origin` per finding, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch`, `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed`, `affectedChecksRunOnSketch`. Write `null` with a reason where a field does not apply (no sketch this round);
-  - `c-round-341.md`;
-  - `c-round-341/progress.json`;
-  - evidence under `c-round-341/{tools,out,shots}`.
-- **Every bug gets:** an id `C-R341-NN`, a severity, the item, the steps, the evidence path, and "regression yes/no" with the round of its last pass.
+- **A:** `a-round-342.md` (baseline only).
+- **C:** `c-round-342.json` with `taskStatus`, `browserVerified`, `realVerified`, `passed`, `failed`, `inconclusive`, `blocked`, `notRun`, `gate`, `bugs`, `observations`, `invalidRuns`, `lookups`, `stopSignal`, and all L57 fields (`null` with a reason where there is no sketch). Also `c-round-342.md`, `c-round-342/progress.json`, and evidence under `c-round-342/{tools,out,shots}`.
+- **Every bug gets:** an id `C-R342-NN`, a severity, the item, the steps, the evidence path, "regression yes/no" with the round of its last pass, and its origin.
 - **Gate rows, not claimed by C:** full vitest, typecheck, build, Biome and `npm run verify`.
 
 ## 7. Root notes
-- No source change is expected. Nothing is published when no source changed; the loop-state commit records the sweep.
+- No source change is expected. Nothing is published when no source changed.
+- **INFO-C341-DELETE-MISTAKE:** in round 341, C deleted untracked evidence WAVs across older round folders. They cannot be restored from the loop repo. From now on, any oracle that compares WAV bytes (rather than a sha saved in JSON) regenerates its reference first. B deleted and restored nothing.
 - **Frontend-architect checkpoint:** `ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE` is still planned for after c5. It is not due now.
 - **Still open for root:**
   - checkpoint D-29z915;
