@@ -507,3 +507,41 @@ Consult agents trimmed based on actual usage audit (last 20 rounds):
 - `run.sh` writes git status, diff stat, log and HEAD sha to `loop/context/` before the round.
 - Agents read these files instead of running git commands (saves 1-2 LLM turns per phase).
 - Files: `context/git-status.txt`, `context/git-diff-stat.txt`, `context/git-log-recent.txt`, `context/head-sha.txt`.
+
+## Parallel execution policy (Saba, 2026-11-05)
+
+### Rule: root always looks for parallelism
+
+When the loop (B→A→C) runs a task, root checks:
+1. Are there other tasks that touch **different files**?
+2. Do they have **no dependency** on the loop's current work?
+3. Is the result deliverable as a **patch** (`cloud/root-commits/`)?
+
+If all three are yes, root works on them in parallel from the orchestrator session.
+
+### How it works
+- Root implements the parallel task on the store's master branch
+- Creates a `.patch` file in `cloud/root-commits/`
+- The loop's `run.sh` applies patches with `git am` before each round
+- No merge conflicts because files don't overlap
+
+### File conflict check (mandatory before starting parallel work)
+Root lists the files the loop's current task touches (from `current-task.md` and `a-round-N.md`) and the files the parallel task will touch. If any file appears in both lists, the parallel task waits.
+
+### Current parallel lanes
+
+| Lane | Runner | Files |
+|------|--------|-------|
+| **PERF** (loop) | GitHub Actions B→A→C | `app/components/studio/arrangement/*` |
+| **COPY-PD** (root parallel) | This session → patch | `app/components/studio/export/*`, `app/components/studio/StudioToolbar.tsx` |
+| **SRW-21-PLAN** (root parallel) | This session → plan doc | `docs/` only, no code |
+
+### Tasks that CANNOT run in parallel with PERF
+- STEM-LANES — touches arrangement components (same files as PERF)
+- STORE-2b+ — needs direction decision from Saba first
+- T12-ADVANCED — touches arrangement components
+
+### Tasks that CAN run in parallel with PERF
+- COPY-PD — export dialog text, toolbar text (different files)
+- SRW-21-PLAN — planning doc only (no code)
+- REVIEW-RECOMMENDATIONS sub-tasks that are Store-only (DUX-R-*)
