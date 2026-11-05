@@ -1,0 +1,6 @@
+B round 345->346 checkpoint: round 345 task archived (cmp equal). Next: names probe trim/move on dev 645b2e6, then consults, then backlog scripts.
+- names probe HEAD 645b2e6 dev 1440: fade [10x4], trim [22x4], move [19,19,101,19]; saved names-head-645b2e6.json. Trim/move remainder = clip subtree + overview + detail readouts (all draw changed values) + wrappers. Plan: D-ID revise trim/move target to measured ceiling; round 346 = conversions (budgets) + C-R345-CAPTION-MUTANT-GAP test + DP62 finally + budget notes; round 347 = PERF-CAND-VIDEO-TRIM-FADE-ROWS.
+- consults done: tech-lead (fold Lows OK; DP62 try/finally; caption test must assert differing value; checkpoint Qs), perf-optimizer (7 wasted renders: lane ChevronDown+Icon, 2 MixFader, clip GripVertical+Icon, DetailClipGain; cut -> trim 15, move 12, fade 4; ceil budgets; release==1 mutant flushSync). names v2 saved. Decision: round 346 = c6 cut (rows record), 347 conversions, 348 video trim/fade rows.
+- sketch: patch b-round-345/sketch/source.patch.txt (biome/tsc 0), names sketch fade 6 trim 18 move 15 (89 crossing) click 88; claims-346.sh written; backlog script written (not run); covering vitest running
+- backlog v307 applied; feature-status updated; current-task written. Remaining: vitest result, b-round-345.md, b-next.json.
+- DONE: b-round-345.md, b-next.json written; store clean

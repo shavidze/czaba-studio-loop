@@ -1,0 +1,62 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T07:35:30.9186461Z",
+  "round": 345,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R345-CAPTION-MUTANT-GAP",
+   "severity": "low",
+   "steps": [
+    "scratch copy of A's tree",
+    "change ArrangementVideoCaption arrangement={videoLaneArrangement} to arrangement={arrangement}",
+    "npx vitest run drag-preview-render.test.tsx"
+   ],
+   "expected": "a test goes red (the caption must follow the preview)",
+   "actual": "64/64 pass; no jsdom test or DOCK-FOLLOWS field reads the caption mid-drag, so a regression there would be undetected",
+   "evidence": "c-round-345/mut2-caption.log"
+  },
+  {
+   "id": "C-R345-PERF-DURATION",
+   "severity": "low",
+   "steps": [
+    "npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts"
+   ],
+   "expected": "durationMs <= 450000 (L31)",
+   "actual": "465718 ms (A: 476277); already tracked as ROOT-REQ-PERF-TIMEOUT, root-only config",
+   "evidence": "c-round-345/perf-results/latest-interactions.json"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT",
+  "MUTANT",
+  "PERF",
+  "DOCK-FOLLOWS",
+  "RENDERS",
+  "PERF-LIB",
+  "G345-AUTH",
+  "READ",
+  "DOCS",
+  "FLOW-ADD-VIDEO-MOVE-EXPORT-WAV"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "backend unavailable in cloud: mock API :5199 was not running; /api/studio-token fakeBearer returned 500 (expected only when mock down), not a failure"
+ ],
+ "assertsSpecified": 6,
+ "mutantRedOnSketch": true
+}
