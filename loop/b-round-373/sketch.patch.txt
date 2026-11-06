@@ -1,0 +1,511 @@
+diff --git a/app/components/arrangement/ArrangementExportDialog.tsx b/app/components/arrangement/ArrangementExportDialog.tsx
+index a1a0221..73af85e 100644
+--- a/app/components/arrangement/ArrangementExportDialog.tsx
++++ b/app/components/arrangement/ArrangementExportDialog.tsx
+@@ -1,4 +1,4 @@
+-import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
++import { memo, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+ import { Modal, ModalBody, ModalDescription, ModalHeader, ModalTitle } from '~/components/ui';
+ import {
+   formatArrangementTime,
+@@ -75,7 +75,13 @@ function videoSoundStatus(source: WorkspaceVideoSource, isAudible: boolean): str
+   return isAudible ? studioExportStrings.videoSoundIncluded : studioExportStrings.videoSoundOff;
+ }
+ 
+-export function ArrangementExportDialog({ isOpen, onClose }: ArrangementExportDialogProps) {
++function ArrangementExportDialogShell({ isOpen, onClose }: ArrangementExportDialogProps) {
++  return isOpen ? <ArrangementExportDialogContent isOpen onClose={onClose} /> : null;
++}
++
++export const ArrangementExportDialog = memo(ArrangementExportDialogShell);
++
++function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDialogProps) {
+   const {
+     arrangement,
+     projectEnd,
+diff --git a/app/components/arrangement/ArrangementMaster.tsx b/app/components/arrangement/ArrangementMaster.tsx
+index ae3e418..6fd28a4 100644
+--- a/app/components/arrangement/ArrangementMaster.tsx
++++ b/app/components/arrangement/ArrangementMaster.tsx
+@@ -1,5 +1,6 @@
+-import { useCallback, useRef, useSyncExternalStore } from 'react';
++import { memo, useCallback, useMemo, useRef, useSyncExternalStore } from 'react';
+ import {
++  type ArrangementContextValue,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
+   useMasterMeterStore,
+@@ -137,9 +138,72 @@ function ArrangementMasterMeter({ onResetPeak }: { onResetPeak: () => void }) {
+   );
+ }
+ 
++export type ArrangementMasterActions = Pick<
++  ArrangementContextValue,
++  | 'toggleMasterMute'
++  | 'previewMasterGain'
++  | 'commitMasterGain'
++  | 'beginMasterGainGesture'
++  | 'blurMasterGain'
++  | 'isPointerGestureActive'
++  | 'resetMasterPeak'
++  | 'getArrangement'
++  | 'setStatus'
++>;
++
++interface ArrangementMasterViewProps {
++  master: ArrangementContextValue['master'];
++  actions: ArrangementMasterActions;
++}
++
++export function useArrangementMasterActions(
++  workspace: ArrangementContextValue,
++): ArrangementMasterActions {
++  const {
++    toggleMasterMute,
++    previewMasterGain,
++    commitMasterGain,
++    beginMasterGainGesture,
++    blurMasterGain,
++    isPointerGestureActive,
++    resetMasterPeak,
++    getArrangement,
++    setStatus,
++  } = workspace;
++  return useMemo(
++    () => ({
++      toggleMasterMute,
++      previewMasterGain,
++      commitMasterGain,
++      beginMasterGainGesture,
++      blurMasterGain,
++      isPointerGestureActive,
++      resetMasterPeak,
++      getArrangement,
++      setStatus,
++    }),
++    [
++      toggleMasterMute,
++      previewMasterGain,
++      commitMasterGain,
++      beginMasterGainGesture,
++      blurMasterGain,
++      isPointerGestureActive,
++      resetMasterPeak,
++      getArrangement,
++      setStatus,
++    ],
++  );
++}
++
+ export function ArrangementMaster() {
++  const workspace = useArrangement();
++  const actions = useArrangementMasterActions(workspace);
++  return <ArrangementMasterView master={workspace.master} actions={actions} />;
++}
++
++function ArrangementMasterViewInner({ master, actions }: ArrangementMasterViewProps) {
+   const {
+-    master,
+     toggleMasterMute,
+     previewMasterGain,
+     commitMasterGain,
+@@ -149,7 +213,7 @@ export function ArrangementMaster() {
+     resetMasterPeak,
+     getArrangement,
+     setStatus,
+-  } = useArrangement();
++  } = actions;
+   const masterFaderDrag = useRelativeFaderDrag({
+     min: MASTER_GAIN_MIN_DB,
+     max: MASTER_GAIN_MAX_DB,
+@@ -223,3 +287,5 @@ export function ArrangementMaster() {
+     </fieldset>
+   );
+ }
++
++export const ArrangementMasterView = memo(ArrangementMasterViewInner);
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 6f88812..6cb7a6a 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -201,7 +201,7 @@ import {
+ import { ArrangementLibrary } from './ArrangementLibrary';
+ import { ArrangementLoopBrace } from './ArrangementLoopBrace';
+ import { ArrangementMarkerRow, type ArrangementMarkerRowHandle } from './ArrangementMarkerRow';
+-import { ArrangementMaster } from './ArrangementMaster';
++import { ArrangementMasterView, useArrangementMasterActions } from './ArrangementMaster';
+ import { ArrangementOverview } from './ArrangementOverview';
+ import { ArrangementRuler } from './ArrangementRuler';
+ import { ArrangementShortcutSheet } from './ArrangementShortcutSheet';
+@@ -1027,6 +1027,8 @@ export function StudioWorkspace() {
+   const rangeStore = useArrangementRangeStore();
+   const selectionStore = useArrangementSelectionStore();
+   const [isExportOpen, setIsExportOpen] = useState(false);
++  const closeExportDialog = useCallback(() => setIsExportOpen(false), []);
++  const masterActions = useArrangementMasterActions(workspace);
+   const [isShortcutSheetOpen, setIsShortcutSheetOpen] = useState(false);
+   const isOverviewHidden = useSyncExternalStore(
+     subscribeOverviewVisibility,
+@@ -3639,7 +3641,7 @@ export function StudioWorkspace() {
+             collection={collection}
+             videoSources={videoSources}
+           />
+-          <ArrangementMaster />
++          <ArrangementMasterView master={arrangement.master} actions={masterActions} />
+           <button
+             ref={shortcutButtonRef}
+             type="button"
+@@ -3673,7 +3675,7 @@ export function StudioWorkspace() {
+           onClose={closeGridMenu}
+         />
+       ) : null}
+-      <ArrangementExportDialog isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} />
++      <ArrangementExportDialog isOpen={isExportOpen} onClose={closeExportDialog} />
+       <ArrangementShortcutSheet
+         isOpen={isShortcutSheetOpen}
+         onClose={closeShortcutSheet}
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index b0c766f..ab5f8db 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -4429,14 +4429,18 @@ export function useArrangementInsertMarkerStore(): ArrangementPositionStore {
+   return store;
+ }
+ 
+-export function useArrangementPositionStore(): ArrangementPositionStore {
++function useArrangementPositionStoreContext(hookName: string): ArrangementPositionStore {
+   const store = useContext(ArrangementPositionContext);
+   if (!store) {
+-    throw new Error('useArrangementPositionStore must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
++export function useArrangementPositionStore(): ArrangementPositionStore {
++  return useArrangementPositionStoreContext('useArrangementPositionStore');
++}
++
+ export function useArrangementMixDraftStore(): ArrangementMixDraftStore {
+   const store = useContext(ArrangementMixDraftContext);
+   if (!store) {
+@@ -4445,60 +4449,76 @@ export function useArrangementMixDraftStore(): ArrangementMixDraftStore {
+   return store;
+ }
+ 
+-export function useArrangementRangeStore(): ArrangementRangeStore {
++function useArrangementRangeStoreContext(hookName: string): ArrangementRangeStore {
+   const store = useContext(ArrangementRangeContext);
+   if (!store) {
+-    throw new Error('useArrangementRangeStore must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
++export function useArrangementRangeStore(): ArrangementRangeStore {
++  return useArrangementRangeStoreContext('useArrangementRangeStore');
++}
++
+ export function useArrangementRange<Selected>(
+   selector: (state: ArrangementRangeState) => Selected,
+ ): Selected {
+-  return useStore(useArrangementRangeStore(), selector);
++  return useStore(useArrangementRangeStoreContext('useArrangementRange'), selector);
+ }
+ 
+-export function useArrangementClipLaneDragStore(): ArrangementClipLaneDragStore {
++function useArrangementClipLaneDragStoreContext(hookName: string): ArrangementClipLaneDragStore {
+   const store = useContext(ArrangementClipLaneDragContext);
+   if (!store) {
+-    throw new Error('useArrangementClipLaneDragStore must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
++export function useArrangementClipLaneDragStore(): ArrangementClipLaneDragStore {
++  return useArrangementClipLaneDragStoreContext('useArrangementClipLaneDragStore');
++}
++
+ export function useArrangementClipLaneDrag<Selected>(
+   selector: (state: ArrangementClipLaneDragStoreState) => Selected,
+ ): Selected {
+-  return useStore(useArrangementClipLaneDragStore(), selector);
++  return useStore(useArrangementClipLaneDragStoreContext('useArrangementClipLaneDrag'), selector);
+ }
+ 
+-export function useArrangementSelectionStore(): ArrangementSelectionStore {
++function useArrangementSelectionStoreContext(hookName: string): ArrangementSelectionStore {
+   const store = useContext(ArrangementSelectionContext);
+   if (!store) {
+-    throw new Error('useArrangementSelectionStore must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
++export function useArrangementSelectionStore(): ArrangementSelectionStore {
++  return useArrangementSelectionStoreContext('useArrangementSelectionStore');
++}
++
+ export function useArrangementSelection<Selected>(
+   selector: (state: ArrangementSelectionState) => Selected,
+ ): Selected {
+-  return useStore(useArrangementSelectionStore(), selector);
++  return useStore(useArrangementSelectionStoreContext('useArrangementSelection'), selector);
+ }
+ 
+-export function useArrangementPreviewStore(): ArrangementPreviewStore {
++function useArrangementPreviewStoreContext(hookName: string): ArrangementPreviewStore {
+   const store = useContext(ArrangementPreviewContext);
+   if (!store) {
+-    throw new Error('useArrangementPreviewStore must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
++export function useArrangementPreviewStore(): ArrangementPreviewStore {
++  return useArrangementPreviewStoreContext('useArrangementPreviewStore');
++}
++
+ export function useArrangementPreview<Selected>(
+   selector: (state: ArrangementPreviewState) => Selected,
+ ): Selected {
+-  return useStore(useArrangementPreviewStore(), selector);
++  return useStore(useArrangementPreviewStoreContext('useArrangementPreview'), selector);
+ }
+ 
+ function useArrangementPlaybackStoreContext(hookName: string): ArrangementPlaybackStore {
+@@ -4525,7 +4545,10 @@ export function useArrangementWorkspaceSessionStore(): ArrangementWorkspaceSessi
+ }
+ 
+ export function useArrangementActiveTrackId(): string | null {
+-  return useStore(useArrangementSelectionStore(), (state) => state.activeTrackId);
++  return useStore(
++    useArrangementSelectionStoreContext('useArrangementActiveTrackId'),
++    (state) => state.activeTrackId,
++  );
+ }
+ 
+ export function useArrangementIsPlaying(): boolean {
+@@ -4549,18 +4572,19 @@ export function useArrangementPreviewLaneClips(
+   committed: Arrangement,
+   trackId: string,
+ ): ArrangementClip[] {
+-  return useArrangementPreview(
++  return useStore(
++    useArrangementPreviewStoreContext('useArrangementPreviewLaneClips'),
+     useShallow((state) => selectPreviewLaneClips(state.preview, committed, trackId)),
+   );
+ }
+ 
+ export function useArrangementPosition(): number {
+-  const store = useArrangementPositionStore();
++  const store = useArrangementPositionStoreContext('useArrangementPosition');
+   return useSyncExternalStore(store.subscribePosition, store.getPosition, store.getPosition);
+ }
+ 
+ export function useArrangementPositionWriter(writePosition: (position: number) => void): void {
+-  const store = useArrangementPositionStore();
++  const store = useArrangementPositionStoreContext('useArrangementPositionWriter');
+   usePositionWriterEffect(() => {
+     const applyPosition = () => writePosition(store.getPosition());
+     applyPosition();
+@@ -4568,16 +4592,20 @@ export function useArrangementPositionWriter(writePosition: (position: number) =
+   }, [store, writePosition]);
+ }
+ 
+-export function useMasterMeterStore(): MasterMeterStore {
++function useMasterMeterStoreContext(hookName: string): MasterMeterStore {
+   const store = useContext(ArrangementMeterContext);
+   if (!store) {
+-    throw new Error('useMasterMeterStore must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
++export function useMasterMeterStore(): MasterMeterStore {
++  return useMasterMeterStoreContext('useMasterMeterStore');
++}
++
+ export function useMasterMeterWriter(writeMeter: (store: MasterMeterStore) => void): void {
+-  const store = useMasterMeterStore();
++  const store = useMasterMeterStoreContext('useMasterMeterWriter');
+   usePositionWriterEffect(() => {
+     const applyMeter = () => writeMeter(store);
+     applyMeter();
+@@ -4585,19 +4613,23 @@ export function useMasterMeterWriter(writeMeter: (store: MasterMeterStore) => vo
+   }, [store, writeMeter]);
+ }
+ 
+-export function useTrackMeterStore(): TrackMeterStore {
++function useTrackMeterStoreContext(hookName: string): TrackMeterStore {
+   const store = useContext(ArrangementTrackMeterContext);
+   if (!store) {
+-    throw new Error('useTrackMeterStore must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
++export function useTrackMeterStore(): TrackMeterStore {
++  return useTrackMeterStoreContext('useTrackMeterStore');
++}
++
+ export function useTrackMeterWriter(
+   trackId: string,
+   writeMeter: (frame: MasterMeterState) => void,
+ ): void {
+-  const store = useTrackMeterStore();
++  const store = useTrackMeterStoreContext('useTrackMeterWriter');
+   usePositionWriterEffect(() => {
+     const applyMeter = () => writeMeter(store.getTrackMeterFrame(trackId));
+     applyMeter();
+diff --git a/app/lib/arrangement/__tests__/context-hygiene.test.tsx b/app/lib/arrangement/__tests__/context-hygiene.test.tsx
+index 3ba7c80..51b92ca 100644
+--- a/app/lib/arrangement/__tests__/context-hygiene.test.tsx
++++ b/app/lib/arrangement/__tests__/context-hygiene.test.tsx
+@@ -5,9 +5,20 @@ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import {
+   ArrangementProvider,
+   useArrangement,
++  useArrangementActiveTrackId,
++  useArrangementClipLaneDrag,
+   useArrangementIsPlaying,
+   useArrangementIsPlayingReader,
++  useArrangementPosition,
+   useArrangementPositionStore,
++  useArrangementPositionWriter,
++  useArrangementPreview,
++  useArrangementPreviewLaneClips,
++  useArrangementRange,
++  useArrangementRangeStore,
++  useArrangementSelection,
++  useMasterMeterWriter,
++  useTrackMeterWriter,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementTrack, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+@@ -329,6 +340,27 @@ function ArrangementOutsideProvider() {
+   return null;
+ }
+ 
++function HookOutsideProvider({ use }: { use: () => void }) {
++  use();
++  return null;
++}
++
++const WRAPPER_HOOKS_OUTSIDE_PROVIDER: ReadonlyArray<readonly [string, () => void]> = [
++  ['useArrangementRange', () => useArrangementRange((state) => state.range)],
++  ['useArrangementClipLaneDrag', () => useArrangementClipLaneDrag((state) => state)],
++  ['useArrangementSelection', () => useArrangementSelection((state) => state.activeTrackId)],
++  ['useArrangementPreview', () => useArrangementPreview((state) => state.preview)],
++  ['useArrangementActiveTrackId', () => useArrangementActiveTrackId()],
++  ['useArrangementPosition', () => useArrangementPosition()],
++  ['useArrangementPositionWriter', () => useArrangementPositionWriter(() => undefined)],
++  ['useMasterMeterWriter', () => useMasterMeterWriter(() => undefined)],
++  ['useTrackMeterWriter', () => useTrackMeterWriter('music', () => undefined)],
++  [
++    'useArrangementPreviewLaneClips',
++    () => useArrangementPreviewLaneClips(hygieneArrangement(), 'music'),
++  ],
++];
++
+ function thrownOutsideProvider(child: ReactNode): string | null {
+   let caught: string | null = null;
+   render(
+@@ -512,5 +544,21 @@ describe('context hygiene (D-29z9, round 44) — counts React renders (consumer
+         'useArrangementIsPlayingReader must be used within an ArrangementProvider',
+       );
+     });
++
++    it.each(
++      WRAPPER_HOOKS_OUTSIDE_PROVIDER,
++    )('L8e: %s outside a provider throws its own name (B-R370-HOOK-ERROR-NAMES)', (name, use) => {
++      vi.spyOn(console, 'error').mockImplementation(() => undefined);
++      expect(thrownOutsideProvider(<HookOutsideProvider use={use} />)).toBe(
++        `${name} must be used within an ArrangementProvider`,
++      );
++    });
++
++    it('L8f: a store hook called directly outside a provider keeps its own name', () => {
++      vi.spyOn(console, 'error').mockImplementation(() => undefined);
++      expect(
++        thrownOutsideProvider(<HookOutsideProvider use={() => useArrangementRangeStore()} />),
++      ).toBe('useArrangementRangeStore must be used within an ArrangementProvider');
++    });
+   });
+ });
+diff --git a/app/lib/arrangement/__tests__/pending-status.test.tsx b/app/lib/arrangement/__tests__/pending-status.test.tsx
+index 0e8b113..dbd7921 100644
+--- a/app/lib/arrangement/__tests__/pending-status.test.tsx
++++ b/app/lib/arrangement/__tests__/pending-status.test.tsx
+@@ -385,6 +385,22 @@ describe('pending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT
+       expect(result.current.status).toBe('T');
+     });
+ 
++    it('S5b-same-act: a new status, a refusal and the release in one batch keep the new status (TL-R372-M1)', async () => {
++      const { result } = await mountPendingHook();
++      act(() => result.current.setStatus('X'));
++      let release: () => void = () => undefined;
++      act(() => {
++        release = result.current.beginPointerGesture();
++      });
++      act(() => {
++        result.current.setStatus('T');
++        result.current.toggleTrackSolo('music', false);
++        release();
++      });
++      expect(result.current.status).toBe('T');
++      expect(trackOf(result.current.arrangement, 'music').solo).toBe(false);
++    });
++
+     it('S6: a gesture with no refusal leaves the status unchanged', async () => {
+       const { result } = await mountPendingHook();
+       act(() => result.current.setStatus('X'));
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 318666b..108ccc5 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -735,6 +735,38 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBe(0);
+   });
+ 
++  it('RB-LEAF1 a lane commit or a zoom step does not render the Master strip; a Master mute does (PERF-11c-iii)', async () => {
++    const { api, view } = await mountWorkspace();
++    renderLog.counts.clear();
++    act(() => api.current?.toggleTrackMute('music'));
++    act(() => api.current?.setPxPerSecond((api.current?.pxPerSecond ?? 20) * 2));
++    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBe(0);
++    renderLog.counts.clear();
++    act(() => api.current?.toggleMasterMute());
++    expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBe(1);
++    expect(
++      within(view.getByTestId('arrangement-master'))
++        .getByRole('button', { name: 'Master Mute' })
++        .getAttribute('aria-pressed'),
++    ).toBe('true');
++  });
++
++  it('RB-LEAF2 the closed Export dialog renders nothing on a lane commit; opening mounts its content (PERF-11c-iii)', async () => {
++    const { api, view } = await mountWorkspace();
++    renderLog.counts.clear();
++    act(() => api.current?.toggleTrackMute('music'));
++    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementExportDialogShell') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementExportDialogContent') ?? 0).toBe(0);
++    expect(view.queryByRole('dialog')).toBeNull();
++    renderLog.counts.clear();
++    fireEvent.click(view.getByRole('button', { name: 'Export' }));
++    expect(view.getByRole('dialog')).toBeTruthy();
++    expect(renderLog.counts.get('ArrangementExportDialogShell') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementExportDialogContent') ?? 0).toBeGreaterThan(0);
++  });
++
+   it('RB-MEMO3 a workspace commit re-renders the workspace and not the range readout; a status write renders only the status text (C-R320-01, SIG-R360)', async () => {
+     const { api, view } = await mountWorkspace();
+     act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));

@@ -1,0 +1,25 @@
+# B round 373->374 checkpoint
+- step1 done: tasks/round-373.md archived; backups saved
+- step2: advisor consulted (split 11c-iii; render attribution probe; tech-lead ruling; TL-R372-M1 test rows in 374)
+- step3: HEAD probes done: b-round-373/probe/leaf-head.json, subtree-head.json (+ leaf-head-preview.json, preview button identity unverified; 315 LibraryPreview count in leaf-head stop step unexplained = record only)
+- step4: scratch = cp -a store@e69eba4 (b-round-373/scratch). S5b-same-act row added in scratch pending-status (green); mutant MU-NONREFUSAL-OUTSIDE-GESTURE-ONLY red S5b + S5b-same-act (2). Consults tech-lead + performance-optimizer running.
+- (a) cause confirmed: writeInsertMarker updater returns text unchanged when insertMarkerStatusKind(text) is null (ArrangementContext l.946-963): add-text pre-state -> INFO, B spec state recipe gap
+- step5: tech-lead ruling: Master + ExportDialog(shell/content) [LoopBrace optional], VideoDock deferred, frontend-architect checkpoint yes (non-blocking). B-R370 sketch done (sketch-hook-names.py, sketch-hook-tests.py; L8e 9 red on HEAD ctx). perf-optimizer pending.
+- step6: perf-optimizer: Master+Library+ExportDialog best; PERF2-FIRST-FRAME not affected (-> PERF-7 first frame / PERF-11 hydration); estimates zoom 73->~59-62 for 3 leaves. Leaves sketch applied in scratch (sketch-leaves.py), tsc rc0.
+- step7: full suite on sketch 252/3716 rc0 (precheck-full.log); sketch.patch.txt + sha written
+- step8: perf on sketch 214 PASS 0 FAIL (perf-sketch.log); zoom 73->67, releaseComponentsMax -6 (perf-sketch-vs-head.txt)
+- step9: mutants v1 INVALID (git checkout reverted uncommitted sketch; kept mutants/invalid-git-checkout/); runner fixed to backup/restore; scratch re-patched SKETCH-OK; rerunning
+- step10: tech-lead sketch review running (patch only); root request + consult summaries written
+- step11: two concurrent mutant runs (stale first job alive) -> killed, logs in mutants/invalid-concurrent; scratch restored. tech-lead review: approve with changes (Medium: private use*StoreContext helpers; Low: RB-LEAF2 shell positive; PreviewLaneClips name)
+- step12: sketch v2 (review fixes) full suite 252/3717; sketch.patch.txt v2 sha 2d2dfcb97c8fdcf9; v1 kept as sketch-v1.patch.txt
+- step13: current-task.md (round 374) written; pending: mutants (running), perf v2 interactions, sketch-review.md, claims sketch output, backlog v339, feature-status, b-round-373.md, b-next.json
+- step14: backlog v339 written (D-29z1235..1240)
+- step15: feature-status updated (l.400-405, STUDIO-PERFORMANCE row, header)
+- step16: b-next.json, b-round-373.md, sketch-review.md written; pending: mutants, v2 delta review, perf v2, claims sketch output, final claims
+- step17: v2 delta review approve (sketch-review.md)
+- step18: mutants v2 6/6 red (1,1,1,1,1,3); current-task §4 + b-round §6 filled; perf v2 interactions running
+- step19: perf v2 interactions 0 FAIL zoom 67/154; claims-374-output.txt (HEAD) + claims-374-sketch-output.txt written
+- step20 (attempt 2): LT12 recipe v1 invalid (wrong locators; Space eaten by library listbox focus). v2 probe (Play button, Ctrl+Shift+Space, strip click, Stop) reaches LT12 at HEAD both viewports: probe/lt12-head-v2.json. current-task STATUS-LT12-BROWSER row rewritten (backup current-task-before-lt12-v2.md); claims-374.sh K28 +2 files, outputs updated (backups *.before-lt12v2*).
+- step21: b-round-373.md §6b, b-next.json, backlog D-29z1241 written. Remaining: feature-status note, advisor final.
+- step22: feature-status l.405 note added. Remaining: advisor final.
+- step23: attempt 2 complete. Advisor: focus measured (role=option in listbox; Space DOES start playback) -> cause corrected everywhere (add text has no marker kind); probe mkdir added; lt12-head-v2.json rerun. Store tree clean at e69eba4 (git status --short empty); no source edits in B phase.

@@ -1,0 +1,129 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T16:42:20.2496719Z",
+  "round": 373,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "SKETCH-EQUAL",
+  "ASSERT-COUNT",
+  "UNIT",
+  "MUTANTS-TREE",
+  "PERF-INTERACT",
+  "STATUS-BROWSER",
+  "G373-AUTH",
+  "STUDIO-SMOKE-373",
+  "DOCS"
+ ],
+ "recorded": [
+  "MU-B-RECORD: with b-round-359 mu-b.diff on a copy of A's tree: interact.play.start-components 12, stop-components 12, fade release-commits 4 (stopped and playing), play start/stop commits 2; B measured 12/12/4 on the sketch. The mutant goes red as expected (6 asserts), so the budget row can fail.",
+  "STATUS-BROWSER (a): the bars-ruler strip click from stopped starts playback (data-playing true, position ~00:08.66) but the status line stays the add text in BOTH HEAD and A's tree; the LT12 'Insert marker at <t> — playback continues…' text was NOT observed in the browser in either tree (also not on strip click while playing, ruler-body click, or Space). Equal to HEAD, so not a finding; the B expectation of the LT12 form is unconfirmed in the real browser (only jsdom LT12).",
+  "STATUS-BROWSER (b): fade-in drag: during 'Fade In: 1.000 s', after release 'Fade In: 1.000 s.', Undo title 'Undo: Fade In (Ctrl+Z)'; (e) childList mutations pointerup..+500 ms = 2 on both trees, both viewports.",
+  "STATUS-BROWSER (c): Ctrl+Z during name-bar drag -> 'Undo/Redo does not work while dragging — let go first.'; after release 'Move clip: start 00:02.000, length 00:16.000, source offset 00:00.000.', Undo 'Undo: Move clip (Ctrl+Z)'; identical on both trees.",
+  "STATUS-BROWSER (d): ArrowLeft held (>=9 repeats) on the clip at 0: 0 childList mutations on both trees (the clip is already at 0, so the check is weak: no move happened).",
+  "SMOKE: WAV RIFF/WAVE PCM 24-bit stereo 48 kHz, 16.000 s, 768000 frames, peak 0.2171, rms 0.0799, 0 NaN, data length matches file; identical at both viewports. Move status 'Move to track — SFX: start 00:00.000.' / Undo 'Undo: Move to track — SFX' equal to round 372 record.",
+  "Perf: range rows recorded 0 release-commits; background-range rows recorded; move-to-paint p95 differs from B's sketch run (timing noise, no budget): range.playing 6x 29.4 ms vs B 65.7 ms."
+ ],
+ "blocked": [
+  "G373-AUTH: /api/studio-token with a fake bearer returns a fail-closed 500 'Unable to prepare Studio access' (no backend/mock in cloud) instead of the 403 B names for the mock; status 401 without a token is verified. Not a Studio bug; backend unavailable in cloud."
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": [
+  "typecheck+lint+Biome (A)",
+  "covering 136 files (A and C)"
+ ],
+ "chainHeadGateRunGreen": "gate 372 published 4900b83 (gates/gate-round-372.json, not re-read this round)",
+ "affectedChecksNamed": [
+  "covering-373 136 files",
+  "status-lifetime+pending-status shuffled seed 42",
+  "perf interactions spec",
+  "6 mutants",
+  "STATUS-BROWSER",
+  "G373-AUTH",
+  "STUDIO-SMOKE-373"
+ ],
+ "affectedChecksRunOnSketch": [
+  "covering 136 files: 2153 tests pass",
+  "shuffle seed 42: 43 pass",
+  "perf spec: pass, 0 failures, 6 passes (3 at 1x, 3 at 6x)",
+  "6 mutants red 2/3/1/16/1/11",
+  "STATUS-BROWSER both viewports vs HEAD",
+  "G373-AUTH both viewports",
+  "STUDIO-SMOKE both viewports"
+ ],
+ "assertsSpecified": "verified by C's command on B's sketch (perf spec); numbers match B's sketch run",
+ "mutantsRecorded": [
+  "MU-STATUS-ON-VALUE",
+  "MU-ADOPT-KEY-SEQUENCE",
+  "MU-PLAYFROM-ORDER",
+  "MU-NO-PREVIEW-CLEAR",
+  "MU-GESTURE-FLAG-OFF",
+  "MU-NO-NONREFUSAL-WRITE"
+ ],
+ "mutantRedOnSketch": "b-round-372/mutants/",
+ "mutantRedOnTree": {
+  "MU-STATUS-ON-VALUE": {
+   "failed": 2,
+   "sameFailingIdsAsB": true
+  },
+  "MU-ADOPT-KEY-SEQUENCE": {
+   "failed": 3,
+   "sameFailingIdsAsB": true
+  },
+  "MU-PLAYFROM-ORDER": {
+   "failed": 1,
+   "sameFailingIdsAsB": true
+  },
+  "MU-NO-PREVIEW-CLEAR": {
+   "failed": 16,
+   "sameFailingIdsAsB": true
+  },
+  "MU-GESTURE-FLAG-OFF": {
+   "failed": 1,
+   "sameFailingIdsAsB": true
+  },
+  "MU-NO-NONREFUSAL-WRITE": {
+   "failed": 11,
+   "sameFailingIdsAsB": true
+  }
+ },
+ "manifestPaths": "sha256 lists: r373-frozen-sha256.txt (rc 0), protected-sha256.txt (rc 0), sketch-files-sha256.txt (7/7 OK); git status 9 lines at start and end",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "origin": "n/a (no findings)",
+ "abletonConformance": "not applicable: performance refactor, no visible change (2026-10-27 rule)",
+ "measurements": {
+  "unit": "136 files / 2153 tests pass; shuffle 2 files / 43 pass; largest single tests CP12a 6977 ms (describe 30 s, 23%), TC10 2795 ms (15 s, 19%), DXM3 2787 ms (20 s, 14%): none above 50%",
+  "assertCount": "render-budget 125->129 expect, 13 it; selection-wrappers-render 34->37, 7; status-lifetime 145->145, 21",
+  "perf": "start/stop components 11/11; fade release-commits 2; trim/move/lane/group/video 1; video-fade 1; range release-commits 0",
+  "wav": "see smoke"
+ },
+ "observations": [
+  "Docs: doc 239 l.4 and doc 240 l.4 byte-exact; TEMPLATE headings in order; every file and test id doc 240 names exists; 0 'C round N pending' hits.",
+  "CLAIMS: output equals the sketch output except K2=9 and K17 (doc 240 files 1, doc239 l.4 new), as B expected; the rest equals HEAD output.",
+  "Non-blocking: A's reviewer Lows (describeSpaceStart during a gesture, statusSequence +2, naming getStatus) remain B's inputs; no behaviour difference was observable in the browser."
+ ]
+}

@@ -1,0 +1,308 @@
+--- sketch-v1.patch.txt	2026-11-06 17:57:06.927476798 +0000
++++ sketch.patch.txt	2026-11-06 18:42:39.178339729 +0000
+@@ -165,17 +165,15 @@
+          isOpen={isShortcutSheetOpen}
+          onClose={closeShortcutSheet}
+ diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+-index b0c766f..8877d5d 100644
++index b0c766f..ab5f8db 100644
+ --- a/app/contexts/ArrangementContext.tsx
+ +++ b/app/contexts/ArrangementContext.tsx
+-@@ -4429,10 +4429,12 @@ export function useArrangementInsertMarkerStore(): ArrangementPositionStore {
++@@ -4429,14 +4429,18 @@ export function useArrangementInsertMarkerStore(): ArrangementPositionStore {
+    return store;
+  }
+  
+ -export function useArrangementPositionStore(): ArrangementPositionStore {
+-+export function useArrangementPositionStore(
+-+  hookName = 'useArrangementPositionStore',
+-+): ArrangementPositionStore {
+++function useArrangementPositionStoreContext(hookName: string): ArrangementPositionStore {
+    const store = useContext(ArrangementPositionContext);
+    if (!store) {
+ -    throw new Error('useArrangementPositionStore must be used within an ArrangementProvider');
+@@ -183,14 +181,20 @@
+    }
+    return store;
+  }
+-@@ -4445,10 +4447,12 @@ export function useArrangementMixDraftStore(): ArrangementMixDraftStore {
++ 
+++export function useArrangementPositionStore(): ArrangementPositionStore {
+++  return useArrangementPositionStoreContext('useArrangementPositionStore');
+++}
+++
++ export function useArrangementMixDraftStore(): ArrangementMixDraftStore {
++   const store = useContext(ArrangementMixDraftContext);
++   if (!store) {
++@@ -4445,60 +4449,76 @@ export function useArrangementMixDraftStore(): ArrangementMixDraftStore {
+    return store;
+  }
+  
+ -export function useArrangementRangeStore(): ArrangementRangeStore {
+-+export function useArrangementRangeStore(
+-+  hookName = 'useArrangementRangeStore',
+-+): ArrangementRangeStore {
+++function useArrangementRangeStoreContext(hookName: string): ArrangementRangeStore {
+    const store = useContext(ArrangementRangeContext);
+    if (!store) {
+ -    throw new Error('useArrangementRangeStore must be used within an ArrangementProvider');
+@@ -198,18 +202,20 @@
+    }
+    return store;
+  }
+-@@ -4456,13 +4460,15 @@ export function useArrangementRangeStore(): ArrangementRangeStore {
++ 
+++export function useArrangementRangeStore(): ArrangementRangeStore {
+++  return useArrangementRangeStoreContext('useArrangementRangeStore');
+++}
+++
+  export function useArrangementRange<Selected>(
+    selector: (state: ArrangementRangeState) => Selected,
+  ): Selected {
+ -  return useStore(useArrangementRangeStore(), selector);
+-+  return useStore(useArrangementRangeStore('useArrangementRange'), selector);
+++  return useStore(useArrangementRangeStoreContext('useArrangementRange'), selector);
+  }
+  
+ -export function useArrangementClipLaneDragStore(): ArrangementClipLaneDragStore {
+-+export function useArrangementClipLaneDragStore(
+-+  hookName = 'useArrangementClipLaneDragStore',
+-+): ArrangementClipLaneDragStore {
+++function useArrangementClipLaneDragStoreContext(hookName: string): ArrangementClipLaneDragStore {
+    const store = useContext(ArrangementClipLaneDragContext);
+    if (!store) {
+ -    throw new Error('useArrangementClipLaneDragStore must be used within an ArrangementProvider');
+@@ -217,18 +223,20 @@
+    }
+    return store;
+  }
+-@@ -4470,13 +4476,15 @@ export function useArrangementClipLaneDragStore(): ArrangementClipLaneDragStore
++ 
+++export function useArrangementClipLaneDragStore(): ArrangementClipLaneDragStore {
+++  return useArrangementClipLaneDragStoreContext('useArrangementClipLaneDragStore');
+++}
+++
+  export function useArrangementClipLaneDrag<Selected>(
+    selector: (state: ArrangementClipLaneDragStoreState) => Selected,
+  ): Selected {
+ -  return useStore(useArrangementClipLaneDragStore(), selector);
+-+  return useStore(useArrangementClipLaneDragStore('useArrangementClipLaneDrag'), selector);
+++  return useStore(useArrangementClipLaneDragStoreContext('useArrangementClipLaneDrag'), selector);
+  }
+  
+ -export function useArrangementSelectionStore(): ArrangementSelectionStore {
+-+export function useArrangementSelectionStore(
+-+  hookName = 'useArrangementSelectionStore',
+-+): ArrangementSelectionStore {
+++function useArrangementSelectionStoreContext(hookName: string): ArrangementSelectionStore {
+    const store = useContext(ArrangementSelectionContext);
+    if (!store) {
+ -    throw new Error('useArrangementSelectionStore must be used within an ArrangementProvider');
+@@ -236,18 +244,20 @@
+    }
+    return store;
+  }
+-@@ -4484,13 +4492,15 @@ export function useArrangementSelectionStore(): ArrangementSelectionStore {
++ 
+++export function useArrangementSelectionStore(): ArrangementSelectionStore {
+++  return useArrangementSelectionStoreContext('useArrangementSelectionStore');
+++}
+++
+  export function useArrangementSelection<Selected>(
+    selector: (state: ArrangementSelectionState) => Selected,
+  ): Selected {
+ -  return useStore(useArrangementSelectionStore(), selector);
+-+  return useStore(useArrangementSelectionStore('useArrangementSelection'), selector);
+++  return useStore(useArrangementSelectionStoreContext('useArrangementSelection'), selector);
+  }
+  
+ -export function useArrangementPreviewStore(): ArrangementPreviewStore {
+-+export function useArrangementPreviewStore(
+-+  hookName = 'useArrangementPreviewStore',
+-+): ArrangementPreviewStore {
+++function useArrangementPreviewStoreContext(hookName: string): ArrangementPreviewStore {
+    const store = useContext(ArrangementPreviewContext);
+    if (!store) {
+ -    throw new Error('useArrangementPreviewStore must be used within an ArrangementProvider');
+@@ -255,48 +265,60 @@
+    }
+    return store;
+  }
+-@@ -4498,7 +4508,7 @@ export function useArrangementPreviewStore(): ArrangementPreviewStore {
++ 
+++export function useArrangementPreviewStore(): ArrangementPreviewStore {
+++  return useArrangementPreviewStoreContext('useArrangementPreviewStore');
+++}
+++
+  export function useArrangementPreview<Selected>(
+    selector: (state: ArrangementPreviewState) => Selected,
+  ): Selected {
+ -  return useStore(useArrangementPreviewStore(), selector);
+-+  return useStore(useArrangementPreviewStore('useArrangementPreview'), selector);
+++  return useStore(useArrangementPreviewStoreContext('useArrangementPreview'), selector);
+  }
+  
+  function useArrangementPlaybackStoreContext(hookName: string): ArrangementPlaybackStore {
+-@@ -4525,7 +4535,10 @@ export function useArrangementWorkspaceSessionStore(): ArrangementWorkspaceSessi
++@@ -4525,7 +4545,10 @@ export function useArrangementWorkspaceSessionStore(): ArrangementWorkspaceSessi
+  }
+  
+  export function useArrangementActiveTrackId(): string | null {
+ -  return useStore(useArrangementSelectionStore(), (state) => state.activeTrackId);
+ +  return useStore(
+-+    useArrangementSelectionStore('useArrangementActiveTrackId'),
+++    useArrangementSelectionStoreContext('useArrangementActiveTrackId'),
+ +    (state) => state.activeTrackId,
+ +  );
+  }
+  
+  export function useArrangementIsPlaying(): boolean {
+-@@ -4555,12 +4568,12 @@ export function useArrangementPreviewLaneClips(
++@@ -4549,18 +4572,19 @@ export function useArrangementPreviewLaneClips(
++   committed: Arrangement,
++   trackId: string,
++ ): ArrangementClip[] {
++-  return useArrangementPreview(
+++  return useStore(
+++    useArrangementPreviewStoreContext('useArrangementPreviewLaneClips'),
++     useShallow((state) => selectPreviewLaneClips(state.preview, committed, trackId)),
++   );
+  }
+  
+  export function useArrangementPosition(): number {
+ -  const store = useArrangementPositionStore();
+-+  const store = useArrangementPositionStore('useArrangementPosition');
+++  const store = useArrangementPositionStoreContext('useArrangementPosition');
+    return useSyncExternalStore(store.subscribePosition, store.getPosition, store.getPosition);
+  }
+  
+  export function useArrangementPositionWriter(writePosition: (position: number) => void): void {
+ -  const store = useArrangementPositionStore();
+-+  const store = useArrangementPositionStore('useArrangementPositionWriter');
+++  const store = useArrangementPositionStoreContext('useArrangementPositionWriter');
+    usePositionWriterEffect(() => {
+      const applyPosition = () => writePosition(store.getPosition());
+      applyPosition();
+-@@ -4568,16 +4581,16 @@ export function useArrangementPositionWriter(writePosition: (position: number) =
++@@ -4568,16 +4592,20 @@ export function useArrangementPositionWriter(writePosition: (position: number) =
+    }, [store, writePosition]);
+  }
+  
+ -export function useMasterMeterStore(): MasterMeterStore {
+-+export function useMasterMeterStore(hookName = 'useMasterMeterStore'): MasterMeterStore {
+++function useMasterMeterStoreContext(hookName: string): MasterMeterStore {
+    const store = useContext(ArrangementMeterContext);
+    if (!store) {
+ -    throw new Error('useMasterMeterStore must be used within an ArrangementProvider');
+@@ -305,18 +327,22 @@
+    return store;
+  }
+  
+++export function useMasterMeterStore(): MasterMeterStore {
+++  return useMasterMeterStoreContext('useMasterMeterStore');
+++}
+++
+  export function useMasterMeterWriter(writeMeter: (store: MasterMeterStore) => void): void {
+ -  const store = useMasterMeterStore();
+-+  const store = useMasterMeterStore('useMasterMeterWriter');
+++  const store = useMasterMeterStoreContext('useMasterMeterWriter');
+    usePositionWriterEffect(() => {
+      const applyMeter = () => writeMeter(store);
+      applyMeter();
+-@@ -4585,10 +4598,10 @@ export function useMasterMeterWriter(writeMeter: (store: MasterMeterStore) => vo
++@@ -4585,19 +4613,23 @@ export function useMasterMeterWriter(writeMeter: (store: MasterMeterStore) => vo
+    }, [store, writeMeter]);
+  }
+  
+ -export function useTrackMeterStore(): TrackMeterStore {
+-+export function useTrackMeterStore(hookName = 'useTrackMeterStore'): TrackMeterStore {
+++function useTrackMeterStoreContext(hookName: string): TrackMeterStore {
+    const store = useContext(ArrangementTrackMeterContext);
+    if (!store) {
+ -    throw new Error('useTrackMeterStore must be used within an ArrangementProvider');
+@@ -324,20 +350,25 @@
+    }
+    return store;
+  }
+-@@ -4597,7 +4610,7 @@ export function useTrackMeterWriter(
++ 
+++export function useTrackMeterStore(): TrackMeterStore {
+++  return useTrackMeterStoreContext('useTrackMeterStore');
+++}
+++
++ export function useTrackMeterWriter(
+    trackId: string,
+    writeMeter: (frame: MasterMeterState) => void,
+  ): void {
+ -  const store = useTrackMeterStore();
+-+  const store = useTrackMeterStore('useTrackMeterWriter');
+++  const store = useTrackMeterStoreContext('useTrackMeterWriter');
+    usePositionWriterEffect(() => {
+      const applyMeter = () => writeMeter(store.getTrackMeterFrame(trackId));
+      applyMeter();
+ diff --git a/app/lib/arrangement/__tests__/context-hygiene.test.tsx b/app/lib/arrangement/__tests__/context-hygiene.test.tsx
+-index 3ba7c80..03a786f 100644
++index 3ba7c80..51b92ca 100644
+ --- a/app/lib/arrangement/__tests__/context-hygiene.test.tsx
+ +++ b/app/lib/arrangement/__tests__/context-hygiene.test.tsx
+-@@ -5,9 +5,19 @@ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++@@ -5,9 +5,20 @@ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+  import {
+    ArrangementProvider,
+    useArrangement,
+@@ -349,6 +380,7 @@
+    useArrangementPositionStore,
+ +  useArrangementPositionWriter,
+ +  useArrangementPreview,
+++  useArrangementPreviewLaneClips,
+ +  useArrangementRange,
+ +  useArrangementRangeStore,
+ +  useArrangementSelection,
+@@ -357,7 +389,7 @@
+  } from '~/contexts/ArrangementContext';
+  import type { Arrangement, ArrangementTrack, WorkspaceCollection } from '~/types/arrangement';
+  import { createArrangement } from '../model';
+-@@ -329,6 +339,23 @@ function ArrangementOutsideProvider() {
++@@ -329,6 +340,27 @@ function ArrangementOutsideProvider() {
+    return null;
+  }
+  
+@@ -376,12 +408,16 @@
+ +  ['useArrangementPositionWriter', () => useArrangementPositionWriter(() => undefined)],
+ +  ['useMasterMeterWriter', () => useMasterMeterWriter(() => undefined)],
+ +  ['useTrackMeterWriter', () => useTrackMeterWriter('music', () => undefined)],
+++  [
+++    'useArrangementPreviewLaneClips',
+++    () => useArrangementPreviewLaneClips(hygieneArrangement(), 'music'),
+++  ],
+ +];
+ +
+  function thrownOutsideProvider(child: ReactNode): string | null {
+    let caught: string | null = null;
+    render(
+-@@ -512,5 +539,21 @@ describe('context hygiene (D-29z9, round 44) — counts React renders (consumer
++@@ -512,5 +544,21 @@ describe('context hygiene (D-29z9, round 44) — counts React renders (consumer
+          'useArrangementIsPlayingReader must be used within an ArrangementProvider',
+        );
+      });
+@@ -431,10 +467,10 @@
+        const { result } = await mountPendingHook();
+        act(() => result.current.setStatus('X'));
+ diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+-index 318666b..c36f802 100644
++index 318666b..108ccc5 100644
+ --- a/app/lib/arrangement/__tests__/render-budget.test.tsx
+ +++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+-@@ -735,6 +735,37 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
++@@ -735,6 +735,38 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+      expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBe(0);
+    });
+  
+@@ -466,6 +502,7 @@
+ +    renderLog.counts.clear();
+ +    fireEvent.click(view.getByRole('button', { name: 'Export' }));
+ +    expect(view.getByRole('dialog')).toBeTruthy();
+++    expect(renderLog.counts.get('ArrangementExportDialogShell') ?? 0).toBeGreaterThan(0);
+ +    expect(renderLog.counts.get('ArrangementExportDialogContent') ?? 0).toBeGreaterThan(0);
+ +  });
+ +
