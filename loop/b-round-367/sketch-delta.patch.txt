@@ -1,0 +1,291 @@
+diff --git a/app/lib/arrangement/__tests__/stem-cache.test.ts b/app/lib/arrangement/__tests__/stem-cache.test.ts
+index e0c46c9..8f2a642 100644
+--- a/app/lib/arrangement/__tests__/stem-cache.test.ts
++++ b/app/lib/arrangement/__tests__/stem-cache.test.ts
+@@ -966,7 +966,7 @@ describe('PERF-9b-ii stem cache commit discipline (stem-cache.client.ts)', () =>
+     vi.restoreAllMocks();
+   });
+ 
+-  it('SC22 transactionDone resolves only on complete; it rejects on abort with the transaction error, or an AbortError when there is none; an error event alone does not settle it', async () => {
++  it('SC22 transactionDone resolves only on complete; it rejects on abort with the transaction error, or an AbortError when there is none; with no event it stays pending (the error-event order is SC23)', async () => {
+     const completed = createFakeTransaction();
+     const done = transactionDone(completed);
+     completed.oncomplete?.(new Event('complete'));
+@@ -1221,4 +1221,157 @@ describe('PERF-9b-ii stem cache commit discipline (stem-cache.client.ts)', () =>
+     await cached.idle();
+     expect(fake.entries.has(URL_A)).toBe(false);
+   });
++
++  it('SC30 a load that arrives after the pending write of its key was aborted joins that write, so the key is stored once: behind a held sweep and behind a held put of another key', async () => {
++    const fake = createFakeStemCacheStore();
++    const sweepGate = createDeferred();
++    fake.sweep.mockImplementation(() => sweepGate.promise);
++    const cached = cachedWith(
++      fake,
++      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
++    );
++    await cached.fetchSource(URL_B, requestInit());
++    const first = new AbortController();
++    await cached.fetchSource(URL_A, requestInit(first.signal));
++    await flushTasks();
++    first.abort();
++    await cached.fetchSource(URL_A, requestInit());
++    await flushTasks();
++    sweepGate.resolve();
++    await cached.idle();
++    expect(fake.entries.has(URL_A)).toBe(true);
++    expect(fake.entries.has(URL_B)).toBe(true);
++    expect(fake.log.filter((line) => line === `put:${URL_A}`)).toHaveLength(1);
++
++    const held = createFakeStemCacheStore();
++    const putGate = createDeferred();
++    held.put.mockImplementationOnce(async (record, bytes) => {
++      held.log.push(`put:${record.key}`);
++      await putGate.promise;
++      held.entries.set(record.key, { record: { ...record }, bytes: bytes.slice(0) });
++    });
++    const heldCache = cachedWith(
++      held,
++      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(3, 4), validatedHeaders())),
++    );
++    await heldCache.fetchSource(URL_B, requestInit());
++    await flushTasks();
++    expect(held.log).toContain(`put:${URL_B}`);
++    const aborted = new AbortController();
++    await heldCache.fetchSource(URL_A, requestInit(aborted.signal));
++    await flushTasks();
++    aborted.abort();
++    await heldCache.fetchSource(URL_A, requestInit());
++    await flushTasks();
++    putGate.resolve();
++    await heldCache.idle();
++    expect(held.entries.has(URL_A)).toBe(true);
++    expect(held.log.filter((line) => line === `put:${URL_A}`)).toHaveLength(1);
++  });
++
++  it('SC31 a load that joins a pending write keeps it alive when the first load aborts; when only the joining load aborts it is still stored; when every joined load aborts nothing is stored', async () => {
++    const fake = createFakeStemCacheStore();
++    const sweepGate = createDeferred();
++    fake.sweep.mockImplementation(() => sweepGate.promise);
++    const cached = cachedWith(
++      fake,
++      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
++    );
++    const first = new AbortController();
++    await cached.fetchSource(URL_A, requestInit(first.signal));
++    await flushTasks();
++    await cached.fetchSource(URL_A, requestInit());
++    await flushTasks();
++    first.abort();
++    sweepGate.resolve();
++    await cached.idle();
++    expect(fake.entries.has(URL_A)).toBe(true);
++    expect(fake.put).toHaveBeenCalledTimes(1);
++
++    const none = createFakeStemCacheStore();
++    const noneSweep = createDeferred();
++    none.sweep.mockImplementation(() => noneSweep.promise);
++    const noneCache = cachedWith(
++      none,
++      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
++    );
++    const one = new AbortController();
++    const two = new AbortController();
++    await noneCache.fetchSource(URL_A, requestInit(one.signal));
++    await flushTasks();
++    await noneCache.fetchSource(URL_A, requestInit(two.signal));
++    await flushTasks();
++    one.abort();
++    two.abort();
++    noneSweep.resolve();
++    await noneCache.idle();
++    expect(none.put).not.toHaveBeenCalled();
++    expect(none.entries.has(URL_A)).toBe(false);
++
++    const joiner = createFakeStemCacheStore();
++    const joinerSweep = createDeferred();
++    joiner.sweep.mockImplementation(() => joinerSweep.promise);
++    const joinerCache = cachedWith(
++      joiner,
++      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
++    );
++    await joinerCache.fetchSource(URL_A, requestInit());
++    await flushTasks();
++    const late = new AbortController();
++    await joinerCache.fetchSource(URL_A, requestInit(late.signal));
++    await flushTasks();
++    late.abort();
++    joinerSweep.resolve();
++    await joinerCache.idle();
++    expect(joiner.entries.has(URL_A)).toBe(true);
++    expect(joiner.put).toHaveBeenCalledTimes(1);
++  });
++
++  it('SC32 a hit 404 while a same-key 200 is still reading its body deletes after that write lands', async () => {
++    const fake = createFakeStemCacheStore();
++    seed(fake, storedRecord());
++    const body = createControlledBody();
++    const fetchSource = vi.fn<SourceFetch>(async () =>
++      audioResponse(body.body, validatedHeaders('"v2"')),
++    );
++    const cached = cachedWith(fake, fetchSource);
++    const first = await cached.fetchSource(URL_A, requestInit());
++    expect(first.status).toBe(200);
++    fetchSource.mockImplementationOnce(async () => audioResponse(null, {}, 404));
++    const gone = await cached.fetchSource(URL_A, requestInit());
++    expect(gone.status).toBe(404);
++    await flushTasks();
++    body.finish(bytesOf(1, 2, 3, 4));
++    await cached.idle();
++    expect(fake.entries.has(URL_A)).toBe(false);
++    expect(fake.log).toContain(`put:${URL_A}`);
++    expect(fake.log.lastIndexOf(`delete:${URL_A}`)).toBeGreaterThan(
++      fake.log.indexOf(`put:${URL_A}`),
++    );
++  });
++
++  it('SC33 an abort during the quota-retry eviction stores nothing: the retry put is not made', async () => {
++    const fake = createFakeStemCacheStore();
++    seed(fake, storedRecord({ key: '/oldest', fileName: 'o', lastAccessedAt: 5 }));
++    fake.put.mockRejectedValueOnce(new DOMException('full', 'QuotaExceededError'));
++    const deleteGate = createDeferred();
++    fake.remove.mockImplementationOnce(async (key) => {
++      fake.log.push(`delete:${key}`);
++      await deleteGate.promise;
++      fake.entries.delete(key);
++    });
++    const cached = cachedWith(
++      fake,
++      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
++    );
++    const controller = new AbortController();
++    await cached.fetchSource(URL_A, requestInit(controller.signal));
++    await flushTasks();
++    expect(fake.remove).toHaveBeenCalledWith('/oldest');
++    controller.abort();
++    deleteGate.resolve();
++    await cached.idle();
++    expect(fake.put).toHaveBeenCalledTimes(1);
++    expect(fake.entries.has(URL_A)).toBe(false);
++  });
+ });
+diff --git a/app/lib/arrangement/stem-cache.client.ts b/app/lib/arrangement/stem-cache.client.ts
+index 7e5a96b..627184d 100644
+--- a/app/lib/arrangement/stem-cache.client.ts
++++ b/app/lib/arrangement/stem-cache.client.ts
+@@ -267,6 +267,15 @@ async function browserQuota(): Promise<number | undefined> {
+   return (await navigator.storage.estimate()).quota;
+ }
+ 
++interface PendingStemWrite {
++  done: Promise<void>;
++  signals: Array<AbortSignal | null | undefined>;
++}
++
++function isStemWriteAbandoned(signals: ReadonlyArray<AbortSignal | null | undefined>): boolean {
++  return signals.every((signal) => signal?.aborted === true);
++}
++
+ function isQuotaError(error: unknown): boolean {
+   return error instanceof DOMException && error.name === 'QuotaExceededError';
+ }
+@@ -293,7 +302,7 @@ export function createCachedSourceFetch({
+   let disabled = store === null;
+   let sweepPromise: Promise<void> | null = null;
+   let commitChain: Promise<void> = Promise.resolve();
+-  const writes = new Map<string, Promise<void>>();
++  const writes = new Map<string, PendingStemWrite>();
+   const deletes = new Set<Promise<void>>();
+ 
+   const enqueueCommit = (task: () => Promise<void>): Promise<void> => {
+@@ -306,9 +315,9 @@ export function createCachedSourceFetch({
+     activeStore: StemCacheStore,
+     record: StemCacheRecord,
+     bytes: ArrayBuffer,
+-    signal: AbortSignal | null | undefined,
++    abandoned: () => boolean,
+   ): Promise<void> => {
+-    const cancelled = (): boolean => signal?.aborted === true || disabled;
++    const cancelled = (): boolean => abandoned() || disabled;
+     if (cancelled()) {
+       return;
+     }
+@@ -352,11 +361,11 @@ export function createCachedSourceFetch({
+     activeStore: StemCacheStore,
+     record: StemCacheRecord,
+     bytes: ArrayBuffer,
+-    signal: AbortSignal | null | undefined,
+-  ): Promise<void> => enqueueCommit(() => storeBytesNow(activeStore, record, bytes, signal));
++    abandoned: () => boolean,
++  ): Promise<void> => enqueueCommit(() => storeBytesNow(activeStore, record, bytes, abandoned));
+ 
+   const deleteAfterPendingWrite = (activeStore: StemCacheStore, key: string): void => {
+-    const pendingWrite = writes.get(key) ?? Promise.resolve();
++    const pendingWrite = writes.get(key)?.done ?? Promise.resolve();
+     const run = pendingWrite
+       .then(() => enqueueCommit(() => activeStore.delete(key)))
+       .catch(() => undefined);
+@@ -370,7 +379,7 @@ export function createCachedSourceFetch({
+     activeStore: StemCacheStore,
+     key: string,
+     response: Response,
+-    signal: AbortSignal | null | undefined,
++    abandoned: () => boolean,
+   ): Promise<void> => {
+     let bytes: ArrayBuffer;
+     try {
+@@ -378,7 +387,7 @@ export function createCachedSourceFetch({
+     } catch {
+       return;
+     }
+-    if (signal?.aborted || disabled) {
++    if (abandoned() || disabled) {
+       return;
+     }
+     const validators = readStemCacheValidators(response.headers);
+@@ -398,7 +407,7 @@ export function createCachedSourceFetch({
+       schemaVersion: STEM_CACHE_SCHEMA_VERSION,
+     };
+     try {
+-      await storeBytes(activeStore, record, bytes, signal);
++      await storeBytes(activeStore, record, bytes, abandoned);
+     } catch {
+       disabled = true;
+     }
+@@ -408,7 +417,12 @@ export function createCachedSourceFetch({
+     response.status === 200 && readStemCacheValidators(response.headers) !== null;
+ 
+   const writeInBackground = (key: string, response: Response, init: RequestInit): void => {
+-    if (store === null || disabled || writes.has(key) || !isStorable(response)) {
++    if (store === null || disabled || !isStorable(response)) {
++      return;
++    }
++    const pending = writes.get(key);
++    if (pending !== undefined) {
++      pending.signals.push(init.signal);
+       return;
+     }
+     let copy: Response;
+@@ -417,10 +431,11 @@ export function createCachedSourceFetch({
+     } catch {
+       return;
+     }
+-    const pending = write(store, key, copy, init.signal).finally(() => {
++    const signals = [init.signal];
++    const done = write(store, key, copy, () => isStemWriteAbandoned(signals)).finally(() => {
+       writes.delete(key);
+     });
+-    writes.set(key, pending);
++    writes.set(key, { done, signals });
+   };
+ 
+   const cachedFetch: SourceFetch = async (url, init) => {
+@@ -474,7 +489,7 @@ export function createCachedSourceFetch({
+   return {
+     fetchSource: cachedFetch,
+     idle: async () => {
+-      await Promise.all([...writes.values()]);
++      await Promise.all([...writes.values()].map((pending) => pending.done));
+       await Promise.all([...deletes]);
+       await commitChain;
+     },

@@ -1,0 +1,136 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T10:32:00.5709863Z",
+  "round": 367,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R367-DEDUP-CANCELLED-WRITE",
+   "origin": "gate-reviewer (A's code-reviewer), reproduced by C",
+   "severity": "medium",
+   "steps": [
+    "Scratch copy of the tree with B's sketch applied; append a-round-367/dedup-probe-block.ts.txt to stem-cache.test.ts",
+    "P1: hold sweep, write B first, load A (signal c1), flush, abort c1, load A again with a new signal, release the sweep, await idle()",
+    "P2: sweep free, hold B's put, same A1/abort/A2 order",
+    "Run the same two probes on a git-archive d53d113 (HEAD) scratch"
+   ],
+   "expected": "Key A ends up cached (HEAD: storedA=true, put calls 2 and 3); an aborted pending write must not suppress a live same-key write",
+   "actual": "Sketch: storedA=false, putCalls=1 in both P1 and P2. The L3 re-check cancels the aborted first write, while writes.has(key) made the second load skip its own write, so A is not cached and is downloaded again next open. Performance only, no wrong bytes or data loss. Not ruled in sketch-review.md, so A correctly STOPped (L58). C rates it medium by the reviewer's grading; real-world trigger is narrow (abort between body read and queued write, then a re-load of the same source).",
+   "evidence": "c-round-367/dedup-sketch.log, c-round-367/dedup-head.log, a-round-367/dedup-probe-block.ts.txt"
+  },
+  {
+   "id": "C-R367-STATUS-LINE-PREMATURE",
+   "origin": "A",
+   "severity": "low",
+   "steps": [
+    "sed -n 4p docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md"
+   ],
+   "expected": "A STOPped round does not carry a Completed status",
+   "actual": "l.4 reads 'Completed (C round 367 PASS)' while this round is FAIL. It is the L28 form A writes before C; it must be corrected back to the in-progress form if the doc is left as is during a re-dispatch.",
+   "evidence": "doc 236 l.4"
+  },
+  {
+   "id": "C-R367-MUTANT-DELETE-SKIPS-PENDING-GREEN",
+   "origin": "C",
+   "severity": "low",
+   "steps": [
+    "Scratch: in deleteAfterPendingWrite replace 'writes.get(key) ?? Promise.resolve()' with 'Promise.resolve()'",
+    "npx vitest run stem-cache.test.ts"
+   ],
+   "expected": "Red on SC25 (its title says the delete lands after the same-key write)",
+   "actual": "31/31 green. Likely an equivalent mutant in the tested scenario: the put is already on commitChain, so the chained delete is ordered behind it anyway; the explicit same-key wait is not independently guarded. Same class as A's known-gap own-M-L3-RETRY (reviewer L-b).",
+   "evidence": "c-round-367/mutant-own.diff.txt, c-round-367/mutant-own.log"
+  }
+ ],
+ "passed": [
+  "CLAIMS (c-round-367/claims.txt equals a-round-367/claims-final.txt)",
+  "SOURCE-SCOPE (exactly 3 files; git diff -- app cmp-equal to sketch.patch.txt; SC1-SC21 unedited, 0 removed lines in test file)",
+  "UNIT (stem-cache 31/31, source-fetch 6/6)",
+  "INTEGRITY 1440x900 (4 phases: ready, 0 page errors, playhead 00:02.77-2.78, starts=1, analyser peak 0.31, truncate and delete-file re-stored under new file names with sizes 4054080 / 3610677, others 304, 2 records = 2 files, waitedMs 0)",
+  "INTEGRITY 1280x720 (same results)",
+  "VALIDATOR 1440x900 and 1280x720 (middle-east sent If-None-Match \"b366-stale\" -> 200, record ETag = server W/\"3ddc40-1a1b06afab8\"; hero 304; plays)",
+  "G367-AUTH 1440x900 and 1280x720 (/studio-lab opens anonymously as demo; /studio/middle-east asks sign-in with 0 audio; /api/studio-token without credentials 401, no token; fake-bearer 500 fails closed)",
+  "DOCS structure (7 headings, SC22-SC29 exist, no 'C round N pending')"
+ ],
+ "failed": [
+  "A-REVIEW: A STOPped on an unruled Medium (A-R367-REVIEW-DEDUP-CANCELLED-WRITE); C reproduced it independently, so the round's acceptance cannot be called PASS and needs a B ruling and re-dispatch",
+  "DOCS l.4: 'Completed (C round 367 PASS)' is not true for a FAIL round"
+ ],
+ "blocked": [
+  "Backend not needed; nothing blocked. Fake-bearer /api/studio-token returns 500 (fails closed, no token), listed under G367-AUTH, not a FAIL"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke",
+  "npm run test:perf (perf/studio-lab-stem-cache.perf.spec.ts)"
+ ],
+ "notRun": [
+  "MUTANT-OWN beyond one mutant; the 13 sketch mutants (A ran them, not re-run by C)",
+  "code-reviewer by C (A's reviewer result used as data)"
+ ],
+ "abletonConformance": "not applicable (storage hardening, nothing on screen)",
+ "observations": [
+  "PLAYBACK-EXPORT (record only): cold export and export after truncating the middle-east OPFS file to 1000 B are bit-identical: sha256 5fadd97a0987446824232373dd74d7740342a0e30f59972a1c4c4e9c77698202, 24-bit/48 kHz stereo, 29,189,420 B, 101.352 s, peak 1.0 (known C-R178-EXPORT-CLIPS-AT-0DB), rms -15.29 dB, nonFinite 0 (c-round-367/export-trunc.json)",
+  "Cold phase of integrity probe showed no If-None-Match on miss requests (None) in this run; B's HEAD cold phase had one from HTTP-cache priming (B-R364-DEMO-DOUBLE-FETCH); not a FAIL",
+  "The sketch behaves correctly in the browser for all four integrity/validator phases; the only defect found is the cache-efficiency dedup regression in an abort-then-reload edge",
+  "Reviewer Lows L-a..L-g from A's report are unverified by C beyond the L-b mutant gap which C's own mutant corroborates in class"
+ ],
+ "manifestPaths": [
+  "c-round-367/claims.txt",
+  "c-round-367/integrity-1440x900.json",
+  "c-round-367/integrity-1280x720.json",
+  "c-round-367/export-trunc.json",
+  "c-round-367/auth.out",
+  "c-round-367/dedup-sketch.log",
+  "c-round-367/dedup-head.log",
+  "c-round-367/mutant-own.diff.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": [
+  "SC22-SC29 (named, run in the 31/31 unit file)",
+  "INTEGRITY per phase: ready, playback liveness, miss status 200 and re-store with new file name and full size, record/file consistency",
+  "VALIDATOR: If-None-Match \"b366-stale\" -> 200, record ETag = response ETag"
+ ],
+ "mutantsRecorded": [
+  "13 sketch mutants (A logs a-round-367/mutants/)",
+  "2 probe mutant builds (B: nosize, nohitrestore)",
+  "C own: M-DELETE-SKIPS-PENDING-WRITE (green, 31/31)"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-366/sketch/mutant-summary.txt",
+  "b-round-366/probe/mutant-nosize-1440x900.json",
+  "b-round-366/probe/mutant-nohitrestore-1440x900.json"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "biome"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-366/precheck-full.log",
+  "b-round-366/sketch-typecheck.log",
+  "b-round-366/sketch-biome.log"
+ ],
+ "chainHeadGateRunGreen": "gate 366",
+ "affectedChecksNamed": [
+  "stem-cache test file",
+  "integrity probe at both viewports"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-366/sketch-covering.log",
+  "b-round-366/probe/sketch-1440x900.json",
+  "b-round-366/probe/sketch-1280x720.json"
+ ],
+ "origin": "C"
+}

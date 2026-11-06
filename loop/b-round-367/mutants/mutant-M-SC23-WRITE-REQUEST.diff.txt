@@ -1,0 +1,15 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-367/v2-stem-cache.client.ts.txt	2026-11-06 10:42:24.379157731 +0000
++++ /home/runner/b367-scratch/app/lib/arrangement/stem-cache.client.ts	2026-11-06 10:49:27.358875099 +0000
+@@ -140,9 +140,9 @@
+   };
+   const writeRecord = async (record: StemCacheRecord): Promise<void> => {
+     const db = await openDb();
+-    const transaction = db.transaction(STORE_NAME, 'readwrite');
+-    transaction.objectStore(STORE_NAME).put(record);
+-    await transactionDone(transaction);
++    await requestToPromise(
++      db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(record),
++    );
+   };
+   const deleteRecord = async (key: string): Promise<void> => {
+     const db = await openDb();

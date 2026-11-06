@@ -1,0 +1,49 @@
+
+describe('A367 dedup probe (scratch only)', () => {
+  it('A367-P1 sweep held: A1 aborted after body read while its write waits; A2 same key arrives', async () => {
+    const fake = createFakeStemCacheStore();
+    const sweepGate = createDeferred();
+    fake.sweep.mockImplementation(() => sweepGate.promise);
+    const cached = cachedWith(
+      fake,
+      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
+    );
+    await cached.fetchSource(URL_B, { credentials: 'omit', signal: new AbortController().signal });
+    const c1 = new AbortController();
+    await cached.fetchSource(URL_A, { credentials: 'omit', signal: c1.signal });
+    await flushTasks();
+    c1.abort();
+    await cached.fetchSource(URL_A, { credentials: 'omit', signal: new AbortController().signal });
+    await flushTasks();
+    sweepGate.resolve();
+    await cached.idle();
+    console.log(`A367-P1 RESULT storedA=${fake.entries.has(URL_A)} storedB=${fake.entries.has(URL_B)} putCalls=${fake.put.mock.calls.length} log=${fake.log.join(',')}`);
+    expect(true).toBe(true);
+  });
+
+  it('A367-P2 sweep free, B put held: A1 aborted after body read; A2 same key arrives', async () => {
+    const fake = createFakeStemCacheStore();
+    const putGate = createDeferred();
+    fake.put.mockImplementationOnce(async (record, bytes) => {
+      fake.log.push(`put-held:${record.key}`);
+      await putGate.promise;
+      fake.entries.set(record.key, { record: { ...record }, bytes: bytes.slice(0) });
+    });
+    const cached = cachedWith(
+      fake,
+      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
+    );
+    await cached.fetchSource(URL_B, { credentials: 'omit', signal: new AbortController().signal });
+    await flushTasks();
+    const c1 = new AbortController();
+    await cached.fetchSource(URL_A, { credentials: 'omit', signal: c1.signal });
+    await flushTasks();
+    c1.abort();
+    await cached.fetchSource(URL_A, { credentials: 'omit', signal: new AbortController().signal });
+    await flushTasks();
+    putGate.resolve();
+    await cached.idle();
+    console.log(`A367-P2 RESULT storedA=${fake.entries.has(URL_A)} storedB=${fake.entries.has(URL_B)} putCalls=${fake.put.mock.calls.length} log=${fake.log.join(',')}`);
+    expect(true).toBe(true);
+  });
+});

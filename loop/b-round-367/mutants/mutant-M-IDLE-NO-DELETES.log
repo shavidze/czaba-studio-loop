@@ -1,0 +1,66 @@
+
+ RUN  v4.0.16 /home/runner/b367-scratch
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts (35 tests | 1 failed) 322ms
+     ✓ SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin 1ms
+     ✓ SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules 2ms
+     ✓ SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB 0ms
+     ✓ SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim 1ms
+     ✓ SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put 6ms
+     ✓ SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache 0ms
+     ✓ SC5 miss: one request with the identical init, body equal to the network body, then one stored record 3ms
+     ✓ SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward 2ms
+     ✓ SC7 hit + 200: the entry is replaced with the new bytes and the new ETag 1ms
+     ✓ SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object 2ms
+     ✓ SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged 1ms
+     ✓ SC10 get rejects: plain request with the original init and the load succeeds 2ms
+     ✓ SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off 2ms
+     ✓ SC12 the signal aborts before the commit: nothing is stored 2ms
+     ✓ SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4 2ms
+     ✓ SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch 0ms
+     ✓ SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom 1ms
+     ✓ SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request 2ms
+     ✓ SC17 two misses for one key while the first write is pending: put is called once 1ms
+     ✓ SC18 hit + 503: the stored bytes are returned and nothing is written 1ms
+     ✓ SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off 2ms
+     ✓ SC20 sweep runs once per session and every write waits for it, including a second key started together 12ms
+     ✓ SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes 2ms
+     ✓ SC22 transactionDone resolves only on complete; it rejects on abort with the transaction error, or an AbortError when there is none; with no event it stays pending (the error-event order is SC23) 3ms
+     ✓ SC23 browser store (fake IndexedDB + OPFS): put resolves only after the record transaction completes and removes the previous file only then; an aborted transaction rejects with its own error and keeps the previous entry 22ms
+     ✓ SC28 browser store integrity (fake IndexedDB + OPFS): a file whose size differs from its record, or a missing file, is a miss that deletes the record and the file 17ms
+     ✓ SC24 an abort after the body is read stores nothing: during the sweep no victim is deleted, during a victim delete nothing is put 22ms
+     ✓ SC25 a 404, 410 or unstorable 200 on a hit returns without waiting for a pending write of the same key, and the delete still lands after that write 35ms
+     ✓ SC26 a clone that throws is an unstored miss with the store still on, and a stored content type that Headers rejects is served without it 2ms
+     ✓ SC27 eviction planning is serialised per session: two keys started together end within the budget 12ms
+     × SC29 idle() waits for a pending hit delete 8ms
+     ✓ SC30 a load that arrives after the pending write of its key was aborted joins that write, so the key is stored once: behind a held sweep and behind a held put of another key 61ms
+     ✓ SC31 a load that joins a pending write keeps it alive when the first load aborts; when only the joining load aborts it is still stored; when every joined load aborts nothing is stored 68ms
+     ✓ SC32 a hit 404 while a same-key 200 is still reading its body deletes after that write lands 12ms
+     ✓ SC33 an abort during the quota-retry eviction stores nothing: the retry put is not made 12ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 34 passed (35)
+   Start at  10:50:01
+   Duration  1.16s (transform 191ms, setup 0ms, import 218ms, tests 322ms, environment 479ms)
+
+
+::error file=/home/runner/b367-scratch/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9b-ii stem cache commit discipline (stem-cache.client.ts) > SC29 idle() waits for a pending hit delete,line=1219,column=19::AssertionError: expected 'settled' to be 'pending' // Object.is equality%0A%0AExpected: "pending"%0AReceived: "settled"%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:1219:19%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9b-ii stem cache commit discipline (stem-cache.client.ts) > SC29 idle() waits for a pending hit delete
+AssertionError: expected 'settled' to be 'pending' // Object.is equality
+
+Expected: "pending"
+Received: "settled"
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:1219:19
+    1217|       flushTasks(10).then(() => 'pending'),
+    1218|     ]);
+    1219|     expect(state).toBe('pending');
+       |                   ^
+    1220|     deleteGate.resolve();
+    1221|     await cached.idle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

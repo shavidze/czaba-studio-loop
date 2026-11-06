@@ -1,10 +1,11 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 366 is C PASS from C evidence (c-round-366.json: taskStatus PASS, browserVerified true, realVerified true, 0 bugs) and gate 366 published d53d113; PERF-9b-i done. No cloud-fixable Critical/High/Medium is open. Next dependency-ordered scope is PERF-9b-ii (SYS-R365-STEM-CACHE-HARDENING), with a B sketch (v2 after a tech-lead review that found 2 High in v1, all ruled), full suite on the sketch 250/3684 green, 13 mutants red, and production browser probes at both viewports on HEAD, sketch and 2 mutant builds. Much scoped work remains; nothing external blocks the next round.",
- "nextTask": "Round 367: PERF-9b-ii (D-29z1201..D-29z1205). A applies b-round-366/sketch.patch.txt (sha 66ce5455) to app/lib/arrangement/stem-cache.client.ts and its test file (SC22-SC29: transactionDone on abort only, abort/disabled re-checks, non-blocking chained hit delete, clone/headers guards, per-session commit chain, fake IndexedDB+OPFS integrity) and writes doc 236 stage 3 (l.4 Completed (C round 367 PASS)); runs the 13 mutants. C: CLAIMS, SOURCE-SCOPE, UNIT, MUTANT-OWN, INTEGRITY and VALIDATOR on a production build at 1440x900 and 1280x720 (truncate / delete-file / stale-etag recover and play), PLAYBACK-EXPORT (record), G367-AUTH, DOCS.",
+ "reason": "Round 367 is C FAIL from C evidence (c-round-367.json: taskStatus FAIL, browserVerified true, realVerified true): A STOPped on an unruled code-reviewer Medium and C reproduced it (C-R367-DEDUP-CANCELLED-WRITE, cache-efficiency regression vs HEAD); the INTEGRITY/VALIDATOR/AUTH browser rows passed on v2 but PERF-9b-ii is not done and gate 367 was skipped. B ruled it (L10) with a join fix, built sketch v3 with rows SC30-SC33, 19 mutants red, v2 client red on SC30/SC31, full suite 250/3688 rc 0, production probe at both viewports identical to C 367, and a tech-lead review of the final sketch with no Medium+. Much scoped work remains; nothing external blocks the next round.",
+ "nextTask": "Round 368: PERF-9b-ii re-dispatch (D-29z1206..D-29z1209). A applies b-round-367/sketch-delta.patch.txt on the current tree (git diff -- app must equal b-round-367/sketch.patch.txt): a same-key load joins the pending write and cancels it only when every joined signal is aborted; SC30-SC33; SC22 title; doc 236 l.4 Completed (C round 368 PASS) plus L26 claim fixes; 19 mutants; code-reviewer. C: CLAIMS, SOURCE-SCOPE, UNIT 35/35, DEDUP (round-367 P1/P2 now storedA=true), MUTANT-OWN, INTEGRITY and VALIDATOR on a production build at 1440x900 and 1280x720, PLAYBACK-EXPORT (record), G368-AUTH, DOCS. RETRO moves to 369.",
  "remaining": [
   "PERF-9b-ii",
-  "RETRO-368",
+  "C-R367-DEDUP-CANCELLED-WRITE",
+  "RETRO-369",
   "REGRESSION-2026-11-08",
   "PERF-9c",
   "PERF-9d",

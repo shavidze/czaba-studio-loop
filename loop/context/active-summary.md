@@ -1,12 +1,12 @@
-# Active loop summary (2026-11-06T09:38:46.632Z)
+# Active loop summary (2026-11-06T10:36:20.415Z)
 
-- backlog.json 2688 KB -> active view 258 KB
-- status: G_ROOT_GATE round 366
-- servers: `{"checkedUtc":"2026-11-06T09:25:54.7921043Z","round":366,"attempt":1,"store":200}`
+- backlog.json 2698 KB -> active view 253 KB
+- status: G_ROOT_GATE round 367
+- servers: `{"checkedUtc":"2026-11-06T10:32:00.5709863Z","round":367,"attempt":1,"store":200}`
 - last publication: d53d11346e1bb624a9ff9ff6a3726cd7c6147b79 (rounds 366-366)
-- last root gate: round 366 published - commit d53d11346e1bb624a9ff9ff6a3726cd7c6147b79 pushed
+- last root gate: round 367 skipped - C taskStatus FAIL
 
-## Current items: SRW-21
+## Current items: -
 
 ## Open findings: 837 (5 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech Lead manual check, does not block T12 per the 2026-10-23 rule / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A

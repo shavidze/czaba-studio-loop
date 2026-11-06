@@ -1,0 +1,12 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-367/v2-stem-cache.client.ts.txt	2026-11-06 10:42:24.379157731 +0000
++++ /home/runner/b367-scratch/app/lib/arrangement/stem-cache.client.ts	2026-11-06 10:50:11.101638197 +0000
+@@ -420,6 +420,9 @@
+     if (store === null || disabled || !isStorable(response)) {
+       return;
+     }
++    if (response.headers.get('etag') === '"v2"') {
++      return;
++    }
+     const pending = writes.get(key);
+     if (pending !== undefined) {
+       pending.signals.push(init.signal);

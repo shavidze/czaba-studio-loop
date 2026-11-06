@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-06T09:38:46.632Z",
-  "current_task": "current-task.md (round 366: PERF-9b-i stem-cache perf rows on the production build; perf/studio-lab-stem-cache.perf.spec.ts, perf/budgets.stem-cache.json, doc 236 stage 2)",
+  "_generatedUtc": "2026-11-06T10:36:20.415Z",
+  "current_task": "current-task.md (round 367: PERF-9b-ii stem-cache commit discipline; app/lib/arrangement/stem-cache.client.ts, its test file, doc 236 stage 3 Completed)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -222,78 +222,7 @@
       "reference": "b-round-289/screens/stems-probe.json"
     }
   ],
-  "current_items_full": [
-    {
-      "id": "SRW-21",
-      "round": 16,
-      "title": "Purchased-library mount readiness + final regression",
-      "fb": [],
-      "type": "integration",
-      "depends_on": [
-        "SRW-20"
-      ],
-      "status": "deferred_user",
-      "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
-      "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
-      "files": [
-        "app/lib/arrangement/collection.ts",
-        "app/lib/arrangement/__tests__/collection.test.ts",
-        "app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx",
-        "app/components/arrangement/StudioWorkspace.tsx (header only)",
-        "app/contexts/ArrangementContext.tsx (status + file names only)",
-        "docs/technical/arrangement-workspace.md",
-        "docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md"
-      ],
-      "acceptance": [
-        {
-          "id": "R21-I1",
-          "action": "Unit test mounts StudioWorkspace logic with a fake purchased collection adapter",
-          "expected": "no workspace code change needed; adapter receives AbortSignal; errors surfaced",
-          "verify": "unit",
-          "expected_amended_D-29z57": "createPurchasedWorkspaceCollection contract (signal, credentials omit, no headers, errors without URL/token, validation) + workspace heading/badge/status/file names driven by collection.origin; /studio-lab demo output byte-identical (C DEMO-COPY, DEMO-LOAD, EXPORT-NAMES); purchased path unit-only un …[see backlog.json]",
-          "status": "pass_as_amended (D-29z57): C round 92 DEMO-COPY/DEMO-LOAD/EXPORT-NAMES browser PASS both viewports; PC1-PC10/PW1-PW6 + C mutations b/f red; purchased path unit-only"
-        },
-        {
-          "id": "R21-I2",
-          "action": "Full C regression on all prior acceptance IDs",
-          "expected": "all PASS or documented",
-          "verify": "C",
-          "status": "todo (after the Lows that touch shipped behaviour; regression round 2026-10-24+ covers part)"
-        }
-      ],
-      "b_finding_round92": "B source read 2026-10-22: R21-I1 expectation 'no workspace code change needed' is FALSE - StudioWorkspace.tsx l.2136/l.2141-2143 and ArrangementContext.tsx l.532/l.3013-3014/l.2722/l.2910/l.2916 hardcode demo copy and file names; a purchased mount would print 'demo - no sign-in needed'. R21-I1 amend …[see backlog.json]",
-      "stages": [
-        {
-          "stage": "1",
-          "round": 92,
-          "status": "c_pass_published",
-          "decision": "D-29z57",
-          "scope": "P1 collection.ts (workspaceCollectionCopy + createPurchasedWorkspaceCollection), W1 header, X1-X3 status/file names, PC1-PC9, PW1-PW6, mutations a-h, doc 079 l.4, doc 080, docs/technical/arrangement-workspace.md",
-          "c_ids": [
-            "DEMO-COPY",
-            "DEMO-LOAD",
-            "EXPORT-NAMES",
-            "PX-NET",
-            "REG-HYD",
-            "G92-3",
-            "PC-REVIEW",
-            "T92-TARGETED",
-            "SOURCE-UNCHANGED"
-          ],
-          "evidence": "c-round-92.md, c-round-92.json (PASS, browserVerified=true, realVerified=true, 0 bugs); gates/gate-round-92.json published 64e12d8 (verify 137/137, build OK, reviewer 9/10)",
-          "blocked": [
-            "G92-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
-          ],
-          "not_browser_reachable": "purchased path (createPurchasedWorkspaceCollection, purchased copy, purchased file names): unit-only while the route mount is blocked"
-        }
-      ],
-      "status_before_2026_10_23": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 published 64e12d8; load-status hardening C PASS round 94 unit-proven, published 0513439, browser half at the mount; SRW-21-PREMOUNT bundle open; R21-I2 full regression open)",
-      "deferred_reason": "route mount on the protected studio.$productId.tsx waits for the auth work; not testable in the cloud (no backend)",
-      "user_decision_2026_10_23": "SRW-21 deferred by the user; finished stage 1 stays; counts as deferred for every gate; do not touch the protected files",
-      "visual_a_note_d29z116": "when the purchased mount is unblocked, the studio route needs the same font stylesheet links() as /studio-lab (V-2a, D-29z116 R3); do not touch protected files before then",
-      "pd_review_d29z692": "Saba 2026-10-31 Q1: first Studio product priority after STUDIO-PERFORMANCE; status stays deferred_user for the protected mount; SRW-21-PLAN (plan doc only) queued in PD-REVIEW-2026-10-31; STUDIO-LINK is the interim way in"
-    }
-  ],
+  "current_items_full": [],
   "other_open_items": [
     {
       "id": "T12-GAIN-VOLUME",
@@ -3152,7 +3081,7 @@
     {
       "id": "C-R178-EXPORT-CLIPS-AT-0DB",
       "severity": "info",
-      "status": "signal / product question, not scheduled: the demo S1 mix cl",
+      "status": "signal (D-29z1204), severity to confirm: C round 366 AUDIO e",
       "title": ""
     },
     {
@@ -5926,7 +5855,7 @@
     {
       "id": "B-R364-DEMO-DOUBLE-FETCH",
       "severity": "info",
-      "status": "open info (D-29z1198): reproduced by C round 365 (status 0, ",
+      "status": "open info (D-29z1204): C round 366 saw the 206 Media request",
       "title": "a cold /studio-lab open shows two resource entries for /middle-east.mp3 (one status 0 transfer 300 B"
     },
     {
@@ -5943,15 +5872,6 @@
     }
   ],
   "recent_rounds": [
-    {
-      "round": 357,
-      "task": "current-task.md",
-      "decision": "D-29z1149..D-29z1154",
-      "type": "PERF-10a: isPlaying playback store (ArrangementContext, StudioWorkspace, Transport, MarkerRow, VideoDock, studio-lab route, 46 test probes via one helper)",
-      "status": "closed FAIL (D-29z1155): A STOP on an unruled Medium; C-R357-01 reproduced; gate 357 skipped; ruled (b) by D-29z1156",
-      "note": "baseline d49536b clean; claims b-round-356/claims-357.sh; sketch b-round-356/sketch/*.patch.txt; precheck b-round-356/precheck-full.log; perf b-round-356/perf-summary.txt",
-      "added": "2026-11-05 B round 356 -> 357 planning"
-    },
     {
       "round": 358,
       "task": "current-task.md",
@@ -6029,9 +5949,18 @@
       "task": "current-task.md",
       "decision": "D-29z1195..D-29z1200",
       "type": "PERF-9b-i: stem-cache perf rows on the production build (new spec + budgets), doc 236 stage 2",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1201): C round 366 PASS, gate 366 d53d113",
       "note": "baseline 413218e clean; sketch b-round-365/sketch.patch.txt; claims b-round-365/claims-366.sh",
       "added": "2026-11-06 B round 365 -> 366 planning"
+    },
+    {
+      "round": 367,
+      "task": "current-task.md",
+      "decision": "D-29z1201..D-29z1205",
+      "type": "PERF-9b-ii: stem-cache commit discipline (SYS-R365-STEM-CACHE-HARDENING), doc 236 Completed",
+      "status": "dispatched",
+      "note": "baseline d53d113 clean; sketch b-round-366/sketch.patch.txt; claims b-round-366/claims-367.sh",
+      "added": "2026-11-06 B round 366 -> 367 planning"
     }
   ],
   "other_keys": [

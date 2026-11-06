@@ -1,0 +1,11 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-367/v2-stem-cache.client.ts.txt	2026-11-06 10:42:24.379157731 +0000
++++ /home/runner/b367-scratch/app/lib/arrangement/stem-cache.client.ts	2026-11-06 10:49:53.314778859 +0000
+@@ -479,7 +479,7 @@
+       return cachedResponse(entry);
+     }
+     if (response.ok && !isStorable(response)) {
+-      deleteAfterPendingWrite(store, key);
++      await store.delete(key).catch(() => undefined);
+       return response;
+     }
+     writeInBackground(key, response, init);

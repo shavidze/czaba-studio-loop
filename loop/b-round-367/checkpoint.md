@@ -1,0 +1,11 @@
+# B round 367 -> 368 checkpoint
+- [x] tasks/round-367.md archived (copy). C 367 FAIL (A STOP, Medium C-R367-DEDUP-CANCELLED-WRITE), browserVerified true. gate 367 skipped -> baseline still d53d113; tree holds v1 sketch + doc 236 uncommitted.
+- [x] advisor 1: rule whole ordering class (joined signals), identity-checked finally, regenerate mutants on v2, delta patch, review final v2, RETRO -> 369.
+- next: scratch /home/runner/b367-scratch (d53d113 + v1), write v2, rows SC30-SC32, mutants, tech-lead review, probes, claims, backlog, feature-status, task.
+- [x] v2 = join design (same-key load joins pending write; cancel only when all joined signals aborted). replace-branch tried and dropped (M-V2-SKIP-ABANDONED green = equivalent). SC30-SC33 added, SC22 title narrowed. 35/35 + source-fetch 6/6; v1 client red on SC30, SC31; 17 mutants red (mutants/mutant-summary.txt); typecheck 0, biome 0. sketch.patch.txt (full vs d53d113) + sketch-delta.patch.txt (on current tree) sha in sketch-dispatched.sha256.
+- running: full suite on scratch (precheck-full.log), tech-lead review of v2.
+- next: build + probe v2 both viewports, claims-368.sh, backlog, feature-status, task, report, b-next.
+- [x] sketch v3 final (TL3-2/3 fixed), 19 mutants red, probe both viewports OK, sketch-review.md, backlog v331 (update-backlog.done). running: full suite final. next: feature-status, task, report, b-next
+- [x] feature-status updated (update-feature-status.done). next: write current-task.md (draft text ready), b-round-367.md, b-next.json, claims rerun, advisor final
+- [x] current-task.md (368), b-round-367.md, b-next.json written; claims re-run (K16 empty). next: advisor final
+- [x] advisor final follow-ups: dedup-probe-v3.log, log renamed, TODO five Lows, claims re-run (K16 empty). DONE pending final advisor

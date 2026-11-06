@@ -1,0 +1,61 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/czaba-project/store[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/stem-cache.test.ts [2m([22m[2m31 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 189[2mms[22m[39m
+     [32m✓[39m SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin[32m 2[2mms[22m[39m
+     [32m✓[39m SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules[32m 2[2mms[22m[39m
+     [32m✓[39m SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB[32m 0[2mms[22m[39m
+     [32m✓[39m SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim[32m 1[2mms[22m[39m
+     [32m✓[39m SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put[32m 6[2mms[22m[39m
+     [32m✓[39m SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache[32m 0[2mms[22m[39m
+     [32m✓[39m SC5 miss: one request with the identical init, body equal to the network body, then one stored record[32m 3[2mms[22m[39m
+     [32m✓[39m SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward[32m 2[2mms[22m[39m
+     [32m✓[39m SC7 hit + 200: the entry is replaced with the new bytes and the new ETag[32m 1[2mms[22m[39m
+     [32m✓[39m SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object[32m 2[2mms[22m[39m
+     [32m✓[39m SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged[32m 1[2mms[22m[39m
+     [32m✓[39m SC10 get rejects: plain request with the original init and the load succeeds[32m 2[2mms[22m[39m
+     [32m✓[39m SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off[32m 2[2mms[22m[39m
+     [32m✓[39m SC12 the signal aborts before the commit: nothing is stored[32m 2[2mms[22m[39m
+     [32m✓[39m SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4[32m 2[2mms[22m[39m
+     [32m✓[39m SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch[32m 0[2mms[22m[39m
+     [32m✓[39m SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom[32m 1[2mms[22m[39m
+     [32m✓[39m SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request[32m 2[2mms[22m[39m
+     [32m✓[39m SC17 two misses for one key while the first write is pending: put is called once[32m 1[2mms[22m[39m
+     [32m✓[39m SC18 hit + 503: the stored bytes are returned and nothing is written[32m 1[2mms[22m[39m
+     [32m✓[39m SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off[32m 2[2mms[22m[39m
+     [32m✓[39m SC20 sweep runs once per session and every write waits for it, including a second key started together[32m 12[2mms[22m[39m
+     [32m✓[39m SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes[32m 2[2mms[22m[39m
+     [32m✓[39m SC22 transactionDone resolves only on complete; it rejects on abort with the transaction error, or an AbortError when there is none; an error event alone does not settle it[32m 3[2mms[22m[39m
+     [32m✓[39m SC23 browser store (fake IndexedDB + OPFS): put resolves only after the record transaction completes and removes the previous file only then; an aborted transaction rejects with its own error and keeps the previous entry[32m 22[2mms[22m[39m
+     [32m✓[39m SC28 browser store integrity (fake IndexedDB + OPFS): a file whose size differs from its record, or a missing file, is a miss that deletes the record and the file[32m 19[2mms[22m[39m
+     [32m✓[39m SC24 an abort after the body is read stores nothing: during the sweep no victim is deleted, during a victim delete nothing is put[32m 23[2mms[22m[39m
+     [32m✓[39m SC25 a 404, 410 or unstorable 200 on a hit returns without waiting for a pending write of the same key, and the delete still lands after that write[32m 35[2mms[22m[39m
+[31m     [31m×[31m SC26 a clone that throws is an unstored miss with the store still on, and a stored content type that Headers rejects is served without it[39m[32m 10[2mms[22m[39m
+     [32m✓[39m SC27 eviction planning is serialised per session: two keys started together end within the budget[32m 16[2mms[22m[39m
+     [32m✓[39m SC29 idle() waits for a pending hit delete[32m 11[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/stem-cache.test.ts[2m > [22mPERF-9b-ii stem cache commit discipline (stem-cache.client.ts)[2m > [22mSC26 a clone that throws is an unstored miss with the store still on, and a stored content type that Headers rejects is served without it
+[31m[1mTypeError[22m: Headers.set: "audio/mpeg
+x-injected: 1" is an invalid header value.[39m
+[36m [2m❯[22m cachedResponse app/lib/arrangement/stem-cache.client.ts:[2m277:13[22m[39m
+    [90m275| [39m  [35mconst[39m headers [33m=[39m [35mnew[39m [33mHeaders[39m()[33m;[39m
+    [90m276| [39m  [35mif[39m (entry[33m.[39mrecord[33m.[39mcontentType [33m!==[39m [35mnull[39m) {
+    [90m277| [39m    headers[33m.[39m[35mset[39m([32m'content-type'[39m[33m,[39m entry[33m.[39mrecord[33m.[39mcontentType)[33m;[39m
+    [90m   | [39m            [31m^[39m
+    [90m278| [39m  }
+    [90m279| [39m  [35mreturn[39m [35mnew[39m [33mResponse[39m(entry[33m.[39mbytes[33m,[39m { status[33m:[39m [34m200[39m[33m,[39m headers })[33m;[39m
+[90m [2m❯[22m Object.cachedFetch app/lib/arrangement/stem-cache.client.ts:[2m453:14[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/stem-cache.test.ts:[2m1166:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m30 passed[39m[22m[90m (31)[39m
+[2m   Start at [22m 10:19:30
+[2m   Duration [22m 1.06s[2m (transform 198ms, setup 0ms, import 228ms, tests 189ms, environment 480ms)[22m
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/stem-cache.client.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9b-ii stem cache commit discipline (stem-cache.client.ts) > SC26 a clone that throws is an unstored miss with the store still on%2C and a stored content type that Headers rejects is served without it,line=277,column=13::TypeError: Headers.set: "audio/mpeg%0Ax-injected: 1" is an invalid header value.%0A ❯ cachedResponse app/lib/arrangement/stem-cache.client.ts:277:13%0A ❯ Object.cachedFetch app/lib/arrangement/stem-cache.client.ts:453:14%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:1166:20%0A%0A

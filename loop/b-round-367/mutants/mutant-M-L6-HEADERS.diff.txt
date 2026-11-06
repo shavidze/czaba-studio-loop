@@ -1,0 +1,15 @@
+--- /home/runner/czaba-project/tmp/studio-real-loop/b-round-367/v2-stem-cache.client.ts.txt	2026-11-06 10:42:24.379157731 +0000
++++ /home/runner/b367-scratch/app/lib/arrangement/stem-cache.client.ts	2026-11-06 10:49:56.895889187 +0000
+@@ -283,11 +283,7 @@
+ function cachedResponse(entry: StemCacheEntry): Response {
+   const headers = new Headers();
+   if (entry.record.contentType !== null) {
+-    try {
+-      headers.set('content-type', entry.record.contentType);
+-    } catch {
+-      return new Response(entry.bytes, { status: 200 });
+-    }
++    headers.set('content-type', entry.record.contentType);
+   }
+   return new Response(entry.bytes, { status: 200, headers });
+ }
