@@ -1,0 +1,14 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const page = await ctx.newPage();
+const reqs = [];
+page.on('request', (r) => { if (/\.(wav|mp3|m4a|ogg|mp4)(\?|$)/i.test(r.url())) reqs.push(r.url().slice(-60)); });
+const ready = async () => { await page.waitForSelector('[data-testid="arrangement-timeline-scroller"]', { timeout: 120000 }); await page.getByText('Demo collection ready', { exact: false }).first().waitFor({ timeout: 120000 }); await page.waitForTimeout(1500); };
+await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' }); await ready();
+const first = reqs.splice(0);
+const dbs = await page.evaluate(async () => (await indexedDB.databases()).map((d) => d.name));
+await page.reload({ waitUntil: 'networkidle' }); await ready();
+const second = reqs.splice(0);
+console.log(JSON.stringify({ firstLoadAudioRequests: first, idb: dbs, reloadAudioRequests: second }));
+await b.close();

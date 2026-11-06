@@ -1,0 +1,26 @@
+# C — round 369 (RETRO 369): PASS
+
+**Date:** 2026-11-06. Baseline HEAD `29f4b4d`. `browserVerified` and `realVerified` are true: G369-AUTH, STUDIO-SMOKE-369 and the RT-SCREEN re-run all ran at 1440×900 and 1280×720 in a fresh Chromium (Playwright). The mock backend on :5199 was healthy for the run and I stopped it afterwards.
+Evidence is under `c-round-369/`. The machine-readable result is `c-round-369.json` (`tools/l57-check.py` rc 0, `c-round-369/l57-check.txt`).
+
+| Row | Result | Evidence |
+|---|---|---|
+| SOURCE-SCOPE | PASS | HEAD `29f4b4d`, 0 status lines, frozen sha check rc 0, at start and end (`scope-start.txt`, `scope-end.txt`) |
+| CLAIMS | PASS | `claims-out.txt` is identical to `b-round-368/claims-369-output.txt`. Stderr is empty. No `MISSING` |
+| RT-NUM | PASS | Scripts copied to `scripts/`, outputs written to `data/`. 17 of 19 data files are byte-identical to B's, including `retro-numbers-369.txt`. The two differences are the key order in `collect.txt`/`cost.txt` and round 368's `b_cost` (10.19 now, 0 in B's copy). Totals are not affected. Checked against the retro: $287.91 (B 173.19, A 99.77, C 14.95, B share 60.2%), median 16.73, phase medians 11.46/6.07/0.76, FAIL $54.00, chains 44.02/31.85/42.99 (118.86), STOP rounds 357/361/363/367 ($75.04), top 5, 13/3/0 and 12/4/0, open 30 and deferred 39 with their origins and severities, 678/1049/95, L57 16/16 and 21/21. The retro-353 column equals `retros/retro-353.md`. L58 bytes are 2908 → 2931 → 3430 and L30 407 → 750 |
+| RT-CAUSE | PASS | STOP lines in 357/361/363/367, `c-round-357/358/363/367/368.json` (bugs, status, `browserVerified`), the shas in `b-round-366/sketch-review.md` (`66ce5455…` dispatched, `18a264e6` reviewed), the 367 annotation, and `c-models.txt` (358 shows a Fable advisor). Consultant opinions are labelled as opinions and inferences are marked |
+| RT-IDS | PASS | Round 368 closure and the 9 closed ids (found in `archive/findings-archived.json` and `deferred_low_polish`); the 4 new ids and the architecture signal are present; `closes` has 9 ids and each carries "scheduled in SYS-R369…"; 45 `retro_candidates`; ROOT-REQ-B-RETRO-CONSULTS; SR-353-4 `duplicate_of` SR-290-1/2; D-29z1210…1217 exist; `retro_runs[-1]` = 369; `next_due` names round 384. The inventory script gives 36 hits / 33 ids, `cmp` identical. Spellings of RETRO 368/369 are covered. Ids not named in retro-369 text have a D-ID disposition in the backlog |
+| RT-LESSONS | PASS, with a Low note | 60 lines. Only l.3, l.19 (L30) and l.41 (L58) differ. L30 keeps its old text and appends one clause. No `A-R`/`B-R`/`C-R`/`GATE` id was lost. **C369-L1 (Low):** L58 also lost the row id `R11-P1e` and the chain ranges 312–314/316–317/318–320, so retro §10's "lost 0" is imprecise. These are row and round labels inside evidence parentheses, not finding ids |
+| RT-L57 | PASS | `c-round-368.json` gives rc 0. A mutant copy without `origin` and `claimCheckMinutes` gives rc 1. My own JSON gives rc 0 |
+| RT-SABA | PASS | §12.1 is information plus one proposal, §12.3 is a proposal to root, §12.5 says there is no project-rule proposal |
+| RT-SCREEN (browser) | PASS | `screens/capture.log`, `screenC369.json` and 12 PNGs. Rows: 138/168/118/144 (identical). No `laneErrors`. The journey reaches `/studio-lab?preview=middle-east`. Position after Play: 00:01.462 (1440), 00:01.471 (1280). SR-353-1: the last clip's left edge is 2432 px, beyond the 1440/1280 viewport. SR-353-5 (`auth.json`): "Original sound" is visible at 1440 (y 332, not clipped) and absent from the DOM at 1280 |
+| G369-AUTH (browser) | PASS | Anonymous context at both sizes. `/studio-lab` shows the workspace and the demo state, with `auth_user` null (only `czaba_session_id`). `/studio/middle-east` shows "Sign in required", 0 workspace and 0 `audio[src]`. `/api/studio-token` gives 401 without a token and 403 with a fake bearer (mock running). No token or URL in any body. Premium auth is not bypassed |
+| STUDIO-SMOKE-369 (browser) | PASS, with a Low note | `smoke.json`. Added Bass; Play `data-playing` false → true → false; position ≥ 00:01.46. Dragged the clip by its name bar from `stems` to `sfx`. Ctrl+Z restored `stems`. After a reload, the demo is ready again and Play reaches ≥ 00:01.45. Export WAV: RIFF/WAVE, PCM 24-bit, 48 kHz, stereo, 16.000 s, peak 0.217, 1,535,830 non-zero samples, 0 NaN, data length matches the file. The 1440 and 1280 exports have identical statistics (`exports/`). **C369-L2 (Low, B spec):** the Undo title reads "Undo: Move to track — SFX (Ctrl+Z)", not the literal "Undo: Move clip" from the task. This is `historyMoveToTrack`; "Move clip" is the same-lane label. Behaviour is right |
+
+## Gate rows (not claimed)
+Full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke: listed under `gate` in the JSON. I did not run them.
+
+## Observations
+- The project does not persist across reload (0 clips). The demo stems come back ready and `czaba-stem-cache-v2` exists in IndexedDB. I did not measure the cache hit separately, so "the stem cache path" is not separately proved here.
+- The optional `product-designer` consult on `screen-review-369.md` was not run. Round 370 is REGRESSION if planning is on or after 2026-11-08.
+- No app bug found. No Critical, High or Medium finding. Source unchanged.

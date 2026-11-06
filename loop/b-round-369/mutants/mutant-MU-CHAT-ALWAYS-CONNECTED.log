@@ -1,0 +1,65 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b369-sketch[39m
+
+[90mstderr[2m | app/contexts/__tests__/chat-lazy-signalr.test.tsx[2m > [22m[2mChatContext lazy signalr (PERF-11a)[2m > [22m[2mCL4: a failed signalr chunk load leaves the chat disconnected with an error
+[22m[39mFailed to connect to chat hub: Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+    at ManualMockedModule.resolve (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4m@vitest/mocker[24m/dist/chunk-registry.js:163:24)
+    at VitestMocker.callFunctionMock (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:376:32)
+[90m    ... 5 lines matching cause stack trace ...[39m
+    at request (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4mvite[24m/dist/node/module-runner.js:1104:76)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+    at [90m/home/runner/b369-sketch/[39mapp/contexts/ChatContext.tsx:142:23 {
+  cause: Error: chunk load failed
+      at signalrModule [90m(/home/runner/b369-sketch/[39mapp/contexts/__tests__/chat-lazy-signalr.test.tsx:17:11[90m)[39m
+      at ManualMockedModule.factory (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/vi.2VT5v0um.js:3816:78)
+      at ManualMockedModule.resolve (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4m@vitest/mocker[24m/dist/chunk-registry.js:161:27)
+      at VitestMocker.callFunctionMock (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:376:32)
+      at file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:497:23
+      at Traces.$ (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27)
+      at VitestMocker.requestWithMockedModule (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:462:21)
+      at VitestMocker.mockedRequest (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:512:15)
+      at VitestModuleRunner.cachedRequest (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:664:35)
+      at request (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4mvite[24m/dist/node/module-runner.js:1104:76)
+}
+
+ [31m❯[39m app/contexts/__tests__/chat-lazy-signalr.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 128[2mms[22m[39m
+     [32m✓[39m CL1: the source has no value import of @microsoft/signalr[32m 3[2mms[22m[39m
+     [32m✓[39m CL2: mounting the provider does not load signalr; startSession loads it once and joins[32m 108[2mms[22m[39m
+[31m     [31m×[31m CL3: no invoke while the hub is not connected[39m[32m 7[2mms[22m[39m
+     [32m✓[39m CL4: a failed signalr chunk load leaves the chat disconnected with an error[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/contexts/__tests__/chat-lazy-signalr.test.tsx[2m > [22mChatContext lazy signalr (PERF-11a)[2m > [22mCL3: no invoke while the hub is not connected
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "JoinSession",
+      7,
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m app/contexts/__tests__/chat-lazy-signalr.test.tsx:[2m115:32[22m[39m
+    [90m113| [39m    })[33m;[39m
+    [90m114| [39m    [34mexpect[39m(signalr[33m.[39mstate[33m.[39mloads)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m115| [39m    [34mexpect[39m(signalr[33m.[39minvoke)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m116| [39m  })[33m;[39m
+    [90m117| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 12:22:24
+[2m   Duration [22m 816ms[2m (transform 139ms, setup 0ms, import 160ms, tests 128ms, environment 383ms)[22m
+
+
+::error file=/home/runner/b369-sketch/app/contexts/__tests__/chat-lazy-signalr.test.tsx,title=app/contexts/__tests__/chat-lazy-signalr.test.tsx > ChatContext lazy signalr (PERF-11a) > CL3%3A no invoke while the hub is not connected,line=115,column=32::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      "JoinSession",%0A      7,%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/contexts/__tests__/chat-lazy-signalr.test.tsx:115:32%0A%0A

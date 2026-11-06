@@ -1,0 +1,18 @@
+# B round 369 -> 370 planning checkpoint
+- [x] step 0: archived tasks/round-369.md, before-copies in b-round-369/
+- [ ] step 1: close 369 (C PASS, gate skipped, baseline 29f4b4d); C369-L1/L2 fix in retro
+- [ ] step 2: arch checkpoint answer check
+- [ ] step 3: PERF-11a scoping (import graph, measure HEAD)
+- [ ] step 4: sketch + measure + consults
+- [ ] step 5: write current-task, backlog, feature-status, b-round-369.md, b-next.json
+- [x] step 1 partial: retro-369 §10 + lessons l.3 corrected (C369-L1, D-29z1218); before copies b-round-369/retro-369-before-370.md, lessons-before-370.md
+- [x] step 2: no root answer on any of 18 arch checkpoint requests -> PERF-11 (SYS-R369 stays queued_conditional)
+- [x] step 3: HEAD /home/runner/b369-head, sketch /home/runner/b369-sketch (ChatContext lazy signalr + root studio branch). probe/js-*.json, paint-*.json: bytes 378121 -> 362465; FCP-DCL 352 -> 44
+- [ ] step 4: perf-res spec sketch+head running (perf-res-*.log); consults perf-optimizer + tech-lead running
+- [x] consults: tech-lead (split ok, key on studio div, isHubConnected helper, test rows) + perf-optimizer (asserts: bytes, SSR opacity; record FCP; firebase ~40 KB needs auth.ts; Lenis on studio candidate)
+- [x] sketch final: ChatContext lazy + RouteTransition.tsx + index.ts + root.tsx + 2 tests + budgets; covering 4 files 22 PASS; mutants MU-CHAT-STATIC, MU-RT-NO-KEY, MU-RT-STUDIO-MOTION red
+- [x] root request b-round-369/root-request-perf11b-firebase-lazy.md
+- [ ] perf-res-sketch-final.log + mutant-MU-CHAT-STATIC-perf.log running
+- [ ] write task, claims, backlog, feature-status, b-round-369.md, b-next.json
+- [x] step 5: current-task.md, backlog v335, feature-status, b-round-369.md, b-next.json, claims outputs written
+- [x] advisor hand-off fixes: K11 allowed delta, K16 6 mutants, advisor line, perf-mutant note; claims re-run

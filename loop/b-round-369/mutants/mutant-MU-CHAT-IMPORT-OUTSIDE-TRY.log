@@ -1,0 +1,56 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b369-sketch[39m
+
+[90mstderr[2m | app/contexts/__tests__/chat-lazy-signalr.test.tsx[2m > [22m[2mChatContext lazy signalr (PERF-11a)[2m > [22m[2mCL4: a failed signalr chunk load leaves the chat disconnected with an error
+[22m[39mFailed to start chat session: Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+    at ManualMockedModule.resolve (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4m@vitest/mocker[24m/dist/chunk-registry.js:163:24)
+    at VitestMocker.callFunctionMock (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:376:32)
+[90m    ... 5 lines matching cause stack trace ...[39m
+    at request (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4mvite[24m/dist/node/module-runner.js:1104:76)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+    at [90m/home/runner/b369-sketch/[39mapp/contexts/ChatContext.tsx:131:21 {
+  cause: Error: chunk load failed
+      at signalrModule [90m(/home/runner/b369-sketch/[39mapp/contexts/__tests__/chat-lazy-signalr.test.tsx:17:11[90m)[39m
+      at ManualMockedModule.factory (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/vi.2VT5v0um.js:3816:78)
+      at ManualMockedModule.resolve (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4m@vitest/mocker[24m/dist/chunk-registry.js:161:27)
+      at VitestMocker.callFunctionMock (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:376:32)
+      at file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:497:23
+      at Traces.$ (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27)
+      at VitestMocker.requestWithMockedModule (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:462:21)
+      at VitestMocker.mockedRequest (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:512:15)
+      at VitestModuleRunner.cachedRequest (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/dist/chunks/startModuleRunner.DpqpB8k3.js:664:35)
+      at request (file:///home/runner/czaba-project/store/node_modules/[4mvitest[24m/node_modules/[4mvite[24m/dist/node/module-runner.js:1104:76)
+}
+
+ [31m❯[39m app/contexts/__tests__/chat-lazy-signalr.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 117[2mms[22m[39m
+     [32m✓[39m CL1: the source has no value import of @microsoft/signalr[32m 2[2mms[22m[39m
+     [32m✓[39m CL2: mounting the provider does not load signalr; startSession loads it once and joins[32m 98[2mms[22m[39m
+     [32m✓[39m CL3: no invoke while the hub is not connected[32m 4[2mms[22m[39m
+[31m     [31m×[31m CL4: a failed signalr chunk load leaves the chat disconnected with an error[39m[32m 12[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/contexts/__tests__/chat-lazy-signalr.test.tsx[2m > [22mChatContext lazy signalr (PERF-11a)[2m > [22mCL4: a failed signalr chunk load leaves the chat disconnected with an error
+[31m[1mAssertionError[22m: expected 'Failed to start chat session. Please …' to be 'Failed to connect to chat. Please try…' // Object.is equality[39m
+
+Expected: [32m"Failed to [7mconnect to chat[27m. Please try again."[39m
+Received: [31m"Failed to [7mstart chat session[27m. Please try again."[39m
+
+[36m [2m❯[22m app/contexts/__tests__/chat-lazy-signalr.test.tsx:[2m126:34[22m[39m
+    [90m124| [39m    [34mexpect[39m(signalr[33m.[39mstate[33m.[39mloads)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m125| [39m    [34mexpect[39m(result[33m.[39mcurrent[33m.[39mconnectionStatus)[33m.[39m[34mtoBe[39m([32m'disconnected'[39m)[33m;[39m
+    [90m126| [39m    expect(result.current.error).toBe('Failed to connect to chat. Plea…
+    [90m   | [39m                                 [31m^[39m
+    [90m127| [39m    [34mexpect[39m(signalr[33m.[39minvoke)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m128| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 12:22:42
+[2m   Duration [22m 810ms[2m (transform 134ms, setup 0ms, import 172ms, tests 117ms, environment 385ms)[22m
+
+
+::error file=/home/runner/b369-sketch/app/contexts/__tests__/chat-lazy-signalr.test.tsx,title=app/contexts/__tests__/chat-lazy-signalr.test.tsx > ChatContext lazy signalr (PERF-11a) > CL4%3A a failed signalr chunk load leaves the chat disconnected with an error,line=126,column=34::AssertionError: expected 'Failed to start chat session. Please …' to be 'Failed to connect to chat. Please try…' // Object.is equality%0A%0AExpected: "Failed to connect to chat. Please try again."%0AReceived: "Failed to start chat session. Please try again."%0A%0A ❯ app/contexts/__tests__/chat-lazy-signalr.test.tsx:126:34%0A%0A

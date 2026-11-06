@@ -1,0 +1,220 @@
+123c123
+< +function isHubConnected(connection: HubConnection | null): boolean {
+---
+> +function isHubConnected(connection: HubConnection | null): connection is HubConnection {
+169c169
+< +        if (connectionRef.current && isHubConnected(connectionRef.current)) {
+---
+> +        if (isHubConnected(connectionRef.current)) {
+199c199
+< +    if (connectionRef.current && isHubConnected(connectionRef.current)) {
+---
+> +    if (isHubConnected(connectionRef.current)) {
+206c206
+< @@ -0,0 +1,110 @@
+---
+> @@ -0,0 +1,129 @@
+211c211
+< +import { afterEach, describe, expect, it, vi } from 'vitest';
+---
+> +import { beforeEach, describe, expect, it, vi } from 'vitest';
+216c216
+< +  const state = { loads: 0, failNext: false, connectionState: 'Connected' };
+---
+> +  const state = { loads: 0, failLoad: false, connectionState: 'Connected' };
+220c220
+< +vi.mock('@microsoft/signalr', () => {
+---
+> +function signalrModule() {
+222c222
+< +  if (signalr.state.failNext) {
+---
+> +  if (signalr.state.failLoad) {
+254c254
+< +});
+---
+> +}
+276,280c276,282
+< +import { useChat } from '~/hooks/useChat';
+< +import { ChatProvider } from '../ChatContext';
+< +
+< +function wrapper({ children }: { children: ReactNode }) {
+< +  return <ChatProvider>{children}</ChatProvider>;
+---
+> +async function renderChat() {
+> +  const { ChatProvider } = await import('../ChatContext');
+> +  const { useChat } = await import('~/hooks/useChat');
+> +  function wrapper({ children }: { children: ReactNode }) {
+> +    return <ChatProvider>{children}</ChatProvider>;
+> +  }
+> +  return renderHook(() => useChat(), { wrapper });
+283c285,287
+< +afterEach(() => {
+---
+> +beforeEach(() => {
+> +  vi.resetModules();
+> +  vi.doMock('@microsoft/signalr', signalrModule);
+285a290,291
+> +  signalr.state.loads = 0;
+> +  signalr.state.failLoad = false;
+298c304
+< +    const { result } = renderHook(() => useChat(), { wrapper });
+---
+> +    const { result } = await renderChat();
+310c316,326
+< +    const { result } = renderHook(() => useChat(), { wrapper });
+---
+> +    const { result } = await renderChat();
+> +    await act(async () => {
+> +      await result.current.startSession({ name: 'A', email: 'a@example.com' });
+> +    });
+> +    expect(signalr.state.loads).toBe(1);
+> +    expect(signalr.invoke).not.toHaveBeenCalled();
+> +  });
+> +
+> +  it('CL4: a failed signalr chunk load leaves the chat disconnected with an error', async () => {
+> +    signalr.state.failLoad = true;
+> +    const { result } = await renderChat();
+313a330,332
+> +    expect(signalr.state.loads).toBe(1);
+> +    expect(result.current.connectionStatus).toBe('disconnected');
+> +    expect(result.current.error).toBe('Failed to connect to chat. Please try again.');
+348,473d366
+< @@ -118,7 +118,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "1x pass. In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+< +    "note": "1x pass. In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (\u00b130 %). Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.1.longtasks-over-50",
+< @@ -184,7 +184,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "1x pass. In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+< +    "note": "1x pass. In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (\u00b130 %). Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.2.longtasks-over-50",
+< @@ -334,7 +334,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (\u00b130 %). Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.1.longtasks-over-50.6x",
+< @@ -345,7 +345,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Count of longtask entries over 50 ms inside the window. Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Count of longtask entries over 50 ms inside the window. Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.1.longtask-max.6x",
+< @@ -356,7 +356,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.1.loaf-blocking-max.6x",
+< @@ -367,7 +367,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.1.peak-backing-delta-mib.6x",
+< @@ -378,7 +378,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+<    },
+<    {
+<      "id": "res.export.1.bytes.6x",
+< @@ -389,7 +389,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+<    },
+<    {
+<      "id": "res.export.2.wall-ms.6x",
+< @@ -400,7 +400,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (±30 %). Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). In-page time from the Export WAV click until the dialog shows \"WAV created\". Trend only (\u00b130 %). Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.2.longtasks-over-50.6x",
+< @@ -411,7 +411,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Count of longtask entries over 50 ms inside the window. Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Count of longtask entries over 50 ms inside the window. Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.2.longtask-max.6x",
+< @@ -422,7 +422,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.2.loaf-blocking-max.6x",
+< @@ -433,7 +433,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Largest long-animation-frame blockingDuration in the window (0 when none); LoAF duration is not used. Trend only. Budget owner: PERF-12 (export long tasks)."
+<    },
+<    {
+<      "id": "res.export.2.peak-backing-delta-mib.6x",
+< @@ -444,7 +444,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
+<    },
+<    {
+<      "id": "res.export.2.bytes.6x",
+< @@ -455,7 +455,7 @@
+<      "mode": "record",
+<      "budget": null,
+<      "owner": "PERF-1b-ii",
+< -    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+< +    "note": "6x pass (CPU throttle on after ready and Add); trend only (\u00b130 %). Size of the downloaded czaba-studio-lab.wav (44 + frames x 6). Budget owner: PERF-12 (export)."
+<    },
+<    {
+<      "id": "res.harness.clips-1.6x",
+488c381
+< +    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route). PERF-11a (round 370): assert <= 372000 after signalr became a lazy chunk; B sketch run b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d value is red (b-round-369/perf-res-head.log)."
+---
+> +    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route). PERF-11a: assert <= 372000 once signalr became a lazy chunk (sketch b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d is red). A deliberate bundle change (feature or dependency bump) re-bases this budget with a measurement in its own task."
+506c399
+< +    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route). PERF-11a (round 370): assert <= 258000 after signalr became a lazy chunk; B sketch run b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d value is red (b-round-369/perf-res-head.log)."
+---
+> +    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route). PERF-11a: assert <= 258000 once signalr became a lazy chunk (sketch b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d is red). A deliberate bundle change (feature or dependency bump) re-bases this budget with a measurement in its own task."
+524c417
+< +    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route). PERF-11a (round 370): assert <= 278000 after signalr became a lazy chunk; B sketch run b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d value is red (b-round-369/perf-res-head.log)."
+---
+> +    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route). PERF-11a: assert <= 278000 once signalr became a lazy chunk (sketch b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d is red). A deliberate bundle change (feature or dependency bump) re-bases this budget with a measurement in its own task."

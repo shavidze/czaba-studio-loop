@@ -1,0 +1,420 @@
+diff -ruN '--exclude=node_modules' '--exclude=build' '--exclude=.cache' '--exclude=test-results' '--exclude=public' b369-head/app/components/animations/RouteTransition.tsx b369-sketch/app/components/animations/RouteTransition.tsx
+--- b369-head/app/components/animations/RouteTransition.tsx
++++ b369-sketch/app/components/animations/RouteTransition.tsx
+@@ -0,0 +1,25 @@
++import { AnimatePresence } from 'framer-motion';
++import type { ReactNode } from 'react';
++import { PageTransition } from './PageTransition';
++
++interface RouteTransitionProps {
++  pathname: string;
++  isStudioPage: boolean;
++  children: ReactNode;
++}
++
++export function RouteTransition({ pathname, isStudioPage, children }: RouteTransitionProps) {
++  if (isStudioPage) {
++    return (
++      <div key={pathname} className="page-transition-wrapper">
++        {children}
++      </div>
++    );
++  }
++
++  return (
++    <AnimatePresence mode="wait">
++      <PageTransition key={pathname}>{children}</PageTransition>
++    </AnimatePresence>
++  );
++}
+diff -ruN '--exclude=node_modules' '--exclude=build' '--exclude=.cache' '--exclude=test-results' '--exclude=public' b369-head/app/components/animations/__tests__/route-transition.test.tsx b369-sketch/app/components/animations/__tests__/route-transition.test.tsx
+--- b369-head/app/components/animations/__tests__/route-transition.test.tsx
++++ b369-sketch/app/components/animations/__tests__/route-transition.test.tsx
+@@ -0,0 +1,63 @@
++import { render } from '@testing-library/react';
++import { renderToString } from 'react-dom/server';
++import { MemoryRouter } from 'react-router-dom';
++import { describe, expect, it } from 'vitest';
++import { RouteTransition } from '../RouteTransition';
++
++function Page({ label }: { label: string }) {
++  return <p data-testid="page">{label}</p>;
++}
++
++describe('RouteTransition', () => {
++  it('RT1: a studio path renders the wrapper with no inline opacity on the server', () => {
++    const html = renderToString(
++      <RouteTransition pathname="/studio-lab" isStudioPage>
++        <Page label="studio" />
++      </RouteTransition>,
++    );
++    expect(html).toContain('class="page-transition-wrapper"');
++    expect(html).not.toMatch(/opacity:\s*0/);
++  });
++
++  it('RT2: a store path keeps the motion fade (inline opacity 0 on the server)', () => {
++    const html = renderToString(
++      <MemoryRouter initialEntries={['/']}>
++        <RouteTransition pathname="/" isStudioPage={false}>
++          <Page label="home" />
++        </RouteTransition>
++      </MemoryRouter>,
++    );
++    expect(html).toContain('class="page-transition-wrapper"');
++    expect(html).toMatch(/opacity:\s*0/);
++  });
++
++  it('RT3: a studio path change remounts the page', () => {
++    const { rerender, getByTestId } = render(
++      <RouteTransition pathname="/studio/a" isStudioPage>
++        <Page label="a" />
++      </RouteTransition>,
++    );
++    const first = getByTestId('page');
++    rerender(
++      <RouteTransition pathname="/studio/b" isStudioPage>
++        <Page label="b" />
++      </RouteTransition>,
++    );
++    expect(getByTestId('page')).not.toBe(first);
++  });
++
++  it('RT4: the same studio path keeps the page mounted', () => {
++    const { rerender, getByTestId } = render(
++      <RouteTransition pathname="/studio-lab" isStudioPage>
++        <Page label="x" />
++      </RouteTransition>,
++    );
++    const first = getByTestId('page');
++    rerender(
++      <RouteTransition pathname="/studio-lab" isStudioPage>
++        <Page label="y" />
++      </RouteTransition>,
++    );
++    expect(getByTestId('page')).toBe(first);
++  });
++});
+diff -ruN '--exclude=node_modules' '--exclude=build' '--exclude=.cache' '--exclude=test-results' '--exclude=public' b369-head/app/components/animations/index.ts b369-sketch/app/components/animations/index.ts
+--- b369-head/app/components/animations/index.ts
++++ b369-sketch/app/components/animations/index.ts
+@@ -1,6 +1,7 @@
+ // Barrel export for animation components
+ 
+ export { PageTransition, PageWrapper } from './PageTransition';
++export { RouteTransition } from './RouteTransition';
+ export {
+   fadeIn,
+   // Variants for custom use
+diff -ruN '--exclude=node_modules' '--exclude=build' '--exclude=.cache' '--exclude=test-results' '--exclude=public' b369-head/app/contexts/ChatContext.tsx b369-sketch/app/contexts/ChatContext.tsx
+--- b369-head/app/contexts/ChatContext.tsx
++++ b369-sketch/app/contexts/ChatContext.tsx
+@@ -1,4 +1,4 @@
+-import * as signalR from '@microsoft/signalr';
++import type { HubConnection } from '@microsoft/signalr';
+ import { createContext, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+ import type {
+   ChatConnectionStatus,
+@@ -26,6 +26,16 @@
+ 
+ const ChatContext = createContext<ChatContextValue | undefined>(undefined);
+ 
++let loadedSignalR: typeof import('@microsoft/signalr') | null = null;
++
++function isHubConnected(connection: HubConnection | null): connection is HubConnection {
++  return (
++    connection !== null &&
++    loadedSignalR !== null &&
++    connection.state === loadedSignalR.HubConnectionState.Connected
++  );
++}
++
+ interface ChatProviderProps {
+   children: ReactNode;
+ }
+@@ -61,7 +71,7 @@
+ export function ChatProvider({ children }: ChatProviderProps) {
+   const { user, isAuthenticated } = useAuth();
+   const [state, setState] = useState<ChatState>(initialState);
+-  const connectionRef = useRef<signalR.HubConnection | null>(null);
++  const connectionRef = useRef<HubConnection | null>(null);
+   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+   const connectRef = useRef<() => void>(() => {});
+ 
+@@ -70,7 +80,7 @@
+   }, []);
+ 
+   const setupSignalRHandlers = useCallback(
+-    (connection: signalR.HubConnection) => {
++    (connection: HubConnection) => {
+       connection.on('ReceiveMessage', (message: ChatMessageResponse) => {
+         setState((prev) => {
+           const messageExists = prev.messages.some((m) => m.id === message.id);
+@@ -128,6 +138,8 @@
+       const hubUrl = apiClient.getSignalRHubUrl();
+       const accessToken = apiClient.getAccessToken();
+ 
++      const signalR = await import('@microsoft/signalr');
++      loadedSignalR = signalR;
+       const connection = new signalR.HubConnectionBuilder()
+         .withUrl(hubUrl, {
+           accessTokenFactory: accessToken ? () => accessToken : undefined,
+@@ -201,10 +213,7 @@
+ 
+         await connect();
+ 
+-        if (
+-          connectionRef.current &&
+-          connectionRef.current.state === signalR.HubConnectionState.Connected
+-        ) {
++        if (isHubConnected(connectionRef.current)) {
+           await connectionRef.current.invoke('JoinSession', apiSession.id);
+         }
+       } catch (error) {
+@@ -251,7 +260,7 @@
+     if (!state.session || !connectionRef.current) return;
+ 
+     try {
+-      if (connectionRef.current.state === signalR.HubConnectionState.Connected) {
++      if (isHubConnected(connectionRef.current)) {
+         await connectionRef.current.invoke('StartTyping', state.session.id);
+       }
+     } catch (error) {
+@@ -263,7 +272,7 @@
+     if (!state.session || !connectionRef.current) return;
+ 
+     try {
+-      if (connectionRef.current.state === signalR.HubConnectionState.Connected) {
++      if (isHubConnected(connectionRef.current)) {
+         await connectionRef.current.invoke('StopTyping', state.session.id);
+       }
+     } catch (error) {
+@@ -274,10 +283,7 @@
+   const closeSession = useCallback(async () => {
+     if (!state.session) return;
+ 
+-    if (
+-      connectionRef.current &&
+-      connectionRef.current.state === signalR.HubConnectionState.Connected
+-    ) {
++    if (isHubConnected(connectionRef.current)) {
+       try {
+         await connectionRef.current.invoke('LeaveSession', state.session.id);
+       } catch (error) {
+diff -ruN '--exclude=node_modules' '--exclude=build' '--exclude=.cache' '--exclude=test-results' '--exclude=public' b369-head/app/contexts/__tests__/chat-lazy-signalr.test.tsx b369-sketch/app/contexts/__tests__/chat-lazy-signalr.test.tsx
+--- b369-head/app/contexts/__tests__/chat-lazy-signalr.test.tsx
++++ b369-sketch/app/contexts/__tests__/chat-lazy-signalr.test.tsx
+@@ -0,0 +1,129 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { act, renderHook } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
++
++const signalr = vi.hoisted(() => {
++  const invoke = vi.fn(async () => undefined);
++  const start = vi.fn(async () => undefined);
++  const state = { loads: 0, failLoad: false, connectionState: 'Connected' };
++  return { invoke, start, state };
++});
++
++function signalrModule() {
++  signalr.state.loads += 1;
++  if (signalr.state.failLoad) {
++    throw new Error('chunk load failed');
++  }
++  class FakeConnection {
++    get state() {
++      return signalr.state.connectionState;
++    }
++    on() {}
++    onclose() {}
++    start = signalr.start;
++    stop = vi.fn(async () => undefined);
++    invoke = signalr.invoke;
++  }
++  class HubConnectionBuilder {
++    withUrl() {
++      return this;
++    }
++    withAutomaticReconnect() {
++      return this;
++    }
++    configureLogging() {
++      return this;
++    }
++    build() {
++      return new FakeConnection();
++    }
++  }
++  return {
++    HubConnectionBuilder,
++    HubConnectionState: { Connected: 'Connected', Disconnected: 'Disconnected' },
++    LogLevel: { Warning: 3 },
++  };
++}
++
++vi.mock('~/hooks', () => ({
++  useAuth: () => ({ user: null, isAuthenticated: false }),
++}));
++
++vi.mock('~/services/api/client', () => ({
++  apiClient: {
++    createChatSession: vi.fn(async () => ({
++      id: 7,
++      status: 'active',
++      createdAt: '2026-11-06T00:00:00Z',
++      displayName: 'Guest',
++      displayEmail: '',
++      unreadCount: 0,
++      messages: [],
++    })),
++    getSignalRHubUrl: () => 'http://127.0.0.1:5199/hubs/chat',
++    getAccessToken: () => undefined,
++  },
++}));
++
++async function renderChat() {
++  const { ChatProvider } = await import('../ChatContext');
++  const { useChat } = await import('~/hooks/useChat');
++  function wrapper({ children }: { children: ReactNode }) {
++    return <ChatProvider>{children}</ChatProvider>;
++  }
++  return renderHook(() => useChat(), { wrapper });
++}
++
++beforeEach(() => {
++  vi.resetModules();
++  vi.doMock('@microsoft/signalr', signalrModule);
++  signalr.invoke.mockClear();
++  signalr.start.mockClear();
++  signalr.state.loads = 0;
++  signalr.state.failLoad = false;
++  signalr.state.connectionState = 'Connected';
++});
++
++describe('ChatContext lazy signalr (PERF-11a)', () => {
++  it('CL1: the source has no value import of @microsoft/signalr', () => {
++    const source = readFileSync(resolve(__dirname, '../ChatContext.tsx'), 'utf8');
++    const staticImports = source.match(/^import\s[^;]*from\s+'@microsoft\/signalr';/gm) ?? [];
++    expect(staticImports.every((line) => /^import\s+type\s/.test(line))).toBe(true);
++    expect(source).toMatch(/await import\('@microsoft\/signalr'\)/);
++  });
++
++  it('CL2: mounting the provider does not load signalr; startSession loads it once and joins', async () => {
++    const { result } = await renderChat();
++    expect(signalr.state.loads).toBe(0);
++    await act(async () => {
++      await result.current.startSession({ name: 'A', email: 'a@example.com' });
++    });
++    expect(signalr.state.loads).toBe(1);
++    expect(result.current.connectionStatus).toBe('connected');
++    expect(signalr.invoke).toHaveBeenCalledWith('JoinSession', 7);
++  });
++
++  it('CL3: no invoke while the hub is not connected', async () => {
++    signalr.state.connectionState = 'Disconnected';
++    const { result } = await renderChat();
++    await act(async () => {
++      await result.current.startSession({ name: 'A', email: 'a@example.com' });
++    });
++    expect(signalr.state.loads).toBe(1);
++    expect(signalr.invoke).not.toHaveBeenCalled();
++  });
++
++  it('CL4: a failed signalr chunk load leaves the chat disconnected with an error', async () => {
++    signalr.state.failLoad = true;
++    const { result } = await renderChat();
++    await act(async () => {
++      await result.current.startSession({ name: 'A', email: 'a@example.com' });
++    });
++    expect(signalr.state.loads).toBe(1);
++    expect(result.current.connectionStatus).toBe('disconnected');
++    expect(result.current.error).toBe('Failed to connect to chat. Please try again.');
++    expect(signalr.invoke).not.toHaveBeenCalled();
++  });
++});
+diff -ruN '--exclude=node_modules' '--exclude=build' '--exclude=.cache' '--exclude=test-results' '--exclude=public' b369-head/app/root.tsx b369-sketch/app/root.tsx
+--- b369-head/app/root.tsx
++++ b369-sketch/app/root.tsx
+@@ -8,8 +8,7 @@
+   useLocation,
+   useNavigation,
+ } from '@remix-run/react';
+-import { AnimatePresence } from 'framer-motion';
+-import { PageTransition } from '~/components/animations';
++import { RouteTransition } from '~/components/animations';
+ import { AudioPlayer, StemsPlayerModal } from '~/components/audio';
+ import { AuthModal } from '~/components/auth';
+ import { CookieConsent } from '~/components/common';
+@@ -142,11 +141,9 @@
+       {!isStudioPage && <Header cartCount={cartCount} />}
+       {/* Navigation loading bar */}
+       {isNavigating && <div className="nav-loading-bar" />}
+-      <AnimatePresence mode="wait">
+-        <PageTransition key={location.pathname}>
+-          <Outlet />
+-        </PageTransition>
+-      </AnimatePresence>
++      <RouteTransition pathname={location.pathname} isStudioPage={isStudioPage}>
++        <Outlet />
++      </RouteTransition>
+       {!isStudioPage && (
+         <>
+           <AudioPlayer />
+diff -ruN '--exclude=node_modules' '--exclude=build' '--exclude=.cache' '--exclude=test-results' '--exclude=public' b369-head/perf/budgets.resources.json b369-sketch/perf/budgets.resources.json
+--- b369-head/perf/budgets.resources.json
++++ b369-sketch/perf/budgets.resources.json
+@@ -547,10 +547,13 @@
+     "metric": "encoded-bytes",
+     "unit": "bytes",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-ii",
+-    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 372000
++    },
++    "owner": "PERF-11a",
++    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route). PERF-11a: assert <= 372000 once signalr became a lazy chunk (sketch b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d is red). A deliberate bundle change (feature or dependency bump) re-bases this budget with a measurement in its own task."
+   },
+   {
+     "id": "res.js.studio-lab.decoded-bytes",
+@@ -605,10 +608,13 @@
+     "metric": "encoded-bytes",
+     "unit": "bytes",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-ii",
+-    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 258000
++    },
++    "owner": "PERF-11a",
++    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Budget owner: PERF-11 (JS bytes per route). PERF-11a: assert <= 258000 once signalr became a lazy chunk (sketch b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d is red). A deliberate bundle change (feature or dependency bump) re-bases this budget with a measurement in its own task."
+   },
+   {
+     "id": "res.js.home.decoded-bytes",
+@@ -663,10 +669,13 @@
+     "metric": "encoded-bytes",
+     "unit": "bytes",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-ii",
+-    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 278000
++    },
++    "owner": "PERF-11a",
++    "note": "1x only. Sum of Network.loadingFinished.encodedDataLength for responses of type Script (headers included). Measures the sign-in guard screen bundle by design, not the Studio. Budget owner: PERF-11 (JS bytes per route). PERF-11a: assert <= 278000 once signalr became a lazy chunk (sketch b-round-369/perf-res-sketch-final.log; HEAD 29f4b4d is red). A deliberate bundle change (feature or dependency bump) re-bases this budget with a measurement in its own task."
+   },
+   {
+     "id": "res.js.studio-guard.decoded-bytes",

@@ -1,0 +1,74 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b369-sketch[39m
+
+ [31m❯[39m app/contexts/__tests__/chat-lazy-signalr.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 117[2mms[22m[39m
+[31m     [31m×[31m CL1: the source has no value import of @microsoft/signalr[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m CL2: mounting the provider does not load signalr; startSession loads it once and joins[39m[32m 98[2mms[22m[39m
+     [32m✓[39m CL3: no invoke while the hub is not connected[32m 6[2mms[22m[39m
+[31m     [31m×[31m CL4: a failed signalr chunk load leaves the chat disconnected with an error[39m[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/contexts/__tests__/chat-lazy-signalr.test.tsx[2m > [22mChatContext lazy signalr (PERF-11a)[2m > [22mCL1: the source has no value import of @microsoft/signalr
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/contexts/__tests__/chat-lazy-signalr.test.tsx:[2m93:74[22m[39m
+    [90m 91| [39m    const source = readFileSync(resolve(__dirname, '../ChatContext.tsx…
+    [90m 92| [39m    const staticImports = source.match(/^import\s[^;]*from\s+'@microso…
+    [90m 93| [39m    expect(staticImports.every((line) => /^import\s+type\s/.test(line)…
+    [90m   | [39m                                                                         [31m^[39m
+    [90m 94| [39m    [34mexpect[39m(source)[33m.[39m[34mtoMatch[39m([36m/await import\('@microsoft\/signalr'\)/[39m)[33m;[39m
+    [90m 95| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/contexts/__tests__/chat-lazy-signalr.test.tsx[2m > [22mChatContext lazy signalr (PERF-11a)[2m > [22mCL2: mounting the provider does not load signalr; startSession loads it once and joins
+[31m[1mAssertionError[22m: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/contexts/__tests__/chat-lazy-signalr.test.tsx:[2m99:33[22m[39m
+    [90m 97| [39m  it('CL2: mounting the provider does not load signalr; startSession l…
+    [90m 98| [39m    [35mconst[39m { result } [33m=[39m [35mawait[39m [34mrenderChat[39m()[33m;[39m
+    [90m 99| [39m    [34mexpect[39m(signalr[33m.[39mstate[33m.[39mloads)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m100| [39m    [35mawait[39m [34mact[39m([35masync[39m () [33m=>[39m {
+    [90m101| [39m      await result.current.startSession({ name: 'A', email: 'a@example…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/contexts/__tests__/chat-lazy-signalr.test.tsx[2m > [22mChatContext lazy signalr (PERF-11a)[2m > [22mCL4: a failed signalr chunk load leaves the chat disconnected with an error
+[31m[1mError[22m: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock[39m
+[36m [2m❯[22m app/contexts/ChatContext.tsx:[2m1:1[22m[39m
+    [90m  1| [39m[35mimport[39m [33m*[39m [35mas[39m signalR [35mfrom[39m [32m'@microsoft/signalr'[39m[33m;[39m
+    [90m   | [39m[31m^[39m
+    [90m  2| [39mimport { createContext, type ReactNode, useCallback, useEffect, useRef…
+    [90m  3| [39m[35mimport[39m type {
+
+[31m[1mCaused by: Error[22m: chunk load failed[39m
+[36m [2m❯[22m signalrModule app/contexts/__tests__/chat-lazy-signalr.test.tsx:[2m17:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 12:22:43
+[2m   Duration [22m 804ms[2m (transform 141ms, setup 0ms, import 163ms, tests 117ms, environment 377ms)[22m
+
+
+::error file=/home/runner/b369-sketch/app/contexts/__tests__/chat-lazy-signalr.test.tsx,title=app/contexts/__tests__/chat-lazy-signalr.test.tsx > ChatContext lazy signalr (PERF-11a) > CL1%3A the source has no value import of @microsoft/signalr,line=93,column=74::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/contexts/__tests__/chat-lazy-signalr.test.tsx:93:74%0A%0A
+
+::error file=/home/runner/b369-sketch/app/contexts/__tests__/chat-lazy-signalr.test.tsx,title=app/contexts/__tests__/chat-lazy-signalr.test.tsx > ChatContext lazy signalr (PERF-11a) > CL2%3A mounting the provider does not load signalr; startSession loads it once and joins,line=99,column=33::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/contexts/__tests__/chat-lazy-signalr.test.tsx:99:33%0A%0A
+
+::error file=/home/runner/b369-sketch/app/contexts/ChatContext.tsx,title=app/contexts/__tests__/chat-lazy-signalr.test.tsx > ChatContext lazy signalr (PERF-11a) > CL4%3A a failed signalr chunk load leaves the chat disconnected with an error,line=1,column=1::Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock%0A ❯ app/contexts/ChatContext.tsx:1:1%0A%0ACaused by: Caused by: Error: chunk load failed%0A ❯ signalrModule app/contexts/__tests__/chat-lazy-signalr.test.tsx:17:11%0A%0A

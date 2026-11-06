@@ -1,0 +1,24 @@
+--- /home/runner/b369-head/app/root.tsx	2026-11-06 11:25:04.000000000 +0000
++++ /home/runner/b369-sketch/app/root.tsx	2026-11-06 12:10:59.461081720 +0000
+@@ -142,11 +142,17 @@
+       {!isStudioPage && <Header cartCount={cartCount} />}
+       {/* Navigation loading bar */}
+       {isNavigating && <div className="nav-loading-bar" />}
+-      <AnimatePresence mode="wait">
+-        <PageTransition key={location.pathname}>
++      {isStudioPage ? (
++        <div key={location.pathname} className="page-transition-wrapper">
+           <Outlet />
+-        </PageTransition>
+-      </AnimatePresence>
++        </div>
++      ) : (
++        <AnimatePresence mode="wait">
++          <PageTransition key={location.pathname}>
++            <Outlet />
++          </PageTransition>
++        </AnimatePresence>
++      )}
+       {!isStudioPage && (
+         <>
+           <AudioPlayer />

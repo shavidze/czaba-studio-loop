@@ -1,0 +1,333 @@
+app/contexts/__tests__/cart-helpers.test.ts:219:13 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    218 │   it('returns existing session ID from localStorage', () => {
+  > 219 │     storage['czaba_session_id'] = 'sess_existing_123';
+        │             ^^^^^^^^^^^^^^^^^^
+    220 │     const id = getSessionId();
+    221 │     expect(id).toBe('sess_existing_123');
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    217 217 │   
+    218 218 │     it('returns existing session ID from localStorage', () => {
+    219     │ - ····storage['czaba_session_id']·=·'sess_existing_123';
+        219 │ + ····storage.czaba_session_id·=·'sess_existing_123';
+    220 220 │       const id = getSessionId();
+    221 221 │       expect(id).toBe('sess_existing_123');
+  
+
+app/components/animations/ScrollReveal.tsx:283:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    281 │     >
+    282 │       {words.map((word, wordIndex) => (
+  > 283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+        │                    ^^^^^^^^^
+    284 │           {word.split('').map((char, charIndex) => (
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+  
+  i This is the source of the key value.
+  
+    280 │       aria-label={text}
+    281 │     >
+  > 282 │       {words.map((word, wordIndex) => (
+        │                         ^^^^^^^^^
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/components/animations/ScrollReveal.tsx:285:31 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the index of an array as key property in an element.
+  
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+    284 │           {word.split('').map((char, charIndex) => (
+  > 285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+        │                               ^^^^^^^^^
+    286 │               {char}
+    287 │             </motion.span>
+  
+  i This is the source of the key value.
+  
+    282 │       {words.map((word, wordIndex) => (
+    283 │         <span key={wordIndex} className="inline-block whitespace-nowrap">
+  > 284 │           {word.split('').map((char, charIndex) => (
+        │                                      ^^^^^^^^^
+    285 │             <motion.span key={charIndex} variants={charVariants} className="inline-block">
+    286 │               {char}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+app/contexts/StemsContext.tsx:173:32 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback passed to forEach() iterable method should not return a value.
+  
+    171 │     if (state.isPlaying) {
+    172 │       // Pause all
+  > 173 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                ^^^^^^^
+    174 │       setState((prev) => ({ ...prev, isPlaying: false }));
+    175 │     } else {
+  
+  i Either remove this return or remove the returned value.
+  
+    171 │     if (state.isPlaying) {
+    172 │       // Pause all
+  > 173 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                                   ^^^^^^^^^^^^^
+    174 │       setState((prev) => ({ ...prev, isPlaying: false }));
+    175 │     } else {
+  
+
+app/contexts/StemsContext.tsx:255:32 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback passed to forEach() iterable method should not return a value.
+  
+    253 │     // Pause if playing
+    254 │     if (wasPlaying) {
+  > 255 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                ^^^^^^^
+    256 │     }
+    257 │ 
+  
+  i Either remove this return or remove the returned value.
+  
+    253 │     // Pause if playing
+    254 │     if (wasPlaying) {
+  > 255 │       audioElementsRef.current.forEach((audio) => audio.pause());
+        │                                                   ^^^^^^^^^^^^^
+    256 │     }
+    257 │ 
+  
+
+app/contexts/StudioContext.tsx:260:67 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    258 │     try {
+    259 │       debug.log('🎛� Creating AudioContext...');
+  > 260 │       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        │                                                                   ^^^
+    261 │       const ctx = new AudioContextClass();
+    262 │       audioContextRef.current = ctx;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:432:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    430 │   const loadVideo = useCallback(async (file: File) => {
+    431 │     // Check if it's a YouTube embed
+  > 432 │     const isYouTube = (file as any).isYouTube;
+        │                                ^^^
+    433 │ 
+    434 │     if (!isYouTube) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:448:35 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    447 │     // Use requestIdleCallback for non-critical state update if available
+  > 448 │     const updateState = (updater: any) => {
+        │                                   ^^^
+    449 │       if ('requestIdleCallback' in window) {
+    450 │         requestIdleCallback(() => setState(updater), { timeout: 100 });
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:456:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    454 │     };
+    455 │ 
+  > 456 │     updateState((prev: any) => ({
+        │                        ^^^
+    457 │       ...prev,
+    458 │       video: {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:468:35 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    466 │       if (isYouTube) {
+    467 │         // Handle YouTube embed - no heavy processing needed
+  > 468 │         const embedUrl = (file as any).embedUrl;
+        │                                   ^^^
+    469 │         const youtubeId = (file as any).youtubeId;
+    470 │ 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:469:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    467 │         // Handle YouTube embed - no heavy processing needed
+    468 │         const embedUrl = (file as any).embedUrl;
+  > 469 │         const youtubeId = (file as any).youtubeId;
+        │                                    ^^^
+    470 │ 
+    471 │         setState((prev) => ({
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+app/contexts/StudioContext.tsx:1624:35 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━
+
+  ! This callback passed to forEach() iterable method should not return a value.
+  
+    1622 │           if (!modKey && state.selectedStemIds.size > 0) {
+    1623 │             e.preventDefault();
+  > 1624 │             state.selectedStemIds.forEach((stemId) => toggleMute(stemId));
+         │                                   ^^^^^^^
+    1625 │           }
+    1626 │           break;
+  
+  i Either remove this return or remove the returned value.
+  
+    1622 │           if (!modKey && state.selectedStemIds.size > 0) {
+    1623 │             e.preventDefault();
+  > 1624 │             state.selectedStemIds.forEach((stemId) => toggleMute(stemId));
+         │                                                       ^^^^^^^^^^^^^^^^^^
+    1625 │           }
+    1626 │           break;
+  
+
+app/contexts/StudioContext.tsx:742:26 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    740 │       }
+    741 │     });
+  > 742 │   }, [startTimeTracking, shouldStemBeAudible]);
+        │                          ^^^^^^^^^^^^^^^^^^^
+    743 │ 
+    744 │   // Restart audio at a specific position (used for loop restart)
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:799:6 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    797 │       });
+    798 │     },
+  > 799 │     [shouldStemBeAudible],
+        │      ^^^^^^^^^^^^^^^^^^^
+    800 │   );
+    801 │ 
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:902:6 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    900 │       });
+    901 │     },
+  > 902 │     [shouldStemBeAudible],
+        │      ^^^^^^^^^^^^^^^^^^^
+    903 │   );
+    904 │ 
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:968:6 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    966 │       });
+    967 │     },
+  > 968 │     [shouldStemBeAudible],
+        │      ^^^^^^^^^^^^^^^^^^^
+    969 │   );
+    970 │ 
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/contexts/StudioContext.tsx:1009:7 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━
+
+  ! shouldStemBeAudible changes on every re-render and should not be used as a hook dependency.
+  
+    1007 │       return { ...prev, stems: newStems, hasUnsavedChanges: true };
+    1008 │     });
+  > 1009 │   }, [shouldStemBeAudible]);
+         │       ^^^^^^^^^^^^^^^^^^^
+    1010 │ 
+    1011 │   // ==========================================
+  
+  i To fix this, wrap the definition of shouldStemBeAudible in its own useCallback() hook.
+  
+
+app/root.tsx:50:15 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    48 │           <>
+    49 │             <script
+  > 50 │               dangerouslySetInnerHTML={{
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    51 │                 __html: `
+    52 │                   window.dataLayer = window.dataLayer || [];
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/root.tsx:77:15 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    75 │             />
+    76 │             <script
+  > 77 │               dangerouslySetInnerHTML={{
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    78 │                 __html: `
+    79 │                   gtag('js', new Date());
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+app/root.tsx:91:13 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    89 │         {FB_PIXEL_ID && (
+    90 │           <script
+  > 91 │             dangerouslySetInnerHTML={{
+       │             ^^^^^^^^^^^^^^^^^^^^^^^
+    92 │               __html: `
+    93 │                 !function(f,b,e,v,n,t,s)
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 1.
+Checked 22 files in 134ms. No fixes applied.
+Found 20 warnings.
+Found 1 info.

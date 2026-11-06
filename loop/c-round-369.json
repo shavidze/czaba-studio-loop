@@ -1,0 +1,115 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T11:56:36.0250578Z",
+  "round": 369,
+  "attempt": 1,
+  "store": 200
+ },
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "RT-NUM",
+  "RT-CAUSE",
+  "RT-IDS",
+  "RT-LESSONS",
+  "RT-L57",
+  "RT-SABA",
+  "RT-SCREEN",
+  "G369-AUTH",
+  "STUDIO-SMOKE-369"
+ ],
+ "failed": [],
+ "blocked": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "rows": {
+  "SOURCE-SCOPE": "PASS (start+end: HEAD 29f4b4d, 0 status lines, frozen sha rc 0; c-round-369/scope-start.txt, scope-end.txt)",
+  "CLAIMS": "PASS (output identical to b-round-368/claims-369-output.txt, stderr empty, 0 MISSING)",
+  "RT-NUM": "PASS (scripts re-run from c-round-369/scripts; 17/19 data files byte-identical; retro-numbers-369.txt identical; diffs only collect/cost ordering and b_cost of round 368 = 10.19 vs 0, not in totals)",
+  "RT-CAUSE": "PASS (STOP lines, c-round JSONs, sketch-review shas, annotation, c-models checked; inferences labelled)",
+  "RT-IDS": "PASS (round 368 closure, new ids, 9 closes, 45 retro_candidates, inventory 36/33 cmp identical, retro_runs 369, next_due 384)",
+  "RT-LESSONS": "PASS with Low note C369-L1 (60 lines; only l.3/19/41 differ; L30 prefix byte-kept; no A-R/B-R/C-R/GATE id lost; row id R11-P1e and chain round ranges dropped though retro says nothing lost)",
+  "RT-L57": "PASS (c-round-368.json rc 0; mutant without origin/claimCheckMinutes rc 1; own JSON see l57-check.txt)",
+  "RT-SABA": "PASS (§12.1 info+proposal, §12.3 proposal to root, §12.5 no project-rule proposal)",
+  "RT-SCREEN (browser)": "PASS (mock health ok; row counts 138/168/118/144; laneErrors none; journey reached /studio-lab?preview=middle-east; position after play 00:01.462/00:01.471; last clip left 2432 > viewport 1440/1280; Original sound visible at 1440 (y332) and absent from DOM at 1280)",
+  "G369-AUTH (browser)": "PASS (anon context both viewports: /studio-lab workspace+demo, auth_user null; /studio/middle-east Sign in required, 0 workspace, 0 audio[src]; token 401 no auth, 403 with fake bearer, no token in bodies)",
+  "STUDIO-SMOKE-369 (browser)": "PASS with Low note C369-L2 (add Bass; data-playing false>true>false; pos >=00:01.46; drag stems>sfx; Ctrl+Z restores stems; reload demo ready; play after reload >=00:01.45; WAV RIFF/WAVE 24-bit 48 kHz stereo, 16.000 s, peak 0.217, 0 NaN). Undo title reads 'Undo: Move to track — SFX (Ctrl+Z)', not literal 'Move clip'"
+ },
+ "bugs": [
+  {
+   "id": "C369-L1",
+   "severity": "low",
+   "origin": "B",
+   "steps": [
+    "diff b-round-368/lessons-before-369.md lessons.md on l.41 (L58)",
+    "compare tokens"
+   ],
+   "expected": "retro-369 §10: no evidence id lost",
+   "actual": "row id R11-P1e and the chain round ranges 312–314, 316–317, 318–320 were removed from L58 evidence parentheses; all A-R/B-R/C-R/GATE ids kept",
+   "evidence": "c-round-369/data/lessons-diff-c.txt"
+  },
+  {
+   "id": "C369-L2",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "Studio-lab, add Bass to Stems, drag by name bar to SFX lane, read Undo button title"
+   ],
+   "expected": "task text: Undo title reads 'Undo: Move clip'",
+   "actual": "'Undo: Move to track — SFX (Ctrl+Z)' (historyMoveToTrack in strings.ts; 'Move clip' is the same-lane label). Product behaviour correct; the task wording is inexact",
+   "evidence": "c-round-369/smoke.json"
+  }
+ ],
+ "observations": [
+  "Reload: project is not persisted (0 clips after reload); demo stems come back ready (IndexedDB czaba-stem-cache-v2 exists); a cache hit was not measured separately",
+  "collect.py re-run gives b_cost 10.19 for round 368 (B file existed later) vs 0 in B's data; totals unaffected",
+  "product-designer consult not run (optional)",
+  "G369-AUTH 'demo badge' checked via visible /demo/i text; mock stopped by PID after the run"
+ ],
+ "manifestPaths": [
+  "c-round-369/scope-start.txt",
+  "c-round-369/scope-end.txt",
+  "c-round-369/claims-out.txt",
+  "c-round-369/data/",
+  "c-round-369/screens/screenC369.json",
+  "c-round-369/auth.json",
+  "c-round-369/smoke.json",
+  "c-round-369/cache.json",
+  "c-round-369/exports/",
+  "c-round-369/progress.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "nullReason": "RETRO: no assert specified",
+ "abletonConformance": "not applicable (RETRO round, nothing visible changes)",
+ "origin": "C",
+ "notRun": [
+  "optional product-designer review",
+  "gate rows"
+ ]
+}
