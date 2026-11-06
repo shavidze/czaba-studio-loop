@@ -1,0 +1,34 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const [base, outPath] = process.argv.slice(2);
+const out = { base };
+const browser = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const r = {}; out[`${w}x${h}`] = r;
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/studio-lab`, { waitUntil: 'networkidle' });
+  await page.getByText('Demo collection ready', { exact: false }).first().waitFor({ timeout: 120000 });
+  await page.waitForTimeout(1000);
+  const mute = page.getByTestId('arrangement-master').locator('button[aria-pressed]').first();
+  const fader = page.getByTestId('arrangement-master').locator('input[type=range]').first();
+  const undo = page.locator('button[title^="Undo"]').first();
+  const readout = page.getByTestId('arrangement-master-readout');
+  const snap = async (k) => { r[k] = { pressed: await mute.getAttribute('aria-pressed'), value: await fader.inputValue(), valueText: await fader.getAttribute('aria-valuetext'), readout: await readout.innerText().catch(() => null), undoTitle: await undo.getAttribute('title'), undoDisabled: await undo.isDisabled() }; };
+  await snap('0_initial');
+  await mute.click(); await page.waitForTimeout(300); await snap('a1_afterMute');
+  await page.keyboard.press('Control+z'); await page.waitForTimeout(300); await snap('a2_afterUndo');
+  await fader.focus(); await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown'); await page.waitForTimeout(300); await snap('b1_afterArrowDownx2');
+  await page.keyboard.press('Control+z'); await page.waitForTimeout(300); await snap('b2_afterUndo');
+  await fader.dblclick(); await page.waitForTimeout(300); await snap('c_afterDblclick');
+  const bb = await fader.boundingBox();
+  const sx = bb.x + bb.width * 0.7, sy = bb.y + bb.height / 2;
+  await page.mouse.move(sx, sy); await page.mouse.down();
+  for (let i = 1; i <= 6; i++) await page.mouse.move(sx - 5 * i, sy, { steps: 2 });
+  await page.mouse.up(); await page.waitForTimeout(400); await snap('d_afterDrag30');
+  await page.screenshot({ path: outPath.replace(/\.json$/, `-${w}.png`) });
+  await ctx.close();
+}
+await browser.close(); writeFileSync(outPath, JSON.stringify(out, null, 1)); console.log(JSON.stringify(out));

@@ -1,0 +1,56 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const [base, outPath] = process.argv.slice(2);
+const out = { base };
+const browser = await chromium.launch();
+const laneOf = (page) => page.evaluate(() => { const c = document.querySelector('[data-clip-id]'); return c ? c.closest('[data-track-id]')?.getAttribute('data-track-id') : null; });
+const pos = (page) => page.getByTestId('arrangement-position').textContent().then((s) => s.trim());
+const st = (page) => page.getByTestId('arrangement-status').textContent().then((s) => s.trim()).catch(() => null);
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  const r = {}; out[`${w}x${h}`] = r;
+  await page.goto(`${base}/studio-lab`, { waitUntil: 'networkidle' });
+  await page.getByText('Demo collection ready', { exact: false }).first().waitFor({ timeout: 120000 });
+  await page.waitForTimeout(1000);
+  await page.getByTestId('arrangement-library-list').getByRole('option', { name: /Bass/ }).first().click();
+  await page.waitForTimeout(250); await page.keyboard.press('Enter'); await page.waitForTimeout(900);
+  r.clipCount = await page.locator('[data-clip-id]').count(); r.startLane = await laneOf(page); r.statusAfterAdd = await st(page);
+  const play = page.getByRole('button', { name: /^Play/ }).first();
+  await play.click(); await page.waitForTimeout(1500);
+  r.playingDuring = await play.getAttribute('data-playing'); r.positionAfter1500 = await pos(page);
+  await page.getByRole('button', { name: /^Stop/ }).first().click(); await page.waitForTimeout(400);
+  r.playingAfter = await play.getAttribute('data-playing');
+  const lanes = await page.evaluate(() => [...document.querySelectorAll('[data-track-id]')].map((l) => { const b = l.getBoundingClientRect(); return { id: l.getAttribute('data-track-id'), y: b.y, h: b.height, x: b.x, hasClip: !!l.querySelector('[data-clip-id]') }; }));
+  r.lanes = lanes.map((l) => l.id);
+  const idx = lanes.findIndex((l) => l.id === r.startLane);
+  const tIdx = idx + 1 < lanes.length ? idx + 1 : idx - 1;
+  r.targetLane = lanes[tIdx].id;
+  const bar = page.locator('[data-clip-id] > div').first();
+  const bb = await bar.boundingBox();
+  const sx = bb.x + 40, sy = bb.y + bb.height / 2;
+  const dy = lanes[tIdx].y + Math.min(lanes[tIdx].h, 60) / 2 - (lanes[idx].y + (bb.y - lanes[idx].y) + bb.height / 2);
+  await page.mouse.move(sx, sy); await page.mouse.down();
+  for (let i = 1; i <= 12; i++) await page.mouse.move(sx, sy + (dy * i) / 12, { steps: 2 });
+  await page.waitForTimeout(150); await page.mouse.up(); await page.waitForTimeout(500);
+  r.laneAfterDrag = await laneOf(page);
+  const undoBtn = page.locator('button[title^="Undo"]').first();
+  r.undoTitle = await undoBtn.getAttribute('title'); r.statusAfterMove = await page.getByTestId('arrangement-status').textContent().catch(()=>null);
+  await page.screenshot({ path: `c-round-373/screens/smoke-afterdrag-${w}x${h}.png` });
+  await page.keyboard.press('Control+z'); await page.waitForTimeout(500);
+  r.laneAfterUndo = await laneOf(page); r.undoTitleAfterUndo = await page.locator('button[title^="Undo"]').first().getAttribute('title').catch(() => null); r.statusAfterUndo = await st(page);
+  // hold ArrowRight on the selected clip
+  await page.locator('[data-clip-id]').first().click({ position: { x: 20, y: 6 } }).catch(() => {});
+  await page.waitForTimeout(200);
+  const before = await page.locator('[data-clip-id]').first().boundingBox();
+  await page.keyboard.down('ArrowRight');
+  for (let i = 0; i < 8; i++) { await page.keyboard.down('ArrowRight'); await page.waitForTimeout(40); }
+  await page.keyboard.up('ArrowRight'); await page.waitForTimeout(400);
+  const after = await page.locator('[data-clip-id]').first().boundingBox();
+  r.holdArrowRight = { dx: after.x - before.x, status: await st(page) };
+  await page.screenshot({ path: outPath.replace(/\.json$/, `-${w}.png`) });
+  await ctx.close();
+}
+await browser.close(); writeFileSync(outPath, JSON.stringify(out, null, 1)); console.log(JSON.stringify(out));

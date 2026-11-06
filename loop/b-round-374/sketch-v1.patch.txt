@@ -1,0 +1,565 @@
+diff --git a/app/components/arrangement/ArrangementLibrary.tsx b/app/components/arrangement/ArrangementLibrary.tsx
+index 019e6c9..ff1be35 100644
+--- a/app/components/arrangement/ArrangementLibrary.tsx
++++ b/app/components/arrangement/ArrangementLibrary.tsx
+@@ -15,6 +15,7 @@ import {
+   useSyncExternalStore,
+ } from 'react';
+ import {
++  type ArrangementContextValue,
+   formatArrangementTime,
+   type SourceLoadState,
+   useArrangement,
+@@ -39,7 +40,11 @@ import { studioLibraryPanelStrings, studioSourceLoadStrings } from '~/lib/arrang
+ import { cn } from '~/lib/utils';
+ import type { WorkspaceSource } from '~/types/arrangement';
+ import { ArrangementLibraryMenu } from './ArrangementLibraryMenu';
+-import { ArrangementLibraryPreview } from './ArrangementLibraryPreview';
++import {
++  ArrangementLibraryPreviewView,
++  type LibraryTrackLabel,
++  sameLibraryLeafProps,
++} from './ArrangementLibraryPreview';
+ import { STUDIO_FOCUS_RING_INSET_CLASS } from './studio-focus';
+ import { STUDIO_SCROLLBAR_CLASS } from './studio-scrollbar';
+ 
+@@ -169,25 +174,100 @@ interface ArrangementLibraryProps {
+   bottomInsetPx?: number;
+ }
+ 
+-export function ArrangementLibrary({
++export type ArrangementLibraryActions = Pick<
++  ArrangementContextValue,
++  | 'selectSource'
++  | 'addSourceToActiveTrack'
++  | 'startLibraryPreview'
++  | 'stopLibraryPreview'
++  | 'getLibraryPreviewOffset'
++  | 'beginLibraryDrag'
++  | 'endLibraryDrag'
++>;
++
++interface ArrangementLibraryViewProps extends ArrangementLibraryProps {
++  collection: ArrangementContextValue['collection'];
++  sourceStates: ArrangementContextValue['sourceStates'];
++  sourcePeaks: ArrangementContextValue['sourcePeaks'];
++  selectedSourceId: string | null;
++  libraryPreviewSourceId: string | null;
++  tracks: readonly LibraryTrackLabel[];
++  actions: ArrangementLibraryActions;
++}
++
++export function useArrangementLibraryActions(
++  workspace: ArrangementLibraryActions,
++): ArrangementLibraryActions {
++  const {
++    selectSource,
++    addSourceToActiveTrack,
++    startLibraryPreview,
++    stopLibraryPreview,
++    getLibraryPreviewOffset,
++    beginLibraryDrag,
++    endLibraryDrag,
++  } = workspace;
++  return useMemo(
++    () => ({
++      selectSource,
++      addSourceToActiveTrack,
++      startLibraryPreview,
++      stopLibraryPreview,
++      getLibraryPreviewOffset,
++      beginLibraryDrag,
++      endLibraryDrag,
++    }),
++    [
++      selectSource,
++      addSourceToActiveTrack,
++      startLibraryPreview,
++      stopLibraryPreview,
++      getLibraryPreviewOffset,
++      beginLibraryDrag,
++      endLibraryDrag,
++    ],
++  );
++}
++
++export function ArrangementLibrary(props: ArrangementLibraryProps) {
++  const workspace = useArrangement();
++  const actions = useArrangementLibraryActions(workspace);
++  return (
++    <ArrangementLibraryView
++      {...props}
++      collection={workspace.collection}
++      sourceStates={workspace.sourceStates}
++      sourcePeaks={workspace.sourcePeaks}
++      selectedSourceId={workspace.selectedSourceId}
++      libraryPreviewSourceId={workspace.libraryPreviewSourceId}
++      tracks={workspace.arrangement.tracks}
++      actions={actions}
++    />
++  );
++}
++
++function ArrangementLibraryViewInner({
+   isCollapsed,
+   onCollapsedChange,
+   asideRef,
+   bodyRef,
+   bottomInsetPx = 0,
+-}: ArrangementLibraryProps) {
++  collection,
++  sourceStates,
++  sourcePeaks,
++  selectedSourceId,
++  libraryPreviewSourceId,
++  tracks,
++  actions,
++}: ArrangementLibraryViewProps) {
+   const {
+-    collection,
+-    sourceStates,
+-    selectedSourceId,
+-    libraryPreviewSourceId,
+     selectSource,
+     addSourceToActiveTrack,
+     startLibraryPreview,
+     stopLibraryPreview,
+     beginLibraryDrag,
+     endLibraryDrag,
+-  } = useArrangement();
++  } = actions;
+   const tree = useMemo(() => buildLibraryTree(collection.sources), [collection.sources]);
+   const [nodeId, setNodeId] = useState(LIBRARY_ALL_NODE_ID);
+   const [collapsedCollections, setCollapsedCollections] = useState<ReadonlySet<string>>(
+@@ -794,7 +874,15 @@ export function ArrangementLibrary({
+               </div>
+             </div>
+           </div>
+-          <ArrangementLibraryPreview sourceId={visibleSelectedId} />
++          <ArrangementLibraryPreviewView
++            sourceId={visibleSelectedId}
++            collection={collection}
++            sourceStates={sourceStates}
++            sourcePeaks={sourcePeaks}
++            libraryPreviewSourceId={libraryPreviewSourceId}
++            tracks={tracks}
++            actions={actions}
++          />
+         </div>
+       )}
+       {isCollapsed ? null : (
+@@ -826,3 +914,5 @@ export function ArrangementLibrary({
+     </aside>
+   );
+ }
++
++export const ArrangementLibraryView = memo(ArrangementLibraryViewInner, sameLibraryLeafProps);
+diff --git a/app/components/arrangement/ArrangementLibraryPreview.tsx b/app/components/arrangement/ArrangementLibraryPreview.tsx
+index 3f2fece..1f62862 100644
+--- a/app/components/arrangement/ArrangementLibraryPreview.tsx
++++ b/app/components/arrangement/ArrangementLibraryPreview.tsx
+@@ -10,6 +10,7 @@ import {
+   useState,
+ } from 'react';
+ import {
++  type ArrangementContextValue,
+   formatArrangementTime,
+   useArrangement,
+   useArrangementActiveTrackId,
+@@ -18,6 +19,7 @@ import {
+ import { normalizePeakColumns } from '~/lib/arrangement/peaks';
+ import { studioLibraryPanelStrings } from '~/lib/arrangement/strings';
+ import { cn } from '~/lib/utils';
++import type { ArrangementTrackKind } from '~/types/arrangement';
+ import { guardSoftDisabledClick, softDisabledButtonProps } from './studio-soft-disabled';
+ 
+ const PREVIEW_WAVE_COLUMNS = 96;
+@@ -29,6 +31,68 @@ interface ArrangementLibraryPreviewProps {
+   sourceId: string | null;
+ }
+ 
++export interface LibraryTrackLabel {
++  readonly id: string;
++  readonly kind: ArrangementTrackKind;
++  readonly name: string;
++}
++
++export type ArrangementLibraryPreviewActions = Pick<
++  ArrangementContextValue,
++  | 'startLibraryPreview'
++  | 'stopLibraryPreview'
++  | 'getLibraryPreviewOffset'
++  | 'addSourceToActiveTrack'
++>;
++
++interface ArrangementLibraryPreviewViewProps {
++  sourceId: string | null;
++  collection: ArrangementContextValue['collection'];
++  sourceStates: ArrangementContextValue['sourceStates'];
++  sourcePeaks: ArrangementContextValue['sourcePeaks'];
++  libraryPreviewSourceId: string | null;
++  tracks: readonly LibraryTrackLabel[];
++  actions: ArrangementLibraryPreviewActions;
++}
++
++export function sameLibraryTrackLabels(
++  previous: readonly LibraryTrackLabel[],
++  next: readonly LibraryTrackLabel[],
++): boolean {
++  if (previous === next) {
++    return true;
++  }
++  if (previous.length !== next.length) {
++    return false;
++  }
++  return previous.every((track, index) => {
++    const other = next.at(index);
++    return (
++      other !== undefined &&
++      track.id === other.id &&
++      track.kind === other.kind &&
++      track.name === other.name
++    );
++  });
++}
++
++export function sameLibraryLeafProps<Props extends { tracks: readonly LibraryTrackLabel[] }>(
++  previous: Props,
++  next: Props,
++): boolean {
++  for (const key in previous) {
++    if (key !== 'tracks' && !Object.is(previous[key], next[key])) {
++      return false;
++    }
++  }
++  for (const key in next) {
++    if (!(key in previous)) {
++      return false;
++    }
++  }
++  return sameLibraryTrackLabels(previous.tracks, next.tracks);
++}
++
+ interface PreviewCursor {
+   sourceId: string | null;
+   seconds: number;
+@@ -101,6 +165,43 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+     getLibraryPreviewOffset,
+     addSourceToActiveTrack,
+   } = useArrangement();
++  const actions = useMemo(
++    (): ArrangementLibraryPreviewActions => ({
++      startLibraryPreview,
++      stopLibraryPreview,
++      getLibraryPreviewOffset,
++      addSourceToActiveTrack,
++    }),
++    [startLibraryPreview, stopLibraryPreview, getLibraryPreviewOffset, addSourceToActiveTrack],
++  );
++  return (
++    <ArrangementLibraryPreviewView
++      sourceId={sourceId}
++      collection={collection}
++      sourceStates={sourceStates}
++      sourcePeaks={sourcePeaks}
++      libraryPreviewSourceId={libraryPreviewSourceId}
++      tracks={arrangement.tracks}
++      actions={actions}
++    />
++  );
++}
++
++function ArrangementLibraryPreviewViewInner({
++  sourceId,
++  collection,
++  sourceStates,
++  sourcePeaks,
++  libraryPreviewSourceId,
++  tracks,
++  actions,
++}: ArrangementLibraryPreviewViewProps) {
++  const {
++    startLibraryPreview,
++    stopLibraryPreview,
++    getLibraryPreviewOffset,
++    addSourceToActiveTrack,
++  } = actions;
+   const previewCursorRef = useRef<PreviewCursor>({ sourceId: null, seconds: 0 });
+   const [previewCursor, setPreviewCursor] = useState<PreviewCursor>(previewCursorRef.current);
+   const source = collection.sources.find((entry) => entry.id === sourceId) ?? null;
+@@ -109,7 +210,7 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+   const duration = isReady ? state.duration : 0;
+   const isPreviewing = source !== null && libraryPreviewSourceId === source.id;
+   const activeTrackId = useArrangementActiveTrackId();
+-  const activeTrack = arrangement.tracks.find((track) => track.id === activeTrackId);
++  const activeTrack = tracks.find((track) => track.id === activeTrackId);
+   const canAdd = isReady && activeTrack?.kind === 'audio';
+   const previewUnavailableTitle = !source
+     ? studioLibraryPanelStrings.previewNeedsSoundTitle
+@@ -364,3 +465,8 @@ export function ArrangementLibraryPreview({ sourceId }: ArrangementLibraryPrevie
+     </section>
+   );
+ }
++
++export const ArrangementLibraryPreviewView = memo(
++  ArrangementLibraryPreviewViewInner,
++  sameLibraryLeafProps,
++);
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 6cb7a6a..0c01416 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -198,7 +198,7 @@ import {
+   type TrackHeightChangeSource,
+   type TrackRowSelectModifiers,
+ } from './ArrangementLane';
+-import { ArrangementLibrary } from './ArrangementLibrary';
++import { ArrangementLibraryView, useArrangementLibraryActions } from './ArrangementLibrary';
+ import { ArrangementLoopBrace } from './ArrangementLoopBrace';
+ import { ArrangementMarkerRow, type ArrangementMarkerRowHandle } from './ArrangementMarkerRow';
+ import { ArrangementMasterView, useArrangementMasterActions } from './ArrangementMaster';
+@@ -1029,6 +1029,7 @@ export function StudioWorkspace() {
+   const [isExportOpen, setIsExportOpen] = useState(false);
+   const closeExportDialog = useCallback(() => setIsExportOpen(false), []);
+   const masterActions = useArrangementMasterActions(workspace);
++  const libraryActions = useArrangementLibraryActions(workspace);
+   const [isShortcutSheetOpen, setIsShortcutSheetOpen] = useState(false);
+   const isOverviewHidden = useSyncExternalStore(
+     subscribeOverviewVisibility,
+@@ -3264,12 +3265,19 @@ export function StudioWorkspace() {
+         navigation={transportNavigation}
+       />
+       <div className="flex min-h-0 flex-1">
+-        <ArrangementLibrary
++        <ArrangementLibraryView
+           isCollapsed={isLibraryCollapsed}
+           onCollapsedChange={changeLibraryCollapsed}
+           asideRef={libraryAsideRef}
+           bodyRef={libraryBodyRef}
+           bottomInsetPx={libraryBottomInsetPx}
++          collection={collection}
++          sourceStates={workspace.sourceStates}
++          sourcePeaks={sourcePeaks}
++          selectedSourceId={workspace.selectedSourceId}
++          libraryPreviewSourceId={workspace.libraryPreviewSourceId}
++          tracks={arrangement.tracks}
++          actions={libraryActions}
+         />
+         <div
+           className="flex min-h-0 min-w-0 flex-1 flex-col"
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index aa84971..08a797c 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -432,7 +432,7 @@ describe('PERF-DRAG-PREVIEW stage a — trim and same-lane move previews', () =>
+     expect(rendersOf('ArrangementProvider')).toBe(0);
+     expect(rendersOf('StudioWorkspace')).toBe(0);
+     expect(rendersOf('ArrangementTransport')).toBe(0);
+-    expect(rendersOf('ArrangementLibrary')).toBe(0);
++    expect(rendersOf('ArrangementLibraryViewInner')).toBe(0);
+     expect(rendersOf('ArrangementLane')).toBe(2);
+     expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
+     expect(rendersOf('ArrangementClipViewInner')).toBe(2);
+@@ -606,7 +606,7 @@ describe('PERF-DRAG-PREVIEW stage a — trim and same-lane move previews', () =>
+     expect(rendersOf('ArrangementProvider')).toBe(0);
+     expect(rendersOf('StudioWorkspace')).toBe(0);
+     expect(rendersOf('ArrangementTransport')).toBe(0);
+-    expect(rendersOf('ArrangementLibrary')).toBe(0);
++    expect(rendersOf('ArrangementLibraryViewInner')).toBe(0);
+     expect(rendersOf('ArrangementLane')).toBe(2);
+     expect(textOf(view, 'arrangement-lane-move-hint')).toBe(
+       'Shift — lock the time; only the track changes',
+@@ -660,7 +660,7 @@ describe('PERF-DRAG-PREVIEW stage a — trim and same-lane move previews', () =>
+     expect(rendersOf('ArrangementProvider')).toBe(0);
+     expect(rendersOf('StudioWorkspace')).toBe(0);
+     expect(rendersOf('ArrangementTransport')).toBe(0);
+-    expect(rendersOf('ArrangementLibrary')).toBe(0);
++    expect(rendersOf('ArrangementLibraryViewInner')).toBe(0);
+     expect(rendersOf('ArrangementClipViewInner')).toBe(2);
+     expect(rendersOf('ArrangementStatusTextInner')).toBe(2);
+     expect(audio.root.dataset.fadeIn).toBe('3.000');
+@@ -1628,7 +1628,7 @@ describe('PERF-DRAG-PREVIEW stage c4-ii — a group move previews through the st
+     expect(rendersOf('ArrangementProvider')).toBe(0);
+     expect(rendersOf('StudioWorkspace')).toBe(0);
+     expect(rendersOf('ArrangementTransport')).toBe(0);
+-    expect(rendersOf('ArrangementLibrary')).toBe(0);
++    expect(rendersOf('ArrangementLibraryViewInner')).toBe(0);
+     expect(first.root.dataset.clipStart).toBe('5.000');
+     expect(second.root.dataset.clipStart).toBe('4.000');
+     expect(previewOf(api)).not.toBeNull();
+diff --git a/app/lib/arrangement/__tests__/library-preview.test.tsx b/app/lib/arrangement/__tests__/library-preview.test.tsx
+index 6c76218..e2caddc 100644
+--- a/app/lib/arrangement/__tests__/library-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview.test.tsx
+@@ -1,6 +1,11 @@
+ import { act, fireEvent, render } from '@testing-library/react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+-import { ArrangementLibraryPreview } from '~/components/arrangement/ArrangementLibraryPreview';
++import {
++  ArrangementLibraryPreview,
++  type LibraryTrackLabel,
++  sameLibraryLeafProps,
++  sameLibraryTrackLabels,
++} from '~/components/arrangement/ArrangementLibraryPreview';
+ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+@@ -279,7 +284,9 @@ describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R1
+       cursorTexts.push(wave.getAttribute('aria-valuetext') ?? '');
+     }
+     expect(new Set(cursorTexts).size).toBe(12);
+-    expect(renderLog.counts.get('ArrangementLibraryPreview') ?? 0).toBeGreaterThanOrEqual(10);
++    expect(renderLog.counts.get('ArrangementLibraryPreviewViewInner') ?? 0).toBeGreaterThanOrEqual(
++      10,
++    );
+     expect(renderLog.counts.get('LibraryInsertMarkerText') ?? 0).toBe(0);
+     expect(view.getByTestId('arrangement-library-insert-marker')).toBe(insertMarkerText);
+     expect(insertMarkerText.textContent).toBe('00:00.000');
+@@ -454,3 +461,33 @@ describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R1
+     expect(liveApi(api).arrangement.clips.length).toBe(clipsBefore + 1);
+   });
+ });
++
++describe('Library leaf props equality (PERF-11c-iii-b)', () => {
++  const video: LibraryTrackLabel = { id: 'video', kind: 'video', name: 'Video' };
++  const music: LibraryTrackLabel = { id: 'music', kind: 'audio', name: 'Music' };
++  const tracks: readonly LibraryTrackLabel[] = [video, music];
++
++  it('LP-EQ1 track labels compare by id, kind and name, not by identity or other fields', () => {
++    const muted = tracks.map((track) => ({ ...track, mute: true }));
++    expect(sameLibraryTrackLabels(tracks, muted)).toBe(true);
++    expect(sameLibraryTrackLabels(tracks, [video, { ...music, name: 'Score' }])).toBe(false);
++    expect(sameLibraryTrackLabels(tracks, [music, video])).toBe(false);
++    expect(sameLibraryTrackLabels(tracks, [video])).toBe(false);
++  });
++
++  it('LP-EQ2 leaf props are equal only when every other prop is the same value', () => {
++    const actions = { run: () => undefined };
++    const base = { sourceId: 'song', tracks, actions };
++    expect(
++      sameLibraryLeafProps(base, { ...base, tracks: tracks.map((track) => ({ ...track })) }),
++    ).toBe(true);
++    expect(sameLibraryLeafProps(base, { ...base, sourceId: 'hit' })).toBe(false);
++    expect(sameLibraryLeafProps(base, { ...base, actions: { run: () => undefined } })).toBe(false);
++    expect(
++      sameLibraryLeafProps<{ tracks: readonly LibraryTrackLabel[]; sourceId?: string }>(
++        { tracks },
++        { tracks, sourceId: 'song' },
++      ),
++    ).toBe(false);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 108ccc5..88d530f 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -11,6 +11,7 @@ import {
+   useArrangementInsertMarkerStore,
+   useArrangementPositionStore,
+ } from '~/contexts/ArrangementContext';
++import { studioLibraryPanelStrings } from '~/lib/arrangement/strings';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+ import type { ArrangementPositionStore } from '../position-store';
+@@ -251,7 +252,6 @@ function countsOf(names: readonly string[]): Record<string, number> {
+ const CONTEXT_CONSUMERS = [
+   'ArrangementTransport',
+   'ArrangementRuler',
+-  'ArrangementLibrary',
+   'ArrangementLane',
+   'ArrangementDetailPanel',
+ ] as const;
+@@ -341,7 +341,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+       expect(api.current?.isPlaying).toBe(true);
+       expect(renderLog.counts.get('ArrangementTransportPlayStopInner') ?? 0).toBeGreaterThan(0);
+       expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBe(0);
+-      for (const parent of ['ArrangementRuler', 'ArrangementLibrary', 'ArrangementLane']) {
++      for (const parent of ['ArrangementRuler', 'ArrangementLibraryViewInner', 'ArrangementLane']) {
+         expect(renderLog.counts.get(parent) ?? 0).toBe(0);
+       }
+       expect(countsOf(WATCHED_LISTS)).toEqual({
+@@ -351,9 +351,10 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+         ArrangementRulerTicksInner: 0,
+       });
+       act(() => api.current?.resetExportState());
+-      for (const parent of ['ArrangementRuler', 'ArrangementLibrary', 'ArrangementLane']) {
++      for (const parent of ['ArrangementRuler', 'ArrangementLane']) {
+         expect(renderLog.counts.get(parent) ?? 0).toBeGreaterThan(0);
+       }
++      expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(0);
+       expect(countsOf(WATCHED_LISTS)).toEqual({
+         ArrangementClipViewInner: 0,
+         ArrangementOverviewInner: 0,
+@@ -686,21 +687,22 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(countsOf(CONTEXT_CONSUMERS)).toEqual({
+       ArrangementTransport: 0,
+       ArrangementRuler: 0,
+-      ArrangementLibrary: 0,
+       ArrangementLane: 0,
+       ArrangementDetailPanel: 0,
+     });
++    expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(0);
+     act(() => api.current?.selectClip('music-1'));
+     expect(api.current).toBe(valueAtPlay);
+     expect(raw.current).toBe(rawAtPlay);
+     expect(renderLog.counts.get('ArrangementRuler') ?? 0).toBe(0);
+-    expect(renderLog.counts.get('ArrangementLibrary') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(0);
+     act(() => api.current?.resetExportState());
+     expect(api.current).not.toBe(valueAtPlay);
+     expect(raw.current).not.toBe(rawAtPlay);
+     for (const name of CONTEXT_CONSUMERS) {
+       expect(renderLog.counts.get(name) ?? 0).toBeGreaterThan(0);
+     }
++    expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(0);
+     expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+     fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+     expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+@@ -742,6 +744,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     act(() => api.current?.setPxPerSecond((api.current?.pxPerSecond ?? 20) * 2));
+     expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
+     expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementMaster') ?? 0).toBe(0);
+     renderLog.counts.clear();
+     act(() => api.current?.toggleMasterMute());
+     expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBe(1);
+@@ -767,6 +770,39 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(renderLog.counts.get('ArrangementExportDialogContent') ?? 0).toBeGreaterThan(0);
+   });
+ 
++  it('RB-LEAF3 a lane mute, a zoom step and an Undo render neither the Library nor its preview; an active-lane change renders only the preview (PERF-11c-iii)', async () => {
++    const { api, view } = await mountWorkspace();
++    act(() => api.current?.selectSource('song'));
++    act(() => api.current?.setActiveTrack('music'));
++    const preview = view.getByTestId('arrangement-library-preview');
++    const add = within(preview).getByRole('button', { name: studioLibraryPanelStrings.add });
++    expect(add.getAttribute('aria-disabled')).toBeNull();
++    renderLog.counts.clear();
++    act(() => api.current?.toggleTrackMute('music'));
++    act(() => api.current?.setPxPerSecond((api.current?.pxPerSecond ?? 20) * 2));
++    act(() => api.current?.undo());
++    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementLibraryPreviewViewInner') ?? 0).toBe(0);
++    renderLog.counts.clear();
++    act(() => api.current?.setActiveTrack('video'));
++    expect(renderLog.counts.get('ArrangementLibraryPreviewViewInner') ?? 0).toBe(1);
++    expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(0);
++    expect(add.getAttribute('aria-disabled')).toBe('true');
++    expect(add.getAttribute('title')).toBe(studioLibraryPanelStrings.addNeedsAudioTrackTitle);
++    act(() => api.current?.setActiveTrack('music'));
++    expect(add.getAttribute('aria-disabled')).toBeNull();
++    renderLog.counts.clear();
++    act(() => api.current?.selectSource('hit'));
++    expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(1);
++    expect(within(preview).getByText('Hit')).toBeTruthy();
++    renderLog.counts.clear();
++    fireEvent.change(view.getByTestId('arrangement-library-search'), { target: { value: 'hi' } });
++    expect(renderLog.counts.get('ArrangementLibraryViewInner') ?? 0).toBe(1);
++    expect(renderLog.counts.get('ArrangementLibraryPreviewViewInner') ?? 0).toBe(0);
++    expect(within(preview).getByText('Hit')).toBeTruthy();
++  });
++
+   it('RB-MEMO3 a workspace commit re-renders the workspace and not the range readout; a status write renders only the status text (C-R320-01, SIG-R360)', async () => {
+     const { api, view } = await mountWorkspace();
+     act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));

@@ -1,0 +1,270 @@
+import { computePeaks, PEAK_BUCKETS_PER_SECOND } from './peaks';
+import type { PeaksWorkerRequest } from './peaks.worker-protocol';
+
+export const PEAKS_CHUNK_SECONDS = 2;
+export const PEAKS_CHUNKS_IN_FLIGHT = 4;
+export const PEAKS_WORKER_STALL_TIMEOUT_MS = 3_000;
+export const PEAKS_WORKER_COLD_START_TIMEOUT_MS = 10_000;
+
+export type SourcePeaksCallback = (peaks: Float32Array) => void;
+
+interface PeaksJob {
+  jobId: number;
+  buffer: AudioBuffer;
+  signal: AbortSignal;
+  onPeaks: SourcePeaksCallback;
+  next: number;
+  inFlight: number;
+}
+
+function computePeaksOnMainThread(buffer: AudioBuffer): Float32Array {
+  const channels = Array.from({ length: buffer.numberOfChannels }, (_, index) =>
+    buffer.getChannelData(index),
+  );
+  return computePeaks(channels, buffer.sampleRate, PEAK_BUCKETS_PER_SECOND);
+}
+
+function isChannelList(value: unknown): value is Float32Array<ArrayBuffer>[] {
+  return (
+    Array.isArray(value) &&
+    value.every((item) => item instanceof Float32Array && item.buffer instanceof ArrayBuffer)
+  );
+}
+
+type PeaksWorkerReply =
+  | { type: 'ack'; jobId: number; channels: Float32Array<ArrayBuffer>[] }
+  | { type: 'done'; jobId: number; peaks: Float32Array };
+
+export function readPeaksWorkerReply(data: unknown): PeaksWorkerReply | null {
+  if (typeof data !== 'object' || data === null || !('type' in data) || !('jobId' in data)) {
+    return null;
+  }
+  const { type, jobId } = data;
+  if (typeof jobId !== 'number') {
+    return null;
+  }
+  if (type === 'ack' && 'channels' in data && isChannelList(data.channels)) {
+    return { type, jobId, channels: data.channels };
+  }
+  if (type === 'done' && 'peaks' in data && data.peaks instanceof Float32Array) {
+    return { type, jobId, peaks: data.peaks };
+  }
+  return null;
+}
+
+export interface SourcePeaksComputer {
+  request: (buffer: AudioBuffer, signal: AbortSignal, onPeaks: SourcePeaksCallback) => void;
+  dispose: () => void;
+}
+
+export function createSourcePeaksComputer(): SourcePeaksComputer {
+  let worker: Worker | null = null;
+  let workerFailed = false;
+  let workerReplied = false;
+  let nextJobId = 1;
+  let active: PeaksJob | null = null;
+  const queue: PeaksJob[] = [];
+  const pool: Float32Array<ArrayBuffer>[][] = [];
+  let stallTimer = 0;
+
+  const deliver = (job: PeaksJob, peaks: Float32Array) => {
+    try {
+      job.onPeaks(peaks);
+    } catch (error) {
+      window.setTimeout(() => {
+        throw error;
+      }, 0);
+    }
+  };
+
+  const deliverOnMainThread = (job: PeaksJob) => {
+    if (!job.signal.aborted) {
+      deliver(job, computePeaksOnMainThread(job.buffer));
+    }
+  };
+
+  const post = (message: PeaksWorkerRequest, transfer: ArrayBuffer[] = []): boolean => {
+    if (!worker) {
+      return false;
+    }
+    try {
+      worker.postMessage(message, { transfer });
+      return true;
+    } catch {
+      failWorker();
+      return false;
+    }
+  };
+
+  const failWorker = () => {
+    window.clearTimeout(stallTimer);
+    workerFailed = true;
+    if (worker) {
+      worker.onmessage = null;
+      worker.onerror = null;
+      worker.onmessageerror = null;
+      worker.terminate();
+      worker = null;
+    }
+    pool.length = 0;
+    const pending = active ? [active, ...queue] : [...queue];
+    active = null;
+    queue.length = 0;
+    for (const job of pending) {
+      deliverOnMainThread(job);
+    }
+  };
+
+  const armStall = () => {
+    window.clearTimeout(stallTimer);
+    stallTimer = window.setTimeout(
+      failWorker,
+      workerReplied ? PEAKS_WORKER_STALL_TIMEOUT_MS : PEAKS_WORKER_COLD_START_TIMEOUT_MS,
+    );
+  };
+
+  const chunkLength = (buffer: AudioBuffer) =>
+    Math.max(1, Math.round(buffer.sampleRate * PEAKS_CHUNK_SECONDS));
+
+  const takeChannels = (buffer: AudioBuffer): Float32Array<ArrayBuffer>[] => {
+    const size = chunkLength(buffer);
+    const reused = pool.pop();
+    if (
+      reused &&
+      reused.length === buffer.numberOfChannels &&
+      reused.every((channel) => channel.length === size)
+    ) {
+      return reused;
+    }
+    return Array.from({ length: buffer.numberOfChannels }, () => new Float32Array(size));
+  };
+
+  const pump = () => {
+    const job = active;
+    if (!job) {
+      return;
+    }
+    if (job.signal.aborted) {
+      post({ type: 'cancel', jobId: job.jobId });
+      active = null;
+      startNext();
+      return;
+    }
+    const size = chunkLength(job.buffer);
+    while (job.inFlight < PEAKS_CHUNKS_IN_FLIGHT && job.next < job.buffer.length) {
+      const start = job.next;
+      const length = Math.min(size, job.buffer.length - start);
+      const channels = takeChannels(job.buffer);
+      channels.forEach((channel, index) => {
+        job.buffer.copyFromChannel(channel, index, start);
+      });
+      job.next = start + length;
+      job.inFlight += 1;
+      if (
+        !post(
+          { type: 'chunk', jobId: job.jobId, start, length, channels },
+          channels.map((channel) => channel.buffer),
+        )
+      ) {
+        return;
+      }
+    }
+    if (job.next >= job.buffer.length && job.inFlight === 0) {
+      post({ type: 'end', jobId: job.jobId });
+    }
+  };
+
+  const startNext = () => {
+    const job = queue.shift();
+    if (!job) {
+      window.clearTimeout(stallTimer);
+      return;
+    }
+    active = job;
+    pool.length = 0;
+    if (
+      !post({
+        type: 'begin',
+        jobId: job.jobId,
+        length: job.buffer.length,
+        sampleRate: job.buffer.sampleRate,
+        bucketsPerSecond: PEAK_BUCKETS_PER_SECOND,
+      })
+    ) {
+      return;
+    }
+    armStall();
+    pump();
+  };
+
+  const handleReply = (event: MessageEvent<unknown>) => {
+    const reply = readPeaksWorkerReply(event.data);
+    if (reply) {
+      workerReplied = true;
+    }
+    const job = active;
+    if (!reply || !job || reply.jobId !== job.jobId) {
+      return;
+    }
+    armStall();
+    if (reply.type === 'ack') {
+      job.inFlight -= 1;
+      pool.push(reply.channels);
+      pump();
+      return;
+    }
+    active = null;
+    if (!job.signal.aborted) {
+      deliver(job, reply.peaks);
+    }
+    if (!active) {
+      startNext();
+    }
+  };
+
+  const ensureWorker = (): boolean => {
+    if (worker) {
+      return true;
+    }
+    if (workerFailed || typeof Worker === 'undefined') {
+      return false;
+    }
+    try {
+      worker = new Worker(new URL('./peaks.worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      workerFailed = true;
+      return false;
+    }
+    worker.onmessage = handleReply;
+    worker.onerror = failWorker;
+    worker.onmessageerror = failWorker;
+    return true;
+  };
+
+  return {
+    request(buffer, signal, onPeaks) {
+      const job: PeaksJob = { jobId: nextJobId++, buffer, signal, onPeaks, next: 0, inFlight: 0 };
+      if (buffer.length === 0 || !ensureWorker()) {
+        deliverOnMainThread(job);
+        return;
+      }
+      queue.push(job);
+      if (!active) {
+        startNext();
+      }
+    },
+    dispose() {
+      window.clearTimeout(stallTimer);
+      queue.length = 0;
+      active = null;
+      pool.length = 0;
+      if (worker) {
+        worker.onmessage = null;
+        worker.onerror = null;
+        worker.onmessageerror = null;
+        worker.terminate();
+        worker = null;
+      }
+    },
+  };
+}

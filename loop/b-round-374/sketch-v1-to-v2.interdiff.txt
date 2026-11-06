@@ -1,0 +1,41 @@
+391c391
+< index 6c76218..e2caddc 100644
+---
+> index 6c76218..0acb31f 100644
+418c418
+< @@ -454,3 +461,33 @@ describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R1
+---
+> @@ -454,3 +461,35 @@ describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R1
+433a434,435
+> +    expect(sameLibraryTrackLabels(tracks, [video, { ...music, id: 'music-2' }])).toBe(false);
+> +    expect(sameLibraryTrackLabels(tracks, [video, { ...music, kind: 'video' }])).toBe(false);
+453c455
+< index 108ccc5..88d530f 100644
+---
+> index 108ccc5..df27c6c 100644
+492a495,512
+> @@ -653,7 +654,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+>          'StudioWorkspace',
+>          'ArrangementTransport',
+>          'ArrangementRuler',
+> -        'ArrangementLibrary',
+> +        'ArrangementLibraryViewInner',
+>          'ArrangementLane',
+>          'ArrangementDetailPanel',
+>        ]),
+> @@ -661,7 +662,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+>        StudioWorkspace: 0,
+>        ArrangementTransport: 0,
+>        ArrangementRuler: 0,
+> -      ArrangementLibrary: 0,
+> +      ArrangementLibraryViewInner: 0,
+>        ArrangementLane: 0,
+>        ArrangementDetailPanel: 0,
+>      });
+526c546
+< @@ -767,6 +770,39 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+---
+> @@ -767,6 +770,41 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+543a564,565
+> +    expect(renderLog.counts.get('ArrangementLibrary') ?? 0).toBe(0);
+> +    expect(renderLog.counts.get('ArrangementLibraryPreview') ?? 0).toBe(0);
