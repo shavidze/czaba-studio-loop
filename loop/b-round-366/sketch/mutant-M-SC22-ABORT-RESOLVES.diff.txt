@@ -1,0 +1,12 @@
+--- /tmp/b366-src.ts	2026-11-06 09:56:38.740749111 +0000
++++ app/lib/arrangement/stem-cache.client.ts	2026-11-06 09:57:51.321926442 +0000
+@@ -66,8 +66,7 @@
+ export function transactionDone(transaction: CompletableTransaction): Promise<void> {
+   return new Promise((resolve, reject) => {
+     transaction.oncomplete = () => resolve();
+-    transaction.onabort = () =>
+-      reject(transaction.error ?? new DOMException('The transaction was aborted.', 'AbortError'));
++    transaction.onabort = () => resolve();
+   });
+ }
+ 

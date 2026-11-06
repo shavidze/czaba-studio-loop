@@ -1,0 +1,15 @@
+# B round 366 -> 367 checkpoint
+- step 1 done: tasks/round-366.md archived (copy of current-task.md); backups saved here.
+- facts: C 366 PASS browserVerified true; gate 366 published d53d113 (baseline for 367). Date 2026-11-06 < 2026-11-08 so no REGRESSION. RETRO due 368.
+- plan: round 367 = PERF-9b-ii SYS-R365-STEM-CACHE-HARDENING (L3-L6, C-R365-OBS-INTEGRITY, changed-validator row, serialize eviction ruling, doc 236 Completed).
+- [x] advisor 1 consulted (3 grants; transactionDone helper for L4; rows per Low; browser rows baseline+mutant)
+- [x] sketch in /home/runner/b366-scratch: client + SC22-SC27; covering file 29/29; 9 mutants red as designed (b-round-366/sketch/mutant-*.log); sketch.patch.txt sha 18a264e6...; typecheck 0, biome 0
+- [ ] full suite on sketch (precheck-full.raw.log, running), tech-lead review running
+- [x] HEAD copy /home/runner/b366-head built (probe/head-build.log); probe script probe/stem-integrity-probe.mjs written
+- next: HEAD probe both viewports, sketch build + probe, mutant build (size check removed) probe, claims script, backlog v330, feature-status, task, report, b-next
+- [x] tech-lead review on v1: 2 High (onerror null; L5 wait on response path), 3 Medium, 3 Low -> all ruled in sketch-review.md; v2 sketch sha 66ce5455..., 31/31, 13 mutants red (sketch/mutant-summary.txt), full suite v2 250/3684 rc 0 (precheck-full.log)
+- [x] probes: HEAD + sketch both viewports identical recovery (probe-summary.txt); mutant builds nosize (truncate red) and nohitrestore (stale-etag red)
+- [x] claims-367.sh + planning/sketch outputs
+- next: update-backlog.py (v330), feature-status, current-task.md, b-round-366.md, b-next.json, advisor final
+- [x] backlog v330, feature-status, current-task 367, b-round-366.md, b-next.json written; root-request-arch-checkpoint.md. next: advisor final
+- [x] advisor final: INTEGRITY row reworded (INM/body record-only; peak > 0.01 + starts 1). DONE

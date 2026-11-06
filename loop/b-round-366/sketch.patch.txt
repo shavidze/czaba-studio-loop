@@ -1,0 +1,727 @@
+diff --git a/app/lib/arrangement/__tests__/stem-cache.test.ts b/app/lib/arrangement/__tests__/stem-cache.test.ts
+index 83c71c8..e0c46c9 100644
+--- a/app/lib/arrangement/__tests__/stem-cache.test.ts
++++ b/app/lib/arrangement/__tests__/stem-cache.test.ts
+@@ -11,12 +11,14 @@ import {
+   stemCacheKey,
+ } from '../stem-cache';
+ import {
++  type CompletableTransaction,
+   createBrowserStemCacheStore,
+   createCachedSourceFetch,
+   isStemCacheRecord,
+   publicPreviewSourceFetch,
+   type StemCacheEntry,
+   type StemCacheStore,
++  transactionDone,
+ } from '../stem-cache.client';
+ import { studioSourceLoadStrings } from '../strings';
+ 
+@@ -753,3 +755,470 @@ describe('PERF-9a cached source fetch (stem-cache.client.ts)', () => {
+     }
+   });
+ });
++
++function createFakeTransaction(): CompletableTransaction {
++  return { error: null, oncomplete: null, onabort: null };
++}
++
++function requestInit(signal: AbortSignal = new AbortController().signal): RequestInit {
++  return { credentials: 'omit', signal };
++}
++
++type FakeEventHandler = ((event: Event) => void) | null;
++
++interface FakeBrowserStorage {
++  records: Map<string, StemCacheRecord>;
++  files: Map<string, Uint8Array>;
++  holdNextCommit: () => Deferred;
++  failNextPut: (error: DOMException) => void;
++}
++
++function installFakeBrowserStorage(): FakeBrowserStorage {
++  const records = new Map<string, StemCacheRecord>();
++  const files = new Map<string, Uint8Array>();
++  let heldCommit: Deferred | null = null;
++  let putFailure: DOMException | null = null;
++  let created = false;
++
++  class FakeRequest {
++    result: unknown = undefined;
++    error: DOMException | null = null;
++    onsuccess: FakeEventHandler = null;
++    onerror: FakeEventHandler = null;
++    onupgradeneeded: FakeEventHandler = null;
++  }
++
++  class FakeTransaction {
++    error: DOMException | null = null;
++    oncomplete: FakeEventHandler = null;
++    onerror: FakeEventHandler = null;
++    onabort: FakeEventHandler = null;
++    private pending = 0;
++    private finished = false;
++    private readonly staged: Array<() => void> = [];
++    private readonly gate: Promise<void>;
++
++    constructor(mode: string) {
++      this.gate =
++        mode === 'readwrite' && heldCommit !== null ? heldCommit.promise : Promise.resolve();
++      if (mode === 'readwrite') {
++        heldCommit = null;
++      }
++    }
++
++    objectStore() {
++      return {
++        get: (key: string) => this.request(() => records.get(key)),
++        getAll: () => this.request(() => [...records.values()]),
++        put: (value: StemCacheRecord) => {
++          const failure = putFailure;
++          putFailure = null;
++          return this.request(() => {
++            this.staged.push(() => records.set(value.key, value));
++            return value.key;
++          }, failure);
++        },
++        delete: (key: string) =>
++          this.request(() => {
++            this.staged.push(() => records.delete(key));
++            return undefined;
++          }),
++      };
++    }
++
++    private request(read: () => unknown, failure: DOMException | null = null): FakeRequest {
++      const request = new FakeRequest();
++      this.pending += 1;
++      setTimeout(() => {
++        if (this.finished) {
++          return;
++        }
++        if (failure !== null) {
++          request.error = failure;
++          request.onerror?.(new Event('error'));
++          this.onerror?.(new Event('error'));
++          this.error = failure;
++          this.finished = true;
++          this.onabort?.(new Event('abort'));
++          return;
++        }
++        request.result = read();
++        request.onsuccess?.(new Event('success'));
++        this.pending -= 1;
++        if (this.pending === 0) {
++          void this.commit();
++        }
++      }, 0);
++      return request;
++    }
++
++    private async commit(): Promise<void> {
++      await this.gate;
++      await new Promise<void>((done) => setTimeout(done, 0));
++      if (this.finished || this.pending > 0) {
++        return;
++      }
++      this.finished = true;
++      for (const apply of this.staged) {
++        apply();
++      }
++      this.oncomplete?.(new Event('complete'));
++    }
++  }
++
++  const database = {
++    objectStoreNames: { contains: () => created },
++    createObjectStore: () => {
++      created = true;
++    },
++    transaction: (_name: string, mode: string) => new FakeTransaction(mode),
++  };
++
++  class FakeFileHandle {
++    constructor(private readonly name: string) {}
++
++    async getFile() {
++      const bytes = files.get(this.name);
++      if (bytes === undefined) {
++        throw new DOMException('missing', 'NotFoundError');
++      }
++      return { size: bytes.byteLength, arrayBuffer: async () => bytes.slice().buffer };
++    }
++
++    async createWritable() {
++      const name = this.name;
++      let written = new Uint8Array();
++      return {
++        write: async (data: ArrayBuffer) => {
++          written = new Uint8Array(data.slice(0));
++        },
++        close: async () => {
++          files.set(name, written);
++        },
++        abort: async () => undefined,
++      };
++    }
++  }
++
++  const directory = {
++    getFileHandle: async (name: string, options: { create?: boolean } = {}) => {
++      if (!files.has(name)) {
++        if (options.create !== true) {
++          throw new DOMException('missing', 'NotFoundError');
++        }
++        files.set(name, new Uint8Array());
++      }
++      return new FakeFileHandle(name);
++    },
++    removeEntry: async (name: string) => {
++      if (!files.delete(name)) {
++        throw new DOMException('missing', 'NotFoundError');
++      }
++    },
++    keys: async function* () {
++      for (const name of [...files.keys()]) {
++        yield name;
++      }
++    },
++  };
++
++  vi.stubGlobal('FileSystemFileHandle', FakeFileHandle);
++  vi.stubGlobal('navigator', {
++    storage: { getDirectory: async () => ({ getDirectoryHandle: async () => directory }) },
++  });
++  vi.stubGlobal('indexedDB', {
++    open: () => {
++      const request = new FakeRequest();
++      setTimeout(() => {
++        request.result = database;
++        request.onupgradeneeded?.(new Event('upgradeneeded'));
++        request.onsuccess?.(new Event('success'));
++      }, 0);
++      return request;
++    },
++  });
++
++  return {
++    records,
++    files,
++    holdNextCommit: () => {
++      const gate = createDeferred();
++      heldCommit = gate;
++      return gate;
++    },
++    failNextPut: (error) => {
++      putFailure = error;
++    },
++  };
++}
++
++function openBrowserStore(): StemCacheStore {
++  const store = createBrowserStemCacheStore();
++  if (store === null) {
++    throw new Error('the browser stem cache store is unavailable');
++  }
++  return store;
++}
++
++describe('PERF-9b-ii stem cache commit discipline (stem-cache.client.ts)', () => {
++  afterEach(() => {
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  it('SC22 transactionDone resolves only on complete; it rejects on abort with the transaction error, or an AbortError when there is none; an error event alone does not settle it', async () => {
++    const completed = createFakeTransaction();
++    const done = transactionDone(completed);
++    completed.oncomplete?.(new Event('complete'));
++    await expect(done).resolves.toBeUndefined();
++
++    const failure = new DOMException('write failed', 'QuotaExceededError');
++    const aborted = { ...createFakeTransaction(), error: failure };
++    const abortedDone = transactionDone(aborted);
++    aborted.onabort?.(new Event('abort'));
++    await expect(abortedDone).rejects.toBe(failure);
++
++    const bare = createFakeTransaction();
++    const bareDone = transactionDone(bare);
++    bare.onabort?.(new Event('abort'));
++    await expect(bareDone).rejects.toMatchObject({ name: 'AbortError' });
++
++    const waiting = createFakeTransaction();
++    const state = await Promise.race([
++      transactionDone(waiting).then(
++        () => 'settled',
++        () => 'settled',
++      ),
++      flushTasks(2).then(() => 'pending'),
++    ]);
++    expect(state).toBe('pending');
++  });
++
++  it('SC23 browser store (fake IndexedDB + OPFS): put resolves only after the record transaction completes and removes the previous file only then; an aborted transaction rejects with its own error and keeps the previous entry', async () => {
++    const fake = installFakeBrowserStorage();
++    const store = openBrowserStore();
++    await store.put(storedRecord({ fileName: 'old', size: 3 }), bytesOf(7, 8, 9).buffer);
++    expect(fake.files.has('old')).toBe(true);
++
++    const gate = fake.holdNextCommit();
++    const pendingPut = store.put(
++      storedRecord({ fileName: 'new', etag: '"v2"', size: 2 }),
++      bytesOf(1, 2).buffer,
++    );
++    const state = await Promise.race([
++      pendingPut.then(() => 'settled'),
++      flushTasks(10).then(() => 'pending'),
++    ]);
++    expect(state).toBe('pending');
++    expect(fake.files.has('old')).toBe(true);
++    expect(fake.records.get(URL_A)?.fileName).toBe('old');
++    gate.resolve();
++    await pendingPut;
++    expect(fake.files.has('old')).toBe(false);
++    expect(fake.records.get(URL_A)?.etag).toBe('"v2"');
++    const entry = await store.get(URL_A);
++    expect(new Uint8Array(entry?.bytes ?? new ArrayBuffer(0))).toEqual(bytesOf(1, 2));
++
++    const failure = new DOMException('quota', 'QuotaExceededError');
++    fake.failNextPut(failure);
++    await expect(
++      store.put(storedRecord({ fileName: 'third', etag: '"v3"', size: 1 }), bytesOf(5).buffer),
++    ).rejects.toBe(failure);
++    expect(fake.files.has('third')).toBe(false);
++    expect(fake.files.has('new')).toBe(true);
++    expect(fake.records.get(URL_A)?.etag).toBe('"v2"');
++  });
++
++  it('SC28 browser store integrity (fake IndexedDB + OPFS): a file whose size differs from its record, or a missing file, is a miss that deletes the record and the file', async () => {
++    const fake = installFakeBrowserStorage();
++    const store = openBrowserStore();
++    await store.put(storedRecord({ fileName: 'a-file', size: 3 }), bytesOf(7, 8, 9).buffer);
++    await store.put(
++      storedRecord({ key: URL_B, fileName: 'b-file', size: 2 }),
++      bytesOf(1, 2).buffer,
++    );
++    fake.files.set('a-file', bytesOf(7));
++    expect(await store.get(URL_A)).toBeNull();
++    expect(fake.records.has(URL_A)).toBe(false);
++    expect(fake.files.has('a-file')).toBe(false);
++    fake.files.delete('b-file');
++    expect(await store.get(URL_B)).toBeNull();
++    expect(fake.records.has(URL_B)).toBe(false);
++    expect([...fake.records.keys()]).toEqual([]);
++  });
++
++  it('SC24 an abort after the body is read stores nothing: during the sweep no victim is deleted, during a victim delete nothing is put', async () => {
++    const fake = createFakeStemCacheStore();
++    seed(
++      fake,
++      storedRecord({ key: '/old', fileName: 'o', size: 35, lastAccessedAt: 1 }),
++      new Uint8Array(35),
++    );
++    const sweepGate = createDeferred();
++    fake.sweep.mockImplementation(() => sweepGate.promise);
++    const cached = cachedWith(
++      fake,
++      vi.fn<SourceFetch>(async () => audioResponse(new Uint8Array(10), validatedHeaders())),
++      400,
++    );
++    const controller = new AbortController();
++    await cached.fetchSource(URL_A, requestInit(controller.signal));
++    await flushTasks();
++    expect(fake.sweep).toHaveBeenCalledTimes(1);
++    controller.abort();
++    sweepGate.resolve();
++    await cached.idle();
++    expect(fake.remove).not.toHaveBeenCalled();
++    expect(fake.put).not.toHaveBeenCalled();
++    expect(fake.entries.has('/old')).toBe(true);
++
++    const second = createFakeStemCacheStore();
++    seed(
++      second,
++      storedRecord({ key: '/old', fileName: 'o', size: 35, lastAccessedAt: 1 }),
++      new Uint8Array(35),
++    );
++    const deleteGate = createDeferred();
++    second.remove.mockImplementationOnce(async (key) => {
++      second.log.push(`delete:${key}`);
++      await deleteGate.promise;
++      second.entries.delete(key);
++    });
++    const secondCache = cachedWith(
++      second,
++      vi.fn<SourceFetch>(async () => audioResponse(new Uint8Array(10), validatedHeaders())),
++      400,
++    );
++    const secondController = new AbortController();
++    await secondCache.fetchSource(URL_A, requestInit(secondController.signal));
++    await flushTasks();
++    expect(second.remove).toHaveBeenCalledWith('/old');
++    secondController.abort();
++    deleteGate.resolve();
++    await secondCache.idle();
++    expect(second.put).not.toHaveBeenCalled();
++    expect(second.entries.has(URL_A)).toBe(false);
++  });
++
++  it('SC25 a 404, 410 or unstorable 200 on a hit returns without waiting for a pending write of the same key, and the delete still lands after that write', async () => {
++    const finals: Array<{ status: number; response: () => Response }> = [
++      { status: 404, response: () => audioResponse(null, {}, 404) },
++      { status: 410, response: () => audioResponse(null, {}, 410) },
++      { status: 200, response: () => audioResponse(bytesOf(5), { 'content-type': 'audio/mpeg' }) },
++    ];
++    for (const final of finals) {
++      const fake = createFakeStemCacheStore();
++      seed(fake, storedRecord());
++      const putGate = createDeferred();
++      fake.put.mockImplementationOnce(async (record, bytes) => {
++        fake.log.push(`put:${record.key}`);
++        await putGate.promise;
++        fake.entries.set(record.key, { record: { ...record }, bytes: bytes.slice(0) });
++      });
++      const fetchSource = vi.fn<SourceFetch>(async () =>
++        audioResponse(bytesOf(1, 2, 3, 4), validatedHeaders('"v2"')),
++      );
++      const cached = cachedWith(fake, fetchSource);
++      await cached.fetchSource(URL_A, requestInit());
++      await flushTasks();
++      expect(fake.put).toHaveBeenCalledTimes(1);
++      fetchSource.mockImplementationOnce(async () => final.response());
++      const pending = cached.fetchSource(URL_A, requestInit());
++      const state = await Promise.race([
++        pending.then(() => 'settled'),
++        flushTasks(10).then(() => 'pending'),
++      ]);
++      expect(state).toBe('settled');
++      expect((await pending).status).toBe(final.status);
++      putGate.resolve();
++      await cached.idle();
++      expect(fake.entries.has(URL_A)).toBe(false);
++      expect(fake.log.lastIndexOf(`delete:${URL_A}`)).toBeGreaterThan(
++        fake.log.indexOf(`put:${URL_A}`),
++      );
++    }
++  });
++
++  it('SC26 a clone that throws is an unstored miss with the store still on, and a stored content type that Headers rejects is served without it', async () => {
++    const fake = createFakeStemCacheStore();
++    const network = audioResponse(bytesOf(1, 2), validatedHeaders());
++    vi.spyOn(network, 'clone').mockImplementation(() => {
++      throw new TypeError('clone failed');
++    });
++    const fetchSource = vi.fn<SourceFetch>(async () => network);
++    const cached = cachedWith(fake, fetchSource);
++    const response = await cached.fetchSource(URL_A, requestInit());
++    expect(response).toBe(network);
++    expect(await bodyOf(response)).toEqual(bytesOf(1, 2));
++    await cached.idle();
++    expect(fake.put).not.toHaveBeenCalled();
++    fetchSource.mockImplementation(async () => audioResponse(bytesOf(3), validatedHeaders()));
++    await cached.fetchSource(URL_B, requestInit());
++    await cached.idle();
++    expect(fake.put).toHaveBeenCalledTimes(1);
++
++    const hit = createFakeStemCacheStore();
++    seed(hit, storedRecord({ contentType: 'audio/mpeg\nx-injected: 1' }));
++    const hitCache = cachedWith(
++      hit,
++      vi.fn<SourceFetch>(async () => audioResponse(null, {}, 304)),
++    );
++    const served = await hitCache.fetchSource(URL_A, requestInit());
++    expect(served.status).toBe(200);
++    expect(served.headers.get('content-type')).toBeNull();
++    expect(served.headers.get('x-injected')).toBeNull();
++    expect(await bodyOf(served)).toEqual(bytesOf(7, 8, 9));
++  });
++
++  it('SC27 eviction planning is serialised per session: two keys started together end within the budget', async () => {
++    const fake = createFakeStemCacheStore();
++    seed(
++      fake,
++      storedRecord({ key: '/old', fileName: 'o', size: 25, lastAccessedAt: 1 }),
++      new Uint8Array(25),
++    );
++    const sweepGate = createDeferred();
++    fake.sweep.mockImplementation(() => sweepGate.promise);
++    const cached = cachedWith(
++      fake,
++      vi.fn<SourceFetch>(async () => audioResponse(new Uint8Array(10), validatedHeaders())),
++      400,
++    );
++    await Promise.all([
++      cached.fetchSource(URL_A, requestInit()),
++      cached.fetchSource(URL_B, requestInit()),
++    ]);
++    await flushTasks();
++    sweepGate.resolve();
++    await cached.idle();
++    const used = [...fake.entries.values()].reduce((total, entry) => total + entry.record.size, 0);
++    expect(used).toBeLessThanOrEqual(40);
++    expect([...fake.entries.keys()].sort()).toEqual([URL_A, URL_B].sort());
++    expect(fake.remove).toHaveBeenCalledWith('/old');
++    expect(fake.log.indexOf(`put:${URL_A}`)).toBeLessThan(fake.log.lastIndexOf('list'));
++  });
++
++  it('SC29 idle() waits for a pending hit delete', async () => {
++    const fake = createFakeStemCacheStore();
++    seed(fake, storedRecord());
++    const deleteGate = createDeferred();
++    fake.remove.mockImplementationOnce(async (key) => {
++      fake.log.push(`delete:${key}`);
++      await deleteGate.promise;
++      fake.entries.delete(key);
++    });
++    const cached = cachedWith(
++      fake,
++      vi.fn<SourceFetch>(async () => audioResponse(null, {}, 404)),
++    );
++    await cached.fetchSource(URL_A, requestInit());
++    const state = await Promise.race([
++      cached.idle().then(() => 'settled'),
++      flushTasks(10).then(() => 'pending'),
++    ]);
++    expect(state).toBe('pending');
++    deleteGate.resolve();
++    await cached.idle();
++    expect(fake.entries.has(URL_A)).toBe(false);
++  });
++});
+diff --git a/app/lib/arrangement/stem-cache.client.ts b/app/lib/arrangement/stem-cache.client.ts
+index 9452438..7e5a96b 100644
+--- a/app/lib/arrangement/stem-cache.client.ts
++++ b/app/lib/arrangement/stem-cache.client.ts
+@@ -57,6 +57,20 @@ function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
+   });
+ }
+ 
++export interface CompletableTransaction {
++  readonly error: DOMException | null;
++  oncomplete: ((event: Event) => void) | null;
++  onabort: ((event: Event) => void) | null;
++}
++
++export function transactionDone(transaction: CompletableTransaction): Promise<void> {
++  return new Promise((resolve, reject) => {
++    transaction.oncomplete = () => resolve();
++    transaction.onabort = () =>
++      reject(transaction.error ?? new DOMException('The transaction was aborted.', 'AbortError'));
++  });
++}
++
+ function isStringOrNull(value: unknown): boolean {
+   return value === null || typeof value === 'string';
+ }
+@@ -126,9 +140,15 @@ export function createBrowserStemCacheStore(): StemCacheStore | null {
+   };
+   const writeRecord = async (record: StemCacheRecord): Promise<void> => {
+     const db = await openDb();
+-    await requestToPromise(
+-      db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(record),
+-    );
++    const transaction = db.transaction(STORE_NAME, 'readwrite');
++    transaction.objectStore(STORE_NAME).put(record);
++    await transactionDone(transaction);
++  };
++  const deleteRecord = async (key: string): Promise<void> => {
++    const db = await openDb();
++    const transaction = db.transaction(STORE_NAME, 'readwrite');
++    transaction.objectStore(STORE_NAME).delete(key);
++    await transactionDone(transaction);
+   };
+   const removeFile = async (fileName: string): Promise<void> => {
+     try {
+@@ -145,10 +165,7 @@ export function createBrowserStemCacheStore(): StemCacheStore | null {
+   };
+   const remove = async (key: string): Promise<void> => {
+     const record = await readRecord(key);
+-    const db = await openDb();
+-    await requestToPromise(
+-      db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(key),
+-    );
++    await deleteRecord(key);
+     if (record !== null) {
+       await removeFile(record.fileName);
+     }
+@@ -196,11 +213,16 @@ export function createBrowserStemCacheStore(): StemCacheStore | null {
+     },
+     async touch(key, at) {
+       const db = await openDb();
+-      const store = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME);
+-      const value: unknown = await requestToPromise(store.get(key));
+-      if (isStemCacheRecord(value)) {
+-        await requestToPromise(store.put({ ...value, lastAccessedAt: at }));
+-      }
++      const transaction = db.transaction(STORE_NAME, 'readwrite');
++      const store = transaction.objectStore(STORE_NAME);
++      const request = store.get(key);
++      request.onsuccess = () => {
++        const value: unknown = request.result;
++        if (isStemCacheRecord(value)) {
++          store.put({ ...value, lastAccessedAt: at });
++        }
++      };
++      await transactionDone(transaction);
+     },
+     delete: remove,
+     async list() {
+@@ -208,7 +230,6 @@ export function createBrowserStemCacheStore(): StemCacheStore | null {
+     },
+     async sweep(now) {
+       const values = await readAll();
+-      const db = await openDb();
+       const known = new Set<string>();
+       for (const value of values) {
+         if (isStemCacheRecord(value)) {
+@@ -216,9 +237,7 @@ export function createBrowserStemCacheStore(): StemCacheStore | null {
+         } else if (typeof value === 'object' && value !== null && 'key' in value) {
+           const key = value.key;
+           if (typeof key === 'string') {
+-            await requestToPromise(
+-              db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(key),
+-            );
++            await deleteRecord(key);
+           }
+         }
+       }
+@@ -255,7 +274,11 @@ function isQuotaError(error: unknown): boolean {
+ function cachedResponse(entry: StemCacheEntry): Response {
+   const headers = new Headers();
+   if (entry.record.contentType !== null) {
+-    headers.set('content-type', entry.record.contentType);
++    try {
++      headers.set('content-type', entry.record.contentType);
++    } catch {
++      return new Response(entry.bytes, { status: 200 });
++    }
+   }
+   return new Response(entry.bytes, { status: 200, headers });
+ }
+@@ -269,13 +292,26 @@ export function createCachedSourceFetch({
+ }: CachedSourceFetchDeps): CachedSourceFetch {
+   let disabled = store === null;
+   let sweepPromise: Promise<void> | null = null;
++  let commitChain: Promise<void> = Promise.resolve();
+   const writes = new Map<string, Promise<void>>();
++  const deletes = new Set<Promise<void>>();
++
++  const enqueueCommit = (task: () => Promise<void>): Promise<void> => {
++    const run = commitChain.then(task);
++    commitChain = run.catch(() => undefined);
++    return run;
++  };
+ 
+-  const storeBytes = async (
++  const storeBytesNow = async (
+     activeStore: StemCacheStore,
+     record: StemCacheRecord,
+     bytes: ArrayBuffer,
++    signal: AbortSignal | null | undefined,
+   ): Promise<void> => {
++    const cancelled = (): boolean => signal?.aborted === true || disabled;
++    if (cancelled()) {
++      return;
++    }
+     sweepPromise ??= activeStore.sweep(now()).catch(() => undefined);
+     await sweepPromise;
+     const victims = selectStemCacheEvictions(
+@@ -284,12 +320,15 @@ export function createCachedSourceFetch({
+       record.size,
+       stemCacheBudgetBytes(await estimateQuota()),
+     );
+-    if (victims === null) {
++    if (victims === null || cancelled()) {
+       return;
+     }
+     for (const victim of victims) {
+       await activeStore.delete(victim.key);
+     }
++    if (cancelled()) {
++      return;
++    }
+     try {
+       await activeStore.put(record, bytes);
+     } catch (error) {
+@@ -302,10 +341,31 @@ export function createCachedSourceFetch({
+       if (oldest !== undefined) {
+         await activeStore.delete(oldest.key);
+       }
++      if (cancelled()) {
++        return;
++      }
+       await activeStore.put(record, bytes);
+     }
+   };
+ 
++  const storeBytes = (
++    activeStore: StemCacheStore,
++    record: StemCacheRecord,
++    bytes: ArrayBuffer,
++    signal: AbortSignal | null | undefined,
++  ): Promise<void> => enqueueCommit(() => storeBytesNow(activeStore, record, bytes, signal));
++
++  const deleteAfterPendingWrite = (activeStore: StemCacheStore, key: string): void => {
++    const pendingWrite = writes.get(key) ?? Promise.resolve();
++    const run = pendingWrite
++      .then(() => enqueueCommit(() => activeStore.delete(key)))
++      .catch(() => undefined);
++    deletes.add(run);
++    void run.finally(() => {
++      deletes.delete(run);
++    });
++  };
++
+   const write = async (
+     activeStore: StemCacheStore,
+     key: string,
+@@ -338,7 +398,7 @@ export function createCachedSourceFetch({
+       schemaVersion: STEM_CACHE_SCHEMA_VERSION,
+     };
+     try {
+-      await storeBytes(activeStore, record, bytes);
++      await storeBytes(activeStore, record, bytes, signal);
+     } catch {
+       disabled = true;
+     }
+@@ -351,7 +411,13 @@ export function createCachedSourceFetch({
+     if (store === null || disabled || writes.has(key) || !isStorable(response)) {
+       return;
+     }
+-    const pending = write(store, key, response.clone(), init.signal).finally(() => {
++    let copy: Response;
++    try {
++      copy = response.clone();
++    } catch {
++      return;
++    }
++    const pending = write(store, key, copy, init.signal).finally(() => {
+       writes.delete(key);
+     });
+     writes.set(key, pending);
+@@ -391,14 +457,14 @@ export function createCachedSourceFetch({
+       return cachedResponse(entry);
+     }
+     if (response.status === 404 || response.status === 410) {
+-      await store.delete(key).catch(() => undefined);
++      deleteAfterPendingWrite(store, key);
+       return response;
+     }
+     if (response.status >= 500) {
+       return cachedResponse(entry);
+     }
+     if (response.ok && !isStorable(response)) {
+-      await store.delete(key).catch(() => undefined);
++      deleteAfterPendingWrite(store, key);
+       return response;
+     }
+     writeInBackground(key, response, init);
+@@ -409,6 +475,8 @@ export function createCachedSourceFetch({
+     fetchSource: cachedFetch,
+     idle: async () => {
+       await Promise.all([...writes.values()]);
++      await Promise.all([...deletes]);
++      await commitChain;
+     },
+   };
+ }

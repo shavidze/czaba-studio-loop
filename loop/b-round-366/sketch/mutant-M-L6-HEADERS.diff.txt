@@ -1,0 +1,15 @@
+--- /tmp/b366-src.ts	2026-11-06 09:56:38.740749111 +0000
++++ app/lib/arrangement/stem-cache.client.ts	2026-11-06 09:58:18.192130832 +0000
+@@ -274,11 +274,7 @@
+ function cachedResponse(entry: StemCacheEntry): Response {
+   const headers = new Headers();
+   if (entry.record.contentType !== null) {
+-    try {
+-      headers.set('content-type', entry.record.contentType);
+-    } catch {
+-      return new Response(entry.bytes, { status: 200 });
+-    }
++    headers.set('content-type', entry.record.contentType);
+   }
+   return new Response(entry.bytes, { status: 200, headers });
+ }

@@ -1,0 +1,12 @@
+--- /tmp/b366-src.ts	2026-11-06 09:56:38.740749111 +0000
++++ app/lib/arrangement/stem-cache.client.ts	2026-11-06 09:58:08.151980535 +0000
+@@ -457,7 +457,8 @@
+       return cachedResponse(entry);
+     }
+     if (response.status === 404 || response.status === 410) {
+-      deleteAfterPendingWrite(store, key);
++      await writes.get(key)?.catch(() => undefined);
++      await store.delete(key).catch(() => undefined);
+       return response;
+     }
+     if (response.status >= 500) {

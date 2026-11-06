@@ -1,0 +1,11 @@
+--- /tmp/b366-src.ts	2026-11-06 09:56:38.740749111 +0000
++++ app/lib/arrangement/stem-cache.client.ts	2026-11-06 09:58:14.828943929 +0000
+@@ -464,7 +464,7 @@
+       return cachedResponse(entry);
+     }
+     if (response.ok && !isStorable(response)) {
+-      deleteAfterPendingWrite(store, key);
++      await store.delete(key).catch(() => undefined);
+       return response;
+     }
+     writeInBackground(key, response, init);

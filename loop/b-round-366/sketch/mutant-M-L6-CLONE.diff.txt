@@ -1,0 +1,16 @@
+--- /tmp/b366-src.ts	2026-11-06 09:56:38.740749111 +0000
++++ app/lib/arrangement/stem-cache.client.ts	2026-11-06 09:58:16.502618792 +0000
+@@ -411,12 +411,7 @@
+     if (store === null || disabled || writes.has(key) || !isStorable(response)) {
+       return;
+     }
+-    let copy: Response;
+-    try {
+-      copy = response.clone();
+-    } catch {
+-      return;
+-    }
++    const copy = response.clone();
+     const pending = write(store, key, copy, init.signal).finally(() => {
+       writes.delete(key);
+     });

@@ -1,0 +1,15 @@
+--- /tmp/b366-src.ts	2026-11-06 09:56:38.740749111 +0000
++++ app/lib/arrangement/stem-cache.client.ts	2026-11-06 09:57:54.712005103 +0000
+@@ -140,9 +140,9 @@
+   };
+   const writeRecord = async (record: StemCacheRecord): Promise<void> => {
+     const db = await openDb();
+-    const transaction = db.transaction(STORE_NAME, 'readwrite');
+-    transaction.objectStore(STORE_NAME).put(record);
+-    await transactionDone(transaction);
++    await requestToPromise(
++      db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(record),
++    );
+   };
+   const deleteRecord = async (key: string): Promise<void> => {
+     const db = await openDb();

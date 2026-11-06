@@ -1,0 +1,84 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T09:25:54.7921043Z",
+  "round": 366,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "PERF (7/7 asserts, ratio 0.184, 3 samples, no failures)",
+  "MUTANT-OWN (offline-fallback removal red on stem.blocked.ready as predicted)",
+  "PROBE 1440x900",
+  "PROBE 1280x720",
+  "AUDIO 1440x900 (cold/warm/blocked playback + byte-identical WAV export)",
+  "G366-AUTH 1440x900",
+  "G366-AUTH 1280x720",
+  "DOCS"
+ ],
+ "failed": [],
+ "blocked": [
+  "G366-AUTH fake-bearer /api/studio-token returns 500 (fails closed, no token; backend unavailable in cloud) - recorded not claimed"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke",
+  "A-TYPE/A-LINT"
+ ],
+ "notRun": [],
+ "abletonConformance": "not applicable (performance harness round, nothing on screen changes)",
+ "observations": [
+  "206 Media request on the cold open also at 1440x900 (B-R364-DEMO-DOUBLE-FETCH, recorded in audio-requests rows)",
+  "A changed the B sketch after code-reviewer Mediums; L58 input for RETRO 368",
+  "A-R366-REVIEW-* Lows routed to B for 9b-ii",
+  "exported WAV peak 1.0 identical across cold/warm/blocked (pre-existing)"
+ ],
+ "manifestPaths": [
+  "c-round-366/perf.log",
+  "c-round-366/latest-stem-cache.json",
+  "c-round-366/mutant-own.log",
+  "c-round-366/stem-prod-1440x900.json",
+  "c-round-366/stem-prod-1280x720.json",
+  "c-round-366/audio.json",
+  "c-round-366/auth.json",
+  "c-round-366/claims.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": "stem.harness.cold-body-live, stem.cold.entries-stored, stem.warm.body-bytes, stem.warm.status-304, stem.warm-ready-ratio, stem.blocked.ready, stem.blocked.entries",
+ "mutantsRecorded": "cache-off, counter-zero (A logs, not re-run by C) plus C own: offline-fallback-removed (red on stem.blocked.ready)",
+ "mutantRedOnSketch": [
+  "b-round-365/perf-sketch/mutant-cache-off-v3.log",
+  "b-round-365/perf-sketch/mutant-counter-zero.log"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "biome"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-365/sketch-typecheck.log",
+  "b-round-365/sketch-biome.log"
+ ],
+ "chainHeadGateRunGreen": "gate 365",
+ "affectedChecksNamed": [
+  "stem-cache perf spec",
+  "production probe 1440x900 and 1280x720"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-365/perf-sketch/run-v4.log",
+  "b-round-365/probe/stem-prod-1440x900.json",
+  "b-round-365/probe/stem-prod-1280x720.json"
+ ],
+ "origin": "no findings"
+}
