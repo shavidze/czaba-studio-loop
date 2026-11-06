@@ -1,0 +1,539 @@
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 36fa2b8..87a424e 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -156,9 +156,9 @@ export const ArrangementMarkerRow = forwardRef<
+     commitArrangement,
+     seekTo,
+     playFrom,
+-    status,
+     setStatus,
+     getStatusPreviewText,
++    getStatus,
+     isPointerGestureActive,
+     claimPointerGesture,
+   } = useArrangement();
+@@ -284,7 +284,7 @@ export const ArrangementMarkerRow = forwardRef<
+           : direction === 1
+             ? studioMarkerStrings.noneAfterInsertMarker
+             : studioMarkerStrings.noneBeforeInsertMarker;
+-        if (options?.keyRepeat !== true || (getStatusPreviewText() ?? status) !== message) {
++        if (options?.keyRepeat !== true || (getStatusPreviewText() ?? getStatus()) !== message) {
+           setStatus(message);
+         }
+         return;
+@@ -301,7 +301,7 @@ export const ArrangementMarkerRow = forwardRef<
+       projectEnd,
+       seekTo,
+       setStatus,
+-      status,
++      getStatus,
+       getStatusPreviewText,
+     ],
+   );
+@@ -465,7 +465,7 @@ export const ArrangementMarkerRow = forwardRef<
+     const result = moveMarker(before, markerId, time);
+     if (result.kind === 'conflict') {
+       const message = studioMarkerStrings.existsAtTime(result.other.name);
+-      if (!keyRepeat || (getStatusPreviewText() ?? status) !== message) {
++      if (!keyRepeat || (getStatusPreviewText() ?? getStatus()) !== message) {
+         setStatus(message);
+       }
+       return false;
+@@ -493,7 +493,7 @@ export const ArrangementMarkerRow = forwardRef<
+     }
+     setSelectedMarkerId(current.id);
+     if (direction === -1 && current.time < MARKER_TIME_EPS) {
+-      if (!keyRepeat || (getStatusPreviewText() ?? status) !== MARKER_AT_TIME_START_MESSAGE) {
++      if (!keyRepeat || (getStatusPreviewText() ?? getStatus()) !== MARKER_AT_TIME_START_MESSAGE) {
+         setStatus(MARKER_AT_TIME_START_MESSAGE);
+       }
+       return;
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index f1561d4..6f88812 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -968,12 +968,13 @@ function ArrangementOverviewWithPreviewInner({
+ 
+ const ArrangementOverviewWithPreview = memo(ArrangementOverviewWithPreviewInner);
+ 
+-function ArrangementStatusTextInner({ status, statusKey }: { status: string; statusKey: string }) {
++function ArrangementStatusTextInner() {
+   const preview = useArrangementStatusPreview((state) => state.preview);
++  const committed = useArrangementStatusPreview((state) => state.committed);
+   return preview ? (
+     <span key={statusPreviewKey(preview)}>{preview.text}</span>
+   ) : (
+-    <span key={statusKey}>{status}</span>
++    <span key={committed.key}>{committed.text}</span>
+   );
+ }
+ 
+@@ -1012,8 +1013,6 @@ export function StudioWorkspace() {
+     collection,
+     projectEnd: committedProjectEnd,
+     pxPerSecond,
+-    status,
+-    statusKey,
+     setInsertMarker,
+     scrubPlayhead,
+     endPlayheadScrub,
+@@ -2419,7 +2418,7 @@ export function StudioWorkspace() {
+         }
+         const current = workspaceRef.current;
+         const previewText = current.getStatusPreviewText();
+-        const shownStatus = previewText ?? current.status;
++        const shownStatus = previewText ?? current.getStatus();
+         if (insertMarkerStatusKind(shownStatus) === null && shownStatus !== FOLLOW_PAUSED_MESSAGE) {
+           return;
+         }
+@@ -3061,7 +3060,7 @@ export function StudioWorkspace() {
+         if (target === null) {
+           if (
+             !event.repeat ||
+-            (current.getStatusPreviewText() ?? current.status) !== NUDGE_AT_TIME_START_MESSAGE
++            (current.getStatusPreviewText() ?? current.getStatus()) !== NUDGE_AT_TIME_START_MESSAGE
+           ) {
+             current.setStatus(NUDGE_AT_TIME_START_MESSAGE);
+           }
+@@ -3626,7 +3625,7 @@ export function StudioWorkspace() {
+           aria-live="polite"
+           data-testid="arrangement-status"
+         >
+-          <ArrangementStatusText status={status} statusKey={statusKey} />
++          <ArrangementStatusText />
+         </output>
+         <ArrangementPlaybackFollowSync
+           committedRef={committedIsPlayingRef}
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 701a4b7..b0c766f 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -6,14 +6,12 @@ import {
+   useEffect,
+   useLayoutEffect,
+   useMemo,
+-  useReducer,
+   useRef,
+   useState,
+   useSyncExternalStore,
+ } from 'react';
+ import { useStore } from 'zustand';
+ import { useShallow } from 'zustand/react/shallow';
+-import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import {
+   applyClipGainTargets,
+   clipGainMemberKey,
+@@ -190,18 +188,11 @@ import {
+   createArrangementSelectionStore,
+   NO_SELECTION,
+ } from '~/lib/arrangement/selection-store';
++import type { ArrangementStatusUpdate } from '~/lib/arrangement/status-announcement';
+ import {
+-  type ArrangementStatusEntry,
+-  type ArrangementStatusUpdate,
+-  createArrangementStatusEntry,
+-  reduceArrangementStatus,
+-} from '~/lib/arrangement/status-announcement';
+-import {
+-  type ArrangementStatusPreview,
+   type ArrangementStatusPreviewState,
+   type ArrangementStatusPreviewStore,
+   createArrangementStatusPreviewStore,
+-  statusPreviewKey,
+ } from '~/lib/arrangement/status-preview-store';
+ import {
+   studioClipStrings,
+@@ -322,9 +313,6 @@ interface ArrangementContextValue {
+   redoLabel: string | null;
+   selectedSourceId: string | null;
+   pxPerSecond: number;
+-  status: string;
+-  statusSequence: number;
+-  statusKey: string;
+   sourceStates: Record<string, SourceLoadState>;
+   sourcePeaks: ReadonlyMap<string, Float32Array>;
+   sourceDurations: ReadonlyMap<string, number>;
+@@ -383,6 +371,7 @@ interface ArrangementContextValue {
+   previewClipGeometry: (next: Arrangement) => void;
+   previewStatus: (text: string) => void;
+   getStatusPreviewText: () => string | null;
++  getStatus: () => string;
+   commitArrangement: (next: Arrangement, label: string, before: Arrangement) => boolean;
+   nudgeSelectedClip: (delta: number, options?: { readonly keyRepeat?: boolean }) => void;
+   splitSelection: () => void;
+@@ -554,14 +543,6 @@ const ArrangementWorkspaceSessionContext = createContext<ArrangementWorkspaceSes
+   null,
+ );
+ 
+-interface ProviderStatusEntry extends ArrangementStatusEntry {
+-  readonly previewKey: string | null;
+-}
+-
+-type ProviderStatusAction =
+-  | ArrangementStatusUpdate
+-  | { readonly adoptPreview: ArrangementStatusPreview };
+-
+ const ArrangementMeterContext = createContext<MasterMeterStore | null>(null);
+ 
+ interface MasterMeterTap {
+@@ -721,7 +702,9 @@ export function ArrangementProvider({
+     ),
+   );
+   const [previewStore] = useState(() => createArrangementPreviewStore());
+-  const [statusPreviewStore] = useState(() => createArrangementStatusPreviewStore());
++  const [statusPreviewStore] = useState(() =>
++    createArrangementStatusPreviewStore(workspaceCollectionCopy(collection.origin).loading),
++  );
+   const [meterStore] = useState(() => createMasterMeterStore());
+   const [trackMeterStore] = useState(() => createTrackMeterStore());
+   const [playbackStore] = useState(() => createArrangementPlaybackStore());
+@@ -729,55 +712,33 @@ export function ArrangementProvider({
+   const [pxPerSecond, setPxPerSecondState] = useState(TIMELINE_ZOOM_DEFAULT);
+   const gestureCountRef = useRef(0);
+   const nameBarHintShownRef = useRef(false);
+-  const [statusEntry, dispatchStatus] = useReducer(
+-    (previous: ProviderStatusEntry, action: ProviderStatusAction): ProviderStatusEntry => {
+-      if (typeof action === 'object') {
+-        return {
+-          text: action.adoptPreview.text,
+-          sequence: previous.sequence + 1,
+-          previewKey: statusPreviewKey(action.adoptPreview),
+-        };
+-      }
+-      const next = reduceArrangementStatus(previous, action, gestureCountRef.current > 0);
+-      return next === previous ? previous : { ...next, previewKey: null };
+-    },
+-    collection.origin,
+-    (origin): ProviderStatusEntry => ({
+-      ...createArrangementStatusEntry(workspaceCollectionCopy(origin).loading),
+-      previewKey: null,
+-    }),
+-  );
+-  const status = statusEntry.text;
+-  const statusSequence = statusEntry.sequence;
+-  const statusKey = statusEntry.previewKey ?? String(statusSequence);
+-  const lastNonRefusalStatusRef = useRef(status);
+-  const committedStatusTextRef = useRef(status);
+-  const adoptedPreviewSequenceRef = useRef(0);
+-  const flushStatusPreview = useCallback(() => {
+-    const pending = statusPreviewStore.getState().preview;
+-    if (!pending || pending.sequence <= adoptedPreviewSequenceRef.current) {
+-      return;
+-    }
+-    adoptedPreviewSequenceRef.current = pending.sequence;
+-    if (gestureRefusalPrefix(pending.text) === null) {
+-      lastNonRefusalStatusRef.current = pending.text;
+-    }
+-    dispatchStatus({ adoptPreview: pending });
+-  }, [statusPreviewStore]);
++  const lastNonRefusalStatusRef = useRef(statusPreviewStore.getState().committed.text);
+   const setStatus = useCallback(
+     (update: ArrangementStatusUpdate) => {
+-      flushStatusPreview();
+-      dispatchStatus(update);
++      const store = statusPreviewStore.getState();
++      const pending = store.preview;
++      if (
++        pending &&
++        pending.sequence > store.adoptedPreviewSequence &&
++        gestureRefusalPrefix(pending.text) === null
++      ) {
++        lastNonRefusalStatusRef.current = pending.text;
++      }
++      store.commitStatus(update, gestureCountRef.current > 0);
++      const committed = statusPreviewStore.getState().committed.text;
++      if (gestureRefusalPrefix(committed) === null) {
++        lastNonRefusalStatusRef.current = committed;
++      }
+     },
+-    [flushStatusPreview],
++    [statusPreviewStore],
+   );
+   const previewStatus = useCallback(
+     (text: string) => {
+-      const pending = statusPreviewStore.getState().preview;
+-      if (pending === null && text === committedStatusTextRef.current) {
++      const state = statusPreviewStore.getState();
++      if (state.preview === null && text === state.committed.text) {
+         return;
+       }
+-      statusPreviewStore.getState().showPreview(text);
++      state.showPreview(text);
+     },
+     [statusPreviewStore],
+   );
+@@ -785,18 +746,10 @@ export function ArrangementProvider({
+     () => statusPreviewStore.getState().preview?.text ?? null,
+     [statusPreviewStore],
+   );
+-  useIsomorphicLayoutEffect(() => {
+-    committedStatusTextRef.current = status;
+-    if (gestureRefusalPrefix(status) === null) {
+-      lastNonRefusalStatusRef.current = status;
+-    }
+-  }, [status]);
+-  useIsomorphicLayoutEffect(() => {
+-    const pending = statusPreviewStore.getState().preview;
+-    if (pending && pending.sequence <= adoptedPreviewSequenceRef.current) {
+-      statusPreviewStore.getState().clearPreview();
+-    }
+-  }, [statusEntry, statusPreviewStore]);
++  const getStatus = useCallback(
++    () => statusPreviewStore.getState().committed.text,
++    [statusPreviewStore],
++  );
+   const [sourceStates, setSourceStatesState] = useState<Record<string, SourceLoadState>>({});
+   const [sourcePeaks, setSourcePeaks] = useState<ReadonlyMap<string, Float32Array>>(new Map());
+   const peaksComputerRef = useRef<SourcePeaksComputer | null>(null);
+@@ -1698,8 +1651,8 @@ export function ArrangementProvider({
+   const playFrom = useCallback(
+     (time: number) => {
+       const target = Math.max(0, time);
+-      placeInsertMarker(target);
+       if (isPlayingRef.current) {
++        placeInsertMarker(target);
+         seekTo(target);
+         return;
+       }
+@@ -1710,6 +1663,7 @@ export function ArrangementProvider({
+         target >= end - ARRANGEMENT_EPS &&
+         resolveActiveLoop(arrangement.loop, target) === null
+       ) {
++        placeInsertMarker(target);
+         stopLibraryPreview();
+         seekTo(target);
+         setStatus(playPastEndMessage(target, end, 'insert-marker'));
+@@ -1717,6 +1671,7 @@ export function ArrangementProvider({
+       }
+       seekTo(target);
+       startPlaybackAt(target, 'insert-marker');
++      placeInsertMarker(target);
+     },
+     [seekTo, startPlaybackAt, stopLibraryPreview, placeInsertMarker, setStatus],
+   );
+@@ -4202,9 +4157,6 @@ export function ArrangementProvider({
+       redoLabel: history.future[0]?.label ?? null,
+       selectedSourceId,
+       pxPerSecond,
+-      status,
+-      statusSequence,
+-      statusKey,
+       sourceStates,
+       sourcePeaks,
+       sourceDurations,
+@@ -4258,6 +4210,7 @@ export function ArrangementProvider({
+       previewClipGeometry,
+       previewStatus,
+       getStatusPreviewText,
++      getStatus,
+       commitArrangement,
+       nudgeSelectedClip,
+       splitSelection,
+@@ -4319,9 +4272,6 @@ export function ArrangementProvider({
+       history.future,
+       selectedSourceId,
+       pxPerSecond,
+-      status,
+-      statusSequence,
+-      statusKey,
+       sourceStates,
+       sourcePeaks,
+       sourceDurations,
+@@ -4375,6 +4325,7 @@ export function ArrangementProvider({
+       previewClipGeometry,
+       previewStatus,
+       getStatusPreviewText,
++      getStatus,
+       commitArrangement,
+       nudgeSelectedClip,
+       splitSelection,
+diff --git a/app/lib/arrangement/__tests__/helpers/workspace-probe.ts b/app/lib/arrangement/__tests__/helpers/workspace-probe.ts
+index e8c381a..f08aa03 100644
+--- a/app/lib/arrangement/__tests__/helpers/workspace-probe.ts
++++ b/app/lib/arrangement/__tests__/helpers/workspace-probe.ts
+@@ -3,6 +3,7 @@ import {
+   useArrangement,
+   useArrangementActiveTrackId,
+   useArrangementIsPlaying,
++  useArrangementStatusPreview,
+ } from '~/contexts/ArrangementContext';
+ 
+ export interface WorkspaceStatusValue {
+@@ -19,8 +20,8 @@ export type WorkspaceProbeValue = WorkspaceStatusProbeValue & {
+ };
+ 
+ export function useWorkspaceStatus(): WorkspaceStatusValue {
+-  const { status, statusSequence, statusKey } = useArrangement();
+-  return { status, statusSequence, statusKey };
++  const committed = useArrangementStatusPreview((state) => state.committed);
++  return { status: committed.text, statusSequence: committed.sequence, statusKey: committed.key };
+ }
+ 
+ export function useWorkspaceStatusProbe(): WorkspaceStatusProbeValue {
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index afd99fa..318666b 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -350,7 +350,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+         ArrangementLibraryOptionInner: 0,
+         ArrangementRulerTicksInner: 0,
+       });
+-      act(() => api.current?.setStatus('Positive control'));
++      act(() => api.current?.resetExportState());
+       for (const parent of ['ArrangementRuler', 'ArrangementLibrary', 'ArrangementLane']) {
+         expect(renderLog.counts.get(parent) ?? 0).toBeGreaterThan(0);
+       }
+@@ -695,7 +695,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(raw.current).toBe(rawAtPlay);
+     expect(renderLog.counts.get('ArrangementRuler') ?? 0).toBe(0);
+     expect(renderLog.counts.get('ArrangementLibrary') ?? 0).toBe(0);
+-    act(() => api.current?.setStatus('Positive control'));
++    act(() => api.current?.resetExportState());
+     expect(api.current).not.toBe(valueAtPlay);
+     expect(raw.current).not.toBe(rawAtPlay);
+     for (const name of CONTEXT_CONSUMERS) {
+@@ -735,7 +735,7 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBe(0);
+   });
+ 
+-  it('RB-MEMO3 a status write re-renders the workspace and not the range readout (C-R320-01)', async () => {
++  it('RB-MEMO3 a workspace commit re-renders the workspace and not the range readout; a status write renders only the status text (C-R320-01, SIG-R360)', async () => {
+     const { api, view } = await mountWorkspace();
+     act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));
+     expect(view.getByTestId('arrangement-range')).toBeTruthy();
+@@ -743,9 +743,16 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     act(() => api.current?.setTimeRange({ start: 2, end: 5, trackId: 'music' }));
+     expect(renderLog.counts.get('ArrangementRangeReadoutInner') ?? 0).toBe(1);
+     renderLog.counts.clear();
++    act(() => api.current?.resetExportState());
++    act(() => api.current?.resetExportState());
++    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementRangeReadoutInner') ?? 0).toBe(0);
++    renderLog.counts.clear();
+     act(() => api.current?.setStatus('Memo control one'));
+     act(() => api.current?.setStatus('Memo control two'));
+-    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++    expect(view.getByTestId('arrangement-status').textContent).toContain('Memo control two');
++    expect(renderLog.counts.get('ArrangementStatusTextInner') ?? 0).toBe(2);
++    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBe(0);
+     expect(renderLog.counts.get('ArrangementRangeReadoutInner') ?? 0).toBe(0);
+   });
+ });
+diff --git a/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx b/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
+index b04c6c7..3d0236e 100644
+--- a/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
++++ b/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
+@@ -340,6 +340,7 @@ describe('PERF-8b selection wrappers render only on their own inputs (SS8, C-R32
+       renderLog.counts.clear();
+       act(() => live(api).setStatus('Positive control'));
+       expect(view.getByTestId('arrangement-status').textContent).toContain('Positive control');
++      act(() => live(api).resetExportState());
+       expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBeGreaterThan(0);
+       expect(renderLog.counts.get('ArrangementGroupHeaderWithSelectionInner') ?? 0).toBe(0);
+     },
+@@ -376,6 +377,10 @@ describe('PERF-11c-i the group header leaf reads no workspace context (GATE361-S
+       renderLog.counts.clear();
+       act(() => live(api).setStatus('GH1 positive control'));
+       expect(view.getByTestId('arrangement-status').textContent).toContain('GH1 positive control');
++      expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBe(0);
++      expect(renderLog.counts.get('ArrangementGroupHeaderWithSelectionInner') ?? 0).toBe(0);
++      expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe(0);
++      act(() => live(api).resetExportState());
+       expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBeGreaterThan(0);
+       expect(renderLog.counts.get('ArrangementGroupHeaderWithSelectionInner') ?? 0).toBe(0);
+       expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe(0);
+diff --git a/app/lib/arrangement/status-preview-store.ts b/app/lib/arrangement/status-preview-store.ts
+index b8fea6f..bc3b729 100644
+--- a/app/lib/arrangement/status-preview-store.ts
++++ b/app/lib/arrangement/status-preview-store.ts
+@@ -1,23 +1,61 @@
+ import { createStore, type StoreApi } from 'zustand/vanilla';
++import {
++  type ArrangementStatusUpdate,
++  reduceArrangementStatus,
++} from '~/lib/arrangement/status-announcement';
+ 
+ export interface ArrangementStatusPreview {
+   readonly text: string;
+   readonly sequence: number;
+ }
+ 
++export interface ArrangementCommittedStatus {
++  readonly text: string;
++  readonly sequence: number;
++  readonly key: string;
++}
++
+ export interface ArrangementStatusPreviewState {
+   preview: ArrangementStatusPreview | null;
+   written: number;
++  committed: ArrangementCommittedStatus;
++  adoptedPreviewSequence: number;
+   showPreview: (text: string) => void;
+   clearPreview: () => void;
++  commitStatus: (update: ArrangementStatusUpdate, gestureActive: boolean) => void;
+ }
+ 
+ export type ArrangementStatusPreviewStore = StoreApi<ArrangementStatusPreviewState>;
+ 
+-export function createArrangementStatusPreviewStore(): ArrangementStatusPreviewStore {
++export function statusPreviewKey(preview: ArrangementStatusPreview): string {
++  return `preview-${preview.sequence}`;
++}
++
++function adoptPendingPreview(
++  state: ArrangementStatusPreviewState,
++): Pick<ArrangementStatusPreviewState, 'committed' | 'adoptedPreviewSequence'> {
++  const pending = state.preview;
++  if (!pending || pending.sequence <= state.adoptedPreviewSequence) {
++    return { committed: state.committed, adoptedPreviewSequence: state.adoptedPreviewSequence };
++  }
++  return {
++    committed: {
++      text: pending.text,
++      sequence: state.committed.sequence + 1,
++      key: statusPreviewKey(pending),
++    },
++    adoptedPreviewSequence: pending.sequence,
++  };
++}
++
++export function createArrangementStatusPreviewStore(
++  initialText = '',
++): ArrangementStatusPreviewStore {
+   return createStore<ArrangementStatusPreviewState>()((set) => ({
+     preview: null,
+     written: 0,
++    committed: { text: initialText, sequence: 0, key: '0' },
++    adoptedPreviewSequence: 0,
+     showPreview: (text) =>
+       set((state) =>
+         state.preview?.text === text
+@@ -25,9 +63,22 @@ export function createArrangementStatusPreviewStore(): ArrangementStatusPreviewS
+           : { preview: { text, sequence: state.written + 1 }, written: state.written + 1 },
+       ),
+     clearPreview: () => set((state) => (state.preview === null ? state : { preview: null })),
++    commitStatus: (update, gestureActive) =>
++      set((state) => {
++        const adopted = adoptPendingPreview(state);
++        const reduced = reduceArrangementStatus(adopted.committed, update, gestureActive);
++        const committed =
++          reduced === adopted.committed
++            ? adopted.committed
++            : { text: reduced.text, sequence: reduced.sequence, key: String(reduced.sequence) };
++        const preview =
++          state.preview && state.preview.sequence <= adopted.adoptedPreviewSequence
++            ? null
++            : state.preview;
++        if (committed === state.committed && preview === state.preview) {
++          return state;
++        }
++        return { committed, preview, adoptedPreviewSequence: adopted.adoptedPreviewSequence };
++      }),
+   }));
+ }
+-
+-export function statusPreviewKey(preview: ArrangementStatusPreview): string {
+-  return `preview-${preview.sequence}`;
+-}

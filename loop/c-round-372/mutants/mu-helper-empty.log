@@ -1,0 +1,491 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[32m 133[2mms[22m[39m
+[31m     [31m×[31m FS1 refuses to add a failed source with the failed text and no loader detail[39m[32m 48[2mms[22m[39m
+[31m     [31m×[31m FS2 gives the failed text when the failed source is the selection[39m[32m 14[2mms[22m[39m
+[31m     [31m×[31m FS3 keeps the loading text for a source that is still loading[39m[32m 12[2mms[22m[39m
+[31m     [31m×[31m FS4 stops a running preview and gives the failed text when previewing a failed source[39m[32m 10[2mms[22m[39m
+[31m     [31m×[31m FS5 keeps the loading text when previewing a source that is still loading[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m FS6 keeps the selection prompt for an unknown id[39m[32m 10[2mms[22m[39m
+[31m     [31m×[31m FS7 still adds exactly one clip for a ready source[39m[32m 15[2mms[22m[39m
+[31m     [31m×[31m FS8 follows the current state when a loading source fails later[39m[32m 10[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/pending-status.test.tsx [2m([22m[2m22 tests[22m[2m | [22m[31m11 failed[39m[2m)[22m[33m 1683[2mms[22m[39m
+[31m       [31m×[31m S1: an edit refusal during a gesture shows the blocked status, then the previous status after release[39m[32m 38[2mms[22m[39m
+[31m       [31m×[31m S2: an Undo refusal during a gesture keeps the entry and restores the previous status after release[39m[32m 12[2mms[22m[39m
+[31m       [31m×[31m S3: a newer non-refusal status set during the gesture stays after release[39m[32m 8[2mms[22m[39m
+[31m       [31m×[31m S1-same-act: a refusal queued in the same batch as the release still restores the previous status[39m[32m 5[2mms[22m[39m
+[31m       [31m×[31m S3-same-act: a new status queued in the same batch as the release stays[39m[32m 6[2mms[22m[39m
+[31m       [31m×[31m S4: the refusal stays while a second gesture is still active and returns only when both end[39m[32m 4[2mms[22m[39m
+[31m       [31m×[31m S5: an edit refusal followed by an Undo refusal still restores the previous status[39m[32m 4[2mms[22m[39m
+[31m       [31m×[31m S5b: refusal, a new status, a second refusal and release restore the most recent non-refusal status[39m[32m 5[2mms[22m[39m
+[31m       [31m×[31m S6: a gesture with no refusal leaves the status unchanged[39m[32m 6[2mms[22m[39m
+       [33m[2m✓[22m[39m S7: a refused music Volume press during the separator drag shows blocked, then the prior status after pointerup [33m 425[2mms[22m[39m
+[31m       [31m×[31m S8: a window blur that aborts a claimed gesture restores the prior status[39m[32m 5[2mms[22m[39m
+       [32m✓[39m S9: a Clip Gain blur kept during a gesture restores the prior status and keeps the text with its marker[32m 245[2mms[22m[39m
+       [32m✓[39m PM1: typed text that differs from the stored value shows the marker, the warning border and the description[32m 154[2mms[22m[39m
+       [32m✓[39m PM2: Enter commits one Clip Gain entry and removes the marker and the description[32m 171[2mms[22m[39m
+       [32m✓[39m PM3: Escape reverts the text, removes the marker and writes no entry[32m 149[2mms[22m[39m
+       [32m✓[39m PM4: a raw text that differs only in format shows the marker until the blur reverts it[32m 129[2mms[22m[39m
+       [32m✓[39m PM5: a disabled field for a video clip or a group shows no marker and keeps the reason description[32m 124[2mms[22m[39m
+       [32m✓[39m PM6: the 0 dB reset after a typed value stores 0, shows 0.0 and removes the marker[32m 173[2mms[22m[39m
+       [32m✓[39m PO1: an older pending Master preview is committed before a new Volume preview, so Undo restores both[32m 6[2mms[22m[39m
+       [32m✓[39m PO2: a Volume preview followed by a Master preview keeps its order and Undo restores both[32m 4[2mms[22m[39m
+[31m       [31m×[31m PO4: a Volume preview refused during a gesture flushes nothing, so the pending Master preview stays pending[39m[32m 4[2mms[22m[39m
+       [32m✓[39m PO3: a Volume preview and commit with no pending Master writes exactly one Volume entry[32m 4[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/fader-click.test.tsx [2m([22m[2m26 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 2683[2mms[22m[39m
+     [32m✓[39m P1: Volume start 1, Δ −25 px over 100 px gives exactly 0.75[32m 2[2mms[22m[39m
+     [32m✓[39m P2: the value is clamped to the range[32m 1[2mms[22m[39m
+     [32m✓[39m P3: Master start 0, Δ −24 px over 132 px gives −12 dB[32m 0[2mms[22m[39m
+     [32m✓[39m P4: Pan steps start 0, Δ +10 px over 100 px gives 10[32m 1[2mms[22m[39m
+     [32m✓[39m P5: an unusable width or delta keeps the start value; a sub-step move snaps back[32m 0[2mms[22m[39m
+     [32m✓[39m P6: an off-grid drag snaps to the step; a zero delta keeps an off-grid start value[32m 0[2mms[22m[39m
+     [33m[2m✓[22m[39m F1: a press with no movement keeps the music Volume at 0.6, writes no entry and focuses the fader [33m 316[2mms[22m[39m
+     [32m✓[39m F2: a −25 px drag over 100 px moves the music Volume from −4.4 dB to −19.4 dB with one Volume entry; undo restores[32m 231[2mms[22m[39m
+     [32m✓[39m F3: a drag that returns to its start writes no entry[32m 171[2mms[22m[39m
+     [32m✓[39m F4: a −24 px Master drag over 132 px gives −12 dB with one Master Volume entry[32m 163[2mms[22m[39m
+     [32m✓[39m F5: a +10 px Pan drag over 100 px previews 10R without a history change, then commits 0.2 with one Pan entry[32m 217[2mms[22m[39m
+     [32m✓[39m F6: the video-track Volume press writes no entry; a −25 px drag gives −15 dB with one entry[32m 138[2mms[22m[39m
+[31m     [31m×[31m F7: a music Volume press during a separator gesture is refused with the blocked status and no focus or value change[39m[32m 128[2mms[22m[39m
+     [32m✓[39m F8 must-not: a pointercancel during the drag restores the value and writes no entry[32m 109[2mms[22m[39m
+     [32m✓[39m F9 / F9b must-not: a blur during the drag restores the value; later moves, a blur commit and the release change nothing[32m 111[2mms[22m[39m
+     [32m✓[39m D1: a double-click resets the music Volume from −8 dB to 0 dB with one Volume entry[32m 150[2mms[22m[39m
+     [32m✓[39m D2: a double-click resets Master from −12 dB to 0 dB with one Master Volume entry[32m 104[2mms[22m[39m
+     [32m✓[39m D3: a double-click resets the music Pan from 25L to C with one Pan entry and disables the readout[32m 127[2mms[22m[39m
+     [32m✓[39m D4 must-not: a double-click at the default on Volume, Master and Pan writes no entry and leaves the status[32m 64[2mms[22m[39m
+[31m     [31m×[31m D5: a double-click during a separator gesture is refused with the blocked status and no entry[39m[32m 124[2mms[22m[39m
+     [32m✓[39m D6: two presses, two clicks and the double-click add exactly one entry, the reset[32m 120[2mms[22m[39m
+     [32m✓[39m T1: the faders carry touch-none and prevent the press; Zoom stays native[32m 86[2mms[22m[39m
+     [32m✓[39m R1: Clip Gain typed "3" then a music Volume press with no move commits only the Clip Gain and focuses the fader[32m 109[2mms[22m[39m
+     [32m✓[39m must-not: a foreign pointer and a purely vertical move change nothing during the drag[32m 73[2mms[22m[39m
+     [32m✓[39m must-not: a non-left press is not prevented, starts no gesture and moves no focus[32m 72[2mms[22m[39m
+     [32m✓[39m must-not: unmounting during a drag removes the window move listener[32m 63[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 21 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/fader-click.test.tsx[2m > [22mfader press, relative drag and double-click (D-29z3)[2m > [22mF7: a music Volume press during a separator gesture is refused with the blocked status and no focus or value change
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/fader-click.test.tsx:[2m441:30[22m[39m
+    [90m439| [39m    expect(fireEvent.pointerDown(volume, { ...press, pointerId: 42, cl…
+    [90m440| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m(focusedBefore)[33m;[39m
+    [90m441| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m442| [39m    [34mwindowPointer[39m([32m'pointermove'[39m[33m,[39m [34m42[39m[33m,[39m [34m10[39m)[33m;[39m
+    [90m443| [39m    [34mexpect[39m([34mtrackOf[39m([34mlive[39m(api)[33m.[39marrangement[33m,[39m [32m'music'[39m)[33m.[39mvolume)[33m.[39m[34mtoBe[39m([34m0.6[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/fader-click.test.tsx[2m > [22mfader press, relative drag and double-click (D-29z3)[2m > [22mD5: a double-click during a separator gesture is refused with the blocked status and no entry
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/fader-click.test.tsx:[2m537:30[22m[39m
+    [90m535| [39m    [34mstartSeparatorGesture[39m()[33m;[39m
+    [90m536| [39m    fireEvent[33m.[39m[34mdblClick[39m(controls[33m.[39m[34mmusicVolume[39m())[33m;[39m
+    [90m537| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m538| [39m    expect(trackOf(live(api).arrangement, 'music').volume).toBe(trackV…
+    [90m539| [39m    [34mwindowPointer[39m([32m'pointerup'[39m[33m,[39m [34m41[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS1 refuses to add a failed source with the failed text and no loader detail
+[31m[1mAssertionError[22m: expected '' to be '“Broken Song” failed to load — detail…' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- “Broken Song” failed to load — details are in the library.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m195:30[22m[39m
+    [90m193| [39m    [35mconst[39m clipsBefore [33m=[39m [34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[33m.[39mlength[33m;[39m
+    [90m194| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'bad'[39m))[33m;[39m
+    [90m195| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34mfailedText[39m([33mBAD_TITLE[39m))[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m196| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39mnot[33m.[39m[34mtoContain[39m([32m'(network)'[39m)[33m;[39m
+    [90m197| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[33m.[39mlength)[33m.[39m[34mtoBe[39m(clipsBefore)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS2 gives the failed text when the failed source is the selection
+[31m[1mAssertionError[22m: expected '' to be '“Broken Song” failed to load — detail…' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- “Broken Song” failed to load — details are in the library.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m205:30[22m[39m
+    [90m203| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mselectSource[39m([32m'bad'[39m))[33m;[39m
+    [90m204| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m())[33m;[39m
+    [90m205| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34mfailedText[39m([33mBAD_TITLE[39m))[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m206| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m207| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS3 keeps the loading text for a source that is still loading
+[31m[1mAssertionError[22m: expected '' to be '“Slow Song” has not loaded yet.' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- “Slow Song” has not loaded yet.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m212:30[22m[39m
+    [90m210| [39m    [35mconst[39m { api } [33m=[39m [35mawait[39m [34mmountRefusal[39m()[33m;[39m
+    [90m211| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'slow'[39m))[33m;[39m
+    [90m212| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34mloadingText[39m([33mSLOW_TITLE[39m))[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m213| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m214| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS4 stops a running preview and gives the failed text when previewing a failed source
+[31m[1mAssertionError[22m: expected '' to be '“Broken Song” failed to load — detail…' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- “Broken Song” failed to load — details are in the library.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m222:30[22m[39m
+    [90m220| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mstartLibraryPreview[39m([32m'bad'[39m[33m,[39m [34m0[39m))[33m;[39m
+    [90m221| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBe[39m([35mnull[39m)[33m;[39m
+    [90m222| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34mfailedText[39m([33mBAD_TITLE[39m))[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m223| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m224| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS5 keeps the loading text when previewing a source that is still loading
+[31m[1mAssertionError[22m: expected '' to be '“Slow Song” has not loaded yet.' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- “Slow Song” has not loaded yet.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m230:30[22m[39m
+    [90m228| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mstartLibraryPreview[39m([32m'slow'[39m[33m,[39m [34m0[39m))[33m;[39m
+    [90m229| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBe[39m([35mnull[39m)[33m;[39m
+    [90m230| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34mloadingText[39m([33mSLOW_TITLE[39m))[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m231| [39m  })[33m;[39m
+    [90m232| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS6 keeps the selection prompt for an unknown id
+[31m[1mAssertionError[22m: expected '' to be 'Select a sound in the library first.' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Select a sound in the library first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m236:30[22m[39m
+    [90m234| [39m    [35mconst[39m { api } [33m=[39m [35mawait[39m [34mmountRefusal[39m()[33m;[39m
+    [90m235| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'nope'[39m))[33m;[39m
+    [90m236| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mNO_SOURCE[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m237| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m238| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS7 still adds exactly one clip for a ready source
+[31m[1mAssertionError[22m: expected '' to be '“Ready Song” added to the მუსიკა trac…' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- “Ready Song” added to the მუსიკა track at 00:00.000. Drag a clip by its name bar to move it.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m246:30[22m[39m
+    [90m244| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[[34m0[39m][33m?.[39msourceId)[33m.[39m[34mtoBe[39m([32m'ok'[39m)[33m;[39m
+    [90m245| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39marrangement[33m.[39mclips[[34m0[39m][33m?.[39mstart)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m246| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m(
+    [90m   | [39m                             [31m^[39m
+    [90m247| [39m      [32m`[39m[36m${[39mstudioLibraryStrings[33m.[39m[34mclipAdded[39m({
+    [90m248| [39m        title[33m:[39m [33mOK_TITLE[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx[2m > [22mlibrary refusal text for a failed source (C-R95-N1)[2m > [22mFS8 follows the current state when a loading source fails later
+[31m[1mAssertionError[22m: expected '' to be '“Slow Song” has not loaded yet.' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- “Slow Song” has not loaded yet.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:[2m259:30[22m[39m
+    [90m257| [39m    [35mconst[39m { api[33m,[39m slow } [33m=[39m [35mawait[39m [34mmountRefusal[39m()[33m;[39m
+    [90m258| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'slow'[39m))[33m;[39m
+    [90m259| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34mloadingText[39m([33mSLOW_TITLE[39m))[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m260| [39m    [35mconst[39m pending [33m=[39m slow[33m.[39mcurrent[33m;[39m
+    [90m261| [39m    [35mif[39m ([33m![39mpending) {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS1: an edit refusal during a gesture shows the blocked status, then the previous status after release
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m275:37[22m[39m
+    [90m273| [39m      })[33m;[39m
+    [90m274| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mtoggleTrackMute[39m([32m'music'[39m))[33m;[39m
+    [90m275| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m276| [39m      [34mact[39m(() [33m=>[39m [34mrelease[39m())[33m;[39m
+    [90m277| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([32m'X'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS2: an Undo refusal during a gesture keeps the entry and restores the previous status after release
+[31m[1mAssertionError[22m: expected '' to be 'Undo/Redo does not work while draggin…' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Undo/Redo does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m290:37[22m[39m
+    [90m288| [39m      })[33m;[39m
+    [90m289| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mundo[39m())[33m;[39m
+    [90m290| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_UNDO_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m291| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mundoLabel)[33m.[39m[34mtoBe[39m([33mMUTE_MUSIC_LABEL[39m)[33m;[39m
+    [90m292| [39m      [34mact[39m(() [33m=>[39m [34mrelease[39m())[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS3: a newer non-refusal status set during the gesture stays after release
+[31m[1mAssertionError[22m: expected '' to be 'Y' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Y[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m308:37[22m[39m
+    [90m306| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34msetStatus[39m([32m'Y'[39m))[33m;[39m
+    [90m307| [39m      [34mact[39m(() [33m=>[39m [34mrelease[39m())[33m;[39m
+    [90m308| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([32m'Y'[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m309| [39m    })[33m;[39m
+    [90m310| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS1-same-act: a refusal queued in the same batch as the release still restores the previous status
+[31m[1mAssertionError[22m: expected '' to be 'X' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- X[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m322:37[22m[39m
+    [90m320| [39m        [34mrelease[39m()[33m;[39m
+    [90m321| [39m      })[33m;[39m
+    [90m322| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([32m'X'[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m323| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m324| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS3-same-act: a new status queued in the same batch as the release stays
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m334:37[22m[39m
+    [90m332| [39m      })[33m;[39m
+    [90m333| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mtoggleTrackMute[39m([32m'music'[39m))[33m;[39m
+    [90m334| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m335| [39m      [34mact[39m(() [33m=>[39m {
+    [90m336| [39m        result[33m.[39mcurrent[33m.[39m[34msetStatus[39m([32m'Y'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS4: the refusal stays while a second gesture is still active and returns only when both end
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m354:37[22m[39m
+    [90m352| [39m      [34mact[39m(() [33m=>[39m [34mreleaseFirst[39m())[33m;[39m
+    [90m353| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39m[34misPointerGestureActive[39m())[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m354| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m355| [39m      [34mact[39m(() [33m=>[39m [34mreleaseSecond[39m())[33m;[39m
+    [90m356| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([32m'X'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS5: an edit refusal followed by an Undo refusal still restores the previous status
+[31m[1mAssertionError[22m: expected '' to be 'Undo/Redo does not work while draggin…' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Undo/Redo does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m368:37[22m[39m
+    [90m366| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mtoggleTrackMute[39m([32m'music'[39m))[33m;[39m
+    [90m367| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mundo[39m())[33m;[39m
+    [90m368| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_UNDO_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m369| [39m      [34mact[39m(() [33m=>[39m [34mrelease[39m())[33m;[39m
+    [90m370| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([32m'X'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS5b: refusal, a new status, a second refusal and release restore the most recent non-refusal status
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m383:37[22m[39m
+    [90m381| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34msetStatus[39m([32m'T'[39m))[33m;[39m
+    [90m382| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mtoggleTrackSolo[39m([32m'music'[39m[33m,[39m [35mfalse[39m))[33m;[39m
+    [90m383| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m384| [39m      [34mact[39m(() [33m=>[39m [34mrelease[39m())[33m;[39m
+    [90m385| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([32m'T'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS6: a gesture with no refusal leaves the status unchanged
+[31m[1mAssertionError[22m: expected '' to be 'X' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- X[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m396:37[22m[39m
+    [90m394| [39m      })[33m;[39m
+    [90m395| [39m      [34mact[39m(() [33m=>[39m [34mrelease[39m())[33m;[39m
+    [90m396| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([32m'X'[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m397| [39m    })[33m;[39m
+    [90m398| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mrefusal status returns when the last gesture ends[2m > [22mS8: a window blur that aborts a claimed gesture restores the prior status
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m420:37[22m[39m
+    [90m418| [39m      })[33m;[39m
+    [90m419| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mtoggleTrackMute[39m([32m'music'[39m))[33m;[39m
+    [90m420| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m421| [39m      [34mact[39m(() [33m=>[39m {
+    [90m422| [39m        window[33m.[39m[34mdispatchEvent[39m([35mnew[39m [33mEvent[39m([32m'blur'[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/21]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/pending-status.test.tsx[2m > [22mpending status and unsaved Clip Gain (D-29z4, C-R37-01, PENDING-COMMIT-ORDER)[2m > [22mpending preview order[2m > [22mPO4: a Volume preview refused during a gesture flushes nothing, so the pending Master preview stays pending
+[31m[1mAssertionError[22m: expected '' to be 'Editing does not work while dragging …' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Editing does not work while dragging — let go first.[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/pending-status.test.tsx:[2m568:37[22m[39m
+    [90m566| [39m      })[33m;[39m
+    [90m567| [39m      [34mact[39m(() [33m=>[39m result[33m.[39mcurrent[33m.[39m[34mpreviewTrackVolume[39m([32m'video'[39m[33m,[39m [34m0.5[39m))[33m;[39m
+    [90m568| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mstatus)[33m.[39m[34mtoBe[39m([33mGESTURE_EDIT_BLOCKED_MESSAGE[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m569| [39m      [34mexpect[39m(result[33m.[39mcurrent[33m.[39mundoLabel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m570| [39m      expect(trackOf(result.current.arrangement, 'video').volume).toBe…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/21]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m21 failed[39m[22m[2m | [22m[1m[32m35 passed[39m[22m[90m (56)[39m
+[2m   Start at [22m 14:58:19
+[2m   Duration [22m 6.19s[2m (transform 3.22s, setup 0ms, import 5.62s, tests 4.50s, environment 2.68s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/fader-click.test.tsx,title=app/lib/arrangement/__tests__/fader-click.test.tsx > fader press%2C relative drag and double-click (D-29z3) > F7%3A a music Volume press during a separator gesture is refused with the blocked status and no focus or value change,line=441,column=30::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/fader-click.test.tsx:441:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/fader-click.test.tsx,title=app/lib/arrangement/__tests__/fader-click.test.tsx > fader press%2C relative drag and double-click (D-29z3) > D5%3A a double-click during a separator gesture is refused with the blocked status and no entry,line=537,column=30::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/fader-click.test.tsx:537:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS1 refuses to add a failed source with the failed text and no loader detail,line=195,column=30::AssertionError: expected '' to be '“Broken Song” failed to load — detail…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- “Broken Song” failed to load — details are in the library.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:195:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS2 gives the failed text when the failed source is the selection,line=205,column=30::AssertionError: expected '' to be '“Broken Song” failed to load — detail…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- “Broken Song” failed to load — details are in the library.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:205:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS3 keeps the loading text for a source that is still loading,line=212,column=30::AssertionError: expected '' to be '“Slow Song” has not loaded yet.' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- “Slow Song” has not loaded yet.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:212:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS4 stops a running preview and gives the failed text when previewing a failed source,line=222,column=30::AssertionError: expected '' to be '“Broken Song” failed to load — detail…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- “Broken Song” failed to load — details are in the library.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:222:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS5 keeps the loading text when previewing a source that is still loading,line=230,column=30::AssertionError: expected '' to be '“Slow Song” has not loaded yet.' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- “Slow Song” has not loaded yet.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:230:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS6 keeps the selection prompt for an unknown id,line=236,column=30::AssertionError: expected '' to be 'Select a sound in the library first.' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Select a sound in the library first.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:236:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS7 still adds exactly one clip for a ready source,line=246,column=30::AssertionError: expected '' to be '“Ready Song” added to the მუსიკა trac…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- “Ready Song” added to the მუსიკა track at 00:00.000. Drag a clip by its name bar to move it.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:246:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/failed-source-refusal.test.tsx,title=app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS8 follows the current state when a loading source fails later,line=259,column=30::AssertionError: expected '' to be '“Slow Song” has not loaded yet.' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- “Slow Song” has not loaded yet.%0A%0A ❯ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx:259:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S1%3A an edit refusal during a gesture shows the blocked status%2C then the previous status after release,line=275,column=37::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:275:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S2%3A an Undo refusal during a gesture keeps the entry and restores the previous status after release,line=290,column=37::AssertionError: expected '' to be 'Undo/Redo does not work while draggin…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Undo/Redo does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:290:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S3%3A a newer non-refusal status set during the gesture stays after release,line=308,column=37::AssertionError: expected '' to be 'Y' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Y%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:308:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S1-same-act%3A a refusal queued in the same batch as the release still restores the previous status,line=322,column=37::AssertionError: expected '' to be 'X' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- X%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:322:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S3-same-act%3A a new status queued in the same batch as the release stays,line=334,column=37::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:334:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S4%3A the refusal stays while a second gesture is still active and returns only when both end,line=354,column=37::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:354:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S5%3A an edit refusal followed by an Undo refusal still restores the previous status,line=368,column=37::AssertionError: expected '' to be 'Undo/Redo does not work while draggin…' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Undo/Redo does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:368:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S5b%3A refusal%2C a new status%2C a second refusal and release restore the most recent non-refusal status,line=383,column=37::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:383:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S6%3A a gesture with no refusal leaves the status unchanged,line=396,column=37::AssertionError: expected '' to be 'X' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- X%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:396:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > refusal status returns when the last gesture ends > S8%3A a window blur that aborts a claimed gesture restores the prior status,line=420,column=37::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:420:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-372/tree2/app/lib/arrangement/__tests__/pending-status.test.tsx,title=app/lib/arrangement/__tests__/pending-status.test.tsx > pending status and unsaved Clip Gain (D-29z4%2C C-R37-01%2C PENDING-COMMIT-ORDER) > pending preview order > PO4%3A a Volume preview refused during a gesture flushes nothing%2C so the pending Master preview stays pending,line=568,column=37::AssertionError: expected '' to be 'Editing does not work while dragging …' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- Editing does not work while dragging — let go first.%0A%0A ❯ app/lib/arrangement/__tests__/pending-status.test.tsx:568:37%0A%0A
