@@ -1,0 +1,17 @@
+--- /home/runner/czaba-project/store/perf/lib/report.test.ts	2026-11-06 05:30:03.160214981 +0000
++++ perf/lib/report.test.ts	2026-11-06 06:05:22.527349167 +0000
+@@ -377,12 +377,12 @@
+ 
+   it('DC-KINDS: windowed drag commits-per-move rows are wallclock, fader rows stay ratio-checked', () => {
+     const windowedDrag =
+-      /^interact\.drag\.(range|fade|trim|move)\.(stopped|playing)\.commits-per-move(\.6x)?$/;
++      /^interact\.drag\.(range|fade|trim|move|background-range)\.(stopped|playing)\.commits-per-move(\.6x)?$/;
+     const interactions = loadPerfBudgets(
+       fileURLToPath(new URL('../budgets.interactions.json', import.meta.url)),
+     );
+     const drag = interactions.filter((row) => windowedDrag.test(row.id));
+-    expect(drag).toHaveLength(16);
++    expect(drag).toHaveLength(18);
+     expect(drag.filter((row) => row.kind !== 'wallclock')).toEqual([]);
+     expect(
+       interactions.filter((row) => row.metric === 'commits-per-move' && !windowedDrag.test(row.id)),

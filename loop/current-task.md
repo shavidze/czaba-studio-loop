@@ -1,271 +1,190 @@
-# CURRENT TASK — Round 363: PERF-10b-ii-b. Guards that can fail for the three memo boundaries that still have none, and a perf record row for the lane-background range drag (PERF-10 stage 5 of 5)
+# CURRENT TASK — Round 364: PERF-10b-ii-b re-dispatch. Fix C-R363-01 (DC-KINDS guard does not know the new drag) and C-R363-02 (docs not written), apply two reviewer Lows (PERF-10 stage 5 of 5, closing)
 
-Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-06, at the round 362 → 363 planning (`b-round-362.md`).
+Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-06, at the round 363 → 364 planning (`b-round-363.md`).
 
-**Decisions** (`backlog.json` → `decisions_log_b`, v325 → v326):
-- **D-29z1178:** round 362 closes as PASS. `c-round-362.json` has browserVerified true, and gate 362 published `9da8daa` [K1].
-- **D-29z1179:** rulings on the round-362 findings (`b-round-362.md` §2). A-R362-DOC-STALE-MERMAID is fixed in this round (§1.3).
-- **D-29z1180:** C-R320-01 premise re-measured at HEAD (§0.1). One of the four boundaries is already guarded. Three still are not, and this round adds their guards.
-- **D-29z1181:** GATE320-S3 premise ruling (§0.2). No drag can produce an all-lanes range at HEAD. The uncovered gesture is the lane-background range drag, and it gets `record` rows.
-- **D-29z1182:** the scope of this round (§1).
-- **D-29z1183:** the order after this round (§5).
+**Decisions** (`backlog.json` → `decisions_log_b`, v326 → v327):
+- **D-29z1184:** round 363 closes as **C FAIL** (`c-round-363.json`: taskStatus FAIL, browserVerified true). Gate 363 skipped [K1]. The parts that passed (RB-MEMO + mutants, PERF 95/95 0 DIFF, BG-RANGE, G363-AUTH, SOURCE-SCOPE) are kept as A's partial tree; nothing is reverted.
+- **D-29z1185:** C-R363-01 ruled **option (a)**: grant `perf/lib/report.test.ts`, extend the DC-KINDS regex with `background-range` and `toHaveLength(16)` → `18`. Origin is B-spec: B never ran perf-lib against the budgets change in round 363 (L23/L58 pre-check gap). Options (b) (rename metric to dodge the guard) and (c) (drop the rows) are rejected: (b) defeats the guard, (c) shrinks the D-29z1181 measurement.
+- **D-29z1186:** rulings on A's round-363 code-reviewer results (§1.3) and the Insert Marker probe fact (§0.2).
+- **D-29z1187:** the scope of this round (§1).
+- **D-29z1188:** the order after this round is unchanged from D-29z1183 (§5).
 
-**Why this round, now.**
-- REGRESSION is not due. `regression-last.json` says 2026-11-05, so the next one falls on 2026-11-08 or later, and today is 2026-11-06.
-- No Critical, High or Medium finding can be worked in the cloud. The five open Mediums are `open_tech_lead_manual`, `awaiting_user` or `open_root` (`context/active-summary.md`).
-- PERF-10b-ii-b is next by D-29z1176. It closes PERF-10.
+**Why this round, now.** C-R363-01 and C-R363-02 are open Mediums that can be fixed in the cloud, so they come before new scope (policy rule 2). They are two tightly related bugs on one stage. REGRESSION is not due: `regression-last.json` says 2026-11-05, next on or after 2026-11-08; today is 2026-11-06.
 
 **Read first:**
 - `lessons.md`. A reads 11, 12, 23, 26, 28, 30, 31, 34, 38 and 58. C also reads 22, 37, 38, 57, 59 and 60.
-- `c-round-362.md`, `b-round-362.md` and §0 below.
-- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `AGENT_DISCOVERABLE_CODE.md` (new test helper names) and `GEORGIAN_DOCS.md`.
+- `tasks/round-363.md` (the round-363 task: §1.2, §1.3 and §2 still define the stage; this task overrides only what it says), `a-round-363.md`, `c-round-363.md`, and §0 below.
+- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
 
 **L29 note:** untagged code text below is a new value, a row id or a loop-artifact path. Every fact about a current `store/` file carries `[K#]` (§7).
 
-**Not applicable:**
-- Reference-first, product-designer, the YouTube request and the screen budget. This is a test-and-harness round with no `app/` source change and nothing new on screen.
-- Ableton conformance: not applicable.
+**Not applicable:** reference-first, product-designer, the YouTube request and the screen budget (test-and-harness round, no `app/` source change, nothing new on screen). Ableton conformance: not applicable.
 
 ## Baseline
-- HEAD is `9da8daa`, the gate-362 publication [K1]. The tree is clean (0 status entries) [K2].
-- Protected files are 11/11 OK [K6]. There is no dependency change [K8].
-- The budgets file has 252 rows, 95 of them asserted [K3].
-- **Root lanes (2026-11-05 parallel policy).** Root may apply its own patches before the round on `app/components/studio/export/*`, `app/components/studio/StudioToolbar.tsx`, or `docs/` outside docs 234 and 168. A HEAD that descends from `9da8daa` through only those paths is an allowed delta, not a STOP. This round touches no root-lane file.
+- HEAD is `9da8daa` (gate 362; gate 363 skipped) [K1]. The tree has **3 modified files**, A's round-363 partial work: `render-budget.test.tsx`, `perf/studio-lab-interactions.perf.spec.ts`, `perf/budgets.interactions.json` [K2, K3, K7, K12]. They equal `a-round-363/claims-final.txt` on K3, K7 and K12. **Keep them; do not revert or re-apply.**
+- Protected files 11/11 OK [K6]. No dependency change [K8]. Budgets: 264 rows, 95 asserted, 12 background-range `record` rows [K3].
+- `perf/lib/report.test.ts` has the old DC-KINDS regex and `toHaveLength(16)` [K19].
+- **Root lanes (2026-11-05 parallel policy).** A HEAD that descends from `9da8daa` through only `app/components/studio/export/*`, `app/components/studio/StudioToolbar.tsx` or `docs/` outside docs 234 and 168 is an allowed delta, not a STOP.
 
 ## 0. Premises and B's evidence
 
-### 0.1 C-R320-01: which memo boundaries still have no guard (D-29z1180, measured, L37)
-Round 320 added four `memo` boundaries [K5]. C's round-320 mutants (`const X = XInner;`) showed that no test failed when any one of them was removed.
+### 0.1 Option (a), sketched (L58, closes the round-363 pre-check gap)
+Scratch `/home/runner/b364-scratch/sc` = `git archive 9da8daa` + A's 3 modified files + B's patch. It does not survive the job.
+- **Patch:** `b-round-363/sketch-perflib.patch.txt` (only `perf/lib/report.test.ts`, 2 lines; sha256 in `b-round-363/sketch-perflib-dispatched.sha256`). `git apply --check` passes on the current tree.
+  - l.379–380: `/^interact\.drag\.(range|fade|trim|move)\.(stopped|playing)\.commits-per-move(\.6x)?$/` → `/^interact\.drag\.(range|fade|trim|move|background-range)\.(stopped|playing)\.commits-per-move(\.6x)?$/`
+  - l.385: `expect(drag).toHaveLength(16);` → `expect(drag).toHaveLength(18);`
+- **Result:** perf-lib **40/40**, rc 0 (`b-round-363/sketch-perf-lib.log`). `npm run typecheck` rc 0 on the scratch (`b-round-363/sketch-typecheck.log`). Claims on the scratch: `b-round-363/claims-364-sketch-output.txt` (K9 `perf-lib-sha 3a3291c7bdb3`, K19 new regex 1, len-18 1).
+- **Mutants on the sketch** (`b-round-363/mutants/`, budgets restored byte-equal afterwards):
 
-B re-ran the same four mutants on a HEAD scratch (`git archive 9da8daa`). It used the round-320 test set plus `drag-preview-render.test.tsx`: render-budget, clip-gain-pointer-preview, range-store, detail-panel, track-layout and drag-preview-render, 179 tests.
-- Script: `b-round-362/run-head-mutants.sh`, with the mutator `b-round-362/mutate.py`.
-- Results: `b-round-362/mutants-head/summary.txt` and one log per mutant.
-
-| Boundary | Removing the memo at HEAD | Ruling |
+| Mutant | Change (scratch budgets only) | Result |
 |---|---|---|
-| `ArrangementPeakPath` | **Red**: DP43, DP44, DP46, DP47 and DP48 fail (`mutants-head/ArrangementPeakPath.log`). Rounds 331–334 added them [K15] | Already guarded. Closed by L7, with no new row |
-| `ArrangementDetailPlayhead` | Green, 179/179 | Gets RB-MEMO1 |
-| `ArrangementDetailWaveform` | Green, 179/179 | Gets RB-MEMO2 |
-| `ArrangementRangeReadout` | Green, 179/179 | Gets RB-MEMO3 |
+| MU-K | `interact.drag.background-range.stopped.commits-per-move` `kind` → `deterministic` | **Red on DC-KINDS only**, 39/40 (`MU-K-perf-lib.log`) |
+| MU-N | remove `interact.drag.background-range.stopped.commits-per-move.6x` | **Red on DC-KINDS only**, 39/40 (`MU-N-perf-lib.log`) |
 
-**A-R320-REVIEW-WAVEFORM-NAME-POSITIVE** asked for a positive count for `ArrangementDetailWaveformInner`. One already exists in `drag-preview-render.test.tsx` [K15], and RB-MEMO1 adds another (`toBe(5)`). It closes on C PASS.
+So the guard keeps its meaning: every windowed drag commits-per-move row (now 18) is `wallclock`, and no other `commits-per-move` row exists in the interactions file. The 12 measured values from rounds 363 A and C still apply.
 
-### 0.2 GATE320-S3: the "all-lanes drag" (D-29z1181)
-The gate-320 reviewer wrote that on an all-tracks drag, every lane re-renders on every move, because `selectArrangementLaneRange` hands every lane the same `range` when `allTracks` is true [K11].
-- **That branch still exists** [K11]. But at HEAD no drag can set `allTracks`:
-  - In the context, the only range write with `allTracks: true` is `extendRangeToAllTracks`, the Ctrl+Shift+L keypress. The second `allTracks: true` hit is the clipboard, not the range [K11].
-  - The lane-background drag (`updateRange` in `StudioWorkspace.tsx`) writes `{ start, end, trackId }` with no `allTracks` [K11].
-  - Saba's SABA-B-11c answer #2 keeps multi-lane time selection out of scope.
-- So an "all-lanes drag" row would measure a gesture that does not exist. **Ruling:** the gap that remains is that the harness does not time the **lane-background range drag** at all. The perf range drag uses the clip body [K12].
-- This round adds that drag as `record` rows. They are a measurement, not a budget. The keyboard all-lanes extension is one write per key press, not per move, so it gets no row.
-
-### 0.3 B's sketch for the jsdom rows (L58)
-Scratch `/home/runner/b363-scratch/sc` (`git archive 9da8daa`). It does not survive the job.
-- **Patch:** `b-round-362/sketch.patch.txt` (only `render-budget.test.tsx`; sha256 in `b-round-362/sketch-dispatched.sha256`). It applies on HEAD with `git apply --check`.
-- **Rows** (added at the end of the existing `describe` block, reusing its `mountWorkspace()` and `beforeEach`):
-  - **RB-MEMO1:** select `music-1`, open the detail panel and set a range of 2–4 s on `music`. Then make five range changes (end 5…9 s). Result: `ArrangementDetailWaveformInner` = **5** (positive control) and `ArrangementDetailPlayheadInner` = **0**.
-  - **RB-MEMO2:** same setup, then two `fireEvent.change` events on `arrangement-detail-start` [K17] ("2.5", "2.75"). Result: `ArrangementDetailContentInner` = **2** (positive), `ArrangementDetailWaveformInner` = **0** and `ArrangementDetailPlayheadInner` = **0**.
-    - B first tried a status write as the trigger. The detail content does not re-render on a status write, so the positive control failed. Typing in the Start field is the real user action that re-renders the content while the waveform props stay the same.
-  - **RB-MEMO3:** set a range of 2–4 s on `music`. One range change re-renders `ArrangementRangeReadoutInner` exactly **1** time (positive). Then two `setStatus` writes re-render `StudioWorkspace` (> 0, positive) and `ArrangementRangeReadoutInner` = **0**.
-- **Listed deviation from C-R320-01's recipe.**
-  - C asked for a count of 0 "per range-drag move". RB-MEMO1 writes `setTimeRange` directly. That is the same store write the drag makes on each move: the lane-background `updateRange` and the clip range drag both write through `setTimeRange` [K11].
-  - The boundary under test is a props-equality skip, so it does not depend on the pointer path.
-  - C records this as a listed deviation, not as a B-spec Low.
-- **Checks on the sketch:**
-  - `render-budget.test.tsx` passes 13/13 (`b-round-362/sketch-render-budget.log`). The three new rows took 62–162 ms; gate 362's slowest row in this file took 1994 ms (L31 headroom).
-  - `biome check` on the file is clean (`sketch-biome.log`). `npm run typecheck` rc 0 (`sketch-typecheck.log`).
-
-| Mutant (`b-round-362/mutants/`) | Change | Red (B ran it on the sketch) |
-|---|---|---|
-| MU-P | `const ArrangementDetailPlayhead = ArrangementDetailPlayheadInner;` | **RB-MEMO1 only**, 12/13 (`MU-P-render-budget.log`) |
-| MU-W | `const ArrangementDetailWaveform = ArrangementDetailWaveformInner;` | **RB-MEMO2 only**, 12/13 (`MU-W-render-budget.log`) |
-| MU-R | `const ArrangementRangeReadout = ArrangementRangeReadoutInner;` | **RB-MEMO3 only**, 12/13 (`MU-R-render-budget.log`) |
-
-### 0.4 The perf record rows: written by A, not sketched by B
-- L58 governs asserted numbers. These rows are all `record` with `budget: null`, so no number is pinned before A's run.
-- B pins the row ids, the gesture, the reset and the liveness rule (§1.2). A's run and C's run supply the values.
-- A later PERF task may turn them into asserts from C's values.
+### 0.2 Insert Marker and clip state around the background drag (probe, dev, both viewports)
+`b-round-363/im-probe.mjs` (C's `c-round-363/bg.mjs` plus reads of `data-insert-marker` [K20], the audio clip's `data-clip-start` and width, and the Undo title). Output `b-round-363/im-probe-1440x900.json` and `-1280x720.json`:
+- `data-insert-marker` is `0.000` at every read point (before the drag, after press, mid, after release, after the name-bar reset). The marker element is `hidden` while the range exists and visible again after the reset.
+- The clip's start `0.000` and width `640` are unchanged; the Undo title is unchanged.
+- **De-confounded probe** (`b-round-363/im-probe2.mjs`, output `im-probe2-1440x900.json` and `-1280x720.json`). The first probe could not separate "unchanged" from "snapped back to 0", because the clip, the grab point and the marker all sat at 0 s. So the second probe first clicks the video-lane background 200 px to the right, which puts the marker at **5.000**. Then it runs the same drag and reset, then a second scenario: a background click (marker **7.000**) followed directly by a name-bar click.
+  - Both viewports give the same result. The marker stays **5.000** after the press, mid-drag (range 00:00.000–00:02.000), after release (range 00:00.000–00:03.000), just before the reset and after the reset. It stays **7.000** after the direct name-bar click. Clip start/width and the Undo title are unchanged throughout.
+  - Confirmed fact (dev build, Chromium): neither the background-range press/drag nor the name-bar click moves the Insert Marker. This holds the round-363 premise [K18] in the browser.
+- R-L3 still compares the marker across the **reset click** (just before it → after it), because that is the reset contract. It compares the clip start/width across the whole step.
 
 ## 1. Scope (A)
 
-### 1.1 Files (exactly 5)
+### 1.1 Files (exactly 6; the first 3 are already modified)
 | # | File | Change |
 |---|---|---|
-| 1 | `app/lib/arrangement/__tests__/render-budget.test.tsx` | From the store root: `git apply ../tmp/studio-real-loop/b-round-362/sketch.patch.txt`, unchanged. Afterwards K7 equals `b-round-362/claims-363-sketch-output.txt` |
-| 2 | `perf/studio-lab-interactions.perf.spec.ts` | §1.2 |
-| 3 | `perf/budgets.interactions.json` | §1.2: 12 new `record` rows. No existing row changes |
-| 4 | `docs/implementation/2026/quarter-IV/234-perf-playback-store.md` | §1.3 |
-| 5 | `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md` | §1.3 |
+| 1 | `app/lib/arrangement/__tests__/render-budget.test.tsx` | **No change.** Keep A's round-363 state (K7 = `rb-memo-rows 3 rb-tests 13 rb-sha f67004381b1c`) |
+| 2 | `perf/studio-lab-interactions.perf.spec.ts` | §1.3 (two reviewer Lows only) |
+| 3 | `perf/budgets.interactions.json` | **No change.** K3/K4 stay `rows 264 … ` / `d249eb747730` |
+| 4 | `perf/lib/report.test.ts` | **New grant.** From the store root: `git apply ../tmp/studio-real-loop/b-round-363/sketch-perflib.patch.txt`, unchanged. Afterwards K19 = `dc-kinds-regex-new 1 dc-kinds-regex-old 0 drag-len-18 1 drag-len-16 0 report-test-sha 20f761a88bb4` and K9 `perf-lib-sha 3a3291c7bdb3` |
+| 5 | `docs/implementation/2026/quarter-IV/234-perf-playback-store.md` | §1.4 |
+| 6 | `docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md` | §1.4 (as round-363 §1.3) |
 
-A changes nothing else.
-- No `app/` source file changes. The memo boundaries stay exactly as they are [K5].
-- `perf/lib`, the other perf specs and `perf/budgets.json` / `perf/budgets.resources.json` are not touched [K9].
-- e2e, config and the protected files are not touched.
-- A code-reviewer Medium+ finding, or any change A believes is needed beyond these 5 files, is a STOP (L11), not an edit.
+Nothing else. No `app/` source file; other `perf/lib` files, the other perf specs and `budgets.json`/`budgets.resources.json` unchanged (K9 `other-specs-sha 4ea9c8b2886d`); no e2e, config or protected file. A change needed outside these 6 files, or a code-reviewer Medium+, is a STOP (L11).
 
-### 1.2 The lane-background range drag in the perf harness
-**Gesture.**
-- Add a new step, `step = 'drag background-range stopped'`, in `runInteractionPass`. It goes right after the stopped `for (const drag of dragNames)` loop and before `step = 'drag lane stopped';` [K12]. It runs at both CPU rates (1× and 6×), stopped only.
-- **Grab point:** a lane-background point on a lane other than the clip's own. Both the press point and the point +`dragDistancePx` to its right must hit the lane element itself: `elementFromPoint` returns an element whose closest `[data-track-id]` is that lane, with no `[data-clip-id]` and no button, input or slider ancestor. Both points must lie inside the viewport.
-  - A may add a new helper, or an options parameter on `emptyLanePointAfterClip`, as long as its existing three callers [K18] get exactly the same point as before.
-  - If no such point exists, push a problem and set the live row to 0. Do not throw.
-- **Drag:** `pressedGesture` with the same two halves as `measureDrag`: `dragSteps / 2` steps to +`dragDistancePx / 2`, read the mid state, then the rest to +`dragDistancePx`, then read the end state.
-- **State read** (mid and end):
-  - the number of `[data-testid="arrangement-lane-range"]` [K18] elements inside the target lane and in all other lanes;
-  - the end time parsed from the workspace range readout `[data-testid="arrangement-range"]` [K17].
+### 1.2 C-R363-01
+Apply B's patch (file 4) exactly. Do not rename metrics, drop rows or touch other perf-lib tests.
 
-**Rows.** Write them with `rowWriter(result, 'interact.drag.background-range.stopped')` and the window from `dragWindow(whole)`. Compute them exactly as `measureDrag` computes the `rows: 'all'` stopped rows:
-- `commits-per-move`;
-- `move-components-max`;
-- `release-commits`;
-- `move-to-paint-p95`;
-- `move-components-per-move`.
+### 1.3 Reviewer Lows in `measureBackgroundRangeDrag` (D-29z1186)
+- **R-L1 (apply):** the reset problem also fires when `selectedAfter !== selectedBefore`. The problem text stays the existing "reset failed: clip selected before …, after …" line [K20 `selected-before`].
+- **R-L3 (apply):**
+  - Read `readClipState(clip)` once **before** `t0 = await nowIn(page)` (outside the measured window) and once after the reset's `waitForQuiet`. Push a problem `${label}: clip start/width changed by the background range drag or reset: …` unless `start` and `width` are equal.
+  - Read the `data-insert-marker` attribute of `[data-testid="arrangement-insert-marker"]` [K20] **after `snapshot(...)` and before the reset click**, and again after the reset's `waitForQuiet`. Push a problem `${label}: Insert Marker moved by the name-bar reset: <before> -> <after>` unless they are equal (string compare; `null` on both sides counts as a harness problem too: push `${label}: Insert Marker not found`).
+  - These checks write **problems only**. They do not change the liveness rule or any row value.
+- **R-L2 (accepted, no change):** the liveness value including the reset is the round-363 contract (`tasks/round-363.md` §1.2).
+- **Info items (no change):** the not-found sentinel message, `liveId` naming, absent rows on early return, RB-MEMO2's mount positive (RB-MEMO1 covers it).
+- **Architecture note (signal only):** near-duplicate row blocks in `measureDrag` and `measureBackgroundRangeDrag`; recorded as SIG-R363-DRAG-ROW-WRITER; a `writeDragRows` helper only if a third copy appears. Not this round.
 
-`rateRowId` gives the `.6x` copies. The liveness row is `interact.harness.drag-background-range-live` (and `.6x`), written with `setLive`. Its value is 1 only when **all** of these hold:
-- at mid and at end, exactly 1 lane-range element is in the target lane and 0 are in other lanes;
-- the end readout's end time is greater than the mid readout's end time;
-- after the reset, there are 0 lane-range elements and 0 `[data-range-start]` elements.
+### 1.4 Docs (Georgian, technical terms in English)
+**Doc 234** — exactly as `tasks/round-363.md` §1.3, with these changes:
+- **l.4 (L28 re-dispatch):** exactly `**სტატუსი:** Completed (C round 364 PASS)` (K14 md5 prefix `bd0682b1` including the newline).
+- **Stage heading:** exactly `### ეტაპი 5: PERF-10b-ii-b (rounds 363–364, D-29z1182, D-29z1187)` (en dash).
+- In stage 5 also: the DC-KINDS ruling (regex + 16 → 18, MU-K/MU-N table from §0.1) and the two reviewer checks of §1.3; the 12 values cite A's round-364 run (or round 363 where they are equal) and C's round-364 PERF.
+- **`## პრობლემები და გადაწყვეტები`:** one Problem → Solution bullet for C-R363-01 (perf-lib 39/40 → option (a)).
+- **`## შეცვლილი ფაილები`:** add `perf/lib/report.test.ts` to the round-363 list (4 dated bullets).
+- **`## ტესტირება`:** the stage-5 bullet also cites `b-round-363/sketch-perf-lib.log`, `b-round-363/mutants/summary.txt` and C's round-364 PERF-LIB row.
+- Mermaid fix (A-R362-DOC-STALE-MERMAID), the struck **PERF-10b-ii-b** TODO bullet and the 7 `## ` headings as round-363 §1.3.
 
-**Reset.** One click on the clip's name bar (`clipHeaderPoint(clip)`), then `waitForQuiet`.
-- That press selects the clip, makes its lane active and clears the range. A non-range clip press calls `setTimeRange(null)` [K18].
-- On release without movement, the name-bar gesture returns before any commit. The clip's only `seekTo(` is in the range-body branch, and the file has no `setInsertMarker` [K18]. So the press does not move the Insert Marker and adds no Undo entry.
-- After the reset, push a problem unless all of these hold: the clip is selected again (the Clip Gain fader is enabled, as `measureClipClick` reads it); 0 range elements; the Undo `title` equals its value before the step.
-- **Do not** reset with a click on the lane background. That moves the Insert Marker and would change later rows.
+**Doc 168:** as round-363 §1.3 (sequence sub-bullet under item 5 naming the reset by the clip name bar; one `## მეტრიკები` bullet: 12 rows, `record`, owner PERF-10b-ii-b, D-29z1181). l.4 unchanged [K16].
 
-**Budgets file.**
-- Add 12 rows: the 5 metrics and the live row, each at 1× and `.6x`.
-- For each row: `mode: "record"`, `budget: null` and `owner: "PERF-10b-ii-b"`. `scenario` is `lane-background range drag (time selection), stopped`, with ` (6x CPU throttle)` on the `.6x` rows. `kind` and `unit` copy the matching `interact.drag.range.stopped.*` / `interact.harness.drag-range-live` row. `note` names D-29z1181 and says the row is a record-only measurement.
-- Rows become **264**. Asserted rows stay **95** [K3].
-
-**Sequence text.** Add one entry to `interactionSequence`, between the stopped-drags entry and the lane-drag entry: `drag background-range stopped: press on an empty lane background of another lane; ${dragSteps} steps, +${dragDistancePx} px; reset with a click on the clip name bar (interact.drag.background-range.stopped.*)`.
-
-### 1.3 Docs (Georgian, technical terms in English)
-**Doc 234** (L34: the whole stage-5 section and the `## არქიტექტურა` diagram are granted). PERF-10 closes with this stage.
-- **l.4 (L28):** exactly `**სტატუსი:** Completed (C round 363 PASS)`.
-- **A new subsection** under `## მიდგომა`, after stage 4, titled exactly `### ეტაპი 5: PERF-10b-ii-b (round 363, D-29z1182)`. It contains:
-  - §0.1's table (the HEAD mutant result, with PeakPath already guarded);
-  - the three RB-MEMO rows with the MU-P/MU-W/MU-R table;
-  - §0.2's ruling;
-  - the 12 record rows and A's measured values (1× and 6×);
-  - the closure of C-R320-01, A-R320-REVIEW-WAVEFORM-NAME-POSITIVE and GATE320-S3.
-- **A-R362-DOC-STALE-MERMAID (fixed here):** the mermaid diagram matches HEAD.
-  - `S -->|useArrangementIsPlaying| T[ArrangementTransport]` becomes an edge to the Play/Stop leaf (`ArrangementTransportPlayStop leaf`).
-  - `S -->|getState, event time| M[ArrangementMarkerRow callback]` becomes an edge labelled `useArrangementIsPlayingReader, event time`.
-  - After the edit, K14 `mermaid-old-T-edge` and `mermaid-old-M-edge` are both 0. Nothing else in the diagram changes.
-- **`## შეცვლილი ფაილები`:** one dated bullet each for `render-budget.test.tsx`, the interactions spec and the budgets file.
-- **`## ტესტირება`:** one stage-5 bullet that cites only real artifacts: RB-MEMO1–3, `b-round-362/mutants/summary.txt`, the new perf rows and C's round-363 PERF row.
-- **`## TODO / შემდეგი ნაბიჯები`:** the bullet that starts "**PERF-10b-ii-b:**" is struck as done (C round 363 PASS).
-- **The `## ` count stays 7** [K14], in TEMPLATE order (L26).
-
-**Doc 168** (L34: the `### Pass-ის თანმიმდევრობა` section and the `## მეტრიკები` section are granted for additions only; l.4 is unchanged [K16]):
-- In the sequence, one sub-bullet under item 5 for the background drag and its reset (round 363).
-- In `## მეტრიკები`, one bullet naming the 12 rows, `record`, owner PERF-10b-ii-b, with D-29z1181.
+No other doc is in the PERF-10 feature: `grep -rn 'In Progress (stage' docs/implementation` gives doc 234 and doc 232 (PERF-DRAG-PREVIEW, a different feature, not granted).
 
 ## 2. Acceptance
 
 ### 2.1 A rows
 | Row | Command / check | Pass |
 |---|---|---|
-| A-CLAIMS pre | `bash b-round-362/claims-363.sh`, from the loop root | equals `b-round-362/claims-363-planning-output.txt` |
-| A-CLAIMS final | same | <ul><li>K1, K5, K6, K8, K9, K10, K11, K13, K15 and K17 equal the planning output.</li><li>K7 equals `claims-363-sketch-output.txt`.</li><li>K3 = `rows 264 asserted 95 bg-rows 12 bg-record 12 bg-owner PERF-10b-ii-b`.</li><li>K12 `bg-mentions` ≥ 2, `dragNames 1`, `lane-drag-stopped-step 1`.</li><li>K14 = `doc234-l4 0555f820 doc234-h2 7 doc234-stage5 1 mermaid-old-T-edge 0 mermaid-old-M-edge 0` (`0555f820` is the md5 prefix of the §1.3 l.4 line with its newline).</li><li>K18 equals the planning output.</li><li>K16: `doc168-seq-heading 1`, `doc168-l4 ca98da32`, `doc168-bg` ≥ 1.</li><li>K2 = `9da8daa 5`.</li></ul> |
-| A-TYPE / A-LINT | `npm run typecheck` (covers `perf/**`, L30); `npm run lint` | rc 0; lint warnings ≤ 205 (equal to HEAD) |
-| A-TESTS | `npx vitest run --reporter=verbose app/lib/arrangement/__tests__/render-budget.test.tsx` | 13/13. RB-MEMO1–3 are named in the log. Each row runs under 50 % of its timeout (L31) |
-| A-MUTANT | B's MU-P, MU-W and MU-R (§0.3) on A's tree, one at a time, using `b-round-362/mutate.py` on a copy. Restore after each and `git diff --stat` the source | Each is red on its own RB-MEMO row only. The source tree is unchanged afterwards. Logs go under `a-round-363/` |
-| A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs` (GATE304-M1) | 40/40 |
-| A-PERF | Production, **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`. Then `python3 -I b-round-329/perf-rowcmp.py c-round-362/latest-interactions.json <A's test-results/perf/latest-interactions.json>` | <ul><li>rc 0; `complete`; `failures` []; `problems` [] in every pass.</li><li>264 rows; **95/95** asserted pass; 0 NEW.</li><li>`interact.harness.drag-background-range-live` = 1 at 1× and 6×.</li><li>All 12 new rows have a value; A records them.</li><li>**Hard floor:** no pre-existing deterministic components or commits row is higher than C362.</li><li>Rows measured **before** the new step (load, click, zoom with 1 clip, the four stopped drags) are reported as INFO if they differ.</li><li>Rows measured **after** it (the stopped lane drag onward, both rates) must equal C362. An unexplained difference there is a STOP.</li><li>Wallclock rows are recorded only.</li><li>`durationMs` ≤ 560000, recorded.</li></ul> |
-| A-REVIEW | `code-reviewer` on the 5 files | No unruled Medium+ (a Medium+ is a STOP, §1.1). Any change after the review goes back to the reviewer (L11). The Architecture note goes to B |
-| A-DOC | docs 234 and 168 | as §1.3 |
+| A-CLAIMS pre | `bash b-round-363/claims-364.sh` (loop root) | equals `b-round-363/claims-364-planning-output.txt` |
+| A-CLAIMS final | same | <ul><li>K1, K3, K4, K5, K6, K7, K8, K10, K11, K13, K15, K17, K18 equal planning.</li><li>K2 = `9da8daa 6`.</li><li>K9 = `perf-lib-sha 3a3291c7bdb3 other-specs-sha 4ea9c8b2886d perf-lib-files 10`.</li><li>K12: `bg-mentions` ≥ 4, `dragNames 1`, `lane-drag-stopped-step 1` (spec-sha recorded).</li><li>K14 = `doc234-l4 bd0682b1 doc234-h2 7 doc234-stage5 1 mermaid-old-T-edge 0 mermaid-old-M-edge 0`, `dc-kinds-mention` ≥ 1.</li><li>K16: `doc168-seq-heading 1 doc168-l4 ca98da32`, `doc168-bg` ≥ 1.</li><li>K19 as §1.1 row 4.</li><li>K20: `insert-marker-reads` ≥ 1, `selected-before` ≥ 3, the rest equal planning.</li></ul> |
+| A-TYPE / A-LINT | `npm run typecheck`; `npm run lint` | rc 0; lint warnings ≤ 205 |
+| A-TESTS | `npx vitest run --reporter=verbose app/lib/arrangement/__tests__/render-budget.test.tsx` | 13/13 (unchanged file; regression check) |
+| A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs` | **40/40** |
+| A-PERF | Production, **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`, then `python3 -I b-round-329/perf-rowcmp.py c-round-363/latest-interactions.json <A's latest-interactions.json>` | <ul><li>rc 0; `complete`; `failures` []; `problems` [] in every pass (the new R-L1/R-L3 problems must not fire).</li><li>264 rows; 95/95 asserted pass; 0 NEW.</li><li>`interact.harness.drag-background-range-live` = 1 at 1× and 6×.</li><li>Every non-wallclock row equals C363 (the new reads are outside the measured windows). A difference in a row measured before or in the background step is reported as INFO with its values; a difference in any row after it is a STOP.</li><li>`durationMs` ≤ 560000, recorded.</li></ul> |
+| A-REVIEW | `code-reviewer` on the final 6 files | No unruled Medium+ (STOP). Any edit after the review goes back to the reviewer (L11); an edit to the spec after A-PERF means A-PERF runs again |
+| A-DOC | docs 234 and 168 | as §1.4 |
 
 ### 2.2 C rows
-Use a warm dev server (L38): load `/studio-lab` once in a browser before any timed probe. If `:5173` returns "504 Outdated Optimize Dep", restart it first.
+Warm dev server first (L38). If `:5173` returns "504 Outdated Optimize Dep", restart it.
 
 | Row | How | Pass |
 |---|---|---|
-| CLAIMS | `bash b-round-362/claims-363.sh` | equals A's final |
-| SOURCE-SCOPE | `git status --short --untracked-files=all`; `git apply -R --check ../tmp/studio-real-loop/b-round-362/sketch.patch.txt`; `git diff --stat` | <ul><li>5 modified files, 0 untracked.</li><li>The sketch patch reverse-applies.</li><li>No `app/` file outside `render-budget.test.tsx` changed.</li></ul> |
-| RB-MEMO (jsdom guard rows) | A-TESTS' command, then B's MU-P, MU-W and MU-R on a scratch copy | 13/13 on the tree. Each mutant is red on its own row only |
-| MUTANT (C's own, scratch, predicted first in `c-round-363/progress.json`) | One mutant that is **not** MU-P, MU-W or MU-R and that should defeat a boundary. Examples: <ul><li>`ArrangementDetailContentInner` passes `selection={{ ...selection }}` to the waveform;</li><li>the waveform passes `clipStart={clip.start + 0}` and a fresh object prop to the playhead;</li><li>`ArrangementRangeReadout` gets an inline `key` that changes on each StudioWorkspace render.</li></ul> Run `render-budget.test.tsx` on it | <ul><li>Red on an RB-MEMO row, or reported with its counts if it stays green.</li><li>Scratch is under `c-round-363/` only and deleted afterwards (L60); `store/` is unchanged.</li><li>A green mutant that really re-renders a guarded component is a finding against B's rows.</li></ul> |
-| PERF (browser, production, alone) | A-PERF's command and comparison | <ul><li>As A-PERF: 264 rows, 95/95, 0 NEW, live = 1 at both rates, the hard floor, and the before/after rule.</li><li>C records the 12 new values.</li><li>`durationMs` is recorded.</li></ul> |
+| CLAIMS | `bash b-round-363/claims-364.sh` | equals A's final |
+| SOURCE-SCOPE | `git status --short --untracked-files=all`; `git apply -R --check ../tmp/studio-real-loop/b-round-363/sketch-perflib.patch.txt`; `git apply -R --check ../tmp/studio-real-loop/b-round-362/sketch.patch.txt`; `git diff --stat` | 6 modified, 0 untracked; both patches reverse-apply; no `app/` file except `render-budget.test.tsx` changed |
 | PERF-LIB | A-PERF-LIB | 40/40 |
-| BG-RANGE (browser, dev, both viewports; the harness premise) | On `/studio-lab` after "Demo collection ready" (L48), add the demo Full mix. Then, with screenshots at 1440×900 and 1280×720: <ol><li>Drag 120 px right on an empty background of another lane.</li><li>Read the lane-range elements per lane, the workspace range readout, the selected clip and the active lane.</li><li>Click the clip's name bar.</li></ol> | <ul><li>During and after the drag: exactly one lane-range element, on the dragged lane, and none on other lanes.</li><li>The readout shows a positive length.</li><li>No clip is selected.</li><li>After the name-bar click: 0 range elements, the clip is selected and the Insert Marker position text is unchanged.</li></ul> |
-| MARKER-NONE-PLAYING-BACK (browser, dev, 1440×900; best effort; the round-362 playing half) | Load `/studio-lab` and add the Full mix, with no markers. Press Home, then Space. Press Ctrl+Left as soon as possible after Space; script it in the same `page.evaluate`/keyboard sequence. Repeat up to 5 times | <ul><li>If the status reads "No more markers before the playhead", the row passes.</li><li>Otherwise C records the status texts and the position at the key press, as "not observable". That is not a FAIL.</li><li>Fact: the backward target is null only while the position is ≤ `MARKER_TIME_EPS` (0.5 ms) [K18].</li><li>This row does not count toward browserVerified.</li></ul> |
-| G363-AUTH (browser, both viewports) | `c-round-358/auth.mjs`, copied to `c-round-363/` | As G362-AUTH. A fake-bearer 500 that fails closed while the mock is down goes under `blocked` |
-| DOCS | docs 234 and 168 | <ul><li>Doc 234 l.4 byte-exact: `**სტატუსი:** Completed (C round 363 PASS)`.</li><li>7 `## ` headings in TEMPLATE order (L26).</li><li>The mermaid diagram has no old T/M edge (K14).</li><li>Every count in stage 5 matches the live budgets file and C's PERF run (L34).</li><li>Every test the docs name exists (L26).</li><li>Doc 168 l.4 is unchanged (K16).</li><li>`grep -rl 'C round [0-9]* pending' docs/implementation` gives 0 files.</li></ul> |
+| MUTANT-PERFLIB (C's own, scratch under `c-round-364/`, predicted first in `c-round-364/progress.json`) | One budgets mutant that is not MU-K or MU-N, e.g. add a `interact.drag.background-range.playing.commits-per-move` row with `kind: "deterministic"`, or set the `.6x` background row's `metric` to `commits-per-move` on a non-drag id. Run perf-lib on it | Red on DC-KINDS, or reported with its counts if green. Scratch deleted (L60); `store/` unchanged |
+| RB-MEMO | A-TESTS' command | 13/13 (the round-363 mutant evidence stands; the file is unchanged, K7) |
+| PERF (browser, production, alone) | A-PERF's command and comparison against `c-round-363/latest-interactions.json` | As A-PERF; C records the 12 background values and `durationMs` |
+| BG-RANGE (browser, dev, both viewports) | As `tasks/round-363.md` §2.2 BG-RANGE (`c-round-363/bg.mjs` may be copied), **plus** reading `data-insert-marker` just before and after the name-bar click and the clip start/width before the drag and after the click | Round-363 criteria, plus: Insert Marker attribute equal across the click; clip start/width unchanged |
+| MARKER-NONE-PLAYING-BACK (best effort, 1440×900) | As `tasks/round-363.md` §2.2 | Pass or "not observable" with values; does not count toward browserVerified |
+| G364-AUTH (browser, both viewports) | `c-round-363/auth.mjs` copied to `c-round-364/` | `/studio-lab` opens anonymously; `/studio/<id>` shows sign-in required with 0 audio sources; `/api/studio-token` without credentials 401 and no token. Fake-bearer 500 that fails closed goes under `blocked` |
+| DOCS | docs 234 and 168 | <ul><li>Doc 234 l.4 byte-exact `**სტატუსი:** Completed (C round 364 PASS)`; stage heading byte-exact (§1.4).</li><li>7 `## ` in TEMPLATE order (L26); no old mermaid edge (K14).</li><li>Every count in stage 5 matches the live budgets file, B's perf-lib evidence and C's PERF run (L34); every named test exists (L26).</li><li>Doc 168 l.4 unchanged (K16).</li><li>`grep -rl 'C round [0-9]* pending' docs/implementation` → 0 files.</li></ul> |
 
-**Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify` and the e2e smoke.
+**Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
 
-**browserVerified** is false if PERF, BG-RANGE or G363-AUTH does not run. None of them needs the backend.
+**browserVerified** is false if PERF, BG-RANGE or G364-AUTH does not run. None needs the backend.
 
-**L57: write all L57 fields** in `c-round-363.json`, and run `python3 -I tools/l57-check.py c-round-363.json c-round-363/l57-check.txt` until it exits 0.
-- `assertsSpecified`: RB-MEMO1, RB-MEMO2 and RB-MEMO3. `interact.harness.drag-background-range-live` is an acceptance value, `record` in the budgets file, and is not listed here.
-- `mutantsRecorded`: MU-P, MU-W, MU-R and C's own.
-- `mutantRedOnSketch`: `b-round-362/mutants/MU-P-render-budget.log`, `MU-W-render-budget.log` and `MU-R-render-budget.log`.
-- `gateChecksRunOnSketch`: `b-round-362/sketch-typecheck.log`, `b-round-362/sketch-biome.log` and `b-round-362/sketch-render-budget.log`. The full suite was **not** run by B on this sketch; the gate runs it, so write that as the reason.
-- `affectedChecksNamed`: the interactions perf spec, `render-budget.test.tsx` and the perf-lib tests.
-- `affectedChecksRunOnSketch`: `b-round-362/sketch-render-budget.log` and `b-round-362/mutants/summary.txt`. The perf spec has no B sketch run (§0.4).
+**L57: write all L57 fields** in `c-round-364.json` and run `python3 -I tools/l57-check.py c-round-364.json c-round-364/l57-check.txt` until it exits 0:
+- `assertsSpecified`: `DC-KINDS` (the changed assert) plus RB-MEMO1, RB-MEMO2, RB-MEMO3 (unchanged, regression).
+- `mutantsRecorded`: MU-K, MU-N and C's own perf-lib mutant.
+- `mutantRedOnSketch`: `b-round-363/mutants/MU-K-perf-lib.log`, `b-round-363/mutants/MU-N-perf-lib.log` (and the round-363 RB-MEMO logs `b-round-362/mutants/MU-P|MU-W|MU-R-render-budget.log`).
+- `gateChecksNamed`: full vitest, typecheck, biome. `gateChecksRunOnSketch`: `b-round-363/sketch-typecheck.log`, `b-round-363/sketch-perf-lib.log`; the full suite was not run by B on this sketch (the gate runs it) — write that as the reason. `chainHeadGateRunGreen`: gate 362's run.
+- `affectedChecksNamed`: perf-lib tests, the interactions perf spec, `render-budget.test.tsx`. `affectedChecksRunOnSketch`: `b-round-363/sketch-perf-lib.log`, `b-round-363/mutants/summary.txt`; the spec's R-L1/R-L3 checks have no B perf run (problems-only checks; the probe `b-round-363/im-probe-*.json` is the premise evidence).
 
 ## 3. Neighbouring behaviour that could break
-- **Later perf rows.** The new step runs before the stopped lane drag. If its reset leaves a different selection, active lane, Insert Marker or Undo state, later rows change. A-PERF and PERF require every pre-existing deterministic row to equal C362.
-- **The existing helpers.** `emptyLanePointAfterClip` has three callers [K18]. If A changes it, their points must stay the same, and the rows above guard it.
-- **render-budget.test.tsx.** The new rows share its `beforeEach` and fake rAF. They add about 0.3 s to a file that took 8.9 s at gate 362.
-- **App behaviour:** unchanged, because no `app/` source changes. G363-AUTH guards purchase protection.
+- **Later perf rows:** the new reads must stay outside the measured windows; A-PERF/PERF require every non-wallclock row equal to C363.
+- **R-L3 false positive:** if the name-bar click does move the Insert Marker in the production pass, A-PERF reports a problem. That is a STOP with the two values, not a reason to drop the check; B then rules on whether it is an app bug (the round-363 premise [K18]) or a harness read issue.
+- **Other perf-lib tests:** only DC-KINDS changes; 40/40 guards the rest.
+- **App behaviour:** unchanged (no `app/` source). G364-AUTH guards purchase protection.
 
 ## 4. STOP conditions (A)
-- An A-CLAIMS pre mismatch, or a final mismatch outside §2.1. A HEAD that descends through root-lane paths only is not a mismatch.
-- The sketch patch does not apply, or a change is needed outside the 5 files.
-- An RB-MEMO row fails on A's tree, or a B mutant is not red on its own row.
-- A-PERF: any asserted row fails; any NEW row; any `problems` entry; the live row is 0 at either rate; any pre-existing deterministic row differs from C362; or `durationMs` is above 560000.
-- The code-reviewer reports a Medium+ finding.
+- A-CLAIMS pre mismatch, or a final mismatch outside §2.1 (root-lane HEAD deltas excepted).
+- B's patch does not apply, or perf-lib is not 40/40 after it.
+- Any change needed outside the 6 files.
+- A-PERF: an asserted row fails; any NEW row; any `problems` entry; the live row is 0; a non-wallclock row after the background step differs from C363; `durationMs` > 560000.
+- A code-reviewer Medium+.
 
 ## 5. Routed, not in scope
-- **D-29z1179 (round 362 findings, `b-round-362.md` §2):**
-  - A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT (= gate 362 finding 1) goes to PERF-11, which owns the `ArrangementContext.tsx` selector work. It is not a harness-round edit.
-  - GATE362-L2-PS4-REACH: no action. The K7-style sweep for `setPlaying(` callers stays a claims line in any task that touches the playback store.
-  - The gate-362 Architecture proposal (`ArrangementTransportLeaves.tsx`) is recorded as SIG-R362-TRANSPORT-LEAVES-FILE. It is not scheduled.
-  - C-R362-MARKER-PLAYING-NONE-UNREACHABLE: the forward playing branch is not reachable by a user, because project end is a forward target and playback stops there. The backward branch needs a position ≤ 0.5 ms while playing [K18]. C gets one best-effort row for it (MARKER-NONE-PLAYING-BACK). IM24 stays the guard.
-- **Architecture checkpoint:** PERF-10 closes with this round, which is a feature boundary. B has refreshed the bounded root request (`b-round-362/root-request-arch-checkpoint.md`). It is non-blocking.
-- **D-29z1183, next:**
-  1. REGRESSION, if the next planning is on or after 2026-11-08.
-  2. PERF-9.
-  3. PERF-11 (absorbs GATE361-S1, SIG-R360-STATUS-WRITE-RENDERS-WORKSPACE, SIG-R361-CONTEXT-LEAF-CONSUMERS and A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT).
-  4. PERF-12…15, SYS-R2-FAKE-FIDELITY and SYS-CLOCK-DETERMINISM.
-  5. STEM-LANES, SYS-1…3, STORE-2b…5, REVIEW-RECOMMENDATIONS and T12-ADVANCED.
-
-  RETRO comes at round 368 or at the end of STUDIO-PERFORMANCE.
+- **SIG-R363-DRAG-ROW-WRITER** (A's reviewer Architecture note): signal only.
+- **B-R363-PRECHECK-PERFLIB** (B's own origin note for C-R363-01): a RETRO-368 input — "a task that adds a row to a budgets file runs every perf/lib test that reads that file on the sketch". B does not edit `lessons.md`; RETRO does.
+- **Architecture checkpoint:** PERF-10 closes with this round; the bounded root request `b-round-362/root-request-arch-checkpoint.md` stays open and non-blocking.
+- **D-29z1188, next:** REGRESSION if the next planning is on or after 2026-11-08 → PERF-9 → PERF-11 (absorbs GATE361-S1, SIG-R360-STATUS-WRITE-RENDERS-WORKSPACE, SIG-R361-CONTEXT-LEAF-CONSUMERS, A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT) → PERF-12…15 → SYS-R2-FAKE-FIDELITY → SYS-CLOCK-DETERMINISM → STEM-LANES → SYS-1…3 → STORE-2b…5 → REVIEW-RECOMMENDATIONS → T12-ADVANCED → phase-2 entries (skip rule). RETRO at round 368 or at the end of STUDIO-PERFORMANCE.
 
 ## 6. Deliverables
-- **A:** `a-round-363.md`, with every §2.1 row, its evidence under `a-round-363/`, the 12 new perf values and the code-reviewer result.
-- **C:** `c-round-363.md` and `c-round-363.json` with all L57 fields, and evidence under `c-round-363/`.
+- **A:** `a-round-364.md` with every §2.1 row and evidence under `a-round-364/`, the 12 background values, the code-reviewer result.
+- **C:** `c-round-364.md`, `c-round-364.json` (all L57 fields), evidence under `c-round-364/`.
 
 ## 7. Claims
-Run `bash b-round-362/claims-363.sh` from the loop root. `CLAIMS_STORE` points it at a scratch.
+Run `bash b-round-363/claims-364.sh` from the loop root (`CLAIMS_STORE` points it at a scratch).
 
 | Output | File |
 |---|---|
-| Planning, on `9da8daa` (clean tree) | `b-round-362/claims-363-planning-output.txt` |
-| Sketch (render-budget rows only) | `b-round-362/claims-363-sketch-output.txt` |
+| Planning, on `9da8daa` + A's 3 files | `b-round-363/claims-364-planning-output.txt` |
+| Sketch (scratch + perf-lib patch) | `b-round-363/claims-364-sketch-output.txt` |
 
 | Tag | What it pins |
 |---|---|
-| K1 | gate 362 status and commit |
+| K1 | gate 362 status/commit; gate 363 status/reason |
 | K2 | HEAD and the status entry count |
-| K3 | budgets rows; asserted count; background-range rows, their `record` count and owner |
-| K4 | budgets sha256 prefix |
-| K5 | the four `memo` lines: `ArrangementDetailPlayhead`, `ArrangementDetailWaveform` (`ArrangementDetailPanel.tsx`), `ArrangementRangeReadout` (`StudioWorkspace.tsx`) and `ArrangementPeakPath` (`ArrangementClip.tsx`) |
+| K3 / K4 | budgets rows, asserted, background rows/record/owner; budgets sha |
+| K5 | the four `memo` lines |
 | K6 | protected files OK |
-| K7 | RB-MEMO row count, test count and sha of `render-budget.test.tsx` |
-| K8 | `package.json` sha256 prefix |
-| K9 | sha over `perf/lib`; sha over the two other perf specs and the two other budget files |
+| K7 | RB-MEMO rows, test count, sha of `render-budget.test.tsx` |
+| K8 | `package.json` sha |
+| K9 | sha over `perf/lib`; sha over the other perf specs and budget files; perf/lib file count |
 | K10 | cited artifacts missing |
-| K11 | `allTracks: true` hits in `ArrangementContext.tsx` (the Ctrl+Shift+L range write and the clipboard); `allTracks` inside the workspace `updateRange`; the `allTracks` branch in `selectArrangementLaneRange` |
-| K12 | the interactions spec: `background-range` mentions, the `dragNames` line, the `'drag lane stopped'` step and its sha |
+| K11 | `allTracks` writers and the lane-selector branch |
+| K12 | interactions spec: background mentions, `dragNames`, lane-drag step, sha |
 | K13 | quarter-IV doc count; `pending` docs |
-| K14 | doc 234: l.4 md5 prefix, `## ` count, the stage-5 heading and the two old mermaid edges |
-| K15 | DP43–DP48 rows and the `ArrangementDetailWaveformInner` positive in `drag-preview-render.test.tsx` |
-| K16 | doc 168: sequence heading, l.4 md5 prefix and `background-range` mentions |
-| K17 | test ids `arrangement-detail-start`, `arrangement-detail-range` and `arrangement-range` |
-| K18 | `arrangement-lane-range` test id; the `kind !== 'range'` range clear, the `seekTo(` calls and the `setInsertMarker` hits in `ArrangementClip.tsx`; `emptyLanePointAfterClip` callers; `MARKER_TIME_EPS` and the backward null return in `markers.ts` |
+| K14 | doc 234: l.4 md5, `## ` count, stage-5 heading, old mermaid edges, DC-KINDS mention |
+| K15 | DP43–48 and the waveform positive in `drag-preview-render.test.tsx` |
+| K16 | doc 168: sequence heading, l.4 md5, background mentions |
+| K17 | detail/range test ids |
+| K18 | lane-range test id; clip range clear, `seekTo(` and `setInsertMarker` in `ArrangementClip.tsx`; `emptyLanePointAfterClip` callers; marker EPS/null return |
+| K19 | `report.test.ts`: new/old DC-KINDS regex, `toHaveLength(18|16)`, sha |
+| K20 | spec: `data-insert-marker` reads, background functions, `selectedBefore` count; `StudioWorkspace.tsx` insert-marker test id and attribute |
 
-The values are in the two output files.
-
-L29 check for C: every backticked `store/` path or symbol in §0.1, §0.2 and the Baseline section that states a current-code fact carries a `[K#]`. C lists any untagged one as a B-spec Low; no separate grep tool is required.
+L29 check for C: every backticked `store/` fact in the Baseline and §0 carries a `[K#]`; an untagged one is a B-spec Low.

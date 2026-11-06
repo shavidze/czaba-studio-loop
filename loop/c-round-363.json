@@ -1,0 +1,126 @@
+{
+ "taskStatus": "FAIL",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T05:47:36.4612870Z",
+  "round": 363,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R363-01",
+   "severity": "medium",
+   "steps": [
+    "cd store; npx vitest run --root $PWD --config tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs"
+   ],
+   "expected": "40/40 (A-PERF-LIB, PERF-LIB rows)",
+   "actual": "39/40. perf/lib/report.test.ts l.378-389 DC-KINDS fails: its windowedDrag regex /^interact\\.drag\\.(range|fade|trim|move)\\.(stopped|playing)\\.commits-per-move/ does not know interact.drag.background-range.stopped.commits-per-move(.6x). Rows are kind wallclock, so the guard's intent holds; only the regex/toHaveLength(16) is stale. perf/lib was not granted (task K9), so A STOPped correctly.",
+   "evidence": "c-round-363/perf-lib.log; a-round-363/perf-lib.log",
+   "origin": "B-spec (perf/lib not granted; L23/L58 pre-check gap, noted by A)"
+  },
+  {
+   "id": "C-R363-02",
+   "severity": "medium",
+   "steps": [
+    "Read docs/implementation/2026/quarter-IV/234-perf-playback-store.md l.4 and grep stage 5; grep background-range in 168"
+   ],
+   "expected": "l.4 'Completed (C round 363 PASS)', stage-5 section, mermaid fix, doc 168 additions (DOCS row)",
+   "actual": "A STOPped before docs: doc 234 l.4 still 'In Progress (stage 4 of 5; C round 362 PASS)', 0 stage-5 headings, doc 168 has 0 background-range mentions. Code-reviewer Lows not applied (not run against final tree).",
+   "evidence": "a-round-363.md STOP section; direct grep of docs",
+   "origin": "A (STOP before docs; consequence of C-R363-01)"
+  }
+ ],
+ "passed": [
+  "RB-MEMO",
+  "MUTANT-MU-P",
+  "MUTANT-MU-W",
+  "MUTANT-MU-R",
+  "MUTANT-C363",
+  "PERF",
+  "BG-RANGE",
+  "G363-AUTH",
+  "SOURCE-SCOPE"
+ ],
+ "failed": [
+  "PERF-LIB",
+  "DOCS"
+ ],
+ "blocked": [
+  "G363-AUTH sub-row: fake-bearer GET /api/studio-token returns 500 (fails closed, no token body) because mock backend is unavailable in the cloud; not a bypass"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "abletonConformance": "not applicable (test-and-harness round, no app source change)",
+ "notRun": [
+  "MARKER-NONE-PLAYING-BACK (best effort, does not count toward browserVerified)",
+  "CLAIMS (claims-363.sh) not re-run by C; A's claims-final shows only K2/K14/K16 differ because docs not done"
+ ],
+ "observations": {
+  "RB-MEMO": "render-budget.test.tsx 13/13 incl. RB-MEMO1-3 (70/73/69 ms); c-round-363/render-budget.log",
+  "mutants": "MU-P red on RB-MEMO1 only, MU-W on RB-MEMO2 only, MU-R on RB-MEMO3 only (12/13 each), scratch deleted; C's own mutant selection={{...selection}} on waveform red on RB-MEMO2; store tree unchanged (3 modified files, same as before)",
+  "PERF": "production run alone rc 0, 1 passed 8.2m, complete true, failures [], durationMs 476892; 264 rows, asserted 95/95 pass, 0 DIFF vs C362, 8 NEW non-wallclock rows (37 / 7.383 / 1 / live=1 at 1x and 6x); wallclock: commits-per-move 0.983, move-to-paint-p95 2.3 ms (1x), 14.7-18 ms (6x); c-round-363/rowcmp.txt, latest-interactions.json",
+  "BG-RANGE": "1440x900 and 1280x720: lane-background drag +120px on video lane: mid and end exactly one lane-range on 'video', none elsewhere; readout 'Time selection 00:00-00:02 -> 00:03 length 00:03'; Clip Gain fader disabled after drag (no clip selected); after name-bar click 0 range elements, 0 range-start, fader enabled (clip selected), position text unchanged 00:00.000 (playhead text only; Insert Marker not separately read). Screens bg-range-*.png bg-reset-*.png",
+  "G363-AUTH": "both viewports: /studio-lab opens demo with auth_user null, workspace present; /studio/middle-east shows 'sign in required', 0 audio src; /api/studio-token GET 401, no token in body",
+  "scopeNote": "B's sketch patch reverse-applies cleanly; only render-budget.test.tsx, budgets.interactions.json and the interactions spec modified; no app/ source change"
+ },
+ "manifestPaths": [
+  "c-round-363/perf-lib.log",
+  "c-round-363/render-budget.log",
+  "c-round-363/rowcmp.txt",
+  "c-round-363/latest-interactions.json",
+  "c-round-363/bg-1440x900.json",
+  "c-round-363/bg-1280x720.json",
+  "c-round-363/auth.json",
+  "c-round-363/mutant-ArrangementDetailPlayhead.log",
+  "c-round-363/mutant-ArrangementDetailWaveform.log",
+  "c-round-363/mutant-ArrangementRangeReadout.log",
+  "c-round-363/mutant-C363.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 0,
+ "assertsSpecified": [
+  "RB-MEMO1",
+  "RB-MEMO2",
+  "RB-MEMO3"
+ ],
+ "mutantsRecorded": [
+  "MU-P",
+  "MU-W",
+  "MU-R",
+  "C-own-C363"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-362/mutants/MU-P-render-budget.log",
+  "b-round-362/mutants/MU-W-render-budget.log",
+  "b-round-362/mutants/MU-R-render-budget.log"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "biome"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-362/sketch-typecheck.log",
+  "b-round-362/sketch-biome.log",
+  "b-round-362/sketch-render-budget.log"
+ ],
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": [
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "app/lib/arrangement/__tests__/render-budget.test.tsx",
+  "perf/lib tests"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-362/sketch-render-budget.log",
+  "b-round-362/mutants/summary.txt"
+ ]
+}

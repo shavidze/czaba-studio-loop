@@ -1,0 +1,69 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b364-scratch/sc[39m
+
+ [31m❯[39m perf/lib/report.test.ts [2m([22m[2m34 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 25[2mms[22m[39m
+     [32m✓[39m DC-INT: a count row that differs by 1 is nondeterministic[32m 2[2mms[22m[39m
+     [32m✓[39m DC-INT-OK: identical count samples pass[32m 0[2mms[22m[39m
+     [32m✓[39m DC-RATIO: a numerator change fails the ratio row[32m 0[2mms[22m[39m
+     [32m✓[39m DC-DENOM: a denominator change fails even when the values are identical[32m 1[2mms[22m[39m
+     [32m✓[39m DC-RATIO-ALT: the 1a {commits, moves} pair is used when the window pair is absent[32m 1[2mms[22m[39m
+     [32m✓[39m DC-MISSING: a ratio row without its detail pair fails[32m 1[2mms[22m[39m
+     [32m✓[39m DC-MIB-OK: a MiB spread of 0.1 passes[32m 0[2mms[22m[39m
+     [32m✓[39m DC-MIB: a MiB spread over 0.1 fails[32m 0[2mms[22m[39m
+     [32m✓[39m DC-UNKNOWN: a deterministic row with an unknown unit fails closed, even with 0 or 1 samples[32m 1[2mms[22m[39m
+     [32m✓[39m DC-CONTRACT: every metric and unit class resolves in the documented order[32m 1[2mms[22m[39m
+     [32m✓[39m DC-WALL: a wallclock row is never determinism-checked[32m 0[2mms[22m[39m
+     [32m✓[39m DC-CROSS: a 1x vs 6x median difference fails exactly, with the cross set[32m 0[2mms[22m[39m
+     [32m✓[39m DC-CROSS-OFF: the same 6x shape has no cross failure without the cross set[32m 0[2mms[22m[39m
+     [32m✓[39m DC-PARTIAL: a partial run reports a failed assert only with assertWhenPartial[32m 0[2mms[22m[39m
+     [32m✓[39m DC-ORDER: failures keep the documented order[32m 0[2mms[22m[39m
+     [32m✓[39m DC-RATE: rowRate inverts rateRowId[32m 0[2mms[22m[39m
+     [32m✓[39m DC-MIB-EDGE: a MiB spread of exactly 0.2 fails[32m 0[2mms[22m[39m
+     [32m✓[39m DC-MIB-NONFINITE: a NaN or infinite MiB sample fails closed[32m 0[2mms[22m[39m
+[31m     [31m×[31m DC-KINDS: windowed drag commits-per-move rows are wallclock, fader rows stay ratio-checked[39m[32m 13[2mms[22m[39m
+     [32m✓[39m LOAF1: harness.loaf-scripts with 'no entries'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF1: harness.loaf-scripts with 'entries whose scripts arrays are all …'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF1: harness.loaf-scripts with 'entries without a scripts field'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF1: harness.loaf-scripts with 'one entry with a script beside an emp…'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF2: injectedLoafEntries keeps only frames containing the callback: 'a frame that starts before the callba…'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF2: injectedLoafEntries keeps only frames containing the callback: 'an app frame that overlaps the start …'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF2: injectedLoafEntries keeps only frames containing the callback: 'a frame that starts after the callbac…'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF2: injectedLoafEntries keeps only frames containing the callback: 'edges within 1 ms'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF2: injectedLoafEntries keeps only frames containing the callback: 'an app frame before the callback besi…'[32m 0[2mms[22m[39m
+     [32m✓[39m LOAF2: injectedLoafEntries keeps only frames containing the callback: 'no entries'[32m 0[2mms[22m[39m
+     [32m✓[39m SCROLL1: timelineScrollProblem flags any timeline scroll in a fader window: 'unchanged at 0'[32m 0[2mms[22m[39m
+     [32m✓[39m SCROLL1: timelineScrollProblem flags any timeline scroll in a fader window: 'unchanged after a page turn'[32m 0[2mms[22m[39m
+     [32m✓[39m SCROLL1: timelineScrollProblem flags any timeline scroll in a fader window: 'one Follow page turn'[32m 0[2mms[22m[39m
+     [32m✓[39m SCROLL1: timelineScrollProblem flags any timeline scroll in a fader window: 'a sub-pixel change'[32m 0[2mms[22m[39m
+     [32m✓[39m SCROLL1: timelineScrollProblem flags any timeline scroll in a fader window: 'a scroll back'[32m 0[2mms[22m[39m
+ [32m✓[39m perf/lib/zoom-probe.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m perf/lib/report.test.ts[2m > [22mbuildPerfReportCore determinism contract[2m > [22mDC-KINDS: windowed drag commits-per-move rows are wallclock, fader rows stay ratio-checked
+[31m[1mAssertionError[22m: expected [ { …(9) }, { …(9) }, { …(9) }, …(14) ] to have a length of 18 but got 17[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 18[39m
+[31m+ 17[39m
+
+[36m [2m❯[22m perf/lib/report.test.ts:[2m385:18[22m[39m
+    [90m383| [39m    )[33m;[39m
+    [90m384| [39m    const drag = interactions.filter((row) => windowedDrag.test(row.id…
+    [90m385| [39m    [34mexpect[39m(drag)[33m.[39m[34mtoHaveLength[39m([34m18[39m)[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m386| [39m    [34mexpect[39m(drag[33m.[39m[34mfilter[39m((row) [33m=>[39m row[33m.[39mkind [33m!==[39m [32m'wallclock'[39m))[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m387| [39m    [34mexpect[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m39 passed[39m[22m[90m (40)[39m
+[2m   Start at [22m 06:05:37
+[2m   Duration [22m 737ms[2m (transform 137ms, setup 0ms, import 172ms, tests 51ms, environment 528ms)[22m
+
+
+::error file=/home/runner/b364-scratch/sc/perf/lib/report.test.ts,title=perf/lib/report.test.ts > buildPerfReportCore determinism contract > DC-KINDS%3A windowed drag commits-per-move rows are wallclock%2C fader rows stay ratio-checked,line=385,column=18::AssertionError: expected [ { …(9) }, { …(9) }, { …(9) }, …(14) ] to have a length of 18 but got 17%0A%0A- Expected%0A+ Received%0A%0A- 18%0A+ 17%0A%0A ❯ perf/lib/report.test.ts:385:18%0A%0A
