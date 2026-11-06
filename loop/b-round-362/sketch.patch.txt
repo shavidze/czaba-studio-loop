@@ -1,0 +1,50 @@
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -705,4 +705,47 @@
+     fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+     expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+   }, 15000);
++
++  it('RB-MEMO1 a range change on the selected clip redraws the detail waveform and not the detail playhead (C-R320-01)', async () => {
++    const { api, view } = await mountWorkspace();
++    act(() => api.current?.selectClip('music-1'));
++    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++    act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));
++    expect(view.getByTestId('arrangement-detail-range')).toBeTruthy();
++    renderLog.counts.clear();
++    for (let step = 1; step <= 5; step++) {
++      act(() => api.current?.setTimeRange({ start: 2, end: 4 + step, trackId: 'music' }));
++    }
++    expect(renderLog.counts.get('ArrangementDetailWaveformInner') ?? 0).toBe(5);
++    expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBe(0);
++  });
++
++  it('RB-MEMO2 typing in the detail Start field re-renders the detail content and not the detail waveform (C-R320-01)', async () => {
++    const { api, view } = await mountWorkspace();
++    act(() => api.current?.selectClip('music-1'));
++    fireEvent.click(view.getByTestId('arrangement-detail-toggle'));
++    act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));
++    const startField = view.getByTestId('arrangement-detail-start');
++    renderLog.counts.clear();
++    fireEvent.change(startField, { target: { value: '2.5' } });
++    fireEvent.change(startField, { target: { value: '2.75' } });
++    expect(startField).toHaveProperty('value', '2.75');
++    expect(renderLog.counts.get('ArrangementDetailContentInner') ?? 0).toBe(2);
++    expect(renderLog.counts.get('ArrangementDetailWaveformInner') ?? 0).toBe(0);
++    expect(renderLog.counts.get('ArrangementDetailPlayheadInner') ?? 0).toBe(0);
++  });
++
++  it('RB-MEMO3 a status write re-renders the workspace and not the range readout (C-R320-01)', async () => {
++    const { api, view } = await mountWorkspace();
++    act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));
++    expect(view.getByTestId('arrangement-range')).toBeTruthy();
++    renderLog.counts.clear();
++    act(() => api.current?.setTimeRange({ start: 2, end: 5, trackId: 'music' }));
++    expect(renderLog.counts.get('ArrangementRangeReadoutInner') ?? 0).toBe(1);
++    renderLog.counts.clear();
++    act(() => api.current?.setStatus('Memo control one'));
++    act(() => api.current?.setStatus('Memo control two'));
++    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++    expect(renderLog.counts.get('ArrangementRangeReadoutInner') ?? 0).toBe(0);
++  });
+ });

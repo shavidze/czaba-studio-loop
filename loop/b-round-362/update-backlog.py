@@ -1,0 +1,49 @@
+import json,sys,os
+L='/home/runner/czaba-project/tmp/studio-real-loop'
+done=L+'/b-round-362/update-backlog.done'
+if os.path.exists(done): sys.exit('already applied')
+p=L+'/backlog.json'; b=json.load(open(p))
+ADD='2026-11-06 B round 362 -> 363 planning'
+b['version']=326; b['updated']=ADD
+b['current_task']='current-task.md (round 363: PERF-10b-ii-b, PERF-10 stage 5 of 5: RB-MEMO1..3 render-budget guards for DetailPlayhead/DetailWaveform/RangeReadout memos (C-R320-01), 12 record rows interact.drag.background-range.stopped.* + live (GATE320-S3 ruling), doc 234 mermaid fix (A-R362-DOC-STALE-MERMAID))'
+b['advisor_used_by_B']='yes (round 362 -> 363 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | '+b['advisor_used_by_B']
+D=[
+ ('D-29z1178','Round 362 (PERF-10b-ii-a) closed PASS from C evidence: c-round-362.json browserVerified/realVerified true; PERF 95/95 0 NEW, play start/stop 28->11 x3, click 42->38 x3, C mutant MU-C362 red 29>11; PLAY-STOP both viewports; G362-AUTH. Gate 362 published 9da8daa (both remotes). B-R356-PLAYBACK-SETTER and GATE361-L2-DOC234-UC7-WORDING closed. PERF-10b-ii-a done.'),
+ ('D-29z1179','Round-362 findings: A-R362-DOC-UC7-WORDING closed accepted (intent met, K14 uc7-existing=1, C DOCS PASS); A-R362-DOC-STALE-MERMAID scheduled in round 363 (doc 234 owned); A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT (= gate 362 finding 1) deferred_low_polish with fix home PERF-11 (owns ArrangementContext selectors; not a harness-round edit); GATE362-L2-PS4-REACH info, no action (a setPlaying( caller sweep stays a claims line in any playback-store task; do not expand PS4); gate 362 Architecture proposal recorded as SIG-R362-TRANSPORT-LEAVES-FILE (signal, not scheduled; added to the arch checkpoint request); C-R362-MARKER-PLAYING-NONE-UNREACHABLE closed as an accepted coverage limit: adjacentMarkerTarget treats project end as a forward target, so the playing none-text is not reachable forward in the browser; IM24 jsdom guards the branch (hypothesis, unverified: the backward branch near 0 while playing).'),
+ ('D-29z1180','C-R320-01 premise re-measured at HEAD 9da8daa (b-round-362/mutants-head/summary.txt, 179 tests in render-budget, clip-gain-pointer-preview, range-store, detail-panel, track-layout, drag-preview-render): removing ArrangementPeakPath memo is red on DP43, DP44, DP46, DP47, DP48 (rounds 331-334) -> that half closed by L7; DetailPlayhead, DetailWaveform and RangeReadout memo removal stay green -> RB-MEMO1..3 in round 363. A-R320-REVIEW-WAVEFORM-NAME-POSITIVE: positive count exists (drag-preview-render l.1266, round 332) plus RB-MEMO1 toBe(5); closes on C PASS.'),
+ ('D-29z1181','GATE320-S3 premise ruling: at HEAD no drag writes allTracks (only extendRangeToAllTracks, Ctrl+Shift+L, one write per key; the lane-background updateRange writes {start,end,trackId}; SABA-B-11c #2 keeps multi-lane selection out of scope). The uncovered gesture is the lane-background range drag; it gets 12 record rows (interact.drag.background-range.stopped.{commits-per-move,move-components-max,release-commits,move-to-paint-p95,move-components-per-move} + interact.harness.drag-background-range-live, 1x and .6x), owner PERF-10b-ii-b, budget null. Placed after the stopped drags, before drag lane stopped; reset by a clip name-bar click (no Insert Marker move, no Undo entry). Record rows are not L58 pins; a later PERF task may assert from C values.'),
+ ('D-29z1182','Round 363 = PERF-10b-ii-b (PERF-10 stage 5 of 5): 5 files (render-budget.test.tsx via b-round-362/sketch.patch.txt; perf/studio-lab-interactions.perf.spec.ts; perf/budgets.interactions.json 252->264 rows, 95 asserted; doc 234 stage 5 + l.4 Completed (C round 363 PASS) + mermaid fix; doc 168 sequence/metrics additions). B sketch: render-budget 13/13, biome clean, typecheck 0; mutants MU-P/MU-W/MU-R each red only on its RB-MEMO row. Claims b-round-362/claims-363.sh.'),
+ ('D-29z1183','Order after round 363: REGRESSION first at any planning on/after 2026-11-08 -> PERF-9 -> PERF-11 (absorbs GATE361-S1, SIG-R360-STATUS-WRITE-RENDERS-WORKSPACE, SIG-R361-CONTEXT-LEAF-CONSUMERS, A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT) -> PERF-12..15 -> SYS-R2-FAKE-FIDELITY -> SYS-CLOCK-DETERMINISM -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 entries. RETRO at round 368 or at the end of STUDIO-PERFORMANCE. PERF-10 feature boundary: arch checkpoint request refreshed (b-round-362/root-request-arch-checkpoint.md), non-blocking.'),
+]
+for i,t in D: b['decisions_log_b'].append({'id':i,'date':'2026-11-06','text':t})
+for r in b['rounds']:
+    if r.get('round')==362: r['status']='c_pass_published (D-29z1178): C round 362 PASS browserVerified true; gate 362 published 9da8daa'
+b['rounds'].append({'round':363,'task':'current-task.md','decision':'D-29z1178..D-29z1183','type':'PERF-10b-ii-b: RB-MEMO1..3 memo guards (C-R320-01), lane-background range drag record rows (GATE320-S3), doc 234 stage 5 (PERF-10 Completed) + mermaid fix','status':'dispatched','note':'baseline 9da8daa, clean tree; claims b-round-362/claims-363.sh; sketch b-round-362/sketch.patch.txt; mutants b-round-362/mutants/','added':ADD})
+of=b['open_findings']; byid={f.get('id'):f for f in of}
+def pre(fid,s):
+    f=byid[fid]; f['status']=s+' | '+f.get('status','')
+pre('B-R356-PLAYBACK-SETTER','closed (D-29z1178): fixed in round 362 (useArrangementIsPlayingReader; PS4), C round 362 PASS, gate 9da8daa')
+pre('GATE361-L2-DOC234-UC7-WORDING','closed (D-29z1178): fixed in round 362, C DOCS PASS (UC7 called existing)')
+pre('C-R320-01','scheduled (D-29z1180/D-29z1182): round 363 RB-MEMO1..3 for DetailPlayhead/DetailWaveform/RangeReadout; PeakPath half already guarded by DP43-DP48 (B HEAD mutants, b-round-362/mutants-head/summary.txt); closes on C PASS')
+new=[
+ {'id':'A-R362-DOC-UC7-WORDING','severity':'low','origin':'A','title':'doc 234 UC7 clause keeps its description after the colon; literal "UC7 (არსებული, უკვე HEAD-ზე)" not present','evidence':'c-round-362.json bugs[0]','status':'closed (D-29z1179): accepted, intent met (K14 uc7-existing=1, C DOCS PASS)','added':ADD},
+ {'id':'A-R362-DOC-STALE-MERMAID','severity':'low','origin':'gate-reviewer (A code-reviewer), confirmed by C','title':'doc 234 mermaid still draws useArrangementIsPlaying -> ArrangementTransport and getState -> ArrangementMarkerRow','evidence':'c-round-362.json bugs[1]; doc 234 l.144-158','status':'scheduled (D-29z1179): fixed in round 363 (doc 234 owned; K14 old-edge counts 0); closes on C PASS','added':ADD},
+ {'id':'A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT','severity':'low','origin':'A code-reviewer; = gate 362 review finding 1','title':'useArrangementPlaybackStoreContext throws a message naming useArrangementIsPlaying also for the reader hook','evidence':'a-round-362.md; gates/round-362/review.md finding 1','repro':'read ArrangementContext.tsx useArrangementPlaybackStoreContext (~l.4556)','status':'deferred_low_polish (D-29z1179): fix home PERF-11 (owns ArrangementContext selectors); check no test asserts the old message first','added':ADD},
+ {'id':'GATE362-L2-PS4-REACH','severity':'info','origin':'gate reviewer (gates/round-362/review.md finding 2)','title':'PS4 checks export names only, not what exports can reach','status':'closed (D-29z1179): no action; a setPlaying( caller sweep stays a claims line in any task that touches the playback store; PS4 not expanded','added':ADD},
+ {'id':'C-R362-MARKER-PLAYING-NONE-UNREACHABLE','severity':'low','origin':'C','title':'playing branch of the marker none-text not observable in the browser','evidence':'c-round-362/marker-*.json, c-round-362/im24.log','status':'closed (D-29z1179): accepted coverage limit; adjacentMarkerTarget uses project end as a forward target, so the forward playing none-text is not user-reachable; IM24 guards the branch; backward-near-0 reachability is an unverified hypothesis','added':ADD},
+]
+for f in new:
+    assert f['id'] not in byid; of.append(f)
+b['deferred_low_polish'].append({k:v for k,v in new[2].items()})
+sig={'id':'SIG-R362-TRANSPORT-LEAVES-FILE','origin':'gate 362 reviewer Architecture note (gates/round-362/review.md)','note':'ArrangementTransport.tsx now holds memoized leaves (Play/Stop leaf, project-end text) next to the body after several PERF rounds; proposal: move leaves to ArrangementTransportLeaves.tsx with unchanged DOM and render-budget rows. Signal only; question 1d in b-round-362/root-request-arch-checkpoint.md. Not scheduled.','added':ADD}
+b['architecture_signals'].append(sig)
+acr=b['architecture_checkpoint_requests']
+if isinstance(acr,list): acr.append({'id':'ARCH-CHECKPOINT-PERF-DRAG-PREVIEW-CLOSE','file':'b-round-362/root-request-arch-checkpoint.md','question':'repeat at the PERF-10 feature boundary; adds 1d (Transport leaves file) and 1e (one store pattern before PERF-11)','status':'requested, non-blocking','added':ADD})
+sp=[e for e in b['post_current_stage_queue'] if e.get('id')=='STUDIO-PERFORMANCE'][0]
+sp['status']='in_progress (D-29z1182): PERF-10b-ii-a done (C round 362 PASS, gate 9da8daa); round 363 = PERF-10b-ii-b (closes PERF-10); then PERF-9 | '+sp['status']
+sp['execution_order_d29z1183']='PERF-10b-ii-b (363) -> REGRESSION first on/after 2026-11-08 -> PERF-9 -> PERF-11 (absorbs GATE361-S1, SIG-R360-STATUS-WRITE-RENDERS-WORKSPACE, SIG-R361-CONTEXT-LEAF-CONSUMERS, A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT) -> PERF-12..15 -> SYS-R2-FAKE-FIDELITY -> SYS-CLOCK-DETERMINISM; PERF-CAND-MASTER-GROUP-FADER-PROPS waits for the checkpoint'
+for s in sp['stages']:
+    if isinstance(s,dict) and s.get('id')=='PERF-10':
+        s['status']='in_progress (D-29z1182): PERF-10a, 10a-BUDGETS, 10b-i, 10b-ii-a done (C rounds 358, 360, 361, 362); round 363 = PERF-10b-ii-b (RB-MEMO1..3 + background-range record rows), last stage | '+s['status']
+json.dump(b,open(p,'w'),ensure_ascii=False,indent=1)
+open(done,'w').write('ok\n'); print('updated')

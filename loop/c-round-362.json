@@ -1,0 +1,160 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T04:43:36.2244119Z",
+  "round": 362,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R362-DOC-UC7-WORDING",
+   "severity": "low",
+   "steps": [
+    "grep UC7 in docs/implementation/2026/quarter-IV/234-perf-playback-store.md l.208"
+   ],
+   "expected": "Task §1.2 literal clause `UC7 (არსებული, უკვე HEAD-ზე)`",
+   "actual": "Clause reads `UC7 (არსებული, უკვე HEAD-ზე: დამალული active lane …`; A disclosed it; K14 uc7-existing=1 matches B's pin, so the intent (UC7 called existing) is met",
+   "evidence": "a-round-362.md; doc 234 l.208",
+   "origin": "A"
+  },
+  {
+   "id": "A-R362-DOC-STALE-MERMAID",
+   "severity": "low",
+   "steps": [
+    "Read doc 234 `## არქიტექტურა` mermaid (l.146-157)"
+   ],
+   "expected": "Diagram shows the Play/Stop leaf and the reader-only hook",
+   "actual": "Still draws useArrangementIsPlaying -> ArrangementTransport and getState -> ArrangementMarkerRow; stage-1 history text also stale. Not granted by §1.2 (code-reviewer Low, confirmed by C)",
+   "evidence": "doc 234 l.144-158; a-round-362.md code-reviewer section",
+   "origin": "gate-reviewer (A's code-reviewer)"
+  },
+  {
+   "id": "A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT",
+   "severity": "low",
+   "steps": [
+    "Read ArrangementContext.tsx useArrangementPlaybackStoreContext (code-reviewer finding)"
+   ],
+   "expected": "Error message names the calling hook",
+   "actual": "Private lookup throws 'useArrangementIsPlaying must be used within an ArrangementProvider' also when useArrangementIsPlayingReader is the caller. Not exercised by C",
+   "evidence": "a-round-362.md",
+   "origin": "A"
+  },
+  {
+   "id": "C-R362-MARKER-PLAYING-NONE-UNREACHABLE",
+   "severity": "low",
+   "steps": [
+    "/studio-lab, add Full mix, Ctrl+Right to project end, Space, Ctrl+Right at 15-40 ms spacing"
+   ],
+   "expected": "Playing 'No more markers after the playhead' visible in a real browser",
+   "actual": "With the demo project the playhead cannot be at or past project end while playing (playback stops at once), so the readIsPlaying()=true branch of the none-text could not be observed in the browser; stopped branch observed. Branch is covered by IM24 in jsdom (C re-ran: 1 passed). Verification-coverage gap, not a product bug",
+   "evidence": "c-round-362/marker-*.json, c-round-362/im24.log",
+   "origin": "C"
+  }
+ ],
+ "passed": [
+  "CLAIMS (c-round-362/claims-c.txt equals a-round-362/claims-final.txt)",
+  "SOURCE-SCOPE (7 M, 0 untracked, both patches reverse-apply, doc 234 only doc)",
+  "PERF-95of95-asserted-0NEW-play-start-stop-11x3-click-38x3-44DIFF-all-decreases-equal-to-B (durationMs 454589)",
+  "PERF-LIB-40of40",
+  "MUTANT-MU-C362-SPAN-IN-BODY-red-play-29-gt-11",
+  "PLAY-STOP-1440x900 (click play/stop, state span Playing/Stopped, clock advances 1s then freezes, Space, held Enter = 1 start, double-click Stop -> 00:00.000, Tab Follow>Play>Stop>Back to start>Loop)",
+  "PLAY-STOP-1280x720 (same, all rows identical to 1440)",
+  "MARKER-NONE-stopped-branch-1440x900-1280x720 ('No more markers after the insert marker')",
+  "VIDEO-FAIL-STOP-1-1440x900-1280x720 (all rows equal c-round-361 except follow sl 119 vs 123/124 and followPlay pos .831 vs .880; equal to C360 +-1; jitter class C-R359-OBS-FOLLOW-JITTER)",
+  "G362-AUTH-demo-opens-premium-not-bypassed (no credentials: demo ws mounts, /studio/middle-east shows sign-in required, 0 audio[src], studio-token GET 401, no token in body)",
+  "DOCS (l.4 byte-exact md5 ef9813ea, 7 ## headings, stage-4 numbers equal budgets file and perf-final, PS4/RB-PB2 exist, 0 pending docs, UC7 called existing with wording note)"
+ ],
+ "blocked": [
+  "G362-AUTH fake-bearer: /api/studio-token returns 500 (fails closed) at both viewports while mock :5199 is not running in the cloud; 403 not observable (backend unavailable in cloud)",
+  "MARKER-NONE playing-branch: not observable in a real browser (see C-R362-MARKER-PLAYING-NONE-UNREACHABLE); jsdom IM24 only, which is not a browser check. Row split: stopped half PASS, playing half not browser-verified"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "abletonConformance": "not applicable (performance refactor, no on-screen change; Play/Stop DOM, titles, aria-keyshortcuts unchanged)",
+ "notRun": [
+  "Export WAV integrity / audio graph measurement: this round changes only React subscription structure, no audio code; not run, not claimed",
+  "L29 grep over the task spec (no tool defined)"
+ ],
+ "observations": {
+  "perfDurationMs": 454589,
+  "mutantMUC362": "scratch under c-round-362 deleted; store has the same 7 modified files, budgets sha prefix 046c050cbb76",
+  "playSnapshot": "aria-describedby of Play and Stop both equal the leaf's own useId and the hidden span id; title Play (Space)/Stop (Space), aria-keyshortcuts Space",
+  "firstProbeAttempt": "1440x900 playstop first attempt timed out at the ready wait (cold dev server while perf-lib vitest ran); environment-invalid, re-run once and passed (kept playstop-1440x900.log is the re-run)"
+ },
+ "manifestPaths": [
+  "c-round-362/claims-c.txt",
+  "c-round-362/perf.log",
+  "c-round-362/latest-interactions.json",
+  "c-round-362/perf-rowcmp.txt",
+  "c-round-362/perf-lib.log",
+  "c-round-362/mutant-perf.log",
+  "c-round-362/mutant-rowcmp.txt",
+  "c-round-362/mutant-results/latest-interactions.json",
+  "c-round-362/progress.json",
+  "c-round-362/playstop-1440x900.json",
+  "c-round-362/playstop-1280x720.json",
+  "c-round-362/marker-1440x900.json",
+  "c-round-362/marker-1280x720.json",
+  "c-round-362/beh-tree-1440x900.json",
+  "c-round-362/beh-tree-1280x720.json",
+  "c-round-362/auth.json",
+  "c-round-362/im24.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": [
+  "interact.play.start-components",
+  "interact.play.stop-components",
+  "interact.click.components",
+  "PS4",
+  "RB-PB2"
+ ],
+ "mutantsRecorded": [
+  "MU-A",
+  "MU-B",
+  "MU-C",
+  "MU-C362-SPAN-IN-BODY (C)"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-361/mutants/MU-A-render-budget.log",
+  "b-round-361/perf-mu-b-results/latest-interactions.json",
+  "b-round-361/mutants/MU-C-ps4.log",
+  "c-round-362/mutant-results/latest-interactions.json"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-361/precheck-full.log",
+  "b-round-361/sketch-typecheck.log",
+  "b-round-361/sketch-lint.log",
+  "b-round-361/sketch-covering-final.log"
+ ],
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": [
+  "interactions perf spec",
+  "15 covering files",
+  "perf-lib tests",
+  "behaviour probe"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-361/perf-final.log",
+  "b-round-361/perf-sketch.log",
+  "b-round-361/sketch-covering-final.log"
+ ]
+}
