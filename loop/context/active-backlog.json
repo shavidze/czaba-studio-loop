@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-06T10:36:20.415Z",
-  "current_task": "current-task.md (round 367: PERF-9b-ii stem-cache commit discipline; app/lib/arrangement/stem-cache.client.ts, its test file, doc 236 stage 3 Completed)",
+  "_generatedUtc": "2026-11-06T11:25:07.646Z",
+  "current_task": "current-task.md (round 368: PERF-9b-ii re-dispatch; stem-cache.client.ts join fix, stem-cache.test.ts SC30-SC33, doc 236 Completed)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -5869,18 +5869,37 @@
       "severity": "info",
       "status": "open info (D-29z1198): performance-optimizer rated the heade",
       "title": "the perf harness host (remix-serve, playwright.perf.config.ts) serves public files with Cache-Contro"
+    },
+    {
+      "id": "C-R367-DEDUP-CANCELLED-WRITE",
+      "severity": "medium",
+      "origin": "A code-reviewer (A-R367-REVIEW-DEDUP-CANCELLED-WRITE), reproduced by C",
+      "title": "PERF-9b-ii sketch v2: a same-key load skipped by the writes.has(key) dedup loses the cache write when the pending write is cancelled by the L3 re-check (cache efficiency only; no wrong bytes)",
+      "evidence": "c-round-367/dedup-sketch.log, c-round-367/dedup-head.log, a-round-367/dedup-probe-block.ts.txt",
+      "repro": "P1: sweep held, write B, load A (c1), abort c1, load A again, release, idle -> sketch storedA=false (HEAD true). P2: B put held, same order.",
+      "status": "targeted round 368 (D-29z1206, D-29z1208): ruled fix = join (a same-key load joins the pending write; cancel only when every joined signal aborted); rows SC30, SC31; mutants M-V2-NO-JOIN, M-V2-SOME, M-V2-LAST-SIGNAL. Closes on C round 368 PASS.",
+      "added": "2026-11-06 B round 367 -> 368 planning"
+    },
+    {
+      "id": "C-R367-STATUS-LINE-PREMATURE",
+      "severity": "low",
+      "status": "targeted round 368 (D-29z1208): A rewrites l.4 = Completed (",
+      "title": "doc 236 l.4 says Completed (C round 367 PASS) while round 367 is FAIL"
+    },
+    {
+      "id": "C-R367-MUTANT-DELETE-SKIPS-PENDING-GREEN",
+      "severity": "low",
+      "status": "targeted round 368 (D-29z1208): row SC32 (held body + same-k",
+      "title": "deleteAfterPendingWrite without the same-key wait stays green 31/31 (not equivalent: it matters whil"
+    },
+    {
+      "id": "A-R367-REVIEW-L-ABF",
+      "severity": "low",
+      "status": "targeted round 368 (D-29z1208): SC22 title narrowed and SC33",
+      "title": "SC22 title overstates (L-a); quota-retry cancelled() has no row while doc 236 claims it (L-b); doc 2"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 358,
-      "task": "current-task.md",
-      "decision": "D-29z1155..D-29z1158",
-      "type": "PERF-10a re-dispatch: A's round-357 tree + C-R357-01 ruling (b) delta (StudioWorkspace follow leaf transition guard + mount sync after tempo-seed) + RM1/RM2",
-      "status": "closed PASS (D-29z1159): C round 358 PASS, browserVerified true; gate 358 published f269022",
-      "note": "baseline d49536b, A tree 56 entries kept; claims b-round-357/claims-358.sh; delta b-round-357/sketch/*.patch.txt",
-      "added": "2026-11-05 B round 357 -> 358 planning"
-    },
     {
       "round": 359,
       "task": "current-task.md",
@@ -5958,9 +5977,18 @@
       "task": "current-task.md",
       "decision": "D-29z1201..D-29z1205",
       "type": "PERF-9b-ii: stem-cache commit discipline (SYS-R365-STEM-CACHE-HARDENING), doc 236 Completed",
-      "status": "dispatched",
+      "status": "c_fail (D-29z1206): A STOP + C reproduced C-R367-DEDUP-CANCELLED-WRITE (Medium); browser rows passed; gate 367 skipped",
       "note": "baseline d53d113 clean; sketch b-round-366/sketch.patch.txt; claims b-round-366/claims-367.sh",
       "added": "2026-11-06 B round 366 -> 367 planning"
+    },
+    {
+      "round": 368,
+      "task": "current-task.md",
+      "decision": "D-29z1206..D-29z1209",
+      "type": "PERF-9b-ii re-dispatch: join pending same-key writes (C-R367-DEDUP-CANCELLED-WRITE), SC30-SC33, doc 236 Completed",
+      "status": "dispatched",
+      "note": "baseline d53d113 + uncommitted round-367 v2 tree; delta b-round-367/sketch-delta.patch.txt; claims b-round-367/claims-368.sh",
+      "added": "2026-11-06 B round 367 -> 368 planning"
     }
   ],
   "other_keys": [

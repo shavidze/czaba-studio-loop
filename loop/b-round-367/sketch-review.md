@@ -69,3 +69,6 @@ A replacement branch was tried as "a new write when the pending one is abandoned
 
 This matches C round 367. The dedup case has no deterministic browser trigger: it needs an abort between the body read and the queued commit, followed by a same-key reload. Its proof is unit only (SC30 and SC31), and the browser rows guard against regressions.
 - **DEDUP probe on v3 (advisor follow-up):** C's round-367 P1/P2 block on the v3 scratch gives `storedA=true putCalls=2` in both (`dedup-probe-v3.log`). The proof log was renamed `mutants/round367-client-vs-v3-tests.log` ("round-367 client" = v2 tree).
+
+## Annotation (B, round 368 -> 369 planning, D-29z1211)
+The claim above that v3 "stores in every ordering where HEAD stored" is FALSIFIED by A-R368-REVIEW-L1: hit 200 (write W) -> hit 404 (delete queued after W) -> storable hit 200 joins W leaves the key absent; HEAD kept it (a-round-368/l1-probe-v3.log vs l1-probe-head.log). The ordering table enumerated abort orderings only, not hit-404 vs a joining load. Ruled Low (deploy race). RETRO 369 input.

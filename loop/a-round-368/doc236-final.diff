@@ -1,0 +1,153 @@
+diff --git a/docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md b/docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md
+index 5bab113..57f8268 100644
+--- a/docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md
++++ b/docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md
+@@ -1,8 +1,8 @@
+ # PERF-9a: stem-ების მუდმივი cache (v2) `/studio-lab`-ის public preview-ებისთვის
+ 
+ **თარიღი:** 2026-11-06
+-**სტატუსი:** In Progress (stage 2 of 3; C round 366 PASS)
+-**შეცვლილი პროექტი:** Store (stage 1: `app/lib/arrangement/source-fetch.ts`, `app/lib/arrangement/stem-cache.ts`, `app/lib/arrangement/stem-cache.client.ts`, `app/lib/arrangement/collection.ts`, `app/data/studio-lab-demo.ts`; stage 2: `perf/studio-lab-stem-cache.perf.spec.ts`, `perf/budgets.stem-cache.json`)
++**სტატუსი:** Completed (C round 368 PASS)
++**შეცვლილი პროექტი:** Store (stage 1: `app/lib/arrangement/source-fetch.ts`, `app/lib/arrangement/stem-cache.ts`, `app/lib/arrangement/stem-cache.client.ts`, `app/lib/arrangement/collection.ts`, `app/data/studio-lab-demo.ts`; stage 2: `perf/studio-lab-stem-cache.perf.spec.ts`, `perf/budgets.stem-cache.json`; stage 3, rounds 367–368: `app/lib/arrangement/stem-cache.client.ts`, `app/lib/arrangement/__tests__/stem-cache.test.ts`)
+ 
+ ## კონტექსტი
+ 
+@@ -15,6 +15,16 @@
+ 
+ **Stage 2 (9b-i).** 9a-ის browser row-ები dev server-ზე მოწმდებოდა. perf-plan-ის PERF-9 row ითხოვს გაზომვას production build-ზე: „second open: 0 stem network bytes; ready ≤ 50 % of cold“. ამიტომ 9b-i ამატებს ცალკე perf spec-სა და budgets ფაილს, რომლებსაც `npm run test:perf` production build-ზე (remix-serve, port 5188) უშვებს. `app/` კოდი ამ ეტაპზე არ იცვლება.
+ 
++**Stage 3 (9b-ii, SYS-R365-STEM-CACHE-HARDENING).** round 365-ის code review-მ `stem-cache.client.ts`-ში ხუთი Low დატოვა, რომლებსაც ერთი root cause აქვს — storage-ში ჩაწერისა და commit-ის დისციპლინა:
++
++- **A-R365-REVIEW-L4:** readwrite transaction-ის ჩაწერა request-ის `success`-ზე ითვლებოდა დასრულებულად და არა transaction-ის `complete`-ზე; `put` წინა OPFS ფაილს commit-მდე შლიდა.
++- **A-R365-REVIEW-L3:** abort/disabled შემოწმება მხოლოდ sweep-მდე ხდებოდა; sweep/list/quota-ს შემდეგ გაუქმებული ჩაწერა მაინც შლიდა victim-ებს და წერდა.
++- **A-R365-REVIEW-L5:** hit-ზე 404/410 ან unstorable 200-ის delete პირდაპირ await-დებოდა response-ის გზაზე და იმავე key-ს pending ჩაწერას შეიძლება წაეგო.
++- **A-R365-REVIEW-L6:** `response.clone()` და stored content type-ის `headers.set` დაცული არ იყო.
++- **C-R365-OBS-INTEGRITY:** browser store-ის integrity-ს (ზომის შეუსაბამობა, წაშლილი ფაილი) არც unit row ჰქონდა და არც browser row.
++
++ხუთივე ერთ სისტემურ დავალებაში დაიხურა, ერთ ფაილში.
++
+ ## მიდგომა
+ 
+ - **საერთო fetch/decode ბლოკი.** `fetchAndDecodeSource` (`source-fetch.ts`) აერთიანებს demo loader-ისა და purchased adapter-ის ერთნაირ fetch → `arrayBuffer()` → `decodeAudioData` ბლოკს. შეცდომების ტექსტები და abort-ის rethrow ბაიტ-ბაიტ იგივეა (`studioSourceLoadStrings`).
+@@ -46,6 +56,26 @@
+ - **ქსელის body bytes:** Σ `encodedBodySize` მხოლოდ იმ fetch-initiator stem entry-ებზე, რომელთა `transferSize > 0` (304 და HTTP-cache hit ითვლება 0-ად).
+ - **IndexedDB-ის წაკითხვა ბაზას არ ქმნის.** spec `indexedDB.open`-ს aborting `onupgradeneeded`-ით იყენებს; ბაზის არარსებობისას entries = −1. DB-ის სახელი `app/`-დან იმპორტდება.
+ 
++### Stage 3 (9b-ii): commit-ის დისციპლინა
++
++1. **ჩაწერა commit-ზე სრულდება.** ახალი export `transactionDone(transaction)` resolve-დება `complete`-ზე, ხოლო `abort`-ზე reject-დება `transaction.error`-ით, ან `AbortError` DOMException-ით, თუ ის `null`-ია. მხოლოდ `error` event მას არ ასრულებს (TL-1). browser store-ის readwrite transaction-ები (record-ის ჩაწერა, record-ის წაშლა, `touch` და sweep-ის არავალიდური record-ის წაშლა) commit-ს ელოდება. `put` წინა OPFS ფაილს მხოლოდ record transaction-ის დასრულების შემდეგ შლის; aborted ჩაწერა ახალ ფაილს შლის და წინა record-სა და ფაილს ინარჩუნებს (`transactionDone`-ის complete/abort: SC22; error event-ის წესი და browser store-ის put: SC23).
++2. **abort და disable ხელახლა მოწმდება.** signal-ით ან store-ის გამორთვით გაუქმებული ჩაწერა ბრუნდება: commit chain-ზე დაწყებისას, sweep/list/quota-ს await-ების შემდეგ (victim არ იშლება) და ყოველი `put`-ის წინ (SC24), quota retry-ის ჩათვლით (SC33: retry-ის eviction-ის დროს abort → retry put არ კეთდება).
++3. **hit-ის delete response-ს არ აყოვნებს.** 404/410 ან unstorable 200 მაშინვე ბრუნდება. delete (`deleteAfterPendingWrite`) იმავე key-ს pending ჩაწერის შემდეგ და commit chain-ზე დგება, ამიტომ delete ვერ წააგებს იმ ჩაწერას, რომელიც delete-ის დადგომისას უკვე pending იყო. `idle()` ელოდება queued delete-ებსა და chain-ს (SC25, SC29; SC9 და SC21 მწვანე რჩება). hit-ის 404, რომელიც მოდის, სანამ იმავე key-ს 200 ჯერ კიდევ body-ს კითხულობს, იმ ჩაწერის put-ის შემდეგ შლის და key საბოლოოდ აღარ არის (SC32; coverage row — v2-მაც გაიარა).
++4. **Guards.** `response.clone()`-ის throw → არაფერი ინახება, response უცვლელად ბრუნდება და store ჩართული რჩება. stored content type, რომელსაც `Headers.set` უარყოფს, `content-type`-ის გარეშე მიეწოდება (SC26).
++5. **სესიის serialisation.** ყოველი ჩაწერის sweep → list → evict → put წინას შემდეგ სრულდება (`commitChain`), ამიტომ ერთდროულად დაწყებული ორი key budget-ში რჩება (SC27). tech-lead-მა ეს „smallest correct fix“-ად შეაფასა; cross-tab overshoot ფარგლებს გარეთაა (TODO).
++6. **browser store-ის integrity (unit ნაწილი).** fake IndexedDB + OPFS-ში ზომის შეუსაბამობა და წაშლილი ფაილი ორივე miss-ია, რომელიც record-სა და ფაილს შლის (SC28). browser ნაწილი C-ის INTEGRITY row-ია.
++7. **Join (round 368, C-R367-DEDUP-CANCELLED-WRITE).** `writes` ინახავს `{ done, signals }`-ს (`PendingStemWrite`). storable load, რომელიც იმავე key-ს pending ჩაწერისას მოდის, მეორე ჩაწერას არ იწყებს — თავის signal-ს pending ჩაწერას უერთებს. ჩაწერა უქმდება მხოლოდ მაშინ, როცა **ყველა** შეერთებული signal გაუქმებულია (`isStemWriteAbandoned`), ან store გამორთულია (SC30, SC31; SC17 მწვანე რჩება). signal-ის გარეშე load `every`-ის კონტრაქტით ჩაწერას ცოცხალს ტოვებს; ამ შემთხვევას unit row არ აქვს და production-ში მიუღწევადია, რადგან `fetchAndDecodeSource` signal-ს ყოველთვის გადასცემს. same-key თანმიმდევრობები HEAD `d53d113`-თან შედარებით (სრული ცხრილი: B-ის `b-round-367/sketch-review.md`):
++
++   | თანმიმდევრობა | HEAD | v2 (round 367) | v3 (round 368) |
++   |---|---|---|---|
++   | (a) load 1 გაუქმდა body-ის წაკითხვის შემდეგ → load 2 მოდის (sweep ან სხვა key-ს put დაკავებულია) | ინახება | **არ ინახება** | ინახება, put ერთხელ (SC30) |
++   | (b) load 2 უერთდება → load 1 მერე უქმდება | ინახება | არ ინახება | ინახება (SC31, ნაწილი 1) |
++   | (b') load 1 ცოცხალია → შეერთებული load 2 უქმდება | ინახება | ინახება | ინახება (SC31, ნაწილი 3) |
++   | (b'') ყველა შეერთებული load უქმდება | ინახება (HEAD abort-ს არ ამოწმებდა) | არ ინახება | არ ინახება (SC31, ნაწილი 2) |
++   | (c) load 1 გაუქმდა, სანამ body-ს კითხულობს | არ ინახება | არ ინახება | არ ინახება — მიღებულია, HEAD-ის ტოლია |
++
++8. **უცვლელი:** key-ები, validator-ები, budget და eviction policy, 304/5xx/network-error ქცევა, decode path და purchased adapter (cache-ის გარეშე).
++
+ ## არქიტექტურა
+ 
+ ```mermaid
+@@ -59,13 +89,31 @@ flowchart TD
+   G -- hit --> H["fetch + If-None-Match / If-Modified-Since, cache: 'no-store'"]
+   H -- 304 --> T[touch lastAccessedAt → stored bytes 200]
+   H -- 200 storable --> W
+-  H -- 200 unstorable --> D[delete entry → network response]
++  H -- 200 unstorable --> D["network response მაშინვე → delete chain-ზე, response-ის შემდეგ (stage 3)"]
+   H -- 404 / 410 --> D
+   H -- ">= 500" --> S[stored bytes]
+   H -- network error, not aborted --> S
+   H -- aborted --> X[იგივე error object rethrow]
+ ```
+ 
++Stage 3 — commit chain (ერთი სესია):
++
++```mermaid
++sequenceDiagram
++  participant F as cachedFetch
++  participant Q as commitChain
++  participant S as browser store
++  F->>Q: storeBytes(key A) — miss / 200
++  F->>Q: storeBytes(key B)
++  F-->>Q: იმავე key-ს storable load pending ჩაწერისას → join (signals.push), მეორე ჩაწერა არა
++  Q->>S: A: cancelled? → sweep → list → evict → cancelled? → put
++  S-->>Q: transactionDone (complete) → წინა ფაილის წაშლა
++  Q->>S: B: იგივე თანმიმდევრობა A-ის შემდეგ
++  F-->>F: hit + 404/410/unstorable 200 → response მაშინვე
++  F->>Q: deleteAfterPendingWrite(key): writes.get(key)-ის შემდეგ chain-ზე delete
++  Note over F,Q: idle() = writes + deletes + commitChain
++```
++
+ ## შეცვლილი ფაილები
+ 
+ - `app/lib/arrangement/source-fetch.ts` — ახალი: `SourceFetch`, `plainSourceFetch`, `fetchAndDecodeSource`.
+@@ -81,6 +129,12 @@ Stage 2 (9b-i):
+ - `perf/studio-lab-stem-cache.perf.spec.ts` — ახალი: PERF-9b stem cache harness (production build, CDP throttle, 5 გახსნა თითო pass-ში).
+ - `perf/budgets.stem-cache.json` — ახალი: `stem.*` row-ები, მათ შორის 7 assert.
+ 
++Stage 3 (9b-ii):
++
++- `app/lib/arrangement/stem-cache.client.ts` — `transactionDone` export, commit chain (`enqueueCommit`), `deleteAfterPendingWrite`, abort/disable-ის ხელახალი შემოწმება, clone და content-type guard-ები; round 368: join (`PendingStemWrite`, `isStemWriteAbandoned`), `deleteAfterPendingWrite` ელოდება `writes.get(key)?.done`-ს.
++- `app/lib/arrangement/__tests__/stem-cache.test.ts` — მესამე `describe` SC22–SC29, fake browser storage helper (`installFakeBrowserStorage`) და `transactionDone`-ისა და `type CompletableTransaction`-ის import. round 368: SC30–SC33 მესამე `describe`-ის ბოლოს და SC22-ის დავიწროებული სათაური. SC1–SC21 უცვლელია.
++- `docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md` — ეს doc.
++
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **Problem:** dev server `/middle-east.mp3`-ს gzip-ით აგზავნის, ამიტომ transfer size და ფაილის ზომა განსხვავდება. **Solution:** ინახება decoded body (`arrayBuffer()` clone-იდან), და record-ის `size` მისი `byteLength`-ია. C ადარებს `decodedBodySize`-ს.
+@@ -98,6 +152,14 @@ Stage 2 (9b-i):
+ - **Problem:** plain fetch-ს შეუძლია concurrent `<audio preload="metadata">` 206 request-ის ნაწილობრივი HTTP-cache entry გამოიყენოს, ამიტომ plain fetch-ის byte-ჯამი pass-ებს შორის იცვლება (B-ის cache-off mutant-ში: 7,664,757 / 7,515,518 / 7,517,018). **Solution:** `stem.cold.body-bytes`, `stem.cold.transfer-bytes`, `stem.warm-nocache.body-bytes` და `stem.warm-nocache.transfer-bytes` `wallclock` kind-ისაა და არა `deterministic` (exact-match წესი record row-ზე spec-ს ჩააგდებდა). warm-nocache-ზე A-ის გაშვებაში ვარიაცია არ გამოჩენილა; ის B-ის v4 გადაწყვეტით cold-ის byte row-ებს მიჰყვება. სხვა მიზეზით (A-ის code-reviewer, round 366) `wallclock`-ია ოთხი `stem.*.audio-requests` row-იც: დამალული `<audio>`-ს Resource Timing entry მხოლოდ load-ის დასრულებისას ან გაუქმებისას ჩნდება. CDP byte row-ები (`cdp-mp3-bytes`, `cdp-media-bytes`) ითვლება ერთი გახსნის navigation-იდან მომდევნო navigation-მდე, რომ გვიან მოსული bytes შემდეგ გახსნას არ მიეწეროს.
+ - **Problem:** harness-ის host (remix-serve) production არ არის: production Vercel-ზეა (`vercel.json`). **Solution:** row-ები harness host-ის header-ებს ზომავს (`Cache-Control: public, max-age=31536000, immutable`, weak ETag, 304). Vercel-ის header-ები ღია კითხვაა (ROOT-Q-R365-VERCEL-STATIC-HEADERS); ამ ეტაპის არცერთი assert მასზე არ არის დამოკიდებული.
+ 
++Stage 3 (9b-ii):
++
++- **Problem (TL-1):** `transactionDone`-ის პირველი ვერსია `onerror`-ზე reject-დებოდა, როცა `transaction.error` ჯერ კიდევ `null` იყო. quota abort ამიტომ non-quota შეცდომად იქცეოდა და cache-ს თიშავდა. **Solution:** reject მხოლოდ `abort`-ზე, `transaction.error ?? AbortError`-ით; მხოლოდ error event pending რჩება. aborted put იმავე `QuotaExceededError` ობიექტით reject-დება (abort-ის reject: SC22; error event-ის თანმიმდევრობა და aborted put: SC23).
++- **Problem (TL-2):** hit-ის delete-ის ლოდინმა session commit queue response-ის გზაზე დააყენა: 404/410/unstorable 200 სხვა key-ების ჩაწერას ელოდებოდა, ხოლო გაჭედილი store call load-ს გაჭედავდა. **Solution:** response მაშინვე ბრუნდება; delete იმავე key-ს pending ჩაწერის შემდეგ chain-ზე დგება (SC25, SC29).
++- **მიღებული რისკი (TL-3):** store call, რომელიც არასოდეს სრულდება, სესიის ბოლომდე cache-ს აჩერებს, მაგრამ load-ს არასოდეს ბლოკავს: `cachedFetch` მხოლოდ `get`-ს, `touch`-სა და ქსელს ელოდება. ეს იგივე degraded რეჟიმია, რაც „storage error → plain network“. timeout race არ დაემატა — მას გაზომვით დაუსაბუთებელი ლიმიტი დასჭირდებოდა. გაუქმებული queued ჩაწერა `storeBytesNow`-ში მაშინვე ბრუნდება.
++- **Problem (C-R367-DEDUP-CANCELLED-WRITE, Medium):** v2-ში იმავე key-ს მეორე load `writes.has(key)` dedup-ით გამოტოვდებოდა. თუ pending ჩაწერას პირველი load-ის abort აუქმებდა (effect re-run / StrictMode, sweep ან სხვა key-ს put დაკავებული), key საერთოდ აღარ ინახებოდა. HEAD-ში (`d53d113`) abort-ი ჩაწერას არ აუქმებდა და key ინახებოდა (P2-ში A ორჯერაც იწერებოდა); v2 ამ შემთხვევას კარგავდა. **Solution (v3):** join — მეორე load თავის signal-ს pending ჩაწერას უერთებს, ჩაწერა უქმდება მხოლოდ მაშინ, როცა ყველა signal გაუქმებულია. ახლა key ინახება და `put` ერთხელ კეთდება (SC30, SC31). join სრულიად airtight არ არის: load, რომელიც შეუერთდება ჩაწერის ბოლო `cancelled()`-სა და `writes.delete`-ს შორის microtask gap-ში, ჩუმად იკარგება (B-R367-TL3-1-JOIN-MICROTASK-GAP). ბრაუზერში მიუღწევადია, რადგან შემდეგი load ცალკე task-ში მოდის; HEAD-იც ასეთ load-ს ტოვებდა. მიღებული შემთხვევები: (c) ზემოთ, და hit 200 ახალი ETag-ით, რომელიც ძველ pending ჩაწერას უერთდება — ინახება ძველი bytes (HEAD-ის ტოლი), შემდეგი conditional request ასწორებს.
++- **მიღებული რისკი (stale-before-idle):** hit-ის delete response-მდე აღარ სრულდება. იმავე key-ს მეორე fetch-მა `idle()`-მდე შეიძლება ძველი entry ნახოს, ხოლო network error-ზე ძველი bytes მიიღოს. demo თითო source-ს ერთ გახსნაზე ერთხელ ტვირთავს; SC9/SC21 `idle()`-ის შემდეგ ამოწმებს.
++
+ ## ტესტირება
+ 
+ - `app/lib/arrangement/__tests__/stem-cache.test.ts`: SC1–SC21 (SC4-ს აქვს მეორე row cached fetch-ის eviction-ისთვის, SC14-ს კი მეორე row server branch-ისთვის). ისინი იყენებს in-memory `StemCacheStore` fake-ს და `vi.fn` fetcher-ს რეალური `Response` ობიექტებით. background write-ებს `await cached.idle()` ელოდება.
+@@ -107,7 +169,7 @@ Stage 2 (9b-i):
+ - Browser: B-ის probe (`b-round-364/probe/sketch-cache-*.json`). C-ის row-ები: CS-COLD, CS-WARM, CS-AUDIO, CS-BLOCKED, CS-CLEAR, CS-LEGACY და ONE-FETCH.
+ - `publicPreviewSourceFetch()`-ის server branch (`window`-ის გარეშე → `plainSourceFetch`) SC14-ში მოწმდება; Remix Vite-ის server build-ში `.client` export-ები stub-ით იცვლება, ამიტომ რეალურ SSR-ს A-SSR row ამოწმებს.
+ - SC20-ში `put`-ის negative check-ისთვის gate დაჭერილია და რამდენიმე `setTimeout(0)` flush გამოიყენება (M11-ის წითლად გამოსაჩენად); background write-ებს ტესტები მაინც `idle()`-ით ელოდება.
+-- შეზღუდვა: browser store-ის `get` (ფაილის არარსებობა და ზომის შეუსაბამობა) jsdom-ში `null`-ია. ის მხოლოდ C-ის browser row-ებით მოწმდება, unit-ით კი fake-ის კონტრაქტითა და `isStemCacheRecord`-ით (SC15).
++- შეზღუდვა (stage 1; stage 3-ში ჩანაცვლებულია SC28-ით): browser store-ის `get` (ფაილის არარსებობა და ზომის შეუსაბამობა) jsdom-ში `null`-ია. ის მხოლოდ C-ის browser row-ებით მოწმდებოდა, unit-ით კი fake-ის კონტრაქტითა და `isStemCacheRecord`-ით (SC15).
+ 
+ Stage 2 (9b-i). A-ის გაშვება: `npx playwright test --config playwright.perf.config.ts perf/studio-lab-stem-cache.perf.spec.ts`, მარტო, exit 0, 0 failure, ყოველი row 3-ჯერ გაზომილი (საბოლოო გაშვება code-review-ის შესწორებების შემდეგ: `a-round-366/perf-v2.log`, `a-round-366/latest-stem-cache-v2.json`). 7 assert, A-ის median-ებით, და mutant, რომელიც თითოეულს აწითლებს:
+ 
+@@ -126,12 +188,22 @@ Stage 2 (9b-i). A-ის გაშვება: `npx playwright test --config pl
+ - ორივე mutant-ის შემდეგ წყარო აღდგენილია და `cmp`-ით შემოწმებულია.
+ - C-ის row-ები: PERF, MUTANT-OWN, PROBE (1440×900 და 1280×720), AUDIO, G366-AUTH და DOCS.
+ 
++Stage 3 (9b-ii):
++
++- `app/lib/arrangement/__tests__/stem-cache.test.ts`: SC22–SC29 მესამე `describe`-ში. SC23 და SC28 იყენებს fake IndexedDB + OPFS-ს (`installFakeBrowserStorage`, `vi.stubGlobal`): request success commit-მდე ხდება, commit შეიძლება დაკავდეს, put request-ს შეუძლია ჩავარდნა IndexedDB spec-ის თანმიმდევრობით (error event → `error` → abort). ეს ხურავს წინა შეზღუდვას: browser store-ის `get` integrity ახლა unit-ითაც მოწმდება. round 368: SC30–SC33 იმავე `describe`-ში (SC30 — join დაკავებული sweep-ისა და სხვა key-ს დაკავებული put-ის უკან; SC31 — join-ის სამი ნაწილი; SC32 — hit 404 body-ს მკითხველი 200-ის შემდეგ; SC33 — quota retry-ის abort). SC30 და SC31 წითელია v2 client-ზე (round 367-ის ხე) v3 ტესტებით (`b-round-367/mutants/round367-client-vs-v3-tests.log`). A-ის გაშვება: stem-cache 35/35, source-fetch 6/6 (`a-round-368/tests.log`).
++- Mutants (19, v3-ზე; თითოეული წითელია ზუსტად B-ის `b-round-367/mutants/mutant-summary.txt`-ის row-ებზე; A-ის logs: `a-round-368/mutants/`): `M-SC22-ABORT-RESOLVES` (SC22 SC23), `M-SC22-ONERROR-NULL` (SC23), `M-SC23-WRITE-REQUEST` (SC23), `M-SC28-NO-SIZE` (SC28), `M-L3-EVICT` (SC24), `M-L3-PUT` (SC24), `M-L5-GONE` (SC25 SC29 SC32), `M-L5-BLOCKING` (SC25 SC29 SC32), `M-L5-UNSTORABLE` (SC25), `M-L6-CLONE` (SC26), `M-L6-HEADERS` (SC26), `M-SERIAL` (SC27 SC30), `M-IDLE-NO-DELETES` (SC29), `M-V2-NO-JOIN` (SC30 SC31), `M-V2-SOME` (SC30 SC31), `M-C367-DELETE-SKIPS-PENDING` (SC32), `M-L3-RETRY` (SC33), `M-V2-LAST-SIGNAL` (SC31), `M-SC32-NO-WRITE` (SC7 SC15 SC25 SC32).
++- Browser (production build): B-ის probe `b-round-366/probe/stem-integrity-probe.mjs` (cold, truncate, delete-file, stale-etag; 1440×900 და 1280×720) HEAD-სა და sketch-ზე ერთნაირ შედეგს იძლევა; mutant build-ები `nosize` (truncate წითელია; delete-file-ის სიწითლე truncate-იდან გადმოყოლილია — middle-east-ის შეკვეცილი ფაილი 304-ით რჩება) და `nohitrestore` (stale-etag წითელია) აჩვენებს, რომ row-ებს ჩავარდნა შეუძლიათ (`b-round-366/probe/probe-summary.txt`). C round 367-ის row-ები: INTEGRITY და VALIDATOR (ორივე viewport), PLAYBACK-EXPORT (record), G367-AUTH და DOCS.
++- Browser, round 368: B-მა v3-ის production build-ზე იგივე probe გაუშვა (`b-round-367/probe/sketch-*.json`): ყველა phase ready-ა და უკრავს (pos ≈ 00:02.77, peak 0.31, 1 start); truncate და delete-file 200-ის შემდეგ ხელახლა ინახება; stale-etag-ზე `If-None-Match "b366-stale"` → 200 და stored ETag განახლდება. C-ის DEDUP probe v3-ზე: P1 და P2 `storedA=true putCalls=2` (A ერთხელ, B ერთხელ) (`b-round-367/dedup-probe-v3.log`). dedup race-ს დეტერმინისტული browser trigger არ აქვს; მას unit row-ები SC30/SC31 ამტკიცებს. C round 368-ის row-ები: DEDUP, MUTANT-OWN, INTEGRITY და VALIDATOR (ორივე viewport), PLAYBACK-EXPORT (record), G368-AUTH და DOCS.
++
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- **PERF-9b-ii (SYS-R365-STEM-CACHE-HARDENING):** A-R365-REVIEW-L3…L6, C-R365-OBS-INTEGRITY (დაზიანებული OPFS ფაილის browser row), შეცვლილი validator-ის browser row, eviction planning-ის serialize და ამ doc-ის Completed სტატუსი.
++- **Cross-tab budget:** serialisation ერთ სესიაშია; ორ tab-ს შეუძლია budget ერთდროულად გადააჭარბოს.
++- **ARCH-CHECKPOINT-PERF9-STEM-CACHE:** root-ის მოთხოვნა (`frontend-architect`, `architecture-checkpoint.md`), არა-დამბლოკავი.
+ - **ROOT-Q-R365-VERCEL-STATIC-HEADERS:** Vercel-ის static header-ები და 304 production-ზე — root-ის კითხვა.
+ - **PERF-CAND-STEM-BACKGROUND-REVALIDATE (Low, კანდიდატი):** hit-ზე revalidation-ის ფონზე გადატანა.
+ - **PERF-9c:** purchased stem-ები cache-ში — `awaiting_user` (SABA-Q-PERF4-STUDIO-CACHE, SRW-21-PLAN-თან ერთად).
+ - **PERF-9d:** root — legacy `audio-cache.ts`-ისა და `czaba-audio-cache` DB-ის გაუქმება და `indexeddb-cache` skill-ის გადაწერა (protected ფაილები, ROOT-REQ-PERF9D-LEGACY-CACHE).
+ - **B-R364-DEMO-DOUBLE-FETCH (info):** `audio` initiator-ის დამატებითი entry `/middle-east.mp3`-ზე; ჰიპოთეზით, ის `StudioNarrowScreen.tsx`-ის `<audio preload="metadata">`-დან მოდის.
++- **A-R368-REVIEW-L1 (ღია):** hit 200 იწყებს ჩაწერას W-ს → hit 404 delete-ს W-ის შემდეგ აყენებს → მესამე storable 200 W-ს უერთდება; W-ის შემდეგ delete ხვდება და key აღარ არის. HEAD-ში key შენახული რჩებოდა. იკარგება მხოლოდ cache entry, შემდეგი load აღადგენს.
++- **`deferred_low_polish` (D-29z1207):** A-R367-REVIEW-L-c, A-R367-REVIEW-L-d, A-R367-REVIEW-L-e, A-R367-REVIEW-L-g და B-R367-TL3-1-JOIN-MICROTASK-GAP.
+ - IndexedDB `onblocked` / `onversionchange` (sketch-review I4) — ღიაა; 9b-i-ში არ შესულა (ამ ეტაპზე `app/` კოდი არ იცვლება).

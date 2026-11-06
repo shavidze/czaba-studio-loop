@@ -1,0 +1,116 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T11:15:42.8770788Z",
+  "round": 368,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R368-L1-OBSERVATION (A-R368-REVIEW-L1)",
+   "severity": "low",
+   "steps": [
+    "hit 200 starts write W with held body",
+    "hit 404 arrives (delete queued after W)",
+    "storable hit 200 joins W",
+    "release body, idle()"
+   ],
+   "expected": "key stays stored as at HEAD d53d113",
+   "actual": "A reports storedA=false at v3 vs true at HEAD; needs server 200->404->200 inside one write window (deploy race); only a lost cache entry, re-stored on next load. NOT independently re-run by C (A's log a-round-368/l1-probe-v3.log used as data); severity Low is C's judgement, B to rule",
+   "evidence": "a-round-368.md top section; a-round-368/l1-probe-v3.log, l1-probe-head.log",
+   "origin": "A"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "UNIT stem-cache 35/35 + source-fetch 6/6",
+  "DEDUP P1+P2 storedA=true storedB=true putCalls=2",
+  "MUTANT-OWN (join replaces signals; red on predicted SC31)",
+  "INTEGRITY 1440x900 all 4 phases",
+  "INTEGRITY 1280x720 all 4 phases",
+  "VALIDATOR stale-etag 200, ETag updated, hero 304",
+  "PLAYBACK-EXPORT (record: cold and truncated sha equal)",
+  "G368-AUTH both viewports",
+  "DOCS doc 236"
+ ],
+ "blocked": [
+  "Fake-bearer /api/studio-token returns 500 (fails closed, no token); not a FAIL"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke",
+  "npm run test:perf"
+ ],
+ "notRun": [
+  "A's 19 sketch mutants not re-run by C (only 1 own mutant)",
+  "code-reviewer by C",
+  "A-R368-REVIEW-L1 probe not independently re-run"
+ ],
+ "abletonConformance": "not applicable (storage hardening, nothing on screen)",
+ "observations": [
+  "Export cold and after-truncate bit-identical sha256 5fadd97a0987..., 24-bit/48kHz stereo, 29,189,420 B, 101.352 s, nonFinite 0, same as round 367",
+  "Integrity sizes: middle-east 4,054,080, hero 3,610,677, 2 records = 2 OPFS files each phase; 0 page errors; pos ~00:02.78 peak 0.3102 starts 1",
+  "Own build ran (npm run build rc 0) only to serve the probe; build is a gate row",
+  "Server on 5189 stopped by port"
+ ],
+ "manifestPaths": [
+  "c-round-368/claims.txt",
+  "c-round-368/integrity-1440x900.json",
+  "c-round-368/integrity-1280x720.json",
+  "c-round-368/export-trunc.json",
+  "c-round-368/auth.out",
+  "c-round-368/dedup-v3.log",
+  "c-round-368/mutant-own.log"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": [
+  "SC30-SC33 (in 35/35 unit run)",
+  "DEDUP P1 and P2 storedA/storedB/putCalls=2",
+  "INTEGRITY per phase at both viewports",
+  "VALIDATOR stale-etag"
+ ],
+ "mutantsRecorded": [
+  "19 sketch mutants (A logs a-round-368/mutants/)",
+  "2 round-366 probe mutant builds",
+  "C own: join-replaces-signals (red SC31)"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-367/mutants/mutant-summary.txt",
+  "b-round-367/mutants/round367-client-vs-v3-tests.log",
+  "b-round-367/dedup-probe-v3.log",
+  "b-round-366/probe/mutant-nosize-1440x900.json",
+  "b-round-366/probe/mutant-nohitrestore-1440x900.json"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "biome"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-367/precheck-full.log",
+  "b-round-367/sketch-typecheck.log",
+  "b-round-367/sketch-biome.log"
+ ],
+ "chainHeadGateRunGreen": "gate 366",
+ "affectedChecksNamed": [
+  "stem-cache test file",
+  "integrity probe at both viewports"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-367/sketch-covering.log",
+  "b-round-367/dedup-probe-v3.log",
+  "b-round-367/probe/sketch-1440x900.json",
+  "b-round-367/probe/sketch-1280x720.json"
+ ],
+ "origin": "C"
+}
