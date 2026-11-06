@@ -1,0 +1,31 @@
+793c793,797
+< const ArrangementGroupHeaderWithSelection = memo(ArrangementGroupHeaderWithSelectionInner);
+---
+> const ArrangementGroupHeaderWithSelection = memo(ArrangementGroupHeaderWithSelectionInner, (a, b) => {
+>   const changed = Object.keys(b).filter((k) => !Object.is(Reflect.get(a, k), Reflect.get(b, k)));
+>   console.log('GHRPROPS changed=[' + changed.join(',') + ']');
+>   return changed.length === 0;
+> });
+3076a3081,3082
+>   const overviewsRef = useRef<ReadonlyMap<string, readonly TrackGroupOverviewClip[]>>(new Map());
+>   const candidatesRef = useRef<ReadonlyMap<string, readonly string[]>>(new Map());
+3077a3084
+>     const previousOverviews = overviewsRef.current;
+3081c3088,3090
+<         overviews.set(row.id, trackGroupOverviewClips(arrangement, row.id));
+---
+>         const nextClips = trackGroupOverviewClips(arrangement, row.id);
+>         const keptClips = previousOverviews.get(row.id);
+>         overviews.set(row.id, keptClips && sameTrackGroupOverviewClips(keptClips, nextClips) ? keptClips : nextClips);
+3083a3093
+>     overviewsRef.current = overviews;
+3086a3097
+>     const previousCandidates = candidatesRef.current;
+3090c3101,3103
+<         candidates.set(row.id, trackGroupDescendantTrackIds(arrangement, row.id));
+---
+>         const next = trackGroupDescendantTrackIds(arrangement, row.id);
+>         const kept = previousCandidates.get(row.id);
+>         candidates.set(row.id, kept && kept.join('|') === next.join('|') ? kept : next);
+3092a3106
+>     candidatesRef.current = candidates;

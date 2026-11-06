@@ -1,0 +1,44 @@
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -75,10 +75,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 42
++      "value": 38
+     },
+-    "owner": "PERF-10b-i",
+-    "note": "Sum of rendered components over the click window; detail lists the per-commit sizes. Asserted since PERF-10b-i (round 361, D-29z1170): the active track lives in the selection store, so a cross-lane click renders 42 (C360 83; B's sketch 42,0 x3 at 1x and 6x; mutant MU-1 82)."
++    "owner": "PERF-10b-ii-a",
++    "note": "Sum of rendered components over the click window; detail lists the per-commit sizes. Asserted since PERF-10b-i (round 361, D-29z1170, <= 42: the active track lives in the selection store; C360 83; mutant MU-1 82); tightened by PERF-10b-ii-a (round 362, D-29z1177): the memoized Play/Stop leaf no longer re-renders with the Transport (C361 42 x3; B's sketch 38 x3 at 1x and 6x)."
+   },
+   {
+     "id": "interact.click.event-duration-max",
+@@ -828,10 +828,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 28
++      "value": 11
+     },
+-    "owner": "PERF-10a-BUDGETS",
+-    "note": "Sum of rendered components in the same window. Asserted since PERF-10a-BUDGETS (round 360): after PERF-10a only the Transport, the video dock and the follow leaf render on Play (C358 and C359: 28 x3; HEAD before PERF-10a: 70)."
++    "owner": "PERF-10b-ii-a",
++    "note": "Sum of rendered components in the same window. Asserted since PERF-10a-BUDGETS (round 360, <= 28); tightened by PERF-10b-ii-a (round 362, D-29z1177): the Transport body no longer reads isPlaying, only the memoized Play/Stop leaf, the video dock and the follow leaf render on Play (C361 28 x3; B's sketch 11 x3 at 1x and 6x; HEAD before PERF-10a: 70)."
+   },
+   {
+     "id": "interact.play.start-sources",
+@@ -870,10 +870,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "<=",
+-      "value": 28
++      "value": 11
+     },
+-    "owner": "PERF-10a-BUDGETS",
+-    "note": "Sum of rendered components in the same window. Asserted since PERF-10a-BUDGETS (round 360): as start-components (C358 and C359: 28 x3; HEAD before PERF-10a: 70)."
++    "owner": "PERF-10b-ii-a",
++    "note": "Sum of rendered components in the same window. Asserted since PERF-10a-BUDGETS (round 360, <= 28); tightened by PERF-10b-ii-a (round 362, D-29z1177): the Transport body no longer reads isPlaying, only the memoized Play/Stop leaf, the video dock and the follow leaf render on Stop (C361 28 x3; B's sketch 11 x3 at 1x and 6x; HEAD before PERF-10a: 70)."
+   },
+   {
+     "id": "interact.harness.click-live.6x",

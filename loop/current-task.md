@@ -1,105 +1,141 @@
-# CURRENT TASK — Round 361: PERF-10b-i. The active track moves into the selection store; a cross-lane clip click drops from 83 to 42 components
+# CURRENT TASK — Round 362: PERF-10b-ii-a. Play/Stop becomes its own leaf (28 → 11 components) and no component can call `setPlaying`
 
-Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-06, at the round 360 → 361 planning.
+Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-06, at the round 361 → 362 planning (`b-round-361.md`).
 
-**Decisions** (`backlog.json` → `decisions_log_b`, v323 → v324):
-- **D-29z1167:** round 360 is closed as PASS (`c-round-360.json`, browserVerified true; gate 360 published `93ea6c1`).
-- **D-29z1168:** routing of the round-360 notes (§5). C-R360-NOTE-STALE is fixed in this round, because this round owns the budgets file.
-- **D-29z1169:** PERF-10b is split into 10b-i (this round) and 10b-ii (§5).
-- **D-29z1170:** the scope, budgets and rulings of this round (§0).
-- **D-29z1171:** the order after this round (§5).
+**Decisions** (`backlog.json` → `decisions_log_b`, v324 → v325):
+- **D-29z1172:** round 361 closes as PASS: `c-round-361.json` has browserVerified true, and gate 361 published `6fdd82f`.
+- **D-29z1173:** rulings on the round-361 findings (`b-round-361.md` §2):
+  - A's L11 STOP is an accepted delta (runner load).
+  - GATE361-S1 is not a regression. The proposed prop-identity fix lets the wrapper's memo skip, but the leaf header still renders once per edit (leaf count 1 → 1), because the leaf reads the whole context. It moves to PERF-11.
+  - GATE361-L2 is fixed in this round.
+  - GATE361-L3 is deferred.
+- **D-29z1174 / D-29z1175:** PERF-10b-ii is split into 10b-ii-a (this round) and 10b-ii-b (the harness rows C-R320-01 and GATE320-S3).
+- **D-29z1177:** the scope, budgets and rulings of this round (§0).
+- **D-29z1176:** the order after this round (§5).
 
 **Why this round, now.**
-- D-29z1166 put PERF-10b next. REGRESSION is not due: `regression-last.json` says 2026-11-05, so the next one is on or after 2026-11-08 (today is 2026-11-06).
-- No Critical, High or Medium finding can be worked in the cloud. The open Mediums are all `open_tech_lead_manual`, `awaiting_user` or `open_root`, and the 2026-10-23 root clarification says they do not block.
-- PERF-10b as written in D-29z1153 bundled four unrelated changes. This round takes the one with the measured premise: the active track (83 → 42, §0.3).
+- REGRESSION is not due: `regression-last.json` says 2026-11-05, so the next one falls on 2026-11-08 or later. Today is 2026-11-06.
+- No Critical, High or Medium finding can be worked in the cloud. The gate's new Medium GATE361-S1 was measured and re-graded (D-29z1173, evidence in `b-round-361/ghr1-*.log`). The other open Mediums are `open_tech_lead_manual`, `awaiting_user` or `open_root`.
+- PERF-10b-ii was next by D-29z1171.
 
 **Read first:**
-- `lessons.md`. A reads 10, 11, 12, 23 (memo/rename clause), 26, 28, 34 and 58. C also reads 22, 37, 38, 57, 59 and 60.
-- `c-round-360.md`, and §0 below.
-- Primitives: `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md` (Studio state), `AGENT_DISCOVERABLE_CODE.md` (one new export), `TESTING_QUALITY_GATES.md` and `GEORGIAN_DOCS.md`.
+- `lessons.md`. A reads 10, 11, 12, 23, 26, 28, 34 and 58. C also reads 22, 37, 38, 57, 59 and 60.
+- `c-round-361.md`, `b-round-361.md` and §0 below.
+- Primitives: `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `AGENT_DISCOVERABLE_CODE.md` (one export renamed, one new internal component), `FORWARDREF_COMPONENT.md` (the leaf is internal and unexported), `TESTING_QUALITY_GATES.md` and `GEORGIAN_DOCS.md`.
 
 **L29 note:** untagged code text below is a new value, a row id or a loop-artifact path. Every fact about a current `store/` file carries `[K#]` (§7).
 
 **Not applicable:**
-- Reference-first, product-designer, the YouTube request and the screen budget. This is a performance refactor; nothing changes on screen. The active-lane highlight, the collapsed-group ring and the library "Active track" line keep their exact current behaviour (UC7 and the full suite guard them).
+- Reference-first, product-designer, the YouTube request and the screen budget. This is a performance refactor, and nothing changes on screen. The Play and Stop buttons keep the same DOM, names, `data-playing`, titles, `aria-keyshortcuts`, `aria-describedby` and the hidden state span, in the same order [K16].
 - Ableton conformance: not applicable.
 
 ## Baseline
-- HEAD is `93ea6c1`, the gate-360 publication [K1]. The tree is clean (0 status entries) [K2].
-- Protected files are 11/11 OK [K6]. There is no dependency change [K8]. The perf harness (`perf/lib`, specs) is unchanged [K9].
-- **Root lanes (2026-11-05 parallel policy).** Root may apply its own patches before the round on `app/components/studio/export/*`, `app/components/studio/StudioToolbar.tsx` or `docs/` outside doc 234. A HEAD that descends from `93ea6c1` through only those paths is an allowed delta, not a STOP. This round touches no root-lane file.
+- HEAD is `6fdd82f`, the gate-361 publication [K1]. The tree is clean (0 status entries) [K2].
+- Protected files are 11/11 OK [K6]. There is no dependency change [K8]. The perf harness (`perf/lib` and the specs) is unchanged [K9].
+- **Root lanes (2026-11-05 parallel policy).** Root may apply its own patches before the round on `app/components/studio/export/*`, `app/components/studio/StudioToolbar.tsx`, or `docs/` outside doc 234. A HEAD that descends from `6fdd82f` through only those paths is an allowed delta, not a STOP. This round touches no root-lane file.
 
-## 0. The change and B's evidence (D-29z1170)
+## 0. The change and B's evidence (D-29z1177)
 
 ### 0.1 Premise (measured, L37)
-- `activeTrackId` is provider `useState` and a field of `ArrangementContextValue` [K5]. Every change of it gives the whole context a new value.
-- C360 at HEAD: a clip click that also changes the active lane renders **83** components in one commit (`interact.click.components`, perCommit `83,0`, ×3 at 1× and 6×). A same-lane click, which changes only the selection (already a store since PERF-8b), renders **15** (`interact.select.same-lane.30.components`). The difference is the active-track change (`c-round-360/latest-interactions.json`).
-- Readers today: three `latestRef` reads in `ArrangementContext.tsx` and two `workspace`/`current` reads in `StudioWorkspace.tsx` [K7]; `ArrangementLane`, `ArrangementLibraryPreview` and the collapsed-group `containsActive` prop read the context field [K7].
+- After PERF-10a, Play and Stop each render 28 components (`interact.play.start/stop-components`, C361 28 ×3 at 1× and 6×, `c-round-361/latest-interactions.json`).
+- `ArrangementTransport` itself calls `useArrangementIsPlaying()` at its top [K5]. So on every Play and Stop the whole Transport body re-renders: undo/redo, edit, loop, zoom, Follow and every icon. Only the Play button, the Stop button and the hidden state span read `isPlaying` [K5].
+- `useArrangementPlaybackStore()` hands the whole playback store, including `setPlaying`, to any component. Its only consumer is `ArrangementMarkerRow`, which reads `getState().isPlaying` inside a key handler [K7]. This is B-R356-PLAYBACK-SETTER.
 
-### 0.2 The design (consults: `b-round-360/sketch-review.md`)
-- **One store, not a 13th (TL-R361-1).** `activeTrackId` and `setActiveTrackId` join `ArrangementSelectionState` in `app/lib/arrangement/selection-store.ts`. The setter keeps the old state when the id is equal (the guard). `createArrangementSelectionStore(initial, initialActiveTrackId)` seeds it; the provider seeds it from the first **audio** track, as the `useState` initialiser does today [K19].
-- **The field leaves the context value** and both `useMemo` dependency lists [K5]. The provider's `setActiveTrackId` writes the store. Handlers read `selectionStore.getState().activeTrackId` (library add, paste). `StudioWorkspace`'s edge navigation reads the same store through `useArrangementSelectionStore()`.
-- **Subscribers:**
-  - `ArrangementLane`: `useArrangementSelection((state) => state.activeTrackId === track.id)`, a boolean, so only the two lanes whose flag flips re-render (TL-R361-3).
-  - `ArrangementLibraryPreview`: the new hook `useArrangementActiveTrackId()` in `ArrangementContext.tsx`.
-  - Collapsed group header: `containsActive` moves into `ArrangementGroupHeaderWithSelectionInner` (already `XInner` + `memo`), with a boolean selector over `activeCandidateTrackIds`. `StudioWorkspace` passes those ids from a `useMemo` map over collapsed groups (`trackGroupActiveCandidates`) and a module constant `NO_ACTIVE_CANDIDATE_TRACK_IDS` for the rest, never an inline array (TL-R361-2). `StudioWorkspace` no longer reads the active track during render.
-- **Test probes:** `useWorkspaceProbe` spreads `activeTrackId: useArrangementActiveTrackId()`, as it does for `isPlaying`. The two probes typed on `ArrangementContextValue` (`grid-snap-position.test.tsx`, `marker-time-snap-ui.test.tsx`) add the same field. No assertion changes in any existing test.
-- **No memo or rename** of any component; the runtime names `ArrangementLane`, `ArrangementLibraryPreview` and `ArrangementGroupHeaderWithSelectionInner` keep their counts in `app/**/__tests__` and `perf/**` [K12].
-- **Out of this round:** `SIG-R360-STATUS-WRITE-RENDERS-WORKSPACE` (status writes still re-render the provider value) stays a PERF-11 input. Nothing reconciles the active track if its lane disappears; today no track-removal path exists, so this is a recorded hypothesis for STEM-LANES (`TL-R361-ACTIVE-TRACK-DANGLING`, info), and behaviour stays unchanged.
+### 0.2 The design
+- **The Play/Stop leaf.** The Play button, the Stop button and the hidden `arrangement-playback-state` span move unchanged into `function ArrangementTransportPlayStopInner({ togglePlayback, returnToStart })`. It is wrapped as `const ArrangementTransportPlayStop = memo(ArrangementTransportPlayStopInner)` and not exported from the module.
+  - The leaf owns `useArrangementIsPlaying()` and its own `useId()` for the state span.
+  - `preventRepeatedEnterKeyDown` becomes a module-level function. It uses no hooks and is shared by the Transport body and the leaf.
+  - The Transport body no longer reads `isPlaying`.
+- **The reader-only playback hook (B-R356).**
+  - The exported `useArrangementPlaybackStore()` is replaced by `useArrangementIsPlayingReader(): () => boolean`, a `useCallback` over the store's `getState().isPlaying`.
+  - The store lookup becomes the module-private `useArrangementPlaybackStoreContext()`, which `useArrangementIsPlaying()` also uses.
+  - `ArrangementMarkerRow` calls `readIsPlaying()` where it read `playbackStore.getState().isPlaying`, and its deps entry changes accordingly.
+  - After this round, nothing outside the provider can reach `setPlaying`.
+- **Tests.**
+  - `playback-store.test.ts` gets **PS4**: the context module exports `useArrangementIsPlayingReader` and `useArrangementIsPlaying`, and not `useArrangementPlaybackStore`.
+  - `render-budget.test.tsx` gets the L23 grant in §1.1.
+- **No other memo and no other rename.** The runtime name `ArrangementTransport` keeps its hits outside `render-budget.test.tsx` [K12].
 
-### 0.3 B's sketch (scratch `git archive 93ea6c1`, `/home/runner/b360-scratch/sc`; it does not survive the job)
-- **Code:** `b-round-360/sketch.patch.txt` (9 files under `app/`, `apply-sketch.py` + `ss-rows.py`), sha256 in `b-round-360/sketch-dispatched.sha256`.
-- **Budgets:** `b-round-360/budgets.patch.txt` (`apply-budgets.py`), sha256 in `b-round-360/budgets-dispatched.sha256`.
+### 0.3 B's sketch (scratch `git archive 6fdd82f`, `/home/runner/b362-scratch/sc`; it does not survive the job)
+- **Code:** `b-round-361/sketch.patch.txt`, covering 5 files under `app/`. **Budgets:** `b-round-361/budgets.patch.txt`, produced by `apply-budgets.py`. sha256 of both are in `b-round-361/sketch-dispatched.sha256`.
 - **Checks on the sketch:**
-  - typecheck rc 0 (`sketch-typecheck.log`); `biome lint ./app` 205 warnings, equal to HEAD (`sketch-lint.log`); `biome check` on the 9 files clean.
-  - Full suite (L23) on the final sketch (code, SS8–SS11 and budgets): 248 files, 3643 tests, rc 0 (`precheck-full-final.log`; the earlier run without the SS rows is `precheck-full.log`, 3639). `selection-store.test.tsx` with SS8–SS11: 11/11 (`ss-sketch.log`). perf-lib 40/40 (`sketch-perf-lib.log`).
-  - Production perf, alone, budgets still `record` (`perf-summary.txt`): rc 0, 93/93 asserted, 0 NEW; **only two deterministic rows differ from C360**: `interact.click.components` 83 → **42** and its `.6x` copy 83 → **42** (perCommit `42,0`, ×3 each). `click.commits` stays 2 ×3 at both rates; `select.same-lane` 15 and `reclick` 0 are unchanged. `durationMs` 396594.
-  - The same with the asserting budgets file (`perf-sketch-b.log`, `perf-mu-1-b.log`; `perf-summary.txt`, blocks `sketch-b` and `mu-1-b`): sketch rc 0, **95/95**, 0 NEW, click 42 ×3, `durationMs` 425332; MU-1 rc 1, 94/95, red **only** on `interact.click.components` (82 > 42).
+  - `npm run typecheck` rc 0 (`sketch-typecheck.log`).
+  - `biome check` on the 4 changed code files is clean (`sketch-biome.log`).
+  - `biome lint ./app`: 205 warnings, equal to HEAD (`sketch-lint.log`).
+  - The 15 covering files are listed in `covering-files.txt`, and the final run is in `sketch-covering-final.log`.
+  - Full vitest on the final sketch, run after perf (L23): 248 files, 3644 tests (HEAD 3643 plus PS4), rc 0 (`precheck-full.log`).
+- **Production perf.**
+  - Transport leaf only, budgets still at HEAD: `perf-sketch.log` rc 0, 95/95, 0 NEW.
+    - Play start/stop **28 → 11** ×3 at 1× and 6×. `interact.click.components` 42 → **38** ×3, because the memoized leaf no longer re-renders with the Transport.
+    - 44 rows differ from C361, **all of them decreases** (`perf-sketch-rowcmp.txt`).
+  - The full sketch with asserting budgets: `perf-final.log`, `perf-final-results/latest-interactions.json` and `perf-final-rowcmp.txt` (vs C361). The result is in §0.4.
 
-| Mutant (`b-round-360/mutants/`) | Change | Red (predicted in `checkpoint.md` first) |
+| Mutant (`b-round-361/mutants/`) | Change | Red (predicted first in `checkpoint.md`) |
 |---|---|---|
-| MU-1 | `StudioWorkspace` calls `useArrangementActiveTrackId()` at its top | perf `interact.click.components` 82 ×3 (> 42), the only failure of 95 |
-| MU-2 | a provider `useState` mirror of the active track in the context value's deps | SS8 only |
-| MU-3 | the store setter has no equality guard | SS9 only |
-| MU-4 | the seed is the first track of any kind | SS10 only |
-| MU-5 | paste reads a render-time snapshot of the active track | SS11 only |
-| MU-6 | the group leaf never reports the active track | UC7 only [K11] (the perf harness has no collapsed group: green there, PO-R361-3) |
-| MU-7 | the provider's `setActiveTrackId` also schedules `setStatus` 100 ms later (the red-proof for `click.commits <= 2`) | perf, with the asserting budgets: `click.commits` 3 ×3 (> 2) and `click.components` 113 ×3 (`42,0,71`), as predicted; 20 further drag rows also red (status writes in their windows; recorded, not predicted) (`perf-summary.txt` block `mu-7-b`) |
+| MU-A | The Transport body calls `useArrangementIsPlaying()` again | Three `render-budget.test.tsx` rows go red (`MU-A-render-budget.log`): the two "Play → Stop → Play" rows and RB-PB2 (`ArrangementTransport` renders > 0). In perf this equals HEAD: play 28 > 11 (C361) |
+| MU-B | The leaf is not memoized (`= ArrangementTransportPlayStopInner`) | jsdom stays green, as predicted (`MU-B-render-budget.log`). Perf with asserting budgets: rc 1, 94/95, red **only** on `interact.click.components` 43 ×3 > 38. B predicted 42; it measured 43, because the extra function component counts. Play stays 11 (`perf-mu-b.log`, `perf-mu-b-rowcmp.txt`) |
+| MU-C | The context module re-exports `useArrangementPlaybackStore` | PS4 only (`MU-C-ps4.log`) |
+
+### 0.4 Final sketch run
+`b-round-361/perf-final.log` rc 0, run alone on the full sketch with asserting budgets:
+- 95/95 asserted pass, `failures` [], 252 rows, 0 NEW.
+- Play start/stop: 11 ×3 at 1× and 6×. `interact.click.components`: 38 ×3 at 1× and 6×.
+- The 44 DIFF rows against C361 are identical to the leaf-only run, and all are decreases (`perf-final-rowcmp.txt`).
+- `durationMs` 503995.
+
+The B-R356 half changes no subscription, and this run confirms it is render-neutral. The checkpoint line "FINAL" in `b-round-361/checkpoint.md` repeats these numbers.
 
 ## 1. Scope (A)
 
-### 1.1 Files (exactly 11)
+### 1.1 Files (exactly 7)
 | # | File | Change |
 |---|---|---|
-| 1–9 | `app/lib/arrangement/selection-store.ts`, `app/contexts/ArrangementContext.tsx`, `app/components/arrangement/ArrangementLane.tsx`, `app/components/arrangement/ArrangementLibraryPreview.tsx`, `app/components/arrangement/StudioWorkspace.tsx`, `app/lib/arrangement/__tests__/helpers/workspace-probe.ts`, `app/lib/arrangement/__tests__/grid-snap-position.test.tsx`, `app/lib/arrangement/__tests__/marker-time-snap-ui.test.tsx`, `app/lib/arrangement/__tests__/selection-store.test.tsx` | From the store root: `patch -p1 < ../tmp/studio-real-loop/b-round-360/sketch.patch.txt`, unchanged. Afterwards K15 equals the sketch output |
-| 10 | `perf/budgets.interactions.json` | `git apply ../tmp/studio-real-loop/b-round-360/budgets.patch.txt`, unchanged. Its sha256 then equals `budgets-dispatched.sha256` |
-| 11 | `docs/implementation/2026/quarter-IV/234-perf-playback-store.md` | §1.2 |
+| 1–5 | `app/components/arrangement/ArrangementTransport.tsx`, `app/contexts/ArrangementContext.tsx`, `app/components/arrangement/ArrangementMarkerRow.tsx`, `app/lib/arrangement/__tests__/playback-store.test.ts`, `app/lib/arrangement/__tests__/render-budget.test.tsx` | From the store root: `patch -p1 < ../tmp/studio-real-loop/b-round-361/sketch.patch.txt`, unchanged. Afterwards K15 equals the sketch output |
+| 6 | `perf/budgets.interactions.json` | `git apply ../tmp/studio-real-loop/b-round-361/budgets.patch.txt`, unchanged. Afterwards K4 equals the sketch output |
+| 7 | `docs/implementation/2026/quarter-IV/234-perf-playback-store.md` | §1.2 |
 
 A changes nothing else. A code-reviewer Medium+ on the sketch, or any change A believes is needed beyond the patches, is a STOP (L11), not an edit.
 
-**Untouched:** every other `app/` file; `perf/*.spec.ts`, `perf/lib`, `perf/budgets.json`, `perf/budgets.resources.json`; e2e, config and the protected files.
+**L23 grant, `render-budget.test.tsx` (in the patch):**
+- In the three Play → Stop → Play rows (l.342, l.481 and RB-PB2 l.646 [K11]), the positive control `ArrangementTransport > 0` becomes `ArrangementTransportPlayStopInner > 0`. Each row also gains `ArrangementTransport` `toBe(0)`.
+- RB-PB2's zero map gains `ArrangementTransport: 0`, and its title names the Play/Stop leaf.
+- **No assertion is lost; each one is replaced by an equal or stronger one** (L4).
+- The R9-L2 positive control is unchanged and still passes: `setStatus` makes every `CONTEXT_CONSUMERS` entry render more than 0 times, `ArrangementTransport` included.
 
-**Budgets (rows owned by `PERF-10b-i`):**
-| Row | Now [K3] | After | C360 | B sketch |
+**Untouched:**
+- every other `app/` file;
+- `perf/*.spec.ts`, `perf/lib`, `perf/budgets.json` and `perf/budgets.resources.json`;
+- e2e, config and the protected files.
+
+`track-groups-ui.test.tsx` and `track-group-collapse-ui.test.tsx` are not touched (L31, D-29z1173).
+
+**Budgets (rows owned by `PERF-10b-ii-a`):**
+| Row | Now [K3] | After | C361 | B sketch |
 |---|---|---|---|---|
-| `interact.click.components` | record | assert `<= 42` | 83 ×3 | 42 ×3 (1× and 6×) |
-| `interact.click.commits` | record | assert `<= 2` | 2 ×3 | 2 ×3 (1× and 6×) |
+| `interact.play.start-components` | assert `<= 28` | assert `<= 11` | 28 ×3 | 11 ×3 (1× and 6×) |
+| `interact.play.stop-components` | assert `<= 28` | assert `<= 11` | 28 ×3 | 11 ×3 (1× and 6×) |
+| `interact.click.components` | assert `<= 42` | assert `<= 38` | 42 ×3 | 38 ×3 (1× and 6×) |
 
-- `<= 42` has no headroom: the count is deterministic (the round-348 rule) and equal in 6 samples.
-- `click.commits` is `<= 2`, an upper bound. The second commit renders 0 components and is unexplained (PO-R361-2); a click that commits nothing already fails `interact.harness.click-live` (the fader must become enabled) [K3].
-- The `.6x` copies stay `record` (same ruling as round 360: the loaded replicate, with its own equal-samples check).
-- **C-R360-NOTE-STALE** is fixed in the same patch: the two video-fade notes lose "Record until C measures it (…)", and the playing fade note loses "the third commit is intermittent" [K3 `stale-notes`]. Notes only; modes and budgets of those rows do not change.
-- Asserted rows go from 93 to 95, of 252 [K3].
+- There is no headroom, because the counts are deterministic (the round-348 rule) and equal in 6 samples. MU-B proves that `<= 38` catches a 5-component regression.
+- The `.6x` copies stay `record`. The asserted count stays at 95 of 252 [K3].
+- The owner and note of each row name PERF-10b-ii-a and D-29z1177 (in the patch).
 
-### 1.2 Doc 234 (Georgian, technical terms in English; L34: the whole stage-3 section is granted)
-PERF-10 now has 4 stages: 10a, 10a-budgets, 10b-i (this round), 10b-ii.
-- **l.4 (L28, no `pending`):** exactly `**სტატუსი:** In Progress (stage 3 of 4; C round 361 PASS)`.
-- **l.5:** add `app/lib/arrangement/selection-store.ts`, `ArrangementLane.tsx` and `ArrangementLibraryPreview.tsx` to the list. Nothing else on that line changes.
-- **A new subsection** under `## მიდგომა`, after stage 2, titled exactly `### ეტაპი 3: PERF-10b-i (round 361, D-29z1170)`. It contains the premise (83 vs 15), the design of §0.2, the budget table and its rules, the mutant table of §0.3, and the two items left out (SIG-R360, TL-R361-ACTIVE-TRACK-DANGLING).
-- **`## შეცვლილი ფაილები`:** one dated bullet per changed file of this stage (the 9 app files, the budgets file).
-- **`## ტესტირება`:** one stage-3 bullet that cites only real artifacts: SS8–SS11 in `selection-store.test.tsx`, UC7, `b-round-360/perf-summary.txt` and C's round-361 PERF row.
-- **`## TODO / შემდეგი ნაბიჯები`:** the bullet that starts "**PERF-10b:** `activeTrackId` და selection store" [K14] is replaced by two bullets: PERF-10b-i struck as done (C round 361 PASS), and **PERF-10b-ii**: Transport-ის play ღილაკი საკუთარ subscriber-ად (≤ 20), `B-R356-PLAYBACK-SETTER`, C-R320-01-ის render-budget row, GATE320-S3-ის record row. Add one bullet for `TL-R361-ACTIVE-TRACK-DANGLING` (a STEM-LANES input).
+### 1.2 Doc 234 (Georgian, technical terms in English; L34: the whole stage-4 section is granted)
+PERF-10 now has 5 stages: 10a, 10a-budgets, 10b-i, 10b-ii-a (this round) and 10b-ii-b.
+- **l.4 (L28):** exactly `**სტატუსი:** In Progress (stage 4 of 5; C round 362 PASS)`.
+- **l.5:** unchanged. It already lists `ArrangementTransport.tsx` and `ArrangementMarkerRow.tsx`.
+- **A new subsection** under `## მიდგომა`, after stage 3, titled exactly `### ეტაპი 4: PERF-10b-ii-a (round 362, D-29z1177)`. It contains:
+  - the premise (28; the Transport reads `isPlaying`);
+  - the design of §0.2;
+  - the budget table and its rules;
+  - the MU-A/MU-B/MU-C table;
+  - the B-R356 closure.
+- **GATE361-L2 (fixed here):** in `## ტესტირება`, the stage-3 bullet's UC7 clause becomes `UC7 (არსებული, უკვე HEAD-ზე)`, so it no longer reads as added in round 361. Nothing else in that bullet changes.
+- **`## შეცვლილი ფაილები`:** one dated bullet per changed file of this stage: the 5 app files and the budgets file.
+- **`## ტესტირება`:** one stage-4 bullet that cites only real artifacts: PS4, the three granted `render-budget.test.tsx` rows, `b-round-361/perf-final.log` and C's round-362 PERF row.
+- **`## TODO / შემდეგი ნაბიჯები`:** the bullet that starts "**PERF-10b-ii:**" [K14] is replaced by two bullets:
+  - PERF-10b-ii-a, struck as done (C round 362 PASS);
+  - **PERF-10b-ii-b:** C-R320-01-ის render-budget row (+ A-R320-REVIEW-WAVEFORM-NAME-POSITIVE) და GATE320-S3-ის record row.
 - **The `## ` count stays 7** [K14], in TEMPLATE order (L26).
 
 ## 2. Acceptance
@@ -107,14 +143,14 @@ PERF-10 now has 4 stages: 10a, 10a-budgets, 10b-i (this round), 10b-ii.
 ### 2.1 A rows
 | Row | Command / check | Pass |
 |---|---|---|
-| A-CLAIMS pre | `bash b-round-360/claims-361.sh`, from the loop root | equals `b-round-360/claims-361-planning-output.txt` |
-| A-CLAIMS final | same | <ul><li>K3, K4, K5, K7, K11 and K15 equal `b-round-360/claims-361-sketch-output.txt`.</li><li>K2 = `93ea6c1 11`.</li><li>K14 = `doc234-l4 d116f6ef doc234-h2 7 doc234-stage3 1 doc234-10b-bullet 0` (`d116f6ef` is the md5 prefix of the §1.2 line with its newline).</li><li>K1, K6, K8, K9, K10, K12, K13 and K16–K20 equal the planning output.</li></ul> |
+| A-CLAIMS pre | `bash b-round-361/claims-362.sh`, from the loop root | equals `b-round-361/claims-362-planning-output.txt` |
+| A-CLAIMS final | same | <ul><li>K3, K4, K5, K7, K11, K12 and K15 equal `b-round-361/claims-362-sketch-output.txt`.</li><li>K2 = `6fdd82f 7`.</li><li>K14 = `doc234-l4 ef9813ea doc234-h2 7 doc234-stage4 1 doc234-uc7-existing 1` (`ef9813ea` is the md5 prefix of the §1.2 l.4 line with its newline).</li><li>K1, K6, K8, K9, K10, K13 and K16 equal the planning output.</li></ul> |
 | A-TYPE / A-LINT | `npm run typecheck`; `npm run lint` | rc 0; lint warnings ≤ 205 |
-| A-TESTS | `npx vitest run` on `selection-store.test.tsx`, `track-group-collapse-ui.test.tsx`, `track-groups-ui.test.tsx`, `marker-edge-nav-ui.test.tsx`, `marker-time-snap-ui.test.tsx`, `grid-snap-position.test.tsx`, `background-time-selection-ui.test.tsx`, `all-lane-clipboard.test.tsx`, `clip-gain.test.tsx` (all under `app/lib/arrangement/__tests__/`) | all pass; SS8–SS11 and UC7 named in the log |
+| A-TESTS | `npx vitest run --reporter=verbose $(cat ../tmp/studio-real-loop/b-round-361/covering-files.txt)` (15 files) | <ul><li>All pass; PS4 and RB-PB2 are named in the log.</li><li>The file and test counts equal B's `sketch-covering-final.log` (15 files, 284 tests).</li><li>B's slowest test was TC10 at 4487 ms, against a declared 15 000 ms (30 %); gate 361 measured it at 4511 ms on HEAD.</li><li>A test above 50 % of its timeout here is reported with B's run as the reference. It is a STOP only if B's run of the same test was under 50 % (D-29z1173: parallel load alone is an accepted delta).</li></ul> |
 | A-PERF-LIB | `npx vitest run --root /home/runner/czaba-project/store --config /home/runner/czaba-project/tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs` (GATE304-M1) | 40/40 |
-| A-PERF | Production, **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`. Then `python3 -I b-round-329/perf-rowcmp.py c-round-360/latest-interactions.json <A's test-results/perf/latest-interactions.json>` | <ul><li>rc 0; `complete`; `failures` [].</li><li>252 rows; **95/95** asserted pass; 0 NEW.</li><li>`interact.click.components` 42 ×3 and its `.6x` 42 ×3; no other deterministic components or commits row higher than C360.</li><li>`durationMs` ≤ 540000, recorded.</li></ul> |
-| A-MUTANT | not required: B ran MU-1…MU-7 (§0.3). A cites them | — |
-| A-REVIEW | `code-reviewer` on the 11 files | no unruled Medium+ (a Medium+ is a STOP, §1.1). Any change after the review goes back to the reviewer (L11). The Architecture note goes to B |
+| A-PERF | Production, **alone** (L38): `npx playwright test -c playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`. Then `python3 -I b-round-329/perf-rowcmp.py c-round-361/latest-interactions.json <A's test-results/perf/latest-interactions.json>` | <ul><li>rc 0; `complete`; `failures` [].</li><li>252 rows; **95/95** asserted pass; 0 NEW.</li><li>Play start/stop components 11 ×3 and their `.6x` 11 ×3; `interact.click.components` 38 ×3.</li><li>No deterministic components or commits row is higher than C361.</li><li>The DIFF rows equal B's `perf-final-rowcmp.txt`.</li><li>`durationMs` ≤ 540000, recorded.</li></ul> |
+| A-MUTANT | Not required: B ran MU-A…MU-C (§0.3). A cites them | — |
+| A-REVIEW | `code-reviewer` on the 7 files | No unruled Medium+ (a Medium+ is a STOP, §1.1). Any change after the review goes back to the reviewer (L11). The Architecture note goes to B |
 | A-DOC | doc 234 | as §1.2 |
 
 ### 2.2 C rows
@@ -122,91 +158,87 @@ Use a warm dev server (L38): load `/studio-lab` once in a browser before any tim
 
 | Row | How | Pass |
 |---|---|---|
-| CLAIMS | `bash b-round-360/claims-361.sh` | equals A's final |
-| SOURCE-SCOPE | `git status --short --untracked-files=all`; `patch -p1 -R --dry-run < ../tmp/studio-real-loop/b-round-360/sketch.patch.txt`; `git apply -R --check` of `b-round-360/budgets.patch.txt`; `git diff --stat` | <ul><li>11 modified files, 0 untracked.</li><li>Both patches reverse-apply; K15 and the budgets sha256 equal the sketch.</li><li>Doc 234 is the only doc changed.</li></ul> |
-| PERF (browser, production, alone) | A-PERF's command and comparison | as A-PERF: 95/95, 0 NEW, click components 42, none higher than C360. `durationMs` recorded |
-| MUTANT (C's own, scratch, predicted first in `c-round-361/progress.json`) | One mutant that is **not** MU-1…MU-7 and that should move `interact.click.components`. Examples: <ul><li>`ArrangementLibraryPreview` subscribes to the whole selection state;</li><li>`ArrangementLane` selects `state.activeTrackId` (a string) instead of the boolean;</li><li>`setActiveTrackId` in the provider also calls `setStatus` with the same text.</li></ul> Run the interactions spec alone on it | <ul><li>Red on `interact.click.components`, or its value reported with numbers if it stays green.</li><li>Scratch under `c-round-361/` only, deleted after (L60); `store/` unchanged.</li><li>A mutant that stays green is a finding against B's budget only if `click.components` rose above 42 and still passed.</li></ul> |
+| CLAIMS | `bash b-round-361/claims-362.sh` | equals A's final |
+| SOURCE-SCOPE | `git status --short --untracked-files=all`; `patch -p1 -R --dry-run < ../tmp/studio-real-loop/b-round-361/sketch.patch.txt`; `git apply -R --check` of `b-round-361/budgets.patch.txt`; `git diff --stat` | <ul><li>7 modified files, 0 untracked.</li><li>Both patches reverse-apply.</li><li>Doc 234 is the only doc changed.</li></ul> |
+| PERF (browser, production, alone) | A-PERF's command and comparison | As A-PERF: 95/95, 0 NEW, play 11 and click 38, no row higher than C361. `durationMs` recorded |
+| MUTANT (C's own, scratch, predicted first in `c-round-362/progress.json`) | One mutant that is **not** MU-A…MU-C and that should move a play or click row. Examples: <ul><li>the leaf gets an inline arrow `togglePlayback={() => togglePlayback()}`, so memo breaks;</li><li>the hidden state span stays in the Transport body and reads `isPlaying` there;</li><li>`ArrangementTransportPosition` moves into the leaf.</li></ul> Run the interactions spec alone on it | <ul><li>Red on an asserted play or click row, or its value reported with numbers if it stays green.</li><li>Scratch under `c-round-362/` only, deleted afterwards (L60); `store/` unchanged.</li><li>A mutant that stays green is a finding against B's budget only if a play row rose above 11, or click above 38, and still passed.</li></ul> |
 | PERF-LIB | A-PERF-LIB | 40/40 |
-| ACTIVE-LANE (browser, dev, both viewports) | `node b-round-360/lane-probe.mjs http://127.0.0.1:5173 c-round-361/lane-<W>x<H>.json <W>x<H> active` (C reads the script first). On `/studio-lab` after "ready" it: adds "Full mix" with Enter; clicks the Stems lane name button; clicks the clip's name bar; clicks the Stems lane name button and presses Enter on "Full mix". After each step it reads the active lanes as the harness does (`[data-track-id] button[aria-pressed="true"]` [K17]), the library "Active track:" line, the status and the lane of each audio clip | Equal to B's run on HEAD `93ea6c1` (`b-round-360/lane-probe/head-1440x900.json`, `head-1280x720.json`): <ul><li>start, afterAdd: `music`, "Active track: Music · insert marker 00:00.000";</li><li>afterStemsClick: `stems`, line "Stems";</li><li>afterClipClick: `music`, line "Music";</li><li>afterEnterOnStems: `stems`, clips on `music, stems`, status "“Night Pulse · Full mix” added to the Stems track at 00:00.000."</li></ul> |
-| GROUP-RING (browser, dev, 1440×900) | The same script with mode `all` (`c-round-361/lane-1440x900-all.json`): Stems name button, Shift+click SFX, Ctrl+G [K18]; click SFX; click "Fold or unfold group — Group 1" [K20]; click the Music name button | Equal to B's HEAD run (`head-1440x900.json` `groupRing`): <ul><li>afterGroup: status "Group “Group 1” created: Stems, SFX.", `data-contains-active` absent;</li><li>afterCollapse: `data-contains-active="true"` [K16] (no lane button is pressed, because the SFX lane is hidden) and the library line still "SFX";</li><li>afterMusicClick: `music` active, attribute absent again.</li></ul> |
-| PASTE-LANE (browser, dev, 1440×900) | The same `all` run: add "Full mix", click its name bar, Ctrl+C, click the SFX name button, Ctrl+V | Equal to B's HEAD run (`pasteLane`): clips on `music, sfx`, `sfx` active, status "Paste (1): at 00:00.000 · on the SFX track." (SS11 in the browser) |
-| VIDEO-FAIL-STOP-1 (browser, dev, both viewports; regression guard) | `c-round-358/behaviour-probe.mjs` on the tree | every row equals `c-round-360/beh-tree-*.json` (FOLLOW within the 4 px / jitter rule of C-R359-OBS-FOLLOW-JITTER) |
-| G361-AUTH (browser, both viewports) | `c-round-358/auth.mjs`, copied to `c-round-361/` | as G360-AUTH. A fake-bearer 500 that fails closed while the mock is down goes under `blocked` |
-| DOCS | doc 234 | <ul><li>l.4 byte-exact: `**სტატუსი:** In Progress (stage 3 of 4; C round 361 PASS)`.</li><li>7 `## ` headings in TEMPLATE order (L26).</li><li>Every budget and count the stage-3 section states matches the live budgets file and `perf-summary.txt` (L34).</li><li>Every test the doc names exists (L26).</li><li>`grep -rl 'C round [0-9]* pending' docs/implementation` gives 0 files.</li></ul> |
+| PLAY-STOP (browser, dev, both viewports) | On `/studio-lab` after "Demo collection ready" (L48), with screenshots at 1440×900 and 1280×720: <ol><li>Click Play: `data-playing="true"` on Play, the state span reads the playing text, and the clock advances over 1 s.</li><li>Click Stop: `data-playing="false"`, the stopped text, and the clock stops.</li><li>Space starts and stops playback the same way.</li><li>Hold Enter on the focused Play button: one start, no toggling on key repeat.</li><li>Double-click Stop: back to 00:00.000.</li><li>Tab order around the centre group (Follow → Play → Stop → Back to start → Loop).</li></ol> | Each step equals a HEAD run of the same probe. C runs it on a HEAD scratch dev server with its own Vite `cacheDir` (L38), or cites the `c-round-361/beh-tree-*.json` rows that already cover a step |
+| MARKER-NONE (browser, dev, 1440×900) | Add the demo "Full mix". With no marker after the playhead, press Ctrl+Right while stopped, then while playing | Stopped: status "No more markers after the insert marker". Playing: "No more markers after the playhead". This is the `readIsPlaying()` path, as in IM24 [K16] |
+| VIDEO-FAIL-STOP-1 (browser, dev, both viewports; regression guard) | `c-round-358/behaviour-probe.mjs` on the tree | Every row equals `c-round-361/beh-tree-*.json` (FOLLOW within the 4 px jitter rule of C-R359-OBS-FOLLOW-JITTER) |
+| G362-AUTH (browser, both viewports) | `c-round-358/auth.mjs`, copied to `c-round-362/` | As G361-AUTH. A fake-bearer 500 that fails closed while the mock is down goes under `blocked` |
+| DOCS | doc 234 | <ul><li>l.4 byte-exact: `**სტატუსი:** In Progress (stage 4 of 5; C round 362 PASS)`.</li><li>7 `## ` headings in TEMPLATE order (L26).</li><li>Every budget and count in the stage-4 section matches the live budgets file and `b-round-361/perf-final.log` (L34).</li><li>Every test the doc names exists (L26), and UC7 is called existing.</li><li>`grep -rl 'C round [0-9]* pending' docs/implementation` gives 0 files.</li></ul> |
 
-**Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
+**Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify` and the e2e smoke.
 
-**browserVerified** is false if any of these rows does not run: PERF, MUTANT, ACTIVE-LANE, GROUP-RING, PASTE-LANE, VIDEO-FAIL-STOP-1 or G361-AUTH. None of them needs the backend.
+**browserVerified** is false if any of these rows does not run: PERF, MUTANT, PLAY-STOP, MARKER-NONE, VIDEO-FAIL-STOP-1 or G362-AUTH. None of them needs the backend.
 
-**L57: write all L57 fields** in `c-round-361.json`, and run `python3 -I tools/l57-check.py c-round-361.json c-round-361/l57-check.txt` until it exits 0.
-- `assertsSpecified`: `interact.click.components`, `interact.click.commits`, SS8, SS9, SS10, SS11.
-- `mutantsRecorded`: MU-1…MU-7 and C's own.
-- `mutantRedOnSketch`: `b-round-360/perf-mu-1-b-results/latest-interactions.json`, `b-round-360/perf-mu-7-b-results/latest-interactions.json`, `b-round-360/mutant-MU-2.log` … `mutant-MU-6.log`.
-- `gateChecksRunOnSketch`: `b-round-360/precheck-full-final.log`, `b-round-360/sketch-typecheck.log`, `b-round-360/sketch-lint.log`, `b-round-360/sketch-perf-lib.log`.
-- `affectedChecksNamed`: the interactions perf spec, the A-TESTS files, the perf-lib tests and the behaviour probe. `affectedChecksRunOnSketch`: `b-round-360/perf-sketch-b.log`, `b-round-360/ss-sketch.log`, `b-round-360/precheck-full-final.log`, `b-round-360/lane-probe/head-1440x900.json` (the HEAD baseline of the three browser rows).
+**L57: write all L57 fields** in `c-round-362.json`, and run `python3 -I tools/l57-check.py c-round-362.json c-round-362/l57-check.txt` until it exits 0.
+- `assertsSpecified`: `interact.play.start-components`, `interact.play.stop-components`, `interact.click.components`, PS4 and RB-PB2.
+- `mutantsRecorded`: MU-A…MU-C and C's own.
+- `mutantRedOnSketch`: `b-round-361/mutants/MU-A-render-budget.log`, `b-round-361/perf-mu-b-results/latest-interactions.json` and `b-round-361/mutants/MU-C-ps4.log`.
+- `gateChecksRunOnSketch`: `b-round-361/precheck-full.log` (full vitest on the sketch: 248 files, 3644 tests, rc 0), `b-round-361/sketch-typecheck.log`, `b-round-361/sketch-lint.log` and `b-round-361/sketch-covering-final.log`.
+- `affectedChecksNamed`: the interactions perf spec, the 15 covering files, the perf-lib tests and the behaviour probe.
+- `affectedChecksRunOnSketch`: `b-round-361/perf-final.log`, `b-round-361/perf-sketch.log` and `b-round-361/sketch-covering-final.log`.
 
 ## 3. Neighbouring behaviour that could break
-- **Which lane is active.** Lane click, clip click, library drop and Enter add all set it; library add and paste read it. UC7, the A-TESTS files, ACTIVE-LANE and PASTE-LANE guard it.
-- **Collapsed-group ring.** It now subscribes inside the group header; UC7 / MU-6 and GROUP-RING guard it.
-- **Edge navigation (Alt+Arrow over markers).** It reads the active track from the store at key time; `marker-edge-nav-ui.test.tsx` covers it.
-- **Library "Active track" line.** It now has its own subscription; ACTIVE-LANE reads it.
-- **Perf:** a flaky assert. Six equal samples per row (1× and 6×) on B's sketch; `click.commits` has a ceiling.
-- **App behaviour otherwise:** unchanged. VIDEO-FAIL-STOP-1 and G361-AUTH guard it.
+- **The Play and Stop buttons.** Click, Space, the held-Enter guard, double-click Stop, focus order, and the `aria-describedby` link to the state span (now with the leaf's own `useId`). PLAY-STOP and the 15 covering files guard them.
+- **Undo/Redo focus hand-off.** `armFocusHandoff` and the layout effect stay in the Transport body, unchanged. `self-disabling-focus.test.tsx`, which is in the covering set, guards them.
+- **The marker "no more markers" text.** It now goes through `readIsPlaying()`. IM24 and MARKER-NONE guard it.
+- **Perf.** A changed row could become flaky. Each changed row has six equal samples (1× and 6×) on B's sketch.
+- **Everything else in the app:** unchanged. VIDEO-FAIL-STOP-1 and G362-AUTH guard it.
 
 ## 4. STOP conditions (A)
 - A-CLAIMS pre mismatch, or a final mismatch outside §2.1. A HEAD that descends through root-lane paths only is not a mismatch.
-- A patch does not apply, or a change is needed outside the 11 files or beyond the two patches and §1.2.
-- A covering test fails or runs above 50 % of its timeout (L11).
-- A-PERF: any asserted row fails; any NEW row; any deterministic components or commits row higher than C360 other than the expected drop; or `durationMs` above 540000.
+- A patch does not apply, or a change is needed outside the 7 files, beyond the two patches and §1.2.
+- A covering test fails (the timing rule is in A-TESTS).
+- A-PERF: any asserted row fails; any NEW row; any deterministic components or commits row higher than C361; or `durationMs` above 540000.
 - The code-reviewer reports a Medium+ finding.
 
 ## 5. Routed, not in scope
-- **D-29z1168 (round 360 notes):**
-  - **C-R360-NOTE-STALE** (Low, origin B spec) is fixed in this round (§1.1), with A-R360-REVIEW-VIDEOFADE-NOTE-STALE and A-R360-REVIEW-FADE-PLAYING-INTERMITTENT merged into it. It closes on C PASS.
-  - The 0-commit side of `== 1` on the play rows stays untested (info, TL-R360-3).
-  - VFS-v2's first-attempt cold-server timeout and the 1 px / 11 ms FOLLOW jitter are environment info (same class as C-R359-OBS-FOLLOW-JITTER).
-- **D-29z1169 (PERF-10b split):** PERF-10b-ii = the Transport play/stop button as its own subscriber (≤ 20 on Play/Stop), `B-R356-PLAYBACK-SETTER`, the C-R320-01 render-budget row (with A-R320-REVIEW-WAVEFORM-NAME-POSITIVE) and the GATE320-S3 record row. `SIG-R322-ACTIVE-TRACK-STORE` is adopted by this round. `TL-R361-ACTIVE-TRACK-DANGLING` (info: a removed lane would leave the active id pointing at no track; no removal path exists today) is a STEM-LANES input, not a deferred Low.
-- **Architecture checkpoint** (`b-round-358/root-request-arch-checkpoint.md`) is still unanswered and non-blocking. This round adds no store (the active track joins the selection store).
-- **D-29z1171, next:**
+- **D-29z1173 (round 361 findings):** see `b-round-361.md` §2.
+  - GATE361-S1-COLLAPSED-HEADER-RENDERS is re-graded to Low (perf signal), with A-R361-REVIEW-CANDIDATES-ARRANGEMENT-DEP merged into it. It becomes a PERF-11 input: the group header should subscribe through selectors, and the harness needs a collapsed-group row.
+  - GATE361-L3-LIBRARY-ACTIVE-RAW goes to `deferred_low_polish`.
+  - GATE361-L2 is fixed in §1.2.
+- **PERF-10b-ii-b (next PERF round):** the C-R320-01 render-budget row (with A-R320-REVIEW-WAVEFORM-NAME-POSITIVE) and the GATE320-S3 record row. Both are harness and budget rows only.
+- **Architecture checkpoint** (`b-round-358/root-request-arch-checkpoint.md`): still unanswered and non-blocking. This round adds no store. The new signal SIG-R361-CONTEXT-LEAF-CONSUMERS (several leaves still call `useArrangement()` whole) is a PERF-11 input.
+- **D-29z1176, next:**
   1. REGRESSION, if the next planning is on or after 2026-11-08.
-  2. PERF-10b-ii.
-  3. PERF-9 and PERF-11…15, then STEM-LANES, SYS-1…3, STORE-2b…5, REVIEW-RECOMMENDATIONS and T12-ADVANCED.
+  2. PERF-10b-ii-b.
+  3. PERF-9, PERF-11…15, SYS-R2-FAKE-FIDELITY and SYS-CLOCK-DETERMINISM.
+  4. STEM-LANES, SYS-1…3, STORE-2b…5, REVIEW-RECOMMENDATIONS and T12-ADVANCED.
 
   RETRO comes at round 368 or at the end of STUDIO-PERFORMANCE.
 
 ## 6. Deliverables
-- **A:** `a-round-361.md`, with every §2.1 row, its evidence under `a-round-361/` and the code-reviewer result.
-- **C:** `c-round-361.md` and `c-round-361.json` with all L57 fields, and evidence under `c-round-361/`.
+- **A:** `a-round-362.md`, with every §2.1 row, its evidence under `a-round-362/` and the code-reviewer result.
+- **C:** `c-round-362.md` and `c-round-362.json` with all L57 fields, and evidence under `c-round-362/`.
 
 ## 7. Claims
-Run `bash b-round-360/claims-361.sh` from the loop root. `CLAIMS_STORE` points it at a scratch.
+Run `bash b-round-361/claims-362.sh` from the loop root. `CLAIMS_STORE` points it at a scratch.
 
 | Output | File |
 |---|---|
-| Planning, on `93ea6c1` (clean tree) | `b-round-360/claims-361-planning-output.txt` |
-| Sketch (code + budgets, no doc) | `b-round-360/claims-361-sketch-output.txt` |
+| Planning, on `6fdd82f` (clean tree) | `b-round-361/claims-362-planning-output.txt` |
+| Sketch (code + budgets, no doc) | `b-round-361/claims-362-sketch-output.txt` |
 
-| Tag | What it pins | Planning | Sketch |
-|---|---|---|---|
-| K1 | gate 360 status and commit | `published 93ea6c1` | same |
-| K2 | HEAD and status entry count | `93ea6c1 0` | scratch n/a; A's final `93ea6c1 11` |
-| K3 | rows; asserted count; click rows (1× commits, 1× components, `.6x` commits, `.6x` components); stale notes left | `252`, `93`, `r- r- r- r-`, `3` | `252`, `95`, `a<=2 a<=42 r- r-`, `0` |
-| K4 | budgets sha256 prefix | `728ed85b08d4` | `371659418617` |
-| K5 | `activeTrackId` field in `ArrangementContextValue`; `setActiveTrackIdState` uses; store field; `useArrangementActiveTrackId` export | `1 2 0 0` | `0 0 1 1` |
-| K6 | protected files OK | 11 | 11 |
-| K7 | SWEEP (roots `app/**`, `perf/**`): `activeTrackId` hits outside / inside tests; `latestRef` reads in the context; `workspace.`/`current.` reads in `StudioWorkspace.tsx` | `22 39 3 2` | `17 46 0 0` |
-| K8 | `package.json` sha256 prefix | `948eb8eee712` | same |
-| K9 | sha256 over `perf/lib` and the perf specs | `9b27ff50da71` | same |
-| K10 | cited artifacts missing | `0` | `0` |
-| K11 | SS rows in `selection-store.test.tsx`; UC7 in `track-group-collapse-ui.test.tsx`; the probe helper's new field | `7 1 0` | `11 1 1` |
-| K12 | runtime-name hits (roots `app/**`, `perf/**`): `'ArrangementLane'`, `'ArrangementLibraryPreview'`, `'ArrangementGroupHeaderWithSelectionInner'` | `16 1 2` | same |
-| K13 | `236-` docs in quarter IV; `pending` docs | `0 0` | same |
-| K14 | doc 234: l.4 md5 prefix, `## ` count, stage-3 heading, old PERF-10b bullet | `5807ea0e 7 0 1` | unchanged on the scratch; A's final `d116f6ef 7 1 0` |
-| K15 | sha256 over the 9 sketch files | `603be69e4ba2` | `f96e046ed0aa` |
-| K16 | `data-contains-active` render in `ArrangementGroupHeader.tsx` | `1` | same |
-| K20 | the group fold label `Fold or unfold group — ${name}` in `strings.ts` | `1` | same |
-| K19 | the first-audio-track seed expression in `ArrangementContext.tsx` (`useState` initialiser at HEAD; store seed on the sketch) | `1` | `1` |
-| K18 | the Ctrl/Cmd+G group chord in `StudioWorkspace.tsx` | `1` | same |
-| K17 | the lane name button's `aria-pressed={isActive}` in `ArrangementLane.tsx`; the harness's active-lane reader in the interactions spec | `1 1` | same |
+| Tag | What it pins |
+|---|---|
+| K1 | gate 361 status and commit |
+| K2 | HEAD and the status entry count |
+| K3 | rows; asserted count; mode, budget and owner of the six play/click rows |
+| K4 | budgets sha256 prefix |
+| K5 | in `ArrangementTransport.tsx`: `useArrangementIsPlaying()` calls, the leaf function, the leaf memo, and lines with `isPlaying` |
+| K6 | protected files OK |
+| K7 | SWEEP (roots `app/**`, `perf/**`): `useArrangementPlaybackStore` hits, `useArrangementIsPlayingReader` hits, `playbackStore` lines in `ArrangementMarkerRow.tsx`, and files outside the context and the store that call `setPlaying(` |
+| K8 | `package.json` sha256 prefix |
+| K9 | sha256 over `perf/lib` and the perf specs |
+| K10 | cited artifacts missing |
+| K11 | in `render-budget.test.tsx`: `ArrangementTransport > 0` controls, `ArrangementTransportPlayStopInner > 0` controls and `ArrangementTransport` `toBe(0)`; the PS rows in `playback-store.test.ts` |
+| K12 | runtime-name hits `'ArrangementTransport'` and `'ArrangementTransportPlayStopInner'` (roots `app/**`, `perf/**`) |
+| K13 | quarter-IV doc count; `pending` docs |
+| K14 | doc 234: l.4 md5 prefix, `## ` count, stage-4 heading, the UC7-existing wording |
+| K15 | sha256 over the 5 sketch files |
+| K16 | the IM24 row in `insert-marker-ui.test.tsx`; the `arrangement-playback-state` span in `ArrangementTransport.tsx` |
 
-C also runs the L29 grep over this task.
+The values are in the two output files. L29 check for C: every backticked `store/` path or symbol in §0.1, §0.2 and the Baseline section that states a current-code fact carries a `[K#]`. C lists any untagged one as a B-spec Low; no separate grep tool is required.

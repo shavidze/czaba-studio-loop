@@ -1,11 +1,11 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 360 (PERF-10a-BUDGETS) closed PASS from C evidence (c-round-360.json: browserVerified/realVerified true; PERF 93/93 asserted, 0 NEW; C mutant red as predicted; VIDEO-FAIL-STOP-1/2/3 and G360-AUTH PASS) and gate 360 published 93ea6c1. No Critical/High/Medium finding is workable in the cloud (the open Mediums are tech-lead-manual, awaiting_user or open_root and do not block). REGRESSION is due on/after 2026-11-08, not yet. Next by D-29z1166/D-29z1169: PERF-10b, split into 10b-i and 10b-ii. Much scoped work remains; nothing external blocks the loop.",
- "nextTask": "Round 361: PERF-10b-i (D-29z1167..D-29z1171). activeTrackId moves from provider state into the existing selection store (no new store); Lane, LibraryPreview and the collapsed-group ring subscribe with selectors. B's sketch: cross-lane clip click 83 -> 42 components (production, x3 at 1x and 6x), full suite 3639/3639, mutants MU-1..MU-7 red (MU-7 proves the click.commits bound). Budgets: interact.click.components <= 42, interact.click.commits <= 2; C-R360-NOTE-STALE notes fixed in the same patch. C runs PERF, its own mutant, ACTIVE-LANE, GROUP-RING, PASTE-LANE, VIDEO-FAIL-STOP-1, G361-AUTH and DOCS.",
+ "reason": "Round 361 (PERF-10b-i) closed PASS from C evidence (c-round-361.json browserVerified/realVerified true; PERF 95/95, click 83->42, C mutant red) and gate 361 published 6fdd82f. The gate's new Medium GATE361-S1 was measured by B: pre-existing at 93ea6c1; the proposed prop fix only skips the wrapper, the leaf header still renders once per edit because it reads useArrangement() itself, so it is re-graded Low and routed to PERF-11 (D-29z1173); no Critical/High/Medium is workable in the cloud. REGRESSION is due on/after 2026-11-08, not yet. Next by D-29z1171: PERF-10b-ii, split into ii-a and ii-b. Much scoped work remains; nothing external blocks the loop.",
+ "nextTask": "Round 362: PERF-10b-ii-a (D-29z1172..D-29z1177). The Transport's Play/Stop buttons and state span move into a memoized leaf, so Play/Stop render 11 components instead of 28 and a clip click 38 instead of 42 (B's production sketch: 95/95, 44 rows all lower, 6 equal samples). useArrangementPlaybackStore() is replaced by a read-only useArrangementIsPlayingReader() (B-R356). Budgets play.start/stop <= 11, click <= 38; L23 grant on three render-budget positive controls; PS4 added. Mutants MU-A (jsdom red), MU-B (perf click 43 > 38), MU-C (PS4 red). C runs PERF, its own mutant, PLAY-STOP, MARKER-NONE, VIDEO-FAIL-STOP-1, G362-AUTH and DOCS.",
  "remaining": [
-  "PERF-10b-i",
+  "PERF-10b-ii-a",
   "REGRESSION-2026-11-08",
-  "PERF-10b-ii",
+  "PERF-10b-ii-b",
   "PERF-CAND-MASTER-GROUP-FADER-PROPS",
   "PERF-9",
   "PERF-11",

@@ -1,0 +1,35 @@
+diff --git a/tmp/C.orig b/app/contexts/ArrangementContext.tsx
+index 520dd98..58db1d9 100644
+--- a/tmp/C.orig
++++ b/app/contexts/ArrangementContext.tsx
+@@ -4550,19 +4550,14 @@ export function useArrangementPreview<Selected>(
+   return useStore(useArrangementPreviewStore(), selector);
+ }
+ 
+-function useArrangementPlaybackStoreContext(): ArrangementPlaybackStore {
++export function useArrangementPlaybackStore(): ArrangementPlaybackStore {
+   const store = useContext(ArrangementPlaybackContext);
+   if (!store) {
+-    throw new Error('useArrangementIsPlaying must be used within an ArrangementProvider');
++    throw new Error('useArrangementPlaybackStore must be used within an ArrangementProvider');
+   }
+   return store;
+ }
+ 
+-export function useArrangementIsPlayingReader(): () => boolean {
+-  const store = useArrangementPlaybackStoreContext();
+-  return useCallback(() => store.getState().isPlaying, [store]);
+-}
+-
+ export function useArrangementWorkspaceSessionStore(): ArrangementWorkspaceSessionStore {
+   const store = useContext(ArrangementWorkspaceSessionContext);
+   if (!store) {
+@@ -4578,7 +4573,7 @@ export function useArrangementActiveTrackId(): string | null {
+ }
+ 
+ export function useArrangementIsPlaying(): boolean {
+-  return useStore(useArrangementPlaybackStoreContext(), (state) => state.isPlaying);
++  return useStore(useArrangementPlaybackStore(), (state) => state.isPlaying);
+ }
+ 
+ export function useArrangementStatusPreview<Selected>(

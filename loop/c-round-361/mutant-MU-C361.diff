@@ -1,0 +1,12 @@
+--- /home/runner/czaba-project/store/app/components/arrangement/ArrangementLane.tsx	2026-11-06 02:59:34.446958961 +0000
++++ app/components/arrangement/ArrangementLane.tsx	2026-11-06 03:28:52.259245563 +0000
+@@ -269,7 +269,8 @@
+     () => selectedClipIdSetFromKey(laneSelectionKey),
+     [laneSelectionKey],
+   );
+-  const isActive = useArrangementSelection((state) => state.activeTrackId === track.id);
++  const activeTrackIdMutant = useArrangementSelection((state) => state.activeTrackId);
++  const isActive = activeTrackIdMutant === track.id;
+   const isVideo = track.kind === 'video';
+   const mixLabel = isVideo ? VIDEO_MIX_LABEL : track.name;
+   const storedPan = trackPanValue(track);

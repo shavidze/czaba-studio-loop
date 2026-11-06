@@ -1,0 +1,160 @@
+diff --git a/tmp/T.orig b/app/components/arrangement/ArrangementTransport.tsx
+index a06e676..5de6365 100644
+--- a/tmp/T.orig
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -87,77 +87,8 @@ function ArrangementProjectEndTextInner({ committedProjectEnd }: { committedProj
+ 
+ const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner);
+ 
+-function preventRepeatedEnterKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+-  if (event.key === 'Enter' && event.repeat) {
+-    event.preventDefault();
+-  }
+-}
+-
+-interface ArrangementTransportPlayStopProps {
+-  togglePlayback: () => void;
+-  returnToStart: () => void;
+-}
+-
+-function ArrangementTransportPlayStopInner({
+-  togglePlayback,
+-  returnToStart,
+-}: ArrangementTransportPlayStopProps) {
+-  const isPlaying = useArrangementIsPlaying();
+-  const playbackStateId = useId();
+-  return (
+-    <>
+-      <button
+-        type="button"
+-        onClick={() => {
+-          if (!isPlaying) {
+-            togglePlayback();
+-          }
+-        }}
+-        onKeyDown={preventRepeatedEnterKeyDown}
+-        aria-label={studioPlaybackStrings.playLabel}
+-        aria-describedby={playbackStateId}
+-        title={studioPlaybackStrings.playTitle}
+-        aria-keyshortcuts={studioShortcutAria('play-stop')}
+-        data-playing={isPlaying ? 'true' : 'false'}
+-        className={cn(
+-          toolButtonClass,
+-          'w-8 justify-center rounded-full px-0 text-background',
+-          isPlaying
+-            ? 'bg-brand not-aria-disabled:hover:bg-brand/92 not-aria-disabled:active:bg-brand/88'
+-            : 'bg-foreground not-aria-disabled:hover:bg-foreground/92 not-aria-disabled:active:bg-foreground/88',
+-        )}
+-      >
+-        <Play className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+-      </button>
+-      <button
+-        type="button"
+-        onClick={() => {
+-          if (isPlaying) {
+-            togglePlayback();
+-          }
+-        }}
+-        onDoubleClick={returnToStart}
+-        onKeyDown={preventRepeatedEnterKeyDown}
+-        aria-label={studioPlaybackStrings.stopLabel}
+-        aria-describedby={playbackStateId}
+-        title={studioPlaybackStrings.stopTitle}
+-        aria-keyshortcuts={studioShortcutAria('play-stop')}
+-        className={cn(toolButtonClass, 'w-8 justify-center px-0')}
+-      >
+-        <Square className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+-      </button>
+-      <span id={playbackStateId} hidden data-testid="arrangement-playback-state">
+-        {isPlaying
+-          ? studioPlaybackStrings.playbackStatePlaying
+-          : studioPlaybackStrings.playbackStateStopped}
+-      </span>
+-    </>
+-  );
+-}
+-
+-const ArrangementTransportPlayStop = memo(ArrangementTransportPlayStopInner);
+-
+ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTransportProps) {
++  const isPlaying = useArrangementIsPlaying();
+   const {
+     projectEnd: committedProjectEnd,
+     undoLabel,
+@@ -181,6 +112,7 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+       ? studioEditStrings.deleteRangeAllTracksHint
+       : studioEditStrings.deleteRangeHint
+     : null;
++  const playbackStateId = useId();
+   const undoButtonRef = useRef<HTMLButtonElement>(null);
+   const redoButtonRef = useRef<HTMLButtonElement>(null);
+   const fitButtonRef = useRef<HTMLButtonElement>(null);
+@@ -214,6 +146,12 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+     }
+   });
+ 
++  const preventRepeatedEnterKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
++    if (event.key === 'Enter' && event.repeat) {
++      event.preventDefault();
++    }
++  };
++
+   return (
+     <div
+       data-testid="arrangement-transport"
+@@ -334,10 +272,51 @@ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTr
+             <ArrangementProjectEndText committedProjectEnd={committedProjectEnd} />
+           </span>
+         </div>
+-        <ArrangementTransportPlayStop
+-          togglePlayback={togglePlayback}
+-          returnToStart={returnToStart}
+-        />
++        <button
++          type="button"
++          onClick={() => {
++            if (!isPlaying) {
++              togglePlayback();
++            }
++          }}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          aria-label={studioPlaybackStrings.playLabel}
++          aria-describedby={playbackStateId}
++          title={studioPlaybackStrings.playTitle}
++          aria-keyshortcuts={studioShortcutAria('play-stop')}
++          data-playing={isPlaying ? 'true' : 'false'}
++          className={cn(
++            toolButtonClass,
++            'w-8 justify-center rounded-full px-0 text-background',
++            isPlaying
++              ? 'bg-brand not-aria-disabled:hover:bg-brand/92 not-aria-disabled:active:bg-brand/88'
++              : 'bg-foreground not-aria-disabled:hover:bg-foreground/92 not-aria-disabled:active:bg-foreground/88',
++          )}
++        >
++          <Play className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
++        </button>
++        <button
++          type="button"
++          onClick={() => {
++            if (isPlaying) {
++              togglePlayback();
++            }
++          }}
++          onDoubleClick={returnToStart}
++          onKeyDown={preventRepeatedEnterKeyDown}
++          aria-label={studioPlaybackStrings.stopLabel}
++          aria-describedby={playbackStateId}
++          title={studioPlaybackStrings.stopTitle}
++          aria-keyshortcuts={studioShortcutAria('play-stop')}
++          className={cn(toolButtonClass, 'w-8 justify-center px-0')}
++        >
++          <Square className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++        </button>
++        <span id={playbackStateId} hidden data-testid="arrangement-playback-state">
++          {isPlaying
++            ? studioPlaybackStrings.playbackStatePlaying
++            : studioPlaybackStrings.playbackStateStopped}
++        </span>
+         <button
+           type="button"
+           onClick={returnToStart}

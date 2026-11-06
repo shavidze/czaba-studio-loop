@@ -1,0 +1,145 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T03:14:45.9590108Z",
+  "round": 361,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "A-R361-REVIEW-CANDIDATES-ARRANGEMENT-DEP",
+   "severity": "low",
+   "steps": [
+    "Read StudioWorkspace.tsx trackGroupActiveCandidates useMemo deps (code-reviewer finding, A report section 4)"
+   ],
+   "expected": "Memo deps narrower than the whole arrangement",
+   "actual": "Depends on whole arrangement, so a collapsed group header gets a new array identity on every arrangement edit; reviewer says no extra cost because trackGroupOverviews changes on the same inputs. Not reproduced as a measurable regression by C (perf 95/95, no row above C360)",
+   "evidence": "a-round-361.md section 4; c-round-361/perf-rowcmp-vs-c360.txt",
+   "origin": "A"
+  },
+  {
+   "id": "INFO-A-R361-L11-TIMING",
+   "severity": "low",
+   "steps": [
+    "A ran the 9-file A-TESTS command in parallel: TG1 3254 ms, UC1 3377 ms (68% of 5000 ms default)"
+   ],
+   "expected": "Covering tests under 50% of timeout",
+   "actual": "Over 50% only in the parallel run; isolated 1.7 s; same command on HEAD scratch 3561/3204 ms (pre-existing, load-related). C did not re-run the suite (gate row); the gate full-suite run decides. Not a product bug",
+   "evidence": "a-round-361/a-tests-head-scratch.log (A artifact, not re-run by C)",
+   "origin": "pre-existing"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "PERF-95of95-asserted-0NEW-click.components-83to42-click.commits-2-no-row-above-C360",
+  "PERF-LIB-40of40",
+  "MUTANT-MU-C361-red-44-gt-42",
+  "ACTIVE-LANE-1440x900-equal-HEAD",
+  "ACTIVE-LANE-1280x720-equal-HEAD",
+  "GROUP-RING-1440x900-equal-HEAD-modulo-random-group-uuid",
+  "PASTE-LANE-1440x900-equal-HEAD",
+  "VIDEO-FAIL-STOP-1-1440x900-1280x720-within-jitter-rule",
+  "G361-AUTH-demo-opens-premium-not-bypassed",
+  "DOCS"
+ ],
+ "blocked": [
+  "G361-AUTH fake-bearer: /api/studio-token returns 500 (fails closed) while mock :5199 is not running in cloud; 403 not observable. Unauthenticated GET 401; /studio/middle-east shows sign-in required with 0 audio elements at both viewports (backend unavailable in cloud)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke",
+  "TG1/UC1 timing in full suite"
+ ],
+ "notRun": [
+  "L29 grep over the task (no definition of the grep in lessons.md; not invented)"
+ ],
+ "abletonConformance": "not applicable (performance refactor, no on-screen change)",
+ "observations": {
+  "perfDurationMs": 512520,
+  "followJitter": "beh-tree followScrollersBefore sl 123 vs C360 119 (1440) and 124 vs 120 (1280): 4 px, followPlay pos 00:01.880 vs 00:01.831; same class as C-R359-OBS-FOLLOW-JITTER; all other rows equal",
+  "laneProbeAttempt1": "1440 all-mode first attempt timed out at first ready wait (probe ran concurrently with vitest perf-lib, cold dev server); environment-invalid, replaced by attempt 2 (kept lane-1440-all-attempt1-timeout.log)",
+  "mutantMUC361": "ArrangementLane selects state.activeTrackId string: click.components 44,0 x3 (>42) at 1x and 6x, only failure of 95, click.commits 2 and select.same-lane 15 unchanged, as predicted. Scratch deleted; store has only A's 11 modified files, budgets sha 371659418617",
+  "groupRingDiff": "only the random group UUID differs from B's HEAD run; data-contains-active true after collapse (active lanes empty, library line SFX) and absent after Music click"
+ },
+ "manifestPaths": [
+  "c-round-361/claims.txt",
+  "c-round-361/perf.log",
+  "c-round-361/latest-interactions.json",
+  "c-round-361/perf-rowcmp-vs-c360.txt",
+  "c-round-361/perf-lib.log",
+  "c-round-361/mutant-MU-C361.diff",
+  "c-round-361/mutant-perf.log",
+  "c-round-361/mutant-results/latest-interactions.json",
+  "c-round-361/mutant-rowcmp.txt",
+  "c-round-361/lane-1440x900-all.json",
+  "c-round-361/lane-1280x720.json",
+  "c-round-361/beh-tree-1440x900.json",
+  "c-round-361/beh-tree-1280x720.json",
+  "c-round-361/auth.json",
+  "c-round-361/progress.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": [
+  "interact.click.components",
+  "interact.click.commits",
+  "SS8",
+  "SS9",
+  "SS10",
+  "SS11"
+ ],
+ "mutantsRecorded": [
+  "MU-1..MU-7 (B)",
+  "MU-C361 (C own: ArrangementLane subscribes to the activeTrackId string)"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-360/perf-mu-1-b-results/latest-interactions.json",
+  "b-round-360/perf-mu-7-b-results/latest-interactions.json",
+  "b-round-360/mutant-MU-2.log",
+  "b-round-360/mutant-MU-3.log",
+  "b-round-360/mutant-MU-4.log",
+  "b-round-360/mutant-MU-5.log",
+  "b-round-360/mutant-MU-6.log"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-360/precheck-full-final.log",
+  "b-round-360/sketch-typecheck.log",
+  "b-round-360/sketch-lint.log",
+  "b-round-360/sketch-perf-lib.log"
+ ],
+ "chainHeadGateRunGreen": "gate 360 published 93ea6c1",
+ "affectedChecksNamed": [
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "A-TESTS 9 files",
+  "perf-lib tests",
+  "behaviour probe",
+  "lane-probe"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-360/perf-sketch-b.log",
+  "b-round-360/ss-sketch.log",
+  "b-round-360/precheck-full-final.log",
+  "b-round-360/lane-probe/head-1440x900.json"
+ ],
+ "origin": {
+  "A-R361-REVIEW-CANDIDATES-ARRANGEMENT-DEP": "A",
+  "INFO-A-R361-L11-TIMING": "pre-existing"
+ }
+}

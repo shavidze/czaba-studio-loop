@@ -1,0 +1,86 @@
+
+ RUN  v4.0.16 /home/runner/b362-scratch/sc
+
+ ❯ app/lib/arrangement/__tests__/render-budget.test.tsx (10 tests | 3 failed) 6599ms
+     × does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play 1371ms
+     ✓ RB-IM keeps the insert marker line as the same node over Play → Stop → Play  1198ms
+     ✓ moves the playhead, ruler handle and transport time on playback frames without React renders  731ms
+     × does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e) 1016ms
+     ✓ shows the seek position immediately when stopped and after a zoom change 107ms
+     ✓ writes only transform on the detail playhead per frame and never left, width or height (R9-D3, C-R8-01) 97ms
+     ✓ keeps the library insert-marker text on 60 position frames and writes marker moves without rendering LibraryInsertMarkerText (R9-L1, C-R6-02, C-R250-01) 90ms
+     ✓ RB-PB1 keeps the context value object over Play → Stop → Play (PERF-10a)  527ms
+     × RB-PB2 renders only the Play/Stop leaf and the follow leaf on Play → Stop → Play (PERF-10a, PERF-10b-ii-a) 501ms
+     ✓ keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)  958ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U) > does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play
+AssertionError: expected 3 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 3
+
+ ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:343:65
+    341|       expect(api.current?.isPlaying).toBe(true);
+    342|       expect(renderLog.counts.get('ArrangementTransportPlayStopInner')…
+    343|       expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBe(0…
+       |                                                                 ^
+    344|       for (const parent of ['ArrangementRuler', 'ArrangementLibrary', …
+    345|         expect(renderLog.counts.get(parent) ?? 0).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U) > does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e)
+AssertionError: expected 3 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 3
+
+ ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:483:63
+    481|     expect(api.current?.isPlaying).toBe(true);
+    482|     expect(renderLog.counts.get('ArrangementTransportPlayStopInner') ?…
+    483|     expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBe(0);
+       |                                                               ^
+    484|     expect(renderLog.counts.get('ArrangementDetailPanel') ?? 0).toBe(0…
+    485|     expect(renderLog.counts.get('ArrangementDetailContentInner') ?? 0)…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U) > RB-PB2 renders only the Play/Stop leaf and the follow leaf on Play → Stop → Play (PERF-10a, PERF-10b-ii-a)
+AssertionError: expected 3 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 3
+
+ ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:649:63
+    647|     expect(view.getByRole('button', { name: 'Play' }).dataset.playing)…
+    648|     expect(renderLog.counts.get('ArrangementTransportPlayStopInner') ?…
+    649|     expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBe(0);
+       |                                                               ^
+    650|     expect(renderLog.counts.get('ArrangementPlaybackFollowSyncInner') …
+    651|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 7 passed (10)
+   Start at  04:02:06
+   Duration  9.00s (transform 1.20s, setup 0ms, import 1.75s, tests 6.60s, environment 493ms)
+
+
+::error file=/home/runner/b362-scratch/sc/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > does not re-render clips%2C overview bars%2C library rows or ruler ticks over Play → Stop → Play,line=343,column=65::AssertionError: expected 3 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 3%0A%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:343:65%0A%0A
+
+::error file=/home/runner/b362-scratch/sc/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e),line=483,column=63::AssertionError: expected 3 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 3%0A%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:483:63%0A%0A
+
+::error file=/home/runner/b362-scratch/sc/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > RB-PB2 renders only the Play/Stop leaf and the follow leaf on Play → Stop → Play (PERF-10a%2C PERF-10b-ii-a),line=649,column=63::AssertionError: expected 3 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 3%0A%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:649:63%0A%0A
