@@ -1,0 +1,67 @@
+mutant M12 in app/lib/arrangement/stem-cache.client.ts, expected red row SC21
+--- old
+    if (response.ok && !isStorable(response)) {
+      await store.delete(key).catch(() => undefined);
+      return response;
+--- new
+    if (response.ok && !isStorable(response)) {
+      return response;
+--- vitest rc 1
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/source-fetch.test.ts (6 tests) 13ms
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts (23 tests | 1 failed) 47ms
+     ✓ SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin 1ms
+     ✓ SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules 2ms
+     ✓ SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB 0ms
+     ✓ SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim 1ms
+     ✓ SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put 4ms
+     ✓ SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache 0ms
+     ✓ SC5 miss: one request with the identical init, body equal to the network body, then one stored record 2ms
+     ✓ SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward 1ms
+     ✓ SC7 hit + 200: the entry is replaced with the new bytes and the new ETag 1ms
+     ✓ SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object 1ms
+     ✓ SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged 1ms
+     ✓ SC10 get rejects: plain request with the original init and the load succeeds 1ms
+     ✓ SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off 2ms
+     ✓ SC12 the signal aborts before the commit: nothing is stored 1ms
+     ✓ SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4 2ms
+     ✓ SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch 0ms
+     ✓ SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom 1ms
+     ✓ SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request 2ms
+     ✓ SC17 two misses for one key while the first write is pending: put is called once 1ms
+     ✓ SC18 hit + 503: the stored bytes are returned and nothing is written 1ms
+     ✓ SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off 2ms
+     ✓ SC20 sweep runs once per session and every write waits for it, including a second key started together 14ms
+     × SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes 6ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 28 passed (29)
+   Start at  07:49:17
+   Duration  805ms (transform 330ms, setup 0ms, import 379ms, tests 60ms, environment 856ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC21 hit + an unstorable 200 (no-store%2C or no validators) deletes the entry; a later network error is a network failure%2C not old bytes,line=741,column=39::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:741:39%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:741:39
+    739|       expect(await bodyOf(response)).toEqual(bytesOf(5));
+    740|       await cached.idle();
+    741|       expect(fake.entries.has(URL_A)).toBe(false);
+       |                                       ^
+    742|       expect(fake.put).not.toHaveBeenCalled();
+    743|       fetchSource.mockRejectedValue(new TypeError('Failed to fetch'));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

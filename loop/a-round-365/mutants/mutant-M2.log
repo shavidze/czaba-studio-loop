@@ -1,0 +1,139 @@
+mutant M2 in app/lib/arrangement/stem-cache.client.ts, expected red row SC8
+--- old
+      if (init.signal?.aborted) {
+        throw error;
+      }
+      return cachedResponse(entry);
+--- new
+      return cachedResponse(entry);
+--- vitest rc 1
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/source-fetch.test.ts (6 tests) 18ms
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts (23 tests | 1 failed) 59ms
+     ✓ SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin 2ms
+     ✓ SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules 2ms
+     ✓ SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB 0ms
+     ✓ SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim 1ms
+     ✓ SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put 6ms
+     ✓ SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache 0ms
+     ✓ SC5 miss: one request with the identical init, body equal to the network body, then one stored record 3ms
+     ✓ SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward 2ms
+     ✓ SC7 hit + 200: the entry is replaced with the new bytes and the new ETag 2ms
+     × SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object 11ms
+     ✓ SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged 1ms
+     ✓ SC10 get rejects: plain request with the original init and the load succeeds 1ms
+     ✓ SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off 2ms
+     ✓ SC12 the signal aborts before the commit: nothing is stored 1ms
+     ✓ SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4 1ms
+     ✓ SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch 0ms
+     ✓ SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom 0ms
+     ✓ SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request 1ms
+     ✓ SC17 two misses for one key while the first write is pending: put is called once 1ms
+     ✓ SC18 hit + 503: the stored bytes are returned and nothing is written 1ms
+     ✓ SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off 2ms
+     ✓ SC20 sweep runs once per session and every write waits for it, including a second key started together 16ms
+     ✓ SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes 2ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 28 passed (29)
+   Start at  07:49:05
+   Duration  795ms (transform 216ms, setup 0ms, import 345ms, tests 77ms, environment 853ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC8 hit + network error%3A not aborted returns the stored bytes; aborted rethrows the same error object,line=427,column=5::AssertionError: promise resolved "Response { status: 200, statusText: '', headers: Headers { 'content-type': 'audio/mpeg' }, body: ReadableStream { locked: false, state: 'readable', supportsBYOB: true }, bodyUsed: false, ok: true, redirected: false, type: 'default', url: '' }" instead of rejecting%0A%0A- Expected%0A+ Received%0A%0A- Error {%0A-   "message": "rejected promise",%0A+ Response {%0A+   Symbol(state): {%0A+     "aborted": false,%0A+     "body": {%0A+       "length": 3,%0A+       "source": Uint8Array [%0A+         7,%0A+         8,%0A+         9,%0A+       ],%0A+       "stream": ReadableStream {%0A+         Symbol(kType): "ReadableStream",%0A+         Symbol(kState): {%0A+           "controller": ReadableByteStreamController {%0A+             Symbol(kType): "ReadableByteStreamController",%0A+             Symbol(kState): {%0A+               "autoAllocateChunkSize": undefined,%0A+               "byobRequest": null,%0A+               "cancelAlgorithm": [Function nonOpCancel],%0A+               "closeRequested": false,%0A+               "highWaterMark": 0,%0A+               "pendingPullIntos": [],%0A+               "pullAgain": false,%0A+               "pullAlgorithm": [Function anonymous],%0A+               "pulling": false,%0A+               "queue": [],%0A+               "queueTotalSize": 0,%0A+               "started": true,%0A+               "stream": [Circular],%0A+             },%0A+           },%0A+           "disturbed": false,%0A+           "reader": undefined,%0A+           "state": "readable",%0A+           "storedError": undefined,%0A+           "transfer": {%0A+             "port1": undefined,%0A+             "port2": undefined,%0A+             "promise": undefined,%0A+             "writable": undefined,%0A+           },%0A+         },%0A+         Symbol(nodejs.webstream.isClosedPromise): {%0A+           "promise": Promise {},%0A+           "reject": [Function anonymous],%0A+           "resolve": [Function anonymous],%0A+         },%0A+         Symbol(nodejs.webstream.controllerErrorFunction): [Function anonymous],%0A+       },%0A+     },%0A+     "cacheState": "",%0A+     "headersList": HeadersList {%0A+       "cookies": null,%0A+       Symbol(headers map): Map {%0A+         "content-type" => {%0A+           "name": "content-type",%0A+           "value": "audio/mpeg",%0A+         },%0A+       },%0A+       Symbol(headers map sorted): null,%0A+     },%0A+     "rangeRequested": false,%0A+     "requestIncludesCredentials": false,%0A+     "status": 200,%0A+     "statusText": "",%0A+     "timingAllowPassed": false,%0A+     "timingInfo": null,%0A+     "type": "default",%0A+     "urlList": [],%0A+   },%0A+   Symbol(headers): Headers {},%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:427:5%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object
+AssertionError: promise resolved "Response { status: 200, statusText: '', headers: Headers { 'content-type': 'audio/mpeg' }, body: ReadableStream { locked: false, state: 'readable', supportsBYOB: true }, bodyUsed: false, ok: true, redirected: false, type: 'default', url: '' }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ Response {
++   Symbol(state): {
++     "aborted": false,
++     "body": {
++       "length": 3,
++       "source": Uint8Array [
++         7,
++         8,
++         9,
++       ],
++       "stream": ReadableStream {
++         Symbol(kType): "ReadableStream",
++         Symbol(kState): {
++           "controller": ReadableByteStreamController {
++             Symbol(kType): "ReadableByteStreamController",
++             Symbol(kState): {
++               "autoAllocateChunkSize": undefined,
++               "byobRequest": null,
++               "cancelAlgorithm": [Function nonOpCancel],
++               "closeRequested": false,
++               "highWaterMark": 0,
++               "pendingPullIntos": [],
++               "pullAgain": false,
++               "pullAlgorithm": [Function anonymous],
++               "pulling": false,
++               "queue": [],
++               "queueTotalSize": 0,
++               "started": true,
++               "stream": [Circular],
++             },
++           },
++           "disturbed": false,
++           "reader": undefined,
++           "state": "readable",
++           "storedError": undefined,
++           "transfer": {
++             "port1": undefined,
++             "port2": undefined,
++             "promise": undefined,
++             "writable": undefined,
++           },
++         },
++         Symbol(nodejs.webstream.isClosedPromise): {
++           "promise": Promise {},
++           "reject": [Function anonymous],
++           "resolve": [Function anonymous],
++         },
++         Symbol(nodejs.webstream.controllerErrorFunction): [Function anonymous],
++       },
++     },
++     "cacheState": "",
++     "headersList": HeadersList {
++       "cookies": null,
++       Symbol(headers map): Map {
++         "content-type" => {
++           "name": "content-type",
++           "value": "audio/mpeg",
++         },
++       },
++       Symbol(headers map sorted): null,
++     },
++     "rangeRequested": false,
++     "requestIncludesCredentials": false,
++     "status": 200,
++     "statusText": "",
++     "timingAllowPassed": false,
++     "timingInfo": null,
++     "type": "default",
++     "urlList": [],
++   },
++   Symbol(headers): Headers {},
+  }
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:427:5
+    425|     await expect(
+    426|       abortingCache.fetchSource(URL_A, { credentials: 'omit', signal: …
+    427|     ).rejects.toBe(aborted);
+       |     ^
+    428|   });
+    429| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

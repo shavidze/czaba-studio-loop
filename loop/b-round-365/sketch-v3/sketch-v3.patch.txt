@@ -1,0 +1,913 @@
+diff --git a/perf/studio-lab-stem-cache.perf.spec.ts b/perf/studio-lab-stem-cache.perf.spec.ts
+new file mode 100644
+index 0000000..53f2a28
+--- /dev/null
++++ b/perf/studio-lab-stem-cache.perf.spec.ts
+@@ -0,0 +1,372 @@
++import { mkdirSync, writeFileSync } from 'node:fs';
++import { cpus } from 'node:os';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { type Browser, type CDPSession, expect, type Page, test } from '@playwright/test';
++import { STEM_CACHE_DB_NAME } from '../app/lib/arrangement/stem-cache';
++import { loadPerfBudgets, type PerfBudgetRow } from './lib/budgets';
++import { waitForCollectionReady, waitForLibraryReady } from './lib/page';
++import { buildPerfReportCore, formatLimit, type PerfSample } from './lib/report';
++import { roundTo } from './lib/stats';
++
++const storeRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
++const stemBudgetsPath = path.resolve(
++  storeRoot,
++  process.env.PERF_BUDGETS_STEM_CACHE ?? path.join('perf', 'budgets.stem-cache.json'),
++);
++const resultsDir = path.join(storeRoot, 'test-results', 'perf');
++
++const passesPerRate = 3;
++const cpuRates = [1];
++const viewport = { width: 1440, height: 900 };
++const stemPaths = ['/middle-east.mp3', '/videos/hero/hero-music.mp3'];
++const stemCacheStoreName = 'entries';
++const entriesTimeoutMs = 30000;
++const entriesPollMs = 100;
++const navigationTimeoutMs = 60000;
++const stemEntriesTimeoutMs = 30000;
++const resourceBufferSize = 2000;
++const throttle = {
++  offline: false,
++  latency: 40,
++  downloadThroughput: 1250000,
++  uploadThroughput: 375000,
++};
++
++const stemSequence = [
++  'one browser context per pass (empty HTTP cache, IndexedDB and OPFS); CDP Network.enable and Network.emulateNetworkConditions {latency 40 ms, download 1,250,000 B/s, upload 375,000 B/s} for every open',
++  'a. cold: /studio-lab -> library ready (stem.cold.*); wait until czaba-stem-cache-v2 holds one record per stem (stem.cold.entries-stored)',
++  'b. warm, HTTP cache evicted: Network.clearBrowserCache; /studio-lab again -> ready (stem.warm.*, stem.warm-ready-ratio, stem.warm-window-ratio)',
++  'c. warm, HTTP cache kept: /studio-lab again -> ready (stem.warm-http.*)',
++  'd. warm, DevTools cache disabled: Network.setCacheDisabled(true) (Chromium adds Cache-Control: no-cache); /studio-lab again -> ready (stem.warm-nocache.*); then Network.setCacheDisabled(false)',
++  'e. blocked: Network.setBlockedURLs(["*.mp3"]); /studio-lab again -> ready (stem.blocked.ready)',
++];
++
++interface StemResourceReading {
++  fetchRequests: number;
++  audioRequests: number;
++  bodyBytes: number;
++  transferBytes: number;
++  status200: number;
++  status304: number;
++  windowMs: number;
++}
++
++interface CdpMp3Bytes {
++  all: number;
++  media: number;
++}
++
++interface StemPassResult {
++  cpuRate: number;
++  pass: number;
++  samples: Map<string, PerfSample>;
++  problems: string[];
++  abortedAt: string | null;
++  stepMs: Record<string, number>;
++}
++
++async function readStemResources(page: Page): Promise<StemResourceReading> {
++  return page.evaluate((paths) => {
++    const entries = performance
++      .getEntriesByType('resource')
++      .filter(
++        (entry): entry is PerformanceResourceTiming =>
++          entry instanceof PerformanceResourceTiming &&
++          paths.includes(new URL(entry.name).pathname),
++      );
++    const fetches = entries.filter((entry) => entry.initiatorType === 'fetch');
++    const starts = fetches.map((entry) => entry.startTime);
++    const ends = fetches.map((entry) => entry.responseEnd);
++    return {
++      fetchRequests: fetches.length,
++      audioRequests: entries.filter((entry) => entry.initiatorType === 'audio').length,
++      bodyBytes: fetches.reduce(
++        (sum, entry) => sum + (entry.transferSize > 0 ? entry.encodedBodySize : 0),
++        0,
++      ),
++      transferBytes: fetches.reduce((sum, entry) => sum + entry.transferSize, 0),
++      status200: fetches.filter((entry) => entry.responseStatus === 200).length,
++      status304: fetches.filter((entry) => entry.responseStatus === 304).length,
++      windowMs: fetches.length > 0 ? Math.max(...ends) - Math.min(...starts) : 0,
++    };
++  }, stemPaths);
++}
++
++async function countStemEntries(page: Page): Promise<number> {
++  return page.evaluate(
++    ({ dbName, storeName }) =>
++      new Promise<number>((resolve) => {
++        const request = indexedDB.open(dbName);
++        request.onupgradeneeded = () => request.transaction?.abort();
++        request.onerror = () => resolve(-1);
++        request.onsuccess = () => {
++          const db = request.result;
++          if (!db.objectStoreNames.contains(storeName)) {
++            db.close();
++            resolve(0);
++            return;
++          }
++          const count = db.transaction(storeName, 'readonly').objectStore(storeName).count();
++          count.onsuccess = () => {
++            db.close();
++            resolve(count.result);
++          };
++          count.onerror = () => {
++            db.close();
++            resolve(-1);
++          };
++        };
++      }),
++    { dbName: STEM_CACHE_DB_NAME, storeName: stemCacheStoreName },
++  );
++}
++
++async function waitForStemEntries(page: Page, expected: number): Promise<number> {
++  const started = Date.now();
++  let count = await countStemEntries(page);
++  while (count < expected && Date.now() - started < entriesTimeoutMs) {
++    await page.waitForTimeout(entriesPollMs);
++    count = await countStemEntries(page);
++  }
++  return count;
++}
++
++function trackMp3Bytes(cdp: CDPSession): () => CdpMp3Bytes {
++  const types = new Map<string, string>();
++  let totals: CdpMp3Bytes = { all: 0, media: 0 };
++  cdp.on('Network.requestWillBeSent', (event) => {
++    if (new URL(event.request.url).pathname.endsWith('.mp3')) {
++      types.set(event.requestId, event.type ?? 'Other');
++    }
++  });
++  cdp.on('Network.dataReceived', (event) => {
++    const type = types.get(event.requestId);
++    if (type === undefined) return;
++    totals = {
++      all: totals.all + event.encodedDataLength,
++      media: totals.media + (type === 'Media' ? event.encodedDataLength : 0),
++    };
++  });
++  return () => {
++    const taken = totals;
++    totals = { all: 0, media: 0 };
++    return taken;
++  };
++}
++
++async function waitForStemFetches(page: Page): Promise<void> {
++  await page.waitForFunction(
++    (paths) => {
++      const fetched = new Set(
++        performance
++          .getEntriesByType('resource')
++          .filter(
++            (entry): entry is PerformanceResourceTiming =>
++              entry instanceof PerformanceResourceTiming && entry.initiatorType === 'fetch',
++          )
++          .map((entry) => new URL(entry.name).pathname),
++      );
++      return paths.every((path) => fetched.has(path));
++    },
++    stemPaths,
++    { timeout: stemEntriesTimeoutMs },
++  );
++}
++
++async function openStudio(page: Page, problems: string[], label: string): Promise<number> {
++  await page.goto('/studio-lab', { waitUntil: 'load', timeout: navigationTimeoutMs });
++  const readyMs = await waitForLibraryReady(page);
++  await waitForCollectionReady(page, problems, label);
++  return readyMs;
++}
++
++function putReading(
++  result: StemPassResult,
++  prefix: string,
++  readyMs: number,
++  reading: StemResourceReading,
++  mp3Bytes: CdpMp3Bytes,
++): void {
++  const put = (metric: string, value: number): void => {
++    result.samples.set(`${prefix}.${metric}`, { value });
++  };
++  put('ready-ms', roundTo(readyMs, 0));
++  put('fetch-requests', reading.fetchRequests);
++  put('audio-requests', reading.audioRequests);
++  put('body-bytes', reading.bodyBytes);
++  put('transfer-bytes', reading.transferBytes);
++  put('status-200', reading.status200);
++  put('status-304', reading.status304);
++  put('stem-window-ms', roundTo(reading.windowMs, 0));
++  put('cdp-mp3-bytes', mp3Bytes.all);
++  put('cdp-media-bytes', mp3Bytes.media);
++}
++
++async function runStemPass(browser: Browser, pass: number): Promise<StemPassResult> {
++  const result: StemPassResult = {
++    cpuRate: 1,
++    pass,
++    samples: new Map(),
++    problems: [],
++    abortedAt: null,
++    stepMs: {},
++  };
++  const context = await browser.newContext({ viewport });
++  await context.addInitScript(() => {
++    localStorage.setItem('czaba_analytics_consent', 'denied');
++  });
++  await context.addInitScript((size) => {
++    performance.setResourceTimingBufferSize(size);
++  }, resourceBufferSize);
++  let step = 'cold';
++  let stepStart = Date.now();
++  const beginStep = (name: string): void => {
++    result.stepMs[step] = Date.now() - stepStart;
++    step = name;
++    stepStart = Date.now();
++  };
++  try {
++    const page = await context.newPage();
++    const cdp: CDPSession = await context.newCDPSession(page);
++    const takeMp3Bytes = trackMp3Bytes(cdp);
++    await cdp.send('Network.enable');
++    await cdp.send('Network.emulateNetworkConditions', throttle);
++
++    const coldReady = await openStudio(page, result.problems, 'cold');
++    await waitForStemFetches(page);
++    const cold = await readStemResources(page);
++    putReading(result, 'stem.cold', coldReady, cold, takeMp3Bytes());
++    result.samples.set('stem.harness.cold-body-live', {
++      value: cold.bodyBytes > 1000000 ? 1 : 0,
++      detail: { bodyBytes: cold.bodyBytes },
++    });
++    const stored = await waitForStemEntries(page, stemPaths.length);
++    result.samples.set('stem.cold.entries-stored', { value: stored });
++
++    beginStep('warm');
++    await cdp.send('Network.clearBrowserCache');
++    const warmReady = await openStudio(page, result.problems, 'warm');
++    await waitForStemFetches(page);
++    const warm = await readStemResources(page);
++    putReading(result, 'stem.warm', warmReady, warm, takeMp3Bytes());
++    result.samples.set('stem.warm-ready-ratio', {
++      value: roundTo(warmReady / coldReady, 3),
++      detail: { warmReadyMs: roundTo(warmReady, 0), coldReadyMs: roundTo(coldReady, 0) },
++    });
++    if (cold.windowMs <= 0) result.problems.push('cold stem window is 0 ms');
++    result.samples.set('stem.warm-window-ratio', {
++      value: cold.windowMs > 0 ? roundTo(warm.windowMs / cold.windowMs, 3) : Number.NaN,
++      detail: { warmWindowMs: roundTo(warm.windowMs, 0), coldWindowMs: roundTo(cold.windowMs, 0) },
++    });
++
++    beginStep('warm-http');
++    const httpReady = await openStudio(page, result.problems, 'warm-http');
++    await waitForStemFetches(page);
++    putReading(result, 'stem.warm-http', httpReady, await readStemResources(page), takeMp3Bytes());
++
++    beginStep('warm-nocache');
++    await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
++    const noCacheReady = await openStudio(page, result.problems, 'warm-nocache');
++    await waitForStemFetches(page);
++    putReading(
++      result,
++      'stem.warm-nocache',
++      noCacheReady,
++      await readStemResources(page),
++      takeMp3Bytes(),
++    );
++    await cdp.send('Network.setCacheDisabled', { cacheDisabled: false });
++
++    beginStep('blocked');
++    await cdp.send('Network.setBlockedURLs', { urls: ['*.mp3'] });
++    let blockedReady = 0;
++    try {
++      await openStudio(page, result.problems, 'blocked');
++      blockedReady = 1;
++    } catch (error) {
++      const message = error instanceof Error ? error.message : String(error);
++      result.problems.push(`blocked open: ${message.split('\n')[0]}`);
++    }
++    result.samples.set('stem.blocked.ready', { value: blockedReady });
++    result.samples.set('stem.blocked.entries', { value: await countStemEntries(page) });
++    await cdp.send('Network.setBlockedURLs', { urls: [] });
++    beginStep('done');
++  } catch (error) {
++    const message = error instanceof Error ? error.message : String(error);
++    result.abortedAt = step;
++    result.problems.push(`aborted at ${step}: ${message.split('\n')[0]}`);
++  } finally {
++    result.stepMs[step] = Date.now() - stepStart;
++    await context.close();
++  }
++  return result;
++}
++
++function buildStemReport(
++  budgets: readonly PerfBudgetRow[],
++  passes: readonly StemPassResult[],
++  startedAt: Date,
++  chromium: string,
++) {
++  const { complete, failures, rows } = buildPerfReportCore({
++    budgets,
++    passes,
++    cpuRates,
++    passesPerRate,
++    assertWhenPartial: true,
++  });
++  const finishedAt = new Date();
++  return {
++    harness: 'PERF-9b',
++    complete,
++    startedAt: startedAt.toISOString(),
++    finishedAt: finishedAt.toISOString(),
++    durationMs: finishedAt.getTime() - startedAt.getTime(),
++    budgetsFile: path.relative(storeRoot, stemBudgetsPath),
++    chromium,
++    viewport: `${viewport.width}x${viewport.height}`,
++    machine: { cpus: cpus().length, cpuRate: 1 },
++    throttle,
++    passesPerRate,
++    sequence: stemSequence,
++    passes: passes.map((pass) => ({
++      pass: pass.pass,
++      abortedAt: pass.abortedAt,
++      problems: pass.problems,
++      stepMs: pass.stepMs,
++    })),
++    failures,
++    rows,
++  };
++}
++
++test('studio-lab perf harness PERF-9b stem cache', async ({ browser }) => {
++  const startedAt = new Date();
++  const budgets = loadPerfBudgets(stemBudgetsPath);
++  const stamp = startedAt.toISOString().replace(/[:.]/g, '-');
++  const write = (report: ReturnType<typeof buildStemReport>): void => {
++    mkdirSync(resultsDir, { recursive: true });
++    const json = `${JSON.stringify(report, null, 2)}\n`;
++    writeFileSync(path.join(resultsDir, `perf-9b-${stamp}.json`), json);
++    writeFileSync(path.join(resultsDir, 'latest-stem-cache.json'), json);
++  };
++  const passes: StemPassResult[] = [];
++  for (let pass = 1; pass <= passesPerRate; pass += 1) {
++    passes.push(await runStemPass(browser, pass));
++    write(buildStemReport(budgets, passes, startedAt, browser.version()));
++  }
++  const report = buildStemReport(budgets, passes, startedAt, browser.version());
++  write(report);
++  const table = report.rows.map(
++    (row) =>
++      `${row.id.padEnd(40)} ${row.mode.padEnd(6)} median ${String(row.median).padStart(10)}  min ${String(row.min).padStart(10)}  max ${String(row.max).padStart(10)}  budget ${formatLimit(row.budget).padEnd(8)} ${row.pass === null ? '' : row.pass ? 'PASS' : 'FAIL'}`,
++  );
++  console.log(
++    [
++      `PERF-9b results (${report.durationMs} ms) -> test-results/perf/latest-stem-cache.json`,
++      ...table,
++    ].join('\n'),
++  );
++  expect(report.failures, report.failures.join('\n')).toEqual([]);
++});
+diff --git a/perf/budgets.stem-cache.json b/perf/budgets.stem-cache.json
+new file mode 100644
+index 0000000..3c21c9c
+--- /dev/null
++++ b/perf/budgets.stem-cache.json
+@@ -0,0 +1,529 @@
++[
++  {
++    "id": "stem.harness.cold-body-live",
++    "scenario": "a. cold open",
++    "metric": "cold-body-live",
++    "unit": "boolean (1 = true)",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-9b",
++    "note": "1 when the cold open read more than 1,000,000 stem body bytes through Resource Timing: proves the byte counter is live, so warm body-bytes 0 is not vacuous."
++  },
++  {
++    "id": "stem.cold.ready-ms",
++    "scenario": "a. cold open",
++    "metric": "ready-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
++  },
++  {
++    "id": "stem.cold.fetch-requests",
++    "scenario": "a. cold open",
++    "metric": "fetch-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
++  },
++  {
++    "id": "stem.cold.audio-requests",
++    "scenario": "a. cold open",
++    "metric": "audio-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH)."
++  },
++  {
++    "id": "stem.cold.body-bytes",
++    "scenario": "a. cold open",
++    "metric": "body-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0)."
++  },
++  {
++    "id": "stem.cold.transfer-bytes",
++    "scenario": "a. cold open",
++    "metric": "transfer-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.cold.status-200",
++    "scenario": "a. cold open",
++    "metric": "status-200",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 200."
++  },
++  {
++    "id": "stem.cold.status-304",
++    "scenario": "a. cold open",
++    "metric": "status-304",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 304."
++  },
++  {
++    "id": "stem.cold.stem-window-ms",
++    "scenario": "a. cold open",
++    "metric": "stem-window-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.cold.cdp-mp3-bytes",
++    "scenario": "a. cold open",
++    "metric": "cdp-mp3-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request of this open (fetch and media, aborted ones included); cross-check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
++  },
++  {
++    "id": "stem.cold.cdp-media-bytes",
++    "scenario": "a. cold open",
++    "metric": "cdp-media-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "The Media-type part of cdp-mp3-bytes: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
++  },
++  {
++    "id": "stem.warm.ready-ms",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "ready-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
++  },
++  {
++    "id": "stem.warm.fetch-requests",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "fetch-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
++  },
++  {
++    "id": "stem.warm.audio-requests",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "audio-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH)."
++  },
++  {
++    "id": "stem.warm.body-bytes",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "body-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 0
++    },
++    "owner": "PERF-9b",
++    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0)."
++  },
++  {
++    "id": "stem.warm.transfer-bytes",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "transfer-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.warm.status-200",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "status-200",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 200."
++  },
++  {
++    "id": "stem.warm.status-304",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "status-304",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 2
++    },
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 304."
++  },
++  {
++    "id": "stem.warm.stem-window-ms",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "stem-window-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.warm.cdp-mp3-bytes",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "cdp-mp3-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request of this open (fetch and media, aborted ones included); cross-check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
++  },
++  {
++    "id": "stem.warm.cdp-media-bytes",
++    "scenario": "b. warm reopen, HTTP cache evicted",
++    "metric": "cdp-media-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "The Media-type part of cdp-mp3-bytes: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
++  },
++  {
++    "id": "stem.warm-http.ready-ms",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "ready-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
++  },
++  {
++    "id": "stem.warm-http.fetch-requests",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "fetch-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
++  },
++  {
++    "id": "stem.warm-http.audio-requests",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "audio-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH)."
++  },
++  {
++    "id": "stem.warm-http.body-bytes",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "body-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0)."
++  },
++  {
++    "id": "stem.warm-http.transfer-bytes",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "transfer-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.warm-http.status-200",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "status-200",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 200."
++  },
++  {
++    "id": "stem.warm-http.status-304",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "status-304",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 304."
++  },
++  {
++    "id": "stem.warm-http.stem-window-ms",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "stem-window-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.warm-http.cdp-mp3-bytes",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "cdp-mp3-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request of this open (fetch and media, aborted ones included); cross-check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
++  },
++  {
++    "id": "stem.warm-http.cdp-media-bytes",
++    "scenario": "c. warm reopen, HTTP cache kept",
++    "metric": "cdp-media-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "The Media-type part of cdp-mp3-bytes: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
++  },
++  {
++    "id": "stem.warm-nocache.ready-ms",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "ready-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "performance.now() when the library Add button is enabled and the preview waveform is drawn (waitForLibraryReady)."
++  },
++  {
++    "id": "stem.warm-nocache.fetch-requests",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "fetch-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType fetch for the two stem paths."
++  },
++  {
++    "id": "stem.warm-nocache.audio-requests",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "audio-requests",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Resource Timing entries with initiatorType audio for the two stem paths (B-R364-DEMO-DOUBLE-FETCH)."
++  },
++  {
++    "id": "stem.warm-nocache.body-bytes",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "body-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Network body bytes: sum of encodedBodySize over the fetch-initiator stem entries whose transferSize > 0 (a 304 and an HTTP-cache hit count 0)."
++  },
++  {
++    "id": "stem.warm-nocache.transfer-bytes",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "transfer-bytes",
++    "unit": "bytes",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "Sum of transferSize (headers + body) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.warm-nocache.status-200",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "status-200",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 200."
++  },
++  {
++    "id": "stem.warm-nocache.status-304",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "status-304",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "fetch-initiator stem entries with responseStatus 304."
++  },
++  {
++    "id": "stem.warm-nocache.stem-window-ms",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "stem-window-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "max(responseEnd) - min(startTime) over the fetch-initiator stem entries."
++  },
++  {
++    "id": "stem.warm-nocache.cdp-mp3-bytes",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "cdp-mp3-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "CDP Network.dataReceived encodedDataLength summed over every *.mp3 request of this open (fetch and media, aborted ones included); cross-check of body-bytes. Wallclock because an aborted media request stops at a timing-dependent byte count."
++  },
++  {
++    "id": "stem.warm-nocache.cdp-media-bytes",
++    "scenario": "d. warm reopen, DevTools cache disabled (Cache-Control: no-cache)",
++    "metric": "cdp-media-bytes",
++    "unit": "bytes",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "The Media-type part of cdp-mp3-bytes: the narrow-screen <audio preload=\"metadata\"> request (B-R364-DEMO-DOUBLE-FETCH), which the stem cache does not cover."
++  },
++  {
++    "id": "stem.cold.entries-stored",
++    "scenario": "a. cold open",
++    "metric": "entries-stored",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 2
++    },
++    "owner": "PERF-9b",
++    "note": "czaba-stem-cache-v2 entries record count after the cold open (polled up to 30 s)."
++  },
++  {
++    "id": "stem.warm-ready-ratio",
++    "scenario": "b / a",
++    "metric": "warm-ready-ratio",
++    "unit": "ratio",
++    "kind": "wallclock",
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 0.5
++    },
++    "owner": "PERF-9b",
++    "note": "warm ready-ms / cold ready-ms under the fixed throttle (plan target <= 0.5)."
++  },
++  {
++    "id": "stem.warm-window-ratio",
++    "scenario": "b / a",
++    "metric": "warm-window-ratio",
++    "unit": "ratio",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-9b",
++    "note": "warm stem-window-ms / cold stem-window-ms under the fixed throttle."
++  },
++  {
++    "id": "stem.blocked.ready",
++    "scenario": "e. *.mp3 blocked",
++    "metric": "blocked-ready",
++    "unit": "boolean (1 = true)",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-9b",
++    "note": "1 when the library reaches ready with every .mp3 request blocked (the audio came from the stem cache)."
++  },
++  {
++    "id": "stem.blocked.entries",
++    "scenario": "e. *.mp3 blocked",
++    "metric": "blocked-entries",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 2
++    },
++    "owner": "PERF-9b",
++    "note": "czaba-stem-cache-v2 entries record count after the blocked open: a network error keeps the entries (blocked.ready alone cannot tell ready-from-cache from ready-then-dropped)."
++  }
++]

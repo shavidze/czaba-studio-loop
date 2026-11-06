@@ -1,0 +1,129 @@
+mutant M3 in app/lib/arrangement/stem-cache.client.ts, expected red row SC5
+--- old
+      const response = await fetchSource(url, init);
+      writeInBackground(key, response, init);
+--- new
+      const response = await fetchSource(url, { ...init, headers: new Headers({ 'If-None-Match': '*', 'If-Modified-Since': 'x' }) });
+      writeInBackground(key, response, init);
+--- vitest rc 1
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/source-fetch.test.ts (6 tests) 12ms
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts (23 tests | 3 failed) 51ms
+     ✓ SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin 1ms
+     ✓ SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules 2ms
+     ✓ SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB 0ms
+     ✓ SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim 1ms
+     ✓ SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put 4ms
+     ✓ SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache 0ms
+     × SC5 miss: one request with the identical init, body equal to the network body, then one stored record 9ms
+     ✓ SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward 1ms
+     ✓ SC7 hit + 200: the entry is replaced with the new bytes and the new ETag 1ms
+     ✓ SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object 2ms
+     ✓ SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged 1ms
+     × SC10 get rejects: plain request with the original init and the load succeeds 3ms
+     ✓ SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off 2ms
+     ✓ SC12 the signal aborts before the commit: nothing is stored 1ms
+     ✓ SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4 1ms
+     ✓ SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch 0ms
+     ✓ SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom 0ms
+     × SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request 2ms
+     ✓ SC17 two misses for one key while the first write is pending: put is called once 1ms
+     ✓ SC18 hit + 503: the stored bytes are returned and nothing is written 1ms
+     ✓ SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off 2ms
+     ✓ SC20 sweep runs once per session and every write waits for it, including a second key started together 12ms
+     ✓ SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes 2ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 26 passed (29)
+   Start at  07:49:06
+   Duration  793ms (transform 337ms, setup 0ms, import 389ms, tests 63ms, environment 824ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC5 miss%3A one request with the identical init%2C body equal to the network body%2C then one stored record,line=339,column=18::AssertionError: expected { credentials: 'omit', …(2) } to deeply equal { credentials: 'omit', …(1) }%0A%0A- Expected%0A+ Received%0A%0A@@ -1,7 +1,8 @@%0A  {%0A    "credentials": "omit",%0A+   "headers": Headers {},%0A    "signal": AbortSignal {%0A      Symbol(kEvents): Map {},%0A      Symbol(events.maxEventTargetListeners): 0,%0A      Symbol(events.maxEventTargetListenersWarned): false,%0A      Symbol(kHandlers): Map {},%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:339:18%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC10 get rejects%3A plain request with the original init and the load succeeds,line=463,column=44::AssertionError: expected { credentials: 'omit', …(2) } to strictly equal { credentials: 'omit', …(1) }%0A%0A- Expected%0A+ Received%0A%0A@@ -1,7 +1,8 @@%0A  {%0A    "credentials": "omit",%0A+   "headers": Headers {},%0A    "signal": AbortSignal {%0A      Symbol(kEvents): Map {},%0A      Symbol(events.maxEventTargetListeners): 0,%0A      Symbol(events.maxEventTargetListenersWarned): false,%0A      Symbol(kHandlers): Map {},%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:463:44%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC15 integrity%3A a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request,line=602,column=46::AssertionError: expected { credentials: 'omit', …(2) } to strictly equal { credentials: 'omit', …(1) }%0A%0A- Expected%0A+ Received%0A%0A@@ -1,7 +1,8 @@%0A  {%0A    "credentials": "omit",%0A+   "headers": Headers {},%0A    "signal": AbortSignal {%0A      Symbol(kEvents): Map {},%0A      Symbol(events.maxEventTargetListeners): 0,%0A      Symbol(events.maxEventTargetListenersWarned): false,%0A      Symbol(kHandlers): Map {},%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:602:46%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC5 miss: one request with the identical init, body equal to the network body, then one stored record
+AssertionError: expected { credentials: 'omit', …(2) } to deeply equal { credentials: 'omit', …(1) }
+
+- Expected
++ Received
+
+@@ -1,7 +1,8 @@
+  {
+    "credentials": "omit",
++   "headers": Headers {},
+    "signal": AbortSignal {
+      Symbol(kEvents): Map {},
+      Symbol(events.maxEventTargetListeners): 0,
+      Symbol(events.maxEventTargetListenersWarned): false,
+      Symbol(kHandlers): Map {},
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:339:18
+    337|     const [url, init] = fetchSource.mock.calls[0] ?? [];
+    338|     expect(url).toBe(URL_A);
+    339|     expect(init).toEqual({ credentials: 'omit', signal: controller.sig…
+       |                  ^
+    340|     expect(Object.keys(init ?? {}).sort()).toEqual(['credentials', 'si…
+    341|     expect(await bodyOf(response)).toEqual(bytesOf(1, 2, 3, 4));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC10 get rejects: plain request with the original init and the load succeeds
+AssertionError: expected { credentials: 'omit', …(2) } to strictly equal { credentials: 'omit', …(1) }
+
+- Expected
++ Received
+
+@@ -1,7 +1,8 @@
+  {
+    "credentials": "omit",
++   "headers": Headers {},
+    "signal": AbortSignal {
+      Symbol(kEvents): Map {},
+      Symbol(events.maxEventTargetListeners): 0,
+      Symbol(events.maxEventTargetListenersWarned): false,
+      Symbol(kHandlers): Map {},
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:463:44
+    461|     ).resolves.toBe(decoded);
+    462|     expect(fake.get).toHaveBeenCalledTimes(1);
+    463|     expect(fetchSource.mock.calls[0]?.[1]).toStrictEqual({
+       |                                            ^
+    464|       credentials: 'omit',
+    465|       signal: controller.signal,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request
+AssertionError: expected { credentials: 'omit', …(2) } to strictly equal { credentials: 'omit', …(1) }
+
+- Expected
++ Received
+
+@@ -1,7 +1,8 @@
+  {
+    "credentials": "omit",
++   "headers": Headers {},
+    "signal": AbortSignal {
+      Symbol(kEvents): Map {},
+      Symbol(events.maxEventTargetListeners): 0,
+      Symbol(events.maxEventTargetListenersWarned): false,
+      Symbol(kHandlers): Map {},
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:602:46
+    600|         signal: controller.signal,
+    601|       });
+    602|       expect(fetchSource.mock.calls[0]?.[1]).toStrictEqual({
+       |                                              ^
+    603|         credentials: 'omit',
+    604|         signal: controller.signal,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+

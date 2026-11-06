@@ -1,0 +1,60 @@
+mutant M4b in app/lib/arrangement/stem-cache.client.ts, expected red row SC4
+--- old
+    for (const victim of victims) {
+      await activeStore.delete(victim.key);
+    }
+
+--- new
+
+--- vitest rc 1
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/source-fetch.test.ts (6 tests) 12ms
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts (23 tests | 1 failed) 46ms
+     ✓ SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin 1ms
+     ✓ SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules 2ms
+     ✓ SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB 0ms
+     ✓ SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim 1ms
+     × SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put 8ms
+     ✓ SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache 0ms
+     ✓ SC5 miss: one request with the identical init, body equal to the network body, then one stored record 3ms
+     ✓ SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward 1ms
+     ✓ SC7 hit + 200: the entry is replaced with the new bytes and the new ETag 1ms
+     ✓ SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object 1ms
+     ✓ SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged 1ms
+     ✓ SC10 get rejects: plain request with the original init and the load succeeds 1ms
+     ✓ SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off 2ms
+     ✓ SC12 the signal aborts before the commit: nothing is stored 1ms
+     ✓ SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4 1ms
+     ✓ SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch 0ms
+     ✓ SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom 1ms
+     ✓ SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request 2ms
+     ✓ SC17 two misses for one key while the first write is pending: put is called once 1ms
+     ✓ SC18 hit + 503: the stored bytes are returned and nothing is written 1ms
+     ✓ SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off 2ms
+     ✓ SC20 sweep runs once per session and every write waits for it, including a second key started together 13ms
+     ✓ SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes 2ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 28 passed (29)
+   Start at  07:49:09
+   Duration  788ms (transform 305ms, setup 0ms, import 381ms, tests 58ms, environment 835ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a stem cache rules and evictions > SC4 evictions in the cached fetch%3A the least recently used other entry is deleted before the put,line=301,column=25::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:301:25%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a stem cache rules and evictions > SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:301:25
+    299|     await cached.fetchSource(URL_A, { credentials: 'omit', signal: new…
+    300|     await cached.idle();
+    301|     expect(fake.remove).toHaveBeenCalledTimes(1);
+       |                         ^
+    302|     expect(fake.remove).toHaveBeenCalledWith('/old');
+    303|     expect([...fake.entries.keys()].sort()).toEqual([URL_A, '/new'].so…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

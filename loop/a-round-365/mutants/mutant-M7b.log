@@ -1,0 +1,44 @@
+mutant M7b in app/lib/arrangement/source-fetch.ts, expected red row SF6
+--- old
+export type SourceFetch
+--- new
+export { publicPreviewSourceFetch } from './stem-cache.client';
+
+export type SourceFetch
+
+--- also in collection.ts: import publicPreviewSourceFetch from ./source-fetch; default fetchAudio = publicPreviewSourceFetch()
+--- vitest rc 1
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/arrangement/__tests__/source-fetch.test.ts (6 tests | 1 failed) 22ms
+     ✓ SF1 one request with exactly { credentials: "omit", signal }, decoded from the response bytes 6ms
+     ✓ SF2 a non-ok status maps to httpFailed(status) and nothing is decoded 2ms
+     ✓ SF3 a rejected request maps to networkFailed; when aborted the same error object is rethrown 1ms
+     ✓ SF4 a body read failure maps to networkFailed; when aborted the same error object is rethrown 2ms
+     ✓ SF5 a decode failure maps to decodeFailed 1ms
+     × SF6 purchased never uses the stem cache: no stem-cache import in collection.ts, and a cached path still sends exactly { credentials: "omit", signal } 8ms
+ ✓ app/lib/arrangement/__tests__/stem-cache.test.ts (23 tests) 51ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 28 passed (29)
+   Start at  07:51:10
+   Duration  797ms (transform 333ms, setup 0ms, import 388ms, tests 73ms, environment 836ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/source-fetch.test.ts,title=app/lib/arrangement/__tests__/source-fetch.test.ts > PERF-9a fetchAndDecodeSource (source-fetch.ts) > SF6 purchased never uses the stem cache%3A no stem-cache import in collection.ts%2C and a cached path still sends exactly { credentials%3A "omit"%2C signal },line=221,column=25::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/source-fetch.test.ts:221:25%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/source-fetch.test.ts > PERF-9a fetchAndDecodeSource (source-fetch.ts) > SF6 purchased never uses the stem cache: no stem-cache import in collection.ts, and a cached path still sends exactly { credentials: "omit", signal }
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ app/lib/arrangement/__tests__/source-fetch.test.ts:221:25
+    219|     const controller = new AbortController();
+    220|     await collection.loadSource(source, decodeContext(), controller.si…
+    221|     expect(globalFetch).toHaveBeenCalledTimes(1);
+       |                         ^
+    222|     expect(globalFetch.mock.calls[0]?.[0]).toBe('/a.mp3');
+    223|     expect(globalFetch.mock.calls[0]?.[1]).toStrictEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

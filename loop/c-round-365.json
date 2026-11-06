@@ -1,0 +1,112 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T07:54:08.8536536Z",
+  "round": 365,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R365-INFO-01",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "bash b-round-364/claims-365.sh",
+    "compare K11 with planning output"
+   ],
+   "expected": "K11 = 10 per task 2.1",
+   "actual": "K11 = 12: the grep also matches the two new test files the task itself requires. A's ruling request is reasonable",
+   "evidence": "c-round-365.md section CLAIMS; a-round-365/claims-final.txt"
+  },
+  {
+   "id": "C-R365-INFO-02",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "read 1.2 lines 127 vs 143 (sweep error: ignored vs turns cache off)"
+   ],
+   "expected": "one reading",
+   "actual": "two readings; code follows 'ignored'; no SC row pins either",
+   "evidence": "a-round-365.md STOP 2"
+  }
+ ],
+ "passed": [
+  "UNIT (12 files 194/194; SC1-SC21, SF1-SF6 exist by name)",
+  "SOURCE-SCOPE (2 modified + 6 new, no other path)",
+  "MUTANT-OWN (304-no-touch red on SC6; budget-without-256MiB-cap red on SC3)",
+  "CS-COLD 1440x900 + 1280x720",
+  "CS-WARM 1440x900 + 1280x720 (304, encodedBodySize 0, If-None-Match sent, HTTP cache on and off)",
+  "CS-AUDIO (cold/warm/blocked: same clip width 4054.078, playhead 2.89-2.90s after 2.2s play, analyser peaks 0.05-0.31, export WAV 24-bit/48k 101.352s byte-identical sha256 across all three)",
+  "CS-BLOCKED 1440x900 + 1280x720",
+  "CS-CLEAR 1440x900 + 1280x720",
+  "CS-LEGACY (only czaba-stem-cache-v2 in indexedDB.databases)",
+  "ONE-FETCH (one fetch-initiator request per URL per open; audio-initiator entry status 0/0 B recorded)",
+  "G365-AUTH both viewports (anonymous /studio-lab opens as demo; /studio/middle-east asks sign-in, 0 audio sources; /api/studio-token 401, no token in body)",
+  "DOCS (l.4 byte-exact, 7 headings in order, 0 'C round N pending')"
+ ],
+ "failed": [],
+ "blocked": [
+  "SSR dev-server-log half: dev server stdout goes to the orchestrator pipe; C could not read it (HTML half passed: 200 + CZABA Studio)",
+  "G365-AUTH fake-bearer /api/studio-token returns 500 (fails closed, no token); recorded not claimed"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke",
+  "A-TYPE/A-LINT"
+ ],
+ "notRun": [
+  "SSR dev-log half"
+ ],
+ "abletonConformance": "not applicable (performance round, nothing on screen changes)",
+ "observations": [
+  "B-R364-DEMO-DOUBLE-FETCH reproduced: audio-initiator /middle-east.mp3 status 0, 0 B in every open (not in scope)",
+  "Cold dev-server encodedBodySize for middle-east differs between runs (1.89 MB gzip stream vs 4.05 MB); decoded and stored size is 4,054,080 in all runs",
+  "Reviewer Lows L3-L6 (abort recheck before put, tx.oncomplete, delete vs pending write, clone outside try) remain for 9b"
+ ],
+ "manifestPaths": [
+  "c-round-365/cache-1440x900.json",
+  "c-round-365/cache-1280x720.json",
+  "c-round-365/audio.json",
+  "c-round-365/auth.json",
+  "c-round-365/unit.log",
+  "c-round-365/audio-cold-1440x900.png"
+ ],
+ "missingPaths": [],
+ "countMismatches": [
+  "K11 12 vs 10 (ruled by A proposal, see C-R365-INFO-01)"
+ ],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": "SC1-SC21, SF1-SF6",
+ "mutantsRecorded": "M1-M12 (A logs, not re-run by C) plus C own: 304-no-touch (red SC6), budget-no-256MiB-cap (red SC3)",
+ "mutantRedOnSketch": null,
+ "mutantRedOnSketchReason": "B wrote no unit tests on the sketch; A mutant logs and C's two own mutants are the evidence",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "biome"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-364/precheck-full.log",
+  "b-round-364/sketch-typecheck.log",
+  "b-round-364/sketch-biome.log"
+ ],
+ "gateNote": "Gate results in gates/gate-round-365.json",
+ "chainHeadGateRunGreen": "gate 364",
+ "affectedChecksNamed": [
+  "12 covering vitest files",
+  "browser cache probe 1440x900 and 1280x720"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-364/sketch-covering.log",
+  "b-round-364/probe/sketch-cache-1440x900.json",
+  "b-round-364/probe/sketch-cache-1280x720.json"
+ ],
+ "origin": "see per-bug origin"
+}

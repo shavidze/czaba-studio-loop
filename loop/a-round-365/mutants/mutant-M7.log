@@ -1,0 +1,52 @@
+mutant M7 in app/lib/arrangement/collection.ts, expected red row SF6
+--- old
+import { fetchAndDecodeSource, type SourceFetch } from './source-fetch';
+--- new
+import { fetchAndDecodeSource, type SourceFetch } from './source-fetch';
+import { publicPreviewSourceFetch } from './stem-cache.client';
+
+--- also in collection.ts: default fetchAudio = publicPreviewSourceFetch()
+--- vitest rc 1
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ❯ app/lib/arrangement/__tests__/source-fetch.test.ts (6 tests | 1 failed) 15ms
+     ✓ SF1 one request with exactly { credentials: "omit", signal }, decoded from the response bytes 5ms
+     ✓ SF2 a non-ok status maps to httpFailed(status) and nothing is decoded 1ms
+     ✓ SF3 a rejected request maps to networkFailed; when aborted the same error object is rethrown 1ms
+     ✓ SF4 a body read failure maps to networkFailed; when aborted the same error object is rethrown 1ms
+     ✓ SF5 a decode failure maps to decodeFailed 1ms
+     × SF6 purchased never uses the stem cache: no stem-cache import in collection.ts, and a cached path still sends exactly { credentials: "omit", signal } 6ms
+ ✓ app/lib/arrangement/__tests__/stem-cache.test.ts (23 tests) 44ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 28 passed (29)
+   Start at  07:51:09
+   Duration  788ms (transform 240ms, setup 0ms, import 350ms, tests 60ms, environment 857ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/source-fetch.test.ts,title=app/lib/arrangement/__tests__/source-fetch.test.ts > PERF-9a fetchAndDecodeSource (source-fetch.ts) > SF6 purchased never uses the stem cache%3A no stem-cache import in collection.ts%2C and a cached path still sends exactly { credentials%3A "omit"%2C signal },line=185,column=57::AssertionError: expected [ 'stem-cache' ] to deeply equal []%0A%0A- Expected%0A+ Received%0A%0A- []%0A+ [%0A+   "stem-cache",%0A+ ]%0A%0A ❯ app/lib/arrangement/__tests__/source-fetch.test.ts:185:57%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/source-fetch.test.ts > PERF-9a fetchAndDecodeSource (source-fetch.ts) > SF6 purchased never uses the stem cache: no stem-cache import in collection.ts, and a cached path still sends exactly { credentials: "omit", signal }
+AssertionError: expected [ 'stem-cache' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "stem-cache",
++ ]
+
+ ❯ app/lib/arrangement/__tests__/source-fetch.test.ts:185:57
+    183|   it('SF6 purchased never uses the stem cache: no stem-cache import in…
+    184|     const collectionSource = readFileSync(resolve(ARRANGEMENT_ROOT, 'c…
+    185|     expect(collectionSource.match(/stem-cache/g) ?? []).toEqual([]);
+       |                                                         ^
+    186| 
+    187|     decodeAudioDataMock.mockResolvedValue(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

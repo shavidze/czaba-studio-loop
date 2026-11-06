@@ -1,0 +1,123 @@
+mutant M6 in app/lib/arrangement/stem-cache.client.ts, expected red row SC12
+--- old
+    if (signal?.aborted || disabled) {
+--- new
+    if (disabled) {
+--- vitest rc 1
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/source-fetch.test.ts (6 tests) 13ms
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts (23 tests | 2 failed) 58ms
+     ✓ SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin 1ms
+     ✓ SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules 2ms
+     ✓ SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB 0ms
+     ✓ SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim 1ms
+     ✓ SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put 5ms
+     ✓ SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache 0ms
+     ✓ SC5 miss: one request with the identical init, body equal to the network body, then one stored record 3ms
+     ✓ SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward 2ms
+     ✓ SC7 hit + 200: the entry is replaced with the new bytes and the new ETag 1ms
+     ✓ SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object 3ms
+     ✓ SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged 1ms
+     ✓ SC10 get rejects: plain request with the original init and the load succeeds 2ms
+     ✓ SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off 2ms
+     × SC12 the signal aborts before the commit: nothing is stored 10ms
+     ✓ SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4 2ms
+     ✓ SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch 0ms
+     ✓ SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom 0ms
+     ✓ SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request 1ms
+     ✓ SC17 two misses for one key while the first write is pending: put is called once 1ms
+     ✓ SC18 hit + 503: the stored bytes are returned and nothing is written 1ms
+     × SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off 2ms
+     ✓ SC20 sweep runs once per session and every write waits for it, including a second key started together 15ms
+     ✓ SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes 2ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 27 passed (29)
+   Start at  07:49:11
+   Duration  797ms (transform 296ms, setup 0ms, import 343ms, tests 71ms, environment 865ms)
+
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC12 the signal aborts before the commit%3A nothing is stored,line=522,column=26::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      Object {%0A        "contentType": "audio/mpeg",%0A        "etag": ""v1"",%0A        "fileName": "rt-dq8otjgfvwc",%0A        "key": "/a.mp3",%0A        "lastAccessedAt": 1001,%0A        "lastModified": "Wed, 05 Nov 2026 10:00:00 GMT",%0A        "schemaVersion": 1,%0A        "size": 3,%0A        "storedAt": 1001,%0A      },%0A      ArrayBuffer [%0A        1,%0A        2,%0A        3,%0A      ],%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:522:26%0A%0A
+
+::error file=/home/runner/czaba-project/store/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off,line=665,column=26::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      Object {%0A        "contentType": "audio/mpeg",%0A        "etag": ""v1"",%0A        "fileName": "rt-uimg0yo6ygj",%0A        "key": "/a.mp3",%0A        "lastAccessedAt": 1001,%0A        "lastModified": "Wed, 05 Nov 2026 10:00:00 GMT",%0A        "schemaVersion": 1,%0A        "size": 1,%0A        "storedAt": 1001,%0A      },%0A      ArrayBuffer [%0A        1,%0A      ],%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:665:26%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC12 the signal aborts before the commit: nothing is stored
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st vi.fn() call:
+
+    Array [
+      Object {
+        "contentType": "audio/mpeg",
+        "etag": ""v1"",
+        "fileName": "rt-dq8otjgfvwc",
+        "key": "/a.mp3",
+        "lastAccessedAt": 1001,
+        "lastModified": "Wed, 05 Nov 2026 10:00:00 GMT",
+        "schemaVersion": 1,
+        "size": 3,
+        "storedAt": 1001,
+      },
+      ArrayBuffer [
+        1,
+        2,
+        3,
+      ],
+    ]
+
+
+Number of calls: 1
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:522:26
+    520|     pending.finish(bytesOf(1, 2, 3));
+    521|     await cached.idle();
+    522|     expect(fake.put).not.toHaveBeenCalled();
+       |                          ^
+    523|     expect(fake.entries.size).toBe(0);
+    524|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9a cached source fetch (stem-cache.client.ts) > SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st vi.fn() call:
+
+    Array [
+      Object {
+        "contentType": "audio/mpeg",
+        "etag": ""v1"",
+        "fileName": "rt-uimg0yo6ygj",
+        "key": "/a.mp3",
+        "lastAccessedAt": 1001,
+        "lastModified": "Wed, 05 Nov 2026 10:00:00 GMT",
+        "schemaVersion": 1,
+        "size": 1,
+        "storedAt": 1001,
+      },
+      ArrayBuffer [
+        1,
+      ],
+    ]
+
+
+Number of calls: 1
+
+ ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:665:26
+    663|     pending.finish(bytesOf(1));
+    664|     await cached.idle();
+    665|     expect(fake.put).not.toHaveBeenCalled();
+       |                          ^
+    666|     fetchSource.mockImplementation(async () => audioResponse(bytesOf(1…
+    667|     await cached.fetchSource(URL_A, { credentials: 'omit', signal: new…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

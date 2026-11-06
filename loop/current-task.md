@@ -1,337 +1,209 @@
-# CURRENT TASK — Round 365: PERF-9a. A persistent stem cache (v2) for the two /studio-lab public previews: OPFS + IndexedDB index, conditional revalidation, LRU
+# CURRENT TASK — Round 366: PERF-9b-i. Stem-cache perf rows on the production build (new spec + budgets), doc 236 stage 2
 
-Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-06, at the round 364 → 365 planning (`b-round-364.md`).
+Dispatcher: B · Implementer: A · Verifier: C · Planned 2026-11-06, at the round 365 → 366 planning (`b-round-365.md`).
 
-**Decisions** (`backlog.json` → `decisions_log_b`, v327 → v328):
-- **D-29z1189:** round 364 = C PASS (`c-round-364.json`, browserVerified true), gate 364 published `df4e5b1`. PERF-10 is done. C-R363-01/02, C-R320-01 and A-R362-DOC-STALE-MERMAID are closed.
-- **D-29z1190:** the new Lows (C-R364-01, A-R364-REVIEW-SELECTED-BEFORE, A-R364-REVIEW-MARKER-PRE-DRAG) go to `deferred_low_polish`. Their fix home is PERF-9b.
-- **D-29z1191:** the PERF-9 harness decision (D-29z1152). The network stem path is the two same-origin public previews that `/studio-lab` already fetches.
-- **D-29z1192:** PERF-9 is split into 9a/9b/9c/9d, with four recorded plan deviations (§0.3).
-- **D-29z1193:** the scope of this round (§1).
-- **D-29z1194:** the order after this round (§5).
+**Decisions** (`backlog.json` → `decisions_log_b`, v328 → v329):
+- **D-29z1195:** round 365 = C PASS (`c-round-365.json`, browserVerified true, realVerified true), gate 365 published `413218e`. PERF-9a is done. Rulings on A's two STOPs (§0.1).
+- **D-29z1196:** reviewer Lows A-R365-REVIEW-L3…L6 and C-R365-OBS-INTEGRITY → `deferred_low_polish`, closed together by the systemic task SYS-R365-STEM-CACHE-HARDENING (= PERF-9b-ii).
+- **D-29z1197:** PERF-9b is split into 9b-i (this round) and 9b-ii. The stem rows are documented in doc 236, not doc 168; the three round-364 Lows are re-routed (§5).
+- **D-29z1198:** B's production pre-check and its findings (§0.2).
+- **D-29z1199:** the scope of this round (§1).
+- **D-29z1200:** the order after this round (§5).
 
-**Why this round, now.** No Critical/High/Medium is open that the cloud can fix (the five open Mediums are tech-lead-manual, awaiting_user or open_root). PERF-9 is next in D-29z1188's order. REGRESSION is not due: `regression-last.json` = 2026-11-05, next due on or after 2026-11-08; today is 2026-11-06.
+**Why this round, now.** No Critical/High/Medium is open that the cloud can fix (the five open Mediums are tech-lead-manual, awaiting_user or open_root). PERF-9b is next in D-29z1194's order. REGRESSION is not due: `regression-last.json` = 2026-11-05, next due on or after 2026-11-08; today is 2026-11-06. RETRO is at 368.
 
 **Read first:**
-- `lessons.md`. A reads 11, 12, 23, 26, 28, 30, 31 and 58. C also reads 22, 38, 56, 57, 59 and 60.
-- This task, `b-round-364.md`, and the sketch `b-round-364/sketch.patch.txt` with its review `b-round-364/sketch-review.md`.
-- Primitives: `AGENT_DISCOVERABLE_CODE.md`, `AUDIO_ARCHITECTURE.md`, `API_ERROR_HANDLING.md`, `ERROR_TAXONOMY.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`. Template: `.claude/prompts/new-service.md`. Plan source: `/home/runner/czaba-project/docs/technical/performance/perf-plan.md` (outside `store/`; the PERF-9 row).
+- `lessons.md`. A reads 11, 26, 28, 30, 38 and 58. C also reads 22, 37, 38, 56, 57, 59 and 60.
+- This task, `b-round-365.md`, the sketch `b-round-365/sketch.patch.txt` and its review log `b-round-365/sketch-review.md`.
+- Primitives: `AGENT_DISCOVERABLE_CODE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`. Plan source: `/home/runner/czaba-project/docs/technical/performance/perf-plan.md` (outside `store/`; the PERF-9 row: "second open: 0 stem network bytes; ready ≤ 50 % of cold").
 
 **L29 note:** untagged code text below is a new value, a row id or a loop-artifact path. Every fact about a current `store/` file carries `[K#]` (§7).
 
-**Not applicable:** reference-first, product-designer, the YouTube request and the screen budget. This is a performance round and nothing on screen changes. Ableton conformance: not applicable (Live's own sample cache is not a UI reference for a web download cache).
+**Not applicable:** reference-first, product-designer, the YouTube request and the screen budget. This is a performance-harness round; no `app/` file changes and nothing on screen changes. Ableton conformance: not applicable.
 
 ## Baseline
-- HEAD is `df4e5b1` (gate 364 published), with a clean tree [K1, K2]. Protected files: 11/11 OK [K6]. No dependency change and no `fake-indexeddb` [K8].
-- `app/data/studio-lab-demo.ts` maps `demo-middle-east` → `/middle-east.mp3` and `demo-hero-music` → `/videos/hero/hero-music.mp3`. It fetches them with a raw `fetch` block [K3].
-- `app/lib/arrangement/collection.ts` has the same fetch/arrayBuffer/decode/error block in `createPurchasedWorkspaceCollection`. Its default fetcher is `fetchAudio = (url, init) => fetch(url, init)` [K4].
-- The legacy `app/lib/audio-cache.ts` (DB `czaba-audio-cache`) is imported only by the protected `app/contexts/StudioContext.tsx` [K7, K9].
-- The dev server sends `ETag` and `Last-Modified` for `/middle-east.mp3` [K15].
-- Covering test files: 10 [K11]. They include:
-  - the Georgian-line guard over `studio-lab-demo.ts` and the `walked.length ≥ 60` floor [K12];
-  - DL6 (demo: one fetch with omitted credentials) and PC3 (purchased: exactly `{ credentials: "omit", signal }`) [K13].
-- The next free doc number is 236 [K14].
-- **Root lanes (2026-11-05 parallel policy).** A HEAD that descends from `df4e5b1` only through `app/components/studio/export/*`, `app/components/studio/StudioToolbar.tsx` or `docs/` (COPY-PD, SRW-21-PLAN) is an allowed delta, not a STOP: K2's hash and K14's `doc-next` may differ. If a doc 236 already exists when A starts, A takes the next free number, names file 8 with it, and reports the number. K14's `doc236` check then applies to that number.
+- HEAD is `413218e` (gate 365 published) with a clean tree [K1, K2]. Protected files: 11/11 OK [K5]. No dependency change [K6].
+- The perf config matches every `*.perf.spec.ts` under `perf/`, builds the app and serves it with remix-serve on port 5188 [K9]. A new spec file is picked up by `npm run test:perf` with no config change.
+- The stem cache (PERF-9a) uses the IndexedDB database `czaba-stem-cache-v2` with the object store `entries`; a hit revalidates with `cache: 'no-store'`; the demo previews are wired through `publicPreviewSourceFetch()` [K10].
+- Biome checks `app/**` only, so `perf/**` is checked by `npm run typecheck` (L30) [K11]. The determinism contract treats `count`, `bytes` and `boolean (1 = true)` as exact units [K11].
+- Doc 236 l.4 is `In Progress (stage 1 of 2; C round 365 PASS)` and has the 7 TEMPLATE headings [K8, K12].
+- **Root lanes (2026-11-05 parallel policy).** A HEAD that descends from `413218e` only through `app/components/studio/export/*`, `app/components/studio/StudioToolbar.tsx` or `docs/` (COPY-PD, SRW-21-PLAN) other than doc 236 is an allowed delta, not a STOP; K2's hash may then differ.
 
 ## 0. Premises and B's evidence
 
-### 0.1 Why a cache (B probe, HEAD, dev server, Chromium, 1440×900)
-`b-round-364/probe/reopen-1440.json`:
-- Cold open: `/middle-east.mp3` 200 (gzip, 908,352 B encoded) and `/videos/hero/hero-music.mp3` 200 (3,610,677 B).
-- Warm reopen in the same context: middle-east was **downloaded again in full** (200, 4,054,380 B), while hero-music revalidated (transfer 300 B).
-- This is dev-server evidence. Production (`remix-serve`) may differ, and PERF-9b measures production.
-- `/studio-lab` "ready" took 2759 ms cold and 2483 ms warm. Synth and decode dominate on localhost, so the plan's "ready ≤ 50 % of cold" belongs in PERF-9b under a fixed throttle (§0.3).
+### 0.1 Rulings on round 365 (L10)
+- **STOP 1 / C-R365-INFO-01 (K11 = 12):** accepted. The planning value counted the tree before the two required test files existed. Closed. RETRO 368 input B-R365-COUNT-CLAIM-PLANNING-VS-FINAL.
+- **STOP 2 / C-R365-INFO-02 (sweep error):** §1.2 l.127 of task 365 wins: a sweep error is **ignored**, as the code and sketch ruling D1 do. Listing `sweep` among the errors that turn the cache off (l.143) was a B spec error. No code change. Closed.
+- **SSR dev-log half:** dropped. It was BLOCKED twice (A and C cannot read the orchestrator's pipe). This round changes no `app/` file, so it has no SSR row.
 
-### 0.2 B's sketch (L23/L58), on a scratch `git archive df4e5b1` + `b-round-364/sketch.patch.txt`
-- **Patch:** `b-round-364/sketch.patch.txt` (**v3**, after two tech-lead reviews in `b-round-364/sketch-review.md`: v1 → 4 Medium + 4 Low fixed, the 5xx Info adopted; the v1→v2 delta → 2 more Medium fixed); its sha256 is in `b-round-364/sketch-dispatched.sha256`. `git apply --check` passes on HEAD. The v1 patch and its probe outputs are kept under `b-round-364/sketch-v1/` and `probe/sketch-v1-cache-*.json`.
-  - New: `source-fetch.ts`, `stem-cache.ts`, `stem-cache.client.ts`.
-  - Changed: `collection.ts`, `studio-lab-demo.ts`.
-- **Checks:**
-  - `npm run typecheck` rc 0 (`b-round-364/sketch-typecheck.log`).
-  - Biome on the 5 files: clean (`sketch-biome.log`).
-  - The 10 covering files: 165/165 (`sketch-covering.log`).
-  - **Full suite: 248 files, 3647/3647**, rc 0, on v1, v2 and v3 (`b-round-364/precheck-full.log` is the v3 run). The sketch has no new tests; A writes them.
-- Claims on the sketch: `b-round-364/claims-365-sketch-output.txt`. K6 shows 10 there only because the scratch's `vite.config.ts` got a private `cacheDir` for B's second dev server (L38). That edit is not in the patch.
-- **Browser probe of the sketch.** Script: `b-round-364/probe/sketch-cache.mjs`. It ran on a scratch dev server at :5174 with its own Vite cacheDir, in a persistent Chromium profile, using CDP only (no `route()`). Output: `probe/sketch-cache-1440x900.json` and `-1280x720.json`.
-  - **cold:** each URL gets one `fetch` request, 200. After ready, the IndexedDB `czaba-stem-cache-v2` holds 2 records: `/middle-east.mp3` 4,054,080 B and `/videos/hero/hero-music.mp3` 3,610,677 B. OPFS `czaba-stem-cache-v2/` holds 2 files.
-  - **warm, HTTP cache on, and warm with `Network.setCacheDisabled(true)`:** each URL is requested once with `If-None-Match` equal to the stored ETag. The response is 304 with `encodedBodySize` 0, the status is "Demo collection ready", and no "failed to load" text appears.
-  - **mp3 blocked** (`Network.setBlockedURLs ['*.mp3']`): both fetches fail on the network, yet the page reaches "Demo collection ready" with no failed text. The audio came from the cache.
-  - **after clearing** OPFS and IndexedDB: cold again (200, full body), and the entries are stored again.
-  - In every open there is one extra `/middle-east.mp3` resource entry with `initiatorType` `audio` (status 0, 0 body bytes). The loader itself makes exactly one fetch per URL. This is B-R364-DEMO-DOUBLE-FETCH (info). Inference, not proven: the `<audio preload="metadata">` in `StudioNarrowScreen.tsx` [K10] is mounted at desktop width too. Not in scope.
+### 0.2 B's production pre-check (scratch `git archive 413218e`, `npm run build`, remix-serve)
+- **Headers on the harness host** (`perf-sketch/headers-prod.json`): both previews are served with `Cache-Control: public, max-age=31536000, immutable`, a weak ETag (size + mtime, new on every build) and `Last-Modified`. A conditional request with the stored ETag gets 304.
+- **DevTools cache-disabled mode is not a user path.** With `Network.setCacheDisabled(true)`, Chromium adds `Cache-Control: no-cache` and `Pragma: no-cache`; remix-serve then ignores `If-None-Match` and answers 200 with the full body (`perf-sketch/run1.log`). C's round-365 CS-WARM "cache off → 304" was on the Vite dev server, which behaves differently. Recorded as B-R365-DEVTOOLS-NOCACHE-200 (info). The harness keeps this case as record rows `stem.warm-nocache.*`.
+- **Real reopen paths:** HTTP cache evicted (`Network.clearBrowserCache`) and HTTP cache kept both send `If-None-Match` and get 304 (`probe/stem-prod-1440x900.json`, `-1280x720.json`, both viewports). Under the CDP throttle (latency 40 ms, 1,250,000 B/s down, 375,000 B/s up), 3 passes (`perf-sketch/run2.log`):
+  - cold: ready 7427 ms, stem window 6175 ms, network body 7,664,757 B, 2 entries stored;
+  - warm (evicted): ready 1275 ms, 2 × 304, network body 0, window 44 ms; **ready ratio 0.172**;
+  - loaded replicate (4 busy loops on 4 cores, `run3-loaded.log`): ratio 0.235 (max 0.252); every count row equal.
+- **Production is Vercel**, not remix-serve (`vercel.json`, `framework: remix`). The harness headers above belong to the harness host. Vercel's headers were not measured (no access from the cloud). Recorded as B-R365-HARNESS-HOST-HEADERS (info) and the root question ROOT-Q-R365-VERCEL-STATIC-HEADERS. Nothing in this task depends on the answer.
+- **The narrow-screen `<audio preload="metadata">` request** (B-R364-DEMO-DOUBLE-FETCH) also appears in production: a Media request with `Range: bytes=0-`, 206, then aborted, on the cold and DevTools-no-cache opens. The harness records its bytes (`cdp-media-bytes`); it is not fixed here.
 
-### 0.3 PERF-9 split and plan deviations (D-29z1192)
-| Stage | Scope | When |
-|---|---|---|
-| **9a (this round)** | Shared `source-fetch.ts`; the cache policy and its OPFS + IndexedDB store; wired into the two demo public previews | round 365 |
-| 9b | Perf-harness rows on the production build: warm-reopen stem body bytes, request count, and cold vs warm stem-load time under a fixed CDP throttle; budgets; doc 168; the three deferred Lows | next |
-| 9c | Purchased stems in the cache | `awaiting_user`, SABA-Q-PERF4-STUDIO-CACHE (with SRW-21-PLAN) |
-| 9d | Retire the legacy `audio-cache.ts` and rewrite the `indexeddb-cache` skill doc | protected files → ROOT-REQ-PERF9D-LEGACY-CACHE |
+### 0.3 B's sketch (L58), on the scratch + `b-round-365/sketch.patch.txt`
+- **Patch:** two new files, `perf/studio-lab-stem-cache.perf.spec.ts` and `perf/budgets.stem-cache.json`; sha256 in `b-round-365/sketch-dispatched.sha256`. `git apply --check` passes on HEAD.
+- **Checks:** `npm run typecheck` rc 0 (`sketch-typecheck.log`); Biome on a temporary `app/` copy of the spec: clean (`sketch-biome.log`; L30: Biome does not cover `perf/`).
+- **C's command on the sketch** (`npx playwright test --config playwright.perf.config.ts perf/studio-lab-stem-cache.perf.spec.ts`, production build, nothing else running, L38):
+  - v2: `perf-sketch/run4-assert.log` (+ `run4-assert-latest.json`): every assert PASS, 3 passes.
+  - v3: `perf-sketch/run-v3.log` (+ `run-v3-latest.json`): 46 rows, the 7 asserts PASS, 0 failures; cold ready 7415 ms, warm 1285 ms, ratio 0.173.
+  - **v4 (dispatched)** = v3 with 4 record rows changed from `deterministic` to `wallclock` (`stem.cold.body-bytes`, `stem.cold.transfer-bytes`, `stem.warm-nocache.body-bytes`, `stem.warm-nocache.transfer-bytes`): a plain fetch can reuse the partial HTTP-cache entry of the concurrent `<audio>` 206 request, so its byte total varies (cache-off mutant: 7,664,757 / 7,515,518 / 7,517,018), and the exact-match rule would fail the spec on a record row. The spec file is unchanged from v3. `perf-sketch/run-v4.log` (+ `run-v4-latest.json`): the 7 asserts PASS, 0 failures, ratio 0.168.
+  - **Mutant cache-off** (`publicPreviewSourceFetch()` returns `plainSourceFetch`; `mutant-cache-off.diff.txt`): `mutant-cache-off-assert.log` (v2) and `mutant-cache-off-v3.log` (v3; same spec as v4, and none of the 4 re-kinded rows is an assert). Red on v3: `stem.cold.entries-stored` −1 (no database: the read never creates one), `stem.warm.body-bytes` 7.5 MB, `stem.warm.status-304` 0, `stem.warm-ready-ratio` 0.987, `stem.blocked.ready` 0, `stem.blocked.entries` −1. Liveness stays green.
+  - **Mutant counter-zero** (the body-byte counter never counts; `mutant-counter-zero.diff.txt`, on v3): `mutant-counter-zero.log`. Red only on `stem.harness.cold-body-live`, while `stem.warm.body-bytes` 0 stays green: the liveness row is what keeps the 0 honest.
+- **Sketch review:** `b-round-365/sketch-review.md` (B's own v1 → v2, performance-optimizer and tech-lead).
 
-Deviations from the plan row, each recorded:
-1. "0 stem network bytes" becomes **"0 stem body bytes"**. One conditional request that gets a 304 is allowed, and it keeps a changed file fresh.
-2. "ready ≤ 50 % of cold" is measured in 9b under a fixed throttle and gated on stem-load time.
-3. `navigator.storage.persist()` is **not** called. Firefox shows a permission prompt, and best-effort storage is enough for a cache that can be downloaded again.
-4. Keys are the same-origin path plus the ETag / Last-Modified validators, not a content hash. A hash needs the full download first and can never produce a 304.
-
-### 0.4 Consults (STUDIO-PERFORMANCE `consults_round_365`)
-- **performance-optimizer:**
-  - test for the 304 before `!ok`;
-  - skip 206, opaque, `no-store` and any `Vary` other than Accept-Encoding;
-  - the IndexedDB record is the commit point;
-  - 404/410 evicts;
-  - budget `min(256 MB, 10 % quota)`; an entry larger than budget/4 is not stored;
-  - QuotaExceeded → evict once, retry once, then turn the cache off;
-  - no `persist()`.
-- **tech-lead:**
-  - extract `fetchAndDecodeSource` now;
-  - the cache is a `SourceFetch`;
-  - the purchased adapter keeps plain `fetch`, with a test;
-  - an in-memory store fake;
-  - a new DB name plus `schemaVersion`;
-  - an AbortError passes through;
-  - an SSR guard.
+### 0.4 Consults (STUDIO-PERFORMANCE `consults_round_366`)
+- **performance-optimizer:** keep the asserts; add `stem.blocked.entries`, a CDP byte cross-check and machine details (all adopted in v3); a changed-ETag row goes to 9b-ii; per-hit revalidation is a Low later candidate (PERF-CAND-STEM-BACKGROUND-REVALIDATE). Its "Medium, if production" rating of the headers does not apply: production is Vercel.
+- **tech-lead** (on v2; `sketch-review.md`): wait for both stem fetch entries and for the collection status before reading (Medium, fixed); the ready ratio is noisy (Medium, **kept as assert**: the cold open pays the same JS download under the same throttle; 12 unloaded samples 0.166–0.177, loaded 0.220–0.252, budget 0.5); the entries read must never create the database (fixed: `onupgradeneeded` aborts); the blocked open checks the whole collection (fixed); import the DB name from `app/` (fixed); raise the Resource Timing buffer (fixed). Keep the spec as its own file.
 
 ## 1. Scope (A)
 
-### 1.1 Files (exactly 8)
+### 1.1 Files (exactly 3)
 | # | File | Change |
 |---|---|---|
-| 1 | `app/lib/arrangement/source-fetch.ts` | **New** (sketch). `SourceFetch`, `plainSourceFetch`, `fetchAndDecodeSource`. The error mapping is byte-for-byte the current one (same strings, same abort rethrow) |
-| 2 | `app/lib/arrangement/stem-cache.ts` | **New**, pure (sketch): DB name, schema version, record type, `stemCacheKey`, `readStemCacheValidators`, `stemCacheConditionalHeaders`, `stemCacheBudgetBytes`, `selectStemCacheEvictions` |
-| 3 | `app/lib/arrangement/stem-cache.client.ts` | **New** (sketch v2): `StemCacheStore` (get/put/touch/delete/list/sweep), `isStemCacheRecord`, `createBrowserStemCacheStore`, `createCachedSourceFetch` → `{ fetchSource, idle }`, `publicPreviewSourceFetch` |
-| 4 | `app/lib/arrangement/collection.ts` | Purchased `loadSource` calls `fetchAndDecodeSource(url, ctx, signal, fetchAudio)`. `PurchasedStemFetch = SourceFetch`; the default fetcher is unchanged; **no import from `stem-cache*`** |
-| 5 | `app/data/studio-lab-demo.ts` | The URL branch calls `fetchAndDecodeSource(url, ctx, signal, publicPreviewSourceFetch())`. Nothing else changes |
-| 6 | `app/lib/arrangement/__tests__/stem-cache.test.ts` | **New**: rows SC1–SC21 (§1.3) |
-| 7 | `app/lib/arrangement/__tests__/source-fetch.test.ts` | **New**: rows SF1–SF6 (§1.3) |
-| 8 | `docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md` | **New** doc (§1.4) |
+| 1 | `perf/studio-lab-stem-cache.perf.spec.ts` | **New**, the sketch verbatim |
+| 2 | `perf/budgets.stem-cache.json` | **New**, the sketch verbatim (rows and asserts in §1.2) |
+| 3 | `docs/implementation/2026/quarter-IV/236-perf-stem-cache-v2.md` | l.4 and the stage-2 content (§1.3). The whole doc is granted (L34) |
 
-**Start:** from the store root, run `git apply ../tmp/studio-real-loop/b-round-364/sketch.patch.txt` (check its sha256 first). Then apply the rulings in `b-round-364/sketch-review.md`. No other file changes:
-- no `app/components/**`, `ArrangementContext`, perf spec or budgets;
+**Start:** from the store root, check the sha256 of `../tmp/studio-real-loop/b-round-365/sketch.patch.txt` against `sketch-dispatched.sha256`, then `git apply` it. No other file changes:
+- no `app/**`, no `perf/lib/**`, no existing spec or budgets file (`studio-lab.perf.spec.ts`, `studio-lab-resources.perf.spec.ts`, `studio-lab-interactions.perf.spec.ts`, `budgets.json`, `budgets.resources.json`, `budgets.interactions.json`) [K7];
 - no `package.json`, config or protected file;
-- no legacy `audio-cache.ts`, no `StudioNarrowScreen.tsx`.
+- no doc 168 (its Lows are routed, §5).
 
-A change needed outside these 8 files is a STOP (L11), and so is a code-reviewer Medium+.
+A change needed outside these 3 files is a STOP (L11), and so is a code-reviewer Medium+ on the 2 perf files. A may change the sketch only to fix a code-reviewer finding; any such change is re-run with the A-PERF row and both mutants, and goes back to the reviewer.
 
-### 1.2 Behaviour contract (what the tests pin)
-- **Key.**
-  - Only a same-origin URL with no query and no hash is cached; the key is its pathname. Anything else goes to plain fetch.
-  - **On a miss the request is exactly the original** `fetch(url, { credentials: 'omit', signal })`, with no added headers and no `cache` field. This keeps DL6 and PC3 valid.
-- **Store on a miss** (in the background, never delaying the returned response). The response is stored only if all of these hold:
-  - status 200;
-  - it has an ETag or a Last-Modified;
-  - `Cache-Control` has no `no-store`;
-  - `Vary` has nothing other than `Accept-Encoding` or `Origin`;
-  - the size is ≤ budget/4;
-  - the signal was not aborted before the commit.
+### 1.2 What the harness measures (the contract C checks)
+One browser context per pass (empty HTTP cache, IndexedDB and OPFS), 3 passes, CPU rate 1, viewport 1440×900, the CDP throttle of §0.2 on every open. Sequence:
+Every open waits for library ready (`waitForLibraryReady`, which gives `ready-ms`) and then for the collection status (`waitForCollectionReady`, which fails on a failed status); every open except the blocked one also waits until both stem paths have a fetch entry before reading Resource Timing. The entries read uses `indexedDB.open` with an aborting `onupgradeneeded`, so it never creates the database (−1 when it is absent).
+- **a. cold:** open `/studio-lab`, read Resource Timing for the two stem paths, then poll the `entries` store until it holds 2 records (cap 30 s).
+- **b. warm:** `Network.clearBrowserCache`, reopen.
+- **c. warm-http:** reopen with the HTTP cache kept.
+- **d. warm-nocache:** `Network.setCacheDisabled(true)`, reopen, then turn it off again.
+- **e. blocked:** `Network.setBlockedURLs(['*.mp3'])`, reopen; read the entries count.
 
-  The checks for `disabled`, an in-flight write of the same key, status 200 and the validators run **before** `clone()`. While one write of a key is pending, a second write of that key is skipped. The OPFS file is written first. The IndexedDB record is the commit point: if writing the record fails, the file is removed. The old file is removed after the record is written. The stored bytes are the decoded body (`arrayBuffer()` of the clone). A body read error inside the write returns quietly. Every write of a session awaits one shared `sweep()` promise, which runs once. It deletes invalid index records, plus any OPFS files that no record references and that are older than 60 s (from the base-36 time prefix of the file name). A sweep error is ignored.
-- **Hit.** The request becomes `{ ...init, cache: 'no-store', headers: If-None-Match / If-Modified-Since }` from the stored validators.
-  - **304:** returns a 200 `Response` whose body is the stored bytes, and updates `lastAccessedAt`.
-  - **200:** returns the network response and replaces the entry.
-  - **404 or 410:** deletes the entry and returns the response, so the loader maps it to `httpFailed`.
-  - **Status ≥ 500:** returns the stored bytes.
-  - **200 that cannot be stored** (`no-store`, a disallowed `Vary`, no validators): the entry is **deleted** and the response returned, so stale bytes are never served later.
-  - **Network error, not aborted:** returns the stored bytes.
-  - **Aborted:** rethrows the same error object.
-- **Integrity.**
-  - A record whose file is missing, or whose file size differs from the record, is a miss: the record is deleted and the full request is sent.
-  - A record with another `schemaVersion` is a miss.
-- **Budget and LRU.**
-  - The budget is `min(256 MiB, floor(10 % of estimate().quota))`. An unknown quota gives budget 0, which means nothing is stored.
-  - Before a store, the least recently used other entries are evicted until used + new ≤ budget.
-  - `QuotaExceededError` on write: delete the oldest other entry (by `lastAccessedAt`) once and retry once. If that fails too, the cache is off for this page session and every later load uses plain fetch.
-- **Failure isolation.** Any IndexedDB, OPFS or quota error never fails a load. A `get` error is a miss. A **storage** error during a write (`sweep`/`list`/`delete`/`put`) turns the cache off for the session; a body read error or an abort does not.
-- **Environment.**
-  - `createBrowserStemCacheStore()` returns `null` when `indexedDB`, `navigator.storage.getDirectory` or `FileSystemFileHandle.prototype.createWritable` is missing. That covers jsdom and older Safari.
-  - On the server, `publicPreviewSourceFetch()` returns `plainSourceFetch`.
-  - The DB/OPFS directory name is `czaba-stem-cache-v2`, never `czaba-audio-cache`.
-- **Purchased.** It never uses the cache in 9a (D-29z1192).
+Per open, record rows `stem.<phase>.{ready-ms, fetch-requests, audio-requests, body-bytes, transfer-bytes, status-200, status-304, stem-window-ms, cdp-mp3-bytes, cdp-media-bytes}`. "Network body bytes" = Σ `encodedBodySize` over the fetch-initiator stem entries whose `transferSize > 0` (a 304 and an HTTP-cache hit count 0).
 
-### 1.3 Tests: names and what each must prove
-Use an in-memory `StemCacheStore` fake and a `vi.fn` fetcher returning real `Response` objects. No new dependency.
-- **SC1:** key rules (same-origin path; cross-origin, query and hash → `null`; a relative URL resolves against the origin).
-- **SC2:** validators (ETag only, Last-Modified only, both, none → `null`; `no-store` → `null`; `Vary: Accept-Encoding` and `Origin` are OK; `Vary: Range` → `null`).
-- **SC3:** budget (`undefined`, 0 or NaN → 0; 10 % of the quota; capped at 256 MiB).
-- **SC4:** evictions (LRU order; none when it fits; `null` above budget/4; the same key is excluded from victims).
-- **SC5:** miss:
-  - the fetcher is called once with the **identical** init object contents (`toEqual({ credentials: 'omit', signal })`);
-  - the returned body is byte-equal to the network body;
-  - after the background write settles, one record holds the right size, validators and `schemaVersion`.
-- **SC6:** hit with a 304:
-  - the request has `cache: 'no-store'` and both validator headers;
-  - the body is byte-equal to the stored bytes;
-  - `lastAccessedAt` moves forward.
-- **SC7:** hit with a 200 → the entry is replaced (new bytes and new ETag).
-- **SC8:** hit with a network error:
-  - not aborted → the stored bytes;
-  - aborted → the **same** error object is rethrown.
-- **SC9:** hit with a 404 and a 410 → the entry is deleted, and the status is returned unchanged.
-- **SC10:** `get` rejects → plain request with the original init, and the load succeeds.
-- **SC11:** quota → evict once and retry once (stored); a second quota error → later calls bypass the store (`get` is not called).
-- **SC12:** signal aborted before the commit → nothing is stored.
-- **SC13:** not stored: no validators, `no-store`, 206, and an entry larger than budget/4.
-- **SC14:** `store: null` → plain fetch with the exact init. `createBrowserStemCacheStore()` returns `null` in jsdom.
-- **SC15:** integrity → a size mismatch or another `schemaVersion` is a miss (test it through the fake's `get` contract and the pure `isStemCacheRecord`, or the exported equivalent).
-- **SC16:** the DB name is `czaba-stem-cache-v2` and differs from `czaba-audio-cache`.
-- **SC17:** two misses for the same key while the first write is pending → `put` is called once.
-- **SC18:** hit with a 503 → the stored bytes; no write.
-- **SC19:** a body read error or abort inside the background write → nothing is stored, and the **next** call still uses the store (`get` is called). A `put` that rejects with a non-quota error → later calls bypass the store.
-- **SC20:** `sweep()` runs once per session. Two writes of **different** keys started together both wait for it: in the fake, `put` is never called before `sweep` resolves.
-- **SC21:** hit, then a 200 with `no-store` (and, separately, with no validators) → the entry is deleted. A later network error returns the network error mapping, not the old bytes.
+**Assert rows (7)**, each with the mutant that turns it red on B's sketch:
 
-Tests wait for background writes with `await cached.idle()`, never with blind timers.
-- **SF1–SF5:** `fetchAndDecodeSource`:
-  - SF1: exact init, one call;
-  - SF2: non-ok → `httpFailed(status)`, no decode;
-  - SF3: a network reject → `networkFailed`; aborted → the same object;
-  - SF4: body failure → `networkFailed`; aborted → the same object;
-  - SF5: decode failure → `decodeFailed`.
-- **SF6:** purchased never uses the cache:
-  - a source scan finds no `stem-cache` import in `collection.ts`;
-  - after the demo path has stored an entry for `/a.mp3` in a fake, a purchased `loadSource` for `/a.mp3` sends exactly `{ credentials: 'omit', signal }`.
-
-**Mutants (A runs each against its new tests; logs in `a-round-365/mutants/`; each must turn the named row red):**
-
-| Mutant | Change | Red row |
+| Row | Budget | Red under |
 |---|---|---|
-| M1 | 304 branch returns the network response | SC6 |
-| M2 | network-error branch ignores `signal.aborted` | SC8 |
-| M3 | miss request adds the conditional headers | SC5 |
-| M4 | eviction loop removed | SC4 |
-| M5 | store responses without validators | SC13 |
-| M6 | abort check before commit removed | SC12 |
-| M8 | quota retry deletes nothing (`oldest` lookup removed) | SC11 |
-| M9 | in-flight `writes` check removed | SC17 |
-| M10 | body read error sets `disabled` | SC19 |
-| M11 | only the first writer awaits the sweep (the v2 `swept` flag) | SC20 |
-| M12 | unstorable 200 on a hit keeps the entry | SC21 |
-| M7 | `collection.ts` default fetcher = `publicPreviewSourceFetch()` | SF6 |
+| `stem.harness.cold-body-live` | == 1 (cold body > 1,000,000 B) | counter-zero |
+| `stem.cold.entries-stored` | == 2 | cache-off (−1) |
+| `stem.warm.body-bytes` | == 0 | cache-off |
+| `stem.warm.status-304` | == 2 | cache-off |
+| `stem.warm-ready-ratio` | ≤ 0.5 (wallclock; measured 0.172, loaded 0.235) | cache-off (0.993) |
+| `stem.blocked.ready` | == 1 | cache-off |
+| `stem.blocked.entries` | == 2 | cache-off (−1) |
 
-B wrote no unit tests on the sketch, so these mutants have **no B run** (`record — not run on sketch: tests are A's`). A's logs and C's re-run are the evidence.
+Every other row is `record`. The ratio row is the plan target "ready ≤ 50 % of cold", measured under the throttle (plan deviation 2 of D-29z1192). "0 stem body bytes" is plan deviation 1 (one 304 per stem is allowed).
 
-### 1.4 Doc 236 (Georgian, technical terms in English)
-- l.4 is exactly `**სტატუსი:** In Progress (stage 1 of 2; C round 365 PASS)` (L28).
-- The 7 TEMPLATE `## ` headings, in order (L26).
-- Content:
-  - context (§0.1);
-  - the approach and the rejected options (mock-api collection, SRW-21, content-hash keys, `persist()`);
-  - a mermaid diagram of miss / hit-304 / network error;
-  - the changed files;
-  - Problem → Solution entries (gzip vs stored bytes, the weak ETag, abort, quota);
-  - testing: SC/SF rows, mutants, B's probe and C's rows;
-  - TODO: 9b, 9c (awaiting Saba), 9d (root), B-R364-DEMO-DOUBLE-FETCH.
-- Cite only tests that exist (L26).
+### 1.3 Doc 236 (Georgian, technical terms in English)
+- l.4 is exactly `**სტატუსი:** In Progress (stage 2 of 3; C round 366 PASS)` (L28; stage 3 = PERF-9b-ii).
+- The 7 TEMPLATE `## ` headings stay, in order (L26).
+- Add the stage-2 content, each in its own section:
+  - **კონტექსტი / მიდგომა:** why production (`npm run test:perf`), the CDP throttle values, why the evicted-cache reopen is the primary scenario and the DevTools no-cache case is record only (§0.2), the two plan deviations.
+  - **შეცვლილი ფაილები:** the 2 perf files.
+  - **პრობლემები და გადაწყვეტები:** DevTools no-cache → 200 (Problem → Solution); `encodedBodySize` counts cache hits → network body bytes; a blocked fetch leaves no Resource Timing entry → `stem.blocked.entries`; the harness host is not production (Vercel).
+  - **ტესტირება:** the 7 asserts with their measured medians and their mutants; C's rows.
+  - **TODO:** PERF-9b-ii (SYS-R365-STEM-CACHE-HARDENING), 9c (awaiting Saba), 9d (root), ROOT-Q-R365-VERCEL-STATIC-HEADERS, PERF-CAND-STEM-BACKGROUND-REVALIDATE.
+- Cite only rows and tests that exist (L26). Write measured numbers from A's own run, labelled as A's.
 
 ## 2. Acceptance
 
 ### 2.1 A rows
 | Row | Command / check | Pass |
 |---|---|---|
-| A-CLAIMS pre | `bash b-round-364/claims-365.sh` (loop root) | equals `b-round-364/claims-365-planning-output.txt` |
-| A-CLAIMS final | same | K1, K6–K13 and K15 equal planning. K2 = `df4e5b1 8` (2 modified + 6 new). K3/K4 equal `b-round-364/claims-365-sketch-output.txt`. K5 is all `1`. K9 `v2-db-name-in-app` ≥ 1. K14 `doc236 1 pending 0` |
+| A-CLAIMS pre | `bash b-round-365/claims-366.sh` (loop root) | equals `b-round-365/claims-366-planning-output.txt` |
+| A-CLAIMS final | same | K1, K5, K6, K9–K11 equal planning. K2 = `413218e 3`. K3 `spec 1 budgets 1`. K4 equals `b-round-365/claims-366-sketch-output.txt`. K7 all 0. K8 l.4 = §1.3 and `pending 0`. K12 `doc236-headings ≥ 7`. K13 empty |
 | A-TYPE / A-LINT | `npm run typecheck`; `npm run lint` | rc 0; lint warnings ≤ 205 |
-| A-BIOME | `npx biome check` on files 1–7 | clean |
-| A-TESTS | `npx vitest run` on the 2 new files plus the 10 covering files (list from `grep -rlE "studio-lab-demo\|createPurchasedWorkspaceCollection\|studioSourceLoadStrings\|source-fetch\|stem-cache" app perf e2e`, test folders only) | all pass; record counts. The old files' counts equal B's 165 plus nothing removed |
-| A-MUTANTS | M1–M12 | each red on its named row; logs saved |
-| A-SSR | `curl -s http://127.0.0.1:5173/studio-lab` | 200, and the HTML contains `CZABA Studio`; the dev log has no error that names `stem-cache` |
-| A-REVIEW | `code-reviewer` on the 8 files | no unruled Medium+ (STOP). Any edit after the review goes back to the reviewer (L11) |
-| A-DOC | doc 236 | as §1.4 |
+| A-PERF | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-stem-cache.perf.spec.ts`, alone (L38) | exit 0; every assert PASS; save the log and `test-results/perf/latest-stem-cache.json` under `a-round-366/` |
+| A-MUTANTS | cache-off and counter-zero, exactly as `b-round-365/perf-sketch/mutant-*.diff.txt`, each on a full rebuild (the config's webServer rebuilds) | each red on its rows in §1.2; the other asserts as listed; source restored and checked with `cmp`; logs under `a-round-366/mutants/` |
+| A-REVIEW | `code-reviewer` on the 3 files | no unruled Medium+ (STOP). Any edit after the review goes back to the reviewer (L11) |
+| A-DOC | doc 236 | as §1.3; `grep -rl 'C round [0-9]* pending' docs/implementation` → 0 |
 
-A does not run the full suite or `npm run verify`; the gate does.
+A does not run the full suite, `npm run verify` or the other perf specs; the gate does. **Mutant hygiene (L60):** a mutant edits `app/lib/arrangement/stem-cache.client.ts` or the new spec in place; restore from a copy under `a-round-366/` and prove it with `cmp` before the next run. The webServer rebuilds on every run, so a restored source needs no manual rebuild.
 
 ### 2.2 C rows
-Warm the dev server in a browser first (L38). If `:5173` returns "504 Outdated Optimize Dep", restart it. Copy `b-round-364/probe/sketch-cache.mjs` into `c-round-365/` and point it at `http://127.0.0.1:5173/studio-lab`. Use a **fresh persistent profile per viewport**, CDP only, and no `context.route()`.
+Run nothing else while a perf spec or probe runs (L38). Order: PERF first (its webServer builds and serves on 5188 and stops), then `npm run build` and start the 5189 production server for PROBE, AUDIO and G366-AUTH, then stop it.
 
 | Row | How | Pass |
 |---|---|---|
-| CLAIMS | `bash b-round-364/claims-365.sh` | equals A's final |
-| SOURCE-SCOPE | `git status --short --untracked-files=all`; `git diff --stat` | 2 modified (`collection.ts`, `studio-lab-demo.ts`) + 6 new (3 modules, 2 test files, doc 236; §1.1); no other path |
-| UNIT | A-TESTS' command | all pass; SC1–SC21 and SF1–SF6 exist by name (grep) |
-| MUTANT-OWN (C's own, on a scratch under `c-round-365/`, predicted first in `progress.json`) | One mutant not in M1–M12, e.g. a 304 that does not refresh `lastAccessedAt`, or a budget without the 256 MiB cap | red on its row, or reported with counts if green. Scratch deleted (L60) |
-| CS-COLD (1440×900 and 1280×720) | Cold open | each URL has exactly one `fetch`-initiator request, status 200; after ready, `czaba-stem-cache-v2` has 2 records with sizes equal to each response's `decodedBodySize`; OPFS has 2 files of those sizes |
-| CS-WARM (both viewports) | Reopen twice: HTTP cache on, then `Network.setCacheDisabled(true)` | each URL is requested once, with `If-None-Match` = stored ETag; `responseStatus` 304, `encodedBodySize` 0; "Demo collection ready"; no "failed to load" |
-| CS-AUDIO (1440×900) | On the warm open, add "Middle East — public preview" to a track (Enter on the library item), then play 2 s | the clip's length equals the cold open's; the playhead advances; a level indicator C names shows signal. The cached file plays real audio |
-| CS-BLOCKED (both viewports) | `Network.setBlockedURLs(['*.mp3'])`, reopen | "Demo collection ready", no failed text, both previews listed as loaded |
-| CS-CLEAR (1440×900) | Remove the OPFS directory and delete the DB, reopen | 200 with the full body, and the entries are stored again |
-| CS-LEGACY | `indexedDB.databases()` after the opens | no `czaba-audio-cache` was created by `/studio-lab` |
-| ONE-FETCH | every scenario above | at most one `fetch`-initiator request per URL per open; the `audio`-initiator entry is recorded with its values (B-R364-DEMO-DOUBLE-FETCH) |
-| SSR | A-SSR | as A |
-| G365-AUTH (both viewports) | copy `c-round-364/auth.mjs` | `/studio-lab` opens anonymously; `/studio/<id>` asks for sign-in and has 0 audio sources; `/api/studio-token` without credentials → 401 and no token. A fake-bearer 500 that fails closed goes under `blocked` |
-| DOCS | doc 236 | l.4 byte-exact; 7 `## ` headings in TEMPLATE order; every named test exists (L26); `grep -rl 'C round [0-9]* pending' docs/implementation` → 0 |
+| CLAIMS | `bash b-round-365/claims-366.sh` | equals A's final |
+| SOURCE-SCOPE | `git status --short --untracked-files=all`; `git diff --stat` | 2 new perf files + doc 236 modified; no other path |
+| PERF (1440×900) | A-PERF's command, alone | exit 0; the 7 asserts PASS; every row measured 3 times; no `failures`; save `latest-stem-cache.json` under `c-round-366/` |
+| MUTANT-OWN (C's own, on a scratch under `c-round-366/`, predicted first in `progress.json`) | one mutant not in A's two, e.g. the 304 branch returns the network response (warm body bytes stay 0 but no audio: expect `stem.blocked.*` or ready to change), or the blocked branch deletes entries | red on the predicted row, or reported with counts if green. Scratch deleted (L60) |
+| PROBE (1440×900 and 1280×720) | `node b-round-365/probe/stem-prod-probe.mjs <base> <w>x<h> c-round-366/stem-prod-<w>x<h>.json` against a production server C starts from the store (`npm run build`, then `PORT=5189 npx remix-serve build/server/index.js`, output redirected to a file under `c-round-366/`) | per viewport: cold = one fetch request per stem, 200, and 2 OPFS files of 4,054,080 and 3,610,677 B; warm-evicted and warm-http = 304 with `If-None-Match`; warm-nocache = 200 with `Cache-Control: no-cache` (recorded, the DevTools case); blocked = ready text "Demo collection ready" and both entries still present; screenshots saved. A 304 that CDP reports as `net::ERR_ABORTED` is expected (the cache cancels the 304 body stream) |
+| AUDIO (1440×900) | on the warm-evicted open of the production server: add "Middle East — public preview" to a track (Enter on the library item), play 2 s | the playhead advances and a level C names shows signal: the cached bytes play real audio in production |
+| G366-AUTH (both viewports) | copy `c-round-365/auth.mjs` (production or dev server) | `/studio-lab` opens anonymously; `/studio/<id>` asks for sign-in with 0 audio sources; `/api/studio-token` without credentials → 401 and no token. A fake-bearer 500 that fails closed goes under `blocked` |
+| DOCS | doc 236 | l.4 byte-exact; the 7 `## ` headings in TEMPLATE order; every named row and mutant exists (L26); `grep -rl 'C round [0-9]* pending' docs/implementation` → 0 |
 
 **Gate rows** (C does not claim them): full vitest, build, Biome, typecheck, `npm run verify`, e2e smoke.
 
-**browserVerified** is false if CS-COLD, CS-WARM, CS-AUDIO, CS-BLOCKED or G365-AUTH does not run. None of them needs the backend.
+**browserVerified** is false if PERF, PROBE (either viewport), AUDIO or G366-AUTH does not run. None of them needs the backend.
 
-**Write all L57 fields** in `c-round-365.json` and run `python3 -I tools/l57-check.py c-round-365.json c-round-365/l57-check.txt` until it exits 0.
-- `assertsSpecified`: SC1–SC21, SF1–SF6.
-- `mutantsRecorded`: M1–M12 plus C's own.
-- `mutantRedOnSketch`: `null`. Reason: "B wrote no unit tests on the sketch; A's mutant logs (`a-round-365/mutants/`) and C's re-run are the evidence".
+**Write all L57 fields** in `c-round-366.json` and run `python3 -I tools/l57-check.py c-round-366.json c-round-366/l57-check.txt` until it exits 0.
+- `assertsSpecified`: the 7 assert rows of §1.2.
+- `mutantsRecorded`: cache-off, counter-zero (A logs) plus C's own.
+- `mutantRedOnSketch`: `b-round-365/perf-sketch/mutant-cache-off-v3.log`, `b-round-365/perf-sketch/mutant-counter-zero.log`.
 - `gateChecksNamed`: full vitest, typecheck, biome.
-- `gateChecksRunOnSketch`: `b-round-364/precheck-full.log`, `b-round-364/sketch-typecheck.log`, `b-round-364/sketch-biome.log`.
-- `chainHeadGateRunGreen`: gate 364.
-- `affectedChecksNamed`: the 10 covering files, the 2 new test files, the browser cache probe.
-- `affectedChecksRunOnSketch`: `b-round-364/sketch-covering.log`, `b-round-364/probe/sketch-cache-1440x900.json`, `b-round-364/probe/sketch-cache-1280x720.json`.
+- `gateChecksRunOnSketch`: `b-round-365/sketch-typecheck.log`, `b-round-365/sketch-biome.log` (no full vitest on the sketch: it adds no vitest file and changes no `app/` file).
+- `chainHeadGateRunGreen`: gate 365.
+- `affectedChecksNamed`: the stem-cache perf spec; the production probe at both viewports.
+- `affectedChecksRunOnSketch`: `b-round-365/perf-sketch/run-v4.log`, `b-round-365/probe/stem-prod-1440x900.json`, `b-round-365/probe/stem-prod-1280x720.json`.
 
 ## 3. Neighbouring behaviour that could break
-- **Library load states** (loading → ready / failed text, per-source failed state): the covering files [K11] and the CS rows guard them.
-- **Error texts:**
-  - The demo-loader and purchased-adapter rows in the covering files [K11], including DL6 and PC3 [K13], must pass unchanged.
-  - The Georgian-line guard over `studio-lab-demo.ts` [K12]: the new files must contain no Georgian text.
-- **SSR:** `/studio-lab` must render on the server (A-SSR).
-- **Synth sources, video, peaks and export:** these consume decoded `AudioBuffer`s, which are unchanged. CS-AUDIO is the end-to-end check.
-- **Purchased path:** its behaviour is unchanged (PC rows + SF6). Purchase protection is guarded by G365-AUTH.
-- **Storage growth:** the budget plus the 2 entries (~7.7 MB) are inside the default quota (B probe: `estimate().quota` ≈ 1 GB).
+- **The other perf specs** share `perf/lib` and the config; this round edits neither [K7], and the new spec only imports from `perf/lib`. `buildPerfReportCore` fails a sample without a budget row and a row measured fewer than 3 times: both are part of PERF.
+- **The gate's `npm run test:perf`** (if root runs it) now includes about 1 more minute of work (B: 49–90 s per run incl. the loaded one; the file timeout is 15 min). Each pass makes 5 throttled navigations; the blocked open is capped at 60 s navigation + the 90 s ready wait.
+- **The stem cache itself** is unchanged; PERF-9a's unit rows and C's round-365 rows stay valid. AUDIO re-checks real playback from the cache on the production build.
+- **Purchase protection:** unchanged; G366-AUTH guards it.
 
 ## 4. STOP conditions (A)
 - The sketch patch does not apply, or its sha256 differs.
 - A-CLAIMS pre mismatch, or a final mismatch outside §2.1.
-- Any change needed outside the 8 files.
-- An existing covering test fails, or must be edited.
-- A mutant stays green.
+- Any change needed outside the 3 files.
+- An assert fails on A's run, or a row is measured fewer than 3 times (write the medians; do not loosen a budget).
+- A mutant stays green on its named rows.
 - A code-reviewer Medium+.
-- A ruling in `sketch-review.md` that A cannot apply as written.
 
 ## 5. Routed, not in scope
-- **PERF-9b** (next): production perf rows and budgets, the throttled ratio, doc 168, and the three deferred Lows (C-R364-01, A-R364-REVIEW-SELECTED-BEFORE, A-R364-REVIEW-MARKER-PRE-DRAG).
-- **PERF-9c:** `awaiting_user` (SABA-Q-PERF4-STUDIO-CACHE).
-- **PERF-9d:** ROOT-REQ-PERF9D-LEGACY-CACHE, protected files:
-  - `audio-cache.ts` / `StudioContext.tsx` retirement with the SRW-21 mount;
-  - delete the old `czaba-audio-cache` DB once;
-  - rewrite `.claude/skills/indexeddb-cache/SKILL.md`.
-- **B-R364-DEMO-DOUBLE-FETCH:** info; the `audio` initiator is recorded.
-- **Architecture:** PERF-10 closed a feature boundary. The open request `b-round-362/root-request-arch-checkpoint.md` is now actionable for root; this round touches neither `ArrangementContext` nor `StudioWorkspace`.
-- **D-29z1194, next:** PERF-9b → REGRESSION at any planning on or after 2026-11-08 → PERF-11 → PERF-12…15 → SYS-R2-FAKE-FIDELITY → SYS-CLOCK-DETERMINISM → STEM-LANES → SYS-1…3 → STORE-2b…5 → REVIEW-RECOMMENDATIONS → T12-ADVANCED → phase-2 entries (skip rule). RETRO at 368.
+- **PERF-9b-ii = SYS-R365-STEM-CACHE-HARDENING** (next, unless REGRESSION is due): A-R365-REVIEW-L3…L6, C-R365-OBS-INTEGRITY (corrupted OPFS file browser row), a changed-validator browser row, the reviewer proposal "serialize eviction planning", doc 236 → Completed.
+- **C-R364-01, A-R364-REVIEW-SELECTED-BEFORE, A-R364-REVIEW-MARKER-PRE-DRAG:** re-routed (D-29z1197) to the next task that owns the interactions spec / doc 168, else the polish pass.
+- **PERF-9c:** `awaiting_user` (SABA-Q-PERF4-STUDIO-CACHE). **PERF-9d:** ROOT-REQ-PERF9D-LEGACY-CACHE.
+- **ROOT-Q-R365-VERCEL-STATIC-HEADERS**, **PERF-CAND-STEM-BACKGROUND-REVALIDATE**, **B-R364-DEMO-DOUBLE-FETCH:** recorded, not scheduled.
+- **Architecture:** `b-round-362/root-request-arch-checkpoint.md` stays with root; this round touches no component owner.
+- **D-29z1200, next:** REGRESSION if the round-367 planning is on or after 2026-11-08, else PERF-9b-ii → RETRO 368 → PERF-11 → PERF-12…15 → SYS-R2-FAKE-FIDELITY → SYS-CLOCK-DETERMINISM → STEM-LANES → SYS-1…3 → STORE-2b…5 → REVIEW-RECOMMENDATIONS → T12-ADVANCED → phase-2 entries (skip rule).
 
 ## 6. Deliverables
-- **A:** `a-round-365.md` with every §2.1 row, evidence under `a-round-365/`, mutant logs and the code-reviewer result.
-- **C:** `c-round-365.md`, `c-round-365.json` (all L57 fields), evidence under `c-round-365/`.
+- **A:** `a-round-366.md` with every §2.1 row, evidence under `a-round-366/` (perf log, report JSON, mutant logs) and the code-reviewer result.
+- **C:** `c-round-366.md`, `c-round-366.json` (all L57 fields), evidence under `c-round-366/`.
 
 ## 7. Claims
-Run `bash b-round-364/claims-365.sh` from the loop root. Set `CLAIMS_STORE` to point it at a scratch.
+Run `bash b-round-365/claims-366.sh` from the loop root. Set `CLAIMS_STORE` to point it at a scratch.
 
 | Output | File |
 |---|---|
-| Planning, on `df4e5b1` | `b-round-364/claims-365-planning-output.txt` |
-| Sketch (scratch + patch) | `b-round-364/claims-365-sketch-output.txt` |
+| Planning, on `413218e` | `b-round-365/claims-366-planning-output.txt` |
+| Sketch (scratch + patch) | `b-round-365/claims-366-sketch-output.txt` |
 
 | Tag | What it pins |
 |---|---|
-| K1 | gate 364 status and commit |
+| K1 | gate 365 status and commit |
 | K2 | HEAD and the status entry count |
-| K3 | demo: the two URL map lines, raw `fetch` block, `fetchAndDecodeSource` call, cache import |
-| K4 | collection: raw fetch block, `fetchAndDecodeSource` call, `stem-cache` import (must stay 0), default fetcher |
-| K5 | the 3 new modules and the 2 new test files exist |
-| K6 | protected files OK |
-| K7 | importers of the legacy `audio-cache` |
-| K8 | `package.json` / lock sha; no `fake-indexeddb` |
-| K9 | legacy DB name; the v2 name in `app/` |
-| K10 | `StudioNarrowScreen.tsx` preview URL and `preload="metadata"` |
-| K11 | covering test file count |
-| K12 | Georgian-line guard over the demo file; walk floor |
-| K13 | DL6 and PC3 test names |
-| K14 | last quarter-IV doc; doc 236 exists; `pending` docs |
-| K15 | dev server: `/middle-east.mp3` 200 with ETag and Last-Modified |
-| K16 | cited `b-round-364/` artifacts missing (empty at hand-off; includes `sketch-review.md`) |
+| K3 | the 2 new perf files exist |
+| K4 | budgets: row count, assert count, owner, each assert's op and value |
+| K5 | protected files OK |
+| K6 | `package.json` / lock sha |
+| K7 | no change under `app/`, `perf/lib/` or the existing spec/budgets files |
+| K8 | doc 236 l.4; `pending` docs; `In Progress (stage` hits |
+| K9 | perf config: testMatch, port 5188, build + remix-serve webServer |
+| K10 | stem cache DB name, store name, the hit's `cache: 'no-store'`, the demo wiring |
+| K11 | Biome includes `app/**` only; the exact determinism units |
+| K12 | doc 236 heading count |
+| K13 | cited `b-round-365/` artifacts missing (empty at hand-off) |
 
 L29 check for C: every backticked `store/` fact in the Baseline and §0 carries a `[K#]`; an untagged one is a B-spec Low.

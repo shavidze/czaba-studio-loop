@@ -882,3 +882,7 @@ COMMIT OK. Findings for B: gates/round-362/review.md
 ## Round 364 (2026-11-06)
 COMMIT OK. Findings for B: gates/round-364/review.md
 
+
+## Round 365 (2026-11-06)
+COMMIT OK. Findings for B: gates/round-365/review.md
+

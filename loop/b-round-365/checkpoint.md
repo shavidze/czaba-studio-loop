@@ -1,0 +1,19 @@
+# B round 365 checkpoint
+- archived tasks/round-365.md, backups done
+- [x] advisor 1 consulted (split 9b; L58 production first)
+- [x] scratch /home/runner/b365-scratch = git archive 413218e (+node_modules symlink), production build OK
+- [x] prod headers: mp3 Cache-Control public max-age=31536000 immutable; weak ETag + Last-Modified from build mtime
+- [x] sketch spec perf/studio-lab-stem-cache.perf.spec.ts + perf/budgets.stem-cache.json (37 rows, all record) in scratch
+- [x] run1 (cache-disabled warm -> 200 full: DevTools no-cache + express fresh), headers-prod.json proves it
+- [x] run2 (evicted warm): warm body 0, 304x2, ratio 0.172; mutant cache-off: red (body 7.5MB, 304 0, entries 0, blocked 0, ratio 0.993); run3 loaded (4 busy loops): ratio 0.235 max 0.252
+- next: save sketch patch, decide asserts, rerun with assert budgets, claims script, backlog, task, reports
+- [x] asserts set (6 rows); run4-assert PASS; mutant-counter-zero red only on cold-body-live; mutant-cache-off-assert red on 5 rows
+- [x] sketch.patch.txt + sha256 (e48d45f7...), git apply --check OK on store HEAD; tsc 0 (sketch-typecheck.log); biome via temp app copy clean
+- [x] probe/stem-prod-probe.mjs on clean prod build, both viewports: probe/stem-prod-{1440x900,1280x720}.json (+png)
+- NOTE: a false alarm came from probing the mutant build (server not rebuilt) - resolved by rebuild
+- next: consults (perf-optimizer, tech-lead), claims-366.sh, backlog v329, feature-status, current-task, b-round-365.md, b-next.json
+- [x] consults: performance-optimizer + tech-lead; v3 sketch (46 rows, 7 asserts), run-v3 PASS, mutants v3 red as designed; patch sha 282b59cd...; claims re-run (K13 empty)
+- [x] drafted: current-task.md (needs v3 numbers update), update-backlog.py (needs b-round-365/tech-lead-summary.txt), sketch-review.md
+- next: tech-lead-summary.txt, run update-backlog.py, feature-status, b-round-365.md, b-next.json, advisor final
+- [x] backlog v329, feature-status, current-task 366, b-round-365.md, b-next.json written; next: final advisor
+- [x] v4 (re-kinded 4 byte rows), run-v4 PASS, patch sha 60d2cb84..., claims rerun; task/review/report updated. DONE
