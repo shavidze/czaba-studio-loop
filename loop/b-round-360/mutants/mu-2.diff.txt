@@ -1,0 +1,27 @@
+diff -ru sc/app/contexts/ArrangementContext.tsx mu-2/app/contexts/ArrangementContext.tsx
+--- sc/app/contexts/ArrangementContext.tsx	2026-11-06 02:08:18.168478588 +0000
++++ mu-2/app/contexts/ArrangementContext.tsx	2026-11-06 02:12:07.069868213 +0000
+@@ -714,6 +714,7 @@
+   const [insertMarkerStore] = useState(() => createArrangementPositionStore(0));
+   const [mixDraftStore] = useState(() => createArrangementMixDraftStore());
+   const [rangeStore] = useState(() => createArrangementRangeStore());
++  const [activeTrackMirror, setActiveTrackMirror] = useState<string | null>(null);
+   const [selectionStore] = useState(() =>
+     createArrangementSelectionStore(
+       NO_SELECTION,
+@@ -921,6 +922,7 @@
+   const setActiveTrackId = useCallback(
+     (next: string | null) => {
+       selectionStore.getState().setActiveTrackId(next);
++      setActiveTrackMirror(next);
+     },
+     [selectionStore],
+   );
+@@ -4318,6 +4320,7 @@
+       history.past,
+       history.future,
+       selectedSourceId,
++      activeTrackMirror,
+       pxPerSecond,
+       status,
+       statusSequence,

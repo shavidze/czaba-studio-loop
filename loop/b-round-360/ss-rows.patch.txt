@@ -1,0 +1,88 @@
+--- base/app/lib/arrangement/__tests__/selection-store.test.tsx	2026-11-06 02:02:14.000000000 +0000
++++ sc/app/lib/arrangement/__tests__/selection-store.test.tsx	2026-11-06 02:11:57.418220887 +0000
+@@ -4,6 +4,7 @@
+   type ArrangementContextValue,
+   ArrangementProvider,
+   useArrangement,
++  useArrangementActiveTrackId,
+   useArrangementSelection,
+   useArrangementSelectionStore,
+ } from '~/contexts/ArrangementContext';
+@@ -91,6 +92,12 @@
+   return null;
+ }
+ 
++function ActiveTrackProbe({ seen, count }: { seen: { id: string | null }; count: RenderCount }) {
++  seen.id = useArrangementActiveTrackId();
++  count.renders += 1;
++  return null;
++}
++
+ async function settle() {
+   await act(async () => {
+     await Promise.resolve();
+@@ -237,3 +244,64 @@
+     expect(probes.seen.ids).toEqual(['m2', 'm1']);
+   });
+ });
++
++describe('PERF-10b-i active track in the selection store', () => {
++  async function mountActiveTrackProbes() {
++    const api: SelectionApiRef = { current: null };
++    const contextCount: RenderCount = { renders: 0 };
++    const activeCount: RenderCount = { renders: 0 };
++    const seen: { id: string | null } = { id: null };
++    render(
++      <ArrangementProvider
++        collection={selectionCollection}
++        initialArrangement={selectionArrangement()}
++      >
++        <ContextOnlyProbe api={api} count={contextCount} />
++        <ActiveTrackProbe seen={seen} count={activeCount} />
++      </ArrangementProvider>,
++    );
++    await settle();
++    return { api, contextCount, activeCount, seen };
++  }
++
++  it('SS8: changing the active track re-renders its subscriber once and not the context consumer', async () => {
++    const probes = await mountActiveTrackProbes();
++    const contextBefore = probes.contextCount.renders;
++    const activeBefore = probes.activeCount.renders;
++    act(() => liveApi(probes.api).setActiveTrack('sfx'));
++    expect(probes.seen.id).toBe('sfx');
++    expect(probes.activeCount.renders).toBe(activeBefore + 1);
++    expect(probes.contextCount.renders).toBe(contextBefore);
++  });
++
++  it('SS9: setting the same active track does not notify store listeners', () => {
++    const store = createArrangementSelectionStore(NO_SELECTION, 'music');
++    const listener = vi.fn();
++    const unsubscribe = store.subscribe(listener);
++    store.getState().setActiveTrackId('music');
++    expect(listener).not.toHaveBeenCalled();
++    store.getState().setActiveTrackId('sfx');
++    expect(listener).toHaveBeenCalledTimes(1);
++    expect(store.getState().activeTrackId).toBe('sfx');
++    unsubscribe();
++  });
++
++  it('SS10: the initial active track is the first audio track, not the first track', async () => {
++    const probes = await mountActiveTrackProbes();
++    expect(probes.seen.id).toBe('music');
++  });
++
++  it('SS11: a paste right after an active-track change in the same event lands on the new track', async () => {
++    const probes = await mountActiveTrackProbes();
++    act(() => liveApi(probes.api).selectClip('m1'));
++    act(() => liveApi(probes.api).copySelection());
++    act(() => {
++      liveApi(probes.api).setActiveTrack('sfx');
++      liveApi(probes.api).pasteClipboard();
++    });
++    const pasted = liveApi(probes.api)
++      .getArrangement()
++      .clips.filter((clip) => clip.id !== 'm1' && clip.id !== 'm2');
++    expect(pasted.map((clip) => clip.trackId)).toEqual(['sfx']);
++  });
++});

@@ -1,0 +1,28 @@
+diff -ru sc/app/contexts/ArrangementContext.tsx mu-5/app/contexts/ArrangementContext.tsx
+--- sc/app/contexts/ArrangementContext.tsx	2026-11-06 02:08:18.168478588 +0000
++++ mu-5/app/contexts/ArrangementContext.tsx	2026-11-06 02:12:44.450279555 +0000
+@@ -714,6 +714,7 @@
+   const [insertMarkerStore] = useState(() => createArrangementPositionStore(0));
+   const [mixDraftStore] = useState(() => createArrangementMixDraftStore());
+   const [rangeStore] = useState(() => createArrangementRangeStore());
++  const activeTrackSnapshotRef = useRef<string | null>(null);
+   const [selectionStore] = useState(() =>
+     createArrangementSelectionStore(
+       NO_SELECTION,
+@@ -2563,7 +2564,7 @@
+     const at = insertMarkerRef.current;
+     const plan = planClipboardPaste(historyRef.current.present, clipboardRef.current, {
+       at,
+-      activeTrackId: selectionStore.getState().activeTrackId,
++      activeTrackId: activeTrackSnapshotRef.current,
+       isSourceAvailable: (sourceId) =>
+         videoSourcesRef.current.has(sourceId) ||
+         latestRef.current.sourceStates[sourceId]?.status === 'ready',
+@@ -4190,6 +4191,7 @@
+     [sourceStates, videoSources],
+   );
+ 
++  activeTrackSnapshotRef.current = selectionStore.getState().activeTrackId;
+   const arrangement = history.present;
+   const end = useMemo(() => projectEnd(arrangement), [arrangement]);
+ 

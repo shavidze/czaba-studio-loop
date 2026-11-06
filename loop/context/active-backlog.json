@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-06T00:52:03.064Z",
-  "current_task": "current-task.md (round 359: C-R358-01 fix, workspace tempo/grid settings survive a remount)",
+  "_generatedUtc": "2026-11-06T02:02:18.266Z",
+  "current_task": "current-task.md (round 360: PERF-10a-BUDGETS, nine play/fade-release rows record -> assert; VIDEO-FAIL-STOP variants 2/3 in the browser)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -5793,16 +5793,6 @@
       "title": "two isPlaying read policies (MarkerRow getState live vs StudioWorkspace committed ref) are not docum"
     },
     {
-      "id": "C-R358-01",
-      "severity": "medium",
-      "origin": "C round 358 PRE-REMOUNT record row; pre-existing (identical on HEAD d49536b and the round-358 tree)",
-      "title": "a typed tempo reverts to the seeded BPM and the tempo-seed sentence is re-appended after a narrow->wide window resize (StudioWorkspace remount)",
-      "evidence": "c-round-358.json bugs[0]; c-round-358/beh-head-1440x900.json, beh-tree-1440x900.json, beh-*-1280x720.json rows.pre; B sketch fix b-round-358/beh-sketch-*.json",
-      "repro": "Open /studio-lab 1440x900; add Night Pulse Full mix (tempo 120); resize 800x900 -> 1440x900; type 100 + Enter in BPM; resize 800x900 -> 1440x900: field back to 120, seed sentence appended",
-      "status": "open (D-29z1160): fix in round 359 (b-round-358/sketch/source-delta.patch.txt; WS1-WS5)",
-      "added": "2026-11-06 B round 358 -> 359 planning"
-    },
-    {
       "id": "A-R358-REVIEW-RM1-SEQ",
       "severity": "low",
       "status": "deferred_low_polish (D-29z1161)",
@@ -5817,20 +5807,29 @@
     {
       "id": "B-R359-VIEW-STATE-REMOUNT",
       "severity": "low",
-      "status": "deferred_low_polish (D-29z1160); C record row VIEW-STATE in ",
+      "status": "deferred_low_polish (D-29z1164): browser-confirmed in C roun",
       "title": "by trace: envelope mode and waveform zoom are StudioWorkspace useState and reset on a narrow->wide r"
+    },
+    {
+      "id": "C-R359-01",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1164)",
+      "title": "coverage: snapEnabled, gridDensity, secondsGridDivision and the grid/snap hand-chosen flags can be d"
+    },
+    {
+      "id": "A-R359-REVIEW-METRONOME-REF-RENDER",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1164)",
+      "title": "metronomeOnRef is written only during render (StudioWorkspace ~l.990), unlike the other session refs"
+    },
+    {
+      "id": "A-R359-REVIEW-SESSION-READONLY",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1164)",
+      "title": "ArrangementWorkspaceSessionState fields are not readonly (workspace-session-store.ts l.17-20)"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 350,
-      "task": "current-task.md",
-      "decision": "D-29z1111..D-29z1117",
-      "type": "PERF-CAND-VIDEO-TRIM-FADE-COST stage 1 (video dock stops rendering per drag move)",
-      "status": "c_fail_spec (D-29z1118): C round 350 FAIL on C-R350-01 (Low, origin B spec); all product/perf/browser rows PASS, browserVerified true; gate 350 skipped; tree kept for round 351",
-      "note": "baseline 7f56989 clean; sketch b-round-349/sketch-dock.diff.txt; claims b-round-349/claims-350.sh; probes b-round-349/video-*-probe.mjs",
-      "added": "2026-11-05 B round 349 -> 350 planning"
-    },
     {
       "round": 351,
       "task": "current-task.md",
@@ -5908,9 +5907,18 @@
       "task": "current-task.md",
       "decision": "D-29z1159..D-29z1162",
       "type": "C-R358-01 fix: tempo/grid/snap/metronome settings survive a StudioWorkspace remount (provider-owned workspace-session store)",
-      "status": "dispatched",
+      "status": "closed PASS (D-29z1163): C round 359 PASS, browserVerified true; gate 359 published a977b97",
       "note": "baseline f269022, clean tree; claims b-round-358/claims-359.sh; sketch b-round-358/sketch/*",
       "added": "2026-11-06 B round 358 -> 359 planning"
+    },
+    {
+      "round": 360,
+      "task": "current-task.md",
+      "decision": "D-29z1163..D-29z1166",
+      "type": "PERF-10a-BUDGETS: nine play/fade-release 1x rows record -> assert (84 -> 93); VIDEO-FAIL-STOP variants 2/3",
+      "status": "dispatched",
+      "note": "baseline a977b97, clean tree; claims b-round-359/claims-360.sh; sketch b-round-359/sketch/budgets.patch.txt; runs b-round-359/perf-summary.txt",
+      "added": "2026-11-06 B round 359 -> 360 planning"
     }
   ],
   "other_keys": [

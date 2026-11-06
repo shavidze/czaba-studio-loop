@@ -1,0 +1,1 @@
+"""Applied once after update-backlog.py (B round 360 -> 361): TL-R361-ACTIVE-TRACK-DANGLING reclassified from deferred Low to an info signal for STEM-LANES (no track-removal path at 93ea6c1). Already applied; kept for traceability."""

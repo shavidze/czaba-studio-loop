@@ -1,0 +1,65 @@
+--- a/perf/budgets.interactions.json	2026-11-06 01:28:09.829622475 +0000
++++ b/perf/budgets.interactions.json
+@@ -58,10 +58,13 @@
+     "metric": "commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "React commits from the click until quiet (min 600 ms, then 200 ms without a commit or start(), cap 3 s)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 2
++    },
++    "owner": "PERF-10b-i",
++    "note": "React commits from the click until quiet (min 600 ms, then 200 ms without a commit or start(), cap 3 s). Asserted since PERF-10b-i (round 361, D-29z1170) as an upper bound: the click commit and a 0-component commit (C360 and B's sketch: 2 x3 at 1x and 6x); a click that commits nothing fails interact.harness.click-live."
+   },
+   {
+     "id": "interact.click.components",
+@@ -69,10 +72,13 @@
+     "metric": "components",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components over the click window; detail lists the per-commit sizes."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 42
++    },
++    "owner": "PERF-10b-i",
++    "note": "Sum of rendered components over the click window; detail lists the per-commit sizes. Asserted since PERF-10b-i (round 361, D-29z1170): the active track lives in the selection store, so a cross-lane click renders 42 (C360 83; B's sketch 42,0 x3 at 1x and 6x; mutant MU-1 82)."
+   },
+   {
+     "id": "interact.click.event-duration-max",
+@@ -433,7 +439,7 @@
+       "value": 3
+     },
+     "owner": "PERF-10a-BUDGETS",
+-    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151; the third commit is intermittent while playing (C358 and C359: 2 x3)."
++    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151 (C358, C359 and C360: 2 x3 while playing; the bound matches the stopped fade's 3)."
+   },
+   {
+     "id": "interact.drag.fade.playing.move-to-paint-p95",
+@@ -2934,7 +2940,7 @@
+       "value": 3
+     },
+     "owner": "PERF-10a-BUDGETS",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.release-commits. Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151, as the audio fade (C358 and C359: 2 x3)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.release-commits. Added in round 349 (PERF-CAND-VIDEO-TRIM-FADE-ROWS); kind copied from interact.drag.video.stopped.release-commits. Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151, as the audio fade (C358 and C359: 2 x3)."
+   },
+   {
+     "id": "interact.drag.video-fade.stopped.move-to-paint-p95",
+@@ -2984,7 +2990,7 @@
+       "value": 3
+     },
+     "owner": "PERF-10a-BUDGETS",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.release-commits. Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151, as the audio fade (C358 and C359: 2 x3)."
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.release-commits. Added in round 349 (PERF-CAND-VIDEO-TRIM-FADE-ROWS); kind copied from interact.drag.video.playing.release-commits. Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151, as the audio fade (C358 and C359: 2 x3)."
+   },
+   {
+     "id": "interact.drag.video-fade.playing.move-to-paint-p95",

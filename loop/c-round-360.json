@@ -1,0 +1,119 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T01:38:54.7016559Z",
+  "round": 360,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R360-NOTE-STALE",
+   "severity": "low",
+   "steps": [
+    "Open perf/budgets.interactions.json notes of interact.drag.video-fade.{stopped,playing}.release-commits and interact.drag.fade.playing.release-commits"
+   ],
+   "expected": "Notes consistent with the new assert mode",
+   "actual": "Video-fade notes still start with 'Record until C measures it'; fade.playing note says the 3rd commit is intermittent though all 18 samples are 2 (confirmed again this round: [2,2,2])",
+   "evidence": "A's review Lows 1-2 (a-round-360.md); C360 latest-interactions.json; origin: B spec (sha-pinned patch). Documentation only, routed to deferred_low_polish",
+   "origin": "B spec"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "PERF-93of93-asserted-0NEW-181-rows-equal-C359",
+  "PERF-LIB-40of40",
+  "MUTANT-MU-C",
+  "VIDEO-FAIL-STOP-1",
+  "VIDEO-FAIL-STOP-2",
+  "VIDEO-FAIL-STOP-3",
+  "G360-AUTH-demo-and-premium-not-bypassed"
+ ],
+ "blocked": [
+  "G360-AUTH fake-bearer: /api/studio-token returns 500 (fails closed) while mock :5199 is not running in cloud; 403 not observable. Unauthenticated GET 401, /studio/middle-east shows sign-in required with 0 audio elements at both viewports (backend unavailable in cloud)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notRun": [],
+ "abletonConformance": "not applicable (budget-only round)",
+ "observations": {
+  "vfsV2FirstAttempt": "timed out at the first 'ready' wait (cold dev server, environment-invalid, kept as vfs-v2-attempt1-timeout.log); replacement attempt PASS",
+  "behFollowJitter": "beh-tree 1440 followScrollersBefore sl 119 vs C359 120 and followPlay pos 00:01.831 vs 00:01.842: 1px/11ms jitter, same class as C-R359-OBS-FOLLOW-JITTER; videoFail row equal; 1280 rows fully equal",
+  "perfDurationMs": 418424,
+  "mutantMUC": "ArrangementRuler calls useArrangementIsPlaying(): start-components and stop-components 30x3 (>28) red as predicted; commits 1, sources 1 stay; fade rows unchanged; 93 asserted, exactly 2 failures. Scratch deleted; store only has A's 3 modified files; the 0-commit side of ==1 is untested (info)"
+ },
+ "manifestPaths": [
+  "c-round-360/claims.txt",
+  "c-round-360/perf.log",
+  "c-round-360/latest-interactions.json",
+  "c-round-360/perf-rowcmp-vs-c359.txt",
+  "c-round-360/perf-lib.log",
+  "c-round-360/mutant-MU-C.diff",
+  "c-round-360/mutant-perf.log",
+  "c-round-360/mutant-results/latest-interactions.json",
+  "c-round-360/vfs-v2-1440x900.json",
+  "c-round-360/vfs-v3-1440x900.json",
+  "c-round-360/beh-tree-1440x900.json",
+  "c-round-360/beh-tree-1280x720.json",
+  "c-round-360/auth.json",
+  "c-round-360/progress.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": [
+  "interact.play.start-commits",
+  "interact.play.start-components",
+  "interact.play.start-sources",
+  "interact.play.stop-commits",
+  "interact.play.stop-components",
+  "interact.drag.fade.stopped.release-commits",
+  "interact.drag.fade.playing.release-commits",
+  "interact.drag.video-fade.stopped.release-commits",
+  "interact.drag.video-fade.playing.release-commits"
+ ],
+ "mutantsRecorded": [
+  "MU-A (M-P1, M-P3)",
+  "MU-B (M-P2, M-F1)",
+  "MU-C (C own: Ruler subscribes to isPlaying)"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-359/perf-mu-a-results/latest-interactions.json",
+  "b-round-359/perf-mu-b-results/latest-interactions.json"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-359/perf-sketch.log",
+  "b-round-359/sketch-perf-lib.log"
+ ],
+ "affectedChecksNamed": [
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "perf-lib tests",
+  "behaviour probe",
+  "vfs-probe v2/v3"
+ ],
+ "origin": {
+  "C-R360-NOTE-STALE": "B spec"
+ },
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "chainHeadGateRunGreen": "gate 359 published a977b97",
+ "affectedChecksRunOnSketch": [
+  "b-round-359/perf-sketch.log",
+  "b-round-359/sketch-perf-lib.log"
+ ]
+}

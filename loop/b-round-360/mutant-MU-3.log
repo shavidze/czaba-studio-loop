@@ -1,0 +1,79 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/b360-scratch/mu-3[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/selection-store.test.tsx [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 64[2mms[22m[39m
+     [32m✓[39m SS1: starts at NO_SELECTION and stores new content by reference[32m 2[2mms[22m[39m
+     [32m✓[39m SS2: keeps the old reference for the same ordered ids and notifies on a new order[32m 2[2mms[22m[39m
+     [32m✓[39m SS3: two stores and two providers hold independent selections[32m 20[2mms[22m[39m
+     [32m✓[39m SS4: moving the selection between two clips on one track re-renders only the selection subscriber[32m 5[2mms[22m[39m
+     [32m✓[39m SS5: selecting the already-selected clip renders neither probe[32m 2[2mms[22m[39m
+     [32m✓[39m SS6: an event-time delete right after a selection change uses the new selection[32m 3[2mms[22m[39m
+     [32m✓[39m SS7: the primary clip is the last one added, and re-adding a clip moves it to the end[32m 4[2mms[22m[39m
+     [32m✓[39m SS8: changing the active track re-renders its subscriber once and not the context consumer[32m 2[2mms[22m[39m
+[31m     [31m×[31m SS9: setting the same active track does not notify store listeners[39m[32m 5[2mms[22m[39m
+     [32m✓[39m SS10: the initial active track is the first audio track, not the first track[32m 11[2mms[22m[39m
+     [32m✓[39m SS11: a paste right after an active-track change in the same event lands on the new track[32m 5[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-group-collapse-ui.test.tsx [2m([22m[2m30 tests[22m[2m)[22m[33m 10390[2mms[22m[39m
+     [33m[2m✓[22m[39m UC1 the fold button hides the member lanes, shows an overview and writes no history [33m 667[2mms[22m[39m
+     [33m[2m✓[22m[39m UC2 U and the fold button are refused during a pointer gesture and a pending fader preview [33m 564[2mms[22m[39m
+     [33m[2m✓[22m[39m UC3 nested collapse keeps the inner group collapsed when the outer one expands [33m 472[2mms[22m[39m
+     [33m[2m✓[22m[39m UC3 a collapsed group nested by Ctrl+G stays collapsed and ungrouping shows its children [33m 387[2mms[22m[39m
+     [33m[2m✓[22m[39m UC4 hidden lane controls are unreachable and the collapsed label carries the clip count [33m 358[2mms[22m[39m
+     [33m[2m✓[22m[39m UC4 F3 a collapse moves focus from a hidden lane to the collapsing group name [33m 396[2mms[22m[39m
+     [33m[2m✓[22m[39m UC5 collapsing prunes hidden clip, row and lane-range selections, keeps an all-lanes range [33m 817[2mms[22m[39m
+     [33m[2m✓[22m[39m UC6 nested: an outer collapse leaves one lane and one group row to fit [33m 399[2mms[22m[39m
+     [33m[2m✓[22m[39m UC7 a hidden active lane marks its collapsed group and still receives library adds [33m 324[2mms[22m[39m
+     [33m[2m✓[22m[39m UC8 Undo shows the lanes, Redo restores the collapsed group without pruning [33m 349[2mms[22m[39m
+     [33m[2m✓[22m[39m GF2 Redo: Ungroup Tracks by Ctrl+Shift+Z and by Ctrl+Y lands on the first former member [33m 526[2mms[22m[39m
+     [33m[2m✓[22m[39m GF3 focus on the fold, mute or volume control of the removed row moves the same way [33m 436[2mms[22m[39m
+     [33m[2m✓[22m[39m GF4 a folded group removed by Undo hands focus to its first member, now shown [33m 310[2mms[22m[39m
+     [33m[2m✓[22m[39m GF5 nested: the removed outer group hands focus to its first child; the kept inner one keeps it [33m 519[2mms[22m[39m
+     [33m[2m✓[22m[39m GF6 focus that was not inside the removed row is not moved [33m 347[2mms[22m[39m
+     [33m[2m✓[22m[39m GF7 Ctrl+Shift+G keeps its own focus target when it also removes the focused row [33m 484[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/selection-store.test.tsx[2m > [22mPERF-10b-i active track in the selection store[2m > [22mSS9: setting the same active track does not notify store listeners
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      Object {
+        "activeTrackId": "music",
+        "selectedClipIds": Array [],
+        "setActiveTrackId": [Function setActiveTrackId],
+        "setSelectedClipIds": [Function setSelectedClipIds],
+      },
+      Object {
+        "activeTrackId": "music",
+        "selectedClipIds": Array [],
+        "setActiveTrackId": [Function setActiveTrackId],
+        "setSelectedClipIds": [Function setSelectedClipIds],
+      },
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/selection-store.test.tsx:[2m282:26[22m[39m
+    [90m280| [39m    [35mconst[39m unsubscribe [33m=[39m store[33m.[39m[34msubscribe[39m(listener)[33m;[39m
+    [90m281| [39m    store[33m.[39m[34mgetState[39m()[33m.[39m[34msetActiveTrackId[39m([32m'music'[39m)[33m;[39m
+    [90m282| [39m    [34mexpect[39m(listener)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                         [31m^[39m
+    [90m283| [39m    store[33m.[39m[34mgetState[39m()[33m.[39m[34msetActiveTrackId[39m([32m'sfx'[39m)[33m;[39m
+    [90m284| [39m    [34mexpect[39m(listener)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m40 passed[39m[22m[90m (41)[39m
+[2m   Start at [22m 02:12:19
+[2m   Duration [22m 11.84s[2m (transform 998ms, setup 0ms, import 1.60s, tests 10.45s, environment 599ms)[22m
+
+
+::error file=/home/runner/b360-scratch/mu-3/app/lib/arrangement/__tests__/selection-store.test.tsx,title=app/lib/arrangement/__tests__/selection-store.test.tsx > PERF-10b-i active track in the selection store > SS9%3A setting the same active track does not notify store listeners,line=282,column=26::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      Object {%0A        "activeTrackId": "music",%0A        "selectedClipIds": Array [],%0A        "setActiveTrackId": [Function setActiveTrackId],%0A        "setSelectedClipIds": [Function setSelectedClipIds],%0A      },%0A      Object {%0A        "activeTrackId": "music",%0A        "selectedClipIds": Array [],%0A        "setActiveTrackId": [Function setActiveTrackId],%0A        "setSelectedClipIds": [Function setSelectedClipIds],%0A      },%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/selection-store.test.tsx:282:26%0A%0A
+rc 1
