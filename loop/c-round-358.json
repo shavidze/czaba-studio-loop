@@ -1,0 +1,128 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-05T23:10:54.3659156Z",
+  "round": 358,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R358-01",
+   "severity": "medium",
+   "origin": "pre-existing (identical on HEAD d49536b and on A's tree; not caused by round 358) = A-R357-TEMPO-SEED-REMOUNT-DUP",
+   "steps": [
+    "Open /studio-lab at 1440x900, wait for 'Demo collection ready'",
+    "Select 'Night Pulse · Full mix', Enter (clip added, tempo field 120)",
+    "Resize to 800x900 then back to 1440x900 (StudioWorkspace unmounts/remounts under the live provider)",
+    "Type 100 in the tempo field, Enter -> status 'Tempo 100 BPM · 4/4 — bars ruler updated', field 100",
+    "Resize to 800x900 then back to 1440x900"
+   ],
+   "expected": "A typed tempo of 100 BPM survives a window resize; the status does not repeat the 'Tempo 120 BPM from ...' sentence",
+   "actual": "After the 2nd remount the tempo field is back to 120 and the status ends with the appended 'Tempo 120 BPM from “Night Pulse · Full mix” — bars ruler on ...' sentence. After the 1st remount the seed sentence is already duplicated twice in the status. Same on HEAD and on the tree (the PRE-REMOUNT record row).",
+   "evidence": "c-round-358/beh-head-1440x900.json and beh-tree-1440x900.json rows.pre (EQ at 1440 and 1280, c-round-358/beh-*-1280x720.json)"
+  }
+ ],
+ "passed": [
+  "CLAIMS (c-round-358/claims.txt equals a-round-358/claims-final.txt)",
+  "SOURCE-SCOPE (57 entries; StudioWorkspace delta lines all present in the tree diff vs HEAD; perf/** and package.json unchanged; K6 11/11)",
+  "READ (round-358 delta: prev-value guard in the leaf at l.922-930, atMount string branch l.2333, mount effect after tempo-seed (K18 seed-first); K3 value-field 0, K5 workspaceRef-isPlaying 0 (claims); StudioWorkspace's only useArrangementIsPlaying call is the leaf at l.921). 357 READ points beyond claims were not re-read line by line",
+  "UNIT (A-COVER command, 71 files, 1290/1290, c-round-358/cover.log); includes RM1/RM2 = REMOUNT-ANNOUNCE",
+  "REMOUNT browser 1440x900: all 7 step texts equal HEAD (c-round-358/remount3-tree.json vs c-round-357/remount3-head.json), final data-playing false",
+  "PRE-REMOUNT record row: tree == HEAD at both viewports (result: pre-existing defect, see bugs C-R358-01)",
+  "PLAY-BEHAVIOUR 1440x900 and 1280x720: Space plays (data-playing true, transport clock +1.0 s), stop text, marker-next with no marker: tree equals HEAD in a dedicated probe (c-round-358/marker-*.json; the first behaviour probe's marker steps were vacuous). Observation recorded, same on HEAD: clicking Next marker with no marker while playing turns data-playing false and shows no new message",
+  "FOLLOW 1440x900 and 1280x720: play scrolls timeline (scrollLeft 0 -> 1178 / 1447), manual scroll -> 'Follow paused by manual navigation...' with dashed Follow, Stop resumes Follow and shows the stopped text; texts equal HEAD, scrollLeft within 4 px (c-round-358/follow-*.json)",
+  "VIDEO-SYNC 1440x900 equal to c-round-356/behaviour-1440x900.json except blob src",
+  "VIDEO-FAIL-STOP (first variant, HEAD and tree): 'Video playback failed — try MP4 (H.264) or WebM.', data-playing false; equal. Follow-paused and play-from-before-clip variants not run",
+  "NARROW HEAD and tree: playing at 1440 -> 800x900 shows 'The Studio works on a computer', back to 1440 data-playing false",
+  "G358-AUTH both viewports: /studio-lab demo opens with auth_user null; /studio/middle-east shows Sign in required, 0 audio[src]; studio-token without header 401; no token in body",
+  "PERF (production, alone): rc 0, complete, 252 rows, 84/84 asserted pass, 0 NEW; vs C356 DIFF only on the four play component rows 70 -> 28 [28,28,28]; durationMs 472986; also equal to A's file (c-round-358/perf-rowcmp-vs-*.txt)",
+  "DOCS (doc 234 l.4 byte-exact, 7 '## ' headings in TEMPLATE order, RM1/RM2/PS1/PS3/RB-PB1/RB-PB2/FW-PB1 present in tests, 0 'C round N pending' files)",
+  "MUTANT (C own): remove the leaf's prev-value guard -> RM1/RM2 and the 47 Follow files (959 tests) stay green: recorded as equivalence/coverage gap = A-R358-REVIEW-LEAF-GATE-COVER, not a FAIL (c-round-358/mutant-noguard.log)"
+ ],
+ "failed": [],
+ "blocked": [
+  "G358-AUTH fake-bearer: /api/studio-token returns 500 (fails closed), backend mock :5199 not running in cloud; 403 not observable. Premium auth is not bypassed"
+ ],
+ "notRun": [
+  "VIDEO-FAIL-STOP variants 'Follow paused' and 'playhead reaches clip'",
+  "PLAY-BEHAVIOUR/VIDEO-SYNC at 1280x720 for the video probe (task asks 1440x900 only)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "abletonConformance": "not applicable (performance round)",
+ "manifestPaths": [
+  "c-round-358/claims.txt",
+  "c-round-358/cover.log",
+  "c-round-358/remount3-tree.json",
+  "c-round-358/beh-head-1440x900.json",
+  "c-round-358/beh-tree-1440x900.json",
+  "c-round-358/beh-head-1280x720.json",
+  "c-round-358/beh-tree-1280x720.json",
+  "c-round-358/follow-head-1440x900.json",
+  "c-round-358/follow-tree-1440x900.json",
+  "c-round-358/follow-head-1280x720.json",
+  "c-round-358/follow-tree-1280x720.json",
+  "c-round-358/narrow-head.json",
+  "c-round-358/narrow-tree.json",
+  "c-round-358/behaviour-video-1440x900.json",
+  "c-round-358/auth.json",
+  "c-round-358/latest-interactions.json",
+  "c-round-358/perf-rowcmp-vs-c356.txt",
+  "c-round-358/perf-rowcmp-vs-a358.txt",
+  "c-round-358/mutant-noguard.log",
+  "c-round-358/marker-tree-1440x900.json",
+  "c-round-358/marker-head-1440x900.json",
+  "c-round-358/marker-tree-1280x720.json",
+  "c-round-358/marker-head-1280x720.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "none (no perf row changes mode)",
+ "mutantsRecorded": [
+  "M-B1..M-B6 (A-reported, not re-run by C)",
+  "C-M1: remove leaf prev-value guard (survives)"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-357/mutants/mutant-m-b5.log",
+  "b-round-357/mutants/mutant-m-b6.log",
+  "b-round-357/mutants/sketch-m-b1.log",
+  "b-round-357/mutants/sketch-m-b2.log",
+  "b-round-357/mutants/sketch-m-b3.log",
+  "b-round-357/mutants/sketch-m-b4.log",
+  "b-round-357/rm-on-atree.log"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-357/typecheck.log",
+  "b-round-357/biome.log",
+  "b-round-356/precheck-full-final.log"
+ ],
+ "chainHeadGateRunGreen": "gate 357 skipped; gate 356 published d49536b",
+ "affectedChecksNamed": [
+  "covering set b-round-357/cover-paths.txt",
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "Follow tests",
+  "remount probe"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-357/cover-sketch.log",
+  "b-round-357/remount3-sketch.json"
+ ]
+}

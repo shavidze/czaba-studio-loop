@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-05T22:21:16.075Z",
-  "current_task": "current-task.md (round 357: PERF-10a playback store)",
+  "_generatedUtc": "2026-11-05T23:42:14.894Z",
+  "current_task": "current-task.md (round 358: PERF-10a re-dispatch with the C-R357-01 ruling)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -5773,18 +5773,43 @@
       "severity": "low",
       "status": "deferred_low_polish (D-29z1153): fix home PERF-10b (a reader",
       "title": "useArrangementPlaybackStore() exposes setPlaying to any consumer, out of sync with isPlayingRef and "
+    },
+    {
+      "id": "C-R357-01",
+      "severity": "medium",
+      "origin": "B spec (leaf design not ruled for remount) / A STOP confirmed by C",
+      "title": "PERF-10a tree: after a narrow->wide remount the stopped insert-marker status keeps an appended tempo-seed sentence (HEAD replaces it) and is not re-announced",
+      "evidence": "c-round-357.md, c-round-357/remount3-head.json, c-round-357/remount3-atree.json",
+      "repro": "Add Night Pulse Full mix; Space; click the ruler bottom strip; Space; resize 800x900 then 1440x900; compare status with HEAD",
+      "status": "open (D-29z1156): ruled (b), fix in round 358 (b-round-357/sketch/source-delta.patch.txt; RM1/RM2)",
+      "added": "2026-11-05 B round 357 -> 358 planning"
+    },
+    {
+      "id": "A-R357-REVIEW-SPLIT-RENDER-LATENT",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1157)",
+      "title": "outside React events the playback store write renders at SyncLane apart from status dispatches; the "
+    },
+    {
+      "id": "A-R357-REVIEW-FWPB1-TIMING",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1157)",
+      "title": "FW-PB1 uses a real 50 ms wait with act off (flake risk); assert statusSequence === before + 1 and ad"
+    },
+    {
+      "id": "A-R357-REVIEW-READ-POLICY",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1157)",
+      "title": "two isPlaying read policies (MarkerRow getState live vs StudioWorkspace committed ref) are not docum"
+    },
+    {
+      "id": "A-R357-TEMPO-SEED-REMOUNT-DUP",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1157); C record row PRE-REMOUNT in",
+      "title": "pre-existing by trace: StudioWorkspace-local tempo/grid state and tempoSeedOpenRef reset on every na"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 348,
-      "task": "current-task.md",
-      "decision": "D-29z1100..D-29z1104",
-      "type": "PERF-DRAG-PREVIEW conversions (trim/move/fade 1x rows -> assert at ceil; DP63/DP65 finally)",
-      "status": "c_pass_published (D-29z1106): C round 348 PASS browserVerified=true realVerified=true; gate 348 published 70751a5",
-      "note": "baseline 95774e6 clean; patches b-round-347/sketch/{budgets,tests}.patch.txt; claims b-round-347/claims-348.sh; perf b-round-347/perf-summary.txt",
-      "added": "2026-11-05 B round 347 -> 348 planning"
-    },
     {
       "round": 349,
       "task": "current-task.md",
@@ -5862,9 +5887,18 @@
       "task": "current-task.md",
       "decision": "D-29z1149..D-29z1154",
       "type": "PERF-10a: isPlaying playback store (ArrangementContext, StudioWorkspace, Transport, MarkerRow, VideoDock, studio-lab route, 46 test probes via one helper)",
-      "status": "dispatched",
+      "status": "closed FAIL (D-29z1155): A STOP on an unruled Medium; C-R357-01 reproduced; gate 357 skipped; ruled (b) by D-29z1156",
       "note": "baseline d49536b clean; claims b-round-356/claims-357.sh; sketch b-round-356/sketch/*.patch.txt; precheck b-round-356/precheck-full.log; perf b-round-356/perf-summary.txt",
       "added": "2026-11-05 B round 356 -> 357 planning"
+    },
+    {
+      "round": 358,
+      "task": "current-task.md",
+      "decision": "D-29z1155..D-29z1158",
+      "type": "PERF-10a re-dispatch: A's round-357 tree + C-R357-01 ruling (b) delta (StudioWorkspace follow leaf transition guard + mount sync after tempo-seed) + RM1/RM2",
+      "status": "dispatched",
+      "note": "baseline d49536b, A tree 56 entries kept; claims b-round-357/claims-358.sh; delta b-round-357/sketch/*.patch.txt",
+      "added": "2026-11-05 B round 357 -> 358 planning"
     }
   ],
   "other_keys": [

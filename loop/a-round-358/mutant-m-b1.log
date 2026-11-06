@@ -1,0 +1,97 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/a358-scratch/mu/m-b1[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/render-budget.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 5489[2mms[22m[39m
+[31m     [31m×[31m does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play[39m[33m 1150[2mms[22m[39m
+     [33m[2m✓[22m[39m RB-IM keeps the insert marker line as the same node over Play → Stop → Play [33m 1027[2mms[22m[39m
+     [33m[2m✓[22m[39m moves the playhead, ruler handle and transport time on playback frames without React renders [33m 606[2mms[22m[39m
+     [33m[2m✓[22m[39m does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e) [33m 1051[2mms[22m[39m
+     [32m✓[39m shows the seek position immediately when stopped and after a zoom change[32m 84[2mms[22m[39m
+     [32m✓[39m writes only transform on the detail playhead per frame and never left, width or height (R9-D3, C-R8-01)[32m 72[2mms[22m[39m
+     [32m✓[39m keeps the library insert-marker text on 60 position frames and writes marker moves without rendering LibraryInsertMarkerText (R9-L1, C-R6-02, C-R250-01)[32m 66[2mms[22m[39m
+[31m     [31m×[31m RB-PB1 keeps the context value object over Play → Stop → Play (PERF-10a)[39m[32m 232[2mms[22m[39m
+[31m     [31m×[31m RB-PB2 renders only the transport and the follow leaf on Play → Stop → Play (PERF-10a)[39m[33m 384[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02) [33m 815[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/render-budget.test.tsx[2m > [22mPlay render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)[2m > [22mdoes not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play
+[31m[1mAssertionError[22m: expected 3 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 3[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/render-budget.test.tsx:[2m344:51[22m[39m
+    [90m342| [39m      expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBeGr…
+    [90m343| [39m      for (const parent of ['ArrangementRuler', 'ArrangementLibrary', …
+    [90m344| [39m        [34mexpect[39m(renderLog[33m.[39mcounts[33m.[39m[35mget[39m(parent) [33m??[39m [34m0[39m)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                                  [31m^[39m
+    [90m345| [39m      }
+    [90m346| [39m      [34mexpect[39m([34mcountsOf[39m([33mWATCHED_LISTS[39m))[33m.[39m[34mtoEqual[39m({
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/render-budget.test.tsx[2m > [22mPlay render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)[2m > [22mRB-PB1 keeps the context value object over Play → Stop → Play (PERF-10a)
+[31m[1mAssertionError[22m: expected { …(116) } to be { …(116) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(116) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/render-budget.test.tsx:[2m627:27[22m[39m
+    [90m625| [39m    fireEvent[33m.[39m[34mclick[39m(view[33m.[39m[34mgetByRole[39m([32m'button'[39m[33m,[39m { name[33m:[39m [32m'Play'[39m }))[33m;[39m
+    [90m626| [39m    expect(view.getByRole('button', { name: 'Play' }).dataset.playing)…
+    [90m627| [39m    [34mexpect[39m(value[33m.[39mcurrent)[33m.[39m[34mtoBe[39m(beforePlay)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m628| [39m    fireEvent[33m.[39m[34mclick[39m(view[33m.[39m[34mgetByRole[39m([32m'button'[39m[33m,[39m { name[33m:[39m [32m'Stop'[39m }))[33m;[39m
+    [90m629| [39m    expect(view.getByRole('button', { name: 'Play' }).dataset.playing)…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/render-budget.test.tsx[2m > [22mPlay render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)[2m > [22mRB-PB2 renders only the transport and the follow leaf on Play → Stop → Play (PERF-10a)
+[31m[1mAssertionError[22m: expected { StudioWorkspace: 3, …(4) } to deeply equal { StudioWorkspace: +0, …(4) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "ArrangementDetailPanel": 0,[22m
+[32m-   "ArrangementLane": 0,[39m
+[32m-   "ArrangementLibrary": 0,[39m
+[32m-   "ArrangementRuler": 0,[39m
+[32m-   "StudioWorkspace": 0,[39m
+[31m+   "ArrangementLane": 9,[39m
+[31m+   "ArrangementLibrary": 3,[39m
+[31m+   "ArrangementRuler": 3,[39m
+[31m+   "StudioWorkspace": 3,[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/render-budget.test.tsx:[2m656:7[22m[39m
+    [90m654| [39m        [32m'ArrangementDetailPanel'[39m[33m,[39m
+    [90m655| [39m      ])[33m,[39m
+    [90m656| [39m    )[33m.[39m[34mtoEqual[39m({
+    [90m   | [39m      [31m^[39m
+    [90m657| [39m      [33mStudioWorkspace[39m[33m:[39m [34m0[39m[33m,[39m
+    [90m658| [39m      [33mArrangementRuler[39m[33m:[39m [34m0[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 22:57:51
+[2m   Duration [22m 7.38s[2m (transform 973ms, setup 0ms, import 1.38s, tests 5.49s, environment 389ms)[22m
+
+
+::error file=/home/runner/a358-scratch/mu/m-b1/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > does not re-render clips%2C overview bars%2C library rows or ruler ticks over Play → Stop → Play,line=344,column=51::AssertionError: expected 3 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 3%0A%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:344:51%0A%0A
+
+::error file=/home/runner/a358-scratch/mu/m-b1/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > RB-PB1 keeps the context value object over Play → Stop → Play (PERF-10a),line=627,column=27::AssertionError: expected { …(116) } to be { …(116) } // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: { …(116) }%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:627:27%0A%0A
+
+::error file=/home/runner/a358-scratch/mu/m-b1/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > RB-PB2 renders only the transport and the follow leaf on Play → Stop → Play (PERF-10a),line=656,column=7::AssertionError: expected { StudioWorkspace: 3, …(4) } to deeply equal { StudioWorkspace: +0, …(4) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "ArrangementDetailPanel": 0,%0A-   "ArrangementLane": 0,%0A-   "ArrangementLibrary": 0,%0A-   "ArrangementRuler": 0,%0A-   "StudioWorkspace": 0,%0A+   "ArrangementLane": 9,%0A+   "ArrangementLibrary": 3,%0A+   "ArrangementRuler": 3,%0A+   "StudioWorkspace": 3,%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:656:7%0A%0A

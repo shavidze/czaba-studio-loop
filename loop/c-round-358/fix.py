@@ -1,0 +1,6 @@
+s = open('behaviour-probe.mjs').read()
+s = s.replace("await page.keyboard.press('Space')", "await sp()")
+s = s.replace("const R = {", "const sp = async () => { await page.evaluate(() => document.activeElement?.blur?.()); await page.keyboard.press('Space'); };\nconst R = {", 1)
+s = s.replace("await page.getByText('Night Pulse · Full mix', { exact: false }).first().click().catch(() => {});", "await page.getByText('Full mix', { exact: true }).first().click();")
+s = s.replace("await page.getByTestId('arrangement-marker-next').click();", "await page.getByTestId('arrangement-marker-next').click(); await page.evaluate(() => document.activeElement?.blur?.());")
+open('behaviour-probe.mjs', 'w').write(s)

@@ -1,0 +1,452 @@
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 59a8cbb..d461e03 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -15,6 +15,7 @@ import {
+   formatArrangementTime,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
++  useArrangementPlaybackStore,
+   useArrangementRangeStore,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+@@ -151,7 +152,6 @@ export const ArrangementMarkerRow = forwardRef<
+     projectEnd,
+     getArrangement,
+     getLocatorPosition,
+-    isPlaying,
+     previewArrangement,
+     commitArrangement,
+     seekTo,
+@@ -162,6 +162,7 @@ export const ArrangementMarkerRow = forwardRef<
+     isPointerGestureActive,
+     claimPointerGesture,
+   } = useArrangement();
++  const playbackStore = useArrangementPlaybackStore();
+   const rangeStore = useArrangementRangeStore();
+   const markers = arrangementMarkers(arrangement);
+   const [editor, setEditor] = useState<MarkerEditor | null>(null);
+@@ -276,7 +277,7 @@ export const ArrangementMarkerRow = forwardRef<
+         edgeTimes,
+       );
+       if (!target) {
+-        const message = isPlaying
++        const message = playbackStore.getState().isPlaying
+           ? direction === 1
+             ? studioMarkerStrings.noneAfter
+             : studioMarkerStrings.noneBefore
+@@ -296,7 +297,7 @@ export const ArrangementMarkerRow = forwardRef<
+     [
+       getArrangement,
+       getLocatorPosition,
+-      isPlaying,
++      playbackStore,
+       projectEnd,
+       seekTo,
+       setStatus,
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index e0a8471..5de6365 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -13,6 +13,7 @@ import { type KeyboardEvent, memo, useCallback, useId, useRef } from 'react';
+ import {
+   formatArrangementTime,
+   useArrangement,
++  useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+   useArrangementPreview,
+@@ -87,8 +88,8 @@ function ArrangementProjectEndTextInner({ committedProjectEnd }: { committedProj
+ const ArrangementProjectEndText = memo(ArrangementProjectEndTextInner);
+ 
+ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTransportProps) {
++  const isPlaying = useArrangementIsPlaying();
+   const {
+-    isPlaying,
+     projectEnd: committedProjectEnd,
+     undoLabel,
+     redoLabel,
+diff --git a/app/components/arrangement/ArrangementVideoDock.tsx b/app/components/arrangement/ArrangementVideoDock.tsx
+index 02252d5..a1d66bb 100644
+--- a/app/components/arrangement/ArrangementVideoDock.tsx
++++ b/app/components/arrangement/ArrangementVideoDock.tsx
+@@ -15,6 +15,7 @@ import {
+   type ArrangementPlaybackClock,
+   formatArrangementTime,
+   useArrangement,
++  useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+   useArrangementPreviewStore,
+@@ -354,13 +355,13 @@ export function ArrangementVideoDock({
+ }: ArrangementVideoDockProps) {
+   const {
+     arrangement,
+-    isPlaying,
+     videoSources,
+     pausePlaybackWithStatus,
+     getLivePosition,
+     getPlaybackClock,
+     getArrangement,
+   } = useArrangement();
++  const isPlaying = useArrangementIsPlaying();
+   const rootRef = useRef<HTMLElement>(null);
+   const firstVideoRef = useRef<HTMLVideoElement>(null);
+   const secondVideoRef = useRef<HTMLVideoElement>(null);
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 93b20de..4eb1916 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -2,6 +2,7 @@ import { Link } from '@remix-run/react';
+ import { ArrowLeft } from 'lucide-react';
+ import {
+   type ComponentProps,
++  type MutableRefObject,
+   memo,
+   type MouseEvent as ReactMouseEvent,
+   type PointerEvent as ReactPointerEvent,
+@@ -19,6 +20,7 @@ import {
+   useArrangement,
+   useArrangementClipLaneDrag,
+   useArrangementInsertMarkerStore,
++  useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+   useArrangementPreview,
+@@ -907,6 +909,32 @@ function ArrangementStatusTextInner({ status, statusKey }: { status: string; sta
+ 
+ const ArrangementStatusText = memo(ArrangementStatusTextInner);
+ 
++interface ArrangementPlaybackFollowSyncProps {
++  committedRef: MutableRefObject<boolean>;
++  onPlayingChange: (isPlaying: boolean) => void;
++}
++
++function ArrangementPlaybackFollowSyncInner({
++  committedRef,
++  onPlayingChange,
++}: ArrangementPlaybackFollowSyncProps) {
++  const isPlaying = useArrangementIsPlaying();
++  const syncedRef = useRef(isPlaying);
++  useIsomorphicLayoutEffect(() => {
++    committedRef.current = isPlaying;
++  }, [committedRef, isPlaying]);
++  useEffect(() => {
++    if (syncedRef.current === isPlaying) {
++      return;
++    }
++    syncedRef.current = isPlaying;
++    onPlayingChange(isPlaying);
++  }, [isPlaying, onPlayingChange]);
++  return null;
++}
++
++const ArrangementPlaybackFollowSync = memo(ArrangementPlaybackFollowSyncInner);
++
+ export function StudioWorkspace() {
+   const workspace = useArrangement();
+   const {
+@@ -921,7 +949,6 @@ export function StudioWorkspace() {
+     endPlayheadScrub,
+     videoSources,
+     claimPointerGesture,
+-    isPlaying,
+     sourcePeaks,
+     setTimeRange,
+     setStatus,
+@@ -1017,6 +1044,7 @@ export function StudioWorkspace() {
+   const zoomHistoryRef = useRef<TimelineView[]>([]);
+   const followModeRef = useRef<TimelineFollowMode>('on');
+   const autoScrollLeftRef = useRef(0);
++  const committedIsPlayingRef = useRef(false);
+   const scrollListenersRef = useRef(new Set<() => void>());
+   const viewportWidthRef = useRef(0);
+   const lastScrollLeftRef = useRef(0);
+@@ -1671,7 +1699,7 @@ export function StudioWorkspace() {
+   }, [pxPerSecond]);
+ 
+   const pauseFollowForNavigation = useCallback(() => {
+-    if (workspaceRef.current.isPlaying && followModeRef.current === 'on') {
++    if (committedIsPlayingRef.current && followModeRef.current === 'on') {
+       setFollowMode('paused');
+       workspaceRef.current.setStatus(FOLLOW_PAUSED_MESSAGE);
+     }
+@@ -1785,7 +1813,7 @@ export function StudioWorkspace() {
+   const playFromRuler = useCallback(
+     (time: number) => {
+       const current = workspaceRef.current;
+-      const resuming = current.isPlaying && followModeRef.current === 'paused';
++      const resuming = committedIsPlayingRef.current && followModeRef.current === 'paused';
+       if (resuming) {
+         autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+       }
+@@ -1800,7 +1828,7 @@ export function StudioWorkspace() {
+   const placeInsertMarkerFromRuler = useCallback(
+     (time: number) => {
+       const current = workspaceRef.current;
+-      const pausing = current.isPlaying && followModeRef.current === 'on';
++      const pausing = committedIsPlayingRef.current && followModeRef.current === 'on';
+       setInsertMarker(time);
+       if (pausing) {
+         setFollowMode('paused');
+@@ -2211,7 +2239,7 @@ export function StudioWorkspace() {
+         closeGridMenu();
+         return;
+       }
+-      if (scroller && workspaceRef.current.isPlaying && followModeRef.current === 'on') {
++      if (scroller && committedIsPlayingRef.current && followModeRef.current === 'on') {
+         const left = scroller.scrollLeft;
+         const clampedByBrowser =
+           left < autoScrollLeftRef.current &&
+@@ -2247,14 +2275,14 @@ export function StudioWorkspace() {
+       left < autoScrollLeftRef.current &&
+       left >= scroller.scrollWidth - scroller.clientWidth - FOLLOW_SCROLL_TOLERANCE_PX;
+     const followAutoScroll =
+-      workspaceRef.current.isPlaying &&
++      committedIsPlayingRef.current &&
+       followModeRef.current === 'on' &&
+       (clampedByBrowser ||
+         Math.abs(left - autoScrollLeftRef.current) <= FOLLOW_SCROLL_TOLERANCE_PX);
+     if (left !== previousLeft && !followAutoScroll) {
+       markerRowRef.current?.closeMenu();
+     }
+-    if (!workspaceRef.current.isPlaying || clampedByBrowser) {
++    if (!committedIsPlayingRef.current || clampedByBrowser) {
+       autoScrollLeftRef.current = left;
+     } else if (
+       followModeRef.current === 'on' &&
+@@ -2290,23 +2318,40 @@ export function StudioWorkspace() {
+     }
+   }, []);
+ 
+-  useEffect(() => {
+-    if (!isPlaying) {
++  const syncFollowWithPlayback = useCallback(
++    (isPlaying: boolean, atMount = false) => {
++      if (!isPlaying) {
++        if (followModeRef.current === 'paused') {
++          setFollowMode('on');
++        }
++        const current = workspaceRef.current;
++        const previewText = current.getStatusPreviewText();
++        const shownStatus = previewText ?? current.status;
++        if (insertMarkerStatusKind(shownStatus) === null && shownStatus !== FOLLOW_PAUSED_MESSAGE) {
++          return;
++        }
++        if (previewText !== null || atMount) {
++          current.setStatus(current.describeSpaceStart());
++          return;
++        }
++        current.setStatus((text) =>
++          insertMarkerStatusKind(text) !== null || text === FOLLOW_PAUSED_MESSAGE
++            ? current.describeSpaceStart()
++            : text,
++        );
++        return;
++      }
++      autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+       if (followModeRef.current === 'paused') {
+         setFollowMode('on');
+       }
+-      const current = workspaceRef.current;
+-      const shownStatus = current.getStatusPreviewText() ?? current.status;
+-      if (insertMarkerStatusKind(shownStatus) !== null || shownStatus === FOLLOW_PAUSED_MESSAGE) {
+-        current.setStatus(current.describeSpaceStart());
+-      }
+-      return;
+-    }
+-    autoScrollLeftRef.current = scrollerRef.current?.scrollLeft ?? 0;
+-    if (followModeRef.current === 'paused') {
+-      setFollowMode('on');
+-    }
+-  }, [isPlaying, setFollowMode]);
++    },
++    [setFollowMode],
++  );
++
++  useEffect(() => {
++    syncFollowWithPlayback(committedIsPlayingRef.current, true);
++  }, [syncFollowWithPlayback]);
+ 
+   useEffect(
+     () =>
+@@ -2316,7 +2361,7 @@ export function StudioWorkspace() {
+         if (
+           !scroller ||
+           followModeRef.current !== 'on' ||
+-          !current.isPlaying ||
++          !committedIsPlayingRef.current ||
+           current.isPointerGestureActive()
+         ) {
+           return;
+@@ -3448,6 +3493,10 @@ export function StudioWorkspace() {
+         >
+           <ArrangementStatusText status={status} statusKey={statusKey} />
+         </output>
++        <ArrangementPlaybackFollowSync
++          committedRef={committedIsPlayingRef}
++          onPlayingChange={syncFollowWithPlayback}
++        />
+         <ArrangementRangeReadout />
+         <ArrangementSelectionCount />
+         <div className="flex min-w-0 basis-full items-center gap-x-4">
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 8db1cee..f17f374 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -152,6 +152,10 @@ import {
+   resolvePlaybackStart,
+   resolveSpaceStartPoint,
+ } from '~/lib/arrangement/playback-start';
++import {
++  type ArrangementPlaybackStore,
++  createArrangementPlaybackStore,
++} from '~/lib/arrangement/playback-store';
+ import {
+   type ArrangementPositionStore,
+   createArrangementPositionStore,
+@@ -314,7 +318,6 @@ interface ArrangementContextValue {
+   redoLabel: string | null;
+   selectedSourceId: string | null;
+   activeTrackId: string | null;
+-  isPlaying: boolean;
+   pxPerSecond: number;
+   status: string;
+   statusSequence: number;
+@@ -543,6 +546,7 @@ const ArrangementClipLaneDragContext = createContext<ArrangementClipLaneDragStor
+ const ArrangementSelectionContext = createContext<ArrangementSelectionStore | null>(null);
+ const ArrangementPreviewContext = createContext<ArrangementPreviewStore | null>(null);
+ const ArrangementStatusPreviewContext = createContext<ArrangementStatusPreviewStore | null>(null);
++const ArrangementPlaybackContext = createContext<ArrangementPlaybackStore | null>(null);
+ 
+ interface ProviderStatusEntry extends ArrangementStatusEntry {
+   readonly previewKey: string | null;
+@@ -712,7 +716,7 @@ export function ArrangementProvider({
+   const [statusPreviewStore] = useState(() => createArrangementStatusPreviewStore());
+   const [meterStore] = useState(() => createMasterMeterStore());
+   const [trackMeterStore] = useState(() => createTrackMeterStore());
+-  const [isPlaying, setIsPlaying] = useState(false);
++  const [playbackStore] = useState(() => createArrangementPlaybackStore());
+   const [pxPerSecond, setPxPerSecondState] = useState(TIMELINE_ZOOM_DEFAULT);
+   const gestureCountRef = useRef(0);
+   const nameBarHintShownRef = useRef(false);
+@@ -1233,7 +1237,7 @@ export function ArrangementProvider({
+       scrubbingRef.current = false;
+       lastScrubRescheduleRef.current = null;
+       isPlayingRef.current = false;
+-      setIsPlaying(false);
++      playbackStore.getState().setPlaying(false);
+       if (frameRef.current !== null) {
+         cancelAnimationFrame(frameRef.current);
+         frameRef.current = null;
+@@ -1248,7 +1252,7 @@ export function ArrangementProvider({
+       trackMeterStatesRef.current = floorTrackMeterFrames(trackMeterStatesRef.current);
+       trackMeterStore.publishTrackMeterFrames(trackMeterStatesRef.current);
+     },
+-    [livePosition, meterStore, stopGraph, trackMeterStore, updatePosition],
++    [livePosition, meterStore, playbackStore, stopGraph, trackMeterStore, updatePosition],
+   );
+ 
+   const sampleMasterMeter = useCallback(() => {
+@@ -1533,7 +1537,7 @@ export function ArrangementProvider({
+       playbackEndedAtRef.current = null;
+       const from = plan.from;
+       isPlayingRef.current = true;
+-      setIsPlaying(true);
++      playbackStore.getState().setPlaying(true);
+       setStatus((text) =>
+         insertMarkerStatusKind(text) === 'stopped'
+           ? studioPlaybackStrings.playingFrom(formatArrangementTime(from))
+@@ -1552,6 +1556,7 @@ export function ArrangementProvider({
+     },
+     [
+       ensureAudioContext,
++      playbackStore,
+       pumpPlaybackAudio,
+       startGraph,
+       stopLibraryPreview,
+@@ -4176,7 +4181,6 @@ export function ArrangementProvider({
+       redoLabel: history.future[0]?.label ?? null,
+       selectedSourceId,
+       activeTrackId,
+-      isPlaying,
+       pxPerSecond,
+       status,
+       statusSequence,
+@@ -4295,7 +4299,6 @@ export function ArrangementProvider({
+       history.future,
+       selectedSourceId,
+       activeTrackId,
+-      isPlaying,
+       pxPerSecond,
+       status,
+       statusSequence,
+@@ -4416,13 +4419,15 @@ export function ArrangementProvider({
+               <ArrangementSelectionContext.Provider value={selectionStore}>
+                 <ArrangementPreviewContext.Provider value={previewStore}>
+                   <ArrangementStatusPreviewContext.Provider value={statusPreviewStore}>
+-                    <ArrangementMeterContext.Provider value={meterStore}>
+-                      <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
+-                        <ArrangementContext.Provider value={value}>
+-                          {children}
+-                        </ArrangementContext.Provider>
+-                      </ArrangementTrackMeterContext.Provider>
+-                    </ArrangementMeterContext.Provider>
++                    <ArrangementPlaybackContext.Provider value={playbackStore}>
++                      <ArrangementMeterContext.Provider value={meterStore}>
++                        <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
++                          <ArrangementContext.Provider value={value}>
++                            {children}
++                          </ArrangementContext.Provider>
++                        </ArrangementTrackMeterContext.Provider>
++                      </ArrangementMeterContext.Provider>
++                    </ArrangementPlaybackContext.Provider>
+                   </ArrangementStatusPreviewContext.Provider>
+                 </ArrangementPreviewContext.Provider>
+               </ArrangementSelectionContext.Provider>
+@@ -4522,6 +4527,18 @@ export function useArrangementPreview<Selected>(
+   return useStore(useArrangementPreviewStore(), selector);
+ }
+ 
++export function useArrangementPlaybackStore(): ArrangementPlaybackStore {
++  const store = useContext(ArrangementPlaybackContext);
++  if (!store) {
++    throw new Error('useArrangementPlaybackStore must be used within an ArrangementProvider');
++  }
++  return store;
++}
++
++export function useArrangementIsPlaying(): boolean {
++  return useStore(useArrangementPlaybackStore(), (state) => state.isPlaying);
++}
++
+ export function useArrangementStatusPreview<Selected>(
+   selector: (state: ArrangementStatusPreviewState) => Selected,
+ ): Selected {
+diff --git a/app/routes/studio-lab.tsx b/app/routes/studio-lab.tsx
+index d580fa4..0f8ab2a 100644
+--- a/app/routes/studio-lab.tsx
++++ b/app/routes/studio-lab.tsx
+@@ -4,7 +4,11 @@ import { useEffect, useRef } from 'react';
+ import ibmPlexMonoLatinFont from '~/assets/fonts/ibm-plex-mono-latin.woff2?url';
+ import instrumentSansLatinFont from '~/assets/fonts/instrument-sans-latin.woff2?url';
+ import { StudioNarrowScreen, StudioWorkspace } from '~/components/arrangement';
+-import { ArrangementProvider, useArrangement } from '~/contexts/ArrangementContext';
++import {
++  ArrangementProvider,
++  useArrangement,
++  useArrangementIsPlaying,
++} from '~/contexts/ArrangementContext';
+ import { studioLabDemoCollection } from '~/data/studio-lab-demo';
+ import { resolveStudioLabPreviewSourceId, STUDIO_LAB_PREVIEW_PARAM } from '~/data/studio-lab-links';
+ import { useStudioHydrated, useStudioWideViewport } from '~/hooks/useStudioWideViewport';
+@@ -40,7 +44,8 @@ const studioLabInitialArrangement = createArrangement([
+ ]);
+ 
+ function StopPlaybackOnNarrow() {
+-  const { isPlaying, togglePlayback, stopLibraryPreview } = useArrangement();
++  const { togglePlayback, stopLibraryPreview } = useArrangement();
++  const isPlaying = useArrangementIsPlaying();
+   useEffect(() => {
+     stopLibraryPreview();
+   }, [stopLibraryPreview]);
