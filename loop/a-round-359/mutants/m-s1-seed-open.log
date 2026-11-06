@@ -1,0 +1,41 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/a359-scratch[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/follow-remount-ui.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 1060[2mms[22m[39m
+     [33m[2m✓[22m[39m RM1 a remount with a tempo-source clip keeps the stopped insert-marker text, with no tempo append [33m 609[2mms[22m[39m
+     [33m[2m✓[22m[39m RM2 a remount re-writes the unchanged stopped text once, so the status is announced again [33m 449[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2476[2mms[22m[39m
+     [33m[2m✓[22m[39m WS1 a typed tempo survives a remount and the seed does not run again [33m 1155[2mms[22m[39m
+     [33m[2m✓[22m[39m WS2 the seed sentence appears once across two remounts when the user never typed a tempo [33m 449[2mms[22m[39m
+[31m     [31m×[31m WS3 a cleared tempo stays cleared after a remount[39m[33m 367[2mms[22m[39m
+     [32m✓[39m WS4 grid division, snap and metronome chosen by hand survive a remount[32m 235[2mms[22m[39m
+     [32m✓[39m WS5 a new provider starts from the defaults and seeds again[32m 262[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx[2m > [22mWorkspace tempo and grid settings survive a remount under a live provider[2m > [22mWS3 a cleared tempo stays cleared after a remount
+[31m[1mAssertionError[22m: expected '90' to be '' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ 90[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:[2m190:36[22m[39m
+    [90m188| [39m    [34mexpect[39m([34mtempoInput[39m(view)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m''[39m)[33m;[39m
+    [90m189| [39m    [35mawait[39m [34mremount[39m()[33m;[39m
+    [90m190| [39m    [34mexpect[39m([34mtempoInput[39m(view)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m''[39m)[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m191| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39mnot[33m.[39m[34mtoContain[39m([33mSEEDED_SENTENCE[39m)[33m;[39m
+    [90m192| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 00:18:47
+[2m   Duration [22m 8.07s[2m (transform 4.93s, setup 0ms, import 8.26s, tests 3.54s, environment 2.18s)[22m
+
+
+::error file=/home/runner/a359-scratch/app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx,title=app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx > Workspace tempo and grid settings survive a remount under a live provider > WS3 a cleared tempo stays cleared after a remount,line=190,column=36::AssertionError: expected '90' to be '' // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A+ 90%0A%0A ❯ app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:190:36%0A%0A

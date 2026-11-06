@@ -1,0 +1,147 @@
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 4eb1916..7f24efa 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -28,6 +28,7 @@ import {
+   useArrangementRangeStore,
+   useArrangementSelection,
+   useArrangementStatusPreview,
++  useArrangementWorkspaceSessionStore,
+ } from '~/contexts/ArrangementContext';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { selectLaneMoveRefusal } from '~/lib/arrangement/clip-lane-drag-store';
+@@ -968,28 +969,32 @@ export function StudioWorkspace() {
+   const shortcutButtonRef = useRef<HTMLButtonElement>(null);
+   const closeShortcutSheet = useCallback(() => setIsShortcutSheetOpen(false), []);
+   const [followMode, setFollowModeState] = useState<TimelineFollowMode>('on');
+-  const [snapEnabled, setSnapEnabled] = useState(false);
++  const workspaceSessionStore = useArrangementWorkspaceSessionStore();
++  const [restoredTempoGrid] = useState(() => workspaceSessionStore.getState().tempoGrid);
++  const [snapEnabled, setSnapEnabled] = useState(restoredTempoGrid?.snapEnabled ?? false);
+   const [envelopeMode, setEnvelopeMode] = useState(false);
+   const envelopeModeRef = useRef(envelopeMode);
+   envelopeModeRef.current = envelopeMode;
+   const [waveformZoom, setWaveformZoom] = useState(WAVEFORM_ZOOM_DEFAULT);
+   const [secondsGridDivision, setSecondsGridDivision] = useState<number>(
+-    GRID_DEFAULT_DIVISION_SECONDS,
++    restoredTempoGrid?.secondsGridDivision ?? GRID_DEFAULT_DIVISION_SECONDS,
+   );
+   const [musicalGridDivision, setMusicalGridDivision] = useState<MusicalGridDivisionId | null>(
+-    null,
++    restoredTempoGrid?.musicalGridDivision ?? null,
+   );
+-  const [tempoBpm, setTempoBpm] = useState<number | null>(null);
+-  const tempoSeedOpenRef = useRef(true);
+-  const gridHandChosenRef = useRef(false);
+-  const snapHandChosenRef = useRef(false);
+-  const [metronomeOn, setMetronomeOn] = useState(false);
++  const [tempoBpm, setTempoBpm] = useState<number | null>(restoredTempoGrid?.tempoBpm ?? null);
++  const tempoSeedOpenRef = useRef(restoredTempoGrid?.tempoSeedOpen ?? true);
++  const gridHandChosenRef = useRef(restoredTempoGrid?.gridHandChosen ?? false);
++  const snapHandChosenRef = useRef(restoredTempoGrid?.snapHandChosen ?? false);
++  const [metronomeOn, setMetronomeOn] = useState(restoredTempoGrid?.metronomeOn ?? false);
++  const metronomeOnRef = useRef(metronomeOn);
++  metronomeOnRef.current = metronomeOn;
+   const snapEnabledRef = useRef(snapEnabled);
+   snapEnabledRef.current = snapEnabled;
+-  const [gridMode, setGridMode] = useState<GridMode>('adaptive');
++  const [gridMode, setGridMode] = useState<GridMode>(restoredTempoGrid?.gridMode ?? 'adaptive');
+   const gridModeRef = useRef(gridMode);
+   gridModeRef.current = gridMode;
+-  const [gridDensity, setGridDensity] = useState(0);
++  const [gridDensity, setGridDensity] = useState(restoredTempoGrid?.gridDensity ?? 0);
+   const gridDensityRef = useRef(gridDensity);
+   gridDensityRef.current = gridDensity;
+   const fixedGridDivisionId =
+@@ -2019,6 +2024,24 @@ export function StudioWorkspace() {
+     [resolveAdaptiveGrid],
+   );
+ 
++  useEffect(
++    () => () => {
++      workspaceSessionStore.getState().saveTempoGrid({
++        tempoBpm: tempoBpmRef.current,
++        tempoSeedOpen: tempoSeedOpenRef.current,
++        gridHandChosen: gridHandChosenRef.current,
++        snapHandChosen: snapHandChosenRef.current,
++        snapEnabled: snapEnabledRef.current,
++        secondsGridDivision: secondsGridDivisionRef.current,
++        musicalGridDivision: musicalGridDivisionRef.current,
++        gridMode: gridModeRef.current,
++        gridDensity: gridDensityRef.current,
++        metronomeOn: metronomeOnRef.current,
++      });
++    },
++    [workspaceSessionStore],
++  );
++
+   const collectionHasTempoSource = useMemo(
+     () => hasAssetTempoSource(collection.sources),
+     [collection.sources],
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index f17f374..6a16173 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -230,6 +230,10 @@ import {
+ } from '~/lib/arrangement/video';
+ import { decodeVideoAudio, probeVideoFile, videoAudioNote } from '~/lib/arrangement/video.client';
+ import { clampTimelineZoom, TIMELINE_ZOOM_DEFAULT } from '~/lib/arrangement/view';
++import {
++  type ArrangementWorkspaceSessionStore,
++  createArrangementWorkspaceSessionStore,
++} from '~/lib/arrangement/workspace-session-store';
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -547,6 +551,9 @@ const ArrangementSelectionContext = createContext<ArrangementSelectionStore | nu
+ const ArrangementPreviewContext = createContext<ArrangementPreviewStore | null>(null);
+ const ArrangementStatusPreviewContext = createContext<ArrangementStatusPreviewStore | null>(null);
+ const ArrangementPlaybackContext = createContext<ArrangementPlaybackStore | null>(null);
++const ArrangementWorkspaceSessionContext = createContext<ArrangementWorkspaceSessionStore | null>(
++  null,
++);
+ 
+ interface ProviderStatusEntry extends ArrangementStatusEntry {
+   readonly previewKey: string | null;
+@@ -717,6 +724,7 @@ export function ArrangementProvider({
+   const [meterStore] = useState(() => createMasterMeterStore());
+   const [trackMeterStore] = useState(() => createTrackMeterStore());
+   const [playbackStore] = useState(() => createArrangementPlaybackStore());
++  const [workspaceSessionStore] = useState(() => createArrangementWorkspaceSessionStore());
+   const [pxPerSecond, setPxPerSecondState] = useState(TIMELINE_ZOOM_DEFAULT);
+   const gestureCountRef = useRef(0);
+   const nameBarHintShownRef = useRef(false);
+@@ -4422,9 +4430,13 @@ export function ArrangementProvider({
+                     <ArrangementPlaybackContext.Provider value={playbackStore}>
+                       <ArrangementMeterContext.Provider value={meterStore}>
+                         <ArrangementTrackMeterContext.Provider value={trackMeterStore}>
+-                          <ArrangementContext.Provider value={value}>
+-                            {children}
+-                          </ArrangementContext.Provider>
++                          <ArrangementWorkspaceSessionContext.Provider
++                            value={workspaceSessionStore}
++                          >
++                            <ArrangementContext.Provider value={value}>
++                              {children}
++                            </ArrangementContext.Provider>
++                          </ArrangementWorkspaceSessionContext.Provider>
+                         </ArrangementTrackMeterContext.Provider>
+                       </ArrangementMeterContext.Provider>
+                     </ArrangementPlaybackContext.Provider>
+@@ -4535,6 +4547,16 @@ export function useArrangementPlaybackStore(): ArrangementPlaybackStore {
+   return store;
+ }
+ 
++export function useArrangementWorkspaceSessionStore(): ArrangementWorkspaceSessionStore {
++  const store = useContext(ArrangementWorkspaceSessionContext);
++  if (!store) {
++    throw new Error(
++      'useArrangementWorkspaceSessionStore must be used within an ArrangementProvider',
++    );
++  }
++  return store;
++}
++
+ export function useArrangementIsPlaying(): boolean {
+   return useStore(useArrangementPlaybackStore(), (state) => state.isPlaying);
+ }

@@ -1,0 +1,31 @@
+diff -ru sc/app/components/arrangement/ArrangementClip.tsx mu-b/app/components/arrangement/ArrangementClip.tsx
+--- sc/app/components/arrangement/ArrangementClip.tsx	2026-11-06 00:51:55.000000000 +0000
++++ mu-b/app/components/arrangement/ArrangementClip.tsx	2026-11-06 00:57:44.079153301 +0000
+@@ -831,6 +831,8 @@
+           (faded ? clipFadeSeconds(faded, fadeEdge) : 0).toFixed(3),
+         ),
+       );
++      window.setTimeout(() => setStatus('mutant f1 a'), 100);
++      window.setTimeout(() => setStatus('mutant f1 b'), 200);
+       return;
+     }
+     if (gesture.kind === 'range') {
+diff -ru sc/app/contexts/ArrangementContext.tsx mu-b/app/contexts/ArrangementContext.tsx
+--- sc/app/contexts/ArrangementContext.tsx	2026-11-06 00:51:55.000000000 +0000
++++ mu-b/app/contexts/ArrangementContext.tsx	2026-11-06 00:57:44.078886591 +0000
+@@ -1246,6 +1246,7 @@
+       lastScrubRescheduleRef.current = null;
+       isPlayingRef.current = false;
+       playbackStore.getState().setPlaying(false);
++      window.setTimeout(() => setStatus('mutant p2 stop'), 100);
+       if (frameRef.current !== null) {
+         cancelAnimationFrame(frameRef.current);
+         frameRef.current = null;
+@@ -1546,6 +1547,7 @@
+       const from = plan.from;
+       isPlayingRef.current = true;
+       playbackStore.getState().setPlaying(true);
++      window.setTimeout(() => setStatus('mutant p2 start'), 100);
+       setStatus((text) =>
+         insertMarkerStatusKind(text) === 'stopped'
+           ? studioPlaybackStrings.playingFrom(formatArrangementTime(from))

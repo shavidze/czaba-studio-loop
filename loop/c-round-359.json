@@ -1,0 +1,126 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T00:29:01.4905871Z",
+  "round": 359,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R359-01",
+   "severity": "low",
+   "steps": [
+    "Edit store/app/components/arrangement/StudioWorkspace.tsx in a scratch copy: useState(restoredTempoGrid?.snapEnabled ?? false) -> useState(false)",
+    "Run workspace-session-remount-ui.test.tsx"
+   ],
+   "expected": "A row (WS1-WS5) goes red when snapEnabled is not restored",
+   "actual": "5/5 green: mutant survives. A's extra mutants x-density, x-seconds, x-handchosen also survive (a-round-359.md); the browser SETTINGS row does not discriminate either, because the hand-off Snap is also the unrestored default",
+   "evidence": "c-round-359/mutant-snap.log; a-round-359.md mutants-extra",
+   "note": "Coverage gap only, Low, per task ruling. Suggested rows WS6-WS8 (seeded Snap on survives; adaptive density survives; Snap off before any tempo clip then remount then add a bpm clip). Goes to deferred_low_polish.",
+   "origin": "round 359 tests (missing rows for 4 of the 10 restored fields); not a product defect"
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "READ",
+  "UNIT (79 files, 1452/1452)",
+  "MUTANT (C's own, snap-not-restored: survived as predicted, Low coverage gap)",
+  "TEMPO-REMOUNT 1440x900",
+  "TEMPO-REMOUNT 1280x720",
+  "SETTINGS-REMOUNT 1440x900",
+  "SETTINGS-REMOUNT 1280x720",
+  "METRONOME-AUDIO",
+  "CLEARED",
+  "RELOAD",
+  "REMOUNT",
+  "FOLLOW (texts equal; see jitter note)",
+  "PERF (84/84, 0 NEW, 0 DIFF)",
+  "G359-AUTH (premium not bypassed)",
+  "DOCS",
+  "C-R358-01 fixed"
+ ],
+ "failed": [],
+ "blocked": [
+  "G359-AUTH fake-bearer: /api/studio-token returns 500 (fails closed) while the mock :5199 is not running in cloud; 403 not observable. Unauthenticated GET is 401 and /studio/middle-east shows sign-in required with 0 audio elements at both viewports"
+ ],
+ "notRun": [],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "abletonConformance": "not applicable (state-loss bug fix; no Live claim)",
+ "observations": {
+  "viewState": "VIEW-STATE record only: after resize, Env resets to off (aria-pressed false) and waveform zoom resets 8 -> 1, as B expected (B-R359-VIEW-STATE-REMOUNT, Low, deferred). Not a FAIL.",
+  "followJitter": "FOLLOW at 1280x720: 3 runs gave play1 scrollLeft 1452, 1447, 1450 against C358 tree 1447 and head 1445; run 1 was 5 px off (task tolerance 4). Texts equal in all runs; head vs tree already differs by 2 and the 3 runs span 5, so this is timing jitter, not a regression.",
+  "settingsRulerProbe": "bars ruler (arrangement-bars-ruler, 20 px high, bars 1..23) present both before and after the resize at both viewports",
+  "metronomeMethod": "init script wraps AudioBufferSourceNode.prototype.start and records buffer.duration; clicks have 0.03 s buffers, clips 16 s. Metronome on, Space 2 s: A=8 clicks; after resize 800x900 and back: B=8 (|B-A|=0); metronome off control: 0 clicks"
+ },
+ "manifestPaths": [
+  "c-round-359/claims.txt",
+  "c-round-359/cover.log",
+  "c-round-359/beh-tree-1440x900.json",
+  "c-round-359/beh-tree-1280x720.json",
+  "c-round-359/settings-probe.json",
+  "c-round-359/extra.json",
+  "c-round-359/remount3-tree.json",
+  "c-round-359/follow-tree-1440x900.json",
+  "c-round-359/follow-tree-1280x720.json",
+  "c-round-359/follow-tree-1280x720-r2.json",
+  "c-round-359/follow-tree-1280x720-r3.json",
+  "c-round-359/auth.json",
+  "c-round-359/latest-interactions.json",
+  "c-round-359/perf-rowcmp-vs-c358.txt",
+  "c-round-359/mutant-snap.log",
+  "c-round-359/source.diff",
+  "c-round-359/status.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "none (no perf row changes mode); new jsdom rows WS1-WS5",
+ "mutantsRecorded": [
+  "M-S1..M-S5 (A-reported, scratch; not re-run by C)",
+  "C-M1: snapEnabled not restored (survives, Low)"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-358/mutants/m-s1-seed-open.log",
+  "b-round-358/mutants/m-s2-tempo.log",
+  "b-round-358/mutants/m-s3-singleton.log",
+  "b-round-358/mutants/m-s4-metronome.log",
+  "b-round-358/mutants/m-s5-no-save.log",
+  "b-round-358/ws-on-head.log"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-358/sketch-typecheck.log",
+  "b-round-358/sketch-biome.log"
+ ],
+ "chainHeadGateRunGreen": "gate 358 published f269022",
+ "affectedChecksNamed": [
+  "covering set b-round-358/cover-paths-359.txt",
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "behaviour probe",
+  "remount probe",
+  "follow probe"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-358/cover-sketch.log",
+  "b-round-358/beh-sketch-1440x900.json",
+  "b-round-358/beh-sketch-1280x720.json"
+ ]
+}

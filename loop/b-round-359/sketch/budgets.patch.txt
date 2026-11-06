@@ -1,0 +1,164 @@
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -363,10 +363,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 3
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151: provider commit, status-preview clear, and a 0-component commit after the click (C358 and C359: 3 x3)."
+   },
+   {
+     "id": "interact.drag.fade.stopped.move-to-paint-p95",
+@@ -424,10 +427,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the in-page pointerup until quiet (min 600 ms)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 3
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "Commits from the in-page pointerup until quiet (min 600 ms). Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151; the third commit is intermittent while playing (C358 and C359: 2 x3)."
+   },
+   {
+     "id": "interact.drag.fade.playing.move-to-paint-p95",
+@@ -799,10 +805,13 @@
+     "metric": "start-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the Space press until quiet (min 1 s)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "Commits from the Space press until quiet (min 1 s). Asserted since PERF-10a-BUDGETS (round 360): Space -> playing commits once (C358 and C359: 1 x3)."
+   },
+   {
+     "id": "interact.play.start-components",
+@@ -810,10 +819,13 @@
+     "metric": "start-components",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the same window."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 28
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "Sum of rendered components in the same window. Asserted since PERF-10a-BUDGETS (round 360): after PERF-10a only the Transport, the video dock and the follow leaf render on Play (C358 and C359: 28 x3; HEAD before PERF-10a: 70)."
+   },
+   {
+     "id": "interact.play.start-sources",
+@@ -821,10 +833,13 @@
+     "metric": "start-sources",
+     "unit": "start() calls",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "start() calls in the same window."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "start() calls in the same window. Asserted since PERF-10a-BUDGETS (round 360): one start() per Play for the one-clip scenario; a second graph start is a restart (C358 and C359: 1 x3)."
+   },
+   {
+     "id": "interact.play.stop-commits",
+@@ -832,10 +847,13 @@
+     "metric": "stop-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Commits from the Space press until quiet (min 1 s)."
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 1
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "Commits from the Space press until quiet (min 1 s). Asserted since PERF-10a-BUDGETS (round 360): Space -> stopped commits once (C358 and C359: 1 x3)."
+   },
+   {
+     "id": "interact.play.stop-components",
+@@ -843,10 +861,13 @@
+     "metric": "stop-components",
+     "unit": "components",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-1b-i",
+-    "note": "Sum of rendered components in the same window."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 28
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "Sum of rendered components in the same window. Asserted since PERF-10a-BUDGETS (round 360): as start-components (C358 and C359: 28 x3; HEAD before PERF-10a: 70)."
+   },
+   {
+     "id": "interact.harness.click-live.6x",
+@@ -2907,10 +2928,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-CAND-VIDEO-TRIM-FADE-ROWS",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.release-commits."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 3
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.stopped.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.stopped.release-commits. Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151, as the audio fade (C358 and C359: 2 x3)."
+   },
+   {
+     "id": "interact.drag.video-fade.stopped.move-to-paint-p95",
+@@ -2954,10 +2978,13 @@
+     "metric": "release-commits",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-CAND-VIDEO-TRIM-FADE-ROWS",
+-    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.release-commits."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 3
++    },
++    "owner": "PERF-10a-BUDGETS",
++    "note": "1x only, measured last (after the 30-clip block), on the same imported video clip as interact.drag.video.*: same windows and definition as interact.drag.fade.playing.release-commits. Record until C measures it (L58, PERF-CAND-VIDEO-TRIM-FADE-ROWS, round 349); kind copied from interact.drag.video.playing.release-commits. Asserted since PERF-10a-BUDGETS (round 360), upper bound per D-29z1151, as the audio fade (C358 and C359: 2 x3)."
+   },
+   {
+     "id": "interact.drag.video-fade.playing.move-to-paint-p95",

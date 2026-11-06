@@ -1,0 +1,86 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/a359-scratch[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/follow-remount-ui.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 1173[2mms[22m[39m
+     [33m[2m✓[22m[39m RM1 a remount with a tempo-source clip keeps the stopped insert-marker text, with no tempo append [33m 834[2mms[22m[39m
+     [33m[2m✓[22m[39m RM2 a remount re-writes the unchanged stopped text once, so the status is announced again [33m 338[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 2061[2mms[22m[39m
+     [33m[2m✓[22m[39m WS1 a typed tempo survives a remount and the seed does not run again [33m 1187[2mms[22m[39m
+[31m     [31m×[31m WS2 the seed sentence appears once across two remounts when the user never typed a tempo[39m[32m 143[2mms[22m[39m
+     [32m✓[39m WS3 a cleared tempo stays cleared after a remount[32m 264[2mms[22m[39m
+[31m     [31m×[31m WS4 grid division, snap and metronome chosen by hand survive a remount[39m[32m 210[2mms[22m[39m
+[31m     [31m×[31m WS5 a new provider starts from the defaults and seeds again[39m[32m 255[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx[2m > [22mWorkspace tempo and grid settings survive a remount under a live provider[2m > [22mWS2 the seed sentence appears once across two remounts when the user never typed a tempo
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:[2m178:60[22m[39m
+    [90m176| [39m  it('WS2 the seed sentence appears once across two remounts when the …
+    [90m177| [39m    [35mconst[39m { api[33m,[39m view[33m,[39m remount } [33m=[39m [35mawait[39m [34mmountSession[39m()[33m;[39m
+    [90m178| [39m    [34mexpect[39m([34moccurrences[39m([34mlive[39m(api)[33m.[39mstatus[33m,[39m [33mSEEDED_SENTENCE[39m))[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                                                           [31m^[39m
+    [90m179| [39m    [35mawait[39m [34mremount[39m()[33m;[39m
+    [90m180| [39m    [35mawait[39m [34mremount[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx[2m > [22mWorkspace tempo and grid settings survive a remount under a live provider[2m > [22mWS4 grid division, snap and metronome chosen by hand survive a remount
+[31m[1mAssertionError[22m: expected { snap: 'false', division: '1', …(1) } to deeply equal { Object (snap, division, ...) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "division": "1/8",[39m
+[32m-   "metronome": "true",[39m
+[31m+   "division": "1",[39m
+[31m+   "metronome": "false",[39m
+[2m    "snap": "false",[22m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:[2m205:20[22m[39m
+    [90m203| [39m      metronome[33m:[39m [34mpressed[39m(view[33m,[39m [32m'arrangement-metronome-toggle'[39m)[33m,[39m
+    [90m204| [39m    }[33m;[39m
+    [90m205| [39m    expect(before).toEqual({ snap: 'false', division: '1/8', metronome…
+    [90m   | [39m                   [31m^[39m
+    [90m206| [39m    [35mawait[39m [34mremount[39m()[33m;[39m
+    [90m207| [39m    [34mexpect[39m({
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx[2m > [22mWorkspace tempo and grid settings survive a remount under a live provider[2m > [22mWS5 a new provider starts from the defaults and seeds again
+[31m[1mAssertionError[22m: expected '100' to be '90' // Object.is equality[39m
+
+Expected: [32m"[7m9[27m0"[39m
+Received: [31m"[7m10[27m0"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:[2m219:43[22m[39m
+    [90m217| [39m    first[33m.[39mview[33m.[39m[34munmount[39m()[33m;[39m
+    [90m218| [39m    [35mconst[39m second [33m=[39m [35mawait[39m [34mmountSession[39m()[33m;[39m
+    [90m219| [39m    [34mexpect[39m([34mtempoInput[39m(second[33m.[39mview)[33m.[39mvalue)[33m.[39m[34mtoBe[39m([32m'90'[39m)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m220| [39m    expect(occurrences(live(second.api).status, SEEDED_SENTENCE)).toBe…
+    [90m221| [39m    expect(pressed(second.view, 'arrangement-snap-toggle')).toBe('true…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 00:19:06
+[2m   Duration [22m 8.05s[2m (transform 6.24s, setup 0ms, import 9.08s, tests 3.23s, environment 2.26s)[22m
+
+
+::error file=/home/runner/a359-scratch/app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx,title=app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx > Workspace tempo and grid settings survive a remount under a live provider > WS2 the seed sentence appears once across two remounts when the user never typed a tempo,line=178,column=60::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:178:60%0A%0A
+
+::error file=/home/runner/a359-scratch/app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx,title=app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx > Workspace tempo and grid settings survive a remount under a live provider > WS4 grid division%2C snap and metronome chosen by hand survive a remount,line=205,column=20::AssertionError: expected { snap: 'false', division: '1', …(1) } to deeply equal { Object (snap, division, ...) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "division": "1/8",%0A-   "metronome": "true",%0A+   "division": "1",%0A+   "metronome": "false",%0A    "snap": "false",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:205:20%0A%0A
+
+::error file=/home/runner/a359-scratch/app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx,title=app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx > Workspace tempo and grid settings survive a remount under a live provider > WS5 a new provider starts from the defaults and seeds again,line=219,column=43::AssertionError: expected '100' to be '90' // Object.is equality%0A%0AExpected: "90"%0AReceived: "100"%0A%0A ❯ app/lib/arrangement/__tests__/workspace-session-remount-ui.test.tsx:219:43%0A%0A

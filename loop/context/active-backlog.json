@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-05T23:42:14.894Z",
-  "current_task": "current-task.md (round 358: PERF-10a re-dispatch with the C-R357-01 ruling)",
+  "_generatedUtc": "2026-11-06T00:52:03.064Z",
+  "current_task": "current-task.md (round 359: C-R358-01 fix, workspace tempo/grid settings survive a remount)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -5775,16 +5775,6 @@
       "title": "useArrangementPlaybackStore() exposes setPlaying to any consumer, out of sync with isPlayingRef and "
     },
     {
-      "id": "C-R357-01",
-      "severity": "medium",
-      "origin": "B spec (leaf design not ruled for remount) / A STOP confirmed by C",
-      "title": "PERF-10a tree: after a narrow->wide remount the stopped insert-marker status keeps an appended tempo-seed sentence (HEAD replaces it) and is not re-announced",
-      "evidence": "c-round-357.md, c-round-357/remount3-head.json, c-round-357/remount3-atree.json",
-      "repro": "Add Night Pulse Full mix; Space; click the ruler bottom strip; Space; resize 800x900 then 1440x900; compare status with HEAD",
-      "status": "open (D-29z1156): ruled (b), fix in round 358 (b-round-357/sketch/source-delta.patch.txt; RM1/RM2)",
-      "added": "2026-11-05 B round 357 -> 358 planning"
-    },
-    {
       "id": "A-R357-REVIEW-SPLIT-RENDER-LATENT",
       "severity": "low",
       "status": "deferred_low_polish (D-29z1157)",
@@ -5803,22 +5793,35 @@
       "title": "two isPlaying read policies (MarkerRow getState live vs StudioWorkspace committed ref) are not docum"
     },
     {
-      "id": "A-R357-TEMPO-SEED-REMOUNT-DUP",
+      "id": "C-R358-01",
+      "severity": "medium",
+      "origin": "C round 358 PRE-REMOUNT record row; pre-existing (identical on HEAD d49536b and the round-358 tree)",
+      "title": "a typed tempo reverts to the seeded BPM and the tempo-seed sentence is re-appended after a narrow->wide window resize (StudioWorkspace remount)",
+      "evidence": "c-round-358.json bugs[0]; c-round-358/beh-head-1440x900.json, beh-tree-1440x900.json, beh-*-1280x720.json rows.pre; B sketch fix b-round-358/beh-sketch-*.json",
+      "repro": "Open /studio-lab 1440x900; add Night Pulse Full mix (tempo 120); resize 800x900 -> 1440x900; type 100 + Enter in BPM; resize 800x900 -> 1440x900: field back to 120, seed sentence appended",
+      "status": "open (D-29z1160): fix in round 359 (b-round-358/sketch/source-delta.patch.txt; WS1-WS5)",
+      "added": "2026-11-06 B round 358 -> 359 planning"
+    },
+    {
+      "id": "A-R358-REVIEW-RM1-SEQ",
       "severity": "low",
-      "status": "deferred_low_polish (D-29z1157); C record row PRE-REMOUNT in",
-      "title": "pre-existing by trace: StudioWorkspace-local tempo/grid state and tempoSeedOpenRef reset on every na"
+      "status": "deferred_low_polish (D-29z1161)",
+      "title": "RM1 checks only the final text; statusSequence === before + 2 (seed + Follow) would separate \"seed a"
+    },
+    {
+      "id": "A-R358-REVIEW-LEAF-GATE-COVER",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1161)",
+      "title": "no row pins one status write per Stop transition while mounted; C mutant C-M1 (leaf prev-value guard"
+    },
+    {
+      "id": "B-R359-VIEW-STATE-REMOUNT",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1160); C record row VIEW-STATE in ",
+      "title": "by trace: envelope mode and waveform zoom are StudioWorkspace useState and reset on a narrow->wide r"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 349,
-      "task": "current-task.md",
-      "decision": "D-29z1106..D-29z1110",
-      "type": "PERF-CAND-VIDEO-TRIM-FADE-ROWS (video trim-start and fade-in drag rows, record)",
-      "status": "c_pass_published (D-29z1111): C round 349 PASS browserVerified=true realVerified=true; gate 349 published 7f56989",
-      "note": "baseline 70751a5 clean; patches b-round-348/sketch/{spec,budgets}.patch.txt; claims b-round-348/claims-349.sh; perf b-round-348/perf-summary.txt",
-      "added": "2026-11-05 B round 348 -> 349 planning"
-    },
     {
       "round": 350,
       "task": "current-task.md",
@@ -5896,9 +5899,18 @@
       "task": "current-task.md",
       "decision": "D-29z1155..D-29z1158",
       "type": "PERF-10a re-dispatch: A's round-357 tree + C-R357-01 ruling (b) delta (StudioWorkspace follow leaf transition guard + mount sync after tempo-seed) + RM1/RM2",
-      "status": "dispatched",
+      "status": "closed PASS (D-29z1159): C round 358 PASS, browserVerified true; gate 358 published f269022",
       "note": "baseline d49536b, A tree 56 entries kept; claims b-round-357/claims-358.sh; delta b-round-357/sketch/*.patch.txt",
       "added": "2026-11-05 B round 357 -> 358 planning"
+    },
+    {
+      "round": 359,
+      "task": "current-task.md",
+      "decision": "D-29z1159..D-29z1162",
+      "type": "C-R358-01 fix: tempo/grid/snap/metronome settings survive a StudioWorkspace remount (provider-owned workspace-session store)",
+      "status": "dispatched",
+      "note": "baseline f269022, clean tree; claims b-round-358/claims-359.sh; sketch b-round-358/sketch/*",
+      "added": "2026-11-06 B round 358 -> 359 planning"
     }
   ],
   "other_keys": [

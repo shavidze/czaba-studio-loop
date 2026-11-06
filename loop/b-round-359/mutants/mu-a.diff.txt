@@ -1,0 +1,22 @@
+diff -ru sc/app/components/arrangement/StudioWorkspace.tsx mu-a/app/components/arrangement/StudioWorkspace.tsx
+--- sc/app/components/arrangement/StudioWorkspace.tsx	2026-11-06 00:51:55.000000000 +0000
++++ mu-a/app/components/arrangement/StudioWorkspace.tsx	2026-11-06 00:57:44.063589771 +0000
+@@ -937,6 +937,7 @@
+ const ArrangementPlaybackFollowSync = memo(ArrangementPlaybackFollowSyncInner);
+ 
+ export function StudioWorkspace() {
++  useArrangementIsPlaying();
+   const workspace = useArrangement();
+   const {
+     arrangement,
+diff -ru sc/app/contexts/ArrangementContext.tsx mu-a/app/contexts/ArrangementContext.tsx
+--- sc/app/contexts/ArrangementContext.tsx	2026-11-06 00:51:55.000000000 +0000
++++ mu-a/app/contexts/ArrangementContext.tsx	2026-11-06 00:57:44.064277353 +0000
+@@ -1555,6 +1555,7 @@
+       const startAt = ctx.currentTime + PLAYBACK_LOOKAHEAD;
+       meterFreshFromRef.current = startAt;
+       startGraph(arrangement, createPlaybackAnchor(from, startAt));
++      startGraph(arrangement, createPlaybackAnchor(from, startAt));
+       if (frameRef.current === null) {
+         frameRef.current = requestAnimationFrame(tick);
+       }
