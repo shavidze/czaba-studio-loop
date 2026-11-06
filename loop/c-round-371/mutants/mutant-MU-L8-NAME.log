@@ -1,0 +1,139 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/context-hygiene.test.tsx [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 648[2mms[22m[39m
+       [32m✓[39m PV1: previewing the stored volume 1 causes 0 consumer renders and no entry[32m 35[2mms[22m[39m
+       [32m✓[39m PV2: a preview above the range clamps to the stored 1 and causes 0 consumer renders and no entry[32m 5[2mms[22m[39m
+       [32m✓[39m PV3: a preview for a missing track causes 0 consumer renders and no entry[32m 5[2mms[22m[39m
+       [32m✓[39m PV4: a double-click on the music Volume fader at 0 dB causes 0 provider and 0 consumer renders and 0 entries[32m 279[2mms[22m[39m
+       [32m✓[39m PV5: an off-default round trip writes one Volume entry per change and Undo returns to 0.72[32m 265[2mms[22m[39m
+       [32m✓[39m PV6: repeating a pending preview value keeps the first before snapshot and commits one entry[32m 9[2mms[22m[39m
+       [32m✓[39m PV7: a no-change Volume preview still flushes a pending Master preview exactly once[32m 5[2mms[22m[39m
+       [32m✓[39m PV8: a pending preview that returns to the value before the gesture commits 0 entries[32m 6[2mms[22m[39m
+       [32m✓[39m L8a: useArrangementPositionStore outside a provider throws its own name[32m 24[2mms[22m[39m
+       [32m✓[39m L8b: useArrangement outside a provider keeps its own name[32m 4[2mms[22m[39m
+       [32m✓[39m L8c: useArrangementIsPlaying outside a provider throws its own name[32m 4[2mms[22m[39m
+[31m       [31m×[31m L8d: useArrangementIsPlayingReader outside a provider throws its own name (A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT)[39m[32m 7[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 4667[2mms[22m[39m
+     [33m[2m✓[22m[39m SS8a a folded group header does not re-render on a workspace commit that changes none of its props [33m 1200[2mms[22m[39m
+     [33m[2m✓[22m[39m SS8b selecting every clip re-renders the folded group header and marks each overview block selected [33m 702[2mms[22m[39m
+     [33m[2m✓[22m[39m GH1 a status write renders neither the folded group wrapper nor the header leaf [33m 544[2mms[22m[39m
+     [33m[2m✓[22m[39m GH2 an arrangement edit outside the folded group renders neither the wrapper nor the header leaf [33m 538[2mms[22m[39m
+     [33m[2m✓[22m[39m GH3 a nudge of a member clip re-renders the header and moves its overview block [33m 557[2mms[22m[39m
+     [33m[2m✓[22m[39m GH4 soloing a member lane updates the folded group Solo state, and clearing it returns to off [33m 551[2mms[22m[39m
+     [33m[2m✓[22m[39m GH5 muting a second group renders that group header only, never the folded first group [33m 573[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m18 passed[39m[22m[90m (19)[39m
+[2m   Start at [22m 14:14:16
+[2m   Duration [22m 7.25s[2m (transform 2.40s, setup 0ms, import 3.68s, tests 5.31s, environment 1.11s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx,title=app/lib/arrangement/__tests__/context-hygiene.test.tsx > context hygiene (D-29z9%2C round 44) — counts React renders (consumer and provider)%2C not audio > R9-REVIEWER-L8%3A the provider hook errors name the hook that failed > L8d%3A useArrangementIsPlayingReader outside a provider throws its own name (A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT),line=511,column=73::AssertionError: expected 'useArrangementIsPlaying must be used …' to be 'useArrangementIsPlayingReader must be…' // Object.is equality%0A%0AExpected: "useArrangementIsPlayingReader must be used within an ArrangementProvider"%0AReceived: "useArrangementIsPlaying must be used within an ArrangementProvider"%0A%0A ❯ app/lib/arrangement/__tests__/context-hygiene.test.tsx:511:73%0A%0A
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4484:11)
+    at PositionStoreOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:313:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangementPositionStore must be used within an ArrangementProvider
+    at Module.useArrangementPositionStore (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4484:11)
+    at PositionStoreOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:313:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4468:11)
+    at ArrangementOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:328:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangement must be used within an ArrangementProvider
+    at Module.useArrangement (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4468:11)
+    at ArrangementOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:328:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangementIsPlaying must be used within an ArrangementProvider
+    at useArrangementPlaybackStoreContext (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4556:11)
+    at Module.useArrangementIsPlaying (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4582:5)
+    at IsPlayingOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:318:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+Error: useArrangementIsPlaying must be used within an ArrangementProvider
+    at useArrangementPlaybackStoreContext (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4556:11)
+    at Module.useArrangementIsPlaying (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4582:5)
+    at IsPlayingOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:318:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+Error: useArrangementIsPlaying must be used within an ArrangementProvider
+    at useArrangementPlaybackStoreContext (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4556:11)
+    at Module.useArrangementIsPlayingReader (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4562:17)
+    at IsPlayingReaderOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:323:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+Error: useArrangementIsPlaying must be used within an ArrangementProvider
+    at useArrangementPlaybackStoreContext (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4556:11)
+    at Module.useArrangementIsPlayingReader (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/contexts/ArrangementContext.tsx:4562:17)
+    at IsPlayingReaderOutsideProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-371/tree-copy/app/lib/arrangement/__tests__/context-hygiene.test.tsx:323:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/context-hygiene.test.tsx[2m > [22mcontext hygiene (D-29z9, round 44) — counts React renders (consumer and provider), not audio[2m > [22mR9-REVIEWER-L8: the provider hook errors name the hook that failed[2m > [22mL8d: useArrangementIsPlayingReader outside a provider throws its own name (A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT)
+[31m[1mAssertionError[22m: expected 'useArrangementIsPlaying must be used …' to be 'useArrangementIsPlayingReader must be…' // Object.is equality[39m
+
+Expected: [32m"useArrangementIsPlaying[7mReader[27m must be used within an ArrangementProvider"[39m
+Received: [31m"useArrangementIsPlaying must be used within an ArrangementProvider"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/context-hygiene.test.tsx:[2m511:73[22m[39m
+    [90m509| [39m    it('L8d: useArrangementIsPlayingReader outside a provider throws i…
+    [90m510| [39m      vi[33m.[39m[34mspyOn[39m(console[33m,[39m [32m'error'[39m)[33m.[39m[34mmockImplementation[39m(() [33m=>[39m undefined)[33m;[39m
+    [90m511| [39m      expect(thrownOutsideProvider(<IsPlayingReaderOutsideProvider />)…
+    [90m   | [39m                                                                        [31m^[39m
+    [90m512| [39m        'useArrangementIsPlayingReader must be used within an Arrangem…
+    [90m513| [39m      )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

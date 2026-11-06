@@ -1,0 +1,37 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const out = {};
+const browser = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  const r = {};
+  await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-testid="arrangement-timeline-scroller"]', { timeout: 120000 });
+  r.labDemoBadge = await page.getByText(/demo/i).first().isVisible();
+  r.labBody = (await page.locator('body').innerText()).length;
+  r.authUser = await page.evaluate(() => localStorage.getItem('auth_user'));
+  r.lsKeys = await page.evaluate(() => Object.keys(localStorage));
+  const og = await page.getByText('Original sound').first();
+  const box = await og.boundingBox().catch(() => null);
+  r.originalSound = { count: await page.getByText('Original sound').count(), box, visibleInViewport: !!box && box.y + box.height <= h && box.y >= 0 };
+  r.originalSoundIntersect = await page.evaluate(() => { const e=[...document.querySelectorAll('*')].find(n=>n.childElementCount===0&&n.textContent.trim()==='Original sound'); if(!e) return null; const b=e.getBoundingClientRect(); const top=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2); return {y:b.y,bottom:b.bottom,innerHeight,clippedBy: top&&top!==e&&!e.contains(top)?top.tagName+':'+(top.getAttribute('data-testid')||''):null}; });
+  await page.goto('http://127.0.0.1:5173/studio/middle-east', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(2500);
+  const txt = await page.locator('body').innerText();
+  r.studioRoute = { signInRequired: /Sign in required/i.test(txt), workspace: await page.locator('[data-testid="arrangement-timeline-scroller"]').count(), audioSrc: await page.locator('audio[src]').count(), snippet: txt.replace(/\s+/g,' ').slice(0,160) };
+  const u = 'http://127.0.0.1:5173/api/studio-token?product=middle-east&file=a.wav';
+  const noTok = await page.request.get(u);
+  r.tokenNoAuth = { status: noTok.status(), body: (await noTok.text()).slice(0,120) };
+  const fake = await page.request.get(u, { headers: { Authorization: 'Bearer fake.fake.fake' } });
+  const fb = await fake.text();
+  r.tokenFake = { status: fake.status(), body: fb.slice(0,120), hasUrlOrToken: /https?:\/\/|signed|token"/i.test(fb) };
+  out[`${w}x${h}`] = r;
+  await page.screenshot({ path: `c-round-371/screens/auth-studio-route-${w}x${h}.png` });
+  await ctx.close();
+}
+await browser.close();
+writeFileSync('c-round-371/auth.json', JSON.stringify(out, null, 1));
+console.log(JSON.stringify(out, null, 1));
