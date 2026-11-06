@@ -1,0 +1,555 @@
+diff -ruN base/app/data/studio-lab-demo.ts sc/app/data/studio-lab-demo.ts
+--- a/app/data/studio-lab-demo.ts	2026-11-06 06:51:59.000000000 +0000
++++ b/app/data/studio-lab-demo.ts	2026-11-06 06:58:17.163253688 +0000
+@@ -7,6 +7,8 @@
+   generateSoftImpactSamples,
+ } from '~/lib/arrangement/demo-synth';
+ import { synthesizeDemoCompositionOffMainThread } from '~/lib/arrangement/demo-synth.client';
++import { fetchAndDecodeSource } from '~/lib/arrangement/source-fetch';
++import { publicPreviewSourceFetch } from '~/lib/arrangement/stem-cache.client';
+ import { studioSourceLoadStrings } from '~/lib/arrangement/strings';
+ import type { WorkspaceCollection, WorkspaceSource } from '~/types/arrangement';
+ 
+@@ -110,32 +112,7 @@
+ ): Promise<AudioBuffer> {
+   const url = demoUrls[source.id];
+   if (url) {
+-    let response: Response;
+-    try {
+-      response = await fetch(url, { credentials: 'omit', signal });
+-    } catch (error) {
+-      if (signal.aborted) {
+-        throw error;
+-      }
+-      throw new Error(studioSourceLoadStrings.networkFailed);
+-    }
+-    if (!response.ok) {
+-      throw new Error(studioSourceLoadStrings.httpFailed(response.status));
+-    }
+-    let audioData: ArrayBuffer;
+-    try {
+-      audioData = await response.arrayBuffer();
+-    } catch (error) {
+-      if (signal.aborted) {
+-        throw error;
+-      }
+-      throw new Error(studioSourceLoadStrings.networkFailed);
+-    }
+-    try {
+-      return await ctx.decodeAudioData(audioData);
+-    } catch {
+-      throw new Error(studioSourceLoadStrings.decodeFailed);
+-    }
++    return fetchAndDecodeSource(url, ctx, signal, publicPreviewSourceFetch());
+   }
+   const samples = await synthesizeDemoSamples(source.id);
+   if (!samples) {
+diff -ruN base/app/lib/arrangement/collection.ts sc/app/lib/arrangement/collection.ts
+--- a/app/lib/arrangement/collection.ts	2026-11-06 06:51:59.000000000 +0000
++++ b/app/lib/arrangement/collection.ts	2026-11-06 06:58:17.163469353 +0000
+@@ -1,5 +1,6 @@
+ import type { WorkspaceCollection, WorkspaceOrigin, WorkspaceSource } from '~/types/arrangement';
+ import type { AudioStem } from '~/types/audio';
++import { fetchAndDecodeSource, type SourceFetch } from './source-fetch';
+ import { studioSourceLoadStrings } from './strings';
+ 
+ export interface WorkspaceCollectionCopy {
+@@ -66,7 +67,7 @@
+   return origin === 'purchased' ? purchasedWorkspaceCollectionCopy : demoWorkspaceCollectionCopy;
+ }
+ 
+-export type PurchasedStemFetch = (url: string, init: RequestInit) => Promise<Response>;
++export type PurchasedStemFetch = SourceFetch;
+ 
+ export interface PurchasedWorkspaceCollectionInput {
+   productId: string;
+@@ -114,32 +115,7 @@
+     if (url === undefined) {
+       throw new Error(studioSourceLoadStrings.unknownSource);
+     }
+-    let response: Response;
+-    try {
+-      response = await fetchAudio(url, { credentials: 'omit', signal });
+-    } catch (error) {
+-      if (signal.aborted) {
+-        throw error;
+-      }
+-      throw new Error(studioSourceLoadStrings.networkFailed);
+-    }
+-    if (!response.ok) {
+-      throw new Error(studioSourceLoadStrings.httpFailed(response.status));
+-    }
+-    let audioData: ArrayBuffer;
+-    try {
+-      audioData = await response.arrayBuffer();
+-    } catch (error) {
+-      if (signal.aborted) {
+-        throw error;
+-      }
+-      throw new Error(studioSourceLoadStrings.networkFailed);
+-    }
+-    try {
+-      return await ctx.decodeAudioData(audioData);
+-    } catch {
+-      throw new Error(studioSourceLoadStrings.decodeFailed);
+-    }
++    return fetchAndDecodeSource(url, ctx, signal, fetchAudio);
+   };
+ 
+   return {
+diff -ruN base/app/lib/arrangement/source-fetch.ts sc/app/lib/arrangement/source-fetch.ts
+--- a/app/lib/arrangement/source-fetch.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/source-fetch.ts	2026-11-06 06:57:41.760431727 +0000
+@@ -0,0 +1,39 @@
++import { studioSourceLoadStrings } from './strings';
++
++export type SourceFetch = (url: string, init: RequestInit) => Promise<Response>;
++
++export const plainSourceFetch: SourceFetch = (url, init) => fetch(url, init);
++
++export async function fetchAndDecodeSource(
++  url: string,
++  ctx: BaseAudioContext,
++  signal: AbortSignal,
++  fetchSource: SourceFetch,
++): Promise<AudioBuffer> {
++  let response: Response;
++  try {
++    response = await fetchSource(url, { credentials: 'omit', signal });
++  } catch (error) {
++    if (signal.aborted) {
++      throw error;
++    }
++    throw new Error(studioSourceLoadStrings.networkFailed);
++  }
++  if (!response.ok) {
++    throw new Error(studioSourceLoadStrings.httpFailed(response.status));
++  }
++  let audioData: ArrayBuffer;
++  try {
++    audioData = await response.arrayBuffer();
++  } catch (error) {
++    if (signal.aborted) {
++      throw error;
++    }
++    throw new Error(studioSourceLoadStrings.networkFailed);
++  }
++  try {
++    return await ctx.decodeAudioData(audioData);
++  } catch {
++    throw new Error(studioSourceLoadStrings.decodeFailed);
++  }
++}
+diff -ruN base/app/lib/arrangement/stem-cache.client.ts sc/app/lib/arrangement/stem-cache.client.ts
+--- a/app/lib/arrangement/stem-cache.client.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/stem-cache.client.ts	2026-11-06 06:58:07.776920566 +0000
+@@ -0,0 +1,309 @@
++import { plainSourceFetch, type SourceFetch } from './source-fetch';
++import {
++  readStemCacheValidators,
++  STEM_CACHE_DB_NAME,
++  STEM_CACHE_SCHEMA_VERSION,
++  type StemCacheRecord,
++  selectStemCacheEvictions,
++  stemCacheBudgetBytes,
++  stemCacheConditionalHeaders,
++  stemCacheKey,
++} from './stem-cache';
++
++const STORE_NAME = 'entries';
++
++export interface StemCacheEntry {
++  record: StemCacheRecord;
++  bytes: ArrayBuffer;
++}
++
++export interface StemCacheStore {
++  get(key: string): Promise<StemCacheEntry | null>;
++  put(record: StemCacheRecord, bytes: ArrayBuffer): Promise<void>;
++  touch(key: string, at: number): Promise<void>;
++  delete(key: string): Promise<void>;
++  list(): Promise<StemCacheRecord[]>;
++}
++
++export interface CachedSourceFetchDeps {
++  store: StemCacheStore | null;
++  origin: string;
++  fetchSource?: SourceFetch;
++  now?: () => number;
++  estimateQuota?: () => Promise<number | undefined>;
++}
++
++function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
++  return new Promise((resolve, reject) => {
++    request.onsuccess = () => resolve(request.result);
++    request.onerror = () => reject(request.error);
++  });
++}
++
++function isStemCacheRecord(value: unknown): value is StemCacheRecord {
++  return (
++    typeof value === 'object' &&
++    value !== null &&
++    'key' in value &&
++    'fileName' in value &&
++    'size' in value &&
++    'schemaVersion' in value &&
++    typeof value.key === 'string' &&
++    typeof value.fileName === 'string' &&
++    typeof value.size === 'number' &&
++    value.schemaVersion === STEM_CACHE_SCHEMA_VERSION
++  );
++}
++
++export function createBrowserStemCacheStore(): StemCacheStore | null {
++  if (
++    typeof indexedDB === 'undefined' ||
++    typeof navigator === 'undefined' ||
++    typeof navigator.storage?.getDirectory !== 'function' ||
++    typeof FileSystemFileHandle === 'undefined' ||
++    typeof FileSystemFileHandle.prototype.createWritable !== 'function'
++  ) {
++    return null;
++  }
++  let dbPromise: Promise<IDBDatabase> | null = null;
++  const openDb = (): Promise<IDBDatabase> => {
++    if (dbPromise === null) {
++      const request = indexedDB.open(STEM_CACHE_DB_NAME, STEM_CACHE_SCHEMA_VERSION);
++      request.onupgradeneeded = () => {
++        if (!request.result.objectStoreNames.contains(STORE_NAME)) {
++          request.result.createObjectStore(STORE_NAME, { keyPath: 'key' });
++        }
++      };
++      dbPromise = requestToPromise(request);
++    }
++    return dbPromise;
++  };
++  const directory = async (): Promise<FileSystemDirectoryHandle> =>
++    (await navigator.storage.getDirectory()).getDirectoryHandle(STEM_CACHE_DB_NAME, {
++      create: true,
++    });
++  const readRecord = async (key: string): Promise<StemCacheRecord | null> => {
++    const db = await openDb();
++    const value: unknown = await requestToPromise(
++      db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(key),
++    );
++    return isStemCacheRecord(value) ? value : null;
++  };
++  const writeRecord = async (record: StemCacheRecord): Promise<void> => {
++    const db = await openDb();
++    await requestToPromise(
++      db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(record),
++    );
++  };
++  const removeFile = async (fileName: string): Promise<void> => {
++    try {
++      await (await directory()).removeEntry(fileName);
++    } catch {
++      return;
++    }
++  };
++  const remove = async (key: string): Promise<void> => {
++    const record = await readRecord(key);
++    const db = await openDb();
++    await requestToPromise(
++      db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(key),
++    );
++    if (record !== null) {
++      await removeFile(record.fileName);
++    }
++  };
++  return {
++    async get(key) {
++      const record = await readRecord(key);
++      if (record === null) {
++        return null;
++      }
++      let file: File;
++      try {
++        file = await (await (await directory()).getFileHandle(record.fileName)).getFile();
++      } catch {
++        await remove(key);
++        return null;
++      }
++      if (file.size !== record.size) {
++        await remove(key);
++        return null;
++      }
++      return { record, bytes: await file.arrayBuffer() };
++    },
++    async put(record, bytes) {
++      const previous = await readRecord(record.key);
++      const handle = await (await directory()).getFileHandle(record.fileName, { create: true });
++      const writable = await handle.createWritable();
++      try {
++        await writable.write(bytes);
++        await writable.close();
++      } catch (error) {
++        await writable.abort();
++        await removeFile(record.fileName);
++        throw error;
++      }
++      await writeRecord(record);
++      if (previous !== null && previous.fileName !== record.fileName) {
++        await removeFile(previous.fileName);
++      }
++    },
++    async touch(key, at) {
++      const record = await readRecord(key);
++      if (record !== null) {
++        await writeRecord({ ...record, lastAccessedAt: at });
++      }
++    },
++    delete: remove,
++    async list() {
++      const db = await openDb();
++      const values: unknown[] = await requestToPromise(
++        db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll(),
++      );
++      return values.filter(isStemCacheRecord);
++    },
++  };
++}
++
++async function browserQuota(): Promise<number | undefined> {
++  if (typeof navigator === 'undefined' || typeof navigator.storage?.estimate !== 'function') {
++    return undefined;
++  }
++  return (await navigator.storage.estimate()).quota;
++}
++
++function isQuotaError(error: unknown): boolean {
++  return error instanceof DOMException && error.name === 'QuotaExceededError';
++}
++
++export function createCachedSourceFetch({
++  store,
++  origin,
++  fetchSource = plainSourceFetch,
++  now = () => Date.now(),
++  estimateQuota = browserQuota,
++}: CachedSourceFetchDeps): SourceFetch {
++  let disabled = store === null;
++
++  const write = async (
++    key: string,
++    response: Response,
++    signal: AbortSignal | null | undefined,
++  ): Promise<void> => {
++    if (store === null || disabled) {
++      return;
++    }
++    const validators = readStemCacheValidators(response.headers);
++    if (validators === null || response.status !== 200) {
++      return;
++    }
++    const bytes = await response.arrayBuffer();
++    if (signal?.aborted) {
++      return;
++    }
++    const at = now();
++    const record: StemCacheRecord = {
++      key,
++      fileName: `${at.toString(36)}-${Math.random().toString(36).slice(2)}`,
++      etag: validators.etag,
++      lastModified: validators.lastModified,
++      contentType: response.headers.get('content-type'),
++      size: bytes.byteLength,
++      storedAt: at,
++      lastAccessedAt: at,
++      schemaVersion: STEM_CACHE_SCHEMA_VERSION,
++    };
++    const victims = selectStemCacheEvictions(
++      await store.list(),
++      key,
++      bytes.byteLength,
++      stemCacheBudgetBytes(await estimateQuota()),
++    );
++    if (victims === null) {
++      return;
++    }
++    for (const victim of victims) {
++      await store.delete(victim.key);
++    }
++    try {
++      await store.put(record, bytes);
++    } catch (error) {
++      if (!isQuotaError(error)) {
++        throw error;
++      }
++      const oldest = selectStemCacheEvictions(await store.list(), key, Number.MAX_VALUE, Infinity);
++      if (oldest !== null && oldest.length > 0) {
++        await store.delete(oldest[0].key);
++      }
++      try {
++        await store.put(record, bytes);
++      } catch {
++        disabled = true;
++      }
++    }
++  };
++
++  const writeInBackground = (key: string, response: Response, init: RequestInit): void => {
++    void write(key, response.clone(), init.signal).catch(() => {
++      disabled = true;
++    });
++  };
++
++  return async (url, init) => {
++    const key = disabled || store === null ? null : stemCacheKey(url, origin);
++    if (key === null || store === null) {
++      return fetchSource(url, init);
++    }
++    let entry: StemCacheEntry | null;
++    try {
++      entry = await store.get(key);
++    } catch {
++      entry = null;
++    }
++    if (entry === null) {
++      const response = await fetchSource(url, init);
++      writeInBackground(key, response, init);
++      return response;
++    }
++    let response: Response;
++    try {
++      response = await fetchSource(url, {
++        ...init,
++        cache: 'no-store',
++        headers: stemCacheConditionalHeaders(entry.record),
++      });
++    } catch (error) {
++      if (init.signal?.aborted) {
++        throw error;
++      }
++      return new Response(entry.bytes, { status: 200 });
++    }
++    if (response.status === 304) {
++      void store.touch(key, now()).catch(() => undefined);
++      return new Response(entry.bytes, { status: 200 });
++    }
++    if (response.status === 404 || response.status === 410) {
++      void store.delete(key).catch(() => undefined);
++      return response;
++    }
++    if (response.ok) {
++      writeInBackground(key, response, init);
++    }
++    return response;
++  };
++}
++
++let sharedPreviewFetch: SourceFetch | null = null;
++
++export function publicPreviewSourceFetch(): SourceFetch {
++  if (typeof window === 'undefined') {
++    return plainSourceFetch;
++  }
++  if (sharedPreviewFetch === null) {
++    sharedPreviewFetch = createCachedSourceFetch({
++      store: createBrowserStemCacheStore(),
++      origin: window.location.origin,
++    });
++  }
++  return sharedPreviewFetch;
++}
+diff -ruN base/app/lib/arrangement/stem-cache.ts sc/app/lib/arrangement/stem-cache.ts
+--- a/app/lib/arrangement/stem-cache.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/app/lib/arrangement/stem-cache.ts	2026-11-06 06:57:41.761431748 +0000
+@@ -0,0 +1,96 @@
++export const STEM_CACHE_DB_NAME = 'czaba-stem-cache-v2';
++export const STEM_CACHE_SCHEMA_VERSION = 1;
++export const STEM_CACHE_MAX_BUDGET_BYTES = 256 * 1024 * 1024;
++export const STEM_CACHE_QUOTA_SHARE = 0.1;
++
++export interface StemCacheRecord {
++  key: string;
++  fileName: string;
++  etag: string | null;
++  lastModified: string | null;
++  contentType: string | null;
++  size: number;
++  storedAt: number;
++  lastAccessedAt: number;
++  schemaVersion: number;
++}
++
++export interface StemCacheValidators {
++  etag: string | null;
++  lastModified: string | null;
++}
++
++export function stemCacheKey(url: string, origin: string): string | null {
++  let parsed: URL;
++  try {
++    parsed = new URL(url, origin);
++  } catch {
++    return null;
++  }
++  if (parsed.origin !== origin || parsed.search !== '' || parsed.hash !== '') {
++    return null;
++  }
++  return parsed.pathname;
++}
++
++export function readStemCacheValidators(headers: Headers): StemCacheValidators | null {
++  const cacheControl = (headers.get('cache-control') ?? '').toLowerCase();
++  if (cacheControl.includes('no-store')) {
++    return null;
++  }
++  const vary = (headers.get('vary') ?? '')
++    .split(',')
++    .map((part) => part.trim().toLowerCase())
++    .filter((part) => part.length > 0 && part !== 'accept-encoding' && part !== 'origin');
++  if (vary.length > 0) {
++    return null;
++  }
++  const etag = headers.get('etag');
++  const lastModified = headers.get('last-modified');
++  if (etag === null && lastModified === null) {
++    return null;
++  }
++  return { etag, lastModified };
++}
++
++export function stemCacheConditionalHeaders(record: StemCacheRecord): Headers {
++  const headers = new Headers();
++  if (record.etag !== null) {
++    headers.set('If-None-Match', record.etag);
++  }
++  if (record.lastModified !== null) {
++    headers.set('If-Modified-Since', record.lastModified);
++  }
++  return headers;
++}
++
++export function stemCacheBudgetBytes(quota: number | undefined): number {
++  if (quota === undefined || !Number.isFinite(quota) || quota <= 0) {
++    return 0;
++  }
++  return Math.min(STEM_CACHE_MAX_BUDGET_BYTES, Math.floor(quota * STEM_CACHE_QUOTA_SHARE));
++}
++
++export function selectStemCacheEvictions(
++  records: readonly StemCacheRecord[],
++  incomingKey: string,
++  incomingSize: number,
++  budget: number,
++): StemCacheRecord[] | null {
++  if (incomingSize <= 0 || incomingSize > budget / 4) {
++    return null;
++  }
++  const others = records
++    .filter((record) => record.key !== incomingKey)
++    .sort((first, second) => first.lastAccessedAt - second.lastAccessedAt);
++  let used = others.reduce((total, record) => total + record.size, 0);
++  const victims: StemCacheRecord[] = [];
++  for (const record of others) {
++    if (used + incomingSize <= budget) {
++      break;
++    }
++    victims.push(record);
++    used -= record.size;
++  }
++  return victims;
++}

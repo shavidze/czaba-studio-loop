@@ -1,0 +1,114 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T06:29:55.7134382Z",
+  "round": 364,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R364-01",
+   "severity": "low",
+   "origin": "B spec (grant additions-only)",
+   "steps": [
+    "Read docs/implementation/2026/quarter-IV/168-perf-interactions-baseline.md l.113 and l.284"
+   ],
+   "expected": "No stale count after DC-KINDS 16 -> 18",
+   "actual": "Older round-225 paragraphs still say 'drag-ის 16 commits-per-move სტრიქონი wallclock'; the new round-364 bullet says 18. Historical wording, grant allowed additions only.",
+   "evidence": "docs 168 l.113, l.284; A flagged it in a-round-364.md 'For B'. Deferred Low, not blocking."
+  }
+ ],
+ "passed": [
+  "CLAIMS",
+  "SOURCE-SCOPE",
+  "PERF-LIB (40/40)",
+  "MUTANT-PERFLIB (own mutant red on DC-KINDS)",
+  "RB-MEMO (13/13)",
+  "PERF (production alone: rc0, complete, failures [], problems [] x6 passes, 264 rows, 95/95 asserted, 189 EQUAL, 0 DIFF, 0 NEW, durationMs 462919)",
+  "BG-RANGE 1440x900 + 1280x720 (incl. de-confounded Insert Marker 5.000 unchanged across drag and name-bar reset; clip start 0.000 / width 640 and Undo title unchanged)",
+  "G364-AUTH 1440x900 + 1280x720",
+  "DOCS"
+ ],
+ "failed": [],
+ "blocked": [
+  "G364-AUTH sub-row: fake-bearer GET /api/studio-token returns 500 (fails closed, no token in body) because backend unavailable in cloud; not a bypass; anonymous GET 401"
+ ],
+ "gate": [
+  "full vitest",
+  "build",
+  "Biome",
+  "typecheck",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "notRun": [
+  "MARKER-NONE-PLAYING-BACK (best effort, does not count toward browserVerified)"
+ ],
+ "abletonConformance": "not applicable (test-and-harness round, no app source change)",
+ "observations": {
+  "wallclockValues": "background-range move-to-paint-p95 C: 1x [5.3,2.5,2.9] median 2.9 ms; 6x [24.2,19.1,16.8] median 19.1 ms (wallclock record rows, no budget; A got 2.8/17.4). Deterministic: 0.983 commits-per-move, 37 components-max, 1 release commit, 7.383 per move, live=1 at 1x and 6x.",
+  "mutantNote": "C's own mutant: added interact.drag.background-range.playing.commits-per-move kind deterministic row on scratch -> DC-KINDS red (length 19 vs 18). A zoom-probe.test.ts failure in the scratch is a scratch artifact (only perf/lib + budgets copied), not in the real tree: real perf-lib is 40/40. Scratch deleted; store tree unchanged (6 modified).",
+  "docs": "doc 234 l.4 byte-exact; stage 5 heading exact; 7 '## ' headings; 'C round N pending' 0 files; doc 168 l.4 md5 ca98da32 unchanged; cited mutant summaries exist."
+ },
+ "manifestPaths": [
+  "c-round-364/claims.txt",
+  "c-round-364/source-scope.txt",
+  "c-round-364/perf-lib.log",
+  "c-round-364/render-budget.log",
+  "c-round-364/mutant-perflib.log",
+  "c-round-364/perf.log",
+  "c-round-364/latest-interactions.json",
+  "c-round-364/rowcmp.txt",
+  "c-round-364/bg-1440x900.json",
+  "c-round-364/bg-1280x720.json",
+  "c-round-364/bgm-1440x900.json",
+  "c-round-364/bgm-1280x720.json",
+  "c-round-364/auth1440x900.out",
+  "c-round-364/auth1280x720.out"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": [
+  "DC-KINDS",
+  "RB-MEMO1",
+  "RB-MEMO2",
+  "RB-MEMO3"
+ ],
+ "mutantsRecorded": [
+  "MU-K",
+  "MU-N",
+  "C-own-perflib-playing-row"
+ ],
+ "mutantRedOnSketch": [
+  "b-round-363/mutants/MU-K-perf-lib.log",
+  "b-round-363/mutants/MU-N-perf-lib.log",
+  "b-round-362/mutants/MU-P-render-budget.log",
+  "b-round-362/mutants/MU-W-render-budget.log",
+  "b-round-362/mutants/MU-R-render-budget.log"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "biome"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-363/sketch-typecheck.log",
+  "b-round-363/sketch-perf-lib.log"
+ ],
+ "gateNote": "full suite not run by B on this sketch; the gate runs it",
+ "chainHeadGateRunGreen": true,
+ "affectedChecksNamed": [
+  "perf/lib tests",
+  "perf/studio-lab-interactions.perf.spec.ts",
+  "app/lib/arrangement/__tests__/render-budget.test.tsx"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-363/sketch-perf-lib.log",
+  "b-round-363/mutants/summary.txt"
+ ],
+ "origin": "B spec"
+}

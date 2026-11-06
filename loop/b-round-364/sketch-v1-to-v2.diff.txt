@@ -1,0 +1,278 @@
+145,146c145,146
+< +++ b/app/lib/arrangement/stem-cache.client.ts	2026-11-06 06:58:07.776920566 +0000
+< @@ -0,0 +1,309 @@
+---
+> +++ b/app/lib/arrangement/stem-cache.client.ts	2026-11-06 07:07:41.384480138 +0000
+> @@ -0,0 +1,427 @@
+171a172
+> +  sweep(): Promise<void>;
+181a183,197
+> +export interface CachedSourceFetch {
+> +  fetchSource: SourceFetch;
+> +  idle: () => Promise<void>;
+> +}
+> +
+> +interface ListableDirectory {
+> +  keys(): AsyncIterable<string>;
+> +}
+> +
+> +function isListableDirectory(
+> +  directory: FileSystemDirectoryHandle,
+> +): directory is FileSystemDirectoryHandle & ListableDirectory {
+> +  return 'keys' in directory && typeof directory.keys === 'function';
+> +}
+> +
+189c205,213
+< +function isStemCacheRecord(value: unknown): value is StemCacheRecord {
+---
+> +function isStringOrNull(value: unknown): boolean {
+> +  return value === null || typeof value === 'string';
+> +}
+> +
+> +function isFiniteNumber(value: unknown): boolean {
+> +  return typeof value === 'number' && Number.isFinite(value);
+> +}
+> +
+> +export function isStemCacheRecord(value: unknown): value is StemCacheRecord {
+194a219,221
+> +    'etag' in value &&
+> +    'lastModified' in value &&
+> +    'contentType' in value &&
+195a223,224
+> +    'storedAt' in value &&
+> +    'lastAccessedAt' in value &&
+199c228,233
+< +    typeof value.size === 'number' &&
+---
+> +    isStringOrNull(value.etag) &&
+> +    isStringOrNull(value.lastModified) &&
+> +    isStringOrNull(value.contentType) &&
+> +    isFiniteNumber(value.size) &&
+> +    isFiniteNumber(value.storedAt) &&
+> +    isFiniteNumber(value.lastAccessedAt) &&
+250a285,290
+> +  const readAll = async (): Promise<unknown[]> => {
+> +    const db = await openDb();
+> +    return requestToPromise(
+> +      db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll(),
+> +    );
+> +  };
+288c328,334
+< +        await writable.abort();
+---
+> +        await writable.abort().catch(() => undefined);
+> +        await removeFile(record.fileName);
+> +        throw error;
+> +      }
+> +      try {
+> +        await writeRecord(record);
+> +      } catch (error) {
+292d337
+< +      await writeRecord(record);
+298,300c343,347
+< +      const record = await readRecord(key);
+< +      if (record !== null) {
+< +        await writeRecord({ ...record, lastAccessedAt: at });
+---
+> +      const db = await openDb();
+> +      const store = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME);
+> +      const value: unknown = await requestToPromise(store.get(key));
+> +      if (isStemCacheRecord(value)) {
+> +        await requestToPromise(store.put({ ...value, lastAccessedAt: at }));
+304a352,355
+> +      return (await readAll()).filter(isStemCacheRecord);
+> +    },
+> +    async sweep() {
+> +      const values = await readAll();
+306,309c357,382
+< +      const values: unknown[] = await requestToPromise(
+< +        db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll(),
+< +      );
+< +      return values.filter(isStemCacheRecord);
+---
+> +      const known = new Set<string>();
+> +      for (const value of values) {
+> +        if (isStemCacheRecord(value)) {
+> +          known.add(value.fileName);
+> +        } else if (typeof value === 'object' && value !== null && 'key' in value) {
+> +          const key = value.key;
+> +          if (typeof key === 'string') {
+> +            await requestToPromise(
+> +              db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(key),
+> +            );
+> +          }
+> +        }
+> +      }
+> +      const dir = await directory();
+> +      if (!isListableDirectory(dir)) {
+> +        return;
+> +      }
+> +      const orphans: string[] = [];
+> +      for await (const name of dir.keys()) {
+> +        if (!known.has(name)) {
+> +          orphans.push(name);
+> +        }
+> +      }
+> +      for (const name of orphans) {
+> +        await removeFile(name);
+> +      }
+324a398,405
+> +function cachedResponse(entry: StemCacheEntry): Response {
+> +  const headers = new Headers();
+> +  if (entry.record.contentType !== null) {
+> +    headers.set('content-type', entry.record.contentType);
+> +  }
+> +  return new Response(entry.bytes, { status: 200, headers });
+> +}
+> +
+331c412
+< +}: CachedSourceFetchDeps): SourceFetch {
+---
+> +}: CachedSourceFetchDeps): CachedSourceFetch {
+332a414,452
+> +  let swept = false;
+> +  const writes = new Map<string, Promise<void>>();
+> +
+> +  const storeBytes = async (
+> +    activeStore: StemCacheStore,
+> +    record: StemCacheRecord,
+> +    bytes: ArrayBuffer,
+> +  ): Promise<void> => {
+> +    if (!swept) {
+> +      swept = true;
+> +      await activeStore.sweep();
+> +    }
+> +    const victims = selectStemCacheEvictions(
+> +      await activeStore.list(),
+> +      record.key,
+> +      record.size,
+> +      stemCacheBudgetBytes(await estimateQuota()),
+> +    );
+> +    if (victims === null) {
+> +      return;
+> +    }
+> +    for (const victim of victims) {
+> +      await activeStore.delete(victim.key);
+> +    }
+> +    try {
+> +      await activeStore.put(record, bytes);
+> +    } catch (error) {
+> +      if (!isQuotaError(error)) {
+> +        throw error;
+> +      }
+> +      const oldest = (await activeStore.list())
+> +        .filter((candidate) => candidate.key !== record.key)
+> +        .sort((first, second) => first.lastAccessedAt - second.lastAccessedAt)[0];
+> +      if (oldest !== undefined) {
+> +        await activeStore.delete(oldest.key);
+> +      }
+> +      await activeStore.put(record, bytes);
+> +    }
+> +  };
+334a455
+> +    activeStore: StemCacheStore,
+339c460,463
+< +    if (store === null || disabled) {
+---
+> +    let bytes: ArrayBuffer;
+> +    try {
+> +      bytes = await response.arrayBuffer();
+> +    } catch {
+342,343c466
+< +    const validators = readStemCacheValidators(response.headers);
+< +    if (validators === null || response.status !== 200) {
+---
+> +    if (signal?.aborted || disabled) {
+346,347c469,470
+< +    const bytes = await response.arrayBuffer();
+< +    if (signal?.aborted) {
+---
+> +    const validators = readStemCacheValidators(response.headers);
+> +    if (validators === null) {
+362,373d484
+< +    const victims = selectStemCacheEvictions(
+< +      await store.list(),
+< +      key,
+< +      bytes.byteLength,
+< +      stemCacheBudgetBytes(await estimateQuota()),
+< +    );
+< +    if (victims === null) {
+< +      return;
+< +    }
+< +    for (const victim of victims) {
+< +      await store.delete(victim.key);
+< +    }
+375,388c486,488
+< +      await store.put(record, bytes);
+< +    } catch (error) {
+< +      if (!isQuotaError(error)) {
+< +        throw error;
+< +      }
+< +      const oldest = selectStemCacheEvictions(await store.list(), key, Number.MAX_VALUE, Infinity);
+< +      if (oldest !== null && oldest.length > 0) {
+< +        await store.delete(oldest[0].key);
+< +      }
+< +      try {
+< +        await store.put(record, bytes);
+< +      } catch {
+< +        disabled = true;
+< +      }
+---
+> +      await storeBytes(activeStore, record, bytes);
+> +    } catch {
+> +      disabled = true;
+393,394c493,503
+< +    void write(key, response.clone(), init.signal).catch(() => {
+< +      disabled = true;
+---
+> +    if (
+> +      store === null ||
+> +      disabled ||
+> +      writes.has(key) ||
+> +      response.status !== 200 ||
+> +      readStemCacheValidators(response.headers) === null
+> +    ) {
+> +      return;
+> +    }
+> +    const pending = write(store, key, response.clone(), init.signal).finally(() => {
+> +      writes.delete(key);
+395a505
+> +    writes.set(key, pending);
+398c508
+< +  return async (url, init) => {
+---
+> +  const cachedFetch: SourceFetch = async (url, init) => {
+425c535
+< +      return new Response(entry.bytes, { status: 200 });
+---
+> +      return cachedResponse(entry);
+428,429c538,539
+< +      void store.touch(key, now()).catch(() => undefined);
+< +      return new Response(entry.bytes, { status: 200 });
+---
+> +      await store.touch(key, now()).catch(() => undefined);
+> +      return cachedResponse(entry);
+432c542
+< +      void store.delete(key).catch(() => undefined);
+---
+> +      await store.delete(key).catch(() => undefined);
+435,436c545,546
+< +    if (response.ok) {
+< +      writeInBackground(key, response, init);
+---
+> +    if (response.status >= 500) {
+> +      return cachedResponse(entry);
+437a548
+> +    writeInBackground(key, response, init);
+439a551,557
+> +
+> +  return {
+> +    fetchSource: cachedFetch,
+> +    idle: async () => {
+> +      await Promise.all([...writes.values()]);
+> +    },
+> +  };
+452c570
+< +    });
+---
+> +    }).fetchSource;
