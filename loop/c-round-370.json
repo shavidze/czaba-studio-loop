@@ -1,0 +1,127 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-06T12:47:42.9462346Z",
+  "round": 370,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "ROOT-NARROW",
+  "CHAT-SHAPE",
+  "UNIT",
+  "MUTANTS-TREE",
+  "PERF-BYTES",
+  "NO-SIGNALR",
+  "SSR-OPACITY",
+  "PAINT",
+  "FADE",
+  "NAV",
+  "G370-AUTH",
+  "STUDIO-SMOKE-370",
+  "DOCS",
+  "RT-FIX"
+ ],
+ "blocked": [
+  "CHAT: real chat connect needs the backend hub; backend unavailable in cloud (CL2-CL4 cover the client path in jsdom)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "route-transition.test.tsx",
+  "chat-lazy-signalr.test.tsx",
+  "self-hosted-fonts.test.ts",
+  "store-focus-ring.test.ts",
+  "studio-lab-resources perf spec"
+ ],
+ "affectedChecksRunOnSketch": true,
+ "assertsSpecified": [
+  "RT1-RT4",
+  "CL1-CL4",
+  "res.js.*.encoded-bytes x3"
+ ],
+ "mutantsRecorded": [
+  "MU-CHAT-STATIC",
+  "MU-RT-NO-KEY",
+  "MU-RT-STUDIO-MOTION",
+  "MU-CHAT-IMPORT-OUTSIDE-TRY"
+ ],
+ "mutantRedOnSketch": "b-round-369/mutants/",
+ "mutantRedOnTree": {
+  "a ChatContext at HEAD": "CL1,CL2,CL4 red",
+  "b key removed": "RT3 red",
+  "c studio returns motion": "RT1,RT3,RT4 red (superset of RT1)",
+  "d import before try": "CL4 red"
+ },
+ "manifestPaths": [
+  "b-round-369/claims-370-output.txt",
+  "b-round-369/claims-370-sketch-output.txt",
+  "b-round-369/claims-370.sh",
+  "b-round-369/mutants/mutant-MU-CHAT-ALWAYS-CONNECTED.log",
+  "b-round-369/mutants/mutant-MU-CHAT-IMPORT-OUTSIDE-TRY.log",
+  "b-round-369/mutants/mutant-MU-CHAT-STATIC-perf.log",
+  "b-round-369/mutants/mutant-MU-CHAT-STATIC.log",
+  "b-round-369/mutants/mutant-MU-RT-NO-KEY.log",
+  "b-round-369/mutants/mutant-MU-RT-STORE-PLAIN.log",
+  "b-round-369/mutants/mutant-MU-RT-STUDIO-MOTION.log",
+  "b-round-369/r370-frozen-sha256.txt",
+  "b-round-369/sketch-review.md",
+  "b-round-369/sketch.patch.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "origin": "C",
+ "abletonConformance": "not applicable (pure performance round, no new control)",
+ "measurements": {
+  "perfBytesEncoded": {
+   "studio-lab": 362477,
+   "home": 250526,
+   "studio-guard": 270648,
+   "budgets": [
+    372000,
+    258000,
+    278000
+   ],
+   "note": "equal to B sketch values"
+  },
+  "noSignalr": "0 of 46 (studio-lab) and 0 of 42 (home) loaded scripts contain the signalr string at both viewports; the string exists in lazy chunk build/client/assets/index-CJQPnPAn.js",
+  "ssr": "studio-lab and studio/middle-east wrappers have no inline opacity:0; / has opacity:0;transform:translateY(8px) (curl on prod 5190 and dev 5173)",
+  "paintFcpMinusDclMedianMs": {
+   "1440x900": 26,
+   "1280x720": 31.9,
+   "note": "record only, 3 runs, noisy (3.2-122 ms); screenshot at FCP+100 shows workspace, opacity 1"
+  },
+  "fade": "/ -> /about wrapper opacity min 0.185 (1440) / 0.092 (1280), final 1",
+  "nav": "/ -> Studio -> back to / works at both viewports; only console errors are cloud-expected ERR_CONNECTION_REFUSED / Failed to load cart",
+  "auth": "auth_user null; /studio/middle-east shows Sign in required, 0 workspace, 0 audio[src]; /api/studio-token 401 without token; fake bearer fail-closed 500 with no token/url in body",
+  "smoke": "Bass added with Enter; position 00:01.471 after 1.5s; cross-lane move Undo title 'Undo: Move to track \u2014 SFX (Ctrl+Z)'; WAV RIFF/WAVE, 24-bit, 48 kHz, 16.000 s, peak 0.217, 0 NaN, data length consistent; stats identical at both viewports and identical to round 369"
+ },
+ "observations": [
+  "PAINT FCP-DCL is wallclock and noisy (records only, not a FAIL).",
+  "Prod server on 5190 was run from the build produced by the perf spec on A's tree (not a separate HEAD control build); HEAD comparison relies on B's logs b-round-369/perf-res-head.log.",
+  "RT-FIX diff: only retro-369 \u00a710 L58 bullet and lessons.md l.3 changed; lessons.md is 60 lines.",
+  "Doc 237 names RT1, RT4, CL1, CL4 only; all exist."
+ ]
+}

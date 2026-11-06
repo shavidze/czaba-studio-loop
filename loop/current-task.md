@@ -1,201 +1,215 @@
-# Round 370: PERF-11a. Lazy signalr and no framer page transition on `/studio*` (root diet, stage 1 of PERF-11), plus RT-FIX for the round-369 retro
+# Round 371: PERF-11c-i. The track-group header leaf stops reading the whole workspace context (GATE361-S1, the first leaf of SIG-R361), plus the playback-store hook error text (A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT)
 
-**Planned by:** B, at the round 369 → 370 planning, 2026-11-06 (`b-round-369.md`).
+**Planned by:** B, at the round 370 → 371 planning, 2026-11-06 (`b-round-370.md`).
 
-**Decisions** (`backlog.json` v334 → v335, `decisions_log_b`):
-- **D-29z1218:** round 369 is accepted from C's evidence (`c-round-369.json` PASS, 11 rows, `browserVerified` and `realVerified` true, 0 app bugs).
-  - Gate 369 was **skipped (no real changes)**, so nothing was published. The baseline stays `29f4b4d`.
-  - C369-L1 (Low, B): B corrected `retros/retro-369.md` §10 and `lessons.md` l.3. C re-checks them in row RT-FIX.
-  - C369-L2 (Low, B spec) is closed as wording: a cross-lane move is labelled "Undo: Move to track — <lane>".
-- **D-29z1219:** PERF-11 is next. Root answered none of the 18 architecture checkpoint requests, so SYS-R369 is skipped under its own condition. PERF-11 splits into three stages:
-  - **11a:** this round;
-  - **11b:** lazy Firebase. It needs the protected `auth.ts` [K7] and goes to root/Saba as `b-round-369/root-request-perf11b-firebase-lazy.md` (non-blocking);
-  - **11c:** the ArrangementContext leaf-consumer inputs.
-- **D-29z1220:** the target is re-based from measurement. "230 KB" is not reachable inside the loop; the reasons are in the root request.
-- **D-29z1221:** consult opinions (`tech-lead`, `performance-optimizer`). PERF-CAND-STUDIO-LENIS is recorded as a candidate, not scheduled.
-- **D-29z1222:** this task and the order after it (§6).
+**Decisions** (`backlog.json` v335 → v336, `decisions_log_b`):
+- **D-29z1223:** round 370 (PERF-11a) is accepted from C's evidence (`c-round-370.json` PASS, `browserVerified` and `realVerified` true, 0 bugs). Gate 370 published `f530e2d`, which is the new baseline.
+- **D-29z1224:** the round-370 reviewer Lows and architecture notes are recorded and not scheduled.
+- **D-29z1225:** PERF-11c is split into three stages:
+  - **11c-i (this round):** the group header leaf. Done first because it has the smallest grant and its jsdom rows are red at HEAD.
+  - **11c-ii:** committed status leaves the context value (SIG-R360). 28 test files read `status`/`statusSequence` off the value, so that stage carries a test-migration grant.
+  - **11c-iii:** the remaining `useArrangement()` leaves, and PERF2-FIRST-FRAME-LONGTASK.
+- **D-29z1226:** this task and the order after it (§6).
 
 **Read first:**
-- `lessons.md`. A reads 11, 12, 23, 26, 28, 30 and 58. C also reads 22, 29, 38, 56, 57, 59 and 60.
-- `b-round-369/sketch.patch.txt` (the dispatched sketch) and `b-round-369/sketch-review.md`.
+- `lessons.md`. A reads 11, 12, 23, 26, 28 and 58. C also reads 22, 29, 38, 56, 57, 59 and 60.
+- `b-round-370/sketch.patch.txt` (the dispatched sketch) and `b-round-370/sketch-review.md`.
 - Primitives:
-  - `AGENT_DISCOVERABLE_CODE.md` (new export `RouteTransition`);
-  - `FORWARDREF_COMPONENT.md` (a new component; it takes no ref, so plain function);
-  - `REACT_CONTEXT.md` (ChatContext);
-  - `API_ERROR_HANDLING.md` (a chunk-load failure takes the existing chat error path);
+  - `AGENT_DISCOVERABLE_CODE.md` (a new export `ArrangementGroupHeaderActions`);
+  - `FORWARDREF_COMPONENT.md` (an existing component's props change; no ref);
+  - `REACT_CONTEXT.md` (context consumers, ArrangementContext hook errors);
   - `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
 
 **L29 note:** untagged code text below is a new value, a row id or a loop-artifact path. Every fact about a current `store/` file carries `[K#]` (§8).
 
-**Not applicable:** reference-first, `product-designer`, the YouTube request and the Ableton conformance check. This is a pure performance round: no new control and no new user action.
-**Screen budget:** no persistent element is added. The only visible difference is that `/studio*` no longer fades in from opacity 0. C's row PAINT checks that the first paint shows the workspace.
+**Not applicable:** reference-first, `product-designer`, the YouTube request and the Ableton conformance check. This is a pure performance round: no new control, no new user action and no visible change.
+**Screen budget:** nothing visible is added or removed.
 
 ## Baseline
-- HEAD is `29f4b4d`, and gate 369 was skipped with that head [K1]. The tree is clean [K2].
+- HEAD is `f530e2d`, published by gate 370 [K1]. The tree is clean [K2].
 - Protected files: all pass their sha check [K10].
-- Frozen: every tracked file except the grants below is listed in `b-round-369/r370-frozen-sha256.txt` [K12]. C checks it at the start and the end.
-- `regression-last.json` is 2026-11-05 [K20], so REGRESSION is due on or after 2026-11-08, not now.
+- Frozen: every tracked file except the grants below is listed in `b-round-370/r371-frozen-sha256.txt` (1,257 entries) [K12]. C checks it at the start and the end.
+- `regression-last.json` is 2026-11-05 [K20], so REGRESSION is due at the first planning on or after 2026-11-08, not now.
 - **Today, at HEAD:**
-  - `app/root.tsx` imports `AnimatePresence` from framer-motion and `PageTransition` [K3]. It wraps every route, `/studio*` included, in `<AnimatePresence mode="wait"><PageTransition key=…>` [K3]. So the server HTML of `/studio-lab` carries inline `opacity:0` on `.page-transition-wrapper`, and the first paint waits for hydration and the fade.
-  - `app/contexts/ChatContext.tsx` has a value import `import * as signalR from '@microsoft/signalr'`. It is the only file in `app/` that imports signalr [K4]. `connect()` is reached only from `startSession` (`await connect()`) and from the reconnect timer (`connectRef.current()`) [K9]. Both follow a user action.
-  - `app/styles/app.css` targets `.page-transition-wrapper` twice (min-height, and the `:has(.studio-container)` override) [K6]. The class must stay.
-  - No test file under `app/`, `e2e/` or `perf/` names ChatProvider, PageTransition, AnimatePresence or `page-transition-wrapper` [K5].
-  - The three `res.js.*.encoded-bytes` rows of `perf/budgets.resources.json` are `record` [K8].
+  - `ArrangementGroupHeader` (the leaf) calls `useArrangement()` and computes `trackGroupSoloState(arrangement, group.id)` itself [K3]. So every context value change re-renders every group header: each status write and each arrangement edit, including edits outside the group (GATE361-S1).
+  - The wrapper `ArrangementGroupHeaderWithSelection` is a plain `memo` [K4]. StudioWorkspace rebuilds each folded group's overview and active-candidate arrays on every arrangement edit [K4], so the wrapper also re-renders on edits outside the group.
+  - The leaf is rendered at exactly one site, the wrapper [K5].
+  - `useArrangementPlaybackStoreContext` throws the text `useArrangementIsPlaying must be used within an ArrangementProvider` also for `useArrangementIsPlayingReader` [K6]. No test asserts that text [K7].
+  - fader-pointer-preview.test.tsx keys its `PARENT_NAMES` on the runtime name `'ArrangementGroupHeader'` [K8]. So the leaf must keep that name: it is **not** wrapped in `memo` and not renamed. Its parent wrapper is already memoised, so the leaf renders only when the wrapper does or when its own state changes.
+  - Five test files read the `ArrangementGroupHeader.tsx` source [K9]. All pass on the sketch (§0).
+  - The `/studio-lab` demo has no track groups, and the interactions perf spec never presses Ctrl+G. The fader perf spec groups Stems + SFX for its group fader rows [K13].
+  - **Browser baseline (B's probe at HEAD, both viewports)** [K25]:
+    - Ctrl+G on Music + Stems creates "Group 1".
+    - Group Solo goes off → on → off. Soloing the Music lane makes the group Solo `mixed`.
+    - Group Mute: on, then Ctrl+Z turns it off.
+    - Group Volume: ArrowDown 0 → −0.1, Ctrl+Z → 0.
+    - F2 rename "Drums" + Enter: the name updates and focus returns to the name button.
+    - With the group folded, muting SFX (outside the group) renders the header leaf **1** time and the wrapper **1** time.
 
-## 0. B's pre-check (L30, L37, L58)
+## 0. B's pre-check (L23, L30, L37, L58)
 | What | Command | Result |
 |---|---|---|
-| HEAD bytes (C's command) | `npx playwright test --config playwright.perf.config.ts studio-lab-resources` on a production build of HEAD | studio-lab **378,121**, home 264,641, studio-guard 286,109 (`b-round-369/perf-res-head.log`) [K14] |
-| Sketch bytes, with the new asserts | same command on the sketch | studio-lab **362,477**, home 250,526, studio-guard 270,648; all PASS (`perf-res-sketch-final.log`; the v1 sketch gave 362,494 in `perf-res-sketch-v1.log`) [K14] |
-| Mutant MU-CHAT-STATIC (ChatContext back to HEAD) | same command | the 3 encoded-bytes asserts FAIL: 378,149 / 264,669 / 286,137 (`mutants/mutant-MU-CHAT-STATIC-perf.log`) [K15] |
-| Paint (record) | `b-round-369/probe/paint-probe.mjs`, 5 fresh contexts each, median | FCP − DCL: HEAD 358 ms → sketch 6 ms (an earlier pair of builds: 352 → 44, `probe/paint-run1.log`); SSR `opacity:0` on HEAD 5/5, sketch 0/5 (`probe/paint-final.log`) [K17] |
-| Unit rows and mutants | `npx vitest run` on the 4 covering files | 23/23 PASS on the sketch (`sketch-covering.log`); the chat file passes under shuffle seeds 1, 7, 42 (`sketch-chat-shuffle.log`). Mutants: MU-CHAT-STATIC → CL1, CL2, CL4 red; MU-CHAT-IMPORT-OUTSIDE-TRY → CL4; MU-CHAT-ALWAYS-CONNECTED → CL3; MU-RT-NO-KEY → RT3; MU-RT-STORE-PLAIN → RT2; MU-RT-STUDIO-MOTION → RT1, RT3, RT4 (`mutants/*.log`) [K16] |
-| Sketch review (L58) | `tech-lead`, v1 then a delta review of the frozen sketch | 2 Mediums fixed in the sketch, the Lows ruled; reviewed sha = dispatched sha `338dbe40…` (`sketch-review.md`) |
-| Typecheck, Biome | `npx tsc --noEmit`; `npx biome check` on the changed files | rc 0 and rc 0. The Biome output has 5 pre-existing warnings: 3 × `noDangerouslySetInnerHtml` in root.tsx and 2 × `noArrayIndexKey` in ScrollReveal.tsx (`sketch-typecheck.log`, `sketch-biome.log`) |
-| Other test roots (L30) | `perf/lib` is not touched; `self-hosted-fonts.test.ts` and `store-focus-ring.test.ts` read `root.tsx` [K22] | both PASS on the sketch (in `sketch-covering.log`) |
-
-**Notes on the measurements:**
-- `encodedDataLength` includes response headers. The values were identical over the three runs of each spec [K14].
-- The long task near FCP (51–73 ms in 3 of 5 sketch runs) is hydration that now happens before the first paint instead of behind an invisible page. It is **record only**. PERF2-FIRST-FRAME-LONGTASK stays with PERF-11c.
+| New rows on HEAD | the two covering test files of §4 copied onto a HEAD copy | GH1, GH2, GH5 and L8d are **red**; GH3, GH4 and L8c are green (positive controls) (`b-round-370/head-new-rows.log`) [K14] |
+| Mutants on the sketch | `b-round-370/mutants.py` (each mutant applied, the two test files run, restored) | all 8 red as predicted (§4; `b-round-370/mutants/mutant-*.log`) [K15] |
+| Full suite on the sketch (L23 RETRO 305) | `npm run test:run` | 252 files and 3,703 tests pass (`b-round-370/precheck-full.log`) [K16] |
+| Typecheck, Biome, lint | `npx tsc --noEmit`; `npx biome check` on the 5 files; `npm run lint` | rc 0, rc 0, rc 0. Lint shows the repo's 205 pre-existing warnings (`sketch-typecheck.log`, `sketch-biome.log`, `sketch-lint.log`) |
+| Interactions perf spec, alone (L38) | `npx playwright test --config playwright.perf.config.ts studio-lab-interactions` on sketch **v1** | 1 passed, `failures []`, 95 asserts. All 264 deterministic rows are equal to `c-round-364/latest-interactions.json`. The demo has no group, so this spec cannot see the change (`perf-sketch.log`, `perf-sketch-rowcmp.txt`) [K17]. v1 → v2 changed only the comparator's form and added test rows (`sketch-v1-to-v2.diff.txt`) |
+| Fader perf spec, alone | `npx playwright test --config playwright.perf.config.ts studio-lab.perf` on sketch **v2** | 1 passed, `failures []`, 94 asserts. All deterministic rows are equal to `c-round-347/fader-perf-results/latest.json`, including the 26 group fader rows (`perf-fader-sketch.log`, `perf-fader-rowcmp.txt`) [K17b] |
+| Other test roots (L30) | `perf/lib` is not touched; e2e is not touched | n/a |
+| Consult (perf queue rule) | `performance-optimizer`, read-only, on v2 | Keep the sketch. The per-clip table loop is a small constant-factor overhead; it also runs in the preview-store selector on drag ticks. The solo map does no more work than HEAD. The 11c-ii premise still holds; MarkerRow needs a committed-status getter there. Recorded as `consults_round_371` |
+| Sketch review (L58) | `tech-lead`: v1, then a delta review of v2 | v1: 1 Medium (the comparator could silently ignore a new prop) fixed in v2 with a compile-checked equality table; Lows fixed or ruled. v2 approved, nothing new at Medium or above. Reviewed sha = dispatched sha `e82ad292…51bb` (`sketch-review.md`) |
 
 ## 1. What A changes (grants: exactly these files)
-1. **`app/contexts/ChatContext.tsx`.** Make signalr lazy:
-   - `import type { HubConnection } from '@microsoft/signalr'`;
-   - inside `connect()`'s existing `try`, after `setConnectionStatus('connecting')`: `const signalR = await import('@microsoft/signalr')`. Store it in a module-level `let loadedSignalR: typeof import('@microsoft/signalr') | null = null`;
-   - one module-level `isHubConnected(connection: HubConnection | null): boolean`. It replaces the four `state === signalR.HubConnectionState.Connected` compares.
-
-   Rules: no `any`, no type assertion and no string compare against the enum. A failed import lands in the existing `catch`, which sets `disconnected` and the existing error text. Everything else stays as it is: handlers, reconnect, `startSession`, `disconnect` and the context value.
-2. **`app/components/animations/RouteTransition.tsx` (new)** plus one export line in `app/components/animations/index.ts`:
-   - `RouteTransition({ pathname, isStudioPage, children })`;
-   - studio: `<div key={pathname} className="page-transition-wrapper">{children}</div>`;
-   - otherwise: exactly today's `<AnimatePresence mode="wait"><PageTransition key={pathname}>…`.
-3. **`app/root.tsx` (narrow grant, D-29z852 precedent):** byte-equal to `b-round-369/sketch-root.tsx.txt`.
-   - The two imports (`AnimatePresence`, `PageTransition`) become `import { RouteTransition } from '~/components/animations'`.
-   - The block becomes `<RouteTransition pathname={location.pathname} isStudioPage={isStudioPage}><Outlet /></RouteTransition>`.
-   - Nothing else changes. `isStudioPage` is the existing `location.pathname.startsWith('/studio')` [K3].
-4. **Tests (new files):**
-   - `app/components/animations/__tests__/route-transition.test.tsx`, rows RT1–RT4 (§3).
-   - `app/contexts/__tests__/chat-lazy-signalr.test.tsx`, rows CL1–CL4 (§3). Each test gets a fresh module graph: `vi.resetModules()` and `vi.doMock('@microsoft/signalr', …)` in `beforeEach`, and ChatContext is imported dynamically (sketch-review TL-2).
-5. **`perf/budgets.resources.json`:** three rows only. `res.js.studio-lab.encoded-bytes`, `res.js.home.encoded-bytes` and `res.js.studio-guard.encoded-bytes` become `mode: "assert"` with `{ "op": "<=", "value": 372000 }`, `258000` and `278000`, owner `PERF-11a`, and an appended note. Every other row is unchanged.
-6. **`docs/implementation/2026/quarter-IV/237-perf-root-diet-studio.md` (new; 237 is free [K11]):**
+A applies `b-round-370/sketch.patch.txt` with `patch -p1` from `store/`, after checking its sha256 against `b-round-370/sketch-dispatched.sha256`. A makes no other edit to these five files (row SKETCH-EQUAL).
+1. **`app/components/arrangement/ArrangementGroupHeader.tsx`:**
+   - The leaf no longer imports or calls `useArrangement`.
+   - New exported type `ArrangementGroupHeaderActions`: a `Pick` of 9 context callbacks.
+   - Two new props, `soloState: TrackGroupSoloState` and `actions: ArrangementGroupHeaderActions`.
+   - One TODO line: keep the leaf un-memoised (because of `PARENT_NAMES`).
+2. **`app/components/arrangement/StudioWorkspace.tsx`:**
+   - A per-group `trackGroupSoloStates` map (`useMemo` on `arrangement` and `trackRows`).
+   - One memoised `groupHeaderActions` object.
+   - Both are passed to the wrapper.
+   - The wrapper's `memo` gets `sameGroupHeaderWithSelectionProps`. It is driven by `GROUP_HEADER_WITH_SELECTION_PROP_EQUALITY: PropEquality<…>`, a mapped type with `-?`, so tsc rejects a missing or extra key. `overviewClips` and `activeCandidateTrackIds` are compared by content.
+   - `sameTrackGroupOverviewClips` compares clips through `TRACK_GROUP_OVERVIEW_CLIP_EQUALITY`.
+   - No `any`, no type assertion.
+3. **`app/contexts/ArrangementContext.tsx`:** `useArrangementPlaybackStoreContext(hookName: string)`. Each of its two callers passes its own name.
+4. **Tests (existing files, rows added):**
+   - `app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx`: rows GH1–GH5.
+   - `app/lib/arrangement/__tests__/context-hygiene.test.tsx`: rows L8c and L8d.
+5. **`docs/implementation/2026/quarter-IV/238-perf-group-header-leaf.md` (new; 238 is free [K11]):**
    - Georgian, with the TEMPLATE headings (L26);
-   - l.4 exactly `Completed (C round 370 PASS)` (L28);
-   - it records the measurements of §0, the 11b/11c split, and that 230 KB is not reachable inside the loop.
+   - l.4 exactly `**სტატუსი:** In Progress (stage 1 of 3; C round 371 PASS)`, the label form of docs 234–237 and the L28 multi-stage form;
+   - it records §0's measurements, the 11c-i/ii/iii split, and the browser baseline;
+   - it names only tests that exist.
 
 **Ruling lines (L4):**
-- `.page-transition-wrapper` on `/studio*`: the class stays (app.css [K6]) and wins over "remove the transition wrapper"; only the motion goes.
-- `/studio/$productId` (protected route): the route file does not change. The root change applies to it as well, and that is intended (the same full-screen Studio rule).
+- The leaf's runtime name: "keep `'ArrangementGroupHeader'` (fader-pointer-preview `PARENT_NAMES` [K8])" wins over "memo every leaf you touch" (L58's memo clause). The wrapper is the memo boundary.
+- `ArrangementContextValue`'s shape: unchanged in this round. Removing `status` is 11c-ii.
 
 **Behaviour that must not change (neighbour risk):**
-- The store pages keep their fade (RT2; C row FADE).
-- Navigating from the store to the Studio loses the store page's exit fade. This is accepted: it is the smallest honest behaviour for "no framer transition on `/studio*`", because the studio branch is outside `AnimatePresence`.
-- Navigating from the Studio to the store plays the store's enter fade, as on a cold load.
-- Chat (`/support`, ChatWidget) works the same after the first `startSession`; the backend is unavailable in the cloud (CL rows cover it in jsdom).
+- Group Solo, Mute, Volume (drag, keys, double-click reset, Undo), rename (F2, Enter, Esc, blur), fold, overview blocks and their selection marks, focus restore when a focused group row unmounts.
+- Group fader perf rows (asserts ≤ 3 per move, 0 restarts).
 
 ## 2. A: checks (speed rules)
-- Run `npm run typecheck`, `npm run lint`, and `npx vitest run` on the covering files:
-  - `app/components/animations/__tests__/route-transition.test.tsx`;
-  - `app/contexts/__tests__/chat-lazy-signalr.test.tsx`;
-  - `app/lib/__tests__/self-hosted-fonts.test.ts`;
-  - `app/lib/__tests__/store-focus-ring.test.ts`.
-- Run the perf spec `npx playwright test --config playwright.perf.config.ts studio-lab-resources` **alone** (L38). The three asserts must PASS. Report the three values.
-- Ask the code-reviewer once (8 files change), and send any later edit back to it (L11).
-- A STOP is the L11 form: a red covering file, an assert that fails, or a sketch line that does not fit.
+- Run `npm run typecheck` and `npm run lint`.
+- Run `npx vitest run` on the covering files:
+  - `selection-wrappers-render.test.tsx`;
+  - `context-hygiene.test.tsx`;
+  - `fader-pointer-preview.test.tsx`;
+  - `track-group-collapse-ui.test.tsx`;
+  - `track-group-mix-ui.test.tsx`;
+  - `track-groups-ui.test.tsx`;
+  - `group-volume-db.test.tsx`;
+  - `affordance-colour-ui.test.tsx`;
+  - `mixer-onstate-colour-ui.test.tsx`;
+  - `studio-theme-obsidian.test.tsx`;
+  - `studio-focus-ring.test.ts`;
+  - `strings.test.ts`;
+  - `drag-preview-render.test.tsx`;
+  - `fader-style-ui.test.tsx`;
+  - `fader-touch.test.tsx`;
+  - `clip-gain-waveform.test.tsx`;
+  - `grid-snap-menu.test.tsx`;
+  - `header-meter-envelope-strings-ui.test.tsx`;
+  - `track-volume-db.test.tsx`.
+
+  These are the 19 app test files that name the group header, its testids or its actions (B's grep; all passed in `precheck-full.log`). All live under `app/lib/arrangement/__tests__/`.
+- Do not run the perf specs: B ran both, and C runs them alone.
+- Ask the code-reviewer once (6 files change), and send any later edit back to it (L11).
+- A STOP takes the L11 form: a red covering file, a test above 50 % of its timeout, or a sketch hunk that does not apply.
 
 ## 3. C: what to verify
-C writes `c-round-370.md` and `c-round-370.json` as it goes, with **all L57 fields**:
+C writes `c-round-371.md` and `c-round-371.json` as it goes, with **all L57 fields**:
 - `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`;
 - an `origin` for every finding;
-- `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch` (= `b-round-369/mutants/`), `mutantRedOnTree`;
+- `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch` (= `b-round-370/mutants/`), `mutantRedOnTree`;
 - `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed`, `affectedChecksRunOnSketch`.
 
-Then `python3 -I tools/l57-check.py c-round-370.json c-round-370/l57-check.txt` must exit 0. Write `c-round-370/progress.json` after every row (L59).
+Then `python3 -I tools/l57-check.py c-round-371.json c-round-371/l57-check.txt` must exit 0. Write `c-round-371/progress.json` after every row (L59).
 
 | Row | Check | PASS means |
 |---|---|---|
-| **SOURCE-SCOPE** | At the start and the end: `git status --short --untracked-files=all` lists only the §1 files (4 changed, 4 new). `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-369/r370-frozen-sha256.txt` from `store/` gives rc 0. The protected sha check gives rc 0 | Nothing outside the grants changed |
-| **CLAIMS** | Run `bash b-round-369/claims-370.sh` from the loop root first (L56). Compare with `b-round-369/claims-370-output.txt` | On A's tree, K3, K4, K5 and K8 may differ only as `b-round-369/claims-370-sketch-output.txt` shows (the same script on the sketch, `STORE=/home/runner/b369-sketch`), and K2 shows `29f4b4d` with 8 status lines (the 4 changed and the 4 new files of §1). K11 reads `K11 doc 237 free: 1 last: 237-perf-root-diet-studio.md`, because A creates that file (§1 item 6; the sketch has no doc). Every other line is equal (K12 stays at 0 failing lines) and there is no `MISSING` |
-| **ROOT-NARROW** | `diff app/root.tsx ../tmp/studio-real-loop/b-round-369/sketch-root.tsx.txt` | No output |
-| **CHAT-SHAPE** | Read the ChatContext diff | Type-only import, `await import` inside the `try`, one `isHubConnected`, no `any`, no `as`, no string compare to `'Connected'`, nothing else changed |
-| **UNIT** | Run the 4 covering files, and the chat file again with `--sequence.shuffle --sequence.seed=42` | All pass. RT1–RT4 and CL1–CL4 exist as §4 states |
-| **MUTANTS-TREE** | On a copy of A's tree under `c-round-370/`: (a) ChatContext back to HEAD; (b) the `key` removed from the studio div; (c) the studio branch returns the motion branch; (d) the `await import` moved before the `try` | (a) CL1, CL2 and CL4 red; (b) RT3 red; (c) RT1 red; (d) CL4 red. Record as `mutantRedOnTree` |
-| **PERF-BYTES** | The perf spec `studio-lab-resources`, run **alone** (L38) | The three encoded-bytes asserts PASS. Record the values (B's sketch: 362,477 / 250,526 / 270,648). A studio-lab value more than 1,000 B away from 362,477 is recorded with its cause |
-| **NO-SIGNALR (browser)** | Fresh context at 1440×900 and 1280×720, on the production server of the perf run or on `:5173`. List the Script responses of `/studio-lab` and `/` | No loaded script contains the signalr library string `Server timeout elapsed without receiving a message from the server.` On HEAD's build that string is in the shared root chunk |
-| **SSR-OPACITY (browser/HTTP)** | GET `/studio-lab`, `/studio/middle-east` and `/` | `.page-transition-wrapper` has no inline `opacity:0` on the two studio routes and still has it on `/` |
-| **PAINT (browser, record)** | Fresh context at both viewports, `/studio-lab`, 3 runs: DCL, FCP, the screenshot at FCP + 100 ms | Record the medians (B's final pair: FCP − DCL 6 ms on the sketch, 358 ms at HEAD). The screenshot shows the workspace, not a blank page. Wallclock values are never a FAIL |
-| **FADE (browser)** | On `/`, a store link to `/about`, then back | The store page still fades: the wrapper opacity is < 1 shortly after navigation and reaches 1 |
-| **NAV (browser)** | `/` → the nav "Studio" link → `/studio-lab` → `← CZABA` back | Both moves work; the workspace renders; no console error other than the cloud-expected network errors |
-| **G370-AUTH (browser)** | A fresh anonymous context at both viewports. Warm up first (L38) | `/studio-lab` shows the workspace and the demo state, and `localStorage.auth_user` is null. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. `/api/studio-token` returns 401 with no token (a fake bearer: 403 with the mock, else a fail-closed 500 under `blocked`). No token appears in any body |
-| **STUDIO-SMOKE-370 (browser)** | After `Demo collection ready` (L48), at both viewports: <ul><li>add `Bass` with Enter;</li><li>Play: the position is ≥ 00:01.000 after 1.5 s;</li><li>drag the clip by its name bar to the lane below, then Ctrl+Z (a cross-lane move reads "Undo: Move to track — <lane>");</li><li>export a WAV</li></ul> | As stated. The WAV is RIFF/WAVE, 48 kHz, with peak > 0 |
-| **CHAT (blocked)** | A real chat connect needs the backend hub | BLOCKED, "backend unavailable in cloud". It is never PASS. CL2–CL4 cover the client path |
-| **DOCS** | Doc 237: l.4 byte for byte; the TEMPLATE headings as a subsequence; every test it names exists (L26) | As stated |
-| **RT-FIX** | `diff b-round-369/retro-369-before-370.md retros/retro-369.md` and `diff b-round-369/lessons-before-370.md lessons.md` | Only the §10 L58 bullet and `lessons.md` l.3 changed. They name R11-P1e, the three chain ranges and the dropped phrases. `lessons.md` is still 60 lines |
+| **SOURCE-SCOPE** | At the start and the end: `git status --short --untracked-files=all` lists only the §1 files (5 changed, 1 new doc). `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-370/r371-frozen-sha256.txt` from `store/` gives rc 0. The protected sha check gives rc 0 | Nothing outside the grants changed |
+| **CLAIMS** | Run `bash b-round-370/claims-371.sh` from the loop root first (L56). Compare with `b-round-370/claims-371-output.txt` (HEAD) and `b-round-370/claims-371-sketch-output.txt` (the same script on the sketch) | On A's tree, K3, K4, K6, K7, K8, K24 and K26 equal the sketch output (K26: 0 failing lines). K2 reads `f530e2d status-lines: 6`. K11 reads `doc 238 free: 1 last: 238-perf-group-header-leaf.md`. Every other line equals the HEAD output, with K12 at 0 failing lines and no `MISSING` |
+| **SKETCH-EQUAL** | From `store/`: `sha256sum -c ../tmp/studio-real-loop/b-round-370/sketch-files-sha256.txt` (the five patched files of B's sketch) | rc 0, all five OK. A `git diff` byte compare with `sketch.patch.txt` is optional and never a FAIL by itself (git config can change the headers) |
+| **UNIT** | The 19 covering files of §2, plus `selection-wrappers-render.test.tsx` with `--sequence.shuffle --sequence.seed=42` | All pass. GH1–GH5, L8c and L8d exist as §4 states |
+| **MUTANTS-TREE** | On a copy of A's tree under `c-round-371/` (never in `store/`, L60), at least: MU-GH-CTX, MU-GH-DEFAULT-MEMO, MU-GH-COMPARATOR-NO-GROUP and MU-L8-NAME (`python3 -I b-round-370/mutants.py <copy> <loop>/c-round-371/mutants`: the first argument is the tree and the second is the output folder; never leave the default output, which is B's `b-round-370/mutants/`) | Each is red on the rows §4 predicts. Record them as `mutantRedOnTree` |
+| **PERF-FADER** | `npx playwright test --config playwright.perf.config.ts studio-lab.perf`, run **alone** (L38) | 1 passed, `failures []`. The 26 group fader deterministic rows equal B's sketch values (`b-round-370/perf-fader-rowcmp.txt`: move-components-max 1, per-move 0.75, release-commits 1, restarts 0, at 1× and 6×). A deterministic row that differs from B's v2 sketch is recorded with its cause |
+| **PERF-INTERACT** | `npx playwright test --config playwright.perf.config.ts studio-lab-interactions`, run **alone** | 1 passed, `failures []` (the budgets file is unchanged). Deterministic rows: record. B's v1 values equal `c-round-364`; a difference is recorded, never a FAIL by itself (`record — v2 not run on sketch: v2 changes only the comparator form; the demo has no group`) |
+| **GROUP-BEHAVIOUR (browser)** | `b-round-370/probe/group-probe.mjs` on `http://127.0.0.1:5173` (A's tree), output under `c-round-371/`. Fresh context at 1440×900 and 1280×720. Warm up first (L38) | Every behaviour field equals B's HEAD run `b-round-370/probe/group-head.json` [K25]: group created, solo off → on → off, member solo `mixed` then `off`, mute true → Ctrl+Z false, volume 0 → −0.1 → Ctrl+Z 0, rename "Drums" with focus back on `arrangement-group-name`, folded `aria-expanded="false"`, outside mute pressed. Screenshots at both viewports |
+| **GROUP-RENDERS (browser, record)** | The same probe's `rendersOnOutsideMute` | `record — not run on sketch: a second dev server for the sketch needs its own Vite cache, which this planning did not run`. Expected header 0 and wrapper 0 (HEAD: 1 and 1). If either is > 0 on A's tree, record it with the commit's names; jsdom GH2 is the assert |
+| **G371-AUTH (browser)** | A fresh anonymous context at both viewports. Warm up first (L38) | `/studio-lab` shows the workspace and the demo state, and `localStorage.auth_user` is null. `/studio/middle-east` shows "Sign in required", no workspace and 0 `audio[src]`. `/api/studio-token` returns 401 with no token (a fake bearer: 403 with the mock, else a fail-closed 500 under `blocked`). No token appears in any body |
+| **STUDIO-SMOKE-371 (browser)** | After `Demo collection ready` (L48), at both viewports: <ul><li>add `Bass` with Enter;</li><li>Play: the position is ≥ 00:01.000 after 1.5 s;</li><li>drag the clip by its name bar to the lane below, then Ctrl+Z (the Undo title reads "Undo: Move to track — <lane>");</li><li>export a WAV</li></ul> | As stated. The WAV is RIFF/WAVE, 48 kHz, with peak > 0 |
+| **DOCS** | Doc 238: l.4 byte for byte (§1 item 5); the TEMPLATE headings as an in-order subsequence; every test it names exists (L26). `grep -rn 'C round [0-9]* pending' docs/implementation` gives 0 hits | As stated |
 
 - **Gate rows:** full vitest, typecheck, build, Biome, `npm run verify` and the e2e smoke. List them under `"gate"` and in `gateChecksNamed`, never under `"passed"`.
-- **`browserVerified`:** true only if NO-SIGNALR, SSR-OPACITY, PAINT, FADE, NAV, G370-AUTH and STUDIO-SMOKE-370 ran at both viewports. CHAT is backend-blocked and does not make it false.
+- **`browserVerified`:** true only if GROUP-BEHAVIOUR, G371-AUTH and STUDIO-SMOKE-371 ran at both viewports. GROUP-RENDERS is record-only.
 
-## 4. Unit rows (the sketch has all eight; A keeps them, equal or stronger)
-| Row | Asserts | Mutant that turns it red |
-|---|---|---|
-| RT1 | `renderToString` with a studio path: the wrapper class is present, and no `opacity:0` | the studio branch returns the motion branch |
-| RT2 | a store path inside `MemoryRouter`: the wrapper class is present, with inline `opacity:0` | the store branch returns the plain div |
-| RT3 | studio `/studio/a` → `/studio/b`: the page element is a new node | the `key` removed |
-| RT4 | the same studio path re-rendered: the page node is the same | the studio branch returns the motion branch (MU-RT-STUDIO-MOTION) |
-| CL1 | every `@microsoft/signalr` import line in the source is `import type`, and `await import('@microsoft/signalr')` is present | the HEAD value import |
-| CL2 | mounting the provider loads the mocked module 0 times; `startSession` loads it once, reaches `connected` and invokes `JoinSession` | the HEAD value import (it loads at module load) |
-| CL3 | a hub whose state is not `Connected`: `invoke` is never called | `isHubConnected` returns true |
-| CL4 | the mocked import throws: `connectionStatus` is `disconnected`, the error is exactly `Failed to connect to chat. Please try again.` (the existing connect-catch text), and `invoke` is not called | the import moved before the `try` (startSession's catch text then wins) |
+## 4. Unit rows (the sketch has all seven; A keeps them, equal or stronger)
+| Row | Asserts | Red on HEAD | Mutant that turns it red |
+|---|---|---|---|
+| GH1 | folded group, `setStatus`: Transport renders (> 0); the wrapper and the leaf `ArrangementGroupHeader` render 0 | yes | MU-GH-CTX, MU-GH-ACTIONS-INLINE |
+| GH2 | folded group, `toggleTrackMute('music')` (outside the group): music is muted, the undo label changed, StudioWorkspace renders; the wrapper and the leaf render 0; the overview starts are unchanged | yes | MU-GH-CTX, MU-GH-DEFAULT-MEMO, MU-GH-ACTIONS-INLINE |
+| GH3 | nudge of a member clip: the leaf renders; the overview block's `data-overview-start` follows the new start | no (positive control) | MU-GH-CLIP-START-IGNORED |
+| GH4 | member solo → group `data-solo`/`aria-pressed` `mixed`, the leaf renders; then off; group Solo click → `on`; group Mute click → `aria-pressed` true | no (positive control) | MU-GH-SOLO-OFF, MU-GH-COMPARATOR-NO-SOLO, MU-GH-COMPARATOR-NO-GROUP |
+| GH5 | two groups; muting the second renders exactly 1 header leaf; only that group's Mute is pressed | yes ("expected 2 to be 1") | MU-GH-CTX, MU-GH-DEFAULT-MEMO, MU-GH-COMPARATOR-NO-GROUP |
+| L8c | `useArrangementIsPlaying` outside a provider throws its own name | no | — |
+| L8d | `useArrangementIsPlayingReader` outside a provider throws its own name | yes | MU-L8-NAME |
 
 ## 5. Neighbour risk
-- **The chat reconnect path** (`onclose` → timer → `connectRef.current()` [K9]) now awaits the import, which is cached after the first load. `performance-optimizer` (opinion) notes that the path already captures a stale `state.session`, so it is not a regression probe.
-- **A slow chunk on the first chat open** adds one fetch to the first connect only, inside the existing `connecting` state.
-- **A failed chunk load** shows the existing connect error. Some browsers cache a failed dynamic import until reload, so a retry may fail again. This is recorded (sketch-review TL-9); there is no code for it in 11a.
-- **Unmount during connect:** a connection built after the provider unmounts is never stopped. This is pre-existing at HEAD around `start()`, and the import widens the window slightly. It is deferred as B-R369-CHAT-UNMOUNT-RACE (Low).
-- **Future Studio features** add bytes to the studio-lab route. The 372,000 assert then fails, and B rules a new budget with a measurement. That is the purpose of the row, not a reason to drop it.
+- **A prop added to the group header later:** tsc rejects the equality table until the new key is listed (TL-1 fix). A field added to `TrackGroupOverviewClip` is caught the same way.
+- **A callback that loses identity stability** (a new dependency in its chain): GH1, GH2 and GH5 turn red. `tech-lead` traced all 13 callbacks as stable at HEAD.
+- **The volume fader preview** runs through the mix-draft store and `useRelativeFaderDrag`'s ref, not through the parent render. The fader perf rows are unchanged on the sketch.
+- **Ruled, not changed** (Lows): B-R370-GH-ACTIVE-CANDIDATES-ROW (a clip-less track joining a folded group changes only the candidate list); expanded groups are trivially stable; B-R370-HOOK-ERROR-NAMES (other wrapper hooks name their store hook).
 
-## 6. Order after this round (D-29z1222)
+## 6. Order after this round (D-29z1226)
 1. REGRESSION at the first planning on or after 2026-11-08.
-2. PERF-11c.
+2. PERF-11c-ii (status out of the context value), then PERF-11c-iii.
 3. PERF-11b, if root or Saba answers.
 4. PERF-12…15, then SYS-R2-FAKE-FIDELITY and SYS-CLOCK-DETERMINISM.
 5. STEM-LANES, then SYS-1…3.
 6. STORE-2b…5, then REVIEW-RECOMMENDATIONS and T12-ADVANCED.
 7. The phase-2 entries, under the skip rule.
 
-SYS-R369 runs when root answers ARCH-CHECKPOINT-PERF9-STEM-CACHE.
+SYS-R369 runs when root answers ARCH-CHECKPOINT-PERF9-STEM-CACHE. RETRO is due at about round 384, or at the end of STUDIO-PERFORMANCE.
 
 ## 7. Root notes
-- **For root and Saba:** `b-round-369/root-request-perf11b-firebase-lazy.md`. Lazy Firebase needs a 2-line edit of the protected `app/lib/auth.ts` [K7] (estimated −36 KB on every page). It asks for option (a), (b) or (c).
-- The perf-plan's 230 KB target is not reachable inside the loop.
-- The open root requests are unchanged:
-  - ARCH-CHECKPOINT-PERF9-STEM-CACHE (non-blocking);
+- No new root request. The open ones are unchanged:
+  - ROOT-REQ-PERF11B-FIREBASE-LAZY (`b-round-369/root-request-perf11b-firebase-lazy.md`);
+  - ARCH-CHECKPOINT-PERF9-STEM-CACHE;
   - ROOT-REQ-VITEST-PERF-INCLUDE (= GATE304-M1);
   - ROOT-REQ-B-RETRO-CONSULTS.
+- After C PASS, this round is ready for the gate: 5 source/test files and 1 doc.
 
 ## 8. Claims (L29 + L56)
-Run `bash b-round-369/claims-370.sh` from the loop root. The expected output at HEAD is `b-round-369/claims-370-output.txt`, and on the sketch it is `b-round-369/claims-370-sketch-output.txt`.
+Run `bash b-round-370/claims-371.sh` from the loop root. The expected output at HEAD is `b-round-370/claims-371-output.txt`, and on the sketch it is `b-round-370/claims-371-sketch-output.txt`.
 
 | Tag | Claim |
 |---|---|
-| K1 | gate 369 skipped, head `29f4b4d` |
+| K1 | gate 370 published `f530e2d` |
 | K2 | HEAD and the status line count |
-| K3 | root.tsx: the framer and PageTransition imports, the AnimatePresence block, the `isStudioPage` definition |
-| K4 | the ChatContext value import; one file in `app/` imports signalr |
-| K5 | 0 test files name ChatProvider, PageTransition, AnimatePresence or `page-transition-wrapper` |
-| K6 | the 2 app.css wrapper rules |
-| K7 | auth.ts's static firebase import, and auth.ts is protected |
-| K8 | the three `res.js` encoded rows are `record` at HEAD |
-| K9 | the 2 `connect` call sites |
+| K3 | the leaf's `useArrangement` lines and its own `trackGroupSoloState(arrangement, …)` |
+| K4 | the wrapper's plain `memo`; the per-edit overview and candidate arrays |
+| K5 | the one leaf render site |
+| K6 | the playback-store error text and the no-argument lines (the definition plus 2 callers) |
+| K7 | 0 tests assert the old text at HEAD |
+| K8 | the test files keyed on the runtime name `'ArrangementGroupHeader'` |
+| K9 | the 5 test files that read `ArrangementGroupHeader.tsx` |
 | K10 | the protected sha check |
-| K11 | doc 237 is free, and the last doc number |
+| K11 | doc 238 is free, and the last doc number |
 | K12 | the frozen list check |
-| K13 | `useSmoothScroll` starts a Lenis rAF loop (the candidate) |
-| K14 | HEAD and sketch bytes from the perf logs |
-| K15 | the mutant perf rows that fail |
-| K16 | the mutant unit reds |
-| K17 | the paint medians |
+| K13 | no group in the demo or in the interactions spec; the fader spec's group step |
+| K14 | the new rows that are red on HEAD |
+| K15 | the mutant reds |
+| K16 | the full suite on the sketch |
+| K17, K17b | the interactions (v1) and fader (v2) perf runs on the sketch |
 | K18 | every cited artifact exists |
 | K19 | the lessons line count |
 | K20 | the regression-last date |
-| K21 | the round-369 archive sha |
-| K22 | the 2 covering tests that read root.tsx |
+| K21 | the round-370 archive sha |
+| K22 | the l57 check on `c-round-370.json` |
+| K23 | SS8a exists |
+| K24 | the `useArrangement()` consumer files (11c-iii input) |
+| K25 | B's HEAD browser probe, both viewports |
+| K26 | the five granted files equal B's sketch (`b-round-370/sketch-files-sha256.txt`; HEAD 5 failing lines, sketch 0) |

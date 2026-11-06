@@ -1,0 +1,96 @@
+diff --git a/app/contexts/ChatContext.tsx b/app/contexts/ChatContext.tsx
+index e992561..788d11e 100644
+--- a/app/contexts/ChatContext.tsx
++++ b/app/contexts/ChatContext.tsx
+@@ -1,4 +1,4 @@
+-import * as signalR from '@microsoft/signalr';
++import type { HubConnection } from '@microsoft/signalr';
+ import { createContext, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+ import type {
+   ChatConnectionStatus,
+@@ -26,6 +26,16 @@ const initialState: ChatState = {
+ 
+ const ChatContext = createContext<ChatContextValue | undefined>(undefined);
+ 
++let loadedSignalR: typeof import('@microsoft/signalr') | null = null;
++
++function isHubConnected(connection: HubConnection | null): connection is HubConnection {
++  return (
++    connection !== null &&
++    loadedSignalR !== null &&
++    connection.state === loadedSignalR.HubConnectionState.Connected
++  );
++}
++
+ interface ChatProviderProps {
+   children: ReactNode;
+ }
+@@ -61,7 +71,7 @@ function transformApiSession(apiSession: ChatSessionResponse): ChatSession {
+ export function ChatProvider({ children }: ChatProviderProps) {
+   const { user, isAuthenticated } = useAuth();
+   const [state, setState] = useState<ChatState>(initialState);
+-  const connectionRef = useRef<signalR.HubConnection | null>(null);
++  const connectionRef = useRef<HubConnection | null>(null);
+   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+   const connectRef = useRef<() => void>(() => {});
+ 
+@@ -70,7 +80,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
+   }, []);
+ 
+   const setupSignalRHandlers = useCallback(
+-    (connection: signalR.HubConnection) => {
++    (connection: HubConnection) => {
+       connection.on('ReceiveMessage', (message: ChatMessageResponse) => {
+         setState((prev) => {
+           const messageExists = prev.messages.some((m) => m.id === message.id);
+@@ -128,6 +138,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
+       const hubUrl = apiClient.getSignalRHubUrl();
+       const accessToken = apiClient.getAccessToken();
+ 
++      const signalR = await import('@microsoft/signalr');
++      loadedSignalR = signalR;
+       const connection = new signalR.HubConnectionBuilder()
+         .withUrl(hubUrl, {
+           accessTokenFactory: accessToken ? () => accessToken : undefined,
+@@ -201,10 +213,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
+ 
+         await connect();
+ 
+-        if (
+-          connectionRef.current &&
+-          connectionRef.current.state === signalR.HubConnectionState.Connected
+-        ) {
++        if (isHubConnected(connectionRef.current)) {
+           await connectionRef.current.invoke('JoinSession', apiSession.id);
+         }
+       } catch (error) {
+@@ -251,7 +260,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
+     if (!state.session || !connectionRef.current) return;
+ 
+     try {
+-      if (connectionRef.current.state === signalR.HubConnectionState.Connected) {
++      if (isHubConnected(connectionRef.current)) {
+         await connectionRef.current.invoke('StartTyping', state.session.id);
+       }
+     } catch (error) {
+@@ -263,7 +272,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
+     if (!state.session || !connectionRef.current) return;
+ 
+     try {
+-      if (connectionRef.current.state === signalR.HubConnectionState.Connected) {
++      if (isHubConnected(connectionRef.current)) {
+         await connectionRef.current.invoke('StopTyping', state.session.id);
+       }
+     } catch (error) {
+@@ -274,10 +283,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
+   const closeSession = useCallback(async () => {
+     if (!state.session) return;
+ 
+-    if (
+-      connectionRef.current &&
+-      connectionRef.current.state === signalR.HubConnectionState.Connected
+-    ) {
++    if (isHubConnected(connectionRef.current)) {
+       try {
+         await connectionRef.current.invoke('LeaveSession', state.session.id);
+       } catch (error) {

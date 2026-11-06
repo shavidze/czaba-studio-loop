@@ -1,0 +1,65 @@
+Sketch reviewed: sha256 ff3671beb05a22585f502051782627e26c86e197851410d8794989039c997f09 (hash matches).
+
+**Verdict: approve for round 371.** I found nothing Critical or High: one Medium (comparator maintenance) and six Low. This was read and grep only; I ran no tests, tsc or builds. Where I say "B's log", I am using the evidence B already gathered.
+
+**1. Can the comparator skip a needed render? No, at this sketch.**
+- **Prop coverage:** `ArrangementGroupHeaderWithSelectionProps` has 15 props: 12 from the Omit plus overviewClips, overviewGroupId and activeCandidateTrackIds. `sameGroupHeaderWithSelectionProps` (StudioWorkspace.tsx:800-821) compares exactly those 15. `key` is not a prop. The leaf has no other inputs: everything it took from `useArrangement()` is now `soloState` or `actions`.
+- **`group` identity:** `row.group` is the same object as in `arrangement.groups`. Neither `groupMap` nor `arrangementGroups` clones (groups.ts:48-54), and `allTrackRows` is `useMemo(trackGroupRows(arrangement))`. `setTrackGroupMix` (groups.ts:112-135) replaces only the target group and leaves siblings untouched. So a change to this group's volume, mute, solo or name gives a new `group` and a render, while an edit elsewhere keeps the same object. GH4's mute click covers this path.
+- **Stale closures after a skipped render:** the wrapper's selectors keep the previous `committedOverviewClips` and `activeCandidateTrackIds`. These only reach `includes(...)` and `useEqualityStableSelector`, which use content, never identity, so old arrays with equal content give the same results. The `blocks` useMemo is keyed on the selector output, which is held stable, so it does not care whether the prop identity changed.
+- **`sameTrackGroupOverviewClips`** compares all four fields of `TrackGroupOverviewClip` (groups.ts:224-229), so it is complete today.
+- **Volume fader gesture:** `useRelativeFaderDrag` keeps the latest options in `optionsRef` (updated in an effect), and its callbacks read `getArrangement()` fresh. `ArrangementMixFader` subscribes to the draft store itself through `useSyncExternalStore`, so the live preview does not depend on the parent rendering.
+- **Rename editor:** `draft` is the leaf's own state, so it renders whatever the parent memo decides.
+- **Focus restore:** `recordFocusedRowDetach` has `[]` deps, and `attachRowNode` depends only on `group.id`.
+- **`soloState`:** it is computed from the same committed `arrangement` that the leaf read before, so behaviour is unchanged. The map covers only visible rows, but hidden group rows are not rendered anyway.
+
+**2. Are the 9 callbacks stable? Yes, all of them, checked by reading the dependency arrays at HEAD, not only by the green tests.**
+- `getArrangement` and `isPointerGestureActive` have `[]` deps.
+- `setStatus` depends on `flushStatusPreview`, which depends on `statusPreviewStore` (created once with useState).
+- `toggleGroupMute` and `toggleGroupSolo` depend on `applyEdit` and `refuseEditDuringGesture`. `refuseEditDuringGesture` depends on `setStatus`. `applyEdit` depends on the three `flushPending*` functions (each depends on `updateHistory`, which depends on `previewStore`) and on `syncPlayback`. `syncPlayback` depends on `startGraph`, which depends on `fillLoopIterations`, `fillMetronomeHorizon` and `releaseRetiredGraphs` (ArrangementContext.tsx:1240), all of which bottom out in `[]`.
+- `previewVolumeTarget`, `commitVolumeTarget`, `beginVolumeTargetGesture` and `blurVolumeTarget` depend on stores, refs-only callbacks, `claimPointerGesture` and `beginPointerGesture`. `beginPointerGesture` depends on `rewriteStoppedTruth`, which depends on `describeSpaceStart`, which depends on `rangeStore`.
+- I found no `arrangement`, `status` or other per-render value anywhere in these chains.
+- The wrapper's own callback props are stable too: `selectTrackRow`, `renameTrackGroupRow` and `toggleTrackGroupCollapse` depend on `replaceTrackSelection` (`[]`) and/or `rangeStore` (directly or via `setTrackGroupsCollapsed`), and `recordFocusedRowDetach` has `[]`.
+- If anything in these chains becomes unstable later, GH1 and GH2 go red, because the comparator includes `actions` (B's MU-GH-ACTIONS-INLINE log shows this).
+
+**Findings**
+
+1. **Medium – comparator maintenance hazard, in two places (StudioWorkspace.tsx:738-753 and :800-821).**
+   - The props type comes from `ComponentProps<typeof ArrangementGroupHeader>`. A new leaf prop flows into the wrapper's type but not into the hand-written `&&` chain, so it is silently ignored and the header renders stale. That is a wrong-UI bug, not just a performance one.
+   - `sameTrackGroupOverviewClips` lists the four fields by hand, so a fifth field added to `TrackGroupOverviewClip` would be ignored the same way.
+   - **Smallest guard, checked at compile time with no type assertion:** a mapped equality table that tsc refuses if any key is missing. Default everything to `Object.is`, and override only `overviewClips` and `activeCandidateTrackIds`:
+     ```ts
+     type PropEquality<P> = { [K in keyof P]-?: (a: P[K], b: P[K]) => boolean };
+     const GROUP_HEADER_PROP_EQUALITY: PropEquality<ArrangementGroupHeaderWithSelectionProps> = { group: Object.is, /* …all 15… */ };
+     ```
+     Run it with a generic `for (const key in table)` helper. Please confirm that helper compiles under strict mode without a cast. If it does not, a bare `Record<keyof ArrangementGroupHeaderWithSelectionProps, true>` constant placed next to the explicit chain still forces whoever adds a prop to look at it.
+     - **Do not** iterate `Object.keys(next)`: getting typed keys that way needs an assertion, which the project rules ban.
+   - For the clip fields, a similar `Record<keyof TrackGroupOverviewClip, true>` placed next to `sameTrackGroupOverviewClips` is enough.
+   - I would not use a runtime test as the main guard.
+
+2. **Low – no row for sibling-group isolation (selection-wrappers-render.test.tsx:368+).** The fixture has only one group. Nothing shows that muting or renaming group B renders group A zero times. The code path is correct (see `setTrackGroupMix`), but a GH5 with two groups would pin it.
+
+3. **Low – no mutant or row where `activeCandidateTrackIds` alone changes.** That only happens when a track with no clips joins or leaves a folded group while the group object stays the same: `track.groupId` changes, `group` does not, and `overviewClips` has the same content. Then `sameTrackIdList` is the only comparison that catches it. A mutant that sets that comparison to `true` would probably survive all six rows. This is optional, since it is an edge case.
+
+4. **Low – no named mutant for "comparator ignores `group`".** GH4's mute click would turn red, so this is covered implicitly. Adding it to the mutant list would make that explicit.
+
+5. **Low – GH1 and GH2 cover only a folded group.** An expanded group gets the constant `NO_TRACK_GROUP_OVERVIEW_CLIPS` and `NO_ACTIVE_CANDIDATE_TRACK_IDS`, so it is trivially stable. It is still untested.
+
+6. **Low – the leaf name is load-bearing.** The leaf is deliberately left un-memoised so it stays visible as `'ArrangementGroupHeader'` in fader-pointer-preview.test.tsx:217-223 `PARENT_NAMES`. That is correct, but anyone who later wraps the leaf in `memo` could quietly weaken that test. A one-line TODO at the leaf, or adding `ArrangementGroupHeaderWithSelectionInner` to `PARENT_NAMES`, would remove the trap.
+
+7. **Low – error text (Q5).** A `hookName` parameter is fine (ArrangementContext.tsx:4553). Typing it as the literal union `'useArrangementIsPlaying' | 'useArrangementIsPlayingReader'` would be a nit-level improvement. L8c and L8d pin both names, and B's log shows MU-L8-NAME turning L8d red.
+   - Out of scope for this round: other wrapper hooks report the store hook's name rather than their own. For example, `useArrangementPreview` reports `useArrangementPreviewStore` (:4542). Possibly intended; worth a backlog note.
+
+**Q4, do the GH rows prove the claim?** Yes, none of them passes vacuously.
+- Each row has a positive control: GH1 checks `ArrangementTransport > 0`, GH2 checks `StudioWorkspace > 0` plus the mute and undo state, GH3 checks the actual move, and GH4 checks the off → mixed → off → on transitions and that the mute click works.
+- At HEAD, SS8a already showed the wrapper skipping a status write. The leaf's own `useArrangement()` subscription was what rendered. GH1 and GH2 being red at HEAD and red again under MU-GH-CTX is the evidence that settles it.
+- The render probe counts a component only when its props or hook state changed identity, so a skipped memo really reads as 0.
+
+**Side note on performance:** the `trackGroupSoloStates` map is rebuilt for every visible group on every arrangement edit. That is cheaper than HEAD, where every header recomputed it on every context write, so it is acceptable.
+
+Files reviewed:
+- /home/runner/b371-scratch/sc/app/components/arrangement/StudioWorkspace.tsx (:729-826, :1114-1117, :1430-1660, :3110-3160, :3515-3536)
+- /home/runner/b371-scratch/sc/app/components/arrangement/ArrangementGroupHeader.tsx
+- /home/runner/b371-scratch/head/app/contexts/ArrangementContext.tsx (dependency arrays at :756-1031, :1158-1496, :1946-2050, :2858-3141)
+- /home/runner/b371-scratch/sc/app/lib/arrangement/groups.ts (:48-54, :112-135, :169-273)
+- /home/runner/b371-scratch/sc/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
+- /home/runner/czaba-project/tmp/studio-real-loop/b-round-370/head-new-rows.log and mutants/*.log

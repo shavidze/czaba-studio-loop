@@ -1,0 +1,151 @@
+2c2
+< index 09e1a29..d49a97d 100644
+---
+> index 09e1a29..0188f0d 100644
+54c54,62
+< @@ -86,6 +104,8 @@ export function ArrangementGroupHeader({
+---
+> @@ -78,6 +96,7 @@ function trackGroupNameLabel(
+>    return `${studioGroupHeaderStrings.nameLabel(name)}${state}${selected ? studioLaneStrings.selectedSuffix : ''}`;
+>  }
+>  
+> +// TODO(PERF-11c): keep this leaf un-memoised; fader-pointer-preview PARENT_NAMES keys on its runtime name.
+>  export function ArrangementGroupHeader({
+>    group,
+>    depth,
+> @@ -86,6 +105,8 @@ export function ArrangementGroupHeader({
+63c71
+< @@ -115,7 +135,6 @@ export function ArrangementGroupHeader({
+---
+> @@ -115,7 +136,6 @@ export function ArrangementGroupHeader({
+71c79
+< @@ -125,8 +144,7 @@ export function ArrangementGroupHeader({
+---
+> @@ -125,8 +145,7 @@ export function ArrangementGroupHeader({
+82c90
+< index b27260f..6011553 100644
+---
+> index b27260f..f1561d4 100644
+109c117,161
+< @@ -790,7 +793,37 @@ function ArrangementGroupHeaderWithSelectionInner({
+---
+> @@ -732,6 +735,28 @@ type ArrangementGroupHeaderWithSelectionProps = Omit<
+>    activeCandidateTrackIds: readonly string[];
+>  };
+>  
+> +type PropEquality<Props> = { [Key in keyof Props]-?: (a: Props[Key], b: Props[Key]) => boolean };
+> +
+> +function samePropsByTable<Props extends object>(
+> +  table: PropEquality<Props>,
+> +  previous: Props,
+> +  next: Props,
+> +): boolean {
+> +  for (const key in table) {
+> +    if (!table[key](previous[key], next[key])) {
+> +      return false;
+> +    }
+> +  }
+> +  return true;
+> +}
+> +
+> +const TRACK_GROUP_OVERVIEW_CLIP_EQUALITY: PropEquality<TrackGroupOverviewClip> = {
+> +  clipId: Object.is,
+> +  trackId: Object.is,
+> +  start: Object.is,
+> +  duration: Object.is,
+> +};
+> +
+>  function sameTrackGroupOverviewClips(
+>    a: readonly TrackGroupOverviewClip[],
+>    b: readonly TrackGroupOverviewClip[],
+> @@ -739,12 +764,8 @@ function sameTrackGroupOverviewClips(
+>    return (
+>      a === b ||
+>      (a.length === b.length &&
+> -      a.every(
+> -        (clip, index) =>
+> -          clip.clipId === b[index].clipId &&
+> -          clip.trackId === b[index].trackId &&
+> -          clip.start === b[index].start &&
+> -          clip.duration === b[index].duration,
+> +      a.every((clip, index) =>
+> +        samePropsByTable(TRACK_GROUP_OVERVIEW_CLIP_EQUALITY, clip, b[index]),
+>        ))
+>    );
+>  }
+> @@ -790,7 +811,40 @@ function ArrangementGroupHeaderWithSelectionInner({
+117a170,188
+> +const GROUP_HEADER_WITH_SELECTION_PROP_EQUALITY: PropEquality<ArrangementGroupHeaderWithSelectionProps> =
+> +  {
+> +    group: Object.is,
+> +    depth: Object.is,
+> +    selected: Object.is,
+> +    timelineWidth: Object.is,
+> +    collapsed: Object.is,
+> +    soloState: Object.is,
+> +    actions: Object.is,
+> +    pxPerSecond: Object.is,
+> +    onSelectGroup: Object.is,
+> +    onRenameGroup: Object.is,
+> +    onToggleCollapse: Object.is,
+> +    onFocusedRowDetach: Object.is,
+> +    overviewGroupId: Object.is,
+> +    activeCandidateTrackIds: sameTrackIdList,
+> +    overviewClips: sameTrackGroupOverviewClips,
+> +  };
+> +
+122,138c193
+< +  return (
+< +    previous.group === next.group &&
+< +    previous.depth === next.depth &&
+< +    previous.selected === next.selected &&
+< +    previous.timelineWidth === next.timelineWidth &&
+< +    previous.collapsed === next.collapsed &&
+< +    previous.soloState === next.soloState &&
+< +    previous.actions === next.actions &&
+< +    previous.pxPerSecond === next.pxPerSecond &&
+< +    previous.onSelectGroup === next.onSelectGroup &&
+< +    previous.onRenameGroup === next.onRenameGroup &&
+< +    previous.onToggleCollapse === next.onToggleCollapse &&
+< +    previous.onFocusedRowDetach === next.onFocusedRowDetach &&
+< +    previous.overviewGroupId === next.overviewGroupId &&
+< +    sameTrackIdList(previous.activeCandidateTrackIds, next.activeCandidateTrackIds) &&
+< +    sameTrackGroupOverviewClips(previous.overviewClips, next.overviewClips)
+< +  );
+---
+> +  return samePropsByTable(GROUP_HEADER_WITH_SELECTION_PROP_EQUALITY, previous, next);
+148c203
+< @@ -3083,6 +3116,39 @@ export function StudioWorkspace() {
+---
+> @@ -3083,6 +3137,39 @@ export function StudioWorkspace() {
+188c243
+< @@ -3460,6 +3526,8 @@ export function StudioWorkspace() {
+---
+> @@ -3460,6 +3547,8 @@ export function StudioWorkspace() {
+284c339
+< index 6276eb7..9c4ff3d 100644
+---
+> index 6276eb7..b04c6c7 100644
+287c342
+< @@ -364,3 +364,86 @@ describe('PERF-8b selection wrappers render only on their own inputs (SS8, C-R32
+---
+> @@ -364,3 +364,104 @@ describe('PERF-8b selection wrappers render only on their own inputs (SS8, C-R32
+370a426,443
+> +    },
+> +  );
+> +  it(
+> +    'GH5 muting a second group renders that group header only, never the folded first group',
+> +    {
+> +      timeout: 20_000,
+> +    },
+> +    async () => {
+> +      const { view } = await mountCollapsedGroup();
+> +      clickLane(view, 'მუსიკა');
+> +      pressGroupKey();
+> +      expect(view.getAllByTestId('arrangement-group-header')).toHaveLength(2);
+> +      const mutes = view.getAllByTestId('arrangement-group-mute');
+> +      renderLog.counts.clear();
+> +      fireEvent.click(mutes[0]);
+> +      expect(mutes[0].getAttribute('aria-pressed')).toBe('true');
+> +      expect(mutes[1].getAttribute('aria-pressed')).toBe('false');
+> +      expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe(1);

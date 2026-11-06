@@ -1,0 +1,446 @@
+diff --git a/app/components/arrangement/ArrangementGroupHeader.tsx b/app/components/arrangement/ArrangementGroupHeader.tsx
+index 09e1a29..0188f0d 100644
+--- a/app/components/arrangement/ArrangementGroupHeader.tsx
++++ b/app/components/arrangement/ArrangementGroupHeader.tsx
+@@ -1,6 +1,9 @@
+ import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
+ import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+-import { GESTURE_EDIT_BLOCKED_MESSAGE, useArrangement } from '~/contexts/ArrangementContext';
++import {
++  type ArrangementContextValue,
++  GESTURE_EDIT_BLOCKED_MESSAGE,
++} from '~/contexts/ArrangementContext';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
+ import { FADER_SHIFT_FINE_DIVISOR } from '~/lib/arrangement/fader';
+ import {
+@@ -8,7 +11,7 @@ import {
+   TRACK_GROUP_INDENT_PX,
+   TRACK_GROUP_NAME_MAX_LENGTH,
+   type TrackGroupOverviewClip,
+-  trackGroupSoloState,
++  type TrackGroupSoloState,
+   trackGroupVolume,
+ } from '~/lib/arrangement/groups';
+ import { groupVolumeDraftKey } from '~/lib/arrangement/mix-draft-store';
+@@ -49,6 +52,19 @@ export interface TrackGroupOverviewBlock extends TrackGroupOverviewClip {
+   selected: boolean;
+ }
+ 
++export type ArrangementGroupHeaderActions = Pick<
++  ArrangementContextValue,
++  | 'getArrangement'
++  | 'isPointerGestureActive'
++  | 'setStatus'
++  | 'toggleGroupMute'
++  | 'toggleGroupSolo'
++  | 'previewGroupVolume'
++  | 'commitGroupVolume'
++  | 'beginGroupVolumeGesture'
++  | 'blurGroupVolume'
++>;
++
+ interface ArrangementGroupHeaderProps {
+   group: ArrangementTrackGroup;
+   depth: number;
+@@ -57,6 +73,8 @@ interface ArrangementGroupHeaderProps {
+   collapsed: boolean;
+   containsActive: boolean;
+   overviewClips: readonly TrackGroupOverviewBlock[];
++  soloState: TrackGroupSoloState;
++  actions: ArrangementGroupHeaderActions;
+   pxPerSecond: number;
+   onSelectGroup: (groupId: string, modifiers: TrackRowSelectModifiers) => void;
+   onRenameGroup: (groupId: string, draft: string) => void;
+@@ -78,6 +96,7 @@ function trackGroupNameLabel(
+   return `${studioGroupHeaderStrings.nameLabel(name)}${state}${selected ? studioLaneStrings.selectedSuffix : ''}`;
+ }
+ 
++// TODO(PERF-11c): keep this leaf un-memoised; fader-pointer-preview PARENT_NAMES keys on its runtime name.
+ export function ArrangementGroupHeader({
+   group,
+   depth,
+@@ -86,6 +105,8 @@ export function ArrangementGroupHeader({
+   collapsed,
+   containsActive,
+   overviewClips,
++  soloState,
++  actions,
+   pxPerSecond,
+   onSelectGroup,
+   onRenameGroup,
+@@ -115,7 +136,6 @@ export function ArrangementGroupHeader({
+   );
+   const isEditing = draft !== null;
+   const {
+-    arrangement,
+     getArrangement,
+     isPointerGestureActive,
+     setStatus,
+@@ -125,8 +145,7 @@ export function ArrangementGroupHeader({
+     commitGroupVolume,
+     beginGroupVolumeGesture,
+     blurGroupVolume,
+-  } = useArrangement();
+-  const soloState = trackGroupSoloState(arrangement, group.id);
++  } = actions;
+   const volume = trackGroupVolume(group);
+   const muted = group.mute === true;
+ 
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index b27260f..f1561d4 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -83,6 +83,7 @@ import {
+   TRACK_GROUP_COLLAPSE_EMPTY_MESSAGE,
+   type TrackGroupOverviewClip,
+   type TrackGroupRow,
++  type TrackGroupSoloState,
+   trackGroupCollapseTargets,
+   trackGroupCreatedMessage,
+   trackGroupDescendantTrackIds,
+@@ -90,6 +91,7 @@ import {
+   trackGroupOverviewClips,
+   trackGroupRefusalMessage,
+   trackGroupRows,
++  trackGroupSoloState,
+   ungroupSelectedRows,
+   visibleTrackGroupRows,
+ } from '~/lib/arrangement/groups';
+@@ -186,6 +188,7 @@ import { ArrangementExportDialog } from './ArrangementExportDialog';
+ import { ArrangementGridMenu } from './ArrangementGridMenu';
+ import {
+   ArrangementGroupHeader,
++  type ArrangementGroupHeaderActions,
+   TRACK_GROUP_ROW_HEIGHT_PX,
+   type TrackGroupOverviewBlock,
+ } from './ArrangementGroupHeader';
+@@ -732,6 +735,28 @@ type ArrangementGroupHeaderWithSelectionProps = Omit<
+   activeCandidateTrackIds: readonly string[];
+ };
+ 
++type PropEquality<Props> = { [Key in keyof Props]-?: (a: Props[Key], b: Props[Key]) => boolean };
++
++function samePropsByTable<Props extends object>(
++  table: PropEquality<Props>,
++  previous: Props,
++  next: Props,
++): boolean {
++  for (const key in table) {
++    if (!table[key](previous[key], next[key])) {
++      return false;
++    }
++  }
++  return true;
++}
++
++const TRACK_GROUP_OVERVIEW_CLIP_EQUALITY: PropEquality<TrackGroupOverviewClip> = {
++  clipId: Object.is,
++  trackId: Object.is,
++  start: Object.is,
++  duration: Object.is,
++};
++
+ function sameTrackGroupOverviewClips(
+   a: readonly TrackGroupOverviewClip[],
+   b: readonly TrackGroupOverviewClip[],
+@@ -739,12 +764,8 @@ function sameTrackGroupOverviewClips(
+   return (
+     a === b ||
+     (a.length === b.length &&
+-      a.every(
+-        (clip, index) =>
+-          clip.clipId === b[index].clipId &&
+-          clip.trackId === b[index].trackId &&
+-          clip.start === b[index].start &&
+-          clip.duration === b[index].duration,
++      a.every((clip, index) =>
++        samePropsByTable(TRACK_GROUP_OVERVIEW_CLIP_EQUALITY, clip, b[index]),
+       ))
+   );
+ }
+@@ -790,7 +811,40 @@ function ArrangementGroupHeaderWithSelectionInner({
+   );
+ }
+ 
+-const ArrangementGroupHeaderWithSelection = memo(ArrangementGroupHeaderWithSelectionInner);
++function sameTrackIdList(a: readonly string[], b: readonly string[]): boolean {
++  return a === b || (a.length === b.length && a.every((id, index) => id === b[index]));
++}
++
++const GROUP_HEADER_WITH_SELECTION_PROP_EQUALITY: PropEquality<ArrangementGroupHeaderWithSelectionProps> =
++  {
++    group: Object.is,
++    depth: Object.is,
++    selected: Object.is,
++    timelineWidth: Object.is,
++    collapsed: Object.is,
++    soloState: Object.is,
++    actions: Object.is,
++    pxPerSecond: Object.is,
++    onSelectGroup: Object.is,
++    onRenameGroup: Object.is,
++    onToggleCollapse: Object.is,
++    onFocusedRowDetach: Object.is,
++    overviewGroupId: Object.is,
++    activeCandidateTrackIds: sameTrackIdList,
++    overviewClips: sameTrackGroupOverviewClips,
++  };
++
++function sameGroupHeaderWithSelectionProps(
++  previous: ArrangementGroupHeaderWithSelectionProps,
++  next: ArrangementGroupHeaderWithSelectionProps,
++): boolean {
++  return samePropsByTable(GROUP_HEADER_WITH_SELECTION_PROP_EQUALITY, previous, next);
++}
++
++const ArrangementGroupHeaderWithSelection = memo(
++  ArrangementGroupHeaderWithSelectionInner,
++  sameGroupHeaderWithSelectionProps,
++);
+ 
+ const NO_ACTIVE_CANDIDATE_TRACK_IDS: readonly string[] = [];
+ 
+@@ -3083,6 +3137,39 @@ export function StudioWorkspace() {
+     }
+     return overviews;
+   }, [arrangement, trackRows, trackLaneLayout.collapsedGroups]);
++  const trackGroupSoloStates = useMemo(() => {
++    const states = new Map<string, TrackGroupSoloState>();
++    for (const row of trackRows) {
++      if (row.kind === 'group') {
++        states.set(row.id, trackGroupSoloState(arrangement, row.id));
++      }
++    }
++    return states;
++  }, [arrangement, trackRows]);
++  const groupHeaderActions = useMemo(
++    (): ArrangementGroupHeaderActions => ({
++      getArrangement: workspace.getArrangement,
++      isPointerGestureActive,
++      setStatus,
++      toggleGroupMute: workspace.toggleGroupMute,
++      toggleGroupSolo: workspace.toggleGroupSolo,
++      previewGroupVolume: workspace.previewGroupVolume,
++      commitGroupVolume: workspace.commitGroupVolume,
++      beginGroupVolumeGesture: workspace.beginGroupVolumeGesture,
++      blurGroupVolume: workspace.blurGroupVolume,
++    }),
++    [
++      workspace.getArrangement,
++      isPointerGestureActive,
++      setStatus,
++      workspace.toggleGroupMute,
++      workspace.toggleGroupSolo,
++      workspace.previewGroupVolume,
++      workspace.commitGroupVolume,
++      workspace.beginGroupVolumeGesture,
++      workspace.blurGroupVolume,
++    ],
++  );
+   const trackGroupActiveCandidates = useMemo(() => {
+     const candidates = new Map<string, readonly string[]>();
+     for (const row of trackRows) {
+@@ -3460,6 +3547,8 @@ export function StudioWorkspace() {
+                     }
+                     overviewClips={trackGroupOverviews.get(row.id) ?? NO_TRACK_GROUP_OVERVIEW_CLIPS}
+                     overviewGroupId={row.id}
++                    soloState={trackGroupSoloStates.get(row.id) ?? 'off'}
++                    actions={groupHeaderActions}
+                     pxPerSecond={pxPerSecond}
+                     onSelectGroup={selectTrackRow}
+                     onRenameGroup={renameTrackGroupRow}
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 520dd98..701a4b7 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -4550,16 +4550,16 @@ export function useArrangementPreview<Selected>(
+   return useStore(useArrangementPreviewStore(), selector);
+ }
+ 
+-function useArrangementPlaybackStoreContext(): ArrangementPlaybackStore {
++function useArrangementPlaybackStoreContext(hookName: string): ArrangementPlaybackStore {
+   const store = useContext(ArrangementPlaybackContext);
+   if (!store) {
+-    throw new Error('useArrangementIsPlaying must be used within an ArrangementProvider');
++    throw new Error(`${hookName} must be used within an ArrangementProvider`);
+   }
+   return store;
+ }
+ 
+ export function useArrangementIsPlayingReader(): () => boolean {
+-  const store = useArrangementPlaybackStoreContext();
++  const store = useArrangementPlaybackStoreContext('useArrangementIsPlayingReader');
+   return useCallback(() => store.getState().isPlaying, [store]);
+ }
+ 
+@@ -4578,7 +4578,10 @@ export function useArrangementActiveTrackId(): string | null {
+ }
+ 
+ export function useArrangementIsPlaying(): boolean {
+-  return useStore(useArrangementPlaybackStoreContext(), (state) => state.isPlaying);
++  return useStore(
++    useArrangementPlaybackStoreContext('useArrangementIsPlaying'),
++    (state) => state.isPlaying,
++  );
+ }
+ 
+ export function useArrangementStatusPreview<Selected>(
+diff --git a/app/lib/arrangement/__tests__/context-hygiene.test.tsx b/app/lib/arrangement/__tests__/context-hygiene.test.tsx
+index c792bd6..67a3233 100644
+--- a/app/lib/arrangement/__tests__/context-hygiene.test.tsx
++++ b/app/lib/arrangement/__tests__/context-hygiene.test.tsx
+@@ -6,6 +6,8 @@ import {
+   type ArrangementContextValue,
+   ArrangementProvider,
+   useArrangement,
++  useArrangementIsPlaying,
++  useArrangementIsPlayingReader,
+   useArrangementPositionStore,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementTrack, WorkspaceCollection } from '~/types/arrangement';
+@@ -312,6 +314,16 @@ function PositionStoreOutsideProvider() {
+   return null;
+ }
+ 
++function IsPlayingOutsideProvider() {
++  useArrangementIsPlaying();
++  return null;
++}
++
++function IsPlayingReaderOutsideProvider() {
++  useArrangementIsPlayingReader();
++  return null;
++}
++
+ function ArrangementOutsideProvider() {
+   useArrangement();
+   return null;
+@@ -486,5 +498,19 @@ describe('context hygiene (D-29z9, round 44) — counts React renders (consumer
+         'useArrangement must be used within an ArrangementProvider',
+       );
+     });
++
++    it('L8c: useArrangementIsPlaying outside a provider throws its own name', () => {
++      vi.spyOn(console, 'error').mockImplementation(() => undefined);
++      expect(thrownOutsideProvider(<IsPlayingOutsideProvider />)).toBe(
++        'useArrangementIsPlaying must be used within an ArrangementProvider',
++      );
++    });
++
++    it('L8d: useArrangementIsPlayingReader outside a provider throws its own name (A-R362-REVIEW-PLAYBACK-CTX-ERROR-TEXT)', () => {
++      vi.spyOn(console, 'error').mockImplementation(() => undefined);
++      expect(thrownOutsideProvider(<IsPlayingReaderOutsideProvider />)).toBe(
++        'useArrangementIsPlayingReader must be used within an ArrangementProvider',
++      );
++    });
+   });
+ });
+diff --git a/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx b/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
+index 6276eb7..b04c6c7 100644
+--- a/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
++++ b/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
+@@ -364,3 +364,104 @@ describe('PERF-8b selection wrappers render only on their own inputs (SS8, C-R32
+     },
+   );
+ });
++
++describe('PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361)', () => {
++  it(
++    'GH1 a status write renders neither the folded group wrapper nor the header leaf',
++    {
++      timeout: 20_000,
++    },
++    async () => {
++      const { api, view } = await mountCollapsedGroup();
++      renderLog.counts.clear();
++      act(() => live(api).setStatus('GH1 positive control'));
++      expect(view.getByTestId('arrangement-status').textContent).toContain('GH1 positive control');
++      expect(renderLog.counts.get('ArrangementTransport') ?? 0).toBeGreaterThan(0);
++      expect(renderLog.counts.get('ArrangementGroupHeaderWithSelectionInner') ?? 0).toBe(0);
++      expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe(0);
++    },
++  );
++
++  it(
++    'GH2 an arrangement edit outside the folded group renders neither the wrapper nor the header leaf',
++    {
++      timeout: 20_000,
++    },
++    async () => {
++      const { api, view } = await mountCollapsedGroup();
++      const undoBefore = live(api).undoLabel;
++      renderLog.counts.clear();
++      act(() => live(api).toggleTrackMute('music'));
++      expect(live(api).arrangement.tracks.find((track) => track.id === 'music')?.mute).toBe(true);
++      expect(live(api).undoLabel).not.toBe(undoBefore);
++      expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++      expect(renderLog.counts.get('ArrangementGroupHeaderWithSelectionInner') ?? 0).toBe(0);
++      expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe(0);
++      expect(overviewBlocks(view).map((block) => block.dataset.overviewStart)).toEqual([
++        '2.000',
++        '4.000',
++      ]);
++    },
++  );
++
++  it(
++    'GH3 a nudge of a member clip re-renders the header and moves its overview block',
++    {
++      timeout: 20_000,
++    },
++    async () => {
++      const { api, view } = await mountCollapsedGroup();
++      act(() => live(api).selectClips(['cs']));
++      renderLog.counts.clear();
++      fireEvent.keyDown(document.body, { key: 'ArrowRight', code: 'ArrowRight' });
++      const moved = live(api).arrangement.clips.find((clip) => clip.id === 'cs')?.start ?? 2;
++      expect(moved).toBeGreaterThan(2);
++      expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBeGreaterThan(0);
++      expect(
++        overviewBlocks(view).find((block) => block.dataset.overviewClipId === 'cs')?.dataset
++          .overviewStart,
++      ).toBe(moved.toFixed(3));
++    },
++  );
++
++  it(
++    'GH4 soloing a member lane updates the folded group Solo state, and clearing it returns to off',
++    {
++      timeout: 20_000,
++    },
++    async () => {
++      const { api, view } = await mountCollapsedGroup();
++      const solo = view.getByTestId('arrangement-group-solo');
++      expect(solo.dataset.solo).toBe('off');
++      renderLog.counts.clear();
++      act(() => live(api).toggleTrackSolo('stems', false));
++      expect(solo.dataset.solo).toBe('mixed');
++      expect(solo.getAttribute('aria-pressed')).toBe('mixed');
++      expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBeGreaterThan(0);
++      act(() => live(api).toggleTrackSolo('stems', false));
++      expect(solo.dataset.solo).toBe('off');
++      fireEvent.click(solo);
++      expect(solo.dataset.solo).toBe('on');
++      fireEvent.click(view.getByTestId('arrangement-group-mute'));
++      expect(view.getByTestId('arrangement-group-mute').getAttribute('aria-pressed')).toBe('true');
++    },
++  );
++  it(
++    'GH5 muting a second group renders that group header only, never the folded first group',
++    {
++      timeout: 20_000,
++    },
++    async () => {
++      const { view } = await mountCollapsedGroup();
++      clickLane(view, 'მუსიკა');
++      pressGroupKey();
++      expect(view.getAllByTestId('arrangement-group-header')).toHaveLength(2);
++      const mutes = view.getAllByTestId('arrangement-group-mute');
++      renderLog.counts.clear();
++      fireEvent.click(mutes[0]);
++      expect(mutes[0].getAttribute('aria-pressed')).toBe('true');
++      expect(mutes[1].getAttribute('aria-pressed')).toBe('false');
++      expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe(1);
++    },
++  );
++});
