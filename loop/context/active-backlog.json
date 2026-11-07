@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T19:07:59.955Z",
-  "current_task": "Round 393: PERF-13c-i: library preview of a URL-backed source streams through a media element (no decode); fallback to the decode path on a stream error; doc 252 (current-task.md)",
+  "_generatedUtc": "2026-11-07T19:54:42.542Z",
+  "current_task": "Round 394: PERF-13c-ii-a: streamed library preview stall watchdog, synchronous-throw guard, external pause ends the preview (preview.client.ts only); doc 252 stage 2 of 3 (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6239,20 +6239,41 @@
       "origin": "B sketch review (tech-lead), round 393 planning",
       "evidence": "b-round-392/sketch-review.md #1",
       "title": "a stalled streamed preview (stalled/waiting, no error) never recovers: Stop stays shown with a frozen cursor",
-      "status": "scheduled PERF-13c-ii (D-29z1341): 13c-i streams same-origin static demo files only; the decode path has the same hung-fetch exposure today; not a shipped defect until 13c-i lands",
+      "status": "scheduled round 394 PERF-13c-ii-a (D-29z1344): HEAD premise b-round-393/premise/events-head.json (HOLD: toggle Stop after 14 s, no fallback); sketch fixes it (fallback 8378 ms, both viewports) | scheduled PERF-13c-ii (D-29z1341): 13c-i streams same-origin static demo files only; the decode path has  …[see backlog.json]",
       "added": "2026-11-07 B round 392 -> 393 planning"
+    },
+    {
+      "id": "GATE393-M1-SYNC-THROW",
+      "severity": "medium",
+      "origin": "gate 393 reviewer (gates/round-393/review.md suggestion 1)",
+      "evidence": "gates/round-393/review.md",
+      "title": "element.currentTime = start or element.play() can throw synchronously; active stays set, the UI shows Stop on silence",
+      "status": "scheduled round 394 PERF-13c-ii-a (D-29z1344): try/catch -> error route; rows PS22, PS23 (jsdom only)",
+      "added": "2026-11-07 B round 393 -> 394 planning"
+    },
+    {
+      "id": "A-R393-REVIEW-M1-EXTERNAL-PAUSE",
+      "severity": "medium",
+      "origin": "A round 393 code-reviewer (Medium); B re-rating (D-29z1344)",
+      "evidence": "a-round-393.md Code review M1; b-round-393/premise/events-head.json (console pause keeps Stop at HEAD)",
+      "title": "a streamed preview paused externally (media key / OS media session; the bare element is listed in Chrome/OS media controls, A-393 L7) keeps Stop with a frozen cursor",
+      "status": "scheduled round 394 PERF-13c-ii-a (D-29z1344): pause on the active element (not ended, no error) ends the preview; C row R2",
+      "added": "2026-11-07 B round 393 -> 394 planning"
+    },
+    {
+      "id": "GATE393-L4-FALLBACK-NEVER-EXPIRES",
+      "severity": "low",
+      "status": "scheduled PERF-13c-ii-b (D-29z1345): decide expiry with sign",
+      "title": "streamFallbackRef is never cleared per collection; one transient error disables streaming for that i"
+    },
+    {
+      "id": "ARCH-CHECKPOINT-PREVIEW-AFTER-13C",
+      "severity": "info",
+      "status": "open_root (D-29z1346): after PERF-13c-ii-b C PASS; same regi",
+      "title": "bounded frontend-architect checkpoint on the library preview region (decidePreviewMode / useLibraryP"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 384,
-      "task": "current-task.md",
-      "decision": "D-29z1280..D-29z1284",
-      "type": "PERF-13b-i verification completion: C-only rows (prod heap, PERF-RES, mutants, PLAY-REFUSE, UNIT, G384-AUTH 401, EVICT-B2-COUNT, CLAIMS, L57); A doc 248 l.4 only",
-      "status": "done (D-29z1285): C round 384 PASS (c-round-384.json: 13 rows passed, browserVerified true, realVerified true, 0 bugs; fake-bearer row blocked = backend-only); gate 384 published 7295618 on both remotes (rounds 382-384)",
-      "note": "baseline 5745526 + uncommitted 382/383 tree; frozen b-round-383/r384-frozen-sha256.txt; claims b-round-383/claims-384.sh; carried 383 rows listed in task §3",
-      "added": "2026-11-07 B round 383 -> 384 planning"
-    },
     {
       "round": 385,
       "task": "current-task.md",
@@ -6333,9 +6354,18 @@
       "task": "current-task.md",
       "decision": "D-29z1336..D-29z1341",
       "type": "PERF-13c-i: library preview streams URL sources through a media element; fallback to decode on a stream error; doc 252",
-      "status": "dispatched",
+      "status": "done: C PASS (c-round-393.json), gate published 1091b9e (D-29z1342)",
       "note": "baseline c1183a0 (clean); grants b-round-392/grants-393.txt (7); frozen b-round-392/r393-frozen-sha256.txt (1280); claims b-round-392/claims-393.sh K1..K22; sketch b-round-392/sketch-393.patch.txt",
       "added": "2026-11-07 B round 392 -> 393 planning"
+    },
+    {
+      "round": 394,
+      "task": "current-task.md",
+      "decision": "D-29z1342..D-29z1346",
+      "type": "PERF-13c-ii-a: stream lifecycle robustness (stall watchdog, sync-throw guard, external pause ends the preview) in preview.client.ts only; doc 252 stage 2 of 3",
+      "status": "dispatched",
+      "note": "baseline 1091b9e (clean); grants b-round-393/grants-394.txt (3); frozen b-round-393/r394-frozen-sha256.txt (1284); claims b-round-393/claims-394.sh K1..K20; sketch b-round-393/sketch-394.patch.txt",
+      "added": "2026-11-07 B round 393 -> 394 planning"
     }
   ],
   "other_keys": [

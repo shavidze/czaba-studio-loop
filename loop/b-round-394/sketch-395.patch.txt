@@ -1,0 +1,106 @@
+--- a/app/lib/arrangement/preview.client.ts	2026-11-07 19:34:45.094408794 +0000
++++ b/app/lib/arrangement/preview.client.ts	2026-11-07 19:58:56.277771466 +0000
+@@ -36,6 +36,7 @@
+   url: string;
+   detach: () => void;
+   fail: () => void;
++  restartArmedStall: () => void;
+ }
+ 
+ type ActivePreview = ActiveBufferPreview | ActiveStreamPreview;
+@@ -102,6 +103,7 @@
+       if (active?.kind === 'stream' && active.url === url) {
+         try {
+           active.element.currentTime = start;
++          active.restartArmedStall();
+         } catch {
+           active.fail();
+         }
+@@ -137,7 +139,7 @@
+           }
+         }, streamStallTimeoutMs);
+       };
+-      const handleProgress = () => {
++      const restartArmedStall = () => {
+         if (cancelStall) {
+           armStall();
+         }
+@@ -152,7 +154,7 @@
+       element.addEventListener('error', handleError);
+       element.addEventListener('waiting', armStall);
+       element.addEventListener('playing', disarmStall);
+-      element.addEventListener('progress', handleProgress);
++      element.addEventListener('progress', restartArmedStall);
+       element.addEventListener('pause', handlePause);
+       const preview: ActiveStreamPreview = {
+         kind: 'stream',
+@@ -164,10 +166,11 @@
+           element.removeEventListener('error', handleError);
+           element.removeEventListener('waiting', armStall);
+           element.removeEventListener('playing', disarmStall);
+-          element.removeEventListener('progress', handleProgress);
++          element.removeEventListener('progress', restartArmedStall);
+           element.removeEventListener('pause', handlePause);
+         },
+         fail: handleError,
++        restartArmedStall,
+       };
+       active = preview;
+       try {
+--- a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx	2026-11-07 19:34:45.093539850 +0000
++++ b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx	2026-11-07 19:57:32.718667754 +0000
+@@ -760,6 +760,7 @@
+     expect(() => first.playLibraryPreviewStream(BIG_URL, 3, timeError)).not.toThrow();
+     expect(timeError).toHaveBeenCalledTimes(1);
+     expect(first.getLibraryPreviewOffset()).toBeNull();
++    expect(throwingTime.hasAttribute('src')).toBe(false);
+ 
+     const throwingPlay = document.createElement('audio');
+     vi.spyOn(throwingPlay, 'play').mockImplementation(() => {
+@@ -772,6 +773,7 @@
+     const playError = vi.fn();
+     expect(() => second.playLibraryPreviewStream(BIG_URL, 0, playError)).not.toThrow();
+     expect(playError).toHaveBeenCalledTimes(1);
++    expect(second.getLibraryPreviewOffset()).toBeNull();
+     expect(throwingPlay.hasAttribute('src')).toBe(false);
+     expect(scheduler.pending()).toBe(0);
+   });
+@@ -816,4 +818,38 @@
+       vi.useRealTimers();
+     }
+   });
++
++  it('PS25 a same-url seek before playing restarts the armed watchdog from the new time', () => {
++    const scheduler = createFakeStallScheduler();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    const element = onlyElement();
++    player.playLibraryPreviewStream(BIG_URL, 5, onError);
++    expect(scheduler.pending()).toBe(1);
++    expect(scheduler.delays).toEqual([8000, 8000]);
++    expect(element.getAttribute('src')).toBe(BIG_URL);
++    scheduler.fire();
++    expect(onError).toHaveBeenCalledTimes(1);
++    expect(onError).toHaveBeenCalledWith(5);
++    expect(element.hasAttribute('src')).toBe(false);
++    expect(player.getLibraryPreviewOffset()).toBeNull();
++  });
++
++  it('PS26 a stop removes every listener the stream added', () => {
++    const scheduler = createFakeStallScheduler();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 0, vi.fn());
++    const element = onlyElement();
++    const removed = vi.spyOn(element, 'removeEventListener');
++    player.stopLibraryPreview();
++    expect(removed.mock.calls.map(([type]) => type).sort()).toEqual([
++      'ended',
++      'error',
++      'pause',
++      'playing',
++      'progress',
++      'waiting',
++    ]);
++  });
+ });

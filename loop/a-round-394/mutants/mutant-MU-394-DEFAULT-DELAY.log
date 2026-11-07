@@ -1,0 +1,89 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a394-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m23 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 524[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media[32m 5[2mms[22m[39m
+     [32m✓[39m PS2 a seek on the playing stream reuses the same element without pausing it[32m 1[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ending after its stop does nothing[32m 2[2mms[22m[39m
+     [32m✓[39m PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not[32m 3[2mms[22m[39m
+     [32m✓[39m PS5 a buffer preview after a stream releases the stream element and starts one buffer source[32m 1[2mms[22m[39m
+     [32m✓[39m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[32m 76[2mms[22m[39m
+     [32m✓[39m PS7 a cached buffer wins over the stream: no media element, one buffer source[32m 58[2mms[22m[39m
+     [32m✓[39m PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered[32m 54[2mms[22m[39m
+     [32m✓[39m PS9 Play stops a streaming preview: the element is released and the transport plays[32m 56[2mms[22m[39m
+     [32m✓[39m PS10 unmounting the provider releases a streaming element[32m 45[2mms[22m[39m
+     [32m✓[39m PS11 a stream preview stops the playing transport before the element plays[32m 53[2mms[22m[39m
+     [32m✓[39m PS12 the natural end of a stream clears the preview id and releases the preview pin[32m 46[2mms[22m[39m
+     [32m✓[39m PS13 the fallback resumes from the element time, not from zero[32m 51[2mms[22m[39m
+     [32m✓[39m PS14 a streamed preview writes no status[32m 52[2mms[22m[39m
+[31m     [31m×[31m PS16 a stream that never plays falls back after the stall timeout with its time[39m[32m 9[2mms[22m[39m
+     [32m✓[39m PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only[32m 1[2mms[22m[39m
+     [32m✓[39m PS18 the watchdog does nothing when the element time moved since it was armed[32m 0[2mms[22m[39m
+     [32m✓[39m PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves[32m 1[2mms[22m[39m
+     [32m✓[39m PS20 an external pause ends the preview once and releases the element[32m 1[2mms[22m[39m
+     [32m✓[39m PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event[32m 1[2mms[22m[39m
+     [32m✓[39m PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception[32m 1[2mms[22m[39m
+     [32m✓[39m PS23 a synchronous throw on a same-url seek is a stream error of the active preview[32m 1[2mms[22m[39m
+[31m     [31m×[31m PS24 the default scheduler arms an 8000 ms window timer that a stop clears[39m[32m 3[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m21 passed[39m[22m[90m (23)[39m
+[2m   Start at [22m 19:36:03
+[2m   Duration [22m 1.83s[2m (transform 590ms, setup 0ms, import 755ms, tests 524ms, environment 400ms)[22m
+
+
+::error file=/tmp/a394-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS16 a stream that never plays falls back after the stall timeout with its time,line=626,column=30::AssertionError: expected [ 4000 ] to deeply equal [ 8000 ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   8000,%0A+   4000,%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:626:30%0A%0A
+
+::error file=/tmp/a394-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS24 the default scheduler arms an 8000 ms window timer that a stop clears,line=808,column=27::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      0,%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:808:27%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mPERF-13c-ii-a stream lifecycle robustness[2m > [22mPS16 a stream that never plays falls back after the stall timeout with its time
+[31m[1mAssertionError[22m: expected [ 4000 ] to deeply equal [ 8000 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   8000,[39m
+[31m+   4000,[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m626:30[22m[39m
+    [90m624| [39m    [35mconst[39m element [33m=[39m [34monlyElement[39m()[33m;[39m
+    [90m625| [39m    [34mexpect[39m(scheduler[33m.[39m[34mpending[39m())[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m626| [39m    [34mexpect[39m(scheduler[33m.[39mdelays)[33m.[39m[34mtoEqual[39m([[34m8000[39m])[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m627| [39m    scheduler[33m.[39m[34mfire[39m()[33m;[39m
+    [90m628| [39m    [34mexpect[39m(onError)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mPERF-13c-ii-a stream lifecycle robustness[2m > [22mPS24 the default scheduler arms an 8000 ms window timer that a stop clears
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      0,
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m808:27[22m[39m
+    [90m806| [39m      player[33m.[39m[34mplayLibraryPreviewStream[39m([33mBIG_URL[39m[33m,[39m [34m0[39m[33m,[39m onError)[33m;[39m
+    [90m807| [39m      vi[33m.[39m[34madvanceTimersByTime[39m([34m7999[39m)[33m;[39m
+    [90m808| [39m      [34mexpect[39m(onError)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m809| [39m      vi[33m.[39m[34madvanceTimersByTime[39m([34m1[39m)[33m;[39m
+    [90m810| [39m      [34mexpect[39m(onError)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

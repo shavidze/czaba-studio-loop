@@ -1,0 +1,69 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "C-R394-01",
+   "severity": "medium",
+   "origin": "B spec (same as A-R394-REVIEW-M1-SEEK-BEFORE-PLAYING)",
+   "steps": [
+    "Fresh context, 1440x900 or 1280x720, /studio-lab",
+    "Route **/middle-east.mp3 so media requests are never answered (HOLD)",
+    "Select Middle East, click Preview toggle",
+    "~3.5 s later click the preview wave at 5% (same-URL seek before 'playing')",
+    "Wait 20 s"
+   ],
+   "expected": "Stall watchdog still falls back to decode within ~8 s of the stall (REV-B393-M1-STALL closed): status Loading -> ready, one 101.35 s buffer start",
+   "actual": "No fallback after 23.6 s at both viewports: toggle stays Stop, element src=/middle-east.mp3 paused=false currentTime=4.99 networkState=2, 0 decodes, 0 buffer starts, status unchanged. Events: play, waiting, loadstart, stalled, then nothing",
+   "evidence": "c-round-394/rows-R1.json R1b_seekBeforePlaying-1440x900 and -1280x720; a-round-394.md STOP section"
+  }
+ ],
+ "passed": [
+  "R1-STALL-FALLBACK (no-click HOLD, both viewports: 8369/8362 ms, 1 decode, 1 start 101.35, PCM +101.35, 0 media requests after fallback)",
+  "R2-EXTERNAL-PAUSE",
+  "R3-NORMAL-20S",
+  "R4-END",
+  "R5-ABORT",
+  "R6-STOP",
+  "R7-PLAY-STOPS-PREVIEW",
+  "PERF-RES (pcm-live-mib-ready 31.9<=60, decode 0<=0)",
+  "AUTH",
+  "SOURCE-SCOPE",
+  "DOC-252 (structure, l.4)"
+ ],
+ "blocked": [],
+ "gate": [
+  "full vitest/typecheck/build/biome/verify"
+ ],
+ "jsdomOnlyNotes": [
+  "PS21(b), PS22, PS23 not browser-testable; rely on a-round-394/mutants/summary.txt (12/12 red per A, not re-run by C)"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T19:45:20.3581400Z",
+  "round": 394,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": [
+  "b-round-393/r394-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": true,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": "b-round-393/mutants/summary.txt",
+ "mutantRedOnTree": "a-round-394/mutants/summary.txt (A's run; C did not re-run)",
+ "gateChecksNamed": true,
+ "gateChecksRunOnSketch": "b-round-393/precheck-covering.log",
+ "chainHeadGateRunGreen": "gate 393 published 1091b9e",
+ "affectedChecksNamed": true,
+ "affectedChecksRunOnSketch": [
+  "b-round-393/sketch-events.json",
+  "b-round-393/sketch-hold.json"
+ ],
+ "progressFile": "c-round-394/progress.json",
+ "stopSignal": "A STOP unresolved (no B ruling) - round not closable"
+}

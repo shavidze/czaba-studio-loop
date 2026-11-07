@@ -1,7 +1,7 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 393 PERF-13c-i: C PASS (c-round-393.json, browserVerified/realVerified true, 0 bugs) and gate 393 published 1091b9e, so PERF-13c-i is done (D-29z1342). Three Medium findings on the shipped stream path are open (REV-B393-M1-STALL, GATE393-M1-SYNC-THROW, A-R393-REVIEW-M1-EXTERNAL-PAUSE) and fixed first per the bug gate; many scoped items remain (PERF-13c-ii-b..15, STEM-LANES, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2, deferred Lows), so COMPLETE is not possible; nothing external blocks the next stage.",
- "nextTask": "Round 394: PERF-13c-ii-a on 1091b9e. preview.client.ts only (zero provider change): stall watchdog 8000 ms (armed at start and on waiting, cleared on playing/stop, restarted on progress, acts only when currentTime did not move -> existing decode fallback); synchronous throw of src/currentTime/play and same-url seek -> error route; external pause (media key/OS) on the active element ends the preview (guards !ended && !error); NotAllowedError keeps the fallback. jsdom PS16-PS24 with 12 named mutants; doc 252 stage 2 of 3. C: R1 stall fallback, R2 external pause, R3 normal 20 s, R4 end, R5 abort, R6 stop, R7 Play stops preview at 1440+1280, PERF-RES, AUTH, SOURCE-SCOPE, DOC-252.",
+ "reason": "Round 394 PERF-13c-ii-a: C FAIL (c-round-394.json, browserVerified/realVerified true) with one Medium, C-R394-01 (a wave click during a stalled stream disables the watchdog; = A STOP); gate 394 skipped, nothing published, nothing moves to done. B ruled option (a) (D-29z1348) and verified it on a sketch with C's own browser probe (fallback 8296/8300 ms after the seek at both viewports, 15/15 mutants red). Many scoped items remain (PERF-13c-ii-b..15, STEM-LANES, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2, deferred Lows), so COMPLETE is not possible; nothing external blocks the fix.",
+ "nextTask": "Round 395: PERF-13c-ii-a fix-up on the unpublished round-394 tree (HEAD 1091b9e + 3 modified grants, kept). preview.client.ts: ActiveStreamPreview.restartArmedStall (renamed progress handler) called after a successful same-url seek - restarts an armed timer, never arms one. Tests: PS25 (seek before playing -> onStreamError(5)), PS26 (stop removes the 6 listeners), two PS22 asserts; mutants MU-395-SEEK-NO-REARM / SEEK-ARMS-ALWAYS / PAUSE-LISTENER-LEFT. Doc 252 l.4 \"C round 395 PASS\". C: R1b binding (fallback 7.5-11 s after the wave click, 1 decode/start 101.35) + R1-R7, PERF-RES, AUTH, SOURCE-SCOPE, DOC-252 at 1440+1280.",
  "remaining": [
   "ROOT-NOTE-R387-STOP-NOT-HONOURED",
   "ARCH-CHECKPOINT-DECODE-REGION",
@@ -10,6 +10,9 @@
   "ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING",
   "SIG-R382-USE-DECODED-SOURCE-BUFFERS",
   "PERF-13c-ii-a",
+  "C-R394-01",
+  "A-R394-REVIEW-L1-PS22-ASSERTS",
+  "A-R394-REVIEW-L2-PS21A-LISTENER-REMOVAL",
   "REV-B393-M1-STALL",
   "GATE393-M1-SYNC-THROW",
   "A-R393-REVIEW-M1-EXTERNAL-PAUSE",
@@ -76,6 +79,9 @@
   "GATE393-L4-FALLBACK-NEVER-EXPIRES",
   "A-R393-ARCH-DECIDE-PREVIEW-MODE",
   "GATE393-ARCH-PREVIEW-CONTROLLER",
-  "ARCH-CHECKPOINT-PREVIEW-AFTER-13C"
+  "ARCH-CHECKPOINT-PREVIEW-AFTER-13C",
+  "A-R394-REVIEW-L3-REENTRANT-SYNC-THROW",
+  "A-R394-ARCH-STREAM-WATCHDOG-UNIT",
+  "RC-R394-GESTURE-IN-DEGRADED-STATE"
  ]
 }
