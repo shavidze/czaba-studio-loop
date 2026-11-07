@@ -1,0 +1,47 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav-stream.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 228[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 403[2mms[22m[39m
+     [32m✓[39m SW1 writer bytes, peak and clipped equal encodeArrangementWav at lengths 1, 65,535, 65,536, 65,537 and 2·65,536+123[32m 132[2mms[22m[39m
+     [32m✓[39m SW1 the data covers NaN, ±1.5, exactly MAX_24BIT_SAMPLE and −1 in the first and the last chunk[32m 25[2mms[22m[39m
+     [32m✓[39m SW1 chunk sizes 1, 7, 65,536 and one whole chunk give the same bytes as the oracle[32m 75[2mms[22m[39m
+     [32m✓[39m SW1 a mono odd-length stream writes the pad byte and the header sizes like the oracle[32m 9[2mms[22m[39m
+     [32m✓[39m SW1 peak and clipped equal measureExportOverload on the whole input when the loudest sample sits in an early chunk[32m 45[2mms[22m[39m
+[31m     [31m×[31m SW1 peak equals measureExportOverload on the whole input when the loudest sample sits in a later chunk[39m[32m 36[2mms[22m[39m
+     [32m✓[39m SW1 length 0, a non-integer length and a bad channel count reject at once[32m 1[2mms[22m[39m
+     [32m✓[39m SW1 the writer rejects an empty chunk, a shape mismatch and more frames than declared, and keeps what it wrote[32m 1[2mms[22m[39m
+     [32m✓[39m SW1 finish with fewer frames than declared throws, at zero and part way[32m 0[2mms[22m[39m
+     [32m✓[39m SW1 the writer leaves its input chunks untouched (replaces IP2: no in-place clamp any more)[32m 46[2mms[22m[39m
+     [32m✓[39m SW1 encodeArrangementWav still leaves its input untouched and equals the stream writer (replaces IP5)[32m 17[2mms[22m[39m
+     [32m✓[39m SW1 write returns the cumulative written count per chunk[32m 13[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mPERF-12a SW1 the WAV stream writer the worker runs (round 380)[2m > [22mSW1 peak equals measureExportOverload on the whole input when the loudest sample sits in a later chunk
+[31m[1mAssertionError[22m: expected 1.0499999523162842 to be 1.2999999523162842 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1.2999999523162842[39m
+[31m+ 1.0499999523162842[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m215:25[22m[39m
+    [90m213| [39m    [34mexpect[39m(firstChunk[33m.[39mpeak)[33m.[39m[34mtoBeLessThan[39m(whole[33m.[39mpeak)[33m;[39m
+    [90m214| [39m    [35mconst[39m actual [33m=[39m [34mstreamEncode[39m(raw[33m,[39m [33mARRANGEMENT_WAV_CHUNK_FRAMES[39m)[33m;[39m
+    [90m215| [39m    [34mexpect[39m(actual[33m.[39mpeak)[33m.[39m[34mtoBe[39m([33mMath[39m[33m.[39m[34mfround[39m([34m1.3[39m))[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m216| [39m    [34mexpect[39m(actual[33m.[39mclippedSamples)[33m.[39m[34mtoBe[39m(whole[33m.[39mclippedSamples)[33m;[39m
+    [90m217| [39m    [34mexpect[39m(actual[33m.[39mclippedSamples)[33m.[39m[34mtoBe[39m([34m3[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m23 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 05:40:56
+[2m   Duration [22m 1.04s[2m (transform 250ms, setup 0ms, import 322ms, tests 630ms, environment 759ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > PERF-12a SW1 the WAV stream writer the worker runs (round 380) > SW1 peak equals measureExportOverload on the whole input when the loudest sample sits in a later chunk,line=215,column=25::AssertionError: expected 1.0499999523162842 to be 1.2999999523162842 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1.2999999523162842%0A+ 1.0499999523162842%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:215:25%0A%0A

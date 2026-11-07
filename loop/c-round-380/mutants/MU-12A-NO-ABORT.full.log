@@ -1,0 +1,110 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 135[2mms[22m[39m
+     [32m✓[39m exports the exact messages and a named cancel error[32m 6[2mms[22m[39m
+     [32m✓[39m without a signal returns the same promise and its result[32m 0[2mms[22m[39m
+     [32m✓[39m with a pre-aborted signal rejects with the cancel error[32m 1[2mms[22m[39m
+     [32m✓[39m an abort mid-flight rejects with the cancel error even though the work resolves later[32m 4[2mms[22m[39m
+     [32m✓[39m a work rejection before any abort passes that error through[32m 0[2mms[22m[39m
+     [32m✓[39m removes its abort listener once the work settles[32m 1[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal with a work that rejects later raises no unhandled rejection[32m 18[2mms[22m[39m
+     [32m✓[39m a late work rejection after an abort raises no unhandled rejection[32m 12[2mms[22m[39m
+     [32m✓[39m EC2 a pre-aborted signal rejects cancelled and never constructs an OfflineAudioContext[32m 1[2mms[22m[39m
+     [32m✓[39m EC2 a signal alone schedules suspend points, and an abort before the first suspend resolves never resumes[32m 22[2mms[22m[39m
+     [32m✓[39m EC2 an abort after one resumed suspend stops resuming at the next suspend point[32m 27[2mms[22m[39m
+     [32m✓[39m EC2 an abort after startRendering resolved but before the worker constructs no Worker[32m 3[2mms[22m[39m
+     [32m✓[39m EC3 GATE89-S1 a rejected resume() rejects the render with that error instead of hanging[32m 1[2mms[22m[39m
+     [32m✓[39m EC3 a rejected suspend() alone still renders[32m 4[2mms[22m[39m
+     [32m✓[39m SW6 a pre-aborted signal rejects cancelled, constructs no Worker and copies nothing[32m 1[2mms[22m[39m
+     [32m✓[39m SW6 the no-Worker fallback checks the signal before it encodes[32m 0[2mms[22m[39m
+[31m     [31m×[31m SW6 an abort mid-stream terminates once, rejects cancelled, and a late ack or complete changes nothing[39m[32m 26[2mms[22m[39m
+[31m     [31m×[31m SW6 removes the abort listener on complete and on a worker failure[39m[32m 4[2mms[22m[39m
+     [32m✓[39m SW6 a 3-argument call streams as before: begin, a transferred chunk, finish after the ack, and complete resolves[32m 1[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav-stream.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 321[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 540[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 409[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 318[2mms[22m[39m
+     [32m✓[39m EW2 graph.client re-exports the same measureExportOverload[32m 0[2mms[22m[39m
+     [32m✓[39m EW3 encoding progress never decreases and ends at 1[32m 19[2mms[22m[39m
+     [32m✓[39m EW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav[32m 29[2mms[22m[39m
+     [32m✓[39m EW6 without onProgress no suspend is called, and a context without suspend still renders[32m 2[2mms[22m[39m
+     [32m✓[39m EW6 a throwing progress callback still resumes every suspend, so the render settles instead of hanging[32m 21[2mms[22m[39m
+     [32m✓[39m EW6 a rejecting suspend does not fail the render[32m 3[2mms[22m[39m
+     [32m✓[39m SW7 a rendered buffer whose getChannelData throws still gives a Blob equal to the oracle for its channels[32m 1[2mms[22m[39m
+     [32m✓[39m EW8a SW5 a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing[32m 3[2mms[22m[39m
+     [32m✓[39m EW8b SW5 each ack restarts the stall timer: acks at 29 s and 58 s keep the stream alive past 30 s and 60 s, and the stall fires 30 s after the last ack[32m 2[2mms[22m[39m
+     [32m✓[39m EW8b SW5 the last ack also restarts the timer: after finish is posted the stream stays alive 30 s from that ack[32m 1[2mms[22m[39m
+     [32m✓[39m EW8c SW5 complete before the timeout resolves, clears the timer and ignores a late ack[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW8d SW5 an abort mid-stream rejects cancelled, clears the timer, and the copyFromChannel count stops changing[39m[32m 7[2mms[22m[39m
+     [32m✓[39m EW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer and ignores a late ack[32m 2[2mms[22m[39m
+     [32m✓[39m EW8f the stall timeout is exactly 30 s and the stalled message is exact[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 SW6 encodeArrangementWavStreamOffMainThread honours the signal (PERF-12a)[2m > [22mSW6 an abort mid-stream terminates once, rejects cancelled, and a late ack or complete changes nothing
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m473:31[22m[39m
+    [90m471| [39m    [34mexpect[39m(source[33m.[39mcopyFromChannel)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m4[39m)[33m;[39m
+    [90m472| [39m    controller[33m.[39m[34mabort[39m()[33m;[39m
+    [90m473| [39m    [34mexpect[39m(worker[33m.[39mterminated)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m474| [39m    worker[33m.[39m[34memit[39m({ type[33m:[39m [32m'ack'[39m[33m,[39m written[33m:[39m [34m2[39m [33m*[39m [34m65_536[39m })[33m;[39m
+    [90m475| [39m    worker[33m.[39m[34memit[39m([34mcompleteMessage[39m([34m0.2[39m[33m,[39m [34m0[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 SW6 encodeArrangementWavStreamOffMainThread honours the signal (PERF-12a)[2m > [22mSW6 removes the abort listener on complete and on a worker failure
+[31m[1mAssertionError[22m: expected [Function handleAbort] to be undefined // Object.is equality[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+[Function handleAbort]
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m497:39[22m[39m
+    [90m495| [39m    [34mexpect[39m(([35mawait[39m done)[33m.[39mpeak)[33m.[39m[34mtoBe[39m([34m0.2[39m)[33m;[39m
+    [90m496| [39m    [34mexpect[39m(remove)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m497| [39m    [34mexpect[39m(remove[33m.[39mmock[33m.[39mcalls[[34m0[39m][33m?.[39m[[34m1[39m])[33m.[39m[34mtoBe[39m(add[33m.[39mmock[33m.[39mcalls[[34m0[39m][33m?.[39m[[34m1[39m])[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m498| [39m    [35mconst[39m failed [33m=[39m [34moutcomeOf[39m(
+    [90m499| [39m      encodeArrangementWavStreamOffMainThread(streamSource(), undefine…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3), re-pointed at the WAV stream (PERF-12a SW5)[2m > [22mEW8d SW5 an abort mid-stream rejects cancelled, clears the timer, and the copyFromChannel count stops changing
+[31m[1mAssertionError[22m: expected 'pending' to be 'rejected' // Object.is equality[39m
+
+Expected: [32m"rejected"[39m
+Received: [31m"pending"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m495:27[22m[39m
+    [90m493| [39m    controller[33m.[39m[34mabort[39m()[33m;[39m
+    [90m494| [39m    [35mawait[39m vi[33m.[39m[34madvanceTimersByTimeAsync[39m([34m0[39m)[33m;[39m
+    [90m495| [39m    [34mexpect[39m(outcome[33m.[39mstate)[33m.[39m[34mtoBe[39m([32m'rejected'[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m496| [39m    expect(outcome.error instanceof ArrangementExportCancelledError).t…
+    [90m497| [39m    [34mexpect[39m(vi[33m.[39m[34mgetTimerCount[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m55 passed[39m[22m[90m (58)[39m
+[2m   Start at [22m 06:00:00
+[2m   Duration [22m 1.69s[2m (transform 896ms, setup 0ms, import 1.24s, tests 1.40s, environment 2.69s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 SW6 encodeArrangementWavStreamOffMainThread honours the signal (PERF-12a) > SW6 an abort mid-stream terminates once%2C rejects cancelled%2C and a late ack or complete changes nothing,line=473,column=31::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:473:31%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 SW6 encodeArrangementWavStreamOffMainThread honours the signal (PERF-12a) > SW6 removes the abort listener on complete and on a worker failure,line=497,column=39::AssertionError: expected [Function handleAbort] to be undefined // Object.is equality%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A[Function handleAbort]%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:497:39%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3)%2C re-pointed at the WAV stream (PERF-12a SW5) > EW8d SW5 an abort mid-stream rejects cancelled%2C clears the timer%2C and the copyFromChannel count stops changing,line=495,column=27::AssertionError: expected 'pending' to be 'rejected' // Object.is equality%0A%0AExpected: "rejected"%0AReceived: "pending"%0A%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:495:27%0A%0A

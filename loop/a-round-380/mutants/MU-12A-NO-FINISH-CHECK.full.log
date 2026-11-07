@@ -1,0 +1,82 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 105[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-stream.test.ts [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 333[2mms[22m[39m
+     [32m✓[39m SW1 without a Worker global the fallback returns a Blob whose bytes, peak and clipped equal the oracle[32m 94[2mms[22m[39m
+     [32m✓[39m SW1 the fallback rejects a length-0 source at once with the writer message[32m 2[2mms[22m[39m
+     [32m✓[39m SW2a begin has the exact shape, one chunk is posted before the first ack, then one per ack, finish after the last ack, and complete resolves and terminates once[32m 55[2mms[22m[39m
+     [32m✓[39m SW2b a worker error, onerror and onmessageerror each reject with the exact message and terminate once[32m 2[2mms[22m[39m
+     [32m✓[39m SW2c a Worker constructor that throws rejects with the exact message and copies nothing[32m 1[2mms[22m[39m
+     [32m✓[39m SW2d postMessage throwing on begin, the first chunk, a later chunk or finish rejects with the constant and terminates once[32m 29[2mms[22m[39m
+     [32m✓[39m SW2e a throwing onProgress still completes, on the worker path and on the no-Worker fallback[32m 61[2mms[22m[39m
+     [32m✓[39m SW4 on the worker path progress starts at 0, never decreases and ends at exactly 1[32m 3[2mms[22m[39m
+     [32m✓[39m SW4 two acks inside the same whole percent give one callback[32m 2[2mms[22m[39m
+     [32m✓[39m SW4 on the fallback progress starts at 0, never decreases, has one call per whole percent and ends at exactly 1 (replaces IP3)[32m 17[2mms[22m[39m
+     [32m✓[39m SW3 begin is silent, each chunk acks the cumulative written count, and complete carries a Blob with the oracle bytes[32m 54[2mms[22m[39m
+[31m     [31m×[31m SW3 a chunk before begin, a shape mismatch, too many frames, a short finish and an empty chunk each post the exact error[39m[32m 12[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 546[2mms[22m[39m
+     [32m✓[39m SW1 writer bytes, peak and clipped equal encodeArrangementWav at lengths 1, 65,535, 65,536, 65,537 and 2·65,536+123[32m 141[2mms[22m[39m
+     [32m✓[39m SW1 the data covers NaN, ±1.5, exactly MAX_24BIT_SAMPLE and −1 in the first and the last chunk[32m 21[2mms[22m[39m
+     [32m✓[39m SW1 chunk sizes 1, 7, 65,536 and one whole chunk give the same bytes as the oracle[32m 129[2mms[22m[39m
+     [32m✓[39m SW1 a mono odd-length stream writes the pad byte and the header sizes like the oracle[32m 16[2mms[22m[39m
+     [32m✓[39m SW1 peak and clipped equal measureExportOverload on the whole input when the loudest sample sits in an early chunk[32m 78[2mms[22m[39m
+     [32m✓[39m SW1 peak equals measureExportOverload on the whole input when the loudest sample sits in a later chunk[32m 70[2mms[22m[39m
+     [32m✓[39m SW1 length 0, a non-integer length and a bad channel count reject at once[32m 1[2mms[22m[39m
+     [32m✓[39m SW1 the writer rejects an empty chunk, a shape mismatch and more frames than declared, and keeps what it wrote[32m 1[2mms[22m[39m
+[31m     [31m×[31m SW1 finish with fewer frames than declared throws, at zero and part way[39m[32m 5[2mms[22m[39m
+     [32m✓[39m SW1 the writer leaves its input chunks untouched (replaces IP2: no in-place clamp any more)[32m 53[2mms[22m[39m
+     [32m✓[39m SW1 encodeArrangementWav still leaves its input untouched and equals the stream writer (replaces IP5)[32m 17[2mms[22m[39m
+     [32m✓[39m SW1 write returns the cumulative written count per chunk[32m 13[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 443[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 362[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mPERF-12a SW1 the WAV stream writer the worker runs (round 380)[2m > [22mSW1 finish with fewer frames than declared throws, at zero and part way
+[31m[1mAssertionError[22m: expected function to throw an error, but it didn't[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m260:34[22m[39m
+    [90m258| [39m  it('SW1 finish with fewer frames than declared throws, at zero and p…
+    [90m259| [39m    [35mconst[39m empty [33m=[39m [34mcreateArrangementWavStreamWriter[39m([34m4[39m[33m,[39m [34m1[39m[33m,[39m [34m48000[39m)[33m;[39m
+    [90m260| [39m    expect(() => empty.finish()).toThrow(new Error('WAV stream: fewer …
+    [90m   | [39m                                 [31m^[39m
+    [90m261| [39m    [35mconst[39m partial [33m=[39m [34mcreateArrangementWavStreamWriter[39m([34m4[39m[33m,[39m [34m1[39m[33m,[39m [34m48000[39m)[33m;[39m
+    [90m262| [39m    [34mexpect[39m(partial[33m.[39m[34mwrite[39m([[33mFloat32Array[39m[33m.[39m[35mof[39m([34m0.1[39m[33m,[39m [34m0.2[39m[33m,[39m [34m0.3[39m)]))[33m.[39m[34mtoBe[39m([34m3[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-stream.test.ts[2m > [22mPERF-12a SW3 the worker module: begin, ack, finish, complete, error (replaces EW7, IP4)[2m > [22mSW3 a chunk before begin, a shape mismatch, too many frames, a short finish and an empty chunk each post the exact error
+[31m[1mAssertionError[22m: expected { type: 'complete', …(3) } to deeply equal { type: 'error', …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "message": "WAV stream: fewer frames than declared",[39m
+[32m-   "type": "error",[39m
+[31m+   "blob": Blob {},[39m
+[31m+   "clippedSamples": 0,[39m
+[31m+   "peak": 0,[39m
+[31m+   "type": "complete",[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-stream.test.ts:[2m529:23[22m[39m
+    [90m527| [39m    [34mexpect[39m([34merrorOf[39m())[33m.[39m[34mtoEqual[39m({ type[33m:[39m [32m'ack'[39m[33m,[39m written[33m:[39m [34m3[39m })[33m;[39m
+    [90m528| [39m    [34msend[39m({ type[33m:[39m [32m'finish'[39m })[33m;[39m
+    [90m529| [39m    expect(errorOf()).toEqual({ type: 'error', message: 'WAV stream: f…
+    [90m   | [39m                      [31m^[39m
+    [90m530| [39m    send({ type: 'begin', length: 4, channelCount: 1, sampleRate: 4800…
+    [90m531| [39m    [34msend[39m({ type[33m:[39m [32m'chunk'[39m[33m,[39m channels[33m:[39m [[35mnew[39m [33mFloat32Array[39m([34m0[39m)] })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m56 passed[39m[22m[90m (58)[39m
+[2m   Start at [22m 05:40:46
+[2m   Duration [22m 1.68s[2m (transform 814ms, setup 0ms, import 1.15s, tests 1.43s, environment 2.69s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > PERF-12a SW1 the WAV stream writer the worker runs (round 380) > SW1 finish with fewer frames than declared throws%2C at zero and part way,line=260,column=34::AssertionError: expected function to throw an error, but it didn't%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:260:34%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-stream.test.ts,title=app/lib/arrangement/__tests__/export-wav-stream.test.ts > PERF-12a SW3 the worker module%3A begin%2C ack%2C finish%2C complete%2C error (replaces EW7%2C IP4) > SW3 a chunk before begin%2C a shape mismatch%2C too many frames%2C a short finish and an empty chunk each post the exact error,line=529,column=23::AssertionError: expected { type: 'complete', …(3) } to deeply equal { type: 'error', …(1) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "message": "WAV stream: fewer frames than declared",%0A-   "type": "error",%0A+   "blob": Blob {},%0A+   "clippedSamples": 0,%0A+   "peak": 0,%0A+   "type": "complete",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-stream.test.ts:529:23%0A%0A

@@ -1,0 +1,198 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 447[2mms[22m[39m
+[31m     [31m×[31m SW1 writer bytes, peak and clipped equal encodeArrangementWav at lengths 1, 65,535, 65,536, 65,537 and 2·65,536+123[39m[32m 108[2mms[22m[39m
+     [32m✓[39m SW1 the data covers NaN, ±1.5, exactly MAX_24BIT_SAMPLE and −1 in the first and the last chunk[32m 23[2mms[22m[39m
+[31m     [31m×[31m SW1 chunk sizes 1, 7, 65,536 and one whole chunk give the same bytes as the oracle[39m[32m 86[2mms[22m[39m
+     [32m✓[39m SW1 a mono odd-length stream writes the pad byte and the header sizes like the oracle[32m 36[2mms[22m[39m
+[31m     [31m×[31m SW1 peak and clipped equal measureExportOverload on the whole input when the loudest sample sits in an early chunk[39m[32m 52[2mms[22m[39m
+     [32m✓[39m SW1 length 0, a non-integer length and a bad channel count reject at once[32m 1[2mms[22m[39m
+     [32m✓[39m SW1 the writer rejects an empty chunk, a shape mismatch and more frames than declared, and keeps what it wrote[32m 4[2mms[22m[39m
+     [32m✓[39m SW1 finish with fewer frames than declared throws, at zero and part way[32m 0[2mms[22m[39m
+     [32m✓[39m SW1 the writer leaves its input chunks untouched (replaces IP2: no in-place clamp any more)[32m 94[2mms[22m[39m
+[31m     [31m×[31m SW1 encodeArrangementWav still leaves its input untouched and equals the stream writer (replaces IP5)[39m[32m 25[2mms[22m[39m
+     [32m✓[39m SW1 write returns the cumulative written count per chunk[32m 16[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-stream.test.ts [2m([22m[2m12 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 397[2mms[22m[39m
+[31m     [31m×[31m SW1 without a Worker global the fallback returns a Blob whose bytes, peak and clipped equal the oracle[39m[32m 105[2mms[22m[39m
+     [32m✓[39m SW1 the fallback rejects a length-0 source at once with the writer message[32m 3[2mms[22m[39m
+     [32m✓[39m SW2a begin has the exact shape, one chunk is posted before the first ack, then one per ack, finish after the last ack, and complete resolves and terminates once[32m 57[2mms[22m[39m
+     [32m✓[39m SW2b a worker error, onerror and onmessageerror each reject with the exact message and terminate once[32m 2[2mms[22m[39m
+     [32m✓[39m SW2c a Worker constructor that throws rejects with the exact message and copies nothing[32m 1[2mms[22m[39m
+     [32m✓[39m SW2d postMessage throwing on begin or mid-stream rejects with the constant and terminates once[32m 15[2mms[22m[39m
+[31m     [31m×[31m SW2e a throwing onProgress still completes, on the worker path and on the no-Worker fallback[39m[32m 24[2mms[22m[39m
+     [32m✓[39m SW4 on the worker path progress starts at 0, never decreases and ends at exactly 1[32m 2[2mms[22m[39m
+     [32m✓[39m SW4 two acks inside the same whole percent give one callback[32m 1[2mms[22m[39m
+     [32m✓[39m SW4 on the fallback progress starts at 0, never decreases, has one call per whole percent and ends at exactly 1 (replaces IP3)[32m 12[2mms[22m[39m
+[31m     [31m×[31m SW3 begin is silent, each chunk acks the cumulative written count, and complete carries a Blob with the oracle bytes[39m[32m 171[2mms[22m[39m
+     [32m✓[39m SW3 a chunk before begin, a shape mismatch, too many frames, a short finish and an empty chunk each post the exact error[32m 1[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 460[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 382[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mPERF-12a SW1 the WAV stream writer the worker runs (round 380)[2m > [22mSW1 writer bytes, peak and clipped equal encodeArrangementWav at lengths 1, 65,535, 65,536, 65,537 and 2·65,536+123
+[31m[1mAssertionError[22m: expected { peak: 1.5, clippedSamples: +0 } to deeply equal { peak: 1.5, clippedSamples: 44156 }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "clippedSamples": 44156,[39m
+[31m+   "clippedSamples": 0,[39m
+[2m    "peak": 1.5,[22m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m117:76[22m[39m
+    [90m115| [39m      [34mexpect[39m(actual[33m.[39mbytes[33m.[39mbyteLength)[33m.[39m[34mtoBe[39m([34m44[39m [33m+[39m length [33m*[39m [34m2[39m [33m*[39m [34m3[39m)[33m;[39m
+    [90m116| [39m      expect(countByteMismatches(actual.bytes, expected.bytes)).toBe(0…
+    [90m117| [39m      expect({ peak: actual.peak, clippedSamples: actual.clippedSample…
+    [90m   | [39m                                                                           [31m^[39m
+    [90m118| [39m        peak[33m:[39m expected[33m.[39mpeak[33m,[39m
+    [90m119| [39m        clippedSamples[33m:[39m expected[33m.[39mclippedSamples[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mPERF-12a SW1 the WAV stream writer the worker runs (round 380)[2m > [22mSW1 chunk sizes 1, 7, 65,536 and one whole chunk give the same bytes as the oracle
+[31m[1mAssertionError[22m: expected +0 to be 47162 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 47162[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m158:37[22m[39m
+    [90m156| [39m      expect(countByteMismatches(actual.bytes, expected.bytes)).toBe(0…
+    [90m157| [39m      [34mexpect[39m(actual[33m.[39mpeak)[33m.[39m[34mtoBe[39m(expected[33m.[39mpeak)[33m;[39m
+    [90m158| [39m      [34mexpect[39m(actual[33m.[39mclippedSamples)[33m.[39m[34mtoBe[39m(expected[33m.[39mclippedSamples)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m159| [39m    }
+    [90m160| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mPERF-12a SW1 the WAV stream writer the worker runs (round 380)[2m > [22mSW1 peak and clipped equal measureExportOverload on the whole input when the loudest sample sits in an early chunk
+[31m[1mAssertionError[22m: expected 1 to be 7 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 7[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m188:35[22m[39m
+    [90m186| [39m    [35mconst[39m actual [33m=[39m [34mstreamEncode[39m(raw[33m,[39m [33mARRANGEMENT_WAV_CHUNK_FRAMES[39m)[33m;[39m
+    [90m187| [39m    [34mexpect[39m(actual[33m.[39mpeak)[33m.[39m[34mtoBe[39m(whole[33m.[39mpeak)[33m;[39m
+    [90m188| [39m    [34mexpect[39m(actual[33m.[39mclippedSamples)[33m.[39m[34mtoBe[39m(whole[33m.[39mclippedSamples)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m189| [39m    [34mexpect[39m(actual[33m.[39mclippedSamples)[33m.[39m[34mtoBe[39m([34m7[39m)[33m;[39m
+    [90m190| [39m    [35mconst[39m expected [33m=[39m [34mencodeArrangementWav[39m([34mcopyChannels[39m(raw)[33m,[39m [34m48000[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mPERF-12a SW1 the WAV stream writer the worker runs (round 380)[2m > [22mSW1 encodeArrangementWav still leaves its input untouched and equals the stream writer (replaces IP5)
+[31m[1mAssertionError[22m: expected { peak: 1.5, clippedSamples: 47162 } to deeply equal { peak: 1.5, clippedSamples: 3007 }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "clippedSamples": 3007,[39m
+[31m+   "clippedSamples": 47162,[39m
+[2m    "peak": 1.5,[22m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m273:74[22m[39m
+    [90m271| [39m    [34mexpect[39m(raw[[34m0[39m][33m?.[39m[[34m0[39m])[33m.[39m[34mtoBe[39m([34m1.5[39m)[33m;[39m
+    [90m272| [39m    [35mconst[39m streamed [33m=[39m [34mstreamEncode[39m(copy[33m,[39m [33mARRANGEMENT_WAV_CHUNK_FRAMES[39m)[33m;[39m
+    [90m273| [39m    expect({ peak: oracle.peak, clippedSamples: oracle.clippedSamples …
+    [90m   | [39m                                                                         [31m^[39m
+    [90m274| [39m      peak[33m:[39m streamed[33m.[39mpeak[33m,[39m
+    [90m275| [39m      clippedSamples[33m:[39m streamed[33m.[39mclippedSamples[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-stream.test.ts[2m > [22mPERF-12a SW1 the no-Worker fallback streams through the same writer (replaces EW4)[2m > [22mSW1 without a Worker global the fallback returns a Blob whose bytes, peak and clipped equal the oracle
+[31m[1mAssertionError[22m: expected 86 to be 88377 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 88377[39m
+[31m+ 86[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-stream.test.ts:[2m151:35[22m[39m
+    [90m149| [39m    )[33m;[39m
+    [90m150| [39m    [34mexpect[39m(result[33m.[39mpeak)[33m.[39m[34mtoBe[39m(expected[33m.[39mpeak)[33m;[39m
+    [90m151| [39m    [34mexpect[39m(result[33m.[39mclippedSamples)[33m.[39m[34mtoBe[39m(expected[33m.[39mclippedSamples)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m152| [39m    [34mexpect[39m(source[33m.[39mcopyFromChannel)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m3[39m [33m*[39m [34m2[39m)[33m;[39m
+    [90m153| [39m    [34mexpect[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-stream.test.ts[2m > [22mPERF-12a SW2 the worker pump: one chunk in flight[2m > [22mSW2e a throwing onProgress still completes, on the worker path and on the no-Worker fallback
+[31m[1mAssertionError[22m: expected 4 to be 44159 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 44159[39m
+[31m+ 4[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-stream.test.ts:[2m329:37[22m[39m
+    [90m327| [39m    [34mexpect[39m(throwing)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m3[39m)[33m;[39m
+    [90m328| [39m    [34mexpect[39m(fallback[33m.[39mpeak)[33m.[39m[34mtoBe[39m(expected[33m.[39mpeak)[33m;[39m
+    [90m329| [39m    [34mexpect[39m(fallback[33m.[39mclippedSamples)[33m.[39m[34mtoBe[39m(expected[33m.[39mclippedSamples)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m330| [39m    [34mexpect[39m(
+    [90m331| [39m      countByteMismatches(await blobBytes(fallback.blob), new Uint8Arr…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-stream.test.ts[2m > [22mPERF-12a SW3 the worker module: begin, ack, finish, complete, error (replaces EW7, IP4)[2m > [22mSW3 begin is silent, each chunk acks the cumulative written count, and complete carries a Blob with the oracle bytes
+[31m[1mAssertionError[22m: expected { type: 'complete', …(3) } to match object { type: 'complete', peak: 1.5, …(1) }
+(1 matching property omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "clippedSamples": 88377,[39m
+[31m+   "clippedSamples": 86,[39m
+[2m    "peak": 1.5,[22m
+[2m    "type": "complete",[22m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-stream.test.ts:[2m447:18[22m[39m
+    [90m445| [39m    [34mexpect[39m(posted)[33m.[39m[34mtoHaveLength[39m([34m4[39m)[33m;[39m
+    [90m446| [39m    [35mconst[39m last [33m=[39m posted[33m.[39m[34mat[39m([33m-[39m[34m1[39m)[33m?.[39mmessage[33m;[39m
+    [90m447| [39m    [34mexpect[39m(last)[33m.[39m[34mtoMatchObject[39m({
+    [90m   | [39m                 [31m^[39m
+    [90m448| [39m      type[33m:[39m [32m'complete'[39m[33m,[39m
+    [90m449| [39m      peak[33m:[39m expected[33m.[39mpeak[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m49 passed[39m[22m[90m (56)[39m
+[2m   Start at [22m 05:25:34
+[2m   Duration [22m 1.70s[2m (transform 920ms, setup 0ms, import 1.17s, tests 1.41s, environment 2.67s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > PERF-12a SW1 the WAV stream writer the worker runs (round 380) > SW1 writer bytes%2C peak and clipped equal encodeArrangementWav at lengths 1%2C 65%2C535%2C 65%2C536%2C 65%2C537 and 2·65%2C536+123,line=117,column=76::AssertionError: expected { peak: 1.5, clippedSamples: +0 } to deeply equal { peak: 1.5, clippedSamples: 44156 }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "clippedSamples": 44156,%0A+   "clippedSamples": 0,%0A    "peak": 1.5,%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:117:76%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > PERF-12a SW1 the WAV stream writer the worker runs (round 380) > SW1 chunk sizes 1%2C 7%2C 65%2C536 and one whole chunk give the same bytes as the oracle,line=158,column=37::AssertionError: expected +0 to be 47162 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 47162%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:158:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > PERF-12a SW1 the WAV stream writer the worker runs (round 380) > SW1 peak and clipped equal measureExportOverload on the whole input when the loudest sample sits in an early chunk,line=188,column=35::AssertionError: expected 1 to be 7 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 7%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:188:35%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > PERF-12a SW1 the WAV stream writer the worker runs (round 380) > SW1 encodeArrangementWav still leaves its input untouched and equals the stream writer (replaces IP5),line=273,column=74::AssertionError: expected { peak: 1.5, clippedSamples: 47162 } to deeply equal { peak: 1.5, clippedSamples: 3007 }%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "clippedSamples": 3007,%0A+   "clippedSamples": 47162,%0A    "peak": 1.5,%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:273:74%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-stream.test.ts,title=app/lib/arrangement/__tests__/export-wav-stream.test.ts > PERF-12a SW1 the no-Worker fallback streams through the same writer (replaces EW4) > SW1 without a Worker global the fallback returns a Blob whose bytes%2C peak and clipped equal the oracle,line=151,column=35::AssertionError: expected 86 to be 88377 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 88377%0A+ 86%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-stream.test.ts:151:35%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-stream.test.ts,title=app/lib/arrangement/__tests__/export-wav-stream.test.ts > PERF-12a SW2 the worker pump%3A one chunk in flight > SW2e a throwing onProgress still completes%2C on the worker path and on the no-Worker fallback,line=329,column=37::AssertionError: expected 4 to be 44159 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 44159%0A+ 4%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-stream.test.ts:329:37%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav-stream.test.ts,title=app/lib/arrangement/__tests__/export-wav-stream.test.ts > PERF-12a SW3 the worker module%3A begin%2C ack%2C finish%2C complete%2C error (replaces EW7%2C IP4) > SW3 begin is silent%2C each chunk acks the cumulative written count%2C and complete carries a Blob with the oracle bytes,line=447,column=18::AssertionError: expected { type: 'complete', …(3) } to match object { type: 'complete', peak: 1.5, …(1) }%0A(1 matching property omitted from actual)%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "clippedSamples": 88377,%0A+   "clippedSamples": 86,%0A    "peak": 1.5,%0A    "type": "complete",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-stream.test.ts:447:18%0A%0A

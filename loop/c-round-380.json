@@ -1,0 +1,81 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE",
+  "CLAIMS",
+  "SKETCH-EQUAL",
+  "ROW-MAP",
+  "UNIT",
+  "MUTANTS-UNIT",
+  "PERF-RES",
+  "PERF-MUTANTS",
+  "WAV-BYTES",
+  "CANCEL-BROWSER",
+  "MP3-BROWSER",
+  "G380-AUTH",
+  "DOCS"
+ ],
+ "blocked": [
+  "G380-AUTH sub-row: fake bearer /api/studio-token returns 500 'Unable to prepare Studio access' (backend unavailable in cloud) \u2014 not PASS, not a Studio bug"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T05:46:55.3484759Z",
+  "round": 380,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": "b-round-379/r380-frozen-sha256.txt (1254 entries) + b-round-318/protected-sha256.txt, rc 0 at start and end",
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "PERF-RES 22 asserts PASS incl. four flipped rows; SW1..SW7 rows; it/expect counts in c-round-380/counts.txt",
+ "mutantsRecorded": 10,
+ "mutantRedOnSketch": "b-round-379/mutants/sketch-perf-v2/ (B's perf mutants, not re-read as evidence); unit mutants have no B sketch run because A writes those rows",
+ "mutantRedOnTree": {
+  "MU-12A-NO-CLAMP": "SW1",
+  "MU-12A-OFFSET": "SW1",
+  "MU-12A-PEAK-LAST": "SW1",
+  "MU-12A-CLIPPED-LAST": "SW1",
+  "MU-12A-ALL-IN-FLIGHT": "SW2a",
+  "MU-12A-NO-ABORT": "SW6",
+  "MU-12A-NO-REARM": "SW5",
+  "MU-12A-NO-FINISH-CHECK": "SW1,SW3",
+  "MU-12A-PERF-GCD": "peak-backing 37.2/74.4 >5",
+  "MU-12A-PERF-FALLBACK": "longtask-max.6x 1221/2220 >100"
+ },
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "gateChecksRunOnSketch": "not run by C (gate rows); A ran typecheck/lint/biome/covering set rc 0",
+ "chainHeadGateRunGreen": "gate 379 published ed634d5 (HEAD)",
+ "affectedChecksNamed": [
+  "32-file covering set",
+  "stream/wav/cancel shuffle seed 42",
+  "MUTANTS-UNIT",
+  "PERF-RES",
+  "PERF-MUTANTS",
+  "WAV-BYTES",
+  "CANCEL-BROWSER",
+  "MP3-BROWSER",
+  "G380-AUTH"
+ ],
+ "affectedChecksRunOnSketch": "all run by C on A's tree (sketch files 14/14 OK)",
+ "evidence": "c-round-380/ (see c-round-380.md)",
+ "notes": "Overload text not exercised in browser (E4 does not clip on either tree); HEAD cancel race at 1280 and download order are HEAD-side variance."
+}

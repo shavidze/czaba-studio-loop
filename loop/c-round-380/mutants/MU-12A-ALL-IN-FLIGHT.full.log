@@ -1,0 +1,190 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 152[2mms[22m[39m
+     [32m✓[39m exports the exact messages and a named cancel error[32m 5[2mms[22m[39m
+     [32m✓[39m without a signal returns the same promise and its result[32m 0[2mms[22m[39m
+     [32m✓[39m with a pre-aborted signal rejects with the cancel error[32m 0[2mms[22m[39m
+     [32m✓[39m an abort mid-flight rejects with the cancel error even though the work resolves later[32m 1[2mms[22m[39m
+     [32m✓[39m a work rejection before any abort passes that error through[32m 0[2mms[22m[39m
+     [32m✓[39m removes its abort listener once the work settles[32m 4[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal with a work that rejects later raises no unhandled rejection[32m 12[2mms[22m[39m
+     [32m✓[39m a late work rejection after an abort raises no unhandled rejection[32m 13[2mms[22m[39m
+     [32m✓[39m EC2 a pre-aborted signal rejects cancelled and never constructs an OfflineAudioContext[32m 1[2mms[22m[39m
+     [32m✓[39m EC2 a signal alone schedules suspend points, and an abort before the first suspend resolves never resumes[32m 26[2mms[22m[39m
+     [32m✓[39m EC2 an abort after one resumed suspend stops resuming at the next suspend point[32m 25[2mms[22m[39m
+     [32m✓[39m EC2 an abort after startRendering resolved but before the worker constructs no Worker[32m 7[2mms[22m[39m
+     [32m✓[39m EC3 GATE89-S1 a rejected resume() rejects the render with that error instead of hanging[32m 1[2mms[22m[39m
+     [32m✓[39m EC3 a rejected suspend() alone still renders[32m 5[2mms[22m[39m
+     [32m✓[39m SW6 a pre-aborted signal rejects cancelled, constructs no Worker and copies nothing[32m 1[2mms[22m[39m
+     [32m✓[39m SW6 the no-Worker fallback checks the signal before it encodes[32m 0[2mms[22m[39m
+[31m     [31m×[31m SW6 an abort mid-stream terminates once, rejects cancelled, and a late ack or complete changes nothing[39m[32m 40[2mms[22m[39m
+     [32m✓[39m SW6 removes the abort listener on complete and on a worker failure[32m 6[2mms[22m[39m
+     [32m✓[39m SW6 a 3-argument call streams as before: begin, a transferred chunk, finish after the ack, and complete resolves[32m 1[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-stream.test.ts [2m([22m[2m12 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 334[2mms[22m[39m
+     [32m✓[39m SW1 without a Worker global the fallback returns a Blob whose bytes, peak and clipped equal the oracle[32m 99[2mms[22m[39m
+     [32m✓[39m SW1 the fallback rejects a length-0 source at once with the writer message[32m 1[2mms[22m[39m
+[31m     [31m×[31m SW2a begin has the exact shape, one chunk is posted before the first ack, then one per ack, finish after the last ack, and complete resolves and terminates once[39m[32m 20[2mms[22m[39m
+     [32m✓[39m SW2b a worker error, onerror and onmessageerror each reject with the exact message and terminate once[32m 3[2mms[22m[39m
+     [32m✓[39m SW2c a Worker constructor that throws rejects with the exact message and copies nothing[32m 1[2mms[22m[39m
+[31m     [31m×[31m SW2d postMessage throwing on begin, the first chunk, a later chunk or finish rejects with the constant and terminates once[39m[32m 30[2mms[22m[39m
+[31m     [31m×[31m SW2e a throwing onProgress still completes, on the worker path and on the no-Worker fallback[39m[32m 5[2mms[22m[39m
+     [32m✓[39m SW4 on the worker path progress starts at 0, never decreases and ends at exactly 1[32m 4[2mms[22m[39m
+     [32m✓[39m SW4 two acks inside the same whole percent give one callback[32m 4[2mms[22m[39m
+     [32m✓[39m SW4 on the fallback progress starts at 0, never decreases, has one call per whole percent and ends at exactly 1 (replaces IP3)[32m 37[2mms[22m[39m
+     [32m✓[39m SW3 begin is silent, each chunk acks the cumulative written count, and complete carries a Blob with the oracle bytes[32m 128[2mms[22m[39m
+     [32m✓[39m SW3 a chunk before begin, a shape mismatch, too many frames, a short finish and an empty chunk each post the exact error[32m 1[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 535[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 507[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 415[2mms[22m[39m
+     [32m✓[39m EW2 graph.client re-exports the same measureExportOverload[32m 0[2mms[22m[39m
+     [32m✓[39m EW3 encoding progress never decreases and ends at 1[32m 17[2mms[22m[39m
+     [32m✓[39m EW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav[32m 25[2mms[22m[39m
+     [32m✓[39m EW6 without onProgress no suspend is called, and a context without suspend still renders[32m 1[2mms[22m[39m
+     [32m✓[39m EW6 a throwing progress callback still resumes every suspend, so the render settles instead of hanging[32m 21[2mms[22m[39m
+     [32m✓[39m EW6 a rejecting suspend does not fail the render[32m 3[2mms[22m[39m
+     [32m✓[39m SW7 a rendered buffer whose getChannelData throws still gives a Blob equal to the oracle for its channels[32m 1[2mms[22m[39m
+     [32m✓[39m EW8a SW5 a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing[32m 3[2mms[22m[39m
+[31m     [31m×[31m EW8b SW5 each ack restarts the stall timer: acks at 29 s and 58 s keep the stream alive past 30 s and 60 s, and the stall fires 30 s after the last ack[39m[32m 10[2mms[22m[39m
+     [32m✓[39m EW8b SW5 the last ack also restarts the timer: after finish is posted the stream stays alive 30 s from that ack[32m 1[2mms[22m[39m
+     [32m✓[39m EW8c SW5 complete before the timeout resolves, clears the timer and ignores a late ack[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW8d SW5 an abort mid-stream rejects cancelled, clears the timer, and the copyFromChannel count stops changing[39m[32m 2[2mms[22m[39m
+     [32m✓[39m EW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer and ignores a late ack[32m 2[2mms[22m[39m
+     [32m✓[39m EW8f the stall timeout is exactly 30 s and the stalled message is exact[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 SW6 encodeArrangementWavStreamOffMainThread honours the signal (PERF-12a)[2m > [22mSW6 an abort mid-stream terminates once, rejects cancelled, and a late ack or complete changes nothing
+[31m[1mAssertionError[22m: expected [ { message: { …(4) }, …(1) }, …(4) ] to have a length of 3 but got 5[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 3[39m
+[31m+ 5[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m470:26[22m[39m
+    [90m468| [39m    [35mconst[39m worker [33m=[39m [34mlastWorker[39m()[33m;[39m
+    [90m469| [39m    worker[33m.[39m[34memit[39m({ type[33m:[39m [32m'ack'[39m[33m,[39m written[33m:[39m [34m65_536[39m })[33m;[39m
+    [90m470| [39m    [34mexpect[39m(worker[33m.[39mposts)[33m.[39m[34mtoHaveLength[39m([34m3[39m)[33m;[39m
+    [90m   | [39m                         [31m^[39m
+    [90m471| [39m    [34mexpect[39m(source[33m.[39mcopyFromChannel)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m4[39m)[33m;[39m
+    [90m472| [39m    controller[33m.[39m[34mabort[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-stream.test.ts[2m > [22mPERF-12a SW2 the worker pump: one chunk in flight[2m > [22mSW2a begin has the exact shape, one chunk is posted before the first ack, then one per ack, finish after the last ack, and complete resolves and terminates once
+[31m[1mAssertionError[22m: expected [ 'begin', 'chunk', 'chunk', 'chunk' ] to deeply equal [ 'begin', 'chunk' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "begin",[22m
+[2m    "chunk",[22m
+[31m+   "chunk",[39m
+[31m+   "chunk",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-stream.test.ts:[2m226:28[22m[39m
+    [90m224| [39m    })[33m;[39m
+    [90m225| [39m    [34mexpect[39m(worker[33m.[39mposts[[34m0[39m][33m?.[39mtransfer)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m226| [39m    [34mexpect[39m(worker[33m.[39m[34mtypes[39m())[33m.[39m[34mtoEqual[39m([[32m'begin'[39m[33m,[39m [32m'chunk'[39m])[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m227| [39m    [34mexpect[39m(events)[33m.[39m[34mtoEqual[39m([[32m'progress:0'[39m])[33m;[39m
+    [90m228| [39m    const offsets = [0, ARRANGEMENT_WAV_CHUNK_FRAMES, 2 * ARRANGEMENT_…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-stream.test.ts[2m > [22mPERF-12a SW2 the worker pump: one chunk in flight[2m > [22mSW2d postMessage throwing on begin, the first chunk, a later chunk or finish rejects with the constant and terminates once
+[31m[1mAssertionError[22m: expected [ 'begin', 'chunk', 'chunk' ] to have a length of 2 but got 3[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 3[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-stream.test.ts:[2m322:32[22m[39m
+    [90m320| [39m      [35mconst[39m worker [33m=[39m [34mlastWorker[39m()[33m;[39m
+    [90m321| [39m      [35mfor[39m ([35mlet[39m ack [33m=[39m [34m1[39m[33m;[39m ack [33m<[39m failingPost[33m;[39m ack[33m++[39m) {
+    [90m322| [39m        [34mexpect[39m(worker[33m.[39m[34mtypes[39m())[33m.[39m[34mtoHaveLength[39m(ack [33m+[39m [34m1[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m323| [39m        worker.emit({ type: 'ack', written: ack * ARRANGEMENT_WAV_CHUN…
+    [90m324| [39m      }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-stream.test.ts[2m > [22mPERF-12a SW2 the worker pump: one chunk in flight[2m > [22mSW2e a throwing onProgress still completes, on the worker path and on the no-Worker fallback
+[31m[1mAssertionError[22m: expected [ 'begin', 'chunk', 'chunk', …(2) ] to deeply equal [ 'begin', 'chunk', 'chunk', 'finish' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "begin",[22m
+[2m    "chunk",[22m
+[2m    "chunk",[22m
+[2m    "finish",[22m
+[31m+   "finish",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-stream.test.ts:[2m341:28[22m[39m
+    [90m339| [39m    worker.emit({ type: 'ack', written: ARRANGEMENT_WAV_CHUNK_FRAMES }…
+    [90m340| [39m    worker.emit({ type: 'ack', written: ARRANGEMENT_WAV_CHUNK_FRAMES +…
+    [90m341| [39m    expect(worker.types()).toEqual(['begin', 'chunk', 'chunk', 'finish…
+    [90m   | [39m                           [31m^[39m
+    [90m342| [39m    [35mconst[39m blob [33m=[39m [35mnew[39m [33mBlob[39m([[35mnew[39m [33mUint8Array[39m([34m2[39m)][33m,[39m { type[33m:[39m [32m'audio/wav'[39m })[33m;[39m
+    [90m343| [39m    worker.emit({ type: 'complete', blob, peak: 0.5, clippedSamples: 0…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3), re-pointed at the WAV stream (PERF-12a SW5)[2m > [22mEW8b SW5 each ack restarts the stall timer: acks at 29 s and 58 s keep the stream alive past 30 s and 60 s, and the stall fires 30 s after the last ack
+[31m[1mAssertionError[22m: expected [ { type: 'begin', …(3) }, …(4) ] to have a length of 3 but got 5[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 3[39m
+[31m+ 5[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m433:26[22m[39m
+    [90m431| [39m    [35mawait[39m vi[33m.[39m[34madvanceTimersByTimeAsync[39m([34m29_000[39m)[33m;[39m
+    [90m432| [39m    worker[33m.[39m[34memit[39m({ type[33m:[39m [32m'ack'[39m[33m,[39m written[33m:[39m [34m65_536[39m })[33m;[39m
+    [90m433| [39m    [34mexpect[39m(worker[33m.[39mposts)[33m.[39m[34mtoHaveLength[39m([34m3[39m)[33m;[39m
+    [90m   | [39m                         [31m^[39m
+    [90m434| [39m    [35mawait[39m vi[33m.[39m[34madvanceTimersByTimeAsync[39m([34m1_001[39m)[33m;[39m
+    [90m435| [39m    [34mexpect[39m(outcome[33m.[39mstate)[33m.[39m[34mtoBe[39m([32m'pending'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3), re-pointed at the WAV stream (PERF-12a SW5)[2m > [22mEW8d SW5 an abort mid-stream rejects cancelled, clears the timer, and the copyFromChannel count stops changing
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 2 times, but got 3 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m491:36[22m[39m
+    [90m489| [39m    const { outcome, worker, source } = startStallEncode(controller.si…
+    [90m490| [39m    worker[33m.[39m[34memit[39m({ type[33m:[39m [32m'ack'[39m[33m,[39m written[33m:[39m [34m65_536[39m })[33m;[39m
+    [90m491| [39m    [34mexpect[39m(source[33m.[39mcopyFromChannel)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m492| [39m    [35mawait[39m vi[33m.[39m[34madvanceTimersByTimeAsync[39m([34m10_000[39m)[33m;[39m
+    [90m493| [39m    controller[33m.[39m[34mabort[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m52 passed[39m[22m[90m (58)[39m
+[2m   Start at [22m 05:59:57
+[2m   Duration [22m 1.74s[2m (transform 859ms, setup 0ms, import 1.17s, tests 1.53s, environment 2.62s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 SW6 encodeArrangementWavStreamOffMainThread honours the signal (PERF-12a) > SW6 an abort mid-stream terminates once%2C rejects cancelled%2C and a late ack or complete changes nothing,line=470,column=26::AssertionError: expected [ { message: { …(4) }, …(1) }, …(4) ] to have a length of 3 but got 5%0A%0A- Expected%0A+ Received%0A%0A- 3%0A+ 5%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:470:26%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-wav-stream.test.ts,title=app/lib/arrangement/__tests__/export-wav-stream.test.ts > PERF-12a SW2 the worker pump%3A one chunk in flight > SW2a begin has the exact shape%2C one chunk is posted before the first ack%2C then one per ack%2C finish after the last ack%2C and complete resolves and terminates once,line=226,column=28::AssertionError: expected [ 'begin', 'chunk', 'chunk', 'chunk' ] to deeply equal [ 'begin', 'chunk' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "begin",%0A    "chunk",%0A+   "chunk",%0A+   "chunk",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-stream.test.ts:226:28%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-wav-stream.test.ts,title=app/lib/arrangement/__tests__/export-wav-stream.test.ts > PERF-12a SW2 the worker pump%3A one chunk in flight > SW2d postMessage throwing on begin%2C the first chunk%2C a later chunk or finish rejects with the constant and terminates once,line=322,column=32::AssertionError: expected [ 'begin', 'chunk', 'chunk' ] to have a length of 2 but got 3%0A%0A- Expected%0A+ Received%0A%0A- 2%0A+ 3%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-stream.test.ts:322:32%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-wav-stream.test.ts,title=app/lib/arrangement/__tests__/export-wav-stream.test.ts > PERF-12a SW2 the worker pump%3A one chunk in flight > SW2e a throwing onProgress still completes%2C on the worker path and on the no-Worker fallback,line=341,column=28::AssertionError: expected [ 'begin', 'chunk', 'chunk', …(2) ] to deeply equal [ 'begin', 'chunk', 'chunk', 'finish' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "begin",%0A    "chunk",%0A    "chunk",%0A    "finish",%0A+   "finish",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-stream.test.ts:341:28%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3)%2C re-pointed at the WAV stream (PERF-12a SW5) > EW8b SW5 each ack restarts the stall timer%3A acks at 29 s and 58 s keep the stream alive past 30 s and 60 s%2C and the stall fires 30 s after the last ack,line=433,column=26::AssertionError: expected [ { type: 'begin', …(3) }, …(4) ] to have a length of 3 but got 5%0A%0A- Expected%0A+ Received%0A%0A- 3%0A+ 5%0A%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:433:26%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-380/tree/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3)%2C re-pointed at the WAV stream (PERF-12a SW5) > EW8d SW5 an abort mid-stream rejects cancelled%2C clears the timer%2C and the copyFromChannel count stops changing,line=491,column=36::AssertionError: expected "vi.fn()" to be called 2 times, but got 3 times%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:491:36%0A%0A

@@ -1,0 +1,48 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree[39m
+
+ [32m✓[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 97[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav-stream.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 305[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 467[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 464[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 378[2mms[22m[39m
+     [32m✓[39m EW2 graph.client re-exports the same measureExportOverload[32m 0[2mms[22m[39m
+     [32m✓[39m EW3 encoding progress never decreases and ends at 1[32m 18[2mms[22m[39m
+     [32m✓[39m EW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav[32m 25[2mms[22m[39m
+     [32m✓[39m EW6 without onProgress no suspend is called, and a context without suspend still renders[32m 1[2mms[22m[39m
+     [32m✓[39m EW6 a throwing progress callback still resumes every suspend, so the render settles instead of hanging[32m 21[2mms[22m[39m
+     [32m✓[39m EW6 a rejecting suspend does not fail the render[32m 3[2mms[22m[39m
+     [32m✓[39m SW7 a rendered buffer whose getChannelData throws still gives a Blob equal to the oracle for its channels[32m 1[2mms[22m[39m
+     [32m✓[39m EW8a SW5 a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing[32m 3[2mms[22m[39m
+[31m     [31m×[31m EW8b SW5 an ack restarts the stall timer: an ack at 29 s keeps the stream alive past 30 s, and the stall fires 30 s after that ack[39m[32m 7[2mms[22m[39m
+     [32m✓[39m EW8c SW5 complete before the timeout resolves, clears the timer and ignores a late ack[32m 1[2mms[22m[39m
+     [32m✓[39m EW8d SW5 an abort mid-stream rejects cancelled, clears the timer, and the copyFromChannel count stops changing[32m 1[2mms[22m[39m
+     [32m✓[39m EW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer and ignores a late ack[32m 2[2mms[22m[39m
+     [32m✓[39m EW8f the stall timeout is exactly 30 s and the stalled message is exact[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3), re-pointed at the WAV stream (PERF-12a SW5)[2m > [22mEW8b SW5 an ack restarts the stall timer: an ack at 29 s keeps the stream alive past 30 s, and the stall fires 30 s after that ack
+[31m[1mAssertionError[22m: expected 'rejected' to be 'pending' // Object.is equality[39m
+
+Expected: [32m"pending"[39m
+Received: [31m"rejected"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m439:27[22m[39m
+    [90m437| [39m    [34mexpect[39m(worker[33m.[39mposts[33m.[39m[34mat[39m([33m-[39m[34m1[39m))[33m.[39m[34mtoEqual[39m({ type[33m:[39m [32m'finish'[39m })[33m;[39m
+    [90m438| [39m    [35mawait[39m vi[33m.[39m[34madvanceTimersByTimeAsync[39m([34m1_001[39m)[33m;[39m
+    [90m439| [39m    [34mexpect[39m(outcome[33m.[39mstate)[33m.[39m[34mtoBe[39m([32m'pending'[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m440| [39m    [35mawait[39m vi[33m.[39m[34madvanceTimersByTimeAsync[39m([33mSTALL_TIMEOUT_MS[39m [33m-[39m [34m1_001[39m [33m-[39m [34m1[39m)[33m;[39m
+    [90m441| [39m    [34mexpect[39m(outcome[33m.[39mstate)[33m.[39m[34mtoBe[39m([32m'pending'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m55 passed[39m[22m[90m (56)[39m
+[2m   Start at [22m 05:25:41
+[2m   Duration [22m 1.74s[2m (transform 1.03s, setup 0ms, import 1.33s, tests 1.33s, environment 2.63s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-380/tree/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3)%2C re-pointed at the WAV stream (PERF-12a SW5) > EW8b SW5 an ack restarts the stall timer%3A an ack at 29 s keeps the stream alive past 30 s%2C and the stall fires 30 s after that ack,line=439,column=27::AssertionError: expected 'rejected' to be 'pending' // Object.is equality%0A%0AExpected: "pending"%0AReceived: "rejected"%0A%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:439:27%0A%0A
