@@ -1,0 +1,99 @@
+K1 gate381: published 5745526 HEAD: 5745526
+K2 status lines: 11
+K3 buffersRef decl:
+K4 buffersRef set sites: 0 delete/clear sites: 0
+K5 SWEEP buffersRef consumers (app/** perf/**): 0
+K6 demo URL sources + loader branch:
+22:  'demo-middle-east': '/middle-east.mp3',
+23:  'demo-hero-music': '/videos/hero/hero-music.mp3',
+113:  const url = demoUrls[source.id];
+115:    return fetchAndDecodeSource(url, ctx, signal, publicPreviewSourceFetch());
+  public/middle-east.mp3 4054080 bytes
+  public/videos/hero/hero-music.mp3 3610677 bytes
+K7 WorkspaceCollection fields:
+88:export interface WorkspaceCollection {
+  canReloadSource hits in app/**: 5
+K8 placement/paste/drag gates on status ready:
+1712:        latestRef.current.sourceStates[sourceId]?.status === 'ready' &&
+1743:      if (!source || !buffer || latestRef.current.sourceStates[sourceId]?.status !== 'ready') {
+1948:      if (!state || state.status !== 'ready') {
+2014:    if (!source || !state || state.status !== 'ready') {
+2725:        latestRef.current.sourceStates[sourceId]?.status === 'ready',
+K9 preview buffer guard + sourceNotLoaded:
+1737:              : studioLibraryStrings.sourceNotLoaded(source.title),
+1750:          setStatus(studioLibraryStrings.sourceNotLoaded(source.title));
+1952:            : studioLibraryStrings.sourceNotLoaded(source.title),
+280:  sourceNotLoaded: (title: string): string => `“${title}” has not loaded yet.`,
+K10 load path: set after peaks, resync when a clip uses it:
+4304:            if (present.clips.some((clip) => clip.sourceId === source.id)) {
+K11 render + schedule consumers:
+K12 test files naming loadSource / sourceNotLoaded / 'has not loaded yet' (app/**): 131
+K13 demo-collection / studio-lab route tests (covering set C-DEMO):
+  app/data/__tests__/studio-lab-demo.test.ts
+  app/lib/arrangement/__tests__/default-track-names-ssr.test.tsx
+  app/lib/arrangement/__tests__/library-notice-ui.test.tsx
+  app/lib/arrangement/__tests__/ssr-layout-effect.test.tsx
+  app/lib/arrangement/__tests__/studio-link-hydrate-ssr-ui.test.tsx
+  app/lib/arrangement/__tests__/studio-link-hydrate-ui.test.tsx
+  app/lib/arrangement/__tests__/studio-link-ui.test.tsx
+  app/lib/arrangement/__tests__/studio-link-view-in-store-ui.test.tsx
+  app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
+  app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+  count 10
+K14 protected sha:
+  rc 0
+K15 frozen sha (r382, 1259 entries):
+  rc 0
+K16 docs: 248 1 present; doc 247 l.4: **სტატუსი:** In Progress (stage 1 of 4; C round 381 PASS)
+K17 'In Progress (stage' hits: docs/implementation/2026/quarter-IV/232-perf-drag-preview.md docs/implementation/2026/quarter-IV/238-perf-group-header-leaf.md docs/implementation/2026/quarter-IV/246-perf-export-wav-stream.md docs/implementation/2026/quarter-IV/247-perf-pcm-live-baseline.md docs/implementation/2026/quarter-IV/248-perf-decoded-buffer-cache.md 
+K18 regression-last: 2026-11-05 lessons lines: 60
+K19 artifacts:
+  ok b-round-380/probe/pcm-probe-381.mjs
+  ok b-round-380/probe/pcm-head-381.json
+  ok b-round-380/probe/pcm-detail-head-381.json
+  ok c-round-381/res-rows.txt
+  ok c-round-381/perf-res.log
+  ok b-round-381/grants-382.txt
+  ok b-round-381/r382-frozen-sha256.txt
+  ok b-round-334/vitest.perf-lib.config.mjs
+  ok b-round-318/protected-sha256.txt
+  ok b-round-381/tech-lead-382.md
+  ok b-round-381/fixture-grants-382.txt
+  ok b-round-381/fixture-expect-counts-head.txt
+K20 studio-lab initial arrangement (tracks only, no clips):
+39:const studioLabInitialArrangement = createArrangement([
+  clip/source refs in that block: 0
+K21 harness count guard + problem strings:
+134:  if (!reading.registryPresent) return ['pcm registry missing'];
+138:    problems.push('pcm registry did not count its probe buffer');
+K22 default selected source = first collection source; first demo source:
+696:      collection.sources[0]?.id ??
+47:    id: 'demo-middle-east',
+K23 C round 381 production rows:
+  res.mem.pcm-live-mib-ready record 124
+  res.mem.pcm-live-count-ready record 9
+  res.mem.pcm-live-decode-mib-ready record 92.2
+  res.mem.pcm-live-after-export-delta-mib record 0
+  res.export.1.peak-backing-delta-mib assert 0.1
+  res.export.1.bytes record 29189420
+  res.export.2.peak-backing-delta-mib assert 0.2
+  res.export.2.bytes record 58378796
+  res.export.1.longtask-max.6x assert 0
+K24 per-buffer seconds at ready (B HEAD probe): [(2, 0.73), (5, 1.83), (16, 5.86), (16, 5.86), (16, 5.86), (16, 5.86), (16, 5.86), (101.35, 37.12), (150.37, 55.07)]
+K25 assert rows in budgets: 22
+K26 stem cache fetch for public previews:
+501:export function publicPreviewSourceFetch(): SourceFetch {
+K27 perf lib test files: 3
+K28 collection load effect cleanup aborts only:
+K29 startGraph callers:
+1377:        startGraph(arrangement, anchor);
+1664:      startGraph(arrangement, createPlaybackAnchor(from, startAt));
+1810:        startGraph(
+1891:        startGraph(
+1911:        startGraph(
+K30 updateHistory decl:
+913:  const updateHistory = useCallback(
+K31 consumers already take ReadonlyMap:
+58:  buffers: ReadonlyMap<string, TBuffer>;
+524:  buffers: ReadonlyMap<string, AudioBuffer>,
+K32 other buffer holders release it: peaks active cleared 4 sites; preview stopActive/onended clear 2 sites; AudioBuffer in stem-cache.client.ts: 0

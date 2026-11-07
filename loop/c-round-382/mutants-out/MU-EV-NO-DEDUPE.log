@@ -1,0 +1,78 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-382/mut-tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 10747[2mms[22m[39m
+     [32m✓[39m EV1: after load the evictable buffer is gone, the other stays, and both stay ready[32m 67[2mms[22m[39m
+[31m     [31m×[31m EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight[39m[32m 58[2mms[22m[39m
+     [32m✓[39m EV3: Play is refused while the placed source decodes, and starts once it settles[32m 54[2mms[22m[39m
+     [32m✓[39m EV3: while already playing, a newly placed clip joins through the resync and playback never stops[32m 52[2mms[22m[39m
+     [32m✓[39m EV4: Undo of the place evicts the buffer again, and Redo decodes it again[32m 56[2mms[22m[39m
+[31m     [31m×[31m EV5: export waits for the decode, renders with the buffer, and releases its pins[39m[33m 5004[2mms[22m[39m
+     [32m✓[39m EV5: a cancelled export also releases its pins[32m 68[2mms[22m[39m
+     [32m✓[39m EV5: a replaced export does not release the pins of the export that replaced it[32m 73[2mms[22m[39m
+     [32m✓[39m EV6: a failed re-decode sets the source to error and shows the existing failure text[32m 60[2mms[22m[39m
+[31m     [31m×[31m EV6: an export whose re-decode fails creates no file and shows the export failure text[39m[33m 5003[2mms[22m[39m
+     [32m✓[39m EV9: a preview plays the re-decoded source and releases it on Stop[32m 62[2mms[22m[39m
+     [32m✓[39m EV9: a superseded preview request does not start when its decode settles[32m 61[2mms[22m[39m
+     [32m✓[39m EV7: a collection change clears the cache, and an old decode in flight never sets[32m 66[2mms[22m[39m
+     [32m✓[39m EV8: a volume edit that keeps the clips array does not recompute pins[32m 62[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV2: placing the evicted source decodes it again exactly once, even when placed twice in flight
+[31m[1mAssertionError[22m: expected 3 to be 2 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 3[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m290:28[22m[39m
+    [90m288| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'big'[39m))[33m;[39m
+    [90m289| [39m    expect(live(api).arrangement.clips.filter((clip) => clip.sourceId …
+    [90m290| [39m    [34mexpect[39m(bigLoads[33m.[39mcount)[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m291| [39m    [34mexpect[39m(pending)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m292| [39m    [35mawait[39m [34msettleNext[39m(pending[33m,[39m [34mbigBuffer[39m())[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: export waits for the decode, renders with the buffer, and releases its pins
+[31m[1mError[22m: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m338:3[22m[39m
+    [90m336| [39m  })[33m;[39m
+    [90m337| [39m
+    [90m338| [39m  it('EV5: export waits for the decode, renders with the buffer, and r…
+    [90m   | [39m  [31m^[39m
+    [90m339| [39m    [35mconst[39m { api[33m,[39m pending } [33m=[39m [35mawait[39m [34mmountEviction[39m()[33m;[39m
+    [90m340| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'big'[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV6: an export whose re-decode fails creates no file and shows the export failure text
+[31m[1mError[22m: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m434:3[22m[39m
+    [90m432| [39m  })[33m;[39m
+    [90m433| [39m
+    [90m434| [39m  it('EV6: an export whose re-decode fails creates no file and shows t…
+    [90m   | [39m  [31m^[39m
+    [90m435| [39m    [35mconst[39m { api[33m,[39m pending } [33m=[39m [35mawait[39m [34mmountEviction[39m()[33m;[39m
+    [90m436| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'big'[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 08:16:30
+[2m   Duration [22m 12.00s[2m (transform 516ms, setup 0ms, import 702ms, tests 10.75s, environment 413ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-382/mut-tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV2%3A placing the evicted source decodes it again exactly once%2C even when placed twice in flight,line=290,column=28::AssertionError: expected 3 to be 2 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 2%0A+ 3%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:290:28%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-382/mut-tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A export waits for the decode%2C renders with the buffer%2C and releases its pins,line=338,column=3::Error: Test timed out in 5000ms.%0AIf this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:338:3%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-382/mut-tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV6%3A an export whose re-decode fails creates no file and shows the export failure text,line=434,column=3::Error: Test timed out in 5000ms.%0AIf this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:434:3%0A%0A

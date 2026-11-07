@@ -1,0 +1,100 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-382/tree-copy[39m
+
+ [31m❯[39m perf/lib/pcm-live.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 18[2mms[22m[39m
+     [32m✓[39m PL1: sums length × channels × 4 and splits the bytes by origin[32m 3[2mms[22m[39m
+     [32m✓[39m PL2: an empty list gives count 0 and bytes 0[32m 0[2mms[22m[39m
+     [32m✓[39m PL4: the probe buffer is excluded from the totals[32m 0[2mms[22m[39m
+     [32m✓[39m PL3: a valid reading gives no problem[32m 0[2mms[22m[39m
+     [32m✓[39m PL3: a missing registry fires alone[32m 0[2mms[22m[39m
+     [32m✓[39m PL3: an uncounted probe fires alone[32m 0[2mms[22m[39m
+[31m     [31m×[31m PL3: a count above the library bound fires alone[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m PL3: a count below the placed bound fires alone[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m PL3: probe and count problems keep their order when all fire[39m[32m 2[2mms[22m[39m
+     [32m✓[39m PL5: a missing decode probe fires alone[32m 0[2mms[22m[39m
+     [32m✓[39m PL5: two live decode probes fire the decode probe problem alone[32m 0[2mms[22m[39m
+     [32m✓[39m PL5: a dropped probe still live fires alone[32m 0[2mms[22m[39m
+     [32m✓[39m PL6: a reading with N = P and one with N = M are both valid[32m 0[2mms[22m[39m
+     [32m✓[39m PL7: the dropped and decode probes are excluded from the totals[32m 0[2mms[22m[39m
+ [32m✓[39m perf/lib/report.test.ts [2m([22m[2m34 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m perf/lib/zoom-probe.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m perf/lib/pcm-live.test.ts[2m > [22mpcmLiveProblems[2m > [22mPL3: a count above the library bound fires alone
+[31m[1mAssertionError[22m: expected [] to deeply equal [ 'pcm live count 2 outside [0, 1]' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   "pcm live count 2 outside [0, 1]",[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m perf/lib/pcm-live.test.ts:[2m88:63[22m[39m
+    [90m 86| [39m
+    [90m 87| [39m  [34mit[39m([32m'PL3: a count above the library bound fires alone'[39m[33m,[39m () [33m=>[39m {
+    [90m 88| [39m    [34mexpect[39m([34mpcmLiveProblems[39m(valid[33m,[39m { placed[33m:[39m [34m0[39m[33m,[39m library[33m:[39m [34m1[39m }))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                                              [31m^[39m
+    [90m 89| [39m      [32m'pcm live count 2 outside [0, 1]'[39m[33m,[39m
+    [90m 90| [39m    ])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m perf/lib/pcm-live.test.ts[2m > [22mpcmLiveProblems[2m > [22mPL3: a count below the placed bound fires alone
+[31m[1mAssertionError[22m: expected [] to deeply equal [ 'pcm live count 2 outside [3, 9]' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   "pcm live count 2 outside [3, 9]",[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m perf/lib/pcm-live.test.ts:[2m94:63[22m[39m
+    [90m 92| [39m
+    [90m 93| [39m  [34mit[39m([32m'PL3: a count below the placed bound fires alone'[39m[33m,[39m () [33m=>[39m {
+    [90m 94| [39m    [34mexpect[39m([34mpcmLiveProblems[39m(valid[33m,[39m { placed[33m:[39m [34m3[39m[33m,[39m library[33m:[39m [34m9[39m }))[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m                                                              [31m^[39m
+    [90m 95| [39m      [32m'pcm live count 2 outside [3, 9]'[39m[33m,[39m
+    [90m 96| [39m    ])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m perf/lib/pcm-live.test.ts[2m > [22mpcmLiveProblems[2m > [22mPL3: probe and count problems keep their order when all fire
+[31m[1mAssertionError[22m: expected [ …(3) ] to deeply equal [ …(4) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "pcm registry did not count its probe buffer",[22m
+[2m    "pcm registry did not count its decode probe",[22m
+[2m    "pcm registry kept a dropped probe",[22m
+[32m-   "pcm live count 1 outside [2, 9]",[39m
+[2m  ][22m
+
+[36m [2m❯[22m perf/lib/pcm-live.test.ts:[2m105:7[22m[39m
+    [90m103| [39m        { placed[33m:[39m [34m2[39m[33m,[39m library[33m:[39m [34m9[39m }[33m,[39m
+    [90m104| [39m      )[33m,[39m
+    [90m105| [39m    )[33m.[39m[34mtoEqual[39m([
+    [90m   | [39m      [31m^[39m
+    [90m106| [39m      [32m'pcm registry did not count its probe buffer'[39m[33m,[39m
+    [90m107| [39m      [32m'pcm registry did not count its decode probe'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m51 passed[39m[22m[90m (54)[39m
+[2m   Start at [22m 07:55:52
+[2m   Duration [22m 747ms[2m (transform 284ms, setup 0ms, import 340ms, tests 60ms, environment 485ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-382/tree-copy/perf/lib/pcm-live.test.ts,title=perf/lib/pcm-live.test.ts > pcmLiveProblems > PL3%3A a count above the library bound fires alone,line=88,column=63::AssertionError: expected [] to deeply equal [ 'pcm live count 2 outside [0, 1]' ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   "pcm live count 2 outside [0, 1]",%0A- ]%0A+ []%0A%0A ❯ perf/lib/pcm-live.test.ts:88:63%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-382/tree-copy/perf/lib/pcm-live.test.ts,title=perf/lib/pcm-live.test.ts > pcmLiveProblems > PL3%3A a count below the placed bound fires alone,line=94,column=63::AssertionError: expected [] to deeply equal [ 'pcm live count 2 outside [3, 9]' ]%0A%0A- Expected%0A+ Received%0A%0A- [%0A-   "pcm live count 2 outside [3, 9]",%0A- ]%0A+ []%0A%0A ❯ perf/lib/pcm-live.test.ts:94:63%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-382/tree-copy/perf/lib/pcm-live.test.ts,title=perf/lib/pcm-live.test.ts > pcmLiveProblems > PL3%3A probe and count problems keep their order when all fire,line=105,column=7::AssertionError: expected [ …(3) ] to deeply equal [ …(4) ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "pcm registry did not count its probe buffer",%0A    "pcm registry did not count its decode probe",%0A    "pcm registry kept a dropped probe",%0A-   "pcm live count 1 outside [2, 9]",%0A  ]%0A%0A ❯ perf/lib/pcm-live.test.ts:105:7%0A%0A

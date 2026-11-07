@@ -1,0 +1,52 @@
+import { open, has } from './lib.mjs';
+import fs from 'fs';
+const base = process.argv[2];
+const out = [];
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const { browser, page, live } = await open(base, w, h);
+  const r = { vp: `${w}x${h}` };
+  const shot = (n) => page.screenshot({ path: `shots/evict-${w}-${n}.png` });
+  r.options = await page.getByRole('listbox', { name: 'Sounds' }).getByRole('option').allTextContents();
+  r.ready = await live(); r.status0 = await page.locator('[role=status]').first().textContent().catch(() => null);
+  await shot('a-ready');
+  r.readyHas = { hero: has(r.ready, 150.37), me: has(r.ready, 101.35) };
+  r.readyLater = (await new Promise(async (res) => { await page.waitForTimeout(10000); res(await live()); }));
+  r.readyLaterHas = { hero: has(r.readyLater, 150.37), me: has(r.readyLater, 101.35) };
+  // (b) preview selected (middle-east)
+  const sel = await page.getByRole('option', { selected: true }).first().textContent().catch(() => null);
+  r.selected = sel;
+  await page.evaluate(() => { window.__starts.length = 0; });
+  await page.getByRole('button', { name: 'Preview', exact: true }).first().click();
+  const t0 = Date.now();
+  await page.getByRole('button', { name: 'Stop', exact: true }).first().waitFor({ timeout: 30000 }).catch(() => {});
+  await page.waitForFunction(() => window.__starts.length > 0, null, { timeout: 30000 }).catch(() => {});
+  r.previewStartMs = Date.now() - t0;
+  r.previewStarts = await page.evaluate(() => window.__starts.map((s) => s.sec));
+  r.previewLive = await live(); r.previewLiveHasMe = has(r.previewLive, 101.35);
+  await shot('b-preview');
+  const stopBtn = page.getByRole('button', { name: 'Stop', exact: true }).first();
+  r.stopVisible = await stopBtn.isVisible().catch(() => false);
+  if (r.stopVisible) await stopBtn.click();
+  await page.waitForTimeout(500);
+  r.afterStop = await live(); r.afterStopHasMe = has(r.afterStop, 101.35);
+  // (c) add
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.waitForFunction(() => window.__detail().some((x) => Math.abs(x - 101.35) < 0.02), null, { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(1000);
+  r.afterAdd = await live(); r.afterAddHasMe = has(r.afterAdd, 101.35);
+  r.clipsAfterAdd = await page.locator('[data-testid^="arrangement-clip"]').count();
+  await shot('c-add');
+  await page.locator('body').click({ position: { x: 5, y: 5 } }).catch(() => {});
+  await page.keyboard.press('Control+z'); await page.waitForTimeout(500);
+  r.afterUndo = await live(); r.afterUndoHasMe = has(r.afterUndo, 101.35);
+  await shot('d-undo');
+  await page.keyboard.press('Control+Shift+z'); 
+  await page.waitForFunction(() => window.__detail().some((x) => Math.abs(x - 101.35) < 0.02), null, { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(800);
+  r.afterRedo = await live(); r.afterRedoHasMe = has(r.afterRedo, 101.35);
+  r.status1 = await page.locator('[role=status]').first().textContent().catch(() => null);
+  await shot('e-redo');
+  out.push(r); await browser.close();
+}
+fs.writeFileSync(process.argv[3], JSON.stringify(out, null, 1));
+for (const r of out) console.log(JSON.stringify({ ...r, options: undefined }));

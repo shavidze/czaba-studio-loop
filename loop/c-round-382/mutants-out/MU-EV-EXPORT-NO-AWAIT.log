@@ -1,0 +1,41 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-382/mut-tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 790[2mms[22m[39m
+     [32m✓[39m EV1: after load the evictable buffer is gone, the other stays, and both stay ready[32m 69[2mms[22m[39m
+     [32m✓[39m EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight[32m 58[2mms[22m[39m
+     [32m✓[39m EV3: Play is refused while the placed source decodes, and starts once it settles[32m 54[2mms[22m[39m
+     [32m✓[39m EV3: while already playing, a newly placed clip joins through the resync and playback never stops[32m 53[2mms[22m[39m
+     [32m✓[39m EV4: Undo of the place evicts the buffer again, and Redo decodes it again[32m 58[2mms[22m[39m
+[31m     [31m×[31m EV5: export waits for the decode, renders with the buffer, and releases its pins[39m[32m 62[2mms[22m[39m
+     [32m✓[39m EV5: a cancelled export also releases its pins[32m 58[2mms[22m[39m
+     [32m✓[39m EV5: a replaced export does not release the pins of the export that replaced it[32m 63[2mms[22m[39m
+     [32m✓[39m EV6: a failed re-decode sets the source to error and shows the existing failure text[32m 53[2mms[22m[39m
+     [32m✓[39m EV6: an export whose re-decode fails creates no file and shows the export failure text[32m 52[2mms[22m[39m
+     [32m✓[39m EV9: a preview plays the re-decoded source and releases it on Stop[32m 50[2mms[22m[39m
+     [32m✓[39m EV9: a superseded preview request does not start when its decode settles[32m 51[2mms[22m[39m
+     [32m✓[39m EV7: a collection change clears the cache, and an old decode in flight never sets[32m 55[2mms[22m[39m
+     [32m✓[39m EV8: a volume edit that keeps the clips array does not recompute pins[32m 53[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: export waits for the decode, renders with the buffer, and releases its pins
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called 1 times, but got 0 times[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m356:27[22m[39m
+    [90m354| [39m      [35mawait[39m exported[33m;[39m
+    [90m355| [39m    })[33m;[39m
+    [90m356| [39m    [34mexpect[39m(renderWavMock)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m357| [39m    [34mexpect[39m(heldAtRender)[33m.[39m[34mtoEqual[39m([[35mtrue[39m])[33m;[39m
+    [90m358| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m'done'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 08:16:48
+[2m   Duration [22m 2.07s[2m (transform 560ms, setup 0ms, import 727ms, tests 790ms, environment 420ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-382/mut-tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A export waits for the decode%2C renders with the buffer%2C and releases its pins,line=356,column=27::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:356:27%0A%0A
