@@ -1,0 +1,350 @@
+[
+ {
+  "id": "SOURCE-SCOPE-start",
+  "s": "PASS",
+  "note": "HEAD 11ca746, status empty, K3 11 OK, K4 0 failures",
+  "ev": "out/claims-start.txt"
+ },
+ {
+  "id": "MOCK-START",
+  "s": "PASS",
+  "note": "mock-api PID 3773 on :5199, /api/products 200",
+  "ev": "mock.pid"
+ },
+ {
+  "id": "R390-VIDEO-SOUND",
+  "s": "PASS",
+  "note": "both viewports: before move sound 0.31-4.03 s (peak 0.50); moved to 3.000 s (grid-snapped, not 2.25) silent 0.5-2.6 s (level 0), sound from 3.13 s, peak 0.503; Undo returns start to 0.000 and sound from 0.30 s; pageErrors []. Also pk-video-sound (held decoding level 0, ready 0.50) PASS at 1440",
+  "ev": "out/vsound-1440x900.json, out/vsound-1280x720.json, out/pkvid-1440.json"
+ },
+ {
+  "id": "R390-WAV-3CLIP-LEN",
+  "s": "PASS",
+  "note": "both viewports: dialog 00:00.000-00:48.000; RIFF/WAVE PCM 24-bit 48 kHz 2ch, 2304000 frames = 48.000 s; 99.98% non-zero, peak 0.297; sha256 37c56490\u2026 equals round 389 (1440 and 1280)",
+  "ev": "out/det-1440-0.wav, out/export-det-*.json"
+ },
+ {
+  "id": "R340-WAVEFORM",
+  "s": "PASS",
+  "note": "wd 0 diffs vs round 341 (both vp); video-wave 0 diffs; trim-end only clip-id differences",
+  "ev": "out/wd-*.json, out/video-*.json, out/trimend-*.json"
+ },
+ {
+  "id": "R340-SHOWN-READERS",
+  "s": "PASS",
+  "note": "shown-probe 0 diffs vs 341, both vp",
+  "ev": "out/shown-*.json"
+ },
+ {
+  "id": "R340-PROJECT-END",
+  "s": "PASS",
+  "note": "end-bound-probe 0 diffs vs 341",
+  "ev": "out/end-bound.json"
+ },
+ {
+  "id": "R340-OVERVIEW-METER",
+  "s": "PASS",
+  "note": "overview markup keys equal; only live meter dB drift \u22640.7 dB (real-time meters). Void sub-check not run (D-29z1068)",
+  "ev": "out/ovr-*.json"
+ },
+ {
+  "id": "R340-FADE-STATUS/DRAG-A (rows.mjs head)",
+  "s": "PASS",
+  "note": "normalised diff vs 341: only loop position samples jitter and tmp path; WAV sha 453d1a04\u2026c567 equal at both vp",
+  "ev": "rows/rows-head390.json"
+ },
+ {
+  "id": "R340-CROSS-LANE",
+  "s": "PASS",
+  "note": "stopped + while playing (Space, data-playing true before and after), both vp: behaviour fields equal c-round-338 oracle; ghosts on stems lane, Undo 'Move to track \u2014 Stems', track music\u2192stems\u2192(undo)music, pageErrors []",
+  "ev": "out/cross-playing-*.json, out/cross-stopped-*.json"
+ },
+ {
+  "id": "R340-GROUP-MOVE",
+  "s": "PASS",
+  "note": "both vp: behaviour fields equal b-round-338 oracle after dropping counts; Undo 'Move (2)'; pageErrors []",
+  "ev": "out/group-*.json"
+ },
+ {
+  "id": "R340-DETAIL-TEXT",
+  "s": "PASS",
+  "note": "detail-n.json 0 diffs vs 341",
+  "ev": "out/b3/detail-n.json"
+ },
+ {
+  "id": "R340-SELECTION",
+  "s": "PASS",
+  "note": "c324 rows-n/group-n 0 diffs vs 341 (both vp)",
+  "ev": "out/b2/rows-n.json, out/b2/group-n.json"
+ },
+ {
+  "id": "R340-RANGE",
+  "s": "PASS",
+  "note": "c320 rows at 1440, 1280, 1280-reload: only playhead 1 px / 0.01% translate jitter; wave-n 0 diffs; R-EXPORT at 1440 covered by rows-head sha equality",
+  "ev": "out/b2/"
+ },
+ {
+  "id": "R340-FADE-STATUS / DRAG-A / c325 / c328",
+  "s": "PASS",
+  "note": "r325/r328 rows-n only position jitter (\u22640.012 s) vs 341; WAV sha equal",
+  "ev": "out/b4/r325, out/b4/r328"
+ },
+ {
+  "id": "R340-PEAKS",
+  "s": "PASS",
+  "note": "pk-load, pk-video-sound (held decoding level 0, released 0.50), cold-start equal to 341 within timing; waveforms after Demo collection ready",
+  "ev": "out/b3/pkload-*.json, pkvid-*.json, out/b4/cold-1440.json"
+ },
+ {
+  "id": "R340-PERF3D",
+  "s": "PASS",
+  "note": "scroll-after-crossing (same shape: 29 rewrites, maxStepRewrites 1, loafMax 0, msMax 33.8 vs 33.3), visible-d 0 diffs both vp",
+  "ev": "out/b3/scroll-*.json, visd-*.json"
+ },
+ {
+  "id": "R340-RESCHEDULE (CONT-1, CONT-30, ENDED, NO-CHANGE)",
+  "s": "PASS",
+  "note": "CONT-1/CONT-30 both vp 3 runs: starts unchanged (1 / 30), valid, ratioToBaseMax 0.056-0.061, zeroRun 0, errors 0; ENDED (onended-probe) identical to 341; NO-CHANGE = posctl record (see R390-POSCTL)",
+  "ev": "out/b3/cont-*.json, onended.log"
+ },
+ {
+  "id": "R340-WORKER-R2",
+  "s": "PASS",
+  "note": "local worker proxy r2-proxy.js: proxy-throw and head-control 0 diffs vs c-round-311; proxy-short equal except the final step's JSON capture (log flush race; server log line present, 304 h0g2c2 identical)",
+  "ev": "wk/*.json, wk/*-server.log"
+ },
+ {
+  "id": "R340-FONTS",
+  "s": "PASS",
+  "note": "FONT-NET 0 Google requests, FONT-PRELOAD 2 CORS preloads (dev and scratch prod build on :5192, woff2 under /assets/); font-bytes equal baseline; FONT-PIXEL retired. Known Low C-R341-02 (preload warning after client nav) reproduces unchanged",
+  "ev": "out/fonts/"
+ },
+ {
+  "id": "R340-NAME",
+  "s": "PASS",
+  "note": "main.cjs equal to 341 (home 'CZABA Studio', nav 'Studio', narrow title); budget/budget2 equal",
+  "ev": "out/b3/name.log"
+ },
+ {
+  "id": "R340-HINT",
+  "s": "PASS",
+  "note": "hint-main: only the status sequence differs (hint+tempo posted in one update, final string exact); once per page load, video-first no hint on video add, undo/second add no hint",
+  "ev": "tools/hint/main.json"
+ },
+ {
+  "id": "R340-JOURNEY",
+  "s": "PASS",
+  "note": "product \u2192 'Try it in the Studio' (/studio-lab?preview=middle-east, title 'CZABA Studio \u2014 Demo collection') \u2192 Enter adds 1 clip \u2192 Space plays (clock 1.56-1.57 s) \u2192 Stop \u2192 Export WAV in same page: dialog 00:00.000\u201401:41.352, file 4864896 frames = 101.352 s, 24-bit/48k/2ch, non-silent 99.77 %, 0 NaN, sha 5fadd97a\u2026 (equal both vp) \u2192 View in store new tab opener null; errors []; screenshots per step",
+  "ev": "out/journey-full.json, shots/journey-*.png, out/b3/journey301.json"
+ },
+ {
+  "id": "R390-POSCTL",
+  "s": "RECORDED",
+  "note": "3 runs per vp, valid=false in all (no splice in capture, starts=1, playing false) = oracle c-round-342 valid=false",
+  "ev": "out/b3/posctl.json"
+ },
+ {
+  "id": "R390-ESC-DRAG",
+  "s": "RECORDED",
+  "note": "Esc during a clip drag does not cancel: drag continues and release commits (start 0.000\u21925.000, Undo 'Move clip'), both vp. Same as round 389; signal ESCAPE-CANCEL-GESTURE, not a finding",
+  "ev": "out/escdrag-*.json"
+ },
+ {
+  "id": "R390-RP-BUILT",
+  "s": "RECORDED",
+  "note": "RP-C301-01 and RP-C331-01 equal to c-round-342; RP-FOLD-SELECTION ids only; RP-STATUS-RACE timestamps only",
+  "ev": "out/rp-*.json"
+ },
+ {
+  "id": "R390-RP301",
+  "s": "RECORDED",
+  "note": "rp301 equal to c-round-342 (0 diffs)",
+  "ev": "out/rp301.json"
+ },
+ {
+  "id": "RR-OSS single file",
+  "s": "RECORDED",
+  "note": "single file third-party-licenses.test.ts 70/70 recorded only; the full licence suite is a gate row (not claimed)",
+  "ev": "out/b4/oss.log"
+ },
+ {
+  "id": "SA-19",
+  "s": "CARRIED",
+  "note": "awaiting_user",
+  "ev": "\u2014"
+ },
+ {
+  "id": "SOURCE-SCOPE-end",
+  "s": "PASS",
+  "note": "HEAD 11ca746, status empty (0 lines), K3 11 OK, K4 0 failures/1284; git status clean after smoke too",
+  "ev": "out/claims-end.txt"
+ },
+ {
+  "id": "R301-MASTER",
+  "s": "PASS",
+  "note": "c262 layout + audio-keys: layout-n 0 diffs; audio-keys booleans equal, dB within meter jitter (\u22640.4 dB)",
+  "ev": "t301/r262/"
+ },
+ {
+  "id": "R301-CONTRACTS",
+  "s": "PASS",
+  "note": "cc.mjs log 0 diffs vs 341 (both vp, Control/Meta)",
+  "ev": "t301/r264/cc.log"
+ },
+ {
+  "id": "R301-BG-RANGE",
+  "s": "PASS",
+  "note": "rounds 265/266/270 probes replayed (t301x): 0 significant diffs vs c-round-301 after normalising the one-time name-bar hint and ids; split-selection 0 diffs",
+  "ev": "t301x/r265,r266,r270"
+ },
+ {
+  "id": "R301-HIDDEN-GRID-BG",
+  "s": "PASS",
+  "note": "hgbg + hgbg-music logs 0 diffs vs 341, flags true",
+  "ev": "t301/hgbg/"
+ },
+ {
+  "id": "R301-ALTGR",
+  "s": "PASS",
+  "note": "c268 log 0 diffs vs 341",
+  "ev": "t301/r268/br.log"
+ },
+ {
+  "id": "R301-TAPER",
+  "s": "PASS",
+  "note": "1440 exports: -15.003 / -29.999 / -44.999 dB at 25/50/75 % (\u00b10.5), analysis JSON 0 diffs vs 341; UI drag (ui.log) 0 diffs both vp",
+  "ev": "t301/r269/exp/analysis-1440x900.json"
+ },
+ {
+  "id": "R301-REL-SNAP",
+  "s": "PASS",
+  "note": "c271-ui equal to 341 (timing/hints only)",
+  "ev": "t301/r271/"
+ },
+ {
+  "id": "R301-STATUS-LIFETIME",
+  "s": "PASS",
+  "note": "c274 equal to 341; rounds 272/273 probes replayed: 0 significant diffs vs c-round-301",
+  "ev": "t301/r274, t301x/r272, r273"
+ },
+ {
+  "id": "R301-DISABLED",
+  "s": "PASS",
+  "note": "c276 0 'pass=false'; c278 all rows pass=true except 'perf' (an old/new predicate A-B probe) pass=false at both vp, identical to 341 \u2014 recorded, not an acceptance of the disabled-control behaviour",
+  "ev": "t301/r276, r278"
+ },
+ {
+  "id": "R301-WORKER",
+  "s": "PASS",
+  "note": "library-probe 0 diffs; worker runs in Worker; Pulse export sha256 1fea093b\u20263f94 (4 608 044 B) and all-7 export equal to round 282/341, both vp",
+  "ev": "t301/r282, r283"
+ },
+ {
+  "id": "R301-PERF3",
+  "s": "PASS",
+  "note": "ruler in/out + flip + flip120 probes: step arrays/flip counts identical to 341 (only event-timing ms vary, 16 vs 24 ms); run with nothing else running",
+  "ev": "t301/perf3/out/"
+ },
+ {
+  "id": "R301-NAMES",
+  "s": "PASS",
+  "note": "r289 and r291 probes: English names, group headings; r289 probe 0 diffs, r291 differs from the c301 oracle by the CZABA Studio name/hint only",
+  "ev": "t301/r289, t301x/r291"
+ },
+ {
+  "id": "R301-NARROW",
+  "s": "PASS",
+  "note": "c293 log equal to 341 (B-NARROW-*, B-BOUNDARY 899/900; B-DESK-SAME reference image stale per round 341 lookup)",
+  "ev": "t301/r293/"
+ },
+ {
+  "id": "R301-LOAF",
+  "s": "PASS (provoked)",
+  "note": "natural idle LoAF entries after ready = 0 (c295: entries 0-2, withScripts 0); a provoked 140 ms rAF busy loop in real Chromium produced a LoAF entry with a non-empty scripts[] (FrameRequestCallback, 139 ms) at both vp, so the observer path is live. Harness-validity only; no natural long frame to attribute",
+  "ev": "out/loaf.json, t301/r295/"
+ },
+ {
+  "id": "R301-LINK",
+  "s": "PASS",
+  "note": "c296 + c297/298/299 replayed: 0 significant diffs vs c-round-301 except blob ids/timing; mock API",
+  "ev": "t301/r296, t301x/r297,r298,r299"
+ },
+ {
+  "id": "R301-MENU",
+  "s": "PASS",
+  "note": "r300 rows/audio equal to 341",
+  "ev": "t301/r300/"
+ },
+ {
+  "id": "R301-JOURNEY",
+  "s": "COVERED",
+  "note": "covered by R340-JOURNEY (not run twice)",
+  "ev": ""
+ },
+ {
+  "id": "R301-PRICE",
+  "s": "PASS",
+  "note": "mock-c288 replay: probe n2 equals accepted c-round-288 a.json (base URL only); product-probe known 0 diffs vs c301; priceless 'Price unavailable', free-pack $0; standard mock restarted, health 200. Mock = client path only",
+  "ev": "t301x/r288/probe/n2.json, out/price/"
+ },
+ {
+  "id": "RG-01..24, RG-T1..T4B (both vp, RG-03 1440)",
+  "s": "PASS (with adaptations)",
+  "note": "64 result files: all checks true except 3 known adaptations \u2014 RG-03 video follow \u2192 RG-03-mute variant all true; RG-04 resume \u2192 rg04-258 variant equals 341; RG-06 plain-drag marquee false because since SABA-B-11c a plain background drag is a time selection: Ctrl+drag marquee variant true both vp (as round 301). RG-18 needs STEM=demo-stem-pad (default now pulse \u2192 rising false for rhythmic source = env-invalid): pad rerun all true, export sha equal 341. RG-22 narrow equal c342",
+  "ev": "t258/out/, t258/logs/"
+ },
+ {
+  "id": "R390-RS / \u00a74 / \u00a74.S (RV, RR, RS, t203/204/205, s186-s195)",
+  "s": "PASS",
+  "note": "rows compared with 341 (0 diff vs c301 in 341): RV-STATIC/RV-M/RV-FADER/marker/env/focus/chrome equal modulo clip ids and timing; RV-M-1440 attempt 1 env-invalid (hydration 'Invalid hook call' on /studio/middle-east, not reproducible in 4 loads), attempt 2 0 diffs; s186 1440 attempt 1 crash (clip-empty screenshot, known env), attempt 2 ok, 1280 guarded run ok; rs2a rerun after guest195, 0 diffs; s187/s188/s190 timing only; t203/t204/t205 equal",
+  "ev": "t258/"
+ },
+ {
+  "id": "\u00a74b rows (items 200\u2013257: c241-c257, r246, r247, homedrag, grid258, mp3, facade, legacy)",
+  "s": "PASS",
+  "note": "all equal modulo timing; r250 splitPlaying single-instant rms probe flake (series max 0.148, sound continues) and c218 mp3 Add-wait adaptation (4 055 208 B mp3, no page errors) \u2014 see invalidRuns",
+  "ev": "t258/logs/, out/mp3/, t258/r250series/"
+ },
+ {
+  "id": "RR-PERF",
+  "s": "CARRIED",
+  "note": "round 389, same HEAD 11ca746 (c-round-389/perf-results, 4 files; drag-lane-live and drag-group-live present)",
+  "ev": ""
+ },
+ {
+  "id": "PERF-LIB",
+  "s": "CARRIED",
+  "note": "round 389, same HEAD 11ca746 (3 files / 54 tests)",
+  "ev": ""
+ },
+ {
+  "id": "NO-SHIFT-203",
+  "s": "CARRIED",
+  "note": "no reference server started (needs a second server / reference build; single-dev-server rule D-29z1057)",
+  "ev": ""
+ },
+ {
+  "id": "RG-SMOKE",
+  "s": "PASS",
+  "note": "npm run test:e2e:smoke alone: 2 passed (4.5 s), rc 0; git status stays clean",
+  "ev": "out/smoke.log"
+ },
+ {
+  "id": "G390-AUTH",
+  "s": "PASS",
+  "note": "both vp: /studio-lab anonymous \u2192 workspace + demo badge, auth_user null; /studio/middle-east \u2192 'Sign in required', audio[src]=0; /api/studio-token no header 401, bare 400, fake Bearer 403 (mock); no token in any body. SRW-21 stays deferred_user",
+  "ev": "out/g390-auth.json"
+ },
+ {
+  "id": "RR-OSS full licence suite",
+  "s": "GATE",
+  "note": "not claimed by C (single file third-party-licenses.test.ts 70/70 only)",
+  "ev": "out/b4/oss.log"
+ },
+ {
+  "id": "Gate rows",
+  "s": "GATE",
+  "note": "full vitest, typecheck, build, Biome, npm run verify: gate rows, not claimed (gates/gate-round-390.json)",
+  "ev": ""
+ }
+]

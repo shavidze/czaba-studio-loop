@@ -1,0 +1,4 @@
+const f=process.argv[2]; const R=require(f);
+const row=(k,d)=>{ if(!d) return console.log(k,'MISSING'); console.log([k,d.playState,'moves',d.winMoves,'pre',d.preCommits+'/'+d.preMax,'win',d.winCommits,'max',d.winMax,'pm',d.winPerMove,'rel',d.releaseCommits+'/'+d.releaseMax,'chg',d.perMoveValueChanges,'ins',d.inputsInWindow,'lag',d.laggingInputs,'starts',d.sourceStartsDuringDrag,'stDur',JSON.stringify(d.statusDuring),'stPost',JSON.stringify(d.statusPost).slice(0,80),'before',d.before.vt,'mid',d.mid.vt,'abort',d.afterAbort&&d.afterAbort.vt,'after',d.after.vt,'undo',d.undoAfter&&d.undoAfter.title].join(' '));};
+for (const sec of ['harnessReplica','belowMax']) { const S=R[sec]||{}; console.log('==',sec); for(const [k,v] of Object.entries(S)) if(v&&v.winMoves!==undefined) row(k,v); else if(k!=='errors') console.log(k, JSON.stringify(v).slice(0,300)); console.log('errors',JSON.stringify(S.errors)); }
+console.log('fatal',R.fatal);

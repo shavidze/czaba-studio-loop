@@ -1,0 +1,106 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const BASE = process.env.BASE ?? 'http://127.0.0.1:5173';
+const out = process.argv[2]; const label = process.argv[3] ?? 'after';
+const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const res = {};
+const st = (page) => page.evaluate(() => {
+  const f = document.querySelector('[data-testid="arrangement-master"] input[type="range"]');
+  const m = document.querySelector('[data-testid="arrangement-master-meter"]');
+  const mute = document.querySelector('[data-testid="arrangement-master"] button[aria-pressed]');
+  const undo = [...document.querySelectorAll('button')].find((b) => /^Undo/.test((b.textContent ?? '').trim()));
+  return { value: f.value, readout: document.querySelector('[data-testid="arrangement-master-readout"]')?.textContent, valuetext: f.getAttribute('aria-valuetext'), level: m?.getAttribute('data-level-db'), mute: mute?.getAttribute('aria-pressed'), undo: undo?.getAttribute('title') ?? undo?.textContent?.trim(), undoAria: undo?.getAttribute('aria-label') };
+});
+const sample = async (page, ms) => {
+  const vals = [];
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) { vals.push((await st(page)).level); await page.waitForTimeout(50); }
+  const nums = vals.map((v) => (v === '-inf' || v == null ? -Infinity : Number(v)));
+  const fin = nums.filter(Number.isFinite);
+  return { n: vals.length, finite: fin.length, max: fin.length ? Math.max(...fin) : null, mean: fin.length ? fin.reduce((a, b) => a + b, 0) / fin.length : null, raw: vals.slice(0, 8), last: vals.at(-1) };
+};
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const v = `${w}x${h}`;
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
+  await page.goto(`${BASE}/studio-lab`, { waitUntil: 'networkidle' });
+  await page.getByText(/Demo collection ready/).first().waitFor({ timeout: 90000 }).catch(() => {});
+  await page.waitForTimeout(1500);
+  const r = { errors };
+  const fader = page.getByRole('slider', { name: 'Master Volume', exact: true });
+  // KEYS (stopped, empty project)
+  await fader.focus();
+  r.keys0 = await st(page);
+  await page.keyboard.press('ArrowDown');
+  r.keys1 = await st(page);
+  await page.keyboard.press('ArrowDown');
+  r.keys2 = await st(page);
+  await page.keyboard.press('Shift+ArrowDown');
+  r.keys3 = await st(page);
+  const fb = await fader.boundingBox();
+  r.faderBox = fb;
+  const valueX = (val) => fb.x + 7 + ((val + 60) / 66) * (fb.width - 14);
+  const pre = await st(page);
+  await page.mouse.move(valueX(Number(pre.value)), fb.y + fb.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(valueX(Number(pre.value)) - fb.width * 0.3, fb.y + fb.height / 2, { steps: 6 });
+  r.escMid = await st(page);
+  await page.keyboard.press('Escape');
+  await page.mouse.up();
+  await page.waitForTimeout(200);
+  r.escAfter = await st(page);
+  r.escPre = pre;
+  // reset to 0 via double click
+  await fader.dblclick();
+  await page.waitForTimeout(200);
+  r.resetBeforeAudio = await st(page);
+  // AUDIO
+  await page.getByRole('button', { name: 'Add', exact: true }).first().click();
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await page.waitForTimeout(1500);
+  r.play0 = await sample(page, 1500);
+  const s0 = await st(page);
+  const x0 = valueX(Number(s0.value));
+  await page.mouse.move(x0, fb.y + fb.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(x0 - fb.width * 0.4, fb.y + fb.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await page.waitForTimeout(800);
+  r.afterDrag = await st(page);
+  r.playDrag = await sample(page, 1500);
+  await page.getByRole('button', { name: 'Master Mute', exact: true }).click();
+  const tm = Date.now();
+  let muteInf = null;
+  while (Date.now() - tm < 1500) { const s = await st(page); if (s.level === '-inf') { muteInf = Date.now() - tm; break; } await page.waitForTimeout(30); }
+  r.mute = { ...(await st(page)), msToInf: muteInf };
+  await page.getByRole('button', { name: 'Master Mute', exact: true }).click();
+  await page.waitForTimeout(600);
+  r.unmuted = await st(page);
+  await fader.dblclick();
+  await page.waitForTimeout(500);
+  r.dbl = await st(page);
+  r.playDbl = await sample(page, 1000);
+  const s1 = await st(page);
+  const x1 = valueX(Number(s1.value));
+  await page.mouse.move(x1, fb.y + fb.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(x1 - fb.width * 0.25, fb.y + fb.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await page.waitForTimeout(400);
+  r.drag2 = await st(page);
+  await page.locator('button', { hasText: /^Undo/ }).first().click();
+  await page.waitForTimeout(400);
+  r.undo1 = await st(page);
+  await page.screenshot({ path: `${out}/${label}-audio-${v}.png` });
+  await page.getByRole('button', { name: 'Stop', exact: true }).click().catch(() => {});
+  res[v] = r;
+  await ctx.close();
+}
+await browser.close();
+writeFileSync(`${out}/${label}-audio-keys.json`, JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res, null, 1));

@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-07T13:38:35.161Z)
+# Active loop summary (2026-11-07T16:26:40.256Z)
 
-- backlog.json 2858 KB -> active view 270 KB
-- status: G_ROOT_GATE round 389
-- servers: `{"checkedUtc":"2026-11-07T12:44:02.1482250Z","round":389,"attempt":1,"store":200}`
+- backlog.json 2858 KB -> active view 271 KB
+- status: G_ROOT_GATE round 390
+- servers: `{"checkedUtc":"2026-11-07T13:48:35.1675520Z","round":390,"attempt":1,"store":200}`
 - last publication: 11ca746397c8da4f55259656f71b3769b34be2cf (rounds 387-388)
-- last root gate: round 389 skipped - no real changes
+- last root gate: round 390 skipped - no real changes
 
 ## Current items: -
 

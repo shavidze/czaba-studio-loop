@@ -1,0 +1,38 @@
+--- /home/runner/czaba-project/store/perf/budgets.resources.json	2026-11-07 13:47:32.344950271 +0000
++++ perf/budgets.resources.json	2026-11-07 16:31:44.256573892 +0000
+@@ -38,10 +38,13 @@
+     "metric": "pcm-live-mib-ready",
+     "unit": "MiB",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-13a",
+-    "note": "1× only. Live decoded PCM after GC ×2 (perf/lib/pcm-live.ts): sum of length × numberOfChannels × 4 over every AudioBuffer still alive, the kept, dropped and decode probes excluded (MiB, 0.1). B's HEAD dev probe: 124.04 (b-round-380/probe/pcm-head-381.json). PERF-13b-i expected ready value ≈ 31.9 (the two demo MP3 buffers evicted, 7 synth buffers live); record until 13b-ii flips it. Budget owner: PERF-13b. Replaces backing-ready as the PERF-13 target."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 60
++    },
++    "owner": "PERF-13b",
++    "note": "1× only. Live decoded PCM after GC ×2 (perf/lib/pcm-live.ts): sum of length × numberOfChannels × 4 over every AudioBuffer still alive, the kept, dropped and decode probes excluded (MiB, 0.1). Budget ≤ 60 MiB (perf-plan PERF-13 row: backing store at ready ≤ 60 MB; ROOT-NOTE-PERF13-PLAN-ROW). PERF-13b-ii flip (D-29z1324): B's production sketch b-round-390/perf-sketch-391.log 31.9 ×3; fix-removed mutant MU-391-NOTHING-EVICTABLE (canReloadSource → false) red, b-round-390/mutants/."
+   },
+   {
+     "id": "res.mem.pcm-live-count-ready",
+@@ -60,10 +63,13 @@
+     "metric": "pcm-live-decode-mib-ready",
+     "unit": "MiB",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
+-    "owner": "PERF-13a",
+-    "note": "1× only. The 'decode' part of res.mem.pcm-live-mib-ready (decodeAudioData results, the decoded files; the decode probe excluded) (MiB, 0.1). B's HEAD dev probe: 92.18. PERF-13b-i expected ready value 0 (both decoded MP3 buffers evicted)."
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 0
++    },
++    "owner": "PERF-13b",
++    "note": "1× only. The 'decode' part of res.mem.pcm-live-mib-ready (decodeAudioData results; the decode probe excluded) (MiB, 0.1). Budget 0: at ready no decoded file stays alive (both demo MP3 buffers evicted, PERF-13b-i). PERF-13b-ii flip (D-29z1324): B's production sketch 0 ×3; mutant MU-391-NOTHING-EVICTABLE red, b-round-390/mutants/."
+   },
+   {
+     "id": "res.mem.pcm-live-mib-after-add",

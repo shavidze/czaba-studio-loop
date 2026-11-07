@@ -1,0 +1,11 @@
+# B round 390 -> 391 checkpoint
+- [x] tasks/round-390.md archived (copy of round-390 current-task.md)
+- [x] backups *-before-391.* in b-round-390/
+- [x] regression-last.json -> 2026-11-07 / 390
+- [x] perf sketch (budgets flip, patch sha d2127c92) 31.9/0 PASS; mutant MU-391-NOTHING-EVICTABLE 124/92.2 FAIL; scratch removed
+- [x] tech-lead + product-designer consults
+- [x] L23 pre-apply log: ST12 + EV3 red (granted)
+- [x] grants-391 (6), r391-frozen (1279, 0 fail), claims-391.sh K1..K26 + planning output (rerun after last edit)
+- [x] current-task.md (round 391 PERF-13b-ii) + user-review/questions-perf13b-ii.md
+- [x] backlog v358, feature-status, b-next.json, b-round-390.md
+- [x] advisor close review: failure write unconditional (EV16 failure variant + mutant), MOCK-START before B6, injection order; patch = 2 hunks (flip only); claims rerun

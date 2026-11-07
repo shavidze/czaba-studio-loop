@@ -1,0 +1,11 @@
+const L = require('./lib.cjs'); const fs = require('fs'); const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+(async () => { const b = await L.chromium.launch(); const out = {};
+for (const [w, h, pn] of [[1440, 900, 'open'], [1280, 720, 'closed'], [1280, 720, 'open']]) { const k = `${w}x${h}-panel-${pn}`;
+  const o = await L.openStudio(b, { width: w, height: h }, 'c331-' + k, [], {}); const p = o.page;
+  await p.locator('[role=option][data-source-id]').first().focus(); await p.keyboard.press('Enter'); await sleep(800);
+  const bb = await p.locator('[data-clip-id]').first().boundingBox(); await p.mouse.click(bb.x + bb.width / 2, bb.y + 8); await sleep(500);
+  if (pn === 'open' && (await p.locator('[data-testid=arrangement-detail-toggle]').getAttribute('aria-expanded')) === 'false') { await p.locator('[data-testid=arrangement-detail-toggle]').click(); await sleep(600); }
+  const panel = await p.evaluate(() => { const t = document.querySelector('[data-testid=arrangement-detail-toggle]'); return { toggle: !!t, expanded: t?.getAttribute('aria-expanded'), label: t?.textContent?.trim().slice(0, 40) }; });
+  const r = await p.evaluate(() => { const c = document.querySelector('[data-clip-id]'); const cb = c.getBoundingClientRect(); const edge = c.querySelector('.cursor-ew-resize.left-0.w-2'); const e = edge.getBoundingClientRect(); const pts = [0.5, 0.75].map((f) => { const x = e.x + e.width / 2, y = e.y + e.height * f; const el = document.elementFromPoint(x, y); return { f, x, y, at: el?.getAttribute('title') || el?.getAttribute('aria-label') || el?.className?.toString().slice(0, 60), isEdge: el === edge }; }); const fh = [...c.querySelectorAll('[data-testid$="-in-handle"]')].map((x) => { const q = x.getBoundingClientRect(); return [q.x, q.y, q.width, q.height].map(Math.round); }); return { clip: [cb.x, cb.y, cb.width, cb.height].map(Math.round), edge: [e.x, e.y, e.width, e.height].map(Math.round), fadeInHandle: fh, pts }; });
+  out[k] = { panel, ...r }; await p.screenshot({ path: `/home/runner/czaba-project/tmp/studio-real-loop/c-round-390/shots/c331-${k}.png` }); console.log(k, JSON.stringify(out[k])); await o.ctx.close(); }
+fs.writeFileSync('/home/runner/czaba-project/tmp/studio-real-loop/c-round-390/out/rp-c331-01.json', JSON.stringify(out, null, 1)); await b.close(); })();

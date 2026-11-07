@@ -1,262 +1,235 @@
-# Round 390: REGRESSION round, part 2 (REGRESSION-2026-11-08). C-only browser sweep of everything finished up to round 342 (the round-340 template), plus two rows carried from part 1. A changes nothing
+# Round 391: PERF-13b-ii. Honest status while dropped audio is decoded again; a clip whose sound failed never disappears silently from an export; the PCM memory rows become `assert`
 
-**Planned by:** B, at the round 389 → 390 planning, 2026-11-07 (`b-round-389.md`).
-**Decisions:** D-29z1316 … D-29z1321 (`backlog.json` v357, `decisions_log_b`, `regression_rounds` id `REGRESSION-2026-11-08`).
+**Planned by:** B, at the round 390 → 391 planning, 2026-11-07 (`b-round-390.md`).
+**Decisions:** D-29z1322 … D-29z1329 (`backlog.json` v358, `decisions_log_b`).
 
 **Read first:**
 - `lessons.md` in full. Directly relevant:
-  - L6: every scope addition is a named row or "carried";
-  - L25: soft-disabled clicks;
+  - L4: one element, one rule;
+  - L10;
+  - L23: collisions are granted;
   - L29 and L56: claims;
-  - L38: perf runs alone; warm up before a timed probe;
-  - L48: wait for `Demo collection ready`;
-  - L54: journey row;
+  - L31: timeouts;
+  - L37/L58: perf rows come from B's sketch, with a mutant;
+  - L51: status writes, what they overwrite and their lifetime;
+  - L52: a jsdom assert must be able to fail;
   - L57: harness fields;
-  - L59: do not end early; heaviest first; `progress.json`;
-  - L60: destructive commands stay in `c-round-390/`.
-- The rules: `docs/technical/studio-real-workspace/agent-workflow.md`, especially the speed rules and "Regression round every 3 days", the 2026-10-23 bug gate and the cloud-runner section.
-- **The template, by reference:** `tasks/round-340.md` §2–§9. Rounds 341 and 342 ran it in practice: see `tasks/round-341.md`, `tasks/round-342.md`, C's reports `c-round-341.md` / `c-round-342.md`, and their `tools/` and `out/`. **Where this task differs from rounds 340–342, this task wins.**
-- Part 1 (rounds 343–388) is done: `tasks/round-389.md` (exact copy), `c-round-389.md`, `c-round-389.json`. B's reasoning is in `b-round-389.md`.
-- Every fact below about current code or evidence carries a `[K#]` tag from `b-round-389/claims-390.sh` (planning output `b-round-389/claims-390-planning-output.txt`). Run it from the loop root at SOURCE-SCOPE start and end. Only K6 may differ (the mock you start).
+  - L59: do not end early;
+  - L60: destructive commands stay in `c-round-391/`.
+- The rules: `docs/technical/studio-real-workspace/agent-workflow.md` (speed rules, the bug gate, reference-first, product-designer, cloud runner).
+- Earlier stages of this feature:
+  - `tasks/round-382.md` §2: the cache, pins and `ensureDecoded` (D-29z1274/1275);
+  - `tasks/round-386.md`: decode-resync errors.
+- **Claims.** Every fact below about current code or evidence carries a `[K#]` tag from `b-round-390/claims-391.sh`; the planning output is `b-round-390/claims-391-planning-output.txt`. Run it from the loop root.
+  - A runs it before editing.
+  - C runs it at SOURCE-SCOPE start, where it must equal the planning output, and again at the end. At the end only the facts listed in §6 may differ.
 
-## Baseline: HEAD `11ca746`, clean tree (unchanged since round 389)
-- **Gates** [K1]:
-  - `gates/gate-round-388.json` is `published`, with `commit` `11ca746…` on both remotes. Its `head` field `5312260` is the pre-commit HEAD; do not use it.
-  - `gates/gate-round-389.json` is `skipped` (no source change).
-  - So the baseline stays gate 388's commit. `context/head-sha.txt` may be stale.
+## Baseline: HEAD `11ca746`, clean tree
+- **Gates** [K1]: `gates/gate-round-388.json` is `published` with `commit` `11ca746…`. Gates 389 and 390 are `skipped` (no source change). So the baseline is `11ca746`. `context/head-sha.txt` may be stale.
 - **At planning:**
-  - `git rev-parse --short HEAD` = `11ca746` and `git status --short --untracked-files=all` is empty [K2];
+  - HEAD is `11ca746`, with 0 status lines [K2];
   - the protected files are 11/11 OK [K3];
-  - the round-389 frozen tree `b-round-388/r389-tree-sha256.txt` is reused because HEAD is the same: 1284 entries, 0 failures [K4]. From `store/`, `sha256sum -c` on it must report 0 failures at start and at end.
+  - the frozen manifest `b-round-390/r391-frozen-sha256.txt` (the round-389 tree minus the granted paths) has 1279 entries and 0 failures [K4].
 
-## 0. Why this round (D-29z1316, D-29z1317)
-- **Part 1 passed.** `c-round-389.json`: PASS, 20 rows, 0 failed, `browserVerified`/`realVerified` true, 0 bugs [K7]. Gate 389 was skipped, so there is nothing to publish.
-- **The outcome was fixed in advance.** D-29z1315: C PASS → round 390 = part 2 on `11ca746`.
-- `regression-last.json` is still 2026-11-05 / 342 [K5]. It is updated only when part 2 closes.
-- No Critical, High or cloud-reproducible Medium is open. The open Mediums are root-only, manual-only or awaiting Saba.
+## 0. Why this round
+- **REGRESSION-2026-11-08 is closed.** C round 389 (part 1) and C round 390 (part 2) both passed, with 0 bugs and `browserVerified` true [K7]. `regression-last.json` is now 2026-11-07 / 390 [K5]. The next regression is due on or after 2026-11-10 (D-29z1322).
+- No Critical or High finding is open, and no cloud-reproducible Medium. The next item in the approved order (D-29z1298) is **PERF-13b-ii** (STUDIO-PERFORMANCE).
+- PERF-13b-i made the Studio drop decoded audio that no clip uses and decode it again on demand. It left three gaps in honest behaviour:
+  1. **Wait text.** While a dropped sound decodes again, Play writes `“X” has not loaded yet.` [K9], which reads like a broken sound. The library preview writes nothing during the wait [K12]. Nothing tells the user when the sound is ready.
+  2. **Data honesty (A-R382-ERROR-SOURCE-SKIPPED).** If a placed clip's sound fails to decode again, its source becomes `error`. Play and export wait only for sources that are `ready` and not cached [K10], so an `error` clip is skipped silently. **An exported WAV can lack a clip, with no message.**
+  3. **Memory rows.** `res.mem.pcm-live-mib-ready` and `res.mem.pcm-live-decode-mib-ready` are still `record` [K18]. B has now run the production sketch and a fix-removed mutant (L58), so they become `assert`.
 
-## 1. A: no code or doc change
-- **Baseline check,** from `store/`:
-  - `git rev-parse HEAD` must be `11ca746…`;
-  - `git status --short --untracked-files=all` must be empty.
+**Promise this serves (L55):** "What you hear and what you export are the clips on the timeline. When a sound is not available, the Studio says so; it never drops it silently."
 
-  If either differs, write "STOP — baseline differs" at the top of `a-round-390.md` with the output, and change nothing.
-- Do not edit any file in `store/`. Run no vitest, typecheck, lint or code-reviewer: there is no change.
-- Write `a-round-390.md` with:
-  - the start HEAD;
-  - the status output;
-  - "no change by design (REGRESSION round part 2, D-29z1317)".
-- **Forbidden:**
-  - `global_forbidden_files` / `global_forbidden_actions`;
-  - the protected files;
-  - commit, push, stash, checkout, deploy;
-  - dev-server restarts.
+## 1. Rulings (B)
 
-## 2. C: scope, method and budget (round 340 §2 applies, with these changes)
-- **SOURCE-SCOPE** at start and at end:
-  - HEAD `11ca746`, status empty;
-  - K3 11 OK;
-  - K4 0 failures.
+### D-29z1324: the assert flip
+Apply B's sketch exactly: `b-round-390/sketch-391.patch.txt` (sha256 prefix `d2127c92` [K20]). The resulting file is `b-round-390/sketch-391-budgets.resources.json`.
+- **The two rows that flip:**
+  - `res.mem.pcm-live-mib-ready`: `assert`, `<= 60` MiB. This is the perf-plan PERF-13 target, "≤ 60 MB at ready" (ROOT-NOTE-PERF13-PLAN-ROW).
+  - `res.mem.pcm-live-decode-mib-ready`: `assert`, `<= 0`.
+- **B's production run on the sketch:** 31.9 and 0, three samples each. Both rows PASS, and the spec reports `1 passed` [K20]. Logs: `b-round-390/perf-sketch-391.log` and `perf-sketch-391-latest-resources.json`.
+- **Mutant MU-391-NOTHING-EVICTABLE** (`canReloadSource` → `false` in `app/data/studio-lab-demo.ts` [K19]): the values become 124 and 92.2, and both rows FAIL [K21]. Log: `b-round-390/mutants/mutant-MU-391-NOTHING-EVICTABLE.log`.
+- **No loaded replicate.** The memory values are deterministic (three identical samples in each run), so L37's loaded replicate does not apply.
+- **`count-ready`, `after-add`, `count-after-add` and `after-export-delta` stay `record`.** An exact count would break the day a synth source is added, and the plan sets no budget for the after-add values.
+- No test reads the budgets file; only the perf spec does [K18].
 
-  Any change by anyone is a SCOPE FAIL; name the writer if you can.
-- **Start the mock API first.** Round 340 went BLOCKED because the mock was not started.
-  - Run `mock-api/server.mjs` from the loop folder on 127.0.0.1:5199. At planning, :5199 returned 000 [K6].
-  - Record its PID in `c-round-390/mock.pid`, and stop only that PID at the end.
-  - Mock data proves the client path only, never backend behaviour.
-- **Tools.** Reuse them in this order of priority [K10]:
-  1. `c-round-341/tools/`, including `run-batch1.sh` … `run-batch4.sh`;
-  2. `c-round-342/tools/`, including `rp/`;
-  3. `c-round-301/tools/` and `c-round-301/t258/` for the older bundles;
-  4. `c-round-389/tools/` for the journey and flow scripts.
+### D-29z1325: the decode wait text (the "known vs decoded" state)
+- **No new React state.** "Decoding again" is derived from data that already exists: the source is `ready`, it has no cached buffer (`decodedBuffers.has`), and a decode is in flight. This follows `tech-lead`, because the root architecture checkpoint for this region is still unanswered (D-29z1328).
+- **New strings in `studioLibraryStrings`:**
+  - `sourceDecoding(title)` → `Loading “<title>”…`
+  - `sourceReady(title)` → `“<title>” is ready.`
+- **Play,** on every start path through `startPlaybackAt`: a clip whose source is `ready` but not cached gets `sourceDecoding(<title of awaiting[0]>)` instead of `sourceNotLoaded` [K9]. Play still does not start (the round-382 ruling: no auto-start), and `isPlaying` stays false.
+- **Library preview** of a source that is `ready` but not cached: it writes `sourceDecoding(title)` before it waits [K12].
+- **Settle (the L51 lifetime).**
+  - **Where:** at the two call sites, in the `.then` of the `ensureDecoded` call each one started. Not inside `ensureDecoded`: its other callers (the pin path and export) write no status.
+  - **How:** one functional update, `setStatus(cur => cur === loadingText ? next : cur)`. Exact text equality is the only token.
+  - **What:** `next` is decided at settle time from the cache and the source states, never from the promise resolving (the promise also resolves after an abort):
+    - **Success:** every awaited source is cached → `sourceReady(<the same title as the loading text>)`.
+    - **Failure:** an awaited source is `error` → `sourceFailed(<the title of the first such source>)`. This write is **unconditional**; see the ruling lines (L4).
+    - **Neither** (an abort, or the collection changed) → no write.
+- **Preview: the smallest honest rule.** The settle rule above also holds for a preview.
+  - When the preview starts, the line reads `“X” is ready.`.
+  - A preview that another preview or Stop has replaced does not start (as now). Its settle still swaps its own loading text if that text is still on the line, so a stale "Loading" never stays.
+  - **Rejected:** `product-designer`'s "clear the text when the preview starts". Restoring the text that the loading text replaced needs bookkeeping across overlapping waits: preview A waits, then preview B waits. The restored text could itself be a stale loading text. The uniform rule is always true and needs no new state.
+- **Unchanged:**
+  - A source that is still `loading` (its first load) keeps `sourceNotLoaded`. That covers Add (`addSourceToActiveTrack`), drop, and the preview's not-`ready` branch: the other 3 `sourceNotLoaded` call sites [K8].
+  - `dropNotLoaded` is unchanged.
 
-  Copy what you use into `c-round-390/tools/` and redirect every output sink into `c-round-390/`. L60: a script that writes into an older round folder is edited to write here first; that edit is a lookup.
-- **Changed UI facts since round 342.** Adapt older scripts to these. Each adaptation is "lookup, not deviation"; name the fact.
-  - A graph-build failure stops playback with the `scheduleFailed` status, and the meters fall to −∞ (rounds 386–388).
-  - Play is refused while a needed source is still decoding (round 382). A script that presses Space right after an add waits for `Demo collection ready` and for the refusal to clear (L48).
-  - Decoded audio of unpinned sources can be evicted (rounds 382–384). `AudioBuffer` identity is not a signal; audible output is.
-  - There is no framer page transition on `/studio*` (round 370).
-  - From C's round-389 lookups (`c-round-389.json` `lookups`):
-    - the library option regex `/Night Pulse · Pulse/` became `/Pulse/`;
-    - the narrow-state status text no longer repeats the Tempo sentence;
-    - `cache.mjs` needs the `/studio-lab` URL as base;
-    - `master.mjs`'s :5180 second server is removed.
-  - The round-340 §2 facts still hold: the name "CZABA Studio", the one-time first-add hint, the self-hosted fonts and the drag previews.
-- **B rulings already made, binding here (do not re-open):**
-  - **R340-HINT (D-29z1062):** the hint shows once per page load and is back after a reload. Not a finding.
-  - **R340-OVERVIEW-METER "press L" sub-check: VOID (D-29z1068).** There is no bare `L` key. The 23-sample overview invariant is the row.
-  - **R340-FONTS FONT-PIXEL: retired (D-29z1068).**
-    - The baseline is `c-round-341/out/fonts/` [K10]; compare with it.
-    - The woff2 files are served from `/assets/`, not `/s/`.
-    - FONT-NET and FONT-PRELOAD stay.
-    - The production-build half runs on a scratch production server (D-29z1063), never on a second dev server.
-  - **RR-OSS full licence suite:** a gate row.
-  - **R342-POSCTL:** the oracle is `c-round-342/out/posctl.json` [K10]. Record only; it is not a decision row.
-  - **RP-NOBPM-RULER and C-R341-01 (= C-R318-06):** done in round 341; not re-run.
-- **Single dev server (D-29z1057).** Every dev row runs on :5173. For production rows (the FONTS production half, and any export-hash row that the template runs on a build), serve a production build on its own port and stop it after.
-- **Not re-run, carried with evidence.** HEAD is the same as in round 389, where these passed:
-  - RR-PERF: `c-round-389/perf-results/`, 4 files; both `interact.harness.drag-lane-live` and `drag-group-live` are present [K8];
-  - PERF-LIB: 3 files / 54 tests.
+### D-29z1326: a clip whose source is `error` (A-R382-ERROR-SOURCE-SKIPPED)
+- **Export (WAV and MP3) refuses.**
+  - **Which clips:** `prepareExportSources` [K11] returns the existing failed text when a clip **that the export renders** has a source whose status is exactly `'error'`.
+    - With no render window: the whole arrangement.
+    - With a render window: only clips that overlap it, `clip.start < window.end && clip.start + clip.duration > window.start`.
+  - **What it returns:** still one message, the same `librarySourceFailedMessage(title)` that the callers already wrap in `studioExportStrings.exportFailed` [K11, K15]. The dialog reads `Export failed — no file was created. “<title>” failed to load — details are in the library.`
+  - **Keep:**
+    - the pins being set before the `await`;
+    - the callers' `signal.aborted` check before `failedSource`, so a cancel still wins;
+    - the `finally` → `releaseExportPins`.
+  - A source with no `sourceStates` entry (video) is never "failed".
+- **Play plays, and says why a clip is silent.** This matches Live, which plays silence for missing media and warns in the status bar (see the Reference section).
+  - When `present.clips` has a clip whose source is `'error'`, Play starts as before. The status then becomes `sourceFailed(<the title of the first such clip's source>)`.
+  - Write it **after** the existing `playingFrom` write [K14], so it is not overwritten. It replaces the "Playing from" text. That is the accepted cost: the warning matters more than the start position.
+  - If every clip has failed, Play still starts, plays silence and shows the same warning, as in Live.
+- **Not in scope:**
+  - retrying a failed source;
+  - an "Offline" mark on the clip, as Live has. That mark is a question for Saba (`user-review/questions-perf13b-ii.md`, Q1; default "not now").
 
-  RG-SMOKE is **run** again (2 tests, about 1 minute), because the speed rule's regression round names it: `npm run test:e2e:smoke` in `store/`, alone, just before G390-AUTH.
+### D-29z1327: A-R383-REVIEW-L1-STALE-ENSURE-DECODED is closed, with no code
+- `tech-lead` traced every path to the stale `.then`:
+  - collection cleanup aborts the signal before it clears the in-flight map;
+  - a stale `ensureDecoded` closure gets `controller = null` from the owner check [K13];
+  - unmount runs the same cleanup.
+- So an extra guard would mean the same as `signal.aborted`, and no mutant could tell the two apart (L52).
+- EV7 already proves that an old decode in flight never sets [K16].
 
-  List the carried rows under `carried` with "round 389, same HEAD 11ca746". Do not run `npm run test:perf` this round.
-- **Order.** After a time-limit stop, resume from `c-round-390/progress.json`. Inside each block, run the heaviest evidence first (L59).
-  1. SOURCE-SCOPE start, claims, mock start;
-  2. §3 carried rows (R390-VIDEO-SOUND, R390-WAV-3CLIP-LEN);
-  3. §4 = round 340 §4d rows (rounds 302–339);
-  4. §5 = round 340 §4c (round 301's rows for 259–300), with R301-PRICE **last** among the store rows;
-  5. §6 = round 340 §4b, then §3 (RG-01 … RG-24, RG-T1 … RG-T4B), then §4 and §4.S;
-  6. §7 parked rows;
-  7. RG-SMOKE (alone), then G390-AUTH;
-  8. SOURCE-SCOPE end, then stop your PIDs.
+### D-29z1329: the purchased collection's reload
+Signed URLs can expire, so `canReloadSource` stays absent for the purchased adapter. This becomes a question in `SRW-21-PLAN` (root's parallel lane), not code here.
 
-  **Write `c-round-390.json`, `c-round-390.md` and `progress.json` after every row.**
-- **Budget per row:** up to 2 replacement attempts, for environment-invalid runs only. The known ones are the cold-start Sounds-listbox timeout and the s186 gift-card crash when the mock lacks that product. Thresholds are not relaxed. A row that fails on a valid setup is a finding.
-- **Console noise known in the cloud:**
-  - `Failed to load cart`, `ERR_CONNECTION_REFUSED`, `ERR_TUNNEL_CONNECTION_FAILED`;
-  - the known Low C-R341-02: a font preload "not used" warning after client navigation from a product page.
+### Ruling lines (L4)
+- Status line after the Play refusal: D-29z1325 wins over the round-382 `sourceNotLoaded` refusal text, for the ready-but-not-cached case only.
+- Status line after Play with an `error` clip: D-29z1326's warning wins over `playingFrom`.
+- The EV9 assertion `status` = `statusBefore` [K16]: the D-29z1325 settle rule wins. EV9 is rewritten, and no assertion is lost.
+- **Settle writes: success is conditional, failure is not.** The `sourceReady` write is the conditional swap (only when the line still shows the loading text). The **failure** write (`sourceFailed(<first failed title>)`) is **unconditional** at both call sites. For the preview this is today's behaviour, pinned by EV13 [K12]. For Play it is new. A failure must never go silent because another text replaced the loading text. EV13 is not weakened.
 
-  Record any other page error with its row.
-- **Ableton:** no new behaviour and no new parity claim. C judges the CZABA requirement only.
-- **Both viewports** (1440×900 and 1280×720) on every row unless the row says otherwise.
+## 2. Reference: how Ableton Live 12 does it (and where we differ)
+| Behaviour | Source | Live (confirmed) | CZABA decision | C check |
+|---|---|---|---|---|
+| Waiting for a sound to decode | Live 12 manual, ch. 5 "Managing Files and Sets" (searched by `product-designer`, 2026-11-07) | **No reference found.** Live streams samples from disk, so it shows no decode wait | Status line `Loading “X”…` → `“X” is ready.`; no auto-start (round 382) | B1, B2 |
+| Play with a clip whose media is missing | Live 12 manual 5.6 "Locating Missing Files", https://www.ableton.com/en/live-manual/12/managing-files-and-sets/#locating-missing-files | "Live's Status Bar … will display a warning message"; the clips are marked "Offline"; "Live will play silence instead of the missing samples" | Plays, with a warning in the status line. **Difference:** no "Offline" mark on the clip (Saba Q1, L44) | B3 |
+| Export with missing media | Live 12 manual 5.1.3 "Exporting Audio and Video" | **No reference found.** The section does not mention missing files | Refuse, and write no file. Our own decision: a WAV with a missing part must never reach an editor's timeline | B4 |
 
-## 3. C: two rows carried from part 1 (L6, D-29z1318)
+**Product design (`product-designer`, 2026-11-07).**
+- **Framing:** a short wait (≤ 2 s) needs a truthful text, not a new visual element.
+- **Rejected:**
+  - a spinner on the library row: a new element for a wait of 2 s or less;
+  - auto-start after the decode: the sound would arrive after the user has moved on;
+  - rendering silence with a warning: the warning is lost and the WAV is wrong.
+- **Where B deviates from it:** the preview settle text (D-29z1325, with the reason given there).
 
-### R390-VIDEO-SOUND [SA-12 rest]
-**Why carried.** R389-VIDEO-DRAG required "video sound plays after the move". C reported that it was not re-asserted (`c-round-389.md`, open question 2).
+**Screen budget (L39):** nothing new is permanently visible. Only the existing status line changes text, so C has nothing to count.
 
-**Tools** [K10]: build from `c-round-389/tools/flow.cjs` (the move) and the level sampler of `c-round-341/tools/pk-video-sound.cjs` (with its generated 440 Hz webm).
+## 3. What A changes (grants: `b-round-390/grants-391.txt`, 6 paths)
+1. **`perf/budgets.resources.json`:** apply `b-round-390/sketch-391.patch.txt` exactly. The result must be byte-identical to `b-round-390/sketch-391-budgets.resources.json` (`cmp`).
+2. **`app/lib/arrangement/strings.ts`:** add `sourceDecoding` and `sourceReady` to `studioLibraryStrings`, with the exact texts in D-29z1325. Change nothing else [K15].
+3. **`app/contexts/ArrangementContext.tsx`:** D-29z1325 and D-29z1326 only.
+   - No new `useState` or context field. Add a ref only if one is needed to remember the loading text per call, and explain it in the report.
+   - Do not touch `ensureDecoded`'s body [K13], the cache, the pins or the collection effect.
+4. **`app/lib/arrangement/__tests__/strings.test.ts`:**
+   - add the two formatters to the `studioLibraryStrings` formatter-sample table [K17];
+   - add exact-text expectations next to the existing `sourceNotLoaded` one.
 
-**Steps:**
-1. Import the webm and wait until the clip's sound is ready.
-2. Drag the video clip so that it starts at ≈ 2.25 s (as in round 389), and release.
-3. Play from 0 and sample the output level. No other clip may sound: use a project with only the video clip, or mute the other lanes.
-4. Undo the move and play from 0 again.
+   B's L23 pre-apply showed ST12 red without this [K22].
+5. **`app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx`:** rewrite EV3 and EV9 to the new contract, and add the rows in §4.
+   - The file has 22 tests and ran in 1855 ms at gate 388 [K24], so the L31 headroom is fine.
+   - Rewrites keep every assertion or replace it with an equal or stronger one. A test whose only change removes an assertion is a Medium finding.
+6. **`docs/implementation/2026/quarter-IV/251-perf-decode-status-and-failed-sources.md`** (new; 251 is the next free number [K23]): in Georgian, following `docs/implementation/TEMPLATE.md`.
 
-**Expected:**
-- **Before** the new start (0.5–1.8 s), the level is at the noise floor.
-- **Inside** the moved clip (from 0.3 s after its start), the level is ≥ 20 dB above that floor.
-- After Undo, the sound starts at the original start.
-- `pageErrors` is [].
+**Forbidden:**
+- every path not in the grants, including `ensureDecoded`'s body, `app/data/studio-lab-demo.ts`, `graph.client.ts` and the purchased adapter;
+- `global_forbidden_files` / `global_forbidden_actions` and the 4 protected files;
+- `package.json`;
+- commit, push, stash, checkout, deploy, and dev-server restarts.
 
-Silence inside the moved clip on a valid run is a **Medium** finding (audio lost after an edit).
+## 4. A: tests (jsdom, in `decoded-buffer-eviction-ui.test.tsx`; the ids are binding)
+Each row names the mutant that must turn it red. A runs each mutant on a scratch copy outside `store/`, and saves the logs in `a-round-391/mutants/`.
 
-### R390-WAV-3CLIP-LEN [SA-4 rest]
-**Why carried.** R389-WAV-STREAM parsed length and format on the 2-clip export. On the 3-clip project it proved only sha determinism (`c-round-389/export-det.json`: 3 clips, equal [K9]).
+| Row | Sequence | Expected | Mutant (red) |
+|---|---|---|---|
+| **EV3** (rewritten) | Add `big`; Play before the decode settles | `isPlaying` false; status `sourceDecoding(BIG_TITLE)`. Settle OK → status `sourceReady(BIG_TITLE)`, still not playing. Play again → plays. Keep the rest of today's EV3 asserts | MU-391-OLD-PLAY-TEXT (`sourceNotLoaded` back at the Play refusal); MU-391-NO-SETTLE-SWAP (the `.then` swap removed) |
+| **EV16** | As EV3, but another status write lands before the settle (a second Add, of the ready source `keep`) | After the settle, the status is still the second write's exact text, not `sourceReady`. **Failure variant:** the same sequence, but the settle fails → the status is `sourceFailed(BIG_TITLE)` (unconditional) | MU-391-UNCONDITIONAL-SWAP (`setStatus(next)` without the equality check); MU-391-CONDITIONAL-FAILURE (the failure write also gated on the loading text) |
+| **EV17** | Two evicted sources placed: `big` and a second evictable fixture (add one to the fixture if none exists). Play; settle the first only | Status still `sourceDecoding(<first title>)`. Settle the second **with an error** → `sourceFailed(<second title>)`; `isPlaying` false | MU-391-READY-ON-FIRST (decides "ready" from the first settled id only) |
+| **EV9** (rewritten, both cases) | Preview `big` (evicted) | Before the settle: status `sourceDecoding(BIG_TITLE)`. After the settle: the preview plays `big` and the status is `sourceReady(BIG_TITLE)`. **Superseded case:** preview `big`, then preview `keep`. After `big`'s settle, `libraryPreviewSourceId` is `keep`, the status is `sourceReady(BIG_TITLE)` (it still equalled the loading text), and the cache does not keep `big` (as today) | MU-391-PREVIEW-NO-LOADING (no loading write) |
+| **EV18** | Preview `big`; settle **with an error** | Status `sourceFailed(BIG_TITLE)` (today's EV13 failure text, now reached through the swap); no preview | MU-391-NO-SETTLE-SWAP |
+| **EV19** | Add `big`; settle with an error (the source is now `error`); then `exportWav()` | `renderWavMock` not called; `exportState` = `{ phase: 'error', message: exportFailed(sourceFailed(BIG_TITLE)) }`; the export pins are released | MU-391-EXPORT-NO-ERROR-CHECK (the new failed branch removed) |
+| **EV20** | As EV19, but a range export whose window does not overlap the failed clip, with a `ready`, cached clip inside it | The render runs (`renderWavMock` called once); no failure text | MU-391-ERROR-CHECK-IGNORES-WINDOW |
+| **EV21** | As EV19, then Play | `isPlaying` true; status `sourceFailed(BIG_TITLE)`, not `playingFrom` | MU-391-PLAY-NO-WARNING; MU-391-WARNING-BEFORE-PLAYINGFROM (the warning written before the `playingFrom` update) |
+| **EV22** | Play → `sourceDecoding`; `beginPointerGesture()` [K14]; settle OK; release the gesture | **Record** the final committed status and `getStatusPreviewText()` in the report. Assert only that the final status is not `sourceDecoding(BIG_TITLE)`. EV3 is the positive counterpart | None (a record row for `tech-lead`'s mid-gesture risk) |
 
-**Steps,** at both viewports:
-1. Rebuild the 3-clip project as `c-round-389/tools/export-det.mjs` does.
-2. Read the dialog's range end. Round 389 saw 00:00.000–00:48.000.
-3. Export the WAV and parse its header.
+**A also runs:**
+- `npm run typecheck` and `npm run lint`;
+- `npx vitest run` on:
+  - `decoded-buffer-eviction-ui.test.tsx`, `strings.test.ts`, `failed-source-refusal.test.tsx`, `name-bar-hint-ui.test.tsx`, `grid-snap-loop-drop.test.tsx`;
+  - `export-range-ui.test.tsx`, `export-range.test.ts`, `schedule-failure-ui.test.tsx`;
+  - every other test file under `app/` that matches `sourceNotLoaded|exportFailed|prepareExportSources|playingFrom` (paste the grep and its file list);
+- the `code-reviewer` (3 or more files changed).
 
-**Expected:**
-- RIFF/WAVE, 24-bit, 48 kHz, stereo;
-- frames / 48000 = the dialog's range end, ±1 frame;
-- non-silent: ≥ 1 % non-zero samples and peak > 0;
-- 0 NaN.
+A does not run the full suite or `verify`; the gate does.
 
-At 1440, also compare the sha256 with round 389's 3-clip sha in `export-det.json`. Equal is expected. A difference is reported for B to rule; it is not a FAIL by itself.
+**A's report, `a-round-391.md`:**
+- the changed files;
+- each command with its rc and its log path under `a-round-391/`;
+- each mutant's red log;
+- the EV22 record;
+- the reviewer's notes. An Architecture note goes to B as a signal.
 
-## 4. C: round 340 §4d (items finished in rounds 302–339)
-Run every row of `tasks/round-340.md` §4d as written there, with:
-- the §2 rulings and changed facts above;
-- the scripts round 341 used for them (`c-round-341/tools/`);
-- for the WORKER rows, `c-round-311/run-wk.sh`, as `tasks/round-342.md` rows 2–3 describe.
+## 5. C: browser rows (1440×900 and 1280×720, on `http://127.0.0.1:5173/studio-lab`)
+**Probe setup.**
+- **Base:** `c-round-382/lib.mjs` `open()`, with the injection style of `b-round-385/probe/preview-while-playing.mjs`.
+- **Two init helpers:**
+  - `window.__delayDecodes = n`: the next n `decodeAudioData` calls resolve 1500 ms late, so the wait is visible;
+  - `window.__failDecodes = n`: the next n calls reject.
+- **Status:** read it from `[data-testid="arrangement-status"]`, an `aria-live="polite"` `output` [K26]. Record every text the line takes with a `MutationObserver`.
+- **Ready wait:** wait for the text starting `Demo collection ready.` before the first action (L48) [K26].
+- **Injection order:** install both helpers with their counters at 0, wait for ready, and only then set a counter to 1 and act. A counter set before ready delays or fails the collection's own first decode, and makes the run invalid (a replacement attempt, not a FAIL).
+- **Title:** the Middle East title is `Middle East — public preview` [K19].
 
-**The rows:**
-- R340-CROSS-LANE, R340-GROUP-MOVE;
-- R340-WAVEFORM, R340-DETAIL-TEXT;
-- R340-OVERVIEW-METER, without the void sub-check;
-- R340-SHOWN-READERS, R340-PROJECT-END, R340-FADE-STATUS, R340-DRAG-A;
-- R340-SELECTION, R340-RANGE;
-- R340-FONTS: FONT-NET and FONT-PRELOAD on dev; the preloads, `/assets/` and the pixels vs the round-341 baseline on a scratch production server;
-- R340-PEAKS;
-- R340-WORKER-R2: WK-BROWSER-PROXY, WK-GUARD-PROXY, WK-HEAD-CONTROL. BLOCKED only if the proxy cannot start, with the log;
-- R340-RESCHEDULE: CONT-1, CONT-30, ENDED, NO-CHANGE;
-- R340-PERF3D;
-- R340-NAME (mock);
-- R340-HINT;
-- R340-JOURNEY.
-
-**R340-JOURNEY is one continuous flow, export included.** Round 389 left the export out of its journey. Take a screenshot at each step:
-1. Product page → "Try it in the Studio".
-2. `/studio-lab?preview=<handle>`, titled "CZABA Studio".
-3. Enter adds the source (the hint shows once).
-4. Space plays ≥ 1 s (the clock advances), then Stop.
-5. **Export WAV in the same page:** non-silent, and its length equals the dialog's range end ±1 frame.
-6. Right-click → "View in store" opens a new tab with `opener` null.
-
-Start from `c-round-389/tools/journey.cjs` and splice in the export step of `c-round-389/tools/export-wav.mjs` [K10].
-
-## 5. C: round 340 §4c (round 301's rows for items finished in rounds 259–300)
-Run `tasks/round-301.md` §4c as round 340 §4 states. The rows:
-- R301-MASTER, R301-CONTRACTS;
-- R301-BG-RANGE, R301-HIDDEN-GRID-BG;
-- R301-ALTGR;
-- R301-TAPER: exports at 1440 only;
-- R301-REL-SNAP, R301-STATUS-LIFETIME, R301-DISABLED;
-- R301-WORKER: the hash rule as written (one re-export; a reproducible difference is Medium);
-- R301-PERF3: compare with `c-round-284/shots`; the fallback rule applies;
-- R301-NAMES, R301-NARROW, R301-LOAF;
-- R301-LINK, R301-MENU;
-- R301-JOURNEY: covered by R340-JOURNEY above. Record "covered" and do not run it twice.
-
-**R301-PRICE runs last among the store rows,** by the procedure of `tasks/round-342.md` row 10:
-1. Stop the standard mock by its PID.
-2. Run `mock-c288.mjs`, the c288 replay and the c286 product-probe.
-3. Restart the standard mock and confirm health 200 before any later row.
-
-## 6. C: round 340 §4b, §3, §4 and §4.S
-- **§4b** (round 258 §4b rows, items finished in rounds 200–257) and **§4 / §4.S** (round 258 §4, items 122–199; store rows with the mock):
-  - Run them as round 341 did (`c-round-341/t258/`, `c-round-301/t258/`).
-  - Run the RS rows as round 342 rows 4–5 did. The gift-card step is guarded and records "absent in mock". RS-2A, RS-4B, RS-HIDDEN and RS-LM are mapped to their logs.
-  - **Expected:** 0 normalised diff lines vs round 301, except diffs explained by a §2 fact.
-- **§3:** RG-01 … RG-24 and RG-T1 … RG-T4B at both viewports (RG-03 at 1440 only), with round 301's adaptations.
-  - RG-22's narrow half: `c-round-301/tools/narrow/rg22n.cjs` with its sink redirected.
-  - Its oracle is `c-round-342/out/rg22n.json` [K10].
-- **NO-SHIFT-203:** carried unless you start a reference server. Give the reason.
-
-## 7. C: parked rows (record only unless stated)
-| Row | Action | Oracle / rule |
+| Row | Steps | PASS when |
 |---|---|---|
-| R390-RP301 (RP-METRO-MUTE, RP-SPACE-EMPTY, RP-VIDEO-MARKER, RP-NARROW, RP-MENU-SHEET, RP-LINK-NATIVE-MENU, RP-LINK-DRAG) | `c-round-301/tools/rp301/rp301.cjs`, with its sink redirected | `c-round-342/out/rp301.json`. A difference is a finding only if it changes behaviour |
-| R390-RP-BUILT (RP-C301-01, RP-FOLD-SELECTION, RP-SAME-TEXT-RACE, RP-GATE328-S1, RP-C331-01) | `c-round-342/tools/rp/*.cjs` [K10] | `c-round-342/out/rp-*.json`. Record. Low unless the row text says otherwise; no Live parity claim |
-| R390-POSCTL | `c-round-308/posctl-probe.cjs`, once per viewport | `c-round-342/out/posctl.json`. Record, including `valid` |
-| R390-ESC-DRAG (signal, record) | Press Esc during a clip drag, then release | Record whether the drag commits (in round 389 it did). This is evidence for the existing signal ESCAPE-CANCEL-GESTURE / C-R85-L1, which has no CZABA contract and waits for a Live source and Saba. **Not** a finding |
-| SA-19 (RETRO 336 screen candidates) | — | `awaiting_user`; carried, not run |
+| **B1 PREVIEW-LOADING** | Fresh load; delay 1; select Middle East; click Preview | The observed sequence contains `Loading “Middle East — public preview”…`, then `“Middle East — public preview” is ready.`. The preview audibly starts (a source start longer than 100 s, or the toggle reads Stop). 0 `pageerror` |
+| **B2 PLAY-LOADING** | Fresh load; delay 1; Add Middle East (Enter); press Space within 500 ms | The status shows `Loading “Middle East — public preview”…` and `data-playing` stays false. After the decode, the status is `“Middle East — public preview” is ready.` and playback is still stopped. Space again → playing, with a level at least 20 dB above the floor |
+| **B3 FAILED-CLIP-PLAY** | Add Middle East and wait for the decode; Delete the clip (its buffer is released); fail 1; Ctrl+Z (the clip returns and its re-decode fails) | After Ctrl+Z, the library row of Middle East shows its load error. The undo path writes no decode status, so record the status text without asserting it. Space → `data-playing` true, and the status is `“Middle East — public preview” failed to load — details are in the library.` |
+| **B4 FAILED-CLIP-EXPORT** | Continue from B3: Stop; Export → WAV | No download. The dialog shows `Export failed — no file was created. “Middle East — public preview” failed to load — details are in the library.`. Repeat once with MP3: the same text, no download |
+| **B5 CONTROL-EXPORT** | Fresh load, no injection: Add Middle East, export a WAV | One WAV with a RIFF/WAVE header and length > 0 (the existing flow still works) |
+| **MOCK-START** (before B6 only) | Start `mock-api/server.mjs` from the loop folder on 127.0.0.1:5199, as round 390 did; stop it at the end. B1–B5 and PERF-RES do not need it | `GET /api/products` returns 200. Without it, B6 is BLOCKED (environment), not FAIL |
+| **B6 JOURNEY (L54)** | Product page → "Try it in the Studio" → `/studio-lab` → preview → Add → Play → Export WAV | A screenshot of each step; the B1 and B2 texts appear where expected; the WAV arrives |
+| **PERF-RES** | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-resources.perf.spec.ts`, alone (it builds; port 5188) | 1 passed, 0 problems. `pcm-live-mib-ready` assert PASS (≈ 31.9), `decode-mib-ready` assert PASS (0), and every other assert PASS. Copy the results to `c-round-391/perf-results/` |
+| **SOURCE-SCOPE** | At start and end: the claims script, `git status`, and `sha256sum -c` on `r391-frozen-sha256.txt` and on the protected manifest | Start = the planning output. End: only the 6 granted paths changed (doc 251 is new); K4 0 failures; K3 11 |
+| **gate** | Full vitest, typecheck, build, Biome, verify | Marked `gate`; not claimed in `passed` |
 
-## 8. C: auth guard and gate rows
-- **G390-AUTH:** `c-round-342/tools/g340-auth.cjs`, with the mock running, at both viewports:
-  - `/studio-lab` anonymous opens the workspace with the demo badge, and `auth_user` is null;
-  - `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`;
-  - `/api/studio-token`: no header → 401; bare → 400; fake Bearer → 403 with the mock;
-  - no token in any body.
+**Neighbours that can break** (one short check each, at 1440 only):
+- the round-382 EV13 path: a preview while playing keeps the timeline playing until its decode succeeds;
+- the first-load sequence `Loading the demo collection…` → `Demo collection ready.`;
+- Add of a source that is still loading still says `has not loaded yet.`.
 
-  If the fake Bearer cannot get 403 from the mock, mark it BLOCKED (backend unavailable in cloud) and list it under `blocked`. That does not make `browserVerified` false. SRW-21 stays `deferred_user`.
-- **Gate rows, not claimed by C:** full vitest, typecheck, build, Biome, `npm run verify`, RR-OSS.
+**L57 fields** in `c-round-391.json`:
+- `manifestPaths` = `b-round-390/r391-frozen-sha256.txt`, `b-round-318/protected-sha256.txt`;
+- `mutantRedOnSketch` = "MU-391-NOTHING-EVICTABLE red on B's sketch (`b-round-390/mutants/`); jsdom mutants: A's logs";
+- an `origin` per finding.
 
-## 9. What could break, and where to look first
-- **The new play path under older audio rows.** The playback changes of rounds 382–388 sit under every older audio row. R390-VIDEO-SOUND, R340-RESCHEDULE (CONT-1/CONT-30), R301-TAPER and R301-WORKER are the first audible checks of older features on the new path.
-- **The decoded-cache refusal (round 382)** can make an older script's first Space fail. Wait for the refusal to clear before calling it a regression. A refusal that never clears is a Medium finding.
-- **Old output sinks.** Older scripts write into their own round folders; redirect the sinks first (L60).
-- **The PRICE mock swap** can leave :5199 on the wrong data. It runs last among the store rows, and the standard mock is restarted (health 200) before G390-AUTH.
+## 6. Claims that may change during the round
+- **K8:** 4 → 2 or 3. The Play refusal goes; the preview `.then` fallback at the old not-`error` branch may go too, if the swap replaces it. The Add/drop and preview not-`ready` call sites stay. A lists each remaining call site.
+- **K9:** 1 → 0.
+- **K15** `new-keys`: 0 → 2.
+- **K16:** the EV pins and the test count (22 → 22 plus the new rows).
+- **K17:** unchanged, with new rows next to it.
+- **K18:** `assert assert record record`.
 
-## 10. Report
-- **`c-round-390.json`:**
-  - `taskStatus`: PASS, FAIL or PARTIAL;
-  - `passed`, `failed`, `inconclusive`, `blocked`, `carried`, `gate`;
-  - `bugs`, each with id `C-R390-NN`, `severity`, `origin`, item, repro, evidence path, and "regression yes/no" with the round of its last pass;
-  - `observations`, `invalidRuns`, `lookups`;
-  - `browserVerified`, `realVerified`, `stopSignal`;
-  - the L57 harness fields (`null` with a reason where they do not apply).
-- **`c-round-390.md`:** one table, one line per row, with its evidence file.
-- **PARTIAL** is allowed only for a real time-limit stop, with `progress.json` naming the rows left (L59).
+Everything else must equal the planning output.
 
-## 11. Outcome, fixed in advance (D-29z1321)
-| C result | B at the 390 → 391 planning |
-|---|---|
-| Every row has an allowed result and there is no Medium+ finding (Lows → `deferred_low_polish`) | <ul><li>`regression-last.json` = `{"date": <C's completion date>, "round": 390}`, and REGRESSION-2026-11-08 closes.</li><li>Round 391 = **PERF-13b-ii**.</li><li>ARCH-CHECKPOINT-DECODE-REGION is wanted before PERF-13b-ii. If root has not answered it by then, B rules on proceeding, with a written reason.</li></ul> |
-| A Critical or High finding | <ul><li>Round 391 = its bounded fix-up.</li><li>`regression-last.json` is updated if every row ran.</li><li>PERF-13b-ii follows.</li></ul> |
-| A cloud-reproducible Medium finding | Round 391 = its fix-up (≤ 3 related bugs); then PERF-13b-ii |
-| PARTIAL (time limit) | Round 391 continues part 2 from `progress.json`; `regression-last.json` waits |
-| A browser row that could run here did not run | `browserVerified=false`; B re-plans that half |
+## 7. Out of scope (recorded, not dropped)
+- An "Offline" mark on clips (Saba Q1).
+- Retrying a failed source.
+- Q-PREVIEW-STOPS-TRANSPORT (awaiting Saba).
+- The purchased reload (SRW-21-PLAN).
+- PERF-13c (streaming library preview) comes next.
