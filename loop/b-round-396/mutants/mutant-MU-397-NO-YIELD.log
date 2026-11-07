@@ -1,0 +1,72 @@
+
+ RUN  v4.0.16 /tmp/b397-scratch
+
+ ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts (15 tests | 2 failed) 226ms
+     ✓ SB1 demo-synth-mix builds one stereo 48 kHz buffer and copies the worker array itself into both channels 3ms
+     ✓ SB1 demo-stem-pulse builds one stereo 48 kHz buffer and copies the worker array itself into both channels 1ms
+     ✓ SB1 demo-stem-bass builds one stereo 48 kHz buffer and copies the worker array itself into both channels 0ms
+     ✓ SB1 demo-stem-pad builds one stereo 48 kHz buffer and copies the worker array itself into both channels 0ms
+     ✓ SB1 demo-stem-lead builds one stereo 48 kHz buffer and copies the worker array itself into both channels 0ms
+     ✓ SB2 demo-soft-impact copies one generated array into both channels and keeps the generated samples 50ms
+     ✓ SB2 demo-slow-rise copies one generated array into both channels and keeps the generated samples 140ms
+     ✓ SB3 demo-synth-mix both channels hold the source samples value for value 1ms
+     ✓ SB3 demo-stem-pulse both channels hold the source samples value for value 1ms
+     ✓ SB3 demo-stem-bass both channels hold the source samples value for value 0ms
+     ✓ SB3 demo-stem-pad both channels hold the source samples value for value 0ms
+     ✓ SB3 demo-stem-lead both channels hold the source samples value for value 0ms
+     × SB4 five concurrent worker-source loads build their buffers in five separate timer tasks 5ms
+     ✓ SB6 the two generated sources build without waiting for a timer task 21ms
+     × SB5 an abort while the build waits for its task rejects with the abort reason and builds nothing 3ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  22:08:24
+   Duration  943ms (transform 155ms, setup 0ms, import 183ms, tests 226ms, environment 403ms)
+
+
+::error file=/tmp/b397-scratch/app/data/__tests__/studio-lab-demo-synth-buffer.test.ts,title=app/data/__tests__/studio-lab-demo-synth-buffer.test.ts > PERF-13d demo synth buffers%3A one shared source array%2C one build per task (D-29z1356) > SB4 five concurrent worker-source loads build their buffers in five separate timer tasks,line=151,column=19::AssertionError: expected [ …(5) ] to have a length of +0 but got 5%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 5%0A%0A ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts:151:19%0A%0A
+
+::error file=/tmp/b397-scratch/app/data/__tests__/studio-lab-demo-synth-buffer.test.ts,title=app/data/__tests__/studio-lab-demo-synth-buffer.test.ts > PERF-13d demo synth buffers%3A one shared source array%2C one build per task (D-29z1356) > SB5 an abort while the build waits for its task rejects with the abort reason and builds nothing,line=187,column=27::AssertionError: expected 'resolved' to be DOMException{ stack: 'AbortError: Th…' } // Object.is equality%0A%0A- Expected: %0AAbortError {%0A  "message": "This operation was aborted",%0A}%0A%0A+ Received: %0A"resolved"%0A%0A ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts:187:27%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/data/__tests__/studio-lab-demo-synth-buffer.test.ts > PERF-13d demo synth buffers: one shared source array, one build per task (D-29z1356) > SB4 five concurrent worker-source loads build their buffers in five separate timer tasks
+AssertionError: expected [ …(5) ] to have a length of +0 but got 5
+
+- Expected
++ Received
+
+- 0
++ 5
+
+ ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts:151:19
+    149|     const loads = WORKER_SOURCES.map(([id]) => loadDemo(id));
+    150|     await flushMicrotasks();
+    151|     expect(built).toHaveLength(0);
+       |                   ^
+    152|     expect(queued).toHaveLength(WORKER_SOURCES.length);
+    153|     for (const [task, run] of queued.entries()) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/data/__tests__/studio-lab-demo-synth-buffer.test.ts > PERF-13d demo synth buffers: one shared source array, one build per task (D-29z1356) > SB5 an abort while the build waits for its task rejects with the abort reason and builds nothing
+AssertionError: expected 'resolved' to be DOMException{ stack: 'AbortError: Th…' } // Object.is equality
+
+- Expected: 
+AbortError {
+  "message": "This operation was aborted",
+}
+
++ Received: 
+"resolved"
+
+ ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts:187:27
+    185|     vi.advanceTimersToNextTimer();
+    186|     await flushMicrotasks();
+    187|     expect(await outcome).toBe(controller.signal.reason);
+       |                           ^
+    188|     expect(built).toHaveLength(0);
+    189|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

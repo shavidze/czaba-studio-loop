@@ -1,0 +1,14 @@
+phase1 (B planning 396->397), 2026-11-07
+- [x] tasks/round-396.md archived (copy); pre-edit copies b-round-396/*-before-397.*
+- [x] gate 396 published 4f28bff = baseline; C 396 PASS browserVerified true, 0 bugs
+- [x] premise probe HEAD dev 6x: b-round-396/probe/head-6x-1.json (187 ms longtask containing 5 synth buffer builds, copyToChannel ~100 ms)
+- [x] consults performance-optimizer + tech-lead
+- [x] advisor
+- [x] sketch done
+- [x] consults done (perf-optimizer: include yield; tech-lead: separate stage) -> ruling: yield on worker path only (both: no hang risk; narrow-gate NG5b/c collision when yield applied to SFX, b-round-396/precheck-full-v1-yield-all.log)
+- [x] advisor consulted
+- [x] sketch /tmp/b397-scratch: tsc 0, biome 0, full 259/3847 rc0 (precheck-full.log); mutants 7/7 red (mutants/summary.txt)
+- [x] browser probe rows.cjs HEAD vs sketch 6x both vps (probe/rows-summary.txt; hash-equal)
+- [x] perf spec on sketch rc 0 (perf-sketch-load-rows.txt)
+- [x] sketch review (0 Medium+), claims K1-K25, backlog v364, feature-status, current-task.md (round 397), b-round-396.md, b-next.json
+- [x] advisor close (fixes: jsdom note SB6, b-next ids, doc-253 collision line, advisor wording)

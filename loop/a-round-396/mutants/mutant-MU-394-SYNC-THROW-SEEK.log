@@ -1,0 +1,89 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/tmp/a396-scratch
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx (28 tests | 2 failed) 526ms
+     ✓ PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media 4ms
+     ✓ PS2 a seek on the playing stream reuses the same element without pausing it 1ms
+     ✓ PS3 ended fires onEnded once; an old element ending after its stop does nothing 2ms
+     ✓ PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not 2ms
+     ✓ PS5 a buffer preview after a stream releases the stream element and starts one buffer source 1ms
+     ✓ PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set 64ms
+     ✓ PS7 a cached buffer wins over the stream: no media element, one buffer source 47ms
+     ✓ PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered 46ms
+     ✓ PS9 Play stops a streaming preview: the element is released and the transport plays 46ms
+     ✓ PS10 unmounting the provider releases a streaming element 38ms
+     ✓ PS11 a stream preview stops the playing transport before the element plays 44ms
+     ✓ PS12 the natural end of a stream clears the preview id and releases the preview pin 39ms
+     ✓ PS13 the fallback resumes from the element time, not from zero 44ms
+     ✓ PS14 a streamed preview writes no status 44ms
+     ✓ PS27 the remembered fallback lives with its collection object: a new collection streams the same source again 88ms
+     ✓ PS16 a stream that never plays falls back after the stall timeout with its time 1ms
+     ✓ PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only 1ms
+     ✓ PS18 the watchdog does nothing when the element time moved since it was armed 0ms
+     ✓ PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves 1ms
+     ✓ PS20 an external pause ends the preview once and releases the element 0ms
+     ✓ PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event 1ms
+     ✓ PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception 1ms
+     × PS23 a synchronous throw on a same-url seek is a stream error of the active preview 7ms
+     ✓ PS24 the default scheduler arms an 8000 ms window timer that a stop clears 2ms
+     ✓ PS25 a same-url seek before playing restarts the armed watchdog from the new time 0ms
+     ✓ PS26 a stop removes every listener the stream added 1ms
+     × PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer 1ms
+     ✓ PS29 the stream element requests its URL in anonymous CORS mode, like the credential-free decode fetch 0ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 passed (28)
+   Start at  21:29:36
+   Duration  1.66s (transform 489ms, setup 0ms, import 631ms, tests 526ms, environment 388ms)
+
+
+::error file=/home/runner/czaba-project/tmp/a396-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS23 a synchronous throw on a same-url seek is a stream error of the active preview,line=826,column=77::AssertionError: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0ADOMException {}%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:826:77%0A%0A
+
+::error file=/home/runner/czaba-project/tmp/a396-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer,line=909,column=77::AssertionError: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0ADOMException {}%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:909:77%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS23 a synchronous throw on a same-url seek is a stream error of the active preview
+AssertionError: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+DOMException {}
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:826:77
+    824|       },
+    825|     });
+    826|     expect(() => player.playLibraryPreviewStream(BIG_URL, 60, onError)…
+       |                                                                             ^
+    827|     expect(onError).toHaveBeenCalledTimes(1);
+    828|     expect(onError).toHaveBeenCalledWith(9);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer
+AssertionError: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+DOMException {}
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:909:77
+    907|       },
+    908|     });
+    909|     expect(() => player.playLibraryPreviewStream(BIG_URL, 50, onError)…
+       |                                                                             ^
+    910|     expect(onError).toHaveBeenCalledTimes(1);
+    911|     expect(onError).toHaveBeenCalledWith(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

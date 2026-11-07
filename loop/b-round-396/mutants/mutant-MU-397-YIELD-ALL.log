@@ -1,0 +1,49 @@
+
+ RUN  v4.0.16 /tmp/b397-scratch
+
+ ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts (15 tests | 1 failed) 214ms
+     ✓ SB1 demo-synth-mix builds one stereo 48 kHz buffer and copies the worker array itself into both channels 4ms
+     ✓ SB1 demo-stem-pulse builds one stereo 48 kHz buffer and copies the worker array itself into both channels 2ms
+     ✓ SB1 demo-stem-bass builds one stereo 48 kHz buffer and copies the worker array itself into both channels 2ms
+     ✓ SB1 demo-stem-pad builds one stereo 48 kHz buffer and copies the worker array itself into both channels 2ms
+     ✓ SB1 demo-stem-lead builds one stereo 48 kHz buffer and copies the worker array itself into both channels 2ms
+     ✓ SB2 demo-soft-impact copies one generated array into both channels and keeps the generated samples 52ms
+     ✓ SB2 demo-slow-rise copies one generated array into both channels and keeps the generated samples 136ms
+     ✓ SB3 demo-synth-mix both channels hold the source samples value for value 1ms
+     ✓ SB3 demo-stem-pulse both channels hold the source samples value for value 2ms
+     ✓ SB3 demo-stem-bass both channels hold the source samples value for value 1ms
+     ✓ SB3 demo-stem-pad both channels hold the source samples value for value 1ms
+     ✓ SB3 demo-stem-lead both channels hold the source samples value for value 1ms
+     ✓ SB4 five concurrent worker-source loads build their buffers in five separate timer tasks 1ms
+     × SB6 the two generated sources build without waiting for a timer task 5ms
+     ✓ SB5 an abort while the build waits for its task rejects with the abort reason and builds nothing 2ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  22:08:27
+   Duration  897ms (transform 140ms, setup 0ms, import 167ms, tests 214ms, environment 395ms)
+
+
+::error file=/tmp/b397-scratch/app/data/__tests__/studio-lab-demo-synth-buffer.test.ts,title=app/data/__tests__/studio-lab-demo-synth-buffer.test.ts > PERF-13d demo synth buffers%3A one shared source array%2C one build per task (D-29z1356) > SB6 the two generated sources build without waiting for a timer task,line=170,column=20::AssertionError: expected [ [Function], [Function] ] to have a length of +0 but got 2%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 2%0A%0A ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts:170:20%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/data/__tests__/studio-lab-demo-synth-buffer.test.ts > PERF-13d demo synth buffers: one shared source array, one build per task (D-29z1356) > SB6 the two generated sources build without waiting for a timer task
+AssertionError: expected [ [Function], [Function] ] to have a length of +0 but got 2
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ app/data/__tests__/studio-lab-demo-synth-buffer.test.ts:170:20
+    168|     const loads = GENERATED_SOURCES.map(([id]) => loadDemo(id));
+    169|     await flushMicrotasks();
+    170|     expect(queued).toHaveLength(0);
+       |                    ^
+    171|     expect(built).toHaveLength(GENERATED_SOURCES.length);
+    172|     expect(await Promise.all(loads)).toHaveLength(GENERATED_SOURCES.le…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

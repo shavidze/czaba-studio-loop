@@ -1,0 +1,455 @@
+diff --git a/app/lib/arrangement/__tests__/collection.test.ts b/app/lib/arrangement/__tests__/collection.test.ts
+index 331225f..a96a207 100644
+--- a/app/lib/arrangement/__tests__/collection.test.ts
++++ b/app/lib/arrangement/__tests__/collection.test.ts
+@@ -456,3 +456,45 @@ describe('SABA-B-11a-FIX-2 loadingCollectionStatus', () => {
+     expect(loadingCollectionStatus('Clip added.', demo)).toBe(demo.loading);
+   });
+ });
++
++describe('PERF-13c-ii-b purchased adapter previewUrl (D-29z1352)', () => {
++  it('PV1 previewUrl returns the stem URL of each known source without fetching, and null for an unknown source', () => {
++    const fetchAudio = vi.fn<PurchasedStemFetch>(async () => okResponse());
++    const collection = createPurchasedWorkspaceCollection({
++      productId: 'middle-east',
++      productTitle: 'Middle East',
++      stems: stems(),
++      fetchAudio,
++    });
++    expect(typeof collection.previewUrl).toBe('function');
++    expect(collection.sources.map((source) => collection.previewUrl?.(source))).toEqual([
++      'https://stems.example.test/lead?token=L',
++      SECRET_URL,
++      'https://stems.example.test/bass?token=B',
++      'https://stems.example.test/pad?token=P',
++    ]);
++    const unknown: WorkspaceSource = {
++      id: 'unknown',
++      title: 'Middle East · Unknown',
++      collectionLabel: 'Middle East · purchased stems',
++      kind: 'stem',
++      origin: 'purchased',
++    };
++    expect(collection.previewUrl?.(unknown)).toBeNull();
++    expect(fetchAudio).not.toHaveBeenCalled();
++  });
++
++  it('PV2 previewUrl is stable: repeated calls return the same string and later input changes do not reach it', () => {
++    const input = stems();
++    const collection = createPurchasedWorkspaceCollection({
++      productId: 'middle-east',
++      productTitle: 'Middle East',
++      stems: input,
++    });
++    const drums = sourceOf(collection.sources, 'drums');
++    const first = collection.previewUrl?.(drums);
++    input[1].audioUrl = 'https://evil.example.test/changed';
++    expect(first).toBe(SECRET_URL);
++    expect(collection.previewUrl?.(drums)).toBe(first);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+index 94aa067..b56a58a 100644
+--- a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+@@ -568,6 +568,37 @@ describe('PERF-13c-i library preview of a URL source streams without decoding',
+     expect(live(api).status).toBe(textBefore);
+     expect(live(api).statusSequence).toBe(sequenceBefore);
+   });
++
++  it('PS27 the remembered fallback lives with its collection object: a new collection streams the same source again', async () => {
++    const { api, pending, view } = await mountStream();
++    act(() => live(api).startLibraryPreview('big', 0));
++    act(() => {
++      onlyElement().dispatchEvent(new Event('error'));
++    });
++    await settleNext(pending, bigBuffer());
++    act(() => live(api).stopLibraryPreview());
++    act(() => live(api).startLibraryPreview('big', 0));
++    expect(createdElements).toHaveLength(1);
++    expect(pending).toHaveLength(1);
++    await settleNext(pending, bigBuffer());
++    act(() => live(api).stopLibraryPreview());
++    const next = streamCollection();
++    view.rerender(
++      <ArrangementProvider collection={next.collection} initialArrangement={streamArrangement()}>
++        <StreamProbe api={api} />
++      </ArrangementProvider>,
++    );
++    await flushAsync();
++    await settleNext(next.pending, bigBuffer());
++    expect(observedCache().has('big')).toBe(false);
++    const loadsBefore = next.bigLoads.count;
++    act(() => live(api).startLibraryPreview('big', 0));
++    expect(createdElements).toHaveLength(2);
++    expect(createdElements[1]?.getAttribute('src')).toBe(BIG_URL);
++    expect(next.pending).toHaveLength(0);
++    expect(next.bigLoads.count).toBe(loadsBefore);
++    expect(live(api).libraryPreviewSourceId).toBe('big');
++  });
+ });
+ 
+ interface FakeStallScheduler {
+@@ -860,4 +891,45 @@ describe('PERF-13c-ii-a stream lifecycle robustness', () => {
+     expect(removedPairs).toHaveLength(6);
+     expect(removedPairs).toEqual(expect.arrayContaining(addedPairs));
+   });
++
++  it('PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer', () => {
++    const scheduler = createFakeStallScheduler();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 3, onError);
++    const element = onlyElement();
++    expect(scheduler.pending()).toBe(1);
++    Object.defineProperty(element, 'currentTime', {
++      configurable: true,
++      get: () => 3,
++      set: () => {
++        throw new DOMException('not seekable', 'InvalidStateError');
++      },
++    });
++    expect(() => player.playLibraryPreviewStream(BIG_URL, 50, onError)).not.toThrow();
++    expect(onError).toHaveBeenCalledTimes(1);
++    expect(onError).toHaveBeenCalledWith(3);
++    expect(scheduler.pending()).toBe(0);
++    expect(element.hasAttribute('src')).toBe(false);
++    expect(player.getLibraryPreviewOffset()).toBeNull();
++  });
++
++  it('PS29 the stream element requests its URL in anonymous CORS mode, like the credential-free decode fetch', () => {
++    const nativeSrc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src');
++    const crossOriginAtSrc: Array<string | null> = [];
++    vi.spyOn(HTMLMediaElement.prototype, 'src', 'set').mockImplementation(function (
++      this: HTMLMediaElement,
++      value: string,
++    ) {
++      crossOriginAtSrc.push(this.getAttribute('crossorigin'));
++      nativeSrc?.set?.call(this, value);
++    });
++    const scheduler = createFakeStallScheduler();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 0, vi.fn());
++    const element = onlyElement();
++    expect(crossOriginAtSrc).toEqual(['anonymous']);
++    expect(element.getAttribute('crossorigin')).toBe('anonymous');
++    expect(element.getAttribute('src')).toBe(BIG_URL);
++  });
+ });
+diff --git a/app/lib/arrangement/collection.ts b/app/lib/arrangement/collection.ts
+index 61d3688..cfe49d9 100644
+--- a/app/lib/arrangement/collection.ts
++++ b/app/lib/arrangement/collection.ts
+@@ -124,5 +124,6 @@ export function createPurchasedWorkspaceCollection({
+     origin: 'purchased',
+     sources,
+     loadSource,
++    previewUrl: (source) => stemUrls.get(source.id) ?? null,
+   };
+ }
+diff --git a/app/lib/arrangement/preview.client.ts b/app/lib/arrangement/preview.client.ts
+index 750679d..c43b99e 100644
+--- a/app/lib/arrangement/preview.client.ts
++++ b/app/lib/arrangement/preview.client.ts
+@@ -111,6 +111,7 @@ export function createLibraryPreviewPlayer(
+       }
+       stopActive();
+       const element = createAudioElement();
++      element.crossOrigin = 'anonymous';
+       const handleEnded = () => {
+         if (active === preview) {
+           stopActive();
+diff --git a/docs/implementation/2026/quarter-IV/248-perf-decoded-buffer-cache.md b/docs/implementation/2026/quarter-IV/248-perf-decoded-buffer-cache.md
+index f6aa276..fb2d683 100644
+--- a/docs/implementation/2026/quarter-IV/248-perf-decoded-buffer-cache.md
++++ b/docs/implementation/2026/quarter-IV/248-perf-decoded-buffer-cache.md
+@@ -1,7 +1,7 @@
+ # PERF-13b-i: გამოუყენებელი decoded audio თავისუფლდება და საჭიროებისას თავიდან იშიფრება
+ 
+ **თარიღი:** 2026-11-07
+-**სტატუსი:** In Progress (stage 1 of 2; C round 384 PASS)
++**სტატუსი:** Completed (C round 392 PASS)
+ **შეცვლილი პროექტი:** Store (`app/lib/arrangement/decoded-buffer-cache.ts`, `app/contexts/ArrangementContext.tsx`, `app/types/arrangement.ts`, `app/data/studio-lab-demo.ts`, `perf/lib/pcm-live.ts`, `perf/studio-lab-resources.perf.spec.ts`, `perf/budgets.resources.json` და ტესტები).
+ 
+ ## კონტექსტი
+diff --git a/docs/implementation/2026/quarter-IV/252-perf-library-preview-stream.md b/docs/implementation/2026/quarter-IV/252-perf-library-preview-stream.md
+index a9f0487..c7fbb54 100644
+--- a/docs/implementation/2026/quarter-IV/252-perf-library-preview-stream.md
++++ b/docs/implementation/2026/quarter-IV/252-perf-library-preview-stream.md
+@@ -1,8 +1,8 @@
+-# PERF-13c: library preview-ს stream URL-იდან, decode-ის გარეშე (rounds 393–395)
++# PERF-13c: library preview-ს stream URL-იდან, decode-ის გარეშე (rounds 393–396)
+ 
+ **თარიღი:** 2026-11-07
+-**სტატუსი:** In Progress (stage 2 of 3; C round 395 PASS)
+-**შეცვლილი პროექტი:** Store (`app/contexts/ArrangementContext.tsx`, `app/lib/arrangement/preview.client.ts`, `app/types/arrangement.ts`, `app/data/studio-lab-demo.ts` და ტესტები).
++**სტატუსი:** Completed (C round 396 PASS)
++**შეცვლილი პროექტი:** Store (`app/contexts/ArrangementContext.tsx`, `app/lib/arrangement/preview.client.ts`, `app/types/arrangement.ts`, `app/data/studio-lab-demo.ts`, `app/lib/arrangement/collection.ts`, `perf/studio-lab-resources.perf.spec.ts`, `perf/budgets.resources.json` და ტესტები).
+ 
+ ## კონტექსტი
+ 
+@@ -30,6 +30,10 @@ Round 394-ის C შემოწმება ჩავარდა (C-R394-01,
+ 
+ HEAD-ზე გაზომილი event-ების თანმიმდევრობა (guard-ების საფუძველი): ბუნებრივ დასასრულზე `pause` `ended`-მდე მოდის და `element.ended` უკვე `true`-ა; გაუქმებული source `error`-ს `pause`-ის გარეშე იძლევა; seek იძლევა `seeking`, `waiting`, `seeked`, `canplay`, `playing`.
+ 
++### Stage 3 (PERF-13c-ii-b, round 396)
++
++PERF-13c-ის ბოლო ეტაპი. Purchased collection-ს (`createPurchasedWorkspaceCollection`) `previewUrl` არ ჰქონდა, ამიტომ ნაყიდი stem-ის Preview ისევ სრულ decode-ს აკეთებდა. B-ის sketch-ის `tech-lead` review-მ ერთი Medium იპოვა (TL-B395-SKETCH-M2-CROSSORIGIN): stream element-ი URL-ს no-cors რეჟიმში credential-ებით ითხოვდა, decode fetch კი `credentials: 'omit'`-ით; signed stem URL-ებზე ეს პირველად ახლა იჩენდა თავს. Perf harness-ს preview-ს row არ ჰქონდა, ამიტომ "preview არაფერს decode-ს" მხოლოდ unit ტესტებით მოწმდებოდა.
++
+ ## მიდგომა
+ 
+ **D-29z1341 — preview-ს გზის არჩევა.** `startLibraryPreview` source-ისთვის პირველივე შესაბამის წესს ირჩევს:
+@@ -75,6 +79,27 @@ Stream-გზა: `ensureAudioContext()` (თუ ვერ შეიქმნა
+ 
+ **`NotAllowedError` ისევ decode-ზე გადადის (D-29z1344).** Safari/iOS-ზე element შეიძლება დაიბლოკოს, მაშინ როცა unlock-ილი `AudioContext` მუშაობს: fallback ხმას ნიშნავს, დასრულება კი სიჩუმეს. ეს ხურავს sketch-review #2-სა და GATE393-L2-NOTALLOWED-ს.
+ 
++### Stage 3: D-29z1352 (ხუთი გადაწყვეტილება)
++
++1. **Purchased adapter-ის `previewUrl`.** `createPurchasedWorkspaceCollection` აბრუნებს `previewUrl: (source) => stemUrls.get(source.id) ?? null` — იმავე `stemUrls` Map-იდან, რომელსაც `loadSource` იყენებს. Provider-ი უკვე იძახებს `collection.previewUrl?.(source)`-ს, ამიტომ ნაყიდი stem demo URL-ის მსგავსად stream-დება და provider-ი (`ArrangementContext.tsx`) უცვლელია.
++2. **Seek-ის გასაღები ისევ URL-ია (A-R393-REVIEW-L6 დაიხურა).** Map ერთხელ იქმნება, ამიტომ `previewUrl` ერთ source-ზე collection-ის მთელი სიცოცხლის განმავლობაში ერთსა და იმავე string-ს აბრუნებს (PV2), და player-ის same-URL შემოწმება სტაბილური გასაღებია. Stage 1-ის ვარაუდი — "ყოველ გამოძახებაზე ახალი signed URL" — ამით შესწორდა: signed URL-ის მომავალი განახლება ახალ collection ობიექტს უნდა ქმნიდეს, რომელიც fallback-საც ანულებს (პუნქტი 3), ამიტომ URL-ების შედარება უსაფრთხოდ ჩავარდება.
++3. **Fallback-ის სიცოცხლე = collection ობიექტი (GATE393-L4).** Timer არ არის. "Stream ჩავარდა → decode" სია collection ობიექტზეა მიბმული; ახალი collection იგივე source-ს ისევ stream-ით უკრავს (PS27).
++4. **Cache-ის warm არ ხდება (SIG-R393-PREVIEW-NO-CACHE-WARM).** Stream-გზა decoded cache-ს, pin-ს და stem cache-ს არ წერს. Stall ან abort fallback ჩვეულებრივ decode-გზას მიჰყვება, უცვლელად; purchased source-ებიც ასევე.
++5. **`crossOrigin = 'anonymous'` stream element-ზე (TL-B395-SKETCH-M2-CROSSORIGIN).** `playLibraryPreviewStream`-ში `createAudioElement()`-ის შემდეგ და `src`-მდე. Element ახლა URL-ს CORS რეჟიმში ითხოვს (credentials mode `same-origin`): cross-origin signed stem URL-ზე cookie-ები არ იგზავნება, ისევე როგორც decode fetch-ის `credentials: 'omit'`-ის დროს; same-origin demo URL-ზე ეს ორი რეჟიმი განსხვავდება. Same-origin demo-სთვის არაფერი იცვლება (B-ის browser probe `tmp/studio-real-loop/b-round-395/probe/rows-R8.json`). Cross-origin asset host-ს ახლა stream-ისთვისაც CORS header-ები სჭირდება; decode fetch-ს ისინი ისედაც სჭირდება, ხოლო header-ის არქონა stream error-ად და შემდეგ decode fallback-ად იქცევა, რომელიც დღევანდელივით ჩავარდება.
++
++**Purchased-ის browser ნაწილი BLOCKED: "no mount point: SRW-21 deferred_user".** `createPurchasedWorkspaceCollection`-ს ტესტების გარდა გამომძახებელი არ ჰყავს (`app/**`, `perf/**`, `e2e/**`); purchased route-ის mount SRW-21-ია, რომელიც მომხმარებელმა გადადო. ამ ნაწილს unit row-ები PV1/PV2 და provider-ის row-ები PS6–PS14 ფარავს (ისინი ნებისმიერ `previewUrl`-ზე მუშაობს).
++
++**Perf harness-ის row-ები (assert).** `perf/studio-lab-resources.perf.spec.ts`-ში "pcm ready"-ის შემდეგ ემატება მხოლოდ 1×-ის ნაბიჯი `a2`: library Preview default selection-ზე (Middle East), ლოდინი, სანამ media element ≥ 1 s-ზე უკრავს (15 s), live PCM GC ×2-ის შემდეგ, შემდეგ Stop და `Preview` label-ის ლოდინი. `HTMLMediaElement.prototype.play` გვერდში ეხვევა და `finally`-ში აღდგება. სამი row:
++- `res.harness.preview-stream-playing` ≥ 1 — liveness guard, რომ stall-მა მეხსიერების row-ები ცრუდ არ გაატაროს;
++- `res.mem.pcm-live-preview-delta-mib` ≤ 0;
++- `res.mem.pcm-live-preview-decode-count` ≤ 0.
++
++B-ის production sketch-ზე: 1 / 0 / 0 (`tmp/studio-real-loop/b-round-395/perf-sketch.log`). მუტანტი MU-396-DEMO-NO-STREAM (demo-ს `previewUrl` → `null`) სამივეზე წითელია: 0 / 37.1 / 1 (`tmp/studio-real-loop/b-round-395/mutants/perf-MU-396-DEMO-NO-STREAM.log`).
++
++**Low-ები (D-29z1353, D-29z1354).** A-R395-REVIEW-L2-THROW-WHILE-ARMED დაიხურა row PS28-ით. B-R395-DOC248-STATUS: doc 248-ის სტატუსის ხაზი `Completed (C round 392 PASS)`-ზე გასწორდა.
++
++**Status line-ზე** ეს ეტაპი არაფერს წერს.
++
+ ## არქიტექტურა
+ 
+ ```mermaid
+@@ -131,6 +156,15 @@ Stage 2-ის შესწორება (round 395):
+ - `app/lib/arrangement/preview.client.ts` — `ActiveStreamPreview.restartArmedStall`, `handleProgress` → `restartArmedStall`, მისი გამოძახება same-URL seek-ის `try`-ში.
+ - `app/lib/arrangement/__tests__/library-preview-stream.test.tsx` — PS25, PS26 და PS22-ის ორი დამატებითი assert.
+ 
++Stage 3 (round 396):
++- `app/lib/arrangement/collection.ts` — purchased adapter-ის `previewUrl`.
++- `app/lib/arrangement/preview.client.ts` — `element.crossOrigin = 'anonymous'`.
++- `app/lib/arrangement/__tests__/collection.test.ts` — PV1, PV2 ახალ describe-ში.
++- `app/lib/arrangement/__tests__/library-preview-stream.test.tsx` — PS27, PS28, PS29; PS1–PS26 უცვლელია.
++- `perf/studio-lab-resources.perf.spec.ts` — ნაბიჯი `a2` (`measurePreviewStream`, `runPreviewStream`).
++- `perf/budgets.resources.json` — სამი ახალი assert row.
++- `docs/implementation/2026/quarter-IV/248-perf-decoded-buffer-cache.md` — მხოლოდ სტატუსის ხაზი.
++
+ ## პრობლემები და გადაწყვეტები
+ 
+ - **პრობლემა:** B-ის sketch-ის ტესტები type assertion-ებს (`as unknown as`) იყენებდა, რაც პროექტის წესით აკრძალულია. **გადაწყვეტა:** player-ის ტესტებში `AudioContext`/`AudioBuffer` global stub-ით იქმნება (`new AudioContext()` სწორ ტიპს იძლევა), element-ები რეალური jsdom `<audio>`-ია, `play`/`pause`/`load` კი `HTMLMediaElement.prototype`-ზე spy-ით ითვლება.
+@@ -141,6 +175,8 @@ Stage 2-ის შესწორება (round 395):
+ - **პრობლემა:** jsdom-ში `element.error` `undefined`-ია, `null` არა. **გადაწყვეტა:** pause guard `!element.error`-ს იყენებს.
+ - **პრობლემა (C-R394-01, round 394 C FAIL):** stall-ის დროს `playing`-მდე waveform click-ი (same-URL seek) `currentTime`-ს გადაწევდა, watchdog ვადის ამოწურვისას "გადაწეულ დროს" ხედავდა და preview `Stop`-ზე სამუდამოდ რჩებოდა. **გადაწყვეტა (round 395):** seek ჩართულ timer-ს თავიდან იწყებს ახალი დროიდან. B-ის sketch-ზე (`tmp/studio-real-loop/b-round-394/probe/rows-R1b.json`) fallback seek-იდან 8296 ms (1440×900) და 8300 ms (1280×720) შემდეგ მოხდა; seek-ის შემდეგ დრო 4.99 იყო და უცვლელი დარჩა.
+ - **ცნობილი ხარვეზი (არ გამოსწორებულა):** stream, რომელიც byte-ებს გამუდმებით აწვდის (`progress` timer-ს თავიდან იწყებს), მაგრამ `playing`-მდე ვერ მიდის, watchdog-ს ვერ ააქტიურებს. დაზიანებული data `error`-ით მთავრდება, პათოლოგიური "წვეთოვანი" კავშირი კი არა. ამ მდგომარეობაში seek-იც timer-ს თავიდან იწყებს; ეს ხარვეზს არ აფართოებს.
++- **პრობლემა (stage 3):** stream element-ი credential-ებით ითხოვდა URL-ს, decode fetch კი მათ გარეშე (TL-B395-SKETCH-M2-CROSSORIGIN). **გადაწყვეტა:** `crossOrigin = 'anonymous'` `src`-მდე; PS29 და მუტანტი MU-396-NO-CROSSORIGIN. Code-review-ის შემდეგ PS29 `src`-ის მინიჭების მომენტშიც ამოწმებს attribute-ს; მუტანტი MU-A396-CROSSORIGIN-AFTER-SRC (`crossOrigin` `src`-ის შემდეგ) PS29-ს აწითლებს.
++- **პრობლემა (stage 3):** perf-ის მეხსიერების row-ები stall-ზეც გაივლიდა (preview რომ არ უკრავს, PCM-იც არ იზრდება). **გადაწყვეტა:** liveness guard `res.harness.preview-stream-playing`.
+ 
+ ## ტესტირება
+ 
+@@ -171,9 +207,17 @@ Stage 2-ის შესწორება (round 395):
+ - სამი ახალი მუტანტი (`MU-395-SEEK-NO-REARM` → PS25, `MU-395-SEEK-ARMS-ALWAYS` → PS19, `MU-395-PAUSE-LISTENER-LEFT` → PS26) და 12 `MU-394-*` წითელია, pristine მწვანეა; covering set (14 ფაილი, 258 ტესტი) მწვანეა. ლოგები `tmp/studio-real-loop/a-round-395/`-შია.
+ - Browser-ში bug-ის row R1b (HOLD route, Preview, 3.5 წამში waveform click → fallback) და R1–R7-ის განმეორება C-ის round 395-ის ნაწილია. PS26 (listener-ების მოხსნა) მხოლოდ jsdom-ში მოწმდება.
+ 
++**Stage 3 (round 396):**
++- `collection.test.ts`, describe "PERF-13c-ii-b purchased adapter previewUrl (D-29z1352)": PV1 (4 stem-იანი purchased collection: `previewUrl` ფუნქციაა, დალაგებულ თითო source-ზე თავისი stem-ის URL-ს აბრუნებს, უცნობზე `null`-ს, `fetchAudio` არ იძახება), PV2 (drums-ის URL ორჯერ წაკითხვისას ერთი და იგივეა, შემავალი stem-ის `audioUrl`-ის შეცვლა მას არ სწვდება).
++- `library-preview-stream.test.tsx`: PS27 (stream error → fallback ახსოვს; ახალ collection ობიექტზე იგივე source ისევ stream-დება, 0 pending decode), PS28 (`playing`-მდე armed stream-ზე same-URL seek-ის `currentTime` throw: throw არ ვრცელდება, `onError(3)` ერთხელ, 0 pending timer, `src` არ არის, offset `null`), PS29 (element-ის `crossorigin` attribute `anonymous`-ია უკვე `src`-ის მინიჭებისას, `src` = URL). PS1–PS26 უცვლელია.
++- მუტანტები, თითოეული წითელი: MU-396-PURCHASED-NO-PREVIEW → PV1, PV2; MU-396-PREVIEW-LIVE-INPUT → PV2; MU-396-UNKNOWN-NOT-NULL → PV1; MU-396-FALLBACK-ANY-COLLECTION → PS27; MU-394-SYNC-THROW-SEEK → PS23, PS28; MU-396-NO-CROSSORIGIN → PS29; MU-A396-CROSSORIGIN-AFTER-SRC → PS29; MU-394-STALL-SURVIVES-STOP → PS19, PS22, PS28. Pristine მწვანეა; covering set (19 ფაილი, 314 ტესტი) მწვანეა. ლოგები `tmp/studio-real-loop/a-round-396/`-შია.
++- Perf row-ები და MU-396-DEMO-NO-STREAM — იხ. მიდგომა, stage 3. Browser-ში `crossOrigin` (R8) და R1–R7, R1b-ის განმეორება C-ის round 396-ის ნაწილია; PV1, PV2, PS27, PS28 მხოლოდ jsdom-ში მოწმდება.
++
+ ## TODO / შემდეგი ნაბიჯები
+ 
+-- **Stage 3 = PERF-13c-ii-b:** purchased adapter-ის `previewUrl` (ყოველ გამოძახებაზე ახალი signed URL; browser ნაწილი cloud-ში backend-ის გარეშე BLOCKED), seek-ის სტაბილური გასაღები (source id URL-ის ნაცვლად), fallback სიის ვადის გასვლა, perf harness-ის preview row და stem-cache-ის warm-ის გადაწყვეტა (SIG-R393-PREVIEW-NO-CACHE-WARM).
++- ~~**Stage 3 = PERF-13c-ii-b**~~ — შესრულდა round 396-ში (D-29z1352): purchased `previewUrl`, seek-ის გასაღებად URL რჩება (ვარაუდი "ყოველ გამოძახებაზე ახალი signed URL" არასწორი იყო: URL collection-ის სიცოცხლეში სტაბილურია, განახლება ახალ collection-ს ქმნის), fallback collection ობიექტზეა მიბმული, perf-ის preview row-ები, cache warm არ ხდება.
++- Architecture checkpoint ARCH-CHECKPOINT-PREVIEW-AFTER-13C (root-ის მოთხოვნა `tmp/studio-real-loop/b-round-393/root-request-arch-checkpoint-preview.md`) — PERF-13c-ის დასრულების შემდეგ root-ი უშვებს.
++- TL-B395-SRW21-MEMO-ADAPTER: SRW-21-ის mount-ისას purchased adapter-ი memoise-ებული უნდა იყოს, რომ ყოველ render-ზე ახალი collection ობიექტი (და ახალი fallback) არ შეიქმნას — SRW-21-PLAN-ის შესატანი.
+ - "წვეთოვანი" stream-ის ხარვეზი (`progress` გამუდმებით, `playing` არასდროს): ჩაწერილია, ჯერ არ არის დაგეგმილი.
+ - A-R392-REVIEW-M1 და collection-ის შეცვლისას stream-ის გაჩერება — SRW-21-PLAN-ის row-ები (დღეს მიუწვდომელია: ერთი provider mount, მუდმივი collection).
+ - `decideDecodeSettle`-ის `lib/arrangement`-ში გადატანა — კანდიდატი PERF-13c-ის შემდეგ, root-ის თანხმობით.
+diff --git a/perf/budgets.resources.json b/perf/budgets.resources.json
+index 603263f..630634f 100644
+--- a/perf/budgets.resources.json
++++ b/perf/budgets.resources.json
+@@ -71,6 +71,48 @@
+     "owner": "PERF-13b",
+     "note": "1× only. The 'decode' part of res.mem.pcm-live-mib-ready (decodeAudioData results; the decode probe excluded) (MiB, 0.1). Budget 0: at ready no decoded file stays alive (both demo MP3 buffers evicted, PERF-13b-i). PERF-13b-ii flip (D-29z1324): B's production sketch 0 ×3; mutant MU-391-NOTHING-EVICTABLE red, b-round-390/mutants/."
+   },
++  {
++    "id": "res.harness.preview-stream-playing",
++    "scenario": "ready, library Preview of the selected URL source (Middle East)",
++    "metric": "preview-stream-playing",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": ">=",
++      "value": 1
++    },
++    "owner": "PERF-13c-ii-b",
++    "note": "1x only. Liveness guard for the two preview rows: media elements (HTMLMediaElement.prototype.play wrapped in the page) that are not paused and at currentTime >= 1 s within 15 s of the Preview click. 0 means the preview did not stream (decode path, or a stall), so the memory rows below say nothing. B sketch: b-round-395/perf-sketch.log; red on MU-396-DEMO-NO-STREAM."
++  },
++  {
++    "id": "res.mem.pcm-live-preview-delta-mib",
++    "scenario": "ready, library Preview streaming (>= 1 s), after HeapProfiler.collectGarbage x2",
++    "metric": "pcm-live-preview-delta-mib",
++    "unit": "MiB",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 0
++    },
++    "owner": "PERF-13c-ii-b",
++    "note": "1x only. Live decoded PCM while the preview streams minus res.mem.pcm-live-mib-ready (MiB, 0.1; perf/lib/pcm-live.ts). A streamed preview decodes nothing (PERF-13c). B sketch: b-round-395/perf-sketch.log; red on MU-396-DEMO-NO-STREAM (the decode path holds the whole file)."
++  },
++  {
++    "id": "res.mem.pcm-live-preview-decode-count",
++    "scenario": "ready, library Preview streaming (>= 1 s), after HeapProfiler.collectGarbage x2",
++    "metric": "pcm-live-preview-decode-count",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 0
++    },
++    "owner": "PERF-13c-ii-b",
++    "note": "1x only. Live decodeAudioData results (the decode probe excluded) while the preview streams. B sketch: b-round-395/perf-sketch.log; red on MU-396-DEMO-NO-STREAM."
++  },
+   {
+     "id": "res.mem.pcm-live-mib-after-add",
+     "scenario": "after the first library Add has settled and its source is decoded again, after GC ×2",
+diff --git a/perf/studio-lab-resources.perf.spec.ts b/perf/studio-lab-resources.perf.spec.ts
+index cfec194..5329168 100644
+--- a/perf/studio-lab-resources.perf.spec.ts
++++ b/perf/studio-lab-resources.perf.spec.ts
+@@ -37,6 +37,7 @@ import {
+   waitForStudioQuiet,
+ } from './lib/page';
+ import {
++  classifyPcmProbe,
+   installPcmLiveRegistry,
+   pcmLiveProblems,
+   pcmProbeShapes,
+@@ -69,6 +70,7 @@ const pathTimeoutMs = 30000;
+ const observerSettleMs = 200;
+ const passGuardMs = 8 * 60 * 1000;
+ const pcmAfterAddDecodeTimeoutMs = 15000;
++const previewStreamTimeoutMs = 15000;
+ const clockProbeCount = 5;
+ const clockProbeMaxRttMs = 20;
+ const expectedWavName = 'czaba-studio-lab.wav';
+@@ -86,6 +88,7 @@ const jsRoutes = [
+ 
+ const resourceSequence = [
+   'a. /studio-lab -> ready (library Add enabled and the preview waveform drawn); HeapProfiler.collectGarbage, Runtime.getHeapUsage (1x: res.mem.backing-ready-mib, res.mem.used-ready-mib); 1x: res.dom.page-0',
++  'a2. 1x only: library Preview of the selected URL source (Middle East); wait until a media element plays at >= 1 s (15 s; res.harness.preview-stream-playing), GC x2 (res.mem.pcm-live-preview-delta-mib, res.mem.pcm-live-preview-decode-count); Stop, wait for the Preview label',
+   'b. library Add; wait for the clip waveform and quiet (res.harness.clips-1; 1x: res.dom.page-1, res.dom.clip-subtree, res.dom.ruler-1); 1x: poll the PCM registry until the re-decoded source is live (15 s), GC x2 (res.mem.pcm-live-mib-after-add, res.mem.pcm-live-count-after-add)',
+   'CPU throttle on (6x passes), after ready and Add',
+   `c. Export -> WAV checked (default) -> Export WAV; window from the click to the "${perfWavDoneName}" text; heap polled every 50 ms; download header checked; Done (res.export.1.*, res.harness.export-1-produced, res.harness.mem-polls-1)`,
+@@ -523,6 +526,88 @@ async function newResourceContext(browser: Browser): Promise<BrowserContext> {
+   return context;
+ }
+ 
++declare global {
++  interface Window {
++    __czabaPreviewMedia?: HTMLMediaElement[];
++    __czabaPreviewRestore?: () => void;
++  }
++}
++
++async function measurePreviewStream(
++  page: Page,
++  cdp: CDPSession,
++  pcmReadyBytes: number,
++  result: ResourcePassResult,
++): Promise<void> {
++  await page.evaluate(() => {
++    const elements: HTMLMediaElement[] = [];
++    window.__czabaPreviewMedia = elements;
++    const nativePlay = HTMLMediaElement.prototype.play;
++    window.__czabaPreviewRestore = () => {
++      HTMLMediaElement.prototype.play = nativePlay;
++      window.__czabaPreviewMedia = undefined;
++      window.__czabaPreviewRestore = undefined;
++    };
++    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement): Promise<void> {
++      if (!elements.includes(this)) elements.push(this);
++      return nativePlay.call(this);
++    };
++  });
++  try {
++    await runPreviewStream(page, cdp, pcmReadyBytes, result);
++  } finally {
++    await page.evaluate(() => window.__czabaPreviewRestore?.());
++  }
++}
++
++async function runPreviewStream(
++  page: Page,
++  cdp: CDPSession,
++  pcmReadyBytes: number,
++  result: ResourcePassResult,
++): Promise<void> {
++  const toggle = page.getByTestId('arrangement-library-preview-toggle');
++  await toggle.click();
++  const playing = await page
++    .waitForFunction(
++      () =>
++        (window.__czabaPreviewMedia ?? []).some(
++          (element) => !element.paused && element.currentTime >= 1,
++        ),
++      null,
++      { timeout: previewStreamTimeoutMs },
++    )
++    .then(() => true)
++    .catch(() => false);
++  const streaming = await page.evaluate(
++    () =>
++      (window.__czabaPreviewMedia ?? []).filter(
++        (element) => !element.paused && element.currentTime >= 1,
++      ).length,
++  );
++  result.samples.set('res.harness.preview-stream-playing', { value: streaming });
++  if (!playing) {
++    result.problems.push(
++      `preview stream: no media element playing at >= 1 s within ${previewStreamTimeoutMs} ms`,
++    );
++  }
++  const reading = await readPcmLiveAfterGc(cdp, page);
++  const summary = summarizePcmLive(reading.entries);
++  result.samples.set('res.mem.pcm-live-preview-delta-mib', {
++    value: toMebibytes(summary.bytes - pcmReadyBytes),
++  });
++  result.samples.set('res.mem.pcm-live-preview-decode-count', {
++    value: reading.entries.filter(
++      (entry) => entry.origin === 'decode' && classifyPcmProbe(entry) === null,
++    ).length,
++  });
++  if ((await toggle.textContent())?.trim() === studioLibraryPanelStrings.previewStop) {
++    await toggle.click();
++  }
++  await expect(toggle).toHaveText(studioLibraryPanelStrings.previewPlay);
++  await page.waitForTimeout(settleMs);
++}
++
+ async function runResourcePass(
+   browser: Browser,
+   cpuRate: number,
+@@ -607,6 +692,11 @@ async function runResourcePass(
+       });
+     }
+ 
++    if (record && pcmReadyBytes !== null) {
++      beginStep('preview stream');
++      await measurePreviewStream(page, cdp, pcmReadyBytes, result);
++    }
++
+     beginStep('library Add');
+     const addStart = await nowIn(page);
+     await page.getByRole('button', { name: perfLibraryAddLabel, exact: true }).click();
