@@ -1,0 +1,83 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "G389-AUTH",
+  "R389-SCHED-FAIL",
+  "R389-RESYNC-METER",
+  "R389-EDIT-THROW",
+  "R389-DECODE-CACHE",
+  "R389-WAV-STREAM",
+  "R389-LEAVES",
+  "R389-STATUS",
+  "R389-LAZY",
+  "R389-STEM-CACHE",
+  "R389-RANGE-BG",
+  "R389-SELECT-TRANSPORT",
+  "R389-PLAY-STORE",
+  "R389-VIDEO-DRAG",
+  "R389-FADERS-ICONS",
+  "R389-GROUP-MOVE",
+  "R389-JOURNEY",
+  "RR-PERF",
+  "PERF-LIB",
+  "RG-SMOKE"
+ ],
+ "failed": [],
+ "blocked": [
+  "G389-AUTH fake Bearer token: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "notes": [
+  "R389-STATUS: Esc does not cancel a clip drag; known and ruled earlier (C-R85-L1 low, ESCAPE-CANCEL-GESTURE info; round 338 'Esc no-cancel as HEAD'). Not a regression",
+  "R389-JOURNEY: one continuous flow to Space/Stop and View in store; WAV export proven by R389-WAV-STREAM, not spliced into the journey (labelled deviation)",
+  "R389-WAV-STREAM: 3-clip export dialog showed 00:00.000-00:48.000, sha equal twice (1440); length/format parsed on the 2-clip 32 s export at both viewports",
+  "R389-LAZY: no route-level fade on /studio-lab; 4 frames of one IMG at opacity 0.95-0.97 (~40 ms) seen on /studio-lab, home route fades as before",
+  "R389-GROUP-MOVE: collapsed variant moves + Undo 'Move (2)'; Stems-folded overview bar shifts after the move (weak check, bars located by geometry)"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T12:44:02.1482250Z",
+  "round": 389,
+  "attempt": 1,
+  "store": 200
+ },
+ "harness": {
+  "tools": "c-round-389/tools",
+  "viewports": [
+   "1440x900",
+   "1280x720"
+  ],
+  "dev": "http://127.0.0.1:5173",
+  "perfServer": "remix-serve prod build"
+ },
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": null,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "l57Note": "REGRESSION round: no sketch, no A change; all 12 L57 fields are null (not applicable). claims-389.sh equal at planning and at end (K1..K10).",
+ "lookups": [
+  "master.mjs :5180 removed (round 375 compared two servers)",
+  "library option regex /Night Pulse \u00b7 Pulse/ -> /Pulse/",
+  "narrow-state status text no longer repeats the Tempo sentence",
+  "journey rebuilt from round 300 journey.cjs (round 340 script not found) with Enter/Space/Stop steps added",
+  "resync-meter derived from meter-freeze (busy-wait + second clock read); m1b extends resync-throw with clip/undo fields",
+  "cache.mjs needs the /studio-lab URL as base",
+  "heap and export-trunc served from the prod build on :5189/:5190, stopped after"
+ ]
+}

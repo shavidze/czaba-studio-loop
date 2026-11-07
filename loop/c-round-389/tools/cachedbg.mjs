@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const ctx = await chromium.launchPersistentContext('/tmp/c389prof', { viewport: { width: 1440, height: 900 } });
+const page = ctx.pages()[0] ?? await ctx.newPage(); const logs=[]; page.on('console',m=>logs.push(m.type()+' '+m.text().slice(0,140))); page.on('pageerror',e=>logs.push('PE '+String(e).slice(0,200)));
+await page.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'load'}); 
+await page.waitForTimeout(15000);
+console.log((await page.evaluate(()=>document.body.innerText.match(/Demo collection[^\n]*|[^\n]*failed[^\n]*/g))));
+console.log(await page.title(), logs.slice(0,10));
+await page.screenshot({path:'screens/cachedbg.png'}); await ctx.close();
