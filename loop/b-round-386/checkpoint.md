@@ -1,0 +1,14 @@
+# B round 386 -> 387 checkpoint
+- archived tasks/round-386.md (copied)
+- next: GATE-B385-M2 (+A-R386-REVIEW-M1 + unguarded startGraph callers); regression due 2026-11-08
+- step 1: HEAD browser repro (probe/m2-head-*.json)
+- step 1 DONE: HEAD repro probe/m2-head-1440.json, m2-head-1280.json (thrown 1, 2 pageerrors per throw, leaked 1 -> 2, position jumps 00:02.0 on Space, 3rd Play toggles stop)
+- step 2 DONE: sketch at /tmp/b386-scratch (graph.client rollback + startGraphOrStop/stopForScheduleFailure; queueMicrotask status), new tests apply-schedule-rollback.test.ts AR1-5, schedule-failure-ui.test.tsx SF1-6, 11/11 pass
+- next: covering + full suite on sketch, mutants, browser sketch probe on :5175, tech-lead review, artifacts
+- step 3 DONE: precheck-full 257/3783 green; 12 mutants red; flow-sketch/head both viewports; export identical; claims-387 HEAD+sketch; grants/frozen(1279); tech-lead review running (background)
+- INFO: c-round-386.json L57 absent 5 fields (l57-c386.txt)
+- next: write sketch-review.md from tech-lead, then current-task.md, backlog v354, feature-status, b-round-386.md, b-next.json
+- step 4 DONE: backlog v354, feature-status, b-round-386.md draft, b-next.json written; current-task.md + sketch-review.md pending tech-lead result
+- step 5: tech-lead found TL-R387-M1 + L1-L6; fixed M1,L1,L2,L4,L5,L6 in sketch v2 (sha a9f22614); 15/15 mutants red; full 257/3787; browser flow + m1 neighbour on sketch; export identical; delta review running; task text updated to v2
+- step 6 DONE: delta review OK; sketch-review.md; claims rerun 0 MISSING; b-round-386.md updated; sketch server stopped; store clean
+- step 7 DONE: advisor final fixes applied (feature-status v2 numbers, L31 table, CLAIMS deltas, b-next TL-R387-M1). Planning complete.

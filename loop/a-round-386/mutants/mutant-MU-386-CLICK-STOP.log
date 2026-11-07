@@ -1,0 +1,28 @@
+applied MU-386-CLICK-STOP
+ ✓ app/lib/arrangement/__tests__/peaks-worker-video.test.tsx (2 tests) 86ms
+     ✓ EV1: after load the evictable buffer is gone, the other stays, and both stay ready 74ms
+     ✓ EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight 64ms
+     ✓ EV3: Play is refused while the placed source decodes, and starts once it settles 55ms
+     ✓ EV3: while already playing, a newly placed clip joins through the resync and playback never stops 51ms
+     ✓ EV4: Undo of the place evicts the buffer again, and Redo decodes it again 58ms
+     ✓ EV5: export waits for the decode, renders with the buffer, and releases its pins 59ms
+     ✓ EV5: a cancelled export also releases its pins 57ms
+     ✓ EV5: a replaced export does not release the pins of the export that replaced it 64ms
+     ✓ EV6: a failed re-decode sets the source to error and shows the existing failure text 53ms
+     ✓ EV6: an export whose re-decode fails creates no file and shows the export failure text 52ms
+     ✓ EV9: a preview plays the re-decoded source and releases it on Stop 50ms
+     ✓ EV9: a superseded preview request does not start when its decode settles 51ms
+     ✓ EV7: a collection change deletes exactly the old collection ids, never clears, and an old decode in flight never sets 57ms
+     ✓ EV10: peaks of two sources that arrive in the same tick are both kept, each with its own array 15ms
+     ✓ EV8: a volume edit that keeps the clips array does not recompute pins 52ms
+     ✓ EV11: a resync that throws after a re-decode while playing stops playback with a status and leaks no rejection 62ms
+     ✓ EV11: an export waiting on the same re-decode still renders when the resync throws 51ms
+     ✓ EV12: a stale preview call from before a collection change decodes nothing under the new collection 56ms
+     × EV13: a preview of an evicted source keeps the timeline playing until its decode succeeds 55ms
+     × EV13: a preview whose decode fails leaves the timeline playing and shows the failure text 51ms
+     ✓ EV14: re-rendering the provider with the same collection loads nothing again and deletes no buffer 55ms
+     ✓ EV15: a resync that throws after the first load of a placed source stops playback and keeps the source ready 55ms
+ FAIL  app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV13: a preview of an evicted source keeps the timeline playing until its decode succeeds
+ FAIL  app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV13: a preview whose decode fails leaves the timeline playing and shows the failure text
+      Tests  2 failed | 22 passed (24)
+restored

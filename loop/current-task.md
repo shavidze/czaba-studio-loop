@@ -1,184 +1,212 @@
-# Round 386: decode-resync error handling. Three bugs in `ensureDecoded` / `startLibraryPreview` (GATE384-M1, A-R383-REVIEW-L1, GATE384-L2)
+# Round 387: a failed audio schedule never leaves sound running or the transport stuck (GATE-B385-M2, A-R386-REVIEW-M1, B-R386-UNGUARDED-GRAPH-CALLERS)
 
-**Planned by:** B, at the round 385 → 386 planning, 2026-11-07 (`b-round-385.md`).
+**Planned by:** B, at the round 386 → 387 planning, 2026-11-07 (`b-round-386.md`).
 
-**Decisions** (`backlog.json` v352 → v353, `decisions_log_b`):
-- **D-29z1293:** round 385 (RETRO 385) is accepted on C's evidence: C PASS, 12 rows, `browserVerified` true, 0 bugs (`c-round-385.json`). Gate 385 was `skipped` (no source change), so the **baseline stays `7295618`**.
-- **D-29z1294:** **scope.** Three tightly related bugs in the same two functions:
-  - **GATE384-M1** (Medium): unhandled rejection after a post-decode resync throws;
-  - **A-R383-REVIEW-L1** (Low): a stale `ensureDecoded` decodes under the new collection's controller;
-  - **GATE384-L2** (Low): a deferred preview stops the timeline at click time, even when its decode then fails.
+**Baseline:** HEAD `5312260` (gate 386 `published`, `gates/gate-round-386.json`), 0 status lines [K1, K2].
 
-  GATE384-L4 (Low, load-effect identity) gets no code change. It closes on this round's guard row EV14 when C passes.
-- **D-29z1295:** **the contract after a throw** (the smallest honest behaviour; rationale in §1):
-  - when the resync after a successful decode throws, playback **stops**;
-  - the status line shows `studioPlaybackStrings.scheduleFailed`;
-  - the decoded buffer stays, and the source stays `ready`;
-  - the next successful Play replaces the text with "Playing from …".
-- **D-29z1296:** the **load path** (HEAD l.4316) and the **video-audio path** (HEAD l.2848) have the same unguarded call [K3]. All three call sites go through one helper (L7: close the same root cause together). The sketch reviewer `tech-lead` raised the video path as TL-R385-M1.
-- **D-29z1297:** **GATE-B385-M2-APPLY-SCHEDULE-ROLLBACK** (Medium, pre-existing, from `tech-lead`) is ruled out of this round and scheduled as its own task. The problem: `applySchedule` is not all-or-nothing, so a throw partway through `startPlan` can leave already-started sources sounding. Accepted by the delta reviewer with that risk (`b-round-385/sketch-review.md`). TL-R385-L4, L5, L6 and L8 → `deferred_low_polish`.
+**Decisions** (`backlog.json` v353 → v354, `decisions_log_b`):
+- **D-29z1300:** round 386 is accepted on C's evidence: C PASS, 19 rows, `browserVerified` true, 0 bugs (`c-round-386.json`). GATE384-M1, A-R383-REVIEW-L1, GATE384-L2 and GATE384-L4 are closed. Gate 386 published `5312260`.
+- **D-29z1301:** **scope = three bugs with one root cause** (a throw while building the playback graph):
+  - **GATE-B385-M2** (Medium): `applySchedule` is not all-or-nothing. B reproduced it in the real browser at HEAD [K19]: when the 2nd source `start()` of a Play throws, the 1st source keeps sounding and Stop cannot stop it; each throw is an uncaught page error.
+  - **A-R386-REVIEW-M1** (Medium): a Play that throws leaves `isPlaying` true with no graph. The next press acts as Stop, and Stop jumps the clock to a stale anchor (HEAD: 00:00.000 → 00:02.011) [K19].
+  - **B-R386-UNGUARDED-GRAPH-CALLERS** (Medium, new; from A's round-386 reviewer note, ruled here): the other graph builders let the throw escape while the old graph keeps playing the old arrangement. These are `syncPlayback` (edits, loop resync), `seekTo`, `scrubPlayhead`, `endPlayheadScrub` and the audio pump's loop/metronome fill [K4, K6]. This is the silently-wrong-mix class that D-29z1295 rated Medium.
+- **D-29z1302:** **the contract after a schedule throw is the D-29z1295 contract, now applied everywhere:**
+  - playback stops and nothing keeps sounding;
+  - the status line shows `studioPlaybackStrings.scheduleFailed` (an existing string; no new text) [K7];
+  - an edit that triggered the reschedule is **kept** in history;
+  - the next successful Play replaces the text with "Playing from …" (the existing clause).
 
-- **D-29z1298:** the order after this round (§6). **D-29z1299:** the pre-existing direct-preview stop goes to Saba once as Q-PREVIEW-STOPS-TRANSPORT (L44). It is not scheduled.
+  The status write is deferred to a microtask, so the failure text is the last write of the action. Commit actions write their own status synchronously after the reschedule, and that text would otherwise hide the failure [K22].
+- **D-29z1303:** **architecture ruling** (the TL-R385-ARCH vs A-R386 build-or-stop conflict). Both are adopted, and they do not conflict:
+  - `graph.client.ts` guarantees "a throw means nothing changed" (TL-R385-ARCH);
+  - one provider-owned wrapper decides what the user sees (A's reviewer).
 
-**Why this round.** Gate 384's reviewer rated GATE384-M1 Medium. Under the bug gate, Mediums go before new PERF scope. B reproduced it in the real browser at HEAD [K23]:
-- a forced throw in the post-decode resync gives **1 `pageerror` ("injected schedule failure")**;
-- the timeline keeps playing the old graph, so the newly placed clip is silent;
-- the status does not change.
+  `resyncAfterDecode` keeps its own `catch` (round-386 contract, frozen). It is now a second line of defence.
+- **D-29z1304:** A-R386-REVIEW-L1 (`stopPlayback` inside a catch could throw on a half-built graph) closes with this round. After the rollback, no half-built graph is ever stored in `handleRef`, and `handle.stop` already catches each `source.stop` (AR3). Gate-386 suggestions S1–S5, A-R386-REVIEW-L2 and the two round-386 Architecture notes are recorded, not scheduled (`b-round-386.md` §3).
+- **D-29z1305:** **the sketch review** (`tech-lead`, `b-round-386/sketch-review.md`) found TL-R387-M1 (Medium: a failed reschedule after a time-removing edit stopped at a stale-timeline position) and L1–L6.
+  - **Fixed in the sketch:** M1, L1, L2, L4, L5 and L6, with new rows SF8, SF9 and SF10 and three new mutants.
+  - **L3** (the catch logs no diagnostic) is deferred like TL-R385-L8: the Studio has no client diagnostic channel.
+  - A delta review covered the dispatched sha.
+
+**Why this round.** GATE-B385-M2 is the only open, scheduled Medium. The regression round is due on **2026-11-08** (`regression-last.json`: 2026-11-05 + 3 days). Today is 2026-11-07, so D-29z1298 puts this bug first. The next planning opens REGRESSION-2026-11-08.
 
 **What the user notices:**
-- **Normally: nothing.**
-- **Preview while playing.** Clicking Preview on a library sound that must be decoded again while the timeline plays now keeps the timeline playing until that preview actually starts. If the decode fails, the timeline keeps playing and the existing failure text appears. Before, the timeline stopped at the click and nothing played.
-- **Resync failure.** In the rare case that scheduling fails after a decode, playback stops with a clear status instead of continuing silently.
+- **Normally: nothing.** The export is byte-identical to HEAD (B measured: `probe/export-sha256.txt`, 1 distinct hash) [K21].
+- **In the rare case that the browser refuses to schedule audio:**
+  - playback stops cleanly, and nothing keeps playing behind the user's back;
+  - the status line says "Playback stopped — the audio could not be scheduled. Press Play to try again.";
+  - Play works again. Before this round, a sound could keep playing that no button could stop, and the transport got stuck.
 
 **Read first:**
 - `lessons.md`: A reads 11, 12, 23, 26, 28, 31, 49, 51 and 58. C also reads 38, 56, 57, 59 and 60.
 - Primitives: `AUDIO_ARCHITECTURE.md`, `REACT_CONTEXT.md`, `ERROR_TAXONOMY.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, `AGENT_DISCOVERABLE_CODE.md`.
-- `b-round-385/sketch-review.md`: findings, rulings, the ordering matrix and B's browser pre-check.
+- `b-round-386/sketch-review.md`: findings, rulings and the throw-site × caller matrix.
 
 **Not applicable:**
-- **Reference-first and `product-designer`:** this is a bug round with no new feature. Live has no documented equivalent of an internal scheduling failure; no reference was searched.
-- **YouTube request:** not applicable.
-- **Screen budget (L39):** no new persistent element. `scheduleFailed` is an error-only text in the existing status line.
-
-**Reference and Deviations (L2 only; M1 and L1 have no user-facing reference).**
-- **Source:** Live 12 manual, *Working with the Browser*, "Previewing Files" (§4.9 on B's 2026-11-07 fetch; §5.9 in the 2026-10-24 capture of `user-review/ableton-review.md`), https://www.ableton.com/en/live-manual/12/working-with-the-browser/.
-- **Confirmed fact:** "By default, the Raw button is deactivated, which allows Live to preview files at the beginning of the next bar when transport is running". A preview does not stop the Arrangement transport.
-- **CZABA now:** a **direct** preview (buffer already decoded) stops timeline playback before it starts (l.1761) [K24]. That is a pre-existing difference, and this round does not touch it. It goes to Saba once as **Q-PREVIEW-STOPS-TRANSPORT** (L44; `user-review/questions-preview-transport.md`) and stays `awaiting_user`.
-- **This round:** the **deferred** path no longer stops at the click. During the decode it behaves like Live, and the final stop when the preview starts equals the direct path.
-
-## Baseline
-- **HEAD:** `7295618`, 0 status lines [K1, K2].
-- **Post-decode resync**, three direct `syncPlayback(present, undefined, true)` calls [K3]:
-  - in `ensureDecoded`'s fulfilled handler, l.1442. This is the two-argument `.then`: a throw inside `onFulfilled` is not routed to `onRejected` [K3];
-  - in video audio, l.2848 [K3];
-  - in the load effect, l.4316 [K3].
-- **The three `void` call sites** [K4]: l.927, l.1646 and l.1727.
-- **Deferred-preview click-time stop** at l.1722–1724 [K5].
-- **`collectionControllerRef`** is `AbortController | null` (l.819). It is set at l.4255 and compared at l.4260 [K6].
-- **`startPlaybackAt`'s status updater** replaces only `'stopped'`-kind text (l.1659–1663) [K7].
-- **`scheduleFailed`:** 0 hits in `app` [K8].
-- **Existing rows:** 15 `it('EV` and 1 `it('PW`; the new names have 0 hits [K9]. The ST10 literal map lists `nothingToPlay` at `strings.test.ts` l.673 [K10]. `applySchedule` is imported in the context (l.63) [K11].
-- **Timeout headroom (L31), at gate 384** [K12]:
-  - eviction file: 15 tests, 1522 ms;
-  - `peaks-worker-video`: 1 test, 89 ms;
-  - `strings.test.ts`: 64 tests, 171 ms.
-
-  No per-test timeout is declared, so the vitest default applies. All are far below 50 %.
-- **Manifests:**
-  - frozen: `b-round-385/r386-frozen-sha256.txt`, 1,275 entries (every tracked and untracked file except the 6 grants), rc 0 [K16];
-  - protected: `b-round-318/protected-sha256.txt`, rc 0 [K15].
-- **Sketch:** `b-round-385/sketch-386.patch.txt`, sha256 `1cada6c7…a01ae` [K13]. It applies cleanly to HEAD [K14].
+- **Reference-first, `product-designer`, YouTube:** a bug round with no new feature. Live has no documented equivalent of an internal scheduling failure; no reference was searched.
+- **Screen budget (L39):** no new persistent element. `scheduleFailed` is an existing error-only text in the existing status line.
 
 ## 1. Behaviour that must not change
-- **EV1–EV10 and PW19:** the round-382/383 contracts stay unchanged. EV1–EV10 are every existing eviction row:
-  - eviction;
-  - single re-decode;
-  - Play refusal during a decode;
-  - join-while-playing;
-  - Undo/Redo;
-  - export pins (complete, cancel, replace);
-  - failure text;
-  - preview and supersede;
-  - collection reset with `deleteMany`;
-  - peaks arrival.
-- **Unchanged code paths:**
-  - a decode that **rejects** still sets the source to `error` with the existing text;
-  - an export whose decode **fails** still creates no file;
-  - a **direct** preview (buffer already decoded) still stops timeline playback before it starts (l.1761) [K24];
-  - Play during a decode is still refused with the existing text (GATE384-L3 stays a deferred product question).
-- **Purchase protection:** unchanged. No protected file is touched (K15).
-- **Why stop rather than continue (D-29z1295).** B measured HEAD: the throw happens in `applySchedule` before the handle swap, so the old graph keeps playing **without the new clip**. Continuing would make the mix silently wrong; stopping with a status is the honest, smallest state. The status text is an existing-line error message, not a new persistent element.
+- **Happy-path audio.** Every node is created, connected and started in the same order as at HEAD. The only reorder is `trackGains.set`/`panners.set` before their `connect` calls, which has no observable effect. The export of the round-386 C recipe (Pulse + Bass stems, WAV 24-bit) is **byte-identical** to HEAD [K21].
+- **Round-386 contracts:**
+  - EV1–EV15 and PW19/PW20 pass unchanged;
+  - `resyncAfterDecode` still has its `try`/`catch` [K9];
+  - the direct-preview stop is unchanged (Q-PREVIEW-STOPS-TRANSPORT stays `awaiting_user`).
+- **Meter taps.** The cached master tap and the track taps passed in as `tap`/`trackTaps` are never disconnected by a rollback; only the nodes `applySchedule` created are (AR1, AR4).
+- **Purchase protection:** unchanged. No protected file is touched [K15].
+- **L49, side effects of the replaced direct calls.** `startGraph` itself is unchanged: the wrapper calls it, so every side effect stays. In `startPlaybackAt` the effects before the build are:
+  - `stopLibraryPreview` and `playbackEndedAtRef = null`: kept;
+  - `isPlaying`/store true, the status updater, `updatePosition(from)` and `meterFreshFromRef`: undone or overwritten by `stopPlayback(from)` and the failure status on a throw (SF1, SF2);
+  - the rAF tick and audio pump: **not started** on a throw (the early `return`; mutant MU-387-PLAY-NO-GUARD).
+- **L51: what the failure text overwrites and what replaces it.**
+  - **Overwrites:** "Playing from …" (Play), the action's own text after an edit (e.g. "“One” added to the Music track …"), and scrub or seek texts.
+  - **Replaced by:** the next successful Play (the existing `startPlaybackAt` clause, SF2), any later action's status, and later async settles (TL-R385-L4, accepted).
+  - **Rows:** SF2 (a repeated failing Play keeps the text, a clean Play replaces it) and SF3 (an edit's own text does not hide the failure).
+- **Position after a failure** (rows in brackets):
+  - Play: stays at the start point (SF1, not the stale anchor);
+  - seek: the seek target (SF4);
+  - scrub and scrub end: the scrub point (SF5, SF7);
+  - edit: the position remapped into the new timeline (SF8);
+  - loop and pump: the live position of the graph that was playing.
 
-## 2. What A changes (grants: `b-round-385/grants-386.txt`, 6 paths)
-**Apply the reviewed sketch verbatim:** from `store/`, run `git apply ../tmp/studio-real-loop/b-round-385/sketch-386.patch.txt`. Reviewed = dispatched (L58): A changes no line of those five files beyond the patch. If a check fails, A writes **STOP** (L11) and does not improvise. The patch contains:
-1. **`app/contexts/ArrangementContext.tsx`:**
-   - **`resyncAfterDecode(sourceId)`.** A `useCallback` with deps `[setStatus, stopPlayback, syncPlayback]`. It returns if no clip uses `sourceId`. Otherwise it calls `syncPlayback(present, undefined, true)` in `try`; the `catch` calls `stopPlayback()` and `setStatus(studioPlaybackStrings.scheduleFailed)`.
-   - **Three call sites use the helper:** `ensureDecoded` (after `decodedBuffers.has(id)`), video audio and the load effect. The deps of `ensureDecoded`, `decodeVideoSourceAudio` and the load effect swap `syncPlayback` for `resyncAfterDecode`.
-   - **Owner guard (L1).** `collectionControllerRef` holds `{ collection, controller }`. `ensureDecoded` uses the controller only when `owner.collection === collection`; otherwise it decodes nothing. The reset compares `.controller`.
-   - **L2.** The deferred branch of `startLibraryPreview` no longer calls `stopPlayback()` at click time.
-   - **Replay status.** The `startPlaybackAt` status updater also replaces the text when it equals `scheduleFailed`.
-2. **`app/lib/arrangement/strings.ts`:** `studioPlaybackStrings.scheduleFailed = 'Playback stopped — the audio could not be scheduled. Press Play to try again.'`
-3. **`app/lib/arrangement/__tests__/strings.test.ts`:** the ST10 expected map gains that literal (an L23 grant: ST10 pins every plain string) [K10].
-4. **`app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx`:**
-   - `applySchedule` spied through the existing `graph.client` mock, with `mockReset()` in `beforeEach`;
-   - **EV11** ×2: a throw while playing → 0 unhandled rejections, stopped, status, `ready`, buffer kept, and replay "Playing from"; an export joined to the same decode still renders;
-   - **EV12:** a stale preview after a collection change → no load, no entry;
-   - **EV13** ×2: the timeline keeps playing during the preview decode; a failed decode keeps it playing and shows the failure text;
-   - **EV14:** a same-collection re-render → no reload, no `deleteMany`;
-   - **EV15:** a load-path throw.
-5. **`app/lib/arrangement/__tests__/peaks-worker-video.test.tsx`:** **PW20**, a video-audio resync throw → no window error, stopped, status, audio `ready`. The applied throw is proved by the call count.
-6. **New doc `docs/implementation/2026/quarter-IV/249-decode-resync-errors.md`** (number free [K19]), in Georgian, with the TEMPLATE headings in order (L26):
-   - l.4 byte for byte: `**სტატუსი:** Completed (C round 386 PASS)` (L28);
-   - Problem → Solution for M1, L1 and L2, plus the video and load paths;
-   - the D-29z1295 contract;
-   - the follow-up GATE-B385-M2;
-   - each EV/PW/MU id it names exists.
+## 2. What A changes (grants: `b-round-386/grants-387.txt`, 5 paths)
+**Apply the reviewed sketch verbatim:** from `store/`, run `git apply ../tmp/studio-real-loop/b-round-386/sketch-387.patch.txt` (sha256 `a9f22614…6486` [K13]; `--check` rc 0 at HEAD [K14]). Reviewed = dispatched (L58): A changes no line of the four files beyond the patch. If a check fails, A writes **STOP** (L11) and does not improvise. The patch contains:
+1. **`app/lib/arrangement/graph.client.ts`:**
+   - `applySchedule` builds inside one `try`. On a throw it calls `stop()` on every clip and click source whose `start()` returned (sources are recorded only after `start`). It then disconnects every node it created through `releaseNodes()`, which `handle.disconnect()` now shares, and rethrows the **same** error.
+   - Inside `startPlan`, a failing `start()` disconnects that item's own chain before rethrowing. This also covers `appendPlan` on a live handle (AR5).
+   - `startClicks` does the same for a click whose `start()` throws (TL-R387-L2, AR2).
+2. **`app/contexts/ArrangementContext.tsx`:**
+   - `stopForScheduleFailure(stopAt?)` = `stopPlayback(stopAt)` + a microtask that writes `scheduleFailed` only if playback has not been restarted in the meantime (SF10). One Georgian-context comment explains why the write is deferred (an allowed comment under the project rules).
+   - `resyncAfterDecode`'s `catch` also calls `stopForScheduleFailure()` (TL-R387-L1).
+   - `startGraphOrStop(arrangement, anchor, stopAt?)`: `boolean`.
+   - **Used by:**
+     - `syncPlayback`, the only direct `startGraph` call left, with `stopAt` = `positionAt(anchor, startAt)`: the remapped, loop-wrapped position in the new timeline (TL-R387-M1, SF8);
+     - `startPlaybackAt` (`stopAt` = `from`; returns before the rAF and the pump start);
+     - `seekTo` (`stopAt` = the target; TL-R387-L5);
+     - `scrubPlayhead` and `endPlayheadScrub` (`stopAt` = the target).
+   - `pumpPlaybackAudio` wraps the loop fill, the loop resync and the metronome fill in `try`/`catch` → `stopForScheduleFailure()`.
+   - Deps were updated; `npm run typecheck` and Biome are clean on the sketch.
+3. **New `app/lib/arrangement/__tests__/apply-schedule-rollback.test.ts`:** AR1–AR5, the real `applySchedule` with a recording fake context:
+   - AR1: a mid-plan throw stops the started source, disconnects every node once, leaves the tap untouched and rethrows the same error;
+   - AR2: a metronome click throw;
+   - AR3: a `stop()` that throws during the rollback does not replace the original error;
+   - AR4: the happy path stops and disconnects nothing;
+   - AR5: an `appendPlan` throw keeps the earlier sources stoppable.
+4. **New `app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx`:** SF1–SF10, the provider with a fake `AudioContext` whose Nth `start()` throws, and the real `applySchedule`. Each row covers no window error or unhandled rejection, stopped, the status, nothing left sounding, and the position:
+   - SF1: Play;
+   - SF2: a repeated Play throw, then a clean Play;
+   - SF3: an edit while playing (the edit is kept);
+   - SF4: seek;
+   - SF5: scrub;
+   - SF6: the loop pump (polls up to 20 × 150 ms);
+   - SF7: scrub end;
+   - SF8: a Cut Time edit while playing (stops at the remapped position, about 1 s);
+   - SF9: a throw in the first loop fill inside the Play build;
+   - SF10: a clean Play in the same task as a failed one is not overwritten by the failure text.
+5. **New doc `docs/implementation/2026/quarter-IV/250-schedule-failure-rollback.md`** (number free [K10]), in Georgian, with the TEMPLATE headings in order (L26):
+   - l.4 byte for byte: `**სტატუსი:** Completed (C round 387 PASS)` (L28);
+   - Problem → Solution for the three bugs;
+   - the D-29z1302 contract;
+   - the D-29z1303 ruling;
+   - every AR/SF/MU id it names exists.
 
-   Doc 248 is not edited.
+   Doc 249 is not edited.
 
 ## 3. A: checks (speed rules)
-- **Static checks:** `npm run typecheck` and `npm run lint`.
-- **Tests:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-385/covering-386-full.txt)` (34 files). On the sketch, B's run had 34 files and 633 tests passing (`covering-386-full-sketch.log`). Paste the totals.
-- **Mutants:** run `TREE=<abs cp -a copy of store> OUT=<abs a-round-386/mutants> bash ../tmp/studio-real-loop/b-round-385/mutants/run-mutants-386.sh` on a copy, never on `store/`. All 7 mutants must be red on their rows (the table in `sketch-review.md`), and `restored` must be printed.
+- **Pre-flight:** `git status` empty; `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-386/r387-frozen-sha256.txt` (1,279 entries) and the protected manifest `b-round-318/protected-sha256.txt`, both rc 0 from `store/`.
+- **Static checks:** `npm run typecheck` and `npm run lint` (gate 386 had 205 warnings; the count must not rise).
+- **Tests:** `npx vitest run $(cat ../tmp/studio-real-loop/b-round-386/covering-387.txt)` (65 files: round 386's 34 covering files, the 40 test files that import `graph.client`, and the 2 new files). B's full suite on the sketch passed 257 files and 3,787 tests (`precheck-full.log`) [K20]. Paste the totals.
+  - **Timeout headroom (L31, every covering file):**
+    - SF6 takes about 0.3 s, polling at most 3 s against the 5 s default.
+    - The slowest covering tests in B's full run on the sketch (`precheck-full.log`):
+
+      | Test | Time | Declared timeout | Share |
+      |---|---|---|---|
+      | CP12a | 5.9 s | 30 s | 20 % |
+      | UM9 | 3.3 s | 20 s | 16 % |
+      | TG1 | 3.1 s | 20 s | 16 % |
+      | TC10 | 4.0 s | 15 s | 27 % (gate 386 `verify.log`) |
+      | `render-budget` Play → Stop → Play | 2.6 s | 15 s | 17 % |
+
+      Every other covering test is under 2 s. Nothing is near 50 %.
+- **Mutants:** run `TREE=<abs cp -a copy of store> OUT=<abs a-round-387/mutants> bash ../tmp/studio-real-loop/b-round-386/mutants/run-mutants-387.sh` on a copy, never on `store/`. All 15 must be red on their rows (table in `sketch-review.md`; B's logs are under `b-round-386/mutants/` [K18]), and `restored` must be printed.
 - **No full suite, no perf run, no browser run is required of A.**
 - **`code-reviewer`:** required (3+ files). Paste its Architecture note verbatim.
-  - A Medium+ that the sketch review did not rule is a **STOP**: B rules on it. The sketch-review findings are already ruled.
+  - A Medium+ that `sketch-review.md` did not rule is a **STOP**. The findings in `sketch-review.md` are already ruled.
 
-**STOP (L11):** in any of these cases A writes STOP at the top of `a-round-386.md` and changes nothing else:
-- `r386-frozen` is not rc 0 at the start;
+**STOP (L11):** in any of these cases A writes STOP at the top of `a-round-387.md` and changes nothing else:
+- the frozen manifest is not rc 0 at the start;
 - `git apply` fails;
-- a covering test fails.
+- a covering test fails or exceeds 50 % of its timeout.
 
 ## 4. C: what to verify
-C writes `c-round-386.md` and `c-round-386.json` as it goes, with **all L57 fields**:
-- `assertsSpecified` = the EV11–EV15/PW20 rows;
-- `mutantsRecorded` = 7;
-- `mutantRedOnSketch` = "7/7 (b-round-385/mutants)";
-- write `progress.json` after every row (L59);
-- copies and destructive commands stay under `c-round-386/` (L60);
-- browser jobs run alone (L38).
+C writes `c-round-387.md` and `c-round-387.json` as it goes, with **all L57 fields**, including the five that `c-round-386.json` lacked (INFO-B386-L57-C386-FIELDS): `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed` and `affectedChecksRunOnSketch`. Run `python3 -I tools/l57-check.py` before hand-off.
+- `assertsSpecified` = AR1–AR5 and SF1–SF10;
+- `mutantsRecorded` = 15;
+- `mutantRedOnSketch` = "15/15 (b-round-386/mutants)";
+- `affectedChecksRunOnSketch`: B's `precheck-full.log`, `probe/flow-sketch-*.json` and `probe/export-sha256.txt`;
+- `progress.json` after every row (L59); copies and destructive commands stay under `c-round-387/` (L60); browser jobs run alone (L38); warm `/studio-lab` up once in a browser before timed probes.
 
-**Browser scripts:** B's `b-round-385/probe/resync-throw.mjs` and `preview-while-playing.mjs`. Run them **in place**, with absolute output paths under `c-round-386/`: they import `../../c-round-382/lib.mjs` relative to their own folder. Do not edit them; BROWSER-JOIN has its own script, `join-while-playing.mjs`. The clock (the first `mm:ss.mmm` on the page) is the playing signal. The transport Stop is always rendered, so its count is not a signal.
+**Browser scripts:** under `b-round-386/probe/`. Run them **in place**, with absolute output paths under `c-round-387/`. They import `../../c-round-382/lib.mjs`; do not edit them. The clock (the first `mm:ss.mmm` on the page) is the playing signal. `leaked` counts realtime sources that started and never got `stop()`.
 
 | Row | Check | PASS means |
 |---|---|---|
-| **SOURCE-SCOPE** | At start and end: `git status --short --untracked-files=all`; `sha256sum -c --quiet b-round-385/r386-frozen-sha256.txt` and the protected manifest, from `store/` | Status lines are exactly the 5 patched files plus the new doc 249; both checks rc 0 |
-| **CLAIMS** | `bash b-round-385/claims-386.sh`, compared with `b-round-385/claims-386-output.txt`; plus L29's task grep | Differences only where the patch changes lines. K3: 1 call inside the helper. K4: shifted lines. K5: the block is gone. K6: new type. K7: new clause. K8: hits now present. K9: 22 EV `it`s, 2 PW, 8 new-name hits (EV11 ×2, EV12, EV13 ×2, EV14, EV15, PW20). K14: `--check` fails because the patch is applied (expected; `git apply --check -R` passes). K16: rc 0. No `MISSING` |
-| **PATCH-EQUAL** | For the 5 files: `diff -u --label a/$f --label b/$f <(git show 7295618:$f) $f` (pinned to the baseline, not HEAD, in case root lands a pre-round commit), concatenated in grants order, then `cmp` with `sketch-386.patch.txt` | Identical (reviewed = dispatched) |
-| **UNIT** | The 34 covering files | All pass; EV11–EV15 and PW20 present by name |
-| **MUTANTS** | `run-mutants-386.sh` on a `cp -a` copy of store, with `OUT` under `c-round-386/` | All 7 red on the named rows; `restored` printed; the copy only |
-| **BROWSER-M1** (1440×900, 1280×720) | `resync-throw.mjs http://127.0.0.1:5173 <out> [w h]` | `thrown` 1; `errors` []; the clock is frozen after the throw (`clockAfter[0] === clockAfter[1]`); `statusHasScheduleFailed` true; after Play, `replayStatusPlayingFrom` true and `replayStatusStillFailed` false. Screenshot. B's sketch values are in `probe/sketch-*.json` |
-| **BROWSER-M1-MUTANT** (1440×900) | MU-386-NO-CATCH applied (`mutate.py <copy> MU-386-NO-CATCH`) on a `cp -a` copy, with its own dev server on :5174 and its own Vite `cacheDir` (L38); then the same script | `record — not run on sketch: B ran the HEAD control instead (probe/head-*.json: 1 pageerror, clock running)`. Expected: ≥ 1 `pageerror` "injected schedule failure". Stop the server afterwards |
-| **BROWSER-L2-OK** (both viewports) | `preview-while-playing.mjs <base> <out> ok [w h]` | `clockDuringDecode[1] > [0]` (the timeline plays during the decode); `previewStarted` true; `clockAfterSettle` frozen; `errors` []. The first reads are 150 ms apart and B measured the decode at about 360 ms (01.050 → stop at 01.413). If a run's decode settles inside that window (both reads equal and `previewStarted` true already), it is environment-invalid and uses the sync-measurement replacement budget (2 extra attempts), not a FAIL |
-| **BROWSER-L2-FAIL** (both viewports) | `… fail [w h]` (`decodeAudioData` rejects once) | `decodeFailed` 1; `previewStarted` false; `clockAfterSettle[1] > [0]` (the timeline keeps playing); `failText` = "“Middle East — public preview” failed to load — details are in the library."; `errors` [] |
-| **BROWSER-JOIN** (both viewports) | `b-round-385/probe/join-while-playing.mjs <base> <abs out> [w h]`, in place | `longSourceStarted` = [101.35] (Middle East re-decoded and started in the live `AudioContext`); `clockAfterJoin[1] > [0]`; `errors` []. B's HEAD values: `probe/join-head-1440.json` and `join-head-1280.json` ([101.35], 01.422 → 02.211, []). Neighbour regression for EV3; the patch does not change this path |
-| **G386-AUTH** (both viewports) | Fresh anonymous context (the G385 recipe; L29: valid `product`/`file` params) | `/studio-lab` workspace with `auth_user` null; `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token?product=middle-east&file=stem.mp3` without Authorization → 401, no token. Fake bearer → `blocked` (backend) |
-| **STUDIO-SMOKE** (both viewports) | Enter adds a clip, Play for 1.5 s, Stop, Export dialog opens, Esc closes | As in round 385 |
-| **DOCS** | Doc 249 | l.4 byte for byte; TEMPLATE headings in order; every EV/PW/MU id it names exists; `grep -rn 'C round [0-9]* pending' docs/implementation` = 0 hits |
+| **SOURCE-SCOPE** | At start and end: `git status --short --untracked-files=all`; `sha256sum -c --quiet b-round-386/r387-frozen-sha256.txt` and the protected manifest, from `store/` | Status lines are exactly the 2 patched files, the 2 new test files and the new doc 250; both checks rc 0 |
+| **CLAIMS** | `bash b-round-386/claims-387.sh` from the loop root, compared with `b-round-386/claims-387-sketch-output.txt` (B's run on the sketch) | Identical to the sketch output, with these allowed deltas only: **K15 and K16** (rc 0 expected on store; rc 1 in B's output only because of a scratch-only `vite.config.ts` cacheDir edit) and **K1** only if root landed a pre-round commit (INFO-C268). On A's tree K2 (5 = 4 code files + doc 250), K12 (41) and K14 (`--check` rc 1, `-R --check` rc 0) **match** the sketch output. K4 shows one direct call, inside `startGraphOrStop`. No `MISSING` |
+| **PATCH-EQUAL** | `cmp store/<f> b-round-386/sketch-files/<f>` for the 4 code and test files | All identical (reviewed = dispatched) |
+| **UNIT** | The 65 covering files | All pass; AR1–AR5 and SF1–SF10 present by name |
+| **MUTANTS** | `run-mutants-387.sh` on a `cp -a` copy of store, with `OUT` under `c-round-387/` | All 15 red on their named rows (K18 table: B's logs); `restored` printed; the copy only |
+| **BROWSER-M2-FLOW** (1440×900, 1280×720) | `node b-round-386/probe/m2-flow.mjs http://127.0.0.1:5173 <abs out> <w> <h>` | `errors` [] everywhere; **play1** `thrown` 1, `leaked` 0, `scheduleFailed` true, clock frozen; **play2** `thrown` 2, `leaked` 0, still `scheduleFailed`, clock frozen; **play3** `playingFrom` true, clock advancing, `leaked` 2; **commit** `thrown` 3, `clips` 3 (the edit kept), `leaked` 0, `scheduleFailed` true, clock frozen; **afterStop** `leaked` 0. B's sketch values: `probe/flow-sketch-*.json`. HEAD control: `probe/flow-head-*.json` (errors, `leaked` 1, stuck). Screenshots |
+| **BROWSER-M1-NEIGHBOUR** (both viewports) | `node b-round-385/probe/resync-throw.mjs http://127.0.0.1:5173 <abs out> <w> <h>` (round-386 script, in place) | As round 386: `thrown` 1, `errors` [], clock frozen, `statusHasScheduleFailed` true, `replayStatusPlayingFrom` true, `replayStatusStillFailed` false |
+| **EXPORT-EQUAL** | `node b-round-386/probe/export-compare.mjs http://127.0.0.1:5173 <abs c-round-387 dir> c387`, then `sha256sum` | The WAV's sha256 equals the HEAD/sketch hash in `probe/export-sha256.txt` (`06aeb3de…e9fd`) |
+| **G387-AUTH** (both viewports) | Fresh anonymous context (the G386 recipe; L29: valid `product`/`file` params) | `/studio-lab` workspace with `auth_user` null; `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token?product=middle-east&file=stem.mp3` without Authorization → 401, no token. Fake bearer → `blocked` (backend) |
+| **STUDIO-SMOKE** (both viewports) | Enter adds a clip, Play for 1.5 s (clock advances), Stop (clock frozen), Export dialog opens, Esc closes | As in round 386, with 0 page errors |
+| **DOCS** | Doc 250 | l.4 byte for byte; TEMPLATE headings in order; every AR/SF/MU id it names exists; `grep -rn 'C round [0-9]* pending' docs/implementation` = 0 hits |
 
-**`browserVerified`:** true only if BROWSER-M1, BROWSER-L2-OK, BROWSER-L2-FAIL, BROWSER-JOIN, G386-AUTH and STUDIO-SMOKE ran at both viewports in this round.
+**`browserVerified`:** true only if BROWSER-M2-FLOW, BROWSER-M1-NEIGHBOUR, EXPORT-EQUAL, G387-AUTH and STUDIO-SMOKE all ran in this round (each at both viewports where listed).
 
 **Verdict:**
-- **PASS:** every row other than BROWSER-M1-MUTANT, which is `record`, passes.
+- **PASS:** every row passes.
 - **Gate rows** (verify, full suite, build) are not claimed.
 
 ## 5. Neighbour risk
-- **Status clobber (L51).** `scheduleFailed` can follow "… added to the Music track …" or a settled collection status (the load path settles first, then the resync, so `scheduleFailed` wins; EV15). A later "N failed" settle can replace it (TL-R385-L4, deferred: both are true).
-- **Effect identity (GATE384-L4).** The load effect's deps change. EV14, together with MU-386-UNSTABLE-RESYNC, proves that it does not re-run on a same-collection render.
-- **Preview + resync** (TL-R385-L5, deferred). A preview of a placed, evicted source while playing rebuilds once, then stops for the preview.
-- **Partial schedule** (GATE-B385-M2, the next Medium task). Out of scope; do not touch `graph.client.ts`.
+- **Status timing.** The failure text now lands one microtask later. A test or UI that reads the status synchronously right after a failing call sees the previous text; SF rows flush once.
+- **`resyncAfterDecode`.** Its `catch` is now normally unreachable, because `syncPlayback` catches inside. That is why round-386 mutant MU-386-NO-CATCH would no longer turn EV11 red. This is expected and is recorded, not a regression. EV11, EV15 and PW20 still pass.
+- **Loop pump.** A throw in the loop or metronome fill now stops playback instead of leaving a silent gap and a page error (SF6).
+- **Export.** It uses `applySchedule` on an offline context. The happy path is unchanged (EXPORT-EQUAL). A throw there now rolls back before the existing export error handling sees it.
 
-## 6. Order after this round (D-29z1298)
-1. **REGRESSION-2026-11-08,** if the next planning is on or after 2026-11-08 (it is due then). Otherwise GATE-B385-M2 comes first and the regression follows.
-2. **GATE-B385-M2-APPLY-SCHEDULE-ROLLBACK** (Medium; `graph.client.ts` all-or-nothing, plus a repeated throw on Play leaving `isPlaying` true).
-3. **PERF-13b-ii,** then PERF-13c, PERF-13d, PERF-14 and PERF-15.
+## 6. Order after this round
+1. **REGRESSION-2026-11-08** (due; the next planning is on or after 2026-11-08).
+2. **PERF-13b-ii,** then PERF-13c, PERF-13d, PERF-14 and PERF-15.
    - PERF-11c-iii-d/e stay held for Saba (questions-arch-leaf-plumbing). If there is no answer by RETRO 400, the default is SYS-R385-LEAF-ACTIONS-CONTEXT.
-4. **SYS-R2-FAKE-FIDELITY** and **SYS-CLOCK-DETERMINISM.**
-5. **STEM-LANES,** then SYS-1…3, then STORE-2b…5 (direction gate).
-6. **REVIEW-RECOMMENDATIONS,** then T12-ADVANCED.
-7. **The phase-2 entries,** under the skip rule.
+   - ARCH-CHECKPOINT-DECODE-REGION stays requested from root before PERF-13b-ii.
+3. **SYS-R2-FAKE-FIDELITY** and **SYS-CLOCK-DETERMINISM.**
+4. **STEM-LANES,** then SYS-1…3, then STORE-2b…5 (direction gate).
+5. **REVIEW-RECOMMENDATIONS,** then T12-ADVANCED.
+6. **The phase-2 entries,** under the skip rule.
 
 ## 7. Claims
-Run `bash b-round-385/claims-386.sh` from the loop root. The output at planning is in `b-round-385/claims-386-output.txt` (0 `MISSING`).
-- **K23** (the HEAD browser reproduction) is the files `b-round-385/probe/head-1440.json` and `head-1280.json` (checked with `test -f` in K17).
-- **K17** also covers every cited `b-round-385/` artifact. **K18** checks the mutant logs; **K20–K22** read doc 248 l.4 and the HEAD deps blocks [K20, K21, K22]; **K24** reads the direct-preview stop at l.1761 [K24].
+Run `bash b-round-386/claims-387.sh` from the loop root (optionally with a store root). The outputs at planning:
+- `b-round-386/claims-387-output.txt`: HEAD;
+- `b-round-386/claims-387-sketch-output.txt`: B's sketch scratch.
+
+Tags:
+- **K1/K2:** HEAD and status.
+- **K3:** `releaseNodes` and `throw error;` counts in `graph.client.ts`.
+- **K4:** the direct `startGraph(` call lines in the provider (5 at HEAD: l.1383, 1686, 1829, 1910, 1930; 1 on the sketch).
+- **K5:** `startPlaybackAt` sets `isPlayingRef` (l.1676) before the build (l.1686).
+- **K6:** no `try` in `pumpPlaybackAudio` at HEAD.
+- **K7:** `scheduleFailed` exists in `strings.ts`.
+- **K8:** the AR/SF ids.
+- **K9:** the `resyncAfterDecode` catch.
+- **K10:** doc 250 is free.
+- **K11:** 0 `perf`/`e2e` importers.
+- **K12:** the test importers of `graph.client`.
+- **K13/K14:** the sketch sha and `apply --check`.
+- **K15/K16:** the manifests.
+- **K17:** every cited `b-round-386/` artifact.
+- **K18:** the mutant logs.
+- **K19:** the HEAD browser repro (`probe/m2-head-1440.json`: 2 page errors per throw, `leaked` 1).
+- **K20:** the full suite on the sketch.
+- **K21:** the export hash.
+- **K22:** the status-clobber premise (MU-387-STATUS-SYNC turns SF3 red).

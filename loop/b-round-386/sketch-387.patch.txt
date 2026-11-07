@@ -1,0 +1,961 @@
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 0c83f0c..159d172 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -1257,6 +1257,32 @@ export function ArrangementProvider({
+     [livePosition, meterStore, playbackStore, stopGraph, trackMeterStore, updatePosition],
+   );
+ 
++  const stopForScheduleFailure = useCallback(
++    (stopAt?: number) => {
++      stopPlayback(stopAt);
++      // სტატუსი microtask-შია: commit-ის მოქმედება reschedule-ის შემდეგ საკუთარ სტატუსს წერს (SF3).
++      queueMicrotask(() => {
++        if (!isPlayingRef.current) {
++          setStatus(studioPlaybackStrings.scheduleFailed);
++        }
++      });
++    },
++    [setStatus, stopPlayback],
++  );
++
++  const startGraphOrStop = useCallback(
++    (arrangement: Arrangement, anchor: PlaybackAnchor, stopAt?: number): boolean => {
++      try {
++        startGraph(arrangement, anchor);
++        return true;
++      } catch {
++        stopForScheduleFailure(stopAt);
++        return false;
++      }
++    },
++    [startGraph, stopForScheduleFailure],
++  );
++
+   const sampleMasterMeter = useCallback(() => {
+     const tap = meterTapRef.current;
+     const ctx = audioContextRef.current;
+@@ -1317,12 +1343,17 @@ export function ArrangementProvider({
+     if (!isPlayingRef.current) {
+       return;
+     }
+-    if (fillLoopIterations()) {
+-      resyncLoopRef.current();
++    try {
++      if (fillLoopIterations()) {
++        resyncLoopRef.current();
++      }
++      fillMetronomeHorizon();
++    } catch {
++      stopForScheduleFailure();
++      return;
+     }
+-    fillMetronomeHorizon();
+     releaseRetiredGraphs(false);
+-  }, [fillLoopIterations, fillMetronomeHorizon, releaseRetiredGraphs]);
++  }, [fillLoopIterations, fillMetronomeHorizon, releaseRetiredGraphs, stopForScheduleFailure]);
+ 
+   const tick = useCallback(() => {
+     if (!isPlayingRef.current) {
+@@ -1380,7 +1411,7 @@ export function ArrangementProvider({
+               },
+               ctx.currentTime,
+             );
+-        startGraph(arrangement, anchor);
++        startGraphOrStop(arrangement, anchor, positionAt(anchor, startAt));
+         return;
+       }
+       const handle = handleRef.current;
+@@ -1404,7 +1435,7 @@ export function ArrangementProvider({
+         handle.setClipGain(clip.id, clipLinearGain(clip));
+       }
+     },
+-    [startGraph],
++    [startGraphOrStop],
+   );
+ 
+   resyncLoopRef.current = () => syncPlayback(historyRef.current.present, undefined, true);
+@@ -1418,11 +1449,10 @@ export function ArrangementProvider({
+       try {
+         syncPlayback(present, undefined, true);
+       } catch {
+-        stopPlayback();
+-        setStatus(studioPlaybackStrings.scheduleFailed);
++        stopForScheduleFailure();
+       }
+     },
+-    [setStatus, stopPlayback, syncPlayback],
++    [stopForScheduleFailure, syncPlayback],
+   );
+ 
+   const ensureDecoded = useCallback(
+@@ -1683,7 +1713,9 @@ export function ArrangementProvider({
+       updatePosition(from);
+       const startAt = ctx.currentTime + PLAYBACK_LOOKAHEAD;
+       meterFreshFromRef.current = startAt;
+-      startGraph(arrangement, createPlaybackAnchor(from, startAt));
++      if (!startGraphOrStop(arrangement, createPlaybackAnchor(from, startAt), from)) {
++        return;
++      }
+       if (frameRef.current === null) {
+         frameRef.current = requestAnimationFrame(tick);
+       }
+@@ -1698,7 +1730,7 @@ export function ArrangementProvider({
+       ensureDecoded,
+       playbackStore,
+       pumpPlaybackAudio,
+-      startGraph,
++      startGraphOrStop,
+       stopLibraryPreview,
+       tick,
+       updatePosition,
+@@ -1826,15 +1858,16 @@ export function ArrangementProvider({
+       scrubbingRef.current = false;
+       lastScrubRescheduleRef.current = null;
+       if (isPlayingRef.current && ctx) {
+-        startGraph(
++        startGraphOrStop(
+           historyRef.current.present,
+           createPlaybackAnchor(target, ctx.currentTime + PLAYBACK_LOOKAHEAD),
++          target,
+         );
+       }
+       writeInsertMarker(target);
+       updatePosition(target);
+     },
+-    [startGraph, updatePosition, writeInsertMarker],
++    [startGraphOrStop, updatePosition, writeInsertMarker],
+   );
+ 
+   const setInsertMarker = useCallback(
+@@ -1907,13 +1940,14 @@ export function ArrangementProvider({
+       scrubbingRef.current = true;
+       if (shouldRescheduleScrub(lastScrubRescheduleRef.current, ctx.currentTime)) {
+         lastScrubRescheduleRef.current = ctx.currentTime;
+-        startGraph(
++        startGraphOrStop(
+           historyRef.current.present,
+           createPlaybackAnchor(target, ctx.currentTime + PLAYBACK_LOOKAHEAD),
++          target,
+         );
+       }
+     },
+-    [startGraph, updatePosition],
++    [startGraphOrStop, updatePosition],
+   );
+ 
+   const endPlayheadScrub = useCallback(
+@@ -1927,13 +1961,14 @@ export function ArrangementProvider({
+       }
+       const ctx = audioContextRef.current;
+       if (isPlayingRef.current && ctx) {
+-        startGraph(
++        startGraphOrStop(
+           historyRef.current.present,
+           createPlaybackAnchor(target, ctx.currentTime + PLAYBACK_LOOKAHEAD),
++          target,
+         );
+       }
+     },
+-    [placeInsertMarker, startGraph, updatePosition],
++    [placeInsertMarker, startGraphOrStop, updatePosition],
+   );
+ 
+   const selectSource = useCallback(
+diff --git a/app/lib/arrangement/__tests__/apply-schedule-rollback.test.ts b/app/lib/arrangement/__tests__/apply-schedule-rollback.test.ts
+new file mode 100644
+index 0000000..8daea95
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/apply-schedule-rollback.test.ts
+@@ -0,0 +1,202 @@
++import { describe, expect, it } from 'vitest';
++import type { ArrangementTrack, ScheduledClip } from '~/types/arrangement';
++import {
++  applySchedule,
++  type ScheduleAudioContext,
++  type ScheduleAudioNode,
++  type ScheduleAudioParam,
++} from '../graph.client';
++
++class RecordingParam implements ScheduleAudioParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class RecordingNode implements ScheduleAudioNode {
++  readonly label: string;
++  disconnects = 0;
++  constructor(label: string) {
++    this.label = label;
++  }
++  connect(destination: ScheduleAudioNode) {
++    return destination;
++  }
++  disconnect() {
++    this.disconnects += 1;
++  }
++}
++
++class RecordingGain extends RecordingNode {
++  gain = new RecordingParam();
++}
++
++class RecordingPanner extends RecordingNode {
++  pan = new RecordingParam();
++}
++
++class RecordingSource extends RecordingNode {
++  buffer: string | null = null;
++  onended: ((event: Event) => unknown) | null = null;
++  started = false;
++  stops = 0;
++  private readonly owner: RecordingContext;
++  constructor(owner: RecordingContext) {
++    super('source');
++    this.owner = owner;
++  }
++  start() {
++    this.owner.startCalls += 1;
++    if (this.owner.startCalls === this.owner.throwOnStart) {
++      throw this.owner.startError;
++    }
++    this.started = true;
++  }
++  stop() {
++    this.stops += 1;
++    if (this.owner.stopThrows) {
++      throw new Error('stop failed');
++    }
++  }
++}
++
++class RecordingContext implements ScheduleAudioContext<string> {
++  readonly currentTime = 0;
++  readonly destination = new RecordingNode('destination');
++  readonly nodes: RecordingNode[] = [];
++  readonly sources: RecordingSource[] = [];
++  startCalls = 0;
++  throwOnStart = 0;
++  stopThrows = false;
++  readonly startError = new Error('start failed');
++  createBufferSource() {
++    const source = new RecordingSource(this);
++    this.nodes.push(source);
++    this.sources.push(source);
++    return source;
++  }
++  createGain() {
++    const gain = new RecordingGain('gain');
++    this.nodes.push(gain);
++    return gain;
++  }
++  createStereoPanner() {
++    const panner = new RecordingPanner('panner');
++    this.nodes.push(panner);
++    return panner;
++  }
++}
++
++const tracks: ArrangementTrack[] = [
++  { id: 'a', kind: 'audio', name: 'A', volume: 1, mute: false, solo: false },
++  { id: 'b', kind: 'audio', name: 'B', volume: 1, mute: false, solo: false },
++];
++
++const plan: ScheduledClip[] = [
++  { clipId: 'c1', trackId: 'a', sourceId: 's1', when: 0, sourceOffset: 0, duration: 4 },
++  { clipId: 'c2', trackId: 'b', sourceId: 's2', when: 0, sourceOffset: 0, duration: 4 },
++  { clipId: 'c3', trackId: 'a', sourceId: 's1', when: 4, sourceOffset: 0, duration: 4 },
++];
++
++const buffers = new Map([
++  ['s1', 'buffer-1'],
++  ['s2', 'buffer-2'],
++]);
++
++function scheduleOn(ctx: RecordingContext, tap?: RecordingNode, metronome = false) {
++  return applySchedule(ctx, plan, {
++    buffers,
++    tracks,
++    from: 0,
++    startAt: 0.05,
++    tap,
++    trackTaps: tap ? new Map([['a', tap]]) : undefined,
++    clipFades: new Map([['c1', { start: 0, duration: 4, fadeIn: 0.5, fadeOut: 0.5 }]]),
++    metronome: metronome
++      ? {
++          accent: 'accent',
++          beat: 'beat',
++          clicks: [
++            { when: 0, offset: 0, duration: 0.05, accent: true },
++            { when: 0.5, offset: 0, duration: 0.05, accent: false },
++          ],
++        }
++      : undefined,
++  });
++}
++
++describe('applySchedule all-or-nothing (GATE-B385-M2)', () => {
++  it('AR1: a start that throws mid-plan stops every started source, disconnects every node and rethrows the same error', () => {
++    const ctx = new RecordingContext();
++    const tap = new RecordingNode('tap');
++    ctx.throwOnStart = 2;
++    let caught: unknown = null;
++    try {
++      scheduleOn(ctx, tap);
++    } catch (error) {
++      caught = error;
++    }
++    expect(caught).toBe(ctx.startError);
++    const started = ctx.sources.filter((source) => source.started);
++    expect(started).toHaveLength(1);
++    expect(started.map((source) => source.stops)).toEqual([1]);
++    expect(ctx.sources.filter((source) => !source.started).map((source) => source.stops)).toEqual([
++      0,
++    ]);
++    expect(ctx.nodes.map((node) => node.disconnects)).toEqual(ctx.nodes.map(() => 1));
++    expect(tap.disconnects).toBe(0);
++    expect(ctx.destination.disconnects).toBe(0);
++  });
++
++  it('AR2: a metronome click that throws stops the started clip sources and clicks, disconnects the click gain and rethrows', () => {
++    const ctx = new RecordingContext();
++    ctx.throwOnStart = 5;
++    expect(() => scheduleOn(ctx, undefined, true)).toThrow(ctx.startError);
++    const started = ctx.sources.filter((source) => source.started);
++    expect(started).toHaveLength(4);
++    expect(started.every((source) => source.stops === 1)).toBe(true);
++    expect(ctx.nodes.map((node) => node.disconnects)).toEqual(ctx.nodes.map(() => 1));
++  });
++
++  it('AR3: a stop that throws during the rollback does not replace the original error', () => {
++    const ctx = new RecordingContext();
++    ctx.throwOnStart = 3;
++    ctx.stopThrows = true;
++    expect(() => scheduleOn(ctx)).toThrow(ctx.startError);
++    expect(ctx.sources.filter((source) => source.started).map((source) => source.stops)).toEqual([
++      1, 1,
++    ]);
++    expect(ctx.nodes.map((node) => node.disconnects)).toEqual(ctx.nodes.map(() => 1));
++  });
++
++  it('AR4: a schedule that builds normally stops and disconnects nothing until its handle does', () => {
++    const ctx = new RecordingContext();
++    const tap = new RecordingNode('tap');
++    const handle = scheduleOn(ctx, tap, true);
++    expect(ctx.sources.every((source) => source.started)).toBe(true);
++    expect(ctx.sources.map((source) => source.stops).every((stops) => stops === 0)).toBe(true);
++    expect(ctx.nodes.every((node) => node.disconnects === 0)).toBe(true);
++    expect(handle.activeSourceCount()).toBe(3);
++    handle.disconnect();
++    expect(ctx.nodes.every((node) => node.disconnects === 1)).toBe(true);
++    expect(tap.disconnects).toBe(0);
++  });
++
++  it('AR5: an appended plan whose start throws keeps the earlier sources stoppable and detaches only the failed clip', () => {
++    const ctx = new RecordingContext();
++    const handle = scheduleOn(ctx);
++    const firstBuild = ctx.nodes.length;
++    ctx.throwOnStart = ctx.startCalls + 2;
++    expect(() => handle.appendPlan(plan, 8, 8.05)).toThrow(ctx.startError);
++    const appended = ctx.nodes.slice(firstBuild);
++    expect(appended.filter((node) => node.disconnects === 1)).toHaveLength(2);
++    expect(appended.filter((node) => node.disconnects === 0)).toHaveLength(3);
++    expect(handle.activeSourceCount()).toBe(4);
++    handle.stop();
++    expect(
++      ctx.sources.filter((source) => source.started).every((source) => source.stops === 1),
++    ).toBe(true);
++    expect(handle.activeSourceCount()).toBe(0);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx b/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
+new file mode 100644
+index 0000000..41bbdfa
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
+@@ -0,0 +1,396 @@
++import { act, render } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
++import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
++import { addClip, createArrangement } from '../model';
++import { studioPlaybackStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
++
++const fakeClock = { base: 0 };
++const startFailure = { armedAt: 0, calls: 0, thrown: 0 };
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++  setValueAtTime() {}
++  linearRampToValueAtTime() {}
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  started = false;
++  stops = 0;
++  start() {
++    if (startFailure.armedAt > 0) {
++      startFailure.calls += 1;
++      if (startFailure.calls === startFailure.armedAt) {
++        startFailure.armedAt = 0;
++        startFailure.calls = 0;
++        startFailure.thrown += 1;
++        throw new Error('injected start failure');
++      }
++    }
++    this.started = true;
++  }
++  stop() {
++    this.stops += 1;
++  }
++}
++
++const createdSources: FakeSource[] = [];
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  get currentTime() {
++    return Date.now() / 1000 - fakeClock.base;
++  }
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    const source = new FakeSource();
++    createdSources.push(source);
++    return source;
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++const SAMPLE_RATE = 48000;
++const SOURCE_SECONDS = 4;
++
++function failureCollection(): WorkspaceCollection {
++  return {
++    id: 'schedule-failure',
++    label: 'schedule-failure',
++    origin: 'demo',
++    sources: [
++      { id: 'one', title: 'One', collectionLabel: 'schedule-failure', kind: 'sfx', origin: 'demo' },
++      { id: 'two', title: 'Two', collectionLabel: 'schedule-failure', kind: 'sfx', origin: 'demo' },
++    ],
++    loadSource: () =>
++      Promise.resolve(
++        new AudioBuffer({
++          length: SOURCE_SECONDS * SAMPLE_RATE,
++          numberOfChannels: 2,
++          sampleRate: SAMPLE_RATE,
++        }),
++      ),
++  };
++}
++
++function twoClipArrangement(loop: Arrangement['loop'] = null): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++    { id: 'sfx', kind: 'audio', name: 'SFX' },
++  ]);
++  const first = addClip(base, {
++    trackId: 'music',
++    sourceId: 'one',
++    desiredStart: 0,
++    sourceDuration: SOURCE_SECONDS,
++  });
++  if (!first) {
++    throw new Error('first clip not added');
++  }
++  const second = addClip(first.arrangement, {
++    trackId: 'sfx',
++    sourceId: 'two',
++    desiredStart: 0,
++    sourceDuration: SOURCE_SECONDS,
++  });
++  if (!second) {
++    throw new Error('second clip not added');
++  }
++  return { ...second.arrangement, loop };
++}
++
++interface ProbeRef {
++  current: WorkspaceProbeValue | null;
++}
++
++function FailureProbe({ api }: { api: ProbeRef }) {
++  api.current = useWorkspaceProbe();
++  return null;
++}
++
++function live(api: ProbeRef): WorkspaceProbeValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++async function flushAsync(rounds = 5) {
++  for (let i = 0; i < rounds; i++) {
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 0));
++    });
++  }
++}
++
++async function mountFailure(loop: Arrangement['loop'] = null) {
++  const api: ProbeRef = { current: null };
++  const view = render(
++    <ArrangementProvider
++      collection={failureCollection()}
++      initialArrangement={twoClipArrangement(loop)}
++    >
++      <FailureProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await flushAsync();
++  expect(live(api).sourceStates.one?.status).toBe('ready');
++  expect(live(api).sourceStates.two?.status).toBe('ready');
++  return { api, view };
++}
++
++function startedWithoutStop(): number {
++  return createdSources.filter((source) => source.started && source.stops === 0).length;
++}
++
++function armStartFailure(nth: number) {
++  startFailure.armedAt = nth;
++  startFailure.calls = 0;
++}
++
++describe('schedule failure stops playback with a status (GATE-B385-M2)', () => {
++  const errors: unknown[] = [];
++  const onError = (event: ErrorEvent) => {
++    errors.push(event.error);
++  };
++  const onRejection = (reason: unknown) => {
++    errors.push(reason);
++  };
++
++  beforeEach(() => {
++    errors.length = 0;
++    createdSources.length = 0;
++    startFailure.armedAt = 0;
++    startFailure.calls = 0;
++    startFailure.thrown = 0;
++    fakeClock.base = Date.now() / 1000 - 5;
++    vi.stubGlobal('AudioContext', FakeAudioContext);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++    vi.stubGlobal('requestAnimationFrame', () => 1);
++    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    window.addEventListener('error', onError);
++    process.on('unhandledRejection', onRejection);
++  });
++
++  afterEach(() => {
++    window.removeEventListener('error', onError);
++    process.off('unhandledRejection', onRejection);
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  it('SF1: a Play whose second source start throws stops at the start point with a status and leaves nothing sounding', async () => {
++    const { api } = await mountFailure();
++    armStartFailure(2);
++    act(() => live(api).togglePlayback());
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(startedWithoutStop()).toBe(0);
++    expect(live(api).getLivePosition()).toBe(0);
++  });
++
++  it('SF2: a repeated Play throw keeps the failure status, then a clean Play plays from the start point', async () => {
++    const { api } = await mountFailure();
++    armStartFailure(2);
++    act(() => live(api).togglePlayback());
++    armStartFailure(1);
++    act(() => live(api).togglePlayback());
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(2);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(startedWithoutStop()).toBe(0);
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    expect(live(api).status.startsWith('Playing from 00:00.000')).toBe(true);
++    expect(startedWithoutStop()).toBe(2);
++    act(() => live(api).togglePlayback());
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF3: an edit while playing whose reschedule throws keeps the edit, stops the old graph and shows the status', async () => {
++    const { api } = await mountFailure();
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    const clipsBefore = live(api).arrangement.clips.length;
++    armStartFailure(2);
++    act(() => live(api).addSourceToActiveTrack('one'));
++    await flushAsync();
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).arrangement.clips).toHaveLength(clipsBefore + 1);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF4: a seek while playing whose reschedule throws stops at the seek target with the status', async () => {
++    const { api } = await mountFailure();
++    act(() => live(api).togglePlayback());
++    armStartFailure(1);
++    act(() => live(api).seekTo(2));
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(live(api).getLivePosition()).toBe(2);
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF5: a scrub while playing whose reschedule throws stops at the scrub point, and the scrub end leaves the marker there', async () => {
++    const { api } = await mountFailure();
++    act(() => live(api).togglePlayback());
++    armStartFailure(1);
++    act(() => live(api).scrubPlayhead(1.5));
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(live(api).getLivePosition()).toBe(1.5);
++    act(() => live(api).endPlayheadScrub(1.5));
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).getLocatorPosition()).toBe(1.5);
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF7: a scrub end while playing whose reschedule throws stops at the release point with the status', async () => {
++    const { api } = await mountFailure();
++    act(() => live(api).togglePlayback());
++    act(() => live(api).scrubPlayhead(1));
++    expect(live(api).isPlaying).toBe(true);
++    armStartFailure(1);
++    act(() => live(api).endPlayheadScrub(1.5));
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(live(api).getLivePosition()).toBe(1.5);
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF8: an edit that removes time while playing and whose reschedule throws stops at the remapped position', async () => {
++    const { api } = await mountFailure();
++    act(() => live(api).playFrom(3));
++    expect(live(api).isPlaying).toBe(true);
++    act(() => live(api).setTimeRange({ start: 0, end: 2, trackId: 'music' }));
++    armStartFailure(1);
++    act(() => live(api).cutTimeSelection());
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(live(api).getLivePosition()).toBeCloseTo(1, 1);
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF9: a Play whose first loop iteration fill throws inside the build stops at the start point with the status', async () => {
++    const { api } = await mountFailure({ start: 0, end: 0.5, enabled: true });
++    armStartFailure(3);
++    act(() => live(api).togglePlayback());
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(live(api).getLivePosition()).toBe(0);
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF10: a clean Play right after a failed Play in the same task keeps playing and is not overwritten by the failure text', async () => {
++    const { api } = await mountFailure();
++    armStartFailure(2);
++    act(() => {
++      live(api).togglePlayback();
++      live(api).togglePlayback();
++    });
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(true);
++    expect(live(api).status).not.toBe(studioPlaybackStrings.scheduleFailed);
++    expect(startedWithoutStop()).toBe(2);
++    act(() => live(api).togglePlayback());
++    expect(startedWithoutStop()).toBe(0);
++  });
++
++  it('SF6: a loop iteration appended by the audio pump that throws stops playback with the status', async () => {
++    const { api } = await mountFailure({ start: 0, end: 0.5, enabled: true });
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    armStartFailure(1);
++    for (let i = 0; i < 20 && startFailure.thrown === 0; i++) {
++      await act(async () => {
++        await new Promise((resolve) => setTimeout(resolve, 150));
++      });
++    }
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(startedWithoutStop()).toBe(0);
++  });
++});
+diff --git a/app/lib/arrangement/graph.client.ts b/app/lib/arrangement/graph.client.ts
+index 6d267a6..8d060e7 100644
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -187,38 +187,17 @@ export function applySchedule<TBuffer>(
+   const master = ctx.createGain();
+   let lastMasterTarget = options.masterGain ?? 1;
+   master.gain.value = lastMasterTarget;
+-  master.connect(ctx.destination);
+-  if (options.tap) {
+-    master.connect(options.tap);
+-  }
+   const trackGains = new Map<string, ScheduleGainNode>();
+   const lastGainTargets = new Map<string, number>();
+   const panners = new Map<string, SchedulePannerNode>();
+   const lastPanTargets = new Map<string, number>();
+-  for (const track of options.tracks) {
+-    const trackGain = ctx.createGain();
+-    const initialGain =
+-      options.trackGains?.get(track.id) ??
+-      (isTrackAudible(track, options.tracks) ? track.volume : 0);
+-    trackGain.gain.value = initialGain;
+-    lastGainTargets.set(track.id, initialGain);
+-    const panner = ctx.createStereoPanner();
+-    const initialPan = clampPan(track.pan ?? 0);
+-    panner.pan.value = initialPan;
+-    lastPanTargets.set(track.id, initialPan);
+-    trackGain.connect(panner);
+-    panner.connect(master);
+-    const trackTap = options.trackTaps?.get(track.id);
+-    if (trackTap) {
+-      panner.connect(trackTap);
+-    }
+-    trackGains.set(track.id, trackGain);
+-    panners.set(track.id, panner);
+-  }
+   const clipGainTargets = new Map<string, number>(options.clipGains ?? []);
+   const clipFadeTargets = new Map<string, ClipFadeShape>(options.clipFades ?? []);
+   const clipEnvelopeTargets = new Map<string, ClipEnvelopeShape>(options.clipEnvelopes ?? []);
+   let sources: ScheduledSourceState<TBuffer>[] = [];
++  let clickSources: ScheduledClickState<TBuffer>[] = [];
++  const metronome = options.metronome;
++  let metronomeGain: ScheduleGainNode | null = null;
+   let disconnected = false;
+   const startPlan = (items: readonly ScheduledClip[], from: number, startAt: number) => {
+     for (const item of items) {
+@@ -260,35 +239,102 @@ export function applySchedule<TBuffer>(
+       source.onended = () => {
+         state.ended = true;
+       };
+-      source.start(startAt + (item.when - from), item.sourceOffset, item.duration);
++      try {
++        source.start(startAt + (item.when - from), item.sourceOffset, item.duration);
++      } catch (error) {
++        source.disconnect();
++        fadeGain?.disconnect();
++        envelopeGain?.disconnect();
++        clipGain.disconnect();
++        throw error;
++      }
+       sources.push(state);
+     }
+   };
+-  startPlan(plan, options.from, options.startAt);
+-  const metronome = options.metronome;
+-  const metronomeGain = metronome ? ctx.createGain() : null;
+-  if (metronomeGain) {
+-    metronomeGain.gain.value = 1;
+-    metronomeGain.connect(master);
+-  }
+-  let clickSources: ScheduledClickState<TBuffer>[] = [];
+   const startClicks = (clicks: readonly MetronomeClick[], from: number, startAt: number) => {
+-    if (!metronome || !metronomeGain) {
++    const clickGain = metronomeGain;
++    if (!metronome || !clickGain) {
+       return;
+     }
+     for (const click of clicks) {
+       const source = ctx.createBufferSource();
+       source.buffer = click.accent ? metronome.accent : metronome.beat;
+-      source.connect(metronomeGain);
++      source.connect(clickGain);
+       const state: ScheduledClickState<TBuffer> = { source, ended: false, stopAt: null };
+       source.onended = () => {
+         state.ended = true;
+       };
+-      source.start(startAt + (click.when - from), click.offset, click.duration);
++      try {
++        source.start(startAt + (click.when - from), click.offset, click.duration);
++      } catch (error) {
++        source.disconnect();
++        throw error;
++      }
+       clickSources.push(state);
+     }
+   };
+-  startClicks(metronome?.clicks ?? [], options.from, options.startAt);
++  const releaseNodes = () => {
++    for (const state of sources) {
++      state.source.disconnect();
++      state.fadeGain?.disconnect();
++      state.envelopeGain?.disconnect();
++      state.clipGain.disconnect();
++    }
++    for (const trackGain of trackGains.values()) {
++      trackGain.disconnect();
++    }
++    for (const panner of panners.values()) {
++      panner.disconnect();
++    }
++    for (const state of clickSources) {
++      state.source.disconnect();
++    }
++    metronomeGain?.disconnect();
++    master.disconnect();
++  };
++  try {
++    master.connect(ctx.destination);
++    if (options.tap) {
++      master.connect(options.tap);
++    }
++    for (const track of options.tracks) {
++      const trackGain = ctx.createGain();
++      const initialGain =
++        options.trackGains?.get(track.id) ??
++        (isTrackAudible(track, options.tracks) ? track.volume : 0);
++      trackGain.gain.value = initialGain;
++      lastGainTargets.set(track.id, initialGain);
++      const panner = ctx.createStereoPanner();
++      const initialPan = clampPan(track.pan ?? 0);
++      panner.pan.value = initialPan;
++      lastPanTargets.set(track.id, initialPan);
++      trackGains.set(track.id, trackGain);
++      panners.set(track.id, panner);
++      trackGain.connect(panner);
++      panner.connect(master);
++      const trackTap = options.trackTaps?.get(track.id);
++      if (trackTap) {
++        panner.connect(trackTap);
++      }
++    }
++    startPlan(plan, options.from, options.startAt);
++    metronomeGain = metronome ? ctx.createGain() : null;
++    if (metronomeGain) {
++      metronomeGain.gain.value = 1;
++      metronomeGain.connect(master);
++    }
++    startClicks(metronome?.clicks ?? [], options.from, options.startAt);
++  } catch (error) {
++    for (const state of [...sources, ...clickSources]) {
++      try {
++        state.source.stop();
++      } catch {
++        state.ended = true;
++      }
++    }
++    releaseNodes();
++    throw error;
++  }
+   return {
+     appendClicks(clicks, from, startAt) {
+       if (disconnected || !metronome) {
+@@ -354,23 +400,7 @@ export function applySchedule<TBuffer>(
+         return;
+       }
+       disconnected = true;
+-      for (const state of sources) {
+-        state.source.disconnect();
+-        state.fadeGain?.disconnect();
+-        state.envelopeGain?.disconnect();
+-        state.clipGain.disconnect();
+-      }
+-      for (const trackGain of trackGains.values()) {
+-        trackGain.disconnect();
+-      }
+-      for (const panner of panners.values()) {
+-        panner.disconnect();
+-      }
+-      for (const state of clickSources) {
+-        state.source.disconnect();
+-      }
+-      metronomeGain?.disconnect();
+-      master.disconnect();
++      releaseNodes();
+     },
+     setTrackGain(trackId, value) {
+       const trackGain = trackGains.get(trackId);

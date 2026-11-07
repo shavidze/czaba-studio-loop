@@ -1,0 +1,479 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -816,7 +816,10 @@
+   });
+   const pinnedClipsRef = useRef(history.present.clips);
+   const decodeInFlightRef = useRef(new Map<string, Promise<void>>());
+-  const collectionControllerRef = useRef<AbortController | null>(null);
++  const collectionControllerRef = useRef<{
++    collection: WorkspaceCollection;
++    controller: AbortController;
++  } | null>(null);
+   const ensureDecodedRef = useRef<(ids: Iterable<string>) => Promise<void>>(() =>
+     Promise.resolve(),
+   );
+@@ -1406,9 +1409,26 @@
+ 
+   resyncLoopRef.current = () => syncPlayback(historyRef.current.present, undefined, true);
+ 
++  const resyncAfterDecode = useCallback(
++    (sourceId: string) => {
++      const present = historyRef.current.present;
++      if (!present.clips.some((clip) => clip.sourceId === sourceId)) {
++        return;
++      }
++      try {
++        syncPlayback(present, undefined, true);
++      } catch {
++        stopPlayback();
++        setStatus(studioPlaybackStrings.scheduleFailed);
++      }
++    },
++    [setStatus, stopPlayback, syncPlayback],
++  );
++
+   const ensureDecoded = useCallback(
+     (ids: Iterable<string>): Promise<void> => {
+-      const controller = collectionControllerRef.current;
++      const owner = collectionControllerRef.current;
++      const controller = owner?.collection === collection ? owner.controller : null;
+       const waits: Promise<void>[] = [];
+       for (const id of new Set(ids)) {
+         const inFlight = decodeInFlightRef.current.get(id);
+@@ -1437,9 +1457,8 @@
+                 evictable: collection.canReloadSource?.(source) === true,
+               });
+               decodedBuffers.evict();
+-              const present = historyRef.current.present;
+-              if (decodedBuffers.has(id) && present.clips.some((clip) => clip.sourceId === id)) {
+-                syncPlayback(present, undefined, true);
++              if (decodedBuffers.has(id)) {
++                resyncAfterDecode(id);
+               }
+             },
+             (error: unknown) => {
+@@ -1466,7 +1485,7 @@
+       }
+       return Promise.all(waits).then(() => undefined);
+     },
+-    [collection, decodedBuffers, getDecodeContext, patchSourceState, syncPlayback],
++    [collection, decodedBuffers, getDecodeContext, patchSourceState, resyncAfterDecode],
+   );
+   ensureDecodedRef.current = ensureDecoded;
+ 
+@@ -1657,7 +1676,7 @@
+       isPlayingRef.current = true;
+       playbackStore.getState().setPlaying(true);
+       setStatus((text) =>
+-        insertMarkerStatusKind(text) === 'stopped'
++        insertMarkerStatusKind(text) === 'stopped' || text === studioPlaybackStrings.scheduleFailed
+           ? studioPlaybackStrings.playingFrom(formatArrangementTime(from))
+           : text,
+       );
+@@ -1719,9 +1738,6 @@
+         if (!ensureAudioContext()) {
+           return;
+         }
+-        if (isPlayingRef.current) {
+-          stopPlayback();
+-        }
+         previewRequestRef.current = sourceId;
+         decodedBuffers.setPinned('preview', [sourceId]);
+         void ensureDecoded([sourceId]).then(() => {
+@@ -2843,10 +2859,7 @@
+           decodedBuffers.evict();
+           storeSourcePeaks(sourceId, peaks);
+           settle({ audio: 'ready', audioNote: null });
+-          const present = historyRef.current.present;
+-          if (present.clips.some((clip) => clip.sourceId === sourceId)) {
+-            syncPlayback(present, undefined, true);
+-          }
++          resyncAfterDecode(sourceId);
+         });
+       } catch {
+         settle({ audio: 'error', audioNote: videoAudioNote('decode-failed') });
+@@ -2857,8 +2870,8 @@
+       getDecodeContext,
+       patchVideoSource,
+       requestSourcePeaks,
++      resyncAfterDecode,
+       storeSourcePeaks,
+-      syncPlayback,
+     ],
+   );
+ 
+@@ -4252,12 +4265,12 @@
+ 
+   useEffect(() => {
+     const controller = new AbortController();
+-    collectionControllerRef.current = controller;
++    collectionControllerRef.current = { collection, controller };
+     const inFlight = decodeInFlightRef.current;
+     const collectionSourceIds = collection.sources.map((source) => source.id);
+     const resetDecodedBuffers = () => {
+       controller.abort();
+-      if (collectionControllerRef.current === controller) {
++      if (collectionControllerRef.current?.controller === controller) {
+         collectionControllerRef.current = null;
+       }
+       inFlight.clear();
+@@ -4311,10 +4324,7 @@
+               error: null,
+             });
+             settle(false);
+-            const present = historyRef.current.present;
+-            if (present.clips.some((clip) => clip.sourceId === source.id)) {
+-              syncPlayback(present, undefined, true);
+-            }
++            resyncAfterDecode(source.id);
+           });
+         })
+         .catch((error: unknown) => {
+@@ -4337,8 +4347,8 @@
+     getDecodeContext,
+     patchSourceState,
+     requestSourcePeaks,
++    resyncAfterDecode,
+     storeSourcePeaks,
+-    syncPlayback,
+     setStatus,
+   ]);
+ 
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -228,6 +228,7 @@
+   webAudioUnavailable:
+     'Web Audio is not available in this browser — playback and export will not work.',
+   nothingToPlay: 'Nothing to play — add a clip from the library first.',
++  scheduleFailed: 'Playback stopped — the audio could not be scheduled. Press Play to try again.',
+   backToStartLabel: 'Back to start',
+   backToStartTitle: studioShortcutTitle('Back to start', 'back-to-start'),
+   playLabel: 'Play',
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -671,6 +671,7 @@
+     webAudioUnavailable:
+       'Web Audio is not available in this browser — playback and export will not work.',
+     nothingToPlay: 'Nothing to play — add a clip from the library first.',
++    scheduleFailed: 'Playback stopped — the audio could not be scheduled. Press Play to try again.',
+     backToStartLabel: 'Back to start',
+     backToStartTitle: 'Back to start (Home)',
+     playLabel: 'Play',
+--- a/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx
+@@ -1,10 +1,14 @@
+ import { act, render } from '@testing-library/react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+-import { type ArrangementWavResult, renderArrangementWav } from '~/lib/arrangement/graph.client';
++import {
++  type ArrangementWavResult,
++  applySchedule,
++  renderArrangementWav,
++} from '~/lib/arrangement/graph.client';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+-import { createArrangement } from '../model';
+-import { studioExportStrings, studioLibraryStrings } from '../strings';
++import { addClip, createArrangement } from '../model';
++import { studioExportStrings, studioLibraryStrings, studioPlaybackStrings } from '../strings';
+ import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ObservedDecodedCache {
+@@ -44,10 +48,11 @@
+ 
+ vi.mock('~/lib/arrangement/graph.client', async (importOriginal) => {
+   const actual = await importOriginal<typeof import('~/lib/arrangement/graph.client')>();
+-  return { ...actual, renderArrangementWav: vi.fn() };
++  return { ...actual, applySchedule: vi.fn(actual.applySchedule), renderArrangementWav: vi.fn() };
+ });
+ 
+ const renderWavMock = vi.mocked(renderArrangementWav);
++const applyScheduleMock = vi.mocked(applySchedule);
+ 
+ const fakeClock = { base: 0 };
+ 
+@@ -264,6 +269,7 @@
+     createdSources.length = 0;
+     fakeClock.base = Date.now() / 1000;
+     renderWavMock.mockReset();
++    applyScheduleMock.mockReset();
+     renderWavMock.mockResolvedValue({
+       blob: new Blob(['wav']),
+       peak: 0.5,
+@@ -579,4 +585,172 @@
+     act(() => live(api).addSourceToActiveTrack('keep'));
+     expect(cache.setPinnedCalls()).toBe(before + 1);
+   });
++  it('EV11: a resync that throws after a re-decode while playing stops playback with a status and leaks no rejection', async () => {
++    const rejections: unknown[] = [];
++    const onRejection = (reason: unknown) => {
++      rejections.push(reason);
++    };
++    process.on('unhandledRejection', onRejection);
++    try {
++      const { api, pending } = await mountEviction();
++      act(() => live(api).addSourceToActiveTrack('keep'));
++      act(() => live(api).togglePlayback());
++      expect(live(api).isPlaying).toBe(true);
++      act(() => live(api).addSourceToActiveTrack('big'));
++      applyScheduleMock.mockImplementationOnce(() => {
++        throw new Error('schedule failed');
++      });
++      await settleNext(pending, bigBuffer());
++      await flushAsync(10);
++      expect(rejections).toEqual([]);
++      expect(live(api).isPlaying).toBe(false);
++      expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++      expect(live(api).sourceStates.big?.status).toBe('ready');
++      expect(observedCache().has('big')).toBe(true);
++      act(() => live(api).togglePlayback());
++      expect(live(api).isPlaying).toBe(true);
++      expect(live(api).status).not.toBe(studioPlaybackStrings.scheduleFailed);
++      expect(live(api).status.startsWith('Playing from ')).toBe(true);
++      act(() => live(api).togglePlayback());
++    } finally {
++      process.off('unhandledRejection', onRejection);
++    }
++  });
++
++  it('EV11: an export waiting on the same re-decode still renders when the resync throws', async () => {
++    const { api, pending } = await mountEviction();
++    act(() => live(api).addSourceToActiveTrack('keep'));
++    act(() => live(api).togglePlayback());
++    act(() => live(api).addSourceToActiveTrack('big'));
++    let exported: Promise<void> = Promise.resolve();
++    act(() => {
++      exported = live(api).exportWav();
++    });
++    applyScheduleMock.mockImplementationOnce(() => {
++      throw new Error('schedule failed');
++    });
++    await settleNext(pending, bigBuffer());
++    await act(async () => {
++      await exported;
++    });
++    expect(live(api).isPlaying).toBe(false);
++    expect(renderWavMock).toHaveBeenCalledTimes(1);
++    expect(live(api).exportState.phase).not.toBe('error');
++  });
++
++  it('EV12: a stale preview call from before a collection change decodes nothing under the new collection', async () => {
++    const { api, view, bigLoads } = await mountEviction();
++    const stale = live(api);
++    const next: WorkspaceCollection = {
++      id: 'next',
++      label: 'next',
++      origin: 'demo',
++      sources: [
++        { id: 'other', title: 'Other', collectionLabel: 'next', kind: 'sfx', origin: 'demo' },
++      ],
++      loadSource: () => new Promise<AudioBuffer>(() => undefined),
++    };
++    view.rerender(
++      <ArrangementProvider collection={next} initialArrangement={evictionArrangement()}>
++        <EvictionProbe api={api} />
++      </ArrangementProvider>,
++    );
++    await flushAsync();
++    const loadsBefore = bigLoads.count;
++    act(() => stale.startLibraryPreview('big', 0));
++    await flushAsync();
++    expect(bigLoads.count).toBe(loadsBefore);
++    expect(observedCache().has('big')).toBe(false);
++  });
++
++  it('EV13: a preview of an evicted source keeps the timeline playing until its decode succeeds', async () => {
++    const { api, pending } = await mountEviction();
++    act(() => live(api).addSourceToActiveTrack('keep'));
++    act(() => live(api).togglePlayback());
++    act(() => live(api).startLibraryPreview('big', 0));
++    expect(live(api).isPlaying).toBe(true);
++    expect(live(api).libraryPreviewSourceId).toBe(null);
++    await settleNext(pending, bigBuffer());
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).libraryPreviewSourceId).toBe('big');
++    act(() => live(api).stopLibraryPreview());
++  });
++
++  it('EV13: a preview whose decode fails leaves the timeline playing and shows the failure text', async () => {
++    const { api, pending } = await mountEviction();
++    act(() => live(api).addSourceToActiveTrack('keep'));
++    act(() => live(api).togglePlayback());
++    act(() => live(api).startLibraryPreview('big', 0));
++    await settleNext(pending, new Error(DECODE_ERROR));
++    expect(live(api).isPlaying).toBe(true);
++    expect(live(api).libraryPreviewSourceId).toBe(null);
++    expect(live(api).status).toBe(studioLibraryStrings.sourceFailed(BIG_TITLE));
++    act(() => live(api).togglePlayback());
++  });
++
++  it('EV14: re-rendering the provider with the same collection loads nothing again and deletes no buffer', async () => {
++    const { api, view, bigLoads, collection } = await mountEviction();
++    const cache = observedCache();
++    const loadsBefore = bigLoads.count;
++    const deleteManyBefore = cache.deleteManyCalls().length;
++    view.rerender(
++      <ArrangementProvider collection={collection} initialArrangement={evictionArrangement()}>
++        <EvictionProbe api={api} />
++      </ArrangementProvider>,
++    );
++    await flushAsync();
++    act(() => live(api).addSourceToActiveTrack('keep'));
++    await flushAsync();
++    expect(bigLoads.count).toBe(loadsBefore);
++    expect(cache.deleteManyCalls().length).toBe(deleteManyBefore);
++    expect(cache.has('keep')).toBe(true);
++  });
++  it('EV15: a resync that throws after the first load of a placed source stops playback and keeps the source ready', async () => {
++    const rejections: unknown[] = [];
++    const onRejection = (reason: unknown) => {
++      rejections.push(reason);
++    };
++    process.on('unhandledRejection', onRejection);
++    try {
++      const setup = evictionCollection();
++      const withKeep = addClip(evictionArrangement(), {
++        trackId: 'music',
++        sourceId: 'keep',
++        sourceDuration: 0.1,
++        desiredStart: 0,
++      });
++      const withBig = withKeep
++        ? addClip(withKeep.arrangement, {
++            trackId: 'music',
++            sourceId: 'big',
++            sourceDuration: 10,
++            desiredStart: 1,
++          })
++        : null;
++      if (!withBig) {
++        throw new Error('seed arrangement not built');
++      }
++      const api: ProbeRef = { current: null };
++      render(
++        <ArrangementProvider collection={setup.collection} initialArrangement={withBig.arrangement}>
++          <EvictionProbe api={api} />
++        </ArrangementProvider>,
++      );
++      await flushAsync();
++      expect(live(api).sourceStates.big?.status).toBe('loading');
++      act(() => live(api).togglePlayback());
++      expect(live(api).isPlaying).toBe(true);
++      applyScheduleMock.mockImplementationOnce(() => {
++        throw new Error('schedule failed');
++      });
++      await settleNext(setup.pending, bigBuffer());
++      await flushAsync(10);
++      expect(rejections).toEqual([]);
++      expect(live(api).isPlaying).toBe(false);
++      expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++      expect(live(api).sourceStates.big?.status).toBe('ready');
++    } finally {
++      process.off('unhandledRejection', onRejection);
++    }
++  });
+ });
+--- a/app/lib/arrangement/__tests__/peaks-worker-video.test.tsx
++++ b/app/lib/arrangement/__tests__/peaks-worker-video.test.tsx
+@@ -2,6 +2,7 @@
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementProvider } from '~/contexts/ArrangementContext';
++import { applySchedule } from '~/lib/arrangement/graph.client';
+ import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+@@ -10,6 +11,7 @@
+   type PeaksWorkerRequest,
+   type PeaksWorkerState,
+ } from '../peaks.worker-protocol';
++import { studioPlaybackStrings } from '../strings';
+ import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -18,7 +20,7 @@
+ 
+ vi.mock('~/lib/arrangement/graph.client', async (importOriginal) => {
+   const actual = await importOriginal<typeof import('~/lib/arrangement/graph.client')>();
+-  return { ...actual, renderArrangementWav: vi.fn() };
++  return { ...actual, applySchedule: vi.fn(actual.applySchedule), renderArrangementWav: vi.fn() };
+ });
+ 
+ vi.mock('~/lib/arrangement/video.client', async (importOriginal) => {
+@@ -33,6 +35,7 @@
+ 
+ const probeVideoMock = vi.mocked(probeVideoFile);
+ const decodeVideoMock = vi.mocked(decodeVideoAudio);
++const applyScheduleMock = vi.mocked(applySchedule);
+ 
+ class FakeAudioBuffer implements AudioBuffer {
+   readonly length: number;
+@@ -179,6 +182,7 @@
+     RecordingSource.started = [];
+     probeVideoMock.mockReset();
+     decodeVideoMock.mockReset();
++    applyScheduleMock.mockReset();
+     vi.stubGlobal('Worker', ManualPeaksWorker);
+     vi.stubGlobal('AudioContext', RecordingAudioContext);
+     vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+@@ -251,4 +255,60 @@
+     expect(live(api).sourcePeaks.has(sourceId)).toBe(true);
+     expect(RecordingSource.started).toContain(buffer);
+   });
++  it('PW20 a resync that throws when the video sound is ready stops playback with a status and keeps the sound ready', async () => {
++    const errors: unknown[] = [];
++    const onError = (event: ErrorEvent) => {
++      errors.push(event.error);
++      event.preventDefault();
++    };
++    window.addEventListener('error', onError);
++    try {
++      const buffer = new FakeAudioBuffer([tone(1500)], 1000);
++      probeVideoMock.mockResolvedValue({
++        url: 'blob:film',
++        duration: 1.5,
++        width: 640,
++        height: 360,
++      });
++      decodeVideoMock.mockResolvedValue({ buffer, reason: null });
++      const api: PeaksVideoApiRef = { current: null };
++      mountedView = render(
++        <ArrangementProvider
++          collection={emptyCollection}
++          initialArrangement={emptyVideoArrangement()}
++        >
++          <PeaksVideoProbe api={api} />
++        </ArrangementProvider>,
++      );
++      await flush();
++      await act(async () => {
++        live(api).importVideoFiles([new File(['x'], 'film.mp4', { type: 'video/mp4' })]);
++      });
++      await flush();
++      const sourceId = [...live(api).videoSources.values()][0]?.id ?? '';
++      await act(async () => {
++        live(api).togglePlayback();
++      });
++      await flush();
++      expect(live(api).isPlaying).toBe(true);
++      const calls = applyScheduleMock.mock.calls.length;
++      applyScheduleMock.mockImplementationOnce(() => {
++        throw new Error('schedule failed');
++      });
++      const worker = ManualPeaksWorker.instances[0];
++      await act(async () => {
++        for (let index = 0; index < worker.posted.length; index++) {
++          worker.run(worker.posted[index]);
++        }
++      });
++      await flush();
++      expect(applyScheduleMock.mock.calls.length).toBe(calls + 1);
++      expect(errors).toEqual([]);
++      expect(live(api).isPlaying).toBe(false);
++      expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++      expect(live(api).videoSources.get(sourceId)?.audio).toBe('ready');
++    } finally {
++      window.removeEventListener('error', onError);
++    }
++  });
+ });

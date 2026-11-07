@@ -1,0 +1,21 @@
+applied MU-387-NO-ROLLBACK-STOP
+     × AR1: a start that throws mid-plan stops every started source, disconnects every node and rethrows the same error 12ms
+     × AR2: a metronome click that throws stops the started clip sources and clicks, disconnects the click gain and rethrows 2ms
+     × AR3: a stop that throws during the rollback does not replace the original error 2ms
+     ✓ AR4: a schedule that builds normally stops and disconnects nothing until its handle does 1ms
+     ✓ AR5: an appended plan whose start throws keeps the earlier sources stoppable and detaches only the failed clip 1ms
+     × SF1: a Play whose second source start throws stops at the start point with a status and leaves nothing sounding 45ms
+     × SF2: a repeated Play throw keeps the failure status, then a clean Play plays from the start point 14ms
+     × SF3: an edit while playing whose reschedule throws keeps the edit, stops the old graph and shows the status 29ms
+     ✓ SF4: a seek while playing whose reschedule throws stops at the seek target with the status 17ms
+     ✓ SF5: a scrub while playing whose reschedule throws stops at the scrub point, and the scrub end leaves the marker there 15ms
+     ✓ SF7: a scrub end while playing whose reschedule throws stops at the release point with the status 11ms
+     ✓ SF6: a loop iteration appended by the audio pump that throws stops playback with the status  913ms
+ FAIL  app/lib/arrangement/__tests__/apply-schedule-rollback.test.ts > applySchedule all-or-nothing (GATE-B385-M2) > AR1: a start that throws mid-plan stops every started source, disconnects every node and rethrows the same error
+ FAIL  app/lib/arrangement/__tests__/apply-schedule-rollback.test.ts > applySchedule all-or-nothing (GATE-B385-M2) > AR2: a metronome click that throws stops the started clip sources and clicks, disconnects the click gain and rethrows
+ FAIL  app/lib/arrangement/__tests__/apply-schedule-rollback.test.ts > applySchedule all-or-nothing (GATE-B385-M2) > AR3: a stop that throws during the rollback does not replace the original error
+ FAIL  app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx > schedule failure stops playback with a status (GATE-B385-M2) > SF1: a Play whose second source start throws stops at the start point with a status and leaves nothing sounding
+ FAIL  app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx > schedule failure stops playback with a status (GATE-B385-M2) > SF2: a repeated Play throw keeps the failure status, then a clean Play plays from the start point
+ FAIL  app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx > schedule failure stops playback with a status (GATE-B385-M2) > SF3: an edit while playing whose reschedule throws keeps the edit, stops the old graph and shows the status
+      Tests  6 failed | 6 passed (12)
+restored

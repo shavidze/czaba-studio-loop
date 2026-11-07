@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T09:56:21.390Z",
-  "current_task": "current-task.md (round 385: RETRO 385, window 369-384; no app code; A nothing; C traceability RT-* rows, script re-run under c-round-385/scripts, G385-AUTH, STUDIO-SMOKE-385 both viewports; frozen b-round-384/r385-tree-sha256.txt; claims b-round-384/claims-385.sh)",
+  "_generatedUtc": "2026-11-07T10:54:40.056Z",
+  "current_task": "current-task.md (round 386: GATE384-M1 + A-R383-REVIEW-L1 + GATE384-L2, decode-resync error handling; A applies reviewed sketch b-round-385/sketch-386.patch.txt (sha 1cada6c7) + doc 249; grants b-round-385/grants-386.txt (6); frozen b-round-385/r386-frozen-sha256.txt (1275); claims b-round-385/claims-386.sh)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6206,7 +6206,7 @@
     {
       "id": "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
       "severity": "low",
-      "status": "assigned to PERF-13b-ii scope (D-29z1283): guard controller ",
+      "status": "dispatched round 386 (D-29z1294): owner-guarded collectionCo",
       "title": "stale ensureDecoded after a collection change could decode an old-collection source under the new co"
     },
     {
@@ -6217,19 +6217,26 @@
       "severity": "medium",
       "title": "ensureDecoded fulfilled handler calls syncPlayback; if it throws, the Promise.all rejects and the three void call sites (history publish ~922/927, startPlaybackAt 1646, startLibraryPreview 1727) leave it unhandled",
       "repro": "gates/round-384/review.md suggestion 1; ArrangementContext.tsx l.1409-1450 (ensureDecoded), l.927, l.1646, l.1727 at 7295618; reachability needs a syncPlayback/startGraph throw (not yet reproduced in a browser)",
-      "status": "scheduled round 386 (D-29z1287): bug round with A-R383-REVIEW-L1 (same function), before REGRESSION and PERF-13b-ii; severity kept as the reviewer rated it (bug gate)"
+      "status": "dispatched round 386 (D-29z1294, D-29z1295): reproduced by B in the browser at HEAD (b-round-385/probe/head-1440.json, head-1280.json: 1 pageerror, clock running); fix = resyncAfterDecode try/catch; rows EV11 x2, EV15, PW20; closes on C round 386 PASS"
+    },
+    {
+      "id": "GATE-B385-M2-APPLY-SCHEDULE-ROLLBACK",
+      "severity": "medium",
+      "origin": "tech-lead review of B's round-386 sketch (pre-existing code)",
+      "evidence": "b-round-385/sketch-review.md TL-R385-M2 + delta review",
+      "title": "applySchedule is not all-or-nothing: a throw partway through startPlan (after master connect and some source.start calls) leaves started sources sounding with no handle, so stopPlayback cannot stop them; also a repeated throw on Play leaves isPlayingRef true with no sound",
+      "repro": "not browser-reproduced; needs a mid-plan throw (e.g. RangeError/InvalidStateError from start()); graph.client.ts ~l.190 master connect, ~l.223-265 startPlan at 7295618",
+      "status": "scheduled (D-29z1297, D-29z1298): own bug round after round 386 (regression first if due); scope = roll back inside graph.client.ts (stop+disconnect started sources, disconnect master, rethrow) + Play repeated-throw case",
+      "added": "2026-11-07 B round 385 -> 386 planning"
+    },
+    {
+      "id": "Q-PREVIEW-STOPS-TRANSPORT",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1299): question to Saba; not scheduled",
+      "title": "library preview stops timeline playback (Live keeps the transport running and starts the preview at "
     }
   ],
   "recent_rounds": [
-    {
-      "round": 376,
-      "task": "current-task.md",
-      "decision": "D-29z1246..D-29z1249",
-      "type": "PERF-11c-iii-c1: ArrangementTransportView memo + Edit/Centre/View memo groups + useSoftDisableFocusHandoff (TL-R376-M1) + useArrangementTransportActions; RB-LEAF4, FL11; RB-LEAF3 per step; DP23 library control",
-      "status": "stopped (D-29z1250): A STOP for B rulings (TC10 headroom misread, reviewer M1); C BLOCKED, 0 bugs, browserVerified false; gate 376 skipped; continued in round 377 on the same uncommitted tree",
-      "note": "baseline 6b11be7 clean; sketch b-round-375/sketch.patch.txt; claims b-round-375/claims-376.sh",
-      "added": "2026-11-06 B round 375 -> 376 planning"
-    },
     {
       "round": 377,
       "task": "current-task.md",
@@ -6307,9 +6314,18 @@
       "task": "current-task.md",
       "decision": "D-29z1288..D-29z1292",
       "type": "RETRO 385 (window 369-384) + screen/journey review; no app code",
-      "status": "dispatched",
+      "status": "done (D-29z1293): C round 385 PASS (c-round-385.json: 12 rows passed, browserVerified true, realVerified true, 0 bugs; fake-bearer row blocked = backend-only); gate 385 skipped (no real changes), baseline stays 7295618",
       "note": "baseline 7295618 clean; frozen b-round-384/r385-tree-sha256.txt (1280); claims b-round-384/claims-385.sh; grants none",
       "added": "2026-11-07 B round 384 -> 385 planning"
+    },
+    {
+      "round": 386,
+      "task": "current-task.md",
+      "decision": "D-29z1293..D-29z1298",
+      "type": "bug round: GATE384-M1 (Medium) + A-R383-REVIEW-L1 + GATE384-L2 (Low) in ensureDecoded/startLibraryPreview; resyncAfterDecode helper for ensureDecoded, video-audio and load paths; owner-guarded controller; no click-time stop on deferred preview; scheduleFailed status",
+      "status": "dispatched",
+      "note": "baseline 7295618 clean; sketch b-round-385/sketch-386.patch.txt sha 1cada6c7 reviewed by tech-lead (+delta); 7 mutants red; covering 34 files/633 tests on sketch; browser pre-check b-round-385/probe/",
+      "added": "2026-11-07 B round 385 -> 386 planning"
     }
   ],
   "other_keys": [
