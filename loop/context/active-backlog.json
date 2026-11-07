@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T21:52:12.704Z",
-  "current_task": "Round 396: PERF-13c-ii-b (stage 3 of 3): purchased adapter previewUrl; stream element crossOrigin anonymous; fallback lifetime = collection object (PS27); PS28; perf harness preview rows (assert, B sketch); doc 252 Completed, doc 248 l.4 (current-task.md)",
+  "_generatedUtc": "2026-11-07T22:52:19.370Z",
+  "current_task": "Round 397: PERF-13d (final PERF-13 stage): the 5 worker synth demo buffers are built one per timer task from one shared array (copyToChannel x2, generateDemoStereoChannels deleted); SB1-SB6; browser BUF-TASKS/SAME-ARRAY/HASH/STATUS/PLAY at 6x; doc 253 new, doc 247 Completed (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -222,78 +222,7 @@
       "reference": "b-round-289/screens/stems-probe.json"
     }
   ],
-  "current_items_full": [
-    {
-      "id": "SRW-21",
-      "round": 16,
-      "title": "Purchased-library mount readiness + final regression",
-      "fb": [],
-      "type": "integration",
-      "depends_on": [
-        "SRW-20"
-      ],
-      "status": "deferred_user",
-      "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
-      "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
-      "files": [
-        "app/lib/arrangement/collection.ts",
-        "app/lib/arrangement/__tests__/collection.test.ts",
-        "app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx",
-        "app/components/arrangement/StudioWorkspace.tsx (header only)",
-        "app/contexts/ArrangementContext.tsx (status + file names only)",
-        "docs/technical/arrangement-workspace.md",
-        "docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md"
-      ],
-      "acceptance": [
-        {
-          "id": "R21-I1",
-          "action": "Unit test mounts StudioWorkspace logic with a fake purchased collection adapter",
-          "expected": "no workspace code change needed; adapter receives AbortSignal; errors surfaced",
-          "verify": "unit",
-          "expected_amended_D-29z57": "createPurchasedWorkspaceCollection contract (signal, credentials omit, no headers, errors without URL/token, validation) + workspace heading/badge/status/file names driven by collection.origin; /studio-lab demo output byte-identical (C DEMO-COPY, DEMO-LOAD, EXPORT-NAMES); purchased path unit-only un …[see backlog.json]",
-          "status": "pass_as_amended (D-29z57): C round 92 DEMO-COPY/DEMO-LOAD/EXPORT-NAMES browser PASS both viewports; PC1-PC10/PW1-PW6 + C mutations b/f red; purchased path unit-only"
-        },
-        {
-          "id": "R21-I2",
-          "action": "Full C regression on all prior acceptance IDs",
-          "expected": "all PASS or documented",
-          "verify": "C",
-          "status": "todo (after the Lows that touch shipped behaviour; regression round 2026-10-24+ covers part)"
-        }
-      ],
-      "b_finding_round92": "B source read 2026-10-22: R21-I1 expectation 'no workspace code change needed' is FALSE - StudioWorkspace.tsx l.2136/l.2141-2143 and ArrangementContext.tsx l.532/l.3013-3014/l.2722/l.2910/l.2916 hardcode demo copy and file names; a purchased mount would print 'demo - no sign-in needed'. R21-I1 amend …[see backlog.json]",
-      "stages": [
-        {
-          "stage": "1",
-          "round": 92,
-          "status": "c_pass_published",
-          "decision": "D-29z57",
-          "scope": "P1 collection.ts (workspaceCollectionCopy + createPurchasedWorkspaceCollection), W1 header, X1-X3 status/file names, PC1-PC9, PW1-PW6, mutations a-h, doc 079 l.4, doc 080, docs/technical/arrangement-workspace.md",
-          "c_ids": [
-            "DEMO-COPY",
-            "DEMO-LOAD",
-            "EXPORT-NAMES",
-            "PX-NET",
-            "REG-HYD",
-            "G92-3",
-            "PC-REVIEW",
-            "T92-TARGETED",
-            "SOURCE-UNCHANGED"
-          ],
-          "evidence": "c-round-92.md, c-round-92.json (PASS, browserVerified=true, realVerified=true, 0 bugs); gates/gate-round-92.json published 64e12d8 (verify 137/137, build OK, reviewer 9/10)",
-          "blocked": [
-            "G92-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
-          ],
-          "not_browser_reachable": "purchased path (createPurchasedWorkspaceCollection, purchased copy, purchased file names): unit-only while the route mount is blocked"
-        }
-      ],
-      "status_before_2026_10_23": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 published 64e12d8; load-status hardening C PASS round 94 unit-proven, published 0513439, browser half at the mount; SRW-21-PREMOUNT bundle open; R21-I2 full regression open)",
-      "deferred_reason": "route mount on the protected studio.$productId.tsx waits for the auth work; not testable in the cloud (no backend)",
-      "user_decision_2026_10_23": "SRW-21 deferred by the user; finished stage 1 stays; counts as deferred for every gate; do not touch the protected files",
-      "visual_a_note_d29z116": "when the purchased mount is unblocked, the studio route needs the same font stylesheet links() as /studio-lab (V-2a, D-29z116 R3); do not touch protected files before then",
-      "pd_review_d29z692": "Saba 2026-10-31 Q1: first Studio product priority after STUDIO-PERFORMANCE; status stays deferred_user for the protected mount; SRW-21-PLAN (plan doc only) queued in PD-REVIEW-2026-10-31; STUDIO-LINK is the interim way in"
-    }
-  ],
+  "current_items_full": [],
   "other_open_items": [
     {
       "id": "T12-GAIN-VOLUME",
@@ -4849,7 +4778,7 @@
     {
       "id": "PERF2-STEREO-COPY",
       "severity": "low",
-      "status": "moved to PERF-13 (D-29z846) | signal (D-29z661): not in roun",
+      "status": "scheduled round 397 (D-29z1356): copyToChannel(samples, 0) a",
       "title": "loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) befor"
     },
     {
@@ -5314,7 +5243,7 @@
     {
       "id": "R314-DEMO-BUFFER-LONGTASK-6X",
       "severity": "info",
-      "status": "signal (D-29z846): PERF-13 (with PERF2-STEREO-COPY)",
+      "status": "scheduled round 397 (D-29z1356): premise confirmed at HEAD (",
       "title": "a 142-168 ms long task at 6x just before the demo stems' buffers appear; hypothesis (unconfirmed): A"
     },
     {
@@ -6305,49 +6234,13 @@
       "title": "the first-load \"Loading the demo collection\" text was not observed because the observer was installe"
     },
     {
-      "id": "GATE393-L4-FALLBACK-NEVER-EXPIRES",
-      "severity": "low",
-      "status": "scheduled round 396 (D-29z1352): ruled no timer; lifetime = ",
-      "title": "streamFallbackRef is never cleared per collection; one transient error disables streaming for that i"
-    },
-    {
       "id": "ARCH-CHECKPOINT-PREVIEW-AFTER-13C",
       "severity": "info",
-      "status": "due after round 396 C PASS (D-29z1353): request b-round-393/",
+      "status": "DUE NOW (D-29z1358): PERF-13c passed C round 396 (gate 396 4",
       "title": "bounded frontend-architect checkpoint on the library preview region (decidePreviewMode / useLibraryP"
-    },
-    {
-      "id": "A-R395-REVIEW-L2-THROW-WHILE-ARMED",
-      "severity": "low",
-      "status": "scheduled round 396 (D-29z1353): PS28 (test file owned this ",
-      "title": "no row for a same-url seek that throws while the stall timer is armed before playing (PS23 covers it"
-    },
-    {
-      "id": "B-R395-DOC248-STATUS",
-      "severity": "low",
-      "status": "scheduled round 396 (D-29z1354): doc 248 l.4 granted -> 'Com",
-      "title": "doc 248 (PERF-13b-i) status line not closed at the final PERF-13b stage (L28 multi-stage clause miss"
-    },
-    {
-      "id": "TL-B395-SKETCH-M2-CROSSORIGIN",
-      "severity": "medium",
-      "origin": "B pre-check (tech-lead review of the round-396 sketch, before dispatch)",
-      "evidence": "b-round-395/sketch-review.md Review 1 Medium 2",
-      "title": "the stream element requests its URL in no-cors mode with credentials included, unlike the decode fetch (credentials omit); first relevant now that the purchased adapter hands it signed stem URLs",
-      "status": "scheduled round 396 (D-29z1352): element.crossOrigin = anonymous; PS29 + MU-396-NO-CROSSORIGIN; browser row R8 (b-round-395/probe/rows-R8.json)",
-      "added": "2026-11-07 B round 395 -> 396 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 387,
-      "task": "current-task.md",
-      "decision": "D-29z1300..D-29z1305",
-      "type": "bug round: GATE-B385-M2 + A-R386-REVIEW-M1 + B-R386-UNGUARDED-GRAPH-CALLERS (Medium x3, one root cause: a throw while building the playback graph); applySchedule rollback + provider startGraphOrStop + pump catch; scheduleFailed status deferred to a microtask",
-      "status": "c_fail (D-29z1306): C round 387 FAIL, browserVerified true; 8 rows PASS, UNIT/MUTANTS not completed by C; 1 Medium C-R387-01 (= A-R387-REVIEW-M1); gate 387 skipped; tree kept uncommitted for round 388",
-      "note": "baseline 5312260 clean; sketch b-round-386/sketch-387.patch.txt sha a9f22614 (v2 after tech-lead TL-R387-M1/L1-L6; v1 6e30325e kept as sketch-387-v1.patch.txt) reviewed by tech-lead + delta; 15 mutants red; full suite on sketch 257/3787; browser HEAD repro + sketch flow + M1 neighbour both viewports; export byte-identical",
-      "added": "2026-11-07 B round 386 -> 387 planning"
-    },
     {
       "round": 388,
       "task": "current-task.md",
@@ -6428,9 +6321,18 @@
       "task": "current-task.md",
       "decision": "D-29z1351..D-29z1354",
       "type": "PERF-13c-ii-b (stage 3 of 3): purchased previewUrl, crossOrigin anonymous, fallback lifetime, perf preview rows, doc 252 Completed",
-      "status": "dispatched",
+      "status": "C PASS (c-round-396.json, browserVerified true, 0 bugs); gate 396 published 4f28bff (D-29z1355)",
       "note": "baseline cf81dff clean; grants b-round-395/grants-396.txt (8); frozen b-round-395/r396-frozen-sha256.txt (1279); claims b-round-395/claims-396.sh K1..K22; sketch b-round-395/sketch-396.patch.txt sha 91c5d730",
       "added": "2026-11-07 B round 395 -> 396 planning"
+    },
+    {
+      "round": 397,
+      "task": "current-task.md",
+      "decision": "D-29z1355..D-29z1358",
+      "type": "PERF-13d (final PERF-13 stage): synth demo buffers one per task, one shared array; doc 253, doc 247 Completed",
+      "status": "dispatched",
+      "note": "baseline 4f28bff clean; grants b-round-396/grants-397.txt (5); frozen b-round-396/r397-frozen-sha256.txt (1284); claims b-round-396/claims-397.sh K1..K22; sketch b-round-396/sketch-397.patch.txt sha 4db03d5a",
+      "added": "2026-11-07 B round 396 -> 397 planning"
     }
   ],
   "other_keys": [

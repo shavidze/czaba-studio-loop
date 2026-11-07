@@ -1,0 +1,81 @@
+diff --git a/app/data/studio-lab-demo.ts b/app/data/studio-lab-demo.ts
+index d43e3ba..7b809f8 100644
+--- a/app/data/studio-lab-demo.ts
++++ b/app/data/studio-lab-demo.ts
+@@ -2,7 +2,6 @@ import {
+   DEMO_STEM_BEAT_SECONDS,
+   DEMO_SYNTH_SAMPLE_RATE,
+   type DemoStemPart,
+-  generateDemoStereoChannels,
+   generateSlowRiseSamples,
+   generateSoftImpactSamples,
+ } from '~/lib/arrangement/demo-synth';
+@@ -93,13 +92,22 @@ const studioLabDemoSources: WorkspaceSource[] = [
+   ),
+ ];
+ 
+-async function synthesizeDemoSamples(sourceId: string): Promise<Float32Array<ArrayBuffer> | null> {
++function yieldToNextTask(): Promise<void> {
++  return new Promise((resolve) => {
++    setTimeout(resolve, 0);
++  });
++}
++
++async function synthesizeDemoSamples(
++  sourceId: string,
++  signal: AbortSignal,
++): Promise<Float32Array<ArrayBuffer> | null> {
+   const part = demoStemParts[sourceId];
+-  if (part) {
+-    return (await synthesizeDemoCompositionOffMainThread()).stems[part];
+-  }
+-  if (sourceId === 'demo-synth-mix') {
+-    return (await synthesizeDemoCompositionOffMainThread()).mix;
++  if (part || sourceId === 'demo-synth-mix') {
++    const composition = await synthesizeDemoCompositionOffMainThread();
++    await yieldToNextTask();
++    signal.throwIfAborted();
++    return part ? composition.stems[part] : composition.mix;
+   }
+   const generate = demoSynths[sourceId];
+   return generate ? generate() : null;
+@@ -114,19 +122,17 @@ async function loadDemoSource(
+   if (url) {
+     return fetchAndDecodeSource(url, ctx, signal, publicPreviewSourceFetch());
+   }
+-  const samples = await synthesizeDemoSamples(source.id);
++  const samples = await synthesizeDemoSamples(source.id, signal);
+   if (!samples) {
+     throw new Error(studioSourceLoadStrings.unknownDemoSource);
+   }
+-  const channels = generateDemoStereoChannels(() => samples);
+   const buffer = new AudioBuffer({
+-    numberOfChannels: channels.length,
+-    length: channels[0].length,
++    numberOfChannels: 2,
++    length: samples.length,
+     sampleRate: DEMO_SYNTH_SAMPLE_RATE,
+   });
+-  for (const [index, channel] of channels.entries()) {
+-    buffer.copyToChannel(channel, index);
+-  }
++  buffer.copyToChannel(samples, 0);
++  buffer.copyToChannel(samples, 1);
+   return buffer;
+ }
+ 
+diff --git a/app/lib/arrangement/demo-synth.ts b/app/lib/arrangement/demo-synth.ts
+index 959cddb..9375e96 100644
+--- a/app/lib/arrangement/demo-synth.ts
++++ b/app/lib/arrangement/demo-synth.ts
+@@ -156,10 +156,3 @@ export function getDemoStemComposition(): DemoStemComposition {
+   cachedDemoComposition = { stems, mix };
+   return cachedDemoComposition;
+ }
+-
+-export function generateDemoStereoChannels(
+-  generate: () => Float32Array<ArrayBuffer>,
+-): Float32Array<ArrayBuffer>[] {
+-  const left = generate();
+-  return [left, new Float32Array(left)];
+-}

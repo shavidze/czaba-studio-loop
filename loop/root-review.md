@@ -966,3 +966,7 @@ COMMIT OK. Findings for B: gates/round-395/review.md
 ## Round 396 (2026-11-07)
 COMMIT OK. Findings for B: gates/round-396/review.md
 
+
+## Round 397 (2026-11-07)
+COMMIT OK. Findings for B: gates/round-397/review.md
+

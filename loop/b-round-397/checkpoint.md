@@ -1,0 +1,12 @@
+phase1 (B planning 397->398), 2026-11-07
+- [x] tasks/round-397.md archived (copy); pre-edit copies b-round-397/*-before-398.*
+- [x] gate 397 published c93d926 = baseline (HEAD c93d926 clean); C 397 PASS browserVerified true, 0 bugs; l57 OK
+- [x] premise probe HEAD 200 clips both vps 1x/6x (probe/head-200-*.json)
+- [x] advisor (orientation); consults performance-optimizer + tech-lead (consults.md)
+- [x] sweep-clip-dom-locators.txt (51)
+- [x] sketch (lane data-clip-count + LC1-LC5), mutants 5/5 red, tsc 0, biome 0, full suite v1 (3 rows) 260/3850 rc0
+- [x] tech-lead review + delta review (sketch-review.md, sha bd8fe321)
+- [x] full suite on final sketch 260/3852 rc0 (precheck-full.log)
+- [x] current-task.md, b-round-397.md, b-next.json, backlog v365, feature-status
+- [x] claims planning output + on-sketch output
+- [x] advisor close: K25 probe (groups 0; held drag 3/0, release 2/1, undo 3/0), COUNT-BROWSER + self-check + K8 + screenshot row fixed; claims regenerated

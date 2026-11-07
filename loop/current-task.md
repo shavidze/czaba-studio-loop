@@ -1,189 +1,223 @@
-# Round 397: PERF-13d. The five synth demo buffers are built in five tasks from one shared array
+# Round 398: PERF-14a. A 200-clip scale harness, and a lane clip count that does not depend on the DOM
 
-**Planned by:** B, at the round 396 → 397 planning, 2026-11-07 (`b-round-396.md`).
-**Decisions:** D-29z1355 … D-29z1358 (`backlog.json` v364, `decisions_log_b`).
-**Type:** final stage of PERF-13 (performance). No new screen element and no new behaviour a user must learn. What the user hears does not change (channel hashes equal HEAD, §6 BUF-HASH).
+**Planned by:** B, at the round 397 → 398 planning, 2026-11-07 (`b-round-397.md`).
+**Decisions:** D-29z1359 … D-29z1361 (`backlog.json` v365, `decisions_log_b`).
+**Type:** stage 1 of 3 of PERF-14 (performance). A user sees and hears nothing new. One data attribute is added to each lane row. A new perf spec records how the Studio behaves with 200 clips.
 
 **Read first:**
-- `lessons.md` in full. Most relevant here: L11, L23, L26, L28, L29, L31, L37, L38, L49, L51, L56, L57, L58, L59.
-- This file. Open `tasks/round-396.md` only to look up a row.
-- **Claims:** `b-round-396/claims-397.sh`, run from the loop root.
-  - Planning output: `b-round-396/claims-397-planning-output.txt`.
-  - Output on B's sketch: `b-round-396/claims-397-on-sketch.txt`.
-  - A runs the claims before editing. C runs them at SOURCE-SCOPE start (must equal the planning output) and at the end (only the §7 facts may differ).
+- `lessons.md` in full. Most relevant here: L11, L12, L23, L26, L28, L29, L30, L31, L37, L38, L56, L57, L58, L59.
+- This file. Open `tasks/round-397.md` only to look up a row.
+- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `AUDIO_ARCHITECTURE.md`, `AGENT_DISCOVERABLE_CODE.md`, `GEORGIAN_DOCS.md`.
+- **Claims:** `b-round-397/claims-398.sh`, run from the loop root.
+  - Planning output: `b-round-397/claims-398-planning-output.txt`.
+  - Output on B's sketch: `b-round-397/claims-398-on-sketch.txt`.
+  - A runs the claims before editing. C runs them at the start of SOURCE-SCOPE, where they must equal the planning output. C runs them again at the end, where only the §7 facts may differ.
 
-## Baseline: `4f28bff`, clean tree
-- Gate 396 is `published`, commit `4f28bff` on both remotes [K1]. HEAD is `4f28bff` with 0 modified files [K2].
-- Protected files: 11/11 [K3]. Frozen manifest `b-round-396/r397-frozen-sha256.txt`: 1284 entries, 0 failures [K4]. It covers every tracked file except the 3 tracked grants.
-- Grants: `b-round-396/grants-397.txt` (§4).
+## Baseline: `c93d926`, clean tree
+- Gate 397 is `published` with commit `c93d926` on both remotes [K1]. HEAD is `c93d926`, with 0 modified files [K2]. (The gate JSON's `head` field, `4f28bff`, is the tree before the commit. The baseline is the published commit.)
+- Protected files: 11 of 11 [K3]. The frozen manifest is `b-round-397/r398-frozen-sha256.txt`: 1288 entries, 0 failures [K4]. It covers every tracked file except the one tracked grant, `ArrangementLane.tsx`.
+- Grants: `b-round-397/grants-398.txt` (§4).
 
 ## 0. Why this round
-- C round 396 PASS, `browserVerified` true, 0 bugs [K7]. Gate 396 published it. PERF-13c is done (all three stages).
-- **No open C bug.** Every open Critical/High/Medium is manual-only, `awaiting_user` or `open_root` (2026-10-23 rule).
-- Regression is not due: the last one was 2026-11-07, round 390 [K5]; the next is due on or after 2026-11-10. RETRO is at round 400.
-- PERF-13d is the last stage of PERF-13 and the next dependency-ordered item in STUDIO-PERFORMANCE. PERF-12b and PERF-11c-iii-d/e are `awaiting_user`.
-- **Premise re-measured at HEAD (L37).** B's probe (`b-round-396/probe/premise.cjs`, dev server, CPU 6×) found one 187 ms long task that holds all five 768000-sample synth buffer builds (`b-round-396/probe/head-6x-1.json`). The ten `copyToChannel` calls take 7–12 ms each. B's row probe found the same at both viewports, three runs each: 135–185 ms, 5 builds in one long task [K16]. R314-DEMO-BUFFER-LONGTASK-6X is therefore confirmed, and its cause is known: the five loads resume from one awaited worker promise, so they run in one task.
+- **C round 397 PASS:** `browserVerified` true, 0 bugs, and the L57 check is OK (`b-round-397/l57-check-c397.txt`). Gate 397 published it, so PERF-13 is done (13a–13d).
+- **No open C bug.** Every open Critical/High/Medium finding is manual-only, `awaiting_user` or `open_root` (the 2026-10-23 rule).
+- **No regression or RETRO this round.** The last regression was on 2026-11-07, in round 390 [K5]; the next is due on or after 2026-11-10. RETRO is at round 400.
+- **PERF-14 is the next dependency-ordered item** in STUDIO-PERFORMANCE: "Clip virtualization + multi-resolution peaks. 200 clips: ≤ 2000 DOM elements; zoom p95 < 50 ms" (`docs/technical/performance/perf-plan.md`, PERF-14 row).
+- **Premise measured at HEAD (L37).** B's probe is `b-round-397/probe/clips200.cjs` on the dev server. It clicks Add, clicks the clip's name bar, then presses Ctrl+D ×199 [K16]:
+
+  | Measure | 1440×900 | 1280×720 |
+  |---|---|---|
+  | Whole-page elements | 4294 | 4277 |
+  | Elements in clip subtrees (17 per clip) | 3400 | 3400 |
+  | Clips mounted | 200 | 200 |
+  | Clips in the window, default zoom | 1 | 1 |
+  | Clips in the window, min zoom | 19 | 16 |
+  | Zoom keydown max, 1× | 48 ms | 40 ms |
+  | Zoom keydown max, 6× | 272 ms | 280 ms |
+  | Ctrl+D ×199 | about 5 s | about 5 s |
+
+  - Two conclusions: the 2000-element target fails today, and virtualization can meet it at any zoom.
+  - The ruler is already windowed (95/79 elements, also with 200 clips) [K22]. PERF-14's old note that "the ruler grows with the project" is obsolete (D-29z1360).
+- **Why the harness comes first.** No perf row covers 200 clips. The 30-clip rows live in the 2059-line interactions spec, and every later row there starts from the state those rows leave.
+  - Once PERF-14b (virtualization) takes clips out of the DOM, every DOM clip count becomes a count of mounted clips. 51 test and perf files locate clips through the DOM [K14] (`b-round-397/sweep-clip-dom-locators.txt`).
+  - The harness therefore needs a count from the model. This round adds it to the app as one attribute, so that 14b changes neither this harness nor its meaning (`tech-lead`).
+- **Consults** (`b-round-397/consults.md`): `performance-optimizer` and `tech-lead`, both given the probe numbers.
+  - They agree on the order: 14a harness → 14b virtualization → 14c peak pyramid and canvas tiles.
+  - They agree on a new spec file and on measuring at minimum zoom scrolled to the middle. That state is where the 2000 budget is tightest (tech-lead estimates about 1860).
+  - They disagree on which clips 14b keeps mounted. That question is recorded for 14b as `Q-14B-PIN-SELECTED` and is not ruled here.
 
 ## 1. Rulings (B)
 
-### D-29z1356: scope of PERF-13d
-1. **One shared array for both channels (PERF2-STEREO-COPY).**
-   - `loadDemoSource` builds `new AudioBuffer({ numberOfChannels: 2, length: samples.length, sampleRate: DEMO_SYNTH_SAMPLE_RATE })` and calls `buffer.copyToChannel(samples, 0)` and `buffer.copyToChannel(samples, 1)` [K8].
-   - `copyToChannel` copies into the buffer's own storage, so both calls may read the same array. This removes five 3 MB `Float32Array` copies per load [K9 `copy-ctor`].
-   - `generateDemoStereoChannels` is deleted from `demo-synth.ts`; its only importer is `studio-lab-demo.ts` and no test imports it [K10]. L23 deleted-export rule: `npm run typecheck` is an A row.
-   - This alone does not shorten the task by much: the ten `copyToChannel` calls stay. Item 2 is what splits it.
-2. **One build per task on the worker path (R314-DEMO-BUFFER-LONGTASK-6X).**
-   - `synthesizeDemoSamples(sourceId, signal)` takes the abort signal. For the mix and the four stems, after `await synthesizeDemoCompositionOffMainThread()`, it awaits `yieldToNextTask()` (a `setTimeout(resolve, 0)` promise), then calls `signal.throwIfAborted()`, then returns the samples [K8].
-   - Timers run in the order they were set, so the five builds run in five tasks.
-   - **The two generated SFX (Soft impact, Slow rise) get no yield.** Their arrays are 96000 and 240000 samples (1–4 ms per copy at 6×). B's first sketch applied the yield to them as well, and the full suite then failed NG5b and NG5c in `studio-narrow-gate-ui.test.tsx`, which wait one microtask for Soft impact to be ready (`b-round-396/precheck-full-v1-yield-all.log`, 2 FAIL [K18]). There is no value in changing those tests for a 1–4 ms build. Row SB6 pins this choice.
-   - **`setTimeout`, not `scheduler.yield`:** `scheduler.yield` is not in every browser the Studio supports; a feature-detect adds a branch with no row that could fail. Recorded, not a STOP.
-3. **Abort.** An abort that lands while a worker-path build waits for its task rejects with `signal.reason` and builds nothing (SB5).
-   - Both consumers ignore a settled load once their signal is aborted [K11]: the collection effect (`controller.signal.aborted`) and the re-decode path (`signal.aborted`). Synth sources are not evictable (`canReloadSource` is true only for the two URL sources), so the re-decode path never reaches them today.
-   - HEAD ignored the signal on the synth path and built the buffer anyway. The new rejection reaches no user-visible state.
-4. **Mono is rejected.** Each track runs gain into a `StereoPannerNode`. A mono input is panned with the equal-power law (about −3 dB per side at pan 0); a stereo input with equal channels passes through at pan 0. Peaks and the WAV export also read the channel count. Keeping 2 channels keeps the sound identical (BUF-HASH).
-5. **Status (L51).** No status write is added or moved. Per-source `ready` and the final text `Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.` [K22] are written only after every source settles. The yield delays the five builds by one task each; the final text and its order stay. Row BUF-STATUS checks the final text at 6×.
-6. **Perf harness: no new row.** No existing `load.*` row isolates these builds. They are recorded at 1× only, where the five builds take about 30 ms in total, under the 50 ms long-task line; `load.settled.longtask-max` also holds the first-frame task. The deterministic evidence is the browser probe (§6 BUF-TASKS), which C runs with B's script. `perf/studio-lab.perf.spec.ts` is an affected check: its one assert row `load.script-max` (< 100) must still pass, and the `load.*` rows are recorded next to B's sketch run [K20].
+### D-29z1360: scope of PERF-14a
+1. **Model clip count on each lane row.** `ArrangementLane.tsx` adds `data-clip-count={clips.length}` on the element that carries `data-track-id={track.id}` [K8].
+   - `clips` is the existing `useArrangementPreviewLaneClips(arrangement, track.id)` [K9]. It is the same list the lane renders at `{clips.map((clip) => {` [K9]. The count therefore follows a cross-lane drag preview, exactly as the rendered clips do.
+   - **Contract:** the attribute is the number of clips this lane holds in the model (preview or committed). It never counts mounted elements, and it does not change when a lane is folded. PERF-14b must keep it equal to the model when clips are no longer mounted.
+   - A member lane of a collapsed group is not rendered at all, and neither is its attribute. A harness that sums the attribute over lanes must first make sure no group is collapsed. At HEAD the demo shows 0 `[data-group-id]` rows at ready [K25]. The scale spec still checks that 0 elements carry `data-group-collapsed="true"` (the attribute `ArrangementGroupHeader.tsx` writes for a collapsed group [K25]) and records a problem otherwise.
+   - **During a held cross-lane name-bar drag**, the lane keeps rendering the moving clip on its source lane, and the clip moves to the target only on release [K25]. Since the attribute and the rendered clips come from the same `clips` list [K9], the attribute equals the mounted count in every state at HEAD.
+2. **New perf spec `perf/studio-lab-scale.perf.spec.ts`** and **`perf/budgets.scale.json`**. Every row is `record — not run on sketch: the spec is A's code this round (L58)`. The harness self-checks (§3 item 3) push to `problems`, and any problem fails the spec.
+3. **No change to the existing perf specs or their budgets.** Adding an attribute adds no element and no component, so `res.dom.*` and the component rows stay the same. C checks this with PERF-RES (§6).
+4. **Not in this round:** virtualization (14b), the peak pyramid and canvas tiles (14c), and the round-315 peaks Lows (14c is their home, D-29z854).
 
-### D-29z1357: notes from round 396, placed
-- Gate-396 Lows go to `deferred_low_polish`: GATE396-L1-CORS-DEPLOY and GATE396-L2-SIGNED-URL-STRING (both also inputs to SRW-21-PLAN), and GATE396-I4-PREVIEW-ELEMENT-IDENTITY (info). The gate's third Low (restore in `finally` hides the real error) has the same root cause as B-R395-PERF-RESTORE-CATCH. Its evidence is merged into that id (L7); no new id.
-- A-R396-REVIEW-DOC248-TODO (doc 248's TODO still lists PERF-13b-ii) and C-R396-NOTE-PS29-TITLE go to `deferred_low_polish`. A changes no line for them.
-- The gate-396 Architecture note (GATE396-ARCH-STREAM-FACTORY) joins ARCH-CHECKPOINT-PREVIEW-AFTER-13C, which is now due. Root runs it; it does not block this round (§8).
-
-### Side effects of the code this round touches (L49)
+### Side effects (L49)
 | Effect | Ruling |
 |---|---|
-| Five worker-path builds each wait one timer task | Intended (item 2). Ready order is by settle count, not by source order |
-| An aborted worker-path load now rejects instead of resolving | Intended (item 3). Both consumers ignore it [K11] |
-| `generateDemoStereoChannels` export removed | Intended (item 1). No importer outside the two source files [K10] |
-| `load.commits` and `ready-ms` (record rows) may shift slightly | Accepted; recorded, not asserted |
-| Generated SFX path | Unchanged; SB6 pins it |
+| One new attribute on each lane row | Intended. It adds no render: a count change always comes with a new `clips` array (`tech-lead`, `b-round-397/sketch-review.md`) |
+| SSR and hydration | Both sides read `preview ?? committed`, and the preview is null at load. No mismatch (`sketch-review.md`) |
+| Tests that compare `outerHTML` | They compare the clip root, the detail panel and the overview, never the lane row (`drag-preview-render.test.tsx`). The full suite passes on the sketch [K24] |
+| New spec in the `perf/` folder | `playwright.perf.config.ts` already picks up every `*.perf.spec.ts`, with one worker [K10]. The root gate does not run `test:perf` |
 
 ### Ruling lines (L4)
-- **Worker path vs SFX path:** only the worker path yields. SB4 and SB6 bind it.
-- **Status line:** this round writes none.
+- **Lane row `[data-track-id]`:** the rule "no visible change" wins over everything else. The new attribute carries no style and no text.
+- **Group rows:** the scale spec counts lanes with `[data-track-id][data-clip-count]` and never with bare `[data-track-id]`. Keyboard row navigation uses the bare selector, and it also matches group rows.
 
 ## 2. Reference
-- This is a performance round, so the policy exempts it from the full reference section and the `product-designer` consult.
+- This is a performance round, so the policy exempts it from the full reference section and from the `product-designer` consult.
 - **Ableton:** `not applicable / perf`. Nothing a user sees or hears changes.
 - **Screen budget (L39):** nothing new is visible.
 
 ## 3. What A changes
-Apply `b-round-396/sketch-397.patch.txt` (sha256 `4db03d5ace7a6b76…` [K17]; `git apply --check` passes on the tree). It covers the 3 code and test paths. The docs are A's.
+Apply `b-round-397/sketch-398.patch.txt` (sha256 `bd8fe321255fbac9…` [K17]). `git apply --check` passes on the tree. The patch covers items 1 and 2. Items 3 to 5 are A's own work.
 
-1. **`app/data/studio-lab-demo.ts`:** items 1–3 of §1 only: the import of `generateDemoStereoChannels` removed, `yieldToNextTask`, `synthesizeDemoSamples(sourceId, signal)` with the worker-path yield and abort check, and the two-call buffer build.
-2. **`app/lib/arrangement/demo-synth.ts`:** delete `generateDemoStereoChannels` only [K9].
-3. **`app/data/__tests__/studio-lab-demo-synth-buffer.test.ts`** (new): rows SB1–SB6 as in the sketch.
-4. **`docs/implementation/2026/quarter-IV/253-perf-demo-synth-buffers.md`** (new, Georgian, the 7 TEMPLATE headings in order):
-   - l.4 byte-exact: `**სტატუსი:** Completed (C round 397 PASS)`;
-   - the premise numbers and their files (`b-round-396/probe/head-6x-1.json`, `rows-summary.txt`), the five rulings of §1 and why (mono rejected, SFX not yielded, `setTimeout` not `scheduler.yield`);
-   - the rows SB1–SB6 and the mutants of §5; the browser rows with B's sketch numbers;
-   - TODO: the generated SFX still build in the effect task (1–4 ms at 6×, no row needed); a hidden tab throttles the `setTimeout(0)` yield to about 1 s (accepted, `b-round-396/sketch-review.md` L1); cite only ids that exist (L26).
-   - If the number 253 is already taken when A starts (root's parallel lane can land docs), that shows as a K13 claims mismatch at A's start: A reports it as a STOP and does not renumber alone.
-5. **`docs/implementation/2026/quarter-IV/247-perf-pcm-live-baseline.md`** (L28, final PERF-13 stage):
-   - l.4 byte-exact: `**სტატუსი:** Completed (C round 397 PASS)`;
-   - its `## TODO / შემდეგი ნაბიჯები` section only: item 4 (13d) marked done with a pointer to doc 253 [K23]. No other line changes.
+1. **`app/components/arrangement/ArrangementLane.tsx`:** add the one attribute line from §1.1 and nothing else.
+2. **`app/lib/arrangement/__tests__/lane-clip-count.test.tsx`** (new): rows LC1–LC5, as in the sketch (§5).
+3. **`perf/studio-lab-scale.perf.spec.ts`** (new). Use the stem-cache spec as the shape model: its imports, its report through `buildPerfReportCore` and its `expect(report.failures).toEqual([])`. Reuse the existing `perf/lib` exports [K13]: `installPerfInstrumentation`, `snapshot`, `nowIn`, `waitForQuiet`, `blurActive`, `waitForCollectionReady`, `percentile`, `rateRowId`, `loadPerfBudgets`, `perfZoomSliderLabel`, `perfLibraryAddLabel` and `perfMoveTitlePattern`. Do not edit `perf/lib/**`.
+   - **Passes:** 3. Each pass gets a fresh browser context at 1440×900, the config default.
+   - **Scenario per pass, in order:**
+     - **a. Load.** Open `/studio-lab` and wait for `waitForCollectionReady`.
+     - **b. Build 200 clips.** Click the library Add button. Click the new clip's name bar (`perfMoveTitlePattern`) and blur it. Press Ctrl+D 199 times; after each press, wait until the clip's lane `data-clip-count` equals press + 1.
+       - The lane is the clip's own lane, found with `closest('[data-track-id]')` from the added clip (Add uses the active track, not necessarily the first row; it is Music at HEAD [K25]).
+       - Self-check: after the last press, the lane count is 200, there are 200 distinct `data-clip-start` values, and 0 `[data-group-collapsed="true"]` elements exist.
+       - Record `scale.harness.build-ms` (wallclock). Then wait for quiet.
+     - **c. Default zoom, scroll 0, at 1×.** Record:
+       - `scale.dom.page`: `document.querySelectorAll('*').length`;
+       - `scale.dom.clip-subtree`: the sum, over `[data-clip-kind="audio"]`, of 1 plus its descendants;
+       - `scale.clips.model`: the sum of `Number(data-clip-count)` over `[data-track-id][data-clip-count]`;
+       - `scale.clips.mounted`: the count of `[data-clip-kind="audio"]`;
+       - `scale.clips.in-window`: the audio clips whose box intersects the box of the timeline scroller.
+     - **d. Zoom keys at 1×.** 5 × `-`, then 5 × `=`, with one window per key from the press until quiet. Record:
+       - `scale.zoom.keydown-p95-ms` (`percentile(…, 0.95)` of the per-key Event Timing keydown maximum; a key with no entry counts as 0);
+       - `scale.zoom.keydown-max-ms`;
+       - `scale.zoom.commits-per-key`;
+       - `scale.zoom.components-per-key`.
 
-**B's sketch evidence:**
-- `tsc` rc 0, scoped Biome rc 0 (`b-round-396/sketch-tsc.log`, `sketch-biome.log`).
-- Full suite on the sketch: 259 files, 3847 tests, rc 0 (`b-round-396/precheck-full.log`) [K18].
-- Covering set: 16 files, 219 tests, rc 0 (`b-round-396/precheck-covering.log`) [K19].
-- Unit mutants 7/7 red, pristine rc 0 [K15].
-- Browser probe HEAD vs sketch [K16]: HEAD 5 builds in one long task in all 6 runs (135–185 ms), 0 shared arrays; sketch 0 builds inside a long task in all 6 runs (one extra 1280 run: 1 build in a 51 ms task), 5/5 shared arrays; channel hashes equal; play works.
-- Perf spec on the sketch, production build (`b-round-396/perf-sketch-load.log`, `perf-sketch-load-latest.json`, rows in `perf-sketch-load-rows.txt`) [K20]: rc 0, `failures` empty; `load.script-max` 0 / 0 / 5 ms (C round 389 on `11ca746`: 39 / 40 / 0); `load.longtask-max` 79 / 55 / 55 (C 389: 71 / 74 / 66). These are records from different trees, not asserts.
-- `tech-lead` reviewed the sketch; the reviewed sha equals the dispatched one (`b-round-396/sketch-review.md`) [K17].
+       Self-check: the Zoom slider value changes in the key's direction on every key and ends at its start value.
+     - **e. The same keys at 6×.** Set `Emulation.setCPUThrottlingRate` to 6, repeat step d, then set the rate back to 1. Use the same ids through `rateRowId(…, 6)` (`.6x`).
+     - **f. Minimum zoom.** Press `-` until the slider's `aria-valuenow` equals its `aria-valuemin` (at most 60 keys; a problem otherwise), then wait for quiet. Record `scale.dom.page.min-zoom`, `scale.clips.mounted.min-zoom` and `scale.clips.in-window.min-zoom`.
+     - **g. Minimum zoom, scrolled to the middle.** Set the timeline scroller's `scrollLeft` to `round((scrollWidth − clientWidth) / 2)` and wait for quiet. Record `scale.dom.page.min-zoom-mid`, `scale.clips.mounted.min-zoom-mid` and `scale.clips.in-window.min-zoom-mid`.
+       - Self-check: `scrollLeft` > 0 afterwards, and `scale.clips.in-window.min-zoom-mid` ≥ 1.
+     - **h. Scroll page crossings at minimum zoom.** From the middle, add `clientWidth` to `scrollLeft` 4 times, with one window per step. Record `scale.scroll.commits-per-step`, `scale.scroll.components-per-step` and `scale.scroll.loaf-max-ms`.
+   - **Scroller:** the timeline scroller is the scroll container that holds `[data-testid="arrangement-ruler"]` [K12]. Find it by walking up to the first ancestor whose `scrollWidth > clientWidth`. Never hard-code a class.
+   - **Results:** write `test-results/perf/latest-scale.json` and a stamped copy. The sequence text lists steps a–h.
+4. **`perf/budgets.scale.json`** (new). Add one row for each id in item 3, plus `scale.harness.build-ms`, each with `mode: "record"` and `budget: null`. Use `kind: "deterministic"` for counts and `kind: "wallclock"` for ms. The owner is `PERF-14a`. Each note says what is measured and in which state, and ends with "record — not run on sketch (L58)".
+5. **`docs/implementation/2026/quarter-IV/254-perf-scale-harness.md`** (new). The number 254 is free [K6]. Write it in Georgian, with the 7 TEMPLATE headings in order (L26).
+   - l.4 must be byte-exact: `**სტატუსი:** In Progress (stage 1 of 3; C round 398 PASS)`. This is L28's multi-stage form; 14b and 14c will close it.
+   - The contract section describes the spec's steps a–h, every row id, the self-checks and the `data-clip-count` contract (§1.1, L34).
+   - Include the premise table and its files: `b-round-397/probe/head-200-*.json`.
+   - TODO: list 14b (virtualization, `Q-14B-PIN-SELECTED`, the 51-file DOM-locator sweep) and 14c (the pyramid and the round-315 Lows). Cite only ids that exist (L26).
 
-**No `as`, `any` or `@ts-ignore`.** A deviation from §1's semantics is a STOP (L11).
+**No `as`, `any` or `@ts-ignore`.** A deviation from §1 is a STOP (L11).
 
 **Forbidden:**
-- every path outside the grants, in particular `ArrangementContext.tsx`, `collection.ts`, `demo-synth.client.ts`, `demo-synth.worker.ts`, `studio-narrow-gate-ui.test.tsx`, `perf/**` and `types/arrangement.ts`;
+- every path outside the grants, in particular `perf/lib/**`, the three existing perf specs and their budget files, `playwright.perf.config.ts`, `ArrangementClip.tsx`, `StudioWorkspace.tsx`, `ArrangementContext.tsx` and `view.ts`;
 - the global forbidden files and actions, the protected files and `package.json`;
 - commit, push, stash, checkout, deploy and dev-server restarts.
 
-## 4. Grants (`b-round-396/grants-397.txt`)
-- `app/data/studio-lab-demo.ts`
-- `app/lib/arrangement/demo-synth.ts`
-- `app/data/__tests__/studio-lab-demo-synth-buffer.test.ts` (new)
-- `docs/implementation/2026/quarter-IV/253-perf-demo-synth-buffers.md` (new)
-- `docs/implementation/2026/quarter-IV/247-perf-pcm-live-baseline.md` (l.4 and the TODO section only)
+## 4. Grants (`b-round-397/grants-398.txt`)
+- `app/components/arrangement/ArrangementLane.tsx` (the one attribute line only)
+- `app/lib/arrangement/__tests__/lane-clip-count.test.tsx` (new)
+- `perf/studio-lab-scale.perf.spec.ts` (new)
+- `perf/budgets.scale.json` (new)
+- `docs/implementation/2026/quarter-IV/254-perf-scale-harness.md` (new)
 
 ## 5. A: tests
-Row ids are binding. Each row names the mutant that must turn it red. A runs the unit mutants on a scratch copy outside `store/` with B's runner: `python3 -I b-round-396/mutants/run.py <scratch-root> a-round-397/mutants` (never omit the second argument). B's result is `b-round-396/mutants/summary.txt`.
+Row ids are binding. Run the unit mutants on a scratch copy outside `store/` with B's runner: `python3 -I b-round-397/mutants/run.py <scratch-root> a-round-398/mutants`. Never omit the second argument. B's result is in `b-round-397/mutants/summary.txt`: 5 of 5 red, and pristine rc 0 before and after [K21].
 
 | Row | Sequence | Expected | Mutant (red) |
 |---|---|---|---|
-| **SB1** (×5, worker sources) | Mocked composition (8-sample ramps); load one source | One buffer: 2 channels, length = samples, 48000 Hz; `copyToChannel` channels `[0, 1]`, both calls receive the composition array itself (`toBe`) | MU-397-SECOND-COPY, MU-397-MONO, MU-397-SKIP-RIGHT, MU-397-WRONG-STEM |
-| **SB2** (×2, generated SFX) | Load Soft impact / Slow rise | 2 channels; length = generated length; both calls receive one array; channel 0 equals a fresh generation | MU-397-SECOND-COPY, MU-397-MONO, MU-397-SKIP-RIGHT |
-| **SB3** (×5) | Load one worker source | Channel 0 and channel 1 equal the source value for value | MU-397-MONO, MU-397-SKIP-RIGHT, MU-397-WRONG-STEM |
-| **SB4** | `setTimeout` stubbed to queue; start all 5 worker loads; flush microtasks; run the queued callbacks one at a time | 0 buffers before the first callback; 5 callbacks queued; exactly one more buffer after each callback; all 5 resolve | MU-397-NO-YIELD |
-| **SB5** | Fake timers; start the bass load; flush; abort; advance one timer | Rejects with `signal.reason`; 0 buffers built | MU-397-NO-YIELD, MU-397-NO-ABORT-CHECK |
-| **SB6** | `setTimeout` stubbed to queue; load both SFX; flush microtasks | 0 timers queued; 2 buffers built; both resolve | MU-397-YIELD-ALL |
+| **LC1** | Mount video 1 clip, music 2, sfx 0 | Lane counts `['1', '2', '0']` | MU-398-NO-ATTR, MU-398-TOTAL |
+| **LC2** | Select m2 and duplicate; undo; select m1 and delete | music 3 → 2 → 1; video 1; sfx 0 | MU-398-NO-ATTR, MU-398-TOTAL, MU-398-STALE |
+| **LC3** | After mount, and after duplicating m1+m2 | Every lane count equals the model count for its track; music 4 | MU-398-NO-ATTR, MU-398-TOTAL, MU-398-STALE |
+| **LC4** | `previewClipGeometry` moves m1 to sfx, then `previewClipGeometry(before)` clears it | music/sfx `['1', '1']` during the preview, then `['2', '0']` | MU-398-COMMITTED (committed clips filtered by track) |
+| **LC5** | Click "Fold or unfold — Music" | `data-track-folded` `true`; music count `2` | MU-398-FOLD-ZERO |
 
-DL1–DL8, DL-VAL, DL-EN, DL-BPM and PS15 in `studio-lab-demo.test.ts` are unchanged and stay green. No assert anywhere is removed or weakened.
-
-**Collision rows (L23):**
-- The covering set is `b-round-396/covering-files.txt` (16 files; the sweep gives 15 at HEAD [K24], plus the new file): every test file under `app/**`, `perf/**` and `e2e/**` that names `studio-lab-demo`, `demo-synth`, `routes/studio-lab`, `generateDemoStereoChannels` or `loadDemoSource`, plus the new file.
-- Fake-timer suites that load the real demo collection: none [K14]. The UI suites that render the route stub the worker with a promise that never resolves.
-- **Timeout headroom (L31):** the slowest covering test is NG5 at 1.7 s under a 15 s describe timeout (gate 396 `verify.log`: 1.57 s); next is DW10 at 1.1 s under the 5 s default (gate 396: 1.18 s) [K19, `b-round-396/covering-slowest.txt`]. The new rows take milliseconds (SB2 slow rise about 0.13 s).
+- **Collision (L23):** the sweep for `data-clip-count` over `app`, `perf` and `e2e` gives 0 files at HEAD [K8].
+- The full suite on the sketch has 260 files and 3852 tests, rc 0 (`b-round-397/precheck-full.log`) [K24].
+- **Covering set:** `b-round-397/covering-vitest.txt` holds 63 files [K20]: every test file under `app/**` that names `data-track-id`, `data-clip-count` or `ArrangementLane`, plus the new file. Its perf hits (`perf/lib/app-labels.ts`, the interactions spec) are not vitest files.
+- **Timeout headroom (L31):** the slowest covering test at gate 397 is CP12a, at 5.0 s under a 30 s describe timeout (17 %) [K20, `b-round-397/gate397-slow-tests.txt`]. The new file runs in under 1 s.
 
 **A also runs:**
-- `npm run typecheck`, `npm run lint`, and scoped `npx biome check` on the 3 `app/**` paths;
-- `npx vitest run` on the covering set;
-- the claims script at start and end;
+- `npm run typecheck`;
+- `npm run lint`;
+- scoped `npx biome check` on the 2 `app/**` paths. Biome ignores `perf/**` [K11], so typecheck covers the spec (L30);
+- `npx vitest run $(cat b-round-397/covering-vitest.txt)`;
+- the claims script at the start and at the end;
 - the `code-reviewer` (5 files changed).
 
-A reviewer Medium whose fix falls outside §1 is a STOP (L11). A does not run the full suite, `verify`, the build, the perf spec or a browser.
+**A runs the new perf spec once, alone (L38):** `npx playwright test --config playwright.perf.config.ts perf/studio-lab-scale.perf.spec.ts`.
+- `failures` must be empty and every self-check must pass.
+- A spec that cannot finish within the default 15-minute test timeout is a STOP. Do not cut passes on your own.
+- Report the medians next to B's dev probe. They are records, not asserts.
 
-**A's report, `a-round-397.md`:** the changed lines; each command with its rc and a log path under `a-round-397/`; the mutant logs; any deviation from the sketch; the reviewer's notes (Architecture notes go to B as signals).
+A does not run the full suite, `verify`, the build outside the perf config, or the other perf specs.
 
-## 6. C: browser rows
-Run at 1440×900 and 1280×720 on `http://127.0.0.1:5173/studio-lab`, with a fresh context per run. Load `/studio-lab` once untimed in a browser first (L38).
-- **Probe:** copy `b-round-396/probe/rows.cjs` into `c-round-397/` and run `node rows.cjs http://127.0.0.1:5173 6 <out.json> <viewport>`. It records every 768000-sample `AudioBuffer`, the arrays its two `copyToChannel` calls received, the long tasks that hold a build, the channel hashes, the final status and a short play of a Pulse clip.
-- B's runs: `b-round-396/probe/head-6x-*.json` (HEAD) and `sketch-6x-*.json` (sketch), summary `rows-summary.txt` [K16].
+**A's report, `a-round-398.md`:**
+- the changed lines;
+- each command, with its rc and a log path under `a-round-398/`;
+- the mutant logs;
+- the scale spec's rows;
+- any deviation from the sketch;
+- the reviewer's notes (Architecture notes go to B as signals).
+
+## 6. C: rows
+Run at 1440×900 and 1280×720 on `http://127.0.0.1:5173/studio-lab`, with a fresh context per run. Load `/studio-lab` once, untimed, in a browser first (L38). Run the heaviest rows first (L59).
 
 | Row | Steps | PASS when |
 |---|---|---|
-| **PERF-LOAD** (run alone, first) | `npx playwright test --config playwright.perf.config.ts perf/studio-lab.perf.spec.ts`; copy `test-results/perf/latest.json` [K25] to `c-round-397/perf-results/` | The spec's `failures` are empty; every `assert` row passes, including `load.script-max` (< 100) [K25] and `harness.loaf-scripts-live`. **Record:** every `load.*` median next to B's sketch run (`b-round-396/perf-sketch-load-rows.txt`) |
-| **BUF-TASKS** | 3 runs per viewport at CPU 6× | Every run: `synthBuilds` 5; `maxSynthBuildsPerLongtask` ≤ 1 (B's sketch: 0 ×6, and 1 in one extra 1280 run; HEAD: 5 in every run, 135–185 ms); `pageErrors` empty |
-| **BUF-SAME-ARRAY** | Same runs | `sameArrayBuilds` 5 in every run (HEAD 0) |
-| **BUF-HASH** | Same runs | `hashes` equals the HEAD string in `b-round-396/probe/head-6x-hash.json` and, per build, `hash0` = `hash1` (the sound is unchanged) |
-| **BUF-STATUS** | Same runs | `status` is exactly `Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts.` (same as HEAD) |
-| **BUF-PLAY** | Same runs (`play` field) | `clips` 1 and `playing` `"true"` after adding Pulse with Enter and pressing Space |
-| **AUTH** | Fresh context, no credentials | `/studio-lab` opens the demo; `/studio/<premium handle>` shows sign-in with no workspace; `/api/studio-token` without credentials is refused (4xx) |
-| **SOURCE-SCOPE** | Claims at start and end; `git status`; `sha256sum -c` on `b-round-396/r397-frozen-sha256.txt` and `b-round-318/protected-sha256.txt` | Start equals the planning output. End: only the 5 grants changed (2 new); K4 0 failures; K3 11; K11 unchanged; only the §7 facts differ |
-| **DOCS** | Read doc 253 and doc 247 | Doc 253: Georgian; the 7 TEMPLATE headings in order; l.4 exact as in §3; every cited row and mutant id exists; cited files exist. Doc 247: `git diff` touches l.4 and the TODO section only. `grep -rln 'In Progress (stage' docs/implementation` gives 3 files. `grep -rn 'C round [0-9]* pending' docs/implementation` gives 0 hits |
+| **SCALE-SPEC** (run alone, first) | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-scale.perf.spec.ts`; copy `test-results/perf/latest-scale.json` to `c-round-398/perf-results/` | rc 0 and `failures` empty. Every id in `perf/budgets.scale.json` has a value in all 3 passes. `scale.clips.model` = 200 and `scale.clips.mounted` = 200 (HEAD has no virtualization). `scale.dom.clip-subtree` = 3400 (B's probe [K16]). `scale.clips.in-window` = 1. `scale.clips.in-window.min-zoom-mid` ≥ 1. **Record:** every median next to B's dev probe |
+| **PERF-RES** (alone) | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-resources.perf.spec.ts`; copy `latest-resources.json` | `failures` empty. `res.dom.page-0/1/2`, `res.dom.clip-subtree` (17) and `res.dom.ruler-1/2` are equal to `c-round-396/perf-results/latest-resources.json` (an attribute adds no element) |
+| **COUNT-BROWSER** | Each viewport, B's recipe `b-round-397/probe/groups-drag.cjs` [K25]: Add (Music), click the name bar, Ctrl+D ×2; drag the name bar onto the next lane (Stems) and hold for 400 ms; release; Ctrl+Z. Then fold Music. Record `data-clip-count` and the `[data-clip-id]` count of every lane at each step | At every step and on every lane, `data-clip-count` equals the mounted `[data-clip-id]` count. The expected mounted counts are B's HEAD probe [K25]: Music/Stems 3/0 after Ctrl+D, 3/0 while held, 2/1 after release, 3/0 after Ctrl+Z. Folding Music keeps its count 3. Take a screenshot of each step |
+| **NO-VISIBLE-CHANGE** | `grep -rn 'clip-count' app --include=*.css` and `grep -rn '\[data-clip-count' app` (Tailwind arbitrary variants); full-window screenshots of the empty and the demo project at both viewports | Both greps give 0 hits, so no style can depend on the attribute. The screenshots are a plain record; no comparison is claimed |
+| **AUTH** | Fresh context, no credentials | `/studio-lab` opens the demo; `/studio/<premium handle>` shows sign-in with no workspace; `/api/studio-token?product=<handle>&file=a.wav` without credentials is refused (4xx) |
+| **SOURCE-SCOPE** | Claims at start and end; `git status`; `sha256sum -c` on `b-round-397/r398-frozen-sha256.txt` and `b-round-318/protected-sha256.txt` | The start equals the planning output. At the end, only the 5 grants have changed (4 new); K4 has 0 failures; K3 is 11; only the §7 facts differ. `git diff` on `ArrangementLane.tsx` is the one added line |
+| **DOCS** | Read doc 254 | Georgian; the 7 TEMPLATE headings in order; l.4 exact as in §3; every cited row id, mutant id and file exists; the contract section matches the spec's steps and ids. `grep -rln 'In Progress (stage' docs/implementation` gives 4 files (3 + doc 254). `grep -rn 'C round [0-9]* pending' docs/implementation` gives 0 hits |
 | **gate** | Full vitest, typecheck, build, Biome, verify | Marked `gate`; not claimed in `passed` |
 
-- **jsdom-only note** (not in `passed`/`blocked`, no effect on `browserVerified`): SB5 (an abort timed inside the yield cannot be placed reliably in a browser) and SB6 (the probe records only the 768000-sample builds, so the SFX path is not visible to it), relying on A's `a-round-397/mutants/summary.txt`. SB4's browser half is BUF-TASKS.
+- **jsdom-only note:** none of the LC rows is jsdom-only in meaning, because COUNT-BROWSER covers LC1–LC5 in the browser. The mutants are A's: `a-round-398/mutants/summary.txt`.
 - **Ableton:** `not applicable / perf`.
-- **All L57 fields in `c-round-397.json`:**
-  - `manifestPaths` = `b-round-396/r397-frozen-sha256.txt`, `b-round-318/protected-sha256.txt`;
+- **All L57 fields in `c-round-398.json`:**
+  - `manifestPaths` = `b-round-397/r398-frozen-sha256.txt`, `b-round-318/protected-sha256.txt`;
   - `missingPaths`, `countMismatches`, `claimCheckMinutes`;
   - an `origin` per finding;
   - `assertsSpecified`, `mutantsRecorded`;
-  - `mutantRedOnSketch` = `b-round-396/mutants/summary.txt`;
+  - `mutantRedOnSketch` = `b-round-397/mutants/summary.txt`;
   - `mutantRedOnTree`;
-  - `gateChecksNamed`, `gateChecksRunOnSketch` (`b-round-396/precheck-full.log`, `precheck-covering.log`);
-  - `chainHeadGateRunGreen` (gate 396 published `4f28bff`);
-  - `affectedChecksNamed`, `affectedChecksRunOnSketch` (`b-round-396/perf-sketch-load.log`, `b-round-396/probe/rows-summary.txt`, `b-round-396/probe/sketch-6x-*.json`);
+  - `gateChecksNamed`, `gateChecksRunOnSketch` (`b-round-397/precheck-full.log`);
+  - `chainHeadGateRunGreen` (gate 397 published `c93d926`);
+  - `affectedChecksNamed`, `affectedChecksRunOnSketch` (`b-round-397/precheck-full.log` and `b-round-397/probe/head-200-*.json`; the scale spec itself was not run on a sketch, so write that);
   - `progressFile`, `stopSignal`.
-- **Before hand-off:** run `tools/l57-check.py`. Run PERF-LOAD alone first, then the probe runs. Write `c-round-397/progress.json` after each row (L59).
+- **Before hand-off:** run `tools/l57-check.py`. Write `c-round-398/progress.json` after each row (L59).
 
 ## 7. Claims that may change during the round
-Taken from `diff b-round-396/claims-397-planning-output.txt b-round-396/claims-397-on-sketch.txt`, plus the docs:
-- **K2:** `4f28bff 0` → `4f28bff 5` (3 modified, 2 new).
-- **K8:** `stereo-helper` 2 → 0; `copy-same` 0 → 2; `channels-literal` 0 → 1; `yield-call` 0 → 1; `abort-check` 0 → 1; `set-timeout` 0 → 1; `worker-call` 2 → 1.
-- **K9:** `export-stereo` 1 → 0; `copy-ctor` 1 → 0.
-- **K10:** the sweep lists no file.
-- **K12:** `SB-ids` none → `SB1 SB2 SB3 SB4 SB5 SB6`.
-- **K13:** doc247 l.4 → `**სტატუსი:** Completed (C round 397 PASS)`; doc253 `exists` with that l.4 and `headings` ≥ 7; `in-progress-docs` 4 → 3.
-- **K24:** 15 → 16 (the new file).
-- **K14:** adds `app/data/__tests__/studio-lab-demo-synth-buffer.test.ts` only (SB5 uses fake timers on purpose; no existing suite joins).
+Taken from `diff b-round-397/claims-398-planning-output.txt b-round-397/claims-398-on-sketch.txt`, plus A's new files:
+- **K2:** `c93d926 0` → `c93d926 5` (1 modified, 4 new).
+- **K8:** `clip-count-attr` 0 → 1; `clip-count-sweep` 0 → 3, or 4 when a note in `perf/budgets.scale.json` names the attribute (both are allowed). The files are the lane file, the new test, the new spec and possibly the budgets file. The doc is outside the `app`/`perf`/`e2e` roots.
+- **K14:** 51 → 52 on A's tree. The new spec uses `[data-clip-kind="audio"]`; the new test names neither attribute. On B's sketch it stays 51. Any other value is a mismatch to report.
 - **K17:** `applies-to-tree` yes → no.
+- **K18:** all three → `exists`.
+- **K23:** `none` → the number of rows in `perf/budgets.scale.json`.
+- **K6/K6b and K7:** doc 254 exists, l.4 as in §3, headings ≥ 7; `in-progress-docs` 3 → 4.
 
-Every other fact must equal the planning output, including K11 (the consumers) and K14.
+Every other fact must equal the planning output.
+
+Note on `claims-398-on-sketch.txt`: B's scratch is not a git repository, so its K2 line shows a git error. Its K8 sweep is 2, because the sketch has no spec yet. Neither is a mismatch.
 
 ## 8. Out of scope (recorded, not dropped)
-- **Architecture checkpoint, now due:** ARCH-CHECKPOINT-PREVIEW-AFTER-13C (`b-round-393/root-request-arch-checkpoint-preview.md`), together with ARCH-CHECKPOINT-DECODE-REGION. New signal: GATE396-ARCH-STREAM-FACTORY (gate reviewer: keep; extract only if a fourth round touches `playLibraryPreviewStream`). Root runs it; it does not block PERF-13d, which touches neither region.
-- **Deferred Lows** (§1, D-29z1357).
-- **Purchased preview browser half:** still open evidence on SRW-21 (BLOCKED "no mount point: SRW-21 deferred_user" in C round 396).
-- **Next:** PERF-14 → PERF-15 (PERF-12b and PERF-11c-iii-d/e are `awaiting_user`). The regression round is due at the first planning on or after 2026-11-10. RETRO is at round 400.
+- **PERF-14b** (next): clip virtualization in the lane, reusing the page window that `ArrangementClip.tsx` already computes. It also covers:
+  - must-stay-mounted rules, including the ruling on `Q-14B-PIN-SELECTED`, measured with select-all;
+  - the 51-file DOM-locator sweep, which is its first collision block;
+  - the scale rows becoming `assert` from B's sketch run: page ≤ 2000 at default zoom, at minimum zoom and at minimum zoom scrolled to the middle;
+  - zoom p95 < 50 ms at 1×.
+- **PERF-14c:** the power-of-two peak pyramid in the peaks worker and canvas tiles. It also closes C-R315-T1, C-R315-T2, A-R315-REVIEW-L1…L4, GATE315-S2 and GATE315-S8.
+- **Architecture checkpoint, still due for root:** ARCH-CHECKPOINT-PREVIEW-AFTER-13C with ARCH-CHECKPOINT-DECODE-REGION (`b-round-396/root-request-arch-checkpoint-due.md`). It is not blocking; this round touches neither region.
+- **Deferred Low:** C-R397-NOTE-LONGTASK-1280 (D-29z1361).
+- **Next items:** PERF-15, then the rest of the queue unchanged. The regression round is due at the first planning on or after 2026-11-10. RETRO is at round 400.
