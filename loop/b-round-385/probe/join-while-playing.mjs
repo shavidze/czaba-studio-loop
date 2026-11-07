@@ -1,0 +1,22 @@
+// usage: node join-while-playing.mjs <base> <out.json> [width height]
+import { open } from '../../c-round-382/lib.mjs';
+import fs from 'fs';
+const [base, outPath, w = '1440', h = '900'] = process.argv.slice(2);
+const { browser, page } = await open(base, +w, +h);
+const errors = [];
+page.on('pageerror', (e) => errors.push(String(e.message || e)));
+const list = page.getByRole('listbox', { name: 'Sounds' });
+const add = async (re) => { await list.getByRole('option', { name: re }).first().click(); await page.getByRole('button', { name: 'Add', exact: true }).first().click(); };
+const clock = () => page.evaluate(() => (document.body.innerText.match(/\d\d:\d\d\.\d\d\d/) || [''])[0]);
+await add(/Full mix/); await page.waitForTimeout(800);
+await page.locator('button[aria-label="Play"]').first().click(); await page.waitForTimeout(1000);
+const n = await page.evaluate(() => window.__starts.length);
+await add(/Middle East/);
+await page.waitForFunction((k) => window.__starts.slice(k).some((s) => s.sec > 100 && s.ctx === 'AudioContext'), n, { timeout: 20000 }).catch(() => {});
+const r = { base, vp: `${w}x${h}` };
+r.longSourceStarted = await page.evaluate((k) => window.__starts.slice(k).filter((s) => s.sec > 100).map((s) => s.sec), n);
+const c1 = await clock(); await page.waitForTimeout(800); const c2 = await clock();
+r.clockAfterJoin = [c1, c2]; r.errors = errors;
+await page.screenshot({ path: outPath.replace(/\.json$/, '.png') });
+fs.writeFileSync(outPath, JSON.stringify(r, null, 1)); console.log(JSON.stringify(r));
+await browser.close();

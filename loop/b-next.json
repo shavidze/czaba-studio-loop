@@ -1,14 +1,16 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 384 C PASS (browserVerified true, 0 bugs), gate published 7295618: PERF-13b-i done, C-R382-01 closed. Gate-384 review adds GATE384-M1 (Medium, unhandled rejection in ensureDecoded) scheduled for round 386. RETRO was due at 384 and changes no code, so round 385 = RETRO 385 (window 369-384). Regression not due until 2026-11-08. Nothing external blocks; ARCH leaf-plumbing question sent to Saba holds only PERF-11c-iii-d/e.",
- "nextTask": "Round 385: RETRO 385 (window 369-384), no app code. Objects: retros/retro-385.md, lessons.md (l.3, L29, L31, L58, L59 clauses), user-review/screen-review-385.md, user-review/questions-arch-leaf-plumbing.md, backlog v352 (D-29z1285..1292). A: nothing. C: SOURCE-SCOPE (r385 manifest 1280 rc0), G385-AUTH (valid params -> 401) and STUDIO-SMOKE-385 at both viewports, RT-SCREEN capture re-run with mock API (138/168/118/144), CLAIMS (claims-385.sh), RT-NUM (scripts re-run under c-round-385/scripts + cmp), RT-CAUSE, RT-IDS, RT-LESSONS, RT-L57, RT-SABA, L57. Then round 386 = GATE384-M1 + A-R383-REVIEW-L1, REGRESSION-2026-11-08, PERF-13b-ii.",
+ "reason": "Round 385 (RETRO 385) C PASS (browserVerified true, 0 bugs); gate 385 skipped (no changes), baseline stays 7295618. Open Medium GATE384-M1 reproduced by B in the real browser at HEAD (1 unhandled rejection, silent new clip) and fixed on a reviewed sketch (tech-lead + delta review, 7/7 mutants red, 34-file covering set green, browser pre-check both viewports). Tech-lead raised a pre-existing Medium GATE-B385-M2 (applySchedule not all-or-nothing), scheduled as its own round. Nothing external blocks; the ARCH leaf-plumbing question with Saba holds only PERF-11c-iii-d/e.",
+ "nextTask": "Round 386: decode-resync bugs GATE384-M1 + A-R383-REVIEW-L1 + GATE384-L2 (+ GATE384-L4 guard row). A applies b-round-385/sketch-386.patch.txt verbatim (sha 1cada6c7; ArrangementContext resyncAfterDecode helper for ensureDecoded/video/load paths with stop + scheduleFailed status, owner-guarded collection controller, no click-time stop on deferred preview, replay status; strings + ST10; EV11-EV15, PW20) and writes doc 249; typecheck, lint, 34 covering files, 7 mutants, code-reviewer. C: SOURCE-SCOPE, CLAIMS, PATCH-EQUAL, UNIT, MUTANTS, BROWSER-M1/L2-OK/L2-FAIL/JOIN at 1440x900 and 1280x720, M1 mutant in browser (record), G386-AUTH 401, STUDIO-SMOKE, DOCS. Then REGRESSION-2026-11-08 (if due) and GATE-B385-M2, then PERF-13b-ii.",
  "remaining": [
-  "RETRO-385",
   "GATE384-M1-ENSURE-DECODED-UNHANDLED-REJECTION",
+  "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
+  "GATE384-L2-PREVIEW-STOP-ON-FAILED-DECODE",
+  "GATE-B385-M2-APPLY-SCHEDULE-ROLLBACK",
   "ARCH-CHECKPOINT-DECODE-REGION",
+  "GATE384-L4-LOAD-EFFECT-RESET-ON-IDENTITY",
   "REGRESSION-2026-11-08",
   "PERF-13b-ii",
-  "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
   "PERF-11c-iii-d",
   "PERF-11c-iii-e",
   "ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING",
@@ -64,6 +66,6 @@
   "SYS-R385-LEAF-ACTIONS-CONTEXT",
   "ROOT-REQ-L57-CHECK-PROGRESS",
   "Q-SR-385-1",
-  "GATE384-L2-PREVIEW-STOP-ON-FAILED-DECODE"
+  "Q-PREVIEW-STOPS-TRANSPORT"
  ]
 }

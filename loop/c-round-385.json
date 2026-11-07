@@ -1,0 +1,64 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE-start",
+  "G385-AUTH (both viewports)",
+  "STUDIO-SMOKE-385 (both viewports)",
+  "RT-SCREEN (both viewports; counts 138/168/118/144, clip lefts 512/1152/1792/2432)",
+  "CLAIMS",
+  "RT-NUM",
+  "RT-CAUSE",
+  "RT-IDS",
+  "RT-LESSONS",
+  "RT-L57",
+  "RT-SABA",
+  "SOURCE-SCOPE-end",
+  "extra: real WAV export of 2 stems = 32.000 s, 24-bit/48 kHz stereo, no NaN (sequential layout confirmed)"
+ ],
+ "blocked": [
+  "fake-bearer /api/studio-token path: backend unavailable in cloud (not PASS, not a FAIL of A/B)"
+ ],
+ "gate": [
+  "verify / full test suite belong to the root gate; no source change, no publication expected"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T09:50:10.0846643Z",
+  "round": 385,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": "b-round-384/r385-tree-sha256.txt (1280 entries rc 0), b-round-318/protected-sha256.txt rc 0",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": [
+  "verify",
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "e2e smoke (root gate rows; none claimed by C; no source changed)"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "nullReason": "RETRO: no assert specified",
+ "stopSignal": "none: all rows 1-12 ran to a result",
+ "progressFile": "c-round-385/progress.json",
+ "infoNotes": [
+  "INFO-C385-K25-ARCHIVE: claims K25 prints empty (KeyError) now because cloud/optimize-backlog.py moved closed findings C-R382-01, B-R383-AUTH-ROW-BARE-URL, TL-R376-M1 to archive/findings-archived.json; verified there: all three status closed, GATE384-M1 and GATE384-L2 still current (scheduled/candidate). Not a B error.",
+  "INFO-C385-COLLECT-B384: collect.py b_cost for round 384 is 8.7 in C's run vs 0 in B's (B's 384->385 planning cost logged after the retro was written); cost-rows.json, retro-numbers-385.txt and every retro number are byte-identical.",
+  "INFO-C385-CITE: retro-385 s.3 cites a-round-376.md l.3 for the TC10 62 % figure; l.3 is the STOP header, the figure is at l.5 item 1. Cosmetic.",
+  "INFO-C385-BYTES: L23/L58 byte counts measure 5057/3716 by C (5058/3717 in retro, newline counted). Both < 5500.",
+  "INFO-C385-TOKEN-BODY: 401 body is JSON {\"error\":\"Please sign in to access Studio.\"} (same as round 384); contains the expected sentence, no token.",
+  "Retro s.4 C-R382-02 'reclassified' rests on B's probe (D-29z1277) and C's own later closure (D-29z1281, c-round-384 row 10 EVICT-B2-COUNT PASS); the c-round-382 report itself still labels it an A defect. Labelled correctly in retro as B evidence."
+ ],
+ "notes": "Evidence under c-round-385/. Premium auth not bypassed: fresh incognito contexts, auth_user null, /studio-lab opens demo; /studio/middle-east shows 'Sign in required' with 0 audio[src] and no timeline; /api/studio-token valid params, no Authorization -> 401 at both viewports (auth-smoke.json). Smoke: 1 clip added with Enter, position 00:00.000 -> ~00:01.47 after 1.5 s Play, identical after Stop at +0.8 s, Export dialog opens and Esc closes (smoke-*.png). RT-SCREEN: capture re-run, visible-text rows 138/168/118/144 identical to B's per-row text, journey URL /studio-lab?preview=middle-east, clips left 512/1152/1792/2432 at both viewports, export range 01:04.000. WAV (export-wav.json): 2 x 16 s stems export 32.000 s, 24-bit 48 kHz stereo PCM, peak 0.297, 0 NaN, 99.98 % nonzero samples, so stems lay out sequentially (the product gap that STEM-LANES owns). Scripts re-run from c-round-385/scripts with outputs in c-round-385/data; cmp identical except the explained collect/cost diffs."
+}

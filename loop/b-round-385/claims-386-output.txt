@@ -1,0 +1,119 @@
+K1 HEAD
+72956183a2ccf966a801f81681897f86bd98fe29
+K2 status lines
+0
+K3 post-decode resync calls (expect 3: ensureDecoded, video audio, load effect)
+1442:                syncPlayback(present, undefined, true);
+2848:            syncPlayback(present, undefined, true);
+4316:              syncPlayback(present, undefined, true);
+K4 void ensureDecoded sites
+927:        void ensureDecodedRef.current(ids);
+1646:        void ensureDecoded(awaiting);
+1727:        void ensureDecoded([sourceId]).then(() => {
+K5 deferred preview click-time stop
+        if (isPlayingRef.current) {
+          stopPlayback();
+        }
+        previewRequestRef.current = sourceId;
+K6 controller ref type and set
+819:  const collectionControllerRef = useRef<AbortController | null>(null);
+4255:    collectionControllerRef.current = controller;
+4260:      if (collectionControllerRef.current === controller) {
+K7 startPlaybackAt status updater
+      setStatus((text) =>
+        insertMarkerStatusKind(text) === 'stopped'
+          ? studioPlaybackStrings.playingFrom(formatArrangementTime(from))
+          : text,
+      );
+K8 scheduleFailed hits in app (expect 0)
+0
+K9 rows
+15
+1
+0
+K10 ST10 literal map neighbour
+673:    nothingToPlay: 'Nothing to play — add a clip from the library first.',
+K11 applySchedule import in context
+63:  applySchedule,
+K12 gate-384 file times
+✓ app/lib/arrangement/__tests__/strings.test.ts (64 tests) 171ms
+✓ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx (15 tests) 1522ms
+✓ app/lib/arrangement/__tests__/peaks-worker-video.test.tsx (1 test) 89ms
+K13 sketch patch sha
+1cada6c7e1eda38c82a51001bc6e09dad0999fe93bb9dedbc5e9c13edc3a01ae
+K14 patch applies to HEAD
+apply-ok
+K15 protected manifest
+rc 0
+K16 frozen manifest
+1275
+rc 0
+K17 cited artifacts
+ok sketch-386.patch.txt
+ok sketch-386.sha256
+ok sketch-review.md
+ok grants-386.txt
+ok covering-386-full.txt
+ok covering-386-full-sketch.log
+ok mutants/mutate.py
+ok mutants/run-mutants-386.sh
+ok probe/resync-throw.mjs
+ok probe/preview-while-playing.mjs
+ok probe/head-1440.json
+ok probe/sketch-1440.json
+ok probe/head-1280.json
+ok probe/sketch-1280.json
+ok probe/pv-head-ok-1440.json
+ok probe/pv-sketch-ok-1440.json
+ok probe/pv-head-fail-1440.json
+ok probe/pv-sketch-fail-1440.json
+ok probe/pv-head-ok-1280.json
+ok probe/pv-sketch-ok-1280.json
+ok probe/pv-head-fail-1280.json
+ok probe/pv-sketch-fail-1280.json
+ok probe/join-while-playing.mjs
+ok probe/join-head-1440.json
+ok probe/join-head-1280.json
+K18 mutant logs red rows
+NO-CATCH: 4 target-fails; Tests  4 failed | 20 passed (24)
+NO-OWNER-GUARD: 1 target-fails; Tests  1 failed | 23 passed (24)
+CLICK-STOP: 2 target-fails; Tests  2 failed | 22 passed (24)
+LOAD-PATH-DIRECT: 1 target-fails; Tests  1 failed | 23 passed (24)
+VIDEO-PATH-DIRECT: 1 target-fails; Tests  1 failed | 23 passed (24)
+REPLAY-STATUS: 1 target-fails; Tests  1 failed | 23 passed (24)
+UNSTABLE-RESYNC: 4 target-fails; Tests  15 failed | 9 passed (24)
+K19 next doc number free
+248-perf-decoded-buffer-cache.md
+free
+K20 doc 248 status line
+**სტატუსი:** In Progress (stage 1 of 2; C round 384 PASS)
+K21 load effect deps include syncPlayback
+  }, [
+    collection,
+    decodedBuffers,
+    getDecodeContext,
+    patchSourceState,
+    requestSourcePeaks,
+    storeSourcePeaks,
+    syncPlayback,
+    setStatus,
+  ]);
+K22 video audio deps
+      }
+    },
+    [
+      decodedBuffers,
+      getDecodeContext,
+      patchVideoSource,
+      requestSourcePeaks,
+      storeSourcePeaks,
+      syncPlayback,
+    ],
+K24 direct preview stops playback
+      const ctx = ensureAudioContext();
+      if (!ctx) {
+        return;
+      }
+      if (isPlayingRef.current) {
+        stopPlayback();
+      }

@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T09:32:52.134Z",
-  "current_task": "current-task.md (round 384: PERF-13b-i verification completion - C runs round-383 rows not run (prod heap, 1280 live list, PERF-RES, MUTANTS-UNIT, PLAY-REFUSE, UNIT covering/C-DEMO/perf-lib, G384-AUTH with valid params -> 401, EVICT-B2-COUNT, CLAIMS, L57); A changes only doc 248 l.4 -> C round 384 PASS; grants b-round-383/grants-384.txt; frozen b-round-383/r384-frozen-sha256.txt; claims b-round-383/claims-384.sh)",
+  "_generatedUtc": "2026-11-07T09:56:21.390Z",
+  "current_task": "current-task.md (round 385: RETRO 385, window 369-384; no app code; A nothing; C traceability RT-* rows, script re-run under c-round-385/scripts, G385-AUTH, STUDIO-SMOKE-385 both viewports; frozen b-round-384/r385-tree-sha256.txt; claims b-round-384/claims-385.sh)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6204,28 +6204,23 @@
       "title": "installPcmLiveRegistry installed in every resources pass though only the 1x record pass reads it"
     },
     {
-      "id": "B-R383-AUTH-ROW-BARE-URL",
-      "severity": "low",
-      "status": "scheduled round 384 G384-AUTH (D-29z1282); process finding, ",
-      "title": "auth guard row called /api/studio-token without product/file, got 400 (validation) and never exercis"
-    },
-    {
       "id": "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
       "severity": "low",
       "status": "assigned to PERF-13b-ii scope (D-29z1283): guard controller ",
       "title": "stale ensureDecoded after a collection change could decode an old-collection source under the new co"
+    },
+    {
+      "origin": "gate 384 code-reviewer",
+      "evidence": "gates/round-384/review.md",
+      "added": "2026-11-07 B round 384 -> 385 planning",
+      "id": "GATE384-M1-ENSURE-DECODED-UNHANDLED-REJECTION",
+      "severity": "medium",
+      "title": "ensureDecoded fulfilled handler calls syncPlayback; if it throws, the Promise.all rejects and the three void call sites (history publish ~922/927, startPlaybackAt 1646, startLibraryPreview 1727) leave it unhandled",
+      "repro": "gates/round-384/review.md suggestion 1; ArrangementContext.tsx l.1409-1450 (ensureDecoded), l.927, l.1646, l.1727 at 7295618; reachability needs a syncPlayback/startGraph throw (not yet reproduced in a browser)",
+      "status": "scheduled round 386 (D-29z1287): bug round with A-R383-REVIEW-L1 (same function), before REGRESSION and PERF-13b-ii; severity kept as the reviewer rated it (bug gate)"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 375,
-      "task": "current-task.md",
-      "decision": "D-29z1242..D-29z1245",
-      "type": "PERF-11c-iii-b: ArrangementLibraryView + ArrangementLibraryPreviewView memo with sameLibraryLeafProps (track labels id/kind/name); RB-LEAF3, LP-EQ1/2; RB-LEAF1 ArrangementMaster 0 (GATE374-L2)",
-      "status": "done (D-29z1246): C PASS, gate 375 published 6b11be7",
-      "note": "baseline ad13a96 clean; sketch b-round-374/sketch.patch.txt sha b246502f...da2f; claims b-round-374/claims-375.sh",
-      "added": "2026-11-06 B round 374 -> 375 planning"
-    },
     {
       "round": 376,
       "task": "current-task.md",
@@ -6303,9 +6298,18 @@
       "task": "current-task.md",
       "decision": "D-29z1280..D-29z1284",
       "type": "PERF-13b-i verification completion: C-only rows (prod heap, PERF-RES, mutants, PLAY-REFUSE, UNIT, G384-AUTH 401, EVICT-B2-COUNT, CLAIMS, L57); A doc 248 l.4 only",
-      "status": "dispatched",
+      "status": "done (D-29z1285): C round 384 PASS (c-round-384.json: 13 rows passed, browserVerified true, realVerified true, 0 bugs; fake-bearer row blocked = backend-only); gate 384 published 7295618 on both remotes (rounds 382-384)",
       "note": "baseline 5745526 + uncommitted 382/383 tree; frozen b-round-383/r384-frozen-sha256.txt; claims b-round-383/claims-384.sh; carried 383 rows listed in task §3",
       "added": "2026-11-07 B round 383 -> 384 planning"
+    },
+    {
+      "round": 385,
+      "task": "current-task.md",
+      "decision": "D-29z1288..D-29z1292",
+      "type": "RETRO 385 (window 369-384) + screen/journey review; no app code",
+      "status": "dispatched",
+      "note": "baseline 7295618 clean; frozen b-round-384/r385-tree-sha256.txt (1280); claims b-round-384/claims-385.sh; grants none",
+      "added": "2026-11-07 B round 384 -> 385 planning"
     }
   ],
   "other_keys": [
