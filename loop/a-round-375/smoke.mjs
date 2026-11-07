@@ -1,0 +1,30 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/@playwright/test/index.mjs';
+const out = [];
+const browser = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto('http://127.0.0.1:5173/studio-lab', { timeout: 120000, waitUntil: 'networkidle' });
+  await page.getByText('Demo collection ready').first().waitFor({ timeout: 120000 }); await page.waitForTimeout(800);
+  const list = page.getByRole('listbox', { name: 'Sounds' });
+  const bass = list.getByRole('option', { name: /Bass/ }).first();
+  await bass.click();
+  const before = await page.locator('[data-clip-id]').count();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(800);
+  const after = await page.locator('[data-clip-id]').count();
+  const preview = page.getByTestId('arrangement-library-preview');
+  const add = preview.getByRole('button', { name: 'Add', exact: true });
+  const addTitle = await add.getAttribute('title');
+  await page.getByRole('button', { name: 'Video — set as the active track' }).click();
+  const addVideo = [await add.getAttribute('aria-disabled'), await add.getAttribute('title')];
+  await page.getByRole('button', { name: 'Music — set as the active track' }).click();
+  const addMusic = [await add.getAttribute('aria-disabled'), await add.getAttribute('title')];
+  await page.screenshot({ path: `/home/runner/czaba-project/tmp/studio-real-loop/a-round-375/smoke-${w}.png` });
+  out.push({ viewport: `${w}x${h}`, before, after, addTitle, addVideo, addMusic, errors });
+  await ctx.close();
+}
+await browser.close();
+console.log(JSON.stringify(out, null, 1));

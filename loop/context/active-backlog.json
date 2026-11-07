@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-06T20:35:51.757Z",
-  "current_task": "current-task.md (round 374: PERF-11c-iii-a Master memo view + closed Export dialog shell + B-R370 hook names + S5b-same-act; sketch b-round-373/sketch.patch.txt sha 2d2dfcb9...0b60)",
+  "_generatedUtc": "2026-11-06T23:16:52.473Z",
+  "current_task": "current-task.md (round 375: PERF-11c-iii-b Library + LibraryPreview memo views with a track-label comparator + RB-LEAF1 Master-site row (GATE374-L2); sketch b-round-374/sketch.patch.txt sha b246502f...da2f)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -5937,12 +5937,6 @@
       "title": "no row where only a folded group's activeCandidateTrackIds change (a clip-less track joins/leaves th"
     },
     {
-      "id": "B-R370-HOOK-ERROR-NAMES",
-      "severity": "low",
-      "status": "scheduled round 374 (D-29z1237): fixed in the sketch (privat",
-      "title": "other ArrangementContext wrapper hooks report their store hook's name in the outside-provider error "
-    },
-    {
       "id": "A-R371-REVIEW-TODO-COMMENT",
       "severity": "low",
       "status": "deferred_low_polish (D-29z1228)",
@@ -5991,16 +5985,6 @@
       "title": "keep spread order {...useArrangement(), ...useWorkspaceStatus()} so store-backed values win"
     },
     {
-      "id": "TL-R372-M1-SAME-BATCH-REFUSAL-RESTORE",
-      "severity": "medium",
-      "origin": "B pre-check (tech-lead sketch review)",
-      "title": "non-refusal string + refusal + release in one batch: sketch restores the in-batch non-refusal text, HEAD restored the pre-batch text",
-      "evidence": "b-round-372/sketch-review.md",
-      "repro": "one act: setStatus('A'); setStatus(GESTURE_EDIT_BLOCKED_MESSAGE) during a gesture; release()",
-      "status": "ruled_accepted_delta; closes on C PASS of round 374 (S5b-same-act row lands, D-29z1237) | ruled_accepted_delta (D-29z1234): matches S5b contract; no production path; S5b-same-act row is a PERF-11c-iii input; closes when that row lands",
-      "added": "2026-11-06 B round 372 -> 373 planning"
-    },
-    {
       "id": "A-R373-REVIEW-SAME-BATCH-PREVIEW",
       "severity": "info",
       "status": "info (D-29z1236): record; no production path",
@@ -6023,18 +6007,45 @@
       "severity": "info",
       "status": "info (D-29z1236): round 374 smoke holds ArrowRight",
       "title": "held ArrowLeft on a clip already at 0 moves nothing, so the 0-mutation equality was weak"
+    },
+    {
+      "id": "GATE374-L2-RBLEAF1-REVERT",
+      "severity": "low",
+      "status": "scheduled round 375 (D-29z1243): RB-LEAF1 asserts Arrangemen",
+      "title": "RB-LEAF1 stays green if StudioWorkspace renders <ArrangementMaster /> again (the wrapper's child mem"
+    },
+    {
+      "id": "GATE374-L3-FOCUS-ORDER",
+      "severity": "info",
+      "status": "info (D-29z1243): accepted delta R-SHELL-EQUIV (D-29z1239); ",
+      "title": "Export dialog: focus returns to the opener in the content's layout-effect cleanup before the portal "
+    },
+    {
+      "id": "INFO-C374-MASTER-ARROWDOWN-TWO-UNDO",
+      "severity": "info",
+      "status": "info (D-29z1243): unchanged behaviour; not judged against Li",
+      "title": "Master fader ArrowDown x2 = two Undo steps"
+    },
+    {
+      "id": "INFO-C374-EXPORT-TAB-DISTANCE",
+      "severity": "info",
+      "status": "info (D-29z1243): pre-existing; input for the REVIEW-RECOMME",
+      "title": "a Tab walk from <body> reaches Export after 79 (1280) / 84 (1440) Tabs; first focus in the dialog is"
+    },
+    {
+      "id": "B-R374-MASTER-VACUOUS-NAME-COUNTS",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1244): fix home = the first round ",
+      "title": "master-ui.test.tsx:639,676 and fader-pointer-preview.test.tsx:221 count 'ArrangementMaster' renders "
+    },
+    {
+      "id": "TL-375-L2-SOURCE-ID-PROP-SWAP",
+      "severity": "info",
+      "status": "info (D-29z1244): guarded by workspace UI tests and C's LIBR",
+      "title": "selectedSourceId and libraryPreviewSourceId are both string|null props; a swap type-checks"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 365,
-      "task": "current-task.md",
-      "decision": "D-29z1189..D-29z1194",
-      "type": "PERF-9a: stem cache v2 for the /studio-lab public previews (OPFS + IndexedDB index, conditional revalidation, LRU), shared source-fetch",
-      "status": "c_pass_published (D-29z1195): C round 365 PASS, gate 365 413218e",
-      "note": "baseline df4e5b1 clean; sketch v3 b-round-364/sketch.patch.txt; review b-round-364/sketch-review.md; claims b-round-364/claims-365.sh",
-      "added": "2026-11-06 B round 364 -> 365 planning"
-    },
     {
       "round": 366,
       "task": "current-task.md",
@@ -6113,9 +6124,18 @@
       "task": "current-task.md",
       "decision": "D-29z1235..D-29z1240",
       "type": "PERF-11c-iii-a: ArrangementMasterView memo + ExportDialog memo shell (closed = null) + private use*StoreContext(hookName) helpers (B-R370) + S5b-same-act (TL-R372-M1)",
-      "status": "dispatched",
+      "status": "done (D-29z1242): C PASS, gate 374 published ad13a96",
       "note": "baseline e69eba4 clean; sketch b-round-373/sketch.patch.txt sha 2d2dfcb9...0b60; claims b-round-373/claims-374.sh",
       "added": "2026-11-06 B round 373 -> 374 planning"
+    },
+    {
+      "round": 375,
+      "task": "current-task.md",
+      "decision": "D-29z1242..D-29z1245",
+      "type": "PERF-11c-iii-b: ArrangementLibraryView + ArrangementLibraryPreviewView memo with sameLibraryLeafProps (track labels id/kind/name); RB-LEAF3, LP-EQ1/2; RB-LEAF1 ArrangementMaster 0 (GATE374-L2)",
+      "status": "dispatched",
+      "note": "baseline ad13a96 clean; sketch b-round-374/sketch.patch.txt sha b246502f...da2f; claims b-round-374/claims-375.sh",
+      "added": "2026-11-06 B round 374 -> 375 planning"
     }
   ],
   "other_keys": [

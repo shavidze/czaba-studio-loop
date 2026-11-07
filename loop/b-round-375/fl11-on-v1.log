@@ -1,0 +1,96 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-375/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx [2m([22m[2m23 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 642[2mms[22m[39m
+     [32m✓[39m FL1: a keyboard 0 dB reset moves focus to the Clip Gain input, and a fresh Enter there adds no clip[32m 170[2mms[22m[39m
+     [32m✓[39m FL2: a mouse 0 dB reset never focuses the button and leaves focus on BODY[32m 73[2mms[22m[39m
+     [32m✓[39m FL3: Undo keeps focus while history remains and hands it to Redo on the last step[32m 16[2mms[22m[39m
+[31m     [31m×[31m FL11: an Undo click whose commit leaves the transport labels unchanged does not leave a handoff armed for a later undo (TL-R376-M1)[39m[32m 20[2mms[22m[39m
+     [32m✓[39m FL4: Redo keeps focus while redo entries remain and hands it to Undo on the last step[32m 11[2mms[22m[39m
+     [32m✓[39m FL5: Delete on the selected clip hands focus to Undo, which now undoes the delete[32m 9[2mms[22m[39m
+     [32m✓[39m FL6: Zoom back on its last history step hands focus to Fit[32m 12[2mms[22m[39m
+     [32m✓[39m FL7: Undo clicked without holding focus never moves focus[32m 9[2mms[22m[39m
+     [32m✓[39m FL8: an Undo refused during a pointer gesture keeps Undo enabled and focused[32m 8[2mms[22m[39m
+     [32m✓[39m FL9: enabled Undo, Redo, Delete and Zoom back prevent a repeated Enter and allow a fresh one; a repeated Space is untouched[32m 11[2mms[22m[39m
+     [32m✓[39m FL10: when the browser already dropped focus to BODY before the commit, Zoom back still hands focus to Fit[32m 10[2mms[22m[39m
+     [32m✓[39m SD1: in an empty arrangement the seven unavailable buttons are aria-disabled, focusable and titled with their reason[32m 7[2mms[22m[39m
+     [32m✓[39m SD2: a click on each soft-disabled button changes no status, history, range, loop, clips or zoom[32m 8[2mms[22m[39m
+     [32m✓[39m SD2b: during a pointer gesture a click on each soft-disabled button still writes no refusal status (A-R276-REVIEW-SD2-UNDO)[32m 6[2mms[22m[39m
+     [32m✓[39m SD3: mousedown on a soft-disabled button is default-prevented, on Fit it is not[32m 6[2mms[22m[39m
+     [32m✓[39m SD4: a selected clip or a range makes Split and Delete available with their action titles[32m 13[2mms[22m[39m
+     [32m✓[39m SD5: after one edit, Undo hands focus to Redo when it becomes soft-disabled, and Redo hands it back[32m 9[2mms[22m[39m
+     [32m✓[39m SD6: a focused soft-disabled Redo becomes available in place after Ctrl+Z, and a click then redoes[32m 10[2mms[22m[39m
+     [32m✓[39m SD7: the transport source has no enabled:/disabled: tokens or disabled props, and the rendered Undo keeps the aria-disabled tokens[32m 7[2mms[22m[39m
+     [32m✓[39m SD8: with no target Delete is named plainly; a selected clip and a range keep their own names (A-R276-REVIEW-DELETE-NAME)[32m 6[2mms[22m[39m
+     [32m✓[39m SD9: the tempo row and library preview sources have no enabled:/disabled: tokens or disabled props, and the metronome, Preview and Add render the layered not-allowed cursor[32m 212[2mms[22m[39m
+     [32m✓[39m SD10: the metronome toggle is guarded at the button: 'without a tempo the click never reach…' (A-R278-REVIEW-METRONOME-SPY)[32m 3[2mms[22m[39m
+     [32m✓[39m SD10: the metronome toggle is guarded at the button: 'with a tempo the same click calls it …' (A-R278-REVIEW-METRONOME-SPY)[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx[2m > [22ma self-disabling button hands keyboard focus to its partner (C-R107-01, D-29z73)[2m > [22mFL11: an Undo click whose commit leaves the transport labels unchanged does not leave a handoff armed for a later undo (TL-R376-M1)
+[31m[1mAssertionError[22m: expected <button type="button" …(3)>…(2)</button> to be <button type="button" …(4)>…(2)</button> // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,15 +1,14 @@[39m
+[2m  <button[22m
+[32m-   aria-disabled="true"[39m
+[32m-   aria-keyshortcuts="Control+Z Meta+Z"[39m
+[31m+   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"[39m
+[2m    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40 w-28"[22m
+[32m-   title="Undo — nothing to undo yet (Ctrl+Z)"[39m
+[31m+   title="Redo: Clip Gain (Ctrl+Shift+Z)"[39m
+[2m    type="button"[22m
+[2m  >[22m
+[2m    <svg[22m
+[2m      aria-hidden="true"[22m
+[32m-     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"[39m
+[31m+     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"[39m
+[2m      fill="none"[22m
+[2m      height="24"[22m
+[2m      stroke="currentColor"[22m
+[2m      stroke-linecap="round"[22m
+[2m      stroke-linejoin="round"[22m
+[33m@@ -17,17 +16,18 @@[39m
+[2m      viewBox="0 0 24 24"[22m
+[2m      width="24"[22m
+[2m      xmlns="http://www.w3.org/2000/svg"[22m
+[2m    >[22m
+[2m      <path[22m
+[32m-       d="M9 14 4 9l5-5"[39m
+[31m+       d="m15 14 5-5-5-5"[39m
+[2m      />[22m
+[2m      <path[22m
+[32m-       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"[39m
+[31m+       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"[39m
+[2m      />[22m
+[2m    </svg>[22m
+[2m    <span[22m
+[2m      class="truncate"[22m
+[2m    >[22m
+[32m-     Undo[39m
+[31m+     Redo[39m
+[31m+     : Clip Gain[39m
+[2m    </span>[22m
+[2m  </button>[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:[2m357:36[22m[39m
+    [90m355| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mundoLabel)[33m.[39m[34mtoBe[39m([35mnull[39m)[33m;[39m
+    [90m356| [39m    [34mexpect[39m([34mundoButton[39m()[33m.[39m[34mgetAttribute[39m([32m'aria-disabled'[39m))[33m.[39m[34mtoBe[39m([32m'true'[39m)[33m;[39m
+    [90m357| [39m    [34mexpect[39m(document[33m.[39mactiveElement)[33m.[39m[34mtoBe[39m([34mundoButton[39m())[33m;[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m358| [39m  })[33m;[39m
+    [90m359| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (23)[39m
+[2m   Start at [22m 23:29:03
+[2m   Duration [22m 2.35s[2m (transform 938ms, setup 0ms, import 1.32s, tests 642ms, environment 285ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-375/scratch/app/lib/arrangement/__tests__/self-disabling-focus.test.tsx,title=app/lib/arrangement/__tests__/self-disabling-focus.test.tsx > a self-disabling button hands keyboard focus to its partner (C-R107-01%2C D-29z73) > FL11%3A an Undo click whose commit leaves the transport labels unchanged does not leave a handoff armed for a later undo (TL-R376-M1),line=357,column=36::AssertionError: expected <button type="button" …(3)>…(2)</button> to be <button type="button" …(4)>…(2)</button> // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A@@ -1,15 +1,14 @@%0A  <button%0A-   aria-disabled="true"%0A-   aria-keyshortcuts="Control+Z Meta+Z"%0A+   aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y"%0A    class="inline-flex h-8 items-center gap-1 rounded-md border border-transparent bg-foreground/5 px-2.5 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! not-aria-disabled:hover:bg-foreground/8 not-aria-disabled:active:bg-foreground/12 aria-disabled:cursor-not-allowed! aria-disabled:*:opacity-40 w-28"%0A-   title="Undo — nothing to undo yet (Ctrl+Z)"%0A+   title="Redo: Clip Gain (Ctrl+Shift+Z)"%0A    type="button"%0A  >%0A    <svg%0A      aria-hidden="true"%0A-     class="lucide lucide-undo2 lucide-undo-2 size-3 shrink-0"%0A+     class="lucide lucide-redo2 lucide-redo-2 size-3 shrink-0"%0A      fill="none"%0A      height="24"%0A      stroke="currentColor"%0A      stroke-linecap="round"%0A      stroke-linejoin="round"%0A@@ -17,17 +16,18 @@%0A      viewBox="0 0 24 24"%0A      width="24"%0A      xmlns="http://www.w3.org/2000/svg"%0A    >%0A      <path%0A-       d="M9 14 4 9l5-5"%0A+       d="m15 14 5-5-5-5"%0A      />%0A      <path%0A-       d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"%0A+       d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"%0A      />%0A    </svg>%0A    <span%0A      class="truncate"%0A    >%0A-     Undo%0A+     Redo%0A+     : Clip Gain%0A    </span>%0A  </button>%0A%0A ❯ app/lib/arrangement/__tests__/self-disabling-focus.test.tsx:357:36%0A%0A

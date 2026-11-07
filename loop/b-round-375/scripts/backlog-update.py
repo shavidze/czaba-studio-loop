@@ -1,0 +1,56 @@
+import json
+P='backlog.json'
+b=json.load(open(P))
+assert b['version']==340, b['version']
+D='2026-11-06'; BY='B round 375 -> 376 planning'
+of=b['open_findings']; ids={f.get('id'):f for f in of}
+def setf(i,status):
+    ids[i]['status']=status+' | '+ids[i].get('status','')
+def add(f):
+    assert f['id'] not in ids, f['id']
+    f.setdefault('added', D+' '+BY); of.append(f); ids[f['id']]=f
+# 1. round 375 result
+q=b['post_current_stage_queue'][7]; st={s['id']:s for s in q['stages']}
+st['PERF-11c-iii-b']['status']='done (D-29z1246): C round 375 PASS (c-round-375.json: 16 rows passed, browserVerified true, realVerified true, 0 bugs; fake-bearer 500 blocked = backend-only); gate 375 published 6b11be7 | '+st['PERF-11c-iii-b']['status']
+setf('GATE374-L2-RBLEAF1-REVERT','closed (D-29z1246): RB-LEAF1 ArrangementMaster 0 + MU-MASTER-SITE-REVERT red (C round 375 MUTANTS-TREE 10/10); gate 375 6b11be7')
+for dl in b['deferred_low_polish']:
+    if dl.get('id')=='GATE374-L2-RBLEAF1-REVERT': dl['status']='closed (D-29z1246, L7) | '+dl.get('status','')
+add({'id':'A-R375-REVIEW-DPR-NO-POSITIVE-CONTROL','severity':'low','origin':'A round 375 code-reviewer (reviewer label Low-Medium, A filed Low)','title':"drag-preview-render.test.tsx renamed ArrangementLibraryViewInner toBe(0) rows had no same-file >0 control",'evidence':'a-round-375.md §3','status':'ruled Low (D-29z1246: RB-LEAF3 in the same covering set proves the name live; no behaviour gap) and scheduled in round 376 (the round owns drag-preview-render.test.tsx): DP23 mount asserts ArrangementLibraryViewInner > 0; closes on C PASS of round 376'})
+add({'id':'A-R375-REVIEW-RBLEAF3-PER-STEP','severity':'low','origin':'A round 375 code-reviewer','title':'RB-LEAF3 asserted StudioWorkspace > 0 once for mute + zoom + undo together','evidence':'a-round-375.md §3','status':'scheduled round 376 (D-29z1246; owned file, small): RB-LEAF3 asserts per commit (clear, commit, StudioWorkspace > 0 and the four library names 0); closes on C PASS of round 376'})
+add({'id':'A-R375-REVIEW-PREV-ONLY-UNDEFINED-KEY','severity':'info','origin':'A round 375 code-reviewer','title':'sameLibraryLeafProps treats a previous-only key with value undefined as equal','evidence':'a-round-375.md §3; doc 242','status':'info (D-29z1246): same as React shallow-equal semantics for an absent vs undefined prop; no render can differ; not scheduled'})
+add({'id':'GATE375-L1-UNUSED-WRAPPERS','severity':'low','origin':'gate 375 reviewer finding 1','title':'ArrangementLibrary / ArrangementLibraryPreview wrappers are reached only via index.ts and tests','evidence':'gates/round-375/review.md finding 1','repro':"grep -rn '<ArrangementLibrary\\b\\|<ArrangementLibraryPreview\\b' app --include=*.tsx | grep -v __tests__",'status':'deferred_low_polish (D-29z1246): input to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING (wrapper policy decided once for all leaves; round 376 Transport wrapper same shape)'})
+add({'id':'GATE375-L2-COMPARATOR-UNSTABLE-PROP','severity':'low','origin':'gate 375 reviewer finding 2','title':'sameLibraryLeafProps (for..in Object.is) is silently defeated by a future inline prop','evidence':'gates/round-375/review.md finding 2','status':'deferred_low_polish (D-29z1246): guarded by RB-LEAF3/LP-EQ2 render-budget rows; folded into SIG-R375-LEAF-COMPARATOR-HOME'})
+add({'id':'GATE375-I3-NAME-RENAME-VACUOUS','severity':'info','origin':'gate 375 reviewer finding 3','title':'name-keyed toBe(0) rows pass vacuously after an inner rename','evidence':'gates/round-375/review.md finding 3','status':'info (D-29z1246): lesson L23 positive-control rule; round 376 adds same-file >0 controls for every renamed name'})
+add({'id':'INFO-C375-LIBKEYS-ACTIVE-FLAKE','severity':'info','origin':'C round 375 notes','title':'LIB-KEYS activeElement after ArrowDown alternates between two options run to run on both trees; preview aria-valuetext differs by timing','evidence':'c-round-375.json notes','status':'info (D-29z1246): equal on HEAD; timing flake, not a regression'})
+add({'id':'B-R375-PROBE-FORWARDREF-NAME','severity':'low','origin':'B pre-check round 375 -> 376 (advisor-prompted check)','title':'browser leaf probes keyed forwardRef components by render.name, so ArrangementMarkerRow (anonymous arrow + displayName) always read 0 (b-round-373/374 leaf-head jsons)','evidence':'b-round-375/probe/leaf-head-376.json (displayName-aware probe: MarkerRow 1 per commit at HEAD) vs b-round-374/probe/leaf-head-375.json (0)','status':'fixed in the loop probe (b-round-375/probe/leaf-probe-376.mjs, B-owned); premise for PERF-11c-iii-c2 corrected; unit render logs already read displayName (no app change)'})
+# signals
+for s in b['architecture_signals']:
+    if s.get('id')=='SIG-R375-LEAF-COMPARATOR-HOME':
+        s.setdefault('inputs',[]).append("D-29z1246: gate 375 architecture note = third independent echo (StudioWorkspace calls two action-bundle hooks + 7 library props; proposes one bounded 'leaf actions bundle' helper if a fourth leaf follows); A-R375 reviewer: ArrangementLibrary imports sameLibraryLeafProps/LibraryTrackLabel from its child file -> move to app/lib/arrangement/ with LP-EQ1/2; GATE375-L1/L2")
+for r in b['architecture_checkpoint_requests']:
+    if r.get('id')=='ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING':
+        r.setdefault('inputs',[]).append('D-29z1246/D-29z1248: gate 375 note = third echo; round 376 Transport (c1) is the fourth pattern-A leaf (useArrangementTransportActions = third action-bundle hook); still no root answer at round 376 planning; c2 continues pattern A; d/e still wait for the answer or RETRO 384')
+        r['status']='requested; non-blocking; 11c-iii-c1/c2 continue with A; 11c-iii-d/e wait for the answer or RETRO 384 (D-29z1248)'
+# split c
+i=[s['id'] for s in q['stages']].index('PERF-11c-iii-b')
+st['PERF-11c-iii']['substages_d29z1247']=['PERF-11c-iii-a','PERF-11c-iii-b','PERF-11c-iii-c1','PERF-11c-iii-c2','PERF-11c-iii-d','PERF-11c-iii-e']
+q['stages'].insert(i+1,{'id':'PERF-11c-iii-c1','what':'ArrangementTransportView = memo; three memo groups (Edit: undo/redo/split/delete; Centre: follow/position/end/play-stop/back/loop; View: zoom/zoom-range/zoom-back/fit/export), each with its own range/selection selectors; shared useSoftDisableFocusHandoff (arm expires after one frame, TL-R376-M1); useArrangementTransportActions; StudioWorkspace renders the view with openExportDialog useCallback; rows RB-LEAF4, FL11; name-keyed renames with same-file >0 controls','status':'dispatched round 376 (D-29z1248)','sketch':'b-round-375/sketch.patch.txt (sha in b-round-375/sketch-dispatched.sha256)','added':D+' '+BY})
+q['stages'].insert(i+2,{'id':'PERF-11c-iii-c2','what':'ArrangementLoopBrace + ArrangementMarkerRow leaves (pattern A unless the checkpoint rules otherwise); premise from the displayName-aware probe (MarkerRow renders once per commit at HEAD, B-R375-PROBE-FORWARDREF-NAME); MarkerRow is forwardRef with an imperative handle, editor state and focus hand-offs (L47/L50 rows)','status':'not started (next after c1; REGRESSION first if planned on/after 2026-11-08)','added':D+' '+BY})
+st['PERF-11c-iii']['status']='in_progress (D-29z1248): a, b done (gates 374 ad13a96, 375 6b11be7); c split into c1 (round 376: Transport) and c2 (LoopBrace + MarkerRow); d/e wait for ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING or RETRO 384 | '+st['PERF-11c-iii']['status']
+q['status']='in_progress (D-29z1248): PERF-11c-iii-b done (C round 375 PASS, gate 375 6b11be7); round 376 = PERF-11c-iii-c1 (Transport); then REGRESSION (due at the first planning on/after 2026-11-08), c2, d/e | '+q['status']
+# rounds
+for r in b['rounds']:
+    if r.get('round')==375: r['status']='done (D-29z1246): C PASS, gate 375 published 6b11be7'
+b['rounds'].append({'round':376,'task':'current-task.md','decision':'D-29z1246..D-29z1249','type':'PERF-11c-iii-c1: ArrangementTransportView memo + Edit/Centre/View memo groups + useSoftDisableFocusHandoff (TL-R376-M1) + useArrangementTransportActions; RB-LEAF4, FL11; RB-LEAF3 per step; DP23 library control','status':'dispatched','note':'baseline 6b11be7 clean; sketch b-round-375/sketch.patch.txt; claims b-round-375/claims-376.sh','added':D+' '+BY})
+b['current_task']='current-task.md (round 376: PERF-11c-iii-c1 Transport memo view + three memo groups + focus-handoff hook with one-frame expiry; sketch b-round-375/sketch.patch.txt)'
+b['decisions_log_b'].extend([
+ {'id':'D-29z1246','date':D,'by':BY,'decision':'Round 375 (PERF-11c-iii-b) done from C evidence: c-round-375.json taskStatus PASS, 16 rows passed, browserVerified/realVerified true, 0 bugs; gate 375 published 6b11be7 (new baseline, tree clean). GATE374-L2 closed. A-R375 Lows: DPR-NO-POSITIVE-CONTROL ruled Low (RB-LEAF3 proves the name live) and fixed in round 376 (owned file); RBLEAF3-PER-STEP fixed in round 376; PREV-ONLY-UNDEFINED-KEY info. Gate 375 review: L1 unused wrappers and L2 comparator fragility -> deferred_low_polish + SIG-R375-LEAF-COMPARATOR-HOME; I3 info; architecture note = third echo on ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING (input, not a task). C flakes -> INFO-C375-LIBKEYS-ACTIVE-FLAKE. Archive tasks/round-375.md = dispatched current-task.md (sha cffb349d...)'},
+ {'id':'D-29z1247','date':D,'by':BY,'decision':'PERF-11c-iii-c split into c1 (Transport) and c2 (LoopBrace + MarkerRow): MarkerRow is a 946-line forwardRef with an imperative handle, editor state and focus hand-offs, and LoopBrace shares its gesture shape; one leaf family per round keeps the L58 pre-check tractable. Scope unchanged. B-R375-PROBE-FORWARDREF-NAME: the browser leaf probe keyed forwardRef by render.name, so MarkerRow read 0; fixed probe shows 1 per commit at HEAD (b-round-375/probe/leaf-head-376.json)'},
+ {'id':'D-29z1248','date':D,'by':BY,'decision':'Round 376 = PERF-11c-iii-c1. Premise at HEAD in the browser (leaf-head-376.json, both viewports): every add/zoom/mute/undo/Undo-button/Redo-button/preview commit renders ArrangementTransport once. Sketch: ArrangementTransportView memo with data props + Edit/Centre/View memo groups (own range/selection selectors), useArrangementTransportActions, openExportDialog useCallback. jsdom counts (RB-LEAF4, View/Edit/Centre/ViewGroup): reset 0000, mute 1100, zoom 1001, range 0111, loop 1110, undo 1100. tech-lead review: approve with changes; TL-R376-M1 (a handoff arm could outlive its click once groups render separately) fixed in v2 by useSoftDisableFocusHandoff with a one-frame expiry; FL11 green on HEAD, red on v1, green on v2; L1 duplicate handoff -> the hook; L2 unused wrapper -> GATE375-L1 family. Test renames with same-file >0 controls; RB-LEAF4 wrapper-0 site-revert guard'},
+ {'id':'D-29z1249','date':D,'by':BY,'decision':'REGRESSION: regression-last.json 2026-11-05 (round 342), due at the first planning on/after 2026-11-08 (today 2026-11-06): not this round. RETRO about round 384 or at the end of STUDIO-PERFORMANCE. ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING still requested (fourth pattern-A leaf). lessons.md unchanged (no Saba-reported issue). Advisor available and consulted before the plan'},
+])
+b['version']=341; b['updated']=D+' '+BY
+for i in ('GATE375-L1-UNUSED-WRAPPERS','GATE375-L2-COMPARATOR-UNSTABLE-PROP'):
+    b['deferred_low_polish'].append(dict(ids[i]))
+json.dump(b,open(P,'w'),ensure_ascii=False,indent=2)
+print('ok', b['version'])
