@@ -1,0 +1,61 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b393-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 155[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays, reports the element time, and stop releases the media[32m 2[2mms[22m[39m
+     [32m✓[39m PS2 a seek on the playing stream reuses the element[32m 1[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ended after stop does nothing[32m 1[2mms[22m[39m
+     [32m✓[39m PS4 an error on the active stream calls onStreamError with its time; a rejection after stop does not[32m 2[2mms[22m[39m
+[31m     [31m×[31m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[39m[32m 102[2mms[22m[39m
+[31m     [31m×[31m PS8 a stream error falls back to the decode path once and plays the decoded buffer[39m[32m 45[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 18:27:01
+[2m   Duration [22m 1.51s[2m (transform 518ms, setup 0ms, import 701ms, tests 155ms, environment 493ms)[22m
+
+
+::error file=/tmp/b393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > library preview streams a URL source without decoding (PERF-13c sketch UI) > PS6 Preview of an evicted URL source streams%3A no decode%2C no loading text%2C no pin%2C preview id set,line=444,column=28::AssertionError: expected 2 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:444:28%0A%0A
+
+::error file=/tmp/b393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > library preview streams a URL source without decoding (PERF-13c sketch UI) > PS8 a stream error falls back to the decode path once and plays the decoded buffer,line=472,column=21::AssertionError: expected [] to have a length of 1 but got +0%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:472:21%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mlibrary preview streams a URL source without decoding (PERF-13c sketch UI)[2m > [22mPS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set
+[31m[1mAssertionError[22m: expected 2 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m444:28[22m[39m
+    [90m442| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m443| [39m    statuses[33m.[39m[34mpush[39m([34mlive[39m(api)[33m.[39mstatus)[33m;[39m
+    [90m444| [39m    [34mexpect[39m(bigLoads[33m.[39mcount)[33m.[39m[34mtoBe[39m(loadsBefore)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m445| [39m    [34mexpect[39m(pending)[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+    [90m446| [39m    expect(statuses).not.toContain(studioLibraryStrings.sourceDecoding…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mlibrary preview streams a URL source without decoding (PERF-13c sketch UI)[2m > [22mPS8 a stream error falls back to the decode path once and plays the decoded buffer
+[31m[1mAssertionError[22m: expected [] to have a length of 1 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m472:21[22m[39m
+    [90m470| [39m    [35mconst[39m { api[33m,[39m pending } [33m=[39m [35mawait[39m [34mmountEviction[39m()[33m;[39m
+    [90m471| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mstartLibraryPreview[39m([32m'big'[39m[33m,[39m [34m0[39m))[33m;[39m
+    [90m472| [39m    [34mexpect[39m(created)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m473| [39m    [34mact[39m(() [33m=>[39m {
+    [90m474| [39m      created[[34m0[39m][33m.[39m[34mdispatchEvent[39m([35mnew[39m [33mEvent[39m([32m'error'[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

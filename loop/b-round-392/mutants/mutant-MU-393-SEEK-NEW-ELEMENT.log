@@ -1,0 +1,40 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b393-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 149[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays, reports the element time, and stop releases the media[32m 2[2mms[22m[39m
+[31m     [31m×[31m PS2 a seek on the playing stream reuses the element[39m[32m 10[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ended after stop does nothing[32m 1[2mms[22m[39m
+     [32m✓[39m PS4 an error on the active stream calls onStreamError with its time; a rejection after stop does not[32m 1[2mms[22m[39m
+     [32m✓[39m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[32m 77[2mms[22m[39m
+     [32m✓[39m PS8 a stream error falls back to the decode path once and plays the decoded buffer[32m 55[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 18:27:06
+[2m   Duration [22m 1.54s[2m (transform 560ms, setup 0ms, import 745ms, tests 149ms, environment 491ms)[22m
+
+
+::error file=/tmp/b393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > library preview stream player (PERF-13c sketch) > PS2 a seek on the playing stream reuses the element,line=368,column=29::AssertionError: expected [ …(2) ] to have a length of 1 but got 2%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:368:29%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mlibrary preview stream player (PERF-13c sketch)[2m > [22mPS2 a seek on the playing stream reuses the element
+[31m[1mAssertionError[22m: expected [ …(2) ] to have a length of 1 but got 2[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m368:29[22m[39m
+    [90m366| [39m    player[33m.[39m[34mplayLibraryPreviewStream[39m([32m'/big.mp3'[39m[33m,[39m [34m0[39m[33m,[39m vi[33m.[39m[34mfn[39m())[33m;[39m
+    [90m367| [39m    player[33m.[39m[34mplayLibraryPreviewStream[39m([32m'/big.mp3'[39m[33m,[39m [34m40[39m[33m,[39m vi[33m.[39m[34mfn[39m())[33m;[39m
+    [90m368| [39m    [34mexpect[39m(createdElements)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m369| [39m    [34mexpect[39m(createdElements[[34m0[39m][33m.[39mcurrentTime)[33m.[39m[34mtoBe[39m([34m40[39m)[33m;[39m
+    [90m370| [39m    [34mexpect[39m(createdElements[[34m0[39m][33m.[39mpauseCalls)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

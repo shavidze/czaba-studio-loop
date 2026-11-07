@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T17:18:47.162Z",
-  "current_task": "Round 391: PERF-13b-ii decode wait text, error-source clips, PCM rows -> assert (current-task.md)",
+  "_generatedUtc": "2026-11-07T18:04:27.982Z",
+  "current_task": "Round 392: PERF-13b-ii re-dispatch: settle ruling for A STOP / C-R391-01 (owner-controller success, null-owner no loading write), EV9 superseded rewrite, EV23-25, doc 251 (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6214,18 +6214,19 @@
       "severity": "info",
       "status": "awaiting_user (D-29z1326): default not now",
       "title": "a clip whose source failed has no Offline mark (Live marks such clips Offline); status-line warning "
+    },
+    {
+      "id": "C-R391-01",
+      "severity": "medium",
+      "origin": "C round 391 (= A STOP; root cause: B spec success clause written on cache state, l.68 vs l.73/l.162)",
+      "evidence": "c-round-391.json bugs[0]; c-round-391/probe2-1440.json rows.STALE_SUPERSEDED; a-round-391.md §0, a-round-391/stop-probes.log",
+      "title": "a superseded (or stopped) library preview leaves 'Loading “X”…' on the status line forever",
+      "repro": "/studio-lab, __delayDecodes=1, Preview Middle East, then Preview Full mix while it decodes; status stays Loading",
+      "status": "in_fix round 392 (D-29z1331)",
+      "added": "2026-11-07 B round 391 -> 392 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 382,
-      "task": "current-task.md",
-      "decision": "D-29z1272..D-29z1275",
-      "type": "PERF-13b-i: decoded-buffer-cache.ts + ArrangementContext wiring (evict reloadable unpinned, pins clips/preview/export, ensureDecoded, Play refusal while decoding, failure -> error, clear on reset); harness guard bound + decode probe + dropped probe (M3); DC1-DC7, EV1-EV8, PL1-PL7; doc 248",
-      "status": "c_fail (D-29z1276): C-R382-01 confirmed, C-R382-02 reclassified pending C; fixed in round 383",
-      "note": "baseline 5745526 (gate 381); claims b-round-381/claims-382.sh; tech-lead b-round-381/tech-lead-382.md",
-      "added": "2026-11-07 B round 381 -> 382 planning"
-    },
     {
       "round": 383,
       "task": "current-task.md",
@@ -6306,9 +6307,18 @@
       "task": "current-task.md",
       "decision": "D-29z1322..D-29z1329",
       "type": "PERF-13b-ii: decode wait text (sourceDecoding/sourceReady, settle swap), error-source clips (export refuses window-limited, Play plays with warning), pcm-live-mib-ready/decode-mib-ready record -> assert",
-      "status": "dispatched",
+      "status": "C FAIL (c-round-391.json: C-R391-01 Medium = A STOP, C-R391-02 Low; browserVerified true; B1,B3-B6,PERF-RES PASS); gate 391 skipped; work kept in tree (D-29z1330)",
       "note": "baseline 11ca746 clean; grants b-round-390/grants-391.txt (6); frozen b-round-390/r391-frozen-sha256.txt (1279); claims b-round-390/claims-391.sh K1..K26; perf sketch 31.9/0 PASS, mutant MU-391-NOTHING-EVICTABLE 124/92.2 FAIL",
       "added": "2026-11-07 B round 390 -> 391 planning"
+    },
+    {
+      "round": 392,
+      "task": "current-task.md",
+      "decision": "D-29z1330..D-29z1335",
+      "type": "PERF-13b-ii re-dispatch: settle rule decided by the owner controller (not the cache) at Play and preview; null owner -> sourceNotLoaded, no loading write; superseded failure unconditional; EV9 superseded rewritten to sourceReady, EV9 stop, EV12 extended, EV23-25; doc 251; C rows B7 (C-R391-01 repro), B8 preview->Space, B9 superseded failure, B1-B4, PERF-RES",
+      "status": "dispatched",
+      "note": "baseline 11ca746 + A round-391 tree (5 status lines); grants b-round-391/grants-392.txt (6, same as 391); frozen b-round-390/r391-frozen-sha256.txt (1279, 0 fail); claims b-round-391/claims-392.sh K1..K24",
+      "added": "2026-11-07 B round 391 -> 392 planning"
     }
   ],
   "other_keys": [

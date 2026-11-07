@@ -1,0 +1,66 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-392/mutants/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx [2m([22m[2m35 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m34 skipped[39m[2m)[22m[32m 86[2mms[22m[39m
+     [2m[90m↓[39m[22m EV1: after load the evictable buffer is gone, the other stays, and both stay ready
+     [2m[90m↓[39m[22m EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight
+     [2m[90m↓[39m[22m EV3: Play is refused while the placed source decodes, and starts once it settles
+     [2m[90m↓[39m[22m EV3: while already playing, a newly placed clip joins through the resync and playback never stops
+     [2m[90m↓[39m[22m EV4: Undo of the place evicts the buffer again, and Redo decodes it again
+     [2m[90m↓[39m[22m EV5: export waits for the decode, renders with the buffer, and releases its pins
+     [2m[90m↓[39m[22m EV5: a cancelled export also releases its pins
+     [2m[90m↓[39m[22m EV5: a replaced export does not release the pins of the export that replaced it
+     [2m[90m↓[39m[22m EV6: a failed re-decode sets the source to error and shows the existing failure text
+     [2m[90m↓[39m[22m EV6: an export whose re-decode fails creates no file and shows the export failure text
+[31m     [31m×[31m EV9: a preview plays the re-decoded source and releases it on Stop[39m[32m 84[2mms[22m[39m
+     [2m[90m↓[39m[22m EV9: a superseded preview request does not start when its decode settles
+     [2m[90m↓[39m[22m EV9: a preview stopped before its decode settles shows the ready text and does not start
+     [2m[90m↓[39m[22m EV7: a collection change deletes exactly the old collection ids, never clears, and an old decode in flight never sets
+     [2m[90m↓[39m[22m EV10: peaks of two sources that arrive in the same tick are both kept, each with its own array
+     [2m[90m↓[39m[22m EV8: a volume edit that keeps the clips array does not recompute pins
+     [2m[90m↓[39m[22m EV11: a resync that throws after a re-decode while playing stops playback with a status and leaks no rejection
+     [2m[90m↓[39m[22m EV11: an export waiting on the same re-decode still renders when the resync throws
+     [2m[90m↓[39m[22m EV12: a stale preview call from before a collection change decodes nothing under the new collection
+     [2m[90m↓[39m[22m EV13: a preview of an evicted source keeps the timeline playing until its decode succeeds
+     [2m[90m↓[39m[22m EV13: a preview whose decode fails leaves the timeline playing and shows the failure text
+     [2m[90m↓[39m[22m EV14: re-rendering the provider with the same collection loads nothing again and deletes no buffer
+     [2m[90m↓[39m[22m EV15: a resync that throws after the first load of a placed source stops playback and keeps the source ready
+     [2m[90m↓[39m[22m EV16: a status written during the wait survives a successful settle
+     [2m[90m↓[39m[22m EV16: a failed settle writes the failure even after another status replaced the loading text
+     [2m[90m↓[39m[22m EV17: Play waits for every awaited source, and a later failure names that source
+     [2m[90m↓[39m[22m EV17: when every awaited source decodes, the ready text comes only after the last one
+     [2m[90m↓[39m[22m EV18: a preview whose re-decode fails shows the failure text and does not start
+     [2m[90m↓[39m[22m EV19: an export refuses a clip whose source failed, renders nothing and releases its pins
+     [2m[90m↓[39m[22m EV20: a range export whose window misses the failed clip still renders
+     [2m[90m↓[39m[22m EV21: Play with a failed clip plays and names the failed source instead of the start point
+     [2m[90m↓[39m[22m EV22: a settle during a pointer gesture never leaves the loading text (record row)
+     [2m[90m↓[39m[22m EV23: a superseded preview whose decode fails still shows the failure text
+     [2m[90m↓[39m[22m EV24: an MP3 range export whose window misses the failed clip still renders and encodes
+     [2m[90m↓[39m[22m EV25: an old decode that settles after a collection change leaves the new collection status
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV9: a preview plays the re-decoded source and releases it on Stop
+[31m[1mAssertionError[22m: expected 'Loading “Big Preview”…' to be '“Big Preview” is ready.' // Object.is equality[39m
+
+Expected: [32m"“Big Preview”[7m is ready.[27m"[39m
+Received: [31m"[7mLoading [27m“Big Preview”[7m…[27m"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m533:30[22m[39m
+    [90m531| [39m    [35mawait[39m [34msettleNext[39m(pending[33m,[39m [34mbigBuffer[39m())[33m;[39m
+    [90m532| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBe[39m([32m'big'[39m)[33m;[39m
+    [90m533| [39m    expect(live(api).status).toBe(studioLibraryStrings.sourceReady(BIG…
+    [90m   | [39m                             [31m^[39m
+    [90m534| [39m    [34mexpect[39m([34mobservedCache[39m()[33m.[39m[34mhas[39m([32m'big'[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m535| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mstopLibraryPreview[39m())[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m34 skipped[39m[90m (35)[39m
+[2m   Start at [22m 17:37:08
+[2m   Duration [22m 1.49s[2m (transform 577ms, setup 0ms, import 765ms, tests 86ms, environment 484ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-392/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV9%3A a preview plays the re-decoded source and releases it on Stop,line=533,column=30::AssertionError: expected 'Loading “Big Preview”…' to be '“Big Preview” is ready.' // Object.is equality%0A%0AExpected: "“Big Preview” is ready."%0AReceived: "Loading “Big Preview”…"%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:533:30%0A%0A

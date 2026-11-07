@@ -1,0 +1,701 @@
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 40f4ee0..d2ea79f 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -885,6 +885,10 @@ export function ArrangementProvider({
+   const webAudioUnavailableRef = useRef(false);
+   const previewPlayerRef = useRef<LibraryPreviewPlayer | null>(null);
+   const libraryPreviewSourceRef = useRef<string | null>(null);
++  const streamFallbackRef = useRef<{
++    collection: WorkspaceCollection;
++    sourceIds: Set<string>;
++  } | null>(null);
+   const libraryDragSourceRef = useRef<string | null>(null);
+   const [libraryPreviewSourceId, setLibraryPreviewSourceId] = useState<string | null>(null);
+ 
+@@ -1825,6 +1829,46 @@ export function ArrangementProvider({
+   const startLibraryPreview = useCallback(
+     (sourceId: string, offset = 0) => {
+       const source = collection.sources.find((entry) => entry.id === sourceId);
++      const fallback = streamFallbackRef.current;
++      const streamUrl =
++        source &&
++        latestRef.current.sourceStates[sourceId]?.status === 'ready' &&
++        !decodedBuffers.has(sourceId) &&
++        !(fallback?.collection === collection && fallback.sourceIds.has(sourceId))
++          ? (collection.previewUrl?.(source) ?? null)
++          : null;
++      if (source && streamUrl !== null) {
++        const ctx = ensureAudioContext();
++        if (!ctx) {
++          return;
++        }
++        if (isPlayingRef.current) {
++          stopPlayback();
++        }
++        if (!previewPlayerRef.current) {
++          previewPlayerRef.current = createLibraryPreviewPlayer(ctx, () => {
++            libraryPreviewSourceRef.current = null;
++            setLibraryPreviewSourceId(null);
++            releasePreviewPin();
++          });
++        }
++        previewRequestRef.current = null;
++        releasePreviewPin();
++        libraryPreviewSourceRef.current = sourceId;
++        setLibraryPreviewSourceId(sourceId);
++        previewPlayerRef.current.playLibraryPreviewStream(streamUrl, offset, (atSeconds) => {
++          const current = streamFallbackRef.current;
++          if (current?.collection === collection) {
++            current.sourceIds.add(sourceId);
++          } else {
++            streamFallbackRef.current = { collection, sourceIds: new Set([sourceId]) };
++          }
++          libraryPreviewSourceRef.current = null;
++          setLibraryPreviewSourceId(null);
++          startLibraryPreviewRef.current(sourceId, atSeconds);
++        });
++        return;
++      }
+       if (
+         source &&
+         latestRef.current.sourceStates[sourceId]?.status === 'ready' &&
+diff --git a/app/data/studio-lab-demo.ts b/app/data/studio-lab-demo.ts
+index d440d2f..d43e3ba 100644
+--- a/app/data/studio-lab-demo.ts
++++ b/app/data/studio-lab-demo.ts
+@@ -138,4 +138,5 @@ export const studioLabDemoCollection: WorkspaceCollection = {
+   sources: studioLabDemoSources,
+   loadSource: loadDemoSource,
+   canReloadSource: (source) => Object.hasOwn(demoUrls, source.id),
++  previewUrl: (source) => (Object.hasOwn(demoUrls, source.id) ? demoUrls[source.id] : null),
+ };
+diff --git a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+new file mode 100644
+index 0000000..e32b7eb
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+@@ -0,0 +1,485 @@
++import { act, render } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { ArrangementProvider } from '~/contexts/ArrangementContext';
++import {
++  type ArrangementWavResult,
++  applySchedule,
++  renderArrangementWav,
++} from '~/lib/arrangement/graph.client';
++import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { createLibraryPreviewPlayer } from '../preview.client';
++import { studioExportStrings, studioLibraryStrings, studioPlaybackStrings } from '../strings';
++import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
++
++interface ObservedDecodedCache {
++  has: (id: string) => boolean;
++  setPinnedCalls: () => number;
++  setPinnedArgs: () => [string, string[]][];
++  deleteManyCalls: () => string[][];
++  clearCalls: () => number;
++}
++
++const cacheObserver = vi.hoisted(() => {
++  const instances: ObservedDecodedCache[] = [];
++  return { instances };
++});
++
++vi.mock('~/lib/arrangement/decoded-buffer-cache', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('~/lib/arrangement/decoded-buffer-cache')>();
++  const createSpiedCache: typeof actual.createDecodedBufferCache = (options) => {
++    const cache = actual.createDecodedBufferCache(options);
++    const setPinned = vi.fn(cache.setPinned);
++    const deleteManyCalls: string[][] = [];
++    const deleteMany = vi.fn((ids: Iterable<string>) => {
++      const list = [...ids];
++      deleteManyCalls.push(list);
++      cache.deleteMany(list);
++    });
++    const clear = vi.fn(cache.clear);
++    cacheObserver.instances.push({
++      has: cache.has,
++      setPinnedCalls: () => setPinned.mock.calls.length,
++      setPinnedArgs: () =>
++        setPinned.mock.calls.map(([owner, ids]): [string, string[]] => [owner, [...ids]]),
++      deleteManyCalls: () => deleteManyCalls.map((ids) => [...ids]),
++      clearCalls: () => clear.mock.calls.length,
++    });
++    return { ...cache, setPinned, deleteMany, clear };
++  };
++  return { ...actual, createDecodedBufferCache: vi.fn(createSpiedCache) };
++});
++
++vi.mock('~/lib/arrangement/graph.client', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('~/lib/arrangement/graph.client')>();
++  return { ...actual, applySchedule: vi.fn(actual.applySchedule), renderArrangementWav: vi.fn() };
++});
++
++const mp3EncoderStub = vi.hoisted(() => ({
++  encode: vi.fn(async (_wav: Blob) => new Blob(['mp3'])),
++}));
++
++vi.mock('~/lib/arrangement/mp3-encoder.client', () => ({
++  loadArrangementMp3Encoder: async () => ({ encode: mp3EncoderStub.encode }),
++  resetArrangementMp3Encoder: () => undefined,
++}));
++
++const renderWavMock = vi.mocked(renderArrangementWav);
++const applyScheduleMock = vi.mocked(applySchedule);
++
++const fakeClock = { base: 0 };
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++const createdSources: FakeSource[] = [];
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  get currentTime() {
++    return Date.now() / 1000 - fakeClock.base;
++  }
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    const source = new FakeSource();
++    createdSources.push(source);
++    return source;
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++const BIG_TITLE = 'Big Preview';
++const KEEP_TITLE = 'Kept Synth';
++const SECOND_BIG_TITLE = 'Second Big Preview';
++const BIG_FRAMES = (40 * 1024 * 1024) / 4;
++const SAMPLE_RATE = 48000;
++const DECODE_ERROR = 'Decode failed (network)';
++
++interface PendingLoad {
++  resolve: (buffer: AudioBuffer) => void;
++  reject: (error: Error) => void;
++}
++
++function bigBuffer(): AudioBuffer {
++  return new AudioBuffer({ length: BIG_FRAMES, numberOfChannels: 1, sampleRate: SAMPLE_RATE });
++}
++
++function evictionCollection() {
++  const pending: PendingLoad[] = [];
++  const bigLoads = { count: 0 };
++  const collection: WorkspaceCollection = {
++    id: 'eviction',
++    label: 'eviction',
++    origin: 'demo',
++    sources: [
++      { id: 'big', title: BIG_TITLE, collectionLabel: 'eviction', kind: 'music', origin: 'demo' },
++      { id: 'keep', title: KEEP_TITLE, collectionLabel: 'eviction', kind: 'sfx', origin: 'demo' },
++    ],
++    loadSource: (source) => {
++      if (source.id === 'keep') {
++        return Promise.resolve(
++          new AudioBuffer({ length: 4800, numberOfChannels: 2, sampleRate: SAMPLE_RATE }),
++        );
++      }
++      bigLoads.count += 1;
++      return new Promise<AudioBuffer>((resolve, reject) => {
++        pending.push({ resolve, reject });
++      });
++    },
++    canReloadSource: (source) => source.id === 'big',
++    previewUrl: (source) => (source.id === 'big' ? '/big.mp3' : null),
++  };
++  return { collection, pending, bigLoads };
++}
++
++function evictionArrangement(): Arrangement {
++  return createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++  ]);
++}
++
++interface ProbeRef {
++  current: WorkspaceProbeValue | null;
++}
++
++function EvictionProbe({ api }: { api: ProbeRef }) {
++  api.current = useWorkspaceProbe();
++  return null;
++}
++
++function live(api: ProbeRef): WorkspaceProbeValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++async function flushAsync(rounds = 5) {
++  for (let i = 0; i < rounds; i++) {
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 0));
++    });
++  }
++}
++
++function observedCache(): ObservedDecodedCache {
++  const cache = cacheObserver.instances.at(-1);
++  if (!cache) {
++    throw new Error('decoded buffer cache not created');
++  }
++  return cache;
++}
++
++async function settleNext(pending: PendingLoad[], outcome: AudioBuffer | Error) {
++  const next = pending.shift();
++  if (!next) {
++    throw new Error('no decode in flight');
++  }
++  if (outcome instanceof Error) {
++    next.reject(outcome);
++  } else {
++    next.resolve(outcome);
++  }
++  await flushAsync();
++}
++
++async function mountEviction() {
++  const setup = evictionCollection();
++  const api: ProbeRef = { current: null };
++  const view = render(
++    <ArrangementProvider collection={setup.collection} initialArrangement={evictionArrangement()}>
++      <EvictionProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await flushAsync();
++  await settleNext(setup.pending, bigBuffer());
++  return { ...setup, api, view };
++}
++
++async function placeBigDecoded(api: ProbeRef, pending: PendingLoad[]) {
++  act(() => live(api).addSourceToActiveTrack('big'));
++  await settleNext(pending, bigBuffer());
++  expect(observedCache().has('big')).toBe(true);
++}
++
++function sameTickPeaksCollection() {
++  const pending: PendingLoad[] = [];
++  const collection: WorkspaceCollection = {
++    id: 'same-tick',
++    label: 'same-tick',
++    origin: 'demo',
++    sources: [
++      { id: 'first', title: 'First', collectionLabel: 'same-tick', kind: 'sfx', origin: 'demo' },
++      { id: 'second', title: 'Second', collectionLabel: 'same-tick', kind: 'sfx', origin: 'demo' },
++    ],
++    loadSource: () =>
++      new Promise<AudioBuffer>((resolve, reject) => {
++        pending.push({ resolve, reject });
++      }),
++  };
++  return { collection, pending };
++}
++
++function twoEvictableCollection() {
++  const pending: PendingLoad[] = [];
++  const collection: WorkspaceCollection = {
++    id: 'two-evictable',
++    label: 'two-evictable',
++    origin: 'demo',
++    sources: [
++      { id: 'big', title: BIG_TITLE, collectionLabel: 'two', kind: 'music', origin: 'demo' },
++      {
++        id: 'big2',
++        title: SECOND_BIG_TITLE,
++        collectionLabel: 'two',
++        kind: 'music',
++        origin: 'demo',
++      },
++    ],
++    loadSource: () =>
++      new Promise<AudioBuffer>((resolve, reject) => {
++        pending.push({ resolve, reject });
++      }),
++    canReloadSource: () => true,
++  };
++  return { collection, pending };
++}
++
++class FakeMediaElement extends EventTarget {
++  src = '';
++  currentTime = 0;
++  playCalls = 0;
++  pauseCalls = 0;
++  loadCalls = 0;
++  playResult: Promise<void> = Promise.resolve();
++  play() {
++    this.playCalls += 1;
++    return this.playResult;
++  }
++  pause() {
++    this.pauseCalls += 1;
++  }
++  load() {
++    this.loadCalls += 1;
++  }
++  removeAttribute(name: string) {
++    if (name === 'src') {
++      this.src = '';
++    }
++  }
++}
++
++const createdElements: FakeMediaElement[] = [];
++
++function fakeElementFactory(): HTMLAudioElement {
++  const element = new FakeMediaElement();
++  createdElements.push(element);
++  return element as unknown as HTMLAudioElement;
++}
++
++describe('library preview stream player (PERF-13c sketch)', () => {
++  beforeEach(() => {
++    createdElements.length = 0;
++  });
++
++  it('PS1 a stream preview sets the url and offset, plays, reports the element time, and stop releases the media', () => {
++    const ended = vi.fn();
++    const player = createLibraryPreviewPlayer(new FakeAudioContext() as unknown as AudioContext, ended, {
++      createAudioElement: fakeElementFactory,
++    });
++    player.playLibraryPreviewStream('/big.mp3', 12, vi.fn());
++    const element = createdElements[0];
++    expect(element.src).toBe('/big.mp3');
++    expect(element.currentTime).toBe(12);
++    expect(element.playCalls).toBe(1);
++    element.currentTime = 13.5;
++    expect(player.getLibraryPreviewOffset()).toBe(13.5);
++    player.stopLibraryPreview();
++    expect(element.pauseCalls).toBe(1);
++    expect(element.src).toBe('');
++    expect(element.loadCalls).toBe(1);
++    expect(player.getLibraryPreviewOffset()).toBeNull();
++  });
++
++  it('PS2 a seek on the playing stream reuses the element', () => {
++    const player = createLibraryPreviewPlayer(new FakeAudioContext() as unknown as AudioContext, vi.fn(), {
++      createAudioElement: fakeElementFactory,
++    });
++    player.playLibraryPreviewStream('/big.mp3', 0, vi.fn());
++    player.playLibraryPreviewStream('/big.mp3', 40, vi.fn());
++    expect(createdElements).toHaveLength(1);
++    expect(createdElements[0].currentTime).toBe(40);
++    expect(createdElements[0].pauseCalls).toBe(0);
++  });
++
++  it('PS3 ended fires onEnded once; an old element ended after stop does nothing', () => {
++    const ended = vi.fn();
++    const player = createLibraryPreviewPlayer(new FakeAudioContext() as unknown as AudioContext, ended, {
++      createAudioElement: fakeElementFactory,
++    });
++    player.playLibraryPreviewStream('/big.mp3', 0, vi.fn());
++    createdElements[0].dispatchEvent(new Event('ended'));
++    expect(ended).toHaveBeenCalledTimes(1);
++    expect(player.getLibraryPreviewOffset()).toBeNull();
++    player.playLibraryPreviewStream('/big.mp3', 0, vi.fn());
++    player.stopLibraryPreview();
++    createdElements[1].dispatchEvent(new Event('ended'));
++    expect(ended).toHaveBeenCalledTimes(1);
++  });
++
++  it('PS4 an error on the active stream calls onStreamError with its time; a rejection after stop does not', async () => {
++    const player = createLibraryPreviewPlayer(new FakeAudioContext() as unknown as AudioContext, vi.fn(), {
++      createAudioElement: fakeElementFactory,
++    });
++    const onError = vi.fn();
++    player.playLibraryPreviewStream('/big.mp3', 5, onError);
++    createdElements[0].dispatchEvent(new Event('error'));
++    expect(onError).toHaveBeenCalledWith(5);
++    expect(createdElements[0].pauseCalls).toBe(1);
++    const late = vi.fn();
++    let reject: (error: Error) => void = () => undefined;
++    const pendingPlay = new Promise<void>((_, rj) => {
++      reject = rj;
++    });
++    const next = new FakeMediaElement();
++    next.playResult = pendingPlay;
++    const player2 = createLibraryPreviewPlayer(new FakeAudioContext() as unknown as AudioContext, vi.fn(), {
++      createAudioElement: () => next as unknown as HTMLAudioElement,
++    });
++    player2.playLibraryPreviewStream('/big.mp3', 0, late);
++    player2.stopLibraryPreview();
++    reject(new DOMException('aborted', 'AbortError'));
++    await Promise.resolve();
++    await Promise.resolve();
++    expect(late).not.toHaveBeenCalled();
++  });
++});
++
++describe('library preview streams a URL source without decoding (PERF-13c sketch UI)', () => {
++  beforeEach(() => {
++    cacheObserver.instances.length = 0;
++    createdSources.length = 0;
++    fakeClock.base = Date.now() / 1000;
++    vi.stubGlobal('AudioContext', FakeAudioContext);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++    vi.stubGlobal('requestAnimationFrame', () => 1);
++    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  });
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  it('PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set', async () => {
++    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
++    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++    vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++    const { api, pending, bigLoads } = await mountEviction();
++    const loadsBefore = bigLoads.count;
++    const statuses: string[] = [];
++    act(() => live(api).startLibraryPreview('big', 0));
++    statuses.push(live(api).status);
++    await flushAsync();
++    statuses.push(live(api).status);
++    expect(bigLoads.count).toBe(loadsBefore);
++    expect(pending).toHaveLength(0);
++    expect(statuses).not.toContain(studioLibraryStrings.sourceDecoding(BIG_TITLE));
++    expect(play).toHaveBeenCalledTimes(1);
++    expect(live(api).libraryPreviewSourceId).toBe('big');
++    expect(observedCache().has('big')).toBe(false);
++    expect(observedCache().setPinnedArgs()).not.toContainEqual(['preview', ['big']]);
++    act(() => live(api).stopLibraryPreview());
++    expect(live(api).libraryPreviewSourceId).toBe(null);
++  });
++
++  it('PS8 a stream error falls back to the decode path once and plays the decoded buffer', async () => {
++    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
++    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
++    vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
++    const created: HTMLAudioElement[] = [];
++    const NativeAudio = window.Audio;
++    vi.stubGlobal(
++      'Audio',
++      class extends NativeAudio {
++        constructor() {
++          super();
++          created.push(this);
++        }
++      },
++    );
++    const { api, pending } = await mountEviction();
++    act(() => live(api).startLibraryPreview('big', 0));
++    expect(created).toHaveLength(1);
++    act(() => {
++      created[0].dispatchEvent(new Event('error'));
++    });
++    expect(live(api).status).toBe(studioLibraryStrings.sourceDecoding(BIG_TITLE));
++    await settleNext(pending, bigBuffer());
++    expect(live(api).status).toBe(studioLibraryStrings.sourceReady(BIG_TITLE));
++    expect(live(api).libraryPreviewSourceId).toBe('big');
++    act(() => live(api).stopLibraryPreview());
++    act(() => live(api).startLibraryPreview('big', 0));
++    expect(created).toHaveLength(1);
++    expect(live(api).status).toBe(studioLibraryStrings.sourceDecoding(BIG_TITLE));
++  });
++});
+diff --git a/app/lib/arrangement/preview.client.ts b/app/lib/arrangement/preview.client.ts
+index b7d21d7..9dee846 100644
+--- a/app/lib/arrangement/preview.client.ts
++++ b/app/lib/arrangement/preview.client.ts
+@@ -1,19 +1,39 @@
+ export interface LibraryPreviewPlayer {
+   playLibraryPreview: (buffer: AudioBuffer, offset: number) => void;
++  playLibraryPreviewStream: (
++    url: string,
++    offset: number,
++    onStreamError: (atSeconds: number) => void,
++  ) => void;
+   stopLibraryPreview: () => void;
+   getLibraryPreviewOffset: () => number | null;
+ }
+ 
+-interface ActivePreview {
++export interface LibraryPreviewPlayerOptions {
++  createAudioElement?: () => HTMLAudioElement;
++}
++
++interface ActiveBufferPreview {
++  kind: 'buffer';
+   source: AudioBufferSourceNode;
+   startedAt: number;
+   offset: number;
+   duration: number;
+ }
+ 
++interface ActiveStreamPreview {
++  kind: 'stream';
++  element: HTMLAudioElement;
++  url: string;
++  detach: () => void;
++}
++
++type ActivePreview = ActiveBufferPreview | ActiveStreamPreview;
++
+ export function createLibraryPreviewPlayer(
+   ctx: AudioContext,
+   onEnded: () => void,
++  { createAudioElement = () => new Audio() }: LibraryPreviewPlayerOptions = {},
+ ): LibraryPreviewPlayer {
+   let active: ActivePreview | null = null;
+ 
+@@ -23,6 +43,13 @@ export function createLibraryPreviewPlayer(
+     if (!current) {
+       return;
+     }
++    if (current.kind === 'stream') {
++      current.detach();
++      current.element.pause();
++      current.element.removeAttribute('src');
++      current.element.load();
++      return;
++    }
+     current.source.onended = null;
+     try {
+       current.source.stop();
+@@ -39,7 +66,8 @@ export function createLibraryPreviewPlayer(
+       const source = ctx.createBufferSource();
+       source.buffer = buffer;
+       source.connect(ctx.destination);
+-      const preview: ActivePreview = {
++      const preview: ActiveBufferPreview = {
++        kind: 'buffer',
+         source,
+         startedAt: ctx.currentTime,
+         offset: start,
+@@ -55,6 +83,46 @@ export function createLibraryPreviewPlayer(
+       source.start(ctx.currentTime, start);
+       active = preview;
+     },
++    playLibraryPreviewStream(url, offset, onStreamError) {
++      const start = Math.max(0, offset);
++      if (active?.kind === 'stream' && active.url === url) {
++        active.element.currentTime = start;
++        return;
++      }
++      stopActive();
++      const element = createAudioElement();
++      const handleEnded = () => {
++        if (active === preview) {
++          stopActive();
++          onEnded();
++        }
++      };
++      const handleError = () => {
++        if (active === preview) {
++          const at = element.currentTime;
++          stopActive();
++          onStreamError(at);
++        }
++      };
++      element.addEventListener('ended', handleEnded);
++      element.addEventListener('error', handleError);
++      const preview: ActiveStreamPreview = {
++        kind: 'stream',
++        element,
++        url,
++        detach: () => {
++          element.removeEventListener('ended', handleEnded);
++          element.removeEventListener('error', handleError);
++        },
++      };
++      active = preview;
++      element.src = url;
++      if (active !== preview) {
++        return;
++      }
++      element.currentTime = start;
++      void Promise.resolve(element.play()).catch(handleError);
++    },
+     stopLibraryPreview() {
+       stopActive();
+     },
+@@ -62,6 +130,9 @@ export function createLibraryPreviewPlayer(
+       if (!active) {
+         return null;
+       }
++      if (active.kind === 'stream') {
++        return active.element.currentTime;
++      }
+       return Math.min(
+         active.duration,
+         active.offset + Math.max(0, ctx.currentTime - active.startedAt),
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index 32be40e..ec34f0e 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -97,6 +97,7 @@ export interface WorkspaceCollection {
+     signal: AbortSignal,
+   ) => Promise<AudioBuffer>;
+   canReloadSource?: (source: WorkspaceSource) => boolean;
++  previewUrl?: (source: WorkspaceSource) => string | null;
+ }
+ 
+ export type WorkspaceVideoAudioStatus = 'decoding' | 'ready' | 'none' | 'error';
