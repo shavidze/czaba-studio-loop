@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T00:33:46.929Z",
-  "current_task": "current-task.md (round 376: PERF-11c-iii-c1 Transport memo view + three memo groups + focus-handoff hook with one-frame expiry; sketch b-round-375/sketch.patch.txt)",
+  "_generatedUtc": "2026-11-07T02:11:06.847Z",
+  "current_task": "current-task.md (round 377: PERF-11c-iii-c1 close-out; RB-LEAF4b delta b-round-376/sketch-v3-delta.patch.txt; full C verification)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6103,18 +6103,43 @@
       "severity": "low",
       "status": "deferred_low_polish (D-29z1248): one tri-state range selecto",
       "title": "EditGroup subscribes to the range store twice; one tri-state selector would do"
+    },
+    {
+      "id": "A-R376-REVIEW-M1-EDIT-IDENTITY-ROW",
+      "severity": "medium",
+      "origin": "A round 376 code-reviewer (gap in B sketch / B spec)",
+      "title": "no row proves the transport leaves stay still across an edit that keeps the Undo/Redo labels (provider action identity)",
+      "evidence": "a-round-376.md STOP 2; b-round-376/rbleaf4b-sketch.log; b-round-376/mutants/sketch-run/mutant-MU-T-UNDO-FRESH-PER-EDIT.full.log (red only on RB-LEAF4b; RB-LEAF4 stays green, so the gap was real)",
+      "repro": "mutant: undo useCallback deps + history -> all existing rows green",
+      "status": "scheduled round 377 (D-29z1251): RB-LEAF4b (two Master Mute toggles, all four leaves 0 on the second, StudioWorkspace > 0) + mutant MU-T-UNDO-FRESH-PER-EDIT; closes on C PASS of round 377",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-M2-ONE-FRAME-SYNC-COMMIT",
+      "severity": "low",
+      "status": "ruled Low (D-29z1251): no transition on the path today (K5 =",
+      "title": "the hand-off one-frame expiry assumes synchronous commits; a future startTransition/useDeferredValue"
+    },
+    {
+      "id": "A-R376-REVIEW-L1-RAF-UNARMED",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it wo",
+      "title": "useSoftDisableFocusHandoff schedules its expiry rAF on paths where nothing was armed (early return m"
+    },
+    {
+      "id": "A-R376-REVIEW-L2-DP23-STALE-TITLE",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it wo",
+      "title": "DP23 title still says \"renders the transport\"; could also assert Centre/View 0 on selectClip"
+    },
+    {
+      "id": "A-R376-REVIEW-L3-UNUSED-EVENT-PARAMS",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it wo",
+      "title": "unused event params in ArrangementTransport click handlers (~l.336/451/529; Biome rule off)"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 367,
-      "task": "current-task.md",
-      "decision": "D-29z1201..D-29z1205",
-      "type": "PERF-9b-ii: stem-cache commit discipline (SYS-R365-STEM-CACHE-HARDENING), doc 236 Completed",
-      "status": "c_fail (D-29z1206): A STOP + C reproduced C-R367-DEDUP-CANCELLED-WRITE (Medium); browser rows passed; gate 367 skipped",
-      "note": "baseline d53d113 clean; sketch b-round-366/sketch.patch.txt; claims b-round-366/claims-367.sh",
-      "added": "2026-11-06 B round 366 -> 367 planning"
-    },
     {
       "round": 368,
       "task": "current-task.md",
@@ -6193,9 +6218,18 @@
       "task": "current-task.md",
       "decision": "D-29z1246..D-29z1249",
       "type": "PERF-11c-iii-c1: ArrangementTransportView memo + Edit/Centre/View memo groups + useSoftDisableFocusHandoff (TL-R376-M1) + useArrangementTransportActions; RB-LEAF4, FL11; RB-LEAF3 per step; DP23 library control",
-      "status": "dispatched",
+      "status": "stopped (D-29z1250): A STOP for B rulings (TC10 headroom misread, reviewer M1); C BLOCKED, 0 bugs, browserVerified false; gate 376 skipped; continued in round 377 on the same uncommitted tree",
       "note": "baseline 6b11be7 clean; sketch b-round-375/sketch.patch.txt; claims b-round-375/claims-376.sh",
       "added": "2026-11-06 B round 375 -> 376 planning"
+    },
+    {
+      "round": 377,
+      "task": "current-task.md",
+      "decision": "D-29z1250..D-29z1253",
+      "type": "PERF-11c-iii-c1 close-out: rulings on the 376 STOP; A applies b-round-376/sketch-v3-delta.patch.txt (RB-LEAF4b) + doc 243 update; full C run (unit, shuffle, 11 mutants, perf, leaf probe, transport browser incl. (f), auth, smoke)",
+      "status": "dispatched",
+      "note": "baseline 6b11be7 + A round 376 uncommitted tree (6 M + doc 243); claims b-round-376/claims-377.sh",
+      "added": "2026-11-07 B round 376 -> 377 planning"
     }
   ],
   "other_keys": [

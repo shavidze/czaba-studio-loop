@@ -1,0 +1,69 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T00:51:55.4755870Z",
+  "round": 377,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE (start and end: 7 status lines = 6 M + doc 243, identical; frozen manifest rc 0; protected rc 0)",
+  "CLAIMS (claims-377.sh rc 0, 0 MISSING; K6/K10/K11/K12 as expected, K2=7, all other lines equal the before-A output)",
+  "SKETCH-EQUAL (6/6 OK)",
+  "ASSERT-COUNT (render-budget 187/18, drag-preview-render 530/74, selection-wrappers-render 38/7, self-disabling-focus 137/21; equal expect-counts-377.txt)",
+  "UNIT (140 files, 2201 tests pass; render-budget + self-disabling-focus shuffle seed 42: 41/41; no test above 50% of its declared timeout: slowest per-test CP12a 6.3s of 30s, TC10 4.1s of 15s)",
+  "MUTANTS-TREE (11/11 red on a copy of A's tree, one at a time alone; 10 round-376 mutants red ids include B's recorded sets; extra red RB-LEAF4b on MU-T-ACTIONS-FRESH, MU-T-EXPORT-INLINE, MU-T-VIEW-NO-MEMO allowed; MU-T-UNDO-FRESH-PER-EDIT red on RB-LEAF4b only, View 1 / Edit 1; ArrangementContext restored; tree sha 0 failing)",
+  "PERF-INTERACT (production build, alone, 1 passed 8.8m, 0 failures, 6 passes; 189 count rows equal the round-375 sketch column, 0 diffs; zoom.1.components-per-key 41, zoom.30 128, click.components 29, range move-components-max 27)",
+  "PERF-RESOURCES (passes; res.harness.export-1-produced == 1 PASS)",
+  "LEAF-PROBE (browser, dev, 1440x900 and 1280x720: 260 cells each, 0 diffs vs b-round-375/probe/leaf-sketch-376.json)",
+  "TRANSPORT-BROWSER (f) (browser, both viewports: A equals HEAD 6b11be7 in every value; Split/Delete/Zoom-to-selection titles and aria-disabled, Ctrl+L Loop aria-pressed, lane Mute then Loop, Zoom to selection then Zoom back to soft-disabled, focus on Fit; with keyboard activation Fit has focus-visible ring 1px brass rgba(201,164,106,.8) offset 2px, same as HEAD)",
+  "TRANSPORT-BROWSER (a, c) (browser, both viewports: empty-project titles and aria-disabled of Undo/Redo/Split/Delete/Loop/Zoom to selection/Zoom back equal HEAD; select clip, Tab/focus Delete, Enter: focus lands on Undo 'Undo: Delete clip', equal HEAD)",
+  "G377-AUTH (browser, fresh anonymous contexts, both viewports: /studio-lab shows the workspace with auth_user null; /studio/middle-east shows 'Sign in required', 0 workspace, 0 audio[src]; /api/studio-token?product=...&file=... with no token -> 401 'Please sign in to access Studio.', no token in the body; premium auth not bypassed)",
+  "STUDIO-SMOKE-377 (browser, both viewports: Add Bass with Enter; Play shows 00:01.46-00:01.47 after 1.5s; lane drag music->stems, Undo title 'Undo: Move to track — Stems (Ctrl+Z)', Ctrl+Z restores music; Master Mute on/off; library preview Play->Stop; all equal HEAD apart from a 9 ms playback-position jitter)",
+  "RB-LEAF4b in the browser (Master Mute clicked twice: Undo title and text after the 2nd click equal those after the 1st, 'Undo: Master Mute (Ctrl+Z)', both viewports, equals HEAD)",
+  "DOCS (doc 243 l.4 byte for byte '**სტატუსი:** Completed (C round 377 PASS)'; 7 TEMPLATE headings in order; RB-LEAF4b x4, MU-T-UNDO-FRESH-PER-EDIT x2, all ten other mutant ids, FL11 and TC10 present; the red row quoted for MU-T-UNDO-FRESH-PER-EDIT equals the B log; 0 'C round N pending' hits)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify",
+  "e2e smoke"
+ ],
+ "blocked": [
+  "fake bearer fail-closed 500 (G377-AUTH): backend unavailable in cloud; not attempted this round (round-376 auth.mjs observed the 500)"
+ ],
+ "notes": [
+  "Not a FAIL: playback position after 1.5 s differs between A and HEAD by 9 ms (00:01.471 vs 00:01.462); the row only needs >= 00:01.000.",
+  "A's doc 243 says 'C round 377 PASS' in l.4 as the task demands; this report is the C PASS that makes it true.",
+  "Ableton conformance: not applicable (performance refactor, no visible change, per the 2026-10-27 rule). Screen budget: nothing visible added or removed; Undo/Redo/Loop/Zoom titles are unchanged vs HEAD.",
+  "C's own probe scripts (rows377.mjs, ring.mjs, probe-range.mjs) are under c-round-377/; the first range drag in rows377 started on the clip body and made no time selection (body drag does not select); it was corrected to a lane-background drag, then rerun on both trees. Nothing in app source changed.",
+  "Fit focus ring: after a MOUSE click path (Zoom to selection, then Zoom back until soft-disabled) focus lands on Fit but :focus-visible is false and no ring is drawn, identical on A and HEAD and consistent with the SABA-B-4 focus-visible-only rule. Via the KEYBOARD path the ring is 1px brass (rgba 201,164,106,.8), offset 2px, identical on A and HEAD. Observation for B: the row's wording 'visible ring' expects a ring on a click path that the project's own rule forbids; equal to HEAD, not A's bug, does not block PASS.",
+  "run-all-376.sh printed 'restore-check rc 1' because it looks for sketch-files-sha256.txt next to TREE's parent (c-round-377/); not a dirty tree. C verified 0 failing lines against sketch-v3-files-sha256.txt and cmp of ArrangementContext.tsx.",
+  "LEAF-PROBE: the first attempt died at C's own 110 s wrapper timeout (rc 124, environment-invalid); one replacement attempt was used and was clean."
+ ],
+ "manifestPaths": [
+  "b-round-376/claims-377.sh",
+  "b-round-376/sketch-v3-files-sha256.txt",
+  "b-round-375/r376-frozen-sha256.txt",
+  "b-round-376/expect-counts-377.txt",
+  "b-round-375/covering-376.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": true,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": true,
+ "mutantRedOnTree": true,
+ "gateChecksNamed": true,
+ "gateChecksRunOnSketch": true,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": true,
+ "affectedChecksRunOnSketch": true,
+ "nullReason": "chainHeadGateRunGreen null: the chain-head gate (gate 375) is B's/root's record, not re-run by C; gate rows are in gates/gate-round-N.json"
+}

@@ -1,0 +1,59 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-377/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/render-budget.test.tsx [2m([22m[2m18 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m16 skipped[39m[2m)[22m[33m 690[2mms[22m[39m
+     [2m[90m↓[39m[22m does not re-render clips, overview bars, library rows or ruler ticks over Play → Stop → Play
+     [2m[90m↓[39m[22m RB-IM keeps the insert marker line as the same node over Play → Stop → Play
+     [2m[90m↓[39m[22m moves the playhead, ruler handle and transport time on playback frames without React renders
+     [2m[90m↓[39m[22m does not re-render the detail panel content over 60 position frames or Play → Stop → Play (R11-P1e)
+     [2m[90m↓[39m[22m shows the seek position immediately when stopped and after a zoom change
+     [2m[90m↓[39m[22m writes only transform on the detail playhead per frame and never left, width or height (R9-D3, C-R8-01)
+     [2m[90m↓[39m[22m keeps the library insert-marker text on 60 position frames and writes marker moves without rendering LibraryInsertMarkerText (R9-L1, C-R6-02, C-R250-01)
+     [2m[90m↓[39m[22m RB-PB1 keeps the context value object over Play → Stop → Play (PERF-10a)
+     [2m[90m↓[39m[22m RB-PB2 renders only the Play/Stop leaf and the follow leaf on Play → Stop → Play (PERF-10a, PERF-10b-ii-a)
+     [2m[90m↓[39m[22m keeps the context value and its consumers unchanged when the start hold releases (R9-L2, C-R6-02)
+     [2m[90m↓[39m[22m RB-MEMO1 a range change on the selected clip redraws the detail waveform and not the detail playhead (C-R320-01)
+     [2m[90m↓[39m[22m RB-MEMO2 typing in the detail Start field re-renders the detail content and not the detail waveform (C-R320-01)
+     [2m[90m↓[39m[22m RB-LEAF1 a lane commit or a zoom step does not render the Master strip; a Master mute does (PERF-11c-iii)
+     [2m[90m↓[39m[22m RB-LEAF2 the closed Export dialog renders nothing on a lane commit; opening mounts its content (PERF-11c-iii)
+     [2m[90m↓[39m[22m RB-LEAF3 a lane mute, a zoom step and an Undo render neither the Library nor its preview; an active-lane change renders only the preview (PERF-11c-iii)
+     [33m[2m✓[22m[39m RB-LEAF4 the transport renders only the group whose input changed (PERF-11c-iii-c1) [33m 580[2mms[22m[39m
+[31m     [31m×[31m RB-LEAF4b an edit that keeps the Undo and Redo labels renders no transport leaf (A-R376-REVIEW-M1)[39m[32m 107[2mms[22m[39m
+     [2m[90m↓[39m[22m RB-MEMO3 a workspace commit re-renders the workspace and not the range readout; a status write renders only the status text (C-R320-01, SIG-R360)
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/render-budget.test.tsx[2m > [22mPlay render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)[2m > [22mRB-LEAF4b an edit that keeps the Undo and Redo labels renders no transport leaf (A-R376-REVIEW-M1)
+[31m[1mAssertionError[22m: expected { …(4) } to deeply equal { …(4) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "ArrangementTransportCentreGroupInner": 0,[22m
+[32m-   "ArrangementTransportEditGroupInner": 0,[39m
+[31m+   "ArrangementTransportEditGroupInner": 1,[39m
+[2m    "ArrangementTransportViewGroupInner": 0,[22m
+[32m-   "ArrangementTransportViewInner": 0,[39m
+[31m+   "ArrangementTransportViewInner": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/render-budget.test.tsx:[2m913:40[22m[39m
+    [90m911| [39m    [34mexpect[39m(api[33m.[39mcurrent[33m?.[39marrangement[33m.[39mmaster[33m.[39mmute)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m912| [39m    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterTh…
+    [90m913| [39m    expect(countsOf(TRANSPORT_LEAVES)).toEqual(TRANSPORT_STEP_COUNTS.r…
+    [90m   | [39m                                       [31m^[39m
+    [90m914| [39m    expect(view.getByTestId('arrangement-transport-edit').textContent)…
+    [90m915| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[2m | [22m[33m16 skipped[39m[90m (18)[39m
+[2m   Start at [22m 02:03:10
+[2m   Duration [22m 3.06s[2m (transform 1.30s, setup 0ms, import 1.82s, tests 690ms, environment 414ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-377/tree/app/lib/arrangement/__tests__/render-budget.test.tsx,title=app/lib/arrangement/__tests__/render-budget.test.tsx > Play render budget and per-frame writers (C-R6-02%2C RF7-P2%2C RF7-U) > RB-LEAF4b an edit that keeps the Undo and Redo labels renders no transport leaf (A-R376-REVIEW-M1),line=913,column=40::AssertionError: expected { …(4) } to deeply equal { …(4) }%0A%0A- Expected%0A+ Received%0A%0A  {%0A    "ArrangementTransportCentreGroupInner": 0,%0A-   "ArrangementTransportEditGroupInner": 0,%0A+   "ArrangementTransportEditGroupInner": 1,%0A    "ArrangementTransportViewGroupInner": 0,%0A-   "ArrangementTransportViewInner": 0,%0A+   "ArrangementTransportViewInner": 1,%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/render-budget.test.tsx:913:40%0A%0A
+rc 1

@@ -1,0 +1,175 @@
+--- a/app/components/arrangement/ArrangementLoopBrace.tsx
++++ b/app/components/arrangement/ArrangementLoopBrace.tsx
+@@ -1,5 +1,9 @@
+-import { type KeyboardEvent, type PointerEvent, useEffect, useRef } from 'react';
+-import { formatArrangementTime, useArrangement } from '~/contexts/ArrangementContext';
++import { type KeyboardEvent, memo, type PointerEvent, useEffect, useMemo, useRef } from 'react';
++import {
++  type ArrangementContextValue,
++  formatArrangementTime,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
+ import {
+   adjacentGridLine,
+   resolveGridTimeWithTargets,
+@@ -36,27 +40,71 @@
+   gridSeconds?: number;
+ }
+ 
++export type ArrangementLoopBraceActions = Pick<
++  ArrangementContextValue,
++  | 'getArrangement'
++  | 'previewLoopArrangement'
++  | 'commitLoopRange'
++  | 'stepLoopRange'
++  | 'claimPointerGesture'
++>;
++
++interface ArrangementLoopBraceViewProps extends ArrangementLoopBraceProps {
++  loop: ArrangementLoop | null;
++  actions: ArrangementLoopBraceActions;
++}
++
+ function roundLoopTime(value: number): number {
+   return Math.round(value * 1000) / 1000;
+ }
+ 
+-export function ArrangementLoopBrace({
++export function useArrangementLoopBraceActions(
++  workspace: ArrangementContextValue,
++): ArrangementLoopBraceActions {
++  const {
++    getArrangement,
++    previewLoopArrangement,
++    commitLoopRange,
++    stepLoopRange,
++    claimPointerGesture,
++  } = workspace;
++  return useMemo(
++    () => ({
++      getArrangement,
++      previewLoopArrangement,
++      commitLoopRange,
++      stepLoopRange,
++      claimPointerGesture,
++    }),
++    [getArrangement, previewLoopArrangement, commitLoopRange, stepLoopRange, claimPointerGesture],
++  );
++}
++
++export function ArrangementLoopBrace(props: ArrangementLoopBraceProps) {
++  const workspace = useArrangement();
++  const actions = useArrangementLoopBraceActions(workspace);
++  return (
++    <ArrangementLoopBraceView {...props} loop={workspace.arrangement.loop} actions={actions} />
++  );
++}
++
++function ArrangementLoopBraceViewInner({
+   seconds,
+   pxPerSecond,
+   snapSeconds = null,
+   gridSeconds,
+-}: ArrangementLoopBraceProps) {
++  loop,
++  actions,
++}: ArrangementLoopBraceViewProps) {
+   const {
+-    arrangement,
+     getArrangement,
+     previewLoopArrangement,
+     commitLoopRange,
+     stepLoopRange,
+     claimPointerGesture,
+-  } = useArrangement();
++  } = actions;
+   const braceRef = useRef<HTMLDivElement>(null);
+   const gestureRef = useRef<LoopGesture | null>(null);
+-  const loop = arrangement.loop;
+ 
+   useEffect(
+     () => () => {
+@@ -275,3 +323,5 @@
+     </div>
+   );
+ }
++
++export const ArrangementLoopBraceView = memo(ArrangementLoopBraceViewInner);
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -199,7 +199,7 @@
+   type TrackRowSelectModifiers,
+ } from './ArrangementLane';
+ import { ArrangementLibraryView, useArrangementLibraryActions } from './ArrangementLibrary';
+-import { ArrangementLoopBrace } from './ArrangementLoopBrace';
++import { ArrangementLoopBraceView, useArrangementLoopBraceActions } from './ArrangementLoopBrace';
+ import { ArrangementMarkerRow, type ArrangementMarkerRowHandle } from './ArrangementMarkerRow';
+ import { ArrangementMasterView, useArrangementMasterActions } from './ArrangementMaster';
+ import { ArrangementOverview } from './ArrangementOverview';
+@@ -1032,6 +1032,7 @@
+   const masterActions = useArrangementMasterActions(workspace);
+   const libraryActions = useArrangementLibraryActions(workspace);
+   const transportActions = useArrangementTransportActions(workspace);
++  const loopBraceActions = useArrangementLoopBraceActions(workspace);
+   const [isShortcutSheetOpen, setIsShortcutSheetOpen] = useState(false);
+   const isOverviewHidden = useSyncExternalStore(
+     subscribeOverviewVisibility,
+@@ -3542,11 +3543,13 @@
+                       <span className="text-label font-medium uppercase tracking-label">Loop</span>
+                     )}
+                   </div>
+-                  <ArrangementLoopBrace
++                  <ArrangementLoopBraceView
+                     seconds={timelineSeconds}
+                     pxPerSecond={pxPerSecond}
+                     snapSeconds={activeSnapSeconds}
+                     gridSeconds={snapGridSeconds}
++                    loop={arrangement.loop}
++                    actions={loopBraceActions}
+                   />
+                 </div>
+               </div>
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -914,6 +914,41 @@
+     expect(view.getByTestId('arrangement-transport-edit').textContent).toBe(editText);
+   });
+ 
++  it('RB-LEAF5 a lane mute, a Master mute and an Undo do not render the loop brace; a loop toggle and a zoom step do (PERF-11c-iii-c2a)', async () => {
++    const { api, view } = await mountWorkspace();
++    act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));
++    act(() => api.current?.toggleLoopSelection());
++    const loop = api.current?.arrangement.loop ?? null;
++    expect(loop).not.toBeNull();
++    expect(view.getByTestId('arrangement-loop-brace').getAttribute('data-loop-enabled')).toBe(
++      'true',
++    );
++    for (const commit of [
++      () => api.current?.toggleTrackMute('music'),
++      () => api.current?.toggleMasterMute(),
++      () => api.current?.undo(),
++    ]) {
++      renderLog.counts.clear();
++      act(() => {
++        commit();
++      });
++      expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++      expect(renderLog.counts.get('ArrangementLoopBraceViewInner') ?? 0).toBe(0);
++      expect(renderLog.counts.get('ArrangementLoopBrace') ?? 0).toBe(0);
++      expect(api.current?.arrangement.loop).toBe(loop);
++    }
++    renderLog.counts.clear();
++    act(() => api.current?.setPxPerSecond((api.current?.pxPerSecond ?? 20) * 2));
++    expect(renderLog.counts.get('ArrangementLoopBraceViewInner') ?? 0).toBe(1);
++    renderLog.counts.clear();
++    act(() => api.current?.toggleLoopSelection());
++    expect(api.current?.arrangement.loop?.enabled).toBe(false);
++    expect(renderLog.counts.get('ArrangementLoopBraceViewInner') ?? 0).toBe(1);
++    expect(view.getByTestId('arrangement-loop-brace').getAttribute('data-loop-enabled')).toBe(
++      'false',
++    );
++  });
++
+   it('RB-MEMO3 a workspace commit re-renders the workspace and not the range readout; a status write renders only the status text (C-R320-01, SIG-R360)', async () => {
+     const { api, view } = await mountWorkspace();
+     act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));
