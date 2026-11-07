@@ -1,0 +1,91 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx [2m([22m[2m15 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 810[2mms[22m[39m
+     [32m✓[39m EV1: after load the evictable buffer is gone, the other stays, and both stay ready[32m 93[2mms[22m[39m
+     [32m✓[39m EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight[32m 57[2mms[22m[39m
+     [32m✓[39m EV3: Play is refused while the placed source decodes, and starts once it settles[32m 55[2mms[22m[39m
+     [32m✓[39m EV3: while already playing, a newly placed clip joins through the resync and playback never stops[32m 50[2mms[22m[39m
+     [32m✓[39m EV4: Undo of the place evicts the buffer again, and Redo decodes it again[32m 56[2mms[22m[39m
+[31m     [31m×[31m EV5: export waits for the decode, renders with the buffer, and releases its pins[39m[32m 64[2mms[22m[39m
+[31m     [31m×[31m EV5: a cancelled export also releases its pins[39m[32m 56[2mms[22m[39m
+[31m     [31m×[31m EV5: a replaced export does not release the pins of the export that replaced it[39m[32m 63[2mms[22m[39m
+     [32m✓[39m EV6: a failed re-decode sets the source to error and shows the existing failure text[32m 51[2mms[22m[39m
+     [32m✓[39m EV6: an export whose re-decode fails creates no file and shows the export failure text[32m 49[2mms[22m[39m
+     [32m✓[39m EV9: a preview plays the re-decoded source and releases it on Stop[32m 48[2mms[22m[39m
+     [32m✓[39m EV9: a superseded preview request does not start when its decode settles[32m 48[2mms[22m[39m
+     [32m✓[39m EV7: a collection change deletes exactly the old collection ids, never clears, and an old decode in flight never sets[32m 53[2mms[22m[39m
+     [32m✓[39m EV10: peaks of two sources that arrive in the same tick are both kept, each with its own array[32m 15[2mms[22m[39m
+     [32m✓[39m EV8: a volume edit that keeps the clips array does not recompute pins[32m 49[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: export waits for the decode, renders with the buffer, and releases its pins
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m389:40[22m[39m
+    [90m387| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m'done'[39m)[33m;[39m
+    [90m388| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mundo[39m())[33m;[39m
+    [90m389| [39m    [34mexpect[39m([34mobservedCache[39m()[33m.[39m[34mhas[39m([32m'big'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                       [31m^[39m
+    [90m390| [39m  })[33m;[39m
+    [90m391| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: a cancelled export also releases its pins
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m413:40[22m[39m
+    [90m411| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m'cancelled'[39m)[33m;[39m
+    [90m412| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mundo[39m())[33m;[39m
+    [90m413| [39m    [34mexpect[39m([34mobservedCache[39m()[33m.[39m[34mhas[39m([32m'big'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                       [31m^[39m
+    [90m414| [39m  })[33m;[39m
+    [90m415| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: a replaced export does not release the pins of the export that replaced it
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m446:40[22m[39m
+    [90m444| [39m      [35mawait[39m second[33m;[39m
+    [90m445| [39m    })[33m;[39m
+    [90m446| [39m    [34mexpect[39m([34mobservedCache[39m()[33m.[39m[34mhas[39m([32m'big'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                       [31m^[39m
+    [90m447| [39m  })[33m;[39m
+    [90m448| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 09:23:39
+[2m   Duration [22m 2.22s[2m (transform 556ms, setup 0ms, import 754ms, tests 810ms, environment 505ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A export waits for the decode%2C renders with the buffer%2C and releases its pins,line=389,column=40::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:389:40%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A a cancelled export also releases its pins,line=413,column=40::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:413:40%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A a replaced export does not release the pins of the export that replaced it,line=446,column=40::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:446:40%0A%0A

@@ -1,0 +1,42 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-cache.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 14[2mms[22m[39m
+     [32m✓[39m DC1: evicts the least recently used entry first, and get refreshes an entry[32m 2[2mms[22m[39m
+     [32m✓[39m DC2: a pinned entry is never evicted, and is evicted once the last owner unpins it[32m 1[2mms[22m[39m
+     [32m✓[39m DC3: a non-evictable entry is never evicted, even over the budget[32m 0[2mms[22m[39m
+     [32m✓[39m DC4: an entry larger than the budget on its own is evicted once it is unpinned[32m 0[2mms[22m[39m
+     [32m✓[39m DC5: asReadonlyMap returns the same instance after set, delete, clear and evict[32m 0[2mms[22m[39m
+     [32m✓[39m DC6: estimateBufferBytes gives mono ×4 and stereo ×8 per frame[32m 0[2mms[22m[39m
+     [32m✓[39m DC7: setPinned with an empty list releases only that owner pins[32m 0[2mms[22m[39m
+[31m     [31m×[31m DC8: deleteMany removes only the named ids, keeps pins, and evict keeps the LRU order of the rest[39m[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-cache.test.ts[2m > [22mcreateDecodedBufferCache[2m > [22mDC8: deleteMany removes only the named ids, keeps pins, and evict keeps the LRU order of the rest
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-cache.test.ts:[2m111:28[22m[39m
+    [90m109| [39m    cache[33m.[39m[34msetPinned[39m([32m'clips'[39m[33m,[39m [[32m'b'[39m[33m,[39m [32m'c'[39m])[33m;[39m
+    [90m110| [39m    cache[33m.[39m[34mdeleteMany[39m([[32m'b'[39m[33m,[39m [32m'd'[39m[33m,[39m [32m'missing'[39m])[33m;[39m
+    [90m111| [39m    [34mexpect[39m(cache[33m.[39m[34mhas[39m([32m'a'[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m112| [39m    [34mexpect[39m(cache[33m.[39m[34mhas[39m([32m'b'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m113| [39m    [34mexpect[39m(cache[33m.[39m[34mhas[39m([32m'c'[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 09:24:14
+[2m   Duration [22m 783ms[2m (transform 75ms, setup 0ms, import 92ms, tests 14ms, environment 516ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree/app/lib/arrangement/__tests__/decoded-buffer-cache.test.ts,title=app/lib/arrangement/__tests__/decoded-buffer-cache.test.ts > createDecodedBufferCache > DC8%3A deleteMany removes only the named ids%2C keeps pins%2C and evict keeps the LRU order of the rest,line=111,column=28::AssertionError: expected false to be true // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- true%0A+ false%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-cache.test.ts:111:28%0A%0A

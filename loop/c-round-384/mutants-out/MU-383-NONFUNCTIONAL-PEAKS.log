@@ -1,0 +1,51 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 783[2mms[22m[39m
+     [32m✓[39m EV1: after load the evictable buffer is gone, the other stays, and both stay ready[32m 70[2mms[22m[39m
+     [32m✓[39m EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight[32m 56[2mms[22m[39m
+     [32m✓[39m EV3: Play is refused while the placed source decodes, and starts once it settles[32m 53[2mms[22m[39m
+     [32m✓[39m EV3: while already playing, a newly placed clip joins through the resync and playback never stops[32m 51[2mms[22m[39m
+     [32m✓[39m EV4: Undo of the place evicts the buffer again, and Redo decodes it again[32m 56[2mms[22m[39m
+     [32m✓[39m EV5: export waits for the decode, renders with the buffer, and releases its pins[32m 57[2mms[22m[39m
+     [32m✓[39m EV5: a cancelled export also releases its pins[32m 56[2mms[22m[39m
+     [32m✓[39m EV5: a replaced export does not release the pins of the export that replaced it[32m 62[2mms[22m[39m
+     [32m✓[39m EV6: a failed re-decode sets the source to error and shows the existing failure text[32m 51[2mms[22m[39m
+     [32m✓[39m EV6: an export whose re-decode fails creates no file and shows the export failure text[32m 48[2mms[22m[39m
+     [32m✓[39m EV9: a preview plays the re-decoded source and releases it on Stop[32m 49[2mms[22m[39m
+     [32m✓[39m EV9: a superseded preview request does not start when its decode settles[32m 47[2mms[22m[39m
+     [32m✓[39m EV7: a collection change deletes exactly the old collection ids, never clears, and an old decode in flight never sets[32m 54[2mms[22m[39m
+[31m     [31m×[31m EV10: peaks of two sources that arrive in the same tick are both kept, each with its own array[39m[32m 22[2mms[22m[39m
+     [32m✓[39m EV8: a volume edit that keeps the clips array does not recompute pins[32m 51[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV10: peaks of two sources that arrive in the same tick are both kept, each with its own array
+[31m[1mAssertionError[22m: expected [ 'second' ] to deeply equal [ 'first', 'second' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "first",[39m
+[2m    "second",[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m558:31[22m[39m
+    [90m556| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m557| [39m    [35mconst[39m peaks [33m=[39m [34mlive[39m(api)[33m.[39msourcePeaks[33m;[39m
+    [90m558| [39m    [34mexpect[39m([[33m...[39mpeaks[33m.[39m[34mkeys[39m()])[33m.[39m[34mtoEqual[39m([[32m'first'[39m[33m,[39m [32m'second'[39m])[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m559| [39m    [35mconst[39m firstPeaks [33m=[39m peaks[33m.[39m[35mget[39m([32m'first'[39m)[33m;[39m
+    [90m560| [39m    [35mconst[39m secondPeaks [33m=[39m peaks[33m.[39m[35mget[39m([32m'second'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m14 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 09:24:11
+[2m   Duration [22m 2.24s[2m (transform 590ms, setup 0ms, import 790ms, tests 783ms, environment 506ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV10%3A peaks of two sources that arrive in the same tick are both kept%2C each with its own array,line=558,column=31::AssertionError: expected [ 'second' ] to deeply equal [ 'first', 'second' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "first",%0A    "second",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:558:31%0A%0A

@@ -1,0 +1,70 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE-start",
+  "DOCS-L4",
+  "HEAP-RETAINERS-PROD",
+  "HEAP-LIVE-1280",
+  "PERF-RES",
+  "MUTANTS-UNIT",
+  "PLAY-REFUSE-BROWSER",
+  "UNIT-COVERING",
+  "G384-AUTH",
+  "EVICT-B2-COUNT",
+  "CLAIMS",
+  "SOURCE-SCOPE-end",
+  "L57"
+ ],
+ "blocked": [
+  "fake-bearer token row: backend unavailable in cloud (not PASS, not a FAIL)",
+  "HEAP-LIVE-1280 on dev server not run (optional, 'if time allows'); prod at 1280x720 passed"
+ ],
+ "gate": [
+  "verify / full test suite: belongs to the root gate (gates/gate-round-384.json), not claimed by C"
+ ],
+ "carried": {
+  "SWEEP": "c-round-383",
+  "decoded-buffer UNIT 23/23": "c-round-383/unit.log",
+  "HEAP-RETAINERS dev 1440": "c-round-383/heap-dev-1.json,heap-dev-2.json",
+  "HEAP-MUTANT": "c-round-383/heap-mutant-2.json",
+  "EVICT-BROWSER/B2 live lists": "c-round-383/b2.json",
+  "EXPORT-BROWSER": "c-round-383/exp383.json",
+  "G383-AUTH lab/studio halves": "c-round-383/auth.json (re-run this round too)",
+  "DOCS rows other than l.4": "c-round-383.md",
+  "RESET-UNREACHABLE": "c-round-383.md"
+ },
+ "closedFindings": [
+  "C-R382-01 (production heap live [2,5,16x5] with 0 baseQueue paths at both viewports + PERF-RES 22/22, pcm ready 31.9 MiB/7)"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T09:18:56.8623893Z",
+  "round": 384,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": "b-round-383/r384-frozen-sha256.txt (1279 entries rc 0), b-round-318/protected-sha256.txt rc 0",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 1,
+ "assertsSpecified": "PERF-RES 22 asserts (perf/budgets.resources.json); heap live list exact",
+ "mutantsRecorded": "19 unit mutants, all red on named row (c-round-384/mutants-out/summary.txt)",
+ "mutantRedOnSketch": "none: B ran no sketch; perf rows stay record (13b-ii flips them)",
+ "mutantRedOnTree": "19/19 red on C's tree copy (c-round-384/tree)",
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "HEAP-RETAINERS-PROD",
+  "PERF-RES",
+  "MUTANTS-UNIT",
+  "UNIT covering 45 files",
+  "PLAY-REFUSE",
+  "EVICT-B2-COUNT"
+ ],
+ "affectedChecksRunOnSketch": "none: no sketch for a verification round",
+ "stopSignal": "none: all rows 1-12 ran to a result",
+ "notes": "Evidence under c-round-384/. Measurements: prod heap live [2,5,16,16,16,16,16], 0 baseQueue (heap-prod-1440.json, heap-prod-1280x720.json). PERF-RES log perfres.log: export bytes 29189420 / 58378796, pcm-live-mib-ready 31.9, count 7, decode 0, after-add 69.0/8, after-export delta +37.1. Auth: anonymous fresh context, /studio-lab opens (auth_user null, 9 options), /studio/middle-east shows Sign in required with 0 audio[src] and no listbox; /api/studio-token with valid params returns 401 {\"error\":\"Please sign in to access Studio.\"} at both viewports; premium auth is not bypassed. Auth first attempt hit a cold-start 30s timeout (env-invalid), replaced by run 2. PLAY-REFUSE at 1440x900 CPU 6x: refusal text exact, second Space starts hero 150.37 s in both scenarios. Heap probe is a snapshot-based AudioBuffer count, not a listening test."
+}

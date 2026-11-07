@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T09:06:06.969Z",
-  "current_task": "current-task.md (round 383: PERF-13b-i fix - C-R382-01 updater-closure retention via storeSourcePeaks helper + SWEEP; collection reset deleteMany (D-29z1278); C re-verifies round-382 acceptance + HEAP-RETAINERS + EVICT-B2; grants b-round-382/grants-383.txt; claims b-round-382/claims-383.sh)",
+  "_generatedUtc": "2026-11-07T09:32:52.134Z",
+  "current_task": "current-task.md (round 384: PERF-13b-i verification completion - C runs round-383 rows not run (prod heap, 1280 live list, PERF-RES, MUTANTS-UNIT, PLAY-REFUSE, UNIT covering/C-DEMO/perf-lib, G384-AUTH with valid params -> 401, EVICT-B2-COUNT, CLAIMS, L57); A changes only doc 248 l.4 -> C round 384 PASS; grants b-round-383/grants-384.txt; frozen b-round-383/r384-frozen-sha256.txt; claims b-round-383/claims-384.sh)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6204,35 +6204,19 @@
       "title": "installPcmLiveRegistry installed in every resources pass though only the 1x record pass reads it"
     },
     {
-      "id": "C-R382-01",
-      "severity": "medium",
-      "origin": "C round 382 (pre-existing updater closure at HEAD + B premise K32 + no browser retention row)",
-      "title": "hero 150.37 s decoded MP3 (55.07 MiB) stays live at ready; ready PCM 86.9 MiB vs target <= 60",
-      "evidence": "c-round-382.json bugs[0]; b-round-382/probe/heap-ready2.json (path via baseQueue), heap-ready3-ctx.json",
-      "repro": "c-round-382.json steps",
-      "status": "scheduled round 383 (D-29z1277): storeSourcePeaks helper + SWEEP; C rows HEAP-RETAINERS, HEAP-MUTANT, PERF-RES, EVICT-BROWSER",
-      "added": "2026-11-07 B round 382 -> 383 planning"
+      "id": "B-R383-AUTH-ROW-BARE-URL",
+      "severity": "low",
+      "status": "scheduled round 384 G384-AUTH (D-29z1282); process finding, ",
+      "title": "auth guard row called /api/studio-token without product/file, got 400 (validation) and never exercis"
     },
     {
-      "id": "C-R382-02",
-      "severity": "medium",
-      "origin": "C round 382",
-      "title": "previewed buffer live after Stop and after Add+Undo",
-      "evidence": "c-round-382.json bugs[1]; B counter-evidence b-round-382/probe/preview-stop-check.json (transport Stop: 0 stop calls, preview still playing) and preview-stop-check-lib.json (library Stop releases; Add live; Undo releases)",
-      "status": "reclassified_pending_C (D-29z1277): B evidence says test step clicked the transport Stop; C re-runs EVICT-B2 with the library preview Stop in round 383 and closes or keeps it",
-      "added": "2026-11-07 B round 382 -> 383 planning"
+      "id": "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
+      "severity": "low",
+      "status": "assigned to PERF-13b-ii scope (D-29z1283): guard controller ",
+      "title": "stale ensureDecoded after a collection change could decode an old-collection source under the new co"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 374,
-      "task": "current-task.md",
-      "decision": "D-29z1235..D-29z1240",
-      "type": "PERF-11c-iii-a: ArrangementMasterView memo + ExportDialog memo shell (closed = null) + private use*StoreContext(hookName) helpers (B-R370) + S5b-same-act (TL-R372-M1)",
-      "status": "done (D-29z1242): C PASS, gate 374 published ad13a96",
-      "note": "baseline e69eba4 clean; sketch b-round-373/sketch.patch.txt sha 2d2dfcb9...0b60; claims b-round-373/claims-374.sh",
-      "added": "2026-11-06 B round 373 -> 374 planning"
-    },
     {
       "round": 375,
       "task": "current-task.md",
@@ -6310,9 +6294,18 @@
       "task": "current-task.md",
       "decision": "D-29z1276..D-29z1279",
       "type": "PERF-13b-i fix: C-R382-01 (storeSourcePeaks helper, SWEEP of AudioBuffer scopes), collection reset deleteMany (D-29z1278), DC8, EV7 reworded, EV10, doc 248 l.4 round 383; C re-verifies round-382 acceptance + HEAP-RETAINERS/HEAP-MUTANT + EVICT-B2",
-      "status": "dispatched",
+      "status": "c_blocked_incomplete (D-29z1280): C 0 bugs, required rows not run (time), browserVerified false; gate skipped; completion = round 384",
       "note": "baseline 5745526 (gate 382 skipped) + uncommitted round-382 tree; claims b-round-382/claims-383.sh; heap evidence b-round-382/probe/",
       "added": "2026-11-07 B round 382 -> 383 planning"
+    },
+    {
+      "round": 384,
+      "task": "current-task.md",
+      "decision": "D-29z1280..D-29z1284",
+      "type": "PERF-13b-i verification completion: C-only rows (prod heap, PERF-RES, mutants, PLAY-REFUSE, UNIT, G384-AUTH 401, EVICT-B2-COUNT, CLAIMS, L57); A doc 248 l.4 only",
+      "status": "dispatched",
+      "note": "baseline 5745526 + uncommitted 382/383 tree; frozen b-round-383/r384-frozen-sha256.txt; claims b-round-383/claims-384.sh; carried 383 rows listed in task §3",
+      "added": "2026-11-07 B round 383 -> 384 planning"
     }
   ],
   "other_keys": [

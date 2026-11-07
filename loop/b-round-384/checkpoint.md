@@ -1,0 +1,13 @@
+# B round 384->385 checkpoint
+- step0 before-copies taken (backlog, task, lessons, feature-status, b-next); HEAD + status recorded
+- step1 scripts copied to b-round-384 (window 369-384), collect/cost/classify/fails/gate/l57/exp/manifest/awaiting/misc run, outputs in b-round-384/data
+- step2 screens captured b-round-384/screens (counts 138/168/118/144 = 369), compare-369-385.txt; mock api pid in screens/mock.pid
+- step3 backlog part1 applied (v351): 384 accepted, C-R382-01/B-R383 closed, TL-R376-M1 closed, GATE384 routed, D-29z1285..1287
+- step4 user-review/screen-review-385.md written (no new candidates, Q-SR-385-1); waiting tech-lead consult
+- step5 data: l58-l30-application.txt (b-round-N = planning of N+1); 382 dispatched without sketch (b-round-381 no sketch-review; tech-lead-382.md only); window ids in classify-out.json; r385 manifest 1280 rc0, protected 11x1
+- step6 retros/retro-385.md draft written (§3,§7-§13 pending tech-lead)
+- step7 lessons edited (diff b-round-384/lessons-diff.txt), questions-arch-leaf-plumbing.md, backlog part2 v352 D-29z1288..1292
+- step8 retro-385.md complete
+- step9 feature-status updated
+- step10 current-task.md, b-round-384.md, b-next.json written; mock killed; claims re-run
+- DONE: all outputs written; advisor final call unavailable (overloaded) — self-check done (SYS closes ids exist, claims 0 MISSING, store status 0 lines)

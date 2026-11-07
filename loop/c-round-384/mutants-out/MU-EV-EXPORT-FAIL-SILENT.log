@@ -1,0 +1,108 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 797[2mms[22m[39m
+     [32m✓[39m EV1: after load the evictable buffer is gone, the other stays, and both stay ready[32m 72[2mms[22m[39m
+     [32m✓[39m EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight[32m 57[2mms[22m[39m
+     [32m✓[39m EV3: Play is refused while the placed source decodes, and starts once it settles[32m 54[2mms[22m[39m
+     [32m✓[39m EV3: while already playing, a newly placed clip joins through the resync and playback never stops[32m 52[2mms[22m[39m
+     [32m✓[39m EV4: Undo of the place evicts the buffer again, and Redo decodes it again[32m 57[2mms[22m[39m
+     [32m✓[39m EV5: export waits for the decode, renders with the buffer, and releases its pins[32m 59[2mms[22m[39m
+     [32m✓[39m EV5: a cancelled export also releases its pins[32m 55[2mms[22m[39m
+     [32m✓[39m EV5: a replaced export does not release the pins of the export that replaced it[32m 62[2mms[22m[39m
+     [32m✓[39m EV6: a failed re-decode sets the source to error and shows the existing failure text[32m 51[2mms[22m[39m
+[31m     [31m×[31m EV6: an export whose re-decode fails creates no file and shows the export failure text[39m[32m 56[2mms[22m[39m
+     [32m✓[39m EV9: a preview plays the re-decoded source and releases it on Stop[32m 49[2mms[22m[39m
+     [32m✓[39m EV9: a superseded preview request does not start when its decode settles[32m 49[2mms[22m[39m
+     [32m✓[39m EV7: a collection change deletes exactly the old collection ids, never clears, and an old decode in flight never sets[32m 56[2mms[22m[39m
+     [32m✓[39m EV10: peaks of two sources that arrive in the same tick are both kept, each with its own array[32m 16[2mms[22m[39m
+     [32m✓[39m EV8: a volume edit that keeps the clips array does not recompute pins[32m 50[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV6: an export whose re-decode fails creates no file and shows the export failure text
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      Object {
+        "clips": Array [
+          Object {
+            "duration": 218.45333333333335,
+            "id": "710629d5-4fbd-4534-86b8-2619291fabfe",
+            "sourceId": "big",
+            "sourceOffset": 0,
+            "start": 0,
+            "trackId": "music",
+          },
+        ],
+        "loop": null,
+        "master": Object {
+          "gainDb": 0,
+          "mute": false,
+        },
+        "tracks": Array [
+          Object {
+            "id": "video",
+            "kind": "video",
+            "mute": false,
+            "name": "Video",
+            "solo": false,
+            "volume": 1,
+          },
+          Object {
+            "id": "music",
+            "kind": "audio",
+            "mute": false,
+            "name": "Music",
+            "solo": false,
+            "volume": 1,
+          },
+        ],
+      },
+      Map {
+        "keep" => FakeAudioBuffer {
+          "length": 4800,
+          "numberOfChannels": 2,
+          "sampleRate": 48000,
+        },
+      },
+      undefined,
+      Object {
+        "onProgress": [Function onProgress],
+        "signal": AbortSignal {
+          Symbol(kEvents): Map {},
+          Symbol(events.maxEventTargetListeners): 0,
+          Symbol(events.maxEventTargetListenersWarned): false,
+          Symbol(kHandlers): Map {},
+          Symbol(kAborted): false,
+          Symbol(kReason): undefined,
+          Symbol(kComposite): false,
+        },
+      },
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m474:31[22m[39m
+    [90m472| [39m      [35mawait[39m exported[33m;[39m
+    [90m473| [39m    })[33m;[39m
+    [90m474| [39m    [34mexpect[39m(renderWavMock)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m475| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mexportState)[33m.[39m[34mtoEqual[39m({
+    [90m476| [39m      phase[33m:[39m [32m'error'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m14 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 09:23:45
+[2m   Duration [22m 2.21s[2m (transform 561ms, setup 0ms, import 765ms, tests 797ms, environment 498ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/c-round-384/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV6%3A an export whose re-decode fails creates no file and shows the export failure text,line=474,column=31::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      Object {%0A        "clips": Array [%0A          Object {%0A            "duration": 218.45333333333335,%0A            "id": "710629d5-4fbd-4534-86b8-2619291fabfe",%0A            "sourceId": "big",%0A            "sourceOffset": 0,%0A            "start": 0,%0A            "trackId": "music",%0A          },%0A        ],%0A        "loop": null,%0A        "master": Object {%0A          "gainDb": 0,%0A          "mute": false,%0A        },%0A        "tracks": Array [%0A          Object {%0A            "id": "video",%0A            "kind": "video",%0A            "mute": false,%0A            "name": "Video",%0A            "solo": false,%0A            "volume": 1,%0A          },%0A          Object {%0A            "id": "music",%0A            "kind": "audio",%0A            "mute": false,%0A            "name": "Music",%0A            "solo": false,%0A            "volume": 1,%0A          },%0A        ],%0A      },%0A      Map {%0A        "keep" => FakeAudioBuffer {%0A          "length": 4800,%0A          "numberOfChannels": 2,%0A          "sampleRate": 48000,%0A        },%0A      },%0A      undefined,%0A      Object {%0A        "onProgress": [Function onProgress],%0A        "signal": AbortSignal {%0A          Symbol(kEvents): Map {},%0A          Symbol(events.maxEventTargetListeners): 0,%0A          Symbol(events.maxEventTargetListenersWarned): false,%0A          Symbol(kHandlers): Map {},%0A          Symbol(kAborted): false,%0A          Symbol(kReason): undefined,%0A          Symbol(kComposite): false,%0A        },%0A      },%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:474:31%0A%0A
