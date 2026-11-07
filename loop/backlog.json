@@ -1,9 +1,9 @@
 {
-  "version": 354,
-  "updated": "2026-11-07 B round 386 -> 387 planning",
+  "version": 355,
+  "updated": "2026-11-07 B round 387 -> 388 planning",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "current-task.md (round 387: GATE-B385-M2 + A-R386-REVIEW-M1 + B-R386-UNGUARDED-GRAPH-CALLERS, schedule-failure rollback; A applies reviewed sketch b-round-386/sketch-387.patch.txt (sha a9f22614) + doc 250; grants b-round-386/grants-387.txt (5); frozen b-round-386/r387-frozen-sha256.txt (1279); claims b-round-386/claims-387.sh)",
+  "current_task": "current-task.md (round 388: C-R387-01 meter floor after a pump schedule failure, closing round 387; A applies b-round-387/sketch-388.patch.txt (sha 494afafc) on top of the uncommitted round-387 tree + doc 250 l.4/C-R387-01; grants b-round-387/grants-388.txt (3); frozen b-round-387/r388-frozen-sha256.txt (1281); claims b-round-387/claims-388.sh)",
   "advisor_used_by_B": "yes (round 386 -> 387 planning: advisor available and used twice - before the sketch; final review: board numbers, L31 on all covering files, CLAIMS delta wording) | yes (round 382 -> 383 planning: advisor available; consulted after the heap-snapshot diagnosis and before writing, and before declaring done) | yes (round 378 -> 379 planning: advisor available; consulted after orientation and before declaring done) | yes (round 377 -> 378 planning: advisor available; consulted after orientation and before declaring done) | yes (round 376 -> 377 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 373 -> 374 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 363 -> 364 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 362 -> 363 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 361 -> 362 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 360 -> 361 planning: advisor available; consulted after orientation and before declaring done)",
   "baseline": {
     "tsc_errors": 0,
@@ -11863,9 +11863,18 @@
       "task": "current-task.md",
       "decision": "D-29z1300..D-29z1305",
       "type": "bug round: GATE-B385-M2 + A-R386-REVIEW-M1 + B-R386-UNGUARDED-GRAPH-CALLERS (Medium x3, one root cause: a throw while building the playback graph); applySchedule rollback + provider startGraphOrStop + pump catch; scheduleFailed status deferred to a microtask",
-      "status": "dispatched",
+      "status": "c_fail (D-29z1306): C round 387 FAIL, browserVerified true; 8 rows PASS, UNIT/MUTANTS not completed by C; 1 Medium C-R387-01 (= A-R387-REVIEW-M1); gate 387 skipped; tree kept uncommitted for round 388",
       "note": "baseline 5312260 clean; sketch b-round-386/sketch-387.patch.txt sha a9f22614 (v2 after tech-lead TL-R387-M1/L1-L6; v1 6e30325e kept as sketch-387-v1.patch.txt) reviewed by tech-lead + delta; 15 mutants red; full suite on sketch 257/3787; browser HEAD repro + sketch flow + M1 neighbour both viewports; export byte-identical",
       "added": "2026-11-07 B round 386 -> 387 planning"
+    },
+    {
+      "round": 388,
+      "task": "current-task.md",
+      "decision": "D-29z1306..D-29z1309",
+      "type": "bug round: C-R387-01 (Medium) tick guard after pumpPlaybackAudio + SF11 + MU-388-TICK-NO-GUARD; closes round 387 (GATE-B385-M2, A-R386-REVIEW-M1, B-R386-UNGUARDED-GRAPH-CALLERS, TL-R387-M1, A-R386-REVIEW-L1) on C PASS",
+      "status": "dispatched",
+      "note": "baseline 5312260 + uncommitted round-387 tree (5 lines); sketch b-round-387/sketch-388.patch.txt sha 494afafc; tsc rc0; covering 66/1026 on sketch (65 round-387 files + master-hold-tick); MU-388 red on SF11; MU-387 set rerun same rows (PUMP-NO-CATCH now SF6+SF11); browser meter-sketch both viewports -inf, meter-head -19.8 frozen; flow-sketch388-1440 = 387 contract",
+      "added": "2026-11-07 B round 387 -> 388 planning"
     }
   ],
   "post_current_stage_queue": [
@@ -26968,33 +26977,13 @@
       "added": "2026-11-07 B round 381 -> 382 planning"
     },
     {
-      "id": "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
-      "severity": "low",
-      "origin": "A round 383 code-reviewer L1",
-      "title": "stale ensureDecoded after a collection change could decode an old-collection source under the new controller; with deleteMany(oldIds) the entry would persist until unmount",
-      "evidence": "a-round-383.md code-reviewer L1",
-      "repro": "not browser-reachable (collection is a module constant; createPurchasedWorkspaceCollection has 0 route callers)",
-      "status": "closed (D-29z1300): C round 386 PASS (c-round-386.json, browserVerified true, 0 bugs); published 5312260 (gate 386)",
-      "added": "2026-11-07 B round 383 -> 384 planning"
-    },
-    {
-      "origin": "gate 384 code-reviewer",
-      "evidence": "gates/round-384/review.md",
-      "added": "2026-11-07 B round 384 -> 385 planning",
-      "id": "GATE384-M1-ENSURE-DECODED-UNHANDLED-REJECTION",
-      "severity": "medium",
-      "title": "ensureDecoded fulfilled handler calls syncPlayback; if it throws, the Promise.all rejects and the three void call sites (history publish ~922/927, startPlaybackAt 1646, startLibraryPreview 1727) leave it unhandled",
-      "repro": "gates/round-384/review.md suggestion 1; ArrangementContext.tsx l.1409-1450 (ensureDecoded), l.927, l.1646, l.1727 at 7295618; reachability needs a syncPlayback/startGraph throw (not yet reproduced in a browser)",
-      "status": "closed (D-29z1300): C round 386 PASS (c-round-386.json, browserVerified true, 0 bugs); published 5312260 (gate 386)"
-    },
-    {
       "id": "GATE-B385-M2-APPLY-SCHEDULE-ROLLBACK",
       "severity": "medium",
       "origin": "tech-lead review of B's round-386 sketch (pre-existing code)",
       "evidence": "b-round-385/sketch-review.md TL-R385-M2 + delta review",
       "title": "applySchedule is not all-or-nothing: a throw partway through startPlan (after master connect and some source.start calls) leaves started sources sounding with no handle, so stopPlayback cannot stop them; also a repeated throw on Play leaves isPlayingRef true with no sound",
       "repro": "not browser-reproduced; needs a mid-plan throw (e.g. RangeError/InvalidStateError from start()); graph.client.ts ~l.190 master connect, ~l.223-265 startPlan at 7295618",
-      "status": "dispatched round 387 (D-29z1301): reproduced by B in the browser at HEAD 5312260 (b-round-386/probe/m2-head-*.json, flow-head-*.json: 2 pageerrors per throw, 1 source never stopped, transport stuck); fix = applySchedule all-or-nothing rollback (AR1-AR5) + provider startGraphOrStop (SF1-SF10); closes on C round 387 PASS",
+      "status": "C round 387: all rows PASS except C-R387-01 and C's incomplete UNIT/MUTANTS (D-29z1306); closes on C round 388 PASS | dispatched round 387 (D-29z1301): reproduced by B in the browser at HEAD 5312260 (b-round-386/probe/m2-head-*.json, flow-head-*.json: 2 pageerrors per throw, 1 source never stopped, transport stuck); fix = applySchedule all-or-nothing rollback (AR1-AR5) + provider startGraphOrStop (SF1-SF10); closes on C round 387 PASS",
       "added": "2026-11-07 B round 385 -> 386 planning"
     },
     {
@@ -27014,7 +27003,7 @@
       "evidence": "a-round-386.md \u00a75b; b-round-386/probe/flow-head-*.json",
       "title": "startPlaybackAt sets isPlaying and the status before startGraph; a Play that throws leaves isPlaying true with no graph (next press acts as Stop) and Stop jumps the clock to a stale anchor",
       "repro": "browser at HEAD 5312260: m2-head-1440.json play1 clock 00:00.000, afterSpace 00:02.011; flow-head play3 does not play",
-      "status": "dispatched round 387 (D-29z1301): rows SF1, SF2; mutants MU-387-PLAY-NO-GUARD, MU-387-PLAY-NO-STOPAT; closes on C round 387 PASS",
+      "status": "C round 387: all rows PASS except C-R387-01 and C's incomplete UNIT/MUTANTS (D-29z1306); closes on C round 388 PASS | dispatched round 387 (D-29z1301): rows SF1, SF2; mutants MU-387-PLAY-NO-GUARD, MU-387-PLAY-NO-STOPAT; closes on C round 387 PASS",
       "added": "2026-11-07 B round 386 -> 387 planning"
     },
     {
@@ -27024,7 +27013,7 @@
       "evidence": "a-round-386.md \u00a75b; b-round-386/sketch-review.md matrix",
       "title": "syncPlayback (edits, loop resync), seekTo, scrubPlayhead, endPlayheadScrub and the audio pump let a graph-build throw escape as an uncaught error while the old graph keeps playing the old arrangement",
       "repro": "SF3-SF7 red on the HEAD-equivalent mutants (MU-387-SYNC-DIRECT, SEEK-DIRECT, SCRUB-DIRECT, ENDSCRUB-DIRECT, PUMP-NO-CATCH); browser: flow-sketch commit row vs HEAD",
-      "status": "dispatched round 387 (D-29z1301): one provider wrapper startGraphOrStop + pump catch; closes on C round 387 PASS",
+      "status": "C round 387: all rows PASS except C-R387-01 and C's incomplete UNIT/MUTANTS (D-29z1306); closes on C round 388 PASS | dispatched round 387 (D-29z1301): one provider wrapper startGraphOrStop + pump catch; closes on C round 387 PASS",
       "added": "2026-11-07 B round 386 -> 387 planning"
     },
     {
@@ -27034,7 +27023,7 @@
       "evidence": "a-round-386.md \u00a75",
       "title": "stopPlayback inside resyncAfterDecode catch could throw while tearing down a half-built graph",
       "repro": "reachable only via GATE-B385-M2",
-      "status": "dispatched round 387 (D-29z1304): after the rollback no half-built graph is stored; handle.stop catches per source (AR3); closes on C round 387 PASS",
+      "status": "C round 387: all rows PASS except C-R387-01 and C's incomplete UNIT/MUTANTS (D-29z1306); closes on C round 388 PASS | dispatched round 387 (D-29z1304): after the rollback no half-built graph is stored; handle.stop catches per source (AR3); closes on C round 387 PASS",
       "added": "2026-11-07 B round 386 -> 387 planning"
     },
     {
@@ -27054,7 +27043,7 @@
       "evidence": "b-round-386/sketch-review.md",
       "title": "syncPlayback's failure path stopped at livePosition() of the old anchor; after a time-removing edit the playhead landed off by b-a",
       "repro": "SF8 on sketch v1 (MU-387-SYNC-NO-STOPAT)",
-      "status": "fixed in sketch v2 before dispatch (D-29z1305): stopAt = positionAt(anchor, startAt); row SF8; closes with round 387 C PASS",
+      "status": "C round 387: all rows PASS except C-R387-01 and C's incomplete UNIT/MUTANTS (D-29z1306); closes on C round 388 PASS | fixed in sketch v2 before dispatch (D-29z1305): stopAt = positionAt(anchor, startAt); row SF8; closes with round 387 C PASS",
       "added": "2026-11-07 B round 386 -> 387 planning"
     },
     {
@@ -27066,6 +27055,16 @@
       "repro": "n/a",
       "status": "recorded (D-29z1305); no row",
       "added": "2026-11-07 B round 386 -> 387 planning"
+    },
+    {
+      "id": "C-R387-01-METER-FREEZE-AFTER-PUMP-FAILURE",
+      "severity": "medium",
+      "origin": "C round 387 (= A-R387-REVIEW-M1, code-reviewer)",
+      "evidence": "c-round-387/meter-1440.json, meter-1280.json, meter-control-1440.json; b-round-387/probe/meter-head-*.json",
+      "title": "after a loop-pump schedule failure inside the rAF tick, tick re-samples the analysers and the master/track meters stay frozen (~-19.8 dB) beside the 'Playback stopped' status",
+      "repro": "c-round-387/meter-freeze.mjs (copy: b-round-387/probe/meter-freeze.mjs): Soft impact, loop selection, Play, inject AudioBufferSourceNode.start throw",
+      "status": "dispatched round 388 (D-29z1307, D-29z1308): tick guard + SF11 + MU-388-TICK-NO-GUARD; closes on C round 388 PASS",
+      "added": "2026-11-07 B round 387 -> 388 planning"
     }
   ],
   "tech_lead_notes": [
@@ -29912,6 +29911,14 @@
       "note": "one build-or-stop wrapper for all startGraph callers; conflicts on its face with TL-R385-ARCH (all-or-nothing in graph.client.ts)",
       "status": "ruled (D-29z1303): both adopted in round 387 - graph.client atomicity + provider startGraphOrStop for the user-facing policy",
       "added": "2026-11-07 B round 386 -> 387 planning"
+    },
+    {
+      "id": "SIG-R387-SCHEDULING-REGION",
+      "origin": "A round 387 code-reviewer Architecture note",
+      "evidence": "a-round-387.md \u00a75",
+      "note": "signal 3: scheduling region of ArrangementContext.tsx (~1136-1456) changed again; keep decision D-29z1303 holds; C-R387-01 is a lifecycle gap, not an extraction reason",
+      "status": "recorded (D-29z1309); attached to ARCH-CHECKPOINT-DECODE-REGION; not scheduled",
+      "added": "2026-11-07 B round 387 -> 388 planning"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -37207,6 +37214,56 @@
       "repro": "see sketch-review.md",
       "status": "deferred_low_polish (D-29z1305)",
       "added": "2026-11-07 B round 386 -> 387 planning"
+    },
+    {
+      "id": "A-R387-REVIEW-L-a-AR6",
+      "severity": "low",
+      "origin": "A round 387 code-reviewer",
+      "evidence": "a-round-387.md \u00a75",
+      "title": "AR1 cited for S3 (createGain/createStereoPanner/connect throw) but no AR row throws there; proposed AR6",
+      "repro": "code reading (test or rollback code in round-387 tree)",
+      "status": "deferred_low_polish (D-29z1309)",
+      "added": "2026-11-07 B round 387 -> 388 planning"
+    },
+    {
+      "id": "A-R387-REVIEW-L-b-RELEASE-UNGUARDED",
+      "severity": "low",
+      "origin": "A round 387 code-reviewer",
+      "evidence": "a-round-387.md \u00a75",
+      "title": "rollback releaseNodes() unguarded: a throwing disconnect() could replace the original error (real no-arg disconnect does not throw)",
+      "repro": "code reading (test or rollback code in round-387 tree)",
+      "status": "deferred_low_polish (D-29z1309)",
+      "added": "2026-11-07 B round 387 -> 388 planning"
+    },
+    {
+      "id": "A-R387-REVIEW-L-d-SF7-LOCATOR",
+      "severity": "low",
+      "origin": "A round 387 code-reviewer",
+      "evidence": "a-round-387.md \u00a75",
+      "title": "SF7 does not assert getLocatorPosition() after a failed scrub end",
+      "repro": "code reading (test or rollback code in round-387 tree)",
+      "status": "deferred_low_polish (D-29z1309)",
+      "added": "2026-11-07 B round 387 -> 388 planning"
+    },
+    {
+      "id": "A-R387-REVIEW-L-e-SF2-HARDCODED",
+      "severity": "low",
+      "origin": "A round 387 code-reviewer",
+      "evidence": "a-round-387.md \u00a75",
+      "title": "SF2 hardcodes 'Playing from 00:00.000' instead of studioPlaybackStrings.playingFrom(...)",
+      "repro": "code reading (test or rollback code in round-387 tree)",
+      "status": "deferred_low_polish (D-29z1309)",
+      "added": "2026-11-07 B round 387 -> 388 planning"
+    },
+    {
+      "id": "A-R387-REVIEW-L-f-SF3-UNDO",
+      "severity": "low",
+      "origin": "A round 387 code-reviewer",
+      "evidence": "a-round-387.md \u00a75",
+      "title": "SF3 checks the clip count, not that the edit is in history (undo availability)",
+      "repro": "code reading (test or rollback code in round-387 tree)",
+      "status": "deferred_low_polish (D-29z1309)",
+      "added": "2026-11-07 B round 387 -> 388 planning"
     }
   ],
   "regression_rounds": [
@@ -39069,7 +39126,7 @@
       "requested_of": "root (read-only frontend-architect, store/.claude/references/architecture-checkpoint.md)",
       "file": "b-round-383/root-request-arch-checkpoint-decode-region.md",
       "question": "before PERF-13b-ii: keep decode/peaks/cache/reset in ArrangementProvider vs extract useDecodedSourceBuffers vs pure loader unit in lib/arrangement",
-      "status": "requested; non-blocking; wanted before PERF-13b-ii dispatch; may be answered together with ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING",
+      "status": "requested; non-blocking; wanted before PERF-13b-ii dispatch; may be answered together with ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING | +SIG-R387-SCHEDULING-REGION (round 387 signal 3, same provider region) added to the question (D-29z1309)",
       "added": "2026-11-07 B round 383 -> 384 planning"
     }
   ],
@@ -39081,42 +39138,6 @@
     "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
   },
   "decisions_log_b": [
-    {
-      "id": "D-29z1250",
-      "date": "2026-11-07",
-      "by": "B round 376 -> 377 planning",
-      "decision": "Round 376 not accepted: A STOP (a-round-376.md), C BLOCKED with 0 bugs and browserVerified false (c-round-376.json), gate 376 skipped. Ruling 1 (TC10, L10/L11): TC10 is inside the describe at transport-centre-ui.test.tsx l.175-471 with timeout 15_000 (claims-377 K3); measurements 2096 (gate 375) / 2984 (B v3 covering) / 3088 (A, loaded) / 1685 (C standalone) ms are 11-21% of 15 s; A computed against the 5 s default. No STOP condition, no grant, no timeout change; INFO-A376-TC10-DESCRIBE-TIMEOUT closed. A tree kept as is (6 M + doc 243); archive tasks/round-376.md = dispatched task (sha c6ddc2cd...)"
-    },
-    {
-      "id": "D-29z1251",
-      "date": "2026-11-07",
-      "by": "B round 376 -> 377 planning",
-      "decision": "Ruling 2 (A-R376-REVIEW-M1, Medium, accepted): new row RB-LEAF4b in render-budget.test.tsx: toggleMasterMute twice (MASTER_MUTE_LABEL constant, so the Undo/Redo labels, range, selection, loop and project end are unchanged on the second); on the second: StudioWorkspace > 0, all four transport leaves 0, Edit text unchanged, master.mute toggled back. Pre-run on scratch (A tree + delta): 2/2 RB-LEAF4*, shuffle 41/41, covering 140/2201, tsc 0, Biome clean. Mutant MU-T-UNDO-FRESH-PER-EDIT (undo deps + history) red only on RB-LEAF4b (View 1, Edit 1). Ruling 3 (A-R376-REVIEW-M2): Low, documented, claim K5 tripwire. Reviewer Lows L1-L3 -> deferred_low_polish. Architecture note -> SIG-R376-THREE-ACTION-HOOKS (input to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING)"
-    },
-    {
-      "id": "D-29z1252",
-      "date": "2026-11-07",
-      "by": "B round 376 -> 377 planning",
-      "decision": "Round 377 = c1 close-out, a full C run (not an L22 short round: the STOP clauses are now ruled). Grants: render-budget.test.tsx (apply the delta only) and doc 243 (l.4 -> \"C round 377 PASS\"; add RB-LEAF4b, MU-T-UNDO-FRESH-PER-EDIT and the TC10/M2 rulings). The other 5 files must equal b-round-376/sketch-v3-files-sha256.txt. MUTANTS-TREE: 10 round-376 mutants + the new one; for the old ten, an extra red RB-LEAF4b is allowed, any other new red id is compared to b-round-375 logs"
-    },
-    {
-      "id": "D-29z1253",
-      "date": "2026-11-07",
-      "by": "B round 376 -> 377 planning",
-      "decision": "Order: REGRESSION is due at the first planning on/after 2026-11-08 (regression-last 2026-11-05); today 2026-11-07, so round 377 is not one, but the round-378 planning will be (if on/after 11-08) unless c1 still needs a fix round. Then PERF-11c-iii-c2. lessons.md unchanged (60 lines; TC10 misread is 1x, recorded as a RETRO input). Advisor available and consulted after orientation and before declaring done"
-    },
-    {
-      "id": "D-29z1254",
-      "date": "2026-11-07",
-      "by": "B round 377 -> 378 planning",
-      "decision": "Round 377 accepted from evidence: C PASS (c-round-377.json, 16 rows, browserVerified/realVerified true, 0 bugs; L57 check OK, b-round-377/l57-check-c377.txt); gate 377 published 79ed8a9 on both remotes (verify 252 files / 3723 tests). PERF-11c-iii-c1 done; A-R376-REVIEW-M1 closed. Baseline for round 378 = 79ed8a9; store tree clean. tasks/round-377.md archived (byte copy, sha 6895798c...)"
-    },
-    {
-      "id": "D-29z1255",
-      "date": "2026-11-07",
-      "by": "B round 377 -> 378 planning",
-      "decision": "Gate 377 review (COMMIT OK, Lows only): finding 1 -> GATE377-L1-TRANSITION-GUARD-NOT-IN-REPO (deferred Low); finding 2 = A-R376-REVIEW-L1-RAF-UNARMED (already deferred, not filed twice, L7); architecture signal 3 -> SIG-R377-RENDER-COUNT-CONSTANTS (fifth echo to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING, request restated); signal 4 keep. C notes -> INFO-C377-FIT-RING-WORDING, INFO-C377-RUNALL-RESTORE-PATH, INFO-C377-RANGE-DRAG-ON-BODY. docs In Progress (stage: 232 (PERF-DRAG-PREVIEW open) and 238 (PERF-11c group header, open stages) are tied to open backlog stages (L28)"
-    },
     {
       "id": "D-29z1256",
       "date": "2026-11-07",
@@ -39416,6 +39437,30 @@
       "date": "2026-11-07",
       "by": "2026-11-07 B round 386 -> 387 planning",
       "decision": "tech-lead sketch review of v1 (6e30325e): TL-R387-M1 (Medium, stale stop position after a time-removing edit) and L1-L6. Fixed in sketch v2 (a9f22614): M1 (syncPlayback stopAt = positionAt(anchor, startAt), SF8), L1 (resyncAfterDecode catch -> stopForScheduleFailure), L2 (startClicks detaches a failed click, AR2), L4 (microtask writes only if not playing, SF10), L5 (seekTo stopAt = target), L6 (SF9 initial loop fill; SF6 polls). L3 deferred like TL-R385-L8. 15/15 mutants red; full suite 257/3787 on v2; delta review on v2."
+    },
+    {
+      "id": "D-29z1306",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 387 -> 388 planning",
+      "decision": "Round 387 not accepted: C FAIL (c-round-387.json, browserVerified true). PASS rows SOURCE-SCOPE, PATCH-EQUAL, CLAIMS, BROWSER-M2-FLOW, BROWSER-M1-NEIGHBOUR, EXPORT-EQUAL, G387-AUTH, STUDIO-SMOKE; UNIT (2/65) and MUTANTS (not run) incomplete. GATE-B385-M2, A-R386-REVIEW-M1, B-R386-UNGUARDED-GRAPH-CALLERS, TL-R387-M1, A-R386-REVIEW-L1 stay dispatched; close on C round 388 PASS with UNIT and MUTANTS run by C. Gate 387 skipped; baseline 5312260 + uncommitted round-387 tree."
+    },
+    {
+      "id": "D-29z1307",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 387 -> 388 planning",
+      "decision": "C-R387-01 (= A-R387-REVIEW-M1) kept Medium (C offered downgrade): a meter frozen at ~-19.8 dB beside 'Playback stopped' is a silently wrong display, the D-29z1295 class; one-guard fix. B reproduced it at both viewports on the round-387 tree (b-round-387/probe/meter-head-*.json)."
+    },
+    {
+      "id": "D-29z1308",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 387 -> 388 planning",
+      "decision": "Ruling on A's round-387 STOP (L10): grant the reviewer's tick guard (if !isPlayingRef after pumpPlaybackAudio -> frameRef null, return) + SF11 (metered fake, captured rAF, setInterval stubbed so the pump runs from tick) + MU-388-TICK-NO-GUARD, as reviewed sketch sha 494afafc. The loop ran C despite A's STOP -> ROOT-NOTE-R387-STOP-NOT-HONOURED (root runner signal, not an A/C fault)."
+    },
+    {
+      "id": "D-29z1309",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 387 -> 388 planning",
+      "decision": "Round-387 code-reviewer Lows: L-a (AR6 createGain/connect throw), L-b (unguarded releaseNodes in rollback), L-d (SF7 locator assert), L-e (SF2 hardcoded Playing from text), L-f (SF3 undo availability) -> deferred_low_polish; not fixed in round 388 because the sketch is re-dispatched byte-identical (L58) and SF1-SF10 must stay identical. L-c (resyncAfterDecode catch unreachable) closed accepted (round 387 task \u00a75). Round-387 Architecture note (signal 3, scheduling region) -> SIG-R387-SCHEDULING-REGION, attached to ARCH-CHECKPOINT-DECODE-REGION. REGRESSION-2026-11-08 opens unconditionally at the next planning unless a new Critical/High appears."
     }
   ],
   "retro_candidates": [
@@ -39840,6 +39885,12 @@
       "id": "ROOT-REQ-L57-CHECK-PROGRESS",
       "added": "2026-11-07 B round 384 -> 385 planning",
       "note": "tools/l57-check.py does not check progressFile/stopSignal for BLOCKED-for-time C JSONs (L59 not enforced, 3x). Proposal: fail when taskStatus BLOCKED and progressFile or stopSignal is absent. B does not edit tools/; C writes the fields by L59 meanwhile",
+      "status": "open (non-blocking)"
+    },
+    {
+      "id": "ROOT-NOTE-R387-STOP-NOT-HONOURED",
+      "added": "2026-11-07 B round 387 -> 388 planning",
+      "note": "a-round-387.md opened with STOP (unruled reviewer Medium, L11) but the runner dispatched C anyway; C then reproduced the Medium (C-R387-01). Proposal: the runner routes A STOP to B before C. Also info: C round 387 re-ran c-round-386/auth-smoke.mjs in place, overwriting c-round-386/auth-smoke.json and screens with equivalent round-387 data (C's note); 386 file is not original",
       "status": "open (non-blocking)"
     }
   ],

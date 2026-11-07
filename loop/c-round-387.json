@@ -1,0 +1,70 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "C-R387-01",
+   "severity": "medium",
+   "steps": [
+    "Open /studio-lab (1440x900 and 1280x720), add 'Soft impact' (2 s SFX)",
+    "Drag on the clip body to make a time selection, press Loop",
+    "Press Play; meters show -19.2 dB on the Music track",
+    "Inject AudioBufferSourceNode.start to throw on the realtime context (pump loop fill fails); script c-round-387/meter-freeze.mjs"
+   ],
+   "expected": "Playback stops, status shows scheduleFailed, and the meters return to the floor (-inf) like a normal Stop",
+   "actual": "Playback stops and status shows 'could not be scheduled', but the track/master meters stay frozen at -19.8 dB (1.5 s later still -19.8). Control with a normal Stop: all -inf. Same at both viewports. This is A-R387-REVIEW-M1 (tick samples meters and re-queues after pumpPlaybackAudio stopped playback), reproduced in the real browser. No sound plays, no page error, no data loss; the clock is stopped correctly.",
+   "evidence": "c-round-387/meter-1440.json, meter-1280.json, meter-control-1440.json, meter-1440.png. Source: ArrangementContext.tsx tick (l.1358-1379) has no isPlayingRef check after pumpPlaybackAudio().",
+   "origin": "C"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE",
+  "PATCH-EQUAL",
+  "CLAIMS (only allowed deltas K10,K15,K16)",
+  "BROWSER-M2-FLOW",
+  "BROWSER-M1-NEIGHBOUR",
+  "EXPORT-EQUAL",
+  "G387-AUTH",
+  "STUDIO-SMOKE"
+ ],
+ "blocked": [
+  "MUTANTS not run by C (15/15 only per A's report, not independently verified)",
+  "UNIT: C ran only the 2 new files (15 tests pass), not the 65 covering files",
+  "DOCS: line 4 and sections OK, but it says 'Completed (C round 387 PASS)' while this verdict is FAIL; gate rows (verify/full suite/build) not claimed",
+  "A-R387-REVIEW-M1 unruled by B; A reported STOP, loop still moved to C"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T11:43:29.0437673Z",
+  "round": 387,
+  "attempt": 1,
+  "store": 200
+ },
+ "gateChecksNamed": [
+  "verify",
+  "full suite",
+  "build"
+ ],
+ "gateChecksRunOnSketch": "B precheck-full.log only; not rerun by C",
+ "chainHeadGateRunGreen": "see gates/gate-round-387.json",
+ "affectedChecksNamed": [
+  "AR1-AR5",
+  "SF1-SF10",
+  "m2-flow",
+  "resync-throw",
+  "export-compare"
+ ],
+ "affectedChecksRunOnSketch": "B's precheck-full.log, flow-sketch-*.json, export-sha256.txt compared; browser probes rerun by C",
+ "assertsSpecified": "AR1-AR5 and SF1-SF10",
+ "mutantsRecorded": 15,
+ "mutantRedOnSketch": "15/15 (b-round-386/mutants)",
+ "manifestPaths": [
+  "b-round-386/r387-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [
+  "K10 doc 250 files 1 vs sketch 0 (expected: A created doc 250)"
+ ],
+ "claimCheckMinutes": 1
+}

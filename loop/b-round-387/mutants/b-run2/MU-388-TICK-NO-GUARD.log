@@ -1,0 +1,43 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-387/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m10 skipped[39m[2m)[22m[33m 663[2mms[22m[39m
+     [2m[90m↓[39m[22m SF1: a Play whose second source start throws stops at the start point with a status and leaves nothing sounding
+     [2m[90m↓[39m[22m SF2: a repeated Play throw keeps the failure status, then a clean Play plays from the start point
+     [2m[90m↓[39m[22m SF3: an edit while playing whose reschedule throws keeps the edit, stops the old graph and shows the status
+     [2m[90m↓[39m[22m SF4: a seek while playing whose reschedule throws stops at the seek target with the status
+     [2m[90m↓[39m[22m SF5: a scrub while playing whose reschedule throws stops at the scrub point, and the scrub end leaves the marker there
+     [2m[90m↓[39m[22m SF7: a scrub end while playing whose reschedule throws stops at the release point with the status
+     [2m[90m↓[39m[22m SF8: an edit that removes time while playing and whose reschedule throws stops at the remapped position
+     [2m[90m↓[39m[22m SF9: a Play whose first loop iteration fill throws inside the build stops at the start point with the status
+     [2m[90m↓[39m[22m SF10: a clean Play right after a failed Play in the same task keeps playing and is not overwritten by the failure text
+     [2m[90m↓[39m[22m SF6: a loop iteration appended by the audio pump that throws stops playback with the status
+[31m     [31m×[31m SF11: a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor, with no frame left queued[39m[33m 662[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx[2m > [22ma pump failure inside the meter frame floors the meters (C-R387-01)[2m > [22mSF11: a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor, with no frame left queued
+[31m[1mAssertionError[22m: expected '-20.0' to be '-inf' // Object.is equality[39m
+
+Expected: [32m"-[7minf[27m"[39m
+Received: [31m"-[7m20.0[27m"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx:[2m512:50[22m[39m
+    [90m510| [39m    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed…
+    [90m511| [39m    [34mexpect[39m([34mstartedWithoutStop[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m512| [39m    [34mexpect[39m(master[33m.[39m[34mgetAttribute[39m([32m'data-level-db'[39m))[33m.[39m[34mtoBe[39m([32m'-inf'[39m)[33m;[39m
+    [90m   | [39m                                                 [31m^[39m
+    [90m513| [39m    [34mexpect[39m(master[33m.[39m[34mgetAttribute[39m([32m'data-hold-db'[39m))[33m.[39m[34mtoBe[39m([32m'-inf'[39m)[33m;[39m
+    [90m514| [39m    [35mfor[39m ([35mconst[39m meter [35mof[39m tracks) {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m10 skipped[39m[90m (11)[39m
+[2m   Start at [22m 11:57:47
+[2m   Duration [22m 1.45s[2m (transform 330ms, setup 0ms, import 453ms, tests 663ms, environment 256ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-387/scratch/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx,title=app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx > a pump failure inside the meter frame floors the meters (C-R387-01) > SF11%3A a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor%2C with no frame left queued,line=512,column=50::AssertionError: expected '-20.0' to be '-inf' // Object.is equality%0A%0AExpected: "-inf"%0AReceived: "-20.0"%0A%0A ❯ app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx:512:50%0A%0A
+vitest rc 1

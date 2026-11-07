@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T10:54:40.056Z",
-  "current_task": "current-task.md (round 386: GATE384-M1 + A-R383-REVIEW-L1 + GATE384-L2, decode-resync error handling; A applies reviewed sketch b-round-385/sketch-386.patch.txt (sha 1cada6c7) + doc 249; grants b-round-385/grants-386.txt (6); frozen b-round-385/r386-frozen-sha256.txt (1275); claims b-round-385/claims-386.sh)",
+  "_generatedUtc": "2026-11-07T11:52:38.759Z",
+  "current_task": "current-task.md (round 387: GATE-B385-M2 + A-R386-REVIEW-M1 + B-R386-UNGUARDED-GRAPH-CALLERS, schedule-failure rollback; A applies reviewed sketch b-round-386/sketch-387.patch.txt (sha a9f22614) + doc 250; grants b-round-386/grants-387.txt (5); frozen b-round-386/r387-frozen-sha256.txt (1279); claims b-round-386/claims-387.sh)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6204,29 +6204,13 @@
       "title": "installPcmLiveRegistry installed in every resources pass though only the 1x record pass reads it"
     },
     {
-      "id": "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
-      "severity": "low",
-      "status": "dispatched round 386 (D-29z1294): owner-guarded collectionCo",
-      "title": "stale ensureDecoded after a collection change could decode an old-collection source under the new co"
-    },
-    {
-      "origin": "gate 384 code-reviewer",
-      "evidence": "gates/round-384/review.md",
-      "added": "2026-11-07 B round 384 -> 385 planning",
-      "id": "GATE384-M1-ENSURE-DECODED-UNHANDLED-REJECTION",
-      "severity": "medium",
-      "title": "ensureDecoded fulfilled handler calls syncPlayback; if it throws, the Promise.all rejects and the three void call sites (history publish ~922/927, startPlaybackAt 1646, startLibraryPreview 1727) leave it unhandled",
-      "repro": "gates/round-384/review.md suggestion 1; ArrangementContext.tsx l.1409-1450 (ensureDecoded), l.927, l.1646, l.1727 at 7295618; reachability needs a syncPlayback/startGraph throw (not yet reproduced in a browser)",
-      "status": "dispatched round 386 (D-29z1294, D-29z1295): reproduced by B in the browser at HEAD (b-round-385/probe/head-1440.json, head-1280.json: 1 pageerror, clock running); fix = resyncAfterDecode try/catch; rows EV11 x2, EV15, PW20; closes on C round 386 PASS"
-    },
-    {
       "id": "GATE-B385-M2-APPLY-SCHEDULE-ROLLBACK",
       "severity": "medium",
       "origin": "tech-lead review of B's round-386 sketch (pre-existing code)",
       "evidence": "b-round-385/sketch-review.md TL-R385-M2 + delta review",
       "title": "applySchedule is not all-or-nothing: a throw partway through startPlan (after master connect and some source.start calls) leaves started sources sounding with no handle, so stopPlayback cannot stop them; also a repeated throw on Play leaves isPlayingRef true with no sound",
       "repro": "not browser-reproduced; needs a mid-plan throw (e.g. RangeError/InvalidStateError from start()); graph.client.ts ~l.190 master connect, ~l.223-265 startPlan at 7295618",
-      "status": "scheduled (D-29z1297, D-29z1298): own bug round after round 386 (regression first if due); scope = roll back inside graph.client.ts (stop+disconnect started sources, disconnect master, rethrow) + Play repeated-throw case",
+      "status": "dispatched round 387 (D-29z1301): reproduced by B in the browser at HEAD 5312260 (b-round-386/probe/m2-head-*.json, flow-head-*.json: 2 pageerrors per throw, 1 source never stopped, transport stuck); fix = applySchedule all-or-nothing rollback (AR1-AR5) + provider startGraphOrStop (SF1-SF10); closes …[see backlog.json]",
       "added": "2026-11-07 B round 385 -> 386 planning"
     },
     {
@@ -6234,18 +6218,35 @@
       "severity": "info",
       "status": "awaiting_user (D-29z1299): question to Saba; not scheduled",
       "title": "library preview stops timeline playback (Live keeps the transport running and starts the preview at "
+    },
+    {
+      "id": "A-R386-REVIEW-M1-PLAY-RETRY-THROW-STUCK",
+      "severity": "medium",
+      "origin": "A round 386 code-reviewer (second result)",
+      "evidence": "a-round-386.md §5b; b-round-386/probe/flow-head-*.json",
+      "title": "startPlaybackAt sets isPlaying and the status before startGraph; a Play that throws leaves isPlaying true with no graph (next press acts as Stop) and Stop jumps the clock to a stale anchor",
+      "repro": "browser at HEAD 5312260: m2-head-1440.json play1 clock 00:00.000, afterSpace 00:02.011; flow-head play3 does not play",
+      "status": "dispatched round 387 (D-29z1301): rows SF1, SF2; mutants MU-387-PLAY-NO-GUARD, MU-387-PLAY-NO-STOPAT; closes on C round 387 PASS",
+      "added": "2026-11-07 B round 386 -> 387 planning"
+    },
+    {
+      "id": "B-R386-UNGUARDED-GRAPH-CALLERS",
+      "severity": "medium",
+      "origin": "B planning, from A round 386 code-reviewer Architecture note (signal 3) and suggestion",
+      "evidence": "a-round-386.md §5b; b-round-386/sketch-review.md matrix",
+      "title": "syncPlayback (edits, loop resync), seekTo, scrubPlayhead, endPlayheadScrub and the audio pump let a graph-build throw escape as an uncaught error while the old graph keeps playing the old arrangement",
+      "repro": "SF3-SF7 red on the HEAD-equivalent mutants (MU-387-SYNC-DIRECT, SEEK-DIRECT, SCRUB-DIRECT, ENDSCRUB-DIRECT, PUMP-NO-CATCH); browser: flow-sketch commit row vs HEAD",
+      "status": "dispatched round 387 (D-29z1301): one provider wrapper startGraphOrStop + pump catch; closes on C round 387 PASS",
+      "added": "2026-11-07 B round 386 -> 387 planning"
+    },
+    {
+      "id": "A-R386-REVIEW-L1-STOP-IN-CATCH",
+      "severity": "low",
+      "status": "dispatched round 387 (D-29z1304): after the rollback no half",
+      "title": "stopPlayback inside resyncAfterDecode catch could throw while tearing down a half-built graph"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 377,
-      "task": "current-task.md",
-      "decision": "D-29z1250..D-29z1253",
-      "type": "PERF-11c-iii-c1 close-out: rulings on the 376 STOP; A applies b-round-376/sketch-v3-delta.patch.txt (RB-LEAF4b) + doc 243 update; full C run (unit, shuffle, 11 mutants, perf, leaf probe, transport browser incl. (f), auth, smoke)",
-      "status": "done (D-29z1254): C PASS (browserVerified true, 0 bugs); gate 377 published 79ed8a9 (rounds 376-377)",
-      "note": "baseline 6b11be7 + A round 376 uncommitted tree (6 M + doc 243); claims b-round-376/claims-377.sh",
-      "added": "2026-11-07 B round 376 -> 377 planning"
-    },
     {
       "round": 378,
       "task": "current-task.md",
@@ -6323,9 +6324,18 @@
       "task": "current-task.md",
       "decision": "D-29z1293..D-29z1298",
       "type": "bug round: GATE384-M1 (Medium) + A-R383-REVIEW-L1 + GATE384-L2 (Low) in ensureDecoded/startLibraryPreview; resyncAfterDecode helper for ensureDecoded, video-audio and load paths; owner-guarded controller; no click-time stop on deferred preview; scheduleFailed status",
-      "status": "dispatched",
+      "status": "C PASS (c-round-386.json, browserVerified true, 0 bugs); published 5312260 (gate 386)",
       "note": "baseline 7295618 clean; sketch b-round-385/sketch-386.patch.txt sha 1cada6c7 reviewed by tech-lead (+delta); 7 mutants red; covering 34 files/633 tests on sketch; browser pre-check b-round-385/probe/",
       "added": "2026-11-07 B round 385 -> 386 planning"
+    },
+    {
+      "round": 387,
+      "task": "current-task.md",
+      "decision": "D-29z1300..D-29z1305",
+      "type": "bug round: GATE-B385-M2 + A-R386-REVIEW-M1 + B-R386-UNGUARDED-GRAPH-CALLERS (Medium x3, one root cause: a throw while building the playback graph); applySchedule rollback + provider startGraphOrStop + pump catch; scheduleFailed status deferred to a microtask",
+      "status": "dispatched",
+      "note": "baseline 5312260 clean; sketch b-round-386/sketch-387.patch.txt sha a9f22614 (v2 after tech-lead TL-R387-M1/L1-L6; v1 6e30325e kept as sketch-387-v1.patch.txt) reviewed by tech-lead + delta; 15 mutants red; full suite on sketch 257/3787; browser HEAD repro + sketch flow + M1 neighbour both viewports; export byte-identical",
+      "added": "2026-11-07 B round 386 -> 387 planning"
     }
   ],
   "other_keys": [

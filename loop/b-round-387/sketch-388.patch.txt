@@ -1,0 +1,148 @@
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -1361,6 +1361,10 @@
+       return;
+     }
+     pumpPlaybackAudio();
++    if (!isPlayingRef.current) {
++      frameRef.current = null;
++      return;
++    }
+     sampleMasterMeter();
+     sampleTrackMeters();
+     if (scrubbingRef.current) {
+--- a/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
+@@ -1,5 +1,7 @@
+ import { act, render } from '@testing-library/react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { ArrangementMaster } from '~/components/arrangement/ArrangementMaster';
++import { ArrangementTrackMeter } from '~/components/arrangement/ArrangementTrackMeter';
+ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { addClip, createArrangement } from '../model';
+@@ -394,3 +396,124 @@
+     expect(startedWithoutStop()).toBe(0);
+   });
+ });
++
++const meterSignal = { value: 0 };
++
++class FakeAnalyser extends FakeNode {
++  fftSize = 2048;
++  getFloatTimeDomainData(target: Float32Array) {
++    target.fill(meterSignal.value);
++  }
++}
++
++class FakeSplitter extends FakeNode {}
++
++class MeteredFailureAudioContext extends FakeAudioContext {
++  createChannelSplitter() {
++    return new FakeSplitter();
++  }
++  createAnalyser() {
++    return new FakeAnalyser();
++  }
++}
++
++class FakeResizeObserver {
++  observe() {}
++  disconnect() {}
++}
++
++describe('a pump failure inside the meter frame floors the meters (C-R387-01)', () => {
++  const errors: unknown[] = [];
++  const frames: FrameRequestCallback[] = [];
++  const onError = (event: ErrorEvent) => {
++    errors.push(event.error);
++  };
++
++  beforeEach(() => {
++    errors.length = 0;
++    frames.length = 0;
++    createdSources.length = 0;
++    startFailure.armedAt = 0;
++    startFailure.calls = 0;
++    startFailure.thrown = 0;
++    meterSignal.value = 0;
++    fakeClock.base = Date.now() / 1000 - 5;
++    vi.stubGlobal('AudioContext', MeteredFailureAudioContext);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
++      frames.push(callback);
++      return frames.length;
++    });
++    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    vi.stubGlobal('setInterval', () => 0);
++    window.addEventListener('error', onError);
++  });
++
++  afterEach(() => {
++    window.removeEventListener('error', onError);
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  function runFrames(count: number) {
++    for (let index = 0; index < count; index++) {
++      const pending = frames.splice(0, frames.length);
++      act(() => {
++        for (const frame of pending) {
++          frame(performance.now());
++        }
++      });
++    }
++  }
++
++  it('SF11: a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor, with no frame left queued', async () => {
++    const api: ProbeRef = { current: null };
++    const view = render(
++      <ArrangementProvider
++        collection={failureCollection()}
++        initialArrangement={twoClipArrangement({ start: 0, end: 0.5, enabled: true })}
++      >
++        <ArrangementMaster />
++        <ArrangementTrackMeter trackId="music" trackName="Music" />
++        <ArrangementTrackMeter trackId="sfx" trackName="SFX" />
++        <FailureProbe api={api} />
++      </ArrangementProvider>,
++    );
++    await flushAsync();
++    const master = view.getByTestId('arrangement-master-meter');
++    const tracks = view.getAllByTestId('arrangement-track-meter');
++    expect(tracks).toHaveLength(2);
++    act(() => live(api).togglePlayback());
++    expect(live(api).isPlaying).toBe(true);
++    meterSignal.value = 10 ** (-20 / 20);
++    await act(async () => {
++      await new Promise((resolve) => setTimeout(resolve, 150));
++    });
++    runFrames(3);
++    expect(master.getAttribute('data-level-db')).not.toBe('-inf');
++    for (const meter of tracks) {
++      expect(meter.getAttribute('data-level-db')).not.toBe('-inf');
++    }
++    armStartFailure(1);
++    for (let i = 0; i < 20 && startFailure.thrown === 0; i++) {
++      await act(async () => {
++        await new Promise((resolve) => setTimeout(resolve, 150));
++      });
++      runFrames(1);
++    }
++    await flushAsync(1);
++    expect(startFailure.thrown).toBe(1);
++    expect(errors).toEqual([]);
++    expect(live(api).isPlaying).toBe(false);
++    expect(live(api).status).toBe(studioPlaybackStrings.scheduleFailed);
++    expect(startedWithoutStop()).toBe(0);
++    expect(master.getAttribute('data-level-db')).toBe('-inf');
++    expect(master.getAttribute('data-hold-db')).toBe('-inf');
++    for (const meter of tracks) {
++      expect(meter.getAttribute('data-level-db')).toBe('-inf');
++    }
++    expect(frames).toHaveLength(0);
++  });
++});
