@@ -1,0 +1,53 @@
+
+ RUN  v4.0.16 /tmp/a393-scratch
+
+ ✓ app/data/__tests__/studio-lab-demo.test.ts (16 tests) 20ms
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx (14 tests | 1 failed) 490ms
+     ✓ PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media 5ms
+     ✓ PS2 a seek on the playing stream reuses the same element without pausing it 1ms
+     ✓ PS3 ended fires onEnded once; an old element ending after its stop does nothing 2ms
+     ✓ PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not 3ms
+     × PS5 a buffer preview after a stream releases the stream element and starts one buffer source 8ms
+     ✓ PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set 75ms
+     ✓ PS7 a cached buffer wins over the stream: no media element, one buffer source 55ms
+     ✓ PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered 51ms
+     ✓ PS9 Play stops a streaming preview: the element is released and the transport plays 52ms
+     ✓ PS10 unmounting the provider releases a streaming element 43ms
+     ✓ PS11 a stream preview stops the playing transport before the element plays 53ms
+     ✓ PS12 the natural end of a stream clears the preview id and releases the preview pin 42ms
+     ✓ PS13 the fallback resumes from the element time, not from zero 50ms
+     ✓ PS14 a streamed preview writes no status 48ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 29 passed (30)
+   Start at  18:51:44
+   Duration  2.00s (transform 819ms, setup 0ms, import 1.10s, tests 510ms, environment 1.14s)
+
+
+::error file=/tmp/a393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview stream player > PS5 a buffer preview after a stream releases the stream element and starts one buffer source,line=300,column=48::AssertionError: expected +0 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:300:48%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview stream player > PS5 a buffer preview after a stream releases the stream element and starts one buffer source
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:300:48
+    298|     const buffer = new AudioBuffer({ length: 4800, numberOfChannels: 1…
+    299|     player.playLibraryPreview(buffer, 0);
+    300|     expect(callsOn(mediaCalls.pause, element)).toBe(1);
+       |                                                ^
+    301|     expect(element.hasAttribute('src')).toBe(false);
+    302|     expect(startedSources).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

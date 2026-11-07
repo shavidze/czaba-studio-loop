@@ -1,0 +1,383 @@
+diff --git a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+index 2a946ca..2810fe8 100644
+--- a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+@@ -569,3 +569,251 @@ describe('PERF-13c-i library preview of a URL source streams without decoding',
+     expect(live(api).statusSequence).toBe(sequenceBefore);
+   });
+ });
++
++interface FakeStallScheduler {
++  schedule: (callback: () => void, ms: number) => () => void;
++  pending: () => number;
++  delays: number[];
++  fire: () => void;
++}
++
++function createFakeStallScheduler(): FakeStallScheduler {
++  const timers: { callback: () => void; live: boolean }[] = [];
++  const delays: number[] = [];
++  return {
++    delays,
++    schedule(callback, ms) {
++      const timer = { callback, live: true };
++      timers.push(timer);
++      delays.push(ms);
++      return () => {
++        timer.live = false;
++      };
++    },
++    pending: () => timers.filter((timer) => timer.live).length,
++    fire() {
++      for (const timer of timers.filter((entry) => entry.live)) {
++        timer.live = false;
++        timer.callback();
++      }
++    },
++  };
++}
++
++function streamPlayer(scheduler: FakeStallScheduler, onEnded = vi.fn()) {
++  return createLibraryPreviewPlayer(new AudioContext(), onEnded, {
++    createAudioElement: createTrackedAudio,
++    scheduleStallTimeout: scheduler.schedule,
++  });
++}
++
++describe('PERF-13c-ii-a stream lifecycle robustness', () => {
++  beforeEach(installGlobals);
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  it('PS16 a stream that never plays falls back after the stall timeout with its time', () => {
++    const scheduler = createFakeStallScheduler();
++    const ended = vi.fn();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler, ended);
++    player.playLibraryPreviewStream(BIG_URL, 7, onError);
++    const element = onlyElement();
++    expect(scheduler.pending()).toBe(1);
++    expect(scheduler.delays).toEqual([8000]);
++    scheduler.fire();
++    expect(onError).toHaveBeenCalledTimes(1);
++    expect(onError).toHaveBeenCalledWith(7);
++    expect(ended).not.toHaveBeenCalled();
++    expect(element.hasAttribute('src')).toBe(false);
++    expect(player.getLibraryPreviewOffset()).toBeNull();
++  });
++
++  it('PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only', () => {
++    const scheduler = createFakeStallScheduler();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    const element = onlyElement();
++    element.dispatchEvent(new Event('playing'));
++    expect(scheduler.pending()).toBe(0);
++    element.dispatchEvent(new Event('progress'));
++    expect(scheduler.pending()).toBe(0);
++    scheduler.fire();
++    expect(onError).not.toHaveBeenCalled();
++    element.dispatchEvent(new Event('waiting'));
++    expect(scheduler.pending()).toBe(1);
++    element.dispatchEvent(new Event('progress'));
++    expect(scheduler.pending()).toBe(1);
++    expect(scheduler.delays).toHaveLength(3);
++    scheduler.fire();
++    expect(onError).toHaveBeenCalledTimes(1);
++  });
++
++  it('PS18 the watchdog does nothing when the element time moved since it was armed', () => {
++    const scheduler = createFakeStallScheduler();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    const element = onlyElement();
++    element.currentTime = 2.5;
++    scheduler.fire();
++    expect(onError).not.toHaveBeenCalled();
++    expect(player.getLibraryPreviewOffset()).toBe(2.5);
++    expect(element.getAttribute('src')).toBe(BIG_URL);
++  });
++
++  it('PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves', () => {
++    const scheduler = createFakeStallScheduler();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    onlyElement().dispatchEvent(new Event('playing'));
++    player.playLibraryPreviewStream(BIG_URL, 30, onError);
++    expect(scheduler.pending()).toBe(0);
++    player.stopLibraryPreview();
++    expect(scheduler.pending()).toBe(0);
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    expect(scheduler.pending()).toBe(1);
++    player.playLibraryPreview(
++      new AudioBuffer({ length: 48000, numberOfChannels: 1, sampleRate: 48000 }),
++      0,
++    );
++    expect(scheduler.pending()).toBe(0);
++    scheduler.fire();
++    expect(onError).not.toHaveBeenCalled();
++  });
++
++  it('PS20 an external pause ends the preview once and releases the element', () => {
++    const scheduler = createFakeStallScheduler();
++    const ended = vi.fn();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler, ended);
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    const element = onlyElement();
++    element.dispatchEvent(new Event('playing'));
++    element.dispatchEvent(new Event('pause'));
++    expect(ended).toHaveBeenCalledTimes(1);
++    expect(onError).not.toHaveBeenCalled();
++    expect(element.hasAttribute('src')).toBe(false);
++    expect(player.getLibraryPreviewOffset()).toBeNull();
++    element.dispatchEvent(new Event('pause'));
++    element.dispatchEvent(new Event('ended'));
++    expect(ended).toHaveBeenCalledTimes(1);
++  });
++
++  it('PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event', () => {
++    const scheduler = createFakeStallScheduler();
++    const ended = vi.fn();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler, ended);
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    const stopped = onlyElement();
++    player.stopLibraryPreview();
++    stopped.dispatchEvent(new Event('pause'));
++    expect(ended).not.toHaveBeenCalled();
++
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    const finishing = createdElements[1];
++    if (!finishing) {
++      throw new Error('no second element');
++    }
++    Object.defineProperty(finishing, 'ended', { configurable: true, get: () => true });
++    finishing.dispatchEvent(new Event('pause'));
++    expect(ended).not.toHaveBeenCalled();
++    finishing.dispatchEvent(new Event('ended'));
++    expect(ended).toHaveBeenCalledTimes(1);
++
++    player.playLibraryPreviewStream(BIG_URL, 0, onError);
++    const failing = createdElements[2];
++    if (!failing) {
++      throw new Error('no third element');
++    }
++    Object.defineProperty(failing, 'error', {
++      configurable: true,
++      get: () => ({ code: 2, message: 'network' }),
++    });
++    failing.dispatchEvent(new Event('pause'));
++    expect(ended).toHaveBeenCalledTimes(1);
++    failing.dispatchEvent(new Event('error'));
++    expect(onError).toHaveBeenCalledTimes(1);
++  });
++
++  it('PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception', () => {
++    const scheduler = createFakeStallScheduler();
++    const throwingTime = document.createElement('audio');
++    Object.defineProperty(throwingTime, 'currentTime', {
++      configurable: true,
++      get: () => 0,
++      set: () => {
++        throw new DOMException('not ready', 'InvalidStateError');
++      },
++    });
++    const first = createLibraryPreviewPlayer(new AudioContext(), vi.fn(), {
++      createAudioElement: () => throwingTime,
++      scheduleStallTimeout: scheduler.schedule,
++    });
++    const timeError = vi.fn();
++    expect(() => first.playLibraryPreviewStream(BIG_URL, 3, timeError)).not.toThrow();
++    expect(timeError).toHaveBeenCalledTimes(1);
++    expect(first.getLibraryPreviewOffset()).toBeNull();
++
++    const throwingPlay = document.createElement('audio');
++    vi.spyOn(throwingPlay, 'play').mockImplementation(() => {
++      throw new DOMException('blocked', 'NotSupportedError');
++    });
++    const second = createLibraryPreviewPlayer(new AudioContext(), vi.fn(), {
++      createAudioElement: () => throwingPlay,
++      scheduleStallTimeout: scheduler.schedule,
++    });
++    const playError = vi.fn();
++    expect(() => second.playLibraryPreviewStream(BIG_URL, 0, playError)).not.toThrow();
++    expect(playError).toHaveBeenCalledTimes(1);
++    expect(throwingPlay.hasAttribute('src')).toBe(false);
++    expect(scheduler.pending()).toBe(0);
++  });
++
++  it('PS23 a synchronous throw on a same-url seek is a stream error of the active preview', () => {
++    const scheduler = createFakeStallScheduler();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 4, onError);
++    const element = onlyElement();
++    element.dispatchEvent(new Event('playing'));
++    Object.defineProperty(element, 'currentTime', {
++      configurable: true,
++      get: () => 9,
++      set: () => {
++        throw new DOMException('not seekable', 'InvalidStateError');
++      },
++    });
++    expect(() => player.playLibraryPreviewStream(BIG_URL, 60, onError)).not.toThrow();
++    expect(onError).toHaveBeenCalledTimes(1);
++    expect(onError).toHaveBeenCalledWith(9);
++    expect(element.hasAttribute('src')).toBe(false);
++  });
++
++  it('PS24 the default scheduler arms an 8000 ms window timer that a stop clears', () => {
++    vi.useFakeTimers();
++    try {
++      const onError = vi.fn();
++      const player = createLibraryPreviewPlayer(new AudioContext(), vi.fn(), {
++        createAudioElement: createTrackedAudio,
++      });
++      player.playLibraryPreviewStream(BIG_URL, 0, onError);
++      vi.advanceTimersByTime(7999);
++      expect(onError).not.toHaveBeenCalled();
++      vi.advanceTimersByTime(1);
++      expect(onError).toHaveBeenCalledTimes(1);
++      player.playLibraryPreviewStream(BIG_URL, 0, onError);
++      player.stopLibraryPreview();
++      vi.advanceTimersByTime(20000);
++      expect(onError).toHaveBeenCalledTimes(1);
++    } finally {
++      vi.useRealTimers();
++    }
++  });
++});
+diff --git a/app/lib/arrangement/preview.client.ts b/app/lib/arrangement/preview.client.ts
+index 9dee846..7afb7e1 100644
+--- a/app/lib/arrangement/preview.client.ts
++++ b/app/lib/arrangement/preview.client.ts
+@@ -11,8 +11,17 @@ export interface LibraryPreviewPlayer {
+ 
+ export interface LibraryPreviewPlayerOptions {
+   createAudioElement?: () => HTMLAudioElement;
++  scheduleStallTimeout?: (callback: () => void, ms: number) => () => void;
++  streamStallTimeoutMs?: number;
+ }
+ 
++export const LIBRARY_PREVIEW_STREAM_STALL_MS = 8000;
++
++const scheduleWindowTimeout = (callback: () => void, ms: number) => {
++  const id = window.setTimeout(callback, ms);
++  return () => window.clearTimeout(id);
++};
++
+ interface ActiveBufferPreview {
+   kind: 'buffer';
+   source: AudioBufferSourceNode;
+@@ -26,6 +35,7 @@ interface ActiveStreamPreview {
+   element: HTMLAudioElement;
+   url: string;
+   detach: () => void;
++  fail: () => void;
+ }
+ 
+ type ActivePreview = ActiveBufferPreview | ActiveStreamPreview;
+@@ -33,7 +43,11 @@ type ActivePreview = ActiveBufferPreview | ActiveStreamPreview;
+ export function createLibraryPreviewPlayer(
+   ctx: AudioContext,
+   onEnded: () => void,
+-  { createAudioElement = () => new Audio() }: LibraryPreviewPlayerOptions = {},
++  {
++    createAudioElement = () => new Audio(),
++    scheduleStallTimeout = scheduleWindowTimeout,
++    streamStallTimeoutMs = LIBRARY_PREVIEW_STREAM_STALL_MS,
++  }: LibraryPreviewPlayerOptions = {},
+ ): LibraryPreviewPlayer {
+   let active: ActivePreview | null = null;
+ 
+@@ -86,7 +100,11 @@ export function createLibraryPreviewPlayer(
+     playLibraryPreviewStream(url, offset, onStreamError) {
+       const start = Math.max(0, offset);
+       if (active?.kind === 'stream' && active.url === url) {
+-        active.element.currentTime = start;
++        try {
++          active.element.currentTime = start;
++        } catch {
++          active.fail();
++        }
+         return;
+       }
+       stopActive();
+@@ -104,24 +122,65 @@ export function createLibraryPreviewPlayer(
+           onStreamError(at);
+         }
+       };
++      let cancelStall: (() => void) | null = null;
++      const disarmStall = () => {
++        cancelStall?.();
++        cancelStall = null;
++      };
++      const armStall = () => {
++        disarmStall();
++        const armedAt = element.currentTime;
++        cancelStall = scheduleStallTimeout(() => {
++          cancelStall = null;
++          if (active === preview && element.currentTime === armedAt) {
++            handleError();
++          }
++        }, streamStallTimeoutMs);
++      };
++      const handleProgress = () => {
++        if (cancelStall) {
++          armStall();
++        }
++      };
++      const handlePause = () => {
++        if (active === preview && !element.ended && !element.error) {
++          stopActive();
++          onEnded();
++        }
++      };
+       element.addEventListener('ended', handleEnded);
+       element.addEventListener('error', handleError);
++      element.addEventListener('waiting', armStall);
++      element.addEventListener('playing', disarmStall);
++      element.addEventListener('progress', handleProgress);
++      element.addEventListener('pause', handlePause);
+       const preview: ActiveStreamPreview = {
+         kind: 'stream',
+         element,
+         url,
+         detach: () => {
++          disarmStall();
+           element.removeEventListener('ended', handleEnded);
+           element.removeEventListener('error', handleError);
++          element.removeEventListener('waiting', armStall);
++          element.removeEventListener('playing', disarmStall);
++          element.removeEventListener('progress', handleProgress);
++          element.removeEventListener('pause', handlePause);
+         },
++        fail: handleError,
+       };
+       active = preview;
+-      element.src = url;
+-      if (active !== preview) {
+-        return;
++      try {
++        element.src = url;
++        if (active !== preview) {
++          return;
++        }
++        element.currentTime = start;
++        armStall();
++        void Promise.resolve(element.play()).catch(handleError);
++      } catch {
++        handleError();
+       }
+-      element.currentTime = start;
+-      void Promise.resolve(element.play()).catch(handleError);
+     },
+     stopLibraryPreview() {
+       stopActive();

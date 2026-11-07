@@ -1,0 +1,233 @@
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 40f4ee0..ac91588 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -885,6 +885,10 @@ export function ArrangementProvider({
+   const webAudioUnavailableRef = useRef(false);
+   const previewPlayerRef = useRef<LibraryPreviewPlayer | null>(null);
+   const libraryPreviewSourceRef = useRef<string | null>(null);
++  const streamFallbackRef = useRef<{
++    collection: WorkspaceCollection;
++    sourceIds: Set<string>;
++  } | null>(null);
+   const libraryDragSourceRef = useRef<string | null>(null);
+   const [libraryPreviewSourceId, setLibraryPreviewSourceId] = useState<string | null>(null);
+ 
+@@ -1825,6 +1829,47 @@ export function ArrangementProvider({
+   const startLibraryPreview = useCallback(
+     (sourceId: string, offset = 0) => {
+       const source = collection.sources.find((entry) => entry.id === sourceId);
++      const isCached = decodedBuffers.has(sourceId);
++      const fallback = streamFallbackRef.current;
++      const streamUrl =
++        source &&
++        latestRef.current.sourceStates[sourceId]?.status === 'ready' &&
++        !isCached &&
++        !(fallback?.collection === collection && fallback.sourceIds.has(sourceId))
++          ? (collection.previewUrl?.(source) ?? null)
++          : null;
++      if (source && streamUrl !== null) {
++        const ctx = ensureAudioContext();
++        if (!ctx) {
++          return;
++        }
++        if (isPlayingRef.current) {
++          stopPlayback();
++        }
++        if (!previewPlayerRef.current) {
++          previewPlayerRef.current = createLibraryPreviewPlayer(ctx, () => {
++            libraryPreviewSourceRef.current = null;
++            setLibraryPreviewSourceId(null);
++            releasePreviewPin();
++          });
++        }
++        previewRequestRef.current = null;
++        releasePreviewPin();
++        libraryPreviewSourceRef.current = sourceId;
++        setLibraryPreviewSourceId(sourceId);
++        previewPlayerRef.current.playLibraryPreviewStream(streamUrl, offset, (atSeconds) => {
++          const current = streamFallbackRef.current;
++          if (current?.collection === collection) {
++            current.sourceIds.add(sourceId);
++          } else {
++            streamFallbackRef.current = { collection, sourceIds: new Set([sourceId]) };
++          }
++          libraryPreviewSourceRef.current = null;
++          setLibraryPreviewSourceId(null);
++          startLibraryPreviewRef.current(sourceId, atSeconds);
++        });
++        return;
++      }
+       if (
+         source &&
+         latestRef.current.sourceStates[sourceId]?.status === 'ready' &&
+diff --git a/app/data/__tests__/studio-lab-demo.test.ts b/app/data/__tests__/studio-lab-demo.test.ts
+index 5eb175c..00563b7 100644
+--- a/app/data/__tests__/studio-lab-demo.test.ts
++++ b/app/data/__tests__/studio-lab-demo.test.ts
+@@ -302,4 +302,17 @@ describe('C-R92-N1 studio-lab demo loader error text (D-29z60)', () => {
+       expect(source !== undefined && 'bpm' in source, id).toBe(false);
+     }
+   });
++
++  it('PS15 previewUrl streams only the two demo MP3 files and returns null for every other source', () => {
++    const expected: Record<string, string> = {
++      'demo-middle-east': '/middle-east.mp3',
++      'demo-hero-music': '/videos/hero/hero-music.mp3',
++    };
++    const previewUrl = studioLabDemoCollection.previewUrl;
++    expect(previewUrl).toBeTypeOf('function');
++    expect(studioLabDemoCollection.sources).toHaveLength(9);
++    for (const source of studioLabDemoCollection.sources) {
++      expect(previewUrl?.(source), source.id).toBe(expected[source.id] ?? null);
++    }
++  });
+ });
+diff --git a/app/data/studio-lab-demo.ts b/app/data/studio-lab-demo.ts
+index d440d2f..d43e3ba 100644
+--- a/app/data/studio-lab-demo.ts
++++ b/app/data/studio-lab-demo.ts
+@@ -138,4 +138,5 @@ export const studioLabDemoCollection: WorkspaceCollection = {
+   sources: studioLabDemoSources,
+   loadSource: loadDemoSource,
+   canReloadSource: (source) => Object.hasOwn(demoUrls, source.id),
++  previewUrl: (source) => (Object.hasOwn(demoUrls, source.id) ? demoUrls[source.id] : null),
+ };
+diff --git a/app/lib/arrangement/preview.client.ts b/app/lib/arrangement/preview.client.ts
+index b7d21d7..9dee846 100644
+--- a/app/lib/arrangement/preview.client.ts
++++ b/app/lib/arrangement/preview.client.ts
+@@ -1,19 +1,39 @@
+ export interface LibraryPreviewPlayer {
+   playLibraryPreview: (buffer: AudioBuffer, offset: number) => void;
++  playLibraryPreviewStream: (
++    url: string,
++    offset: number,
++    onStreamError: (atSeconds: number) => void,
++  ) => void;
+   stopLibraryPreview: () => void;
+   getLibraryPreviewOffset: () => number | null;
+ }
+ 
+-interface ActivePreview {
++export interface LibraryPreviewPlayerOptions {
++  createAudioElement?: () => HTMLAudioElement;
++}
++
++interface ActiveBufferPreview {
++  kind: 'buffer';
+   source: AudioBufferSourceNode;
+   startedAt: number;
+   offset: number;
+   duration: number;
+ }
+ 
++interface ActiveStreamPreview {
++  kind: 'stream';
++  element: HTMLAudioElement;
++  url: string;
++  detach: () => void;
++}
++
++type ActivePreview = ActiveBufferPreview | ActiveStreamPreview;
++
+ export function createLibraryPreviewPlayer(
+   ctx: AudioContext,
+   onEnded: () => void,
++  { createAudioElement = () => new Audio() }: LibraryPreviewPlayerOptions = {},
+ ): LibraryPreviewPlayer {
+   let active: ActivePreview | null = null;
+ 
+@@ -23,6 +43,13 @@ export function createLibraryPreviewPlayer(
+     if (!current) {
+       return;
+     }
++    if (current.kind === 'stream') {
++      current.detach();
++      current.element.pause();
++      current.element.removeAttribute('src');
++      current.element.load();
++      return;
++    }
+     current.source.onended = null;
+     try {
+       current.source.stop();
+@@ -39,7 +66,8 @@ export function createLibraryPreviewPlayer(
+       const source = ctx.createBufferSource();
+       source.buffer = buffer;
+       source.connect(ctx.destination);
+-      const preview: ActivePreview = {
++      const preview: ActiveBufferPreview = {
++        kind: 'buffer',
+         source,
+         startedAt: ctx.currentTime,
+         offset: start,
+@@ -55,6 +83,46 @@ export function createLibraryPreviewPlayer(
+       source.start(ctx.currentTime, start);
+       active = preview;
+     },
++    playLibraryPreviewStream(url, offset, onStreamError) {
++      const start = Math.max(0, offset);
++      if (active?.kind === 'stream' && active.url === url) {
++        active.element.currentTime = start;
++        return;
++      }
++      stopActive();
++      const element = createAudioElement();
++      const handleEnded = () => {
++        if (active === preview) {
++          stopActive();
++          onEnded();
++        }
++      };
++      const handleError = () => {
++        if (active === preview) {
++          const at = element.currentTime;
++          stopActive();
++          onStreamError(at);
++        }
++      };
++      element.addEventListener('ended', handleEnded);
++      element.addEventListener('error', handleError);
++      const preview: ActiveStreamPreview = {
++        kind: 'stream',
++        element,
++        url,
++        detach: () => {
++          element.removeEventListener('ended', handleEnded);
++          element.removeEventListener('error', handleError);
++        },
++      };
++      active = preview;
++      element.src = url;
++      if (active !== preview) {
++        return;
++      }
++      element.currentTime = start;
++      void Promise.resolve(element.play()).catch(handleError);
++    },
+     stopLibraryPreview() {
+       stopActive();
+     },
+@@ -62,6 +130,9 @@ export function createLibraryPreviewPlayer(
+       if (!active) {
+         return null;
+       }
++      if (active.kind === 'stream') {
++        return active.element.currentTime;
++      }
+       return Math.min(
+         active.duration,
+         active.offset + Math.max(0, ctx.currentTime - active.startedAt),
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index 32be40e..ec34f0e 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -97,6 +97,7 @@ export interface WorkspaceCollection {
+     signal: AbortSignal,
+   ) => Promise<AudioBuffer>;
+   canReloadSource?: (source: WorkspaceSource) => boolean;
++  previewUrl?: (source: WorkspaceSource) => string | null;
+ }
+ 
+ export type WorkspaceVideoAudioStatus = 'decoding' | 'ready' | 'none' | 'error';

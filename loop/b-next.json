@@ -1,16 +1,19 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 392 PERF-13b-ii: C PASS (c-round-392.json, browserVerified/realVerified true, 0 bugs) and gate 392 published c1183a0, so PERF-13b-ii is done and C-R391-01 closed (D-29z1336). Many scoped items remain (PERF-13c..15, STEM-LANES, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 entries, deferred Lows), so COMPLETE is not possible; nothing external blocks the next stage.",
- "nextTask": "Round 393: PERF-13c-i on c1183a0. Library preview of a ready, not-cached, URL-backed source (collection.previewUrl; demo MP3s) streams through a bare HTMLAudioElement (preview.client.ts playLibraryPreviewStream): 0 decodeAudioData, 0 MiB added PCM, no status while buffering; any stream error falls back to the round-392 decode path (remembered per collection). jsdom PS1-PS15 with named mutants; doc 252 (stage 1 of 2). C: S1-S11 at 1440+1280 (stream, stop, hero, seek, end, Play stops preview, preview stops transport, unmount, fallback, synth, supersede through fallback), PERF-RES, AUTH, SOURCE-SCOPE, DOC-252.",
+ "reason": "Round 393 PERF-13c-i: C PASS (c-round-393.json, browserVerified/realVerified true, 0 bugs) and gate 393 published 1091b9e, so PERF-13c-i is done (D-29z1342). Three Medium findings on the shipped stream path are open (REV-B393-M1-STALL, GATE393-M1-SYNC-THROW, A-R393-REVIEW-M1-EXTERNAL-PAUSE) and fixed first per the bug gate; many scoped items remain (PERF-13c-ii-b..15, STEM-LANES, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2, deferred Lows), so COMPLETE is not possible; nothing external blocks the next stage.",
+ "nextTask": "Round 394: PERF-13c-ii-a on 1091b9e. preview.client.ts only (zero provider change): stall watchdog 8000 ms (armed at start and on waiting, cleared on playing/stop, restarted on progress, acts only when currentTime did not move -> existing decode fallback); synchronous throw of src/currentTime/play and same-url seek -> error route; external pause (media key/OS) on the active element ends the preview (guards !ended && !error); NotAllowedError keeps the fallback. jsdom PS16-PS24 with 12 named mutants; doc 252 stage 2 of 3. C: R1 stall fallback, R2 external pause, R3 normal 20 s, R4 end, R5 abort, R6 stop, R7 Play stops preview at 1440+1280, PERF-RES, AUTH, SOURCE-SCOPE, DOC-252.",
  "remaining": [
-  "PERF-13c-i",
   "ROOT-NOTE-R387-STOP-NOT-HONOURED",
   "ARCH-CHECKPOINT-DECODE-REGION",
   "PERF-11c-iii-d",
   "PERF-11c-iii-e",
   "ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING",
   "SIG-R382-USE-DECODED-SOURCE-BUFFERS",
-  "PERF-13c-ii",
+  "PERF-13c-ii-a",
+  "REV-B393-M1-STALL",
+  "GATE393-M1-SYNC-THROW",
+  "A-R393-REVIEW-M1-EXTERNAL-PAUSE",
+  "PERF-13c-ii-b",
   "PERF-13d",
   "PERF-12b",
   "SABA-Q-PERF12B-TOLERANCE",
@@ -66,10 +69,13 @@
   "SABA-Q-PERF13B-OFFLINE-MARK",
   "SIG-R391-DECODE-REGION-NINTH-ROUND",
   "SIG-R392-DECODE-SETTLE-HELPER",
-  "REV-B393-M1-STALL",
   "A-R392-REVIEW-M1",
   "GATE392-ARCH-SETTLE-HELPER",
   "SIG-R393-PREVIEW-NO-CACHE-WARM",
-  "GATE392-L3-BUDGET-ZERO-WATCH"
+  "GATE392-L3-BUDGET-ZERO-WATCH",
+  "GATE393-L4-FALLBACK-NEVER-EXPIRES",
+  "A-R393-ARCH-DECIDE-PREVIEW-MODE",
+  "GATE393-ARCH-PREVIEW-CONTROLLER",
+  "ARCH-CHECKPOINT-PREVIEW-AFTER-13C"
  ]
 }

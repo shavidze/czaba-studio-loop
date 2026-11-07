@@ -1,0 +1,46 @@
+
+ RUN  v4.0.16 /tmp/a393-scratch
+
+ ✓ app/data/__tests__/studio-lab-demo.test.ts (16 tests) 22ms
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx (14 tests | 1 failed) 509ms
+     ✓ PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media 5ms
+     ✓ PS2 a seek on the playing stream reuses the same element without pausing it 1ms
+     ✓ PS3 ended fires onEnded once; an old element ending after its stop does nothing 2ms
+     × PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not 7ms
+     ✓ PS5 a buffer preview after a stream releases the stream element and starts one buffer source 1ms
+     ✓ PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set 85ms
+     ✓ PS7 a cached buffer wins over the stream: no media element, one buffer source 57ms
+     ✓ PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered 51ms
+     ✓ PS9 Play stops a streaming preview: the element is released and the transport plays 59ms
+     ✓ PS10 unmounting the provider releases a streaming element 48ms
+     ✓ PS11 a stream preview stops the playing transport before the element plays 50ms
+     ✓ PS12 the natural end of a stream clears the preview id and releases the preview pin 42ms
+     ✓ PS13 the fallback resumes from the element time, not from zero 50ms
+     ✓ PS14 a streamed preview writes no status 49ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 29 passed (30)
+   Start at  18:52:13
+   Duration  2.03s (transform 699ms, setup 0ms, import 1.10s, tests 531ms, environment 1.13s)
+
+
+::error file=/tmp/a393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview stream player > PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not,line=268,column=26::AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:268:26%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview stream player > PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:268:26
+    266|     await Promise.resolve();
+    267|     await Promise.resolve();
+    268|     expect(refusedError).toHaveBeenCalledTimes(1);
+       |                          ^
+    269|     expect(refusedError).toHaveBeenCalledWith(7);
+    270|     expect(refused.hasAttribute('src')).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

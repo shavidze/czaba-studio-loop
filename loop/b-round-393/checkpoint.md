@@ -1,0 +1,14 @@
+# B round 393 -> 394 planning checkpoint
+- [x] tasks/round-393.md copied; backups *-before-394 in b-round-393/
+- [x] evidence read: c-round-393.json PASS browserVerified true 0 bugs; gate 393 published 1091b9e (review: 1 Medium sync-throw, Lows 2-4, arch note)
+- [x] advisor consulted (shape: 13c-ii-a robustness in preview.client.ts only; external pause re-rate; event-order probe)
+- [x] premise at HEAD: premise/events-head.json (HOLD frozen Stop no fallback; console pause keeps Stop; pause before ended at end; abort error without pause)
+- [x] consults tech-lead (drop NotAllowedError change - keep fallback; progress check on expiry) + performance-optimizer (progress reset; assert/record split; perf/ untouched)
+- [x] sketch /tmp/b394-scratch: sketch-394.patch.txt sha 723a6d9e42b1aaa0; covering 14 files 256 tests rc0 (precheck-covering.log); mutants 12/12 red pristine rc0
+- [x] sketch browser probe 5174 both viewports: sketch-events.json (HOLD fallback 8378 ms; pause->Preview; normal 20 s 0 decode PCM unchanged); scratch server stopped, 5173 200
+- [ ] advisor check; grants/frozen/claims; doc wording; current-task; backlog v361; feature-status; b-round-393.md; b-next.json
+- [x] current-task.md written (round 394)
+- [x] backlog v361 (b-round-393/update-backlog.py, .done)
+- [x] feature-status.md updated
+- [x] b-round-393.md, b-next.json, root request written
+- [x] advisor close done (fixes: ARCH-CHECKPOINT-PREVIEW-AFTER-13C id, R4 event order -> record, jsdom-only note); final claims equal

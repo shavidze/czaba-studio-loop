@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T18:04:27.982Z",
-  "current_task": "Round 392: PERF-13b-ii re-dispatch: settle ruling for A STOP / C-R391-01 (owner-controller success, null-owner no loading write), EV9 superseded rewrite, EV23-25, doc 251 (current-task.md)",
+  "_generatedUtc": "2026-11-07T19:07:59.955Z",
+  "current_task": "Round 393: PERF-13c-i: library preview of a URL-backed source streams through a media element (no decode); fallback to the decode path on a stream error; doc 252 (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6216,26 +6216,34 @@
       "title": "a clip whose source failed has no Offline mark (Live marks such clips Offline); status-line warning "
     },
     {
-      "id": "C-R391-01",
+      "id": "GATE392-L3-BUDGET-ZERO-WATCH",
+      "severity": "info",
+      "status": "watch (D-29z1338): no action unless a gate fails on it",
+      "title": "pcm-live-decode-mib-ready assert <= 0 relies on GC x2 reclaiming every decoded buffer; watch the nex"
+    },
+    {
+      "id": "INFO-C392-B3-PLAYING",
+      "severity": "info",
+      "status": "ruled (D-29z1339): the D-29z1326 contract (Play plays and wa",
+      "title": "B3: Play with only a failed clip sets data-playing true"
+    },
+    {
+      "id": "INFO-C392-FIRSTLOAD-OBSERVER",
+      "severity": "info",
+      "status": "probe note (D-29z1339): install the status observer with add",
+      "title": "the first-load \"Loading the demo collection\" text was not observed because the observer was installe"
+    },
+    {
+      "id": "REV-B393-M1-STALL",
       "severity": "medium",
-      "origin": "C round 391 (= A STOP; root cause: B spec success clause written on cache state, l.68 vs l.73/l.162)",
-      "evidence": "c-round-391.json bugs[0]; c-round-391/probe2-1440.json rows.STALE_SUPERSEDED; a-round-391.md §0, a-round-391/stop-probes.log",
-      "title": "a superseded (or stopped) library preview leaves 'Loading “X”…' on the status line forever",
-      "repro": "/studio-lab, __delayDecodes=1, Preview Middle East, then Preview Full mix while it decodes; status stays Loading",
-      "status": "in_fix round 392 (D-29z1331)",
-      "added": "2026-11-07 B round 391 -> 392 planning"
+      "origin": "B sketch review (tech-lead), round 393 planning",
+      "evidence": "b-round-392/sketch-review.md #1",
+      "title": "a stalled streamed preview (stalled/waiting, no error) never recovers: Stop stays shown with a frozen cursor",
+      "status": "scheduled PERF-13c-ii (D-29z1341): 13c-i streams same-origin static demo files only; the decode path has the same hung-fetch exposure today; not a shipped defect until 13c-i lands",
+      "added": "2026-11-07 B round 392 -> 393 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 383,
-      "task": "current-task.md",
-      "decision": "D-29z1276..D-29z1279",
-      "type": "PERF-13b-i fix: C-R382-01 (storeSourcePeaks helper, SWEEP of AudioBuffer scopes), collection reset deleteMany (D-29z1278), DC8, EV7 reworded, EV10, doc 248 l.4 round 383; C re-verifies round-382 acceptance + HEAP-RETAINERS/HEAP-MUTANT + EVICT-B2",
-      "status": "c_blocked_incomplete (D-29z1280): C 0 bugs, required rows not run (time), browserVerified false; gate skipped; completion = round 384",
-      "note": "baseline 5745526 (gate 382 skipped) + uncommitted round-382 tree; claims b-round-382/claims-383.sh; heap evidence b-round-382/probe/",
-      "added": "2026-11-07 B round 382 -> 383 planning"
-    },
     {
       "round": 384,
       "task": "current-task.md",
@@ -6316,9 +6324,18 @@
       "task": "current-task.md",
       "decision": "D-29z1330..D-29z1335",
       "type": "PERF-13b-ii re-dispatch: settle rule decided by the owner controller (not the cache) at Play and preview; null owner -> sourceNotLoaded, no loading write; superseded failure unconditional; EV9 superseded rewritten to sourceReady, EV9 stop, EV12 extended, EV23-25; doc 251; C rows B7 (C-R391-01 repro), B8 preview->Space, B9 superseded failure, B1-B4, PERF-RES",
-      "status": "dispatched",
+      "status": "done: C PASS (c-round-392.json), gate published c1183a0 (D-29z1336)",
       "note": "baseline 11ca746 + A round-391 tree (5 status lines); grants b-round-391/grants-392.txt (6, same as 391); frozen b-round-390/r391-frozen-sha256.txt (1279, 0 fail); claims b-round-391/claims-392.sh K1..K24",
       "added": "2026-11-07 B round 391 -> 392 planning"
+    },
+    {
+      "round": 393,
+      "task": "current-task.md",
+      "decision": "D-29z1336..D-29z1341",
+      "type": "PERF-13c-i: library preview streams URL sources through a media element; fallback to decode on a stream error; doc 252",
+      "status": "dispatched",
+      "note": "baseline c1183a0 (clean); grants b-round-392/grants-393.txt (7); frozen b-round-392/r393-frozen-sha256.txt (1280); claims b-round-392/claims-393.sh K1..K22; sketch b-round-392/sketch-393.patch.txt",
+      "added": "2026-11-07 B round 392 -> 393 planning"
     }
   ],
   "other_keys": [

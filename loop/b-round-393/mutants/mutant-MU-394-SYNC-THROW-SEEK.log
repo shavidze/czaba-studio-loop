@@ -1,0 +1,61 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b394-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m23 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 528[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media[32m 6[2mms[22m[39m
+     [32m✓[39m PS2 a seek on the playing stream reuses the same element without pausing it[32m 1[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ending after its stop does nothing[32m 2[2mms[22m[39m
+     [32m✓[39m PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not[32m 3[2mms[22m[39m
+     [32m✓[39m PS5 a buffer preview after a stream releases the stream element and starts one buffer source[32m 1[2mms[22m[39m
+     [32m✓[39m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[32m 90[2mms[22m[39m
+     [32m✓[39m PS7 a cached buffer wins over the stream: no media element, one buffer source[32m 55[2mms[22m[39m
+     [32m✓[39m PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered[32m 51[2mms[22m[39m
+     [32m✓[39m PS9 Play stops a streaming preview: the element is released and the transport plays[32m 51[2mms[22m[39m
+     [32m✓[39m PS10 unmounting the provider releases a streaming element[32m 43[2mms[22m[39m
+     [32m✓[39m PS11 a stream preview stops the playing transport before the element plays[32m 49[2mms[22m[39m
+     [32m✓[39m PS12 the natural end of a stream clears the preview id and releases the preview pin[32m 42[2mms[22m[39m
+     [32m✓[39m PS13 the fallback resumes from the element time, not from zero[32m 56[2mms[22m[39m
+     [32m✓[39m PS14 a streamed preview writes no status[32m 59[2mms[22m[39m
+     [32m✓[39m PS16 a stream that never plays falls back after the stall timeout with its time[32m 1[2mms[22m[39m
+     [32m✓[39m PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only[32m 1[2mms[22m[39m
+     [32m✓[39m PS18 the watchdog does nothing when the element time moved since it was armed[32m 1[2mms[22m[39m
+     [32m✓[39m PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves[32m 1[2mms[22m[39m
+     [32m✓[39m PS20 an external pause ends the preview once and releases the element[32m 1[2mms[22m[39m
+     [32m✓[39m PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event[32m 1[2mms[22m[39m
+     [32m✓[39m PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception[32m 1[2mms[22m[39m
+[31m     [31m×[31m PS23 a synchronous throw on a same-url seek is a stream error of the active preview[39m[32m 9[2mms[22m[39m
+     [32m✓[39m PS24 the default scheduler arms an 8000 ms window timer that a stop clears[32m 3[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (23)[39m
+[2m   Start at [22m 19:16:05
+[2m   Duration [22m 1.93s[2m (transform 579ms, setup 0ms, import 765ms, tests 528ms, environment 492ms)[22m
+
+
+::error file=/tmp/b394-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS23 a synchronous throw on a same-url seek is a stream error of the active preview,line=793,column=77::AssertionError: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0ADOMException {}%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:793:77%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mPERF-13c-ii-a stream lifecycle robustness[2m > [22mPS23 a synchronous throw on a same-url seek is a stream error of the active preview
+[31m[1mAssertionError[22m: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+DOMException {}
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m793:77[22m[39m
+    [90m791| [39m      }[33m,[39m
+    [90m792| [39m    })[33m;[39m
+    [90m793| [39m    expect(() => player.playLibraryPreviewStream(BIG_URL, 60, onError)…
+    [90m   | [39m                                                                            [31m^[39m
+    [90m794| [39m    [34mexpect[39m(onError)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m795| [39m    [34mexpect[39m(onError)[33m.[39m[34mtoHaveBeenCalledWith[39m([34m9[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

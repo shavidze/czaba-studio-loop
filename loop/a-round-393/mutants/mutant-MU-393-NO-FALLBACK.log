@@ -1,0 +1,65 @@
+
+ RUN  v4.0.16 /tmp/a393-scratch
+
+ ✓ app/data/__tests__/studio-lab-demo.test.ts (16 tests) 23ms
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx (14 tests | 2 failed) 495ms
+     ✓ PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media 5ms
+     ✓ PS2 a seek on the playing stream reuses the same element without pausing it 1ms
+     ✓ PS3 ended fires onEnded once; an old element ending after its stop does nothing 2ms
+     ✓ PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not 3ms
+     ✓ PS5 a buffer preview after a stream releases the stream element and starts one buffer source 1ms
+     ✓ PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set 90ms
+     ✓ PS7 a cached buffer wins over the stream: no media element, one buffer source 55ms
+     × PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered 51ms
+     ✓ PS9 Play stops a streaming preview: the element is released and the transport plays 52ms
+     ✓ PS10 unmounting the provider releases a streaming element 42ms
+     ✓ PS11 a stream preview stops the playing transport before the element plays 51ms
+     ✓ PS12 the natural end of a stream clears the preview id and releases the preview pin 48ms
+     × PS13 the fallback resumes from the element time, not from zero 43ms
+     ✓ PS14 a streamed preview writes no status 49ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 28 passed (30)
+   Start at  18:51:51
+   Duration  2.01s (transform 822ms, setup 0ms, import 1.11s, tests 518ms, environment 1.13s)
+
+
+::error file=/tmp/a393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview of a URL source streams without decoding > PS8 a stream error falls back to the decode path%2C plays the buffer%2C and the fallback is remembered,line=478,column=30::AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Loading “Big Preview”…' // Object.is equality%0A%0AExpected: "Loading “Big Preview”…"%0AReceived: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:478:30%0A%0A
+
+::error file=/tmp/a393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview of a URL source streams without decoding > PS13 the fallback resumes from the element time%2C not from zero,line=391,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/library-preview-stream.test.tsx:391:11%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:556:11%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview of a URL source streams without decoding > PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered
+AssertionError: expected 'Demo collection ready. Drag a sound o…' to be 'Loading “Big Preview”…' // Object.is equality
+
+Expected: "Loading “Big Preview”…"
+Received: "Demo collection ready. Drag a sound onto a track, or press Enter to add it. Press ? for shortcuts."
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:478:30
+    476|       element.dispatchEvent(new Event('error'));
+    477|     });
+    478|     expect(live(api).status).toBe(studioLibraryStrings.sourceDecoding(…
+       |                              ^
+    479|     const startsBefore = startedSources.length;
+    480|     await settleNext(pending, bigBuffer());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview of a URL source streams without decoding > PS13 the fallback resumes from the element time, not from zero
+Error: no decode in flight
+ ❯ settleNext app/lib/arrangement/__tests__/library-preview-stream.test.tsx:391:11
+    389|   const next = pending.shift();
+    390|   if (!next) {
+    391|     throw new Error('no decode in flight');
+       |           ^
+    392|   }
+    393|   next.resolve(buffer);
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:556:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

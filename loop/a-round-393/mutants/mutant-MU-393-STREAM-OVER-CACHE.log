@@ -1,0 +1,55 @@
+
+ RUN  v4.0.16 /tmp/a393-scratch
+
+ ✓ app/data/__tests__/studio-lab-demo.test.ts (16 tests) 20ms
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx (14 tests | 1 failed) 505ms
+     ✓ PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media 5ms
+     ✓ PS2 a seek on the playing stream reuses the same element without pausing it 1ms
+     ✓ PS3 ended fires onEnded once; an old element ending after its stop does nothing 2ms
+     ✓ PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not 3ms
+     ✓ PS5 a buffer preview after a stream releases the stream element and starts one buffer source 1ms
+     ✓ PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set 88ms
+     × PS7 a cached buffer wins over the stream: no media element, one buffer source 66ms
+     ✓ PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered 51ms
+     ✓ PS9 Play stops a streaming preview: the element is released and the transport plays 53ms
+     ✓ PS10 unmounting the provider releases a streaming element 43ms
+     ✓ PS11 a stream preview stops the playing transport before the element plays 50ms
+     ✓ PS12 the natural end of a stream clears the preview id and releases the preview pin 42ms
+     ✓ PS13 the fallback resumes from the element time, not from zero 50ms
+     ✓ PS14 a streamed preview writes no status 48ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 29 passed (30)
+   Start at  18:51:49
+   Duration  1.99s (transform 876ms, setup 0ms, import 1.14s, tests 525ms, environment 1.11s)
+
+
+::error file=/tmp/a393-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview of a URL source streams without decoding > PS7 a cached buffer wins over the stream%3A no media element%2C one buffer source,line=464,column=29::AssertionError: expected [ <audio preload="auto" …(1)></audio> ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:464:29%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-i library preview of a URL source streams without decoding > PS7 a cached buffer wins over the stream: no media element, one buffer source
+AssertionError: expected [ <audio preload="auto" …(1)></audio> ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:464:29
+    462|     const startsBefore = startedSources.length;
+    463|     act(() => live(api).startLibraryPreview('big', 0));
+    464|     expect(createdElements).toHaveLength(0);
+       |                             ^
+    465|     expect(mediaCalls.play).toHaveLength(0);
+    466|     expect(startedSources).toHaveLength(startsBefore + 1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
