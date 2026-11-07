@@ -1,0 +1,44 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-381/scratch/store[39m
+
+ [31m❯[39m perf/lib/pcm-live.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 25[2mms[22m[39m
+[31m     [31m×[31m PL1: sums length × channels × 4 and splits the bytes by origin[39m[32m 19[2mms[22m[39m
+     [32m✓[39m PL2: an empty list gives count 0 and bytes 0[32m 1[2mms[22m[39m
+     [32m✓[39m PL4: the probe buffer is excluded from the totals[32m 1[2mms[22m[39m
+     [32m✓[39m PL3: a valid reading gives no problem[32m 0[2mms[22m[39m
+     [32m✓[39m PL3: a missing registry fires alone[32m 0[2mms[22m[39m
+     [32m✓[39m PL3: an uncounted probe fires alone[32m 0[2mms[22m[39m
+     [32m✓[39m PL3: a count mismatch fires alone[32m 0[2mms[22m[39m
+     [32m✓[39m PL3: probe and count problems keep their order when both fire[32m 0[2mms[22m[39m
+ [32m✓[39m perf/lib/report.test.ts [2m([22m[2m34 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m perf/lib/zoom-probe.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m perf/lib/pcm-live.test.ts[2m > [22msummarizePcmLive[2m > [22mPL1: sums length × channels × 4 and splits the bytes by origin
+[31m[1mAssertionError[22m: expected 292000 to be 580000 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 580000[39m
+[31m+ 292000[39m
+
+[36m [2m❯[22m perf/lib/pcm-live.test.ts:[2m30:27[22m[39m
+    [90m 28| [39m    ])[33m;[39m
+    [90m 29| [39m    [34mexpect[39m(summary[33m.[39mcount)[33m.[39m[34mtoBe[39m([34m3[39m)[33m;[39m
+    [90m 30| [39m    expect(summary.bytes).toBe(48000 * 2 * 4 + 1000 * 4 + 24000 * 2 * …
+    [90m   | [39m                          [31m^[39m
+    [90m 31| [39m    [34mexpect[39m(summary[33m.[39mbyOrigin)[33m.[39m[34mtoEqual[39m({
+    [90m 32| [39m      decode[33m:[39m ([34m48000[39m [33m+[39m [34m24000[39m) [33m*[39m [34m2[39m [33m*[39m [34m4[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m47 passed[39m[22m[90m (48)[39m
+[2m   Start at [22m 06:39:12
+[2m   Duration [22m 873ms[2m (transform 295ms, setup 0ms, import 368ms, tests 74ms, environment 576ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-381/scratch/store/perf/lib/pcm-live.test.ts,title=perf/lib/pcm-live.test.ts > summarizePcmLive > PL1%3A sums length × channels × 4 and splits the bytes by origin,line=30,column=27::AssertionError: expected 292000 to be 580000 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 580000%0A+ 292000%0A%0A ❯ perf/lib/pcm-live.test.ts:30:27%0A%0A

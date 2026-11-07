@@ -1,0 +1,64 @@
+K1 gate380: published 9a05c82 HEAD: 9a05c82
+K2 status lines: 5
+K3 buffersRef decl:
+798:  const buffersRef = useRef(new Map<string, AudioBuffer>());
+K4 buffersRef set sites: 2 delete/clear sites: 0
+K5 demo URL sources:
+22:  'demo-middle-east': '/middle-east.mp3',
+23:  'demo-hero-music': '/videos/hero/hero-music.mp3',
+  present public/middle-east.mp3
+  present public/videos/hero/hero-music.mp3
+K6 demo synth stem seconds:
+31:export const DEMO_STEM_DURATION = 16;
+K7 instanceof AudioBuffer in app/** perf/** e2e/**: 0
+K8 res.mem rows in budgets: 7
+3:    "id": "res.mem.backing-ready-mib",
+14:    "id": "res.mem.used-ready-mib",
+25:    "id": "res.mem.backing-after-export-delta-mib",
+36:    "id": "res.mem.pcm-live-mib-ready",
+47:    "id": "res.mem.pcm-live-count-ready",
+58:    "id": "res.mem.pcm-live-decode-mib-ready",
+69:    "id": "res.mem.pcm-live-after-export-delta-mib",
+K9 determinism exact units include count:
+20:  'count',
+K10 resources spec heap read + init scripts:
+222:async function readHeapAfterGc(cdp: CDPSession, page: Page): Promise<HeapReading | null> {
+518:  await context.addInitScript(() => {
+542:  await context.addInitScript(installPerfInstrumentation);
+543:  await context.addInitScript(installBlockingFrameObserver);
+544:  await context.addInitScript(installPcmLiveRegistry);
+579:      result.samples.set('res.mem.backing-ready-mib', { value: toMebibytes(ready.backingBytes) });
+K11 consumers of the budgets file / spec in app perf e2e: /home/runner/czaba-project/store/perf/studio-lab-resources.perf.spec.ts 
+K12 protected sha:
+  rc 0
+K13 frozen sha (r381, 1271 entries):
+  rc 0
+K14 B HEAD probe (dev, both viewports x3):
+  runs 6 mib [124.04] live [9] byOrigin {'ctor': 31.86, 'decode': 92.18}
+  detail seconds [2, 5, 16, 16, 16, 16, 16, 101.35, 150.37]
+K15 docs: 247 1 present; doc 246 l.4: **სტატუსი:** In Progress (stage 1 of 2; C round 380 PASS)
+K16 'In Progress (stage' hits: docs/implementation/2026/quarter-IV/232-perf-drag-preview.md docs/implementation/2026/quarter-IV/247-perf-pcm-live-baseline.md docs/implementation/2026/quarter-IV/246-perf-export-wav-stream.md docs/implementation/2026/quarter-IV/238-perf-group-header-leaf.md 
+K17 regression-last: 2026-11-05 lessons lines: 60
+K18 artifacts:
+  ok b-round-380/probe/head-resources-c380.json
+  ok b-round-380/probe/lib-count-381.mjs
+  ok b-round-380/probe/lib-count-head-381.json
+  ok b-round-380/probe/pcm-probe-381.mjs
+  ok b-round-380/probe/pcm-head-381.json
+  ok b-round-380/probe/pcm-detail-head-381.json
+  ok b-round-380/grants-381.txt
+  ok b-round-380/r381-frozen-sha256.txt
+  ok b-round-334/vitest.perf-lib.config.mjs
+  ok b-round-318/protected-sha256.txt
+K19 perf lib test files: 3
+K20 library source locator (B dev probe, both viewports):
+   [('1440x900', [{'label': 'Sounds', 'testid': 'arrangement-library-list', 'n': 9}]), ('1280x720', [{'label': 'Sounds', 'testid': 'arrangement-library-list', 'n': 9}])]
+K21 tsconfig target/lib (WeakRef needs ES2021+):
+3:    "target": "ES2022",
+5:    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+K22 collection-ready helper + resources ready wait:
+114:export async function waitForCollectionReady(
+34:  waitForCollectionReady,
+235:  await waitForLibraryReady(page);
+586:      await waitForCollectionReady(page, result.problems, 'pcm ready');
+K23 HEAD resources problems arrays (copy of C round 380 latest-resources.json): ['"problems": []']
