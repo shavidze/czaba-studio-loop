@@ -1,9 +1,9 @@
 {
-  "version": 349,
-  "updated": "2026-11-07 B round 382 -> 383 planning",
+  "version": 350,
+  "updated": "2026-11-07 B round 383 -> 384 planning",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "current-task.md (round 383: PERF-13b-i fix - C-R382-01 updater-closure retention via storeSourcePeaks helper + SWEEP; collection reset deleteMany (D-29z1278); C re-verifies round-382 acceptance + HEAP-RETAINERS + EVICT-B2; grants b-round-382/grants-383.txt; claims b-round-382/claims-383.sh)",
+  "current_task": "current-task.md (round 384: PERF-13b-i verification completion - C runs round-383 rows not run (prod heap, 1280 live list, PERF-RES, MUTANTS-UNIT, PLAY-REFUSE, UNIT covering/C-DEMO/perf-lib, G384-AUTH with valid params -> 401, EVICT-B2-COUNT, CLAIMS, L57); A changes only doc 248 l.4 -> C round 384 PASS; grants b-round-383/grants-384.txt; frozen b-round-383/r384-frozen-sha256.txt; claims b-round-383/claims-384.sh)",
   "advisor_used_by_B": "yes (round 382 -> 383 planning: advisor available; consulted after the heap-snapshot diagnosis and before writing, and before declaring done) | yes (round 378 -> 379 planning: advisor available; consulted after orientation and before declaring done) | yes (round 377 -> 378 planning: advisor available; consulted after orientation and before declaring done) | yes (round 376 -> 377 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 373 -> 374 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 363 -> 364 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 362 -> 363 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 361 -> 362 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 360 -> 361 planning: advisor available; consulted after orientation and before declaring done)",
   "baseline": {
     "tsc_errors": 0,
@@ -11827,9 +11827,18 @@
       "task": "current-task.md",
       "decision": "D-29z1276..D-29z1279",
       "type": "PERF-13b-i fix: C-R382-01 (storeSourcePeaks helper, SWEEP of AudioBuffer scopes), collection reset deleteMany (D-29z1278), DC8, EV7 reworded, EV10, doc 248 l.4 round 383; C re-verifies round-382 acceptance + HEAP-RETAINERS/HEAP-MUTANT + EVICT-B2",
-      "status": "dispatched",
+      "status": "c_blocked_incomplete (D-29z1280): C 0 bugs, required rows not run (time), browserVerified false; gate skipped; completion = round 384",
       "note": "baseline 5745526 (gate 382 skipped) + uncommitted round-382 tree; claims b-round-382/claims-383.sh; heap evidence b-round-382/probe/",
       "added": "2026-11-07 B round 382 -> 383 planning"
+    },
+    {
+      "round": 384,
+      "task": "current-task.md",
+      "decision": "D-29z1280..D-29z1284",
+      "type": "PERF-13b-i verification completion: C-only rows (prod heap, PERF-RES, mutants, PLAY-REFUSE, UNIT, G384-AUTH 401, EVICT-B2-COUNT, CLAIMS, L57); A doc 248 l.4 only",
+      "status": "dispatched",
+      "note": "baseline 5745526 + uncommitted 382/383 tree; frozen b-round-383/r384-frozen-sha256.txt; claims b-round-383/claims-384.sh; carried 383 rows listed in task \u00a73",
+      "added": "2026-11-07 B round 383 -> 384 planning"
     }
   ],
   "post_current_stage_queue": [
@@ -14990,13 +14999,17 @@
         {
           "id": "PERF-13b-i",
           "what": "decoded-buffer-cache.ts (LRU, per-owner pins, evictable flag, stable readonly map, 32 MiB unpinned budget) wired into ArrangementContext; WorkspaceCollection.canReloadSource (demo URL sources only; purchased and synth and video never evicted); pins = present.clips (recomputed in updateHistory, skipped on clips identity) + preview + export (finally); ensureDecoded (dedupe, collection signal, no peaks, resync, failure -> error); Play refused with sourceNotLoaded while a placed source decodes; clear on collection reset; harness bound P<=N<=M + decode probe + dropped probe; record rows after-add",
-          "status": "c_fail round 382 (D-29z1276); fix round 383 (D-29z1277, D-29z1278) | dispatched round 382 (D-29z1274, D-29z1275)"
+          "status": "c_verifying round 384 (D-29z1280): round 383 C BLOCKED incomplete, 0 bugs | c_fail round 382 (D-29z1276); fix round 383 (D-29z1277, D-29z1278) | dispatched round 382 (D-29z1274, D-29z1275)"
         },
         {
           "id": "PERF-13b-ii",
           "what": "known-vs-decoded source state + preview text for a decoding source; flip res.mem.pcm-live-mib-ready (and count/decode) to assert with B's production sketch run and a fix-removed mutant (L58); purchased collection reload question (signed URL expiry) with SRW-21",
           "status": "not_started (D-29z1274): after PERF-13b-i C PASS and REGRESSION-2026-11-08",
-          "ruling_candidates_d29z1279": "A-R382-ERROR-SOURCE-SKIPPED: error-state source clip skipped by export/Play without refusal; B-R382-TRANSPORT-STOP-VS-PREVIEW (question only)"
+          "ruling_candidates_d29z1279": "A-R382-ERROR-SOURCE-SKIPPED: error-state source clip skipped by export/Play without refusal; B-R382-TRANSPORT-STOP-VS-PREVIEW (question only)",
+          "scope_additions": [
+            "A-R383-REVIEW-L1-STALE-ENSURE-DECODED guard (D-29z1283)",
+            "answer of ARCH-CHECKPOINT-DECODE-REGION if root returns one"
+          ]
         },
         {
           "id": "PERF-13c",
@@ -26938,7 +26951,7 @@
       "title": "hero 150.37 s decoded MP3 (55.07 MiB) stays live at ready; ready PCM 86.9 MiB vs target <= 60",
       "evidence": "c-round-382.json bugs[0]; b-round-382/probe/heap-ready2.json (path via baseQueue), heap-ready3-ctx.json",
       "repro": "c-round-382.json steps",
-      "status": "scheduled round 383 (D-29z1277): storeSourcePeaks helper + SWEEP; C rows HEAP-RETAINERS, HEAP-MUTANT, PERF-RES, EVICT-BROWSER",
+      "status": "fixed_pending_C (D-29z1280): round-383 dev evidence live [2,5,16,16,16,16,16], 0 baseQueue, heap mutant red; closes on round-384 HEAP-RETAINERS-PROD + PERF-RES | scheduled round 383 (D-29z1277): storeSourcePeaks helper + SWEEP; C rows HEAP-RETAINERS, HEAP-MUTANT, PERF-RES, EVICT-BROWSER",
       "added": "2026-11-07 B round 382 -> 383 planning"
     },
     {
@@ -26947,8 +26960,28 @@
       "origin": "C round 382",
       "title": "previewed buffer live after Stop and after Add+Undo",
       "evidence": "c-round-382.json bugs[1]; B counter-evidence b-round-382/probe/preview-stop-check.json (transport Stop: 0 stop calls, preview still playing) and preview-stop-check-lib.json (library Stop releases; Add live; Undo releases)",
-      "status": "reclassified_pending_C (D-29z1277): B evidence says test step clicked the transport Stop; C re-runs EVICT-B2 with the library preview Stop in round 383 and closes or keeps it",
+      "status": "closed (D-29z1281): C round 383 b2.json both viewports - library preview Stop releases, Add live, Undo gone, Redo live; transport Stop = HEAD parity; stop() count corroboration in round 384 | reclassified_pending_C (D-29z1277): B evidence says test step clicked the transport Stop; C re-runs EVICT-B2 with the library preview Stop in round 383 and closes or keeps it",
       "added": "2026-11-07 B round 382 -> 383 planning"
+    },
+    {
+      "id": "B-R383-AUTH-ROW-BARE-URL",
+      "severity": "low",
+      "origin": "C rounds 382/383 test step (bare /api/studio-token URL) + B spec (no params named)",
+      "title": "auth guard row called /api/studio-token without product/file, got 400 (validation) and never exercised the 401 branch; c-round-382.json reported '401 verified'",
+      "evidence": "c-round-382/auth.json, c-round-383/auth.json (400 x2); auth.mjs l.18; api.studio-token.ts l.19/l.23; b-round-383/claims-384-output.txt K8/K9",
+      "repro": "GET /api/studio-token with no query -> 400 Invalid product or file parameters",
+      "status": "scheduled round 384 G384-AUTH (D-29z1282); process finding, RETRO input",
+      "added": "2026-11-07 B round 383 -> 384 planning"
+    },
+    {
+      "id": "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
+      "severity": "low",
+      "origin": "A round 383 code-reviewer L1",
+      "title": "stale ensureDecoded after a collection change could decode an old-collection source under the new controller; with deleteMany(oldIds) the entry would persist until unmount",
+      "evidence": "a-round-383.md code-reviewer L1",
+      "repro": "not browser-reachable (collection is a module constant; createPurchasedWorkspaceCollection has 0 route callers)",
+      "status": "assigned to PERF-13b-ii scope (D-29z1283): guard controller === collectionControllerRef.current and collection current before set",
+      "added": "2026-11-07 B round 383 -> 384 planning"
     }
   ],
   "tech_lead_notes": [
@@ -29756,6 +29789,13 @@
       "note": "proposal: one bounded task useDecodedSourceBuffers(collection, historyRef) owning the cache, pins, ensureDecoded and reset, with EV1-EV10 as its tests; keep for now (pins bound to updateHistory/startPlaybackAt/export lifecycle)",
       "status": "recorded (D-29z1279): joined to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING; feature-boundary checkpoint request after PERF-13b-ii",
       "added": "2026-11-07 B round 382 -> 383 planning"
+    },
+    {
+      "id": "SIG-R383-SOURCE-LOAD-ORCHESTRATION",
+      "origin": "A round 383 code-reviewer Architecture note (Signal 3: same region changed rounds 381-383)",
+      "note": "proposal: move source-load orchestration (loadSource -> peaks -> cache set -> ready) into a lib/arrangement unit taking cache + callbacks; alternative useReducer for sourcePeaks removing the SWEEP rule need; reviewer verdict keep this round",
+      "status": "recorded (D-29z1283): joined to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING; root request b-round-383/root-request-arch-checkpoint-decode-region.md",
+      "added": "2026-11-07 B round 383 -> 384 planning"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -38729,6 +38769,15 @@
         "D-29z1259: SIG-R378-LEAF-ACTIONS-CONVENTION (sixth echo, gate 378); still no root answer at round 378 planning; c2b (MarkerRow, round 379) continues pattern A as the request allows; d/e wait for the answer or RETRO 384 (deadline, L46); request restated in b-round-378.md",
         "D-29z1260: SIG-R379-ACTIONS-CONTEXT (seventh echo, tech-lead on the c2b sketch, favours option B). With c2b all small leaves are pattern A; d (VideoDock) and e (Lane) wait for the root answer or RETRO 384 (deadline, L46)"
       ]
+    },
+    {
+      "id": "ARCH-CHECKPOINT-DECODE-REGION",
+      "decision": "D-29z1283",
+      "requested_of": "root (read-only frontend-architect, store/.claude/references/architecture-checkpoint.md)",
+      "file": "b-round-383/root-request-arch-checkpoint-decode-region.md",
+      "question": "before PERF-13b-ii: keep decode/peaks/cache/reset in ArrangementProvider vs extract useDecodedSourceBuffers vs pure loader unit in lib/arrangement",
+      "status": "requested; non-blocking; wanted before PERF-13b-ii dispatch; may be answered together with ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING",
+      "added": "2026-11-07 B round 383 -> 384 planning"
     }
   ],
   "leadmagnet_dialog_rulings_d29z170": {
@@ -38739,26 +38788,6 @@
     "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
   },
   "decisions_log_b": [
-    {
-      "id": "D-29z1226",
-      "date": "2026-11-06",
-      "text": "Round 371 dispatched = PERF-11c-i (current-task.md): sketch b-round-370/sketch.patch.txt sha e82ad292...51bb; tech-lead v1 review (1 Medium comparator hazard -> fixed in v2 with a PropEquality table; Lows fixed or ruled: B-R370-GH-ACTIVE-CANDIDATES-ROW, B-R370-HOOK-ERROR-NAMES deferred) and delta review approved v2 (reviewed = dispatched). HEAD red GH1, GH2, GH5, L8d; 8 mutants red; full suite 252/3703 on sketch; interactions (v1) and fader (v2) perf specs unchanged vs c-round-364/c-round-347. Browser HEAD probe b-round-370/probe/group-head.json. Order after: REGRESSION at first planning on/after 2026-11-08 -> PERF-11c-ii -> PERF-11c-iii -> PERF-11b if answered -> PERF-12..15 -> SYS-R2-FAKE-FIDELITY -> SYS-CLOCK-DETERMINISM -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase-2 (skip rule). Not an architecture checkpoint trigger: one small leaf change; the 11c-ii status-store change is the boundary where B will request a bounded frontend-architect checkpoint if root has not answered the open ones."
-    },
-    {
-      "id": "D-29z1227",
-      "date": "2026-11-06",
-      "text": "Round 371 (PERF-11c-i) accepted from C evidence: c-round-371.json PASS, 11 rows passed, GROUP-RENDERS recorded (header 0 / wrapper 0 vs HEAD 1/1), browserVerified true, realVerified true, 0 bugs, L57 rc 0. Gate 371 published 66ee771 on both remotes = new baseline. PERF-11c-i done. tasks/round-371.md archived (sha addbc239..., identical to dispatched current-task.md)."
-    },
-    {
-      "id": "D-29z1228",
-      "date": "2026-11-06",
-      "text": "Round-371 reviewer Lows recorded and deferred: A-R371-REVIEW-TODO-COMMENT (gate L3 merged), A-R371-REVIEW-SOLO-FALLBACK, A-R371-REVIEW-GH5-IDENTITY, GATE371-L1-SOLO-RECOMPUTE, GATE371-L2-COMPARATOR-PER-KEY. Architecture signals GATE371-ARCH-GROUP-HEADER-PROPS-HOOK and A-R371-ARCH-PROP-EQUALITY-HELPER recorded, not scheduled."
-    },
-    {
-      "id": "D-29z1229",
-      "date": "2026-11-06",
-      "text": "PERF-11c-ii split (advisor + tech-lead): 11c-ii-a = test-only migration (round 372); 11c-ii-b = committed status into the status store (round 373). Evidence: removing status/statusSequence/statusKey from ArrangementContextValue breaks 34 test files + StudioWorkspace + MarkerRow at HEAD (b-round-371/tsc-remove-status-files.txt); 18 go through useWorkspaceProbe, 16 via local probes. Correction (performance-optimizer): play.start-components is 11 at HEAD, not 28. Feature-boundary checkpoint ARCH-CHECKPOINT-PERF11C-STATUS-STORE filed with root, non-blocking."
-    },
     {
       "id": "D-29z1230",
       "date": "2026-11-06",
@@ -39048,6 +39077,36 @@
       "date": "2026-11-07",
       "by": "2026-11-07 B round 382 -> 383 planning",
       "decision": "Records only: (1) B-R382-TRANSPORT-STOP-VS-PREVIEW: transport Stop does not stop a running library preview; HEAD parity (stopPlayback has 0 preview refs); candidate question for a later ableton-arrangement-expert consult, not scheduled. (2) B-R382-DUP-STOP-NAME Low -> deferred_low_polish (transport aria-label Stop and library preview button text Stop share an accessible name). (3) A-R382-ERROR-SOURCE-SKIPPED: an error-state source's clip is skipped by export/Play without refusal - ruling candidate for PERF-13b-ii. (4) SIG-R382-USE-DECODED-SOURCE-BUFFERS (code-reviewer Architecture note) joined to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING; feature-boundary checkpoint request after 13b-ii. (5) RETRO 384 inputs: scoped locators when two controls share a name; no updater-form setter in a scope binding an AudioBuffer; jsdom is blind to closure retention (browser heap row needed)."
+    },
+    {
+      "id": "D-29z1280",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 383 -> 384 planning",
+      "decision": "Round 383 accepted as C BLOCKED (incomplete, 0 bugs; required rows not run for time; browserVerified false). Gate 383 skipped; baseline stays 5745526 + uncommitted 382/383 tree (11 status lines). Passed 383 rows carry (r383 frozen still rc 0; r384 manifest 1279 entries rc 0). Round 384 = verification half of PERF-13b-i: C-only rows, A changes doc 248 l.4 to 'C round 384 PASS' (L28). Not new scope."
+    },
+    {
+      "id": "D-29z1281",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 383 -> 384 planning",
+      "decision": "C-R382-02 closed on C's independent evidence c-round-383/b2.json (both viewports: library preview Stop -> 101.35 s released; Add live; Undo gone; Redo live; transport Stop keeps preview playing = HEAD parity). stop() call count = corroboration row EVICT-B2-COUNT in round 384; a contradiction reopens. C-R382-01 stays open until round-384 rows HEAP-RETAINERS-PROD and PERF-RES pass (dev evidence already good)."
+    },
+    {
+      "id": "D-29z1282",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 383 -> 384 planning",
+      "decision": "Auth row corrected: api.studio-token.ts validates product/file (400, l.19) before Authorization (401, l.23); C auth.mjs in rounds 382 and 383 used the bare URL (auth.json 400 both) while c-round-382.json claimed 'no-token 401 verified'. The 401 branch was not browser-verified; G384-AUTH uses ?product=middle-east&file=stem.mp3. Recorded B-R383-AUTH-ROW-BARE-URL (Low, process) + RETRO input C-R382-AUTH-CLAIM-MISMATCH. No product change."
+    },
+    {
+      "id": "D-29z1283",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 383 -> 384 planning",
+      "decision": "code-reviewer round 383: L1 (stale ensureDecoded may set an old-collection entry after a collection change; unreachable today) -> A-R383-REVIEW-L1-STALE-ENSURE-DECODED Low, assigned to PERF-13b-ii scope (guard controller + collection current before set). Architecture note -> SIG-R383-SOURCE-LOAD-ORCHESTRATION joined to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING; accumulated risk (rounds 381-383 same region) -> bounded root checkpoint request b-round-383/root-request-arch-checkpoint-decode-region.md, wanted before PERF-13b-ii, non-blocking."
+    },
+    {
+      "id": "D-29z1284",
+      "date": "2026-11-07",
+      "by": "2026-11-07 B round 383 -> 384 planning",
+      "decision": "Order: round 384 completion -> REGRESSION-2026-11-08 (first planning on/after 2026-11-08) -> RETRO (due by count, last 369 window 353-368; deadlines tied to 'RETRO 384' move to it: ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING, PERF-11c-iii-d/e) -> PERF-13b-ii -> PERF-13c/13d/14/15 -> SYS-R2-FAKE-FIDELITY -> SYS-CLOCK-DETERMINISM -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). A Medium+ from round 384 goes first."
     }
   ],
   "retro_candidates": [
@@ -39353,6 +39412,22 @@
       "note": "an updater-form setter created in a scope that binds a large object retains it via React's stale baseQueue; jsdom unit rows cannot see it; memory rows need a browser heap-retainer check (b-round-382/probe/heap-retainers.mjs); RETRO 384 input",
       "status": "open",
       "added": "2026-11-07 B round 382 -> 383 planning"
+    },
+    {
+      "id": "C-R383-L59-EARLY-STOP",
+      "decision": "D-29z1280",
+      "round": 383,
+      "note": "C round 383 ended BLOCKED-for-time with no progress.json, no L57 fields, no named stop signal (L59/L57 not applied); claims-384 K11",
+      "status": "open",
+      "added": "2026-11-07 B round 383 -> 384 planning"
+    },
+    {
+      "id": "C-R382-AUTH-CLAIM-MISMATCH",
+      "decision": "D-29z1282",
+      "round": 383,
+      "note": "c-round-382.json said 'no-token 401 verified' while its auth.json shows 400 (bare URL); report text vs evidence check missing; claims-384 K9",
+      "status": "open",
+      "added": "2026-11-07 B round 383 -> 384 planning"
     }
   ],
   "root_requests_b": [

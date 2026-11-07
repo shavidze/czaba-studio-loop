@@ -1,13 +1,14 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 382 C FAIL (browserVerified true): C-R382-01 Medium confirmed by B heap snapshot (hero AudioBuffer retained by React alternate hook baseQueue -> setSourcePeaks updater closure context -> buffer; pre-existing at HEAD, masked before eviction); C-R382-02 reclassified as a test-step issue (transport Stop clicked; library Stop releases) pending C re-run. Gate 382 skipped; baseline 5745526 + uncommitted round-382 tree. A's STOP ruled (reset deleteMany, video audio kept). REGRESSION not due until 2026-11-08. Scoped work remains, nothing external blocks round 383.",
- "nextTask": "Round 383: PERF-13b-i fix (D-29z1276..1279). A: component-scope storeSourcePeaks helper used by both onPeaks sites + SWEEP (no updater-form setter in a scope binding an AudioBuffer); cache deleteMany + reset deletes only old collection ids (no clear, no pins); DC8, EV7 reworded, EV10; mutants MU-383-RESET-CLEAR, -DELETE-MANY-ALL, -NONFUNCTIONAL-PEAKS (unit) and MU-383-INLINE-PEAKS-UPDATER (browser); doc 248 l.4 'C round 383 PASS' + Problem/Solution. C: SOURCE-SCOPE, CLAIMS (b-round-382/claims-383.sh), SWEEP, UNIT, MUTANTS-UNIT, HEAP-RETAINERS (dev+prod: 7 live, 0 baseQueue paths), HEAP-MUTANT, PERF-RES (prod; ready ~31.9/7/0), EVICT-BROWSER, EVICT-B2 (library preview Stop, scoped locator; closes or keeps C-R382-02), PLAY-REFUSE, EXPORT (sha 5fadd97a...), RESET-UNREACHABLE, G383-AUTH, DOCS. Then REGRESSION-2026-11-08, PERF-13b-ii, RETRO 384.",
+ "reason": "Round 383 C BLOCKED (incomplete): 0 bugs, but prod heap, PERF-RES, PLAY-REFUSE, unit mutants, covering/C-DEMO/perf-lib, 1280 live list, CLAIMS and L57 did not run (browserVerified false), so PERF-13b-i is not done and C-R382-01 (Medium) stays open pending prod evidence. C-R382-02 closed on C's b2.json. Auth row used a bare URL (400 by validation); 401 branch not yet browser-verified. Gate 383 skipped; baseline 5745526 + uncommitted 382/383 tree. Nothing external blocks.",
+ "nextTask": "Round 384: PERF-13b-i verification completion (D-29z1280..1284). A: doc 248 l.4 -> 'In Progress (stage 1 of 2; C round 384 PASS)' only. C: SOURCE-SCOPE (r384 frozen 1279 rc0), DOCS-L4, HEAP-RETAINERS-PROD 1440 + live list 1280 (7 live, 0 baseQueue), PERF-RES (22/22, ready ~31.9/7/0), MUTANTS-UNIT (19 red), PLAY-REFUSE, UNIT (35 covering + 10 C-DEMO + perf lib), G384-AUTH (?product=middle-east&file=stem.mp3 no auth -> 401), EVICT-B2-COUNT, CLAIMS (claims-384.sh), L57; 383 passed rows carried. Then REGRESSION-2026-11-08, RETRO, PERF-13b-ii.",
  "remaining": [
   "C-R382-01",
-  "C-R382-02",
   "PERF-13b-i",
+  "ARCH-CHECKPOINT-DECODE-REGION",
   "REGRESSION-2026-11-08",
   "PERF-13b-ii",
+  "A-R383-REVIEW-L1-STALE-ENSURE-DECODED",
   "RETRO-384",
   "PERF-11c-iii-d",
   "PERF-11c-iii-e",
@@ -59,6 +60,8 @@
   "B-R364-DEMO-DOUBLE-FETCH",
   "SRW-21",
   "B-R373-PLAYFROM-GESTURE-RANGE-TEXT",
-  "B-R373-EXPORT-CONTENT-DEAD-ISOPEN"
+  "B-R373-EXPORT-CONTENT-DEAD-ISOPEN",
+  "B-R383-AUTH-ROW-BARE-URL",
+  "SIG-R383-SOURCE-LOAD-ORCHESTRATION"
  ]
 }

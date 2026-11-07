@@ -1,0 +1,15 @@
+import { open } from '../../c-round-382/lib.mjs';
+const { browser, page, live } = await open('http://127.0.0.1:5173', 1440, 900);
+const errs = [];
+page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text().slice(0, 200)); });
+console.log('live0', JSON.stringify(await live()));
+await page.waitForTimeout(8000);
+console.log('live8s', JSON.stringify(await live()));
+console.log('starts', await page.evaluate(() => typeof window.__detail));
+const lb = await page.locator('[role=listbox]').first().textContent();
+console.log('listbox', lb.slice(0, 400));
+const st = await page.locator('[role=status]').allTextContents();
+console.log('status', JSON.stringify(st).slice(0, 400));
+await page.screenshot({ path: 'diag-1440.png' });
+console.log('errs', JSON.stringify(errs));
+await browser.close();

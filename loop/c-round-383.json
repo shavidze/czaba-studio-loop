@@ -1,0 +1,38 @@
+{
+ "taskStatus": "BLOCKED",
+ "bugs": [],
+ "passed": [
+  "SOURCE-SCOPE (11 status lines; frozen + protected sha256 rc 0 at start and end)",
+  "SWEEP-partial (storeSourcePeaks l.768; both onPeaks sites l.2844/l.4307 call it; only updater setSourcePeaks is inside helper; decodedBuffers.clear 0 hits; deleteMany l.4264) - source read by C",
+  "UNIT-partial (decoded-buffer-cache 8/8 incl DC8, eviction-ui 15/15 incl EV10; rc 0)",
+  "HEAP-RETAINERS dev 1440x900 x2: live [2,5,16,16,16,16,16], 0 baseQueue paths",
+  "HEAP-MUTANT: copy with inline updater -> live [...,150.37] and 1 baseQueue path (red, run 2 after cold run 1 read []); restored; store tree untouched",
+  "EVICT-BROWSER dev: ready live >30s = [] at both viewports; add/undo/redo live/gone/live",
+  "EVICT-B2 dev both viewports: library Stop (outerHTML without aria-label) -> 101.35 gone; Add live; Undo gone; Redo live. Transport Stop observation: preview keeps playing, 101.35 stays live (HEAD parity)",
+  "EXPORT-BROWSER dev both viewports: sha256 5fadd97a...8202, 29189420 bytes, 24-bit 48k stereo 101.352 s, 0 nonFinite, RIFF ok; evicted after Undo",
+  "G383-AUTH both viewports: /studio-lab auth_user null, 9 options; /studio/middle-east 'Sign in required', 0 audio[src], 0 listbox; /api/studio-token without token 400 (not 401), no token in body",
+  "DOCS: l.4 exact, TEMPLATE headings in order, deleteMany/DC8/EV10/MU-383 present, library preview Stop wording, 0 'C round N pending'",
+  "RESET-UNREACHABLE: recorded from A/doc (not re-read in code by C)"
+ ],
+ "blocked": [
+  "backend unavailable in cloud: fake-bearer token check",
+  "NOT RUN (time): HEAP-RETAINERS production build",
+  "NOT RUN (time): PERF-RES (playwright perf, prod build)",
+  "NOT RUN (time): PLAY-REFUSE-BROWSER",
+  "NOT RUN (time): MUTANTS-UNIT (19 unit mutants)",
+  "NOT RUN (time): UNIT: covering-hit tests, 10 C-DEMO files, perf lib",
+  "NOT RUN (time): EVICT-B2 stop() call count on the 101.35 s source (only live-list measured)",
+  "NOT RUN (time): HEAP live list at 1280x720 (probe fixed to 1440x900; EVICT/B2/EXPORT ran at both)",
+  "NOT RUN (time): l57 fields / tools/l57-check.py",
+  "NOT RUN (time): CLAIMS line-by-line explanation (diff is large, shifted lines; K1/K2 baseline text differs by design)"
+ ],
+ "browserVerified": false,
+ "realVerified": false,
+ "envStatus": {
+  "checkedUtc": "2026-11-07T09:02:22.8678215Z",
+  "round": 383,
+  "attempt": 1,
+  "store": 200
+ },
+ "notes": "No bug found in what ran. Not PASS because required rows (prod heap, PERF-RES, PLAY-REFUSE, unit mutants) were not run. Observation: /api/studio-token returns 400 without token (task said 401) - low, not a bypass. Evidence in c-round-383/ (heap-dev-*.json, heap-mutant-*.json, b2.json, exp383.json, auth.json)."
+}

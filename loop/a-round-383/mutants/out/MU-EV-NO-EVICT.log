@@ -1,0 +1,340 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree[39m
+
+[90mstderr[2m | app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22m[2mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22m[2mEV6: an export whose re-decode fails creates no file and shows the export failure text
+[22m[39mWarning: An update to ArrangementProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ArrangementProvider (/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/contexts/ArrangementContext.tsx:291:3)
+
+ [31m❯[39m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx [2m([22m[2m15 tests[22m[2m | [22m[31m13 failed[39m[2m)[22m[33m 720[2mms[22m[39m
+[31m     [31m×[31m EV1: after load the evictable buffer is gone, the other stays, and both stay ready[39m[32m 77[2mms[22m[39m
+[31m     [31m×[31m EV2: placing the evicted source decodes it again exactly once, even when placed twice in flight[39m[32m 51[2mms[22m[39m
+[31m     [31m×[31m EV3: Play is refused while the placed source decodes, and starts once it settles[39m[32m 49[2mms[22m[39m
+     [32m✓[39m EV3: while already playing, a newly placed clip joins through the resync and playback never stops[32m 54[2mms[22m[39m
+[31m     [31m×[31m EV4: Undo of the place evicts the buffer again, and Redo decodes it again[39m[32m 46[2mms[22m[39m
+[31m     [31m×[31m EV5: export waits for the decode, renders with the buffer, and releases its pins[39m[32m 55[2mms[22m[39m
+[31m     [31m×[31m EV5: a cancelled export also releases its pins[39m[32m 45[2mms[22m[39m
+[31m     [31m×[31m EV5: a replaced export does not release the pins of the export that replaced it[39m[32m 45[2mms[22m[39m
+[31m     [31m×[31m EV6: a failed re-decode sets the source to error and shows the existing failure text[39m[32m 46[2mms[22m[39m
+[31m     [31m×[31m EV6: an export whose re-decode fails creates no file and shows the export failure text[39m[32m 52[2mms[22m[39m
+[31m     [31m×[31m EV9: a preview plays the re-decoded source and releases it on Stop[39m[32m 46[2mms[22m[39m
+[31m     [31m×[31m EV9: a superseded preview request does not start when its decode settles[39m[32m 46[2mms[22m[39m
+[31m     [31m×[31m EV7: a collection change deletes exactly the old collection ids, never clears, and an old decode in flight never sets[39m[32m 46[2mms[22m[39m
+     [32m✓[39m EV10: peaks of two sources that arrive in the same tick are both kept, each with its own array[32m 15[2mms[22m[39m
+[31m     [31m×[31m EV8: a volume edit that keeps the clips array does not recompute pins[39m[32m 45[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 13 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV1: after load the evictable buffer is gone, the other stays, and both stay ready
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m298:30[22m[39m
+    [90m296| [39m    [35mconst[39m { api } [33m=[39m [35mawait[39m [34mmountEviction[39m()[33m;[39m
+    [90m297| [39m    [35mconst[39m cache [33m=[39m [34mobservedCache[39m()[33m;[39m
+    [90m298| [39m    [34mexpect[39m(cache[33m.[39m[34mhas[39m([32m'big'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m299| [39m    [34mexpect[39m(cache[33m.[39m[34mhas[39m([32m'keep'[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m300| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39msourceStates[33m.[39mbig)[33m.[39m[34mtoEqual[39m({
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV2: placing the evicted source decodes it again exactly once, even when placed twice in flight
+[31m[1mAssertionError[22m: expected 1 to be 2 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m316:28[22m[39m
+    [90m314| [39m    [34mexpect[39m(bigLoads[33m.[39mcount)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m315| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'big'[39m))[33m;[39m
+    [90m316| [39m    [34mexpect[39m(bigLoads[33m.[39mcount)[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m317| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'big'[39m))[33m;[39m
+    [90m318| [39m    expect(live(api).arrangement.clips.filter((clip) => clip.sourceId …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV3: Play is refused while the placed source decodes, and starts once it settles
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m330:33[22m[39m
+    [90m328| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'big'[39m))[33m;[39m
+    [90m329| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mtogglePlayback[39m())[33m;[39m
+    [90m330| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39misPlaying)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m331| [39m    expect(live(api).status).toBe(studioLibraryStrings.sourceNotLoaded…
+    [90m332| [39m    [35mawait[39m [34msettleNext[39m(pending[33m,[39m [34mbigBuffer[39m())[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV4: Undo of the place evicts the buffer again, and Redo decodes it again
+[31m[1mError[22m: no decode in flight[39m
+[36m [2m❯[22m settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m214:11[22m[39m
+    [90m212| [39m  [35mconst[39m next [33m=[39m pending[33m.[39m[34mshift[39m()[33m;[39m
+    [90m213| [39m  [35mif[39m ([33m![39mnext) {
+    [90m214| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'no decode in flight'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m215| [39m  }
+    [90m216| [39m  [35mif[39m (outcome [35minstanceof[39m [33mError[39m) {
+[90m [2m❯[22m placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m239:9[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m356:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: export waits for the decode, renders with the buffer, and releases its pins
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      Object {
+        "clips": Array [
+          Object {
+            "duration": 218.45333333333335,
+            "id": "b83d0f7b-e781-4521-a14a-5c4d737c4ba8",
+            "sourceId": "big",
+            "sourceOffset": 0,
+            "start": 0,
+            "trackId": "music",
+          },
+        ],
+        "loop": null,
+        "master": Object {
+          "gainDb": 0,
+          "mute": false,
+        },
+        "tracks": Array [
+          Object {
+            "id": "video",
+            "kind": "video",
+            "mute": false,
+            "name": "Video",
+            "solo": false,
+            "volume": 1,
+          },
+          Object {
+            "id": "music",
+            "kind": "audio",
+            "mute": false,
+            "name": "Music",
+            "solo": false,
+            "volume": 1,
+          },
+        ],
+      },
+      Map {
+        "keep" => FakeAudioBuffer {
+          "length": 4800,
+          "numberOfChannels": 2,
+          "sampleRate": 48000,
+        },
+        "big" => FakeAudioBuffer {
+          "length": 10485760,
+          "numberOfChannels": 1,
+          "sampleRate": 48000,
+        },
+      },
+      undefined,
+      Object {
+        "onProgress": [Function onProgress],
+        "signal": AbortSignal {
+          Symbol(kEvents): Map {},
+          Symbol(events.maxEventTargetListeners): 0,
+          Symbol(events.maxEventTargetListenersWarned): false,
+          Symbol(kHandlers): Map {},
+          Symbol(kAborted): false,
+          Symbol(kReason): undefined,
+          Symbol(kComposite): false,
+        },
+      },
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m380:31[22m[39m
+    [90m378| [39m    })[33m;[39m
+    [90m379| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m380| [39m    [34mexpect[39m(renderWavMock)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m381| [39m    [35mawait[39m [34msettleNext[39m(pending[33m,[39m [34mbigBuffer[39m())[33m;[39m
+    [90m382| [39m    [35mawait[39m [34mact[39m([35masync[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: a cancelled export also releases its pins
+[31m[1mError[22m: no decode in flight[39m
+[36m [2m❯[22m settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m214:11[22m[39m
+    [90m212| [39m  [35mconst[39m next [33m=[39m pending[33m.[39m[34mshift[39m()[33m;[39m
+    [90m213| [39m  [35mif[39m ([33m![39mnext) {
+    [90m214| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'no decode in flight'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m215| [39m  }
+    [90m216| [39m  [35mif[39m (outcome [35minstanceof[39m [33mError[39m) {
+[90m [2m❯[22m placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m239:9[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m394:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV5: a replaced export does not release the pins of the export that replaced it
+[31m[1mError[22m: no decode in flight[39m
+[36m [2m❯[22m settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m214:11[22m[39m
+    [90m212| [39m  [35mconst[39m next [33m=[39m pending[33m.[39m[34mshift[39m()[33m;[39m
+    [90m213| [39m  [35mif[39m ([33m![39mnext) {
+    [90m214| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'no decode in flight'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m215| [39m  }
+    [90m216| [39m  [35mif[39m (outcome [35minstanceof[39m [33mError[39m) {
+[90m [2m❯[22m placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m239:9[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m418:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV6: a failed re-decode sets the source to error and shows the existing failure text
+[31m[1mError[22m: no decode in flight[39m
+[36m [2m❯[22m settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m214:11[22m[39m
+    [90m212| [39m  [35mconst[39m next [33m=[39m pending[33m.[39m[34mshift[39m()[33m;[39m
+    [90m213| [39m  [35mif[39m ([33m![39mnext) {
+    [90m214| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'no decode in flight'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m215| [39m  }
+    [90m216| [39m  [35mif[39m (outcome [35minstanceof[39m [33mError[39m) {
+[90m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m452:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV6: an export whose re-decode fails creates no file and shows the export failure text
+[31m[1mError[22m: no decode in flight[39m
+[36m [2m❯[22m settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m214:11[22m[39m
+    [90m212| [39m  [35mconst[39m next [33m=[39m pending[33m.[39m[34mshift[39m()[33m;[39m
+    [90m213| [39m  [35mif[39m ([33m![39mnext) {
+    [90m214| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'no decode in flight'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m215| [39m  }
+    [90m216| [39m  [35mif[39m (outcome [35minstanceof[39m [33mError[39m) {
+[90m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m470:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV9: a preview plays the re-decoded source and releases it on Stop
+[31m[1mAssertionError[22m: expected 'big' to be null // Object.is equality[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+"big"
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m484:46[22m[39m
+    [90m482| [39m    [35mconst[39m { api[33m,[39m pending } [33m=[39m [35mawait[39m [34mmountEviction[39m()[33m;[39m
+    [90m483| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mstartLibraryPreview[39m([32m'big'[39m[33m,[39m [34m0[39m))[33m;[39m
+    [90m484| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBe[39m([35mnull[39m)[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m485| [39m    [35mawait[39m [34msettleNext[39m(pending[33m,[39m [34mbigBuffer[39m())[33m;[39m
+    [90m486| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBe[39m([32m'big'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV9: a superseded preview request does not start when its decode settles
+[31m[1mError[22m: no decode in flight[39m
+[36m [2m❯[22m settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m214:11[22m[39m
+    [90m212| [39m  [35mconst[39m next [33m=[39m pending[33m.[39m[34mshift[39m()[33m;[39m
+    [90m213| [39m  [35mif[39m ([33m![39mnext) {
+    [90m214| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'no decode in flight'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m215| [39m  }
+    [90m216| [39m  [35mif[39m (outcome [35minstanceof[39m [33mError[39m) {
+[90m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m499:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV7: a collection change deletes exactly the old collection ids, never clears, and an old decode in flight never sets
+[31m[1mAssertionError[22m: expected [] to have a length of 1 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m509:21[22m[39m
+    [90m507| [39m    [35mconst[39m { api[33m,[39m pending[33m,[39m view } [33m=[39m [35mawait[39m [34mmountEviction[39m()[33m;[39m
+    [90m508| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34maddSourceToActiveTrack[39m([32m'big'[39m))[33m;[39m
+    [90m509| [39m    [34mexpect[39m(pending)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m510| [39m    [35mconst[39m cache [33m=[39m [34mobservedCache[39m()[33m;[39m
+    [90m511| [39m    [34mexpect[39m(cache[33m.[39m[34mhas[39m([32m'keep'[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx[2m > [22mdecoded audio eviction and re-decode (PERF-13b-i)[2m > [22mEV8: a volume edit that keeps the clips array does not recompute pins
+[31m[1mError[22m: no decode in flight[39m
+[36m [2m❯[22m settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m214:11[22m[39m
+    [90m212| [39m  [35mconst[39m next [33m=[39m pending[33m.[39m[34mshift[39m()[33m;[39m
+    [90m213| [39m  [35mif[39m ([33m![39mnext) {
+    [90m214| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'no decode in flight'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m215| [39m  }
+    [90m216| [39m  [35mif[39m (outcome [35minstanceof[39m [33mError[39m) {
+[90m [2m❯[22m placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m239:9[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:[2m570:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m13 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 08:57:47
+[2m   Duration [22m 1.98s[2m (transform 536ms, setup 0ms, import 705ms, tests 720ms, environment 423ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV1%3A after load the evictable buffer is gone%2C the other stays%2C and both stay ready,line=298,column=30::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:298:30%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV2%3A placing the evicted source decodes it again exactly once%2C even when placed twice in flight,line=316,column=28::AssertionError: expected 1 to be 2 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 2%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:316:28%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV3%3A Play is refused while the placed source decodes%2C and starts once it settles,line=330,column=33::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:330:33%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV4%3A Undo of the place evicts the buffer again%2C and Redo decodes it again,line=214,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:214:11%0A ❯ placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:239:9%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:356:11%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A export waits for the decode%2C renders with the buffer%2C and releases its pins,line=380,column=31::AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times%0A%0AReceived: %0A%0A  1st vi.fn() call:%0A%0A    Array [%0A      Object {%0A        "clips": Array [%0A          Object {%0A            "duration": 218.45333333333335,%0A            "id": "b83d0f7b-e781-4521-a14a-5c4d737c4ba8",%0A            "sourceId": "big",%0A            "sourceOffset": 0,%0A            "start": 0,%0A            "trackId": "music",%0A          },%0A        ],%0A        "loop": null,%0A        "master": Object {%0A          "gainDb": 0,%0A          "mute": false,%0A        },%0A        "tracks": Array [%0A          Object {%0A            "id": "video",%0A            "kind": "video",%0A            "mute": false,%0A            "name": "Video",%0A            "solo": false,%0A            "volume": 1,%0A          },%0A          Object {%0A            "id": "music",%0A            "kind": "audio",%0A            "mute": false,%0A            "name": "Music",%0A            "solo": false,%0A            "volume": 1,%0A          },%0A        ],%0A      },%0A      Map {%0A        "keep" => FakeAudioBuffer {%0A          "length": 4800,%0A          "numberOfChannels": 2,%0A          "sampleRate": 48000,%0A        },%0A        "big" => FakeAudioBuffer {%0A          "length": 10485760,%0A          "numberOfChannels": 1,%0A          "sampleRate": 48000,%0A        },%0A      },%0A      undefined,%0A      Object {%0A        "onProgress": [Function onProgress],%0A        "signal": AbortSignal {%0A          Symbol(kEvents): Map {},%0A          Symbol(events.maxEventTargetListeners): 0,%0A          Symbol(events.maxEventTargetListenersWarned): false,%0A          Symbol(kHandlers): Map {},%0A          Symbol(kAborted): false,%0A          Symbol(kReason): undefined,%0A          Symbol(kComposite): false,%0A        },%0A      },%0A    ]%0A%0A%0ANumber of calls: 1%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:380:31%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A a cancelled export also releases its pins,line=214,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:214:11%0A ❯ placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:239:9%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:394:11%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV5%3A a replaced export does not release the pins of the export that replaced it,line=214,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:214:11%0A ❯ placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:239:9%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:418:11%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV6%3A a failed re-decode sets the source to error and shows the existing failure text,line=214,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:214:11%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:452:11%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV6%3A an export whose re-decode fails creates no file and shows the export failure text,line=214,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:214:11%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:470:11%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV9%3A a preview plays the re-decoded source and releases it on Stop,line=484,column=46::AssertionError: expected 'big' to be null // Object.is equality%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A"big"%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:484:46%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV9%3A a superseded preview request does not start when its decode settles,line=214,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:214:11%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:499:11%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV7%3A a collection change deletes exactly the old collection ids%2C never clears%2C and an old decode in flight never sets,line=509,column=21::AssertionError: expected [] to have a length of 1 but got +0%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 0%0A%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:509:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-383/mutants/tree/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx,title=app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx > decoded audio eviction and re-decode (PERF-13b-i) > EV8%3A a volume edit that keeps the clips array does not recompute pins,line=214,column=11::Error: no decode in flight%0A ❯ settleNext app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:214:11%0A ❯ placeBigDecoded app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:239:9%0A ❯ app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx:570:11%0A%0A

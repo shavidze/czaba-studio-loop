@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T08:26:28.726Z",
-  "current_task": "current-task.md (round 382: PERF-13b-i decoded-buffer cache, eviction of reloadable unpinned sources, re-decode on demand; grants b-round-381/grants-382.txt + fixture-grants-382.txt; claims b-round-381/claims-382.sh)",
+  "_generatedUtc": "2026-11-07T09:06:06.969Z",
+  "current_task": "current-task.md (round 383: PERF-13b-i fix - C-R382-01 updater-closure retention via storeSourcePeaks helper + SWEEP; collection reset deleteMany (D-29z1278); C re-verifies round-382 acceptance + HEAP-RETAINERS + EVICT-B2; grants b-round-382/grants-383.txt; claims b-round-382/claims-383.sh)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6202,18 +6202,28 @@
       "severity": "low",
       "status": "scheduled round 382 (D-29z1273): fixed inside PERF-13b-i sec",
       "title": "installPcmLiveRegistry installed in every resources pass though only the 1x record pass reads it"
+    },
+    {
+      "id": "C-R382-01",
+      "severity": "medium",
+      "origin": "C round 382 (pre-existing updater closure at HEAD + B premise K32 + no browser retention row)",
+      "title": "hero 150.37 s decoded MP3 (55.07 MiB) stays live at ready; ready PCM 86.9 MiB vs target <= 60",
+      "evidence": "c-round-382.json bugs[0]; b-round-382/probe/heap-ready2.json (path via baseQueue), heap-ready3-ctx.json",
+      "repro": "c-round-382.json steps",
+      "status": "scheduled round 383 (D-29z1277): storeSourcePeaks helper + SWEEP; C rows HEAP-RETAINERS, HEAP-MUTANT, PERF-RES, EVICT-BROWSER",
+      "added": "2026-11-07 B round 382 -> 383 planning"
+    },
+    {
+      "id": "C-R382-02",
+      "severity": "medium",
+      "origin": "C round 382",
+      "title": "previewed buffer live after Stop and after Add+Undo",
+      "evidence": "c-round-382.json bugs[1]; B counter-evidence b-round-382/probe/preview-stop-check.json (transport Stop: 0 stop calls, preview still playing) and preview-stop-check-lib.json (library Stop releases; Add live; Undo releases)",
+      "status": "reclassified_pending_C (D-29z1277): B evidence says test step clicked the transport Stop; C re-runs EVICT-B2 with the library preview Stop in round 383 and closes or keeps it",
+      "added": "2026-11-07 B round 382 -> 383 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 373,
-      "task": "current-task.md",
-      "decision": "D-29z1231..D-29z1234",
-      "type": "PERF-11c-ii-b: committed status leaves ArrangementContextValue into status-preview-store (one set: adopt + reduce + clear); getStatus getter; ArrangementStatusText subscribes itself; playFrom reorder",
-      "status": "done (D-29z1235): C PASS (c-round-373.json, browserVerified/realVerified true, 0 bugs), gate 373 published e69eba4",
-      "note": "baseline 4900b83 clean; sketch b-round-372/sketch.patch.txt sha dddd2145...49b1; claims b-round-372/claims-373.sh",
-      "added": "2026-11-06 B round 372 -> 373 planning"
-    },
     {
       "round": 374,
       "task": "current-task.md",
@@ -6291,9 +6301,18 @@
       "task": "current-task.md",
       "decision": "D-29z1272..D-29z1275",
       "type": "PERF-13b-i: decoded-buffer-cache.ts + ArrangementContext wiring (evict reloadable unpinned, pins clips/preview/export, ensureDecoded, Play refusal while decoding, failure -> error, clear on reset); harness guard bound + decode probe + dropped probe (M3); DC1-DC7, EV1-EV8, PL1-PL7; doc 248",
-      "status": "dispatched",
+      "status": "c_fail (D-29z1276): C-R382-01 confirmed, C-R382-02 reclassified pending C; fixed in round 383",
       "note": "baseline 5745526 (gate 381); claims b-round-381/claims-382.sh; tech-lead b-round-381/tech-lead-382.md",
       "added": "2026-11-07 B round 381 -> 382 planning"
+    },
+    {
+      "round": 383,
+      "task": "current-task.md",
+      "decision": "D-29z1276..D-29z1279",
+      "type": "PERF-13b-i fix: C-R382-01 (storeSourcePeaks helper, SWEEP of AudioBuffer scopes), collection reset deleteMany (D-29z1278), DC8, EV7 reworded, EV10, doc 248 l.4 round 383; C re-verifies round-382 acceptance + HEAP-RETAINERS/HEAP-MUTANT + EVICT-B2",
+      "status": "dispatched",
+      "note": "baseline 5745526 (gate 382 skipped) + uncommitted round-382 tree; claims b-round-382/claims-383.sh; heap evidence b-round-382/probe/",
+      "added": "2026-11-07 B round 382 -> 383 planning"
     }
   ],
   "other_keys": [

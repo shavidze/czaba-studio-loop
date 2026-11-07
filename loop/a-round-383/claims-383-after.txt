@@ -1,0 +1,85 @@
+== K1
+skipped C taskStatus FAIL
+5745526
+== K2
+11
+ M app/contexts/ArrangementContext.tsx
+ M app/data/studio-lab-demo.ts
+ M app/types/arrangement.ts
+ M perf/budgets.resources.json
+ M perf/lib/pcm-live.test.ts
+ M perf/lib/pcm-live.ts
+ M perf/studio-lab-resources.perf.spec.ts
+?? app/lib/arrangement/__tests__/decoded-buffer-cache.test.ts
+?? app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx
+?? app/lib/arrangement/decoded-buffer-cache.ts
+?? docs/implementation/2026/quarter-IV/248-perf-decoded-buffer-cache.md
+== K3-updater-sites
+769:    setSourcePeaks((previous) => new Map(previous).set(id, peaks));
+== K4-updater-at-HEAD
+2639:          setSourcePeaks((previous) => new Map(previous).set(sourceId, peaks));
+4058:            setSourcePeaks((previous) => new Map(previous).set(source.id, peaks));
+== K5-onPeaks-sites
+2838:        requestSourcePeaks(buffer, signal, (peaks) => {
+4299:          requestSourcePeaks(buffer, controller.signal, (peaks) => {
+== K6-reset
+4258:    const resetDecodedBuffers = () => {
+== K7-video-set
+2842:          decodedBuffers.set(sourceId, buffer, { evictable: false });
+== K8-cache-api
+69:    get: (id) => {
+76:    has: (id) => buffers.has(id),
+77:    set: (id, buffer, { evictable }) => {
+82:    delete: (id) => {
+86:    deleteMany: (ids) => {
+92:    clear: () => {
+96:    setPinned: (owner, ids) => {
+105:    totalBytes: () => {
+113:    evict: () => {
+133:    asReadonlyMap: () => buffers,
+2
+== K9-ev-rows
+      1 EV1
+      1 EV10
+      1 EV2
+      2 EV3
+      1 EV4
+      3 EV5
+      2 EV6
+      1 EV7
+      1 EV8
+      2 EV9
+== K10-doc248-l4
+**სტატუსი:** In Progress (stage 1 of 2; C round 383 PASS)
+18:  - `preview` — preview-ის წყარო, თავისუფლდება preview-ის დასრულებისას ან **library preview-ის** Stop-ზე (transport-ის Stop preview-ს არ აჩერებს, როგორც HEAD-ზე).
+83:  - **EV9** (ორი it: preview ხელახლა გაშიფრულ წყაროს უკრავს და **library preview-ის** Stop-ზე ათავისუფლებს; ჩანაცვლებული preview მოთხოვნა decode-ის შემდეგ არ იწყება და status-ს არ ცვლის) — MU-EV-PREVIEW-NO-STOP-RELEASE, MU-EV-PREVIEW-NO-SUPERSEDE
+== K11-stopPlayback-no-preview
+0
+HEAD:
+0
+== K12-heap-evidence
+ok heap-ready2.json
+ok heap-ready3-ctx.json
+ok heap-preview.json
+ok preview-stop-check.json
+ok preview-stop-check-lib.json
+ok source-release-exp.out
+ok heap-retainers.mjs
+== K13-heap-numbers
+ready live [2, 5, 16, 16, 16, 16, 16, 150.37]
+native 8 via cache 7 via baseQueue 1
+transport-stop stops [] live [2, 5, 16, 16, 16, 16, 16, 101.35]
+library-stop stops [{'sec': 101.35}] live [2, 5, 16, 16, 16, 16, 16] afterAdd [2, 5, 16, 16, 16, 16, 16, 101.35] afterUndo [2, 5, 16, 16, 16, 16, 16]
+== K14-ctx-vars
+[['context:buffer'], ['context:peaks'], ['internal:feedback_cell', 'internal:shared', 'internal:context', 'internal:code', 'internal:map']]
+== K15-protected
+rc0
+== K16-frozen
+1275
+rc0
+== K17-regression
+2026-11-05
+60
+== K18-library-stop-button
+867:  previewPlay: 'Preview',
+868:  previewStop: 'Stop',
