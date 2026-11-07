@@ -1,0 +1,158 @@
+import { ArrangementExportCancelledError } from './export-cancel';
+import {
+  ARRANGEMENT_WAV_CHUNK_FRAMES,
+  type ArrangementWavChunkSource,
+  type ArrangementWavStreamRequest,
+  type ArrangementWavStreamResponse,
+  type ArrangementWavStreamResult,
+  createArrangementWavStreamWriter,
+} from './export-wav';
+import { studioExportStrings } from './strings';
+
+export const ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE = studioExportStrings.wavWorkerFailed;
+
+export const ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS = 30_000;
+
+export const ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE = studioExportStrings.wavWorkerStalled(
+  ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS / 1000,
+);
+
+function copyArrangementWavChunk(
+  source: ArrangementWavChunkSource,
+  offset: number,
+): Float32Array[] {
+  const frames = Math.min(ARRANGEMENT_WAV_CHUNK_FRAMES, source.length - offset);
+  return Array.from({ length: source.numberOfChannels }, (_, channelNumber) => {
+    const chunk = new Float32Array(frames);
+    source.copyFromChannel(chunk, channelNumber, offset);
+    return chunk;
+  });
+}
+
+function createWavProgressReporter(length: number, onProgress?: (fraction: number) => void) {
+  let lastPercent = -1;
+  return (written: number) => {
+    const percent = Math.floor((written / length) * 100);
+    if (percent !== lastPercent) {
+      lastPercent = percent;
+      onProgress?.(written / length);
+    }
+  };
+}
+
+export function encodeArrangementWavStreamOffMainThread(
+  source: ArrangementWavChunkSource,
+  onProgress?: (fraction: number) => void,
+  signal?: AbortSignal,
+): Promise<ArrangementWavStreamResult> {
+  if (signal?.aborted) {
+    return Promise.reject(new ArrangementExportCancelledError());
+  }
+  const { length, numberOfChannels, sampleRate } = source;
+  const reportProgress = createWavProgressReporter(length, onProgress);
+  if (typeof Worker === 'undefined') {
+    try {
+      const writer = createArrangementWavStreamWriter(length, numberOfChannels, sampleRate);
+      for (let offset = 0; offset < length; offset += ARRANGEMENT_WAV_CHUNK_FRAMES) {
+        reportProgress(writer.write(copyArrangementWavChunk(source, offset)));
+      }
+      const { bytes, peak, clippedSamples } = writer.finish();
+      return Promise.resolve({
+        blob: new Blob([bytes], { type: 'audio/wav' }),
+        peak,
+        clippedSamples,
+      });
+    } catch (reason) {
+      return Promise.reject(reason);
+    }
+  }
+  return new Promise<ArrangementWavStreamResult>((resolve, reject) => {
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL('./export-wav.worker.ts', import.meta.url), {
+        type: 'module',
+      });
+    } catch {
+      reject(new Error(ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE));
+      return;
+    }
+    let stallTimer = 0;
+    let offset = 0;
+    const detachWorker = () => {
+      window.clearTimeout(stallTimer);
+      signal?.removeEventListener('abort', handleAbort);
+      worker.onmessage = null;
+      worker.onerror = null;
+      worker.onmessageerror = null;
+      worker.terminate();
+    };
+    const handleAbort = () => {
+      detachWorker();
+      reject(new ArrangementExportCancelledError());
+    };
+    signal?.addEventListener('abort', handleAbort);
+    const fail = (workerMessage?: string) => {
+      detachWorker();
+      const detail = workerMessage?.trim();
+      reject(
+        new Error(
+          detail
+            ? `${ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE} ${detail}`
+            : ARRANGEMENT_WAV_WORKER_FAILED_MESSAGE,
+        ),
+      );
+    };
+    const handleStall = () => {
+      detachWorker();
+      reject(new Error(ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE));
+    };
+    const armStallTimer = () => {
+      window.clearTimeout(stallTimer);
+      stallTimer = window.setTimeout(handleStall, ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS);
+    };
+    const post = (message: ArrangementWavStreamRequest, transfer: Transferable[] = []) => {
+      worker.postMessage(message, transfer);
+    };
+    const postNextChunk = () => {
+      const channels = copyArrangementWavChunk(source, offset);
+      offset += channels[0]?.length ?? 0;
+      post(
+        { type: 'chunk', channels },
+        channels.map((channel) => channel.buffer),
+      );
+    };
+    worker.onmessage = (event: MessageEvent<ArrangementWavStreamResponse>) => {
+      const message = event.data;
+      if (message.type === 'ack') {
+        armStallTimer();
+        reportProgress(message.written);
+        try {
+          if (offset < length) {
+            postNextChunk();
+          } else {
+            post({ type: 'finish' });
+          }
+        } catch {
+          fail();
+        }
+        return;
+      }
+      if (message.type === 'complete') {
+        detachWorker();
+        resolve({ blob: message.blob, peak: message.peak, clippedSamples: message.clippedSamples });
+        return;
+      }
+      fail(message.message);
+    };
+    worker.onerror = () => fail();
+    worker.onmessageerror = () => fail();
+    try {
+      post({ type: 'begin', length, channelCount: numberOfChannels, sampleRate });
+      postNextChunk();
+    } catch {
+      fail();
+      return;
+    }
+    armStallTimer();
+  });
+}

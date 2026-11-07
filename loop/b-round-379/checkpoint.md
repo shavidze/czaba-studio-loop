@@ -1,0 +1,13 @@
+# B round 379 checkpoint
+- DONE: archive tasks/round-379.md, backups
+- running: perf resources spec on sketch (scratch)
+- DONE: premise probe (backing-model), sketch src+fakes patches (b-round-379/), render tests 493/495 (2 protocol rows); consults tech-lead + perf-optimizer running
+- DONE: perf resources spec on sketch v1 (perf-res-sketch.log); perf-optimizer consult done
+- DONE: backlog v346 (D-29z1262..1265)
+- DONE: v2 sketch (tech-lead: progress-throw, empty chunk, wav 0); render tests v2 run
+- DONE: perf v2 (perf-res-sketch-v2.log)
+- DONE: wav-bytes probe HEAD vs sketch v2 EQUAL both viewports (E4 no overload on either); claims-380 outputs; next: write current-task.md, backlog update-2, feature-status, b-round-379.md, b-next.json
+- DONE: current-task.md, questions-perf12b.md, backlog update-2 (D-29z1266)
+- DONE: feature-status, b-round-379.md, b-next.json; store tree clean; next: advisor final
+- DONE: advisor items 1-5 (biome fakes fixed, budgets patch, assert perf run PASS, v2 perf mutants red, apply-check 14/14, unit 475/495); claims refreshed
+- DONE: large copies moved under ignored scratch/; planning complete (round 380 PERF-12a dispatched)

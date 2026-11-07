@@ -1,0 +1,88 @@
+--- a/perf/budgets.resources.json
++++ b/perf/budgets.resources.json
+@@ -159,10 +159,13 @@
+     "metric": "peak-backing-delta-mib",
+     "unit": "MiB",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 5
++    },
+     "owner": "PERF-1b-ii",
+-    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker is outside it, and the rendered AudioBuffer counts only after getChannelData, which the export no longer calls (PERF-12a, b-round-379/probe/backing-model-1440.json). Budget owner: PERF-12 (export peak memory). PERF-12a: asserted (round 380)."
+   },
+   {
+     "id": "res.export.1.bytes",
+@@ -225,10 +228,13 @@
+     "metric": "peak-backing-delta-mib",
+     "unit": "MiB",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 5
++    },
+     "owner": "PERF-1b-ii",
+-    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "1x pass. Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker is outside it, and the rendered AudioBuffer counts only after getChannelData, which the export no longer calls (PERF-12a, b-round-379/probe/backing-model-1440.json). Budget owner: PERF-12 (export peak memory). PERF-12a: asserted (round 380)."
+   },
+   {
+     "id": "res.export.2.bytes",
+@@ -353,10 +359,13 @@
+     "metric": "longtask-max",
+     "unit": "ms",
+     "kind": "wallclock",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 100
++    },
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
++    "note": "6x pass (CPU throttle on after ready and Add); Largest longtask entry in the window (0 when none). Budget owner: PERF-12 (export long tasks). PERF-12a: asserted (round 380)."
+   },
+   {
+     "id": "res.export.1.loaf-blocking-max.6x",
+@@ -378,7 +387,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker is outside it, and the rendered AudioBuffer counts only after getChannelData, which the export no longer calls (PERF-12a, b-round-379/probe/backing-model-1440.json). Budget owner: PERF-12 (export peak memory)."
+   },
+   {
+     "id": "res.export.1.bytes.6x",
+@@ -419,10 +428,13 @@
+     "metric": "longtask-max",
+     "unit": "ms",
+     "kind": "wallclock",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 100
++    },
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Largest longtask entry in the window (0 when none). Trend only. Budget owner: PERF-12 (export long tasks)."
++    "note": "6x pass (CPU throttle on after ready and Add); Largest longtask entry in the window (0 when none). Budget owner: PERF-12 (export long tasks). PERF-12a: asserted (round 380)."
+   },
+   {
+     "id": "res.export.2.loaf-blocking-max.6x",
+@@ -444,7 +456,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker and the rendered AudioBuffer are outside it. Budget owner: PERF-12 (export peak memory)."
++    "note": "6x pass (CPU throttle on after ready and Add); trend only (±30 %). Max Runtime.getHeapUsage().backingStorageSize over the heap samples (polled every 50 ms, or one CDP round trip if longer) whose request-response midpoint, on the page clock, falls in the export window, plus one window-end sample, minus the ready value (MiB, 0.1). Page JS heap only; the worker is outside it, and the rendered AudioBuffer counts only after getChannelData, which the export no longer calls (PERF-12a, b-round-379/probe/backing-model-1440.json). Budget owner: PERF-12 (export peak memory)."
+   },
+   {
+     "id": "res.export.2.bytes.6x",

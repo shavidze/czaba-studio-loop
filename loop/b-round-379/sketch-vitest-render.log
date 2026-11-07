@@ -1,0 +1,853 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/master.test.ts [2m([22m[2m17 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 48[2mms[22m[39m
+     [32m✓[39m createArrangement starts with the default master (0 dB, not muted)[32m 3[2mms[22m[39m
+     [32m✓[39m setMasterMix clamps gainDb to [-60, +6] and returns the same object on a no-op[32m 1[2mms[22m[39m
+     [32m✓[39m masterLinearGain maps dB to linear and mute to 0[32m 0[2mms[22m[39m
+     [32m✓[39m formatMasterGainDb uses U+2212 for negatives, + for positives and no sign at 0[32m 1[2mms[22m[39m
+     [32m✓[39m deleteTime and a clipboard paste keep the master unchanged[32m 4[2mms[22m[39m
+     [32m✓[39m undo and redo restore a master change[32m 1[2mms[22m[39m
+     [32m✓[39m sets the initial master gain from masterGain, and to 1 when it is omitted[32m 1[2mms[22m[39m
+     [32m✓[39m setMasterGain uses τ 0.003 into and out of mute and τ 0.015 otherwise[32m 3[2mms[22m[39m
+     [32m✓[39m a graph started muted unmutes with the short constant[32m 1[2mms[22m[39m
+     [32m✓[39m setMasterGain does nothing after disconnect[32m 0[2mms[22m[39m
+     [32m✓[39m measures the pre-clamp peak and counts 3 over-range samples → +0.8 dBFS, 3 sample, 0.9 dB[32m 6[2mms[22m[39m
+     [32m✓[39m does not count a sample exactly at MAX_24BIT_SAMPLE and gives no warning[32m 0[2mms[22m[39m
+     [32m✓[39m counts negative over-range samples[32m 0[2mms[22m[39m
+     [32m✓[39m prints +0.0 dBFS and the 0.1 dB minimum when the peak is at or just below 1.0[32m 0[2mms[22m[39m
+     [32m✓[39m ignores NaN in the peak and treats an all-silent render as no overload[32m 0[2mms[22m[39m
+[31m     [31m×[31m sets the offline master gain from the model and measures raw samples before the unchanged clamp[39m[32m 23[2mms[22m[39m
+[31m     [31m×[31m keeps the offline master gain at exactly 1 at 0 dB and 0 when muted[39m[32m 1[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-range.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[32m 105[2mms[22m[39m
+[31m     [31m×[31m XR1 no window renders the whole project exactly like the 0-based plan[39m[32m 71[2mms[22m[39m
+[31m     [31m×[31m XR1 no window keeps ceil for a fractional project end[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m XR1 window 4–9 on a 20 s project: 240000 frames, mid-start offsets, outside clips skipped[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m XR1 the window length is rounded, not ceiled (4–9.00001 s stays 240000 frames)[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m XR2 a fade-in 3–5 s with window start 4 begins at 0.5 and reaches 1 at render time 1[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m XR2 an envelope crossing the window start begins at its mid-value[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m XR3 overload is measured over the window only[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m XR4 a window past the project end renders its own length with silence after the end[39m[32m 2[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m18 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 1159[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 542[2mms[22m[39m
+     [32m✓[39m EW2 graph.client re-exports the same measureExportOverload[32m 0[2mms[22m[39m
+     [32m✓[39m EW3 encoding progress never decreases and ends at 1[32m 31[2mms[22m[39m
+     [33m[2m✓[22m[39m EW4 without a Worker global the client encodes on the calling thread with identical bytes [33m 425[2mms[22m[39m
+     [32m✓[39m EW5 the worker path posts transferred channels, forwards progress, resolves on complete and terminates[32m 5[2mms[22m[39m
+     [32m✓[39m EW5 worker error, onerror and onmessageerror each reject with the exact message and terminate[32m 3[2mms[22m[39m
+     [32m✓[39m EW5 a Worker constructor that throws rejects with the exact message[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW7 the worker module posts whole-percent progress, transfers the bytes on complete and reports errors[39m[32m 76[2mms[22m[39m
+[31m     [31m×[31m EW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav[39m[32m 31[2mms[22m[39m
+[31m     [31m×[31m EW6 without onProgress no suspend is called, and a context without suspend still renders[39m[32m 4[2mms[22m[39m
+     [32m✓[39m EW6 a throwing progress callback still resumes every suspend, so the render settles instead of hanging[32m 25[2mms[22m[39m
+[31m     [31m×[31m EW6 a rejecting suspend does not fail the render[39m[32m 1[2mms[22m[39m
+     [32m✓[39m EW8a a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing[32m 3[2mms[22m[39m
+     [32m✓[39m EW8b a progress message restarts the stall timer and is still forwarded[32m 1[2mms[22m[39m
+     [32m✓[39m EW8c complete before the timeout resolves, clears the timer and ignores a late progress[32m 1[2mms[22m[39m
+     [32m✓[39m EW8d an abort mid-encode rejects cancelled and clears the timer[32m 2[2mms[22m[39m
+     [32m✓[39m EW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer and ignores a late progress[32m 3[2mms[22m[39m
+     [32m✓[39m EW8f the stall timeout is exactly 30 s and the stalled message is exact[32m 0[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: navigation to another Document
+Not implemented: navigation to another Document
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 3115[2mms[22m[39m
+     [33m[2m✓[22m[39m TR1 WAV checked: Tab from the checked and from the unchecked format radio stays native; Tab from Cancel wraps to X [33m 1122[2mms[22m[39m
+     [33m[2m✓[22m[39m TR2 MP3 checked: Tab from the checked MP3 radio stays native; Tab from Cancel wraps to X [33m 553[2mms[22m[39m
+     [33m[2m✓[22m[39m TR3 WAV + MP3 checked: Tab from the both radio stays native; Tab from Cancel wraps to X (C round 88 V3) [33m 383[2mms[22m[39m
+     [33m[2m✓[22m[39m TR4 MP3 checked: Shift+Tab from X and from the trap wrapper goes to Cancel, the last stop [33m 349[2mms[22m[39m
+     [33m[2m✓[22m[39m TR5 render: Shift+Tab from the checked WAV radio, Tab from X and Shift+Tab from Cancel stay native [33m 358[2mms[22m[39m
+     [33m[2m✓[22m[39m TR6 idle: Tab from the checked format and scope radios stays native; Export ↔ X wrap [33m 331[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/metronome-ui.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 2995[2mms[22m[39m
+     [33m[2m✓[22m[39m UI1 is disabled and unpressed without a tempo, and Play schedules no metronome [33m 471[2mms[22m[39m
+     [33m[2m✓[22m[39m UI2 turns on at 120 BPM with its status and Play schedules a click on every beat [33m 336[2mms[22m[39m
+     [33m[2m✓[22m[39m UI3 turning it off while playing forces one resync without a metronome [33m 368[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/master-ui.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[33m 3429[2mms[22m[39m
+       [33m[2m✓[22m[39m renders the Master group with Mute, the fader and a readout that follows the value [33m 347[2mms[22m[39m
+       [33m[2m✓[22m[39m sits in the footer's last row, directly before the Shortcuts button, and renders 0 times per Play frame [33m 2010[2mms[22m[39m
+       [33m[2m✓[22m[39m FOCUS-KEEP: keeps the same focused Master Volume node while the footer content changes [33m 641[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-focus.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 6697[2mms[22m[39m
+     [33m[2m✓[22m[39m moves focus to Done inside the dialog when it opens [33m 1062[2mms[22m[39m
+     [33m[2m✓[22m[39m wraps Tab from the last control to the first and Shift+Tab from the first to the last [33m 480[2mms[22m[39m
+     [33m[2m✓[22m[39m skips disabled controls when it wraps (empty project: WAV disabled) [33m 355[2mms[22m[39m
+     [33m[2m✓[22m[39m ignores every key except Tab and never stops propagation (Esc still reaches the Modal) [33m 325[2mms[22m[39m
+     [33m[2m✓[22m[39m restores focus to the remembered opener when the dialog closes [33m 319[2mms[22m[39m
+     [33m[2m✓[22m[39m does not swallow Enter on Done, and its activation closes without starting an export [33m 343[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps Space on a dialog button away from the transport [33m 330[2mms[22m[39m
+     [33m[2m✓[22m[39m returns focus to ✕ of the expanded video after Esc closes Export, and keeps the video expanded [33m 510[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps focus inside the dialog while a WAV render disables its buttons, then returns it to Done [33m 325[2mms[22m[39m
+     [33m[2m✓[22m[39m leaves focus on an enabled control while a render starts and ends [33m 315[2mms[22m[39m
+     [33m[2m✓[22m[39m sends Tab to the first control and Shift+Tab to the last when focus sits on the dialog itself [33m 305[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps X → WAV → MP3 → WAV + MP3 → project scope → Done → Export WAV in DOM order and intercepts Tab only at the ends (C-R14-02) [33m 330[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps Shift+Tab from the X inside the dialog (the exact C-R14-02 repro) [33m 302[2mms[22m[39m
+     [33m[2m✓[22m[39m does not steal focus from the X while a render starts and ends [33m 307[2mms[22m[39m
+     [33m[2m✓[22m[39m removes the Tab listener from the Modal content when the dialog closes [33m 408[2mms[22m[39m
+     [33m[2m✓[22m[39m leaves Enter and Space alone on the last control and Enter on the first, so focus stays put (C-R15-03, D-29g) [33m 330[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/track-pan.test.tsx [2m([22m[2m26 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2568[2mms[22m[39m
+       [32m✓[39m setArrangementTrackPan(-1) changes only that track pan and leaves volume, mute, solo, clips and master[32m 4[2mms[22m[39m
+       [32m✓[39m setting 0 removes the key so the arrangement equals a never-changed one[32m 1[2mms[22m[39m
+       [32m✓[39m clamps to ±1 and rounds to 1/50 steps[32m 1[2mms[22m[39m
+       [32m✓[39m returns the same object for NaN, an unknown id, the video track and an unchanged value[32m 1[2mms[22m[39m
+       [32m✓[39m formatTrackPan shows C, NL and NR in 1…50 units[32m 0[2mms[22m[39m
+       [32m✓[39m tracks with pan seed that panner and leave the others at 0 without new nodes[32m 2[2mms[22m[39m
+       [32m✓[39m setTrackPan ramps only that track panner with τ 0.015 and ignores a repeated value[32m 1[2mms[22m[39m
+       [32m✓[39m an unknown track and a disconnected handle do nothing[32m 1[2mms[22m[39m
+[31m       [31m×[31m renderArrangementWav keeps the same applySchedule call and never calls setTrackPan[39m[32m 33[2mms[22m[39m
+       [32m✓[39m setTrackPan commits one Pan entry; Undo removes the key and Redo re-applies it[32m 69[2mms[22m[39m
+       [32m✓[39m a pan change while playing does not reschedule and ramps the music panner; Undo too[32m 16[2mms[22m[39m
+       [32m✓[39m starts the graph with the stored pan on that panner only[32m 8[2mms[22m[39m
+       [32m✓[39m begin → previews leave history untouched; commit makes exactly one entry[32m 9[2mms[22m[39m
+       [32m✓[39m cancel makes no entry and pushes the stored pan back to the live panner[32m 6[2mms[22m[39m
+       [32m✓[39m a window pointercancel cancels and a window pointerup commits the gesture[32m 8[2mms[22m[39m
+       [32m✓[39m a reschedule during a preview keeps the dragged pan on the new graph panner[32m 17[2mms[22m[39m
+       [32m✓[39m refuses during another pointer gesture, and a pan gesture blocks a second claim[32m 5[2mms[22m[39m
+       [33m[2m✓[22m[39m audio lanes show Pan and its reset; the video lane and a folded lane do not [33m 488[2mms[22m[39m
+       [32m✓[39m row 1 DOM order is fold, name, Pan, readout[32m 224[2mms[22m[39m
+       [33m[2m✓[22m[39m a pointer drag follows the draft live without history, then commits one entry showing NL [33m 499[2mms[22m[39m
+       [32m✓[39m each keyboard value change is one entry immediately[32m 218[2mms[22m[39m
+       [32m✓[39m the readout click returns to C with one entry and is disabled afterwards[32m 257[2mms[22m[39m
+       [32m✓[39m a blur during a drag makes no entry and shows the stored pan again[32m 208[2mms[22m[39m
+       [32m✓[39m a window pointercancel during a drag clears the draft without an entry[32m 148[2mms[22m[39m
+       [32m✓[39m Delete and Backspace on the focused Pan slider do not delete the selected clip[32m 161[2mms[22m[39m
+       [32m✓[39m Space on the focused Pan slider toggles playback like Volume[32m 181[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain.test.tsx [2m([22m[2m28 tests[22m[2m)[22m[33m 2576[2mms[22m[39m
+       [33m[2m✓[22m[39m type 6 + Enter commits one entry, shows the status and the stored text [33m 561[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-mp3.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 2409[2mms[22m[39m
+     [33m[2m✓[22m[39m MX1 WAV is the default, MP3 and WAV + MP3 are enabled with exact texts, video stays disabled, reopen resets to WAV [33m 601[2mms[22m[39m
+     [33m[2m✓[22m[39m MX10 mounting the workspace, opening Export and a WAV export never touch the encoder [33m 722[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1133[2mms[22m[39m
+     [33m[2m✓[22m[39m IP1 encodeArrangementWavInPlace bytes equal the oracle and the report is measured on the unclamped samples [33m 578[2mms[22m[39m
+     [32m✓[39m IP2 the same array objects passed in hold the clamped samples afterwards[32m 67[2mms[22m[39m
+     [32m✓[39m IP3 in-place encoding progress never decreases and ends at 1[32m 46[2mms[22m[39m
+[31m     [31m×[31m IP4 the worker module encodes the posted channels in place and transfers only the bytes[39m[32m 57[2mms[22m[39m
+     [33m[2m✓[22m[39m IP5 encodeArrangementWav still leaves its input untouched and matches the in-place result [33m 379[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/collection-load-status.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 2214[2mms[22m[39m
+     [33m[2m✓[22m[39m LS1 empty demo collection: the status is exactly the demo empty text, loadSource is never called and nothing logs an error [33m 312[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 2202[2mms[22m[39m
+     [33m[2m✓[22m[39m CU3 load-phase cancel before the import resolves (runs first in this file, while the import gate is still closed): the import resets exactly once, never loads, and the next MP3 export succeeds [33m 600[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 2147[2mms[22m[39m
+     [33m[2m✓[22m[39m HU1 Play from 0 schedules only the first 2 s of clicks [33m 625[2mms[22m[39m
+     [33m[2m✓[22m[39m HU2 the pump refills every beat exactly once to the end, never late, then stops appending [33m 320[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: navigation to another Document
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 2092[2mms[22m[39m
+     [33m[2m✓[22m[39m DXL1: the Detail group count is foreground with font-medium and no brass [33m 434[2mms[22m[39m
+     [33m[2m✓[22m[39m DXL5: the Library filter value is foreground inside the muted filter line [33m 430[2mms[22m[39m
+     [33m[2m✓[22m[39m DXL6: every Grid menu check slot is foreground and checked items still draw one lucide check [33m 496[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 1790[2mms[22m[39m
+     [33m[2m✓[22m[39m HE1 a repeated Enter on Done after a render-phase WAV cancel is prevented: no close, the cancelled status stays and focus stays on Done [33m 605[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-range-ui.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 1533[2mms[22m[39m
+     [33m[2m✓[22m[39m XU1 no range: project checked, range disabled with the reason, whole-project export unchanged [33m 499[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-a11y-copy.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1477[2mms[22m[39m
+     [33m[2m✓[22m[39m AN1 no range, no loop: every radio has the exact name and description [33m 645[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-progress-ui.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1455[2mms[22m[39m
+     [33m[2m✓[22m[39m PU4 the 120 s timer covers the encoder import, the timeout clears the progress, and a module that arrives later never starts a load and resets [33m 484[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/video-import-status-ui.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 211[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/strings.test.ts [2m([22m[2m64 tests[22m[2m)[22m[32m 180[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [31m❯[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 125[2mms[22m[39m
+     [32m✓[39m exports the exact messages and a named cancel error[32m 2[2mms[22m[39m
+     [32m✓[39m without a signal returns the same promise and its result[32m 1[2mms[22m[39m
+     [32m✓[39m with a pre-aborted signal rejects with the cancel error[32m 1[2mms[22m[39m
+     [32m✓[39m an abort mid-flight rejects with the cancel error even though the work resolves later[32m 1[2mms[22m[39m
+     [32m✓[39m a work rejection before any abort passes that error through[32m 0[2mms[22m[39m
+     [32m✓[39m removes its abort listener once the work settles[32m 5[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal with a work that rejects later raises no unhandled rejection[32m 16[2mms[22m[39m
+     [32m✓[39m a late work rejection after an abort raises no unhandled rejection[32m 13[2mms[22m[39m
+     [32m✓[39m EC2 a pre-aborted signal rejects cancelled and never constructs an OfflineAudioContext[32m 1[2mms[22m[39m
+     [32m✓[39m EC2 a signal alone schedules suspend points, and an abort before the first suspend resolves never resumes[32m 21[2mms[22m[39m
+     [32m✓[39m EC2 an abort after one resumed suspend stops resuming at the next suspend point[32m 31[2mms[22m[39m
+     [32m✓[39m EC2 an abort after startRendering resolved but before the worker constructs no Worker[32m 7[2mms[22m[39m
+     [32m✓[39m EC3 GATE89-S1 a rejected resume() rejects the render with that error instead of hanging[32m 1[2mms[22m[39m
+[31m     [31m×[31m EC3 a rejected suspend() alone still renders[39m[32m 12[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal rejects cancelled and constructs no Worker[32m 1[2mms[22m[39m
+     [32m✓[39m the no-Worker fallback checks the signal before it encodes[32m 0[2mms[22m[39m
+     [32m✓[39m an abort mid-encode terminates once, rejects cancelled, and a later complete changes nothing[32m 2[2mms[22m[39m
+     [32m✓[39m removes the abort listener on complete and on a worker failure[32m 1[2mms[22m[39m
+     [32m✓[39m a 3-argument call behaves as before: posts transferred channels, forwards progress, resolves on complete[32m 1[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-footer.test.tsx [2m([22m[2m15 tests[22m[2m)[22m[33m 1170[2mms[22m[39m
+     [33m[2m✓[22m[39m FT1 idle: the footer is sticky, opaque, holds Done and Export only, and is the last child of ModalBody [33m 374[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1196[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/peaks-worker-video.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/graph.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/envelope.test.ts [2m([22m[2m30 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 81[2mms[22m[39m
+     [32m✓[39m EV1 is 1 without points, holds the edge values, is exact at points and dB-linear between them[32m 3[2mms[22m[39m
+     [32m✓[39m EV1 formats gains in dB with a true minus sign, 0 dB at unity and −∞ at silence[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 a new point takes the current line value, rounds to ms and is inserted in order[32m 4[2mms[22m[39m
+     [32m✓[39m EV2 returns the same arrangement for a missing clip, a video clip, a time outside or a duplicate ms[32m 1[2mms[22m[39m
+     [32m✓[39m EV2 removing the last point leaves no envelope key and a missing point changes nothing[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 a point stops 1 ms short of each neighbour and inside the clip window[32m 1[2mms[22m[39m
+     [32m✓[39m EV3 the gain is clamped to [0, 1] and rounded to 4 decimals; no change returns the same arrangement[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 a move keeps the envelope and the timeline points shift with the clip[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 a split gives both parts the full list and the level is continuous at the cut[32m 3[2mms[22m[39m
+     [32m✓[39m EV4 a start trim hides points without deleting them and a trim back shows them again[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 Delete Time keeps the level of every source sample on the right part[32m 5[2mms[22m[39m
+     [32m✓[39m EV4 duplicate, clip copy/paste and range copy keep the whole list[32m 2[2mms[22m[39m
+     [32m✓[39m EV4 a clip without an envelope gives exactly today’s objects (no envelope key)[32m 1[2mms[22m[39m
+     [32m✓[39m EV4 shapes cover audio clips with at least one point only[32m 0[2mms[22m[39m
+     [32m✓[39m EV5a playing from 0 sets the first value at the clip start and ramps through every point[32m 7[2mms[22m[39m
+     [32m✓[39m EV5b a mid-clip start begins at the line value of that position, not at the first point[32m 3[2mms[22m[39m
+     [32m✓[39m EV5c a trimmed window ramps toward a hidden point after it and ends on the line value[32m 2[2mms[22m[39m
+     [32m✓[39m EV5d a clip without points builds no extra node; one with points adds exactly one[32m 1[2mms[22m[39m
+     [32m✓[39m EV5e a loop iteration appended later schedules against its own startAt[32m 3[2mms[22m[39m
+     [32m✓[39m EV5f setClipGain touches only the clip gain; disconnect releases the envelope node[32m 1[2mms[22m[39m
+     [32m✓[39m EV5g a faded clip with an envelope connects source → fade → envelope → clip gain[32m 3[2mms[22m[39m
+     [32m✓[39m EV5h an ended source is released together with its envelope node on the next append[32m 1[2mms[22m[39m
+     [32m✓[39m EV6 renderArrangementWav passes envelopes and fades and still has no pan or live-gain calls[32m 1[2mms[22m[39m
+[31m     [31m×[31m EV6b an export renders an enveloped clip through its own envelope gain[39m[32m 19[2mms[22m[39m
+     [32m✓[39m DB1 a 0 dB → −∞ line reads −15 / −30 / −45 dB at 25 / 50 / 75 % and the stored gains at its points[32m 0[2mms[22m[39m
+     [32m✓[39m DB2 depth and gain round-trip on the fader scale, with the top at 0 dB and the bottom at −∞[32m 0[2mms[22m[39m
+     [32m✓[39m DB3 the envelope depth uses the same dB scale as the lane Volume fader[32m 0[2mms[22m[39m
+     [32m✓[39m DB4 the scheduler steps are at most 0.5 dB apart and land exactly on every knot[32m 11[2mms[22m[39m
+     [32m✓[39m DB5 a legacy gain below −60 dB keeps its level and interpolates in dB toward it[32m 0[2mms[22m[39m
+     [32m✓[39m DB6 adding a point on the line keeps the sound of the line around it[32m 0[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/clip-fades.test.ts [2m([22m[2m25 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 37[2mms[22m[39m
+     [32m✓[39m FD1 clamps to [0, duration - other fade], rounds to ms and omits zero[32m 5[2mms[22m[39m
+     [32m✓[39m FD1 returns the same reference for no change, a missing clip, a video clip or NaN[32m 1[2mms[22m[39m
+     [32m✓[39m FD1 reads effective fades clamped by the invariant even when stored values overlap[32m 1[2mms[22m[39m
+     [32m✓[39m FD2 follows the linear in/out ramps and is 1 between them[32m 1[2mms[22m[39m
+     [32m✓[39m FD2 meets at exactly 1 when fadeIn + fadeOut = duration[32m 0[2mms[22m[39m
+     [32m✓[39m FD3 a start trim shrinks the fade-in first, an end trim the fade-out first[32m 1[2mms[22m[39m
+     [32m✓[39m FD3 a clip without fades trims to exactly the pre-fade object[32m 0[2mms[22m[39m
+     [32m✓[39m FD4 split keeps the fade-in on the left and the fade-out on the right only[32m 1[2mms[22m[39m
+     [32m✓[39m FD4 a kept fade longer than its part shrinks to the part[32m 0[2mms[22m[39m
+     [32m✓[39m FD5 deleteTime drops the fade at each new cut and only shifts later clips[32m 1[2mms[22m[39m
+     [32m✓[39m FD5 a cut that starts before the clip drops only its fade-in[32m 0[2mms[22m[39m
+     [32m✓[39m FD6 clip copy and paste keep both fades[32m 1[2mms[22m[39m
+     [32m✓[39m FD6 a range copy keeps a fade only when the window contains that clip edge[32m 1[2mms[22m[39m
+     [32m✓[39m FD6 cutRangeFromArrangement drops the fade at each new cut edge[32m 0[2mms[22m[39m
+     [32m✓[39m FD6 clipFadeShapes lists only audio clips with an effective fade[32m 0[2mms[22m[39m
+     [32m✓[39m FD7a a fade-in from 0 starts silent at the clip start and ramps to 1[32m 2[2mms[22m[39m
+     [32m✓[39m FD7b playback started mid-fade begins at the ramp value of that instant[32m 0[2mms[22m[39m
+     [32m✓[39m FD7c a fade-out holds 1 until its start and ramps to 0 at the clip end[32m 1[2mms[22m[39m
+     [32m✓[39m FD7d a clip without fades builds the same graph as before (no extra gain node)[32m 2[2mms[22m[39m
+     [32m✓[39m FD7e a loop iteration appended later schedules the ramps against its own startAt[32m 1[2mms[22m[39m
+     [32m✓[39m FD7f setClipGain during a fade touches only the clip gain node[32m 0[2mms[22m[39m
+     [32m✓[39m FD7g meeting fades with non-exact float sums keep event times in order[32m 1[2mms[22m[39m
+     [32m✓[39m FD7h a loop iteration that starts inside a fade-in starts at the ramp value[32m 0[2mms[22m[39m
+     [32m✓[39m FD8 renderArrangementWav passes the fade shapes and still has no pan or live-gain calls[32m 1[2mms[22m[39m
+[31m     [31m×[31m FD8b an export renders a faded clip through its own fade gain with the same ramps[39m[32m 13[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/track-group-mix.test.ts [2m([22m[2m10 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 32[2mms[22m[39m
+     [32m✓[39m GM1 the normaliser omits default fields and returns the same object for no-ops[32m 5[2mms[22m[39m
+     [32m✓[39m GM2 group volume multiplies down the ancestor chain[32m 2[2mms[22m[39m
+     [32m✓[39m GM3 an outer mute silences every descendant; inner changes are kept and apply on unmute[32m 1[2mms[22m[39m
+     [32m✓[39m GM4 solo through groups; mute beats solo at every level[32m 2[2mms[22m[39m
+     [32m✓[39m GM5 half-solo state: on, mixed for an ancestor of a soloed row, off otherwise[32m 1[2mms[22m[39m
+     [32m✓[39m GM6 exclusive and additive solo across tracks and groups[32m 2[2mms[22m[39m
+     [32m✓[39m GM7 cyclic and ghost parent chains stay finite[32m 1[2mms[22m[39m
+     [32m✓[39m GM9 ungroup drops the dissolved group mix state and keeps the children fields[32m 2[2mms[22m[39m
+     [32m✓[39m GM8 applySchedule takes initial track gains from the map; without it the old rule holds[32m 2[2mms[22m[39m
+[31m     [31m×[31m GM8 renderArrangementWav renders with the effective group gains[39m[32m 14[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/meter.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 23[2mms[22m[39m
+     [32m✓[39m flags only samples above the 24-bit maximum or below −1[32m 2[2mms[22m[39m
+     [32m✓[39m is the predicate measureExportOverload counts with[32m 1[2mms[22m[39m
+     [32m✓[39m returns the absolute peak and the over flag of a Float32Array block[32m 0[2mms[22m[39m
+     [32m✓[39m treats −1.0 as a peak of 1 that is not over, and an empty block as silence[32m 1[2mms[22m[39m
+     [32m✓[39m rises instantly and falls at the documented release rate down to the floor[32m 1[2mms[22m[39m
+     [32m✓[39m holds the highest level for 1.5 s and then follows the level[32m 1[2mms[22m[39m
+     [32m✓[39m keeps a monotonic max peak until reset[32m 0[2mms[22m[39m
+     [32m✓[39m latches over on any over block; quiet blocks never clear it, only the reset does[32m 1[2mms[22m[39m
+     [32m✓[39m floorMasterMeter drops level and hold to the floor and keeps the max and the latch[32m 1[2mms[22m[39m
+     [32m✓[39m formats over peaks with + floored at +0.0, clear peaks with U+2212, and silence as −∞[32m 1[2mms[22m[39m
+     [32m✓[39m writes one decimal or -inf at or below the floor for the data attributes[32m 0[2mms[22m[39m
+     [32m✓[39m publishes frames to subscribers and exposes the latch as a separate snapshot[32m 1[2mms[22m[39m
+     [32m✓[39m fans the master out to the destination and the tap only when a tap is given[32m 1[2mms[22m[39m
+     [32m✓[39m feeds the tap from the master node and from no track, panner or clip node[32m 1[2mms[22m[39m
+[31m     [31m×[31m connects the offline master only to the destination[39m[32m 10[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/track-meter.test.ts [2m([22m[2m13 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 17[2mms[22m[39m
+     [32m✓[39m keeps independent state per track: an over on one track leaves another clear and unchanged[32m 2[2mms[22m[39m
+     [32m✓[39m notifies each subscriber exactly once per publish, however many tracks it carries[32m 1[2mms[22m[39m
+     [32m✓[39m stops notifying after unsubscribe[32m 0[2mms[22m[39m
+     [32m✓[39m reset clears every track max peak and over latch and keeps the levels[32m 1[2mms[22m[39m
+     [32m✓[39m floor drops every track level and hold to the floor and keeps max peak and latch[32m 0[2mms[22m[39m
+     [32m✓[39m returns a floor frame, not a throw, for an unknown track id[32m 1[2mms[22m[39m
+     [32m✓[39m a later publish does not leak a latch from one track into another[32m 0[2mms[22m[39m
+     [32m✓[39m connects the music panner to the master first and then to its own tap[32m 1[2mms[22m[39m
+     [32m✓[39m leaves a track without a tap wired to the master only[32m 0[2mms[22m[39m
+     [32m✓[39m wires exactly as before when no trackTaps are given[32m 0[2mms[22m[39m
+     [32m✓[39m feeds each tap only from its own track panner, never from a track gain, clip, other panner or the master[32m 1[2mms[22m[39m
+     [32m✓[39m removes the tap connection when the graph is disconnected[32m 0[2mms[22m[39m
+[31m     [31m×[31m connects every offline panner only to the master and the master only to the destination[39m[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 22 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/clip-fades.test.ts[2m > [22mSRW-18 stage 1 export render (FD8b)[2m > [22mFD8b an export renders a faded clip through its own fade gain with the same ramps
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/clip-fades.test.ts:[2m517:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/envelope.test.ts[2m > [22mSRW-18 stage 2 export render (EV6b)[2m > [22mEV6b an export renders an enveloped clip through its own envelope gain
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/envelope.test.ts:[2m673:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC2–EC3 renderArrangementWav honours the signal and a resume error[2m > [22mEC3 a rejected suspend() alone still renders
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m409:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR1 no window renders the whole project exactly like the 0-based plan
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m181:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m214:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR1 no window keeps ceil for a fractional project end
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m181:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m225:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR1 window 4–9 on a 20 s project: 240000 frames, mid-start offsets, outside clips skipped
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m180:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m232:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR1 the window length is rounded, not ceiled (4–9.00001 s stays 240000 frames)
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m180:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m243:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR2 a fade-in 3–5 s with window start 4 begins at 0.5 and reaches 1 at render time 1
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m180:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m253:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR2 an envelope crossing the window start begins at its mid-value
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m180:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m277:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR3 overload is measured over the window only
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m180:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m305:21[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-range.test.ts[2m > [22mSRW-20 stage 1 range export renderer (D-29z50, R20-X1)[2m > [22mXR4 a window past the project end renders its own length with silence after the end
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m renderOnce app/lib/arrangement/__tests__/export-range.test.ts:[2m180:7[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-range.test.ts:[2m318:29[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mSRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56, GATE89-S2)[2m > [22mIP4 the worker module encodes the posted channels in place and transfers only the bytes
+[31m[1mAssertionError[22m: expected { type: 'error', …(1) } to match object { type: 'complete', peak: 1.5, …(1) }
+(1 matching property omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "clippedSamples": 134689,[39m
+[32m-   "peak": 1.5,[39m
+[32m-   "type": "complete",[39m
+[31m+   "type": "error",[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m129:27[22m[39m
+    [90m127| [39m    )[33m;[39m
+    [90m128| [39m    [35mconst[39m last [33m=[39m posted[33m.[39m[34mat[39m([33m-[39m[34m1[39m)[33m;[39m
+    [90m129| [39m    [34mexpect[39m(last[33m?.[39mmessage)[33m.[39m[34mtoMatchObject[39m({
+    [90m   | [39m                          [31m^[39m
+    [90m130| [39m      type[33m:[39m [32m'complete'[39m[33m,[39m
+    [90m131| [39m      peak[33m:[39m [34m1.5[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a WAV encoding off the main thread (D-29z52)[2m > [22mEW7 the worker module posts whole-percent progress, transfers the bytes on complete and reports errors
+[31m[1mAssertionError[22m: expected 0 to be greater than 2[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m214:29[22m[39m
+    [90m212| [39m        [33m:[39m [33mNumber[39m[33m.[39m[33mNaN[39m[33m,[39m
+    [90m213| [39m    )[33m;[39m
+    [90m214| [39m    [34mexpect[39m(percents[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m215| [39m    [34mexpect[39m([35mnew[39m [33mSet[39m(percents)[33m.[39msize)[33m.[39m[34mtoBe[39m(percents[33m.[39mlength)[33m;[39m
+    [90m216| [39m    [34mexpect[39m(percents[33m.[39m[34mat[39m([33m-[39m[34m1[39m))[33m.[39m[34mtoBe[39m([34m100[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a render progress through OfflineAudioContext.suspend (EW6)[2m > [22mEW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m384:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a render progress through OfflineAudioContext.suspend (EW6)[2m > [22mEW6 without onProgress no suspend is called, and a context without suspend still renders
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m411:19[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a render progress through OfflineAudioContext.suspend (EW6)[2m > [22mEW6 a rejecting suspend does not fail the render
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m445:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/master.test.ts[2m > [22mrenderArrangementWav applies the Master and reports the pre-clamp overload[2m > [22msets the offline master gain from the model and measures raw samples before the unchanged clamp
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/master.test.ts:[2m323:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/master.test.ts[2m > [22mrenderArrangementWav applies the Master and reports the pre-clamp overload[2m > [22mkeeps the offline master gain at exactly 1 at 0 dB and 0 when muted
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/master.test.ts:[2m345:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/meter.test.ts[2m > [22mrenderArrangementWav passes no meter tap[2m > [22mconnects the offline master only to the destination
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/meter.test.ts:[2m312:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/track-group-mix.test.ts[2m > [22mtrack group mix graph (GM8)[2m > [22mGM8 renderArrangementWav renders with the effective group gains
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/track-group-mix.test.ts:[2m373:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/track-meter.test.ts[2m > [22mrenderArrangementWav gets no track taps[2m > [22mconnects every offline panner only to the master and the master only to the destination
+[31m[1mError[22m: WAV stream: invalid length or channel count[39m
+[36m [2m❯[22m createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:[2m114:11[22m[39m
+    [90m112| [39m    channelCount [33m<[39m [34m1[39m
+    [90m113| [39m  ) {
+    [90m114| [39m    [35mthrow[39m [35mnew[39m [33mError[39m([32m'WAV stream: invalid length or channel count'[39m)[33m;[39m
+    [90m   | [39m          [31m^[39m
+    [90m115| [39m  }
+    [90m116| [39m  [35mconst[39m size [33m=[39m length [33m*[39m channelCount [33m*[39m [34m3[39m[33m;[39m
+[90m [2m❯[22m encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:[2m146:22[22m[39m
+[90m [2m❯[22m renderArrangementWav app/lib/arrangement/graph.client.ts:[2m585:10[22m[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/track-meter.test.ts:[2m325:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/22]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/track-pan.test.tsx[2m > [22mTrack Pan (SRW-13 stage 4a, FB-05, R13-M2)[2m > [22mgraph[2m > [22mrenderArrangementWav keeps the same applySchedule call and never calls setTrackPan
+[31m[1mAssertionError[22m: expected 'export async function renderArrangeme…' to contain 'return { blob: new Blob([bytes], { ty…'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [7mreturn { blob: new Blob([bytes], { type: 'audio/wav' }), ...report }[27m;[39m
+[31m+ export async function renderArrangementWav([39m
+[31m+   arrangement: Arrangement,[39m
+[31m+   buffers: ReadonlyMap<string, AudioBuffer>,[39m
+[31m+   renderWindow?: ArrangementRenderWindow,[39m
+[31m+   renderOptions?: ArrangementRenderOptions,[39m
+[31m+ ): Promise<ArrangementWavResult> {[39m
+[31m+   const signal = renderOptions?.signal;[39m
+[31m+   if (signal?.aborted) {[39m
+[31m+     throw new ArrangementExportCancelledError();[39m
+[31m+   }[39m
+[31m+   const end = projectEnd(arrangement);[39m
+[31m+   if (end <= 0) {[39m
+[31m+     throw new Error(studioExportStrings.emptyProjectError);[39m
+[31m+   }[39m
+[31m+   const length = renderWindow[39m
+[31m+     ? Math.round((renderWindow.end - renderWindow.start) * ARRANGEMENT_EXPORT_SAMPLE_RATE)[39m
+[31m+     : Math.ceil(end * ARRANGEMENT_EXPORT_SAMPLE_RATE);[39m
+[31m+   const ctx = new OfflineAudioContext({[39m
+[31m+     numberOfChannels: 2,[39m
+[31m+     length,[39m
+[31m+     sampleRate: ARRANGEMENT_EXPORT_SAMPLE_RATE,[39m
+[31m+   });[39m
+[31m+   const options: ApplyScheduleOptions<AudioBuffer> = {[39m
+[31m+     buffers,[39m
+[31m+     tracks: arrangement.tracks,[39m
+[31m+     from: 0,[39m
+[31m+     startAt: 0,[39m
+[31m+     masterGain: masterLinearGain(arrangement.master),[39m
+[31m+     clipGains: clipLinearGains(arrangement),[39m
+[31m+     clipFades: clipFadeShapes(arrangement),[39m
+[31m+     clipEnvelopes: clipEnvelopeShapes(arrangement),[39m
+[31m+     trackGains: trackEffectiveGains(arrangement),[39m
+[31m+   };[39m
+[31m+   if (renderWindow) {[39m
+[31m+     applySchedule(ctx, planSchedule(arrangement, renderWindow.start, renderWindow.end), {[39m
+[31m+       ...options,[39m
+[31m+       from: renderWindow.start,[39m
+[31m+     });[39m
+[31m+   } else {[39m
+[31m+     applySchedule(ctx, planSchedule(arrangement, 0), options);[39m
+[31m+   }[39m
+[31m+   const onProgress = renderOptions?.onProgress;[39m
+[31m+   const resumeFailure =[39m
+[31m+     onProgress || signal[39m
+[31m+       ? scheduleArrangementRenderProgress([39m
+[31m+           ctx,[39m
+[31m+           length,[39m
+[31m+           (fraction) => onProgress?.('render', fraction),[39m
+[31m+           signal,[39m
+[31m+         )[39m
+[31m+       : null;[39m
+[31m+   if (resumeFailure) {[39m
+[31m+     await Promise.resolve();[39m
+[31m+   }[39m
+[31m+   const rendering = ctx.startRendering();[39m
+[31m+   const rendered = await raceArrangementExportAbort([39m
+[31m+     resumeFailure ? Promise.race([rendering, resumeFailure]) : rendering,[39m
+[31m+     signal,[39m
+[31m+   );[39m
+[31m+   if (signal?.aborted) {[39m
+[31m+     throw new ArrangementExportCancelledError();[39m
+[31m+   }[39m
+[31m+   onProgress?.('render', 1);[39m
+[31m+   return encodeArrangementWavStreamOffMainThread([39m
+[31m+     rendered,[39m
+[31m+     (fraction) => onProgress?.('wav', fraction),[39m
+[31m+     signal,[39m
+[31m+ [7m  )[27m;[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/track-pan.test.tsx:[2m447:22[22m[39m
+    [90m445| [39m      [34mexpect[39m(bodyEnd)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m446| [39m      [35mconst[39m render [33m=[39m tail[33m.[39m[34mslice[39m([34m0[39m[33m,[39m bodyEnd)[33m;[39m
+    [90m447| [39m      [34mexpect[39m(render)[33m.[39m[34mtoContain[39m(
+    [90m   | [39m                     [31m^[39m
+    [90m448| [39m        "return { blob: new Blob([bytes], { type: 'audio/wav' }), ...r…
+    [90m449| [39m      )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/22]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m11 failed[39m[22m[2m | [22m[1m[32m20 passed[39m[22m[90m (31)[39m
+[2m      Tests [22m [1m[31m22 failed[39m[22m[2m | [22m[1m[32m473 passed[39m[22m[90m (495)[39m
+[2m   Start at [22m 04:47:26
+[2m   Duration [22m 25.84s[2m (transform 5.78s, setup 0ms, import 26.02s, tests 44.32s, environment 25.08s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/clip-fades.test.ts > SRW-18 stage 1 export render (FD8b) > FD8b an export renders a faded clip through its own fade gain with the same ramps,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/clip-fades.test.ts:517:7%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/envelope.test.ts > SRW-18 stage 2 export render (EV6b) > EV6b an export renders an enveloped clip through its own envelope gain,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/envelope.test.ts:673:7%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC2–EC3 renderArrangementWav honours the signal and a resume error > EC3 a rejected suspend() alone still renders,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:409:20%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR1 no window renders the whole project exactly like the 0-based plan,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:181:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:214:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR1 no window keeps ceil for a fractional project end,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:181:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:225:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR1 window 4–9 on a 20 s project%3A 240000 frames%2C mid-start offsets%2C outside clips skipped,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:180:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:232:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR1 the window length is rounded%2C not ceiled (4–9.00001 s stays 240000 frames),line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:180:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:243:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR2 a fade-in 3–5 s with window start 4 begins at 0.5 and reaches 1 at render time 1,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:180:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:253:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR2 an envelope crossing the window start begins at its mid-value,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:180:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:277:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR3 overload is measured over the window only,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:180:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:305:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-range.test.ts > SRW-20 stage 1 range export renderer (D-29z50%2C R20-X1) > XR4 a window past the project end renders its own length with silence after the end,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ renderOnce app/lib/arrangement/__tests__/export-range.test.ts:180:7%0A ❯ app/lib/arrangement/__tests__/export-range.test.ts:318:29%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > SRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56%2C GATE89-S2) > IP4 the worker module encodes the posted channels in place and transfers only the bytes,line=129,column=27::AssertionError: expected { type: 'error', …(1) } to match object { type: 'complete', peak: 1.5, …(1) }%0A(1 matching property omitted from actual)%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "clippedSamples": 134689,%0A-   "peak": 1.5,%0A-   "type": "complete",%0A+   "type": "error",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:129:27%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a WAV encoding off the main thread (D-29z52) > EW7 the worker module posts whole-percent progress%2C transfers the bytes on complete and reports errors,line=214,column=29::AssertionError: expected 0 to be greater than 2%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:214:29%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a render progress through OfflineAudioContext.suspend (EW6) > EW6 with onProgress%2C suspends are scheduled before startRendering at the quantum frames and progress runs render then wav,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:384:20%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a render progress through OfflineAudioContext.suspend (EW6) > EW6 without onProgress no suspend is called%2C and a context without suspend still renders,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:411:19%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a render progress through OfflineAudioContext.suspend (EW6) > EW6 a rejecting suspend does not fail the render,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:445:22%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/master.test.ts > renderArrangementWav applies the Master and reports the pre-clamp overload > sets the offline master gain from the model and measures raw samples before the unchanged clamp,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/master.test.ts:323:20%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/master.test.ts > renderArrangementWav applies the Master and reports the pre-clamp overload > keeps the offline master gain at exactly 1 at 0 dB and 0 when muted,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/master.test.ts:345:5%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/meter.test.ts > renderArrangementWav passes no meter tap > connects the offline master only to the destination,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/meter.test.ts:312:5%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/track-group-mix.test.ts > track group mix graph (GM8) > GM8 renderArrangementWav renders with the effective group gains,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/track-group-mix.test.ts:373:5%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/export-wav.ts,title=app/lib/arrangement/__tests__/track-meter.test.ts > renderArrangementWav gets no track taps > connects every offline panner only to the master and the master only to the destination,line=114,column=11::Error: WAV stream: invalid length or channel count%0A ❯ createArrangementWavStreamWriter app/lib/arrangement/export-wav.ts:114:11%0A ❯ encodeArrangementWavStreamOffMainThread app/lib/arrangement/export-wav.client.ts:146:22%0A ❯ renderArrangementWav app/lib/arrangement/graph.client.ts:585:10%0A ❯ app/lib/arrangement/__tests__/track-meter.test.ts:325:5%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/scratch/app/lib/arrangement/__tests__/track-pan.test.tsx,title=app/lib/arrangement/__tests__/track-pan.test.tsx > Track Pan (SRW-13 stage 4a%2C FB-05%2C R13-M2) > graph > renderArrangementWav keeps the same applySchedule call and never calls setTrackPan,line=447,column=22::AssertionError: expected 'export async function renderArrangeme…' to contain 'return { blob: new Blob([bytes], { ty…'%0A%0A- Expected%0A+ Received%0A%0A- return { blob: new Blob([bytes], { type: 'audio/wav' }), ...report };%0A+ export async function renderArrangementWav(%0A+   arrangement: Arrangement,%0A+   buffers: ReadonlyMap<string, AudioBuffer>,%0A+   renderWindow?: ArrangementRenderWindow,%0A+   renderOptions?: ArrangementRenderOptions,%0A+ ): Promise<ArrangementWavResult> {%0A+   const signal = renderOptions?.signal;%0A+   if (signal?.aborted) {%0A+     throw new ArrangementExportCancelledError();%0A+   }%0A+   const end = projectEnd(arrangement);%0A+   if (end <= 0) {%0A+     throw new Error(studioExportStrings.emptyProjectError);%0A+   }%0A+   const length = renderWindow%0A+     ? Math.round((renderWindow.end - renderWindow.start) * ARRANGEMENT_EXPORT_SAMPLE_RATE)%0A+     : Math.ceil(end * ARRANGEMENT_EXPORT_SAMPLE_RATE);%0A+   const ctx = new OfflineAudioContext({%0A+     numberOfChannels: 2,%0A+     length,%0A+     sampleRate: ARRANGEMENT_EXPORT_SAMPLE_RATE,%0A+   });%0A+   const options: ApplyScheduleOptions<AudioBuffer> = {%0A+     buffers,%0A+     tracks: arrangement.tracks,%0A+     from: 0,%0A+     startAt: 0,%0A+     masterGain: masterLinearGain(arrangement.master),%0A+     clipGains: clipLinearGains(arrangement),%0A+     clipFades: clipFadeShapes(arrangement),%0A+     clipEnvelopes: clipEnvelopeShapes(arrangement),%0A+     trackGains: trackEffectiveGains(arrangement),%0A+   };%0A+   if (renderWindow) {%0A+     applySchedule(ctx, planSchedule(arrangement, renderWindow.start, renderWindow.end), {%0A+       ...options,%0A+       from: renderWindow.start,%0A+     });%0A+   } else {%0A+     applySchedule(ctx, planSchedule(arrangement, 0), options);%0A+   }%0A+   const onProgress = renderOptions?.onProgress;%0A+   const resumeFailure =%0A+     onProgress || signal%0A+       ? scheduleArrangementRenderProgress(%0A+           ctx,%0A+           length,%0A+           (fraction) => onProgress?.('render', fraction),%0A+           signal,%0A+         )%0A+       : null;%0A+   if (resumeFailure) {%0A+     await Promise.resolve();%0A+   }%0A+   const rendering = ctx.startRendering();%0A+   const rendered = await raceArrangementExportAbort(%0A+     resumeFailure ? Promise.race([rendering, resumeFailure]) : rendering,%0A+     signal,%0A+   );%0A+   if (signal?.aborted) {%0A+     throw new ArrangementExportCancelledError();%0A+   }%0A+   onProgress?.('render', 1);%0A+   return encodeArrangementWavStreamOffMainThread(%0A+     rendered,%0A+     (fraction) => onProgress?.('wav', fraction),%0A+     signal,%0A+   );%0A%0A ❯ app/lib/arrangement/__tests__/track-pan.test.tsx:447:22%0A%0A

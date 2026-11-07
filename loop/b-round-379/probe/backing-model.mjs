@@ -1,0 +1,25 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+const out = process.argv[2];
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.goto('http://127.0.0.1:5173/studio-lab');
+await page.getByText('Demo collection ready').first().waitFor({ timeout: 90000 }).catch(() => {});
+const cdp = await page.context().newCDPSession(page);
+const mib = async () => { await cdp.send('HeapProfiler.collectGarbage'); const u = await cdp.send('Runtime.getHeapUsage'); return Math.round(((u.backingStorageSize ?? 0) / 1048576) * 10) / 10; };
+const frames = 4864896; // export.1 length from res.export.1.bytes (29189420-44)/6
+const rows = [];
+const step = async (name, fn) => { const t0 = Date.now(); await page.evaluate(fn, frames); rows.push({ name, backingMiB: await mib(), ms: Date.now() - t0 }); };
+await step('baseline', () => {});
+await step('rendered AudioBuffer (no channel access)', async (n) => { const c = new OfflineAudioContext({ numberOfChannels: 2, length: n, sampleRate: 48000 }); const o = c.createOscillator(); o.connect(c.destination); o.start(); window.__r = await c.startRendering(); });
+await step('copyFromChannel 1 s chunk x2 (no getChannelData)', (n) => { const a = new Float32Array(48000), b = new Float32Array(48000); window.__r.copyFromChannel(a, 0, 0); window.__r.copyFromChannel(b, 1, 0); window.__chunk = [a, b]; });
+await step('getChannelData x2 (views kept)', () => { window.__views = [0, 1].map((i) => window.__r.getChannelData(i)); });
+await step('slice copies x2', () => { window.__copies = window.__views.map((v) => v.slice()); });
+await step('wav bytes ArrayBuffer (6 B/frame)', (n) => { window.__bytes = new ArrayBuffer(44 + n * 6); });
+await step('Blob from bytes', () => { window.__blob = new Blob([window.__bytes], { type: 'audio/wav' }); });
+await step('drop bytes, copies, views (blob kept)', () => { window.__bytes = null; window.__copies = null; window.__views = null; });
+await step('drop AudioBuffer (blob kept)', () => { window.__r = null; });
+await step('Blob made in a worker, received in page', async (n) => { const src = `onmessage=(e)=>{const b=new ArrayBuffer(44+e.data*6);postMessage(new Blob([b]));}`; const w = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' }))); window.__wblob = await new Promise((r) => { w.onmessage = (e) => r(e.data); w.postMessage(n); }); w.terminate(); });
+const fs = await import('node:fs');
+fs.writeFileSync(out, JSON.stringify({ url: 'http://127.0.0.1:5173/studio-lab', frames, chromium: browser.version(), rows }, null, 1));
+console.log(JSON.stringify(rows, null, 1));
+await browser.close();

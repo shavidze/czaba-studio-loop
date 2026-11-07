@@ -1,0 +1,229 @@
+--- a/app/lib/arrangement/__tests__/helpers/fake-rendered-buffer.ts
++++ b/app/lib/arrangement/__tests__/helpers/fake-rendered-buffer.ts
+@@ -0,0 +1,24 @@
++export interface FakeRenderedBuffer {
++  sampleRate: number;
++  length: number;
++  numberOfChannels: number;
++  getChannelData(index: number): Float32Array;
++  copyFromChannel(destination: Float32Array, channelNumber: number, bufferOffset: number): void;
++}
++
++export function fakeRenderedBuffer(
++  channels: Float32Array[],
++  sampleRate = 48000,
++): FakeRenderedBuffer {
++  return {
++    sampleRate,
++    length: channels[0]?.length ?? 0,
++    numberOfChannels: channels.length,
++    getChannelData: (index) => channels[index],
++    copyFromChannel: (destination, channelNumber, bufferOffset) => {
++      destination.set(
++        channels[channelNumber].subarray(bufferOffset, bufferOffset + destination.length),
++      );
++    },
++  };
++}
+--- a/app/lib/arrangement/__tests__/export-range.test.ts
++++ b/app/lib/arrangement/__tests__/export-range.test.ts
+@@ -11,6 +11,7 @@
+ } from '../graph.client';
+ import { createArrangement, projectEnd } from '../model';
+ import { planSchedule } from '../schedule';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ type ParamCall = ['set', number, number] | ['ramp', number, number];
+ 
+@@ -121,10 +122,7 @@
+       }
+     }
+     const channels = [channel, Float32Array.from(channel)];
+-    return Promise.resolve({
+-      sampleRate: this.sampleRate,
+-      getChannelData: (index: number) => channels[index],
+-    });
++    return Promise.resolve(fakeRenderedBuffer(channels, this.sampleRate));
+   }
+ }
+ 
+--- a/app/lib/arrangement/__tests__/master.test.ts
++++ b/app/lib/arrangement/__tests__/master.test.ts
+@@ -28,6 +28,7 @@
+   undoHistory,
+ } from '../model';
+ import { studioExportStrings } from '../strings';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ interface FakeBuffer {
+   id: string;
+@@ -301,10 +302,7 @@
+     }
+     startRendering() {
+       const channels = [Float32Array.of(1.1, 0.5), Float32Array.of(-1.2, 0)];
+-      return Promise.resolve({
+-        sampleRate: 48000,
+-        getChannelData: (index: number) => channels[index],
+-      });
++      return Promise.resolve(fakeRenderedBuffer(channels));
+     }
+   }
+ 
+--- a/app/lib/arrangement/__tests__/clip-fades.test.ts
++++ b/app/lib/arrangement/__tests__/clip-fades.test.ts
+@@ -30,6 +30,7 @@
+ import { planLoopIteration } from '../loop';
+ import { createArrangement, deleteTime, splitClipAt, trimClipEnd, trimClipStart } from '../model';
+ import { planSchedule } from '../schedule';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ function fadeArrangement(clips: ArrangementClip[]): Arrangement {
+   const base = createArrangement([
+@@ -505,7 +506,7 @@
+         contexts.push(this);
+       }
+       startRendering() {
+-        return Promise.resolve({ sampleRate: 48000, getChannelData: () => new Float32Array(4) });
++        return Promise.resolve(fakeRenderedBuffer([new Float32Array(4), new Float32Array(4)]));
+       }
+     }
+     vi.stubGlobal('OfflineAudioContext', RenderRecordingContext);
+--- a/app/lib/arrangement/__tests__/envelope.test.ts
++++ b/app/lib/arrangement/__tests__/envelope.test.ts
+@@ -49,6 +49,7 @@
+ } from '../model';
+ import { planSchedule } from '../schedule';
+ import { trackVolumeFromDb } from '../track-volume-db';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ const V_POINTS: ArrangementClipEnvelopePoint[] = [
+   { time: 4, gain: 1 },
+@@ -661,7 +662,7 @@
+         contexts.push(this);
+       }
+       startRendering() {
+-        return Promise.resolve({ sampleRate: 48000, getChannelData: () => new Float32Array(4) });
++        return Promise.resolve(fakeRenderedBuffer([new Float32Array(4), new Float32Array(4)]));
+       }
+     }
+     vi.stubGlobal('OfflineAudioContext', RenderRecordingContext);
+--- a/app/lib/arrangement/__tests__/track-group-mix.test.ts
++++ b/app/lib/arrangement/__tests__/track-group-mix.test.ts
+@@ -25,6 +25,7 @@
+   planSchedule,
+   trackEffectiveGains,
+ } from '../schedule';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ const CLIPS: ArrangementClip[] = [
+   { id: 'cm', trackId: 'music', sourceId: 'song', start: 0, sourceOffset: 0, duration: 10 },
+@@ -323,7 +324,7 @@
+     renderedContexts.push(this);
+   }
+   startRendering() {
+-    return Promise.resolve({ sampleRate: 48000, getChannelData: () => new Float32Array(8) });
++    return Promise.resolve(fakeRenderedBuffer([new Float32Array(8), new Float32Array(8)]));
+   }
+ }
+ 
+--- a/app/lib/arrangement/__tests__/meter.test.ts
++++ b/app/lib/arrangement/__tests__/meter.test.ts
+@@ -28,6 +28,7 @@
+   stepMeter,
+ } from '../meter';
+ import { createArrangement } from '../model';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ interface FakeBuffer {
+   id: string;
+@@ -287,10 +288,7 @@
+     }
+     startRendering() {
+       const channels = [Float32Array.of(0.5, 0), Float32Array.of(0, 0)];
+-      return Promise.resolve({
+-        sampleRate: 48000,
+-        getChannelData: (index: number) => channels[index],
+-      });
++      return Promise.resolve(fakeRenderedBuffer(channels));
+     }
+   }
+ 
+--- a/app/lib/arrangement/__tests__/track-meter.test.ts
++++ b/app/lib/arrangement/__tests__/track-meter.test.ts
+@@ -20,6 +20,7 @@
+   stepMeter,
+ } from '../meter';
+ import { createArrangement } from '../model';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ interface FakeBuffer {
+   id: string;
+@@ -292,10 +293,7 @@
+     }
+     startRendering() {
+       const channels = [Float32Array.of(0.1, 0.2), Float32Array.of(0.1, 0.2)];
+-      return Promise.resolve({
+-        sampleRate: 48000,
+-        getChannelData: (index: number) => channels[index],
+-      });
++      return Promise.resolve(fakeRenderedBuffer(channels));
+     }
+   }
+ 
+--- a/app/lib/arrangement/__tests__/export-cancel.test.ts
++++ b/app/lib/arrangement/__tests__/export-cancel.test.ts
+@@ -11,6 +11,7 @@
+ import { renderArrangementWav } from '../graph.client';
+ import { createArrangement } from '../model';
+ import { studioExportStrings } from '../strings';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ async function settleMicrotasks(rounds = 10) {
+   for (let i = 0; i < rounds; i++) {
+@@ -113,10 +114,7 @@
+ 
+ function renderedChannels() {
+   const channels = [Float32Array.of(0.25, 0.5, -0.25), Float32Array.of(-0.5, 0, 0.75)];
+-  return {
+-    sampleRate: 48000,
+-    getChannelData: (index: number) => channels[index] ?? new Float32Array(3),
+-  };
++  return fakeRenderedBuffer(channels);
+ }
+ 
+ class PlainOfflineContext {
+--- a/app/lib/arrangement/__tests__/export-wav.test.ts
++++ b/app/lib/arrangement/__tests__/export-wav.test.ts
+@@ -14,6 +14,7 @@
+ import { MAX_24BIT_SAMPLE } from '../meter';
+ import { createArrangement } from '../model';
+ import { studioExportStrings } from '../strings';
++import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ function wavOracle(raw: readonly Float32Array[], sampleRate: number) {
+   const report = measureExportOverload(raw);
+@@ -304,10 +305,7 @@
+   }
+   renderedChannels() {
+     const channels = [Float32Array.of(1.25, 0.5, -0.25), Float32Array.of(-1.5, 0, 0.75)];
+-    return Promise.resolve({
+-      sampleRate: 48000,
+-      getChannelData: (index: number) => channels[index] ?? new Float32Array(3),
+-    });
++    return Promise.resolve(fakeRenderedBuffer(channels));
+   }
+ }
+ 
+--- a/app/lib/arrangement/__tests__/track-pan.test.tsx
++++ b/app/lib/arrangement/__tests__/track-pan.test.tsx
+@@ -444,9 +444,7 @@
+       const bodyEnd = tail.search(/\r?\n\}\r?\n/);
+       expect(bodyEnd).toBeGreaterThan(0);
+       const render = tail.slice(0, bodyEnd);
+-      expect(render).toContain(
+-        "return { blob: new Blob([bytes], { type: 'audio/wav' }), ...report };",
+-      );
++      expect(render).toContain('return encodeArrangementWavStreamOffMainThread(');
+       expect(render).toContain('applySchedule(ctx, planSchedule(arrangement, 0)');
+       expect(render).toContain('tracks: arrangement.tracks,');
+       expect(render).toContain('clipGains: clipLinearGains(arrangement)');

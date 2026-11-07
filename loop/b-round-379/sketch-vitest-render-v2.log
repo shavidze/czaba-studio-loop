@@ -1,0 +1,543 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav-in-place.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 201[2mms[22m[39m
+[31m     [31m×[31m IP1 encodeArrangementWavInPlace bytes equal the oracle and the report is measured on the unclamped samples[39m[32m 41[2mms[22m[39m
+[31m     [31m×[31m IP2 the same array objects passed in hold the clamped samples afterwards[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m IP3 in-place encoding progress never decreases and ends at 1[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m IP4 the worker module encodes the posted channels in place and transfers only the bytes[39m[32m 93[2mms[22m[39m
+[31m     [31m×[31m IP5 encodeArrangementWav still leaves its input untouched and matches the in-place result[39m[32m 47[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 116[2mms[22m[39m
+     [32m✓[39m exports the exact messages and a named cancel error[32m 2[2mms[22m[39m
+     [32m✓[39m without a signal returns the same promise and its result[32m 1[2mms[22m[39m
+     [32m✓[39m with a pre-aborted signal rejects with the cancel error[32m 0[2mms[22m[39m
+     [32m✓[39m an abort mid-flight rejects with the cancel error even though the work resolves later[32m 1[2mms[22m[39m
+     [32m✓[39m a work rejection before any abort passes that error through[32m 0[2mms[22m[39m
+     [32m✓[39m removes its abort listener once the work settles[32m 2[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal with a work that rejects later raises no unhandled rejection[32m 16[2mms[22m[39m
+     [32m✓[39m a late work rejection after an abort raises no unhandled rejection[32m 14[2mms[22m[39m
+     [32m✓[39m EC2 a pre-aborted signal rejects cancelled and never constructs an OfflineAudioContext[32m 1[2mms[22m[39m
+     [32m✓[39m EC2 a signal alone schedules suspend points, and an abort before the first suspend resolves never resumes[32m 26[2mms[22m[39m
+     [32m✓[39m EC2 an abort after one resumed suspend stops resuming at the next suspend point[32m 24[2mms[22m[39m
+     [32m✓[39m EC2 an abort after startRendering resolved but before the worker constructs no Worker[32m 4[2mms[22m[39m
+     [32m✓[39m EC3 GATE89-S1 a rejected resume() rejects the render with that error instead of hanging[32m 1[2mms[22m[39m
+     [32m✓[39m EC3 a rejected suspend() alone still renders[32m 5[2mms[22m[39m
+[31m     [31m×[31m a pre-aborted signal rejects cancelled and constructs no Worker[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m the no-Worker fallback checks the signal before it encodes[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m an abort mid-encode terminates once, rejects cancelled, and a later complete changes nothing[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m removes the abort listener on complete and on a worker failure[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m a 3-argument call behaves as before: posts transferred channels, forwards progress, resolves on complete[39m[32m 1[2mms[22m[39m
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m18 tests[22m[2m | [22m[31m10 failed[39m[2m)[22m[33m 710[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 521[2mms[22m[39m
+     [32m✓[39m EW2 graph.client re-exports the same measureExportOverload[32m 0[2mms[22m[39m
+     [32m✓[39m EW3 encoding progress never decreases and ends at 1[32m 38[2mms[22m[39m
+[31m     [31m×[31m EW4 without a Worker global the client encodes on the calling thread with identical bytes[39m[32m 34[2mms[22m[39m
+[31m     [31m×[31m EW5 the worker path posts transferred channels, forwards progress, resolves on complete and terminates[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m EW5 worker error, onerror and onmessageerror each reject with the exact message and terminate[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW5 a Worker constructor that throws rejects with the exact message[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW7 the worker module posts whole-percent progress, transfers the bytes on complete and reports errors[39m[32m 39[2mms[22m[39m
+     [32m✓[39m EW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav[32m 33[2mms[22m[39m
+     [32m✓[39m EW6 without onProgress no suspend is called, and a context without suspend still renders[32m 2[2mms[22m[39m
+     [32m✓[39m EW6 a throwing progress callback still resumes every suspend, so the render settles instead of hanging[32m 24[2mms[22m[39m
+     [32m✓[39m EW6 a rejecting suspend does not fail the render[32m 4[2mms[22m[39m
+[31m     [31m×[31m EW8a a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m EW8b a progress message restarts the stall timer and is still forwarded[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW8c complete before the timeout resolves, clears the timer and ignores a late progress[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW8d an abort mid-encode rejects cancelled and clears the timer[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m EW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer and ignores a late progress[39m[32m 1[2mms[22m[39m
+     [32m✓[39m EW8f the stall timeout is exactly 30 s and the stalled message is exact[32m 0[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: navigation to another Document
+Not implemented: navigation to another Document
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/metronome-ui.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 2848[2mms[22m[39m
+     [33m[2m✓[22m[39m UI1 is disabled and unpressed without a tempo, and Play schedules no metronome [33m 383[2mms[22m[39m
+     [33m[2m✓[22m[39m UI2 turns on at 120 BPM with its status and Play schedules a click on every beat [33m 363[2mms[22m[39m
+     [33m[2m✓[22m[39m UI3 turning it off while playing forces one resync without a metronome [33m 307[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-tab-stops.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 3153[2mms[22m[39m
+     [33m[2m✓[22m[39m TR1 WAV checked: Tab from the checked and from the unchecked format radio stays native; Tab from Cancel wraps to X [33m 1176[2mms[22m[39m
+     [33m[2m✓[22m[39m TR2 MP3 checked: Tab from the checked MP3 radio stays native; Tab from Cancel wraps to X [33m 521[2mms[22m[39m
+     [33m[2m✓[22m[39m TR3 WAV + MP3 checked: Tab from the both radio stays native; Tab from Cancel wraps to X (C round 88 V3) [33m 378[2mms[22m[39m
+     [33m[2m✓[22m[39m TR4 MP3 checked: Shift+Tab from X and from the trap wrapper goes to Cancel, the last stop [33m 406[2mms[22m[39m
+     [33m[2m✓[22m[39m TR5 render: Shift+Tab from the checked WAV radio, Tab from X and Shift+Tab from Cancel stay native [33m 344[2mms[22m[39m
+     [33m[2m✓[22m[39m TR6 idle: Tab from the checked format and scope radios stays native; Export ↔ X wrap [33m 310[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/master-ui.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[33m 3272[2mms[22m[39m
+       [33m[2m✓[22m[39m renders the Master group with Mute, the fader and a readout that follows the value [33m 308[2mms[22m[39m
+       [33m[2m✓[22m[39m sits in the footer's last row, directly before the Shortcuts button, and renders 0 times per Play frame [33m 1955[2mms[22m[39m
+       [33m[2m✓[22m[39m FOCUS-KEEP: keeps the same focused Master Volume node while the footer content changes [33m 651[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-focus.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 6473[2mms[22m[39m
+     [33m[2m✓[22m[39m moves focus to Done inside the dialog when it opens [33m 1020[2mms[22m[39m
+     [33m[2m✓[22m[39m wraps Tab from the last control to the first and Shift+Tab from the first to the last [33m 472[2mms[22m[39m
+     [33m[2m✓[22m[39m restores focus to the remembered opener when the dialog closes [33m 352[2mms[22m[39m
+     [33m[2m✓[22m[39m does not swallow Enter on Done, and its activation closes without starting an export [33m 363[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps Space on a dialog button away from the transport [33m 311[2mms[22m[39m
+     [33m[2m✓[22m[39m returns focus to ✕ of the expanded video after Esc closes Export, and keeps the video expanded [33m 500[2mms[22m[39m
+     [33m[2m✓[22m[39m leaves focus on an enabled control while a render starts and ends [33m 318[2mms[22m[39m
+     [33m[2m✓[22m[39m sends Tab to the first control and Shift+Tab to the last when focus sits on the dialog itself [33m 403[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps X → WAV → MP3 → WAV + MP3 → project scope → Done → Export WAV in DOM order and intercepts Tab only at the ends (C-R14-02) [33m 384[2mms[22m[39m
+     [33m[2m✓[22m[39m leaves Enter and Space alone on the last control and Enter on the first, so focus stays put (C-R15-03, D-29g) [33m 321[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/clip-gain.test.tsx [2m([22m[2m28 tests[22m[2m)[22m[33m 2438[2mms[22m[39m
+       [33m[2m✓[22m[39m type 6 + Enter commits one entry, shows the status and the stored text [33m 530[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-mp3.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 2417[2mms[22m[39m
+     [33m[2m✓[22m[39m MX1 WAV is the default, MP3 and WAV + MP3 are enabled with exact texts, video stays disabled, reopen resets to WAV [33m 582[2mms[22m[39m
+     [33m[2m✓[22m[39m MX10 mounting the workspace, opening Export and a WAV export never touch the encoder [33m 690[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-pan.test.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 2609[2mms[22m[39m
+       [33m[2m✓[22m[39m audio lanes show Pan and its reset; the video lane and a folded lane do not [33m 644[2mms[22m[39m
+       [33m[2m✓[22m[39m a pointer drag follows the draft live without history, then commits one entry showing NL [33m 451[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/collection-load-status.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 2215[2mms[22m[39m
+     [33m[2m✓[22m[39m LS1 empty demo collection: the status is exactly the demo empty text, loadSource is never called and nothing logs an error [33m 310[2mms[22m[39m
+     [33m[2m✓[22m[39m LS3 a collection swap resets the status to the new origin loading text until the new load settles [33m 337[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-cancel-ui.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 2059[2mms[22m[39m
+     [33m[2m✓[22m[39m CU3 load-phase cancel before the import resolves (runs first in this file, while the import gate is still closed): the import resets exactly once, never loads, and the next MP3 export succeeds [33m 561[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/metronome-horizon-ui.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 2114[2mms[22m[39m
+     [33m[2m✓[22m[39m HU1 Play from 0 schedules only the first 2 s of clicks [33m 569[2mms[22m[39m
+Not implemented: navigation to another Document
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 2006[2mms[22m[39m
+     [33m[2m✓[22m[39m DXL1: the Detail group count is foreground with font-medium and no brass [33m 456[2mms[22m[39m
+     [33m[2m✓[22m[39m DXL5: the Library filter value is foreground inside the muted filter line [33m 452[2mms[22m[39m
+     [33m[2m✓[22m[39m DXL6: every Grid menu check slot is foreground and checked items still draw one lucide check [33m 370[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 1716[2mms[22m[39m
+     [33m[2m✓[22m[39m HE1 a repeated Enter on Done after a render-phase WAV cancel is prevented: no close, the cancelled status stays and focus stays on Done [33m 591[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-range-ui.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 1423[2mms[22m[39m
+     [33m[2m✓[22m[39m XU1 no range: project checked, range disabled with the reason, whole-project export unchanged [33m 376[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-a11y-copy.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 1467[2mms[22m[39m
+     [33m[2m✓[22m[39m AN1 no range, no loop: every radio has the exact name and description [33m 627[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-progress-ui.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1374[2mms[22m[39m
+     [33m[2m✓[22m[39m PU4 the 120 s timer covers the encoder import, the timeout clears the progress, and a module that arrives later never starts a load and resets [33m 565[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-range.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 727[2mms[22m[39m
+Not implemented: Window's scrollTo() method
+ [32m✓[39m app/lib/arrangement/__tests__/export-dialog-footer.test.tsx [2m([22m[2m15 tests[22m[2m)[22m[33m 1154[2mms[22m[39m
+     [33m[2m✓[22m[39m FT1 idle: the footer is sticky, opaque, holds Done and Export only, and is the last child of ModalBody [33m 303[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/strings.test.ts [2m([22m[2m64 tests[22m[2m)[22m[32m 134[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1075[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/envelope.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 116[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/peaks-worker-video.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 103[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/video-import-status-ui.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 127[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/graph.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 57[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-group-mix.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/track-meter.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/meter.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/clip-fades.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m app/lib/arrangement/__tests__/master.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 20 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 encodeArrangementWavOffMainThread honours the signal[2m > [22ma pre-aborted signal rejects cancelled and constructs no Worker
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m430:7[22m[39m
+    [90m428| [39m    controller[33m.[39m[34mabort[39m()[33m;[39m
+    [90m429| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34moutcomeOf[39m(
+    [90m430| [39m      encodeArrangementWavOffMainThread(channels(), 48000, undefined, …
+    [90m   | [39m      [31m^[39m
+    [90m431| [39m    )[33m;[39m
+    [90m432| [39m    [34mexpect[39m([34misArrangementExportCancelledError[39m(result))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 encodeArrangementWavOffMainThread honours the signal[2m > [22mthe no-Worker fallback checks the signal before it encodes
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m442:7[22m[39m
+    [90m440| [39m    [35mconst[39m progress [33m=[39m vi[33m.[39m[34mfn[39m()[33m;[39m
+    [90m441| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34moutcomeOf[39m(
+    [90m442| [39m      encodeArrangementWavOffMainThread(channels(), 48000, progress, c…
+    [90m   | [39m      [31m^[39m
+    [90m443| [39m    )[33m;[39m
+    [90m444| [39m    [34mexpect[39m([34misArrangementExportCancelledError[39m(result))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 encodeArrangementWavOffMainThread honours the signal[2m > [22man abort mid-encode terminates once, rejects cancelled, and a later complete changes nothing
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m453:7[22m[39m
+    [90m451| [39m    [35mconst[39m progress [33m=[39m vi[33m.[39m[34mfn[39m()[33m;[39m
+    [90m452| [39m    [35mconst[39m outcome [33m=[39m [34moutcomeOf[39m(
+    [90m453| [39m      encodeArrangementWavOffMainThread(channels(), 48000, progress, c…
+    [90m   | [39m      [31m^[39m
+    [90m454| [39m    )[33m;[39m
+    [90m455| [39m    [35mconst[39m worker [33m=[39m [34mlastWorker[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 encodeArrangementWavOffMainThread honours the signal[2m > [22mremoves the abort listener on complete and on a worker failure
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m471:18[22m[39m
+    [90m469| [39m    [35mconst[39m add [33m=[39m vi[33m.[39m[34mspyOn[39m(controller[33m.[39msignal[33m,[39m [32m'addEventListener'[39m)[33m;[39m
+    [90m470| [39m    [35mconst[39m remove [33m=[39m vi[33m.[39m[34mspyOn[39m(controller[33m.[39msignal[33m,[39m [32m'removeEventListener'[39m)[33m;[39m
+    [90m471| [39m    const done = encodeArrangementWavOffMainThread(channels(), 48000, …
+    [90m   | [39m                 [31m^[39m
+    [90m472| [39m    [34mlastWorker[39m()[33m.[39m[34memit[39m({
+    [90m473| [39m      type[33m:[39m [32m'complete'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mEC4 encodeArrangementWavOffMainThread honours the signal[2m > [22ma 3-argument call behaves as before: posts transferred channels, forwards progress, resolves on complete
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m495:18[22m[39m
+    [90m493| [39m    [35mconst[39m input [33m=[39m [34mchannels[39m()[33m;[39m
+    [90m494| [39m    [35mconst[39m progress [33m=[39m vi[33m.[39m[34mfn[39m()[33m;[39m
+    [90m495| [39m    const done = encodeArrangementWavOffMainThread(input, 48000, progr…
+    [90m   | [39m                 [31m^[39m
+    [90m496| [39m    [35mconst[39m worker [33m=[39m [34mlastWorker[39m()[33m;[39m
+    [90m497| [39m    expect(worker.posted).toEqual({ channels: input, sampleRate: 48000…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mSRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56, GATE89-S2)[2m > [22mIP1 encodeArrangementWavInPlace bytes equal the oracle and the report is measured on the unclamped samples
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m75:20[22m[39m
+    [90m 73| [39m    [35mconst[39m copy [33m=[39m [34mcopyChannels[39m(raw)[33m;[39m
+    [90m 74| [39m    [35mconst[39m expected [33m=[39m [34mwavOracle[39m(copy[33m,[39m [34m48000[39m)[33m;[39m
+    [90m 75| [39m    [35mconst[39m actual [33m=[39m [34mencodeArrangementWavInPlace[39m(raw[33m,[39m [34m48000[39m)[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m 76| [39m    expect({ peak: actual.peak, clippedSamples: actual.clippedSamples …
+    [90m 77| [39m      [34mmeasureExportOverload[39m(copy)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mSRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56, GATE89-S2)[2m > [22mIP2 the same array objects passed in hold the clamped samples afterwards
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m89:5[22m[39m
+    [90m 87| [39m    [35mconst[39m [left[33m,[39m right] [33m=[39m raw[33m;[39m
+    [90m 88| [39m    [35mconst[39m expected [33m=[39m [34mwavOracle[39m([34mcopyChannels[39m(raw)[33m,[39m [34m48000[39m)[33m;[39m
+    [90m 89| [39m    [34mencodeArrangementWavInPlace[39m(raw[33m,[39m [34m48000[39m)[33m;[39m
+    [90m   | [39m    [31m^[39m
+    [90m 90| [39m    [34mexpect[39m(raw[[34m0[39m])[33m.[39m[34mtoBe[39m(left)[33m;[39m
+    [90m 91| [39m    [34mexpect[39m(raw[[34m1[39m])[33m.[39m[34mtoBe[39m(right)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mSRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56, GATE89-S2)[2m > [22mIP3 in-place encoding progress never decreases and ends at 1
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m101:5[22m[39m
+    [90m 99| [39m  it('IP3 in-place encoding progress never decreases and ends at 1', (…
+    [90m100| [39m    [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m101| [39m    encodeArrangementWavInPlace(testChannels(), 48000, (fraction) => f…
+    [90m   | [39m    [31m^[39m
+    [90m102| [39m    [34mexpect[39m(fractions[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m2[39m)[33m;[39m
+    [90m103| [39m    [35mfor[39m ([35mlet[39m i [33m=[39m [34m1[39m[33m;[39m i [33m<[39m fractions[33m.[39mlength[33m;[39m i[33m++[39m) {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mSRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56, GATE89-S2)[2m > [22mIP4 the worker module encodes the posted channels in place and transfers only the bytes
+[31m[1mAssertionError[22m: expected { type: 'error', …(1) } to match object { type: 'complete', peak: 1.5, …(1) }
+(1 matching property omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "clippedSamples": 134689,[39m
+[32m-   "peak": 1.5,[39m
+[32m-   "type": "complete",[39m
+[31m+   "type": "error",[39m
+[2m  }[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m129:27[22m[39m
+    [90m127| [39m    )[33m;[39m
+    [90m128| [39m    [35mconst[39m last [33m=[39m posted[33m.[39m[34mat[39m([33m-[39m[34m1[39m)[33m;[39m
+    [90m129| [39m    [34mexpect[39m(last[33m?.[39mmessage)[33m.[39m[34mtoMatchObject[39m({
+    [90m   | [39m                          [31m^[39m
+    [90m130| [39m      type[33m:[39m [32m'complete'[39m[33m,[39m
+    [90m131| [39m      peak[33m:[39m [34m1.5[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav-in-place.test.ts[2m > [22mSRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56, GATE89-S2)[2m > [22mIP5 encodeArrangementWav still leaves its input untouched and matches the in-place result
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav-in-place.test.ts:[2m152:21[22m[39m
+    [90m150| [39m    [34mexpectSamplesIdentical[39m(raw[33m,[39m copy)[33m;[39m
+    [90m151| [39m    [34mexpect[39m(raw[[34m0[39m][33m?.[39m[[34m0[39m])[33m.[39m[34mtoBe[39m([34m1.5[39m)[33m;[39m
+    [90m152| [39m    const inPlace = encodeArrangementWavInPlace(copyChannels(copy), 48…
+    [90m   | [39m                    [31m^[39m
+    [90m153| [39m    expect({ peak: shared.peak, clippedSamples: shared.clippedSamples …
+    [90m154| [39m      peak[33m:[39m inPlace[33m.[39mpeak[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a WAV encoding off the main thread (D-29z52)[2m > [22mEW4 without a Worker global the client encodes on the calling thread with identical bytes
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m125:26[22m[39m
+    [90m123| [39m    [35mconst[39m expected [33m=[39m [34mwavOracle[39m(raw[33m,[39m [34m48000[39m)[33m;[39m
+    [90m124| [39m    [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m125| [39m    const actual = await encodeArrangementWavOffMainThread(raw, 48000,…
+    [90m   | [39m                         [31m^[39m
+    [90m126| [39m      fractions[33m.[39m[34mpush[39m(fraction)[33m,[39m
+    [90m127| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a WAV encoding off the main thread (D-29z52)[2m > [22mEW5 the worker path posts transferred channels, forwards progress, resolves on complete and terminates
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m138:21[22m[39m
+    [90m136| [39m    [35mconst[39m channels [33m=[39m [[35mnew[39m [33mFloat32Array[39m([34m4[39m)[33m,[39m [35mnew[39m [33mFloat32Array[39m([34m4[39m)][33m;[39m
+    [90m137| [39m    [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m138| [39m    const pending = encodeArrangementWavOffMainThread(channels, 48000,…
+    [90m   | [39m                    [31m^[39m
+    [90m139| [39m      fractions[33m.[39m[34mpush[39m(fraction)[33m,[39m
+    [90m140| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a WAV encoding off the main thread (D-29z52)[2m > [22mEW5 worker error, onerror and onmessageerror each reject with the exact message and terminate
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m167:23[22m[39m
+    [90m165| [39m    ][33m;[39m
+    [90m166| [39m    [35mfor[39m ([35mconst[39m fail [35mof[39m failures) {
+    [90m167| [39m      const pending = encodeArrangementWavOffMainThread([new Float32Ar…
+    [90m   | [39m                      [31m^[39m
+    [90m168| [39m      [35mconst[39m worker [33m=[39m [34mlastWorker[39m()[33m;[39m
+    [90m169| [39m      [34mfail[39m(worker)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a WAV encoding off the main thread (D-29z52)[2m > [22mEW5 a Worker constructor that throws rejects with the exact message
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m186:18[22m[39m
+    [90m184| [39m      }[33m,[39m
+    [90m185| [39m    )[33m;[39m
+    [90m186| [39m    await expect(encodeArrangementWavOffMainThread([new Float32Array(2…
+    [90m   | [39m                 [31m^[39m
+    [90m187| [39m      [35mnew[39m [33mError[39m([33mARRANGEMENT_WAV_WORKER_FAILED_MESSAGE[39m)[33m,[39m
+    [90m188| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mSRW-20 stage 3a WAV encoding off the main thread (D-29z52)[2m > [22mEW7 the worker module posts whole-percent progress, transfers the bytes on complete and reports errors
+[31m[1mAssertionError[22m: expected 0 to be greater than 2[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m215:29[22m[39m
+    [90m213| [39m        [33m:[39m [33mNumber[39m[33m.[39m[33mNaN[39m[33m,[39m
+    [90m214| [39m    )[33m;[39m
+    [90m215| [39m    [34mexpect[39m(percents[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m216| [39m    [34mexpect[39m([35mnew[39m [33mSet[39m(percents)[33m.[39msize)[33m.[39m[34mtoBe[39m(percents[33m.[39mlength)[33m;[39m
+    [90m217| [39m    [34mexpect[39m(percents[33m.[39m[34mat[39m([33m-[39m[34m1[39m))[33m.[39m[34mtoBe[39m([34m100[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3)[2m > [22mEW8a a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:[2m472:19[22m[39m
+    [90m470| [39m  vi[33m.[39m[34museFakeTimers[39m({ toFake[33m:[39m [[32m'setTimeout'[39m[33m,[39m [32m'clearTimeout'[39m] })[33m;[39m
+    [90m471| [39m  [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m472| [39m  [35mconst[39m pending [33m=[39m [34mencodeArrangementWavOffMainThread[39m(
+    [90m   | [39m                  [31m^[39m
+    [90m473| [39m    [[35mnew[39m [33mFloat32Array[39m([34m2[39m)][33m,[39m
+    [90m474| [39m    [34m48000[39m[33m,[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m499:42[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3)[2m > [22mEW8b a progress message restarts the stall timer and is still forwarded
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:[2m472:19[22m[39m
+    [90m470| [39m  vi[33m.[39m[34museFakeTimers[39m({ toFake[33m:[39m [[32m'setTimeout'[39m[33m,[39m [32m'clearTimeout'[39m] })[33m;[39m
+    [90m471| [39m  [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m472| [39m  [35mconst[39m pending [33m=[39m [34mencodeArrangementWavOffMainThread[39m(
+    [90m   | [39m                  [31m^[39m
+    [90m473| [39m    [[35mnew[39m [33mFloat32Array[39m([34m2[39m)][33m,[39m
+    [90m474| [39m    [34m48000[39m[33m,[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m518:45[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3)[2m > [22mEW8c complete before the timeout resolves, clears the timer and ignores a late progress
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:[2m472:19[22m[39m
+    [90m470| [39m  vi[33m.[39m[34museFakeTimers[39m({ toFake[33m:[39m [[32m'setTimeout'[39m[33m,[39m [32m'clearTimeout'[39m] })[33m;[39m
+    [90m471| [39m  [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m472| [39m  [35mconst[39m pending [33m=[39m [34mencodeArrangementWavOffMainThread[39m(
+    [90m   | [39m                  [31m^[39m
+    [90m473| [39m    [[35mnew[39m [33mFloat32Array[39m([34m2[39m)][33m,[39m
+    [90m474| [39m    [34m48000[39m[33m,[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m531:53[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3)[2m > [22mEW8d an abort mid-encode rejects cancelled and clears the timer
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:[2m472:19[22m[39m
+    [90m470| [39m  vi[33m.[39m[34museFakeTimers[39m({ toFake[33m:[39m [[32m'setTimeout'[39m[33m,[39m [32m'clearTimeout'[39m] })[33m;[39m
+    [90m471| [39m  [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m472| [39m  [35mconst[39m pending [33m=[39m [34mencodeArrangementWavOffMainThread[39m(
+    [90m   | [39m                  [31m^[39m
+    [90m473| [39m    [[35mnew[39m [33mFloat32Array[39m([34m2[39m)][33m,[39m
+    [90m474| [39m    [34m48000[39m[33m,[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m547:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3)[2m > [22mEW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer and ignores a late progress
+[31m[1mTypeError[22m: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function[39m
+[36m [2m❯[22m startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:[2m472:19[22m[39m
+    [90m470| [39m  vi[33m.[39m[34museFakeTimers[39m({ toFake[33m:[39m [[32m'setTimeout'[39m[33m,[39m [32m'clearTimeout'[39m] })[33m;[39m
+    [90m471| [39m  [35mconst[39m fractions[33m:[39m number[] [33m=[39m [][33m;[39m
+    [90m472| [39m  [35mconst[39m pending [33m=[39m [34mencodeArrangementWavOffMainThread[39m(
+    [90m   | [39m                  [31m^[39m
+    [90m473| [39m    [[35mnew[39m [33mFloat32Array[39m([34m2[39m)][33m,[39m
+    [90m474| [39m    [34m48000[39m[33m,[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m575:46[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/20]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m28 passed[39m[22m[90m (31)[39m
+[2m      Tests [22m [1m[31m20 failed[39m[22m[2m | [22m[1m[32m475 passed[39m[22m[90m (495)[39m
+[2m   Start at [22m 05:13:08
+[2m   Duration [22m 25.28s[2m (transform 6.13s, setup 0ms, import 25.57s, tests 42.22s, environment 24.88s)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 encodeArrangementWavOffMainThread honours the signal > a pre-aborted signal rejects cancelled and constructs no Worker,line=430,column=7::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:430:7%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 encodeArrangementWavOffMainThread honours the signal > the no-Worker fallback checks the signal before it encodes,line=442,column=7::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:442:7%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 encodeArrangementWavOffMainThread honours the signal > an abort mid-encode terminates once%2C rejects cancelled%2C and a later complete changes nothing,line=453,column=7::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:453:7%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 encodeArrangementWavOffMainThread honours the signal > removes the abort listener on complete and on a worker failure,line=471,column=18::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:471:18%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > EC4 encodeArrangementWavOffMainThread honours the signal > a 3-argument call behaves as before%3A posts transferred channels%2C forwards progress%2C resolves on complete,line=495,column=18::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:495:18%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > SRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56%2C GATE89-S2) > IP1 encodeArrangementWavInPlace bytes equal the oracle and the report is measured on the unclamped samples,line=75,column=20::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:75:20%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > SRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56%2C GATE89-S2) > IP2 the same array objects passed in hold the clamped samples afterwards,line=89,column=5::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:89:5%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > SRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56%2C GATE89-S2) > IP3 in-place encoding progress never decreases and ends at 1,line=101,column=5::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:101:5%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > SRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56%2C GATE89-S2) > IP4 the worker module encodes the posted channels in place and transfers only the bytes,line=129,column=27::AssertionError: expected { type: 'error', …(1) } to match object { type: 'complete', peak: 1.5, …(1) }%0A(1 matching property omitted from actual)%0A%0A- Expected%0A+ Received%0A%0A  {%0A-   "clippedSamples": 134689,%0A-   "peak": 1.5,%0A-   "type": "complete",%0A+   "type": "error",%0A  }%0A%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:129:27%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav-in-place.test.ts,title=app/lib/arrangement/__tests__/export-wav-in-place.test.ts > SRW-20 stage 3b-2 in-place WAV encoding for worker-owned channels (D-29z56%2C GATE89-S2) > IP5 encodeArrangementWav still leaves its input untouched and matches the in-place result,line=152,column=21::TypeError: (0 , __vite_ssr_import_2__.encodeArrangementWavInPlace) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav-in-place.test.ts:152:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a WAV encoding off the main thread (D-29z52) > EW4 without a Worker global the client encodes on the calling thread with identical bytes,line=125,column=26::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:125:26%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a WAV encoding off the main thread (D-29z52) > EW5 the worker path posts transferred channels%2C forwards progress%2C resolves on complete and terminates,line=138,column=21::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:138:21%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a WAV encoding off the main thread (D-29z52) > EW5 worker error%2C onerror and onmessageerror each reject with the exact message and terminate,line=167,column=23::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:167:23%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a WAV encoding off the main thread (D-29z52) > EW5 a Worker constructor that throws rejects with the exact message,line=186,column=18::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:186:18%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > SRW-20 stage 3a WAV encoding off the main thread (D-29z52) > EW7 the worker module posts whole-percent progress%2C transfers the bytes on complete and reports errors,line=215,column=29::AssertionError: expected 0 to be greater than 2%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:215:29%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3) > EW8a a silent worker times out once with the stalled message%2C terminates once%2C and a later complete changes nothing,line=472,column=19::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:472:19%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:499:42%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3) > EW8b a progress message restarts the stall timer and is still forwarded,line=472,column=19::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:472:19%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:518:45%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3) > EW8c complete before the timeout resolves%2C clears the timer and ignores a late progress,line=472,column=19::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:472:19%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:531:53%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3) > EW8d an abort mid-encode rejects cancelled and clears the timer,line=472,column=19::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:472:19%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:547:33%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/b-round-379/apply-check/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3) > EW8e a worker error message is appended trimmed%2C a blank one and onerror keep the exact constant%2C and each clears the timer and ignores a late progress,line=472,column=19::TypeError: (0 , __vite_ssr_import_4__.encodeArrangementWavOffMainThread) is not a function%0A ❯ startStallEncode app/lib/arrangement/__tests__/export-wav.test.ts:472:19%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:575:46%0A%0A

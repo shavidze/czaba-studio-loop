@@ -1,0 +1,98 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const [base, out] = [process.argv[2], process.argv[3]];
+const res = {};
+const browser = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const r = {};
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  await page.goto(base + '/studio-lab', { waitUntil: 'domcontentloaded' });
+  await page.getByText('Demo collection ready').first().waitFor({ timeout: 150000 });
+  r.authUser = await page.evaluate(() => localStorage.getItem('auth_user'));
+  r.labWorkspace = await page.getByTestId('arrangement-marker-add').count();
+  const p2 = await ctx.newPage();
+  await p2.goto(base + '/studio/middle-east', { waitUntil: 'domcontentloaded' });
+  await p2.waitForTimeout(4000);
+  r.protectedText = (await p2.locator('body').innerText()).slice(0, 300);
+  r.signInRequired = /Sign in required/i.test(r.protectedText);
+  r.protectedWorkspace = await p2.getByTestId('arrangement-marker-add').count();
+  r.protectedAudioSrc = await p2.locator('audio[src]').count();
+  const tok = await ctx.request.get(base + '/api/studio-token');
+  const tb = await tok.text();
+  r.tokenStatus = tok.status(); r.tokenBody = tb.slice(0, 200);
+  const fake = await ctx.request.get(base + '/api/studio-token', { headers: { Authorization: 'Bearer fake' } });
+  r.fakeStatus = fake.status();
+  await p2.close();
+  // smoke
+  const errs = []; page.on('pageerror', (e) => errs.push(String(e)));
+  const flags = async () => page.locator('[data-testid="arrangement-marker"]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+  const clipInfo = async () => page.locator('[data-clip-id]').evaluateAll((els) => els.map((e) => ({ track: e.closest('[data-track-id]')?.getAttribute('data-track-id'), start: e.getAttribute('data-clip-start') })));
+  const steps = {};
+  const rec = async (name, extra = {}) => { console.log(name, await page.locator('[data-clip-id]').count()); steps[name] = { flags: await flags(), clips: await clipInfo(), ...extra }; };
+  await page.getByRole('option', { name: /Bass/ }).first().click();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(1000);
+  await rec('addBass');
+  const pos = page.getByTestId('arrangement-position');
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(1500);
+  const clockText = await pos.innerText();
+  const m = clockText.match(/(\d+):(\d+)\.(\d+)/);
+  steps.playClock = { text: clockText, seconds: m ? +m[1] * 60 + +m[2] + +m[3] / 1000 : null };
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('m');
+  await page.keyboard.type('A');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(400);
+  await rec('marker');
+  // drag clip by name bar to the lane below
+  const clip = page.locator('[data-clip-id]').first();
+  const cb = await clip.boundingBox();
+  const lanes = await page.locator('[data-track-id]').evaluateAll((els) => els.map((e) => { const b = e.getBoundingClientRect(); return { id: e.getAttribute('data-track-id'), y: b.y, h: b.height }; }));
+  const own = await clip.evaluate((e) => e.closest('[data-track-id]')?.getAttribute('data-track-id'));
+  const idx = lanes.findIndex((l) => l.id === own);
+  steps.lanes = lanes.map((l) => l.id); steps.ownLane = own;
+  const target = lanes[idx + 1];
+  if (cb && target) {
+    await page.mouse.move(cb.x + 30, cb.y + 6);
+    await page.mouse.down();
+    await page.mouse.move(cb.x + 32, cb.y + 20, { steps: 4 });
+    await page.mouse.move(cb.x + 32, target.y + target.h / 2, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(500);
+  }
+  await rec('afterDrag');
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+  await rec('afterDragUndo');
+  const mm = page.locator('button[aria-label="Master Mute"]');
+  steps.masterMuteFound = await mm.count();
+  await mm.click();
+  await page.waitForTimeout(300);
+  steps.masterMuted = await mm.getAttribute('aria-pressed');
+  await rec('afterMasterMute');
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(300);
+  steps.masterMutedAfterUndo = await mm.getAttribute('aria-pressed');
+  await rec('afterMasterUndo');
+  const pv = page.getByRole('button', { name: /^Preview$/ }).first();
+  steps.previewFound = await pv.count();
+  if (steps.previewFound) {
+    await pv.click(); await page.waitForTimeout(800);
+    steps.previewStopVisible = await page.getByRole('button', { name: /^Stop$/ }).count();
+    await rec('afterPreviewStart');
+    await page.getByRole('button', { name: /^Stop$/ }).first().click(); await page.waitForTimeout(400);
+    await rec('afterPreviewStop');
+  }
+  r.steps = steps;
+  r.errors = errs;
+  await page.screenshot({ path: out.replace('.json', `-${w}.png`) });
+  res[`${w}x${h}`] = r;
+  await ctx.close();
+}
+await browser.close();
+writeFileSync(out, JSON.stringify(res, null, 1));

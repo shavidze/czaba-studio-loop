@@ -1,0 +1,42 @@
+37c37
+< @@ -57,17 +70,79 @@
+---
+> @@ -57,17 +70,82 @@
+94a95,97
+> +      if (frames === 0) {
+> +        throw new Error('WAV stream: empty chunk');
+> +      }
+145c148
+< @@ -14,19 +17,56 @@
+---
+> @@ -14,19 +17,61 @@
+170c173,177
+< +      onProgress?.(written / length);
+---
+> +      try {
+> +        onProgress?.(written / length);
+> +      } catch {
+> +        return;
+> +      }
+189a197
+> +      reportProgress(0);
+208c216
+< @@ -37,6 +77,7 @@
+---
+> @@ -37,6 +82,7 @@
+216c224
+< @@ -69,20 +110,36 @@
+---
+> @@ -69,20 +115,37 @@
+238d245
+< +        reportProgress(message.written);
+246a254
+> +          return;
+247a256
+> +        reportProgress(message.written);
+261c270
+< @@ -90,10 +147,8 @@
+---
+> @@ -90,10 +153,9 @@
+270a280
+> +      reportProgress(0);

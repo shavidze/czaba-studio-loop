@@ -1,0 +1,377 @@
+--- a/app/lib/arrangement/export-wav.ts
++++ b/app/lib/arrangement/export-wav.ts
+@@ -10,14 +10,27 @@
+   bytes: ArrayBuffer;
+ }
+ 
+-export interface ArrangementWavEncodeRequest {
+-  channels: Float32Array[];
+-  sampleRate: number;
++export const ARRANGEMENT_WAV_CHUNK_FRAMES = 65_536;
++
++export interface ArrangementWavChunkSource {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  copyFromChannel(destination: Float32Array, channelNumber: number, bufferOffset: number): void;
++}
++
++export interface ArrangementWavStreamResult extends ExportOverloadReport {
++  blob: Blob;
+ }
+ 
+-export type ArrangementWavEncodeResponse =
+-  | { type: 'progress'; fraction: number }
+-  | ({ type: 'complete' } & ArrangementWavEncoding)
++export type ArrangementWavStreamRequest =
++  | { type: 'begin'; length: number; channelCount: number; sampleRate: number }
++  | { type: 'chunk'; channels: Float32Array[] }
++  | { type: 'finish' };
++
++export type ArrangementWavStreamResponse =
++  | { type: 'ack'; written: number }
++  | ({ type: 'complete' } & ArrangementWavStreamResult)
+   | { type: 'error'; message: string };
+ 
+ export function measureExportOverload(
+@@ -57,17 +70,82 @@
+   return { bytes, ...report };
+ }
+ 
+-export function encodeArrangementWavInPlace(
+-  channels: Float32Array[],
++export interface ArrangementWavStreamWriter {
++  write(channels: readonly Float32Array[]): number;
++  finish(): ArrangementWavEncoding;
++}
++
++export function createArrangementWavStreamWriter(
++  length: number,
++  channelCount: number,
+   sampleRate: number,
+-  onProgress?: (fraction: number) => void,
+-): ArrangementWavEncoding {
+-  const report = measureExportOverload(channels);
+-  for (const channel of channels) {
+-    for (let i = 0; i < channel.length; i++) {
+-      channel[i] = Math.min(MAX_24BIT_SAMPLE, Math.max(-1, channel[i]));
+-    }
++): ArrangementWavStreamWriter {
++  if (
++    !Number.isInteger(length) ||
++    length < 1 ||
++    !Number.isInteger(channelCount) ||
++    channelCount < 1
++  ) {
++    throw new Error('WAV stream: invalid length or channel count');
+   }
+-  const bytes = encodeSfxWav({ sampleRate, channels }, onProgress);
+-  return { bytes, ...report };
++  const size = length * channelCount * 3;
++  const bytes = new ArrayBuffer(44 + size + (size % 2));
++  const view = new DataView(bytes);
++  const tag = (at: number, value: string) => {
++    for (let i = 0; i < value.length; i++) view.setUint8(at + i, value.charCodeAt(i));
++  };
++  tag(0, 'RIFF');
++  view.setUint32(4, size + 36 + (size % 2), true);
++  tag(8, 'WAVE');
++  tag(12, 'fmt ');
++  view.setUint32(16, 16, true);
++  view.setUint16(20, 1, true);
++  view.setUint16(22, channelCount, true);
++  view.setUint32(24, sampleRate, true);
++  view.setUint32(28, sampleRate * channelCount * 3, true);
++  view.setUint16(32, channelCount * 3, true);
++  view.setUint16(34, 24, true);
++  tag(36, 'data');
++  view.setUint32(40, size, true);
++  let written = 0;
++  let peak = 0;
++  let clippedSamples = 0;
++  return {
++    write(channels) {
++      const frames = channels[0]?.length ?? 0;
++      if (frames === 0) {
++        throw new Error('WAV stream: empty chunk');
++      }
++      if (
++        channels.length !== channelCount ||
++        channels.some((channel) => channel.length !== frames)
++      ) {
++        throw new Error('WAV stream: chunk shape does not match');
++      }
++      if (written + frames > length) {
++        throw new Error('WAV stream: more frames than declared');
++      }
++      const report = measureExportOverload(channels);
++      peak = Math.max(peak, report.peak);
++      clippedSamples += report.clippedSamples;
++      for (let i = 0; i < frames; i++) {
++        for (let channel = 0; channel < channelCount; channel++) {
++          const clamped = Math.min(MAX_24BIT_SAMPLE, Math.max(-1, channels[channel][i]));
++          const value = Math.round(clamped * 8388608);
++          const at = 44 + ((written + i) * channelCount + channel) * 3;
++          view.setUint8(at, value & 255);
++          view.setUint8(at + 1, (value >> 8) & 255);
++          view.setUint8(at + 2, (value >> 16) & 255);
++        }
++      }
++      written += frames;
++      return written;
++    },
++    finish() {
++      if (written !== length) {
++        throw new Error('WAV stream: fewer frames than declared');
++      }
++      return { bytes, peak, clippedSamples };
++    },
++  };
+ }
+--- a/app/lib/arrangement/export-wav.client.ts
++++ b/app/lib/arrangement/export-wav.client.ts
+@@ -1,8 +1,11 @@
+ import { ArrangementExportCancelledError } from './export-cancel';
+ import {
+-  type ArrangementWavEncodeResponse,
+-  type ArrangementWavEncoding,
+-  encodeArrangementWav,
++  ARRANGEMENT_WAV_CHUNK_FRAMES,
++  type ArrangementWavChunkSource,
++  type ArrangementWavStreamRequest,
++  type ArrangementWavStreamResponse,
++  type ArrangementWavStreamResult,
++  createArrangementWavStreamWriter,
+ } from './export-wav';
+ import { studioExportStrings } from './strings';
+ 
+@@ -14,19 +17,61 @@
+   ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS / 1000,
+ );
+ 
+-export function encodeArrangementWavOffMainThread(
+-  channels: Float32Array[],
+-  sampleRate: number,
++function copyArrangementWavChunk(
++  source: ArrangementWavChunkSource,
++  offset: number,
++): Float32Array[] {
++  const frames = Math.min(ARRANGEMENT_WAV_CHUNK_FRAMES, source.length - offset);
++  return Array.from({ length: source.numberOfChannels }, (_, channelNumber) => {
++    const chunk = new Float32Array(frames);
++    source.copyFromChannel(chunk, channelNumber, offset);
++    return chunk;
++  });
++}
++
++function createWavProgressReporter(length: number, onProgress?: (fraction: number) => void) {
++  let lastPercent = -1;
++  return (written: number) => {
++    const percent = Math.floor((written / length) * 100);
++    if (percent !== lastPercent) {
++      lastPercent = percent;
++      try {
++        onProgress?.(written / length);
++      } catch {
++        return;
++      }
++    }
++  };
++}
++
++export function encodeArrangementWavStreamOffMainThread(
++  source: ArrangementWavChunkSource,
+   onProgress?: (fraction: number) => void,
+   signal?: AbortSignal,
+-): Promise<ArrangementWavEncoding> {
++): Promise<ArrangementWavStreamResult> {
+   if (signal?.aborted) {
+     return Promise.reject(new ArrangementExportCancelledError());
+   }
++  const { length, numberOfChannels, sampleRate } = source;
++  const reportProgress = createWavProgressReporter(length, onProgress);
+   if (typeof Worker === 'undefined') {
+-    return Promise.resolve(encodeArrangementWav(channels, sampleRate, onProgress));
++    try {
++      const writer = createArrangementWavStreamWriter(length, numberOfChannels, sampleRate);
++      reportProgress(0);
++      for (let offset = 0; offset < length; offset += ARRANGEMENT_WAV_CHUNK_FRAMES) {
++        reportProgress(writer.write(copyArrangementWavChunk(source, offset)));
++      }
++      const { bytes, peak, clippedSamples } = writer.finish();
++      return Promise.resolve({
++        blob: new Blob([bytes], { type: 'audio/wav' }),
++        peak,
++        clippedSamples,
++      });
++    } catch (reason) {
++      return Promise.reject(reason);
++    }
+   }
+-  return new Promise<ArrangementWavEncoding>((resolve, reject) => {
++  return new Promise<ArrangementWavStreamResult>((resolve, reject) => {
+     let worker: Worker;
+     try {
+       worker = new Worker(new URL('./export-wav.worker.ts', import.meta.url), {
+@@ -37,6 +82,7 @@
+       return;
+     }
+     let stallTimer = 0;
++    let offset = 0;
+     const detachWorker = () => {
+       window.clearTimeout(stallTimer);
+       signal?.removeEventListener('abort', handleAbort);
+@@ -69,20 +115,37 @@
+       window.clearTimeout(stallTimer);
+       stallTimer = window.setTimeout(handleStall, ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS);
+     };
+-    worker.onmessage = (event: MessageEvent<ArrangementWavEncodeResponse>) => {
++    const post = (message: ArrangementWavStreamRequest, transfer: Transferable[] = []) => {
++      worker.postMessage(message, transfer);
++    };
++    const postNextChunk = () => {
++      const channels = copyArrangementWavChunk(source, offset);
++      offset += channels[0]?.length ?? 0;
++      post(
++        { type: 'chunk', channels },
++        channels.map((channel) => channel.buffer),
++      );
++    };
++    worker.onmessage = (event: MessageEvent<ArrangementWavStreamResponse>) => {
+       const message = event.data;
+-      if (message.type === 'progress') {
++      if (message.type === 'ack') {
+         armStallTimer();
+-        onProgress?.(message.fraction);
++        try {
++          if (offset < length) {
++            postNextChunk();
++          } else {
++            post({ type: 'finish' });
++          }
++        } catch {
++          fail();
++          return;
++        }
++        reportProgress(message.written);
+         return;
+       }
+       if (message.type === 'complete') {
+         detachWorker();
+-        resolve({
+-          bytes: message.bytes,
+-          peak: message.peak,
+-          clippedSamples: message.clippedSamples,
+-        });
++        resolve({ blob: message.blob, peak: message.peak, clippedSamples: message.clippedSamples });
+         return;
+       }
+       fail(message.message);
+@@ -90,10 +153,9 @@
+     worker.onerror = () => fail();
+     worker.onmessageerror = () => fail();
+     try {
+-      worker.postMessage(
+-        { channels, sampleRate },
+-        channels.map((channel) => channel.buffer).filter((buffer) => buffer instanceof ArrayBuffer),
+-      );
++      post({ type: 'begin', length, channelCount: numberOfChannels, sampleRate });
++      postNextChunk();
++      reportProgress(0);
+     } catch {
+       fail();
+       return;
+--- a/app/lib/arrangement/export-wav.worker.ts
++++ b/app/lib/arrangement/export-wav.worker.ts
+@@ -1,31 +1,43 @@
+ import {
+-  type ArrangementWavEncodeRequest,
+-  type ArrangementWavEncodeResponse,
+-  encodeArrangementWavInPlace,
++  type ArrangementWavStreamRequest,
++  type ArrangementWavStreamResponse,
++  type ArrangementWavStreamWriter,
++  createArrangementWavStreamWriter,
+ } from './export-wav';
+ 
+-const sendWavEncodeMessage = (
+-  message: ArrangementWavEncodeResponse,
+-  transfer: Transferable[] = [],
+-) => self.postMessage(message, { transfer });
++const sendWavStreamMessage = (message: ArrangementWavStreamResponse) => self.postMessage(message);
+ 
+-self.onmessage = (event: MessageEvent<ArrangementWavEncodeRequest>) => {
++let writer: ArrangementWavStreamWriter | null = null;
++
++self.onmessage = (event: MessageEvent<ArrangementWavStreamRequest>) => {
++  const message = event.data;
+   try {
+-    let lastPercent = -1;
+-    const result = encodeArrangementWavInPlace(
+-      event.data.channels,
+-      event.data.sampleRate,
+-      (fraction) => {
+-        const percent = Math.floor(fraction * 100);
+-        if (percent !== lastPercent) {
+-          lastPercent = percent;
+-          sendWavEncodeMessage({ type: 'progress', fraction });
+-        }
+-      },
+-    );
+-    sendWavEncodeMessage({ type: 'complete', ...result }, [result.bytes]);
++    if (message.type === 'begin') {
++      writer = createArrangementWavStreamWriter(
++        message.length,
++        message.channelCount,
++        message.sampleRate,
++      );
++      return;
++    }
++    if (!writer) {
++      throw new Error('WAV stream: no begin message');
++    }
++    if (message.type === 'chunk') {
++      sendWavStreamMessage({ type: 'ack', written: writer.write(message.channels) });
++      return;
++    }
++    const { bytes, peak, clippedSamples } = writer.finish();
++    writer = null;
++    sendWavStreamMessage({
++      type: 'complete',
++      blob: new Blob([bytes], { type: 'audio/wav' }),
++      peak,
++      clippedSamples,
++    });
+   } catch (reason) {
+-    sendWavEncodeMessage({
++    writer = null;
++    sendWavStreamMessage({
+       type: 'error',
+       message: reason instanceof Error ? reason.message : 'WAV encoding failed',
+     });
+--- a/app/lib/arrangement/graph.client.ts
++++ b/app/lib/arrangement/graph.client.ts
+@@ -8,7 +8,7 @@
+ import { ArrangementExportCancelledError, raceArrangementExportAbort } from './export-cancel';
+ import { arrangementRenderSuspendFrames } from './export-progress';
+ import { type ExportOverloadReport, measureExportOverload } from './export-wav';
+-import { encodeArrangementWavOffMainThread } from './export-wav.client';
++import { encodeArrangementWavStreamOffMainThread } from './export-wav.client';
+ import { type ClipFadeShape, clipFadeGainAt, clipFadeShapes } from './fades';
+ import type { MetronomeClick } from './metronome';
+ import { clipLinearGains, masterLinearGain, projectEnd } from './model';
+@@ -582,12 +582,9 @@
+     throw new ArrangementExportCancelledError();
+   }
+   onProgress?.('render', 1);
+-  const copies = [0, 1].map((index) => rendered.getChannelData(index).slice());
+-  const { bytes, ...report } = await encodeArrangementWavOffMainThread(
+-    copies,
+-    rendered.sampleRate,
++  return encodeArrangementWavStreamOffMainThread(
++    rendered,
+     (fraction) => onProgress?.('wav', fraction),
+     signal,
+   );
+-  return { blob: new Blob([bytes], { type: 'audio/wav' }), ...report };
+ }

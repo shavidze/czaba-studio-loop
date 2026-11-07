@@ -1,0 +1,11 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const b = await chromium.launch(); const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await page.goto('http://127.0.0.1:5173/studio-lab');
+await page.getByText('Demo collection ready').first().waitFor({ timeout: 150000 });
+await page.getByRole('option', { name: /Bass/ }).first().click();
+await page.keyboard.press('Enter'); await page.waitForTimeout(1200);
+console.log(await page.locator('[data-clip-id]').count(), await page.locator('[data-track-id]').count());
+console.log(await page.evaluate(() => [...document.querySelectorAll('[data-testid]')].map(e=>e.dataset.testid).filter(t=>/clip|lane/.test(t)).slice(0,15)));
+await b.close();
