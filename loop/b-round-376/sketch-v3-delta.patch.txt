@@ -1,0 +1,23 @@
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -900,6 +900,20 @@
+     expect(view.getByTestId('arrangement-transport-edit').textContent).toContain('Redo:');
+   });
+ 
++  it('RB-LEAF4b an edit that keeps the Undo and Redo labels renders no transport leaf (A-R376-REVIEW-M1)', async () => {
++    const { api, view } = await mountWorkspace();
++    act(() => api.current?.toggleMasterMute());
++    expect(api.current?.arrangement.master.mute).toBe(true);
++    const editText = view.getByTestId('arrangement-transport-edit').textContent;
++    expect(editText).toContain('Undo: Master Mute');
++    renderLog.counts.clear();
++    act(() => api.current?.toggleMasterMute());
++    expect(api.current?.arrangement.master.mute).toBe(false);
++    expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
++    expect(countsOf(TRANSPORT_LEAVES)).toEqual(TRANSPORT_STEP_COUNTS.reset);
++    expect(view.getByTestId('arrangement-transport-edit').textContent).toBe(editText);
++  });
++
+   it('RB-MEMO3 a workspace commit re-renders the workspace and not the range readout; a status write renders only the status text (C-R320-01, SIG-R360)', async () => {
+     const { api, view } = await mountWorkspace();
+     act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));

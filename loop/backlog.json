@@ -1,10 +1,10 @@
 {
-  "version": 341,
-  "updated": "2026-11-06 B round 375 -> 376 planning",
+  "version": 342,
+  "updated": "2026-11-07 B round 376 -> 377 planning",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "current-task.md (round 376: PERF-11c-iii-c1 Transport memo view + three memo groups + focus-handoff hook with one-frame expiry; sketch b-round-375/sketch.patch.txt)",
-  "advisor_used_by_B": "yes (round 373 -> 374 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 363 -> 364 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 362 -> 363 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 361 -> 362 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 360 -> 361 planning: advisor available; consulted after orientation and before declaring done)",
+  "current_task": "current-task.md (round 377: PERF-11c-iii-c1 close-out; RB-LEAF4b delta b-round-376/sketch-v3-delta.patch.txt; full C verification)",
+  "advisor_used_by_B": "yes (round 376 -> 377 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 373 -> 374 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 363 -> 364 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 362 -> 363 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 361 -> 362 planning: advisor available; consulted after orientation, before the approach, and before declaring done) | yes (round 360 -> 361 planning: advisor available; consulted after orientation and before declaring done)",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -11764,9 +11764,18 @@
       "task": "current-task.md",
       "decision": "D-29z1246..D-29z1249",
       "type": "PERF-11c-iii-c1: ArrangementTransportView memo + Edit/Centre/View memo groups + useSoftDisableFocusHandoff (TL-R376-M1) + useArrangementTransportActions; RB-LEAF4, FL11; RB-LEAF3 per step; DP23 library control",
-      "status": "dispatched",
+      "status": "stopped (D-29z1250): A STOP for B rulings (TC10 headroom misread, reviewer M1); C BLOCKED, 0 bugs, browserVerified false; gate 376 skipped; continued in round 377 on the same uncommitted tree",
       "note": "baseline 6b11be7 clean; sketch b-round-375/sketch.patch.txt; claims b-round-375/claims-376.sh",
       "added": "2026-11-06 B round 375 -> 376 planning"
+    },
+    {
+      "round": 377,
+      "task": "current-task.md",
+      "decision": "D-29z1250..D-29z1253",
+      "type": "PERF-11c-iii-c1 close-out: rulings on the 376 STOP; A applies b-round-376/sketch-v3-delta.patch.txt (RB-LEAF4b) + doc 243 update; full C run (unit, shuffle, 11 mutants, perf, leaf probe, transport browser incl. (f), auth, smoke)",
+      "status": "dispatched",
+      "note": "baseline 6b11be7 + A round 376 uncommitted tree (6 M + doc 243); claims b-round-376/claims-377.sh",
+      "added": "2026-11-07 B round 376 -> 377 planning"
     }
   ],
   "post_current_stage_queue": [
@@ -14846,7 +14855,7 @@
         {
           "id": "PERF-11c-iii-c1",
           "what": "ArrangementTransportView = memo; three memo groups (Edit: undo/redo/split/delete; Centre: follow/position/end/play-stop/back/loop; View: zoom/zoom-range/zoom-back/fit/export), each with its own range/selection selectors; shared useSoftDisableFocusHandoff (arm expires after one frame, TL-R376-M1); useArrangementTransportActions; StudioWorkspace renders the view with openExportDialog useCallback; rows RB-LEAF4, FL11; name-keyed renames with same-file >0 controls",
-          "status": "dispatched round 376 (D-29z1248)",
+          "status": "in_progress (D-29z1250): round 376 A applied the sketch (6/6 sha) and STOPped for B rulings; C round 376 BLOCKED (0 bugs; perf, mutants, shuffle, (f), smoke rest not run; browserVerified false); gate 376 skipped. Round 377 = c1 close-out: RB-LEAF4b delta + full C run | dispatched round 376 (D-29z1248)",
           "sketch": "b-round-375/sketch.patch.txt (sha in b-round-375/sketch-dispatched.sha256)",
           "added": "2026-11-06 B round 375 -> 376 planning"
         },
@@ -26480,16 +26489,6 @@
       "added": "2026-11-06 B round 373 -> 374 planning"
     },
     {
-      "id": "GATE374-L2-RBLEAF1-REVERT",
-      "severity": "low",
-      "origin": "gate 374 reviewer finding 2 (= A-R374-REVIEW-L4)",
-      "title": "RB-LEAF1 stays green if StudioWorkspace renders <ArrangementMaster /> again (the wrapper's child memo bails out)",
-      "evidence": "gates/round-374/review.md finding 2; c-round-374.json recorded",
-      "repro": "swap the StudioWorkspace Master site back to <ArrangementMaster />; RB-LEAF1 passes",
-      "status": "closed (D-29z1246): RB-LEAF1 ArrangementMaster 0 + MU-MASTER-SITE-REVERT red (C round 375 MUTANTS-TREE 10/10); gate 375 6b11be7 | scheduled round 375 (D-29z1243): RB-LEAF1 asserts ArrangementMaster renders 0 on a lane commit; mutant MU-MASTER-SITE-REVERT; closes on C PASS of round 375 (the round owns render-budget.test.tsx; cheap)",
-      "added": "2026-11-06 B round 374 -> 375 planning"
-    },
-    {
       "id": "GATE374-L3-FOCUS-ORDER",
       "severity": "info",
       "origin": "gate 374 reviewer finding 3",
@@ -26652,6 +26651,61 @@
       "evidence": "b-round-375/sketch-review.md",
       "status": "deferred_low_polish (D-29z1248): one tri-state range selector in EditGroup; no render-count change",
       "added": "2026-11-06 B round 375 -> 376 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-M1-EDIT-IDENTITY-ROW",
+      "severity": "medium",
+      "origin": "A round 376 code-reviewer (gap in B sketch / B spec)",
+      "title": "no row proves the transport leaves stay still across an edit that keeps the Undo/Redo labels (provider action identity)",
+      "evidence": "a-round-376.md STOP 2; b-round-376/rbleaf4b-sketch.log; b-round-376/mutants/sketch-run/mutant-MU-T-UNDO-FRESH-PER-EDIT.full.log (red only on RB-LEAF4b; RB-LEAF4 stays green, so the gap was real)",
+      "repro": "mutant: undo useCallback deps + history -> all existing rows green",
+      "status": "scheduled round 377 (D-29z1251): RB-LEAF4b (two Master Mute toggles, all four leaves 0 on the second, StudioWorkspace > 0) + mutant MU-T-UNDO-FRESH-PER-EDIT; closes on C PASS of round 377",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-M2-ONE-FRAME-SYNC-COMMIT",
+      "severity": "low",
+      "origin": "A round 376 code-reviewer",
+      "title": "the hand-off one-frame expiry assumes synchronous commits; a future startTransition/useDeferredValue on the path could expire the arm before its commit",
+      "evidence": "a-round-376.md STOP 2; claims-377 K5 = 0 transition APIs in ArrangementTransport/StudioWorkspace/ArrangementContext",
+      "status": "ruled Low (D-29z1251): no transition on the path today (K5 = 0); documented in doc 243; tripwire = claim K5 in every PERF task touching these files; no guard row. Severity Low because no current code path can reach it",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "INFO-A376-TC10-DESCRIBE-TIMEOUT",
+      "severity": "info",
+      "origin": "A round 376 (STOP 1, misread)",
+      "title": "A measured TC10 against the 5 s vitest default; TC10 (l.408) sits in the describe at l.175-471 with timeout 15_000",
+      "evidence": "b-round-376/claims-377-output.txt K3, K4 (gate 375 2096 ms = 14%, B v3 covering 2984 ms = 20%, A loaded 3088 ms = 21%, C standalone 1685 ms = 11%)",
+      "status": "closed (D-29z1250): no headroom risk (< 50% at every measurement); no grant, no timeout change. L11 lesson input: read the describe options before computing headroom",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-L1-RAF-UNARMED",
+      "severity": "low",
+      "origin": "A round 376 code-reviewer (B sketch)",
+      "title": "useSoftDisableFocusHandoff schedules its expiry rAF on paths where nothing was armed (early return missing)",
+      "evidence": "a-round-376.md \"Code review\" Lows",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it would reopen FL11 and the mutant set in a close-out round",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-L2-DP23-STALE-TITLE",
+      "severity": "low",
+      "origin": "A round 376 code-reviewer (B sketch)",
+      "title": "DP23 title still says \"renders the transport\"; could also assert Centre/View 0 on selectClip",
+      "evidence": "a-round-376.md \"Code review\" Lows",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it would reopen FL11 and the mutant set in a close-out round",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-L3-UNUSED-EVENT-PARAMS",
+      "severity": "low",
+      "origin": "A round 376 code-reviewer (B sketch)",
+      "title": "unused event params in ArrangementTransport click handlers (~l.336/451/529; Biome rule off)",
+      "evidence": "a-round-376.md \"Code review\" Lows",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it would reopen FL11 and the mutant set in a close-out round",
+      "added": "2026-11-07 B round 376 -> 377 planning"
     }
   ],
   "tech_lead_notes": [
@@ -29379,6 +29433,12 @@
       "inputs": [
         "D-29z1246: gate 375 architecture note = third independent echo (StudioWorkspace calls two action-bundle hooks + 7 library props; proposes one bounded 'leaf actions bundle' helper if a fourth leaf follows); A-R375 reviewer: ArrangementLibrary imports sameLibraryLeafProps/LibraryTrackLabel from its child file -> move to app/lib/arrangement/ with LP-EQ1/2; GATE375-L1/L2"
       ]
+    },
+    {
+      "id": "SIG-R376-THREE-ACTION-HOOKS",
+      "origin": "A round 376 code-reviewer architecture note",
+      "note": "three use*Actions(workspace) hooks now sit in StudioWorkspace (l.1032-1034) and render-budget tests were rewritten across rounds 374-376; reviewer: keep for now. Alternative: a per-group state bump on arm (removes the timer, survives transitions, +1 group render per click). Input to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING; not scheduled",
+      "added": "2026-11-07 B round 376 -> 377 planning"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -36417,6 +36477,33 @@
       "evidence": "b-round-375/sketch-review.md",
       "status": "deferred_low_polish (D-29z1248): one tri-state range selector in EditGroup; no render-count change",
       "added": "2026-11-06 B round 375 -> 376 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-L1-RAF-UNARMED",
+      "severity": "low",
+      "origin": "A round 376 code-reviewer (B sketch)",
+      "title": "useSoftDisableFocusHandoff schedules its expiry rAF on paths where nothing was armed (early return missing)",
+      "evidence": "a-round-376.md \"Code review\" Lows",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it would reopen FL11 and the mutant set in a close-out round",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-L2-DP23-STALE-TITLE",
+      "severity": "low",
+      "origin": "A round 376 code-reviewer (B sketch)",
+      "title": "DP23 title still says \"renders the transport\"; could also assert Centre/View 0 on selectClip",
+      "evidence": "a-round-376.md \"Code review\" Lows",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it would reopen FL11 and the mutant set in a close-out round",
+      "added": "2026-11-07 B round 376 -> 377 planning"
+    },
+    {
+      "id": "A-R376-REVIEW-L3-UNUSED-EVENT-PARAMS",
+      "severity": "low",
+      "origin": "A round 376 code-reviewer (B sketch)",
+      "title": "unused event params in ArrangementTransport click handlers (~l.336/451/529; Biome rule off)",
+      "evidence": "a-round-376.md \"Code review\" Lows",
+      "status": "deferred_low_polish (D-29z1251): sketch code; changing it would reopen FL11 and the mutant set in a close-out round",
+      "added": "2026-11-07 B round 376 -> 377 planning"
     }
   ],
   "regression_rounds": [
@@ -38219,7 +38306,8 @@
       "added": "2026-11-06 B round 373 -> 374 planning",
       "inputs": [
         "D-29z1243/D-29z1244: gate 374 signal 2 (second independent echo), SIG-R375-LEAF-COMPARATOR-HOME; round 375 (Library) is the third pattern-A leaf; still requested, no root answer found at round 375 planning",
-        "D-29z1246/D-29z1248: gate 375 note = third echo; round 376 Transport (c1) is the fourth pattern-A leaf (useArrangementTransportActions = third action-bundle hook); still no root answer at round 376 planning; c2 continues pattern A; d/e still wait for the answer or RETRO 384"
+        "D-29z1246/D-29z1248: gate 375 note = third echo; round 376 Transport (c1) is the fourth pattern-A leaf (useArrangementTransportActions = third action-bundle hook); still no root answer at round 376 planning; c2 continues pattern A; d/e still wait for the answer or RETRO 384",
+        "D-29z1251: SIG-R376-THREE-ACTION-HOOKS (fourth echo); A-R376-REVIEW-M2 transition assumption; request repeated in b-round-376.md; c2 may proceed with pattern A, d/e wait (unchanged)"
       ]
     }
   ],
@@ -38231,26 +38319,6 @@
     "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
   },
   "decisions_log_b": [
-    {
-      "id": "D-29z1196",
-      "date": "2026-11-06",
-      "text": "Reviewer Lows A-R365-REVIEW-L3..L6 and C-R365-OBS-INTEGRITY -> deferred_low_polish, closed together by the systemic task SYS-R365-STEM-CACHE-HARDENING (= PERF-9b-ii: one file, one root cause), queued right after PERF-9b-i. Info I2-I5 stay notes in a-round-365.md."
-    },
-    {
-      "id": "D-29z1197",
-      "date": "2026-11-06",
-      "text": "PERF-9b split into 9b-i (perf rows, round 366) and 9b-ii (hardening). Doc home ruling: stem rows go to doc 236 (stage 2 of 3), not doc 168; C-R364-01, A-R364-REVIEW-SELECTED-BEFORE, A-R364-REVIEW-MARKER-PRE-DRAG re-routed to the next task owning the interactions spec / doc 168, else the polish pass."
-    },
-    {
-      "id": "D-29z1198",
-      "date": "2026-11-06",
-      "text": "B production pre-check (scratch 413218e build, remix-serve): warm reopen with the HTTP cache evicted = 2x 304, 0 network body bytes, ready 1275 vs 7427 ms (ratio 0.172; loaded 0.235); DevTools cache-disabled = 200 full body (B-R365-DEVTOOLS-NOCACHE-200, info); harness-host headers immutable + mtime ETag, production is Vercel (B-R365-HARNESS-HOST-HEADERS, info; ROOT-Q-R365-VERCEL-STATIC-HEADERS). Candidate PERF-CAND-STEM-BACKGROUND-REVALIDATE (Low, not scheduled)."
-    },
-    {
-      "id": "D-29z1199",
-      "date": "2026-11-06",
-      "text": "Round 366 = PERF-9b-i (current-task.md): A applies b-round-365/sketch.patch.txt (2 new perf files) and updates doc 236 (l.4 In Progress (stage 2 of 3; C round 366 PASS), stage-2 content). No app/ change. B ran C's command on the sketch (production build): run2/run4-assert PASS, loaded replicate run3, mutants cache-off (5 asserts red + blocked.entries red in v3) and counter-zero (liveness red only). Reference-first / product-designer / screen budget not applicable (performance, nothing on screen)."
-    },
     {
       "id": "D-29z1200",
       "date": "2026-11-06",
@@ -38510,6 +38578,30 @@
       "date": "2026-11-06",
       "by": "B round 375 -> 376 planning",
       "decision": "REGRESSION: regression-last.json 2026-11-05 (round 342), due at the first planning on/after 2026-11-08 (today 2026-11-06): not this round. RETRO about round 384 or at the end of STUDIO-PERFORMANCE. ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING still requested (fourth pattern-A leaf). lessons.md unchanged (no Saba-reported issue). Advisor available and consulted before the plan"
+    },
+    {
+      "id": "D-29z1250",
+      "date": "2026-11-07",
+      "by": "B round 376 -> 377 planning",
+      "decision": "Round 376 not accepted: A STOP (a-round-376.md), C BLOCKED with 0 bugs and browserVerified false (c-round-376.json), gate 376 skipped. Ruling 1 (TC10, L10/L11): TC10 is inside the describe at transport-centre-ui.test.tsx l.175-471 with timeout 15_000 (claims-377 K3); measurements 2096 (gate 375) / 2984 (B v3 covering) / 3088 (A, loaded) / 1685 (C standalone) ms are 11-21% of 15 s; A computed against the 5 s default. No STOP condition, no grant, no timeout change; INFO-A376-TC10-DESCRIBE-TIMEOUT closed. A tree kept as is (6 M + doc 243); archive tasks/round-376.md = dispatched task (sha c6ddc2cd...)"
+    },
+    {
+      "id": "D-29z1251",
+      "date": "2026-11-07",
+      "by": "B round 376 -> 377 planning",
+      "decision": "Ruling 2 (A-R376-REVIEW-M1, Medium, accepted): new row RB-LEAF4b in render-budget.test.tsx: toggleMasterMute twice (MASTER_MUTE_LABEL constant, so the Undo/Redo labels, range, selection, loop and project end are unchanged on the second); on the second: StudioWorkspace > 0, all four transport leaves 0, Edit text unchanged, master.mute toggled back. Pre-run on scratch (A tree + delta): 2/2 RB-LEAF4*, shuffle 41/41, covering 140/2201, tsc 0, Biome clean. Mutant MU-T-UNDO-FRESH-PER-EDIT (undo deps + history) red only on RB-LEAF4b (View 1, Edit 1). Ruling 3 (A-R376-REVIEW-M2): Low, documented, claim K5 tripwire. Reviewer Lows L1-L3 -> deferred_low_polish. Architecture note -> SIG-R376-THREE-ACTION-HOOKS (input to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING)"
+    },
+    {
+      "id": "D-29z1252",
+      "date": "2026-11-07",
+      "by": "B round 376 -> 377 planning",
+      "decision": "Round 377 = c1 close-out, a full C run (not an L22 short round: the STOP clauses are now ruled). Grants: render-budget.test.tsx (apply the delta only) and doc 243 (l.4 -> \"C round 377 PASS\"; add RB-LEAF4b, MU-T-UNDO-FRESH-PER-EDIT and the TC10/M2 rulings). The other 5 files must equal b-round-376/sketch-v3-files-sha256.txt. MUTANTS-TREE: 10 round-376 mutants + the new one; for the old ten, an extra red RB-LEAF4b is allowed, any other new red id is compared to b-round-375 logs"
+    },
+    {
+      "id": "D-29z1253",
+      "date": "2026-11-07",
+      "by": "B round 376 -> 377 planning",
+      "decision": "Order: REGRESSION is due at the first planning on/after 2026-11-08 (regression-last 2026-11-05); today 2026-11-07, so round 377 is not one, but the round-378 planning will be (if on/after 11-08) unless c1 still needs a fix round. Then PERF-11c-iii-c2. lessons.md unchanged (60 lines; TC10 misread is 1x, recorded as a RETRO input). Advisor available and consulted after orientation and before declaring done"
     }
   ],
   "retro_candidates": [

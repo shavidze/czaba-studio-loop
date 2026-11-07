@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-06T23:16:52.473Z",
-  "current_task": "current-task.md (round 375: PERF-11c-iii-b Library + LibraryPreview memo views with a track-label comparator + RB-LEAF1 Master-site row (GATE374-L2); sketch b-round-374/sketch.patch.txt sha b246502f...da2f)",
+  "_generatedUtc": "2026-11-07T00:33:46.929Z",
+  "current_task": "current-task.md (round 376: PERF-11c-iii-c1 Transport memo view + three memo groups + focus-handoff hook with one-frame expiry; sketch b-round-375/sketch.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6009,12 +6009,6 @@
       "title": "held ArrowLeft on a clip already at 0 moves nothing, so the 0-mutation equality was weak"
     },
     {
-      "id": "GATE374-L2-RBLEAF1-REVERT",
-      "severity": "low",
-      "status": "scheduled round 375 (D-29z1243): RB-LEAF1 asserts Arrangemen",
-      "title": "RB-LEAF1 stays green if StudioWorkspace renders <ArrangementMaster /> again (the wrapper's child mem"
-    },
-    {
       "id": "GATE374-L3-FOCUS-ORDER",
       "severity": "info",
       "status": "info (D-29z1243): accepted delta R-SHELL-EQUIV (D-29z1239); ",
@@ -6043,18 +6037,75 @@
       "severity": "info",
       "status": "info (D-29z1244): guarded by workspace UI tests and C's LIBR",
       "title": "selectedSourceId and libraryPreviewSourceId are both string|null props; a swap type-checks"
+    },
+    {
+      "id": "A-R375-REVIEW-DPR-NO-POSITIVE-CONTROL",
+      "severity": "low",
+      "status": "ruled Low (D-29z1246: RB-LEAF3 in the same covering set prov",
+      "title": "drag-preview-render.test.tsx renamed ArrangementLibraryViewInner toBe(0) rows had no same-file >0 co"
+    },
+    {
+      "id": "A-R375-REVIEW-RBLEAF3-PER-STEP",
+      "severity": "low",
+      "status": "scheduled round 376 (D-29z1246; owned file, small): RB-LEAF3",
+      "title": "RB-LEAF3 asserted StudioWorkspace > 0 once for mute + zoom + undo together"
+    },
+    {
+      "id": "A-R375-REVIEW-PREV-ONLY-UNDEFINED-KEY",
+      "severity": "info",
+      "status": "info (D-29z1246): same as React shallow-equal semantics for ",
+      "title": "sameLibraryLeafProps treats a previous-only key with value undefined as equal"
+    },
+    {
+      "id": "GATE375-L1-UNUSED-WRAPPERS",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1246): input to ARCH-CHECKPOINT-PE",
+      "title": "ArrangementLibrary / ArrangementLibraryPreview wrappers are reached only via index.ts and tests"
+    },
+    {
+      "id": "GATE375-L2-COMPARATOR-UNSTABLE-PROP",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1246): guarded by RB-LEAF3/LP-EQ2 ",
+      "title": "sameLibraryLeafProps (for..in Object.is) is silently defeated by a future inline prop"
+    },
+    {
+      "id": "GATE375-I3-NAME-RENAME-VACUOUS",
+      "severity": "info",
+      "status": "info (D-29z1246): lesson L23 positive-control rule; round 37",
+      "title": "name-keyed toBe(0) rows pass vacuously after an inner rename"
+    },
+    {
+      "id": "INFO-C375-LIBKEYS-ACTIVE-FLAKE",
+      "severity": "info",
+      "status": "info (D-29z1246): equal on HEAD; timing flake, not a regress",
+      "title": "LIB-KEYS activeElement after ArrowDown alternates between two options run to run on both trees; prev"
+    },
+    {
+      "id": "TL-R376-D-L1-FRAME-WHEN-UNARMED",
+      "severity": "info",
+      "status": "info (D-29z1248): harmless; not scheduled",
+      "title": "useSoftDisableFocusHandoff schedules an expiry frame even when the arm is null"
+    },
+    {
+      "id": "TL-R376-D-L2-FL11-CANCEL-FRAME",
+      "severity": "info",
+      "status": "info (D-29z1248): both frames clear the same arm; not schedu",
+      "title": "FL11 does not stub cancelAnimationFrame, so both queued expiry frames run"
+    },
+    {
+      "id": "TL-R376-D-L3-BACKGROUND-TAB-ARM",
+      "severity": "info",
+      "status": "info (D-29z1248): rAF pauses in background tabs; very unlike",
+      "title": "rAF pauses in background tabs, so an unused arm can survive a tab switch"
+    },
+    {
+      "id": "TL-R376-D-L5-EDIT-DOUBLE-RANGE-SUB",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1248): one tri-state range selecto",
+      "title": "EditGroup subscribes to the range store twice; one tri-state selector would do"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 366,
-      "task": "current-task.md",
-      "decision": "D-29z1195..D-29z1200",
-      "type": "PERF-9b-i: stem-cache perf rows on the production build (new spec + budgets), doc 236 stage 2",
-      "status": "c_pass_published (D-29z1201): C round 366 PASS, gate 366 d53d113",
-      "note": "baseline 413218e clean; sketch b-round-365/sketch.patch.txt; claims b-round-365/claims-366.sh",
-      "added": "2026-11-06 B round 365 -> 366 planning"
-    },
     {
       "round": 367,
       "task": "current-task.md",
@@ -6133,9 +6184,18 @@
       "task": "current-task.md",
       "decision": "D-29z1242..D-29z1245",
       "type": "PERF-11c-iii-b: ArrangementLibraryView + ArrangementLibraryPreviewView memo with sameLibraryLeafProps (track labels id/kind/name); RB-LEAF3, LP-EQ1/2; RB-LEAF1 ArrangementMaster 0 (GATE374-L2)",
-      "status": "dispatched",
+      "status": "done (D-29z1246): C PASS, gate 375 published 6b11be7",
       "note": "baseline ad13a96 clean; sketch b-round-374/sketch.patch.txt sha b246502f...da2f; claims b-round-374/claims-375.sh",
       "added": "2026-11-06 B round 374 -> 375 planning"
+    },
+    {
+      "round": 376,
+      "task": "current-task.md",
+      "decision": "D-29z1246..D-29z1249",
+      "type": "PERF-11c-iii-c1: ArrangementTransportView memo + Edit/Centre/View memo groups + useSoftDisableFocusHandoff (TL-R376-M1) + useArrangementTransportActions; RB-LEAF4, FL11; RB-LEAF3 per step; DP23 library control",
+      "status": "dispatched",
+      "note": "baseline 6b11be7 clean; sketch b-round-375/sketch.patch.txt; claims b-round-375/claims-376.sh",
+      "added": "2026-11-06 B round 375 -> 376 planning"
     }
   ],
   "other_keys": [

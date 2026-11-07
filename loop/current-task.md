@@ -1,177 +1,134 @@
-# Round 376: PERF-11c-iii-c1. The Transport renders only the group whose input changed
+# Round 377: PERF-11c-iii-c1 close-out. Rulings on the round-376 STOP, one identity row, then the full C run
 
-**Planned by:** B, at the round 375 → 376 planning, 2026-11-06 (`b-round-375.md`).
+**Planned by:** B, at the round 376 → 377 planning, 2026-11-07 (`b-round-376.md`).
 
-**Decisions** (`backlog.json` v340 → v341, `decisions_log_b`):
-- **D-29z1246:** round 375 (PERF-11c-iii-b) is accepted from C's evidence (`c-round-375.json` PASS, `browserVerified` and `realVerified` true, 0 bugs). Gate 375 published `6b11be7`, the new baseline. GATE374-L2 is closed. A-R375's two test Lows are fixed in this round because it owns those files (A-R375-REVIEW-DPR-NO-POSITIVE-CONTROL, A-R375-REVIEW-RBLEAF3-PER-STEP).
-- **D-29z1247:** PERF-11c-iii-c is split into **c1 = Transport (this round)** and **c2 = LoopBrace + MarkerRow (next)**. Scope is unchanged.
-- **D-29z1248:** this round's design, measurements and the rulings on the `tech-lead` review (below).
-- **D-29z1249:** the order after this round, REGRESSION and RETRO timing.
+**Decisions** (`backlog.json` v341 → v342, `decisions_log_b`):
+- **D-29z1250:** round 376 is not accepted. A stopped and asked for B rulings (`a-round-376.md`). C reported BLOCKED with 0 bugs and `browserVerified` false (`c-round-376.json`). Gate 376 was skipped. **Ruling 1 (TC10):** see §1.
+- **D-29z1251:** **Ruling 2 (A-R376-REVIEW-M1, Medium, accepted):** new row RB-LEAF4b. **Ruling 3 (A-R376-REVIEW-M2):** Low, documented, guarded by claim K5. The reviewer's Lows L1–L3 go to `deferred_low_polish`. The Architecture note becomes `SIG-R376-THREE-ACTION-HOOKS`.
+- **D-29z1252:** this round's grants, delta and C rows.
+- **D-29z1253:** the order after this round.
 
-**What this round does:** at HEAD, every workspace commit renders the whole `ArrangementTransport` once: adding a clip, a zoom key, a lane mute, Ctrl+Z, the Undo and Redo buttons, a library preview start and stop [K24]. After this round, StudioWorkspace renders `ArrangementTransportView` (memo) with data props, and the view holds three memo groups:
-- **Edit** (Undo, Redo, Split, Delete) renders when the Undo/Redo labels, the range or the clip selection change;
-- **Centre** (Follow, position, project end, Play/Stop, back to start, Loop) renders when the follow mode, the committed project end, the loop or the range change;
-- **View** (zoom slider and readout, zoom to selection, Zoom back, Fit, Export) renders when the zoom, `canZoomBack` or the range change.
+**What this round does:** it finishes PERF-11c-iii-c1. The round-376 code (the Transport memo view, the three memo groups, the hand-off hook and the actions hook) stays exactly as A applied it.
+- A adds one test row and updates doc 243.
+- C then runs every row that round 376 did not run.
 
-A lane mute renders the view and the Edit group only. A zoom step renders the view and the View group only. A status write or an export reset renders none of them. What the user sees, hears and focuses is unchanged.
+The user sees, hears and focuses nothing different.
 
 **Read first:**
-- `lessons.md`. A reads 11, 12, 23, 26, 28, 47, 50 and 58. C also reads 22, 37, 38, 48, 56, 57, 59 and 60.
-- `b-round-375/sketch.patch.txt` (the dispatched sketch), `b-round-375/sketch-review.md`.
-- Primitives: `AUDIO_ARCHITECTURE.md` (Studio); `REACT_CONTEXT.md`; `FORWARDREF_COMPONENT.md` (component change); `AGENT_DISCOVERABLE_CODE.md` (new exports `ArrangementTransportView`, `ArrangementTransportViewProps`, `ArrangementTransportActions`, `useArrangementTransportActions`); `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
+- `lessons.md`. A reads 10, 11, 23, 26, 28 and 58. C also reads 22, 37, 38, 48, 56, 57, 59 and 60.
+- `tasks/round-376.md` (the c1 task; its §3 rows, §4 mutants and §5 neighbour risk still apply where this task does not change them).
+- `b-round-376/sketch-v3-delta.patch.txt`.
+- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`.
 
-**L29 note:** untagged code text below is a new value, a row id or a loop-artifact path. Every fact about a current `store/` file carries `[K#]` (§8).
-
-**Not applicable:** reference-first, `product-designer`, the YouTube request and the Ableton conformance check. This is a performance refactor with no visible change (the 2026-10-27 rule).
-
-**Screen budget:** nothing visible is added or removed.
+**Not applicable:** reference-first, `product-designer`, the YouTube request and the Ableton conformance check. This is a performance refactor with no visible change (the 2026-10-27 rule). **Screen budget:** nothing visible is added or removed.
 
 ## Baseline
-- HEAD is `6b11be7`, published by gate 375 [K1]. The tree is clean [K2].
-- Protected files pass their sha check [K11]. No grant is a protected file.
-- Frozen: every tracked file except the grants is in `b-round-375/r376-frozen-sha256.txt` (1,261 entries) [K12].
-- REGRESSION: `regression-last.json` is 2026-11-05 [K21]. It is due at the first planning on or after 2026-11-08, so not this round.
-- **At HEAD:**
-  - `ArrangementTransport({ onOpenExport, navigation })` calls `useArrangement()` once and reads `arrangement` for `arrangement.loop` [K3, K4]. It has one focus hand-off ref and one layout effect that runs after every render; four buttons arm it (Undo→Redo, Redo→Undo, Delete→Undo, Zoom back→Fit) [K3, K4].
-  - StudioWorkspace renders `<ArrangementTransport` with an inline `onOpenExport={() => setIsExportOpen(true)}` and a memoised `transportNavigation` [K5].
-  - The seven transport actions are `useCallback`s in the provider [K6].
-  - Name-keyed counts of `'ArrangementTransport'`: render-budget 5, selection-wrappers 3, drag-preview 7 [K7]. Two test files mount the wrapper directly, and `index.ts` exports it [K8]; its signature must not change.
-  - The focus tests stub `requestAnimationFrame` to a no-op in both describes [K10].
-- **Measured at HEAD:**
-  - Production perf (C round 375's run on this code, `c-round-375/perf-interact.log`; the same values as `b-round-374/perf-sketch-results/latest-interactions.json`): `interact.zoom.1.components-per-key` 53, `zoom.30` 140, `click.components` 38, drag `releaseComponentsMax` 52 to 54, move/lane `move-components-max` 58.
-  - Dev probe, displayName-aware (`b-round-375/probe/leaf-head-376.json`, both viewports): add 3, zoom 1, mute 1, Ctrl+Z 1, Undo button 1, Redo button 1, preview start 1, preview stop 2 Transport renders; Play/Stop render only `ArrangementTransportPlayStopInner` [K24].
+- HEAD is `6b11be7` (gate 375 published) [K1].
+- On top of HEAD is A's uncommitted round-376 work: 6 modified files and the new doc 243, 7 status lines [K2].
+  - The 6 files equal the round-375 sketch: `b-round-375/sketch-files-sha256.txt`, 0 failing lines [K10].
+  - Do not revert or redo any of it (policy 6).
+- Protected files pass [K8]. The frozen manifest `b-round-375/r376-frozen-sha256.txt` (1,261 entries) still applies, because the grants did not grow [K9].
+- REGRESSION: `regression-last.json` is 2026-11-05 [K16]. It is due at the first planning on or after 2026-11-08, so not this round.
 
-## 0. B's pre-check (L23, L30, L37, L58)
-| What | Command | Result |
-|---|---|---|
-| Sketch typecheck, Biome | `npm run typecheck`; `npx biome check` on the 6 sketch files | 0 TS errors; Biome rc 0 [K16] |
-| Full suite on sketch v1 (L23) | `npx vitest run` | 252 files, 3,721 tests pass (HEAD 3,720 + RB-LEAF4) [K15] |
-| Covering files on sketch v2 | `xargs -a b-round-375/covering-376.txt npx vitest run` | 140 files, 2,200 tests pass [K15] |
-| Perf on sketch v2 (L58), production build, alone | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts perf/studio-lab-resources.perf.spec.ts` | <ul><li>2 passed; 0 FAIL rows [K17].</li><li>`zoom.1.components-per-key` 53 → **41** (1x and 6x); `zoom.30` 140 → **128**; `click.components` 38 → **29**.</li><li>`releaseComponentsMax`: fade/trim 52 → 44; move/lane 53 → 51; group 54 → 52; video, video-trim, video-fade 53 → 45. `move-components-max` move/lane 58 → 40, group 59 → 41.</li><li>**One accepted increase:** range and background-range `move-components-max` +2 (25 → 27, 37 → 39), per-move +0.033. The three groups each hold the range selector, so a range start renders three group leaves where HEAD rendered one Transport. Moving the subscription into the view would render four. Ruled acceptable (D-29z1248); the row stays within its budget.</li><li>Every other deterministic row equals HEAD (`b-round-375/perf-sketch-vs-head.txt`, `perf-sketch-vs-head-json-all.txt`)</li></ul> |
-| Other test roots (L30) | `perf/lib` imports no changed module; `e2e/` reaches the Transport only through the UI | The two perf specs passed on v2 |
-| FL11 on three trees | `self-disabling-focus.test.tsx` on a HEAD copy, on v1 and on v2 | HEAD green, v1 **red**, v2 green (`fl11-on-head.log`, `fl11-on-v1.log`, `v2-covering.log`) |
-| Mutants | §4 | [K19] |
-| Assertion counts | `expect(` / `it(` per changed test file, HEAD vs sketch | `b-round-375/expect-counts-376.txt` [K20] |
-| Patch equals sketch | the 6 files from `git show HEAD:`, `patch -p1`, `sha256sum -c sketch-files-sha256.txt` | rc 0, 6/6 OK (`patch-equals-sketch.txt`) |
-| Browser probe on the sketch (dev, port 5176, own Vite cache, both viewports) | `node b-round-375/probe/leaf-probe-376.mjs` | the wrapper 0 on every step; zoom renders View + View group; mute and Ctrl+Z View + Edit; Undo/Redo buttons View + Edit + Centre; preview start/stop 0 (HEAD 1/2) [K25]. B's separate warm-up script timed out cold (L38); the probe itself ran clean at both viewports |
-| Timeout headroom (L31) | gate 375 `verify.log`, `v2-covering.log` | RB-LEAF4 and FL11 are below vitest's 300 ms report line (default 5 s limit) in `v2-covering.log`; render-budget's slowest row (Play→Stop→Play, 15 s limit) 2.01 s at gate 375 and 1.78 s on v2; the start-hold row 0.99 s / 0.93 s. No changed-file row above 50 % |
-| Consult | `tech-lead`: v1 approve with changes (TL-R376-M1 Medium fixed in v2; two Lows ruled below); delta review of v2 in `b-round-375/sketch-review.md` | — |
+## 1. Rulings on the round-376 STOP (L10)
+| Id | A's point | Ruling | Evidence |
+|---|---|---|---|
+| **TC10 headroom** (INFO-A376-TC10-DESCRIBE-TIMEOUT) | A's loaded run took 3,088 ms, which A read as 62 % of the 5 s default | **No STOP condition, closed.** TC10 (l.408) sits inside the describe at `transport-centre-ui.test.tsx` l.175–471, which sets `timeout: 15_000` (l.178) [K3]. All measurements are 11–21 % of 15 s: 2,096 ms in gate 375, 2,984 ms in B's v3 covering run, 3,088 ms in A's run and 1,685 ms in C's standalone run [K4]. No grant, no timeout change | `b-round-376/claims-377-output.txt` K3, K4 |
+| **A-R376-REVIEW-M1** (Medium) | No row proves the transport leaves stay still across an edit that keeps the Undo/Redo labels | **Accepted. New row RB-LEAF4b.** Scenario: toggle Master Mute twice (one constant label, `MASTER_MUTE_LABEL` [K7]). On the second toggle: `StudioWorkspace` > 0, all four leaves 0, the Edit text unchanged, `master.mute` back to false. The new mutant MU-T-UNDO-FRESH-PER-EDIT (the provider's `undo` deps gain `history`) is red **only** on RB-LEAF4b (View 1, Edit 1). RB-LEAF4 stays green, which proves the gap was real [K15] | `b-round-376/rbleaf4b-sketch.log`, `b-round-376/mutants/sketch-run/` |
+| **A-R376-REVIEW-M2** | The one-frame expiry assumes synchronous commits | **Low, no guard row.** Zero `startTransition`/`useTransition`/`useDeferredValue` in ArrangementTransport, StudioWorkspace and ArrangementContext [K5]. Doc 243 records the assumption. Claim K5 is the tripwire that every later PERF task touching these files repeats | K5 |
+| Reviewer Lows L1–L3 (rAF scheduled when nothing is armed; DP23 stale title; unused `event` params) | — | `deferred_low_polish`. They are sketch code, and changing it would reopen FL11 and the mutant set in a close-out round | `a-round-376.md` |
+| Architecture note (three `use*Actions` hooks) | — | `SIG-R376-THREE-ACTION-HOOKS`, an input to ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING. Not scheduled | — |
 
-## 1. What A changes (grants: exactly these files, `b-round-375/grants-376.txt`)
-1. **Apply the sketch:** from `store/`, `patch -p1 < ../tmp/studio-real-loop/b-round-375/sketch.patch.txt` (check `sha256sum` against `sketch-dispatched.sha256` first). Then `sha256sum -c ../tmp/studio-real-loop/b-round-375/sketch-files-sha256.txt` must give 6/6 OK. Make no other edit to those six files. The sketch contains:
-   - `ArrangementTransport.tsx`: `useSoftDisableFocusHandoff()` (the HEAD layout-effect body unchanged; the arm callback is a `useCallback`; a new arm cancels the previous expiry frame and schedules a `requestAnimationFrame` that clears the arm; the frame is cancelled on unmount); `ArrangementTransportActions` (Pick of the seven actions) and `useArrangementTransportActions`; `ArrangementTransportEditGroup`, `ArrangementTransportCentreGroup`, `ArrangementTransportViewGroup` (memo, each with its own range/selection selectors and, for Edit and View, its own hand-off); `ArrangementTransportView = memo(ArrangementTransportViewInner)`; the `ArrangementTransport` wrapper keeps its exported signature and renders the view.
-   - `StudioWorkspace.tsx`: `openExportDialog` (`useCallback`, no deps), `transportActions`, and `<ArrangementTransportView … />` with `undoLabel`, `redoLabel`, `pxPerSecond`, `loop={arrangement.loop}`, `committedProjectEnd`.
-   - `render-budget.test.tsx`: `TRANSPORT_LEAVES`, `TRANSPORT_STEP_COUNTS`, row **RB-LEAF4** (mount liveness of the four inner names; then reset 0/0/0/0, mute 1/1/0/0, zoom 1/0/0/1, range 0/1/1/1, loop 1/1/1/0, mute with a loop on 1/1/0/0, undo 1/1/0/0, as View/Edit/Centre/ViewGroup; the wrapper `ArrangementTransport` 0 at reset and zoom as a site-revert guard); `CONTEXT_CONSUMERS` uses `StudioWorkspace` instead of the wrapper; the Play/Stop rows count `ArrangementTransportViewInner`; RB-LEAF3 asserts per commit.
-   - `selection-wrappers-render.test.tsx`: the two "a commit happened" controls use `StudioWorkspace`; GH1 checks `ArrangementTransportViewInner` is live at mount (> 0) and 0 on a status write.
-   - `drag-preview-render.test.tsx`: the five `toBe(0)` rows count `ArrangementTransportViewInner`; DP23 adds mount controls for `ArrangementTransportViewInner` and `ArrangementLibraryViewInner` (> 0) and expects a selection change to render `ArrangementTransportEditGroupInner` and not the view.
-   - `self-disabling-focus.test.tsx`: row **FL11**.
-2. **Doc:** `docs/implementation/2026/quarter-IV/243-perf-transport-leaves.md` (new; no 243 exists [K14]). Line 4 is byte for byte `**სტატუსი:** Completed (C round 376 PASS)`. TEMPLATE headings in order. It records: the three groups and what renders each; the hand-off hook and why the arm expires after one frame (TL-R376-M1, FL11); the test renames and why they are required; the §0 perf numbers including the accepted range +2; the mutants. Loop artifacts are cited with their full `tmp/studio-real-loop/…` path and labelled as outside the repository.
+## 0. B's pre-check on the v3 sketch (scratch = A's tree + delta; L23, L58)
+| What | Result |
+|---|---|
+| RB-LEAF4 and RB-LEAF4b | 2 pass (`rbleaf4b-sketch.log`) |
+| `render-budget` + `self-disabling-focus`, `--sequence.shuffle --sequence.seed=42` | 2 files, 41 tests pass [K14] |
+| The 140 covering files (`b-round-375/covering-376.txt`) | 140 files, **2,201** tests pass (round 376: 2,200 + RB-LEAF4b); TC10 2,984 ms of 15 s [K14] |
+| `npm run typecheck`; Biome on render-budget | rc 0; clean [K14] |
+| Assertion counts | render-budget 181/17 → **187/18**; the other three unchanged at 530/74, 38/7 and 137/21 (`b-round-376/expect-counts-377.txt`) [K12] |
+| Mutant MU-T-UNDO-FRESH-PER-EDIT | red: RB-LEAF4b only, 1 failed [K15] |
+| Not re-run by B | perf and the leaf probe. The delta is test-only and changes no app file, so the round-375 sketch numbers stand (`b-round-375/perf-sketch-vs-head-json-all.txt`, `probe/leaf-sketch-376.json`) |
 
-**Rulings (D-29z1248):**
-- **TL-R376-M1 (Medium, fixed in the sketch):** with separate groups, a hand-off armed by a click whose commit leaves its group's props unchanged (two Undo clicks with the same labels) stayed armed until a later commit. The one-frame expiry restores HEAD's effective lifetime. FL11 proves it on three trees.
-- **TL-R376-L1 (duplicate hand-off logic):** fixed by the shared hook.
-- **TL-R376-L2 (the wrapper is reached only through `index.ts` and tests):** kept as the public convenience API, as in rounds 374 and 375; GATE375-L1-UNUSED-WRAPPERS is the shared deferred Low for the wrapper policy.
-- **The range +2:** accepted, see §0.
-- **Name renames are required:** once StudioWorkspace renders the view, the wrapper name counts 0 under StudioWorkspace, so every `toBe(0)` on it would pass vacuously (L23). Each renamed name has a `> 0` row in the same file.
+## 2. What A changes (grants: `b-round-376/grants-377.txt`, exactly 2 files)
+1. **render-budget.test.tsx:** check `sha256sum ../tmp/studio-real-loop/b-round-376/sketch-v3-delta.patch.txt` against `sketch-v3-dispatched.sha256` (`08c162f8…`). From `store/`, run `patch -p1 < ../tmp/studio-real-loop/b-round-376/sketch-v3-delta.patch.txt`. Then `sha256sum -c ../tmp/studio-real-loop/b-round-376/sketch-v3-files-sha256.txt` must give 6/6 OK. Make no other edit to any of the six files.
+2. **Doc 243** (`docs/implementation/2026/quarter-IV/243-perf-transport-leaves.md`, A's file):
+   - Line 4 becomes, byte for byte, `**სტატუსი:** Completed (C round 377 PASS)`.
+   - Add RB-LEAF4b and why it exists (A-R376-REVIEW-M1).
+   - Add MU-T-UNDO-FRESH-PER-EDIT, with its red row taken from the log (`b-round-376/mutants/sketch-run/mutant-MU-T-UNDO-FRESH-PER-EDIT.full.log`), not from this table.
+   - Add the TC10 ruling (the 15 s describe) and the M2 assumption with the K5 tripwire.
+   - Keep the TEMPLATE headings in order. Loop artifacts keep their full `tmp/studio-real-loop/…` path, labelled as outside the repository.
 
-**Behaviour that must not change (neighbour risk):** every Transport button's label, title, `aria-*`, `aria-keyshortcuts`, soft-disabled state and click result; the four focus hand-offs (FL3–FL10, SD5, SD6); the Loop button's pressed state and titles; the zoom slider value and readout; the Export dialog opening and focus return; Play/Stop and the position readout during playback.
+**Must not change (neighbour risk):** everything in `tasks/round-376.md` §1 "Behaviour that must not change" and §5.
 
-## 2. A: checks (speed rules)
-- `npm run typecheck`, `npm run lint`, `npx biome check` on the 6 files.
-- `xargs -a ../tmp/studio-real-loop/b-round-375/covering-376.txt npx vitest run` (140 files). Report the count and any test above 50 % of its timeout.
-- `code-reviewer` on the diff (3+ files), and again on any change after its review (L11).
-- A does not run the full suite, `npm run verify`, the build, perf, the mutants or the browser rows.
-- Write `a-round-376.md` as you go. Report reviewer findings and any Architecture note for B.
+## 3. A: checks (speed rules)
+- `npm run typecheck`, `npm run lint`, and `npx biome check` on render-budget.test.tsx.
+- `npx vitest run app/lib/arrangement/__tests__/render-budget.test.tsx` → 18 tests pass.
+- Optionally, the 140 covering files. If you run them, report any test above 50 % of **its declared timeout**: read the `describe`/`it` options first (D-29z1250).
+- `code-reviewer` is not required: 2 files, one of them a doc. If you edit anything beyond the patch and the doc, that is a STOP.
+- Write `a-round-377.md` as you go.
 
-## 3. C: what to verify
-C writes `c-round-376.md` and `c-round-376.json` as it goes, with all L57 fields (`manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, an `origin` per finding, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch` = `b-round-375/mutants/`, `mutantRedOnTree`, `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed`, `affectedChecksRunOnSketch`). Then `python3 -I tools/l57-check.py c-round-376.json c-round-376/l57-check.txt` must exit 0. Write `c-round-376/progress.json` after every row (L59). Destructive commands and copies stay under `c-round-376/` (L60).
+## 4. C: what to verify (full run; not an L22 short round, because the STOP clauses are ruled)
+C writes `c-round-377.md` and `c-round-377.json` as it goes, with all L57 fields (`manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, an `origin` per finding, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch` = `b-round-375/mutants/` + `b-round-376/mutants/sketch-run/`, `mutantRedOnTree`, `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed`, `affectedChecksRunOnSketch`). Then `python3 -I tools/l57-check.py c-round-377.json c-round-377/l57-check.txt` must exit 0. Write `c-round-377/progress.json` after every row (L59). Copies and destructive commands stay under `c-round-377/` (L60). Run perf and mutants alone (L38). Warm up the browser before timed probes (L38).
 
-**Copies:** `cp -a` for every tree copy. Run mutants and perf one at a time, never next to each other or another vitest job (L38). A HEAD copy served on another port gets its own Vite cache.
-
-**Browser recipe (all browser rows):** after `Demo collection ready` (L48), at 1440×900 and 1280×720, on a copy of HEAD served on another port and on A's tree. **PASS means A's value equals HEAD's for the same step at both viewports**, unless the row says otherwise.
+**Browser rows:** run them at 1440×900 and 1280×720, after `Demo collection ready` (L48). Compare against a HEAD copy (`6b11be7`) on another port with its own Vite `cacheDir`. **PASS means A's value equals HEAD's for the same step at both viewports**, unless the row says otherwise. **One rule: every browser row below runs fresh in round 377 at both viewports.** C's round-376 files (`c-round-376/leaf-A.json`, `recipe-A.json`, `browser.json`, `auth.json`) are reference values for comparison only, never a substitute. A cold-start timeout is environment-invalid (L38) and uses a replacement attempt.
 
 | Row | Check | PASS means |
 |---|---|---|
-| **SOURCE-SCOPE** | At the start and the end: `git status --short --untracked-files=all` lists only the §1 files (6 modified, 1 new doc = 7 lines). From `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-375/r376-frozen-sha256.txt` rc 0; the protected check `b-round-318/protected-sha256.txt` rc 0 | Nothing outside the grants changed |
-| **CLAIMS** | First (L56), from the loop root: `bash b-round-375/claims-376.sh`; compare with `b-round-375/claims-376-output.txt` (HEAD) and `claims-376-sketch-output.txt` (sketch) | K3–K10 and K27 equal the sketch output; K2 reads 7; K14 reads `doc 243 files: 1` with doc 242 l.4 unchanged; every other line equals the HEAD output; no `MISSING` |
-| **SKETCH-EQUAL** | From `store/`: `sha256sum -c ../tmp/studio-real-loop/b-round-375/sketch-files-sha256.txt` | rc 0, 6/6 OK |
-| **ASSERT-COUNT** | `expect(` and `^\s*it\(` on A's tree vs `git show HEAD:` for the 4 test files | Equal to `b-round-375/expect-counts-376.txt`. A lower count is a Medium bug |
-| **UNIT** | The 140 files of `covering-376.txt`; then `render-budget.test.tsx` and `self-disabling-focus.test.tsx` with `--sequence.shuffle --sequence.seed=42` | All pass; no covering test above 50 % of its timeout |
-| **MUTANTS-TREE** | On a `cp -a` copy of A's tree under `c-round-376/`: `TREE=<copy> OUT=<abs>/c-round-376/mutants bash b-round-375/mutants/run-all-376.sh`, once, alone | Each mutant red with the same failing ids as `b-round-375/mutants/mutant-<id>.log` (§4) |
-| **PERF-INTERACT** | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts` on A's tree, alone | Every assert passes; `zoom.1.components-per-key` = 41 and `zoom.30` = 128; `click.components` = 29; each drag `releaseComponentsMax` and `move-components-max` equals `b-round-375/perf-sketch-vs-head-json-all.txt` (sketch column); range `move-components-max` 27 (accepted). A value equal to HEAD's (53/140/38) is a FAIL. A value off by one is compared with `perf-sketch.log` before it is called a FAIL |
+| **SOURCE-SCOPE** | At the start and the end: `git status --short --untracked-files=all`; from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-375/r376-frozen-sha256.txt` and the protected check `b-round-318/protected-sha256.txt` | 7 lines (the 6 M files + doc 243); both rc 0 |
+| **CLAIMS** | From the loop root: `bash b-round-376/claims-377.sh`; compare with `b-round-376/claims-377-output.txt` (before A) and `claims-377-sketch-output.txt` (v3 sketch) | K6, K10 and K12 equal the sketch output. K11 shows l.4 `C round 377 PASS` and ≥ 1 mention each of RB-LEAF4b and MU-T-UNDO-FRESH-PER-EDIT. K2 reads 7 (compare K2 on `store/` only). Every other line equals the before-A output. No `MISSING` |
+| **SKETCH-EQUAL** | `sha256sum -c ../tmp/studio-real-loop/b-round-376/sketch-v3-files-sha256.txt` from `store/` | 6/6 OK |
+| **ASSERT-COUNT** | `expect(` and `^\s*it\(` on the 4 test files | Equal to `b-round-376/expect-counts-377.txt`. A lower count is a Medium bug |
+| **UNIT** | The 140 files of `b-round-375/covering-376.txt`; then render-budget and self-disabling-focus with `--sequence.shuffle --sequence.seed=42` | 140 files, 2,201 tests pass; shuffle 41/41. Report every test above 50 % of **its declared timeout** (describe or row option, else 5 s) |
+| **MUTANTS-TREE** | On a `cp -a` copy of A's tree under `c-round-377/`, one at a time, alone: (1) `TREE=<copy> OUT=<abs>/c-round-377/mutants bash b-round-375/mutants/run-all-376.sh`; (2) `TREE=<copy> OUT=<abs>/c-round-377/mutants bash b-round-376/mutants/run-mutant-377.sh` | All 11 red. For the 10 round-376 mutants, the red ids include those in `b-round-375/mutants/mutant-<id>.log`. An extra red **RB-LEAF4b** is allowed. Any other new red id is recorded and compared before it is called a FAIL. MU-T-UNDO-FRESH-PER-EDIT is red on RB-LEAF4b. The copy's `ArrangementContext.tsx` is restored afterwards (the script prints `restored`) |
+| **PERF-INTERACT** | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts` on A's tree, alone, after a production build | Every assert passes; `zoom.1.components-per-key` 41; `zoom.30` 128; `click.components` 29; each drag `releaseComponentsMax`/`move-components-max` equals the sketch column of `b-round-375/perf-sketch-vs-head-json-all.txt`; range `move-components-max` 27 (accepted +2). A value equal to HEAD's (53/140/38) is a FAIL. A value off by one is compared with `b-round-375/perf-sketch.log` before it is called a FAIL |
 | **PERF-RESOURCES** | `…/studio-lab-resources.perf.spec.ts`, alone | Passes; `res.harness.export-1-produced` passes |
-| **LEAF-PROBE (browser, dev)** | Warm up first (L38). `node b-round-375/probe/leaf-probe-376.mjs <A's dev base> c-round-376/leaf-A.json`, and the same on HEAD | On A, at both viewports, equal to `b-round-375/probe/leaf-sketch-376.json` [K25] (View/Edit/Centre/ViewGroup): `ArrangementTransport` 0 on every step; `add-bass-enter` 1/1/1/0; `zoom-in-key` and `zoom-out-key` 1/0/0/1; `lane-mute-click` and `undo-ctrl-z` 1/1/0/0; `transport-undo-button` and `transport-redo-button` 1/1/1/0 (they undo and redo the clip add, so the committed project end changes); `space-play`/`space-stop`: only `ArrangementTransportPlayStopInner` 1; `library-preview-start`/`-stop`: all 0. On HEAD the wrapper renders 1 per commit, including the preview start (1) and stop (2) [K24] |
-| **TRANSPORT-BROWSER (browser)** | <ul><li>(a) Empty project: read the title and `aria-disabled` of Undo, Redo, Split, Delete, Loop, Zoom to selection, Zoom back.</li><li>(b) Add `Bass` with Enter; read the Undo text and title; click Undo, read Redo; click Redo.</li><li>(c) Select the clip; Tab to Delete, press Enter: read `document.activeElement` (Undo, ring visible).</li><li>(d) Focus Undo, press Enter until history is empty: focus lands on Redo (L47).</li><li>(e) Click Fit first (the slider alone writes no zoom history: Zoom back stays disabled, `recipe-head-376-v1-no-fit.json`); then the zoom slider ArrowRight twice, read the readout; focus Zoom back, press Enter until it is soft-disabled: focus lands on Fit.</li><li>(f) Drag a time range on the lane: Split, Delete and Zoom to selection become available with their range titles; Ctrl+L: Loop `aria-pressed="true"`; mute a lane: Loop stays pressed (B did not pre-probe (f); C runs it on both trees).</li><li>(g) Follow toggle text and `data-follow-mode`; Export opens the dialog, Escape returns focus to Export</li></ul> | Every value equals HEAD. B's recipe probe (`b-round-375/probe/recipe-probe-376.mjs`, steps a, b, d, e, g) gave equal values on HEAD and the sketch at both viewports: Enter on Undo hands focus to Redo, Enter on Redo hands it back to Undo, Zoom back hands focus to Fit (`recipe-head-376.json`, `recipe-sketch-376.json`) [K28] |
-| **G376-AUTH (browser)** | Fresh anonymous context, both viewports, warmed up | `/studio-lab` shows the workspace, `localStorage.auth_user` null; `/studio/middle-east` shows "Sign in required", no workspace, 0 `audio[src]`; `/api/studio-token` no token → 401, no token in the body. A fake bearer's fail-closed 500 goes under `blocked` (backend unavailable) |
-| **STUDIO-SMOKE-376 (browser)** | Add `Bass` with Enter; Play: position ≥ 00:01.000 after 1.5 s (L48); drag the clip by its name bar to the lane below, Ctrl+Z (Undo title "Undo: Move to track — <lane>"); Master Mute click and Ctrl+Z; library preview Play and Stop | As stated, equal to HEAD |
-| **DOCS** | Doc 243 l.4 byte for byte; TEMPLATE headings in order; every test and file it names exists (L26); `grep -rn 'C round [0-9]* pending' docs/implementation` 0 hits | As stated |
+| **LEAF-PROBE (browser, dev)** | `node b-round-375/probe/leaf-probe-376.mjs <A base> c-round-377/leaf-A.json` | Equal to `b-round-375/probe/leaf-sketch-376.json` at both viewports |
+| **TRANSPORT-BROWSER (f) (browser)** | On A's tree and the HEAD copy: drag a time range on the Music lane; read the title and `aria-disabled` of Split, Delete and Zoom to selection; press Ctrl+L and read Loop `aria-pressed`; mute a lane and read Loop again; click Zoom to selection, then Zoom back until it is soft-disabled, and read `document.activeElement` | Every value equals HEAD; focus lands on Fit with a visible ring |
+| **TRANSPORT-BROWSER (a, c) (browser)** | (a) empty project: the titles and `aria-disabled` of Undo, Redo, Split, Delete, Loop, Zoom to selection and Zoom back. (c) select the clip, Tab to Delete, press Enter: `document.activeElement` | Equal to HEAD |
+| **G377-AUTH (browser)** | Fresh anonymous context, both viewports, warmed up | `/studio-lab` shows the workspace with `auth_user` null; `/studio/middle-east` shows "Sign in required" with no workspace and 0 `audio[src]`; `/api/studio-token` with no token → 401 and no token in the body. The fake bearer's 500 goes under `blocked` (backend unavailable) |
+| **STUDIO-SMOKE-377 (browser)** | Add `Bass` with Enter; Play shows position ≥ 00:01.000 after 1.5 s; drag the clip by its name bar to the lane below, then Ctrl+Z (Undo title `Undo: Move to track — <lane>`); click Master Mute, then Ctrl+Z; library preview Play and Stop. **Also, for RB-LEAF4b in the browser:** click Master Mute twice and read that the Undo button's title and text after the second click equal those after the first | As stated, equal to HEAD |
+| **DOCS** | Doc 243 l.4 byte for byte; TEMPLATE headings in order; every row id, mutant id and file it names exists (L26); `grep -rn 'C round [0-9]* pending' docs/implementation` gives 0 hits | As stated |
 
 - **Gate rows:** full vitest, typecheck, build, Biome, `npm run verify`, e2e smoke. List them under `"gate"` and `gateChecksNamed`, never under `"passed"`.
-- **`browserVerified`:** true only if LEAF-PROBE, TRANSPORT-BROWSER, G376-AUTH and STUDIO-SMOKE-376 all ran at both viewports.
-
-## 4. Mutants (`b-round-375/mutants/run-all-376.sh`, on the 140 covering files)
-See `b-round-375/mutants/summary.txt` and `mutant-<id>.log` for the exact red ids [K19]. The first DELETE attempt in `summary.txt` (`MUTANT-NOT-APPLIED rc 4` and a traceback) was a wrong-indent anchor; it was re-run with the corrected anchor (now in `run-all-376.sh`), and `mutant-MU-T-DELETE-NO-ARM.log` is the valid record (FL5 red). Pass `TREE=` explicitly: the default `scratch/` was removed after planning (the runner exits 2 without it).
-
-| Mutant | File: old → new | Expected red |
-|---|---|---|
-| MU-T-DELETE-NO-ARM | Transport: Delete stops arming the hand-off | FL5 |
-| MU-T-UNDO-ARM-SELF | Transport: Undo arms `undoButtonRef` instead of Redo | FL3, SD5 |
-| MU-T-HANDOFF-NO-EXPIRY | Transport: the expiry frame does not clear the arm | FL11 |
-| MU-T-ACTIONS-FRESH | Transport: the actions `useMemo` gets a fresh `{}` dep | RB-LEAF4 reset |
-| MU-T-EXPORT-INLINE | StudioWorkspace: `onOpenExport` inline again | RB-LEAF4 reset |
-| MU-T-LOOP-CLONE | StudioWorkspace: `loop` shallow-cloned | RB-LEAF4 mute (Centre) |
-| MU-T-VIEW-NO-MEMO | Transport: the view without `memo` | RB-LEAF4 reset, Play/Stop rows |
-| MU-T-EDIT-NO-MEMO | Transport: the Edit group without `memo` | RB-LEAF4 zoom (Edit) |
-| MU-T-SITE-REVERT | StudioWorkspace renders `<ArrangementTransport …/>` again | RB-LEAF4 wrapper 0 |
-| MU-T-CANZOOMBACK-TRUE | Transport: `canZoomBack={true}` | SD1 / FL6 |
+- **`browserVerified`:** true only if LEAF-PROBE, both TRANSPORT-BROWSER rows, G377-AUTH and STUDIO-SMOKE-377 ran at both viewports in this round. No exception. If the budget runs out, it is false and B plans the remainder (V2 rule).
+- If a row cannot finish before the job limit, mark it not run with the real stop signal (L59), never PASS.
 
 ## 5. Neighbour risk
-- **Render totals** may only drop, except the accepted range +2. RS4, PV1–PV4, GH1–GH5, RB-MEMO1–3, RB-LEAF1–3 and RB-PB2 pass on the sketch.
-- **Focus:** the hand-off now runs per group. Every source and its partner are in the same group, so a source that becomes soft-disabled always renders its group in that commit (`tech-lead`). FL3–FL11 and SD1–SD9 cover it.
-- **Stale props:** every value the old Transport read from `useArrangement()` is a prop or the group's own subscription (`tech-lead`, `sketch-review.md`).
-- **The wrapper contract:** `<ArrangementTransport onOpenExport navigation>` (2 test files, `index.ts`) keeps its signature [K8].
+- RB-LEAF4b reads `api.current?.arrangement.master.mute` and `toggleMasterMute`. A change to the master mix label or history would show up there first, and that is intended.
+- The 10 round-376 mutants now run on 18 render-budget rows instead of 17, so their red sets can grow by RB-LEAF4b. This is allowed as written above.
 
-## 6. Order after this round (D-29z1249)
-1. REGRESSION first, if the round-377 planning falls on or after 2026-11-08.
-2. PERF-11c-iii-c2: LoopBrace and MarkerRow (premise from the displayName-aware probe).
-3. PERF-11c-iii-d (VideoDock) and -e (Lane): wait for ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING, or RETRO 384.
-4. PERF-11b if root or Saba answers; PERF-12…15; SYS-R2-FAKE-FIDELITY, SYS-CLOCK-DETERMINISM.
-5. STEM-LANES, SYS-1…3, STORE-2b…5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, the phase-2 entries under the skip rule.
+## 6. Order after this round (D-29z1253)
+1. After C PASS, round 376+377 goes to the gate as one stage: 6 code/test files and doc 243.
+2. **REGRESSION** at the first planning on or after 2026-11-08 (likely the round-378 planning).
+3. PERF-11c-iii-c2: LoopBrace and MarkerRow.
+4. PERF-11c-iii-d (VideoDock) and -e (Lane) wait for ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING or RETRO 384.
+5. Then PERF-11b, PERF-12…15, SYS-R2-FAKE-FIDELITY, SYS-CLOCK-DETERMINISM, STEM-LANES, SYS-1…3, STORE-2b…5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, and the phase-2 entries under the skip rule.
 
 ## 7. Root notes
-- **ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING** is still open (`b-round-373/root-request-arch-checkpoint-leaf-plumbing.md`). Gate 375's architecture note is its third echo; this round is the fourth pattern-A leaf and the third `use*Actions` hook. It does not block c1 or c2.
-- After C PASS this round is ready for the gate: 6 code/test files and 1 doc.
+- **ARCH-CHECKPOINT-PERF11C-LEAF-PLUMBING** is still open, and this is its fourth echo (`SIG-R376-THREE-ACTION-HOOKS`; `b-round-373/root-request-arch-checkpoint-leaf-plumbing.md`). It blocks neither c1 nor c2.
+- The working tree carries A's round-376 changes uncommitted. Do not reset it between rounds.
 
 ## 8. Claims (L29 + L56)
-Run `bash b-round-375/claims-376.sh` from the loop root. HEAD output: `b-round-375/claims-376-output.txt`; sketch output: `b-round-375/claims-376-sketch-output.txt`.
+Run `bash b-round-376/claims-377.sh` from the loop root. Before-A output: `b-round-376/claims-377-output.txt`. Sketch output: `b-round-376/claims-377-sketch-output.txt`.
 
 | Tag | Claim |
 |---|---|
-| K1 | gate 375 published `6b11be7` |
+| K1 | gate 375 published `6b11be7`; gate 376 skipped |
 | K2 | status line count |
-| K3 | Transport: wrapper form, `useArrangement()` calls, memo view, memo groups, hand-off hook, layout effects, range selectors |
-| K4 | HEAD Transport reads `arrangement`, `arrangement.loop`, four arm calls |
-| K5 | StudioWorkspace Transport site, export opener, actions hook, navigation memo |
-| K6 | the seven transport actions are `useCallback`s |
-| K7 | name-keyed counts in the three render test files |
-| K8 | tests mounting the wrapper; `index.ts` export |
-| K9 | row ids |
-| K10 | focus tests stub rAF to a no-op |
-| K11 | protected sha check |
-| K12 | frozen sha check |
-| K13 | the six files equal the sketch |
-| K14 | doc 243 count; doc 242 l.4 |
-| K15 | suite on v1, covering on v2 |
-| K16 | sketch typecheck, Biome |
-| K17 | perf on the sketch |
-| K18 | patch sha |
-| K19 | mutant failed-test counts |
-| K20 | expect/it counts |
-| K21 | regression date, lessons lines |
-| K22 | `tasks/round-375.md` sha |
-| K23 | covering file count |
-| K24 | HEAD dev probe |
-| K25 | sketch dev probe |
-| K26 | every cited artifact exists |
-| K27 | Transport testids |
-| K28 | recipe probe on HEAD and the sketch |
+| K3 | TC10 sits inside the 15 s describe |
+| K4 | TC10 times |
+| K5 | 0 transition APIs on the hand-off path |
+| K6 | row ids RB-LEAF4, RB-LEAF4b, FL11 |
+| K7 | `MASTER_MUTE_LABEL`; the undo/redo deps lines |
+| K8 | protected sha |
+| K9 | frozen sha |
+| K10 | v3 sketch files; round-375 sketch files |
+| K11 | doc 243 l.4 and its mentions |
+| K12 | expect/it counts |
+| K13 | delta patch sha |
+| K14 | B's v3 runs |
+| K15 | M1 mutant on the sketch |
+| K16 | regression date, lessons lines, archive sha |
+| K17 | covering file count |
+| K18 | every cited artifact exists |
