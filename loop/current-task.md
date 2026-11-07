@@ -1,235 +1,135 @@
-# Round 391: PERF-13b-ii. Honest status while dropped audio is decoded again; a clip whose sound failed never disappears silently from an export; the PCM memory rows become `assert`
+# Round 392: PERF-13b-ii, re-dispatch. The settle ruling for A's STOP (C-R391-01): a decode wait never leaves `Loading “X”…` on the status line
 
-**Planned by:** B, at the round 390 → 391 planning, 2026-11-07 (`b-round-390.md`).
-**Decisions:** D-29z1322 … D-29z1329 (`backlog.json` v358, `decisions_log_b`).
+**Planned by:** B, at the round 391 → 392 planning, 2026-11-07 (`b-round-391.md`).
+**Decisions:** D-29z1330 … D-29z1335 (`backlog.json` v359, `decisions_log_b`).
+**Type:** one Medium (C-R391-01 = A's round-391 STOP) plus the unfinished parts of the same stage (L10). Not new scope.
 
 **Read first:**
-- `lessons.md` in full. Directly relevant:
-  - L4: one element, one rule;
-  - L10;
-  - L23: collisions are granted;
-  - L29 and L56: claims;
-  - L31: timeouts;
-  - L37/L58: perf rows come from B's sketch, with a mutant;
-  - L51: status writes, what they overwrite and their lifetime;
-  - L52: a jsdom assert must be able to fail;
-  - L57: harness fields;
-  - L59: do not end early;
-  - L60: destructive commands stay in `c-round-391/`.
-- The rules: `docs/technical/studio-real-workspace/agent-workflow.md` (speed rules, the bug gate, reference-first, product-designer, cloud runner).
-- Earlier stages of this feature:
-  - `tasks/round-382.md` §2: the cache, pins and `ensureDecoded` (D-29z1274/1275);
-  - `tasks/round-386.md`: decode-resync errors.
-- **Claims.** Every fact below about current code or evidence carries a `[K#]` tag from `b-round-390/claims-391.sh`; the planning output is `b-round-390/claims-391-planning-output.txt`. Run it from the loop root.
-  - A runs it before editing.
-  - C runs it at SOURCE-SCOPE start, where it must equal the planning output, and again at the end. At the end only the facts listed in §6 may differ.
+- `lessons.md` in full. Directly relevant: L4, L10, L11, L26, L28, L29/L56, L31, L51, L52, L57, L59, L60.
+- `tasks/round-391.md`: the round-391 task. Everything in it still binds unless this file changes it. This file changes only: the settle rule (§1), EV9 superseded (§4), the new rows EV12+/EV23–EV25, the mutant table, and C's rows.
+- `a-round-391.md` §0 (the STOP), §3 (mutants), §5 (review). `c-round-391.md` / `c-round-391.json`.
+- **Claims:** `b-round-391/claims-392.sh`, run from the loop root. Its planning output is `b-round-391/claims-392-planning-output.txt`. A runs it before editing; C runs it at SOURCE-SCOPE start (must equal the planning output) and at the end (only the facts in §6 may differ).
 
-## Baseline: HEAD `11ca746`, clean tree
-- **Gates** [K1]: `gates/gate-round-388.json` is `published` with `commit` `11ca746…`. Gates 389 and 390 are `skipped` (no source change). So the baseline is `11ca746`. `context/head-sha.txt` may be stale.
-- **At planning:**
-  - HEAD is `11ca746`, with 0 status lines [K2];
-  - the protected files are 11/11 OK [K3];
-  - the frozen manifest `b-round-390/r391-frozen-sha256.txt` (the round-389 tree minus the granted paths) has 1279 entries and 0 failures [K4].
+## Baseline: HEAD `11ca746` **plus A's round-391 work in the tree**
+- Gate 391 is `skipped` (C FAIL) [K1]; gate 388's `11ca746` is still the last published commit. HEAD is `11ca746` with **5 status lines** [K2]: A's round-391 changes to the 5 granted files.
+- **A continues on that tree and reverts nothing** (policy §6). `perf/budgets.resources.json` already equals B's sketch [K18]. `strings.ts` already has the two strings [K15]. No further change is expected in those two files or in `strings.test.ts`.
+- Protected 11/11 [K3]. The frozen manifest `b-round-390/r391-frozen-sha256.txt` (1279 entries, granted paths excluded) still applies, with 0 failures [K4].
+- Grants: `b-round-391/grants-392.txt`, the same 6 paths as round 391.
 
 ## 0. Why this round
-- **REGRESSION-2026-11-08 is closed.** C round 389 (part 1) and C round 390 (part 2) both passed, with 0 bugs and `browserVerified` true [K7]. `regression-last.json` is now 2026-11-07 / 390 [K5]. The next regression is due on or after 2026-11-10 (D-29z1322).
-- No Critical or High finding is open, and no cloud-reproducible Medium. The next item in the approved order (D-29z1298) is **PERF-13b-ii** (STUDIO-PERFORMANCE).
-- PERF-13b-i made the Studio drop decoded audio that no clip uses and decode it again on demand. It left three gaps in honest behaviour:
-  1. **Wait text.** While a dropped sound decodes again, Play writes `“X” has not loaded yet.` [K9], which reads like a broken sound. The library preview writes nothing during the wait [K12]. Nothing tells the user when the sound is ready.
-  2. **Data honesty (A-R382-ERROR-SOURCE-SKIPPED).** If a placed clip's sound fails to decode again, its source becomes `error`. Play and export wait only for sources that are `ready` and not cached [K10], so an `error` clip is skipped silently. **An exported WAV can lack a clip, with no message.**
-  3. **Memory rows.** `res.mem.pcm-live-mib-ready` and `res.mem.pcm-live-decode-mib-ready` are still `record` [K18]. B has now run the production sketch and a fix-removed mutant (L58), so they become `assert`.
-
-**Promise this serves (L55):** "What you hear and what you export are the clips on the timeline. When a sound is not available, the Studio says so; it never drops it silently."
+- **C round 391 FAIL** [K7]. B1, B3, B4, B5, B6, PERF-RES and the status/transport part of B2 passed at both viewports, with `browserVerified` true.
+- **C-R391-01 (Medium).** A preview that a second preview replaces leaves `Loading “Middle East — public preview”…` on the line forever. C reproduced it at both viewports [K23]. A had reported the same case as its STOP [K22].
+- **Root cause (B's spec, not A's code).** The round-391 success clause ("every awaited source is cached") was written in terms of internal state. A superseded or stopped preview loses its `preview` pin. `ensureDecoded`'s own success handler runs `set` and then `evict()` before any caller `.then` [K13], so the buffer is already gone. The clause could never produce the `sourceReady` text that round 391 l.162 required.
+- **C-R391-02 (Low).** The export dialog's preflight says "no clip with sound" when the only clip failed. It is consumed in `ArrangementExportDialog.tsx` [K20], which is not granted (root's COPY-PD lane holds the export dialog). It goes to `deferred_low_polish` (D-29z1334).
 
 ## 1. Rulings (B)
 
-### D-29z1324: the assert flip
-Apply B's sketch exactly: `b-round-390/sketch-391.patch.txt` (sha256 prefix `d2127c92` [K20]). The resulting file is `b-round-390/sketch-391-budgets.resources.json`.
-- **The two rows that flip:**
-  - `res.mem.pcm-live-mib-ready`: `assert`, `<= 60` MiB. This is the perf-plan PERF-13 target, "≤ 60 MB at ready" (ROOT-NOTE-PERF13-PLAN-ROW).
-  - `res.mem.pcm-live-decode-mib-ready`: `assert`, `<= 0`.
-- **B's production run on the sketch:** 31.9 and 0, three samples each. Both rows PASS, and the spec reports `1 passed` [K20]. Logs: `b-round-390/perf-sketch-391.log` and `perf-sketch-391-latest-resources.json`.
-- **Mutant MU-391-NOTHING-EVICTABLE** (`canReloadSource` → `false` in `app/data/studio-lab-demo.ts` [K19]): the values become 124 and 92.2, and both rows FAIL [K21]. Log: `b-round-390/mutants/mutant-MU-391-NOTHING-EVICTABLE.log`.
-- **No loaded replicate.** The memory values are deterministic (three identical samples in each run), so L37's loaded replicate does not apply.
-- **`count-ready`, `after-add`, `count-after-add` and `after-export-delta` stay `record`.** An exact count would break the day a synth source is added, and the plan sets no budget for the after-add values.
-- No test reads the budgets file; only the perf spec does [K18].
+### D-29z1331: the settle rule (answers A's STOP, option (i))
+Both call sites (the Play refusal in `startPlaybackAt`, and the library preview of a `ready` source that is not cached) use **one** rule.
 
-### D-29z1325: the decode wait text (the "known vs decoded" state)
-- **No new React state.** "Decoding again" is derived from data that already exists: the source is `ready`, it has no cached buffer (`decodedBuffers.has`), and a decode is in flight. This follows `tech-lead`, because the root architecture checkpoint for this region is still unanswered (D-29z1328).
-- **New strings in `studioLibraryStrings`:**
-  - `sourceDecoding(title)` → `Loading “<title>”…`
-  - `sourceReady(title)` → `“<title>” is ready.`
-- **Play,** on every start path through `startPlaybackAt`: a clip whose source is `ready` but not cached gets `sourceDecoding(<title of awaiting[0]>)` instead of `sourceNotLoaded` [K9]. Play still does not start (the round-382 ruling: no auto-start), and `isPlaying` stays false.
-- **Library preview** of a source that is `ready` but not cached: it writes `sourceDecoding(title)` before it waits [K12].
-- **Settle (the L51 lifetime).**
-  - **Where:** at the two call sites, in the `.then` of the `ensureDecoded` call each one started. Not inside `ensureDecoded`: its other callers (the pin path and export) write no status.
-  - **How:** one functional update, `setStatus(cur => cur === loadingText ? next : cur)`. Exact text equality is the only token.
-  - **What:** `next` is decided at settle time from the cache and the source states, never from the promise resolving (the promise also resolves after an abort):
-    - **Success:** every awaited source is cached → `sourceReady(<the same title as the loading text>)`.
-    - **Failure:** an awaited source is `error` → `sourceFailed(<the title of the first such source>)`. This write is **unconditional**; see the ruling lines (L4).
-    - **Neither** (an abort, or the collection changed) → no write.
-- **Preview: the smallest honest rule.** The settle rule above also holds for a preview.
-  - When the preview starts, the line reads `“X” is ready.`.
-  - A preview that another preview or Stop has replaced does not start (as now). Its settle still swaps its own loading text if that text is still on the line, so a stale "Loading" never stays.
-  - **Rejected:** `product-designer`'s "clear the text when the preview starts". Restoring the text that the loading text replaced needs bookkeeping across overlapping waits: preview A waits, then preview B waits. The restored text could itself be a stale loading text. The uniform rule is always true and needs no new state.
-- **Unchanged:**
-  - A source that is still `loading` (its first load) keeps `sourceNotLoaded`. That covers Add (`addSourceToActiveTrack`), drop, and the preview's not-`ready` branch: the other 3 `sourceNotLoaded` call sites [K8].
-  - `dropNotLoaded` is unchanged.
+1. **At call time,** read the owner exactly as `ensureDecoded` does [K13]:
+   `const owner = collectionControllerRef.current; const controller = owner?.collection === collection ? owner.controller : null;`
+2. **Null owner (D-29z1332).** If `controller` is null, `ensureDecoded` would decode nothing, so a loading text would be false the moment it is written.
+   - Write **no** loading text. Do not set the preview pin, and do not call `ensureDecoded`.
+   - Write `studioLibraryStrings.sourceNotLoaded(<title>)`, the pre-391 text for this path. That is one honest text, and it adds back at most 2 `sourceNotLoaded` call sites (K8 may become 3 or 4).
+   - The preview path has still run `stopLibraryPreview()` first, as today.
+3. **Otherwise,** write the loading text and call `ensureDecoded`, as now. In its `.then`, decide in this order:
+   - **Failure:** an awaited source has status `'error'` → `setStatus(librarySourceFailedMessage(<title of the first such source>))`. **Unconditional**, as in round 391. For a superseded preview this is new and confirmed (D-29z1333).
+   - **Success:** `controller.signal.aborted` is false → the conditional swap `setStatus(cur => cur === loadingText ? sourceReady(title) : cur)`.
+   - **Neither** (the signal was aborted: a collection change or unmount) → no write. The collection's own status owns the line: the collection effect writes on every change, `setStatus(copy.empty)` or `setStatus(current => loadingCollectionStatus(current, copy))`, and `loadingCollectionStatus` replaces any text that does not start with the collection's loading copy, so `Loading “X”…` is replaced [K25].
+4. **Delete the cache-based success expressions** [K10]: `awaiting.every((id) => decodedBuffers.has(id))` and the preview's `else if (decodedBuffers.has(sourceId))` settle branch. The preview's **start** decision after the supersession gate stays cache-based, as now ("start if `decodedBuffers.has(sourceId)`, else `releasePreviewPin()`").
+5. **What `“X” is ready.` means:** the decode of X completed under the current collection. It does **not** promise that X is held in memory. A superseded or stopped preview's buffer is evicted (as before, the cache does not keep it), and the next Preview of X decodes again and shows `Loading “X”…` again.
+   - **Why this is honest enough:** the line tells the truth about the action the user started (the load finished). The alternative, restoring the text the loading line replaced, needs bookkeeping across overlapping waits, and was already rejected in round 391 (D-29z1325).
+   - This is a CZABA decision with no Live reference (Live streams from disk and shows no decode wait).
+6. **Helper (optional).** A may put the shared decision in **one** module-level function inside `ArrangementContext.tsx`, used by both sites (for example `decideDecodeSettle(awaiting, states, controller) → 'failed' | 'ready' | 'none'`). No new file, no new export, no new React state, ref or context field.
+7. **Untouched, as in round 391:** `ensureDecoded`'s body, the cache, the pins, the collection effect, `prepareExportSources`' logic, the Play warning (D-29z1326).
 
-### D-29z1326: a clip whose source is `error` (A-R382-ERROR-SOURCE-SKIPPED)
-- **Export (WAV and MP3) refuses.**
-  - **Which clips:** `prepareExportSources` [K11] returns the existing failed text when a clip **that the export renders** has a source whose status is exactly `'error'`.
-    - With no render window: the whole arrangement.
-    - With a render window: only clips that overlap it, `clip.start < window.end && clip.start + clip.duration > window.start`.
-  - **What it returns:** still one message, the same `librarySourceFailedMessage(title)` that the callers already wrap in `studioExportStrings.exportFailed` [K11, K15]. The dialog reads `Export failed — no file was created. “<title>” failed to load — details are in the library.`
-  - **Keep:**
-    - the pins being set before the `await`;
-    - the callers' `signal.aborted` check before `failedSource`, so a cancel still wins;
-    - the `finally` → `releaseExportPins`.
-  - A source with no `sourceStates` entry (video) is never "failed".
-- **Play plays, and says why a clip is silent.** This matches Live, which plays silence for missing media and warns in the status bar (see the Reference section).
-  - When `present.clips` has a clip whose source is `'error'`, Play starts as before. The status then becomes `sourceFailed(<the title of the first such clip's source>)`.
-  - Write it **after** the existing `playingFrom` write [K14], so it is not overwritten. It replaces the "Playing from" text. That is the accepted cost: the warning matters more than the start position.
-  - If every clip has failed, Play still starts, plays silence and shows the same warning, as in Live.
-- **Not in scope:**
-  - retrying a failed source;
-  - an "Offline" mark on the clip, as Live has. That mark is a question for Saba (`user-review/questions-perf13b-ii.md`, Q1; default "not now").
+### D-29z1333: a superseded preview whose decode fails
+Writes `sourceFailed(<title>)` (unconditional). Confirmed. A failure must never go silent (round 391 ruling line, EV13). New row EV23.
 
-### D-29z1327: A-R383-REVIEW-L1-STALE-ENSURE-DECODED is closed, with no code
-- `tech-lead` traced every path to the stale `.then`:
-  - collection cleanup aborts the signal before it clears the in-flight map;
-  - a stale `ensureDecoded` closure gets `controller = null` from the owner check [K13];
-  - unmount runs the same cleanup.
-- So an extra guard would mean the same as `signal.aborted`, and no mutant could tell the two apart (L52).
-- EV7 already proves that an old decode in flight never sets [K16].
-
-### D-29z1329: the purchased collection's reload
-Signed URLs can expire, so `canReloadSource` stays absent for the purchased adapter. This becomes a question in `SRW-21-PLAN` (root's parallel lane), not code here.
+### D-29z1335: mutant rulings (L52)
+- **MU-391-WARNING-BEFORE-PLAYINGFROM: equivalent, accepted.** The `playingFrom` write is a functional update that replaces only "stopped"-kind texts or `scheduleFailed`; the warning is neither, so the order cannot change the result. No replacement mutant. MU-391-PLAY-NO-WARNING (red) still guards EV21.
+- **MU-391-READY-ON-FIRST and MU-391-READY-ON-SOME: retired.** Their target (`every(cached)`) is deleted by D-29z1331.
+- **The mutant table in §4 is regenerated.** No round-391 red log counts for an expression this round changes.
 
 ### Ruling lines (L4)
-- Status line after the Play refusal: D-29z1325 wins over the round-382 `sourceNotLoaded` refusal text, for the ready-but-not-cached case only.
-- Status line after Play with an `error` clip: D-29z1326's warning wins over `playingFrom`.
-- The EV9 assertion `status` = `statusBefore` [K16]: the D-29z1325 settle rule wins. EV9 is rewritten, and no assertion is lost.
-- **Settle writes: success is conditional, failure is not.** The `sourceReady` write is the conditional swap (only when the line still shows the loading text). The **failure** write (`sourceFailed(<first failed title>)`) is **unconditional** at both call sites. For the preview this is today's behaviour, pinned by EV13 [K12]. For Play it is new. A failure must never go silent because another text replaced the loading text. EV13 is not weakened.
+- Status after a superseded or stopped preview's successful settle: D-29z1331's swap wins over round-391's "cached" clause, and over EV9-superseded's old `toBe(statusBefore)`.
+- Status for a null-owner call: D-29z1332's `sourceNotLoaded` wins over the round-391 loading write.
+- The failure write stays unconditional at both sites (round 391, unchanged).
+- Status after Play with an `error` clip: D-29z1326's warning still wins over `playingFrom` (unchanged).
 
-## 2. Reference: how Ableton Live 12 does it (and where we differ)
-| Behaviour | Source | Live (confirmed) | CZABA decision | C check |
-|---|---|---|---|---|
-| Waiting for a sound to decode | Live 12 manual, ch. 5 "Managing Files and Sets" (searched by `product-designer`, 2026-11-07) | **No reference found.** Live streams samples from disk, so it shows no decode wait | Status line `Loading “X”…` → `“X” is ready.`; no auto-start (round 382) | B1, B2 |
-| Play with a clip whose media is missing | Live 12 manual 5.6 "Locating Missing Files", https://www.ableton.com/en/live-manual/12/managing-files-and-sets/#locating-missing-files | "Live's Status Bar … will display a warning message"; the clips are marked "Offline"; "Live will play silence instead of the missing samples" | Plays, with a warning in the status line. **Difference:** no "Offline" mark on the clip (Saba Q1, L44) | B3 |
-| Export with missing media | Live 12 manual 5.1.3 "Exporting Audio and Video" | **No reference found.** The section does not mention missing files | Refuse, and write no file. Our own decision: a WAV with a missing part must never reach an editor's timeline | B4 |
+**Status writes this round can collide with (L51):** `Loading “X”…`, `“X” is ready.`, `sourceFailed`, `sourceNotLoaded`, `playingFrom`, the Undo/Redo texts, the add text (`added to the Music track…`), the collection's `Loading the demo collection…` / `Demo collection ready.`, and the export failure in the dialog (not the status line).
 
-**Product design (`product-designer`, 2026-11-07).**
-- **Framing:** a short wait (≤ 2 s) needs a truthful text, not a new visual element.
-- **Rejected:**
-  - a spinner on the library row: a new element for a wait of 2 s or less;
-  - auto-start after the decode: the sound would arrive after the user has moved on;
-  - rendering silence with a warning: the warning is lost and the WAV is wrong.
-- **Where B deviates from it:** the preview settle text (D-29z1325, with the reason given there).
+## 2. Reference
+Unchanged from `tasks/round-391.md` §2. The only behaviour this round changes (decode wait text) has **no Live reference** (Live 12 manual ch. 5; Live streams from disk). The missing-media row (Live 12 manual 5.6) is unchanged and already passed (B3).
+**Screen budget (L39):** nothing new is permanently visible; only the existing status line's text changes.
 
-**Screen budget (L39):** nothing new is permanently visible. Only the existing status line changes text, so C has nothing to count.
+## 3. What A changes (grants: `b-round-391/grants-392.txt`, 6 paths)
+1. **`app/contexts/ArrangementContext.tsx`:** D-29z1331 and D-29z1332 only, at the two call sites (and the optional helper). The owner compare uses `collection` itself; A adds `collection` to the two dependency arrays (`startPlaybackAt`, `startLibraryPreview`) if lint requires it. No other dependency change.
+2. **`app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx`:** the rows in §4. Keep every round-391 row (31). A rewrite keeps every assertion or replaces it with an equal or stronger one; a change whose only effect is removing an assertion is a Medium finding.
+3. **`docs/implementation/2026/quarter-IV/251-perf-decode-status-and-failed-sources.md`** (new, still the next free number [K21]). In Georgian, following `docs/implementation/TEMPLATE.md`. It covers the whole PERF-13b-ii stage (rounds 391–392): D-29z1324…1327, 1331…1333; status line l.4 per L28 (`Completed (C round 392 PASS)`). It cites only rows that exist (L26).
+4. `perf/budgets.resources.json`, `strings.ts`, `strings.test.ts`: already done; no change expected. If A must change one, it explains why in the report.
 
-## 3. What A changes (grants: `b-round-390/grants-391.txt`, 6 paths)
-1. **`perf/budgets.resources.json`:** apply `b-round-390/sketch-391.patch.txt` exactly. The result must be byte-identical to `b-round-390/sketch-391-budgets.resources.json` (`cmp`).
-2. **`app/lib/arrangement/strings.ts`:** add `sourceDecoding` and `sourceReady` to `studioLibraryStrings`, with the exact texts in D-29z1325. Change nothing else [K15].
-3. **`app/contexts/ArrangementContext.tsx`:** D-29z1325 and D-29z1326 only.
-   - No new `useState` or context field. Add a ref only if one is needed to remember the loading text per call, and explain it in the report.
-   - Do not touch `ensureDecoded`'s body [K13], the cache, the pins or the collection effect.
-4. **`app/lib/arrangement/__tests__/strings.test.ts`:**
-   - add the two formatters to the `studioLibraryStrings` formatter-sample table [K17];
-   - add exact-text expectations next to the existing `sourceNotLoaded` one.
-
-   B's L23 pre-apply showed ST12 red without this [K22].
-5. **`app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx`:** rewrite EV3 and EV9 to the new contract, and add the rows in §4.
-   - The file has 22 tests and ran in 1855 ms at gate 388 [K24], so the L31 headroom is fine.
-   - Rewrites keep every assertion or replace it with an equal or stronger one. A test whose only change removes an assertion is a Medium finding.
-6. **`docs/implementation/2026/quarter-IV/251-perf-decode-status-and-failed-sources.md`** (new; 251 is the next free number [K23]): in Georgian, following `docs/implementation/TEMPLATE.md`.
-
-**Forbidden:**
-- every path not in the grants, including `ensureDecoded`'s body, `app/data/studio-lab-demo.ts`, `graph.client.ts` and the purchased adapter;
-- `global_forbidden_files` / `global_forbidden_actions` and the 4 protected files;
-- `package.json`;
-- commit, push, stash, checkout, deploy, and dev-server restarts.
+**Forbidden:** as in round 391 (every path outside the grants, `ensureDecoded`'s body, `studio-lab-demo.ts`, `graph.client.ts`, the purchased adapter, `ArrangementExportDialog.tsx`, the global forbidden files and actions, the 4 protected files, `package.json`; commit, push, stash, checkout, deploy, dev-server restarts). Do not revert A's round-391 work.
 
 ## 4. A: tests (jsdom, in `decoded-buffer-eviction-ui.test.tsx`; the ids are binding)
-Each row names the mutant that must turn it red. A runs each mutant on a scratch copy outside `store/`, and saves the logs in `a-round-391/mutants/`.
+Each row names the mutant that must turn it red. A runs each mutant on a scratch copy outside `store/` and saves the logs in `a-round-392/mutants/`.
 
 | Row | Sequence | Expected | Mutant (red) |
 |---|---|---|---|
-| **EV3** (rewritten) | Add `big`; Play before the decode settles | `isPlaying` false; status `sourceDecoding(BIG_TITLE)`. Settle OK → status `sourceReady(BIG_TITLE)`, still not playing. Play again → plays. Keep the rest of today's EV3 asserts | MU-391-OLD-PLAY-TEXT (`sourceNotLoaded` back at the Play refusal); MU-391-NO-SETTLE-SWAP (the `.then` swap removed) |
-| **EV16** | As EV3, but another status write lands before the settle (a second Add, of the ready source `keep`) | After the settle, the status is still the second write's exact text, not `sourceReady`. **Failure variant:** the same sequence, but the settle fails → the status is `sourceFailed(BIG_TITLE)` (unconditional) | MU-391-UNCONDITIONAL-SWAP (`setStatus(next)` without the equality check); MU-391-CONDITIONAL-FAILURE (the failure write also gated on the loading text) |
-| **EV17** | Two evicted sources placed: `big` and a second evictable fixture (add one to the fixture if none exists). Play; settle the first only | Status still `sourceDecoding(<first title>)`. Settle the second **with an error** → `sourceFailed(<second title>)`; `isPlaying` false | MU-391-READY-ON-FIRST (decides "ready" from the first settled id only) |
-| **EV9** (rewritten, both cases) | Preview `big` (evicted) | Before the settle: status `sourceDecoding(BIG_TITLE)`. After the settle: the preview plays `big` and the status is `sourceReady(BIG_TITLE)`. **Superseded case:** preview `big`, then preview `keep`. After `big`'s settle, `libraryPreviewSourceId` is `keep`, the status is `sourceReady(BIG_TITLE)` (it still equalled the loading text), and the cache does not keep `big` (as today) | MU-391-PREVIEW-NO-LOADING (no loading write) |
-| **EV18** | Preview `big`; settle **with an error** | Status `sourceFailed(BIG_TITLE)` (today's EV13 failure text, now reached through the swap); no preview | MU-391-NO-SETTLE-SWAP |
-| **EV19** | Add `big`; settle with an error (the source is now `error`); then `exportWav()` | `renderWavMock` not called; `exportState` = `{ phase: 'error', message: exportFailed(sourceFailed(BIG_TITLE)) }`; the export pins are released | MU-391-EXPORT-NO-ERROR-CHECK (the new failed branch removed) |
-| **EV20** | As EV19, but a range export whose window does not overlap the failed clip, with a `ready`, cached clip inside it | The render runs (`renderWavMock` called once); no failure text | MU-391-ERROR-CHECK-IGNORES-WINDOW |
-| **EV21** | As EV19, then Play | `isPlaying` true; status `sourceFailed(BIG_TITLE)`, not `playingFrom` | MU-391-PLAY-NO-WARNING; MU-391-WARNING-BEFORE-PLAYINGFROM (the warning written before the `playingFrom` update) |
-| **EV22** | Play → `sourceDecoding`; `beginPointerGesture()` [K14]; settle OK; release the gesture | **Record** the final committed status and `getStatusPreviewText()` in the report. Assert only that the final status is not `sourceDecoding(BIG_TITLE)`. EV3 is the positive counterpart | None (a record row for `tech-lead`'s mid-gesture risk) |
+| **EV9 superseded** (rewritten) | Preview `big` (evicted), then preview `keep`; settle `big` OK | `libraryPreviewSourceId` = `keep`; status **`toBe(sourceReady(BIG_TITLE))`** (replaces `toBe(statusBefore)`); `not.toBe(sourceDecoding(BIG_TITLE))`; the cache does not keep `big` (as now) | MU-392-SUCCESS-BY-CACHE (success decided by `decodedBuffers.has` again) |
+| **EV9 stop** (new, same `it` group) | Preview `big`; `stopLibraryPreview()` before the settle; settle OK | No preview; status `sourceReady(BIG_TITLE)`; cache does not keep `big` | MU-392-SUCCESS-BY-CACHE |
+| **EV12** (extended) | As today (a stale preview call from before a collection change) | Today's asserts, **plus**: the status after the stale call is `sourceNotLoaded(<its title>)`, it was never `sourceDecoding(...)` (record every status in the row), and no preview pin was set for the stale id | MU-392-LOADING-ON-NULL-OWNER (the loading write and pin happen even with a null owner) |
+| **EV23** | Preview `big`, then preview `keep`; settle `big` **with an error** | Status `sourceFailed(BIG_TITLE)`; preview still `keep` | MU-392-SUPERSEDED-FAILURE-SILENT (the failure write moved after the supersession gate) |
+| **EV24** | As EV20 (a failed clip outside a range window, a ready cached clip inside), but `exportMp3(window)` | **Binding:** `exportState` never reaches `{ phase: 'error', message: exportFailed(sourceFailed(BIG_TITLE)) }`, and the export pins are released. The test file has no MP3 render mock today (only `renderWavMock`); if A adds one inside the test file, "the MP3 render runs once" is asserted too | MU-392-MP3-DROPS-WINDOW (`renderWindow` dropped at the MP3 call site) |
+| **EV25** | Play with an evicted placed clip → `sourceDecoding`; change the collection (abort) before the settle; then settle the old decode OK | The status after the settle equals the new collection's own status text (the collection effect replaced the loading text [K25]); it is never `sourceReady(BIG_TITLE)` or `sourceDecoding(BIG_TITLE)` | MU-392-IGNORE-ABORT (success ignores `signal.aborted`). If A shows this mutant is equivalent (the collection's own write always replaces the loading text first), A records the argument and the row stays a record row (L52) |
+| **EV3, EV16 ×2, EV17 ×2, EV18** | Unchanged sequences | Unchanged expectations | Re-run against the new rule: MU-391-NO-SETTLE-SWAP (EV3, EV18), MU-391-UNCONDITIONAL-SWAP (EV16), MU-391-CONDITIONAL-FAILURE (EV16 failure), MU-392-FAILURE-FIRST-ONLY (EV17 failure: only `awaiting[0]` checked for `error`) |
+| **EV19–EV22** | Unchanged | Unchanged | MU-391-EXPORT-NO-ERROR-CHECK, MU-391-ERROR-CHECK-IGNORES-WINDOW, MU-391-PLAY-NO-WARNING re-run once on the final tree |
 
 **A also runs:**
-- `npm run typecheck` and `npm run lint`;
-- `npx vitest run` on:
-  - `decoded-buffer-eviction-ui.test.tsx`, `strings.test.ts`, `failed-source-refusal.test.tsx`, `name-bar-hint-ui.test.tsx`, `grid-snap-loop-drop.test.tsx`;
-  - `export-range-ui.test.tsx`, `export-range.test.ts`, `schedule-failure-ui.test.tsx`;
-  - every other test file under `app/` that matches `sourceNotLoaded|exportFailed|prepareExportSources|playingFrom` (paste the grep and its file list);
-- the `code-reviewer` (3 or more files changed).
+- `npm run typecheck`, `npm run lint`, scoped `npx biome check` on the changed paths;
+- `npx vitest run` on the round-391 covering set (11 files, `a-round-391/covering-grep.txt` plus the 4 named files), re-grepped on the final tree for `sourceNotLoaded|sourceDecoding|sourceReady|exportFailed|prepareExportSources|playingFrom`;
+- the claims script at start and end;
+- the `code-reviewer` again (3+ files changed across the stage), given the new settle code and the rewritten rows.
 
 A does not run the full suite or `verify`; the gate does.
 
-**A's report, `a-round-391.md`:**
-- the changed files;
-- each command with its rc and its log path under `a-round-391/`;
-- each mutant's red log;
-- the EV22 record;
-- the reviewer's notes. An Architecture note goes to B as a signal.
+**A's report, `a-round-392.md`:** changed files; each command with rc and log path under `a-round-392/`; each mutant's red log (or the equivalence argument); the EV12/EV25 recorded statuses; the `sourceNotLoaded` call sites that remain (K8); the reviewer's notes (Architecture notes go to B as signals).
 
-## 5. C: browser rows (1440×900 and 1280×720, on `http://127.0.0.1:5173/studio-lab`)
-**Probe setup.**
-- **Base:** `c-round-382/lib.mjs` `open()`, with the injection style of `b-round-385/probe/preview-while-playing.mjs`.
-- **Two init helpers:**
-  - `window.__delayDecodes = n`: the next n `decodeAudioData` calls resolve 1500 ms late, so the wait is visible;
-  - `window.__failDecodes = n`: the next n calls reject.
-- **Status:** read it from `[data-testid="arrangement-status"]`, an `aria-live="polite"` `output` [K26]. Record every text the line takes with a `MutationObserver`.
-- **Ready wait:** wait for the text starting `Demo collection ready.` before the first action (L48) [K26].
-- **Injection order:** install both helpers with their counters at 0, wait for ready, and only then set a counter to 1 and act. A counter set before ready delays or fails the collection's own first decode, and makes the run invalid (a replacement attempt, not a FAIL).
-- **Title:** the Middle East title is `Middle East — public preview` [K19].
+## 5. C: browser rows (1440×900 and 1280×720, `http://127.0.0.1:5173/studio-lab`)
+**Probe setup:** as round 391 §5. Reuse `c-round-391/probe2.mjs` (the `__delayDecodes` / `__failDecodes` helpers, the `MutationObserver` on `[data-testid="arrangement-status"]`, the ready wait, the injection order). Copy it into `c-round-392/`; do not edit round-391 files.
 
 | Row | Steps | PASS when |
 |---|---|---|
-| **B1 PREVIEW-LOADING** | Fresh load; delay 1; select Middle East; click Preview | The observed sequence contains `Loading “Middle East — public preview”…`, then `“Middle East — public preview” is ready.`. The preview audibly starts (a source start longer than 100 s, or the toggle reads Stop). 0 `pageerror` |
-| **B2 PLAY-LOADING** | Fresh load; delay 1; Add Middle East (Enter); press Space within 500 ms | The status shows `Loading “Middle East — public preview”…` and `data-playing` stays false. After the decode, the status is `“Middle East — public preview” is ready.` and playback is still stopped. Space again → playing, with a level at least 20 dB above the floor |
-| **B3 FAILED-CLIP-PLAY** | Add Middle East and wait for the decode; Delete the clip (its buffer is released); fail 1; Ctrl+Z (the clip returns and its re-decode fails) | After Ctrl+Z, the library row of Middle East shows its load error. The undo path writes no decode status, so record the status text without asserting it. Space → `data-playing` true, and the status is `“Middle East — public preview” failed to load — details are in the library.` |
-| **B4 FAILED-CLIP-EXPORT** | Continue from B3: Stop; Export → WAV | No download. The dialog shows `Export failed — no file was created. “Middle East — public preview” failed to load — details are in the library.`. Repeat once with MP3: the same text, no download |
-| **B5 CONTROL-EXPORT** | Fresh load, no injection: Add Middle East, export a WAV | One WAV with a RIFF/WAVE header and length > 0 (the existing flow still works) |
-| **MOCK-START** (before B6 only) | Start `mock-api/server.mjs` from the loop folder on 127.0.0.1:5199, as round 390 did; stop it at the end. B1–B5 and PERF-RES do not need it | `GET /api/products` returns 200. Without it, B6 is BLOCKED (environment), not FAIL |
-| **B6 JOURNEY (L54)** | Product page → "Try it in the Studio" → `/studio-lab` → preview → Add → Play → Export WAV | A screenshot of each step; the B1 and B2 texts appear where expected; the WAV arrives |
-| **PERF-RES** | `npx playwright test --config playwright.perf.config.ts perf/studio-lab-resources.perf.spec.ts`, alone (it builds; port 5188) | 1 passed, 0 problems. `pcm-live-mib-ready` assert PASS (≈ 31.9), `decode-mib-ready` assert PASS (0), and every other assert PASS. Copy the results to `c-round-391/perf-results/` |
-| **SOURCE-SCOPE** | At start and end: the claims script, `git status`, and `sha256sum -c` on `r391-frozen-sha256.txt` and on the protected manifest | Start = the planning output. End: only the 6 granted paths changed (doc 251 is new); K4 0 failures; K3 11 |
-| **gate** | Full vitest, typecheck, build, Biome, verify | Marked `gate`; not claimed in `passed` |
+| **B7 SUPERSEDED (C-R391-01)** | Fresh load; delay 1; select Middle East; Preview; while it decodes, select Full mix and Preview; wait 3 s | The observed sequence contains `Loading “Middle East — public preview”…` and then `“Middle East — public preview” is ready.`. The line **does not end** on the loading text. Full mix is the playing preview. 0 `pageerror` |
+| **B8 PREVIEW-THEN-SPACE** | Fresh load; Add Full mix (already decoded at load) so Play has something to play; delay 1; Preview Middle East; press Space while it decodes; wait 3 s | Playback runs (`data-playing` true). The line does not end on `Loading “Middle East — public preview”…` (it ends on `“…” is ready.` or another non-loading text). Record the full sequence |
+| **B9 SUPERSEDED-FAILURE** | As B7, but the Middle East decode **fails after the wait**. `c-round-391/probe2.mjs`'s `__failDecodes` rejects at once, so add to C's own copy a third helper, `window.__delayFailDecodes = n` (the next n decodes reject with `EncodingError` after 1500 ms), installed at 0 with the others and set to 1 after ready | The line ends on `“Middle East — public preview” failed to load — details are in the library.`; Full mix is the playing preview; 0 `pageerror` |
+| **B1 PREVIEW-LOADING** | As round 391 | As round 391 |
+| **B2 PLAY-LOADING** | As round 391 | As round 391, **without** the level clause: the level ≥ 20 dB half is dropped for this round (round 391 did not run it, and this round's change does not touch the audio path). Playback is proven by `data-playing` true and the source start |
+| **B3 FAILED-CLIP-PLAY** | As round 391 | As round 391 |
+| **B4 FAILED-CLIP-EXPORT** | As round 391 (WAV and MP3) | As round 391 |
+| **PERF-RES** | As round 391 (alone, L38) | As round 391; copy results to `c-round-392/perf-results/` |
+| **SOURCE-SCOPE** | Claims at start and end, `git status`, `sha256sum -c` on `r391-frozen-sha256.txt` and `b-round-318/protected-sha256.txt` | Start = planning output. End: only granted paths changed (doc 251 new), K4 0 failures, K3 11, and only §6 facts differ |
+| **DOC-251** | Read the doc | Georgian, TEMPLATE sections, l.4 per L28, and every cited row id exists in the test file (L26) |
+| **gate** | Full vitest, typecheck, build, Biome, verify | `gate`; not claimed in `passed` |
 
-**Neighbours that can break** (one short check each, at 1440 only):
-- the round-382 EV13 path: a preview while playing keeps the timeline playing until its decode succeeds;
-- the first-load sequence `Loading the demo collection…` → `Demo collection ready.`;
-- Add of a source that is still loading still says `has not loaded yet.`.
-
-**L57 fields** in `c-round-391.json`:
-- `manifestPaths` = `b-round-390/r391-frozen-sha256.txt`, `b-round-318/protected-sha256.txt`;
-- `mutantRedOnSketch` = "MU-391-NOTHING-EVICTABLE red on B's sketch (`b-round-390/mutants/`); jsdom mutants: A's logs";
-- an `origin` per finding.
+- **Carried, not re-run:** B5 CONTROL-EXPORT and B6 JOURNEY passed in `c-round-391.json` on a tree whose export and journey code this round does not touch. C cites that evidence. Run them again only if time remains after every row above has a result (L59).
+- **Neighbours** (one short check each, 1440 only): the first-load sequence `Loading the demo collection…` → `Demo collection ready.`; Add of a source that is still loading says `has not loaded yet.`; EV13 path (a preview while playing keeps the timeline playing until the decode succeeds).
+- **L57 fields** in `c-round-392.json`: `manifestPaths` = `b-round-390/r391-frozen-sha256.txt`, `b-round-318/protected-sha256.txt`; `mutantRedOnSketch` = "jsdom mutants: A's logs (`a-round-392/mutants/`); budgets mutant MU-391-NOTHING-EVICTABLE red on B's sketch (`b-round-390/mutants/`)"; an `origin` per finding; `missingPaths`, `countMismatches`, `claimCheckMinutes`.
 
 ## 6. Claims that may change during the round
-- **K8:** 4 → 2 or 3. The Play refusal goes; the preview `.then` fallback at the old not-`error` branch may go too, if the swap replaces it. The Add/drop and preview not-`ready` call sites stay. A lists each remaining call site.
-- **K9:** 1 → 0.
-- **K15** `new-keys`: 0 → 2.
-- **K16:** the EV pins and the test count (22 → 22 plus the new rows).
-- **K17:** unchanged, with new rows next to it.
-- **K18:** `assert assert record record`.
-
+- **K2:** 5 → 6 status lines (doc 251 is new).
+- **K8:** 2 → 2…4 (null-owner `sourceNotLoaded` writes). A lists each call site.
+- **K10:** `1 1` → `0 0`.
+- **K13:** `owner-check` and `owner-read` 1 → 2 or 3 (the caller-side reads, or one in the helper).
+- **K16:** EV tests 31 → 34…36; `EV9-superseded-statusBefore` 1 → 0; `EV23-25` 0 → 3.
+- **K17:** may change (count only).
+- **K21:** doc251 0 → 1, last 250 → 251.
+- **K22–K25:** unchanged.
 Everything else must equal the planning output.
 
 ## 7. Out of scope (recorded, not dropped)
-- An "Offline" mark on clips (Saba Q1).
-- Retrying a failed source.
-- Q-PREVIEW-STOPS-TRANSPORT (awaiting Saba).
-- The purchased reload (SRW-21-PLAN).
-- PERF-13c (streaming library preview) comes next.
+- C-R391-02 (export preflight says "no clip with sound" for a failed clip): `deferred_low_polish`, owner lane COPY-PD / the export dialog (D-29z1334).
+- The "Offline" mark (Saba Q1), retrying a failed source, Q-PREVIEW-STOPS-TRANSPORT, the purchased reload (SRW-21-PLAN).
+- Extracting the settle rule to `lib/arrangement` (reviewer's Architecture note): a signal appended to ARCH-CHECKPOINT-DECODE-REGION, not this round.
+- Next after PERF-13b-ii: PERF-13c (streaming library preview).
