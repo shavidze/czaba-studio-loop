@@ -1,0 +1,11 @@
+# B round 378 checkpoint
+- DONE: archive tasks/round-378.md, backups
+- next: orientation checks c2b, backlog v344
+- DONE: backlog v344 (round 378 accepted, gate review)
+- DONE: sketch (MarkerRow + StudioWorkspace + RB-LEAF6), tsc/biome rc0, mutants sketch-run 4/4 red RB-LEAF6 only, marker-head-379.json; running: full suite, then sketch dev probe
+- DONE: full suite 252/3725 rc0; marker recipe sketch==HEAD; leaf probe 28 diff cells MarkerRow only; next: perf spec, tech-lead review, task
+- DONE: current-task.md drafted (round 379 c2b); waiting tech-lead review; then sketch-review.md, backlog v345, feature-status, b-round-378.md, b-next.json
+- v2 sketch (tech-lead L1/L2 applied) eaa1b3fd; v1 kept as sketch-v1.*; running: full suite v2, delta review, probes v2
+- DONE: sketch-review.md, task v2, claims re-run, backlog v345
+- DONE: feature-status, b-round-378.md, b-next.json; remaining: advisor final check
+- DONE: advisor final check (forwardRef ruling L10, LEAF-PROBE one-cell clause L4). Planning complete.

@@ -1,0 +1,48 @@
+142c142,149
+< @@ -337,7 +407,7 @@
+---
+> @@ -331,13 +401,14 @@
+>          return false;
+>        }
+>        focusMarkerTarget(successor.markerId);
+> +      pendingFocusRef.current = null;
+>        return true;
+>      },
+>      [focusMarkerTarget],
+151c158
+< @@ -941,6 +1011,6 @@
+---
+> @@ -941,6 +1012,6 @@
+220c227
+< @@ -949,6 +950,47 @@
+---
+> @@ -949,6 +950,74 @@
+255a263,287
+> +    fireEvent.click(view.getByRole('button', { name: 'Play' }));
+> +    expect(api.current?.isPlaying).toBe(true);
+> +    fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+> +    expect(api.current?.isPlaying).toBe(false);
+> +    act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));
+> +    expect(renderLog.counts.get('ArrangementMarkerRowViewInner') ?? 0).toBe(0);
+> +    const current = raw.current?.getArrangement();
+> +    if (!current) {
+> +      throw new Error('workspace not mounted');
+> +    }
+> +    const projectEnd = raw.current?.projectEnd;
+> +    const longer = {
+> +      ...current,
+> +      clips: current.clips.map((clip) =>
+> +        clip.id === 'music-1' ? { ...clip, duration: 40 } : clip,
+> +      ),
+> +    };
+> +    renderLog.counts.clear();
+> +    act(() => raw.current?.commitArrangement(longer, 'Trim Clip', current));
+> +    expect(raw.current?.projectEnd).not.toBe(projectEnd);
+> +    expect(api.current?.arrangement.markers).toBe(markers);
+> +    expect(renderLog.counts.get('ArrangementMarkerRowViewInner') ?? 0).toBe(1);
+> +    act(() => api.current?.undo());
+> +    act(() => api.current?.setTimeRange(null));
+> +    renderLog.counts.clear();
+262a295,296
+> +    fireEvent.keyDown(document.body, { key: 'm', code: 'KeyM' });
+> +    expect(view.getByTestId('arrangement-marker-name-input')).toBe(document.activeElement);
