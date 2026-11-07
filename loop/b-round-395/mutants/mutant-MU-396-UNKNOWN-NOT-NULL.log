@@ -1,0 +1,55 @@
+
+ RUN  v4.0.16 /tmp/b396-scratch
+
+ ❯ app/lib/arrangement/__tests__/collection.test.ts (21 tests | 1 failed) 23ms
+     ✓ PC1 shape: id, label, origin, no notice, sources sorted by order (stable) with exact titles; later input changes do not reach the collection 5ms
+     ✓ PC2 validation: an empty stems array, a duplicate stem id and an empty productId each throw 1ms
+     ✓ PC3 request: fetchAudio is called once with the stem URL and exactly { credentials: "omit", signal } (no headers, no method) 1ms
+     ✓ PC3 the default fetchAudio uses the global fetch at call time, not at module load 1ms
+     ✓ PC4 decode: resolves to the decodeAudioData result, called with the response ArrayBuffer 1ms
+     ✓ PC5 HTTP 401 rejects with the status only; the message never contains the URL or the token 1ms
+     ✓ PC5 HTTP 403 rejects with the status only; the message never contains the URL or the token 0ms
+     ✓ PC5 HTTP 404 rejects with the status only; the message never contains the URL or the token 0ms
+     ✓ PC5 HTTP 500 rejects with the status only; the message never contains the URL or the token 1ms
+     ✓ PC6 network: a non-aborted rejection becomes the network text; with an aborted signal the original error is rethrown 1ms
+     ✓ PC7 decode error: a decodeAudioData rejection becomes exactly the decode text 1ms
+     ✓ PC8 unknown source id rejects with Unknown source and never calls fetchAudio 0ms
+     ✓ PC10 body read failure: a non-aborted arrayBuffer rejection becomes the network text without the URL; when aborted the original error is rethrown and decode never runs 1ms
+     ✓ PC9 copy: demo returns the published demo texts; purchased returns the purchased texts 0ms
+     ✓ PC10 copy: both ready texts teach drag and Enter and end with the shortcut-sheet key 0ms
+     ✓ CR1 the bare loading text becomes ready, or failed(n) when sources failed 0ms
+     ✓ CR2 a loading prefix is swapped and the rest is kept 0ms
+     ✓ CR3 any other status is kept when all sources loaded, and is replaced by failed(n) otherwise 0ms
+     ✓ CR4 a status that already starts with this loading text is kept; anything else becomes loading 0ms
+     × PV1 previewUrl returns the stem URL of each known source without fetching, and null for an unknown source 6ms
+     ✓ PV2 previewUrl is stable: repeated calls return the same string and later input changes do not reach it 0ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  20:56:42
+   Duration  699ms (transform 144ms, setup 0ms, import 165ms, tests 23ms, environment 373ms)
+
+
+::error file=/tmp/b396-scratch/app/lib/arrangement/__tests__/collection.test.ts,title=app/lib/arrangement/__tests__/collection.test.ts > PERF-13c-ii-b purchased adapter previewUrl (D-29z1352) > PV1 previewUrl returns the stem URL of each known source without fetching%2C and null for an unknown source,line=483,column=46::AssertionError: expected '' to be null%0A%0A- Expected: %0Anull%0A%0A+ Received: %0A""%0A%0A ❯ app/lib/arrangement/__tests__/collection.test.ts:483:46%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/collection.test.ts > PERF-13c-ii-b purchased adapter previewUrl (D-29z1352) > PV1 previewUrl returns the stem URL of each known source without fetching, and null for an unknown source
+AssertionError: expected '' to be null
+
+- Expected: 
+null
+
++ Received: 
+""
+
+ ❯ app/lib/arrangement/__tests__/collection.test.ts:483:46
+    481|       origin: 'purchased',
+    482|     };
+    483|     expect(collection.previewUrl?.(unknown)).toBeNull();
+       |                                              ^
+    484|     expect(fetchAudio).not.toHaveBeenCalled();
+    485|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

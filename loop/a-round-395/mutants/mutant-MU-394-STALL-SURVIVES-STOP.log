@@ -1,0 +1,84 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/a395-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m25 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 513[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media[32m 5[2mms[22m[39m
+     [32m✓[39m PS2 a seek on the playing stream reuses the same element without pausing it[32m 1[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ending after its stop does nothing[32m 2[2mms[22m[39m
+     [32m✓[39m PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not[32m 3[2mms[22m[39m
+     [32m✓[39m PS5 a buffer preview after a stream releases the stream element and starts one buffer source[32m 1[2mms[22m[39m
+     [32m✓[39m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[32m 82[2mms[22m[39m
+     [32m✓[39m PS7 a cached buffer wins over the stream: no media element, one buffer source[32m 56[2mms[22m[39m
+     [32m✓[39m PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered[32m 53[2mms[22m[39m
+     [32m✓[39m PS9 Play stops a streaming preview: the element is released and the transport plays[32m 53[2mms[22m[39m
+     [32m✓[39m PS10 unmounting the provider releases a streaming element[32m 44[2mms[22m[39m
+     [32m✓[39m PS11 a stream preview stops the playing transport before the element plays[32m 51[2mms[22m[39m
+     [32m✓[39m PS12 the natural end of a stream clears the preview id and releases the preview pin[32m 44[2mms[22m[39m
+     [32m✓[39m PS13 the fallback resumes from the element time, not from zero[32m 50[2mms[22m[39m
+     [32m✓[39m PS14 a streamed preview writes no status[32m 50[2mms[22m[39m
+     [32m✓[39m PS16 a stream that never plays falls back after the stall timeout with its time[32m 1[2mms[22m[39m
+     [32m✓[39m PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only[32m 1[2mms[22m[39m
+     [32m✓[39m PS18 the watchdog does nothing when the element time moved since it was armed[32m 0[2mms[22m[39m
+[31m     [31m×[31m PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves[39m[32m 7[2mms[22m[39m
+     [32m✓[39m PS20 an external pause ends the preview once and releases the element[32m 1[2mms[22m[39m
+     [32m✓[39m PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event[32m 1[2mms[22m[39m
+[31m     [31m×[31m PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception[39m[32m 2[2mms[22m[39m
+     [32m✓[39m PS23 a synchronous throw on a same-url seek is a stream error of the active preview[32m 1[2mms[22m[39m
+     [32m✓[39m PS24 the default scheduler arms an 8000 ms window timer that a stop clears[32m 2[2mms[22m[39m
+     [32m✓[39m PS25 a same-url seek before playing restarts the armed watchdog from the new time[32m 1[2mms[22m[39m
+     [32m✓[39m PS26 a stop removes every listener the stream added[32m 1[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m23 passed[39m[22m[90m (25)[39m
+[2m   Start at [22m 20:16:54
+[2m   Duration [22m 1.77s[2m (transform 565ms, setup 0ms, import 733ms, tests 513ms, environment 388ms)[22m
+
+
+::error file=/tmp/a395-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS19 stop%2C a new preview and a same-url seek never leave or arm a stall timer by themselves,line=685,column=33::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:685:33%0A%0A
+
+::error file=/tmp/a395-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS22 a synchronous throw from currentTime or play() is a stream error%2C never an uncaught exception,line=778,column=33::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:778:33%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mPERF-13c-ii-a stream lifecycle robustness[2m > [22mPS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves
+[31m[1mAssertionError[22m: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m685:33[22m[39m
+    [90m683| [39m      [34m0[39m[33m,[39m
+    [90m684| [39m    )[33m;[39m
+    [90m685| [39m    [34mexpect[39m(scheduler[33m.[39m[34mpending[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m686| [39m    scheduler[33m.[39m[34mfire[39m()[33m;[39m
+    [90m687| [39m    [34mexpect[39m(onError)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mPERF-13c-ii-a stream lifecycle robustness[2m > [22mPS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception
+[31m[1mAssertionError[22m: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m778:33[22m[39m
+    [90m776| [39m    [34mexpect[39m(second[33m.[39m[34mgetLibraryPreviewOffset[39m())[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m777| [39m    [34mexpect[39m(throwingPlay[33m.[39m[34mhasAttribute[39m([32m'src'[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m778| [39m    [34mexpect[39m(scheduler[33m.[39m[34mpending[39m())[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m779| [39m  })[33m;[39m
+    [90m780| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

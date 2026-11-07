@@ -1,0 +1,10 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+const b = await chromium.launch(); const c = await b.newContext(); const p = await c.newPage();
+const out = {};
+await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'load' }); await p.waitForTimeout(3000);
+out.lab = { url: p.url(), status: await p.getByTestId('arrangement-status').count() };
+const r = await p.goto('http://127.0.0.1:5173/studio/some-premium-handle', { waitUntil: 'load' }); await p.waitForTimeout(3000);
+out.premium = { http: r.status(), url: p.url(), workspace: await p.getByTestId('arrangement-status').count(), text: (await p.locator('body').innerText()).slice(0, 200).replace(/\n+/g, ' | ') };
+const t = await c.request.get('http://127.0.0.1:5173/api/studio-token'); out.token = t.status();
+const t2 = await c.request.post('http://127.0.0.1:5173/api/studio-token', { data: {} }); out.tokenPost = t2.status();
+console.log(JSON.stringify(out)); await b.close();

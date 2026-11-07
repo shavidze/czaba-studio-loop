@@ -1,0 +1,333 @@
+diff --git a/app/lib/arrangement/__tests__/collection.test.ts b/app/lib/arrangement/__tests__/collection.test.ts
+index 331225f..a96a207 100644
+--- a/app/lib/arrangement/__tests__/collection.test.ts
++++ b/app/lib/arrangement/__tests__/collection.test.ts
+@@ -456,3 +456,45 @@ describe('SABA-B-11a-FIX-2 loadingCollectionStatus', () => {
+     expect(loadingCollectionStatus('Clip added.', demo)).toBe(demo.loading);
+   });
+ });
++
++describe('PERF-13c-ii-b purchased adapter previewUrl (D-29z1352)', () => {
++  it('PV1 previewUrl returns the stem URL of each known source without fetching, and null for an unknown source', () => {
++    const fetchAudio = vi.fn<PurchasedStemFetch>(async () => okResponse());
++    const collection = createPurchasedWorkspaceCollection({
++      productId: 'middle-east',
++      productTitle: 'Middle East',
++      stems: stems(),
++      fetchAudio,
++    });
++    expect(typeof collection.previewUrl).toBe('function');
++    expect(collection.sources.map((source) => collection.previewUrl?.(source))).toEqual([
++      'https://stems.example.test/lead?token=L',
++      SECRET_URL,
++      'https://stems.example.test/bass?token=B',
++      'https://stems.example.test/pad?token=P',
++    ]);
++    const unknown: WorkspaceSource = {
++      id: 'unknown',
++      title: 'Middle East · Unknown',
++      collectionLabel: 'Middle East · purchased stems',
++      kind: 'stem',
++      origin: 'purchased',
++    };
++    expect(collection.previewUrl?.(unknown)).toBeNull();
++    expect(fetchAudio).not.toHaveBeenCalled();
++  });
++
++  it('PV2 previewUrl is stable: repeated calls return the same string and later input changes do not reach it', () => {
++    const input = stems();
++    const collection = createPurchasedWorkspaceCollection({
++      productId: 'middle-east',
++      productTitle: 'Middle East',
++      stems: input,
++    });
++    const drums = sourceOf(collection.sources, 'drums');
++    const first = collection.previewUrl?.(drums);
++    input[1].audioUrl = 'https://evil.example.test/changed';
++    expect(first).toBe(SECRET_URL);
++    expect(collection.previewUrl?.(drums)).toBe(first);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+index 94aa067..cab66a8 100644
+--- a/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview-stream.test.tsx
+@@ -568,6 +568,37 @@ describe('PERF-13c-i library preview of a URL source streams without decoding',
+     expect(live(api).status).toBe(textBefore);
+     expect(live(api).statusSequence).toBe(sequenceBefore);
+   });
++
++  it('PS27 the remembered fallback lives with its collection object: a new collection streams the same source again', async () => {
++    const { api, pending, view } = await mountStream();
++    act(() => live(api).startLibraryPreview('big', 0));
++    act(() => {
++      onlyElement().dispatchEvent(new Event('error'));
++    });
++    await settleNext(pending, bigBuffer());
++    act(() => live(api).stopLibraryPreview());
++    act(() => live(api).startLibraryPreview('big', 0));
++    expect(createdElements).toHaveLength(1);
++    expect(pending).toHaveLength(1);
++    await settleNext(pending, bigBuffer());
++    act(() => live(api).stopLibraryPreview());
++    const next = streamCollection();
++    view.rerender(
++      <ArrangementProvider collection={next.collection} initialArrangement={streamArrangement()}>
++        <StreamProbe api={api} />
++      </ArrangementProvider>,
++    );
++    await flushAsync();
++    await settleNext(next.pending, bigBuffer());
++    expect(observedCache().has('big')).toBe(false);
++    const loadsBefore = next.bigLoads.count;
++    act(() => live(api).startLibraryPreview('big', 0));
++    expect(createdElements).toHaveLength(2);
++    expect(createdElements[1]?.getAttribute('src')).toBe(BIG_URL);
++    expect(next.pending).toHaveLength(0);
++    expect(next.bigLoads.count).toBe(loadsBefore);
++    expect(live(api).libraryPreviewSourceId).toBe('big');
++  });
+ });
+ 
+ interface FakeStallScheduler {
+@@ -860,4 +891,35 @@ describe('PERF-13c-ii-a stream lifecycle robustness', () => {
+     expect(removedPairs).toHaveLength(6);
+     expect(removedPairs).toEqual(expect.arrayContaining(addedPairs));
+   });
++
++  it('PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer', () => {
++    const scheduler = createFakeStallScheduler();
++    const onError = vi.fn();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 3, onError);
++    const element = onlyElement();
++    expect(scheduler.pending()).toBe(1);
++    Object.defineProperty(element, 'currentTime', {
++      configurable: true,
++      get: () => 3,
++      set: () => {
++        throw new DOMException('not seekable', 'InvalidStateError');
++      },
++    });
++    expect(() => player.playLibraryPreviewStream(BIG_URL, 50, onError)).not.toThrow();
++    expect(onError).toHaveBeenCalledTimes(1);
++    expect(onError).toHaveBeenCalledWith(3);
++    expect(scheduler.pending()).toBe(0);
++    expect(element.hasAttribute('src')).toBe(false);
++    expect(player.getLibraryPreviewOffset()).toBeNull();
++  });
++
++  it('PS29 the stream element requests its URL in anonymous CORS mode, like the credential-free decode fetch', () => {
++    const scheduler = createFakeStallScheduler();
++    const player = streamPlayer(scheduler);
++    player.playLibraryPreviewStream(BIG_URL, 0, vi.fn());
++    const element = onlyElement();
++    expect(element.getAttribute('crossorigin')).toBe('anonymous');
++    expect(element.getAttribute('src')).toBe(BIG_URL);
++  });
+ });
+diff --git a/app/lib/arrangement/collection.ts b/app/lib/arrangement/collection.ts
+index 61d3688..cfe49d9 100644
+--- a/app/lib/arrangement/collection.ts
++++ b/app/lib/arrangement/collection.ts
+@@ -124,5 +124,6 @@ export function createPurchasedWorkspaceCollection({
+     origin: 'purchased',
+     sources,
+     loadSource,
++    previewUrl: (source) => stemUrls.get(source.id) ?? null,
+   };
+ }
+diff --git a/app/lib/arrangement/preview.client.ts b/app/lib/arrangement/preview.client.ts
+index 750679d..c43b99e 100644
+--- a/app/lib/arrangement/preview.client.ts
++++ b/app/lib/arrangement/preview.client.ts
+@@ -111,6 +111,7 @@ export function createLibraryPreviewPlayer(
+       }
+       stopActive();
+       const element = createAudioElement();
++      element.crossOrigin = 'anonymous';
+       const handleEnded = () => {
+         if (active === preview) {
+           stopActive();
+diff --git a/perf/budgets.resources.json b/perf/budgets.resources.json
+index 603263f..630634f 100644
+--- a/perf/budgets.resources.json
++++ b/perf/budgets.resources.json
+@@ -71,6 +71,48 @@
+     "owner": "PERF-13b",
+     "note": "1× only. The 'decode' part of res.mem.pcm-live-mib-ready (decodeAudioData results; the decode probe excluded) (MiB, 0.1). Budget 0: at ready no decoded file stays alive (both demo MP3 buffers evicted, PERF-13b-i). PERF-13b-ii flip (D-29z1324): B's production sketch 0 ×3; mutant MU-391-NOTHING-EVICTABLE red, b-round-390/mutants/."
+   },
++  {
++    "id": "res.harness.preview-stream-playing",
++    "scenario": "ready, library Preview of the selected URL source (Middle East)",
++    "metric": "preview-stream-playing",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": ">=",
++      "value": 1
++    },
++    "owner": "PERF-13c-ii-b",
++    "note": "1x only. Liveness guard for the two preview rows: media elements (HTMLMediaElement.prototype.play wrapped in the page) that are not paused and at currentTime >= 1 s within 15 s of the Preview click. 0 means the preview did not stream (decode path, or a stall), so the memory rows below say nothing. B sketch: b-round-395/perf-sketch.log; red on MU-396-DEMO-NO-STREAM."
++  },
++  {
++    "id": "res.mem.pcm-live-preview-delta-mib",
++    "scenario": "ready, library Preview streaming (>= 1 s), after HeapProfiler.collectGarbage x2",
++    "metric": "pcm-live-preview-delta-mib",
++    "unit": "MiB",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 0
++    },
++    "owner": "PERF-13c-ii-b",
++    "note": "1x only. Live decoded PCM while the preview streams minus res.mem.pcm-live-mib-ready (MiB, 0.1; perf/lib/pcm-live.ts). A streamed preview decodes nothing (PERF-13c). B sketch: b-round-395/perf-sketch.log; red on MU-396-DEMO-NO-STREAM (the decode path holds the whole file)."
++  },
++  {
++    "id": "res.mem.pcm-live-preview-decode-count",
++    "scenario": "ready, library Preview streaming (>= 1 s), after HeapProfiler.collectGarbage x2",
++    "metric": "pcm-live-preview-decode-count",
++    "unit": "count",
++    "kind": "deterministic",
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 0
++    },
++    "owner": "PERF-13c-ii-b",
++    "note": "1x only. Live decodeAudioData results (the decode probe excluded) while the preview streams. B sketch: b-round-395/perf-sketch.log; red on MU-396-DEMO-NO-STREAM."
++  },
+   {
+     "id": "res.mem.pcm-live-mib-after-add",
+     "scenario": "after the first library Add has settled and its source is decoded again, after GC ×2",
+diff --git a/perf/studio-lab-resources.perf.spec.ts b/perf/studio-lab-resources.perf.spec.ts
+index cfec194..5329168 100644
+--- a/perf/studio-lab-resources.perf.spec.ts
++++ b/perf/studio-lab-resources.perf.spec.ts
+@@ -37,6 +37,7 @@ import {
+   waitForStudioQuiet,
+ } from './lib/page';
+ import {
++  classifyPcmProbe,
+   installPcmLiveRegistry,
+   pcmLiveProblems,
+   pcmProbeShapes,
+@@ -69,6 +70,7 @@ const pathTimeoutMs = 30000;
+ const observerSettleMs = 200;
+ const passGuardMs = 8 * 60 * 1000;
+ const pcmAfterAddDecodeTimeoutMs = 15000;
++const previewStreamTimeoutMs = 15000;
+ const clockProbeCount = 5;
+ const clockProbeMaxRttMs = 20;
+ const expectedWavName = 'czaba-studio-lab.wav';
+@@ -86,6 +88,7 @@ const jsRoutes = [
+ 
+ const resourceSequence = [
+   'a. /studio-lab -> ready (library Add enabled and the preview waveform drawn); HeapProfiler.collectGarbage, Runtime.getHeapUsage (1x: res.mem.backing-ready-mib, res.mem.used-ready-mib); 1x: res.dom.page-0',
++  'a2. 1x only: library Preview of the selected URL source (Middle East); wait until a media element plays at >= 1 s (15 s; res.harness.preview-stream-playing), GC x2 (res.mem.pcm-live-preview-delta-mib, res.mem.pcm-live-preview-decode-count); Stop, wait for the Preview label',
+   'b. library Add; wait for the clip waveform and quiet (res.harness.clips-1; 1x: res.dom.page-1, res.dom.clip-subtree, res.dom.ruler-1); 1x: poll the PCM registry until the re-decoded source is live (15 s), GC x2 (res.mem.pcm-live-mib-after-add, res.mem.pcm-live-count-after-add)',
+   'CPU throttle on (6x passes), after ready and Add',
+   `c. Export -> WAV checked (default) -> Export WAV; window from the click to the "${perfWavDoneName}" text; heap polled every 50 ms; download header checked; Done (res.export.1.*, res.harness.export-1-produced, res.harness.mem-polls-1)`,
+@@ -523,6 +526,88 @@ async function newResourceContext(browser: Browser): Promise<BrowserContext> {
+   return context;
+ }
+ 
++declare global {
++  interface Window {
++    __czabaPreviewMedia?: HTMLMediaElement[];
++    __czabaPreviewRestore?: () => void;
++  }
++}
++
++async function measurePreviewStream(
++  page: Page,
++  cdp: CDPSession,
++  pcmReadyBytes: number,
++  result: ResourcePassResult,
++): Promise<void> {
++  await page.evaluate(() => {
++    const elements: HTMLMediaElement[] = [];
++    window.__czabaPreviewMedia = elements;
++    const nativePlay = HTMLMediaElement.prototype.play;
++    window.__czabaPreviewRestore = () => {
++      HTMLMediaElement.prototype.play = nativePlay;
++      window.__czabaPreviewMedia = undefined;
++      window.__czabaPreviewRestore = undefined;
++    };
++    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement): Promise<void> {
++      if (!elements.includes(this)) elements.push(this);
++      return nativePlay.call(this);
++    };
++  });
++  try {
++    await runPreviewStream(page, cdp, pcmReadyBytes, result);
++  } finally {
++    await page.evaluate(() => window.__czabaPreviewRestore?.());
++  }
++}
++
++async function runPreviewStream(
++  page: Page,
++  cdp: CDPSession,
++  pcmReadyBytes: number,
++  result: ResourcePassResult,
++): Promise<void> {
++  const toggle = page.getByTestId('arrangement-library-preview-toggle');
++  await toggle.click();
++  const playing = await page
++    .waitForFunction(
++      () =>
++        (window.__czabaPreviewMedia ?? []).some(
++          (element) => !element.paused && element.currentTime >= 1,
++        ),
++      null,
++      { timeout: previewStreamTimeoutMs },
++    )
++    .then(() => true)
++    .catch(() => false);
++  const streaming = await page.evaluate(
++    () =>
++      (window.__czabaPreviewMedia ?? []).filter(
++        (element) => !element.paused && element.currentTime >= 1,
++      ).length,
++  );
++  result.samples.set('res.harness.preview-stream-playing', { value: streaming });
++  if (!playing) {
++    result.problems.push(
++      `preview stream: no media element playing at >= 1 s within ${previewStreamTimeoutMs} ms`,
++    );
++  }
++  const reading = await readPcmLiveAfterGc(cdp, page);
++  const summary = summarizePcmLive(reading.entries);
++  result.samples.set('res.mem.pcm-live-preview-delta-mib', {
++    value: toMebibytes(summary.bytes - pcmReadyBytes),
++  });
++  result.samples.set('res.mem.pcm-live-preview-decode-count', {
++    value: reading.entries.filter(
++      (entry) => entry.origin === 'decode' && classifyPcmProbe(entry) === null,
++    ).length,
++  });
++  if ((await toggle.textContent())?.trim() === studioLibraryPanelStrings.previewStop) {
++    await toggle.click();
++  }
++  await expect(toggle).toHaveText(studioLibraryPanelStrings.previewPlay);
++  await page.waitForTimeout(settleMs);
++}
++
+ async function runResourcePass(
+   browser: Browser,
+   cpuRate: number,
+@@ -607,6 +692,11 @@ async function runResourcePass(
+       });
+     }
+ 
++    if (record && pcmReadyBytes !== null) {
++      beginStep('preview stream');
++      await measurePreviewStream(page, cdp, pcmReadyBytes, result);
++    }
++
+     beginStep('library Add');
+     const addStart = await nowIn(page);
+     await page.getByRole('button', { name: perfLibraryAddLabel, exact: true }).click();

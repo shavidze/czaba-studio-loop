@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T19:54:42.542Z",
-  "current_task": "Round 394: PERF-13c-ii-a: streamed library preview stall watchdog, synchronous-throw guard, external pause ends the preview (preview.client.ts only); doc 252 stage 2 of 3 (current-task.md)",
+  "_generatedUtc": "2026-11-07T20:37:29.387Z",
+  "current_task": "Round 395: PERF-13c-ii-a fix-up on the unpublished round-394 tree: a same-url seek restarts an armed stall watchdog (C-R394-01); PS25/PS26 + PS22 asserts; doc 252 l.4 \"C round 395 PASS\" (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6239,7 +6239,7 @@
       "origin": "B sketch review (tech-lead), round 393 planning",
       "evidence": "b-round-392/sketch-review.md #1",
       "title": "a stalled streamed preview (stalled/waiting, no error) never recovers: Stop stays shown with a frozen cursor",
-      "status": "scheduled round 394 PERF-13c-ii-a (D-29z1344): HEAD premise b-round-393/premise/events-head.json (HOLD: toggle Stop after 14 s, no fallback); sketch fixes it (fallback 8378 ms, both viewports) | scheduled PERF-13c-ii (D-29z1341): 13c-i streams same-origin static demo files only; the decode path has  …[see backlog.json]",
+      "status": "round 394 tree (unpublished; gate 394 skipped, C FAIL): C browser PASS on its rows: R1 no-click HOLD (8369/8362 ms), but C-R394-01 (wave click before playing) still reproduces the stuck Stop -> stays open; fix-up round 395 (D-29z1348) | scheduled round 394 PERF-13c-ii-a (D-29z1344): HEAD premise b-r …[see backlog.json]",
       "added": "2026-11-07 B round 392 -> 393 planning"
     },
     {
@@ -6248,7 +6248,7 @@
       "origin": "gate 393 reviewer (gates/round-393/review.md suggestion 1)",
       "evidence": "gates/round-393/review.md",
       "title": "element.currentTime = start or element.play() can throw synchronously; active stays set, the UI shows Stop on silence",
-      "status": "scheduled round 394 PERF-13c-ii-a (D-29z1344): try/catch -> error route; rows PS22, PS23 (jsdom only)",
+      "status": "round 394 tree (unpublished; gate 394 skipped, C FAIL): C browser PASS on its rows: jsdom PS22/PS23 only (not browser-testable); stays open until gate 395 publishes (D-29z1347) | scheduled round 394 PERF-13c-ii-a (D-29z1344): try/catch -> error route; rows PS22, PS23 (jsdom only)",
       "added": "2026-11-07 B round 393 -> 394 planning"
     },
     {
@@ -6257,7 +6257,7 @@
       "origin": "A round 393 code-reviewer (Medium); B re-rating (D-29z1344)",
       "evidence": "a-round-393.md Code review M1; b-round-393/premise/events-head.json (console pause keeps Stop at HEAD)",
       "title": "a streamed preview paused externally (media key / OS media session; the bare element is listed in Chrome/OS media controls, A-393 L7) keeps Stop with a frozen cursor",
-      "status": "scheduled round 394 PERF-13c-ii-a (D-29z1344): pause on the active element (not ended, no error) ends the preview; C row R2",
+      "status": "round 394 tree (unpublished; gate 394 skipped, C FAIL): C browser PASS on its rows: R2 PASS both viewports; stays open until gate 395 publishes (D-29z1347) | scheduled round 394 PERF-13c-ii-a (D-29z1344): pause on the active element (not ended, no error) ends the preview; C row R2",
       "added": "2026-11-07 B round 393 -> 394 planning"
     },
     {
@@ -6271,18 +6271,31 @@
       "severity": "info",
       "status": "open_root (D-29z1346): after PERF-13c-ii-b C PASS; same regi",
       "title": "bounded frontend-architect checkpoint on the library preview region (decidePreviewMode / useLibraryP"
+    },
+    {
+      "id": "C-R394-01",
+      "alias": "A-R394-REVIEW-M1-SEEK-BEFORE-PLAYING",
+      "severity": "medium",
+      "origin": "B spec (round-394 ruling \"not armed by a same-URL seek\"); found by A code-reviewer (STOP), browser-confirmed by C",
+      "evidence": "c-round-394.json bugs[0]; c-round-394/rows-R1.json R1b_seekBeforePlaying-*; a-round-394.md STOP; b-round-394/probe/rows-R1b.json (sketch fixes it: 8296/8300 ms after the seek)",
+      "title": "HOLD stream + wave click before playing: the seek moves currentTime, the watchdog expiry sees moved time, never re-arms; toggle stays Stop forever (23.6 s observed, both viewports)",
+      "status": "scheduled round 395 (D-29z1348): option (a) - a same-url seek restarts an already armed timer (re-reading armedAt), never arms one; PS25 + MU-395-SEEK-NO-REARM; C row R1b binding",
+      "added": "2026-11-07 B round 394 -> 395 planning"
+    },
+    {
+      "id": "A-R394-REVIEW-L1-PS22-ASSERTS",
+      "severity": "low",
+      "status": "scheduled round 395 (D-29z1349): same file, the round owns i",
+      "title": "PS22 lacks two asserts of the task row (src removed in case 1, offset null in case 2)"
+    },
+    {
+      "id": "A-R394-REVIEW-L2-PS21A-LISTENER-REMOVAL",
+      "severity": "low",
+      "status": "scheduled round 395 (D-29z1349): same file, the round owns i",
+      "title": "PS21(a) cannot catch a listener detach failed to remove; no row asserts the 4 new removals"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 385,
-      "task": "current-task.md",
-      "decision": "D-29z1288..D-29z1292",
-      "type": "RETRO 385 (window 369-384) + screen/journey review; no app code",
-      "status": "done (D-29z1293): C round 385 PASS (c-round-385.json: 12 rows passed, browserVerified true, realVerified true, 0 bugs; fake-bearer row blocked = backend-only); gate 385 skipped (no real changes), baseline stays 7295618",
-      "note": "baseline 7295618 clean; frozen b-round-384/r385-tree-sha256.txt (1280); claims b-round-384/claims-385.sh; grants none",
-      "added": "2026-11-07 B round 384 -> 385 planning"
-    },
     {
       "round": 386,
       "task": "current-task.md",
@@ -6363,9 +6376,18 @@
       "task": "current-task.md",
       "decision": "D-29z1342..D-29z1346",
       "type": "PERF-13c-ii-a: stream lifecycle robustness (stall watchdog, sync-throw guard, external pause ends the preview) in preview.client.ts only; doc 252 stage 2 of 3",
-      "status": "dispatched",
+      "status": "C FAIL (c-round-394.json, C-R394-01 Medium); gate 394 skipped; tree kept for round 395 (D-29z1347)",
       "note": "baseline 1091b9e (clean); grants b-round-393/grants-394.txt (3); frozen b-round-393/r394-frozen-sha256.txt (1284); claims b-round-393/claims-394.sh K1..K20; sketch b-round-393/sketch-394.patch.txt",
       "added": "2026-11-07 B round 393 -> 394 planning"
+    },
+    {
+      "round": 395,
+      "task": "current-task.md",
+      "decision": "D-29z1347..D-29z1350",
+      "type": "PERF-13c-ii-a fix-up: same-url seek restarts the armed stall watchdog (C-R394-01) + PS22 asserts + PS26 listener removal; doc 252 l.4",
+      "status": "dispatched",
+      "note": "baseline HEAD 1091b9e + the 3 round-394 granted files modified (unpublished, kept); grants b-round-394/grants-395.txt (same 3); frozen b-round-393/r394-frozen-sha256.txt (1284, still valid: it excludes the 3 grants); claims b-round-394/claims-395.sh K1..K19; sketch b-round-394/sketch-395.patch.txt",
+      "added": "2026-11-07 B round 394 -> 395 planning"
     }
   ],
   "other_keys": [

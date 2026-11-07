@@ -1,0 +1,110 @@
+
+ RUN  v4.0.16 /tmp/b396-scratch
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx (28 tests | 3 failed) 611ms
+     ✓ PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media 5ms
+     ✓ PS2 a seek on the playing stream reuses the same element without pausing it 1ms
+     ✓ PS3 ended fires onEnded once; an old element ending after its stop does nothing 2ms
+     ✓ PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not 3ms
+     ✓ PS5 a buffer preview after a stream releases the stream element and starts one buffer source 1ms
+     ✓ PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set 73ms
+     ✓ PS7 a cached buffer wins over the stream: no media element, one buffer source 56ms
+     ✓ PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered 57ms
+     ✓ PS9 Play stops a streaming preview: the element is released and the transport plays 53ms
+     ✓ PS10 unmounting the provider releases a streaming element 44ms
+     ✓ PS11 a stream preview stops the playing transport before the element plays 51ms
+     ✓ PS12 the natural end of a stream clears the preview id and releases the preview pin 44ms
+     ✓ PS13 the fallback resumes from the element time, not from zero 49ms
+     ✓ PS14 a streamed preview writes no status 50ms
+     ✓ PS27 the remembered fallback lives with its collection object: a new collection streams the same source again 99ms
+     ✓ PS16 a stream that never plays falls back after the stall timeout with its time 1ms
+     ✓ PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only 1ms
+     ✓ PS18 the watchdog does nothing when the element time moved since it was armed 0ms
+     × PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves 8ms
+     ✓ PS20 an external pause ends the preview once and releases the element 1ms
+     ✓ PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event 1ms
+     × PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception 2ms
+     ✓ PS23 a synchronous throw on a same-url seek is a stream error of the active preview 1ms
+     ✓ PS24 the default scheduler arms an 8000 ms window timer that a stop clears 2ms
+     ✓ PS25 a same-url seek before playing restarts the armed watchdog from the new time 1ms
+     ✓ PS26 a stop removes every listener the stream added 1ms
+     × PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer 1ms
+     ✓ PS29 the stream element requests its URL in anonymous CORS mode, like the credential-free decode fetch 0ms
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 25 passed (28)
+   Start at  20:56:51
+   Duration  1.83s (transform 547ms, setup 0ms, import 709ms, tests 611ms, environment 381ms)
+
+
+::error file=/tmp/b396-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS19 stop%2C a new preview and a same-url seek never leave or arm a stall timer by themselves,line=716,column=33::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:716:33%0A%0A
+
+::error file=/tmp/b396-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS22 a synchronous throw from currentTime or play() is a stream error%2C never an uncaught exception,line=809,column=33::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:809:33%0A%0A
+
+::error file=/tmp/b396-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer,line=912,column=33::AssertionError: expected 1 to be +0 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:912:33%0A%0A
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:716:33
+    714|       0,
+    715|     );
+    716|     expect(scheduler.pending()).toBe(0);
+       |                                 ^
+    717|     scheduler.fire();
+    718|     expect(onError).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:809:33
+    807|     expect(second.getLibraryPreviewOffset()).toBeNull();
+    808|     expect(throwingPlay.hasAttribute('src')).toBe(false);
+    809|     expect(scheduler.pending()).toBe(0);
+       |                                 ^
+    810|   });
+    811| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  app/lib/arrangement/__tests__/library-preview-stream.test.tsx > PERF-13c-ii-a stream lifecycle robustness > PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:912:33
+    910|     expect(onError).toHaveBeenCalledTimes(1);
+    911|     expect(onError).toHaveBeenCalledWith(3);
+    912|     expect(scheduler.pending()).toBe(0);
+       |                                 ^
+    913|     expect(element.hasAttribute('src')).toBe(false);
+    914|     expect(player.getLibraryPreviewOffset()).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+

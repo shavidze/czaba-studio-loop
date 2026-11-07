@@ -1,0 +1,14 @@
+phase1 (B planning 395->396), 2026-11-07
+- [x] tasks/round-395.md archived (copy); pre-edit copies b-round-395/*-before-396.*
+- [x] advisor consulted (available) after orientation
+- rulings planned: 13c-ii-b = purchased previewUrl (collection.ts, unit) + harness preview rows (perf spec + budgets) + PS27 fallback lifetime + PS28 throw-while-armed + doc 252 Completed; seek key stays URL; preview.client.ts not owned
+- [ ] sketch /tmp/b396-scratch
+- [ ] perf sketch + mutant
+- [ ] claims, backlog, feature-status, task, b-round-395.md, b-next.json
+- [x] sketch final sha 91c5d730 (collection.ts previewUrl, preview.client.ts crossOrigin, PV1/PV2, PS27/PS28/PS29, perf preview step + 3 budget rows); tsc/biome rc0; full 258/3832 rc0; covering 19/314 rc0
+- [x] perf sketch PASS (1/0/0), perf mutant MU-396-DEMO-NO-STREAM red (0/37.1/1); unit mutants 7/7 red
+- [x] browser probe on 5174 sketch: R1b/R1/R3/R2/R6 = C r395; R8 crossOrigin anonymous
+- [x] tech-lead review 1 (2 Medium fixed); delta re-review requested
+- [x] backlog v363 (update-backlog.py + -2.py, .done)
+- [x] current-task.md (round 396), feature-status.md
+- [x] b-round-395.md + b-next.json; [x] advisor close (R8 bound >= 1 s, perf compare wording, run.py out arg, lib.mjs path, L57 field split)
