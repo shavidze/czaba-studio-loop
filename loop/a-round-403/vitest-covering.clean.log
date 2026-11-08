@@ -1,0 +1,134 @@
+
+ RUN  v4.0.16 /home/runner/czaba-project/store
+
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW1-PW2 streaming peak kernel > PW1 equals computePeaks byte for byte across rates, lengths, chunk sizes and channel counts 815ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW1-PW2 streaming peak kernel > PW1b keeps NaN, -0 and infinity handling identical 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW1-PW2 streaming peak kernel > PW2 bucket count matches computePeaks, including empty and invalid input 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW3 worker protocol > accumulates chunks, acks with the same arrays and transfers the peaks on end 6ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW3 worker protocol > cancel drops the job without a done reply 0ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW4 streams bounded, reused chunks to one worker and delivers its peaks 22ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW5 delivers the worker reply object itself (no main-thread recompute) 2ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW6 without Worker computes synchronously on the main thread 4ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW7 abort drops the job, posts cancel and runs the next job 4ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW7b an abort after the last chunk drops the done reply 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW8 a worker error falls back to main-thread peaks for pending jobs 2ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW20 an empty buffer gets its peaks at once on the main thread and starts no worker 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW9 after the first reply, a stalled worker falls back after the stall timeout 4ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW14 a worker that has not replied yet gets the cold-start budget, not the stall timeout 2ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW15 every worker reply re-arms the stall timer 2ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW10 runs jobs one at a time in request order 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW14b pins the cold-start and stall budgets 0ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW24 an unparsable message before the first reply keeps the cold-start budget 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW24b an unparsable message while the worker is idle keeps the cold-start budget for the next job 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW25 dispose resets the first-reply flag, so a new worker gets the cold-start budget again 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW26 without Worker a throwing onPeaks does not throw from request and rethrows on a timer 2ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW27 a worker failure delivers the jobs behind one whose main-thread peaks throw, and rethrows on a timer 2ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW29 a failing post inside request still throws the peak error of the requesting job from request, with no deferred rethrow 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW28 without Worker a throwing main-thread peak computation still throws from request 0ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW11 context keeps "ready" after the worker peaks > PW11 the source becomes ready only after done, with the worker peaks as its sourcePeaks 29ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW18 a source buffer reaches playback only together with "ready" > PW18 playback started while peaks run leaves the clip out, then re-syncs it in when the source is ready 10ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW12 a request made inside onPeaks keeps every queued job and delivers all of them in order 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW13 a throwing postMessage on begin falls back to main-thread peaks at once and turns the worker off 3ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW13 a throwing postMessage on chunk falls back to main-thread peaks at once and turns the worker off 3ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW13b a throwing postMessage on end turns the worker off without a stray timer 4ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW13b a throwing postMessage on cancel turns the worker off without a stray timer 1ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW16 a throwing onPeaks still starts and delivers the next job and rethrows on a timer 2ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW17 a worker failure delivers every pending job even when one onPeaks throws, and rethrows on a timer 1ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > waveform-zoom module (D-29z86, T12 stage 4b) > WZ1: exact B literals for zoom and gain × zoom; video, invalid zooms, parsing and labels 9ms
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX1 WAV is the default, MP3 and WAV + MP3 are enabled with exact texts, video stays disabled, reopen resets to WAV 725ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ2: 2× scales every audio lane by its gain × 2, shows the state and status; 1× restores the exact drawings 747ms
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX2 MP3 project export renders once, loads the encoder once, converts the rendered blob and downloads only the MP3 133ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX3 MP3 range 4–9 renders exactly that window and names the file -range 111ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP1: a single Clip Gain drag writes no history and re-renders no parent per move; the model stays put while the live gain and both drawings follow 876ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX4 WAV + MP3 renders once and downloads the WAV then the MP3, project and range 192ms
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ3: −6 dB at 2× draws gain × zoom; a Clip Gain drag at 2× follows previewed dB × 2 before release 394ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP2: pointerup writes one Clip Gain entry with the exact last previewed dB; Undo restores the model, the live gain and the lane drawing 547ms
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX5 a rejected encoder load writes the exact error, downloads nothing, and a retry with a working load succeeds 338ms
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX6 an encoder load that never settles times out at exactly 120 s with no file 92ms
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ4 must-not: a video clip lane drawing is byte-identical at 1× and 8× 439ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX7 a rejected conversion writes the exact error with its text and downloads nothing 139ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP3 pointercancel: a members drag follows clipGainShiftTargets live; the cancel restores every member gain, both lane drawings and the block with no entry 305ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ5 must-not: the detail panel drawing is byte-identical at 1× and 4× 231ms
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX8 guards and invalid windows match exportWav and never render or load the encoder 177ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ6: the zoom is not history — Undo/Redo states are unchanged and Ctrl+Z / Ctrl+Shift+Z move only the edit 208ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP4 stolen claim: a members drag follows clipGainShiftTargets live; the steal restores every member gain, both lane drawings and the block with no entry 363ms
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX9 master mute appends the existing suffix to the MP3 and WAV + MP3 messages 188ms
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ7: the zoom is not audio — same arrangement reference; during play 0 new sources, 0 setClipGain, position advances 316ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP5-members fader blur: a members drag follows clipGainShiftTargets live; the blur restores every member gain, both lane drawings and the block with no entry 326ms
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ8: an audio clip added from the library at 2× is drawn × 2 from its first render 189ms
+ ✓ app/lib/arrangement/__tests__/waveform-zoom.test.tsx > Waveform Zoom in the workspace (D-29z86, T12 stage 4b) > WZ9: keys on the focused zoom select never edit, move or play; Digit1 on the grid-division select still narrows 190ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP5: a fader blur mid single drag cancels with no entry and restores the display and the live gain 184ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP5b: a pointercancel mid single drag restores the field, the fader, the draft and the live gain with no entry 195ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > buildPeakShape display scale (D-29z85, T12 stage 4a) > WG1: the fixture gives the exact B literals at 0/−6/+3/−60/+24 dB; NaN, Infinity and −1 fall back to scale 1 13ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > buildPeakShape display scale (D-29z85, T12 stage 4a) > WG2: scale 1 on a realistic fixture is byte-identical to the pre-round drawing 2ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX10 mounting the workspace, opening Export and a WAV export never touch the encoder 865ms
+Not implemented: Window's scrollTo() method
+ ✓ app/lib/arrangement/__tests__/export-mp3.test.tsx > SRW-20 stage 2 MP3 and WAV + MP3 export (D-29z51, R20-X2) > MX11 X1: the project scope radio stays enabled without a range and the disabled range radio names its reason 124ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP6: a members commit writes one entry, sets the members status exactly as the pending path does and stores the pending result for the same anchor 246ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG3: a −6 dB clip draws the −6 dB shape (not the scale-1 one); a clip without gainDb draws scale 1 592ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP7: playing, a stop and start or a forced resync mid-drag builds the new graph with the dragged clip gain 205ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP8: playing a short loop, a late loop wrap mid-drag rebuilds the graph with the dragged clip gain 164ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > ZQ1 (PERF-3a): zoom 40 → 50 → 62.5 → 80 px/s writes no lane waveform d or viewBox; 20 px/s redraws each clip once at its band 558ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP9: fader keyboard steps, double-click reset, the typed field and the reset button keep their values, labels and statuses 467ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG4: during a single Clip Gain drag the lane follows before release; one entry; Undo restores the exact drawing 324ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG5: two clips at −6 and +3 draw their own factors; a multi drag changes both and each matches its stored gain 295ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP10: mid-drag the field shows the draft with no pending marker and the reset button follows the draft; after release both show the committed state 337ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG6: the detail panel draws the −6 dB shape at 480 columns from the same raw peaks 178ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP10b: a selection change mid members-drag to clips that include a video clip shows the stored disabled state, not the draft 176ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP11: unmounting mid-drag clears the override and every draft entry and leaves no window pointer listener 219ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP12-COVER: the slider chunks list every tenth of a dB from CLIP_GAIN_MIN_DB to CLIP_GAIN_MAX_DB once, in order, with no gap and no overlap 2ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG7 must-not: track Volume, group Volume, Master, Pan, Mute/Solo, a fade-in and an envelope point leave the lane byte-identical 341ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker-video.test.tsx > PW19 a video sound buffer reaches playback only together with "ready" > PW19 playback started while the video sound computes peaks leaves it out, then re-syncs it in when the sound is ready 110ms
+ ✓ app/lib/arrangement/__tests__/peaks-worker-video.test.tsx > PW19 a video sound buffer reaches playback only together with "ready" > PW20 a resync that throws when the video sound is ready stops playback with a status and keeps the sound ready 42ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG8 must-not (audio): a drag while playing sends exactly 10^(dB/20) to the clip gain node and creates no new sources 213ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG9: the detail panel draws a clip with a source offset from that offset 143ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-waveform.test.tsx > lane and detail waveforms follow Clip Gain (D-29z85, T12 stage 4a) > WG10: a committed source offset change with the same duration redraws the lane and the detail panel 148ms
+ ✓ app/lib/arrangement/__tests__/content-colour-ui.test.tsx > DUX-R-5a content colour (D-29z139, R30-R33, K1-K6) > DXC1: the audio clip waveform is neutral text-muted/70, unselected and selected 554ms
+ ✓ app/lib/arrangement/__tests__/content-colour-ui.test.tsx > DUX-R-5a content colour (D-29z139, R30-R33, K1-K6) > DXC2: the video clip body, header, waveform colour and fade ramps are neutral 223ms
+ ✓ app/lib/arrangement/__tests__/content-colour-ui.test.tsx > DUX-R-5a content colour (D-29z139, R30-R33, K1-K6) > DXC3: a selected audio clip and a selected video clip keep the brass selection (K1) 282ms
+ ✓ app/lib/arrangement/__tests__/content-colour-ui.test.tsx > DUX-R-5a content colour (D-29z139, R30-R33, K1-K6) > DXC4: Overview bars use the neutral ladder and the playhead keeps bg-accent (R33, K2) 214ms
+ ✓ app/lib/arrangement/__tests__/content-colour-ui.test.tsx > DUX-R-5a content colour (D-29z139, R30-R33, K1-K6) > DXC5: the detail waveform box is neutral text-muted/70 220ms
+ ✓ app/lib/arrangement/__tests__/content-colour-ui.test.tsx > DUX-R-5a content colour (D-29z139, R30-R33, K1-K6) > DXC6: retired content tokens are gone and the reserved brass sites stay exactly once 9ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS1 refuses to add a failed source with the failed text and no loader detail 50ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS2 gives the failed text when the failed source is the selection 17ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS3 keeps the loading text for a source that is still loading 20ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS4 stops a running preview and gives the failed text when previewing a failed source 23ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS5 keeps the loading text when previewing a source that is still loading 14ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS6 keeps the selection prompt for an unknown id 11ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS7 still adds exactly one clip for a ready source 24ms
+ ✓ app/lib/arrangement/__tests__/failed-source-refusal.test.tsx > library refusal text for a failed source (C-R95-N1) > FS8 follows the current state when a loading source fails later 34ms
+ ✓ app/lib/arrangement/__tests__/video-import-status-ui.test.tsx > V-0.2c1 video import status texts in the Context > VI1 a good import shows Opening, then the added status, the history label and one clip at 0 64ms
+ ✓ app/lib/arrangement/__tests__/video-import-status-ui.test.tsx > V-0.2c1 video import status texts in the Context > VI2 a probe failure shows the probe error and adds no clip 16ms
+ ✓ app/lib/arrangement/__tests__/video-import-status-ui.test.tsx > V-0.2c1 video import status texts in the Context > VI3 a rejected batch joins both rejections in order and never probes 14ms
+ ✓ app/lib/arrangement/__tests__/video-import-status-ui.test.tsx > V-0.2c1 video import status texts in the Context > VI4 a video without sound stores audio none and the English no-sound note 17ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP12a: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -600 to tenth -391 3929ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP12b: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -390 to tenth -181 2691ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP12c: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth -180 to tenth 29 2584ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP12d: the committed pointer gainDb equals the pending onChange result for every single-clip slider dB from tenth 30 to tenth 240 2492ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP12e: Shift-fine pointer and pending commits agree, and three members anchors including both clamps commit the same gains by pointer and by pending onChange 179ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP13: at waveform zoom 2 the lane drawing during a drag is the shape for draft × 2; the detail drawing ignores the zoom 86ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP14: dragging back to the start value shows the stored value mid-gesture, writes no entry and clears every draft 90ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP15: releasing a value-changing single drag from a typed −12 dB commits the Clip Gain block once, never with the pending state 78ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP16: after a release, Undo, Redo, typing then Escape and the reset button re-sync the field and the pending state as before 124ms
+ ✓ app/lib/arrangement/__tests__/clip-gain-pointer-preview.test.tsx > PERF-FADER-b Clip Gain pointer preview (D-29z189) > CP17: a members drag builds the range from the drafts and the stored gains passed as props; a mid-drag selection change shows the new selection’s stored gains 78ms
+
+ Test Files  9 passed (9)
+      Tests  109 passed (109)
+   Start at  07:00:07
+   Duration  20.55s (transform 4.77s, setup 0ms, import 12.46s, tests 28.48s, environment 8.56s)
+

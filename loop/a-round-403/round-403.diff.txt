@@ -1,0 +1,586 @@
+diff --git a/app/lib/arrangement/__tests__/peaks-worker.test.ts b/app/lib/arrangement/__tests__/peaks-worker.test.ts
+index f998b14..2a6aeeb 100644
+--- a/app/lib/arrangement/__tests__/peaks-worker.test.ts
++++ b/app/lib/arrangement/__tests__/peaks-worker.test.ts
+@@ -48,6 +48,12 @@ class FakeAudioBuffer implements AudioBuffer {
+   copyToChannel(): void {}
+ }
+ 
++class ThrowingChannelBuffer extends FakeAudioBuffer {
++  getChannelData(): Float32Array<ArrayBuffer> {
++    throw new Error('getChannelData failed');
++  }
++}
++
+ function signal(seed: number, length: number): Float32Array<ArrayBuffer> {
+   const data = new Float32Array(length);
+   let x = seed;
+@@ -480,6 +486,176 @@ describe('PW4-PW10 peaks client', () => {
+     const begins = worker.posted.filter((entry) => entry.message.type === 'begin');
+     expect(begins.map((entry) => entry.message.jobId)).toEqual([1, 2]);
+   });
++  it('PW14b pins the cold-start and stall budgets', () => {
++    expect(PEAKS_WORKER_COLD_START_TIMEOUT_MS).toBe(10_000);
++    expect(PEAKS_WORKER_STALL_TIMEOUT_MS).toBe(3_000);
++  });
++
++  it('PW24 an unparsable message before the first reply keeps the cold-start budget', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const results: Float32Array[] = [];
++    createSourcePeaksComputer().request(
++      new FakeAudioBuffer([signal(24, 700)], 1000),
++      new AbortController().signal,
++      (p) => results.push(p),
++    );
++    const worker = FakePeaksWorker.instances[0];
++    worker.onmessage?.(new MessageEvent('message', { data: { type: 'junk', jobId: 1 } }));
++    vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS);
++    worker.onmessage?.(new MessageEvent('message', { data: null }));
++    worker.onmessage?.(
++      new MessageEvent('message', { data: { type: 'ack', jobId: 1, channels: 'no channel list' } }),
++    );
++    expect(results).toHaveLength(0);
++    expect(worker.terminated).toBe(0);
++    vi.advanceTimersByTime(PEAKS_WORKER_COLD_START_TIMEOUT_MS - PEAKS_WORKER_STALL_TIMEOUT_MS - 1);
++    expect(results).toHaveLength(0);
++    vi.advanceTimersByTime(1);
++    expect(results).toHaveLength(1);
++    expect(worker.terminated).toBe(1);
++  });
++
++  it('PW24b an unparsable message while the worker is idle keeps the cold-start budget for the next job', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const computer = createSourcePeaksComputer();
++    const results: Float32Array[] = [];
++    const aborted = new AbortController();
++    aborted.abort();
++    computer.request(new FakeAudioBuffer([signal(32, 700)], 1000), aborted.signal, (p) =>
++      results.push(p),
++    );
++    const worker = FakePeaksWorker.instances[0];
++    expect(worker.posted.map((entry) => entry.message.type)).toEqual(['begin', 'cancel']);
++    expect(vi.getTimerCount()).toBe(0);
++    worker.onmessage?.(new MessageEvent('message', { data: null }));
++    computer.request(
++      new FakeAudioBuffer([signal(33, 700)], 1000),
++      new AbortController().signal,
++      (p) => results.push(p),
++    );
++    vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS);
++    expect(results).toHaveLength(0);
++    expect(worker.terminated).toBe(0);
++    vi.advanceTimersByTime(PEAKS_WORKER_COLD_START_TIMEOUT_MS - PEAKS_WORKER_STALL_TIMEOUT_MS);
++    expect(results).toHaveLength(1);
++    expect(worker.terminated).toBe(1);
++  });
++
++  it('PW25 dispose resets the first-reply flag, so a new worker gets the cold-start budget again', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const computer = createSourcePeaksComputer();
++    const results: Float32Array[] = [];
++    computer.request(
++      new FakeAudioBuffer([signal(25, 700)], 1000),
++      new AbortController().signal,
++      (p) => results.push(p),
++    );
++    const first = FakePeaksWorker.instances[0];
++    for (let index = 0; index < first.posted.length; index++) {
++      first.run(first.posted[index].message);
++    }
++    expect(results).toHaveLength(1);
++    computer.dispose();
++    expect(first.terminated).toBe(1);
++    computer.request(
++      new FakeAudioBuffer([signal(26, 700)], 1000),
++      new AbortController().signal,
++      (p) => results.push(p),
++    );
++    expect(FakePeaksWorker.instances).toHaveLength(2);
++    const second = FakePeaksWorker.instances[1];
++    vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS);
++    expect(results).toHaveLength(1);
++    expect(second.terminated).toBe(0);
++    vi.advanceTimersByTime(PEAKS_WORKER_COLD_START_TIMEOUT_MS - PEAKS_WORKER_STALL_TIMEOUT_MS);
++    expect(results).toHaveLength(2);
++    expect(second.terminated).toBe(1);
++  });
++
++  it('PW26 without Worker a throwing onPeaks does not throw from request and rethrows on a timer', () => {
++    vi.useFakeTimers();
++    vi.stubGlobal('Worker', undefined);
++    const results: string[] = [];
++    expect(() =>
++      createSourcePeaksComputer().request(
++        new FakeAudioBuffer([signal(27, 700)], 1000),
++        new AbortController().signal,
++        () => {
++          results.push('delivered');
++          throw new Error('main-thread onPeaks failed');
++        },
++      ),
++    ).not.toThrow();
++    expect(results).toEqual(['delivered']);
++    expect(() => vi.runOnlyPendingTimers()).toThrow('main-thread onPeaks failed');
++  });
++
++  it('PW27 a worker failure delivers the jobs behind one whose main-thread peaks throw, and rethrows on a timer', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    const computer = createSourcePeaksComputer();
++    const results: string[] = [];
++    const second = [signal(28, 700)];
++    const third = [signal(29, 900)];
++    const peaks: Float32Array[] = [];
++    computer.request(
++      new ThrowingChannelBuffer([signal(30, 700)], 1000),
++      new AbortController().signal,
++      () => results.push('first'),
++    );
++    computer.request(new FakeAudioBuffer(second, 1000), new AbortController().signal, (p) => {
++      results.push('second');
++      peaks.push(p);
++    });
++    computer.request(new FakeAudioBuffer(third, 1000), new AbortController().signal, (p) => {
++      results.push('third');
++      peaks.push(p);
++    });
++    const worker = FakePeaksWorker.instances[0];
++    expect(() => worker.onerror?.(new Event('error'))).not.toThrow();
++    expect(results).toEqual(['second', 'third']);
++    expect(bytes(peaks[0])).toEqual(bytes(computePeaks(second, 1000, PEAK_BUCKETS_PER_SECOND)));
++    expect(bytes(peaks[1])).toEqual(bytes(computePeaks(third, 1000, PEAK_BUCKETS_PER_SECOND)));
++    expect(worker.terminated).toBe(1);
++    expect(() => vi.runOnlyPendingTimers()).toThrow('getChannelData failed');
++  });
++
++  it('PW29 a failing post inside request still throws the peak error of the requesting job from request, with no deferred rethrow', () => {
++    vi.useFakeTimers();
++    FakePeaksWorker.auto = false;
++    FakePeaksWorker.throwOn = 'begin';
++    const results: string[] = [];
++    try {
++      expect(() =>
++        createSourcePeaksComputer().request(
++          new ThrowingChannelBuffer([signal(34, 700)], 1000),
++          new AbortController().signal,
++          () => results.push('delivered'),
++        ),
++      ).toThrow('getChannelData failed');
++    } finally {
++      FakePeaksWorker.throwOn = null;
++    }
++    expect(results).toEqual([]);
++    expect(FakePeaksWorker.instances[0].terminated).toBe(1);
++    expect(vi.getTimerCount()).toBe(0);
++  });
++
++  it('PW28 without Worker a throwing main-thread peak computation still throws from request', () => {
++    vi.stubGlobal('Worker', undefined);
++    const results: string[] = [];
++    expect(() =>
++      createSourcePeaksComputer().request(
++        new ThrowingChannelBuffer([signal(31, 700)], 1000),
++        new AbortController().signal,
++        () => results.push('delivered'),
++      ),
++    ).toThrow('getChannelData failed');
++    expect(results).toEqual([]);
++  });
+ });
+ 
+ interface PeaksProbeRef {
+@@ -590,6 +766,7 @@ class RecordingAudioContext {
+ }
+ 
+ describe('PW18 a source buffer reaches playback only together with "ready"', () => {
++  let view: ReturnType<typeof render> | null = null;
+   beforeEach(() => {
+     FakePeaksWorker.instances = [];
+     FakePeaksWorker.auto = false;
+@@ -600,7 +777,12 @@ describe('PW18 a source buffer reaches playback only together with "ready"', ()
+     vi.stubGlobal('AudioContext', RecordingAudioContext);
+   });
+   afterEach(() => {
+-    vi.unstubAllGlobals();
++    try {
++      view?.unmount();
++    } finally {
++      view = null;
++      vi.unstubAllGlobals();
++    }
+   });
+ 
+   it('PW18 playback started while peaks run leaves the clip out, then re-syncs it in when the source is ready', async () => {
+@@ -631,7 +813,7 @@ describe('PW18 a source buffer reaches playback only together with "ready"', ()
+       ],
+     };
+     const api: PeaksProbeRef = { current: null };
+-    const view = render(
++    view = render(
+       createElement(
+         ArrangementProvider,
+         { collection, initialArrangement },
+@@ -657,7 +839,6 @@ describe('PW18 a source buffer reaches playback only together with "ready"', ()
+     });
+     expect(api.current?.sourceStates.tone?.status).toBe('ready');
+     expect(RecordingSource.started).toContain(buffer);
+-    view.unmount();
+   });
+ });
+ 
+@@ -675,6 +856,7 @@ describe('PW12-PW13 peaks client robustness (A-R312 review)', () => {
+   afterEach(() => {
+     FakePeaksWorker.throwOn = null;
+     vi.unstubAllGlobals();
++    vi.useRealTimers();
+   });
+ 
+   it('PW12 a request made inside onPeaks keeps every queued job and delivers all of them in order', async () => {
+diff --git a/app/lib/arrangement/peaks.client.ts b/app/lib/arrangement/peaks.client.ts
+index 49c10d6..33c0029 100644
+--- a/app/lib/arrangement/peaks.client.ts
++++ b/app/lib/arrangement/peaks.client.ts
+@@ -66,17 +66,29 @@ export function createSourcePeaksComputer(): SourcePeaksComputer {
+   const queue: PeaksJob[] = [];
+   const pool: Float32Array<ArrayBuffer>[][] = [];
+   let stallTimer = 0;
++  let requesting: PeaksJob | null = null;
++  let requestingFailure: { error: unknown } | null = null;
++
++  const rethrowLater = (error: unknown) => {
++    window.setTimeout(() => {
++      throw error;
++    }, 0);
++  };
+ 
+   const deliver = (job: PeaksJob, peaks: Float32Array) => {
+     try {
+       job.onPeaks(peaks);
+     } catch (error) {
+-      window.setTimeout(() => {
+-        throw error;
+-      }, 0);
++      rethrowLater(error);
+     }
+   };
+ 
++  const takeRequestingFailure = (): { error: unknown } | null => {
++    const failure = requestingFailure;
++    requestingFailure = null;
++    return failure;
++  };
++
+   const deliverOnMainThread = (job: PeaksJob) => {
+     if (!job.signal.aborted) {
+       deliver(job, computePeaksOnMainThread(job.buffer));
+@@ -111,7 +123,15 @@ export function createSourcePeaksComputer(): SourcePeaksComputer {
+     active = null;
+     queue.length = 0;
+     for (const job of pending) {
+-      deliverOnMainThread(job);
++      try {
++        deliverOnMainThread(job);
++      } catch (error) {
++        if (job === requesting) {
++          requestingFailure = { error };
++        } else {
++          rethrowLater(error);
++        }
++      }
+     }
+   };
+ 
+@@ -249,12 +269,23 @@ export function createSourcePeaksComputer(): SourcePeaksComputer {
+         return;
+       }
+       queue.push(job);
+-      if (!active) {
++      if (active) {
++        return;
++      }
++      requesting = job;
++      try {
+         startNext();
++      } finally {
++        requesting = null;
++      }
++      const failure = takeRequestingFailure();
++      if (failure) {
++        throw failure.error;
+       }
+     },
+     dispose() {
+       window.clearTimeout(stallTimer);
++      workerReplied = false;
+       queue.length = 0;
+       active = null;
+       pool.length = 0;
+diff --git a/docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md b/docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md
+index f671d3d..7ea05d6 100644
+--- a/docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md
++++ b/docs/implementation/2026/quarter-IV/228-perf-peaks-worker.md
+@@ -105,7 +105,7 @@ sequenceDiagram
+ - **`peaks-worker-video.test.tsx` (1 test):** PW19 — video import, decode → `audio` `decoding`, `sourcePeaks`-ში არ არის, Play-ის შემდეგ ხმის buffer არ იწყება; worker-ის შესრულების შემდეგ `ready`, `sourcePeaks` აქვს და მიმდინარე playback-ში buffer იწყება.
+ - **Mutants (round 315, scratch ასლზე):** B-ის `unit-mutants.py`-ის 11 mutant-იდან 10 red (MU-COLD-START-SAME → PW14; MU-NEVER-REPLIED, MU-STALL-ONLY-AT-BEGIN → PW9, PW15; MU-DELIVER-NO-CATCH/SWALLOW/SYNC-THROW → PW16, PW17; MU-FAIL-KEEPS-TIMER → PW13b; MU-EMPTY-TO-WORKER → PW20; MU-BUFFER-BEFORE-PEAKS, MU-NO-COLLECTION-RESYNC → PW18); MU-REPLIED-AFTER-FILTER by design ექვივალენტურია. A-ს MU-VIDEO-BUFFER-BEFORE-PEAKS → PW19 red step 3-ზე; დამატებით video re-sync-ის წაშლა → PW19 red step 5-ზე. აღდგენილი კოდი green. Stage 1-ის mutant-ები (round 312) ასევე red იყო.
+ - **Covering run (round 315):** peaks-worker, clip-gain-waveform, content-colour-ui, clip-gain-pointer-preview, waveform-zoom, failed-source-refusal, video-import-status-ui, export-mp3 — 8 ფაილი, 97/97.
+-- **Browser (C round 314, stage 1):** main thread-ზე peaks-ის 0 ms, `peaks.worker.ts`-ის შექმნა, 9 preview waveform-ის byte identity, ready-ის თანმიმდევრობა, video და perf harness — PASS.
++- **Browser (C round 312, stage 1):** main thread-ზე peaks-ის 0 ms, `peaks.worker.ts`-ის შექმნა, 9 preview waveform-ის byte identity, ready-ის თანმიმდევრობა, video და perf harness — PASS.
+ - **Perf harness (rounds 313–314):** `harness.loaf-scripts-live` ≥ 50; 164 deterministic სტრიქონი ემთხვევა HEAD-harness control-ს; C round 314 PASS. Stage 2-ის browser row-ები (PK-LOAD, PK-COLD-START, PK-VIDEO-SOUND, PK-PERF-LOAD) C round 315-ისაა.
+ 
+ ## TODO / შემდეგი ნაბიჯები
+@@ -119,4 +119,4 @@ sequenceDiagram
+   - power-of-two pyramid → PERF-14;
+   - PERF2-REMAINDER-SFX-SYNTH — signal-ად რჩება backlog-ში.
+ - **A-R312-REVIEW-L6 (info):** უცვლელი, გამომძახებლები `signal.aborted`-ს თავად ამოწმებენ.
+-- **Round 315-ის review-ის Low შენიშვნები (B-სთვის, ამ რაუნდში `peaks.client.ts` sketch-ზეა გაყინული):** `dispose()` `workerReplied`-ს არ აბრუნებს; `computePeaksOnMainThread`-ის exception `failWorker`-ის loop-ს შეაჩერებდა; „`Worker` არ არის + throwing `onPeaks`“ სინქრონულ path-ს ცალკე row არ აქვს; `PW12-PW13` describe-ის (PW12, PW13, PW13b, PW16, PW17) `afterEach` `vi.useRealTimers()`-ს არ იძახებს; ორი call site-ის საერთო „source ready“ ბლოკი — architecture note (`commitDecodedSource`).
++- **Round 315-ის review-ის Low შენიშვნები (B-სთვის, ამ რაუნდში `peaks.client.ts` sketch-ზეა გაყინული):** `dispose()` `workerReplied`-ს არ აბრუნებს; `computePeaksOnMainThread`-ის exception `failWorker`-ის loop-ს შეაჩერებდა; „`Worker` არ არის + throwing `onPeaks`“ სინქრონულ path-ს ცალკე row არ აქვს; `PW12-PW13` describe-ის (PW12, PW13, PW13b, PW16, PW17) `afterEach` `vi.useRealTimers()`-ს არ იძახებს; ორი call site-ის საერთო „source ready“ ბლოკი — architecture note (`commitDecodedSource`). — დაიხურა PERF-14c-i-ში (round 403, doc 257); `commitDecodedSource` architecture note რჩება signal-ად.
+diff --git a/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md b/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md
+index 6f5365a..17e4711 100644
+--- a/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md
++++ b/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md
+@@ -44,7 +44,7 @@ D-29z1360-ის ფარგლები (B, `tech-lead` და `performance-op
+ - Cross-lane name-bar drag-ის დროს clip წყარო lane-ზე რჩება და target-ზე მხოლოდ release-ზე გადადის. Attribute და დახატული clip-ები ერთი `clips` სიიდან მოდის, ამიტომ HEAD-ზე attribute ყოველ მდგომარეობაში mount-ებულ რაოდენობას უდრის.
+ - Group row-ებსაც აქვთ `data-track-id`; ამიტომ scale spec lane-ებს მხოლოდ `[data-track-id][data-clip-count]`-ით ითვლის.
+ 
+-### Spec-ის ნაბიჯები (a–h)
++### Spec-ის ნაბიჯები (a–i)
+ 
+ თითო pass ახალ browser context-ში, 1440×900, perf instrumentation load-მდე. 3 pass.
+ 
+@@ -56,6 +56,7 @@ D-29z1360-ის ფარგლები (B, `tech-lead` და `performance-op
+ - **f. Minimum zoom:** `-` სანამ slider-ის მნიშვნელობა მის `min`-ს არ გაუტოლდება (მაქსიმუმ 60 key, სხვაგვარად problem). Row-ები: `scale.dom.page.min-zoom`, `scale.clips.mounted.min-zoom`, `scale.clips.in-window.min-zoom`.
+ - **g. Minimum zoom, შუაში:** timeline scroller-ის `scrollLeft = round((scrollWidth − clientWidth) / 2)`. Row-ები: `scale.dom.page.min-zoom-mid`, `scale.clips.mounted.min-zoom-mid`, `scale.clips.in-window.min-zoom-mid`. Self-check: `scrollLeft` > 0 და `in-window` ≥ 1.
+ - **h. Scroll-ის გვერდის გადაკვეთა:** შუიდან 4-ჯერ `scrollLeft += clientWidth`, თითო ნაბიჯს თავისი window. Row-ები: `scale.scroll.commits-per-step`, `scale.scroll.components-per-step`, `scale.scroll.loaf-max-ms`. ყოველი ნაბიჯის შემდეგ (window-ის გარეთ) visible-gap self-check მეორდება.
++- **i. Zoom key-ები minimum zoom-ზე (PERF-14c-i, round 403, doc 257):** იწყება იმ მდგომარეობიდან, რომელიც h-მა დატოვა (minimum zoom, h-ის scroll). Quiet-ის შემდეგ spec ინახავს `scrollLeft`-ს, შემდეგ 1×-ზე 5 × `=` და 5 × `-`, თითო key-ს თავისი window quiet-მდე. Row-ები: `scale.zoom.min.keydown-p95-ms`, `scale.zoom.min.keydown-max-ms`, `scale.zoom.min.commits-per-key`, `scale.zoom.min.components-per-key`. ამის შემდეგ `scrollLeft` i-ს დასაწყისის მნიშვნელობას უბრუნდება (თუ არ დაბრუნდა, problem იწერება) და იგივე key-ები 6×-ზე ეშვება, იგივე id-ებით `.6x` suffix-ით; შემდეგ rate ისევ 1. Self-check (d-ს იგივე `measureZoomKeys`): Zoom slider ყოველ key-ზე სწორი მიმართულებით იცვლება და minimum-ს უბრუნდება. `measureZoomKeys` ახლა `rowPrefix`-სა და პირველ key-ს იღებს; default-ები (`scale.zoom`, `-`) d და e ნაბიჯებს უცვლელად ტოვებს. `setTimelineScroll` რიცხვსაც იღებს.
+ 
+ Timeline scroller არის ruler-ის (`[data-testid="arrangement-ruler"]`) პირველი წინაპარი, რომლის `scrollWidth > clientWidth` და computed `overflowX` არის `auto` ან `scroll`; class-ის სახელი არ გამოიყენება. დამატებითი self-check-ები: c და f ნაბიჯებზე `scrollLeft` 0-ია, h-ზე ყოველი ნაბიჯი ზუსტად `clientWidth`-ით მოძრაობს, page error არ არის. `in-window` = audio clip-ები, რომელთა box **lane area**-ს კვეთს: scroller-ის box-ს გამოკლებული პირველი `[data-testid="arrangement-track-header"]`-ის გაზომილი სიგანე, რადგან header `sticky left-0`-ია და მის ქვეშ clip-ები არ ჩანს (C-R398-SIGNAL-M2, D-29z1363; HEAD-ზე `scale.clips.in-window.min-zoom-mid` = 19, ძველი განმარტებით 24 იყო).
+ 
+@@ -81,6 +82,21 @@ PERF-14a-ში 23-ვე row `record` იყო (მიდგომის პ
+ - **Premise:** HEAD `c17d0e9`-ზე (virtualization-ის გარეშე) გვერდის row-ები 2000-ს აჭარბებს (ქვემოთ, ტესტირება: `scale.dom.page` 4333), ამიტომ სამი `scale.dom.page*` assert და ორი `components-per-key` assert virtualization-ის გარეშე ჩავარდება; ამას ამოწმებს fix-removed mutant MU-399-NO-FILTER (`tmp/studio-real-loop/b-round-398/perf-sketch-scale-mutant-no-filter.log`). `scale.clips.model` (`== 200`) model count-ის guard-ია: ის mount-ზე არ არის დამოკიდებული, ამიტომ no-filter mutant მასზე არ მოქმედებს და HEAD-ზეც 200-ია. მისი JSON note-ის mutant-ის ციტატა ამ row-ზე არ ვრცელდება (A-R402-REVIEW-F2).
+ - `perf-sketch-scale-final.json` dispatched patch-ის run-ია; `perf-sketch-scale-run1.json` და `run2.json` (JSON note-ებში ციტირებული) review-ის pass 1-ის budget-ებით გაშვებული ადრინდელი run-ებია, იგივე მნიშვნელობებით (`tmp/studio-real-loop/b-round-401/sketch-review.md`).
+ 
++**i ნაბიჯის row-ები (PERF-14c-i, round 403, doc 257).** ფაილი 23-დან 31 row-მდე იზრდება; პირველი 23 უცვლელია, `assert` კვლავ 7-ია. 8 ახალი row ყველა `record`-ია (`budget` null, `owner` `PERF-14c-i`), `kind` შესაბამისი `scale.zoom.*` row-იდან. მნიშვნელობები B-ის საბოლოო sketch run-იდანაა (production build, 3 pass, `tmp/studio-real-loop/b-round-402/perf-sketch-scale-v2.json`); JSON note-ები ადრინდელ run-ს `b-round-402/perf-sketch-scale.json`-ს ასახელებს, სადაც 1× row-ები იგივეა, 6× კი სხვა (components 112.4, wallclock 144/80/88).
++
++| Row | Kind | B-ის sketch run (v2, 3 pass) |
++|---|---|---|
++| `scale.zoom.min.keydown-p95-ms` | wallclock | 24 / 24 / 24 |
++| `scale.zoom.min.keydown-max-ms` | wallclock | 24 / 24 / 24 |
++| `scale.zoom.min.commits-per-key` | deterministic | 1 / 1 / 1 |
++| `scale.zoom.min.components-per-key` | deterministic | 121.1 / 121.1 / 121.1 |
++| `scale.zoom.min.keydown-p95-ms.6x` | wallclock | 112 / 120 / 112 |
++| `scale.zoom.min.keydown-max-ms.6x` | wallclock | 112 / 120 / 112 |
++| `scale.zoom.min.commits-per-key.6x` | deterministic | 1 / 1 / 1 |
++| `scale.zoom.min.components-per-key.6x` | deterministic | 121.1 / 121.1 / 121.1 |
++
++ეს row-ები PERF-14c-ii-ის premise-ია: minimum zoom-თან 16–24 clip რჩება mount-ებული და ყოველ key-ზე იცვლება. 6× wallclock row-ები „zoom p95 < 50 ms“ მიზანს აჭარბებს, ამიტომ მათი budget PERF-14c-ii-ის გაზომვის შემდეგ წყდება.
++
+ ## არქიტექტურა
+ 
+ ```mermaid
+diff --git a/perf/budgets.scale.json b/perf/budgets.scale.json
+index 1d46a99..5db96a3 100644
+--- a/perf/budgets.scale.json
++++ b/perf/budgets.scale.json
+@@ -272,5 +272,93 @@
+     "budget": null,
+     "owner": "PERF-14a",
+     "note": "Longest long-animation-frame overlapping any of the 4 scroll step windows. record — not run on sketch (L58)"
++  },
++  {
++    "id": "scale.zoom.min.keydown-p95-ms",
++    "scenario": "i. zoom keys at minimum zoom 1x",
++    "metric": "keydown-p95-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "95th percentile of the Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
++  },
++  {
++    "id": "scale.zoom.min.keydown-max-ms",
++    "scenario": "i. zoom keys at minimum zoom 1x",
++    "metric": "keydown-max-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "Longest Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
++  },
++  {
++    "id": "scale.zoom.min.commits-per-key",
++    "scenario": "i. zoom keys at minimum zoom 1x",
++    "metric": "commits-per-key",
++    "unit": "commits / key",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "React commits per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
++  },
++  {
++    "id": "scale.zoom.min.components-per-key",
++    "scenario": "i. zoom keys at minimum zoom 1x",
++    "metric": "components-per-key",
++    "unit": "components / key",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "Rendered components per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
++  },
++  {
++    "id": "scale.zoom.min.keydown-p95-ms.6x",
++    "scenario": "i. zoom keys at minimum zoom 6x",
++    "metric": "keydown-p95-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "95th percentile of the Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
++  },
++  {
++    "id": "scale.zoom.min.keydown-max-ms.6x",
++    "scenario": "i. zoom keys at minimum zoom 6x",
++    "metric": "keydown-max-ms",
++    "unit": "ms",
++    "kind": "wallclock",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "Longest Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
++  },
++  {
++    "id": "scale.zoom.min.commits-per-key.6x",
++    "scenario": "i. zoom keys at minimum zoom 6x",
++    "metric": "commits-per-key",
++    "unit": "commits / key",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "React commits per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
++  },
++  {
++    "id": "scale.zoom.min.components-per-key.6x",
++    "scenario": "i. zoom keys at minimum zoom 6x",
++    "metric": "components-per-key",
++    "unit": "components / key",
++    "kind": "deterministic",
++    "mode": "record",
++    "budget": null,
++    "owner": "PERF-14c-i",
++    "note": "Rendered components per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json"
+   }
+ ]
+diff --git a/perf/studio-lab-scale.perf.spec.ts b/perf/studio-lab-scale.perf.spec.ts
+index 43195d7..795b50d 100644
+--- a/perf/studio-lab-scale.perf.spec.ts
++++ b/perf/studio-lab-scale.perf.spec.ts
+@@ -60,6 +60,7 @@ const scaleSequence = [
+   `f. minimum zoom: "-" until the Zoom slider value equals its min (at most ${minZoomKeyLimit} keys), wait for quiet (scale.*.min-zoom)`,
+   'g. minimum zoom, timeline scroller scrollLeft = round((scrollWidth - clientWidth) / 2), wait for quiet (scale.*.min-zoom-mid); self-check scrollLeft > 0 and in-window >= 1',
+   `h. scroll page crossings: scrollLeft += clientWidth x${scrollStepCount}, one window per step until quiet (scale.scroll.*)`,
++  `i. zoom keys at minimum zoom, scroll as left by h: ${zoomKeyCount} x "=" then ${zoomKeyCount} x "-", one window per key until quiet (scale.zoom.min.*), at 1x, then scrollLeft restored to its value at the start of i, then the same keys at ${throttledRate}x (ids with .${throttledRate}x); self-check direction per key, return to the minimum and the restored scrollLeft`,
+ ];
+ 
+ interface ScalePassResult {
+@@ -206,7 +207,7 @@ function readScaleDom(page: Page): Promise<ScaleDomReading> {
+   }, scaleSelectors);
+ }
+ 
+-function setTimelineScroll(page: Page, mode: 'middle' | 'page'): Promise<number> {
++function setTimelineScroll(page: Page, mode: 'middle' | 'page' | number): Promise<number> {
+   return page.evaluate(
+     ({ selector, scrollMode }) => {
+       let scroller = document.querySelector(selector)?.parentElement ?? null;
+@@ -221,9 +222,11 @@ function setTimelineScroll(page: Page, mode: 'middle' | 'page'): Promise<number>
+       }
+       if (!scroller) return -1;
+       scroller.scrollLeft =
+-        scrollMode === 'middle'
+-          ? Math.round((scroller.scrollWidth - scroller.clientWidth) / 2)
+-          : scroller.scrollLeft + scroller.clientWidth;
++        typeof scrollMode === 'number'
++          ? scrollMode
++          : scrollMode === 'middle'
++            ? Math.round((scroller.scrollWidth - scroller.clientWidth) / 2)
++            : scroller.scrollLeft + scroller.clientWidth;
+       return scroller.scrollLeft;
+     },
+     { selector: rulerSelector, scrollMode: mode },
+@@ -340,13 +343,19 @@ async function buildScaleClips(page: Page, result: ScalePassResult): Promise<voi
+   await waitForQuiet(page, await nowIn(page), settleMs);
+ }
+ 
+-async function measureZoomKeys(page: Page, result: ScalePassResult): Promise<void> {
++async function measureZoomKeys(
++  page: Page,
++  result: ScalePassResult,
++  rowPrefix = 'scale.zoom',
++  firstKey: '-' | '=' = '-',
++): Promise<void> {
+   const slider = zoomSlider(page);
+   await expect(slider).toHaveCount(1);
+   const startValue = Number(await slider.inputValue());
++  const secondKey = firstKey === '-' ? '=' : '-';
+   const keys = [
+-    ...Array.from({ length: zoomKeyCount }, () => '-'),
+-    ...Array.from({ length: zoomKeyCount }, () => '='),
++    ...Array.from({ length: zoomKeyCount }, () => firstKey),
++    ...Array.from({ length: zoomKeyCount }, () => secondKey),
+   ];
+   const records: ScaleStepRecord[] = [];
+   for (const key of keys) {
+@@ -357,7 +366,7 @@ async function measureZoomKeys(page: Page, result: ScalePassResult): Promise<voi
+   const components = records.map((record) => record.components);
+   const values = [startValue, ...records.map((record) => record.value)];
+   const put = (metric: string, sample: PerfSample): void => {
+-    result.samples.set(rateRowId(`scale.zoom.${metric}`, result.cpuRate), sample);
++    result.samples.set(rateRowId(`${rowPrefix}.${metric}`, result.cpuRate), sample);
+   };
+   put('keydown-p95-ms', {
+     value: percentile(keydown, 0.95),
+@@ -378,7 +387,7 @@ async function measureZoomKeys(page: Page, result: ScalePassResult): Promise<voi
+   }).length;
+   if (wrongDirection > 0 || values[values.length - 1] !== startValue) {
+     result.problems.push(
+-      `zoom keys at ${result.cpuRate}x: ${wrongDirection} keys moved the wrong way; slider values ${values.join(',')}`,
++      `${rowPrefix} keys at ${result.cpuRate}x: ${wrongDirection} keys moved the wrong way; slider values ${values.join(',')}`,
+     );
+   }
+ }
+@@ -535,6 +544,28 @@ async function runScalePass(browser: Browser, pass: number): Promise<ScalePassRe
+ 
+     step = 'h. scroll page crossings';
+     await measureScrollSteps(page, result);
++
++    step = 'i. zoom keys at minimum zoom 1x';
++    await waitForQuiet(page, await nowIn(page), settleMs);
++    const minStart = await readScaleDom(page);
++    await measureZoomKeys(page, result, 'scale.zoom.min', '=');
++
++    step = `i. zoom keys at minimum zoom ${throttledRate}x`;
++    const restored = await setTimelineScroll(page, minStart.scrollLeft);
++    await waitForQuiet(page, await nowIn(page), settleMs);
++    if (restored !== minStart.scrollLeft) {
++      result.problems.push(
++        `minimum zoom keys: scrollLeft ${restored} before ${throttledRate}x, not ${minStart.scrollLeft}`,
++      );
++    }
++    await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttledRate });
++    result.cpuRate = throttledRate;
++    try {
++      await measureZoomKeys(page, result, 'scale.zoom.min', '=');
++    } finally {
++      result.cpuRate = 1;
++      await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
++    }
+   } catch (error) {
+     const message = error instanceof Error ? error.message : String(error);
+     result.abortedAt = step;

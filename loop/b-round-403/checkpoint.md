@@ -1,0 +1,18 @@
+# B round 403 -> 404 planning checkpoint (2026-11-08)
+- Done: tasks/round-403.md archived (cp of current-task.md round 403). Baseline HEAD cc5cbc6 clean (gate 403 published).
+- PERF-14c-ii premise measured on cc5cbc6 scratch prod builds (/tmp/b404-*), 200 clips, 6x, both viewports, 10 keys each (probe/medians.txt):
+  - HEAD: default median 56/48 max 64/72; near-min median 76/68 max 88/88 (mounted 24/19, 20/16 alternating)
+  - mutA (cols 4096->512): default 48/48 max 56/48; near-min 80/72 max 88/96  -> column cost <= 1 Event Timing step (8 ms)
+  - mutB (fixed path d): default 48/48 max 56/56; near-min 76/68 max 96/96 -> path build+raster <= 8 ms
+  - mutC (window page-4..page+5): default max 96/80; near-min max 152/136, mounted 58/47 -> cost scales with mounted clips; wider window / hysteresis makes it worse
+- Conclusion: pyramid (14c-ii) and canvas (14c-iii) have no measured gain at the plan's metric; near-min 6x cost scales with mounted clip count.
+- Next: rulings, backlog update, choose round-404 scope from queue order (D-29z1387).
+- mutD (sticky set): 0 churn, near-min median 80/64 (HEAD 76/68) -> churn branch closed; round 404 = SYS-R385 (D-29z1387 order).
+- Written: user-review/questions-perf14c-pyramid-canvas.md, b-round-403/root-request-arch-checkpoint-perf14.md, backlog v372 (update-backlog.py + .done; D-29z1388..1391).
+- Pending: tech-lead consult for SYS-R385 stage 1 (background); then sketch on /tmp/b404-sketch, mutants, claims, current-task.md, feature-status, b-round-403.md, b-next.json.
+- sketch on /tmp/b404-sketch (git base commit): ArrangementContext actions ctx + 4 hook narrowings + 5 call sites + new actions-context.test.tsx AC1-AC6 (6/6 pass). Next: biome/tsc, mutants, covering tests, patch.txt
+- Sketch evidence: patch b-round-403/sketch-404.patch.txt sha256 022c2184e898..., applies on store HEAD; mutants 8/8 RED (mutants/summary.txt); full vitest 262/3876 rc 0; tsc/lint/biome rc 0; interactions spec rc 0, 189/189 deterministic rows equal c-round-402/perf-interactions.json (interactions-compare.txt).
+- Next: tech-lead review of the sketch (sketch-review.md), then current-task.md, grants, frozen manifest, claims script, b-next.json.
+- current-task.md round 404 written (D-29z1392..1394). Pending: tech-lead sketch review -> sketch-review.md; backlog part 2 (update-backlog-2.py), feature-status round-404 line, b-round-403.md final, b-next.json.
+- DONE: all planning artifacts written; final advisor check pending.
+- advisor hand-off fixes applied (rows 2/4/6, K18); claims rerun, stderr empty. FINAL.

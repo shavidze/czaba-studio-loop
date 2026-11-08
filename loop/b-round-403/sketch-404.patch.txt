@@ -1,0 +1,674 @@
+diff --git a/app/components/arrangement/ArrangementLibrary.tsx b/app/components/arrangement/ArrangementLibrary.tsx
+index ff1be35..35cb16e 100644
+--- a/app/components/arrangement/ArrangementLibrary.tsx
++++ b/app/components/arrangement/ArrangementLibrary.tsx
+@@ -19,6 +19,7 @@ import {
+   formatArrangementTime,
+   type SourceLoadState,
+   useArrangement,
++  useArrangementActions,
+ } from '~/contexts/ArrangementContext';
+ import { getStudioLabProductHref } from '~/data/studio-lab-links';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+@@ -231,7 +232,7 @@ export function useArrangementLibraryActions(
+ 
+ export function ArrangementLibrary(props: ArrangementLibraryProps) {
+   const workspace = useArrangement();
+-  const actions = useArrangementLibraryActions(workspace);
++  const actions = useArrangementLibraryActions(useArrangementActions());
+   return (
+     <ArrangementLibraryView
+       {...props}
+diff --git a/app/components/arrangement/ArrangementLoopBrace.tsx b/app/components/arrangement/ArrangementLoopBrace.tsx
+index c047ef2..edfc6ca 100644
+--- a/app/components/arrangement/ArrangementLoopBrace.tsx
++++ b/app/components/arrangement/ArrangementLoopBrace.tsx
+@@ -3,6 +3,7 @@ import {
+   type ArrangementContextValue,
+   formatArrangementTime,
+   useArrangement,
++  useArrangementActions,
+ } from '~/contexts/ArrangementContext';
+ import {
+   adjacentGridLine,
+@@ -59,7 +60,7 @@ function roundLoopTime(value: number): number {
+ }
+ 
+ export function useArrangementLoopBraceActions(
+-  workspace: ArrangementContextValue,
++  actions: ArrangementLoopBraceActions,
+ ): ArrangementLoopBraceActions {
+   const {
+     getArrangement,
+@@ -67,7 +68,7 @@ export function useArrangementLoopBraceActions(
+     commitLoopRange,
+     stepLoopRange,
+     claimPointerGesture,
+-  } = workspace;
++  } = actions;
+   return useMemo(
+     () => ({
+       getArrangement,
+@@ -82,7 +83,7 @@ export function useArrangementLoopBraceActions(
+ 
+ export function ArrangementLoopBrace(props: ArrangementLoopBraceProps) {
+   const workspace = useArrangement();
+-  const actions = useArrangementLoopBraceActions(workspace);
++  const actions = useArrangementLoopBraceActions(useArrangementActions());
+   return (
+     <ArrangementLoopBraceView {...props} loop={workspace.arrangement.loop} actions={actions} />
+   );
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 11841b7..0244177 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -120,7 +120,7 @@ interface ArrangementMarkerRowViewProps {
+ }
+ 
+ export function useArrangementMarkerRowActions(
+-  workspace: ArrangementContextValue,
++  actions: ArrangementMarkerRowActions,
+ ): ArrangementMarkerRowActions {
+   const {
+     getArrangement,
+@@ -134,7 +134,7 @@ export function useArrangementMarkerRowActions(
+     getStatus,
+     isPointerGestureActive,
+     claimPointerGesture,
+-  } = workspace;
++  } = actions;
+   return useMemo(
+     () => ({
+       getArrangement,
+diff --git a/app/components/arrangement/ArrangementMaster.tsx b/app/components/arrangement/ArrangementMaster.tsx
+index 6fd28a4..50dd6d6 100644
+--- a/app/components/arrangement/ArrangementMaster.tsx
++++ b/app/components/arrangement/ArrangementMaster.tsx
+@@ -3,6 +3,7 @@ import {
+   type ArrangementContextValue,
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   useArrangement,
++  useArrangementActions,
+   useMasterMeterStore,
+   useMasterMeterWriter,
+ } from '~/contexts/ArrangementContext';
+@@ -157,7 +158,7 @@ interface ArrangementMasterViewProps {
+ }
+ 
+ export function useArrangementMasterActions(
+-  workspace: ArrangementContextValue,
++  actions: ArrangementMasterActions,
+ ): ArrangementMasterActions {
+   const {
+     toggleMasterMute,
+@@ -169,7 +170,7 @@ export function useArrangementMasterActions(
+     resetMasterPeak,
+     getArrangement,
+     setStatus,
+-  } = workspace;
++  } = actions;
+   return useMemo(
+     () => ({
+       toggleMasterMute,
+@@ -198,7 +199,7 @@ export function useArrangementMasterActions(
+ 
+ export function ArrangementMaster() {
+   const workspace = useArrangement();
+-  const actions = useArrangementMasterActions(workspace);
++  const actions = useArrangementMasterActions(useArrangementActions());
+   return <ArrangementMasterView master={workspace.master} actions={actions} />;
+ }
+ 
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index 994606b..110e17c 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -14,6 +14,7 @@ import {
+   type ArrangementContextValue,
+   formatArrangementTime,
+   useArrangement,
++  useArrangementActions,
+   useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+@@ -231,7 +232,7 @@ export interface ArrangementTransportViewProps {
+ }
+ 
+ export function useArrangementTransportActions(
+-  workspace: ArrangementContextValue,
++  actions: ArrangementTransportActions,
+ ): ArrangementTransportActions {
+   const {
+     togglePlayback,
+@@ -241,7 +242,7 @@ export function useArrangementTransportActions(
+     splitSelection,
+     deleteSelection,
+     toggleLoopSelection,
+-  } = workspace;
++  } = actions;
+   return useMemo(
+     () => ({
+       togglePlayback,
+@@ -636,7 +637,7 @@ export const ArrangementTransportView = memo(ArrangementTransportViewInner);
+ 
+ export function ArrangementTransport({ onOpenExport, navigation }: ArrangementTransportProps) {
+   const workspace = useArrangement();
+-  const actions = useArrangementTransportActions(workspace);
++  const actions = useArrangementTransportActions(useArrangementActions());
+   return (
+     <ArrangementTransportView
+       onOpenExport={onOpenExport}
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 3ff6dc3..56cdbe1 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -18,6 +18,7 @@ import {
+   GESTURE_EDIT_BLOCKED_MESSAGE,
+   NUDGE_AT_TIME_START_MESSAGE,
+   useArrangement,
++  useArrangementActions,
+   useArrangementClipLaneDrag,
+   useArrangementInsertMarkerStore,
+   useArrangementIsPlaying,
+@@ -1033,11 +1034,12 @@ export function StudioWorkspace() {
+   const [isExportOpen, setIsExportOpen] = useState(false);
+   const closeExportDialog = useCallback(() => setIsExportOpen(false), []);
+   const openExportDialog = useCallback(() => setIsExportOpen(true), []);
+-  const masterActions = useArrangementMasterActions(workspace);
+-  const libraryActions = useArrangementLibraryActions(workspace);
+-  const transportActions = useArrangementTransportActions(workspace);
+-  const loopBraceActions = useArrangementLoopBraceActions(workspace);
+-  const markerRowActions = useArrangementMarkerRowActions(workspace);
++  const workspaceActions = useArrangementActions();
++  const masterActions = useArrangementMasterActions(workspaceActions);
++  const libraryActions = useArrangementLibraryActions(workspaceActions);
++  const transportActions = useArrangementTransportActions(workspaceActions);
++  const loopBraceActions = useArrangementLoopBraceActions(workspaceActions);
++  const markerRowActions = useArrangementMarkerRowActions(workspaceActions);
+   const [isShortcutSheetOpen, setIsShortcutSheetOpen] = useState(false);
+   const isOverviewHidden = useSyncExternalStore(
+     subscribeOverviewVisibility,
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index ac91588..f1d14f8 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -546,8 +546,48 @@ interface RetiredGraph {
+   stopAt: number;
+ }
+ 
++type ArrangementActions = Pick<
++  ArrangementContextValue,
++  | 'addSourceToActiveTrack'
++  | 'beginLibraryDrag'
++  | 'beginMasterGainGesture'
++  | 'blurMasterGain'
++  | 'claimPointerGesture'
++  | 'commitArrangement'
++  | 'commitLoopRange'
++  | 'commitMasterGain'
++  | 'deleteSelection'
++  | 'endLibraryDrag'
++  | 'getArrangement'
++  | 'getLibraryPreviewOffset'
++  | 'getLocatorPosition'
++  | 'getStatus'
++  | 'getStatusPreviewText'
++  | 'isPointerGestureActive'
++  | 'playFrom'
++  | 'previewArrangement'
++  | 'previewLoopArrangement'
++  | 'previewMasterGain'
++  | 'redo'
++  | 'resetMasterPeak'
++  | 'returnToStart'
++  | 'seekTo'
++  | 'selectSource'
++  | 'setStatus'
++  | 'splitSelection'
++  | 'startLibraryPreview'
++  | 'stepLoopRange'
++  | 'stopLibraryPreview'
++  | 'toggleLoopSelection'
++  | 'toggleMasterMute'
++  | 'togglePlayback'
++  | 'undo'
++>;
++
+ const ArrangementContext = createContext<ArrangementContextValue | undefined>(undefined);
+ 
++const ArrangementActionsContext = createContext<ArrangementActions | undefined>(undefined);
++
+ const ArrangementPositionContext = createContext<ArrangementPositionStore | null>(null);
+ const ArrangementInsertMarkerContext = createContext<ArrangementPositionStore | null>(null);
+ 
+@@ -4575,6 +4615,80 @@ export function ArrangementProvider({
+   const arrangement = history.present;
+   const end = useMemo(() => projectEnd(arrangement), [arrangement]);
+ 
++  const actions = useMemo<ArrangementActions>(
++    () => ({
++      addSourceToActiveTrack,
++      beginLibraryDrag,
++      beginMasterGainGesture,
++      blurMasterGain,
++      claimPointerGesture,
++      commitArrangement,
++      commitLoopRange,
++      commitMasterGain,
++      deleteSelection,
++      endLibraryDrag,
++      getArrangement,
++      getLibraryPreviewOffset,
++      getLocatorPosition,
++      getStatus,
++      getStatusPreviewText,
++      isPointerGestureActive,
++      playFrom,
++      previewArrangement,
++      previewLoopArrangement,
++      previewMasterGain,
++      redo,
++      resetMasterPeak,
++      returnToStart,
++      seekTo,
++      selectSource,
++      setStatus,
++      splitSelection,
++      startLibraryPreview,
++      stepLoopRange,
++      stopLibraryPreview,
++      toggleLoopSelection,
++      toggleMasterMute,
++      togglePlayback,
++      undo,
++    }),
++    [
++      addSourceToActiveTrack,
++      beginLibraryDrag,
++      beginMasterGainGesture,
++      blurMasterGain,
++      claimPointerGesture,
++      commitArrangement,
++      commitLoopRange,
++      commitMasterGain,
++      deleteSelection,
++      endLibraryDrag,
++      getArrangement,
++      getLibraryPreviewOffset,
++      getLocatorPosition,
++      getStatus,
++      getStatusPreviewText,
++      isPointerGestureActive,
++      playFrom,
++      previewArrangement,
++      previewLoopArrangement,
++      previewMasterGain,
++      redo,
++      resetMasterPeak,
++      returnToStart,
++      seekTo,
++      selectSource,
++      setStatus,
++      splitSelection,
++      startLibraryPreview,
++      stepLoopRange,
++      stopLibraryPreview,
++      toggleLoopSelection,
++      toggleMasterMute,
++      togglePlayback,
++      undo,
++    ],
++  );
+   const value = useMemo<ArrangementContextValue>(
+     () => ({
+       collection,
+@@ -4822,9 +4936,11 @@ export function ArrangementProvider({
+                           <ArrangementWorkspaceSessionContext.Provider
+                             value={workspaceSessionStore}
+                           >
+-                            <ArrangementContext.Provider value={value}>
+-                              {children}
+-                            </ArrangementContext.Provider>
++                            <ArrangementActionsContext.Provider value={actions}>
++                              <ArrangementContext.Provider value={value}>
++                                {children}
++                              </ArrangementContext.Provider>
++                            </ArrangementActionsContext.Provider>
+                           </ArrangementWorkspaceSessionContext.Provider>
+                         </ArrangementTrackMeterContext.Provider>
+                       </ArrangementMeterContext.Provider>
+@@ -4848,6 +4964,14 @@ export function useArrangement(): ArrangementContextValue {
+   return context;
+ }
+ 
++export function useArrangementActions(): ArrangementActions {
++  const context = useContext(ArrangementActionsContext);
++  if (context === undefined) {
++    throw new Error('useArrangementActions must be used within an ArrangementProvider');
++  }
++  return context;
++}
++
+ export function useArrangementInsertMarkerStore(): ArrangementPositionStore {
+   const store = useContext(ArrangementInsertMarkerContext);
+   if (!store) {
+@@ -5064,4 +5188,4 @@ export function useTrackMeterWriter(
+   }, [store, trackId, writeMeter]);
+ }
+ 
+-export type { ArrangementContextValue };
++export type { ArrangementActions, ArrangementContextValue };
+diff --git a/app/lib/arrangement/__tests__/actions-context.test.tsx b/app/lib/arrangement/__tests__/actions-context.test.tsx
+new file mode 100644
+index 0000000..84f8cd4
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/actions-context.test.tsx
+@@ -0,0 +1,308 @@
++import { readdirSync, readFileSync } from 'node:fs';
++import { join, resolve } from 'node:path';
++import { act, render } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import {
++  type ArrangementActions,
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++  useArrangementActions,
++} from '~/contexts/ArrangementContext';
++import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
++import { addMarker } from '../markers';
++import { createArrangement } from '../model';
++
++class FakeParam {
++  value = 0;
++  setTargetAtTime(target: number) {
++    this.value = target;
++  }
++}
++
++class FakeNode {
++  connect(destination: FakeNode) {
++    return destination;
++  }
++  disconnect() {}
++}
++
++class FakeGain extends FakeNode {
++  gain = new FakeParam();
++}
++
++class FakePanner extends FakeNode {
++  pan = new FakeParam();
++}
++
++class FakeSource extends FakeNode {
++  buffer: unknown = null;
++  onended: (() => void) | null = null;
++  start() {}
++  stop() {}
++}
++
++class FakeAudioContext {
++  state = 'running';
++  destination = new FakeNode();
++  sampleRate = 48000;
++  currentTime = 0;
++  resume() {
++    return Promise.resolve();
++  }
++  close() {
++    return Promise.resolve();
++  }
++  createGain() {
++    return new FakeGain();
++  }
++  createStereoPanner() {
++    return new FakePanner();
++  }
++  createBufferSource() {
++    return new FakeSource();
++  }
++}
++
++class FakeOfflineAudioContext {}
++
++class FakeAudioBuffer {
++  readonly length: number;
++  readonly numberOfChannels: number;
++  readonly sampleRate: number;
++  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++    this.length = options.length;
++    this.numberOfChannels = options.numberOfChannels;
++    this.sampleRate = options.sampleRate;
++  }
++  get duration() {
++    return this.length / this.sampleRate;
++  }
++  getChannelData() {
++    return new Float32Array(this.length);
++  }
++}
++
++const actionsCollection: WorkspaceCollection = {
++  id: 'actions',
++  label: 'actions',
++  origin: 'demo',
++  sources: [
++    { id: 'song', title: 'Song', collectionLabel: 'actions', kind: 'music', origin: 'demo' },
++  ],
++  loadSource: async () => new AudioBuffer({ length: 2000, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++function actionsArrangement(): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++  ]);
++  return {
++    ...base,
++    clips: [
++      {
++        id: 'music-1',
++        trackId: 'music',
++        sourceId: 'song',
++        start: 0,
++        sourceOffset: 0,
++        duration: 20,
++      },
++    ],
++    loop: { start: 2, end: 8, enabled: true },
++    markers: [{ id: 'marker-0', time: 1, name: 'Intro' }],
++  };
++}
++
++interface ActionsProbeRef {
++  actions: ArrangementActions | null;
++  value: ArrangementContextValue | null;
++}
++
++function ActionsProbe({ probe }: { probe: ActionsProbeRef }) {
++  probe.actions = useArrangementActions();
++  probe.value = useArrangement();
++  return null;
++}
++
++function OutsideProbe() {
++  useArrangementActions();
++  return null;
++}
++
++function currentActions(probe: ActionsProbeRef): ArrangementActions {
++  if (probe.actions === null) {
++    throw new Error('actions probe did not render');
++  }
++  return probe.actions;
++}
++
++function markerCount(arrangement: Arrangement): number {
++  return arrangement.markers?.length ?? 0;
++}
++
++function currentValue(probe: ActionsProbeRef): ArrangementContextValue {
++  if (probe.value === null) {
++    throw new Error('value probe did not render');
++  }
++  return probe.value;
++}
++
++const SCANNED_ROOTS = ['components/arrangement', 'contexts'];
++const TRANSITION_API = /\b(startTransition|useTransition|useDeferredValue)\b/;
++const APP_ROOT = resolve(__dirname, '../../..');
++
++function withoutComments(text: string): string {
++  return text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
++}
++
++function sourceFiles(directory: string): string[] {
++  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
++    const path = join(directory, entry.name);
++    if (entry.isDirectory()) {
++      return entry.name === '__tests__' ? [] : sourceFiles(path);
++    }
++    return /\.(ts|tsx)$/.test(entry.name) ? [path] : [];
++  });
++}
++
++describe('Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)', () => {
++  beforeEach(() => {
++    vi.stubGlobal('AudioContext', FakeAudioContext);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  });
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  async function mountProbe() {
++    const probe: ActionsProbeRef = { actions: null, value: null };
++    render(
++      <ArrangementProvider collection={actionsCollection} initialArrangement={actionsArrangement()}>
++        <ActionsProbe probe={probe} />
++      </ArrangementProvider>,
++    );
++    await act(async () => {
++      await Promise.resolve();
++      await Promise.resolve();
++    });
++    return probe;
++  }
++
++  it('AC1 keeps one actions object across a lane mute, a zoom step, a marker commit and an undo while the context value changes', async () => {
++    const probe = await mountProbe();
++    const actions = currentActions(probe);
++    const before = currentValue(probe);
++    act(() => before.toggleTrackMute('music'));
++    expect(currentValue(probe)).not.toBe(before);
++    expect(currentActions(probe)).toBe(actions);
++    const zoomBefore = currentValue(probe).pxPerSecond;
++    act(() => currentValue(probe).setPxPerSecond(zoomBefore * 2));
++    expect(currentValue(probe).pxPerSecond).not.toBe(zoomBefore);
++    expect(currentActions(probe)).toBe(actions);
++    const present = actions.getArrangement();
++    const markersBefore = markerCount(present);
++    const added = addMarker(present, 4, 'Cue');
++    if (added.arrangement === null) {
++      throw new Error('marker was not added');
++    }
++    const next = added.arrangement;
++    act(() => {
++      actions.commitArrangement(next, 'Add marker', present);
++    });
++    expect(markerCount(currentValue(probe).arrangement)).toBe(markersBefore + 1);
++    expect(currentActions(probe)).toBe(actions);
++    act(() => actions.undo());
++    expect(markerCount(currentValue(probe).arrangement)).toBe(markersBefore);
++    expect(currentActions(probe)).toBe(actions);
++  });
++
++  it('AC2 hands out the provider callbacks themselves, and they keep their identity across a lane mute and a zoom step', async () => {
++    const probe = await mountProbe();
++    const actions = currentActions(probe);
++    const first = currentValue(probe);
++    const pinned = {
++      toggleMasterMute: first.toggleMasterMute,
++      commitArrangement: first.commitArrangement,
++      undo: first.undo,
++      togglePlayback: first.togglePlayback,
++      getArrangement: first.getArrangement,
++    };
++    expect(actions.toggleMasterMute).toBe(pinned.toggleMasterMute);
++    expect(actions.commitArrangement).toBe(pinned.commitArrangement);
++    expect(actions.undo).toBe(pinned.undo);
++    expect(actions.togglePlayback).toBe(pinned.togglePlayback);
++    act(() => first.toggleTrackMute('music'));
++    act(() => currentValue(probe).setPxPerSecond(currentValue(probe).pxPerSecond * 2));
++    const later = currentValue(probe);
++    expect(later).not.toBe(first);
++    expect(later.toggleMasterMute).toBe(pinned.toggleMasterMute);
++    expect(later.commitArrangement).toBe(pinned.commitArrangement);
++    expect(later.undo).toBe(pinned.undo);
++    expect(later.togglePlayback).toBe(pinned.togglePlayback);
++    expect(later.getArrangement).toBe(pinned.getArrangement);
++  });
++
++  it('AC3 reads the latest arrangement through the stable actions after a commit and after its undo', async () => {
++    const probe = await mountProbe();
++    const actions = currentActions(probe);
++    act(() => currentValue(probe).toggleTrackMute('music'));
++    const muted = actions.getArrangement();
++    expect(muted).toBe(currentValue(probe).arrangement);
++    expect(muted.tracks.find((track) => track.id === 'music')?.mute).toBe(true);
++    act(() => actions.undo());
++    const restored = actions.getArrangement();
++    expect(restored).toBe(currentValue(probe).arrangement);
++    expect(restored.tracks.find((track) => track.id === 'music')?.mute).toBe(false);
++  });
++
++  it('AC4 keeps the loop and markers frozen and identical across commits that do not touch the loop (GATE378-L2)', async () => {
++    const probe = await mountProbe();
++    const start = currentActions(probe).getArrangement();
++    const loop = Object.freeze(start.loop);
++    expect(loop).not.toBeNull();
++    for (const marker of start.markers ?? []) {
++      Object.freeze(marker);
++    }
++    expect(markerCount(start)).toBe(1);
++    act(() => currentValue(probe).toggleTrackMute('music'));
++    expect(currentValue(probe).arrangement.loop).toBe(loop);
++    act(() => currentValue(probe).toggleMasterMute());
++    expect(currentValue(probe).arrangement.loop).toBe(loop);
++    const present = currentActions(probe).getArrangement();
++    const added = addMarker(present, 6, 'Hit');
++    if (added.arrangement === null) {
++      throw new Error('marker was not added');
++    }
++    const next = added.arrangement;
++    act(() => {
++      currentActions(probe).commitArrangement(next, 'Add marker', present);
++    });
++    expect(currentValue(probe).arrangement.loop).toBe(loop);
++    expect(currentValue(probe).arrangement.loop).toEqual({ start: 2, end: 8, enabled: true });
++    expect(markerCount(currentValue(probe).arrangement)).toBe(2);
++  });
++
++  it('AC5 the Arrangement components and contexts use no React transition API (GATE377-L1)', () => {
++    const files = SCANNED_ROOTS.flatMap((root) => sourceFiles(resolve(APP_ROOT, root)));
++    expect(files.length).toBeGreaterThan(20);
++    const hits = files.filter((file) =>
++      TRANSITION_API.test(withoutComments(readFileSync(file, 'utf8'))),
++    );
++    expect(hits).toEqual([]);
++  });
++
++  it('AC6 throws a named error outside the provider', () => {
++    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
++    try {
++      expect(() => render(<OutsideProbe />)).toThrow(
++        'useArrangementActions must be used within an ArrangementProvider',
++      );
++    } finally {
++      spy.mockRestore();
++    }
++  });
++});

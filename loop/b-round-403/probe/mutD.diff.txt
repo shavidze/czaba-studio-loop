@@ -1,0 +1,16 @@
+diff -r b404-head/app/components/arrangement/ArrangementLane.tsx b404-mutD/app/components/arrangement/ArrangementLane.tsx
+318a319,320
+>   const stickyRef = useRef(new Set<string>());
+>   const outerWindow = laneWindow === undefined ? undefined : { fromPx: laneWindow.fromPx - (laneWindow.toPx - laneWindow.fromPx) / 3, toPx: laneWindow.toPx + (laneWindow.toPx - laneWindow.fromPx) / 3 };
+327c329,335
+<       ),
+---
+>       ) ||
+>       (stickyRef.current.has(clip.id) &&
+>         spanInTimelineWindow(
+>           clip.start * pxPerSecond,
+>           (clip.start + clip.duration) * pxPerSecond,
+>           outerWindow,
+>         )),
+328a337
+>   stickyRef.current = new Set(mountedClips.map((clip) => clip.id));
