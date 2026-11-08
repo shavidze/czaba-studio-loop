@@ -1,0 +1,82 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "row1-SOURCE-SCOPE-start",
+  "row2-PATCH-IDENTITY",
+  "row3-DEMO-UNCHANGED",
+  "row4-LANE-PATH",
+  "row5-UNIT+MUTANT",
+  "row6-AUTH",
+  "row7-DOCS",
+  "row8-SOURCE-SCOPE-end+L57"
+ ],
+ "blocked": [
+  "fake-bearer /api/studio-token path (backend unavailable in cloud); only no-auth 401 claimed"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T15:07:45.5915130Z",
+  "round": 410,
+  "attempt": 1,
+  "store": 200
+ },
+ "failed": [],
+ "manifestPaths": [
+  "b-round-409/r410-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt",
+  "b-round-409/sketch-410.patch.txt",
+  "b-round-409/mutants/summary.txt",
+  "b-round-409/claims-410-planning-output.txt",
+  "b-round-409/claims-410-sketch-output.txt",
+  "b-round-409/probe/peaks-probe-410.mjs",
+  "b-round-409/sketch-dispatched.sha256"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "origin": {},
+ "assertsSpecified": "Patch sha 8f22c005447dc388 = dispatched; 5 patch files cmp identical to git-archive+patch; peaks probe ok both viewports, 0 peaks requests, 0 pageErrors, 9 sources x 96 rects; lane probe ok 8/8 steps both viewports, 0 pageErrors; covering 274/274; 17/17 mutants red; AUTH demo no auth/no sign-in, premium Sign in required/0 audio[src]/401; doc263 l4 byte-exact, 7 headings, 17 mutant lines",
+ "mutantsRecorded": "b-round-409/mutants/summary.txt (17 mutants)",
+ "mutantRedOnSketch": "17/17 red per B's b-round-409/mutants/summary.txt",
+ "mutantRedOnTree": "C re-ran on committed scratch /tmp/c410-scratch with own OUT: 17/17 RED naming expected rows (some also fail neighbours), PRISTINE-BEFORE/AFTER rc 0 failed [], SCRATCH-STATUS 0; c-round-410/mutants-summary.txt",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-409/precheck-full.log",
+  "b-round-409/precheck-lint.log",
+  "b-round-409/sketch-logs/"
+ ],
+ "chainHeadGateRunGreen": "gate 409 published 9616d3a (base); gate 410 pending root",
+ "affectedChecksNamed": [
+  "PATCH-IDENTITY (2)",
+  "DEMO-UNCHANGED (3)",
+  "LANE-PATH (4)",
+  "UNIT+MUTANT (5)",
+  "AUTH (6)"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-409/probe/sketch-1440x900.json",
+  "b-round-409/probe/sketch-1280x720.json",
+  "b-round-409/lane/summary.txt",
+  "b-round-409/sketch-logs/covering.json",
+  "b-round-409/mutants/summary.txt"
+ ],
+ "l57NullReason": null,
+ "stopSignal": null,
+ "abletonConformance": "not applicable: behaviour-neutral perf round (no peaksUrl set by any collection); reference-first excludes it",
+ "notes": "Lane probe 1440x900 attempt 1 timed out on 'Demo collection ready' (cold server, L38; kept as lane-1440x900-attempt1-timeout.*); retry passed, not a FAIL. Covering slowest 3004 ms vs 15000 ms timeout (20%). PERF-15 is NOT done: the precomputed path (waveform-before-ready) is proven only in jsdom (PPC rows); no collection sets peaksUrl so no browser exercise of it exists until 15b. Product flow find->add->fit video->export not changed; export WAV integrity not re-measured here (gate/unchanged). Lows from A review (A-R410-REV-S1..S4: fetch credentials policy vs source-fetch 'omit', unread body not cancelled on non-ok/over-cap, peaks fetches start before loadSource, weak bucket-count identity) are carried to B, not C bugs."
+}
