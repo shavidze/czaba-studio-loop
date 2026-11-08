@@ -1,0 +1,382 @@
+import { readFileSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  createPurchasedWorkspaceCollection,
+  type PurchasedStemFetch,
+} from '~/lib/arrangement/collection';
+import {
+  PRECOMPUTED_PEAKS_MAX_BYTES,
+  parseAudiowaveformPeaks,
+  precomputedPeaksMatchDecodedLength,
+} from '~/lib/arrangement/precomputed-peaks';
+import type { WorkspaceSource } from '~/types/arrangement';
+import { studioLabDemoCollection } from '../studio-lab-demo';
+
+const NETWORK_TEXT = 'File failed to load (network)';
+const DECODE_TEXT = 'File could not be decoded';
+
+const decodeAudioDataMock = vi.fn<(data: ArrayBuffer) => Promise<AudioBuffer>>();
+const fetchMock = vi.fn<typeof fetch>();
+
+class FakeDecodeContext {
+  decodeAudioData(data: ArrayBuffer) {
+    return decodeAudioDataMock(data);
+  }
+}
+
+class FakeAudioBuffer {
+  readonly length: number;
+  readonly numberOfChannels: number;
+  readonly sampleRate: number;
+  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+    this.length = options.length;
+    this.numberOfChannels = options.numberOfChannels;
+    this.sampleRate = options.sampleRate;
+  }
+  get duration() {
+    return this.length / this.sampleRate;
+  }
+  getChannelData() {
+    return new Float32Array(this.length);
+  }
+}
+
+function decodeContext(): BaseAudioContext {
+  return new OfflineAudioContext({ numberOfChannels: 2, length: 1, sampleRate: 48000 });
+}
+
+function decodedBuffer(): AudioBuffer {
+  return new AudioBuffer({ numberOfChannels: 2, length: 480, sampleRate: 48000 });
+}
+
+function demoSource(id: string): WorkspaceSource {
+  const source = studioLabDemoCollection.sources.find((entry) => entry.id === id);
+  if (!source) {
+    throw new Error(`source ${id} missing`);
+  }
+  return source;
+}
+
+function responseWithBody(body: ArrayBuffer): Response {
+  const response = new Response(new Uint8Array(8));
+  vi.spyOn(response, 'arrayBuffer').mockResolvedValue(body);
+  return response;
+}
+
+function responseWithBodyFailure(failure: unknown): Response {
+  const response = new Response(new Uint8Array(8));
+  vi.spyOn(response, 'arrayBuffer').mockRejectedValue(failure);
+  return response;
+}
+
+async function rejectionOf(promise: Promise<unknown>): Promise<unknown> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('expected rejection');
+}
+
+async function messageOf(promise: Promise<unknown>): Promise<string> {
+  const error = await rejectionOf(promise);
+  if (!(error instanceof Error)) {
+    throw new Error('expected Error instance');
+  }
+  return error.message;
+}
+
+function loadDemo(id: string, signal = new AbortController().signal): Promise<AudioBuffer> {
+  return studioLabDemoCollection.loadSource(demoSource(id), decodeContext(), signal);
+}
+
+function loadPurchased(fetchAudio: PurchasedStemFetch): Promise<AudioBuffer> {
+  const collection = createPurchasedWorkspaceCollection({
+    productId: 'middle-east',
+    productTitle: 'Middle East',
+    stems: [{ id: 'drums', name: 'Drums', audioUrl: 'https://stems.example.test/drums', order: 0 }],
+    fetchAudio,
+  });
+  return collection.loadSource(
+    collection.sources[0],
+    decodeContext(),
+    new AbortController().signal,
+  );
+}
+
+describe('C-R92-N1 studio-lab demo loader error text (D-29z60)', () => {
+  beforeEach(() => {
+    decodeAudioDataMock.mockReset();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubGlobal('OfflineAudioContext', FakeDecodeContext);
+    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('DL1 network failure maps to the English network text without browser text or URL', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+    const error = await rejectionOf(loadDemo('demo-middle-east'));
+    expect(error).toBeInstanceOf(Error);
+    const message = error instanceof Error ? error.message : '';
+    expect(message).toBe(NETWORK_TEXT);
+    expect(message.includes('Failed to fetch')).toBe(false);
+    expect(message.includes('/middle-east.mp3')).toBe(false);
+    expect(decodeAudioDataMock).not.toHaveBeenCalled();
+  });
+
+  it('DL2 body read failure maps to the English network text', async () => {
+    fetchMock.mockResolvedValue(responseWithBodyFailure(new TypeError('network error')));
+    expect(await messageOf(loadDemo('demo-middle-east'))).toBe(NETWORK_TEXT);
+    expect(decodeAudioDataMock).not.toHaveBeenCalled();
+  });
+
+  it('DL3 decode failure maps to the English decode text', async () => {
+    fetchMock.mockResolvedValue(responseWithBody(new ArrayBuffer(8)));
+    decodeAudioDataMock.mockRejectedValue(
+      new DOMException('Unable to decode audio data', 'EncodingError'),
+    );
+    const message = await messageOf(loadDemo('demo-middle-east'));
+    expect(message).toBe(DECODE_TEXT);
+    expect(message.includes('Unable to decode')).toBe(false);
+  });
+
+  it('DL4 HTTP 404 keeps the status text and never decodes', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 404 }));
+    expect(await messageOf(loadDemo('demo-middle-east'))).toBe('File failed to load (404)');
+    expect(decodeAudioDataMock).not.toHaveBeenCalled();
+  });
+
+  it('DL5 aborted fetch rethrows the same error object', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const abortError = new DOMException('aborted', 'AbortError');
+    fetchMock.mockRejectedValue(abortError);
+    await expect(loadDemo('demo-middle-east', controller.signal)).rejects.toBe(abortError);
+  });
+
+  it('DL5 aborted body read rethrows the same error object', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const abortError = new DOMException('aborted', 'AbortError');
+    fetchMock.mockResolvedValue(responseWithBodyFailure(abortError));
+    await expect(loadDemo('demo-middle-east', controller.signal)).rejects.toBe(abortError);
+    expect(decodeAudioDataMock).not.toHaveBeenCalled();
+  });
+
+  it('DL5 any fetch error after abort is rethrown unchanged, not mapped', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const rawError = new TypeError('Failed to fetch');
+    fetchMock.mockRejectedValue(rawError);
+    await expect(loadDemo('demo-middle-east', controller.signal)).rejects.toBe(rawError);
+  });
+
+  it('DL5 decode failure after abort still maps to the English decode text, like the purchased adapter', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    fetchMock.mockResolvedValue(responseWithBody(new ArrayBuffer(8)));
+    decodeAudioDataMock.mockRejectedValue(new DOMException('aborted', 'AbortError'));
+    expect(await messageOf(loadDemo('demo-middle-east', controller.signal))).toBe(DECODE_TEXT);
+  });
+
+  it.each([
+    ['demo-middle-east', '/middle-east.mp3'],
+    ['demo-hero-music', '/videos/hero/hero-music.mp3'],
+  ])('DL6 success for %s fetches %s once with omitted credentials and returns the decoded buffer', async (id, url) => {
+    const controller = new AbortController();
+    const data = new ArrayBuffer(16);
+    const decoded = decodedBuffer();
+    fetchMock.mockResolvedValue(responseWithBody(data));
+    decodeAudioDataMock.mockResolvedValue(decoded);
+    const result = await loadDemo(id, controller.signal);
+    expect(result).toBe(decoded);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [calledUrl, init] = fetchMock.mock.calls[0];
+    expect(calledUrl).toBe(url);
+    expect(init).toStrictEqual({ credentials: 'omit', signal: controller.signal });
+    expect(init?.signal).toBe(controller.signal);
+    expect(decodeAudioDataMock).toHaveBeenCalledTimes(1);
+    expect(decodeAudioDataMock.mock.calls[0][0]).toBe(data);
+  });
+
+  it('DL7 unknown source rejects with the unknown-demo text and never fetches', async () => {
+    const unknown: WorkspaceSource = {
+      id: 'demo-not-in-any-table',
+      title: 'Unknown',
+      collectionLabel: 'Unknown',
+      kind: 'sfx',
+      origin: 'demo',
+    };
+    const message = await messageOf(
+      studioLabDemoCollection.loadSource(unknown, decodeContext(), new AbortController().signal),
+    );
+    expect(message).toBe('Unknown demo source');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('DL8 network and decode texts equal the purchased adapter texts for the same failure', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+    const demoNetwork = await messageOf(loadDemo('demo-middle-east'));
+    const purchasedNetwork = await messageOf(
+      loadPurchased(async () => {
+        throw new TypeError('Failed to fetch');
+      }),
+    );
+    expect(demoNetwork).toBe(purchasedNetwork);
+
+    decodeAudioDataMock.mockRejectedValue(
+      new DOMException('Unable to decode audio data', 'EncodingError'),
+    );
+    fetchMock.mockResolvedValue(responseWithBody(new ArrayBuffer(8)));
+    const demoDecode = await messageOf(loadDemo('demo-middle-east'));
+    const purchasedDecode = await messageOf(
+      loadPurchased(async () => new Response(new Uint8Array(8))),
+    );
+    expect(demoDecode).toBe(purchasedDecode);
+  });
+
+  it('DL-VAL demo collection label, notice and source collection labels are the exact English values', () => {
+    expect(studioLabDemoCollection.label).toBe(
+      'Demo collection · CZABA public previews + synthetic sounds',
+    );
+    expect(studioLabDemoCollection.notice).toBe(
+      'Synthetic demo stems — not CZABA catalogue audio.',
+    );
+    const collectionLabels = new Set(
+      studioLabDemoCollection.sources.map((source) => source.collectionLabel),
+    );
+    expect(collectionLabels).toEqual(
+      new Set(['CZABA public previews + synthetic SFX', 'Synthetic demo · Night Pulse']),
+    );
+    const middleDot = String.fromCodePoint(0x00b7);
+    const emDash = String.fromCodePoint(0x2014);
+    expect(studioLabDemoCollection.label).toContain(` ${middleDot} `);
+    expect(studioLabDemoCollection.notice).toContain(` ${emDash} `);
+    expect(
+      [...collectionLabels].some((label) => label.startsWith(`Synthetic demo ${middleDot} `)),
+    ).toBe(true);
+  });
+
+  it('DL-EN the 9 demo sources carry the exact English titles and short titles, with no Georgian code point', () => {
+    expect(
+      studioLabDemoCollection.sources.map((source) => [
+        source.id,
+        source.title,
+        source.shortTitle ?? null,
+      ]),
+    ).toEqual([
+      ['demo-middle-east', 'Middle East — public preview', null],
+      ['demo-hero-music', 'CZABA hero — public preview', null],
+      ['demo-soft-impact', 'Soft impact', null],
+      ['demo-slow-rise', 'Slow rise', null],
+      ['demo-synth-mix', 'Night Pulse · Full mix', 'Full mix'],
+      ['demo-stem-pulse', 'Night Pulse · Pulse', 'Pulse'],
+      ['demo-stem-bass', 'Night Pulse · Bass', 'Bass'],
+      ['demo-stem-pad', 'Night Pulse · Pad', 'Pad'],
+      ['demo-stem-lead', 'Night Pulse · Melody', 'Melody'],
+    ]);
+    const georgian = /[Ⴀ-ჿ]/u;
+    for (const source of studioLabDemoCollection.sources) {
+      expect(source.title, source.id).not.toMatch(georgian);
+      expect(source.shortTitle ?? '', source.id).not.toMatch(georgian);
+      expect(source.collectionLabel, source.id).not.toMatch(georgian);
+    }
+  });
+
+  it('DL-BPM the 5 synthetic-composition sources carry bpm 120; the 4 others have no bpm', () => {
+    const synthetic = [
+      'demo-synth-mix',
+      'demo-stem-pulse',
+      'demo-stem-bass',
+      'demo-stem-lead',
+      'demo-stem-pad',
+    ];
+    const others = ['demo-middle-east', 'demo-hero-music', 'demo-soft-impact', 'demo-slow-rise'];
+    const byId = new Map(studioLabDemoCollection.sources.map((source) => [source.id, source]));
+    expect([...byId.keys()].sort()).toEqual([...synthetic, ...others].sort());
+    for (const id of synthetic) {
+      expect(byId.get(id)?.bpm, id).toBe(120);
+    }
+    for (const id of others) {
+      const source = byId.get(id);
+      expect(source, id).toBeDefined();
+      expect(source !== undefined && 'bpm' in source, id).toBe(false);
+    }
+  });
+
+  it('PS15 previewUrl streams only the two demo MP3 files and returns null for every other source', () => {
+    const expected: Record<string, string> = {
+      'demo-middle-east': '/middle-east.mp3',
+      'demo-hero-music': '/videos/hero/hero-music.mp3',
+    };
+    const previewUrl = studioLabDemoCollection.previewUrl;
+    expect(previewUrl).toBeTypeOf('function');
+    expect(studioLabDemoCollection.sources).toHaveLength(9);
+    for (const source of studioLabDemoCollection.sources) {
+      expect(previewUrl?.(source), source.id).toBe(expected[source.id] ?? null);
+    }
+  });
+});
+
+describe('PERF-15b demo precomputed peaks', () => {
+  const peaksFiles: Record<string, { path: string; mp3: string }> = {
+    'demo-middle-east': { path: '/peaks/middle-east.peaks.json', mp3: '/middle-east.mp3' },
+    'demo-hero-music': { path: '/peaks/hero-music.peaks.json', mp3: '/videos/hero/hero-music.mp3' },
+  };
+
+  function readPeaksMeta(mp3: string): { mp3Bytes: number; decodedLength: number } {
+    const meta: unknown = JSON.parse(
+      readFileSync(resolve(__dirname, '../../../scripts/peaks/demo-peaks-meta.json'), 'utf8'),
+    );
+    const entry: unknown =
+      typeof meta === 'object' && meta !== null
+        ? Object.getOwnPropertyDescriptor(meta, mp3)?.value
+        : null;
+    const mp3Bytes: unknown =
+      typeof entry === 'object' && entry !== null
+        ? Object.getOwnPropertyDescriptor(entry, 'mp3Bytes')?.value
+        : null;
+    const decodedLength: unknown =
+      typeof entry === 'object' && entry !== null
+        ? Object.getOwnPropertyDescriptor(entry, 'decodedLength')?.value
+        : null;
+    return {
+      mp3Bytes: typeof mp3Bytes === 'number' ? mp3Bytes : -1,
+      decodedLength: typeof decodedLength === 'number' ? decodedLength : -1,
+    };
+  }
+
+  it('PS16 peaksUrl names a peaks file only for the two demo MP3 files and returns null for every other source', () => {
+    const peaksUrl = studioLabDemoCollection.peaksUrl;
+    expect(peaksUrl).toBeTypeOf('function');
+    expect(studioLabDemoCollection.sources).toHaveLength(9);
+    for (const source of studioLabDemoCollection.sources) {
+      expect(peaksUrl?.(source), source.id).toBe(peaksFiles[source.id]?.path ?? null);
+    }
+  });
+
+  it('PS17 each shipped peaks file parses as 16-bit, fits the size cap and belongs to its MP3 by the byte size in the generator meta and matches the decoded length recorded there at 44.1 and 48 kHz', () => {
+    for (const [id, { path, mp3 }] of Object.entries(peaksFiles)) {
+      const { mp3Bytes, decodedLength } = readPeaksMeta(mp3);
+      expect(decodedLength, id).toBeGreaterThan(0);
+      expect(statSync(resolve(__dirname, '../../../public', `.${mp3}`)).size, id).toBe(mp3Bytes);
+      const text = readFileSync(resolve(__dirname, '../../../public', `.${path}`), 'utf8');
+      expect(new TextEncoder().encode(text).byteLength, id).toBeLessThanOrEqual(
+        PRECOMPUTED_PEAKS_MAX_BYTES,
+      );
+      const parsed = parseAudiowaveformPeaks(JSON.parse(text));
+      expect(parsed?.bits, id).toBe(16);
+      const peaks = parsed?.peaks ?? new Float32Array(0);
+      expect(precomputedPeaksMatchDecodedLength(peaks, decodedLength, 44100), id).toBe(true);
+      const at48k = Math.round((decodedLength * 48000) / 44100);
+      expect(precomputedPeaksMatchDecodedLength(peaks, at48k, 48000), id).toBe(true);
+      expect(Math.max(...peaks), id).toBeGreaterThan(0.5);
+    }
+  });
+});

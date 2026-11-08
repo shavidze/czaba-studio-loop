@@ -1,0 +1,7 @@
+# B round 411 -> 412 checkpoint
+- step 1: tasks/round-411.md archived; backups in b-round-411/. Ruling: A-R411-REVIEW-M1 option (b) v6 delta (advisor agreed). Next: scratch /tmp/b412
+- step 2: scratch /tmp/b412 (v5 commit a7f84dc, v6 commit on top). v6 = generator pin 44100 + response.ok + try/finally + braces; PS17 reads meta sampleRate, pins 44100, header sample_rate/spp tie (folds L1). regen identical (sketch-logs/regen-v6-identity.txt); mutants 13/13 red (mutants/summary.txt); on v5 test META/HEADER-RATE-48K survive (mutants/on-v5-test); tsc 0; covering 425/425; cumulative identity 10/10 same. Patches: sketch-412-delta.patch.txt (2b0332f7), sketch-412-cumulative.patch.txt (b920d24b). tech-lead review running; full vitest running (sketch-logs/full.*). Next: claims-412.sh, task, backlog, status, b-next.
+- step 3: v6 full vitest 264/3911 rc0 (sketch-logs/full.*). tech-lead v6 APPROVE WITH LOWS; v6.1 (L-a, L-c) delta sha 833196f8; regen identical; mutants 13/13; covering 425; cumulative 10 same; delta re-review running. Next: sketch-review.md, current-task.md
+- step 4: sketch-review.md, current-task.md (round 412), claims planning/sketch/diff written. Next: backlog (update-backlog.py), feature-status, b-round-411.md, b-next.json
+- step 5: backlog v387, feature-status, b-round-411.md, b-next.json written. Next: advisor final check
+- step 6: advisor fixes applied (K22/K23 tags, K14b artifact checks, row 8 wording, restore fallback); claims planning/sketch regenerated, diff K1/K2/K5/K7/K8 only, stable. Planning complete.

@@ -1,0 +1,50 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "A-R411-REVIEW-M1",
+      "severity": "medium",
+      "steps": [
+        "Read scripts/peaks/generate-demo-peaks.mjs l.19: new AudioContext() with no sampleRate, then spp = rate/100 and sample_rate = device rate",
+        "Read app/data/__tests__/studio-lab-demo.test.ts PS17 l.376: precomputedPeaksMatchDecodedLength(peaks, decodedLength, 44100); readPeaksMeta drops the meta's sampleRate",
+        "Reasoning (not executed on a 48 kHz host): regenerating on a 48 kHz host writes sample_rate 48000, spp 480 and a 48 kHz decodedLength, so the 44100 assertion fails"
+      ],
+      "expected": "The generator is deterministic (fixed 44100 context) and PS17 reads sampleRate from the meta file, so a valid regeneration keeps PS17 green",
+      "actual": "Generator depends on the device sample rate. PS17 hardcodes 44100. Committed files are unaffected: headers 44100/441/16-bit, runtime fine",
+      "evidence": "c-round-411.md section 'M1'; grep l.19 and l.376 confirmed by C; A's STOP in a-round-411.md"
+    }
+  ],
+  "passed": [
+    "row3-WAVEFORM-BEFORE-READY",
+    "row4-FALLBACKS",
+    "row5a-LANE-PROBE",
+    "row6-covering-425-of-425-only",
+    "row7-AUTH",
+    "row10-SCREEN-BUDGET",
+    "row1-frozen-1300-only"
+  ],
+  "blocked": [
+    "fake-bearer /api/studio-token path (backend unavailable in cloud); only no-auth 401 claimed"
+  ],
+  "gate": ["full vitest", "typecheck", "build", "Biome", "verify"],
+  "notRun": [
+    "row2 PATCH-IDENTITY cmp",
+    "row5b peaks-probe-410",
+    "row6 mutants 10/10 (only the covering set was run)",
+    "row8 DOCS byte checks",
+    "row9 REFERENCE table review",
+    "row11 claims-at-end + tools/l57-check.py",
+    "protected-file hash check",
+    "reason: A stopped on a reviewer Medium (L11); round is routed to B for a ruling, C did a reduced verification"
+  ],
+  "browserVerified": true,
+  "realVerified": true,
+  "browserNote": "All browser rows that could be run for this stopped round were run (rows 3, 4, 5a, 7 at both viewports); rows 5b not run, so full-round acceptance is not claimed",
+  "envStatus": {
+    "checkedUtc": "2026-11-08T16:17:11.2277343Z",
+    "round": 411,
+    "attempt": 1,
+    "store": 200
+  },
+  "stopSignal": "STOPPED-ROUTED-TO-B: A-R411-REVIEW-M1 needs B ruling (a: re-rate Low and re-dispatch v5, b: v6 sketch)"
+}

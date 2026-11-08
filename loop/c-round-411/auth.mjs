@@ -1,0 +1,14 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const { chromium } = createRequire('/home/runner/czaba-project/store/package.json')('@playwright/test');
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+const p = await ctx.newPage(); const out = {};
+await p.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'domcontentloaded', timeout: 90000 });
+await p.waitForSelector('[data-testid="arrangement-library-preview-wave"]', { timeout: 90000 });
+out.lab = { authUser: await p.evaluate(() => localStorage.getItem('auth_user')), signIn: await p.getByText('Sign in required').count() };
+await p.goto('http://127.0.0.1:5173/studio/middle-east', { waitUntil: 'domcontentloaded', timeout: 90000 });
+await p.getByText('Sign in required').first().waitFor({timeout:60000}).catch(()=>{}); await p.waitForTimeout(1500);
+out.premium = { signIn: await p.getByText('Sign in required').count(), audioSrc: await p.locator('audio[src]').count() };
+await p.screenshot({ path: 'auth-premium.png' });
+const r = await ctx.request.get('http://127.0.0.1:5173/api/studio-token?product=middle-east&file=a.mp3'); out.tokenStatus = r.status();
+writeFileSync('auth.json', JSON.stringify(out, null, 1)); console.log(out); await b.close();
