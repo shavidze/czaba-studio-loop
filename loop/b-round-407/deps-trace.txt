@@ -1,0 +1,58 @@
+previewClipGeometry [previewStore],
+previewStatus [statusPreviewStore],
+selectClip [setSelectedClipId],
+toggleClipSelection [setRange, setSelection, getSelectedClipIds],
+getSelectedClipIds [selectionStore],
+setTimeRange [setRange],
+setActiveTrack [setActiveTrackId],
+setInsertMarker [placeInsertMarker, updatePosition, setStatus],
+toggleTrackMute [applyEdit, refuseEditDuringGesture],
+toggleTrackSolo [applyEdit, refuseEditDuringGesture],
+previewTrackVolume [previewVolumeTarget],
+commitTrackVolume [commitVolumeTarget],
+beginTrackVolumeGesture [beginVolumeTargetGesture],
+blurTrackVolume [blurVolumeTarget],
+setTrackPan [applyEdit, refuseEditDuringGesture],
+beginTrackPanGesture [ cancelTrackPan, claimPointerGesture, commitTrackPan, flushPendingClipGain, flushPendingMaster, flushPendingVolume, mixDraftStore, restoreStoredTrackPan, ],
+previewTrackPan [mixDraftStore],
+commitTrackPan [finishTrackPanGesture, setTrackPan],
+cancelTrackPan [finishTrackPanGesture, restoreStoredTrackPan],
+importVideoFiles [runVideoImport, setStatus],
+getLibraryDragSource [collection.sources]
+dropLibrarySource [ applyEdit, getLibraryDragSource, refuseEditDuringGesture, setActiveTrackId, setRange, setSelectedClipId, withNameBarHint, setStatus, ],
+setClipLaneDrag [clipLaneDragStore],
+previewVolumeTarget [ flushPendingClipGain, flushPendingMaster, flushPendingVolume, mixDraftStore, refuseEditDuringGesture, syncPlayback, updateHistory, writeLiveMixGains, ],
+commitVolumeTarget [applyEdit, takeMixOverride],
+beginVolumeTargetGesture [ cancelVolumeTargetGesture, claimPointerGesture, commitVolumeTarget, flushPendingClipGain, flushPendingMaster, flushPendingVolume, revertVolumeTargetPreview, ],
+blurVolumeTarget [cancelVolumeTargetGesture, commitVolumeTarget],
+applyEdit [flushPendingClipGain, flushPendingMaster, flushPendingVolume, syncPlayback, updateHistory],
+refuseEditDuringGesture [setStatus]
+setRange [rangeStore, rewriteStoppedTruth, setStatus],
+setSelection [selectionStore],
+setSelectedClipId [setSelection],
+setActiveTrackId [selectionStore],
+finishTrackPanGesture [mixDraftStore],
+restoreStoredTrackPan []
+runVideoImport [ applyEdit, decodeVideoSourceAudio, patchVideoSource, seekTo, setRange, setSelectedClipId, stopPlayback, setStatus, ],
+placeInsertMarker [rangeStore, setRange, writeInsertMarker],
+updatePosition [positionStore],
+withNameBarHint []
+flushPendingClipGain [updateHistory]
+flushPendingMaster [updateHistory]
+flushPendingVolume [updateHistory]
+requestSourcePeaks [],
+resyncAfterDecode [stopForScheduleFailure, syncPlayback],
+storeSourcePeaks []
+decodeVideoSourceAudio [ decodedBuffers, getDecodeContext, patchVideoSource, requestSourcePeaks, resyncAfterDecode, storeSourcePeaks, ],
+patchVideoSource []
+stopPlayback [getLivePosition, meterStore, playbackStore, stopGraph, trackMeterStore, updatePosition],
+seekTo [startGraphOrStop, updatePosition, writeInsertMarker],
+takeMixOverride [mixDraftStore]
+writeLiveMixGains []
+cancelVolumeTargetGesture [revertVolumeTargetPreview]
+revertVolumeTargetPreview [syncPlayback, takeMixOverride, updateHistory, writeLiveMixGains]
+rewriteStoppedTruth [describeSpaceStart],
+writeInsertMarker [describeSpaceStart, insertMarkerStore, setStatus],
+getDecodeContext []
+stopForScheduleFailure [setStatus, stopPlayback],
+addSourceToActiveTrack [ applyEdit, collection.sources, refuseEditDuringGesture, selectionStore, setRange, setSelectedClipId, withNameBarHint, setStatus, ],

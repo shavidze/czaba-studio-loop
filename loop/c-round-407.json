@@ -1,0 +1,90 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "row1-SOURCE-SCOPE-start",
+  "row2-PATCH-IDENTITY",
+  "row3-STOPPED-SEEK",
+  "row4-VIDEO-SYNC",
+  "row5-LEAF-PROBE",
+  "row6-UNIT+MUTANT",
+  "row7-AUTH",
+  "row8-DOCS",
+  "row9-SOURCE-SCOPE-end+L57"
+ ],
+ "blocked": [
+  "fake-bearer /api/studio-token path (backend unavailable in cloud); only no-auth 401 claimed"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T11:41:05.4684044Z",
+  "round": 407,
+  "attempt": 1,
+  "store": 200
+ },
+ "failed": [],
+ "manifestPaths": [
+  "b-round-406/r407-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt",
+  "b-round-406/sketch-407.patch.txt",
+  "b-round-406/mutants/summary.txt",
+  "b-round-406/claims-407-planning-output.txt",
+  "b-round-406/claims-407-sketch-output.txt",
+  "b-round-406/probe/leaf-sketch-407.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "origin": {},
+ "assertsSpecified": "stopped-seek error<=0.05 all 4 steps & moved; play drift<=0.05 & paused false; leaf counts equal sketch per step (VideoDock [0,3,1,1,1,0,1,1,1,1,1,1,2], Caption/Inner 13 zeros); 360/360 covering; 7/7 mutants red",
+ "mutantsRecorded": "b-round-406/mutants/summary.txt (7 mutants)",
+ "mutantRedOnSketch": "7/7 red per B's summary",
+ "mutantRedOnTree": "C re-ran on committed scratch /tmp/c407-scratch of the working tree: 7/7 RED naming expected DP row, pristine before/after rc 0, scratch status 0; c-round-407/mutants/summary.txt identical to B's on all 9 result lines",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-406/precheck-full.log",
+  "b-round-406/sketch-logs/"
+ ],
+ "chainHeadGateRunGreen": "gate 406 published 8ac5bfb",
+ "affectedChecksNamed": [
+  "PATCH-IDENTITY (2)",
+  "STOPPED-SEEK (3)",
+  "VIDEO-SYNC (4)",
+  "LEAF-PROBE (5)",
+  "UNIT+MUTANT (6)",
+  "AUTH (7)"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-406/video/",
+  "b-round-406/probe/leaf-sketch-407.json",
+  "b-round-406/mutants/summary.txt"
+ ],
+ "l57NullReason": null,
+ "stopSignal": null,
+ "abletonConformance": "not applicable: behaviour-preserving refactor/perf round; reference-first excludes it",
+ "notes": [
+  "Row3: first 1440 run timed out on cold server (environment; c-round-407/stopped-1440x900-cold-timeout.json), retry 1 passed. All 4 steps error 0 at both viewports, moved true.",
+  "Row4: 12 samples, paused false, max |drift| 0.008 s (1440) / 0.013 s (1280). Dock after play: swaps 0, fallbacks 0 (also hard-seeks 0, escalations 0, settles 0). Caption text '1.mp4' stopped and playing.",
+  "Row5: 0 differences vs leaf-sketch-407.json over 13 steps x 24 leaves x 2 viewports; VideoDock [0,3,1,1,1,0,1,1,1,1,1,1,2]; Caption and DockViewInner 13 zeros; StudioWorkspace equals sketch. 0 page errors (rerun with pageerror listener: leaf-pageerr.json). Positive control: expand click -> DockViewInner 0->1, VideoDock 0->1, Caption stays 0 (extra-*.json). library-preview-stop jitter not seen (0 diffs).",
+  "Row7: /studio-lab auth_user null, no sign-in wall; /studio/middle-east 'Sign in required', 0 audio[src], no workspace; /api/studio-token?product=middle-east&file=a.mp3 no auth -> 401.",
+  "Row6: 16 files 360/360 rc 0 (vitest.log).",
+  "Row8: doc260 l.4 byte-exact, 7 headings in order, mutant rows equal B summary, DP73-75 in test file; doc259 differs from HEAD only on l.4; 0 'C round N pending'.",
+  "Row1/9: status = 4 granted paths at start and end; claims-end == claims-start; K3 1297 rc 0; K4 rc 0. HEAD 8ac5bfb.",
+  "Gate rows not run by C (speed rules).",
+  "Not independently proven: pointer-drag of floating video box (covered by floating-video unit file in the 360 set, not browser-run)."
+ ]
+}

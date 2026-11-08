@@ -1,0 +1,15 @@
+# B 407->408 checkpoint
+- [x] tasks/round-407.md copied (cp -n), backups in b-round-407/
+- [ ] backlog update from C407 PASS
+- [ ] plan PERF-11c-iii-e (Lane) task
+- [x] backlog v380 (update-backlog.py done): D-29z1412 (407 done), D-29z1413 (lows/arch)
+- plan: e-i = Lane callbacks via actions (+const tuple, AC7 count, livePosition rename?), e-ii later
+- [x] sketch /tmp/b408-sketch frozen: b-round-407/sketch-408.patch.txt sha 029e5f8a12e55c8f (3 files); tools/make-sketch*.py
+- [x] tsc/biome rc0 (sketch-logs), full vitest 262/3882 rc0 (precheck-full.log), mutants 5/5 RED (mutants/summary.txt)
+- [x] lane probe HEAD+sketch ok both vp; MISMAP-SOLO browser red (lane/); leaf probe 0 diffs (probe/)
+- [x] perf-optimizer consult done (summary to save in consult-performance-optimizer.md)
+- [ ] tech-lead review on sha -> sketch-review.md
+- [ ] claims-408.sh, grants-408.txt, r408-frozen-sha256.txt, covering.txt, task, reports; kill :5174
+- [x] tech-lead APPROVE WITH LOWS (sketch-review.md); :5174 stopped; scratch vite.config reverted + committed
+- [x] claims planning/sketch saved after last edit; backlog v381; feature-status; current-task.md; b-round-407.md; b-next.json
+- [x] advisor final check (row-3 active-track reworded as non-regression; B-R408-PROBE-ACTIVE-TRACK-VACUOUS deferred; claims re-saved)
