@@ -1,0 +1,752 @@
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index e221903..bb422cc 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -163,6 +163,11 @@ import {
+   type ArrangementPositionStore,
+   createArrangementPositionStore,
+ } from '~/lib/arrangement/position-store';
++import {
++  fetchPrecomputedPeaks,
++  type PrecomputedPeaks,
++  precomputedPeaksMatchDecodedLength,
++} from '~/lib/arrangement/precomputed-peaks';
+ import {
+   createLibraryPreviewPlayer,
+   type LibraryPreviewPlayer,
+@@ -847,6 +852,16 @@ export function ArrangementProvider({
+   const storeSourcePeaks = useCallback((id: string, peaks: Float32Array) => {
+     setSourcePeaks((previous) => new Map(previous).set(id, peaks));
+   }, []);
++  const dropSourcePeaks = useCallback((id: string) => {
++    setSourcePeaks((previous) => {
++      if (!previous.has(id)) {
++        return previous;
++      }
++      const next = new Map(previous);
++      next.delete(id);
++      return next;
++    });
++  }, []);
+   useEffect(
+     () => () => {
+       peaksComputerRef.current?.dispose();
+@@ -4526,6 +4541,21 @@ export function ArrangementProvider({
+       );
+       setStatus((current) => settledCollectionStatus(current, copy, failedCount));
+     };
++    const precomputedPeaks = new Map<string, PrecomputedPeaks>();
++    const peaksDecided = new Set<string>();
++    for (const source of collection.sources) {
++      const peaksUrl = collection.peaksUrl?.(source) ?? null;
++      if (peaksUrl === null) {
++        continue;
++      }
++      void fetchPrecomputedPeaks(peaksUrl, controller.signal).then((precomputed) => {
++        if (!precomputed || controller.signal.aborted || peaksDecided.has(source.id)) {
++          return;
++        }
++        precomputedPeaks.set(source.id, precomputed);
++        storeSourcePeaks(source.id, precomputed.peaks);
++      });
++    }
+     for (const source of collection.sources) {
+       collection
+         .loadSource(source, decodeContext, controller.signal)
+@@ -4533,7 +4563,7 @@ export function ArrangementProvider({
+           if (controller.signal.aborted) {
+             return;
+           }
+-          requestSourcePeaks(buffer, controller.signal, (peaks) => {
++          const markReady = (peaks: Float32Array) => {
+             if (controller.signal.aborted) {
+               return;
+             }
+@@ -4549,12 +4579,26 @@ export function ArrangementProvider({
+             });
+             settle(false);
+             resyncAfterDecode(source.id);
+-          });
++          };
++          peaksDecided.add(source.id);
++          const precomputed = precomputedPeaks.get(source.id);
++          if (
++            precomputed?.bits === 16 &&
++            precomputedPeaksMatchDecodedLength(precomputed.peaks, buffer.length, buffer.sampleRate)
++          ) {
++            markReady(precomputed.peaks);
++            return;
++          }
++          requestSourcePeaks(buffer, controller.signal, markReady);
+         })
+         .catch((error: unknown) => {
+           if (controller.signal.aborted) {
+             return;
+           }
++          peaksDecided.add(source.id);
++          if (precomputedPeaks.delete(source.id)) {
++            dropSourcePeaks(source.id);
++          }
+           patchSourceState(source.id, {
+             status: 'error',
+             duration: 0,
+@@ -4568,6 +4612,7 @@ export function ArrangementProvider({
+   }, [
+     collection,
+     decodedBuffers,
++    dropSourcePeaks,
+     getDecodeContext,
+     patchSourceState,
+     requestSourcePeaks,
+diff --git a/app/lib/arrangement/__tests__/precomputed-peaks-context.test.tsx b/app/lib/arrangement/__tests__/precomputed-peaks-context.test.tsx
+new file mode 100644
+index 0000000..c1fd4ba
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/precomputed-peaks-context.test.tsx
+@@ -0,0 +1,260 @@
++import { act, render } from '@testing-library/react';
++import { createElement } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import type { WorkspaceCollection } from '~/types/arrangement';
++
++class ZeroAudioBuffer implements AudioBuffer {
++  readonly numberOfChannels = 1;
++  readonly duration: number;
++  private readonly channel: Float32Array<ArrayBuffer>;
++  constructor(
++    readonly length: number,
++    readonly sampleRate: number,
++  ) {
++    this.duration = length / sampleRate;
++    this.channel = new Float32Array(length);
++  }
++  getChannelData(): Float32Array<ArrayBuffer> {
++    return this.channel;
++  }
++  copyFromChannel(destination: Float32Array<ArrayBuffer>, _channel: number, start = 0): void {
++    destination.set(this.channel.subarray(start, start + destination.length));
++  }
++  copyToChannel(): void {}
++}
++
++class FakeOfflineAudioContext {}
++
++interface Deferred<T> {
++  promise: Promise<T>;
++  resolve: (value: T) => void;
++  reject: (error: Error) => void;
++}
++
++function deferred<T>(): Deferred<T> {
++  let resolve: (value: T) => void = () => {};
++  let reject: (error: Error) => void = () => {};
++  const promise = new Promise<T>((done, fail) => {
++    resolve = done;
++    reject = fail;
++  });
++  return { promise, resolve, reject };
++}
++
++const SAMPLE_RATE = 48000;
++const BUCKETS = 4;
++
++function peaksBody(bits: 8 | 16, buckets = BUCKETS) {
++  const scale = bits === 8 ? 128 : 32768;
++  const data: number[] = [];
++  for (let bucket = 0; bucket < buckets; bucket++) {
++    data.push(-scale / 2, scale / 4);
++  }
++  return {
++    version: 2,
++    channels: 1,
++    sample_rate: SAMPLE_RATE,
++    samples_per_pixel: SAMPLE_RATE / 100,
++    bits,
++    length: buckets,
++    data,
++  };
++}
++
++function peaksResponse(body: unknown, status = 200): Response {
++  return new Response(JSON.stringify(body), { status });
++}
++
++interface ProbeRef {
++  current: ArrangementContextValue | null;
++}
++
++function Probe({ api }: { api: ProbeRef }) {
++  api.current = useArrangement();
++  return null;
++}
++
++function live(api: ProbeRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++async function flush(rounds = 20) {
++  await act(async () => {
++    for (let i = 0; i < rounds; i++) {
++      await new Promise((resolve) => setTimeout(resolve, 0));
++    }
++  });
++}
++
++function setup(peaksUrl?: WorkspaceCollection['peaksUrl']) {
++  const decode = deferred<AudioBuffer>();
++  const collection: WorkspaceCollection = {
++    id: 'precomputed',
++    label: 'precomputed',
++    origin: 'demo',
++    sources: [
++      { id: 'tone', title: 'Tone', collectionLabel: 'precomputed', kind: 'music', origin: 'demo' },
++    ],
++    loadSource: () => decode.promise,
++    ...(peaksUrl ? { peaksUrl } : {}),
++  };
++  const api: ProbeRef = { current: null };
++  const view = render(
++    createElement(ArrangementProvider, { collection }, createElement(Probe, { api })),
++  );
++  return { api, view, decode };
++}
++
++function peaksOf(api: ProbeRef): number[] | null {
++  const peaks = live(api).sourcePeaks.get('tone');
++  return peaks ? Array.from(peaks) : null;
++}
++
++const fetchMock = vi.fn<(url: string, init: RequestInit) => Promise<Response>>();
++
++describe('PPC1-PPC9 precomputed peaks in the collection load (PERF-15a)', () => {
++  beforeEach(() => {
++    fetchMock.mockReset();
++    vi.stubGlobal('fetch', fetchMock);
++    vi.stubGlobal('Worker', undefined);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  });
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it('PPC1 16-bit peaks show while the source is loading and are kept at ready without a recompute', async () => {
++    fetchMock.mockResolvedValue(peaksResponse(peaksBody(16)));
++    const { api, view, decode } = setup(() => '/peaks/tone.json');
++    await flush();
++    expect(fetchMock).toHaveBeenCalledTimes(1);
++    expect(fetchMock.mock.calls[0][0]).toBe('/peaks/tone.json');
++    expect(live(api).sourceStates.tone?.status).toBe('loading');
++    expect(peaksOf(api)).toEqual([0.5, 0.5, 0.5, 0.5]);
++    const early = live(api).sourcePeaks.get('tone');
++    await act(async () => {
++      decode.resolve(new ZeroAudioBuffer(BUCKETS * 480, SAMPLE_RATE));
++    });
++    await flush();
++    expect(live(api).sourceStates.tone?.status).toBe('ready');
++    expect(live(api).sourcePeaks.get('tone')).toBe(early);
++    view.unmount();
++  });
++
++  it('PPC2 8-bit peaks are a placeholder: shown while loading, replaced by the decoded peaks at ready', async () => {
++    fetchMock.mockResolvedValue(peaksResponse(peaksBody(8)));
++    const { api, view, decode } = setup(() => '/peaks/tone.json');
++    await flush();
++    expect(peaksOf(api)).toEqual([0.5, 0.5, 0.5, 0.5]);
++    await act(async () => {
++      decode.resolve(new ZeroAudioBuffer(BUCKETS * 480, SAMPLE_RATE));
++    });
++    await flush();
++    expect(live(api).sourceStates.tone?.status).toBe('ready');
++    expect(peaksOf(api)).toEqual([0, 0, 0, 0]);
++    view.unmount();
++  });
++
++  it('PPC3 16-bit peaks two buckets off the decoded length are replaced by the decoded peaks', async () => {
++    fetchMock.mockResolvedValue(peaksResponse(peaksBody(16, BUCKETS + 2)));
++    const { api, view, decode } = setup(() => '/peaks/tone.json');
++    await flush();
++    expect(peaksOf(api)).toHaveLength(BUCKETS + 2);
++    await act(async () => {
++      decode.resolve(new ZeroAudioBuffer(BUCKETS * 480, SAMPLE_RATE));
++    });
++    await flush();
++    expect(peaksOf(api)).toEqual([0, 0, 0, 0]);
++    view.unmount();
++  });
++
++  it('PPC4 peaks that arrive after the decode never replace the decoded peaks', async () => {
++    const late = deferred<Response>();
++    fetchMock.mockReturnValue(late.promise);
++    const { api, view, decode } = setup(() => '/peaks/tone.json');
++    await act(async () => {
++      decode.resolve(new ZeroAudioBuffer(BUCKETS * 480, SAMPLE_RATE));
++    });
++    await flush();
++    expect(live(api).sourceStates.tone?.status).toBe('ready');
++    const decoded = live(api).sourcePeaks.get('tone');
++    expect(peaksOf(api)).toEqual([0, 0, 0, 0]);
++    await act(async () => {
++      late.resolve(peaksResponse(peaksBody(16)));
++    });
++    await flush();
++    expect(live(api).sourcePeaks.get('tone')).toBe(decoded);
++    view.unmount();
++  });
++
++  it('PPC5 a failed decode removes the precomputed peaks, so no waveform is shown for an error source', async () => {
++    fetchMock.mockResolvedValue(peaksResponse(peaksBody(16)));
++    const { api, view, decode } = setup(() => '/peaks/tone.json');
++    await flush();
++    expect(peaksOf(api)).not.toBeNull();
++    await act(async () => {
++      decode.reject(new Error('decode failed'));
++    });
++    await flush();
++    expect(live(api).sourceStates.tone?.status).toBe('error');
++    expect(live(api).sourcePeaks.has('tone')).toBe(false);
++    view.unmount();
++  });
++
++  it('PPC6 without peaksUrl, or with a null url, nothing is fetched and the decoded peaks are used', async () => {
++    for (const peaksUrl of [undefined, () => null]) {
++      fetchMock.mockClear();
++      const { api, view, decode } = setup(peaksUrl);
++      await flush();
++      expect(peaksOf(api)).toBeNull();
++      await act(async () => {
++        decode.resolve(new ZeroAudioBuffer(BUCKETS * 480, SAMPLE_RATE));
++      });
++      await flush();
++      expect(fetchMock).not.toHaveBeenCalled();
++      expect(peaksOf(api)).toEqual([0, 0, 0, 0]);
++      view.unmount();
++    }
++  });
++
++  it('PPC7 a 404 peaks file shows nothing early and the decoded peaks arrive at ready', async () => {
++    fetchMock.mockResolvedValue(peaksResponse({}, 404));
++    const { api, view, decode } = setup(() => '/peaks/tone.json');
++    await flush();
++    expect(fetchMock).toHaveBeenCalledTimes(1);
++    expect(peaksOf(api)).toBeNull();
++    await act(async () => {
++      decode.resolve(new ZeroAudioBuffer(BUCKETS * 480, SAMPLE_RATE));
++    });
++    await flush();
++    expect(live(api).sourceStates.tone?.status).toBe('ready');
++    expect(peaksOf(api)).toEqual([0, 0, 0, 0]);
++    view.unmount();
++  });
++
++  it('PPC8 unmounting aborts the peaks fetch; the late reply is dropped without an error', async () => {
++    const late = deferred<Response>();
++    fetchMock.mockReturnValue(late.promise);
++    const errors = vi.spyOn(console, 'error');
++    const { view } = setup(() => '/peaks/tone.json');
++    await flush();
++    const signal = fetchMock.mock.calls[0][1].signal;
++    expect(signal?.aborted).toBe(false);
++    view.unmount();
++    expect(signal?.aborted).toBe(true);
++    await act(async () => {
++      late.resolve(peaksResponse(peaksBody(16)));
++    });
++    await flush();
++    expect(errors).not.toHaveBeenCalled();
++    errors.mockRestore();
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/precomputed-peaks.test.ts b/app/lib/arrangement/__tests__/precomputed-peaks.test.ts
+new file mode 100644
+index 0000000..f399ddb
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/precomputed-peaks.test.ts
+@@ -0,0 +1,247 @@
++import { describe, expect, it, vi } from 'vitest';
++import { computePeaks, PEAK_BUCKETS_PER_SECOND, peakBucketCount } from '../peaks';
++import {
++  fetchPrecomputedPeaks,
++  PRECOMPUTED_PEAKS_MAX_BYTES,
++  parseAudiowaveformPeaks,
++  precomputedPeaksMatchDecodedLength,
++} from '../precomputed-peaks';
++import type { SourceFetch } from '../source-fetch';
++
++interface WaveformJson {
++  version: number;
++  channels?: number;
++  sample_rate: number;
++  samples_per_pixel: number;
++  bits: number;
++  length: number;
++  data: number[];
++}
++
++function waveform(overrides: Partial<WaveformJson> & Pick<WaveformJson, 'data'>): WaveformJson {
++  const channels = overrides.channels ?? 1;
++  return {
++    version: 2,
++    channels,
++    sample_rate: 48000,
++    samples_per_pixel: 480,
++    bits: 16,
++    length: overrides.data.length / (channels * 2),
++    ...overrides,
++  };
++}
++
++function values(peaks: Float32Array | undefined): number[] {
++  return Array.from(peaks ?? []);
++}
++
++function audiowaveformOf(
++  channels: readonly Int16Array[],
++  samplesPerPixel: number,
++  sampleRate: number,
++): WaveformJson {
++  const length = Math.ceil(channels[0].length / samplesPerPixel);
++  const data: number[] = [];
++  for (let pixel = 0; pixel < length; pixel++) {
++    for (const channel of channels) {
++      const slice = channel.subarray(pixel * samplesPerPixel, (pixel + 1) * samplesPerPixel);
++      data.push(Math.min(...slice), Math.max(...slice));
++    }
++  }
++  return {
++    version: 2,
++    channels: channels.length,
++    sample_rate: sampleRate,
++    samples_per_pixel: samplesPerPixel,
++    bits: 16,
++    length,
++    data,
++  };
++}
++
++function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
++  return new Response(JSON.stringify(body), {
++    status: 200,
++    headers: { 'content-type': 'application/json' },
++    ...init,
++  });
++}
++
++describe('PP1-PP5 parseAudiowaveformPeaks (audiowaveform JSON v1/v2 -> 100 buckets per second)', () => {
++  it('PP1 v2 16-bit stereo, one pixel per bucket: max of |min| and |max| over every channel, over 32768', () => {
++    const parsed = parseAudiowaveformPeaks(
++      waveform({
++        channels: 2,
++        data: [-16384, 8192, -100, 200, -10, 4096, -32768, 32767, 0, 0, -1, 1],
++      }),
++    );
++    expect(parsed?.bits).toBe(16);
++    expect(values(parsed?.peaks)).toEqual([0.5, 1, 1 / 32768]);
++  });
++
++  it('PP2 v1 8-bit mono without a channels field: values over 128, -128 is full scale', () => {
++    const parsed = parseAudiowaveformPeaks({
++      version: 1,
++      sample_rate: 44100,
++      samples_per_pixel: 441,
++      bits: 8,
++      length: 3,
++      data: [-128, 10, -32, 64, 0, -1],
++    });
++    expect(parsed?.bits).toBe(8);
++    expect(values(parsed?.peaks)).toEqual([1, 0.5, 1 / 128]);
++  });
++
++  it('PP3 finer pixels pool by max into each bucket, and the bucket count follows peakBucketCount', () => {
++    const parsed = parseAudiowaveformPeaks(
++      waveform({ samples_per_pixel: 240, data: [0, 100, -300, 0, 0, 200, -50, 0, 0, 400] }),
++    );
++    expect(peakBucketCount(5 * 240, 48000, PEAK_BUCKETS_PER_SECOND)).toBe(3);
++    expect(values(parsed?.peaks)).toEqual([300 / 32768, 200 / 32768, 400 / 32768]);
++  });
++
++  it('PP4 on a non-integer pixel/bucket ratio it matches computePeaks within one neighbouring bucket', () => {
++    const sampleRate = 44100;
++    const length = sampleRate * 2 + 123;
++    const left = new Int16Array(length);
++    const right = new Int16Array(length);
++    let seed = 7;
++    for (let i = 0; i < length; i++) {
++      seed = (seed * 1103515245 + 12345) % 2147483648;
++      const envelope = Math.abs(Math.sin(i / 3000));
++      left[i] = Math.round(((seed / 2147483648) * 2 - 1) * 32767 * envelope);
++      right[i] = Math.round(-left[i] * 0.5);
++    }
++    const parsed = parseAudiowaveformPeaks(audiowaveformOf([left, right], 256, sampleRate));
++    const computed = computePeaks(
++      [left, right].map((channel) => Float32Array.from(channel, (value) => value / 32768)),
++      sampleRate,
++      PEAK_BUCKETS_PER_SECOND,
++    );
++    const peaks = parsed?.peaks ?? new Float32Array(0);
++    expect(peaks.length).toBe(computed.length);
++    const tolerance = 1 / 32768;
++    for (let bucket = 0; bucket < computed.length; bucket++) {
++      const neighbours = Math.max(
++        computed[bucket],
++        computed[bucket - 1] ?? 0,
++        computed[bucket + 1] ?? 0,
++      );
++      expect(peaks[bucket]).toBeGreaterThanOrEqual(computed[bucket] - tolerance);
++      expect(peaks[bucket]).toBeLessThanOrEqual(neighbours + tolerance);
++    }
++  });
++
++  it('PP5 rejects every malformed or unsupported file with null', () => {
++    const good = waveform({ data: [-1, 1, -2, 2] });
++    expect(parseAudiowaveformPeaks(good)).not.toBeNull();
++    const rejected: unknown[] = [
++      null,
++      'peaks',
++      [good],
++      { ...good, version: 3 },
++      { ...good, version: '2' },
++      { ...good, version: 1, channels: 2, data: [-1, 1, -2, 2, -3, 3, -4, 4] },
++      { ...good, channels: 0 },
++      { ...good, bits: 12 },
++      { ...good, sample_rate: 0 },
++      { ...good, samples_per_pixel: 481 },
++      { ...good, samples_per_pixel: 1.5 },
++      { ...good, length: 0, data: [] },
++      { ...good, length: 3 },
++      { ...good, data: [-1, 1, -2] },
++      { ...good, data: [-1, 1, -2, 2.5] },
++      { ...good, data: [-1, 1, -2, '2'] },
++      { ...good, data: [-32769, 1, -2, 2] },
++      { ...good, data: [-1, 32768, -2, 2] },
++      { ...good, bits: 8, data: [-1, 128, -2, 2] },
++      { ...good, bits: 8, data: [-129, 1, -2, 2] },
++    ];
++    for (const entry of rejected) {
++      expect(parseAudiowaveformPeaks(entry)).toBeNull();
++    }
++  });
++});
++
++describe('PP6 precomputedPeaksMatchDecodedLength', () => {
++  it('PP6 accepts the decoded bucket count within one bucket, at any decode sample rate', () => {
++    const peaks = new Float32Array(200);
++    expect(precomputedPeaksMatchDecodedLength(peaks, 96000, 48000)).toBe(true);
++    expect(precomputedPeaksMatchDecodedLength(peaks, 88200, 44100)).toBe(true);
++    expect(precomputedPeaksMatchDecodedLength(peaks, 96000 + 480, 48000)).toBe(true);
++    expect(precomputedPeaksMatchDecodedLength(peaks, 96000 - 480, 48000)).toBe(true);
++    expect(precomputedPeaksMatchDecodedLength(peaks, 96000 + 961, 48000)).toBe(false);
++    expect(precomputedPeaksMatchDecodedLength(peaks, 96000 - 960, 48000)).toBe(false);
++    expect(precomputedPeaksMatchDecodedLength(new Float32Array(1), 0, 48000)).toBe(false);
++  });
++});
++
++describe('PP7 fetchPrecomputedPeaks never throws and falls back with null', () => {
++  const body = waveform({ data: [-16384, 0] });
++
++  it('PP7a parses an ok response and passes the abort signal to the fetch', async () => {
++    const controller = new AbortController();
++    const fetchPeaks = vi.fn<SourceFetch>(async () => jsonResponse(body));
++    const parsed = await fetchPrecomputedPeaks('/peaks/a.json', controller.signal, fetchPeaks);
++    expect(values(parsed?.peaks)).toEqual([0.5]);
++    expect(fetchPeaks).toHaveBeenCalledTimes(1);
++    expect(fetchPeaks.mock.calls[0][0]).toBe('/peaks/a.json');
++    expect(fetchPeaks.mock.calls[0][1].signal).toBe(controller.signal);
++  });
++
++  it('PP7b a non-ok status, bad JSON, invalid data or a rejected fetch give null', async () => {
++    const signal = new AbortController().signal;
++    const cases: SourceFetch[] = [
++      async () => jsonResponse(body, { status: 404 }),
++      async () => new Response('not json', { status: 200 }),
++      async () => jsonResponse({ ...body, bits: 4 }),
++      async () => {
++        throw new TypeError('network down');
++      },
++    ];
++    for (const fetchPeaks of cases) {
++      await expect(fetchPrecomputedPeaks('/peaks/a.json', signal, fetchPeaks)).resolves.toBeNull();
++    }
++  });
++
++  it('PP7c a declared size above the cap is refused before parsing; the cap itself and a missing header pass', async () => {
++    const signal = new AbortController().signal;
++    const sized = (bytes: number | null): SourceFetch => {
++      return async () => {
++        const response = jsonResponse(body);
++        const headers = new Headers(response.headers);
++        if (bytes === null) {
++          headers.delete('content-length');
++        } else {
++          headers.set('content-length', String(bytes));
++        }
++        return new Response(JSON.stringify(body), { status: 200, headers });
++      };
++    };
++    expect(PRECOMPUTED_PEAKS_MAX_BYTES).toBe(4 * 1024 * 1024);
++    await expect(
++      fetchPrecomputedPeaks('/p', signal, sized(PRECOMPUTED_PEAKS_MAX_BYTES + 1)),
++    ).resolves.toBeNull();
++    await expect(
++      fetchPrecomputedPeaks('/p', signal, sized(PRECOMPUTED_PEAKS_MAX_BYTES)),
++    ).resolves.not.toBeNull();
++    await expect(fetchPrecomputedPeaks('/p', signal, sized(null))).resolves.not.toBeNull();
++  });
++
++  it('PP7d an abort while the body is read gives null', async () => {
++    const controller = new AbortController();
++    const fetchPeaks: SourceFetch = async () => {
++      const response = jsonResponse(body);
++      const json = response.json.bind(response);
++      return Object.assign(response, {
++        json: async () => {
++          controller.abort();
++          return json();
++        },
++      });
++    };
++    await expect(
++      fetchPrecomputedPeaks('/peaks/a.json', controller.signal, fetchPeaks),
++    ).resolves.toBeNull();
++  });
++});
+diff --git a/app/lib/arrangement/precomputed-peaks.ts b/app/lib/arrangement/precomputed-peaks.ts
+new file mode 100644
+index 0000000..fe1b624
+--- /dev/null
++++ b/app/lib/arrangement/precomputed-peaks.ts
+@@ -0,0 +1,115 @@
++import { PEAK_BUCKETS_PER_SECOND, peakBucketCount } from './peaks';
++import { plainSourceFetch, type SourceFetch } from './source-fetch';
++
++export const PRECOMPUTED_PEAKS_BUCKET_TOLERANCE = 1;
++
++export const PRECOMPUTED_PEAKS_MAX_BYTES = 4 * 1024 * 1024;
++
++export interface PrecomputedPeaks {
++  peaks: Float32Array;
++  bits: 8 | 16;
++}
++
++function readBits(value: unknown): 8 | 16 | null {
++  return value === 8 || value === 16 ? value : null;
++}
++
++function readPositiveInteger(value: unknown): number | null {
++  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : null;
++}
++
++function readChannelCount(version: unknown, channels: unknown): number | null {
++  if (version === 1) {
++    return channels === undefined || channels === 1 ? 1 : null;
++  }
++  if (version === 2) {
++    return readPositiveInteger(channels);
++  }
++  return null;
++}
++
++export function parseAudiowaveformPeaks(data: unknown): PrecomputedPeaks | null {
++  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
++    return null;
++  }
++  const record: Record<string, unknown> = { ...data };
++  const channels = readChannelCount(record.version, record.channels);
++  const sampleRate = readPositiveInteger(record.sample_rate);
++  const samplesPerPixel = readPositiveInteger(record.samples_per_pixel);
++  const length = readPositiveInteger(record.length);
++  const bits = readBits(record.bits);
++  const values = record.data;
++  if (
++    channels === null ||
++    sampleRate === null ||
++    samplesPerPixel === null ||
++    length === null ||
++    bits === null ||
++    samplesPerPixel > sampleRate / PEAK_BUCKETS_PER_SECOND ||
++    !Array.isArray(values) ||
++    values.length !== length * channels * 2
++  ) {
++    return null;
++  }
++  const fullScale = bits === 8 ? 128 : 32768;
++  const pixels = new Float32Array(length);
++  for (let pixel = 0; pixel < length; pixel++) {
++    let max = 0;
++    for (let offset = pixel * channels * 2; offset < (pixel + 1) * channels * 2; offset++) {
++      const value: unknown = values[offset];
++      if (
++        typeof value !== 'number' ||
++        !Number.isInteger(value) ||
++        value < -fullScale ||
++        value >= fullScale
++      ) {
++        return null;
++      }
++      max = Math.max(max, Math.abs(value));
++    }
++    pixels[pixel] = Math.min(1, max / fullScale);
++  }
++  const totalSamples = length * samplesPerPixel;
++  const samplesPerBucket = sampleRate / PEAK_BUCKETS_PER_SECOND;
++  const peaks = new Float32Array(
++    peakBucketCount(totalSamples, sampleRate, PEAK_BUCKETS_PER_SECOND),
++  );
++  for (let bucket = 0; bucket < peaks.length; bucket++) {
++    const from = Math.floor(bucket * samplesPerBucket);
++    const to = Math.min(totalSamples, Math.floor((bucket + 1) * samplesPerBucket));
++    const lastPixel = Math.min(length, Math.ceil(to / samplesPerPixel));
++    let max = 0;
++    for (let pixel = Math.floor(from / samplesPerPixel); pixel < lastPixel; pixel++) {
++      max = Math.max(max, pixels[pixel]);
++    }
++    peaks[bucket] = max;
++  }
++  return { peaks, bits };
++}
++
++export function precomputedPeaksMatchDecodedLength(
++  peaks: Float32Array,
++  decodedLength: number,
++  sampleRate: number,
++): boolean {
++  const expected = peakBucketCount(decodedLength, sampleRate, PEAK_BUCKETS_PER_SECOND);
++  return expected > 0 && Math.abs(peaks.length - expected) <= PRECOMPUTED_PEAKS_BUCKET_TOLERANCE;
++}
++
++export async function fetchPrecomputedPeaks(
++  url: string,
++  signal: AbortSignal,
++  fetchPeaks: SourceFetch = plainSourceFetch,
++): Promise<PrecomputedPeaks | null> {
++  try {
++    const response = await fetchPeaks(url, { signal });
++    const declaredBytes = Number(response.headers.get('content-length') ?? 0);
++    if (!response.ok || !(declaredBytes <= PRECOMPUTED_PEAKS_MAX_BYTES)) {
++      return null;
++    }
++    const data: unknown = await response.json();
++    return signal.aborted ? null : parseAudiowaveformPeaks(data);
++  } catch {
++    return null;
++  }
++}
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index ec34f0e..509bc27 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -98,6 +98,7 @@ export interface WorkspaceCollection {
+   ) => Promise<AudioBuffer>;
+   canReloadSource?: (source: WorkspaceSource) => boolean;
+   previewUrl?: (source: WorkspaceSource) => string | null;
++  peaksUrl?: (source: WorkspaceSource) => string | null;
+ }
+ 
+ export type WorkspaceVideoAudioStatus = 'decoding' | 'ready' | 'none' | 'error';

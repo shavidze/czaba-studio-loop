@@ -1,0 +1,78 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "row1-SOURCE-SCOPE-start",
+  "row2-PATCH-IDENTITY",
+  "row3-LANE-ACTIONS",
+  "row4-LEAF-PROBE",
+  "row5-UNIT+MUTANT",
+  "row6-AUTH",
+  "row7-DOCS",
+  "row8-SOURCE-SCOPE-end+L57"
+ ],
+ "blocked": [
+  "fake-bearer /api/studio-token path (backend unavailable in cloud); only no-auth 401 claimed"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T14:03:20.2552346Z",
+  "round": 409,
+  "attempt": 1,
+  "store": 200
+ },
+ "failed": [],
+ "manifestPaths": [
+  "b-round-408/r409-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt",
+  "b-round-408/sketch-409.patch.txt",
+  "b-round-408/mutants/summary.txt",
+  "b-round-408/claims-409-planning-output.txt",
+  "b-round-408/claims-409-sketch-output.txt",
+  "b-round-408/probe/leaf-sketch-409.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "origin": {},
+ "assertsSpecified": "Lane inner [0,8,4,4,0,0,0,1,1,4,4,0,0,1,1], shell [0,12,4,4,0,0,0,4,4,4,4,4,8,4,4], StudioWorkspace equals sketch both viewports; LANE-ACTIONS 8/8 steps pass ok no pageErrors both viewports; 914/914 covering; 9/9 mutants red + tsc guard rc 2; AUTH demo no auth/premium sign-in required/0 audio[src]/401",
+ "mutantsRecorded": "b-round-408/mutants/summary.txt (9 mutants + tsc guard)",
+ "mutantRedOnSketch": "9/9 red per B's summary",
+ "mutantRedOnTree": "C re-ran on committed scratch /tmp/c409-scratch: 9/9 RED naming expected rows, pristine before/after rc 0, scratch status 0; tsc guard rc 2 naming colour in ArrangementLane.tsx; c-round-409/mutants/summary.txt, tsc-guard.log",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-408/precheck-full.log",
+  "b-round-408/sketch-logs/"
+ ],
+ "chainHeadGateRunGreen": "gate 408 published 37b1db8 (base); gate 409 pending root",
+ "affectedChecksNamed": [
+  "PATCH-IDENTITY (2)",
+  "LANE-ACTIONS (3)",
+  "LEAF-PROBE (4)",
+  "UNIT+MUTANT (5)",
+  "AUTH (6)"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-408/lane/",
+  "b-round-408/probe/leaf-sketch-409.json",
+  "b-round-408/mutants/summary.txt"
+ ],
+ "l57NullReason": null,
+ "stopSignal": null,
+ "abletonConformance": "not applicable: behaviour-preserving refactor/perf round; reference-first excludes it",
+ "notes": "Lane probe 1440x900 first attempt hit a cold-server timeout while mutants ran concurrently (kept as lane-1440x900-attempt1-coldtimeout.stdout); retry passed, not a FAIL (L38). Leaf probe ArrangementLibraryPreviewViewInner last step 11 vs B's 10 = known +-2 jitter, recorded. Covering slowest 3707 ms (UM9, in a 20000 ms describe per A). Lane probe does not cover library drop/video import/lane drag (unit-covered). Low from A: A-R409-REVIEW-L4-TRACK-FIELD-COVERAGE (no mutant for wrong compare body of name/volume/groupId/kind) -> B. Product-level flow find->add->fit video->export not changed by this round; export WAV integrity is gate/unchanged and was NOT re-measured here."
+}

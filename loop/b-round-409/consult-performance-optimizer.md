@@ -1,0 +1,8 @@
+# performance-optimizer consult, round 409 -> 410 planning (PERF-15a), 2026-11-08
+Read-only consult (no edits). B's question: stage-a shape, conversion rule, skip vs always compute, parse cost, stage-b row.
+Adopted (summary of the agent's answer, recorded verbatim in intent):
+- (a) Scale /128 and /32768 with clamp is correct. audiowaveform downmixes to mono by default -> handoff asks --split-channels. Require samples_per_pixel <= sample_rate/100 (pool downward only), reject coarser; ask backend for spp = sample_rate/100. Compare durations, never raw sample counts (rate may differ). MP3 delay+padding ~2257 samples (~5 buckets @48k): keep tolerance 1; fallback to compute is safe; backend must use the decoded asset with gapless-aware decode.
+- (b) Skip the worker only for 16-bit + length match; 8-bit is a placeholder and is always recomputed at decode (normalize stretches quiet stems, 8-bit steps visible). Fixture row: precomputed vs computed within 1/32768 plus one neighbouring bucket (PP4). Storing twice must invalidate derived caches (B checked: no peak-keyed cache besides memo deps by identity). Decode before fetch: compute, drop late arrival.
+- (c) JSON.parse ~10-25 ms for ~2 MB at load is acceptable; no worker in stage a. Cap content-length at 4 MB. Handoff: spp = sr/100 and later binary .dat.
+- (d) Stage b: gate-based browser row with page.route: peaks JSON immediate, audio held; assert preview columns while loading; release audio; ready; worker job count 0 for 16-bit matched and 1 for 8-bit; negative 404 row; performance marks info only.
+- Scope note: lane clips need ready -> stage b shows the gain in the library preview only; record the limit.
