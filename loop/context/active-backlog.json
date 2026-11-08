@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-08T01:59:49.582Z",
-  "current_task": "Round 399: PERF-14b-i: perf harnesses count clips from the model (data-clip-count) and reach targets that may be unmounted; interactions + resources migrated by Rule R (R-a..R-d), scale harness patch (M2 lane-area in-window, visible-gap self-check, build self-check), perf/lib/page.ts add-only helpers; every deterministic row equal at HEAD; specs complete on the virtualization sketch; docs 254 (stage 1 of 4) + 255 (current-task.md)",
+  "_generatedUtc": "2026-11-08T03:40:50.123Z",
+  "current_task": "Round 400: PERF-14b-i completion: R-b' ruling for the Ctrl+D group copy (C-R399-01): copy reads live when mounted (HEAD path), else reveal next to the original outside measured windows with exact scroll restore and Follow restore; copyBefore falls back to the setup at-rest read (no scroll before t0); ownCopy null when unmounted (check (f) skipped, detail OwnCopyObserved); new check (g) Follow on at t0 while playing; B sketch b-round-399/sketch-400-group-copy.patch.txt applied byte-identical; doc 255 updated; full C row set (INTERACT/RES/SCALE HEAD+VIRT, PERF-LIB, BUDGET-SHAPE, NO-APP-CHANGE, AUTH, SOURCE-SCOPE, DOCS) (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6248,7 +6248,7 @@
       "origin": "B sketch (tech-lead review)",
       "evidence": "b-round-398/sketch-review.md; b-round-398/perf-sketch-studio-lab-interactions.log; perf-sketch-studio-lab-resources.log",
       "title": "interactions and resources perf specs count mounted clips; abort under virtualization",
-      "status": "dispatched as round 399 PERF-14b-i (D-29z1365)",
+      "status": "round 399 PERF-14b-i C FAIL (C-R399-01); re-dispatched as round 400 completion (D-29z1368) | dispatched as round 399 PERF-14b-i (D-29z1365)",
       "added": "2026-11-08 B round 398 -> 399 planning"
     },
     {
@@ -6256,19 +6256,24 @@
       "severity": "low",
       "status": "ruled (D-29z1363): M2 lane area = scroller box minus measure",
       "title": "scale in-window counted clips under the sticky header; zoom p95 == max with 10 keys"
+    },
+    {
+      "id": "C-R399-01",
+      "severity": "medium",
+      "origin": "B spec (round-399 R-b conflicts with 'deterministic values equal HEAD'); A STOP confirmed by C",
+      "evidence": "c-round-399.json; c-round-399/virt-interactions.json; a-round-399.md STOP; a-round-399/probe/follow-probe.txt",
+      "title": "interactions group setup finds no Ctrl+D copy under virtualization; 24 group rows null, 13 asserts fail",
+      "status": "dispatched as round 400 (D-29z1368): R-b' conditional reveal; B sketch run green on both trees (b-round-399/sketch/compare-head.txt 189/189 equal; interactions-virt problems [] x6, drag-group-live 1)",
+      "added": "2026-11-08 B round 399 -> 400 planning"
+    },
+    {
+      "id": "Q-14B-PIN-GROUP-MEMBERS",
+      "severity": "info",
+      "status": "14b-ii input (D-29z1368): decide at 14b-ii sketch review whe",
+      "title": "under the 14b-ii lane sketch the non-pressed members of a group move are unmounted mid-gesture when "
     }
   ],
   "recent_rounds": [
-    {
-      "round": 390,
-      "task": "current-task.md",
-      "decision": "D-29z1316..D-29z1321",
-      "type": "REGRESSION-2026-11-08 part 2 (SA-17): round-340 template rows (rounds 199-342) + carried R390-VIDEO-SOUND, R390-WAV-3CLIP-LEN; RR-PERF/PERF-LIB carried from round 389 (same HEAD), RG-SMOKE run; A no change",
-      "status": "c_pass (D-29z1322): REGRESSION part 2 PASS, 0 bugs; gate 390 skipped - nothing to publish | dispatched",
-      "note": "baseline 11ca746 clean; claims b-round-389/claims-390.sh; frozen tree reused b-round-388/r389-tree-sha256.txt (1284)",
-      "added": "2026-11-07 B round 389 -> 390 planning",
-      "result": "c-round-390.json (PASS, 0 failed, 0 bugs, 0 inconclusive, 0 blocked, browserVerified/realVerified true; recorded R390-POSCTL, R390-ESC-DRAG, R390-RP-BUILT, R390-RP301, RR-OSS single file); a-round-390.md no change; gate 390 skipped (no real changes), baseline stays 11ca746"
-    },
     {
       "round": 391,
       "task": "current-task.md",
@@ -6347,9 +6352,19 @@
       "task": "current-task.md",
       "decision": "D-29z1362..D-29z1366",
       "type": "PERF-14b-i: harness readiness for clip virtualization (perf/** + docs only, no app change)",
-      "status": "dispatched",
+      "status": "c_fail_stop",
       "note": "baseline c3ee1d6 clean; grants b-round-398/grants-399.txt (8 tracked + doc 255 new); frozen b-round-398/r399-frozen-sha256.txt (1285); harness patch b-round-398/sketch-399-harness.patch.txt sha 204e282a; lane sketch (14b-ii) b-round-398/sketch-14bii-lane.patch.txt sha 3d1fc4d8; claims b-round-398/claims-399.sh",
-      "added": "2026-11-08 B round 398 -> 399 planning"
+      "added": "2026-11-08 B round 398 -> 399 planning",
+      "result": "C round 399 FAIL 'STOPPED - routed to B' (L22 short round): C-R399-01 Medium (origin B spec: R-b vs 'values equal HEAD' for the Ctrl+D copy); SOURCE-SCOPE/NO-APP-CHANGE/AUTH PASS; INTERACT-HEAD/RES/SCALE/PERF-LIB/BUDGET-SHAPE/DOCS not run; browserVerified false; gate 399 skipped; A's diff kept in tree (b-round-399/a399-diff.patch.txt sha 5f3c1351) (D-29z1367)"
+    },
+    {
+      "round": 400,
+      "task": "current-task.md",
+      "decision": "D-29z1367..D-29z1370",
+      "type": "PERF-14b-i completion: R-b' group-copy ruling (perf/** + docs only, no app change)",
+      "status": "dispatched",
+      "note": "baseline c3ee1d6 + A round-399 diff (unpublished, gate 399 skipped); grants b-round-399/grants-400.txt (interactions spec + doc 255); frozen b-round-399/r400-frozen-sha256.txt (1292); sketch b-round-399/sketch-400-group-copy.patch.txt sha d1b8c17d (v2 after tech-lead review) -> spec sha fc804c3d; claims b-round-399/claims-400.sh",
+      "added": "2026-11-08 B round 399 -> 400 planning"
     }
   ],
   "other_keys": [

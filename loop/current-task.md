@@ -1,141 +1,205 @@
-# Round 400: PERF-14b-i, completion. Rule the Ctrl+D group-copy reads (C-R399-01) and finish the harness migration
+# Round 401: RETRO 401 (fourteenth retrospective, rounds 385–400) + whole-screen and journey review. No app code. A: nothing to implement. C: traceability check of the retro, plus the auth guard and a short Studio smoke in the browser
 
-**Planned by:** B, at the round 399 → 400 planning, 2026-11-08 (`b-round-399.md`).
-**Decisions:** D-29z1367 … D-29z1370 (`backlog.json` v367, `decisions_log_b`).
-**Type:** stage 2 of 4 of PERF-14, second dispatch (performance, test harness only). **No `app/**` file changes.** A user sees and hears nothing new.
+**Planned by:** B, at the round 400 → 401 planning, 2026-11-08 (`b-round-400.md`).
 
-**Read first:**
-- `lessons.md` in full. Most relevant here: L10, L11, L22, L23, L28, L29, L30, L31, L37, L38, L57, L58, L59, L60.
-- This file. Open `tasks/round-399.md` only to look up a row or a ruling (Rule R, D-29z1363 … D-29z1366 stay in force unless §1 here changes them).
-- Primitives: `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `AGENT_DISCOVERABLE_CODE.md`, `GEORGIAN_DOCS.md`.
-- **Claims:** `b-round-399/claims-400.sh`, run from the loop root.
-  - Planning output: `b-round-399/claims-400-planning-output.txt`.
-  - A runs the claims before editing. C runs them at the start of SOURCE-SCOPE, where they must equal the planning output. C runs them again at the end, where only the §7 facts may differ.
+## Decisions
+These are recorded in `backlog.json` (v367 → v369) under `decisions_log_b`.
 
-## Baseline: `c3ee1d6` plus A's round-399 work (not published)
-- Gate 399 is `skipped` ("C taskStatus FAIL"); gate 398 published `c3ee1d6` [K1]. HEAD is `c3ee1d6` with 9 changed paths (8 modified, 1 new) and an empty `app` diff [K2].
-- **A's round-399 work stays in the tree and is kept, not redone.** Its tracked diff at planning is `b-round-399/a399-diff.patch.txt` and doc 255 at planning is `b-round-399/a399-doc255.md` [K8].
-- Protected files: 11 of 11 [K3].
-- Frozen manifest: `b-round-399/r400-frozen-sha256.txt`, 1292 entries, 0 failures [K4]. It covers every tracked file except the interactions spec, **including A's finished round-399 files at their current hashes** (scale spec, resources spec, `perf/lib/page.ts`, the three budgets files, doc 254). Those are done; touching them is a STOP.
-- Grants: `b-round-399/grants-400.txt` (§4): the interactions spec and doc 255 only.
+- **D-29z1371: round 400 is accepted.**
+  - Evidence: C PASS in `c-round-400.json` (12 rows; `browserVerified` and `realVerified` both true; 0 bugs). Gate 400 published `c17d0e9`, covering rounds 399–400 [K1].
+  - **PERF-14b-i is done.**
+  - Closed: C-R399-01 and TL-R398-SK-M2.
+  - A's four spec Lows → A-R400-REVIEW-SPEC-LOWS (a PERF-14b-ii input). The reviewer's architecture note → signal A-R400-ARCH-READBESIDECLIP.
+- **D-29z1372: the RETRO outputs** (§1). `retro_policy.next_due` = round 416.
+- **D-29z1373: lessons.** l.3, L4 and L58 change (§1).
+- **D-29z1374: RETRO-400 deadlines (L46).** There is no answer to `user-review/questions-arch-leaf-plumbing.md` [K23], so the recorded defaults apply:
+  - SYS-R385-LEAF-ACTIONS-CONTEXT is `queued` after PERF-14c;
+  - SYS-R369 is `queued` before STEM-LANES;
+  - SYS-R388 is `queued`;
+  - ARCH-CHECKPOINT-PREVIEW-AFTER-13C gets deadline RETRO 416;
+  - B-R382-SCOPED-LOCATORS is retired.
+- **D-29z1375: order after this round** (§5). REGRESSION-2026-11-10 is entered.
+- **D-29z1376: origin re-tagging; root note.**
+  - All 4 C FAILs in the window are re-tagged B-origin.
+  - ROOT-NOTE-R387-STOP-NOT-HONOURED is recorded as recurring 4×.
+  - `root-pre-push-review.md` and `publication-checkpoint.json` date from 2026-10-07 and carry nothing new.
+
+## Rules
+- **Policy:**
+  - "Retrospective: stop, look back, improve" (Saba, 2026-10-26);
+  - "Look back on every issue Saba finds, and guard the whole screen" (2026-10-28);
+  - the RETRO journey step (2026-10-31);
+  - `backlog.json` → `retro_policy`.
+- **Window: 385–400** (16 rounds). The retro slipped one round (D-29z1369). Older ids "RETRO 400" / `RETRO-400` refer to this retro. Its file is `retros/retro-401.md`; there is no `retro-400.md`.
+- **Read `lessons.md` first.** This planning revised it, and the revision applies from round 401: l.3, L4 (l.9) and L58 (l.41) each gained one clause.
+- **L57:** C's JSON carries **all** L57 fields.
+  - Every field except `gateChecksNamed` and the four manifest fields is `null`, with the reason "RETRO: no assert specified".
+  - `gateChecksNamed` lists the gate rows below.
+  - Before hand-off, C runs `python3 -I tools/l57-check.py c-round-401.json c-round-401/l57-check.txt` and fixes its own JSON until it exits 0.
+- **L29:** untagged code text below is a row id, a loop-artifact path or a description of what C runs. The only facts about `store/` are the HEAD, the tree and the manifest [K2] [K3] [K19].
+- **L59, L60:**
+  - run every row until it has a result;
+  - run the heaviest rows (the browser rows) first;
+  - write `c-round-401/progress.json` after each row;
+  - destructive commands stay inside `c-round-401/`.
+
+**Not applicable in a RETRO round:** reference-first, the Ableton conformance check, the product-designer design step, the YouTube request and the screen budget. Nothing visible changes.
+
+## Baseline: HEAD `c17d0e9`, clean tree
+- **Gate:** gate 400 published `c17d0e9…` on both remotes [K1].
+- **Tree:** `git status --short --untracked-files=all` was empty at planning, with HEAD `c17d0e9` [K2] [K19].
+- **Frozen:** every tracked file, **1,294** entries, is listed in `b-round-400/r401-tree-sha256.txt` [K3].
+  - Check it from `store/`: `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-400/r401-tree-sha256.txt`. B ran it at planning: rc 0.
+  - Each of the 11 protected files of `b-round-318/protected-sha256.txt` appears exactly once [K4].
+- **Grants: none.** No file in `store/` may change in this round.
 
 ## 0. Why this round
-- **C round 399 FAIL, "STOPPED — routed to B"** (L22 short round). C reproduced A's STOP in the browser: on the virtualization sketch every interactions pass reports `group setup: no Ctrl+D copy next to clip <id>`, the 24 group rows have 0 samples, and 12 group asserts plus `interact.harness.drag-group-live` fail (`c-round-399/virt-interactions.json`). SOURCE-SCOPE, NO-APP-CHANGE and AUTH passed. C did not run INTERACT-HEAD, RES-*, SCALE-*, PERF-LIB, BUDGET-SHAPE or DOCS.
-- **C-R399-01 (Medium, origin B spec).** Round 399's R-b said "bring the target into the lane area before the read", and §1 also said "any deterministic row that differs from HEAD is a STOP". For the copy both cannot hold: the copy starts ≈ 4054 px right of the lane area even at HEAD, and a scroll while playing pauses Follow (`a-round-399/probe/follow-probe.txt`; `StudioWorkspace.tsx` `pauseFollowForNavigation` [K11]). B owns this conflict.
-- **This round is the bug fix first (L10), before RETRO.** RETRO moves from 400 to **401** (window 385–400, D-29z1369). Reason: the tree carries A's unverified round-399 diff; a RETRO round on that tree has no clean publish boundary.
-- **The ruling was run before dispatch (L58).** B wrote the candidate (`b-round-399/sketch-400-group-copy.patch.txt` [K9]) and ran the interactions spec alone on two scratch copies of the current tree: plain, and with `b-round-398/sketch-14bii-lane.patch.txt` [K13–K16]. Results:
-  - **Plain tree** (`b-round-399/sketch/interactions-head.log`, 483 s): rc 0, `failures` [], `problems` [] ×6, **189 of 189 deterministic rows equal** `b-round-398/perf-head-interactions.json` (`sketch/compare-head.txt`). Every pass takes the mounted path: `CopyReveals` 0, `OwnCopyObserved` true, `CopyBeforeSource` `mounted`, `PlayingFollowAtT0` `on` [K14, K16].
-  - **Virtualization sketch** (`sketch/interactions-virt.log`, 549 s): `complete` true, `abortedAt` null ×6, `problems` [] ×6, all 264 rows have 3 non-null samples. `interact.harness.drag-group-live` = 1 in every pass; `CopyReveals` 3 per branch (setup id + release read + reset read), `OwnCopyObserved` false, `CopyBeforeSource` `setup-at-rest`, `PlayingFollowAtT0` `on`. rc 1 only because of `interact.zoom.30.out.path-rewrites` (median 2, budget == 3), the known virtualization effect. All 10 group asserts pass there (e.g. `move-components-per-move` 10.906, `release-commits` 1, `playing.move-restarts` 0) [K15, K16; `sketch/group-virt.txt`].
+- **The RETRO is due.** `retro_policy.next_due` was round 400. It moved to 401 because round 400 finished C-R399-01 on an unpublished tree (D-29z1369).
+- **Nothing blocks a code-free round.**
+  - Round 400 closed the only open Medium from a C FAIL (C-R399-01).
+  - The remaining open Mediums are root-only, manual, `awaiting_user` or sketch inputs (TL-R398-SK-M1, fixed inside the PERF-14b-ii sketch before dispatch). They do not block (2026-10-23 clarification).
+- **REGRESSION is not due yet.** `regression-last.json` says 2026-11-07 [K13]. The next one is due at the first planning on or after 2026-11-10.
 
-## 1. Rulings (B)
-
-### D-29z1368: R-b′ for the Ctrl+D copy (closes the round-399 STOP, L10)
-The round-399 R-b clause "bring the target into the lane area before the interaction" is replaced, **for the group copy only**, by this conditional form. Every other R-b site keeps the round-399 rule (A's round-399 table classifies them; none needed a scroll).
-
-| Read | Rule |
+## 1. What B already produced (the objects under test)
+| File | Content |
 |---|---|
-| **Copy id** (setup, old l.914–921) | Scan mounted clips first (HEAD path, unchanged). Only when no copy is mounted: scroll the timeline scroller so the original clip's right edge sits 8 px right of the lane-area left (the copy is back-to-back after Ctrl+D), wait for quiet, scan again, restore the saved `scrollLeft` (checked within 1 px), wait for quiet |
-| **Copy at rest** (new, setup) | Read `readClipState(copy)` once in setup (stopped), with the same reveal-only-when-unmounted rule. Stored as `copyAtRest` |
-| **`copyBefore`** (both branches, before `t0`) | Live read when the copy is mounted (HEAD path). When it is not mounted: use `copyAtRest`. **No scroll before `t0`, in either branch** (this removes the Follow confound). Detail `CopyBeforeSource` = `mounted` / `setup-at-rest` |
-| **`ownCopy`** (inside the gesture, inside the measured window) | `copy.count() > 0 ? readClipState(copy) : null`. **Never scroll and never wait for the copy here.** When null, check (f) is skipped and detail `OwnCopyObserved` = false. This is not a problem: check (c) still proves the copy moved by the clip's delta after release. Listed as a virtualization-only deviation and a 14b-ii input (Q-14B-PIN-GROUP-MEMBERS) |
-| **`copyReleased` + copy lane id**, **`copyReset` + copy lane id** (after `tEnd`) | Live read when mounted; else the reveal → read → restore of row 1. When Follow was `on` before the reveal and reads otherwise after the restore, click `arrangement-follow`, blur, wait for quiet, and require `data-follow-mode` = `on` (else a problem). All of this is after `tEnd`, outside every measured window |
-| **Failed copy read (h)** | When a reveal still finds no copy, the branch does not return early: `resetAfterDrag` and `setLive` still run, and liveness failure `(h)` is recorded, so `drag-group-live` is 0 for that pass (tech-lead review, High, fixed in v2) |
-| **New check (g)** | In the playing branch, `data-follow-mode` read just before `t0` must be `on`; otherwise a liveness failure. Detail `FollowAtT0` in both branches |
+| `retros/retro-401.md` | The analysis, in Georgian with English terms, for Saba. Window 385–400, 13 sections |
+| `lessons.md` | **60 lines** [K7]. Before-copy: `b-round-400/lessons-before-401.md`. Diff: `b-round-400/lessons-diff.txt`. Three lines change: l.3, L4 (l.9) and L58 (l.41) [K18] |
+| `user-review/screen-review-401.md` | No new candidates and no new question. Captures are in `b-round-400/screens/`: `capture.mjs`, `warmup.mjs`, `capture.log`, `screen401.json`, `compare-385-401.txt` and 12 PNGs [K5] [K6] [K9] |
+| `b-round-400/*.py`, `*.sh`, `data/*` | The scripts and data behind every number. `data/retro-numbers-401.txt` is produced by `b-round-400/retro-numbers.py` |
+| `backlog.json` (v369) [K10] | <ul><li>D-29z1371…D-29z1376;</li><li>`retro_runs` 401;</li><li>`retro_policy.next_due`: round 416;</li><li>`retro_candidates` dispositions, plus the new RC-R401-ORIGIN-RETAG;</li><li>`systemic_tasks`: SYS-R385, SYS-R369 and SYS-R388 are `queued`;</li><li>ARCH-CHECKPOINT-PREVIEW-AFTER-13C has the L46 deadline;</li><li>`screen_review_candidates` SR-401-NONE;</li><li>`regression_rounds` REGRESSION-2026-11-10;</li><li>A-R400-REVIEW-SPEC-LOWS;</li><li>A-R400-ARCH-READBESIDECLIP.</li></ul> Before-copy: `b-round-400/backlog-before-401.json`. Edits: `update-backlog-part1.py` (v368) and `update-backlog-part2.py` (v369) |
+| `feature-status.md` | Round 400 is done. The next line, the STUDIO-PERFORMANCE row and a RETRO 401 row are updated (`b-round-400/update-feature-status.py`) |
 
-- **At HEAD every branch above takes the mounted path:** 0 scrolls, 0 Follow clicks, `CopyReveals` = 0, `OwnCopyObserved` = true. So every deterministic row stays equal to HEAD by construction, and C checks it.
-- **The sketch is the contract (reviewed by `tech-lead`, `b-round-399/sketch-review-400.md`: one High and two Mediums; the High and one Medium are fixed in the dispatched v2, the other Medium is the recorded (f) deviation).** A applies `b-round-399/sketch-400-group-copy.patch.txt` with `git apply` (sha256 in [K9]; `--check` is clean on the tree). It applies byte-identical: the resulting `perf/studio-lab-interactions.perf.spec.ts` has the same sha256 as `b-round-399/sketch/interactions.sketch.ts` (`fc804c3d3868f622…`). Any further edit to the spec is a STOP.
-- **No row id, kind, mode or budget changes.** `perf/budgets.interactions.json` is frozen this round.
+**Order of work (C-R215-01, RC-R336-SCRIPT-OUTPUT-DIR):**
+- The analysis scripts read the **before** copy, `b-round-400/backlog-before-401.json`, and write to `b-round-400/data/` by default.
+- **First copy the scripts to `c-round-401/scripts/`.** In the copies, rewrite every `b-round-400/data/` output path to `c-round-401/data/`, run them there, and `cmp` your outputs against B's.
+- Run order:
+  1. `collect.py`;
+  2. `cost.py` (its stdout is `cost.txt`);
+  3. `retro-numbers.py`;
+  4. the others.
 
-### D-29z1370: claims and records
-- **C-R399-LOW-CLAIMS fixed:** this round's claims expect K20 `perf/lib/page.ts` = 2 and K27 = 21 (A's round-399 deltas, both forced by the mandated work).
-- **14b-ii inputs (recorded, not scheduled now):** `interact.zoom.30.out.path-rewrites` median 2 vs budget 3 on the sketch; `res.harness.clips-1` still DOM-sourced (resources l.707); the round-399 reviewer's Lows on B's scale patch (gap check uses the `Math.max` lane count while the model row uses the sum; `box.right` includes the scrollbar; a NaN `data-clip-start` weakens the gap check; the in-window notes still open with "intersects the timeline scroller's box"); Q-14B-PIN-GROUP-MEMBERS.
+  `misc-outputs.sh` takes an output folder argument: give it `c-round-401/data`.
+- **Do not run** `update-backlog-part*.py`, `update-feature-status.py` or `edit-lessons.py`. They are not re-runnable: the `.done` markers make them refuse.
 
-## 2. Reference
-- Performance and test-harness round: exempt from the reference section and the `product-designer` consult.
-- **Ableton:** `not applicable / perf`.
-- **Screen budget (L39):** nothing visible changes.
+## 2. A: nothing to implement
+A writes `a-round-401.md` with one line: "RETRO round, no implementation." **STOP (L11):** if the frozen manifest is not rc 0, A reports the failing paths and changes nothing.
 
-## 3. What A changes
-1. Apply `b-round-399/sketch-400-group-copy.patch.txt` to `perf/studio-lab-interactions.perf.spec.ts` with `git apply` (`--check` first).
-2. Update doc 255 (granted): replace the STOP section with the R-b′ table above (Georgian, technical terms in English), add the per-site rows for the copy reads (old line → new code, class R-b′), and note that `perf/budgets.interactions.json` is unchanged. Keep l.4 byte-exact: `**სტატუსი:** In Progress (stage 2 of 4; C round 400 PASS)`. Keep the 7 TEMPLATE headings in order (L26). The word `STOP` may remain only in the problems/solutions history.
-3. Nothing else.
+## 3. C: what to verify
+C writes `c-round-401.md` and `c-round-401.json` as it goes, plus `c-round-401/progress.json` after every row. **Run order:** the browser rows first (rows 2–4), then the document rows.
 
-**No `as`, `any` or `@ts-ignore`.** A deviation from §1 is a STOP (L11).
+| # | Row | Check | PASS means |
+|---|---|---|---|
+| 1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all` in `store/`; the r401 manifest and the protected manifest | 0 lines; both rc 0 |
+| 2 | **G401-AUTH (browser)** | Fresh anonymous context at 1440×900 and 1280×720. Open `/studio-lab`, then `/studio/middle-east`, then `GET /api/studio-token?product=middle-east&file=stem.mp3` with **no** Authorization header (valid parameters, L29) | `localStorage.auth_user` is null and the workspace opens. "Sign in required" shows with 0 `audio[src]`. The token API returns **401** with body `Please sign in to access Studio.` and no token. A fake-bearer check goes under `blocked` (no backend) |
+| 3 | **STUDIO-SMOKE-401 (browser)** | Both viewports, after `Demo collection ready`: add one library item with Enter; press Play for about 1.5 s, then Stop; open Export and close it | The clip appears, the position advances and then stops, and the dialog opens and closes. Screenshots go under `c-round-401/` |
+| 4 | **RT-SCREEN (browser)** | <ul><li>Open the PNGs that `screen-review-401.md` cites and check that they show what is described.</li><li>Check `http://127.0.0.1:5199/api/products`. If it is not 200, start `node mock-api/server.mjs` in the background.</li><li>Run `b-round-400/screens/warmup.mjs` from `store/`, then `node <abs>/b-round-400/screens/capture.mjs <abs c-round-401/screens>`.</li></ul> | <ul><li>Visible-text counts are 138/168/118/144, and the outside-timeline counts are 97/124/86/101 [K5].</li><li>The journey ends at `/studio-lab?preview=middle-east` with 4 clips at left 512/1152/1792/2432 [K6].</li><li>A difference is explained (`positionAfterPlay` is wallclock), or it is a finding with `origin`.</li></ul> |
+| 5 | **CLAIMS** | `bash b-round-400/claims-401.sh`, compared with `b-round-400/claims-401-planning-output.txt` | No `MISSING`. Differences are allowed only where C's own work changes a value (none expected); each one is explained |
+| 6 | **RT-NUM** | Re-run the scripts as in §1 and `cmp` the outputs. Recompute **every number** in `retro-401.md` §1, §2, §4 and §9 from its named file. At least the list below this table | Every number matches its source. A number without a source is a finding (origin B) |
+| 7 | **RT-CAUSE** | For each row of §3 and each fact in §5, §7 and §8, open the quoted source. At least the list below this table | Each "fact" is in its source. Each opinion is labelled as `tech-lead`'s or `product-designer`'s. No cause is invented |
+| 8 | **RT-IDS** | `backlog.json`. The full list is below this table | All present, as stated |
+| 9 | **RT-LESSONS** | `lessons.md` | <ul><li>≤ 60 lines, in three parts;</li><li>the diff touches only l.3, 9 and 41 [K18];</li><li>each of l.9 and 41 keeps its old text byte for byte as a prefix and appends one clause;</li><li>l.3 changes only the retro pointer and appends one sentence;</li><li>no lesson id is lost [K12];</li><li>L23 is 5058 bytes and L58 4335, both < 5500 [K14]</li></ul> |
+| 10 | **RT-L57** | `python3 -I tools/l57-check.py c-round-400.json c-round-401/l57-c400.txt` (rc 0, K11), then the same on your own `c-round-401.json` | Both rc 0 |
+| 11 | **RT-SABA** | `retro-401.md` §12 and `screen-review-401.md` | Every rule change and screen item is phrased as information, a proposal or a question. Nothing is presented as Saba's decision. The defaults in §8 are labelled as defaults under L46, with the question still open |
+| 12 | **SOURCE-SCOPE** (end) + **L57** | As row 1; then `l57-check` on `c-round-401.json` | 0 lines and both rc 0; then rc 0 |
 
-**Forbidden:** every path outside the two grants, in particular every `app/**` file, every other `perf/**` file (A's round-399 files are frozen), the budgets files, `playwright.perf.config.ts`, the protected files, `package.json`; commit, push, stash, checkout, deploy and dev-server restarts.
+**RT-NUM: the numbers to recompute (at least).**
+- Totals: $294.13; B $181.15, A $98.51, C $14.47; B share 61.6 %.
+- Medians: round $19.16; B $11.28, A $5.695, C $0.64 [K16].
+- Costs: FAIL rounds $101.13 (34.4 %); chains $156.23 (53.1 %); C's cost in the four FAIL rounds $2.68 [K25]; RETRO 385 $10.27; REGRESSION $18.75.
+- Results: PASS 12 / FAIL [387, 391, 394, 399] / BLOCKED 0; gate skipped [385, 387, 389, 390, 391, 394, 399] [K20].
+- STOP rounds 387, 391, 394, 399 [K17].
+- The `classify` counts 5 / 44 and the deferred origins A 25 / gate 13 / C 4 / B 2.
+- L57 12/16, with 386, 390, 391 and 392 incomplete.
+- Plannings with a sketch and no review: 388, 391, 394, 395 [K21].
+- 31 gate-review findings.
 
-## 4. Grants (`b-round-399/grants-400.txt`)
-- `perf/studio-lab-interactions.perf.spec.ts` (the sketch patch only)
-- `docs/implementation/2026/quarter-IV/255-perf-harness-model-count.md` (§3 item 2)
+**RT-CAUSE: the sources to open (at least).**
+- `a-round-387.md` l.1, `a-round-391.md` l.1, `a-round-394.md` l.3 and `a-round-399.md` l.3.
+- `c-round-387/391/394/399.json` (bugs with `origin`).
+- `b-round-386/sketch-review.md`.
+- `b-round-398/sketch-review.md` ("Split after review").
+- `c-round-399.json` `affectedChecksRunOnSketch` [K24].
+- `data/l58-sketch-review-application.txt`.
+- `user-review/questions-arch-leaf-plumbing.md` (the answer line) [K23].
 
-## 5. A: checks
-**Never run two perf specs at once, and never run vitest or tsc while one runs (L38).**
+**RT-IDS: what must be in `backlog.json`.**
+- These statuses start as stated [K22]:
+  - C-R399-01 and TL-R398-SK-M2: `closed`;
+  - SYS-R385, SYS-R369 and SYS-R388: `queued`;
+  - ARCH-CHECKPOINT-PREVIEW-AFTER-13C: `L46`;
+  - B-R382-SCOPED-LOCATORS: `retired`;
+  - RC-R394 and RC-R399: `adopted`.
+- D-29z1371…D-29z1376 exist.
+- `retro_runs` has round 401.
+- `retro_policy.next_due` starts with "round 416".
+- These ids exist: RC-R401-ORIGIN-RETAG, SR-401-NONE, REGRESSION-2026-11-10, A-R400-REVIEW-SPEC-LOWS and A-R400-ARCH-READBESIDECLIP.
+- Every id that retro §11 lists exists in `deferred_low_polish` or `open_findings`.
 
-| # | Command | PASS when |
-|---|---|---|
-| A1 | Claims at start | Equal to the planning output |
-| A2 | `npm run typecheck` | rc 0 |
-| A3 | `npx vitest run --config ../tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs` | 3 files, 54 tests pass |
-| A4 | Interactions spec alone on the working tree (`npx playwright test --config playwright.perf.config.ts perf/studio-lab-interactions.perf.spec.ts`) | rc 0, `failures` [], every pass `problems` []. **All 189 deterministic rows equal `b-round-398/perf-head-interactions.json`** (per-row comparison file, as `a-round-399/compare.py`). Every pass's `drag-group-live` detail has `CopyReveals` 0 and `OwnCopyObserved` true |
-| A5 | Interactions spec alone on a scratch copy of the working tree with `b-round-398/sketch-14bii-lane.patch.txt` applied (rsync outside `store/`, `node_modules` symlinked) | VIRT-RULE (below). List every failing assert with its median. Delete the scratch by absolute path (L60) |
-| A6 | Claims at end | Only the §7 facts differ |
-| A7 | `code-reviewer` on the applied interactions diff and doc 255. It is required here even with 2 files, because B's v2 delta after the `tech-lead` review was not re-reviewed (`b-round-399/sketch-review-400.md`) | No Medium+ open. A Medium+ in the patch logic is a STOP (the spec is pinned byte-identical); a doc finding is fixed in doc 255 |
+**Flags and gate rows:**
+- **`browserVerified`:** true only if rows 2, 3 and 4 all ran at both viewports. The other rows are document checks.
+- **`gate` rows:** verify and the full suite belong to the root gate. There is no source change, so no publication is expected.
 
-- Resources and scale specs are not re-run by A: their files are frozen and A's round-399 runs stand (`a-round-399/a4-*-compare.txt`, `a5-*-summary.txt`) [K18, K19]. C re-runs them.
-- **Timeout headroom (L31):** the interactions spec ran 498 s of 900 s in round 399 [K21]. A run above 12 minutes on either tree is a STOP. Do not cut passes.
+**Verdict and routing:**
+| Result | What happens |
+|---|---|
+| Every row PASS | PASS |
+| An RT row fails (untraceable number, invented cause, missing disposition, lost clause or id) | B corrects the files at the round-402 planning; the next C round re-checks only the changed lines (RT-FIX) |
+| A browser row finds a Medium or worse in the app | It is fixed first (bug gate) |
+| A browser row finds a Low | It goes to `deferred_low_polish` |
 
-**VIRT-RULE (one rule for A5 and C's INTERACT-VIRT).** rc may be 1. It is a **FAIL** when any of these holds:
-- `complete` is not true, or any `abortedAt` is not null;
-- any pass has `problems` that is not [];
-- any row has fewer than 3 non-null samples;
-- any `interact.drag.group.*` assert fails, or `interact.harness.drag-group-live` (or `.6x`) is below 1 in any sample;
-- `playingFollowAtT0` is not `on` in any pass.
+## 4. Neighbour risk
+None in the app: no code changes. The only risk is to loop artifacts. C must not re-run B's `.done` scripts (§1).
 
-Otherwise it is a PASS. `interact.zoom.30.out.path-rewrites` failing (median 2, budget == 3) is expected; it is a 14b-ii input. Any other failing assert is listed. If it is on C's list but not on A's A5 list (or the reverse), it is a **Low**, not a FAIL.
+## 5. Order after this round (D-29z1375)
+1. **Round 402 is PERF-14b-ii, unless REGRESSION-2026-11-10 is due at that planning; if it is, the REGRESSION round goes first.** Before PERF-14b-ii is dispatched:
+   - fix `b-round-398/sketch-14bii-lane.patch.txt` for TL-R398-SK-M1 (unpin on window `blur`; remove all three listeners) and TL-R398-SK-L1;
+   - re-run VZ and the mutants;
+   - get a delta review (the L58 claim);
+   - rule Q-14B-PIN-GROUP-MEMBERS, the budget flips and the scroll ceiling;
+   - fold in A-R400-REVIEW-SPEC-LOWS.
+2. PERF-14c.
+3. SYS-R385-LEAF-ACTIONS-CONTEXT.
+4. PERF-15.
+5. SYS-R2-FAKE-FIDELITY and SYS-R388.
+6. SYS-CLOCK-DETERMINISM.
+7. SYS-R369.
+8. STEM-LANES.
+9. SYS-1…3.
+10. STORE-2b…5.
+11. REVIEW-RECOMMENDATIONS, then T12-ADVANCED.
+12. The phase-2 entries, under the skip rule.
 
-**Detail keys are per branch.** `drag-group-live` details use the keys `stoppedCopyReveals` / `playingCopyReveals`, `stoppedOwnCopyObserved` / `playingOwnCopyObserved`, `stoppedCopyBeforeSource` / `playingCopyBeforeSource` and `stoppedFollowAtT0` / `playingFollowAtT0`. Where this task writes `CopyReveals` and the other short names, it means both branches. The expected values:
-- **plain tree:** reveals 0, observed true, source `mounted`;
-- **lane sketch:** reveals 3 (the setup id reveal, the release read and the reset read), observed false, source `setup-at-rest`.
+## 6. Out of scope
+App code, tests, docs in `store/` and the protected files.
 
-**A's report, `a-round-400.md`:** each command with rc and a log under `a-round-400/`; the A4 comparison file; the A5 summary (failing asserts with medians); the `drag-group-live` detail per pass on both trees.
+## 7. Claims
+Run `bash b-round-400/claims-401.sh` from the loop root. The output at planning is in `b-round-400/claims-401-planning-output.txt` (0 `MISSING`, stderr empty).
 
-## 6. C: rows
-This is the full row set (not an L22 short round). Load `/studio-lab` once, untimed, in a browser first (L38). Heaviest first (L59). Each perf spec alone, at 1440×900 on the perf config's own production server. 1280×720 does not apply (no `app/**` change; SOURCE-SCOPE proves it).
-
-| Row | Steps | PASS when |
-|---|---|---|
-| **INTERACT-HEAD** | Interactions spec alone on the working tree; copy `latest-interactions.json` to `c-round-400/perf-results/` | rc 0, `failures` [], `complete` true, `problems` [] ×6. All 189 deterministic rows equal `b-round-398/perf-head-interactions.json` (per-row diff file). `drag-group-live` detail: `CopyReveals` 0, `OwnCopyObserved` true in every pass |
-| **INTERACT-VIRT** | Same spec alone on a scratch with `b-round-398/sketch-14bii-lane.patch.txt` | VIRT-RULE (below). Write C's failing-assert list next to A's A5 list |
-| **RES-HEAD** | Resources spec alone on the working tree | `failures` [], `problems` [] ×6; all 46 deterministic rows equal `c-round-398/perf-results/latest-resources.json` |
-| **RES-VIRT** | Resources spec alone on the virtualization scratch | `abortedAt` null, `problems` [], `res.harness.clips-2` = 2, every row non-null |
-| **SCALE-HEAD** | Scale spec alone on the working tree | `failures` [], `problems` []; 17 deterministic rows equal `b-round-398/perf-head-harness-scale.json`; `scale.clips.in-window.min-zoom-mid` = 19 |
-| **SCALE-VIRT** | Scale spec alone on the virtualization scratch | `failures` [], `problems` []; `scale.dom.page`, `.min-zoom`, `.min-zoom-mid` = 950, 1532, 1868; `scale.clips.model` = 200 |
-| **PERF-LIB** | A3's command | 3 files, ≥ 54 tests pass |
-| **BUDGET-SHAPE** | JSON diff of the three budgets files against `c3ee1d6` | Only `note` strings differ, only on the rows listed in round 399's D-29z1365 (A's `a-round-399/budget-shape.txt` is the expected shape) |
-| **NO-APP-CHANGE** | `git status --porcelain`, `git diff --stat -- app` | Only round-399 grants plus this round's two grants changed; `app` diff empty |
-| **AUTH** | Fresh context, no credentials | `/studio-lab` opens the demo; `/studio/<premium handle>` shows sign-in with no workspace; `/api/studio-token?product=<handle>&file=a.wav` without credentials is refused (4xx) |
-| **SOURCE-SCOPE** | Claims at start and end; `sha256sum -c` on `b-round-399/r400-frozen-sha256.txt` and `b-round-318/protected-sha256.txt`; `sha256sum perf/studio-lab-interactions.perf.spec.ts` equals `b-round-399/sketch/interactions.sketch.ts` (`fc804c3d3868f622…`) | Start equals the planning output; end differs only on §7; K4 0 failures; K3 11 |
-| **DOCS** | Read docs 254 and 255 | Both Georgian, 7 TEMPLATE headings in order. Doc 254 l.4 `**სტატუსი:** In Progress (stage 1 of 4; C round 398 PASS)`; doc 255 l.4 `**სტატუსი:** In Progress (stage 2 of 4; C round 400 PASS)`. Doc 255 holds the R-b′ table and per-site rows matching the diff; every id and file it cites exists. `grep -rln 'In Progress (stage' docs/implementation` = 5, `grep -rn 'C round [0-9]* pending' docs/implementation` = 0 |
-| **gate** | Full vitest, typecheck, build, Biome, verify | Marked `gate`; not claimed in `passed` |
-
-- Delete the virtualization scratch by absolute path when done (L60).
-- `browserVerified` is true only when the six perf rows ran (real Chromium runs).
-- **Ableton:** `not applicable / perf`.
-- **L57 fields in `c-round-400.json`:** `manifestPaths` (`b-round-399/r400-frozen-sha256.txt`, `b-round-318/protected-sha256.txt`), `missingPaths`, `countMismatches`, `claimCheckMinutes`, `origin` per finding, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch` (`b-round-398/perf-sketch-scale-mutant-shifted-window.log`, `perf-sketch-scale-mutant-no-filter.log`), `mutantRedOnTree` null ("no app change"), `gateChecksNamed`, `gateChecksRunOnSketch` (`b-round-398/head-perf-lib-vitest.log`), `chainHeadGateRunGreen` (gate 398 published `c3ee1d6`; gate 399 skipped), `affectedChecksNamed`, `affectedChecksRunOnSketch` (`b-round-399/sketch/interactions-head.log`, `interactions-virt.log`), `progressFile`, `stopSignal`. Run `tools/l57-check.py` before hand-off; write `c-round-400/progress.json` after each row (L59).
-
-## 7. Claims that may change during the round
-- **K2:** `c3ee1d6 9 app-diff 0` stays 9 paths (the interactions spec is already modified; doc 255 already new). `app-diff` stays 0.
-- **K6:** doc 255 l.4 → `… (stage 2 of 4; C round 400 PASS)`; headings stay ≥ 7; the `STOP` count may change.
-- **K8:** `doc255-now` changes. The two `at-planning` hashes stay.
-- **K9:** `interactions-sha` `1739d82c2aca29bf` → `fc804c3d3868f622`; `applies-to-tree` yes → no; `lane-applies` stays yes.
-- **K10:** `raw-copy-reads` 6 → 5, `mounted-copy-scan` 1 → 0, `reveal-helper` 0 → 1 (the sketch's values).
-- **K20:** stays exactly as planned (total 55; interactions 27, the sketch's own count; `perf/lib/page.ts` 2; `model-helper` 2). C-R399-LOW-CLAIMS: the page.ts 2 and K27 21 are already in the planning output.
-
-Every other fact must equal the planning output.
-
-## 8. Out of scope (recorded, not dropped)
-- **RETRO 401** (window 385–400): next round.
-- **PERF-14b-ii (after RETRO 401): clip virtualization** from `b-round-398/sketch-14bii-lane.patch.txt`. Before dispatch: TL-R398-SK-M1 (unpin on window `blur`), TL-R398-SK-L1 (cleanup on unmount), re-run VZ and the mutants, delta review; then Q-14B-PIN-GROUP-MEMBERS, the scale budget flips, the scroll-components ceiling (TL-R398-SK-L3) and the re-rule of the A5 list (`path-rewrites` 2 vs 3).
-- **PERF-14c**, **PERF-15**, then the rest of the queue unchanged. The regression round is due at the first planning on or after 2026-11-10.
-- **Architecture checkpoint still due for root:** ARCH-CHECKPOINT-PREVIEW-AFTER-13C with ARCH-CHECKPOINT-DECODE-REGION (non-blocking).
-- **Signals:** A-R398-ARCH-FIND-TIMELINE-SCROLLER, PERF-CAND-14-SCROLL-HYSTERESIS.
+| Tag | Claim |
+|---|---|
+| K1 | gate 400 published `c17d0e9` |
+| K2 | git status was 0 bytes at planning; HEAD `c17d0e9` |
+| K3 | 1,294 manifest entries |
+| K4 | each protected file appears once |
+| K5 | screen counts 138/168/118/144 |
+| K6 | journey URL and clip lefts |
+| K7 | lessons: 60 lines |
+| K8 | every cited artifact exists (`b-round-400/cited-artifacts.txt`) |
+| K9 | 12 PNGs |
+| K10 | backlog v369, last decision D-29z1376 |
+| K11 | l57-check on `c-round-400.json` rc 0 |
+| K12 | lesson ids |
+| K13 | regression-last 2026-11-07 |
+| K14 | L4 / L23 / L58 byte counts |
+| K15 | `tasks/round-400.md` equals the before-copy |
+| K16 | the B median and the cost totals |
+| K17 | the STOP rounds |
+| K18 | the lessons diff lines |
+| K19 | HEAD and the status line count at planning |
+| K20 | the FAIL / BLOCKED / gate-skipped lists |
+| K21 | plannings with a sketch patch and no `sketch-review.md` |
+| K22 | the finding and task statuses |
+| K23 | the leaf-plumbing answer line is still the template (1) and there is no decisions file (0) |
+| K24 | `c-round-399.json` records that the migrated specs were not run on a sketch by B |
+| K25 | C's cost in the four FAIL rounds |

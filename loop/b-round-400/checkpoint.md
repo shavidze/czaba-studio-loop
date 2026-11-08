@@ -1,0 +1,13 @@
+# B round 400->401 checkpoint
+- step0 before-copies taken; tasks/round-400.md copied from current-task.md; HEAD in head-at-planning.txt
+- step1 scripts copied+parametrized to b-round-400 (window 385-400), all run, outputs in b-round-400/data; stops regex '^(**|## )STOP'; gate-reviews score None for 395/396/400 = no score line in review.md (parse gap); l58-sketch-review-application.txt, new-clauses-applied.txt written
+- step2 screens captured b-round-400/screens (138/168/118/144, identical text lists to 385; journey equal except wallclock position); mock api pid in screens/mock.pid
+- step3 backlog part1 applied (v368): 400 accepted, C-R399-01/TL-R398-SK-M2 closed, D-29z1371
+- step4 user-review/screen-review-401.md written (no new candidates; 1 audio files = STORE-4 F3)
+- step5 r401 manifest 1294 rc0; git status 0 bytes; l57-check c-round-400 run
+- step6 lessons edited (3c3 9c9 41c41; L58 4335 B); backlog part2 v369 D-29z1372..1376; retro-401 draft written (sections 3,5,7-13 pending)
+- step7 retro-401.md complete (199 lines)
+- step8 claims-401.sh + planning output (0 MISSING), cited-artifacts.txt
+- step9 feature-status updated
+- step10 current-task.md, b-round-400.md, b-next.json written; mock killed; claims re-run
+- DONE: all outputs written; advisor final check done (K5 extended with outside counts; feature-status hand fix noted)
