@@ -1,0 +1,729 @@
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -11,6 +11,7 @@ import {
+   useMemo,
+   useRef,
+   useState,
++  useSyncExternalStore,
+ } from 'react';
+ import { useShallow } from 'zustand/react/shallow';
+ import {
+@@ -72,7 +73,15 @@ import {
+   trackVolumeSliderDb,
+ } from '~/lib/arrangement/track-volume-db';
+ import { audioLaneDropMessage } from '~/lib/arrangement/video';
+-import type { TimelineWindowSource } from '~/lib/arrangement/view';
++import {
++  getServerTimelinePageKey,
++  parseTimelinePageKey,
++  readTimelinePage,
++  spanInTimelineWindow,
++  type TimelineWindowSource,
++  timelinePageKey,
++  timelinePageWindow,
++} from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import type { ArrangementTrack } from '~/types/arrangement';
+ import { ArrangementClipView } from './ArrangementClip';
+@@ -168,6 +177,10 @@ interface ArrangementLaneProps {
+   timelineWindow?: TimelineWindowSource;
+ }
+ 
++function noLaneWindowSubscription(): () => void {
++  return () => {};
++}
++
+ const LANE_FOLD_CHEVRON_RIGHT = (
+   <ChevronRight className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+ );
+@@ -286,6 +299,62 @@ export function ArrangementLane({
+     () => new Set(laneMoveSourceKey === '' ? [] : laneMoveSourceKey.split('\n')),
+     [laneMoveSourceKey],
+   );
++  const getLanePageKey = useCallback(
++    () =>
++      timelineWindow
++        ? timelinePageKey(
++            readTimelinePage(timelineWindow.getTimelineView, timelineWindow.getTimelineViewportPx),
++          )
++        : '',
++    [timelineWindow],
++  );
++  const lanePageKey = useSyncExternalStore(
++    timelineWindow?.subscribeTimelineScroll ?? noLaneWindowSubscription,
++    getLanePageKey,
++    getServerTimelinePageKey,
++  );
++  const gesturePinsRef = useRef(new Map<number, { clipId: string; unpin: () => void }>());
++  const laneWindow = timelinePageWindow(parseTimelinePageKey(lanePageKey));
++  const gestureClipIds = new Set([...gesturePinsRef.current.values()].map((pin) => pin.clipId));
++  const mountedClips = clips.filter(
++    (clip) =>
++      laneMoveSourceIds.has(clip.id) ||
++      gestureClipIds.has(clip.id) ||
++      spanInTimelineWindow(
++        clip.start * pxPerSecond,
++        (clip.start + clip.duration) * pxPerSecond,
++        laneWindow,
++      ),
++  );
++  const handleClipPointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
++    const clipId =
++      event.target instanceof Element
++        ? event.target.closest<HTMLElement>('[data-clip-id]')?.dataset.clipId
++        : undefined;
++    if (clipId === undefined) {
++      return;
++    }
++    const pins = gesturePinsRef.current;
++    const pointerId = event.pointerId;
++    pins.get(pointerId)?.unpin();
++    const finish = (end: globalThis.PointerEvent) => {
++      if (end.pointerId === pointerId) {
++        unpin();
++      }
++    };
++    function unpin() {
++      window.removeEventListener('pointerup', finish, true);
++      window.removeEventListener('pointercancel', finish, true);
++      window.removeEventListener('blur', unpin);
++      if (pins.get(pointerId)?.unpin === unpin) {
++        pins.delete(pointerId);
++      }
++    }
++    pins.set(pointerId, { clipId, unpin });
++    window.addEventListener('pointerup', finish, true);
++    window.addEventListener('pointercancel', finish, true);
++    window.addEventListener('blur', unpin);
++  };
+   const sourceTitle = (sourceId: string) =>
+     videoSources.get(sourceId)?.name ??
+     collection.sources.find((source) => source.id === sourceId)?.title ??
+@@ -410,6 +479,15 @@ export function ArrangementLane({
+ 
+   useEffect(() => () => panBlurSuppressionCleanupRef.current?.(), []);
+ 
++  useEffect(() => {
++    const pins = gesturePinsRef.current;
++    return () => {
++      for (const pin of [...pins.values()]) {
++        pin.unpin();
++      }
++    };
++  }, []);
++
+   const suppressPanPointerAfterBlur = (pointerId: number) => {
+     panBlurSuppressionCleanupRef.current?.();
+     const release = (end: globalThis.PointerEvent) => {
+@@ -945,6 +1023,7 @@ export function ArrangementLane({
+         }}
+         data-grid-seconds={gridSeconds}
+         data-grid-lines={gridLinesState}
++        onPointerDownCapture={handleClipPointerDownCapture}
+         onPointerDown={(event) => onBackgroundPointerDown(event, track.id)}
+         onContextMenu={(event) => {
+           event.preventDefault();
+@@ -1048,7 +1127,7 @@ export function ArrangementLane({
+             </div>
+           );
+         })}
+-        {clips.map((clip) => {
++        {mountedClips.map((clip) => {
+           const videoSource = isVideo ? videoSources.get(clip.sourceId) : undefined;
+           return (
+             <ArrangementClipView
+diff --git a/app/lib/arrangement/__tests__/lane-virtualization.test.tsx b/app/lib/arrangement/__tests__/lane-virtualization.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/lane-virtualization.test.tsx
+@@ -0,0 +1,284 @@
++import { act, fireEvent, render } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import {
++  type ArrangementContextValue,
++  ArrangementProvider,
++  useArrangement,
++} from '~/contexts/ArrangementContext';
++import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
++import { createArrangement } from '../model';
++import { createWorkspaceTestEnvironment } from './helpers/workspace-test-environment';
++
++vi.mock('@remix-run/react', () => ({
++  Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
++    <a href={to} className={className}>
++      {children}
++    </a>
++  ),
++}));
++
++const {
++  fakeClock,
++  FakeAudioContext,
++  FakeOfflineAudioContext,
++  FakeAudioBuffer,
++  FakeResizeObserver,
++} = createWorkspaceTestEnvironment();
++
++const SCROLLER_TEST_ID = 'arrangement-timeline-scroller';
++const HEADER_PX = 224;
++const VIEWPORT_PX = 1216;
++const LANE_ROW_PX = 100;
++const layout = { scrollerWidth: VIEWPORT_PX + HEADER_PX };
++
++const windowCollection: WorkspaceCollection = {
++  id: 'window',
++  label: 'window',
++  origin: 'demo',
++  sources: [
++    { id: 'song', title: 'Song', collectionLabel: 'window', kind: 'music', origin: 'demo' },
++  ],
++  loadSource: async () => new AudioBuffer({ length: 20000, numberOfChannels: 1, sampleRate: 100 }),
++};
++
++const WINDOW_CLIPS: ArrangementClip[] = [
++  { id: 'near', trackId: 'music', sourceId: 'song', start: 0, sourceOffset: 0, duration: 50 },
++  { id: 'far', trackId: 'music', sourceId: 'song', start: 150, sourceOffset: 0, duration: 50 },
++];
++
++function windowArrangement(): Arrangement {
++  const base = createArrangement([
++    { id: 'video', kind: 'video', name: 'Video' },
++    { id: 'music', kind: 'audio', name: 'Music' },
++    { id: 'sfx', kind: 'audio', name: 'SFX' },
++  ]);
++  return { ...base, clips: WINDOW_CLIPS };
++}
++
++interface WindowApiRef {
++  current: ArrangementContextValue | null;
++}
++
++function WindowProbe({ api }: { api: WindowApiRef }) {
++  api.current = useArrangement();
++  return null;
++}
++
++function live(api: WindowApiRef): ArrangementContextValue {
++  if (!api.current) {
++    throw new Error('provider not mounted');
++  }
++  return api.current;
++}
++
++async function mountWindowWorkspace(pxPerSecond: number) {
++  const api: WindowApiRef = { current: null };
++  const view = render(
++    <ArrangementProvider collection={windowCollection} initialArrangement={windowArrangement()}>
++      <StudioWorkspace />
++      <WindowProbe api={api} />
++    </ArrangementProvider>,
++  );
++  await act(async () => {
++    await Promise.resolve();
++    await Promise.resolve();
++  });
++  act(() => live(api).setPxPerSecond(pxPerSecond));
++  const mounted = (): string[] =>
++    [...view.container.querySelectorAll<HTMLElement>('[data-clip-id]')]
++      .map((clip) => clip.dataset.clipId ?? '')
++      .sort();
++  const musicCount = (): string | null =>
++    view.container
++      .querySelector<HTMLElement>('[data-track-id="music"]')
++      ?.getAttribute('data-clip-count') ?? null;
++  const scrollTo = (left: number) => {
++    const scroller = view.getByTestId(SCROLLER_TEST_ID);
++    scroller.scrollLeft = left;
++    fireEvent.scroll(scroller);
++  };
++  const header = (clipId: string): HTMLElement => {
++    const root = view.container.querySelector<HTMLElement>(`[data-clip-id="${clipId}"]`);
++    const first = root?.firstElementChild;
++    if (!root || !(first instanceof HTMLElement)) {
++      throw new Error(`clip ${clipId} not mounted`);
++    }
++    for (const [name, value] of [
++      ['setPointerCapture', () => undefined],
++      ['hasPointerCapture', () => false],
++      ['releasePointerCapture', () => undefined],
++    ] as const) {
++      Object.defineProperty(root, name, { configurable: true, value });
++    }
++    return first;
++  };
++  return { api, view, mounted, musicCount, scrollTo, header };
++}
++
++beforeEach(() => {
++  fakeClock.base = 0;
++  layout.scrollerWidth = VIEWPORT_PX + HEADER_PX;
++  vi.stubGlobal('AudioContext', FakeAudioContext);
++  vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++  vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++  vi.stubGlobal('requestAnimationFrame', () => 1);
++  vi.stubGlobal('cancelAnimationFrame', () => undefined);
++  vi.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(function stubClientWidth(
++    this: Element,
++  ) {
++    return this.getAttribute('data-testid') === SCROLLER_TEST_ID ? layout.scrollerWidth : 0;
++  });
++});
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.restoreAllMocks();
++});
++
++describe('PERF-14b lane clip virtualization', { timeout: 15_000 }, () => {
++  it('VZ1 an unmeasured viewport mounts every clip', async () => {
++    layout.scrollerWidth = 0;
++    const { mounted, musicCount } = await mountWindowWorkspace(40);
++    expect(mounted()).toEqual(['far', 'near']);
++    expect(musicCount()).toBe('2');
++  });
++
++  it('VZ2 a measured viewport mounts only the clips inside the page window; the count stays the model', async () => {
++    const { mounted, musicCount } = await mountWindowWorkspace(40);
++    expect(mounted()).toEqual(['near']);
++    expect(musicCount()).toBe('2');
++  });
++
++  it('VZ3 scrolling across pages mounts and unmounts clips', async () => {
++    const { mounted, scrollTo, musicCount } = await mountWindowWorkspace(40);
++    scrollTo(3000);
++    expect(mounted()).toEqual(['near']);
++    scrollTo(4000);
++    expect(mounted()).toEqual(['far']);
++    scrollTo(0);
++    expect(mounted()).toEqual(['near']);
++    expect(musicCount()).toBe('2');
++  });
++
++  it('VZ4 zooming out brings a far clip into the window', async () => {
++    const { api, mounted } = await mountWindowWorkspace(40);
++    act(() => live(api).setPxPerSecond(20));
++    expect(mounted()).toEqual(['near']);
++    act(() => live(api).setPxPerSecond(10));
++    expect(mounted()).toEqual(['far', 'near']);
++  });
++
++  it('VZ5 a clip under an active pointer gesture stays mounted until the pointer is released', async () => {
++    const { mounted, scrollTo, header } = await mountWindowWorkspace(40);
++    fireEvent.pointerDown(header('near'), { button: 0, buttons: 1, pointerId: 7, clientX: 300 });
++    scrollTo(4000);
++    expect(mounted()).toEqual(['far', 'near']);
++    fireEvent.pointerUp(window, { pointerId: 7, clientX: 300 });
++    scrollTo(5000);
++    expect(mounted()).toEqual(['far']);
++  });
++
++  it('VZ6 a lane-move source outside the window stays mounted while the move is held', async () => {
++    const { api, mounted } = await mountWindowWorkspace(40);
++    act(() =>
++      live(api).setClipLaneDrag({
++        ghosts: [
++          {
++            clipId: 'far',
++            trackId: 'sfx',
++            start: 150,
++            duration: 50,
++            blocked: false,
++            message: null,
++          },
++        ],
++        timeLocked: false,
++      }),
++    );
++    expect(mounted()).toEqual(['far', 'near']);
++    act(() => live(api).setClipLaneDrag(null));
++    expect(mounted()).toEqual(['near']);
++  });
++
++  it('VZ7 select-all does not mount clips outside the window, and Delete still reaches them', async () => {
++    const { api, mounted, musicCount } = await mountWindowWorkspace(40);
++    act(() => live(api).selectAllClips());
++    expect(live(api).getSelectedClipIds()).toEqual(expect.arrayContaining(['near', 'far']));
++    expect(mounted()).toEqual(['near']);
++    act(() => live(api).deleteSelection());
++    expect(musicCount()).toBe('0');
++    expect(mounted()).toEqual([]);
++  });
++
++  it('VZ8 a window blur during a press unpins the clip, so the next scroll unmounts it', async () => {
++    const { mounted, scrollTo, header } = await mountWindowWorkspace(40);
++    fireEvent.pointerDown(header('near'), { button: 0, buttons: 1, pointerId: 8, clientX: 300 });
++    scrollTo(4000);
++    expect(mounted()).toEqual(['far', 'near']);
++    act(() => {
++      window.dispatchEvent(new Event('blur'));
++    });
++    scrollTo(5000);
++    expect(mounted()).toEqual(['far']);
++  });
++
++  it('VZ9 unmounting the workspace during a press removes every window listener the press added', async () => {
++    const { view, header } = await mountWindowWorkspace(40);
++    const target = header('near');
++    const pressTypes = new Set(['pointerup', 'pointercancel', 'blur']);
++    const addSpy = vi.spyOn(window, 'addEventListener');
++    fireEvent.pointerDown(target, { button: 0, buttons: 1, pointerId: 6, clientX: 300 });
++    const added = addSpy.mock.calls.filter(([type]) => pressTypes.has(type));
++    addSpy.mockRestore();
++    expect(added.filter(([type]) => type === 'blur').length).toBeGreaterThanOrEqual(2);
++    const removeSpy = vi.spyOn(window, 'removeEventListener');
++    view.unmount();
++    const removed = removeSpy.mock.calls;
++    const captureOf = (options: boolean | EventListenerOptions | undefined): boolean =>
++      typeof options === 'boolean' ? options : (options?.capture ?? false);
++    const leftover = added.filter(
++      ([type, listener, options]) =>
++        !removed.some(
++          ([removedType, removedListener, removedOptions]) =>
++            removedType === type &&
++            removedListener === listener &&
++            captureOf(removedOptions) === captureOf(options),
++        ),
++    );
++    expect(leftover.map(([type]) => type)).toEqual([]);
++  });
++
++  it('VZ10 a same-lane group member outside the window mounts at its preview position mid-gesture', async () => {
++    const { api, view, mounted, scrollTo, header } = await mountWindowWorkspace(40);
++    view.container.querySelectorAll<HTMLElement>('[data-track-id]').forEach((row, index) => {
++      Object.defineProperty(row, 'getBoundingClientRect', {
++        configurable: true,
++        value: () => new DOMRect(0, index * LANE_ROW_PX, 800, LANE_ROW_PX),
++      });
++    });
++    act(() => live(api).selectClips(['near', 'far']));
++    const grip = header('near');
++    const root = view.container.querySelector<HTMLElement>('[data-clip-id="near"]');
++    if (!root) {
++      throw new Error('near not mounted');
++    }
++    const y = LANE_ROW_PX * 1.5;
++    fireEvent.pointerDown(grip, { button: 0, buttons: 1, pointerId: 9, clientX: 300, clientY: y });
++    fireEvent.pointerMove(root, { buttons: 1, pointerId: 9, clientX: 340, clientY: y });
++    fireEvent.pointerMove(root, { buttons: 1, pointerId: 9, clientX: 380, clientY: y });
++    expect(mounted()).toEqual(['near']);
++    scrollTo(4000);
++    expect(mounted()).toEqual(['far', 'near']);
++    const far = view.container.querySelector<HTMLElement>('[data-clip-id="far"]');
++    expect(far?.dataset.clipStart).toBe('152.000');
++    fireEvent.pointerUp(root, { pointerId: 9, clientX: 380, clientY: y });
++    expect(
++      live(api)
++        .getArrangement()
++        .clips.find((clip) => clip.id === 'far')?.start,
++    ).toBe(152);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx b/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx
+--- a/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx
+@@ -183,6 +183,22 @@ function columnsOf(view: GateView, clipId: string): number {
+   return Number((svg.getAttribute('viewBox') ?? '').split(' ')[2]);
+ }
+ 
++function pinOutsideClips(api: GateApiRef) {
++  act(() =>
++    live(api).setClipLaneDrag({
++      ghosts: GATE_CLIPS.map((clip) => ({
++        clipId: clip.id,
++        trackId: 'video',
++        start: clip.start,
++        duration: clip.duration,
++        blocked: false,
++        message: null,
++      })),
++      timeLocked: false,
++    }),
++  );
++}
++
+ function scrollTo(view: GateView, left: number) {
+   const scroller = view.getByTestId(SCROLLER_TEST_ID);
+   scroller.scrollLeft = left;
+@@ -234,6 +250,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG2 a band crossing rebuilds only the clips inside the window', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     expect(waveformPeakColumns(50, 40)).not.toBe(waveformPeakColumns(50, 20));
+     expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 40));
+     expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+@@ -244,6 +261,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG3 a scroll that brings a stale clip into the window rebuilds it at the new band', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     act(() => live(api).setPxPerSecond(20));
+     expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+     scrollTo(view, 3000);
+@@ -253,6 +271,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG4 zooming back while the stale clip is outside keeps it at its old band', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     act(() => live(api).setPxPerSecond(20));
+     act(() => live(api).setPxPerSecond(40));
+     expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 40));
+@@ -266,6 +285,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG5 a real anchored zoom gates by the pending view, not the old scroll', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     act(() => live(api).setPxPerSecond(20));
+     act(() => live(api).seekTo(175));
+     scrollTo(view, 3000);
+diff --git a/perf/budgets.interactions.json b/perf/budgets.interactions.json
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -1973,10 +1973,10 @@
+     "mode": "assert",
+     "budget": {
+       "op": "==",
+-      "value": 3
++      "value": 2
+     },
+     "owner": "PERF-3c",
+-    "note": "1x only. Waveform path d rewrites over the 10 keys (MutationObserver from perf/lib/zoom-probe.ts: attribute d on a path inside [data-testid=\"arrangement-clip-waveform\"]; fade and envelope paths do not count). detail.perKey lists them. The out-first path crosses the 25 px/s column band on key 3 and back on key 8. Since PERF-3d (doc 223) a crossing rebuilds only the waveforms inside the three-viewport timeline window; a clip outside keeps its previous path until a scroll brings it into the window. At 1440x900 with 30 clips: key 3 rewrites 1, key 4 rewrites 1 (the anchored scroll brings one stale clip into the window), key 8 rewrites 1. Was 60 before PERF-3d (each crossing rewrote all 30)."
++    "note": "1x only. Waveform path d rewrites over the 10 keys (MutationObserver from perf/lib/zoom-probe.ts: attribute d on a path inside [data-testid=\"arrangement-clip-waveform\"]; fade and envelope paths do not count). detail.perKey lists them. The out-first path crosses the 25 px/s column band on key 3 and back on key 8. Since PERF-3d (doc 223) a crossing rebuilds only the waveforms inside the three-viewport timeline window; a clip outside keeps its previous path until a scroll brings it into the window. Since PERF-14b-ii (lane clip virtualization) a clip outside the lane's page window is not mounted, so the clip the anchored scroll on key 4 brings into the window mounts fresh at the new band instead of rewriting its path. At 1440x900 with 30 clips: key 3 rewrites 1, key 8 rewrites 1 (perKey 0,0,1,0,0,0,0,1,0,0). Was 3 from PERF-3d to PERF-14b-i (key 4 rewrote the stale clip) and 60 before PERF-3d (each crossing rewrote all 30)."
+   },
+   {
+     "id": "interact.zoom.30.out.ruler-mutations",
+diff --git a/perf/budgets.scale.json b/perf/budgets.scale.json
+--- a/perf/budgets.scale.json
++++ b/perf/budgets.scale.json
+@@ -16,10 +16,13 @@
+     "metric": "page",
+     "unit": "elements",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 2000
++    },
+     "owner": "PERF-14a",
+-    "note": "document.querySelectorAll('*').length with 200 clips at the default zoom, scrollLeft 0. record — not run on sketch (L58)"
++    "note": "document.querySelectorAll('*').length with 200 clips at the default zoom, scrollLeft 0. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 950 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log"
+   },
+   {
+     "id": "scale.dom.clip-subtree",
+@@ -38,10 +41,13 @@
+     "metric": "model",
+     "unit": "count",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "==",
++      "value": 200
++    },
+     "owner": "PERF-14a",
+-    "note": "Sum of the lane model clip counts (data-clip-count on [data-track-id][data-clip-count]); independent of mounting. record — not run on sketch (L58)"
++    "note": "Sum of the lane model clip counts (data-clip-count on [data-track-id][data-clip-count]); independent of mounting. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 200 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log"
+   },
+   {
+     "id": "scale.clips.mounted",
+@@ -104,10 +110,13 @@
+     "metric": "components-per-key",
+     "unit": "components / key",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 60
++    },
+     "owner": "PERF-14a",
+-    "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)"
++    "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 42.4 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log"
+   },
+   {
+     "id": "scale.zoom.keydown-p95-ms.6x",
+@@ -148,10 +157,13 @@
+     "metric": "components-per-key",
+     "unit": "components / key",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 60
++    },
+     "owner": "PERF-14a",
+-    "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)"
++    "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 42.4 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log"
+   },
+   {
+     "id": "scale.dom.page.min-zoom",
+@@ -159,10 +171,13 @@
+     "metric": "page",
+     "unit": "elements",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 2000
++    },
+     "owner": "PERF-14a",
+-    "note": "document.querySelectorAll('*').length at the Zoom slider minimum. record — not run on sketch (L58)"
++    "note": "document.querySelectorAll('*').length at the Zoom slider minimum. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 1532 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log"
+   },
+   {
+     "id": "scale.clips.mounted.min-zoom",
+@@ -192,10 +207,13 @@
+     "metric": "page",
+     "unit": "elements",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 2000
++    },
+     "owner": "PERF-14a",
+-    "note": "document.querySelectorAll('*').length at minimum zoom with scrollLeft = round((scrollWidth - clientWidth) / 2). record — not run on sketch (L58)"
++    "note": "document.querySelectorAll('*').length at minimum zoom with scrollLeft = round((scrollWidth - clientWidth) / 2). PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 1868 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log"
+   },
+   {
+     "id": "scale.clips.mounted.min-zoom-mid",
+@@ -236,10 +254,13 @@
+     "metric": "components-per-step",
+     "unit": "components / key",
+     "kind": "deterministic",
+-    "mode": "record",
+-    "budget": null,
++    "mode": "assert",
++    "budget": {
++      "op": "<=",
++      "value": 140
++    },
+     "owner": "PERF-14a",
+-    "note": "Rendered components from each scroll step until quiet, over 4 steps, divided by 4. Per scroll step; the unit reads \"/ key\" because perf/lib/determinism.ts has no \"/ step\" exact unit (precedent interact.zoom.30.wheel.commits-per-step). record — not run on sketch (L58)"
++    "note": "Rendered components from each scroll step until quiet, over 4 steps, divided by 4. Per scroll step; the unit reads \"/ key\" because perf/lib/determinism.ts has no \"/ step\" exact unit (precedent interact.zoom.30.wheel.commits-per-step). Ceiling (PERF-14b-ii, TL-R398-SK-L3): <= 140 against the virtualized lane's 116.5 (min = max over 3 passes, b-round-401/perf-sketch-scale-run1.json and run2.json). This is a known, accepted cost and not a target: HEAD without virtualization measures 57.75, and a page crossing mounts the next page's clips once, so the per-step work roughly doubles while the page DOM is 4.5x smaller. Hysteresis is the later candidate PERF-CAND-14-SCROLL-HYSTERESIS."
+   },
+   {
+     "id": "scale.scroll.loaf-max-ms",
+diff --git a/perf/studio-lab-interactions.perf.spec.ts b/perf/studio-lab-interactions.perf.spec.ts
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -977,6 +977,14 @@ async function setupGroupClips(
+   await page.keyboard.press('Control+d');
+   await expectModelClipCount(page, 2);
+   await waitForQuiet(page, from, settleMs);
++  const again = await clipHeaderPoint(clip);
++  await page.keyboard.down('Control');
++  try {
++    await page.mouse.click(again.x, again.y);
++  } finally {
++    await page.keyboard.up('Control');
++  }
++  await waitForQuiet(page, await nowIn(page), settleMs);
+   const findCopyId = async (): Promise<string | undefined> => {
+     const ids = await audioClips(page).evaluateAll((clips) =>
+       clips.map((element) => element.getAttribute('data-clip-id') ?? ''),
+@@ -987,44 +995,27 @@ async function setupGroupClips(
+     page,
+     clip,
+     async () => (await findCopyId()) !== undefined,
+-    findCopyId,
++    async () => {
++      const id = await findCopyId();
++      return id === undefined ? null : { id, state: await readClipState(clipById(page, id)) };
++    },
+     result.problems,
+     'group setup',
+   );
+-  const copyId = found?.value;
+   if (found === null) {
+     return null;
+   }
+-  if (copyId === undefined) {
++  if (found.value === null) {
+     result.problems.push(`group setup: no Ctrl+D copy next to clip ${clipId}`);
+     return null;
+   }
+-  const copy = clipById(page, copyId);
+-  const atRest = await readBesideClip(
+-    page,
+-    clip,
+-    async () => (await copy.count()) > 0,
+-    () => readClipState(copy),
+-    result.problems,
+-    'group setup',
+-  );
+-  if (atRest === null) {
+-    return null;
+-  }
+-  const again = await clipHeaderPoint(clip);
+-  await page.keyboard.down('Control');
+-  try {
+-    await page.mouse.click(again.x, again.y);
+-  } finally {
+-    await page.keyboard.up('Control');
+-  }
+-  await waitForQuiet(page, await nowIn(page), settleMs);
++  const copy = clipById(page, found.value.id);
+   return {
+     clip,
+     copy,
+     undoBefore,
+     before,
+-    copyAtRest: atRest.value,
++    copyAtRest: found.value.state,
+     copyIdRevealed: found.revealed,
+   };
+ }
+@@ -1292,9 +1283,17 @@ async function measureGroupDrag(
+   const copyResetTrackId = resetCopy?.value.trackId ?? null;
+ 
+   const failed: string[] = [];
+-  if (ownCopy !== null && ownCopy.start === copyBefore.start) {
++  if (copyMountedBefore && ownCopy !== null && ownCopy.start === copyBefore.start) {
+     failed.push(`(f) the copy's start ${ownCopy.start} did not move on the own-lane read`);
+   }
++  if (copyMountedBefore && ownCopy === null) {
++    failed.push('(f) the copy was mounted at t0 but not on the own-lane read');
++  }
++  if (!copyMountedBefore && ownCopy !== null) {
++    failed.push(
++      '(f) the copy started outside the page window but was mounted on the own-lane read; same-lane group members are not pinned (D-29z1379)',
++    );
++  }
+   if (copyReleased === null || copyReset === null) {
+     failed.push(
+       `(h) the copy was unreadable after a reveal (release ${copyReleased !== null}, reset ${copyReset !== null})`,
+@@ -1322,8 +1321,9 @@ async function measureGroupDrag(
+   }
+   const releaseDelta = Number(released.start) - Number(before.start);
+   const copyDelta =
+-    copyReleased === null ? Number.NaN : Number(copyReleased.start) - Number(copyBefore.start);
++    copyReleased === null ? null : Number(copyReleased.start) - Number(copyBefore.start);
+   if (
++    copyDelta === null ||
+     releasedTrackId !== target.clipTrackId ||
+     copyReleasedTrackId !== target.clipTrackId ||
+     !(releaseDelta > 0) ||
+@@ -1358,7 +1358,7 @@ async function measureGroupDrag(
+     [`${state}CrossGhostStart`]: crossGhosts.targetStart ?? '',
+     [`${state}BackDocumentGhosts`]: backGhosts.document,
+     [`${state}ReleaseDelta`]: roundTo(releaseDelta, 3),
+-    [`${state}CopyDelta`]: roundTo(copyDelta, 3),
++    [`${state}CopyDelta`]: copyDelta === null ? '' : roundTo(copyDelta, 3),
+     [`${state}Reset`]: JSON.stringify(reset),
+   });
+   for (const failure of failed) {

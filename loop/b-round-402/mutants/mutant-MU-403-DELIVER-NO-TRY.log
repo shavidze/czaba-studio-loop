@@ -1,0 +1,88 @@
+
+ RUN  v4.0.16 /tmp/b403-sketch
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts (33 tests | 2 failed) 467ms
+     ✓ PW1 equals computePeaks byte for byte across rates, lengths, chunk sizes and channel counts  393ms
+     ✓ PW1b keeps NaN, -0 and infinity handling identical 0ms
+     ✓ PW2 bucket count matches computePeaks, including empty and invalid input 0ms
+     ✓ accumulates chunks, acks with the same arrays and transfers the peaks on end 4ms
+     ✓ cancel drops the job without a done reply 0ms
+     ✓ PW4 streams bounded, reused chunks to one worker and delivers its peaks 11ms
+     ✓ PW5 delivers the worker reply object itself (no main-thread recompute) 1ms
+     ✓ PW6 without Worker computes synchronously on the main thread 1ms
+     ✓ PW7 abort drops the job, posts cancel and runs the next job 3ms
+     ✓ PW7b an abort after the last chunk drops the done reply 0ms
+     ✓ PW8 a worker error falls back to main-thread peaks for pending jobs 1ms
+     ✓ PW20 an empty buffer gets its peaks at once on the main thread and starts no worker 0ms
+     ✓ PW9 after the first reply, a stalled worker falls back after the stall timeout 2ms
+     ✓ PW14 a worker that has not replied yet gets the cold-start budget, not the stall timeout 1ms
+     ✓ PW15 every worker reply re-arms the stall timer 1ms
+     ✓ PW10 runs jobs one at a time in request order 0ms
+     ✓ PW14b pins the cold-start and stall budgets 0ms
+     ✓ PW24 an unparsable message before the first reply keeps the cold-start budget 1ms
+     ✓ PW24b an unparsable message while the worker is idle keeps the cold-start budget for the next job 1ms
+     ✓ PW25 dispose resets the first-reply flag, so a new worker gets the cold-start budget again 1ms
+     × PW26 without Worker a throwing onPeaks does not throw from request and rethrows on a timer 6ms
+     ✓ PW27 a worker failure delivers the jobs behind one whose main-thread peaks throw, and rethrows on a timer 1ms
+     ✓ PW29 a failing post inside request still throws the peak error of the requesting job from request, with no deferred rethrow 1ms
+     ✓ PW28 without Worker a throwing main-thread peak computation still throws from request 0ms
+     ✓ PW11 the source becomes ready only after done, with the worker peaks as its sourcePeaks 18ms
+     ✓ PW18 playback started while peaks run leaves the clip out, then re-syncs it in when the source is ready 7ms
+     ✓ PW12 a request made inside onPeaks keeps every queued job and delivers all of them in order 1ms
+     ✓ PW13 a throwing postMessage on begin falls back to main-thread peaks at once and turns the worker off 1ms
+     ✓ PW13 a throwing postMessage on chunk falls back to main-thread peaks at once and turns the worker off 1ms
+     ✓ PW13b a throwing postMessage on end turns the worker off without a stray timer 2ms
+     ✓ PW13b a throwing postMessage on cancel turns the worker off without a stray timer 1ms
+     × PW16 a throwing onPeaks still starts and delivers the next job and rethrows on a timer 1ms
+     ✓ PW17 a worker failure delivers every pending job even when one onPeaks throws, and rethrows on a timer 1ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 31 passed (33)
+   Start at  06:36:46
+   Duration  1.55s (transform 426ms, setup 0ms, import 575ms, tests 467ms, environment 389ms)
+
+
+::error file=/tmp/b403-sketch/app/lib/arrangement/__tests__/peaks-worker.test.ts,title=app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW26 without Worker a throwing onPeaks does not throw from request and rethrows on a timer,line=591,column=11::AssertionError: expected [Function] to not throw an error but 'Error: main-thread onPeaks failed' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"Error: main-thread onPeaks failed"%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:591:11%0A%0A
+
+::error file=/tmp/b403-sketch/app/lib/arrangement/__tests__/peaks-worker.test.ts,title=app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW16 a throwing onPeaks still starts and delivers the next job and rethrows on a timer,line=967,column=60::AssertionError: expected [Function] to not throw an error but 'Error: first onPeaks failed' was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0A"Error: first onPeaks failed"%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:967:60%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW26 without Worker a throwing onPeaks does not throw from request and rethrows on a timer
+AssertionError: expected [Function] to not throw an error but 'Error: main-thread onPeaks failed' was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+"Error: main-thread onPeaks failed"
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:591:11
+    589|         },
+    590|       ),
+    591|     ).not.toThrow();
+       |           ^
+    592|     expect(results).toEqual(['delivered']);
+    593|     expect(() => vi.runOnlyPendingTimers()).toThrow('main-thread onPea…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW12-PW13 peaks client robustness (A-R312 review) > PW16 a throwing onPeaks still starts and delivers the next job and rethrows on a timer
+AssertionError: expected [Function] to not throw an error but 'Error: first onPeaks failed' was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+"Error: first onPeaks failed"
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:967:60
+    965|     worker.run(worker.posted[1].message);
+    966|     vi.useFakeTimers();
+    967|     expect(() => worker.run(worker.posted[2].message)).not.toThrow();
+       |                                                            ^
+    968|     expect(results).toEqual(['first']);
+    969|     const begins = worker.posted.filter((entry) => entry.message.type …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

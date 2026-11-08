@@ -1,0 +1,15 @@
+# Consult: PERF-14c-ii design (B round 402 -> 403 planning)
+
+`performance-optimizer` (read-only, on B's consult list), one real run, 2026-11-08, on HEAD 7d7d7b2 and B's premise files `probe/head-minzoom-*.json`. Summary of its answer (data, recorded for the PERF-14c-ii planning; not a dispatched task):
+
+1. **Where the 6x zoom time goes.**
+   - Default zoom: keys that leave columns at the 4096 cap still take ~48 ms while the `useMemo` in `ArrangementPeakPath` hits, so path building is not the floor; the floor is SVG re-raster of the ~8k-vertex path under `preserveAspectRatio="none"` and/or the React render of each mounted clip (`pxPerSecond` changes). Keys that also change columns (2534↔4096) are ~8 ms slower.
+   - Near min zoom: 159 columns per clip, no path rebuild; mounted clips swing 16↔24 every key. The cost is mount/unmount churn, which a pyramid or canvas does not touch; its fix belongs to the PERF-14b window (hysteresis / page boundary; PERF-CAND-14-SCROLL-HYSTERESIS).
+   - Measurement before writing 14c-ii: at 6x, ≥ 10 keys, medians (Event Timing has 8 ms steps): mutant A `PEAK_SHAPE_MAX_COLUMNS` 4096 → 512; mutant B a fixed-rectangle `d`; plus a CPU profile for the `buildPeakShape` share. If A barely moves default-zoom keys, 14c-ii is not "the zoom fix".
+2. **Smallest staged design.**
+   - Pyramid: **max-only** (the render is symmetric; differs from the oss-adoption wording "min/max", to be recorded), **exact range-max** over aligned power-of-two blocks, so every path literal stays byte-identical; lazy levels in a module `WeakMap<Float32Array, Float32Array[]>`; `sourcePeaks` keeps `ReadonlyMap<string, Float32Array>` and its 3 consumers do not change. Building levels in the worker only if a profile shows the lazy build matters.
+   - Canvas tiles: a separate later stage; tiles cover the visible page window, not whole clips (a 41 s clip at 644 px/s is ~26k CSS px; × DPR past canvas limits).
+   - Rows starved by canvas: `interact.zoom.*.path-rewrites` (counts `<path d>` rewrites under `arrangement-clip-waveform`; interactions spec and `perf/lib/zoom-probe.ts`), the `toHaveCount` checks on that test id in the interactions, studio-lab and resources specs, the probe's `pathChars`/`maxColumns`; replace with a tile-redraw count. Candidates to assert: 6x `keydown-max-ms` at default and near-min zoom, a new `mounted-delta-per-key` near min.
+3. **Risks.** Byte identity (holds only with exact range-max; canvas ends path comparisons); zoom anchoring (tiles redraw after the anchored scroll); gain scale (`waveformScaleForGainDb`; keep the 0.02 floor and clamp); hidden tab (mark dirty, draw on `visibilitychange`); devicePixelRatio (back store × DPR, redraw on change, cap at high zoom); memory (max-only levels ≈ +1× level 0, ~800 B/s per source; Ctrl+D clips share a source); avoid OffscreenCanvas transfer under mount churn.
+
+B's use: recorded in `backlog.json` PERF-14c-ii/iii outline (D-29z1383). The measurement in item 1 is the first step of the 14c-ii planning (L37).

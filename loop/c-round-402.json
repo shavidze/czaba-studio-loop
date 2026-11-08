@@ -1,0 +1,37 @@
+{
+  "taskStatus": "PASS",
+  "bugs": [],
+  "passed": [
+    "SOURCE-SCOPE-start", "PATCH-IDENTITY", "AUTH-browser-1440x900-1280x720", "VIRT-FRAMES-browser", "PIN-BLUR-GROUP-browser",
+    "STUDIO-SMOKE-browser", "SCALE", "INTERACT", "RES+STUDIO-LAB", "VZ+MUTANT", "BUDGET-SHAPE", "DOCS", "RT-FIX-401", "SOURCE-SCOPE-end"
+  ],
+  "failed": [],
+  "gate": ["full vitest", "typecheck", "build", "Biome", "verify"],
+  "blocked": ["fake-bearer /api/studio-token authorised path: backend unavailable in cloud (fake bearer got 500 'Unable to prepare Studio access', no token issued; not a PASS, not a FAIL)"],
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {"checkedUtc": "2026-11-08T05:27:02.0585922Z", "round": 402, "attempt": 1, "store": 200},
+  "manifestPaths": ["b-round-401/r402-frozen-sha256.txt", "b-round-318/protected-sha256.txt"],
+  "missingPaths": [],
+  "countMismatches": [],
+  "claimCheckMinutes": 2,
+  "origin": {},
+  "assertsSpecified": "VZ1-VZ10 (10 pass in A3 re-run, 189/189 in the 7-file set) and the 8 changed budget rows (7 scale asserts + interact.zoom.30.out.path-rewrites == 2), all re-run by C and equal to B's sketch values",
+  "mutantsRecorded": "b-round-401/mutants/summary.txt (11 mutants)",
+  "mutantRedOnSketch": "11/11 red per B's summary.txt (not re-run by C except one)",
+  "mutantRedOnTree": "MU-402-NO-BLUR-UNPIN on an own scratch copy: VZ8 and VZ9 red, 8 others pass (c-round-402/mutant-no-blur.log)",
+  "gateChecksNamed": ["full vitest", "typecheck", "build", "Biome", "verify"],
+  "gateChecksRunOnSketch": ["b-round-401/sketch-full-vitest.log", "b-round-401/sketch-tsc.log", "b-round-401/sketch-biome.log"],
+  "chainHeadGateRunGreen": "gate 400 published c17d0e9",
+  "affectedChecksNamed": ["SCALE", "INTERACT", "RES", "STUDIO-LAB", "VIRT-FRAMES", "PIN-BLUR-GROUP"],
+  "affectedChecksRunOnSketch": ["b-round-401/perf-sketch-scale-final.json", "perf-sketch-interactions-final.json", "perf-sketch-resources.*", "perf-sketch-studio-lab.*"],
+  "l57NullReason": null,
+  "progressFile": "c-round-402/progress.json",
+  "stopSignal": null,
+  "notes": [
+    "Non-blocking items carried to B from A's reviewer (not C findings, all Low): F1 residual (spec branches 2/3 assume same page window at t0 and at own-lane read), F2 JSON note cites a mutant that cannot affect a model count, F3 ref read in render, F5 candidate VZ11 (pointercancel / other pointerId / same-id re-press), F8 scale.dom.page.min-zoom-mid 1868 is ~7% under 2000. F1 disposition checked: StudioWorkspace.tsx:2464-2471 early return on isPointerGestureActive() exists; no drag edge auto-scroll was checked beyond A's grep.",
+    "A-R402-REVIEW-F4 (focus falls to BODY when a focused clip leaves the window): not reproducible. ArrangementClip.tsx and its envelope/fade children contain no tabIndex or button, and the browser probe found no focusable element inside a clip (focusTarget null; activeElement BODY before and after a 3-page scroll with 40 clips). Recommend B close F4 as not applicable unless a clip gets a tab stop (c-round-402/f4-1440x900.json).",
+    "Not re-measured this round (by task design): export WAV samples/duration and audio graph output; REGRESSION-2026-11-10 carries them. Ableton conformance: not applicable (PERF round, no behaviour change). Playwright perf runs rebuilt store/build (git-ignored); store source untouched by C.",
+    "Dev server cold first load exceeded 90 s once (environment); retry after warm-up passed."
+  ]
+}

@@ -1,0 +1,14 @@
+# A round 402 — PERF-14b-ii (in progress checkpoint)
+- A1 claims at start: rc 0, identical to `b-round-401/claims-402-planning-output.txt` (`a-round-402/claims-start.txt`).
+- Patch `b-round-401/sketch-402.patch.txt` sha256 28569ea2d35c479b…: `git apply --check` OK, applied; 6 files (5 M, 1 ??).
+- Next: docs 256/254/255, checks A2–A7.
+- A2: typecheck rc 0 (`a-round-402/typecheck.log`), lint rc 0 (`a-round-402/lint.log`).
+- A3: 7 files, 189 tests PASS rc 0 (`a-round-402/vitest-a3.clean.log`); slowest test 1538 ms (NS5) < 50 % timeout.
+- A4: perf-lib 3 files, 54 tests PASS rc 0 (`a-round-402/vitest-a4.clean.log`).
+- Doc 256 written. Next: docs 254/255 contract sections, A5 perf specs.
+- Docs: 256 new; 254 "Budget-ები" subsection + file-list note; 255 R-b′ setup row merged (one reveal), (f) three branches, CopyReveals true count, copyDelta null, Low 3 ruling. l.4 of 254/255 unchanged; `In Progress (stage` = 6; `pending` = 0.
+- Patch identity: diff of the 6 files vs sketch-402 (ignoring index lines) empty (`a-round-402/patch-identity.txt`). (Used `git add -N` briefly to diff, then `git reset` of those 2 paths: index back to 7 M, 2 ??.)
+- A5 scale: rc 0, failures [], complete true; 950/1532/1868, 200, 42.4/42.4, 116.5 = K10 (`a-round-402/perf-scale.json`).
+- Running: interactions spec alone; code-reviewer.
+- A5 interactions: rc 0 (9.0 min), complete true, failures [], problems [] x6; 189 deterministic rows equal b-round-401/perf-sketch-interactions-final.json incl. samples (`a-round-402/interactions-compare.txt`, script `a-round-402/tools/compare_interactions.py`); path-rewrites [2,2,2]; drag-group-live [1,1,1].
+- A7 reviewer pass 1: 0 Critical/High; F1 Medium (spec check (f) page-flip premise) — disposed with code evidence (Follow early-return on isPointerGestureActive, StudioWorkspace.tsx:2466; claim at ArrangementClip.tsx:499; no drag edge auto-scroll); residual pre-press gap = Low For B. Doc fixes F2(doc)/F6/F7/F9/F10 applied. Delta review next.

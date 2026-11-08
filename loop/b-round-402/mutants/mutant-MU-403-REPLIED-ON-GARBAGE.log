@@ -1,0 +1,67 @@
+
+ RUN  v4.0.16 /tmp/b403-sketch
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts (33 tests | 1 failed) 488ms
+     ✓ PW1 equals computePeaks byte for byte across rates, lengths, chunk sizes and channel counts  414ms
+     ✓ PW1b keeps NaN, -0 and infinity handling identical 0ms
+     ✓ PW2 bucket count matches computePeaks, including empty and invalid input 0ms
+     ✓ accumulates chunks, acks with the same arrays and transfers the peaks on end 4ms
+     ✓ cancel drops the job without a done reply 0ms
+     ✓ PW4 streams bounded, reused chunks to one worker and delivers its peaks 10ms
+     ✓ PW5 delivers the worker reply object itself (no main-thread recompute) 1ms
+     ✓ PW6 without Worker computes synchronously on the main thread 1ms
+     ✓ PW7 abort drops the job, posts cancel and runs the next job 3ms
+     ✓ PW7b an abort after the last chunk drops the done reply 0ms
+     ✓ PW8 a worker error falls back to main-thread peaks for pending jobs 1ms
+     ✓ PW20 an empty buffer gets its peaks at once on the main thread and starts no worker 0ms
+     ✓ PW9 after the first reply, a stalled worker falls back after the stall timeout 2ms
+     ✓ PW14 a worker that has not replied yet gets the cold-start budget, not the stall timeout 1ms
+     ✓ PW15 every worker reply re-arms the stall timer 1ms
+     ✓ PW10 runs jobs one at a time in request order 1ms
+     ✓ PW14b pins the cold-start and stall budgets 0ms
+     ✓ PW24 an unparsable message before the first reply keeps the cold-start budget 1ms
+     × PW24b an unparsable message while the worker is idle keeps the cold-start budget for the next job 8ms
+     ✓ PW25 dispose resets the first-reply flag, so a new worker gets the cold-start budget again 1ms
+     ✓ PW26 without Worker a throwing onPeaks does not throw from request and rethrows on a timer 1ms
+     ✓ PW27 a worker failure delivers the jobs behind one whose main-thread peaks throw, and rethrows on a timer 1ms
+     ✓ PW29 a failing post inside request still throws the peak error of the requesting job from request, with no deferred rethrow 1ms
+     ✓ PW28 without Worker a throwing main-thread peak computation still throws from request 0ms
+     ✓ PW11 the source becomes ready only after done, with the worker peaks as its sourcePeaks 18ms
+     ✓ PW18 playback started while peaks run leaves the clip out, then re-syncs it in when the source is ready 7ms
+     ✓ PW12 a request made inside onPeaks keeps every queued job and delivers all of them in order 1ms
+     ✓ PW13 a throwing postMessage on begin falls back to main-thread peaks at once and turns the worker off 1ms
+     ✓ PW13 a throwing postMessage on chunk falls back to main-thread peaks at once and turns the worker off 1ms
+     ✓ PW13b a throwing postMessage on end turns the worker off without a stray timer 1ms
+     ✓ PW13b a throwing postMessage on cancel turns the worker off without a stray timer 1ms
+     ✓ PW16 a throwing onPeaks still starts and delivers the next job and rethrows on a timer 1ms
+     ✓ PW17 a worker failure delivers every pending job even when one onPeaks throws, and rethrows on a timer 1ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 32 passed (33)
+   Start at  06:36:44
+   Duration  1.56s (transform 414ms, setup 0ms, import 571ms, tests 488ms, environment 382ms)
+
+
+::error file=/tmp/b403-sketch/app/lib/arrangement/__tests__/peaks-worker.test.ts,title=app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW24b an unparsable message while the worker is idle keeps the cold-start budget for the next job,line=539,column=21::AssertionError: expected [ Array(1) ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:539:21%0A%0A
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/peaks-worker.test.ts > PW4-PW10 peaks client > PW24b an unparsable message while the worker is idle keeps the cold-start budget for the next job
+AssertionError: expected [ Array(1) ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/peaks-worker.test.ts:539:21
+    537|     );
+    538|     vi.advanceTimersByTime(PEAKS_WORKER_STALL_TIMEOUT_MS);
+    539|     expect(results).toHaveLength(0);
+       |                     ^
+    540|     expect(worker.terminated).toBe(0);
+    541|     vi.advanceTimersByTime(PEAKS_WORKER_COLD_START_TIMEOUT_MS - PEAKS_…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

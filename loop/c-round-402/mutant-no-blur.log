@@ -1,0 +1,60 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c402scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/lane-virtualization.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1158[2mms[22m[39m
+     [32m✓[39m VZ1 an unmeasured viewport mounts every clip[32m 227[2mms[22m[39m
+     [32m✓[39m VZ2 a measured viewport mounts only the clips inside the page window; the count stays the model[32m 117[2mms[22m[39m
+     [32m✓[39m VZ3 scrolling across pages mounts and unmounts clips[32m 150[2mms[22m[39m
+     [32m✓[39m VZ4 zooming out brings a far clip into the window[32m 92[2mms[22m[39m
+     [32m✓[39m VZ5 a clip under an active pointer gesture stays mounted until the pointer is released[32m 102[2mms[22m[39m
+     [32m✓[39m VZ6 a lane-move source outside the window stays mounted while the move is held[32m 70[2mms[22m[39m
+     [32m✓[39m VZ7 select-all does not mount clips outside the window, and Delete still reaches them[32m 91[2mms[22m[39m
+[31m     [31m×[31m VZ8 a window blur during a press unpins the clip, so the next scroll unmounts it[39m[32m 129[2mms[22m[39m
+[31m     [31m×[31m VZ9 unmounting the workspace during a press removes every window listener the press added[39m[32m 70[2mms[22m[39m
+     [32m✓[39m VZ10 a same-lane group member outside the window mounts at its preview position mid-gesture[32m 109[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-virtualization.test.tsx[2m > [22mPERF-14b lane clip virtualization[2m > [22mVZ8 a window blur during a press unpins the clip, so the next scroll unmounts it
+[31m[1mAssertionError[22m: expected [ 'far', 'near' ] to deeply equal [ 'far' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "far",[22m
+[31m+   "near",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/lane-virtualization.test.tsx:[2m225:23[22m[39m
+    [90m223| [39m    })[33m;[39m
+    [90m224| [39m    [34mscrollTo[39m([34m5000[39m)[33m;[39m
+    [90m225| [39m    [34mexpect[39m([34mmounted[39m())[33m.[39m[34mtoEqual[39m([[32m'far'[39m])[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m226| [39m  })[33m;[39m
+    [90m227| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-virtualization.test.tsx[2m > [22mPERF-14b lane clip virtualization[2m > [22mVZ9 unmounting the workspace during a press removes every window listener the press added
+[31m[1mAssertionError[22m: expected 1 to be greater than or equal to 2[39m
+[36m [2m❯[22m app/lib/arrangement/__tests__/lane-virtualization.test.tsx:[2m236:62[22m[39m
+    [90m234| [39m    const added = addSpy.mock.calls.filter(([type]) => pressTypes.has(…
+    [90m235| [39m    addSpy[33m.[39m[34mmockRestore[39m()[33m;[39m
+    [90m236| [39m    expect(added.filter(([type]) => type === 'blur').length).toBeGreat…
+    [90m   | [39m                                                             [31m^[39m
+    [90m237| [39m    [35mconst[39m removeSpy [33m=[39m vi[33m.[39m[34mspyOn[39m(window[33m,[39m [32m'removeEventListener'[39m)[33m;[39m
+    [90m238| [39m    view[33m.[39m[34munmount[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 05:55:13
+[2m   Duration [22m 3.02s[2m (transform 955ms, setup 0ms, import 1.37s, tests 1.16s, environment 385ms)[22m
+
+
+::error file=/tmp/c402scratch/app/lib/arrangement/__tests__/lane-virtualization.test.tsx,title=app/lib/arrangement/__tests__/lane-virtualization.test.tsx > PERF-14b lane clip virtualization > VZ8 a window blur during a press unpins the clip%2C so the next scroll unmounts it,line=225,column=23::AssertionError: expected [ 'far', 'near' ] to deeply equal [ 'far' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "far",%0A+   "near",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/lane-virtualization.test.tsx:225:23%0A%0A
+
+::error file=/tmp/c402scratch/app/lib/arrangement/__tests__/lane-virtualization.test.tsx,title=app/lib/arrangement/__tests__/lane-virtualization.test.tsx > PERF-14b lane clip virtualization > VZ9 unmounting the workspace during a press removes every window listener the press added,line=236,column=62::AssertionError: expected 1 to be greater than or equal to 2%0A ❯ app/lib/arrangement/__tests__/lane-virtualization.test.tsx:236:62%0A%0A

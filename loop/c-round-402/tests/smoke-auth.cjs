@@ -1,0 +1,76 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+const [base, out, vp] = process.argv.slice(2);
+const [w, h] = vp.split('x').map(Number);
+const O = require('path').dirname(out);
+(async () => {
+  const res = { vp, base };
+  const browser = await chromium.launch();
+  // AUTH: fresh incognito context
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  await ctx.addInitScript(() => localStorage.setItem('czaba_analytics_consent', 'denied'));
+  const page = await ctx.newPage();
+  const errs = []; page.on('pageerror', (e) => errs.push(String(e)));
+  await page.goto(base + '/studio-lab', { waitUntil: 'load', timeout: 120000 });
+  await page.getByTestId('arrangement-status').filter({ hasText: /Demo collection ready/ }).waitFor({ timeout: 90000 });
+  res.authUserOnDemo = await page.evaluate(() => localStorage.getItem('auth_user'));
+  res.demoOpens = true;
+  // AUTH premium
+  const p2 = await ctx.newPage();
+  await p2.goto(base + '/studio/middle-east', { waitUntil: 'load', timeout: 60000 }).catch((e) => (res.studioGotoErr = String(e)));
+  await p2.waitForTimeout(2500);
+  res.premiumText = (await p2.locator('body').innerText()).slice(0, 400);
+  res.premiumSignInRequired = /sign in required/i.test(res.premiumText);
+  res.premiumAudioSrc = await p2.locator('audio[src]').count();
+  await p2.screenshot({ path: `${O}/auth-premium-${vp}.png` });
+  const r = await ctx.request.get(base + '/api/studio-token?product=middle-east&file=stem.mp3');
+  res.tokenNoAuth = { status: r.status(), body: (await r.text()).slice(0, 200) };
+  const r2 = await ctx.request.get(base + '/api/studio-token?product=middle-east&file=stem.mp3', { headers: { Authorization: 'Bearer fake.token.value' } });
+  res.tokenFakeBearer = { status: r2.status(), body: (await r2.text()).slice(0, 200) };
+  await p2.close();
+  // SMOKE
+  await page.screenshot({ path: `${O}/smoke-0-ready-${vp}.png` });
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  const clip = page.locator('[data-clip-kind="audio"]').first();
+  await clip.waitFor();
+  const start0 = await clip.getAttribute('data-clip-start');
+  const bar = clip.getByTitle(/ — drag to move$/).first();
+  const b = await bar.boundingBox();
+  await page.mouse.move(b.x + 20, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + 70, b.y + b.height / 2, { steps: 5 });
+  await page.mouse.move(b.x + 120, b.y + b.height / 2, { steps: 5 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  const start1 = await page.locator('[data-clip-kind="audio"]').first().getAttribute('data-clip-start');
+  await page.screenshot({ path: `${O}/smoke-1-moved-${vp}.png` });
+  await page.evaluate(() => (document.activeElement instanceof HTMLElement ? document.activeElement.blur() : null));
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(300);
+  const start2 = await page.locator('[data-clip-kind="audio"]').first().getAttribute('data-clip-start');
+  res.clipStart = { added: start0, moved: start1, afterUndo: start2 };
+  // transport
+  const playBtn = page.getByRole('button', { name: /^Play/ }).first();
+  const clock = async () => (await page.getByTestId('arrangement-position').first().innerText().catch(() => null));
+  res.clock0 = await clock();
+  await playBtn.click();
+  await page.waitForTimeout(1500);
+  res.clockPlaying = await clock();
+  res.statusPlaying = await page.getByTestId('arrangement-status').innerText();
+  await page.screenshot({ path: `${O}/smoke-2-playing-${vp}.png` });
+  await page.getByRole('button', { name: /^Stop/ }).first().click().catch(async () => { await page.keyboard.press('Space'); });
+  await page.waitForTimeout(500);
+  const c1 = await clock(); await page.waitForTimeout(700); const c2 = await clock();
+  res.clockStoppedA = c1; res.clockStoppedB = c2;
+  // export
+  const exp = page.getByRole('button', { name: /export/i }).first();
+  await exp.click();
+  await page.waitForTimeout(800);
+  res.dialogOpen = await page.getByRole('dialog').count();
+  await page.screenshot({ path: `${O}/smoke-3-export-${vp}.png` });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(500);
+  res.dialogAfterEsc = await page.getByRole('dialog').count();
+  res.pageErrors = errs;
+  require('fs').writeFileSync(out, JSON.stringify(res, null, 2));
+  await browser.close();
+})().catch((e) => { console.error(e); process.exit(1); });
