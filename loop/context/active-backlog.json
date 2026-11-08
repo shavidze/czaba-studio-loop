@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-08T17:47:53.023Z",
-  "current_task": "Round 413: PERF-15b-ii-a from B reviewed sketch b-round-412/sketch-413.patch.txt (current-task.md)",
+  "_generatedUtc": "2026-11-08T18:19:46.328Z",
+  "current_task": "Round 414: SYS-R2-FAKE-FIDELITY from B reviewed sketch b-round-413/sketch-414.patch.txt (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -222,78 +222,7 @@
       "reference": "b-round-289/screens/stems-probe.json"
     }
   ],
-  "current_items_full": [
-    {
-      "id": "SRW-21",
-      "round": 16,
-      "title": "Purchased-library mount readiness + final regression",
-      "fb": [],
-      "type": "integration",
-      "depends_on": [
-        "SRW-20"
-      ],
-      "status": "deferred_user",
-      "blocked_reason": "app/routes/studio.$productId.tsx and studio-token flow are owned by the auth agent; mounting the workspace there is forbidden until released by Tech Lead",
-      "independent_progress": "WorkspaceCollection/loadSource adapter contract tests with a fake purchased adapter (no network/auth); docs for the future mount; full regression of SRW-01..SRW-20 by C",
-      "files": [
-        "app/lib/arrangement/collection.ts",
-        "app/lib/arrangement/__tests__/collection.test.ts",
-        "app/lib/arrangement/__tests__/purchased-collection-ui.test.tsx",
-        "app/components/arrangement/StudioWorkspace.tsx (header only)",
-        "app/contexts/ArrangementContext.tsx (status + file names only)",
-        "docs/technical/arrangement-workspace.md",
-        "docs/implementation/2026/quarter-IV/080-studio-workspace-purchased-collection-readiness.md"
-      ],
-      "acceptance": [
-        {
-          "id": "R21-I1",
-          "action": "Unit test mounts StudioWorkspace logic with a fake purchased collection adapter",
-          "expected": "no workspace code change needed; adapter receives AbortSignal; errors surfaced",
-          "verify": "unit",
-          "expected_amended_D-29z57": "createPurchasedWorkspaceCollection contract (signal, credentials omit, no headers, errors without URL/token, validation) + workspace heading/badge/status/file names driven by collection.origin; /studio-lab demo output byte-identical (C DEMO-COPY, DEMO-LOAD, EXPORT-NAMES); purchased path unit-only un …[see backlog.json]",
-          "status": "pass_as_amended (D-29z57): C round 92 DEMO-COPY/DEMO-LOAD/EXPORT-NAMES browser PASS both viewports; PC1-PC10/PW1-PW6 + C mutations b/f red; purchased path unit-only"
-        },
-        {
-          "id": "R21-I2",
-          "action": "Full C regression on all prior acceptance IDs",
-          "expected": "all PASS or documented",
-          "verify": "C",
-          "status": "todo (after the Lows that touch shipped behaviour; regression round 2026-10-24+ covers part)"
-        }
-      ],
-      "b_finding_round92": "B source read 2026-10-22: R21-I1 expectation 'no workspace code change needed' is FALSE - StudioWorkspace.tsx l.2136/l.2141-2143 and ArrangementContext.tsx l.532/l.3013-3014/l.2722/l.2910/l.2916 hardcode demo copy and file names; a purchased mount would print 'demo - no sign-in needed'. R21-I1 amend …[see backlog.json]",
-      "stages": [
-        {
-          "stage": "1",
-          "round": 92,
-          "status": "c_pass_published",
-          "decision": "D-29z57",
-          "scope": "P1 collection.ts (workspaceCollectionCopy + createPurchasedWorkspaceCollection), W1 header, X1-X3 status/file names, PC1-PC9, PW1-PW6, mutations a-h, doc 079 l.4, doc 080, docs/technical/arrangement-workspace.md",
-          "c_ids": [
-            "DEMO-COPY",
-            "DEMO-LOAD",
-            "EXPORT-NAMES",
-            "PX-NET",
-            "REG-HYD",
-            "G92-3",
-            "PC-REVIEW",
-            "T92-TARGETED",
-            "SOURCE-UNCHANGED"
-          ],
-          "evidence": "c-round-92.md, c-round-92.json (PASS, browserVerified=true, realVerified=true, 0 bugs); gates/gate-round-92.json published 64e12d8 (verify 137/137, build OK, reviewer 9/10)",
-          "blocked": [
-            "G92-3 fake-Bearer 403 sub-check: backend unavailable in cloud"
-          ],
-          "not_browser_reachable": "purchased path (createPurchasedWorkspaceCollection, purchased copy, purchased file names): unit-only while the route mount is blocked"
-        }
-      ],
-      "status_before_2026_10_23": "blocked-partial (route mount: auth owner; stage 1 C PASS round 92 published 64e12d8; load-status hardening C PASS round 94 unit-proven, published 0513439, browser half at the mount; SRW-21-PREMOUNT bundle open; R21-I2 full regression open)",
-      "deferred_reason": "route mount on the protected studio.$productId.tsx waits for the auth work; not testable in the cloud (no backend)",
-      "user_decision_2026_10_23": "SRW-21 deferred by the user; finished stage 1 stays; counts as deferred for every gate; do not touch the protected files",
-      "visual_a_note_d29z116": "when the purchased mount is unblocked, the studio route needs the same font stylesheet links() as /studio-lab (V-2a, D-29z116 R3); do not touch protected files before then",
-      "pd_review_d29z692": "Saba 2026-10-31 Q1: first Studio product priority after STUDIO-PERFORMANCE; status stays deferred_user for the protected mount; SRW-21-PLAN (plan doc only) queued in PD-REVIEW-2026-10-31; STUDIO-LINK is the interim way in"
-    }
-  ],
+  "current_items_full": [],
   "other_open_items": [
     {
       "id": "T12-GAIN-VOLUME",
@@ -6329,34 +6258,16 @@
       "title": "= TL-R410-SK-3 (unguarded peaksUrl call)"
     },
     {
-      "id": "GATE410-L2",
-      "severity": "low",
-      "status": "fix dispatched round 413 (D-29z1434; PP10, PP11 (= TL-R411-L",
-      "title": "4 MiB cap works only with an uncompressed content-length"
-    },
-    {
       "id": "TL-R411-L3",
       "severity": "low",
       "status": "tracked as TLM-PERF15-FIREFOX (D-29z1435): Playwright Firefo",
       "title": "demo peaks evidence is HeadlessChrome only; Firefox/Safari MP3 decode length may differ by > 1 bucke"
     },
     {
-      "id": "TL-R411-L4",
-      "severity": "low",
-      "status": "fix dispatched round 413 (D-29z1434; PP10, PP11, PP12); clos",
-      "title": "size cap applies only with content-length (chunked/gzip unbounded)"
-    },
-    {
       "id": "TL-R411-L5",
       "severity": "low",
       "status": "deferred_low_polish (D-29z1429): kept; PS16 pins both maps",
       "title": "demoPeaksUrls repeats the demoUrls keys"
-    },
-    {
-      "id": "TL-R411-L9",
-      "severity": "low",
-      "status": "fix dispatched round 413 (D-29z1434; PS18); close on C round",
-      "title": "meta 'file' field not checked against peaksFiles path"
     },
     {
       "id": "INFO-B411-CONTEXT-STALE",
@@ -6383,12 +6294,6 @@
       "title": "peaks<->MP3 tie is byte size only (no sha256 in meta)"
     },
     {
-      "id": "A-R411-REVIEW-L5",
-      "severity": "low",
-      "status": "fix dispatched round 413 (D-29z1434; PK2 (bearer header from",
-      "title": "doc 264 l.31 claims an injected SourceFetch bearer header still works; no row tests it"
-    },
-    {
       "id": "TL-R412-L-D",
       "severity": "low",
       "status": "deferred_low_polish (D-29z1432): dev script",
@@ -6397,20 +6302,14 @@
     {
       "id": "TL-R413-L-A",
       "severity": "low",
-      "status": "product contract (D-29z1434): written into docs/technical/st",
+      "status": "contract recorded (D-29z1437): handoff doc + doc 265; stays ",
       "title": "same-origin rule is fail-closed: signed-CDN audio with peaks on the API origin loses the optimisatio"
     },
     {
       "id": "TL-R413-L-B",
       "severity": "low",
-      "status": "deferred_low_polish (D-29z1436)",
+      "status": "also gate 413 reviewer #2 (GATE413-L2 alias, D-29z1440) | de",
       "title": "PP12/PP12b 1 s race timers outlive the test"
-    },
-    {
-      "id": "TL-R413-L-C",
-      "severity": "low",
-      "status": "doc 265 sentence in round 413 (A docs grant); close on C rou",
-      "title": "no note that a dropped peaksUrl means the decode-based waveform"
     },
     {
       "id": "TL-R413-I1",
@@ -6423,18 +6322,63 @@
       "severity": "info",
       "status": "info; browser rows 413 = demo regression (real/404/8bit)",
       "title": "no Playwright harness here delivers a body without a trustworthy content-length (route.continue to a"
+    },
+    {
+      "id": "A-R413-REVIEW-L1",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1440)",
+      "title": "readCappedText returns partial text after an abort; only the caller's signal.aborted check makes it "
+    },
+    {
+      "id": "A-R413-REVIEW-L2",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1440)",
+      "title": "no cap+1-byte streamed row: a limit like > maxBytes + 1024 passes PP10/PP11"
+    },
+    {
+      "id": "A-R413-REVIEW-L3",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1440): drop or reword the assert i",
+      "title": "PK2 Authorization assert is set by the test's own stub (cannot fail); the identity asserts are the r"
+    },
+    {
+      "id": "A-R413-REVIEW-L4",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1440): candidate redirect 'error' ",
+      "title": "same-origin check covers the first URL only; a same-origin 302 to another host is followed (redirect"
+    },
+    {
+      "id": "A-R413-REVIEW-L5",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1440): one-condition fix (reject o",
+      "title": "opaque origins (data:, file:, custom schemes) all give 'null', so 'null' === 'null' passes the same-"
+    },
+    {
+      "id": "GATE413-L1",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1440)",
+      "title": "readCappedText holds chunks then copies (peak memory ~2x the 4 MiB cap); JSON.parse on the main thre"
+    },
+    {
+      "id": "B-R414-RANGE-UNIT-CASE",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1439): worker change for a later w",
+      "title": "worker parseRangeSpec treats 'Bytes=0-9' as no range (full 200); RFC 9110 14.1 says range unit names"
+    },
+    {
+      "id": "B-R414-HEAD-RANGE-206",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1439): pre-existing; a worker chan",
+      "title": "HEAD with Range answers 206 with a partial Content-Length; RFC 9110 14.2: a server MUST ignore Range"
+    },
+    {
+      "id": "TL-R414-L-UNSAFE-START",
+      "severity": "info",
+      "status": "pointer (D-29z1439): round-311 section 4.1 contract, = A-R31",
+      "title": "r2RangeOf passes an unsafe start unchecked; GATE311-L1 closes by a fake-model change, not by evidenc"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 404,
-      "task": "current-task.md",
-      "decision": "D-29z1388..D-29z1395",
-      "type": "SYS-R385-LEAF-ACTIONS-CONTEXT stage 1 of 2 (stable actions context; behaviour-preserving)",
-      "status": "C PASS (c-round-404.json, browserVerified true); gate 404 published dd52107",
-      "note": "baseline cc5cbc6 clean; frozen b-round-403/r404-frozen-sha256.txt (1290); grants b-round-403/grants-404.txt (9); patch b-round-403/sketch-404.patch.txt; claims b-round-403/claims-404.sh",
-      "added": "2026-11-08 B round 403 -> 404 planning"
-    },
     {
       "round": 405,
       "task": "current-task.md",
@@ -6512,8 +6456,16 @@
       "task": "current-task.md",
       "decision": "D-29z1434..D-29z1436",
       "type": "PERF-15b-ii-a (purchased peaksUrl same-origin, fetchPeaks pass-through, streamed cap; closes PERF-15)",
-      "status": "dispatched",
+      "status": "C PASS (c-round-413.json: 11 rows passed, browserVerified/realVerified true, 0 bugs); gate 413 published dc536a6 (D-29z1437)",
       "note": "baseline 107eb2d clean; frozen b-round-412/r413-frozen-sha256.txt (1301); grants b-round-412/grants-413.txt (12); sketch b-round-412/sketch-413.patch.txt sha a7913dec; claims b-round-412/claims-413.sh"
+    },
+    {
+      "round": 414,
+      "task": "current-task.md",
+      "decision": "D-29z1437..D-29z1440",
+      "type": "SYS-R2-FAKE-FIDELITY (test-only R2 worker fake fidelity)",
+      "status": "dispatched",
+      "note": "baseline dc536a6 clean; frozen b-round-413/r414-frozen-sha256.txt (1312); grants b-round-413/grants-414.txt (2); sketch b-round-413/sketch-414.patch.txt sha 5279fce53efec300 (v2; v1 3a155bc6 rejected by tech-lead); claims b-round-413/claims-414.sh"
     }
   ],
   "other_keys": [

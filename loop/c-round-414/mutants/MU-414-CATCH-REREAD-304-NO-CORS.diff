@@ -1,0 +1,11 @@
+files: ['workers/r2-proxy.js', 'cloudflare/r2-worker.js']
+--- old
+        await releaseBody(object);
+        return new Response(null, { status: 304, headers });
+      }
+      headers.set('Content-Type', contentType);
++++ new
+        await releaseBody(object);
+        return new Response(null, { status: 304, headers: new Headers({ ETag: object.httpEtag, 'Cache-Control': headers.get('Cache-Control') }) });
+      }
+      headers.set('Content-Type', contentType);

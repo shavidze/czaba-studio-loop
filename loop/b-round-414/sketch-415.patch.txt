@@ -1,0 +1,700 @@
+diff --git a/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx b/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx
+index 42c4e39..12f9e79 100644
+--- a/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/decoded-buffer-eviction-ui.test.tsx
+@@ -9,6 +9,7 @@ import {
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { addClip, createArrangement } from '../model';
+ import { studioExportStrings, studioLibraryStrings, studioPlaybackStrings } from '../strings';
++import { createFakeWebAudio } from './helpers/fake-web-audio';
+ import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ interface ObservedDecodedCache {
+@@ -66,83 +67,7 @@ vi.mock('~/lib/arrangement/mp3-encoder.client', () => ({
+ const renderWavMock = vi.mocked(renderArrangementWav);
+ const applyScheduleMock = vi.mocked(applySchedule);
+ 
+-const fakeClock = { base: 0 };
+-
+-class FakeParam {
+-  value = 0;
+-  setTargetAtTime(target: number) {
+-    this.value = target;
+-  }
+-}
+-
+-class FakeNode {
+-  connect(destination: FakeNode) {
+-    return destination;
+-  }
+-  disconnect() {}
+-}
+-
+-class FakeGain extends FakeNode {
+-  gain = new FakeParam();
+-}
+-
+-class FakePanner extends FakeNode {
+-  pan = new FakeParam();
+-}
+-
+-class FakeSource extends FakeNode {
+-  buffer: unknown = null;
+-  onended: (() => void) | null = null;
+-  start() {}
+-  stop() {}
+-}
+-
+-const createdSources: FakeSource[] = [];
+-
+-class FakeAudioContext {
+-  state = 'running';
+-  destination = new FakeNode();
+-  sampleRate = 48000;
+-  get currentTime() {
+-    return Date.now() / 1000 - fakeClock.base;
+-  }
+-  resume() {
+-    return Promise.resolve();
+-  }
+-  close() {
+-    return Promise.resolve();
+-  }
+-  createGain() {
+-    return new FakeGain();
+-  }
+-  createStereoPanner() {
+-    return new FakePanner();
+-  }
+-  createBufferSource() {
+-    const source = new FakeSource();
+-    createdSources.push(source);
+-    return source;
+-  }
+-}
+-
+-class FakeOfflineAudioContext {}
+-
+-class FakeAudioBuffer {
+-  readonly length: number;
+-  readonly numberOfChannels: number;
+-  readonly sampleRate: number;
+-  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+-    this.length = options.length;
+-    this.numberOfChannels = options.numberOfChannels;
+-    this.sampleRate = options.sampleRate;
+-  }
+-  get duration() {
+-    return this.length / this.sampleRate;
+-  }
+-  getChannelData() {
+-    return new Float32Array(this.length);
+-  }
+-}
++const { createdSources, install } = createFakeWebAudio();
+ 
+ const BIG_TITLE = 'Big Preview';
+ const KEEP_TITLE = 'Kept Synth';
+@@ -304,8 +229,6 @@ function twoEvictableCollection() {
+ describe('decoded audio eviction and re-decode (PERF-13b-i)', () => {
+   beforeEach(() => {
+     cacheObserver.instances.length = 0;
+-    createdSources.length = 0;
+-    fakeClock.base = Date.now() / 1000;
+     renderWavMock.mockReset();
+     applyScheduleMock.mockReset();
+     renderWavMock.mockResolvedValue({
+@@ -313,11 +236,7 @@ describe('decoded audio eviction and re-decode (PERF-13b-i)', () => {
+       peak: 0.5,
+       clippedSamples: 0,
+     });
+-    vi.stubGlobal('AudioContext', FakeAudioContext);
+-    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+-    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+-    vi.stubGlobal('requestAnimationFrame', () => 1);
+-    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    install();
+     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+     Object.defineProperty(URL, 'createObjectURL', {
+       configurable: true,
+diff --git a/app/lib/arrangement/__tests__/helpers/fake-web-audio.ts b/app/lib/arrangement/__tests__/helpers/fake-web-audio.ts
+new file mode 100644
+index 0000000..ad62b23
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/helpers/fake-web-audio.ts
+@@ -0,0 +1,197 @@
++import { act } from '@testing-library/react';
++import { vi } from 'vitest';
++
++export interface FakeWebAudioInstallOptions {
++  metered?: boolean;
++  captureFrames?: boolean;
++  stubSetInterval?: boolean;
++  resizeObserver?: boolean;
++  clockLeadSeconds?: number;
++}
++
++export function createFakeWebAudio() {
++  const fakeClock = { base: 0 };
++  const meterSignal = { value: 0 };
++  const startFailure = { armedAt: 0, calls: 0, thrown: 0 };
++  const frames: FrameRequestCallback[] = [];
++
++  class FakeParam {
++    value = 0;
++    setTargetAtTime(target: number) {
++      this.value = target;
++    }
++    setValueAtTime() {}
++    linearRampToValueAtTime() {}
++  }
++
++  class FakeNode {
++    connect(destination: FakeNode) {
++      return destination;
++    }
++    disconnect() {}
++  }
++
++  class FakeGain extends FakeNode {
++    gain = new FakeParam();
++  }
++
++  class FakePanner extends FakeNode {
++    pan = new FakeParam();
++  }
++
++  class FakeSource extends FakeNode {
++    buffer: unknown = null;
++    onended: (() => void) | null = null;
++    started = false;
++    stops = 0;
++    start() {
++      if (startFailure.armedAt > 0) {
++        startFailure.calls += 1;
++        if (startFailure.calls === startFailure.armedAt) {
++          startFailure.armedAt = 0;
++          startFailure.calls = 0;
++          startFailure.thrown += 1;
++          throw new Error('injected start failure');
++        }
++      }
++      this.started = true;
++    }
++    stop() {
++      this.stops += 1;
++    }
++  }
++
++  const createdSources: FakeSource[] = [];
++
++  class FakeAudioContext {
++    state = 'running';
++    destination = new FakeNode();
++    sampleRate = 48000;
++    get currentTime() {
++      return Date.now() / 1000 - fakeClock.base;
++    }
++    resume() {
++      return Promise.resolve();
++    }
++    close() {
++      return Promise.resolve();
++    }
++    createGain() {
++      return new FakeGain();
++    }
++    createStereoPanner() {
++      return new FakePanner();
++    }
++    createBufferSource() {
++      const source = new FakeSource();
++      createdSources.push(source);
++      return source;
++    }
++  }
++
++  class FakeAnalyser extends FakeNode {
++    fftSize = 2048;
++    getFloatTimeDomainData(target: Float32Array) {
++      target.fill(meterSignal.value);
++    }
++  }
++
++  class FakeSplitter extends FakeNode {}
++
++  class MeteredAudioContext extends FakeAudioContext {
++    createChannelSplitter() {
++      return new FakeSplitter();
++    }
++    createAnalyser() {
++      return new FakeAnalyser();
++    }
++  }
++
++  class FakeOfflineAudioContext {}
++
++  class FakeAudioBuffer {
++    readonly length: number;
++    readonly numberOfChannels: number;
++    readonly sampleRate: number;
++    constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
++      this.length = options.length;
++      this.numberOfChannels = options.numberOfChannels;
++      this.sampleRate = options.sampleRate;
++    }
++    get duration() {
++      return this.length / this.sampleRate;
++    }
++    getChannelData() {
++      return new Float32Array(this.length);
++    }
++  }
++
++  class FakeResizeObserver {
++    observe() {}
++    disconnect() {}
++  }
++
++  function armStartFailure(nth: number) {
++    startFailure.armedAt = nth;
++    startFailure.calls = 0;
++  }
++
++  function install(options: FakeWebAudioInstallOptions = {}) {
++    frames.length = 0;
++    createdSources.length = 0;
++    startFailure.armedAt = 0;
++    startFailure.calls = 0;
++    startFailure.thrown = 0;
++    meterSignal.value = 0;
++    fakeClock.base = Date.now() / 1000 - (options.clockLeadSeconds ?? 0);
++    vi.stubGlobal('AudioContext', options.metered ? MeteredAudioContext : FakeAudioContext);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
++    if (options.resizeObserver) {
++      vi.stubGlobal('ResizeObserver', FakeResizeObserver);
++    }
++    if (options.captureFrames) {
++      vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
++        frames.push(callback);
++        return frames.length;
++      });
++    } else {
++      vi.stubGlobal('requestAnimationFrame', () => 1);
++    }
++    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    if (options.stubSetInterval) {
++      const stub = () => 0;
++      vi.stubGlobal('setInterval', stub);
++      if (!Object.is(window.setInterval, stub)) {
++        throw new Error('the setInterval stub did not replace window.setInterval');
++      }
++    }
++  }
++
++  function runFrames(count = 1) {
++    for (let index = 0; index < count; index++) {
++      const pending = frames.splice(0, frames.length);
++      act(() => {
++        for (const frame of pending) {
++          frame(performance.now());
++        }
++      });
++    }
++  }
++
++  return {
++    fakeClock,
++    FakeAudioContext,
++    MeteredAudioContext,
++    FakeOfflineAudioContext,
++    FakeAudioBuffer,
++    FakeResizeObserver,
++    meterSignal,
++    startFailure,
++    frames,
++    createdSources,
++    armStartFailure,
++    install,
++    runFrames,
++  };
++}
+diff --git a/app/lib/arrangement/__tests__/master-hold-tick.test.tsx b/app/lib/arrangement/__tests__/master-hold-tick.test.tsx
+index 59373f2..88a425a 100644
+--- a/app/lib/arrangement/__tests__/master-hold-tick.test.tsx
++++ b/app/lib/arrangement/__tests__/master-hold-tick.test.tsx
+@@ -5,107 +5,11 @@ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import { METER_CEILING_DB, METER_FLOOR_DB } from '~/lib/arrangement/meter';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
++import { createFakeWebAudio } from './helpers/fake-web-audio';
+ import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+ const TOP_CLAMPED_HOLD_TRANSFORM = 'translateX(calc(100% - 1px))';
+-const fakeClock = { base: 0 };
+-const meterSignal = { value: 0 };
+-
+-class FakeParam {
+-  value = 0;
+-  setTargetAtTime(target: number) {
+-    this.value = target;
+-  }
+-}
+-
+-class FakeNode {
+-  outputs: FakeNode[] = [];
+-  connect(destination: FakeNode) {
+-    this.outputs.push(destination);
+-    return destination;
+-  }
+-  disconnect() {
+-    this.outputs = [];
+-  }
+-}
+-
+-class FakeGain extends FakeNode {
+-  gain = new FakeParam();
+-}
+-
+-class FakePanner extends FakeNode {
+-  pan = new FakeParam();
+-}
+-
+-class FakeSource extends FakeNode {
+-  buffer: unknown = null;
+-  onended: (() => void) | null = null;
+-  start() {}
+-  stop() {}
+-}
+-
+-class FakeAnalyser extends FakeNode {
+-  fftSize = 2048;
+-  getFloatTimeDomainData(target: Float32Array) {
+-    target.fill(meterSignal.value);
+-  }
+-}
+-
+-class FakeSplitter extends FakeNode {}
+-
+-class MeteredAudioContext {
+-  state = 'running';
+-  destination = new FakeNode();
+-  sampleRate = 48000;
+-  get currentTime() {
+-    return Date.now() / 1000 - fakeClock.base;
+-  }
+-  resume() {
+-    return Promise.resolve();
+-  }
+-  close() {
+-    return Promise.resolve();
+-  }
+-  createGain() {
+-    return new FakeGain();
+-  }
+-  createStereoPanner() {
+-    return new FakePanner();
+-  }
+-  createBufferSource() {
+-    return new FakeSource();
+-  }
+-  createChannelSplitter() {
+-    return new FakeSplitter();
+-  }
+-  createAnalyser() {
+-    return new FakeAnalyser();
+-  }
+-}
+-
+-class FakeOfflineAudioContext {}
+-
+-class FakeAudioBuffer {
+-  readonly length: number;
+-  readonly numberOfChannels: number;
+-  readonly sampleRate: number;
+-  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+-    this.length = options.length;
+-    this.numberOfChannels = options.numberOfChannels;
+-    this.sampleRate = options.sampleRate;
+-  }
+-  get duration() {
+-    return this.length / this.sampleRate;
+-  }
+-  getChannelData() {
+-    return new Float32Array(this.length);
+-  }
+-}
+-
+-class FakeResizeObserver {
+-  observe() {}
+-  disconnect() {}
+-}
++const { meterSignal, install, runFrames } = createFakeWebAudio();
+ 
+ const holdTickCollection: WorkspaceCollection = {
+   id: 'hold-tick',
+@@ -166,21 +70,8 @@ function plainHoldPercent(hold: HTMLElement): number {
+ }
+ 
+ describe('Master hold tick geometry, structural pins on the written style; jsdom has no layout (MASTER-HOLD-TICK-EDGE, D-29z8)', () => {
+-  const frames: FrameRequestCallback[] = [];
+-
+   beforeEach(() => {
+-    frames.length = 0;
+-    meterSignal.value = 0;
+-    fakeClock.base = Date.now() / 1000;
+-    vi.stubGlobal('AudioContext', MeteredAudioContext);
+-    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+-    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+-    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+-      frames.push(callback);
+-      return frames.length;
+-    });
+-    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    install({ metered: true, captureFrames: true, resizeObserver: true });
+     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
+     vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+     vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
+@@ -191,17 +82,6 @@ describe('Master hold tick geometry, structural pins on the written style; jsdom
+     vi.restoreAllMocks();
+   });
+ 
+-  function runFrames(count = 1) {
+-    for (let index = 0; index < count; index++) {
+-      const pending = frames.splice(0, frames.length);
+-      act(() => {
+-        for (const frame of pending) {
+-          frame(performance.now());
+-        }
+-      });
+-    }
+-  }
+-
+   async function mountPlayingMaster() {
+     const api: HoldTickApiRef = { current: null };
+     const view = render(
+diff --git a/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx b/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
+index d35ea0b..2ba14fd 100644
+--- a/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
+@@ -6,103 +6,11 @@ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { addClip, createArrangement } from '../model';
+ import { studioPlaybackStrings } from '../strings';
++import { createFakeWebAudio } from './helpers/fake-web-audio';
+ import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+-const fakeClock = { base: 0 };
+-const startFailure = { armedAt: 0, calls: 0, thrown: 0 };
+-
+-class FakeParam {
+-  value = 0;
+-  setTargetAtTime(target: number) {
+-    this.value = target;
+-  }
+-  setValueAtTime() {}
+-  linearRampToValueAtTime() {}
+-}
+-
+-class FakeNode {
+-  connect(destination: FakeNode) {
+-    return destination;
+-  }
+-  disconnect() {}
+-}
+-
+-class FakeGain extends FakeNode {
+-  gain = new FakeParam();
+-}
+-
+-class FakePanner extends FakeNode {
+-  pan = new FakeParam();
+-}
+-
+-class FakeSource extends FakeNode {
+-  buffer: unknown = null;
+-  onended: (() => void) | null = null;
+-  started = false;
+-  stops = 0;
+-  start() {
+-    if (startFailure.armedAt > 0) {
+-      startFailure.calls += 1;
+-      if (startFailure.calls === startFailure.armedAt) {
+-        startFailure.armedAt = 0;
+-        startFailure.calls = 0;
+-        startFailure.thrown += 1;
+-        throw new Error('injected start failure');
+-      }
+-    }
+-    this.started = true;
+-  }
+-  stop() {
+-    this.stops += 1;
+-  }
+-}
+-
+-const createdSources: FakeSource[] = [];
+-
+-class FakeAudioContext {
+-  state = 'running';
+-  destination = new FakeNode();
+-  sampleRate = 48000;
+-  get currentTime() {
+-    return Date.now() / 1000 - fakeClock.base;
+-  }
+-  resume() {
+-    return Promise.resolve();
+-  }
+-  close() {
+-    return Promise.resolve();
+-  }
+-  createGain() {
+-    return new FakeGain();
+-  }
+-  createStereoPanner() {
+-    return new FakePanner();
+-  }
+-  createBufferSource() {
+-    const source = new FakeSource();
+-    createdSources.push(source);
+-    return source;
+-  }
+-}
+-
+-class FakeOfflineAudioContext {}
+-
+-class FakeAudioBuffer {
+-  readonly length: number;
+-  readonly numberOfChannels: number;
+-  readonly sampleRate: number;
+-  constructor(options: { length: number; numberOfChannels: number; sampleRate: number }) {
+-    this.length = options.length;
+-    this.numberOfChannels = options.numberOfChannels;
+-    this.sampleRate = options.sampleRate;
+-  }
+-  get duration() {
+-    return this.length / this.sampleRate;
+-  }
+-  getChannelData() {
+-    return new Float32Array(this.length);
+-  }
+-}
++const { startFailure, createdSources, meterSignal, frames, armStartFailure, install, runFrames } =
++  createFakeWebAudio();
+ 
+ const SAMPLE_RATE = 48000;
+ const SOURCE_SECONDS = 4;
+@@ -198,11 +106,6 @@ function startedWithoutStop(): number {
+   return createdSources.filter((source) => source.started && source.stops === 0).length;
+ }
+ 
+-function armStartFailure(nth: number) {
+-  startFailure.armedAt = nth;
+-  startFailure.calls = 0;
+-}
+-
+ describe('schedule failure stops playback with a status (GATE-B385-M2)', () => {
+   const errors: unknown[] = [];
+   const onError = (event: ErrorEvent) => {
+@@ -214,16 +117,7 @@ describe('schedule failure stops playback with a status (GATE-B385-M2)', () => {
+ 
+   beforeEach(() => {
+     errors.length = 0;
+-    createdSources.length = 0;
+-    startFailure.armedAt = 0;
+-    startFailure.calls = 0;
+-    startFailure.thrown = 0;
+-    fakeClock.base = Date.now() / 1000 - 5;
+-    vi.stubGlobal('AudioContext', FakeAudioContext);
+-    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+-    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+-    vi.stubGlobal('requestAnimationFrame', () => 1);
+-    vi.stubGlobal('cancelAnimationFrame', () => undefined);
++    install({ clockLeadSeconds: 5 });
+     window.addEventListener('error', onError);
+     process.on('unhandledRejection', onRejection);
+   });
+@@ -397,57 +291,21 @@ describe('schedule failure stops playback with a status (GATE-B385-M2)', () => {
+   });
+ });
+ 
+-const meterSignal = { value: 0 };
+-
+-class FakeAnalyser extends FakeNode {
+-  fftSize = 2048;
+-  getFloatTimeDomainData(target: Float32Array) {
+-    target.fill(meterSignal.value);
+-  }
+-}
+-
+-class FakeSplitter extends FakeNode {}
+-
+-class MeteredFailureAudioContext extends FakeAudioContext {
+-  createChannelSplitter() {
+-    return new FakeSplitter();
+-  }
+-  createAnalyser() {
+-    return new FakeAnalyser();
+-  }
+-}
+-
+-class FakeResizeObserver {
+-  observe() {}
+-  disconnect() {}
+-}
+-
+ describe('a pump failure inside the meter frame floors the meters (C-R387-01)', () => {
+   const errors: unknown[] = [];
+-  const frames: FrameRequestCallback[] = [];
+   const onError = (event: ErrorEvent) => {
+     errors.push(event.error);
+   };
+ 
+   beforeEach(() => {
+     errors.length = 0;
+-    frames.length = 0;
+-    createdSources.length = 0;
+-    startFailure.armedAt = 0;
+-    startFailure.calls = 0;
+-    startFailure.thrown = 0;
+-    meterSignal.value = 0;
+-    fakeClock.base = Date.now() / 1000 - 5;
+-    vi.stubGlobal('AudioContext', MeteredFailureAudioContext);
+-    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+-    vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+-    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+-      frames.push(callback);
+-      return frames.length;
++    install({
++      metered: true,
++      captureFrames: true,
++      stubSetInterval: true,
++      resizeObserver: true,
++      clockLeadSeconds: 5,
+     });
+-    vi.stubGlobal('cancelAnimationFrame', () => undefined);
+-    vi.stubGlobal('setInterval', () => 0);
+     window.addEventListener('error', onError);
+   });
+ 
+@@ -457,17 +315,6 @@ describe('a pump failure inside the meter frame floors the meters (C-R387-01)',
+     vi.restoreAllMocks();
+   });
+ 
+-  function runFrames(count: number) {
+-    for (let index = 0; index < count; index++) {
+-      const pending = frames.splice(0, frames.length);
+-      act(() => {
+-        for (const frame of pending) {
+-          frame(performance.now());
+-        }
+-      });
+-    }
+-  }
+-
+   it('SF11: a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor, with no frame left queued', async () => {
+     const api: ProbeRef = { current: null };
+     const view = render(
