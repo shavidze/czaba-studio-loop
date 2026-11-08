@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-07T23:57:41.882Z",
-  "current_task": "Round 398: PERF-14a: lane data-clip-count model signal + 200-clip scale perf harness (perf/studio-lab-scale.perf.spec.ts + perf/budgets.scale.json, record rows: DOM at default and min zoom, clips in DOM and in window, zoom keydown p95/max 1x and 6x, components per zoom key) + doc 254 (current-task.md)",
+  "_generatedUtc": "2026-11-08T01:59:49.582Z",
+  "current_task": "Round 399: PERF-14b-i: perf harnesses count clips from the model (data-clip-count) and reach targets that may be unmounted; interactions + resources migrated by Rule R (R-a..R-d), scale harness patch (M2 lane-area in-window, visible-gap self-check, build self-check), perf/lib/page.ts add-only helpers; every deterministic row equal at HEAD; specs complete on the virtualization sketch; docs 254 (stage 1 of 4) + 255 (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6226,19 +6226,39 @@
       "severity": "info",
       "status": "DUE NOW (D-29z1358): PERF-13c passed C round 396 (gate 396 4",
       "title": "bounded frontend-architect checkpoint on the library preview region (decidePreviewMode / useLibraryP"
+    },
+    {
+      "id": "Q-14B-PIN-SELECTED",
+      "severity": "info",
+      "status": "ruled (D-29z1364): do NOT pin selected clips; pin = clips un",
+      "title": "PERF-14b pin set: selected clips or not"
+    },
+    {
+      "id": "TL-R398-SK-M1",
+      "severity": "medium",
+      "origin": "B sketch (tech-lead review)",
+      "evidence": "b-round-398/sketch-review.md",
+      "title": "PERF-14b-ii lane sketch: gesture pin cleared only on pointerup/pointercancel; touch/pen pointerId churn + window blur leaves a permanent pin and 2 listeners",
+      "status": "sketch_input (D-29z1364): not in app code; fix in sketch-14bii-lane before 14b-ii dispatch (add window blur unpin, remove all 3 listeners) with a row + mutant",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "TL-R398-SK-M2",
+      "severity": "medium",
+      "origin": "B sketch (tech-lead review)",
+      "evidence": "b-round-398/sketch-review.md; b-round-398/perf-sketch-studio-lab-interactions.log; perf-sketch-studio-lab-resources.log",
+      "title": "interactions and resources perf specs count mounted clips; abort under virtualization",
+      "status": "dispatched as round 399 PERF-14b-i (D-29z1365)",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "C-R398-SIGNAL-M2-M3",
+      "severity": "low",
+      "status": "ruled (D-29z1363): M2 lane area = scroller box minus measure",
+      "title": "scale in-window counted clips under the sticky header; zoom p95 == max with 10 keys"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 389,
-      "task": "current-task.md",
-      "decision": "D-29z1310..D-29z1315",
-      "type": "REGRESSION-2026-11-08 part 1: C-only browser sweep of rounds 343-388 (SA-1..SA-16), RR-PERF alone, PERF-LIB, RG-SMOKE, G389-AUTH; A no change",
-      "status": "c_pass (D-29z1316): REGRESSION part 1 PASS, 0 bugs; gate 389 skipped - nothing to publish | dispatched",
-      "note": "baseline 11ca746 clean; claims b-round-388/claims-389.sh; frozen b-round-388/r389-tree-sha256.txt (1284)",
-      "added": "2026-11-07 B round 388 -> 389 planning",
-      "result": "c-round-389.json (PASS, 20 rows, 0 failed, 0 bugs, browserVerified/realVerified true; RR-PERF 4/4 218 assert rows, PERF-LIB 3/54, RG-SMOKE 2); gate 389 skipped (no source change), baseline stays 11ca746"
-    },
     {
       "round": 390,
       "task": "current-task.md",
@@ -6317,9 +6337,19 @@
       "task": "current-task.md",
       "decision": "D-29z1359..D-29z1361",
       "type": "PERF-14a: 200-clip scale perf harness (record rows) + doc 254",
-      "status": "dispatched",
+      "status": "done",
       "note": "baseline c93d926 clean; grants b-round-397/grants-398.txt (5: ArrangementLane.tsx + 4 new); frozen b-round-397/r398-frozen-sha256.txt (1288); sketch b-round-397/sketch-398.patch.txt sha bd8fe321; claims b-round-397/claims-398.sh",
-      "added": "2026-11-07 B round 397 -> 398 planning"
+      "added": "2026-11-07 B round 397 -> 398 planning",
+      "result": "C PASS (c-round-398.json browserVerified/realVerified true, 0 bugs, L57 OK b-round-398/l57-check-c398.txt); gate 398 published c3ee1d6 on both remotes (D-29z1362)"
+    },
+    {
+      "round": 399,
+      "task": "current-task.md",
+      "decision": "D-29z1362..D-29z1366",
+      "type": "PERF-14b-i: harness readiness for clip virtualization (perf/** + docs only, no app change)",
+      "status": "dispatched",
+      "note": "baseline c3ee1d6 clean; grants b-round-398/grants-399.txt (8 tracked + doc 255 new); frozen b-round-398/r399-frozen-sha256.txt (1285); harness patch b-round-398/sketch-399-harness.patch.txt sha 204e282a; lane sketch (14b-ii) b-round-398/sketch-14bii-lane.patch.txt sha 3d1fc4d8; claims b-round-398/claims-399.sh",
+      "added": "2026-11-08 B round 398 -> 399 planning"
     }
   ],
   "other_keys": [

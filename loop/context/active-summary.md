@@ -1,17 +1,19 @@
-# Active loop summary (2026-11-07T23:57:41.882Z)
+# Active loop summary (2026-11-08T01:59:49.582Z)
 
-- backlog.json 2897 KB -> active view 271 KB
-- status: G_ROOT_GATE round 398
-- servers: `{"checkedUtc":"2026-11-07T23:44:43.5014703Z","round":398,"attempt":1,"store":200}`
+- backlog.json 2906 KB -> active view 273 KB
+- status: G_ROOT_GATE round 399
+- servers: `{"checkedUtc":"2026-11-08T01:51:20.2959641Z","round":399,"attempt":1,"store":200}`
 - last publication: c3ee1d6bae0213faaa6aa9932f81f530036d6659 (rounds 398-398)
-- last root gate: round 398 published - commit c3ee1d6bae0213faaa6aa9932f81f530036d6659 pushed
+- last root gate: round 399 skipped - C taskStatus FAIL
 
 ## Current items: -
 
-## Open findings: 896 (5 Critical/High/Medium)
+## Open findings: 900 (7 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech Lead manual check, does not block T12 per the 2026-10-23 rule / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
 - **GATE274-S1-HELD-REPEAT-ANNOUNCE** / medium / open_tech_lead_manual (D-29z606): per-step announcement is the round-274 contract (SK13, doc 205); the only remaining step is a real screen-reader check (2026-10-23 root clarification: does not block); manual row TLM-R274-SR-HELD-REPEAT, deadline RETRO 290 (L46). If Saba reproduces it, it becomes a  …[see backlog.json] / a held ArrowRight on one clip writes a new nudge text on every key repeat (function form, new start each step), so the aria-live span is re-
 - **GATE304-M1-PERF-LIB-NOT-IN-GATE** / medium / open_root (D-29z800): = ROOT-REQ-VITEST-PERF-INCLUDE (vitest.config.ts is outside loop grants); non-blocking for the loop (as the 2026-10-23 root clarification for root/manual-only Mediums); until root lands it, every PERF task cites the scratch-config command for perf/lib tests as an A and C row / vitest.config.ts includes app/** only, so perf/lib/report.test.ts and zoom-probe.test.ts (ZP1-ZP6) never run in the gate; only scratch-confi
-- ... and 891 Low/info (see backlog.json)
+- **TL-R398-SK-M1** / medium / sketch_input (D-29z1364): not in app code; fix in sketch-14bii-lane before 14b-ii dispatch (add window blur unpin, remove all 3 listeners) with a row + mutant / PERF-14b-ii lane sketch: gesture pin cleared only on pointerup/pointercancel; touch/pen pointerId churn + window blur leaves a permanent pin
+- **TL-R398-SK-M2** / medium / dispatched as round 399 PERF-14b-i (D-29z1365) / interactions and resources perf specs count mounted clips; abort under virtualization
+- ... and 893 Low/info (see backlog.json)

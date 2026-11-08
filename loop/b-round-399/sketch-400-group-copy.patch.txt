@@ -1,0 +1,249 @@
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -723,6 +723,68 @@
+     (element) => element.closest('[data-track-id]')?.getAttribute('data-track-id') ?? null,
+   );
+ 
++const copyRevealMarginPx = 8;
++
++const followMode = (page: Page): Promise<string | null> =>
++  page.getByTestId('arrangement-follow').getAttribute('data-follow-mode');
++
++async function readBesideClip<T>(
++  page: Page,
++  anchor: Locator,
++  isMounted: () => Promise<boolean>,
++  read: () => Promise<T>,
++  problems: string[],
++  label: string,
++): Promise<{ value: T; revealed: boolean } | null> {
++  if (await isMounted()) {
++    return { value: await read(), revealed: false };
++  }
++  const scroller = page.getByTestId('arrangement-timeline-scroller');
++  const followBefore = await followMode(page);
++  const saved = await scroller.evaluate((element) => element.scrollLeft);
++  const shift = await anchor.evaluate((element) => {
++    const scrollerElement = document.querySelector('[data-testid="arrangement-timeline-scroller"]');
++    const header = document.querySelector('[data-testid="arrangement-track-header"]');
++    if (scrollerElement === null || header === null) return null;
++    const laneLeft =
++      scrollerElement.getBoundingClientRect().left + header.getBoundingClientRect().width;
++    return element.getBoundingClientRect().right - laneLeft;
++  });
++  if (shift === null) {
++    problems.push(`${label}: no timeline scroller or track header to reveal the copy`);
++    return null;
++  }
++  let from = await nowIn(page);
++  await scroller.evaluate((element, left) => {
++    element.scrollLeft = left;
++  }, saved + shift - copyRevealMarginPx);
++  await waitForQuiet(page, from, settleMs);
++  const mounted = await isMounted();
++  const value = mounted ? await read() : null;
++  from = await nowIn(page);
++  await scroller.evaluate((element, left) => {
++    element.scrollLeft = left;
++  }, saved);
++  await waitForQuiet(page, from, settleMs);
++  if (Math.abs((await scroller.evaluate((element) => element.scrollLeft)) - saved) > 1) {
++    problems.push(`${label}: the timeline scroll did not return to ${saved} after the copy read`);
++  }
++  if (followBefore === 'on' && (await followMode(page)) !== 'on') {
++    from = await nowIn(page);
++    await page.getByTestId('arrangement-follow').click();
++    await blurActive(page);
++    await waitForQuiet(page, from, settleMs);
++    if ((await followMode(page)) !== 'on') {
++      problems.push(`${label}: Follow is ${await followMode(page)} after the copy read; want on`);
++    }
++  }
++  if (!mounted || value === null) {
++    problems.push(`${label}: the copy is not mounted after a reveal next to the clip`);
++    return null;
++  }
++  return { value, revealed: true };
++}
++
+ async function measureLaneDrag(
+   page: Page,
+   state: PlaybackState,
+@@ -892,6 +954,8 @@
+   copy: Locator;
+   undoBefore: string | null;
+   before: ClipState;
++  copyAtRest: ClipState;
++  copyIdRevealed: boolean;
+ }
+ 
+ async function setupGroupClips(
+@@ -913,14 +977,40 @@
+   await page.keyboard.press('Control+d');
+   await expectModelClipCount(page, 2);
+   await waitForQuiet(page, from, settleMs);
+-  const ids = await audioClips(page).evaluateAll((clips) =>
+-    clips.map((element) => element.getAttribute('data-clip-id') ?? ''),
++  const findCopyId = async (): Promise<string | undefined> => {
++    const ids = await audioClips(page).evaluateAll((clips) =>
++      clips.map((element) => element.getAttribute('data-clip-id') ?? ''),
++    );
++    return ids.find((id) => id !== '' && id !== clipId);
++  };
++  const found = await readBesideClip(
++    page,
++    clip,
++    async () => (await findCopyId()) !== undefined,
++    findCopyId,
++    result.problems,
++    'group setup',
+   );
+-  const copyId = ids.find((id) => id !== '' && id !== clipId);
++  const copyId = found?.value;
++  if (found === null) {
++    return null;
++  }
+   if (copyId === undefined) {
+     result.problems.push(`group setup: no Ctrl+D copy next to clip ${clipId}`);
+     return null;
+   }
++  const copy = clipById(page, copyId);
++  const atRest = await readBesideClip(
++    page,
++    clip,
++    async () => (await copy.count()) > 0,
++    () => readClipState(copy),
++    result.problems,
++    'group setup',
++  );
++  if (atRest === null) {
++    return null;
++  }
+   const again = await clipHeaderPoint(clip);
+   await page.keyboard.down('Control');
+   try {
+@@ -929,7 +1019,14 @@
+     await page.keyboard.up('Control');
+   }
+   await waitForQuiet(page, await nowIn(page), settleMs);
+-  return { clip, copy: clipById(page, copyId), undoBefore, before };
++  return {
++    clip,
++    copy,
++    undoBefore,
++    before,
++    copyAtRest: atRest.value,
++    copyIdRevealed: found.revealed,
++  };
+ }
+ 
+ async function teardownGroupClips(
+@@ -1075,7 +1172,9 @@
+   const target = await emptyLanePointAfterClip(clip);
+   const undoBefore = await undoTitle(page);
+   const before = await readClipState(clip);
+-  const copyBefore = await readClipState(copy);
++  const copyMountedBefore = (await copy.count()) > 0;
++  const copyBefore = copyMountedBefore ? await readClipState(copy) : group.copyAtRest;
++  const followAtT0 = await followMode(page);
+   const t0 = await nowIn(page);
+   const { ownCopy, t1, entryGhosts, crossGhosts, t2, backGhosts, t3 } = await pressedGesture(
+     page,
+@@ -1088,7 +1187,7 @@
+             requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+           }),
+       );
+-      const own = await readClipState(copy);
++      const own = (await copy.count()) > 0 ? await readClipState(copy) : null;
+       const crossStart = await nowIn(page);
+       await page.mouse.move(grab.x + laneSegmentPx, target.y, { steps: 1 });
+       const entry = await readLaneGhosts(page, target.trackId);
+@@ -1113,9 +1212,17 @@
+   const tEnd = await waitForQuiet(page, tUp, settleMs);
+   const whole = await snapshot(page, t0, tEnd);
+   const released = await readClipState(clip);
+-  const copyReleased = await readClipState(copy);
+   const releasedTrackId = await clipLaneTrackId(clip);
+-  const copyReleasedTrackId = await clipLaneTrackId(copy);
++  const releasedCopy = await readBesideClip(
++    page,
++    clip,
++    async () => (await copy.count()) > 0,
++    async () => ({ state: await readClipState(copy), trackId: await clipLaneTrackId(copy) }),
++    result.problems,
++    `${label} release read`,
++  );
++  const copyReleased = releasedCopy?.value.state ?? null;
++  const copyReleasedTrackId = releasedCopy?.value.trackId ?? null;
+   if (state === 'playing' && !(await isPlaying(page))) {
+     result.problems.push(`playback not running after ${label}`);
+   }
+@@ -1172,14 +1279,30 @@
+ 
+   await resetAfterDrag(page, clip, 'move', grab, undoBefore, before, label, result.problems);
+   const reset = await readClipState(clip);
+-  const copyReset = await readClipState(copy);
+   const resetTrackId = await clipLaneTrackId(clip);
+-  const copyResetTrackId = await clipLaneTrackId(copy);
++  const resetCopy = await readBesideClip(
++    page,
++    clip,
++    async () => (await copy.count()) > 0,
++    async () => ({ state: await readClipState(copy), trackId: await clipLaneTrackId(copy) }),
++    result.problems,
++    `${label} reset read`,
++  );
++  const copyReset = resetCopy?.value.state ?? null;
++  const copyResetTrackId = resetCopy?.value.trackId ?? null;
+ 
+   const failed: string[] = [];
+-  if (ownCopy.start === copyBefore.start) {
++  if (ownCopy !== null && ownCopy.start === copyBefore.start) {
+     failed.push(`(f) the copy's start ${ownCopy.start} did not move on the own-lane read`);
+   }
++  if (copyReleased === null || copyReset === null) {
++    failed.push(
++      `(h) the copy was unreadable after a reveal (release ${copyReleased !== null}, reset ${copyReset !== null})`,
++    );
++  }
++  if (state === 'playing' && followAtT0 !== 'on') {
++    failed.push(`(g) Follow is ${followAtT0} at the start of the playing group drag; want on`);
++  }
+   if (crossGhosts.targetLane !== 2) {
+     failed.push(
+       `(a) target-lane ${target.trackId} non-blocked ghosts ${crossGhosts.targetLane} at the cross read; want 2`,
+@@ -1198,7 +1321,8 @@
+     failed.push(`(b) document ghosts ${backGhosts.document} at the back read`);
+   }
+   const releaseDelta = Number(released.start) - Number(before.start);
+-  const copyDelta = Number(copyReleased.start) - Number(copyBefore.start);
++  const copyDelta =
++    copyReleased === null ? Number.NaN : Number(copyReleased.start) - Number(copyBefore.start);
+   if (
+     releasedTrackId !== target.clipTrackId ||
+     copyReleasedTrackId !== target.clipTrackId ||
+@@ -1211,7 +1335,7 @@
+   }
+   if (
+     JSON.stringify(reset) !== JSON.stringify(before) ||
+-    JSON.stringify(copyReset) !== JSON.stringify(copyBefore) ||
++    (copyReset !== null && JSON.stringify(copyReset) !== JSON.stringify(copyBefore)) ||
+     resetTrackId !== target.clipTrackId ||
+     copyResetTrackId !== target.clipTrackId
+   ) {
+@@ -1221,7 +1345,14 @@
+   }
+   const live = failed.length === 0;
+   setLive(result, rateRowId('interact.harness.drag-group-live', result.cpuRate), live, {
+-    [`${state}OwnCopyStart`]: ownCopy.start,
++    [`${state}OwnCopyStart`]: ownCopy?.start ?? '',
++    [`${state}OwnCopyObserved`]: ownCopy !== null,
++    [`${state}CopyBeforeSource`]: copyMountedBefore ? 'mounted' : 'setup-at-rest',
++    [`${state}CopyReveals`]:
++      Number(group.copyIdRevealed) +
++      Number(releasedCopy?.revealed ?? false) +
++      Number(resetCopy?.revealed ?? false),
++    [`${state}FollowAtT0`]: followAtT0 ?? '',
+     [`${state}TargetLaneGhosts`]: crossGhosts.targetLane,
+     [`${state}EntryGhostStart`]: entryGhosts.targetStart ?? '',
+     [`${state}CrossGhostStart`]: crossGhosts.targetStart ?? '',

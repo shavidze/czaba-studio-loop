@@ -1,0 +1,6 @@
+- step1 snapshots done
+- step2 sketch written (sketch-400-group-copy.patch.txt sha 8d2e6579), runs started
+- step3 sketch runs: head 189/189 equal problems [] x6; virt problems [] x6, only path-rewrites fails; scratches deleted
+- step4 backlog v367 applied
+- step5 task, reports, b-next written
+- step6 v2 sketch reviewed+rerun, docs finalized

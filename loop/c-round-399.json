@@ -1,0 +1,74 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "C-R399-01",
+   "severity": "medium",
+   "origin": "B spec (R-b conflicts with 'values equal HEAD'); A STOP confirmed",
+   "steps": [
+    "Copy the working tree to a scratch outside store/, apply b-round-398/sketch-14bii-lane.patch.txt",
+    "Run perf/studio-lab-interactions.perf.spec.ts alone (perf config, 1440x900)",
+    "Read test-results/perf/latest-interactions.json"
+   ],
+   "expected": "complete, abortedAt null, problems [] in every pass, 3 non-null samples in every row (task section 5 A5 / section 6 INTERACT-VIRT)",
+   "actual": "rc 1 (430 s). complete true, abortedAt null, but every pass has problem 'group setup: no Ctrl+D copy next to clip <id>' (setupGroupClips, interactions l.914-921 picks the copy from mounted clips; the copy is unmounted under virtualization). 24 group rows have 0 samples, 13 assert rows fail: 12 group rows (+6x) and interact.harness.drag-group-live = 0, plus interact.zoom.30.out.path-rewrites median 2 vs budget 3 (virtualization effect, not the STOP). Identical to A's A5 list.",
+   "evidence": "c-round-399/virt-interactions.log, virt-interactions.json, a-round-399.md STOP section"
+  }
+ ],
+ "passed": [
+  "SOURCE-SCOPE (claims equal planning output apart from section 7 facts + the two unlisted gaps K20 page.ts 1->2 and K27 20->21 that A reported; frozen manifest 0 failures; protected 11/11; app diff empty; claims stable start vs end)",
+  "NO-APP-CHANGE",
+  "AUTH (fresh context: /studio-lab opens demo at 1440 and 1280; /studio/<premium handle> shows 'Sign in required' with no workspace; /api/studio-token without credentials -> 401)",
+  "STOP-REPRODUCED (A's STOP confirmed independently in the browser run)"
+ ],
+ "blocked": [
+  "Short round per L22 (A STOP on a ruled clause with a diff): INTERACT-HEAD, RES-HEAD, SCALE-HEAD, RES-VIRT, SCALE-VIRT, PERF-LIB, BUDGET-SHAPE, DOCS were NOT run by C and are not claimed. A's own runs (A4 189/189, 46/46, 17/17 equal) are unverified by C.",
+  "gate rows (full vitest, typecheck, build, Biome, verify) belong to the root gate"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "jsdomOnlyNotes": [],
+ "browserVerified": false,
+ "realVerified": false,
+ "browserVerifiedNote": "Short round: the perf-spec rows INTERACT-HEAD/RES-*/SCALE-* were not run (L22), so false. Browser checks that did run: AUTH, INTERACT-VIRT.",
+ "envStatus": {
+  "checkedUtc": "2026-11-08T01:51:20.2959641Z",
+  "round": 399,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": [
+  "b-round-398/r399-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [
+  "K20 per-file perf/lib/page.ts 1->2 and K27 20->21 are outside section 7 (A reported them as forced by the mandated work)"
+ ],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": true,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": "b-round-398/perf-sketch-scale-mutant-shifted-window.log and perf-sketch-scale-mutant-no-filter.log (recorded by B, not re-run by C)",
+ "mutantRedOnTree": null,
+ "mutantRedOnTreeReason": "no app change",
+ "gateChecksNamed": true,
+ "gateChecksRunOnSketch": "b-round-398/head-perf-lib-vitest.log",
+ "chainHeadGateRunGreen": "gate 398 published c3ee1d6",
+ "affectedChecksNamed": true,
+ "affectedChecksRunOnSketch": "b-round-398/perf-head-harness-scale.log, perf-sketch-scale-run2.log, perf-head-interactions.log; interactions/resources migrated specs were not run on a sketch by B. C ran the migrated interactions spec on the sketch (c-round-399/virt-interactions.log)",
+ "progressFile": "c-round-399/progress.json",
+ "stopSignal": "A STOP on a ruled clause (R-b group-copy reads) - short round per L22",
+ "lows": [
+  {
+   "id": "C-R399-LOW-CLAIMS",
+   "severity": "low",
+   "origin": "B spec",
+   "note": "claims K20 page.ts and K27 do not list the mandated helper/doc 255 as expected deltas"
+  }
+ ]
+}

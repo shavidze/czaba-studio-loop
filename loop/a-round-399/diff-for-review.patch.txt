@@ -1,0 +1,485 @@
+diff --git a/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md b/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md
+index f95021c..3e19c68 100644
+--- a/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md
++++ b/docs/implementation/2026/quarter-IV/254-perf-scale-harness.md
+@@ -1,7 +1,7 @@
+ # PERF-14a: 200-clip-იანი scale harness და lane-ის clip count, რომელიც DOM-ზე არ არის დამოკიდებული (round 398)
+ 
+ **თარიღი:** 2026-11-07
+-**სტატუსი:** In Progress (stage 1 of 3; C round 398 PASS)
++**სტატუსი:** In Progress (stage 1 of 4; C round 398 PASS)
+ **შეცვლილი პროექტი:** Store (`app/components/arrangement/ArrangementLane.tsx`, `app/lib/arrangement/__tests__/lane-clip-count.test.tsx`, `perf/studio-lab-scale.perf.spec.ts`, `perf/budgets.scale.json`).
+ 
+ ## კონტექსტი
+@@ -49,15 +49,17 @@ D-29z1360-ის ფარგლები (B, `tech-lead` და `performance-op
+ თითო pass ახალ browser context-ში, 1440×900, perf instrumentation load-მდე. 3 pass.
+ 
+ - **a. Load:** `/studio-lab` → `waitForLibraryReady` → `waitForCollectionReady`.
+-- **b. 200 clip:** library Add, clip-ის name bar-ზე click (`perfMoveTitlePattern`), blur, Control+d ×199. ყოველ press-ზე ელოდება, სანამ clip-ის lane-ის (`closest('[data-track-id]')`) `data-clip-count` press + 1 გახდება. Self-check: lane count 200, 200 განსხვავებული `data-clip-start`, 0 collapsed group. Row: `scale.harness.build-ms` (Control+d loop-ის wallclock).
+-- **c. Default zoom, scroll 0, 1×:** `scale.dom.page`, `scale.dom.clip-subtree`, `scale.clips.model`, `scale.clips.mounted`, `scale.clips.in-window`.
+-- **d. Zoom key-ები 1×-ზე:** 5 × `-`, შემდეგ 5 × `=`, თითო key-ს თავისი window quiet-მდე. Row-ები: `scale.zoom.keydown-p95-ms`, `scale.zoom.keydown-max-ms`, `scale.zoom.commits-per-key`, `scale.zoom.components-per-key`. Self-check: Zoom slider ყოველ key-ზე სწორი მიმართულებით იცვლება და საწყის მნიშვნელობას უბრუნდება.
++- **b. 200 clip:** library Add, clip-ის name bar-ზე click (`perfMoveTitlePattern`), blur, Control+d ×199. ყოველ press-ზე ელოდება, სანამ clip-ის lane-ის (`closest('[data-track-id]')`) `data-clip-count` press + 1 გახდება. Self-check: lane count 200, ≥ 1 mount-ებული clip და თითო mount-ებულ clip-ზე ერთი განსხვავებული `data-clip-start` (PERF-14b-i-მდე: 200 განსხვავებული `data-clip-start`; HEAD-ზე ყველა clip mount-ებულია, ამიტომ ეს იგივე 200-ია), 0 collapsed group. Row: `scale.harness.build-ms` (Control+d loop-ის wallclock).
++- **c. Default zoom, scroll 0, 1×:** `scale.dom.page`, `scale.dom.clip-subtree`, `scale.clips.model`, `scale.clips.mounted`, `scale.clips.in-window`. აქედან იწყება visible-gap self-check (იხ. ქვემოთ).
++- **d. Zoom key-ები 1×-ზე:** 5 × `-`, შემდეგ 5 × `=`, თითო key-ს თავისი window quiet-მდე. Row-ები: `scale.zoom.keydown-p95-ms`, `scale.zoom.keydown-max-ms`, `scale.zoom.commits-per-key`, `scale.zoom.components-per-key`. 10 key-ზე `perf/lib/stats.ts`-ის `percentile` (`floor(n × 0.95)`) მაქსიმუმს იღებს, ამიტომ p95 row `keydown-max-ms`-ს უდრის; PERF-14-ის მიზანი „zoom p95 < 50 ms“ `keydown-max-ms`-ზე იკითხება (C-R398-SIGNAL-M3, D-29z1363). Wallclock row-ები `record` რჩება, key-ების რაოდენობა არ შეცვლილა. Self-check: Zoom slider ყოველ key-ზე სწორი მიმართულებით იცვლება და საწყის მნიშვნელობას უბრუნდება.
+ - **e. იგივე key-ები 6× CPU-ზე** (`Emulation.setCPUThrottlingRate`), იგივე id-ები `.6x` suffix-ით; შემდეგ rate ისევ 1.
+ - **f. Minimum zoom:** `-` სანამ slider-ის მნიშვნელობა მის `min`-ს არ გაუტოლდება (მაქსიმუმ 60 key, სხვაგვარად problem). Row-ები: `scale.dom.page.min-zoom`, `scale.clips.mounted.min-zoom`, `scale.clips.in-window.min-zoom`.
+ - **g. Minimum zoom, შუაში:** timeline scroller-ის `scrollLeft = round((scrollWidth − clientWidth) / 2)`. Row-ები: `scale.dom.page.min-zoom-mid`, `scale.clips.mounted.min-zoom-mid`, `scale.clips.in-window.min-zoom-mid`. Self-check: `scrollLeft` > 0 და `in-window` ≥ 1.
+-- **h. Scroll-ის გვერდის გადაკვეთა:** შუიდან 4-ჯერ `scrollLeft += clientWidth`, თითო ნაბიჯს თავისი window. Row-ები: `scale.scroll.commits-per-step`, `scale.scroll.components-per-step`, `scale.scroll.loaf-max-ms`.
++- **h. Scroll-ის გვერდის გადაკვეთა:** შუიდან 4-ჯერ `scrollLeft += clientWidth`, თითო ნაბიჯს თავისი window. Row-ები: `scale.scroll.commits-per-step`, `scale.scroll.components-per-step`, `scale.scroll.loaf-max-ms`. ყოველი ნაბიჯის შემდეგ (window-ის გარეთ) visible-gap self-check მეორდება.
+ 
+-Timeline scroller არის ruler-ის (`[data-testid="arrangement-ruler"]`) პირველი წინაპარი, რომლის `scrollWidth > clientWidth` და computed `overflowX` არის `auto` ან `scroll`; class-ის სახელი არ გამოიყენება. დამატებითი self-check-ები: c და f ნაბიჯებზე `scrollLeft` 0-ია, h-ზე ყოველი ნაბიჯი ზუსტად `clientWidth`-ით მოძრაობს, page error არ არის. `in-window` = audio clip-ები, რომელთა box scroller-ის box-ს კვეთს. შედეგი: `test-results/perf/latest-scale.json` და დროის ნიშნულიანი ასლი.
++Timeline scroller არის ruler-ის (`[data-testid="arrangement-ruler"]`) პირველი წინაპარი, რომლის `scrollWidth > clientWidth` და computed `overflowX` არის `auto` ან `scroll`; class-ის სახელი არ გამოიყენება. დამატებითი self-check-ები: c და f ნაბიჯებზე `scrollLeft` 0-ია, h-ზე ყოველი ნაბიჯი ზუსტად `clientWidth`-ით მოძრაობს, page error არ არის. `in-window` = audio clip-ები, რომელთა box **lane area**-ს კვეთს: scroller-ის box-ს გამოკლებული პირველი `[data-testid="arrangement-track-header"]`-ის გაზომილი სიგანე, რადგან header `sticky left-0`-ია და მის ქვეშ clip-ები არ ჩანს (C-R398-SIGNAL-M2, D-29z1363; HEAD-ზე `scale.clips.in-window.min-zoom-mid` = 19, ძველი განმარტებით 24 იყო).
++
++**Visible-gap self-check (PERF-14b-i):** c, f, g ნაბიჯებზე და h-ის ყოველი ნაბიჯის შემდეგ spec ამოწმებს, რომ mount-ებული clip-ები lane area-ს model-ის ბოლომდე (`data-clip-count` × clip-ის სიგანე) ხვრელის გარეშე ფარავს: მარცხენა კიდე, მარჯვენა კიდე და მეზობელ clip-ებს შორის > 1 px ხვრელი problem-ად იწერება. ის b ნაბიჯის back-to-back Control+d build-ს ეყრდნობა (თანაბარი სიგრძის clip-ები, თითო წინას ბოლოში იწყება; TL-R398-SK-L2), და ეს დაშვება spec-ის `scaleSequence`-ის c ხაზშიც წერია. Liveness: B-ის shifted-window mutant-ი 36 gap problem-ს იძლევა (`tmp/studio-real-loop/b-round-398/perf-sketch-scale-mutant-shifted-window.log`). შედეგი: `test-results/perf/latest-scale.json` და დროის ნიშნულიანი ასლი.
+ 
+ ## არქიტექტურა
+ 
+diff --git a/perf/budgets.interactions.json b/perf/budgets.interactions.json
+index b0a1050..4442c57 100644
+--- a/perf/budgets.interactions.json
++++ b/perf/budgets.interactions.json
+@@ -1763,7 +1763,7 @@
+       "value": 30
+     },
+     "owner": "PERF-1b-i",
+-    "note": "1x only. Audio clips after the clip header click and 29 Ctrl+D presses; each press is checked for count = press + 1, and the 30 copies must have 30 distinct data-clip-start values."
++    "note": "1x only. Clips in the model (the sum of the lane data-clip-count values) after the clip header click and 29 Ctrl+D presses; each press is waited until that sum = press + 1, and the mounted clips (at least 1) must each have a distinct data-clip-start value. Read from the model since PERF-14b-i (doc 255)."
+   },
+   {
+     "id": "interact.harness.zoom-30-live",
+diff --git a/perf/budgets.resources.json b/perf/budgets.resources.json
+index 630634f..d32d5ed 100644
+--- a/perf/budgets.resources.json
++++ b/perf/budgets.resources.json
+@@ -199,7 +199,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "1x only. Whole page elements with 2 clips. Budget owner: PERF-14 (DOM and ruler)."
++    "note": "1x only. Whole page elements with 2 clips. Under virtualization the copy may be unmounted; this counts mounted elements. Budget owner: PERF-14 (DOM and ruler)."
+   },
+   {
+     "id": "res.dom.ruler-2",
+@@ -210,7 +210,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "1x only. Ruler subtree with 2 clips. Since PERF-3b (doc 213) the ruler renders a three-viewport page window of ticks, so the count no longer grows with project length. Budget owner: PERF-14 (DOM and ruler)."
++    "note": "1x only. Ruler subtree with 2 clips. Since PERF-3b (doc 213) the ruler renders a three-viewport page window of ticks, so the count no longer grows with project length. Under virtualization the copy may be unmounted; this counts mounted elements. Budget owner: PERF-14 (DOM and ruler)."
+   },
+   {
+     "id": "res.dom.page-per-added-clip",
+@@ -221,7 +221,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-1b-ii",
+-    "note": "1x only. page-2 minus page-1: clip subtree + ruler growth + overview. Budget owner: PERF-14 (DOM and ruler)."
++    "note": "1x only. page-2 minus page-1: clip subtree + ruler growth + overview. Under virtualization the copy may be unmounted; this counts mounted elements. Budget owner: PERF-14 (DOM and ruler)."
+   },
+   {
+     "id": "res.export.1.wall-ms",
+@@ -387,7 +387,7 @@
+       "value": 2
+     },
+     "owner": "PERF-1b-ii",
+-    "note": "1x pass. Liveness. [data-clip-kind=\"audio\"] count after one Ctrl+D on the selected clip."
++    "note": "1x pass. Liveness. Clips in the model (the sum of the lane data-clip-count values) after one Ctrl+D on the selected clip; the mounted [data-clip-kind=\"audio\"] count is kept as detail. Read from the model since PERF-14b-i (doc 255)."
+   },
+   {
+     "id": "res.harness.export-1-produced",
+diff --git a/perf/budgets.scale.json b/perf/budgets.scale.json
+index e36801e..a00615a 100644
+--- a/perf/budgets.scale.json
++++ b/perf/budgets.scale.json
+@@ -63,7 +63,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-14a",
+-    "note": "Audio clips whose box intersects the timeline scroller's box (first ancestor of the ruler with scrollWidth > clientWidth), default zoom, scrollLeft 0. record — not run on sketch (L58)"
++    "note": "Audio clips whose box intersects the timeline scroller's box (first ancestor of the ruler with scrollWidth > clientWidth), default zoom, scrollLeft 0. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)"
+   },
+   {
+     "id": "scale.zoom.keydown-p95-ms",
+@@ -74,7 +74,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-14a",
+-    "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. record — not run on sketch (L58)"
++    "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. With 10 keys perf/lib percentile (floor(n x 0.95)) picks the maximum, so this row equals keydown-max-ms; the PERF-14 target \"zoom p95 < 50 ms\" is read on keydown-max-ms (C-R398-SIGNAL-M3, PERF-14b-i). record — not run on sketch (L58)"
+   },
+   {
+     "id": "scale.zoom.keydown-max-ms",
+@@ -118,7 +118,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-14a",
+-    "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. record — not run on sketch (L58)"
++    "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. With 10 keys perf/lib percentile (floor(n x 0.95)) picks the maximum, so this row equals keydown-max-ms; the PERF-14 target \"zoom p95 < 50 ms\" is read on keydown-max-ms (C-R398-SIGNAL-M3, PERF-14b-i). record — not run on sketch (L58)"
+   },
+   {
+     "id": "scale.zoom.keydown-max-ms.6x",
+@@ -184,7 +184,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-14a",
+-    "note": "Audio clips intersecting the timeline scroller's box at the Zoom slider minimum. record — not run on sketch (L58)"
++    "note": "Audio clips intersecting the timeline scroller's box at the Zoom slider minimum. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)"
+   },
+   {
+     "id": "scale.dom.page.min-zoom-mid",
+@@ -217,7 +217,7 @@
+     "mode": "record",
+     "budget": null,
+     "owner": "PERF-14a",
+-    "note": "Audio clips intersecting the timeline scroller's box at minimum zoom, scrolled to the middle. record — not run on sketch (L58)"
++    "note": "Audio clips intersecting the timeline scroller's box at minimum zoom, scrolled to the middle. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)"
+   },
+   {
+     "id": "scale.scroll.commits-per-step",
+diff --git a/perf/lib/page.ts b/perf/lib/page.ts
+index 911695d..cbc1f6d 100644
+--- a/perf/lib/page.ts
++++ b/perf/lib/page.ts
+@@ -176,3 +176,21 @@ export function startTasks(starts: readonly { task: number }[]): Record<string,
+ export { rateRowId } from './report';
+ 
+ export const audioClips = (page: Page): Locator => page.locator('[data-clip-kind="audio"]');
++
++export const modelClipCount = (page: Page): Promise<number> =>
++  page.evaluate(() =>
++    [...document.querySelectorAll('[data-track-id][data-clip-count]')].reduce(
++      (sum, lane) => sum + Number(lane.getAttribute('data-clip-count')),
++      0,
++    ),
++  );
++
++export async function expectModelClipCount(
++  page: Page,
++  count: number,
++  timeoutMs?: number,
++): Promise<void> {
++  await expect
++    .poll(() => modelClipCount(page), timeoutMs === undefined ? {} : { timeout: timeoutMs })
++    .toBe(count);
++}
+diff --git a/perf/studio-lab-interactions.perf.spec.ts b/perf/studio-lab-interactions.perf.spec.ts
+index d869ec2..eb24c4e 100644
+--- a/perf/studio-lab-interactions.perf.spec.ts
++++ b/perf/studio-lab-interactions.perf.spec.ts
+@@ -16,7 +16,9 @@ import { installPerfInstrumentation, type PerfWindowSnapshot } from './lib/instr
+ import {
+   audioClips,
+   blurActive,
++  expectModelClipCount,
+   isPlaying,
++  modelClipCount,
+   nowIn,
+   rateRowId,
+   reactRendererProblem,
+@@ -909,7 +911,7 @@ async function setupGroupClips(
+   await blurActive(page);
+   const from = await nowIn(page);
+   await page.keyboard.press('Control+d');
+-  await expect(audioClips(page)).toHaveCount(2);
++  await expectModelClipCount(page, 2);
+   await waitForQuiet(page, from, settleMs);
+   const ids = await audioClips(page).evaluateAll((clips) =>
+     clips.map((element) => element.getAttribute('data-clip-id') ?? ''),
+@@ -948,7 +950,7 @@ async function teardownGroupClips(
+       `group teardown: ${presses} Ctrl+Z presses to reach the start entry; want 1`,
+     );
+   }
+-  await expect(audioClips(page)).toHaveCount(1);
++  await expectModelClipCount(page, 1);
+   const after = await readClipState(group.clip);
+   if (JSON.stringify(after) !== JSON.stringify(group.before)) {
+     result.problems.push(
+@@ -1768,17 +1770,21 @@ async function buildThirtyClips(
+   await blurActive(page);
+   for (let press = 1; press < clipsTarget; press += 1) {
+     await page.keyboard.press('Control+d');
+-    await expect(audioClips(page)).toHaveCount(press + 1);
++    await expectModelClipCount(page, press + 1);
+   }
+-  const count = await audioClips(page).count();
++  const count = await modelClipCount(page);
+   const starts = await audioClips(page).evaluateAll((clips) =>
+     clips.map((element) => element.getAttribute('data-clip-start') ?? ''),
+   );
++  const mountedClips = starts.length;
+   const distinctStarts = new Set(starts).size;
+-  result.samples.set('interact.harness.clips-30', { value: count, detail: { distinctStarts } });
+-  if (distinctStarts !== clipsTarget) {
++  result.samples.set('interact.harness.clips-30', {
++    value: count,
++    detail: { distinctStarts, mountedClips },
++  });
++  if (mountedClips < 1 || distinctStarts !== mountedClips) {
+     result.problems.push(
+-      `Ctrl+D copies overlap: ${distinctStarts} distinct clip starts of ${count}`,
++      `Ctrl+D copies overlap: ${distinctStarts} distinct clip starts on ${mountedClips} mounted clips (model ${count})`,
+     );
+   }
+   await waitForQuiet(page, await nowIn(page), settleMs);
+@@ -1826,7 +1832,7 @@ async function runInteractionPass(
+     step = 'library Add';
+     const addStart = await nowIn(page);
+     await page.getByRole('button', { name: perfLibraryAddLabel, exact: true }).click();
+-    await expect(audioClips(page)).toHaveCount(1);
++    await expectModelClipCount(page, 1);
+     await expect(page.getByTestId('arrangement-clip-waveform')).toHaveCount(1);
+     const added = await snapshot(page, addStart, await waitForQuiet(page, addStart, settleMs));
+     if (cpuRate === 1) {
+@@ -1903,10 +1909,10 @@ async function runInteractionPass(
+       setLive(result, rateRowId('interact.harness.drag-group-live', result.cpuRate), false, {
+         setup: 'failed',
+       });
+-      if ((await audioClips(page).count()) === 2) {
++      if ((await modelClipCount(page)) === 2) {
+         await blurActive(page);
+         await page.keyboard.press('Control+z');
+-        await expect(audioClips(page)).toHaveCount(1);
++        await expectModelClipCount(page, 1);
+       }
+     }
+ 
+diff --git a/perf/studio-lab-resources.perf.spec.ts b/perf/studio-lab-resources.perf.spec.ts
+index 5329168..a0e8e88 100644
+--- a/perf/studio-lab-resources.perf.spec.ts
++++ b/perf/studio-lab-resources.perf.spec.ts
+@@ -27,6 +27,8 @@ import { installPerfInstrumentation } from './lib/instrumentation';
+ import {
+   audioClips,
+   blurActive,
++  expectModelClipCount,
++  modelClipCount,
+   nowIn,
+   rateRowId,
+   reactRendererProblem,
+@@ -513,9 +515,7 @@ async function duplicateFirstClip(page: Page): Promise<void> {
+   await header.click({ position: { x: Math.min(40, box.width / 2), y: box.height / 2 } });
+   await blurActive(page);
+   await page.keyboard.press('Control+d');
+-  await expect(audioClips(page))
+-    .toHaveCount(2, { timeout: 10000 })
+-    .catch(() => undefined);
++  await expectModelClipCount(page, 2, 10000).catch(() => undefined);
+ }
+ 
+ async function newResourceContext(browser: Browser): Promise<BrowserContext> {
+@@ -679,7 +679,7 @@ async function runResourcePass(
+       const pcmReady = await readPcmLiveAfterGc(cdp, page);
+       result.problems.push(
+         ...pcmLiveProblems(pcmReady, {
+-          placed: await audioClips(page).count(),
++          placed: await modelClipCount(page),
+           library: librarySourceCount,
+         }),
+       );
+@@ -700,7 +700,7 @@ async function runResourcePass(
+     beginStep('library Add');
+     const addStart = await nowIn(page);
+     await page.getByRole('button', { name: perfLibraryAddLabel, exact: true }).click();
+-    await expect(audioClips(page)).toHaveCount(1);
++    await expectModelClipCount(page, 1);
+     await expect(page.getByTestId('arrangement-clip-waveform')).toHaveCount(1);
+     await waitForQuiet(page, addStart, settleMs);
+     await blurActive(page);
+@@ -738,7 +738,7 @@ async function runResourcePass(
+       const pcmAfterAdd = await readPcmLiveAfterGc(cdp, page);
+       result.problems.push(
+         ...pcmLiveProblems(pcmAfterAdd, {
+-          placed: await audioClips(page).count(),
++          placed: await modelClipCount(page),
+           library: librarySourceCount,
+         }),
+       );
+@@ -780,8 +780,11 @@ async function runResourcePass(
+     await duplicateFirstClip(page);
+     await waitForQuiet(page, await nowIn(page), settleMs);
+     await blurActive(page);
+-    const clipsAfterDuplicate = await audioClips(page).count();
+-    result.samples.set(rateRowId('res.harness.clips-2', cpuRate), { value: clipsAfterDuplicate });
++    const clipsAfterDuplicate = await modelClipCount(page);
++    result.samples.set(rateRowId('res.harness.clips-2', cpuRate), {
++      value: clipsAfterDuplicate,
++      detail: { mountedClips: await audioClips(page).count() },
++    });
+     if (clipsAfterDuplicate !== 2) {
+       throw new Error(`after Ctrl+D: ${clipsAfterDuplicate} clips, expected 2`);
+     }
+diff --git a/perf/studio-lab-scale.perf.spec.ts b/perf/studio-lab-scale.perf.spec.ts
+index ab49af3..43195d7 100644
+--- a/perf/studio-lab-scale.perf.spec.ts
++++ b/perf/studio-lab-scale.perf.spec.ts
+@@ -53,8 +53,8 @@ const rulerSelector = '[data-testid="arrangement-ruler"]';
+ const scaleSequence = [
+   'one browser context per pass at 1440x900, perf instrumentation installed before load',
+   'a. load: /studio-lab -> waitForLibraryReady -> waitForCollectionReady',
+-  `b. build: library Add, click the clip name bar, blur; Control+d x${scaleClipTarget - 1}, each waited until the lane data-clip-count equals press + 1 (scale.harness.build-ms = the Control+d loop); self-check lane count ${scaleClipTarget}, ${scaleClipTarget} distinct data-clip-start, 0 collapsed groups; wait for quiet`,
+-  'c. default zoom, scroll 0, 1x: scale.dom.page, scale.dom.clip-subtree, scale.clips.model, scale.clips.mounted, scale.clips.in-window',
++  `b. build: library Add, click the clip name bar, blur; Control+d x${scaleClipTarget - 1}, each waited until the lane data-clip-count equals press + 1 (scale.harness.build-ms = the Control+d loop); self-check lane count ${scaleClipTarget}, >= 1 mounted clip and one distinct data-clip-start per mounted clip, 0 collapsed groups; wait for quiet`,
++  'c. default zoom, scroll 0, 1x: scale.dom.page, scale.dom.clip-subtree, scale.clips.model, scale.clips.mounted, scale.clips.in-window (in-window = clips intersecting the lane area: the timeline scroller box minus the first track header width); self-check visible gap here, at f, at g and after each h step: the mounted clips cover the lane area up to the model end with no hole, which assumes the back-to-back Control+d build of step b (equal-length clips, each starting where the previous one ends)',
+   `d. zoom keys at 1x: ${zoomKeyCount} x "-" then ${zoomKeyCount} x "=", one window per key until quiet (scale.zoom.*); self-check direction per key and return to the start value`,
+   `e. the same keys at ${throttledRate}x CPU (Emulation.setCPUThrottlingRate), ids with .${throttledRate}x; rate back to 1`,
+   `f. minimum zoom: "-" until the Zoom slider value equals its min (at most ${minZoomKeyLimit} keys), wait for quiet (scale.*.min-zoom)`,
+@@ -82,6 +82,7 @@ interface ScaleDomReading {
+   scrollWidth: number;
+   clientWidth: number;
+   scrollerFound: boolean;
++  visibleGap: string | null;
+ }
+ 
+ interface ScaleStepRecord {
+@@ -96,6 +97,7 @@ const scaleSelectors = {
+   audio: audioClipSelector,
+   lane: countedLaneSelector,
+   ruler: rulerSelector,
++  header: '[data-testid="arrangement-track-header"]',
+ };
+ 
+ const zoomSlider = (page: Page): Locator =>
+@@ -124,18 +126,68 @@ function readScaleDom(page: Page): Promise<ScaleDomReading> {
+     }
+     const clips = [...document.querySelectorAll<HTMLElement>(selectors.audio)];
+     const box = scroller?.getBoundingClientRect() ?? null;
+-    const inWindow = box
+-      ? clips.filter((clip) => {
+-          const rect = clip.getBoundingClientRect();
+-          return (
+-            rect.width > 0 &&
+-            rect.right > box.left &&
+-            rect.left < box.right &&
+-            rect.bottom > box.top &&
+-            rect.top < box.bottom
+-          );
+-        }).length
+-      : 0;
++    const headerWidth =
++      document.querySelector(selectors.header)?.getBoundingClientRect().width ?? 0;
++    const laneLeft = box ? box.left + headerWidth : 0;
++    const visible = box
++      ? clips
++          .map((clip) => ({
++            rect: clip.getBoundingClientRect(),
++            start: Number(clip.dataset.clipStart),
++          }))
++          .filter(
++            ({ rect }) =>
++              rect.width > 0 &&
++              rect.right > laneLeft &&
++              rect.left < box.right &&
++              rect.bottom > box.top &&
++              rect.top < box.bottom,
++          )
++          .sort((a, b) => a.rect.left - b.rect.left || a.start - b.start)
++      : [];
++    const inWindow = visible.length;
++    const lanes = [...document.querySelectorAll<HTMLElement>(selectors.lane)];
++    const modelCount = lanes.reduce(
++      (max, lane) => Math.max(max, Number(lane.getAttribute('data-clip-count'))),
++      0,
++    );
++    const placed = clips
++      .map((clip) => ({
++        left: clip.getBoundingClientRect().left,
++        width: clip.getBoundingClientRect().width,
++        start: Number(clip.dataset.clipStart),
++      }))
++      .sort((a, b) => a.start - b.start);
++    const first = placed[0];
++    const second = placed.find((clip) => first !== undefined && clip.start > first.start);
++    const pxPerSecond =
++      first && second ? (second.left - first.left) / (second.start - first.start) : null;
++    const modelEndX =
++      first && pxPerSecond
++        ? first.left - first.start * pxPerSecond + modelCount * first.width
++        : null;
++    let visibleGap: string | null = null;
++    if (box && modelCount > 0) {
++      const areaRight = modelEndX === null ? box.right : Math.min(box.right, modelEndX);
++      if (visible.length === 0) {
++        visibleGap = `no clip in the lane area ${Math.round(laneLeft)}-${Math.round(areaRight)}`;
++      } else {
++        const head = visible[0];
++        const tail = visible[visible.length - 1];
++        if (head.rect.left > laneLeft + 1 && head.start > 0) {
++          visibleGap = `left edge: first visible clip at ${Math.round(head.rect.left)} > lane ${Math.round(laneLeft)}`;
++        } else if (tail.rect.right < areaRight - 1) {
++          visibleGap = `right edge: last visible clip ends ${Math.round(tail.rect.right)} < ${Math.round(areaRight)}`;
++        } else {
++          for (let index = 1; index < visible.length; index += 1) {
++            if (visible[index].rect.left - visible[index - 1].rect.right > 1) {
++              visibleGap = `hole between ${visible[index - 1].start} and ${visible[index].start}`;
++              break;
++            }
++          }
++        }
++      }
++    }
+     return {
+       page: document.querySelectorAll('*').length,
+       clipSubtree: clips.reduce((sum, clip) => sum + 1 + clip.querySelectorAll('*').length, 0),
+@@ -149,6 +201,7 @@ function readScaleDom(page: Page): Promise<ScaleDomReading> {
+       scrollWidth: scroller?.scrollWidth ?? 0,
+       clientWidth: scroller?.clientWidth ?? 0,
+       scrollerFound: scroller !== null,
++      visibleGap,
+     };
+   }, scaleSelectors);
+ }
+@@ -255,6 +308,7 @@ async function buildScaleClips(page: Page, result: ScalePassResult): Promise<voi
+   const check = await page.evaluate(
+     ({ audio, laneSelector, collapsed }) => ({
+       laneCount: Number(document.querySelector(laneSelector)?.getAttribute('data-clip-count')),
++      mountedClips: document.querySelectorAll(audio).length,
+       distinctStarts: new Set(
+         [...document.querySelectorAll(audio)].map(
+           (element) => element.getAttribute('data-clip-start') ?? '',
+@@ -275,8 +329,10 @@ async function buildScaleClips(page: Page, result: ScalePassResult): Promise<voi
+   if (check.laneCount !== scaleClipTarget) {
+     result.problems.push(`build: lane ${trackId} data-clip-count ${check.laneCount}`);
+   }
+-  if (check.distinctStarts !== scaleClipTarget) {
+-    result.problems.push(`build: ${check.distinctStarts} distinct data-clip-start values`);
++  if (check.mountedClips < 1 || check.distinctStarts !== check.mountedClips) {
++    result.problems.push(
++      `build: ${check.distinctStarts} distinct data-clip-start values on ${check.mountedClips} mounted clips`,
++    );
+   }
+   if (check.collapsedGroups !== 0) {
+     result.problems.push(`build: ${check.collapsedGroups} collapsed groups`);
+@@ -365,6 +421,10 @@ async function measureScrollSteps(page: Page, result: ScalePassResult): Promise<
+         scrollLefts.push(await setTimelineScroll(page, 'page'));
+       }),
+     );
++    const afterStep = await readScaleDom(page);
++    if (afterStep.visibleGap) {
++      result.problems.push(`scroll step ${step + 1}: ${afterStep.visibleGap}`);
++    }
+   }
+   const commits = records.map((record) => record.commits);
+   const components = records.map((record) => record.components);
+@@ -435,6 +495,7 @@ async function runScalePass(browser: Browser, pass: number): Promise<ScalePassRe
+       result.problems.push(`default zoom: timeline scrollLeft ${atStart.scrollLeft}, not 0`);
+     }
+     putDomReading(result, '', atStart, ['page', 'clip-subtree', 'model', 'mounted', 'in-window']);
++    if (atStart.visibleGap) result.problems.push(`default zoom: ${atStart.visibleGap}`);
+ 
+     step = 'd. zoom keys 1x';
+     await measureZoomKeys(page, result);
+@@ -457,12 +518,14 @@ async function runScalePass(browser: Browser, pass: number): Promise<ScalePassRe
+       result.problems.push(`minimum zoom: timeline scrollLeft ${atMinimum.scrollLeft}, not 0`);
+     }
+     putDomReading(result, '.min-zoom', atMinimum, ['page', 'mounted', 'in-window']);
++    if (atMinimum.visibleGap) result.problems.push(`minimum zoom: ${atMinimum.visibleGap}`);
+ 
+     step = 'g. minimum zoom, middle';
+     const middle = await setTimelineScroll(page, 'middle');
+     await waitForQuiet(page, await nowIn(page), settleMs);
+     const mid = await readScaleDom(page);
+     putDomReading(result, '.min-zoom-mid', mid, ['page', 'mounted', 'in-window']);
++    if (mid.visibleGap) result.problems.push(`middle scroll: ${mid.visibleGap}`);
+     if (middle <= 0 || mid.scrollLeft <= 0) {
+       result.problems.push(`middle scroll: scrollLeft ${mid.scrollLeft} (set ${middle})`);
+     }

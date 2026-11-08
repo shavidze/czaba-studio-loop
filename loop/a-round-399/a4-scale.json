@@ -1,0 +1,891 @@
+{
+  "harness": "PERF-14a",
+  "complete": true,
+  "startedAt": "2026-11-08T01:27:17.108Z",
+  "finishedAt": "2026-11-08T01:28:11.410Z",
+  "durationMs": 54302,
+  "budgetsFile": "perf/budgets.scale.json",
+  "chromium": "143.0.7499.4",
+  "reactRenderer": "18.3.1",
+  "viewport": "1440x900",
+  "clipTarget": 200,
+  "passesPerRate": 3,
+  "sequence": [
+    "one browser context per pass at 1440x900, perf instrumentation installed before load",
+    "a. load: /studio-lab -> waitForLibraryReady -> waitForCollectionReady",
+    "b. build: library Add, click the clip name bar, blur; Control+d x199, each waited until the lane data-clip-count equals press + 1 (scale.harness.build-ms = the Control+d loop); self-check lane count 200, >= 1 mounted clip and one distinct data-clip-start per mounted clip, 0 collapsed groups; wait for quiet",
+    "c. default zoom, scroll 0, 1x: scale.dom.page, scale.dom.clip-subtree, scale.clips.model, scale.clips.mounted, scale.clips.in-window (in-window = clips intersecting the lane area: the timeline scroller box minus the first track header width); self-check visible gap here, at f, at g and after each h step: the mounted clips cover the lane area up to the model end with no hole, which assumes the back-to-back Control+d build of step b (equal-length clips, each starting where the previous one ends)",
+    "d. zoom keys at 1x: 5 x \"-\" then 5 x \"=\", one window per key until quiet (scale.zoom.*); self-check direction per key and return to the start value",
+    "e. the same keys at 6x CPU (Emulation.setCPUThrottlingRate), ids with .6x; rate back to 1",
+    "f. minimum zoom: \"-\" until the Zoom slider value equals its min (at most 60 keys), wait for quiet (scale.*.min-zoom)",
+    "g. minimum zoom, timeline scroller scrollLeft = round((scrollWidth - clientWidth) / 2), wait for quiet (scale.*.min-zoom-mid); self-check scrollLeft > 0 and in-window >= 1",
+    "h. scroll page crossings: scrollLeft += clientWidth x4, one window per step until quiet (scale.scroll.*)"
+  ],
+  "passes": [
+    {
+      "pass": 1,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "pass": 2,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "pass": 3,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    }
+  ],
+  "failures": [],
+  "rows": [
+    {
+      "id": "scale.harness.build-ms",
+      "scenario": "b. build 200 clips",
+      "metric": "build-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Wall time of the 199 Control+d presses after the name-bar click, each waited until the clip's lane data-clip-count equals press + 1. record — not run on sketch (L58)",
+      "samples": [
+        4156,
+        3923,
+        4086
+      ],
+      "details": [
+        {
+          "trackId": "music",
+          "laneCount": 200,
+          "mountedClips": 200,
+          "distinctStarts": 200,
+          "collapsedGroups": 0
+        },
+        {
+          "trackId": "music",
+          "laneCount": 200,
+          "mountedClips": 200,
+          "distinctStarts": 200,
+          "collapsedGroups": 0
+        },
+        {
+          "trackId": "music",
+          "laneCount": 200,
+          "mountedClips": 200,
+          "distinctStarts": 200,
+          "collapsedGroups": 0
+        }
+      ],
+      "median": 4086,
+      "min": 3923,
+      "max": 4156,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.dom.page",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "page",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "document.querySelectorAll('*').length with 200 clips at the default zoom, scrollLeft 0. record — not run on sketch (L58)",
+      "samples": [
+        4333,
+        4333,
+        4333
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 4333,
+      "min": 4333,
+      "max": 4333,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.dom.clip-subtree",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "clip-subtree",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Sum over [data-clip-kind=\"audio\"] of 1 plus its descendants, default zoom, scrollLeft 0. record — not run on sketch (L58)",
+      "samples": [
+        3400,
+        3400,
+        3400
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 3400,
+      "min": 3400,
+      "max": 3400,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.model",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "model",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Sum of the lane model clip counts (data-clip-count on [data-track-id][data-clip-count]); independent of mounting. record — not run on sketch (L58)",
+      "samples": [
+        200,
+        200,
+        200
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 200,
+      "min": 200,
+      "max": 200,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.mounted",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "mounted",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Count of mounted [data-clip-kind=\"audio\"] elements, default zoom, scrollLeft 0. record — not run on sketch (L58)",
+      "samples": [
+        200,
+        200,
+        200
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 200,
+      "min": 200,
+      "max": 200,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.in-window",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "in-window",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Audio clips whose box intersects the timeline scroller's box (first ancestor of the ruler with scrollWidth > clientWidth), default zoom, scrollLeft 0. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.keydown-p95-ms",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "keydown-p95-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. With 10 keys perf/lib percentile (floor(n x 0.95)) picks the maximum, so this row equals keydown-max-ms; the PERF-14 target \"zoom p95 < 50 ms\" is read on keydown-max-ms (C-R398-SIGNAL-M3, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        32,
+        32,
+        32
+      ],
+      "details": [
+        {
+          "perKey": "24,24,32,32,24,24,32,24,24,24"
+        },
+        {
+          "perKey": "24,32,24,32,24,24,24,32,24,24"
+        },
+        {
+          "perKey": "24,24,32,32,24,24,24,24,24,24"
+        }
+      ],
+      "median": 32,
+      "min": 32,
+      "max": 32,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.keydown-max-ms",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "keydown-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Largest per-key Event Timing keydown duration over the 10 zoom keys. record — not run on sketch (L58)",
+      "samples": [
+        32,
+        32,
+        32
+      ],
+      "details": [
+        {
+          "perKey": "24,24,32,32,24,24,32,24,24,24"
+        },
+        {
+          "perKey": "24,32,24,32,24,24,24,32,24,24"
+        },
+        {
+          "perKey": "24,24,32,32,24,24,24,24,24,24"
+        }
+      ],
+      "median": 32,
+      "min": 32,
+      "max": 32,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.commits-per-key",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "React commits from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.components-per-key",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)",
+      "samples": [
+        638.3,
+        638.3,
+        638.3
+      ],
+      "details": [
+        {
+          "perKey": "638,638,639,639,638,638,638,639,638,638",
+          "max": 639
+        },
+        {
+          "perKey": "638,638,639,639,638,638,638,639,638,638",
+          "max": 639
+        },
+        {
+          "perKey": "638,638,639,639,638,638,638,639,638,638",
+          "max": 639
+        }
+      ],
+      "median": 638.3,
+      "min": 638.3,
+      "max": 638.3,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.keydown-p95-ms.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "keydown-p95-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. With 10 keys perf/lib percentile (floor(n x 0.95)) picks the maximum, so this row equals keydown-max-ms; the PERF-14 target \"zoom p95 < 50 ms\" is read on keydown-max-ms (C-R398-SIGNAL-M3, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        176,
+        168,
+        176
+      ],
+      "details": [
+        {
+          "perKey": "144,152,176,160,152,144,160,160,152,160"
+        },
+        {
+          "perKey": "136,152,168,152,152,144,160,160,152,160"
+        },
+        {
+          "perKey": "152,160,160,152,144,168,168,176,160,152"
+        }
+      ],
+      "median": 176,
+      "min": 168,
+      "max": 176,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.keydown-max-ms.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "keydown-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Largest per-key Event Timing keydown duration over the 10 zoom keys. record — not run on sketch (L58)",
+      "samples": [
+        176,
+        168,
+        176
+      ],
+      "details": [
+        {
+          "perKey": "144,152,176,160,152,144,160,160,152,160"
+        },
+        {
+          "perKey": "136,152,168,152,152,144,160,160,152,160"
+        },
+        {
+          "perKey": "152,160,160,152,144,168,168,176,160,152"
+        }
+      ],
+      "median": 176,
+      "min": 168,
+      "max": 176,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.commits-per-key.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "React commits from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.components-per-key.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)",
+      "samples": [
+        638.2,
+        638.2,
+        638.2
+      ],
+      "details": [
+        {
+          "perKey": "638,638,639,638,638,638,638,639,638,638",
+          "max": 639
+        },
+        {
+          "perKey": "638,638,639,638,638,638,638,639,638,638",
+          "max": 639
+        },
+        {
+          "perKey": "638,638,639,638,638,638,638,639,638,638",
+          "max": 639
+        }
+      ],
+      "median": 638.2,
+      "min": 638.2,
+      "max": 638.2,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.dom.page.min-zoom",
+      "scenario": "f. minimum zoom, scrollLeft 0",
+      "metric": "page",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "document.querySelectorAll('*').length at the Zoom slider minimum. record — not run on sketch (L58)",
+      "samples": [
+        4303,
+        4303,
+        4303
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 4303,
+      "min": 4303,
+      "max": 4303,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.mounted.min-zoom",
+      "scenario": "f. minimum zoom, scrollLeft 0",
+      "metric": "mounted",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Mounted [data-clip-kind=\"audio\"] elements at the Zoom slider minimum. record — not run on sketch (L58)",
+      "samples": [
+        200,
+        200,
+        200
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 200,
+      "min": 200,
+      "max": 200,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.in-window.min-zoom",
+      "scenario": "f. minimum zoom, scrollLeft 0",
+      "metric": "in-window",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Audio clips intersecting the timeline scroller's box at the Zoom slider minimum. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        19,
+        19,
+        19
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 19,
+      "min": 19,
+      "max": 19,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.dom.page.min-zoom-mid",
+      "scenario": "g. minimum zoom, scrolled to the middle",
+      "metric": "page",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "document.querySelectorAll('*').length at minimum zoom with scrollLeft = round((scrollWidth - clientWidth) / 2). record — not run on sketch (L58)",
+      "samples": [
+        4333,
+        4333,
+        4333
+      ],
+      "details": [
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 4333,
+      "min": 4333,
+      "max": 4333,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.mounted.min-zoom-mid",
+      "scenario": "g. minimum zoom, scrolled to the middle",
+      "metric": "mounted",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Mounted [data-clip-kind=\"audio\"] elements at minimum zoom, scrolled to the middle. record — not run on sketch (L58)",
+      "samples": [
+        200,
+        200,
+        200
+      ],
+      "details": [
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 200,
+      "min": 200,
+      "max": 200,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.in-window.min-zoom-mid",
+      "scenario": "g. minimum zoom, scrolled to the middle",
+      "metric": "in-window",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Audio clips intersecting the timeline scroller's box at minimum zoom, scrolled to the middle. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        19,
+        19,
+        19
+      ],
+      "details": [
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 19,
+      "min": 19,
+      "max": 19,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.scroll.commits-per-step",
+      "scenario": "h. scroll page crossings at minimum zoom",
+      "metric": "commits-per-step",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "React commits from each scrollLeft += clientWidth step until quiet, over 4 steps from the middle, divided by 4. Per scroll step; the unit reads \"/ key\" because perf/lib/determinism.ts has no \"/ step\" exact unit (precedent interact.zoom.30.wheel.commits-per-step). record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "1,1,1,1"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "1,1,1,1"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "1,1,1,1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.scroll.components-per-step",
+      "scenario": "h. scroll page crossings at minimum zoom",
+      "metric": "components-per-step",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Rendered components from each scroll step until quiet, over 4 steps, divided by 4. Per scroll step; the unit reads \"/ key\" because perf/lib/determinism.ts has no \"/ step\" exact unit (precedent interact.zoom.30.wheel.commits-per-step). record — not run on sketch (L58)",
+      "samples": [
+        57.75,
+        57.75,
+        57.75
+      ],
+      "details": [
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "57,60,57,57"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "57,60,57,57"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "57,60,57,57"
+        }
+      ],
+      "median": 57.75,
+      "min": 57.75,
+      "max": 57.75,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.scroll.loaf-max-ms",
+      "scenario": "h. scroll page crossings at minimum zoom",
+      "metric": "loaf-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Longest long-animation-frame overlapping any of the 4 scroll step windows. record — not run on sketch (L58)",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "0,0,0,0"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "0,0,0,0"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "0,0,0,0"
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    }
+  ]
+}
