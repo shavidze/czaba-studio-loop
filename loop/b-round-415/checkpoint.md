@@ -1,0 +1,13 @@
+# B round 415->416 checkpoint (RETRO 416)
+- step0 tasks/round-415.md copied (cmp equal); before-copies *-before-416.*; HEAD 344a59f clean
+- step1 scripts ported to b-round-415 (window 401-415), run; data/ written; stops regex excludes "STOP: none"; retro-numbers.py rewritten
+- step2 screens captured b-round-415/screens (text identical to 401; journey: 3 mounted clips by PERF-14b-ii virtualization, melody-probe confirms 4th mounts on scroll); mock api pid screens/mock.pid
+- step3 consults tech-lead + product-designer launched (background)
+- step4 r416 manifest written
+- step5 backlog part1 v391 (D-29z1444)
+- step6 lessons edited (3, 40, 41, 55, 57, 58; 60 lines; L58 4988 B); tools/l58-check.py written, window run data/l58-check-window.txt
+- step7 backlog part2 v392 D-29z1445..1449; screen-review-416.md written
+- step8 retro-416.md written; feature-status updated
+- step9 current-task.md (RETRO 416), claims-416.sh run (0 MISSING)
+- step10 b-round-415.md, b-next.json written; mock killed; claims re-run stable
+- step11 advisor final: root-file sentence fixed; data/retro416-deadlines.txt added, cited; claims re-run (K8 done). DONE
