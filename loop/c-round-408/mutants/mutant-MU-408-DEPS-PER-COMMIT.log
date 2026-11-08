@@ -1,0 +1,114 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c408-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/actions-context.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 87[2mms[22m[39m
+[31m     [31m×[31m AC1 keeps one actions object across a lane mute, a zoom step, a marker commit and an undo while the context value changes[39m[32m 36[2mms[22m[39m
+     [32m✓[39m AC2 hands out the provider callbacks themselves, and they keep their identity across a lane mute and a zoom step[32m 18[2mms[22m[39m
+     [32m✓[39m AC3 reads the latest arrangement through the stable actions after a commit and after its undo[32m 5[2mms[22m[39m
+     [32m✓[39m AC4 keeps the loop and markers frozen and identical across commits that do not touch the loop (GATE378-L2)[32m 4[2mms[22m[39m
+     [32m✓[39m AC5 the Arrangement components and contexts use no React transition API (GATE377-L1)[32m 4[2mms[22m[39m
+[31m     [31m×[31m AC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out every provider callback the ArrangementActions Pick declares (C-R404-A-AC1-COVERAGE, TL-R406-SK-L1)[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m AC8 keeps one actions object across the lane paths: solo, a volume and a pan commit, a clip selection, a time range, the active track and the insert marker (PERF-11c-iii-e-i)[39m[32m 3[2mms[22m[39m
+     [32m✓[39m AC6 throws a named error outside the provider[32m 9[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 12:41:55
+[2m   Duration [22m 1.03s[2m (transform 395ms, setup 0ms, import 521ms, tests 87ms, environment 315ms)[22m
+
+
+::error file=/tmp/c408-scratch/app/lib/arrangement/__tests__/actions-context.test.tsx,title=app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC1 keeps one actions object across a lane mute%2C a zoom step%2C a marker commit and an undo while the context value changes,line=231,column=35::AssertionError: expected { …(59) } to be { …(59) } // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: { …(59) }%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ app/lib/arrangement/__tests__/actions-context.test.tsx:231:35%0A%0A
+
+::error file=/tmp/c408-scratch/app/lib/arrangement/__tests__/actions-context.test.tsx,title=app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC7 keeps one actions object across a source selection%2C a library preview%2C Play/Stop and a Master mute and gain step%2C and hands out every provider callback the ArrangementActions Pick declares (C-R404-A-AC1-COVERAGE%2C TL-R406-SK-L1),line=366,column=35::AssertionError: expected { …(59) } to be { …(59) } // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: { …(59) }%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ app/lib/arrangement/__tests__/actions-context.test.tsx:366:35%0A%0A
+
+::error file=/tmp/c408-scratch/app/lib/arrangement/__tests__/actions-context.test.tsx,title=app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC8 keeps one actions object across the lane paths%3A solo%2C a volume and a pan commit%2C a clip selection%2C a time range%2C the active track and the insert marker (PERF-11c-iii-e-i),line=391,column=35::AssertionError: expected { …(59) } to be { …(59) } // Object.is equality%0A%0AIf it should pass with deep equality, replace "toBe" with "toStrictEqual"%0A%0AExpected: { …(59) }%0AReceived: serializes to the same string%0A%0A%0ACompared values have no visual difference.%0A%0A ❯ app/lib/arrangement/__tests__/actions-context.test.tsx:391:35%0A%0A
+Error: useArrangementActions must be used within an ArrangementProvider
+    at useArrangementActions (/tmp/c408-scratch/app/contexts/ArrangementContext.tsx:5046:11)
+    at OutsideProbe (/tmp/c408-scratch/app/lib/arrangement/__tests__/actions-context.test.tsx:160:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangementActions must be used within an ArrangementProvider
+    at useArrangementActions (/tmp/c408-scratch/app/contexts/ArrangementContext.tsx:5046:11)
+    at OutsideProbe (/tmp/c408-scratch/app/lib/arrangement/__tests__/actions-context.test.tsx:160:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/actions-context.test.tsx[2m > [22mArrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)[2m > [22mAC1 keeps one actions object across a lane mute, a zoom step, a marker commit and an undo while the context value changes
+[31m[1mAssertionError[22m: expected { …(59) } to be { …(59) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(59) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/actions-context.test.tsx:[2m231:35[22m[39m
+    [90m229| [39m    [34mact[39m(() [33m=>[39m before[33m.[39m[34mtoggleTrackMute[39m([32m'music'[39m))[33m;[39m
+    [90m230| [39m    [34mexpect[39m([34mcurrentValue[39m(probe))[33m.[39mnot[33m.[39m[34mtoBe[39m(before)[33m;[39m
+    [90m231| [39m    [34mexpect[39m([34mcurrentActions[39m(probe))[33m.[39m[34mtoBe[39m(actions)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m232| [39m    [35mconst[39m zoomBefore [33m=[39m [34mcurrentValue[39m(probe)[33m.[39mpxPerSecond[33m;[39m
+    [90m233| [39m    [34mact[39m(() [33m=>[39m [34mcurrentValue[39m(probe)[33m.[39m[34msetPxPerSecond[39m(zoomBefore [33m*[39m [34m2[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/actions-context.test.tsx[2m > [22mArrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)[2m > [22mAC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out every provider callback the ArrangementActions Pick declares (C-R404-A-AC1-COVERAGE, TL-R406-SK-L1)
+[31m[1mAssertionError[22m: expected { …(59) } to be { …(59) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(59) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/actions-context.test.tsx:[2m366:35[22m[39m
+    [90m364| [39m    [34mact[39m(() [33m=>[39m actions[33m.[39m[34mtoggleMasterMute[39m())[33m;[39m
+    [90m365| [39m    [34mexpect[39m([34mcurrentValue[39m(probe)[33m.[39marrangement[33m.[39mmaster[33m.[39mmute)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m366| [39m    [34mexpect[39m([34mcurrentActions[39m(probe))[33m.[39m[34mtoBe[39m(actions)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m367| [39m    [35mconst[39m gainBefore [33m=[39m [34mcurrentValue[39m(probe)[33m.[39marrangement[33m.[39mmaster[33m.[39mgainDb[33m;[39m
+    [90m368| [39m    [34mact[39m(() [33m=>[39m actions[33m.[39m[34mpreviewMasterGain[39m(gainBefore [33m-[39m [34m6[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/actions-context.test.tsx[2m > [22mArrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)[2m > [22mAC8 keeps one actions object across the lane paths: solo, a volume and a pan commit, a clip selection, a time range, the active track and the insert marker (PERF-11c-iii-e-i)
+[31m[1mAssertionError[22m: expected { …(59) } to be { …(59) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { …(59) }
+Received: serializes to the same string
+[39m
+
+[2mCompared values have no visual difference.[22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/actions-context.test.tsx:[2m391:35[22m[39m
+    [90m389| [39m    [34mact[39m(() [33m=>[39m actions[33m.[39m[34mtoggleTrackSolo[39m([32m'music'[39m[33m,[39m [35mfalse[39m))[33m;[39m
+    [90m390| [39m    [34mexpect[39m([34mmusic[39m()[33m?.[39msolo)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m391| [39m    [34mexpect[39m([34mcurrentActions[39m(probe))[33m.[39m[34mtoBe[39m(actions)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m392| [39m    [34mact[39m(() [33m=>[39m actions[33m.[39m[34mpreviewTrackVolume[39m([32m'music'[39m[33m,[39m [34m0.5[39m))[33m;[39m
+    [90m393| [39m    [34mact[39m(() [33m=>[39m actions[33m.[39m[34mcommitTrackVolume[39m([32m'music'[39m))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+rc 1

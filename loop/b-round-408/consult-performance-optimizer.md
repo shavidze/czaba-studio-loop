@@ -1,0 +1,9 @@
+# performance-optimizer consult, B round 408 -> 409 (PERF-11c-iii-e-ii sketch v2, sha bd47148b0d1717d4). Read-only; agent edited no files.
+Summary of the agent's answer (relayed by B, close to verbatim):
+
+1. Design sound. ArrangementTrack has exactly the 8 fields isSameLaneTrack compares; the inner reads track only through those fields (trackPanValue(track)) and never passes the object by identity, so a stale field-equal object is harmless. Weak spot = the future: a new ArrangementTrack field would be silently ignored. Cheap safe fix this round: a few-line compile-time check that the compared keys cover keyof ArrangementTrack. Nothing else worth adding.
+2. No meaningful saving lost. (a) peaks and ready land in the same commit, so sourceDurations changes anyway; a content compare could only win on a peaks-only change, which does not exist. (b) agreed: a lane-scoped durations map would change identity on every inner render and re-render every ArrangementClipView.
+3. No real risk: per commit 4 shells x (4 context reads, 2 useMemo dep checks, 1 shallow selector, ~25-prop compare) is tiny vs one render of the ~1300-line inner; map rebuild O(lane clips) only when inputs change (which forces an inner render anyway).
+4. Assert exactly in jsdom: inner = 1 for mute, its undo, solo click and the in-length move; = 2 for the exclusive solo swap and the ghost add; = all lanes for zoom; aria-pressed and ghost title (correctness). Do NOT assert shells() === 3 exactly (pins a cost that is not the goal) -> toBeLessThanOrEqual(3) or record. Browser numbers (add-bass 8, transport 4, preview 0, shell counts) depend on dev StrictMode and lane count -> record; preview start/stop inner = 0 is the most valuable browser win and belongs in the record.
+
+B ruling (D-29z1419): adopt the compile-time field guard (v3 sketch) and relax shells() to an upper bound; browser inner arrays: see task row 4 (asserted from B's runs incl. loaded replicate, L58).

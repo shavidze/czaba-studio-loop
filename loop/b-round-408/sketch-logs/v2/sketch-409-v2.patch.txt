@@ -1,0 +1,396 @@
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index a7c28f2..7db95a1 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -4,6 +4,7 @@ import {
+   type DragEvent,
+   type KeyboardEvent,
+   type MouseEvent,
++  memo,
+   type PointerEvent,
+   useCallback,
+   useEffect,
+@@ -29,6 +30,7 @@ import {
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
+ import { useStableHandler } from '~/hooks/useStableHandler';
+ import {
++  type ClipLaneGhost,
+   selectLaneDragGhosts,
+   selectLaneMoveSourceKey,
+ } from '~/lib/arrangement/clip-lane-drag-store';
+@@ -84,7 +86,13 @@ import {
+   timelinePageWindow,
+ } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+-import type { ArrangementTrack } from '~/types/arrangement';
++import type {
++  ArrangementClip,
++  ArrangementTrack,
++  WorkspaceCollection,
++  WorkspaceVideoAudioStatus,
++  WorkspaceVideoSource,
++} from '~/types/arrangement';
+ import { ArrangementClipView } from './ArrangementClip';
+ import { ArrangementMixFader } from './ArrangementMixFader';
+ import { ArrangementTrackMeter } from './ArrangementTrackMeter';
+@@ -178,6 +186,69 @@ interface ArrangementLaneProps {
+   timelineWindow?: TimelineWindowSource;
+ }
+ 
++interface ArrangementLaneSource {
++  title: string;
++  peaks: Float32Array | undefined;
++  videoAudio: WorkspaceVideoAudioStatus | undefined;
++}
++
++interface ArrangementLaneViewProps extends ArrangementLaneProps {
++  clips: readonly ArrangementClip[];
++  pxPerSecond: number;
++  laneSources: ReadonlyMap<string, ArrangementLaneSource>;
++  sourceDurations: ReadonlyMap<string, number>;
++  laneGhosts: readonly ClipLaneGhost[];
++  laneGhostTitles: readonly string[];
++  hasArrangementClips: boolean;
++}
++
++function isSameLaneTrack(a: ArrangementTrack, b: ArrangementTrack): boolean {
++  return (
++    a === b ||
++    (a.id === b.id &&
++      a.kind === b.kind &&
++      a.name === b.name &&
++      a.volume === b.volume &&
++      a.mute === b.mute &&
++      a.solo === b.solo &&
++      a.pan === b.pan &&
++      a.groupId === b.groupId)
++  );
++}
++
++function laneSourceTitle(
++  sourceId: string,
++  collection: WorkspaceCollection,
++  videoSources: ReadonlyMap<string, WorkspaceVideoSource>,
++): string {
++  return (
++    videoSources.get(sourceId)?.name ??
++    collection.sources.find((source) => source.id === sourceId)?.title ??
++    sourceId
++  );
++}
++
++const NO_LANE_GHOST_TITLES: readonly string[] = [];
++
++function areArrangementLaneViewPropsEqual(
++  previous: ArrangementLaneViewProps,
++  next: ArrangementLaneViewProps,
++): boolean {
++  const { track, ...previousRest } = previous;
++  const { track: nextTrack, ...nextRest } = next;
++  if (!isSameLaneTrack(track, nextTrack)) {
++    return false;
++  }
++  const previousEntries: [string, unknown][] = Object.entries(previousRest);
++  const nextValues: ReadonlyMap<string, unknown> = new Map(Object.entries(nextRest));
++  return (
++    previousEntries.length === nextValues.size &&
++    previousEntries.every(
++      ([key, value]) => nextValues.has(key) && Object.is(value, nextValues.get(key)),
++    )
++  );
++}
++
+ function noLaneWindowSubscription(): () => void {
+   return () => {};
+ }
+@@ -192,7 +263,7 @@ const LANE_ADD_PLUS_ICON = (
+   <Plus className="size-2.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+ );
+ 
+-export function ArrangementLane({
++function ArrangementLaneViewInner({
+   track,
+   timelineWidth,
+   timelineSeconds,
+@@ -213,9 +284,14 @@ export function ArrangementLane({
+   envelopeMode = false,
+   waveformZoom = 1,
+   timelineWindow,
+-}: ArrangementLaneProps) {
+-  const { arrangement, collection, sourcePeaks, sourceDurations, pxPerSecond, videoSources } =
+-    useArrangement();
++  clips,
++  pxPerSecond,
++  laneSources,
++  sourceDurations,
++  laneGhosts,
++  laneGhostTitles,
++  hasArrangementClips,
++}: ArrangementLaneViewProps) {
+   const {
+     getArrangement,
+     previewArrangement,
+@@ -264,7 +340,6 @@ export function ArrangementLane({
+   const heightHandleRef = useRef<HTMLDivElement>(null);
+   const density = trackHeaderDensity(height, folded);
+   const isCompactHeader = density === 'folded' || density === 'tight';
+-  const clips = useArrangementPreviewLaneClips(arrangement, track.id);
+   const laneSeconds = timelineSeconds ?? timelineWidth / pxPerSecond;
+   const laneRange = useArrangementRange((state) =>
+     selectArrangementLaneRange(state.range, track.id, clips),
+@@ -283,9 +358,6 @@ export function ArrangementLane({
+   const isVideo = track.kind === 'video';
+   const mixLabel = isVideo ? VIDEO_MIX_LABEL : track.name;
+   const storedPan = trackPanValue(track);
+-  const laneGhosts = useArrangementClipLaneDrag(
+-    useShallow((state) => selectLaneDragGhosts(state.drag, track.id)),
+-  );
+   const laneMoveSourceKey = useArrangementClipLaneDrag((state) =>
+     selectLaneMoveSourceKey(
+       state.drag,
+@@ -352,11 +424,6 @@ export function ArrangementLane({
+     window.addEventListener('pointercancel', finish, true);
+     window.addEventListener('blur', unpin);
+   };
+-  const sourceTitle = (sourceId: string) =>
+-    videoSources.get(sourceId)?.name ??
+-    collection.sources.find((source) => source.id === sourceId)?.title ??
+-    sourceId;
+-
+   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+     const files = Array.from(event.target.files ?? []);
+     event.target.value = '';
+@@ -1040,7 +1107,7 @@ export function ArrangementLane({
+         {!isVideo &&
+         isActive &&
+         density !== 'folded' &&
+-        arrangement.clips.length === 0 &&
++        !hasArrangementClips &&
+         !isFileDragOver &&
+         libraryGhost === null ? (
+           <p
+@@ -1091,8 +1158,7 @@ export function ArrangementLane({
+             </span>
+           </div>
+         ) : null}
+-        {laneGhosts.map((ghost) => {
+-          const ghostClip = arrangement.clips.find((entry) => entry.id === ghost.clipId);
++        {laneGhosts.map((ghost, ghostIndex) => {
+           return (
+             <div
+               key={`lane-ghost-${ghost.clipId}-${ghost.blocked ? 'blocked' : 'valid'}`}
+@@ -1117,27 +1183,26 @@ export function ArrangementLane({
+                 <span className="shrink-0 whitespace-nowrap font-mono font-normal tabular-nums">
+                   {formatArrangementTime(ghost.start)}
+                 </span>
+-                <span className="min-w-0 truncate">
+-                  {ghostClip ? sourceTitle(ghostClip.sourceId) : ''}
+-                </span>
++                <span className="min-w-0 truncate">{laneGhostTitles[ghostIndex] ?? ''}</span>
+               </span>
+             </div>
+           );
+         })}
+         {mountedClips.map((clip) => {
+-          const videoSource = isVideo ? videoSources.get(clip.sourceId) : undefined;
++          const laneSource = laneSources.get(clip.sourceId);
++          const videoAudio = isVideo ? laneSource?.videoAudio : undefined;
+           return (
+             <ArrangementClipView
+               key={clip.id}
+               clip={clip}
+-              title={sourceTitle(clip.sourceId)}
+-              peaks={sourcePeaks.get(clip.sourceId)}
++              title={laneSource?.title ?? clip.sourceId}
++              peaks={laneSource?.peaks}
+               isVideo={isVideo}
+               audioNote={
+-                videoSource && videoSource.audio !== 'ready'
+-                  ? videoSource.audio === 'decoding'
++                videoAudio !== undefined && videoAudio !== 'ready'
++                  ? videoAudio === 'decoding'
+                     ? studioLaneStrings.audioDecoding
+-                    : videoSource.audio === 'error'
++                    : videoAudio === 'error'
+                       ? studioLaneStrings.audioUnreadable
+                       : studioLaneStrings.audioNone
+                   : null
+@@ -1226,3 +1291,51 @@ export function ArrangementLane({
+     </div>
+   );
+ }
++
++const ArrangementLaneView = memo(ArrangementLaneViewInner, areArrangementLaneViewPropsEqual);
++
++export function ArrangementLane(props: ArrangementLaneProps) {
++  const { arrangement, collection, sourcePeaks, sourceDurations, pxPerSecond, videoSources } =
++    useArrangement();
++  const trackId = props.track.id;
++  const clips = useArrangementPreviewLaneClips(arrangement, trackId);
++  const laneGhosts = useArrangementClipLaneDrag(
++    useShallow((state) => selectLaneDragGhosts(state.drag, trackId)),
++  );
++  const laneSources = useMemo(() => {
++    const sources = new Map<string, ArrangementLaneSource>();
++    for (const clip of clips) {
++      if (!sources.has(clip.sourceId)) {
++        sources.set(clip.sourceId, {
++          title: laneSourceTitle(clip.sourceId, collection, videoSources),
++          peaks: sourcePeaks.get(clip.sourceId),
++          videoAudio: videoSources.get(clip.sourceId)?.audio,
++        });
++      }
++    }
++    return sources;
++  }, [clips, collection, sourcePeaks, videoSources]);
++  const arrangementClips = arrangement.clips;
++  const laneGhostTitles = useMemo(
++    () =>
++      laneGhosts.length === 0
++        ? NO_LANE_GHOST_TITLES
++        : laneGhosts.map((ghost) => {
++            const ghostClip = arrangementClips.find((entry) => entry.id === ghost.clipId);
++            return ghostClip ? laneSourceTitle(ghostClip.sourceId, collection, videoSources) : '';
++          }),
++    [laneGhosts, arrangementClips, collection, videoSources],
++  );
++  return (
++    <ArrangementLaneView
++      {...props}
++      clips={clips}
++      pxPerSecond={pxPerSecond}
++      laneSources={laneSources}
++      sourceDurations={sourceDurations}
++      laneGhosts={laneGhosts}
++      laneGhostTitles={laneGhostTitles}
++      hasArrangementClips={arrangement.clips.length > 0}
++    />
++  );
++}
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index a319177..4e6f1f7 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -1017,6 +1017,122 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     expect(view.getByTestId('arrangement-marker-name-input')).toBe(document.activeElement);
+   });
+ 
++  function laneHeader(view: ReturnType<typeof render>, trackId: string): HTMLElement {
++    const lane = view.container.querySelector<HTMLElement>(`[data-track-id="${trackId}"]`);
++    if (!lane) {
++      throw new Error(`lane ${trackId} not mounted`);
++    }
++    return within(lane).getByTestId('arrangement-track-header');
++  }
++
++  function laneButtonPressed(
++    view: ReturnType<typeof render>,
++    trackId: string,
++    name: RegExp,
++  ): string | null {
++    return within(laneHeader(view, trackId))
++      .getByRole('button', { name })
++      .getAttribute('aria-pressed');
++  }
++
++  it('RB-LEAF7 a lane mute, its Undo and a clip move inside the project length render only the lane they change; a zoom step renders every lane; an exclusive solo renders only the lanes whose Solo flips (PERF-11c-iii-e-ii)', async () => {
++    const { api, raw, view } = await mountWorkspace();
++    const inner = () => renderLog.counts.get('ArrangementLaneViewInner') ?? 0;
++    const shells = () => renderLog.counts.get('ArrangementLane') ?? 0;
++    renderLog.counts.clear();
++    act(() => api.current?.toggleTrackMute('music'));
++    expect(shells()).toBe(3);
++    expect(inner()).toBe(1);
++    expect(laneButtonPressed(view, 'music', /^Mute — /)).toBe('true');
++    expect(laneButtonPressed(view, 'sfx', /^Mute — /)).toBe('false');
++    renderLog.counts.clear();
++    act(() => api.current?.undo());
++    expect(shells()).toBe(3);
++    expect(inner()).toBe(1);
++    expect(laneButtonPressed(view, 'music', /^Mute — /)).toBe('false');
++    renderLog.counts.clear();
++    act(() => api.current?.setPxPerSecond((api.current?.pxPerSecond ?? 20) * 2));
++    expect(inner()).toBe(3);
++    renderLog.counts.clear();
++    act(() => api.current?.toggleTrackSolo('music', false));
++    expect(api.current?.arrangement.tracks.map((track) => track.solo)).toEqual([
++      false,
++      true,
++      false,
++    ]);
++    expect(inner()).toBe(1);
++    expect(laneButtonPressed(view, 'music', /^Solo — /)).toBe('true');
++    renderLog.counts.clear();
++    act(() => api.current?.toggleTrackSolo('sfx', false));
++    expect(api.current?.arrangement.tracks.map((track) => track.solo)).toEqual([
++      false,
++      false,
++      true,
++    ]);
++    expect(inner()).toBe(2);
++    expect(laneButtonPressed(view, 'music', /^Solo — /)).toBe('false');
++    expect(laneButtonPressed(view, 'sfx', /^Solo — /)).toBe('true');
++    const before = raw.current?.getArrangement();
++    if (!before) {
++      throw new Error('workspace not mounted');
++    }
++    const moved = {
++      ...before,
++      clips: before.clips.map((clip) => (clip.id === 'hit-1' ? { ...clip, start: 6 } : clip)),
++    };
++    const projectEnd = raw.current?.projectEnd;
++    renderLog.counts.clear();
++    act(() => raw.current?.commitArrangement(moved, 'Move Clip', before));
++    expect(raw.current?.projectEnd).toBe(projectEnd);
++    expect(inner()).toBe(1);
++    expect(api.current?.arrangement.clips.find((clip) => clip.id === 'hit-1')?.start).toBe(6);
++  });
++
++  it('RB-LEAF8 every audio clip shows its waveform once its peaks arrive, and the clip titles come from the lane sources (PERF-11c-iii-e-ii)', async () => {
++    const { view } = await mountWorkspace();
++    for (const [trackId, title] of [
++      ['music', 'Song'],
++      ['sfx', 'Hit'],
++    ] as const) {
++      const lane = view.container.querySelector<HTMLElement>(`[data-track-id="${trackId}"]`);
++      if (!lane) {
++        throw new Error(`lane ${trackId} not mounted`);
++      }
++      expect(within(lane).getAllByTestId('arrangement-clip-waveform')).toHaveLength(1);
++      expect(lane.textContent).toContain(title);
++    }
++  });
++
++  it('RB-LEAF9 a lane-move ghost on another lane shows the dragged clip title; clearing the drag removes it (PERF-11c-iii-e-ii)', async () => {
++    const { raw, view } = await mountWorkspace();
++    const sfx = view.container.querySelector<HTMLElement>('[data-track-id="sfx"]');
++    if (!sfx) {
++      throw new Error('lane sfx not mounted');
++    }
++    renderLog.counts.clear();
++    act(() =>
++      raw.current?.setClipLaneDrag({
++        ghosts: [
++          {
++            clipId: 'music-1',
++            trackId: 'sfx',
++            start: 8,
++            duration: 20,
++            blocked: false,
++            message: null,
++          },
++        ],
++        timeLocked: false,
++      }),
++    );
++    expect(renderLog.counts.get('ArrangementLaneViewInner') ?? 0).toBe(2);
++    expect(within(sfx).getByTestId('arrangement-lane-move-ghost-label').textContent).toContain(
++      'Song',
++    );
++    act(() => raw.current?.setClipLaneDrag(null));
++    expect(within(sfx).queryByTestId('arrangement-lane-move-ghost')).toBeNull();
++  });
++
+   it('RB-MEMO3 a workspace commit re-renders the workspace and not the range readout; a status write renders only the status text (C-R320-01, SIG-R360)', async () => {
+     const { api, view } = await mountWorkspace();
+     act(() => api.current?.setTimeRange({ start: 2, end: 4, trackId: 'music' }));

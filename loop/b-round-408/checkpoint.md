@@ -1,0 +1,23 @@
+# B 408->409 checkpoint
+- [x] tasks/round-408.md copied (identical to current-task.md)
+- [x] advisor consulted after orientation (plan: backlog -> arch request -> e-ii sketch pipeline -> task)
+- [x] backlog v381->v382 from C408 PASS (update-backlog.py)
+- [ ] root-request-arch-checkpoint-perf11c-iii.md
+- [ ] e-ii sketch + pipeline
+- [ ] task, reports, b-next
+- [x] arch request: TODO write file (after sketch)
+- [x] sketch v2 (/tmp/b409-sketch, tools/make-sketch.py + make-sketch-tests.py; v1 with content comparators dropped: MU sources-always-equal equivalent, peaks+ready same callback)
+- [x] tsc/biome rc0; covering 46 files 914/914 (slowest 1788 ms); full vitest 262/3885 rc0 (precheck-full.log)
+- [x] mutants 8/8 RED (trial in /tmp/b409-mut-try; final run to b-round-408/mutants after commit of vite revert)
+- [x] lane probe (v1 sketch!) ok; HEAD ok both vp. MUST rerun on final sketch
+- [ ] leaf probe HEAD vs sketch; lane probe final sketch both vp; tech-lead review; claims; task
+- [x] FINAL sketch frozen: b-round-408/sketch-409.patch.txt sha bd47148b0d1717d4 (2 files), reproducible from tools (cmp ok); apply --check ok on store HEAD 37b1db8
+- [x] tsc/biome/lint rc0 (sketch-logs/rc.txt); covering 914/914; full 262/3885 rc0; mutants 8/8 RED (mutants/summary.txt)
+- [x] lane probe final sketch ok both vp; HEAD ok both vp; browser mutant DROP-SOLO-FIELD red (lane/)
+- [x] leaf probe 15 steps: head/sketch/loaded/PLAIN-MEMO mutant (probe/leaf-sketch-vs-head-409.txt); :5174 stopped; scratch vite.config reverted
+- [ ] tech-lead review (sketch-review.md); arch request file; claims; grants; frozen; task; reports
+- [x] tech-lead review v2: APPROVE WITH LOWS (SK-1..4 Low, 5..7 Info); perf-optimizer consult saved (consult-performance-optimizer.md)
+- [x] v3 = v2 + SK-1 typed field table, SK-2 getAllByTitle, SK-3 blocked-then-valid ghost, SK-4 pan row + DROP-PAN mutant, shells <= 3; sha 1beedffbda3eca0f; v2 artifacts moved to */v2/
+- [x] v3: tsc/biome/lint rc0; covering 914/914 (max 2072 ms, 41 % of 5000; UM9 describe 20000); full 262/3885 rc0; mutants 9/9 RED + tsc guard rc 2; lane probe ok both vp; DROP-SOLO-FIELD browser red; leaf probe = v2 numbers (head/sketch/loaded/PLAIN-MEMO); :5174 stopped, vite.config reverted
+- [x] tech-lead confirm v3 APPROVE (sketch-review.md); claims saved after last edit; task, backlog v383, feature-status, b-round-408.md, b-next.json written
+- [x] PHASE COMPLETE (attempt 2, 2026-11-08): all artifacts verified (claims identical on 37b1db8, patch sha 1beedffb, backlog v383, b-next valid, store clean). Earlier unchecked boxes are superseded by later lines. Nothing left to do.
