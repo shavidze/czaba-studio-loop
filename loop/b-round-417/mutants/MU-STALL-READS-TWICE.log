@@ -1,0 +1,84 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b417-scratch[39m
+
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m40 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1435[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media[32m 6[2mms[22m[39m
+     [32m✓[39m PS2 a seek on the playing stream reuses the same element without pausing it[32m 1[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ending after its stop does nothing[32m 2[2mms[22m[39m
+     [32m✓[39m PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not[32m 3[2mms[22m[39m
+     [32m✓[39m PS5 a buffer preview after a stream releases the stream element and starts one buffer source[32m 1[2mms[22m[39m
+     [32m✓[39m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[32m 76[2mms[22m[39m
+     [32m✓[39m PS7 a cached buffer wins over the stream: no media element, one buffer source[32m 54[2mms[22m[39m
+     [32m✓[39m PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered[32m 50[2mms[22m[39m
+     [32m✓[39m PS9 Play stops a streaming preview: the element is released and the transport plays[32m 52[2mms[22m[39m
+     [32m✓[39m PS10 unmounting the provider releases a streaming element[32m 43[2mms[22m[39m
+     [32m✓[39m PS11 a stream preview stops the playing transport before the element plays[32m 49[2mms[22m[39m
+     [32m✓[39m PS12 the natural end of a stream clears the preview id and releases the preview pin[32m 42[2mms[22m[39m
+     [32m✓[39m PS13 the fallback resumes from the element time, not from zero[32m 49[2mms[22m[39m
+     [32m✓[39m PS14 a streamed preview writes no status[32m 47[2mms[22m[39m
+     [32m✓[39m PS27 the remembered fallback lives with its collection object: a new collection streams the same source again[32m 97[2mms[22m[39m
+     [32m✓[39m PS16 a stream that never plays falls back after the stall timeout with its time[32m 1[2mms[22m[39m
+     [32m✓[39m PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only[32m 1[2mms[22m[39m
+     [32m✓[39m PS18 the watchdog does nothing when the element time moved since it was armed[32m 0[2mms[22m[39m
+     [32m✓[39m PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves[32m 1[2mms[22m[39m
+     [32m✓[39m PS20 an external pause ends the preview once and releases the element[32m 1[2mms[22m[39m
+     [32m✓[39m PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event[32m 1[2mms[22m[39m
+     [32m✓[39m PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception[32m 2[2mms[22m[39m
+     [32m✓[39m PS23 a synchronous throw on a same-url seek is a stream error of the active preview[32m 1[2mms[22m[39m
+     [32m✓[39m PS24 the default scheduler arms an 8000 ms window timer that a stop clears[32m 3[2mms[22m[39m
+     [32m✓[39m PS25 a same-url seek before playing restarts the armed watchdog from the new time[32m 1[2mms[22m[39m
+     [32m✓[39m PS26 a stop removes every listener the stream added[32m 1[2mms[22m[39m
+     [32m✓[39m PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer[32m 1[2mms[22m[39m
+     [32m✓[39m PS29 the stream element requests its URL in anonymous CORS mode, like the credential-free decode fetch[32m 1[2mms[22m[39m
+     [32m✓[39m PC1 stop then a re-preview of the same source during its decode starts once, at the second offset[32m 83[2mms[22m[39m
+     [32m✓[39m PC2 a stream preview supersedes a pending decode preview of another source[32m 93[2mms[22m[39m
+     [32m✓[39m PC3 a stale call whose collection has no live owner writes its refusal and leaves the live preview playing[32m 170[2mms[22m[39m
+     [32m✓[39m PC4 a stream error starts the fallback after the media handler returns, never inside it[32m 106[2mms[22m[39m
+     [32m✓[39m PC5 a synchronous src throw inside the stream start falls back once, after the start call returns[32m 103[2mms[22m[39m
+     [32m✓[39m PC6 a stop between the stream error and its deferred fallback wins: no decode, no restart, the fallback is still remembered[32m 98[2mms[22m[39m
+     [32m✓[39m PC12 a same-url seek re-targets the stream error: a stall after the seek still falls back, from the element time[32m 98[2mms[22m[39m
+     [32m✓[39m PC7 unmounting the provider during a decode preview starts nothing when the decode settles[32m 87[2mms[22m[39m
+     [32m✓[39m PC8 a pause fired synchronously inside a same-url seek ends the preview once and throws nothing[32m 1[2mms[22m[39m
+[31m     [31m×[31m PC9 the stall watchdog reads the element time once per tick and a throwing read is a stream error at the start offset[39m[32m 8[2mms[22m[39m
+     [32m✓[39m PC10 a media error whose time read throws still reports one stream error at the start offset[32m 1[2mms[22m[39m
+     [32m✓[39m PC11 a stream with a different url releases the previous element before the new one plays[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mSYS-R416 preview player re-entrancy and media reads[2m > [22mPC9 the stall watchdog reads the element time once per tick and a throwing read is a stream error at the start offset
+[31m[1mAssertionError[22m: expected 2 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 2[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m1185:25[22m[39m
+    [90m1183| [39m    })[33m;[39m
+    [90m1184| [39m    [34mexpect[39m(() [33m=>[39m scheduler[33m.[39m[34mfire[39m())[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m1185| [39m    [34mexpect[39m(reads[33m.[39mcount)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m1186| [39m    [34mexpect[39m(onError)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m1187| [39m    [34mexpect[39m(onError)[33m.[39m[34mtoHaveBeenCalledWith[39m([34m7[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m39 passed[39m[22m[90m (40)[39m
+[2m   Start at [22m 20:22:04
+[2m   Duration [22m 2.87s[2m (transform 609ms, setup 0ms, import 806ms, tests 1.44s, environment 479ms)[22m
+
+
+::error file=/tmp/b417-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > SYS-R416 preview player re-entrancy and media reads > PC9 the stall watchdog reads the element time once per tick and a throwing read is a stream error at the start offset,line=1185,column=25::AssertionError: expected 2 to be 1 // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- 1%0A+ 2%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:1185:25%0A%0A

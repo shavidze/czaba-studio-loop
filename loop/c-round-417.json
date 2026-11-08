@@ -1,0 +1,92 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R417-L58-SKETCH-REVIEW-MISSING",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "ls b-round-416 | grep -i sketch-review",
+    "grep l58 b-round-416/claims-417.sh"
+   ],
+   "expected": "L58: b-round-416/sketch-review.md (sha256 + per-row mutant logs) exists and claims run tools/l58-check.py for a git-apply sketch dispatch",
+   "actual": "No sketch-review.md in b-round-416; claims-417.sh has no l58 call (same class as round 415; A reported it too)",
+   "evidence": "c-round-417.md section 'Findings'; ls output of b-round-416 (sketch-417.patch.txt, sha256, make-sketch.py, mutants/ only)"
+  },
+  {
+   "id": "C-R417-BW5-HOIST-FRAGILE",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "scratch = git archive HEAD + sketch; in tempo.ts snapshot rulerWindow into a plain object at function entry, set firstBar=0, remove the window break",
+    "npx vitest run tempo-window.test.ts"
+   ],
+   "expected": "BW5 (read-count <=1000) red under a full-build regression",
+   "actual": "BW5 stays green (151 ms) when the getters are read once (hoisted) AND the full build is restored. BW2/BW3 went red in that scratch, but my mutant was crude (-0 label, count differences from the removed break), so I cannot claim BW2/3 would catch a faithful full-build regression. Confirms A-R417-REVIEW-M1 as a latent weakness, not a present defect (MU-BW5-FULLBUILD is red on the sketch)",
+   "evidence": "c-round-417.md; reproduced by hand in /tmp/c417-scratch (not kept; steps above are complete)"
+  }
+ ],
+ "passed": [
+  "417-row1-source-scope-claims-start",
+  "417-row2-patch-identity-unit-63of63",
+  "417-row3-mutants-12-lines-equal-and-loaded-63of63",
+  "417-row4-im24-browser-both-viewports",
+  "417-row5-play-stop-smoke-both-viewports",
+  "417-row6-auth-guard-no-bypass",
+  "417-row7-doc-268",
+  "417-row8-source-scope-end"
+ ],
+ "blocked": [
+  "fake-bearer premium path: backend unavailable in cloud",
+  "Ableton conformance: does not apply (test-only round)"
+ ],
+ "gate": [
+  "full vitest, typecheck, build, Biome, verify (root gate)"
+ ],
+ "notRun": [
+  "export WAV/audio graph measurement: test-only round, no runtime/helper file changed (git diff HEAD on app/contexts, app/components, app/lib/arrangement/*.ts, helpers is empty)",
+  "scripted it()-body diff tool: C inspected the 16 git diff -U0 hunk headers plus byte-equality with the sketch instead"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T19:45:17.8312259Z",
+  "round": 417,
+  "attempt": 1,
+  "store": 200
+ },
+ "browserNote": "Real Chromium (Playwright), fresh contexts, 1440x900 and 1280x720: IM24 end-stop contract, play/stop smoke, auth guard. 0 page errors.",
+ "manifestPaths": "b-round-416/r417-frozen-sha256.txt (1311 rc 0, claims K3) + b-round-318/protected-sha256.txt (rc 0, K4)",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "B asserts run on the sketch via B's sketch-run.log and mutants/summary.txt; C re-ran 63/63 and the 12 mutant lines (identical set and order)",
+ "mutantsRecorded": 6,
+ "mutantRedOnSketch": "b-round-416/mutants/summary.txt",
+ "mutantRedOnTree": "c-round-417/b416copy/mutants/summary.txt, byte-equal to B's summary (12 lines); scratch base = git archive HEAD",
+ "gateChecksNamed": [
+  "vitest full",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "none by C (gate rows)",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "vitest 5 files",
+  "claims start/end",
+  "patch cmp",
+  "mutants run.py",
+  "loaded replicate",
+  "IM24 browser",
+  "play/stop browser",
+  "auth probe"
+ ],
+ "affectedChecksRunOnSketch": "C reran: vitest 5 files 63/63 (plain and with 2 busy loops), mutants equal, IM24 + smoke + auth browser probes, both viewports",
+ "measurements": {
+  "im24": "Ctrl+Right while playing: 2.000 -> 6.000 -> 16.000 (stopped at project end); next press: 'No more markers after the insert marker', insert marker 16.000, stays stopped; both viewports",
+  "smoke": "1.062 s position in ~1.12 s wall; stopped position frozen over 500 ms (1.172/1.152); 0 page errors",
+  "auth": "auth_user null on /studio-lab; /studio/middle-east 'Sign in required', audio[src] 0, no timeline; /api/studio-token without auth = 401"
+ }
+}

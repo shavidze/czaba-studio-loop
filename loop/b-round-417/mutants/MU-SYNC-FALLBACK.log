@@ -1,0 +1,126 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b417-scratch[39m
+
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m40 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 1429[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media[32m 6[2mms[22m[39m
+     [32m✓[39m PS2 a seek on the playing stream reuses the same element without pausing it[32m 1[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ending after its stop does nothing[32m 2[2mms[22m[39m
+     [32m✓[39m PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not[32m 3[2mms[22m[39m
+     [32m✓[39m PS5 a buffer preview after a stream releases the stream element and starts one buffer source[32m 1[2mms[22m[39m
+     [32m✓[39m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[32m 77[2mms[22m[39m
+     [32m✓[39m PS7 a cached buffer wins over the stream: no media element, one buffer source[32m 52[2mms[22m[39m
+     [32m✓[39m PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered[32m 52[2mms[22m[39m
+     [32m✓[39m PS9 Play stops a streaming preview: the element is released and the transport plays[32m 53[2mms[22m[39m
+     [32m✓[39m PS10 unmounting the provider releases a streaming element[32m 43[2mms[22m[39m
+     [32m✓[39m PS11 a stream preview stops the playing transport before the element plays[32m 51[2mms[22m[39m
+     [32m✓[39m PS12 the natural end of a stream clears the preview id and releases the preview pin[32m 44[2mms[22m[39m
+     [32m✓[39m PS13 the fallback resumes from the element time, not from zero[32m 50[2mms[22m[39m
+     [32m✓[39m PS14 a streamed preview writes no status[32m 49[2mms[22m[39m
+     [32m✓[39m PS27 the remembered fallback lives with its collection object: a new collection streams the same source again[32m 99[2mms[22m[39m
+     [32m✓[39m PS16 a stream that never plays falls back after the stall timeout with its time[32m 1[2mms[22m[39m
+     [32m✓[39m PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only[32m 1[2mms[22m[39m
+     [32m✓[39m PS18 the watchdog does nothing when the element time moved since it was armed[32m 0[2mms[22m[39m
+     [32m✓[39m PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves[32m 1[2mms[22m[39m
+     [32m✓[39m PS20 an external pause ends the preview once and releases the element[32m 1[2mms[22m[39m
+     [32m✓[39m PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event[32m 1[2mms[22m[39m
+     [32m✓[39m PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception[32m 2[2mms[22m[39m
+     [32m✓[39m PS23 a synchronous throw on a same-url seek is a stream error of the active preview[32m 1[2mms[22m[39m
+     [32m✓[39m PS24 the default scheduler arms an 8000 ms window timer that a stop clears[32m 3[2mms[22m[39m
+     [32m✓[39m PS25 a same-url seek before playing restarts the armed watchdog from the new time[32m 1[2mms[22m[39m
+     [32m✓[39m PS26 a stop removes every listener the stream added[32m 1[2mms[22m[39m
+     [32m✓[39m PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer[32m 1[2mms[22m[39m
+     [32m✓[39m PS29 the stream element requests its URL in anonymous CORS mode, like the credential-free decode fetch[32m 1[2mms[22m[39m
+     [32m✓[39m PC1 stop then a re-preview of the same source during its decode starts once, at the second offset[32m 83[2mms[22m[39m
+     [32m✓[39m PC2 a stream preview supersedes a pending decode preview of another source[32m 111[2mms[22m[39m
+     [32m✓[39m PC3 a stale call whose collection has no live owner writes its refusal and leaves the live preview playing[32m 176[2mms[22m[39m
+[31m     [31m×[31m PC4 a stream error starts the fallback after the media handler returns, never inside it[39m[32m 102[2mms[22m[39m
+[31m     [31m×[31m PC5 a synchronous src throw inside the stream start falls back once, after the start call returns[39m[32m 95[2mms[22m[39m
+[31m     [31m×[31m PC6 a stop between the stream error and its deferred fallback wins: no decode, no restart, the fallback is still remembered[39m[32m 83[2mms[22m[39m
+     [32m✓[39m PC12 a same-url seek re-targets the stream error: a stall after the seek still falls back, from the element time[32m 91[2mms[22m[39m
+     [32m✓[39m PC7 unmounting the provider during a decode preview starts nothing when the decode settles[32m 84[2mms[22m[39m
+     [32m✓[39m PC8 a pause fired synchronously inside a same-url seek ends the preview once and throws nothing[32m 1[2mms[22m[39m
+     [32m✓[39m PC9 the stall watchdog reads the element time once per tick and a throwing read is a stream error at the start offset[32m 1[2mms[22m[39m
+     [32m✓[39m PC10 a media error whose time read throws still reports one stream error at the start offset[32m 1[2mms[22m[39m
+     [32m✓[39m PC11 a stream with a different url releases the previous element before the new one plays[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mSYS-R416 preview controller: request token and deferred fallback[2m > [22mPC4 a stream error starts the fallback after the media handler returns, never inside it
+[31m[1mAssertionError[22m: expected [ { resolve: [Function], …(1) } ] to have a length of +0 but got 1[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m1053:21[22m[39m
+    [90m1051| [39m      element[33m.[39m[34mdispatchEvent[39m([35mnew[39m [33mEvent[39m([32m'error'[39m))[33m;[39m
+    [90m1052| [39m    })[33m;[39m
+    [90m1053| [39m    [34mexpect[39m(pending)[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m1054| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mstatus)[33m.[39m[34mtoBe[39m(statusBefore)[33m;[39m
+    [90m1055| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mSYS-R416 preview controller: request token and deferred fallback[2m > [22mPC5 a synchronous src throw inside the stream start falls back once, after the start call returns
+[31m[1mAssertionError[22m: expected [ { resolve: [Function], …(1) } ] to have a length of +0 but got 1[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m1082:21[22m[39m
+    [90m1080| [39m    [35mconst[39m { api[33m,[39m pending } [33m=[39m [35mawait[39m [34mmountDecode[39m()[33m;[39m
+    [90m1081| [39m    expect(() => act(() => live(api).startLibraryPreview('big', 0))).n…
+    [90m1082| [39m    [34mexpect[39m(pending)[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m1083| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m1084| [39m    [34mexpect[39m(pending)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mSYS-R416 preview controller: request token and deferred fallback[2m > [22mPC6 a stop between the stream error and its deferred fallback wins: no decode, no restart, the fallback is still remembered
+[31m[1mAssertionError[22m: expected [ { resolve: [Function], …(1) } ] to have a length of +0 but got 1[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m1101:21[22m[39m
+    [90m1099| [39m    })[33m;[39m
+    [90m1100| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m1101| [39m    [34mexpect[39m(pending)[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m1102| [39m    [34mexpect[39m([34mbigSources[39m())[33m.[39m[34mtoHaveLength[39m([34m0[39m)[33m;[39m
+    [90m1103| [39m    [34mexpect[39m([34mlive[39m(api)[33m.[39mlibraryPreviewSourceId)[33m.[39m[34mtoBe[39m([35mnull[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m37 passed[39m[22m[90m (40)[39m
+[2m   Start at [22m 20:21:42
+[2m   Duration [22m 2.85s[2m (transform 605ms, setup 0ms, import 793ms, tests 1.43s, environment 491ms)[22m
+
+
+::error file=/tmp/b417-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > SYS-R416 preview controller%3A request token and deferred fallback > PC4 a stream error starts the fallback after the media handler returns%2C never inside it,line=1053,column=21::AssertionError: expected [ { resolve: [Function], …(1) } ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:1053:21%0A%0A
+
+::error file=/tmp/b417-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > SYS-R416 preview controller%3A request token and deferred fallback > PC5 a synchronous src throw inside the stream start falls back once%2C after the start call returns,line=1082,column=21::AssertionError: expected [ { resolve: [Function], …(1) } ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:1082:21%0A%0A
+
+::error file=/tmp/b417-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > SYS-R416 preview controller%3A request token and deferred fallback > PC6 a stop between the stream error and its deferred fallback wins%3A no decode%2C no restart%2C the fallback is still remembered,line=1101,column=21::AssertionError: expected [ { resolve: [Function], …(1) } ] to have a length of +0 but got 1%0A%0A- Expected%0A+ Received%0A%0A- 0%0A+ 1%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:1101:21%0A%0A
