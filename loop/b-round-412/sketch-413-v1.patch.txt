@@ -1,0 +1,452 @@
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index 778f104..4e299bd 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -4554,13 +4554,15 @@ export function ArrangementProvider({
+       if (peaksUrl === null) {
+         continue;
+       }
+-      void fetchPrecomputedPeaks(peaksUrl, controller.signal).then((precomputed) => {
+-        if (!precomputed || controller.signal.aborted || peaksDecided.has(source.id)) {
+-          return;
+-        }
+-        precomputedPeaks.set(source.id, precomputed);
+-        storeSourcePeaks(source.id, precomputed.peaks);
+-      });
++      void fetchPrecomputedPeaks(peaksUrl, controller.signal, collection.fetchPeaks).then(
++        (precomputed) => {
++          if (!precomputed || controller.signal.aborted || peaksDecided.has(source.id)) {
++            return;
++          }
++          precomputedPeaks.set(source.id, precomputed);
++          storeSourcePeaks(source.id, precomputed.peaks);
++        },
++      );
+     }
+     for (const source of collection.sources) {
+       collection
+diff --git a/app/data/__tests__/studio-lab-demo.test.ts b/app/data/__tests__/studio-lab-demo.test.ts
+index bb8c161..42e6b10 100644
+--- a/app/data/__tests__/studio-lab-demo.test.ts
++++ b/app/data/__tests__/studio-lab-demo.test.ts
+@@ -358,6 +358,19 @@ describe('PERF-15b demo precomputed peaks', () => {
+     };
+   }
+ 
++  function readPeaksMetaFile(mp3: string): unknown {
++    const meta: unknown = JSON.parse(
++      readFileSync(resolve(__dirname, '../../../scripts/peaks/demo-peaks-meta.json'), 'utf8'),
++    );
++    const entry: unknown =
++      typeof meta === 'object' && meta !== null
++        ? Object.getOwnPropertyDescriptor(meta, mp3)?.value
++        : null;
++    return typeof entry === 'object' && entry !== null
++      ? Object.getOwnPropertyDescriptor(entry, 'file')?.value
++      : null;
++  }
++
+   it('PS16 peaksUrl names a peaks file only for the two demo MP3 files and returns null for every other source', () => {
+     const peaksUrl = studioLabDemoCollection.peaksUrl;
+     expect(peaksUrl).toBeTypeOf('function');
+@@ -389,4 +402,10 @@ describe('PERF-15b demo precomputed peaks', () => {
+       expect(Math.max(...peaks), id).toBeGreaterThan(0.5);
+     }
+   });
++
++  it('PS18 the generator meta names, for each demo MP3, the same peaks file the collection serves', () => {
++    for (const [id, { path, mp3 }] of Object.entries(peaksFiles)) {
++      expect(readPeaksMetaFile(mp3), id).toBe(`public${path}`);
++    }
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/collection.test.ts b/app/lib/arrangement/__tests__/collection.test.ts
+index a96a207..f519ef9 100644
+--- a/app/lib/arrangement/__tests__/collection.test.ts
++++ b/app/lib/arrangement/__tests__/collection.test.ts
+@@ -8,6 +8,7 @@ import {
+   settledCollectionStatus,
+   workspaceCollectionCopy,
+ } from '../collection';
++import { fetchPrecomputedPeaks } from '../precomputed-peaks';
+ import { findStudioShortcut } from '../shortcuts';
+ 
+ const SECRET_URL = 'https://stems.example.test/middle-east/drums.wav?token=SECRET';
+@@ -498,3 +499,110 @@ describe('PERF-13c-ii-b purchased adapter previewUrl (D-29z1352)', () => {
+     expect(collection.previewUrl?.(drums)).toBe(first);
+   });
+ });
++
++describe('PERF-15b-ii purchased adapter peaksUrl and fetchPeaks (D-29z1434)', () => {
++  const PEAKS_SECRET = 'https://stems.example.test/middle-east/drums.peaks.json?token=SECRET';
++
++  function peaksStems(): AudioStem[] {
++    const input = stems();
++    input[1].peaksUrl = PEAKS_SECRET;
++    input[0].peaksUrl = '';
++    return input;
++  }
++
++  function peaksBody() {
++    return {
++      version: 2,
++      channels: 1,
++      sample_rate: 48000,
++      samples_per_pixel: 480,
++      bits: 16,
++      length: 1,
++      data: [-16384, 0],
++    };
++  }
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++    vi.restoreAllMocks();
++  });
++
++  it('PK1 peaksUrl returns a stem peaks URL only when the stem has a non-empty one, null otherwise; nothing is fetched and later input changes do not reach it', () => {
++    const input = peaksStems();
++    const fetchAudio = vi.fn<PurchasedStemFetch>(async () => okResponse());
++    const collection = createPurchasedWorkspaceCollection({
++      productId: 'middle-east',
++      productTitle: 'Middle East',
++      stems: input,
++      fetchAudio,
++    });
++    expect(collection.sources.map((source) => collection.peaksUrl?.(source) ?? null)).toEqual([
++      null,
++      PEAKS_SECRET,
++      null,
++      null,
++    ]);
++    const unknown: WorkspaceSource = {
++      id: 'unknown',
++      title: 'Middle East · Unknown',
++      collectionLabel: 'Middle East · purchased stems',
++      kind: 'stem',
++      origin: 'purchased',
++    };
++    expect(collection.peaksUrl?.(unknown)).toBeNull();
++    input[1].peaksUrl = 'https://evil.example.test/changed.json';
++    expect(collection.peaksUrl?.(sourceOf(collection.sources, 'drums'))).toBe(PEAKS_SECRET);
++    expect(fetchAudio).not.toHaveBeenCalled();
++  });
++
++  it('PK2 the peaks request goes through the injected fetchAudio, so a bearer header it adds is kept; credentials stay omit and the global fetch is not used', async () => {
++    const globalFetch = vi.fn<(url: string, init: RequestInit) => Promise<Response>>();
++    vi.stubGlobal('fetch', globalFetch);
++    const seen: { url: string; init: RequestInit }[] = [];
++    const fetchAudio: PurchasedStemFetch = async (url, init) => {
++      const headers = new Headers(init.headers);
++      headers.set('Authorization', 'Bearer TOKEN');
++      seen.push({ url, init: { ...init, headers } });
++      return new Response(JSON.stringify(peaksBody()), { status: 200 });
++    };
++    const collection = createPurchasedWorkspaceCollection({
++      productId: 'middle-east',
++      productTitle: 'Middle East',
++      stems: peaksStems(),
++      fetchAudio,
++    });
++    const drums = sourceOf(collection.sources, 'drums');
++    const url = collection.peaksUrl?.(drums) ?? '';
++    const parsed = await fetchPrecomputedPeaks(
++      url,
++      new AbortController().signal,
++      collection.fetchPeaks,
++    );
++    expect(parsed?.bits).toBe(16);
++    expect(seen).toHaveLength(1);
++    expect(seen[0].url).toBe(PEAKS_SECRET);
++    expect(seen[0].init.credentials).toBe('omit');
++    expect(new Headers(seen[0].init.headers).get('Authorization')).toBe('Bearer TOKEN');
++    expect(globalFetch).not.toHaveBeenCalled();
++  });
++
++  it('PK3 without fetchAudio, fetchPeaks uses the global fetch at call time', async () => {
++    const collection = createPurchasedWorkspaceCollection({
++      productId: 'middle-east',
++      productTitle: 'Middle East',
++      stems: peaksStems(),
++    });
++    const globalFetch = vi.fn<(url: string, init: RequestInit) => Promise<Response>>(
++      async () => new Response(JSON.stringify(peaksBody()), { status: 200 }),
++    );
++    vi.stubGlobal('fetch', globalFetch);
++    const parsed = await fetchPrecomputedPeaks(
++      PEAKS_SECRET,
++      new AbortController().signal,
++      collection.fetchPeaks,
++    );
++    expect(parsed?.bits).toBe(16);
++    expect(globalFetch).toHaveBeenCalledTimes(1);
++    expect(globalFetch.mock.calls[0][0]).toBe(PEAKS_SECRET);
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/precomputed-peaks-context.test.tsx b/app/lib/arrangement/__tests__/precomputed-peaks-context.test.tsx
+index 66d71fd..73160ea 100644
+--- a/app/lib/arrangement/__tests__/precomputed-peaks-context.test.tsx
++++ b/app/lib/arrangement/__tests__/precomputed-peaks-context.test.tsx
+@@ -322,3 +322,43 @@ describe('PPC1-PPC11 precomputed peaks in the collection load (PERF-15a)', () =>
+     view.unmount();
+   });
+ });
++
++describe('PPC12 the collection fetchPeaks carries the peaks request (PERF-15b-ii)', () => {
++  beforeEach(() => {
++    fetchMock.mockReset();
++    vi.stubGlobal('fetch', fetchMock);
++    vi.stubGlobal('Worker', undefined);
++    vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
++  });
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it('PPC12 a collection fetchPeaks receives the peaks url with credentials omit; the global fetch is not used and the peaks show while loading', async () => {
++    const fetchPeaks = vi.fn<(url: string, init: RequestInit) => Promise<Response>>(async () =>
++      peaksResponse(peaksBody(16)),
++    );
++    const { collection, decode } = toneCollection('carried', () => '/peaks/signed.json');
++    const api: ProbeRef = { current: null };
++    const view = render(
++      createElement(
++        ArrangementProvider,
++        { collection: { ...collection, fetchPeaks } },
++        createElement(Probe, { api }),
++      ),
++    );
++    await flush();
++    expect(fetchPeaks).toHaveBeenCalledTimes(1);
++    expect(fetchPeaks.mock.calls[0][0]).toBe('/peaks/signed.json');
++    expect(fetchPeaks.mock.calls[0][1].credentials).toBe('omit');
++    expect(fetchMock).not.toHaveBeenCalled();
++    expect(live(api).sourceStates.tone?.status).toBe('loading');
++    expect(peaksOf(api)).toEqual([0.5, 0.5, 0.5, 0.5]);
++    await act(async () => {
++      decode.resolve(new ZeroAudioBuffer(BUCKETS * 480, SAMPLE_RATE));
++    });
++    await flush();
++    expect(live(api).sourceStates.tone?.status).toBe('ready');
++    view.unmount();
++  });
++});
+diff --git a/app/lib/arrangement/__tests__/precomputed-peaks.test.ts b/app/lib/arrangement/__tests__/precomputed-peaks.test.ts
+index e7dd214..ae5aead 100644
+--- a/app/lib/arrangement/__tests__/precomputed-peaks.test.ts
++++ b/app/lib/arrangement/__tests__/precomputed-peaks.test.ts
+@@ -228,21 +228,34 @@ describe('PP7 fetchPrecomputedPeaks never throws and falls back with null', () =
+     await expect(fetchPrecomputedPeaks('/p', signal, sized(null))).resolves.not.toBeNull();
+   });
+ 
+-  it('PP7d an abort while the body is read gives null', async () => {
++  it('PP7d an abort while the body is read gives null and cancels the rest of the body', async () => {
+     const controller = new AbortController();
++    const cancelled: string[] = [];
++    const text = JSON.stringify(body);
++    const half = Math.floor(text.length / 2);
+     const fetchPeaks: SourceFetch = async () => {
+-      const response = jsonResponse(body);
+-      const json = response.json.bind(response);
+-      return Object.assign(response, {
+-        json: async () => {
++      let step = 0;
++      const stream = new ReadableStream<Uint8Array>({
++        pull(streamController) {
++          step += 1;
++          if (step === 1) {
++            streamController.enqueue(new TextEncoder().encode(text.slice(0, half)));
++            return;
++          }
+           controller.abort();
+-          return json();
++          streamController.enqueue(new TextEncoder().encode(text.slice(half)));
++          streamController.close();
++        },
++        cancel() {
++          cancelled.push('aborted');
+         },
+       });
++      return new Response(stream, { status: 200 });
+     };
+     await expect(
+       fetchPrecomputedPeaks('/peaks/a.json', controller.signal, fetchPeaks),
+     ).resolves.toBeNull();
++    await vi.waitFor(() => expect(cancelled).toEqual(['aborted']));
+   });
+ });
+ 
+@@ -297,3 +310,61 @@ describe('PP8-PP9 fetchPrecomputedPeaks request policy and refused bodies (PERF-
+     expect(okCancelled).toEqual([]);
+   });
+ });
++
++describe('PP10-PP11 streamed-bytes cap (PERF-15b-ii, TL-R411-L4)', () => {
++  const body = waveform({ data: [-16384, 0] });
++
++  function chunkedBody(
++    chunks: number,
++    chunkBytes: number,
++    cancelled: string[],
++    label: string,
++  ): ReadableStream<Uint8Array> {
++    let sent = 0;
++    return new ReadableStream<Uint8Array>({
++      pull(controller) {
++        if (sent === chunks) {
++          controller.close();
++          return;
++        }
++        sent += 1;
++        controller.enqueue(new Uint8Array(chunkBytes).fill(32));
++      },
++      cancel() {
++        cancelled.push(label);
++      },
++    });
++  }
++
++  it('PP10 without content-length, a body that streams past the cap is refused and cancelled; the stream is not read to its end', async () => {
++    const cancelled: string[] = [];
++    const chunkBytes = 1024 * 1024;
++    const chunks = 8;
++    const stream = chunkedBody(chunks, chunkBytes, cancelled, 'no-length');
++    const fetchPeaks: SourceFetch = async () => new Response(stream, { status: 200 });
++    await expect(
++      fetchPrecomputedPeaks('/p', new AbortController().signal, fetchPeaks),
++    ).resolves.toBeNull();
++    await vi.waitFor(() => expect(cancelled).toEqual(['no-length']));
++    expect(PRECOMPUTED_PEAKS_MAX_BYTES / chunkBytes).toBeLessThan(chunks);
++  });
++
++  it('PP11 a small declared content-length does not let a longer streamed body through; a body exactly at the cap is parsed', async () => {
++    const cancelled: string[] = [];
++    const lying: SourceFetch = async () =>
++      new Response(chunkedBody(8, 1024 * 1024, cancelled, 'lying'), {
++        status: 200,
++        headers: { 'content-length': '100' },
++      });
++    await expect(
++      fetchPrecomputedPeaks('/p', new AbortController().signal, lying),
++    ).resolves.toBeNull();
++    await vi.waitFor(() => expect(cancelled).toEqual(['lying']));
++    const text = JSON.stringify(body);
++    const padded = text + ' '.repeat(PRECOMPUTED_PEAKS_MAX_BYTES - text.length);
++    expect(new TextEncoder().encode(padded).byteLength).toBe(PRECOMPUTED_PEAKS_MAX_BYTES);
++    const atCap: SourceFetch = async () => new Response(padded, { status: 200 });
++    const parsed = await fetchPrecomputedPeaks('/p', new AbortController().signal, atCap);
++    expect(values(parsed?.peaks)).toEqual([0.5]);
++  });
++});
+diff --git a/app/lib/arrangement/collection.ts b/app/lib/arrangement/collection.ts
+index cfe49d9..ba598e0 100644
+--- a/app/lib/arrangement/collection.ts
++++ b/app/lib/arrangement/collection.ts
+@@ -90,11 +90,15 @@ export function createPurchasedWorkspaceCollection({
+   }
+   const sortedStems = [...stems].sort((first, second) => first.order - second.order);
+   const stemUrls = new Map<string, string>();
++  const stemPeaksUrls = new Map<string, string>();
+   for (const stem of sortedStems) {
+     if (stemUrls.has(stem.id)) {
+       throw new Error(studioSourceLoadStrings.purchasedDuplicateStemId);
+     }
+     stemUrls.set(stem.id, stem.audioUrl);
++    if (stem.peaksUrl !== undefined && stem.peaksUrl.length > 0) {
++      stemPeaksUrls.set(stem.id, stem.peaksUrl);
++    }
+   }
+   const label = studioSourceLoadStrings.purchasedCollectionLabel(productTitle);
+   const sources: WorkspaceSource[] = sortedStems.map((stem) => ({
+@@ -125,5 +129,7 @@ export function createPurchasedWorkspaceCollection({
+     sources,
+     loadSource,
+     previewUrl: (source) => stemUrls.get(source.id) ?? null,
++    peaksUrl: (source) => stemPeaksUrls.get(source.id) ?? null,
++    fetchPeaks: fetchAudio,
+   };
+ }
+diff --git a/app/lib/arrangement/precomputed-peaks.ts b/app/lib/arrangement/precomputed-peaks.ts
+index 9e45863..cb1816a 100644
+--- a/app/lib/arrangement/precomputed-peaks.ts
++++ b/app/lib/arrangement/precomputed-peaks.ts
+@@ -96,6 +96,35 @@ export function precomputedPeaksMatchDecodedLength(
+   return expected > 0 && Math.abs(peaks.length - expected) <= PRECOMPUTED_PEAKS_BUCKET_TOLERANCE;
+ }
+ 
++async function readCappedText(
++  body: ReadableStream<Uint8Array>,
++  maxBytes: number,
++  signal: AbortSignal,
++): Promise<string | null> {
++  const reader = body.getReader();
++  const chunks: Uint8Array[] = [];
++  let total = 0;
++  for (;;) {
++    const { done, value } = await reader.read();
++    if (done) {
++      break;
++    }
++    total += value.byteLength;
++    if (total > maxBytes || signal.aborted) {
++      void reader.cancel().catch(() => undefined);
++      return null;
++    }
++    chunks.push(value);
++  }
++  const bytes = new Uint8Array(total);
++  let offset = 0;
++  for (const chunk of chunks) {
++    bytes.set(chunk, offset);
++    offset += chunk.byteLength;
++  }
++  return new TextDecoder().decode(bytes);
++}
++
+ export async function fetchPrecomputedPeaks(
+   url: string,
+   signal: AbortSignal,
+@@ -104,12 +133,16 @@ export async function fetchPrecomputedPeaks(
+   try {
+     const response = await fetchPeaks(url, { credentials: 'omit', signal });
+     const declaredBytes = Number(response.headers.get('content-length') ?? 0);
+-    if (!response.ok || !(declaredBytes <= PRECOMPUTED_PEAKS_MAX_BYTES)) {
++    if (!response.ok || !(declaredBytes <= PRECOMPUTED_PEAKS_MAX_BYTES) || response.body === null) {
+       void response.body?.cancel().catch(() => undefined);
+       return null;
+     }
+-    const data: unknown = await response.json();
+-    return signal.aborted ? null : parseAudiowaveformPeaks(data);
++    const text = await readCappedText(response.body, PRECOMPUTED_PEAKS_MAX_BYTES, signal);
++    if (text === null || signal.aborted) {
++      return null;
++    }
++    const data: unknown = JSON.parse(text);
++    return parseAudiowaveformPeaks(data);
+   } catch {
+     return null;
+   }
+diff --git a/app/types/arrangement.ts b/app/types/arrangement.ts
+index 509bc27..2aef51a 100644
+--- a/app/types/arrangement.ts
++++ b/app/types/arrangement.ts
+@@ -99,6 +99,7 @@ export interface WorkspaceCollection {
+   canReloadSource?: (source: WorkspaceSource) => boolean;
+   previewUrl?: (source: WorkspaceSource) => string | null;
+   peaksUrl?: (source: WorkspaceSource) => string | null;
++  fetchPeaks?: (url: string, init: RequestInit) => Promise<Response>;
+ }
+ 
+ export type WorkspaceVideoAudioStatus = 'decoding' | 'ready' | 'none' | 'error';
+diff --git a/app/types/audio.ts b/app/types/audio.ts
+index a4918ec..5931764 100644
+--- a/app/types/audio.ts
++++ b/app/types/audio.ts
+@@ -4,6 +4,7 @@ export interface AudioStem {
+   id: string;
+   name: string; // e.g., "Drums", "Bass", "Vocals", "Melody"
+   audioUrl: string; // CDN URL (Cloudflare/AWS)
++  peaksUrl?: string;
+   order: number; // Display order
+ }
+ 

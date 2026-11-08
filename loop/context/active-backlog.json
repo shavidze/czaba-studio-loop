@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-08T16:20:11.758Z",
-  "current_task": "Round 411: PERF-15b-i from B reviewed sketch b-round-410/sketch-411.patch.txt (current-task.md)",
+  "_generatedUtc": "2026-11-08T16:58:38.773Z",
+  "current_task": "Round 412: PERF-15b-i fix-up from B reviewed delta b-round-411/sketch-412-delta.patch.txt (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6292,18 +6292,66 @@
       "severity": "info",
       "status": "info",
       "title": "context files written before gate 410; the gate file wins"
+    },
+    {
+      "id": "A-R411-REVIEW-M1",
+      "severity": "medium",
+      "origin": "A code-reviewer (round 411); confirmed by C round 411 by code reading",
+      "evidence": "a-round-411.md section 4; c-round-411.json bugs[0]",
+      "title": "demo peaks generator uses the host AudioContext rate; PS17 hardcodes 44100 and ignores the meta sampleRate (false red after a valid 48 kHz regeneration)",
+      "status": "fix dispatched in round 412 (D-29z1432; v6.1 delta; MU-412-META-RATE-48K, MU-412-HEADER-RATE-48K, MU-412-REGEN-48K); close on C round 412 PASS",
+      "added": "2026-11-08 B round 411 -> 412 planning"
+    },
+    {
+      "id": "B-R411-SKETCH-M1-MISSED",
+      "severity": "low",
+      "status": "retro input RETRO 416 (origin B); fixed by round 412",
+      "title": "B's reviewed v5 sketch carried a Medium (host-rate generator, hardcoded PS17 rate) that the review d"
+    },
+    {
+      "id": "INFO-A411-L31-TIMEOUT-WORDING",
+      "severity": "info",
+      "status": "info; round 412 numbers re-measured (sketch-logs/slowest.txt",
+      "title": "task 411 quoted the detail-panel row against the 5,000 ms default; its declared timeout is 15,000 ms"
+    },
+    {
+      "id": "A-R411-REVIEW-L1",
+      "severity": "low",
+      "status": "fix dispatched in round 412 (PS17 ties header spp to sampleR",
+      "title": "generator rate/100 duplicates PEAK_BUCKETS_PER_SECOND"
+    },
+    {
+      "id": "A-R411-REVIEW-L2",
+      "severity": "low",
+      "status": "scheduled PERF-15b-ii candidate (with TL-R411-L9)",
+      "title": "peaks<->MP3 tie is byte size only (no sha256 in meta)"
+    },
+    {
+      "id": "A-R411-REVIEW-L3",
+      "severity": "low",
+      "status": "fix dispatched in round 412 (v6.1); close on C round 412 PAS",
+      "title": "generator: no response.ok check, no try/finally around browser.close, braceless for"
+    },
+    {
+      "id": "A-R411-REVIEW-L5",
+      "severity": "low",
+      "status": "doc reworded in round 412; test row scheduled PERF-15b-ii",
+      "title": "doc 264 l.31 claims an injected SourceFetch bearer header still works; no row tests it"
+    },
+    {
+      "id": "TL-R412-L-D",
+      "severity": "low",
+      "status": "deferred_low_polish (D-29z1432): dev script",
+      "title": "generator: browser.close() in finally can mask the original error"
+    },
+    {
+      "id": "TL-R412-L-F",
+      "severity": "low",
+      "status": "doc 264 wording in round 412; close on C round 412 PASS",
+      "title": "byte-identical regeneration proved on the loop runner's Chromium build only"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 402,
-      "task": "current-task.md",
-      "decision": "D-29z1377..D-29z1381",
-      "type": "PERF-14b-ii lane clip virtualization (stage 3 of 4) + RT-FIX-401",
-      "status": "C PASS (c-round-402.json, browserVerified true); gate 402 published 7d7d7b2",
-      "note": "baseline c17d0e9 clean; frozen b-round-401/r402-frozen-sha256.txt (1287); grants b-round-401/grants-402.txt (9); patch b-round-401/sketch-402.patch.txt; claims b-round-401/claims-402.sh",
-      "added": "2026-11-08 B round 401 -> 402 planning"
-    },
     {
       "round": 403,
       "task": "current-task.md",
@@ -6381,9 +6429,18 @@
       "task": "current-task.md",
       "decision": "D-29z1427..D-29z1431",
       "type": "PERF-15b-i (demo precomputed peaks files + generator + S1/S2 + preview strip tooltip; stage 2 of 3)",
-      "status": "dispatched",
+      "status": "C FAIL (c-round-411.json: A STOP on A-R411-REVIEW-M1; browser rows 3/4/5a/7 PASS, browserVerified true); gate 411 skipped (D-29z1432)",
       "note": "baseline 328db74 clean; frozen b-round-410/r411-frozen-sha256.txt (1300); grants b-round-410/grants-411.txt (12); patch b-round-410/sketch-411.patch.txt sha e9b149c4be701ad1; claims b-round-410/claims-411.sh",
       "added": "2026-11-08 B round 410 -> 411 planning"
+    },
+    {
+      "round": 412,
+      "task": "current-task.md",
+      "decision": "D-29z1432..D-29z1433",
+      "type": "PERF-15b-i fix-up (A-R411-REVIEW-M1: deterministic generator + PS17 meta rate) + full stage verification",
+      "status": "dispatched",
+      "note": "baseline 328db74 + round-411 uncommitted tree (12 granted lines); frozen b-round-411/r412-frozen-sha256.txt (1300); grants b-round-411/grants-412.txt (12); delta b-round-411/sketch-412-delta.patch.txt sha 833196f8; claims b-round-411/claims-412.sh",
+      "added": "2026-11-08 B round 411 -> 412 planning"
     }
   ],
   "other_keys": [
