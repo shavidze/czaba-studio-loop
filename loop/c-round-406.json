@@ -1,0 +1,86 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "row1-SOURCE-SCOPE-start",
+  "row2-PATCH-IDENTITY",
+  "row3-VIDEO-SYNC",
+  "row4-LEAF-PROBE",
+  "row5-UNIT+MUTANT",
+  "row6-AUTH",
+  "row7-DOCS",
+  "row8-SOURCE-SCOPE-end+L57"
+ ],
+ "blocked": [
+  "fake-bearer /api/studio-token path (backend unavailable in cloud); only no-auth 401 claimed",
+  "row3 recorded item 'stopped seek to 2 s -> active video currentTime': not run, B gave no stopped-seek recipe (record-only, not a pass claim)",
+  "row3 data-video-hardseeks attribute does not exist on the dock (null); swaps=0, fallbacks=0 recorded"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T10:44:26.5016458Z",
+  "round": 406,
+  "attempt": 1,
+  "store": 200
+ },
+ "failed": [],
+ "manifestPaths": [
+  "b-round-405/r406-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt",
+  "b-round-405/sketch-406.patch.txt",
+  "b-round-405/mutants/summary.txt",
+  "b-round-405/claims-406-planning-output.txt",
+  "b-round-405/claims-406-sketch-output.txt",
+  "b-round-405/probe/leaf-sketch-406.json"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "origin": {},
+ "assertsSpecified": "AC7 count 36 + toBe loop incl. getLivePosition/getPlaybackClock; 8-file A3 set 180/180 re-run by C; video drift <=0.05 s & paused false; leaf counts equal sketch per step",
+ "mutantsRecorded": "b-round-405/mutants/summary.txt (4 mutants)",
+ "mutantRedOnSketch": "4/4 red per B's summary",
+ "mutantRedOnTree": "C re-ran on committed scratch /tmp/c406-scratch of the working tree: 4/4 RED (AC7 named), pristine before/after rc 0, scratch status 0; c-round-406/mutants/summary.txt MU lines identical to B's",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-405/precheck-full.log",
+  "b-round-405/sketch-logs/"
+ ],
+ "chainHeadGateRunGreen": "gate 405 published 5c89a95",
+ "affectedChecksNamed": [
+  "PATCH-IDENTITY (2)",
+  "VIDEO-SYNC (3)",
+  "LEAF-PROBE (4)",
+  "UNIT+MUTANT (5)",
+  "AUTH (6)"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-405/video/drift-summary.txt",
+  "b-round-405/probe/leaf-sketch-406.json",
+  "b-round-405/mutants/summary.txt"
+ ],
+ "l57NullReason": null,
+ "stopSignal": null,
+ "abletonConformance": "not applicable: behaviour-preserving refactor/perf round; reference-first excludes it",
+ "notes": [
+  "Row3: max |drift| 1440x900 0.006 s, 1280x720 0.011 s; paused false in all 12 samples (2 windows x 3 x 2 viewports); 1440 first attempt timed out on cold server (environment), retry 1 passed. Screenshots video-*.png.",
+  "Row4: 0 differences vs leaf-sketch-406.json over 13 steps x 22 leaves x 2 viewports; VideoDock [0,3,1,1,1,0,1,1,1,1,1,1,2]; 0 page errors.",
+  "Row6: token check used valid params (?product=middle-east&file=a.mp3) -> 401; a param-less GET is 400 (validation first).",
+  "Row1: status = the 4 granted paths; frozen 1296 rc0; protected rc0; claims differ from planning only on A4 lines.",
+  "Gate rows not run by C (speed rules)."
+ ]
+}
