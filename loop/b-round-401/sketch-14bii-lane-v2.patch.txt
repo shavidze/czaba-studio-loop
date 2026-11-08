@@ -1,0 +1,195 @@
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 35e35e4..649cf80 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -11,6 +11,7 @@ import {
+   useMemo,
+   useRef,
+   useState,
++  useSyncExternalStore,
+ } from 'react';
+ import { useShallow } from 'zustand/react/shallow';
+ import {
+@@ -72,7 +73,15 @@ import {
+   trackVolumeSliderDb,
+ } from '~/lib/arrangement/track-volume-db';
+ import { audioLaneDropMessage } from '~/lib/arrangement/video';
+-import type { TimelineWindowSource } from '~/lib/arrangement/view';
++import {
++  getServerTimelinePageKey,
++  parseTimelinePageKey,
++  readTimelinePage,
++  spanInTimelineWindow,
++  type TimelineWindowSource,
++  timelinePageKey,
++  timelinePageWindow,
++} from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import type { ArrangementTrack } from '~/types/arrangement';
+ import { ArrangementClipView } from './ArrangementClip';
+@@ -168,6 +177,10 @@ interface ArrangementLaneProps {
+   timelineWindow?: TimelineWindowSource;
+ }
+ 
++function noLaneWindowSubscription(): () => void {
++  return () => {};
++}
++
+ const LANE_FOLD_CHEVRON_RIGHT = (
+   <ChevronRight className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
+ );
+@@ -286,6 +299,62 @@ export function ArrangementLane({
+     () => new Set(laneMoveSourceKey === '' ? [] : laneMoveSourceKey.split('\n')),
+     [laneMoveSourceKey],
+   );
++  const getLanePageKey = useCallback(
++    () =>
++      timelineWindow
++        ? timelinePageKey(
++            readTimelinePage(timelineWindow.getTimelineView, timelineWindow.getTimelineViewportPx),
++          )
++        : '',
++    [timelineWindow],
++  );
++  const lanePageKey = useSyncExternalStore(
++    timelineWindow?.subscribeTimelineScroll ?? noLaneWindowSubscription,
++    getLanePageKey,
++    getServerTimelinePageKey,
++  );
++  const gesturePinsRef = useRef(new Map<number, { clipId: string; unpin: () => void }>());
++  const laneWindow = timelinePageWindow(parseTimelinePageKey(lanePageKey));
++  const gestureClipIds = new Set([...gesturePinsRef.current.values()].map((pin) => pin.clipId));
++  const mountedClips = clips.filter(
++    (clip) =>
++      laneMoveSourceIds.has(clip.id) ||
++      gestureClipIds.has(clip.id) ||
++      spanInTimelineWindow(
++        clip.start * pxPerSecond,
++        (clip.start + clip.duration) * pxPerSecond,
++        laneWindow,
++      ),
++  );
++  const handleClipPointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
++    const clipId =
++      event.target instanceof Element
++        ? event.target.closest<HTMLElement>('[data-clip-id]')?.dataset.clipId
++        : undefined;
++    if (clipId === undefined) {
++      return;
++    }
++    const pins = gesturePinsRef.current;
++    const pointerId = event.pointerId;
++    pins.get(pointerId)?.unpin();
++    const finish = (end: globalThis.PointerEvent) => {
++      if (end.pointerId === pointerId) {
++        unpin();
++      }
++    };
++    function unpin() {
++      window.removeEventListener('pointerup', finish, true);
++      window.removeEventListener('pointercancel', finish, true);
++      window.removeEventListener('blur', unpin);
++      if (pins.get(pointerId)?.unpin === unpin) {
++        pins.delete(pointerId);
++      }
++    }
++    pins.set(pointerId, { clipId, unpin });
++    window.addEventListener('pointerup', finish, true);
++    window.addEventListener('pointercancel', finish, true);
++    window.addEventListener('blur', unpin);
++  };
+   const sourceTitle = (sourceId: string) =>
+     videoSources.get(sourceId)?.name ??
+     collection.sources.find((source) => source.id === sourceId)?.title ??
+@@ -410,6 +479,15 @@ export function ArrangementLane({
+ 
+   useEffect(() => () => panBlurSuppressionCleanupRef.current?.(), []);
+ 
++  useEffect(() => {
++    const pins = gesturePinsRef.current;
++    return () => {
++      for (const pin of [...pins.values()]) {
++        pin.unpin();
++      }
++    };
++  }, []);
++
+   const suppressPanPointerAfterBlur = (pointerId: number) => {
+     panBlurSuppressionCleanupRef.current?.();
+     const release = (end: globalThis.PointerEvent) => {
+@@ -945,6 +1023,7 @@ export function ArrangementLane({
+         }}
+         data-grid-seconds={gridSeconds}
+         data-grid-lines={gridLinesState}
++        onPointerDownCapture={handleClipPointerDownCapture}
+         onPointerDown={(event) => onBackgroundPointerDown(event, track.id)}
+         onContextMenu={(event) => {
+           event.preventDefault();
+@@ -1048,7 +1127,7 @@ export function ArrangementLane({
+             </div>
+           );
+         })}
+-        {clips.map((clip) => {
++        {mountedClips.map((clip) => {
+           const videoSource = isVideo ? videoSources.get(clip.sourceId) : undefined;
+           return (
+             <ArrangementClipView
+diff --git a/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx b/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx
+index abaeba0..808fdb6 100644
+--- a/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/waveform-window-ui.test.tsx
+@@ -183,6 +183,22 @@ function columnsOf(view: GateView, clipId: string): number {
+   return Number((svg.getAttribute('viewBox') ?? '').split(' ')[2]);
+ }
+ 
++function pinOutsideClips(api: GateApiRef) {
++  act(() =>
++    live(api).setClipLaneDrag({
++      ghosts: GATE_CLIPS.map((clip) => ({
++        clipId: clip.id,
++        trackId: 'video',
++        start: clip.start,
++        duration: clip.duration,
++        blocked: false,
++        message: null,
++      })),
++      timeLocked: false,
++    }),
++  );
++}
++
+ function scrollTo(view: GateView, left: number) {
+   const scroller = view.getByTestId(SCROLLER_TEST_ID);
+   scroller.scrollLeft = left;
+@@ -234,6 +250,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG2 a band crossing rebuilds only the clips inside the window', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     expect(waveformPeakColumns(50, 40)).not.toBe(waveformPeakColumns(50, 20));
+     expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 40));
+     expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+@@ -244,6 +261,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG3 a scroll that brings a stale clip into the window rebuilds it at the new band', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     act(() => live(api).setPxPerSecond(20));
+     expect(columnsOf(view, 'far')).toBe(waveformPeakColumns(50, 40));
+     scrollTo(view, 3000);
+@@ -253,6 +271,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG4 zooming back while the stale clip is outside keeps it at its old band', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     act(() => live(api).setPxPerSecond(20));
+     act(() => live(api).setPxPerSecond(40));
+     expect(columnsOf(view, 'near')).toBe(waveformPeakColumns(50, 40));
+@@ -266,6 +285,7 @@ describe('PERF-3d waveform columns follow the visible window', { timeout: 15_000
+ 
+   it('WG5 a real anchored zoom gates by the pending view, not the old scroll', async () => {
+     const { api, view } = await mountGateWorkspace(40);
++    pinOutsideClips(api);
+     act(() => live(api).setPxPerSecond(20));
+     act(() => live(api).seekTo(175));
+     scrollTo(view, 3000);

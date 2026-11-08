@@ -1,0 +1,46 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b402-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/lane-virtualization.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1070[2mms[22m[39m
+     [32m✓[39m VZ1 an unmeasured viewport mounts every clip[32m 198[2mms[22m[39m
+     [32m✓[39m VZ2 a measured viewport mounts only the clips inside the page window; the count stays the model[32m 102[2mms[22m[39m
+     [32m✓[39m VZ3 scrolling across pages mounts and unmounts clips[32m 125[2mms[22m[39m
+[31m     [31m×[31m VZ4 zooming out brings a far clip into the window[39m[32m 87[2mms[22m[39m
+     [32m✓[39m VZ5 a clip under an active pointer gesture stays mounted until the pointer is released[32m 107[2mms[22m[39m
+     [32m✓[39m VZ6 a lane-move source outside the window stays mounted while the move is held[32m 95[2mms[22m[39m
+     [32m✓[39m VZ7 select-all does not mount clips outside the window, and Delete still reaches them[32m 78[2mms[22m[39m
+     [32m✓[39m VZ8 a window blur during a press unpins the clip, so the next scroll unmounts it[32m 106[2mms[22m[39m
+     [32m✓[39m VZ9 unmounting the workspace during a press removes every window listener the press added[32m 65[2mms[22m[39m
+     [32m✓[39m VZ10 a same-lane group member outside the window mounts at its preview position mid-gesture[32m 104[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 04:37:06
+[2m   Duration [22m 2.90s[2m (transform 1.01s, setup 0ms, import 1.40s, tests 1.07s, environment 307ms)[22m
+
+
+::error file=/tmp/b402-scratch/app/lib/arrangement/__tests__/lane-virtualization.test.tsx,title=app/lib/arrangement/__tests__/lane-virtualization.test.tsx > PERF-14b lane clip virtualization > VZ4 zooming out brings a far clip into the window,line=171,column=23::AssertionError: expected [ 'near' ] to deeply equal [ 'far', 'near' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "far",%0A    "near",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/lane-virtualization.test.tsx:171:23%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-virtualization.test.tsx[2m > [22mPERF-14b lane clip virtualization[2m > [22mVZ4 zooming out brings a far clip into the window
+[31m[1mAssertionError[22m: expected [ 'near' ] to deeply equal [ 'far', 'near' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "far",[39m
+[2m    "near",[22m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/lane-virtualization.test.tsx:[2m171:23[22m[39m
+    [90m169| [39m    [34mexpect[39m([34mmounted[39m())[33m.[39m[34mtoEqual[39m([[32m'near'[39m])[33m;[39m
+    [90m170| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34msetPxPerSecond[39m([34m10[39m))[33m;[39m
+    [90m171| [39m    [34mexpect[39m([34mmounted[39m())[33m.[39m[34mtoEqual[39m([[32m'far'[39m[33m,[39m [32m'near'[39m])[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m172| [39m  })[33m;[39m
+    [90m173| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

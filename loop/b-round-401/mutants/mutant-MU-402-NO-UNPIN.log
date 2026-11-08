@@ -1,0 +1,69 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b402-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/lane-virtualization.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 987[2mms[22m[39m
+     [32m✓[39m VZ1 an unmeasured viewport mounts every clip[32m 182[2mms[22m[39m
+     [32m✓[39m VZ2 a measured viewport mounts only the clips inside the page window; the count stays the model[32m 93[2mms[22m[39m
+     [32m✓[39m VZ3 scrolling across pages mounts and unmounts clips[32m 121[2mms[22m[39m
+     [32m✓[39m VZ4 zooming out brings a far clip into the window[32m 78[2mms[22m[39m
+[31m     [31m×[31m VZ5 a clip under an active pointer gesture stays mounted until the pointer is released[39m[32m 100[2mms[22m[39m
+     [32m✓[39m VZ6 a lane-move source outside the window stays mounted while the move is held[32m 60[2mms[22m[39m
+     [32m✓[39m VZ7 select-all does not mount clips outside the window, and Delete still reaches them[32m 63[2mms[22m[39m
+[31m     [31m×[31m VZ8 a window blur during a press unpins the clip, so the next scroll unmounts it[39m[32m 126[2mms[22m[39m
+     [32m✓[39m VZ9 unmounting the workspace during a press removes every window listener the press added[32m 64[2mms[22m[39m
+     [32m✓[39m VZ10 a same-lane group member outside the window mounts at its preview position mid-gesture[32m 98[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 04:36:56
+[2m   Duration [22m 2.71s[2m (transform 896ms, setup 0ms, import 1.26s, tests 987ms, environment 302ms)[22m
+
+
+::error file=/tmp/b402-scratch/app/lib/arrangement/__tests__/lane-virtualization.test.tsx,title=app/lib/arrangement/__tests__/lane-virtualization.test.tsx > PERF-14b lane clip virtualization > VZ5 a clip under an active pointer gesture stays mounted until the pointer is released,line=181,column=23::AssertionError: expected [ 'far', 'near' ] to deeply equal [ 'far' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "far",%0A+   "near",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/lane-virtualization.test.tsx:181:23%0A%0A
+
+::error file=/tmp/b402-scratch/app/lib/arrangement/__tests__/lane-virtualization.test.tsx,title=app/lib/arrangement/__tests__/lane-virtualization.test.tsx > PERF-14b lane clip virtualization > VZ8 a window blur during a press unpins the clip%2C so the next scroll unmounts it,line=225,column=23::AssertionError: expected [ 'far', 'near' ] to deeply equal [ 'far' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "far",%0A+   "near",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/lane-virtualization.test.tsx:225:23%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-virtualization.test.tsx[2m > [22mPERF-14b lane clip virtualization[2m > [22mVZ5 a clip under an active pointer gesture stays mounted until the pointer is released
+[31m[1mAssertionError[22m: expected [ 'far', 'near' ] to deeply equal [ 'far' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "far",[22m
+[31m+   "near",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/lane-virtualization.test.tsx:[2m181:23[22m[39m
+    [90m179| [39m    fireEvent[33m.[39m[34mpointerUp[39m(window[33m,[39m { pointerId[33m:[39m [34m7[39m[33m,[39m clientX[33m:[39m [34m300[39m })[33m;[39m
+    [90m180| [39m    [34mscrollTo[39m([34m5000[39m)[33m;[39m
+    [90m181| [39m    [34mexpect[39m([34mmounted[39m())[33m.[39m[34mtoEqual[39m([[32m'far'[39m])[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m182| [39m  })[33m;[39m
+    [90m183| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-virtualization.test.tsx[2m > [22mPERF-14b lane clip virtualization[2m > [22mVZ8 a window blur during a press unpins the clip, so the next scroll unmounts it
+[31m[1mAssertionError[22m: expected [ 'far', 'near' ] to deeply equal [ 'far' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "far",[22m
+[31m+   "near",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/lane-virtualization.test.tsx:[2m225:23[22m[39m
+    [90m223| [39m    })[33m;[39m
+    [90m224| [39m    [34mscrollTo[39m([34m5000[39m)[33m;[39m
+    [90m225| [39m    [34mexpect[39m([34mmounted[39m())[33m.[39m[34mtoEqual[39m([[32m'far'[39m])[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m226| [39m  })[33m;[39m
+    [90m227| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+

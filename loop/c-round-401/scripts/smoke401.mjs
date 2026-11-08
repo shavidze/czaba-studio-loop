@@ -1,0 +1,38 @@
+import { chromium } from '/home/runner/czaba-project/store/node_modules/playwright/index.mjs';
+import { writeFileSync } from 'node:fs';
+const out='/home/runner/czaba-project/tmp/studio-real-loop/c-round-401';
+const b=await chromium.launch({args:['--autoplay-policy=no-user-gesture-required']});const R={};
+for (const [w,h] of [[1440,900],[1280,720]]){
+ const ctx=await b.newContext({viewport:{width:w,height:h}});const p=await ctx.newPage();const r={errs:[]};
+ p.on('pageerror',e=>r.errs.push(String(e).slice(0,150)));
+ await p.addInitScript(()=>{window.__ac=[];const O=window.AudioContext;window.AudioContext=class extends O{constructor(...a){super(...a);window.__ac.push(this);}};});
+ await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'networkidle',timeout:120000});
+ await p.waitForSelector('[data-testid="arrangement-timeline-scroller"]',{timeout:120000});
+ await p.getByText('Demo collection ready').first().waitFor({timeout:60000});await p.waitForTimeout(1000);
+ r.clipsBefore=await p.locator('[data-clip-id]').count();
+ await p.getByTestId('arrangement-library-list').getByRole('option').first().click();await p.waitForTimeout(250);
+ r.picked=(await p.locator('[role="option"][aria-selected="true"]').first().textContent().catch(()=>'')).replace(/\s+/g,' ').slice(0,60);
+ await p.keyboard.press('Enter');await p.waitForTimeout(1200);
+ r.clipsAfter=await p.locator('[data-clip-id]').count();
+ r.status=(await p.getByTestId('arrangement-status').textContent().catch(()=>'')).trim();
+ await p.screenshot({path:`${out}/smoke-added-${w}x${h}.png`});
+ const pos=async()=> (await p.getByTestId('arrangement-position').textContent().catch(()=>'')).trim();
+ r.pos0=await pos();
+ await p.getByRole('button',{name:/^Play/}).first().click();
+ const t0=Date.now();await p.waitForTimeout(1500);
+ r.posPlay=await pos();r.playMs=Date.now()-t0;
+ r.audio=await p.evaluate(()=>window.__ac.map(c=>({state:c.state,t:c.currentTime,sr:c.sampleRate})));
+ r.stopBtn=await p.getByRole('button',{name:/^Stop/}).first().isVisible().catch(()=>false);
+ await p.screenshot({path:`${out}/smoke-playing-${w}x${h}.png`});
+ await p.getByRole('button',{name:/^Stop/}).first().click().catch(()=>{});
+ await p.waitForTimeout(600);r.posStop1=await pos();await p.waitForTimeout(800);r.posStop2=await pos();
+ r.audioAfter=await p.evaluate(()=>window.__ac.map(c=>({state:c.state,t:c.currentTime})));
+ await p.getByRole('button',{name:/^Export/}).first().click();await p.waitForTimeout(800);
+ const dlg=p.getByRole('dialog').first();r.dialogOpen=await dlg.isVisible().catch(()=>false);
+ r.dialogText=(await dlg.innerText().catch(()=>'')).replace(/\s+/g,' ').slice(0,300);
+ await p.screenshot({path:`${out}/smoke-export-${w}x${h}.png`});
+ await p.keyboard.press('Escape');await p.waitForTimeout(500);
+ r.dialogClosedEsc=!(await dlg.isVisible().catch(()=>false));
+ R[`${w}x${h}`]=r;await ctx.close();
+}
+await b.close();writeFileSync(out+'/smoke401.json',JSON.stringify(R,null,1));console.log(JSON.stringify(R,null,1));

@@ -1,0 +1,56 @@
+{
+  "taskStatus": "FAIL",
+  "bugs": [
+    {
+      "id": "C-R401-01",
+      "severity": "low",
+      "origin": "B (retro-401 §10 and lessons.md l.3, planning artifact)",
+      "steps": [
+        "python3 -I difflib of b-round-400/lessons-before-401.md l.3 against lessons.md l.3 (c-round-401/data/lessons-l3-diff.txt)",
+        "read retros/retro-401.md §10 'l.3: pointer -> retro-401 (window 385-400)' and the task row RT-LESSONS 'l.3 changes only the retro pointer and appends one sentence'"
+      ],
+      "expected": "l.3 either updates the Sources pointer (retro-385.md / windows 369-384 -> retro-401.md / 385-400) as retro §10 and the task say, or retro §10 says only a sentence was appended",
+      "actual": "The only change in l.3 is one inserted sentence ' **RETRO 401 (D-29z1373):** L4 and L58 gain one clause each (both tech-lead).' The Sources list still ends at retro-385.md (windows ... 369-384). Retro §10 describes a pointer change that did not happen. Everything else in the row holds: 60 lines, only l.3/9/41 differ, l.9 and l.41 keep their old text byte for byte as a prefix and append one clause, no lesson id lost, L23 5057 and L58 4334 bytes (< 5500).",
+      "evidence": "c-round-401/data/lessons-l3-diff.txt; b-round-400/lessons-diff.txt (3c3 9c9 41c41); retros/retro-401.md §10 l.1"
+    }
+  ],
+  "passed": [
+    "SOURCE-SCOPE-start",
+    "G401-AUTH",
+    "STUDIO-SMOKE-401",
+    "RT-SCREEN",
+    "CLAIMS",
+    "RT-NUM",
+    "RT-CAUSE",
+    "RT-IDS",
+    "RT-L57",
+    "RT-SABA",
+    "SOURCE-SCOPE-end"
+  ],
+  "failed": ["RT-LESSONS (Low, C-R401-01: l.3 pointer claim not matched by the file; all other RT-LESSONS clauses hold)"],
+  "gate": ["full vitest", "typecheck", "build", "Biome", "verify"],
+  "blocked": [
+    "fake-bearer /api/studio-token check: backend unavailable in cloud (not a FAIL, not a PASS)"
+  ],
+  "browserVerified": true,
+  "realVerified": true,
+  "envStatus": {"checkedUtc": "2026-11-08T04:09:37.1548619Z", "round": 401, "attempt": 1, "store": 200},
+  "manifestPaths": ["b-round-400/r401-tree-sha256.txt", "b-round-318/protected-sha256.txt"],
+  "missingPaths": [],
+  "countMismatches": [],
+  "claimCheckMinutes": 2,
+  "origin": {"C-R401-01": "B"},
+  "assertsSpecified": null,
+  "mutantsRecorded": null,
+  "mutantRedOnSketch": null,
+  "mutantRedOnTree": null,
+  "gateChecksNamed": ["full vitest", "typecheck", "build", "Biome", "verify"],
+  "gateChecksRunOnSketch": null,
+  "chainHeadGateRunGreen": null,
+  "affectedChecksNamed": null,
+  "affectedChecksRunOnSketch": null,
+  "l57NullReason": "RETRO: no assert specified",
+  "progressFile": "c-round-401/progress.json",
+  "stopSignal": null,
+  "notes": ["A wrote 'RETRO round, no implementation.'; source untouched (0 status lines, manifests rc 0 at start and end). A transient first G401-AUTH attempt timed out at the 120 s timeline wait on a cold Vite; a warmup then both viewports passed (environment, not an app bug). Retro numbers recomputed independently from result JSONs: B 181.15, A 98.51, C 14.49 (retro 14.47: 0.02 from extra c-round-N-result* globbing), total 294.15 (retro 294.13), all others equal. Two script-output differences vs B are explained: round-400 B cost column (13.15 vs 0 = round-401 planning cost attributed after B's run) and archived-mediums.txt (misc-outputs.sh reads the live backlog, which gained two closed items). K22 claim empty because root's optimize-backlog archived C-R399-01 and TL-R398-SK-M2 to archive/findings-archived.json (status closed, checked)."]
+}
