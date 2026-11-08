@@ -1,0 +1,178 @@
+diff --git a/workers/r2-proxy.test.mjs b/workers/r2-proxy.test.mjs
+index 0d7aea0..501f40b 100644
+--- a/workers/r2-proxy.test.mjs
++++ b/workers/r2-proxy.test.mjs
+@@ -23,7 +23,7 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+     const reads = [];
+     const env = { TOKEN_SECRET: secret, R2_BUCKET: { get: async (key, getOptions) => {
+       reads.push(key);
+-      return getOptions?.range ? { body: 'le', size: 4, range: { offset: 2, length: 2 } } : { body: 'file', size: 4 };
++      return getOptions?.range ? { body: 'le', size: 4, etag: 'etag-1', httpEtag: '"etag-1"', range: { offset: 2, length: 2 } } : { body: 'file', size: 4, etag: 'etag-1', httpEtag: '"etag-1"' };
+     } }, ...options };
+     const headers = options.headers || {};
+     const response = await worker.fetch(new Request(`https://r2.example/${path}?token=${encodeURIComponent(token)}`, { headers }), env);
+@@ -134,7 +134,7 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+   });
+   const BYTES = new Uint8Array(100).map((_, i) => i);
+   const ETAG = '"etag-1"';
+-  async function publicRequest(path, { method = 'GET', headers = {}, missing = false, outOfRange = 'throw', failGet = false, changedOnSecondRead = false, empty = false, cancelRejects = false } = {}) {
++  async function publicRequest(path, { method = 'GET', headers = {}, missing = false, outOfRange = 'throw', failGet = false, changedOnSecondRead = false, headSeesNewVersion = false, goneOnHead = false, goneOnSecondRead = false, empty = false, cancelRejects = false } = {}) {
+     const DATA = empty ? new Uint8Array(0) : BYTES;
+     const reads = [];
+     const heads = [];
+@@ -142,17 +142,19 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+     const env = { TOKEN_SECRET: secret, R2_BUCKET: {
+       head: async (key) => {
+         heads.push(key);
+-        return missing ? null : { size: DATA.length, etag: 'etag-1', httpEtag: ETAG };
++        if (missing || goneOnHead) return null;
++        const etag = headSeesNewVersion ? 'etag-2' : 'etag-1';
++        return { size: DATA.length, etag, httpEtag: `"${etag}"` };
+       },
+       get: async (key, options) => {
+         reads.push({ key, range: options?.range ?? null, onlyIf: options?.onlyIf ?? null });
+         if (failGet) throw new Error('R2 unavailable');
+-        if (missing) return null;
++        if (missing || (goneOnSecondRead && reads.length > 1)) return null;
+         const second = changedOnSecondRead && reads.length > 1;
+         const etag = second ? 'etag-2' : 'etag-1';
+         const range = options?.range;
+         let slice = DATA;
+-        if (range && [range.offset, range.length, range.suffix].some((value) => value !== undefined && !Number.isSafeInteger(value))) throw new TypeError('R2 range value is not a safe integer');
++        if (outOfRange === 'throw' && range && [range.offset, range.length, range.suffix].some((value) => value !== undefined && !Number.isSafeInteger(value))) throw new TypeError('R2 range value is not a safe integer');
+         if (range) {
+           const offset = range.suffix !== undefined ? Math.max(0, DATA.length - range.suffix) : range.offset;
+           if (offset >= DATA.length && outOfRange === 'throw') throw new Error('R2 invalid range');
+@@ -320,6 +322,7 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+       assert.equal(fresh.reads.length, 1);
+       assert.equal(fresh.heads.length, outOfRange === 'throw' ? 1 : 0);
+       assert.ok(fresh.opened.every((o) => o.cancelled));
++      assert.equal(fresh.opened.length, outOfRange === 'throw' ? 0 : 1, outOfRange);
+       const stale = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=500-', 'If-Range': '"old"' }, outOfRange });
+       assert.equal(stale.response.status, 200, outOfRange);
+       assert.equal(stale.body.length, 100);
+@@ -328,6 +331,7 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+       assert.equal(stale.response.headers.get('Cache-Control'), 'public, max-age=86400');
+       assert.deepEqual(stale.reads.map((r) => r.range), [{ offset: 500 }, null]);
+       assert.equal(stale.heads.length, outOfRange === 'throw' ? 1 : 0);
++      assert.deepEqual(stale.opened.map((o) => o.cancelled), outOfRange === 'throw' ? [false] : [true, false], outOfRange);
+     }
+   });
+   test(`${name}: PR15 empty object ranges give 416 and a failing body cancel still gives 304`, async () => {
+@@ -340,6 +344,7 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+         assert.equal(response.headers.get('ETag'), ETAG);
+         assert.equal(body, null);
+         assert.ok(opened.every((o) => o.cancelled), `${outOfRange} ${range}`);
++        assert.equal(opened.length, outOfRange === 'throw' ? 0 : 1, `${outOfRange} ${range}`);
+       }
+     }
+     const rejected = await publicRequest('preview/mall/a.wav', { headers: { 'If-None-Match': ETAG }, cancelRejects: true });
+@@ -366,7 +371,8 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+       assert.equal(far.response.headers.get('Content-Range'), 'bytes */100');
+       assert.equal(far.response.headers.get('Cache-Control'), 'no-store');
+       assert.deepEqual(far.reads.map((r) => r.range), [{ offset: Infinity }], outOfRange);
+-      assert.equal(far.heads.length, 1, outOfRange);
++      assert.equal(far.heads.length, outOfRange === 'throw' ? 1 : 0, outOfRange);
++      assert.deepEqual(far.opened.map((o) => o.cancelled), outOfRange === 'throw' ? [] : [true], outOfRange);
+     }
+   });
+   test(`${name}: PR17 the If-Range re-read answers If-None-Match and takes its ETag from the second object`, async () => {
+@@ -378,6 +384,7 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+         assert.equal(served.response.headers.get('ETag'), '"etag-2"', label);
+         assert.equal(served.body.length, 100, label);
+         assert.equal(served.reads.length, 2, label);
++        assert.equal(served.heads.length, outOfRange === 'throw' && range === 'bytes=500-' ? 1 : 0, label);
+         const fresh = await publicRequest('preview/mall/a.wav', { headers: { Range: range, 'If-Range': '"old"', 'If-None-Match': '"etag-2"' }, outOfRange, changedOnSecondRead: true });
+         assert.equal(fresh.response.status, 304, label);
+         assert.equal(fresh.body, null, label);
+@@ -387,6 +394,8 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+         assert.equal(fresh.response.headers.get('Content-Range'), null, label);
+         assert.equal(fresh.response.headers.get('Accept-Ranges'), null, label);
+         assert.equal(fresh.response.headers.get('Cache-Control'), 'public, max-age=86400', label);
++        assert.equal(fresh.response.headers.get('Access-Control-Allow-Origin'), '*', label);
++        assert.equal(fresh.response.headers.get('Access-Control-Expose-Headers'), 'ETag, Content-Range, Accept-Ranges, Content-Length', label);
+         assert.equal(fresh.reads.length, 2, label);
+         assert.ok(fresh.opened.length > 0 && fresh.opened.every((o) => o.cancelled), label);
+       }
+@@ -401,6 +410,67 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+     assert.equal(fresh.reads.length, 0);
+     assert.equal(fresh.response.headers.get('Content-Length'), null);
+   });
++  test(`${name}: PR19 a head that already sees the new version answers If-None-Match and If-Range from that version`, async () => {
++    const fresh = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=500-', 'If-Range': ETAG, 'If-None-Match': '"etag-2"' }, headSeesNewVersion: true, changedOnSecondRead: true });
++    assert.equal(fresh.response.status, 304);
++    assert.equal(fresh.body, null);
++    assert.equal(fresh.response.headers.get('ETag'), '"etag-2"');
++    assert.equal(fresh.reads.length, 1);
++    assert.equal(fresh.heads.length, 1);
++    assert.equal(fresh.opened.length, 0);
++    const stale = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=500-', 'If-Range': ETAG }, headSeesNewVersion: true, changedOnSecondRead: true });
++    assert.equal(stale.response.status, 200);
++    assert.equal(stale.response.headers.get('ETag'), '"etag-2"');
++    assert.equal(stale.response.headers.get('Content-Range'), null);
++    assert.equal(stale.body.length, 100);
++    assert.deepEqual(stale.reads.map((r) => r.range), [{ offset: 500 }, null]);
++    assert.equal(stale.heads.length, 1);
++  });
++  test(`${name}: PR20 an object deleted before the If-Range re-read, or before the head of the throw path, gives the preview 404`, async () => {
++    for (const [outOfRange, range] of [['throw', 'bytes=500-'], ['short', 'bytes=0-9']]) {
++      const { response, body, reads, heads, opened } = await publicRequest('preview/mall/a.wav', { headers: { Range: range, 'If-Range': '"old"' }, outOfRange, goneOnSecondRead: true });
++      assert.equal(response.status, 404, outOfRange);
++      assert.equal(new TextDecoder().decode(body), 'File Not Found: mall/Preview/a.wav', outOfRange);
++      assert.equal(reads.length, 2, outOfRange);
++      assert.equal(heads.length, outOfRange === 'throw' ? 1 : 0, outOfRange);
++      assert.deepEqual(opened.map((o) => o.cancelled), outOfRange === 'throw' ? [] : [true], outOfRange);
++    }
++    const headGone = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes=500-', 'If-None-Match': ETAG }, goneOnHead: true });
++    assert.equal(headGone.response.status, 404);
++    assert.equal(new TextDecoder().decode(headGone.body), 'File Not Found: mall/Preview/a.wav');
++    assert.equal(headGone.reads.length, 1);
++    assert.equal(headGone.heads.length, 1);
++    assert.equal(headGone.opened.length, 0);
++  });
++  test(`${name}: PR21 protected routes ignore If-None-Match: a granted file is a full private 200 and a denied one reads nothing`, async () => {
++    for (const [path, purpose, file] of [['download/mall/standart.zip', 'download', 'standart.zip'], ['recordings/mall/01_Parking.m4a', 'recording', '01_Parking.m4a'], ['originals/mall/premium-02.wav', 'original', 'premium-02.wav']]) {
++      const token = tokenFor(purpose, [file]);
++      for (const inm of ['*', ETAG]) {
++        const label = `${path} ${inm}`;
++        const ok = await request(path, token, { headers: { 'If-None-Match': inm } });
++        assert.equal(ok.response.status, 200, label);
++        assert.equal(ok.response.headers.get('ETag'), null, label);
++        assert.equal(ok.response.headers.get('Cache-Control'), 'private, no-store', label);
++        assert.equal(ok.reads.length, 1, label);
++        const denied = await request(path.replace('/mall/', '/other/'), token, { headers: { 'If-None-Match': inm } });
++        assert.equal(denied.response.status, 403, label);
++        assert.equal(denied.reads.length, 0, label);
++        const gone = await request(path, token, { headers: { 'If-None-Match': inm }, R2_BUCKET: { get: async () => null } });
++        assert.equal(gone.response.status, 404, label);
++      }
++    }
++  });
++  test(`${name}: PR22 a padded Range reaches the worker trimmed and gets the 206; a Range with spaces around = is ignored`, async () => {
++    const padded = await publicRequest('preview/mall/a.wav', { headers: { Range: '  bytes=0-9  ' } });
++    assert.equal(padded.response.status, 206);
++    assert.equal(padded.response.headers.get('Content-Range'), 'bytes 0-9/100');
++    assert.equal(padded.body.length, 10);
++    const spaced = await publicRequest('preview/mall/a.wav', { headers: { Range: 'bytes = 0-9' } });
++    assert.equal(spaced.response.status, 200);
++    assert.equal(spaced.response.headers.get('Content-Range'), null);
++    assert.equal(spaced.body.length, 100);
++    assert.deepEqual(spaced.reads.map((r) => r.range), [null]);
++  });
+   if (name === 'proxy') {
+     test(`${name}: PR9 cover image ETag and 304, 404 text kept, no range`, async () => {
+       const first = await publicRequest('mall/cover.jpg');
+@@ -412,7 +482,12 @@ for (const [name, worker] of [['proxy', proxy], ['alternate', alternate]]) {
+       const revalidated = await publicRequest('mall/cover.jpg', { headers: { 'If-None-Match': ETAG } });
+       assert.equal(revalidated.response.status, 304);
+       assert.deepEqual(revalidated.opened.map((o) => o.cancelled), [true]);
+-      assert.equal((await publicRequest('mall/cover.jpg', { headers: { Range: 'bytes=0-9' } })).response.status, 200);
++      const ranged = await publicRequest('mall/cover.jpg', { headers: { Range: 'bytes=0-9' } });
++      assert.equal(ranged.response.status, 200);
++      assert.equal(ranged.body.length, 100);
++      assert.equal(ranged.response.headers.get('Content-Range'), null);
++      assert.equal(ranged.response.headers.get('Accept-Ranges'), null);
++      assert.deepEqual(ranged.reads.map((r) => r.range), [null]);
+       const missing = await publicRequest('mall/cover.jpg', { missing: true });
+       assert.equal(missing.response.status, 404);
+       assert.equal(new TextDecoder().decode(missing.body), 'Image Not Found');

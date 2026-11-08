@@ -1,0 +1,6 @@
+files: ['workers/r2-proxy.js', 'cloudflare/r2-worker.js']
+--- old
+  const rangeHeader = ['recording', 'original'].includes(purpose)
++++ new
+  if (purpose !== 'studio' && request.headers.get('If-None-Match')) return new Response(null, { status: 304, headers: corsHeaders });
+  const rangeHeader = ['recording', 'original'].includes(purpose)

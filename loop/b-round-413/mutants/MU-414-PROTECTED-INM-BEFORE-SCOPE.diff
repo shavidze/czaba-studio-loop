@@ -1,0 +1,5 @@
+files: ['workers/r2-proxy.js', 'cloudflare/r2-worker.js']
+--- old
+    return new Response('Forbidden', { status: 403, headers: corsHeaders });
++++ new
+    return new Response(request.headers.get('If-None-Match') ? null : 'Forbidden', { status: request.headers.get('If-None-Match') ? 304 : 403, headers: corsHeaders });
