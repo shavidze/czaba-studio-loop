@@ -1,0 +1,87 @@
+diff --git a/app/components/arrangement/ArrangementVideoDock.tsx b/app/components/arrangement/ArrangementVideoDock.tsx
+index a1d66bb..256bacc 100644
+--- a/app/components/arrangement/ArrangementVideoDock.tsx
++++ b/app/components/arrangement/ArrangementVideoDock.tsx
+@@ -15,6 +15,7 @@ import {
+   type ArrangementPlaybackClock,
+   formatArrangementTime,
+   useArrangement,
++  useArrangementActions,
+   useArrangementIsPlaying,
+   useArrangementPositionStore,
+   useArrangementPositionWriter,
+@@ -353,14 +354,8 @@ export function ArrangementVideoDock({
+   onVideoExpandedChange,
+   claimPointerGesture,
+ }: ArrangementVideoDockProps) {
+-  const {
+-    arrangement,
+-    videoSources,
+-    pausePlaybackWithStatus,
+-    getLivePosition,
+-    getPlaybackClock,
+-    getArrangement,
+-  } = useArrangement();
++  const { arrangement, videoSources, pausePlaybackWithStatus } = useArrangement();
++  const { getLivePosition, getPlaybackClock, getArrangement } = useArrangementActions();
+   const isPlaying = useArrangementIsPlaying();
+   const rootRef = useRef<HTMLElement>(null);
+   const firstVideoRef = useRef<HTMLVideoElement>(null);
+diff --git a/app/contexts/ArrangementContext.tsx b/app/contexts/ArrangementContext.tsx
+index f1d14f8..ec1e911 100644
+--- a/app/contexts/ArrangementContext.tsx
++++ b/app/contexts/ArrangementContext.tsx
+@@ -560,7 +560,9 @@ type ArrangementActions = Pick<
+   | 'endLibraryDrag'
+   | 'getArrangement'
+   | 'getLibraryPreviewOffset'
++  | 'getLivePosition'
+   | 'getLocatorPosition'
++  | 'getPlaybackClock'
+   | 'getStatus'
+   | 'getStatusPreviewText'
+   | 'isPointerGestureActive'
+@@ -4629,7 +4631,9 @@ export function ArrangementProvider({
+       endLibraryDrag,
+       getArrangement,
+       getLibraryPreviewOffset,
++      getLivePosition: livePosition,
+       getLocatorPosition,
++      getPlaybackClock,
+       getStatus,
+       getStatusPreviewText,
+       isPointerGestureActive,
+@@ -4666,9 +4670,11 @@ export function ArrangementProvider({
+       getArrangement,
+       getLibraryPreviewOffset,
+       getLocatorPosition,
++      getPlaybackClock,
+       getStatus,
+       getStatusPreviewText,
+       isPointerGestureActive,
++      livePosition,
+       playFrom,
+       previewArrangement,
+       previewLoopArrangement,
+diff --git a/app/lib/arrangement/__tests__/actions-context.test.tsx b/app/lib/arrangement/__tests__/actions-context.test.tsx
+index e517c89..f9860f1 100644
+--- a/app/lib/arrangement/__tests__/actions-context.test.tsx
++++ b/app/lib/arrangement/__tests__/actions-context.test.tsx
+@@ -103,7 +103,7 @@ const twoSourceCollection: WorkspaceCollection = {
+   ],
+ };
+ 
+-const ACTION_KEY_COUNT = 34;
++const ACTION_KEY_COUNT = 36;
+ 
+ function actionsArrangement(): Arrangement {
+   const base = createArrangement([
+@@ -317,7 +317,7 @@ describe('Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)', () => {
+     expect(hits).toEqual([]);
+   });
+ 
+-  it('AC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out all 34 provider callbacks (C-R404-A-AC1-COVERAGE)', async () => {
++  it('AC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out all 36 provider callbacks (C-R404-A-AC1-COVERAGE)', async () => {
+     const probe: ActionsProbeRef = { actions: null, value: null, isPlaying: null };
+     render(
+       <ArrangementProvider

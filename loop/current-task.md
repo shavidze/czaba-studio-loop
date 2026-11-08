@@ -1,146 +1,172 @@
-# Round 405: SYS-R385-LEAF-ACTIONS-CONTEXT stage 2 of 2 — test strength for the actions context and the leaf render counts, comparators closed on mutant evidence (behaviour-preserving), from B's reviewed sketch
+# Round 406: PERF-11c-iii-d-i — the actions context hands out the dock's two playback getters, and the video dock reads its getters from it (behaviour-preserving, from B's reviewed sketch)
 
-**Planned by:** B, at the round 404 → 405 planning, 2026-11-08 (`b-round-404.md`). Advisor used before planning and before hand-off.
+**Planned by:** B, at the round 405 → 406 planning, 2026-11-08 (`b-round-405.md`). Advisor used before planning and before hand-off.
 
 ## Read first
-- `lessons.md` in full. Most relevant: L4, L7, L8, L11, L23, L26, L28, L29, L31, L56, L57, L58, L59, L60.
-- This file. Open `tasks/round-404.md` only to look up the stage-1 contract (AC1–AC6, unchanged here except AC4's two lines, see D-29z1400).
-- Primitives: `AGENT_DISCOVERABLE_CODE.md`, `REACT_CONTEXT.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`; `.claude/prompts/new-test.md`.
-- **Claims:** `bash b-round-404/claims-405.sh` (`ROOT=` and `LOOP=` can be overridden).
-  - Planning output on the real store: `b-round-404/claims-405-planning-output.txt` (stderr empty, `claims-405-planning-stderr.txt`).
-  - The same script on a fresh HEAD copy with the patch applied but not committed: `b-round-404/claims-405-sketch-output.txt`. It differs from planning only on the lines listed in `b-round-404/claims-405-planning-vs-sketch.diff`: K1 (the scratch repo's own commit), K2 (6 on the scratch, 7 for A with doc 258), K5, K7, K7b, K8, K9, K10, K11, K12 and K13.
+- `lessons.md` in full. The most relevant lessons are L4, L11, L26, L28, L29, L31, L49, L56, L57, L58 and L59.
+- This file. Open `tasks/round-404.md` or `tasks/round-405.md` only to look up the actions-context contract (AC1–AC7).
+- Primitives: `AGENT_DISCOVERABLE_CODE.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `TESTING_QUALITY_GATES.md` and `GEORGIAN_DOCS.md`, plus `docs/implementation/TEMPLATE.md`.
+- **Claims:** `bash b-round-405/claims-406.sh` (`ROOT=` and `LOOP=` can be overridden).
+  - Planning output on the real store: `b-round-405/claims-406-planning-output.txt`. Its stderr is empty (`claims-406-planning-stderr.txt`).
+  - Output on the sketch scratch, which is HEAD plus the patch: `b-round-405/claims-406-sketch-output.txt`.
+  - The two differ only on the lines in `b-round-405/claims-406-planning-vs-sketch.diff`:
+    - K1 (the scratch commit);
+    - K2 (3 on the scratch, 4 for A once doc 259 exists);
+    - K5, K7, K7b, K8, K9, K10 and K11.
 
-## Baseline: HEAD `dd52107`, clean tree
-- Gate 404 published `dd52107` on both remotes [K18]. HEAD is `dd52107…` [K1]. `git status --short --untracked-files=all` is empty [K2]. (`context/head-sha.txt` says `cc5cbc6`; it was written before the gate and is stale.)
-- **Frozen:** `b-round-404/r405-frozen-sha256.txt`, **1,292** entries: every tracked file except the 7 grants. `sha256sum -c` gives rc 0 [K3]. All 11 protected files of `b-round-318/protected-sha256.txt` are unchanged and none is granted [K4].
-- **Grants:** `b-round-404/grants-405.txt` (7 paths, §4).
+## Baseline: HEAD `5c89a95`, clean tree
+- Gate 405 published `5c89a95` on both remotes [K17]. HEAD is `5c89a95…` [K1], and `git status --short --untracked-files=all` is empty [K2].
+- `context/head-sha.txt` says `dd52107`. It was written before the gate and is stale.
+- **Frozen:** `b-round-405/r406-frozen-sha256.txt` has **1,296** entries: every tracked file except the 3 granted source files. `sha256sum -c` gives rc 0 [K3].
+- **Protected:** all 11 protected files in `b-round-318/protected-sha256.txt` are unchanged, and none is granted [K4].
+- **Grants:** `b-round-405/grants-406.txt` (4 paths, §4).
 
 ## 0. Why this round
-- **Round 404 (SYS-R385 stage 1) passed and is published.** C PASS on 8 rows, `browserVerified`/`realVerified` true, gate 404 published `dd52107`.
-- **REGRESSION-2026-11-10 is not due.** Today is 2026-11-08 and `regression-last.json` says 2026-11-07 [K19].
-- **No Critical or High finding is open.** The open Mediums are root-only, manual or `awaiting_user`; none reproduces in the cloud browser.
-- **The D-29z1395 order puts SYS-R385 stage 2 next.** It closes the action-identity and leaf-render-count test class in one owner, and it is the last step before PERF-11c-iii-d/e (VideoDock, Lane).
-- **Product promise (L55):** the Studio behaves exactly as before. Only tests get stronger, and one local parameter is renamed. No user-visible change.
+- **Round 405 passed and is published.** SYS-R385 is complete (C round 405 PASS, `browserVerified`/`realVerified` true, gate 405 `5c89a95`).
+- **No Critical or High finding is open.** The open Mediums are root-only, manual or `awaiting_user`, and none reproduces in the cloud browser. C's only round-405 bug is a Low, deferred (D-29z1404).
+- **REGRESSION-2026-11-10 is not due.** `regression-last.json` says 2026-11-07 [K18].
+- **The D-29z1402 order puts PERF-11c-iii-d (VideoDock) next.** HEAD measurement (`b-round-405/probe/leaf-head-406.json`, identical at both viewports): the dock renders on every workspace commit, plus 1 on play and 1 on stop. Per step:
+
+  | Step | Dock renders |
+  |---|---|
+  | audio add | 3 |
+  | zoom step | 1 |
+  | audio-lane mute | 1 |
+  | Ctrl+Z | 1 |
+  | Undo / Redo button | 1 each |
+  | preview start | 1 |
+  | preview stop | 2 |
+- **Split (D-29z1405, `tech-lead`):**
+  - **d-i (this round)** widens the actions contract, without changing behaviour.
+  - **d-ii (next round)** delivers the render saving: a memoised `ArrangementVideoDockViewInner`, the video-lane reader keyed on the video track plus a committed video-clip signal, and a memoised caption.
+  - The split gives d-ii a clean baseline, so its render change and its stopped-video correctness trap can be judged on their own.
+- **Product promise (L55):** the Studio and its video behave exactly as before. A video on the lane plays in sync, and nothing visible changes.
 
 ## 1. Rulings (B)
-### D-29z1400: the dispatched patch (L58: reviewed = dispatched)
-- **Patch:** `b-round-404/sketch-405.patch.txt`, sha256 `c64a5589ed319464…` [K15] (v2, after `tech-lead` pass 1; v1 `9158d333…` is described in `sketch-review.md`). It has 6 files, and `git apply --check` is clean on HEAD [K5]. **A applies it byte-for-byte and does not edit those 6 files afterwards.**
-- **`app/components/arrangement/ArrangementLibrary.tsx`:** `useArrangementLibraryActions` renames its parameter `workspace` to `actions` [K11]. The other four bundle hooks already use `actions`. Closes A-R404-REVIEW-LIBRARY-PARAM.
-- **`actions-context.test.tsx`:**
-  - **New AC7** (C-R404-A-AC1-COVERAGE, A-R404-REVIEW-AC2-ALL-KEYS). A second source (`hit`) is added. The actions object is captured *before* the mount-time load flush, then the test checks that it is the same object (`toBe`) after each of these steps, each proven effective:
-    - the sources load (`sourceStates` replaced, `song` `ready`);
-    - `selectSource('hit')`;
-    - a library preview starts (`waitFor` on `libraryPreviewSourceId === 'hit'`) and stops (`null`);
-    - Play/Stop (`useArrangementIsPlayingReader`);
-    - Master mute;
-    - a Master gain step (`previewMasterGain` + `commitMasterGain`, then `gainDb` −6 and `undoLabel` `'Master Volume'`).
+### D-29z1405: d-i scope and the checkpoint default
+- **ARCH-CHECKPOINT-SYS-R385-ACTIONS has no answer from root** (`architecture_checkpoint_requests` still says `requested`). By the request's own clause, B applies option 1: extend `ArrangementActions` (the B-actions default).
+- **`performance-optimizer` preferred separate props** (`b-round-405/consult-performance-optimizer.md`). It is ruled down for three reasons:
+  - both forms give the same identities, because every getter is `useCallback([])` [K13];
+  - the SYS-R385 convention and `tech-lead` both favour one actions source;
+  - AC7 then pins the new keys.
+- **New keys: `getLivePosition` and `getPlaybackClock`.** The count goes 34 → 36.
+  - `getArrangement` is already an action.
+  - `pausePlaybackWithStatus` stays on `useArrangement()`. Its dependency chain is not proven stable, and the dock reads it through a ref anyway.
+- **The const-tuple derivation (TL-R403-SK-L1) is not folded in.** `tech-lead` found it cannot remove the memo-object list or the deps list without either a forbidden type assertion or breaking Biome's literal deps. It stays a deferred Low and is ruled again at the Lane (e) planning.
 
-    At the end, all 34 action entries are `toBe` the provider value's entry under the same key, and the entry count is pinned to 34.
-  - **AC4** (TL-R403-SK2-L1/L2): the redundant `not.toBeNull` goes, `start.markers` is frozen, and `arrangement.markers` is checked `toBe` the frozen array after the track and Master mutes.
-  - AC1–AC3, AC5 and AC6 are unchanged. The AC row count goes 6 → 7 [K12].
-- **`master-ui.test.tsx` and `fader-pointer-preview.test.tsx`** (B-R374-MASTER-VACUOUS-NAME-COUNTS):
-  - The render counts key on `'ArrangementMasterViewInner'` [K7, K7b]. That is the fiber `StudioWorkspace` mounts [K14].
-  - master-ui's footer test now clears the counts first [K9]. Without the clear, its positive control was fed by the previous test's `<ArrangementMaster />` mount, because that file never cleared counts.
-  - fader-pointer-preview gets **FP0**: every `PARENT_NAMES` entry renders on mount [K13].
-- **`render-budget.test.tsx`** (TL-R405-SK-L1): RB-LEAF1's vacuous `'ArrangementMaster'` `toBe(0)` line is removed. Its `ArrangementMasterViewInner` `toBe(0)` and `toBe(1)` checks stay. After the patch, the only `'ArrangementMaster'` literal left in `app`, `perf` and `e2e` is in `meter-ui.test.tsx` [K8]. That file mounts `<ArrangementMaster />` directly, so its count is live (pass 1); it is not part of B-R374.
-- **`selection-wrappers-render.test.tsx`** (A-R371-REVIEW-GH5-IDENTITY): the render log records the `group.id` of each `ArrangementGroupHeader` render [K10]. GH5 asserts that the ids equal `[the one muted group's id]`, and that this id is not `g1`.
-- **Evidence on the final sketch (L58):**
-  - **Mutants:** 14/14 red. The four gap mutants keep AC1/AC2 green, which proves the gap was real. The pristine runs pass before and after on all 5 test files, and the scratch status is 0 (`b-round-404/mutants/summary.txt`, runner `mutants/run.py`) [K17].
-  - `tsc`, `lint` and Biome on the 6 files: rc 0 (`b-round-404/sketch-{tsc,lint,biome}.log`).
-  - Full vitest (`b-round-404/precheck-full.log`) [K21].
-- **Review:** `tech-lead`, two passes (`b-round-404/sketch-review.md`, which opens with the dispatched sha).
-  - Pass 1 on v1: "no Medium+", 4 Lows, all folded into v2.
-  - Pass 2 on the final sha: "no Medium+ … dispatch sha c64a5589… as is".
-- **No perf row is asserted.** The only runtime-visible change is a local parameter name, so render counts cannot move. L58: `record — not run on sketch: no runtime change`. C runs no perf spec this round.
+### D-29z1407: the dispatched patch (L58: reviewed = dispatched)
+- **Patch:** `b-round-405/sketch-406.patch.txt`, sha256 `60bdf24c7a0fff14…` [K14]. It touches 3 files, and `git apply --check` is clean on HEAD [K5]. **A applies it byte-for-byte and does not edit those 3 files afterwards.**
+- **`app/contexts/ArrangementContext.tsx`:**
+  - the `ArrangementActions` Pick gains `'getLivePosition'` and `'getPlaybackClock'`, for 36 keys [K7, K7b];
+  - the actions memo gains `getLivePosition: livePosition,` and `getPlaybackClock,`;
+  - its deps gain `getPlaybackClock` and `livePosition` [K8].
+- **`app/components/arrangement/ArrangementVideoDock.tsx`:** `ArrangementVideoDock` reads `getLivePosition`, `getPlaybackClock` and `getArrangement` from `useArrangementActions()`. It keeps `arrangement`, `videoSources` and `pausePlaybackWithStatus` from `useArrangement()` [K10], so its render count does not change; d-ii changes it.
+- **`app/lib/arrangement/__tests__/actions-context.test.tsx`:** `ACTION_KEY_COUNT = 36`, and AC7's title says "all 36" [K9]. AC7's all-keys loop now also pins the two new entries `toBe` the provider value's entries.
+- **Evidence on the final sketch:**
+  - tsc and Biome: rc 0 on the 3 files (`b-round-405/sketch-logs/`).
+  - The 8 covering files pass 180/180: actions-context, floating-video, video-fades-ui, video-dock-strings-ui, render-budget, library-video-return-focus, drag-preview-render and overview-visibility-ui.
+  - Full vitest: 262 files and 3878 tests, rc 0 [K20].
+  - Mutants: 4/4 red. The pristine runs before and after give rc 0 [K16].
+  - Dev leaf probe, sketch against HEAD: **0 differences** over all 22 leaves × 13 steps × 2 viewports [K21].
+  - Real-video play sync on HEAD and on the sketch: max |drift| 0.013 s, and the video never paused [K22].
+- **Review:** `tech-lead` made one pass on the dispatched sha (`b-round-405/sketch-review.md` names the sha [K14]). Result: **no Critical, High or Medium.** The Lows TL-R406-SK-L1…L5 are ruled there (D-29z1406):
+  - L1–L3 are deferred;
+  - L4 is proven in d-ii;
+  - L5 is doc 259, below.
 
-### D-29z1399: comparators closed on mutant evidence (no production change)
-- GATE371-L2-COMPARATOR-PER-KEY and GATE375-L2-COMPARATOR-UNSTABLE-PROP are closed as covered, following `b-round-404/consult-tech-lead-stage2.md`.
-  - A type rule cannot reject `Object.is`, because it is typed `(any, any) => boolean`.
-  - GH2 and RB-LEAF3 already go red on the regressions the findings describe: `Object.is` on `activeCandidateTrackIds` or `overviewClips`, or an inline `actions={{ ... }}` at the two production call sites.
-- **They close when C's mutant row (row 5) shows the four comparator mutants red on the tree.**
-
-### D-29z1398: GATE375-L1 goes to Saba
-Deleting the test-only wrappers needs the owner's permission (CLAUDE.md). It is asked in `user-review/questions-unused-leaf-wrappers.md` [K16b] as `awaiting_user`. Nothing in this round deletes or moves a wrapper.
-
-### D-29z1400 (doc): doc 258 is the final-stage doc
-- Doc 258 l.4 becomes, byte-exact: `**სტატუსი:** Completed (C round 405 PASS)` (L28). Today it reads `In Progress (stage 1 of 2; C round 404 PASS)` [K6].
-- A adds a `### ეტაპი 2 (round 405)` sub-section inside `## ტესტირება`. The 7 TEMPLATE headings must stay in order (L26). It contains:
-  - the closed ids;
-  - the AC7, FP0 and GH5 rows, and the master-ui clear;
-  - the comparator closure, with the four mutant ids;
-  - the 14-row mutant table copied from `b-round-404/mutants/summary.txt`;
-  - the Lows that stay deferred: TL-R403-SK2-L3, TL-R403-SK-L1, GATE404-L2/L3.
-- The TODO section marks stage-2 items done and keeps the deferred ones. Doc 258's `შეცვლილი პროექტი` line also names the 6 stage-2 files.
-- No other doc changes. The other 7 `In Progress (stage` docs belong to open stages (PERF-14, PERF-DRAG-PREVIEW, PERF-12b, PERF-11c) and are not granted [K6b]. The `pending` form count stays 0 [K6b].
+### Doc 259 (new; L26, L28)
+- **Path:** `docs/implementation/2026/quarter-IV/259-perf-video-dock-actions.md`. 259 is the next free number; 258 is SYS-R385.
+- **Form:** title `PERF-11c-iii-d: video dock-ის leaf …`, in Georgian with technical terms in English. The 7 TEMPLATE headings, in order.
+- **l.4, byte-exact:** `**სტატუსი:** In Progress (stage 1 of 2; C round 406 PASS)`.
+  - This is the post-PASS value (L28). `c-round-406.json` stays the source of truth.
+  - The count of `In Progress (stage` docs goes from 7 to 8 [K6b]. The count of `C round N pending` lines stays 0.
+- **ტესტირება** contains:
+  - the AC7 count change;
+  - the 4 mutant rows, copied from `b-round-405/mutants/summary.txt`;
+  - the leaf-probe result (0 differences);
+  - the video-drift numbers from `b-round-405/video/drift-summary.txt`.
+- **TODO** lists:
+  - d-ii: the memo inner, the reader keyed on the video track and the committed video clips, the caption memo, and the stopped video-Undo re-seek row;
+  - the deferred TL-R406-SK-L1…L3.
+- No other doc changes.
 
 ### Ruling lines (L4)
-- "Apply the patch byte-for-byte" wins over any style preference of A's reviewer for those 6 files.
-- A Medium+ in the patch logic is a STOP (L11), not an edit. A doc finding is fixed in doc 258.
-- RB-LEAF1 line removal: "no assertion lost; equal or stronger replacements allowed" wins over "assertions unchanged". The removed count could never be non-zero, and the `ArrangementMasterViewInner` checks stay (pass 2).
+- "Apply the patch byte-for-byte" wins over any style preference of A's reviewer for the 3 patch files.
+- A Medium+ in the patch logic is a STOP (L11), not an edit. A doc finding is fixed in doc 259.
+- AC7 follows "no assertion lost; equal or stronger replacements allowed". Changing the count literal from 34 to 36 is the intended pin, not a weaker assertion.
 
 ### Side effects (L49)
 | Effect | Ruling |
 |---|---|
-| master-ui footer test now clears counts | Intended. It makes the positive control live (MU-405-MU-OLD-NAME red) |
-| `ACTION_KEY_COUNT = 34` pin | Intended. Adding an action key without updating AC7 fails loudly (pass 1) |
-| AC7 depends on load timing | Ruled: the mount flush uses the same two microtask turns as `mountProbe`, and the preview step uses `waitFor` |
-| A future leaf action added to `ArrangementActions` | AC7 turns red until the count and the key are updated. That is the intended pin |
+| Two more entries in the actions object | Intended. Both getters are stable `useCallback([])` [K13], so the actions object keeps one identity (AC1/AC7) |
+| The dock now calls `useArrangementActions()` | Intended. The function identities are the same, so the sync-loop effect never re-runs differently. The dock still subscribes through `useArrangement()`, so its render count is unchanged (probe: 0 differences) |
+| A future action key | AC7 turns red until `ACTION_KEY_COUNT` and the title are updated. This pin is intended |
 
 ## 2. Reference
-Not applicable. This is a test and refactor round with no visible or behavioural change, which the reference-first rule excludes. No screen-budget change. The product-designer, Ableton and YouTube steps do not apply.
+Not applicable. This is a performance and refactor round with no visible or behavioural change, which the reference-first rule excludes. There is no screen-budget change, and the product-designer, Ableton and YouTube steps do not apply.
 
 ## 3. What A changes
 1. Run the claims at the start (A1).
-2. From `store/`, run `git apply --check ../tmp/studio-real-loop/b-round-404/sketch-405.patch.txt`, then `git apply` the same file. Do not edit the 6 files after that.
-3. Edit doc 258 as D-29z1400 (doc) says.
-4. Run the §5 checks. Write `a-round-405.md` as you go: changed files, checks with rc and file paths, reviewer findings, and a For B section.
+2. From `store/`, run `git apply --check ../tmp/studio-real-loop/b-round-405/sketch-406.patch.txt`, then `git apply` the same file. Do not edit the 3 files after that.
+3. Write doc 259 as above.
+4. Run the §5 checks. Write `a-round-406.md` as you go: changed files, checks with their rc and file paths, reviewer findings, and a For B section.
 
-## 4. Grants (`b-round-404/grants-405.txt`)
+## 4. Grants (`b-round-405/grants-406.txt`)
 - **Patch only:**
-  - `app/components/arrangement/ArrangementLibrary.tsx`;
-  - `app/lib/arrangement/__tests__/{actions-context,fader-pointer-preview,master-ui,render-budget,selection-wrappers-render}.test.tsx`.
-- **Doc:** `docs/implementation/2026/quarter-IV/258-sys-arrangement-actions-context.md` (whole file; the l.4 value is fixed above).
-- **Nothing else.** No protected, auth, route, config, package, perf or other doc file. At the end, `git status --short --untracked-files=all` shows exactly 7 ` M` lines.
+  - `app/contexts/ArrangementContext.tsx`
+  - `app/components/arrangement/ArrangementVideoDock.tsx`
+  - `app/lib/arrangement/__tests__/actions-context.test.tsx`
+- **New doc:** `docs/implementation/2026/quarter-IV/259-perf-video-dock-actions.md`.
+- **Nothing else:** no protected, auth, route, config, package, perf or other doc file.
+- At the end, `git status --short --untracked-files=all` shows exactly 3 ` M` lines and 1 `??` line.
 
-## 5. A's checks (speed rules: the full suite and verify belong to the gate)
+## 5. A's checks
+Under the speed rules, the full suite and verify belong to the gate.
+
 | # | Check | Pass |
 |---|---|---|
-| A1 | `bash b-round-404/claims-405.sh` at start | equals `claims-405-planning-output.txt`; stderr empty |
-| A2 | `npm run typecheck`; `npm run lint`; `npx biome check` on the 6 patch files | rc 0 each |
-| A3 | `npx vitest run` on `app/lib/arrangement/__tests__/{actions-context,render-budget,selection-wrappers-render,library-preview,master-ui,fader-pointer-preview}.test.tsx` | all pass; report the slowest test against its timeout. L31: none above 50 %, otherwise STOP. Gate 404 slowest: render-budget 2134 ms / 15 000, selection-wrappers SS8a 1601 / 20 000, master-ui footer 1509 / 15 000, fader FP12 1387 / 20 000 |
-| A4 | Claims at end | differ from planning only on K2 (7 status lines), K5 (`applies-on-tree no`), K6 (the new l.4), K6b (`in-progress-stage-docs` 8 → 7; `pending-form 0` unchanged) and K7–K13; K7–K13 equal `claims-405-sketch-output.txt`. K3 stays 1,292 rc 0 |
-| A5 | `code-reviewer` (7 files) | no Critical/High/Medium in the patch logic; a Medium+ in the patch logic is a STOP (L11); doc findings are fixed in doc 258; a test-strength Medium is reported at the top for B, not edited |
+| A1 | `bash b-round-405/claims-406.sh` at start | Equals `claims-406-planning-output.txt`; stderr empty |
+| A2 | `npm run typecheck`; `npm run lint`; `npx biome check` on the 3 patch files | rc 0 each |
+| A3 | `npx vitest run` on the 8 files in `b-round-405/sketch-logs/covering.txt` | 180/180 pass. Report the slowest test against its declared timeout. L31: none may be above 50 %; otherwise STOP |
+| A4 | Claims at end | Differs from planning only on K2 (4 lines), K5 (`no`), K6 (`1` plus the l.4 above), K6b (8, pending 0) and K7–K11. K7–K11 equal `claims-406-sketch-output.txt`. K3 stays 1,296 with rc 0 |
+| A5 | `code-reviewer` (4 files) | No Critical, High or Medium in the patch logic. A Medium+ there is a STOP (L11). Doc findings are fixed in doc 259 |
 
-## 6. C's acceptance (`c-round-405.json` with all L57 fields, including `mutantRedOnTree`, `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed` and `affectedChecksRunOnSketch`; one result per row)
+## 6. C's acceptance
+Write `c-round-406.json` with **all L57 fields**, including `mutantRedOnTree`, `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed` and `affectedChecksRunOnSketch`, and one result per row. Run the heaviest rows first (L59): row 5, then row 4, then row 3.
+
 | # | Row | Pass |
 |---|---|---|
-| 1 | **SOURCE-SCOPE start** | claims equal the planning output except the A4 lines; status = the 7 granted paths; frozen 1,292 rc 0; protected rc 0 |
-| 2 | **PATCH-IDENTITY** | apply the patch to a `git archive HEAD` scratch and `diff` its 6 files against the working tree: 0 differences. Or: `git diff -- <the 6 files>` equals `sketch-405.patch.txt`, ignoring `index` lines |
-| 3 | **AUTH** (browser, 1440×900 and 1280×720) | the demo `/studio-lab` opens with `auth_user` null; `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token` without auth gets 401. The fake-bearer path is BLOCKED (backend unavailable in the cloud) |
-| 4 | **STUDIO-SMOKE** (browser, both viewports, working tree) | add a library sound with Enter (the lane `data-clip-count` goes +1); Play then Stop (the clock moves, then stops; a real `AudioContext` is running); Master Mute `aria-pressed` true then false; select a second library sound and start, then stop, its preview; 0 page errors; a screenshot per step. This is a smoke check of the renamed hook's consumer, the Library. Behaviour must be identical to HEAD |
-| 5 | **UNIT + MUTANT** | the A3 set passes. Mutants: copy the working tree to `/tmp/c405-scratch` (symlink `node_modules`), `git init && git add -A && git commit`, then run `S=/tmp/c405-scratch OUT=<loop>/c-round-405/mutants python3 -I b-round-404/mutants/run.py`. Never run it with the default `OUT`, which is B's evidence. Pass = 14/14 RED, the gap mutants' must-stay-green lists empty (`red []`), pristine rc 0 before and after on all 5 files, scratch status 0 lines. This row closes GATE371-L2 and GATE375-L2 (D-29z1399) |
-| 6 | **DOCS** | doc 258: l.4 byte-exact `**სტატუსი:** Completed (C round 405 PASS)`; the 7 TEMPLATE headings in order; the stage-2 mutant table equals `b-round-404/mutants/summary.txt`; AC7, FP0 and GH5 are named and each exists in its test file (L26); `grep -rn 'C round [0-9]* pending' docs/implementation` gives 0 hits; no other doc changed |
-| 7 | **SOURCE-SCOPE end + L57** | as row 1, at the end; claims at end equal claims at start; `tools/l57-check.py` OK |
-| gate | full vitest, typecheck, build, Biome, verify | not run by C (gate rows) |
+| 1 | **SOURCE-SCOPE start** | Claims equal the planning output except the A4 lines. Status = the 4 granted paths. Frozen 1,296 rc 0; protected rc 0 |
+| 2 | **PATCH-IDENTITY** | Apply the patch to a `git archive HEAD` scratch and `cmp` its 3 files against the working tree: 0 differences |
+| 3 | **VIDEO-SYNC** (browser, 1440×900 and 1280×720, working tree) | Run `node b-round-405/video/video-playsync-probe.mjs http://127.0.0.1:5173 <out>.json <viewport>` (see the notes below the table). **Assert:** every sample has `paused` false and \|drift\| ≤ 0.05 s. **Record:** the `data-video-swaps/fallbacks/hardSeeks` values on `[data-testid="arrangement-video-dock"]` after the run, and a screenshot per viewport. **Record — not run on sketch: no B stopped-seek recipe:** while stopped, seek to 2 s and read the active video's `currentTime` |
+| 4 | **LEAF-PROBE** (browser, both viewports) | Run `node b-round-405/probe/leaf-probe-406.mjs http://127.0.0.1:5173 <out>.json`. **Assert:** 0 page errors, and the per-step counts equal `b-round-405/probe/leaf-sketch-406.json` for `StudioWorkspace` and `ArrangementVideoDock`. VideoDock per step: `[0,3,1,1,1,0,1,1,1,1,1,1,2]`. `ArrangementLane` and the other leaves are recorded (see the notes) |
+| 5 | **UNIT + MUTANT** | The A3 set passes. Then run the mutants on a scratch copy of the working tree (steps in the notes). Pass = 4/4 RED, pristine before and after rc 0, and scratch status 0 lines |
+| 6 | **AUTH** (browser, both viewports) | Demo `/studio-lab` opens with `auth_user` null and no "Sign in required". `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`. `/api/studio-token` without auth gets 401. The fake-bearer path is BLOCKED (backend unavailable in the cloud) |
+| 7 | **DOCS** | Doc 259: l.4 byte-exact as above; the 7 TEMPLATE headings in order; the 4 mutant rows equal `b-round-405/mutants/summary.txt`; AC7 exists in the test file (L26). `grep -rn 'C round [0-9]* pending' docs/implementation` gives 0 hits. No other doc changed |
+| 8 | **SOURCE-SCOPE end + L57** | As row 1, at the end. Claims at end equal claims at start, and `tools/l57-check.py` is OK |
+| gate | Full vitest, typecheck, build, Biome, verify | Not run by C (gate rows). B's sketch run is in `b-round-405/precheck-full.log` |
 
-**Neighbouring behaviour that could break:** only test outcomes: every row in the 5 test files, which row 5 runs as pristine. The only source change is the Library actions hook (row 4).
+Notes on the rows:
+- **Row 3, probe:** it adds `public/videos/hero/1.mp4` and records two play windows of 3 samples each. The second window comes after a trim, a fade and a move, each followed by Ctrl+Z.
+- **Row 3, baseline:** B measured max |drift| 0.013 s on HEAD and on the sketch [K22].
+- **Row 3, retries:** a first-load timeout on a cold server is an environment problem. Retry at most twice; it is never a FAIL.
+- **Row 4, recorded leaves:** `ArrangementLibraryPreviewViewInner`'s `library-preview-stop` count has a known jitter of ±2 (round 379).
+- **Row 5, mutant steps:**
+  1. Copy the working tree to `/tmp/c406-scratch` and symlink `node_modules`.
+  2. `git init && git add -A && git commit`.
+  3. Run `S=/tmp/c406-scratch OUT=<loop>/c-round-406/mutants python3 -I b-round-405/mutants/run.py`. Never use the default `OUT`, which is B's evidence.
+  4. The runner prints `SCRATCH-STATUS N lines (sketch files expected: 3)`. The parenthetical describes B's uncommitted scratch. On C's committed scratch, 0 lines is the pass value.
 
-## 7. For C: the mutants (`b-round-404/mutants/run.py`)
-| Mutant | Site | Expected red | Must stay green |
-|---|---|---|---|
-| MU-405-SELECTED-DEP | `selectedSourceId` in the `toggleMasterMute` deps | AC7 | AC1 |
-| MU-405-SOURCESTATES-DEP | `sourceStates` in the `undo` deps | AC7 | AC1 |
-| MU-405-PREVIEW-DEP | `libraryPreviewSourceId` in the `toggleMasterMute` deps | AC7 | AC1 |
-| MU-405-SEEKTO-WRAP | `seekTo: (time) => seekTo(time)` in the actions object | AC7 | AC2 |
-| MU-405-MASTER-COMMIT-SKIP | `commitMasterGain` skips its history entry | AC7 | — |
-| MU-405-MARKERS-INPLACE | `setTrackMix` writes `markers` in place (`push()`) | AC4 | — |
-| MU-405-MARKERS-COPY | `setTrackMix` copies `markers` | AC4 | — |
-| MU-405-FP-OLD-NAME | `PARENT_NAMES` back to `'ArrangementMaster'` | FP0 | — |
-| MU-405-MU-OLD-NAME | master-ui footer positive control back to `'ArrangementMaster'` | footer test | — |
-| MU-405-GH5-RECORDER | GH5 expects `['g1']` (recorder liveness) | GH5 | — |
-| MU-405-GH2-CANDIDATES-OBJECTIS | `activeCandidateTrackIds: Object.is` | GH2 | — |
-| MU-405-GH2-OVERVIEW-OBJECTIS | `overviewClips: Object.is` | GH2 | — |
-| MU-405-RBLEAF3-INLINE-WORKSPACE | `actions={{ ...libraryActions }}` in StudioWorkspace | RB-LEAF3 | — |
-| MU-405-RBLEAF3-INLINE-LIBRARY | `actions={{ ...actions }}` in ArrangementLibrary | RB-LEAF3 | — |
+**Neighbouring behaviour that could break:**
+- The video sync loop. It reads `getArrangement()`, `getLivePosition()` and `getPlaybackClock()` on every sample, and now gets them from the actions context. Row 3 covers it.
+- Every actions consumer (K11 SWEEP: Library, LoopBrace, Master, Transport, StudioWorkspace and VideoDock), if the actions identity were to change. AC1 and AC7 cover that, and row 4 shows no extra renders.
 
-**Equivalent and recorded (not rows):** GH5's new id assertion has no source mutant that turns it red while the old `aria-pressed` and count asserts stay green. A wrong header render would also leave the clicked header's `aria-pressed` stale. MU-405-GH5-RECORDER proves the recorder is live.
+## 7. For C: the mutants (`b-round-405/mutants/run.py`)
+| Mutant | Site | Expected red |
+|---|---|---|
+| MU-406-DROP-LIVEPOS | `getLivePosition: livePosition,` removed from the actions memo | AC7 (count 35) |
+| MU-406-DROP-CLOCK | `getPlaybackClock,` removed from the actions memo | AC7 |
+| MU-406-WRAP-LIVEPOS | `getLivePosition: () => livePosition(),` | AC7 (not `toBe` the provider entry) |
+| MU-406-WRAP-CLOCK | `getPlaybackClock: () => getPlaybackClock(),` | AC7 |
+
+**Equivalent and recorded (not rows):** if the dock read its getters from `useArrangement()` instead of `useArrangementActions()`, the function identities would be the same, so no test can tell the two apart (TL-R406-SK-L4). d-ii's render-budget row is the proof that the dock depends on the actions context alone.

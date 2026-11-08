@@ -1,0 +1,61 @@
+
+ RUN  v4.0.16 /tmp/c405-scratch
+
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC1 keeps one actions object across a lane mute, a zoom step, a marker commit and an undo while the context value changes 45ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC2 hands out the provider callbacks themselves, and they keep their identity across a lane mute and a zoom step 35ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC3 reads the latest arrangement through the stable actions after a commit and after its undo 4ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC4 keeps the loop and markers frozen and identical across commits that do not touch the loop (GATE378-L2) 3ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC5 the Arrangement components and contexts use no React transition API (GATE377-L1) 5ms
+ × app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out all 34 provider callbacks (C-R404-A-AC1-COVERAGE) 14ms
+   → seekTo: expected [Function] to be [Function seekTo] // Object.is equality
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC6 throws a named error outside the provider 11ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  10:03:55
+   Duration  1.12s (transform 367ms, setup 0ms, import 510ms, tests 118ms, environment 375ms)
+
+Error: useArrangementActions must be used within an ArrangementProvider
+    at useArrangementActions (/tmp/c405-scratch/app/contexts/ArrangementContext.tsx:4970:11)
+    at OutsideProbe (/tmp/c405-scratch/app/lib/arrangement/__tests__/actions-context.test.tsx:151:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangementActions must be used within an ArrangementProvider
+    at useArrangementActions (/tmp/c405-scratch/app/contexts/ArrangementContext.tsx:4970:11)
+    at OutsideProbe (/tmp/c405-scratch/app/lib/arrangement/__tests__/actions-context.test.tsx:151:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out all 34 provider callbacks (C-R404-A-AC1-COVERAGE)
+AssertionError: seekTo: expected [Function] to be [Function seekTo] // Object.is equality
+
+- Expected
++ Received
+
+- [Function seekTo]
++ [Function anonymous]
+
+ ❯ app/lib/arrangement/__tests__/actions-context.test.tsx:369:38
+    367|     for (const [key, callback] of entries) {
+    368|       expect(typeof callback, key).toBe('function');
+    369|       expect(provided.get(key), key).toBe(callback);
+       |                                      ^
+    370|     }
+    371|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -1,0 +1,31 @@
+# performance-optimizer consult: PERF-11c-iii-d (2026-11-08, read-only real run; summary by B)
+
+- **HEAD fact used:** `b-round-405/probe/leaf-head-406.json`. ArrangementVideoDock renders 1 per workspace commit and 1 each on play and stop. The counts are identical at both viewports.
+- **Confirmed:**
+  - The per-frame sync effect never re-runs on commits. Its deps (l.769) are three stable callbacks (Context l.1100, 1113, 2320), and it reads `getArrangement()` per sample (l.527).
+  - `useVideoLanePreviewReader` has `arrangement` in its deps (l.234) but uses it only for `videoTrackId` (l.212). So `videoLane` gets a new identity every commit, which re-runs the stopped-sync effect (l.816) and re-subscribes the caption and fade (l.248, l.322).
+  - `videoSources` is `useState` (Context l.832), stable across audio commits.
+  - Nothing in tests or perf reads `data-video-*`.
+- **Recommended:** option (a).
+  - A shell keeps `<section ref={rootRef}>` with the caption and `{overview}`.
+  - A memo `ArrangementVideoDockViewInner` returns the placeholder plus the video box as a Fragment, with `rootRef` as a prop.
+  - The caption is memoised.
+  - The reader is keyed on `videoTrackId` plus the committed video-lane clips.
+  - Reject (b): it would move `pxPerSecond`, `committedProjectEnd` and the loop into stores for the overview.
+- **Correctness trap (inference):** the same one tech-lead named. A stopped Undo, Redo, split or delete of a video clip re-seeks today only through the re-render. Mutant M4 (commit signal dropped) must turn a new video-Undo re-seek test red.
+- **Play/stop:** keep 1 render each, because the effect switches on `isPlaying`. Getting to 0 needs `useArrangementIsPlayingReader` and is out of scope.
+- **Rows for d-ii:**
+  - render-budget: inner = 0 on zoom, audio mute, audio undo/redo, audio add and preview start/stop; inner = 1 on a video-clip Undo.
+  - Add `ArrangementVideoDockViewInner` to `VIDEO_DOCK_COMPONENTS` (drag-preview-render l.2054) and to the probe's leaves.
+  - Perf: `interact.zoom.1.components-per-key` is record only until measured on the sketch.
+- **Mutants:**
+  - M1 memo removed;
+  - M2 `arrangement` passed as a prop;
+  - M3 reader still keyed on `arrangement`;
+  - M4 commit signal dropped (only the video-Undo re-seek test red).
+- **Dissent on d-i:** it prefers passing the getters as separate props over widening `ArrangementActions`. B's ruling is D-29z1405.
+- **Risks:**
+  - Counters stay on the section through `rootRef`.
+  - `stoppedKeyRef` dedupes stopped seeks, which is safe only with the M4 guard.
+  - The float state moves unchanged.
+  - `panel-radius-ui` counts 2 `rounded-panel` in the file; do not add any.

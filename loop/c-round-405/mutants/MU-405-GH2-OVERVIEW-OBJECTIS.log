@@ -1,0 +1,59 @@
+
+ RUN  v4.0.16 /tmp/c405-scratch
+
+ ✓ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-8b selection wrappers render only on their own inputs (SS8, C-R323-02) > SS8a a folded group header does not re-render on a workspace commit that changes none of its props 735ms
+ ✓ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-8b selection wrappers render only on their own inputs (SS8, C-R323-02) > SS8b selecting every clip re-renders the folded group header and marks each overview block selected 507ms
+ ✓ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361) > GH1 a status write renders neither the folded group wrapper nor the header leaf 397ms
+ × app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361) > GH2 an arrangement edit outside the folded group renders neither the wrapper nor the header leaf 384ms
+   → expected 1 to be +0 // Object.is equality
+ ✓ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361) > GH3 a nudge of a member clip re-renders the header and moves its overview block 390ms
+ ✓ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361) > GH4 soloing a member lane updates the folded group Solo state, and clearing it returns to off 396ms
+ × app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361) > GH5 muting a second group renders that group header only, never the folded first group 409ms
+   → expected 2 to be 1 // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+   Start at  10:04:16
+   Duration  4.96s (transform 868ms, setup 0ms, import 1.25s, tests 3.22s, environment 374ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361) > GH2 an arrangement edit outside the folded group renders neither the wrapper nor the header leaf
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx:420:85
+    418|       expect(live(api).undoLabel).not.toBe(undoBefore);
+    419|       expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreater…
+    420|       expect(renderLog.counts.get('ArrangementGroupHeaderWithSelection…
+       |                                                                                     ^
+    421|       expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe…
+    422|       expect(overviewBlocks(view).map((block) => block.dataset.overvie…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx > PERF-11c-i the group header leaf reads no workspace context (GATE361-S1, SIG-R361) > GH5 muting a second group renders that group header only, never the folded first group
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx:487:67
+    485|       expect(mutes[0].getAttribute('aria-pressed')).toBe('true');
+    486|       expect(mutes[1].getAttribute('aria-pressed')).toBe('false');
+    487|       expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe…
+       |                                                                   ^
+    488|       const muted = (live(api).arrangement.groups ?? []).filter((group…
+    489|       expect(muted).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

@@ -1,0 +1,94 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R405-GH5-NOT-G1-VACUOUS",
+   "severity": "low",
+   "origin": "A reviewer (A-R405-REVIEW-GH5-G1-VACUOUS), in the B-dispatched patch; confirmed by C",
+   "type": "test-strength, not a behaviour bug",
+   "steps": [
+    "sed -n 490p app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx -> expect(muted[0].id).not.toBe('g1')",
+    "groups.ts:336 groupId defaults to crypto.randomUUID(), so an id can never equal 'g1'"
+   ],
+   "expected": "GH5 distinguishes the muted second group from the folded first group by id",
+   "actual": "the not.toBe('g1') line can never fail; the groupHeaderIds toEqual [muted[0].id] assertion is live (MU-405-GH5-RECORDER red) but does not by itself prove the muted group is Group 2 (A and reviewer rated Medium; C rates Low: dispatched byte-for-byte, no behaviour impact, 14/14 mutants red)",
+   "evidence": "c-round-405.md section 5; fix for a later bounded task: assert muted[0].name === 'Group 2' or compare to the folded group's id"
+  }
+ ],
+ "passed": [
+  "row1-SOURCE-SCOPE-start",
+  "row2-PATCH-IDENTITY",
+  "row3-AUTH",
+  "row4-STUDIO-SMOKE",
+  "row5-UNIT+MUTANT",
+  "row6-DOCS",
+  "row7-SOURCE-SCOPE-end+L57"
+ ],
+ "blocked": [
+  "fake-bearer /api/studio-token returns 500 (backend unavailable in cloud), not 401/403; only the no-auth 401 and 'no token issued' are claimed"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T10:01:41.1689875Z",
+  "round": 405,
+  "attempt": 1,
+  "store": 200
+ },
+ "failed": [],
+ "manifestPaths": [
+  "b-round-404/r405-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt",
+  "b-round-404/sketch-405.patch.txt",
+  "b-round-404/mutants/summary.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "origin": {
+  "C-R405-GH5-NOT-G1-VACUOUS": "A reviewer, dispatched test"
+ },
+ "assertsSpecified": "AC7 (new), AC4 (markers frozen), FP0, GH5 group ids, master-ui footer clear; 6-file A3 set 85/85 pass; no perf assert (no runtime change)",
+ "mutantsRecorded": "b-round-404/mutants/summary.txt (14 mutants)",
+ "mutantRedOnSketch": "14/14 red per B's summary",
+ "mutantRedOnTree": "C re-ran on scratch copy of the working tree /tmp/c405-scratch: 14/14 RED, gap mutants' must-stay-green lists empty, pristine before/after rc 0 on all 5 files, scratch status 0; c-round-405/mutants/summary.txt identical to B's. Closes GATE371-L2 and GATE375-L2 per D-29z1399 (four comparator mutants GH2 x2, RB-LEAF3 x2 red)",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-404/precheck-full.log",
+  "b-round-404/sketch-tsc.log",
+  "b-round-404/sketch-lint.log",
+  "b-round-404/sketch-biome.log"
+ ],
+ "chainHeadGateRunGreen": "gate 404 published dd52107",
+ "affectedChecksNamed": [
+  "PATCH-IDENTITY (row 2)",
+  "STUDIO-SMOKE (row 4)",
+  "UNIT+MUTANT (row 5)"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-404/mutants/summary.txt"
+ ],
+ "l57NullReason": null,
+ "stopSignal": null,
+ "abletonConformance": "not applicable: test-only plus one parameter rename; reference-first excludes such rounds",
+ "notes": [
+  "Row 1: claims differ from planning only on K2,K5,K6,K6b,K7-K13; K7-K13 equal claims-405-sketch-output.txt; 7 status lines = 7 grants; frozen 1292 rc 0; protected rc 0.",
+  "Row 2: patch applied to git-archive HEAD scratch; 6 files byte-identical (cmp) to working tree; sha256 c64a5589ed319464.",
+  "Row 3 both viewports: demo /studio-lab auth_user null, workspace + demo badge, no Sign in required; /studio/middle-east 'Sign in required', 0 audio[src], no workspace; /api/studio-token no-auth 401. First auth run timed out on cold dev-server route (environment), passed after warm.",
+  "Row 4: leaf.cjs 32 steps x 2 viewports: add via Enter/Add button +1 clip, play clock moved with AudioContext running, stop, Master Mute true->false, library preview start/stop (previewing marker 1->0, source starts 2 stops 2), 0 page errors; 0 differences vs round-404 working-tree run.",
+  "Row 6: l.4 byte-exact; 7 headings in order; summary block verbatim; AC7/FP0/GH5 exist; 0 'C round N pending'; only doc 258 changed."
+ ]
+}
