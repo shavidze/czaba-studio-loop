@@ -1,0 +1,19 @@
+phase1 (B planning 398->399), 2026-11-07
+- [x] tasks/round-398.md archived (copy); pre-edit copies b-round-398/*-before-399.*
+- [x] advisor (orientation)
+- [x] sketch in /tmp/b399-scratch: ArrangementLane window filter + gesture pin (capture) + lane-move pin; VZ1-VZ7 new test; WG2-WG5 pinOutsideClips (0 lines removed)
+- [x] mutants 7/7 red (b-round-398/mutants/summary.txt); full suite v1 260 files, only WG2-WG5 red (precheck-full-v1-raw.log)
+- [x] scale spec on sketch: run1 (old build self-check collision), run2 asserts green; browser mutants no-filter red, shifted-window gap red
+- [x] frame probe both vps: 0 gap frames, select-all windowed, held pin 1
+- [ ] other perf specs on sketch (running: perf-sketch-others.txt)
+- [ ] full suite v2 on final sketch; sketch patch + sha; tech-lead review; claims; task; backlog; feature-status; b-next
+- [x] tech-lead sketch review: no Crit/High; Medium blur-unpin (touch/pen), Medium interactions spec counts DOM; Lows (unmount cleanup, gap-check assumes Ctrl+D build, scroll comps ceiling)
+- [x] other perf specs on sketch: stem-cache 0, studio-lab 0, resources 1 (duplicate step waits 2 mounted), interactions 1 (30-clip build aborts)
+- PIVOT (advisor 2): split 14b -> 14b-i harness readiness (round 399, perf/** + docs only) -> RETRO 400 -> 14b-ii virtualization (lane sketch kept)
+- [ ] HEAD interactions baseline running (perf-head-interactions.rc) — NO vitest/tsc/perf until done
+- [ ] split patches: sketch-399-harness.patch.txt (scale spec, budgets all record) + sketch-14bii-lane.patch.txt
+- [ ] HEAD scale run with harness patch; rewrite claims-399.sh; task; backlog; feature-status; b-next
+- [x] current-task.md (round 399 PERF-14b-i) written; claims planning + on-sketch outputs
+- [x] backlog v366 (update-backlog.py/.done), feature-status updated
+- [x] b-round-398.md, b-next.json
+- [x] advisor-3 fixes: R-b identity, 20 superseded docs K27, K11 wording, A5 problems, K28; interactions run2 0 differing; tech-lead delta review no new Medium+; claims regenerated (planning + on-sketch)

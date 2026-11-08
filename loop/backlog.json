@@ -1,9 +1,9 @@
 {
-  "version": 365,
-  "updated": "2026-11-07 B round 397 -> 398 planning",
+  "version": 366,
+  "updated": "2026-11-08 B round 398 -> 399 planning",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 398: PERF-14a: lane data-clip-count model signal + 200-clip scale perf harness (perf/studio-lab-scale.perf.spec.ts + perf/budgets.scale.json, record rows: DOM at default and min zoom, clips in DOM and in window, zoom keydown p95/max 1x and 6x, components per zoom key) + doc 254 (current-task.md)",
+  "current_task": "Round 399: PERF-14b-i: perf harnesses count clips from the model (data-clip-count) and reach targets that may be unmounted; interactions + resources migrated by Rule R (R-a..R-d), scale harness patch (M2 lane-area in-window, visible-gap self-check, build self-check), perf/lib/page.ts add-only helpers; every deterministic row equal at HEAD; specs complete on the virtualization sketch; docs 254 (stage 1 of 4) + 255 (current-task.md)",
   "advisor_used_by_B": "round 396 -> 397 planning: advisor available and consulted at orientation and at close; performance-optimizer and tech-lead consulted; tech-lead reviewed the frozen sketch",
   "baseline": {
     "tsc_errors": 0,
@@ -11965,9 +11965,19 @@
       "task": "current-task.md",
       "decision": "D-29z1359..D-29z1361",
       "type": "PERF-14a: 200-clip scale perf harness (record rows) + doc 254",
-      "status": "dispatched",
+      "status": "done",
       "note": "baseline c93d926 clean; grants b-round-397/grants-398.txt (5: ArrangementLane.tsx + 4 new); frozen b-round-397/r398-frozen-sha256.txt (1288); sketch b-round-397/sketch-398.patch.txt sha bd8fe321; claims b-round-397/claims-398.sh",
-      "added": "2026-11-07 B round 397 -> 398 planning"
+      "added": "2026-11-07 B round 397 -> 398 planning",
+      "result": "C PASS (c-round-398.json browserVerified/realVerified true, 0 bugs, L57 OK b-round-398/l57-check-c398.txt); gate 398 published c3ee1d6 on both remotes (D-29z1362)"
+    },
+    {
+      "round": 399,
+      "task": "current-task.md",
+      "decision": "D-29z1362..D-29z1366",
+      "type": "PERF-14b-i: harness readiness for clip virtualization (perf/** + docs only, no app change)",
+      "status": "dispatched",
+      "note": "baseline c3ee1d6 clean; grants b-round-398/grants-399.txt (8 tracked + doc 255 new); frozen b-round-398/r399-frozen-sha256.txt (1285); harness patch b-round-398/sketch-399-harness.patch.txt sha 204e282a; lane sketch (14b-ii) b-round-398/sketch-14bii-lane.patch.txt sha 3d1fc4d8; claims b-round-398/claims-399.sh",
+      "added": "2026-11-08 B round 398 -> 399 planning"
     }
   ],
   "post_current_stage_queue": [
@@ -15224,7 +15234,7 @@
         {
           "id": "PERF-14",
           "what": "see perf-plan.md task outline",
-          "status": "in_progress (D-29z1360): split 14a (round 398: lane data-clip-count model signal + 200-clip scale harness + doc 254; scale rows all record) / 14b (clip virtualization; owner of the 51-file DOM-locator sweep b-round-397/sweep-clip-dom-locators.txt) / 14c (power-of-two peak pyramid in the peaks worker + canvas tiles; fix home of the round-315 peaks Lows). Premise at HEAD c93d926 (b-round-397/probe/head-200-*.json): 200 clips -> page 4294/4277 elements, clip subtrees 3400 (17 each), 1 clip in the window at default zoom, 16-19 at min zoom; zoom keydown max 48/40 ms 1x, 272/280 ms 6x | not_started; gains the power-of-two peak pyramid from PERF-5 (D-29z834, oss-adoption.md: computed in the peaks worker; first consumer = canvas tiles) | not_started | fix home for the round-315 peaks Lows (D-29z854): C-R315-T1/T2, A-R315-REVIEW-L1..L4, GATE315-S2, GATE315-S8",
+          "status": "in_progress (D-29z1364): 4 stages 14a done (round 398) / 14b-i harness readiness (round 399) / 14b-ii virtualization (after RETRO 400) / 14c peak pyramid + canvas tiles. in_progress (D-29z1360): split 14a (round 398: lane data-clip-count model signal + 200-clip scale harness + doc 254; scale rows all record) / 14b (clip virtualization; owner of the 51-file DOM-locator sweep b-round-397/sweep-clip-dom-locators.txt) / 14c (power-of-two peak pyramid in the peaks worker + canvas tiles; fix home of the round-315 peaks Lows). Premise at HEAD c93d926 (b-round-397/probe/head-200-*.json): 200 clips -> page 4294/4277 elements, clip subtrees 3400 (17 each), 1 clip in the window at default zoom, 16-19 at min zoom; zoom keydown max 48/40 ms 1x, 272/280 ms 6x | not_started; gains the power-of-two peak pyramid from PERF-5 (D-29z834, oss-adoption.md: computed in the peaks worker; first consumer = canvas tiles) | not_started | fix home for the round-315 peaks Lows (D-29z854): C-R315-T1/T2, A-R315-REVIEW-L1..L4, GATE315-S2, GATE315-S8",
           "scope_addition_d29z215": "zoom with 30 clips grows with clip count: 240 comps/key (interact.zoom.30.components-per-key), key window 98-113 ms 1x",
           "baseline_source_d29z217": "round 216 PERF-1b-ii res.* rows (doc 169); probe b-round-215/consult-perf/",
           "probe_note_d29z217": "probe: ~220 page elements per added 101 s clip = 17 clip subtree + ~202 ruler + 1 overview; ruler is not virtualized and grows with project length, so the 200-clip <= 2000-element target needs ruler work too",
@@ -15233,12 +15243,25 @@
             {
               "id": "PERF-14a",
               "what": "lane data-clip-count (model count, ArrangementLane.tsx; LC1-LC5, 5 mutants red, sketch b-round-397/sketch-398.patch.txt) + 200-clip scale harness perf/studio-lab-scale.perf.spec.ts + perf/budgets.scale.json (record rows) + doc 254",
-              "status": "dispatched round 398 (D-29z1360)"
+              "status": "done (D-29z1362): C round 398 PASS, gate 398 published c3ee1d6"
             },
             {
               "id": "PERF-14b",
               "what": "clip virtualization (render clips intersecting the scroll window + overscan; gesture clip and lane-move sources stay mounted; Q-14B-PIN-SELECTED: pin selected clips (tech-lead) vs not (performance-optimizer: select-all would remount 200), rule with a select-all measurement; jsdom with no layout already renders all, lock with one row; first collision block = b-round-397/sweep-clip-dom-locators.txt (51 files); scale rows res -> assert (page <= 2000 at default and min zoom) from B sketch run",
-              "status": "not_started"
+              "status": "split (D-29z1364): 14b-i harness readiness (round 399) -> RETRO 400 -> 14b-ii virtualization",
+              "stages_d29z1364": [
+                {
+                  "id": "PERF-14b-i",
+                  "what": "perf harnesses count clips from the model and reach possibly-unmounted targets (Rule R: R-a model fact, R-b bring target into lane area outside measured windows, R-c distinct starts per mounted clip, R-d unchanged); scale harness patch (M2 lane-area in-window, visible-gap self-check, build self-check; all rows record); perf/lib/page.ts add-only modelClipCount/expectModelClipCount; deterministic rows equal at HEAD; interactions/resources/scale complete on the lane sketch (rc may be 1, failing asserts listed); docs 254 l.4 stage 1 of 4 + 255 stage 2 of 4",
+                  "status": "dispatched round 399 (D-29z1365)"
+                },
+                {
+                  "id": "PERF-14b-ii",
+                  "what": "clip virtualization in ArrangementLane from b-round-398/sketch-14bii-lane.patch.txt (lane useSyncExternalStore page window [page-1,page+2]; pins: clips under an active pointer press (capture handler + window pointerup/pointercancel) and lane-move sources; selected NOT pinned; VZ1-VZ7; WG2-WG5 pinOutsideClips, 0 assertions removed) + scale assert flips (b-round-398/sketch-14bii-budget-flips.patch.txt: page <=2000 x3, model ==200, zoom components-per-key <=60 1x/6x) + scroll components ceiling row (TL-R398-SK-L3) + re-rule of round-399 A5 failing-assert list. Before dispatch: fix TL-R398-SK-M1 (window blur unpin) and TL-R398-SK-L1 (unmount cleanup), re-run VZ + 7 mutants + full suite + delta review + perf on sketch",
+                  "status": "not_started (after RETRO 400)",
+                  "sketch_evidence": "b-round-398/perf-sketch-scale-run2.log (950/1532/1868, comps/key 42.4, scroll comps/step 116.5), perf-sketch-scale-mutant-no-filter.log, perf-sketch-scale-mutant-shifted-window.log, probe/sketch-frames-*.json (0 gap frames of ~455, select-all mounted 55/46, held pin 1), mutants/summary.txt 7/7 red, precheck-full-v1.log (only WG2-WG5 before the pin step), sketch-review.md"
+                }
+              ]
             },
             {
               "id": "PERF-14c",
@@ -24513,15 +24536,6 @@
       "added": "2026-10-31 B round 281 -> 282 planning"
     },
     {
-      "id": "PERF2-STEREO-COPY",
-      "severity": "low",
-      "origin": "tech-lead + performance-optimizer (round 282 consults)",
-      "title": "loadDemoSource copies each mono synth array into a second channel (generateDemoStereoChannels) before copyToChannel; calling copyToChannel twice with the same array saves one 768k-float copy per source",
-      "status": "closed (D-29z1359): fixed round 397, C PASS BUF-TASKS/BUF-SAME-ARRAY (c-round-397.json), gate 397 published c93d926 | scheduled round 397 (D-29z1356): copyToChannel(samples, 0) and (samples, 1); generateDemoStereoChannels deleted; rows SB1/SB2 identity + BUF-SAME-ARRAY (HEAD 0/5, sketch 5/5) | moved to PERF-13 (D-29z846) | signal (D-29z661): not in round 282 (code = measured sketch); fold into PERF-5 (peaks in a worker) planning",
-      "evidence": "current-task.md round 282 §2.3; claims K19",
-      "added": "2026-10-31 B round 281 -> 282 planning"
-    },
-    {
       "id": "INFO-B282-CONSULT-FALSE-CLAIMS",
       "severity": "info",
       "origin": "B",
@@ -25521,14 +25535,6 @@
       "status": "signal (D-29z846): PERF-10",
       "title": "each peaks delivery commits the whole provider subtree: 9 x 94 components per /studio-lab load",
       "evidence": "b-round-314/probe/summary.txt"
-    },
-    {
-      "id": "R314-DEMO-BUFFER-LONGTASK-6X",
-      "severity": "info",
-      "origin": "B probe round 314->315",
-      "status": "closed (D-29z1359): fixed round 397, C PASS BUF-TASKS/BUF-SAME-ARRAY (c-round-397.json), gate 397 published c93d926 | scheduled round 397 (D-29z1356): premise confirmed at HEAD (hypothesis -> confirmed cause: the 5 synth loads resume from one awaited worker promise, so all builds run in one task; b-round-396/probe/rows-summary.txt); fix = one timer task per build; browser row BUF-TASKS asserts <=1 build per longtask (HEAD 5) | signal (D-29z846): PERF-13 (with PERF2-STEREO-COPY)",
-      "title": "a 142-168 ms long task at 6x just before the demo stems' buffers appear; hypothesis (unconfirmed): AudioBuffer creation + channel copies in loadDemoSource",
-      "evidence": "b-round-314/probe/timeline-6x.txt"
     },
     {
       "id": "B-R314-EXPORT-LOADING-GATE",
@@ -27234,6 +27240,41 @@
         "GATE395-ARCH-STREAM-FACTORY: gate-395 reviewer: keep now; after 13c-ii-b consider extracting createStreamPreview(element, hooks) as a pure factory inside preview.client.ts (PS1-PS26 unchanged) (D-29z1353)",
         "GATE396-ARCH-STREAM-FACTORY: gate-396 reviewer: keep playLibraryPreviewStream as one closure (one lifecycle, PS1-PS29); extract a pure createStreamPreview(element, hooks) inside preview.client.ts only if a fourth round touches the region (D-29z1357)"
       ]
+    },
+    {
+      "id": "Q-14B-PIN-SELECTED",
+      "severity": "info",
+      "origin": "B round 397 consults",
+      "title": "PERF-14b pin set: selected clips or not",
+      "status": "ruled (D-29z1364): do NOT pin selected clips; pin = clips under an active pointer press + lane-move sources. Evidence on B's sketch: clips have no focusable element (claims K10 = 0), app reaches clip DOM only via the pressed clip's envelope (K11), select-all keeps 55/46 mounted (probe/sketch-frames-*.json), a held group move of 200 selected clips applied through unmounted clips (same probe, status 'Move (200)')",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "TL-R398-SK-M1",
+      "severity": "medium",
+      "origin": "B sketch (tech-lead review)",
+      "evidence": "b-round-398/sketch-review.md",
+      "title": "PERF-14b-ii lane sketch: gesture pin cleared only on pointerup/pointercancel; touch/pen pointerId churn + window blur leaves a permanent pin and 2 listeners",
+      "status": "sketch_input (D-29z1364): not in app code; fix in sketch-14bii-lane before 14b-ii dispatch (add window blur unpin, remove all 3 listeners) with a row + mutant",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "TL-R398-SK-M2",
+      "severity": "medium",
+      "origin": "B sketch (tech-lead review)",
+      "evidence": "b-round-398/sketch-review.md; b-round-398/perf-sketch-studio-lab-interactions.log; perf-sketch-studio-lab-resources.log",
+      "title": "interactions and resources perf specs count mounted clips; abort under virtualization",
+      "status": "dispatched as round 399 PERF-14b-i (D-29z1365)",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "C-R398-SIGNAL-M2-M3",
+      "severity": "low",
+      "origin": "B spec",
+      "evidence": "c-round-398.json lows; a-round-398.md M2/M3",
+      "title": "scale in-window counted clips under the sticky header; zoom p95 == max with 10 keys",
+      "status": "ruled (D-29z1363): M2 lane area = scroller box minus measured track-header width (harness patch, round 399); M3 keep 10 keys, p95 rows stay record, PERF-14 target read on keydown-max-ms",
+      "added": "2026-11-08 B round 398 -> 399 planning"
     }
   ],
   "tech_lead_notes": [
@@ -30174,6 +30215,22 @@
       "signal": "keep yieldToNextTask local in studio-lab-demo.ts; extract a small lib/arrangement helper with its own test only if a second collection needs one-build-per-task",
       "status": "signal (D-29z1361), not scheduled",
       "added": "2026-11-07 B round 397 -> 398 planning"
+    },
+    {
+      "id": "A-R398-ARCH-FIND-TIMELINE-SCROLLER",
+      "origin": "A round 398 code-reviewer + gate 398 reviewer",
+      "evidence": "a-round-398.md Architecture note; gates/round-398/review.md Architecture note",
+      "signal": "timeline-scroller walk duplicated in studio-lab-scale.perf.spec.ts (readScaleDom, setTimelineScroll); candidate perf/lib helper findTimelineScroller once a third caller appears (PERF-14b-i may add one: R-b scrolls)",
+      "status": "signal (D-29z1363), not scheduled",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "PERF-CAND-14-SCROLL-HYSTERESIS",
+      "origin": "B sketch (tech-lead review)",
+      "evidence": "b-round-398/sketch-review.md L3",
+      "signal": "lane page window re-renders on every page crossing; hysteresis (re-check only when the view leaves the inner page band) is a later candidate if scroll cost matters",
+      "status": "candidate (D-29z1364), not scheduled",
+      "added": "2026-11-08 B round 398 -> 399 planning"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -37806,6 +37863,33 @@
       "title": "studio-lab-demo.ts setTimeout(0) yield is throttled in a hidden tab (about 1 s later ready); the yield timer is not cancelled on abort; the abort check runs after the worker await. Reviewer: keep, no fix; doc 253 records the hidden-tab trade-off",
       "status": "deferred_low_polish (D-29z1361): reviewer ruled keep; re-check only if a hidden-tab load row is ever added",
       "added": "2026-11-07 B round 397 -> 398 planning"
+    },
+    {
+      "id": "TL-R398-SK-L1-L3",
+      "severity": "low",
+      "origin": "B sketch (tech-lead review)",
+      "evidence": "b-round-398/sketch-review.md",
+      "title": "L1 lane unmount mid-press keeps unpin listeners; L2 gap self-check assumes the Ctrl+D build; L3 scroll components per page step 57.75 -> 116.5",
+      "status": "scheduled inside PERF-14b-i (L2 sequence text) and PERF-14b-ii (L1 cleanup, L3 ceiling row) (D-29z1364)",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "C-R398-NOTE-FIRST-RUN-1440",
+      "severity": "low",
+      "origin": "environment",
+      "evidence": "c-round-398.json lows",
+      "title": "first count-browser.cjs run at 1440x900 exited with a Node error; reruns passed; dev-server cold start suspected",
+      "status": "deferred_low_polish (D-29z1363): environment, watch only",
+      "added": "2026-11-08 B round 398 -> 399 planning"
+    },
+    {
+      "id": "GATE398-L1-L5",
+      "severity": "low",
+      "origin": "gate 398 reviewer",
+      "evidence": "gates/round-398/review.md Suggestions 1-5",
+      "title": "scale spec: 30 s per-press timeout on a silent Ctrl+D; zoom symmetry self-check assumes no clamp; expect.poll as control flow; duplicated scroller walk; doc 254 cites tmp/ paths",
+      "status": "deferred_low_polish (D-29z1363): optional per reviewer; item 4 = architecture signal A-R398-ARCH-FIND-TIMELINE-SCROLLER",
+      "added": "2026-11-08 B round 398 -> 399 planning"
     }
   ],
   "regression_rounds": [
@@ -39722,24 +39806,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1309",
-      "date": "2026-11-07",
-      "by": "2026-11-07 B round 387 -> 388 planning",
-      "decision": "Round-387 code-reviewer Lows: L-a (AR6 createGain/connect throw), L-b (unguarded releaseNodes in rollback), L-d (SF7 locator assert), L-e (SF2 hardcoded Playing from text), L-f (SF3 undo availability) -> deferred_low_polish; not fixed in round 388 because the sketch is re-dispatched byte-identical (L58) and SF1-SF10 must stay identical. L-c (resyncAfterDecode catch unreachable) closed accepted (round 387 task §5). Round-387 Architecture note (signal 3, scheduling region) -> SIG-R387-SCHEDULING-REGION, attached to ARCH-CHECKPOINT-DECODE-REGION. REGRESSION-2026-11-08 opens unconditionally at the next planning unless a new Critical/High appears."
-    },
-    {
-      "id": "D-29z1310",
-      "date": "2026-11-07",
-      "by": "2026-11-07 B round 388 -> 389 planning",
-      "decision": "Round 388 accepted on C evidence (c-round-388.json PASS, 14 rows, browserVerified/realVerified true, 0 bugs; meter-1440/1280.json all -inf after the failure; unit 66/1026; mutants 16/16); gate 388 published 11ca746. Closed: C-R387-01, GATE-B385-M2, A-R386-REVIEW-M1, B-R386-UNGUARDED-GRAPH-CALLERS, TL-R387-M1, A-R386-REVIEW-L1. Baseline for round 389 = 11ca746 (gate commit, not head 5312260)."
-    },
-    {
-      "id": "D-29z1311",
-      "date": "2026-11-07",
-      "by": "2026-11-07 B round 388 -> 389 planning",
-      "decision": "Round 389 = REGRESSION-2026-11-08 part 1, opened one day before the 3-day trigger (regression-last 2026-11-05; due 2026-11-08): per D-29z1309, and independently because rounds 385-388 changed shared playback infrastructure (graph build/rollback, pump, tick, stop), a named trigger for re-checking unchanged features. regression-last.json is updated only when part 2 closes."
-    },
-    {
       "id": "D-29z1312",
       "date": "2026-11-07",
       "by": "2026-11-07 B round 388 -> 389 planning",
@@ -40038,6 +40104,36 @@
       "date": "2026-11-07",
       "by": "2026-11-07 B round 397 -> 398 planning",
       "decision": "C-R397-NOTE-LONGTASK-1280 (Low, harness) and GATE397-L1-HIDDEN-TAB-YIELD (gate 397 reviewer Lows 1-3, ruled keep) to deferred_low_polish; GATE397-ARCH-YIELD-HELPER recorded as an architecture signal, not scheduled. Q-14B-PIN-SELECTED recorded on PERF-14b."
+    },
+    {
+      "id": "D-29z1362",
+      "date": "2026-11-08",
+      "by": "2026-11-08 B round 398 -> 399 planning",
+      "decision": "PERF-14a done: C round 398 PASS (browserVerified/realVerified true, 0 bugs, L57 OK b-round-398/l57-check-c398.txt); gate 398 published c3ee1d6 on both remotes; baseline for round 399 = c3ee1d6 (context/head-sha.txt c93d926 is pre-commit)."
+    },
+    {
+      "id": "D-29z1363",
+      "date": "2026-11-08",
+      "by": "2026-11-08 B round 398 -> 399 planning",
+      "decision": "C round 398 signals ruled: M2 in-window = lane area (scroller box minus measured track-header width); M3 keep 10 keys, wallclock zoom rows stay record, PERF-14 'zoom p95 < 50 ms' read on keydown-max-ms. C-R398-NOTE-FIRST-RUN-1440 and gate 398 Lows 1-5 to deferred_low_polish; scroller-walk duplication = architecture signal A-R398-ARCH-FIND-TIMELINE-SCROLLER."
+    },
+    {
+      "id": "D-29z1364",
+      "date": "2026-11-08",
+      "by": "2026-11-08 B round 398 -> 399 planning",
+      "decision": "PERF-14b sketched and measured in full (b-round-398: lane window filter + press/lane-move pins; prod build 200 clips page 950/1532/1868 vs HEAD 4333/4303/4333; zoom comps/key 42.4 vs 638; 0 gap frames; 7/7 jsdom mutants red; tech-lead review no Crit/High). Under it the interactions and resources perf specs abort (count mounted clips), so 14b is split without dropping scope: 14b-i harness readiness (round 399) -> RETRO 400 -> 14b-ii virtualization. Q-14B-PIN-SELECTED ruled: selected clips not pinned; pins = active press + lane-move sources. PERF-14 now 4 stages."
+    },
+    {
+      "id": "D-29z1365",
+      "date": "2026-11-08",
+      "by": "2026-11-08 B round 398 -> 399 planning",
+      "decision": "Round 399 = PERF-14b-i: Rule R (R-a model fact via lane data-clip-count, R-b bring a positional target into the lane area outside measured windows, R-c distinct starts per mounted clip, R-d unchanged) over the 66-hit perf grep; perf/lib/page.ts add-only helpers; scale harness patch; budgets notes only; every deterministic row equal to HEAD baselines (interactions 189 b-round-398/perf-head-interactions.json, resources 46 c-round-398, scale 17 b-round-398/perf-head-harness-scale.json); specs complete on the lane sketch (rc may be 1, failing asserts listed as 14b-ii input)."
+    },
+    {
+      "id": "D-29z1366",
+      "date": "2026-11-08",
+      "by": "2026-11-08 B round 398 -> 399 planning",
+      "decision": "PERF-14 docs: doc 254 l.4 -> 'In Progress (stage 1 of 4; C round 398 PASS)'; new doc 255 'In Progress (stage 2 of 4; C round 399 PASS)' holds the migrated harness contract; earlier harness docs 231/232/233/234/240/247/248/252 are not edited (historical; doc 255 names them superseded for clip waits only)."
     }
   ],
   "retro_candidates": [

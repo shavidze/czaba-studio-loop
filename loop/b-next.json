@@ -1,8 +1,9 @@
 {
  "decision": "CONTINUE",
- "reason": "Round 397 PERF-13d: C PASS (c-round-397.json browserVerified/realVerified true, 0 bugs; L57 OK) and gate 397 published c93d926; PERF-13 done (D-29z1359). No open C bug; the remaining Critical/High/Medium findings are manual-only, awaiting_user or open_root. Many scoped items remain (PERF-14a-c, PERF-15, STEM-LANES, SYS-1..3, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase-2 entries, deferred Lows; purchased preview browser row open on SRW-21), so COMPLETE is not possible; nothing external blocks the next stage. Architecture checkpoint ARCH-CHECKPOINT-PREVIEW-AFTER-13C still due for root (non-blocking).",
- "nextTask": "Round 398: PERF-14a on c93d926. Apply b-round-397/sketch-398.patch.txt (sha bd8fe321): ArrangementLane.tsx adds data-clip-count={clips.length} on the data-track-id row (model count of preview lane clips, independent of mounted DOM); new lane-clip-count.test.tsx LC1-LC5 (5 mutants red on sketch). A writes perf/studio-lab-scale.perf.spec.ts + perf/budgets.scale.json (200 clips via Add + Ctrl+D x199; record rows: DOM page/clip-subtree, clips model/mounted/in-window at default zoom, min zoom and min zoom scrolled to the middle; zoom keydown p95/max, commits and components per key at 1x and 6x; scroll page-cross) and doc 254 (In Progress stage 1 of 3). C: SCALE-SPEC alone (model 200, mounted 200, subtree 3400, in-window 1), PERF-RES unchanged vs c-round-396, COUNT-BROWSER (attr = mounted per lane: Music/Stems 3/0 after Ctrl+D x2, 3/0 while a cross-lane drag is held, 2/1 after release, 3/0 after Ctrl+Z, fold keeps 3; B HEAD probe groups-drag.cjs) at both viewports, NO-VISIBLE-CHANGE, AUTH, SOURCE-SCOPE, DOCS.",
+ "reason": "Round 398 PERF-14a: C PASS (c-round-398.json browserVerified/realVerified true, 0 bugs; L57 OK) and gate 398 published c3ee1d6; PERF-14a done (D-29z1362). No open C bug; remaining Critical/High/Medium findings are manual-only, awaiting_user or open_root. B sketched PERF-14b (virtualization) with full evidence, but the interactions/resources perf harnesses abort under it, so 14b is split (D-29z1364, no scope dropped): 14b-i harness readiness now, RETRO 400, then 14b-ii. Many scoped items remain (PERF-14b-ii/14c, PERF-15, STEM-LANES, SYS-1..3, STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase-2 entries, deferred Lows; purchased preview browser row open on SRW-21), so COMPLETE is not possible; nothing external blocks the next stage. Architecture checkpoint ARCH-CHECKPOINT-PREVIEW-AFTER-13C still due for root (non-blocking).",
+ "nextTask": "Round 399: PERF-14b-i on c3ee1d6 (perf/** + docs only). Apply b-round-398/sketch-399-harness.patch.txt (sha 204e282a: scale spec M2 lane-area in-window, visible-gap self-check, build self-check; budgets notes). Add perf/lib/page.ts add-only modelClipCount/expectModelClipCount. Migrate studio-lab-interactions and studio-lab-resources specs by Rule R (R-a model count via lane data-clip-count, R-b bring positional targets into the lane area outside measured windows, R-c distinct starts per mounted clip, R-d unchanged) over the 66-hit perf grep. Budget notes only. Docs 254 l.4 'stage 1 of 4' + contract, new doc 255 'stage 2 of 4'. A/C: each spec alone at the working tree with every deterministic row equal to HEAD baselines (interactions 189 b-round-398/perf-head-interactions.json, resources 46 c-round-398, scale 17 b-round-398/perf-head-harness-scale.json); each spec completes (abortedAt null, problems []) on a scratch with b-round-398/sketch-14bii-lane.patch.txt (rc may be 1; failing asserts listed for 14b-ii); perf/lib vitest; budget JSON shape; no app change; AUTH; SOURCE-SCOPE; DOCS.",
  "remaining": [
+  "RETRO-400",
   "ROOT-NOTE-R387-STOP-NOT-HONOURED",
   "ARCH-CHECKPOINT-DECODE-REGION",
   "PERF-11c-iii-d",
@@ -16,8 +17,9 @@
   "PERF-9d",
   "PERF-CAND-MASTER-GROUP-FADER-PROPS",
   "PERF-11b",
-  "PERF-14a",
-  "PERF-14b",
+  "PERF-14b-i",
+  "PERF-14b-ii",
+  "TL-R398-SK-M1",
   "PERF-14c",
   "Q-14B-PIN-SELECTED",
   "PERF-14",
@@ -92,6 +94,8 @@
   "GATE396-ARCH-STREAM-FACTORY",
   "C-R397-NOTE-LONGTASK-1280",
   "GATE397-L1-HIDDEN-TAB-YIELD",
-  "GATE397-ARCH-YIELD-HELPER"
+  "GATE397-ARCH-YIELD-HELPER",
+  "A-R398-ARCH-FIND-TIMELINE-SCROLLER",
+  "PERF-CAND-14-SCROLL-HYSTERESIS"
  ]
 }

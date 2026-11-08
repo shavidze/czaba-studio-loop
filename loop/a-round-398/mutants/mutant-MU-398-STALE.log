@@ -1,0 +1,87 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-398/scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/lane-clip-count.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 892[2mms[22m[39m
+     [32m✓[39m LC1: each lane carries the number of its own clips[32m 216[2mms[22m[39m
+[31m     [31m×[31m LC2: duplicate, undo and delete update the lane count[39m[32m 122[2mms[22m[39m
+[31m     [31m×[31m LC3: every lane count equals the model after each step[39m[32m 140[2mms[22m[39m
+[31m     [31m×[31m LC4: a cross-lane drag preview moves the count; clearing the preview restores it[39m[32m 74[2mms[22m[39m
+     [33m[2m✓[22m[39m LC5: folding a lane keeps its count [33m 338[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 23:29:21
+[2m   Duration [22m 3.09s[2m (transform 1.21s, setup 0ms, import 1.67s, tests 892ms, environment 398ms)[22m
+
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-398/scratch/app/lib/arrangement/__tests__/lane-clip-count.test.tsx,title=app/lib/arrangement/__tests__/lane-clip-count.test.tsx > lane data-clip-count (PERF-14a model clip count) > LC2%3A duplicate%2C undo and delete update the lane count,line=119,column=32::AssertionError: expected '2' to be '3' // Object.is equality%0A%0AExpected: "3"%0AReceived: "2"%0A%0A ❯ app/lib/arrangement/__tests__/lane-clip-count.test.tsx:119:32%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-398/scratch/app/lib/arrangement/__tests__/lane-clip-count.test.tsx,title=app/lib/arrangement/__tests__/lane-clip-count.test.tsx > lane data-clip-count (PERF-14a model clip count) > LC3%3A every lane count equals the model after each step,line=131,column=58::AssertionError: expected [ '1', '2', '0' ] to deeply equal [ '1', '4', '0' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A    "1",%0A-   "4",%0A+   "2",%0A    "0",%0A  ]%0A%0A ❯ check app/lib/arrangement/__tests__/lane-clip-count.test.tsx:131:58%0A ❯ app/lib/arrangement/__tests__/lane-clip-count.test.tsx:137:5%0A%0A
+
+::error file=/home/runner/work/czaba-studio-loop/czaba-studio-loop/loop/a-round-398/scratch/app/lib/arrangement/__tests__/lane-clip-count.test.tsx,title=app/lib/arrangement/__tests__/lane-clip-count.test.tsx > lane data-clip-count (PERF-14a model clip count) > LC4%3A a cross-lane drag preview moves the count; clearing the preview restores it,line=149,column=52::AssertionError: expected [ '2', '0' ] to deeply equal [ '1', '1' ]%0A%0A- Expected%0A+ Received%0A%0A  [%0A-   "1",%0A-   "1",%0A+   "2",%0A+   "0",%0A  ]%0A%0A ❯ app/lib/arrangement/__tests__/lane-clip-count.test.tsx:149:52%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-clip-count.test.tsx[2m > [22mlane data-clip-count (PERF-14a model clip count)[2m > [22mLC2: duplicate, undo and delete update the lane count
+[31m[1mAssertionError[22m: expected '2' to be '3' // Object.is equality[39m
+
+Expected: [32m"3"[39m
+Received: [31m"2"[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/lane-clip-count.test.tsx:[2m119:32[22m[39m
+    [90m117| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mselectClip[39m([32m'm2'[39m))[33m;[39m
+    [90m118| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mduplicateSelection[39m())[33m;[39m
+    [90m119| [39m    [34mexpect[39m([34mlaneCount[39m([32m'music'[39m))[33m.[39m[34mtoBe[39m([32m'3'[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m120| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mundo[39m())[33m;[39m
+    [90m121| [39m    [34mexpect[39m([34mlaneCount[39m([32m'music'[39m))[33m.[39m[34mtoBe[39m([32m'2'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-clip-count.test.tsx[2m > [22mlane data-clip-count (PERF-14a model clip count)[2m > [22mLC3: every lane count equals the model after each step
+[31m[1mAssertionError[22m: expected [ '1', '2', '0' ] to deeply equal [ '1', '4', '0' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "1",[22m
+[32m-   "4",[39m
+[31m+   "2",[39m
+[2m    "0",[22m
+[2m  ][22m
+
+[36m [2m❯[22m check app/lib/arrangement/__tests__/lane-clip-count.test.tsx:[2m131:58[22m[39m
+    [90m129| [39m    [35mconst[39m lanes [33m=[39m [[32m'video'[39m[33m,[39m [32m'music'[39m[33m,[39m [32m'sfx'[39m][33m;[39m
+    [90m130| [39m    [35mconst[39m check [33m=[39m () [33m=>[39m
+    [90m131| [39m      [34mexpect[39m(lanes[33m.[39m[34mmap[39m((trackId) [33m=>[39m [34mlaneCount[39m(trackId)))[33m.[39m[34mtoEqual[39m(
+    [90m   | [39m                                                         [31m^[39m
+    [90m132| [39m        lanes[33m.[39m[34mmap[39m((trackId) [33m=>[39m [34mmodelCount[39m(trackId))[33m,[39m
+    [90m133| [39m      )[33m;[39m
+[90m [2m❯[22m app/lib/arrangement/__tests__/lane-clip-count.test.tsx:[2m137:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/lane-clip-count.test.tsx[2m > [22mlane data-clip-count (PERF-14a model clip count)[2m > [22mLC4: a cross-lane drag preview moves the count; clearing the preview restores it
+[31m[1mAssertionError[22m: expected [ '2', '0' ] to deeply equal [ '1', '1' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "1",[39m
+[32m-   "1",[39m
+[31m+   "2",[39m
+[31m+   "0",[39m
+[2m  ][22m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/lane-clip-count.test.tsx:[2m149:52[22m[39m
+    [90m147| [39m    }[33m;[39m
+    [90m148| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mpreviewClipGeometry[39m(moved))[33m;[39m
+    [90m149| [39m    [34mexpect[39m([[34mlaneCount[39m([32m'music'[39m)[33m,[39m [34mlaneCount[39m([32m'sfx'[39m)])[33m.[39m[34mtoEqual[39m([[32m'1'[39m[33m,[39m [32m'1'[39m])[33m;[39m
+    [90m   | [39m                                                   [31m^[39m
+    [90m150| [39m    [34mact[39m(() [33m=>[39m [34mlive[39m(api)[33m.[39m[34mpreviewClipGeometry[39m(before))[33m;[39m
+    [90m151| [39m    [34mexpect[39m([[34mlaneCount[39m([32m'music'[39m)[33m,[39m [34mlaneCount[39m([32m'sfx'[39m)])[33m.[39m[34mtoEqual[39m([[32m'2'[39m[33m,[39m [32m'0'[39m])[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+

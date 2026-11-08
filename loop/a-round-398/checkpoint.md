@@ -1,0 +1,6 @@
+- [x] claims start == planning; sketch applied
+- [x] spec + budgets written; typecheck 0, lint 0, scoped biome 0
+- [x] covering vitest 63/1213 rc0; mutants 5/5 red, pristine 0/0
+- [ ] perf spec run (alone)
+- [x] perf spec run1 rc0 failures [] (perf-results/latest-scale.json)
+- [x] code-reviewer done; fixes applied; perf run2 rc0; claims end == §7; report a-round-398.md written
