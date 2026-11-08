@@ -1,0 +1,60 @@
+
+ RUN  v4.0.16 /tmp/b405-sketch
+
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC1 keeps one actions object across a lane mute, a zoom step, a marker commit and an undo while the context value changes 40ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC2 hands out the provider callbacks themselves, and they keep their identity across a lane mute and a zoom step 19ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC3 reads the latest arrangement through the stable actions after a commit and after its undo 4ms
+ × app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC4 keeps the loop and markers frozen and identical across commits that do not touch the loop (GATE378-L2) 12ms
+   → Cannot assign to read only property 'length' of object '[object Array]'
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC5 the Arrangement components and contexts use no React transition API (GATE377-L1) 5ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out all 34 provider callbacks (C-R404-A-AC1-COVERAGE) 10ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC6 throws a named error outside the provider 6ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:43:04
+   Duration  1.11s (transform 378ms, setup 0ms, import 519ms, tests 98ms, environment 380ms)
+
+Error: useArrangementActions must be used within an ArrangementProvider
+    at useArrangementActions (/tmp/b405-sketch/app/contexts/ArrangementContext.tsx:4970:11)
+    at OutsideProbe (/tmp/b405-sketch/app/lib/arrangement/__tests__/actions-context.test.tsx:151:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+Error: useArrangementActions must be used within an ArrangementProvider
+    at useArrangementActions (/tmp/b405-sketch/app/contexts/ArrangementContext.tsx:4970:11)
+    at OutsideProbe (/tmp/b405-sketch/app/lib/arrangement/__tests__/actions-context.test.tsx:151:3)
+    at renderWithHooks (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:20103:13)
+    at beginWork (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (/home/runner/czaba-project/store/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/home/runner/czaba-project/store/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC4 keeps the loop and markers frozen and identical across commits that do not touch the loop (GATE378-L2)
+TypeError: Cannot assign to read only property 'length' of object '[object Array]'
+ ❯ setTrackMix app/lib/arrangement/model.ts:469:24
+    467|   patch: Partial<Pick<ArrangementTrack, 'volume' | 'mute'>>,
+    468| ): Arrangement {
+    469|   arrangement.markers?.push();
+       |                        ^
+    470|   return {
+    471|     ...arrangement,
+ ❯ Object.toggleTrackMute app/contexts/ArrangementContext.tsx:3217:17
+ ❯ app/lib/arrangement/__tests__/actions-context.test.tsx:292:35
+ ❯ ../../home/runner/czaba-project/store/node_modules/@testing-library/react/dist/act-compat.js:47:24
+ ❯ act ../../home/runner/czaba-project/store/node_modules/react/cjs/react.development.js:2512:16
+ ❯ ../../home/runner/czaba-project/store/node_modules/@testing-library/react/dist/act-compat.js:46:25
+ ❯ app/lib/arrangement/__tests__/actions-context.test.tsx:292:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

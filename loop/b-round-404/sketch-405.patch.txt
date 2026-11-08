@@ -1,0 +1,314 @@
+diff --git a/app/components/arrangement/ArrangementLibrary.tsx b/app/components/arrangement/ArrangementLibrary.tsx
+index 35cb16e..60ff7ce 100644
+--- a/app/components/arrangement/ArrangementLibrary.tsx
++++ b/app/components/arrangement/ArrangementLibrary.tsx
+@@ -197,7 +197,7 @@ interface ArrangementLibraryViewProps extends ArrangementLibraryProps {
+ }
+ 
+ export function useArrangementLibraryActions(
+-  workspace: ArrangementLibraryActions,
++  actions: ArrangementLibraryActions,
+ ): ArrangementLibraryActions {
+   const {
+     selectSource,
+@@ -207,7 +207,7 @@ export function useArrangementLibraryActions(
+     getLibraryPreviewOffset,
+     beginLibraryDrag,
+     endLibraryDrag,
+-  } = workspace;
++  } = actions;
+   return useMemo(
+     () => ({
+       selectSource,
+diff --git a/app/lib/arrangement/__tests__/actions-context.test.tsx b/app/lib/arrangement/__tests__/actions-context.test.tsx
+index 84f8cd4..e517c89 100644
+--- a/app/lib/arrangement/__tests__/actions-context.test.tsx
++++ b/app/lib/arrangement/__tests__/actions-context.test.tsx
+@@ -1,6 +1,6 @@
+ import { readdirSync, readFileSync } from 'node:fs';
+ import { join, resolve } from 'node:path';
+-import { act, render } from '@testing-library/react';
++import { act, render, waitFor } from '@testing-library/react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import {
+   type ArrangementActions,
+@@ -8,6 +8,7 @@ import {
+   ArrangementProvider,
+   useArrangement,
+   useArrangementActions,
++  useArrangementIsPlayingReader,
+ } from '~/contexts/ArrangementContext';
+ import type { Arrangement, WorkspaceCollection } from '~/types/arrangement';
+ import { addMarker } from '../markers';
+@@ -93,6 +94,17 @@ const actionsCollection: WorkspaceCollection = {
+   loadSource: async () => new AudioBuffer({ length: 2000, numberOfChannels: 1, sampleRate: 100 }),
+ };
+ 
++const twoSourceCollection: WorkspaceCollection = {
++  ...actionsCollection,
++  id: 'actions-two',
++  sources: [
++    ...actionsCollection.sources,
++    { id: 'hit', title: 'Hit', collectionLabel: 'actions', kind: 'sfx', origin: 'demo' },
++  ],
++};
++
++const ACTION_KEY_COUNT = 34;
++
+ function actionsArrangement(): Arrangement {
+   const base = createArrangement([
+     { id: 'video', kind: 'video', name: 'Video' },
+@@ -118,14 +130,23 @@ function actionsArrangement(): Arrangement {
+ interface ActionsProbeRef {
+   actions: ArrangementActions | null;
+   value: ArrangementContextValue | null;
++  isPlaying: (() => boolean) | null;
+ }
+ 
+ function ActionsProbe({ probe }: { probe: ActionsProbeRef }) {
+   probe.actions = useArrangementActions();
+   probe.value = useArrangement();
++  probe.isPlaying = useArrangementIsPlayingReader();
+   return null;
+ }
+ 
++function playing(probe: ActionsProbeRef): boolean {
++  if (probe.isPlaying === null) {
++    throw new Error('playing probe did not render');
++  }
++  return probe.isPlaying();
++}
++
+ function OutsideProbe() {
+   useArrangementActions();
+   return null;
+@@ -179,7 +200,7 @@ describe('Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)', () => {
+   });
+ 
+   async function mountProbe() {
+-    const probe: ActionsProbeRef = { actions: null, value: null };
++    const probe: ActionsProbeRef = { actions: null, value: null, isPlaying: null };
+     render(
+       <ArrangementProvider collection={actionsCollection} initialArrangement={actionsArrangement()}>
+         <ActionsProbe probe={probe} />
+@@ -263,8 +284,8 @@ describe('Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)', () => {
+     const probe = await mountProbe();
+     const start = currentActions(probe).getArrangement();
+     const loop = Object.freeze(start.loop);
+-    expect(loop).not.toBeNull();
+-    for (const marker of start.markers ?? []) {
++    const markers = Object.freeze(start.markers);
++    for (const marker of markers ?? []) {
+       Object.freeze(marker);
+     }
+     expect(markerCount(start)).toBe(1);
+@@ -272,6 +293,7 @@ describe('Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)', () => {
+     expect(currentValue(probe).arrangement.loop).toBe(loop);
+     act(() => currentValue(probe).toggleMasterMute());
+     expect(currentValue(probe).arrangement.loop).toBe(loop);
++    expect(currentValue(probe).arrangement.markers).toBe(markers);
+     const present = currentActions(probe).getArrangement();
+     const added = addMarker(present, 6, 'Hit');
+     if (added.arrangement === null) {
+@@ -295,6 +317,59 @@ describe('Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT)', () => {
+     expect(hits).toEqual([]);
+   });
+ 
++  it('AC7 keeps one actions object across a source selection, a library preview, Play/Stop and a Master mute and gain step, and hands out all 34 provider callbacks (C-R404-A-AC1-COVERAGE)', async () => {
++    const probe: ActionsProbeRef = { actions: null, value: null, isPlaying: null };
++    render(
++      <ArrangementProvider
++        collection={twoSourceCollection}
++        initialArrangement={actionsArrangement()}
++      >
++        <ActionsProbe probe={probe} />
++      </ArrangementProvider>,
++    );
++    const actions = currentActions(probe);
++    const statesBefore = currentValue(probe).sourceStates;
++    await act(async () => {
++      await Promise.resolve();
++      await Promise.resolve();
++    });
++    expect(currentValue(probe).sourceStates).not.toBe(statesBefore);
++    expect(currentValue(probe).sourceStates.song?.status).toBe('ready');
++    expect(currentActions(probe)).toBe(actions);
++    expect(currentValue(probe).selectedSourceId).toBe('song');
++    act(() => actions.selectSource('hit'));
++    expect(currentValue(probe).selectedSourceId).toBe('hit');
++    expect(currentActions(probe)).toBe(actions);
++    act(() => actions.startLibraryPreview('hit'));
++    await waitFor(() => expect(currentValue(probe).libraryPreviewSourceId).toBe('hit'));
++    expect(currentActions(probe)).toBe(actions);
++    act(() => actions.stopLibraryPreview());
++    expect(currentValue(probe).libraryPreviewSourceId).toBeNull();
++    expect(currentActions(probe)).toBe(actions);
++    act(() => actions.togglePlayback());
++    expect(playing(probe)).toBe(true);
++    expect(currentActions(probe)).toBe(actions);
++    act(() => actions.togglePlayback());
++    expect(playing(probe)).toBe(false);
++    expect(currentActions(probe)).toBe(actions);
++    act(() => actions.toggleMasterMute());
++    expect(currentValue(probe).arrangement.master.mute).toBe(true);
++    expect(currentActions(probe)).toBe(actions);
++    const gainBefore = currentValue(probe).arrangement.master.gainDb;
++    act(() => actions.previewMasterGain(gainBefore - 6));
++    act(() => actions.commitMasterGain());
++    expect(currentValue(probe).arrangement.master.gainDb).toBe(gainBefore - 6);
++    expect(currentValue(probe).undoLabel).toBe('Master Volume');
++    expect(currentActions(probe)).toBe(actions);
++    const provided = new Map(Object.entries(currentValue(probe)));
++    const entries = Object.entries(currentActions(probe));
++    expect(entries).toHaveLength(ACTION_KEY_COUNT);
++    for (const [key, callback] of entries) {
++      expect(typeof callback, key).toBe('function');
++      expect(provided.get(key), key).toBe(callback);
++    }
++  });
++
+   it('AC6 throws a named error outside the provider', () => {
+     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+     try {
+diff --git a/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx b/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx
+index 02318e9..b5a0122 100644
+--- a/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/fader-pointer-preview.test.tsx
+@@ -218,7 +218,7 @@ const PARENT_NAMES = [
+   'StudioWorkspace',
+   'ArrangementLane',
+   'ArrangementGroupHeader',
+-  'ArrangementMaster',
++  'ArrangementMasterViewInner',
+   'PreviewProbe',
+ ];
+ 
+@@ -467,6 +467,13 @@ describe('PERF-FADER-a pointer fader preview (D-29z179)', { timeout: 20_000 }, (
+     vi.restoreAllMocks();
+   });
+ 
++  it('FP0: every PARENT_NAMES entry is a live fiber name that renders on mount (B-R374-MASTER-VACUOUS-NAME-COUNTS)', async () => {
++    await mountPreviewWorkspace();
++    for (const name of PARENT_NAMES) {
++      expect(renderLog.counts.get(name) ?? 0, name).toBeGreaterThan(0);
++    }
++  });
++
+   it('FP1: a track pointer drag writes no history and re-renders no parent per move; the model stays put while the live gain follows', async () => {
+     const { api, controls } = await mountPreviewWorkspace();
+     act(() => live(api).togglePlayback());
+diff --git a/app/lib/arrangement/__tests__/master-ui.test.tsx b/app/lib/arrangement/__tests__/master-ui.test.tsx
+index e5cc37e..3bf61b5 100644
+--- a/app/lib/arrangement/__tests__/master-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/master-ui.test.tsx
+@@ -629,6 +629,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+ 
+     it("sits in the footer's last row, directly before the Shortcuts button, and renders 0 times per Play frame", async () => {
+       const api: MasterApiRef = { current: null };
++      renderLog.counts.clear();
+       const view = render(
+         <ArrangementProvider collection={masterCollection} initialArrangement={masterArrangement()}>
+           <StudioWorkspace />
+@@ -636,7 +637,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+         </ArrangementProvider>,
+       );
+       await flushLoads();
+-      expect(renderLog.counts.get('ArrangementMaster') ?? 0).toBeGreaterThan(0);
++      expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBeGreaterThan(0);
+       const header = view.container.querySelector('header');
+       const footer = view.container.querySelector('footer');
+       const mute = view.getByRole('button', { name: 'Master Mute' });
+@@ -673,7 +674,7 @@ describe('Master bus (SRW-13 stage 1, FB-14, D-29p)', { timeout: 15_000 }, () =>
+         runFrames();
+       }
+       expect(live(api).getLivePosition()).toBeGreaterThan(0.3);
+-      expect(renderLog.counts.get('ArrangementMaster') ?? 0).toBe(0);
++      expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBe(0);
+       expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('true');
+       fireEvent.click(view.getByRole('button', { name: 'Stop' }));
+       expect(view.getByRole('button', { name: 'Play' }).dataset.playing).toBe('false');
+diff --git a/app/lib/arrangement/__tests__/render-budget.test.tsx b/app/lib/arrangement/__tests__/render-budget.test.tsx
+index 13b8f0c..a319177 100644
+--- a/app/lib/arrangement/__tests__/render-budget.test.tsx
++++ b/app/lib/arrangement/__tests__/render-budget.test.tsx
+@@ -792,7 +792,6 @@ describe('Play render budget and per-frame writers (C-R6-02, RF7-P2, RF7-U)', ()
+     act(() => api.current?.setPxPerSecond((api.current?.pxPerSecond ?? 20) * 2));
+     expect(renderLog.counts.get('StudioWorkspace') ?? 0).toBeGreaterThan(0);
+     expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBe(0);
+-    expect(renderLog.counts.get('ArrangementMaster') ?? 0).toBe(0);
+     renderLog.counts.clear();
+     act(() => api.current?.toggleMasterMute());
+     expect(renderLog.counts.get('ArrangementMasterViewInner') ?? 0).toBe(1);
+diff --git a/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx b/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
+index fe33475..11b20f7 100644
+--- a/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
++++ b/app/lib/arrangement/__tests__/selection-wrappers-render.test.tsx
+@@ -26,6 +26,17 @@ interface ProbeFiber {
+ 
+ const renderLog = vi.hoisted(() => {
+   const counts = new Map<string, number>();
++  const groupHeaderIds: string[] = [];
++  const groupIdOf = (props: unknown): string | null => {
++    if (typeof props !== 'object' || props === null || !('group' in props)) {
++      return null;
++    }
++    const group = props.group;
++    if (typeof group !== 'object' || group === null || !('id' in group)) {
++      return null;
++    }
++    return typeof group.id === 'string' ? group.id : null;
++  };
+   const seen = new WeakMap<object, { props: unknown; state: unknown }>();
+   const componentName = (type: unknown): string | null =>
+     typeof type === 'function' && 'name' in type && typeof type.name === 'string'
+@@ -48,6 +59,10 @@ const renderLog = vi.hoisted(() => {
+           previous.state !== fiber.memoizedState
+         ) {
+           counts.set(name, (counts.get(name) ?? 0) + 1);
++          const groupId = name === 'ArrangementGroupHeader' ? groupIdOf(fiber.memoizedProps) : null;
++          if (groupId !== null) {
++            groupHeaderIds.push(groupId);
++          }
+         }
+         seen.set(fiber, { props: fiber.memoizedProps, state: fiber.memoizedState });
+         if (fiber.alternate) {
+@@ -76,7 +91,7 @@ const renderLog = vi.hoisted(() => {
+       onPostCommitFiberRoot: () => undefined,
+     },
+   });
+-  return { counts };
++  return { counts, groupHeaderIds };
+ });
+ 
+ vi.mock('@remix-run/react', () => ({
+@@ -313,6 +328,7 @@ beforeEach(() => {
+   fakeClock.base = Date.now() / 1000;
+   resizeCallbacks.clear();
+   renderLog.counts.clear();
++  renderLog.groupHeaderIds.length = 0;
+   vi.stubGlobal('AudioContext', FakeAudioContext);
+   vi.stubGlobal('OfflineAudioContext', FakeOfflineAudioContext);
+   vi.stubGlobal('AudioBuffer', FakeAudioBuffer);
+@@ -458,16 +474,21 @@ describe('PERF-11c-i the group header leaf reads no workspace context (GATE361-S
+       timeout: 20_000,
+     },
+     async () => {
+-      const { view } = await mountCollapsedGroup();
++      const { api, view } = await mountCollapsedGroup();
+       clickLane(view, 'მუსიკა');
+       pressGroupKey();
+       expect(view.getAllByTestId('arrangement-group-header')).toHaveLength(2);
+       const mutes = view.getAllByTestId('arrangement-group-mute');
+       renderLog.counts.clear();
++      renderLog.groupHeaderIds.length = 0;
+       fireEvent.click(mutes[0]);
+       expect(mutes[0].getAttribute('aria-pressed')).toBe('true');
+       expect(mutes[1].getAttribute('aria-pressed')).toBe('false');
+       expect(renderLog.counts.get('ArrangementGroupHeader') ?? 0).toBe(1);
++      const muted = (live(api).arrangement.groups ?? []).filter((group) => group.mute === true);
++      expect(muted).toHaveLength(1);
++      expect(muted[0].id).not.toBe('g1');
++      expect(renderLog.groupHeaderIds).toEqual([muted[0].id]);
+     },
+   );
+ });

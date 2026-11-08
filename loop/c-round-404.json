@@ -1,0 +1,115 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R404-A-AC1-COVERAGE",
+   "severity": "low",
+   "origin": "A (code-reviewer finding A-R404-REVIEW-AC1-COVERAGE, in the B-dispatched test file; confirmed by C)",
+   "type": "test-strength, not a behaviour bug",
+   "steps": [
+    "grep selectSource|selectedSourceId|sourceStates app/lib/arrangement/__tests__/actions-context.test.tsx -> 0 matches",
+    "AC1 changes a lane mute, a zoom step, a marker commit and an undo, but never a source selection or sourceStates"
+   ],
+   "expected": "AC1 turns red if a future dependency on selectedSourceId/sourceStates is added to one of the 34 callbacks",
+   "actual": "AC1 would stay green (fixture has one source, no selectSource/loadSource step) (reviewer and A rated it Medium; C rates it Low: coverage gap in a tech-lead-reviewed, dispatched test, no behaviour impact, mutants 9/9 red)",
+   "evidence": "c-round-404/progress.json; grep result above; a-round-404.md reviewer section; doc 258 TODO. Not a regression of this round: the patch is dispatched byte-for-byte (D-29z1392). For B: stage 2 or follow-up adds a second source plus selectSource and asserts toBe(actions)."
+  },
+  {
+   "id": "C-R404-B-LOOP-OFF-WORDING",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "select a time selection, click Loop (brace shows), click Loop again"
+   ],
+   "expected": "task row 4 says the loop brace hides",
+   "actual": "brace stays with label 'Loop off' (data-loop-enabled=false); identical on pre-patch HEAD",
+   "evidence": "out/leaf-compare.txt steps 10-11; a documented product behaviour ('Loop is off; the range is kept'), so only the task wording is wrong"
+  }
+ ],
+ "passed": [
+  "row1-SOURCE-SCOPE-start",
+  "row2-PATCH-IDENTITY",
+  "row3-AUTH",
+  "row4-LEAF-ACTIONS",
+  "row5-INTERACT",
+  "row6-UNIT+MUTANT",
+  "row7-DOCS",
+  "row8-SOURCE-SCOPE-end+L57"
+ ],
+ "blocked": [
+  "fake-bearer token request returns 500 (no backend in cloud), not 401/403; not PASS-claimed, only the no-auth 401 and 'no token issued' are claimed"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T08:51:12.3511591Z",
+  "round": 404,
+  "attempt": 1,
+  "store": 200
+ },
+ "failed": [],
+ "manifestPaths": [
+  "b-round-403/r404-frozen-sha256.txt",
+  "b-round-318/protected-sha256.txt",
+  "b-round-403/sketch-404.patch.txt"
+ ],
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "origin": {
+  "C-R404-A-AC1-COVERAGE": "A reviewer, dispatched test",
+  "C-R404-B-LOOP-OFF-WORDING": "B spec"
+ },
+ "assertsSpecified": "AC1-AC6 (actions-context.test.tsx, 83 tests pass in the 6-file A3 set); no perf assert added; 189 deterministic interaction rows equal B's sketch run",
+ "mutantsRecorded": "b-round-403/mutants/summary.txt (10 rows: 9 mutants + 1 control)",
+ "mutantRedOnSketch": "9/9 red + control green per B's b-round-403/mutants/summary.txt",
+ "mutantRedOnTree": "C re-ran on a scratch copy of the working tree (/tmp/c404-scratch): 9/9 RED, control GREEN-AS-EXPECTED, pristine before/after rc 0, scratch status 0; c-round-404/mutants/summary.txt is identical to B's",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": [
+  "b-round-403/sketch-full-vitest.log",
+  "b-round-403/sketch-tsc.log",
+  "b-round-403/sketch-lint.log",
+  "b-round-403/sketch-biome.log"
+ ],
+ "chainHeadGateRunGreen": "gate 403 published cc5cbc6",
+ "affectedChecksNamed": [
+  "LEAF-ACTIONS (row 4)",
+  "INTERACT (row 5)",
+  "UNIT+MUTANT (row 6)"
+ ],
+ "affectedChecksRunOnSketch": [
+  "b-round-403/perf-sketch-interactions.json",
+  "b-round-403/mutants/summary.txt"
+ ],
+ "l57NullReason": null,
+ "progressFile": "c-round-404/progress.json",
+ "stopSignal": null,
+ "abletonConformance": "not applicable: behaviour-preserving refactor; reference-first excludes refactor/test-only rounds",
+ "notes": [
+  "Row 1: claims differ from the planning output only on K2 (status-lines 9), K5 (applies-on-tree no), K6 (doc258-free 1, stage docs 8), K8, K9, K10, and K8-K10 equal claims-404-sketch-output.txt; status lines = the 9 granted paths; frozen 1,290 sha256sum rc 0; protected 11 files unchanged (0 failures).",
+  "Row 2: patch applied to a git-archive HEAD scratch; all 8 patch files byte-identical to the working tree; patch sha256 9c0cdbc99e9e0b1c.",
+  "Row 3 (both viewports): demo /studio-lab auth_user null, workspace + 'Demo collection' badge, no 'Sign in required'; /studio/middle-east shows 'Sign in required', 0 audio[src], no workspace; /api/studio-token without auth 401 'Please sign in', fake bearer 500 and no token (backend unavailable), bare 400. First attempts timed out on cold dev-server routes (environment, warmed in a browser, then passed).",
+  "Row 4: same script (c-round-404/tools/leaf.cjs, 32 steps x 2 viewports) run on a pre-patch HEAD dev server (:5198, own Vite cache) and on the working tree: 0 differences in clips/starts/widths, undo text, lane counts, loop-enabled, markers, master mute and volume, status text and audio start/stop counts (leaf-compare.txt). Real audio graph: AudioContext running, currentTime advancing, 1 BufferSource start on Play and its stop on Stop, clock moved 0 -> ~1.77 s -> 2.9 s and stopped; library preview start/stop counted; 0 page errors. Move drag lands at 3.000 s (grid snap), Undo 0 -> Redo 3.0 via keys and buttons; Ctrl+E split 1 -> 3 pieces (both edges inside), 1 -> 2 (one edge crossed), undo restores 1; Master Mute aria-pressed true/false; Master Volume ArrowUp hold shows +0.5 dB, key-up commits 'Undo: Master Volume', Ctrl+Z restores 0.0 dB; marker added at 0 + Enter commits (Undo: Add Marker), Home then Next marker lands on 00:19.000.",
+  "Wording difference vs the task text (not a bug, identical on HEAD): Loop off keeps the loop brace on screen with label 'Loop off' (data-loop-enabled false), it does not hide. The task row said 'shows then hides'.",
+  "Row 4 marker note: after Add marker + Enter and Home, Next marker lands on 00:19.000 on both trees (identical on pre-patch HEAD; C did not investigate why the marker time is 19.000 s, since it is unchanged).",
+  "Row 5: rc 0, complete true, failures [], 264 rows; 189 deterministic rows equal b-round-403/perf-sketch-interactions.json (0 unequal); the 75 other rows are wallclock (record/trend, budget null). Ran alone (L38).",
+  "Row 6: 6-file A3 set 83 tests pass (rc 0); mutants as above.",
+  "Row 7: doc 258 l.4 byte-exact, 7 headings equal TEMPLATE, AC1-AC6 each have an it() in the test file and a doc row, all 10 mutant ids present in the doc, summary block equal to B's; only doc 258 is new under docs.",
+  "Not measured by design: export WAV samples/duration (export code untouched by this stage; the 34 actions do not include export). Not run by C (gate rows): full vitest, typecheck, build, Biome, verify.",
+  "Carried to B from A's reviewer (Lows, recorded not edited): A-R404-REVIEW-AC2-ALL-KEYS (AC2 toBe on 4 of 34 keys), A-R404-REVIEW-LIBRARY-PARAM and the reviewer's other Lows in a-round-404.md.",
+  "Open Mediums in the backlog are root/manual/awaiting_user and unaffected by this round."
+ ]
+}

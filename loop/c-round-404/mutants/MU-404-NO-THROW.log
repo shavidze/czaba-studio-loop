@@ -1,0 +1,41 @@
+
+ RUN  v4.0.16 /tmp/c404-scratch
+
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC1 keeps one actions object across a lane mute, a zoom step, a marker commit and an undo while the context value changes 41ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC2 hands out the provider callbacks themselves, and they keep their identity across a lane mute and a zoom step 32ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC3 reads the latest arrangement through the stable actions after a commit and after its undo 5ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC4 keeps the loop and markers frozen and identical across commits that do not touch the loop (GATE378-L2) 4ms
+ ✓ app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC5 the Arrangement components and contexts use no React transition API (GATE377-L1) 5ms
+ × app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC6 throws a named error outside the provider 7ms
+   → expected [Function] to throw an error
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  09:16:44
+   Duration  1.09s (transform 356ms, setup 0ms, import 503ms, tests 95ms, environment 378ms)
+
+stderr | app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC6 throws a named error outside the provider
+useArrangementActions must be used within an ArrangementProvider
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/actions-context.test.tsx > Arrangement actions context (SYS-R385-LEAF-ACTIONS-CONTEXT) > AC6 throws a named error outside the provider
+AssertionError: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ app/lib/arrangement/__tests__/actions-context.test.tsx:301:46
+    299|     const spy = vi.spyOn(console, 'error').mockImplementation(() => un…
+    300|     try {
+    301|       expect(() => render(<OutsideProbe />)).toThrow(
+       |                                              ^
+    302|         'useArrangementActions must be used within an ArrangementProvi…
+    303|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -1,0 +1,13 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+(async()=>{const b=await chromium.launch({args:['--autoplay-policy=no-user-gesture-required']});const p=await (await b.newContext({viewport:{width:1440,height:900}})).newPage();
+await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'load'});
+await p.waitForFunction(()=>/ready/i.test(document.querySelector('[data-testid="arrangement-status"]')?.textContent||''),null,{timeout:120000});
+await p.waitForTimeout(1500);
+console.log('active',await p.evaluate(()=>document.activeElement?.outerHTML.slice(0,200)));
+const opts=await p.evaluate(()=>[...document.querySelectorAll('[role=option]')].map(o=>o.getAttribute('data-source-id')+'|'+o.getAttribute('aria-selected')+'|'+o.textContent.trim().slice(0,40)));console.log(opts);
+await p.locator('[role=option]').first().click();await p.keyboard.press('Enter');await p.waitForTimeout(1500);
+console.log(await p.evaluate(()=>[...document.querySelectorAll('[data-clip-id]')].map(c=>c.outerHTML.slice(0,500))));
+console.log(await p.evaluate(()=>[...document.querySelectorAll('[data-track-id]')].map(c=>c.getAttribute('data-track-id')+' '+c.getAttribute('data-clip-count'))));
+console.log(await p.evaluate(()=>[...document.querySelectorAll('button')].map(x=>(x.getAttribute('aria-label')||x.textContent.trim()).slice(0,40)+'|'+(x.getAttribute('aria-pressed')??'')).join('\n')));
+console.log(await p.evaluate(()=>[...document.querySelectorAll('input[type=range],[role=slider]')].map(x=>x.getAttribute('aria-label')+'|'+x.getAttribute('aria-valuenow')+'|'+x.getAttribute('aria-valuetext')).join('\n')));
+await p.screenshot({path:'../shots/explore.png'});await b.close();})();
