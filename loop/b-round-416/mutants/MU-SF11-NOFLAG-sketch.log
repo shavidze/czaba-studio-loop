@@ -1,0 +1,73 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b416-scratch2[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m10 skipped[39m[2m)[22m[32m 82[2mms[22m[39m
+     [2m[90m↓[39m[22m SF1: a Play whose second source start throws stops at the start point with a status and leaves nothing sounding
+     [2m[90m↓[39m[22m SF2: a repeated Play throw keeps the failure status, then a clean Play plays from the start point
+     [2m[90m↓[39m[22m SF3: an edit while playing whose reschedule throws keeps the edit, stops the old graph and shows the status
+     [2m[90m↓[39m[22m SF4: a seek while playing whose reschedule throws stops at the seek target with the status
+     [2m[90m↓[39m[22m SF5: a scrub while playing whose reschedule throws stops at the scrub point, and the scrub end leaves the marker there
+     [2m[90m↓[39m[22m SF7: a scrub end while playing whose reschedule throws stops at the release point with the status
+     [2m[90m↓[39m[22m SF8: an edit that removes time while playing and whose reschedule throws stops at the remapped position
+     [2m[90m↓[39m[22m SF9: a Play whose first loop iteration fill throws inside the build stops at the start point with the status
+     [2m[90m↓[39m[22m SF10: a clean Play right after a failed Play in the same task keeps playing and is not overwritten by the failure text
+     [2m[90m↓[39m[22m SF6: a loop iteration appended by the audio pump that throws stops playback with the status
+[31m     [31m×[31m SF11: a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor, with no frame left queued[39m[32m 80[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m10 skipped[39m[90m (11)[39m
+[2m   Start at [22m 19:32:37
+[2m   Duration [22m 1.54s[2m (transform 589ms, setup 0ms, import 803ms, tests 82ms, environment 494ms)[22m
+
+
+::error file=/tmp/b416-scratch2/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx,title=app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx > a pump failure inside the meter frame floors the meters (C-R387-01) > SF11%3A a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor%2C with no frame left queued,line=339,column=56::AssertionError: expected { Object (_idleTimeout, _idlePrev, ...) } to be +0 // Object.is equality%0A%0A- Expected: %0A0%0A%0A+ Received: %0ATimeout {%0A  "_destroyed": false,%0A  "_idleNext": TimersList {%0A    "_idleNext": [Circular],%0A    "_idlePrev": [Circular],%0A    "expiry": 2500,%0A    "id": -9007199254740982,%0A    "msecs": 1000,%0A    "priorityQueuePosition": 2,%0A  },%0A  "_idlePrev": TimersList {%0A    "_idleNext": [Circular],%0A    "_idlePrev": [Circular],%0A    "expiry": 2500,%0A    "id": -9007199254740982,%0A    "msecs": 1000,%0A    "priorityQueuePosition": 2,%0A  },%0A  "_idleStart": 1500,%0A  "_idleTimeout": 1000,%0A  "_onTimeout": [Function anonymous],%0A  "_repeat": 1000,%0A  "_timerArgs": undefined,%0A  Symbol(refed): true,%0A  Symbol(kHasPrimitive): false,%0A  Symbol(asyncId): 174,%0A  Symbol(triggerId): 0,%0A  Symbol(kAsyncContextFrame): undefined,%0A}%0A%0A ❯ app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx:339:56%0A%0A
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx[2m > [22ma pump failure inside the meter frame floors the meters (C-R387-01)[2m > [22mSF11: a loop fill that throws inside the rAF tick stops playback and leaves the master and track meters at the floor, with no frame left queued
+[31m[1mAssertionError[22m: expected { Object (_idleTimeout, _idlePrev, ...) } to be +0 // Object.is equality[39m
+
+[32m- Expected:[39m 
+0
+
+[31m+ Received:[39m 
+Timeout {
+  "_destroyed": false,
+  "_idleNext": TimersList {
+    "_idleNext": [Circular],
+    "_idlePrev": [Circular],
+    "expiry": 2500,
+    "id": -9007199254740982,
+    "msecs": 1000,
+    "priorityQueuePosition": 2,
+  },
+  "_idlePrev": TimersList {
+    "_idleNext": [Circular],
+    "_idlePrev": [Circular],
+    "expiry": 2500,
+    "id": -9007199254740982,
+    "msecs": 1000,
+    "priorityQueuePosition": 2,
+  },
+  "_idleStart": 1500,
+  "_idleTimeout": 1000,
+  "_onTimeout": [Function anonymous],
+  "_repeat": 1000,
+  "_timerArgs": undefined,
+  Symbol(refed): true,
+  Symbol(kHasPrimitive): false,
+  Symbol(asyncId): 174,
+  Symbol(triggerId): 0,
+  Symbol(kAsyncContextFrame): undefined,
+}
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx:[2m339:56[22m[39m
+    [90m337| [39m    )[33m;[39m
+    [90m338| [39m    [35mawait[39m [34mflushAsync[39m()[33m;[39m
+    [90m339| [39m    [34mexpect[39m(window[33m.[39m[34msetInterval[39m(() [33m=>[39m undefined[33m,[39m [34m1_000[39m))[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                                       [31m^[39m
+    [90m340| [39m    vi[33m.[39m[34mspyOn[39m([33mDate[39m[33m,[39m [32m'now'[39m)[33m.[39m[34mmockReturnValue[39m([33mDate[39m[33m.[39m[34mnow[39m())[33m;[39m
+    [90m341| [39m    [35mconst[39m master [33m=[39m view[33m.[39m[34mgetByTestId[39m([32m'arrangement-master-meter'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

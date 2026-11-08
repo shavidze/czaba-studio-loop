@@ -1,0 +1,23 @@
+# RETRO 416 number index. Run from the loop root: python3 -I b-round-415/retro-numbers.py > c-round-416/data/retro-numbers-416.txt
+import json, statistics as st
+CR = json.load(open('c-round-416/data/cost-rows.json'))
+R = json.load(open('c-round-416/data/rounds-401-415.json'))
+print('window 401-415 rounds', len(R))
+per = {r[0]: round((r[1] or 0) + r[2] + r[3], 2) for r in CR}
+tot = lambda ns: round(sum(per[n] for n in ns), 2)
+ALL = range(401, 416)
+print('total', tot(ALL), 'B', round(sum(r[1] or 0 for r in CR), 2), 'A', round(sum(r[2] for r in CR), 2), 'C', round(sum(r[3] for r in CR), 2))
+print('B share %', round(100 * sum(r[1] or 0 for r in CR) / tot(ALL), 1))
+print('median round', st.median(per.values()), 'B', st.median(r[1] for r in CR if r[1] is not None), 'A', st.median(r[2] for r in CR), 'C', st.median(r[3] for r in CR))
+print('B planning-cost note: planning of 409 = b-round-408-result.json 1.43 only; b-round-408-result.json.attempt1.json is empty (cost unknown), so B total is a lower bound')
+print('C status', {s: [r['round'] for r in R if r['c_status'] == s] for s in sorted(set(r['c_status'] for r in R))})
+print('gate', {s: [r['round'] for r in R if r['gate'] == s] for s in sorted(set(str(r['gate']) for r in R))})
+print('browserVerified true', sum(1 for r in R if r['browser'] is True), '/', len(R))
+print('C FAIL rounds cost [401,411]', tot([401, 411]), 'share %', round(100 * tot([401, 411]) / tot(ALL), 1))
+print('chains (FAIL + next round, retro-401 definition): 401-402', tot([401, 402]), '411-412', tot([411, 412]), 'all', tot([401, 402, 411, 412]), 'share %', round(100 * tot([401, 402, 411, 412]) / tot(ALL), 1))
+print('pure fix-up chain 411-412 share %', round(100 * tot([411, 412]) / tot(ALL), 1), '(402 was mainly PERF-14b-ii new scope plus RT-FIX-401)')
+print('RETRO [401]', tot([401]), '| REGRESSION none in window')
+print('A STOP rounds (a-round-N.md top STOP, read by hand; regex hit in 403 is "STOP: none."): [411]')
+print('plannings with sketch patch and no sketch-review.md: [414->415] of 14 sketch plannings (data/l58-sketch-review-application.txt)')
+print('unruled Medium+ found by A on B sketch: [411] (A-R411-REVIEW-M1 / B-R411-SKETCH-M1-MISSED)')
+print('compare retro-401 (window 385-400): PASS 12 FAIL 4 BLOCKED 0, total 294.13, B 181.15 A 98.51 C 14.47, B share 61.6%, round median 19.16, B median 11.28, L57 12/16, chains 53.1%')

@@ -1,0 +1,110 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R416-CLAIMS-K22-ARCHIVE",
+   "severity": "low",
+   "origin": "environment",
+   "steps": [
+    "bash b-round-415/claims-416.sh from the loop root"
+   ],
+   "expected": "K22 prints all RT-IDS statuses, stderr empty",
+   "actual": "K22 stops at B-R411-SKETCH-M1-MISSED with KeyError: the optimizer moved that closed finding (and TL-R413-I1) into archive/findings-archived.json after B planned. Both ids exist there with status closed (D-29z1446). RT-IDS was re-verified by C directly in backlog.json plus the archive: all 19 ids present as stated.",
+   "evidence": "c-round-416/claims.err, c-round-416/claims.out; RT-IDS table in c-round-416.md. Not a defect in B's retro; claims script should read archive/ too (loop tool, not app)."
+  }
+ ],
+ "passed": [
+  "G416-AUTH-browser",
+  "STUDIO-SMOKE-416-browser",
+  "RT-SCREEN-browser",
+  "RT-NUM",
+  "RT-CAUSE",
+  "RT-IDS",
+  "RT-LESSONS",
+  "RT-CHECKERS",
+  "RT-SABA",
+  "SOURCE-SCOPE-start",
+  "SOURCE-SCOPE-end"
+ ],
+ "blocked": [
+  "G416-AUTH fake-bearer check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest, typecheck, build, Biome, verify (root gate; no source change)"
+ ],
+ "notRun": [
+  "export WAV/audio graph measurement: RETRO round, no runtime change; smoke only opened/closed the Export dialog"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-08T19:10:08.3629997Z",
+  "round": 416,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": 1316,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": 1,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": [
+  "vitest full",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "l57NullReason": "RETRO: no assert specified",
+ "measurements": {
+  "frozen_rc": 0,
+  "protected_rc": 0,
+  "status_lines": 0,
+  "head": "344a59f",
+  "screens": {
+   "1440x900-S0": [
+    138,
+    97
+   ],
+   "1440x900-DEMO": [
+    168,
+    124
+   ],
+   "1280x720-S0": [
+    118,
+    86
+   ],
+   "1280x720-DEMO": [
+    144,
+    101
+   ]
+  },
+  "journeyClipLefts": [
+   512,
+   1152,
+   1792
+  ],
+  "melodyProbe": "scroll0 Pulse/Bass/Pad; end Pad/Melody; back 3 clips both viewports",
+  "auth": {
+   "labAuthUser": null,
+   "premiumSignInRequired": true,
+   "premiumAudioSrc": 0,
+   "tokenStatus": 401
+  },
+  "smoke": {
+   "clips": "0->1",
+   "playMs1500Pos": [
+    "00:01.462",
+    "00:01.471"
+   ],
+   "stopped": "position frozen",
+   "exportDialog": "open+closed"
+  }
+ }
+}

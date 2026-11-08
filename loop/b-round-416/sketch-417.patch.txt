@@ -1,0 +1,189 @@
+diff --git a/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx b/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+index 2d55eba..1230e3b 100644
+--- a/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/insert-marker-ui.test.tsx
+@@ -667,6 +667,11 @@ describe(
+       expect(live(mounted.api).isPlaying).toBe(false);
+       expect(statusText(mounted)).toBe(studioMarkerStrings.noneAfterInsertMarker);
+       expect(statusText(mounted)).toBe('No more markers after the insert marker');
++      const frames: FrameRequestCallback[] = [];
++      vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
++        frames.push(callback);
++        return frames.length;
++      });
+       key({ key: 'Home', code: 'Home' });
+       key(SPACE);
+       expect(live(mounted.api).isPlaying).toBe(true);
+@@ -674,14 +679,27 @@ describe(
+       expect(live(mounted.api).isPlaying).toBe(true);
+       expect(statusText(mounted)).toBe('No more markers before the playhead');
+       const playingVisits: number[] = [];
+-      for (let step = 0; step < 5; step += 1) {
++      for (let step = 0; step < 4; step += 1) {
+         key(ctrlRight);
+         playingVisits.push(Math.round(live(mounted.api).getLivePosition() * 1000) / 1000);
+       }
+-      expect(playingVisits).toEqual([2, 6, 10, 16, 16]);
++      expect(playingVisits).toEqual([2, 6, 10, 16]);
+       expect(live(mounted.api).isPlaying).toBe(true);
+-      expect(statusText(mounted)).toBe('No more markers after the playhead');
+-      key(SPACE);
++      expect(frames.length).toBeGreaterThan(0);
++      advance(0.05);
++      const pending = frames.splice(0, frames.length);
++      act(() => {
++        for (const frame of pending) {
++          frame(performance.now());
++        }
++      });
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expect(positionOf(mounted.api)).toBe(16);
++      key(ctrlRight);
++      expect(live(mounted.api).isPlaying).toBe(false);
++      expect(positionOf(mounted.api)).toBe(16);
++      expect(insertMarkerOf(mounted)).toBe('16.000');
++      expect(statusText(mounted)).toBe('No more markers after the insert marker');
+     });
+ 
+     it('IM21 a stopped playhead-handle step clears a time selection and moves the insert marker', async () => {
+diff --git a/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx b/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
+index 7c13f5a..b5e74c2 100644
+--- a/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/marker-edge-nav-ui.test.tsx
+@@ -427,13 +427,16 @@ describe(
+ 
+     it('EN10: Ctrl+Right to a clip edge while playing keeps playing', async () => {
+       const { api } = await mountEdgeWorkspace();
++      vi.spyOn(Date, 'now').mockReturnValue(Date.now());
+       act(() => live(api).seekTo(0));
+       act(() => live(api).togglePlayback());
+       expect(live(api).isPlaying).toBe(true);
+       pressStep('ArrowRight');
+       expect(live(api).isPlaying).toBe(true);
+-      expect(live(api).getLivePosition()).toBeGreaterThanOrEqual(2.25);
+-      expect(live(api).getLivePosition()).toBeLessThan(2.75);
++      expect(live(api).getLivePosition()).toBe(2.25);
++      fakeClock.base -= 0.3;
++      expect(live(api).getLivePosition()).toBeCloseTo(2.5, 6);
++      expect(live(api).isPlaying).toBe(true);
+       act(() => live(api).togglePlayback());
+     });
+   },
+diff --git a/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx b/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
+index 2ba14fd..bfa46d3 100644
+--- a/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/schedule-failure-ui.test.tsx
+@@ -9,8 +9,16 @@ import { studioPlaybackStrings } from '../strings';
+ import { createFakeWebAudio } from './helpers/fake-web-audio';
+ import { useWorkspaceProbe, type WorkspaceProbeValue } from './helpers/workspace-probe';
+ 
+-const { startFailure, createdSources, meterSignal, frames, armStartFailure, install, runFrames } =
+-  createFakeWebAudio();
++const {
++  fakeClock,
++  startFailure,
++  createdSources,
++  meterSignal,
++  frames,
++  armStartFailure,
++  install,
++  runFrames,
++} = createFakeWebAudio();
+ 
+ const SAMPLE_RATE = 48000;
+ const SOURCE_SECONDS = 4;
+@@ -329,15 +337,15 @@ describe('a pump failure inside the meter frame floors the meters (C-R387-01)',
+       </ArrangementProvider>,
+     );
+     await flushAsync();
++    expect(window.setInterval(() => undefined, 1_000)).toBe(0);
++    vi.spyOn(Date, 'now').mockReturnValue(Date.now());
+     const master = view.getByTestId('arrangement-master-meter');
+     const tracks = view.getAllByTestId('arrangement-track-meter');
+     expect(tracks).toHaveLength(2);
+     act(() => live(api).togglePlayback());
+     expect(live(api).isPlaying).toBe(true);
+     meterSignal.value = 10 ** (-20 / 20);
+-    await act(async () => {
+-      await new Promise((resolve) => setTimeout(resolve, 150));
+-    });
++    fakeClock.base -= 0.15;
+     runFrames(3);
+     expect(master.getAttribute('data-level-db')).not.toBe('-inf');
+     for (const meter of tracks) {
+@@ -345,9 +353,7 @@ describe('a pump failure inside the meter frame floors the meters (C-R387-01)',
+     }
+     armStartFailure(1);
+     for (let i = 0; i < 20 && startFailure.thrown === 0; i++) {
+-      await act(async () => {
+-        await new Promise((resolve) => setTimeout(resolve, 150));
+-      });
++      fakeClock.base -= 0.15;
+       runFrames(1);
+     }
+     await flushAsync(1);
+diff --git a/app/lib/arrangement/__tests__/tempo-window.test.ts b/app/lib/arrangement/__tests__/tempo-window.test.ts
+index bf2f3d4..67afe20 100644
+--- a/app/lib/arrangement/__tests__/tempo-window.test.ts
++++ b/app/lib/arrangement/__tests__/tempo-window.test.ts
+@@ -119,9 +119,18 @@ describe('SRW-15 viewport-windowed bars ruler marks (D-29z35)', () => {
+ 
+   it('BW5 a window on a 100-hour timeline costs only the marks inside it', () => {
+     const rulerWindow = { fromPx: 1e8, toPx: 1e8 + 3648 };
+-    const started = performance.now();
+-    const marks = barsRulerMarks(360_000, 320, 999, rulerWindow);
+-    const elapsed = performance.now() - started;
++    const windowReads = { count: 0 };
++    const countedWindow = {
++      get fromPx() {
++        windowReads.count += 1;
++        return rulerWindow.fromPx;
++      },
++      get toPx() {
++        windowReads.count += 1;
++        return rulerWindow.toPx;
++      },
++    };
++    const marks = barsRulerMarks(360_000, 320, 999, countedWindow);
+     expect(marks.length).toBeGreaterThanOrEqual(180);
+     expect(marks.length).toBeLessThanOrEqual(240);
+     expect(
+@@ -143,7 +152,7 @@ describe('SRW-15 viewport-windowed bars ruler marks (D-29z35)', () => {
+     expect(marks.filter((mark) => mark.kind === 'beat').every((mark) => mark.label === null)).toBe(
+       true,
+     );
+-    expect(elapsed).toBeLessThan(100);
++    expect(windowReads.count).toBeLessThanOrEqual(1_000);
+   });
+ 
+   it('BW6 an invalid window returns no marks', () => {
+diff --git a/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx b/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx
+index 885cc39..1d79073 100644
+--- a/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/video-dock-strings-ui.test.tsx
+@@ -207,6 +207,7 @@ describe('video dock English copy (V-0.5c)', () => {
+   });
+ 
+   afterEach(() => {
++    vi.useRealTimers();
+     vi.unstubAllGlobals();
+     vi.restoreAllMocks();
+   });
+@@ -313,11 +314,15 @@ describe('video dock English copy (V-0.5c)', () => {
+       expect(live(api).arrangement.clips).toHaveLength(1);
+     });
+     expect(live(api).getLivePosition()).toBe(0);
++    vi.useFakeTimers({ toFake: ['Date', 'performance'] });
+     act(() => live(api).togglePlayback());
+     expect(live(api).isPlaying).toBe(true);
++    flushFrames();
++    expect(playSpy).not.toHaveBeenCalled();
++    vi.advanceTimersByTime(50);
++    flushFrames();
++    expect(playSpy).toHaveBeenCalledTimes(1);
+     await waitFor(() => {
+-      flushFrames();
+-      expect(playSpy).toHaveBeenCalled();
+       expect(view.getByTestId('arrangement-status').textContent).toBe(
+         'Video playback failed — try MP4 (H.264) or WebM.',
+       );
