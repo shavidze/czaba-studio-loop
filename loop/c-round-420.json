@@ -1,0 +1,86 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R420-CLAIMS-K22-ARCHIVE-AGAIN",
+   "severity": "low",
+   "origin": "environment",
+   "steps": [
+    "bash b-round-419/claims-420.sh from loop root",
+    "compare with claims-420-planning-output.txt"
+   ],
+   "expected": "K22 prints TL-R419-L1-OPEN-INVARIANT = closed",
+   "actual": "K22 prints 'TL-R419-L1-OPEN-INVARIANT = MISSING': optimize-backlog.py moved the closed finding to archive/findings-archived.json after B planned (status there: closed D-29z1462). Same class as C-R416-CLAIMS-K22-ARCHIVE; K14 reads the archive since D-29z1451, K22 still does not. RT-IDS verified directly in backlog.json + archive.",
+   "evidence": "c-round-420/claims.out line K22, c-round-420/claims.err"
+  },
+  {
+   "id": "C-R420-CLAIMS-K8-K24-YOUTUBE-REQUEST-CONSUMED",
+   "severity": "low",
+   "origin": "environment",
+   "steps": [
+    "bash b-round-419/claims-420.sh",
+    "check K8 and K24"
+   ],
+   "expected": "K8 'done' and K24 'STEM-LANES 6'",
+   "actual": "youtube-request.json is no longer in the loop root (root's yt step consumed it; reference/youtube/STEM-LANES.md now exists), so K8 prints MISSING and K24 raises FileNotFoundError on stderr. Facts verified: request existed per B's artifacts; AGREE-STEM-LANES.md row 5 still says 'search not yet there' while reference/youtube/STEM-LANES.md exists (info only; transcripts file not present).",
+   "evidence": "c-round-420/claims.err; ls reference/youtube"
+  }
+ ],
+ "passed": [
+  "420-row1-source-scope-start",
+  "420-row2-G420-AUTH-browser-both-viewports",
+  "420-row3-STUDIO-SMOKE-420-browser-both-viewports",
+  "420-row4-RT-SCREEN-line-counts-138-168-118-144-and-97-124-86-101-exact-journey-3-clips-512-1152-1792-melody-00:48",
+  "420-row6-RT-NUM-scripts-rerun-cmp-only-explained-diffs",
+  "420-row7-RT-CAUSE-facts-K23-fail-detail-gate-reviews",
+  "420-row8-RT-IDS-present-with-stated-status-TL-R419-L1-via-archive",
+  "420-row9-RT-LESSONS",
+  "420-row10-RT-CHECKERS",
+  "420-row11-RT-SABA",
+  "420-row12-source-scope-end"
+ ],
+ "blocked": [
+  "fake-bearer premium path: backend unavailable in cloud",
+  "Ableton conformance: does not apply (RETRO round, nothing visible changed)"
+ ],
+ "gate": [
+  "full vitest, typecheck, build, Biome, verify (root gate; RETRO changes no source)"
+ ],
+ "partial": [
+  "420-row5-CLAIMS: literal criterion 'no MISSING, stderr empty' NOT met (K8, K22, K24 differ, both Low, environment). Every underlying fact verified directly, so not counted as passed row"
+ ],
+ "notRun": [
+  "export WAV/audio-graph/sample-integrity measurement: no source changed (HEAD 6609dfa, tree clean, manifest rc 0); smoke only opened and closed the Export dialog and advanced/stopped the position (1.46s/1.47s, frozen after Stop)"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-09T16:49:13.3630413Z",
+  "round": 420,
+  "attempt": 1,
+  "store": 200
+ },
+ "browserNote": "Real Chromium (Playwright) at 1440x900 and 1280x720, fresh incognito contexts, no credentials: /studio-lab opens (auth_user null), clip added with Enter (0->1), Play 1.5s position 00:01.462/00:01.471, Stop then frozen, Export dialog open/close; /studio/middle-east shows 'Sign in required' with 0 audio[src]; GET /api/studio-token anonymous = 401. screen capture re-run (mock API on 5199): line counts identical to B's, journey clips at left 512/1152/1792, status names Melody at 00:48.000 (nearest free spot). No retries needed.",
+ "retroNumbers": "cost.txt, classify.txt, gate-reviews.txt, l57-coverage.txt, fails-detail.txt, stops-count.txt reproduced byte-equal; only collect.txt/rounds json (419 B cost 14.33 = B's planning of round 420, written after B's snapshot, outside the window cost basis b-round-(N-1)) and archived-mediums.txt (+1 line A-R419-REVIEW-CR-2-5-DOC) differ. 72.3%/67.9%, medians 15.51/11.74, A PASS 3.69, retro-416 18.97/13.85/5.53 recomputed.",
+ "manifestPaths": "b-round-419/r420-tree-sha256.txt (1319 entries, rc 0) + b-round-318/protected-sha256.txt (rc 0)",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 3,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": [
+  "vitest full",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "nullReason": "RETRO: no assert specified",
+ "progressFile": "c-round-420/progress.json",
+ "stopSignal": "none"
+}

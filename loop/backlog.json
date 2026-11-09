@@ -1,10 +1,10 @@
 {
-  "version": 396,
-  "updated": "2026-11-09 (B round 419 -> 420 planning: RETRO 420 dispatched; STEM-LANES AGREE written)",
+  "version": 397,
+  "updated": "2026-11-09 (B round 420 -> 421 planning: RETRO 420 accepted; SYS-R418-PREVIEW-LIFECYCLE dispatched as round 421)",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 420: RETRO 420 (window 416-419, end of STUDIO-PERFORMANCE); no app code; C verifies traceability + auth + smoke (current-task.md)",
-  "advisor_used_by_B": "round 396 -> 397 planning: advisor available and consulted at orientation and at close; performance-optimizer and tech-lead consulted; tech-lead reviewed the frozen sketch",
+  "current_task": "Round 421: SYS-R418-PREVIEW-LIFECYCLE (preview lifecycle: collection change/unmount stop + token bump, guarded reads, setStart; closes 8 Lows); sketch b-round-420/sketch-421.patch.txt (current-task.md)",
+  "advisor_used_by_B": "round 420 -> 421 planning: advisor available and consulted after orientation and before close; tech-lead reviewed the frozen sketch (b-round-420/sketch-review.md)",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12151,8 +12151,24 @@
       "task": "current-task.md",
       "decision": "D-29z1458..D-29z1461",
       "type": "SYS-R369-STEM-CACHE-WRITE-COORDINATOR (runtime + tests)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1462): C PASS c-round-419.json; gate 419 published 6609dfa",
       "note": "baseline 3579fcc clean (gate 418 published); frozen b-round-418/r419-frozen-sha256.txt (1316); grants b-round-418/grants-419.txt (3); sketch b-round-418/sketch-419.patch.txt; review b-round-418/sketch-review.md; claims b-round-418/claims-419.sh"
+    },
+    {
+      "round": 420,
+      "task": "tasks/round-420.md",
+      "decision": "D-29z1462..D-29z1466, D-29z1467",
+      "type": "RETRO 420 (no app code)",
+      "status": "c_pass (D-29z1467): C PASS c-round-420.json; gate 420 skipped (no real changes)",
+      "note": "baseline 6609dfa; window 416-419"
+    },
+    {
+      "round": 421,
+      "task": "current-task.md",
+      "decision": "D-29z1469",
+      "type": "SYS-R418-PREVIEW-LIFECYCLE (runtime + tests)",
+      "status": "dispatched",
+      "note": "baseline 6609dfa clean (gate 420 skipped); frozen b-round-420/r421-frozen-sha256.txt (1316); grants b-round-420/grants-421.txt (4); sketch b-round-420/sketch-421.patch.txt; review b-round-420/sketch-review.md; claims b-round-420/claims-421.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -26901,36 +26917,6 @@
       "added": "2026-11-06 B round 365 -> 366 planning"
     },
     {
-      "origin": "A code-reviewer (round 368)",
-      "evidence": "a-round-368.md \"code-reviewer findings\"",
-      "added": "2026-11-06 B round 368 -> 369 planning",
-      "id": "A-R368-REVIEW-L1",
-      "severity": "low",
-      "title": "stem-cache join: hit 200 starts write W, a hit 404 queues a delete after W, a third storable 200 joins W -> key ends absent (HEAD kept it)",
-      "repro": "a-round-368/l1-probe-v3.log (v3 storedA=false) vs a-round-368/l1-probe-head.log (HEAD storedA=true); C rated Low without re-running (c-round-368.json bugs[0])",
-      "status": "closed (D-29z1462): C round 419 PASS (SC26, SC34-SC41, doc 270 row 7), gate 419 published 6609dfa | scheduled in round 419 SYS-R369 (D-29z1460); closes on C PASS | scheduled in SYS-R369-STEM-CACHE-WRITE-COORDINATOR (conditional, D-29z1215) | deferred_low_polish (D-29z1211): ruled Low by B. Unlike C-R367-DEDUP-CANCELLED-WRITE (Medium: reachable by a StrictMode re-run plus abort in normal use), this needs the server to answer 200 -> 404 -> 200 for one static preview path inside one body-read/commit window (a deploy race); effect is one lost cache entry, re-stored on the next load, no wrong bytes. Same item as gate-368 review Low #2 (deduped). Fix candidate: tombstone on the pending write (gate review) when the stem-cache region is next owned. Also falsifies the b-round-367/sketch-review.md claim \"v3 stores in every ordering where HEAD stored\" (annotated; RETRO 369 input)"
-    },
-    {
-      "origin": "A code-reviewer (round 368)",
-      "evidence": "a-round-368.md \"code-reviewer findings\"",
-      "added": "2026-11-06 B round 368 -> 369 planning",
-      "id": "A-R368-REVIEW-L3",
-      "severity": "low",
-      "title": "stem-cache: the chain-start cancelled() check has no mutant (near-equivalent: a cancelled queued write still returns before put after sweep and list)",
-      "repro": "a-round-368.md finding 3",
-      "status": "closed (D-29z1462): C round 419 PASS (SC26, SC34-SC41, doc 270 row 7), gate 419 published 6609dfa | scheduled in round 419 SYS-R369 (D-29z1460); closes on C PASS | scheduled in SYS-R369-STEM-CACHE-WRITE-COORDINATOR (conditional, D-29z1215) | deferred_low_polish (D-29z1211): add a list-not-called assertion or record it as an accepted equivalent mutant when the region is next owned"
-    },
-    {
-      "origin": "gate 368 code-reviewer",
-      "evidence": "gates/round-368/review.md",
-      "added": "2026-11-06 B round 368 -> 369 planning",
-      "id": "GATE368-L1-REMOVEFILE-SAME-NAME",
-      "severity": "low",
-      "title": "stem-cache put: on an aborted record write, removeFile(record.fileName) deletes the file the previous record still points to when the names are equal (get treats it as a miss; one valid entry lost)",
-      "repro": "gates/round-368/review.md finding 1; stem-cache.client.ts put catch path",
-      "status": "closed (D-29z1462): C round 419 PASS (SC26, SC34-SC41, doc 270 row 7), gate 419 published 6609dfa | scheduled in round 419 SYS-R369 (D-29z1460); closes on C PASS | scheduled in SYS-R369-STEM-CACHE-WRITE-COORDINATOR (conditional, D-29z1215) | deferred_low_polish (D-29z1211): skip removeFile when previous.fileName === record.fileName, or prove names are unique per write with a row"
-    },
-    {
       "origin": "gate 368 code-reviewer",
       "evidence": "gates/round-368/review.md",
       "added": "2026-11-06 B round 368 -> 369 planning",
@@ -27779,21 +27765,67 @@
       "added": "2026-11-08 B round 415 -> 416 planning"
     },
     {
-      "id": "TL-R419-L1-OPEN-INVARIANT",
-      "severity": "info",
-      "origin": "B pre-check",
-      "title": "MU-JOIN-IGNORES-OPEN is equivalent for a structural reason: no wait on a store or network call between open=false and settle(); keep open as insurance",
-      "evidence": "b-round-418/sketch-review.md",
-      "status": "closed (D-29z1462): C round 419 PASS (SC26, SC34-SC41, doc 270 row 7), gate 419 published 6609dfa | in round 419 task (ruling 3) and doc 270 (C row 7); closes on C round 419 PASS",
-      "added": "2026-11-09 B round 418 -> 419 planning"
+      "id": "C-R420-CLAIMS-K22-ARCHIVE-AGAIN",
+      "severity": "low",
+      "origin": "environment",
+      "title": "claims-420 K22 did not read archive/findings-archived.json (TL-R419-L1 archived between B and C)",
+      "evidence": "c-round-420.json; c-round-420/claims.out",
+      "status": "fixed in B tooling (D-29z1468): tools/find-ids.py, L56 clause; closes on C round 421 CLAIMS row (K14)",
+      "added": "2026-11-09 B round 420 -> 421 planning"
     },
     {
-      "id": "A-R419-REVIEW-CR-2-5-DOC",
+      "id": "C-R420-CLAIMS-K8-K24-YOUTUBE-REQUEST-CONSUMED",
       "severity": "low",
-      "origin": "A (code-reviewer)",
-      "title": "doc 270 diagram/wording (abandoned() edge, disabled-store early exits, per-instance counter, full TL id)",
-      "evidence": "a-round-419.md R419-CR-2..5; c-round-419.md row 7",
-      "status": "closed (D-29z1462): fixed by A in doc 270, C round 419 row 7 PASS"
+      "origin": "environment",
+      "title": "claims-420 K8/K24 read youtube-request.json after root consumed it; AGREE-STEM-LANES row 5 was stale",
+      "evidence": "c-round-420.json; c-round-420/claims.err",
+      "status": "fixed in B tooling (D-29z1468): request files are no claims input (L56); AGREE row 5 updated; closes on C round 421 CLAIMS row (K20)",
+      "added": "2026-11-09 B round 420 -> 421 planning"
+    },
+    {
+      "id": "TL-R421-01",
+      "severity": "low",
+      "origin": "B pre-check",
+      "title": "PL4 (unmount) passes at HEAD for another reason; no row proves the unmount bump",
+      "evidence": "b-round-420/sketch-review.md",
+      "status": "closed (D-29z1469): accepted as lock row; same line as the collection bump (MU-COLLECTION-NO-STOP)",
+      "added": "2026-11-09 B round 420 -> 421 planning"
+    },
+    {
+      "id": "TL-R421-02",
+      "severity": "low",
+      "origin": "B pre-check",
+      "title": "PL3 is double-guarded (abort + token) and stays green under MU-COLLECTION-NO-STOP",
+      "evidence": "b-round-420/sketch-review.md",
+      "status": "closed (D-29z1469): accepted as lock row; named so in the task",
+      "added": "2026-11-09 B round 420 -> 421 planning"
+    },
+    {
+      "id": "TL-R421-03",
+      "severity": "low",
+      "origin": "B pre-check",
+      "title": "PL5 re-renders only with the same collection object",
+      "evidence": "b-round-420/sketch-review.md",
+      "status": "closed (D-29z1469): covered by browser R11 (Snap + zoom while previewing; equal to HEAD)",
+      "added": "2026-11-09 B round 420 -> 421 planning"
+    },
+    {
+      "id": "TL-R421-04",
+      "severity": "low",
+      "origin": "B pre-check",
+      "title": "PL7 depends on jsdom honouring element.currentTime = 3",
+      "evidence": "b-round-420/sketch-review.md",
+      "status": "closed (D-29z1469): MU-TICK-FALLBACK-START turns PL7 red; no action",
+      "added": "2026-11-09 B round 420 -> 421 planning"
+    },
+    {
+      "id": "TL-R421-05",
+      "severity": "low",
+      "origin": "B pre-check",
+      "title": "the change needs an implementation doc",
+      "evidence": "b-round-420/sketch-review.md",
+      "status": "closed (D-29z1469): doc 271 is in the task",
+      "added": "2026-11-09 B round 420 -> 421 planning"
     }
   ],
   "tech_lead_notes": [
@@ -39236,7 +39268,7 @@
       "origin": "B pre-check",
       "title": "provider unmount does not bump previewTokenRef; a decode pending at unmount is dropped only because the abort empties the cache (HEAD same)",
       "evidence": "b-round-417/sketch-review.md",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): MU-UNMOUNT-NO-BUMP green, no row can prove it today",
+      "status": "in round 421 (D-29z1469; rows PL4 lock + PL1/PL2 same line); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): MU-UNMOUNT-NO-BUMP green, no row can prove it today",
       "added": "2026-11-08 B round 417 -> 418 planning"
     },
     {
@@ -39245,7 +39277,7 @@
       "origin": "B pre-check",
       "title": "a throwing currentTime read at the watchdog tick, after arming at a real time != start, skips the stall; after a same-url seek start is the old offset; report at armedAt instead",
       "evidence": "b-round-417/sketch-review.md",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): shipping browsers do not throw from the getter",
+      "status": "in round 421 (D-29z1469; rows PL6, PL7); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): shipping browsers do not throw from the getter",
       "added": "2026-11-08 B round 417 -> 418 planning"
     },
     {
@@ -39254,7 +39286,7 @@
       "origin": "B pre-check",
       "title": "getLibraryPreviewOffset reads stream currentTime unguarded",
       "evidence": "b-round-417/sketch-review.md",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): with TL-R418-L2",
+      "status": "in round 421 (D-29z1469; rows PL8); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): with TL-R418-L2",
       "added": "2026-11-08 B round 417 -> 418 planning"
     },
     {
@@ -39263,7 +39295,7 @@
       "origin": "pre-existing",
       "title": "a collection change neither stops the library preview nor bumps the token; a stale decode or fallback can start a same-id source of the new collection (HEAD same)",
       "evidence": "b-round-417/sketch-review.md",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): outside the controller region; EV12 stays green",
+      "status": "in round 421 (D-29z1469; rows PL1, PL2, PL3); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1456): outside the controller region; EV12 stays green",
       "added": "2026-11-08 B round 417 -> 418 planning"
     },
     {
@@ -39272,7 +39304,7 @@
       "origin": "B spec",
       "title": "preview.client.ts readTime falls back to the element-creation start, which a same-url seek does not update; ruling 5 said \"the request start offset\"",
       "evidence": "a-round-418.md For B; c-round-418.json C-R418-READTIME-STALE-START; gates/round-418/review.md finding 2",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): only reachable when the currentTime getter throws (not in shipping browsers); fix with A-R418-REVIEW-L2 in one round that owns preview.client.ts: readTime on ActiveStreamPreview + an updatable start (setStart beside setErrorHandler). Same class as TL-R418-L2",
+      "status": "in round 421 (D-29z1469; rows PL6); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): only reachable when the currentTime getter throws (not in shipping browsers); fix with A-R418-REVIEW-L2 in one round that owns preview.client.ts: readTime on ActiveStreamPreview + an updatable start (setStart beside setErrorHandler). Same class as TL-R418-L2",
       "added": "2026-11-09 B round 418 -> 419 planning"
     },
     {
@@ -39290,7 +39322,7 @@
       "origin": "pre-existing",
       "title": "getLibraryPreviewOffset reads active.element.currentTime unguarded (preview.client.ts l.218-220)",
       "evidence": "a-round-418.md; c-round-418.json C-R418-OFFSET-RAW-READ; gates/round-418/review.md finding 1",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): same item as TL-R418-L3-OFFSET-RAW-READ; closes with A-R418-REVIEW-L1",
+      "status": "in round 421 (D-29z1469; rows PL8); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): same item as TL-R418-L3-OFFSET-RAW-READ; closes with A-R418-REVIEW-L1",
       "added": "2026-11-09 B round 418 -> 419 planning"
     },
     {
@@ -39308,7 +39340,7 @@
       "origin": "B spec",
       "title": "PC12 title says stall after the seek, body dispatches error; seek-then-stall is covered only by browser R1b",
       "evidence": "a-round-418.md; c-round-418.json C-R418-PC12-TITLE; gates/round-418/review.md finding 3",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): rename or drive the stall path when library-preview-stream.test.tsx is next owned",
+      "status": "in round 421 (D-29z1469; rows PC12 title + PL9); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): rename or drive the stall path when library-preview-stream.test.tsx is next owned",
       "added": "2026-11-09 B round 418 -> 419 planning"
     },
     {
@@ -39326,7 +39358,7 @@
       "origin": "gate reviewer",
       "title": "the deferred stream-fallback microtask is not cancelled on provider unmount and unmount does not bump previewTokenRef (reviewer judges it unreachable: unmount detaches the player listeners first)",
       "evidence": "gates/round-418/review.md finding 4",
-      "status": "assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): same root as TL-R418-L1-UNMOUNT-NO-BUMP; fix together (bump the token on unmount) when the preview region is next owned",
+      "status": "in round 421 (D-29z1469; rows PL4 lock + PL1/PL2 same line); closes on its C PASS | assigned to SYS-R418-PREVIEW-LIFECYCLE (D-29z1465); closes on its C PASS | deferred_low_polish (D-29z1459): same root as TL-R418-L1-UNMOUNT-NO-BUMP; fix together (bump the token on unmount) when the preview region is next owned",
       "added": "2026-11-09 B round 418 -> 419 planning"
     },
     {
@@ -39661,7 +39693,8 @@
       ],
       "scope_additions_d29z1401": [
         "marker seek (INFO-C404-MARKER-SEEK-RECIPE): place the marker at a non-zero time, Home, then Next marker; read the clock = the marker time (round 404 row 4 left this unexercised: marker at 0 s, Next fell back to project end)"
-      ]
+      ],
+      "planning_note_d29z1470": "due at the round 421 -> 422 planning if it runs on or after 2026-11-10; extend its scope with every item done in rounds 402-421 (one short check each, both viewports)"
     }
   ],
   "ableton_recommendations": [
@@ -40893,7 +40926,7 @@
         "A-R418-REVIEW-L2-OFFSET-RAW-READ",
         "A-R418-REVIEW-L3-PC12-TITLE"
       ],
-      "status": "queued (D-29z1466): after REGRESSION-2026-11-10, before STEM-LANES"
+      "status": "dispatched round 421 (D-29z1469); closes its 8 ids on C PASS | was: queued (D-29z1466): after REGRESSION-2026-11-10, before STEM-LANES"
     }
   ],
   "retro_runs": [
@@ -41208,7 +41241,8 @@
         "design-philosopher": "not in the B consult list; not called",
         "first-visit-host": "not in the B consult list; not called"
       },
-      "trigger": "end of STUDIO-PERFORMANCE (D-29z1463)"
+      "trigger": "end of STUDIO-PERFORMANCE (D-29z1463)",
+      "c_verdict": "C PASS round 420 (c-round-420.json; D-29z1467); row 5 CLAIMS partial for two environment Lows (D-29z1468)"
     }
   ],
   "hidden_focusables_rulings_d29z169": {
@@ -41528,36 +41562,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1412",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 407 -> 408 planning",
-      "decision": "Round 407 (PERF-11c-iii-d-ii) accepted on independent C evidence: c-round-407.json taskStatus PASS, 9 rows passed (SOURCE-SCOPE start/end + L57, PATCH-IDENTITY cmp-identical to sketch sha 4ec62e31, STOPPED-SEEK all 4 steps error 0 both viewports, VIDEO-SYNC max |drift| 0.008/0.013 s paused false swaps 0 fallbacks 0, LEAF-PROBE 0 differences vs sketch (Caption + ArrangementVideoDockViewInner 13 zeros, shell [0,3,1,1,1,0,1,1,1,1,1,1,2]), UNIT 360/360 + 7/7 mutants RED on C's committed scratch, AUTH, DOCS), failed [], bugs [], browserVerified/realVerified true; gate 407 published 5508f70 on both remotes (review COMMIT OK, 8.5/10, no blocking). PERF-11c-iii-d-ii done; PERF-11c-iii-d (VideoDock) complete. Still open evidence: fake-bearer /api/studio-token row BLOCKED (backend unavailable in cloud). C note: floating-box pointer drag covered by unit file only, not browser-run (recorded, not a bug)."
-    },
-    {
-      "id": "D-29z1413",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 407 -> 408 planning",
-      "decision": "Round 407 reviewer findings ruled. R406-CR-L3 closed (C round 407 row 4 VIDEO-SYNC PASS, D-29z1411 condition met). TL-R407-SK-L1 title widened per A (a-round-407.md 'For B'): cachedLane keeps the top-level fields of an older base after ANY commit that leaves video clips unchanged, not only track-only commits; gate-407 review item 2 checked every lane consumer (only track.kind/id, clips) -> still no visible effect; stays deferred_low_polish, with A's suggested video-track-only unit row as its test. A-R407-REVIEW-L2 (mutable registry inside useMemo) and gate-407 item 1 (= A-R407-REVIEW-I5, clipsRef written during render; self-correcting via publishedClips) -> one deferred Low A-R407-REVIEW-RENDER-PHASE-REGISTRY. A-R407-REVIEW-L4 (ArrangementVideoCaptionView naming vs folder XInner -> X pattern; render-log name 'ArrangementVideoCaption' is the live key, so renaming is a test-selector change, L8) -> deferred_low_polish with fix home = the round that next owns drag-preview-render VIDEO_DOCK_COMPONENTS. Gate-407 items 3/4 info, closed. Architecture notes: A reviewer + gate 407 both 'keep' the reader/publish lifecycle in the dock; extract createVideoLaneStore() into app/lib/arrangement/ only on a second consumer -> recorded as signal SIG-R407-VIDEO-LANE-STORE on architecture_signals, not scheduled. The VideoDock leaf (feature boundary d) is closed; the open non-blocking root request ARCH-CHECKPOINT-SYS-R385-ACTIONS remains the checkpoint for the leaf-plumbing work and gets this as its fourth echo."
-    },
-    {
-      "id": "D-29z1414",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 407 -> 408 planning",
-      "decision": "PERF-11c-iii-e (ArrangementLane, the last useArrangement() leaf of PERF-11c-iii) split like d: e-i (round 408) = behaviour-preserving plumbing: ArrangementActions Pick 36 -> 59 (the 23 Lane callbacks not yet in it), the Lane reads its 29 callbacks from useArrangementActions() and keeps the 6 data fields (arrangement, collection, sourcePeaks, sourceDurations, pxPerSecond, videoSources) on useArrangement(); no render saving (leaf probe 0 differences). e-ii (next) = the render saving: memo inner + per-lane props/slices (performance-optimizer design in b-round-407/consult-performance-optimizer.md). Folded into e-i because it owns the actions region (re-rule at e planning, D-29z1409/D-29z1413): TL-R406-SK-L1 (AC7 hardcoded count -> AC7 derives the key list from the Pick source), TL-R406-SK-L2 (internal livePosition renamed getLivePosition, 13 sites, alias gone) and TL-R406-SK-L3 (deps sort by internal name; one sorted list now). TL-R403-SK-L1 const-tuple derivation NOT folded: tech-lead confirms it needs `as const` (type assertion) or a helper and adds a third list (sketch-review I5); stays deferred. The fader-test Low with 'fix home at the latest PERF-11c-iii-e' is already closed (D-29z1403); e-i grants no fader test. Dependency premise: every new key and its transitive deps are store-, empty- or already-actions-keyed (b-round-407/deps-trace.txt, 0 arrangement/history deps); getLibraryDragSource [collection.sources] = the coupling the existing addSourceToActiveTrack already has."
-    },
-    {
-      "id": "D-29z1415",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 407 -> 408 planning",
-      "decision": "Round 408 dispatched from B's reviewed sketch b-round-407/sketch-408.patch.txt sha256 029e5f8a12e55c8f (3 files: ArrangementContext.tsx, ArrangementLane.tsx, actions-context.test.tsx) + new doc 261 (l.4 'In Progress (stage 1 of 2; C round 408 PASS)'). Evidence on sketch: tsc + Biome rc 0; 44 covering files 870/870 (max 21.9 % of a declared timeout); full vitest 262/3882 rc 0; mutants 5/5 red (drop solo, mismap solo->mute, wrap pan, per-commit history dep, drop getLibraryDragSource), pristine rc 0; dev leaf probe 0 differences vs HEAD (24 leaves x 13 steps x 2 viewports; Lane [0,12,4,4,0,0,0,4,4,4,4,4,8]); new browser LANE-ACTIONS probe (mute/solo click + Ctrl+Z, volume and pan pointer drags, Undo x2, active track) ok on HEAD and sketch at both viewports, mismap mutant fails the solo step via HMR. tech-lead review on the dispatched sha: APPROVE WITH LOWS (no Medium+); TL-R408-SK-L1/L2 deferred_low_polish, L3 accepted (identity-only rows), infos recorded. performance-optimizer consulted on the split (sound; no cheaper split). Baseline 5508f70 clean; frozen 1298; grants 4."
-    },
-    {
-      "id": "D-29z1416",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 408 -> 409 planning",
-      "decision": "Round 408 (PERF-11c-iii-e-i) accepted on independent C evidence: c-round-408.json taskStatus PASS, 8 rows passed (SOURCE-SCOPE start/end + L57, PATCH-IDENTITY cmp-identical to sketch sha 029e5f8a, LANE-ACTIONS ok both viewports no pageErrors, LEAF-PROBE Lane [0,12,4,4,0,0,0,4,4,4,4,4,8] and 0 diffs vs sketch both viewports (1440 attempt 1 cold-server timeout kept, L38), UNIT 911/911 + 5/5 mutants RED on C's committed scratch, AUTH, DOCS), failed [], bugs [], browserVerified/realVerified true; gate 408 published 37b1db8 on both remotes (review COMMIT OK, no blockers). PERF-11c-iii-e-i done. Still open evidence: fake-bearer /api/studio-token row BLOCKED (backend unavailable in cloud). C-recorded gaps (not bugs): library drop / video import / lane drag not browser-run (unit-covered); active-track probe step vacuous (B-R408-PROBE-ACTIVE-TRACK-VACUOUS, fix home e-ii probe)."
-    },
-    {
       "id": "D-29z1417",
       "date": "2026-11-08",
       "by": "2026-11-08 B round 408 -> 409 planning",
@@ -41856,6 +41860,30 @@
       "date": "2026-11-09",
       "by": "2026-11-09 B round 419 -> 420 planning",
       "decision": "Order: 420 RETRO 420 -> 421 REGRESSION-2026-11-10 (due on/after 2026-11-10) -> SYS-R418-PREVIEW-LIFECYCLE -> STEM-LANES S1..S4 once AGREE-STEM-LANES is answered (if not yet answered: SYS-1..3, then STORE-2b..5 per the skip-while-waiting rule, STEM-LANES first as soon as the answer arrives) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). Next RETRO round 435."
+    },
+    {
+      "id": "D-29z1467",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 420 -> 421 planning",
+      "decision": "Round 420 (RETRO 420) accepted: C PASS (c-round-420.json; 11 rows passed, row 5 CLAIMS partial for two environment Lows; browserVerified/realVerified true). Gate 420 skipped (no real changes), so the round-421 baseline stays 6609dfa. RETRO 420 is complete; next RETRO round 435."
+    },
+    {
+      "id": "D-29z1468",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 420 -> 421 planning",
+      "decision": "C-R420-CLAIMS-K22-ARCHIVE-AGAIN and C-R420-CLAIMS-K8-K24-YOUTUBE-REQUEST-CONSUMED: the class is removed in B tooling: tools/find-ids.py (backlog + archive id lookup) is the one lookup every claims script calls; a root-consumed request file is never a claims input (lessons L56 clause replaced, still 60 lines). AGREE-STEM-LANES.md row 5 now cites reference/youtube/STEM-LANES.md, names B picks #1-#4 and asks root for their transcripts. Both close on C round 421 CLAIMS row (claims-421.sh K14/K20)."
+    },
+    {
+      "id": "D-29z1469",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 420 -> 421 planning",
+      "decision": "SYS-R418-PREVIEW-LIFECYCLE dispatched as round 421 (sketch b-round-420/sketch-421.patch.txt, sha 8d5fc47d; tech-lead approve). Rulings: (1) the collection effect teardown calls stopLibraryPreview (token bump + stop + id clear + pin release) on collection change and provider unmount; a preview of the old collection stops when the collection changes (new stop trigger: its source may no longer be in the library; unreachable in /studio-lab where the collection is a module constant; jsdom PL1-PL3 prove it, browser R11 proves ordinary re-renders do not stop it); (2) setStart beside setErrorHandler, readTime(fallback = start) follows a same-url seek; (3) the watchdog tick read falls back to armedAt (a throwing read at the tick is a stall at the armed time); (4) getLibraryPreviewOffset uses the guarded read and returns the latest seek offset on a throwing getter, never throws; null still means no preview; (5) PC12 retitled to its body; PL9 drives seek-then-stall in jsdom; (6) whether a preview stops the transport is unchanged (Q-PREVIEW-STOPS-TRANSPORT awaiting_user); (7) TL-R418-L1/GATE418-L4 close as a defence on the same line (PL4 lock row; no observable effect by design, TL-R421-01). Doc 271."
+    },
+    {
+      "id": "D-29z1470",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 420 -> 421 planning",
+      "decision": "Order: 421 SYS-R418-PREVIEW-LIFECYCLE -> 422 REGRESSION-2026-11-10 (due at the first planning on or after 2026-11-10; scope = rounds 391-401 items + scope_additions + every item done since, 402-421) -> STEM-LANES S1..S4 once AGREE-STEM-LANES is answered (else SYS-1..3, then STORE-2b..5 per the skip-while-waiting rule; STEM-LANES first when the answer arrives) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). Next RETRO round 435. ARCH-CHECKPOINT-STEM-LANES stays requested of root."
     }
   ],
   "retro_candidates": [

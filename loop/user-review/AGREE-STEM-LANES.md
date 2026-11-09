@@ -18,7 +18,7 @@
 | 2 | Group Track-ს თავად clip არ უჭირავს; ის ხმის შემკრები, ჩაკეცვადი კონტეინერია | [Live 12 manual, Mixing → Group Tracks](https://www.ableton.com/en/live-manual/12/mixing/) | დადასტურებული (product-designer, 2026-11-09) |
 | 3 | რამდენიმე ფაილის ერთად ჩაგდებისას: ერთ track-ზე მიყოლებით თუ ცალ-ცალკე track-ებზე; Ctrl-ის როლი | — | **დაუდასტურებელი.** root-ის გაზომვა LIVE-MEAS-STEM-DROP (`live-checks.md`, 2026-10-31) ჯერ არ გაკეთებულა |
 | 4 | იგივე ფაილების მეორედ ჩაგდება | — | დაუდასტურებელი |
-| 5 | YouTube tutorials | `youtube-request.json` (6 query) | root-ის ძებნა და transcripts ჯერ არ არის; მოსვლისას B ამ ცხრილს შეავსებს |
+| 5 | YouTube tutorials | `youtube-request.json` (6 query) → root-ის ძებნის შედეგი `reference/youtube/STEM-LANES.md` (2026-11-09, 12 კანდიდატი) | B-ის არჩევანი (2026-11-09, round 420 → 421 დაგეგმვა, D-29z1468): #1 „Learn Live: Moving between Session and Arrangement Views“ (Ableton) — ფაილების ჩაგდება Arrangement-ში; #2 „Learn Live: Arrangement View“ (Ableton) — track-ები და clip-ები; #3 „Learn Live: Grouping tracks“ (Ableton) — Group Track-ის შექმნა; #4 „Split Ableton Drum Rack into Separate Audio Tracks…“ (Off The Beat Music) — ერთი წყაროს რამდენიმე track-ად დაშლა. **Transcripts ჯერ არ არის** (`STEM-LANES-transcripts.md` არ არსებობს): root-ს ვთხოვთ ამ ოთხის წაკითხვას Saba-ს კომპიუტერზე. ვიდეოს სათაური მონაცემია და არა ქცევის მტკიცებულება |
 
 ## რას გთავაზობს product-designer (2026-11-09, read-only consult)
 **დაპირება:** როცა მონტაჟორი stem set-ს ამატებს, თითო stem თავის ხაზზე ჯდება Insert Marker-ზე, ასე რომ set ერთ მიქსად ჟღერს, რომლის ბალანსიც შეიცვლება და export-დება.
