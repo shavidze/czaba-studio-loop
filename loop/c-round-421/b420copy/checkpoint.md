@@ -1,0 +1,11 @@
+# B round 420 -> 421 checkpoint
+- Step 1 done: tasks/round-420.md archived (cmp identical), before-copies in b-round-420/.
+- Decision: round 420 accepted (C PASS, browserVerified true; gate 420 skipped, baseline stays 6609dfa).
+- Next task: SYS-R418-PREVIEW-LIFECYCLE (regression due at 2026-11-10 planning, today 2026-11-09). Doc number 271.
+- Next step: stability check of collection prop/effect deps, then scratch /tmp/b420-scratch sketch.
+- Step 2 done: sketch b-round-420/sketch-421.patch.txt sha 8d5fc47d… (generators make-sketch-src.py/make-sketch-test.py); stream file 49/49; covering 14 files 286/286 (precheck-a2.log); typecheck/lint(205 warn)/biome rc 0.
+- Step 3 done: mutants/summary.txt (7 lines) on /tmp/b420-mut.
+- Running: full suite on /tmp/b420-scratch (precheck-full.log). Next: browser HEAD vs sketch (reuse b-round-417/probe/rows-418.mjs + new R11 rerender row), tech-lead review.
+- Step 4 done: full 264/3951 rc0; loaded 49/49; browser compare ALL EQUAL 16 cells (probe/compare-head-vs-sketch.txt); tech-lead approve, Lows TL-R421-01..05. Next: sketch-review.md, backlog, task, reports.
+- Step 5 done: backlog v397, feature-status, lessons L56, task, claims (planning stderr 0), l58 OK, b-round-420.md, b-next.json. Next: advisor close.
+- Close: K20 no longer claims the root-controlled transcripts file (advisor); claims regenerated (stderr 0, diff 10 lines), L58 OK, store clean. Planning complete.

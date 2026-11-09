@@ -1,0 +1,95 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/c421-scratch[39m
+
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+Not implemented: HTMLMediaElement's pause() method
+Not implemented: HTMLMediaElement's load() method
+ [31m❯[39m app/lib/arrangement/__tests__/library-preview-stream.test.tsx [2m([22m[2m49 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2385[2mms[22m[39m
+     [32m✓[39m PS1 a stream preview sets the url and offset, plays once, reports the element time, and stop releases the media[32m 5[2mms[22m[39m
+     [32m✓[39m PS2 a seek on the playing stream reuses the same element without pausing it[32m 1[2mms[22m[39m
+     [32m✓[39m PS3 ended fires onEnded once; an old element ending after its stop does nothing[32m 2[2mms[22m[39m
+     [32m✓[39m PS4 an error or a play rejection on the active stream reports its time; a play rejection after stop does not[32m 3[2mms[22m[39m
+     [32m✓[39m PS5 a buffer preview after a stream releases the stream element and starts one buffer source[32m 1[2mms[22m[39m
+     [32m✓[39m PS6 Preview of an evicted URL source streams: no decode, no loading text, no pin, preview id set[32m 90[2mms[22m[39m
+     [32m✓[39m PS7 a cached buffer wins over the stream: no media element, one buffer source[32m 60[2mms[22m[39m
+     [32m✓[39m PS8 a stream error falls back to the decode path, plays the buffer, and the fallback is remembered[32m 56[2mms[22m[39m
+     [32m✓[39m PS9 Play stops a streaming preview: the element is released and the transport plays[32m 61[2mms[22m[39m
+     [32m✓[39m PS10 unmounting the provider releases a streaming element[32m 47[2mms[22m[39m
+     [32m✓[39m PS11 a stream preview stops the playing transport before the element plays[32m 53[2mms[22m[39m
+     [32m✓[39m PS12 the natural end of a stream clears the preview id and releases the preview pin[32m 46[2mms[22m[39m
+     [32m✓[39m PS13 the fallback resumes from the element time, not from zero[32m 52[2mms[22m[39m
+     [32m✓[39m PS14 a streamed preview writes no status[32m 53[2mms[22m[39m
+     [32m✓[39m PS27 the remembered fallback lives with its collection object: a new collection streams the same source again[32m 105[2mms[22m[39m
+     [32m✓[39m PS16 a stream that never plays falls back after the stall timeout with its time[32m 1[2mms[22m[39m
+     [32m✓[39m PS17 playing disarms the watchdog; waiting re-arms it; progress restarts an armed timer only[32m 1[2mms[22m[39m
+     [32m✓[39m PS18 the watchdog does nothing when the element time moved since it was armed[32m 0[2mms[22m[39m
+     [32m✓[39m PS19 stop, a new preview and a same-url seek never leave or arm a stall timer by themselves[32m 1[2mms[22m[39m
+     [32m✓[39m PS20 an external pause ends the preview once and releases the element[32m 1[2mms[22m[39m
+     [32m✓[39m PS21 our own stop and a natural end never count as an external pause; a pause with an error is left to the error event[32m 1[2mms[22m[39m
+     [32m✓[39m PS22 a synchronous throw from currentTime or play() is a stream error, never an uncaught exception[32m 1[2mms[22m[39m
+     [32m✓[39m PS23 a synchronous throw on a same-url seek is a stream error of the active preview[32m 1[2mms[22m[39m
+     [32m✓[39m PS24 the default scheduler arms an 8000 ms window timer that a stop clears[32m 3[2mms[22m[39m
+     [32m✓[39m PS25 a same-url seek before playing restarts the armed watchdog from the new time[32m 1[2mms[22m[39m
+     [32m✓[39m PS26 a stop removes every listener the stream added[32m 1[2mms[22m[39m
+     [32m✓[39m PS28 a synchronous throw on a same-url seek before playing is a stream error and leaves no stall timer[32m 1[2mms[22m[39m
+     [32m✓[39m PS29 the stream element requests its URL in anonymous CORS mode, like the credential-free decode fetch[32m 1[2mms[22m[39m
+     [32m✓[39m PC1 stop then a re-preview of the same source during its decode starts once, at the second offset[32m 88[2mms[22m[39m
+     [32m✓[39m PC2 a stream preview supersedes a pending decode preview of another source[32m 107[2mms[22m[39m
+     [32m✓[39m PC3 a stale call whose collection has no live owner writes its refusal and leaves the live preview playing[32m 199[2mms[22m[39m
+     [32m✓[39m PC4 a stream error starts the fallback after the media handler returns, never inside it[32m 111[2mms[22m[39m
+     [32m✓[39m PC5 a synchronous src throw inside the stream start falls back once, after the start call returns[32m 103[2mms[22m[39m
+     [32m✓[39m PC6 a stop between the stream error and its deferred fallback wins: no decode, no restart, the fallback is still remembered[32m 105[2mms[22m[39m
+     [32m✓[39m PC12 a same-url seek re-targets the stream error: an error after the seek still falls back, from the element time[32m 114[2mms[22m[39m
+     [32m✓[39m PC7 unmounting the provider during a decode preview starts nothing when the decode settles[32m 106[2mms[22m[39m
+     [32m✓[39m PC8 a pause fired synchronously inside a same-url seek ends the preview once and throws nothing[32m 1[2mms[22m[39m
+     [32m✓[39m PC9 the stall watchdog reads the element time once per tick and a throwing read is a stream error at the start offset[32m 1[2mms[22m[39m
+     [32m✓[39m PC10 a media error whose time read throws still reports one stream error at the start offset[32m 1[2mms[22m[39m
+     [32m✓[39m PC11 a stream with a different url releases the previous element before the new one plays[32m 1[2mms[22m[39m
+     [32m✓[39m PL1 a collection change stops a playing stream preview: the element is released and the preview id clears[32m 124[2mms[22m[39m
+     [32m✓[39m PL2 a stream fallback queued before a collection change never starts a source of the new collection[32m 206[2mms[22m[39m
+     [32m✓[39m PL3 a decode preview pending across a collection change starts nothing when its decode settles[32m 232[2mms[22m[39m
+     [32m✓[39m PL4 lock: a stream error queued before the provider unmounts starts nothing after it (defence; no observable effect by design)[32m 116[2mms[22m[39m
+     [32m✓[39m PL5 a provider re-render with the same collection keeps the stream preview playing[32m 106[2mms[22m[39m
+     [32m✓[39m PL6 after a same-url seek a media error whose time read throws reports the seek offset, not the first start[32m 1[2mms[22m[39m
+     [32m✓[39m PL7 a watchdog armed at a real time whose tick read throws reports a stall at the armed time[32m 1[2mms[22m[39m
+[31m     [31m×[31m PL8 the preview offset never throws: a throwing read returns the latest seek offset while the stream is active[39m[32m 10[2mms[22m[39m
+     [32m✓[39m PL9 a same-url seek then a stall falls back through the newest request at the seek time[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/library-preview-stream.test.tsx[2m > [22mSYS-R418 preview player: the read fallback follows the seek[2m > [22mPL8 the preview offset never throws: a throwing read returns the latest seek offset while the stream is active
+[31m[1mAssertionError[22m: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown[39m
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+DOMException {}
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/library-preview-stream.test.tsx:[2m1394:56[22m[39m
+    [90m1392| [39m    player[33m.[39m[34mplayLibraryPreviewStream[39m([33mBIG_URL[39m[33m,[39m [34m6[39m[33m,[39m onError)[33m;[39m
+    [90m1393| [39m    [34mthrowingTimeAfter[39m(element)[33m;[39m
+    [90m1394| [39m    [34mexpect[39m(() [33m=>[39m player[33m.[39m[34mgetLibraryPreviewOffset[39m())[33m.[39mnot[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                                                       [31m^[39m
+    [90m1395| [39m    [34mexpect[39m(player[33m.[39m[34mgetLibraryPreviewOffset[39m())[33m.[39m[34mtoBe[39m([34m6[39m)[33m;[39m
+    [90m1396| [39m    [34mexpect[39m(onError)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m48 passed[39m[22m[90m (49)[39m
+[2m   Start at [22m 17:37:28
+[2m   Duration [22m 3.73s[2m (transform 617ms, setup 0ms, import 804ms, tests 2.39s, environment 404ms)[22m
+
+
+::error file=/tmp/c421-scratch/app/lib/arrangement/__tests__/library-preview-stream.test.tsx,title=app/lib/arrangement/__tests__/library-preview-stream.test.tsx > SYS-R418 preview player%3A the read fallback follows the seek > PL8 the preview offset never throws%3A a throwing read returns the latest seek offset while the stream is active,line=1394,column=56::AssertionError: expected [Function] to not throw an error but DOMException{ stack: 'InvalidStateEr…', …(1) } was thrown%0A%0A- Expected: %0Aundefined%0A%0A+ Received: %0ADOMException {}%0A%0A ❯ app/lib/arrangement/__tests__/library-preview-stream.test.tsx:1394:56%0A%0A

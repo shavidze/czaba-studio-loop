@@ -1042,3 +1042,7 @@ COMMIT OK. Findings for B: gates/round-418/review.md
 ## Round 419 (2026-11-09)
 COMMIT OK. Findings for B: gates/round-419/review.md
 
+
+## Round 421 (2026-11-09)
+COMMIT OK. Findings for B: gates/round-421/review.md
+

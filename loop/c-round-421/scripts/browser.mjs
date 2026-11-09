@@ -1,0 +1,53 @@
+import { createRequire } from 'node:module';
+import { writeFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const out = process.argv[2];
+const B = 'http://127.0.0.1:5173';
+const res = {};
+const browser = await chromium.launch();
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const k = `${w}x${h}`; const j = (res[k] = {});
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  const aud = []; page.on('pageerror', (e) => (j.pageErrors = (j.pageErrors || []).concat(String(e).slice(0, 150))));
+  await page.goto(`${B}/studio-lab`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[data-testid="arrangement-timeline-scroller"]', { timeout: 120000 });
+  await page.getByText('Demo collection ready').first().waitFor({ timeout: 120000 }).catch(() => (j.readyTimeout = true));
+  await page.waitForTimeout(1200);
+  j.authUser = await page.evaluate(() => localStorage.getItem('auth_user'));
+  await page.screenshot({ path: `${out}/lab-open-${k}.png` });
+  // smoke
+  await page.getByRole('button', { name: 'All' }).first().click().catch(() => {});
+  await page.getByTestId('arrangement-library-list').getByRole('option').first().click();
+  await page.waitForTimeout(250);
+  const before = await page.locator('[data-clip-id]').count();
+  await page.keyboard.press('Enter'); await page.waitForTimeout(900);
+  j.clipsBefore = before; j.clipsAfter = await page.locator('[data-clip-id]').count();
+  const pos = async () => (await page.getByTestId('arrangement-position').textContent().catch(() => ''))?.trim();
+  j.pos0 = await pos();
+  await page.getByRole('button', { name: /^Play/ }).first().click(); await page.waitForTimeout(1500);
+  j.posPlaying = await pos(); await page.screenshot({ path: `${out}/playing-${k}.png` });
+  await page.getByRole('button', { name: /^Stop/ }).first().click(); await page.waitForTimeout(400);
+  const p1 = await pos(); await page.waitForTimeout(600); j.posStopped1 = p1; j.posStopped2 = await pos();
+  await page.getByRole('button', { name: /^Export/ }).first().click(); await page.waitForTimeout(800);
+  j.dialogOpen = await page.getByRole('dialog').count();
+  j.dialogText = (await page.getByRole('dialog').first().innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 300);
+  await page.screenshot({ path: `${out}/export-${k}.png` });
+  await page.keyboard.press('Escape'); await page.waitForTimeout(500);
+  if (await page.getByRole('dialog').count()) await page.getByRole('button', { name: /Cancel|Done|Close/ }).first().click().catch(() => {});
+  await page.waitForTimeout(400); j.dialogAfterClose = await page.getByRole('dialog').count();
+  await ctx.close();
+  // anonymous protected route
+  const c2 = await browser.newContext({ viewport: { width: w, height: h } }); const p2 = await c2.newPage();
+  const srcs = []; 
+  await p2.goto(`${B}/studio/middle-east`, { waitUntil: 'domcontentloaded' }); await p2.waitForTimeout(8000); j.pUrls = p2.url();
+  j.protected = { url: p2.url(), authUser: await p2.evaluate(() => localStorage.getItem('auth_user')), text: (await p2.evaluate(() => document.body ? document.body.innerText : 'NOBODY')).replace(/\s+/g, ' ').slice(0, 300), audioSrc: await p2.locator('audio[src]').count(), signIn: await p2.getByText(/Sign in required/i).count() };
+  await p2.screenshot({ path: `${out}/protected-${k}.png` });
+  const r = await c2.request.get(`${B}/api/studio-token?product=middle-east&file=a.mp3`, { failOnStatusCode: false });
+  j.tokenStatus = r.status(); j.tokenBody = (await r.text()).slice(0, 150);
+  await c2.close();
+}
+await browser.close();
+writeFileSync(`${out}/browser.json`, JSON.stringify(res, null, 1));
+console.log(JSON.stringify(res, null, 1));
