@@ -1,10 +1,10 @@
 {
-  "version": 398,
-  "updated": "2026-11-09 (B round 421 -> 422 planning: round 421 accepted and published 4786c13; SYS-2 stage 1 (held Enter on the transport and marker flag) dispatched as round 422)",
+  "version": 399,
+  "updated": "2026-11-09 (B round 422 -> 423 planning: round 422 accepted and published 875ff37; REGRESSION-2026-11-10 part 1 dispatched as round 423)",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 422: SYS-2 stage 1 (held Enter acts once on Split, Follow, Back to start, Loop, Zoom to range and the marker flag); sketch b-round-421/sketch-422.patch.txt (current-task.md)",
-  "advisor_used_by_B": "round 421 -> 422 planning: advisor available and consulted after orientation and before close; tech-lead reviewed the sketch (b-round-421/sketch-review.md)",
+  "current_task": "Round 423: REGRESSION-2026-11-10 part 1 (C-only browser sweep of the items finished in rounds 391-422, scope additions SA-1..SA-6 named; A changes nothing) (current-task.md)",
+  "advisor_used_by_B": "round 422 -> 423 planning: advisor available and consulted after orientation and before close",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12175,8 +12175,16 @@
       "task": "current-task.md",
       "decision": "D-29z1473",
       "type": "SYS-2 stage 1 (runtime + tests)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1475): C PASS c-round-422.json; gate 422 published 875ff37",
       "note": "baseline 4786c13 clean; frozen b-round-421/r422-frozen-sha256.txt (1317); grants b-round-421/grants-422.txt (4); sketch b-round-421/sketch-422.patch.txt sha 7002efc1; review b-round-421/sketch-review.md; claims b-round-421/claims-422.sh"
+    },
+    {
+      "round": 423,
+      "task": "current-task.md",
+      "decision": "D-29z1476, D-29z1477",
+      "type": "REGRESSION-2026-11-10 part 1 (C-only browser sweep; A no change)",
+      "status": "dispatched",
+      "note": "baseline 875ff37 clean; tree manifest b-round-422/r423-tree-sha256.txt (1321); claims b-round-422/claims-423.sh; marker-seek baseline b-round-422/probe/head/"
     }
   ],
   "post_current_stage_queue": [
@@ -27479,7 +27487,7 @@
       "origin": "C recipe (round 404 row 4)",
       "evidence": "c-round-404/out/leaf-compare.txt steps 23-27; app/lib/arrangement/markers.ts adjacentMarkerTarget",
       "title": "marker placed at 0 s, so Next marker fell back to project end 19.000 s; marker seek not exercised",
-      "status": "info (D-29z1401): carried into REGRESSION-2026-11-10 scope_additions_d29z1401 | info (D-29z1401): carry into the next marker-seek C row",
+      "status": "in round 423 (D-29z1477): row R423-MARKER-SEEK; baseline b-round-422/probe/head/marker-seek.json | info (D-29z1401): carried into REGRESSION-2026-11-10 scope_additions_d29z1401 | info (D-29z1401): carry into the next marker-seek C row",
       "added": "2026-11-08 B round 404 -> 405 planning"
     },
     {
@@ -27771,105 +27779,6 @@
       "title": "module-scope factory state reset only by install() (all suites call it in beforeEach); setInterval stub undone by unstubAllGlobals; unused returned members kept for SIG-R415-WORKSPACE-ENV-CONVERGENCE",
       "status": "recorded (D-29z1444): no action; #4 folds into SIG-R415-WORKSPACE-ENV-CONVERGENCE",
       "added": "2026-11-08 B round 415 -> 416 planning"
-    },
-    {
-      "id": "C-R420-CLAIMS-K22-ARCHIVE-AGAIN",
-      "severity": "low",
-      "origin": "environment",
-      "title": "claims-420 K22 did not read archive/findings-archived.json (TL-R419-L1 archived between B and C)",
-      "evidence": "c-round-420.json; c-round-420/claims.out",
-      "status": "closed (D-29z1471): C round 421 row 1 PASS (K14 all located, K20 reads AGREE + search result) | fixed in B tooling (D-29z1468): tools/find-ids.py, L56 clause; closes on C round 421 CLAIMS row (K14)",
-      "added": "2026-11-09 B round 420 -> 421 planning"
-    },
-    {
-      "id": "C-R420-CLAIMS-K8-K24-YOUTUBE-REQUEST-CONSUMED",
-      "severity": "low",
-      "origin": "environment",
-      "title": "claims-420 K8/K24 read youtube-request.json after root consumed it; AGREE-STEM-LANES row 5 was stale",
-      "evidence": "c-round-420.json; c-round-420/claims.err",
-      "status": "closed (D-29z1471): C round 421 row 1 PASS (K14 all located, K20 reads AGREE + search result) | fixed in B tooling (D-29z1468): request files are no claims input (L56); AGREE row 5 updated; closes on C round 421 CLAIMS row (K20)",
-      "added": "2026-11-09 B round 420 -> 421 planning"
-    },
-    {
-      "id": "TL-R422-01",
-      "severity": "info",
-      "origin": "B pre-check",
-      "title": "flag guard before the target/modifier early return is safe; repeated Ctrl+Enter also prevented",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): accepted",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-02",
-      "severity": "info",
-      "origin": "B pre-check",
-      "title": "no Enter path reads defaultPrevented; no stopPropagation added",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): accepted",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-03",
-      "severity": "info",
-      "origin": "B pre-check",
-      "title": "every HE row can fail and checks a positive first-press effect",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): accepted",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-04",
-      "severity": "low",
-      "origin": "B pre-check",
-      "title": "HE4 not.toBe(null) was vacuous",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): fixed in the sketch: not.toBe(before.undo)",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-05",
-      "severity": "low",
-      "origin": "B pre-check",
-      "title": "HE2 toContain('\"loop\"') was weak",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): fixed in the sketch: line removed",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-06",
-      "severity": "low",
-      "origin": "B pre-check",
-      "title": "HE5 snapshot cannot observe a repeat (idempotent zoom)",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): fixed in the sketch: title says so; prevented keydown is the observable",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-07",
-      "severity": "info",
-      "origin": "B pre-check",
-      "title": "timeout headroom about 45x",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): accepted",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-08",
-      "severity": "info",
-      "origin": "B pre-check",
-      "title": "transport coverage complete except Fit (TH5 lock)",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): accepted",
-      "added": "2026-11-09 B round 421 -> 422 planning"
-    },
-    {
-      "id": "TL-R422-09",
-      "severity": "low",
-      "origin": "B pre-check",
-      "title": "needs an implementation doc",
-      "evidence": "b-round-421/sketch-review.md",
-      "status": "closed (D-29z1473): doc 272 is in the task",
-      "added": "2026-11-09 B round 421 -> 422 planning"
     }
   ],
   "tech_lead_notes": [
@@ -30974,6 +30883,14 @@
       "source": "a-round-421.md For B (Architecture note)",
       "signal": "ArrangementContext collection effect now also owns part of the library preview lifecycle (previewTokenRef, previewPlayerRef, streamFallbackRef, startLibraryPreviewRef; rounds 416/418/421). Reviewer: keep for now. Candidate: internal useLibraryPreviewController hook; acceptance = useArrangement() surface unchanged, PC/PS/PL/EV12 bodies unchanged, MU-COLLECTION-NO-STOP still red on PL1/PL2.",
       "attached_to": "ARCH-CHECKPOINT-PREVIEW-AFTER-13C (b-round-393/root-request-arch-checkpoint-preview.md, still requested of root; not scheduled)"
+    },
+    {
+      "id": "SIG-R422-REPEAT-SAFE-BUTTON-PROPS",
+      "added": "2026-11-09 B round 422 -> 423 planning",
+      "decision": "D-29z1475",
+      "source": "gates/round-422/review.md Architecture note + suggestion 2; a-round-422.md For B",
+      "signal": "repeated-Enter handling is spread over several handlers (preventRepeatedEnterKeyDown in ArrangementTransport.tsx, the inline flag guard in ArrangementMarkerRow.tsx, the Export inline guard); proposal: one exported repeat-safe button-props helper used by every A-R107 sweep site, TH5 Fit exception kept",
+      "status": "attached to SYS-2 stage 2a (decided inside that task, one owner, behaviour-preserving rows); not a separate task"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -32319,7 +32236,7 @@
     {
       "id": "GATE107-S1-MARKER-FLAG-HELD-ENTER",
       "severity": "low",
-      "status": "in round 422 (D-29z1473; row HE6); closes on its C PASS | open - waits for ARCH-R107-SHARED-ENTER-GUARD checkpoint, then the held-Enter toolbar sweep round",
+      "status": "closed (D-29z1475): C round 422 PASS (rows 3 MU-FLAG->HE6, 4 FLAG cells ALL OK), gate 422 published 875ff37 | in round 422 (D-29z1473; row HE6); closes on its C PASS | open - waits for ARCH-R107-SHARED-ENTER-GUARD checkpoint, then the held-Enter toolbar sweep round",
       "to": "held-Enter sweep",
       "title": "held Enter on a marker flag runs jumpToMarker on every auto-repeat (handleFlagKeyDown has no repeat guard)",
       "evidence": "gates/round-107/review.md suggestion 1",
@@ -32340,7 +32257,7 @@
     {
       "id": "A-R107-SWEEP-HELD-ENTER-TOOLBAR",
       "severity": "low",
-      "status": "in_progress (D-29z1473): transport part in round 422 (HE1-HE5); rest in SYS-2 stage 2 | open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
+      "status": "in_progress (D-29z1475, D-29z1478): transport part done in round 422 (HE1-HE5); rest in SYS-2 stage 2a/2b | in_progress (D-29z1473): transport part in round 422 (HE1-HE5); rest in SYS-2 stage 2 | open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
       "to": "held-Enter sweep",
       "title": "held Enter repeats on toolbar buttons without a guard: Loop, Play, Split, Follow, Zoom to range, Snap, Env, Metronome, video expand/return, track/group Mute/Solo, master mute, folds, detail toggle; Low: Home and marker flags restart the graph during playback; group name editor settles on a repeated Enter; held Escape on the marker editor",
       "evidence": "a-round-107.md Sweep 1 and Sweep 2",
@@ -39466,6 +39383,29 @@
       "evidence": "a-round-421.md Reviewer findings; doc 271 TODO; c-round-421.json notes",
       "repro": "read library-preview-stream.test.tsx PL1-PL3",
       "added": "2026-11-09 B round 421 -> 422 planning"
+    },
+    {
+      "id": "A-R422-REVIEW-L1-ONKEYDOWN-SPREAD-ORDER",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1478: rides SYS-2 stage 2a)",
+      "title": "on Split, Loop and Zoom to range the onKeyDown guard precedes {...softDisabledButtonProps(...)}; safe today (the spread has only aria-disabled and onMouseDown) but a future onKeyDown in SoftDisabledButtonProps would silently override the guard",
+      "evidence": "a-round-422.md Reviewer findings (A6); gate 422 review Checks: Event ordering",
+      "repro": "read ArrangementTransport.tsx Split/Loop/Zoom to range JSX and studio-soft-disabled.ts SoftDisabledButtonProps",
+      "added": "2026-11-09 B round 422 -> 423 planning"
+    },
+    {
+      "id": "A-R422-REVIEW-L2-HE4-HE5-PREVENTED-ONLY",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish",
+      "title": "HE4 (Split) and HE5 (Zoom to range) observe a repeat only through the prevented keydown, because a repeated Split at the same insert marker and a repeated zoom are idempotent; mutants MU-SPLIT/MU-ZOOMRANGE still turn them red",
+      "evidence": "a-round-422.md Reviewer findings; doc 272",
+      "confirmedBy": [
+        "gate 422 review suggestion 3 (gates/round-422/review.md)"
+      ],
+      "repro": "read transport-centre-ui.test.tsx HE4/HE5",
+      "added": "2026-11-09 B round 422 -> 423 planning"
     }
   ],
   "regression_rounds": [
@@ -39733,7 +39673,7 @@
     {
       "id": "REGRESSION-2026-11-10",
       "decision": "D-29z1375",
-      "status": "due at the first planning on or after 2026-11-10",
+      "status": "dispatched part 1 (D-29z1476, D-29z1477): round 423 (rounds 391-422, SA-1..SA-6); part 2 = round 424 (round-390 template); regression-last updated only when part 2 closes | due at the first planning on or after 2026-11-10",
       "scope": "C re-verifies in the browser the key acceptance of every item done since REGRESSION-2026-11-08 (rounds 391-401: PERF-13b-ii, 13c-i, 13c-ii-a/b, 13d, 14a, 14b-i) plus one short check per earlier done item, both viewports; npm run test:e2e:smoke; A fixes only what C finds",
       "added": "2026-11-08 B round 400 -> 401 planning",
       "scope_additions": [
@@ -39757,7 +39697,17 @@
         "marker seek (INFO-C404-MARKER-SEEK-RECIPE): place the marker at a non-zero time, Home, then Next marker; read the clock = the marker time (round 404 row 4 left this unexercised: marker at 0 s, Next fell back to project end)"
       ],
       "planning_note_d29z1470": "due at the round 421 -> 422 planning if it runs on or after 2026-11-10; extend its scope with every item done in rounds 402-421 (one short check each, both viewports)",
-      "planning_note_d29z1472": "not due at the 421 -> 422 planning (2026-11-09); due at the 422 -> 423 planning if on or after 2026-11-10; window extends to round 422"
+      "planning_note_d29z1472": "not due at the 421 -> 422 planning (2026-11-09); due at the 422 -> 423 planning if on or after 2026-11-10; window extends to round 422",
+      "round": 423,
+      "scope_named_d29z1477": {
+        "SA-1": "REG-14BII-EXPORT-UNMOUNTED -> R423-SCALE-EXPORT",
+        "SA-2": "PERF-14b-ii frames200 + pin-blur-group -> R423-SCALE",
+        "SA-3": "PERF-14c-i peaks-fallback failing mode -> R423-PEAKS-FALLBACK",
+        "SA-4": "export WAV samples/duration and audio graph output -> R423-SCALE-EXPORT + R423-JOURNEY",
+        "SA-5": "fake-bearer BLOCKED -> G423-AUTH",
+        "SA-6": "INFO-C404-MARKER-SEEK-RECIPE -> R423-MARKER-SEEK",
+        "SA-7": "planning_note_d29z1470 (every item done 402-422) -> rows R423-*"
+      }
     }
   ],
   "ableton_recommendations": [
@@ -40565,7 +40515,7 @@
       "evidence": "retros/retro-200.md section 6; grep at 5b1a2bb",
       "size": "1 round",
       "acceptance_note": "key auto-repeat and held-key rows; one toggle per press; real-browser held Enter at both viewports",
-      "status": "in_progress (D-29z1473): stage 1 dispatched round 422 (transport Split/Follow/Back to start/Loop/Zoom to range + marker flag); stage 2 = remaining A-R107 sweep | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 204 (hidden focusables) and round 205 (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS) | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
+      "status": "in_progress (D-29z1475, D-29z1478): stage 1 done (C round 422 PASS, gate 422 published 875ff37); stage 2a (mixer/lane controls + shared repeat-safe props decision) and stage 2b (library, dock, menus, dialogs, marker editor Escape) queued after REGRESSION-2026-11-10 | in_progress (D-29z1473): stage 1 dispatched round 422 (transport Split/Follow/Back to start/Loop/Zoom to range + marker flag); stage 2 = remaining A-R107 sweep | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 204 (hidden focusables) and round 205 (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS) | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
       "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
       "vetoable": "root or Saba may reorder without a B round",
       "status_note_d29z170": "2026-10-27 B round 204 -> 205 planning (D-29z170): still queued; order after round 205: SYS-1, SYS-2, SYS-3",
@@ -40573,6 +40523,12 @@
       "stages_d29z1473": {
         "stage1": "round 422: ArrangementTransport.tsx Split, Follow, Back to start, Loop, Zoom to range; ArrangementMarkerRow.tsx handleFlagKeyDown; rows HE1-HE6",
         "stage2": "remaining sites of b-round-421/data/button-guard-scan.txt (NONE / KEYDOWN-NO-REPEAT lines outside the transport), each ruled guard or idempotent-exclusion; held Escape on the marker editor; group name editor",
+        "fit": "excluded (TH5 lock, idempotent)"
+      },
+      "stages_d29z1478": {
+        "stage1": "done round 422 (HE1-HE6, doc 272)",
+        "stage2a": "ArrangementLane, ArrangementGroupHeader, ArrangementMaster, ArrangementTempoRow sites + SIG-R422-REPEAT-SAFE-BUTTON-PROPS decision + A-R422-REVIEW-L1",
+        "stage2b": "ArrangementLibrary, ArrangementVideoDock, ArrangementDetailPanel, ArrangementGridMenu, ArrangementMarkerMenu, ArrangementExportDialog, ArrangementShortcutSheet, StudioNarrowScreen, StudioWorkspace footer buttons, marker editor held Escape",
         "fit": "excluded (TH5 lock, idempotent)"
       }
     },
@@ -41630,30 +41586,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1421",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 409 -> 410 planning",
-      "decision": "Round 409 (PERF-11c-iii-e-ii) accepted on independent C evidence: c-round-409.json taskStatus PASS, 8 rows passed (SOURCE-SCOPE start/end + L57, PATCH-IDENTITY cmp-identical to sketch sha 1beedffb, LANE-ACTIONS 8/8 ok both viewports no pageErrors (1440 attempt 1 cold timeout kept, L38), LEAF-PROBE inner [0,8,4,4,0,0,0,1,1,4,4,0,0,1,1] shell [0,12,4,4,0,0,0,4,4,4,4,4,8,4,4] both viewports, UNIT 914/914 + 9/9 mutants RED on C's committed scratch + tsc guard rc 2, AUTH, DOCS), failed [], bugs [], browserVerified/realVerified true; gate 409 published 9616d3a on both remotes (review COMMIT OK, no blockers). PERF-11c-iii-e-ii done; PERF-11c-iii done (a..e all done); PERF-11c done (i, ii, iii). PERF-11 stays in_progress only on 11b (awaiting_user). Still open evidence: fake-bearer /api/studio-token row BLOCKED (backend unavailable in cloud). C-recorded gaps (not bugs): library drop / video import / lane drag not browser-run (unit-covered); export WAV integrity not re-measured (unchanged code)."
-    },
-    {
-      "id": "D-29z1422",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 409 -> 410 planning",
-      "decision": "Round 409 reviewer findings ruled. A-R409-REVIEW-L4-TRACK-FIELD-COVERAGE (Low: no mutant for a wrong compare body of name/volume/groupId/kind) -> deferred_low_polish, fix home = next round owning render-budget.test.tsx (proposal: a volume step and a rename step, each 1 inner render + DOM updated). Gate-409 review: item 2 -> GATE409-L1-COMPARATOR-OBJECT-IS-TRAP (Low, deferred_low_polish; RB-LEAF7 inner counts guard it today); item 3 -> GATE409-L2-ARRANGEMENT-CLIPS-ALIAS (Low, deferred_low_polish, tidy only when editing nearby); item 1 info = TL-R409-SK-6, merged into the signal below. A reviewer + gate 409 Architecture notes (both 'keep' the shell + inner in one file; both propose an identity-stable sourceDurations in ArrangementContext) -> one signal SIG-R409-SOURCE-DURATIONS-IDENTITY attached to ARCH-CHECKPOINT-PERF11C-III-BOUNDARY; not scheduled. ARCH-CHECKPOINT-PERF11C-III-BOUNDARY has no root result at this planning; non-blocking per b-round-408.md section 3, so B proceeds with PERF-15."
-    },
-    {
-      "id": "D-29z1423",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 409 -> 410 planning",
-      "decision": "PERF-15a contract (current-task.md D-29z1423): new pure module app/lib/arrangement/precomputed-peaks.ts (parseAudiowaveformPeaks: BBC audiowaveform JSON v1/v2, bits 8|16, interleaved min/max per channel, max over channels of max(|min|,|max|)/128|32768 clamped, max-pooled onto 100 buckets/s with peakBucketCount, null for anything malformed or coarser than 100/s; precomputedPeaksMatchDecodedLength within 1 bucket; fetchPrecomputedPeaks never throws, 4 MiB declared-size cap as defence in depth, passes the signal); optional WorkspaceCollection.peaksUrl; collection-load wiring: parallel fetch, early store while loading, skip the worker only for 16-bit + matching length, 8-bit is a placeholder, decoded peaks always win, late arrival ignored, decode error drops early peaks, swap/unmount cleanup drops early peaks of sources never ready, a ready source keeps its peaks (HEAD behaviour). No collection sets peaksUrl yet, so /studio-lab is unchanged. Premise measured at HEAD: library preview draws sourcePeaks in any load state (dimmed opacity-40 while loading); lanes need ready (sourceDurations ready-only), so 'waveform visible before decode' = the library preview only; re-decode never recomputes peaks. No status write, focus change or visible change."
-    },
-    {
-      "id": "D-29z1424",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 409 -> 410 planning",
-      "decision": "PERF-15 split: PERF-15a (round 410: parser + optional peaksUrl + fallback wiring, jsdom rows + browser no-regression rows) and PERF-15b (next: the demo's URL-backed sources get a peaksUrl and a real-browser 'waveform before ready' row with page.route stubs (peaks JSON immediate, audio held; 16-bit matched = 0 worker jobs, 8-bit = 1, 404 negative row), purchased adapter peaksUrl input, product-designer consult on the dimmed loading waveform, PERF-15 closes). 15a's unit PASS does not make PERF-15 done. Backend half = handoff note docs/technical/studio-real-workspace/perf-15-backend-peaks-handoff.md (B-owned; audiowaveform as an external process, -b 16 --split-channels, spp = sample_rate/100, same decoded asset or WAV master, versioned and protected peaksUrl for purchased files); real backend checks stay BLOCKED in the cloud."
-    },
-    {
       "id": "D-29z1425",
       "date": "2026-11-08",
       "by": "2026-11-08 B round 409 -> 410 planning",
@@ -41952,6 +41884,30 @@
       "date": "2026-11-09",
       "by": "2026-11-09 B round 421 -> 422 planning",
       "decision": "Order inside SYS-1..3: SYS-2 stage 1 first (a real-browser keyboard defect: held Enter flips Follow and Loop and restarts playback, reproduced at HEAD in b-round-421/probe/head), then SYS-2 stage 2, SYS-1 (test-only selector hygiene; all six anchors still present at 4786c13), SYS-3 (IME; 0 isComposing in arrangement). REGRESSION-2026-11-10 goes first at the 422 -> 423 planning. STEM-LANES goes first as soon as Saba answers AGREE-STEM-LANES. Then STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 (skip rule). Next RETRO round 435."
+    },
+    {
+      "id": "D-29z1475",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 422 -> 423 planning",
+      "decision": "Round 422 accepted from C evidence only: C PASS (c-round-422.json: 8 rows passed, 0 bugs, browserVerified/realVerified true; L57 OK in b-round-422/l57-check-c422.txt; fake-bearer auth path BLOCKED backend-unavailable, kept as open backend evidence); gate 422 published 875ff37 on both remotes (verify 264 files / 3957 tests). SYS-2 stage 1 done; GATE107-S1-MARKER-FLAG-HELD-ENTER closes (C rows 3 MU-FLAG->HE6 and 4 FLAG cells ALL OK). A-R107-SWEEP-HELD-ENTER-TOOLBAR stays open for stage 2 (transport part HE1-HE5 done). New Lows: A-R422-REVIEW-L1-ONKEYDOWN-SPREAD-ORDER and A-R422-REVIEW-L2-HE4-HE5-PREVENTED-ONLY (confirmedBy gate 422 suggestion 3) -> deferred_low_polish. Gate 422 suggestion 1 (flag guard before the target check) is TL-R422-01 (accepted, archived) and gets no new id (L7). Gate 422 Architecture note + suggestion 2 + A-422 For B (fold Export inline guard) -> one signal SIG-R422-REPEAT-SAFE-BUTTON-PROPS attached to SYS-2 stage 2, not a scheduled task. Baseline for round 423 = 875ff37."
+    },
+    {
+      "id": "D-29z1476",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 422 -> 423 planning",
+      "decision": "REGRESSION-2026-11-10 dispatched as round 423 at this planning. Clock at planning: 2026-11-09T22:5x UTC, so regression-last (2026-11-07) is 2 days old; the 3-day trigger is reached at 00:00 UTC, about an hour later. A and C run round 423 on 2026-11-10 in any case; the 3-day rule is a floor, not a prohibition (precedent D-29z1311, round 389 opened one day early), D-29z1472/D-29z1474 already placed the regression at 423, and a SYS-2 stage 2 dispatch (sketch, mutants, full-suite pre-check, browser probe, review) could not be built and verified before midnight anyway. regression-last.json is updated only when the whole regression closes."
+    },
+    {
+      "id": "D-29z1477",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 422 -> 423 planning",
+      "decision": "REGRESSION-2026-11-10 split in two parts, as REGRESSION-2026-11-08: part 1 = round 423, one short browser check per item finished in rounds 391-422 (rows R423-*), every scope addition named SA-1..SA-6 (L6), plus RR-PERF, PERF-LIB, RG-SMOKE and the auth guard; part 2 = round 424 on the same baseline: the round-390 template (everything finished up to round 390, including its carried and parked rows). New recipe R423-MARKER-SEEK run by B at the baseline (b-round-422/probe/head/marker-seek*.json: marker 00:09.000, Next after Home = 00:09.000; control without a marker = 00:16.000). Outcome fixed in advance in current-task.md section 7: Critical/High -> fix-up round 424 then part 2; cloud-reproducible Medium -> fix-up (<= 3 related bugs) then part 2; Lows -> deferred_low_polish; PARTIAL -> continue part 1. After part 2 closes: regression-last updated; then SYS-2 stage 2a, unless Saba has answered AGREE-STEM-LANES (STEM-LANES first)."
+    },
+    {
+      "id": "D-29z1478",
+      "date": "2026-11-09",
+      "by": "2026-11-09 B round 422 -> 423 planning",
+      "decision": "SYS-2 stage 2 sizing (record only, not dispatched): the remaining scan sites (b-round-421/data/button-guard-scan.txt, 62 buttons, 16 guarded + the 6 stage-1 sites) do not fit one round. Split by owner, nothing dropped: stage 2a = mixer and lane controls (ArrangementLane Mute/Solo/fold/active-track/pan reset/video import, ArrangementGroupHeader Mute/Solo/name editor, ArrangementMaster Mute/peak, ArrangementTempoRow metronome) and the shared repeat-safe button props decision (SIG-R422-REPEAT-SAFE-BUTTON-PROPS: one helper vs per-site handler, including the onKeyDown-vs-spread order of A-R422-REVIEW-L1 and Export inline guard fold); stage 2b = library (notice, folder, entries, expand/collapse/clear), video dock (return, expand, close), detail panel, grid menu items, marker menu, export dialog cancel/secondary, shortcut sheet close, narrow screen, workspace footer buttons, held Escape on the marker editor. Each site still gets a ruling (guard or idempotent exclusion) in its task; Fit stays excluded (TH5)."
     }
   ],
   "retro_candidates": [

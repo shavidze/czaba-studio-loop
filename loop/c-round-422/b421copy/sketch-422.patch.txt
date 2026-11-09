@@ -1,0 +1,174 @@
+diff --git a/app/components/arrangement/ArrangementMarkerRow.tsx b/app/components/arrangement/ArrangementMarkerRow.tsx
+index 0244177..609769f 100644
+--- a/app/components/arrangement/ArrangementMarkerRow.tsx
++++ b/app/components/arrangement/ArrangementMarkerRow.tsx
+@@ -779,6 +779,10 @@ function ArrangementMarkerRowViewInner({
+     event: KeyboardEvent<HTMLButtonElement>,
+     marker: ArrangementMarker,
+   ) => {
++    if (event.key === 'Enter' && event.repeat) {
++      event.preventDefault();
++      return;
++    }
+     if (event.target !== event.currentTarget || event.ctrlKey || event.metaKey || event.altKey) {
+       return;
+     }
+diff --git a/app/components/arrangement/ArrangementTransport.tsx b/app/components/arrangement/ArrangementTransport.tsx
+index 110e17c..ec6917f 100644
+--- a/app/components/arrangement/ArrangementTransport.tsx
++++ b/app/components/arrangement/ArrangementTransport.tsx
+@@ -337,6 +337,7 @@ function ArrangementTransportEditGroupInner({
+         onClick={guardSoftDisabledClick((event) => {
+           splitSelection();
+         })}
++        onKeyDown={preventRepeatedEnterKeyDown}
+         {...softDisabledButtonProps(!hasRange && !hasSelectedClip)}
+         title={
+           hasRange
+@@ -409,6 +410,7 @@ function ArrangementTransportCentreGroupInner({
+       <button
+         type="button"
+         onClick={onToggleFollow}
++        onKeyDown={preventRepeatedEnterKeyDown}
+         aria-pressed={followMode === 'on'}
+         title={
+           followMode === 'off'
+@@ -440,6 +442,7 @@ function ArrangementTransportCentreGroupInner({
+       <button
+         type="button"
+         onClick={returnToStart}
++        onKeyDown={preventRepeatedEnterKeyDown}
+         aria-label={studioPlaybackStrings.backToStartLabel}
+         title={studioPlaybackStrings.backToStartTitle}
+         aria-keyshortcuts={studioShortcutAria('back-to-start')}
+@@ -452,6 +455,7 @@ function ArrangementTransportCentreGroupInner({
+         onClick={guardSoftDisabledClick((event) => {
+           toggleLoopSelection();
+         })}
++        onKeyDown={preventRepeatedEnterKeyDown}
+         {...softDisabledButtonProps(!hasRange && !loop)}
+         aria-pressed={loop?.enabled === true}
+         title={
+@@ -530,6 +534,7 @@ function ArrangementTransportViewGroupInner({
+         onClick={guardSoftDisabledClick((event) => {
+           onZoomToRange();
+         })}
++        onKeyDown={preventRepeatedEnterKeyDown}
+         {...softDisabledButtonProps(!hasRange)}
+         aria-label={studioViewStrings.zoomToSelectionLabel}
+         aria-keyshortcuts="Z"
+diff --git a/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx b/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+index f2fd722..088a875 100644
+--- a/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/transport-centre-ui.test.tsx
+@@ -469,3 +469,110 @@ describe(
+     });
+   },
+ );
++
++describe(
++  'SYS-2 stage 1: a held Enter acts once on Split, Follow, Back to start, Loop, Zoom to range and a marker flag (D-29z1473)',
++  {
++    timeout: 15_000,
++  },
++  () => {
++    async function mountHeldEnterWorkspace() {
++      const mounted = await mountCentreWorkspace();
++      const snapshot = () => ({
++        arrangement: JSON.stringify(live(mounted.api).getArrangement()),
++        follow: mounted.view.getByTestId('arrangement-follow').getAttribute('data-follow-mode'),
++        zoom: mounted.view.getByTestId('arrangement-zoom-readout').textContent,
++        zoomBack: mounted.view.getByTestId('arrangement-zoom-back').getAttribute('title'),
++        undo: mounted.view.getByRole('button', { name: /^Undo/ }).getAttribute('title'),
++        marker: mounted.marker(),
++        playing: live(mounted.api).isPlaying,
++        statusSequence: live(mounted.api).statusSequence,
++        sourceStarts,
++      });
++      return { ...mounted, snapshot };
++    }
++
++    function holdEnter(
++      button: HTMLElement,
++      snapshot: () => Record<string, unknown>,
++    ): Record<string, unknown> {
++      button.focus();
++      expect(pressEnter(button, false)).toBe(true);
++      const afterFirst = snapshot();
++      for (let held = 0; held < 3; held++) {
++        expect(pressEnter(button, true)).toBe(false);
++      }
++      expect(snapshot()).toEqual(afterFirst);
++      return afterFirst;
++    }
++
++    it('HE1 held Enter on Follow switches the mode once', async () => {
++      const mounted = await mountHeldEnterWorkspace();
++      const before = mounted.snapshot();
++      const after = holdEnter(mounted.view.getByTestId('arrangement-follow'), mounted.snapshot);
++      expect(after.follow).not.toBe(before.follow);
++    });
++
++    it('HE2 held Enter on Loop with a time selection sets the loop once', async () => {
++      const mounted = await mountHeldEnterWorkspace();
++      act(() => live(mounted.api).setTimeRange({ start: 1, end: 3, trackId: 'sfx' }));
++      const loop = mounted.view.getByRole('button', { name: /Loop/ });
++      holdEnter(loop, mounted.snapshot);
++      expect(live(mounted.api).getArrangement().loop?.enabled).toBe(true);
++    });
++
++    it('HE3 held Enter on Back to start while playing restarts playback once', async () => {
++      const mounted = await mountHeldEnterWorkspace();
++      fireEvent.click(mounted.play());
++      advance(1);
++      const startsBefore = sourceStarts;
++      const after = holdEnter(
++        mounted.view.getByRole('button', { name: studioPlaybackStrings.backToStartLabel }),
++        mounted.snapshot,
++      );
++      expect(after.playing).toBe(true);
++      expect(after.marker).toBe('0.000');
++      expect(sourceStarts).toBeGreaterThan(startsBefore);
++    });
++
++    it('HE4 held Enter on Split with a selected clip splits once', async () => {
++      const mounted = await mountHeldEnterWorkspace();
++      act(() => live(mounted.api).selectClip('h1'));
++      const before = mounted.snapshot();
++      const after = holdEnter(
++        mounted.view.getByRole('button', { name: /Split/ }),
++        mounted.snapshot,
++      );
++      expect(live(mounted.api).getArrangement().clips).toHaveLength(2);
++      expect(after.undo).not.toBe(before.undo);
++    });
++
++    it('HE5 held Enter on Zoom to range zooms once (the zoom is idempotent, so only the prevented repeat keydown shows a repeat)', async () => {
++      const mounted = await mountHeldEnterWorkspace();
++      act(() => live(mounted.api).setTimeRange({ start: 1, end: 3, trackId: 'sfx' }));
++      const before = mounted.snapshot();
++      const after = holdEnter(mounted.view.getByTestId('arrangement-zoom-range'), mounted.snapshot);
++      expect(after.zoom).not.toBe(before.zoom);
++    });
++
++    it('HE6 held Enter on a marker flag while playing jumps once', async () => {
++      const mounted = await mountHeldEnterWorkspace();
++      act(() => {
++        const current = live(mounted.api).getArrangement();
++        live(mounted.api).commitArrangement(
++          { ...current, markers: [{ id: 'm1', time: 6, name: 'Verse' }] },
++          'Add marker',
++          current,
++        );
++      });
++      fireEvent.click(mounted.play());
++      advance(1);
++      const startsBefore = sourceStarts;
++      const flag = mounted.view.getByRole('button', { name: /Verse/ });
++      const after = holdEnter(flag, mounted.snapshot);
++      expect(after.marker).toBe('6.000');
++      expect(after.playing).toBe(true);
++      expect(sourceStarts).toBeGreaterThan(startsBefore);
++    });
++  },
++);

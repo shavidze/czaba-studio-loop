@@ -1,0 +1,11 @@
+# B round 421 -> 422 checkpoint
+- Step 1 done: tasks/round-421.md archived (cmp identical to current-task.md). Round 421 C PASS (8 rows, browserVerified true), gate 421 published 4786c13 -> baseline 4786c13.
+- Regression not due (regression-last 2026-11-07, today 2026-11-09 < 3 days). STEM-LANES unanswered (no transcripts). Order -> SYS-1..3.
+- Premise greps: SYS-1 anchors all still present (5 span.class sites, LRS3 className toBe, OV1, positional overview, UM8 source text, self-compare). SYS-2 partly covered: transport Play/Stop/Undo/Redo/Delete/ZoomBack/Export + marker add/prev/next/editor guarded; unguarded: Split, Follow, Back to start, Loop, Zoom to range, Fit (+ A-R107 sweep list). SYS-3 premise holds (0 isComposing in arrangement).
+- Choice (pending): SYS-2 stage 1 first (user-visible keyboard defect, small sketch); SYS-1 next.
+- Next: scanner over app/components/arrangement for <button> without Enter-repeat guard -> b-round-421/data/button-guard-scan.txt
+- Step 2: sketch b-round-421/sketch-422.patch.txt written (scratch /tmp/b421-scratch commit 'sketch'); transport-centre-ui 17/17. Next: mutants, covering, full suite, browser, tech-lead.
+- Step 3: mutants 7 lines each exact (mutants/summary.txt); covering 23 app files 509/509 (precheck-a2.log; 2 perf specs listed, not vitest); typecheck rc0, lint rc0 205 warn, full 264/3957 rc0; browser probe/compare-head-vs-sketch.txt ALL OK 12 cells (HEAD shows Follow/Loop/Back/Flag repeat bug). :5174 stopped. Next: tech-lead review, then artifacts.
+- Step 4: sketch-review.md (final sha 7002efc1), grants-422 (4), frozen 1317, claims-422.sh written. Next: backlog update, task, doc, reports.
+- Step 5 done: backlog v398 (update-backlog.done), current-task.md (round 422), feature-status, b-next.json, b-round-421.md, claims planning (stderr 0) + sketch + diff, L58 OK, full 264/3957 rc0. Store clean. Next: advisor close.
+- Close: advisor gaps fixed (mutant harness reset --hard, logs 17 tests, summary identical; compare.py = row 4 only; row 2 patch shape; Reference wording). Claims re-run both trees, stderr 0, diff 10 lines, L58 OK. Store clean. Planning complete.
