@@ -19802,14 +19802,6 @@
       "evidence": "gates/round-77/review.md S3"
     },
     {
-      "id": "GATE77-S4-EN10-CLOCK",
-      "severity": "info",
-      "status": "closed (D-29z1454): C round 417 PASS, gate 417 published 061068d | scheduled in round 417 SYS-CLOCK-DETERMINISM (D-29z1452); closes on C PASS | watch (fix with fakeClock.base if it ever flakes)",
-      "to": "B",
-      "title": "marker-edge-nav-ui EN10 checks the position against the real clock (< 2.75, 0.5 s window)",
-      "evidence": "gates/round-77/review.md S4"
-    },
-    {
       "id": "ARCH-R77-RESOLVE-ARROW-SHORTCUT",
       "severity": "info",
       "status": "signal - in the SRW-16 boundary checkpoint request b-round-78-checkpoint-request.md (requested from root 2026-10-22); reviewer verdict keep for now",
@@ -21547,15 +21539,6 @@
       "severity": "info",
       "status": "applied in round 148 (B dockbase148 includes measureRest)",
       "evidence": "c-round-147.md notes for B #3"
-    },
-    {
-      "id": "GATE148-S2-VDS3-WALLCLOCK",
-      "severity": "low",
-      "status": "closed (D-29z1454): C round 417 PASS, gate 417 published 061068d | scheduled in round 417 SYS-CLOCK-DETERMINISM (D-29z1452); closes on C PASS | deferred_low_polish",
-      "title": "video-dock-strings-ui VDS3 depends on wall-clock time (Date.now FakeAudioContext, ~50 ms start hold, waitFor 1000 ms); may flake on a slow runner",
-      "evidence": "gates/round-148/review.md suggestion 2; doc 121:117",
-      "repro": "run VDS3 under CPU load",
-      "fix_hint": "vi.useFakeTimers({toFake:[\"Date\",\"performance\"]}) and advance past the hold"
     },
     {
       "id": "GATE148-S3-DOCK-ALIASES",
@@ -26112,15 +26095,6 @@
       "added": "2026-11-04 B round 325 -> 326 planning"
     },
     {
-      "id": "C-R326-01",
-      "severity": "low",
-      "origin": "B spec (round-326 B-IM24 row; tasks/round-253.md l.208 had ruled the tail jsdom-only)",
-      "title": "IM24 playing-state tail (\"No more markers after the playhead\" + Playing at 16) is unreachable in the browser: playback auto-stops at the project end",
-      "evidence": "c-round-326.json, c-round-326/b-im24.json, probe-sync-ctrlright.json",
-      "status": "closed (D-29z1454): C round 417 PASS, gate 417 published 061068d | scheduled in round 417 SYS-CLOCK-DETERMINISM (D-29z1452); closes on C PASS | deferred_low_polish (D-29z929); fix with SYS-CLOCK-DETERMINISM",
-      "added": "2026-11-04 B round 326 -> 327 planning"
-    },
-    {
       "id": "INFO-C326-PLAYING-STEP-MOVES-INSERT-MARKER",
       "severity": "info",
       "origin": "C round 326",
@@ -27774,16 +27748,6 @@
       "added": "2026-11-08 B round 414 -> 415 planning"
     },
     {
-      "id": "A-R415-REVIEW-L1-CALLSITE-FLAG",
-      "severity": "low",
-      "origin": "A round 415 code-reviewer (= gate 415 reviewer #1; C round 415 note)",
-      "evidence": "a-round-415.md Reviewer findings; gates/round-415/review.md #1; c-round-415.md Notes for B; mutant MU-415-GUARD-AND-STUB-REMOVED",
-      "title": "deleting stubSetInterval:true from SF11's install({...}) leaves SF11 green (the Object.is guard only runs when the flag is passed)",
-      "repro": "remove the flag at schedule-failure-ui.test.tsx SF11 install call (~l.302-308 at 344a59f); SF11 stays green",
-      "status": "closed (D-29z1454): C round 417 PASS, gate 417 published 061068d | scheduled in round 417 SYS-CLOCK-DETERMINISM (D-29z1452); closes on C PASS | deferred_low_polish (D-29z1444): fix = one SF11 assertion that window.setInterval is the stub; candidate row for SYS-CLOCK-DETERMINISM, which owns SF11's clock (it() bodies may change there)",
-      "added": "2026-11-08 B round 415 -> 416 planning"
-    },
-    {
       "id": "GATE415-S2-S4",
       "severity": "info",
       "origin": "gate 415 reviewer #2-#4",
@@ -27793,30 +27757,12 @@
       "added": "2026-11-08 B round 415 -> 416 planning"
     },
     {
-      "id": "C-R416-CLAIMS-K22-ARCHIVE",
-      "severity": "low",
-      "origin": "environment",
-      "title": "B claims script K22 raised KeyError: the backlog optimizer archived two closed findings to archive/findings-archived.json after B planned",
-      "evidence": "c-round-416.json bugs[0]; c-round-416/claims.err",
-      "status": "closed (D-29z1454): C round 417 PASS, gate 417 published 061068d | fixed_in_b_tooling_pending_c (D-29z1451): b-round-416/claims-417.sh K14 reads open_findings + deferred_low_polish + archive/findings-archived.json; closes when C round 417 CLAIMS shows K14 with empty stderr; lesson L56 gains the archive clause",
-      "added": "2026-11-08 B round 416 -> 417 planning"
-    },
-    {
       "id": "C-R417-L58-SKETCH-REVIEW-MISSING",
       "severity": "low",
       "origin": "B spec",
       "title": "round 417 dispatched a git-apply sketch without b-round-416/sketch-review.md and without tools/l58-check.py in the claims (repeat of round 415)",
       "evidence": "c-round-417.json bugs[0]",
       "status": "fixed_in_b_tooling_pending_c (D-29z1455): round 418 planning writes b-round-417/sketch-review.md (tech-lead review of the dispatched sha) and claims-418.sh K19 runs tools/l58-check.py current-task.md; closes when C round 418 row 1 shows K19 L58 OK",
-      "added": "2026-11-08 B round 417 -> 418 planning"
-    },
-    {
-      "id": "A-R417-REVIEW-M2-DOC-IM24-FILELOCAL",
-      "severity": "info",
-      "origin": "B spec",
-      "title": "task ruling 2 said IM24 keeps a file-local fake; IM24 uses createWorkspaceTestEnvironment (only its rAF capture is local)",
-      "evidence": "a-round-417.md reviewer table",
-      "status": "closed (D-29z1455): doc 268 fixed by A in round 417; SIG-R415-WORKSPACE-ENV-CONVERGENCE scope corrected to EN10 + VDS3",
       "added": "2026-11-08 B round 417 -> 418 planning"
     }
   ],
@@ -41371,30 +41317,6 @@
     "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
   },
   "decisions_log_b": [
-    {
-      "id": "D-29z1404",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 405 -> 406 planning",
-      "decision": "Round 405 findings ruled. C-R405-GH5-NOT-G1-VACUOUS (= A-R405-REVIEW-GH5-G1-VACUOUS = gate-405 item 1) ruled Low, consistent with D-29z1397 for the same class (A's reviewer Medium, C Low): a never-failing not.toBe('g1') line in a dispatched test; the live groupHeaderIds assertion is proven by MU-405-GH5-RECORDER; no behaviour impact. Fix home: deferred_low_polish (fix: assert muted[0].name === 'Group 2' or compare with groups[0].id); round 406 does not own selection-wrappers-render.test.tsx. Gate-405 item 2 (AC7 load step uses two microtask flushes) = A's AC7 timing Low -> deferred_low_polish GATE405-L2-AC7-LOAD-FLUSH. Gate-405 item 3 (ACTION_KEY_COUNT magic number) closed as intended pin (round-405 side-effects table). A-R405-REVIEW-METER-UI-NAME -> deferred_low_polish. Gate-405 item 5 (teardown not seen) info, not a finding: C ran the 6 files 85/85 and 14 mutant runs pristine before/after. Gate-405 Architecture note (derive the action names from one const tuple; keep) is a further echo on TL-R403-SK-L1: signal, not a task; the reviewer's own trigger is 'a third round touches the list', which PERF-11c-iii-d would be, so B rules it at the d planning (D-29z1405)."
-    },
-    {
-      "id": "D-29z1405",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 405 -> 406 planning",
-      "decision": "PERF-11c-iii-d split into d-i (round 406: ArrangementActions 34 -> 36 with getLivePosition (value livePosition) and getPlaybackClock; ArrangementVideoDock reads getLivePosition/getPlaybackClock/getArrangement from useArrangementActions; AC7 count 36; behaviour-preserving) and d-ii (next: memoised ArrangementVideoDockViewInner returning placeholder + video box as a Fragment with rootRef as prop; useVideoLanePreviewReader keyed on videoTrackId + a committed video-lane clip list kept identity-stable via sameClipList (the commit signal for the stopped-sync effect); memoised caption; RB-LEAF7 and a stopped video-Undo re-seek row; mutants M1 memo removed, M2/M3 arrangement-keyed, M4 commit signal dropped). Per tech-lead (b-round-405/consult-tech-lead.md). ARCH-CHECKPOINT-SYS-R385-ACTIONS unanswered: option 1 (extend ArrangementActions) applied by the request's own clause. performance-optimizer dissent (separate props; b-round-405/consult-performance-optimizer.md) ruled down: identical identities (useCallback []), one actions source per SYS-R385 and tech-lead, AC7 pins. pausePlaybackWithStatus not an action (chain not proven stable; dock reads it via ref). Const-tuple (TL-R403-SK-L1) not folded: impossible without a type assertion or non-literal deps (tech-lead); re-ruled at Lane (e)."
-    },
-    {
-      "id": "D-29z1406",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 405 -> 406 planning",
-      "decision": "Sketch review Lows (tech-lead, sha 60bdf24c..., b-round-405/sketch-review.md, no Medium+): TL-R406-SK-L1 AC7 title hardcodes 36, TL-R406-SK-L2 livePosition vs getLivePosition alias, TL-R406-SK-L3 deps sort by internal name -> deferred_low_polish; TL-R406-SK-L4 (no test that the dock reads from actions) -> proven by d-ii RB-LEAF7, equivalent by construction in d-i; TL-R406-SK-L5 (doc) -> doc 259 in round 406."
-    },
-    {
-      "id": "D-29z1407",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 405 -> 406 planning",
-      "decision": "Round 406 = PERF-11c-iii-d-i from b-round-405/sketch-406.patch.txt (sha256 60bdf24c7a0fff14..., 3 files) + new doc 259 (l.4 'In Progress (stage 1 of 2; C round 406 PASS)'). Evidence on sketch: tsc/Biome rc 0; 8 covering files 180/180; full vitest 262/3878 rc 0; mutants 4/4 red; dev leaf probe 0 differences vs HEAD (22 leaves x 13 steps x 2 viewports); real-video playsync max |drift| 0.013 s HEAD and sketch. Baseline 5c89a95 clean; frozen 1296; grants 4. Order after 406: d-ii, then PERF-11c-iii-e (Lane), PERF-15, SYS-R2-FAKE-FIDELITY + SYS-R388, SYS-CLOCK-DETERMINISM, SYS-R369, STEM-LANES, SYS-1..3, STORE-2b..5 (direction gate), REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 (skip rule). REGRESSION-2026-11-10 first at the first planning on/after 2026-11-10. Next RETRO at round 416."
-    },
     {
       "id": "D-29z1408",
       "date": "2026-11-08",
