@@ -1,0 +1,95 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [
+  {
+   "id": "C-R418-READTIME-STALE-START",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "read app/lib/arrangement/preview.client.ts l.125-131 (readTime) and l.204 (same-url seek sets element.currentTime = start)",
+    "note readTime's fallback is the element-creation start, never updated by a seek"
+   ],
+   "expected": "Ruling 5 says a throwing getter returns the request's start offset",
+   "actual": "After a same-url seek, a throwing currentTime getter reports the creation-time start (e.g. 0), so the fallback restarts there. Only reachable when the getter throws; no row covers it. Confirms A-R418-REVIEW-L1",
+   "evidence": "code read; a-round-418.md For B; defer with GATE395-L1 class"
+  },
+  {
+   "id": "C-R418-OFFSET-RAW-READ",
+   "severity": "low",
+   "origin": "pre-existing",
+   "steps": [
+    "read preview.client.ts l.214-219 getLibraryPreviewOffset reads active.element.currentTime unguarded"
+   ],
+   "expected": "Same guarded read as handleError/watchdog (GATE395-L1 class)",
+   "actual": "A throwing getter escapes getLibraryPreviewOffset. Confirms A-R418-REVIEW-L2",
+   "evidence": "code read l.219"
+  },
+  {
+   "id": "C-R418-PC12-TITLE",
+   "severity": "low",
+   "origin": "B spec",
+   "steps": [
+    "read PC12 in library-preview-stream.test.tsx (~l.1110-1126)"
+   ],
+   "expected": "Title matches body",
+   "actual": "Title says stall after the seek; body dispatches error. Stall-after-seek is covered only by browser R1b (equal to HEAD in this round, so the seek-then-stall fallback behaviour is browser-verified). Confirms A-R418-REVIEW-L3",
+   "evidence": "A report + R1b EQUAL both viewports"
+  }
+ ],
+ "passed": [
+  "418-row1-source-scope-claims-start",
+  "418-row2-patch-identity-unit-117of117",
+  "418-row3-mutants-12-lines-equal-and-loaded-40of40",
+  "418-row4-preview-browser-all-equal-14-cells",
+  "418-row5-play-stop-smoke-both-viewports",
+  "418-row6-auth-guard-no-bypass",
+  "418-row7-doc-269",
+  "418-row8-source-scope-end",
+  "closes-C-R417-L58-SKETCH-REVIEW-MISSING"
+ ],
+ "blocked": [
+  "fake-bearer premium path: backend unavailable in cloud",
+  "Ableton conformance: does not apply (behaviour-preserving fix round)"
+ ],
+ "gate": [
+  "full vitest, typecheck, build, Biome, verify (root gate)"
+ ],
+ "notRun": [
+  "export WAV/audio graph measurement: no export, graph or playback runtime file changed; only library-preview controller code; play/stop position smoke run in real browser instead"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-09T08:26:24.6917031Z",
+  "round": 418,
+  "attempt": 1,
+  "store": 200
+ },
+ "browserNote": "Real Chromium (Playwright), fresh contexts, 1440x900 and 1280x720: preview rows R1/R1b/R5/R6/R7/R9/R10 vs HEAD (14 cells ALL EQUAL), play/stop smoke, auth guard. Retries: R1 1440 (cold first load, status element null) and auth 1440 (empty body on cold render), both environment-invalid and retried once, then green. 0 page errors.",
+ "manifestPaths": "b-round-417/r418-frozen-sha256.txt (1314 rc 0, K3) + b-round-318/protected-sha256.txt (rc 0, K4)",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": "B asserts run on sketch (b-round-417 precheck + mutants/summary.txt); C re-ran 117/117, 40/40 loaded and the 12 mutant lines (byte-equal)",
+ "mutantsRecorded": 12,
+ "mutantRedOnSketch": "b-round-417/mutants/summary.txt",
+ "mutantRedOnTree": "c-round-418/b417copy/mutants/summary.txt, byte-equal to B's 12 lines; scratch base = git archive HEAD",
+ "gateChecksNamed": [
+  "vitest full",
+  "typecheck",
+  "build",
+  "biome",
+  "verify"
+ ],
+ "gateChecksRunOnSketch": "none by C (gate rows); B full run precheck-full.log 3934/3934",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "library-preview-stream, failed-source-refusal, decoded-buffer-eviction-ui, actions-context, bars-ruler-ui vitest",
+  "browser rows R1,R1b,R5,R6,R7,R9,R10",
+  "play/stop smoke",
+  "auth guard"
+ ],
+ "affectedChecksRunOnSketch": "A2 117/117 on sketch (precheck-a2.log); C re-ran on working tree = sketch (cmp identical)",
+ "progressFile": "c-round-418/progress.json",
+ "stopSignal": "none: all 8 rows run"
+}

@@ -1,0 +1,119 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/b419-scratch[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/stem-cache.test.ts [2m([22m[2m43 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 414[2mms[22m[39m
+     [32m✓[39m SC1 key: same-origin path only; cross-origin, query and hash give null; relative URLs resolve against the origin[32m 1[2mms[22m[39m
+     [32m✓[39m SC2 validators: ETag only, Last-Modified only, both, none; no-store and Vary rules[32m 2[2mms[22m[39m
+     [32m✓[39m SC3 budget: unknown, 0 or NaN quota gives 0; 10 % of the quota; capped at 256 MiB[32m 0[2mms[22m[39m
+     [32m✓[39m SC4 evictions: least recently used first, none when it fits, null above budget/4, same key never a victim[32m 1[2mms[22m[39m
+     [32m✓[39m SC4 evictions in the cached fetch: the least recently used other entry is deleted before the put[32m 6[2mms[22m[39m
+     [32m✓[39m SC16 the database name is czaba-stem-cache-v2 and differs from the legacy czaba-audio-cache[32m 0[2mms[22m[39m
+     [32m✓[39m SC5 miss: one request with the identical init, body equal to the network body, then one stored record[32m 3[2mms[22m[39m
+     [32m✓[39m SC6 hit + 304: conditional no-store request with both validators, stored bytes returned, lastAccessedAt moves forward[32m 2[2mms[22m[39m
+     [32m✓[39m SC7 hit + 200: the entry is replaced with the new bytes and the new ETag[32m 1[2mms[22m[39m
+     [32m✓[39m SC8 hit + network error: not aborted returns the stored bytes; aborted rethrows the same error object[32m 2[2mms[22m[39m
+     [32m✓[39m SC9 hit + 404 or 410: the entry is deleted and the status is returned unchanged[32m 1[2mms[22m[39m
+     [32m✓[39m SC10 get rejects: plain request with the original init and the load succeeds[32m 2[2mms[22m[39m
+     [32m✓[39m SC11 quota: evict the oldest other entry once and retry once; a second quota error turns the store off[32m 2[2mms[22m[39m
+     [32m✓[39m SC12 the signal aborts before the commit: nothing is stored[32m 2[2mms[22m[39m
+     [32m✓[39m SC13 not stored: no validators, no-store, 206, and an entry larger than budget/4[32m 2[2mms[22m[39m
+     [32m✓[39m SC14 on the server (no window) publicPreviewSourceFetch() is plainSourceFetch[32m 0[2mms[22m[39m
+     [32m✓[39m SC14 no store: plain fetch with the exact init; createBrowserStemCacheStore() is null in jsdom[32m 1[2mms[22m[39m
+     [32m✓[39m SC15 integrity: a size mismatch or another schemaVersion is a miss that deletes the record and sends the full request[32m 2[2mms[22m[39m
+     [32m✓[39m SC17 two misses for one key while the first write is pending: put is called once[32m 1[2mms[22m[39m
+     [32m✓[39m SC18 hit + 503: the stored bytes are returned and nothing is written[32m 1[2mms[22m[39m
+     [32m✓[39m SC19 a body read error or abort in the write keeps the store on; a non-quota put error turns it off[32m 2[2mms[22m[39m
+     [32m✓[39m SC20 sweep runs once per session and every write waits for it, including a second key started together[32m 13[2mms[22m[39m
+     [32m✓[39m SC21 hit + an unstorable 200 (no-store, or no validators) deletes the entry; a later network error is a network failure, not old bytes[32m 2[2mms[22m[39m
+     [32m✓[39m SC22 transactionDone resolves only on complete; it rejects on abort with the transaction error, or an AbortError when there is none; with no event it stays pending (the error-event order is SC23)[32m 3[2mms[22m[39m
+     [32m✓[39m SC23 browser store (fake IndexedDB + OPFS): put resolves only after the record transaction completes and removes the previous file only then; an aborted transaction rejects with its own error and keeps the previous entry[32m 22[2mms[22m[39m
+     [32m✓[39m SC28 browser store integrity (fake IndexedDB + OPFS): a file whose size differs from its record, or a missing file, is a miss that deletes the record and the file[32m 18[2mms[22m[39m
+     [32m✓[39m SC24 an abort after the body is read stores nothing: during the sweep no victim is deleted, during a victim delete nothing is put[32m 24[2mms[22m[39m
+[31m     [31m×[31m SC25 a 404, 410 or unstorable 200 on a hit returns without waiting for a pending write of the same key, and the delete still lands after that write[39m[32m 20[2mms[22m[39m
+     [32m✓[39m SC26 a clone that throws is an unstored miss with the store still on, and a stored content type that Headers rejects is served without it[32m 3[2mms[22m[39m
+     [32m✓[39m SC27 eviction planning is serialised per session: two keys started together end within the budget[32m 14[2mms[22m[39m
+     [32m✓[39m SC29 idle() waits for a pending hit delete[32m 13[2mms[22m[39m
+     [32m✓[39m SC30 a load that arrives after the pending write of its key was aborted joins that write, so the key is stored once: behind a held sweep and behind a held put of another key[32m 57[2mms[22m[39m
+     [32m✓[39m SC31 a load that joins a pending write keeps it alive when the first load aborts; when only the joining load aborts it is still stored; when every joined load aborts nothing is stored[32m 67[2mms[22m[39m
+[31m     [31m×[31m SC32 a hit 404 while a same-key 200 is still reading its body deletes after that write lands[39m[32m 12[2mms[22m[39m
+     [32m✓[39m SC33 an abort during the quota-retry eviction stores nothing: the retry put is not made[32m 12[2mms[22m[39m
+     [32m✓[39m SC34 a storable 200 that arrives after a hit 404 queued a delete behind a pending write starts its own write after that delete, so the key ends stored with the newest bytes[32m 22[2mms[22m[39m
+[31m     [31m×[31m SC35 idle() stays pending while a hit delete waits for a same-key write that is still reading its body, and while that delete is held; it resolves once the delete lands[39m[32m 12[2mms[22m[39m
+     [32m✓[39m SC36 an abort during the first of two victim deletes stops before the second victim and before the put[32m 12[2mms[22m[39m
+     [32m✓[39m SC37 browser store (fake IndexedDB + OPFS): an integrity miss deletes only the record it read, so a same-key put that committed meanwhile keeps its record and file[32m 23[2mms[22m[39m
+     [32m✓[39m SC38 file names are unique per write in one session even with the same clock value and random part, and start with the base-36 write time[32m 1[2mms[22m[39m
+     [32m✓[39m SC39 browser store (fake IndexedDB + OPFS): a put whose file name equals the stored record file name is refused before any file is touched, and the stored entry stays readable[32m 7[2mms[22m[39m
+     [32m✓[39m SC40 a queued write whose load aborts before its turn returns at the chain start: no list, no put[32m 22[2mms[22m[39m
+     [32m✓[39m SC41 lock: the cached fetch exposes exactly fetchSource and idle[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/stem-cache.test.ts[2m > [22mPERF-9b-ii stem cache commit discipline (stem-cache.client.ts)[2m > [22mSC25 a 404, 410 or unstorable 200 on a hit returns without waiting for a pending write of the same key, and the delete still lands after that write
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/stem-cache.test.ts:[2m1147:39[22m[39m
+    [90m1145| [39m      putGate[33m.[39m[34mresolve[39m()[33m;[39m
+    [90m1146| [39m      [35mawait[39m cached[33m.[39m[34midle[39m()[33m;[39m
+    [90m1147| [39m      [34mexpect[39m(fake[33m.[39mentries[33m.[39m[34mhas[39m([33mURL_A[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                      [31m^[39m
+    [90m1148| [39m      [34mexpect[39m(fake[33m.[39mlog[33m.[39m[34mlastIndexOf[39m([32m`delete:[39m[36m${[39m[33mURL_A[39m[36m}[39m[32m`[39m))[33m.[39m[34mtoBeGreaterThan[39m(
+    [90m1149| [39m        fake[33m.[39mlog[33m.[39m[34mindexOf[39m([32m`put:[39m[36m${[39m[33mURL_A[39m[36m}[39m[32m`[39m)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/stem-cache.test.ts[2m > [22mPERF-9b-ii stem cache commit discipline (stem-cache.client.ts)[2m > [22mSC32 a hit 404 while a same-key 200 is still reading its body deletes after that write lands
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/stem-cache.test.ts:[2m1358:37[22m[39m
+    [90m1356| [39m    body[33m.[39m[34mfinish[39m([34mbytesOf[39m([34m1[39m[33m,[39m [34m2[39m[33m,[39m [34m3[39m[33m,[39m [34m4[39m))[33m;[39m
+    [90m1357| [39m    [35mawait[39m cached[33m.[39m[34midle[39m()[33m;[39m
+    [90m1358| [39m    [34mexpect[39m(fake[33m.[39mentries[33m.[39m[34mhas[39m([33mURL_A[39m))[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m1359| [39m    [34mexpect[39m(fake[33m.[39mlog)[33m.[39m[34mtoContain[39m([32m`put:[39m[36m${[39m[33mURL_A[39m[36m}[39m[32m`[39m)[33m;[39m
+    [90m1360| [39m    [34mexpect[39m(fake[33m.[39mlog[33m.[39m[34mlastIndexOf[39m([32m`delete:[39m[36m${[39m[33mURL_A[39m[36m}[39m[32m`[39m))[33m.[39m[34mtoBeGreaterThan[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/stem-cache.test.ts[2m > [22mSYS-R369 stem cache per-key operations (stem-cache.client.ts)[2m > [22mSC35 idle() stays pending while a hit delete waits for a same-key write that is still reading its body, and while that delete is held; it resolves once the delete lands
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/stem-cache.test.ts:[2m1449:21[22m[39m
+    [90m1447| [39m    })[33m;[39m
+    [90m1448| [39m    [35mawait[39m [34mflushTasks[39m()[33m;[39m
+    [90m1449| [39m    [34mexpect[39m(settled)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m1450| [39m    [35mconst[39m deleteGate [33m=[39m [34mcreateDeferred[39m()[33m;[39m
+    [90m1451| [39m    fake[33m.[39mremove[33m.[39m[34mmockImplementationOnce[39m([35masync[39m (key) [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m40 passed[39m[22m[90m (43)[39m
+[2m   Start at [22m 08:48:53
+[2m   Duration [22m 1.27s[2m (transform 204ms, setup 0ms, import 233ms, tests 414ms, environment 479ms)[22m
+
+
+::error file=/tmp/b419-scratch/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9b-ii stem cache commit discipline (stem-cache.client.ts) > SC25 a 404%2C 410 or unstorable 200 on a hit returns without waiting for a pending write of the same key%2C and the delete still lands after that write,line=1147,column=39::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:1147:39%0A%0A
+
+::error file=/tmp/b419-scratch/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > PERF-9b-ii stem cache commit discipline (stem-cache.client.ts) > SC32 a hit 404 while a same-key 200 is still reading its body deletes after that write lands,line=1358,column=37::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:1358:37%0A%0A
+
+::error file=/tmp/b419-scratch/app/lib/arrangement/__tests__/stem-cache.test.ts,title=app/lib/arrangement/__tests__/stem-cache.test.ts > SYS-R369 stem cache per-key operations (stem-cache.client.ts) > SC35 idle() stays pending while a hit delete waits for a same-key write that is still reading its body%2C and while that delete is held; it resolves once the delete lands,line=1449,column=21::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/stem-cache.test.ts:1449:21%0A%0A

@@ -1,10 +1,10 @@
-# Active loop summary (2026-11-08T23:53:55.939Z)
+# Active loop summary (2026-11-09T08:41:23.066Z)
 
 - backlog.json 3041 KB -> active view 275 KB
-- status: ENV_CHECK round 418
-- servers: `{"checkedUtc":"2026-11-08T23:53:55.7096651Z","round":418,"attempt":2,"store":200}`
-- last publication: 061068de538f22f06e577a9f0d4c735a6b7a8f22 (rounds 416-417)
-- last root gate: round 417 published - commit 061068de538f22f06e577a9f0d4c735a6b7a8f22 pushed
+- status: G_ROOT_GATE round 418
+- servers: `{"checkedUtc":"2026-11-09T08:26:24.6917031Z","round":418,"attempt":1,"store":200}`
+- last publication: 3579fcc06166046faf1a0aa2c822454ccdd0ea55 (rounds 418-418)
+- last root gate: round 418 published - commit 3579fcc06166046faf1a0aa2c822454ccdd0ea55 pushed
 
 ## Current items: -
 

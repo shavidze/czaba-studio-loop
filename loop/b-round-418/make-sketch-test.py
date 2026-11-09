@@ -1,0 +1,254 @@
+# B round 418 -> 419: writes the SYS-R369 sketch test changes into <scratch>/app/lib/arrangement/__tests__/stem-cache.test.ts
+import sys
+root = sys.argv[1]
+p = root + '/app/lib/arrangement/__tests__/stem-cache.test.ts'
+s = open(p, encoding='utf-8').read()
+def rep(old, new):
+    global s
+    if s.count(old) != 1:
+        sys.exit('site not found once: ' + old[:80])
+    s = s.replace(old, new)
+
+rep("""    expect(served.headers.get('x-injected')).toBeNull();
+""", """    expect([...served.headers.keys()]).toEqual([]);
+""")
+rep("""  holdNextCommit: () => Deferred;
+  failNextPut: (error: DOMException) => void;
+}
+""", """  holdNextCommit: () => Deferred;
+  holdNextGetFile: () => Deferred;
+  failNextPut: (error: DOMException) => void;
+}
+""")
+rep("""  let heldCommit: Deferred | null = null;
+  let putFailure""", """  let heldCommit: Deferred | null = null;
+  let heldGetFile: Deferred | null = null;
+  let putFailure""")
+rep("""    async getFile() {
+      const bytes = files.get(this.name);""", """    async getFile() {
+      const gate = heldGetFile;
+      heldGetFile = null;
+      if (gate !== null) {
+        await gate.promise;
+      }
+      const bytes = files.get(this.name);""")
+rep("""    failNextPut: (error) => {
+      putFailure = error;
+    },
+  };
+}
+""", """    holdNextGetFile: () => {
+      const gate = createDeferred();
+      heldGetFile = gate;
+      return gate;
+    },
+    failNextPut: (error) => {
+      putFailure = error;
+    },
+  };
+}
+""")
+s = s.rstrip('\n') + '\n' + """
+describe('SYS-R369 stem cache per-key operations (stem-cache.client.ts)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('SC34 a storable 200 that arrives after a hit 404 queued a delete behind a pending write starts its own write after that delete, so the key ends stored with the newest bytes', async () => {
+    const fake = createFakeStemCacheStore();
+    seed(fake, storedRecord());
+    const putGate = createDeferred();
+    fake.put.mockImplementationOnce(async (record, bytes) => {
+      fake.log.push(`put:${record.key}`);
+      await putGate.promise;
+      fake.entries.set(record.key, { record: { ...record }, bytes: bytes.slice(0) });
+    });
+    const fetchSource = vi.fn<SourceFetch>(async () =>
+      audioResponse(bytesOf(1, 2), validatedHeaders('"v2"')),
+    );
+    const cached = cachedWith(fake, fetchSource);
+    await cached.fetchSource(URL_A, requestInit());
+    await flushTasks();
+    expect(fake.put).toHaveBeenCalledTimes(1);
+    fetchSource.mockImplementationOnce(async () => audioResponse(null, {}, 404));
+    expect((await cached.fetchSource(URL_A, requestInit())).status).toBe(404);
+    fetchSource.mockImplementationOnce(async () =>
+      audioResponse(bytesOf(3, 4, 5), validatedHeaders('"v3"')),
+    );
+    expect((await cached.fetchSource(URL_A, requestInit())).status).toBe(200);
+    await flushTasks();
+    putGate.resolve();
+    await cached.idle();
+    expect(fake.entries.get(URL_A)?.record.etag).toBe('"v3"');
+    expect(new Uint8Array(fake.entries.get(URL_A)?.bytes ?? new ArrayBuffer(0))).toEqual(
+      bytesOf(3, 4, 5),
+    );
+    expect(fake.log.filter((line) => line.endsWith(URL_A) && !line.startsWith('get'))).toEqual([
+      `put:${URL_A}`,
+      `delete:${URL_A}`,
+      `put:${URL_A}`,
+    ]);
+  });
+
+  it('SC35 idle() stays pending while a hit delete waits for a same-key write that is still reading its body, and while that delete is held; it resolves once the delete lands', async () => {
+    const fake = createFakeStemCacheStore();
+    seed(fake, storedRecord());
+    const body = createControlledBody();
+    const fetchSource = vi.fn<SourceFetch>(async () =>
+      audioResponse(body.body, validatedHeaders('"v2"')),
+    );
+    const cached = cachedWith(fake, fetchSource);
+    await cached.fetchSource(URL_A, requestInit());
+    fetchSource.mockImplementationOnce(async () => audioResponse(null, {}, 404));
+    await cached.fetchSource(URL_A, requestInit());
+    let settled = false;
+    const idle = cached.idle().then(() => {
+      settled = true;
+    });
+    await flushTasks();
+    expect(settled).toBe(false);
+    const deleteGate = createDeferred();
+    fake.remove.mockImplementationOnce(async (key) => {
+      fake.log.push(`delete:${key}`);
+      await deleteGate.promise;
+      fake.entries.delete(key);
+    });
+    body.finish(bytesOf(1, 2, 3, 4));
+    await flushTasks();
+    expect(fake.log).toContain(`delete:${URL_A}`);
+    expect(settled).toBe(false);
+    deleteGate.resolve();
+    await idle;
+    expect(settled).toBe(true);
+    expect(fake.entries.has(URL_A)).toBe(false);
+  });
+
+  it('SC36 an abort during the first of two victim deletes stops before the second victim and before the put', async () => {
+    const fake = createFakeStemCacheStore();
+    seed(fake, storedRecord({ key: '/v1', fileName: 'v1', size: 8, lastAccessedAt: 1 }), new Uint8Array(8));
+    seed(fake, storedRecord({ key: '/v2', fileName: 'v2', size: 8, lastAccessedAt: 2 }), new Uint8Array(8));
+    seed(
+      fake,
+      storedRecord({ key: '/keep', fileName: 'k', size: 24, lastAccessedAt: 3 }),
+      new Uint8Array(24),
+    );
+    expect(
+      selectStemCacheEvictions(
+        [...fake.entries.values()].map((entry) => entry.record),
+        URL_A,
+        10,
+        stemCacheBudgetBytes(400),
+      )?.map((victim) => victim.key),
+    ).toEqual(['/v1', '/v2']);
+    const deleteGate = createDeferred();
+    fake.remove.mockImplementationOnce(async (key) => {
+      fake.log.push(`delete:${key}`);
+      await deleteGate.promise;
+      fake.entries.delete(key);
+    });
+    const cached = cachedWith(
+      fake,
+      vi.fn<SourceFetch>(async () => audioResponse(new Uint8Array(10), validatedHeaders())),
+      400,
+    );
+    const controller = new AbortController();
+    await cached.fetchSource(URL_A, requestInit(controller.signal));
+    await flushTasks();
+    expect(fake.remove).toHaveBeenCalledTimes(1);
+    controller.abort();
+    deleteGate.resolve();
+    await cached.idle();
+    expect(fake.remove).toHaveBeenCalledTimes(1);
+    expect(fake.entries.has('/v2')).toBe(true);
+    expect(fake.put).not.toHaveBeenCalled();
+  });
+
+  it('SC37 browser store (fake IndexedDB + OPFS): an integrity miss deletes only the record it read, so a same-key put that committed meanwhile keeps its record and file', async () => {
+    const fake = installFakeBrowserStorage();
+    const store = openBrowserStore();
+    await store.put(storedRecord({ fileName: 'a-file', size: 3 }), bytesOf(7, 8, 9).buffer);
+    const gate = fake.holdNextGetFile();
+    const pendingGet = store.get(URL_A);
+    await flushTasks();
+    await store.put(
+      storedRecord({ fileName: 'new-file', etag: '"v2"', size: 2 }),
+      bytesOf(1, 2).buffer,
+    );
+    expect(fake.files.has('a-file')).toBe(false);
+    gate.resolve();
+    expect(await pendingGet).toBeNull();
+    expect(fake.records.get(URL_A)?.fileName).toBe('new-file');
+    expect(fake.files.has('new-file')).toBe(true);
+    const entry = await store.get(URL_A);
+    expect(new Uint8Array(entry?.bytes ?? new ArrayBuffer(0))).toEqual(bytesOf(1, 2));
+  });
+
+  it('SC38 file names are unique per write in one session even with the same clock value and random part, and start with the base-36 write time', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const fake = createFakeStemCacheStore();
+    const cached = createCachedSourceFetch({
+      store: fake.store,
+      origin: ORIGIN,
+      fetchSource: vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
+      now: () => 5_000,
+      estimateQuota: async () => QUOTA,
+    });
+    await cached.fetchSource(URL_A, requestInit());
+    await cached.fetchSource(URL_B, requestInit());
+    await cached.idle();
+    const names = [...fake.entries.values()].map((entry) => entry.record.fileName);
+    expect(names).toHaveLength(2);
+    expect(new Set(names).size).toBe(2);
+    for (const name of names) {
+      expect(Number.parseInt(name.split('-')[0] ?? '', 36)).toBe(5_000);
+    }
+  });
+
+  it('SC39 browser store (fake IndexedDB + OPFS): a put whose file name equals the stored record file name is refused before any file is touched, and the stored entry stays readable', async () => {
+    const fake = installFakeBrowserStorage();
+    const store = openBrowserStore();
+    await store.put(storedRecord({ fileName: 'same', size: 3 }), bytesOf(7, 8, 9).buffer);
+    await expect(
+      store.put(storedRecord({ fileName: 'same', etag: '"v2"', size: 2 }), bytesOf(1, 2).buffer),
+    ).rejects.toMatchObject({ name: 'InvalidStateError' });
+    expect(fake.files.get('same')).toEqual(bytesOf(7, 8, 9));
+    expect(fake.records.get(URL_A)?.etag).toBe('"v1"');
+    const entry = await store.get(URL_A);
+    expect(new Uint8Array(entry?.bytes ?? new ArrayBuffer(0))).toEqual(bytesOf(7, 8, 9));
+  });
+
+  it('SC40 a queued write whose load aborts before its turn returns at the chain start: no list, no put', async () => {
+    const fake = createFakeStemCacheStore();
+    const putGate = createDeferred();
+    fake.put.mockImplementationOnce(async (record, bytes) => {
+      fake.log.push(`put:${record.key}`);
+      await putGate.promise;
+      fake.entries.set(record.key, { record: { ...record }, bytes: bytes.slice(0) });
+    });
+    const cached = cachedWith(
+      fake,
+      vi.fn<SourceFetch>(async () => audioResponse(bytesOf(1, 2), validatedHeaders())),
+    );
+    await cached.fetchSource(URL_B, requestInit());
+    await flushTasks();
+    expect(fake.put).toHaveBeenCalledTimes(1);
+    const controller = new AbortController();
+    await cached.fetchSource(URL_A, requestInit(controller.signal));
+    await flushTasks();
+    controller.abort();
+    putGate.resolve();
+    await cached.idle();
+    expect(fake.list).toHaveBeenCalledTimes(1);
+    expect(fake.put).toHaveBeenCalledTimes(1);
+    expect(fake.entries.has(URL_A)).toBe(false);
+  });
+
+  it('SC41 lock: the cached fetch exposes exactly fetchSource and idle', () => {
+    const cached = cachedWith(createFakeStemCacheStore(), vi.fn<SourceFetch>());
+    expect(Object.keys(cached).sort()).toEqual(['fetchSource', 'idle']);
+  });
+});
+"""
+open(p, 'w', encoding='utf-8').write(s)
+print('ok')
