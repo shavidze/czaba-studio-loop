@@ -1,0 +1,73 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "R424-1 SOURCE-SCOPE+CLAIMS",
+  "R424-2 PATCH-IDENTITY+UNIT (12 files, 291/291)",
+  "R424-3 RR-PERF / C-R423-01 (5 specs passed 22.1 min, all 17 ids at sketch medians, no components row above r423)",
+  "R424-4 NAME-PROBE (fade 4/4, trim 15/15, shell 0, Memo(lane) 0, inner 59, 0 errors)",
+  "R424-5 GHOST-TITLE (both viewports)",
+  "R424-6 LANE+LEAF (leaf-probe 0 diffs except LibraryPreviewViewInner 10->11 within +-1; lane-actions ok; leaf.cjs 0 non-timing diffs)",
+  "R424-7 VIDEO+PLAY SMOKE (max |drift| 0.012 s, 0 swaps/fallbacks, Space plays 1.50 s per 1.5 s, frozen after stop, 0 page errors)",
+  "R424-8 AUTH (anonymous /studio-lab auth_user null; /studio/middle-east Sign in required, 0 audio[src]; studio-token 401)",
+  "R424-9 DOC+SCOPE-END+L57 (doc 273 l.4 byte-exact, 7 headings in order, mutant block and names lines byte-present, end claims equal start claims, only 3 granted paths)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "blocked": [
+  "R424-8 fake-bearer token path: backend unavailable in cloud"
+ ],
+ "failed": [],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-10T01:35:23.9992404Z",
+  "round": 424,
+  "attempt": 1,
+  "store": 200
+ },
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": null,
+ "claimCheckMinutes": null,
+ "assertsSpecified": 17,
+ "mutantsRecorded": 3,
+ "mutantRedOnSketch": "b-round-423/mutants/summary.txt",
+ "gateChecksNamed": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "gateChecksRunOnSketch": "B precheck-full.log (264 files, 3957/3957), not re-run by C (gate rows)",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": [
+  "test:perf interactions spec 17 ids",
+  "covering vitest 12 files",
+  "name probe fade/trim",
+  "ghost-title",
+  "lane+leaf probes",
+  "video playsync"
+ ],
+ "affectedChecksRunOnSketch": "b-round-423/perf-sketch/compare-404-423-sketch.txt, precheck-a2.log",
+ "records": {
+  "nameProbeCommits": 59,
+  "videoMaxAbsDriftS": 0.012,
+  "video.playing.move-components-per-move": 9.95,
+  "video-trim.playing.move-components-per-move": 12.883,
+  "leafcjs .pos differs from B sketch by <=0.07 s (timing)": true
+ },
+ "notes": [
+  "Low candidates from A (not C findings): A-R424-DP30-SHELL-RENDER (DP30 still asserts shell >0), A-R424-PREVIEW-WRAPPER-STYLE, mutants/summary.txt line-number drift (B artifact)",
+  "First fade-names run failed cold-load (environment, retried once, PASS)",
+  "Console noise cart/ERR_CONNECTION_REFUSED only",
+  "Ableton conformance: not applicable (perf fix-up, no behaviour change)"
+ ],
+ "evidence": "c-round-424/{perf-run.log,perf-compare.txt,perf-results/,probe/,lane-leaf-compare.txt,smoke/,vitest-a2.log,claims-*.txt,progress.json}"
+}

@@ -1,10 +1,10 @@
 {
-  "version": 400,
-  "updated": "2026-11-10 (B round 423 -> 424 planning: round 423 C FAIL on one Medium, C-R423-01; round 424 = its fix-up PERF-FIX-R423-LANE-SHELL; regression part 2 moves to round 425)",
+  "version": 401,
+  "updated": "2026-11-10 (B round 424 -> 425 planning: round 424 C PASS, published f6c76f4; C-R423-01 closed; round 425 = REGRESSION-2026-11-10 part 2 on f6c76f4)",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 424: PERF-FIX-R423-LANE-SHELL, fix-up of C-R423-01 (the lane preview subscriptions move into the memo inner so a drag commit renders the lane once, from B reviewed sketch b-round-423/sketch-424.patch.txt) (current-task.md)",
-  "advisor_used_by_B": "round 423 -> 424 planning: advisor available and consulted after orientation and before close",
+  "current_task": "Round 425: REGRESSION-2026-11-10 part 2 on f6c76f4 (C-only browser sweep: round-389 rows for rounds 343-388, round-390 rows for rounds up to 342, the four carries of REGRESSION-2026-11-08, and a lane re-check on the new baseline; A changes nothing) (current-task.md)",
+  "advisor_used_by_B": "round 424 -> 425 planning: advisor available and consulted after orientation and before close",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12191,8 +12191,16 @@
       "task": "current-task.md",
       "decision": "D-29z1480, D-29z1481",
       "type": "PERF-FIX-R423-LANE-SHELL (fix-up of C-R423-01)",
-      "status": "dispatched",
+      "status": "c_pass (D-29z1483): C PASS c-round-424.json, 0 bugs, browserVerified true; gate 424 published f6c76f4",
       "note": "baseline 875ff37 clean; sketch b-round-423/sketch-424.patch.txt; claims b-round-423/claims-424.sh; perf sketch run b-round-423/perf-sketch/"
+    },
+    {
+      "round": 425,
+      "task": "current-task.md",
+      "decision": "D-29z1484, D-29z1485, D-29z1486",
+      "type": "REGRESSION-2026-11-10 part 2 (C-only; A changes nothing)",
+      "status": "dispatched",
+      "note": "baseline f6c76f4 clean; frozen tree b-round-424/r425-tree-sha256.txt; claims b-round-424/claims-425.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -15377,7 +15385,7 @@
         {
           "id": "PERF-11c-iii-e-ii",
           "what": "Lane render saving: memo inner + per-lane props (clips, pxPerSecond, lane-scoped peaks/video/duration slices with content compare, track field compare); rows: own clip move re-renders that lane only, peaks arrival, zoom, video source arrival, exclusive solo (b-round-407/consult-performance-optimizer.md); closes PERF-11c-iii",
-          "status": "bug (D-29z1480): C-R423-01 - the shell split adds 2 fibers per drag commit; fix-up round 424 | done (D-29z1421): C round 409 PASS browserVerified/realVerified true; gate 409 published 9616d3a | dispatched (D-29z1420): round 409, b-round-408/sketch-409.patch.txt sha 1beedffbda3eca0f | not_started (D-29z1414): after e-i C PASS; B sketch + mutants + browser rows + review before dispatch; feature-boundary architecture checkpoint request at its planning"
+          "status": "done (D-29z1483): C-R423-01 fixed by round 424 (C PASS, browserVerified true, gate 424 published f6c76f4) | bug (D-29z1480): C-R423-01 - the shell split adds 2 fibers per drag commit; fix-up round 424 | done (D-29z1421): C round 409 PASS browserVerified/realVerified true; gate 409 published 9616d3a | dispatched (D-29z1420): round 409, b-round-408/sketch-409.patch.txt sha 1beedffbda3eca0f | not_started (D-29z1414): after e-i C PASS; B sketch + mutants + browser rows + review before dispatch; feature-boundary architecture checkpoint request at its planning"
         },
         {
           "id": "PERF-CAND-STUDIO-LENIS",
@@ -27800,7 +27808,7 @@
       "id": "C-R423-01-PERF-DRAG-COMPONENTS-BUDGET",
       "severity": "medium",
       "origin": "B spec",
-      "status": "in_progress (D-29z1481): fix-up round 424 PERF-FIX-R423-LANE-SHELL",
+      "status": "closed (D-29z1483): C round 424 PASS (row 3 RR-PERF: all 17 ids at the sketch medians, c-round-424/perf-compare.txt; row 4 name probe shell 0); gate 424 published f6c76f4 | in_progress (D-29z1481): fix-up round 424 PERF-FIX-R423-LANE-SHELL",
       "title": "every clip drag commit renders 3 lane fibers (shell + Memo + inner) since round 409, so 17 deterministic move-components budgets fail (fade 6/4, trim 17/15, video 15/13, video-trim 17/15, video-fade 5/3)",
       "evidence": "c-round-423.json bug C-R423-01; c-round-423/perf-results/latest-interactions.json; b-round-423/move-components-404-vs-423.txt; b-round-423/probe/fade-names-head.json",
       "repro": "cd store; npm run test:perf (alone); studio-lab-interactions.perf.spec.ts",
@@ -27810,7 +27818,7 @@
       "id": "INFO-C423-DECODE-ORACLE-DRIFT",
       "severity": "info",
       "origin": "B spec",
-      "status": "open (D-29z1482): next regression cites c-round-423/r392/b7-replay2.mjs and r393/r395 instead of round-392 B1/B7/B8/B9/nb",
+      "status": "open (D-29z1486): applied again to R389-DECODE-CACHE BROWSER-L2-OK in round 425 | open (D-29z1482): next regression cites c-round-423/r392/b7-replay2.mjs and r393/r395 instead of round-392 B1/B7/B8/B9/nb",
       "title": "round-392 decode-delay oracle rows are obsolete since library previews stream (393+)",
       "evidence": "c-round-423.json lookups; c-round-423/r392/",
       "repro": "see c-round-423.md R423-DECODE-STATUS",
@@ -30945,6 +30953,14 @@
       "source": "tech-lead + performance-optimizer consults, b-round-423.md",
       "signal": "a shell over memo(inner, compare) costs 2 extra counted fibers on every update that reaches the inner through the shell; per-gesture subscriptions belong inside the memo inner, the shell keeps only commit-time data",
       "status": "applied to the Lane in round 424; check the other leaf shells (video dock, marker row, transport groups) when their drag rows are next touched; not a separate task"
+    },
+    {
+      "id": "SIG-R424-BOUNDARY-FIBER-GUARD",
+      "added": "2026-11-10 B round 424 -> 425 planning",
+      "decision": "D-29z1486",
+      "source": "gates/round-424/review.md Architecture note signal 3; a-round-424.md For B",
+      "signal": "the ArrangementLane shell/inner boundary was reshaped twice (409, 424) and each change needed the browser name probe and test:perf, neither in the gate; proposal: a unit-level render-count guard that fails if a lane shell subscribes to a per-gesture store, or the perf move-components rows on any component-boundary change in components/arrangement/",
+      "status": "signal only; merged with RC-R423-PERF-SPEC-ON-STRUCTURE and GATE304-M1-PERF-LIB-NOT-IN-GATE for RETRO 435; not scheduled"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -39490,6 +39506,36 @@
       "evidence": "b-round-423/sketch-review.md (tech-lead review of sha 942dfdb6)",
       "repro": "read app/components/arrangement/ArrangementLane.tsx after round 424",
       "added": "2026-11-10 B round 423 -> 424 planning"
+    },
+    {
+      "id": "A-R424-DP30-SHELL-RENDER",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1483)",
+      "title": "drag-preview-render DP30 still asserts rendersOf(ArrangementLane) > 0 on a same-lane move to x=80 while DP21 asserts 0 for a similar gesture; the shell render cause is unconfirmed (guess: a committed-context change such as the timeline extent)",
+      "evidence": "a-round-424.md Low 1; docs/implementation/2026/quarter-IV/273-perf-fix-lane-shell-subscriptions.md DP30 paragraph",
+      "repro": "read app/components/arrangement/ArrangementLane.tsx and app/lib/arrangement/__tests__/drag-preview-render.test.tsx at f6c76f4",
+      "added": "2026-11-10 B round 424 -> 425 planning"
+    },
+    {
+      "id": "A-R424-PREVIEW-WRAPPER-STYLE",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1483)",
+      "title": "ArrangementLaneViewInner uses raw useStore(useArrangementPreviewStore(), ...) where the existing useArrangementPreview(selector) wrapper would remove the direct zustand import",
+      "evidence": "a-round-424.md Low 3",
+      "repro": "read app/components/arrangement/ArrangementLane.tsx and app/lib/arrangement/__tests__/drag-preview-render.test.tsx at f6c76f4",
+      "added": "2026-11-10 B round 424 -> 425 planning"
+    },
+    {
+      "id": "INFO-B424-MUTANT-LINE-DRIFT",
+      "severity": "info",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1483)",
+      "title": "b-round-423/mutants/summary.txt cites HEAD line numbers (436/610/978/1248) for the shell toBe(0) asserts, which sit at 437/612/981/1252 in the sketch tree; B artifact only",
+      "evidence": "a-round-424.md Low 2",
+      "repro": "read app/components/arrangement/ArrangementLane.tsx and app/lib/arrangement/__tests__/drag-preview-render.test.tsx at f6c76f4",
+      "added": "2026-11-10 B round 424 -> 425 planning"
     }
   ],
   "regression_rounds": [
@@ -39752,12 +39798,13 @@
         "INFO-C390-HARNESS-DRIFT: fold four probe adaptations into the permanent probes before the next regression: (1) rows1.cjs RG-06 marquee = Ctrl+drag (SABA-B-11c); (2) rows5.cjs RG-18 STEM=demo-stem-pad; (3) c250-s9.cjs splitPlaying uses a sample-series max, not one instant; (4) c218-mp3.cjs waits for \"Demo collection ready\" before Add (L48)",
         "INFO-C390-RV-M-HYDRATION-GLITCH: unreproduced (1 of 6 loads, during a long chain; 4 fresh loads + attempt 2 clean); re-check once with a fresh load per row",
         "INFO-C390-VIDEO-SNAP: R390-VIDEO-SOUND expectation is written against the real (grid-snapped) landing position"
-      ]
+      ],
+      "carry_ruled_d29z1485": "all four carries ruled in round 425 planning (D-29z1485)"
     },
     {
       "id": "REGRESSION-2026-11-10",
       "decision": "D-29z1375",
-      "status": "part 1 done except RR-PERF (D-29z1479): C round 423 FAIL on C-R423-01 only; RR-PERF re-run in fix-up round 424; part 2 = round 425 (round-390 template) | dispatched part 1 (D-29z1476, D-29z1477): round 423 (rounds 391-422, SA-1..SA-6); part 2 = round 424 (round-390 template); regression-last updated only when part 2 closes | due at the first planning on or after 2026-11-10",
+      "status": "part 1 done (D-29z1483: RR-PERF re-run PASS in C round 424); part 2 dispatched as round 425 on f6c76f4 (D-29z1484); regression-last updated only when part 2 closes | part 1 done except RR-PERF (D-29z1479): C round 423 FAIL on C-R423-01 only; RR-PERF re-run in fix-up round 424; part 2 = round 425 (round-390 template) | dispatched part 1 (D-29z1476, D-29z1477): round 423 (rounds 391-422, SA-1..SA-6); part 2 = round 424 (round-390 template); regression-last updated only when part 2 closes | due at the first planning on or after 2026-11-10",
       "scope": "C re-verifies in the browser the key acceptance of every item done since REGRESSION-2026-11-08 (rounds 391-401: PERF-13b-ii, 13c-i, 13c-ii-a/b, 13d, 14a, 14b-i) plus one short check per earlier done item, both viewports; npm run test:e2e:smoke; A fixes only what C finds",
       "added": "2026-11-08 B round 400 -> 401 planning",
       "scope_additions": [
@@ -39791,6 +39838,13 @@
         "SA-5": "fake-bearer BLOCKED -> G423-AUTH",
         "SA-6": "INFO-C404-MARKER-SEEK-RECIPE -> R423-MARKER-SEEK",
         "SA-7": "planning_note_d29z1470 (every item done 402-422) -> rows R423-*"
+      },
+      "scope_named_d29z1484": {
+        "SA-P2-389": "round-389 rows R389-* (rounds 343-388) -> R425-389 block",
+        "SA-P2-390": "round-390 rows (round-340 template, rounds up to 342, parked RP rows) -> R425-390 block",
+        "SA-P2-CARRY": "carry_to_next_regression_d29z1323 of REGRESSION-2026-11-08 -> NO-SHIFT-203 retired (D-29z1485, RS-4B sub-check), HARNESS-DRIFT via c-round-390 copies, R425-RVM-FRESH, R425-VIDEO-SOUND snapped start",
+        "SA-P2-LANE": "ArrangementLane changed in round 424 -> R425-LANE-REBASE (frames200, pin-blur-group, lane peaks vs c-round-423 outputs)",
+        "SA-P2-PERF": "RR-PERF carried from C round 424 (b-round-424/rrperf-carry-proof.txt); PERF-LIB and RG-SMOKE re-run"
       }
     }
   ],
@@ -41658,7 +41712,8 @@
       "file": "b-round-419/root-request-arch-checkpoint-stem-lanes.md",
       "question": "feature boundary STEM-LANES: (1) lane creation in a new module or does the 5325-line ArrangementContext grow; (2) group as load-bearing structure or a new track kind, incl. the existing stems track and saved sessions; (3) cost of a full graph rebuild per add and a lane cap within the perf budgets",
       "status": "requested (D-29z1464); non-blocking: STEM-LANES also waits for AGREE; if unanswered when AGREE is answered, B plans S1 with tech-lead default (new module app/lib/arrangement/stem-lanes.ts, createArrangement unchanged) and records it as L46 default",
-      "absorbs": "ARCH-CHECKPOINT-PERF9-STEM-CACHE (count once)"
+      "absorbs": "ARCH-CHECKPOINT-PERF9-STEM-CACHE (count once)",
+      "note_d29z1486": "attach SIG-R424-BOUNDARY-FIBER-GUARD: the ArrangementLane shell/inner boundary was reshaped twice (409, 424); STEM-LANES touches the same lane code, so the checkpoint should say where per-gesture subscriptions live and whether a unit fiber-count guard is required for boundary changes"
     }
   ],
   "leadmagnet_dialog_rulings_d29z170": {
@@ -41669,30 +41724,6 @@
     "DEVIATION_A1_ruling_d29z171": "accepted: the wasSubmittingRef effect re-anchors focus on the email input after a failed submit; C verified it in the browser (c-round-205/out/steps/fail-tree-1280.json) and m13 red-proves it. Residual in-flight window = C-R205-01 (Low, scheduled)."
   },
   "decisions_log_b": [
-    {
-      "id": "D-29z1429",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 410 -> 411 planning",
-      "decision": "Consults: product-designer keeps the dimmed loading state and adds the strip tooltip (rejected shimmer, hide-until-ready, ready announcement, softer dim); reference Live 12 manual 5.1.2 (.asd: waveform grayed out until fully drawn, not playable) -> match; deviation: CZABA shows the complete stored waveform dimmed. tech-lead v2 APPROVE WITH LOWS (M1 generator, L2 MP3 tie fixed), v4 APPROVE WITH LOWS (L6-L8 fixed in v5), v5 APPROVE; L3/L4/L9 -> 15b-ii, L5 kept."
-    },
-    {
-      "id": "D-29z1430",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 410 -> 411 planning",
-      "decision": "Round 411 dispatched from b-round-410/sketch-411.patch.txt v5 (sha e9b149c4be701ad1, 10 files, git apply --check clean on 328db74). Evidence on the committed scratch: tsc/lint/Biome rc 0; full vitest 264 files 3911/3911 rc 0; covering 24 files 425/425 (slowest 2842 ms / 15000; detail-panel 2119 ms / 5000 = 42 %); mutants 10/10 red; browser at both viewports: HEAD 0 columns while the MP3 is held and 1 worker job per MP3, sketch 96 dimmed columns + tooltip and 0 jobs, 404/8-bit fallbacks 1 job; heights held=ready, HEAD vs sketch <= 0.0133; lane probe ok; frozen r411 1300; grants 12."
-    },
-    {
-      "id": "D-29z1431",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 410 -> 411 planning",
-      "decision": "Round 410 closed: C PASS (8 rows, browserVerified/realVerified true, 0 bugs), gate 410 published 328db74 -> PERF-15a done. A-R410-REV-S1/S2 fixed in 411; S3/S4, GATE410-L3, TL-R411-L5 -> deferred_low_polish; GATE410-L1 = TL-R410-SK-3; GATE410-L2 = TL-R411-L4 -> 15b-ii. Architecture note -> SIG-R410-PEAKS-ARBITRATION (signal, not scheduled). No new checkpoint request: PERF-15 is mid-feature and ARCH-CHECKPOINT-PERF11C-III-BOUNDARY (ArrangementContext) still has no root result; non-blocking."
-    },
-    {
-      "id": "D-29z1432",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 411 -> 412 planning",
-      "decision": "Round 411 closed as C FAIL (A STOP L11 on A-R411-REVIEW-M1, Medium; C reduced run: browser rows 3/4/5a/7 PASS at both viewports on the same runtime, rows 2/5b/6-mutants/8/9/11 not run; gate 411 skipped). Ruling (L10): option (b) fix, not re-rate: two reviewers rated Medium, bug gate fixes Mediums now, doc 264 promises reproducible regeneration. v6.1 delta: generator pins AudioContext 44100 (+throw if not honoured), response.ok, try/finally, braces, writes after all decodes; PS17 reads meta sampleRate, pins 44100, ties header sample_rate and samples_per_pixel (folds A-R411-REVIEW-L1). L2 and L5 test -> 15b-ii; TL-R412-L-D/E -> deferred_low_polish; L-F doc wording. Planning miss recorded as B-R411-SKETCH-M1-MISSED (RETRO 416). PERF-15b-i stays 'bug' until C round 412 PASS; its round-411 browser rows are evidence only."
-    },
     {
       "id": "D-29z1433",
       "date": "2026-11-08",
@@ -41992,6 +42023,30 @@
       "date": "2026-11-10",
       "by": "2026-11-10 B round 423 -> 424 planning",
       "decision": "C round 423 lookups ruled: (1) R423-DECODE-STATUS oracle drift: round-392 rows B1/B7/B8/B9/nb rely on decode-delay hooks that do not apply since previews stream (rounds 393/395, S7: Preview stops the transport); C own replay passed. Accepted as B spec drift, INFO-C423-DECODE-ORACLE-DRIFT (info, origin B spec): later regressions cite c-round-423/r392/b7-replay2.mjs + r393/r395 instead of those five rows. (2) R423-SCALE-EXPORT second clip via Ctrl+D instead of a second Enter: accepted as lookup (the row targets an unmounted clip outside the lane page window, which the copy at 01:41.352 satisfies). (3) Min-zoom probe without a round-403 oracle: recorded only, as written. Why we missed C-R423-01: test:perf is outside the gate and was not run in rounds 405-422; retro candidate RC-R423-PERF-SPEC-ON-STRUCTURE (any task that changes a component fiber structure - shell, memo split, wrapper - runs the interactions spec on the sketch; L58 already says so for \"equal to round N\" claims) for RETRO 435."
+    },
+    {
+      "id": "D-29z1483",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 424 -> 425 planning",
+      "decision": "Round 424 accepted from C evidence only: C PASS (c-round-424.json: 9 rows passed, 0 failed, 0 bugs, browserVerified/realVerified true; L57 OK in b-round-424/l57-check-c424.txt, 5 fields null without a written reason = bookkeeping INFO only). RR-PERF: 5 specs passed (22.1 min), all 17 C-R423-01 ids at the sketch medians, no components row above round 423 (c-round-424/perf-compare.txt). Name probe shell 0 / Memo(lane) 0; ghost, lane/leaf, video and play smoke equal their oracles; auth guard PASS, fake bearer BLOCKED (backend unavailable in cloud, kept as open backend evidence). Gate 424 published f6c76f4 on both remotes (verify 264 files / 3957 tests, gates/round-424/verify.log; review score 9/10, no Medium+). C-R423-01 closes; PERF-11c-iii-e-ii returns to done. A Lows A-R424-DP30-SHELL-RENDER and A-R424-PREVIEW-WRAPPER-STYLE and B artifact drift INFO-B424-MUTANT-LINE-DRIFT go to deferred_low_polish (2026-10-23 rule). L7 sweep: TL-R424-L1/L2/L3 already deferred; A-R424-PREVIEW-WRAPPER-STYLE is a different point from TL-R424-L3 (raw useStore vs the useArrangementPreview wrapper, not selector naming) and the gate review Low 2 (useShallow in render) is confirmed harmless by the reviewer, no new id."
+    },
+    {
+      "id": "D-29z1484",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 424 -> 425 planning",
+      "decision": "Round 425 = REGRESSION-2026-11-10 part 2 on f6c76f4 (task 423 section 7 / task 424 section 6 PASS row). Part 2 = everything finished up to round 390: the round-389 rows (rounds 343-388, tasks/round-389.md section 3) and the round-390 rows (rounds up to 342 via the round-340 template), in one round: metrics/rounds.csv shows 1.03 h + 0.34 h for C rounds 389 + 390, but rounds 341 + 342 ran the same round-340 template in 3.16 h + 0.44 h, so the round may take up to about 4.6 h of a 350-minute job; a time-limit stop is PARTIAL and resumes from progress.json (outcome table). Oracles: each round-390 row compares with the evidence path that row cites in c-round-390.md (c-round-390/out, t258/out, t301, t301x) or the older oracle it used; round-389 pins taken before rounds 391-422 (HEAP live counts, EVICT one stop()) are record with ruling; a diff C attributes to a named round 391-424 goes to lookups for B to rule, an unattributed diff is a finding. RR-PERF is carried from C round 424, not re-run: the published f6c76f4 code equals the sketch C verified (b-round-424/rrperf-carry-proof.txt: both code files sha-equal to sketch-424 applied to 875ff37; diff 875ff37..f6c76f4 = the 3 granted paths; perf/ unchanged since cc5cbc6). PERF-LIB and RG-SMOKE are re-run (cheap, baseline changed). New row R425-LANE-REBASE: ArrangementLane.tsx changed after part 1, and round 424 did not re-run lane virtualization (frames200, pin-blur-group) or lane peaks; they re-run on f6c76f4 against the c-round-423 outputs. R389-JOURNEY and R340-JOURNEY run once as one journey with export."
+    },
+    {
+      "id": "D-29z1485",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 424 -> 425 planning",
+      "decision": "Carries of REGRESSION-2026-11-08 (carry_to_next_regression_d29z1323) ruled, L6: (1) NO-SHIFT-203 retired as a tree-vs-ref row: its reference was the pre-round-203 tree, which no regression has (carried unrun in rounds 301, 340, 390); its intent, no layout shift on focus, is partly covered by the RS-4B sub-check (/ and a product page); the AuthModal empty submit and /store are not; round 425 adds a record-only box capture R425-NOSHIFT-BOXES (product page, AuthModal before and after the empty submit, /store, both viewports) that becomes the next regression oracle; not carried again. (2) INFO-C390-HARNESS-DRIFT: the four adapted probes already live in c-round-390/t258/tools and c-round-390/tools; round 425 uses c-round-390 copies first, so the drift is folded by use; C saves its copies under c-round-425/ as the next template base; closed when C round 425 runs RG-06, RG-18, the c250-s9 split and the c218-mp3 add from those copies. (3) INFO-C390-RV-M-HYDRATION-GLITCH: named row R425-RVM-FRESH (fresh browser context per load, 3 loads per viewport, no other probe running); a reproduction on a valid isolated load is a finding. (4) INFO-C390-VIDEO-SNAP: R425-VIDEO-SOUND expectations are written against the real grid-snapped landing start read from the clip after release."
+    },
+    {
+      "id": "D-29z1486",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 424 -> 425 planning",
+      "decision": "Pre-rulings for older rows on the post-390 tree: (a) R389-DECODE-CACHE round-386 BROWSER-L2-OK (preview started during a decode plays once the decode ends): since rounds 393/395 a URL-backed library preview streams through a media element (K9 preview-client), so the preview may sound before the decode ends; that is the round-393 S1 contract, not a failure. The row passes when the preview is audible at most once (no double start) and stops on Play (S7); a preview that never sounds, or that keeps sounding after Play or Stop, is a Medium finding. Same family as INFO-C423-DECODE-ORACLE-DRIFT. (b) Scripts that count clips use the lane data-clip-count attribute, never DOM clip elements (lane virtualization, round 402). (c) A held Enter acts once on the 11 guarded transport buttons (round 422); older scripts that hold Enter adapt to one action. Reviewer architecture note signal 3 of gate 424 and A report For B (fiber-count guard for component-boundary changes in components/arrangement/) recorded as signal SIG-R424-BOUNDARY-FIBER-GUARD, merged with RC-R423-PERF-SPEC-ON-STRUCTURE and GATE304-M1 for RETRO 435; not scheduled; no architecture checkpoint request (single contained owner, fix verified)."
     }
   ],
   "retro_candidates": [

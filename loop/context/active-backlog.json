@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-10T00:22:29.831Z",
-  "current_task": "Round 423: REGRESSION-2026-11-10 part 1 (C-only browser sweep of the items finished in rounds 391-422, scope additions SA-1..SA-6 named; A changes nothing) (current-task.md)",
+  "_generatedUtc": "2026-11-10T02:15:49.458Z",
+  "current_task": "Round 424: PERF-FIX-R423-LANE-SHELL, fix-up of C-R423-01 (the lane preview subscriptions move into the memo inner so a drag commit renders the lane once, from B reviewed sketch b-round-423/sketch-424.patch.txt) (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6340,17 +6340,31 @@
       "severity": "low",
       "status": "deferred_low_polish (D-29z1441)",
       "title": "PR19/PR20 asserts carry no label for the flag coupling (PR14-PR17 do)"
+    },
+    {
+      "id": "C-R423-01-PERF-DRAG-COMPONENTS-BUDGET",
+      "severity": "medium",
+      "origin": "B spec",
+      "status": "in_progress (D-29z1481): fix-up round 424 PERF-FIX-R423-LANE-SHELL",
+      "title": "every clip drag commit renders 3 lane fibers (shell + Memo + inner) since round 409, so 17 deterministic move-components budgets fail (fade 6/4, trim 17/15, video 15/13, video-trim 17/15, video-fade 5/3)",
+      "evidence": "c-round-423.json bug C-R423-01; c-round-423/perf-results/latest-interactions.json; b-round-423/move-components-404-vs-423.txt; b-round-423/probe/fade-names-head.json",
+      "repro": "cd store; npm run test:perf (alone); studio-lab-interactions.perf.spec.ts",
+      "added": "2026-11-10 B round 423 -> 424 planning"
+    },
+    {
+      "id": "INFO-C423-DECODE-ORACLE-DRIFT",
+      "severity": "info",
+      "status": "open (D-29z1482): next regression cites c-round-423/r392/b7-",
+      "title": "round-392 decode-delay oracle rows are obsolete since library previews stream (393+)"
+    },
+    {
+      "id": "INFO-B423-LANE-RESTORE-PARTIAL",
+      "severity": "info",
+      "status": "open (D-29z1481): record only; C-R423-01 closes on its 17 id",
+      "title": "the round-424 sketch returns the 17 failing ids to round-404 values; record-only or within-budget ro"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 414,
-      "task": "current-task.md",
-      "decision": "D-29z1437..D-29z1440",
-      "type": "SYS-R2-FAKE-FIDELITY (test-only R2 worker fake fidelity)",
-      "status": "done: C round 414 PASS (c-round-414.json: 8 rows passed, browserVerified/realVerified true, 0 bugs; node --test 83/83; mutants summary equal to B (13 red, 1 equivalent)); gate 414 published 5be9294",
-      "note": "baseline dc536a6 clean; frozen b-round-413/r414-frozen-sha256.txt (1312); grants b-round-413/grants-414.txt (2); sketch b-round-413/sketch-414.patch.txt sha 5279fce53efec300 (v2; v1 3a155bc6 rejected by tech-lead); claims b-round-413/claims-414.sh"
-    },
     {
       "round": 415,
       "task": "current-task.md",
@@ -6420,8 +6434,16 @@
       "task": "current-task.md",
       "decision": "D-29z1476, D-29z1477",
       "type": "REGRESSION-2026-11-10 part 1 (C-only browser sweep; A no change)",
-      "status": "dispatched",
+      "status": "c_fail (D-29z1479): C FAIL c-round-423.json, 1 Medium C-R423-01 (RR-PERF); gate 423 skipped; fix-up = round 424",
       "note": "baseline 875ff37 clean; tree manifest b-round-422/r423-tree-sha256.txt (1321); claims b-round-422/claims-423.sh; marker-seek baseline b-round-422/probe/head/"
+    },
+    {
+      "round": 424,
+      "task": "current-task.md",
+      "decision": "D-29z1480, D-29z1481",
+      "type": "PERF-FIX-R423-LANE-SHELL (fix-up of C-R423-01)",
+      "status": "dispatched",
+      "note": "baseline 875ff37 clean; sketch b-round-423/sketch-424.patch.txt; claims b-round-423/claims-424.sh; perf sketch run b-round-423/perf-sketch/"
     }
   ],
   "other_keys": [

@@ -1,127 +1,201 @@
-# Round 424: PERF-FIX-R423-LANE-SHELL — a clip drag renders the lane once again (fix-up of C-R423-01, from B's reviewed sketch)
+# Round 425: REGRESSION round, part 2 (REGRESSION-2026-11-10). C-only browser sweep of everything finished up to round 390, the carries of the last regression, and a lane re-check on the new baseline. A changes nothing
 
-**Planned by:** B, at the round 423 → 424 planning, 2026-11-10 (`b-round-423.md`). The advisor was used after orientation and before close. The round-423 task is archived as `tasks/round-423.md` [K11].
-**Decisions:** D-29z1479 … D-29z1482 (`backlog.json` v400) [K14].
+**Planned by:** B, at the round 424 → 425 planning, 2026-11-10 (`b-round-424.md`). The advisor was used after orientation and before close. The round-424 task is archived as `tasks/round-424.md` [K11].
+**Decisions:** D-29z1483 … D-29z1486 (`backlog.json` v401, `decisions_log_b`, `regression_rounds` id `REGRESSION-2026-11-10`) [K13, K14].
 
 ## Read first
-- **`lessons.md` in full** [K16]. Most relevant here:
-  - L11: STOP rules.
-  - L23: grants and collisions; the memo/rename clause.
-  - L29, L56: claims.
-  - L37, L58: perf asserts come from B's sketch run, and "equal to round N" is an assert.
-  - L38: perf runs alone; warm `/studio-lab` in a browser first.
-  - L57: all harness fields.
-  - L59: heaviest first.
-  - L60: destructive commands only in your own folder.
-- **Primitives (A):** `AGENT_DISCOVERABLE_CODE.md`, `FORWARDREF_COMPONENT.md`, `REACT_CONTEXT.md`, `AUDIO_ARCHITECTURE.md`, `TESTING_QUALITY_GATES.md`, `BUG_HUNTING_TESTS.md`, `GEORGIAN_DOCS.md`, and `docs/implementation/TEMPLATE.md`.
-- **Claims:** `bash b-round-423/claims-424.sh` (`ROOT=` and `LOOP=` can be overridden).
-  - Planning output on the real store: `b-round-423/claims-424-planning-output.txt` (stderr `claims-424-planning.err`, empty).
-  - Output on B's sketch scratch: `b-round-423/claims-424-sketch-output.txt`.
-  - Output on the scratch in A's end state (sketch applied, not committed, plus a stub doc 273 with the l.4 line): `b-round-423/claims-424-a5-stub-output.txt` (stderr empty).
-- **Sketch review (L58):** `b-round-423/sketch-review.md` names the dispatched sha256 and holds the verdict (approve-with-lows). K15 must print `L58 OK`.
+- **`lessons.md` in full** [K16]. Directly relevant:
+  - L6: every scope addition is a named row or "carried";
+  - L25: soft-disabled clicks;
+  - L29, L56: claims;
+  - L38: perf runs alone; warm `/studio-lab` in a browser before a timed probe;
+  - L48: playback-start lead; wait for `Demo collection ready`;
+  - L54: journey row;
+  - L57: all harness fields;
+  - L59: do not end early; heaviest first; `progress.json`;
+  - L60: destructive commands stay in `c-round-425/`.
+- **The rules:** `docs/technical/studio-real-workspace/agent-workflow.md`: the speed rules and "Regression round every 3 days", the 2026-10-23 bug gate, the cloud-runner section.
+- **The templates, by reference** (all exist [K10]):
+  - `tasks/round-389.md` §3 (rounds 343–388) with C's run `c-round-389.md` / `c-round-389/tools/`;
+  - `tasks/round-390.md` §2–§8 (rounds up to 342, parked rows) with C's run `c-round-390.md` / `c-round-390/{tools,t258,t301,out,price,wk}`.
+  - **Where this task differs from rounds 389 and 390, this task wins.**
+- **Part 1** (rounds 391–422) is done: `tasks/round-423.md`, `c-round-423.md` (21 rows PASS; its RR-PERF failure was fixed and re-run in round 424, `c-round-424.md`).
+- **Claims:** `bash b-round-424/claims-425.sh` (`ROOT=` and `LOOP=` can be overridden). Planning output: `b-round-424/claims-425-planning-output.txt` (stderr `claims-425-planning.err`, empty). Run it at G425-SCOPE start and end. The output must equal the planning output, except:
+  - K12 is compared by "every id located, none `NOT-FOUND`" (the optimizer may archive a closed id between B and C, L56);
+  - K18 (ports) may differ by the mock you start.
 
-## Baseline: HEAD `875ff37`, clean tree
-- **Gate 423 is `skipped`** (C FAIL) [K7], so nothing was published after round 422 and the baseline stays `875ff37` [K1]. The tree is clean (K2 `total 0`).
-- **Frozen:** `b-round-423/r424-frozen-sha256.txt` has **1,319** entries: every tracked file except the 2 granted source/test files. `sha256sum -c` gives rc 0 [K3].
-- **Protected:** the 11 files in `b-round-318/protected-sha256.txt` are unchanged, and none is granted [K4]. No auth, route, purchase or download file is touched.
-- **If K1 differs at A1** (root published in between): a root-only commit that leaves `git diff 875ff37 HEAD -- app perf` empty is accepted with a note. Otherwise STOP if K5 is `no` or K3 is not rc 0.
+## Baseline: HEAD `f6c76f4`, clean tree
+- `gates/gate-round-424.json` is `published`, `commit` `f6c76f43ce0c…` on both remotes [K1]. Its `head` field (`875ff37`) is the pre-commit HEAD; do not use it. `context/head-sha.txt` is stale as well.
+- At planning:
+  - `git rev-parse HEAD` = `f6c76f43ce0c…` [K1];
+  - status empty [K2];
+  - tracked tree frozen in `b-round-424/r425-tree-sha256.txt` (1,322 entries, rc 0) [K3];
+  - protected files 11/11 OK (`b-round-318/protected-sha256.txt`) [K4].
+- If root publishes in between and K1 differs, a root-only commit that leaves `git diff f6c76f4 HEAD -- app perf` empty is accepted with a note (L29). Anything else is "STOP — baseline differs".
 
-## 0. Why this round (D-29z1479 … D-29z1481)
-- **C round 423 failed on one Medium.** C-R423-01: 17 deterministic `move-components` asserts of the interactions perf spec fail. Every other row of REGRESSION-2026-11-10 part 1 passed, with `browserVerified` true.
-  - The failing values: fade 6 (budget 4), trim 17 (15), video 15/14 (13/12), video-trim 17 (15), video-fade 5 (3).
-  - Task 423 §7 sends a cloud-reproducible Medium to its fix-up first; part 2 of the regression moves to round 425.
-- **Cause (B named it before dispatch, L37):**
-  - Every clip drag gets exactly **+2 fibers per rendered lane** compared with the last green run (round 404; `b-round-423/move-components-404-vs-423.txt`).
-  - The browser name probe at HEAD (`b-round-423/probe/fade-names-head.json`) shows the two extra fibers per fade-drag commit: the shell `ArrangementLane` and `Memo(ArrangementLaneViewInner)`.
-  - Round 409 split the Lane into a shell that subscribes to the per-lane preview and ghost stores [K9 shell-preview-sub 1], over `memo(ArrangementLaneViewInner, areArrangementLaneViewPropsEqual)` [K9 memo 1].
-  - The harness counts tags 0/1/11/14/15 [K17], so shell + Memo + inner = 3 fibers where round 404 had 1.
-- **Ruling: RESTORE (D-29z1481).** tech-lead: restore; the comparator always fails during a drag, and the budgets have no headroom by design. performance-optimizer dissented (accept +2; latency unchanged, `b-round-423/latency-404-vs-423.txt`). Its latency-budget idea is filed as candidate PERF-CAND-DRAG-LATENCY-BUDGET. **No budget changes** [K18 = 4 15 3].
-- **Why we missed it:** `test:perf` is not a gate row and ran in no round between 405 and 422. Round 409 was dispatched from B's sketch with a leaf-name probe but without the interactions spec on the sketch (L58's "equal to round N's run is an assert" was not applied). Origin `B spec`. Retro candidate RC-R423-PERF-SPEC-ON-STRUCTURE (RETRO 435).
+## 0. Why this round (D-29z1483, D-29z1484)
+- **Round 424 passed and is published** (D-29z1483): C PASS, 9 rows, 0 bugs, `browserVerified` true [K6]; gate 424 published `f6c76f4` (verify 264 files / 3,957 tests). C-R423-01 is closed.
+- **The outcome was fixed in advance** (task 424 §6, PASS row): round 425 = REGRESSION-2026-11-10 part 2 on the new baseline.
+- **Part 2 = everything finished up to round 390.** That is round 389's rows (343–388) **and** round 390's rows (≤ 342). They run in one round. `metrics/rounds.csv` shows 1.03 h + 0.34 h for C rounds 389 + 390, but rounds 341 + 342 ran the same round-340 template in 3.16 h + 0.44 h. Expect up to about 4.6 h. A time-limit stop is PARTIAL and resumes (§10).
+- `regression-last.json` = 2026-11-07 / 390 [K5]. It is updated only when part 2 closes.
+- **Open Criticals/Highs:** none. The open Mediums are root-only, manual-only or `awaiting_user`. STEM-LANES still waits for Saba [K19].
 
-## Reference
-Not applicable. This is a performance fix-up with no visible or behavioural change, which the reference-first rule excludes. The screen budget (L39), `product-designer`, Ableton and YouTube steps do not apply.
+## 1. A: no code or doc change
+- From `store/`: `git rev-parse HEAD` must be `f6c76f4…` and `git status --short --untracked-files=all` must be empty. If either differs, write "STOP — baseline differs" at the top of `a-round-425.md` with the output, and change nothing.
+- Do not edit any file in `store/`. Run no vitest, typecheck, lint or code-reviewer: there is no change.
+- Write `a-round-425.md`: the start HEAD, the status output, and "no change by design (REGRESSION round part 2, D-29z1484)".
+- **Forbidden:**
+  - `global_forbidden_files` / `global_forbidden_actions`;
+  - the protected files;
+  - commit, push, stash, checkout, deploy;
+  - dev-server restarts.
 
-## 1. What A changes (sketch `b-round-423/sketch-424.patch.txt`, sha256 `942dfdb6…` [K13], 2 files)
-1. **A1:** run the claims at the start.
-2. From `store/`, run `git apply --check ../tmp/studio-real-loop/b-round-423/sketch-424.patch.txt`, then `git apply` the same file. **Do not edit those two files afterwards.** If you or your reviewer find a Medium or worse in the sketch logic, STOP (L11); do not edit around it. The sketch does this:
-   - **`ArrangementLane.tsx` inner:** subscribes to the preview store itself (`useStore(useArrangementPreviewStore(), useShallow(…))`), falling back to the new prop `committedLaneClips`. It also subscribes to the lane-drag ghosts and computes `laneSources` and `laneGhostTitles`. Ghost titles read `getArrangement().clips` inside a `useMemo` keyed on the ghosts (TL-R424-L1, ruled Low).
-   - **`ArrangementLane.tsx` shell:** keeps `useArrangement()`. It passes `committedLaneClips` (kept stable by `useShallow(fn)(arrangement)`), `collection`, `sourcePeaks`, `videoSources`, `sourceDurations`, `pxPerSecond` and `hasArrangementClips` [K9 sketch: shell-preview-sub 0, inner-store-sub 1].
-   - **`drag-preview-render.test.tsx`:** DP2, DP49 and DP21 move `rendersOf('ArrangementLane')).toBe(2)` to `ArrangementLaneViewInner` with the same value. DP29 moves `toBeGreaterThan(0)` to the inner. All four add `rendersOf('ArrangementLane')).toBe(0)` [K10 HEAD: lane-2 3, lane-0 1, inner-2 0, lane-gt0 2 → sketch: 0, 5, 3, 1]. No assertion is lost; this is an equal-or-stronger replacement (L4).
-3. **Doc:** create `docs/implementation/2026/quarter-IV/273-perf-fix-lane-shell-subscriptions.md` in Georgian, with English technical terms.
-   - l.4 is exactly `**სტატუსი:** Completed (C round 424 PASS)` (L28).
-   - It has TEMPLATE's 7 `## ` headings, in order (L26).
-   - Content:
-     - the cause (shell + Memo + inner);
-     - the RESTORE ruling and the dissent;
-     - the HEAD → sketch table from `b-round-423/perf-sketch/compare-404-423-sketch.txt`, the 17 ids only;
-     - the name probe lines from `b-round-423/probe/names-summary.txt`, byte for byte;
-     - the mutant block, copying the 3 lines of `b-round-423/mutants/summary.txt` byte for byte;
-     - what did not return to round 404 (INFO-B423-LANE-RESTORE-PARTIAL: zoom 41 → 45, move/lane max 40 → 44, group max 44 → 48, per-move +0.2…0.5; all record-only or within budget) and the surviving round-409 saving (play start/stop 11 → 7);
-     - TODO: TL-R424-L1…L3 (deferred Lows) and PERF-CAND-DRAG-LATENCY-BUDGET.
-   - It cites only rows and files that exist (L26).
-4. Write `a-round-424.md` as you go:
-   - changed files;
-   - each check with its rc and log path (`a-round-424/`);
-   - reviewer findings;
-   - a For B section with any Architecture note.
+## 2. C: scope, method and budget (round 390 §2 applies, with these changes)
+- **G425-SCOPE** at start and at end:
+  - K1 `f6c76f4…`;
+  - K2 total 0;
+  - K3 1,322 rc 0;
+  - K4 rc 0;
+  - the claims output equals the planning output (see "Read first"). K15 is `L58 OK` (no sketch).
 
-## 2. Grants (`b-round-423/grants-424.txt`, 3 paths)
-- `app/components/arrangement/ArrangementLane.tsx` (sketch only)
-- `app/lib/arrangement/__tests__/drag-preview-render.test.tsx` (sketch only)
-- `docs/implementation/2026/quarter-IV/273-perf-fix-lane-shell-subscriptions.md` (new, whole file)
-- **Nothing else.** `perf/**`, the budgets, `ArrangementContext.tsx` and `clip-lane-drag-store.ts` stay as they are. At the end, `git status --short --untracked-files=all` shows 2 ` M` lines and 1 `??` line.
+  Any change by anyone is a SCOPE FAIL; name the writer if you can.
+- **Start the mock API first.** Run `mock-api/server.mjs` from the loop folder on 127.0.0.1:5199. At planning, :5199 answered `000` [K18]. Record its PID in `c-round-425/mock.pid` and stop only that PID. Mock data proves the client path only.
+- **Tools, in this order of priority** [K10]. These copies are already adapted to the current UI, which folds INFO-C390-HARNESS-DRIFT (D-29z1485):
+  1. `c-round-390/tools/`, `c-round-390/t258/tools/`, `c-round-390/t301/` and `c-round-390/wk/`, for the round-390 rows;
+  2. `c-round-389/tools/`, for the round-389 rows;
+  3. then the older folders those rounds name.
 
-## 3. A's checks (the full suite, the perf spec and verify belong to the gate and to C)
-| # | Check | Pass |
+  Copy what you use into `c-round-425/` (same folder depth when a script imports a relative path) and redirect every output sink there (L60). Your copies become the next regression's base: keep them.
+- **Changed UI facts since round 390.** Adapt older scripts to these. Each adaptation is "lookup, not deviation"; name the fact.
+  - A held Enter acts once on the 11 guarded transport buttons; Fit stays unguarded [K9 transport-repeat-guard 11]. A script that holds Enter expects one action.
+  - Lanes virtualize clips: count clips from the lane's `data-clip-count`, never from DOM clip elements [K9 lane-data-clip-count 1].
+  - The demo ships precomputed peaks [K9 demo-peaksUrl 1]: the library waveform shows dimmed before the MP3 decodes.
+  - URL-backed library previews stream through a media element [K9 preview-client present]. Preview stops the transport (round 393 S7).
+  - Round 424 changed only which lane component subscribes to the drag stores. There is no visible change.
+- **B pre-rulings, binding here (D-29z1486):**
+  - **R389-DECODE-CACHE, the round-386 BROWSER-L2-OK half** ("a preview started during a decode plays once the decode ends"): the preview may now sound **before** the decode ends, because it streams. That is the round-393 S1 contract, not a failure.
+    - Pass: the preview is audible, starts at most once (no double start) and stops on Play.
+    - A **Medium** finding: a preview that never sounds, or that keeps sounding after Play or Stop.
+    - This is the same family as INFO-C423-DECODE-ORACLE-DRIFT [K12]. For the decode-status replay, use `c-round-423/r392/b7-replay2.mjs`, not the round-392 B1/B7/B8/B9/nb rows.
+  - **The round-390 rulings stay** (task 390 §2):
+    - R340-HINT;
+    - the void "press L" sub-check;
+    - FONT-PIXEL retired;
+    - R342-POSCTL is record only;
+    - RP-NOBPM-RULER and C-R341-01 are not re-run.
+- **Single dev server.** Every dev row runs on :5173. Production rows (the FONTS production half, R389-DECODE-CACHE HEAP at 1440, R389-STEM-CACHE if it needs a build) use a scratch production server on its own port, stopped after. Never start a second dev server that shares the store's `node_modules/.vite` (L38).
+- **Order** (L59: heaviest first; after a time-limit stop, resume from `c-round-425/progress.json`):
+  1. G425-SCOPE start, claims, mock start.
+  2. PERF-LIB, alone.
+  3. §3 (new baseline and carried rows).
+  4. §4 (round-389 rows).
+  5. §5 (round-390 rows), with R301-PRICE last among the store rows.
+  6. §6 (parked rows).
+  7. RG-SMOKE, alone; then G425-AUTH.
+  8. G425-SCOPE end; stop your PIDs.
+
+  Write `c-round-425.json`, `c-round-425.md` and `progress.json` after every row.
+- **Budget per row:** up to 2 replacement attempts, for environment-invalid runs only. The known ones:
+  - the cold-start Sounds-listbox timeout;
+  - the s186 gift-card crash when the mock lacks that product;
+  - an overlapped job.
+
+  Keep the log. Thresholds are not relaxed. A row that fails on a valid setup is a finding.
+- **Console noise known in the cloud:**
+  - `Failed to load cart`, `ERR_CONNECTION_REFUSED`, `ERR_TUNNEL_CONNECTION_FAILED`;
+  - the known Low C-R341-02 (font preload "not used" after client navigation).
+
+  Record any other page error with its row.
+- **Reference / Ableton / product-designer:** regression round. There is no new behaviour and no new parity claim. C judges the CZABA requirement only; Ableton conformance does not apply.
+- **Both viewports** (1440×900 and 1280×720) on every row unless the row says otherwise.
+
+## 3. C: new-baseline and carried rows (D-29z1484, D-29z1485)
+| Row | Why | Action and expected |
 |---|---|---|
-| A1 | `bash b-round-423/claims-424.sh` at the start | Equals `claims-424-planning-output.txt`, except K12, which is compared by "every id located, none `NOT-FOUND`"; stderr empty |
-| A2 | From `store/`: `npx vitest run $(cat ../tmp/studio-real-loop/b-round-423/covering-files.txt)` (12 files: every test that names the lane fibers, the preview lane hook or the lane ghosts) | rc 0; **12 files, 291/291** (`b-round-423/precheck-a2.log`). `drag-preview-render` alone is 77/77 |
-| A3 | `npm run typecheck`; `npm run lint` | rc 0 each (B: `precheck-typecheck.log`; lint rc 0 with 205 warnings and 1 info, `precheck-lint.log`) |
-| A4 | `npx biome check` on the 2 granted code files | rc 0, no fixes (`precheck-biome2.log`) |
-| A5 | Claims at the end | K1 stays `875ff37`. K2, K3, K5, K6, K9, K10 and K20 equal `claims-424-a5-stub-output.txt` (K2 `status  1 ??  2 M total 3`, K5 `no`, K6 `1` with the l.4 line). K4 rc 0. Every other line equals the planning output (K12 by "every id located") |
-| A6 | `code-reviewer` on the diff and doc 273 (3 files) | No Critical, High or Medium in the sketch logic (otherwise STOP, L11). TL-R424-L1…L4 are not new findings. Fix doc findings in the doc |
+| R425-LANE-REBASE **[SA-P2-LANE]** | `ArrangementLane` changed in round 424, after part 1 ran [K8: 3 paths]. Round 424 did not re-run virtualization or lane peaks | Copy `c-round-423/scale/{clips200,frames200,pin-blur-group}.cjs` and `c-round-423/peaks/{peaks-probe-410,peaks-before-ready-413}.mjs`, and run them as R423-SCALE and R423-PEAKS did (`c-round-423.md`). **Oracle:** the c-round-423 outputs (`scale/frames-*.json`, `scale/pin-*.json`, `peaks/{real,404,p410}-*.json`) [K10]. Pass: 0 gap frames, the held clip stays mounted, pin-blur A/B as in round 423, and peaks equal (timestamps excepted) |
+| R425-VIDEO-SOUND **[SA-P2-CARRY]** | INFO-C390-VIDEO-SNAP | As R390-VIDEO-SOUND (task 390 §3; `c-round-390/tools/vsound.cjs`). **Read the clip's real start after release** (grid-snapped; the script reads `data-clip-start` [K9 clip-data-start 1]), and write the windows against it. Pass: before the start, the level is at the noise floor; from 0.3 s after the start it is ≥ 20 dB above that floor; after Undo the sound starts at the original start; `pageErrors` []. Silence inside the moved clip on a valid run is **Medium** |
+| R425-WAV-3CLIP-LEN | carried rule of task 390 §3 | As R390-WAV-3CLIP-LEN (`c-round-390/tools/exportlen.mjs`): RIFF/WAVE, 24-bit, 48 kHz, stereo; frames / 48000 = the dialog's range end ±1 frame; non-silent; 0 NaN. At 1440, compare the sha256 with `c-round-389/export-det.json`; a difference is reported for B to rule, not a FAIL by itself |
+| R425-RVM-FRESH **[SA-P2-CARRY]** | INFO-C390-RV-M-HYDRATION-GLITCH | `c-round-390/tools/mepage.cjs` (it runs 4 fresh-context loads at 1440; add a 1280×720 copy): 4 loads of `/studio/middle-east` per viewport, **each in a fresh browser context**, with no other probe running. Pass: no "Invalid hook call", no hydration error, body not empty, "Sign in required" shown. A reproduction on a valid isolated load is a finding with its log; C rates the severity by impact (an empty auth-guard page is Medium) |
+| NO-SHIFT-203 | carry | **Retired as a tree-vs-ref row (D-29z1485).** Its reference tree (pre-203) no longer exists. RS-4B's sub-check in §5 covers only part of its intent (`/` and a product page). Record "retired D-29z1485" under `carried` |
+| R425-NOSHIFT-BOXES (record) | rest of NO-SHIFT-203 | Element boxes on a mock product page, the AuthModal before and after an empty submit, and `/store`, at both viewports. Save them as `c-round-425/noshift/*.json`. They become the next regression's oracle; record only, no pass/fail this round |
 
-A does not run `npm run test:perf`; C runs it (L38: alone).
+## 4. C: round-389 rows (items finished in rounds 343–388) [SA-P2-389]
+Run every row of `tasks/round-389.md` §3 as written there, using the §2 facts and rulings above and C's round-389 scripts (`c-round-389/tools/`). The rows:
+- R389-SCHED-FAIL, R389-RESYNC-METER, R389-EDIT-THROW;
+- R389-DECODE-CACHE: with the D-29z1486 ruling. HEAP-RETAINERS-PROD runs at 1440 only, on a production build. **Two pins were taken before rounds 391–422 changed decode, preview and retention, and B has not re-run them** (L58):
+  - HEAP's live counts `[2,5,16,16,16,16,16]`;
+  - EVICT's "one `stop()` on the evicted preview".
 
-## 4. C's acceptance
-**Before hand-off:** write `c-round-424.json` with **all L57 fields**, with `mutantRedOnSketch` = `b-round-423/mutants/summary.txt` and `affectedChecksRunOnSketch` = `b-round-423/perf-sketch/compare-404-423-sketch.txt`, `precheck-a2.log`. Then run `python3 -I tools/l57-check.py c-round-424.json c-round-424/l57-check.txt`.
+  They are `record — not run on this tree by B: pre-391 pins`. The asserted part of EVICT stays: Add plays live, and Undo removes it. B rules on any difference at the next planning;
+- R389-WAV-STREAM;
+- R389-LEAVES, R389-STATUS, R389-LAZY;
+- R389-STEM-CACHE, R389-RANGE-BG, R389-SELECT-TRANSPORT, R389-PLAY-STORE;
+- R389-VIDEO-DRAG: its "video sound after the move" sub-check is R425-VIDEO-SOUND;
+- R389-FADERS-ICONS, R389-GROUP-MOVE.
 
-**Order (L59, heaviest first):** rows 1, 3 (perf, alone), 4–7 (browser), then 2, 8, 9. Write `c-round-424/progress.json` after every row. Never run vitest or a build while the perf spec or a browser probe runs (L38).
+**R389-JOURNEY and R340-JOURNEY run once,** as the R340-JOURNEY row in §5. Record "covered by R340-JOURNEY".
 
-| # | Row | Pass |
-|---|---|---|
-| 1 | **SOURCE-SCOPE start + CLAIMS** | The claims equal the A5 expectation and stderr is empty. K15 prints `L58 OK`. K12 lists every id with a location, none `NOT-FOUND`. Status shows only the 3 granted paths; frozen 1,319 rc 0; protected rc 0 |
-| 2 | **PATCH-IDENTITY + UNIT** | Apply `sketch-424.patch.txt` to a `git archive HEAD` scratch under `c-round-424/` (or `/tmp`) and `cmp` the 2 files against the working tree: identical. A2's command gives 12 files, 291/291. The patch has 2 `diff --git` headers |
-| 3 | **RR-PERF** (C-R423-01) | `npm run test:perf` in `store/`, **alone**, after a browser warm-up of `/studio-lab`. Pass: rc 0; all 5 specs pass; `complete` true; 0 aborts; 0 page errors (B's full run on the sketch: 5 passed in 19.1 min, every spec `complete` with 0 failing asserts, `b-round-423/perf-sketch-full/summary.txt`). **Every one of the 17 ids in `c-round-423.json` bug C-R423-01 passes, with the median equal to B's sketch run** (`b-round-423/perf-sketch/compare-404-423-sketch.txt`: fade 4 / 3.933, trim 15 / 14.75, video stopped 13 / 9.883, video playing max 12, video-trim 15 / 12.817, video-fade 3 / 2.95). No `components` row is above its round-423 value (`c-round-423/perf-results/latest-interactions.json`). **Record:** `interact.drag.video.playing.move-components-per-move` and `interact.drag.video-trim.playing.move-components-per-move` (record rows; they moved by ±0.07 between B's two sketch runs). Save `latest*.json` under `c-round-424/perf-results/`. Mutant: HEAD = the round-423 run (17 red) |
-| 4 | **NAME-PROBE** (browser, dev :5173 = A's tree; **1440×900 only**, as B's probe) | Copy `b-round-423/probe/fade-names.mjs` to `c-round-424/probe/` and run it with `fade`, then `trim`. **Assert** (equal to the sketch lines of `b-round-423/probe/names-summary.txt`): fade maxSize = meanSize = 4; trim maxSize = meanSize = 15; `ArrangementLane` 0 and `Memo(ArrangementLaneViewInner)` 0; `ArrangementLaneViewInner` = the commit count; 0 errors. **Record:** the commit count (wallclock, L37; B saw 59). The HEAD lines in the same file are the control (6 / 17, shell = commits) |
-| 5 | **GHOST-TITLE** (browser, both viewports) | Copy `b-round-423/probe/ghost-title.mjs`, run it on :5173. Pass: equal to `b-round-423/probe/ghost-title-summary.txt` (HEAD = sketch): one ghost on lane `stems`, label `00:00.250Middle East — public preview`, 0 errors |
-| 6 | **LANE + LEAF** (browser) | Copy B's sketch-run copies: `b-round-423/probe/lane/leaf-probe-409.mjs`, `b-round-423/probe/lane/lane-actions-probe.mjs` (both viewports) and `b-round-423/probe/tools/leaf.cjs` (change its `SH` to `c-round-424/shots`; it writes `../out/<OUTN>.json` relative to its folder). **Oracle = B's sketch outputs** (`b-round-423/probe/lane/leaf-probe-sketch.json`, `lane-sketch-*.json`, `b-round-423/probe/out/leaf-sketch.json`; compare in `b-round-423/probe/lane-leaf-video-compare.txt`: 0 diffs vs C round 423 on the first two, 0 non-timing diffs on `leaf.cjs`). **Assert:** every leaf-probe count equal to the oracle, except LibraryPreviewViewInner ±1 (C round 423 jitter); lane-actions `ok` true with steps equal; every `leaf.cjs` field equal except `.pos` and `.aud.ctx`. **Record:** `.pos` and `.aud.ctx` (wallclock; B saw `.pos` differ by up to 50 ms between runs of the same code path) |
-| 7 | **VIDEO + PLAY SMOKE** (browser, both viewports) | Video: copy `b-round-423/probe/video/video-probe-c406.mjs`. **Assert** (round 406 VIDEO-SYNC, `tasks/round-406.md` row 3): every sample `paused` false and \|drift\| ≤ 0.05 s; swaps and fallbacks 0. **Record:** max \|drift\| (C round 423: 0.013 s; B sketch: 0.012 / 0.007 s, `lane-leaf-video-compare.txt`). Play smoke as R423-HELD-ENTER (`c-round-422/scripts/smoke.mjs`): Space plays (≥ 0.9 s per ≥ 1 s, L48), stops frozen 500 ms, 0 page errors. The drag-and-undo behaviour of fade, trim, move and video drags is covered by the perf spec's `interact.harness.*-live` rows in row 3 |
-| 8 | **AUTH** (fresh context, both viewports) | As G423-AUTH (`c-round-423/auth/`): `/studio-lab` opens anonymously with `auth_user` null; `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; `/api/studio-token?product=middle-east&file=a.mp3` without auth → 401. **BLOCKED:** the fake-bearer path (backend unavailable in the cloud) |
-| 9 | **DOC + SOURCE-SCOPE end + L57** | Doc 273 l.4 is byte-exact `**სტატუსი:** Completed (C round 424 PASS)`; the 7 TEMPLATE headings are in order; the mutant block equals `b-round-423/mutants/summary.txt` byte for byte; every cited row and file exists. The end claims equal the start claims. `git diff HEAD --stat` lists only the 2 granted code files. `tools/l57-check.py` is OK |
-| gate | Full vitest, typecheck, build, Biome, verify | Not run by C (gate rows). B's full run on the sketch: `b-round-423/precheck-full.log` (264 files, 3,957/3,957) |
+**Escape clause (D-29z1484).** These rows last passed at `11ca746`, before rounds 391–424:
+- a difference from a round-389 oracle that C can attribute to a named round 391–424 (its task or C report) goes to `lookups` with that round, for B to rule;
+- an unattributed difference on a valid run is a finding.
 
-**Retries (rows 3–8):** a cold-server first load, a port in use or an overlapped job is an environment problem (L38). Keep the log; retry at most twice; it is never a FAIL. A failing budget on a valid isolated run is a finding.
+## 5. C: round-390 rows (items finished up to round 342) [SA-P2-390]
+Run `tasks/round-390.md` §4, §5 and §6 as written there, with the §2 changes above. Where C round 390 already adapted a script, use that copy. The rows:
+- **§4:** the round 340 §4d rows (R340-CROSS-LANE … R340-JOURNEY).
+  - **R340-JOURNEY is one continuous flow with the WAV export and screenshots per step** (`c-round-390/tools/journey-full.cjs`).
+- **§5:** the round 340 §4c / round-301 rows (R301-MASTER … R301-MENU).
+  - R301-JOURNEY is covered by R340-JOURNEY.
+  - **R301-PRICE runs last among the store rows,** with the mock swap and the restart (health 200) of task 390 §5.
+- **§6:** §4b, §3 (RG-01 … RG-24, RG-T1 … RG-T4B; RG-03 at 1440 only), §4 and §4.S, including RS-4B.
+  - **Oracle per row:**
+    - the evidence path that row cites in `c-round-390.md` (under `c-round-390/out/`, `t258/out/`, `t301/` or `t301x/`);
+    - or the older oracle round 390 compared with (rounds 341, 338, 301).
+  - Expected: 0 normalised diff lines, except diffs explained by a §2 fact or attributed to a named round 391–424 (as the §4 escape clause; the attribution goes to `lookups`).
+  - **HARNESS-DRIFT** (D-29z1485): RG-06 (Ctrl+drag marquee), RG-18 (`STEM=demo-stem-pad`), the c250-s9 split (series max) and the c218-mp3 add (waits for ready) run from the `c-round-390` copies. Report each by name in `lookups`.
 
-## 5. Rows and mutants (`b-round-423/mutants/summary.txt`)
-| Row | What it proves | Red under |
-|---|---|---|
-| DP2, DP49, DP21, DP29 (`ArrangementLane` 0) | a drag commit does not re-render the shell | MU-SHELL-SUBSCRIBES: HEAD `ArrangementLane.tsx` with the sketch tests, 4 red (`mutants/mutant-SHELL-SUBSCRIBES-HEAD.log`) |
-| the 17 C-R423-01 perf ids | the fiber count per drag commit is back at round 404 | MU-PERF-HEAD: the C round 423 run, 17 red |
-| NAME-PROBE | shell and Memo(lane) at 0 per drag commit in a real browser | HEAD lines of `probe/names-summary.txt` (shell 59) |
+## 6. C: parked rows (record only unless stated)
+As task 390 §7:
+- **R425-RP301**, oracle `c-round-342/out/rp301.json`. A difference is a finding only if it changes behaviour.
+- **R425-RP-BUILT**, oracle `c-round-342/out/rp-*.json`.
+- **R425-POSCTL**, oracle `c-round-342/out/posctl.json`. Record, including `valid`.
+- **R425-ESC-DRAG**: a signal, not a finding (ESCAPE-CANCEL-GESTURE / C-R85-L1 waits for a Live source and Saba).
+- **SA-19** (RETRO 336 screen candidates): `awaiting_user`; carried, not run.
 
-**Neighbouring behaviour that could break (watch first):**
-- **RB-LEAF7…9:** a clip move renders only one inner, and unaffected lanes skip (`render-budget`, in A2).
-- **Ghost titles on a cross-lane or group drag:** row 5.
-- **Waveform peaks and video-audio status on lane clips:** `laneSources` moved into the inner (rows 6 and 7).
-- **The meter, fader and clip-gain no-lane-render rows:** `track-meter-ui`, `fader-pointer-preview` and `clip-gain-pointer-preview`, all in A2.
-- **Undo during and after a drag:** row 7.
+## 7. C: perf lib, smoke, auth and gate rows
+- **RR-PERF [SA-P2-PERF]:** **carried, not run.** The published `f6c76f4` code is byte-equal to the sketch C verified in round 424 [K8: 2 equal; 3 paths; perf-diff 0]. C round 424 ran all 5 specs and passed (`c-round-424/perf-results/`, 5 files [K6]). List it under `carried` as "C round 424, code equal to f6c76f4 (b-round-424/rrperf-carry-proof.txt)". Do not run `npm run test:perf`.
+- **PERF-LIB:** GATE304-M1 is still open [K12]. From `store/`, run `npx vitest run --config ../tmp/studio-real-loop/b-round-334/vitest.perf-lib.config.mjs`. All must pass; report the counts. Never during a browser timing row.
+- **RG-SMOKE:** `npm run test:e2e:smoke` in `store/`, alone [K17].
+- **G425-AUTH:** `c-round-390/tools/g390-auth.cjs` with the mock running, at both viewports:
+  - `/studio-lab` anonymous opens the workspace with the demo badge, and `auth_user` is null;
+  - `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`;
+  - `/api/studio-token?product=middle-east&file=mix.wav` (the script's URL): no header → 401; bare `/api/studio-token` → 400; no token in any body [K20: B's baseline run gave 401 and 400].
 
-## 6. Outcome, fixed in advance (D-29z1481)
-| C result | B at the 424 → 425 planning |
+  The fake Bearer is BLOCKED (backend unavailable in cloud) unless the mock answers 403. List it under `blocked`; it does not make `browserVerified` false. SRW-21 stays `deferred_user`.
+- **Gate rows, not claimed by C:** full vitest, typecheck, build, Biome, `npm run verify`, RR-OSS.
+
+## 8. What could break, and where to look first
+- **The lane change of round 424** sits under every lane row. R425-LANE-REBASE, R389-GROUP-MOVE, R340-CROSS-LANE and R389-VIDEO-DRAG are the first places a missing ghost, a stale clip or a lost peak would show.
+- **Streaming previews (393+)** change what older decode rows see. Apply the D-29z1486 ruling before calling anything a regression.
+- **The PRICE mock swap** can leave :5199 on the wrong data. It runs last among the store rows, and the standard mock is restarted (health 200) before G425-AUTH.
+- **Old output sinks.** Redirect every sink into `c-round-425/` first (L60).
+
+## 9. Report
+- **`c-round-425.json`:**
+  - `taskStatus`: PASS, FAIL or PARTIAL;
+  - `passed`, `failed`, `inconclusive`, `blocked`, `carried`, `gate`, `notRun`;
+  - `bugs`, each with id `C-R425-NN`, `severity`, `origin`, item, repro, evidence path, and "regression yes/no" with the round of its last pass;
+  - `observations`, `invalidRuns`, `lookups`;
+  - `browserVerified`, `realVerified`, `stopSignal`, `progressFile`;
+  - **all L57 fields**: `manifestPaths`, `missingPaths`, `countMismatches`, `claimCheckMinutes`, `assertsSpecified`, `mutantsRecorded`, `mutantRedOnSketch`, `gateChecksNamed`, `gateChecksRunOnSketch`, `chainHeadGateRunGreen`, `affectedChecksNamed`, `affectedChecksRunOnSketch`. Write `null` **with a reason** where a field does not apply (for example, "regression round, no sketch").
+- Run `python3 -I tools/l57-check.py c-round-425.json c-round-425/l57-check.txt` before hand-off.
+- **`c-round-425.md`:** one table, one line per row, with its evidence file.
+- **PARTIAL** is allowed only for a real time-limit stop, with `progress.json` naming the rows left (L59). It is not done.
+
+## 10. Outcome, fixed in advance (D-29z1484)
+| C result | B at the 425 → 426 planning |
 |---|---|
-| PASS (no Medium+ finding; Lows → `deferred_low_polish`) | C-R423-01 closes. Round 425 = REGRESSION-2026-11-10 part 2 on the new baseline (the round-390 template). When part 2 closes, B updates `regression-last.json`. Then SYS-2 stage 2a, unless Saba has answered `AGREE-STEM-LANES.md` (then STEM-LANES first) |
-| A perf id still red on a valid run | Round 425 = re-plan with the named fibers of the failing drag (L37); part 2 follows |
-| A STOP | B rules on it before anything is re-dispatched (L10) |
-| PARTIAL (time limit) | Round 425 continues from `progress.json` |
+| Every row has an allowed result and there is no Medium+ finding (Lows → `deferred_low_polish`) | `regression-last.json` = `{"date": <C's completion date>, "round": 425}`, and REGRESSION-2026-11-10 closes. Round 426 = **STEM-LANES** if Saba has answered `AGREE-STEM-LANES.md`; otherwise **SYS-2 stage 2a**. Then 2b, SYS-1 and SYS-3. RETRO 435 stays on its schedule |
+| A Critical or High finding | Round 426 = its bounded fix-up. `regression-last.json` is updated only if every row ran |
+| A cloud-reproducible Medium finding | Round 426 = its fix-up (≤ 3 related bugs), unless it is root-only or manual-only; then the queue resumes |
+| PARTIAL (time limit) | Round 426 continues part 2 from `progress.json`; `regression-last.json` waits |
 | A browser row that could run here did not run | `browserVerified=false`; B re-plans that half |
