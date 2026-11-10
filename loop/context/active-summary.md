@@ -1,14 +1,14 @@
-# Active loop summary (2026-11-10T13:16:02.536Z)
+# Active loop summary (2026-11-10T14:51:41.811Z)
 
-- backlog.json 3120 KB -> active view 280 KB
-- status: G_ROOT_GATE round 431
-- servers: `{"checkedUtc":"2026-11-10T13:05:02.9342431Z","round":431,"attempt":1,"store":200}`
-- last publication: 1197dcbfad097ef910a26d416a2bce9bbab0e277 (rounds 431-431)
-- last root gate: round 431 published - commit 1197dcbfad097ef910a26d416a2bce9bbab0e277 pushed
+- backlog.json 3131 KB -> active view 283 KB
+- status: G_ROOT_GATE round 432
+- servers: `{"checkedUtc":"2026-11-10T14:29:42.7703506Z","round":432,"attempt":1,"store":200}`
+- last publication: 1a417fbc97863f2301afbfd35e734a355f540fc4 (rounds 432-432)
+- last root gate: round 432 published - commit 1a417fbc97863f2301afbfd35e734a355f540fc4 pushed
 
 ## Current items: -
 
-## Open findings: 931 (10 Critical/High/Medium)
+## Open findings: 932 (10 Critical/High/Medium)
 - **A-R73-SAFARI-FLAG-FOCUS** / medium / environment_webkit_unavailable: Chromium fixed (round 74 B1 explicit flag focus; C round 75 MK rows PASS); Safari/Firefox-mac unverified - only Chromium on the cloud runner (same class as GATE97-S2); Tech Lead manual check, does not block T12 per the 2026-10-23 rule / Safari / Firefox-mac: clicking flag B does not move focus off flag A while B becomes aria-current; Delete would remove A
 - **GATE232-S2** / medium / contract half verified (C round 264, c-round-264/cc.json; published 2ea196e); platform half open_tech_lead_manual (does not block, 2026-10-23 root clarification) (D-29z552) | L46 deadline RETRO 260 passed (D-29z521): contract half -> L46-CONTRACT-CHECKS; platform half with Saba | open_tech_lead_manu …[see backlog.json] / Windows maps left Ctrl+Alt to AltGr on AltGr layouts; if Chromium reports getModifierState('AltGraph') for left Ctrl+Alt the toggle never fi
 - **GATE271-S1-NO-REALIGN** / medium / awaiting_user (D-29z593): product decision, tied to SABA-Q-11C-REALIGN; the reviewer's two options (0 as a magnetic edge; Alt with Snap on = absolute) added to user-review/questions-11c-stage2.md as (a) and (d); not a bug of round 271 (Saba option (a) contract); not scheduled until Saba answers / once a clip is off the grid, a Snap-on drag cannot put it back on a grid line (relative snap keeps the offset; start 0 unreachable for a cli
@@ -17,6 +17,6 @@
 - **STUDIO-VIS-4** / medium / scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3) / Rename "Source offset" -> "Clip origin" (strings.ts sourceOffsetLabel + selectedClipDetail)
 - **STUDIO-VIS-5** / medium / scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer) / Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)
 - **STUDIO-VIS-6** / medium / scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3) / "From, s" / "To, s" -> "From" / "To"
-- **STUDIO-VIS-2** / medium / in_progress (D-29z1519): SABA-B-12 stage 2a, round 431 | severity set to the parent SABA-B-12 Medium (D-29z1520) / 6 native radios in ArrangementExportDialog -> theme-drawn dot (STUDIO_RADIO_CLASS)
-- **SABA-B-12-STAGE-2B-PROGRESS** / medium / scheduled (D-29z1517): next UI round after 431 (after REGRESSION-2026-11-13 when due) / Export dialog <progress> (determinate + indeterminate PU4 encoder-load state) drawn by the theme, not the browser; neutral colour role kept 
-- ... and 921 Low/info (see backlog.json)
+- **SABA-B-12-STAGE-2B-PROGRESS** / medium / in_progress (D-29z1524): round 432, sketch b-round-431/sketch-432.patch.txt / Export dialog <progress> (determinate + indeterminate PU4 encoder-load state) drawn by the theme, not the browser; neutral colour role kept 
+- **SABA-B-12** / medium / in_progress (D-29z1515, D-29z1517, D-29z1521, D-29z1523, D-29z1524): stages 1 and 2a passed C and are published (5a30894, 1197dcb); stage 2b progress = round 432; stage 3 search cancel next; stage 4 selects in REVIEW-RECOMMENDATIONS / Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cance
+- ... and 922 Low/info (see backlog.json)

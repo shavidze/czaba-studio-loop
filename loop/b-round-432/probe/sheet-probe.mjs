@@ -1,0 +1,50 @@
+import { createRequire } from 'node:module';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const base = process.argv[2] ?? 'http://127.0.0.1:5173';
+const out = process.argv[3] ?? 'head';
+const fs = await import('node:fs');
+fs.mkdirSync(out, { recursive: true });
+const browser = await chromium.launch();
+const results = {};
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(`${base}/studio-lab`, { waitUntil: 'networkidle', timeout: 60000 });
+  await page.waitForSelector('[data-testid="arrangement-library"]', { timeout: 60000 });
+  await page.waitForTimeout(800);
+  await page.locator('body').click({ position: { x: 5, y: 5 } }).catch(() => {});
+  await page.keyboard.press('Shift+Slash');
+  const search = page.getByRole('searchbox', { name: 'Search shortcuts' });
+  await search.waitFor({ timeout: 10000 });
+  const dialog = page.getByRole('dialog');
+  const r = {};
+  r.focusedIsSearch = await search.evaluate((el) => el === document.activeElement);
+  r.scroller = await search.evaluate((el) => {
+    let n = el.parentElement;
+    while (n && !(n.scrollHeight > n.clientHeight && getComputedStyle(n).overflowY !== 'visible')) n = n.parentElement;
+    if (!n) return null;
+    const cs = getComputedStyle(n);
+    return { cls: n.className, scrollHeight: n.scrollHeight, clientHeight: n.clientHeight, offsetWidth: n.offsetWidth, clientWidth: n.clientWidth, scrollbarColor: cs.scrollbarColor, scrollbarWidth: cs.scrollbarWidth };
+  });
+  await search.fill('loop');
+  await page.waitForTimeout(200);
+  r.cancel = await search.evaluate((el) => {
+    const cs = getComputedStyle(el, '::-webkit-search-cancel-button');
+    return { display: cs.display, appearance: cs.appearance, webkitAppearance: cs.webkitAppearance, width: cs.width, height: cs.height };
+  });
+  r.inputBox = await search.boundingBox();
+  r.inputPaddingRight = await search.evaluate((el) => getComputedStyle(el).paddingRight);
+  await search.hover();
+  await page.screenshot({ path: `${out}/${w}x${h}-search-loop.png`, clip: { x: r.inputBox.x - 8, y: r.inputBox.y - 70, width: r.inputBox.width + 16, height: r.inputBox.height + 80 } });
+  await page.screenshot({ path: `${out}/${w}x${h}-sheet-full.png` });
+  r.buttons = await dialog.evaluate((d) => Array.from(d.querySelectorAll('button')).map((b) => b.getAttribute('aria-label') ?? b.textContent));
+  r.errors = errors;
+  results[`${w}x${h}`] = r;
+  await ctx.close();
+}
+await browser.close();
+fs.writeFileSync(`${out}/sheet.json`, JSON.stringify(results, null, 1));
+console.log(JSON.stringify(results, null, 1));

@@ -1,0 +1,267 @@
+diff --git a/app/components/arrangement/ArrangementShortcutSheet.tsx b/app/components/arrangement/ArrangementShortcutSheet.tsx
+--- a/app/components/arrangement/ArrangementShortcutSheet.tsx
++++ b/app/components/arrangement/ArrangementShortcutSheet.tsx
+@@ -100,6 +100,11 @@
+     return () => window.removeEventListener('keydown', handleSheetKeyDown, true);
+   }, [isOpen]);
+ 
++  const clearShortcutSearch = () => {
++    setQuery('');
++    searchRef.current?.focus();
++  };
++
+   const groups = filterStudioShortcutGroups(query);
+   const trimmedQuery = query.trim();
+ 
+@@ -138,15 +143,29 @@
+             <X aria-hidden="true" className="h-4 w-4" />
+           </button>
+         </div>
+-        <input
+-          ref={searchRef}
+-          type="search"
+-          value={query}
+-          onChange={(event) => setQuery(event.target.value)}
+-          aria-label={studioShortcutSheetStrings.searchLabel}
+-          placeholder={studioShortcutSheetStrings.searchPlaceholder}
+-          className="w-full rounded-sm border border-outline bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
+-        />
++        <div className="relative">
++          <input
++            ref={searchRef}
++            type="search"
++            value={query}
++            onChange={(event) => setQuery(event.target.value)}
++            aria-label={studioShortcutSheetStrings.searchLabel}
++            placeholder={studioShortcutSheetStrings.searchPlaceholder}
++            className="w-full rounded-sm border border-outline bg-background py-2 pr-9 pl-3 text-sm text-foreground placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
++          />
++          {query ? (
++            <button
++              type="button"
++              onClick={clearShortcutSearch}
++              onKeyDown={preventRepeatedEnterKeyDown}
++              aria-label={studioShortcutSheetStrings.clearSearch}
++              title={studioShortcutSheetStrings.clearSearch}
++              className="absolute top-1/2 right-1.5 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-sm text-muted hover:text-foreground"
++            >
++              <X aria-hidden="true" className="size-3.5" strokeWidth={2} />
++            </button>
++          ) : null}
++        </div>
+         {groups.length === 0 ? (
+           <p className="text-sm text-muted" data-testid="shortcut-sheet-no-match">
+             {studioShortcutSheetStrings.noMatch(trimmedQuery)}
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -906,6 +906,7 @@
+   subline: 'Ctrl means ⌘ on Mac · Alt means ⌥ · Esc closes.',
+   searchLabel: 'Search shortcuts',
+   searchPlaceholder: 'Search: split, zoom, loop…',
++  clearSearch: 'Clear search',
+   noMatch: (query: string): string => `Nothing matches “${query}”.`,
+   close: 'Close (Esc)',
+   footerButton: 'Shortcuts',
+diff --git a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+--- a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+@@ -699,3 +699,133 @@
+     });
+   },
+ );
++
++function sheetClear(view: SheetView): HTMLElement | null {
++  const dialog = sheet(view);
++  if (!dialog) {
++    throw new Error('sheet not open');
++  }
++  return within(dialog).queryByRole('button', { name: 'Clear search' });
++}
++
++function requireSheetClear(view: SheetView): HTMLElement {
++  const clear = sheetClear(view);
++  if (!clear) {
++    throw new Error('clear search missing');
++  }
++  return clear;
++}
++
++function allShortcutRowCount(): number {
++  return STUDIO_SHORTCUT_GROUPS.reduce((total, group) => total + group.rows.length, 0);
++}
++
++describe(
++  'SABA-B-12 stage 3: the sheet search draws its own clear button',
++  { timeout: 20_000 },
++  () => {
++    it('SC1: Clear search shows only while the query is not empty, spaces included, with a unique name', async () => {
++      const { view } = await mountSheetWorkspace();
++      openFromBody(view);
++      expect(sheetClear(view)).toBeNull();
++      fireEvent.change(sheetSearch(view), { target: { value: '  ' } });
++      expect(sheetClear(view)).not.toBeNull();
++      fireEvent.change(sheetSearch(view), { target: { value: 'loop' } });
++      const dialog = sheet(view);
++      if (!dialog) {
++        throw new Error('sheet not open');
++      }
++      expect(within(dialog).getAllByRole('button', { name: 'Clear search' })).toHaveLength(1);
++      expect(requireSheetClear(view).getAttribute('title')).toBe('Clear search');
++      for (const button of within(dialog).getAllByRole('button')) {
++        const name = button.getAttribute('aria-label') ?? button.textContent ?? '';
++        expect(within(dialog).getAllByRole('button', { name }), name).toHaveLength(1);
++      }
++      fireEvent.change(sheetSearch(view), { target: { value: '' } });
++      expect(sheetClear(view)).toBeNull();
++    });
++
++    it('SC2: a click on Clear empties the query, brings every row back and focuses the search box', async () => {
++      const { view } = await mountSheetWorkspace();
++      openFromBody(view);
++      const dialog = sheet(view);
++      if (!dialog) {
++        throw new Error('sheet not open');
++      }
++      fireEvent.change(sheetSearch(view), { target: { value: 'zzzz' } });
++      expect(dialog.querySelectorAll('[data-shortcut-id]')).toHaveLength(0);
++      const clear = requireSheetClear(view);
++      act(() => clear.focus());
++      fireEvent.click(clear);
++      expect(sheetSearch(view).value).toBe('');
++      expect(dialog.querySelectorAll('[data-shortcut-id]')).toHaveLength(allShortcutRowCount());
++      expect(within(dialog).queryByText('Nothing matches “zzzz”.')).toBeNull();
++      expect(sheetClear(view)).toBeNull();
++      expect(document.activeElement).toBe(sheetSearch(view));
++      expect(sheet(view)).toBeTruthy();
++    });
++
++    it('SC3: with a query, Tab goes search -> Clear -> Close and Shift+Tab from Close lands on Clear', async () => {
++      const { view } = await mountSheetWorkspace();
++      openFromBody(view);
++      const search = sheetSearch(view);
++      fireEvent.change(search, { target: { value: 'loop' } });
++      act(() => search.focus());
++      const clear = requireSheetClear(view);
++      expect(clear.tabIndex).toBe(0);
++      const close = sheetClose(view);
++      expect(fireEvent.keyDown(search, { key: 'Tab', code: 'Tab' })).toBe(true);
++      act(() => clear.focus());
++      expect(fireEvent.keyDown(clear, { key: 'Tab', code: 'Tab' })).toBe(false);
++      expect(document.activeElement).toBe(close);
++      expect(fireEvent.keyDown(close, { key: 'Tab', code: 'Tab', shiftKey: true })).toBe(false);
++      expect(document.activeElement).toBe(clear);
++    });
++
++    it('SC4: a held Enter on Clear clears once; the repeats neither clear nor close', async () => {
++      const { view } = await mountSheetWorkspace();
++      openFromBody(view);
++      fireEvent.change(sheetSearch(view), { target: { value: 'loop' } });
++      const clear = requireSheetClear(view);
++      act(() => clear.focus());
++      expect(pressHeldEnter(clear, true)).toBe(false);
++      expect(sheetSearch(view).value).toBe('loop');
++      expect(pressHeldEnter(clear, false)).toBe(true);
++      expect(sheetSearch(view).value).toBe('');
++      const search = sheetSearch(view);
++      expect(document.activeElement).toBe(search);
++      for (let held = 0; held < 3; held++) {
++        expect(pressHeldEnter(search, true)).toBe(true);
++      }
++      expect(sheet(view)).toBeTruthy();
++      expect(sheetSearch(view).value).toBe('');
++    });
++
++    it('SC5: Esc with a query still closes the sheet, from search and from Clear, and the next open starts empty', async () => {
++      const { view } = await mountSheetWorkspace();
++      openFromBody(view);
++      fireEvent.change(sheetSearch(view), { target: { value: 'loop' } });
++      expect(fireEvent.keyDown(sheetSearch(view), { key: 'Escape', code: 'Escape' })).toBe(false);
++      expect(sheet(view)).toBeNull();
++      openFromBody(view);
++      expect(sheetSearch(view).value).toBe('');
++      fireEvent.change(sheetSearch(view), { target: { value: 'loop' } });
++      const clear = requireSheetClear(view);
++      act(() => clear.focus());
++      expect(fireEvent.keyDown(clear, { key: 'Escape', code: 'Escape' })).toBe(false);
++      expect(sheet(view)).toBeNull();
++    });
++
++    it('SC6: ? on Clear closes the sheet like Close; ? in the search box stays text', async () => {
++      const { view } = await mountSheetWorkspace();
++      openFromBody(view);
++      fireEvent.change(sheetSearch(view), { target: { value: 'loop' } });
++      expect(pressQuestion(sheetSearch(view))).toBe(true);
++      expect(sheet(view)).toBeTruthy();
++      const clear = requireSheetClear(view);
++      act(() => clear.focus());
++      expect(pressQuestion(clear)).toBe(false);
++      expect(sheet(view)).toBeNull();
++    });
++  },
++);
+diff --git a/app/lib/arrangement/__tests__/studio-search-field.test.ts b/app/lib/arrangement/__tests__/studio-search-field.test.ts
+new file mode 100644
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/studio-search-field.test.ts
+@@ -0,0 +1,60 @@
++import { readdirSync, readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { describe, expect, it } from 'vitest';
++
++const ARRANGEMENT_DIR = join(process.cwd(), 'app/components/arrangement');
++const NATIVE_CANCEL_HIDDEN = '[&::-webkit-search-cancel-button]:hidden';
++
++function inputTags(source: string): string[] {
++  const tags: string[] = [];
++  let from = source.indexOf('<input');
++  while (from !== -1) {
++    let depth = 0;
++    let end = from + '<input'.length;
++    for (; end < source.length; end++) {
++      const char = source[end];
++      if (char === '{') {
++        depth++;
++      } else if (char === '}') {
++        depth--;
++      } else if (char === '>' && depth === 0) {
++        break;
++      }
++    }
++    tags.push(source.slice(from, end + 1));
++    from = source.indexOf('<input', end);
++  }
++  return tags;
++}
++
++function searchInputTags(): { file: string; tag: string }[] {
++  return readdirSync(ARRANGEMENT_DIR)
++    .filter((file) => file.endsWith('.tsx'))
++    .flatMap((file) =>
++      inputTags(readFileSync(join(ARRANGEMENT_DIR, file), 'utf8'))
++        .filter((tag) => /type="search"/.test(tag))
++        .map((tag) => ({ file, tag })),
++    );
++}
++
++describe('SABA-B-12 stage 3: no native search cancel in Studio', () => {
++  it('SF1: the whole-tag scanner reads a tag with an arrow function and a > inside braces', () => {
++    const tags = inputTags(
++      '<input type="search" onChange={(event) => set(event.target.value > 1)} className="a b" /><input type="text" />',
++    );
++    expect(tags).toHaveLength(2);
++    expect(tags[0]).toContain('className="a b"');
++    expect(tags[1]).toBe('<input type="text" />');
++  });
++
++  it('SF2: every search field in the arrangement components hides the native cancel', () => {
++    const found = searchInputTags();
++    expect(found.map(({ file }) => file).sort()).toEqual([
++      'ArrangementLibrary.tsx',
++      'ArrangementShortcutSheet.tsx',
++    ]);
++    for (const { file, tag } of found) {
++      expect(tag, file).toContain(NATIVE_CANCEL_HIDDEN);
++    }
++  });
++});

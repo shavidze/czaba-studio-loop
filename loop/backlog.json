@@ -1,9 +1,9 @@
 {
- "version": 414,
+ "version": 415,
  "updated": "2026-11-10",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "Round 432: SABA-B-12 stage 2b - the Export dialog <progress> is drawn by the theme (shared STUDIO_PROGRESS_CLASS: graphite track, cream fill, rounded; indeterminate = dimmed pulse under motion-safe; forced-colors system bar); rows PG1, PG2 + DXL7c/DXL8 replacements; doc 280 (current-task.md; sketch b-round-431/sketch-432.patch.txt)",
+ "current_task": "Round 433: SABA-B-12 stage 3 - the shortcut sheet search hides the native cancel and draws its own Clear search button (Library pattern; always refocuses search; Esc still closes); rows SC1-SC6 + SF1-SF2; doc 281 (current-task.md; sketch b-round-432/sketch-433.patch.txt)",
  "advisor_used_by_B": "round 427 -> 428 planning: advisor available and consulted after orientation and before close",
  "baseline": {
   "tsc_errors": 0,
@@ -12255,8 +12255,16 @@
    "task": "current-task.md",
    "decision": "D-29z1524",
    "type": "SABA-B-12 stage 2b (Export dialog <progress> drawn by the theme)",
-   "status": "dispatched",
+   "status": "c_pass_published (D-29z1527): gate 432 1a417fb",
    "note": "baseline 1197dcb clean; sketch b-round-431/sketch-432.patch.txt; claims b-round-431/claims-432.sh"
+  },
+  {
+   "round": 433,
+   "task": "current-task.md",
+   "decision": "D-29z1530",
+   "type": "SABA-B-12 stage 3 (shortcut sheet search clear)",
+   "status": "dispatched",
+   "note": "baseline 1a417fb clean; sketch b-round-432/sketch-433.patch.txt; claims b-round-432/claims-433.sh"
   }
  ],
  "post_current_stage_queue": [
@@ -27967,7 +27975,8 @@
    "evidence": "cloud runner has Chromium only",
    "added": "2026-11-10 B round 429 -> 430 planning",
    "scope_r431": "also the Export dialog radio dot (appearance-none) in Firefox/Safari: hollow/checked/disabled shapes, focus ring, forced-colors fallback; stage 2b adds ::-moz-progress-bar (D-29z1517)",
-   "scope_r432": "also the Export dialog progress bar in Firefox (::-moz-progress-bar fill, indeterminate foreground/30 pulse, rounded ends) and Safari (::-webkit-progress-*), plus a real Windows High Contrast check that the bar is visible in both states (Chromium emulation draws it all white at HEAD and after) (D-29z1524)"
+   "scope_r432": "also the Export dialog progress bar in Firefox (::-moz-progress-bar fill, indeterminate foreground/30 pulse, rounded ends) and Safari (::-webkit-progress-*), plus a real Windows High Contrast check that the bar is visible in both states (Chromium emulation draws it all white at HEAD and after) (D-29z1524)",
+   "scope_r433": "also: Firefox indeterminate progress single-layer contrast (A-R432-REVIEW-RV432-1); Safari/Firefox shortcut-sheet search shows no native cancel and the Clear search button (D-29z1530)"
   },
   {
    "id": "STUDIO-VIS-4",
@@ -28050,23 +28059,11 @@
    "added": "2026-11-10 B round 429 -> 430 planning"
   },
   {
-   "id": "STUDIO-VIS-2",
-   "severity": "medium",
-   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
-   "kind": "stage_pointer",
-   "status": "done (D-29z1521): C round 431 PASS browserVerified, published 1197dcb",
-   "title": "6 native radios in ArrangementExportDialog -> theme-drawn dot (STUDIO_RADIO_CLASS)",
-   "evidence": "store/docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md STUDIO-VIS-2; b-round-430/probe/",
-   "added": "2026-11-10 B round 430 -> 431 planning",
-   "parent": "SABA-B-12",
-   "severity_audit": "high"
-  },
-  {
    "id": "SABA-B-12-STAGE-2B-PROGRESS",
    "severity": "medium",
    "origin": "B inventory (audit missed it), part of SABA-B-12",
    "kind": "saba_approved_task",
-   "status": "in_progress (D-29z1524): round 432, sketch b-round-431/sketch-432.patch.txt",
+   "status": "done (D-29z1527): C round 432 PASS browserVerified, published 1a417fb",
    "title": "Export dialog <progress> (determinate + indeterminate PU4 encoder-load state) drawn by the theme, not the browser; neutral colour role kept (DXL7c)",
    "evidence": "ArrangementExportDialog.tsx <progress> h-2 w-full accent-foreground; export-progress-ui.test.tsx PU1/PU4; label-status-colour-ui.test.tsx DXL7c/DXL8",
    "next": "B finds a repeatable real-Chromium hold recipe for both states at HEAD (page.route stall of the encoder chunk or a long render), then sketch + probe + reduced-motion row",
@@ -28086,7 +28083,7 @@
    "id": "SABA-B-12",
    "severity": "medium",
    "origin": "Saba 2026-11-10 visual feedback",
-   "status": "in_progress (D-29z1515, D-29z1517, D-29z1521, D-29z1523, D-29z1524): stages 1 and 2a passed C and are published (5a30894, 1197dcb); stage 2b progress = round 432; stage 3 search cancel next; stage 4 selects in REVIEW-RECOMMENDATIONS",
+   "status": "in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1529, D-29z1530): stages 1, 2a, 2b passed C and are published (5a30894, 1197dcb, 1a417fb); stage 3 search clear = round 433; stage 3b dialog scrollbar next; stage 4 selects in REVIEW-RECOMMENDATIONS",
    "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
    "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
    "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
@@ -28104,14 +28101,21 @@
      "id": "STUDIO-VIS-2",
      "severity_audit": "high",
      "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
-     "status": "split (D-29z1517): 2a radios passed C round 431, published 1197dcb (D-29z1521); 2b <progress> = round 432 (D-29z1524)"
+     "status": "complete (D-29z1521, D-29z1527): 2a radios C round 431 (1197dcb); 2b <progress> C round 432 (1a417fb)"
     },
     {
      "stage": 3,
      "id": "SABA-B-12-SEARCH-CANCEL",
      "severity_audit": "n/a (audit missed it)",
      "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
-     "status": "planned after stage 2"
+     "status": "in_progress (D-29z1530): round 433, sketch b-round-432/sketch-433.patch.txt"
+    },
+    {
+     "stage": "3b",
+     "id": "SABA-B-12-DIALOG-SCROLLBAR",
+     "severity_audit": "n/a (audit missed it)",
+     "what": "Modal styled-scrollbar draws a teal thin standard scrollbar in the Studio shortcut sheet (and the Export dialog if it scrolls); give Studio dialogs the Studio scrollbar",
+     "status": "planned after stage 3 (D-29z1529)"
     },
     {
      "stage": 4,
@@ -28124,7 +28128,8 @@
      "stage": null,
      "id": "SABA-B-12-RECORDINGS-NUMBER",
      "what": "7 number inputs (+ search, select, radio, checkbox, progress) in app/components/recordings/*; reached only from routes recordings.$productId and scenes.$productId, not from /studio-lab (import closure 0)",
-     "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)"
+     "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)",
+     "progress_note": "D-29z1528: SfxSceneExport.tsx <progress> also here (apply STUDIO_PROGRESS_CLASS, widen PG2) and SfxSoundLibrary.tsx search input (TL-R433-06)"
     },
     {
      "stage": null,
@@ -28154,7 +28159,29 @@
    "status": "recorded_signal (D-29z1522): checkpoint requested at the SABA-B-12 boundary, not scheduled",
    "title": "studio-*.ts class-constant modules (fader, number-field, radio, progress, scrollbar, focus, soft-disabled) each with its own source-scan regex; options: StudioRadio/StudioProgress components or one studio-controls module + one scan",
    "evidence": "a-round-431.md For B; gates/round-431/review.md Architecture note",
-   "added": "2026-11-10 B round 431 -> 432 planning"
+   "added": "2026-11-10 B round 431 -> 432 planning",
+   "note_r433": "TL-R433-06: only the [&::-webkit-search-cancel-button]:hidden token is shared between Library and sheet search; bring a shared search-field constant to the checkpoint (D-29z1530)"
+  },
+  {
+   "id": "SABA-B-12-SEARCH-CANCEL",
+   "severity": "medium",
+   "origin": "B inventory, part of SABA-B-12 (stage 3)",
+   "kind": "saba_approved_task",
+   "status": "in_progress (D-29z1530): round 433, sketch b-round-432/sketch-433.patch.txt",
+   "title": "Shortcut sheet search shows Chromium's native blue cancel; hide it and draw the app Clear search button (Library pattern)",
+   "evidence": "b-round-432/probe/head/clear.json, head/1440x900-typed.png",
+   "added": "2026-11-10 B round 432 -> 433 planning"
+  },
+  {
+   "id": "SABA-B-12-DIALOG-SCROLLBAR",
+   "severity": "medium",
+   "origin": "B inventory, part of SABA-B-12 (stage 3b)",
+   "kind": "saba_approved_task",
+   "status": "planned (D-29z1529): next UI round after stage 3",
+   "title": "Studio dialogs (shortcut sheet; Export dialog if it scrolls) inherit Modal styled-scrollbar: teal thin standard scrollbar (computed rgba(18,217,200,0.4)); give them the Studio scrollbar without changing the shared store Modal default",
+   "evidence": "b-round-432/probe/head/sheet.json (scrollHeight 1368 vs 808/646; scrollbarColor rgba(18, 217, 200, 0.4) rgba(0, 0, 0, 0); scrollbarWidth thin); Modal.tsx l.110; app/styles/base/utilities.css l.109-113",
+   "repro": "/studio-lab, press ?, scroll the sheet (headed Chromium or ignoreDefaultArgs --hide-scrollbars)",
+   "added": "2026-11-10 B round 432 -> 433 planning"
   }
  ],
  "tech_lead_notes": [
@@ -40085,6 +40112,53 @@
    "evidence": "b-round-431/probe/sketch/1280x720-indeterminate-dialog.png (same at HEAD)",
    "repro": "/studio-lab, add a clip, Export, MP3, Export MP3 with the encoder request slow",
    "added": "2026-11-10 B round 431 -> 432 planning"
+  },
+  {
+   "id": "A-R432-REVIEW-RV432-1-FIREFOX-SINGLE-LAYER",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1528)",
+   "title": "Indeterminate progress relies on Chromium stacking two bg-foreground/30 layers (measured mid pixel 4.37:1); one layer in Firefox ~2.5:1 (< 3:1)",
+   "evidence": "a-round-432.md RV432-1",
+   "added": "2026-11-10 B round 432 -> 433 planning",
+   "confirmedBy": "gates/round-432/review.md suggestion 1"
+  },
+  {
+   "id": "A-R432-REVIEW-RV432-2-PULSE-LOW-POINT",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1528)",
+   "title": "motion-safe animate-pulse takes the indeterminate bar to ~0.5 opacity, ~1.5:1 against the surface at its low point (label + aria-valuetext carry the state)",
+   "evidence": "a-round-432.md RV432-2",
+   "added": "2026-11-10 B round 432 -> 433 planning",
+   "confirmedBy": "gates/round-432/review.md suggestion 2"
+  },
+  {
+   "id": "A-R432-REVIEW-RV432-3-TRACK-AT-ZERO",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1528)",
+   "title": "Progress track vs surface 1.29:1, so the bar outline is invisible at value 0 (every phase reset); ruled \"track carries no meaning\" by product-designer - revisit at the polish pass",
+   "evidence": "a-round-432.md RV432-3",
+   "added": "2026-11-10 B round 432 -> 433 planning"
+  },
+  {
+   "id": "A-R432-REVIEW-RV432-4-BRASS-EXEMPTION-LEFTOVER",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1528)",
+   "title": "label-status-colour-ui.test.tsx brassLabelTokens still exempts accent-foreground; no component uses it any more",
+   "evidence": "a-round-432.md RV432-4",
+   "added": "2026-11-10 B round 432 -> 433 planning"
+  },
+  {
+   "id": "A-R432-REVIEW-RV432-5-PG2-SPREAD",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1528)",
+   "title": "PG2 passes when a later {...spread} or style= on the same <progress> tag overrides the class; misses createElement(progress), .ts wrappers and subdirectories; cheap hardening: reject {... and style= inside the matched tag",
+   "evidence": "a-round-432.md RV432-5",
+   "added": "2026-11-10 B round 432 -> 433 planning"
   }
  ],
  "regression_rounds": [
@@ -40425,6 +40499,11 @@
      "id": "REG-SABA-B-12-PROGRESS",
      "what": "Export dialog progress bar: theme fill/track, indeterminate pulse, reduced motion static, forced colours appearance auto, MP3 and WAV download (b-round-431/probe/progress-probe.mjs + compare-progress.py, both viewports; only if round 432 passed)",
      "added": "D-29z1526"
+    },
+    {
+     "id": "REG-SABA-B-12-SEARCH-CLEAR",
+     "what": "Shortcut sheet search: no native cancel, Clear search button clears and focuses search, real Tab order, Esc closes (b-round-432/probe/clear-probe.mjs + compare-clear.py, both viewports; only if round 433 passed)",
+     "added": "D-29z1530"
     }
    ]
   }
@@ -42318,42 +42397,6 @@
  },
  "decisions_log_b": [
   {
-   "id": "D-29z1471",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 421 -> 422 planning",
-   "decision": "Round 421 accepted from C evidence only: C PASS (c-round-421.json: 8 rows passed, 0 bugs, browserVerified/realVerified true; fake-bearer auth path BLOCKED backend-unavailable, kept as open backend evidence); gate 421 published 4786c13 on both remotes. SYS-R418-PREVIEW-LIFECYCLE done; its 8 ids close (rows PL1-PL9, PC12); C-R420-CLAIMS-K22-ARCHIVE-AGAIN and C-R420-CLAIMS-K8-K24-YOUTUBE-REQUEST-CONSUMED close (C row 1 PASS). A-R421-REVIEW-L1-DECODED-STOP-ROW (Low, test coverage) goes to deferred_low_polish. A-421 architecture note (useLibraryPreviewController) recorded as a signal, not a task. Baseline for round 422 = 4786c13."
-  },
-  {
-   "id": "D-29z1472",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 421 -> 422 planning",
-   "decision": "REGRESSION-2026-11-10 is not due at this planning (regression-last 2026-11-07, today 2026-11-09: 2 days < 3). It is due at the first planning on or after 2026-11-10, now the 422 -> 423 planning; its done-since window extends to round 422."
-  },
-  {
-   "id": "D-29z1473",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 421 -> 422 planning",
-   "decision": "SYS-2 re-anchored at 4786c13 (premise re-check, L7/L29): Play, Stop, Undo, Redo, Delete, Zoom back, Export and the marker add/prev/next buttons and rename field already prevent a repeated Enter; ARCH-R107-SHARED-ENTER-GUARD no longer gates dispatch (L46 default long passed; the existing preventRepeatedEnterKeyDown convention is the shared guard). SYS-2 splits in two stages, full scope kept. Stage 1 = round 422: Split, Follow, Back to start, Loop, Zoom to range (ArrangementTransport.tsx) + the marker flag (handleFlagKeyDown, ArrangementMarkerRow.tsx); rows HE1-HE6 in transport-centre-ui.test.tsx; sketch sha 7002efc1 (tech-lead approve-with-lows; TL-R422-04/05/06 fixed in the sketch). Fit stays unguarded (TH5 lock from round 98; idempotent). Stage 2 = the remaining A-R107 sweep (scan b-round-421/data/button-guard-scan.txt): lane/group/master Mute and Solo, metronome, video dock expand/return/close, folds, detail toggle, Snap/Env and grid menu items, library notice/folder rows, group name editor held Enter, held Escape on the marker editor; each site gets a ruling (guard, or idempotent-exclusion) in its task. Doc 272."
-  },
-  {
-   "id": "D-29z1474",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 421 -> 422 planning",
-   "decision": "Order inside SYS-1..3: SYS-2 stage 1 first (a real-browser keyboard defect: held Enter flips Follow and Loop and restarts playback, reproduced at HEAD in b-round-421/probe/head), then SYS-2 stage 2, SYS-1 (test-only selector hygiene; all six anchors still present at 4786c13), SYS-3 (IME; 0 isComposing in arrangement). REGRESSION-2026-11-10 goes first at the 422 -> 423 planning. STEM-LANES goes first as soon as Saba answers AGREE-STEM-LANES. Then STORE-2b..5, REVIEW-RECOMMENDATIONS, T12-ADVANCED, phase 2 (skip rule). Next RETRO round 435."
-  },
-  {
-   "id": "D-29z1475",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 422 -> 423 planning",
-   "decision": "Round 422 accepted from C evidence only: C PASS (c-round-422.json: 8 rows passed, 0 bugs, browserVerified/realVerified true; L57 OK in b-round-422/l57-check-c422.txt; fake-bearer auth path BLOCKED backend-unavailable, kept as open backend evidence); gate 422 published 875ff37 on both remotes (verify 264 files / 3957 tests). SYS-2 stage 1 done; GATE107-S1-MARKER-FLAG-HELD-ENTER closes (C rows 3 MU-FLAG->HE6 and 4 FLAG cells ALL OK). A-R107-SWEEP-HELD-ENTER-TOOLBAR stays open for stage 2 (transport part HE1-HE5 done). New Lows: A-R422-REVIEW-L1-ONKEYDOWN-SPREAD-ORDER and A-R422-REVIEW-L2-HE4-HE5-PREVENTED-ONLY (confirmedBy gate 422 suggestion 3) -> deferred_low_polish. Gate 422 suggestion 1 (flag guard before the target check) is TL-R422-01 (accepted, archived) and gets no new id (L7). Gate 422 Architecture note + suggestion 2 + A-422 For B (fold Export inline guard) -> one signal SIG-R422-REPEAT-SAFE-BUTTON-PROPS attached to SYS-2 stage 2, not a scheduled task. Baseline for round 423 = 875ff37."
-  },
-  {
-   "id": "D-29z1476",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 422 -> 423 planning",
-   "decision": "REGRESSION-2026-11-10 dispatched as round 423 at this planning. Clock at planning: 2026-11-09T22:5x UTC, so regression-last (2026-11-07) is 2 days old; the 3-day trigger is reached at 00:00 UTC, about an hour later. A and C run round 423 on 2026-11-10 in any case; the 3-day rule is a floor, not a prohibition (precedent D-29z1311, round 389 opened one day early), D-29z1472/D-29z1474 already placed the regression at 423, and a SYS-2 stage 2 dispatch (sketch, mutants, full-suite pre-check, browser probe, review) could not be built and verified before midnight anyway. regression-last.json is updated only when the whole regression closes."
-  },
-  {
    "id": "D-29z1477",
    "date": "2026-11-09",
    "by": "2026-11-09 B round 422 -> 423 planning",
@@ -42653,6 +42696,36 @@
    "date": "2026-11-10",
    "by": "2026-11-10 B round 431 -> 432 planning",
    "decision": "Close-review follow-ups (advisor): (1) Reference corrected from primary source: Live 12 manual 5.1.3.5 \"a progress bar appears in the dialog\" and 5.1.3.4 \"the progress bar in the dialog resets for each individual pass\" (WebFetch 2026-11-10). Our per-phase reset therefore matches Live's export behaviour; the \"12.4.5b11 stem separation overall progress\" claim came from a search summary only (release-notes page too large to fetch) and is withdrawn. SABA-Q-EXPORT-PROGRESS-OVERALL is withdrawn before reaching Saba (status wontask). (2) Row 4b now has its own script b-round-431/probe/compare-neighbours.py (load-phase samples: label == aria-valuetext == HEAD label, aria-label == HEAD, box +-1 px of HEAD); B run sketch vs head-final NEIGHBOURS OK (compare-neighbours.txt); render/wav-phase label == aria-valuetext stays unit row FV1. (3) Optimizer check: optimize-backlog.py l.41-55 reads only the top-level status; archive scan for other open-keyword statuses not in open_findings = 0 (b-round-431/archive-open-scan.txt). (4) REGRESSION-2026-11-13 scope addition REG-SABA-B-12-PROGRESS. (5) Timeout STOP limited to the two files whose rows change; render-budget R11-P1e (2006 ms / 5 s default in B covering run) is a record row."
+  },
+  {
+   "id": "D-29z1527",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 432 -> 433 planning",
+   "decision": "Round 432 accepted from C evidence: c-round-432.json PASS, 0 bugs, browserVerified/realVerified true (fake-bearer backend row and Firefox/Safari/High Contrast BLOCKED in the cloud; gate rows listed as gate). B re-runs: tools/l57-check.py L57 OK (b-round-432/l57-check-c432.txt); C probe JSON re-judged with compare-progress.py -> ALL OK (2 cells, 4 states each) and compare-neighbours.py -> NEIGHBOURS OK (b-round-432/recompare/); c-round-432/mutants/summary.txt identical to b-round-431/mutants/summary.txt; c-round-432/auth/g428-auth.json pass true (warm-up attempt false = cold-server, expected). Gate 432 published 1a417fb on both remotes (gate head field and context/head-sha.txt name 1197dcb, stale); gates/round-432/review.md COMMIT OK, 9/10, suggestions only. SABA-B-12 stage 2b is complete."
+  },
+  {
+   "id": "D-29z1528",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 432 -> 433 planning",
+   "decision": "Round 432 Lows (merged with the gate review where they overlap): A-R432-REVIEW-RV432-1 (indeterminate two stacked foreground/30 layers; Firefox single layer ~2.5:1) = gate suggestion 1 -> deferred_low_polish and in the TLM-SABA-B-12-FIREFOX-SAFARI scope; RV432-2 (pulse low point ~1.5:1) = gate suggestion 2 -> deferred_low_polish; RV432-3 (track vs surface 1.29:1, outline invisible at value 0) -> deferred_low_polish as an explicit product-designer ruling to revisit at the polish pass; RV432-4 (brassLabelTokens still exempts accent-foreground, no user) -> deferred_low_polish; RV432-5 (PG2 passes with a later {...spread} or style= on the tag; misses createElement/.ts wrappers/subdirectories) -> deferred_low_polish. Gate suggestion 3 (forced colours emulation only) = TLM row; gate 4 (PG2 [^<] fails loud) and 5 (labelStatusTokens exists) info, no entry. Records: R11-P1e render-budget 2,299 ms of 5 s (46 %, rising 2,006 -> 2,142 -> 2,299) carried as a record row; SfxSceneExport.tsx <progress> joins SABA-B-12-RECORDINGS-NUMBER (STORE-REDESIGN acceptance, apply STUDIO_PROGRESS_CLASS there and widen PG2 only if that acceptance wants it). Architecture note: none (A and gate)."
+  },
+  {
+   "id": "D-29z1529",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 432 -> 433 planning",
+   "decision": "SABA-B-12 scrollbar scope (Saba named scrollbars; the stage list had none): B found in real Chromium at 1a417fb (b-round-432/probe/head/sheet.json) that the shortcut sheet scrolls on both viewports (scrollHeight 1368 vs clientHeight 808 at 1440x900 and 646 at 1280x720) inside Modal.tsx l.110 `styled-scrollbar`, whose app/styles/base/utilities.css l.109-113 sets scrollbar-width thin and scrollbar-color hsl(175 85% 46% / 0.4) = computed rgba(18,217,200,0.4): a teal (old brand) standard scrollbar; in Chromium 121+ a set scrollbar-color/width overrides the ::-webkit-scrollbar rules. The Studio scrollers already share STUDIO_SCROLLBAR_CLASS (studio-scrollbar.ts). New stage SABA-B-12-DIALOG-SCROLLBAR (Medium, stage 3b): Studio dialogs (shortcut sheet; Export dialog if it scrolls at 1280x720) get the Studio scrollbar without changing the shared store Modal default. Harness fact: Playwright headless passes --hide-scrollbars (offsetWidth-clientWidth = border only), so the stage 3b browser rows launch Chromium with ignoreDefaultArgs [\"--hide-scrollbars\"] and read computed scrollbar-color plus a pixel crop. Next UI round after stage 3."
+  },
+  {
+   "id": "D-29z1530",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 432 -> 433 planning",
+   "decision": "Round 433 dispatched: SABA-B-12 stage 3 (SABA-B-12-SEARCH-CANCEL) on baseline 1a417fb. HEAD fact: Chromium draws its native blue search-cancel in the shortcut sheet search (8 blue pixels in the right 42 px of the field, both viewports; b-round-432/probe/head/). Ruling (product-designer): hide the native cancel and draw the app button on the Library pattern one step up (h-7 w-7, X size-3.5, pr-9, aria-label/title \"Clear search\"); shown while query !== \"\"; a click/Enter/Space clears and ALWAYS focuses the search input (the button unmounts; Library refocuses only when the button had focus - a dialog must not drop focus); Esc still closes the sheet (Saba CALM-1; Live 12 manual 4.2: Esc clears the browser search - existing listed deviation, no new question). Reference: Live 12 manual 4.2 Search Bar \"You can click the x button in the search bar to clear any search terms\" (WebFetch 2026-11-10). tech-lead approve-with-lows TL-R433-01..06; 01-05 applied in sketch v2 (sha 82d7d76c), 06 deferred to ROOT-REQ-ARCH-CHECKPOINT-STUDIO-CONTROLS. B runs on v2: 8/8 mutants red; covering 10 files 196/196; typecheck/lint rc 0 (205 warnings = HEAD); real Chromium sketch ALL OK (2 cells), HEAD NOT ALL OK."
+  },
+  {
+   "id": "D-29z1531",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 432 -> 433 planning (close review)",
+   "decision": "Close-review follow-ups (advisor): full vitest on the round-433 sketch 271 files 4014 tests rc 0 (b-round-432/precheck-full.log), so no suite outside the covering set breaks and the sketch sha 82d7d76c stands; claims K1 no longer prints context/head-sha.txt (rewritten by run.sh before each round) and K8b proves the Library hadFocus guard, outputs regenerated; Live 12 manual 4.2 quotes checked verbatim in the page HTML; decision files unchanged (ableton-decisions 3b132399, design-ux-decisions 0da40d98, direction-decision b8494bb4); root-pre-push-review.md and publication-checkpoint.json bring nothing new beyond feature-status section 6; SF2 top-level-only scan ruled (same shape as RV432-5; recordings under SABA-B-12-RECORDINGS-NUMBER)."
   }
  ],
  "retro_candidates": [
