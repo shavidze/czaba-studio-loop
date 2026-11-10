@@ -1,0 +1,30 @@
+93c93
+< @@ -697,3 +697,82 @@ describe('SRW-20 stage 3b-1 cancel between the settled encode and the downloads
+---
+> @@ -697,3 +697,76 @@ describe('SRW-20 stage 3b-1 cancel between the settled encode and the downloads
+118c118
+< +    it('HX1 held Enter on the Export button starts one render; the repeats are prevented', async () => {
+---
+> +    it('HX1 a repeated Enter that reaches the Export button before a fresh press is prevented; the fresh Enter starts one render and disables the button', async () => {
+130,136c130
+< +      for (let held = 0; held < 3; held++) {
+< +        await act(async () => {
+< +          expect(pressHeldEnter(primary, true)).toBe(false);
+< +          await Promise.resolve();
+< +        });
+< +      }
+< +      expect(controls).toHaveLength(1);
+---
+> +      expect(primary.disabled).toBe(true);
+198c192
+< +    it('HS1 held Enter on the footer Shortcuts button opens the sheet once', async () => {
+---
+> +    it('HQ1 held Enter on the footer Shortcuts button opens the sheet once', async () => {
+209c203
+< +        pressHeldEnter(search, true);
+---
+> +        expect(pressHeldEnter(search, true)).toBe(true);
+216c210
+< +    it('HS2 held Enter on the sheet Close closes it once; focus returns to the footer button and the repeats do not reopen it', async () => {
+---
+> +    it('HQ2 held Enter on the sheet Close closes it once; focus returns to the footer button and the repeats do not reopen it', async () => {

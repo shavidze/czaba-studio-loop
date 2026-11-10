@@ -1,0 +1,52 @@
+
+ RUN  v4.0.16 /tmp/c427-mut
+
+ ❯ app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx (9 tests | 1 failed) 3491ms
+     ✓ HP1 held Enter on the Snap toggle switches it once  704ms
+     ✓ HP2 held Enter on the envelope toggle switches it once  366ms
+     × HP3 held Enter on a library collection fold folds it once 385ms
+     ✓ HP4 held Enter on the library tree nodes selects once and the repeats are prevented  616ms
+     ✓ HP5 the library notice dismiss ignores a repeated Enter; a fresh Enter dismisses once and focuses the search field  403ms
+     ✓ HP6 held Enter on the detail panel toggle collapses it once; Space still toggles once per press 243ms
+     ✓ HP7 held Enter on the video expand button floats the video once 223ms
+     ✓ HP8 held Enter on the floating video close button docks it once 275ms
+     ✓ HP9 the video placeholder return button ignores a repeated Enter and docks once on a fresh Enter 273ms
+ ✓ app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx (18 tests) 5157ms
+     ✓ HM1 held Enter on a track Mute mutes once  732ms
+     ✓ HM2 held Enter on a track Solo solos once  378ms
+     ✓ HM3 held Enter on a track fold folds once  423ms
+     ✓ HM4 held Ctrl+Enter on a track name toggles the selection once  409ms
+     ✓ HM5 Enter on Pan reset centres once and moves focus to the Pan slider; repeats on the slider change nothing and repeats that still reach the reset are prevented  390ms
+     ✓ HM5b characterization (TL-R425-09, D-29z1493): during a pointer gesture the workspace refuses a fresh Enter on Pan reset before it can click; pan unchanged, focus stays on the reset, refusal written once and not re-announced by the repeats  411ms
+     ✓ HM7 held Enter on a group fold collapses it once  330ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx > SYS-2 stage 2b-i: a held Enter acts once on the footer toggles, library tree, detail toggle and video dock buttons (D-29z1494) > HP3 held Enter on a library collection fold folds it once
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ holdEnter app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx:175:53
+    173|   const heldTarget = document.activeElement ?? button;
+    174|   for (let held = 0; held < 3; held++) {
+    175|     expect(pressEnter(heldTarget, true, modifiers)).toBe(false);
+       |                                                     ^
+    176|   }
+    177|   expect(snapshot()).toEqual(afterFirst);
+ ❯ app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx:209:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 26 passed (27)
+   Start at  08:51:29
+   Duration  7.83s (transform 2.57s, setup 0ms, import 3.99s, tests 8.65s, environment 1.00s)
+
+
+::error file=/tmp/c427-mut/app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx,title=app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx > SYS-2 stage 2b-i%3A a held Enter acts once on the footer toggles%2C library tree%2C detail toggle and video dock buttons (D-29z1494) > HP3 held Enter on a library collection fold folds it once,line=175,column=53::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ holdEnter app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx:175:53%0A ❯ app/lib/arrangement/__tests__/panel-held-enter-ui.test.tsx:209:7%0A%0A
