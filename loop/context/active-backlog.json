@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-10T14:51:41.811Z",
-  "current_task": "Round 432: SABA-B-12 stage 2b - the Export dialog <progress> is drawn by the theme (shared STUDIO_PROGRESS_CLASS: graphite track, cream fill, rounded; indeterminate = dimmed pulse under motion-safe; forced-colors system bar); rows PG1, PG2 + DXL7c/DXL8 replacements; doc 280 (current-task.md; sketch b-round-431/sketch-432.patch.txt)",
+  "_generatedUtc": "2026-11-10T15:43:40.886Z",
+  "current_task": "Round 433: SABA-B-12 stage 3 - the shortcut sheet search hides the native cancel and draws its own Clear search button (Library pattern; always refocuses search; Esc still closes); rows SC1-SC6 + SF1-SF2; doc 281 (current-task.md; sketch b-round-432/sketch-433.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6474,17 +6474,6 @@
       "title": "Live 12 value fields change by vertical drag (manual 42.6, Shift = finer); CZABA Detail panel number"
     },
     {
-      "id": "SABA-B-12-STAGE-2B-PROGRESS",
-      "severity": "medium",
-      "origin": "B inventory (audit missed it), part of SABA-B-12",
-      "kind": "saba_approved_task",
-      "status": "in_progress (D-29z1524): round 432, sketch b-round-431/sketch-432.patch.txt",
-      "title": "Export dialog <progress> (determinate + indeterminate PU4 encoder-load state) drawn by the theme, not the browser; neutral colour role kept (DXL7c)",
-      "evidence": "ArrangementExportDialog.tsx <progress> h-2 w-full accent-foreground; export-progress-ui.test.tsx PU1/PU4; label-status-colour-ui.test.tsx DXL7c/DXL8",
-      "next": "B finds a repeatable real-Chromium hold recipe for both states at HEAD (page.route stall of the encoder chunk or a long render), then sketch + probe + reduced-motion row",
-      "added": "2026-11-10 B round 430 -> 431 planning"
-    },
-    {
       "id": "SABA-LANE-RESIZE-HANDLE",
       "severity": "low",
       "status": "scheduled (D-29z1518): with COPY-PD-VIS (Saba-seen Low, fixe",
@@ -6494,7 +6483,7 @@
       "id": "SABA-B-12",
       "severity": "medium",
       "origin": "Saba 2026-11-10 visual feedback",
-      "status": "in_progress (D-29z1515, D-29z1517, D-29z1521, D-29z1523, D-29z1524): stages 1 and 2a passed C and are published (5a30894, 1197dcb); stage 2b progress = round 432; stage 3 search cancel next; stage 4 selects in REVIEW-RECOMMENDATIONS",
+      "status": "in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1529, D-29z1530): stages 1, 2a, 2b passed C and are published (5a30894, 1197dcb, 1a417fb); stage 3 search clear = round 433; stage 3b dialog scrollbar next; stage 4 selects in REVIEW-RECOMMENDATIONS",
       "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
       "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
       "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
@@ -6512,14 +6501,21 @@
           "id": "STUDIO-VIS-2",
           "severity_audit": "high",
           "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
-          "status": "split (D-29z1517): 2a radios passed C round 431, published 1197dcb (D-29z1521); 2b <progress> = round 432 (D-29z1524)"
+          "status": "complete (D-29z1521, D-29z1527): 2a radios C round 431 (1197dcb); 2b <progress> C round 432 (1a417fb)"
         },
         {
           "stage": 3,
           "id": "SABA-B-12-SEARCH-CANCEL",
           "severity_audit": "n/a (audit missed it)",
           "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
-          "status": "planned after stage 2"
+          "status": "in_progress (D-29z1530): round 433, sketch b-round-432/sketch-433.patch.txt"
+        },
+        {
+          "stage": "3b",
+          "id": "SABA-B-12-DIALOG-SCROLLBAR",
+          "severity_audit": "n/a (audit missed it)",
+          "what": "Modal styled-scrollbar draws a teal thin standard scrollbar in the Studio shortcut sheet (and the Export dialog if it scrolls); give Studio dialogs the Studio scrollbar",
+          "status": "planned after stage 3 (D-29z1529)"
         },
         {
           "stage": 4,
@@ -6532,7 +6528,8 @@
           "stage": null,
           "id": "SABA-B-12-RECORDINGS-NUMBER",
           "what": "7 number inputs (+ search, select, radio, checkbox, progress) in app/components/recordings/*; reached only from routes recordings.$productId and scenes.$productId, not from /studio-lab (import closure 0)",
-          "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)"
+          "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)",
+          "progress_note": "D-29z1528: SfxSceneExport.tsx <progress> also here (apply STUDIO_PROGRESS_CLASS, widen PG2) and SfxSoundLibrary.tsx search input (TL-R433-06)"
         },
         {
           "stage": null,
@@ -6549,17 +6546,30 @@
       "severity": "info",
       "status": "wontask (D-29z1526): withdrawn before reaching Saba; Live ma",
       "title": "Export bar resets to 0 between phases (render -> wav, load -> mp3); Live 12.4.5b11 beta notes moved "
+    },
+    {
+      "id": "SABA-B-12-SEARCH-CANCEL",
+      "severity": "medium",
+      "origin": "B inventory, part of SABA-B-12 (stage 3)",
+      "kind": "saba_approved_task",
+      "status": "in_progress (D-29z1530): round 433, sketch b-round-432/sketch-433.patch.txt",
+      "title": "Shortcut sheet search shows Chromium's native blue cancel; hide it and draw the app Clear search button (Library pattern)",
+      "evidence": "b-round-432/probe/head/clear.json, head/1440x900-typed.png",
+      "added": "2026-11-10 B round 432 -> 433 planning"
+    },
+    {
+      "id": "SABA-B-12-DIALOG-SCROLLBAR",
+      "severity": "medium",
+      "origin": "B inventory, part of SABA-B-12 (stage 3b)",
+      "kind": "saba_approved_task",
+      "status": "planned (D-29z1529): next UI round after stage 3",
+      "title": "Studio dialogs (shortcut sheet; Export dialog if it scrolls) inherit Modal styled-scrollbar: teal thin standard scrollbar (computed rgba(18,217,200,0.4)); give them the Studio scrollbar without changing the shared store Modal default",
+      "evidence": "b-round-432/probe/head/sheet.json (scrollHeight 1368 vs 808/646; scrollbarColor rgba(18, 217, 200, 0.4) rgba(0, 0, 0, 0); scrollbarWidth thin); Modal.tsx l.110; app/styles/base/utilities.css l.109-113",
+      "repro": "/studio-lab, press ?, scroll the sheet (headed Chromium or ignoreDefaultArgs --hide-scrollbars)",
+      "added": "2026-11-10 B round 432 -> 433 planning"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 423,
-      "task": "current-task.md",
-      "decision": "D-29z1476, D-29z1477",
-      "type": "REGRESSION-2026-11-10 part 1 (C-only browser sweep; A no change)",
-      "status": "c_fail (D-29z1479): C FAIL c-round-423.json, 1 Medium C-R423-01 (RR-PERF); gate 423 skipped; fix-up = round 424",
-      "note": "baseline 875ff37 clean; tree manifest b-round-422/r423-tree-sha256.txt (1321); claims b-round-422/claims-423.sh; marker-seek baseline b-round-422/probe/head/"
-    },
     {
       "round": 424,
       "task": "current-task.md",
@@ -6629,8 +6639,16 @@
       "task": "current-task.md",
       "decision": "D-29z1524",
       "type": "SABA-B-12 stage 2b (Export dialog <progress> drawn by the theme)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1527): gate 432 1a417fb",
       "note": "baseline 1197dcb clean; sketch b-round-431/sketch-432.patch.txt; claims b-round-431/claims-432.sh"
+    },
+    {
+      "round": 433,
+      "task": "current-task.md",
+      "decision": "D-29z1530",
+      "type": "SABA-B-12 stage 3 (shortcut sheet search clear)",
+      "status": "dispatched",
+      "note": "baseline 1a417fb clean; sketch b-round-432/sketch-433.patch.txt; claims b-round-432/claims-433.sh"
     }
   ],
   "other_keys": [
