@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-10T12:15:51.770Z",
-  "current_task": "Round 430: SABA-B-12 stage 1 (STUDIO-VIS-1) - the Detail panel Clip Gain/From/To number fields lose the browser spin buttons via a shared STUDIO_NUMBER_FIELD_CLASS; rows NF1, NF2, F10; doc 278 (current-task.md; sketch b-round-429/sketch-430.patch.txt)",
+  "_generatedUtc": "2026-11-10T13:16:02.536Z",
+  "current_task": "Round 431: SABA-B-12 stage 2a (STUDIO-VIS-2) - the 6 Export dialog radios become a theme-drawn dot via a shared STUDIO_RADIO_CLASS; rows RD1, RD2, RD3 + DXA7/DXL8 replacements; doc 279 (current-task.md; sketch b-round-430/sketch-431.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -261,13 +261,55 @@
       "status": "done"
     },
     {
+      "id": "ARCH-SPLIT",
+      "status": "not_started (D-29z1518; queued after STORE-REDESIGN, before REVIEW-RECOMMENDATIONS)",
+      "requested": "Saba 2026-11-10 (policy section \"ARCH-SPLIT: large file split rounds\")",
+      "prerequisites": [
+        "STORE-REDESIGN complete (STORE-5)",
+        "frontend-architect audit docs/technical/studio-real-workspace/architecture-file-size-audit-2026-11-10.md (pending at 2026-11-10)"
+      ],
+      "stages": [
+        {
+          "id": "ARCH-SPLIT-1",
+          "what": "ArrangementContext.tsx (~5.3k lines) -> multiple contexts/hooks",
+          "status": "not_started"
+        },
+        {
+          "id": "ARCH-SPLIT-2",
+          "what": "StudioWorkspace.tsx (~3.7k lines) -> extracted components",
+          "status": "not_started"
+        },
+        {
+          "id": "ARCH-SPLIT-3",
+          "what": "ArrangementDetailPanel.tsx + ArrangementLane.tsx + StudioContext.tsx (Saba 2026-11-10 wording)",
+          "status": "not_started",
+          "root_question": "ROOT-Q-ARCH-SPLIT-3-STUDIOCONTEXT: LEGACY-REMOVAL-POLICY says StudioContext.tsx is frozen legacy (no refactor) until ArrangementContext replaces studio.$productId; B asks root at ARCH-SPLIT planning whether stage 3 splits it or only audits it for removal (D-29z1520)"
+        },
+        {
+          "id": "ARCH-SPLIT-REGRESSION",
+          "what": "mandatory full regression: e2e smoke + Playwright browser check of every key flow",
+          "status": "not_started"
+        }
+      ],
+      "rules": [
+        "unit tests for every extracted module",
+        "no behaviour change; C verifies identical behaviour before/after",
+        "B consults frontend-architect and tech-lead for every split",
+        "REACT_CONTEXT.md file-size primitive applies (800-line context limit at 832b3ba)",
+        "also audit: circular imports in arrangement/, props drilling >3 levels, duplicated logic, components rendering >20 direct children",
+        "dead files: grep imports; unused -> removal in the split/cleanup round"
+      ],
+      "estimated_rounds": "3-5"
+    },
+    {
       "id": "REVIEW-RECOMMENDATIONS",
       "status": "not_started (queued after VISUAL-A-OBSIDIAN)",
       "requested": "2026-10-25 (Saba: \"write tasks and bugs from what the reviews checked, and follow them\"; ableton-decisions.md + design-ux-decisions.md)",
       "instruction": "one bounded B task per approved id (split if larger), A->C->B; after VISUAL-A-OBSIDIAN, before T12-ADVANCED and phase 2; each task carries the Ableton source table",
       "prerequisites": [
         "VISUAL-A-OBSIDIAN complete (incl. DUX-R-5 stage, M1/M3/M4, SABA-B-1/2)",
-        "STORE-REDESIGN complete (queue order 2026-10-25; Saba approved)"
+        "STORE-REDESIGN complete (queue order 2026-10-25; Saba approved)",
+        "ARCH-SPLIT complete incl. ARCH-SPLIT-REGRESSION (D-29z1518)"
       ],
       "items": [
         {
@@ -6366,59 +6408,6 @@
       "title": "during a drag that also writes preview status text, a held key repeat may adopt the pending preview "
     },
     {
-      "id": "SABA-B-12",
-      "severity": "medium",
-      "origin": "Saba 2026-11-10 visual feedback",
-      "status": "in_progress (D-29z1512, D-29z1513): stage 1 STUDIO-VIS-1 dispatched as round 430",
-      "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
-      "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
-      "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
-      "added": "2026-11-10 B round 428 -> 429 planning",
-      "stages": [
-        {
-          "stage": 1,
-          "id": "STUDIO-VIS-1",
-          "severity_audit": "high",
-          "what": "hide spin buttons on Detail panel Clip Gain/From/To number fields",
-          "status": "dispatched round 430"
-        },
-        {
-          "stage": 2,
-          "id": "STUDIO-VIS-2",
-          "severity_audit": "high",
-          "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
-          "status": "planned next UI round (rule sr-only vs styled dot vs L1/hidden_focusables_rulings_d29z169)"
-        },
-        {
-          "stage": 3,
-          "id": "SABA-B-12-SEARCH-CANCEL",
-          "severity_audit": "n/a (audit missed it)",
-          "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
-          "status": "planned after stage 2"
-        },
-        {
-          "stage": 4,
-          "id": "STUDIO-VIS-3",
-          "severity_audit": "medium",
-          "what": "native <select> grid division + waveform zoom (zoom select has appearance-none and no chevron)",
-          "status": "deferred by Saba answer 2 (2026-11-10) -> REVIEW-RECOMMENDATIONS"
-        },
-        {
-          "stage": null,
-          "id": "SABA-B-12-RECORDINGS-NUMBER",
-          "what": "7 number inputs (+ search, select, radio, checkbox, progress) in app/components/recordings/*; reached only from routes recordings.$productId and scenes.$productId, not from /studio-lab (import closure 0)",
-          "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)"
-        },
-        {
-          "stage": null,
-          "id": "SABA-B-12-LEGACY-CHECKBOX",
-          "what": "app/components/studio/ExportDialog.tsx checkbox; only importer is protected studio.$productId.tsx",
-          "status": "recorded under SRW-21 (deferred_user); not scheduled"
-        }
-      ],
-      "why_we_missed_it": "D-29z1514 / L61"
-    },
-    {
       "id": "TLM-SABA-B-12-FIREFOX-SAFARI",
       "severity": "info",
       "status": "open_tech_lead_manual (D-29z1513): deadline RETRO 435 (L46)",
@@ -6483,17 +6472,38 @@
       "severity": "info",
       "status": "awaiting_user (D-29z1513)",
       "title": "Live 12 value fields change by vertical drag (manual 42.6, Shift = finer); CZABA Detail panel number"
+    },
+    {
+      "id": "STUDIO-VIS-2",
+      "severity": "medium",
+      "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+      "kind": "stage_pointer",
+      "status": "in_progress (D-29z1519): SABA-B-12 stage 2a, round 431 | severity set to the parent SABA-B-12 Medium (D-29z1520)",
+      "title": "6 native radios in ArrangementExportDialog -> theme-drawn dot (STUDIO_RADIO_CLASS)",
+      "evidence": "store/docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md STUDIO-VIS-2; b-round-430/probe/",
+      "added": "2026-11-10 B round 430 -> 431 planning",
+      "parent": "SABA-B-12",
+      "severity_audit": "high"
+    },
+    {
+      "id": "SABA-B-12-STAGE-2B-PROGRESS",
+      "severity": "medium",
+      "origin": "B inventory (audit missed it), part of SABA-B-12",
+      "kind": "saba_approved_task",
+      "status": "scheduled (D-29z1517): next UI round after 431 (after REGRESSION-2026-11-13 when due)",
+      "title": "Export dialog <progress> (determinate + indeterminate PU4 encoder-load state) drawn by the theme, not the browser; neutral colour role kept (DXL7c)",
+      "evidence": "ArrangementExportDialog.tsx <progress> h-2 w-full accent-foreground; export-progress-ui.test.tsx PU1/PU4; label-status-colour-ui.test.tsx DXL7c/DXL8",
+      "next": "B finds a repeatable real-Chromium hold recipe for both states at HEAD (page.route stall of the encoder chunk or a long render), then sketch + probe + reduced-motion row",
+      "added": "2026-11-10 B round 430 -> 431 planning"
+    },
+    {
+      "id": "SABA-LANE-RESIZE-HANDLE",
+      "severity": "low",
+      "status": "scheduled (D-29z1518): with COPY-PD-VIS (Saba-seen Low, fixe",
+      "title": "Lane resize separator h-1.5 hover:bg-foreground/50 (6 px, 50 % white) too heavy; visible line h-px o"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 421,
-      "task": "current-task.md",
-      "decision": "D-29z1469",
-      "type": "SYS-R418-PREVIEW-LIFECYCLE (runtime + tests)",
-      "status": "c_pass_published (D-29z1471): C PASS c-round-421.json; gate 421 published 4786c13",
-      "note": "baseline 6609dfa clean (gate 420 skipped); frozen b-round-420/r421-frozen-sha256.txt (1316); grants b-round-420/grants-421.txt (4); sketch b-round-420/sketch-421.patch.txt; review b-round-420/sketch-review.md; claims b-round-420/claims-421.sh"
-    },
     {
       "round": 422,
       "task": "current-task.md",
@@ -6563,8 +6573,16 @@
       "task": "current-task.md",
       "decision": "D-29z1513",
       "type": "SABA-B-12 stage 1 (STUDIO-VIS-1 number spin buttons)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1515): gate 430 5a30894",
       "note": "baseline 76f4147 clean; sketch b-round-429/sketch-430.patch.txt; claims b-round-429/claims-430.sh"
+    },
+    {
+      "round": 431,
+      "task": "current-task.md",
+      "decision": "D-29z1519",
+      "type": "SABA-B-12 stage 2a (STUDIO-VIS-2 Export dialog radios)",
+      "status": "dispatched",
+      "note": "baseline 5a30894 clean; sketch b-round-430/sketch-431.patch.txt; claims b-round-430/claims-431.sh"
     }
   ],
   "other_keys": [

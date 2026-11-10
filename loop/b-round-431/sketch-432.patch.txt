@@ -1,0 +1,183 @@
+diff --git a/app/components/arrangement/ArrangementExportDialog.tsx b/app/components/arrangement/ArrangementExportDialog.tsx
+index d6404af..05320c5 100644
+--- a/app/components/arrangement/ArrangementExportDialog.tsx
++++ b/app/components/arrangement/ArrangementExportDialog.tsx
+@@ -16,6 +16,7 @@ import { arrangementHasVideoFades } from '~/lib/arrangement/video-fades';
+ import { cn } from '~/lib/utils';
+ import type { WorkspaceVideoSource } from '~/types/arrangement';
+ import { ArrangementTimeText } from './ArrangementTimeText';
++import { STUDIO_PROGRESS_CLASS } from './studio-progress';
+ import { STUDIO_RADIO_CLASS } from './studio-radio';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+@@ -572,7 +573,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                   aria-valuetext={progressText ?? undefined}
+                   max={1}
+                   value={progress.fraction ?? undefined}
+-                  className="h-2 w-full accent-foreground"
++                  className={STUDIO_PROGRESS_CLASS}
+                 />
+               </>
+             ) : null}
+diff --git a/app/components/arrangement/studio-progress.ts b/app/components/arrangement/studio-progress.ts
+new file mode 100644
+index 0000000..28e3062
+--- /dev/null
++++ b/app/components/arrangement/studio-progress.ts
+@@ -0,0 +1,20 @@
++export const STUDIO_PROGRESS_CLASS = [
++  'h-2',
++  'w-full',
++  'appearance-none',
++  'overflow-hidden',
++  'rounded-full',
++  'border-0',
++  'bg-outline-hover',
++  '[&::-webkit-progress-bar]:rounded-full',
++  '[&::-webkit-progress-bar]:bg-outline-hover',
++  '[&::-webkit-progress-value]:rounded-full',
++  '[&::-webkit-progress-value]:bg-foreground',
++  '[&::-moz-progress-bar]:rounded-full',
++  '[&::-moz-progress-bar]:bg-foreground',
++  'indeterminate:bg-foreground/30',
++  'indeterminate:[&::-webkit-progress-bar]:bg-foreground/30',
++  'indeterminate:[&::-moz-progress-bar]:bg-foreground/30',
++  'motion-safe:indeterminate:animate-pulse',
++  'forced-colors:appearance-auto',
++].join(' ');
+diff --git a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+index 5391465..1ee74b8 100644
+--- a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementExportDialog } from '~/components/arrangement/ArrangementExportDialog';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
++import { STUDIO_PROGRESS_CLASS } from '~/components/arrangement/studio-progress';
+ import {
+   type ArrangementContextValue,
+   ArrangementProvider,
+@@ -478,7 +479,7 @@ describe('DUX-R-5b-3a labels and status texts go neutral (D-29z143)', () => {
+     );
+   });
+ 
+-  it('DXL7c: the Export progress bar uses accent-foreground during a pending render', async () => {
++  it('DXL7c: the Export progress bar carries exactly the shared neutral STUDIO_PROGRESS_CLASS during a pending render', async () => {
+     const control: { options: ArrangementRenderOptions | undefined } = { options: undefined };
+     renderWavMock.mockImplementation(
+       (_arrangement, _buffers, _window, options) =>
+@@ -498,7 +499,15 @@ describe('DUX-R-5b-3a labels and status texts go neutral (D-29z143)', () => {
+     act(() => onProgress('render', 0.5));
+     const progress = view.getByTestId('arrangement-export-progress');
+     expect(progress.tagName).toBe('PROGRESS');
+-    expectLabelTokens(progress, 'export progress', ['accent-foreground'], ['accent-brand']);
++    expect(labelStatusTokens(progress, 'export progress')).toStrictEqual(
++      STUDIO_PROGRESS_CLASS.split(' '),
++    );
++    expectLabelTokens(
++      progress,
++      'export progress',
++      ['[&::-webkit-progress-value]:bg-foreground', '[&::-moz-progress-bar]:bg-foreground'],
++      ['accent-brand', 'accent-foreground'],
++    );
+   });
+ 
+   it('DXL8: the source drops the 5b-3a brass, holds the neutral strings and keeps the kept brass', () => {
+@@ -559,7 +568,9 @@ describe('DUX-R-5b-3a labels and status texts go neutral (D-29z143)', () => {
+     expectCount(LIBRARY_PATH, '<span className="text-foreground">{activeNodeLabel}', 1);
+     expectCount(GRID_MENU_PATH, 'justify-center text-foreground', 4);
+     expectCount(EXPORT_DIALOG_PATH, 'className="text-sm text-foreground"', 2);
+-    expectCount(EXPORT_DIALOG_PATH, 'h-2 w-full accent-foreground', 1);
++    expectCount(EXPORT_DIALOG_PATH, 'h-2 w-full accent-foreground', 0);
++    expectCount(EXPORT_DIALOG_PATH, 'accent-foreground', 0);
++    expectCount(EXPORT_DIALOG_PATH, 'className={STUDIO_PROGRESS_CLASS}', 1);
+ 
+     expectCount(EXPORT_DIALOG_PATH, 'accent-brand', 0);
+     expectCount(EXPORT_DIALOG_PATH, 'className={STUDIO_RADIO_CLASS}', 6);
+diff --git a/app/lib/arrangement/__tests__/studio-progress.test.ts b/app/lib/arrangement/__tests__/studio-progress.test.ts
+new file mode 100644
+index 0000000..10d4c5f
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/studio-progress.test.ts
+@@ -0,0 +1,81 @@
++// @vitest-environment node
++import { readdirSync, readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { describe, expect, it } from 'vitest';
++import { STUDIO_PROGRESS_CLASS } from '~/components/arrangement/studio-progress';
++
++const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
++const PROGRESS_OPENING = /<progress\b/g;
++const PROGRESS_TAG = /<progress\b[^<]*?\/>/g;
++const PROGRESS_CLOSING = /<\/progress>/g;
++const PROGRESS_CLASS_ATTRIBUTE = /\bclassName=\{STUDIO_PROGRESS_CLASS\}/;
++
++function sourceFiles(): string[] {
++  return readdirSync(ARRANGEMENT_DIR).filter(
++    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
++  );
++}
++
++function arrangementSource(name: string): string {
++  return readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8');
++}
++
++function progressOpenings(name: string): number {
++  return arrangementSource(name).match(PROGRESS_OPENING)?.length ?? 0;
++}
++
++function progressTags(name: string): string[] {
++  return arrangementSource(name).match(PROGRESS_TAG) ?? [];
++}
++
++describe('Studio progress bars are drawn by the theme, not the browser (SABA-B-12 stage 2b)', () => {
++  it('PG1: the shared class draws a neutral token-only bar, pulses only while indeterminate and only with motion allowed, and restores the system bar in forced colours (token contract; the browser half is the C probe)', () => {
++    const tokens = STUDIO_PROGRESS_CLASS.split(' ');
++    expect(tokens).toStrictEqual([
++      'h-2',
++      'w-full',
++      'appearance-none',
++      'overflow-hidden',
++      'rounded-full',
++      'border-0',
++      'bg-outline-hover',
++      '[&::-webkit-progress-bar]:rounded-full',
++      '[&::-webkit-progress-bar]:bg-outline-hover',
++      '[&::-webkit-progress-value]:rounded-full',
++      '[&::-webkit-progress-value]:bg-foreground',
++      '[&::-moz-progress-bar]:rounded-full',
++      '[&::-moz-progress-bar]:bg-foreground',
++      'indeterminate:bg-foreground/30',
++      'indeterminate:[&::-webkit-progress-bar]:bg-foreground/30',
++      'indeterminate:[&::-moz-progress-bar]:bg-foreground/30',
++      'motion-safe:indeterminate:animate-pulse',
++      'forced-colors:appearance-auto',
++    ]);
++    expect(tokens.filter((token) => /accent|brand/.test(token))).toStrictEqual([]);
++    expect(tokens.filter((token) => token.includes('animate-'))).toStrictEqual([
++      'motion-safe:indeterminate:animate-pulse',
++    ]);
++  });
++
++  it('PG2: every progress tag in the arrangement components carries className={STUDIO_PROGRESS_CLASS}', () => {
++    const owners = sourceFiles().filter((name) => progressOpenings(name) > 0);
++    expect(
++      owners,
++      'a new progress file must apply STUDIO_PROGRESS_CLASS and be added to this list',
++    ).toStrictEqual(['ArrangementExportDialog.tsx']);
++    const tags = owners.flatMap((name) => progressTags(name));
++    expect(tags, 'each <progress> is one self-closing tag').toHaveLength(
++      owners.reduce((sum, name) => sum + progressOpenings(name), 0),
++    );
++    expect(tags).toHaveLength(1);
++    expect(
++      sourceFiles().filter(
++        (name) => (arrangementSource(name).match(PROGRESS_CLOSING)?.length ?? 0) > 0,
++      ),
++      'no <progress>…</progress> pair hides from the self-closing scan',
++    ).toStrictEqual([]);
++    for (const tag of tags) {
++      expect(PROGRESS_CLASS_ATTRIBUTE.test(tag), tag.slice(0, 120)).toBe(true);
++    }
++  });
++});

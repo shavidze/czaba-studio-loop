@@ -1,9 +1,9 @@
 {
- "version": 412,
+ "version": 414,
  "updated": "2026-11-10",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "Round 431: SABA-B-12 stage 2a (STUDIO-VIS-2) - the 6 Export dialog radios become a theme-drawn dot via a shared STUDIO_RADIO_CLASS; rows RD1, RD2, RD3 + DXA7/DXL8 replacements; doc 279 (current-task.md; sketch b-round-430/sketch-431.patch.txt)",
+ "current_task": "Round 432: SABA-B-12 stage 2b - the Export dialog <progress> is drawn by the theme (shared STUDIO_PROGRESS_CLASS: graphite track, cream fill, rounded; indeterminate = dimmed pulse under motion-safe; forced-colors system bar); rows PG1, PG2 + DXL7c/DXL8 replacements; doc 280 (current-task.md; sketch b-round-431/sketch-432.patch.txt)",
  "advisor_used_by_B": "round 427 -> 428 planning: advisor available and consulted after orientation and before close",
  "baseline": {
   "tsc_errors": 0,
@@ -12247,8 +12247,16 @@
    "task": "current-task.md",
    "decision": "D-29z1519",
    "type": "SABA-B-12 stage 2a (STUDIO-VIS-2 Export dialog radios)",
-   "status": "dispatched",
+   "status": "c_pass_published (D-29z1521): gate 431 1197dcb",
    "note": "baseline 5a30894 clean; sketch b-round-430/sketch-431.patch.txt; claims b-round-430/claims-431.sh"
+  },
+  {
+   "round": 432,
+   "task": "current-task.md",
+   "decision": "D-29z1524",
+   "type": "SABA-B-12 stage 2b (Export dialog <progress> drawn by the theme)",
+   "status": "dispatched",
+   "note": "baseline 1197dcb clean; sketch b-round-431/sketch-432.patch.txt; claims b-round-431/claims-432.sh"
   }
  ],
  "post_current_stage_queue": [
@@ -27942,59 +27950,6 @@
    "added": "2026-11-10 B round 427 -> 428 planning"
   },
   {
-   "id": "SABA-B-12",
-   "severity": "medium",
-   "origin": "Saba 2026-11-10 visual feedback",
-   "status": "in_progress (D-29z1515, D-29z1517, D-29z1519): stage 1 done (round 430, published 5a30894); stage 2a dispatched as round 431; 2b progress next UI round",
-   "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
-   "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
-   "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
-   "added": "2026-11-10 B round 428 -> 429 planning",
-   "stages": [
-    {
-     "stage": 1,
-     "id": "STUDIO-VIS-1",
-     "severity_audit": "high",
-     "what": "hide spin buttons on Detail panel Clip Gain/From/To number fields",
-     "status": "done (C round 430 PASS browserVerified, published 5a30894; D-29z1515)"
-    },
-    {
-     "stage": 2,
-     "id": "STUDIO-VIS-2",
-     "severity_audit": "high",
-     "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
-     "status": "split (D-29z1517): 2a radios = round 431 (option b styled dot, product-designer); 2b <progress> = SABA-B-12-STAGE-2B-PROGRESS next UI round"
-    },
-    {
-     "stage": 3,
-     "id": "SABA-B-12-SEARCH-CANCEL",
-     "severity_audit": "n/a (audit missed it)",
-     "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
-     "status": "planned after stage 2"
-    },
-    {
-     "stage": 4,
-     "id": "STUDIO-VIS-3",
-     "severity_audit": "medium",
-     "what": "native <select> grid division + waveform zoom (zoom select has appearance-none and no chevron)",
-     "status": "deferred by Saba answer 2 (2026-11-10) -> REVIEW-RECOMMENDATIONS"
-    },
-    {
-     "stage": null,
-     "id": "SABA-B-12-RECORDINGS-NUMBER",
-     "what": "7 number inputs (+ search, select, radio, checkbox, progress) in app/components/recordings/*; reached only from routes recordings.$productId and scenes.$productId, not from /studio-lab (import closure 0)",
-     "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)"
-    },
-    {
-     "stage": null,
-     "id": "SABA-B-12-LEGACY-CHECKBOX",
-     "what": "app/components/studio/ExportDialog.tsx checkbox; only importer is protected studio.$productId.tsx",
-     "status": "recorded under SRW-21 (deferred_user); not scheduled"
-    }
-   ],
-   "why_we_missed_it": "D-29z1514 / L61"
-  },
-  {
    "id": "INFO-C428-AUTH-SECOND-VITE",
    "severity": "info",
    "origin": "environment",
@@ -28011,7 +27966,8 @@
    "title": "SABA-B-12 stage 1 on Firefox and Safari: Detail panel number fields show no spin buttons at rest, hover and focus; ArrowUp/Down still step",
    "evidence": "cloud runner has Chromium only",
    "added": "2026-11-10 B round 429 -> 430 planning",
-   "scope_r431": "also the Export dialog radio dot (appearance-none) in Firefox/Safari: hollow/checked/disabled shapes, focus ring, forced-colors fallback; stage 2b adds ::-moz-progress-bar (D-29z1517)"
+   "scope_r431": "also the Export dialog radio dot (appearance-none) in Firefox/Safari: hollow/checked/disabled shapes, focus ring, forced-colors fallback; stage 2b adds ::-moz-progress-bar (D-29z1517)",
+   "scope_r432": "also the Export dialog progress bar in Firefox (::-moz-progress-bar fill, indeterminate foreground/30 pulse, rounded ends) and Safari (::-webkit-progress-*), plus a real Windows High Contrast check that the bar is visible in both states (Chromium emulation draws it all white at HEAD and after) (D-29z1524)"
   },
   {
    "id": "STUDIO-VIS-4",
@@ -28098,7 +28054,7 @@
    "severity": "medium",
    "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
    "kind": "stage_pointer",
-   "status": "in_progress (D-29z1519): SABA-B-12 stage 2a, round 431 | severity set to the parent SABA-B-12 Medium (D-29z1520)",
+   "status": "done (D-29z1521): C round 431 PASS browserVerified, published 1197dcb",
    "title": "6 native radios in ArrangementExportDialog -> theme-drawn dot (STUDIO_RADIO_CLASS)",
    "evidence": "store/docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md STUDIO-VIS-2; b-round-430/probe/",
    "added": "2026-11-10 B round 430 -> 431 planning",
@@ -28110,7 +28066,7 @@
    "severity": "medium",
    "origin": "B inventory (audit missed it), part of SABA-B-12",
    "kind": "saba_approved_task",
-   "status": "scheduled (D-29z1517): next UI round after 431 (after REGRESSION-2026-11-13 when due)",
+   "status": "in_progress (D-29z1524): round 432, sketch b-round-431/sketch-432.patch.txt",
    "title": "Export dialog <progress> (determinate + indeterminate PU4 encoder-load state) drawn by the theme, not the browser; neutral colour role kept (DXL7c)",
    "evidence": "ArrangementExportDialog.tsx <progress> h-2 w-full accent-foreground; export-progress-ui.test.tsx PU1/PU4; label-status-colour-ui.test.tsx DXL7c/DXL8",
    "next": "B finds a repeatable real-Chromium hold recipe for both states at HEAD (page.route stall of the encoder chunk or a long render), then sketch + probe + reduced-motion row",
@@ -28125,6 +28081,80 @@
    "title": "Lane resize separator h-1.5 hover:bg-foreground/50 (6 px, 50 % white) too heavy; visible line h-px or h-0.5 at foreground/20-/25, hit area can stay h-1.5, cursor stays the primary affordance (as Ableton)",
    "evidence": "ArrangementLane.tsx lane resize separator (policy cites l.1341; B re-greps at dispatch)",
    "added": "2026-11-10 B round 430 -> 431 planning"
+  },
+  {
+   "id": "SABA-B-12",
+   "severity": "medium",
+   "origin": "Saba 2026-11-10 visual feedback",
+   "status": "in_progress (D-29z1515, D-29z1517, D-29z1521, D-29z1523, D-29z1524): stages 1 and 2a passed C and are published (5a30894, 1197dcb); stage 2b progress = round 432; stage 3 search cancel next; stage 4 selects in REVIEW-RECOMMENDATIONS",
+   "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
+   "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
+   "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
+   "added": "2026-11-10 B round 428 -> 429 planning",
+   "stages": [
+    {
+     "stage": 1,
+     "id": "STUDIO-VIS-1",
+     "severity_audit": "high",
+     "what": "hide spin buttons on Detail panel Clip Gain/From/To number fields",
+     "status": "done (C round 430 PASS browserVerified, published 5a30894; D-29z1515)"
+    },
+    {
+     "stage": 2,
+     "id": "STUDIO-VIS-2",
+     "severity_audit": "high",
+     "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
+     "status": "split (D-29z1517): 2a radios passed C round 431, published 1197dcb (D-29z1521); 2b <progress> = round 432 (D-29z1524)"
+    },
+    {
+     "stage": 3,
+     "id": "SABA-B-12-SEARCH-CANCEL",
+     "severity_audit": "n/a (audit missed it)",
+     "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
+     "status": "planned after stage 2"
+    },
+    {
+     "stage": 4,
+     "id": "STUDIO-VIS-3",
+     "severity_audit": "medium",
+     "what": "native <select> grid division + waveform zoom (zoom select has appearance-none and no chevron)",
+     "status": "deferred by Saba answer 2 (2026-11-10) -> REVIEW-RECOMMENDATIONS"
+    },
+    {
+     "stage": null,
+     "id": "SABA-B-12-RECORDINGS-NUMBER",
+     "what": "7 number inputs (+ search, select, radio, checkbox, progress) in app/components/recordings/*; reached only from routes recordings.$productId and scenes.$productId, not from /studio-lab (import closure 0)",
+     "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)"
+    },
+    {
+     "stage": null,
+     "id": "SABA-B-12-LEGACY-CHECKBOX",
+     "what": "app/components/studio/ExportDialog.tsx checkbox; only importer is protected studio.$productId.tsx",
+     "status": "recorded under SRW-21 (deferred_user); not scheduled"
+    }
+   ],
+   "why_we_missed_it": "D-29z1514 / L61",
+   "restored": "D-29z1523: back from archive/findings-archived.json (optimizer substring rule)"
+  },
+  {
+   "id": "SABA-Q-EXPORT-PROGRESS-OVERALL",
+   "severity": "info",
+   "origin": "B reference search (D-29z1525)",
+   "kind": "question_for_saba",
+   "status": "wontask (D-29z1526): withdrawn before reaching Saba; Live manual 5.1.3.4 says the export progress bar resets for each pass, which matches ours; the stem-separation release-note claim was search-summary only",
+   "title": "Export bar resets to 0 between phases (render -> wav, load -> mp3); Live 12.4.5b11 beta notes moved stem separation to one overall progress. Keep per-phase bars or one overall bar?",
+   "evidence": "https://www.ableton.com/en/live-manual/12/managing-files-and-sets/ 5.1.3.4 and 5.1.3.5",
+   "added": "2026-11-10 B round 431 -> 432 planning"
+  },
+  {
+   "id": "ARCH-SIGNAL-STUDIO-CONTROLS",
+   "severity": "info",
+   "origin": "A round 431 reviewer Architecture note + gate 431 review Architecture note",
+   "kind": "architecture_signal",
+   "status": "recorded_signal (D-29z1522): checkpoint requested at the SABA-B-12 boundary, not scheduled",
+   "title": "studio-*.ts class-constant modules (fader, number-field, radio, progress, scrollbar, focus, soft-disabled) each with its own source-scan regex; options: StudioRadio/StudioProgress components or one studio-controls module + one scan",
+   "evidence": "a-round-431.md For B; gates/round-431/review.md Architecture note",
+   "added": "2026-11-10 B round 431 -> 432 planning"
   }
  ],
  "tech_lead_notes": [
@@ -40006,6 +40036,55 @@
    "title": "ArrangementDetailPanel inputClass is a hand-joined template string with the shared constant; cn(...) would match l.427 and remove the trailing-space risk",
    "evidence": "gates/round-430/review.md suggestion 1",
    "added": "2026-11-10 B round 430 -> 431 planning"
+  },
+  {
+   "id": "A-R431-REVIEW-L1-RD2-SPREAD-AFTER-TYPE",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1522)",
+   "title": "RD2 accepts <input type=\"text\" {...rest} /> where a spread after the literal type could override it at runtime; TypeScript Omit guards ArrangementMixFader today, the regex does not",
+   "evidence": "a-round-431.md reviewer L1",
+   "confirmedBy": "gates/round-431/review.md finding 2",
+   "added": "2026-11-10 B round 431 -> 432 planning"
+  },
+  {
+   "id": "A-R431-REVIEW-L2-RD2-DATA-TYPE",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1522)",
+   "title": "RD2 \\btype= also matches data-type= and aria-...type=; fix (?<![\\w-])type=",
+   "evidence": "a-round-431.md reviewer L2",
+   "confirmedBy": "gates/round-431/review.md finding 2",
+   "added": "2026-11-10 B round 431 -> 432 planning"
+  },
+  {
+   "id": "A-R431-REVIEW-L3-RD2-DATETIME-LOCAL",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1522)",
+   "title": "RD2 LITERAL_TYPE [a-z]+ rejects type=\"datetime-local\" (false red); fix [a-z-]+",
+   "evidence": "a-round-431.md reviewer L3",
+   "confirmedBy": "gates/round-431/review.md finding 2",
+   "added": "2026-11-10 B round 431 -> 432 planning"
+  },
+  {
+   "id": "GATE431-REVIEW-L3-STRING-COUNT-PINS",
+   "severity": "low",
+   "origin": "gate reviewer",
+   "status": "deferred_low_polish (D-29z1522)",
+   "title": "DXA7/DXL8 count the literal className={STUDIO_RADIO_CLASS} string in source; a formatting change breaks them without a behaviour change (existing pattern in these suites)",
+   "evidence": "gates/round-431/review.md finding 3",
+   "added": "2026-11-10 B round 431 -> 432 planning"
+  },
+  {
+   "id": "B-R431-DUP-ENCODER-LOADING-TEXT",
+   "severity": "low",
+   "origin": "B",
+   "status": "deferred_low_polish (D-29z1525)",
+   "title": "MP3 encoder load shows two visible lines with the same meaning: status \"Loading the MP3 encoder (LAME)...\" and progress label \"Loading MP3 encoder...\"",
+   "evidence": "b-round-431/probe/sketch/1280x720-indeterminate-dialog.png (same at HEAD)",
+   "repro": "/studio-lab, add a clip, Export, MP3, Export MP3 with the encoder request slow",
+   "added": "2026-11-10 B round 431 -> 432 planning"
   }
  ],
  "regression_rounds": [
@@ -40341,6 +40420,11 @@
      "id": "REG-SABA-B-12-RADIOS",
      "what": "Export dialog radios: theme dot, forced-colors fallback, disabled-checked while rendering (b-round-430/probe/radio-probe.mjs + compare-radio.py, radio-extra-probe.mjs + compare-extra.py, both viewports; only if round 431 passed)",
      "added": "D-29z1520"
+    },
+    {
+     "id": "REG-SABA-B-12-PROGRESS",
+     "what": "Export dialog progress bar: theme fill/track, indeterminate pulse, reduced motion static, forced colours appearance auto, MP3 and WAV download (b-round-431/probe/progress-probe.mjs + compare-progress.py, both viewports; only if round 432 passed)",
+     "added": "D-29z1526"
     }
    ]
   }
@@ -42234,42 +42318,6 @@
  },
  "decisions_log_b": [
   {
-   "id": "D-29z1465",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 419 -> 420 planning",
-   "decision": "RETRO 420 outputs: retros/retro-420.md (window 416-419: 4 PASS, 0 FAIL, $63.35, 6 Low C bugs); lessons l.3 + L7 confirmedBy clause (60 lines); counters judged (l58 miss 1 at 417, B share 72.3 % miss); RC-R420-COST-COUNTER adopted; systemic SYS-R418-PREVIEW-LIFECYCLE queued; screen review SR-420-1/2 (awaiting_user); retro_policy.next_due round 435."
-  },
-  {
-   "id": "D-29z1466",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 419 -> 420 planning",
-   "decision": "Order: 420 RETRO 420 -> 421 REGRESSION-2026-11-10 (due on/after 2026-11-10) -> SYS-R418-PREVIEW-LIFECYCLE -> STEM-LANES S1..S4 once AGREE-STEM-LANES is answered (if not yet answered: SYS-1..3, then STORE-2b..5 per the skip-while-waiting rule, STEM-LANES first as soon as the answer arrives) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). Next RETRO round 435."
-  },
-  {
-   "id": "D-29z1467",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 420 -> 421 planning",
-   "decision": "Round 420 (RETRO 420) accepted: C PASS (c-round-420.json; 11 rows passed, row 5 CLAIMS partial for two environment Lows; browserVerified/realVerified true). Gate 420 skipped (no real changes), so the round-421 baseline stays 6609dfa. RETRO 420 is complete; next RETRO round 435."
-  },
-  {
-   "id": "D-29z1468",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 420 -> 421 planning",
-   "decision": "C-R420-CLAIMS-K22-ARCHIVE-AGAIN and C-R420-CLAIMS-K8-K24-YOUTUBE-REQUEST-CONSUMED: the class is removed in B tooling: tools/find-ids.py (backlog + archive id lookup) is the one lookup every claims script calls; a root-consumed request file is never a claims input (lessons L56 clause replaced, still 60 lines). AGREE-STEM-LANES.md row 5 now cites reference/youtube/STEM-LANES.md, names B picks #1-#4 and asks root for their transcripts. Both close on C round 421 CLAIMS row (claims-421.sh K14/K20)."
-  },
-  {
-   "id": "D-29z1469",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 420 -> 421 planning",
-   "decision": "SYS-R418-PREVIEW-LIFECYCLE dispatched as round 421 (sketch b-round-420/sketch-421.patch.txt, sha 8d5fc47d; tech-lead approve). Rulings: (1) the collection effect teardown calls stopLibraryPreview (token bump + stop + id clear + pin release) on collection change and provider unmount; a preview of the old collection stops when the collection changes (new stop trigger: its source may no longer be in the library; unreachable in /studio-lab where the collection is a module constant; jsdom PL1-PL3 prove it, browser R11 proves ordinary re-renders do not stop it); (2) setStart beside setErrorHandler, readTime(fallback = start) follows a same-url seek; (3) the watchdog tick read falls back to armedAt (a throwing read at the tick is a stall at the armed time); (4) getLibraryPreviewOffset uses the guarded read and returns the latest seek offset on a throwing getter, never throws; null still means no preview; (5) PC12 retitled to its body; PL9 drives seek-then-stall in jsdom; (6) whether a preview stops the transport is unchanged (Q-PREVIEW-STOPS-TRANSPORT awaiting_user); (7) TL-R418-L1/GATE418-L4 close as a defence on the same line (PL4 lock row; no observable effect by design, TL-R421-01). Doc 271."
-  },
-  {
-   "id": "D-29z1470",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 420 -> 421 planning",
-   "decision": "Order: 421 SYS-R418-PREVIEW-LIFECYCLE -> 422 REGRESSION-2026-11-10 (due at the first planning on or after 2026-11-10; scope = rounds 391-401 items + scope_additions + every item done since, 402-421) -> STEM-LANES S1..S4 once AGREE-STEM-LANES is answered (else SYS-1..3, then STORE-2b..5 per the skip-while-waiting rule; STEM-LANES first when the answer arrives) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). Next RETRO round 435. ARCH-CHECKPOINT-STEM-LANES stays requested of root."
-  },
-  {
    "id": "D-29z1471",
    "date": "2026-11-09",
    "by": "2026-11-09 B round 421 -> 422 planning",
@@ -42569,6 +42617,42 @@
    "date": "2026-11-10",
    "by": "2026-11-10 B round 430 -> 431 planning",
    "decision": "Close-review follow-ups (advisor): (1) STUDIO-VIS-2 severity high -> medium with kind stage_pointer of SABA-B-12 (the root audit table rated it High; the bug-gate severity is the parent SABA-B-12 Medium; avoids a duplicate open High in the active summary). (2) ARCH-SPLIT-3 keeps Saba's original wording (ArrangementDetailPanel.tsx + ArrangementLane.tsx + StudioContext.tsx); the conflict with LEGACY-REMOVAL-POLICY (StudioContext frozen, no refactor) is a root question at ARCH-SPLIT planning (ROOT-Q-ARCH-SPLIT-3-STUDIOCONTEXT), not a B narrowing. (3) REGRESSION-2026-11-13 scope additions: SABA-B-12 stage 1 spin probe (b-round-429/probe/spin-probe.mjs + compare.py) and stage 2a radio probes (b-round-430/probe/radio-probe.mjs + compare-radio.py, radio-extra-probe.mjs + compare-extra.py), each one short run per viewport. (4) B pre-checks added on the final sketch: full vitest 269 files / 4004 rc 0 (b-round-430/precheck-full.log), npm run lint rc 0 (205 warnings, 1 info = HEAD; precheck-lint.log), forced-colors + disabled-checked-while-rendering + WAV export probe EXTRA ALL OK (b-round-430/probe/compare-extra.txt; HEAD NOT OK)."
+  },
+  {
+   "id": "D-29z1521",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 431 -> 432 planning",
+   "decision": "Round 431 accepted from C evidence: c-round-431.json PASS, 0 bugs, browserVerified/realVerified true. B re-runs: tools/l57-check.py L57 OK (b-round-431/l57-check-c431.txt); C probe JSONs re-judged with C's compare-radio.py -> ALL OK (2 cells, 6 radios each) and compare-extra.py -> EXTRA ALL OK (2 cells) (b-round-431/recompare/); c-round-431/mutants/summary.txt identical to b-round-430/mutants/summary.txt; c-round-431/auth/r2 and r3 g428-auth.json pass true (attempt 1 cold-server hydration error = environment, workspace false, audio[src] 0). Gate 431 published 1197dcb on both remotes; gates/round-431/review.md COMMIT OK, Lows/info only. SABA-B-12 stage 2a (STUDIO-VIS-2) is complete: STUDIO-VIS-2 status set to its closing state."
+  },
+  {
+   "id": "D-29z1522",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 431 -> 432 planning",
+   "decision": "Round 431 Lows and signals: A-R431-REVIEW-L1 (RD2 spread after a literal type), -L2 (\\btype= also matches data-type=), -L3 (LITERAL_TYPE [a-z]+ rejects datetime-local) -> deferred_low_polish, confirmedBy gates/round-431/review.md finding 2. Gate finding 3 (DXA7/DXL8 count literal className={STUDIO_RADIO_CLASS} strings; formatting-fragile, existing pattern) -> deferred_low_polish GATE431-REVIEW-L3-STRING-COUNT-PINS. Gate findings 1, 4 (Video radio hollow; 150 ms border-color fade, TL-R431-01) info, no action; finding 5 = TLM-SABA-B-12-FIREFOX-SAFARI. A-R431-REVIEW-L4 was fixed in doc 279 by A (no entry). Ruling 6 wording (\"a radio cannot hide behind a spread\") was too strong; doc 279 now states the limit. Architecture signals (L42/architecture checkpoint rule, recorded not scheduled): ARCH-SIGNAL-STUDIO-CONTROLS = A proposal (StudioRadio forwardRef component so the guard becomes \"no raw type=radio\") + gate proposal (once a third styled-control family lands, move the studio-*.ts class constants into one studio-controls module with one scan); round 432 adds that third family (studio-progress.ts). Root request ROOT-REQ-ARCH-CHECKPOINT-STUDIO-CONTROLS: one bounded read-only frontend-architect checkpoint at the SABA-B-12 feature boundary (after stage 3), keep/extract, non-blocking."
+  },
+  {
+   "id": "D-29z1523",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 431 -> 432 planning",
+   "decision": "SABA-B-12 restored to open_findings: cloud/optimize-backlog.py l.49 archives any finding whose status contains the substring \"closed\", \"done\" or \"resolved\", so the open Medium parent (status \"in_progress ... stage 1 done ...\") left open_findings for archive/findings-archived.json between the 430 and 431 plannings (A round 431 saw K13 move to archive). Restored with a status that avoids those words; open stage pointers keep such words out of their status from now on. Root request ROOT-REQ-OPTIMIZER-STATUS-SUBSTRING (match a leading status keyword, not a substring). The archive copy stays (nothing deleted)."
+  },
+  {
+   "id": "D-29z1524",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 431 -> 432 planning",
+   "decision": "Round 432 dispatched: SABA-B-12 stage 2b (SABA-B-12-STAGE-2B-PROGRESS), the Export dialog <progress> drawn by the theme, on baseline 1197dcb (gate 431 published; context/head-sha.txt and the gate head field still name 5a30894 and are stale). product-designer ruling: keep native <progress> + shared STUDIO_PROGRESS_CLASS (new studio-progress.ts); track outline-hover, fill foreground (neutral, DXL7c colour role kept), rounded-full, h-2 box unchanged; indeterminate (MP3 encoder load) = dimmed foreground/30 full track + motion-safe:indeterminate:animate-pulse (static under reduced motion; rejected: empty track = looks like 0 %/stalled; custom sliding keyframe = new @keyframes, Tailwind-first); forced-colors:appearance-auto. tech-lead: approve-with-lows TL-R432-01..08; -02 (Firefox indeterminate ::-moz-progress-bar) and -05 (PG2 scan counts openings and closing tags) applied; -03 border-0/overflow-hidden kept (harmless; overflow clips Firefox fill); -07 forced colours recorded: in Chromium emulated forced colours HEAD and sketch both draw an all-white bar for both states (pre-existing, record row; real Windows High Contrast -> TLM). Hold recipes proved at HEAD (b-round-431/probe/head/): indeterminate = page.route stall of /app/lib/arrangement/mp3-encoder.client.ts then release (MP3 downloads); determinate = CDP CPU throttling x20 during a WAV render; a warm-up MP3 export first (Vite dependency discovery reload ate the measured download once). HEAD at 1440 and 1280: Chromium default GREEN fill on grey, square ends. Sketch b-round-431/sketch-432.patch.txt sha 55d39d75 (4 files); probe compare ALL OK (2 cells, 4 states each), HEAD NOT ALL OK; 8/8 mutants red; covering 30 files 386/386; full vitest on the sketch 270/4006 rc 0; typecheck rc 0; lint rc 0 (205 warnings, 1 info = HEAD); Biome rc 0."
+  },
+  {
+   "id": "D-29z1525",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 431 -> 432 planning",
+   "decision": "Recorded observations (not scheduled into round 432): (1) SABA-Q-EXPORT-PROGRESS-OVERALL (awaiting_user, L44): Ableton Live 12.4.5b11 beta release notes say the stem-separation progress dialog now shows overall progress instead of resetting per step; our Export bar resets to 0 at render -> wav and load -> mp3 (pre-existing; label changes with it). Question for Saba, no behaviour change. (2) B-R431-DUP-ENCODER-LOADING-TEXT (Low -> deferred_low_polish): during the MP3 load the dialog shows both the status \"Loading the MP3 encoder (LAME)...\" and the progress label \"Loading MP3 encoder...\" (b-round-431/probe/sketch/1280x720-indeterminate-dialog.png; same at HEAD). (3) Info: the agent-workflow.md on disk (87 lines) ends at the Loop v2 section; the prompt snapshot carries the later sections; B follows the snapshot for them (no newer entry found; no STEM-LANES answer). (4) Info for RETRO-435: lessons.md is 54 KB in 60 lines and A reported it could not read it in full (rounds 430, 431); round 432 inlines the applicable lessons in the task. (5) Info: the auth row's first attempt hit the cold legacy-route hydration error in rounds 430 and 431; the round 432 auth row warms /studio/middle-east first."
+  },
+  {
+   "id": "D-29z1526",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 431 -> 432 planning",
+   "decision": "Close-review follow-ups (advisor): (1) Reference corrected from primary source: Live 12 manual 5.1.3.5 \"a progress bar appears in the dialog\" and 5.1.3.4 \"the progress bar in the dialog resets for each individual pass\" (WebFetch 2026-11-10). Our per-phase reset therefore matches Live's export behaviour; the \"12.4.5b11 stem separation overall progress\" claim came from a search summary only (release-notes page too large to fetch) and is withdrawn. SABA-Q-EXPORT-PROGRESS-OVERALL is withdrawn before reaching Saba (status wontask). (2) Row 4b now has its own script b-round-431/probe/compare-neighbours.py (load-phase samples: label == aria-valuetext == HEAD label, aria-label == HEAD, box +-1 px of HEAD); B run sketch vs head-final NEIGHBOURS OK (compare-neighbours.txt); render/wav-phase label == aria-valuetext stays unit row FV1. (3) Optimizer check: optimize-backlog.py l.41-55 reads only the top-level status; archive scan for other open-keyword statuses not in open_findings = 0 (b-round-431/archive-open-scan.txt). (4) REGRESSION-2026-11-13 scope addition REG-SABA-B-12-PROGRESS. (5) Timeout STOP limited to the two files whose rows change; render-budget R11-P1e (2006 ms / 5 s default in B covering run) is a record row."
   }
  ],
  "retro_candidates": [
@@ -43068,6 +43152,19 @@
    "status": "deferred_to_arch_split_planning (D-29z1520)",
    "question": "ARCH-SPLIT-3 lists StudioContext.tsx, the legacy policy freezes it: split, or removal audit only?",
    "added": "2026-11-10 B round 430 -> 431 planning"
+  },
+  {
+   "id": "ROOT-REQ-OPTIMIZER-STATUS-SUBSTRING",
+   "status": "open (D-29z1523)",
+   "question": "cloud/optimize-backlog.py l.49 archives a finding when its status contains \"closed\"/\"done\"/\"resolved\" anywhere; an in_progress parent mentioning \"stage 1 done\" was archived (SABA-B-12). Please match a leading status keyword (status.split()[0]) instead.",
+   "added": "2026-11-10 B round 431 -> 432 planning",
+   "detail": "Only the top-level status is tested (l.49). Archive scan at this planning: no other open-keyword finding outside open_findings (b-round-431/archive-open-scan.txt). Stage sub-statuses are not affected."
+  },
+  {
+   "id": "ROOT-REQ-ARCH-CHECKPOINT-STUDIO-CONTROLS",
+   "status": "open (D-29z1522): at the SABA-B-12 boundary (after stage 3), non-blocking",
+   "question": "Bounded read-only frontend-architect checkpoint (store/.claude/references/architecture-checkpoint.md): keep the per-family studio-*.ts constants + scans, or extract components / one studio-controls module? keep/extract, value, risk, max three sentences (ARCH-SIGNAL-STUDIO-CONTROLS).",
+   "added": "2026-11-10 B round 431 -> 432 planning"
   }
  ],
  "retro_inputs_round_230": [
