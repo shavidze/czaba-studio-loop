@@ -590,3 +590,11 @@ Source: `docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md`
 - STUDIO-VIS-1 (spinbuttons) and STUDIO-VIS-2 (radios) fit inside the current SYS block or as a quick DUX round.
 - STUDIO-VIS-4, 6, 7, 10 (copy + styling) fit in COPY-PD or DUX-R.
 - STUDIO-VIS-3, 5, 8, 9 (custom components, spacing) fit in REVIEW-RECOMMENDATIONS.
+
+## Saba visual feedback, 2026-11-10: lane resize handle too thick
+
+Saba flagged the grey hover line between lanes. It's the lane resize separator (`ArrangementLane.tsx` line 1341): `h-1.5 hover:bg-foreground/50` = 6px at 50% white opacity.
+
+**Fix:** Reduce to `h-px hover:bg-foreground/20` or `h-0.5 hover:bg-foreground/25` — barely visible, cursor change is the primary affordance (like Ableton). The handle's hit area can stay at `h-1.5` using padding, but the visible line should be subtle.
+
+**Priority:** Low — fits in STUDIO-VIS or DUX-R block.
