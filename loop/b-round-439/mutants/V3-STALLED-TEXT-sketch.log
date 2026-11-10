@@ -1,0 +1,46 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/tmp.nev56z9Zc2/efd71f6[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/export-wav.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 406[2mms[22m[39m
+     [33m[2m✓[22m[39m EW1 encodeArrangementWav bytes and report equal the previous inline path (measure, clamp, encode) [33m 306[2mms[22m[39m
+     [32m✓[39m EW2 graph.client re-exports the same measureExportOverload[32m 0[2mms[22m[39m
+     [32m✓[39m EW3 encoding progress never decreases and ends at 1[32m 23[2mms[22m[39m
+     [32m✓[39m EW6 with onProgress, suspends are scheduled before startRendering at the quantum frames and progress runs render then wav[32m 27[2mms[22m[39m
+     [32m✓[39m EW6 without onProgress no suspend is called, and a context without suspend still renders[32m 2[2mms[22m[39m
+     [32m✓[39m EW6 a throwing progress callback still resumes every suspend, so the render settles instead of hanging[32m 22[2mms[22m[39m
+     [32m✓[39m EW6 a rejecting suspend does not fail the render[32m 3[2mms[22m[39m
+     [32m✓[39m SW7 a rendered buffer whose getChannelData throws still gives a Blob equal to the oracle for its channels[32m 1[2mms[22m[39m
+     [32m✓[39m EW8a SW5 a silent worker times out once with the stalled message, terminates once, and a later complete changes nothing[32m 4[2mms[22m[39m
+     [32m✓[39m EW8b SW5 each ack restarts the stall timer: acks at 29 s and 58 s keep the stream alive past 30 s and 60 s, and the stall fires 30 s after the last ack[32m 2[2mms[22m[39m
+     [32m✓[39m EW8b SW5 the last ack also restarts the timer: after finish is posted the stream stays alive 30 s from that ack[32m 1[2mms[22m[39m
+     [32m✓[39m EW8c SW5 complete before the timeout resolves, clears the timer and ignores a late ack[32m 1[2mms[22m[39m
+     [32m✓[39m EW8d SW5 an abort mid-stream rejects cancelled, clears the timer, and the copyFromChannel count stops changing[32m 2[2mms[22m[39m
+     [32m✓[39m EW8e a worker error message is appended trimmed, a blank one and onerror keep the exact constant, and each clears the timer and ignores a late ack[32m 2[2mms[22m[39m
+[31m     [31m×[31m EW8f the stall timeout is exactly 30 s and the stalled message is exact[39m[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-wav.test.ts[2m > [22mEW8 stall watchdog and worker error text (GATE89-S3), re-pointed at the WAV stream (PERF-12a SW5)[2m > [22mEW8f the stall timeout is exactly 30 s and the stalled message is exact
+[31m[1mAssertionError[22m: expected 'Writing WAV stalled.' to be 'Writing WAV stalled — the worker has …' // Object.is equality[39m
+
+Expected: [32m"Writing WAV stalled[7m — the worker has not responded for 30 seconds[27m."[39m
+Received: [31m"Writing WAV stalled."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-wav.test.ts:[2m539:52[22m[39m
+    [90m537| [39m  it('EW8f the stall timeout is exactly 30 s and the stalled message i…
+    [90m538| [39m    [34mexpect[39m([33mARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS[39m)[33m.[39m[34mtoBe[39m([34m30000[39m)[33m;[39m
+    [90m539| [39m    [34mexpect[39m([33mARRANGEMENT_WAV_WORKER_STALLED_MESSAGE[39m)[33m.[39m[34mtoBe[39m(
+    [90m   | [39m                                                   [31m^[39m
+    [90m540| [39m      'Writing WAV stalled — the worker has not responded for 30 secon…
+    [90m541| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m14 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 21:20:53
+[2m   Duration [22m 1.37s[2m (transform 276ms, setup 0ms, import 321ms, tests 406ms, environment 488ms)[22m
+
+
+::error file=/tmp/tmp.nev56z9Zc2/efd71f6/app/lib/arrangement/__tests__/export-wav.test.ts,title=app/lib/arrangement/__tests__/export-wav.test.ts > EW8 stall watchdog and worker error text (GATE89-S3)%2C re-pointed at the WAV stream (PERF-12a SW5) > EW8f the stall timeout is exactly 30 s and the stalled message is exact,line=539,column=52::AssertionError: expected 'Writing WAV stalled.' to be 'Writing WAV stalled — the worker has …' // Object.is equality%0A%0AExpected: "Writing WAV stalled — the worker has not responded for 30 seconds."%0AReceived: "Writing WAV stalled."%0A%0A ❯ app/lib/arrangement/__tests__/export-wav.test.ts:539:52%0A%0A

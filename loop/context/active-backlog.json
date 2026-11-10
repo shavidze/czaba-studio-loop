@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-10T20:05:21.235Z",
-  "current_task": "Round 438: SYS-R435-SOURCE-SCAN-HELPER (shared TS-parser source-scan helper; six scanners ported; closes 9 deferred Lows + the GATE434-S2 subfolder half) on 142918b (current-task.md)",
+  "_generatedUtc": "2026-11-10T21:00:19.887Z",
+  "current_task": "Round 439: SYS-R435-SOURCE-SCAN-HELPER re-do v4.1 (C-R438-01 NF2 wrapper narrowing + string-markup guards; delta b-round-438/sketch-439-delta.patch.txt sha 4596eec7) on 142918b + round-438 tree (current-task.md)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6515,17 +6515,28 @@
       "severity": "low",
       "status": "scheduled (D-29z1550): fixed by round 437 doc 284 (override ",
       "title": "lane/detail hover hairline ~2.1:1 vs the border pixel, below doc 144 3:1 hover rule; the Saba overri"
+    },
+    {
+      "id": "C-R438-01-NF2-WRAPPER-TAG-NARROWING",
+      "severity": "medium",
+      "origin": "B spec",
+      "status": "scheduled (D-29z1561): fixed by the round-439 v4.1 delta (NF2 any-tag query + raw guard); closes with C round 439 PASS",
+      "title": "ported NF2 selects only lowercase <input>; a wrapper such as <Input type=\"number\" /> made HEAD's NF2 red but passes the v3 sketch",
+      "evidence": "c-round-438.json; c-round-438/m17-*.log; a-round-438/m17/; b-round-438/mutants/ (M17 HEAD rc1, v3 rc0, v4.1 rc1)",
+      "repro": "add app/components/arrangement/ArrangementMutantM17.tsx rendering <Input type=\"number\" className=\"x\" />; npx vitest run app/lib/arrangement/__tests__/studio-number-field.test.ts",
+      "added": "2026-11-10 B round 438 -> 439 planning",
+      "confirmedBy": [
+        "A round 438 code-reviewer M1 (A-R438-REVIEW-M1-NF2-TAG-NARROWING)"
+      ]
+    },
+    {
+      "id": "A-R438-REVIEW-L1-PG2-STRING-MARKUP",
+      "severity": "low",
+      "status": "scheduled (D-29z1561): fixed by the round-439 v4.1 delta (PG",
+      "title": "HEAD's <progress text match also caught markup inside strings; the v3 PG2 sees only JSX and createEl"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 429,
-      "task": "current-task.md",
-      "decision": "D-29z1508",
-      "type": "SYS-2 stage 5 (2b-ii-b: MarkerRow/LibraryMenu folds + closing repo scan)",
-      "status": "c_pass_published (D-29z1510): gate 429 76f4147",
-      "note": "baseline b604cfb clean; sketch b-round-428/sketch-429.patch.txt; claims b-round-428/claims-429.sh"
-    },
     {
       "round": 430,
       "task": "current-task.md",
@@ -6591,11 +6602,19 @@
     },
     {
       "round": 438,
-      "task": "current-task.md",
+      "task": "tasks/round-438.md",
       "decision": "D-29z1558",
       "type": "SYS-R435-SOURCE-SCAN-HELPER (test-only, TS-parser source-scan helper)",
-      "status": "dispatched",
+      "status": "C FAIL (C-R438-01 Medium, origin B spec); gate 438 skipped; A STOP on reviewer M1 (L11)",
       "note": "baseline 142918b clean; sketch b-round-437/sketch-438.patch.txt (sha 1b88d0ec); claims b-round-437/claims-438.sh"
+    },
+    {
+      "round": 439,
+      "task": "current-task.md",
+      "decision": "D-29z1562",
+      "type": "SYS-R435-SOURCE-SCAN-HELPER re-do (test-only, v4.1 delta)",
+      "status": "dispatched",
+      "note": "baseline 142918b + round-438 tree (v3 + doc 285); delta b-round-438/sketch-439-delta.patch.txt (sha 4596eec7); full b-round-438/sketch-439.patch.txt (sha adef9028); claims b-round-438/claims-439.sh"
     }
   ],
   "other_keys": [

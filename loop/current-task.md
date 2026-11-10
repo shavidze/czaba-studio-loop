@@ -1,141 +1,198 @@
-# Round 439: SYS-R435-SOURCE-SCAN-HELPER re-do (v4.1): fix C-R438-01 (NF2 wrapper-tag narrowing) and the string-markup narrowing, then the full round-438 acceptance (test-only)
+# Round 440: SYS-1 stage 1 — tests find elements by text, not by styling class; self-compares become literal pins (test-only)
 
-**Planned by:** B, at the round 438 → 439 planning, 2026-11-10 (`b-round-438.md`).
-- The advisor was consulted after orientation and before hand-off.
-- The round-438 task is archived as `tasks/round-438.md` (byte-identical, [K12]).
-- **Test-only round.** No file outside `app/lib/arrangement/__tests__/` changes, except doc 285.
-- Reference-first and the `product-designer` consult do not apply (policy: refactor and test-only rounds).
-- **Baseline:** gate 438 was `skipped` (C FAIL), so the baseline HEAD stays `142918b` [K1]. The store tree is **not clean**: it holds A's round-438 work (the v3 sketch, 8 test paths, plus doc 285), which this round builds on. Do not revert it.
+**Planned by:** B, at the round 439 → 440 planning, 2026-11-10 (`b-round-439.md`).
+- The advisor was available and was consulted after orientation and before writing.
+- The round-439 task is archived as `tasks/round-439.md` (byte-identical, [K12]).
+- **Test-only round.** Only 6 test files under `app/lib/arrangement/__tests__/` and the new doc 286 change [K2, K21]. No runtime file changes.
+- Reference-first, `product-designer` and the screen budget do not apply (policy: test-only rounds).
+- **Baseline:** gate 439 is `published`, commit `efd71f6` [K1]. The store tree is clean at `efd71f6` [K2]. Round 439's work is committed.
 
-## Decisions (`backlog.json` v424 → v425, `decisions_log_b`) [K15]
-- **D-29z1560:** round 438 is **not accepted** (`c-round-438.json` FAIL, `browserVerified` true) [K16].
-  - **C-R438-01-NF2-WRAPPER-TAG-NARROWING** (Medium, origin B spec) is open and is this round's first target. A found it with the code-reviewer and stopped (L11); C reproduced it independently (M17: HEAD rc 1, v3 rc 0; `c-round-438/m17-*.log`).
-  - SYS-R435 stays `in_progress`; none of its closes take effect until C passes this round.
-  - C's round-438 browser rows (auth, play, export) passed on the v3 tree. They are evidence only; this round repeats them on v4.1.
-- **D-29z1561: ruling = A's option (2), a v4.1 sketch**, not "accept the narrowing". Accepting it would lose a HEAD assertion on a Medium that came from B's spec.
-  - Reviewed by tech-lead twice (`b-round-438/tech-lead-review-v4.md`, `tech-lead-review-v41.md`; dispositions in `b-round-438/sketch-review.md`).
-  - A's reviewer Lows: **A-R438-REVIEW-L1-PG2-STRING-MARKUP is fixed in v4.1** (M19, and the same class for inputs: M20, M21b, M22). **-L2-DS4-SF2-TEXT-CONTAINMENT** (equal to HEAD) and **-L3-PARSE-DIAGNOSTICS** (typecheck covers it) are deferred Lows.
-  - A's Architecture note ("which element counts as a number/radio/search field lives in each suite's filter") is recorded on SIG-R438-OTHER-SCANNERS as `confirmedBy`. It is a signal, not a scheduled task.
-- **D-29z1562:** this dispatch; the order after it is unchanged. RETRO-450 input: B's round-438 mutant matrix tested only where HEAD was wrong, never what HEAD caught that the port drops (`retro_candidates` B-R438-REVERSE-DIRECTION-MATRIX). `lessons.md` is not edited now.
+## Decisions (`backlog.json` v425 → v426, `decisions_log_b`) [K15]
+- **D-29z1563: round 439 is accepted.** `c-round-439.json` is PASS, with `browserVerified` and `realVerified` true [K16], and gate 439 published `efd71f6` [K1].
+  - **SYS-R435-SOURCE-SCAN-HELPER is done.** C-R438-01 and A-R438-REVIEW-L1 are closed.
+  - The 9 deferred Lows and the subfolder half of GATE434-S2 are closed, as D-29z1557 named [K13].
+- **D-29z1564: ruling on A-R439-REVIEW-M1-RD2-SF2-WRAPPER-TAG**, which C-R439-01 confirms (one id, L7). It is a **Low** and goes to `deferred_low_polish`.
+  - B re-ran A's wrapper mutants on clean archives of `142918b` and `efd71f6` (`b-round-439/wrapper-rerun/results.jsonl`, [K22]):
+    - W1, W2, W1b and W2b are green on both.
+    - The W3/W4 positive controls are red on both.
+  - So the gap is equal to HEAD, and no HEAD assertion is lost.
+  - **Must land before** (L8): SABA-B-12 stage 4 (STUDIO-VIS-3, selects), or any task that adds a wrapper `Input` of type radio or search. That is the same class as SIG-R438-OTHER-SCANNERS.
+  - RETRO-450 input: the round-438 sketch review did not ask the sibling suites (RD2, SF2) the question that C-R438-01 raised for NF2 (B-R439-SIBLING-SUITE-GAP).
+- **D-29z1565: SYS-1 is split into two stages.** The full scope is kept.
+  - **Stage 1 (this round, test-only):** RETRO200-CLASS-SELECTORS, GATE146-S4-LRS3-CLASSNAME-PINS, C-R127-L1f-SELF-COMPARE-TESTS.
+  - **Stage 2 (next):** GATE164-OV1-FRAGILE, GATE173-S4-OVERVIEW-BAR-POSITIONAL-SELECTOR (both files) and GATE81-S2-UM8-SOURCE-TEXT. These need data hooks in `ArrangementOverview.tsx`, which has no hook on the outline overlay, the lane rows or the bars [K23]. They also need a jsdom render of the export dialog's video-sound line, which no test renders today [K24].
+- **D-29z1566:** this dispatch, and the order after it:
+  1. SYS-1 stage 2;
+  2. REGRESSION-2026-11-13, at the first planning on or after 2026-11-13 [K8];
+  3. SYS-3;
+  4. STORE-REDESIGN 2b…5;
+  5. ARCH-SPLIT (frontend-architect checkpoint through root first);
+  6. REVIEW-RECOMMENDATIONS;
+  7. T12-ADVANCED;
+  8. phase 2 under the skip rule.
+
+  Next RETRO: round 450.
 
 ## Read first
-- `lessons.md` (60 lines). Apply especially: **L4** (no assertion lost), **L11** (STOP on an unruled reviewer Medium+), **L23** (every red-proof is a named mutant), **L29** (tagged claims), **L31** (timeout headroom: under full-suite load the slowest covering file takes 663 ms in total, at most 14 % of the 5 s default; `b-round-438/l31-headroom.txt`), **L38** (never run vitest while a browser probe runs), **L56–L58** (cited artifacts exist; numbers are saved output on B's sketch), **L57** (C's JSON), **L59/L60** (run every row to a result; mutants only in scratch copies, never in `store/`).
+`lessons.md`. Apply especially:
+- **L4:** no assertion lost; equal or stronger replacements are allowed.
+- **L11:** STOP on an unruled reviewer finding of Medium or higher.
+- **L23:** every red-proof is a named mutant.
+- **L29:** tagged claims.
+- **L31:** timeout headroom. The slowest covering test is LRS4 at 1868 ms in a describe with a 15 s timeout, so 12.5 % [K26] (`b-round-439/l31-headroom.txt`).
+- **L38:** never run vitest while a browser probe runs.
+- **L56:** cited artifacts exist.
+- **L58:** the sketch review names the dispatched sha.
 
 ## 0. Why this round
-- C's round-438 Medium came from B's spec. The bug gate (2026-10-23) fixes Medium before new scope [K14].
-- No Critical or High finding is open. The other loop-fixable Mediums (STUDIO-VIS-5, SABA-B-12 stage 4) are parked by Saba's "defer" in REVIEW-RECOMMENDATIONS (D-29z1512) [K14].
-- REGRESSION is not due until 2026-11-13 [K8]. Next RETRO: round 450.
-- The helper must land before ARCH-SPLIT (L8): five of the six old scanners read only the top level of `app/components/arrangement`.
+- No Critical or High finding is open [K14].
+- The open Mediums are not loop-fixable now:
+  - root, manual or Saba items: GATE232-S2, GATE274, GATE304-M1, A-R73, GATE271;
+  - SABA-B-12 stage 4 and STUDIO-VIS-5, parked by Saba's "defer" in REVIEW-RECOMMENDATIONS (D-29z1512).
+- C-R438-01 closes with this planning.
+- SYS-1 is next in the queue (D-29z1562).
+- REGRESSION is not due until 2026-11-13 [K8].
+- L8: these class and positional selectors are the "time bomb" kind of Low. STORE-REDESIGN and ARCH-SPLIT will move the very classes they pin.
 
-## 1. What v4.1 changes against the v3 tree (5 files; B's scratch evidence in `b-round-438/`)
-1. `helpers/source-scan.ts`:
-   - `JsxOpeningTag` gains `name` (the tag name text: `input`, `Input`, `ui.Field`).
-   - New `allJsxOpeningTags(source, path)` and `scanAllJsxOpeningTags(files)`: every JSX opening and self-closing tag, whatever its name.
-   - `jsxOpeningTags(source, name, path)` becomes a filter over `allJsxOpeningTags` (tech-lead v4 L3: one visitor, no drift).
-2. `source-scan.test.ts`: new **SS9** (the any-tag query reads `Input`, `input`, `ui.Field`, `span`, with their `type` literals; `jsxOpeningTags(…, 'input')` does not see `Input`).
-3. `studio-number-field.test.ts` (**NF2**):
-   - number fields are selected by `type === 'number'` on **any** tag (`scanAllJsxOpeningTags`);
-   - the list of non-`input` number tags is pinned to `[]`, with the message "a wrapper component must be an `<input>` with the shared class, or be pinned here";
-   - a per-file raw-text guard: the count of `/(?<![\w-])type=["'`{]+number["'`}]+/g` in each arrangement `.ts`/`.tsx` equals that file's number-tag count. Markup in strings or comments, or a wrapper with a computed `type` (`{'number' as const}`), is red, as at HEAD. The lookbehind keeps `data-input-type="number"` (M1) green.
-   - Everything else in NF2 (owner pin, 3 tags, carrier, `inputClass` checks, hazards) is unchanged.
-4. `studio-progress.test.ts` (**PG2**): a per-file raw-text guard: the count of `/<progress\b/g` equals the JSX progress-tag count (closes A-R438-REVIEW-L1).
-5. `studio-radio.test.ts` (**IN1**): the same guard for `/<input\b/g` against JSX `input` tags. It closes the string-markup class for radio and search fields too (M20, M21b).
+## 1. What changes (6 test files; sketch `b-round-439/sketch-440.patch.txt`, sha256 in `b-round-439/sketch-440.sha256`)
+**Rule:** a test finds an element by its text, role, testid or a data attribute. A styling class appears only inside an assertion (`classList.contains`, a token list), never as the finder.
 
-**Mutant matrix** (`b-round-438/mutants/head.jsonl`, `v3.jsonl`, `sketch.jsonl`, `helper.jsonl`; scripts `mutate.py`, `helper-mutants.py` in the same folder) [K18]:
+| File | HEAD | Sketch | Closes |
+|---|---|---|---|
+| `detail-panel-polish.test.tsx` (design (d) block) | `info.querySelectorAll('span.font-sans')` finds the labels [K7] | Finds label spans by text (`Track`, `Tracks`, `Start`, `Length`, `Clip origin`). New explicit assert: the `font-sans` spans are exactly `Start`, `Length`, `Clip origin` (group: `Start`, `Length`). The label lists gain `Track`/`Tracks`, which are now found as well | RETRO200 |
+| `detail-panel-strings-ui.test.tsx` DPS2, DPS4 | `span.text-dim` finders [K7] | DPS2: label spans by text equal the 4 labels, **and** the `text-dim` spans equal the same 4. DPS4: exactly one span whose text is `Tracks`, and it has `text-dim` | RETRO200 |
+| `library-preview.test.tsx` (C-R16-01 row) | `row.querySelector('span.text-foreground')` [K7] | Exactly one span whose text is `მუსიკა`; it has `text-foreground`, and it is the first `text-foreground` span in the row (keeps HEAD's ordering check) | RETRO200 |
+| `library-row-strings-ui.test.tsx` LRS3 | `marker.className` and `metaRow.className` pinned with `toBe` [K10]; `children[1].querySelectorAll('span.font-mono')` [K7] | Per-token `toContain` (marker: `flex items-center gap-0.5 whitespace-nowrap text-xs text-foreground`; meta: `flex gap-2 text-xs tabular-nums text-muted`); `not.toContain('flex-wrap')` stays. The duration is found as the **leaf** span whose text is `00:20.000` (the wrapper span has the same text): it has `font-mono`, its `parentElement` is `children[1]`, and the only `font-mono` span in the whole meta row is `00:20.000` (stronger than HEAD's `children[1]`-only count) | RETRO200, GATE146 |
+| `export-cancel.test.ts` | `ARRANGEMENT_EXPORT_CANCELLED_MESSAGE` and `…_ENCODER_MESSAGE` compared with the `studioExportStrings` entries they are defined from [K9] | Compared with the literal English strings. The unused `studioExportStrings` import is removed | C-R127 |
+| `export-wav.test.ts` EW8f | `ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE` compared with `studioExportStrings.wavWorkerStalled(30)` [K9] | Compared with the literal `Writing WAV stalled — the worker has not responded for 30 seconds.` The title "…the stalled message is exact" becomes true | C-R127 |
 
-| Id | Mutant | HEAD | v3 (round 438) | v4.1 |
+**Deliberate drop (ruling S1-R1):** LRS3's exact `className` equality ("no other token") is not ported. GATE146 asked for exactly this. A token reorder (R1, R2) is now green. Removing or renaming any listed token is red (S7, S8). This is the only HEAD check not ported. Every other HEAD assertion has an equal or stronger replacement (`b-round-439/sketch-review.md`, HEAD assertion map).
+
+**Sketch review (L58):**
+- tech-lead reviewed v1 (`b-round-439/tech-lead-review-v1.md`): 0 Medium or higher, 2 Lows. Both Lows are fixed in v2 (S9, S10).
+- tech-lead re-reviewed the delta v1 → v2 and approved; its reply names the dispatched sha.
+- Dispositions are in `b-round-439/sketch-review.md` [K17].
+
+**Out of scope, ruled:**
+- `export-wav.test.ts` l.510 (`${studioExportStrings.wavWorkerFailed} boom`) [K25]. It tests how the worker error is composed with a suffix, not a constant against its own definition.
+- The UI tests that compare rendered text with `studioExportStrings` (for example `export-cancel-ui.test.tsx`) are render-vs-source checks, not self-compares.
+- The `.sr-only` finder in DPS3 and the lucide icon-class finders in other suites (tech-lead v1 Q4) are recorded with the pins below.
+- `className).toBe(` style pins outside the closes list: CookieConsent, detail-panel-reason, detail-panel-polish `WAVEFORM_BOX_CLASS`, track-layout, track-group-collapse-ui, render-budget. They are recorded on SYS-1 as a RETRO-450 question (`sys1_other_classname_pins`). No new finding ids.
+
+**Mutant matrix** (`b-round-439/mutants/results.jsonl`, script `b-round-439/mutants/run-mutants.sh`, logs in the same folder) [K18]:
+
+| Id | Mutant (runtime source, scratch only) | Suite | HEAD | Sketch |
 |---|---|---|---|---|
-| M1–M16 | as in round 438 (`tasks/round-438.md` §2) | unchanged | unchanged | equal to v3, line for line |
-| M17 | `<Input type="number" />` in a new file | red NF2 | **green (C-R438-01)** | red NF2 |
-| M18 | the same wrapper inside `ArrangementDetailPanel.tsx` | green (HEAD false pass) | green | red NF2 |
-| M19 | `'<progress max="1"></progress>'` in a string | red PG2 | green | red PG2 |
-| M20 | `'<input type="radio" name="f" />'` in a string | red RD2 | green | red IN1 |
-| M21 / M21b | `'<input type="search" />'` in a string; M21 runs SF2, M21b runs the radio suite | M21 red SF2; M21b green | green; green | M21 green; **M21b red IN1** |
-| M22 | `'<input type="number" />'` in a string | red NF2 | green | red NF2 |
-| M23 | `<Input type={'number' as const} />` in a new file | red NF2 | green | red NF2 |
-| M24 | the existing `<progress … />` written as a paired tag that keeps the class | red PG2 (HEAD scanner limit) | green | green (ruling (i)) |
-| M25 | the same paired tag without the class | red PG2 | red PG2 | red PG2 |
-| H1–H9 | as in round 438 | — | — | as round 438, except H5, which also turns the new SS9 red (SF1, SS3, SS9); H7 is re-anchored to the new filter |
-| H10 | the any-tag query keeps only `input` | — | — | red DS4, PG2, SS2, SS9 |
+| S1 | Detail `Start` label loses `font-sans` | detail-panel-polish | red | red |
+| S2 | `sourceOffsetLabel` 'Clip origin' → 'Source offset' | detail-panel-strings-ui | red | red |
+| S3 | `Track` label `text-dim` → `text-muted` | detail-panel-strings-ui | red | red |
+| S4 | `Tracks` label `text-dim` → `text-muted` | detail-panel-strings-ui | red | red |
+| S5 | active-lane name span `text-foreground` → `text-muted` | library-preview | red | red |
+| S6 | library duration span loses `font-mono` | library-row-strings-ui | red | red |
+| S7 | Playing marker loses `whitespace-nowrap` | library-row-strings-ui | red | red |
+| S8 | meta row loses `tabular-nums` | library-row-strings-ui | red | red |
+| R1 | marker tokens reordered | library-row-strings-ui | red | **green (ruling S1-R1)** |
+| R2 | meta tokens reordered | library-row-strings-ui | red | **green (ruling S1-R1)** |
+| V1 | `exportCancelled` text changed | export-cancel | **green (HEAD vacuous)** | red |
+| V2 | `exportCancelledEncoder` text changed | export-cancel | **green (HEAD vacuous)** | red |
+| V3 | `wavWorkerStalled` text changed | export-wav | **green (HEAD vacuous)** | red |
+| S9 | the duration wrapper span takes `font-mono` and the inner span is removed | library-row-strings-ui | red | red |
+| S10 | a decoy `text-foreground` span before the active-lane name | library-preview | red | red |
 
-- **Red at HEAD, green on v4.1 in the same suite:** M1, M2, M4, M5, M12, M21 and M24.
-  - M1, M4, M5 and M12 are HEAD's false reds, accepted in round 438.
-  - M2 is replaced by v4.1's stricter per-tag carrier.
-  - M21 is caught by IN1 in the radio suite (M21b red), so the covering set stays red.
-  - M24 falls under ruling (i).
-- **HEAD assertion map:** `b-round-438/head-assertion-map.md` maps every HEAD `expect(` in the six tests to its v4.1 counterpart or to a named ruling. Three HEAD checks only measured the old scanner's coverage, had no runtime meaning, and are deliberately not ported:
-  - **ruling (h):** DS4's `<Modal` text inside strings and comments. A component cannot render from a string.
-  - **ruling (i):** PG2's "every `<progress` is self-closing" and "no `</progress>`". The parser reads paired tags, and the class, hazard and count rules apply to them (M25 stays red).
-  - **ruling (j):** HEAD's file lists also read top-level `*.test.tsx` (SF2, DS4) and `*.spec.tsx` (NF2, RD2, PG2). The helper skips test and spec files, which are never rendered in the Studio UI; none exists today.
-  Doc 285 states all three.
+V1–V3 run one test file each. `strings.test.ts` already pins these literals [K27], so at HEAD the full suite caught a text change there. What this round removes is the vacuous self-compare in these two files (tech-lead v1 Q4).
 
 ## 2. What A does
-**Precondition (STOP if it fails):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-438/claims-439.sh | grep -E '^K(2|5|6) '`. Expect `K2 … outside-grants 0`, `K5 tree-equals-v3 8/8`, `K6 delta-applies yes`.
+**Precondition (STOP if it fails):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-439/claims-440.sh | grep -E '^K(1|2|6) '`. Expect `K1 head efd71f6 gate439 published efd71f6`, `K2 status total 0 outside-grants 0` and `K6 sketch-applies yes`.
 
-1. **Apply the delta.** `git apply --check -p1 ../tmp/studio-real-loop/b-round-438/sketch-439-delta.patch.txt`, then `git apply -p1` the same file (sha256 in `b-round-438/sketch-439.sha256`). Do not hand-edit it. A code-reviewer request is applied only if `b-round-438/sketch-review.md` already rules on it; any other Medium+ is a STOP (L11).
-2. **Doc 285** (`docs/implementation/2026/quarter-IV/285-sys-r435-source-scan-helper.md`): apply edits E1–E8 from `b-round-438/doc285-edits.md`.
-   - Fenced text is verbatim; text outside the fences only says where it goes.
-   - The edits cover: line 4 (`**სტატუსი:** Completed (C round 439 PASS)`), rulings (h), (i) and (j), the closes table, the "NF1, RD1, PG1 …" line, the testing numbers, TODO, the changed-files bullets and the diagram.
-   - B applied E1–E8 to A's current doc by script. The result is `b-round-438/doc285-expected.md` (sha256 `3989aec1…`; script `b-round-438/apply-doc285-edits.py`). **A's doc must be byte-identical to it** (`cmp`).
-   - Self-check: `grep -nE 'SS1–SS8|23/23|round 438|a-round-438|b-round-437/mutants'` on the doc prints nothing.
+1. **Apply the sketch:**
+   - Run `git apply --check -p1 ../tmp/studio-real-loop/b-round-439/sketch-440.patch.txt`, then `git apply -p1` with the same file.
+   - Do not hand-edit it. A code-reviewer request is applied only if `b-round-439/sketch-review.md` already rules on it. Any other Medium or higher is a STOP (L11).
+2. **Doc 286:** `docs/implementation/2026/quarter-IV/286-sys-1-stage-1-test-selectors.md`, following `docs/implementation/TEMPLATE.md` [K21]. Write it in Georgian, with technical terms in English.
+   - **Line 4:** `**სტატუსი:** Completed (C round 440 PASS)`.
+   - **Content:**
+     - the rule above;
+     - the table of the 6 files;
+     - ruling S1-R1;
+     - the mutant matrix ids S1–S10, R1, R2, V1–V3 with their HEAD and sketch results;
+     - the out-of-scope list;
+     - stage 2's three ids under TODO;
+     - the closes: RETRO200-CLASS-SELECTORS, GATE146-S4-LRS3-CLASSNAME-PINS, C-R127-L1f-SELF-COMPARE-TESTS.
+   - The doc may cite loop paths only as `tmp/studio-real-loop/b-round-439/…`. The mutant table itself lives in the doc (gate-439 review L5).
 
 ### A's checks (the full suite and verify are gate rows)
 | # | Check | PASS means |
 |---|---|---|
-| A1 | From `store/`, `cmp` each path in `b-round-438/sketch-paths.txt` with `../tmp/studio-real-loop/b-round-438/sketch-files/<path>`; `cmp` doc 285 with `../tmp/studio-real-loop/b-round-438/doc285-expected.md` | 8/8 identical; doc identical |
-| A2 | `npx vitest run $(cat ../tmp/studio-real-loop/b-round-438/covering-files.txt)` | rc 0, **7 files, 24/24** (`b-round-438/covering-sketch.log`) |
-| A3 | `npm run typecheck`; `npm run lint` | rc 0 each; lint **205 warnings** (= HEAD; `b-round-438/lint-sketch.log`) |
-| A4 | `bash ../tmp/studio-real-loop/b-round-438/claims-439.sh` | Differs from `b-round-438/claims-439-planning-output.txt` exactly as `b-round-438/claims-439-expected-after-A.diff.txt` (B simulated the apply and E1/E4 on a scratch copy), that is only in K5 (`tree-equals-v3 3/8 tree-equals-v4 8/8`), K6 (`delta-applies no`), K7 (line 4 becomes the E1 text; `no-assertion-lost 0`) K9 (all four markers `1`) and K21 (`identical stale-grep 0`). K2 stays `total 9 outside-grants 0` |
+| A1 | From `store/`, `cmp` each path in `b-round-439/sketch-paths.txt` with `../tmp/studio-real-loop/b-round-439/sketch-files/<path>` | 6/6 identical |
+| A2 | `npx vitest run $(cat ../tmp/studio-real-loop/b-round-439/covering-files.txt)` | rc 0, **6 files, 89/89** (`b-round-439/covering-sketch.json`) |
+| A3 | `npm run typecheck`; `npm run lint` | rc 0 each; lint shows **205 warnings** (= HEAD; `b-round-439/lint-sketch.log`) |
+| A4 | `bash ../tmp/studio-real-loop/b-round-439/claims-440.sh` | `diff` against `b-round-439/claims-440-planning-output.txt` equals `b-round-439/claims-440-expected-after-A.diff.txt` exactly. B simulated the apply plus a doc-286 file on a clone of `efd71f6`. The only changes are K2 (`total 7 outside-grants 0`), K5 (`6/6`), K6 (`no`), K7 (`0`), K9 (`0`), K10 (`0 0`), K21 (`doc286 1 last-doc 286-…`) and K26 (the LRS4 line moves from 264 to 276) |
 
-- **code-reviewer: required** (6 changed files incl. the doc). Pass its Architecture note to B.
-- Write `a-round-439.md` as you go; logs in `a-round-439/`.
+- **code-reviewer: required** (7 changed files). Pass its Architecture note to B.
+- Write `a-round-440.md` as you go, with logs in `a-round-440/`.
 
-## 3. Grants (`b-round-438/grants-439.txt`, 9 paths)
-The 8 test paths plus doc 285, the same as round 438. Nothing else in `store/` may change. Frozen files: `b-round-437/r438-frozen-sha256.txt` (1340 entries; HEAD is unchanged) [K3]. Protected files: `b-round-318/protected-sha256.txt`, 0 granted [K4].
+## 3. Grants (`b-round-439/grants-440.txt`, 7 paths)
+- **Granted:** the 6 test paths plus doc 286. Nothing else in `store/` may change.
+- **Frozen files:** `b-round-439/r440-frozen-sha256.txt` (1343 entries: every tracked file except the grants; rc 0 at `efd71f6`) [K3].
+- **Protected files:** `b-round-318/protected-sha256.txt`; none of them is granted [K4].
 
 ## 4. C's acceptance
-**Order:** C1, then the browser rows C7–C8 (warm up first), then the rest. Write `c-round-439.md`, `c-round-439.json` and `c-round-439/progress.json` as you go. Never run vitest during a browser row (L38). Run every row to a result; round 438 left C5's HEAD half, the helper mutants, C6 and C10 partly unrun.
+**Order:**
+1. C1.
+2. The browser rows C6 and C7. Warm up first.
+3. The rest.
+
+**Reports:** write `c-round-440.md`, `c-round-440.json` and `c-round-440/progress.json` as you go.
+
+**Rule:** never run vitest during a browser row (L38).
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all`; the frozen and protected manifests | Only the 9 granted paths changed; both manifests rc 0 |
-| C2 | **PATCH-IDENTITY** | (a) `git archive HEAD` into a scratch, `git apply -p1 b-round-438/sketch-439.patch.txt`, `cmp` the 8 paths with the working tree. (b) A scratch with `b-round-437/sketch-files/` over HEAD, `git apply -p1 b-round-438/sketch-439-delta.patch.txt`, `cmp` again | (a) and (b) both 8/8 identical; doc 285 is the only extra path |
-| C3 | **NO-RUNTIME-CHANGE** | `git status --short` | Every changed path is under `app/lib/arrangement/__tests__/`, or is doc 285 |
-| C4 | **COVERING** | A2 on the working tree | 7 files, 24/24, rc 0 |
-| C5 | **MUTANTS (all three runs)** | Scratch trees with a `node_modules` symlink: old = `git archive HEAD`; new = old plus the 8 working-tree test paths. `python3 -I b-round-438/mutants/mutate.py <old>`, `… <new>`, `python3 -I b-round-438/mutants/helper-mutants.py <new>` | Each line equals `head.jsonl`, `sketch.jsonl`, `helper.jsonl` in `id`, `rc` and `fails`/`red`. In particular M17, M18, M22, M23 red NF2; M19 and M25 red PG2; M20 and M21b red IN1; M24 green |
-| C6 | **SWEEP** | `grep -c readdirSync` over the six ported files; claims K9 and K10 | 0 hits; K9 all 1; K10 `0` (no wrapper with `type=number` today). NF2's own owner pin is the authoritative inventory |
-| C7 | **G439-AUTH (browser)** | Warm-up: one untimed load of `/studio-lab`. Then a fresh anonymous context: `/studio-lab`, `/studio/middle-east`, `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization | `auth_user` null on `/studio-lab`; "Sign in required" with 0 `audio[src]`; token API 401. Fake bearer: BLOCKED (backend unavailable in cloud) |
-| C8 | **SMOKE + REAL EXPORT (browser), both viewports** | `cd c-round-439 && node ../b-round-437/probe/play-status.mjs > play-status.json`; then from the loop root `node b-round-436/probe/press-export-probe.mjs http://127.0.0.1:5173 <abs dir under c-round-439/>`. One retry is allowed after a cold-start timeout; record both attempts | Play: "Loading …", then "… is ready."; the second press plays and the clock advances. Export: `czaba-studio-lab.wav`, 29189420 bytes, `RIFF`…`WAVE`, button back to "Export WAV" at opacity 1 |
-| C9 | **CLAIMS** | `bash b-round-438/claims-439.sh`, compared with `b-round-438/claims-439-planning-output.txt` | Allowed differences: K5, K6, K7, K9 and K21 as in A4 (`b-round-438/claims-439-expected-after-A.diff.txt`). Anything else is a finding |
-| C10 | **DOC** | Doc 285: `cmp` with `b-round-438/doc285-expected.md`; TEMPLATE headings; the E8 self-check grep; the cited ids; spot-check the map's rows against `git show HEAD:` | Identical to the expected file; TEMPLATE headings in order (L26); line 4 exact (L28); the grep prints nothing; every cited test id exists (SS1–SS9, NF2, RD2, IN1, PG2, SF1, SF2, DS4, HS1, HS2, F10); at least 3 map rows match HEAD (row ids in the report) |
-| C11 | **SOURCE-SCOPE** (end) + **L57** | As C1; then `python3 -I tools/l57-check.py c-round-439.json c-round-439/l57-check.txt` | As C1; rc 0 |
-| gate | Full vitest, typecheck, build, Biome, verify | **Not run by C.** List under `"gate"`. B's run on v4.1: 273 files, 4029 tests, rc 0 (`b-round-438/full-suite-sketch.log`) [K19] |
+| C1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all`; the frozen and protected manifests | Only the 7 granted paths changed; both manifests rc 0 |
+| C2 | **PATCH-IDENTITY** | `git archive HEAD` into a scratch, `git apply -p1 b-round-439/sketch-440.patch.txt`, then `cmp` the 6 paths with the working tree | 6/6 identical |
+| C3 | **COVERING** | A2 on the working tree | 6 files, 89/89, rc 0 |
+| C4 | **MUTANTS** | Scratch trees with a `node_modules` symlink: head = `git archive HEAD`; new = head plus the 6 working-tree test paths. `bash b-round-439/mutants/run-mutants.sh <head> head <dir>` and `… <new> sketch <dir>` | Every line equals `b-round-439/mutants/results.jsonl` in `id`, `tree`, `rc` and `fails` (the red test titles, first 50 characters, read from each log): S1–S10 red on both; R1/R2 red at head, green on new; V1–V3 green at head, red on new (30 lines) |
+| C5 | **SWEEP** | Claims K7, K9 and K10 on the working tree. Then, over the 6 files (B's run on the sketch: `b-round-439/c5-sweep-sketch.txt`, 0 lines [K28]), `grep -nE "querySelector(All)?(<[^>]+>)?\(['\"][a-z]*\.(text-|font-|bg-|border|rounded|ring-|flex|gap-|tabular)"` | K7 `0`, K9 `0`, K10 `0 0`; the grep prints nothing |
+| C6 | **G440-AUTH (browser)** | Warm-up: one untimed load of `/studio-lab`. Then a fresh anonymous context: `/studio-lab`, `/studio/middle-east`, and `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization | `auth_user` is null on `/studio-lab`; "Sign in required" with 0 `audio[src]`; token API 401. Fake bearer: BLOCKED (backend unavailable in cloud) |
+| C7 | **SMOKE + REAL EXPORT (browser), both viewports** | `cd c-round-440 && node ../b-round-437/probe/play-status.mjs > play-status.json`. Then, from the loop root, `node b-round-436/probe/press-export-probe.mjs http://127.0.0.1:5173 <abs dir under c-round-440/>`. One retry is allowed after a cold-start timeout; record both attempts | **Play:** "Loading …", then "… is ready."; the second press plays and the clock advances. **Export:** `czaba-studio-lab.wav`, 29189420 bytes, `RIFF`…`WAVE`; the button returns to "Export WAV" at opacity 1 |
+| C8 | **CLAIMS** | `bash b-round-439/claims-440.sh`, compared with `b-round-439/claims-440-planning-output.txt` | The diff equals `b-round-439/claims-440-expected-after-A.diff.txt`. Anything else is a finding |
+| C9 | **DOC** | Doc 286 | TEMPLATE headings in order (L26). Line 4 is exact (L28). It cites every mutant id S1–S10, R1, R2, V1–V3 with the results in C4, ruling S1-R1, and the three stage-2 ids under TODO |
+| C10 | **SOURCE-SCOPE** (end) + **L57** | As C1; then `python3 -I tools/l57-check.py c-round-440.json c-round-440/l57-check.txt` | As C1; rc 0 |
+| gate | Full vitest, typecheck, build, Biome, verify | **Not run by C.** List them under `"gate"`. B's run on the sketch: 273 files, 4029 tests, rc 0 (`b-round-439/precheck-full.clean.log`) [K19] |
 
-- **C's JSON:** all L57 fields. `mutantRedOnSketch` names `b-round-438/mutants/sketch.jsonl` and `helper.jsonl`. Every bug has an enum `origin`.
+- **C's JSON:** all L57 fields. `mutantRedOnSketch` names `b-round-439/mutants/results.jsonl`. Every bug has an enum `origin`.
 - **Ableton conformance:** does not apply (test-only).
-- **Neighbouring behaviour that could break:** a JSDoc or comment that mentions `<progress`, `<input` or `type="number"` in an arrangement source now turns PG2/IN1/NF2 red (HEAD did the same for top-level `.tsx`; the message names the reason). Other suites with their own scanners (SIG-R438-OTHER-SCANNERS) are untouched. SS6 temp-dir cleanup.
+- **Neighbouring behaviour that could break:**
+  - A future second `<span>` with the same text in those rows (e.g. a duplicate lane name) turns the "exactly one" asserts red. That is intended.
+  - A token reorder in the Library marker or meta row no longer turns LRS3 red (ruling S1-R1).
 
-## 5. Claims (`b-round-438/claims-439.sh`; B's run `b-round-438/claims-439-planning-output.txt`)
+## 5. Claims (`b-round-439/claims-440.sh`; B's run `b-round-439/claims-440-planning-output.txt`)
 | Claim | What it checks |
 |---|---|
-| K1 | HEAD and gate 438 |
+| K1 | HEAD and gate 439 |
 | K2 | Tree status: total, outside-grants |
 | K3 | Frozen manifest |
 | K4 | Protected manifest; granted protected files |
-| K5 | The 8 test paths equal v3 / v4.1 |
-| K6 | The delta applies to the tree |
-| K7 | Doc 285: present, line 4, the old "no assertion lost" sentence, last doc |
+| K5 | The 6 test paths equal the sketch |
+| K6 | The sketch applies to the tree |
+| K7 | Class finders (`span.text-…`/`span.font-…`) in the 6 files |
 | K8 | `regression-last.json` |
-| K9 | v4.1 markers: any-tag query, NF2 uses it, PG2 raw guard, SS9 |
-| K10 | Wrapper tags with `type=number` in the arrangement sources today |
+| K9 | Self-compares on `studioExportStrings.exportCancelled`/`exportCancelledEncoder`/`wavWorkerStalled` in export-cancel and export-wav |
+| K10 | LRS3 exact `className).toBe(` pins |
 | K11 | Cited artifacts exist |
-| K12 | Archive of round 438 |
+| K12 | Archive of round 439 against B's planning-time copy `b-round-439/current-task-before-440.md`. It is not an independent source: both were copied from the same file in this planning |
 | K13 | Backlog ids |
 | K14 | Open Critical/High/Medium ids |
 | K15 | Backlog version and last D-ID |
-| K16 | C round 438 result |
-| K17 | sketch-review names both shas; `l58-check` |
-| K18 | Mutant result files |
-| K19 | B's full run on v4.1 |
+| K16 | C round 439 result |
+| K17 | sketch-review names the sha; `l58-check` |
+| K18 | Mutant results |
+| K19 | B's full run on the sketch |
 | K20 | `lessons.md` line count |
-| K21 | Doc 285 against `doc285-expected.md`; stale-text grep count |
+| K21 | Doc 286 present; last doc; TEMPLATE.md exists |
+| K22 | B's wrapper re-run (D-29z1564) |
+| K23 | Data hooks in `ArrangementOverview.tsx` (stage-2 premise) |
+| K24 | Tests that render `arrangement-export-video-sound` (stage-2 premise) |
+| K25 | Line of the `wavWorkerFailed` composition test in export-wav (out of scope) |
+| K26 | LRS describe timeout (15 s) and the LRS4 line |
+| K27 | `strings.test.ts` literal pins of the three export texts |
+| K28 | B's C5 sweep on the sketch files |

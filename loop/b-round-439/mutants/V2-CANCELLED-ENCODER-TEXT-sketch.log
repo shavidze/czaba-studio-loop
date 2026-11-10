@@ -1,0 +1,50 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/tmp.nev56z9Zc2/efd71f6[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/export-cancel.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 92[2mms[22m[39m
+[31m     [31m×[31m exports the exact messages and a named cancel error[39m[32m 10[2mms[22m[39m
+     [32m✓[39m without a signal returns the same promise and its result[32m 0[2mms[22m[39m
+     [32m✓[39m with a pre-aborted signal rejects with the cancel error[32m 1[2mms[22m[39m
+     [32m✓[39m an abort mid-flight rejects with the cancel error even though the work resolves later[32m 0[2mms[22m[39m
+     [32m✓[39m a work rejection before any abort passes that error through[32m 0[2mms[22m[39m
+     [32m✓[39m removes its abort listener once the work settles[32m 1[2mms[22m[39m
+     [32m✓[39m a pre-aborted signal with a work that rejects later raises no unhandled rejection[32m 12[2mms[22m[39m
+     [32m✓[39m a late work rejection after an abort raises no unhandled rejection[32m 11[2mms[22m[39m
+     [32m✓[39m EC2 a pre-aborted signal rejects cancelled and never constructs an OfflineAudioContext[32m 1[2mms[22m[39m
+     [32m✓[39m EC2 a signal alone schedules suspend points, and an abort before the first suspend resolves never resumes[32m 16[2mms[22m[39m
+     [32m✓[39m EC2 an abort after one resumed suspend stops resuming at the next suspend point[32m 25[2mms[22m[39m
+     [32m✓[39m EC2 an abort after startRendering resolved but before the worker constructs no Worker[32m 3[2mms[22m[39m
+     [32m✓[39m EC3 GATE89-S1 a rejected resume() rejects the render with that error instead of hanging[32m 1[2mms[22m[39m
+     [32m✓[39m EC3 a rejected suspend() alone still renders[32m 2[2mms[22m[39m
+     [32m✓[39m SW6 a pre-aborted signal rejects cancelled, constructs no Worker and copies nothing[32m 1[2mms[22m[39m
+     [32m✓[39m SW6 the no-Worker fallback checks the signal before it encodes[32m 0[2mms[22m[39m
+     [32m✓[39m SW6 an abort mid-stream terminates once, rejects cancelled, and a late ack or complete changes nothing[32m 3[2mms[22m[39m
+     [32m✓[39m SW6 removes the abort listener on complete and on a worker failure[32m 1[2mms[22m[39m
+     [32m✓[39m SW6 a 3-argument call streams as before: begin, a transferred chunk, finish after the ack, and complete resolves[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/export-cancel.test.ts[2m > [22mSRW-20 stage 3b-1 export cancel messages and error (D-29z55)[2m > [22mexports the exact messages and a named cancel error
+[31m[1mAssertionError[22m: expected 'Export cancelled — no file was create…' to be 'Export cancelled — no file was create…' // Object.is equality[39m
+
+Expected: [32m"Export cancelled — no file was created. The [7mMP3 [27mencoder [7mwill load again on the next MP3 export[27m."[39m
+Received: [31m"Export cancelled — no file was created. The encoder [7mreloads[27m."[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/export-cancel.test.ts:[2m207:58[22m[39m
+    [90m205| [39m  [34mit[39m([32m'exports the exact messages and a named cancel error'[39m[33m,[39m () [33m=>[39m {
+    [90m206| [39m    expect(ARRANGEMENT_EXPORT_CANCELLED_MESSAGE).toBe('Export cancelle…
+    [90m207| [39m    [34mexpect[39m([33mARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE[39m)[33m.[39m[34mtoBe[39m(
+    [90m   | [39m                                                         [31m^[39m
+    [90m208| [39m      'Export cancelled — no file was created. The MP3 encoder will lo…
+    [90m209| [39m    )[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m18 passed[39m[22m[90m (19)[39m
+[2m   Start at [22m 21:20:52
+[2m   Duration [22m 1.04s[2m (transform 266ms, setup 0ms, import 310ms, tests 92ms, environment 486ms)[22m
+
+
+::error file=/tmp/tmp.nev56z9Zc2/efd71f6/app/lib/arrangement/__tests__/export-cancel.test.ts,title=app/lib/arrangement/__tests__/export-cancel.test.ts > SRW-20 stage 3b-1 export cancel messages and error (D-29z55) > exports the exact messages and a named cancel error,line=207,column=58::AssertionError: expected 'Export cancelled — no file was create…' to be 'Export cancelled — no file was create…' // Object.is equality%0A%0AExpected: "Export cancelled — no file was created. The MP3 encoder will load again on the next MP3 export."%0AReceived: "Export cancelled — no file was created. The encoder reloads."%0A%0A ❯ app/lib/arrangement/__tests__/export-cancel.test.ts:207:58%0A%0A

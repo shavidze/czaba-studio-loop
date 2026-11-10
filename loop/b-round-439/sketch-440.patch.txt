@@ -1,0 +1,202 @@
+diff --git a/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx b/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+index 33eceb9..742c077 100644
+--- a/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
++++ b/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+@@ -366,28 +366,35 @@ describe('Detail panel polish 14b (D-29i, R18-U)', () => {
+   });
+ 
+   describe('design (d): English detail labels and the w-72 info column (D-29i, D-29j)', () => {
++    const DETAIL_INFO_LABEL_TEXTS = ['Track', 'Tracks', 'Start', 'Length', 'Clip origin'];
++
+     function detailLabelTexts(view: ReturnType<typeof render>) {
+       const content = view.getByTestId('arrangement-detail-content');
+       const info = content.firstElementChild;
+       if (!info) {
+         throw new Error('info column missing');
+       }
+-      const infoLabels = Array.from(info.querySelectorAll('span.font-sans')).map(
+-        (span) => span.textContent,
+-      );
++      const infoSpans = Array.from(info.querySelectorAll('span'));
++      const infoLabels = infoSpans
++        .filter((span) => DETAIL_INFO_LABEL_TEXTS.includes(span.textContent ?? ''))
++        .map((span) => span.textContent);
++      const sansLabels = infoSpans
++        .filter((span) => span.classList.contains('font-sans'))
++        .map((span) => span.textContent);
+       const rangeLabels = Array.from(
+         content.querySelectorAll('label:not([data-testid="arrangement-detail-clip-gain"] *)'),
+       ).map((label) => label.firstChild?.textContent ?? null);
+       const ariaLabels = Array.from(
+         content.querySelectorAll('input:not([data-testid="arrangement-detail-clip-gain"] *)'),
+       ).map((input) => input.getAttribute('aria-label'));
+-      return { content, infoLabels, rangeLabels, ariaLabels };
++      return { content, infoLabels, sansLabels, rangeLabels, ariaLabels };
+     }
+ 
+     it('labels the single clip info and the range inputs in English and keeps the aria-labels', async () => {
+       const { view } = await mountWithMusicSelected();
+-      const { content, infoLabels, rangeLabels, ariaLabels } = detailLabelTexts(view);
+-      expect(infoLabels).toEqual(['Start', 'Length', 'Clip origin']);
++      const { content, infoLabels, sansLabels, rangeLabels, ariaLabels } = detailLabelTexts(view);
++      expect(infoLabels).toEqual(['Track', 'Start', 'Length', 'Clip origin']);
++      expect(sansLabels).toEqual(['Start', 'Length', 'Clip origin']);
+       expect(rangeLabels).toEqual(['From', 'To']);
+       expect(ariaLabels).toEqual([
+         'Time selection start (seconds)',
+@@ -402,8 +409,9 @@ describe('Detail panel polish 14b (D-29i, R18-U)', () => {
+       fireEvent.click(toggle);
+       act(() => live(api).selectClips(['music-1', 'hit-1']));
+       expect(view.getByTestId('arrangement-detail-group')).toBeTruthy();
+-      const { content, infoLabels, rangeLabels, ariaLabels } = detailLabelTexts(view);
+-      expect(infoLabels).toEqual(['Start', 'Length']);
++      const { content, infoLabels, sansLabels, rangeLabels, ariaLabels } = detailLabelTexts(view);
++      expect(infoLabels).toEqual(['Tracks', 'Start', 'Length']);
++      expect(sansLabels).toEqual(['Start', 'Length']);
+       expect(rangeLabels).toEqual(['From', 'To']);
+       expect(ariaLabels).toEqual([
+         'Time selection start (seconds)',
+diff --git a/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx b/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx
+index 62438b9..c1714a3 100644
+--- a/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx
+@@ -233,9 +233,18 @@ describe('Clip Detail panel English strings (V-0.4e, D-29z107)', () => {
+     if (!info) {
+       throw new Error('info column missing');
+     }
++    const infoSpans = Array.from(info.querySelectorAll('span'));
++    const labelTexts = ['Track', 'Start', 'Length', 'Clip origin'];
+     expect(
+-      Array.from(info.querySelectorAll('span.text-dim')).map((span) => span.textContent),
+-    ).toEqual(['Track', 'Start', 'Length', 'Clip origin']);
++      infoSpans
++        .filter((span) => labelTexts.includes(span.textContent ?? ''))
++        .map((span) => span.textContent),
++    ).toEqual(labelTexts);
++    expect(
++      infoSpans
++        .filter((span) => span.classList.contains('text-dim'))
++        .map((span) => span.textContent),
++    ).toEqual(labelTexts);
+     expect(content.textContent).toContain('The source file stays unchanged');
+     const start = detailInputByTestId(view, 'arrangement-detail-start');
+     const end = detailInputByTestId(view, 'arrangement-detail-end');
+@@ -271,9 +280,11 @@ describe('Clip Detail panel English strings (V-0.4e, D-29z107)', () => {
+     expect(view.getByTestId('arrangement-detail-header-label').textContent).toBe('2 clips');
+     const group = view.getByTestId('arrangement-detail-group');
+     expect(group.firstElementChild?.textContent).toBe('2 clips');
+-    expect(
+-      Array.from(group.querySelectorAll('span.text-dim')).map((span) => span.textContent),
+-    ).toContain('Tracks');
++    const tracksLabels = Array.from(group.querySelectorAll('span')).filter(
++      (span) => span.textContent === 'Tracks',
++    );
++    expect(tracksLabels).toHaveLength(1);
++    expect(tracksLabels[0]?.classList.contains('text-dim')).toBe(true);
+     expect(group.textContent).toContain(
+       'The selected clips move together · Delete deletes them · Ctrl+D duplicates them',
+     );
+diff --git a/app/lib/arrangement/__tests__/export-cancel.test.ts b/app/lib/arrangement/__tests__/export-cancel.test.ts
+index b8541b3..58d5afb 100644
+--- a/app/lib/arrangement/__tests__/export-cancel.test.ts
++++ b/app/lib/arrangement/__tests__/export-cancel.test.ts
+@@ -10,7 +10,6 @@ import {
+ import { encodeArrangementWavStreamOffMainThread } from '../export-wav.client';
+ import { renderArrangementWav } from '../graph.client';
+ import { createArrangement } from '../model';
+-import { studioExportStrings } from '../strings';
+ import { fakeRenderedBuffer } from './helpers/fake-rendered-buffer';
+ 
+ async function settleMicrotasks(rounds = 10) {
+@@ -204,9 +203,9 @@ function resetRenderLog() {
+ 
+ describe('SRW-20 stage 3b-1 export cancel messages and error (D-29z55)', () => {
+   it('exports the exact messages and a named cancel error', () => {
+-    expect(ARRANGEMENT_EXPORT_CANCELLED_MESSAGE).toBe(studioExportStrings.exportCancelled);
++    expect(ARRANGEMENT_EXPORT_CANCELLED_MESSAGE).toBe('Export cancelled — no file was created.');
+     expect(ARRANGEMENT_EXPORT_CANCELLED_ENCODER_MESSAGE).toBe(
+-      studioExportStrings.exportCancelledEncoder,
++      'Export cancelled — no file was created. The MP3 encoder will load again on the next MP3 export.',
+     );
+     const error = new ArrangementExportCancelledError();
+     expect(error).toBeInstanceOf(Error);
+diff --git a/app/lib/arrangement/__tests__/export-wav.test.ts b/app/lib/arrangement/__tests__/export-wav.test.ts
+index 9f62715..4b7dd27 100644
+--- a/app/lib/arrangement/__tests__/export-wav.test.ts
++++ b/app/lib/arrangement/__tests__/export-wav.test.ts
+@@ -536,6 +536,8 @@ describe('EW8 stall watchdog and worker error text (GATE89-S3), re-pointed at th
+ 
+   it('EW8f the stall timeout is exactly 30 s and the stalled message is exact', () => {
+     expect(ARRANGEMENT_WAV_WORKER_STALL_TIMEOUT_MS).toBe(30000);
+-    expect(ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE).toBe(studioExportStrings.wavWorkerStalled(30));
++    expect(ARRANGEMENT_WAV_WORKER_STALLED_MESSAGE).toBe(
++      'Writing WAV stalled — the worker has not responded for 30 seconds.',
++    );
+   });
+ });
+diff --git a/app/lib/arrangement/__tests__/library-preview.test.tsx b/app/lib/arrangement/__tests__/library-preview.test.tsx
+index db606e6..75752c4 100644
+--- a/app/lib/arrangement/__tests__/library-preview.test.tsx
++++ b/app/lib/arrangement/__tests__/library-preview.test.tsx
+@@ -240,7 +240,16 @@ describe('ArrangementLibraryPreview active-lane row and insert-marker memo (C-R1
+     expect(row.getAttribute('title')).toBe('Active track: მუსიკა');
+     expect(row.getAttribute('title')).toBe(row.textContent?.split('·')[0].trim());
+     expect(row.textContent).toContain('· insert marker 00:00.000');
+-    expect(row.querySelector('span.text-foreground')?.textContent).toBe('მუსიკა');
++    const laneNames = Array.from(row.querySelectorAll('span')).filter(
++      (span) => span.textContent === 'მუსიკა',
++    );
++    expect(laneNames).toHaveLength(1);
++    expect(laneNames[0]?.classList.contains('text-foreground')).toBe(true);
++    expect(
++      Array.from(row.querySelectorAll('span')).find((span) =>
++        span.classList.contains('text-foreground'),
++      ),
++    ).toBe(laneNames[0]);
+   });
+ 
+   it('keeps the video note in the title and visible text when the video lane is active (C-R16-01)', async () => {
+diff --git a/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx b/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+index 3530751..6da7a10 100644
+--- a/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/library-row-strings-ui.test.tsx
+@@ -234,9 +234,11 @@ describe('library row status strings (V-0.5a)', { timeout: 15_000 }, () => {
+     expect(markers).toHaveLength(1);
+     const marker = markers[0];
+     expect(marker.textContent).toBe('Playing');
+-    expect(marker.className).toBe(
+-      'flex items-center gap-0.5 whitespace-nowrap text-xs text-foreground',
+-    );
++    const markerClasses = marker.className.split(/\s+/);
++    for (const token of ['flex', 'items-center', 'gap-0.5', 'whitespace-nowrap', 'text-xs']) {
++      expect(markerClasses, token).toContain(token);
++    }
++    expect(markerClasses).toContain('text-foreground');
+     expect(marker.parentElement).toBe(libraryRow(view, 'song'));
+     expect(libraryRow(view, 'song').lastElementChild).toBe(marker);
+     expect(libraryRow(view, 'broken').querySelectorAll(markerSelector)).toHaveLength(0);
+@@ -249,10 +251,20 @@ describe('library row status strings (V-0.5a)', { timeout: 15_000 }, () => {
+     const metaClasses = (metaRow?.className ?? '').split(/\s+/);
+     expect(metaClasses).toContain('flex');
+     expect(metaClasses).not.toContain('flex-wrap');
+-    expect(metaRow?.className).toBe('flex gap-2 text-xs tabular-nums text-muted');
+-    const durationMonoSpans = metaRow?.children[1]?.querySelectorAll('span.font-mono');
+-    expect(durationMonoSpans).toHaveLength(1);
+-    expect(durationMonoSpans?.[0]?.textContent).toBe('00:20.000');
++    for (const token of ['gap-2', 'text-xs', 'tabular-nums', 'text-muted']) {
++      expect(metaClasses, token).toContain(token);
++    }
++    const durationSpans = Array.from(metaRow?.querySelectorAll('span') ?? []).filter(
++      (span) => span.childElementCount === 0 && span.textContent === '00:20.000',
++    );
++    expect(durationSpans).toHaveLength(1);
++    expect(durationSpans[0]?.classList.contains('font-mono')).toBe(true);
++    expect(durationSpans[0]?.parentElement).toBe(metaRow?.children[1]);
++    expect(
++      Array.from(metaRow?.querySelectorAll('span') ?? [])
++        .filter((span) => span.classList.contains('font-mono'))
++        .map((span) => span.textContent),
++    ).toEqual(['00:20.000']);
+     expect(metaRow?.children[0]?.classList.contains('font-mono')).toBe(false);
+     expect(metaRow?.nextElementSibling).toBe(marker);
+     fireEvent.click(view.getByTestId('arrangement-library-preview-toggle'));

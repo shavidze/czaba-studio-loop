@@ -1,0 +1,61 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-10T20:45:31.7042672Z",
+  "round": 439,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R439-01-RD2-SF2-WRAPPER-TAG-GAP",
+   "severity": "low",
+   "origin": "pre-existing",
+   "steps": [
+    "Read a-round-439.md (code-reviewer finding A-R439-REVIEW-M1, rated Medium by the reviewer, not ruled in sketch-review.md)",
+    "A's scratch mutants W1/W2/W1b/W2b: a capitalised wrapper <Input type=\"radio\"|\"search\"> in a new file or in an owner file"
+   ],
+   "expected": "RD2/SF2 catch a wrapper-tag radio/search field, as NF2 now does for number fields",
+   "actual": "A measured green at HEAD and green on v4.1 (equal to HEAD, no assertion lost). C did not re-run W1/W2 (not in the task's C5 matrix); C's rating Low = equal to HEAD. A stopped under L11; B must rule: defer as Low or a v4.2 sketch",
+   "evidence": "a-round-439.md; a-round-439/wrapper-mutants*.jsonl"
+  }
+ ],
+ "passed": [
+  "C1-SOURCE-SCOPE",
+  "C2-PATCH-IDENTITY",
+  "C3-NO-RUNTIME-CHANGE",
+  "C4-COVERING-7files-24tests",
+  "C5-MUTANTS-head-sketch-helper-identical",
+  "C6-SWEEP",
+  "C7-G439-AUTH",
+  "C8-SMOKE-REAL-EXPORT",
+  "C9-CLAIMS",
+  "C10-DOC",
+  "C11-SOURCE-SCOPE-END"
+ ],
+ "blocked": [
+  "C7 fake-bearer token check: backend unavailable in cloud"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "manifestPaths": "frozen rc 0; protected rc 0",
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": true,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": "c-round-439/c5-sketch.jsonl and c5-helper.jsonl identical to b-round-438/mutants/sketch.jsonl and helper.jsonl; head identical too",
+ "gateChecksNamed": true,
+ "gateChecksRunOnSketch": "B's run (b-round-438/full-suite-sketch.log), not rerun by C",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": true,
+ "affectedChecksRunOnSketch": "A2/C4: 7 files 24/24 rc 0",
+ "notes": "Play attempt 1 hit a cold-start timeout (play-status-attempt1.err); retry after warm-up passed at both viewports. Export 29189420 bytes RIFF/WAVE both viewports. Auth: auth_user null, 'Sign in required', 0 audio[src], token API 401. Ableton conformance not applicable (test-only). C did not compute WAV sample integrity beyond header/size (task row only requires that)."
+}
