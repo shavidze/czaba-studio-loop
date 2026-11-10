@@ -1,10 +1,10 @@
 {
-  "version": 399,
-  "updated": "2026-11-09 (B round 422 -> 423 planning: round 422 accepted and published 875ff37; REGRESSION-2026-11-10 part 1 dispatched as round 423)",
+  "version": 400,
+  "updated": "2026-11-10 (B round 423 -> 424 planning: round 423 C FAIL on one Medium, C-R423-01; round 424 = its fix-up PERF-FIX-R423-LANE-SHELL; regression part 2 moves to round 425)",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 423: REGRESSION-2026-11-10 part 1 (C-only browser sweep of the items finished in rounds 391-422, scope additions SA-1..SA-6 named; A changes nothing) (current-task.md)",
-  "advisor_used_by_B": "round 422 -> 423 planning: advisor available and consulted after orientation and before close",
+  "current_task": "Round 424: PERF-FIX-R423-LANE-SHELL, fix-up of C-R423-01 (the lane preview subscriptions move into the memo inner so a drag commit renders the lane once, from B reviewed sketch b-round-423/sketch-424.patch.txt) (current-task.md)",
+  "advisor_used_by_B": "round 423 -> 424 planning: advisor available and consulted after orientation and before close",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12183,8 +12183,16 @@
       "task": "current-task.md",
       "decision": "D-29z1476, D-29z1477",
       "type": "REGRESSION-2026-11-10 part 1 (C-only browser sweep; A no change)",
-      "status": "dispatched",
+      "status": "c_fail (D-29z1479): C FAIL c-round-423.json, 1 Medium C-R423-01 (RR-PERF); gate 423 skipped; fix-up = round 424",
       "note": "baseline 875ff37 clean; tree manifest b-round-422/r423-tree-sha256.txt (1321); claims b-round-422/claims-423.sh; marker-seek baseline b-round-422/probe/head/"
+    },
+    {
+      "round": 424,
+      "task": "current-task.md",
+      "decision": "D-29z1480, D-29z1481",
+      "type": "PERF-FIX-R423-LANE-SHELL (fix-up of C-R423-01)",
+      "status": "dispatched",
+      "note": "baseline 875ff37 clean; sketch b-round-423/sketch-424.patch.txt; claims b-round-423/claims-424.sh; perf sketch run b-round-423/perf-sketch/"
     }
   ],
   "post_current_stage_queue": [
@@ -15369,7 +15377,7 @@
         {
           "id": "PERF-11c-iii-e-ii",
           "what": "Lane render saving: memo inner + per-lane props (clips, pxPerSecond, lane-scoped peaks/video/duration slices with content compare, track field compare); rows: own clip move re-renders that lane only, peaks arrival, zoom, video source arrival, exclusive solo (b-round-407/consult-performance-optimizer.md); closes PERF-11c-iii",
-          "status": "done (D-29z1421): C round 409 PASS browserVerified/realVerified true; gate 409 published 9616d3a | dispatched (D-29z1420): round 409, b-round-408/sketch-409.patch.txt sha 1beedffbda3eca0f | not_started (D-29z1414): after e-i C PASS; B sketch + mutants + browser rows + review before dispatch; feature-boundary architecture checkpoint request at its planning"
+          "status": "bug (D-29z1480): C-R423-01 - the shell split adds 2 fibers per drag commit; fix-up round 424 | done (D-29z1421): C round 409 PASS browserVerified/realVerified true; gate 409 published 9616d3a | dispatched (D-29z1420): round 409, b-round-408/sketch-409.patch.txt sha 1beedffbda3eca0f | not_started (D-29z1414): after e-i C PASS; B sketch + mutants + browser rows + review before dispatch; feature-boundary architecture checkpoint request at its planning"
         },
         {
           "id": "PERF-CAND-STUDIO-LENIS",
@@ -16360,7 +16368,15 @@
       "execution_order_d29z1420": "round 409 PERF-11c-iii-e-ii -> PERF-15 -> SYS-R2-FAKE-FIDELITY + SYS-R388 -> SYS-CLOCK-DETERMINISM -> SYS-R369 -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). REGRESSION-2026-11-10 first at the first planning on/after 2026-11-10. RETRO at 416.",
       "execution_order_d29z1426": "round 410 PERF-15a -> PERF-15b -> SYS-R2-FAKE-FIDELITY + SYS-R388 -> SYS-CLOCK-DETERMINISM -> SYS-R369 -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). REGRESSION-2026-11-10 first at the first planning on/after 2026-11-10. RETRO at 416.",
       "execution_order_d29z1436": "round 413 PERF-15b-ii-a -> SYS-R2-FAKE-FIDELITY + SYS-R388 -> SYS-CLOCK-DETERMINISM -> SYS-R369 -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). REGRESSION-2026-11-10 first at the first planning on/after 2026-11-10. RETRO at 416.",
-      "execution_order_d29z1438": "round 414 SYS-R2-FAKE-FIDELITY -> 415 SYS-R388-FAKE-WEB-AUDIO-HELPER -> 416 RETRO -> SYS-CLOCK-DETERMINISM -> SYS-R369 -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). REGRESSION-2026-11-10 first at the first planning on/after 2026-11-10 (it precedes RETRO if both are due)."
+      "execution_order_d29z1438": "round 414 SYS-R2-FAKE-FIDELITY -> 415 SYS-R388-FAKE-WEB-AUDIO-HELPER -> 416 RETRO -> SYS-CLOCK-DETERMINISM -> SYS-R369 -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). REGRESSION-2026-11-10 first at the first planning on/after 2026-11-10 (it precedes RETRO if both are due).",
+      "candidates_d29z1481": [
+        {
+          "id": "PERF-CAND-DRAG-LATENCY-BUDGET",
+          "source": "performance-optimizer consult, round 423 -> 424 planning",
+          "idea": "assert a move-to-paint p95 budget for fade/trim/video drags so a real slowdown fails the run, not only a fiber count",
+          "status": "candidate (not scheduled)"
+        }
+      ]
     },
     {
       "id": "STORE-REDESIGN",
@@ -27779,6 +27795,36 @@
       "title": "module-scope factory state reset only by install() (all suites call it in beforeEach); setInterval stub undone by unstubAllGlobals; unused returned members kept for SIG-R415-WORKSPACE-ENV-CONVERGENCE",
       "status": "recorded (D-29z1444): no action; #4 folds into SIG-R415-WORKSPACE-ENV-CONVERGENCE",
       "added": "2026-11-08 B round 415 -> 416 planning"
+    },
+    {
+      "id": "C-R423-01-PERF-DRAG-COMPONENTS-BUDGET",
+      "severity": "medium",
+      "origin": "B spec",
+      "status": "in_progress (D-29z1481): fix-up round 424 PERF-FIX-R423-LANE-SHELL",
+      "title": "every clip drag commit renders 3 lane fibers (shell + Memo + inner) since round 409, so 17 deterministic move-components budgets fail (fade 6/4, trim 17/15, video 15/13, video-trim 17/15, video-fade 5/3)",
+      "evidence": "c-round-423.json bug C-R423-01; c-round-423/perf-results/latest-interactions.json; b-round-423/move-components-404-vs-423.txt; b-round-423/probe/fade-names-head.json",
+      "repro": "cd store; npm run test:perf (alone); studio-lab-interactions.perf.spec.ts",
+      "added": "2026-11-10 B round 423 -> 424 planning"
+    },
+    {
+      "id": "INFO-C423-DECODE-ORACLE-DRIFT",
+      "severity": "info",
+      "origin": "B spec",
+      "status": "open (D-29z1482): next regression cites c-round-423/r392/b7-replay2.mjs and r393/r395 instead of round-392 B1/B7/B8/B9/nb",
+      "title": "round-392 decode-delay oracle rows are obsolete since library previews stream (393+)",
+      "evidence": "c-round-423.json lookups; c-round-423/r392/",
+      "repro": "see c-round-423.md R423-DECODE-STATUS",
+      "added": "2026-11-10 B round 423 -> 424 planning"
+    },
+    {
+      "id": "INFO-B423-LANE-RESTORE-PARTIAL",
+      "severity": "info",
+      "origin": "B pre-check",
+      "status": "open (D-29z1481): record only; C-R423-01 closes on its 17 ids",
+      "title": "the round-424 sketch returns the 17 failing ids to round-404 values; record-only or within-budget rows stay above round 404: zoom components 41 -> 45, move/lane move-components-max 40 -> 44, group max 44 -> 48, move/lane/group per-move +0.2 to +0.5; round 409 saving survives (play start/stop components 11 -> 7)",
+      "evidence": "b-round-423/perf-sketch/compare-404-423-sketch.txt",
+      "repro": "compare c-round-404/perf/interactions.json with b-round-423/perf-sketch/latest-interactions.json",
+      "added": "2026-11-10 B round 423 -> 424 planning"
     }
   ],
   "tech_lead_notes": [
@@ -30891,6 +30937,14 @@
       "source": "gates/round-422/review.md Architecture note + suggestion 2; a-round-422.md For B",
       "signal": "repeated-Enter handling is spread over several handlers (preventRepeatedEnterKeyDown in ArrangementTransport.tsx, the inline flag guard in ArrangementMarkerRow.tsx, the Export inline guard); proposal: one exported repeat-safe button-props helper used by every A-R107 sweep site, TH5 Fit exception kept",
       "status": "attached to SYS-2 stage 2a (decided inside that task, one owner, behaviour-preserving rows); not a separate task"
+    },
+    {
+      "id": "SIG-R423-SHELL-MEMO-FIBER-COST",
+      "added": "2026-11-10 B round 423 -> 424 planning",
+      "decision": "D-29z1481",
+      "source": "tech-lead + performance-optimizer consults, b-round-423.md",
+      "signal": "a shell over memo(inner, compare) costs 2 extra counted fibers on every update that reaches the inner through the shell; per-gesture subscriptions belong inside the memo inner, the shell keeps only commit-time data",
+      "status": "applied to the Lane in round 424; check the other leaf shells (video dock, marker row, transport groups) when their drag rows are next touched; not a separate task"
     }
   ],
   "vitest_floor_round64": 1574,
@@ -39406,6 +39460,36 @@
       ],
       "repro": "read transport-centre-ui.test.tsx HE4/HE5",
       "added": "2026-11-09 B round 422 -> 423 planning"
+    },
+    {
+      "id": "TL-R424-L1-GHOST-TITLE-REF-READ",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1481)",
+      "title": "ghost titles read getArrangement().clips in a render-time useMemo keyed on laneGhosts; a commit that re-sources a ghost clip while the ghosts stay the same keeps the old title until the next ghost update; minimal fix: sourceId on ClipLaneGhost",
+      "evidence": "b-round-423/sketch-review.md (tech-lead review of sha 942dfdb6)",
+      "repro": "read app/components/arrangement/ArrangementLane.tsx after round 424",
+      "added": "2026-11-10 B round 423 -> 424 planning"
+    },
+    {
+      "id": "TL-R424-L2-UNUSED-PREVIEW-LANE-HOOK",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1481)",
+      "title": "useArrangementPreviewLaneClips is used only by context-hygiene and preview-store tests after round 424; removal needs Saba approval (as GATE375-L1-UNUSED-WRAPPERS)",
+      "evidence": "b-round-423/sketch-review.md (tech-lead review of sha 942dfdb6)",
+      "repro": "read app/components/arrangement/ArrangementLane.tsx after round 424",
+      "added": "2026-11-10 B round 423 -> 424 planning"
+    },
+    {
+      "id": "TL-R424-L3-SELECTOR-NAMING",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1481)",
+      "title": "selectPreviewLaneClips(state.preview, state.preview, id) and (null, committed, id) hide intent; a plain lane filter reads better",
+      "evidence": "b-round-423/sketch-review.md (tech-lead review of sha 942dfdb6)",
+      "repro": "read app/components/arrangement/ArrangementLane.tsx after round 424",
+      "added": "2026-11-10 B round 423 -> 424 planning"
     }
   ],
   "regression_rounds": [
@@ -39673,7 +39757,7 @@
     {
       "id": "REGRESSION-2026-11-10",
       "decision": "D-29z1375",
-      "status": "dispatched part 1 (D-29z1476, D-29z1477): round 423 (rounds 391-422, SA-1..SA-6); part 2 = round 424 (round-390 template); regression-last updated only when part 2 closes | due at the first planning on or after 2026-11-10",
+      "status": "part 1 done except RR-PERF (D-29z1479): C round 423 FAIL on C-R423-01 only; RR-PERF re-run in fix-up round 424; part 2 = round 425 (round-390 template) | dispatched part 1 (D-29z1476, D-29z1477): round 423 (rounds 391-422, SA-1..SA-6); part 2 = round 424 (round-390 template); regression-last updated only when part 2 closes | due at the first planning on or after 2026-11-10",
       "scope": "C re-verifies in the browser the key acceptance of every item done since REGRESSION-2026-11-08 (rounds 391-401: PERF-13b-ii, 13c-i, 13c-ii-a/b, 13d, 14a, 14b-i) plus one short check per earlier done item, both viewports; npm run test:e2e:smoke; A fixes only what C finds",
       "added": "2026-11-08 B round 400 -> 401 planning",
       "scope_additions": [
@@ -41586,30 +41670,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1425",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 409 -> 410 planning",
-      "decision": "PERF-15a consults: performance-optimizer (b-round-409/consult-performance-optimizer.md: reject coarser than 100/s, skip the worker only for 16-bit matched, 4 MiB cap, main-thread parse acceptable, PP4 fixture row, stage-b row design). tech-lead on sketch v1 ac774c3c: APPROVE WITH LOWS (SK-1..7); SK-2 and SK-4 fixed in v2 (swap cleanup, PPC9-PPC11), SK-1/5/6 into the docs, SK-3 deferred Low (fix with previewUrl), SK-7 info. tech-lead delta re-review on v2 8f22c005: APPROVE WITH LOWS, new SK-8 (equivalent-mutant record) fixed in b-round-409/mutants/equivalent.txt. No Medium or higher open on the dispatched sha."
-    },
-    {
-      "id": "D-29z1426",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 409 -> 410 planning",
-      "decision": "Round 410 dispatched: PERF-15a from B's reviewed sketch b-round-409/sketch-410.patch.txt (v2, sha 8f22c005447dc388; 5 files; git apply --check clean on 9616d3a). Evidence on the committed scratch: tsc/Biome/lint rc 0; full vitest 264 files 3906/3906 rc 0; covering 16 files 274/274 (slowest 2715 ms in a 15000 ms describe, 18 %); mutants 17/17 red, pristine rc 0 before/after; browser no-regression probe (peaks-probe-410) and round-409 lane probe ok on HEAD and on the v2 sketch at both viewports (9 sources x 96 preview columns, 0 peaks requests, 0 page errors; lane 8/8). Grants b-round-409/grants-410.txt (5 patch files + new doc 263), frozen 1301, protected 11 unchanged; claims b-round-409/claims-410.sh. Doc 263 l.4 'In Progress (stage 1 of 2; C round 410 PASS)'. ARCH-CHECKPOINT-PERF11C-III-BOUNDARY still non-blocking. Order after 410: PERF-15b -> SYS-R2-FAKE-FIDELITY + SYS-R388 -> SYS-CLOCK-DETERMINISM -> SYS-R369 -> STEM-LANES -> SYS-1..3 -> STORE-2b..5 (direction gate) -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). REGRESSION-2026-11-10 first at the first planning on/after 2026-11-10. RETRO at 416."
-    },
-    {
-      "id": "D-29z1427",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 410 -> 411 planning",
-      "decision": "Round 411 contract = PERF-15b-i: committed demo peaks files (public/peaks, audiowaveform v1 16-bit, spp 441 @44.1k, from a Chromium decode; 121,855 / 188,440 bytes) + in-repo generator scripts/peaks (no comments, paths from import.meta.url) + meta; demo peaksUrl for the 2 URL sources only; fetchPrecomputedPeaks credentials 'omit' + refused-body cancel; library preview strip title = previewUnavailableTitle (none when ready). Option (a) committed files chosen over (b) a 404 URL: (a) makes the promise real for users and gives an unstubbed browser row; (b) would fire 2 failing requests per load."
-    },
-    {
-      "id": "D-29z1428",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 410 -> 411 planning",
-      "decision": "PERF-15b split into 15b-i (round 411) and 15b-ii (purchased adapter peaksUrl + streamed cap + Firefox probe + closes PERF-15): staging, not a scope cut; the purchased half needs its own design (fetch injection, signed URLs, no cache by expiring URL)."
-    },
-    {
       "id": "D-29z1429",
       "date": "2026-11-08",
       "by": "2026-11-08 B round 410 -> 411 planning",
@@ -41908,6 +41968,30 @@
       "date": "2026-11-09",
       "by": "2026-11-09 B round 422 -> 423 planning",
       "decision": "SYS-2 stage 2 sizing (record only, not dispatched): the remaining scan sites (b-round-421/data/button-guard-scan.txt, 62 buttons, 16 guarded + the 6 stage-1 sites) do not fit one round. Split by owner, nothing dropped: stage 2a = mixer and lane controls (ArrangementLane Mute/Solo/fold/active-track/pan reset/video import, ArrangementGroupHeader Mute/Solo/name editor, ArrangementMaster Mute/peak, ArrangementTempoRow metronome) and the shared repeat-safe button props decision (SIG-R422-REPEAT-SAFE-BUTTON-PROPS: one helper vs per-site handler, including the onKeyDown-vs-spread order of A-R422-REVIEW-L1 and Export inline guard fold); stage 2b = library (notice, folder, entries, expand/collapse/clear), video dock (return, expand, close), detail panel, grid menu items, marker menu, export dialog cancel/secondary, shortcut sheet close, narrow screen, workspace footer buttons, held Escape on the marker editor. Each site still gets a ruling (guard or idempotent exclusion) in its task; Fit stays excluded (TH5)."
+    },
+    {
+      "id": "D-29z1479",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 423 -> 424 planning",
+      "decision": "Round 423 (REGRESSION-2026-11-10 part 1) accepted from C evidence only: C FAIL (c-round-423.json), 21 rows passed, 1 failed (RR-PERF: interactions spec, 17 deterministic move-components asserts), 1 blocked (fake bearer, backend unavailable in cloud; kept as open backend evidence), browserVerified/realVerified true, L57 OK (c-round-423/l57-check.txt). Gate 423 skipped (C FAIL); baseline for round 424 stays 875ff37. Part 1 is complete except RR-PERF, which is re-run in round 424. regression-last.json is not updated (part 2 not run)."
+    },
+    {
+      "id": "D-29z1480",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 423 -> 424 planning",
+      "decision": "C-R423-01 diagnosed by B before dispatch (L37 name the extra commit): every clip drag gets +2 fibers per rendered lane vs round 404 (b-round-423/move-components-404-vs-423.txt; lane drags +4 = two lanes, range drags unchanged). Named probe b-round-423/probe/fade-names-head.json (dev, fade drag, 59 commits x 6 fibers): ArrangementLane + Memo(ArrangementLaneViewInner) tag 14 + ArrangementLaneViewInner + Memo(ArrangementClipViewInner) + ArrangementClipEnvelope + Memo(ArrangementStatusTextInner); round 404 had 4. Cause: round 409 (PERF-11c-iii-e-ii, 9616d3a) split the Lane into a shell that subscribes to the per-lane preview and ghost stores over memo(inner, custom compare); the harness (perf/lib/instrumentation.ts tags 0/1/11/14/15) counts shell + memo + inner on every drag commit. Origin: B spec (round 409 was dispatched from B sketch without a perf-spec run on the sketch; its K21 checked only the ArrangementLane name count, L58 clause \"equal to round N run is an assert too\" not applied). Move-to-paint p95 unchanged (b-round-423/latency-404-vs-423.txt, all <= 7.8 ms)."
+    },
+    {
+      "id": "D-29z1481",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 423 -> 424 planning",
+      "decision": "Ruling RESTORE over ACCEPT. tech-lead: restore (the memo comparator always fails during a drag and the shell runs hooks per move; budgets have no headroom by design; restoring keeps RB-LEAF7). performance-optimizer dissent: accept +2 (microseconds, latency unchanged) and add a latency budget row instead. B follows tech-lead and the advisor default: the 17 budgets stay as they are (no re-baseline); the fix keeps round 409 saving. The dissent is recorded and its latency-row idea filed as PERF-CAND-DRAG-LATENCY-BUDGET (candidate, not scheduled). Round 424 = PERF-FIX-R423-LANE-SHELL from B sketch b-round-423/sketch-424.patch.txt (ArrangementLane.tsx: preview-lane-clips and ghost subscriptions, laneSources and laneGhostTitles move into the memo inner; the shell passes committedLaneClips via useShallow; 4 drag-preview-render rows move their lane count to ArrangementLaneViewInner and add ArrangementLane = 0). REGRESSION-2026-11-10 part 2 moves to round 425 (task 423 section 7, Medium row)."
+    },
+    {
+      "id": "D-29z1482",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 423 -> 424 planning",
+      "decision": "C round 423 lookups ruled: (1) R423-DECODE-STATUS oracle drift: round-392 rows B1/B7/B8/B9/nb rely on decode-delay hooks that do not apply since previews stream (rounds 393/395, S7: Preview stops the transport); C own replay passed. Accepted as B spec drift, INFO-C423-DECODE-ORACLE-DRIFT (info, origin B spec): later regressions cite c-round-423/r392/b7-replay2.mjs + r393/r395 instead of those five rows. (2) R423-SCALE-EXPORT second clip via Ctrl+D instead of a second Enter: accepted as lookup (the row targets an unmounted clip outside the lane page window, which the copy at 01:41.352 satisfies). (3) Min-zoom probe without a round-403 oracle: recorded only, as written. Why we missed C-R423-01: test:perf is outside the gate and was not run in rounds 405-422; retro candidate RC-R423-PERF-SPEC-ON-STRUCTURE (any task that changes a component fiber structure - shell, memo split, wrapper - runs the interactions spec on the sketch; L58 already says so for \"equal to round N\" claims) for RETRO 435."
     }
   ],
   "retro_candidates": [
@@ -42282,6 +42366,12 @@
       "decision": "D-29z1465",
       "status": "adopted (D-29z1465)",
       "note": "loop counter: B share <= 65 % replaced by median round cost <= $17.00 and B median <= $14.50 (tech-lead: share target predates B-written sketches; A PASS avg 5.53 -> 3.69)"
+    },
+    {
+      "id": "RC-R423-PERF-SPEC-ON-STRUCTURE",
+      "decision": "D-29z1482",
+      "status": "candidate for RETRO 435",
+      "note": "any task that changes a component fiber structure (shell, memo split, wrapper) runs the whole perf suite on the sketch; round 409 ran only a leaf-name probe and C-R423-01 surfaced 14 rounds later (test:perf is not a gate row)"
     }
   ],
   "root_requests_b": [

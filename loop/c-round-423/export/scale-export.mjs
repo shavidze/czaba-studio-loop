@@ -1,0 +1,46 @@
+import { createRequire } from 'node:module';
+import { writeFileSync, readFileSync } from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const out = '/home/runner/czaba-project/tmp/studio-real-loop/c-round-423/export';
+const res = {};
+const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+for (const [w, h] of [[1440, 900], [1280, 720]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, acceptDownloads: true });
+  const page = await ctx.newPage(); const errs = [];
+  page.on('pageerror', (e) => errs.push(String(e)));
+  await page.goto('http://127.0.0.1:5173/studio-lab', { waitUntil: 'domcontentloaded', timeout: 120000 });
+  await page.getByText('Demo collection ready').first().waitFor({ timeout: 120000 });
+  await page.getByRole('listbox', { name: 'Sounds' }).getByRole('option', { name: /Middle East/ }).first().click();
+  await page.keyboard.press('Enter'); await page.waitForTimeout(2500);
+  const lane = page.locator('[data-clip-count]').first();
+  const r = { errs };
+  r.afterFirst = await page.locator('[data-clip-count]').evaluateAll((es) => es.map((e) => e.getAttribute('data-clip-count')));
+  const bb = await page.locator('[data-clip-id]').first().boundingBox();
+  await page.mouse.click(bb.x + 20, bb.y + 8); await page.waitForTimeout(300);
+  await page.keyboard.press('Control+d'); await page.waitForTimeout(1500);
+  r.afterDup = await page.locator('[data-clip-count]').evaluateAll((es) => es.map((e) => e.getAttribute('data-clip-count')));
+  r.status = (await page.getByTestId('arrangement-status').textContent().catch(() => null));
+  r.mountedClips = await page.locator('[data-clip-id]').count();
+  await page.screenshot({ path: `${out}/pre-export-${w}.png` });
+  await page.getByRole('button', { name: /^Export/ }).first().click(); await page.waitForTimeout(600);
+  const dlg = page.getByRole('dialog');
+  r.dialogText = (await dlg.innerText()).replace(/\s+/g, ' ').slice(0, 300);
+  await dlg.getByText(/^WAV · 24-bit/).first().click().catch(() => {});
+  r.buttons = await dlg.getByRole('button').allInnerTexts();
+  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 240000 }), dlg.getByRole('button', { name: /^Export|Download|Render/i }).last().click()]);
+  const path = `${out}/scale-export-${w}.wav`; await dl.saveAs(path);
+  const b = readFileSync(path); const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+  const tag = (o) => b.toString('latin1', o, o + 4);
+  let o = 12, fmt = null, dataOff = 0, dataLen = 0;
+  while (o < b.length - 8) { const id = tag(o), len = dv.getUint32(o + 4, true); if (id === 'fmt ') fmt = { fmt: dv.getUint16(o + 8, true), ch: dv.getUint16(o + 10, true), sr: dv.getUint32(o + 12, true), bits: dv.getUint16(o + 22, true) }; if (id === 'data') { dataOff = o + 8; dataLen = Math.min(len, b.length - dataOff); break; } o += 8 + len + (len & 1); }
+  const bps = fmt.bits / 8, frames = Math.floor(dataLen / (bps * fmt.ch));
+  const get = (i) => { const p = dataOff + i * bps; return bps === 3 ? ((b[p] | (b[p + 1] << 8) | (b[p + 2] << 16)) << 8 >> 8) / 8388608 : dv.getInt16(p, true) / 32768; };
+  const rms = (a, z) => { let s = 0, n = 0, pk = 0; for (let f = a; f < z; f++) for (let c = 0; c < fmt.ch; c++) { const v = get(f * fmt.ch + c); s += v * v; n++; if (Math.abs(v) > pk) pk = Math.abs(v); } return { rms: Math.sqrt(s / n), peak: pk }; };
+  let nan = 0; for (let i = 0; i < frames * fmt.ch; i += 997) if (!Number.isFinite(get(i))) nan++;
+  const half = Math.floor(frames / 2);
+  Object.assign(r, { file: dl.suggestedFilename(), size: b.length, riff: tag(0), wave: tag(8), fmt, frames, seconds: frames / fmt.sr, h1: rms(0, half), h2: rms(half, frames), nan });
+  res[`${w}x${h}`] = r; await ctx.close();
+  writeFileSync(`${out}/scale-export.json`, JSON.stringify(res, null, 1));
+}
+await browser.close(); console.log(JSON.stringify(res).slice(0, 2500));

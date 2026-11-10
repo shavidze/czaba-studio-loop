@@ -1,0 +1,101 @@
+{
+ "taskStatus": "FAIL",
+ "bugs": [
+  {
+   "id": "C-R423-01-PERF-DRAG-COMPONENTS-BUDGET",
+   "severity": "medium",
+   "origin": "regression introduced between round 404 (last green perf run: c-round-404/perf/interactions.log, fade 3.933, trim 14.75) and HEAD 875ff37; no perf run found in rounds 405-422; the files changed since dd52107 are ArrangementVideoDock (+591/-), ArrangementContext (+184), ArrangementLane (+180) (leaf/actions split rounds 405-409), so extra wrapper components per move are the likely cause - hypothesis, not bisected",
+   "steps": [
+    "cd store; npm run test:perf (alone, nothing else running, 5 specs)",
+    "studio-lab-interactions.perf.spec.ts (PERF-1b-i), 3 reps"
+   ],
+   "expected": "every asserted drag budget passes (round 389: fade 3.933/4, trim 14.75/15, video 9.883/10, video-trim 12.817/13, video-fade 2.95/3)",
+   "actual": "17 asserts fail, deterministic (3 identical reps): fade 5.9 per move/max 6 (budget 4); trim 16.717/17 (15); video stopped 11.85/15 (10/13), playing max 14 (12); video-trim stopped 14.783/17 (13/15), playing max 17 (15); video-fade stopped 4.917/5 (3), playing max 5 (3). Only committed-components-per-move metrics; pointermove p95, graph restarts and the other 4 specs (resources, scale, stem-cache, studio-lab) pass. Run validity: complete true, 3 identical reps, nothing else ran, 0 aborts.",
+   "evidence": "c-round-423/perf-run.log, c-round-423/perf-results/latest-interactions.json, c-round-423/status-row-perf.txt; failing ids: interact.drag.fade.playing.move-components-max, interact.drag.fade.playing.move-components-per-move, interact.drag.fade.stopped.move-components-max, interact.drag.fade.stopped.move-components-per-move, interact.drag.trim.playing.move-components-max, interact.drag.trim.playing.move-components-per-move, interact.drag.trim.stopped.move-components-max, interact.drag.trim.stopped.move-components-per-move, interact.drag.video-fade.playing.move-components-max, interact.drag.video-fade.stopped.move-components-max, interact.drag.video-fade.stopped.move-components-per-move, interact.drag.video-trim.playing.move-components-max, interact.drag.video-trim.stopped.move-components-max, interact.drag.video-trim.stopped.move-components-per-move, interact.drag.video.playing.move-components-max, interact.drag.video.stopped.move-components-max, interact.drag.video.stopped.move-components-per-move",
+   "note": "Browser rows show drags, trim and fades work; this is budget drift of re-rendered components per move (+2 on every failing drag). Perf is outside the gate, rounds 405-422 had no perf run. No existing backlog id found (find-ids: NOT-FOUND for PERF-DRAG-COMPONENTS and C-R423-01); PERF-CAND-FADE-BUDGET (info) set the fade budget earlier."
+  }
+ ],
+ "passed": [
+  "R423-HELD-ENTER",
+  "R423-MARKER-SEEK",
+  "R423-PREVIEW-LIFECYCLE",
+  "R423-STEM-CACHE",
+  "R423-PEAKS",
+  "R423-STEM-WORKER",
+  "R423-METER",
+  "R423-LANE",
+  "R423-VIDEO-DOCK (play-sync drift 0.013 s; stopped seek follows exactly: pos 2/5/1 s -> currentTime equal, paused, both vp)",
+  "R423-LEAF-ACTIONS",
+  "R423-PEAKS-FALLBACK",
+  "R423-SCALE",
+  "R423-SCALE-EXPORT",
+  "R423-SYNTH",
+  "R423-PREVIEW-STREAM",
+  "R423-DECODE-STATUS (oracle drift noted)",
+  "R423-JOURNEY",
+  "RG-SMOKE (2 passed)",
+  "PERF-LIB (54/54)",
+  "G423-AUTH",
+  "G423-SCOPE start+end (claims equal, HEAD 875ff37, status 0)"
+ ],
+ "failed": [
+  "RR-PERF (interactions spec, 17 asserts)"
+ ],
+ "blocked": [
+  "G423-AUTH fake Bearer token: backend unavailable in cloud (api/studio-token returned 500)"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "notRun": [],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-09T23:13:43.4129672Z",
+  "round": 423,
+  "attempt": 1,
+  "store": 200
+ },
+ "harness": {
+  "tools": "c-round-423/ (copies of earlier-round scripts)",
+  "viewports": [
+   "1440x900",
+   "1280x720"
+  ],
+  "dev": "http://127.0.0.1:5173",
+  "perfServer": "playwright.perf.config.ts webServer (prod build)"
+ },
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": null,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": null,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "l57Note": "REGRESSION round: no sketch, no A change; the sketch-related L57 fields are null (not applicable). claims-423.sh equal at start and end (K1-K17).",
+ "lookups": [
+  "R423-HELD-ENTER FOLLOW 1440 first run: cold-start locator timeout (environment-invalid, kept in probe/FOLLOW-1440x900-coldstart-invalid.json), one replacement run PASS",
+  "R423-PREVIEW-LIFECYCLE r418 oracle: 1280 R1/R1b/R10 cells come from c-round-418/probe/sketch/rows-R1-attempt1.json (the round-418 sketch rows-R1.json holds only 1440 cells)",
+  "R423-DECODE-STATUS: round-392 B1/B7/B8/B9/nb decode-delay hook rows are obsolete since preview streams through a media element (393+; S7 contract: Preview stops the transport); B2/B3 equal; own failing-stream check shows honest error status, 0 clips added",
+  "R423-JOURNEY: added WAV export step to journey.cjs (task asks for it)",
+  "R423-VIDEO-DOCK: stopped seek checked with an own probe video/stopped-seek.mjs (ruler clicks at 2, 5, 1 s; drift 0)",
+  "R423-DECODE-STATUS: own replay r392/b7-replay2.mjs: preview Middle East (stream) -> select Full mix auto-switches (media.pause + one buffer start); exactly one source open at 2 s, media paused; Stop silences all, toggle Preview, no overlap. The round-392 B1/B7/B8/B9/nb oracle rows are superseded by round 393/395 (S7, R10) = B-spec drift, not an app finding. Fallback status path is covered by r395 R1/R1b and r421 R9 (equal)",
+  "R423-SCALE-EXPORT: second clip made with Ctrl+D (copy at 01:41.352), not a second Enter",
+  "R423-PEAKS-FALLBACK min-zoom probe has no round-403 oracle JSON; recorded only (200 clips, 0 page errors, 159 columns at min zoom)",
+  "root-pre-push-review.md / publication-checkpoint.json exist but are dated 2026-10-07 (round 3); not relevant to round 423"
+ ],
+ "notes": [
+  "R423-SCALE-EXPORT: exported peak is exactly 1.0 (full scale) for Middle East x2 - informational, not asserted",
+  "Console noise cart/ERR_CONNECTION_REFUSED only",
+  "R423-SYNTH hashes equal the round-397 sketch oracle; R423-SCALE pin-blur B: Undo 'Move (30)', member back to 2027.040, 0 errors"
+ ]
+}

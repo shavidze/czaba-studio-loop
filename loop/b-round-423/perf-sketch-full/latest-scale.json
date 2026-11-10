@@ -1,0 +1,1181 @@
+{
+  "harness": "PERF-14a",
+  "complete": true,
+  "startedAt": "2026-11-10T01:10:43.305Z",
+  "finishedAt": "2026-11-10T01:11:53.853Z",
+  "durationMs": 70548,
+  "budgetsFile": "perf/budgets.scale.json",
+  "chromium": "143.0.7499.4",
+  "reactRenderer": "18.3.1",
+  "viewport": "1440x900",
+  "clipTarget": 200,
+  "passesPerRate": 3,
+  "sequence": [
+    "one browser context per pass at 1440x900, perf instrumentation installed before load",
+    "a. load: /studio-lab -> waitForLibraryReady -> waitForCollectionReady",
+    "b. build: library Add, click the clip name bar, blur; Control+d x199, each waited until the lane data-clip-count equals press + 1 (scale.harness.build-ms = the Control+d loop); self-check lane count 200, >= 1 mounted clip and one distinct data-clip-start per mounted clip, 0 collapsed groups; wait for quiet",
+    "c. default zoom, scroll 0, 1x: scale.dom.page, scale.dom.clip-subtree, scale.clips.model, scale.clips.mounted, scale.clips.in-window (in-window = clips intersecting the lane area: the timeline scroller box minus the first track header width); self-check visible gap here, at f, at g and after each h step: the mounted clips cover the lane area up to the model end with no hole, which assumes the back-to-back Control+d build of step b (equal-length clips, each starting where the previous one ends)",
+    "d. zoom keys at 1x: 5 x \"-\" then 5 x \"=\", one window per key until quiet (scale.zoom.*); self-check direction per key and return to the start value",
+    "e. the same keys at 6x CPU (Emulation.setCPUThrottlingRate), ids with .6x; rate back to 1",
+    "f. minimum zoom: \"-\" until the Zoom slider value equals its min (at most 60 keys), wait for quiet (scale.*.min-zoom)",
+    "g. minimum zoom, timeline scroller scrollLeft = round((scrollWidth - clientWidth) / 2), wait for quiet (scale.*.min-zoom-mid); self-check scrollLeft > 0 and in-window >= 1",
+    "h. scroll page crossings: scrollLeft += clientWidth x4, one window per step until quiet (scale.scroll.*)",
+    "i. zoom keys at minimum zoom, scroll as left by h: 5 x \"=\" then 5 x \"-\", one window per key until quiet (scale.zoom.min.*), at 1x, then scrollLeft restored to its value at the start of i, then the same keys at 6x (ids with .6x); self-check direction per key, return to the minimum and the restored scrollLeft"
+  ],
+  "passes": [
+    {
+      "pass": 1,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "pass": 2,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    },
+    {
+      "pass": 3,
+      "abortedAt": null,
+      "pageErrors": 0,
+      "problems": []
+    }
+  ],
+  "failures": [],
+  "rows": [
+    {
+      "id": "scale.harness.build-ms",
+      "scenario": "b. build 200 clips",
+      "metric": "build-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Wall time of the 199 Control+d presses after the name-bar click, each waited until the clip's lane data-clip-count equals press + 1. record — not run on sketch (L58)",
+      "samples": [
+        3067,
+        2663,
+        2571
+      ],
+      "details": [
+        {
+          "trackId": "music",
+          "laneCount": 200,
+          "mountedClips": 1,
+          "distinctStarts": 1,
+          "collapsedGroups": 0
+        },
+        {
+          "trackId": "music",
+          "laneCount": 200,
+          "mountedClips": 1,
+          "distinctStarts": 1,
+          "collapsedGroups": 0
+        },
+        {
+          "trackId": "music",
+          "laneCount": 200,
+          "mountedClips": 1,
+          "distinctStarts": 1,
+          "collapsedGroups": 0
+        }
+      ],
+      "median": 2663,
+      "min": 2571,
+      "max": 3067,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.dom.page",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "page",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "<=",
+        "value": 2000
+      },
+      "owner": "PERF-14a",
+      "note": "document.querySelectorAll('*').length with 200 clips at the default zoom, scrollLeft 0. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 950 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log",
+      "samples": [
+        950,
+        950,
+        950
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 950,
+      "min": 950,
+      "max": 950,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "scale.dom.clip-subtree",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "clip-subtree",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Sum over [data-clip-kind=\"audio\"] of 1 plus its descendants, default zoom, scrollLeft 0. record — not run on sketch (L58)",
+      "samples": [
+        17,
+        17,
+        17
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 17,
+      "min": 17,
+      "max": 17,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.model",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "model",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "==",
+        "value": 200
+      },
+      "owner": "PERF-14a",
+      "note": "Sum of the lane model clip counts (data-clip-count on [data-track-id][data-clip-count]); independent of mounting. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 200 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log",
+      "samples": [
+        200,
+        200,
+        200
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 200,
+      "min": 200,
+      "max": 200,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "scale.clips.mounted",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "mounted",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Count of mounted [data-clip-kind=\"audio\"] elements, default zoom, scrollLeft 0. record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.in-window",
+      "scenario": "c. default zoom, scroll 0, 1x",
+      "metric": "in-window",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Audio clips whose box intersects the timeline scroller's box (first ancestor of the ruler with scrollWidth > clientWidth), default zoom, scrollLeft 0. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 812264,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.keydown-p95-ms",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "keydown-p95-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. With 10 keys perf/lib percentile (floor(n x 0.95)) picks the maximum, so this row equals keydown-max-ms; the PERF-14 target \"zoom p95 < 50 ms\" is read on keydown-max-ms (C-R398-SIGNAL-M3, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        24,
+        16,
+        24
+      ],
+      "details": [
+        {
+          "perKey": "0,24,16,16,16,16,16,16,16,16"
+        },
+        {
+          "perKey": "16,16,16,16,16,0,16,0,0,0"
+        },
+        {
+          "perKey": "16,16,16,16,24,16,16,16,16,16"
+        }
+      ],
+      "median": 24,
+      "min": 16,
+      "max": 24,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.keydown-max-ms",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "keydown-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Largest per-key Event Timing keydown duration over the 10 zoom keys. record — not run on sketch (L58)",
+      "samples": [
+        24,
+        16,
+        24
+      ],
+      "details": [
+        {
+          "perKey": "0,24,16,16,16,16,16,16,16,16"
+        },
+        {
+          "perKey": "16,16,16,16,16,0,16,0,0,0"
+        },
+        {
+          "perKey": "16,16,16,16,24,16,16,16,16,16"
+        }
+      ],
+      "median": 24,
+      "min": 16,
+      "max": 24,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.commits-per-key",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "React commits from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.components-per-key",
+      "scenario": "d. zoom keys at 1x",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "<=",
+        "value": 60
+      },
+      "owner": "PERF-14a",
+      "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 42.4 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log",
+      "samples": [
+        46.4,
+        46.4,
+        46.4
+      ],
+      "details": [
+        {
+          "perKey": "45,45,46,51,48,48,45,46,45,45",
+          "max": 51
+        },
+        {
+          "perKey": "45,45,46,51,48,48,45,46,45,45",
+          "max": 51
+        },
+        {
+          "perKey": "45,45,46,51,48,48,45,46,45,45",
+          "max": 51
+        }
+      ],
+      "median": 46.4,
+      "min": 46.4,
+      "max": 46.4,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "scale.zoom.keydown-p95-ms.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "keydown-p95-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "percentile(0.95) of the per-key Event Timing keydown maximum over 5 x '-' then 5 x '='; a key with no entry counts 0. With 10 keys perf/lib percentile (floor(n x 0.95)) picks the maximum, so this row equals keydown-max-ms; the PERF-14 target \"zoom p95 < 50 ms\" is read on keydown-max-ms (C-R398-SIGNAL-M3, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        72,
+        56,
+        56
+      ],
+      "details": [
+        {
+          "perKey": "56,48,64,72,56,48,56,64,48,40"
+        },
+        {
+          "perKey": "40,40,56,56,40,40,48,56,40,48"
+        },
+        {
+          "perKey": "48,40,56,56,40,40,48,48,40,48"
+        }
+      ],
+      "median": 56,
+      "min": 56,
+      "max": 72,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.keydown-max-ms.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "keydown-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Largest per-key Event Timing keydown duration over the 10 zoom keys. record — not run on sketch (L58)",
+      "samples": [
+        72,
+        56,
+        56
+      ],
+      "details": [
+        {
+          "perKey": "56,48,64,72,56,48,56,64,48,40"
+        },
+        {
+          "perKey": "40,40,56,56,40,40,48,56,40,48"
+        },
+        {
+          "perKey": "48,40,56,56,40,40,48,48,40,48"
+        }
+      ],
+      "median": 56,
+      "min": 56,
+      "max": 72,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.commits-per-key.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "React commits from each key press until quiet, summed over the 10 zoom keys, divided by 10. record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.components-per-key.6x",
+      "scenario": "e. zoom keys at 6x CPU",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "<=",
+        "value": 60
+      },
+      "owner": "PERF-14a",
+      "note": "Rendered components (sum of commit.rendered) from each key press until quiet, summed over the 10 zoom keys, divided by 10. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 42.4 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log",
+      "samples": [
+        46.4,
+        46.4,
+        46.4
+      ],
+      "details": [
+        {
+          "perKey": "45,45,46,51,48,48,45,46,45,45",
+          "max": 51
+        },
+        {
+          "perKey": "45,45,46,51,48,48,45,46,45,45",
+          "max": 51
+        },
+        {
+          "perKey": "45,45,46,51,48,48,45,46,45,45",
+          "max": 51
+        }
+      ],
+      "median": 46.4,
+      "min": 46.4,
+      "max": 46.4,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "scale.dom.page.min-zoom",
+      "scenario": "f. minimum zoom, scrollLeft 0",
+      "metric": "page",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "<=",
+        "value": 2000
+      },
+      "owner": "PERF-14a",
+      "note": "document.querySelectorAll('*').length at the Zoom slider minimum. PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 1532 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log",
+      "samples": [
+        1532,
+        1532,
+        1532
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 1532,
+      "min": 1532,
+      "max": 1532,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "scale.clips.mounted.min-zoom",
+      "scenario": "f. minimum zoom, scrollLeft 0",
+      "metric": "mounted",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Mounted [data-clip-kind=\"audio\"] elements at the Zoom slider minimum. record — not run on sketch (L58)",
+      "samples": [
+        37,
+        37,
+        37
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 37,
+      "min": 37,
+      "max": 37,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.in-window.min-zoom",
+      "scenario": "f. minimum zoom, scrollLeft 0",
+      "metric": "in-window",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Audio clips intersecting the timeline scroller's box at the Zoom slider minimum. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        19,
+        19,
+        19
+      ],
+      "details": [
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 0,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 19,
+      "min": 19,
+      "max": 19,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.dom.page.min-zoom-mid",
+      "scenario": "g. minimum zoom, scrolled to the middle",
+      "metric": "page",
+      "unit": "elements",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "<=",
+        "value": 2000
+      },
+      "owner": "PERF-14a",
+      "note": "document.querySelectorAll('*').length at minimum zoom with scrollLeft = round((scrollWidth - clientWidth) / 2). PERF-14b-ii flip: B's production sketch b-round-401/perf-sketch-scale-run1.json and run2.json 1868 x3 each (HEAD c17d0e9 unvirtualized: see doc 254 premise); fix-removed mutant MU-399-NO-FILTER red, b-round-398/perf-sketch-scale-mutant-no-filter.log",
+      "samples": [
+        1868,
+        1868,
+        1868
+      ],
+      "details": [
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 1868,
+      "min": 1868,
+      "max": 1868,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "scale.clips.mounted.min-zoom-mid",
+      "scenario": "g. minimum zoom, scrolled to the middle",
+      "metric": "mounted",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Mounted [data-clip-kind=\"audio\"] elements at minimum zoom, scrolled to the middle. record — not run on sketch (L58)",
+      "samples": [
+        55,
+        55,
+        55
+      ],
+      "details": [
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 55,
+      "min": 55,
+      "max": 55,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.clips.in-window.min-zoom-mid",
+      "scenario": "g. minimum zoom, scrolled to the middle",
+      "metric": "in-window",
+      "unit": "count",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Audio clips intersecting the timeline scroller's box at minimum zoom, scrolled to the middle. Window = the lane area: the timeline scroller box minus the measured width of the first [data-testid=\"arrangement-track-header\"] (C-R398-SIGNAL-M2, PERF-14b-i). record — not run on sketch (L58)",
+      "samples": [
+        19,
+        19,
+        19
+      ],
+      "details": [
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        },
+        {
+          "scrollLeft": 4617,
+          "scrollWidth": 10375,
+          "clientWidth": 1142
+        }
+      ],
+      "median": 19,
+      "min": 19,
+      "max": 19,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.scroll.commits-per-step",
+      "scenario": "h. scroll page crossings at minimum zoom",
+      "metric": "commits-per-step",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "React commits from each scrollLeft += clientWidth step until quiet, over 4 steps from the middle, divided by 4. Per scroll step; the unit reads \"/ key\" because perf/lib/determinism.ts has no \"/ step\" exact unit (precedent interact.zoom.30.wheel.commits-per-step). record — not run on sketch (L58)",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "1,1,1,1"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "1,1,1,1"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "1,1,1,1"
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.scroll.components-per-step",
+      "scenario": "h. scroll page crossings at minimum zoom",
+      "metric": "components-per-step",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "assert",
+      "budget": {
+        "op": "<=",
+        "value": 140
+      },
+      "owner": "PERF-14a",
+      "note": "Rendered components from each scroll step until quiet, over 4 steps, divided by 4. Per scroll step; the unit reads \"/ key\" because perf/lib/determinism.ts has no \"/ step\" exact unit (precedent interact.zoom.30.wheel.commits-per-step). Ceiling (PERF-14b-ii, TL-R398-SK-L3): <= 140 against the virtualized lane's 116.5 (min = max over 3 passes, b-round-401/perf-sketch-scale-run1.json and run2.json). This is a known, accepted cost and not a target: HEAD without virtualization measures 57.75, and a page crossing mounts the next page's clips once, so the per-step work roughly doubles while the page DOM is 4.5x smaller. Hysteresis is the later candidate PERF-CAND-14-SCROLL-HYSTERESIS.",
+      "samples": [
+        116.5,
+        116.5,
+        116.5
+      ],
+      "details": [
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "115,121,115,115"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "115,121,115,115"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "115,121,115,115"
+        }
+      ],
+      "median": 116.5,
+      "min": 116.5,
+      "max": 116.5,
+      "withinBudget": true,
+      "pass": true
+    },
+    {
+      "id": "scale.scroll.loaf-max-ms",
+      "scenario": "h. scroll page crossings at minimum zoom",
+      "metric": "loaf-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14a",
+      "note": "Longest long-animation-frame overlapping any of the 4 scroll step windows. record — not run on sketch (L58)",
+      "samples": [
+        0,
+        0,
+        0
+      ],
+      "details": [
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "0,0,0,0"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "0,0,0,0"
+        },
+        {
+          "startScrollLeft": 4617,
+          "scrollLefts": "5759,6901,8043,9185",
+          "perStep": "0,0,0,0"
+        }
+      ],
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.keydown-p95-ms",
+      "scenario": "i. zoom keys at minimum zoom 1x",
+      "metric": "keydown-p95-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "95th percentile of the Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        24,
+        24,
+        24
+      ],
+      "details": [
+        {
+          "perKey": "24,16,16,24,16,16,16,16,16,24"
+        },
+        {
+          "perKey": "24,16,24,16,16,16,24,16,16,16"
+        },
+        {
+          "perKey": "24,16,24,16,16,16,16,16,16,16"
+        }
+      ],
+      "median": 24,
+      "min": 24,
+      "max": 24,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.keydown-max-ms",
+      "scenario": "i. zoom keys at minimum zoom 1x",
+      "metric": "keydown-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "Longest Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        24,
+        24,
+        24
+      ],
+      "details": [
+        {
+          "perKey": "24,16,16,24,16,16,16,16,16,24"
+        },
+        {
+          "perKey": "24,16,24,16,16,16,24,16,16,16"
+        },
+        {
+          "perKey": "24,16,24,16,16,16,16,16,16,16"
+        }
+      ],
+      "median": 24,
+      "min": 24,
+      "max": 24,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.commits-per-key",
+      "scenario": "i. zoom keys at minimum zoom 1x",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "React commits per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.components-per-key",
+      "scenario": "i. zoom keys at minimum zoom 1x",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "Rendered components per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        125.1,
+        125.1,
+        125.1
+      ],
+      "details": [
+        {
+          "perKey": "216,114,99,87,78,96,111,129,144,177",
+          "max": 216
+        },
+        {
+          "perKey": "216,114,99,87,78,96,111,129,144,177",
+          "max": 216
+        },
+        {
+          "perKey": "216,114,99,87,78,96,111,129,144,177",
+          "max": 216
+        }
+      ],
+      "median": 125.1,
+      "min": 125.1,
+      "max": 125.1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.keydown-p95-ms.6x",
+      "scenario": "i. zoom keys at minimum zoom 6x",
+      "metric": "keydown-p95-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "95th percentile of the Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        104,
+        112,
+        112
+      ],
+      "details": [
+        {
+          "perKey": "104,64,64,64,56,64,64,72,72,96"
+        },
+        {
+          "perKey": "112,72,56,56,56,56,72,72,80,88"
+        },
+        {
+          "perKey": "112,72,64,56,56,56,56,72,64,72"
+        }
+      ],
+      "median": 112,
+      "min": 104,
+      "max": 112,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.keydown-max-ms.6x",
+      "scenario": "i. zoom keys at minimum zoom 6x",
+      "metric": "keydown-max-ms",
+      "unit": "ms",
+      "kind": "wallclock",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "Longest Event Timing keydown duration over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        104,
+        112,
+        112
+      ],
+      "details": [
+        {
+          "perKey": "104,64,64,64,56,64,64,72,72,96"
+        },
+        {
+          "perKey": "112,72,56,56,56,56,72,72,80,88"
+        },
+        {
+          "perKey": "112,72,64,56,56,56,56,72,64,72"
+        }
+      ],
+      "median": 112,
+      "min": 104,
+      "max": 112,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.commits-per-key.6x",
+      "scenario": "i. zoom keys at minimum zoom 6x",
+      "metric": "commits-per-key",
+      "unit": "commits / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "React commits per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        1,
+        1,
+        1
+      ],
+      "details": [
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        },
+        {
+          "perKey": "1,1,1,1,1,1,1,1,1,1",
+          "max": 1
+        }
+      ],
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "withinBudget": null,
+      "pass": null
+    },
+    {
+      "id": "scale.zoom.min.components-per-key.6x",
+      "scenario": "i. zoom keys at minimum zoom 6x",
+      "metric": "components-per-key",
+      "unit": "components / key",
+      "kind": "deterministic",
+      "mode": "record",
+      "budget": null,
+      "owner": "PERF-14c-i",
+      "note": "Rendered components per key until quiet, averaged over 5 x \"=\" then 5 x \"-\" from the minimum zoom, after step h at 6x CPU. PERF-14c premise (B round 402 -> 403 probe, HEAD 7d7d7b2, b-round-402/probe/head-minzoom-*.json): near the minimum zoom 16-24 clips stay mounted and alternate per key. record — premise row for PERF-14c-ii; values from B's sketch run b-round-402/perf-sketch-scale.json",
+      "samples": [
+        125.1,
+        125.1,
+        125.1
+      ],
+      "details": [
+        {
+          "perKey": "216,114,99,87,78,96,111,129,144,177",
+          "max": 216
+        },
+        {
+          "perKey": "216,114,99,87,78,96,111,129,144,177",
+          "max": 216
+        },
+        {
+          "perKey": "216,114,99,87,78,96,111,129,144,177",
+          "max": 216
+        }
+      ],
+      "median": 125.1,
+      "min": 125.1,
+      "max": 125.1,
+      "withinBudget": null,
+      "pass": null
+    }
+  ]
+}

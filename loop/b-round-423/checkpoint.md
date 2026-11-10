@@ -1,0 +1,17 @@
+# B round 423 -> 424 checkpoint
+- [x] orientation; gate 423 skipped (C FAIL); baseline 875ff37 clean
+- [x] advisor call 1: round 424 = C-R423-01 fix-up; B names the extra fibers before dispatch
+- [x] archive tasks/round-423.md (cmp OK); before-copies in b-round-423/
+- [x] diff move-components rows 404 vs 423 (move-components-404-vs-423.txt: uniform +2 per rendered lane)
+- [x] name extra fibers: probe/fade-names-head.json = Memo(ArrangementLaneViewInner)#14 + ArrangementLaneViewInner (round 409 split)
+- [x] consults: tech-lead RESTORE, performance-optimizer ACCEPT (dissent recorded); B rules RESTORE
+- [x] sketch /tmp/b424/scratch (ArrangementLane + 4 DP rows) sha 942dfdb6; covering 7 files ok after DP rewrite; mutant red 4 rows
+- [x] perf spec on sketch 95/95
+- [x] full suite 3957/3957
+- [x] sketch review approve-with-lows
+- [x] backlog v400, task, b-next, feature-status, b-round-423.md; final claims equal
+- [x] advisor call 2 (close): fixes in progress
+  - [x] lane/leaf/video probes on sketch (probe/lane-leaf-video-compare.txt): 0 diffs / 0 non-timing; rows 6, 7 rewritten (oracle = sketch outputs; .pos record)
+  - [x] row 4 commits -> record, 1440 only; BUG_HUNTING_TESTS primitive; INFO-B423-LANE-RESTORE-PARTIAL + RC-R423 (update-backlog-2.py)
+  - [x] full test:perf on sketch: 5 passed 19.1m (perf-sketch-full/summary.txt); row 3 text
+  - [x] stub claims, A5, outputs regenerated, b-round-423.md §7

@@ -1,0 +1,215 @@
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index c1a5d01..860d881 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -14,6 +14,7 @@ import {
+   useState,
+   useSyncExternalStore,
+ } from 'react';
++import { useStore } from 'zustand';
+ import { useShallow } from 'zustand/react/shallow';
+ import {
+   formatArrangementTime,
+@@ -23,14 +24,13 @@ import {
+   useArrangementActions,
+   useArrangementClipLaneDrag,
+   useArrangementMixDraftStore,
+-  useArrangementPreviewLaneClips,
++  useArrangementPreviewStore,
+   useArrangementRange,
+   useArrangementSelection,
+ } from '~/contexts/ArrangementContext';
+ import { useRelativeFaderDrag } from '~/hooks/useRelativeFaderDrag';
+ import { useStableHandler } from '~/hooks/useStableHandler';
+ import {
+-  type ClipLaneGhost,
+   selectLaneDragGhosts,
+   selectLaneMoveSourceKey,
+ } from '~/lib/arrangement/clip-lane-drag-store';
+@@ -54,6 +54,7 @@ import {
+   trackMinHeight,
+   trackRowHeight,
+ } from '~/lib/arrangement/panels';
++import { selectPreviewLaneClips } from '~/lib/arrangement/preview-store';
+ import { selectArrangementLaneRange } from '~/lib/arrangement/range-store';
+ import {
+   selectedClipIdSetFromKey,
+@@ -87,6 +88,7 @@ import {
+ } from '~/lib/arrangement/view';
+ import { cn } from '~/lib/utils';
+ import type {
++  Arrangement,
+   ArrangementClip,
+   ArrangementTrack,
+   WorkspaceCollection,
+@@ -193,12 +195,12 @@ interface ArrangementLaneSource {
+ }
+ 
+ interface ArrangementLaneViewProps extends ArrangementLaneProps {
+-  clips: readonly ArrangementClip[];
++  committedLaneClips: readonly ArrangementClip[];
+   pxPerSecond: number;
+-  laneSources: ReadonlyMap<string, ArrangementLaneSource>;
++  collection: WorkspaceCollection;
++  sourcePeaks: ReadonlyMap<string, Float32Array>;
++  videoSources: ReadonlyMap<string, WorkspaceVideoSource>;
+   sourceDurations: ReadonlyMap<string, number>;
+-  laneGhosts: readonly ClipLaneGhost[];
+-  laneGhostTitles: readonly string[];
+   hasArrangementClips: boolean;
+ }
+ 
+@@ -292,12 +294,12 @@ function ArrangementLaneViewInner({
+   envelopeMode = false,
+   waveformZoom = 1,
+   timelineWindow,
+-  clips,
++  committedLaneClips,
+   pxPerSecond,
+-  laneSources,
++  collection,
++  sourcePeaks,
++  videoSources,
+   sourceDurations,
+-  laneGhosts,
+-  laneGhostTitles,
+   hasArrangementClips,
+ }: ArrangementLaneViewProps) {
+   const {
+@@ -331,6 +333,41 @@ function ArrangementLaneViewInner({
+     dropLibrarySource,
+     setClipLaneDrag,
+   } = useArrangementActions();
++  const laneTrackId = track.id;
++  const clips = useStore(
++    useArrangementPreviewStore(),
++    useShallow((state) =>
++      state.preview
++        ? selectPreviewLaneClips(state.preview, state.preview, laneTrackId)
++        : committedLaneClips,
++    ),
++  );
++  const laneGhosts = useArrangementClipLaneDrag(
++    useShallow((state) => selectLaneDragGhosts(state.drag, laneTrackId)),
++  );
++  const laneSources = useMemo(() => {
++    const sources = new Map<string, ArrangementLaneSource>();
++    for (const clip of clips) {
++      if (!sources.has(clip.sourceId)) {
++        sources.set(clip.sourceId, {
++          title: laneSourceTitle(clip.sourceId, collection, videoSources),
++          peaks: sourcePeaks.get(clip.sourceId),
++          videoAudio: videoSources.get(clip.sourceId)?.audio,
++        });
++      }
++    }
++    return sources;
++  }, [clips, collection, sourcePeaks, videoSources]);
++  const laneGhostTitles = useMemo(() => {
++    if (laneGhosts.length === 0) {
++      return NO_LANE_GHOST_TITLES;
++    }
++    const arrangementClips = getArrangement().clips;
++    return laneGhosts.map((ghost) => {
++      const ghostClip = arrangementClips.find((entry) => entry.id === ghost.clipId);
++      return ghostClip ? laneSourceTitle(ghostClip.sourceId, collection, videoSources) : '';
++    });
++  }, [laneGhosts, getArrangement, collection, videoSources]);
+   const [isFileDragOver, setIsFileDragOver] = useState(false);
+   const [libraryGhost, setLibraryGhost] = useState<LibraryDropGhost | null>(null);
+   const [isHeightDragging, setIsHeightDragging] = useState(false);
+@@ -1306,43 +1343,18 @@ export function ArrangementLane(props: ArrangementLaneProps) {
+   const { arrangement, collection, sourcePeaks, sourceDurations, pxPerSecond, videoSources } =
+     useArrangement();
+   const trackId = props.track.id;
+-  const clips = useArrangementPreviewLaneClips(arrangement, trackId);
+-  const laneGhosts = useArrangementClipLaneDrag(
+-    useShallow((state) => selectLaneDragGhosts(state.drag, trackId)),
+-  );
+-  const laneSources = useMemo(() => {
+-    const sources = new Map<string, ArrangementLaneSource>();
+-    for (const clip of clips) {
+-      if (!sources.has(clip.sourceId)) {
+-        sources.set(clip.sourceId, {
+-          title: laneSourceTitle(clip.sourceId, collection, videoSources),
+-          peaks: sourcePeaks.get(clip.sourceId),
+-          videoAudio: videoSources.get(clip.sourceId)?.audio,
+-        });
+-      }
+-    }
+-    return sources;
+-  }, [clips, collection, sourcePeaks, videoSources]);
+-  const arrangementClips = arrangement.clips;
+-  const laneGhostTitles = useMemo(
+-    () =>
+-      laneGhosts.length === 0
+-        ? NO_LANE_GHOST_TITLES
+-        : laneGhosts.map((ghost) => {
+-            const ghostClip = arrangementClips.find((entry) => entry.id === ghost.clipId);
+-            return ghostClip ? laneSourceTitle(ghostClip.sourceId, collection, videoSources) : '';
+-          }),
+-    [laneGhosts, arrangementClips, collection, videoSources],
+-  );
++  const committedLaneClips = useShallow((committed: Arrangement) =>
++    selectPreviewLaneClips(null, committed, trackId),
++  )(arrangement);
+   return (
+     <ArrangementLaneView
+       {...props}
+-      clips={clips}
++      committedLaneClips={committedLaneClips}
+       pxPerSecond={pxPerSecond}
+-      laneSources={laneSources}
++      collection={collection}
++      sourcePeaks={sourcePeaks}
++      videoSources={videoSources}
+       sourceDurations={sourceDurations}
+-      laneGhosts={laneGhosts}
+-      laneGhostTitles={laneGhostTitles}
+       hasArrangementClips={arrangement.clips.length > 0}
+     />
+   );
+diff --git a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+index a4c7cf4..ed1773b 100644
+--- a/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
++++ b/app/lib/arrangement/__tests__/drag-preview-render.test.tsx
+@@ -433,7 +433,8 @@ describe('PERF-DRAG-PREVIEW stage a — trim and same-lane move previews', () =>
+     expect(rendersOf('StudioWorkspace')).toBe(0);
+     expect(rendersOf('ArrangementTransportViewInner')).toBe(0);
+     expect(rendersOf('ArrangementLibraryViewInner')).toBe(0);
+-    expect(rendersOf('ArrangementLane')).toBe(2);
++    expect(rendersOf('ArrangementLaneViewInner')).toBe(2);
++    expect(rendersOf('ArrangementLane')).toBe(0);
+     expect(rendersOf('ArrangementClipViewInner')).toBeGreaterThan(0);
+     expect(rendersOf('ArrangementClipViewInner')).toBe(2);
+     expect(root.dataset.clipStart).toBe('5.000');
+@@ -607,7 +608,8 @@ describe('PERF-DRAG-PREVIEW stage a — trim and same-lane move previews', () =>
+     expect(rendersOf('StudioWorkspace')).toBe(0);
+     expect(rendersOf('ArrangementTransportViewInner')).toBe(0);
+     expect(rendersOf('ArrangementLibraryViewInner')).toBe(0);
+-    expect(rendersOf('ArrangementLane')).toBe(2);
++    expect(rendersOf('ArrangementLaneViewInner')).toBe(2);
++    expect(rendersOf('ArrangementLane')).toBe(0);
+     expect(textOf(view, 'arrangement-lane-move-hint')).toBe(
+       'Shift — lock the time; only the track changes',
+     );
+@@ -975,7 +977,8 @@ describe('PERF-DRAG-PREVIEW stage c1 — the project end during a same-lane move
+     expect(rendersOf('ArrangementRuler')).toBe(0);
+     expect(rendersOf('ArrangementTransportViewInner')).toBe(0);
+     expect(rendersOf('ArrangementProjectEndTextInner')).toBe(2);
+-    expect(rendersOf('ArrangementLane')).toBe(2);
++    expect(rendersOf('ArrangementLaneViewInner')).toBe(2);
++    expect(rendersOf('ArrangementLane')).toBe(0);
+     expect(rendersOf('ArrangementOverviewWithPreviewInner')).toBe(2);
+     expect(textOf(view, 'arrangement-project-end')).toContain('00:12.750');
+     expect(overview.dataset.extent).toBe('12.750');
+@@ -1245,7 +1248,8 @@ describe('PERF-DRAG-PREVIEW stage c2b-i — the overview and the track meters sk
+     pointerMoveTo(audio.root, 1, 80);
+     pointerMoveTo(audio.root, 1, 120);
+     expect(rendersOf('ArrangementClipViewInner')).toBe(2);
+-    expect(rendersOf('ArrangementLane')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementLaneViewInner')).toBeGreaterThan(0);
++    expect(rendersOf('ArrangementLane')).toBe(0);
+     expect(audio.root.dataset.fadeIn).toBe('3.000');
+     expect(previewOf(api)).not.toBeNull();
+     expect(rendersOf('ArrangementOverviewWithPreviewInner')).toBe(0);
