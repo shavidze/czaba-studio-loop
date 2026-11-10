@@ -598,3 +598,35 @@ Saba flagged the grey hover line between lanes. It's the lane resize separator (
 **Fix:** Reduce to `h-px hover:bg-foreground/20` or `h-0.5 hover:bg-foreground/25` — barely visible, cursor change is the primary affordance (like Ableton). The handle's hit area can stay at `h-1.5` using padding, but the visible line should be subtle.
 
 **Priority:** Low — fits in STUDIO-VIS or DUX-R block.
+
+## ARCH-SPLIT: large file split rounds (Saba, 2026-11-10)
+
+### Mandate
+StudioWorkspace.tsx (3,718), ArrangementContext.tsx (5,327), and other oversized files must be split. This is a dedicated task block — not ad-hoc.
+
+### Scheduling
+Insert **ARCH-SPLIT** block into `post_current_stage_queue` **after SYS-3 and before STEM-LANES**. Estimated 3-5 rounds.
+
+### Stages (B plans details after frontend-architect audit)
+1. **ARCH-SPLIT-1:** ArrangementContext.tsx (5,327 → multiple contexts/hooks)
+2. **ARCH-SPLIT-2:** StudioWorkspace.tsx (3,718 → extracted components)
+3. **ARCH-SPLIT-3:** ArrangementDetailPanel.tsx + ArrangementLane.tsx + StudioContext.tsx
+4. **ARCH-SPLIT-REGRESSION:** Full regression round — e2e smoke + Playwright browser verification of every key flow
+
+### Rules
+- Every split round MUST include unit tests for the extracted modules
+- After the entire ARCH-SPLIT block: a **mandatory REGRESSION round** with full browser verification
+- B consults `frontend-architect` and `tech-lead` for every split
+- No behavior change allowed — pure structural refactor. C verifies identical behavior before and after
+- The file size primitive (REACT_CONTEXT.md) applies from this point forward
+
+### Other antipatterns to audit
+B also checks during ARCH-SPLIT planning:
+- Circular imports between arrangement/ components
+- Props drilling depth (>3 levels = extract context or composition)
+- Duplicated logic across components (extract to shared hooks/utils)
+- Any component rendering >20 children directly (extract groups)
+
+### Evidence
+- `docs/technical/studio-real-workspace/architecture-file-size-audit-2026-11-10.md` (frontend-architect report, pending)
+- `docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md` (product-designer report)
