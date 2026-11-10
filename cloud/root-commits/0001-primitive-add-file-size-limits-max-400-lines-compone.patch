@@ -1,0 +1,56 @@
+From 17168878bf89fdbcd6748a9c349ed4b8cbf27521 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 10 Nov 2026 15:27:29 +0400
+Subject: [PATCH] primitive: add file size limits (max 400 lines/component,
+ 500/context)
+
+Root cause: loop agents had no size gate, so StudioWorkspace grew from
+434 to 3,718 lines in one month. New rule: B checks before planning,
+C blocks gate if violated. "One in, one out" for existing oversized files.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01W9QHn1PgAoQ1odjwWaCdkX
+---
+ .claude/primitives/REACT_CONTEXT.md | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/.claude/primitives/REACT_CONTEXT.md b/.claude/primitives/REACT_CONTEXT.md
+index c3a6e5e..b61b9c9 100644
+--- a/.claude/primitives/REACT_CONTEXT.md
++++ b/.claude/primitives/REACT_CONTEXT.md
+@@ -182,3 +182,32 @@ useEffect(() => {
+ export type { AuthContextValue, AuthState }
+ export { AuthProvider, useAuth }
+ ```
++
++## File Size Limits (Saba, 2026-11-10)
++
++**Hard limits — enforced by B and C:**
++
++| File type | Max lines | Action when exceeded |
++|-----------|-----------|---------------------|
++| Component (.tsx) | **400 lines** | B must plan extraction in the same round |
++| Context (.tsx) | **500 lines** | B must split into separate contexts |
++| Hook (.ts) | **300 lines** | B must split into composable hooks |
++| Utility (.ts) | **200 lines** | B must split by domain |
++| Test (.test.ts/tsx) | **1000 lines** | Acceptable (tests are verbose) |
++
++**How it works:**
++1. Before A starts implementation, B checks: will the target file exceed the limit after this change?
++2. If yes, B's plan MUST include an extraction step — move existing code to a new file first, then add the new code
++3. C verifies: no file exceeds its limit after the round (except tests)
++4. If C finds a violation, it is a Medium finding that blocks the gate
++
++**Existing violations (tech debt, to be resolved):**
++- `ArrangementContext.tsx`: 5,327 lines (limit 500) — needs architecture redesign
++- `StudioWorkspace.tsx`: 3,718 lines (limit 400) — needs component extraction
++- `ArrangementDetailPanel.tsx`: 1,423 lines (limit 400)
++- `ArrangementLane.tsx`: 1,371 lines (limit 400)
++- `StudioContext.tsx`: 1,755 lines (limit 500)
++
++These are tracked in `docs/technical/studio-real-workspace/architecture-file-size-audit-2026-11-10.md` and will be resolved when the frontend-architect agent provides the split plan.
++
++**The rule applies to NEW code only** — agents must not add lines to an already-oversized file without extracting at least as many lines first ("one in, one out" until the file is under the limit).
+-- 
+2.43.0
+
