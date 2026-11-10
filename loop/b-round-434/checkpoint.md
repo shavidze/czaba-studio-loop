@@ -1,0 +1,14 @@
+# B round 434 -> 435 planning checkpoint
+- step 0 DONE: tasks/round-434.md archived (cmp same); before-copies in b-round-434/*-before-435.*; HEAD 8233840 clean.
+- advisor consulted (orientation done). Next round = RETRO 435 (window 420-434).
+- step 1: accept round 434 from own re-runs (in progress)
+- step 1 DONE: L57 OK (b-round-434/l57-check-c434.txt); mutants cmp identical; recompare after ALL OK / head NOT ALL OK (b-round-434/recheck/); auth measured pass true; gate verify built, published 8233840.
+- step 2: backlog acceptance update (next), then retro data scripts
+- step 2a DONE: backlog v418 (D-29z1538/1539); snapshot b-round-434/backlog-retro-input.json = retro data input
+- step 3 DONE: retro data b-round-434/data/* (scripts b-round-434/*.py, misc-outputs.sh; gate-reviews.py rewritten); screens b-round-434/screens (12 png, screen435.json; mock stopped)
+- step 4: consults tech-lead + product-designer (next), then write retro-435.md, lessons, screen-review-435.md, Saba questions file, backlog part 2, feature-status, task, b-round-434.md, b-next.json
+- step 4 running: consults launched (tech-lead, product-designer, background). Drafted: user-review/questions-retro-435.md, b-round-434/claims-435.sh, r435-tree-sha256.txt (1344, rc0), head/status at planning.
+- screen-review-435.md + consult-product-designer.md written; questions Q4 added. Waiting tech-lead.
+- step 5 DONE: lessons (L37,L56,l.3; 60 lines), tools/l57-check.py enum, backlog v419 (D-29z1540..1543), questions-retro-435 Q1-Q4 aligned. Next: retro-435.md, feature-status, cited-artifacts, task, claims run, b-round-434.md, b-next.json
+- step 6 DONE: current-task.md (round 435), claims rerun (stderr 0, no MISSING), b-round-434.md, b-next.json. Next: advisor close review.
+- close-review fixes applied; claims rerun.

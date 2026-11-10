@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-10T15:43:40.886Z",
-  "current_task": "Round 433: SABA-B-12 stage 3 - the shortcut sheet search hides the native cancel and draws its own Clear search button (Library pattern; always refocuses search; Esc still closes); rows SC1-SC6 + SF1-SF2; doc 281 (current-task.md; sketch b-round-432/sketch-433.patch.txt)",
+  "_generatedUtc": "2026-11-10T16:25:43.466Z",
+  "current_task": "Round 434: SABA-B-12 stage 3b - the shortcut sheet and Export dialog use the Studio scrollbar instead of the store teal styled-scrollbar (Modal scrollbarClassName prop, STUDIO_DIALOG_SCROLLBAR_CLASS); rows DS1-DS4; doc 282 (current-task.md; sketch b-round-433/sketch-434.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6483,7 +6483,7 @@
       "id": "SABA-B-12",
       "severity": "medium",
       "origin": "Saba 2026-11-10 visual feedback",
-      "status": "in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1529, D-29z1530): stages 1, 2a, 2b passed C and are published (5a30894, 1197dcb, 1a417fb); stage 3 search clear = round 433; stage 3b dialog scrollbar next; stage 4 selects in REVIEW-RECOMMENDATIONS",
+      "status": "in_progress (D-29z1515, D-29z1521, D-29z1523, D-29z1527, D-29z1532, D-29z1536): stages 1, 2a, 2b, 3 passed C and are published (5a30894, 1197dcb, 1a417fb, 0c22ac9); stage 3b dialog scrollbar = round 434; stage 4 selects in REVIEW-RECOMMENDATIONS",
       "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
       "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
       "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
@@ -6508,14 +6508,14 @@
           "id": "SABA-B-12-SEARCH-CANCEL",
           "severity_audit": "n/a (audit missed it)",
           "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
-          "status": "in_progress (D-29z1530): round 433, sketch b-round-432/sketch-433.patch.txt"
+          "status": "complete (D-29z1532): C round 433 PASS, published 0c22ac9"
         },
         {
           "stage": "3b",
           "id": "SABA-B-12-DIALOG-SCROLLBAR",
           "severity_audit": "n/a (audit missed it)",
           "what": "Modal styled-scrollbar draws a teal thin standard scrollbar in the Studio shortcut sheet (and the Export dialog if it scrolls); give Studio dialogs the Studio scrollbar",
-          "status": "planned after stage 3 (D-29z1529)"
+          "status": "in_progress (D-29z1536): round 434"
         },
         {
           "stage": 4,
@@ -6548,36 +6548,19 @@
       "title": "Export bar resets to 0 between phases (render -> wav, load -> mp3); Live 12.4.5b11 beta notes moved "
     },
     {
-      "id": "SABA-B-12-SEARCH-CANCEL",
-      "severity": "medium",
-      "origin": "B inventory, part of SABA-B-12 (stage 3)",
-      "kind": "saba_approved_task",
-      "status": "in_progress (D-29z1530): round 433, sketch b-round-432/sketch-433.patch.txt",
-      "title": "Shortcut sheet search shows Chromium's native blue cancel; hide it and draw the app Clear search button (Library pattern)",
-      "evidence": "b-round-432/probe/head/clear.json, head/1440x900-typed.png",
-      "added": "2026-11-10 B round 432 -> 433 planning"
-    },
-    {
       "id": "SABA-B-12-DIALOG-SCROLLBAR",
       "severity": "medium",
       "origin": "B inventory, part of SABA-B-12 (stage 3b)",
       "kind": "saba_approved_task",
-      "status": "planned (D-29z1529): next UI round after stage 3",
+      "status": "in_progress (D-29z1536): round 434, sketch b-round-433/sketch-434.patch.txt",
       "title": "Studio dialogs (shortcut sheet; Export dialog if it scrolls) inherit Modal styled-scrollbar: teal thin standard scrollbar (computed rgba(18,217,200,0.4)); give them the Studio scrollbar without changing the shared store Modal default",
       "evidence": "b-round-432/probe/head/sheet.json (scrollHeight 1368 vs 808/646; scrollbarColor rgba(18, 217, 200, 0.4) rgba(0, 0, 0, 0); scrollbarWidth thin); Modal.tsx l.110; app/styles/base/utilities.css l.109-113",
       "repro": "/studio-lab, press ?, scroll the sheet (headed Chromium or ignoreDefaultArgs --hide-scrollbars)",
-      "added": "2026-11-10 B round 432 -> 433 planning"
+      "added": "2026-11-10 B round 432 -> 433 planning",
+      "evidence_r434": "b-round-433/probe/head/scrollbar.json, compare-head.txt; Export dialog also scrolls at 1280x720"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 424,
-      "task": "current-task.md",
-      "decision": "D-29z1480, D-29z1481",
-      "type": "PERF-FIX-R423-LANE-SHELL (fix-up of C-R423-01)",
-      "status": "c_pass (D-29z1483): C PASS c-round-424.json, 0 bugs, browserVerified true; gate 424 published f6c76f4",
-      "note": "baseline 875ff37 clean; sketch b-round-423/sketch-424.patch.txt; claims b-round-423/claims-424.sh; perf sketch run b-round-423/perf-sketch/"
-    },
     {
       "round": 425,
       "task": "current-task.md",
@@ -6647,8 +6630,16 @@
       "task": "current-task.md",
       "decision": "D-29z1530",
       "type": "SABA-B-12 stage 3 (shortcut sheet search clear)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1532): gate 433 0c22ac9",
       "note": "baseline 1a417fb clean; sketch b-round-432/sketch-433.patch.txt; claims b-round-432/claims-433.sh"
+    },
+    {
+      "round": 434,
+      "task": "current-task.md",
+      "decision": "D-29z1536",
+      "type": "SABA-B-12 stage 3b (Studio dialog scrollbar)",
+      "status": "dispatched",
+      "note": "baseline 0c22ac9 clean; sketch b-round-433/sketch-434.patch.txt; claims b-round-433/claims-434.sh"
     }
   ],
   "other_keys": [
