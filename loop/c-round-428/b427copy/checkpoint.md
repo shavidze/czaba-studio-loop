@@ -1,0 +1,12 @@
+# B round 427->428 checkpoint
+- step1 archived tasks/round-427.md and before-copies (2026-11-10T09:05:38Z)
+- step2 C427 accepted: compare ALL OK 18 re-run, mutant summary identical, L57 OK (b-round-427/l57-check-c427.txt); gate427 266/3984 published ffae71c; review arch note -> confirmedBy SIG-R426
+- step3 HEAD probe 2b-ii: SCLOSE reopen defect, NSEND clipboard x4 defect; XDONE/XMODALX/XEXPORT/SFOOTER/GMENU no defect (b-round-427/probe/head)
+- step4 sketch fc3d0b63 (4 src + 3 tests, rows HS1 HS2 HN1 HX1 HX2 HX3), mutants 7 lines (b-round-427/mutants/summary.txt)
+- step5 typecheck/lint/biome rc0; covering 59/996; full run done
+- step6 browser HEAD vs sketch ALL OK (13 cells) probe/compare.txt; 5174 stopped, scratch vite.config reverted; next tech-lead review
+- step7 TL review approve-with-lows on fc3d0b63; test-only delta (HQ rename, HQ1 search assert, HX1 disabled) -> fa75fa82; mutants rerun 7 lines; covering rerun
+- step8 delta re-review approve; sketch-review.md; backlog v406 (D-29z1498..1503)
+- step9 task, feature-status, b-next, b-round-427.md written; waiting full suite then claims planning+sketch outputs
+- step10 claims planning/sketch outputs (diff saved), full 266/3990 final; store clean; next advisor close
+- step11 advisor close fixes applied (auth recipe run, GMENU confirmedBy C-R301-01, XEXPORT compare hardening, wording); backlog v407 D-29z1504; claims rerun; DONE

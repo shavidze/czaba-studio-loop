@@ -1,0 +1,286 @@
+diff --git a/app/components/arrangement/ArrangementExportDialog.tsx b/app/components/arrangement/ArrangementExportDialog.tsx
+index 73af85e..3b45f92 100644
+--- a/app/components/arrangement/ArrangementExportDialog.tsx
++++ b/app/components/arrangement/ArrangementExportDialog.tsx
+@@ -16,6 +16,7 @@ import { arrangementHasVideoFades } from '~/lib/arrangement/video-fades';
+ import { cn } from '~/lib/utils';
+ import type { WorkspaceVideoSource } from '~/types/arrangement';
+ import { ArrangementTimeText } from './ArrangementTimeText';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ interface ArrangementExportDialogProps {
+   isOpen: boolean;
+@@ -588,6 +589,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                   type="button"
+                   data-testid="arrangement-export-cancel"
+                   onClick={cancelExport}
++                  onKeyDown={preventRepeatedEnterKeyDown}
+                   className="rounded-md border border-transparent bg-foreground/5 px-4 py-2 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12"
+                 >
+                   {studioExportStrings.cancelButton}
+@@ -597,11 +599,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 ref={closeButtonRef}
+                 type="button"
+                 onClick={handleClose}
+-                onKeyDown={(event) => {
+-                  if (event.key === 'Enter' && event.repeat) {
+-                    event.preventDefault();
+-                  }
+-                }}
++                onKeyDown={preventRepeatedEnterKeyDown}
+                 disabled={isRendering}
+                 className="rounded-md border border-transparent bg-foreground/5 px-4 py-2 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:opacity-40"
+               >
+@@ -621,6 +619,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                     void exportMp3(renderWindow, { includeWav: true });
+                   }
+                 }}
++                onKeyDown={preventRepeatedEnterKeyDown}
+                 disabled={isEmpty || isRendering || isDecoding}
+                 className="rounded-md border border-brand bg-foreground/5 px-4 py-2 text-sm font-medium text-brand motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:cursor-not-allowed disabled:opacity-40"
+               >
+diff --git a/app/components/arrangement/ArrangementShortcutSheet.tsx b/app/components/arrangement/ArrangementShortcutSheet.tsx
+index 885b131..ce38119 100644
+--- a/app/components/arrangement/ArrangementShortcutSheet.tsx
++++ b/app/components/arrangement/ArrangementShortcutSheet.tsx
+@@ -4,6 +4,7 @@ import { Modal } from '~/components/ui';
+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';
+ import { filterStudioShortcutGroups } from '~/lib/arrangement/shortcuts';
+ import { studioShortcutSheetStrings } from '~/lib/arrangement/strings';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ interface ArrangementShortcutSheetProps {
+   isOpen: boolean;
+@@ -129,6 +130,7 @@ export function ArrangementShortcutSheet({
+           <button
+             type="button"
+             onClick={onClose}
++            onKeyDown={preventRepeatedEnterKeyDown}
+             aria-label={studioShortcutSheetStrings.close}
+             title={studioShortcutSheetStrings.close}
+             className="shrink-0 rounded-sm p-1 text-muted hover:text-foreground"
+diff --git a/app/components/arrangement/StudioNarrowScreen.tsx b/app/components/arrangement/StudioNarrowScreen.tsx
+index 753b512..40f3183 100644
+--- a/app/components/arrangement/StudioNarrowScreen.tsx
++++ b/app/components/arrangement/StudioNarrowScreen.tsx
+@@ -2,6 +2,7 @@ import { Link } from '@remix-run/react';
+ import { ArrowLeft } from 'lucide-react';
+ import { useEffect, useId, useRef, useState } from 'react';
+ import { cn } from '~/lib/utils';
++import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ const STUDIO_NARROW_PREVIEW_URL = '/middle-east.mp3';
+ const STUDIO_NARROW_PREVIEW_TITLE = 'Middle East — public preview';
+@@ -127,6 +128,7 @@ export function StudioNarrowScreen({
+         <button
+           type="button"
+           onClick={sendStudioLink}
++          onKeyDown={preventRepeatedEnterKeyDown}
+           className="mt-6 self-start rounded-sm border border-outline px-3 py-2 text-sm font-medium text-foreground hover:bg-surface"
+         >
+           Send link
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index 01e292f..c007b7c 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -3678,6 +3678,7 @@ export function StudioWorkspace() {
+             ref={shortcutButtonRef}
+             type="button"
+             onClick={() => setIsShortcutSheetOpen(true)}
++            onKeyDown={preventRepeatedEnterKeyDown}
+             aria-label={studioShortcutSheetStrings.footerButtonLabel}
+             title={studioShortcutSheetStrings.footerButtonLabel}
+             aria-keyshortcuts={findStudioShortcut('shortcuts')?.ariaKeyShortcuts}
+diff --git a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx b/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx
+index f9915e5..3e6e3a4 100644
+--- a/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/export-cancel-ui.test.tsx
+@@ -697,3 +697,76 @@ describe('SRW-20 stage 3b-1 cancel between the settled encode and the downloads
+     expect(resetEncoderMock).toHaveBeenCalledTimes(1);
+   });
+ });
++
++function pressHeldEnter(target: Element, repeat: boolean): boolean {
++  const notPrevented = fireEvent.keyDown(target, { key: 'Enter', code: 'Enter', repeat });
++  if (notPrevented && target instanceof HTMLButtonElement && !target.disabled) {
++    fireEvent.click(target);
++  }
++  return notPrevented;
++}
++
++describe(
++  'SYS-2 stage 4 (2b-ii-a): a held Enter acts once on the export dialog buttons (D-29z1503)',
++  {
++    timeout: 15_000,
++  },
++  () => {
++    beforeEach(() => {
++      cancelEncoderGate.release();
++      setUpCancelEnvironment();
++    });
++    afterEach(tearDownCancelEnvironment);
++
++    it('HX1 a repeated Enter that reaches the Export button before a fresh press is prevented; the fresh Enter starts one render and disables the button', async () => {
++      const controls = controlledRenders();
++      const { view } = await mountCancelDialog();
++      const primary = dialogButton(view, WAV_BUTTON);
++      act(() => primary.focus());
++      expect(pressHeldEnter(primary, true)).toBe(false);
++      expect(controls).toHaveLength(0);
++      await act(async () => {
++        expect(pressHeldEnter(primary, false)).toBe(true);
++        await Promise.resolve();
++      });
++      expect(controls).toHaveLength(1);
++      expect(primary.disabled).toBe(true);
++      expect(cancelButton(view)).not.toBeNull();
++    });
++
++    it('HX2 held Enter on Cancel cancels once; focus moves to Done and the repeats there keep the dialog open', async () => {
++      const controls = controlledRenders();
++      const { api, view } = await mountCancelDialog();
++      await clickExport(view, WAV_BUTTON);
++      const control = controlAt(controls, 0);
++      const cancel = requireCancelButton(view);
++      act(() => cancel.focus());
++      expect(pressHeldEnter(cancel, true)).toBe(false);
++      expect(signalOf(control).aborted).toBe(false);
++      expect(cancelButton(view)).not.toBeNull();
++      await act(async () => {
++        expect(pressHeldEnter(cancel, false)).toBe(true);
++        await Promise.resolve();
++      });
++      expect(live(api).exportState).toEqual(CANCELLED_PLAIN);
++      expect(signalOf(control).aborted).toBe(true);
++      const done = dialogButton(view, studioExportStrings.closeButton);
++      expect(document.activeElement).toBe(done);
++      for (let held = 0; held < 3; held++) {
++        expect(pressHeldEnter(done, true)).toBe(false);
++      }
++      expect(view.queryByRole('dialog')).not.toBeNull();
++      expect(controls).toHaveLength(1);
++    });
++
++    it('HX3 held Enter on Done closes the dialog once; a repeat alone does not close it', async () => {
++      const { view } = await mountCancelDialog();
++      const done = dialogButton(view, studioExportStrings.closeButton);
++      act(() => done.focus());
++      expect(pressHeldEnter(done, true)).toBe(false);
++      expect(view.queryByRole('dialog')).not.toBeNull();
++      expect(pressHeldEnter(done, false)).toBe(true);
++      expect(view.queryByRole('dialog')).toBeNull();
++    });
++  },
++);
+diff --git a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+index c8a7838..e7f55e4 100644
+--- a/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/shortcut-sheet-ui.test.tsx
+@@ -645,3 +645,57 @@ describe('SABA-B-10b transport rows in the shortcut sheet', { timeout: 20_000 },
+     expect(rowKeys(marker)).toEqual(['M']);
+   });
+ });
++
++function pressHeldEnter(target: Element, repeat: boolean): boolean {
++  const notPrevented = fireEvent.keyDown(target, { key: 'Enter', code: 'Enter', repeat });
++  if (notPrevented && target instanceof HTMLButtonElement && !target.disabled) {
++    fireEvent.click(target);
++  }
++  return notPrevented;
++}
++
++describe(
++  'SYS-2 stage 4 (2b-ii-a): a held Enter acts once on the shortcut sheet buttons (D-29z1503)',
++  {
++    timeout: 20_000,
++  },
++  () => {
++    it('HQ1 held Enter on the footer Shortcuts button opens the sheet once', async () => {
++      const { view } = await mountSheetWorkspace();
++      const footer = footerButton(view);
++      act(() => footer.focus());
++      expect(pressHeldEnter(footer, true)).toBe(false);
++      expect(sheet(view)).toBeNull();
++      expect(pressHeldEnter(footer, false)).toBe(true);
++      expect(sheet(view)).toBeTruthy();
++      const search = sheetSearch(view);
++      expect(document.activeElement).toBe(search);
++      for (let held = 0; held < 3; held++) {
++        expect(pressHeldEnter(search, true)).toBe(true);
++      }
++      expect(sheet(view)).toBeTruthy();
++      expect(sheetSearch(view).value).toBe('');
++      expect(footerButton(view).getAttribute('aria-expanded')).toBe('true');
++    });
++
++    it('HQ2 held Enter on the sheet Close closes it once; focus returns to the footer button and the repeats do not reopen it', async () => {
++      const { view } = await mountSheetWorkspace();
++      const footer = footerButton(view);
++      act(() => footer.focus());
++      fireEvent.click(footer);
++      const close = sheetClose(view);
++      act(() => close.focus());
++      expect(pressHeldEnter(close, true)).toBe(false);
++      expect(sheet(view)).toBeTruthy();
++      expect(pressHeldEnter(close, false)).toBe(true);
++      expect(sheet(view)).toBeNull();
++      expect(document.activeElement).toBe(footerButton(view));
++      for (let held = 0; held < 3; held++) {
++        expect(pressHeldEnter(footerButton(view), true)).toBe(false);
++      }
++      expect(sheet(view)).toBeNull();
++      expect(footerButton(view).getAttribute('aria-expanded')).toBe('false');
++      expect(document.activeElement).toBe(footerButton(view));
++    });
++  },
++);
+diff --git a/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx b/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
+index c9a5ee4..299a442 100644
+--- a/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
+@@ -114,6 +114,14 @@ afterEach(() => {
+   document.body.innerHTML = '';
+ });
+ 
++function pressHeldEnter(target: Element, repeat: boolean): boolean {
++  const notPrevented = fireEvent.keyDown(target, { key: 'Enter', code: 'Enter', repeat });
++  if (notPrevented && target instanceof HTMLButtonElement && !target.disabled) {
++    fireEvent.click(target);
++  }
++  return notPrevented;
++}
++
+ describe('FIX-PD-1c studio-lab narrow-window gate (D-29z725, R1–R8)', { timeout: 15_000 }, () => {
+   it('NG1: a narrow client render shows only the narrow state and never mounts the provider', () => {
+     installViewportStub(false);
+@@ -351,6 +359,30 @@ describe('FIX-PD-1c studio-lab narrow-window gate (D-29z725, R1–R8)', { timeou
+       expect(screen.queryByLabelText('Studio link')).toBeNull();
+     });
+ 
++    it('HN1: held Enter on Send link copies once and keeps focus; the repeats are prevented (SYS-2 stage 4, D-29z1503)', async () => {
++      const writeText = vi.fn(() => Promise.resolve());
++      stubNavigator('share', undefined);
++      stubNavigator('clipboard', { writeText });
++      const view = renderNarrowScreen();
++      const send = screen.getByRole('button', { name: 'Send link' });
++      act(() => send.focus());
++      await act(async () => {
++        expect(pressHeldEnter(send, true)).toBe(false);
++      });
++      expect(writeText).not.toHaveBeenCalled();
++      await act(async () => {
++        expect(pressHeldEnter(send, false)).toBe(true);
++      });
++      for (let held = 0; held < 3; held++) {
++        await act(async () => {
++          expect(pressHeldEnter(send, true)).toBe(false);
++        });
++      }
++      expect(writeText).toHaveBeenCalledTimes(1);
++      expect(view.status()).toBe('Link copied');
++      expect(document.activeElement).toBe(send);
++    });
++
+     it('NG7d: a failed clipboard write shows the error and a focused read-only Studio link field', async () => {
+       const writeText = vi.fn(() => Promise.reject(new Error('denied')));
+       stubNavigator('share', undefined);

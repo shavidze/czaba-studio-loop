@@ -1,0 +1,54 @@
+96c96
+< index 0000000..be56088
+---
+> index 0000000..c55ec0e
+99c99
+< @@ -0,0 +1,60 @@
+---
+> @@ -0,0 +1,66 @@
+108,109c108,113
+< +const INLINE_REPEATED_ENTER_PATTERN =
+< +  /\.key\s*===\s*['"]Enter['"]\s*&&\s*[\w.]*\.repeat\b|[\w.]*\.repeat\s*&&\s*[\w.]*\.key\s*===\s*['"]Enter['"]/g;
+---
+> +const ENTER_KEY = String.raw`(?:[\w.?]*\bkey\s*={2,3}\s*['"\x60]Enter['"\x60]|['"\x60]Enter['"\x60]\s*={2,3}\s*[\w.?]*\bkey\b)`;
+> +const REPEAT = String.raw`[\w.?]*\brepeat\b`;
+> +const INLINE_REPEATED_ENTER_PATTERN = new RegExp(
+> +  `${ENTER_KEY}\\s*&&\\s*${REPEAT}|${REPEAT}\\s*&&\\s*${ENTER_KEY}`,
+> +  'g',
+> +);
+132,137c136,139
+< +      const lines = readFileSync(file, 'utf-8').split('\n');
+< +      lines.forEach((line, index) => {
+< +        if (line.match(INLINE_REPEATED_ENTER_PATTERN)) {
+< +          hits.push(`${path}:${index + 1}`);
+< +        }
+< +      });
+---
+> +      const text = readFileSync(file, 'utf-8');
+> +      for (const match of text.matchAll(INLINE_REPEATED_ENTER_PATTERN)) {
+> +        hits.push(`${path}:${text.slice(0, match.index).split('\n').length}`);
+> +      }
+146,147c148,149
+< +    expect(readFileSync(resolve(STORE_ROOT, HELPER_PATH), 'utf-8')).toContain(
+< +      "event.key !== 'Enter' || !event.repeat",
+---
+> +    expect(readFileSync(resolve(STORE_ROOT, HELPER_PATH), 'utf-8')).toMatch(
+> +      /export function preventRepeatedEnterKeyDown\b/,
+151c153
+< +  it('HS2: the scan pattern matches both written orders and ignores the helper form', () => {
+---
+> +  it('HS2: the scan pattern matches both operand orders, ==, wrapped lines and template keys, and ignores the helper and menu forms', () => {
+155a158,160
+> +    expect(matches("if ('Enter' === event.key && event.repeat) {")).toBe(1);
+> +    expect(matches("if (event.key == 'Enter' &&\n      event.repeat) {")).toBe(1);
+> +    expect(matches('if (key === `Enter` && repeat) {')).toBe(1);
+156a162
+> +    expect(matches("if (event.key === 'Enter' || event.key === ' ') {")).toBe(0);
+161c167
+< index a0a7e3a..7b3dbd5 100644
+---
+> index a0a7e3a..2cdd9ff 100644
+201c207
+< +  it('HK3: a repeated Enter in the name editor keeps it open and adds nothing; a fresh Enter commits one marker', async () => {
+---
+> +  it('HK3: a repeated Enter in the name editor does not settle it (editor open, no marker, no undo); a fresh Enter commits one marker', async () => {

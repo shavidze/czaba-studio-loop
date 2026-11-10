@@ -1,0 +1,41 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "R428-1 SOURCE-SCOPE start+CLAIMS (stderr empty; K19 L58 OK; no NOT-FOUND; K8,K8b,K9,K9b,K9c,K17,K24,K2b,K3(1320 rc0),K4(rc0) equal sketch output; K1 ffae71c; status = 7 M + 1 ?? = 8 granted paths)",
+  "R428-2 PATCH-IDENTITY (sketch-428.patch.txt applied to git archive HEAD scratch; 7 files cmp identical to working tree; 7 diff --git headers) + UNIT 59 files 996/996 (c-round-428/a2-vitest.log)",
+  "R428-3 MUTANTS (b427copy run on clean HEAD base; summary.txt IDENTICAL to b-round-427/mutants/summary.txt, 7 lines; MU-HEAD-SRC 5 red HN1,HQ1,HQ2,HX1,HX2)",
+  "R428-4 HELD-ENTER BROWSER + FOCUS ALL OK (13 cells, 1440x900 + 1280x720, NSEND 800x700; first Enter acts, 3 repeats change nothing, firstEqualsHead, 0 page errors; focus SFOOTER->Search shortcuts, SCLOSE->Keyboard shortcuts (?), XDONE/XMODALX->Export, XEXPORT->Done 1 render 1 download, NSEND->Send link; focusVisible true, outline solid; GMENU recorded BODY)",
+  "R428-5 PER-PRESS NEIGHBOURS items 1-3 (c-round-428/probe/neighbours.json): ? opens sheet once, Esc closes, focus returns to footer button; mouse click open/Close-click works; one clip, Export -> exactly 1 offline render + 1 download, Done closes dialog; 0 page errors. Item 4 recorded, see carried",
+  "R428-6 AUTH (fresh contexts, no credentials, 1440x900 and 1280x720: /studio-lab demo badge, auth_user null, workspace; /studio/middle-east 'Sign in required' at 0.5/3/10 s with 0 audio[src] and no workspace; /api/studio-token no-auth 401, bare 400, no token in any body)",
+  "R428-7 DOC 276 (l4 byte-exact; 7 TEMPLATE headings in order; mutant block == summary.txt 7 lines; HQ1,HQ2,HN1,HX1-HX3 exist in tests; says Export/Cancel preventive; docs 274/275 l4 unchanged; 0 'C round N pending' hits)",
+  "R428-8 SOURCE-SCOPE end (end claims == start claims; git diff HEAD 7 files 168+/5-; 8 status lines) + L57 OK"
+ ],
+ "blocked": [
+  "fake Bearer on /api/studio-token with a real backend: backend unavailable in cloud (route returns 500 'Unable to prepare Studio access', mock API not started); does not affect browserVerified"
+ ],
+ "gate": ["full vitest", "typecheck", "build", "Biome", "npm run verify"],
+ "carried": [
+  "INFO (pre-existing, not this round, same on HEAD tree): Space pressed on the focused footer 'Keyboard shortcuts (?)' button does not open the sheet because Space is the global Play shortcut (shortcuts.ts). Verified identical on a HEAD scratch dev server (c-round-428/probe/space.mjs). Not a finding; routed to B as info (task row 5 item 4 expected sheet-open on Space).",
+  "Ableton conformance: does not apply (no per-press behaviour change)"
+ ],
+ "environmentRetries": [
+  "SFOOTER 1440x900 cold-load timeout on first cell (probe/sketch-sfooter1440-attempt1-timeout.json), retried once OK",
+  "g428-auth attempt 1: legacy route at 1440 threw hydration 'Cannot read properties of null (reading useState)' (auth/g428-auth-attempt1-hydration-error.json); no workspace, 0 audio[src], no bypass. Likely caused by C's own temporary second vite server sharing node_modules; retry passed on both viewports"
+ ],
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {"checkedUtc": "2026-11-10T10:11:13.6522483Z", "round": 428, "attempt": 1, "store": 200},
+ "manifestPaths": null,
+ "missingPaths": null,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": true,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": "c-round-428/b427copy/mutants/summary.txt == b-round-427/mutants/summary.txt (7 lines identical)",
+ "gateChecksNamed": ["full vitest", "typecheck", "build", "Biome", "verify"],
+ "gateChecksRunOnSketch": "not run by C (gate); A ran typecheck/lint/biome rc0, B full vitest 266 files/3990",
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": ["covering vitest 59 files"],
+ "affectedChecksRunOnSketch": "C reran: 59 files 996/996"
+}
