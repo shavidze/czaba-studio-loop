@@ -1,0 +1,23 @@
+// usage: node narrow-probe.mjs <base> <absolute outdir> -> narrow-screen (800x900) exit link colours at rest and hover + box
+import { createRequire } from 'node:module';
+import fs from 'node:fs';
+const require = createRequire('/home/runner/czaba-project/store/package.json');
+const { chromium } = require('@playwright/test');
+const [base, out] = [process.argv[2], process.argv[3]];
+fs.mkdirSync(out, { recursive: true });
+const b = await chromium.launch(); const page = await (await b.newContext({ viewport: { width: 800, height: 900 } })).newPage();
+await page.goto(base + '/studio-lab', { waitUntil: 'domcontentloaded', timeout: 180000 });
+const exit = page.getByTestId('studio-narrow-exit');
+await exit.waitFor({ state: 'visible', timeout: 120000 });
+await page.waitForFunction(() => { const e = document.querySelector('[data-testid="studio-narrow-exit"]'); return e && e.getBoundingClientRect().width > 0; }, null, { timeout: 120000 });
+await page.mouse.move(400, 880);
+await page.waitForTimeout(800);
+const read = () => exit.evaluate((el) => { const s = el.querySelector('svg'); const r = el.getBoundingClientRect(); return { link: getComputedStyle(el).color, arrow: getComputedStyle(s).color, box: [r.x, r.y, r.width, r.height].map((v) => +v.toFixed(2)) }; });
+const res = { base, rest: await read() };
+const bb = await exit.boundingBox();
+await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await page.waitForTimeout(300);
+res.hover = await read();
+await page.screenshot({ path: `${out}/narrow-exit-hover.png`, clip: { x: bb.x - 6, y: bb.y - 6, width: bb.width + 12, height: bb.height + 12 } });
+fs.writeFileSync(`${out}/narrow-probe.json`, JSON.stringify(res));
+console.log(JSON.stringify(res));
+await b.close();

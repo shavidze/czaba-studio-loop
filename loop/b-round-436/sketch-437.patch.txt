@@ -1,0 +1,360 @@
+diff --git a/app/components/arrangement/ArrangementDetailPanel.tsx b/app/components/arrangement/ArrangementDetailPanel.tsx
+index 84cfa9d..ffdd459 100644
+--- a/app/components/arrangement/ArrangementDetailPanel.tsx
++++ b/app/components/arrangement/ArrangementDetailPanel.tsx
+@@ -1383,7 +1383,7 @@ export function ArrangementDetailPanel({
+         aria-controls={contentId}
+         onPointerDown={handleSeparatorPointerDown}
+         onKeyDown={handleSeparatorKeyDown}
+-        className={`absolute inset-x-0 top-0 z-20 h-1.5 cursor-row-resize touch-none hover:bg-foreground/50 ${STUDIO_FOCUS_RING_INSET_CLASS}`}
++        className={`absolute inset-x-0 top-0 z-20 h-1.5 cursor-row-resize touch-none after:absolute after:inset-x-0 after:top-0 after:h-px hover:after:bg-foreground/25 ${STUDIO_FOCUS_RING_INSET_CLASS}`}
+         data-testid="arrangement-detail-separator"
+       />
+       <div className="flex h-9 shrink-0 items-center gap-2 border-b border-outline px-3">
+diff --git a/app/components/arrangement/ArrangementExportDialog.tsx b/app/components/arrangement/ArrangementExportDialog.tsx
+index 557651e..923c744 100644
+--- a/app/components/arrangement/ArrangementExportDialog.tsx
++++ b/app/components/arrangement/ArrangementExportDialog.tsx
+@@ -626,7 +626,11 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 }}
+                 onKeyDown={preventRepeatedEnterKeyDown}
+                 disabled={isEmpty || isRendering || isDecoding}
+-                className="rounded-md border border-brand bg-foreground/5 px-4 py-2 text-sm font-medium text-brand motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:cursor-not-allowed disabled:opacity-40"
++                aria-busy={isRendering}
++                className={cn(
++                  'rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-brand-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-brand-hover enabled:active:bg-brand',
++                  isRendering ? 'opacity-70' : 'disabled:cursor-not-allowed disabled:opacity-40',
++                )}
+               >
+                 {isRendering
+                   ? studioExportStrings.busyButton
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 01ba672..495eb8d 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -1338,8 +1338,8 @@ function ArrangementLaneViewInner({
+         className={cn(
+           folded
+             ? `absolute inset-x-0 bottom-0 z-20 h-1.5 pointer-events-none touch-none ${STUDIO_FOCUS_RING_INSET_CLASS}`
+-            : `absolute inset-x-0 bottom-0 z-20 h-1.5 cursor-row-resize touch-none hover:bg-foreground/50 ${STUDIO_FOCUS_RING_INSET_CLASS}`,
+-          isHeightDragging && 'bg-foreground/50',
++            : `absolute inset-x-0 bottom-0 z-20 h-1.5 cursor-row-resize touch-none after:absolute after:inset-x-0 after:-bottom-px after:h-px ${STUDIO_FOCUS_RING_INSET_CLASS}`,
++          !folded && (isHeightDragging ? 'after:bg-foreground/40' : 'hover:after:bg-foreground/25'),
+         )}
+         data-testid="arrangement-track-height"
+       />
+diff --git a/app/components/arrangement/StudioNarrowScreen.tsx b/app/components/arrangement/StudioNarrowScreen.tsx
+index 40f3183..72146b8 100644
+--- a/app/components/arrangement/StudioNarrowScreen.tsx
++++ b/app/components/arrangement/StudioNarrowScreen.tsx
+@@ -92,10 +92,14 @@ export function StudioNarrowScreen({
+     >
+       <Link
+         to="/"
+-        className="inline-flex items-center gap-1 self-start rounded-sm px-1 text-sm font-medium text-muted hover:text-foreground"
++        className="group inline-flex items-center gap-1 self-start rounded-sm px-1 text-sm font-medium text-foreground"
+         data-testid="studio-narrow-exit"
+       >
+-        <ArrowLeft className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++        <ArrowLeft
++          className="size-3 shrink-0 text-muted group-hover:text-foreground"
++          strokeWidth={2}
++          aria-hidden="true"
++        />
+         CZABA
+       </Link>
+       <div className="mt-10 flex w-full max-w-md flex-col">
+diff --git a/app/components/arrangement/StudioWorkspace.tsx b/app/components/arrangement/StudioWorkspace.tsx
+index c007b7c..6a81c44 100644
+--- a/app/components/arrangement/StudioWorkspace.tsx
++++ b/app/components/arrangement/StudioWorkspace.tsx
+@@ -3255,10 +3255,14 @@ export function StudioWorkspace() {
+         <div className="flex items-center gap-3">
+           <Link
+             to="/"
+-            className="inline-flex items-center gap-0.75 rounded-sm px-1 text-sm font-medium text-muted hover:text-foreground"
++            className="group inline-flex items-center gap-0.75 rounded-sm px-1 text-sm font-medium text-foreground"
+             data-testid="arrangement-exit"
+           >
+-            <ArrowLeft className="size-3 shrink-0" strokeWidth={2} aria-hidden="true" />
++            <ArrowLeft
++              className="size-3 shrink-0 text-muted group-hover:text-foreground"
++              strokeWidth={2}
++              aria-hidden="true"
++            />
+             CZABA
+           </Link>
+           <h1 className="text-sm font-medium">
+diff --git a/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx b/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx
+index ad29cff..bcdabfe 100644
+--- a/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx
+@@ -351,6 +351,31 @@ function expectNeutralThumb(element: HTMLElement, label: string, ringOwner: Elem
+   ).toStrictEqual([]);
+ }
+ 
++function expectHairlineHover(
++  element: HTMLElement,
++  edge: 'after:-bottom-px' | 'after:top-0',
++  label: string,
++) {
++  const tokens = tokensOf(element, label);
++  expect(tokens, label).toEqual(
++    expect.arrayContaining([
++      'after:absolute',
++      'after:inset-x-0',
++      edge,
++      'after:h-px',
++      'hover:after:bg-foreground/25',
++    ]),
++  );
++  expect(tokens, `${label} has no 6 px hover fill`).not.toContain('hover:bg-foreground/50');
++  expect(
++    tokens.filter(
++      (token) =>
++        token.includes('accent') || (token.startsWith('hover:') && token.includes('brand')),
++    ),
++    label,
++  ).toStrictEqual([]);
++}
++
+ function expectNeutralHover(element: HTMLElement, label: string) {
+   const tokens = tokensOf(element, label);
+   expect(tokens, label).toContain('hover:bg-foreground/50');
+@@ -463,20 +488,27 @@ describe('DUX-R-5b-1 affordance colour (D-29z140, R34, K4/K6/K7/K10)', () => {
+     }
+   });
+ 
+-  it('DXA5: the track-height handle hovers in foreground/50 and fills foreground/50 only while dragging', async () => {
++  it('DXA5: the track-height handle draws a 1 px foreground/25 hairline on the lane border on hover and foreground/40 only while dragging (SABA-LANE-RESIZE-HANDLE)', async () => {
+     const { trackPart } = await mountAffordanceWorkspace();
+     const handle = trackPart('music', 'arrangement-track-height');
+     stubCapture(handle);
+-    expectNeutralHover(handle, 'music height handle');
+-    expect(tokensOf(handle, 'music height handle at rest')).not.toContain('bg-foreground/50');
++    expectHairlineHover(handle, 'after:-bottom-px', 'music height handle');
++    const rest = tokensOf(handle, 'music height handle at rest');
++    expect(rest).not.toContain('after:bg-foreground/40');
++    expect(rest).not.toContain('bg-foreground/50');
+     fireEvent.pointerDown(handle, { button: 0, buttons: 1, pointerId: 7, clientY: 300 });
+     const dragging = tokensOf(trackPart('music', 'arrangement-track-height'), 'dragging handle');
+-    expect(dragging).toContain('bg-foreground/50');
++    expect(dragging).toContain('after:bg-foreground/40');
++    expect(dragging, 'hover hairline gives way to the drag hairline').not.toContain(
++      'hover:after:bg-foreground/25',
++    );
++    expect(dragging).not.toContain('bg-foreground/50');
+     expect(dragging.filter((token) => token.includes('accent'))).toStrictEqual([]);
+     fireEvent.pointerUp(window, { pointerId: 7, clientY: 300 });
+-    expect(
+-      tokensOf(trackPart('music', 'arrangement-track-height'), 'released handle'),
+-    ).not.toContain('bg-foreground/50');
++    const released = tokensOf(trackPart('music', 'arrangement-track-height'), 'released handle');
++    expect(released).not.toContain('after:bg-foreground/40');
++    expect(released).toContain('hover:after:bg-foreground/25');
++    expect(released).not.toContain('bg-foreground/50');
+   });
+ 
+   it('DXA6: scrollbar thumb, Library resize hover and collapsed-group blocks are neutral; selection keeps the brass and focus never fills (SABA-B-4 R87)', async () => {
+diff --git a/app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx b/app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx
+index 06c26ac..00eda4d 100644
+--- a/app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx
++++ b/app/lib/arrangement/__tests__/export-dialog-hold-enter.test.tsx
+@@ -543,7 +543,7 @@ describe(
+       restoreUrlStubs();
+     });
+ 
+-    it('ESU1 Export takes the brand-outlined 5 % fill, Done and Cancel lose their outline, all with 8 px radius and the 180 ms motion tokens, idle and during a render', async () => {
++    it('ESU1 Export takes the filled brass surface (STUDIO-VIS-7) with brand-hover and a quiet busy state, Done and Cancel lose their outline, all with 8 px radius and the 180 ms motion tokens, idle and during a render', async () => {
+       const renders = pendingRenders();
+       const { view } = await mountSurfaceDialog();
+       const exportButton = view.getByRole('button', { name: WAV_BUTTON });
+@@ -552,9 +552,11 @@ describe(
+         'Export idle',
+         [
+           'border',
+-          'border-brand',
+-          ...SURFACE_FILL_TOKENS,
+-          'text-brand',
++          'border-transparent',
++          'bg-brand',
++          'text-brand-foreground',
++          'enabled:hover:bg-brand-hover',
++          'enabled:active:bg-brand',
+           'font-medium',
+           'rounded-md',
+           'px-4',
+@@ -565,14 +567,16 @@ describe(
+           'disabled:opacity-40',
+         ],
+         [
+-          'bg-brand',
+-          'text-brand-foreground',
+-          'border-transparent',
++          'border-brand',
++          'text-brand',
++          ...SURFACE_FILL_TOKENS,
++          'opacity-70',
+           'rounded-sm',
+           'focus-visible:ring-brand',
+           'focus-visible:outline-none',
+         ],
+       );
++      expect(exportButton.getAttribute('aria-busy')).toBe('false');
+       expect(exportButton.hasAttribute('disabled')).toBe(false);
+       const doneIdle = closeButton(view);
+       expect(doneIdle.disabled).toBe(false);
+@@ -602,6 +606,15 @@ describe(
+           SECONDARY_EXCLUDES,
+         );
+         expect(cancelTokens.filter((token) => token.startsWith('disabled:'))).toEqual([]);
++        const busy = view.getByRole('button', { name: studioExportStrings.busyButton });
++        expect(busy.hasAttribute('disabled')).toBe(true);
++        expect(busy.getAttribute('aria-busy')).toBe('true');
++        expectSurfaceTokens(
++          busy,
++          'Export busy',
++          ['bg-brand', 'text-brand-foreground', 'opacity-70'],
++          ['disabled:opacity-40', 'disabled:cursor-not-allowed', 'border-brand', 'text-brand'],
++        );
+       } finally {
+         await settleRenders(renders);
+       }
+diff --git a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+index 1ee74b8..7178b5a 100644
+--- a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+@@ -359,13 +359,19 @@ describe('DUX-R-5b-3a labels and status texts go neutral (D-29z143)', () => {
+     }
+   });
+ 
+-  it('DXL3: the exit link hovers to foreground and the demo badge is muted with the outline-strong border', async () => {
++  it('DXL3: the exit link reads foreground with a muted arrow that hovers to foreground (STUDIO-VIS-10), and the demo badge is muted with the outline-strong border', async () => {
+     const { view } = await mountLabelStatusWorkspace();
++    const exit = view.getByTestId('arrangement-exit');
+     expectLabelTokens(
+-      view.getByTestId('arrangement-exit'),
++      exit,
+       'exit link',
+-      ['text-muted', 'hover:text-foreground'],
+-      ['hover:text-brand'],
++      ['group', 'text-foreground'],
++      ['hover:text-brand', 'text-muted', 'hover:text-foreground'],
++    );
++    const arrow = exit.querySelector('svg');
++    expect(arrow, 'exit arrow').not.toBeNull();
++    expect((arrow?.getAttribute('class') ?? '').split(/\s+/), 'exit arrow').toEqual(
++      expect.arrayContaining(['text-muted', 'group-hover:text-foreground']),
+     );
+     const badgeText = workspaceCollectionCopy('demo').badge;
+     const badge = Array.from(view.container.querySelectorAll('span')).find(
+@@ -548,7 +554,9 @@ describe('DUX-R-5b-3a labels and status texts go neutral (D-29z143)', () => {
+       '<p className="font-medium text-foreground"> {studioDetailStrings.clipCount',
+       1,
+     );
+-    expectCount(WORKSPACE_PATH, 'font-medium text-muted hover:text-foreground', 1);
++    expectCount(WORKSPACE_PATH, 'font-medium text-muted hover:text-foreground', 0);
++    expectCount(WORKSPACE_PATH, 'rounded-sm px-1 text-sm font-medium text-foreground"', 1);
++    expectCount(WORKSPACE_PATH, 'size-3 shrink-0 text-muted group-hover:text-foreground', 1);
+     expectCount(
+       WORKSPACE_PATH,
+       'rounded-sm border border-outline-strong px-2 py-0.5 text-xs text-muted',
+diff --git a/app/lib/arrangement/__tests__/mixer-onstate-colour-ui.test.tsx b/app/lib/arrangement/__tests__/mixer-onstate-colour-ui.test.tsx
+index e7f7f4f..08e3d61 100644
+--- a/app/lib/arrangement/__tests__/mixer-onstate-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mixer-onstate-colour-ui.test.tsx
+@@ -433,13 +433,22 @@ describe('DUX-R-5b-2a mixer on-states are neutral and distinct', { timeout: 20_0
+     expectMixerTokens(master, 'Master Mute on', MUTE_ON_TOKENS, ON_DROPPED_TOKENS);
+   });
+ 
+-  it('DXM5: the Clip-details separator hovers neutral and takes the inset global focus ring (SABA-B-4 R84)', async () => {
++  it('DXM5: the Clip-details separator hovers as a neutral 1 px hairline and takes the inset global focus ring (SABA-B-4 R84, SABA-LANE-RESIZE-HANDLE)', async () => {
+     const view = await mountMixerOnstateWorkspace();
+     const separator = mixerTokens(
+       view.getByTestId('arrangement-detail-separator'),
+       'detail separator',
+     );
+-    expect(separator).toContain('hover:bg-foreground/50');
++    expect(separator).toEqual(
++      expect.arrayContaining([
++        'after:absolute',
++        'after:inset-x-0',
++        'after:top-0',
++        'after:h-px',
++        'hover:after:bg-foreground/25',
++      ]),
++    );
++    expect(separator).not.toContain('hover:bg-foreground/50');
+     expect(separator).toContain(STUDIO_FOCUS_RING_INSET_CLASS);
+     expect(separator).not.toContain('focus-visible:ring-brand');
+     expect(separator.filter((token) => token.includes('accent'))).toStrictEqual([]);
+@@ -468,7 +477,8 @@ describe('DUX-R-5b-2a mixer on-states are neutral and distinct', { timeout: 20_0
+     expect(countMixerOccurrences(groupHeader, SOLO_ON_SOURCE)).toBe(1);
+     expect(countMixerOccurrences(groupHeader, MIXED_SOLO_SOURCE)).toBe(1);
+     expect(countMixerOccurrences(detail, 'hover:bg-accent/60')).toBe(0);
+-    expect(countMixerOccurrences(detail, 'hover:bg-foreground/50')).toBe(1);
++    expect(countMixerOccurrences(detail, 'hover:bg-foreground/50')).toBe(0);
++    expect(countMixerOccurrences(detail, 'hover:after:bg-foreground/25')).toBe(1);
+     expect(countMixerOccurrences(groupHeader, "'border-brand bg-brand/60'")).toBe(1);
+     expect(countMixerOccurrences(groupHeader, "'border-l-brand'")).toBe(1);
+     expect(countMixerOccurrences(lane, "'border-l-brand'")).toBe(1);
+diff --git a/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx b/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
+index cd5fce7..271c326 100644
+--- a/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
+@@ -101,7 +101,7 @@ const LIBRARY_PREVIEW_WAVE_BASE =
+   "'relative block h-8 w-full overflow-hidden rounded-md bg-background'";
+ const WORKSPACE_PATH = 'components/arrangement/StudioWorkspace.tsx';
+ const WORKSPACE_EXIT_CLASS =
+-  'inline-flex items-center gap-0.75 rounded-sm px-1 text-sm font-medium text-muted hover:text-foreground"';
++  'group inline-flex items-center gap-0.75 rounded-sm px-1 text-sm font-medium text-foreground"';
+ 
+ const MENU_ROW_CONSTANTS: { file: string; name: string }[] = [
+   { file: 'components/arrangement/ArrangementGridMenu.tsx', name: 'GRID_MENU_ITEM_CLASS' },
+diff --git a/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx b/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
+index 299a442..e89d500 100644
+--- a/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-narrow-gate-ui.test.tsx
+@@ -132,6 +132,21 @@ describe('FIX-PD-1c studio-lab narrow-window gate (D-29z725, R1–R8)', { timeou
+     expect(fetchSpy).not.toHaveBeenCalled();
+   });
+ 
++  it('NG1b: the narrow exit link matches the header exit link: foreground word, muted arrow that hovers to foreground (STUDIO-VIS-10)', () => {
++    installViewportStub(false);
++    render(<StudioLabRoute />);
++
++    const exit = testId('studio-narrow-exit');
++    const tokens = (exit?.getAttribute('class') ?? '').split(/\s+/);
++    expect(tokens).toEqual(expect.arrayContaining(['group', 'text-foreground']));
++    expect(tokens).not.toContain('text-muted');
++    expect(tokens).not.toContain('hover:text-foreground');
++    const arrowTokens = (exit?.querySelector('svg')?.getAttribute('class') ?? '').split(/\s+/);
++    expect(arrowTokens).toEqual(
++      expect.arrayContaining(['text-muted', 'group-hover:text-foreground']),
++    );
++  });
++
+   it('NG2: a wide client render shows the workspace with exactly one theme marker', () => {
+     installViewportStub(true);
+     render(<StudioLabRoute />);
+diff --git a/app/lib/arrangement/__tests__/track-layout.test.tsx b/app/lib/arrangement/__tests__/track-layout.test.tsx
+index 5668cf3..f987953 100644
+--- a/app/lib/arrangement/__tests__/track-layout.test.tsx
++++ b/app/lib/arrangement/__tests__/track-layout.test.tsx
+@@ -801,7 +801,7 @@ describe(
+   },
+ );
+ 
+-const UNFOLDED_HANDLE_CLASS = `absolute inset-x-0 bottom-0 z-20 h-1.5 cursor-row-resize touch-none hover:bg-foreground/50 ${STUDIO_FOCUS_RING_INSET_CLASS}`;
++const UNFOLDED_HANDLE_CLASS = `absolute inset-x-0 bottom-0 z-20 h-1.5 cursor-row-resize touch-none after:absolute after:inset-x-0 after:-bottom-px after:h-px ${STUDIO_FOCUS_RING_INSET_CLASS} hover:after:bg-foreground/25`;
+ 
+ describe(
+   'panel polish 14a (C-R11-01..03, deviation 9, C-R15-02; D-29c, D-29g, R16-U)',
+@@ -836,6 +836,7 @@ describe(
+       expect(folded.className).toContain('pointer-events-none');
+       expect(folded.className).not.toContain('cursor-row-resize');
+       expect(folded.className).not.toContain('hover:bg-foreground/50');
++      expect(folded.className).not.toContain('hover:after:bg-foreground/25');
+       expect(folded.tabIndex).toBe(0);
+       expect(folded.getAttribute('role')).toBe('separator');
+       expect(folded.getAttribute('aria-valuenow')).toBe('80');
