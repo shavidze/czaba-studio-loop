@@ -1,0 +1,62 @@
+{
+ "taskStatus": "PASS",
+ "bugs": [],
+ "passed": [
+  "R435-1 SOURCE-SCOPE start: git status 0 lines, HEAD 8233840, frozen manifest rc0 (1344), protected rc0",
+  "R435-2 G435-AUTH (browser, fresh anonymous contexts, 1440x900 + 1280x720): /studio-lab opens demo workspace + badge, auth_user null; /studio/middle-east shows Sign in required at 0.5/3/10s, 0 audio[src], no workspace; GET /api/studio-token?product=middle-east&file=stem.mp3 no auth -> 401, no token in body; fake Bearer -> 500 (no token) (c-round-435/auth/g428-auth.json, measured.log)",
+  "R435-3 STUDIO-SMOKE-435 (browser, both viewports): Enter adds 1 clip (Middle East, 01:41.352, left 512); Play advances 00:00.000 -> ~00:00.66 -> ~00:01.47; Stop holds at ~00:01.56-1.58 over 0.7 s; Export dialog opens and closes on Escape; 0 page errors (c-round-435/smoke/smoke.json, PNGs)",
+  "R435-4 RT-SCREEN (browser): capture.mjs with mock API up: line counts 138/168/118/144, outside 97/124/86/101 exactly equal to B (delta 0); journey 3 clips at left 512/1152/1792, status names 00:48.000 (nearest free spot), both viewports; PNGs show From 48 / To 64 next to Start 00:48.000 (SR-435-1) and footer 'source offset' (SR-435-2, also in text scan at both viewports); Detail spinbuttons show no spin arrows on hover (c-round-435/smoke/spin-hover.png)",
+  "R435-5 CLAIMS: claims-start identical to B's planning output (K1-K28), stderr empty; K10 419/D-29z1543; K25 answer-words 2, no STEM-LANES transcripts",
+  "R435-6 RT-NUM: collect, cost, classify, fails-detail, gate-reviews, l57-coverage, retro435-deadlines, stage-sums and misc outputs re-run from copies in c-round-435/scripts: every output cmp-equal to B's; totals $255.35 (B 180.02, A 61.73, C 13.60), medians 15.62/11.63, A PASS 4.37, stage sums 104.72/76.04/42.41, B share 70.5%, 14 PASS/1 FAIL(423), gate skipped 420/423/425, browser 15/15, 12 gate reviews 46 items (low 18, info 4, unlabelled 24), 37 deferred Lows (A25/gate6/B4/C2), L57 15/15, confirmedBy 13 (open 1 + deferred 12)",
+  "R435-7 RT-CAUSE: facts in retro \u00a73/\u00a75/\u00a76/\u00a77 found in sources (D-29z1482/83 in archive, C-R423 origin text labelled hypothesis, tech-lead 'six scanner files', scrollbarUserRequest, L61); opinions labelled tech-lead / product-designer",
+  "R435-8 RT-IDS: find-ids 21 found, only C-R425-01 NOT-FOUND with C-R425-01-RVM-COLD-DEV-EMPTY present; TLM-PERF15-FIREFOX, RC-R435-NUMBER-CHECKER, RC-R423-PERF-SPEC-ON-STRUCTURE, SR-435-1/2, REGRESSION-2026-11-13, REG-PERF-FULL-SUITE, SYS-R435-SOURCE-SCAN-HELPER present; backlog v419, last D-29z1543 (per-id status text and the 11 systemic_task tags not individually re-read: partial)",
+  "R435-9 RT-LESSONS: lessons.md 60 lines, 3 parts; diff hunks 3c3, 24c24, 40c40 only; l.24 keeps old L37 text and appends the Fiber-structure clause; l.40 clause swap; l.3 pointer + RETRO 435 sentence",
+  "R435-10 RT-CHECKERS: l57-check diff equals B's diff file; backfill loop equals B's (423, 425 INCOMPLETE origin-not-enum, rest OK, 434 OK); l58 on current-task rc0 'no sketch'; l58 loop 421-434 all OK (whitespace-only format difference in my loop output)",
+  "R435-11 RT-SABA: retro \u00a712, screen-review-435, questions Q1-Q4 are information/proposals/questions with defaults; Q4 default = approved From/To; project-rule items labelled proposals",
+  "R435-12 SOURCE-SCOPE end: git status 0, manifest rc0, protected rc0, claims-end == claims-start"
+ ],
+ "blocked": [
+  "Fake-Bearer premium path with real backend: backend unavailable in cloud (route returns 500); does not affect browserVerified",
+  "Firefox/Safari checks (Q1/Q2): only Chromium on the runner; Tech Lead / Saba rows",
+  "Real Ableton Live comparison: RETRO round, not applicable"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "npm run verify"
+ ],
+ "environmentRetries": [
+  "row 2 attempt 1: cold Vite dev server gave 'Cannot read properties of null (reading useState)' hydration error on /studio/middle-east at 1440 (workspace not shown, 0 audio[src], no auth bypass, but 'Sign in required' did not render); attempt 2 all OK (kept c-round-435/auth/attempt1.json/log). Same family as C-R425-01-RVM-COLD-DEV-EMPTY (deferred Low)",
+  "row 4 attempt 1: mock API (5199) was not up (my start command failed); journey/screens identical, re-run with mock up (kept c-round-435/screens-attempt1-nomock)"
+ ],
+ "abletonConformance": "not applicable (RETRO, no behaviour change)",
+ "recorded": [
+  "Audio graph/WAV export integrity not measured: RETRO round changes no Studio code; smoke test only checked clock advance/stop and dialog open/close",
+  "counters-extra.txt has no generating script (retro says so itself); confirmedBy 13 reproduced by hand (open 1 + deferred 12)",
+  "On the Studio journey the stems still land one after another on one lane (F2, known; STEM-LANES awaits Saba)"
+ ],
+ "manifestPaths": 1344,
+ "missingPaths": 0,
+ "countMismatches": 0,
+ "claimCheckMinutes": null,
+ "assertsSpecified": null,
+ "mutantsRecorded": null,
+ "mutantRedOnSketch": null,
+ "gateChecksNamed": true,
+ "gateChecksRunOnSketch": null,
+ "chainHeadGateRunGreen": null,
+ "affectedChecksNamed": null,
+ "affectedChecksRunOnSketch": null,
+ "l57NullReason": "RETRO: no assert specified",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-10T16:49:14.7232000Z",
+  "round": 435,
+  "attempt": 1,
+  "store": 200
+ },
+ "claimCheckMinutesNote": "not timed; claims script ran in seconds"
+}

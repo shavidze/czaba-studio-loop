@@ -1,0 +1,243 @@
+diff --git a/app/components/arrangement/ArrangementClip.tsx b/app/components/arrangement/ArrangementClip.tsx
+index 350d6c5..af6c202 100644
+--- a/app/components/arrangement/ArrangementClip.tsx
++++ b/app/components/arrangement/ArrangementClip.tsx
+@@ -909,7 +909,7 @@ function ArrangementClipViewInner({
+     }
+     if (updated && !gesture.blocked) {
+       setStatus(
+-        `${label}: start ${formatArrangementTime(updated.start)}, length ${formatArrangementTime(updated.duration)}, source offset ${formatArrangementTime(updated.sourceOffset)}.`,
++        `${label}: start ${formatArrangementTime(updated.start)}, length ${formatArrangementTime(updated.duration)}, clip origin ${formatArrangementTime(updated.sourceOffset)}.`,
+       );
+     }
+   };
+diff --git a/app/lib/arrangement/__tests__/clip-fades-ui.test.tsx b/app/lib/arrangement/__tests__/clip-fades-ui.test.tsx
+index ca137cb..99b1de3 100644
+--- a/app/lib/arrangement/__tests__/clip-fades-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/clip-fades-ui.test.tsx
+@@ -549,7 +549,7 @@ describe('SRW-18 stage 1 X1 refused lane release status (FU5)', () => {
+     ]);
+     expect(clipRoot('m1').dataset.clipStart).toBe('1.375');
+     expect(statusText(view)).toBe(
+-      `${MOVE_LABEL}: start 00:01.375, length 00:10.000, source offset 00:00.000.`,
++      `${MOVE_LABEL}: start 00:01.375, length 00:10.000, clip origin 00:00.000.`,
+     );
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+   });
+diff --git a/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx b/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+index bc7c1c0..33eceb9 100644
+--- a/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
++++ b/app/lib/arrangement/__tests__/detail-panel-polish.test.tsx
+@@ -387,8 +387,8 @@ describe('Detail panel polish 14b (D-29i, R18-U)', () => {
+     it('labels the single clip info and the range inputs in English and keeps the aria-labels', async () => {
+       const { view } = await mountWithMusicSelected();
+       const { content, infoLabels, rangeLabels, ariaLabels } = detailLabelTexts(view);
+-      expect(infoLabels).toEqual(['Start', 'Length', 'Source offset']);
+-      expect(rangeLabels).toEqual(['From, s', 'To, s']);
++      expect(infoLabels).toEqual(['Start', 'Length', 'Clip origin']);
++      expect(rangeLabels).toEqual(['From', 'To']);
+       expect(ariaLabels).toEqual([
+         'Time selection start (seconds)',
+         'Time selection end (seconds)',
+@@ -404,7 +404,7 @@ describe('Detail panel polish 14b (D-29i, R18-U)', () => {
+       expect(view.getByTestId('arrangement-detail-group')).toBeTruthy();
+       const { content, infoLabels, rangeLabels, ariaLabels } = detailLabelTexts(view);
+       expect(infoLabels).toEqual(['Start', 'Length']);
+-      expect(rangeLabels).toEqual(['From, s', 'To, s']);
++      expect(rangeLabels).toEqual(['From', 'To']);
+       expect(ariaLabels).toEqual([
+         'Time selection start (seconds)',
+         'Time selection end (seconds)',
+diff --git a/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx b/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx
+index 3a0b6fa..62438b9 100644
+--- a/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/detail-panel-strings-ui.test.tsx
+@@ -235,12 +235,12 @@ describe('Clip Detail panel English strings (V-0.4e, D-29z107)', () => {
+     }
+     expect(
+       Array.from(info.querySelectorAll('span.text-dim')).map((span) => span.textContent),
+-    ).toEqual(['Track', 'Start', 'Length', 'Source offset']);
++    ).toEqual(['Track', 'Start', 'Length', 'Clip origin']);
+     expect(content.textContent).toContain('The source file stays unchanged');
+     const start = detailInputByTestId(view, 'arrangement-detail-start');
+     const end = detailInputByTestId(view, 'arrangement-detail-end');
+-    expect(start.closest('label')?.firstChild?.textContent).toBe('From, s');
+-    expect(end.closest('label')?.firstChild?.textContent).toBe('To, s');
++    expect(start.closest('label')?.firstChild?.textContent).toBe('From');
++    expect(end.closest('label')?.firstChild?.textContent).toBe('To');
+     expect(start.getAttribute('aria-label')).toBe('Time selection start (seconds)');
+     expect(end.getAttribute('aria-label')).toBe('Time selection end (seconds)');
+     expect(view.getByTestId('arrangement-detail-apply').textContent).toBe('Set selection');
+diff --git a/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx b/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
+index c2aea4a..922881d 100644
+--- a/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
++++ b/app/lib/arrangement/__tests__/grid-snap-clip-edges.test.tsx
+@@ -343,7 +343,7 @@ describe('SRW-14 stage 4a single clip move snaps to the edges of other clips', (
+     expect(parts.root.dataset.clipStart).toBe('8.400');
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+     expect(statusText(view)).toBe(
+-      'Move clip: start 00:08.400, length 00:02.000, source offset 00:00.000.',
++      'Move clip: start 00:08.400, length 00:02.000, clip origin 00:00.000.',
+     );
+     expect(undoAll(api)).toBe(1);
+     expect(clipOf(api, 'm1').start).toBe(2);
+@@ -497,7 +497,7 @@ describe('SRW-14 stage 4a trim edges snap to the edges of other clips', () => {
+     expect(live(api).undoLabel).toBe(TRIM_END_TITLE);
+     expect(statusText(view)).not.toBe(TRIM_END_BLOCKED);
+     expect(statusText(view)).toBe(
+-      'Trim — right edge: start 00:07.000, length 00:03.400, source offset 00:00.000.',
++      'Trim — right edge: start 00:07.000, length 00:03.400, clip origin 00:00.000.',
+     );
+   });
+ 
+@@ -563,7 +563,7 @@ describe('SRW-14 stage 4a trim edges snap to the edges of other clips', () => {
+     expect(clipOf(api, 'm1').start).toBe(6.85);
+     expect(statusText(view)).not.toBe(TRIM_START_BLOCKED);
+     expect(statusText(view)).toBe(
+-      'Trim — left edge: start 00:06.850, length 00:04.450, source offset 00:00.150.',
++      'Trim — left edge: start 00:06.850, length 00:04.450, clip origin 00:00.150.',
+     );
+   });
+ });
+@@ -613,7 +613,7 @@ describe('SRW-14 stage 4a exact edges and the placement-lane rule (D-29z18)', ()
+     expect(exactClipEnd(api, 'm1')).toBeLessThanOrEqual(clipOf(api, 'm2').start + 1e-9);
+     expect(statusText(view)).not.toBe(MOVE_BLOCKED_TEXT);
+     expect(statusText(view)).toBe(
+-      'Move clip: start 00:08.400, length 00:02.000, source offset 00:00.000.',
++      'Move clip: start 00:08.400, length 00:02.000, clip origin 00:00.000.',
+     );
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+   });
+@@ -641,7 +641,7 @@ describe('SRW-14 stage 4a exact edges and the placement-lane rule (D-29z18)', ()
+     dragFrom(parts.header, parts.root, 40, [{ dx: 256 }]);
+     expect(clipOf(api, 'm1').start).toBe(8);
+     expect(statusText(view)).toBe(
+-      'Move clip: start 00:08.000, length 00:04.000, source offset 00:00.000.',
++      'Move clip: start 00:08.000, length 00:04.000, clip origin 00:00.000.',
+     );
+     expect(live(api).undoLabel).toBe(MOVE_LABEL);
+   });
+diff --git a/app/lib/arrangement/__tests__/lane-strings-ui.test.tsx b/app/lib/arrangement/__tests__/lane-strings-ui.test.tsx
+index 4c7333c..bb8760f 100644
+--- a/app/lib/arrangement/__tests__/lane-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/lane-strings-ui.test.tsx
+@@ -305,7 +305,7 @@ describe('V-0.4b track lane and header strings in the real workspace', () => {
+     const { api, view } = await mountLaneStringsWorkspace([clipAt('m1', 'music', 2, 8)]);
+     act(() => live(api).selectClip('m1'));
+     const line = view.getByTestId('arrangement-selected-clip');
+-    const expected = 'Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000';
++    const expected = 'Clip: Song · start 00:02.000 · length 00:08.000 · clip origin 00:01.000';
+     expect(line.getAttribute('title')).toBe(expected);
+     expect(line.textContent).toBe(expected);
+   });
+diff --git a/app/lib/arrangement/__tests__/strings.test.ts b/app/lib/arrangement/__tests__/strings.test.ts
+index 57424da..fbc0712 100644
+--- a/app/lib/arrangement/__tests__/strings.test.ts
++++ b/app/lib/arrangement/__tests__/strings.test.ts
+@@ -1890,10 +1890,10 @@ describe('V-0.3d workspace strings', () => {
+         length: '00:08.000',
+         offset: '00:01.000',
+       }),
+-    ).toBe('Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000');
++    ).toBe('Clip: Song · start 00:02.000 · length 00:08.000 · clip origin 00:01.000');
+     expect(
+       ws.selectedClipDetail({ start: '00:02.000', length: '00:08.000', offset: '00:01.000' }),
+-    ).toBe(' · start 00:02.000 · length 00:08.000 · source offset 00:01.000');
++    ).toBe(' · start 00:02.000 · length 00:08.000 · clip origin 00:01.000');
+     expect(studioViewStrings.waveformZoomTitle(100)).toBe(
+       'Waveform Zoom 100% — view only, the sound does not change',
+     );
+@@ -2291,9 +2291,9 @@ const EXPECTED_DETAIL_PLAIN_STRINGS: Record<string, string> = {
+   tracksLabel: 'Tracks',
+   startLabel: 'Start',
+   lengthLabel: 'Length',
+-  sourceOffsetLabel: 'Source offset',
+-  rangeFromLabel: 'From, s',
+-  rangeToLabel: 'To, s',
++  sourceOffsetLabel: 'Clip origin',
++  rangeFromLabel: 'From',
++  rangeToLabel: 'To',
+   rangeStartLabel: 'Time selection start (seconds)',
+   rangeEndLabel: 'Time selection end (seconds)',
+   applyRange: 'Set selection',
+@@ -2810,8 +2810,8 @@ describe('V-2b-3a timecode parts for the workspace sentences (D-29z121 R3)', ()
+     expect(
+       CLIP_SAMPLES.map(({ title, ...detail }) => ws.selectedClipTitle({ title, ...detail })),
+     ).toEqual([
+-      'Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000',
+-      'Clip: CZABA hero — preview · start 00:12.500 · length 00:04.125 · source offset 00:00.000',
++      'Clip: Song · start 00:02.000 · length 00:08.000 · clip origin 00:01.000',
++      'Clip: CZABA hero — preview · start 00:12.500 · length 00:04.125 · clip origin 00:00.000',
+     ]);
+   });
+ 
+@@ -2837,7 +2837,7 @@ describe('V-2b-3a timecode parts for the workspace sentences (D-29z121 R3)', ()
+     expect(clip.filter((part) => !part.isTime).map((part) => part.text)).toEqual([
+       ' · start ',
+       ' · length ',
+-      ' · source offset ',
++      ' · clip origin ',
+     ]);
+     for (const parts of [range, clip]) {
+       const ids = parts.map((part) => part.id);
+diff --git a/app/lib/arrangement/__tests__/track-layout.test.tsx b/app/lib/arrangement/__tests__/track-layout.test.tsx
+index 7c5e43e..5668cf3 100644
+--- a/app/lib/arrangement/__tests__/track-layout.test.tsx
++++ b/app/lib/arrangement/__tests__/track-layout.test.tsx
+@@ -880,7 +880,7 @@ describe(
+       expect(row.children[1]?.getAttribute('data-testid')).toBe('arrangement-master');
+       expect(row.children[2]).toBe(shortcutButton);
+       expect(selected?.textContent).toBe(
+-        'Clip: Song · start 00:02.000 · length 00:08.000 · source offset 00:01.000',
++        'Clip: Song · start 00:02.000 · length 00:08.000 · clip origin 00:01.000',
+       );
+       expect(selected?.getAttribute('title')).toBe(selected?.textContent);
+       expect(selected?.getAttribute('aria-hidden')).toBeNull();
+diff --git a/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx b/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx
+index 6f5a476..dcfe790 100644
+--- a/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/workspace-strings-ui.test.tsx
+@@ -278,7 +278,7 @@ describe('V-0.3d workspace footer strings in the real StudioWorkspace', () => {
+     expect(live(api).getSelectedClipIds()).toEqual(['music-1']);
+     expect(view.queryByTestId('arrangement-selection-count')).toBeNull();
+     expect(view.getByTestId('arrangement-selected-clip').textContent).toBe(
+-      'Clip: Song · start 00:02.000 · length 00:04.000 · source offset 00:00.000',
++      'Clip: Song · start 00:02.000 · length 00:04.000 · clip origin 00:00.000',
+     );
+   });
+ });
+@@ -310,7 +310,7 @@ describe('V-2b-3a workspace sentence timecodes render in mono spans', () => {
+     const line = view.getByTestId('arrangement-selected-clip');
+     expect(line.textContent).toBe(line.getAttribute('title'));
+     expect(line.textContent).toBe(
+-      'Clip: Song · start 00:10.000 · length 00:04.000 · source offset 00:00.000',
++      'Clip: Song · start 00:10.000 · length 00:04.000 · clip origin 00:00.000',
+     );
+     expect(monoTimeTexts(line)).toEqual(['00:10.000', '00:04.000', '00:00.000']);
+   });
+diff --git a/app/lib/arrangement/strings.ts b/app/lib/arrangement/strings.ts
+index 56c0c6a..28d2ba9 100644
+--- a/app/lib/arrangement/strings.ts
++++ b/app/lib/arrangement/strings.ts
+@@ -620,7 +620,7 @@ export const studioTimeTextParts = {
+     { id: 'clip-start', text: start, isTime: true },
+     { id: 'clip-length-label', text: ' · length ', isTime: false },
+     { id: 'clip-length', text: length, isTime: true },
+-    { id: 'clip-offset-label', text: ' · source offset ', isTime: false },
++    { id: 'clip-offset-label', text: ' · clip origin ', isTime: false },
+     { id: 'clip-offset', text: offset, isTime: true },
+   ],
+   exportProjectScope: ({ start, end }: StudioExportTimeBounds): StudioTimeTextPart[] => [
+@@ -811,9 +811,9 @@ export const studioDetailStrings = {
+   tracksLabel: 'Tracks',
+   startLabel: 'Start',
+   lengthLabel: 'Length',
+-  sourceOffsetLabel: 'Source offset',
+-  rangeFromLabel: 'From, s',
+-  rangeToLabel: 'To, s',
++  sourceOffsetLabel: 'Clip origin',
++  rangeFromLabel: 'From',
++  rangeToLabel: 'To',
+   rangeStartLabel: 'Time selection start (seconds)',
+   rangeEndLabel: 'Time selection end (seconds)',
+   applyRange: 'Set selection',
