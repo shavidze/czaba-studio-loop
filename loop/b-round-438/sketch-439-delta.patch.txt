@@ -1,0 +1,176 @@
+diff --git a/app/lib/arrangement/__tests__/helpers/source-scan.ts b/app/lib/arrangement/__tests__/helpers/source-scan.ts
+--- a/app/lib/arrangement/__tests__/helpers/source-scan.ts
++++ b/app/lib/arrangement/__tests__/helpers/source-scan.ts
+@@ -15,6 +15,7 @@
+ export interface JsxOpeningTag {
+   path: string;
+   line: number;
++  name: string;
+   tag: string;
+   attributes: ReadonlyMap<string, string | null>;
+   attributeTexts: ReadonlyMap<string, string>;
+@@ -115,6 +116,7 @@
+   return {
+     path,
+     line: file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1,
++    name: node.tagName.getText(file),
+     tag: node.getText(file),
+     attributes,
+     attributeTexts,
+@@ -122,14 +124,11 @@
+   };
+ }
+ 
+-export function jsxOpeningTags(source: string, name: string, path = 'inline.tsx'): JsxOpeningTag[] {
++export function allJsxOpeningTags(source: string, path = 'inline.tsx'): JsxOpeningTag[] {
+   const file = parseSource(source, path);
+   const tags: JsxOpeningTag[] = [];
+   const visit = (node: ts.Node) => {
+-    if (
+-      (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) &&
+-      node.tagName.getText(file) === name
+-    ) {
++    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+       tags.push(readTag(node, file, path));
+     }
+     ts.forEachChild(node, visit);
+@@ -138,6 +137,14 @@
+   return tags;
+ }
+ 
++export function jsxOpeningTags(source: string, name: string, path = 'inline.tsx'): JsxOpeningTag[] {
++  return allJsxOpeningTags(source, path).filter(({ name: tagName }) => tagName === name);
++}
++
++export function scanAllJsxOpeningTags(files: readonly SourceFile[]): JsxOpeningTag[] {
++  return files.flatMap(({ path, text }) => allJsxOpeningTags(text, path));
++}
++
+ export function scanJsxOpeningTags(name: string, files: readonly SourceFile[]): JsxOpeningTag[] {
+   return files.flatMap((file) => jsxOpeningTags(file.text, name, file.path));
+ }
+diff --git a/app/lib/arrangement/__tests__/source-scan.test.ts b/app/lib/arrangement/__tests__/source-scan.test.ts
+--- a/app/lib/arrangement/__tests__/source-scan.test.ts
++++ b/app/lib/arrangement/__tests__/source-scan.test.ts
+@@ -5,6 +5,7 @@
+ import { afterEach, describe, expect, it } from 'vitest';
+ import {
+   ARRANGEMENT_COMPONENTS_DIR,
++  allJsxOpeningTags,
+   callsWithStringArgument,
+   identifierUsesOutsideImports,
+   jsxAttributeTextsByName,
+@@ -193,4 +194,24 @@
+     ].join('\n');
+     expect(callsWithStringArgument(source, 'createElement', 'progress', 'c.ts')).toBe(2);
+   });
++
++  it('SS9: the any-tag query reads every JSX opening tag, whatever its name, and reports each tag name', () => {
++    const tags = allJsxOpeningTags(
++      view(
++        '    <Input type="number" className="x" />',
++        '    <input type="number" />',
++        '    <ui.Field type={`number`}>',
++        '      <span />',
++        '    </ui.Field>',
++      ),
++    );
++    expect(tags.map(({ name }) => name)).toEqual(['Input', 'input', 'ui.Field', 'span']);
++    expect(tags.map(({ attributes }) => attributes.get('type') ?? null)).toEqual([
++      'number',
++      'number',
++      'number',
++      null,
++    ]);
++    expect(jsxOpeningTags(view('    <Input type="number" />'), 'input')).toEqual([]);
++  });
+ });
+diff --git a/app/lib/arrangement/__tests__/studio-number-field.test.ts b/app/lib/arrangement/__tests__/studio-number-field.test.ts
+--- a/app/lib/arrangement/__tests__/studio-number-field.test.ts
++++ b/app/lib/arrangement/__tests__/studio-number-field.test.ts
+@@ -6,15 +6,17 @@
+   type JsxOpeningTag,
+   jsxAttributeTextsByName,
+   readSourceFiles,
+-  scanJsxOpeningTags,
++  scanAllJsxOpeningTags,
+   variableInitializersUsing,
+ } from './helpers/source-scan';
+ 
++const NUMBER_TYPE_TEXT = /(?<![\w-])type=["'`{]+number["'`}]+/g;
++
+ const NUMBER_CLASS_CARRIER =
+   /^\{(?:inputClass|STUDIO_NUMBER_FIELD_CLASS|cn\((?:inputClass|STUDIO_NUMBER_FIELD_CLASS),[^}]*\))\}$/;
+ 
+-function numberInputTags(): JsxOpeningTag[] {
+-  return scanJsxOpeningTags('input', readSourceFiles()).filter(
++function numberFieldTags(): JsxOpeningTag[] {
++  return scanAllJsxOpeningTags(readSourceFiles()).filter(
+     ({ attributes }) => attributes.get('type') === 'number',
+   );
+ }
+@@ -29,8 +31,24 @@
+     ]);
+   });
+ 
+-  it('NF2: every arrangement file with a number input uses the shared class outside its imports; every number tag takes it through className and carries no spread or style=', () => {
+-    const tags = numberInputTags();
++  it('NF2: every arrangement tag with type="number", on any element, is an input; every file with one uses the shared class outside its imports; every number tag takes it through className and carries no spread or style=', () => {
++    const tags = numberFieldTags();
++    expect(
++      tags
++        .filter(({ name }) => name !== 'input')
++        .map(({ path, line, name }) => `${path}:${line} <${name}>`),
++      'type="number" on a wrapper component must be an <input> with the shared class, or be pinned here',
++    ).toStrictEqual([]);
++    expect(
++      readSourceFiles(undefined, ['.ts', '.tsx'])
++        .filter(
++          ({ path, text }) =>
++            (text.match(NUMBER_TYPE_TEXT) ?? []).length !==
++            tags.filter((tag) => tag.path === path).length,
++        )
++        .map(({ path }) => path),
++      'every type="number" text is a JSX tag with a literal number type (no markup in strings or comments, no computed type on a wrapper)',
++    ).toStrictEqual([]);
+     const owners = [...new Set(tags.map(({ path }) => path))];
+     expect(
+       owners,
+diff --git a/app/lib/arrangement/__tests__/studio-progress.test.ts b/app/lib/arrangement/__tests__/studio-progress.test.ts
+--- a/app/lib/arrangement/__tests__/studio-progress.test.ts
++++ b/app/lib/arrangement/__tests__/studio-progress.test.ts
+@@ -55,5 +55,15 @@
+         .map(({ path }) => path),
+       'no arrangement source creates a progress element outside JSX',
+     ).toStrictEqual([]);
++    expect(
++      readSourceFiles(undefined, ['.ts', '.tsx'])
++        .filter(
++          ({ path, text }) =>
++            (text.match(/<progress\b/g) ?? []).length !==
++            tags.filter((tag) => tag.path === path).length,
++        )
++        .map(({ path }) => path),
++      'every <progress text in an arrangement source is a JSX progress tag (no markup in strings or comments)',
++    ).toStrictEqual([]);
+   });
+ });
+diff --git a/app/lib/arrangement/__tests__/studio-radio.test.ts b/app/lib/arrangement/__tests__/studio-radio.test.ts
+--- a/app/lib/arrangement/__tests__/studio-radio.test.ts
++++ b/app/lib/arrangement/__tests__/studio-radio.test.ts
+@@ -67,5 +67,15 @@
+         /Omit<\s*InputHTMLAttributes<HTMLInputElement>,\s*'type'\s*\|/,
+       );
+     }
++    expect(
++      readSourceFiles(undefined, ['.ts', '.tsx'])
++        .filter(
++          ({ path, text }) =>
++            (text.match(/<input\b/g) ?? []).length !==
++            tags.filter((tag) => tag.path === path).length,
++        )
++        .map(({ path }) => path),
++      'every <input text in an arrangement source is a JSX input tag (no markup in strings or comments)',
++    ).toStrictEqual([]);
+   });
+ });

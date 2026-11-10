@@ -1,9 +1,9 @@
 {
-  "version": 424,
+  "version": 425,
   "updated": "2026-11-10",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 438: SYS-R435-SOURCE-SCAN-HELPER (shared TS-parser source-scan helper; six scanners ported; closes 9 deferred Lows + the GATE434-S2 subfolder half) on 142918b (current-task.md)",
+  "current_task": "Round 439: SYS-R435-SOURCE-SCAN-HELPER re-do v4.1 (C-R438-01 NF2 wrapper narrowing + string-markup guards; delta b-round-438/sketch-439-delta.patch.txt sha 4596eec7) on 142918b + round-438 tree (current-task.md)",
   "advisor_used_by_B": "round 427 -> 428 planning: advisor available and consulted after orientation and before close",
   "baseline": {
     "tsc_errors": 0,
@@ -12299,11 +12299,19 @@
     },
     {
       "round": 438,
-      "task": "current-task.md",
+      "task": "tasks/round-438.md",
       "decision": "D-29z1558",
       "type": "SYS-R435-SOURCE-SCAN-HELPER (test-only, TS-parser source-scan helper)",
-      "status": "dispatched",
+      "status": "C FAIL (C-R438-01 Medium, origin B spec); gate 438 skipped; A STOP on reviewer M1 (L11)",
       "note": "baseline 142918b clean; sketch b-round-437/sketch-438.patch.txt (sha 1b88d0ec); claims b-round-437/claims-438.sh"
+    },
+    {
+      "round": 439,
+      "task": "current-task.md",
+      "decision": "D-29z1562",
+      "type": "SYS-R435-SOURCE-SCAN-HELPER re-do (test-only, v4.1 delta)",
+      "status": "dispatched",
+      "note": "baseline 142918b + round-438 tree (v3 + doc 285); delta b-round-438/sketch-439-delta.patch.txt (sha 4596eec7); full b-round-438/sketch-439.patch.txt (sha adef9028); claims b-round-438/claims-439.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -28035,17 +28043,6 @@
       "added": "2026-11-10 B round 429 -> 430 planning"
     },
     {
-      "id": "STUDIO-VIS-7",
-      "severity": "low",
-      "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
-      "kind": "saba_approved_task",
-      "status": "done (D-29z1554): C round 437 PASS (browserVerified/realVerified true; c-round-437.json C3-C7, C13), gate 437 published 142918b | in_progress (D-29z1552): dispatched round 437 (COPY-PD-VIS stage 2, sketch b-round-436/sketch-437.patch.txt) | scheduled (D-29z1545): COPY-PD-VIS stage 2, round 437 (after stage 1 C PASS) | scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
-      "title": "Export dialog primary button outline -> filled brass (Saba answer 3)",
-      "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
-      "added": "2026-11-10 B round 429 -> 430 planning",
-      "stage2_requirements": "filled bg-brand text-brand-foreground; rule enabled:hover/active (today bg-foreground/8 /12 would un-fill), disabled opacity-40, busy label; measure text-on-brass and focus ring vs brass fill (L15); grep tests for border-brand/text-brand pins"
-    },
-    {
       "id": "STUDIO-VIS-8",
       "severity": "low",
       "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
@@ -28066,17 +28063,6 @@
       "added": "2026-11-10 B round 429 -> 430 planning"
     },
     {
-      "id": "STUDIO-VIS-10",
-      "severity": "low",
-      "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
-      "kind": "saba_approved_task",
-      "status": "done (D-29z1554): C round 437 PASS (browserVerified/realVerified true; c-round-437.json C3-C7, C13), gate 437 published 142918b | in_progress (D-29z1552): dispatched round 437 (COPY-PD-VIS stage 2, sketch b-round-436/sketch-437.patch.txt) | scheduled (D-29z1545): COPY-PD-VIS stage 2, round 437 (after stage 1 C PASS) | scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
-      "title": "\"CZABA\" brand link text-muted -> text-foreground, arrow stays muted (Saba answer 4)",
-      "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
-      "added": "2026-11-10 B round 429 -> 430 planning",
-      "stage2_requirements": "text-foreground on the link text, arrow keeps text-muted via its own class; rule the hover affordance (hover:text-foreground becomes a no-op); rule StudioNarrowScreen.tsx CZABA in or out"
-    },
-    {
       "id": "SABA-Q-NUMBER-FIELD-DRAG",
       "severity": "info",
       "origin": "B spec (L44)",
@@ -28085,18 +28071,6 @@
       "title": "Live 12 value fields change by vertical drag (manual 42.6, Shift = finer); CZABA Detail panel number fields (Clip Gain, From, To) have no drag (pre-existing; Clip Gain has a fader beside it). Add drag-to-change on these fields? Default: no change",
       "evidence": "current-task.md round 430 Reference table; https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/ 42.6",
       "added": "2026-11-10 B round 429 -> 430 planning"
-    },
-    {
-      "id": "SABA-LANE-RESIZE-HANDLE",
-      "severity": "low",
-      "origin": "Saba 2026-11-10 visual feedback (policy section \"lane resize handle too thick\")",
-      "kind": "saba_approved_task",
-      "status": "done (D-29z1554): C round 437 PASS (browserVerified/realVerified true; c-round-437.json C3-C7, C13), gate 437 published 142918b | in_progress (D-29z1552): dispatched round 437 (COPY-PD-VIS stage 2, sketch b-round-436/sketch-437.patch.txt) | scheduled (D-29z1545): COPY-PD-VIS stage 2, round 437 (after stage 1 C PASS) | scheduled (D-29z1518): with COPY-PD-VIS (Saba-seen Low, fixed with the STUDIO-VIS block, not deferred)",
-      "title": "Lane resize separator h-1.5 hover:bg-foreground/50 (6 px, 50 % white) too heavy; visible line h-px or h-0.5 at foreground/20-/25, hit area can stay h-1.5, cursor stays the primary affordance (as Ableton)",
-      "evidence": "ArrangementLane.tsx lane resize separator (policy cites l.1341; B re-greps at dispatch)",
-      "added": "2026-11-10 B round 430 -> 431 planning",
-      "stage2_requirements": "Why we missed it section + lesson (merge into L61 hover-only visuals, keep lessons.md <= 60 lines); Live 12 manual reference for track height resize or \"no reference found\"; rule hover, drag (isHeightDragging bg-foreground/50) and focus; grep sibling handles (hover:bg-foreground/50 in app/components/arrangement)",
-      "ruling_d29z1553": "border row is part of the handle (pointer area 6 -> 7 px); Detail separator followed for consistency, Saba note user-review/note-round-437-detail-separator.md"
     },
     {
       "id": "SABA-B-12",
@@ -28190,6 +28164,28 @@
       "title": "lane/detail hover hairline ~2.1:1 vs the border pixel, below doc 144 3:1 hover rule; the Saba override must be recorded",
       "evidence": "b-round-436/sketch-review.md TL-R437-02",
       "added": "2026-11-10 B round 436 -> 437 planning"
+    },
+    {
+      "id": "C-R438-01-NF2-WRAPPER-TAG-NARROWING",
+      "severity": "medium",
+      "origin": "B spec",
+      "status": "scheduled (D-29z1561): fixed by the round-439 v4.1 delta (NF2 any-tag query + raw guard); closes with C round 439 PASS",
+      "title": "ported NF2 selects only lowercase <input>; a wrapper such as <Input type=\"number\" /> made HEAD's NF2 red but passes the v3 sketch",
+      "evidence": "c-round-438.json; c-round-438/m17-*.log; a-round-438/m17/; b-round-438/mutants/ (M17 HEAD rc1, v3 rc0, v4.1 rc1)",
+      "repro": "add app/components/arrangement/ArrangementMutantM17.tsx rendering <Input type=\"number\" className=\"x\" />; npx vitest run app/lib/arrangement/__tests__/studio-number-field.test.ts",
+      "added": "2026-11-10 B round 438 -> 439 planning",
+      "confirmedBy": [
+        "A round 438 code-reviewer M1 (A-R438-REVIEW-M1-NF2-TAG-NARROWING)"
+      ]
+    },
+    {
+      "id": "A-R438-REVIEW-L1-PG2-STRING-MARKUP",
+      "severity": "low",
+      "origin": "A",
+      "status": "scheduled (D-29z1561): fixed by the round-439 v4.1 delta (PG2 + IN1 raw-count guards; M19, M20, M21b); closes with C round 439 PASS",
+      "title": "HEAD's <progress text match also caught markup inside strings; the v3 PG2 sees only JSX and createElement",
+      "evidence": "a-round-438.md (code-reviewer L1); b-round-438/mutants/ M19",
+      "added": "2026-11-10 B round 438 -> 439 planning"
     }
   ],
   "tech_lead_notes": [
@@ -31369,7 +31365,10 @@
       "decision": "D-29z1557",
       "source": "b-round-437/sketch-review.md (tech-lead)",
       "signal": "studio-focus-ring, studio-theme-obsidian, panel-radius-ui and strings tests carry their own recursive source walkers (duplication, not a hole); port them and HS1 to the shared parser helper in a later test-only round",
-      "status": "signal only; not scheduled"
+      "status": "signal only; not scheduled",
+      "confirmedBy": [
+        "a-round-438.md code-reviewer Architecture note: element classification (number/radio/search) lives in each suite's tag filter; proposal: one 'all JSX tags with a literal type' query + pinned non-input owners, moving NF2, RD2, SF2 onto it (NF2 done in v4.1) - D-29z1561"
+      ]
     },
     {
       "id": "SIG-R438-IDENTIFIER-PREDICATE",
@@ -40464,6 +40463,36 @@
       "title": "NF2 carrier accepts cn(inputClass, ...) with any later arguments; a later Tailwind class could override the shared number class (current ArrangementDetailPanel code is fine)",
       "evidence": "b-round-437/sketch-review.md v3-N3",
       "added": "2026-11-10 B round 437 -> 438 planning"
+    },
+    {
+      "id": "A-R438-REVIEW-L2-DS4-SF2-TEXT-CONTAINMENT",
+      "severity": "low",
+      "origin": "A",
+      "status": "deferred_low_polish (D-29z1561)",
+      "title": "DS4 and SF2 test containment on the whole tag text (node.getText()), so a JSX comment or data- attribute could satisfy them; equal to HEAD",
+      "evidence": "a-round-438.md (code-reviewer L2)",
+      "repro": "add a data-x=\"[scrollbar-width:thin]\" attribute to a Modal tag without the class; DS4 stays green",
+      "added": "2026-11-10 B round 438 -> 439 planning"
+    },
+    {
+      "id": "A-R438-REVIEW-L3-PARSE-DIAGNOSTICS",
+      "severity": "low",
+      "origin": "A",
+      "status": "deferred_low_polish (D-29z1561)",
+      "title": "the ThisNodeHasError guard in helpers/source-scan.ts misses scanner diagnostics that set no node flag; npm run typecheck covers it",
+      "evidence": "a-round-438.md (code-reviewer L3)",
+      "repro": "an unterminated template literal in an arrangement file: the helper may parse it without throwing",
+      "added": "2026-11-10 B round 438 -> 439 planning"
+    },
+    {
+      "id": "TL-R439-N1-NF2-RAW-SPELLING",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1561)",
+      "title": "NF2 raw guard counts type=\"number\" by regex while the AST also counts type={ \"number\" } / type = \"number\"; such a tag plus a string markup in the same file cancel out",
+      "evidence": "b-round-438/tech-lead-review-v41.md L-new-1",
+      "repro": "in one arrangement file write <input type={ \"number\" } .../> and '<input type=\"number\">' in a string; NF2 counts stay equal",
+      "added": "2026-11-10 B round 438 -> 439 planning"
     }
   ],
   "regression_rounds": [
@@ -42077,7 +42106,7 @@
       "decision": "D-29z1542",
       "added": "2026-11-10 B round 434 -> 435 planning (RETRO 435)",
       "origin": "RETRO 435 section 11 (tech-lead)",
-      "status": "in_progress (D-29z1558): dispatched round 438 (sketch b-round-437/sketch-438.patch.txt v3) | queued (after COPY-PD-VIS, before SYS-1; must land before the first ARCH-SPLIT stage)",
+      "status": "in_progress (D-29z1562): round 438 C FAIL (C-R438-01); re-dispatched round 439 with v4.1 delta | in_progress (D-29z1558): dispatched round 438 (sketch b-round-437/sketch-438.patch.txt v3) | queued (after COPY-PD-VIS, before SYS-1; must land before the first ARCH-SPLIT stage)",
       "scope": "test-only: one shared source-scan helper that parses whole JSX tags (L13), rejects spreads and style= inside the tag and walks subfolders recursively; port the six scanners (studio-number-field, studio-radio, studio-progress, studio-search-field, studio-dialog-scrollbar, held-enter-source-scan tests in app/lib/arrangement/__tests__) to it with behaviour-preserving mutants",
       "closes": [
         "A-R430-REVIEW-NF2-TYPE-BOUNDARY",
@@ -42089,7 +42118,9 @@
         "A-R432-REVIEW-RV432-5-PG2-SPREAD",
         "A-R433-REVIEW-SF2-SCANNER-BLIND-SPOTS",
         "GATE434-S2-DS4-SOURCE-SCAN-SCOPE",
-        "A-R429-REVIEW-SCAN-NEGATED-REPEAT"
+        "A-R429-REVIEW-SCAN-NEGATED-REPEAT",
+        "C-R438-01-NF2-WRAPPER-TAG-NARROWING",
+        "A-R438-REVIEW-L1-PG2-STRING-MARKUP"
       ],
       "why_now": "DS4 scans only top-level arrangement/*.tsx; files moved into subfolders by ARCH-SPLIT would pass silently (L8)",
       "closes_note": "GATE434-S2-DS4-SOURCE-SCAN-SCOPE closes for its subfolder half only (D-29z1557)"
@@ -42759,42 +42790,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1504",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 427 -> 428 planning (close)",
-      "decision": "Close fixes to round 428 (advisor): (1) the settled-state auth recipe was run by B at HEAD :5173 (b-round-427/probe/g428-auth.cjs, output probe/auth-head/g428-auth.json: pass true, samples at 0.5/3/10 s and the settled read all Sign in required, workspace false, audio[src] 0, both viewports; API 401/500/400); C row 6 uses that script. C-R427 attempt-2 raw read was not saved by C; B read c-round-427/legacy-1440.png (Sign in required) and treats the transient read as reported by C. (2) GMENU: Enter on an item of a pointer-opened grid menu with no prior focus returns focus to BODY at HEAD and on the sketch: same root cause as C-R301-01 (no return target when pointer-opened with no prior focus), recorded as confirmedBy on C-R301-01; compare.py records GMENU focus and no longer asserts BODY. (3) XEXPORT: the download count depends on when the WAV lands, so compare.py leaves downloads out of the A/B and HEAD comparisons and asserts the whole-interval totals (B renders 1, B downloads 1); re-run on the saved JSONs ALL OK (13 cells), and the same compare with HEAD as the sketch fails 3 of 13 (probe/compare-head-as-sketch.txt). (4) AuthModal and Toast exclusion reworded as not probed, ruled in stage 5 with the closing scan. (5) Row 5 is record only (no pass sentence)."
-    },
-    {
-      "id": "D-29z1505",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 428 -> 429 planning",
-      "decision": "Round 428 accepted from C evidence: c-round-428.json PASS, 0 bugs, browserVerified/realVerified true. B re-runs: tools/l57-check.py L57 OK (b-round-428/l57-check-c428.txt); compare.py on C probe JSONs ALL OK (13 cells) (b-round-428/recompare/); C mutant summary identical to b-round-427/mutants/summary.txt; auth attempt-1 JSON (hydration errors from C second vite) shows workspace false and audio[src] 0 on every read, no bypass. Gate 428 published b604cfb on both remotes = baseline for round 429. SYS-2 stage 4 (2b-ii-a) done; doc 276 published In Progress (stage 4 of 5; C round 428 PASS)."
-    },
-    {
-      "id": "D-29z1506",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 428 -> 429 planning",
-      "decision": "Round 428 items: A-R428-REVIEW-L1-HQ1-VALUE-ASSERT (Low, origin B spec: sketch-only test line) -> deferred_low_polish, fixed with SIG-R427-HELD-ENTER-TEST-HELPER. A reviewer Architecture note (per-button opt-in in ~60 places; wrapper or capture listener later) recorded as confirmedBy on SIG-R426-STUDIO-BUTTON-REPEAT-DEFAULT and SIG-R427-HELD-ENTER-TEST-HELPER; NG7 afterEach descriptor restore attached to SIG-R427 as a note. INFO-C428-SPACE-ON-FOCUSED-BUTTON (origin B spec: task 428 row 5 item 4 expected Space on the focused footer button to open the sheet; Space is the global Play shortcut outside typing targets, identical at HEAD, matches Live where Space starts/stops playback): by design, no action. INFO-C428-AUTH-SECOND-VITE (environment): C attempt 1 hydration error from its own second vite server; round 429 auth row forbids a second dev server while it runs."
-    },
-    {
-      "id": "D-29z1507",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 428 -> 429 planning",
-      "decision": "Saba 2026-11-10 visual feedback (browser-default form controls, e.g. the Detail panel From/To/Clip Gain number spinbuttons) recorded as SABA-B-12 (L42), severity medium (Saba), open_findings + feature-status. Placement ruling (root may overrule): not round 429 (its policy line has no fix-next clause and round 429 is already sketched for SYS-2 stage 5); scheduled as the first UI round after SYS-2 stage 5 closes and after REGRESSION-2026-11-13 when that is due, ahead of ARCH-CHECKPOINT-SYS-2 filing work, SYS-1 and SYS-3, because the 2026-10-23 bug gate fixes reproducible Mediums before new scope. At that planning B runs the browser audit (computed appearance, ::-webkit-inner/outer-spin-button, ::-webkit-search-cancel-button, scrollbars, radio and progress paint) over every control /studio-lab renders, writes Reference (Live 12 value fields: drag/arrow/type, no spinners), consults product-designer, and writes Why we missed it plus its lesson. Starting evidence: b-round-428/data/saba-b-12-native-controls-grep.txt (arrangement: DetailPanel 4, ExportDialog 7, Lane 1, Library 1, MixFader 1, ShortcutSheet 1, Transport 1, StudioWorkspace 2; legacy components/studio and recordings ruled in/out by that task)."
-    },
-    {
-      "id": "D-29z1508",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 428 -> 429 planning",
-      "decision": "Round 429 = SYS-2 stage 5 (2b-ii-b, final) on b604cfb. Sketch b-round-428/sketch-429.patch.txt (v1 4a52f823 tech-lead approve-with-lows; final c75c6186 test-only delta, delta re-review in sketch-review.md): MarkerRow 5 + LibraryMenu 1 inline copies folded into preventRepeatedEnterKeyDown (behaviour-identical; HEAD-vs-sketch real Chromium ALL OK 8 cells); rows HK1-HK4 + repo scan HS1/HS2 (held-enter-source-scan.test.ts); 13 mutant lines. Rulings: the delegated menu form (Enter/Space always prevented, act only if !repeat: GridMenu, MarkerMenu, DetailPanel, Library, GroupHeader) is a different contract and stays; AuthModal (opened only via RequireAuth) and ToastContainer (toasts only from cart add/remove) are not reachable on /studio-lab, ruled by claims; Modal close and CookieConsent as round 428. Grants l.4 of docs 274, 275, 276 to Completed (C round 429 PASS) and new doc 277 Completed (L28). On C PASS: A-R107-SWEEP-HELD-ENTER-TOOLBAR closes, SYS-2 done, ARCH-CHECKPOINT-SYS-2 filed with root."
-    },
-    {
-      "id": "D-29z1509",
-      "date": "2026-11-10",
-      "by": "2026-11-10 B round 428 -> 429 planning (close)",
-      "decision": "Gate 428 review (gates/round-428/review.md: 3 Lows, 0 Medium+) recorded as confirmations: Low 1 (HQ1 value assert) confirmedBy on A-R428-REVIEW-L1-HQ1-VALUE-ASSERT; Low 2 (pressHeldEnter copied in 3 files) confirmedBy on SIG-R427-HELD-ENTER-TEST-HELPER; Low 3 (HX1/HX2 preventive) is the round-428 ruling 3, no id. Its Architecture note (grep-based test for type=button + onClick without an Enter guard, with an allowlist; shared pressHeldEnter util) is confirmedBy on ARCH-CHECKPOINT-SYS-2 and SIG-R426-STUDIO-BUTTON-REPEAT-DEFAULT; round 429 adds the inline-copy scan HS1 only, the button-guard allowlist test stays with the checkpoint. Closing-scan claims added to round 429 (advisor): K9c button-guard-scan-enter over components/arrangement on the sketch = 53 ENTER-GUARD, 9 others each ruled (GridMenu 4 + MarkerMenu 1 menuitems: delegated container; Library option: own !repeat; MarkerRow flag: guard inside handleFlagKeyDown, HK2; Transport Fit: TH5 lock; VideoDock drag handle: no onClick); K9d /studio-lab import closure 47 files, non-arrangement <button> files only app/components/ui/* reached through the barrel, of which only Modal is imported by Studio (ruled round 428), openers-in-closure 0. K13 is passed by location (backlog or archive), not byte equality, because the optimizer may archive closed ids between B and A/C."
-    },
-    {
       "id": "D-29z1510",
       "date": "2026-11-10",
       "by": "2026-11-10 B round 429 -> 430 planning",
@@ -43093,6 +43088,24 @@
       "date": "2026-11-10",
       "by": "2026-11-10 B round 437 -> 438 planning (advisor close review)",
       "decision": "Corrections before hand-off: (1) count fixed: SYS-R435 closes 9 deferred Lows plus the subfolder half of GATE434-S2 (not 10); (2) tech-lead v2 and v3 reviews saved verbatim (b-round-437/tech-lead-review-v2.md, -v3.md) and cited in K15; (3) the 8 sketch files saved under b-round-437/sketch-files/ so A1 can cmp after the scratch is gone; (4) claims K3/K4 capture the manifest rc in a variable (the inline $? after $(wc) read 0); K7 drops the date field; (5) L31 loaded headroom from the full-suite run: max 15 % (b-round-437/l31-headroom.txt); (6) the play-after-decode question added to feature-status Saba list."
+    },
+    {
+      "id": "D-29z1560",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 438 -> 439 planning",
+      "decision": "Round 438 not accepted: c-round-438.json FAIL (browserVerified/realVerified true), 1 Medium C-R438-01-NF2-WRAPPER-TAG-NARROWING (origin B spec; C reproduced A's M17 independently: HEAD rc1, sketch rc0). Gate 438 skipped; baseline stays 142918b; the store tree keeps A's round-438 work (v3 sketch + doc 285). SYS-R435 stays in_progress; its closes take effect only on a later C PASS. C's auth/play/export rows on the v3 tree are evidence only."
+    },
+    {
+      "id": "D-29z1561",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 438 -> 439 planning",
+      "decision": "Ruling on A-R438-REVIEW-M1 / C-R438-01: option (2), a v4.1 sketch (not 'accept the narrowing', which would lose a HEAD assertion). v4.1: helper any-tag query (allJsxOpeningTags/scanAllJsxOpeningTags, name field; jsxOpeningTags filters it), SS9; NF2 any-tag + non-input pin [] + raw guard; PG2 and IN1 raw-count guards. Mutants M17-M23 and M21b, H10 (b-round-438/mutants/); typecheck rc0, lint 205, covering 7/24, full 273/4029 rc0. tech-lead v4 and v4.1 approve-with-lows (b-round-438/sketch-review.md). A-R438-REVIEW-L1 fixed; -L2 and -L3 and TL-R439-N1 deferred Lows; A's Architecture note confirmedBy on SIG-R438-OTHER-SCANNERS. Ruling (h): DS4 '<Modal' text in strings is not ported (no runtime meaning). Ruling (i) (advisor close review): HEAD PG2's self-closing-only and no-</progress> checks were scanner-coverage guards and are not ported; the parser reads paired tags (M24 paired with class: HEAD red / v4.1 green, accepted; M25 paired without class: red on both). Full HEAD assertion map b-round-438/head-assertion-map.md; red-at-HEAD/green-on-v4.1 in the same suite: M1, M2, M4, M5, M12, M21 (caught by IN1 via M21b), M24. Doc 285 edits E1-E8 with the expected file b-round-438/doc285-expected.md. Ruling (j): HEAD's file lists read top-level *.test.tsx (SF2, DS4) and *.spec.tsx (NF2, RD2, PG2); the helper skips test/spec files (not rendered in the Studio UI; none exists today). H5 now also turns SS9 red. Expected doc sha 3989aec1 (b-round-438/apply-doc285-edits.py)."
+    },
+    {
+      "id": "D-29z1562",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 438 -> 439 planning",
+      "decision": "Dispatch round 439 = SYS-R435 re-do with the v4.1 delta on the round-438 tree (baseline HEAD 142918b; gate 438 skipped). Order after it unchanged: REGRESSION-2026-11-13 at the first planning on or after 2026-11-13; SYS-1; SYS-3; STORE-REDESIGN 2b..5; ARCH-SPLIT (frontend-architect checkpoint via root first; ROOT-REQ-ARCH-CHECKPOINT-STUDIO-CONTROLS open); REVIEW-RECOMMENDATIONS; T12-ADVANCED; phase 2 under the skip rule. RETRO-450 candidate B-R438-REVERSE-DIRECTION-MATRIX; lessons.md not edited now."
     }
   ],
   "retro_candidates": [
@@ -43479,6 +43492,13 @@
       "decision": "D-29z1541",
       "status": "candidate (not built)",
       "note": "tech-lead: tools/l58-check.py (or a sibling) greps every number a task asserts in the file and JSON key the L56 clause makes it name; until built, C CLAIMS rows grep by hand"
+    },
+    {
+      "id": "B-R438-REVERSE-DIRECTION-MATRIX",
+      "round": 438,
+      "text": "B's round-438 mutant matrix only tested where HEAD was wrong (false reds/passes), never what HEAD caught that the port drops; A's reviewer found the NF2 wrapper narrowing (C-R438-01, origin B spec). Candidate lesson for RETRO 450: a port/refactor of a test needs a reverse-direction mutant per old pattern (HEAD red -> new red).",
+      "added": "2026-11-10 B round 438 -> 439 planning",
+      "status": "candidate for RETRO 450"
     }
   ],
   "root_requests_b": [

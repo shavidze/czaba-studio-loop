@@ -1,0 +1,134 @@
+import type { LinksFunction, MetaFunction } from '@remix-run/node';
+import { useSearchParams } from '@remix-run/react';
+import { useEffect, useRef } from 'react';
+import ibmPlexMonoLatinFont from '~/assets/fonts/ibm-plex-mono-latin.woff2?url';
+import instrumentSansLatinFont from '~/assets/fonts/instrument-sans-latin.woff2?url';
+import { StudioNarrowScreen, StudioWorkspace } from '~/components/arrangement';
+import {
+  ArrangementProvider,
+  useArrangement,
+  useArrangementIsPlaying,
+} from '~/contexts/ArrangementContext';
+import { studioLabDemoCollection } from '~/data/studio-lab-demo';
+import { resolveStudioLabPreviewSourceId, STUDIO_LAB_PREVIEW_PARAM } from '~/data/studio-lab-links';
+import { useStudioHydrated, useStudioWideViewport } from '~/hooks/useStudioWideViewport';
+import { createArrangement } from '~/lib/arrangement/model';
+
+export const links: LinksFunction = () => [
+  {
+    rel: 'preload',
+    href: instrumentSansLatinFont,
+    as: 'font',
+    type: 'font/woff2',
+    crossOrigin: 'anonymous',
+  },
+  {
+    rel: 'preload',
+    href: ibmPlexMonoLatinFont,
+    as: 'font',
+    type: 'font/woff2',
+    crossOrigin: 'anonymous',
+  },
+];
+
+export const meta: MetaFunction = () => [
+  { title: 'CZABA Studio — Demo collection' },
+  { name: 'robots', content: 'noindex' },
+];
+
+const studioLabInitialArrangement = createArrangement([
+  { id: 'video', kind: 'video', name: 'Video' },
+  { id: 'music', kind: 'audio', name: 'Music' },
+  { id: 'stems', kind: 'audio', name: 'Stems' },
+  { id: 'sfx', kind: 'audio', name: 'SFX' },
+]);
+
+function StopPlaybackOnNarrow() {
+  const { togglePlayback, stopLibraryPreview } = useArrangement();
+  const isPlaying = useArrangementIsPlaying();
+  useEffect(() => {
+    stopLibraryPreview();
+  }, [stopLibraryPreview]);
+  useEffect(() => {
+    if (isPlaying) {
+      togglePlayback();
+    }
+  }, [isPlaying, togglePlayback]);
+  return null;
+}
+
+function isFocusOutsideStudio(active: Element | null): boolean {
+  return (
+    active === null ||
+    active === document.body ||
+    active.closest('[data-testid="studio-narrow-screen"]') !== null
+  );
+}
+
+export default function StudioLabRoute() {
+  const isWide = useStudioWideViewport();
+  const isHydrated = useStudioHydrated();
+  const wasWideRef = useRef(false);
+  const previousIsWideRef = useRef<boolean | null>(null);
+  const workspaceWrapperRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const previewSourceId = resolveStudioLabPreviewSourceId(
+    searchParams.get(STUDIO_LAB_PREVIEW_PARAM),
+  );
+  const previewFocusSettledRef = useRef(false);
+  if (isHydrated && isWide) {
+    wasWideRef.current = true;
+  }
+
+  useEffect(() => {
+    if (!isHydrated || previewFocusSettledRef.current) {
+      return;
+    }
+    previewFocusSettledRef.current = true;
+    if (!isWide || previewSourceId === null || !isFocusOutsideStudio(document.activeElement)) {
+      return;
+    }
+    workspaceWrapperRef.current
+      ?.querySelector<HTMLElement>(`[role="option"][data-source-id="${previewSourceId}"]`)
+      ?.focus();
+  }, [isHydrated, isWide, previewSourceId]);
+
+  useEffect(() => {
+    const wasNarrow = previousIsWideRef.current === false;
+    previousIsWideRef.current = isWide;
+    if (!isWide || !wasNarrow || !isFocusOutsideStudio(document.activeElement)) {
+      return;
+    }
+    workspaceWrapperRef.current
+      ?.querySelector<HTMLElement>('[data-testid="arrangement-exit"]')
+      ?.focus();
+  }, [isWide]);
+
+  if (isHydrated && !wasWideRef.current) {
+    return <StudioNarrowScreen themeMarker focusHeadingOnMount={false} />;
+  }
+  const showsWorkspace = !isHydrated || isWide;
+  return (
+    <>
+      <div ref={workspaceWrapperRef} className="contents max-[900px]:hidden">
+        <ArrangementProvider
+          collection={studioLabDemoCollection}
+          initialArrangement={studioLabInitialArrangement}
+          initialSelectedSourceId={previewSourceId}
+        >
+          {showsWorkspace ? <StudioWorkspace /> : <StopPlaybackOnNarrow />}
+        </ArrangementProvider>
+      </div>
+      {showsWorkspace ? (
+        <StudioNarrowScreen
+          key="studio-narrow-hidden"
+          className="min-[900px]:hidden"
+          themeMarker={false}
+          focusHeadingOnMount={false}
+        />
+      ) : (
+        <StudioNarrowScreen key="studio-narrow-latched" themeMarker focusHeadingOnMount />
+      )}
+    </>
+  );
+}

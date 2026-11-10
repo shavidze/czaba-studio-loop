@@ -1,232 +1,141 @@
-# Round 438: SYS-R435-SOURCE-SCAN-HELPER: one shared JSX source scanner, built on the TypeScript parser, for the six Studio source-scan tests (test-only)
+# Round 439: SYS-R435-SOURCE-SCAN-HELPER re-do (v4.1): fix C-R438-01 (NF2 wrapper-tag narrowing) and the string-markup narrowing, then the full round-438 acceptance (test-only)
 
-**Planned by:** B, at the round 437 → 438 planning, 2026-11-10 (`b-round-437.md`).
-- The advisor was consulted after orientation, before the engine switch, and before hand-off.
-- The round-437 task is archived as `tasks/round-437.md` [K16].
+**Planned by:** B, at the round 438 → 439 planning, 2026-11-10 (`b-round-438.md`).
+- The advisor was consulted after orientation and before hand-off.
+- The round-438 task is archived as `tasks/round-438.md` (byte-identical, [K12]).
 - **Test-only round.** No file outside `app/lib/arrangement/__tests__/` changes, except doc 285.
 - Reference-first and the `product-designer` consult do not apply (policy: refactor and test-only rounds).
+- **Baseline:** gate 438 was `skipped` (C FAIL), so the baseline HEAD stays `142918b` [K1]. The store tree is **not clean**: it holds A's round-438 work (the v3 sketch, 8 test paths, plus doc 285), which this round builds on. Do not revert it.
 
-## Decisions (`backlog.json` v422 → v424, `decisions_log_b`) [K19]
-- **D-29z1554:** round 437 is accepted.
-  - C PASS, `browserVerified` true, 1 Low [K22].
-  - Gate 437 published `142918b` [K1].
-  - STUDIO-VIS-7, STUDIO-VIS-10 and SABA-LANE-RESIZE-HANDLE are done [K17].
-- **D-29z1555:** C-R437-01 is a pre-existing Low and is deferred.
-  - B's probe shows the status line does change ("Loading …", then "… is ready."), which corrects C's "no status message" (`b-round-437/probe/play-status.json`).
-  - Play not resuming after the decode is the round-382 F-13b-i refusal contract [K23].
-  - Auto-resume would be a behaviour change. It is a question for Saba in `user-review/note-round-438-play-after-decode.md` (L44), not a scheduled task.
-- **D-29z1556:** the gate-437 review and A's round-437 notes are recorded.
-  - The Lows are deferred; confirmations go in as `confirmedBy`.
-  - L61's "pointer capture keeps `:hover`" is replaced by the measured fact [K20].
-- **D-29z1557:** the sketch: the engine switch to the TypeScript parser, the rulings below, and the tech-lead reviews (`b-round-437/sketch-review.md`).
-- **D-29z1558:** this dispatch and the order after it.
-- **D-29z1559 (after the advisor's close review):**
-  - the closes count is corrected to 9 Lows plus the GATE434-S2 subfolder half;
-  - tech-lead's v2 and v3 reviews are saved verbatim;
-  - the sketch files are saved;
-  - claims K3/K4 now capture the manifest rc, and K7 no longer prints a date;
-  - the L31 loaded headroom is added.
+## Decisions (`backlog.json` v424 → v425, `decisions_log_b`) [K15]
+- **D-29z1560:** round 438 is **not accepted** (`c-round-438.json` FAIL, `browserVerified` true) [K16].
+  - **C-R438-01-NF2-WRAPPER-TAG-NARROWING** (Medium, origin B spec) is open and is this round's first target. A found it with the code-reviewer and stopped (L11); C reproduced it independently (M17: HEAD rc 1, v3 rc 0; `c-round-438/m17-*.log`).
+  - SYS-R435 stays `in_progress`; none of its closes take effect until C passes this round.
+  - C's round-438 browser rows (auth, play, export) passed on the v3 tree. They are evidence only; this round repeats them on v4.1.
+- **D-29z1561: ruling = A's option (2), a v4.1 sketch**, not "accept the narrowing". Accepting it would lose a HEAD assertion on a Medium that came from B's spec.
+  - Reviewed by tech-lead twice (`b-round-438/tech-lead-review-v4.md`, `tech-lead-review-v41.md`; dispositions in `b-round-438/sketch-review.md`).
+  - A's reviewer Lows: **A-R438-REVIEW-L1-PG2-STRING-MARKUP is fixed in v4.1** (M19, and the same class for inputs: M20, M21b, M22). **-L2-DS4-SF2-TEXT-CONTAINMENT** (equal to HEAD) and **-L3-PARSE-DIAGNOSTICS** (typecheck covers it) are deferred Lows.
+  - A's Architecture note ("which element counts as a number/radio/search field lives in each suite's filter") is recorded on SIG-R438-OTHER-SCANNERS as `confirmedBy`. It is a signal, not a scheduled task.
+- **D-29z1562:** this dispatch; the order after it is unchanged. RETRO-450 input: B's round-438 mutant matrix tested only where HEAD was wrong, never what HEAD caught that the port drops (`retro_candidates` B-R438-REVERSE-DIRECTION-MATRIX). `lessons.md` is not edited now.
 
 ## Read first
-- `lessons.md` (60 lines). The lessons that apply here:
-  - **L23:** a repo-scan test cannot be shown red on the start copy, so every red-proof is a named mutant (§2 table).
-  - **L29:** tagged claims (§7).
-  - **L30:** every test root is pre-run. These tests live under `app/**` and run in `npm run test:run`.
-  - **L31:** timeout headroom. Under full-suite load the slowest covering file takes 746 ms, at most 15 % of the 5 s default (`b-round-437/l31-headroom.txt`).
-  - **L56–L58:** cited artifacts exist, and every asserted number is the saved output of the command on B's sketch.
-  - **L57:** C's JSON fields.
-  - **L8:** a deferred Low on a test selector is a time bomb. That is why this round lands before ARCH-SPLIT.
-- **L38:** never run vitest while a browser probe runs.
-- **L59/L60:** run every row to a result, and write `c-round-438/progress.json` after each row. Mutants run only in scratch copies under `/tmp` or `c-round-438/`, never in `store/`.
-
-## Baseline: HEAD `142918b`, clean tree
-- `git rev-parse HEAD` is `142918b` (gate 437 published) [K1]. At planning, `git status --short --untracked-files=all` is empty [K2].
-- **Frozen files:** `b-round-437/r438-frozen-sha256.txt` lists every tracked file except the 9 grants: **1340** entries, rc 0 [K3].
-  - Check it from `store/` with `sha256sum -c --quiet ../tmp/studio-real-loop/b-round-437/r438-frozen-sha256.txt`.
-  - The 11 protected files (`b-round-318/protected-sha256.txt`) give rc 0, and none of them is granted [K4].
+- `lessons.md` (60 lines). Apply especially: **L4** (no assertion lost), **L11** (STOP on an unruled reviewer Medium+), **L23** (every red-proof is a named mutant), **L29** (tagged claims), **L31** (timeout headroom: under full-suite load the slowest covering file takes 663 ms in total, at most 14 % of the 5 s default; `b-round-438/l31-headroom.txt`), **L38** (never run vitest while a browser probe runs), **L56–L58** (cited artifacts exist; numbers are saved output on B's sketch), **L57** (C's JSON), **L59/L60** (run every row to a result; mutants only in scratch copies, never in `store/`).
 
 ## 0. Why this round
-- **Order.** In `systemic_tasks`, SYS-R435-SOURCE-SCAN-HELPER is "after COPY-PD-VIS, before SYS-1; must land before the first ARCH-SPLIT stage" (RETRO 435, D-29z1542) [K17]. COPY-PD-VIS stage 2 passed in round 437.
-- **Nothing outranks it** [K18]:
-  - no Critical or High finding is open;
-  - the loop-fixable open Mediums are STUDIO-VIS-5 and SABA-B-12 stage 4 (STUDIO-VIS-3). Saba's "defer" parks both in REVIEW-RECOMMENDATIONS (D-29z1512);
-  - every other open Medium is a Tech Lead, root or Saba item.
-- **C's round-437 bug** C-R437-01 is a Low with a designed cause (D-29z1555).
-- **REGRESSION is not due.** `regression-last.json` says 2026-11-10, so it is due at the first planning on or after 2026-11-13 [K7]. Next RETRO: round 450.
-- **No new Saba answer** changes the order [K26].
-- **Why now (L8):** five of the six scanners read only the top level of `app/components/arrangement` [K8] [K9]. ARCH-SPLIT will move files into subfolders, and a moved file would then pass silently.
+- C's round-438 Medium came from B's spec. The bug gate (2026-10-23) fixes Medium before new scope [K14].
+- No Critical or High finding is open. The other loop-fixable Mediums (STUDIO-VIS-5, SABA-B-12 stage 4) are parked by Saba's "defer" in REVIEW-RECOMMENDATIONS (D-29z1512) [K14].
+- REGRESSION is not due until 2026-11-13 [K8]. Next RETRO: round 450.
+- The helper must land before ARCH-SPLIT (L8): five of the six old scanners read only the top level of `app/components/arrangement`.
 
-## 1. What the tests do today (tagged)
-- Five scanners list files with a non-recursive `readdirSync` of `app/components/arrangement`; HS1 has its own recursive walker [K9]. The folder has **0 subfolders** and 25 top-level `.tsx` files [K8].
-- **Known blind spots,** each a deferred Low [K17]. The old patterns are still in place [K10].
-  - NF2's `NUMBER_INPUT` has no left boundary before `type=` (A-R430-…-TYPE-BOUNDARY).
-  - NF2's import stripper can swallow code after a side-effect import (A-R430-…-SIDE-EFFECT-IMPORT).
-  - NF2 rejects a bare `className={STUDIO_NUMBER_FIELD_CLASS}` (A-R430-…-CLASSNAME-CONST).
-  - RD2 does not see a spread after the literal type (A-R431-…-L1), counts `data-type=` as `type=` (…-L2), and rejects `datetime-local` (…-L3).
-  - PG2 passes when a spread or `style=` on the same tag overrides the class, and misses `createElement('progress')` (A-R432-…-RV432-5).
-  - SF2 misses a spread, and an apostrophe in a `//` comment inside a tag (A-R433-…-SF2).
-  - DS4 reads the top-level folder only (GATE434-S2).
-  - HS1's second branch matches `!event.repeat && event.key === 'Enter'` (A-R429-…-NEGATED-REPEAT).
-- **Spread attributes on `<input>`:** exactly one, `ArrangementMixFader.tsx` l.60 (a range input), whose props type omits `'type'` [K11]. `ArrangementMarkerRow.tsx` has an object spread inside an `onChange` expression, which is not a spread attribute [K11].
-- **Number fields:** the shared class reaches the three `type="number"` inputs through the `inputClass` template constant and an `inputClass` prop, not through a `className={CONSTANT}` on the tag [K12].
-- **Tags today** [K13]:
-  - 6 radios and 1 progress, all in `ArrangementExportDialog.tsx`;
-  - search fields in `ArrangementLibrary.tsx` and `ArrangementShortcutSheet.tsx`;
-  - `Modal` in `ArrangementExportDialog.tsx` and `ArrangementShortcutSheet.tsx`.
-- **Docs 277–282** describe these scanners for their own rounds. Doc 282 point 7 states DS4's top-level scope [K14]. All six are records of their rounds and stay unedited; doc 285 states what it supersedes.
+## 1. What v4.1 changes against the v3 tree (5 files; B's scratch evidence in `b-round-438/`)
+1. `helpers/source-scan.ts`:
+   - `JsxOpeningTag` gains `name` (the tag name text: `input`, `Input`, `ui.Field`).
+   - New `allJsxOpeningTags(source, path)` and `scanAllJsxOpeningTags(files)`: every JSX opening and self-closing tag, whatever its name.
+   - `jsxOpeningTags(source, name, path)` becomes a filter over `allJsxOpeningTags` (tech-lead v4 L3: one visitor, no drift).
+2. `source-scan.test.ts`: new **SS9** (the any-tag query reads `Input`, `input`, `ui.Field`, `span`, with their `type` literals; `jsxOpeningTags(…, 'input')` does not see `Input`).
+3. `studio-number-field.test.ts` (**NF2**):
+   - number fields are selected by `type === 'number'` on **any** tag (`scanAllJsxOpeningTags`);
+   - the list of non-`input` number tags is pinned to `[]`, with the message "a wrapper component must be an `<input>` with the shared class, or be pinned here";
+   - a per-file raw-text guard: the count of `/(?<![\w-])type=["'`{]+number["'`}]+/g` in each arrangement `.ts`/`.tsx` equals that file's number-tag count. Markup in strings or comments, or a wrapper with a computed `type` (`{'number' as const}`), is red, as at HEAD. The lookbehind keeps `data-input-type="number"` (M1) green.
+   - Everything else in NF2 (owner pin, 3 tags, carrier, `inputClass` checks, hazards) is unchanged.
+4. `studio-progress.test.ts` (**PG2**): a per-file raw-text guard: the count of `/<progress\b/g` equals the JSX progress-tag count (closes A-R438-REVIEW-L1).
+5. `studio-radio.test.ts` (**IN1**): the same guard for `/<input\b/g` against JSX `input` tags. It closes the string-markup class for radio and search fields too (M20, M21b).
 
-## 2. Rulings (D-29z1557)
-- **(0) Engine: the TypeScript parser** (`ts.createSourceFile`, TSX; `typescript` is already a dependency).
-  - The v1 sketch used a hand-written tag walker. Tech-lead's v1 review found that it reproduced the blind-spot class this task exists to close: a quote overrun (Medium), a silent skeleton fallback, `style = {x}` whitespace, nested-expression literals, and unescaped names (`b-round-437/tech-lead-review-v1.md`, findings 1, 3–6).
-  - The parser removes all of them by construction:
-    - a spread is a `JsxSpreadAttribute` node;
-    - an attribute name is exact;
-    - nested JSX is a separate node.
-  - A source the parser marks with `ThisNodeHasError` throws `path:line` (SS2, H6), so the scanner never passes on a file it cannot read.
-  - The v1 artifacts are kept in `b-round-437/v1/`.
-- **(a) NF2** (tightened per tech-lead v1 finding 7 and v2 findings 1 and 3):
-  - Each number tag's `className` is exactly `{inputClass}`, `{STUDIO_NUMBER_FIELD_CLASS}`, or `{cn(inputClass | STUDIO_NUMBER_FIELD_CLASS, …)}`. A ternary or any other carrier is red (M16).
-  - When a tag uses `inputClass`:
-    - the file declares `inputClass` exactly once, and its initializer contains the identifier `STUDIO_NUMBER_FIELD_CLASS` (AST, so the order inside the template is free);
-    - every `inputClass=` hand-off attribute in the file is exactly `{inputClass}` (M15; `ArrangementDetailPanel.tsx` passes it to the Clip Gain field).
-  - The owner file uses the constant outside its imports, counted by AST identifiers (imports, strings and comments do not count).
-  - NF2 pins 3 tags and rejects a spread or `style` on any number tag.
-  - The rendered half is F10 (the Detail panel render test, unchanged).
-- **(b) The MixFader spread.** IN1 allows exactly one spread-attribute owner, `ArrangementMixFader.tsx`, and checks that its props type is `Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | …>`.
-  - This is a **compile-time guard only.** A JSX spread of a wider object can still pass `type` at runtime, because `{...props}` comes after `type="range"`.
-  - The app fix (move the spread before `type`) is filed as TL-R438-02-MIXFADER-SPREAD-ORDER, a deferred Low, and is not done in this test-only round.
-  - **Ruling line (L4): on the `ArrangementMixFader` `<input>`, the IN1 allow-list wins over the "no spread on an input" rule.**
-- **(c) RD2 and IN1 are split** (tech-lead v1 finding 8).
-  - RD2 keeps the radio rule: 6 tags, each `className` exactly `{STUDIO_RADIO_CLASS}`, with no spread and no style.
-  - The new id **IN1** holds the guards that protect every input: every arrangement `<input>` has a literal `type` matching `^[a-z-]+$`, and the only spread owner is the one allowed in (b).
-- **(d) Scope** stays `app/components/arrangement`, now recursive. `app/components/studio/` is frozen legacy (Legacy removal policy, 2026-11-10). DS4 still pins only the legacy `ExportDialog.tsx` default [K14].
-- **(e) HS1** stays a text regex over `.ts` and `.tsx` under `app/` and `perf/`, through the shared recursive walker. `REPEAT` gains the lookbehind `(?<![!\w.?])`, and HS2 gains two negated-repeat fixtures.
-- **(f) Not closed by this round:**
-  - **GATE431-REVIEW-L3-STRING-COUNT-PINS** lives in DXA7/DXL8. Those are other suites and string counts, not a scanner. It stays deferred, and its `systemic_task` tag is removed.
-  - **GATE434-S2-DS4-SOURCE-SCAN-SCOPE** is closed for its subfolder half (M11). Its "StudioDialog render test" half stays with the ARCH-SPLIT checkpoint, under a new status.
-  - The four suites with their own recursive walkers (`studio-focus-ring`, `studio-theme-obsidian`, `panel-radius-ui`, `strings`) are recorded as the signal SIG-R438-OTHER-SCANNERS. That is duplication, not a hole.
-- **(g) Paths.** The helper resolves the store root from `__dirname`, so DS4 and SF2 no longer depend on `process.cwd()`.
-  - Owner lists are paths relative to `app/components/arrangement`. Today these are the bare file names [K8] [K13].
-  - A file moved into a subfolder shows up as `sub/File.tsx`, so the owner pins go red on purpose. ARCH-SPLIT must update them in the same change (added to the ARCH-SPLIT rules).
-- **Closes, with each red-proof.** B's runs are in `b-round-437/mutants/head.jsonl`, `sketch.jsonl` and `helper.jsonl` [K24]:
+**Mutant matrix** (`b-round-438/mutants/head.jsonl`, `v3.jsonl`, `sketch.jsonl`, `helper.jsonl`; scripts `mutate.py`, `helper-mutants.py` in the same folder) [K18]:
 
-| Id | Mutant | HEAD tests | Sketch tests |
-|---|---|---|---|
-| A-R430-REVIEW-NF2-TYPE-BOUNDARY | M1: `data-input-type="number"` on a text input | red NF2 (false red) | green |
-| A-R430-REVIEW-NF2-CLASSNAME-CONST | M2: the three number tags take `className={STUDIO_NUMBER_FIELD_CLASS}` directly, and `inputClass` drops the constant | red NF2 (false red) | green |
-| A-R430-REVIEW-NF2-SIDE-EFFECT-IMPORT | H3: the helper counts identifiers inside imports | — | red SS5 |
-| A-R431-REVIEW-L1-RD2-SPREAD-AFTER-TYPE | M3: `{...radioOverrides}` on a radio | green (false pass) | red IN1, RD2 |
-| A-R431-REVIEW-L2-RD2-DATA-TYPE | M4: `data-type="radio"` on a text input | red RD2 (false red) | green |
-| A-R431-REVIEW-L3-RD2-DATETIME-LOCAL | M5: `type="datetime-local"` | red RD2 (false red) | green |
-| A-R432-REVIEW-RV432-5-PG2-SPREAD | M6: spread; M7: `style=`; M8: `createElement('progress')` | green ×3 (false pass) | red PG2 ×3 |
-| A-R433-REVIEW-SF2-SCANNER-BLIND-SPOTS | M9: spread on a search tag; M10: a `// …'s >` comment in the tag | M9 green (false pass); M10 green | M9 red SF2; M10 green (the parser reads comments by construction; SF1/SS1 comment fixtures) |
-| GATE434-S2 (subfolder half) | M11: a new `dialogs/ArrangementNewDialog.tsx` with an unskinned `Modal` | green (false pass) | red DS4 |
-| A-R429-REVIEW-SCAN-NEGATED-REPEAT | M12: `!event.repeat && event.key === 'Enter'` | red HS1 (false red) | green |
-| (new guards, tech-lead v1 finding 7 and v2 finding 1) | M13: `style=` on a number input; M14: one number tag drops `inputClass`; M15: the `inputClass` hand-off becomes a string; M16: a ternary `className` carrier | green ×4 | red NF2 ×4 |
-| helper rows | H1: no recursion; H2: no spread hazard; H4: no style hazard; H5: no `{'…'}` literal; H6: no syntax throw; H7: tag-name prefix match; H8: any call argument; H9: property-access names counted | — | red SS6; IN1 + SS4; SS4; SF1 + SS3; SS2; DS4 + SS2; SS7; SS5 |
+| Id | Mutant | HEAD | v3 (round 438) | v4.1 |
+|---|---|---|---|---|
+| M1–M16 | as in round 438 (`tasks/round-438.md` §2) | unchanged | unchanged | equal to v3, line for line |
+| M17 | `<Input type="number" />` in a new file | red NF2 | **green (C-R438-01)** | red NF2 |
+| M18 | the same wrapper inside `ArrangementDetailPanel.tsx` | green (HEAD false pass) | green | red NF2 |
+| M19 | `'<progress max="1"></progress>'` in a string | red PG2 | green | red PG2 |
+| M20 | `'<input type="radio" name="f" />'` in a string | red RD2 | green | red IN1 |
+| M21 / M21b | `'<input type="search" />'` in a string; M21 runs SF2, M21b runs the radio suite | M21 red SF2; M21b green | green; green | M21 green; **M21b red IN1** |
+| M22 | `'<input type="number" />'` in a string | red NF2 | green | red NF2 |
+| M23 | `<Input type={'number' as const} />` in a new file | red NF2 | green | red NF2 |
+| M24 | the existing `<progress … />` written as a paired tag that keeps the class | red PG2 (HEAD scanner limit) | green | green (ruling (i)) |
+| M25 | the same paired tag without the class | red PG2 | red PG2 | red PG2 |
+| H1–H9 | as in round 438 | — | — | as round 438, except H5, which also turns the new SS9 red (SF1, SS3, SS9); H7 is re-anchored to the new filter |
+| H10 | the any-tag query keeps only `input` | — | — | red DS4, PG2, SS2, SS9 |
 
-## 3. What A changes (sketch `b-round-437/sketch-438.patch.txt`, sha256 `1b88d0ec860ff1bf14d9fcd9230686347fa8199d89e8b10391b6111aba1683ad`, 8 `diff ` headers) [K5] [K21]
-From `store/`, run `git apply --check -p1 ../tmp/studio-real-loop/b-round-437/sketch-438.patch.txt`, then `git apply -p1 ../tmp/studio-real-loop/b-round-437/sketch-438.patch.txt`.
-- Do not hand-edit the sketch.
-- If the code-reviewer asks for a change, apply it only if `b-round-437/sketch-review.md` already rules on it. Anything else is a STOP (L11).
+- **Red at HEAD, green on v4.1 in the same suite:** M1, M2, M4, M5, M12, M21 and M24.
+  - M1, M4, M5 and M12 are HEAD's false reds, accepted in round 438.
+  - M2 is replaced by v4.1's stricter per-tag carrier.
+  - M21 is caught by IN1 in the radio suite (M21b red), so the covering set stays red.
+  - M24 falls under ruling (i).
+- **HEAD assertion map:** `b-round-438/head-assertion-map.md` maps every HEAD `expect(` in the six tests to its v4.1 counterpart or to a named ruling. Three HEAD checks only measured the old scanner's coverage, had no runtime meaning, and are deliberately not ported:
+  - **ruling (h):** DS4's `<Modal` text inside strings and comments. A component cannot render from a string.
+  - **ruling (i):** PG2's "every `<progress` is self-closing" and "no `</progress>`". The parser reads paired tags, and the class, hazard and count rules apply to them (M25 stays red).
+  - **ruling (j):** HEAD's file lists also read top-level `*.test.tsx` (SF2, DS4) and `*.spec.tsx` (NF2, RD2, PG2). The helper skips test and spec files, which are never rendered in the Studio UI; none exists today.
+  Doc 285 states all three.
 
-1. **New** `app/lib/arrangement/__tests__/helpers/source-scan.ts`:
-   - `STORE_ROOT`, `ARRANGEMENT_COMPONENTS_DIR`;
-   - `listSourceFiles` / `readSourceFiles`: recursive and sorted; they skip `__tests__`, `node_modules` and `*.test|spec.*`, and return posix relative paths;
-   - `parseSource`: TSX via `ts.createSourceFile`, cached per path and text; throws `path:line` on `ThisNodeHasError`;
-   - `jsxOpeningTags` / `scanJsxOpeningTags`: each result has `{ path, line, tag, attributes, attributeTexts, hazards }`;
-   - `identifierUsesOutsideImports` (skips imports, `export { … }` and property-access names);
-   - `callsWithStringArgument`;
-   - `jsxAttributeTextsByName`, `variableInitializersUsing`.
-2. **New** `app/lib/arrangement/__tests__/source-scan.test.ts`: fixtures SS1–SS8. SS6 builds a temp tree under `os.tmpdir()` and removes it in `afterEach`.
-3. **Ported to the helper:**
-   - `studio-number-field.test.ts` (NF2);
-   - `studio-radio.test.ts` (RD2 and the new IN1);
-   - `studio-progress.test.ts` (PG2);
-   - `studio-search-field.test.ts` (SF1 gains the comment fixture, plus SF2);
-   - `studio-dialog-scrollbar.test.tsx` (DS4);
-   - `held-enter-source-scan.test.ts` (HS1 walker; HS2 fixtures).
+## 2. What A does
+**Precondition (STOP if it fails):** from `store/`, run `bash ../tmp/studio-real-loop/b-round-438/claims-439.sh | grep -E '^K(2|5|6) '`. Expect `K2 … outside-grants 0`, `K5 tree-equals-v3 8/8`, `K6 delta-applies yes`.
 
-   NF1, RD1, PG1 and DS1–DS3 are unchanged. No assertion is lost; there are only equal or stronger replacements (L4).
-4. **Doc** `docs/implementation/2026/quarter-IV/285-sys-r435-source-scan-helper.md`. TEMPLATE headings in order. Line 4 is exactly `**სტატუსი:** Completed (C round 438 PASS)`. It contains:
-   - the rulings (0) and (a)–(g);
-   - the closes table with each mutant;
-   - "docs 277–282 describe the old per-file scanners; doc 282 point 7 is superseded: DS4 is now recursive";
-   - the not-closed items (f).
+1. **Apply the delta.** `git apply --check -p1 ../tmp/studio-real-loop/b-round-438/sketch-439-delta.patch.txt`, then `git apply -p1` the same file (sha256 in `b-round-438/sketch-439.sha256`). Do not hand-edit it. A code-reviewer request is applied only if `b-round-438/sketch-review.md` already rules on it; any other Medium+ is a STOP (L11).
+2. **Doc 285** (`docs/implementation/2026/quarter-IV/285-sys-r435-source-scan-helper.md`): apply edits E1–E8 from `b-round-438/doc285-edits.md`.
+   - Fenced text is verbatim; text outside the fences only says where it goes.
+   - The edits cover: line 4 (`**სტატუსი:** Completed (C round 439 PASS)`), rulings (h), (i) and (j), the closes table, the "NF1, RD1, PG1 …" line, the testing numbers, TODO, the changed-files bullets and the diagram.
+   - B applied E1–E8 to A's current doc by script. The result is `b-round-438/doc285-expected.md` (sha256 `3989aec1…`; script `b-round-438/apply-doc285-edits.py`). **A's doc must be byte-identical to it** (`cmp`).
+   - Self-check: `grep -nE 'SS1–SS8|23/23|round 438|a-round-438|b-round-437/mutants'` on the doc prints nothing.
 
-**STOP (L11)** if the sketch does not apply, a covering file is red, or any file outside the grants changes.
-
-## 4. Grants (`b-round-437/grants-438.txt`, 9 paths)
-The 8 sketch paths plus doc 285. Nothing else in `store/` may change.
-
-## 5. A's checks (the full suite and verify belong to the gate)
+### A's checks (the full suite and verify are gate rows)
 | # | Check | PASS means |
 |---|---|---|
-| A1 | `git apply --check -p1` the sketch, then apply it; from `store/`, `cmp` each path in `b-round-437/sketch-paths.txt` with `../tmp/studio-real-loop/b-round-437/sketch-files/<path>` | All 8 identical |
-| A2 | From `store/`: `npx vitest run $(cat ../tmp/studio-real-loop/b-round-437/covering-files.txt)` | rc 0. On B's sketch: **7 files, 23/23** (`b-round-437/covering-sketch.log`) |
-| A3 | `npm run typecheck`; `npm run lint` | rc 0 for each; lint gives **205 warnings**, the same as HEAD (`b-round-437/lint-sketch.log`) |
-| A4 | `bash ../tmp/studio-real-loop/b-round-437/claims-438.sh` | Differs from `b-round-437/claims-438-planning-output.txt` only in the lines of `b-round-437/claims-438-planning-vs-sketch.diff.txt`, plus K2 (A's tree) and K6 (doc 285 present) |
+| A1 | From `store/`, `cmp` each path in `b-round-438/sketch-paths.txt` with `../tmp/studio-real-loop/b-round-438/sketch-files/<path>`; `cmp` doc 285 with `../tmp/studio-real-loop/b-round-438/doc285-expected.md` | 8/8 identical; doc identical |
+| A2 | `npx vitest run $(cat ../tmp/studio-real-loop/b-round-438/covering-files.txt)` | rc 0, **7 files, 24/24** (`b-round-438/covering-sketch.log`) |
+| A3 | `npm run typecheck`; `npm run lint` | rc 0 each; lint **205 warnings** (= HEAD; `b-round-438/lint-sketch.log`) |
+| A4 | `bash ../tmp/studio-real-loop/b-round-438/claims-439.sh` | Differs from `b-round-438/claims-439-planning-output.txt` exactly as `b-round-438/claims-439-expected-after-A.diff.txt` (B simulated the apply and E1/E4 on a scratch copy), that is only in K5 (`tree-equals-v3 3/8 tree-equals-v4 8/8`), K6 (`delta-applies no`), K7 (line 4 becomes the E1 text; `no-assertion-lost 0`) K9 (all four markers `1`) and K21 (`identical stale-grep 0`). K2 stays `total 9 outside-grants 0` |
 
-- **code-reviewer: required** (3+ files). A Medium+ it finds is a STOP unless `sketch-review.md` already rules on it. Its Architecture note goes into A's report for B.
-- **Full suite:** B ran it on the v3 sketch: **273 files, 4028 tests, rc 0** (`b-round-437/full-suite-sketch.log`) [K25]. HEAD's last gate run was 272/4019; the change adds 1 file and 9 tests (SS1–SS8, IN1). It is a gate row.
+- **code-reviewer: required** (6 changed files incl. the doc). Pass its Architecture note to B.
+- Write `a-round-439.md` as you go; logs in `a-round-439/`.
 
-## 6. C's acceptance
-**Order:** C1, then the browser rows C7–C8, then the rest.
-- Write `c-round-438.md` and `c-round-438.json` as you go.
-- Never run vitest during a browser row (L38).
+## 3. Grants (`b-round-438/grants-439.txt`, 9 paths)
+The 8 test paths plus doc 285, the same as round 438. Nothing else in `store/` may change. Frozen files: `b-round-437/r438-frozen-sha256.txt` (1340 entries; HEAD is unchanged) [K3]. Protected files: `b-round-318/protected-sha256.txt`, 0 granted [K4].
+
+## 4. C's acceptance
+**Order:** C1, then the browser rows C7–C8 (warm up first), then the rest. Write `c-round-439.md`, `c-round-439.json` and `c-round-439/progress.json` as you go. Never run vitest during a browser row (L38). Run every row to a result; round 438 left C5's HEAD half, the helper mutants, C6 and C10 partly unrun.
 
 | # | Row | Check | PASS means |
 |---|---|---|---|
-| C1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all`; the r438 manifest; the protected manifest | Only granted paths changed; both manifests give rc 0 |
-| C2 | **PATCH-IDENTITY** | Apply the sketch to a `git archive HEAD` scratch and `cmp` the 8 files with the working tree | All identical; doc 285 is the only extra path |
+| C1 | **SOURCE-SCOPE** (start) | `git status --short --untracked-files=all`; the frozen and protected manifests | Only the 9 granted paths changed; both manifests rc 0 |
+| C2 | **PATCH-IDENTITY** | (a) `git archive HEAD` into a scratch, `git apply -p1 b-round-438/sketch-439.patch.txt`, `cmp` the 8 paths with the working tree. (b) A scratch with `b-round-437/sketch-files/` over HEAD, `git apply -p1 b-round-438/sketch-439-delta.patch.txt`, `cmp` again | (a) and (b) both 8/8 identical; doc 285 is the only extra path |
 | C3 | **NO-RUNTIME-CHANGE** | `git status --short` | Every changed path is under `app/lib/arrangement/__tests__/`, or is doc 285 |
-| C4 | **COVERING** | A2 on the working tree | 7 files, 23/23, rc 0 |
-| C5 | **MUTANTS** | Build two scratch trees, each with a `node_modules` symlink to `store/node_modules`: `git archive HEAD` (old), and the same plus the 8 working-tree test paths (new). Run `python3 -I b-round-437/mutants/mutate.py <old>`, then `… <new>`, then `python3 -I b-round-437/mutants/helper-mutants.py <new>`. The helper script reads `b-round-437/covering-files.txt`. Never run them in `store/` | Each output line equals B's `head.jsonl`, `sketch.jsonl` and `helper.jsonl` in `id`, `rc` and `fails`/`red` (the §2 table) |
-| C6 | **SWEEP** | K11 and K13 on the working tree; `grep -n readdirSync` over the six ported files | One spread owner (`ArrangementMixFader.tsx`); tags as in §1; 0 `readdirSync` hits in the six files |
-| C7 | **G438-AUTH (browser)** | Fresh anonymous context: open `/studio-lab`, then `/studio/middle-east`, then `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization header | `/studio-lab` opens with `auth_user` null; `/studio/middle-east` shows "Sign in required" with 0 `audio[src]`; the token API returns 401. Fake bearer: BLOCKED (backend unavailable in cloud) |
-| C8 | **SMOKE + REAL EXPORT (browser), both viewports** | `cd c-round-438 && node ../b-round-437/probe/play-status.mjs > play-status.json` (the PNGs land in `c-round-438/`), then `node b-round-436/probe/press-export-probe.mjs http://127.0.0.1:5173 <abs dir under c-round-438/>` from the loop root | **Play** (a record row for C-R437-01): the status goes "Loading …", then "… is ready."; the second press plays and the clock advances (as in `b-round-437/probe/play-status.json`). **Export:** `czaba-studio-lab.wav`, 29189420 bytes, `RIFF`…`WAVE`, and the button returns to "Export WAV" at opacity 1 (the `export` key of `b-round-436/probe/sketch-press/press-export.json`) |
-| C9 | **CLAIMS** | `bash b-round-437/claims-438.sh`, compared with `b-round-437/claims-438-planning-output.txt` | Allowed differences: `b-round-437/claims-438-planning-vs-sketch.diff.txt`, plus K2 (tree) and K6 (doc 285). Anything else is a finding |
-| C10 | **DOC** | Doc 285 | TEMPLATE headings in order (L26); line 4 exact (L28); rulings (0) and (a)–(g), the closes table, the docs 277–282 note and (f) are present; the cited tests exist |
-| C11 | **SOURCE-SCOPE** (end) + **L57** | As C1; then `python3 -I tools/l57-check.py c-round-438.json c-round-438/l57-check.txt` | As C1; then rc 0 |
-| gate | Full vitest, typecheck, build, Biome, verify | **Not run by C.** List them under `"gate"` |
+| C4 | **COVERING** | A2 on the working tree | 7 files, 24/24, rc 0 |
+| C5 | **MUTANTS (all three runs)** | Scratch trees with a `node_modules` symlink: old = `git archive HEAD`; new = old plus the 8 working-tree test paths. `python3 -I b-round-438/mutants/mutate.py <old>`, `… <new>`, `python3 -I b-round-438/mutants/helper-mutants.py <new>` | Each line equals `head.jsonl`, `sketch.jsonl`, `helper.jsonl` in `id`, `rc` and `fails`/`red`. In particular M17, M18, M22, M23 red NF2; M19 and M25 red PG2; M20 and M21b red IN1; M24 green |
+| C6 | **SWEEP** | `grep -c readdirSync` over the six ported files; claims K9 and K10 | 0 hits; K9 all 1; K10 `0` (no wrapper with `type=number` today). NF2's own owner pin is the authoritative inventory |
+| C7 | **G439-AUTH (browser)** | Warm-up: one untimed load of `/studio-lab`. Then a fresh anonymous context: `/studio-lab`, `/studio/middle-east`, `GET /api/studio-token?product=middle-east&file=stem.mp3` with no Authorization | `auth_user` null on `/studio-lab`; "Sign in required" with 0 `audio[src]`; token API 401. Fake bearer: BLOCKED (backend unavailable in cloud) |
+| C8 | **SMOKE + REAL EXPORT (browser), both viewports** | `cd c-round-439 && node ../b-round-437/probe/play-status.mjs > play-status.json`; then from the loop root `node b-round-436/probe/press-export-probe.mjs http://127.0.0.1:5173 <abs dir under c-round-439/>`. One retry is allowed after a cold-start timeout; record both attempts | Play: "Loading …", then "… is ready."; the second press plays and the clock advances. Export: `czaba-studio-lab.wav`, 29189420 bytes, `RIFF`…`WAVE`, button back to "Export WAV" at opacity 1 |
+| C9 | **CLAIMS** | `bash b-round-438/claims-439.sh`, compared with `b-round-438/claims-439-planning-output.txt` | Allowed differences: K5, K6, K7, K9 and K21 as in A4 (`b-round-438/claims-439-expected-after-A.diff.txt`). Anything else is a finding |
+| C10 | **DOC** | Doc 285: `cmp` with `b-round-438/doc285-expected.md`; TEMPLATE headings; the E8 self-check grep; the cited ids; spot-check the map's rows against `git show HEAD:` | Identical to the expected file; TEMPLATE headings in order (L26); line 4 exact (L28); the grep prints nothing; every cited test id exists (SS1–SS9, NF2, RD2, IN1, PG2, SF1, SF2, DS4, HS1, HS2, F10); at least 3 map rows match HEAD (row ids in the report) |
+| C11 | **SOURCE-SCOPE** (end) + **L57** | As C1; then `python3 -I tools/l57-check.py c-round-439.json c-round-439/l57-check.txt` | As C1; rc 0 |
+| gate | Full vitest, typecheck, build, Biome, verify | **Not run by C.** List under `"gate"`. B's run on v4.1: 273 files, 4029 tests, rc 0 (`b-round-438/full-suite-sketch.log`) [K19] |
 
-- **C's JSON:** all L57 fields. `mutantRedOnSketch` names `b-round-437/mutants/sketch.jsonl` and `helper.jsonl`. Every bug carries an enum `origin`.
+- **C's JSON:** all L57 fields. `mutantRedOnSketch` names `b-round-438/mutants/sketch.jsonl` and `helper.jsonl`. Every bug has an enum `origin`.
 - **Ableton conformance:** does not apply (test-only).
-- **Neighbouring behaviour that could break:**
-  - other suites with their own scanners (DXA7/DXL8 string counts, SIG-R438-OTHER-SCANNERS) are untouched;
-  - test-time temp files (SS6 must clean up);
-  - the gate's Biome and timing (the covering set takes about 3 s).
+- **Neighbouring behaviour that could break:** a JSDoc or comment that mentions `<progress`, `<input` or `type="number"` in an arrangement source now turns PG2/IN1/NF2 red (HEAD did the same for top-level `.tsx`; the message names the reason). Other suites with their own scanners (SIG-R438-OTHER-SCANNERS) are untouched. SS6 temp-dir cleanup.
 
-## 7. Claims
-- **Script:** `b-round-437/claims-438.sh`.
-- **B's run at planning:** `b-round-437/claims-438-planning-output.txt`, with stderr in `claims-438-planning.err`.
-- **On the sketch scratch** (`git clone --local` at `142918b` plus the sketch): `claims-438-sketch-output.txt`, diffed against the planning run in `claims-438-planning-vs-sketch.diff.txt`.
-
+## 5. Claims (`b-round-438/claims-439.sh`; B's run `b-round-438/claims-439-planning-output.txt`)
 | Claim | What it checks |
 |---|---|
-| K1 | HEAD and gate 437 |
-| K2 | Tree status: total, and paths outside the grants |
-| K3 | The frozen manifest |
-| K4 | The protected manifest, and how many protected files are granted |
-| K5 | The sketch applies |
-| K6 | The last implementation doc; doc 285 is absent |
-| K7 | The regression date (`regression-last.json`) |
-| K8 | Subfolders and the top-level `.tsx` count in `app/components/arrangement` |
-| K9 | `readdirSync` in the six scanner files; whether the helper exists |
-| K10 | The old patterns (`NUMBER_INPUT`, `RADIO_TYPE`, `LITERAL_TYPE [a-z]+`, `REPEAT` without the lookbehind) |
-| K11 | SWEEP: spread-attribute owners on `<input>`; MixFader omits `type`; the MarkerRow object spread |
-| K12 | The number-field class reaches its inputs through `inputClass` |
-| K13 | Tag owners: radio, progress, search, Modal |
-| K14 | Doc 282 point 7; the legacy `Modal` count |
-| K15 | The cited artifacts exist |
-| K16 | The archived task |
-| K17 | Backlog ids (`tools/find-ids.py`) |
-| K18 | The open Critical/High/Medium ids |
-| K19 | The backlog version and the last D-ID |
-| K20 | The `lessons.md` line count; the old L61 wording is gone (0) |
-| K21 | The review names the sha; `l58-check` |
-| K22 | C round 437 and its L57 check |
-| K23 | The decode-refusal branch in `startPlaybackAt` (the cause of C-R437-01) |
-| K24 | The mutant result files |
-| K25 | The full run on the sketch: 273 files, 4028 tests, rc 0 |
-| K26 | Saba's answer files, and the store-redesign direction decision |
+| K1 | HEAD and gate 438 |
+| K2 | Tree status: total, outside-grants |
+| K3 | Frozen manifest |
+| K4 | Protected manifest; granted protected files |
+| K5 | The 8 test paths equal v3 / v4.1 |
+| K6 | The delta applies to the tree |
+| K7 | Doc 285: present, line 4, the old "no assertion lost" sentence, last doc |
+| K8 | `regression-last.json` |
+| K9 | v4.1 markers: any-tag query, NF2 uses it, PG2 raw guard, SS9 |
+| K10 | Wrapper tags with `type=number` in the arrangement sources today |
+| K11 | Cited artifacts exist |
+| K12 | Archive of round 438 |
+| K13 | Backlog ids |
+| K14 | Open Critical/High/Medium ids |
+| K15 | Backlog version and last D-ID |
+| K16 | C round 438 result |
+| K17 | sketch-review names both shas; `l58-check` |
+| K18 | Mutant result files |
+| K19 | B's full run on v4.1 |
+| K20 | `lessons.md` line count |
+| K21 | Doc 285 against `doc285-expected.md`; stale-text grep count |

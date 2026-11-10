@@ -1,0 +1,12 @@
+import { createRequire } from 'node:module';
+const require=createRequire('/home/runner/czaba-project/store/package.json');const {chromium}=require('@playwright/test');
+const br=await chromium.launch();const c=await br.newContext({viewport:{width:1440,height:900}});const p=await c.newPage();
+const out={};
+await p.goto('http://127.0.0.1:5173/studio-lab',{waitUntil:'domcontentloaded'});await p.waitForSelector('[data-testid="arrangement-timeline-scroller"]');
+out.authUser=await p.evaluate(()=>localStorage.getItem('auth_user'));
+await p.screenshot({path:'auth-studio-lab.png'});
+await p.goto('http://127.0.0.1:5173/studio/middle-east',{waitUntil:'domcontentloaded'});await p.waitForTimeout(4000);
+out.signInRequired=await p.getByText(/Sign in required/i).count();out.audioSrc=await p.locator('audio[src]').count();
+out.url=p.url();await p.screenshot({path:'auth-studio-product.png'});
+const r=await p.request.get('http://127.0.0.1:5173/api/studio-token?product=middle-east&file=stem.mp3');out.tokenStatus=r.status();
+await br.close();console.log(JSON.stringify(out));
