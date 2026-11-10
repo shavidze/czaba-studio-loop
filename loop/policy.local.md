@@ -605,7 +605,7 @@ Saba flagged the grey hover line between lanes. It's the lane resize separator (
 StudioWorkspace.tsx (3,718), ArrangementContext.tsx (5,327), and other oversized files must be split. This is a dedicated task block — not ad-hoc.
 
 ### Scheduling
-Insert **ARCH-SPLIT** block into `post_current_stage_queue` **after SYS-3 and before STEM-LANES**. Estimated 3-5 rounds.
+Insert **ARCH-SPLIT** block into `post_current_stage_queue` **after STORE-REDESIGN (STORE-5) and before REVIEW-RECOMMENDATIONS**. Estimated 3-5 rounds.
 
 ### Stages (B plans details after frontend-architect audit)
 1. **ARCH-SPLIT-1:** ArrangementContext.tsx (5,327 → multiple contexts/hooks)
