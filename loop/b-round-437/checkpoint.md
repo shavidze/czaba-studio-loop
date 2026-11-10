@@ -1,0 +1,12 @@
+# B round 437 -> 438 checkpoint
+- archived tasks/round-437.md; pre-edit copies saved
+- next: read a-round-437, gate review, user-review; verify C-R437-01; sketch SYS-R435
+- v1 sketch sha 9c8f5d9f… full suite 273/4026 rc0 (full-suite-sketch.log, v1); tech-lead v1 approve-with-lows saved (tech-lead-review-v1.md)
+- advisor #2: spike TS-parser engine (createSourceFile); switch if inventory/typecheck/biome/lint 205/M1-M13 equal; else fix findings 1+3
+- backlog still v422, update-backlog.py part1 written not run; current-task.md still round 437 (draft pending)
+- v2 (TS-parser engine) sketch sha 062c2ae0…; covering 7/22 green; typecheck rc0; lint 205 rc0; biome clean; mutants v2 head/sketch/helper jsonl rewritten (M1-M14, H1-H8); full suite v2 running -> full-suite-sketch.log; v1 artifacts in v1/
+- next: tech-lead delta review -> sketch-review.md; rebuild /tmp/b438git; claims; update-backlog (D-29z1554..1558); task; feature-status; lessons L61; b-round-437.md; b-next.json
+- v3 sha 1b88d0ec860ff1bf (v2 review Lows 1-3 applied; M15 M16 H9 added); covering 23/23
+- backlog v423 written (D-29z1554..1558); feature-status updated; next: task final copy, claims runs, b-round-437.md, b-next.json
+- DONE: current-task.md (round 438), b-round-437.md, b-next.json, backlog v423, feature-status, lessons L61, user-review note, claims planning/sketch/diff (stderr empty), L58 OK, full suite v3 273/4028 rc0. Awaiting advisor close review.
+- close-review fixes applied (D-29z1559, backlog v424); claims rerun stderr empty; L58 OK; untagged hits are instructions only. B planning COMPLETE.

@@ -1,0 +1,840 @@
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts b438/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts
+--- b438head/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts	2026-11-10 19:09:57.899537898 +0000
+@@ -1,42 +1,24 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync, statSync } from 'node:fs';
+-import { join, relative, resolve } from 'node:path';
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
++import { readSourceFiles, STORE_ROOT } from './helpers/source-scan';
+ 
+-const STORE_ROOT = resolve(__dirname, '../../../..');
+ const SCAN_ROOTS = ['app', 'perf'];
+ const HELPER_PATH = 'app/components/arrangement/studio-repeat-safe.ts';
+ const ENTER_KEY = String.raw`(?:[\w.?]*\bkey\s*={2,3}\s*['"\x60]Enter['"\x60]|['"\x60]Enter['"\x60]\s*={2,3}\s*[\w.?]*\bkey\b)`;
+-const REPEAT = String.raw`[\w.?]*\brepeat\b`;
++const REPEAT = String.raw`(?<![!\w.?])[\w.?]*\brepeat\b`;
+ const INLINE_REPEATED_ENTER_PATTERN = new RegExp(
+   `${ENTER_KEY}\\s*&&\\s*${REPEAT}|${REPEAT}\\s*&&\\s*${ENTER_KEY}`,
+   'g',
+ );
+ 
+-function listSourceFiles(dir: string): string[] {
+-  const files: string[] = [];
+-  for (const entry of readdirSync(dir)) {
+-    const path = join(dir, entry);
+-    if (entry === 'node_modules' || entry === '__tests__') {
+-      continue;
+-    }
+-    if (statSync(path).isDirectory()) {
+-      files.push(...listSourceFiles(path));
+-    } else if (/\.(ts|tsx)$/.test(entry) && !/\.(test|spec)\.(ts|tsx)$/.test(entry)) {
+-      files.push(path);
+-    }
+-  }
+-  return files;
+-}
+-
+ function findInlineRepeatedEnterCopies(): string[] {
+   const hits: string[] = [];
+   for (const root of SCAN_ROOTS) {
+-    for (const file of listSourceFiles(resolve(STORE_ROOT, root))) {
+-      const path = relative(STORE_ROOT, file).split('\\').join('/');
+-      const text = readFileSync(file, 'utf-8');
++    for (const { path, text } of readSourceFiles(resolve(STORE_ROOT, root), ['.ts', '.tsx'])) {
+       for (const match of text.matchAll(INLINE_REPEATED_ENTER_PATTERN)) {
+-        hits.push(`${path}:${text.slice(0, match.index).split('\n').length}`);
++        hits.push(`${root}/${path}:${text.slice(0, match.index).split('\n').length}`);
+       }
+     }
+   }
+@@ -62,5 +44,7 @@
+     expect(matches("if (event.key !== 'Enter' || !event.repeat) {")).toBe(0);
+     expect(matches("if (event.key === 'Enter' || event.key === ' ') {")).toBe(0);
+     expect(matches('if (!event.repeat) {')).toBe(0);
++    expect(matches("if (!event.repeat && event.key === 'Enter') {")).toBe(0);
++    expect(matches("if (event.key === 'Enter' && !event.repeat) {")).toBe(0);
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/helpers/source-scan.ts b438/app/lib/arrangement/__tests__/helpers/source-scan.ts
+--- b438head/app/lib/arrangement/__tests__/helpers/source-scan.ts	1970-01-01 00:00:00.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/helpers/source-scan.ts	2026-11-10 19:19:55.654299104 +0000
+@@ -0,0 +1,189 @@
++import { readdirSync, readFileSync, statSync } from 'node:fs';
++import { join, relative, resolve } from 'node:path';
++
++export const STORE_ROOT = resolve(__dirname, '../../../../..');
++export const ARRANGEMENT_COMPONENTS_DIR = resolve(STORE_ROOT, 'app/components/arrangement');
++
++export interface SourceFile {
++  path: string;
++  text: string;
++}
++
++export interface JsxOpeningTag {
++  path: string;
++  line: number;
++  tag: string;
++}
++
++const SKIPPED_DIRECTORIES = new Set(['node_modules', '__tests__']);
++const TEST_FILE = /\.(test|spec)\.(ts|tsx)$/;
++const IMPORT_STATEMENT = /^import\s[^;]*;|^import\s*['"][^'"]+['"];?/gm;
++
++export function listSourceFiles(dir: string, extensions: readonly string[] = ['.tsx']): string[] {
++  const files: string[] = [];
++  for (const entry of readdirSync(dir).sort()) {
++    const path = join(dir, entry);
++    if (statSync(path).isDirectory()) {
++      if (!SKIPPED_DIRECTORIES.has(entry)) {
++        files.push(...listSourceFiles(path, extensions));
++      }
++    } else if (
++      extensions.some((extension) => entry.endsWith(extension)) &&
++      !TEST_FILE.test(entry)
++    ) {
++      files.push(path);
++    }
++  }
++  return files;
++}
++
++export function readSourceFiles(
++  dir: string = ARRANGEMENT_COMPONENTS_DIR,
++  extensions: readonly string[] = ['.tsx'],
++): SourceFile[] {
++  return listSourceFiles(dir, extensions).map((file) => ({
++    path: relative(dir, file).split('\\').join('/'),
++    text: readFileSync(file, 'utf8'),
++  }));
++}
++
++function skipQuoted(source: string, from: number, quote: string): number {
++  for (let index = from + 1; index < source.length; index++) {
++    if (source[index] === '\\') {
++      index++;
++    } else if (source[index] === quote) {
++      return index + 1;
++    }
++  }
++  return -1;
++}
++
++interface JsxTagWalk {
++  end: number;
++  skeleton: string;
++}
++
++function walkJsxTag(source: string, from: number): JsxTagWalk | null {
++  const stack: ('brace' | 'template')[] = [];
++  let skeleton = '';
++  let braceStart = -1;
++  let index = from;
++  while (index < source.length) {
++    const char = source[index];
++    const next = source[index + 1];
++    if (stack[stack.length - 1] === 'template') {
++      if (char === '\\') {
++        index += 2;
++      } else if (char === '`') {
++        stack.pop();
++        index++;
++      } else if (char === '$' && next === '{') {
++        stack.push('brace');
++        index += 2;
++      } else {
++        index++;
++      }
++      continue;
++    }
++    if (char === '"' || char === "'") {
++      const close = skipQuoted(source, index, char);
++      if (close === -1) {
++        return null;
++      }
++      if (stack.length === 0) {
++        skeleton += '""';
++      }
++      index = close;
++    } else if (char === '`') {
++      stack.push('template');
++      index++;
++    } else if (char === '/' && next === '/') {
++      const lineEnd = source.indexOf('\n', index);
++      if (lineEnd === -1) {
++        return null;
++      }
++      index = lineEnd + 1;
++    } else if (char === '/' && next === '*') {
++      const commentEnd = source.indexOf('*/', index + 2);
++      if (commentEnd === -1) {
++        return null;
++      }
++      index = commentEnd + 2;
++    } else if (char === '{') {
++      if (stack.length === 0) {
++        braceStart = index;
++      }
++      stack.push('brace');
++      index++;
++    } else if (char === '}') {
++      stack.pop();
++      if (stack.length === 0 && braceStart !== -1) {
++        skeleton += /^\{\s*\.\.\./.test(source.slice(braceStart, index)) ? '{...}' : '{}';
++        braceStart = -1;
++      }
++      index++;
++    } else if (char === '>' && stack.length === 0) {
++      return { end: index, skeleton: `${skeleton}>` };
++    } else {
++      if (stack.length === 0) {
++        skeleton += char;
++      }
++      index++;
++    }
++  }
++  return null;
++}
++
++export function jsxTagSkeleton(tag: string): string {
++  const opener = tag.match(/^<[\w.]+/)?.[0] ?? '';
++  const walk = walkJsxTag(tag, opener.length);
++  return walk ? `${opener}${walk.skeleton}` : tag;
++}
++
++export function jsxOpeningTags(source: string, name: string, path = '<inline>'): JsxOpeningTag[] {
++  const tags: JsxOpeningTag[] = [];
++  const opener = new RegExp(`<${name}(?=[\\s/>])`, 'g');
++  for (let match = opener.exec(source); match; match = opener.exec(source)) {
++    const line = source.slice(0, match.index).split('\n').length;
++    const end = walkJsxTag(source, match.index + name.length + 1)?.end ?? -1;
++    if (end === -1) {
++      throw new Error(`${path}:${line}: <${name}> tag has no end the scanner can read`);
++    }
++    tags.push({ path, line, tag: source.slice(match.index, end + 1) });
++    opener.lastIndex = end;
++  }
++  return tags;
++}
++
++export function scanJsxOpeningTags(name: string, files: readonly SourceFile[]): JsxOpeningTag[] {
++  return files.flatMap((file) => jsxOpeningTags(file.text, name, file.path));
++}
++
++export function jsxAttributeLiteral(tag: string, attribute: string): string | null {
++  const pattern = new RegExp(
++    `(?<![\\w-])${attribute}=(?:"([^"]*)"|'([^']*)'|\\{\\s*(?:"([^"]*)"|'([^']*)'|\`([^\`$]*)\`)\\s*\\})`,
++  );
++  const match = tag.match(pattern);
++  if (!match) {
++    return null;
++  }
++  return match.slice(1).find((group) => group !== undefined) ?? null;
++}
++
++export type JsxTagHazard = 'spread' | 'style';
++
++export function jsxTagHazards(tag: string): JsxTagHazard[] {
++  const skeleton = jsxTagSkeleton(tag);
++  const hazards: JsxTagHazard[] = [];
++  if (skeleton.includes('{...}')) {
++    hazards.push('spread');
++  }
++  if (/(?<![\w-])style=/.test(skeleton)) {
++    hazards.push('style');
++  }
++  return hazards;
++}
++
++export function stripImportStatements(source: string): string {
++  return source.replace(IMPORT_STATEMENT, '');
++}
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/source-scan.test.ts b438/app/lib/arrangement/__tests__/source-scan.test.ts
+--- b438head/app/lib/arrangement/__tests__/source-scan.test.ts	1970-01-01 00:00:00.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/source-scan.test.ts	2026-11-10 19:15:38.837901890 +0000
+@@ -0,0 +1,129 @@
++// @vitest-environment node
++import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { afterEach, describe, expect, it } from 'vitest';
++import {
++  ARRANGEMENT_COMPONENTS_DIR,
++  jsxAttributeLiteral,
++  jsxOpeningTags,
++  jsxTagHazards,
++  readSourceFiles,
++  stripImportStatements,
++} from './helpers/source-scan';
++
++const TEMPLATE_TAG = [
++  '<input a={(e) => e > 1} b="x > y" c=\'}\' d={`>$',
++  '{f({ g: "}" })}>`} e="1" />',
++].join('');
++
++const tags = (source: string, name = 'input') => jsxOpeningTags(source, name).map(({ tag }) => tag);
++
++let scratch: string | null = null;
++
++afterEach(() => {
++  if (scratch) {
++    rmSync(scratch, { recursive: true, force: true });
++    scratch = null;
++  }
++});
++
++describe('shared JSX source scanner (SYS-R435-SOURCE-SCAN-HELPER)', () => {
++  it('SS1: a tag ends at the first > outside quotes, braces, template literals and comments', () => {
++    expect(
++      tags(
++        [
++          TEMPLATE_TAG,
++          '<input\n  // don\'t > stop\n  /* it\'s > here */\n  type="text"\n/>',
++          '<input accept="video/*,.mov" hidden />',
++          '<input render={() => <b />} f="2" />',
++          '<input title={`it\'s > fine`} f="3" />',
++        ].join('\n'),
++      ),
++    ).toEqual([
++      TEMPLATE_TAG,
++      '<input\n  // don\'t > stop\n  /* it\'s > here */\n  type="text"\n/>',
++      '<input accept="video/*,.mov" hidden />',
++      '<input render={() => <b />} f="2" />',
++      '<input title={`it\'s > fine`} f="3" />',
++    ]);
++  });
++
++  it('SS2: the opener needs a whole tag name and a tag the scanner cannot close fails loudly with its line', () => {
++    expect(tags('<inputs a="1" /><input/><ModalBody />', 'input')).toEqual(['<input/>']);
++    expect(tags('<ModalBody a="1"><Modal b="2">', 'Modal')).toEqual(['<Modal b="2">']);
++    expect(() => jsxOpeningTags('\n<input a="unterminated />', 'input', 'X.tsx')).toThrow(
++      'X.tsx:2: <input> tag has no end the scanner can read',
++    );
++  });
++
++  it('SS3: attribute literals respect the name boundary and accept every literal spelling', () => {
++    expect(jsxAttributeLiteral('<input data-type="radio" type="text" />', 'type')).toBe('text');
++    expect(jsxAttributeLiteral('<input inputType="number" />', 'type')).toBeNull();
++    expect(jsxAttributeLiteral('<input aria-type="number" />', 'type')).toBeNull();
++    expect(jsxAttributeLiteral("<input type='radio' />", 'type')).toBe('radio');
++    expect(jsxAttributeLiteral("<input type={ 'search' } />", 'type')).toBe('search');
++    expect(jsxAttributeLiteral('<input type={`number`} />', 'type')).toBe('number');
++    expect(jsxAttributeLiteral('<input type="datetime-local" />', 'type')).toBe('datetime-local');
++    expect(jsxAttributeLiteral('<input type={kind} />', 'type')).toBeNull();
++    expect(jsxAttributeLiteral(['<input type={`$', '{kind}`} />'].join(''), 'type')).toBeNull();
++  });
++
++  it('SS4: a spread attribute or a style= on the tag is a hazard; data-style, an object spread inside a value and text in strings are not', () => {
++    expect(jsxTagHazards('<input type="text" {...rest} />')).toEqual(['spread']);
++    expect(jsxTagHazards('<input type="text" { ...rest} style={s} />')).toEqual([
++      'spread',
++      'style',
++    ]);
++    expect(jsxTagHazards('<input type="text" data-style="x" />')).toEqual([]);
++    expect(jsxTagHazards('<input type="text" className="a" />')).toEqual([]);
++    expect(
++      jsxTagHazards('<input type="text" onChange={(e) => set({ ...current, draft: e })} />'),
++    ).toEqual([]);
++    expect(jsxTagHazards('<input title="style={x} {...y}" type="text" />')).toEqual([]);
++    expect(jsxTagHazards('<input\n  // style={x}\n  type="text"\n/>')).toEqual([]);
++  });
++
++  it('SS5: import stripping removes named, type and side-effect imports and keeps the code after them', () => {
++    const body = stripImportStatements(
++      [
++        "import { A } from './a';",
++        'import type {\n  B,\n} from "./b";',
++        "import './side-effect';",
++        'const C = A;',
++      ].join('\n'),
++    );
++    expect(body).not.toMatch(/import/);
++    expect(body).toContain('const C = A;');
++  });
++
++  it('SS6: the file walk recurses into subfolders, skips __tests__, node_modules and test files, and reports posix paths', () => {
++    scratch = mkdtempSync(join(tmpdir(), 'source-scan-'));
++    mkdirSync(join(scratch, 'lanes', 'deep'), { recursive: true });
++    mkdirSync(join(scratch, '__tests__'));
++    mkdirSync(join(scratch, 'node_modules'));
++    writeFileSync(join(scratch, 'Top.tsx'), '<input type="number" />');
++    writeFileSync(join(scratch, 'lanes', 'deep', 'Moved.tsx'), '<input type="number" />');
++    writeFileSync(join(scratch, 'lanes', 'helper.ts'), 'export const x = 1;');
++    writeFileSync(join(scratch, 'lanes', 'Moved.test.tsx'), '<input type="number" />');
++    writeFileSync(join(scratch, '__tests__', 'Hidden.tsx'), '<input type="number" />');
++    writeFileSync(join(scratch, 'node_modules', 'Dep.tsx'), '<input type="number" />');
++    expect(readSourceFiles(scratch).map(({ path }) => path)).toEqual([
++      'Top.tsx',
++      'lanes/deep/Moved.tsx',
++    ]);
++    expect(readSourceFiles(scratch, ['.ts', '.tsx']).map(({ path }) => path)).toEqual([
++      'Top.tsx',
++      'lanes/deep/Moved.tsx',
++      'lanes/helper.ts',
++    ]);
++  });
++
++  it('SS7: the default root is the real arrangement components folder', () => {
++    const paths = readSourceFiles().map(({ path }) => path);
++    expect(paths).toContain('ArrangementExportDialog.tsx');
++    expect(ARRANGEMENT_COMPONENTS_DIR.split('\\').join('/')).toMatch(
++      /\/app\/components\/arrangement$/,
++    );
++  });
++});
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx b438/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx
+--- b438head/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx	2026-11-10 19:11:19.992132548 +0000
+@@ -1,5 +1,5 @@
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { join } from 'node:path';
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
+ import { cleanup, render, screen } from '@testing-library/react';
+ import { afterEach, describe, expect, it } from 'vitest';
+ import {
+@@ -7,42 +7,17 @@
+   STUDIO_SCROLLBAR_CLASS,
+ } from '~/components/arrangement/studio-scrollbar';
+ import { Modal } from '~/components/ui';
++import {
++  jsxOpeningTags,
++  jsxTagHazards,
++  readSourceFiles,
++  STORE_ROOT,
++  scanJsxOpeningTags,
++} from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = join(process.cwd(), 'app/components/arrangement');
+-const LEGACY_EXPORT_DIALOG = join(process.cwd(), 'app/components/studio/ExportDialog.tsx');
++const LEGACY_EXPORT_DIALOG = resolve(STORE_ROOT, 'app/components/studio/ExportDialog.tsx');
+ const STUDIO_DIALOG_PROP = 'scrollbarClassName={STUDIO_DIALOG_SCROLLBAR_CLASS}';
+ 
+-function openingTags(source: string, name: string): string[] {
+-  const tags: string[] = [];
+-  const opener = new RegExp(`<${name}(?=[\\s>])`, 'g');
+-  for (let match = opener.exec(source); match; match = opener.exec(source)) {
+-    let depth = 0;
+-    let quote: string | null = null;
+-    let end = match.index + name.length + 1;
+-    for (; end < source.length; end++) {
+-      const char = source[end];
+-      if (quote) {
+-        if (char === '\\') {
+-          end++;
+-        } else if (char === quote) {
+-          quote = null;
+-        }
+-      } else if (char === '"' || char === "'" || char === '`') {
+-        quote = char;
+-      } else if (char === '{') {
+-        depth++;
+-      } else if (char === '}') {
+-        depth--;
+-      } else if (char === '>' && depth === 0) {
+-        break;
+-      }
+-    }
+-    tags.push(source.slice(match.index, end + 1));
+-    opener.lastIndex = end;
+-  }
+-  return tags;
+-}
+-
+ function modalPanelTokens(): string[] {
+   const panel = screen.getByRole('dialog').firstElementChild;
+   if (!(panel instanceof HTMLElement)) {
+@@ -97,26 +72,24 @@
+   });
+ 
+   it('DS4: every Modal in the Studio components passes the Studio dialog skin; the legacy dialog keeps the store default', () => {
+-    const studioModals = readdirSync(ARRANGEMENT_DIR)
+-      .filter((file) => file.endsWith('.tsx'))
+-      .flatMap((file) =>
+-        openingTags(readFileSync(join(ARRANGEMENT_DIR, file), 'utf8'), 'Modal').map((tag) => ({
+-          file,
+-          tag,
+-        })),
+-      );
+-    expect(studioModals.map(({ file }) => file).sort()).toEqual([
++    const studioModals = scanJsxOpeningTags('Modal', readSourceFiles());
++    expect(studioModals.map(({ path }) => path).sort()).toEqual([
+       'ArrangementExportDialog.tsx',
+       'ArrangementShortcutSheet.tsx',
+     ]);
+-    for (const { tag } of studioModals) {
+-      expect(tag).toContain(STUDIO_DIALOG_PROP);
++    for (const { path, line, tag } of studioModals) {
++      expect(tag, `${path}:${line}`).toContain(STUDIO_DIALOG_PROP);
++      expect(jsxTagHazards(tag), `${path}:${line}`).toStrictEqual([]);
+     }
+-    const legacy = openingTags(readFileSync(LEGACY_EXPORT_DIALOG, 'utf8'), 'Modal');
++    const legacy = jsxOpeningTags(readFileSync(LEGACY_EXPORT_DIALOG, 'utf8'), 'Modal').map(
++      ({ tag }) => tag,
++    );
+     expect(legacy).toHaveLength(1);
+     expect(legacy[0]).not.toContain('scrollbarClassName');
+-    expect(openingTags('<ModalBody a="1"><Modal x={a > b ? "}" : \'>\'} y="2">', 'Modal')).toEqual([
+-      '<Modal x={a > b ? "}" : \'>\'} y="2">',
+-    ]);
++    expect(
++      jsxOpeningTags('<ModalBody a="1"><Modal x={a > b ? "}" : \'>\'} y="2">', 'Modal').map(
++        ({ tag }) => tag,
++      ),
++    ).toEqual(['<Modal x={a > b ? "}" : \'>\'} y="2">']);
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-number-field.test.ts b438/app/lib/arrangement/__tests__/studio-number-field.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-number-field.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-number-field.test.ts	2026-11-10 19:09:27.067972418 +0000
+@@ -1,17 +1,19 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ import { STUDIO_NUMBER_FIELD_CLASS } from '~/components/arrangement/studio-number-field';
++import {
++  jsxAttributeLiteral,
++  jsxTagHazards,
++  readSourceFiles,
++  scanJsxOpeningTags,
++  stripImportStatements,
++} from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
+-const NUMBER_INPUT = /type=["'`{]+number["'`}]+/g;
+-const IMPORT_STATEMENT = /^import[\s\S]*?from\s+['"][^'"]+['"];?$/gm;
+-const CONSTANT_USE = /\$\{STUDIO_NUMBER_FIELD_CLASS\}|cn\([^)]*STUDIO_NUMBER_FIELD_CLASS/;
++const CONSTANT_USE = /\bSTUDIO_NUMBER_FIELD_CLASS\b/;
+ 
+-function sourceFiles(): string[] {
+-  return readdirSync(ARRANGEMENT_DIR).filter(
+-    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
++function numberInputTags() {
++  return scanJsxOpeningTags('input', readSourceFiles()).filter(
++    ({ tag }) => jsxAttributeLiteral(tag, 'type') === 'number',
+   );
+ }
+ 
+@@ -25,21 +27,25 @@
+     ]);
+   });
+ 
+-  it('NF2: every arrangement file with a number input uses the shared class outside its imports', () => {
+-    const owners = sourceFiles().filter(
+-      (name) =>
+-        (readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').match(NUMBER_INPUT) ?? []).length > 0,
+-    );
++  it('NF2: every arrangement file with a number input uses the shared class outside its imports, and no number input carries a spread or style=', () => {
++    const tags = numberInputTags();
++    const owners = [...new Set(tags.map(({ path }) => path))];
+     expect(
+       owners,
+       'a new number-input file must apply STUDIO_NUMBER_FIELD_CLASS and be added to this list',
+     ).toStrictEqual(['ArrangementDetailPanel.tsx']);
+-    for (const name of owners) {
+-      const body = readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').replace(
+-        IMPORT_STATEMENT,
+-        '',
+-      );
+-      expect(CONSTANT_USE.test(body), `${name} applies STUDIO_NUMBER_FIELD_CLASS`).toBe(true);
++    expect(tags).toHaveLength(3);
++    const files = readSourceFiles();
++    for (const owner of owners) {
++      const file = files.find(({ path }) => path === owner);
++      expect(file, owner).toBeDefined();
++      expect(
++        CONSTANT_USE.test(stripImportStatements(file?.text ?? '')),
++        `${owner} applies STUDIO_NUMBER_FIELD_CLASS`,
++      ).toBe(true);
++    }
++    for (const { path, line, tag } of tags) {
++      expect(jsxTagHazards(tag), `${path}:${line}`).toStrictEqual([]);
+     }
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-progress.test.ts b438/app/lib/arrangement/__tests__/studio-progress.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-progress.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-progress.test.ts	2026-11-10 19:11:19.995132604 +0000
+@@ -1,32 +1,10 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ import { STUDIO_PROGRESS_CLASS } from '~/components/arrangement/studio-progress';
++import { jsxTagHazards, readSourceFiles, scanJsxOpeningTags } from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
+-const PROGRESS_OPENING = /<progress\b/g;
+-const PROGRESS_TAG = /<progress\b[^<]*?\/>/g;
+-const PROGRESS_CLOSING = /<\/progress>/g;
+-const PROGRESS_CLASS_ATTRIBUTE = /\bclassName=\{STUDIO_PROGRESS_CLASS\}/;
+-
+-function sourceFiles(): string[] {
+-  return readdirSync(ARRANGEMENT_DIR).filter(
+-    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
+-  );
+-}
+-
+-function arrangementSource(name: string): string {
+-  return readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8');
+-}
+-
+-function progressOpenings(name: string): number {
+-  return arrangementSource(name).match(PROGRESS_OPENING)?.length ?? 0;
+-}
+-
+-function progressTags(name: string): string[] {
+-  return arrangementSource(name).match(PROGRESS_TAG) ?? [];
+-}
++const PROGRESS_CLASS_ATTRIBUTE = /(?<![\w-])className=\{STUDIO_PROGRESS_CLASS\}/;
++const CREATED_PROGRESS = /createElement\(\s*['"`]progress['"`]/;
+ 
+ describe('Studio progress bars are drawn by the theme, not the browser (SABA-B-12 stage 2b)', () => {
+   it('PG1: the shared class draws a neutral token-only bar, pulses only while indeterminate and only with motion allowed, and restores the system bar in forced colours (token contract; the browser half is the C probe)', () => {
+@@ -57,25 +35,22 @@
+     ]);
+   });
+ 
+-  it('PG2: every progress tag in the arrangement components carries className={STUDIO_PROGRESS_CLASS}', () => {
+-    const owners = sourceFiles().filter((name) => progressOpenings(name) > 0);
++  it('PG2: every progress tag in the arrangement components carries className={STUDIO_PROGRESS_CLASS}, with no spread or style= that could override it', () => {
++    const tags = scanJsxOpeningTags('progress', readSourceFiles());
+     expect(
+-      owners,
++      [...new Set(tags.map(({ path }) => path))],
+       'a new progress file must apply STUDIO_PROGRESS_CLASS and be added to this list',
+     ).toStrictEqual(['ArrangementExportDialog.tsx']);
+-    const tags = owners.flatMap((name) => progressTags(name));
+-    expect(tags, 'each <progress> is one self-closing tag').toHaveLength(
+-      owners.reduce((sum, name) => sum + progressOpenings(name), 0),
+-    );
+     expect(tags).toHaveLength(1);
++    for (const { path, line, tag } of tags) {
++      expect(PROGRESS_CLASS_ATTRIBUTE.test(tag), `${path}:${line}`).toBe(true);
++      expect(jsxTagHazards(tag), `${path}:${line}`).toStrictEqual([]);
++    }
+     expect(
+-      sourceFiles().filter(
+-        (name) => (arrangementSource(name).match(PROGRESS_CLOSING)?.length ?? 0) > 0,
+-      ),
+-      'no <progress>…</progress> pair hides from the self-closing scan',
++      readSourceFiles(undefined, ['.ts', '.tsx'])
++        .filter(({ text }) => CREATED_PROGRESS.test(text))
++        .map(({ path }) => path),
++      'no arrangement source creates a progress element outside JSX',
+     ).toStrictEqual([]);
+-    for (const tag of tags) {
+-      expect(PROGRESS_CLASS_ATTRIBUTE.test(tag), tag.slice(0, 120)).toBe(true);
+-    }
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-radio.test.ts b438/app/lib/arrangement/__tests__/studio-radio.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-radio.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-radio.test.ts	2026-11-10 19:09:33.034699159 +0000
+@@ -1,27 +1,24 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ import { STUDIO_RADIO_CLASS } from '~/components/arrangement/studio-radio';
++import {
++  type JsxOpeningTag,
++  jsxAttributeLiteral,
++  jsxTagHazards,
++  readSourceFiles,
++  scanJsxOpeningTags,
++} from './helpers/source-scan';
++
++const RADIO_CLASS_ATTRIBUTE = /(?<![\w-])className=\{STUDIO_RADIO_CLASS\}/;
++const LITERAL_TYPE = /^[a-z-]+$/;
++const SPREAD_INPUTS_GUARDED_BY_TYPE = ['ArrangementMixFader.tsx'];
+ 
+-const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
+-const INPUT_TAG = /<input\b[\s\S]*?\/>/g;
+-const RADIO_TYPE = /\btype=["'`{]+radio["'`}]+/;
+-const RADIO_CLASS_ATTRIBUTE = /\bclassName=\{STUDIO_RADIO_CLASS\}/;
+-const LITERAL_TYPE = /\btype=["'][a-z]+["']/;
+-
+-function sourceFiles(): string[] {
+-  return readdirSync(ARRANGEMENT_DIR).filter(
+-    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
+-  );
+-}
+-
+-function inputTags(name: string): string[] {
+-  return readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').match(INPUT_TAG) ?? [];
++function inputTags(): JsxOpeningTag[] {
++  return scanJsxOpeningTags('input', readSourceFiles());
+ }
+ 
+-function radioTags(name: string): string[] {
+-  return inputTags(name).filter((tag) => RADIO_TYPE.test(tag));
++function radioTags(): JsxOpeningTag[] {
++  return inputTags().filter(({ tag }) => jsxAttributeLiteral(tag, 'type') === 'radio');
+ }
+ 
+ describe('Studio radios are drawn by the theme, not the browser (SABA-B-12 stage 2a)', () => {
+@@ -47,24 +44,35 @@
+   });
+ 
+   it('RD2: every radio input tag in the arrangement components carries className={STUDIO_RADIO_CLASS}', () => {
+-    const owners = sourceFiles().filter((name) => radioTags(name).length > 0);
++    const tags = radioTags();
+     expect(
+-      owners,
++      [...new Set(tags.map(({ path }) => path))],
+       'a new radio file must apply STUDIO_RADIO_CLASS and be added to this list',
+     ).toStrictEqual(['ArrangementExportDialog.tsx']);
+-    const tags = owners.flatMap((name) => radioTags(name));
+     expect(tags).toHaveLength(6);
+-    for (const tag of tags) {
+-      expect(RADIO_CLASS_ATTRIBUTE.test(tag), tag.slice(0, 120)).toBe(true);
++    for (const { path, line, tag } of tags) {
++      expect(RADIO_CLASS_ATTRIBUTE.test(tag), `${path}:${line}`).toBe(true);
++      expect(jsxTagHazards(tag), `${path}:${line}`).toStrictEqual([]);
+     }
+-    const hiddenTypes = sourceFiles().flatMap((name) =>
+-      inputTags(name)
+-        .filter((tag) => !LITERAL_TYPE.test(tag))
+-        .map((tag) => `${name}: ${tag.slice(0, 80)}`),
+-    );
++    const hiddenTypes = inputTags()
++      .filter(({ tag }) => !LITERAL_TYPE.test(jsxAttributeLiteral(tag, 'type') ?? ''))
++      .map(({ path, line }) => `${path}:${line}`);
+     expect(
+       hiddenTypes,
+-      'every arrangement <input> names a literal type, so a radio cannot hide behind a spread or a variable',
++      'every arrangement <input> names a literal type, so a radio cannot hide behind a variable',
+     ).toStrictEqual([]);
++    const spreadOwners = inputTags()
++      .filter(({ tag }) => jsxTagHazards(tag).includes('spread'))
++      .map(({ path }) => path);
++    expect(
++      spreadOwners,
++      'a spread on an <input> can override its literal type; the only allowed owner omits `type` from its props type',
++    ).toStrictEqual(SPREAD_INPUTS_GUARDED_BY_TYPE);
++    for (const owner of SPREAD_INPUTS_GUARDED_BY_TYPE) {
++      const text = readSourceFiles().find(({ path }) => path === owner)?.text ?? '';
++      expect(text, `${owner} omits type from the props it spreads`).toMatch(
++        /Omit<\s*InputHTMLAttributes<HTMLInputElement>,\s*'type'\s*\|/,
++      );
++    }
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-search-field.test.ts b438/app/lib/arrangement/__tests__/studio-search-field.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-search-field.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-search-field.test.ts	2026-11-10 19:11:19.988132472 +0000
+@@ -1,79 +1,57 @@
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { join } from 'node:path';
+ import { describe, expect, it } from 'vitest';
++import {
++  type JsxOpeningTag,
++  jsxAttributeLiteral,
++  jsxOpeningTags,
++  jsxTagHazards,
++  readSourceFiles,
++  scanJsxOpeningTags,
++} from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = join(process.cwd(), 'app/components/arrangement');
+ const NATIVE_CANCEL_HIDDEN = '[&::-webkit-search-cancel-button]:hidden';
+ 
+-function inputTags(source: string): string[] {
+-  const tags: string[] = [];
+-  let from = source.indexOf('<input');
+-  while (from !== -1) {
+-    let depth = 0;
+-    let quote: string | null = null;
+-    let end = from + '<input'.length;
+-    for (; end < source.length; end++) {
+-      const char = source[end];
+-      if (quote) {
+-        if (char === '\\') {
+-          end++;
+-        } else if (char === quote) {
+-          quote = null;
+-        }
+-      } else if (char === '"' || char === "'" || char === '`') {
+-        quote = char;
+-      } else if (char === '{') {
+-        depth++;
+-      } else if (char === '}') {
+-        depth--;
+-      } else if (char === '>' && depth === 0) {
+-        break;
+-      }
+-    }
+-    tags.push(source.slice(from, end + 1));
+-    from = source.indexOf('<input', end);
+-  }
+-  return tags;
+-}
+-
+-const SEARCH_TYPE = /\btype=(?:"search"|'search'|\{\s*['"`]search['"`]\s*\})/;
+-
+-function searchInputTags(): { file: string; tag: string }[] {
+-  return readdirSync(ARRANGEMENT_DIR)
+-    .filter((file) => file.endsWith('.tsx'))
+-    .flatMap((file) =>
+-      inputTags(readFileSync(join(ARRANGEMENT_DIR, file), 'utf8'))
+-        .filter((tag) => SEARCH_TYPE.test(tag))
+-        .map((tag) => ({ file, tag })),
+-    );
++function searchInputTags(): JsxOpeningTag[] {
++  return scanJsxOpeningTags('input', readSourceFiles()).filter(
++    ({ tag }) => jsxAttributeLiteral(tag, 'type') === 'search',
++  );
+ }
+ 
+ describe('SABA-B-12 stage 3: no native search cancel in Studio', () => {
+-  it('SF1: the whole-tag scanner reads braces, quotes and arrows, and finds every spelling of the search type', () => {
+-    const tags = inputTags(
++  it('SF1: the whole-tag scanner reads braces, quotes, arrows and comments, and finds every spelling of the search type', () => {
++    const tags = jsxOpeningTags(
+       [
+         '<input type="search" onChange={(event) => set(event.target.value > 1)} className="a b" />',
+         '<input placeholder="a > b" title={\'}\'} type={\'search\'} className="c" />',
+         '<input type=\'search\' className="d" />',
+         '<input type="text" />',
++        '<input\n  // don\'t > close here\n  type={`search`}\n  className="e"\n/>',
+       ].join(''),
+-    );
+-    expect(tags).toHaveLength(4);
++      'input',
++    ).map(({ tag }) => tag);
++    expect(tags).toHaveLength(5);
+     expect(tags[0]).toContain('className="a b"');
+     expect(tags[1]).toContain('className="c"');
+     expect(tags[2]).toContain('className="d"');
+     expect(tags[3]).toBe('<input type="text" />');
+-    expect(tags.map((tag) => SEARCH_TYPE.test(tag))).toEqual([true, true, true, false]);
++    expect(tags[4]).toContain('className="e"');
++    expect(tags.map((tag) => jsxAttributeLiteral(tag, 'type') === 'search')).toEqual([
++      true,
++      true,
++      true,
++      false,
++      true,
++    ]);
+   });
+ 
+-  it('SF2: every search field in the arrangement components hides the native cancel', () => {
++  it('SF2: every search field in the arrangement components hides the native cancel, with no spread or style= on the tag', () => {
+     const found = searchInputTags();
+-    expect(found.map(({ file }) => file).sort()).toEqual([
++    expect(found.map(({ path }) => path).sort()).toEqual([
+       'ArrangementLibrary.tsx',
+       'ArrangementShortcutSheet.tsx',
+     ]);
+-    for (const { file, tag } of found) {
+-      expect(tag, file).toContain(NATIVE_CANCEL_HIDDEN);
++    for (const { path, line, tag } of found) {
++      expect(tag, `${path}:${line}`).toContain(NATIVE_CANCEL_HIDDEN);
++      expect(jsxTagHazards(tag), `${path}:${line}`).toStrictEqual([]);
+     }
+   });
+ });

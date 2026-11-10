@@ -1,0 +1,1000 @@
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts b438/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts
+--- b438head/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/held-enter-source-scan.test.ts	2026-11-10 19:09:57.899537898 +0000
+@@ -1,42 +1,24 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync, statSync } from 'node:fs';
+-import { join, relative, resolve } from 'node:path';
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
++import { readSourceFiles, STORE_ROOT } from './helpers/source-scan';
+ 
+-const STORE_ROOT = resolve(__dirname, '../../../..');
+ const SCAN_ROOTS = ['app', 'perf'];
+ const HELPER_PATH = 'app/components/arrangement/studio-repeat-safe.ts';
+ const ENTER_KEY = String.raw`(?:[\w.?]*\bkey\s*={2,3}\s*['"\x60]Enter['"\x60]|['"\x60]Enter['"\x60]\s*={2,3}\s*[\w.?]*\bkey\b)`;
+-const REPEAT = String.raw`[\w.?]*\brepeat\b`;
++const REPEAT = String.raw`(?<![!\w.?])[\w.?]*\brepeat\b`;
+ const INLINE_REPEATED_ENTER_PATTERN = new RegExp(
+   `${ENTER_KEY}\\s*&&\\s*${REPEAT}|${REPEAT}\\s*&&\\s*${ENTER_KEY}`,
+   'g',
+ );
+ 
+-function listSourceFiles(dir: string): string[] {
+-  const files: string[] = [];
+-  for (const entry of readdirSync(dir)) {
+-    const path = join(dir, entry);
+-    if (entry === 'node_modules' || entry === '__tests__') {
+-      continue;
+-    }
+-    if (statSync(path).isDirectory()) {
+-      files.push(...listSourceFiles(path));
+-    } else if (/\.(ts|tsx)$/.test(entry) && !/\.(test|spec)\.(ts|tsx)$/.test(entry)) {
+-      files.push(path);
+-    }
+-  }
+-  return files;
+-}
+-
+ function findInlineRepeatedEnterCopies(): string[] {
+   const hits: string[] = [];
+   for (const root of SCAN_ROOTS) {
+-    for (const file of listSourceFiles(resolve(STORE_ROOT, root))) {
+-      const path = relative(STORE_ROOT, file).split('\\').join('/');
+-      const text = readFileSync(file, 'utf-8');
++    for (const { path, text } of readSourceFiles(resolve(STORE_ROOT, root), ['.ts', '.tsx'])) {
+       for (const match of text.matchAll(INLINE_REPEATED_ENTER_PATTERN)) {
+-        hits.push(`${path}:${text.slice(0, match.index).split('\n').length}`);
++        hits.push(`${root}/${path}:${text.slice(0, match.index).split('\n').length}`);
+       }
+     }
+   }
+@@ -62,5 +44,7 @@
+     expect(matches("if (event.key !== 'Enter' || !event.repeat) {")).toBe(0);
+     expect(matches("if (event.key === 'Enter' || event.key === ' ') {")).toBe(0);
+     expect(matches('if (!event.repeat) {')).toBe(0);
++    expect(matches("if (!event.repeat && event.key === 'Enter') {")).toBe(0);
++    expect(matches("if (event.key === 'Enter' && !event.repeat) {")).toBe(0);
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/helpers/source-scan.ts b438/app/lib/arrangement/__tests__/helpers/source-scan.ts
+--- b438head/app/lib/arrangement/__tests__/helpers/source-scan.ts	1970-01-01 00:00:00.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/helpers/source-scan.ts	2026-11-10 19:37:09.737128832 +0000
+@@ -0,0 +1,248 @@
++import { readdirSync, readFileSync, statSync } from 'node:fs';
++import { join, relative, resolve } from 'node:path';
++import ts from 'typescript';
++
++export const STORE_ROOT = resolve(__dirname, '../../../../..');
++export const ARRANGEMENT_COMPONENTS_DIR = resolve(STORE_ROOT, 'app/components/arrangement');
++
++export interface SourceFile {
++  path: string;
++  text: string;
++}
++
++export type JsxTagHazard = 'spread' | 'style';
++
++export interface JsxOpeningTag {
++  path: string;
++  line: number;
++  tag: string;
++  attributes: ReadonlyMap<string, string | null>;
++  attributeTexts: ReadonlyMap<string, string>;
++  hazards: readonly JsxTagHazard[];
++}
++
++const SKIPPED_DIRECTORIES = new Set(['node_modules', '__tests__']);
++const TEST_FILE = /\.(test|spec)\.(ts|tsx)$/;
++
++export function listSourceFiles(dir: string, extensions: readonly string[] = ['.tsx']): string[] {
++  const files: string[] = [];
++  for (const entry of readdirSync(dir).sort()) {
++    const path = join(dir, entry);
++    if (statSync(path).isDirectory()) {
++      if (!SKIPPED_DIRECTORIES.has(entry)) {
++        files.push(...listSourceFiles(path, extensions));
++      }
++    } else if (
++      extensions.some((extension) => entry.endsWith(extension)) &&
++      !TEST_FILE.test(entry)
++    ) {
++      files.push(path);
++    }
++  }
++  return files;
++}
++
++export function readSourceFiles(
++  dir: string = ARRANGEMENT_COMPONENTS_DIR,
++  extensions: readonly string[] = ['.tsx'],
++): SourceFile[] {
++  return listSourceFiles(dir, extensions).map((file) => ({
++    path: relative(dir, file).split('\\').join('/'),
++    text: readFileSync(file, 'utf8'),
++  }));
++}
++
++const parsedSources = new Map<string, ts.SourceFile>();
++
++export function parseSource(source: string, path = 'inline.tsx'): ts.SourceFile {
++  const key = `${path}\u0000${source}`;
++  const cached = parsedSources.get(key);
++  if (cached) {
++    return cached;
++  }
++  const fileName = /\.tsx?$/.test(path) ? path : `${path}.tsx`;
++  const kind = fileName.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
++  const file = ts.createSourceFile(fileName, source, ts.ScriptTarget.ESNext, true, kind);
++  let errorLine = 0;
++  const findError = (node: ts.Node) => {
++    if (errorLine === 0 && (node.flags & ts.NodeFlags.ThisNodeHasError) !== 0) {
++      errorLine = file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1;
++    }
++    ts.forEachChild(node, findError);
++  };
++  findError(file);
++  if (errorLine !== 0) {
++    throw new Error(`${path}:${errorLine}: the TypeScript parser reports a syntax error`);
++  }
++  parsedSources.set(key, file);
++  return file;
++}
++
++function attributeLiteral(attribute: ts.JsxAttribute): string | null {
++  const initializer = attribute.initializer;
++  if (initializer && ts.isStringLiteral(initializer)) {
++    return initializer.text;
++  }
++  if (initializer && ts.isJsxExpression(initializer) && initializer.expression) {
++    const expression = initializer.expression;
++    if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) {
++      return expression.text;
++    }
++  }
++  return null;
++}
++
++function readTag(
++  node: ts.JsxOpeningElement | ts.JsxSelfClosingElement,
++  file: ts.SourceFile,
++  path: string,
++): JsxOpeningTag {
++  const attributes = new Map<string, string | null>();
++  const attributeTexts = new Map<string, string>();
++  const hazards = new Set<JsxTagHazard>();
++  for (const property of node.attributes.properties) {
++    if (ts.isJsxSpreadAttribute(property)) {
++      hazards.add('spread');
++    } else {
++      const name = property.name.getText(file);
++      attributes.set(name, attributeLiteral(property));
++      attributeTexts.set(name, property.initializer?.getText(file) ?? '');
++      if (name === 'style') {
++        hazards.add('style');
++      }
++    }
++  }
++  return {
++    path,
++    line: file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1,
++    tag: node.getText(file),
++    attributes,
++    attributeTexts,
++    hazards: [...hazards],
++  };
++}
++
++export function jsxOpeningTags(source: string, name: string, path = 'inline.tsx'): JsxOpeningTag[] {
++  const file = parseSource(source, path);
++  const tags: JsxOpeningTag[] = [];
++  const visit = (node: ts.Node) => {
++    if (
++      (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) &&
++      node.tagName.getText(file) === name
++    ) {
++      tags.push(readTag(node, file, path));
++    }
++    ts.forEachChild(node, visit);
++  };
++  visit(file);
++  return tags;
++}
++
++export function scanJsxOpeningTags(name: string, files: readonly SourceFile[]): JsxOpeningTag[] {
++  return files.flatMap((file) => jsxOpeningTags(file.text, name, file.path));
++}
++
++export function identifierUsesOutsideImports(
++  source: string,
++  name: string,
++  path = 'inline.tsx',
++): number {
++  const file = parseSource(source, path);
++  let uses = 0;
++  const visit = (node: ts.Node) => {
++    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
++      return;
++    }
++    if (
++      ts.isIdentifier(node) &&
++      node.text === name &&
++      !(ts.isPropertyAccessExpression(node.parent) && node.parent.name === node)
++    ) {
++      uses++;
++    }
++    ts.forEachChild(node, visit);
++  };
++  visit(file);
++  return uses;
++}
++
++export function callsWithStringArgument(
++  source: string,
++  callee: string,
++  argument: string,
++  path = 'inline.tsx',
++): number {
++  const file = parseSource(source, path);
++  let calls = 0;
++  const visit = (node: ts.Node) => {
++    if (ts.isCallExpression(node)) {
++      const target = node.expression;
++      const calleeName = ts.isPropertyAccessExpression(target)
++        ? target.name.text
++        : ts.isIdentifier(target)
++          ? target.text
++          : '';
++      const first = node.arguments[0];
++      if (
++        calleeName === callee &&
++        first &&
++        (ts.isStringLiteral(first) || ts.isNoSubstitutionTemplateLiteral(first)) &&
++        first.text === argument
++      ) {
++        calls++;
++      }
++    }
++    ts.forEachChild(node, visit);
++  };
++  visit(file);
++  return calls;
++}
++
++export function jsxAttributeTextsByName(
++  source: string,
++  attribute: string,
++  path = 'inline.tsx',
++): string[] {
++  const file = parseSource(source, path);
++  const texts: string[] = [];
++  const visit = (node: ts.Node) => {
++    if (ts.isJsxAttribute(node) && node.name.getText(file) === attribute) {
++      texts.push(node.initializer?.getText(file) ?? '');
++    }
++    ts.forEachChild(node, visit);
++  };
++  visit(file);
++  return texts;
++}
++
++export function variableInitializersUsing(
++  source: string,
++  variable: string,
++  identifier: string,
++  path = 'inline.tsx',
++): boolean[] {
++  const file = parseSource(source, path);
++  const results: boolean[] = [];
++  const visit = (node: ts.Node) => {
++    if (
++      ts.isVariableDeclaration(node) &&
++      ts.isIdentifier(node.name) &&
++      node.name.text === variable
++    ) {
++      let found = false;
++      const search = (child: ts.Node) => {
++        if (ts.isIdentifier(child) && child.text === identifier) {
++          found = true;
++        }
++        ts.forEachChild(child, search);
++      };
++      if (node.initializer) {
++        search(node.initializer);
++      }
++      results.push(found);
++    }
++    ts.forEachChild(node, visit);
++  };
++  visit(file);
++  return results;
++}
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/source-scan.test.ts b438/app/lib/arrangement/__tests__/source-scan.test.ts
+--- b438head/app/lib/arrangement/__tests__/source-scan.test.ts	1970-01-01 00:00:00.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/source-scan.test.ts	2026-11-10 19:35:40.699622366 +0000
+@@ -0,0 +1,196 @@
++// @vitest-environment node
++import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { afterEach, describe, expect, it } from 'vitest';
++import {
++  ARRANGEMENT_COMPONENTS_DIR,
++  callsWithStringArgument,
++  identifierUsesOutsideImports,
++  jsxAttributeTextsByName,
++  jsxOpeningTags,
++  readSourceFiles,
++  variableInitializersUsing,
++} from './helpers/source-scan';
++
++const view = (...lines: string[]) => ['const view = (', '  <>', ...lines, '  </>', ');'].join('\n');
++const inputs = (source: string) => jsxOpeningTags(source, 'input');
++
++let scratch: string | null = null;
++
++afterEach(() => {
++  if (scratch) {
++    rmSync(scratch, { recursive: true, force: true });
++    scratch = null;
++  }
++});
++
++describe('shared JSX source scanner (SYS-R435-SOURCE-SCAN-HELPER)', () => {
++  it('SS1: tags are read by the TypeScript parser, so quotes, braces, templates, comments and nested JSX never end a tag early', () => {
++    const tags = inputs(
++      view(
++        [
++          '    <input a={(e) => e > 1} b="x > y" c={\'}\'} d={`>$',
++          '{f({ g: "}" })}>`} e="1" />',
++        ].join(''),
++        '    <input',
++        "      // don't > stop",
++        "      /* it's > here */",
++        '      type="text"',
++        '    />',
++        '    <input accept="video/*,.mov" hidden />',
++        '    <input render={() => <b type="radio" />} f="2" />',
++        '    <input title={`it\'s > fine`} f="3" />',
++        "    <p>{ready && <span>don't</span>}</p>",
++        '    <input type="search" />',
++      ),
++    );
++    expect(tags.map(({ line }) => line)).toEqual([3, 4, 9, 10, 11, 13]);
++    expect(
++      tags.map(({ attributes }) => attributes.get('e') ?? attributes.get('f') ?? null),
++    ).toEqual(['1', null, null, '2', '3', null]);
++    expect(tags[1].attributes.get('type')).toBe('text');
++    expect(tags[3].attributes.has('type')).toBe(false);
++    expect(tags[5].attributes.get('type')).toBe('search');
++  });
++
++  it('SS2: only the exact tag name matches, and a source the parser cannot read fails loudly with its path and line', () => {
++    const source = view(
++      '    <inputs a="1" />',
++      '    <input />',
++      '    <ModalBody />',
++      '    <Modal b="2" />',
++    );
++    expect(jsxOpeningTags(source, 'input').map(({ tag }) => tag)).toEqual(['<input />']);
++    expect(jsxOpeningTags(source, 'Modal').map(({ tag }) => tag)).toEqual(['<Modal b="2" />']);
++    expect(() =>
++      jsxOpeningTags('const a = 1;\nconst v = (<input a="x />);\n', 'input', 'X.tsx'),
++    ).toThrow('X.tsx:2: the TypeScript parser reports a syntax error');
++  });
++
++  it('SS3: attribute literals are read by exact name and accept every literal spelling', () => {
++    const tags = inputs(
++      view(
++        '    <input data-type="radio" type="text" />',
++        '    <input inputType="number" aria-type="number" />',
++        "    <input type='radio' />",
++        "    <input type={ 'search' } />",
++        '    <input type={`number`} />',
++        '    <input type="datetime-local" />',
++        '    <input type={kind} />',
++        ['    <input type={`$', '{kind}`} />'].join(''),
++      ),
++    );
++    expect(tags.map(({ attributes }) => attributes.get('type'))).toEqual([
++      'text',
++      undefined,
++      'radio',
++      'search',
++      'number',
++      'datetime-local',
++      null,
++      null,
++    ]);
++  });
++
++  it('SS4: a spread attribute or a style attribute is a hazard; an object spread inside a value, data-style and text are not', () => {
++    const tags = inputs(
++      view(
++        '    <input type="text" {...rest} />',
++        '    <input type="text" { ...rest} style = {s} />',
++        '    <input type="text" data-style="x" />',
++        '    <input type="text" onChange={(e) => set({ ...current, draft: e })} />',
++        '    <input title="style={x} {...y}" type="text" />',
++        '    <input',
++        '      // style={x}',
++        '      type="text"',
++        '    />',
++      ),
++    );
++    expect(tags.map(({ hazards }) => hazards)).toEqual([
++      ['spread'],
++      ['spread', 'style'],
++      [],
++      [],
++      [],
++      [],
++    ]);
++  });
++
++  it('SS5: identifier uses ignore every import form, strings and comments, and keep the code after a side-effect import', () => {
++    const source = [
++      "import { CLASS } from './a';",
++      'import type {',
++      '  CLASS as Other,',
++      "} from './b';",
++      "import './side-effect';",
++      "const label = 'CLASS';",
++      '// CLASS',
++      'const used = [CLASS].join(" ");',
++    ].join('\n');
++    expect(identifierUsesOutsideImports(source, 'CLASS', 'a.ts')).toBe(1);
++    expect(
++      identifierUsesOutsideImports(
++        "import { CLASS } from './a';\nexport { CLASS };\nconst x = theme.CLASS;\n",
++        'CLASS',
++        'c.ts',
++      ),
++    ).toBe(0);
++    expect(identifierUsesOutsideImports("import { CLASS } from './a';\n", 'CLASS', 'b.ts')).toBe(0);
++  });
++
++  it('SS8: attribute texts are collected by name across every tag, and variable initializers are searched by identifier', () => {
++    const source = [
++      ['const inputClass = `h-6 $', '{CLASS}`;'].join(''),
++      'const other = `h-6`;',
++      'const view = (',
++      '  <>',
++      '    <Field inputClass={inputClass} />',
++      '    <Field inputClass="h-6" />',
++      '  </>',
++      ');',
++    ].join('\n');
++    expect(jsxAttributeTextsByName(source, 'inputClass')).toEqual(['{inputClass}', '"h-6"']);
++    expect(variableInitializersUsing(source, 'inputClass', 'CLASS')).toEqual([true]);
++    expect(variableInitializersUsing(source, 'other', 'CLASS')).toEqual([false]);
++  });
++
++  it('SS6: the file walk recurses into subfolders, skips __tests__, node_modules and test files, and reports posix paths', () => {
++    scratch = mkdtempSync(join(tmpdir(), 'source-scan-'));
++    mkdirSync(join(scratch, 'lanes', 'deep'), { recursive: true });
++    mkdirSync(join(scratch, '__tests__'));
++    mkdirSync(join(scratch, 'node_modules'));
++    writeFileSync(join(scratch, 'Top.tsx'), 'export const a = 1;');
++    writeFileSync(join(scratch, 'lanes', 'deep', 'Moved.tsx'), 'export const b = 1;');
++    writeFileSync(join(scratch, 'lanes', 'helper.ts'), 'export const x = 1;');
++    writeFileSync(join(scratch, 'lanes', 'Moved.test.tsx'), 'export const c = 1;');
++    writeFileSync(join(scratch, '__tests__', 'Hidden.tsx'), 'export const d = 1;');
++    writeFileSync(join(scratch, 'node_modules', 'Dep.tsx'), 'export const e = 1;');
++    expect(readSourceFiles(scratch).map(({ path }) => path)).toEqual([
++      'Top.tsx',
++      'lanes/deep/Moved.tsx',
++    ]);
++    expect(readSourceFiles(scratch, ['.ts', '.tsx']).map(({ path }) => path)).toEqual([
++      'Top.tsx',
++      'lanes/deep/Moved.tsx',
++      'lanes/helper.ts',
++    ]);
++  });
++
++  it('SS7: the default root is the real arrangement components folder, and calls with a literal first argument are counted by callee name', () => {
++    expect(readSourceFiles().some(({ path }) => path.endsWith('ArrangementExportDialog.tsx'))).toBe(
++      true,
++    );
++    expect(ARRANGEMENT_COMPONENTS_DIR.split('\\').join('/')).toMatch(
++      /\/app\/components\/arrangement$/,
++    );
++    const source = [
++      "document.createElement('progress');",
++      'createElement(`progress`);',
++      "document.createElement('input');",
++      'document.createElement(kind);',
++      'const text = "createElement(\'progress\')";',
++    ].join('\n');
++    expect(callsWithStringArgument(source, 'createElement', 'progress', 'c.ts')).toBe(2);
++  });
++});
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx b438/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx
+--- b438head/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-dialog-scrollbar.test.tsx	2026-11-10 19:29:49.974392159 +0000
+@@ -1,5 +1,5 @@
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { join } from 'node:path';
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
+ import { cleanup, render, screen } from '@testing-library/react';
+ import { afterEach, describe, expect, it } from 'vitest';
+ import {
+@@ -7,42 +7,16 @@
+   STUDIO_SCROLLBAR_CLASS,
+ } from '~/components/arrangement/studio-scrollbar';
+ import { Modal } from '~/components/ui';
++import {
++  jsxOpeningTags,
++  readSourceFiles,
++  STORE_ROOT,
++  scanJsxOpeningTags,
++} from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = join(process.cwd(), 'app/components/arrangement');
+-const LEGACY_EXPORT_DIALOG = join(process.cwd(), 'app/components/studio/ExportDialog.tsx');
++const LEGACY_EXPORT_DIALOG = resolve(STORE_ROOT, 'app/components/studio/ExportDialog.tsx');
+ const STUDIO_DIALOG_PROP = 'scrollbarClassName={STUDIO_DIALOG_SCROLLBAR_CLASS}';
+ 
+-function openingTags(source: string, name: string): string[] {
+-  const tags: string[] = [];
+-  const opener = new RegExp(`<${name}(?=[\\s>])`, 'g');
+-  for (let match = opener.exec(source); match; match = opener.exec(source)) {
+-    let depth = 0;
+-    let quote: string | null = null;
+-    let end = match.index + name.length + 1;
+-    for (; end < source.length; end++) {
+-      const char = source[end];
+-      if (quote) {
+-        if (char === '\\') {
+-          end++;
+-        } else if (char === quote) {
+-          quote = null;
+-        }
+-      } else if (char === '"' || char === "'" || char === '`') {
+-        quote = char;
+-      } else if (char === '{') {
+-        depth++;
+-      } else if (char === '}') {
+-        depth--;
+-      } else if (char === '>' && depth === 0) {
+-        break;
+-      }
+-    }
+-    tags.push(source.slice(match.index, end + 1));
+-    opener.lastIndex = end;
+-  }
+-  return tags;
+-}
+-
+ function modalPanelTokens(): string[] {
+   const panel = screen.getByRole('dialog').firstElementChild;
+   if (!(panel instanceof HTMLElement)) {
+@@ -97,26 +71,27 @@
+   });
+ 
+   it('DS4: every Modal in the Studio components passes the Studio dialog skin; the legacy dialog keeps the store default', () => {
+-    const studioModals = readdirSync(ARRANGEMENT_DIR)
+-      .filter((file) => file.endsWith('.tsx'))
+-      .flatMap((file) =>
+-        openingTags(readFileSync(join(ARRANGEMENT_DIR, file), 'utf8'), 'Modal').map((tag) => ({
+-          file,
+-          tag,
+-        })),
+-      );
+-    expect(studioModals.map(({ file }) => file).sort()).toEqual([
++    const studioModals = scanJsxOpeningTags('Modal', readSourceFiles());
++    expect(studioModals.map(({ path }) => path).sort()).toEqual([
+       'ArrangementExportDialog.tsx',
+       'ArrangementShortcutSheet.tsx',
+     ]);
+-    for (const { tag } of studioModals) {
+-      expect(tag).toContain(STUDIO_DIALOG_PROP);
++    for (const { path, line, tag, hazards } of studioModals) {
++      expect(tag, `${path}:${line}`).toContain(STUDIO_DIALOG_PROP);
++      expect(hazards, `${path}:${line}`).toStrictEqual([]);
+     }
+-    const legacy = openingTags(readFileSync(LEGACY_EXPORT_DIALOG, 'utf8'), 'Modal');
++    const legacy = jsxOpeningTags(
++      readFileSync(LEGACY_EXPORT_DIALOG, 'utf8'),
++      'Modal',
++      'ExportDialog.tsx',
++    ).map(({ tag }) => tag);
+     expect(legacy).toHaveLength(1);
+     expect(legacy[0]).not.toContain('scrollbarClassName');
+-    expect(openingTags('<ModalBody a="1"><Modal x={a > b ? "}" : \'>\'} y="2">', 'Modal')).toEqual([
+-      '<Modal x={a > b ? "}" : \'>\'} y="2">',
+-    ]);
++    expect(
++      jsxOpeningTags(
++        'const v = (<ModalBody a="1"><Modal x={a > b ? "}" : \'>\'} y="2"></Modal></ModalBody>);',
++        'Modal',
++      ).map(({ tag }) => tag),
++    ).toEqual(['<Modal x={a > b ? "}" : \'>\'} y="2">']);
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-number-field.test.ts b438/app/lib/arrangement/__tests__/studio-number-field.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-number-field.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-number-field.test.ts	2026-11-10 19:35:41.446953658 +0000
+@@ -1,17 +1,21 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ import { STUDIO_NUMBER_FIELD_CLASS } from '~/components/arrangement/studio-number-field';
++import {
++  identifierUsesOutsideImports,
++  type JsxOpeningTag,
++  jsxAttributeTextsByName,
++  readSourceFiles,
++  scanJsxOpeningTags,
++  variableInitializersUsing,
++} from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
+-const NUMBER_INPUT = /type=["'`{]+number["'`}]+/g;
+-const IMPORT_STATEMENT = /^import[\s\S]*?from\s+['"][^'"]+['"];?$/gm;
+-const CONSTANT_USE = /\$\{STUDIO_NUMBER_FIELD_CLASS\}|cn\([^)]*STUDIO_NUMBER_FIELD_CLASS/;
++const NUMBER_CLASS_CARRIER =
++  /^\{(?:inputClass|STUDIO_NUMBER_FIELD_CLASS|cn\((?:inputClass|STUDIO_NUMBER_FIELD_CLASS),[^}]*\))\}$/;
+ 
+-function sourceFiles(): string[] {
+-  return readdirSync(ARRANGEMENT_DIR).filter(
+-    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
++function numberInputTags(): JsxOpeningTag[] {
++  return scanJsxOpeningTags('input', readSourceFiles()).filter(
++    ({ attributes }) => attributes.get('type') === 'number',
+   );
+ }
+ 
+@@ -25,21 +29,41 @@
+     ]);
+   });
+ 
+-  it('NF2: every arrangement file with a number input uses the shared class outside its imports', () => {
+-    const owners = sourceFiles().filter(
+-      (name) =>
+-        (readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').match(NUMBER_INPUT) ?? []).length > 0,
+-    );
++  it('NF2: every arrangement file with a number input uses the shared class outside its imports; every number tag takes it through className and carries no spread or style=', () => {
++    const tags = numberInputTags();
++    const owners = [...new Set(tags.map(({ path }) => path))];
+     expect(
+       owners,
+       'a new number-input file must apply STUDIO_NUMBER_FIELD_CLASS and be added to this list',
+     ).toStrictEqual(['ArrangementDetailPanel.tsx']);
+-    for (const name of owners) {
+-      const body = readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').replace(
+-        IMPORT_STATEMENT,
+-        '',
++    expect(tags).toHaveLength(3);
++    const files = readSourceFiles();
++    for (const owner of owners) {
++      const text = files.find(({ path }) => path === owner)?.text ?? '';
++      expect(
++        identifierUsesOutsideImports(text, 'STUDIO_NUMBER_FIELD_CLASS', owner),
++        `${owner} applies STUDIO_NUMBER_FIELD_CLASS`,
++      ).toBeGreaterThan(0);
++    }
++    for (const { path, line, attributeTexts, hazards } of tags) {
++      const className = attributeTexts.get('className') ?? '';
++      expect(className, `${path}:${line} carries the class directly or through inputClass`).toMatch(
++        NUMBER_CLASS_CARRIER,
+       );
+-      expect(CONSTANT_USE.test(body), `${name} applies STUDIO_NUMBER_FIELD_CLASS`).toBe(true);
++      if (/\binputClass\b/.test(className)) {
++        const text = files.find((file) => file.path === path)?.text ?? '';
++        expect(
++          variableInitializersUsing(text, 'inputClass', 'STUDIO_NUMBER_FIELD_CLASS', path),
++          `${path} declares inputClass once, built from STUDIO_NUMBER_FIELD_CLASS`,
++        ).toStrictEqual([true]);
++        expect(
++          jsxAttributeTextsByName(text, 'inputClass', path).filter(
++            (value) => value !== '{inputClass}',
++          ),
++          `${path} hands inputClass to child fields unchanged`,
++        ).toStrictEqual([]);
++      }
++      expect(hazards, `${path}:${line}`).toStrictEqual([]);
+     }
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-progress.test.ts b438/app/lib/arrangement/__tests__/studio-progress.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-progress.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-progress.test.ts	2026-11-10 19:30:16.070856020 +0000
+@@ -1,32 +1,11 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ import { STUDIO_PROGRESS_CLASS } from '~/components/arrangement/studio-progress';
+-
+-const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
+-const PROGRESS_OPENING = /<progress\b/g;
+-const PROGRESS_TAG = /<progress\b[^<]*?\/>/g;
+-const PROGRESS_CLOSING = /<\/progress>/g;
+-const PROGRESS_CLASS_ATTRIBUTE = /\bclassName=\{STUDIO_PROGRESS_CLASS\}/;
+-
+-function sourceFiles(): string[] {
+-  return readdirSync(ARRANGEMENT_DIR).filter(
+-    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
+-  );
+-}
+-
+-function arrangementSource(name: string): string {
+-  return readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8');
+-}
+-
+-function progressOpenings(name: string): number {
+-  return arrangementSource(name).match(PROGRESS_OPENING)?.length ?? 0;
+-}
+-
+-function progressTags(name: string): string[] {
+-  return arrangementSource(name).match(PROGRESS_TAG) ?? [];
+-}
++import {
++  callsWithStringArgument,
++  readSourceFiles,
++  scanJsxOpeningTags,
++} from './helpers/source-scan';
+ 
+ describe('Studio progress bars are drawn by the theme, not the browser (SABA-B-12 stage 2b)', () => {
+   it('PG1: the shared class draws a neutral token-only bar, pulses only while indeterminate and only with motion allowed, and restores the system bar in forced colours (token contract; the browser half is the C probe)', () => {
+@@ -57,25 +36,24 @@
+     ]);
+   });
+ 
+-  it('PG2: every progress tag in the arrangement components carries className={STUDIO_PROGRESS_CLASS}', () => {
+-    const owners = sourceFiles().filter((name) => progressOpenings(name) > 0);
++  it('PG2: every progress tag in the arrangement components carries className={STUDIO_PROGRESS_CLASS}, with no spread or style= that could override it', () => {
++    const tags = scanJsxOpeningTags('progress', readSourceFiles());
+     expect(
+-      owners,
++      [...new Set(tags.map(({ path }) => path))],
+       'a new progress file must apply STUDIO_PROGRESS_CLASS and be added to this list',
+     ).toStrictEqual(['ArrangementExportDialog.tsx']);
+-    const tags = owners.flatMap((name) => progressTags(name));
+-    expect(tags, 'each <progress> is one self-closing tag').toHaveLength(
+-      owners.reduce((sum, name) => sum + progressOpenings(name), 0),
+-    );
+     expect(tags).toHaveLength(1);
++    for (const { path, line, attributeTexts, hazards } of tags) {
++      expect(attributeTexts.get('className'), `${path}:${line}`).toBe('{STUDIO_PROGRESS_CLASS}');
++      expect(hazards, `${path}:${line}`).toStrictEqual([]);
++    }
+     expect(
+-      sourceFiles().filter(
+-        (name) => (arrangementSource(name).match(PROGRESS_CLOSING)?.length ?? 0) > 0,
+-      ),
+-      'no <progress>…</progress> pair hides from the self-closing scan',
++      readSourceFiles(undefined, ['.ts', '.tsx'])
++        .filter(
++          ({ path, text }) => callsWithStringArgument(text, 'createElement', 'progress', path) > 0,
++        )
++        .map(({ path }) => path),
++      'no arrangement source creates a progress element outside JSX',
+     ).toStrictEqual([]);
+-    for (const tag of tags) {
+-      expect(PROGRESS_CLASS_ATTRIBUTE.test(tag), tag.slice(0, 120)).toBe(true);
+-    }
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-radio.test.ts b438/app/lib/arrangement/__tests__/studio-radio.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-radio.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-radio.test.ts	2026-11-10 19:29:49.973790317 +0000
+@@ -1,27 +1,17 @@
+ // @vitest-environment node
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { resolve } from 'node:path';
+ import { describe, expect, it } from 'vitest';
+ import { STUDIO_RADIO_CLASS } from '~/components/arrangement/studio-radio';
++import { type JsxOpeningTag, readSourceFiles, scanJsxOpeningTags } from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
+-const INPUT_TAG = /<input\b[\s\S]*?\/>/g;
+-const RADIO_TYPE = /\btype=["'`{]+radio["'`}]+/;
+-const RADIO_CLASS_ATTRIBUTE = /\bclassName=\{STUDIO_RADIO_CLASS\}/;
+-const LITERAL_TYPE = /\btype=["'][a-z]+["']/;
+-
+-function sourceFiles(): string[] {
+-  return readdirSync(ARRANGEMENT_DIR).filter(
+-    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
+-  );
+-}
++const LITERAL_TYPE = /^[a-z-]+$/;
++const SPREAD_INPUTS_GUARDED_BY_TYPE = ['ArrangementMixFader.tsx'];
+ 
+-function inputTags(name: string): string[] {
+-  return readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').match(INPUT_TAG) ?? [];
++function inputTags(): JsxOpeningTag[] {
++  return scanJsxOpeningTags('input', readSourceFiles());
+ }
+ 
+-function radioTags(name: string): string[] {
+-  return inputTags(name).filter((tag) => RADIO_TYPE.test(tag));
++function radioTags(): JsxOpeningTag[] {
++  return inputTags().filter(({ attributes }) => attributes.get('type') === 'radio');
+ }
+ 
+ describe('Studio radios are drawn by the theme, not the browser (SABA-B-12 stage 2a)', () => {
+@@ -46,25 +36,36 @@
+     expect(tokens.filter((token) => token.startsWith('accent-'))).toStrictEqual([]);
+   });
+ 
+-  it('RD2: every radio input tag in the arrangement components carries className={STUDIO_RADIO_CLASS}', () => {
+-    const owners = sourceFiles().filter((name) => radioTags(name).length > 0);
++  it('RD2: every radio input tag in the arrangement components carries className={STUDIO_RADIO_CLASS}, with no spread or style=', () => {
++    const tags = radioTags();
+     expect(
+-      owners,
++      [...new Set(tags.map(({ path }) => path))],
+       'a new radio file must apply STUDIO_RADIO_CLASS and be added to this list',
+     ).toStrictEqual(['ArrangementExportDialog.tsx']);
+-    const tags = owners.flatMap((name) => radioTags(name));
+     expect(tags).toHaveLength(6);
+-    for (const tag of tags) {
+-      expect(RADIO_CLASS_ATTRIBUTE.test(tag), tag.slice(0, 120)).toBe(true);
++    for (const { path, line, attributeTexts, hazards } of tags) {
++      expect(attributeTexts.get('className'), `${path}:${line}`).toBe('{STUDIO_RADIO_CLASS}');
++      expect(hazards, `${path}:${line}`).toStrictEqual([]);
+     }
+-    const hiddenTypes = sourceFiles().flatMap((name) =>
+-      inputTags(name)
+-        .filter((tag) => !LITERAL_TYPE.test(tag))
+-        .map((tag) => `${name}: ${tag.slice(0, 80)}`),
+-    );
++  });
++
++  it('IN1: every arrangement <input> names a literal type, and the only spread attribute sits on a fader whose props type omits type (compile-time guard)', () => {
++    const tags = inputTags();
+     expect(
+-      hiddenTypes,
+-      'every arrangement <input> names a literal type, so a radio cannot hide behind a spread or a variable',
++      tags
++        .filter(({ attributes }) => !LITERAL_TYPE.test(attributes.get('type') ?? ''))
++        .map(({ path, line }) => `${path}:${line}`),
++      'a radio, number or search field cannot hide behind a variable type',
+     ).toStrictEqual([]);
++    expect(
++      tags.filter(({ hazards }) => hazards.includes('spread')).map(({ path }) => path),
++      'a spread on an <input> can override its literal type; the only allowed owner omits type from its props type',
++    ).toStrictEqual(SPREAD_INPUTS_GUARDED_BY_TYPE);
++    for (const owner of SPREAD_INPUTS_GUARDED_BY_TYPE) {
++      const text = readSourceFiles().find(({ path }) => path === owner)?.text ?? '';
++      expect(text, `${owner} omits type from the props it spreads`).toMatch(
++        /Omit<\s*InputHTMLAttributes<HTMLInputElement>,\s*'type'\s*\|/,
++      );
++    }
+   });
+ });
+diff -ruN '--exclude=node_modules' b438head/app/lib/arrangement/__tests__/studio-search-field.test.ts b438/app/lib/arrangement/__tests__/studio-search-field.test.ts
+--- b438head/app/lib/arrangement/__tests__/studio-search-field.test.ts	2026-11-10 19:04:42.000000000 +0000
++++ b438/app/lib/arrangement/__tests__/studio-search-field.test.ts	2026-11-10 19:30:16.062855836 +0000
+@@ -1,79 +1,65 @@
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { join } from 'node:path';
+ import { describe, expect, it } from 'vitest';
++import {
++  type JsxOpeningTag,
++  jsxOpeningTags,
++  readSourceFiles,
++  scanJsxOpeningTags,
++} from './helpers/source-scan';
+ 
+-const ARRANGEMENT_DIR = join(process.cwd(), 'app/components/arrangement');
+ const NATIVE_CANCEL_HIDDEN = '[&::-webkit-search-cancel-button]:hidden';
+ 
+-function inputTags(source: string): string[] {
+-  const tags: string[] = [];
+-  let from = source.indexOf('<input');
+-  while (from !== -1) {
+-    let depth = 0;
+-    let quote: string | null = null;
+-    let end = from + '<input'.length;
+-    for (; end < source.length; end++) {
+-      const char = source[end];
+-      if (quote) {
+-        if (char === '\\') {
+-          end++;
+-        } else if (char === quote) {
+-          quote = null;
+-        }
+-      } else if (char === '"' || char === "'" || char === '`') {
+-        quote = char;
+-      } else if (char === '{') {
+-        depth++;
+-      } else if (char === '}') {
+-        depth--;
+-      } else if (char === '>' && depth === 0) {
+-        break;
+-      }
+-    }
+-    tags.push(source.slice(from, end + 1));
+-    from = source.indexOf('<input', end);
+-  }
+-  return tags;
+-}
+-
+-const SEARCH_TYPE = /\btype=(?:"search"|'search'|\{\s*['"`]search['"`]\s*\})/;
+-
+-function searchInputTags(): { file: string; tag: string }[] {
+-  return readdirSync(ARRANGEMENT_DIR)
+-    .filter((file) => file.endsWith('.tsx'))
+-    .flatMap((file) =>
+-      inputTags(readFileSync(join(ARRANGEMENT_DIR, file), 'utf8'))
+-        .filter((tag) => SEARCH_TYPE.test(tag))
+-        .map((tag) => ({ file, tag })),
+-    );
++function searchInputTags(): JsxOpeningTag[] {
++  return scanJsxOpeningTags('input', readSourceFiles()).filter(
++    ({ attributes }) => attributes.get('type') === 'search',
++  );
+ }
+ 
+ describe('SABA-B-12 stage 3: no native search cancel in Studio', () => {
+-  it('SF1: the whole-tag scanner reads braces, quotes and arrows, and finds every spelling of the search type', () => {
+-    const tags = inputTags(
++  it('SF1: the shared scanner reads braces, quotes, arrows and comments, and finds every spelling of the search type', () => {
++    const tags = jsxOpeningTags(
+       [
+-        '<input type="search" onChange={(event) => set(event.target.value > 1)} className="a b" />',
+-        '<input placeholder="a > b" title={\'}\'} type={\'search\'} className="c" />',
+-        '<input type=\'search\' className="d" />',
+-        '<input type="text" />',
+-      ].join(''),
++        'const view = (',
++        '  <>',
++        '    <input type="search" onChange={(event) => set(event.target.value > 1)} className="a b" />',
++        '    <input placeholder="a > b" title={\'}\'} type={\'search\'} className="c" />',
++        '    <input type=\'search\' className="d" />',
++        '    <input type="text" />',
++        '    <input',
++        "      // don't > close here",
++        '      type={`search`}',
++        '      className="e"',
++        '    />',
++        '  </>',
++        ');',
++      ].join('\n'),
++      'input',
+     );
+-    expect(tags).toHaveLength(4);
+-    expect(tags[0]).toContain('className="a b"');
+-    expect(tags[1]).toContain('className="c"');
+-    expect(tags[2]).toContain('className="d"');
+-    expect(tags[3]).toBe('<input type="text" />');
+-    expect(tags.map((tag) => SEARCH_TYPE.test(tag))).toEqual([true, true, true, false]);
++    expect(tags).toHaveLength(5);
++    expect(tags.map(({ attributes }) => attributes.get('className'))).toEqual([
++      'a b',
++      'c',
++      'd',
++      undefined,
++      'e',
++    ]);
++    expect(tags.map(({ attributes }) => attributes.get('type') === 'search')).toEqual([
++      true,
++      true,
++      true,
++      false,
++      true,
++    ]);
+   });
+ 
+-  it('SF2: every search field in the arrangement components hides the native cancel', () => {
++  it('SF2: every search field in the arrangement components hides the native cancel, with no spread or style= on the tag', () => {
+     const found = searchInputTags();
+-    expect(found.map(({ file }) => file).sort()).toEqual([
++    expect(found.map(({ path }) => path).sort()).toEqual([
+       'ArrangementLibrary.tsx',
+       'ArrangementShortcutSheet.tsx',
+     ]);
+-    for (const { file, tag } of found) {
+-      expect(tag, file).toContain(NATIVE_CANCEL_HIDDEN);
++    for (const { path, line, tag, hazards } of found) {
++      expect(tag, `${path}:${line}`).toContain(NATIVE_CANCEL_HIDDEN);
++      expect(hazards, `${path}:${line}`).toStrictEqual([]);
+     }
+   });
+ });

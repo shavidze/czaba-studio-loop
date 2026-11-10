@@ -1,0 +1,65 @@
+{
+ "taskStatus": "PASS",
+ "browserVerified": true,
+ "realVerified": true,
+ "envStatus": {
+  "checkedUtc": "2026-11-10T18:52:17.0600577Z",
+  "round": 437,
+  "attempt": 1,
+  "store": 200
+ },
+ "bugs": [
+  {
+   "id": "C-R437-01",
+   "severity": "low",
+   "origin": "pre-existing",
+   "steps": [
+    "New context 1440x900 (also 1280x720) on /studio-lab, wait 'Demo collection ready'",
+    "Select first library option, press Enter (clip added)",
+    "Click Play immediately (or press Space)",
+    "Poll data-playing and arrangement-position for 7 s"
+   ],
+   "expected": "Playback starts, or the UI shows that audio is still loading",
+   "actual": "First Play click/Space right after adding a clip does nothing (data-playing=false, clock stays 00:00.000 for 7 s, no status message). A second click starts it; after waiting ~5 s the first click works. Not touched by round 437 files; not re-run on HEAD, so 'pre-existing' is inferred from scope",
+   "evidence": "c-round-437/play4.json, play6.mjs output, play7.mjs (click/space/wait5-click)"
+  }
+ ],
+ "passed": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C5",
+  "C6",
+  "C7",
+  "C8",
+  "C9-scoped-via-C8-green-sketch",
+  "C10",
+  "C11",
+  "C12",
+  "C13",
+  "C14"
+ ],
+ "gate": [
+  "full vitest",
+  "typecheck",
+  "build",
+  "Biome",
+  "verify"
+ ],
+ "blocked": [
+  "C12 fake-bearer token check: backend unavailable in cloud"
+ ],
+ "manifestPaths": "1333 frozen + 11 protected, rc 0",
+ "missingPaths": [],
+ "countMismatches": [],
+ "claimCheckMinutes": 2,
+ "assertsSpecified": true,
+ "mutantsRecorded": true,
+ "mutantRedOnSketch": "b-round-436/mutants/summary.txt; C re-run c-round-437/mutants.txt: M1-M12 red, sketch green rc 0",
+ "gateChecksNamed": true,
+ "gateChecksRunOnSketch": "covering set via mutant run only (sketch-green rc 0); full suite is gate",
+ "chainHeadGateRunGreen": "gate 436 published 69de9bd (per task)",
+ "affectedChecksNamed": true,
+ "affectedChecksRunOnSketch": "lane resize drag (press probe), export WAV, narrow gate, screen budget"
+}
