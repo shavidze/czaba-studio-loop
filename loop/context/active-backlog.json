@@ -1,7 +1,7 @@
 {
   "_about": "Optimized active view (2026-11-04). Closed findings excluded, Low/info one-line, done items ID-only. Full data in backlog.json.",
-  "_generatedUtc": "2026-11-10T11:23:53.113Z",
-  "current_task": "Round 429: SYS-2 stage 5 (2b-ii-b, final) - fold the last six inline held-Enter copies (marker row, library menu) into preventRepeatedEnterKeyDown, add HK1-HK4 and the closing repo scan HS1/HS2; docs 274-277 Completed (current-task.md; sketch b-round-428/sketch-429.patch.txt)",
+  "_generatedUtc": "2026-11-10T12:15:51.770Z",
+  "current_task": "Round 430: SABA-B-12 stage 1 (STUDIO-VIS-1) - the Detail panel Clip Gain/From/To number fields lose the browser spin buttons via a shared STUDIO_NUMBER_FIELD_CLASS; rows NF1, NF2, F10; doc 278 (current-task.md; sketch b-round-429/sketch-430.patch.txt)",
   "done_policy": {
     "all_scoped_acceptance_pass_by_C": true,
     "no_open_bug_severity": [
@@ -6369,22 +6369,123 @@
       "id": "SABA-B-12",
       "severity": "medium",
       "origin": "Saba 2026-11-10 visual feedback",
-      "status": "scheduled (D-29z1507): first UI round after SYS-2 stage 5 and the due REGRESSION-2026-11-13; browser audit at that planning",
+      "status": "in_progress (D-29z1512, D-29z1513): stage 1 STUDIO-VIS-1 dispatched as round 430",
       "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
       "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
       "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
-      "added": "2026-11-10 B round 428 -> 429 planning"
+      "added": "2026-11-10 B round 428 -> 429 planning",
+      "stages": [
+        {
+          "stage": 1,
+          "id": "STUDIO-VIS-1",
+          "severity_audit": "high",
+          "what": "hide spin buttons on Detail panel Clip Gain/From/To number fields",
+          "status": "dispatched round 430"
+        },
+        {
+          "stage": 2,
+          "id": "STUDIO-VIS-2",
+          "severity_audit": "high",
+          "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
+          "status": "planned next UI round (rule sr-only vs styled dot vs L1/hidden_focusables_rulings_d29z169)"
+        },
+        {
+          "stage": 3,
+          "id": "SABA-B-12-SEARCH-CANCEL",
+          "severity_audit": "n/a (audit missed it)",
+          "what": "ArrangementShortcutSheet type=search shows the native cancel; Library hides it and draws its own clear button; give the sheet the same pattern",
+          "status": "planned after stage 2"
+        },
+        {
+          "stage": 4,
+          "id": "STUDIO-VIS-3",
+          "severity_audit": "medium",
+          "what": "native <select> grid division + waveform zoom (zoom select has appearance-none and no chevron)",
+          "status": "deferred by Saba answer 2 (2026-11-10) -> REVIEW-RECOMMENDATIONS"
+        },
+        {
+          "stage": null,
+          "id": "SABA-B-12-RECORDINGS-NUMBER",
+          "what": "7 number inputs (+ search, select, radio, checkbox, progress) in app/components/recordings/*; reached only from routes recordings.$productId and scenes.$productId, not from /studio-lab (import closure 0)",
+          "status": "Store pages -> STORE-REDESIGN acceptance (TL-R430-10)"
+        },
+        {
+          "stage": null,
+          "id": "SABA-B-12-LEGACY-CHECKBOX",
+          "what": "app/components/studio/ExportDialog.tsx checkbox; only importer is protected studio.$productId.tsx",
+          "status": "recorded under SRW-21 (deferred_user); not scheduled"
+        }
+      ],
+      "why_we_missed_it": "D-29z1514 / L61"
+    },
+    {
+      "id": "TLM-SABA-B-12-FIREFOX-SAFARI",
+      "severity": "info",
+      "status": "open_tech_lead_manual (D-29z1513): deadline RETRO 435 (L46)",
+      "title": "SABA-B-12 stage 1 on Firefox and Safari: Detail panel number fields show no spin buttons at rest, ho"
+    },
+    {
+      "id": "STUDIO-VIS-4",
+      "severity": "medium",
+      "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+      "kind": "saba_approved_task",
+      "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+      "title": "Rename \"Source offset\" -> \"Clip origin\" (strings.ts sourceOffsetLabel + selectedClipDetail)",
+      "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+      "added": "2026-11-10 B round 429 -> 430 planning"
+    },
+    {
+      "id": "STUDIO-VIS-5",
+      "severity": "medium",
+      "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+      "kind": "saba_approved_task",
+      "status": "scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer)",
+      "title": "Detail panel spacing (gap-0.5 -> gap-1, px-3 -> px-4)",
+      "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+      "added": "2026-11-10 B round 429 -> 430 planning"
+    },
+    {
+      "id": "STUDIO-VIS-6",
+      "severity": "medium",
+      "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+      "kind": "saba_approved_task",
+      "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+      "title": "\"From, s\" / \"To, s\" -> \"From\" / \"To\"",
+      "evidence": "docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md",
+      "added": "2026-11-10 B round 429 -> 430 planning"
+    },
+    {
+      "id": "STUDIO-VIS-7",
+      "severity": "low",
+      "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+      "title": "Export dialog primary button outline -> filled brass (Saba answer 3)"
+    },
+    {
+      "id": "STUDIO-VIS-8",
+      "severity": "low",
+      "status": "scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer)",
+      "title": "Insert marker blink timing"
+    },
+    {
+      "id": "STUDIO-VIS-9",
+      "severity": "low",
+      "status": "scheduled (D-29z1512): REVIEW-RECOMMENDATIONS (Saba: defer)",
+      "title": "Purchased collection badge styling"
+    },
+    {
+      "id": "STUDIO-VIS-10",
+      "severity": "low",
+      "status": "scheduled (D-29z1512): COPY-PD-VIS (after SABA-B-12 stage 3)",
+      "title": "\"CZABA\" brand link text-muted -> text-foreground, arrow stays muted (Saba answer 4)"
+    },
+    {
+      "id": "SABA-Q-NUMBER-FIELD-DRAG",
+      "severity": "info",
+      "status": "awaiting_user (D-29z1513)",
+      "title": "Live 12 value fields change by vertical drag (manual 42.6, Shift = finer); CZABA Detail panel number"
     }
   ],
   "recent_rounds": [
-    {
-      "round": 420,
-      "task": "tasks/round-420.md",
-      "decision": "D-29z1462..D-29z1466, D-29z1467",
-      "type": "RETRO 420 (no app code)",
-      "status": "c_pass (D-29z1467): C PASS c-round-420.json; gate 420 skipped (no real changes)",
-      "note": "baseline 6609dfa; window 416-419"
-    },
     {
       "round": 421,
       "task": "current-task.md",
@@ -6454,8 +6555,16 @@
       "task": "current-task.md",
       "decision": "D-29z1508",
       "type": "SYS-2 stage 5 (2b-ii-b: MarkerRow/LibraryMenu folds + closing repo scan)",
-      "status": "dispatched",
+      "status": "c_pass_published (D-29z1510): gate 429 76f4147",
       "note": "baseline b604cfb clean; sketch b-round-428/sketch-429.patch.txt; claims b-round-428/claims-429.sh"
+    },
+    {
+      "round": 430,
+      "task": "current-task.md",
+      "decision": "D-29z1513",
+      "type": "SABA-B-12 stage 1 (STUDIO-VIS-1 number spin buttons)",
+      "status": "dispatched",
+      "note": "baseline 76f4147 clean; sketch b-round-429/sketch-430.patch.txt; claims b-round-429/claims-430.sh"
     }
   ],
   "other_keys": [

@@ -1,0 +1,232 @@
+diff --git a/app/components/arrangement/ArrangementExportDialog.tsx b/app/components/arrangement/ArrangementExportDialog.tsx
+index 3b45f92..d6404af 100644
+--- a/app/components/arrangement/ArrangementExportDialog.tsx
++++ b/app/components/arrangement/ArrangementExportDialog.tsx
+@@ -16,6 +16,7 @@ import { arrangementHasVideoFades } from '~/lib/arrangement/video-fades';
+ import { cn } from '~/lib/utils';
+ import type { WorkspaceVideoSource } from '~/types/arrangement';
+ import { ArrangementTimeText } from './ArrangementTimeText';
++import { STUDIO_RADIO_CLASS } from './studio-radio';
+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';
+ 
+ interface ArrangementExportDialogProps {
+@@ -308,7 +309,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 onChange={() => setExportFormat('wav')}
+                 aria-labelledby={optionIds.wavName}
+                 aria-describedby={optionIds.wavNote}
+-                className="accent-brand"
++                className={STUDIO_RADIO_CLASS}
+               />
+               <span>
+                 <span id={optionIds.wavName}>WAV · 24-bit · 48 kHz · stereo</span>
+@@ -341,7 +342,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 onChange={() => setExportFormat('mp3')}
+                 aria-labelledby={optionIds.mp3Name}
+                 aria-describedby={optionIds.mp3Note}
+-                className="accent-brand"
++                className={STUDIO_RADIO_CLASS}
+               />
+               <span>
+                 <span id={optionIds.mp3Name}>MP3 · 48 kHz · stereo</span>
+@@ -364,7 +365,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 onChange={() => setExportFormat('both')}
+                 aria-labelledby={optionIds.bothName}
+                 aria-describedby={optionIds.bothNote}
+-                className="accent-brand"
++                className={STUDIO_RADIO_CLASS}
+               />
+               <span>
+                 <span id={optionIds.bothName}>{studioExportStrings.bothOptionName}</span>
+@@ -378,6 +379,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 type="radio"
+                 name="arrangement-export-format"
+                 disabled
++                className={STUDIO_RADIO_CLASS}
+                 aria-labelledby={optionIds.videoName}
+                 aria-describedby={optionIds.videoNote}
+               />
+@@ -413,7 +415,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 checked={!isRangeScope}
+                 disabled={isRendering}
+                 onChange={() => setScopeChoice('project')}
+-                className="accent-brand"
++                className={STUDIO_RADIO_CLASS}
+               />
+               <span>
+                 <ArrangementTimeText
+@@ -443,7 +445,7 @@ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDi
+                 aria-describedby={hasValidRange ? undefined : rangeReasonId}
+                 aria-labelledby={hasValidRange ? undefined : optionIds.rangeName}
+                 onChange={() => setScopeChoice('range')}
+-                className="accent-brand"
++                className={STUDIO_RADIO_CLASS}
+               />
+               {hasValidRange ? (
+                 <span>
+diff --git a/app/components/arrangement/studio-radio.ts b/app/components/arrangement/studio-radio.ts
+new file mode 100644
+index 0000000..1253744
+--- /dev/null
++++ b/app/components/arrangement/studio-radio.ts
+@@ -0,0 +1,16 @@
++export const STUDIO_RADIO_CLASS = [
++  'size-4',
++  'shrink-0',
++  'appearance-none',
++  'rounded-full',
++  'border',
++  'border-outline-strong',
++  'bg-transparent',
++  'checked:border-4',
++  'checked:border-brand',
++  'checked:bg-brand-foreground',
++  'enabled:not-checked:hover:border-brand-hover',
++  'disabled:cursor-not-allowed',
++  'disabled:opacity-50',
++  'forced-colors:appearance-auto',
++].join(' ');
+diff --git a/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx b/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx
+index 0934166..ad29cff 100644
+--- a/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/affordance-colour-ui.test.tsx
+@@ -121,6 +121,7 @@ const DETAIL_PATH = `${ARRANGEMENT_DIR}/ArrangementDetailPanel.tsx`;
+ const LIBRARY_PATH = `${ARRANGEMENT_DIR}/ArrangementLibrary.tsx`;
+ const GROUP_HEADER_PATH = `${ARRANGEMENT_DIR}/ArrangementGroupHeader.tsx`;
+ const EXPORT_DIALOG_PATH = `${ARRANGEMENT_DIR}/ArrangementExportDialog.tsx`;
++const RADIO_PATH = `${ARRANGEMENT_DIR}/studio-radio.ts`;
+ 
+ const GRANTED_COMPONENT_PATHS = [
+   CLIP_PATH,
+@@ -150,10 +151,12 @@ const KEPT_BRASS_SITES: ReadonlyArray<[string, string]> = [
+ ];
+ 
+ const KEPT_BRASS_COUNTS: ReadonlyArray<[string, string, number]> = [
+-  [EXPORT_DIALOG_PATH, 'accent-brand', 5],
++  [EXPORT_DIALOG_PATH, 'className={STUDIO_RADIO_CLASS}', 6],
++  [RADIO_PATH, "'checked:border-brand'", 1],
+ ];
+ 
+ const RETIRED_BRASS_SITES: ReadonlyArray<[string, string, number]> = [
++  [EXPORT_DIALOG_PATH, 'accent-brand', 0],
+   [LANE_PATH, "'border-accent bg-accent/20 text-accent'", 0],
+   [LIBRARY_PATH, 'focus-visible:bg-brand', 0],
+ ];
+diff --git a/app/lib/arrangement/__tests__/export-dialog-a11y-copy.test.tsx b/app/lib/arrangement/__tests__/export-dialog-a11y-copy.test.tsx
+index e9ede33..dad0df3 100644
+--- a/app/lib/arrangement/__tests__/export-dialog-a11y-copy.test.tsx
++++ b/app/lib/arrangement/__tests__/export-dialog-a11y-copy.test.tsx
+@@ -2,6 +2,7 @@ import { act, fireEvent, render } from '@testing-library/react';
+ import { type ReactNode, useState } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { ArrangementExportDialog } from '~/components/arrangement/ArrangementExportDialog';
++import { STUDIO_RADIO_CLASS } from '~/components/arrangement/studio-radio';
+ import {
+   type ArrangementContextValue,
+   ArrangementProvider,
+@@ -280,6 +281,16 @@ describe(
+       expect(view.queryAllByRole('radio', { name: NAME_LEAK })).toEqual([]);
+     });
+ 
++    it('RD3 all six rendered radios, enabled and disabled, carry exactly the shared dot class and no accent tint', async () => {
++      const { view } = await mountA11yDialog();
++      const radios = view.getAllByRole('radio').map(radioInput);
++      expect(radios).toHaveLength(6);
++      expect(radios.filter((radio) => radio.disabled)).toHaveLength(2);
++      for (const radio of radios) {
++        expect(radio.getAttribute('class')).toBe(STUDIO_RADIO_CLASS);
++      }
++    });
++
+     it('AN3 valid range + loop: range name without description, WAV description follows the live note', async () => {
+       const looped: Arrangement = {
+         ...a11yArrangement(),
+diff --git a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+index ece70d4..5391465 100644
+--- a/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/label-status-colour-ui.test.tsx
+@@ -561,7 +561,8 @@ describe('DUX-R-5b-3a labels and status texts go neutral (D-29z143)', () => {
+     expectCount(EXPORT_DIALOG_PATH, 'className="text-sm text-foreground"', 2);
+     expectCount(EXPORT_DIALOG_PATH, 'h-2 w-full accent-foreground', 1);
+ 
+-    expectCount(EXPORT_DIALOG_PATH, 'accent-brand', 5);
++    expectCount(EXPORT_DIALOG_PATH, 'accent-brand', 0);
++    expectCount(EXPORT_DIALOG_PATH, 'className={STUDIO_RADIO_CLASS}', 6);
+     expectCount(EXPORT_DIALOG_PATH, 'border-brand bg-brand/10', 5);
+     expectCount(WORKSPACE_PATH, 'border border-brand bg-brand/10', 1);
+     expectCount(DETAIL_PANEL_PATH, 'bg-accent', 1);
+diff --git a/app/lib/arrangement/__tests__/studio-radio.test.ts b/app/lib/arrangement/__tests__/studio-radio.test.ts
+new file mode 100644
+index 0000000..150ff46
+--- /dev/null
++++ b/app/lib/arrangement/__tests__/studio-radio.test.ts
+@@ -0,0 +1,70 @@
++// @vitest-environment node
++import { readdirSync, readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { describe, expect, it } from 'vitest';
++import { STUDIO_RADIO_CLASS } from '~/components/arrangement/studio-radio';
++
++const ARRANGEMENT_DIR = resolve(__dirname, '../../../components/arrangement');
++const INPUT_TAG = /<input\b[\s\S]*?\/>/g;
++const RADIO_TYPE = /\btype=["'`{]+radio["'`}]+/;
++const RADIO_CLASS_ATTRIBUTE = /\bclassName=\{STUDIO_RADIO_CLASS\}/;
++const LITERAL_TYPE = /\btype=["'][a-z]+["']/;
++
++function sourceFiles(): string[] {
++  return readdirSync(ARRANGEMENT_DIR).filter(
++    (name) => name.endsWith('.tsx') && !name.includes('.test.'),
++  );
++}
++
++function inputTags(name: string): string[] {
++  return readFileSync(resolve(ARRANGEMENT_DIR, name), 'utf8').match(INPUT_TAG) ?? [];
++}
++
++function radioTags(name: string): string[] {
++  return inputTags(name).filter((tag) => RADIO_TYPE.test(tag));
++}
++
++describe('Studio radios are drawn by the theme, not the browser (SABA-B-12 stage 2a)', () => {
++  it('RD1: the shared class draws a token-only dot and restores the system radio in forced colours (token contract; the browser half is the C probe)', () => {
++    const tokens = STUDIO_RADIO_CLASS.split(/\s+/);
++    expect(tokens).toStrictEqual([
++      'size-4',
++      'shrink-0',
++      'appearance-none',
++      'rounded-full',
++      'border',
++      'border-outline-strong',
++      'bg-transparent',
++      'checked:border-4',
++      'checked:border-brand',
++      'checked:bg-brand-foreground',
++      'enabled:not-checked:hover:border-brand-hover',
++      'disabled:cursor-not-allowed',
++      'disabled:opacity-50',
++      'forced-colors:appearance-auto',
++    ]);
++    expect(tokens.filter((token) => token.startsWith('accent-'))).toStrictEqual([]);
++  });
++
++  it('RD2: every radio input tag in the arrangement components carries className={STUDIO_RADIO_CLASS}', () => {
++    const owners = sourceFiles().filter((name) => radioTags(name).length > 0);
++    expect(
++      owners,
++      'a new radio file must apply STUDIO_RADIO_CLASS and be added to this list',
++    ).toStrictEqual(['ArrangementExportDialog.tsx']);
++    const tags = owners.flatMap((name) => radioTags(name));
++    expect(tags).toHaveLength(6);
++    for (const tag of tags) {
++      expect(RADIO_CLASS_ATTRIBUTE.test(tag), tag.slice(0, 120)).toBe(true);
++    }
++    const hiddenTypes = sourceFiles().flatMap((name) =>
++      inputTags(name)
++        .filter((tag) => !LITERAL_TYPE.test(tag))
++        .map((tag) => `${name}: ${tag.slice(0, 80)}`),
++    );
++    expect(
++      hiddenTypes,
++      'every arrangement <input> names a literal type, so a radio cannot hide behind a spread or a variable',
++    ).toStrictEqual([]);
++  });
++});

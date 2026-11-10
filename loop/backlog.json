@@ -1,9 +1,9 @@
 {
- "version": 410,
+ "version": 412,
  "updated": "2026-11-10",
  "owner": "B",
  "plan": "docs/technical/studio-real-workspace/plan.md",
- "current_task": "Round 430: SABA-B-12 stage 1 (STUDIO-VIS-1) - the Detail panel Clip Gain/From/To number fields lose the browser spin buttons via a shared STUDIO_NUMBER_FIELD_CLASS; rows NF1, NF2, F10; doc 278 (current-task.md; sketch b-round-429/sketch-430.patch.txt)",
+ "current_task": "Round 431: SABA-B-12 stage 2a (STUDIO-VIS-2) - the 6 Export dialog radios become a theme-drawn dot via a shared STUDIO_RADIO_CLASS; rows RD1, RD2, RD3 + DXA7/DXL8 replacements; doc 279 (current-task.md; sketch b-round-430/sketch-431.patch.txt)",
  "advisor_used_by_B": "round 427 -> 428 planning: advisor available and consulted after orientation and before close",
  "baseline": {
   "tsc_errors": 0,
@@ -12239,8 +12239,16 @@
    "task": "current-task.md",
    "decision": "D-29z1513",
    "type": "SABA-B-12 stage 1 (STUDIO-VIS-1 number spin buttons)",
-   "status": "dispatched",
+   "status": "c_pass_published (D-29z1515): gate 430 5a30894",
    "note": "baseline 76f4147 clean; sketch b-round-429/sketch-430.patch.txt; claims b-round-429/claims-430.sh"
+  },
+  {
+   "round": 431,
+   "task": "current-task.md",
+   "decision": "D-29z1519",
+   "type": "SABA-B-12 stage 2a (STUDIO-VIS-2 Export dialog radios)",
+   "status": "dispatched",
+   "note": "baseline 5a30894 clean; sketch b-round-430/sketch-431.patch.txt; claims b-round-430/claims-431.sh"
   }
  ],
  "post_current_stage_queue": [
@@ -16843,13 +16851,55 @@
    "note_d29z1448": "direction-decision.md exists since 2026-10-25 (direction A, Obsidian & Brass): STORE-2b..5 are not direction-gated; they stay paused only by the 2026-10-27 order (STUDIO-PERFORMANCE, SYS-1..3 first)"
   },
   {
+   "id": "ARCH-SPLIT",
+   "status": "not_started (D-29z1518; queued after STORE-REDESIGN, before REVIEW-RECOMMENDATIONS)",
+   "requested": "Saba 2026-11-10 (policy section \"ARCH-SPLIT: large file split rounds\")",
+   "prerequisites": [
+    "STORE-REDESIGN complete (STORE-5)",
+    "frontend-architect audit docs/technical/studio-real-workspace/architecture-file-size-audit-2026-11-10.md (pending at 2026-11-10)"
+   ],
+   "stages": [
+    {
+     "id": "ARCH-SPLIT-1",
+     "what": "ArrangementContext.tsx (~5.3k lines) -> multiple contexts/hooks",
+     "status": "not_started"
+    },
+    {
+     "id": "ARCH-SPLIT-2",
+     "what": "StudioWorkspace.tsx (~3.7k lines) -> extracted components",
+     "status": "not_started"
+    },
+    {
+     "id": "ARCH-SPLIT-3",
+     "what": "ArrangementDetailPanel.tsx + ArrangementLane.tsx + StudioContext.tsx (Saba 2026-11-10 wording)",
+     "status": "not_started",
+     "root_question": "ROOT-Q-ARCH-SPLIT-3-STUDIOCONTEXT: LEGACY-REMOVAL-POLICY says StudioContext.tsx is frozen legacy (no refactor) until ArrangementContext replaces studio.$productId; B asks root at ARCH-SPLIT planning whether stage 3 splits it or only audits it for removal (D-29z1520)"
+    },
+    {
+     "id": "ARCH-SPLIT-REGRESSION",
+     "what": "mandatory full regression: e2e smoke + Playwright browser check of every key flow",
+     "status": "not_started"
+    }
+   ],
+   "rules": [
+    "unit tests for every extracted module",
+    "no behaviour change; C verifies identical behaviour before/after",
+    "B consults frontend-architect and tech-lead for every split",
+    "REACT_CONTEXT.md file-size primitive applies (800-line context limit at 832b3ba)",
+    "also audit: circular imports in arrangement/, props drilling >3 levels, duplicated logic, components rendering >20 direct children",
+    "dead files: grep imports; unused -> removal in the split/cleanup round"
+   ],
+   "estimated_rounds": "3-5"
+  },
+  {
    "id": "REVIEW-RECOMMENDATIONS",
    "status": "not_started (queued after VISUAL-A-OBSIDIAN)",
    "requested": "2026-10-25 (Saba: \"write tasks and bugs from what the reviews checked, and follow them\"; ableton-decisions.md + design-ux-decisions.md)",
    "instruction": "one bounded B task per approved id (split if larger), A->C->B; after VISUAL-A-OBSIDIAN, before T12-ADVANCED and phase 2; each task carries the Ableton source table",
    "prerequisites": [
     "VISUAL-A-OBSIDIAN complete (incl. DUX-R-5 stage, M1/M3/M4, SABA-B-1/2)",
-    "STORE-REDESIGN complete (queue order 2026-10-25; Saba approved)"
+    "STORE-REDESIGN complete (queue order 2026-10-25; Saba approved)",
+    "ARCH-SPLIT complete incl. ARCH-SPLIT-REGRESSION (D-29z1518)"
    ],
    "items": [
     {
@@ -27895,7 +27945,7 @@
    "id": "SABA-B-12",
    "severity": "medium",
    "origin": "Saba 2026-11-10 visual feedback",
-   "status": "in_progress (D-29z1512, D-29z1513): stage 1 STUDIO-VIS-1 dispatched as round 430",
+   "status": "in_progress (D-29z1515, D-29z1517, D-29z1519): stage 1 done (round 430, published 5a30894); stage 2a dispatched as round 431; 2b progress next UI round",
    "title": "Browser-default form controls in Studio (number spinbutton arrows on Detail panel From/To/Clip Gain; audit every input, select, search cancel, radio, progress, scrollbar) must be custom-styled to Obsidian & Brass",
    "evidence": "policy section \"Saba visual feedback, 2026-11-10\"; b-round-428/data/saba-b-12-native-controls-grep.txt",
    "repro": "/studio-lab, add a clip, open Clip details: the From/To/Clip Gain number fields show native up/down spinners",
@@ -27906,14 +27956,14 @@
      "id": "STUDIO-VIS-1",
      "severity_audit": "high",
      "what": "hide spin buttons on Detail panel Clip Gain/From/To number fields",
-     "status": "dispatched round 430"
+     "status": "done (C round 430 PASS browserVerified, published 5a30894; D-29z1515)"
     },
     {
      "stage": 2,
      "id": "STUDIO-VIS-2",
      "severity_audit": "high",
      "what": "6 native radios in ArrangementExportDialog + its <progress> bar (audit missed progress)",
-     "status": "planned next UI round (rule sr-only vs styled dot vs L1/hidden_focusables_rulings_d29z169)"
+     "status": "split (D-29z1517): 2a radios = round 431 (option b styled dot, product-designer); 2b <progress> = SABA-B-12-STAGE-2B-PROGRESS next UI round"
     },
     {
      "stage": 3,
@@ -27954,22 +28004,14 @@
    "added": "2026-11-10 B round 428 -> 429 planning"
   },
   {
-   "id": "INFO-B-R429-K9-OVERSTATED",
-   "severity": "info",
-   "origin": "B spec",
-   "status": "closed (D-29z1511): doc 277 corrected by A",
-   "title": "task 429 K9 listed DetailPanel/Library/GroupHeader if(!event.repeat) sites as delegated menu containers",
-   "evidence": "a-round-429.md For B",
-   "added": "2026-11-10 B round 429 -> 430 planning"
-  },
-  {
    "id": "TLM-SABA-B-12-FIREFOX-SAFARI",
    "severity": "info",
    "origin": "B spec",
    "status": "open_tech_lead_manual (D-29z1513): deadline RETRO 435 (L46)",
    "title": "SABA-B-12 stage 1 on Firefox and Safari: Detail panel number fields show no spin buttons at rest, hover and focus; ArrowUp/Down still step",
    "evidence": "cloud runner has Chromium only",
-   "added": "2026-11-10 B round 429 -> 430 planning"
+   "added": "2026-11-10 B round 429 -> 430 planning",
+   "scope_r431": "also the Export dialog radio dot (appearance-none) in Firefox/Safari: hollow/checked/disabled shapes, focus ring, forced-colors fallback; stage 2b adds ::-moz-progress-bar (D-29z1517)"
   },
   {
    "id": "STUDIO-VIS-4",
@@ -28050,6 +28092,39 @@
    "title": "Live 12 value fields change by vertical drag (manual 42.6, Shift = finer); CZABA Detail panel number fields (Clip Gain, From, To) have no drag (pre-existing; Clip Gain has a fader beside it). Add drag-to-change on these fields? Default: no change",
    "evidence": "current-task.md round 430 Reference table; https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/ 42.6",
    "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "STUDIO-VIS-2",
+   "severity": "medium",
+   "origin": "product-designer audit 2026-11-10, approved by Saba (policy 2026-11-10)",
+   "kind": "stage_pointer",
+   "status": "in_progress (D-29z1519): SABA-B-12 stage 2a, round 431 | severity set to the parent SABA-B-12 Medium (D-29z1520)",
+   "title": "6 native radios in ArrangementExportDialog -> theme-drawn dot (STUDIO_RADIO_CLASS)",
+   "evidence": "store/docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md STUDIO-VIS-2; b-round-430/probe/",
+   "added": "2026-11-10 B round 430 -> 431 planning",
+   "parent": "SABA-B-12",
+   "severity_audit": "high"
+  },
+  {
+   "id": "SABA-B-12-STAGE-2B-PROGRESS",
+   "severity": "medium",
+   "origin": "B inventory (audit missed it), part of SABA-B-12",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1517): next UI round after 431 (after REGRESSION-2026-11-13 when due)",
+   "title": "Export dialog <progress> (determinate + indeterminate PU4 encoder-load state) drawn by the theme, not the browser; neutral colour role kept (DXL7c)",
+   "evidence": "ArrangementExportDialog.tsx <progress> h-2 w-full accent-foreground; export-progress-ui.test.tsx PU1/PU4; label-status-colour-ui.test.tsx DXL7c/DXL8",
+   "next": "B finds a repeatable real-Chromium hold recipe for both states at HEAD (page.route stall of the encoder chunk or a long render), then sketch + probe + reduced-motion row",
+   "added": "2026-11-10 B round 430 -> 431 planning"
+  },
+  {
+   "id": "SABA-LANE-RESIZE-HANDLE",
+   "severity": "low",
+   "origin": "Saba 2026-11-10 visual feedback (policy section \"lane resize handle too thick\")",
+   "kind": "saba_approved_task",
+   "status": "scheduled (D-29z1518): with COPY-PD-VIS (Saba-seen Low, fixed with the STUDIO-VIS block, not deferred)",
+   "title": "Lane resize separator h-1.5 hover:bg-foreground/50 (6 px, 50 % white) too heavy; visible line h-px or h-0.5 at foreground/20-/25, hit area can stay h-1.5, cursor stays the primary affordance (as Ableton)",
+   "evidence": "ArrangementLane.tsx lane resize separator (policy cites l.1341; B re-greps at dispatch)",
+   "added": "2026-11-10 B round 430 -> 431 planning"
   }
  ],
  "tech_lead_notes": [
@@ -28503,7 +28578,13 @@
   "dashboard": "tmp/studio-real-loop/feature-status.md",
   "mutation_rule_round23": "From round 23, A and C run mutation checks only in a scratch copy outside store/ (A round-22 deviation 4: an in-place mutation was visible to the shared dev server).",
   "saba_issue_root_cause_2026_10_28": "Every SABA-B-* task carries a 'Why we missed it' section by B (which phase should have caught it, why it did not, the rule that would have caught it); B adds that rule to lessons.md in the same planning; C checks the lesson exists; the next RETRO counts Saba-found issues with a lesson and repeats. First application: SABA-B-8 at CALM-1 planning (D-29z265).",
-  "screen_budget_2026_10_28": "A round that adds anything permanently visible attaches before/after full-window screenshots of /studio-lab at 1440x900 and 1280x720 (normal state); B justifies each persistent element after considering tooltip, ? sheet, empty-state-only line, first-run-only hint, status line (in that order); no persistent helper sentences explaining a control; C counts persistent text lines outside the timeline before/after: unjustified increase = Low, a new always-visible strip = Medium."
+  "screen_budget_2026_10_28": "A round that adds anything permanently visible attaches before/after full-window screenshots of /studio-lab at 1440x900 and 1280x720 (normal state); B justifies each persistent element after considering tooltip, ? sheet, empty-state-only line, first-run-only hint, status line (in that order); no persistent helper sentences explaining a control; C counts persistent text lines outside the timeline before/after: unjustified increase = Low, a new always-visible strip = Medium.",
+  "legacy_removal_2026_11_10": {
+   "id": "LEGACY-REMOVAL-POLICY",
+   "decision": "D-29z1518",
+   "rule": "Unused legacy code is removed incrementally, never kept just in case. StudioContext.tsx (legacy Mixdown Studio, route studio.$productId = protected, Saba changes it) is frozen: no refactor, no features, removed when ArrangementContext replaces it. B checks imports (grep -r \"from.*<file>\" app/) and route references; unused files go to the next ARCH-SPLIT or cleanup round; dead exports in living files are removed when that file is touched; unused package.json deps go to a PERF or SYS round (via root-deps-request).",
+   "source": "policy section \"Legacy removal policy (Saba, 2026-11-10)\""
+  }
  },
  "planned_rounds": [
   {
@@ -39888,6 +39969,43 @@
    "title": "row ids HE/HK/HS/HP/HM reused across test files with different meanings (doc 277 table now names the file)",
    "evidence": "a-round-429.md For B; doc 277 TODO",
    "added": "2026-11-10 B round 429 -> 430 planning"
+  },
+  {
+   "id": "A-R430-REVIEW-NF2-TYPE-BOUNDARY",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1516)",
+   "title": "studio-number-field NF2 NUMBER_INPUT has no \\b before type=, so inputType=\"number\" would count (false red only, never false pass)",
+   "evidence": "a-round-430.md reviewer item 2",
+   "added": "2026-11-10 B round 430 -> 431 planning"
+  },
+  {
+   "id": "A-R430-REVIEW-NF2-SIDE-EFFECT-IMPORT",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1516)",
+   "title": "NF2 IMPORT_STATEMENT lazy match can swallow code after a side-effect import './x'; (none in the file today)",
+   "evidence": "a-round-430.md reviewer item 4",
+   "added": "2026-11-10 B round 430 -> 431 planning"
+  },
+  {
+   "id": "A-R430-REVIEW-NF2-CLASSNAME-CONST",
+   "severity": "low",
+   "origin": "A",
+   "status": "deferred_low_polish (D-29z1516)",
+   "title": "NF2 CONSTANT_USE rejects className={STUDIO_NUMBER_FIELD_CLASS} and accepts the constant anywhere outside imports (= TL-R430-05/06 ruling in b-round-429/sketch-review.md); F10 covers the rendered Detail panel",
+   "evidence": "a-round-430.md reviewer item 3",
+   "added": "2026-11-10 B round 430 -> 431 planning",
+   "confirmedBy": "gates/round-430/review.md suggestion 2 (D-29z1516)"
+  },
+  {
+   "id": "GATE430-REVIEW-L1-INPUTCLASS-CN",
+   "severity": "low",
+   "origin": "gate reviewer",
+   "status": "deferred_low_polish (D-29z1516)",
+   "title": "ArrangementDetailPanel inputClass is a hand-joined template string with the shared constant; cn(...) would match l.427 and remove the trailing-space risk",
+   "evidence": "gates/round-430/review.md suggestion 1",
+   "added": "2026-11-10 B round 430 -> 431 planning"
   }
  ],
  "regression_rounds": [
@@ -40212,7 +40330,19 @@
    "decision": "D-29z1487",
    "status": "planned: due at the first planning on or after 2026-11-13",
    "scope": "C re-verifies in the browser the key acceptance of every item done since REGRESSION-2026-11-10 (round 426 onward) plus one short check per earlier done item, both viewports; npm run test:e2e:smoke; carries carry_to_next_regression_d29z1490 of REGRESSION-2026-11-10; A fixes only what C finds",
-   "added": "2026-11-10 B round 425 -> 426 planning"
+   "added": "2026-11-10 B round 425 -> 426 planning",
+   "scope_additions": [
+    {
+     "id": "REG-SABA-B-12-SPIN",
+     "what": "Detail panel number fields: no spin buttons at hover/focus (b-round-429/probe/spin-probe.mjs + compare.py, both viewports)",
+     "added": "D-29z1520"
+    },
+    {
+     "id": "REG-SABA-B-12-RADIOS",
+     "what": "Export dialog radios: theme dot, forced-colors fallback, disabled-checked while rendering (b-round-430/probe/radio-probe.mjs + compare-radio.py, radio-extra-probe.mjs + compare-extra.py, both viewports; only if round 431 passed)",
+     "added": "D-29z1520"
+    }
+   ]
   }
  ],
  "ableton_recommendations": [
@@ -42104,36 +42234,6 @@
  },
  "decisions_log_b": [
   {
-   "id": "D-29z1460",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 418 -> 419 planning",
-   "decision": "SYS-R369-STEM-CACHE-WRITE-COORDINATOR dispatched as round 419 (L46 default D-29z1374; no root answer). 8 of 9 ids in scope; GATE368-L3 deferred with reason (needs a measured concurrent-load limit; STEM-LANES changes it). Sketch b-round-418/sketch-419.patch.txt, 8 new rows SC34-SC41 + SC26 assert replaced, 15 mutant lines, tech-lead sketch review. STEM-LANES coupling confirmed: public demo previews load through publicPreviewSourceFetch (stem cache), purchased stems use their own fetchAudio; a stem set (STEM-LANES) loads several keys together through the same commit chain, so the per-key model lands first."
-  },
-  {
-   "id": "D-29z1461",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 418 -> 419 planning",
-   "decision": "Order: 419 SYS-R369 -> REGRESSION-2026-11-10 (first planning on/after 2026-11-10) -> STEM-LANES (product-designer + reference-first; LIVE-MEAS-STEM-DROP) -> SYS-1..3 -> STORE-2b..5 -> REVIEW-RECOMMENDATIONS -> T12-ADVANCED -> phase 2 (skip rule). Next RETRO round 431 or end of STUDIO-PERFORMANCE. No new architecture checkpoint request: stem-cache region keep (one session lifecycle), ARCH-CHECKPOINT-PERF9-STEM-CACHE still open with root (non-blocking)."
-  },
-  {
-   "id": "D-29z1462",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 419 -> 420 planning",
-   "decision": "Round 419 accepted: C PASS (c-round-419.json, 8 rows, browserVerified/realVerified true, 0 bugs), gate 419 published 6609dfa (round-420 baseline). SYS-R369-STEM-CACHE-WRITE-COORDINATOR done; closes A-R368-REVIEW-L1, B-R367-TL3-1, A-R367-REVIEW-L-c/d/e/g, GATE368-L1, A-R368-REVIEW-L3, TL-R419-L1 (12 entries updated). R419-CR-1 -> deferred_low_polish (A-R419-REVIEW-CR-1-SWEEP-CANCEL-CHECK); R419-CR-2..5 closed (doc 270). Architecture note -> SIG-R419-STEM-CACHE-STORE-COORDINATOR-MODULE (signal, not scheduled)."
-  },
-  {
-   "id": "D-29z1463",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 419 -> 420 planning",
-   "decision": "STUDIO-PERFORMANCE has no loop-runnable stage left after round 419 -> status loop_complete_remainders_parked; the 2026-10-26 rule (RETRO at the end of each queue entry, whichever first) makes round 420 = RETRO 420, window 416-419 (tech-lead: yes; 4-round window, counters are hypotheses). PERF-13b stale sub-status corrected. Parked remainders get deadline RETRO 435."
-  },
-  {
-   "id": "D-29z1464",
-   "date": "2026-11-09",
-   "by": "2026-11-09 B round 419 -> 420 planning",
-   "decision": "STEM-LANES needs AGREE before A builds (2026-10-28 rule; Live has an equivalent; STUDIO-LINK exemption D-29z749 does not apply). Wrote user-review/AGREE-STEM-LANES.md (Q1-Q5 with defaults; false premise: no Stems group exists) and youtube-request.json (6 queries). LIVE-MEAS-STEM-DROP still unmeasured (non-blocking). GATE368-L3 stays deferred (tech-lead ruling). Frontend-architect checkpoint ARCH-CHECKPOINT-STEM-LANES requested of root (feature boundary)."
-  },
-  {
    "id": "D-29z1465",
    "date": "2026-11-09",
    "by": "2026-11-09 B round 419 -> 420 planning",
@@ -42433,6 +42533,42 @@
    "date": "2026-11-10",
    "by": "2026-11-10 B round 429 -> 430 planning",
    "decision": "Why we missed SABA-B-12: VISUAL-A and every RETRO whole-screen review used rest-state screenshots, and Chromium paints number spin buttons only on hover/focus; no task listed native control parts as rows. New lesson L61 (native control chrome is a row). lessons.md stays at 60 lines: old L9 (engine rounding, 1x) merged into L15 as a clause. Copy of the previous file: b-round-429/lessons-before-430.md."
+  },
+  {
+   "id": "D-29z1515",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 430 -> 431 planning",
+   "decision": "Round 430 accepted from C evidence: c-round-430.json PASS, 0 bugs, browserVerified/realVerified true. B re-runs: tools/l57-check.py L57 OK (b-round-430/l57-check-c430.txt); b-round-429/probe/compare.py on C probe JSONs ALL OK (6 cells) (b-round-430/recompare/compare.txt); c-round-430/mutants/summary.txt identical to b-round-429/mutants/summary.txt; c-round-430/auth/g428-auth.json pass true (attempt 1 cold-server hydration error kept as environment, no bypass). Gate 430 published 5a30894 on both remotes = baseline for round 431 (HEAD 832b3ba root primitive-only commit accepted by A and C: git diff 76f4147 832b3ba -- app empty). SABA-B-12 stage 1 (STUDIO-VIS-1) done; Firefox/Safari half stays TLM-SABA-B-12-FIREFOX-SAFARI (RETRO 435)."
+  },
+  {
+   "id": "D-29z1516",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 430 -> 431 planning",
+   "decision": "Round 430 Lows (all Low, none blocks): A reviewer items 2 and 4 are new -> deferred_low_polish A-R430-REVIEW-NF2-TYPE-BOUNDARY, A-R430-REVIEW-NF2-SIDE-EFFECT-IMPORT; A item 3 (CONSTANT_USE rejects className={CONST}; accepts the constant anywhere outside imports) -> A-R430-REVIEW-NF2-CLASSNAME-CONST, which is the TL-R430-05/06 ruling in b-round-429/sketch-review.md, with confirmedBy gates/round-430/review.md suggestion 2. Gate 430 suggestion 1 (inputClass hand-joined template string -> cn()) -> GATE430-REVIEW-L1-INPUTCLASS-CN (Low, deferred). Gate suggestion 3 (F10 pins field order deliberately) = info, no entry. No Architecture note from A or gate (constant module only). The round-431 radio guard RD2 is written with all three hardening fixes from the start (whole <input> tag, \\btype=, className={CONST} accepted), so the class does not repeat."
+  },
+  {
+   "id": "D-29z1517",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 430 -> 431 planning",
+   "decision": "SABA-B-12 stage 2 split (L42 full scope kept): 2a = the 6 Export dialog radios (STUDIO-VIS-2), round 431; 2b = the Export dialog <progress> (determinate and indeterminate PU4 states) = SABA-B-12-STAGE-2B-PROGRESS, next UI round. Reason: the progress bar needs a repeatable real-Chromium hold recipe for both states (L58: B proves it at HEAD before an assert row) and DXL7c/DXL8 pin its accent-foreground tokens; the radios are ready with a run sketch. Radio ruling (D-29z1513 item 2 option b): product-designer consult 2026-11-10 chose a theme-drawn dot on the native input (appearance-none + forced-colors:appearance-auto, studio-fader.ts pattern) over sr-only: keeps the single global :focus-visible ring on the input (app.css:385), a shape cue (hollow ring vs brass ring with dark centre) so selection is not colour-only (WCAG 1.4.1/1.4.11), native arrow-key cycling, and forced-colors. Card highlight border-brand bg-brand/10 stays. Deviation from the audit text (which leaned sr-only) is the product-designer's own choice and trade-off. accent-brand (5 sites) retired from the dialog; DXA7 and DXL8 get equal-or-stronger replacement counts (STUDIO_RADIO_CLASS 6, accent-brand 0, checked:border-brand 1). TLM-SABA-B-12-FIREFOX-SAFARI scope widened to the radio dot and, in stage 2b, ::-moz-progress-bar."
+  },
+  {
+   "id": "D-29z1518",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 430 -> 431 planning",
+   "decision": "L42 records for the 2026-11-10 policy sections: (1) ARCH-SPLIT queue entry inserted after STORE-REDESIGN and before REVIEW-RECOMMENDATIONS (stages ARCH-SPLIT-1 ArrangementContext, -2 StudioWorkspace, -3 DetailPanel+Lane+StudioContext audit, -REGRESSION; frontend-architect + tech-lead per split; unit tests for extracted modules; no behaviour change; antipattern audit list), added to REVIEW-RECOMMENDATIONS prerequisites; not scheduled now. Note: StudioContext.tsx is frozen legacy by the legacy policy (no refactor), so ARCH-SPLIT-3 limits it to the removal audit. (2) SABA-LANE-RESIZE-HANDLE (Low, Saba-seen 2026-11-10): lane resize separator h-1.5 hover:bg-foreground/50 too thick; visible line h-px or h-0.5 at /20-/25, hit area stays; scheduled with COPY-PD-VIS (STUDIO-VIS block, Saba-seen Low fixed with the block, not deferred). (3) LEGACY-REMOVAL-POLICY recorded in workflow_policy: unused files removed incrementally, StudioContext.tsx frozen until ArrangementContext replaces studio.$productId (protected, Saba), dead exports removed when the file is touched, unused deps in a PERF/SYS round; B greps imports at ARCH-SPLIT planning. All recorded, none dispatched this round."
+  },
+  {
+   "id": "D-29z1519",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 430 -> 431 planning",
+   "decision": "Round 431 dispatched: SABA-B-12 stage 2a (STUDIO-VIS-2 Export dialog radios) on baseline 5a30894. Sketch b-round-430/sketch-431.patch.txt (6 files; tech-lead review b-round-430/sketch-review.md); real Chromium HEAD vs sketch b-round-430/probe/compare.txt ALL OK (2 cells, 6 radios each; label boxes equal, tab stops equal, ArrowDown cycles wav->mp3->both->wav, mouse press no :focus-visible); contrast b-round-430/probe/contrast.txt (unchecked ring 3.5:1, brass ring vs selected card 6.74:1); mutants 5/5 red; covering 29 files 384/384; doc 279 l.4 In Progress (stage 2a of 4; C round 431 PASS). Order after: REGRESSION-2026-11-13 when due, SABA-B-12 stage 2b (progress), stage 3 (search cancel), COPY-PD-VIS (+ SABA-LANE-RESIZE-HANDLE), SYS-1, SYS-3, then the queue; STEM-LANES jumps ahead when Saba answers; RETRO-435 at round 435."
+  },
+  {
+   "id": "D-29z1520",
+   "date": "2026-11-10",
+   "by": "2026-11-10 B round 430 -> 431 planning",
+   "decision": "Close-review follow-ups (advisor): (1) STUDIO-VIS-2 severity high -> medium with kind stage_pointer of SABA-B-12 (the root audit table rated it High; the bug-gate severity is the parent SABA-B-12 Medium; avoids a duplicate open High in the active summary). (2) ARCH-SPLIT-3 keeps Saba's original wording (ArrangementDetailPanel.tsx + ArrangementLane.tsx + StudioContext.tsx); the conflict with LEGACY-REMOVAL-POLICY (StudioContext frozen, no refactor) is a root question at ARCH-SPLIT planning (ROOT-Q-ARCH-SPLIT-3-STUDIOCONTEXT), not a B narrowing. (3) REGRESSION-2026-11-13 scope additions: SABA-B-12 stage 1 spin probe (b-round-429/probe/spin-probe.mjs + compare.py) and stage 2a radio probes (b-round-430/probe/radio-probe.mjs + compare-radio.py, radio-extra-probe.mjs + compare-extra.py), each one short run per viewport. (4) B pre-checks added on the final sketch: full vitest 269 files / 4004 rc 0 (b-round-430/precheck-full.log), npm run lint rc 0 (205 warnings, 1 info = HEAD; precheck-lint.log), forced-colors + disabled-checked-while-rendering + WAV export probe EXTRA ALL OK (b-round-430/probe/compare-extra.txt; HEAD NOT OK)."
   }
  ],
  "retro_candidates": [
@@ -42926,6 +43062,12 @@
    "id": "ROOT-REQ-BIOME-SCRIPTS",
    "added": "2026-11-08 B round 412 -> 413 planning",
    "note": "A round 412 proposal: biome.json includes app/** only, so scripts/**/*.mjs (generate-demo-peaks.mjs, check-agents.mjs) are never linted; add them to includes or record that scripts/ stays outside lint (config outside loop grants); non-blocking"
+  },
+  {
+   "id": "ROOT-Q-ARCH-SPLIT-3-STUDIOCONTEXT",
+   "status": "deferred_to_arch_split_planning (D-29z1520)",
+   "question": "ARCH-SPLIT-3 lists StudioContext.tsx, the legacy policy freezes it: split, or removal audit only?",
+   "added": "2026-11-10 B round 430 -> 431 planning"
   }
  ],
  "retro_inputs_round_230": [
