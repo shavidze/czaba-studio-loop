@@ -545,3 +545,16 @@ Root lists the files the loop's current task touches (from `current-task.md` and
 - COPY-PD — export dialog text, toolbar text (different files)
 - SRW-21-PLAN — planning doc only (no code)
 - REVIEW-RECOMMENDATIONS sub-tasks that are Store-only (DUX-R-*)
+
+## Saba visual feedback, 2026-11-10: browser default elements must go
+
+Saba reviewed the Detail panel's From/To/Clip Gain number fields and pointed out the browser-default `<input type="number">` spinbutton arrows (▲▼). These break the premium/cinematic feel.
+
+**Rule:** No browser-default form controls visible in Studio. Every input, button, scrollbar and spinner must be custom-styled to match Obsidian & Brass. This includes:
+- Number field increment/decrement buttons → custom styled or hidden (CSS `-webkit-appearance: none` + custom controls)
+- Any other native form elements that look out of place
+
+This applies to the whole Studio, not just the Detail panel. B should audit all form controls for default browser styling when planning the next UI round.
+
+**Priority:** Medium — fits into DUX-R or REVIEW-RECOMMENDATIONS block.
+**Saba's words:** "უფრო სოლიდური, და ესთეტიური უნდა იყოს რომ ეს კომფორტი და perceived value theory შედეგი იგრძნოს მომხმარებელმა"
