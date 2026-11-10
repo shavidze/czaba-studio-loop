@@ -1,0 +1,690 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/tmp/tmp.U6XnRpJkgs/head[39m
+
+ [31m❯[39m app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 10617[2mms[22m[39m
+     [33m[2m✓[22m[39m UM1 controls render expanded and collapsed, add no text and keep the 28 px row [33m 1344[2mms[22m[39m
+     [33m[2m✓[22m[39m UM2 group Mute silences the members live with one history entry and no restart [33m 595[2mms[22m[39m
+     [33m[2m✓[22m[39m UM3 group Volume: drag, keyboard, blur and double-click each write one entry; cancel reverts [33m 1393[2mms[22m[39m
+     [33m[2m✓[22m[39m UM4 group Solo: exclusive, cleared by a lane solo, Ctrl additive, half-solo on the parent [33m 1347[2mms[22m[39m
+     [33m[2m✓[22m[39m UM5 R17-G3: inner controls stay adjustable under a muted outer group [33m 901[2mms[22m[39m
+     [33m[2m✓[22m[39m UM6 Ctrl+G, group M/S/Volume and Ctrl+Shift+G while playing restart no sources [33m 720[2mms[22m[39m
+     [33m[2m✓[22m[39m UM7 ungrouping a muted group makes its members audible; Undo mutes them again [33m 604[2mms[22m[39m
+[31m     [31m×[31m UM8 the export dialog video-sound line uses the group-aware rule[39m[33m 378[2mms[22m[39m
+     [33m[2m✓[22m[39m UM9 X1: collapsing blurs a hidden focused fader, commits a pending preview and focuses the group [33m 1433[2mms[22m[39m
+     [33m[2m✓[22m[39m UM10 Space, m and u on a focused group M/S behave as on a lane M/S [33m 572[2mms[22m[39m
+     [33m[2m✓[22m[39m UM11 group Mute/Solo use the 5 % fill, on and mixed keep their fills, fold, name and rename get 8 px [33m 1329[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx[2m > [22mSRW-17 stage 3 group Mute / Solo / Volume in the workspace[2m > [22mUM8 the export dialog video-sound line uses the group-aware rule
+[31m[1mAssertionError[22m: expected 'import { memo, useEffect, useId, useR…' to contain 'isTrackAudibleWithGroups(videoTrack, …'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- isTrackAudibleWithGroups(videoTrack, arrangement)[39m
+[31m+ import { memo, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';[39m
+[31m+ import { Modal, ModalBody, ModalDescription, ModalHeader, ModalTitle } from '~/components/ui';[39m
+[31m+ import {[39m
+[31m+   formatArrangementTime,[39m
+[31m+   useArrangement,[39m
+[31m+   useArrangementRange,[39m
+[31m+ } from '~/contexts/ArrangementContext';[39m
+[31m+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';[39m
+[31m+ import { dialogTabStopFocusTarget, groupDialogTabStops } from '~/lib/arrangement/dialog-tab-stops';[39m
+[31m+ import { formatArrangementExportProgress } from '~/lib/arrangement/export-progress';[39m
+[31m+ import { formatMasterGainDb } from '~/lib/arrangement/model';[39m
+[31m+ import { arrangementRangeRenderWindow } from '~/lib/arrangement/render-window';[39m
+[31m+ import { isTrackAudibleWithGroups } from '~/lib/arrangement/schedule';[39m
+[31m+ import { studioExportStrings, studioTimeTextParts } from '~/lib/arrangement/strings';[39m
+[31m+ import { arrangementHasVideoFades } from '~/lib/arrangement/video-fades';[39m
+[31m+ import { cn } from '~/lib/utils';[39m
+[31m+ import type { WorkspaceVideoSource } from '~/types/arrangement';[39m
+[31m+ import { ArrangementTimeText } from './ArrangementTimeText';[39m
+[31m+ import { STUDIO_PROGRESS_CLASS } from './studio-progress';[39m
+[31m+ import { STUDIO_RADIO_CLASS } from './studio-radio';[39m
+[31m+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';[39m
+[31m+ import { STUDIO_DIALOG_SCROLLBAR_CLASS } from './studio-scrollbar';[39m
+[31m+[39m
+[31m+ interface ArrangementExportDialogProps {[39m
+[31m+   isOpen: boolean;[39m
+[31m+   onClose: () => void;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ type ArrangementExportScope = 'project' | 'range';[39m
+[31m+[39m
+[31m+ type ArrangementExportFormat = 'wav' | 'mp3' | 'both';[39m
+[31m+[39m
+[31m+ const EXPORT_FORMAT_BUTTON_LABELS: Record<ArrangementExportFormat, string> = {[39m
+[31m+   wav: studioExportStrings.formatButtonWav,[39m
+[31m+   mp3: studioExportStrings.formatButtonMp3,[39m
+[31m+   both: studioExportStrings.formatButtonBoth,[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ const EXPORT_FORMAT_CREATES: Record<ArrangementExportFormat, string> = {[39m
+[31m+   wav: studioExportStrings.formatCreatesWav,[39m
+[31m+   mp3: studioExportStrings.formatCreatesMp3,[39m
+[31m+   both: studioExportStrings.formatCreatesBoth,[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ const MP3_FORMAT_NOTE = studioExportStrings.mp3FormatNote;[39m
+[31m+[39m
+[31m+ const BOTH_FORMAT_NOTE = studioExportStrings.bothFormatNote;[39m
+[31m+[39m
+[31m+ const EXPORT_RANGE_MISSING_REASON = studioExportStrings.rangeMissingReason;[39m
+[31m+[39m
+[31m+ const VIDEO_RENDER_REASON = studioExportStrings.videoRenderReason;[39m
+[31m+[39m
+[31m+ const VIDEO_FADES_PREVIEW_ONLY_NOTE = studioExportStrings.videoFadesPreviewNote;[39m
+[31m+[39m
+[31m+ export const ARRANGEMENT_EXPORT_FOOTER_FOCUS_MARGIN_PX = 8;[39m
+[31m+[39m
+[31m+ const EXPORT_DIALOG_FOCUSABLE_SELECTOR = [[39m
+[31m+   'button:not([tabindex="-1"])',[39m
+[31m+   'input:not([type="hidden"]):not([tabindex="-1"])',[39m
+[31m+   'select:not([tabindex="-1"])',[39m
+[31m+   'textarea:not([tabindex="-1"])',[39m
+[31m+   'a[href]:not([tabindex="-1"])',[39m
+[31m+   '[tabindex]:not([tabindex="-1"])',[39m
+[31m+ ].join(', ');[39m
+[31m+[39m
+[31m+ function exportDialogFocusableElements(container: HTMLElement): HTMLElement[] {[39m
+[31m+   return Array.from([39m
+[31m+     container.querySelectorAll<HTMLElement>(EXPORT_DIALOG_FOCUSABLE_SELECTOR),[39m
+[31m+   ).filter((element) => !element.matches(':disabled') && element.closest('[hidden]') === null);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ function videoSoundStatus(source: WorkspaceVideoSource, isAudible: boolean): string {[39m
+[31m+   if (source.audio === 'decoding') {[39m
+[31m+     return studioExportStrings.videoSoundDecoding;[39m
+[31m+   }[39m
+[31m+   if (source.audio !== 'ready') {[39m
+[31m+     return source.audioNote ?? studioExportStrings.videoSoundUnreadable;[39m
+[31m+   }[39m
+[31m+   return isAudible ? studioExportStrings.videoSoundIncluded : studioExportStrings.videoSoundOff;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ function ArrangementExportDialogShell({ isOpen, onClose }: ArrangementExportDialogProps) {[39m
+[31m+   return isOpen ? <ArrangementExportDialogContent isOpen onClose={onClose} /> : null;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ export const ArrangementExportDialog = memo(ArrangementExportDialogShell);[39m
+[31m+[39m
+[31m+ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDialogProps) {[39m
+[31m+   const {[39m
+[31m+     arrangement,[39m
+[31m+     projectEnd,[39m
+[31m+     exportState,[39m
+[31m+     exportProgress,[39m
+[31m+     exportWav,[39m
+[31m+     exportMp3,[39m
+[31m+     resetExportState,[39m
+[31m+     cancelExport,[39m
+[31m+     sourceStates,[39m
+[31m+     videoSources,[39m
+[31m+   } = useArrangement();[39m
+[31m+   const range = useArrangementRange((state) => (isOpen ? state.range : null));[39m
+[31m+   const isEmpty = arrangement.clips.length === 0;[39m
+[31m+   const isRendering = exportState.phase === 'rendering';[39m
+[31m+   const progress = useSyncExternalStore([39m
+[31m+     exportProgress.subscribeProgress,[39m
+[31m+     exportProgress.getProgress,[39m
+[31m+     () => null,[39m
+[31m+   );[39m
+[31m+   const rangeWindow = arrangementRangeRenderWindow(range);[39m
+[31m+   const rangeStart = rangeWindow?.start ?? 0;[39m
+[31m+   const rangeEnd = rangeWindow?.end ?? 0;[39m
+[31m+   const hasValidRange = rangeWindow !== null;[39m
+[31m+   const rangeReasonId = useId();[39m
+[31m+   const exportOptionIdBase = useId();[39m
+[31m+   const optionIds = {[39m
+[31m+     wavName: `${exportOptionIdBase}-wav-name`,[39m
+[31m+     wavNote: `${exportOptionIdBase}-wav-note`,[39m
+[31m+     mp3Name: `${exportOptionIdBase}-mp3-name`,[39m
+[31m+     mp3Note: `${exportOptionIdBase}-mp3-note`,[39m
+[31m+     bothName: `${exportOptionIdBase}-both-name`,[39m
+[31m+     bothNote: `${exportOptionIdBase}-both-note`,[39m
+[31m+     videoName: `${exportOptionIdBase}-video-name`,[39m
+[31m+     videoNote: `${exportOptionIdBase}-video-note`,[39m
+[31m+     rangeName: `${exportOptionIdBase}-range-name`,[39m
+[31m+   };[39m
+[31m+   const [scopeChoice, setScopeChoice] = useState<ArrangementExportScope | null>(null);[39m
+[31m+   const [exportFormat, setExportFormat] = useState<ArrangementExportFormat>('wav');[39m
+[31m+   const isRangeScope = hasValidRange && (scopeChoice ?? 'range') === 'range';[39m
+[31m+   const rangeSeconds = studioExportStrings.rangeSeconds(rangeEnd - rangeStart);[39m
+[31m+   const videoTrack = arrangement.tracks.find((track) => track.kind === 'video');[39m
+[31m+   const isVideoAudible = videoTrack ? !videoTrack.mute && isTrackAudibleWithGroups(videoTrack, { ...arrangement, groups: [] }) : false;[39m
+[31m+   const usedVideoSources = [[39m
+[31m+     ...new Set([39m
+[31m+       arrangement.clips[39m
+[31m+         .filter((clip) => clip.trackId === videoTrack?.id)[39m
+[31m+         .map((clip) => clip.sourceId),[39m
+[31m+     ),[39m
+[31m+   ].flatMap((sourceId) => {[39m
+[31m+     const source = videoSources.get(sourceId);[39m
+[31m+     return source ? [source] : [];[39m
+[31m+   });[39m
+[31m+   const hasVideoFades = arrangementHasVideoFades(arrangement);[39m
+[31m+   const isDecoding = usedVideoSources.some((source) => source.audio === 'decoding');[39m
+[31m+   const hasSoundingClip = arrangement.clips.some([39m
+[31m+     (clip) =>[39m
+[31m+       sourceStates[clip.sourceId]?.status === 'ready' ||[39m
+[31m+       videoSources.get(clip.sourceId)?.audio === 'ready',[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   const dialogContentRef = useRef<HTMLDivElement>(null);[39m
+[31m+   const focusTrapRef = useRef<HTMLDivElement>(null);[39m
+[31m+   const closeButtonRef = useRef<HTMLButtonElement>(null);[39m
+[31m+   const footerRef = useRef<HTMLDivElement>(null);[39m
+[31m+[39m
+[31m+   useIsomorphicLayoutEffect(() => {[39m
+[31m+     if (!isOpen) {[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;[39m
+[31m+     return () => {[39m
+[31m+       if (opener?.isConnected && !opener.matches(':disabled')) {[39m
+[31m+         opener.focus();[39m
+[31m+       }[39m
+[31m+     };[39m
+[31m+   }, [isOpen]);[39m
+[31m+[39m
+[31m+   useEffect(() => {[39m
+[31m+     if (!isOpen) {[39m
+[31m+       setScopeChoice(null);[39m
+[31m+       setExportFormat('wav');[39m
+[31m+     }[39m
+[31m+   }, [isOpen]);[39m
+[31m+[39m
+[31m+   useEffect(() => {[39m
+[31m+     const trap = focusTrapRef.current;[39m
+[31m+     const content = dialogContentRef.current;[39m
+[31m+     if (!isOpen || !trap || !content) {[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     const active = document.activeElement;[39m
+[31m+     if (active instanceof HTMLElement && exportDialogFocusableElements(content).includes(active)) {[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     const close = closeButtonRef.current;[39m
+[31m+     if (close && !isRendering) {[39m
+[31m+       close.focus();[39m
+[31m+     } else {[39m
+[31m+       trap.focus();[39m
+[31m+     }[39m
+[31m+   }, [isOpen, isRendering]);[39m
+[31m+[39m
+[31m+   useEffect(() => {[39m
+[31m+     const content = dialogContentRef.current;[39m
+[31m+     if (!isOpen || !content) {[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     const handleDialogTabKey = (event: KeyboardEvent) => {[39m
+[31m+       if (event.key !== 'Tab') {[39m
+[31m+         return;[39m
+[31m+       }[39m
+[31m+       const focusable = exportDialogFocusableElements(content);[39m
+[31m+       const stops = groupDialogTabStops(focusable);[39m
+[31m+       const firstStop = stops[0];[39m
+[31m+       const lastStop = stops[stops.length - 1];[39m
+[31m+       if (!firstStop || !lastStop) {[39m
+[31m+         return;[39m
+[31m+       }[39m
+[31m+       const active = document.activeElement;[39m
+[31m+       let target: HTMLElement | null = null;[39m
+[31m+       if (!(active instanceof HTMLElement) || !focusable.includes(active)) {[39m
+[31m+         target = dialogTabStopFocusTarget(event.shiftKey ? lastStop : firstStop);[39m
+[31m+       } else if (event.shiftKey && firstStop.includes(active)) {[39m
+[31m+         target = dialogTabStopFocusTarget(lastStop);[39m
+[31m+       } else if (!event.shiftKey && lastStop.includes(active)) {[39m
+[31m+         target = dialogTabStopFocusTarget(firstStop);[39m
+[31m+       }[39m
+[31m+       if (!target) {[39m
+[31m+         return;[39m
+[31m+       }[39m
+[31m+       event.preventDefault();[39m
+[31m+       target.focus();[39m
+[31m+     };[39m
+[31m+     content.addEventListener('keydown', handleDialogTabKey);[39m
+[31m+     return () => content.removeEventListener('keydown', handleDialogTabKey);[39m
+[31m+   }, [isOpen]);[39m
+[31m+[39m
+[31m+   useEffect(() => {[39m
+[31m+     const content = dialogContentRef.current;[39m
+[31m+     if (!isOpen || !content) {[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     const handleFooterFocusOverlap = (event: FocusEvent) => {[39m
+[31m+       const footer = footerRef.current;[39m
+[31m+       const target = event.target;[39m
+[31m+       if ([39m
+[31m+         !footer ||[39m
+[31m+         !(target instanceof HTMLElement) ||[39m
+[31m+         footer.contains(target) ||[39m
+[31m+         target.contains(footer)[39m
+[31m+       ) {[39m
+[31m+         return;[39m
+[31m+       }[39m
+[31m+       const card = target.closest('label');[39m
+[31m+       const cardBottom =[39m
+[31m+         card && content.contains(card)[39m
+[31m+           ? card.getBoundingClientRect().bottom[39m
+[31m+           : Number.NEGATIVE_INFINITY;[39m
+[31m+       const coveredBottom = Math.max(target.getBoundingClientRect().bottom, cardBottom);[39m
+[31m+       const overlap = coveredBottom - footer.getBoundingClientRect().top;[39m
+[31m+       if (overlap > 0) {[39m
+[31m+         content.scrollTop += overlap + ARRANGEMENT_EXPORT_FOOTER_FOCUS_MARGIN_PX;[39m
+[31m+       }[39m
+[31m+     };[39m
+[31m+     content.addEventListener('focusin', handleFooterFocusOverlap);[39m
+[31m+     return () => content.removeEventListener('focusin', handleFooterFocusOverlap);[39m
+[31m+   }, [isOpen]);[39m
+[31m+[39m
+[31m+   const progressText = isRendering && progress ? formatArrangementExportProgress(progress) : null;[39m
+[31m+   const handleClose = () => {[39m
+[31m+     if (isRendering) {[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     resetExportState();[39m
+[31m+     onClose();[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <Modal[39m
+[31m+       ref={dialogContentRef}[39m
+[31m+       isOpen={isOpen}[39m
+[31m+       onClose={handleClose}[39m
+[31m+       size="lg"[39m
+[31m+       scrollbarClassName={STUDIO_DIALOG_SCROLLBAR_CLASS}[39m
+[31m+       aria-labelledby="arrangement-export-title"[39m
+[31m+     >[39m
+[31m+       <div ref={focusTrapRef} tabIndex={-1} className="focus:outline-none">[39m
+[31m+         <ModalHeader>[39m
+[31m+           <ModalTitle id="arrangement-export-title">Export</ModalTitle>[39m
+[31m+           <ModalDescription>[39m
+[31m+             {isRangeScope ? ([39m
+[31m+               <ArrangementTimeText[39m
+[31m+                 parts={studioTimeTextParts.exportRangeScope({[39m
+[31m+                   start: formatArrangementTime(rangeStart),[39m
+[31m+                   end: formatArrangementTime(rangeEnd),[39m
+[31m+                   seconds: rangeSeconds,[39m
+[31m+                 })}[39m
+[31m+               />[39m
+[31m+             ) : ([39m
+[31m+               <ArrangementTimeText[39m
+[31m+                 parts={studioTimeTextParts.exportProjectScope({[39m
+[31m+                   start: '00:00.000',[39m
+[31m+                   end: formatArrangementTime(projectEnd),[39m
+[31m+                 })}[39m
+[31m+               />[39m
+[31m+             )}[39m
+[31m+           </ModalDescription>[39m
+[31m+         </ModalHeader>[39m
+[31m+         <ModalBody className="space-y-4 pb-0">[39m
+[31m+           <fieldset className="space-y-2">[39m
+[31m+             <legend className="sr-only">{studioExportStrings.formatLegend}</legend>[39m
+[31m+             <label[39m
+[31m+               className={cn([39m
+[31m+                 'flex items-center gap-3 rounded-md border p-3 text-sm text-foreground',[39m
+[31m+                 exportFormat === 'wav' ? 'border-brand bg-brand/10' : 'border-outline',[39m
+[31m+               )}[39m
+[31m+             >[39m
+[31m+               <input[39m
+[31m+                 type="radio"[39m
+[31m+                 name="arrangement-export-format"[39m
+[31m+                 data-testid="arrangement-export-format-wav"[39m
+[31m+                 checked={exportFormat === 'wav'}[39m
+[31m+                 onChange={() => setExportFormat('wav')}[39m
+[31m+                 aria-labelledby={optionIds.wavName}[39m
+[31m+                 aria-describedby={optionIds.wavNote}[39m
+[31m+                 className={STUDIO_RADIO_CLASS}[39m
+[31m+               />[39m
+[31m+               <span>[39m
+[31m+                 <span id={optionIds.wavName}>WAV · 24-bit · 48 kHz · stereo</span>[39m
+[31m+                 <span[39m
+[31m+                   id={optionIds.wavNote}[39m
+[31m+                   className="block text-xs text-muted"[39m
+[31m+                   data-testid="arrangement-export-graph-note"[39m
+[31m+                 >[39m
+[31m+                   {isRangeScope[39m
+[31m+                     ? arrangement.loop?.enabled[39m
+[31m+                       ? studioExportStrings.wavNoteRangeLoop[39m
+[31m+                       : studioExportStrings.wavNoteRange[39m
+[31m+                     : arrangement.loop?.enabled[39m
+[31m+                       ? studioExportStrings.wavNoteProjectLoop[39m
+[31m+                       : studioExportStrings.wavNoteProject}[39m
+[31m+                 </span>[39m
+[31m+               </span>[39m
+[31m+             </label>[39m
+[31m+             <label[39m
+[31m+               className={cn([39m
+[31m+                 'flex items-center gap-3 rounded-md border p-3 text-sm text-foreground',[39m
+[31m+                 exportFormat === 'mp3' ? 'border-brand bg-brand/10' : 'border-outline',[39m
+[31m+               )}[39m
+[31m+             >[39m
+[31m+               <input[39m
+[31m+                 type="radio"[39m
+[31m+                 name="arrangement-export-format"[39m
+[31m+                 data-testid="arrangement-export-format-mp3"[39m
+[31m+                 checked={exportFormat === 'mp3'}[39m
+[31m+                 onChange={() => setExportFormat('mp3')}[39m
+[31m+                 aria-labelledby={optionIds.mp3Name}[39m
+[31m+                 aria-describedby={optionIds.mp3Note}[39m
+[31m+                 className={STUDIO_RADIO_CLASS}[39m
+[31m+               />[39m
+[31m+               <span>[39m
+[31m+                 <span id={optionIds.mp3Name}>MP3 · 48 kHz · stereo</span>[39m
+[31m+                 <span id={optionIds.mp3Note} className="block text-xs text-muted">[39m
+[31m+                   {MP3_FORMAT_NOTE}[39m
+[31m+                 </span>[39m
+[31m+               </span>[39m
+[31m+             </label>[39m
+[31m+             <label[39m
+[31m+               className={cn([39m
+[31m+                 'flex items-center gap-3 rounded-md border p-3 text-sm text-foreground',[39m
+[31m+                 exportFormat === 'both' ? 'border-brand bg-brand/10' : 'border-outline',[39m
+[31m+               )}[39m
+[31m+             >[39m
+[31m+               <input[39m
+[31m+                 type="radio"[39m
+[31m+                 name="arrangement-export-format"[39m
+[31m+                 data-testid="arrangement-export-format-both"[39m
+[31m+                 checked={exportFormat === 'both'}[39m
+[31m+                 onChange={() => setExportFormat('both')}[39m
+[31m+                 aria-labelledby={optionIds.bothName}[39m
+[31m+                 aria-describedby={optionIds.bothNote}[39m
+[31m+                 className={STUDIO_RADIO_CLASS}[39m
+[31m+               />[39m
+[31m+               <span>[39m
+[31m+                 <span id={optionIds.bothName}>{studioExportStrings.bothOptionName}</span>[39m
+[31m+                 <span id={optionIds.bothNote} className="block text-xs text-muted">[39m
+[31m+                   {BOTH_FORMAT_NOTE}[39m
+[31m+                 </span>[39m
+[31m+               </span>[39m
+[31m+             </label>[39m
+[31m+             <label className="flex items-center gap-3 rounded-md border border-outline p-3 text-sm text-dim">[39m
+[31m+               <input[39m
+[31m+                 type="radio"[39m
+[31m+                 name="arrangement-export-format"[39m
+[31m+                 disabled[39m
+[31m+                 className={STUDIO_RADIO_CLASS}[39m
+[31m+                 aria-labelledby={optionIds.videoName}[39m
+[31m+                 aria-describedby={optionIds.videoNote}[39m
+[31m+               />[39m
+[31m+               <span>[39m
+[31m+                 <span id={optionIds.videoName}>{studioExportStrings.videoOptionName}</span>[39m
+[31m+                 <span id={optionIds.videoNote} className="block text-xs">[39m
+[31m+                   {VIDEO_RENDER_REASON}[39m
+[31m+                 </span>[39m
+[31m+               </span>[39m
+[31m+             </label>[39m
+[31m+             {hasVideoFades ? ([39m
+[31m+               <p className="px-3 text-xs text-muted" data-testid="arrangement-export-video-fades">[39m
+[31m+                 {VIDEO_FADES_PREVIEW_ONLY_NOTE}[39m
+[31m+               </p>[39m
+[31m+             ) : null}[39m
+[31m+           </fieldset>[39m
+[31m+           <fieldset className="space-y-2" data-testid="arrangement-export-scope">[39m
+[31m+             <legend className="mb-2 text-sm font-medium text-foreground">[39m
+[31m+               {studioExportStrings.scopeLegend}[39m
+[31m+             </legend>[39m
+[31m+             <label[39m
+[31m+               className={cn([39m
+[31m+                 'flex items-center gap-3 rounded-md border p-3 text-sm',[39m
+[31m+                 isRangeScope[39m
+[31m+                   ? 'border-outline text-foreground'[39m
+[31m+                   : 'border-brand bg-brand/10 text-foreground',[39m
+[31m+               )}[39m
+[31m+             >[39m
+[31m+               <input[39m
+[31m+                 type="radio"[39m
+[31m+                 name="arrangement-export-scope"[39m
+[31m+                 data-testid="arrangement-export-scope-project"[39m
+[31m+                 checked={!isRangeScope}[39m
+[31m+                 disabled={isRendering}[39m
+[31m+                 onChange={() => setScopeChoice('project')}[39m
+[31m+                 className={STUDIO_RADIO_CLASS}[39m
+[31m+               />[39m
+[31m+               <span>[39m
+[31m+                 <ArrangementTimeText[39m
+[31m+                   parts={studioTimeTextParts.exportProjectScope({[39m
+[31m+                     start: '00:00.000',[39m
+[31m+                     end: formatArrangementTime(projectEnd),[39m
+[31m+                   })}[39m
+[31m+                 />[39m
+[31m+               </span>[39m
+[31m+             </label>[39m
+[31m+             <label[39m
+[31m+               className={cn([39m
+[31m+                 'flex items-center gap-3 rounded-md border p-3 text-sm',[39m
+[31m+                 isRangeScope[39m
+[31m+                   ? 'border-brand bg-brand/10 text-foreground'[39m
+[31m+                   : hasValidRange[39m
+[31m+                     ? 'border-outline text-foreground'[39m
+[31m+                     : 'border-outline text-dim',[39m
+[31m+               )}[39m
+[31m+             >[39m
+[31m+               <input[39m
+[31m+                 type="radio"[39m
+[31m+                 name="arrangement-export-scope"[39m
+[31m+                 data-testid="arrangement-export-scope-range"[39m
+[31m+                 checked={isRangeScope}[39m
+[31m+                 disabled={!hasValidRange || isRendering}[39m
+[31m+                 aria-describedby={hasValidRange ? undefined : rangeReasonId}[39m
+[31m+                 aria-labelledby={hasValidRange ? undefined : optionIds.rangeName}[39m
+[31m+                 onChange={() => setScopeChoice('range')}[39m
+[31m+                 className={STUDIO_RADIO_CLASS}[39m
+[31m+               />[39m
+[31m+               {hasValidRange ? ([39m
+[31m+                 <span>[39m
+[31m+                   <ArrangementTimeText[39m
+[31m+                     parts={studioTimeTextParts.exportRangeScope({[39m
+[31m+                       start: formatArrangementTime(rangeStart),[39m
+[31m+                       end: formatArrangementTime(rangeEnd),[39m
+[31m+                       seconds: rangeSeconds,[39m
+[31m+                     })}[39m
+[31m+                   />[39m
+[31m+                 </span>[39m
+[31m+               ) : ([39m
+[31m+                 <span>[39m
+[31m+                   <span id={optionIds.rangeName}>{studioExportStrings.rangeOptionName}</span>[39m
+[31m+                   <span[39m
+[31m+                     id={rangeReasonId}[39m
+[31m+                     className="block text-xs"[39m
+[31m+                     data-testid="arrangement-export-scope-range-reason"[39m
+[31m+                   >[39m
+[31m+                     {EXPORT_RANGE_MISSING_REASON}[39m
+[31m+                   </span>[39m
+[31m+                 </span>[39m
+[31m+               )}[39m
+[31m+             </label>[39m
+[31m+           </fieldset>[39m
+[31m+           {arrangement.loop ? ([39m
+[31m+             <p[39m
+[31m+               className="text-sm text-muted"[39m
+[31m+               role="note"[39m
+[31m+               data-testid="arrangement-export-loop-note"[39m
+[31m+             >[39m
+[31m+               {isRangeScope ? ([39m
+[31m+                 <ArrangementTimeText[39m
+[31m+                   parts={studioTimeTextParts.exportLoopRangeNote({[39m
+[31m+                     start: formatArrangementTime(rangeStart),[39m
+[31m+                     end: formatArrangementTime(rangeEnd),[39m
+[31m+                     seconds: rangeSeconds,[39m
+[31m+                   })}[39m
+[31m+                 />[39m
+[31m+               ) : ([39m
+[31m+                 <ArrangementTimeText[39m
+[31m+                   parts={studioTimeTextParts.exportLoopProjectNote({[39m
+[31m+                     start: '00:00.000',[39m
+[31m+                     end: formatArrangementTime(projectEnd),[39m
+[31m+                   })}[39m
+[31m+                 />[39m
+[31m+               )}[39m
+[31m+             </p>[39m
+[31m+           ) : null}[39m
+[31m+           {usedVideoSources.length > 0 ? ([39m
+[31m+             <ul[39m
+[31m+               className="space-y-1 text-sm text-foreground"[39m
+[31m+               data-testid="arrangement-export-video-sound"[39m
+[31m+             >[39m
+[31m+               {usedVideoSources.map((source) => ([39m
+[31m+                 <li key={source.id}>[39m
+[31m+                   {studioExportStrings.videoSoundLabel(source.name)}{' '}[39m
+[31m+                   <span className="text-muted">{videoSoundStatus(source, isVideoAudible)}</span>[39m
+[31m+                 </li>[39m
+[31m+               ))}[39m
+[31m+             </ul>[39m
+[31m+           ) : null}[39m
+[31m+           {!isEmpty && !isDecoding && !hasSoundingClip ? ([39m
+[31m+             <p className="text-sm text-muted" role="note">[39m
+[31m+               {studioExportStrings.noSoundNote([39m
+[31m+                 EXPORT_FORMAT_CREATES[exportFormat],[39m
+[31m+                 isRangeScope ? rangeSeconds : formatArrangementTime(projectEnd),[39m
+[31m+               )}[39m
+[31m+             </p>[39m
+[31m+           ) : null}[39m
+[31m+           {arrangement.master.mute ? ([39m
+[31m+             <p[39m
+[31m+               className="text-sm text-muted"[39m
+[31m+               role="note"[39m
+[31m+               data-testid="arrangement-export-master-mute"[39m
+[31m+             >[39m
+[31m+               {studioExportStrings.masterMutedNote([39m
+[31m+                 EXPORT_FORMAT_CREATES[exportFormat],[39m
+[31m+                 isRangeScope ? rangeSeconds : formatArrangementTime(projectEnd),[39m
+[31m+               )}[39m
+[31m+             </p>[39m
+[31m+           ) : null}[39m
+[31m+           {arrangement.master.gainDb !== 0 && !arrangement.master.mute ? ([39m
+[31m+             <p className="text-sm text-muted" data-testid="arrangement-export-master-gain">[39m
+[31m+               {studioExportStrings.masterGainNote(formatMasterGainDb(arrangement.master.gainDb))}[39m
+[31m+             </p>[39m
+[31m+           ) : null}[39m
+[31m+           {isEmpty ? ([39m
+[31m+             <p className="text-sm text-foreground" role="note">[39m
+[31m+               {studioExportStrings.emptyProjectNote}[39m
+[31m+             </p>[39m
+[31m+           ) : null}[39m
+[31m+           <div[39m
+[31m+             ref={footerRef}[39m
+[31m+             data-testid="arrangement-export-footer"[39m
+[31m+             className="sticky bottom-0 -mx-8 space-y-4 border-t border-outline bg-surface px-8 py-4"[39m
+[31m+           >[39m
+[31m+             {exportState.message ? ([39m
+[31m+               <p[39m
+[31m+                 role={exportState.phase === 'error' ? 'alert' : 'status'}[39m
+[31m+                 className={cn([39m
+[31m+                   'text-sm',[39m
+[31m+                   exportState.phase === 'error' && 'text-destructive',[39m
+[31m+                   exportState.phase === 'done' && 'text-positive',[39m
+[31m+                   (exportState.phase === 'rendering' || exportState.phase === 'cancelled') &&[39m
+[31m+                     'text-muted',[39m
+[31m+                 )}[39m
+[31m+               >[39m
+[31m+                 {exportState.message}[39m
+[31m+               </p>[39m
+[31m+             ) : null}[39m
+[31m+             {isRendering && progress ? ([39m
+[31m+               <>[39m
+[31m+                 <p[39m
+[31m+                   aria-hidden="true"[39m
+[31m+                   className="text-xs text-muted"[39m
+[31m+                   data-testid="arrangement-export-progress-label"[39m
+[31m+                 >[39m
+[31m+                   {progressText}[39m
+[31m+                 </p>[39m
+[31m+                 <progress[39m
+[31m+                   data-testid="arrangement-export-progress"[39m
+[31m+                   aria-label={studioExportStrings.progressAriaLabel}[39m
+[31m+                   aria-valuetext={progressText ?? undefined}[39m
+[31m+                   max={1}[39m
+[31m+                   value={progress.fraction ?? undefined}[39m
+[31m+                   className={STUDIO_PROGRESS_CLASS}[39m
+[31m+                 />[39m
+[31m+               </>[39m
+[31m+             ) : null}[39m
+[31m+             {exportState.warning ? ([39m
+[31m+               <p[39m
+[31m+                 role="alert"[39m
+[31m+                 className="text-sm text-foreground"[39m
+[31m+                 data-testid="arrangement-export-overload"[39m
+[31m+               >[39m
+[31m+                 {exportState.warning}[39m
+[31m+               </p>[39m
+[31m+             ) : null}[39m
+[31m+             <div className="flex justify-end gap-2">[39m
+[31m+               {isRendering ? ([39m
+[31m+                 <button[39m
+[31m+                   type="button"[39m
+[31m+                   data-testid="arrangement-export-cancel"[39m
+[31m+                   onClick={cancelExport}[39m
+[31m+                   onKeyDown={preventRepeatedEnterKeyDown}[39m
+[31m+                   className="rounded-md border border-transparent bg-foreground/5 px-4 py-2 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12"[39m
+[31m+                 >[39m
+[31m+                   {studioExportStrings.cancelButton}[39m
+[31m+                 </button>[39m
+[31m+               ) : null}[39m
+[31m+               <button[39m
+[31m+                 ref={closeButtonRef}[39m
+[31m+                 type="button"[39m
+[31m+                 onClick={handleClose}[39m
+[31m+                 onKeyDown={preventRepeatedEnterKeyDown}[39m
+[31m+                 disabled={isRendering}[39m
+[31m+                 className="rounded-md border border-transparent bg-foreground/5 px-4 py-2 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:opacity-40"[39m
+[31m+               >[39m
+[31m+                 {studioExportStrings.closeButton}[39m
+[31m+               </button>[39m
+[31m+               <button[39m
+[31m+                 type="button"[39m
+[31m+                 onClick={() => {[39m
+[31m+                   const renderWindow = isRangeScope[39m
+[31m+                     ? { start: rangeStart, end: rangeEnd }[39m
+[31m+                     : undefined;[39m
+[31m+                   if (exportFormat === 'wav') {[39m
+[31m+                     void (renderWindow ? exportWav(renderWindow) : exportWav());[39m
+[31m+                   } else if (exportFormat === 'mp3') {[39m
+[31m+                     void (renderWindow ? exportMp3(renderWindow) : exportMp3());[39m
+[31m+                   } else {[39m
+[31m+                     void exportMp3(renderWindow, { includeWav: true });[39m
+[31m+                   }[39m
+[31m+                 }}[39m
+[31m+                 onKeyDown={preventRepeatedEnterKeyDown}[39m
+[31m+                 disabled={isEmpty || isRendering || isDecoding}[39m
+[31m+                 aria-busy={isRendering}[39m
+[31m+                 className={cn([39m
+[31m+                   'rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-brand-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-brand-hover enabled:active:bg-brand',[39m
+[31m+                   isRendering ? 'opacity-70' : 'disabled:cursor-not-allowed disabled:opacity-40',[39m
+[31m+                 )}[39m
+[31m+               >[39m
+[31m+                 {isRendering[39m
+[31m+                   ? studioExportStrings.busyButton[39m
+[31m+                   : EXPORT_FORMAT_BUTTON_LABELS[exportFormat]}[39m
+[31m+               </button>[39m
+[31m+             </div>[39m
+[31m+           </div>[39m
+[31m+         </ModalBody>[39m
+[31m+       </div>[39m
+[31m+     </Modal>[39m
+[31m+   );[39m
+[31m+ }[39m
+[31m+[39m
+
+[36m [2m❯[22m app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:[2m644:26[22m[39m
+    [90m642| [39m      [32m'utf8'[39m[33m,[39m
+    [90m643| [39m    )[33m;[39m
+    [90m644| [39m    expect(dialogSource).toContain('isTrackAudibleWithGroups(videoTrac…
+    [90m   | [39m                         [31m^[39m
+    [90m645| [39m    [34mexpect[39m(dialogSource)[33m.[39mnot[33m.[39m[34mtoMatch[39m([36m/isTrackAudible\(/[39m)[33m;[39m
+    [90m646| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m10 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 22:23:03
+[2m   Duration [22m 13.24s[2m (transform 1.41s, setup 0ms, import 1.97s, tests 10.62s, environment 499ms)[22m
+
+
+::error file=/tmp/tmp.U6XnRpJkgs/head/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx,title=app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx > SRW-17 stage 3 group Mute / Solo / Volume in the workspace > UM8 the export dialog video-sound line uses the group-aware rule,line=644,column=26::AssertionError: expected 'import { memo, useEffect, useId, useR…' to contain 'isTrackAudibleWithGroups(videoTrack, …'%0A%0A- Expected%0A+ Received%0A%0A- isTrackAudibleWithGroups(videoTrack, arrangement)%0A+ import { memo, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';%0A+ import { Modal, ModalBody, ModalDescription, ModalHeader, ModalTitle } from '~/components/ui';%0A+ import {%0A+   formatArrangementTime,%0A+   useArrangement,%0A+   useArrangementRange,%0A+ } from '~/contexts/ArrangementContext';%0A+ import { useIsomorphicLayoutEffect } from '~/hooks/useIsomorphicLayoutEffect';%0A+ import { dialogTabStopFocusTarget, groupDialogTabStops } from '~/lib/arrangement/dialog-tab-stops';%0A+ import { formatArrangementExportProgress } from '~/lib/arrangement/export-progress';%0A+ import { formatMasterGainDb } from '~/lib/arrangement/model';%0A+ import { arrangementRangeRenderWindow } from '~/lib/arrangement/render-window';%0A+ import { isTrackAudibleWithGroups } from '~/lib/arrangement/schedule';%0A+ import { studioExportStrings, studioTimeTextParts } from '~/lib/arrangement/strings';%0A+ import { arrangementHasVideoFades } from '~/lib/arrangement/video-fades';%0A+ import { cn } from '~/lib/utils';%0A+ import type { WorkspaceVideoSource } from '~/types/arrangement';%0A+ import { ArrangementTimeText } from './ArrangementTimeText';%0A+ import { STUDIO_PROGRESS_CLASS } from './studio-progress';%0A+ import { STUDIO_RADIO_CLASS } from './studio-radio';%0A+ import { preventRepeatedEnterKeyDown } from './studio-repeat-safe';%0A+ import { STUDIO_DIALOG_SCROLLBAR_CLASS } from './studio-scrollbar';%0A+%0A+ interface ArrangementExportDialogProps {%0A+   isOpen: boolean;%0A+   onClose: () => void;%0A+ }%0A+%0A+ type ArrangementExportScope = 'project' | 'range';%0A+%0A+ type ArrangementExportFormat = 'wav' | 'mp3' | 'both';%0A+%0A+ const EXPORT_FORMAT_BUTTON_LABELS: Record<ArrangementExportFormat, string> = {%0A+   wav: studioExportStrings.formatButtonWav,%0A+   mp3: studioExportStrings.formatButtonMp3,%0A+   both: studioExportStrings.formatButtonBoth,%0A+ };%0A+%0A+ const EXPORT_FORMAT_CREATES: Record<ArrangementExportFormat, string> = {%0A+   wav: studioExportStrings.formatCreatesWav,%0A+   mp3: studioExportStrings.formatCreatesMp3,%0A+   both: studioExportStrings.formatCreatesBoth,%0A+ };%0A+%0A+ const MP3_FORMAT_NOTE = studioExportStrings.mp3FormatNote;%0A+%0A+ const BOTH_FORMAT_NOTE = studioExportStrings.bothFormatNote;%0A+%0A+ const EXPORT_RANGE_MISSING_REASON = studioExportStrings.rangeMissingReason;%0A+%0A+ const VIDEO_RENDER_REASON = studioExportStrings.videoRenderReason;%0A+%0A+ const VIDEO_FADES_PREVIEW_ONLY_NOTE = studioExportStrings.videoFadesPreviewNote;%0A+%0A+ export const ARRANGEMENT_EXPORT_FOOTER_FOCUS_MARGIN_PX = 8;%0A+%0A+ const EXPORT_DIALOG_FOCUSABLE_SELECTOR = [%0A+   'button:not([tabindex="-1"])',%0A+   'input:not([type="hidden"]):not([tabindex="-1"])',%0A+   'select:not([tabindex="-1"])',%0A+   'textarea:not([tabindex="-1"])',%0A+   'a[href]:not([tabindex="-1"])',%0A+   '[tabindex]:not([tabindex="-1"])',%0A+ ].join(', ');%0A+%0A+ function exportDialogFocusableElements(container: HTMLElement): HTMLElement[] {%0A+   return Array.from(%0A+     container.querySelectorAll<HTMLElement>(EXPORT_DIALOG_FOCUSABLE_SELECTOR),%0A+   ).filter((element) => !element.matches(':disabled') && element.closest('[hidden]') === null);%0A+ }%0A+%0A+ function videoSoundStatus(source: WorkspaceVideoSource, isAudible: boolean): string {%0A+   if (source.audio === 'decoding') {%0A+     return studioExportStrings.videoSoundDecoding;%0A+   }%0A+   if (source.audio !== 'ready') {%0A+     return source.audioNote ?? studioExportStrings.videoSoundUnreadable;%0A+   }%0A+   return isAudible ? studioExportStrings.videoSoundIncluded : studioExportStrings.videoSoundOff;%0A+ }%0A+%0A+ function ArrangementExportDialogShell({ isOpen, onClose }: ArrangementExportDialogProps) {%0A+   return isOpen ? <ArrangementExportDialogContent isOpen onClose={onClose} /> : null;%0A+ }%0A+%0A+ export const ArrangementExportDialog = memo(ArrangementExportDialogShell);%0A+%0A+ function ArrangementExportDialogContent({ isOpen, onClose }: ArrangementExportDialogProps) {%0A+   const {%0A+     arrangement,%0A+     projectEnd,%0A+     exportState,%0A+     exportProgress,%0A+     exportWav,%0A+     exportMp3,%0A+     resetExportState,%0A+     cancelExport,%0A+     sourceStates,%0A+     videoSources,%0A+   } = useArrangement();%0A+   const range = useArrangementRange((state) => (isOpen ? state.range : null));%0A+   const isEmpty = arrangement.clips.length === 0;%0A+   const isRendering = exportState.phase === 'rendering';%0A+   const progress = useSyncExternalStore(%0A+     exportProgress.subscribeProgress,%0A+     exportProgress.getProgress,%0A+     () => null,%0A+   );%0A+   const rangeWindow = arrangementRangeRenderWindow(range);%0A+   const rangeStart = rangeWindow?.start ?? 0;%0A+   const rangeEnd = rangeWindow?.end ?? 0;%0A+   const hasValidRange = rangeWindow !== null;%0A+   const rangeReasonId = useId();%0A+   const exportOptionIdBase = useId();%0A+   const optionIds = {%0A+     wavName: `${exportOptionIdBase}-wav-name`,%0A+     wavNote: `${exportOptionIdBase}-wav-note`,%0A+     mp3Name: `${exportOptionIdBase}-mp3-name`,%0A+     mp3Note: `${exportOptionIdBase}-mp3-note`,%0A+     bothName: `${exportOptionIdBase}-both-name`,%0A+     bothNote: `${exportOptionIdBase}-both-note`,%0A+     videoName: `${exportOptionIdBase}-video-name`,%0A+     videoNote: `${exportOptionIdBase}-video-note`,%0A+     rangeName: `${exportOptionIdBase}-range-name`,%0A+   };%0A+   const [scopeChoice, setScopeChoice] = useState<ArrangementExportScope | null>(null);%0A+   const [exportFormat, setExportFormat] = useState<ArrangementExportFormat>('wav');%0A+   const isRangeScope = hasValidRange && (scopeChoice ?? 'range') === 'range';%0A+   const rangeSeconds = studioExportStrings.rangeSeconds(rangeEnd - rangeStart);%0A+   const videoTrack = arrangement.tracks.find((track) => track.kind === 'video');%0A+   const isVideoAudible = videoTrack ? !videoTrack.mute && isTrackAudibleWithGroups(videoTrack, { ...arrangement, groups: [] }) : false;%0A+   const usedVideoSources = [%0A+     ...new Set(%0A+       arrangement.clips%0A+         .filter((clip) => clip.trackId === videoTrack?.id)%0A+         .map((clip) => clip.sourceId),%0A+     ),%0A+   ].flatMap((sourceId) => {%0A+     const source = videoSources.get(sourceId);%0A+     return source ? [source] : [];%0A+   });%0A+   const hasVideoFades = arrangementHasVideoFades(arrangement);%0A+   const isDecoding = usedVideoSources.some((source) => source.audio === 'decoding');%0A+   const hasSoundingClip = arrangement.clips.some(%0A+     (clip) =>%0A+       sourceStates[clip.sourceId]?.status === 'ready' ||%0A+       videoSources.get(clip.sourceId)?.audio === 'ready',%0A+   );%0A+%0A+   const dialogContentRef = useRef<HTMLDivElement>(null);%0A+   const focusTrapRef = useRef<HTMLDivElement>(null);%0A+   const closeButtonRef = useRef<HTMLButtonElement>(null);%0A+   const footerRef = useRef<HTMLDivElement>(null);%0A+%0A+   useIsomorphicLayoutEffect(() => {%0A+     if (!isOpen) {%0A+       return;%0A+     }%0A+     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;%0A+     return () => {%0A+       if (opener?.isConnected && !opener.matches(':disabled')) {%0A+         opener.focus();%0A+       }%0A+     };%0A+   }, [isOpen]);%0A+%0A+   useEffect(() => {%0A+     if (!isOpen) {%0A+       setScopeChoice(null);%0A+       setExportFormat('wav');%0A+     }%0A+   }, [isOpen]);%0A+%0A+   useEffect(() => {%0A+     const trap = focusTrapRef.current;%0A+     const content = dialogContentRef.current;%0A+     if (!isOpen || !trap || !content) {%0A+       return;%0A+     }%0A+     const active = document.activeElement;%0A+     if (active instanceof HTMLElement && exportDialogFocusableElements(content).includes(active)) {%0A+       return;%0A+     }%0A+     const close = closeButtonRef.current;%0A+     if (close && !isRendering) {%0A+       close.focus();%0A+     } else {%0A+       trap.focus();%0A+     }%0A+   }, [isOpen, isRendering]);%0A+%0A+   useEffect(() => {%0A+     const content = dialogContentRef.current;%0A+     if (!isOpen || !content) {%0A+       return;%0A+     }%0A+     const handleDialogTabKey = (event: KeyboardEvent) => {%0A+       if (event.key !== 'Tab') {%0A+         return;%0A+       }%0A+       const focusable = exportDialogFocusableElements(content);%0A+       const stops = groupDialogTabStops(focusable);%0A+       const firstStop = stops[0];%0A+       const lastStop = stops[stops.length - 1];%0A+       if (!firstStop || !lastStop) {%0A+         return;%0A+       }%0A+       const active = document.activeElement;%0A+       let target: HTMLElement | null = null;%0A+       if (!(active instanceof HTMLElement) || !focusable.includes(active)) {%0A+         target = dialogTabStopFocusTarget(event.shiftKey ? lastStop : firstStop);%0A+       } else if (event.shiftKey && firstStop.includes(active)) {%0A+         target = dialogTabStopFocusTarget(lastStop);%0A+       } else if (!event.shiftKey && lastStop.includes(active)) {%0A+         target = dialogTabStopFocusTarget(firstStop);%0A+       }%0A+       if (!target) {%0A+         return;%0A+       }%0A+       event.preventDefault();%0A+       target.focus();%0A+     };%0A+     content.addEventListener('keydown', handleDialogTabKey);%0A+     return () => content.removeEventListener('keydown', handleDialogTabKey);%0A+   }, [isOpen]);%0A+%0A+   useEffect(() => {%0A+     const content = dialogContentRef.current;%0A+     if (!isOpen || !content) {%0A+       return;%0A+     }%0A+     const handleFooterFocusOverlap = (event: FocusEvent) => {%0A+       const footer = footerRef.current;%0A+       const target = event.target;%0A+       if (%0A+         !footer ||%0A+         !(target instanceof HTMLElement) ||%0A+         footer.contains(target) ||%0A+         target.contains(footer)%0A+       ) {%0A+         return;%0A+       }%0A+       const card = target.closest('label');%0A+       const cardBottom =%0A+         card && content.contains(card)%0A+           ? card.getBoundingClientRect().bottom%0A+           : Number.NEGATIVE_INFINITY;%0A+       const coveredBottom = Math.max(target.getBoundingClientRect().bottom, cardBottom);%0A+       const overlap = coveredBottom - footer.getBoundingClientRect().top;%0A+       if (overlap > 0) {%0A+         content.scrollTop += overlap + ARRANGEMENT_EXPORT_FOOTER_FOCUS_MARGIN_PX;%0A+       }%0A+     };%0A+     content.addEventListener('focusin', handleFooterFocusOverlap);%0A+     return () => content.removeEventListener('focusin', handleFooterFocusOverlap);%0A+   }, [isOpen]);%0A+%0A+   const progressText = isRendering && progress ? formatArrangementExportProgress(progress) : null;%0A+   const handleClose = () => {%0A+     if (isRendering) {%0A+       return;%0A+     }%0A+     resetExportState();%0A+     onClose();%0A+   };%0A+%0A+   return (%0A+     <Modal%0A+       ref={dialogContentRef}%0A+       isOpen={isOpen}%0A+       onClose={handleClose}%0A+       size="lg"%0A+       scrollbarClassName={STUDIO_DIALOG_SCROLLBAR_CLASS}%0A+       aria-labelledby="arrangement-export-title"%0A+     >%0A+       <div ref={focusTrapRef} tabIndex={-1} className="focus:outline-none">%0A+         <ModalHeader>%0A+           <ModalTitle id="arrangement-export-title">Export</ModalTitle>%0A+           <ModalDescription>%0A+             {isRangeScope ? (%0A+               <ArrangementTimeText%0A+                 parts={studioTimeTextParts.exportRangeScope({%0A+                   start: formatArrangementTime(rangeStart),%0A+                   end: formatArrangementTime(rangeEnd),%0A+                   seconds: rangeSeconds,%0A+                 })}%0A+               />%0A+             ) : (%0A+               <ArrangementTimeText%0A+                 parts={studioTimeTextParts.exportProjectScope({%0A+                   start: '00:00.000',%0A+                   end: formatArrangementTime(projectEnd),%0A+                 })}%0A+               />%0A+             )}%0A+           </ModalDescription>%0A+         </ModalHeader>%0A+         <ModalBody className="space-y-4 pb-0">%0A+           <fieldset className="space-y-2">%0A+             <legend className="sr-only">{studioExportStrings.formatLegend}</legend>%0A+             <label%0A+               className={cn(%0A+                 'flex items-center gap-3 rounded-md border p-3 text-sm text-foreground',%0A+                 exportFormat === 'wav' ? 'border-brand bg-brand/10' : 'border-outline',%0A+               )}%0A+             >%0A+               <input%0A+                 type="radio"%0A+                 name="arrangement-export-format"%0A+                 data-testid="arrangement-export-format-wav"%0A+                 checked={exportFormat === 'wav'}%0A+                 onChange={() => setExportFormat('wav')}%0A+                 aria-labelledby={optionIds.wavName}%0A+                 aria-describedby={optionIds.wavNote}%0A+                 className={STUDIO_RADIO_CLASS}%0A+               />%0A+               <span>%0A+                 <span id={optionIds.wavName}>WAV · 24-bit · 48 kHz · stereo</span>%0A+                 <span%0A+                   id={optionIds.wavNote}%0A+                   className="block text-xs text-muted"%0A+                   data-testid="arrangement-export-graph-note"%0A+                 >%0A+                   {isRangeScope%0A+                     ? arrangement.loop?.enabled%0A+                       ? studioExportStrings.wavNoteRangeLoop%0A+                       : studioExportStrings.wavNoteRange%0A+                     : arrangement.loop?.enabled%0A+                       ? studioExportStrings.wavNoteProjectLoop%0A+                       : studioExportStrings.wavNoteProject}%0A+                 </span>%0A+               </span>%0A+             </label>%0A+             <label%0A+               className={cn(%0A+                 'flex items-center gap-3 rounded-md border p-3 text-sm text-foreground',%0A+                 exportFormat === 'mp3' ? 'border-brand bg-brand/10' : 'border-outline',%0A+               )}%0A+             >%0A+               <input%0A+                 type="radio"%0A+                 name="arrangement-export-format"%0A+                 data-testid="arrangement-export-format-mp3"%0A+                 checked={exportFormat === 'mp3'}%0A+                 onChange={() => setExportFormat('mp3')}%0A+                 aria-labelledby={optionIds.mp3Name}%0A+                 aria-describedby={optionIds.mp3Note}%0A+                 className={STUDIO_RADIO_CLASS}%0A+               />%0A+               <span>%0A+                 <span id={optionIds.mp3Name}>MP3 · 48 kHz · stereo</span>%0A+                 <span id={optionIds.mp3Note} className="block text-xs text-muted">%0A+                   {MP3_FORMAT_NOTE}%0A+                 </span>%0A+               </span>%0A+             </label>%0A+             <label%0A+               className={cn(%0A+                 'flex items-center gap-3 rounded-md border p-3 text-sm text-foreground',%0A+                 exportFormat === 'both' ? 'border-brand bg-brand/10' : 'border-outline',%0A+               )}%0A+             >%0A+               <input%0A+                 type="radio"%0A+                 name="arrangement-export-format"%0A+                 data-testid="arrangement-export-format-both"%0A+                 checked={exportFormat === 'both'}%0A+                 onChange={() => setExportFormat('both')}%0A+                 aria-labelledby={optionIds.bothName}%0A+                 aria-describedby={optionIds.bothNote}%0A+                 className={STUDIO_RADIO_CLASS}%0A+               />%0A+               <span>%0A+                 <span id={optionIds.bothName}>{studioExportStrings.bothOptionName}</span>%0A+                 <span id={optionIds.bothNote} className="block text-xs text-muted">%0A+                   {BOTH_FORMAT_NOTE}%0A+                 </span>%0A+               </span>%0A+             </label>%0A+             <label className="flex items-center gap-3 rounded-md border border-outline p-3 text-sm text-dim">%0A+               <input%0A+                 type="radio"%0A+                 name="arrangement-export-format"%0A+                 disabled%0A+                 className={STUDIO_RADIO_CLASS}%0A+                 aria-labelledby={optionIds.videoName}%0A+                 aria-describedby={optionIds.videoNote}%0A+               />%0A+               <span>%0A+                 <span id={optionIds.videoName}>{studioExportStrings.videoOptionName}</span>%0A+                 <span id={optionIds.videoNote} className="block text-xs">%0A+                   {VIDEO_RENDER_REASON}%0A+                 </span>%0A+               </span>%0A+             </label>%0A+             {hasVideoFades ? (%0A+               <p className="px-3 text-xs text-muted" data-testid="arrangement-export-video-fades">%0A+                 {VIDEO_FADES_PREVIEW_ONLY_NOTE}%0A+               </p>%0A+             ) : null}%0A+           </fieldset>%0A+           <fieldset className="space-y-2" data-testid="arrangement-export-scope">%0A+             <legend className="mb-2 text-sm font-medium text-foreground">%0A+               {studioExportStrings.scopeLegend}%0A+             </legend>%0A+             <label%0A+               className={cn(%0A+                 'flex items-center gap-3 rounded-md border p-3 text-sm',%0A+                 isRangeScope%0A+                   ? 'border-outline text-foreground'%0A+                   : 'border-brand bg-brand/10 text-foreground',%0A+               )}%0A+             >%0A+               <input%0A+                 type="radio"%0A+                 name="arrangement-export-scope"%0A+                 data-testid="arrangement-export-scope-project"%0A+                 checked={!isRangeScope}%0A+                 disabled={isRendering}%0A+                 onChange={() => setScopeChoice('project')}%0A+                 className={STUDIO_RADIO_CLASS}%0A+               />%0A+               <span>%0A+                 <ArrangementTimeText%0A+                   parts={studioTimeTextParts.exportProjectScope({%0A+                     start: '00:00.000',%0A+                     end: formatArrangementTime(projectEnd),%0A+                   })}%0A+                 />%0A+               </span>%0A+             </label>%0A+             <label%0A+               className={cn(%0A+                 'flex items-center gap-3 rounded-md border p-3 text-sm',%0A+                 isRangeScope%0A+                   ? 'border-brand bg-brand/10 text-foreground'%0A+                   : hasValidRange%0A+                     ? 'border-outline text-foreground'%0A+                     : 'border-outline text-dim',%0A+               )}%0A+             >%0A+               <input%0A+                 type="radio"%0A+                 name="arrangement-export-scope"%0A+                 data-testid="arrangement-export-scope-range"%0A+                 checked={isRangeScope}%0A+                 disabled={!hasValidRange || isRendering}%0A+                 aria-describedby={hasValidRange ? undefined : rangeReasonId}%0A+                 aria-labelledby={hasValidRange ? undefined : optionIds.rangeName}%0A+                 onChange={() => setScopeChoice('range')}%0A+                 className={STUDIO_RADIO_CLASS}%0A+               />%0A+               {hasValidRange ? (%0A+                 <span>%0A+                   <ArrangementTimeText%0A+                     parts={studioTimeTextParts.exportRangeScope({%0A+                       start: formatArrangementTime(rangeStart),%0A+                       end: formatArrangementTime(rangeEnd),%0A+                       seconds: rangeSeconds,%0A+                     })}%0A+                   />%0A+                 </span>%0A+               ) : (%0A+                 <span>%0A+                   <span id={optionIds.rangeName}>{studioExportStrings.rangeOptionName}</span>%0A+                   <span%0A+                     id={rangeReasonId}%0A+                     className="block text-xs"%0A+                     data-testid="arrangement-export-scope-range-reason"%0A+                   >%0A+                     {EXPORT_RANGE_MISSING_REASON}%0A+                   </span>%0A+                 </span>%0A+               )}%0A+             </label>%0A+           </fieldset>%0A+           {arrangement.loop ? (%0A+             <p%0A+               className="text-sm text-muted"%0A+               role="note"%0A+               data-testid="arrangement-export-loop-note"%0A+             >%0A+               {isRangeScope ? (%0A+                 <ArrangementTimeText%0A+                   parts={studioTimeTextParts.exportLoopRangeNote({%0A+                     start: formatArrangementTime(rangeStart),%0A+                     end: formatArrangementTime(rangeEnd),%0A+                     seconds: rangeSeconds,%0A+                   })}%0A+                 />%0A+               ) : (%0A+                 <ArrangementTimeText%0A+                   parts={studioTimeTextParts.exportLoopProjectNote({%0A+                     start: '00:00.000',%0A+                     end: formatArrangementTime(projectEnd),%0A+                   })}%0A+                 />%0A+               )}%0A+             </p>%0A+           ) : null}%0A+           {usedVideoSources.length > 0 ? (%0A+             <ul%0A+               className="space-y-1 text-sm text-foreground"%0A+               data-testid="arrangement-export-video-sound"%0A+             >%0A+               {usedVideoSources.map((source) => (%0A+                 <li key={source.id}>%0A+                   {studioExportStrings.videoSoundLabel(source.name)}{' '}%0A+                   <span className="text-muted">{videoSoundStatus(source, isVideoAudible)}</span>%0A+                 </li>%0A+               ))}%0A+             </ul>%0A+           ) : null}%0A+           {!isEmpty && !isDecoding && !hasSoundingClip ? (%0A+             <p className="text-sm text-muted" role="note">%0A+               {studioExportStrings.noSoundNote(%0A+                 EXPORT_FORMAT_CREATES[exportFormat],%0A+                 isRangeScope ? rangeSeconds : formatArrangementTime(projectEnd),%0A+               )}%0A+             </p>%0A+           ) : null}%0A+           {arrangement.master.mute ? (%0A+             <p%0A+               className="text-sm text-muted"%0A+               role="note"%0A+               data-testid="arrangement-export-master-mute"%0A+             >%0A+               {studioExportStrings.masterMutedNote(%0A+                 EXPORT_FORMAT_CREATES[exportFormat],%0A+                 isRangeScope ? rangeSeconds : formatArrangementTime(projectEnd),%0A+               )}%0A+             </p>%0A+           ) : null}%0A+           {arrangement.master.gainDb !== 0 && !arrangement.master.mute ? (%0A+             <p className="text-sm text-muted" data-testid="arrangement-export-master-gain">%0A+               {studioExportStrings.masterGainNote(formatMasterGainDb(arrangement.master.gainDb))}%0A+             </p>%0A+           ) : null}%0A+           {isEmpty ? (%0A+             <p className="text-sm text-foreground" role="note">%0A+               {studioExportStrings.emptyProjectNote}%0A+             </p>%0A+           ) : null}%0A+           <div%0A+             ref={footerRef}%0A+             data-testid="arrangement-export-footer"%0A+             className="sticky bottom-0 -mx-8 space-y-4 border-t border-outline bg-surface px-8 py-4"%0A+           >%0A+             {exportState.message ? (%0A+               <p%0A+                 role={exportState.phase === 'error' ? 'alert' : 'status'}%0A+                 className={cn(%0A+                   'text-sm',%0A+                   exportState.phase === 'error' && 'text-destructive',%0A+                   exportState.phase === 'done' && 'text-positive',%0A+                   (exportState.phase === 'rendering' || exportState.phase === 'cancelled') &&%0A+                     'text-muted',%0A+                 )}%0A+               >%0A+                 {exportState.message}%0A+               </p>%0A+             ) : null}%0A+             {isRendering && progress ? (%0A+               <>%0A+                 <p%0A+                   aria-hidden="true"%0A+                   className="text-xs text-muted"%0A+                   data-testid="arrangement-export-progress-label"%0A+                 >%0A+                   {progressText}%0A+                 </p>%0A+                 <progress%0A+                   data-testid="arrangement-export-progress"%0A+                   aria-label={studioExportStrings.progressAriaLabel}%0A+                   aria-valuetext={progressText ?? undefined}%0A+                   max={1}%0A+                   value={progress.fraction ?? undefined}%0A+                   className={STUDIO_PROGRESS_CLASS}%0A+                 />%0A+               </>%0A+             ) : null}%0A+             {exportState.warning ? (%0A+               <p%0A+                 role="alert"%0A+                 className="text-sm text-foreground"%0A+                 data-testid="arrangement-export-overload"%0A+               >%0A+                 {exportState.warning}%0A+               </p>%0A+             ) : null}%0A+             <div className="flex justify-end gap-2">%0A+               {isRendering ? (%0A+                 <button%0A+                   type="button"%0A+                   data-testid="arrangement-export-cancel"%0A+                   onClick={cancelExport}%0A+                   onKeyDown={preventRepeatedEnterKeyDown}%0A+                   className="rounded-md border border-transparent bg-foreground/5 px-4 py-2 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12"%0A+                 >%0A+                   {studioExportStrings.cancelButton}%0A+                 </button>%0A+               ) : null}%0A+               <button%0A+                 ref={closeButtonRef}%0A+                 type="button"%0A+                 onClick={handleClose}%0A+                 onKeyDown={preventRepeatedEnterKeyDown}%0A+                 disabled={isRendering}%0A+                 className="rounded-md border border-transparent bg-foreground/5 px-4 py-2 text-sm text-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-foreground/8 enabled:active:bg-foreground/12 disabled:opacity-40"%0A+               >%0A+                 {studioExportStrings.closeButton}%0A+               </button>%0A+               <button%0A+                 type="button"%0A+                 onClick={() => {%0A+                   const renderWindow = isRangeScope%0A+                     ? { start: rangeStart, end: rangeEnd }%0A+                     : undefined;%0A+                   if (exportFormat === 'wav') {%0A+                     void (renderWindow ? exportWav(renderWindow) : exportWav());%0A+                   } else if (exportFormat === 'mp3') {%0A+                     void (renderWindow ? exportMp3(renderWindow) : exportMp3());%0A+                   } else {%0A+                     void exportMp3(renderWindow, { includeWav: true });%0A+                   }%0A+                 }}%0A+                 onKeyDown={preventRepeatedEnterKeyDown}%0A+                 disabled={isEmpty || isRendering || isDecoding}%0A+                 aria-busy={isRendering}%0A+                 className={cn(%0A+                   'rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-brand-foreground motion-safe:transition-[background-color,color]! motion-safe:duration-180! motion-safe:ease-[cubic-bezier(0.2,0.8,0.2,1)]! motion-reduce:transition-none! enabled:hover:bg-brand-hover enabled:active:bg-brand',%0A+                   isRendering ? 'opacity-70' : 'disabled:cursor-not-allowed disabled:opacity-40',%0A+                 )}%0A+               >%0A+                 {isRendering%0A+                   ? studioExportStrings.busyButton%0A+                   : EXPORT_FORMAT_BUTTON_LABELS[exportFormat]}%0A+               </button>%0A+             </div>%0A+           </div>%0A+         </ModalBody>%0A+       </div>%0A+     </Modal>%0A+   );%0A+ }%0A+%0A%0A ❯ app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx:644:26%0A%0A

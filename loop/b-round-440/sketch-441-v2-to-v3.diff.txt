@@ -1,0 +1,100 @@
+38c38
+< index af5134a..9e9e0f9 100644
+---
+> index af5134a..6e2f6c8 100644
+41c41
+< @@ -298,12 +298,20 @@ describe('DUX-R-5a content colour (D-29z139, R30-R33, K1-K6)', () => {
+---
+> @@ -298,14 +298,24 @@ describe('DUX-R-5a content colour (D-29z139, R30-R33, K1-K6)', () => {
+64a65,66
+> +    expect(rows.map((row) => row.children.length)).toStrictEqual([1, 1, 1, 1]);
+> +    expect(lanes.children).toHaveLength(4);
+65a68,69
+>      barTokens.forEach((bars, index) => {
+>        expect(bars[0]).toContain(expected[index]);
+100c104
+< index 271c326..f8a038a 100644
+---
+> index 271c326..2fde714 100644
+103c107
+< @@ -508,10 +508,13 @@ describe('10 px panel radius in the rendered workspace (V-3c-5a, D-29z137)', ()
+---
+> @@ -508,22 +508,33 @@ describe('10 px panel radius in the rendered workspace (V-3c-5a, D-29z137)', ()
+107,110c111
+< +      const outlines = view.getAllByTestId('arrangement-overview-outline');
+< +      expect(outlines).toHaveLength(1);
+< +      expect(outlines[0]?.parentElement).toBe(overview);
+<        expectPanelTokens(
+---
+> -      expectPanelTokens(
+114,118c115,127
+< +        outlines[0],
+< +        ['pointer-events-none', 'absolute', 'inset-0', 'rounded-panel', 'border', 'border-outline'],
+< +        ['rounded-sm', 'rounded-xs'],
+<          'overview overlay',
+<        );
+---
+> -        'overview overlay',
+> -      );
+> +      const outlines = view.getAllByTestId('arrangement-overview-outline');
+> +      expect(outlines).toHaveLength(1);
+> +      expect(outlines[0]?.parentElement).toBe(overview);
+> +      expect([...(outlines[0]?.classList ?? [])].sort()).toStrictEqual([
+> +        'absolute',
+> +        'border',
+> +        'border-outline',
+> +        'inset-0',
+> +        'pointer-events-none',
+> +        'rounded-panel',
+> +      ]);
+120c129,130
+< @@ -520,10 +523,13 @@ describe('10 px panel radius in the rendered workspace (V-3c-5a, D-29z137)', ()
+---
+>          view.getByTestId('arrangement-overview-frame'),
+>          ['rounded-panel', 'border-foreground/70', 'bg-foreground/5'],
+133a144,146
+> +      const laneRows = Array.from(lanes.children);
+> +      expect(laneRows.map((row) => row.hasAttribute('data-overview-lane'))).not.toContain(false);
+> +      expect(laneRows.reduce((sum, row) => sum + row.children.length, 0)).toBe(bars.length);
+138c151
+< index c204fe2..6b13095 100644
+---
+> index c204fe2..e8b7f1f 100644
+140a154,162
+> @@ -219,7 +219,7 @@ describe('Studio Obsidian & Brass scoped tokens (V-1a)', () => {
+>      expect(playheadTokens).toContain('ring-background');
+>    });
+>  
+> -  it('OV1: the Overview root, outline overlay and view frame share the rounded-panel radius (SABA-B-2)', () => {
+> +  it('OV1: the Overview root and view frame share the rounded-panel radius; the empty SSR Overview has no outline overlay (SABA-B-2)', () => {
+>      const html = renderToString(<StudioLabRoute />);
+>      const rootTokens = classTokensByTestId(html, 'arrangement-overview');
+>      const frameTokens = classTokensByTestId(html, 'arrangement-overview-frame');
+162c184
+< index 8e454ce..78e1321 100644
+---
+> index 8e454ce..3cfc89d 100644
+192c214,223
+< @@ -637,12 +644,47 @@ describe('SRW-17 stage 3 group Mute / Solo / Volume in the workspace', { timeout
+---
+> @@ -620,7 +627,7 @@ describe('SRW-17 stage 3 group Mute / Solo / Volume in the workspace', { timeout
+>      act(() => live(api).togglePlayback());
+>    });
+>  
+> -  it('UM8 the export dialog video-sound line uses the group-aware rule', async () => {
+> +  it('UM8 the group-aware audible rule silences the ungrouped video under a group solo and a track solo', async () => {
+>      const { api, view } = await mountMixWorkspace();
+>      groupRows(view, 'სტემები', 'SFX');
+>      const video = () =>
+> @@ -637,12 +644,52 @@ describe('SRW-17 stage 3 group Mute / Solo / Volume in the workspace', { timeout
+205,206c236,242
+< +    probeVideoMock.mockResolvedValue({ url: 'blob:film', duration: 1.5, width: 640, height: 360 });
+< +    decodeVideoMock.mockResolvedValue({
+---
+> +    probeVideoMock.mockResolvedValueOnce({
+> +      url: 'blob:film',
+> +      duration: 1.5,
+> +      width: 640,
+> +      height: 360,
+> +    });
+> +    decodeVideoMock.mockResolvedValueOnce({

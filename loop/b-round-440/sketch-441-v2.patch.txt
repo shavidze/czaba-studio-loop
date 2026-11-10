@@ -1,0 +1,245 @@
+diff --git a/app/components/arrangement/ArrangementOverview.tsx b/app/components/arrangement/ArrangementOverview.tsx
+index 4144897..61a695c 100644
+--- a/app/components/arrangement/ArrangementOverview.tsx
++++ b/app/components/arrangement/ArrangementOverview.tsx
+@@ -308,21 +308,28 @@ function ArrangementOverviewInner({
+       data-overview-state={hasClips ? 'full' : 'empty'}
+     >
+       {hasClips ? (
+-        <div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />
++        <div
++          className="pointer-events-none absolute inset-0 rounded-panel border border-outline"
++          data-testid="arrangement-overview-outline"
++        />
+       ) : (
+         <div
+           className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-outline"
+           data-testid="arrangement-overview-baseline"
+         />
+       )}
+-      <div className="pointer-events-none absolute inset-x-0 inset-y-1 flex flex-col gap-0.5">
++      <div
++        className="pointer-events-none absolute inset-x-0 inset-y-1 flex flex-col gap-0.5"
++        data-testid="arrangement-overview-lanes"
++      >
+         {arrangement.tracks.map((track) => (
+-          <div key={track.id} className="relative min-h-0 flex-1">
++          <div key={track.id} className="relative min-h-0 flex-1" data-overview-lane={track.id}>
+             {arrangement.clips
+               .filter((clip) => clip.trackId === track.id)
+               .map((clip) => (
+                 <div
+                   key={clip.id}
++                  data-overview-bar={clip.id}
+                   className={cn(
+                     'absolute inset-y-0 rounded-xs',
+                     overviewBarClass(arrangement, track.id),
+diff --git a/app/lib/arrangement/__tests__/content-colour-ui.test.tsx b/app/lib/arrangement/__tests__/content-colour-ui.test.tsx
+index af5134a..9e9e0f9 100644
+--- a/app/lib/arrangement/__tests__/content-colour-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/content-colour-ui.test.tsx
+@@ -298,12 +298,20 @@ describe('DUX-R-5a content colour (D-29z139, R30-R33, K1-K6)', () => {
+   });
+ 
+   it('DXC4: Overview bars use the neutral ladder and the playhead keeps bg-accent (R33, K2)', async () => {
+-    const { view } = await mountContentWorkspace();
+-    const overview = view.container.querySelector('[data-timeline-overview]');
+-    const rows = Array.from(overview?.children[1]?.children ?? []);
++    const { api, view } = await mountContentWorkspace();
++    const overview = view.getByTestId('arrangement-overview');
++    const lanes = view.getByTestId('arrangement-overview-lanes');
++    expect(lanes.parentElement).toBe(overview);
++    const rows = Array.from(overview.querySelectorAll('[data-overview-lane]'));
+     expect(rows).toHaveLength(4);
++    expect(rows.map((row) => row.parentElement)).toStrictEqual([lanes, lanes, lanes, lanes]);
++    expect(rows.map((row) => row.getAttribute('data-overview-lane'))).toStrictEqual(
++      live(api).arrangement.tracks.map((track) => track.id),
++    );
+     const barTokens = rows.map((row) =>
+-      Array.from(row.querySelectorAll(':scope > div')).map((bar) => tokensOf(bar, 'overview bar')),
++      Array.from(row.querySelectorAll('[data-overview-bar]')).map((bar) =>
++        tokensOf(bar, 'overview bar'),
++      ),
+     );
+     expect(barTokens.map((bars) => bars.length)).toStrictEqual([1, 1, 1, 1]);
+     const expected = ['bg-foreground/25', 'bg-foreground/80', 'bg-muted/60', 'bg-dim'];
+diff --git a/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx b/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
+index 8f4e1e0..eebc063 100644
+--- a/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/overview-visibility-ui.test.tsx
+@@ -186,16 +186,26 @@ describe('CALM-3 Overview empty state and Ctrl+Alt+O (SABA-B-8)', () => {
+     expect(root?.getAttribute('data-overview-state')).toBe('empty');
+     const baseline = view.getByTestId('arrangement-overview-baseline');
+     expect(root?.children[0]).toBe(baseline);
+-    expect(root?.children[1]?.getAttribute('data-testid')).toBeNull();
+-    expect(root?.children[1]?.children).toHaveLength(2);
++    const lanes = view.getByTestId('arrangement-overview-lanes');
++    expect(lanes.parentElement).toBe(root);
++    expect(lanes.previousElementSibling).toBe(baseline);
++    expect(lanes.children).toHaveLength(2);
++    expect(lanes.querySelectorAll('[data-overview-lane]')).toHaveLength(2);
++    expect(lanes.querySelectorAll('[data-overview-bar]')).toHaveLength(0);
++    expect(view.queryByTestId('arrangement-overview-outline')).toBeNull();
+     act(() => live(api).addSourceToActiveTrack('song'));
+     expect(live(api).arrangement.clips).toHaveLength(1);
+     expect(overview()?.getAttribute('data-overview-state')).toBe('full');
+     expect(view.queryByTestId('arrangement-overview-baseline')).toBeNull();
++    expect(view.getAllByTestId('arrangement-overview-outline')).toHaveLength(1);
++    expect(
++      view.getByTestId('arrangement-overview-lanes').querySelectorAll('[data-overview-bar]'),
++    ).toHaveLength(1);
+     act(() => live(api).undo());
+     expect(live(api).arrangement.clips).toHaveLength(0);
+     expect(overview()?.getAttribute('data-overview-state')).toBe('empty');
+     expect(view.queryByTestId('arrangement-overview-baseline')).not.toBeNull();
++    expect(view.queryByTestId('arrangement-overview-outline')).toBeNull();
+   });
+ 
+   it('OV-E2: the empty Overview keeps its slider values and ← / → navigation', async () => {
+diff --git a/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx b/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
+index 271c326..f8a038a 100644
+--- a/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/panel-radius-ui.test.tsx
+@@ -508,10 +508,13 @@ describe('10 px panel radius in the rendered workspace (V-3c-5a, D-29z137)', ()
+         ['rounded-sm'],
+         'overview root',
+       );
++      const outlines = view.getAllByTestId('arrangement-overview-outline');
++      expect(outlines).toHaveLength(1);
++      expect(outlines[0]?.parentElement).toBe(overview);
+       expectPanelTokens(
+-        overview.firstElementChild,
+-        ['rounded-panel', 'border', 'border-outline'],
+-        ['rounded-sm'],
++        outlines[0],
++        ['pointer-events-none', 'absolute', 'inset-0', 'rounded-panel', 'border', 'border-outline'],
++        ['rounded-sm', 'rounded-xs'],
+         'overview overlay',
+       );
+       expectPanelTokens(
+@@ -520,10 +523,13 @@ describe('10 px panel radius in the rendered workspace (V-3c-5a, D-29z137)', ()
+         ['rounded-sm'],
+         'overview frame',
+       );
+-      const bars = Array.from(
+-        overview.children[1]?.querySelectorAll<HTMLElement>(':scope > div > div') ?? [],
+-      );
++      const lanes = view.getByTestId('arrangement-overview-lanes');
++      expect(lanes.parentElement).toBe(overview);
++      const bars = Array.from(overview.querySelectorAll<HTMLElement>('[data-overview-bar]'));
+       expect(bars.length).toBe(2);
++      for (const bar of bars) {
++        expect(lanes.contains(bar)).toBe(true);
++      }
+       for (const bar of bars) {
+         expectPanelTokens(bar, ['rounded-xs'], ['rounded-panel'], 'overview clip bar');
+       }
+diff --git a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx b/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+index c204fe2..6b13095 100644
+--- a/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
++++ b/app/lib/arrangement/__tests__/studio-theme-obsidian.test.tsx
+@@ -228,16 +228,9 @@ describe('Studio Obsidian & Brass scoped tokens (V-1a)', () => {
+     expect(frameTokens).toContain('rounded-panel');
+     expect(frameTokens).not.toContain('rounded-sm');
+     expect(frameTokens).not.toContain('rounded-xs');
+-    const overviewSource = readFileSync(
+-      resolve(ARRANGEMENT_COMPONENTS_ROOT, 'ArrangementOverview.tsx'),
+-      'utf8',
+-    );
+-    expect(
+-      countOccurrences(
+-        overviewSource,
+-        '<div className="pointer-events-none absolute inset-0 rounded-panel border border-outline" />',
+-      ),
+-    ).toBe(1);
++    expect(html).toContain('data-overview-state="empty"');
++    expect(countOccurrences(html, 'data-testid="arrangement-overview-baseline"')).toBe(1);
++    expect(countOccurrences(html, 'data-testid="arrangement-overview-outline"')).toBe(0);
+   });
+ 
+   it('TH6: the enabled Loop brace uses the neutral bg-foreground/20 fill', () => {
+diff --git a/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx b/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
+index 8e454ce..78e1321 100644
+--- a/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/track-group-mix-ui.test.tsx
+@@ -1,10 +1,9 @@
+-import { readFileSync } from 'node:fs';
+-import { resolve } from 'node:path';
+ import { act, fireEvent, render } from '@testing-library/react';
+ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import { ArrangementProvider, GESTURE_EDIT_BLOCKED_MESSAGE } from '~/contexts/ArrangementContext';
++import { decodeVideoAudio, probeVideoFile } from '~/lib/arrangement/video.client';
+ import type {
+   Arrangement,
+   ArrangementClip,
+@@ -25,6 +24,14 @@ vi.mock('@remix-run/react', () => ({
+   ),
+ }));
+ 
++vi.mock('~/lib/arrangement/video.client', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('~/lib/arrangement/video.client')>();
++  return { ...actual, probeVideoFile: vi.fn(), decodeVideoAudio: vi.fn() };
++});
++
++const probeVideoMock = vi.mocked(probeVideoFile);
++const decodeVideoMock = vi.mocked(decodeVideoAudio);
++
+ const fakeClock = { base: 0 };
+ 
+ class FakeParam {
+@@ -637,12 +644,47 @@ describe('SRW-17 stage 3 group Mute / Solo / Volume in the workspace', { timeout
+     const trackSolo = toggleSolo(labArrangement(), 'music', false);
+     const soloVideo = trackSolo.tracks.find((track) => track.id === 'video');
+     expect(soloVideo && isTrackAudibleWithGroups(soloVideo, trackSolo)).toBe(false);
+-    const dialogSource = readFileSync(
+-      resolve(__dirname, '../../../components/arrangement/ArrangementExportDialog.tsx'),
+-      'utf8',
+-    );
+-    expect(dialogSource).toContain('isTrackAudibleWithGroups(videoTrack, arrangement)');
+-    expect(dialogSource).not.toMatch(/isTrackAudible\(/);
++  });
++
++  it('UM8b the rendered export dialog marks the video sound Off under a group solo and Included without it', async () => {
++    probeVideoMock.mockResolvedValue({ url: 'blob:film', duration: 1.5, width: 640, height: 360 });
++    decodeVideoMock.mockResolvedValue({
++      buffer: new AudioBuffer({ length: 4800, numberOfChannels: 2, sampleRate: 48000 }),
++      reason: null,
++    });
++    const { api, view } = await mountMixWorkspace();
++    await act(async () => {
++      live(api).importVideoFiles([new File(['x'], 'film.mp4', { type: 'video/mp4' })]);
++    });
++    for (let tick = 0; tick < 20; tick++) {
++      if ([...live(api).videoSources.values()].some((source) => source.audio === 'ready')) {
++        break;
++      }
++      await act(async () => {
++        await new Promise((resolve) => setTimeout(resolve, 0));
++      });
++    }
++    const sources = [...live(api).videoSources.values()];
++    expect(sources.map((source) => source.audio)).toStrictEqual(['ready']);
++    const videoClips = live(api)
++      .getArrangement()
++      .clips.filter((clip) => clip.trackId === 'video');
++    expect(videoClips.map((clip) => clip.sourceId)).toStrictEqual([sources[0]?.id]);
++    const videoSoundLine = () => {
++      fireEvent.click(view.getByRole('button', { name: 'Export' }));
++      const lines = view.getAllByTestId('arrangement-export-video-sound');
++      expect(lines).toHaveLength(1);
++      const text = lines[0]?.textContent ?? '';
++      fireEvent.click(view.getByRole('button', { name: 'Done' }));
++      expect(view.queryAllByTestId('arrangement-export-video-sound')).toHaveLength(0);
++      return text;
++    };
++    groupRows(view, 'სტემები', 'SFX');
++    expect(videoSoundLine()).toBe('Original video sound (film.mp4): Included');
++    fireEvent.click(groupControl(view, 'Group 1', 'arrangement-group-solo'));
++    expect(videoSoundLine()).toBe('Original video sound (film.mp4): Off (M/Solo)');
++    fireEvent.click(groupControl(view, 'Group 1', 'arrangement-group-solo'));
++    expect(videoSoundLine()).toBe('Original video sound (film.mp4): Included');
+   });
+ 
+   it('UM9 X1: collapsing blurs a hidden focused fader, commits a pending preview and focuses the group', async () => {
