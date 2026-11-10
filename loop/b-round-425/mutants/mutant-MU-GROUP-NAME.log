@@ -1,0 +1,73 @@
+
+ RUN  v4.0.16 /tmp/b425-mut
+
+ ❯ app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx (17 tests | 2 failed) 4188ms
+     ✓ HM1 held Enter on a track Mute mutes once  620ms
+     ✓ HM2 held Enter on a track Solo solos once 295ms
+     ✓ HM3 held Enter on a track fold folds once  341ms
+     ✓ HM4 held Ctrl+Enter on a track name toggles the selection once  349ms
+     ✓ HM5 Enter on Pan reset centres once and moves focus to the Pan slider; repeats on the slider change nothing and repeats that still reach the reset are prevented  310ms
+     ✓ HM6 held Enter on the video import button opens the file chooser once 212ms
+     ✓ HM6b held Enter on the compact video import button of a folded video track opens the file chooser once 214ms
+     ✓ HM7 held Enter on a group fold collapses it once 278ms
+     ✓ HM8 held Enter on a group Mute mutes once 199ms
+     ✓ HM9 held Enter on a group Solo solos once 186ms
+     × HM10 held Ctrl+Enter on a group name toggles the selection once 255ms
+     × HM11 the group name editor ignores a repeated Enter, commits on a fresh Enter, and returns focus to the name button 190ms
+     ✓ HM11b the group name editor ignores a repeated Escape and cancels on a fresh Escape (defensive guard) 57ms
+     ✓ HM12 held Enter on Master Mute mutes once 293ms
+     ✓ HM13 held Enter on the master peak readout resets once (idempotent, so the prevented repeat is the observable) 185ms
+     ✓ HM14 held Enter on the metronome with a tempo switches it on once 197ms
+     ✓ HM15 the shared guard prevents only a repeated Enter and the soft-disabled spread cannot carry onKeyDown 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx > SYS-2 stage 2a: a held Enter acts once on the lane, group, master and tempo-row buttons (D-29z1489) > HM10 held Ctrl+Enter on a group name toggles the selection once
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ holdEnter app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx:171:53
+    169|   const heldTarget = document.activeElement ?? button;
+    170|   for (let held = 0; held < 3; held++) {
+    171|     expect(pressEnter(heldTarget, true, modifiers)).toBe(false);
+       |                                                     ^
+    172|   }
+    173|   expect(snapshot()).toEqual(afterFirst);
+ ❯ app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx:308:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx > SYS-2 stage 2a: a held Enter acts once on the lane, group, master and tempo-row buttons (D-29z1489) > HM11 the group name editor ignores a repeated Enter, commits on a fresh Enter, and returns focus to the name button
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx:333:46
+    331|       expect(document.activeElement).toBe(nameButton);
+    332|       for (let held = 0; held < 3; held++) {
+    333|         expect(pressEnter(nameButton, true)).toBe(false);
+       |                                              ^
+    334|       }
+    335|       expect(mounted.snapshot()).toEqual(after);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 15 passed (17)
+   Start at  06:56:55
+   Duration  6.57s (transform 1.23s, setup 0ms, import 1.74s, tests 4.19s, environment 484ms)
+
+
+::error file=/tmp/b425-mut/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx,title=app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx > SYS-2 stage 2a%3A a held Enter acts once on the lane%2C group%2C master and tempo-row buttons (D-29z1489) > HM10 held Ctrl+Enter on a group name toggles the selection once,line=171,column=53::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ holdEnter app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx:171:53%0A ❯ app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx:308:21%0A%0A
+
+::error file=/tmp/b425-mut/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx,title=app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx > SYS-2 stage 2a%3A a held Enter acts once on the lane%2C group%2C master and tempo-row buttons (D-29z1489) > HM11 the group name editor ignores a repeated Enter%2C commits on a fresh Enter%2C and returns focus to the name button,line=333,column=46::AssertionError: expected true to be false // Object.is equality%0A%0A- Expected%0A+ Received%0A%0A- false%0A+ true%0A%0A ❯ app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx:333:46%0A%0A

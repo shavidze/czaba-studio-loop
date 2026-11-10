@@ -1,0 +1,54 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/@playwright/test');
+const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
+const BASE = 'http://127.0.0.1:5173'; const SH = path.join(__dirname, 'shots');
+const wavInfo = (buf) => { const fmt = { ch: buf.readUInt16LE(22), rate: buf.readUInt32LE(24), bits: buf.readUInt16LE(34) }; let o = 12, dataLen = 0; while (o < buf.length - 8) { const id = buf.toString('ascii', o, o + 4); const len = buf.readUInt32LE(o + 4); if (id === 'data') { dataLen = len; break; } o += 8 + len; } const st = fmt.bits / 8; const frames = dataLen / (fmt.ch * st); let peak = 0, nz = 0, n = 0, ss = 0, nan = 0; for (let i = o + 8; i + st <= o + 8 + dataLen; i += st * 7) { let v = fmt.bits === 16 ? buf.readInt16LE(i) / 32768 : fmt.bits === 32 ? buf.readFloatLE(i) : buf.readIntLE(i, 3) / 8388608; if (Number.isNaN(v)) { nan++; continue; } const a = Math.abs(v); if (a > peak) peak = a; if (a > 0) nz++; n++; ss += v * v; } return { fmt, frames, durationS: frames / fmt.rate, peak, nonzeroFrac: nz / n, rmsDb: 10 * Math.log10(ss / n), nan, bytes: buf.length, sha256: crypto.createHash('sha256').update(buf).digest('hex') }; };
+(async () => {
+  const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] }); const out = {};
+  for (const [w, h] of [[1440, 900], [1280, 720]]) {
+    const tag = `${w}x${h}`; const R = {}; const ctx = await b.newContext({ viewport: { width: w, height: h }, acceptDownloads: true }); const p = await ctx.newPage();
+    const errors = []; p.on('pageerror', (e) => errors.push(String(e).slice(0, 140)));
+    await p.goto(`${BASE}/products/middle-east`, { waitUntil: 'networkidle' }); await p.waitForTimeout(1500);
+    R.s1 = { url: p.url(), title: await p.title(), h1: (await p.locator('h1').first().textContent().catch(() => null))?.trim(), authUser: await p.evaluate(() => localStorage.getItem('auth_user')) };
+    await p.screenshot({ path: path.join(SH, `j1-product-${tag}.png`) });
+    const link = p.getByRole('link', { name: /Try it in the Studio/i }).first();
+    R.s1.href = await link.getAttribute('href');
+    await link.click(); await p.waitForURL(/studio-lab/, { timeout: 20000 });
+    await p.getByTestId('arrangement-status').filter({ hasText: /Demo collection ready/ }).waitFor({ timeout: 120000 }).catch(() => {});
+    await p.waitForTimeout(800);
+    R.s2 = { url: p.url(), active: await p.evaluate(() => ({ id: document.activeElement?.getAttribute('data-source-id'), sel: document.activeElement?.getAttribute('aria-selected') })) };
+    await p.keyboard.press('Enter'); await p.waitForTimeout(1500);
+    R.s2.clips = await p.locator('[data-clip-kind="audio"]').count();
+    R.s2.clipAttrs = await p.evaluate(() => { const c = document.querySelector('[data-clip-kind="audio"]'); if (!c) return null; const o = {}; for (const a of c.attributes) if (a.name.startsWith('data-') || a.name === 'aria-label') o[a.name] = a.value.slice(0, 120); return o; });
+    R.s2.status = await p.getByTestId('arrangement-status').textContent();
+    await p.screenshot({ path: path.join(SH, `j2-studio-added-${tag}.png`) });
+    await p.evaluate(() => { const a = document.activeElement; if (a instanceof HTMLElement) a.blur(); });
+    const clock = async () => p.evaluate(() => { const el = [...document.querySelectorAll('[data-testid]')].find((e) => /clock|time-readout|position/i.test(e.getAttribute('data-testid')) && /\d\d:\d\d\.\d\d\d/.test(e.textContent)); return el ? el.textContent.trim() : (document.body.innerText.match(/\d\d:\d\d\.\d\d\d/) || [null])[0]; });
+    const c0 = await clock(); await p.keyboard.press('Space'); await p.waitForTimeout(1800); const c1 = await clock();
+    const playing = await p.evaluate(() => document.querySelector('[data-playing]')?.getAttribute('data-playing'));
+    await p.screenshot({ path: path.join(SH, `j3-playing-${tag}.png`) });
+    await p.keyboard.press('Space'); await p.waitForTimeout(500); const c2 = await clock();
+    const playingAfter = await p.evaluate(() => document.querySelector('[data-playing]')?.getAttribute('data-playing'));
+    R.s3 = { c0, c1, c2, playing, playingAfter };
+    await p.getByRole('button', { name: 'Export', exact: true }).first().click();
+    const dlg = p.getByRole('dialog'); await dlg.waitFor();
+    await p.screenshot({ path: path.join(SH, `j4-export-dialog-${tag}.png`) });
+    const dlP = p.waitForEvent('download', { timeout: 180000 });
+    await dlg.getByRole('button', { name: 'Export WAV', exact: true }).click();
+    const dl = await dlP; const file = `/tmp/c301/journey-${tag}.wav`; await dl.saveAs(file);
+    R.s4 = { name: dl.suggestedFilename(), ...wavInfo(fs.readFileSync(file)) }; fs.unlinkSync(file);
+    await p.waitForTimeout(800); await p.screenshot({ path: path.join(SH, `j4-exported-${tag}.png`) });
+    await p.keyboard.press('Escape').catch(() => {}); await p.waitForTimeout(300);
+    if (await p.getByRole('dialog').count()) { const c = p.getByRole('dialog').getByRole('button', { name: /Cancel|Done|Close/ }).first(); await c.click().catch(() => {}); await p.waitForTimeout(300); }
+    const o = p.locator('[role="option"][data-source-id="demo-middle-east"]'); const bb = await o.boundingBox();
+    await p.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2, { button: 'right' }); await p.waitForTimeout(300);
+    R.s5 = { menus: await p.getByRole('menu').count() };
+    await p.screenshot({ path: path.join(SH, `j5-menu-${tag}.png`) });
+    const pP = ctx.waitForEvent('page', { timeout: 10000 }).catch(() => null);
+    await p.getByRole('menuitem', { name: 'View in store' }).click();
+    const np = await pP;
+    if (np) { await np.waitForLoadState('networkidle').catch(() => {}); await np.waitForTimeout(1500); R.s5.newTab = { url: np.url(), openerNull: await np.evaluate(() => window.opener === null), title: await np.title() }; await np.screenshot({ path: path.join(SH, `j5-newtab-${tag}.png`) }); await np.close(); } else R.s5.newTab = null;
+    R.s5.studioAfter = { url: p.url(), clips: await p.locator('[data-clip-kind="audio"]').count() };
+    R.errors = errors; out[tag] = R; await ctx.close(); console.log(tag, JSON.stringify(R));
+  }
+  fs.writeFileSync(path.join('/home/runner/czaba-project/tmp/studio-real-loop/c-round-425/out/b3', 'journey301.json'), JSON.stringify(out, null, 1)); await b.close();
+})();

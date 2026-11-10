@@ -1,0 +1,2 @@
+const R = require('./report.cjs');
+R.record('RR-CURSOR', 'pass', 'both vp: c207.cjs replayed unchanged from a copy (t207/tools, own out dir): CUR-ENV-207 overlay pointer, CUR-POINT-207 breakpoint pointer at rest and during the drag, CUR-VIDEO-207 floating dock grab/pointer per the round-207 map, CUR-UNCHANGED-207 scan; script fails [] at 1440 and 1280; 0 occurrences of crosshair/move/copy/cell in either result JSON; net 0 forbidden, 0 auth. Evidence c-round-258/t207/out/c207-{1440,1280}.json');

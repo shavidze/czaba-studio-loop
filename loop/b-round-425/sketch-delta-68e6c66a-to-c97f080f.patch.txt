@@ -1,0 +1,118 @@
+diff --git a/app/components/arrangement/ArrangementLane.tsx b/app/components/arrangement/ArrangementLane.tsx
+index 6502a05..01ba672 100644
+--- a/app/components/arrangement/ArrangementLane.tsx
++++ b/app/components/arrangement/ArrangementLane.tsx
+@@ -757,6 +757,7 @@ function ArrangementLaneViewInner({
+             panSliderRef.current?.focus();
+           }
+         }}
++        onKeyDown={preventRepeatedEnterKeyDown}
+         disabled={isPanCentred}
+         aria-label={studioLaneStrings.panResetLabel(trackName)}
+         title="Pan → C"
+diff --git a/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx b/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
+index 2e49a0c..92898f6 100644
+--- a/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
++++ b/app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx
+@@ -3,7 +3,10 @@ import type { ReactNode } from 'react';
+ import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
+ import { StudioWorkspace } from '~/components/arrangement/StudioWorkspace';
+ import { preventRepeatedEnterKeyDown } from '~/components/arrangement/studio-repeat-safe';
+-import type { SoftDisabledButtonProps } from '~/components/arrangement/studio-soft-disabled';
++import {
++  type SoftDisabledButtonProps,
++  softDisabledButtonProps,
++} from '~/components/arrangement/studio-soft-disabled';
+ import { ArrangementProvider } from '~/contexts/ArrangementContext';
+ import type { Arrangement, ArrangementClip, WorkspaceCollection } from '~/types/arrangement';
+ import { createArrangement } from '../model';
+@@ -209,7 +212,7 @@ describe(
+       const mounted = await mountMixerWorkspace();
+       const before = mounted.snapshot();
+       const after = holdEnter(
+-        mounted.view.getAllByTestId('arrangement-track-fold')[2],
++        mounted.trackHeader('sfx').getByTestId('arrangement-track-fold'),
+         mounted.snapshot,
+       );
+       expect(after.folded).not.toBe(before.folded);
+@@ -227,7 +230,7 @@ describe(
+       expect(after.activeTrackId).toBe('sfx');
+     });
+ 
+-    it('HM5 Enter on Pan reset centres once and moves focus to the Pan slider, where the repeats change nothing (exclusion: no guard)', async () => {
++    it('HM5 Enter on Pan reset centres once and moves focus to the Pan slider; repeats on the slider change nothing and repeats that still reach the reset are prevented', async () => {
+       const mounted = await mountMixerWorkspace();
+       act(() => {
+         live(mounted.api).setTrackPan('sfx', 0.5);
+@@ -246,6 +249,7 @@ describe(
+         if (slider) {
+           pressEnter(slider, true);
+         }
++        expect(pressEnter(reset, true)).toBe(false);
+       }
+       expect(mounted.snapshot()).toEqual(afterFirst);
+       const sfx = live(mounted.api)
+@@ -265,6 +269,18 @@ describe(
+       expect(after.inputClicks).toBe(1);
+     });
+ 
++    it('HM6b held Enter on the compact video import button of a folded video track opens the file chooser once', async () => {
++      const mounted = await mountMixerWorkspace();
++      fireEvent.click(mounted.trackHeader('video').getByTestId('arrangement-track-fold'));
++      const after = holdEnter(
++        mounted
++          .trackHeader('video')
++          .getByRole('button', { name: studioLaneStrings.videoImportLabel }),
++        mounted.snapshot,
++      );
++      expect(after.inputClicks).toBe(1);
++    });
++
+     it('HM7 held Enter on a group fold collapses it once', async () => {
+       const mounted = await mountMixerWorkspace();
+       const before = mounted.snapshot();
+@@ -280,9 +296,10 @@ describe(
+ 
+     it('HM9 held Enter on a group Solo solos once', async () => {
+       const mounted = await mountMixerWorkspace();
+-      const before = mounted.snapshot();
+-      const after = holdEnter(mounted.view.getByTestId('arrangement-group-solo'), mounted.snapshot);
+-      expect(after.arrangement).not.toBe(before.arrangement);
++      const solo = mounted.view.getByTestId('arrangement-group-solo');
++      expect(solo.getAttribute('data-solo')).toBe('off');
++      holdEnter(solo, mounted.snapshot);
++      expect(solo.getAttribute('data-solo')).toBe('on');
+     });
+ 
+     it('HM10 held Ctrl+Enter on a group name toggles the selection once', async () => {
+@@ -320,6 +337,21 @@ describe(
+       expect(live(mounted.api).getArrangement().groups?.[0]?.name).toBe('Bed');
+     });
+ 
++    it('HM11b the group name editor ignores a repeated Escape and cancels on a fresh Escape (defensive guard)', async () => {
++      const mounted = await mountMixerWorkspace();
++      const name = mounted.view.getByTestId('arrangement-group-name');
++      act(() => name.focus());
++      fireEvent.keyDown(name, { key: 'F2', code: 'F2' });
++      const input = mounted.view.getByTestId('arrangement-group-name-input');
++      fireEvent.change(input, { target: { value: 'Bed' } });
++      expect(fireEvent.keyDown(input, { key: 'Escape', code: 'Escape', repeat: true })).toBe(false);
++      expect(mounted.view.queryByTestId('arrangement-group-name-input')).not.toBeNull();
++      expect(fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' })).toBe(false);
++      expect(mounted.view.queryByTestId('arrangement-group-name-input')).toBeNull();
++      expect(live(mounted.api).getArrangement().groups?.[0]?.name).toBe('Stems');
++      expect(document.activeElement).toBe(mounted.view.getByTestId('arrangement-group-name'));
++    });
++
+     it('HM12 held Enter on Master Mute mutes once', async () => {
+       const mounted = await mountMixerWorkspace();
+       holdEnter(
+@@ -361,6 +393,8 @@ describe(
+       expect(keyDown(' ', true)).toEqual({ prevented: false });
+       expect(keyDown('F2', true)).toEqual({ prevented: false });
+       expectTypeOf<SoftDisabledButtonProps['onKeyDown']>().toEqualTypeOf<undefined>();
++      expect('onKeyDown' in softDisabledButtonProps(true)).toBe(false);
++      expect('onKeyDown' in softDisabledButtonProps(false)).toBe(false);
+     });
+   },
+ );

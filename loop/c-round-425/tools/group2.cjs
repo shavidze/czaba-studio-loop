@@ -1,0 +1,17 @@
+const { chromium } = require('/home/runner/czaba-project/store/node_modules/playwright');
+(async()=>{const [w,h]=process.argv[2].split('x').map(Number);const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:w,height:h}});
+await ctx.addInitScript(()=>localStorage.setItem('czaba_analytics_consent','denied'));const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));
+await p.goto('http://127.0.0.1:5173/studio-lab');await p.waitForFunction(()=>/Demo collection ready/.test(document.body.innerText),null,{timeout:120000});await p.waitForTimeout(1000);
+await p.getByRole('button',{name:'Add',exact:true}).first().click();await p.locator('[data-clip-kind="audio"]').first().waitFor();await p.waitForTimeout(1200);
+const first=p.locator('[data-clip-kind="audio"]').first();const nb=first.getByTitle(/ — drag to move$/);const b0=await nb.boundingBox();
+await p.mouse.click(b0.x+40,b0.y+b0.height/2);await p.waitForTimeout(300);await p.evaluate(()=>document.activeElement instanceof HTMLElement&&document.activeElement.blur());
+await p.keyboard.press('Control+d');await p.waitForTimeout(800);
+const lane=()=>p.evaluate(()=>[...document.querySelectorAll('[data-clip-count]')].map(e=>e.getAttribute('data-clip-count')));
+const res={laneCountsAfterDup:await lane()};
+await p.keyboard.down('Control');await p.mouse.click(b0.x+40,b0.y+b0.height/2);await p.keyboard.up('Control');await p.waitForTimeout(400);
+res.readoutSel=await p.evaluate(()=>document.querySelector('[data-testid="arrangement-selected-clip"]')?.textContent);
+const x=b0.x+40,y=b0.y+b0.height/2;await p.mouse.move(x,y);await p.mouse.down();await p.mouse.move(x+120,y,{steps:15});await p.mouse.up();await p.waitForTimeout(600);
+res.statusAfterMove=await p.getByTestId('arrangement-status').textContent();res.firstStart=await p.locator('[data-clip-kind="audio"]').first().getAttribute('data-clip-start');
+res.undoTitle=await p.getByRole('button',{name:/^Undo/}).first().getAttribute('title');
+await p.keyboard.press('Control+z');await p.waitForTimeout(500);res.statusAfterUndo=await p.getByTestId('arrangement-status').textContent();res.firstStartAfterUndo=await p.locator('[data-clip-kind="audio"]').first().getAttribute('data-clip-start');res.errs=errs;
+console.log(JSON.stringify(res));await b.close();})();

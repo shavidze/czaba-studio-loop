@@ -1,10 +1,10 @@
 {
-  "version": 401,
-  "updated": "2026-11-10 (B round 424 -> 425 planning: round 424 C PASS, published f6c76f4; C-R423-01 closed; round 425 = REGRESSION-2026-11-10 part 2 on f6c76f4)",
+  "version": 402,
+  "updated": "2026-11-10 (B round 425 -> 426 planning: round 425 C PASS; REGRESSION-2026-11-10 closed, regression-last 2026-11-10/425; round 426 = SYS-2 stage 2a on f6c76f4)",
   "owner": "B",
   "plan": "docs/technical/studio-real-workspace/plan.md",
-  "current_task": "Round 425: REGRESSION-2026-11-10 part 2 on f6c76f4 (C-only browser sweep: round-389 rows for rounds 343-388, round-390 rows for rounds up to 342, the four carries of REGRESSION-2026-11-08, and a lane re-check on the new baseline; A changes nothing) (current-task.md)",
-  "advisor_used_by_B": "round 424 -> 425 planning: advisor available and consulted after orientation and before close",
+  "current_task": "Round 426: SYS-2 stage 2a - a held Enter acts once on the lane, group, master and tempo-row buttons; shared preventRepeatedEnterKeyDown module; SoftDisabledButtonProps cannot carry onKeyDown (current-task.md; sketch b-round-425/sketch-426.patch.txt)",
+  "advisor_used_by_B": "round 425 -> 426 planning: advisor available and consulted after orientation and before close",
   "baseline": {
     "tsc_errors": 0,
     "vitest_files": 32,
@@ -12199,8 +12199,16 @@
       "task": "current-task.md",
       "decision": "D-29z1484, D-29z1485, D-29z1486",
       "type": "REGRESSION-2026-11-10 part 2 (C-only; A changes nothing)",
-      "status": "dispatched",
+      "status": "c_pass (D-29z1487): C PASS c-round-425.json, browserVerified true; 1 Low (C-R425-01) deferred; gate 425 skipped (no real changes)",
       "note": "baseline f6c76f4 clean; frozen tree b-round-424/r425-tree-sha256.txt; claims b-round-424/claims-425.sh"
+    },
+    {
+      "round": 426,
+      "task": "current-task.md",
+      "decision": "D-29z1489",
+      "type": "SYS-2 stage 2a (lane, group, master, tempo-row held Enter)",
+      "status": "dispatched",
+      "note": "baseline f6c76f4 clean; sketch b-round-425/sketch-426.patch.txt; claims b-round-425/claims-426.sh"
     }
   ],
   "post_current_stage_queue": [
@@ -27805,16 +27813,6 @@
       "added": "2026-11-08 B round 415 -> 416 planning"
     },
     {
-      "id": "C-R423-01-PERF-DRAG-COMPONENTS-BUDGET",
-      "severity": "medium",
-      "origin": "B spec",
-      "status": "closed (D-29z1483): C round 424 PASS (row 3 RR-PERF: all 17 ids at the sketch medians, c-round-424/perf-compare.txt; row 4 name probe shell 0); gate 424 published f6c76f4 | in_progress (D-29z1481): fix-up round 424 PERF-FIX-R423-LANE-SHELL",
-      "title": "every clip drag commit renders 3 lane fibers (shell + Memo + inner) since round 409, so 17 deterministic move-components budgets fail (fade 6/4, trim 17/15, video 15/13, video-trim 17/15, video-fade 5/3)",
-      "evidence": "c-round-423.json bug C-R423-01; c-round-423/perf-results/latest-interactions.json; b-round-423/move-components-404-vs-423.txt; b-round-423/probe/fade-names-head.json",
-      "repro": "cd store; npm run test:perf (alone); studio-lab-interactions.perf.spec.ts",
-      "added": "2026-11-10 B round 423 -> 424 planning"
-    },
-    {
       "id": "INFO-C423-DECODE-ORACLE-DRIFT",
       "severity": "info",
       "origin": "B spec",
@@ -27833,6 +27831,15 @@
       "evidence": "b-round-423/perf-sketch/compare-404-423-sketch.txt",
       "repro": "compare c-round-404/perf/interactions.json with b-round-423/perf-sketch/latest-interactions.json",
       "added": "2026-11-10 B round 423 -> 424 planning"
+    },
+    {
+      "id": "INFO-C425-CROSS-LANE-FIBERS",
+      "severity": "info",
+      "origin": "C regression lookup",
+      "status": "open (D-29z1490): record only; re-pin at REGRESSION-2026-11-13",
+      "title": "R340-CROSS-LANE dev-fiber rendered counts 44/67 vs 40/63 after round 424 (inner lane subscriber component)",
+      "evidence": "c-round-425.md Lookups; c-round-424.md row 4",
+      "added": "2026-11-10 B round 425 -> 426 planning"
     }
   ],
   "tech_lead_notes": [
@@ -30944,7 +30951,7 @@
       "decision": "D-29z1475",
       "source": "gates/round-422/review.md Architecture note + suggestion 2; a-round-422.md For B",
       "signal": "repeated-Enter handling is spread over several handlers (preventRepeatedEnterKeyDown in ArrangementTransport.tsx, the inline flag guard in ArrangementMarkerRow.tsx, the Export inline guard); proposal: one exported repeat-safe button-props helper used by every A-R107 sweep site, TH5 Fit exception kept",
-      "status": "attached to SYS-2 stage 2a (decided inside that task, one owner, behaviour-preserving rows); not a separate task"
+      "status": "decided in round 426 sketch (D-29z1489): one module-level helper studio-repeat-safe.ts preventRepeatedEnterKeyDown(event): boolean, composable inside existing handlers; no props spread | attached to SYS-2 stage 2a (decided inside that task, one owner, behaviour-preserving rows); not a separate task"
     },
     {
       "id": "SIG-R423-SHELL-MEMO-FIBER-COST",
@@ -32327,7 +32334,7 @@
     {
       "id": "A-R107-SWEEP-HELD-ENTER-TOOLBAR",
       "severity": "low",
-      "status": "in_progress (D-29z1475, D-29z1478): transport part done in round 422 (HE1-HE5); rest in SYS-2 stage 2a/2b | in_progress (D-29z1473): transport part in round 422 (HE1-HE5); rest in SYS-2 stage 2 | open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
+      "status": "in_progress (D-29z1489): lane/group/master/tempo part in round 426 (HM1-HM15); rest in SYS-2 stage 2b | in_progress (D-29z1475, D-29z1478): transport part done in round 422 (HE1-HE5); rest in SYS-2 stage 2a/2b | in_progress (D-29z1473): transport part in round 422 (HE1-HE5); rest in SYS-2 stage 2 | open - one held-Enter sweep round after the ARCH-R107-SHARED-ENTER-GUARD checkpoint; strongest: transport Loop (same toggle+history bug as Ctrl+L); Undo/Redo/Delete/Zoom back/Fit are taken in round 108",
       "to": "held-Enter sweep",
       "title": "held Enter repeats on toolbar buttons without a guard: Loop, Play, Split, Follow, Zoom to range, Snap, Env, Metronome, video expand/return, track/group Mute/Solo, master mute, folds, detail toggle; Low: Home and marker flags restart the graph during playback; group name editor settles on a repeated Enter; held Escape on the marker editor",
       "evidence": "a-round-107.md Sweep 1 and Sweep 2",
@@ -39458,7 +39465,7 @@
       "id": "A-R422-REVIEW-L1-ONKEYDOWN-SPREAD-ORDER",
       "severity": "low",
       "origin": "B spec",
-      "status": "deferred_low_polish (D-29z1478: rides SYS-2 stage 2a)",
+      "status": "in_progress (D-29z1489): round 426 adds onKeyDown?: never to SoftDisabledButtonProps + HM15 runtime/type asserts (mutant MU-SPREAD-TYPE) | deferred_low_polish (D-29z1478: rides SYS-2 stage 2a)",
       "title": "on Split, Loop and Zoom to range the onKeyDown guard precedes {...softDisabledButtonProps(...)}; safe today (the spread has only aria-disabled and onMouseDown) but a future onKeyDown in SoftDisabledButtonProps would silently override the guard",
       "evidence": "a-round-422.md Reviewer findings (A6); gate 422 review Checks: Event ordering",
       "repro": "read ArrangementTransport.tsx Split/Loop/Zoom to range JSX and studio-soft-disabled.ts SoftDisabledButtonProps",
@@ -39536,6 +39543,56 @@
       "evidence": "a-round-424.md Low 2",
       "repro": "read app/components/arrangement/ArrangementLane.tsx and app/lib/arrangement/__tests__/drag-preview-render.test.tsx at f6c76f4",
       "added": "2026-11-10 B round 424 -> 425 planning"
+    },
+    {
+      "id": "C-R425-01-RVM-COLD-DEV-EMPTY",
+      "severity": "low",
+      "origin": "environment (suspected, unattributed)",
+      "status": "deferred_low_polish (D-29z1488/D-29z1490)",
+      "title": "one cold dev-server load of /studio/middle-east rendered an empty body (Invalid hook call, null useState, hydration fallback); production 8/8 clean; B 4/4 further dev loads clean on the same already-warm server (not a cold test)",
+      "evidence": "c-round-425/out/rvm-1440.json load 0; c-round-425/out/rvm-prod-*.json; b-round-425/probe/rvm-cold-1440.json; D-29z1488",
+      "repro": "fresh browser context, first load of /studio/middle-east on a freshly started dev server (c-round-390/tools/mepage.cjs)",
+      "added": "2026-11-10 B round 425 -> 426 planning"
+    },
+    {
+      "id": "C-R425-02-FOLLOW-SCROLL-OFFSET",
+      "severity": "low",
+      "origin": "C regression row (unattributed)",
+      "status": "deferred_low_polish (D-29z1488/D-29z1490)",
+      "title": "after Follow, the timeline scrollLeft is 5 px (1280) / 2 px (1440) larger than the round-389 oracle, constant per viewport; behaviour otherwise equal",
+      "evidence": "c-round-425.md Lookups (R389-PLAY-STORE follow probe); c-round-425/t389/out/follow-*",
+      "repro": "c-round-389/tools/follow-probe.mjs at both viewports vs c-round-389 oracle",
+      "added": "2026-11-10 B round 425 -> 426 planning"
+    },
+    {
+      "id": "INFO-B425-SCANNER-SPACE-AS-ENTER",
+      "severity": "info",
+      "origin": "B pre-check",
+      "status": "deferred_low_polish (D-29z1488/D-29z1490)",
+      "title": "b-round-421/button-guard-scan.py labelled any onKeyDown mentioning repeat as GUARD; the group fold guards only a repeated Space, so it was counted as an Enter guard; replaced by b-round-425/button-guard-scan-enter.py",
+      "evidence": "b-round-425/data/scan-2a-head.txt (group fold KEYDOWN-NO-ENTER)",
+      "repro": "run both scanners on ArrangementGroupHeader.tsx at f6c76f4",
+      "added": "2026-11-10 B round 425 -> 426 planning"
+    },
+    {
+      "id": "TL-R425-09-HM5-GESTURE-ROW",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1491)",
+      "title": "HM5 proves the Pan-reset guard only through a keydown on the already-disabled button; the motivating case (reset refused during an active pointer gesture, button enabled, refusal re-announced on each repeat) has no row",
+      "evidence": "b-round-425/sketch-review.md delta re-review",
+      "repro": "read app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx (sketch c97f080f) HM5 / HM11b",
+      "added": "2026-11-10 B round 425 -> 426 planning"
+    },
+    {
+      "id": "TL-R425-10-HM11B-VACUOUS-PREVENTED",
+      "severity": "low",
+      "origin": "B spec",
+      "status": "deferred_low_polish (D-29z1491)",
+      "title": "HM11b asserts toBe(false) on both Escape keydowns, which always holds because the input prevents every Enter/Escape; the open/closed editor checks carry the row",
+      "evidence": "b-round-425/sketch-review.md delta re-review",
+      "repro": "read app/lib/arrangement/__tests__/mixer-held-enter-ui.test.tsx (sketch c97f080f) HM5 / HM11b",
+      "added": "2026-11-10 B round 425 -> 426 planning"
     }
   ],
   "regression_rounds": [
@@ -39804,7 +39861,7 @@
     {
       "id": "REGRESSION-2026-11-10",
       "decision": "D-29z1375",
-      "status": "part 1 done (D-29z1483: RR-PERF re-run PASS in C round 424); part 2 dispatched as round 425 on f6c76f4 (D-29z1484); regression-last updated only when part 2 closes | part 1 done except RR-PERF (D-29z1479): C round 423 FAIL on C-R423-01 only; RR-PERF re-run in fix-up round 424; part 2 = round 425 (round-390 template) | dispatched part 1 (D-29z1476, D-29z1477): round 423 (rounds 391-422, SA-1..SA-6); part 2 = round 424 (round-390 template); regression-last updated only when part 2 closes | due at the first planning on or after 2026-11-10",
+      "status": "done (D-29z1487): part 1 rounds 423-424 PASS, part 2 round 425 PASS (browserVerified true, 1 Low); regression-last.json = 2026-11-10 / 425; next due on or after 2026-11-13 | part 1 done (D-29z1483: RR-PERF re-run PASS in C round 424); part 2 dispatched as round 425 on f6c76f4 (D-29z1484); regression-last updated only when part 2 closes | part 1 done except RR-PERF (D-29z1479): C round 423 FAIL on C-R423-01 only; RR-PERF re-run in fix-up round 424; part 2 = round 425 (round-390 template) | dispatched part 1 (D-29z1476, D-29z1477): round 423 (rounds 391-422, SA-1..SA-6); part 2 = round 424 (round-390 template); regression-last updated only when part 2 closes | due at the first planning on or after 2026-11-10",
       "scope": "C re-verifies in the browser the key acceptance of every item done since REGRESSION-2026-11-08 (rounds 391-401: PERF-13b-ii, 13c-i, 13c-ii-a/b, 13d, 14a, 14b-i) plus one short check per earlier done item, both viewports; npm run test:e2e:smoke; A fixes only what C finds",
       "added": "2026-11-08 B round 400 -> 401 planning",
       "scope_additions": [
@@ -39845,7 +39902,22 @@
         "SA-P2-CARRY": "carry_to_next_regression_d29z1323 of REGRESSION-2026-11-08 -> NO-SHIFT-203 retired (D-29z1485, RS-4B sub-check), HARNESS-DRIFT via c-round-390 copies, R425-RVM-FRESH, R425-VIDEO-SOUND snapped start",
         "SA-P2-LANE": "ArrangementLane changed in round 424 -> R425-LANE-REBASE (frames200, pin-blur-group, lane peaks vs c-round-423 outputs)",
         "SA-P2-PERF": "RR-PERF carried from C round 424 (b-round-424/rrperf-carry-proof.txt); PERF-LIB and RG-SMOKE re-run"
-      }
+      },
+      "carry_to_next_regression_d29z1490": [
+        "R-RVM (D-29z1488): /studio/middle-east on the production build, 8 fresh-context loads per viewport (authoritative), plus a true cold dev replicate: about 5 scratch dev starts each with a fresh cacheDir, the route loaded first, ?v= deps hashes and the Vite log kept",
+        "R-CROSS-LANE-FIBERS (D-29z1490 b): re-pin rendered 44/67 and record the mounted-lane count",
+        "R-FOLLOW-OFFSET (D-29z1490 c): re-pin Follow scrollLeft and try to attribute C-R425-02",
+        "R-DEV-WARMUP (D-29z1490 d): start with one warm-up MP3 export on the dev server",
+        "R-EVICT-PIN (D-29z1490 a): EVICT expects 0 stop() calls; HEAP [2,5,16,16,16,16,16]",
+        "Base copies: c-round-425/{tools,t258,t301,t301x,wk,t389} (delete stale result files before running)"
+      ]
+    },
+    {
+      "id": "REGRESSION-2026-11-13",
+      "decision": "D-29z1487",
+      "status": "planned: due at the first planning on or after 2026-11-13",
+      "scope": "C re-verifies in the browser the key acceptance of every item done since REGRESSION-2026-11-10 (round 426 onward) plus one short check per earlier done item, both viewports; npm run test:e2e:smoke; carries carry_to_next_regression_d29z1490 of REGRESSION-2026-11-10; A fixes only what C finds",
+      "added": "2026-11-10 B round 425 -> 426 planning"
     }
   ],
   "ableton_recommendations": [
@@ -40653,7 +40725,7 @@
       "evidence": "retros/retro-200.md section 6; grep at 5b1a2bb",
       "size": "1 round",
       "acceptance_note": "key auto-repeat and held-key rows; one toggle per press; real-browser held Enter at both viewports",
-      "status": "in_progress (D-29z1475, D-29z1478): stage 1 done (C round 422 PASS, gate 422 published 875ff37); stage 2a (mixer/lane controls + shared repeat-safe props decision) and stage 2b (library, dock, menus, dialogs, marker editor Escape) queued after REGRESSION-2026-11-10 | in_progress (D-29z1473): stage 1 dispatched round 422 (transport Split/Follow/Back to start/Loop/Zoom to range + marker flag); stage 2 = remaining A-R107 sweep | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 204 (hidden focusables) and round 205 (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS) | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
+      "status": "in_progress (D-29z1489): stage 2a dispatched as round 426 (lane/group/master/tempo row + shared helper + soft-disabled type guard); stage 2b next (library, video dock, detail panel, grid menu, marker menu and editor Escape, export dialog, shortcut sheet, narrow screen, footer; fold every inline Enter-repeat copy onto preventRepeatedEnterKeyDown with a grep row, TL-R425-06) | in_progress (D-29z1475, D-29z1478): stage 1 done (C round 422 PASS, gate 422 published 875ff37); stage 2a (mixer/lane controls + shared repeat-safe props decision) and stage 2b (library, dock, menus, dialogs, marker editor Escape) queued after REGRESSION-2026-11-10 | in_progress (D-29z1473): stage 1 dispatched round 422 (transport Split/Follow/Back to start/Loop/Zoom to range + marker flag); stage 2 = remaining A-R107 sweep | queued (after SABA-B-4 stage 2, before STORE-2b; policy \"queued right after the current stage\") | 2026-10-27 B round 203 -> 204 planning (D-29z169): after round 204 (hidden focusables) and round 205 (B-R203-LEADMAGNET-AUTO-OPEN-FOCUS) | 2026-10-28: not yet run; order moved behind STUDIO-PERFORMANCE by Saba (D-29z172); unchanged",
       "added": "2026-10-27 B round 199 -> 200 planning (D-29z165)",
       "vetoable": "root or Saba may reorder without a B round",
       "status_note_d29z170": "2026-10-27 B round 204 -> 205 planning (D-29z170): still queued; order after round 205: SYS-1, SYS-2, SYS-3",
@@ -41725,30 +41797,6 @@
   },
   "decisions_log_b": [
     {
-      "id": "D-29z1433",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 411 -> 412 planning",
-      "decision": "Round 412 dispatched from b-round-411/sketch-412-delta.patch.txt (v5 -> v6.1, 2 files, sha 833196f8ccf086ab; git apply --check clean on the round-411 tree). Cumulative HEAD -> v6.1 (10 files) equals the scratch. tech-lead: v6 APPROVE WITH LOWS, v6.1 delta APPROVE WITH LOWS, no Medium+. Evidence on /tmp/b412: regeneration byte-identical 3/3; mutants 13/13 red (2 new rate mutants survive on the v5 test); tsc/Biome 0; covering 24 files 425/425 (slowest 2185/15000 ms); full vitest on v6 264/3911 rc 0. C runs the full stage (rows 1-11), incl. scratch-only regeneration and its own held=ready heights compare."
-    },
-    {
-      "id": "D-29z1434",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 412 -> 413 planning",
-      "decision": "Round 413 dispatched = PERF-15b-ii-a from b-round-412/sketch-413.patch.txt v4 (sha a7913dece594db71, 9 files): streamed 4 MiB decoded-bytes cap + abort listener/pre-abort in fetchPrecomputedPeaks (TL-R411-L4, GATE410-L2, TL-R413-L1); WorkspaceCollection.fetchPeaks passed by ArrangementContext (one hunk); AudioStem.peaksUrl; purchased adapter peaksUrl snapshot, same origin as audioUrl (TL-R413-L2), fetchPeaks = fetchAudio (A-R411-REVIEW-L5); PP7d rewritten (json override obsolete, stronger: asserts cancel); new PP7e, PP10, PP11, PP12, PP12b, PPC12, PK1-PK4, PS18 (TL-R411-L9). tech-lead: v1 APPROVE WITH LOWS (L1, L2), v4 delta APPROVE WITH LOWS (L-a contract, L-b deferred, L-c doc). Sketch evidence on /tmp/b413: tsc/Biome rc 0, covering 24 files 436/436, full 264 files 3922/3922, mutants 15/15 red, browser real/404/8bit at 1440 and 1280 on a :5174 sketch server equal round 412. Grants b-round-412/grants-413.txt (12); frozen 1301."
-    },
-    {
-      "id": "D-29z1435",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 412 -> 413 planning",
-      "decision": "PERF-15b-ii split: ii-a = round 413 (all code); ii-b = Firefox probe (TL-R411-L3) -> TLM-PERF15-FIREFOX record item, ROOT-REQ-PLAYWRIGHT-FIREFOX (Firefox not installed, K19 0). PERF-15 closes on C round 413 PASS: decode fallback is safe and browser-proved in Chromium (404/8-bit rows); a Firefox 'crashed' outcome would reopen it. Docs 263/264 l.4 and new doc 265 -> Completed (C round 413 PASS) (L28 final stage)."
-    },
-    {
-      "id": "D-29z1436",
-      "date": "2026-11-08",
-      "by": "2026-11-08 B round 412 -> 413 planning",
-      "decision": "Bookkeeping from independently evidenced C round 412 PASS (c-round-412.json, browserVerified/realVerified true, 0 bugs; gate 412 published 107eb2d): PERF-15b-i done; A-R411-REVIEW-M1/L1/L3/L4, TL-R412-L-F, INFO-A411-SKETCH-REVIEW-HEADER closed; A-R411-REVIEW-L2 and TL-R413-L-B -> deferred_low_polish; ROOT-REQ-BIOME-SCRIPTS (A round 412 proposal) and ROOT-REQ-PLAYWRIGHT-FIREFOX filed; ARCH-CHECKPOINT-PERF15-PEAKS requested at the PERF-15 feature boundary (non-blocking, folded with ARCH-CHECKPOINT-PERF11C-III-BOUNDARY). B-R411-SKETCH-M1-MISSED and TL-R413-I1 stay RETRO 416 inputs. Regression not due (last 2026-11-07, next on/after 2026-11-10)."
-    },
-    {
       "id": "D-29z1437",
       "date": "2026-11-08",
       "by": "2026-11-08 B round 413 -> 414 planning",
@@ -42047,6 +42095,36 @@
       "date": "2026-11-10",
       "by": "2026-11-10 B round 424 -> 425 planning",
       "decision": "Pre-rulings for older rows on the post-390 tree: (a) R389-DECODE-CACHE round-386 BROWSER-L2-OK (preview started during a decode plays once the decode ends): since rounds 393/395 a URL-backed library preview streams through a media element (K9 preview-client), so the preview may sound before the decode ends; that is the round-393 S1 contract, not a failure. The row passes when the preview is audible at most once (no double start) and stops on Play (S7); a preview that never sounds, or that keeps sounding after Play or Stop, is a Medium finding. Same family as INFO-C423-DECODE-ORACLE-DRIFT. (b) Scripts that count clips use the lane data-clip-count attribute, never DOM clip elements (lane virtualization, round 402). (c) A held Enter acts once on the 11 guarded transport buttons (round 422); older scripts that hold Enter adapt to one action. Reviewer architecture note signal 3 of gate 424 and A report For B (fiber-count guard for component-boundary changes in components/arrangement/) recorded as signal SIG-R424-BOUNDARY-FIBER-GUARD, merged with RC-R423-PERF-SPEC-ON-STRUCTURE and GATE304-M1 for RETRO 435; not scheduled; no architecture checkpoint request (single contained owner, fix verified)."
+    },
+    {
+      "id": "D-29z1487",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 425 -> 426 planning",
+      "decision": "Round 425 accepted from C evidence only: C PASS (c-round-425.json: 0 failed, 0 inconclusive, 0 notRun, browserVerified/realVerified true, L57 OK in b-round-425/l57-check-c425.txt). B spot-checked two evidence files: c-round-425/out/g390-auth.json (pass true; /studio-lab anonymous workspace + badge, auth_user null; /studio/middle-east Sign in required, 0 audio[src]; token API 401 no header / 400 bare / 403 fake bearer from the mock) and c-round-425/out/rvm-1440.json (load 0 empty body, loads 1-3 Sign in required). The fake-bearer row is BLOCKED (backend unavailable in cloud) and stays open backend evidence. Gate 425 skipped (no real changes), so the baseline stays f6c76f4 (gate 424 published). REGRESSION-2026-11-10 closes (parts 1 and 2 done); regression-last.json = {date 2026-11-10, round 425}; the next regression is due at the first planning on or after 2026-11-13."
+    },
+    {
+      "id": "D-29z1488",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 425 -> 426 planning",
+      "decision": "C-R425-01 (empty /studio/middle-east on one first dev load) ruled Low, cause unattributed (environment suspected), deferred_low_polish. Evidence: 1 of 12 C dev loads (round 390 had 1 of 6, inside a long chain, not a first load), 0 of 8 production loads, and 0 of 4 fresh-context dev loads by B (b-round-425/probe/rvm-cold-1440.json, one deps hash 14574dd5, no 504; correction: the :5173 server had run since 02:30 and had served the route to C, so these loads were warm and do not test the cold-start hypothesis; cause unattributed). Its signature (Invalid hook call + null useState + hydration fallback) is the two-React-copies pattern of a Vite dev dependency re-optimisation; that cause is an inference, not confirmed (no server log captured), and is recorded as a hypothesis. Task 425 section 3 wrote \"an empty auth-guard page is Medium\": B reads that as a reproducible failure in a user-reachable (production) build; the production build is clean and nothing is exposed (0 audio[src], auth_user null on every load). Next regression row R-RVM: production build authoritative (8 loads per viewport) plus a true cold replicate (about 5 scratch dev starts, each with a fresh cacheDir, the route loaded first, the Vite log kept); a production reproduction, or a cold dev failure without a re-optimise/reload line, is Medium. Nothing reproducible exists today, so no fix-up round is dispatched."
+    },
+    {
+      "id": "D-29z1489",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 425 -> 426 planning",
+      "decision": "Round 426 = SYS-2 stage 2a (task 425 section 10 row 1: no Medium+, STEM-LANES unanswered: AGREE-STEM-LANES.md has no answer and no STEM-LANES-transcripts.md). Scope by owner (D-29z1478 sizing): ArrangementLane (Mute, Solo, fold, active-track name, video import full and compact, Pan reset), ArrangementGroupHeader (fold, name button, name input repeat, Mute, Solo), ArrangementMaster (Mute, peak reset), ArrangementTempoRow (metronome). Rulings: one shared module studio-repeat-safe.ts with preventRepeatedEnterKeyDown(event): boolean (decides SIG-R422-REPEAT-SAFE-BUTTON-PROPS: one helper, not a props spread); the Transport private copy and the Export inline copy fold onto it; SoftDisabledButtonProps gains onKeyDown?: never plus runtime HM15 asserts (closes A-R422-REVIEW-L1); Pan reset is guarded too (TL-R425-02: a refused reset keeps focus); the group name input ignores a repeated Enter/Escape (defensive, TL-R425-04). Fit stays unguarded (TH5). The marker flag inline guard and every other inline copy fold in stage 2b with a grep row (TL-R425-06). B pre-check: the round-421 scanner counted a Space-only fold guard as an Enter guard (group fold); the Enter-specific scanner b-round-425/button-guard-scan-enter.py replaces it (INFO-B425-SCANNER-SPACE-AS-ENTER); stage 2b sizing is re-counted from b-round-425/data/scan-all-head.txt (62 buttons: 23 ENTER-GUARD, 7 KEYDOWN-NO-ENTER, 32 NONE at f6c76f4). Reference: no Ableton behaviour (Chromium auto-repeat activation), conformance does not apply. Sketch reviewed by tech-lead (approve-with-lows, b-round-425/sketch-review.md)."
+    },
+    {
+      "id": "D-29z1490",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 425 -> 426 planning",
+      "decision": "C round 425 lookups ruled: (a) EVICT stop-count re-pinned to 0 stop() calls on the evicted preview (round 393 streaming preview through a media element, no AudioBufferSource); HEAP-RETAINERS-PROD live counts [2,5,16,16,16,16,16] verified on f6c76f4 and kept. (b) R340-CROSS-LANE rendered-fiber counts 44/67 vs 40/63: attributed to round 424, which put an inner subscriber component under each lane shell (c-round-424.md row 4: shell 0, Memo(lane) 0, inner 59 per fade). Hypothesis: +1 fiber per mounted lane, not extra work; recorded as INFO-C425-CROSS-LANE-FIBERS; the next regression re-pins 44/67 and checks the per-lane count; not scheduled. (c) R389-PLAY-STORE Follow scrollLeft +5 px (1280) / +2 px (1440), constant per viewport, not attributed to a named round: Low finding C-R425-02-FOLLOW-SCROLL-OFFSET, deferred_low_polish, re-pinned at the next regression with an attribution step. (d) INFO-C425-DEV-REOPT: harness fact, the next regression starts with one warm-up MP3 export on the dev server. (e) WAVEFORM third-decimal path diffs attributed to precomputed peaks (PERF-15; 0 diffs with /peaks 404), refusal copy to C-R391-01, r300 empty starts to round 393; record only."
+    },
+    {
+      "id": "D-29z1491",
+      "date": "2026-11-10",
+      "by": "2026-11-10 B round 425 -> 426 planning",
+      "decision": "L58 close-out for round 426: the dispatched sketch c97f080f differs from the reviewed 68e6c66a by the post-review delta (Pan reset guard + test rows), so tech-lead re-reviewed the delta (b-round-425/sketch-delta-68e6c66a-to-c97f080f.patch.txt): approve-with-lows on c97f080f. Its two Lows (TL-R425-09 HM5 lacks a gesture-active row; TL-R425-10 HM11b vacuous prevented checks) go to deferred_low_polish, not into the sketch (no further delta). B also ran on the sketch: the full vitest suite (265 files / 3,974, precheck-full.log), the lane render-name probe on a scratch dev server (names-sketch-* equal names-head-*), and rows 5-6 on HEAD (smoke-focus-*.json, focus ring measured as :focus-visible with a 1px solid outline). C-R425-01 wording corrected: B's 4 loads were on the already-warm :5173 server, so the cause is unattributed (D-29z1488 amended)."
     }
   ],
   "retro_candidates": [

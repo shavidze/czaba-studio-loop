@@ -1,0 +1,15 @@
+# B round 425 -> 426 checkpoint
+- step 1 done: tasks/round-425.md archived (copy); before-copies in b-round-425/.
+- step 2 done: C round 425 checked (l57 OK, b-round-425/l57-check-c425.txt; g390-auth.json pass true 401/400/403; rvm-1440.json load 0 empty + dual-React signature). B cold dev probe b-round-425/probe/rvm-cold-1440.json: 4/4 clean (not reproduced). Rulings pending write: C-R425-01 Low (dev-only, unreproduced, prod 8/8), FOLLOW offset -> Low id, +4 renders -> attributed to 424 inner lane comp (signal + next regression check), EVICT re-pin 0 stops, HEAP pin kept.
+- decision: round 426 = SYS-2 stage 2a (STEM-LANES no answer). Sites: Lane Mute/Solo/fold(Enter)/active-track/pan reset/video import x2; Group fold(Enter only Space guarded today!)/name button/name input repeat/Mute/Solo; Master peak/Mute; Tempo metronome. Shared helper module studio-repeat-safe.ts; SoftDisabledButtonProps onKeyDown?: never (A-R422-REVIEW-L1). Flag inline guard folds in 2b.
+- next: scratch /tmp/b425-scratch, sketch, new test mixer-held-enter-ui.test.tsx, mutants, HEAD browser probe.
+- step 3: sketch committed on /tmp/b425-scratch (sketch-426), patch b-round-425/sketch-426.patch.txt; 15/15 HM rows; tsc 0; biome clean. pan reset = exclusion (focus moves to slider). next: mutants.
+- step 4: mutants 16 lines (rerun with fixed parser), covering 56 files 999/999 (precheck-a2.log), typecheck 0, lint 0 (205 warn 1 info), biome8 0. next: browser HEAD+sketch probe, tech-lead review.
+- step 5: tech-lead approve-with-lows (TL-R425-01..08 in sketch-review); fixes applied: pan reset guarded (HM5 reaches reset), HM6b compact video, HM9 data-solo, HM3 by track, HM11b Escape, HM15 runtime 'onKeyDown' in. patch regenerated. next: mutants rerun, covering, tsc/lint, sketch browser.
+- step 6: backlog v402 applied (update-backlog.done) D-29z1487..1490; regression-last updated 2026-11-10/425.
+- step 7: browser ALL OK 28 cells (probe/compare.txt), scratch :5174 stopped + vite reverted; A2 57 files 1015; grants-426 (9), frozen 1316, sketch sha c97f080f; sketch-review final. next: claims-426.sh, current-task, feature-status, b-round-425.md, b-next.
+- step 8: claims-426.sh + planning/sketch outputs (stderr 0), names-head probe, current-task.md written (round 426). next: feature-status, b-round-425.md, b-next.json, advisor.
+- step 9: feature-status, b-round-425.md, b-next.json written. next: final claims run + store clean check + advisor.
+- step 10 (advisor close 1): C-R425-01 wording corrected (warm, unattributed) in task/b-round/backlog/feature-status; full vitest on sketch running in bg.
+- step 11: full vitest on sketch 265/3974 rc0 (precheck-full.log); tech-lead delta re-review approve-with-lows on c97f080f (L-1, L-2 test Lows); rows 5-6 HEAD probe probe/head/smoke-focus-*.json; names on sketch = head (probe/names-sketch-*.json); :5174 stopped, vite reverted. next: update sketch-review, task rows 5-7 tags, claims, backlog lows.
+- step 12: task rows 5-7 + gate tagged (K20, K24, K25), claims re-run (stderr 0, diff 12 lines), b-round-425.md + feature-status updated, D-29z1491. Planning complete pending final advisor.
