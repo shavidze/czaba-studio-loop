@@ -558,3 +558,35 @@ This applies to the whole Studio, not just the Detail panel. B should audit all 
 
 **Priority:** Medium — fits into DUX-R or REVIEW-RECOMMENDATIONS block.
 **Saba's words:** "უფრო სოლიდური, და ესთეტიური უნდა იყოს რომ ეს კომფორტი და perceived value theory შედეგი იგრძნოს მომხმარებელმა"
+
+## Studio visual audit findings (product-designer, 2026-11-10)
+
+Source: `docs/technical/studio-real-workspace/studio-visual-audit-2026-11-10.md`
+
+### New tasks from audit
+
+| Task | Finding | Priority | What |
+|------|---------|----------|------|
+| STUDIO-VIS-1 | High | Immediate | Hide number input spinbuttons (3 inputs in DetailPanel) |
+| STUDIO-VIS-2 | High | Next | Replace native radio buttons in Export Dialog (6 radios) |
+| STUDIO-VIS-3 | Medium | Defer | Replace native `<select>` with custom popover (grid division, waveform zoom) |
+| STUDIO-VIS-4 | Medium | Next | Rename "Source offset" → "Clip origin" |
+| STUDIO-VIS-5 | Medium | Defer | Detail Panel spacing improvements |
+| STUDIO-VIS-6 | Medium | Next | Fix "From, s" / "To, s" → "From" / "To" |
+| STUDIO-VIS-7 | Low | Next | Export button: outline → filled brass |
+| STUDIO-VIS-8 | Low | Defer | Insert marker blink timing |
+| STUDIO-VIS-9 | Low | Defer | Purchased collection badge styling |
+| STUDIO-VIS-10 | Low | Next | "CZABA" brand link: text-muted → text-foreground |
+
+### Saba's answers to open questions (using recommended defaults)
+
+1. "Source offset" → **"Clip origin"** (recommended default)
+2. Native `<select>` → **defer** to separate task (recommended default)
+3. Export button → **filled brass** (recommended default)
+4. "CZABA" brand link → **text-foreground** (recommended default)
+
+### Scheduling
+
+- STUDIO-VIS-1 (spinbuttons) and STUDIO-VIS-2 (radios) fit inside the current SYS block or as a quick DUX round.
+- STUDIO-VIS-4, 6, 7, 10 (copy + styling) fit in COPY-PD or DUX-R.
+- STUDIO-VIS-3, 5, 8, 9 (custom components, spacing) fit in REVIEW-RECOMMENDATIONS.
